@@ -1,0 +1,8 @@
+# ignore the build tree
+build*/
+.DS_Store
+*.swp
+.R*
+doc/
+test/*.saved
+test/*.rt
