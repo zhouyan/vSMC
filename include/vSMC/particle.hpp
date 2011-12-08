@@ -21,11 +21,11 @@ class ParticleSet
     Particle (std::size_t N,
             void (*copy)(std::size_t, std::size_t, PartContainer &)) :
         particle_num(N), particle_set(N), weight(N), log_weight(N),
-        replication(N), copy_particle(copy)
+        weight_r1m(0), weight_r2m(0), replication(N), copy_particle(copy)
     {
         vsldSSNewTask(&ess_task, 1, N, VSL_SS_MATRIX_STORAGE_COLS,
                 weight, NULL, NULL);
-        vsldSSEditMoments(ess_task, NULL, ess_inv,
+        vsldSSEditMoments(ess_task, &weight_r1m, &weight_r2m,
                 NULL, NULL, NULL, NULL, NULL);
     }
 
@@ -53,7 +53,8 @@ class ParticleSet
     dBuffer weight;
     dBuffer log_weight;
     uBuffer replication;
-    double ess_inv;
+    double weight_r1m;
+    double weight_r2m;
 
     VSLSSTaskPtr ess_task;
 
@@ -70,9 +71,9 @@ class ParticleSet
 template <class PartContainer>
 double ParticleSet<PartContainer>::ESS ()
 {
-    vsldSSCompute(ess_task, VSL_SS_2R_MOM, VSL_SS_METHOD_TBS);
+    vsldSSCompute(ess_task, VSL_SS_MEAN|VSL_SS_2R_MOM, VSL_SS_METHOD_TBS);
 
-    return 1 / ess_inv / particle_num;
+    return particle_num * weight_r1m * weight_r1m / weight_r2m;
 }
 
 template <class PartContainer>
