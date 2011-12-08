@@ -69,7 +69,6 @@ class ParticleSet
     void (*copy_particle) (
             std::size_t n1, std::size_t n2, PartContainer &particles);
 
-    inline void normalize_weight ();
     inline void normalize_log_weight ();
 
     inline void resample_multinomial ();
@@ -100,6 +99,11 @@ double ParticleSet<PartContainer>::AddLogWeight (const double *inc_weight)
 {
     vdAdd(particle_num, log_weight, inc_weight, log_weight);
     normalize_log_weight();
+}
+
+template <class PartContainer>
+double ParticleSet<PartContainer>::normalize_log_weight ()
+{
 }
 
 template <class PartContainer>
