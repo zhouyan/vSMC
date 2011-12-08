@@ -21,7 +21,7 @@ class ParticleSet
     Particle (std::size_t N,
             void (*copy)(std::size_t, std::size_t, PartContainer &)) :
         particle_num(N), particle_set(N), weight(N), log_weight(N),
-        copy_particle(copy)
+        replication(N), copy_particle(copy)
     {
         vsldSSNewTask(&ess_task, 1, N, VSL_SS_MATRIX_STORAGE_COLS,
                 weight, NULL, NULL);
@@ -52,6 +52,7 @@ class ParticleSet
     PartContainer particle_set;
     dBuffer weight;
     dBuffer log_weight;
+    uBuffer replication;
     double ess_inv;
 
     VSLSSTaskPtr ess_task;
@@ -63,7 +64,7 @@ class ParticleSet
     inline void resample_residual ();
     inline void resample_stratified ();
     inline void resample_systematic ();
-    inline void resample_do (std::size_t *rep);
+    inline void resample_do ();
 };
 
 template <class PartContainer>
@@ -126,48 +127,41 @@ void ParticleSet<PartContainer>::Resample (ResampleScheme scheme)
 template <class PartContainer>
 void ParticleSet<PartContainer>::resample_multinomial ()
 {
-    uBuffer rep(particle_num);
-
-    resample_do(rep);
+    resample_do();
 }
 
 template <class PartContainer>
 void ParticleSet<PartContainer>::resample_residual ()
 {
-    uBuffer rep(particle_num);
-
-    resample_do(rep);
+    resample_do();
 }
 
 template <class PartContainer>
 void ParticleSet<PartContainer>::resample_stratified ()
 {
-    uBuffer rep(particle_num);
-
-    resample_do(rep);
+    resample_do();
 }
 
 template <class PartContainer>
 void ParticleSet<PartContainer>::resample_systematic ()
 {
-    uBuffer rep(particle_num);
-
-    resample_do(rep);
+    resample_do();
 }
 
 template <class PartContainer>
-void ParticleSet<PartContainer>::resample_do (std::size_t *rep)
+void ParticleSet<PartContainer>::resample_do ()
 {
     std::size_t from = 0;
     std::size_t time = 0;
 
     for (std::size_t i = 0; i != particle_num; ++i)
     {
-        if (!rep[i]) { // rep[i] has zero child
-            if (time == rep[from]) { // all childs of rep[from] are copied
+        if (!replication[i]) { // replication[i] has zero child
+            if (time == replication[from]) {
+                // all childs of replication[from] are already copied
                 time = 0;
                 ++from;
-                while (!rep[from])
+                while (!replication[from])
                     ++from;
             }
             (*copy_particle)(from, i, partile_set);
