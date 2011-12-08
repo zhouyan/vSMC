@@ -1,8 +1,11 @@
 #ifndef V_SMC_PARTICLE_HPP
 #define V_SMC_PARTICLE_HPP
 
-#include <vector>
+#include <limits>
+#include <cmath>
 #include <cstddef>
+#include <cstdlib>
+#include <ctime>
 #include <mkl_vml.h>
 #include <mkl_vsl.h>
 #include <gsl/gsl_rng.hp>
@@ -27,17 +30,21 @@ class ParticleSet
                 weight, NULL, NULL);
         vsldSSEditMoments(ess_task, &weight_r1m, &weight_r2m,
                 NULL, NULL, NULL, NULL, NULL);
+        std::time_t curr_time = std::time(NULL);
+        std::size_t max_int = std::numeric_limits<int>::max();
+        std::size_t rng_seed = curr_time % max_int + 1;
+        rng_gsl = gsl_rng_alloc(gsl_rng_mt19937);
+        gsl_rng_set(rng_gsl, rng_seed);
     }
 
     ~Particle ()
     {
         vslSSDeleteTask(ess_task);
+        gsl_rng_free(rng_gsl);
     }
 
     inline double ESS ();
 
-    inline void SetWeight    (const double *new_weight);
-    inline void MulWeight    (const double *inc_weight);
     inline void SetLogWeight (const double *new_weight);
     inline void AddLogWeight (const double *inc_weight);
 
@@ -57,9 +64,13 @@ class ParticleSet
     double weight_r2m;
 
     VSLSSTaskPtr ess_task;
+    gsl_rng *rng_gsl;
 
     void (*copy_particle) (
             std::size_t n1, std::size_t n2, PartContainer &particles);
+
+    inline void normalize_weight ();
+    inline void normalize_log_weight ();
 
     inline void resample_multinomial ();
     inline void resample_residual ();
@@ -71,37 +82,24 @@ class ParticleSet
 template <class PartContainer>
 double ParticleSet<PartContainer>::ESS ()
 {
+    vdExp(particle_num, log_weight, weight);
     vsldSSCompute(ess_task, VSL_SS_MEAN|VSL_SS_2R_MOM, VSL_SS_METHOD_TBS);
 
     return particle_num * weight_r1m * weight_r1m / weight_r2m;
 }
 
 template <class PartContainer>
-double ParticleSet<PartContainer>::SetWeight (const double *new_weight)
-{
-    cblas_dcopy(particle_num, new_weight, 1, weight, 1);
-    vdLn(particle_num, weight, log_weight);
-}
-
-template <class PartContainer>
-double ParticleSet<PartContainer>::MulWeight (const double *inc_weight)
-{
-    vdMul(particle_num, weight, inc_weight, weight);
-    vdLn(particle_num, weight, log_weight);
-}
-
-template <class PartContainer>
 double ParticleSet<PartContainer>::SetLogWeight (const double *new_weight)
 {
     cblas_dcopy(particle_num, new_weight, 1, log_weight, 1);
-    vdExp(particle_num, log_weight, weight);
+    normalize_log_weight();
 }
 
 template <class PartContainer>
 double ParticleSet<PartContainer>::AddLogWeight (const double *inc_weight)
 {
     vdAdd(particle_num, log_weight, inc_weight, log_weight);
-    vdExp(particle_num, log_weight, weight);
+    normalize_log_weight();
 }
 
 template <class PartContainer>
