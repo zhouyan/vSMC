@@ -43,11 +43,10 @@ class ParticleSet
         gsl_rng_free(rng_gsl);
     }
 
-    inline double ESS ();
-
     inline void SetLogWeight (const double *new_weight);
     inline void AddLogWeight (const double *inc_weight);
 
+    inline double ESS ();
     inline void Resample (ResampleScheme scheme);
 
     private :
@@ -69,7 +68,7 @@ class ParticleSet
     void (*copy_particle) (
             std::size_t n1, std::size_t n2, PartContainer &particles);
 
-    inline void normalize_log_weight ();
+    inline void require_weight ();
 
     inline void resample_multinomial ();
     inline void resample_residual ();
@@ -79,32 +78,32 @@ class ParticleSet
 };
 
 template <class PartContainer>
-double ParticleSet<PartContainer>::ESS ()
-{
-    vdExp(particle_num, log_weight, weight);
-    vsldSSCompute(ess_task, VSL_SS_MEAN|VSL_SS_2R_MOM, VSL_SS_METHOD_TBS);
-
-    return particle_num * weight_r1m * weight_r1m / weight_r2m;
-}
-
-template <class PartContainer>
 double ParticleSet<PartContainer>::SetLogWeight (const double *new_weight)
 {
     cblas_dcopy(particle_num, new_weight, 1, log_weight, 1);
-    normalize_log_weight();
 }
 
 template <class PartContainer>
 double ParticleSet<PartContainer>::AddLogWeight (const double *inc_weight)
 {
     vdAdd(particle_num, log_weight, inc_weight, log_weight);
-    normalize_log_weight();
 }
 
 template <class PartContainer>
-double ParticleSet<PartContainer>::normalize_log_weight ()
+void Particle<PartContainer>::require_weight ()
 {
+    vdExp(particle_num, log_weight, weight);
 }
+
+template <class PartContainer>
+double ParticleSet<PartContainer>::ESS ()
+{
+    require_weight();
+    vsldSSCompute(ess_task, VSL_SS_MEAN|VSL_SS_2R_MOM, VSL_SS_METHOD_TBS);
+
+    return particle_num * weight_r1m * weight_r1m / weight_r2m;
+}
+
 
 template <class PartContainer>
 void ParticleSet<PartContainer>::Resample (ResampleScheme scheme)
@@ -130,12 +129,22 @@ void ParticleSet<PartContainer>::Resample (ResampleScheme scheme)
 template <class PartContainer>
 void ParticleSet<PartContainer>::resample_multinomial ()
 {
+    require_weight();
+    gsl_ran_multinomial(rng_gsl, particle_num, particle_num,
+            weight, replication);
     resample_do();
 }
 
 template <class PartContainer>
 void ParticleSet<PartContainer>::resample_residual ()
 {
+    require_weight();
+    cblas_dscal(particle_num, particle_num, weight, 1);
+    vdFloor(particle_num, weight, weight);
+    std::size_t size = particle_num - cblas_dasum(particle_num, weight, 1);
+    gsl_ran_multinomial(rng_gsl, particle_num, size, weight, replication);
+    for (std::size_t i = 0; i != particle_num, ++i)
+        replication[i] += weight[i];
     resample_do();
 }
 
