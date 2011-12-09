@@ -17,13 +17,13 @@ namespace vSMC {
 enum ResampleScheme {MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC};
 
 template <class PartContainer>
-class ParticleSet
+class Particle
 {
     public :
 
     Particle (std::size_t N,
             void (*copy)(std::size_t, std::size_t, PartContainer &)) :
-        particle_num(N), particle_set(N), weight(N), log_weight(N),
+        particle_num(N), particle(N), weight(N), log_weight(N),
         weight_r1m(0), weight_r2m(0), replication(N), copy_particle(copy)
     {
         vsldSSNewTask(&ess_task, 1, N, VSL_SS_MATRIX_STORAGE_COLS,
@@ -55,7 +55,7 @@ class ParticleSet
     typedef vDist::internal::Buffer<std::size_t> uBuffer;
 
     std::size_t particle_num;
-    PartContainer particle_set;
+    PartContainer particle;
     dBuffer weight;
     dBuffer log_weight;
     uBuffer replication;
@@ -75,16 +75,16 @@ class ParticleSet
     inline void resample_stratified ();
     inline void resample_systematic ();
     inline void resample_do ();
-};
+}; // class Particle
 
 template <class PartContainer>
-double ParticleSet<PartContainer>::SetLogWeight (const double *new_weight)
+double Particle<PartContainer>::SetLogWeight (const double *new_weight)
 {
     cblas_dcopy(particle_num, new_weight, 1, log_weight, 1);
 }
 
 template <class PartContainer>
-double ParticleSet<PartContainer>::AddLogWeight (const double *inc_weight)
+double Particle<PartContainer>::AddLogWeight (const double *inc_weight)
 {
     vdAdd(particle_num, log_weight, inc_weight, log_weight);
 }
@@ -96,7 +96,7 @@ void Particle<PartContainer>::require_weight ()
 }
 
 template <class PartContainer>
-double ParticleSet<PartContainer>::ESS ()
+double Particle<PartContainer>::ESS ()
 {
     require_weight();
     vsldSSCompute(ess_task, VSL_SS_MEAN|VSL_SS_2R_MOM, VSL_SS_METHOD_TBS);
@@ -106,7 +106,7 @@ double ParticleSet<PartContainer>::ESS ()
 
 
 template <class PartContainer>
-void ParticleSet<PartContainer>::Resample (ResampleScheme scheme)
+void Particle<PartContainer>::Resample (ResampleScheme scheme)
 {
     switch (scheme) {
         case MULTINOMIAL :
@@ -127,7 +127,7 @@ void ParticleSet<PartContainer>::Resample (ResampleScheme scheme)
 }
 
 template <class PartContainer>
-void ParticleSet<PartContainer>::resample_multinomial ()
+void Particle<PartContainer>::resample_multinomial ()
 {
     require_weight();
     gsl_ran_multinomial(rng_gsl, particle_num, particle_num,
@@ -136,7 +136,7 @@ void ParticleSet<PartContainer>::resample_multinomial ()
 }
 
 template <class PartContainer>
-void ParticleSet<PartContainer>::resample_residual ()
+void Particle<PartContainer>::resample_residual ()
 {
     require_weight();
     cblas_dscal(particle_num, particle_num, weight, 1);
@@ -149,19 +149,19 @@ void ParticleSet<PartContainer>::resample_residual ()
 }
 
 template <class PartContainer>
-void ParticleSet<PartContainer>::resample_stratified ()
+void Particle<PartContainer>::resample_stratified ()
 {
     resample_do();
 }
 
 template <class PartContainer>
-void ParticleSet<PartContainer>::resample_systematic ()
+void Particle<PartContainer>::resample_systematic ()
 {
     resample_do();
 }
 
 template <class PartContainer>
-void ParticleSet<PartContainer>::resample_do ()
+void Particle<PartContainer>::resample_do ()
 {
     std::size_t from = 0;
     std::size_t time = 0;
