@@ -5,7 +5,6 @@
 #include <cmath>
 #include <cstddef>
 #include <mkl_vml.h>
-#include <mkl_vsl.h>
 #include <gsl/gsl_rng.hp>
 #include <gsl/gsl_randist.h>
 #include <vDist/utilities/service.hpp>
