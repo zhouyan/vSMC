@@ -44,21 +44,27 @@ class Particle
         return particle_num;
     }
 
+    /// \brief Get a reference to particle values
+    T &Value ()
+    {
+        return particle;
+    }
+
     /// \brief Set the log(weights)
     ///
     /// \param [in] new_weight The pointer to the new log weights to be set
     void SetLogWeight (const double *new_weight)
     {
-        cblas_dcopy(particle_num, new_weight, 1, log_weight, 1)
+        cblas_dcopy(particle_num, new_weight, 1, log_weight, 1);
     }
 
     /// \brief Add to the log(weights)
     ///
     /// \param [in] inc_weight The pointer to the incremental log weights to
     /// be added
-    void AddLogWeight (const double *inc_weight);
+    void AddLogWeight (const double *inc_weight)
     {
-        vdAdd(particle_num, log_weight, inc_weight, log_weight)
+        vdAdd(particle_num, log_weight, inc_weight, log_weight);
     }
 
     /// \brief Return the ESS
@@ -98,9 +104,9 @@ class Particle
     private :
 
     typedef vDist::internal::Buffer<double> dBuffer;
-    typedef vDist::internal::Buffer<std::size_t> uBuffer;
+    typedef vDist::internal::Buffer<unsigned> uBuffer;
 
-    const std::size_t particle_num;
+    std::size_t particle_num;
     T particle;
     dBuffer weight;
     dBuffer log_weight;
@@ -121,7 +127,7 @@ class Particle
         resample_do();
     }
 
-    void resample_residual (const gsl_rng *rng);
+    void resample_residual (const gsl_rng *rng)
     {
         require_weight();
         cblas_dscal(particle_num, particle_num, weight, 1);
@@ -131,7 +137,7 @@ class Particle
         size -= cblas_dasum(particle_num, weight, 1);
         gsl_ran_multinomial(rng, particle_num, size, weight, replication);
 
-        for (std::size_t i = 0; i != particle_num, ++i)
+        for (std::size_t i = 0; i != particle_num; ++i)
             replication[i] += weight[i];
 
         resample_do();
@@ -155,7 +161,7 @@ class Particle
                     while (!replication[from])
                         ++from;
                 }
-                copy_particle(from, i, partile_set);
+                copy_particle(from, i, particle);
                 ++time;
             }
         }
