@@ -1,13 +1,12 @@
 #ifndef V_SMC_PARTICLE_HPP
 #define V_SMC_PARTICLE_HPP
 
-#include <limits>
-#include <cmath>
 #include <cstddef>
 #include <mkl_vml.h>
-#include <gsl/gsl_rng.hp>
+#include <gsl/gsl_cblas.h>
+#include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <vDist/utilities/service.hpp>
+#include <vDist/utilities/buffer.hpp>
 
 namespace vSMC {
 
@@ -93,7 +92,7 @@ class Particle
     typedef vDist::internal::Buffer<double> dBuffer;
     typedef vDist::internal::Buffer<std::size_t> uBuffer;
 
-    std::size_t particle_num;
+    const std::size_t particle_num;
     T particle;
     dBuffer weight;
     dBuffer log_weight;
@@ -148,7 +147,7 @@ class Particle
                     while (!replication[from])
                         ++from;
                 }
-                (*copy_particle)(from, i, partile_set);
+                copy_particle(from, i, partile_set);
                 ++time;
             }
         }
