@@ -10,18 +10,8 @@
 
 namespace vSMC {
 
-/// The resampling scheme
 enum ResampleScheme {MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC};
 
-/// \brief Particle contains a set of particles and their weights.
-///
-/// The template parameter \b T is usually a container of the actual particel
-/// types. It can also be other types other than a container. The important
-/// thing is that it is not a single particle, but a set of them at a certain
-/// iteration of the SMC algorithm. It has to have a contructor which accept
-/// an integral type parameter, which is the number of particles, and the user
-/// need to provide a function that tell Particle how to copy one particle to
-/// another's position.
 template <class T>
 class Particle
 {
@@ -49,27 +39,32 @@ class Particle
     {
         return particle;
     }
+    
+    const T &Value () const
+    {
+        return particle;
+    }
+    
+    double *LogWeight ()
+    {
+        return log_weight;
+    }
 
-    /// \brief Set the log(weights)
-    ///
-    /// \param [in] new_weight The pointer to the new log weights to be set
+    const double *LogWeight () const
+    {
+        return log_weight;
+    }
+
     void SetLogWeight (const double *new_weight)
     {
         cblas_dcopy(particle_num, new_weight, 1, log_weight, 1);
     }
 
-    /// \brief Add to the log(weights)
-    ///
-    /// \param [in] inc_weight The pointer to the incremental log weights to
-    /// be added
     void AddLogWeight (const double *inc_weight)
     {
         vdAdd(particle_num, log_weight, inc_weight, log_weight);
     }
 
-    /// \brief Return the ESS
-    ///
-    /// \return The ESS calculated with current weights
     double ESS ()
     {
         require_weight();
@@ -77,10 +72,6 @@ class Particle
         return 1 / cblas_dasum(particle_num, weight, 1);
     }
 
-    /// \brief Perform the resampling
-    ///
-    /// \param scheme See ResampleScheme
-    /// \param rng The pointer to a GSL RNG object
     void Resample (ResampleScheme scheme, const gsl_rng *rng)
     {
         switch (scheme) {
