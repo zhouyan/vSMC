@@ -97,7 +97,7 @@ class Particle
     dBuffer weight;
     dBuffer log_weight;
     uBuffer replication;
-    void (*copy_particle) (std::size_t n1, std::size_t n2, T &particles);
+    void (*copy_particle) (std::size_t, std::size_t, T &);
 
     void require_weight ()
     {

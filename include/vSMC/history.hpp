@@ -65,6 +65,8 @@ class History
 {
     public :
 
+    explicit History (HistoryMode history_mode) : mode(history_mode) {};
+
     inline void push_back (const HistoryElement<T> &element)
     {
         history.push_back(element);
@@ -83,6 +85,7 @@ class History
 
     private :
 
+    HistoryMode mode;
     std::vector<HistoryElement<T> > history;
 }; // class History
 

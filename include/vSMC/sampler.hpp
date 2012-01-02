@@ -6,13 +6,43 @@
 
 namespace vSMC {
 
-template <class PartContainer>
+template <class T>
 class Sampler
 {
     public :
 
-    inline void Initialize ();
-    inline void Iterate ();
+    Sampler (std::size_t N,
+            std::size_t (*init) (Particle<T> &, void *),
+            std::size_t (*move) (Particle<T> &, void *),
+            ResampleScheme resample_scheme = RESIDUAL,
+            double resample_threshold = 0.5,
+            HistoryMode history_mode = HISTORY_RAM) :
+        init_particle(init), move_particle(move),
+        scheme(resample_scheme), threshold(resample_threshold),
+        history(history_mode),
+        particle_num(N), particle(N), resample(false), ess(0), accept(0) {}
+
+    inline void Initialize ()
+    {
+        accept = init_particle(particle);
+        ess = particle.ESS();
+        if (ess < threshold) {
+            particle.resample(scheme);
+            ess = 1;
+        }
+        history.push_back(HistoryElement<T>(particle, resample, ess, accept));
+    }
+
+    inline void Iterate ()
+    {
+        accept = move_particle(particle);
+        ess = particle.ESS();
+        if (ess < threshold) {
+            particle.resample(scheme);
+            ess = 1;
+        }
+        history.push_back(HistoryElement<T>(particle, resample, ess, accept));
+    }
 
     inline void Iterate (std::size_t n)
     {
@@ -22,8 +52,17 @@ class Sampler
 
     private :
 
-    Particle particle;
-    History history;
+    std::size_t (*init_particle) (Particle<T> &, void *);
+    std::size_t (*move_particle) (Particle<T> &, void *);
+    ResampleScheme scheme;
+    double threshold;
+
+    std::size_t particle_num;
+    Particle<T> particle;
+    bool resample;
+    double ess;
+    std::size_t accept;
+    History<T> history;
 };
 
 } // namespace vSMC
