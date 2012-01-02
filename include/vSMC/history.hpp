@@ -7,7 +7,7 @@
 
 namespace vSMC {
 
-enum HistoryMode {HISTORY_RAM, HISTORY_FILE, HISTORY_NONE};
+enum HistoryMode {HISTORY_NONE = 0, HISTORY_RAM, HISTORY_FILE};
 
 template <class T>
 class HistoryElement
