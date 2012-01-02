@@ -14,13 +14,14 @@ class Sampler
     Sampler (std::size_t N,
             std::size_t (*init) (Particle<T> &, void *),
             std::size_t (*move) (Particle<T> &, void *),
+            void (*copy) (std::size_t, std::size_t, T &),
             ResampleScheme resample_scheme = RESIDUAL,
             double resample_threshold = 0.5,
             HistoryMode history_mode = HISTORY_RAM) :
         init_particle(init), move_particle(move),
         scheme(resample_scheme), threshold(resample_threshold),
         history(history_mode),
-        particle_num(N), particle(N), resample(false), ess(0), accept(0) {}
+        particle(N, copy), resample(false), ess(0), accept(0) {}
 
     inline void Initialize ()
     {
@@ -54,10 +55,9 @@ class Sampler
 
     std::size_t (*init_particle) (Particle<T> &, void *);
     std::size_t (*move_particle) (Particle<T> &, void *);
-    ResampleScheme scheme;
-    double threshold;
+    const ResampleScheme scheme;
+    const double threshold;
 
-    std::size_t particle_num;
     Particle<T> particle;
     bool resample;
     double ess;

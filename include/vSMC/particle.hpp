@@ -21,7 +21,7 @@ enum ResampleScheme {MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC};
 /// iteration of the SMC algorithm. It has to have a contructor which accept
 /// an integral type parameter, which is the number of particles, and the user
 /// need to provide a function that tell Particle how to copy one particle to
-/// another's position. A STL sequential container satifies these requirements.
+/// another's position.
 template <class T>
 class Particle
 {
@@ -35,6 +35,14 @@ class Particle
     Particle (std::size_t N, void (*copy)(std::size_t, std::size_t, T &)) :
         particle_num(N), particle(N), weight(N), log_weight(N),
         replication(N), copy_particle(copy) {}
+
+    /// \brief Get the number of particles
+    ///
+    /// \return The size of the particle set
+    std::size_t size () const
+    {
+        return particle_num;
+    }
 
     /// \brief Set the log(weights)
     ///
