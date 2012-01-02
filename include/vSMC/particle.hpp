@@ -17,24 +17,15 @@ class Particle
 {
     public :
 
-    /// \brief The constructor of Particle. There is no default constructor.
-    ///
-    /// \param N The number of particles
-    /// \param copy The pointer to a function which tell Particle how to copy
-    /// a particle at position \b n1 to position \b n2.
     Particle (std::size_t N, void (*copy)(std::size_t, std::size_t, T &)) :
         particle_num(N), particle(N), weight(N), log_weight(N),
         replication(N), copy_particle(copy) {}
 
-    /// \brief Get the number of particles
-    ///
-    /// \return The size of the particle set
     std::size_t size () const
     {
         return particle_num;
     }
 
-    /// \brief Get a reference to particle values
     T &Value ()
     {
         return particle;
@@ -47,12 +38,12 @@ class Particle
     
     double *LogWeight ()
     {
-        return log_weight;
+        return log_weight.get();
     }
 
     const double *LogWeight () const
     {
-        return log_weight;
+        return log_weight.get();
     }
 
     void SetLogWeight (const double *new_weight)
