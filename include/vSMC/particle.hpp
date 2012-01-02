@@ -1,6 +1,8 @@
 #ifndef V_SMC_PARTICLE_HPP
 #define V_SMC_PARTICLE_HPP
 
+#include <algorithm>
+#include <limits>
 #include <cstddef>
 #include <mkl_vml.h>
 #include <gsl/gsl_cblas.h>
@@ -59,8 +61,10 @@ class Particle
     double ESS ()
     {
         require_weight();
+        double sw = cblas_dasum(particle_num, weight, 1);
         vdSqr(particle_num, weight, weight);
-        return 1 / cblas_dasum(particle_num, weight, 1);
+
+        return sw * sw / cblas_dasum(particle_num, weight, 1);
     }
 
     void Resample (ResampleScheme scheme, const gsl_rng *rng)
@@ -97,6 +101,11 @@ class Particle
 
     void require_weight ()
     {
+        double max_weight = -std::numeric_limits<double>::infinity();
+        for (std::size_t i = 0; i != particle_num; ++i)
+            max_weight = std::max(max_weight, log_weight[i]);
+        for (std::size_t i = 0; i != particle_num; ++i)
+            log_weight[i] -= max_weight;
         vdExp(particle_num, log_weight, weight);
     }
 
