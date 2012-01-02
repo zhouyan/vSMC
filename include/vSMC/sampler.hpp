@@ -13,7 +13,12 @@ class Sampler
 
     inline void Initialize ();
     inline void Iterate ();
-    inline void Iterate (std::size_t n);
+
+    inline void Iterate (std::size_t n)
+    {
+        for (std::size_t i = 0; i != n; ++i)
+            Iterate();
+    }
 
     private :
 
