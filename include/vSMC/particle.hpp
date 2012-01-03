@@ -121,16 +121,16 @@ class Particle
     void resample_residual (const gsl_rng *rng)
     {
         vDist::internal::Buffer<unsigned> rep(particle_num);
-        vDist::internal::Buffer<double> fwgt(particle_num);
+        vDist::internal::Buffer<double> uweight(particle_num);
         vDist::internal::Buffer<double> prob(particle_num);
 
-        vDist::dyatx(particle_num, particle_num, weight, 1, fwgt, 1);
-        vdFloor(particle_num, fwgt, fwgt);
-        std::size_t size = particle_num - cblas_dasum(particle_num, fwgt, 1);
-        vdSub(particle_num, weight, fwgt, prob);
+        vDist::dyatx(particle_num, particle_num, weight, 1, uweight, 1);
+        vdModf(particle_num, uweight, uweight, prob);
+        std::size_t size = particle_num;
+        size -= cblas_dasum(particle_num, uweight, 1);
         gsl_ran_multinomial(rng, particle_num, size, prob, rep);
         for (std::size_t i = 0; i != particle_num; ++i)
-            rep[i] += fwgt[i];
+            rep[i] += uweight[i];
         resample_do(rep);
     }
 
@@ -142,17 +142,19 @@ class Particle
         std::size_t from = 0;
         std::size_t time = 0;
 
-        for (std::size_t i = 0; i != particle_num; ++i)
+        for (std::size_t to = 0; to != particle_num; ++to)
         {
-            if (!rep[i]) { // rep[i] has zero child
-                if (time == rep[from]) {
-                    // all childs of rep[from] are already copied
+            if (!rep[to]) {
+                // rep[to] has zero child, copy from elsewhere
+                if (rep[from] - time <= 1) {
+                    // only 1 child left on rep[from]
                     time = 0;
                     ++from;
-                    while (!rep[from])
+                    while (rep[from] < 2)
+                        // rep[from] shall has at least 2 child, 1 for itself
                         ++from;
                 }
-                copy_particle(from, i, particle);
+                copy_particle(from, to, particle);
                 ++time;
             }
         }
