@@ -34,6 +34,11 @@ class Sampler
         gsl_rng_free(rng);
     }
 
+    double ESS () const
+    {
+        return ess;
+    }
+
     void Initialize ()
     {
         while (history.size())
