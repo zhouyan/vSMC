@@ -26,6 +26,7 @@ class Sampler
         rng(gsl_rng_alloc(gsl_rng_mt19937)), integrate_tmp(N)
     {
         gsl_rng_set(rng, 100);
+        Initialize();
     }
 
     ~Sampler ()
