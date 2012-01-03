@@ -93,17 +93,14 @@ class Particle
 
     private :
 
-    typedef vDist::internal::Buffer<double> dBuffer;
-    typedef vDist::internal::Buffer<unsigned> uBuffer;
-
     std::size_t particle_num;
     T particle;
 
     double sum_weight;
-    dBuffer weight;
-    dBuffer log_weight;
+    vDist::internal::Buffer<double> weight;
+    vDist::internal::Buffer<double> log_weight;
 
-    uBuffer replication;
+    vDist::internal::Buffer<unsigned> replication;
     void (*copy_particle) (std::size_t, std::size_t, T &);
 
     void set_weight ()

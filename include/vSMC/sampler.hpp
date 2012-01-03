@@ -87,9 +87,7 @@ class Sampler
 
     gsl_rng *rng;
 
-    typedef vDist::internal::Buffer<double> dBuffer;
-
-    mutable dBuffer integrate_tmp;
+    mutable vDist::internal::Buffer<double> integrate_tmp;
 
     void post_move ()
     {
