@@ -73,7 +73,6 @@ class Particle
 
     void Resample (ResampleScheme scheme, const gsl_rng *rng)
     {
-        std::cout << "RESAMPLING" << std::endl;
         switch (scheme) {
             case MULTINOMIAL :
                 resample_multinomial(rng);
