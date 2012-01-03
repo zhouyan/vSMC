@@ -37,20 +37,41 @@ class Particle
     {
         return particle;
     }
+
+    double *Weight ()
+    {
+        require_weight();
+        return weight;
+    }
+
+    const double *Weight () const
+    {
+        require_weight();
+        return weight;
+    }
+
+    double *Weight (double &sum_weight)
+    {
+        require_weight();
+        sum_weight = cblas_dasum(particle_num, weight, 1);
+        return weight;
+    }
+
+    const double *Weight (double &sum_weight) const
+    {
+        require_weight();
+        sum_weight = cblas_dasum(particle_num, weight, 1);
+        return weight;
+    }
     
     double *LogWeight ()
     {
-        return log_weight.get();
+        return log_weight;
     }
 
     const double *LogWeight () const
     {
-        return log_weight.get();
-    }
-
-    void SetLogWeight (const double *new_weight)
-    {
-        cblas_dcopy(particle_num, new_weight, 1, log_weight, 1);
+        return log_weight;
     }
 
     void AddLogWeight (const double *inc_weight)

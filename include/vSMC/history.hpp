@@ -1,23 +1,24 @@
 #ifndef V_SMC_HISTORY_HPP
 #define V_SMC_HISTORY_HPP
 
+#include <stdexcept>
 #include <vector>
 #include <cstddef>
 #include <vSMC/particle.hpp>
 
 namespace vSMC {
 
-enum HistoryMode {HISTORY_NONE = 0, HISTORY_RAM, HISTORY_FILE};
+enum HistoryMode {HISTORY_NONE, HISTORY_RAM, HISTORY_FILE};
 
 template <class T>
 class HistoryElement
 {
     public :
 
-    HistoryElement (const Particle<T> &particle,
-            bool resample, double ess, std::size_t accept) :
-        e_particle(particle), e_resample(resample),
-        e_ess(ess), e_accept(accept) {}
+    explicit HistoryElement (const Particle<T> &particle,
+            bool was_resample, double ess, std::size_t accept_count) :
+        e_particle(particle), e_resample(was_resample),
+        e_ess(ess), e_accept(accept_count) {}
 
     const Particle<T> &particle () const
     {
@@ -29,12 +30,12 @@ class HistoryElement
         return e_ess;
     }
 
-    bool resample () const
+    bool WasResample () const
     {
         return e_resample;
     }
 
-    std::size_t accept () const
+    std::size_t AcceptCount () const
     {
         return e_accept;
     }
@@ -54,20 +55,38 @@ class History
 
     explicit History (HistoryMode history_mode) : mode(history_mode) {};
 
-    inline void push_back (const HistoryElement<T> &element)
+    void push_back (const HistoryElement<T> &element)
     {
-        history.push_back(element);
+        if (mode == HISTORY_RAM)
+            history.push_back(element);
     }
 
-    inline void pop_back ()
+    void pop_back ()
     {
-        history.pop_back();
+        if (mode == HISTORY_RAM)
+            history.pop_back();
     }
 
-    inline void pop_back (HistoryElement<T> &element)
+    void pop_back (HistoryElement<T> &element)
     {
-        element = history.back();
-        history.pop_back();
+        if (mode == HISTORY_RAM) {
+            element = history.back();
+            history.pop_back();
+        }
+    }
+
+    std::size_t size () const
+    {
+        switch (mode) {
+            case HISTORY_RAM :
+                return history.size();
+            case HISTORY_FILE :
+                return 0;
+            case HISTORY_NONE :
+                return 0;
+            default :
+                throw std::runtime_error("Unknown HistoryMode");
+        }
     }
 
     private :
