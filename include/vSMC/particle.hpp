@@ -111,12 +111,11 @@ class Particle
     {
         double max_weight = -std::numeric_limits<double>::infinity();
 
-        cblas_dcopy(particle_num, log_weight, 1, weight, 1);
         for (std::size_t i = 0; i != particle_num; ++i)
-            max_weight = std::max(max_weight, weight[i]);
+            max_weight = std::max(max_weight, log_weight[i]);
         for (std::size_t i = 0; i != particle_num; ++i)
-            weight[i] -= max_weight;
-        vdExp(particle_num, weight, weight);
+            log_weight[i] -= max_weight;
+        vdExp(particle_num, log_weight, weight);
         sum_weight = cblas_dasum(particle_num, weight, 1);
     }
 
