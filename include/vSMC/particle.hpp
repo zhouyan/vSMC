@@ -46,23 +46,23 @@ class Particle
 
     const double *Weight () const
     {
-        return weight;
+        return weight.get();
     }
 
     const double *LogWeight () const
     {
-        return log_weight;
+        return log_weight.get();
     }
 
-    void SetLogWeight (const double *lweight)
+    void SetLogWeight (const double *new_weight)
     {
-        cblas_dcopy(particle_num, lweight, 1, log_weight, 1);
+        cblas_dcopy(particle_num, new_weight, 1, log_weight, 1);
         set_weight();
     }
 
-    void AddLogWeight (const double *lweight)
+    void AddLogWeight (const double *inc_weight)
     {
-        vdAdd(particle_num, lweight, log_weight, log_weight);
+        vdAdd(particle_num, log_weight, inc_weight, log_weight);
         set_weight();
     }
 
