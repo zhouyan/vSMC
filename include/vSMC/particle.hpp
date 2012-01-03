@@ -20,7 +20,8 @@ class Particle
     public :
 
     Particle (std::size_t N, void (*copy)(std::size_t, std::size_t, T &)) :
-        particle_num(N), particle(N), weight(N), log_weight(N),
+        particle_num(N), particle(N),
+        sum_weight(0), weight(N), log_weight(N),
         replication(N), copy_particle(copy) {}
 
     std::size_t size () const
@@ -38,35 +39,14 @@ class Particle
         return particle;
     }
 
-    double *Weight ()
+    const double SumWeight () const
     {
-        require_weight();
-        return weight;
+        return sum_weight;
     }
 
     const double *Weight () const
     {
-        require_weight();
         return weight;
-    }
-
-    double *Weight (double &sum_weight)
-    {
-        require_weight();
-        sum_weight = cblas_dasum(particle_num, weight, 1);
-        return weight;
-    }
-
-    const double *Weight (double &sum_weight) const
-    {
-        require_weight();
-        sum_weight = cblas_dasum(particle_num, weight, 1);
-        return weight;
-    }
-    
-    double *LogWeight ()
-    {
-        return log_weight;
     }
 
     const double *LogWeight () const
@@ -74,22 +54,26 @@ class Particle
         return log_weight;
     }
 
-    void AddLogWeight (const double *inc_weight)
+    void SetLogWeight (const double *lweight)
     {
-        vdAdd(particle_num, log_weight, inc_weight, log_weight);
+        cblas_dcopy(particle_num, lweight, 1, log_weight, 1);
+        set_weight();
     }
 
-    double ESS ()
+    void AddLogWeight (const double *lweight)
     {
-        require_weight();
-        double sw = cblas_dasum(particle_num, weight, 1);
-        vdSqr(particle_num, weight, weight);
+        vdAdd(particle_num, lweight, log_weight, log_weight);
+        set_weight();
+    }
 
-        return sw * sw / cblas_dasum(particle_num, weight, 1);
+    double ESS () const
+    {
+        return sum_weight * sum_weight / cblas_dnrm2(particle_num, weight, 1);
     }
 
     void Resample (ResampleScheme scheme, const gsl_rng *rng)
     {
+        std::cout << "RESAMPLING" << std::endl;
         switch (scheme) {
             case MULTINOMIAL :
                 resample_multinomial(rng);
@@ -115,24 +99,29 @@ class Particle
 
     std::size_t particle_num;
     T particle;
+
+    double sum_weight;
     dBuffer weight;
     dBuffer log_weight;
+
     uBuffer replication;
     void (*copy_particle) (std::size_t, std::size_t, T &);
 
-    void require_weight ()
+    void set_weight ()
     {
         double max_weight = -std::numeric_limits<double>::infinity();
+
+        cblas_dcopy(particle_num, log_weight, 1, weight, 1);
         for (std::size_t i = 0; i != particle_num; ++i)
-            max_weight = std::max(max_weight, log_weight[i]);
+            max_weight = std::max(max_weight, weight[i]);
         for (std::size_t i = 0; i != particle_num; ++i)
-            log_weight[i] -= max_weight;
-        vdExp(particle_num, log_weight, weight);
+            weight[i] -= max_weight;
+        vdExp(particle_num, weight, weight);
+        sum_weight = cblas_dasum(particle_num, weight, 1);
     }
 
     void resample_multinomial (const gsl_rng *rng)
     {
-        require_weight();
         gsl_ran_multinomial(rng, particle_num, particle_num,
                 weight, replication);
 
@@ -141,12 +130,11 @@ class Particle
 
     void resample_residual (const gsl_rng *rng)
     {
-        require_weight();
         cblas_dscal(particle_num, particle_num, weight, 1);
         vdFloor(particle_num, weight, weight);
 
         std::size_t size = particle_num;
-        size -= cblas_dasum(particle_num, weight, 1);
+        size -= sum_weight;
         gsl_ran_multinomial(rng, particle_num, size, weight, replication);
 
         for (std::size_t i = 0; i != particle_num; ++i)
