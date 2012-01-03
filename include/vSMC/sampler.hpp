@@ -19,7 +19,7 @@ class Sampler
             ResampleScheme resample_scheme = RESIDUAL,
             double resample_threshold = 0.5) :
         init_particle(init), move_particle(move),
-        scheme(resample_scheme), threshold(resample_threshold),
+        scheme(resample_scheme), threshold(resample_threshold * N),
         iter_num(0), particle(N, copy),
         ess(0), resample(false), accept(0),
         mode(history_mode), history(history_mode),
@@ -62,9 +62,8 @@ class Sampler
     {
         std::size_t n = particle.size();
         integral(particle, integrate_tmp, param);
-        double sum = cblas_ddot(n, particle.Weight(), 1, integrate_tmp, 1);
 
-        return sum / particle.SumWeight();
+        return cblas_ddot(n, particle.Weight(), 1, integrate_tmp, 1);
     }
 
     private :
@@ -95,7 +94,7 @@ class Sampler
 
         if (ess < threshold) {
             particle.Resample(scheme, rng);
-            ess = 1;
+            ess = particle.size();
         }
 
         if (mode != HISTORY_NONE) {

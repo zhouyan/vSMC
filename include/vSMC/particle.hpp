@@ -9,6 +9,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <vDist/utilities/buffer.hpp>
+#include <vDist/utilities/eblas.hpp>
 
 namespace vSMC {
 
@@ -20,9 +21,8 @@ class Particle
     public :
 
     Particle (std::size_t N, void (*copy)(std::size_t, std::size_t, T &)) :
-        particle_num(N), particle(N),
-        sum_weight(0), weight(N), log_weight(N),
-        replication(N), copy_particle(copy) {}
+        particle_num(N), particle(N), weight(N), log_weight(N),
+        copy_particle(copy) {}
 
     std::size_t size () const
     {
@@ -37,11 +37,6 @@ class Particle
     const T &Value () const
     {
         return particle;
-    }
-
-    const double SumWeight () const
-    {
-        return sum_weight;
     }
 
     const double *Weight () const
@@ -68,7 +63,7 @@ class Particle
 
     double ESS () const
     {
-        return sum_weight * sum_weight / cblas_dnrm2(particle_num, weight, 1);
+        return 1 / cblas_ddot(particle_num, weight, 1, weight, 1);
     }
 
     void Resample (ResampleScheme scheme, const gsl_rng *rng)
@@ -100,7 +95,6 @@ class Particle
     vDist::internal::Buffer<double> weight;
     vDist::internal::Buffer<double> log_weight;
 
-    vDist::internal::Buffer<unsigned> replication;
     void (*copy_particle) (std::size_t, std::size_t, T &);
 
     void set_weight ()
@@ -112,54 +106,58 @@ class Particle
         for (std::size_t i = 0; i != particle_num; ++i)
             log_weight[i] -= max_weight;
         vdExp(particle_num, log_weight, weight);
-        sum_weight = cblas_dasum(particle_num, weight, 1);
+        double sum = cblas_dasum(particle_num, weight, 1);
+        cblas_dscal(particle_num, 1 / sum, weight, 1);
     }
 
     void resample_multinomial (const gsl_rng *rng)
     {
-        gsl_ran_multinomial(rng, particle_num, particle_num,
-                weight, replication);
+        vDist::internal::Buffer<unsigned> rep(particle_num);
 
-        resample_do();
+        gsl_ran_multinomial(rng, particle_num, particle_num, weight, rep);
+        resample_do(rep);
     }
 
     void resample_residual (const gsl_rng *rng)
     {
-        cblas_dscal(particle_num, particle_num, weight, 1);
-        vdFloor(particle_num, weight, weight);
+        vDist::internal::Buffer<unsigned> rep(particle_num);
+        vDist::internal::Buffer<double> fwgt(particle_num);
+        vDist::internal::Buffer<double> prob(particle_num);
 
-        std::size_t size = particle_num;
-        size -= sum_weight;
-        gsl_ran_multinomial(rng, particle_num, size, weight, replication);
-
+        vDist::dyatx(particle_num, particle_num, weight, 1, fwgt, 1);
+        vdFloor(particle_num, fwgt, fwgt);
+        std::size_t size = particle_num - cblas_dasum(particle_num, fwgt, 1);
+        vdSub(particle_num, weight, fwgt, prob);
+        gsl_ran_multinomial(rng, particle_num, size, prob, rep);
         for (std::size_t i = 0; i != particle_num; ++i)
-            replication[i] += weight[i];
-
-        resample_do();
+            rep[i] += fwgt[i];
+        resample_do(rep);
     }
 
     void resample_stratified (const gsl_rng *rng) {}
     void resample_systematic (const gsl_rng *rng) {}
 
-    void resample_do ()
+    void resample_do (const unsigned *rep)
     {
         std::size_t from = 0;
         std::size_t time = 0;
 
         for (std::size_t i = 0; i != particle_num; ++i)
         {
-            if (!replication[i]) { // replication[i] has zero child
-                if (time == replication[from]) {
-                    // all childs of replication[from] are already copied
+            if (!rep[i]) { // rep[i] has zero child
+                if (time == rep[from]) {
+                    // all childs of rep[from] are already copied
                     time = 0;
                     ++from;
-                    while (!replication[from])
+                    while (!rep[from])
                         ++from;
                 }
                 copy_particle(from, i, particle);
                 ++time;
             }
         }
+        vDist::dfill(particle_num, 1.0 / particle_num, weight, 1);
+        vDist::dfill(particle_num, 0, log_weight, 1);
     }
 }; // class Particle
 
