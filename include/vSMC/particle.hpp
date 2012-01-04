@@ -27,52 +27,93 @@ class Particle
 {
     public :
 
+    /// \brief Particle does not have a default constructor
+    ///
+    /// \param N The number of particles
+    /// \param copy A pointer to the function that can copy particle from one
+    /// position to another position
     Particle (std::size_t N, void (*copy)(std::size_t, std::size_t, T &)) :
         pnum(N), pval(N), weight(N), log_weight(N),
         copy_particle(copy) {}
 
+    /// \brief Size of the particle set
+    ///
+    /// \return The number of particles
     std::size_t size () const
     {
         return pnum;
     }
 
+    /// \brief Read and write access to particle values
+    ///
+    /// \return A reference to the particle values, type (T &)
+    /// \note Any operations that change the state of the particle (e.g.,
+    /// setting log weights or resampling) set can invalidate the reference.
     T &value ()
     {
         return pval;
     }
     
+    /// \brief Read only access to particle values
+    ///
+    /// \return A const reference to the particle values, type (const T &)
+    /// \note Any operations that change the state of the particle (e.g.,
+    /// setting log weights or resampling) set can invalidate the reference.
     const T &value () const
     {
         return pval;
     }
 
+    /// \brief Read only access to the weights
+    ///
+    /// \return A const pointer to the weights, type (const double *)
+    /// \note Any operations that change the state of the particle (e.g.,
+    /// setting log weights or resampling) set can invalidate the pointer.
     const double *getWeightPtr () const
     {
         return weight.get();
     }
 
+    /// \brief Read only access to the log weights
+    ///
+    /// \return A const pointer to the log weights, type (const double *)
+    /// \note Any operations that change the state of the particle (e.g.,
+    /// setting log weights or resampling) set can invalidate the pointer.
     const double *getLogWeightPtr () const
     {
         return log_weight.get();
     }
 
+    /// \brief Set the log weights of the particle sets
+    ///
+    /// \param [in] new_weight New log weights
     void setLogWeight (const double *new_weight)
     {
         cblas_dcopy(pnum, new_weight, 1, log_weight, 1);
         set_weight();
     }
 
+    /// \brief Add to the log weights of the particle sets
+    ///
+    /// \param [in] inc_weight Incremental log weights
     void addLogWeight (const double *inc_weight)
     {
         vdAdd(pnum, log_weight, inc_weight, log_weight);
         set_weight();
     }
 
+    /// \brief The ESS (Effective Sample Size)
+    ///
+    /// \return The value of ESS for current particle set
     double ESS () const
     {
         return 1 / cblas_ddot(pnum, weight, 1, weight, 1);
     }
 
+    /// \brief Perform resampling
+    ///
+    /// \param scheme The resampling scheme, see ResamplingScheme
+    /// \param [in] rng A gsl rng object pointer
     void resample (ResampleScheme scheme, const gsl_rng *rng)
     {
         switch (scheme) {
@@ -97,11 +138,8 @@ class Particle
 
     std::size_t pnum;
     T pval;
-
-    double sum_weight;
     vDist::internal::Buffer<double> weight;
     vDist::internal::Buffer<double> log_weight;
-
     void (*copy_particle) (std::size_t, std::size_t, T &);
 
     void set_weight ()
