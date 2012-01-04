@@ -11,7 +11,9 @@ class Sampler
 {
     public :
 
+    /// The type of particle values
     typedef T value_type;
+    /// The type of partiles
     typedef Particle<T> particle_type;
 
     Sampler (std::size_t N,
@@ -70,12 +72,12 @@ class Sampler
             iterate();
     }
 
-    double integrate (
-            void (*integral) (const Particle<T> &, double *res, void *),
+    double integrate (void (*integral) (
+                std::size_t iter, const Particle<T> &, double *res, void *),
             void *param) const
     {
         std::size_t n = particle.size();
-        integral(particle, integrate_tmp, param);
+        integral(iter_num, particle, integrate_tmp, param);
 
         return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
     }
