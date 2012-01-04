@@ -33,7 +33,7 @@ class Particle
     /// \param copy A pointer to the function that can copy particle from one
     /// position to another position
     Particle (std::size_t N, void (*copy)(std::size_t, std::size_t, T &)) :
-        pnum(N), pval(N), weight(N), log_weight(N),
+        pnum(N), pval(N), weight(N), log_weight(N), rep(N),
         copy_particle(copy) {}
 
     /// \brief Size of the particle set
@@ -140,6 +140,7 @@ class Particle
     T pval;
     vDist::internal::Buffer<double> weight;
     vDist::internal::Buffer<double> log_weight;
+    vDist::internal::Buffer<unsigned> rep;
     void (*copy_particle) (std::size_t, std::size_t, T &);
 
     void set_weight ()
@@ -157,32 +158,31 @@ class Particle
 
     void resample_multinomial (const gsl_rng *rng)
     {
-        vDist::internal::Buffer<unsigned> rep(pnum);
-
         gsl_ran_multinomial(rng, pnum, pnum, weight, rep);
-        resample_do(rep);
+        resample_do();
     }
 
     void resample_residual (const gsl_rng *rng)
     {
-        vDist::internal::Buffer<unsigned> rep(pnum);
-        vDist::internal::Buffer<double> uweight(pnum);
-        vDist::internal::Buffer<double> prob(pnum);
-
-        vDist::dyatx(pnum, pnum, weight, 1, uweight, 1);
-        vdModf(pnum, uweight, uweight, prob);
+        /// \internal Reuse weight and log_weight.
+        /// weight: act as the fractional part of N * weight.
+        /// log_weight: act as the integral part of N * weight.
+        /// They all will be reset to equal weights after resampling.
+        /// So it is safe to modify them here.
+        vDist::dyatx(pnum, pnum, weight, 1, log_weight, 1);
+        vdModf(pnum, log_weight, log_weight, weight);
         std::size_t size = pnum;
-        size -= cblas_dasum(pnum, uweight, 1);
-        gsl_ran_multinomial(rng, pnum, size, prob, rep);
+        size -= cblas_dasum(pnum, log_weight, 1);
+        gsl_ran_multinomial(rng, pnum, size, weight, rep);
         for (std::size_t i = 0; i != pnum; ++i)
-            rep[i] += uweight[i];
-        resample_do(rep);
+            rep[i] += log_weight[i];
+        resample_do();
     }
 
     void resample_stratified (const gsl_rng *rng) {}
     void resample_systematic (const gsl_rng *rng) {}
 
-    void resample_do (const unsigned *rep)
+    void resample_do ()
     {
         std::size_t from = 0;
         std::size_t time = 0;
