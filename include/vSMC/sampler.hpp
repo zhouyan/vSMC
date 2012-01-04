@@ -19,9 +19,12 @@ class Sampler
     typedef T value_type;
     /// The type of partiles
     typedef Particle<T> particle_type;
-    /// The type of monitors
+    /// The type of monitor integration
     typedef void (*monitor_type)
-        (std::size_t iter, const Particle<T> &, double *res);
+        (std::size_t iter, const Particle<T> &, double *);
+    /// The type of path sampling integration
+    typedef double (*path_type)
+        (std::size_t iter, const Particle<T> &, double *);
 
     Sampler (std::size_t N,
             std::size_t (*init) (Particle<T> &),
@@ -35,7 +38,8 @@ class Sampler
         iter_num(0), particle(N, copy),
         ess(0), resample(false), accept(0),
         mode(history_mode), history(history_mode),
-        rng(gsl_rng_alloc(gsl_rng_mt19937)), integrate_tmp(N)
+        rng(gsl_rng_alloc(gsl_rng_mt19937)), integrate_tmp(N),
+        path_integral(NULL), path_estimate(0)
     {
         gsl_rng_set(rng, 100);
     }
@@ -59,12 +63,14 @@ class Sampler
     {
         while (history.size())
             history.pop_back();
+
         for (std::map<std::string, std::vector<double> >::iterator
                 imap = monitor_record.begin();
                 imap != monitor_record.end(); ++imap)
-        {
             imap->second.clear();
-        }
+
+        path_sample.clear();
+        path_width.clear();
 
         iter_num = 0;
         accept = init_particle(particle);
@@ -111,15 +117,35 @@ class Sampler
                     name, std::vector<double>()));
     }
 
-    void removeMonitor (const std::string &name)
+    void eraseMonitor (const std::string &name)
     {
         monitor.erase(name);
         monitor_record.erase(name);
     }
 
+    void clearMonitor ()
+    {
+        monitor.clear();
+        monitor_record.clear();
+    }
+
     std::vector<double> getMonitor (const std::string &name)
     {
         return monitor_record[name];
+    }
+
+    void setPathIntegral (path_type integral)
+    {
+        path_integral = integral;
+    }
+
+    void clearPathIntegral ()
+    {
+        path_integral = NULL;
+    }
+
+    double getPathIntegral () const
+    {
     }
 
     private :
@@ -148,6 +174,11 @@ class Sampler
     std::map<std::string, monitor_type> monitor;
     std::map<std::string, std::vector<double> > monitor_record;
 
+    path_type path_integral;
+    std::vector<double> path_sample;
+    std::vector<double> path_width;
+    double path_estimate;
+
     void post_move ()
     {
         ess = particle.ESS();
@@ -166,14 +197,31 @@ class Sampler
                 imap = monitor.begin(); imap != monitor.end(); ++imap)
         {
             monitor_record.find(imap->first)->second.push_back(
-                    record(imap->second));
+                    eval_monitor(imap->second));
+        }
+
+        if (path_integral) {
+            double sample, width; 
+            sample = eval_path(path_integral, width);
+            path_sample.push_back(sample);
+            path_width.push_back(width);
         }
     }
 
-    double record (monitor_type integral)
+    double eval_monitor (monitor_type integral)
     {
         std::size_t n = particle.size();
+
         integral(iter_num, particle, integrate_tmp);
+
+        return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
+    }
+
+    double eval_path (path_type integral, double &width)
+    {
+        std::size_t n = particle.size();
+
+        width = integral(iter_num, particle, integrate_tmp);
 
         return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
     }
