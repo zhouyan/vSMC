@@ -27,6 +27,8 @@ class Particle
 {
     public :
 
+    typedef T value_type;
+
     Particle (std::size_t N, void (*copy)(std::size_t, std::size_t, T &)) :
         pnum(N), pval(N), weight(N), log_weight(N),
         copy_particle(copy) {}

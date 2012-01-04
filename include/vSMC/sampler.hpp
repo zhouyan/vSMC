@@ -11,6 +11,9 @@ class Sampler
 {
     public :
 
+    typedef T value_type;
+    typedef Particle<T> particle_type;
+
     Sampler (std::size_t N,
             std::size_t (*init) (Particle<T> &),
             std::size_t (*move) (std::size_t iter, Particle<T> &),
