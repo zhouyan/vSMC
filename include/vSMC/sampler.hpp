@@ -69,7 +69,7 @@ class Sampler
         std::size_t n = particle.size();
         integral(particle, integrate_tmp, param);
 
-        return cblas_ddot(n, particle.Weight(), 1, integrate_tmp, 1);
+        return cblas_dsdot(n, particle.Weight(), 1, integrate_tmp, 1);
     }
 
     private :

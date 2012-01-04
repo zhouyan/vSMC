@@ -13,8 +13,15 @@
 
 namespace vSMC {
 
+/// Resample scheme
 enum ResampleScheme {MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC};
 
+/// \brief Particle class
+///
+/// Particle class store the particle set and arrays of weights and log
+/// weights. It provides access to particle values as well as weights. It
+/// computes and manages resources for ESS, resampling, etc, tasks unique to
+/// each iteration.
 template <class T>
 class Particle
 {
@@ -63,7 +70,7 @@ class Particle
 
     double ESS () const
     {
-        return 1 / cblas_ddot(particle_num, weight, 1, weight, 1);
+        return 1 / cblas_dsdot(particle_num, weight, 1, weight, 1);
     }
 
     void Resample (ResampleScheme scheme, const gsl_rng *rng)
