@@ -26,7 +26,7 @@ class Sampler
         rng(gsl_rng_alloc(gsl_rng_mt19937)), integrate_tmp(N)
     {
         gsl_rng_set(rng, 100);
-        Initialize();
+        initialize();
     }
 
     ~Sampler ()
@@ -39,7 +39,12 @@ class Sampler
         return ess;
     }
 
-    void Initialize ()
+    const Particle<T> &getParticle () const
+    {
+        return particle;
+    }
+
+    void initialize ()
     {
         while (history.size())
             history.pop_back();
@@ -49,27 +54,27 @@ class Sampler
         post_move();
     }
 
-    void Iterate ()
+    void iterate ()
     {
         ++iter_num;
         accept = move_particle(iter_num, particle);
         post_move();
     }
 
-    void Iterate (std::size_t n)
+    void iterate (std::size_t n)
     {
         for (std::size_t i = 0; i != n; ++i)
-            Iterate();
+            iterate();
     }
 
-    double Integrate (
+    double integrate (
             void (*integral) (const Particle<T> &, double *res, void *),
             void *param) const
     {
         std::size_t n = particle.size();
         integral(particle, integrate_tmp, param);
 
-        return cblas_dsdot(n, particle.Weight(), 1, integrate_tmp, 1);
+        return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
     }
 
     private :
@@ -99,8 +104,8 @@ class Sampler
         ess = particle.ESS();
 
         if (ess < threshold) {
-            particle.Resample(scheme, rng);
-            ess = particle.size();
+            particle.resample(scheme, rng);
+            ess = particle.ESS();
         }
 
         if (mode != HISTORY_NONE) {
