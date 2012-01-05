@@ -34,14 +34,13 @@ class Sampler
             ResampleScheme resample_scheme = RESIDUAL,
             double resample_threshold = 0.5) :
         initialized(false), init_particle(init), move_particle(move),
-        scheme(resample_scheme), threshold(resample_threshold * N),
-        iter_num(0), particle(N, copy),
-        ess(0), resample(false), accept(0),
+        rng(NULL), scheme(resample_scheme), threshold(resample_threshold * N),
+        particle(N, copy), iter_num(0), ess(0), resample(false), accept(0),
         mode(history_mode), history(history_mode),
-        rng(gsl_rng_alloc(gsl_rng_mt19937)), integrate_tmp(N),
-        path_integral(NULL), path_estimate(0)
+        integrate_tmp(N), path_integral(NULL), path_estimate(0)
     {
-        gsl_rng_set(rng, 100);
+        rng = gsl_rng_alloc(gsl_rng_mt19937);
+        gsl_rng_set(rng, 1);
     }
 
     ~Sampler ()
@@ -52,6 +51,16 @@ class Sampler
     double ESS () const
     {
         return ess;
+    }
+    
+    bool wasResampled () const
+    {
+        return resample;
+    }
+
+    std::size_t acceptCount () const
+    {
+        return accept;
     }
 
     const Particle<T> &getParticle () const
@@ -150,30 +159,35 @@ class Sampler
 
     private :
 
+    /// Initialization indicator
     bool initialized;
 
+    /// Initialization and movement
     std::size_t (*init_particle) (Particle<T> &);
     std::size_t (*move_particle) (std::size_t, Particle<T> &);
 
+    /// Resampling
+    gsl_rng *rng;
     ResampleScheme scheme;
     double threshold;
 
-    std::size_t iter_num;
+    /// Particle sets
     Particle<T> particle;
-
+    std::size_t iter_num;
     double ess;
     bool resample;
     std::size_t accept;
 
+    /// History
     HistoryMode mode;
     History<T> history;
 
-    gsl_rng *rng;
-
+    /// Monte Carlo estimation by integration
     mutable vDist::internal::Buffer<double> integrate_tmp;
     std::map<std::string, monitor_type> monitor;
     std::map<std::string, std::vector<double> > monitor_record;
 
+    /// Path sampling
     path_type path_integral;
     std::vector<double> path_sample;
     std::vector<double> path_width;
@@ -181,12 +195,12 @@ class Sampler
 
     void post_move ()
     {
-        ess = particle.ESS();
-
-        if (ess < threshold) {
+        resample = false;
+        if (particle.ESS() < threshold) {
+            resample = true;
             particle.resample(scheme, rng);
-            ess = particle.ESS();
         }
+        ess = particle.ESS();
 
         if (mode != HISTORY_NONE) {
             history.push_back(
@@ -194,8 +208,7 @@ class Sampler
         }
 
         for (typename std::map<std::string, monitor_type>::iterator
-                imap = monitor.begin(); imap != monitor.end(); ++imap)
-        {
+                imap = monitor.begin(); imap != monitor.end(); ++imap) {
             monitor_record.find(imap->first)->second.push_back(
                     eval_monitor(imap->second));
         }

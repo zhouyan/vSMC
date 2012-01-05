@@ -130,7 +130,9 @@ class Particle
                 resample_systematic(rng);
                 break;
             default :
-                resample_residual(rng);
+                throw std::runtime_error(
+                        "ERROR: vSMC::Particle::resample: "
+                        "Unknown Resample Scheme");
         }
     }
 

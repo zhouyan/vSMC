@@ -85,7 +85,9 @@ class History
             case HISTORY_NONE :
                 return 0;
             default :
-                throw std::runtime_error("Unknown HistoryMode");
+                throw std::runtime_error(
+                        "ERROR: vSMC::Particle::resample: "
+                        "Unknown History Mode");
         }
     }
 
