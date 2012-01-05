@@ -199,10 +199,9 @@ class Particle
                 if (rep[from] - time <= 1) {
                     // only 1 child left on rep[from]
                     time = 0;
-                    ++from;
-                    while (rep[from] < 2)
-                        // rep[from] shall has at least 2 child, 1 for itself
+                    do // move from to some position with at least 2 children
                         ++from;
+                    while (rep[from] < 2);
                 }
                 copy_particle(from, to, pval);
                 ++time;
