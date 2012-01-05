@@ -19,17 +19,18 @@ class Sampler
     typedef T value_type;
     /// The type of partiles
     typedef Particle<T> particle_type;
+    /// The type of initialize callable objects
+    typedef std::size_t (*init_type) (Particle<T> &);
+    /// The type of move callable objects
+    typedef std::size_t (*move_type) (std::size_t, Particle<T> &);
     /// The type of monitor integration
-    typedef void (*monitor_type)
-        (std::size_t iter, const Particle<T> &, double *);
+    typedef void (*monitor_type) (std::size_t, const Particle<T> &, double *);
     /// The type of path sampling integration
-    typedef double (*path_type)
-        (std::size_t iter, const Particle<T> &, double *);
+    typedef double (*path_type) (std::size_t, const Particle<T> &, double *);
 
     Sampler (std::size_t N,
-            std::size_t (*init) (Particle<T> &),
-            std::size_t (*move) (std::size_t iter, Particle<T> &),
-            void (*copy) (std::size_t, std::size_t, T &),
+            init_type init, move_type move,
+            typename Particle<T>::copy_type copy,
             HistoryMode history_mode = HISTORY_RAM,
             ResampleScheme resample_scheme = RESIDUAL,
             double resample_threshold = 0.5) :
@@ -52,7 +53,7 @@ class Sampler
     {
         return ess;
     }
-    
+
     bool wasResampled () const
     {
         return resample;
@@ -163,8 +164,8 @@ class Sampler
     bool initialized;
 
     /// Initialization and movement
-    std::size_t (*init_particle) (Particle<T> &);
-    std::size_t (*move_particle) (std::size_t, Particle<T> &);
+    init_type init_particle;
+    move_type move_particle;
 
     /// Resampling
     gsl_rng *rng;

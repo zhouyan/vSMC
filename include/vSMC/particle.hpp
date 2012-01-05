@@ -27,12 +27,15 @@ class Particle
 {
     public :
 
+    /// The type of copy a particle
+    typedef void (*copy_type) (std::size_t, std::size_t, T &);
+
     /// \brief Particle does not have a default constructor
     ///
     /// \param N The number of particles
     /// \param copy A pointer to the function that can copy particle from one
     /// position to another position
-    Particle (std::size_t N, void (*copy)(std::size_t, std::size_t, T &)) :
+    Particle (std::size_t N, copy_type copy) :
         pnum(N), pval(N), weight(N), log_weight(N), rep(N),
         copy_particle(copy) {}
 
@@ -143,7 +146,7 @@ class Particle
     vDist::internal::Buffer<double> weight;
     vDist::internal::Buffer<double> log_weight;
     vDist::internal::Buffer<unsigned> rep;
-    void (*copy_particle) (std::size_t, std::size_t, T &);
+    copy_type copy_particle;
 
     void set_weight ()
     {
