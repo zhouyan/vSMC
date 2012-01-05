@@ -7,6 +7,7 @@
 #include <vector>
 #include <vSMC/particle.hpp>
 #include <vSMC/history.hpp>
+#include <vDist/rng/rng_gsl.hpp>
 
 namespace vSMC {
 
@@ -31,23 +32,16 @@ class Sampler
     Sampler (std::size_t N,
             init_type init, move_type move,
             typename Particle<T>::copy_type copy,
-            HistoryMode history_mode = HISTORY_RAM,
-            ResampleScheme resample_scheme = RESIDUAL,
-            double resample_threshold = 0.5) :
+            HistoryMode hist_mode = HISTORY_RAM,
+            ResampleScheme rs_scheme = RESIDUAL,
+            double rs_threshold = 0.5,
+            const int seed = V_DIST_SEED,
+            const gsl_rng_type *brng = V_DIST_GSL_BRNG) :
         initialized(false), init_particle(init), move_particle(move),
-        rng(NULL), scheme(resample_scheme), threshold(resample_threshold * N),
+        rng(seed, brng), scheme(rs_scheme), threshold(rs_threshold* N),
         particle(N, copy), iter_num(0), ess(0), resample(false), accept(0),
-        mode(history_mode), history(history_mode),
-        integrate_tmp(N), path_integral(NULL), path_estimate(0)
-    {
-        rng = gsl_rng_alloc(gsl_rng_mt19937);
-        gsl_rng_set(rng, 1);
-    }
-
-    ~Sampler ()
-    {
-        gsl_rng_free(rng);
-    }
+        mode(hist_mode), history(hist_mode),
+        integrate_tmp(N), path_integral(NULL), path_estimate(0) {}
 
     double ESS () const
     {
@@ -168,7 +162,7 @@ class Sampler
     move_type move_particle;
 
     /// Resampling
-    gsl_rng *rng;
+    vDist::RngGSL rng;
     ResampleScheme scheme;
     double threshold;
 
@@ -199,7 +193,7 @@ class Sampler
         resample = false;
         if (particle.ESS() < threshold) {
             resample = true;
-            particle.resample(scheme, rng);
+            particle.resample(scheme, rng.get_rng());
         }
         ess = particle.ESS();
 
