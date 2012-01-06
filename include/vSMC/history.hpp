@@ -11,54 +11,16 @@ namespace vSMC {
 enum HistoryMode {HISTORY_NONE, HISTORY_RAM, HISTORY_FILE};
 
 template <class T>
-class HistoryElement
-{
-    public :
-
-    explicit HistoryElement (const Particle<T> &particle,
-            bool was_resample, double ess, std::size_t accept_count) :
-        e_particle(particle), e_resample(was_resample),
-        e_ess(ess), e_accept(accept_count) {}
-
-    const Particle<T> &particle () const
-    {
-        return e_particle;
-    }
-
-    double ESS () const
-    {
-        return e_ess;
-    }
-
-    bool WasResample () const
-    {
-        return e_resample;
-    }
-
-    std::size_t AcceptCount () const
-    {
-        return e_accept;
-    }
-
-    private :
-
-    Particle<T> e_particle;
-    bool e_resample;
-    double e_ess;
-    std::size_t e_accept;
-}; // class HistoryElement
-
-template <class T>
 class History
 {
     public :
 
     explicit History (HistoryMode history_mode) : mode(history_mode) {};
 
-    void push_back (const HistoryElement<T> &element)
+    void push_back (const Particle<T> &particle)
     {
         if (mode == HISTORY_RAM)
-            history.push_back(element);
+            history.push_back(particle);
     }
 
     void pop_back ()
@@ -67,12 +29,18 @@ class History
             history.pop_back();
     }
 
-    void pop_back (HistoryElement<T> &element)
+    void pop_back (Particle<T> &particle)
     {
         if (mode == HISTORY_RAM) {
-            element = history.back();
+            particle = history.back();
             history.pop_back();
         }
+    }
+
+    void clear ()
+    {
+        if (mode == HISTORY_RAM)
+            history.clear();
     }
 
     std::size_t size () const
@@ -94,7 +62,7 @@ class History
     private :
 
     HistoryMode mode;
-    std::vector<HistoryElement<T> > history;
+    std::vector<Particle<T> > history;
 }; // class History
 
 } // namespace vSMC

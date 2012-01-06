@@ -39,23 +39,22 @@ class Sampler
             const gsl_rng_type *brng = V_DIST_GSL_BRNG) :
         initialized(false), init_particle(init), move_particle(move),
         rng(seed, brng), scheme(rs_scheme), threshold(rs_threshold* N),
-        particle(N, copy), iter_num(0), ess(0), resample(false), accept(0),
-        mode(hist_mode), history(hist_mode),
+        particle(N, copy), iter_num(0), mode(hist_mode), history(hist_mode),
         integrate_tmp(N), path_integral(NULL), path_estimate(0) {}
 
     double ESS () const
     {
-        return ess;
+        return ess.back();
     }
 
     bool wasResampled () const
     {
-        return resample;
+        return resample.back();
     }
 
     std::size_t acceptCount () const
     {
-        return accept;
+        return accept.back();
     }
 
     const Particle<T> &getParticle () const
@@ -65,8 +64,10 @@ class Sampler
 
     void initialize ()
     {
-        while (history.size())
-            history.pop_back();
+        history.clear();
+        ess.clear();
+        resample.clear();
+        accept.clear();
 
         for (std::map<std::string, std::vector<double> >::iterator
                 imap = monitor_record.begin();
@@ -77,7 +78,7 @@ class Sampler
         path_width.clear();
 
         iter_num = 0;
-        accept = init_particle(particle);
+        accept.push_back(init_particle(particle));
         post_move();
 
         initialized = true;
@@ -91,7 +92,7 @@ class Sampler
                     "Sampler has not been initialized yet");
 
         ++iter_num;
-        accept = move_particle(iter_num, particle);
+        accept.push_back(move_particle(iter_num, particle));
         post_move();
     }
 
@@ -179,9 +180,9 @@ class Sampler
     /// Particle sets
     Particle<T> particle;
     std::size_t iter_num;
-    double ess;
-    bool resample;
-    std::size_t accept;
+    std::vector<double> ess;
+    std::vector<bool> resample;
+    std::vector<std::size_t> accept;
 
     /// History
     HistoryMode mode;
@@ -201,17 +202,15 @@ class Sampler
 
     void post_move ()
     {
-        resample = false;
+        bool was_resample = false;
         if (particle.ESS() < threshold) {
-            resample = true;
+            was_resample = true;
             particle.resample(scheme, rng.get_rng());
         }
-        ess = particle.ESS();
+        ess.push_back(particle.ESS());
 
-        if (mode != HISTORY_NONE) {
-            history.push_back(
-                    HistoryElement<T>(particle, resample, ess, accept));
-        }
+        if (mode != HISTORY_NONE)
+            history.push_back(particle);
 
         for (typename std::map<std::string, monitor_type>::iterator
                 imap = monitor.begin(); imap != monitor.end(); ++imap) {
@@ -221,29 +220,24 @@ class Sampler
         }
 
         if (path_integral) {
-            double sample, width; 
-            sample = eval_path(path_integral, width);
-            path_sample.push_back(sample);
+            double width; 
+            path_sample.push_back(eval_path(path_integral, width));
             path_width.push_back(width);
         }
     }
 
     double eval_monitor (monitor_type integral)
     {
-        std::size_t n = particle.size();
-
         integral(iter_num, particle, integrate_tmp);
-
-        return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
+        return cblas_ddot(particle.size(),
+                particle.getWeightPtr(), 1, integrate_tmp, 1);
     }
 
     double eval_path (path_type integral, double &width)
     {
-        std::size_t n = particle.size();
-
         width = integral(iter_num, particle, integrate_tmp);
-
-        return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
+        return cblas_ddot(particle.size(),
+                particle.getWeightPtr(), 1, integrate_tmp, 1);
     }
 }; // class Sampler
 
