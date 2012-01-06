@@ -116,6 +116,9 @@ class Sampler
         monitor.insert(
                 typename std::map<std::string, monitor_type>::value_type(
                     name, integral));
+        monitor_index.insert(
+                std::map<std::string, std::vector<std::size_t> >::value_type(
+                    name, std::vector<size_t>()));
         monitor_record.insert(
                 std::map<std::string, std::vector<double> >::value_type(
                     name, std::vector<double>()));
@@ -124,18 +127,25 @@ class Sampler
     void eraseMonitor (const std::string &name)
     {
         monitor.erase(name);
+        monitor_index.erase(name);
         monitor_record.erase(name);
     }
 
     void clearMonitor ()
     {
         monitor.clear();
+        monitor_index.clear();
         monitor_record.clear();
     }
 
-    std::vector<double> getMonitor (const std::string &name)
+    std::vector<std::size_t> getMonitorIndex (const std::string &name) const
     {
-        return monitor_record[name];
+        return monitor_index.find(name)->second;
+    }
+
+    std::vector<double> getMonitorRecord (const std::string &name) const
+    {
+        return monitor_record.find(name)->second;
     }
 
     void setPathIntegral (path_type integral)
@@ -180,6 +190,7 @@ class Sampler
     /// Monte Carlo estimation by integration
     mutable vDist::internal::Buffer<double> integrate_tmp;
     std::map<std::string, monitor_type> monitor;
+    std::map<std::string, std::vector<std::size_t> > monitor_index;
     std::map<std::string, std::vector<double> > monitor_record;
 
     /// Path sampling
@@ -204,6 +215,7 @@ class Sampler
 
         for (typename std::map<std::string, monitor_type>::iterator
                 imap = monitor.begin(); imap != monitor.end(); ++imap) {
+            monitor_index.find(imap->first)->second.push_back(iter_num);
             monitor_record.find(imap->first)->second.push_back(
                     eval_monitor(imap->second));
         }
@@ -233,7 +245,7 @@ class Sampler
 
         return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
     }
-};
+}; // class Sampler
 
 } // namespace vSMC
 
