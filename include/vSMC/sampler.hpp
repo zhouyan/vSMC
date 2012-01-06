@@ -7,7 +7,7 @@
 #include <vector>
 #include <vSMC/particle.hpp>
 #include <vSMC/history.hpp>
-#include <vDist/rng/rng_gsl.hpp>
+#include <vDist/rng/gsl.hpp>
 
 namespace vSMC {
 
@@ -189,7 +189,7 @@ class Sampler
     History<T> history;
 
     /// Monte Carlo estimation by integration
-    mutable vDist::internal::Buffer<double> integrate_tmp;
+    mutable vDist::tool::Buffer<double> integrate_tmp;
     std::map<std::string, monitor_type> monitor;
     std::map<std::string, std::vector<std::size_t> > monitor_index;
     std::map<std::string, std::vector<double> > monitor_record;

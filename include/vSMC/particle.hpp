@@ -8,8 +8,8 @@
 #include <gsl/gsl_cblas.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <vDist/utilities/buffer.hpp>
-#include <vDist/utilities/eblas.hpp>
+#include <vDist/tool/buffer.hpp>
+#include <vDist/tool/eblas.hpp>
 
 namespace vSMC {
 
@@ -143,9 +143,9 @@ class Particle
 
     std::size_t pnum;
     T pval;
-    vDist::internal::Buffer<double> weight;
-    vDist::internal::Buffer<double> log_weight;
-    vDist::internal::Buffer<unsigned> rep;
+    vDist::tool::Buffer<double> weight;
+    vDist::tool::Buffer<double> log_weight;
+    vDist::tool::Buffer<unsigned> rep;
     copy_type copy_particle;
 
     void set_weight ()
@@ -174,7 +174,7 @@ class Particle
         /// log_weight: act as the integral part of N * weight.
         /// They all will be reset to equal weights after resampling.
         /// So it is safe to modify them here.
-        vDist::dyatx(pnum, pnum, weight, 1, log_weight, 1);
+        vDist::tool::dyatx(pnum, pnum, weight, 1, log_weight, 1);
         vdModf(pnum, log_weight, log_weight, weight);
         std::size_t size = pnum;
         size -= cblas_dasum(pnum, log_weight, 1);
@@ -207,8 +207,8 @@ class Particle
                 ++time;
             }
         }
-        vDist::dfill(pnum, 1.0 / pnum, weight, 1);
-        vDist::dfill(pnum, 0, log_weight, 1);
+        vDist::tool::dfill(pnum, 1.0 / pnum, weight, 1);
+        vDist::tool::dfill(pnum, 0, log_weight, 1);
     }
 }; // class Particle
 
