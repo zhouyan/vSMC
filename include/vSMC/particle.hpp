@@ -51,8 +51,8 @@ class Particle
     /// \brief Read and write access to particle values
     ///
     /// \return A reference to the particle values, type (T &)
-    /// \note Any operations that change the state of the particle (e.g.,
-    /// setting log weights or resampling) set can invalidate the reference.
+    /// \note Any operations that change the state of the particle set (e.g.,
+    /// setting log weights or resampling) may invalidate the reference.
     T &value ()
     {
         return pval;
@@ -61,8 +61,8 @@ class Particle
     /// \brief Read only access to particle values
     ///
     /// \return A const reference to the particle values, type (const T &)
-    /// \note Any operations that change the state of the particle (e.g.,
-    /// setting log weights or resampling) set can invalidate the reference.
+    /// \note Any operations that change the state of the particle set (e.g.,
+    /// setting log weights or resampling) may invalidate the reference.
     const T &value () const
     {
         return pval;
@@ -71,8 +71,8 @@ class Particle
     /// \brief Read only access to the weights
     ///
     /// \return A const pointer to the weights, type (const double *)
-    /// \note Any operations that change the state of the particle (e.g.,
-    /// setting log weights or resampling) set can invalidate the pointer.
+    /// \note Any operations that change the state of the particle set (e.g.,
+    /// setting log weights or resampling) may invalidate the pointer.
     const double *getWeightPtr () const
     {
         return weight.get();
@@ -81,8 +81,8 @@ class Particle
     /// \brief Read only access to the log weights
     ///
     /// \return A const pointer to the log weights, type (const double *)
-    /// \note Any operations that change the state of the particle (e.g.,
-    /// setting log weights or resampling) set can invalidate the pointer.
+    /// \note Any operations that change the state of the particle set (e.g.,
+    /// setting log weights or resampling) may invalidate the pointer.
     const double *getLogWeightPtr () const
     {
         return log_weight.get();

@@ -27,6 +27,9 @@ class Sampler
     /// The type of move callable objects
     typedef boost::function<std::size_t
         (std::size_t, Particle<T> &)> move_type;
+    /// The type of importance sampling integral
+    typedef boost::function<void
+        (std::size_t, const Particle<T> &, double *, void *)> integral_type;
     /// The type of monitor integration
     typedef boost::function<void
         (std::size_t, const Particle<T> &, double *)> monitor_type;
@@ -34,6 +37,15 @@ class Sampler
     typedef boost::function<double
         (std::size_t, const Particle<T> &, double *)> path_type;
 
+    /// \brief Sampler does not have a default constructor
+    ///
+    /// \param N The number of particles
+    /// \param init The functor used to initialize the particles
+    /// \param move The functor used to move the particles and weights
+    /// \param hist_mode The history storage mode. See HistoryMode
+    /// \param rs_scheme The resampling scheme. See ResampleScheme
+    /// \param seed The seed for the reampling RNG. See documentation of vDist
+    /// \param brng The basic RNG for resampling RNG. See documentation of GSL
     Sampler (std::size_t N,
             init_type init, move_type move,
             typename Particle<T>::copy_type copy,
@@ -47,32 +59,52 @@ class Sampler
         particle(N, copy), iter_num(0), mode(hist_mode), history(hist_mode),
         integrate_tmp(N), path_integral(NULL), path_estimate(0) {}
 
+    /// \brief Get ESS
+    ///
+    /// \return The ESS value of the latest iteration
     double ESS () const
     {
         return ess.back();
     }
 
+    /// \brief Get indicator of resampling
+    ///
+    /// \return A bool value, \b true if the latest iteration was resampled
     bool wasResampled () const
     {
         return resample.back();
     }
 
+    /// \brief Get accept count
+    ///
+    /// \return The accept count of the latest iteration
     std::size_t acceptCount () const
     {
         return accept.back();
     }
 
+    /// \brief Read only access to the particle set
+    ///
+    /// \return A const reference to the latest particle set.
+    /// \note Any operations that change the state of the sampler (e.g., an
+    /// iteration) may invalidate the reference.
     const Particle<T> &getParticle () const
     {
         return particle;
     }
 
+    /// \brief (Re)initialize the particle set
     void initialize ()
     {
         history.clear();
         ess.clear();
         resample.clear();
         accept.clear();
+
+        for (std::map<std::string, std::vector<std::size_t> >::iterator
+                imap = monitor_index.begin();
+                imap != monitor_index.end(); ++imap)
+            imap->second.clear();
 
         for (std::map<std::string, std::vector<double> >::iterator
                 imap = monitor_record.begin();
@@ -89,6 +121,7 @@ class Sampler
         initialized = true;
     }
 
+    /// \brief Perform iteration
     void iterate ()
     {
         if (!initialized)
@@ -101,15 +134,20 @@ class Sampler
         post_move();
     }
 
+    /// \brief Perform iteration
+    ///
+    /// \param n The number of iterations to be performed
     void iterate (std::size_t n)
     {
         for (std::size_t i = 0; i != n; ++i)
             iterate();
     }
 
-    double integrate (void (*integral) (
-                std::size_t iter, const Particle<T> &, double *res, void *),
-            void *param) const
+    /// \brief Perform importance sampling integration
+    ///
+    /// \param intgral The functor used to compute the integrands
+    /// \param param Additional parameters to be passed to integral
+    double integrate (integral_type integral, void *param) const
     {
         std::size_t n = particle.size();
         integral(iter_num, particle, integrate_tmp, param);
@@ -117,9 +155,13 @@ class Sampler
         return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
     }
 
-    void addMonitor (const std::string &name, monitor_type integral)
+    /// \brief Add a monitor, similar to \b monitor in \b BUGS
+    ///
+    /// \param name The name of the monitor
+    /// \param integral The functor used to compute the integrands
+    void monitor (const std::string &name, monitor_type integral)
     {
-        monitor.insert(
+        monitor_integral.insert(
                 typename std::map<std::string, monitor_type>::value_type(
                     name, integral));
         monitor_index.insert(
@@ -130,41 +172,58 @@ class Sampler
                     name, std::vector<double>()));
     }
 
-    void eraseMonitor (const std::string &name)
-    {
-        monitor.erase(name);
-        monitor_index.erase(name);
-        monitor_record.erase(name);
-    }
-
-    void clearMonitor ()
-    {
-        monitor.clear();
-        monitor_index.clear();
-        monitor_record.clear();
-    }
-
-    std::vector<std::size_t> getMonitorIndex (const std::string &name) const
-    {
-        return monitor_index.find(name)->second;
-    }
-
-    std::vector<double> getMonitorRecord (const std::string &name) const
+    /// \brief Get the record of a monitor by name
+    ///
+    /// \param name The name of the monitor
+    /// \return A vector of the monitor record
+    std::vector<double> monitor (const std::string &name) const
     {
         return monitor_record.find(name)->second;
     }
 
-    void setPathIntegral (path_type integral)
+    /// \brief Get the iteration numbers of a monitor by name
+    ///
+    /// \param The name of the monitor
+    /// \return A vector of the monitor index
+    std::vector<std::size_t> get_monitor_index (const std::string &name) const
+    {
+        return monitor_index.find(name)->second;
+    }
+
+    /// \brief Erase a monitor by name 
+    ///
+    /// \param name The name of the monitor
+    void erase_monitor (const std::string &name)
+    {
+        monitor_integral.erase(name);
+        monitor_index.erase(name);
+        monitor_record.erase(name);
+    }
+
+    /// \brief Clear all monitors
+    void clear_monitor ()
+    {
+        monitor_integral.clear();
+        monitor_index.clear();
+        monitor_record.clear();
+    }
+
+    /// \brief Set the path sampling integral
+    ///
+    /// \param integral The functor used to compute the integrands
+    void set_path_sampling (path_type integral)
     {
         path_integral = integral;
     }
 
-    void clearPathIntegral ()
+    /// \brief Stop path sampling
+    void clear_path_sampling ()
     {
         path_integral = NULL;
     }
 
-    double getPathIntegral () const
+    /// \brief Get the results of path sampling
+    double get_path_sampling () const
     {
     }
 
@@ -195,7 +254,7 @@ class Sampler
 
     /// Monte Carlo estimation by integration
     mutable vDist::tool::Buffer<double> integrate_tmp;
-    std::map<std::string, monitor_type> monitor;
+    std::map<std::string, monitor_type> monitor_integral;
     std::map<std::string, std::vector<std::size_t> > monitor_index;
     std::map<std::string, std::vector<double> > monitor_record;
 
@@ -218,13 +277,14 @@ class Sampler
             history.push_back(particle);
 
         for (typename std::map<std::string, monitor_type>::iterator
-                imap = monitor.begin(); imap != monitor.end(); ++imap) {
+                imap = monitor_integral.begin();
+                imap != monitor_integral.end(); ++imap) {
             monitor_index.find(imap->first)->second.push_back(iter_num);
             monitor_record.find(imap->first)->second.push_back(
                     eval_monitor(imap->second));
         }
 
-        if (path_integral) {
+        if (!path_integral.empty()) {
             double width; 
             path_sample.push_back(eval_path(path_integral, width));
             path_width.push_back(width);
