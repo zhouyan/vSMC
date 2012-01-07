@@ -5,10 +5,13 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <gsl/gsl_cblas.h>
 #include <boost/function.hpp>
-#include <vSMC/particle.hpp>
-#include <vSMC/history.hpp>
 #include <vDist/rng/gsl.hpp>
+#include <vDist/tool/buffer.hpp>
+#include <vSMC/history.hpp>
+#include <vSMC/monitor.hpp>
+#include <vSMC/particle.hpp>
 
 namespace vSMC {
 
@@ -30,9 +33,6 @@ class Sampler
     /// The type of importance sampling integral
     typedef boost::function<void
         (std::size_t, const Particle<T> &, double *, void *)> integral_type;
-    /// The type of monitor integration
-    typedef boost::function<void
-        (std::size_t, const Particle<T> &, double *)> monitor_type;
     /// The type of path sampling integration
     typedef boost::function<double
         (std::size_t, const Particle<T> &, double *)> path_type;
@@ -46,9 +46,10 @@ class Sampler
     /// \param rs_scheme The resampling scheme. See ResampleScheme
     /// \param seed The seed for the reampling RNG. See documentation of vDist
     /// \param brng The basic RNG for resampling RNG. See documentation of GSL
-    Sampler (std::size_t N,
-            init_type init, move_type move,
-            typename Particle<T>::copy_type copy,
+    Sampler (
+            std::size_t N,
+            const init_type &init, const move_type &move,
+            const typename Particle<T>::copy_type &copy,
             HistoryMode hist_mode = HISTORY_RAM,
             ResampleScheme rs_scheme = RESIDUAL,
             double rs_threshold = 0.5,
@@ -101,14 +102,8 @@ class Sampler
         resample.clear();
         accept.clear();
 
-        for (std::map<std::string, std::vector<std::size_t> >::iterator
-                imap = monitor_index.begin();
-                imap != monitor_index.end(); ++imap)
-            imap->second.clear();
-
-        for (std::map<std::string, std::vector<double> >::iterator
-                imap = monitor_record.begin();
-                imap != monitor_record.end(); ++imap)
+        for (typename std::map<std::string, Monitor<T> >::iterator
+                imap = monitor.begin(); imap != monitor.end(); ++imap)
             imap->second.clear();
 
         path_sample.clear();
@@ -159,26 +154,12 @@ class Sampler
     ///
     /// \param name The name of the monitor
     /// \param integral The functor used to compute the integrands
-    void monitor (const std::string &name, monitor_type integral)
+    void add_monitor (const std::string &name,
+            const typename Monitor<T>::integral_type &integral)
     {
-        monitor_integral.insert(
-                typename std::map<std::string, monitor_type>::value_type(
-                    name, integral));
-        monitor_index.insert(
-                std::map<std::string, std::vector<std::size_t> >::value_type(
-                    name, std::vector<size_t>()));
-        monitor_record.insert(
-                std::map<std::string, std::vector<double> >::value_type(
-                    name, std::vector<double>()));
-    }
-
-    /// \brief Get the record of a monitor by name
-    ///
-    /// \param name The name of the monitor
-    /// \return A vector of the monitor record
-    std::vector<double> monitor (const std::string &name) const
-    {
-        return monitor_record.find(name)->second;
+        monitor.insert(
+                typename std::map<std::string, Monitor<T> >::value_type(
+                    name, Monitor<T>(integral)));
     }
 
     /// \brief Get the iteration numbers of a monitor by name
@@ -187,7 +168,23 @@ class Sampler
     /// \return A vector of the monitor index
     std::vector<std::size_t> get_monitor_index (const std::string &name) const
     {
-        return monitor_index.find(name)->second;
+        return monitor.find(name)->second.get_index();
+    }
+
+    /// \brief Get the record of a monitor by name
+    ///
+    /// \param name The name of the monitor
+    /// \return A vector of the monitor record
+    std::vector<double> get_monitor_record (const std::string &name) const
+    {
+        return monitor.find(name)->second.get_record();
+    }
+
+    /// \brief Get both the iteration numbers and record of a monitor by name
+    std::pair<std::vector<std::size_t>, std::vector<double> > get_monitor (
+            const std::string &name) const
+    {
+        return monitor.find(name)->second.get();
     }
 
     /// \brief Erase a monitor by name 
@@ -195,17 +192,13 @@ class Sampler
     /// \param name The name of the monitor
     void erase_monitor (const std::string &name)
     {
-        monitor_integral.erase(name);
-        monitor_index.erase(name);
-        monitor_record.erase(name);
+        monitor.erase(name);
     }
 
     /// \brief Clear all monitors
     void clear_monitor ()
     {
-        monitor_integral.clear();
-        monitor_index.clear();
-        monitor_record.clear();
+        monitor.clear();
     }
 
     /// \brief Set the path sampling integral
@@ -254,9 +247,7 @@ class Sampler
 
     /// Monte Carlo estimation by integration
     mutable vDist::tool::Buffer<double> integrate_tmp;
-    std::map<std::string, monitor_type> monitor_integral;
-    std::map<std::string, std::vector<std::size_t> > monitor_index;
-    std::map<std::string, std::vector<double> > monitor_record;
+    std::map<std::string, Monitor<T> > monitor;
 
     /// Path sampling
     path_type path_integral;
@@ -276,12 +267,9 @@ class Sampler
         if (mode != HISTORY_NONE)
             history.push_back(particle);
 
-        for (typename std::map<std::string, monitor_type>::iterator
-                imap = monitor_integral.begin();
-                imap != monitor_integral.end(); ++imap) {
-            monitor_index.find(imap->first)->second.push_back(iter_num);
-            monitor_record.find(imap->first)->second.push_back(
-                    eval_monitor(imap->second));
+        for (typename std::map<std::string, Monitor<T> >::iterator
+                imap = monitor.begin(); imap != monitor.end(); ++imap) {
+            imap->second.eval(iter_num, particle);
         }
 
         if (!path_integral.empty()) {
@@ -289,13 +277,6 @@ class Sampler
             path_sample.push_back(eval_path(width));
             path_width.push_back(width);
         }
-    }
-
-    double eval_monitor (monitor_type integral)
-    {
-        integral(iter_num, particle, integrate_tmp);
-        return cblas_ddot(particle.size(),
-                particle.get_weight_ptr(), 1, integrate_tmp, 1);
     }
 
     double eval_path (double &width)

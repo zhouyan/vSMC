@@ -36,7 +36,7 @@ class Particle
     /// \param N The number of particles
     /// \param copy A pointer to the function that can copy particle from one
     /// position to another position
-    Particle (std::size_t N, copy_type copy) :
+    Particle (std::size_t N, const copy_type &copy) :
         pnum(N), pval(N), weight(N), log_weight(N), rep(N),
         copy_particle(copy) {}
 
