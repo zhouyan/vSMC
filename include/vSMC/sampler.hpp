@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <boost/function.hpp>
 #include <vSMC/particle.hpp>
 #include <vSMC/history.hpp>
 #include <vDist/rng/gsl.hpp>
@@ -21,13 +22,17 @@ class Sampler
     /// The type of partiles
     typedef Particle<T> particle_type;
     /// The type of initialize callable objects
-    typedef std::size_t (*init_type) (Particle<T> &);
+    typedef boost::function<std::size_t
+        (Particle<T> &)> init_type;
     /// The type of move callable objects
-    typedef std::size_t (*move_type) (std::size_t, Particle<T> &);
+    typedef boost::function<std::size_t
+        (std::size_t, Particle<T> &)> move_type;
     /// The type of monitor integration
-    typedef void (*monitor_type) (std::size_t, const Particle<T> &, double *);
+    typedef boost::function<void
+        (std::size_t, const Particle<T> &, double *)> monitor_type;
     /// The type of path sampling integration
-    typedef double (*path_type) (std::size_t, const Particle<T> &, double *);
+    typedef boost::function<double
+        (std::size_t, const Particle<T> &, double *)> path_type;
 
     Sampler (std::size_t N,
             init_type init, move_type move,

@@ -8,6 +8,7 @@
 #include <gsl/gsl_cblas.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+#include <boost/function.hpp>
 #include <vDist/tool/buffer.hpp>
 #include <vDist/tool/eblas.hpp>
 
@@ -28,7 +29,7 @@ class Particle
     public :
 
     /// The type of copy a particle
-    typedef void (*copy_type) (std::size_t, std::size_t, T &);
+    typedef boost::function<void (std::size_t, std::size_t, T &)> copy_type;
 
     /// \brief Particle does not have a default constructor
     ///
