@@ -152,7 +152,7 @@ class Sampler
         std::size_t n = particle.size();
         integral(iter_num, particle, integrate_tmp, param);
 
-        return cblas_ddot(n, particle.getWeightPtr(), 1, integrate_tmp, 1);
+        return cblas_ddot(n, particle.get_weight_ptr(), 1, integrate_tmp, 1);
     }
 
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
@@ -286,7 +286,7 @@ class Sampler
 
         if (!path_integral.empty()) {
             double width; 
-            path_sample.push_back(eval_path(path_integral, width));
+            path_sample.push_back(eval_path(width));
             path_width.push_back(width);
         }
     }
@@ -295,14 +295,14 @@ class Sampler
     {
         integral(iter_num, particle, integrate_tmp);
         return cblas_ddot(particle.size(),
-                particle.getWeightPtr(), 1, integrate_tmp, 1);
+                particle.get_weight_ptr(), 1, integrate_tmp, 1);
     }
 
-    double eval_path (path_type integral, double &width)
+    double eval_path (double &width)
     {
-        width = integral(iter_num, particle, integrate_tmp);
+        width = path_integral(iter_num, particle, integrate_tmp);
         return cblas_ddot(particle.size(),
-                particle.getWeightPtr(), 1, integrate_tmp, 1);
+                particle.get_weight_ptr(), 1, integrate_tmp, 1);
     }
 }; // class Sampler
 

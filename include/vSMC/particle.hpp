@@ -73,7 +73,7 @@ class Particle
     /// \return A const pointer to the weights, type (const double *)
     /// \note Any operations that change the state of the particle set (e.g.,
     /// setting log weights or resampling) may invalidate the pointer.
-    const double *getWeightPtr () const
+    const double *get_weight_ptr () const
     {
         return weight.get();
     }
@@ -83,7 +83,7 @@ class Particle
     /// \return A const pointer to the log weights, type (const double *)
     /// \note Any operations that change the state of the particle set (e.g.,
     /// setting log weights or resampling) may invalidate the pointer.
-    const double *getLogWeightPtr () const
+    const double *get_log_weight_ptr () const
     {
         return log_weight.get();
     }
@@ -91,7 +91,7 @@ class Particle
     /// \brief Set the log weights of the particle sets
     ///
     /// \param [in] new_weight New log weights
-    void setLogWeight (const double *new_weight)
+    void set_log_weight (const double *new_weight)
     {
         cblas_dcopy(pnum, new_weight, 1, log_weight, 1);
         set_weight();
@@ -100,7 +100,7 @@ class Particle
     /// \brief Add to the log weights of the particle sets
     ///
     /// \param [in] inc_weight Incremental log weights
-    void addLogWeight (const double *inc_weight)
+    void add_log_weight (const double *inc_weight)
     {
         vdAdd(pnum, log_weight, inc_weight, log_weight);
         set_weight();
