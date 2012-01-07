@@ -159,7 +159,7 @@ class Sampler
     {
         monitor.insert(
                 typename std::map<std::string, Monitor<T> >::value_type(
-                    name, Monitor<T>(integral)));
+                    name, Monitor<T>(integral, particle.size())));
     }
 
     /// \brief Get the iteration numbers of a monitor by name

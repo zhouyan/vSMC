@@ -28,10 +28,10 @@ class Monitor
     /// The type of the record
     typedef std::vector<double> record_type;
 
-    Monitor () : buffer(1) {}
+    Monitor (std::size_t N = 1) : buffer(N) {}
 
-    Monitor (const integral_type &monitor_integral) :
-        integral(monitor_integral), buffer(1) {}
+    Monitor (const integral_type &monitor_integral, std::size_t N = 1) :
+        integral(monitor_integral), buffer(N) {}
 
     void eval (std::size_t iter, const Particle<T> &particle)
     {
