@@ -20,6 +20,13 @@ class Monitor
     /// The type of monitor integration
     typedef boost::function<void
         (std::size_t, const Particle<T> &, double *)> integral_type;
+    /// The type of the values
+    typedef std::pair<std::vector<std::size_t>, std::vector<double> > 
+        value_type;
+    /// The type of the index
+    typedef std::vector<std::size_t> index_type;
+    /// The type of the record
+    typedef std::vector<double> record_type;
 
     Monitor () : buffer(1) {}
 
@@ -35,17 +42,17 @@ class Monitor
                 particle.get_weight_ptr(), 1, buffer, 1));
     }
 
-    std::vector<std::size_t> get_index () const
+    index_type get_index () const
     {
         return index;
     }
 
-    std::vector<double> get_record () const
+    record_type get_record () const
     {
         return record;
     }
 
-    std::pair<std::vector<std::size_t>, std::vector<double> > get () const
+    value_type get_value () const
     {
         return std::make_pair(index, record);
     }

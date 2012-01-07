@@ -166,7 +166,8 @@ class Sampler
     ///
     /// \param The name of the monitor
     /// \return A vector of the monitor index
-    std::vector<std::size_t> get_monitor_index (const std::string &name) const
+    typename Monitor<T>::index_type get_monitor_index (
+            const std::string &name) const
     {
         return monitor.find(name)->second.get_index();
     }
@@ -175,13 +176,14 @@ class Sampler
     ///
     /// \param name The name of the monitor
     /// \return A vector of the monitor record
-    std::vector<double> get_monitor_record (const std::string &name) const
+    typename Monitor<T>::record_type get_monitor_record (
+            const std::string &name) const
     {
         return monitor.find(name)->second.get_record();
     }
 
     /// \brief Get both the iteration numbers and record of a monitor by name
-    std::pair<std::vector<std::size_t>, std::vector<double> > get_monitor (
+    typename Monitor<T>::value_type get_monitor_value (
             const std::string &name) const
     {
         return monitor.find(name)->second.get();
