@@ -162,7 +162,7 @@ class Sampler
                     name, Monitor<T>(integral, particle.size())));
     }
 
-    /// \brief Get the iteration numbers of a monitor by name
+    /// \brief Get the iteration index of a monitor
     ///
     /// \param The name of the monitor
     /// \return A vector of the monitor index
@@ -172,7 +172,7 @@ class Sampler
         return monitor.find(name)->second.get_index();
     }
 
-    /// \brief Get the record of a monitor by name
+    /// \brief Get the record of Monite Carlo integration of a monitor
     ///
     /// \param name The name of the monitor
     /// \return A vector of the monitor record
@@ -182,7 +182,7 @@ class Sampler
         return monitor.find(name)->second.get_record();
     }
 
-    /// \brief Get both the iteration numbers and record of a monitor by name
+    /// \brief Get both the iteration index and record of a monitor
     typename Monitor<T>::value_type get_monitor_value (
             const std::string &name) const
     {

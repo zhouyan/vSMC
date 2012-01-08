@@ -28,11 +28,36 @@ class Monitor
     /// The type of the record
     typedef std::vector<double> record_type;
 
+    /// \brief The default constructor
+    ///
+    /// \param N The number of particles. If one know the number of particles
+    /// in advance (not necessarily a constant), then one can specify it
+    /// explicitly to avoid resizing of buffers used by eval().
     Monitor (std::size_t N = 1) : buffer(N) {}
 
+    /// \brief Construct a Monitor with an integral function
+    ///
+    /// \param monitor_integral The function used to compute the integrands
+    /// \param N See the default constructor
     Monitor (const integral_type &monitor_integral, std::size_t N = 1) :
         integral(monitor_integral), buffer(N) {}
 
+    /// \brief Set the integral function
+    ///
+    /// \param monitor_integral The function used to compute the integrands
+    void set_integral (const integral_type &monitor_integral)
+    {
+        integral = monitor_integral;
+    }
+
+    /// \brief Evaluate the integration
+    ///
+    /// \param iter The iteration number
+    /// \param particle The particle set to be operated on by eval()
+    /// \note The integral functor has to be set through either the
+    /// constructor or set_integral() to a non-NULL value before calling
+    /// eval(). Otherwise runtime_error exception will be raised when calling
+    /// eval().
     void eval (std::size_t iter, const Particle<T> &particle)
     {
         buffer.resize(particle.size());
@@ -42,21 +67,31 @@ class Monitor
                 particle.get_weight_ptr(), 1, buffer, 1));
     }
 
+    /// \brief Get the iteration index
+    ///
+    /// \return A vector of the index
     index_type get_index () const
     {
         return index;
     }
 
+    /// \brief Get the record of Monte Carlo integrations
+    ///
+    /// \return A vector of the record
     record_type get_record () const
     {
         return record;
     }
 
+    /// \brief Get both the index and the record of Monte Carlo integrations
+    ///
+    /// \return A pair of two vectors, index and record
     value_type get_value () const
     {
         return std::make_pair(index, record);
     }
 
+    /// \brief Clear the index and record
     void clear ()
     {
         index.clear();
