@@ -11,7 +11,7 @@
 
 namespace vSMC {
 
-template <class T>
+template <typename T>
 class Monitor
 {
 
@@ -48,6 +48,14 @@ class Monitor
     void set_integral (const integral_type &monitor_integral)
     {
         integral = monitor_integral;
+    }
+
+    /// \brief Test if the monitor is empty
+    ///
+    /// \return True if the monitor is empty
+    bool empty () const
+    {
+        return integral.empty();
     }
 
     /// \brief Evaluate the integration

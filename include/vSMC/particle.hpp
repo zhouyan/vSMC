@@ -23,7 +23,7 @@ enum ResampleScheme {MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC};
 /// weights. It provides access to particle values as well as weights. It
 /// computes and manages resources for ESS, resampling, etc, tasks unique to
 /// each iteration.
-template <class T>
+template <typename T>
 class Particle
 {
     public :

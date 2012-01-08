@@ -15,7 +15,7 @@
 
 namespace vSMC {
 
-template <class T>
+template <typename T>
 class Sampler
 {
     public :
@@ -271,7 +271,8 @@ class Sampler
 
         for (typename std::map<std::string, Monitor<T> >::iterator
                 imap = monitor.begin(); imap != monitor.end(); ++imap) {
-            imap->second.eval(iter_num, particle);
+            if (!imap->second.empty())
+                imap->second.eval(iter_num, particle);
         }
 
         if (!path_integral.empty()) {
