@@ -220,6 +220,7 @@ class Sampler
     /// \brief Get the results of path sampling
     double get_path_sampling () const
     {
+        return 0;
     }
 
     private :
@@ -265,6 +266,7 @@ class Sampler
             particle.resample(scheme, rng.get_rng());
         }
         ess.push_back(particle.ESS());
+        resample.push_back(was_resample);
 
         if (mode != HISTORY_NONE)
             history.push_back(particle);
