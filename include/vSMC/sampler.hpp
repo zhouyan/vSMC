@@ -26,7 +26,7 @@ class Sampler
     typedef Particle<T> particle_type;
     /// The type of initialize callable objects
     typedef boost::function<std::size_t
-        (Particle<T> &)> init_type;
+        (Particle<T> &, void *)> init_type;
     /// The type of move callable objects
     typedef boost::function<std::size_t
         (std::size_t, Particle<T> &)> move_type;
@@ -95,7 +95,10 @@ class Sampler
     }
 
     /// \brief (Re)initialize the particle set
-    void initialize ()
+    ///
+    /// \param param Additional parameters passed to initialization functor,
+    /// the default is NULL
+    void initialize (void *param = NULL)
     {
         history.clear();
         ess.clear();
@@ -110,7 +113,7 @@ class Sampler
         path_width.clear();
 
         iter_num = 0;
-        accept.push_back(init_particle(particle));
+        accept.push_back(init_particle(particle, param));
         post_move();
 
         initialized = true;
