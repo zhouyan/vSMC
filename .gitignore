@@ -1,16 +1,6 @@
 # ignore the build tree
-build*/
 .DS_Store
 *.swp
 .R*
-doc/
-test/*.saved
-test/*.rt
-
-example/pet/res
-
-example/pet/est_vd
-
 example/pet/input
-
 example/pet/ConfigureFile
