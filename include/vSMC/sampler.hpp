@@ -168,6 +168,17 @@ class Sampler
     /// \brief Perform importance sampling integration
     ///
     /// \param intgral The functor used to compute the integrands
+    double integrate (typename Monitor<T>::integral_type integral) const
+    {
+        std::size_t n = particle.size();
+        integral(iter_num, particle, integrate_tmp);
+
+        return cblas_ddot(n, particle.get_weight_ptr(), 1, integrate_tmp, 1);
+    }
+
+    /// \brief Perform importance sampling integration
+    ///
+    /// \param intgral The functor used to compute the integrands
     /// \param param Additional parameters to be passed to integral
     double integrate (integral_type integral, void *param) const
     {
