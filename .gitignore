@@ -8,3 +8,7 @@ test/*.saved
 test/*.rt
 
 example/pet/res
+
+example/pet/est_vd
+
+example/pet/input
