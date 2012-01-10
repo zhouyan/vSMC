@@ -6,3 +6,5 @@ build*/
 doc/
 test/*.saved
 test/*.rt
+
+example/pet/res
