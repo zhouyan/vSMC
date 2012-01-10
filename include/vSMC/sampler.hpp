@@ -258,7 +258,11 @@ class Sampler
     /// \brief Get the results of path sampling
     double get_path_sampling () const
     {
-        return 0;
+	std::size_t num = path_sample.size();
+	double sum = 0;
+	for (std::size_t i = 1; i != num; ++i)
+	    sum += 0.5 * (path_sample[i-1] + path_sample[i]) * path_width[i];
+        return sum;
     }
 
     private :
