@@ -65,23 +65,47 @@ class Sampler
     /// \return The ESS value of the latest iteration
     double ESS () const
     {
-        return ess.back();
+        return ess_history.back();
+    }
+
+    /// \brief Get all ESS
+    ///
+    /// \return History of ESS for all iterations
+    std::vector<double> ESS_history () const
+    {
+        return ess_history;
     }
 
     /// \brief Get indicator of resampling
     ///
     /// \return A bool value, \b true if the latest iteration was resampled
-    bool wasResampled () const
+    bool was_resampled () const
     {
-        return resample.back();
+        return resample_history.back();
+    }
+
+    /// \brief Get history of resampling
+    ///
+    /// \return History of resampling for all iterations
+    std::vector<bool> was_resampled_history () const
+    {
+        return resample_history;
     }
 
     /// \brief Get accept count
     ///
     /// \return The accept count of the latest iteration
-    std::size_t acceptCount () const
+    std::size_t accept_count () const
     {
-        return accept.back();
+        return accept_history.back();
+    }
+
+    /// \brief Get history of accept count
+    ///
+    /// \return History of accept count for all iterations
+    std::vector<std::size_t> accept_count_history () const
+    {
+        return accept_history;
     }
 
     /// \brief Read only access to the particle set
@@ -101,9 +125,9 @@ class Sampler
     void initialize (void *param = NULL)
     {
         history.clear();
-        ess.clear();
-        resample.clear();
-        accept.clear();
+        ess_history.clear();
+        resample_history.clear();
+        accept_history.clear();
 
         for (typename std::map<std::string, Monitor<T> >::iterator
                 imap = monitor.begin(); imap != monitor.end(); ++imap)
@@ -113,7 +137,7 @@ class Sampler
         path_width.clear();
 
         iter_num = 0;
-        accept.push_back(init_particle(particle, param));
+        accept_history.push_back(init_particle(particle, param));
         post_move();
 
         initialized = true;
@@ -128,7 +152,7 @@ class Sampler
                     "Sampler has not been initialized yet");
 
         ++iter_num;
-        accept.push_back(move_particle(iter_num, particle));
+        accept_history.push_back(move_particle(iter_num, particle));
         post_move();
     }
 
@@ -243,9 +267,9 @@ class Sampler
     /// Particle sets
     Particle<T> particle;
     std::size_t iter_num;
-    std::vector<double> ess;
-    std::vector<bool> resample;
-    std::vector<std::size_t> accept;
+    std::vector<double> ess_history;
+    std::vector<bool> resample_history;
+    std::vector<std::size_t> accept_history;
 
     /// History
     HistoryMode mode;
@@ -263,13 +287,13 @@ class Sampler
 
     void post_move ()
     {
-        bool was_resample = false;
+        bool res_indicator = false;
         if (particle.ESS() < threshold) {
-            was_resample = true;
+            res_indicator = true;
             particle.resample(scheme, rng.get_rng());
         }
-        ess.push_back(particle.ESS());
-        resample.push_back(was_resample);
+        ess_history.push_back(particle.ESS());
+        resample_history.push_back(res_indicator);
 
         if (mode != HISTORY_NONE)
             history.push_back(particle);
