@@ -4,3 +4,11 @@
 .R*
 example/pet/input
 example/pet/ConfigureFile
+example/pet/PETData.tab
+example/pet/TimeDelta.tab
+example/pet/ConvMat.tab
+example/pet/pet
+example/pet/buster/
+example/pet/EST*
+example/pf/pf
+example/pf/est
