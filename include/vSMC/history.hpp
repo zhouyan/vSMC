@@ -1,6 +1,8 @@
 #ifndef V_SMC_HISTORY_HPP
 #define V_SMC_HISTORY_HPP
 
+#include <vSMC/config.hpp>
+
 #include <stdexcept>
 #include <vector>
 #include <cstddef>

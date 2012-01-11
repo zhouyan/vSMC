@@ -1,6 +1,8 @@
 #ifndef V_SMC_SAMPLER_HPP
 #define V_SMC_SAMPLER_HPP
 
+#include <vSMC/config.hpp>
+
 #include <map>
 #include <stdexcept>
 #include <string>

@@ -1,6 +1,8 @@
 #ifndef V_SMC_MONITOR_HPP
 #define V_SMC_MONITOR_HPP
 
+#include <vSMC/config.hpp>
+
 #include <utility>
 #include <vector>
 #include <cstddef>
