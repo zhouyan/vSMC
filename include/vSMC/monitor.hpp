@@ -32,15 +32,15 @@ class Monitor
     ///
     /// \param N The size of the particle set
     /// \param monitor_integral The function used to compute the integrands
-    Monitor (std::size_t N, const integral_type &monitor_integral = NULL) :
-        buffer(N), integral(monitor_integral) {}
+    Monitor (std::size_t N, const integral_type &integral = NULL) :
+        buffer_(N), integral_(integral) {}
 
     /// \brief Set the integral function
     ///
-    /// \param monitor_integral The function used to compute the integrands
-    void set_integral (const integral_type &monitor_integral)
+    /// \param integral The function used to compute the integrands
+    void set_integral (const integral_type &integral)
     {
-        integral = monitor_integral;
+        integral_ = integral;
     }
 
     /// \brief Test if the monitor is empty
@@ -48,7 +48,7 @@ class Monitor
     /// \return True if the monitor is empty
     bool empty () const
     {
-        return integral.empty();
+        return integral_.empty();
     }
 
     /// \brief Evaluate the integration
@@ -61,11 +61,10 @@ class Monitor
     /// eval().
     void eval (std::size_t iter, const Particle<T> &particle)
     {
-        buffer.resize(particle.size());
-        integral(iter, particle, buffer);
+        integral_(iter, particle, buffer_);
         index.push_back(iter);
         record.push_back(cblas_ddot(particle.size(),
-                particle.get_weight_ptr(), 1, buffer, 1));
+                particle.get_weight_ptr(), 1, buffer_, 1));
     }
 
     /// \brief Get the iteration index
@@ -101,8 +100,8 @@ class Monitor
 
     private :
 
-    vDist::tool::Buffer<double> buffer;
-    integral_type integral;
+    vDist::tool::Buffer<double> buffer_;
+    integral_type integral_;
     std::vector<std::size_t> index;
     std::vector<double> record;
 }; // class Monitor

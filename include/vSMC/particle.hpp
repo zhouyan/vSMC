@@ -37,15 +37,15 @@ class Particle
     /// \param copy A pointer to the function that can copy particle from one
     /// position to another position
     Particle (std::size_t N, const copy_type &copy) :
-        pnum(N), pval(N), weight(N), log_weight(N), rep(N),
-        copy_particle(copy) {}
+        size_(N), value_(N), weight_(N), log_weight_(N), replication_(N),
+        copy_(copy) {}
 
     /// \brief Size of the particle set
     ///
     /// \return The number of particles
     std::size_t size () const
     {
-        return pnum;
+        return size_;
     }
 
     /// \brief Read and write access to particle values
@@ -55,7 +55,7 @@ class Particle
     /// setting log weights or resampling) may invalidate the reference.
     T &value ()
     {
-        return pval;
+        return value_;
     }
     
     /// \brief Read only access to particle values
@@ -65,7 +65,7 @@ class Particle
     /// setting log weights or resampling) may invalidate the reference.
     const T &value () const
     {
-        return pval;
+        return value_;
     }
 
     /// \brief Read only access to the weights
@@ -75,7 +75,7 @@ class Particle
     /// setting log weights or resampling) may invalidate the pointer.
     const double *get_weight_ptr () const
     {
-        return weight.get();
+        return weight_.get();
     }
 
     /// \brief Read only access to the log weights
@@ -85,7 +85,7 @@ class Particle
     /// setting log weights or resampling) may invalidate the pointer.
     const double *get_log_weight_ptr () const
     {
-        return log_weight.get();
+        return log_weight_.get();
     }
 
     /// \brief Set the log weights of the particle sets
@@ -93,7 +93,7 @@ class Particle
     /// \param [in] new_weight New log weights
     void set_log_weight (const double *new_weight)
     {
-        cblas_dcopy(pnum, new_weight, 1, log_weight, 1);
+        cblas_dcopy(size_, new_weight, 1, log_weight_, 1);
         set_weight();
     }
 
@@ -102,7 +102,7 @@ class Particle
     /// \param [in] inc_weight Incremental log weights
     void add_log_weight (const double *inc_weight)
     {
-        vdAdd(pnum, log_weight, inc_weight, log_weight);
+        vdAdd(size_, log_weight_, inc_weight, log_weight_);
         set_weight();
     }
 
@@ -111,7 +111,7 @@ class Particle
     /// \return The value of ESS for current particle set
     double ESS () const
     {
-        return 1 / cblas_ddot(pnum, weight, 1, weight, 1);
+        return 1 / cblas_ddot(size_, weight_, 1, weight_, 1);
     }
 
     /// \brief Perform resampling
@@ -142,29 +142,29 @@ class Particle
 
     private :
 
-    std::size_t pnum;
-    T pval;
-    vDist::tool::Buffer<double> weight;
-    vDist::tool::Buffer<double> log_weight;
-    vDist::tool::Buffer<unsigned> rep;
-    copy_type copy_particle;
+    std::size_t size_;
+    T value_;
+    vDist::tool::Buffer<double> weight_;
+    vDist::tool::Buffer<double> log_weight_;
+    vDist::tool::Buffer<unsigned> replication_;
+    copy_type copy_;
 
     void set_weight ()
     {
         double max_weight = -std::numeric_limits<double>::infinity();
 
-        for (std::size_t i = 0; i != pnum; ++i)
-            max_weight = std::max(max_weight, log_weight[i]);
-        for (std::size_t i = 0; i != pnum; ++i)
-            log_weight[i] -= max_weight;
-        vdExp(pnum, log_weight, weight);
-        double sum = cblas_dasum(pnum, weight, 1);
-        cblas_dscal(pnum, 1 / sum, weight, 1);
+        for (std::size_t i = 0; i != size_; ++i)
+            max_weight = std::max(max_weight, log_weight_[i]);
+        for (std::size_t i = 0; i != size_; ++i)
+            log_weight_[i] -= max_weight;
+        vdExp(size_, log_weight_, weight_);
+        double sum = cblas_dasum(size_, weight_, 1);
+        cblas_dscal(size_, 1 / sum, weight_, 1);
     }
 
     void resample_multinomial (const gsl_rng *rng)
     {
-        gsl_ran_multinomial(rng, pnum, pnum, weight, rep);
+        gsl_ran_multinomial(rng, size_, size_, weight_, replication_);
         resample_do();
     }
 
@@ -175,13 +175,13 @@ class Particle
         /// log_weight: act as the integral part of N * weight.
         /// They all will be reset to equal weights after resampling.
         /// So it is safe to modify them here.
-        vDist::tool::dyatx(pnum, pnum, weight, 1, log_weight, 1);
-        vdModf(pnum, log_weight, log_weight, weight);
-        std::size_t size = pnum;
-        size -= cblas_dasum(pnum, log_weight, 1);
-        gsl_ran_multinomial(rng, pnum, size, weight, rep);
-        for (std::size_t i = 0; i != pnum; ++i)
-            rep[i] += log_weight[i];
+        vDist::tool::dyatx(size_, size_, weight_, 1, log_weight_, 1);
+        vdModf(size_, log_weight_, log_weight_, weight_);
+        std::size_t size = size_;
+        size -= cblas_dasum(size_, log_weight_, 1);
+        gsl_ran_multinomial(rng, size_, size, weight_, replication_);
+        for (std::size_t i = 0; i != size_; ++i)
+            replication_[i] += log_weight_[i];
         resample_do();
     }
 
@@ -193,23 +193,23 @@ class Particle
         std::size_t from = 0;
         std::size_t time = 0;
 
-        for (std::size_t to = 0; to != pnum; ++to)
+        for (std::size_t to = 0; to != size_; ++to)
         {
-            if (!rep[to]) {
-                // rep[to] has zero child, copy from elsewhere
-                if (rep[from] - time <= 1) {
-                    // only 1 child left on rep[from]
+            if (!replication_[to]) {
+                // replication_[to] has zero child, copy from elsewhere
+                if (replication_[from] - time <= 1) {
+                    // only 1 child left on replication_[from]
                     time = 0;
                     do // move from to some position with at least 2 children
                         ++from;
-                    while (rep[from] < 2);
+                    while (replication_[from] < 2);
                 }
-                copy_particle(from, to, pval);
+                copy_(from, to, value_);
                 ++time;
             }
         }
-        vDist::tool::dfill(pnum, 1.0 / pnum, weight, 1);
-        vDist::tool::dfill(pnum, 0, log_weight, 1);
+        vDist::tool::dfill(size_, 1.0 / size_, weight_, 1);
+        vDist::tool::dfill(size_, 0, log_weight_, 1);
     }
 }; // class Particle
 

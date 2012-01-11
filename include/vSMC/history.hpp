@@ -15,23 +15,28 @@ class History
 {
     public :
 
-    explicit History (HistoryMode history_mode) : mode(history_mode) {};
+    explicit History (HistoryMode mode) : mode_(mode) {};
+
+    HistoryMode mode () const
+    {
+        return mode_;
+    }
 
     void push_back (const Particle<T> &particle)
     {
-        if (mode == HISTORY_RAM)
+        if (mode_ == HISTORY_RAM)
             history.push_back(particle);
     }
 
     void pop_back ()
     {
-        if (mode == HISTORY_RAM)
+        if (mode_ == HISTORY_RAM)
             history.pop_back();
     }
 
     void pop_back (Particle<T> &particle)
     {
-        if (mode == HISTORY_RAM) {
+        if (mode_ == HISTORY_RAM) {
             particle = history.back();
             history.pop_back();
         }
@@ -39,13 +44,13 @@ class History
 
     void clear ()
     {
-        if (mode == HISTORY_RAM)
+        if (mode_ == HISTORY_RAM)
             history.clear();
     }
 
     std::size_t size () const
     {
-        switch (mode) {
+        switch (mode_) {
             case HISTORY_RAM :
                 return history.size();
             case HISTORY_FILE :
@@ -61,7 +66,7 @@ class History
 
     private :
 
-    HistoryMode mode;
+    HistoryMode mode_;
     std::vector<Particle<T> > history;
 }; // class History
 

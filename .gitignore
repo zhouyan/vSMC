@@ -1,14 +1,16 @@
-# ignore the build tree
 .DS_Store
 *.swp
 .R*
-example/pet/input
-example/pet/ConfigureFile
+
+example/pet/ConfigureFile?*
+example/pet/input?*
+example/pet/EST*
+example/pet/ConvMat.tab
 example/pet/PETData.tab
 example/pet/TimeDelta.tab
-example/pet/ConvMat.tab
-example/pet/pet
 example/pet/buster/
-example/pet/EST*
-example/pf/pf
+example/pet/pet
+
+example/pf/Rplots.pdf
 example/pf/est
+example/pf/pf

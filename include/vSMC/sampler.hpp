@@ -42,30 +42,30 @@ class Sampler
     /// \param N The number of particles
     /// \param init The functor used to initialize the particles
     /// \param move The functor used to move the particles and weights
-    /// \param hist_mode The history storage mode. See HistoryMode
-    /// \param rs_scheme The resampling scheme. See ResampleScheme
+    /// \param mode The history storage mode. See HistoryMode
+    /// \param scheme The resampling scheme. See ResampleScheme
     /// \param seed The seed for the reampling RNG. See documentation of vDist
     /// \param brng The basic RNG for resampling RNG. See documentation of GSL
     Sampler (
             std::size_t N,
             const init_type &init, const move_type &move,
             const typename Particle<T>::copy_type &copy,
-            HistoryMode hist_mode = HISTORY_RAM,
-            ResampleScheme rs_scheme = RESIDUAL,
-            double rs_threshold = 0.5,
+            HistoryMode mode = HISTORY_RAM,
+            ResampleScheme scheme = RESIDUAL,
+            double threshold = 0.5,
             const int seed = V_DIST_SEED,
             const gsl_rng_type *brng = V_DIST_GSL_BRNG) :
-        initialized(false), init_particle(init), move_particle(move),
-        rng(seed, brng), scheme(rs_scheme), threshold(rs_threshold* N),
-        particle(N, copy), iter_num(0), mode(hist_mode), history(hist_mode),
-        integrate_tmp(N), path_integral(NULL), path_estimate(0) {}
+        initialized_(false), init_(init), move_(move),
+        rng_(seed, brng), scheme_(scheme), threshold_(threshold * N),
+        particle_(N, copy), iter_num_(0), history_(mode),
+        buffer_(N), path_integral_(NULL) {}
 
     /// \brief Get ESS
     ///
     /// \return The ESS value of the latest iteration
     double ESS () const
     {
-        return ess_history.back();
+        return ess_.back();
     }
 
     /// \brief Get all ESS
@@ -73,7 +73,7 @@ class Sampler
     /// \return History of ESS for all iterations
     std::vector<double> ESS_history () const
     {
-        return ess_history;
+        return ess_;
     }
 
     /// \brief Get indicator of resampling
@@ -81,7 +81,7 @@ class Sampler
     /// \return A bool value, \b true if the latest iteration was resampled
     bool was_resampled () const
     {
-        return resample_history.back();
+        return resample_.back();
     }
 
     /// \brief Get history of resampling
@@ -89,7 +89,7 @@ class Sampler
     /// \return History of resampling for all iterations
     std::vector<bool> was_resampled_history () const
     {
-        return resample_history;
+        return resample_;
     }
 
     /// \brief Get accept count
@@ -97,7 +97,7 @@ class Sampler
     /// \return The accept count of the latest iteration
     std::size_t accept_count () const
     {
-        return accept_history.back();
+        return accept_.back();
     }
 
     /// \brief Get history of accept count
@@ -105,7 +105,7 @@ class Sampler
     /// \return History of accept count for all iterations
     std::vector<std::size_t> accept_count_history () const
     {
-        return accept_history;
+        return accept_;
     }
 
     /// \brief Read only access to the particle set
@@ -115,7 +115,7 @@ class Sampler
     /// iteration) may invalidate the reference.
     const Particle<T> &getParticle () const
     {
-        return particle;
+        return particle_;
     }
 
     /// \brief (Re)initialize the particle set
@@ -124,35 +124,35 @@ class Sampler
     /// the default is NULL
     void initialize (void *param = NULL)
     {
-        history.clear();
-        ess_history.clear();
-        resample_history.clear();
-        accept_history.clear();
+        history_.clear();
+        ess_.clear();
+        resample_.clear();
+        accept_.clear();
 
         for (typename std::map<std::string, Monitor<T> >::iterator
-                imap = monitor.begin(); imap != monitor.end(); ++imap)
+                imap = monitor_.begin(); imap != monitor_.end(); ++imap)
             imap->second.clear();
 
-        path_sample.clear();
-        path_width.clear();
+        path_sample_.clear();
+        path_width_.clear();
 
-        iter_num = 0;
-        accept_history.push_back(init_particle(particle, param));
+        iter_num_ = 0;
+        accept_.push_back(init_(particle_, param));
         post_move();
 
-        initialized = true;
+        initialized_ = true;
     }
 
     /// \brief Perform iteration
     void iterate ()
     {
-        if (!initialized)
+        if (!initialized_)
             throw std::runtime_error(
                     "ERROR: vSMC::Sampler::iterate: "
                     "Sampler has not been initialized yet");
 
-        ++iter_num;
-        accept_history.push_back(move_particle(iter_num, particle));
+        ++iter_num_;
+        accept_.push_back(move_(iter_num_, particle_));
         post_move();
     }
 
@@ -170,10 +170,10 @@ class Sampler
     /// \param intgral The functor used to compute the integrands
     double integrate (typename Monitor<T>::integral_type integral) const
     {
-        std::size_t n = particle.size();
-        integral(iter_num, particle, integrate_tmp);
+        std::size_t n = particle_.size();
+        integral(iter_num_, particle_, buffer_);
 
-        return cblas_ddot(n, particle.get_weight_ptr(), 1, integrate_tmp, 1);
+        return cblas_ddot(n, particle_.get_weight_ptr(), 1, buffer_, 1);
     }
 
     /// \brief Perform importance sampling integration
@@ -182,10 +182,10 @@ class Sampler
     /// \param param Additional parameters to be passed to integral
     double integrate (integral_type integral, void *param) const
     {
-        std::size_t n = particle.size();
-        integral(iter_num, particle, integrate_tmp, param);
+        std::size_t n = particle_.size();
+        integral(iter_num_, particle_, buffer_, param);
 
-        return cblas_ddot(n, particle.get_weight_ptr(), 1, integrate_tmp, 1);
+        return cblas_ddot(n, particle_.get_weight_ptr(), 1, buffer_, 1);
     }
 
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
@@ -195,9 +195,9 @@ class Sampler
     void add_monitor (const std::string &name,
             const typename Monitor<T>::integral_type &integral)
     {
-        monitor.insert(
+        monitor_.insert(
                 typename std::map<std::string, Monitor<T> >::value_type(
-                    name, Monitor<T>(particle.size(), integral)));
+                    name, Monitor<T>(particle_.size(), integral)));
     }
 
     /// \brief Get the iteration index of a monitor
@@ -207,7 +207,7 @@ class Sampler
     typename Monitor<T>::index_type get_monitor_index (
             const std::string &name) const
     {
-        return monitor.find(name)->second.get_index();
+        return monitor_.find(name)->second.get_index();
     }
 
     /// \brief Get the record of Monite Carlo integration of a monitor
@@ -217,14 +217,14 @@ class Sampler
     typename Monitor<T>::record_type get_monitor_record (
             const std::string &name) const
     {
-        return monitor.find(name)->second.get_record();
+        return monitor_.find(name)->second.get_record();
     }
 
     /// \brief Get both the iteration index and record of a monitor
     typename Monitor<T>::value_type get_monitor_value (
             const std::string &name) const
     {
-        return monitor.find(name)->second.get();
+        return monitor_.find(name)->second.get();
     }
 
     /// \brief Erase a monitor by name 
@@ -232,13 +232,13 @@ class Sampler
     /// \param name The name of the monitor
     void erase_monitor (const std::string &name)
     {
-        monitor.erase(name);
+        monitor_.erase(name);
     }
 
     /// \brief Clear all monitors
     void clear_monitor ()
     {
-        monitor.clear();
+        monitor_.clear();
     }
 
     /// \brief Set the path sampling integral
@@ -246,91 +246,90 @@ class Sampler
     /// \param integral The functor used to compute the integrands
     void set_path_sampling (path_type integral)
     {
-        path_integral = integral;
+        path_integral_ = integral;
     }
 
     /// \brief Stop path sampling
     void clear_path_sampling ()
     {
-        path_integral = NULL;
+        path_integral_ = NULL;
     }
 
     /// \brief Get the results of path sampling
     double get_path_sampling () const
     {
-	std::size_t num = path_sample.size();
+	std::size_t num = path_sample_.size();
 	double sum = 0;
 	for (std::size_t i = 1; i != num; ++i)
-	    sum += 0.5 * (path_sample[i-1] + path_sample[i]) * path_width[i];
+            sum += (path_sample_[i-1] + path_sample_[i])
+                * path_width_[i] * 0.5;
         return sum;
     }
 
     private :
 
     /// Initialization indicator
-    bool initialized;
+    bool initialized_;
 
     /// Initialization and movement
-    init_type init_particle;
-    move_type move_particle;
+    init_type init_;
+    move_type move_;
 
     /// Resampling
-    vDist::RngGSL rng;
-    ResampleScheme scheme;
-    double threshold;
+    vDist::RngGSL rng_;
+    ResampleScheme scheme_;
+    double threshold_;
 
     /// Particle sets
-    Particle<T> particle;
-    std::size_t iter_num;
-    std::vector<double> ess_history;
-    std::vector<bool> resample_history;
-    std::vector<std::size_t> accept_history;
+    Particle<T> particle_;
+    std::size_t iter_num_;
+    std::vector<double> ess_;
+    std::vector<bool> resample_;
+    std::vector<std::size_t> accept_;
 
     /// History
-    HistoryMode mode;
-    History<T> history;
+    History<T> history_;
 
     /// Monte Carlo estimation by integration
-    mutable vDist::tool::Buffer<double> integrate_tmp;
-    std::map<std::string, Monitor<T> > monitor;
+    mutable vDist::tool::Buffer<double> buffer_;
+    std::map<std::string, Monitor<T> > monitor_;
 
     /// Path sampling
-    path_type path_integral;
-    std::vector<double> path_sample;
-    std::vector<double> path_width;
-    double path_estimate;
+    path_type path_integral_;
+    std::vector<double> path_sample_;
+    std::vector<double> path_width_;
 
     void post_move ()
     {
         bool res_indicator = false;
-        if (particle.ESS() < threshold) {
+        if (particle_.ESS() < threshold_) {
             res_indicator = true;
-            particle.resample(scheme, rng.get_rng());
+            particle_.resample(scheme_, rng_.get_rng());
         }
-        ess_history.push_back(particle.ESS());
-        resample_history.push_back(res_indicator);
+        ess_.push_back(particle_.ESS());
+        resample_.push_back(res_indicator);
 
-        if (mode != HISTORY_NONE)
-            history.push_back(particle);
+        if (history_.mode() != HISTORY_NONE)
+            history_.push_back(particle_);
 
         for (typename std::map<std::string, Monitor<T> >::iterator
-                imap = monitor.begin(); imap != monitor.end(); ++imap) {
+                imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
             if (!imap->second.empty())
-                imap->second.eval(iter_num, particle);
+                imap->second.eval(iter_num_, particle_);
         }
 
-        if (!path_integral.empty()) {
+        if (!path_integral_.empty()) {
             double width; 
-            path_sample.push_back(eval_path(width));
-            path_width.push_back(width);
+            path_sample_.push_back(eval_path(width));
+            path_width_.push_back(width);
         }
     }
 
     double eval_path (double &width)
     {
-        width = path_integral(iter_num, particle, integrate_tmp);
-        return cblas_ddot(particle.size(),
-                particle.get_weight_ptr(), 1, integrate_tmp, 1);
+        width = path_integral_(iter_num_, particle_, buffer_);
+        return cblas_ddot(particle_.size(),
+                particle_.get_weight_ptr(), 1, buffer_, 1);
     }
 }; // class Sampler
 
