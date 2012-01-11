@@ -28,19 +28,12 @@ class Monitor
     /// The type of the record
     typedef std::vector<double> record_type;
 
-    /// \brief The default constructor
-    ///
-    /// \param N The number of particles. If one know the number of particles
-    /// in advance (not necessarily a constant), then one can specify it
-    /// explicitly to avoid resizing of buffers used by eval().
-    Monitor (std::size_t N = 1) : buffer(N) {}
-
     /// \brief Construct a Monitor with an integral function
     ///
+    /// \param N The size of the particle set
     /// \param monitor_integral The function used to compute the integrands
-    /// \param N See the default constructor
-    Monitor (const integral_type &monitor_integral, std::size_t N = 1) :
-        integral(monitor_integral), buffer(N) {}
+    Monitor (std::size_t N, const integral_type &monitor_integral = NULL) :
+        buffer(N), integral(monitor_integral) {}
 
     /// \brief Set the integral function
     ///
@@ -108,8 +101,8 @@ class Monitor
 
     private :
 
-    integral_type integral;
     vDist::tool::Buffer<double> buffer;
+    integral_type integral;
     std::vector<std::size_t> index;
     std::vector<double> record;
 }; // class Monitor
