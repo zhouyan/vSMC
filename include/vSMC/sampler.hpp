@@ -73,7 +73,7 @@ class Sampler
     /// \brief Get all ESS
     ///
     /// \return History of ESS for all iterations
-    std::vector<double> ESS_history () const
+    const std::vector<double> &ESS_history () const
     {
         return ess_;
     }
@@ -89,7 +89,7 @@ class Sampler
     /// \brief Get history of resampling
     ///
     /// \return History of resampling for all iterations
-    std::vector<bool> was_resampled_history () const
+    const std::vector<bool> &was_resampled_history () const
     {
         return resample_;
     }
@@ -105,7 +105,7 @@ class Sampler
     /// \brief Get history of accept count
     ///
     /// \return History of accept count for all iterations
-    std::vector<std::size_t> accept_count_history () const
+    const std::vector<std::size_t> &accept_count_history () const
     {
         return accept_;
     }
