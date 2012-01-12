@@ -44,20 +44,25 @@ class Sampler
     /// \param N The number of particles
     /// \param init The functor used to initialize the particles
     /// \param move The functor used to move the particles and weights
+    /// \param copy The functor used to copy particles within the sample
+    /// \param mcmc The functor used to perform MCMC move
     /// \param mode The history storage mode. See HistoryMode
     /// \param scheme The resampling scheme. See ResampleScheme
+    /// \param threshold The threshold for performing resampling
     /// \param seed The seed for the reampling RNG. See documentation of vDist
     /// \param brng The basic RNG for resampling RNG. See documentation of GSL
     Sampler (
             std::size_t N,
-            const init_type &init, const move_type &move,
+            const init_type &init,
+            const move_type &move,
             const typename Particle<T>::copy_type &copy,
-            HistoryMode mode = HISTORY_RAM,
+            const move_type &mcmc = NULL,
+            HistoryMode mode = HISTORY_NONE,
             ResampleScheme scheme = RESIDUAL,
             double threshold = 0.5,
             const int seed = V_DIST_SEED,
             const gsl_rng_type *brng = V_DIST_GSL_BRNG) :
-        initialized_(false), init_(init), move_(move),
+        initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         rng_(seed, brng), scheme_(scheme), threshold_(threshold * N),
         particle_(N, copy), iter_num_(0), history_(mode),
         buffer_(N), path_integral_(NULL) {}
@@ -155,6 +160,8 @@ class Sampler
 
         ++iter_num_;
         accept_.push_back(move_(iter_num_, particle_));
+        if (mcmc_)
+            accept_.back() = mcmc_(iter_num_, particle_);
         post_move();
     }
 
@@ -276,6 +283,7 @@ class Sampler
     /// Initialization and movement
     init_type init_;
     move_type move_;
+    move_type mcmc_;
 
     /// Resampling
     vDist::RngGSL rng_;
