@@ -311,12 +311,13 @@ class Sampler
 
     void post_move ()
     {
+        ess_.push_back(particle_.ESS());
+
         bool res_indicator = false;
-        if (particle_.ESS() < threshold_) {
+        if (ess_.back() < threshold_) {
             res_indicator = true;
             particle_.resample(scheme_, rng_.get_rng());
         }
-        ess_.push_back(particle_.ESS());
         resample_.push_back(res_indicator);
 
         if (history_.mode() != HISTORY_NONE)
@@ -338,6 +339,7 @@ class Sampler
     double eval_path (double &width)
     {
         width = path_integral_(iter_num_, particle_, buffer_);
+
         return cblas_ddot(particle_.size(),
                 particle_.get_weight_ptr(), 1, buffer_, 1);
     }
