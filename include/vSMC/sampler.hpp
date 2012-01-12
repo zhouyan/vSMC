@@ -70,7 +70,7 @@ class Sampler
     /// \brief Get ESS
     ///
     /// \return The ESS value of the latest iteration
-    double ESS () const
+    double get_ESS () const
     {
         return ess_.back();
     }
@@ -78,7 +78,7 @@ class Sampler
     /// \brief Get all ESS
     ///
     /// \return History of ESS for all iterations
-    const std::vector<double> &ESS_history () const
+    const std::vector<double> &get_ESS_history () const
     {
         return ess_;
     }
@@ -86,7 +86,7 @@ class Sampler
     /// \brief Get indicator of resampling
     ///
     /// \return A bool value, \b true if the latest iteration was resampled
-    bool was_resampled () const
+    bool get_resample () const
     {
         return resample_.back();
     }
@@ -94,7 +94,7 @@ class Sampler
     /// \brief Get history of resampling
     ///
     /// \return History of resampling for all iterations
-    const std::vector<bool> &was_resampled_history () const
+    const std::vector<bool> &get_resample_history () const
     {
         return resample_;
     }
@@ -102,7 +102,7 @@ class Sampler
     /// \brief Get accept count
     ///
     /// \return The accept count of the latest iteration
-    std::size_t accept_count () const
+    std::size_t get_accept () const
     {
         return accept_.back();
     }
@@ -110,7 +110,7 @@ class Sampler
     /// \brief Get history of accept count
     ///
     /// \return History of accept count for all iterations
-    const std::vector<std::size_t> &accept_count_history () const
+    const std::vector<std::size_t> &get_accept_history () const
     {
         return accept_;
     }
