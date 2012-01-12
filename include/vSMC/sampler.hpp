@@ -120,7 +120,7 @@ class Sampler
     /// \return A const reference to the latest particle set.
     /// \note Any operations that change the state of the sampler (e.g., an
     /// iteration) may invalidate the reference.
-    const Particle<T> &getParticle () const
+    const Particle<T> &particle () const
     {
         return particle_;
     }
