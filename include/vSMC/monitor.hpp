@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 #include <cstddef>
-#include <gsl/gsl_cblas.h>
+#include <mkl_cblas.h>
 #include <boost/function.hpp>
 #include <vDist/tool/buffer.hpp>
 #include <vSMC/particle.hpp>

@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <gsl/gsl_cblas.h>
+#include <mkl_cblas.h>
 #include <boost/function.hpp>
 #include <vDist/rng/gsl.hpp>
 #include <vDist/tool/buffer.hpp>

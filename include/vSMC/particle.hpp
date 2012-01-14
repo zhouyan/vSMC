@@ -4,13 +4,13 @@
 #include <algorithm>
 #include <limits>
 #include <cstddef>
-#include <gsl/gsl_cblas.h>
+#include <mkl_cblas.h>
+#include <mkl_vml.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <boost/function.hpp>
 #include <vDist/tool/buffer.hpp>
 #include <vDist/tool/eblas.hpp>
-#include <vDist/tool/vml.hpp>
 
 namespace vSMC {
 
@@ -102,8 +102,6 @@ class Particle
     /// \param [in] inc_weight Incremental log weights
     void add_log_weight (const double *inc_weight)
     {
-        V_DIST_USING_VML;
-
         vdAdd(size_, log_weight_, inc_weight, log_weight_);
         set_weight();
     }
@@ -153,8 +151,6 @@ class Particle
 
     void set_weight ()
     {
-        V_DIST_USING_VML;
-
         double max_weight = -std::numeric_limits<double>::infinity();
 
         for (std::size_t i = 0; i != size_; ++i)
@@ -174,8 +170,6 @@ class Particle
 
     void resample_residual (const gsl_rng *rng)
     {
-        V_DIST_USING_VML;
-
         /// \internal Reuse weight and log_weight.
         /// weight: act as the fractional part of N * weight.
         /// log_weight: act as the integral part of N * weight.
