@@ -7,8 +7,10 @@ example/pet/input?*
 example/pet/EST*
 example/pet/ConvMat.tab
 example/pet/buster/
-example/pet/pet_mcmc
 example/pet/pet_smc
+example/pet/pet_smc_buster
+example/pet/pet_mcmc
+example/pet/pet_mcmc_buster
 
 example/pf/pf
 example/pf/pf.pdf
