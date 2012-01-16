@@ -231,6 +231,9 @@ class Sampler
     }
 
     /// \brief Get both the iteration index and record of a monitor
+    ///
+    /// \param name The name of the monitor
+    /// \return A pair of vectors of the monitor record and index
     typename Monitor<T>::value_type get_monitor_value (
             const std::string &name) const
     {
@@ -266,6 +269,8 @@ class Sampler
     }
 
     /// \brief Get the results of path sampling
+    ///
+    /// \return The path sampling integration result
     double get_path_sampling () const
     {
 	std::size_t num = path_sample_.size();
@@ -276,21 +281,31 @@ class Sampler
         return sum;
     }
 
+    /// \brief Get the history of path sampling integrand
+    ///
+    /// \return A vector of the path sampling integrand history
     const std::vector<double> &get_path_sample_history () const
     {
         return path_sample_;
     }
 
+    /// \brief Get the history of path sampling width
+    ///
+    /// \return A vector of the path sampling width history
     const std::vector<double> &get_path_width_history () const
     {
         return path_width_;
     }
 
+    /// \brief Get the history of path sampling grid
+    ///
+    /// \return A vector of the path sampling accumulative width history
     const std::vector<double> &get_path_grid_history () const
     {
         return path_grid_;
     }
 
+    /// \brief Toggle whether or not show progress information while iterating
     void toggle_show_progress ()
     {
         show_progress_ = !show_progress_;
