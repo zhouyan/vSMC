@@ -38,7 +38,7 @@ class Particle
     /// position to another position
     Particle (std::size_t N, const copy_type &copy) :
         size_(N), value_(N), weight_(N), log_weight_(N), replication_(N),
-        copy_(copy), resampled_(false) {}
+        copy_(copy), ess_(0), resampled_(false) {}
 
     /// \brief Size of the particle set
     ///
@@ -109,9 +109,9 @@ class Particle
     /// \brief The ESS (Effective Sample Size)
     ///
     /// \return The value of ESS for current particle set
-    double ESS () const
+    double get_ESS () const
     {
-        return 1 / cblas_ddot(size_, weight_, 1, weight_, 1);
+        return ess_;
     }
 
     /// \brief Get indicator of resampling
@@ -164,6 +164,7 @@ class Particle
     vDist::tool::Buffer<double> log_weight_;
     vDist::tool::Buffer<unsigned> replication_;
     copy_type copy_;
+    double ess_;
     bool resampled_;
 
     void set_weight ()
@@ -177,6 +178,7 @@ class Particle
         vdExp(size_, log_weight_, weight_);
         double sum = cblas_dasum(size_, weight_, 1);
         cblas_dscal(size_, 1 / sum, weight_, 1);
+        ess_ = 1 / cblas_ddot(size_, weight_, 1, weight_, 1);
     }
 
     void resample_multinomial (const gsl_rng *rng)
@@ -227,6 +229,7 @@ class Particle
         }
         vDist::tool::dfill(size_, 1.0 / size_, weight_, 1);
         vDist::tool::dfill(size_, 0, log_weight_, 1);
+        ess_ = size_;
     }
 }; // class Particle
 
