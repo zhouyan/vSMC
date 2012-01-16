@@ -38,7 +38,7 @@ class Particle
     /// position to another position
     Particle (std::size_t N, const copy_type &copy) :
         size_(N), value_(N), weight_(N), log_weight_(N), replication_(N),
-        copy_(copy) {}
+        copy_(copy), resampled_(false) {}
 
     /// \brief Size of the particle set
     ///
@@ -114,6 +114,22 @@ class Particle
         return 1 / cblas_ddot(size_, weight_, 1, weight_, 1);
     }
 
+    /// \brief Get indicator of resampling
+    ///
+    /// \return A bool value, \b true if the this iteration was resampled
+    bool get_resample () const
+    {
+        return resampled_;
+    }
+
+    /// \brief Set indicator of resampling
+    ///
+    /// \param resampled \b true if the this iteration was resampled
+    void set_resample (bool resampled)
+    {
+        return resampled_ = resampled;
+    }
+
     /// \brief Perform resampling
     ///
     /// \param scheme The resampling scheme, see ResamplingScheme
@@ -148,6 +164,7 @@ class Particle
     vDist::tool::Buffer<double> log_weight_;
     vDist::tool::Buffer<unsigned> replication_;
     copy_type copy_;
+    bool resampled_;
 
     void set_weight ()
     {

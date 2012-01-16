@@ -352,13 +352,10 @@ class Sampler
     void post_move ()
     {
         ess_.push_back(particle_.ESS());
-
-        bool res_indicator = false;
-        if (ess_.back() < threshold_) {
-            res_indicator = true;
+        particle_.set_resample(ess_back() < threshold_);
+        resample_.push_back(particle_get_resample());
+        if (particle_.get_resample())
             particle_.resample(scheme_, rng_.get_rng());
-        }
-        resample_.push_back(res_indicator);
 
         if (history_.mode() != HISTORY_NONE)
             history_.push_back(particle_);
