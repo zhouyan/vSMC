@@ -352,8 +352,8 @@ class Sampler
     void post_move ()
     {
         ess_.push_back(particle_.get_ESS());
-        particle_.set_resample(ess_back() < threshold_);
-        resample_.push_back(particle_get_resample());
+        particle_.set_resample(ess_.back() < threshold_);
+        resample_.push_back(particle_.get_resample());
         if (particle_.get_resample())
             particle_.resample(scheme_, rng_.get_rng());
 

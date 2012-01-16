@@ -127,7 +127,7 @@ class Particle
     /// \param resampled \b true if the this iteration was resampled
     void set_resample (bool resampled)
     {
-        return resampled_ = resampled;
+        resampled_ = resampled;
     }
 
     /// \brief Perform resampling
