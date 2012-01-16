@@ -46,9 +46,9 @@ class Sampler
     /// \param move The functor used to move the particles and weights
     /// \param copy The functor used to copy particles within the sample
     /// \param mcmc The functor used to perform MCMC move
-    /// \param mode The history storage mode. See HistoryMode
     /// \param scheme The resampling scheme. See ResampleScheme
     /// \param threshold The threshold for performing resampling
+    /// \param mode The history storage mode. See HistoryMode
     /// \param seed The seed for the reampling RNG. See documentation of vDist
     /// \param brng The basic RNG for resampling RNG. See documentation of GSL
     Sampler (
@@ -57,9 +57,9 @@ class Sampler
             const move_type &move,
             const typename Particle<T>::copy_type &copy,
             const move_type &mcmc = NULL,
-            HistoryMode mode = HISTORY_NONE,
             ResampleScheme scheme = RESIDUAL,
             double threshold = 0.5,
+            HistoryMode mode = HISTORY_NONE,
             const int seed = V_DIST_SEED,
             const gsl_rng_type *brng = V_DIST_GSL_BRNG) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
