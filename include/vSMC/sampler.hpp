@@ -65,7 +65,7 @@ class Sampler
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         rng_(seed, brng), scheme_(scheme), threshold_(threshold * N),
         particle_(N, copy), iter_num_(0), history_(mode),
-        buffer_(N), path_integral_(NULL) {}
+        buffer_(N), path_integral_(NULL), show_progress_(false) {}
 
     /// \brief Get ESS
     ///
@@ -142,6 +142,7 @@ class Sampler
 
         path_sample_.clear();
         path_width_.clear();
+        path_grid_.clear();
 
         iter_num_ = 0;
         accept_.push_back(init_(particle_, param));
@@ -275,6 +276,26 @@ class Sampler
         return sum;
     }
 
+    const std::vector<double> &get_path_sample_history () const
+    {
+        return path_sample_;
+    }
+
+    const std::vector<double> &get_path_width_history () const
+    {
+        return path_width_;
+    }
+
+    const std::vector<double> &get_path_grid_history () const
+    {
+        return path_grid_;
+    }
+
+    void toggle_show_progress ()
+    {
+        show_progress_ = !show_progress_;
+    }
+
     private :
 
     /// Initialization indicator
@@ -308,6 +329,10 @@ class Sampler
     path_type path_integral_;
     std::vector<double> path_sample_;
     std::vector<double> path_width_;
+    std::vector<double> path_grid_;
+
+    /// Whether to show prograss while iterating
+    bool show_progress_;
 
     void post_move ()
     {
@@ -333,6 +358,13 @@ class Sampler
             double width; 
             path_sample_.push_back(eval_path(width));
             path_width_.push_back(width);
+            path_grid_.push_back(path_grid_.size() ?
+                    path_grid_.back() + width : width);
+        }
+
+        if (show_progress_) {
+            std::cerr << '.';
+            std::cerr.flush();
         }
     }
 
