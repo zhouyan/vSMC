@@ -28,17 +28,14 @@ class Particle
 {
     public :
 
-    /// The type of copy a particle
-    typedef boost::function<void (std::size_t, std::size_t, T &)> copy_type;
-
     /// \brief Particle does not have a default constructor
     ///
     /// \param N The number of particles
     /// \param copy A pointer to the function that can copy particle from one
     /// position to another position
-    Particle (std::size_t N, const copy_type &copy) :
+    Particle (std::size_t N) :
         size_(N), value_(N), weight_(N), log_weight_(N), replication_(N),
-        copy_(copy), ess_(0), resampled_(false) {}
+        ess_(0), resampled_(false) {}
 
     /// \brief Size of the particle set
     ///
@@ -163,7 +160,6 @@ class Particle
     vDist::tool::Buffer<double> weight_;
     vDist::tool::Buffer<double> log_weight_;
     vDist::tool::Buffer<unsigned> replication_;
-    copy_type copy_;
     double ess_;
     bool resampled_;
 
@@ -223,7 +219,7 @@ class Particle
                         ++from;
                     while (replication_[from] < 2);
                 }
-                copy_(from, to, value_);
+                value_.copy(from, to);
                 ++time;
             }
         }

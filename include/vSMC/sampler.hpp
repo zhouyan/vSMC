@@ -44,7 +44,6 @@ class Sampler
     /// \param N The number of particles
     /// \param init The functor used to initialize the particles
     /// \param move The functor used to move the particles and weights
-    /// \param copy The functor used to copy particles within the sample
     /// \param mcmc The functor used to perform MCMC move
     /// \param scheme The resampling scheme. See ResampleScheme
     /// \param threshold The threshold for performing resampling
@@ -55,7 +54,6 @@ class Sampler
             std::size_t N,
             const init_type &init,
             const move_type &move,
-            const typename Particle<T>::copy_type &copy,
             const move_type &mcmc = NULL,
             ResampleScheme scheme = RESIDUAL,
             double threshold = 0.5,
@@ -64,7 +62,7 @@ class Sampler
             const gsl_rng_type *brng = V_DIST_GSL_BRNG) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         rng_(seed, brng), scheme_(scheme), threshold_(threshold * N),
-        particle_(N, copy), iter_num_(0), history_(mode),
+        particle_(N), iter_num_(0), history_(mode),
         buffer_(N), path_integral_(NULL), show_progress_(false) {}
 
     /// \brief Get ESS
