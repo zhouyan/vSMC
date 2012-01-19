@@ -3,7 +3,7 @@
 .R*
 
 example/pet/ConfigureFile?*
-example/pet/input?*
+example/pet/input*
 example/pet/EST*
 example/pet/ConvMat.tab
 example/pet/Trace
