@@ -6,6 +6,8 @@ example/pet/ConfigureFile?*
 example/pet/input?*
 example/pet/EST*
 example/pet/ConvMat.tab
+example/pet/Trace
+example/pet/PathTrace
 example/pet/buster/
 example/pet/pet_smc
 example/pet/pet_smc_buster
