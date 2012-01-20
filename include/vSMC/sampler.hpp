@@ -373,7 +373,10 @@ class Sampler
         }
 
         if (show_progress_) {
-            std::cerr << '.';
+            if (initialized_)
+                std::cerr << '.';
+            else
+                std::cerr << '*';
             std::cerr.flush();
         }
     }
