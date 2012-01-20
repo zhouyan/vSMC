@@ -9,6 +9,7 @@ example/pet/ConvMat.tab
 example/pet/Trace
 example/pet/PathTrace
 example/pet/buster/
+example/pet/pet_opencl
 example/pet/pet_smc
 example/pet/pet_smc_buster
 example/pet/pet_mcmc
