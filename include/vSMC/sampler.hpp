@@ -373,7 +373,7 @@ class Sampler
         }
 
         if (show_progress_) {
-            if (initialized_)
+            if (iter_num_)
                 std::cerr << '.';
             else
                 std::cerr << '*';
