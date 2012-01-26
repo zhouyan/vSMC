@@ -34,10 +34,10 @@ class Sampler
         (std::size_t, Particle<T> &)> move_type;
     /// The type of importance sampling integral
     typedef boost::function<void
-        (std::size_t, const Particle<T> &, double *, void *)> integral_type;
+        (std::size_t, Particle<T> &, double *, void *)> integral_type;
     /// The type of path sampling integration
     typedef boost::function<double
-        (std::size_t, const Particle<T> &, double *)> path_type;
+        (std::size_t, Particle<T> &, double *)> path_type;
 
     /// \brief Sampler does not have a default constructor
     ///
@@ -176,7 +176,7 @@ class Sampler
     /// \brief Perform importance sampling integration
     ///
     /// \param intgral The functor used to compute the integrands
-    double integrate (typename Monitor<T>::integral_type integral) const
+    double integrate (typename Monitor<T>::integral_type integral)
     {
         std::size_t n = particle_.size();
         integral(iter_num_, particle_, buffer_);
@@ -335,7 +335,7 @@ class Sampler
     History<T> history_;
 
     /// Monte Carlo estimation by integration
-    mutable vDist::tool::Buffer<double> buffer_;
+    vDist::tool::Buffer<double> buffer_;
     std::map<std::string, Monitor<T> > monitor_;
 
     /// Path sampling

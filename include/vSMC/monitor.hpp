@@ -21,7 +21,7 @@ class Monitor
 
     /// The type of monitor integration
     typedef boost::function<void
-        (std::size_t, const Particle<T> &, double *)> integral_type;
+        (std::size_t, Particle<T> &, double *)> integral_type;
     /// The type of the values
     typedef std::pair<std::vector<std::size_t>, std::vector<double> > 
         value_type;
@@ -61,7 +61,7 @@ class Monitor
     /// constructor or set_integral() to a non-NULL value before calling
     /// eval(). Otherwise runtime_error exception will be raised when calling
     /// eval().
-    void eval (std::size_t iter, const Particle<T> &particle)
+    void eval (std::size_t iter, Particle<T> &particle)
     {
         integral_(iter, particle, buffer_);
         index.push_back(iter);
