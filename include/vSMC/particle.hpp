@@ -102,8 +102,8 @@ class Particle
     {
         if (estimate_zconst_) {
             vdExp(size_, inc_weight, inc_weight_);
-            zconst_ += std::log(
-                    cblas_ddot(size_, weight_, 1, inc_weight_, 1));
+            zconst_ +=
+                std::log(cblas_ddot(size_, weight_, 1, inc_weight_, 1));
         }
 
         vdAdd(size_, log_weight_, inc_weight, log_weight_);
