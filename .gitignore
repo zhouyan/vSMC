@@ -21,4 +21,8 @@ example/pf/pf.tab
 
 example/toy/EST*
 example/toy/PathTrace*
-example/toy/toy-*
+example/toy/toy-dn-mn
+example/toy/toy-dn-ml
+example/toy/toy-dl-mn
+example/toy/toy-dl-ml
+example/toy/*.txt
