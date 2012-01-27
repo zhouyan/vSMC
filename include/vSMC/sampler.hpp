@@ -145,7 +145,7 @@ class Sampler
         iter_num_ = 0;
         accept_.push_back(init_(particle_, param));
         post_move();
-        particle_.reset_estimate_zconst();
+        particle_.reset_zconst();
 
         initialized_ = true;
     }
@@ -312,26 +312,20 @@ class Sampler
         show_progress_ = show_progress;
     }
 
+    /// \brief Get the value of SMC normalizing constant
+    ///
+    /// \return SMC normalizng constant estimate
+    double get_zconst () const
+    {
+        return particle_.get_zconst();
+    }
+
     /// \brief Toggle whether or not record SMC normalizing constant
     ///
     /// \param estimate_zconst Start estimating normalzing constant if true.
     void set_estimate_zconst (bool estimate_zconst)
     {
         particle_.set_estimate_zconst(estimate_zconst);
-    }
-
-    /// \brief Get the value of SMC normalizing constant
-    ///
-    /// \return SMC normalizng constant estimate
-    double get_estimate_zconst () const
-    {
-        return particle_.get_estimate_zconst();
-    }
-
-    /// \brief Reset the value of SMC normalizing constant
-    void reset_estimate_zconst ()
-    {
-        particle_.reset_estimate_zconst();
     }
 
     private :

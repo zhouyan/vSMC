@@ -160,6 +160,14 @@ class Particle
         }
     }
 
+    /// \brief Get the value of SMC normalizing constant
+    ///
+    /// \return SMC normalizng constant estimate
+    double get_zconst () const
+    {
+        return zconst_;
+    }
+
     /// \brief Toggle whether or not record SMC normalizing constant
     ///
     /// \param estimate_zconst Start estimating normalzing constant if true.
@@ -168,16 +176,8 @@ class Particle
         estimate_zconst_ = estimate_zconst;
     }
 
-    /// \brief Get the value of SMC normalizing constant
-    ///
-    /// \return SMC normalizng constant estimate
-    double get_estimate_zconst () const
-    {
-        return zconst_;
-    }
-
     /// \brief Reset the value of SMC normalizing constant
-    void reset_estimate_zconst ()
+    void reset_zconst ()
     {
         zconst_ = 0;
     }
