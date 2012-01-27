@@ -34,8 +34,9 @@ class Particle
     /// \param copy A pointer to the function that can copy particle from one
     /// position to another position
     Particle (std::size_t N) :
-        size_(N), value_(N), weight_(N), log_weight_(N), replication_(N),
-        ess_(0), resampled_(false) {}
+        size_(N), value_(N), weight_(N), log_weight_(N), inc_weight_(N),
+        replication_(N),
+        ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false) {}
 
     /// \brief Size of the particle set
     ///
@@ -99,6 +100,12 @@ class Particle
     /// \param [in] inc_weight Incremental log weights
     void add_log_weight (const double *inc_weight)
     {
+        if (estimate_zconst_) {
+            vdExp(size_, inc_weight, inc_weight_);
+            zconst_ += std::log(
+                    cblas_ddot(size_, weight_, 1, inc_weight_, 1));
+        }
+
         vdAdd(size_, log_weight_, inc_weight, log_weight_);
         set_weight();
     }
@@ -153,15 +160,40 @@ class Particle
         }
     }
 
+    /// \brief Toggle whether or not record SMC normalizing constant
+    ///
+    /// \param estimate_zconst Start estimating normalzing constant if true.
+    void set_estimate_zconst (bool estimate_zconst)
+    {
+        estimate_zconst_ = estimate_zconst;
+    }
+
+    /// \brief Get the value of SMC normalizing constant
+    ///
+    /// \return SMC normalizng constant estimate
+    double get_estimate_zconst () const
+    {
+        return zconst_;
+    }
+
+    /// \brief Reset the value of SMC normalizing constant
+    void reset_estimate_zconst ()
+    {
+        zconst_ = 0;
+    }
+
     private :
 
     std::size_t size_;
     T value_;
     vDist::tool::Buffer<double> weight_;
     vDist::tool::Buffer<double> log_weight_;
+    vDist::tool::Buffer<double> inc_weight_;
     vDist::tool::Buffer<unsigned> replication_;
     double ess_;
     bool resampled_;
+    double zconst_;
+    bool estimate_zconst_;
 
     void set_weight ()
     {
