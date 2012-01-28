@@ -377,18 +377,18 @@ class Sampler
         if (history_.mode() != HISTORY_NONE)
             history_.push_back(particle_);
 
-        for (typename std::map<std::string, Monitor<T> >::iterator
-                imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
-            if (!imap->second.empty())
-                imap->second.eval(iter_num_, particle_);
-        }
-
         if (!path_integral_.empty()) {
             double width; 
             path_sample_.push_back(eval_path(width));
             path_width_.push_back(width);
             path_grid_.push_back(path_grid_.size() ?
                     path_grid_.back() + width : width);
+        }
+
+        for (typename std::map<std::string, Monitor<T> >::iterator
+                imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
+            if (!imap->second.empty())
+                imap->second.eval(iter_num_, particle_);
         }
 
         if (show_progress_) {
