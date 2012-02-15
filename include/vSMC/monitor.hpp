@@ -32,10 +32,18 @@ class Monitor
     Monitor (std::size_t N, const integral_type &integral = NULL) :
         buffer_(N), integral_(integral) {}
 
+    /// \brief Size of the particle set
+    ///
+    /// \return The number of particles
+    std::size_t size () const
+    {
+        return buffer_.size();
+    }
+
     /// \brief Size of records
     ///
     /// \return The number of iterations recorded
-    std::size_t size () const
+    std::size_t iter_num () const
     {
         return index_.size();
     }

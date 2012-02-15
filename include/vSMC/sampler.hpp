@@ -70,6 +70,15 @@ class Sampler
         return particle_.size();
     }
 
+    /// \brief Size of records
+    ///
+    /// \return The number of iterations recorded (including the
+    /// initialization)
+    std::size_t iter_num () const
+    {
+        return ess_.size();
+    }
+
     /// \brief Get ESS
     ///
     /// \return The ESS value of the latest iteration
