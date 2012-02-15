@@ -81,6 +81,14 @@ class Sampler
         return ess_.size();
     }
 
+    /// \brief Size of path sampling records
+    ///
+    /// \return The number of iterations with path sampling calculated
+    std::size_t path_size () const
+    {
+        return path_index_.size();
+    }
+
     /// \brief Get ESS
     ///
     /// \return The ESS value of the latest iteration
@@ -91,10 +99,21 @@ class Sampler
 
     /// \brief Get all ESS
     ///
-    /// \return History of ESS for all iterations
+    /// \return The history of ESS for all iterations
     std::vector<double> get_ESS_history () const
     {
         return ess_;
+    }
+
+    /// \brief Get all ESS
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_ESS_history (OIter first) const
+    {
+        for (std::vector<double>::const_iterator iter = ess_.begin();
+                iter != ess_.end(); ++iter)
+            *first++ = *iter;
     }
 
     /// \brief Get indicator of resampling
@@ -105,12 +124,23 @@ class Sampler
         return resample_.back();
     }
 
-    /// \brief Get history of resampling
+    /// \brief Get the history of resampling
     ///
-    /// \return History of resampling for all iterations
+    /// \return The history of resampling for all iterations
     std::vector<bool> get_resample_history () const
     {
         return resample_;
+    }
+
+    /// \brief Get the history of resampling
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_resample_history (OIter first) const
+    {
+        for (std::vector<bool>::const_iterator iter = resample_.begin();
+                iter != resample_.end(); ++iter)
+            *first++ = *iter;
     }
 
     /// \brief Get accept count
@@ -121,12 +151,23 @@ class Sampler
         return accept_.back();
     }
 
-    /// \brief Get history of accept count
+    /// \brief Get the history of accept count
     ///
-    /// \return History of accept count for all iterations
+    /// \return The history of accept count for all iterations
     std::vector<std::size_t> get_accept_history () const
     {
         return accept_;
+    }
+
+    /// \brief Get the history of accept count
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_accept_history (OIter first) const
+    {
+        for (std::vector<std::size_t>::const_iterator iter = accept_.begin();
+                iter != accept_.end(); ++iter)
+            *first++ = *iter;
     }
 
     /// \brief Read only access to the particle set
@@ -296,12 +337,35 @@ class Sampler
         return path_index_;
     }
 
+    /// \brief Get the history of path sampling index
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_path_index (OIter first) const
+    {
+        for (std::vector<std::size_t>::const_iterator
+                iter = path_index_.begin(); iter != path_index_.end(); ++iter)
+            *first++ = *iter;
+    }
+
     /// \brief Get the history of path sampling integrand
     ///
     /// \return A vector of the path sampling integrand history
     std::vector<double> get_path_integrand () const
     {
         return path_integrand_;
+    }
+
+    /// \brief Get the history of path sampling integrand
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_path_integrand (OIter first) const
+    {
+        for (std::vector<double>::const_iterator
+                iter = path_integrand_.begin();
+                iter != path_integrand_.end(); ++iter)
+            *first++ = *iter;
     }
 
     /// \brief Get the history of path sampling width
@@ -312,12 +376,34 @@ class Sampler
         return path_width_;
     }
 
+    /// \brief Get the history of path sampling width
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_path_width (OIter first) const
+    {
+        for (std::vector<double>::const_iterator iter = path_width_.begin();
+                iter != path_width_.end(); ++iter)
+            *first++ = *iter;
+    }
+
     /// \brief Get the history of path sampling grid
     ///
     /// \return A vector of the path sampling accumulative width history
     std::vector<double> get_path_grid () const
     {
         return path_grid_;
+    }
+
+    /// \brief Get the history of path sampling grid
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_path_grid (OIter first) const
+    {
+        for (std::vector<double>::const_iterator iter = path_grid_.begin();
+                iter != path_grid_.end(); ++iter)
+            *first++ = *iter;
     }
 
     /// \brief Toggle whether or not show progress information while iterating
@@ -429,36 +515,41 @@ template<typename T>
 std::ostream & operator<< (std::ostream &output,
         const vSMC::Sampler<T> &sampler)
 {
-    std::vector<double> ess(sampler.get_ESS_history());
-    std::vector<bool> resample(sampler.get_resample_history());
-    std::vector<std::size_t> accept(sampler.get_accept_history());
+    std::vector<double> ess(sampler.iter_size());
+    std::vector<bool> resample(sampler.iter_size());
+    std::vector<std::size_t> accept(sampler.iter_size());
+    std::vector<std::size_t> path_index(sampler.path_size());
+    std::vector<double> path_integrand(sampler.path_size());
+    std::vector<double> path_width(sampler.path_size());
+    std::vector<double> path_grid(sampler.path_size());
 
-    std::vector<std::size_t> path_index(sampler.get_path_index());
+    sampler.get_ESS_history(ess.begin());
+    sampler.get_resample_history(resample.begin());
+    sampler.get_accept_history(accept.begin());
+    sampler.get_path_index(path_index.begin());
+    sampler.get_path_integrand(path_integrand.begin());
+    sampler.get_path_width(path_width.begin());
+    sampler.get_path_grid(path_grid.begin());
+
     std::vector<std::size_t>::const_iterator
         iter_path_index = path_index.begin();
-
-    std::vector<double> path_integrand(sampler.get_path_integrand());
     std::vector<double>::const_iterator
         iter_path_integrand = path_integrand.begin();
-
-    std::vector<double> path_width(sampler.get_path_width());
-    std::vector<double>::const_iterator iter_path_width = path_width.begin();
-    
-    std::vector<double> path_grid(sampler.get_path_grid());
-    std::vector<double>::const_iterator iter_path_grid = path_grid.begin();
+    std::vector<double>::const_iterator
+        iter_path_width = path_width.begin();
+    std::vector<double>::const_iterator
+        iter_path_grid = path_grid.begin();
 
     const std::map<std::string, vSMC::Monitor<T> >
         monitor(sampler.get_monitor());
 
     std::vector<std::string> monitor_name(monitor.size());
-
     std::vector<typename vSMC::Monitor<T>::index_type>
         monitor_index(monitor.size());
-    std::vector<typename vSMC::Monitor<T>::index_type::const_iterator>
-        iter_monitor_index(monitor.size());
-
     std::vector<typename vSMC::Monitor<T>::record_type>
         monitor_record(monitor.size());
+    std::vector<typename vSMC::Monitor<T>::index_type::const_iterator>
+        iter_monitor_index(monitor.size());
     std::vector<typename vSMC::Monitor<T>::record_type::const_iterator>
         iter_monitor_record(monitor.size());
 
@@ -483,7 +574,8 @@ std::ostream & operator<< (std::ostream &output,
     output << std::endl;
 
     for (std::size_t i = 0; i != sampler.iter_size(); ++i) {
-        output << i << '\t' << ess[i] / sampler.size()<< '\t' << resample[i]
+        output
+            << i << '\t' << ess[i] / sampler.size()<< '\t' << resample[i]
             << '\t' << static_cast<double>(accept[i]) / sampler.size();
 
         if (!path_index.empty() && *iter_path_index == i) {

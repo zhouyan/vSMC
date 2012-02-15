@@ -119,9 +119,9 @@ class Monitor
     template<typename OIter>
     void get_index (OIter first) const
     {
-        for (index_type::const_iterator i = index_.begin();
-               i != index_.end(); ++i)
-            *first++ = *i;
+        for (index_type::const_iterator iter = index_.begin();
+               iter != index_.end(); ++iter)
+            *first++ = *iter;
     }
 
     /// \brief Get the record of Monte Carlo integration
@@ -138,9 +138,9 @@ class Monitor
     template<typename OIter>
     void get_record (OIter first) const
     {
-        for (record_type::const_iterator i = record_.begin();
-               i != record_.end(); ++i)
-            *first++ = *i;
+        for (record_type::const_iterator iter = record_.begin();
+               iter != record_.end(); ++iter)
+            *first++ = *iter;
     }
 
     /// \brief Clear the index and record
