@@ -68,7 +68,7 @@ class Monitor
     /// \brief Get the iteration index
     ///
     /// \return A vector of the index
-    const index_type &get_index () const
+    index_type get_index () const
     {
         return index_;
     }
@@ -76,7 +76,7 @@ class Monitor
     /// \brief Get the record of Monte Carlo integrations
     ///
     /// \return A vector of the record
-    const record_type &get_record () const
+    record_type get_record () const
     {
         return record_;
     }

@@ -81,7 +81,7 @@ class Sampler
     /// \brief Get all ESS
     ///
     /// \return History of ESS for all iterations
-    const std::vector<double> &get_ESS_history () const
+    std::vector<double> get_ESS_history () const
     {
         return ess_;
     }
@@ -97,7 +97,7 @@ class Sampler
     /// \brief Get history of resampling
     ///
     /// \return History of resampling for all iterations
-    const std::vector<bool> &get_resample_history () const
+    std::vector<bool> get_resample_history () const
     {
         return resample_;
     }
@@ -113,7 +113,7 @@ class Sampler
     /// \brief Get history of accept count
     ///
     /// \return History of accept count for all iterations
-    const std::vector<std::size_t> &get_accept_history () const
+    std::vector<std::size_t> get_accept_history () const
     {
         return accept_;
     }
@@ -123,7 +123,7 @@ class Sampler
     /// \return A const reference to the latest particle set.
     /// \note Any operations that change the state of the sampler (e.g., an
     /// iteration) may invalidate the reference.
-    const Particle<T> &particle () const
+    Particle<T> particle () const
     {
         return particle_;
     }
@@ -217,7 +217,7 @@ class Sampler
     ///
     /// \param The name of the monitor
     /// \return A vector of the monitor index
-    const typename Monitor<T>::index_type &get_monitor_index (
+    typename Monitor<T>::index_type get_monitor_index (
             const std::string &name) const
     {
         return monitor_.find(name)->second.get_index();
@@ -227,7 +227,7 @@ class Sampler
     ///
     /// \param name The name of the monitor
     /// \return A vector of the monitor record
-    const typename Monitor<T>::record_type &get_monitor_record (
+    typename Monitor<T>::record_type get_monitor_record (
             const std::string &name) const
     {
         return monitor_.find(name)->second.get_record();
@@ -277,7 +277,7 @@ class Sampler
     /// \brief Get the history of path sampling integrand
     ///
     /// \return A vector of the path sampling integrand history
-    const std::vector<double> &get_path_sample_history () const
+    std::vector<double> get_path_sample_history () const
     {
         return path_sample_;
     }
@@ -285,7 +285,7 @@ class Sampler
     /// \brief Get the history of path sampling width
     ///
     /// \return A vector of the path sampling width history
-    const std::vector<double> &get_path_width_history () const
+    std::vector<double> get_path_width_history () const
     {
         return path_width_;
     }
@@ -293,7 +293,7 @@ class Sampler
     /// \brief Get the history of path sampling grid
     ///
     /// \return A vector of the path sampling accumulative width history
-    const std::vector<double> &get_path_grid_history () const
+    std::vector<double> get_path_grid_history () const
     {
         return path_grid_;
     }
