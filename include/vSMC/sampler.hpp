@@ -451,11 +451,13 @@ std::ostream & operator<< (std::ostream &output,
 
     std::vector<std::string> monitor_name;
 
-    std::vector<std::vector<std::size_t> > monitor_index;
-    std::vector<std::vector<std::size_t>::const_iterator> iter_monitor_index;
+    typename std::vector<vSMC::Monitor<T>::index_type> monitor_index;
+    typename std::vector<vSMC::Monitor<T>::index_type::const_iterator>
+        iter_monitor_index;
 
-    std::vector<std::vector<double> > monitor_record;
-    std::vector<std::vector<double>::const_iterator> iter_monitor_record;
+    typename std::vector<vSMC::Monitor<T>::record_type> monitor_record;
+    typename std::vector<vSMC::Monitor<T>::record_type::const_iterator>
+        iter_monitor_record;
 
     for (typename std::map<std::string, vSMC::Monitor<T> >::const_iterator
             iter = monitor.begin(); iter != monitor.end(); ++iter) {
@@ -464,7 +466,7 @@ std::ostream & operator<< (std::ostream &output,
         monitor_record.push_back(iter->second.get_record());
     }
 
-    for (std::size_t i = 0; i != monitor_index.size(); ++i) {
+    for (std::size_t i = 0; i != monitor_name.size(); ++i) {
         iter_monitor_index.push_back(monitor_index[i].begin());
         iter_monitor_record.push_back(monitor_record[i].begin());
     }
