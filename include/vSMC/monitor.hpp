@@ -43,7 +43,7 @@ class Monitor
     /// \brief Size of records
     ///
     /// \return The number of iterations recorded
-    std::size_t iter_num () const
+    std::size_t iter_size () const
     {
         return index_.size();
     }
