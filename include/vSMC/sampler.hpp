@@ -447,28 +447,31 @@ std::ostream & operator<< (std::ostream &output,
     std::vector<double> path_grid(sampler.get_path_grid());
     std::vector<double>::const_iterator iter_path_grid = path_grid.begin();
 
-    std::map<std::string, vSMC::Monitor<T> > monitor(sampler.get_monitor());
+    const std::map<std::string, vSMC::Monitor<T> >
+        monitor(sampler.get_monitor());
 
-    std::vector<std::string> monitor_name;
+    std::vector<std::string> monitor_name(monitor.size());
 
-    typename std::vector<vSMC::Monitor<T>::index_type> monitor_index;
-    typename std::vector<vSMC::Monitor<T>::index_type::const_iterator>
-        iter_monitor_index;
+    std::vector<typename vSMC::Monitor<T>::index_type>
+        monitor_index(monitor.size());
+    std::vector<typename vSMC::Monitor<T>::index_type::const_iterator>
+        iter_monitor_index(monitor.size());
 
-    typename std::vector<vSMC::Monitor<T>::record_type> monitor_record;
-    typename std::vector<vSMC::Monitor<T>::record_type::const_iterator>
-        iter_monitor_record;
+    std::vector<typename vSMC::Monitor<T>::record_type>
+        monitor_record(monitor.size());
+    std::vector<typename vSMC::Monitor<T>::record_type::const_iterator>
+        iter_monitor_record(monitor.size());
 
+    std::size_t m = 0;
     for (typename std::map<std::string, vSMC::Monitor<T> >::const_iterator
-            iter = monitor.begin(); iter != monitor.end(); ++iter) {
-        monitor_name.push_back(iter->first);
-        monitor_index.push_back(iter->second.get_index());
-        monitor_record.push_back(iter->second.get_record());
-    }
-
-    for (std::size_t i = 0; i != monitor_name.size(); ++i) {
-        iter_monitor_index.push_back(monitor_index[i].begin());
-        iter_monitor_record.push_back(monitor_record[i].begin());
+            iter = monitor.begin(); iter != monitor.end(); ++iter, ++m) {
+        monitor_name[m] = iter->first;
+        monitor_index[m].resize(iter->second.iter_size());
+        monitor_record[m].resize(iter->second.iter_size());
+        iter->second.get_index(monitor_index[m].begin());
+        iter->second.get_record(monitor_record[m].begin());
+        iter_monitor_index[m] = monitor_index[m].begin();
+        iter_monitor_record[m] = monitor_record[m].begin();
     }
 
     output
