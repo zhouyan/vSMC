@@ -52,7 +52,7 @@ class Particle
     {
         return value_;
     }
-    
+
     /// \brief Read only access to particle values
     ///
     /// \return A const reference to the particle values, type (const T &)

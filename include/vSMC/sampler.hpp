@@ -293,7 +293,7 @@ class Sampler
         return monitor_;
     }
 
-    /// \brief Erase a monitor by name 
+    /// \brief Erase a monitor by name
     ///
     /// \param name The name of the monitor
     void erase_monitor (const std::string &name)
@@ -475,7 +475,7 @@ class Sampler
             particle_.resample(scheme_, rng_.get_rng());
 
         if (!path_integral_.empty()) {
-            double width; 
+            double width;
             path_index_.push_back(iter_num_);
             path_integrand_.push_back(eval_path(width));
             path_width_.push_back(width);
