@@ -1,6 +1,7 @@
 .DS_Store
 *.swp
 .R*
+doc/
 
 example/pet/ConfigureFile?*
 example/pet/input*

@@ -28,7 +28,7 @@ class Monitor
     /// \brief Construct a Monitor with an integral function
     ///
     /// \param N The size of the particle set
-    /// \param monitor_integral The function used to compute the integrands
+    /// \param integral The function used to compute the integrands
     Monitor (std::size_t N, const integral_type &integral = NULL) :
         buffer_(N), integral_(integral) {}
 

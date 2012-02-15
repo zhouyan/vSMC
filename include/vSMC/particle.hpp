@@ -30,8 +30,6 @@ class Particle
     /// \brief Particle does not have a default constructor
     ///
     /// \param N The number of particles
-    /// \param copy A pointer to the function that can copy particle from one
-    /// position to another position
     Particle (std::size_t N) :
         size_(N), value_(N), weight_(N), log_weight_(N), inc_weight_(N),
         replication_(N),

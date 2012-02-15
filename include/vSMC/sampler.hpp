@@ -189,7 +189,7 @@ class Sampler
 
     /// \brief Perform importance sampling integration
     ///
-    /// \param intgral The functor used to compute the integrands
+    /// \param integral The functor used to compute the integrands
     double integrate (typename Monitor<T>::integral_type integral)
     {
         std::size_t n = particle_.size();
@@ -200,7 +200,7 @@ class Sampler
 
     /// \brief Perform importance sampling integration
     ///
-    /// \param intgral The functor used to compute the integrands
+    /// \param integral The functor used to compute the integrands
     /// \param param Additional parameters to be passed to integral
     double integrate (integral_type integral, void *param) const
     {
@@ -224,7 +224,7 @@ class Sampler
 
     /// \brief Find a monitor by name
     ///
-    /// \param The name of the monitor
+    /// \param name The name of the monitor
     /// \return An iterator point to the monitor for the given name
     typename std::map<std::string, Monitor<T> >::iterator
         find_monitor (const std::string &name) 
@@ -234,7 +234,7 @@ class Sampler
 
     /// \brief Find a monitor by name
     ///
-    /// \param The name of the monitor
+    /// \param name The name of the monitor
     /// \return An const_iterator point to the monitor for the given name
     typename std::map<std::string, Monitor<T> >::const_iterator
         find_monitor (const std::string &name) const
@@ -309,7 +309,7 @@ class Sampler
 
     /// \brief Toggle whether or not show progress information while iterating
     ///
-    /// \param Start printing progress to standard error if true.
+    /// \param show_progress printing progress to standard error if true.
     void set_show_progress (bool show_progress)
     {
         show_progress_ = show_progress;
