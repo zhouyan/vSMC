@@ -3,7 +3,6 @@
 
 #include <vSMC/config.hpp>
 
-#include <utility>
 #include <vector>
 #include <cstddef>
 #include <mkl_cblas.h>
@@ -16,15 +15,11 @@ namespace vSMC {
 template <typename T>
 class Monitor
 {
-
     public :
 
     /// The type of monitor integration
     typedef boost::function<void
         (std::size_t, Particle<T> &, double *)> integral_type;
-    /// The type of the values
-    typedef std::pair<std::vector<std::size_t>, std::vector<double> > 
-        value_type;
     /// The type of the index
     typedef std::vector<std::size_t> index_type;
     /// The type of the record
@@ -57,55 +52,48 @@ class Monitor
     ///
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
-    /// \note The integral functor has to be set through either the
+    /// \note The integral function has to be set through either the
     /// constructor or set_integral() to a non-NULL value before calling
     /// eval(). Otherwise runtime_error exception will be raised when calling
     /// eval().
+    /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
         integral_(iter, particle, buffer_);
-        index.push_back(iter);
-        record.push_back(cblas_ddot(particle.size(),
+        index_.push_back(iter);
+        record_.push_back(cblas_ddot(particle.size(),
                 particle.get_weight_ptr(), 1, buffer_, 1));
     }
 
     /// \brief Get the iteration index
     ///
     /// \return A vector of the index
-    index_type get_index () const
+    const index_type &get_index () const
     {
-        return index;
+        return index_;
     }
 
     /// \brief Get the record of Monte Carlo integrations
     ///
     /// \return A vector of the record
-    record_type get_record () const
+    const record_type &get_record () const
     {
-        return record;
-    }
-
-    /// \brief Get both the index and the record of Monte Carlo integrations
-    ///
-    /// \return A pair of two vectors, index and record
-    value_type get_value () const
-    {
-        return std::make_pair(index, record);
+        return record_;
     }
 
     /// \brief Clear the index and record
     void clear ()
     {
-        index.clear();
-        record.clear();
+        index_.clear();
+        record_.clear();
     }
 
     private :
 
     vDist::tool::Buffer<double> buffer_;
     integral_type integral_;
-    std::vector<std::size_t> index;
-    std::vector<double> record;
+    std::vector<std::size_t> index_;
+    std::vector<double> record_;
 }; // class Monitor
 
 } // namespace vSMC

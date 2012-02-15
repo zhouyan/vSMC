@@ -11,7 +11,6 @@
 #include <boost/function.hpp>
 #include <vDist/rng/gsl.hpp>
 #include <vDist/tool/buffer.hpp>
-#include <vSMC/history.hpp>
 #include <vSMC/monitor.hpp>
 #include <vSMC/particle.hpp>
 
@@ -47,7 +46,6 @@ class Sampler
     /// \param mcmc The functor used to perform MCMC move
     /// \param scheme The resampling scheme. See ResampleScheme
     /// \param threshold The threshold for performing resampling
-    /// \param mode The history storage mode. See HistoryMode
     /// \param seed The seed for the reampling RNG. See documentation of vDist
     /// \param brng The basic RNG for resampling RNG. See documentation of GSL
     Sampler (
@@ -57,13 +55,20 @@ class Sampler
             const move_type &mcmc = NULL,
             ResampleScheme scheme = RESIDUAL,
             double threshold = 0.5,
-            HistoryMode mode = HISTORY_NONE,
             const int seed = V_DIST_SEED,
             const gsl_rng_type *brng = V_DIST_GSL_BRNG) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         rng_(seed, brng), scheme_(scheme), threshold_(threshold * N),
-        particle_(N), iter_num_(0), history_(mode),
+        particle_(N), iter_num_(0),
         buffer_(N), path_integral_(NULL), show_progress_(false) {}
+
+    /// \brief Size of the particle set
+    ///
+    /// \return The number of particles
+    std::size_t size () const
+    {
+        return particle_.size();
+    }
 
     /// \brief Get ESS
     ///
@@ -129,7 +134,6 @@ class Sampler
     /// the default is NULL
     void initialize (void *param = NULL)
     {
-        history_.clear();
         ess_.clear();
         resample_.clear();
         accept_.clear();
@@ -213,7 +217,7 @@ class Sampler
     ///
     /// \param The name of the monitor
     /// \return A vector of the monitor index
-    typename Monitor<T>::index_type get_monitor_index (
+    const typename Monitor<T>::index_type &get_monitor_index (
             const std::string &name) const
     {
         return monitor_.find(name)->second.get_index();
@@ -223,20 +227,10 @@ class Sampler
     ///
     /// \param name The name of the monitor
     /// \return A vector of the monitor record
-    typename Monitor<T>::record_type get_monitor_record (
+    const typename Monitor<T>::record_type &get_monitor_record (
             const std::string &name) const
     {
         return monitor_.find(name)->second.get_record();
-    }
-
-    /// \brief Get both the iteration index and record of a monitor
-    ///
-    /// \param name The name of the monitor
-    /// \return A pair of vectors of the monitor record and index
-    typename Monitor<T>::value_type get_monitor_value (
-            const std::string &name) const
-    {
-        return monitor_.find(name)->second.get();
     }
 
     /// \brief Erase a monitor by name 
@@ -350,9 +344,6 @@ class Sampler
     std::vector<bool> resample_;
     std::vector<std::size_t> accept_;
 
-    /// History
-    History<T> history_;
-
     /// Monte Carlo estimation by integration
     vDist::tool::Buffer<double> buffer_;
     std::map<std::string, Monitor<T> > monitor_;
@@ -373,9 +364,6 @@ class Sampler
         resample_.push_back(particle_.get_resample());
         if (particle_.get_resample())
             particle_.resample(scheme_, rng_.get_rng());
-
-        if (history_.mode() != HISTORY_NONE)
-            history_.push_back(particle_);
 
         if (!path_integral_.empty()) {
             double width; 

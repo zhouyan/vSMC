@@ -6,9 +6,8 @@
 #include <cstddef>
 #include <mkl_cblas.h>
 #include <mkl_vml.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include <boost/function.hpp>
+#include <vDist/rng/gsl.hpp>
 #include <vDist/tool/buffer.hpp>
 #include <vDist/tool/eblas.hpp>
 
@@ -86,7 +85,7 @@ class Particle
         return log_weight_.get();
     }
 
-    /// \brief Set the log weights of the particle sets
+    /// \brief Set the log weights
     ///
     /// \param [in] new_weight New log weights
     void set_log_weight (const double *new_weight)
@@ -95,15 +94,14 @@ class Particle
         set_weight();
     }
 
-    /// \brief Add to the log weights of the particle sets
+    /// \brief Add to the log weights
     ///
     /// \param [in] inc_weight Incremental log weights
     void add_log_weight (const double *inc_weight)
     {
         if (estimate_zconst_) {
             vdExp(size_, inc_weight, inc_weight_);
-            zconst_ +=
-                std::log(cblas_ddot(size_, weight_, 1, inc_weight_, 1));
+            zconst_ += std::log(cblas_ddot(size_, weight_, 1, inc_weight_, 1));
         }
 
         vdAdd(size_, log_weight_, inc_weight, log_weight_);
@@ -134,6 +132,28 @@ class Particle
         resampled_ = resampled;
     }
 
+    /// \brief Get the value of SMC normalizing constant
+    ///
+    /// \return SMC normalizng constant estimate
+    double get_zconst () const
+    {
+        return zconst_;
+    }
+
+    /// \brief Toggle whether or not record SMC normalizing constant
+    ///
+    /// \param estimate_zconst Start estimating normalzing constant if true.
+    void set_estimate_zconst (bool estimate_zconst)
+    {
+        estimate_zconst_ = estimate_zconst;
+    }
+
+    /// \brief Reset the value of SMC normalizing constant
+    void reset_zconst ()
+    {
+        zconst_ = 0;
+    }
+
     /// \brief Perform resampling
     ///
     /// \param scheme The resampling scheme, see ResamplingScheme
@@ -158,28 +178,6 @@ class Particle
                         "ERROR: vSMC::Particle::resample: "
                         "Unknown Resample Scheme");
         }
-    }
-
-    /// \brief Get the value of SMC normalizing constant
-    ///
-    /// \return SMC normalizng constant estimate
-    double get_zconst () const
-    {
-        return zconst_;
-    }
-
-    /// \brief Toggle whether or not record SMC normalizing constant
-    ///
-    /// \param estimate_zconst Start estimating normalzing constant if true.
-    void set_estimate_zconst (bool estimate_zconst)
-    {
-        estimate_zconst_ = estimate_zconst;
-    }
-
-    /// \brief Reset the value of SMC normalizing constant
-    void reset_zconst ()
-    {
-        zconst_ = 0;
     }
 
     private :
