@@ -32,6 +32,14 @@ class Monitor
     Monitor (std::size_t N, const integral_type &integral = NULL) :
         buffer_(N), integral_(integral) {}
 
+    /// \brief Size of records
+    ///
+    /// \return The number of iterations recorded
+    std::size_t size () const
+    {
+        return index_.size();
+    }
+
     /// \brief Set the integral function
     ///
     /// \param integral The function used to compute the integrands
@@ -73,12 +81,34 @@ class Monitor
         return index_;
     }
 
-    /// \brief Get the record of Monte Carlo integrations
+    /// \brief Get the iteration index
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_index (OIter first) const
+    {
+        for (index_type::const_iterator i = index_.begin();
+               i != index_.end(); ++i)
+            *first++ = *i;
+    }
+
+    /// \brief Get the record of Monte Carlo integration
     ///
     /// \return A vector of the record
     record_type get_record () const
     {
         return record_;
+    }
+
+    /// \brief Get the record of Monte Carlo integrtion.
+    ///
+    /// \param first An iterator point to where writing starts
+    template<typename OIter>
+    void get_record (OIter first) const
+    {
+        for (record_type::const_iterator i = record_.begin();
+               i != record_.end(); ++i)
+            *first++ = *i;
     }
 
     /// \brief Clear the index and record

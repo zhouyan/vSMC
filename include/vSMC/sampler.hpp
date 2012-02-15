@@ -213,24 +213,24 @@ class Sampler
                     name, Monitor<T>(particle_.size(), integral)));
     }
 
-    /// \brief Get the iteration index of a monitor
+    /// \brief Find a monitor by name
     ///
     /// \param The name of the monitor
-    /// \return A vector of the monitor index
-    typename Monitor<T>::index_type get_monitor_index (
-            const std::string &name) const
+    /// \return An iterator point to the monitor for the given name
+    typename std::map<std::string, Monitor<T> >::iterator
+        find_monitor (const std::string &name) 
     {
-        return monitor_.find(name)->second.get_index();
+        return monitor_.find(name);
     }
 
-    /// \brief Get the record of Monite Carlo integration of a monitor
+    /// \brief Find a monitor by name
     ///
-    /// \param name The name of the monitor
-    /// \return A vector of the monitor record
-    typename Monitor<T>::record_type get_monitor_record (
-            const std::string &name) const
+    /// \param The name of the monitor
+    /// \return An const_iterator point to the monitor for the given name
+    typename std::map<std::string, Monitor<T> >::const_iterator
+        find_monitor (const std::string &name) const
     {
-        return monitor_.find(name)->second.get_record();
+        return monitor_.find(name);
     }
 
     /// \brief Erase a monitor by name 
@@ -241,7 +241,7 @@ class Sampler
         monitor_.erase(name);
     }
 
-    /// \brief Clear all monitors
+    /// \brief Erase (clear) all monitors
     void clear_monitor ()
     {
         monitor_.clear();
