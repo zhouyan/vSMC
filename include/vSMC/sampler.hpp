@@ -81,14 +81,6 @@ class Sampler
         return ess_.size();
     }
 
-    /// \brief Size of path sampling records
-    ///
-    /// \return The number of iterations with path sampling calculated
-    std::size_t path_size () const
-    {
-        return path_index_.size();
-    }
-
     /// \brief Get ESS
     ///
     /// \return The ESS value of the latest iteration
@@ -329,6 +321,14 @@ class Sampler
             sum += (path_integrand_[i-1] + path_integrand_[i])
                 * path_width_[i] * 0.5;
         return sum;
+    }
+
+    /// \brief Size of path sampling records
+    ///
+    /// \return The number of iterations with path sampling calculated
+    std::size_t path_size () const
+    {
+        return path_index_.size();
     }
 
     /// \brief Get the history of path sampling index
