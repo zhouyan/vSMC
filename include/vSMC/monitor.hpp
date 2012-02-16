@@ -30,13 +30,13 @@ class Monitor
     /// \param N The size of the particle set
     /// \param integral The function used to compute the integrands
     Monitor (std::size_t N, const integral_type &integral = NULL) :
-        size_(N), integral_(integral) {}
+        integral_(integral) {}
 
     /// \brief Copy constructor
     ///
     /// \param monitor The Monitor to by copied
     Monitor (const Monitor<T> &monitor) :
-        size_(monitor.size_), buffer_(0), integral_(monitor.integral_),
+        integral_(monitor.integral_),
         index_(monitor.index_), record_(monitor.record_) {}
 
     /// \brief Assignment operator
@@ -46,21 +46,12 @@ class Monitor
     Monitor<T> & operator= (const Monitor<T> &monitor)
     {
         if (&monitor != this) {
-            size_ = monitor.size_;
             integral_ = monitor.integral_;
             index_ = monitor.index_;
             record_ = monitor.record_;
         }
 
         return *this;
-    }
-
-    /// \brief Size of the particle set
-    ///
-    /// \return The number of particles
-    std::size_t size () const
-    {
-        return size_;
     }
 
     /// \brief Size of records
@@ -97,7 +88,7 @@ class Monitor
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
-        buffer_.resize(size_);
+        buffer_.resize(particle.size());
         integral_(iter, particle, buffer_);
         index_.push_back(iter);
         record_.push_back(cblas_ddot(particle.size(),
@@ -151,7 +142,6 @@ class Monitor
 
     private :
 
-    std::size_t size_;
     vDist::tool::Buffer<double> buffer_;
     integral_type integral_;
     std::vector<std::size_t> index_;
