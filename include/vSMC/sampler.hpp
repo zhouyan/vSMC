@@ -264,7 +264,7 @@ class Sampler
     /// \param name The name of the monitor
     /// \return An iterator point to the monitor for the given name
     typename std::map<std::string, Monitor<T> >::iterator
-        find_monitor (const std::string &name)
+        monitor (const std::string &name)
     {
         return monitor_.find(name);
     }
@@ -274,7 +274,7 @@ class Sampler
     /// \param name The name of the monitor
     /// \return An const_iterator point to the monitor for the given name
     typename std::map<std::string, Monitor<T> >::const_iterator
-        find_monitor (const std::string &name) const
+        monitor (const std::string &name) const
     {
         return monitor_.find(name);
     }
