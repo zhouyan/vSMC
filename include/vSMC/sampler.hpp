@@ -113,7 +113,7 @@ class Sampler
     /// \return A bool value, \b true if the latest iteration was resampled
     bool resampled () const
     {
-        return resample_.back();
+        return resampled_.back();
     }
 
     /// \brief Get the history of resampling
@@ -121,7 +121,7 @@ class Sampler
     /// \return The history of resampling for all iterations
     std::vector<bool> resampled_history () const
     {
-        return resample_;
+        return resampled_;
     }
 
     /// \brief Get the history of resampling
@@ -130,8 +130,8 @@ class Sampler
     template<typename OIter>
     void resampled_history (OIter first) const
     {
-        for (std::vector<bool>::const_iterator iter = resample_.begin();
-                iter != resample_.end(); ++iter)
+        for (std::vector<bool>::const_iterator iter = resampled_.begin();
+                iter != resampled_.end(); ++iter)
             *first++ = *iter;
     }
 
@@ -179,7 +179,7 @@ class Sampler
     void initialize (void *param = NULL)
     {
         ess_.clear();
-        resample_.clear();
+        resampled_.clear();
         accept_.clear();
 
         for (typename std::map<std::string, Monitor<T> >::iterator
@@ -451,7 +451,7 @@ class Sampler
     Particle<T> particle_;
     std::size_t iter_num_;
     std::vector<double> ess_;
-    std::vector<bool> resample_;
+    std::vector<bool> resampled_;
     std::vector<std::size_t> accept_;
 
     /// Monte Carlo estimation by integration
@@ -472,7 +472,7 @@ class Sampler
     {
         ess_.push_back(particle_.ess());
         particle_.resampled(ess_.back() < threshold_);
-        resample_.push_back(particle_.resampled());
+        resampled_.push_back(particle_.resampled());
         if (particle_.resampled())
             particle_.resample(scheme_, rng_.get_rng());
 
