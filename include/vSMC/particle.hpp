@@ -68,7 +68,7 @@ class Particle
     /// \return A const pointer to the weights, type (const double *)
     /// \note Any operations that change the state of the particle set (e.g.,
     /// setting log weights or resampling) may invalidate the pointer.
-    const double *get_weight_ptr () const
+    const double *weight_ptr () const
     {
         return weight_.get();
     }
@@ -78,7 +78,7 @@ class Particle
     /// \return A const pointer to the log weights, type (const double *)
     /// \note Any operations that change the state of the particle set (e.g.,
     /// setting log weights or resampling) may invalidate the pointer.
-    const double *get_log_weight_ptr () const
+    const double *log_weight_ptr () const
     {
         return log_weight_.get();
     }
@@ -109,7 +109,7 @@ class Particle
     /// \brief The ESS (Effective Sample Size)
     ///
     /// \return The value of ESS for current particle set
-    double get_ESS () const
+    double ess () const
     {
         return ess_;
     }
@@ -117,7 +117,7 @@ class Particle
     /// \brief Get indicator of resampling
     ///
     /// \return A bool value, \b true if the this iteration was resampled
-    bool get_resample () const
+    bool resampled () const
     {
         return resampled_;
     }
@@ -125,7 +125,7 @@ class Particle
     /// \brief Set indicator of resampling
     ///
     /// \param resampled \b true if the this iteration was resampled
-    void set_resample (bool resampled)
+    void resampled (bool resampled)
     {
         resampled_ = resampled;
     }
@@ -133,7 +133,7 @@ class Particle
     /// \brief Get the value of SMC normalizing constant
     ///
     /// \return SMC normalizng constant estimate
-    double get_zconst () const
+    double zconst () const
     {
         return zconst_;
     }
@@ -141,7 +141,7 @@ class Particle
     /// \brief Toggle whether or not record SMC normalizing constant
     ///
     /// \param estimate_zconst Start estimating normalzing constant if true.
-    void set_estimate_zconst (bool estimate_zconst)
+    void zconst (bool estimate_zconst)
     {
         estimate_zconst_ = estimate_zconst;
     }

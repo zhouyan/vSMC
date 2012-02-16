@@ -74,7 +74,7 @@ class Monitor
     /// \brief Set the integral function
     ///
     /// \param integral The function used to compute the integrands
-    void set_integral (const integral_type &integral)
+    void integral (const integral_type &integral)
     {
         integral_ = integral;
     }
@@ -92,9 +92,8 @@ class Monitor
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
     /// \note The integral function has to be set through either the
-    /// constructor or set_integral() to a non-NULL value before calling
-    /// eval(). Otherwise runtime_error exception will be raised when calling
-    /// eval().
+    /// constructor or integral() to a non-NULL value before calling eval().
+    /// Otherwise runtime_error exception will be raised when calling eval().
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
@@ -102,13 +101,13 @@ class Monitor
         integral_(iter, particle, buffer_);
         index_.push_back(iter);
         record_.push_back(cblas_ddot(particle.size(),
-                particle.get_weight_ptr(), 1, buffer_, 1));
+                particle.weight_ptr(), 1, buffer_, 1));
     }
 
     /// \brief Get the iteration index
     ///
     /// \return A vector of the index
-    index_type get_index () const
+    index_type index () const
     {
         return index_;
     }
@@ -117,7 +116,7 @@ class Monitor
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
-    void get_index (OIter first) const
+    void index (OIter first) const
     {
         for (index_type::const_iterator iter = index_.begin();
                iter != index_.end(); ++iter)
@@ -127,7 +126,7 @@ class Monitor
     /// \brief Get the record of Monte Carlo integration
     ///
     /// \return A vector of the record
-    record_type get_record () const
+    record_type record () const
     {
         return record_;
     }
@@ -136,7 +135,7 @@ class Monitor
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
-    void get_record (OIter first) const
+    void record (OIter first) const
     {
         for (record_type::const_iterator iter = record_.begin();
                iter != record_.end(); ++iter)
