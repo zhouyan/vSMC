@@ -62,7 +62,7 @@ class Sampler
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         rng_(seed, brng), scheme_(scheme), threshold_(threshold * N),
         particle_(N), iter_num_(0),
-        buffer_(N), path_integral_(NULL), show_progress_(false) {}
+        path_integral_(NULL), show_progress_(false) {}
 
     /// \brief Size of the particle set
     ///
@@ -236,6 +236,7 @@ class Sampler
     double integrate (typename Monitor<T>::integral_type integral)
     {
         std::size_t n = particle_.size();
+        buffer_.resize(n);
         integral(iter_num_, particle_, buffer_);
 
         return cblas_ddot(n, particle_.get_weight_ptr(), 1, buffer_, 1);
@@ -248,6 +249,7 @@ class Sampler
     double integrate (integral_type integral, void *param) const
     {
         std::size_t n = particle_.size();
+        buffer_.resize(n);
         integral(iter_num_, particle_, buffer_, param);
 
         return cblas_ddot(n, particle_.get_weight_ptr(), 1, buffer_, 1);
