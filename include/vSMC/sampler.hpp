@@ -254,9 +254,7 @@ class Sampler
     void monitor (const std::string &name,
             const typename Monitor<T>::integral_type &integral)
     {
-        monitor_.insert(
-                typename std::map<std::string, Monitor<T> >::value_type(
-                    name, Monitor<T>(particle_.size(), integral)));
+        monitor_.insert(std::make_pair(name, Monitor<T>(integral)));
     }
 
     /// \brief Find a monitor by name
@@ -545,13 +543,13 @@ std::ostream & operator<< (std::ostream &output,
     const std::map<std::string, vSMC::Monitor<T> > monitor(sampler.monitor());
 
     std::vector<std::string> monitor_name(monitor.size());
-    std::vector<typename vSMC::Monitor<T>::index_type>
+    std::vector<std::vector<std::size_t> >
         monitor_index(monitor.size());
-    std::vector<typename vSMC::Monitor<T>::record_type>
+    std::vector<std::vector<double> >
         monitor_record(monitor.size());
-    std::vector<typename vSMC::Monitor<T>::index_type::const_iterator>
+    std::vector<std::vector<std::size_t>::const_iterator>
         iter_monitor_index(monitor.size());
-    std::vector<typename vSMC::Monitor<T>::record_type::const_iterator>
+    std::vector<std::vector<double>::const_iterator>
         iter_monitor_record(monitor.size());
 
     std::size_t m = 0;

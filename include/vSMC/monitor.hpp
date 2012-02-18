@@ -20,16 +20,11 @@ class Monitor
     /// The type of monitor integration
     typedef boost::function<void
         (std::size_t, Particle<T> &, double *)> integral_type;
-    /// The type of the index
-    typedef std::vector<std::size_t> index_type;
-    /// The type of the record
-    typedef std::vector<double> record_type;
 
     /// \brief Construct a Monitor with an integral function
     ///
-    /// \param N The size of the particle set
     /// \param integral The function used to compute the integrands
-    Monitor (std::size_t N, const integral_type &integral = NULL) :
+    Monitor (const integral_type &integral = NULL) :
         integral_(integral) {}
 
     /// \brief Copy constructor
@@ -98,7 +93,7 @@ class Monitor
     /// \brief Get the iteration index
     ///
     /// \return A vector of the index
-    index_type index () const
+    std::vector<std::size_t> index () const
     {
         return index_;
     }
@@ -109,7 +104,7 @@ class Monitor
     template<typename OIter>
     void index (OIter first) const
     {
-        for (index_type::const_iterator iter = index_.begin();
+        for (std::vector<std::size_t>::const_iterator iter = index_.begin();
                iter != index_.end(); ++iter)
             *first++ = *iter;
     }
@@ -117,7 +112,7 @@ class Monitor
     /// \brief Get the record of Monte Carlo integration
     ///
     /// \return A vector of the record
-    record_type record () const
+    std::vector<double> record () const
     {
         return record_;
     }
@@ -128,7 +123,7 @@ class Monitor
     template<typename OIter>
     void record (OIter first) const
     {
-        for (record_type::const_iterator iter = record_.begin();
+        for (std::vector<double>::const_iterator iter = record_.begin();
                iter != record_.end(); ++iter)
             *first++ = *iter;
     }
