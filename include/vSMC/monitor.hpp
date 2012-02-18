@@ -24,8 +24,7 @@ class Monitor
     /// \brief Construct a Monitor with an integral function
     ///
     /// \param integral The function used to compute the integrands
-    Monitor (const integral_type &integral = NULL) :
-        integral_(integral) {}
+    Monitor (const integral_type &integral = NULL) : integral_(integral) {}
 
     /// \brief Copy constructor
     ///
@@ -73,23 +72,6 @@ class Monitor
         return integral_.empty();
     }
 
-    /// \brief Evaluate the integration
-    ///
-    /// \param iter The iteration number
-    /// \param particle The particle set to be operated on by eval()
-    /// \note The integral function has to be set through either the
-    /// constructor or integral() to a non-NULL value before calling eval().
-    /// Otherwise runtime_error exception will be raised when calling eval().
-    /// \see Documentation for Boost::function
-    void eval (std::size_t iter, Particle<T> &particle)
-    {
-        buffer_.resize(particle.size());
-        integral_(iter, particle, buffer_);
-        index_.push_back(iter);
-        record_.push_back(cblas_ddot(particle.size(),
-                particle.weight_ptr(), 1, buffer_, 1));
-    }
-
     /// \brief Get the iteration index
     ///
     /// \return A vector of the index
@@ -126,6 +108,23 @@ class Monitor
         for (std::vector<double>::const_iterator iter = record_.begin();
                iter != record_.end(); ++iter)
             *first++ = *iter;
+    }
+
+    /// \brief Evaluate the integration
+    ///
+    /// \param iter The iteration number
+    /// \param particle The particle set to be operated on by eval()
+    /// \note The integral function has to be set through either the
+    /// constructor or integral() to a non-NULL value before calling eval().
+    /// Otherwise runtime_error exception will be raised when calling eval().
+    /// \see Documentation for Boost::function
+    void eval (std::size_t iter, Particle<T> &particle)
+    {
+        buffer_.resize(particle.size());
+        integral_(iter, particle, buffer_);
+        index_.push_back(iter);
+        record_.push_back(cblas_ddot(particle.size(),
+                particle.weight_ptr(), 1, buffer_, 1));
     }
 
     /// \brief Clear the index and record
