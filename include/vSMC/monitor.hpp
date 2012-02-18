@@ -74,8 +74,8 @@ class Monitor
 
     /// \brief Get the iteration index
     ///
-    /// \return A vector of the index
-    std::vector<std::size_t> index () const
+    /// \return A const reference to the index
+    const std::vector<std::size_t> &index () const
     {
         return index_;
     }
@@ -93,8 +93,8 @@ class Monitor
 
     /// \brief Get the record of Monte Carlo integration
     ///
-    /// \return A vector of the record
-    std::vector<double> record () const
+    /// \return A const reference to the record
+    const std::vector<double> &record () const
     {
         return record_;
     }

@@ -232,11 +232,10 @@ class Sampler
     /// \param integral The functor used to compute the integrands
     double integrate (typename Monitor<T>::integral_type integral)
     {
-        buffer_.resize(particle_.size());
+        buffer_.resize(size());
         integral(iter_num_, particle_, buffer_);
 
-        return cblas_ddot(particle_.size(),
-                particle_.weight_ptr(), 1, buffer_, 1);
+        return cblas_ddot(size(), particle_.weight_ptr(), 1, buffer_, 1);
     }
 
     /// \brief Perform importance sampling integration
@@ -245,11 +244,10 @@ class Sampler
     /// \param param Additional parameters to be passed to integral
     double integrate (integral_type integral, void *param) const
     {
-        buffer_.resize(particle_.size());
+        buffer_.resize(size());
         integral(iter_num_, particle_, buffer_, param);
 
-        return cblas_ddot(particle_.size(),
-                particle_.weight_ptr(), 1, buffer_, 1);
+        return cblas_ddot(size(), particle_.weight_ptr(), 1, buffer_, 1);
     }
 
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
@@ -337,12 +335,28 @@ class Sampler
         path_.integral(integral);
     }
 
+    /// \brief Path sampling estimate of normalizing constant
+    ///
+    /// \return The log ratio of normalizing constants
+    double path_sampling () const
+    {
+        return path_.zconst();
+    }
+
     /// \brief Toggle whether or not show progress information while iterating
     ///
     /// \param show_progress printing progress to standard error if true.
     void show_progress (bool show_progress)
     {
         show_progress_ = show_progress;
+    }
+
+    /// \brief Toggle whether or not record SMC normalizing constant
+    ///
+    /// \param estimate_zconst Start estimating normalzing constant if true.
+    void zconst (bool estimate_zconst)
+    {
+        particle_.zconst(estimate_zconst);
     }
 
     /// \brief Get the value of SMC normalizing constant
@@ -353,12 +367,65 @@ class Sampler
         return particle_.zconst();
     }
 
-    /// \brief Toggle whether or not record SMC normalizing constant
-    ///
-    /// \param estimate_zconst Start estimating normalzing constant if true.
-    void zconst (bool estimate_zconst)
+    /// \brief Print the history of the sampler
+    void print (std::ostream &output) const
     {
-        particle_.zconst(estimate_zconst);
+        output
+            << "iter ESS resample accept "
+            << "path.integrand path.width path.grid ";
+        for (typename std::map<std::string, Monitor<T> >::const_iterator
+                imap = monitor_.begin(); imap != monitor_.end(); ++imap)
+            output << imap->first << ' ';
+        output << std::endl;
+
+        std::vector<std::size_t>::const_iterator iter_path_index
+            = path_.index().begin();
+        std::vector<double>::const_iterator iter_path_integrand
+            = path_.integrand().begin();
+        std::vector<double>::const_iterator iter_path_width
+            = path_.width().begin();
+        std::vector<double>::const_iterator iter_path_grid
+            = path_.grid().begin();
+
+        std::vector<std::vector<std::size_t>::const_iterator>
+            iter_monitor_index;
+        std::vector<std::vector<double>::const_iterator>
+            iter_monitor_record;
+        for (typename std::map<std::string, Monitor<T> >::const_iterator
+                imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
+            if (!imap->second.index().empty()) {
+                iter_monitor_index.push_back(imap->second.index().begin());
+                iter_monitor_record.push_back(imap->second.record().begin());
+            }
+        }
+
+        for (std::size_t i = 0; i != iter_size(); ++i) {
+            output
+                << i << '\t' << ess_[i] / size()
+                << '\t' << resampled_[i]
+                << '\t' << static_cast<double>(accept_[i]) / size();
+
+            if (!path_.index().empty() && *iter_path_index == i) {
+                output
+                    << '\t' << *iter_path_integrand++
+                    << '\t' << *iter_path_width++
+                    << '\t' << *iter_path_grid++;
+                ++iter_path_index;
+            } else {
+                output << '\t' << '.' << '\t' << '.' << '\t' << '.';
+            }
+
+            for (std::size_t m = 0; m != iter_monitor_index.size(); ++m) {
+                if (*iter_monitor_index[m] == i) {
+                    output << '\t' << *iter_monitor_record[m]++;
+                    ++iter_monitor_index[m];
+                } else {
+                    output << '\t' << '.';
+                }
+            }
+
+            output << '\n';
+        }
     }
 
     private :
@@ -428,89 +495,7 @@ template<typename T>
 std::ostream & operator<< (std::ostream &output,
         const vSMC::Sampler<T> &sampler)
 {
-    std::vector<double> ess(sampler.iter_size());
-    std::vector<bool> resample(sampler.iter_size());
-    std::vector<std::size_t> accept(sampler.iter_size());
-    std::vector<std::size_t> path_index(sampler.path().iter_size());
-    std::vector<double> path_integrand(sampler.path().iter_size());
-    std::vector<double> path_width(sampler.path().iter_size());
-    std::vector<double> path_grid(sampler.path().iter_size());
-
-    sampler.ess_history(ess.begin());
-    sampler.resampled_history(resample.begin());
-    sampler.accept_history(accept.begin());
-    sampler.path().index(path_index.begin());
-    sampler.path().integrand(path_integrand.begin());
-    sampler.path().width(path_width.begin());
-    sampler.path().grid(path_grid.begin());
-
-    std::vector<std::size_t>::const_iterator
-        iter_path_index = path_index.begin();
-    std::vector<double>::const_iterator
-        iter_path_integrand = path_integrand.begin();
-    std::vector<double>::const_iterator
-        iter_path_width = path_width.begin();
-    std::vector<double>::const_iterator
-        iter_path_grid = path_grid.begin();
-
-    const std::map<std::string, vSMC::Monitor<T> > monitor(sampler.monitor());
-
-    std::vector<std::string> monitor_name(monitor.size());
-    std::vector<std::vector<std::size_t> >
-        monitor_index(monitor.size());
-    std::vector<std::vector<double> >
-        monitor_record(monitor.size());
-    std::vector<std::vector<std::size_t>::const_iterator>
-        iter_monitor_index(monitor.size());
-    std::vector<std::vector<double>::const_iterator>
-        iter_monitor_record(monitor.size());
-
-    std::size_t m = 0;
-    for (typename std::map<std::string, vSMC::Monitor<T> >::const_iterator
-            iter = monitor.begin(); iter != monitor.end(); ++iter, ++m) {
-        monitor_name[m] = iter->first;
-        monitor_index[m].resize(iter->second.iter_size());
-        monitor_record[m].resize(iter->second.iter_size());
-        iter->second.index(monitor_index[m].begin());
-        iter->second.record(monitor_record[m].begin());
-        iter_monitor_index[m] = monitor_index[m].begin();
-        iter_monitor_record[m] = monitor_record[m].begin();
-    }
-
-    output
-        << "iter ESS resample accept "
-        << "path.integrand path.width path.grid ";
-    for (std::vector<std::string>::const_iterator iter = monitor_name.begin();
-            iter != monitor_name.end(); ++iter)
-        output << *iter << ' ';
-    output << std::endl;
-
-    for (std::size_t i = 0; i != sampler.iter_size(); ++i) {
-        output
-            << i << '\t' << ess[i] / sampler.size()<< '\t' << resample[i]
-            << '\t' << static_cast<double>(accept[i]) / sampler.size();
-
-        if (!path_index.empty() && *iter_path_index == i) {
-            output
-                << '\t' << *iter_path_integrand++
-                << '\t' << *iter_path_width++
-                << '\t' << *iter_path_grid++;
-            ++iter_path_index;
-        } else {
-            output << '\t' << '.' << '\t' << '.' << '\t' << '.';
-        }
-
-        for (std::size_t m = 0; m != monitor_index.size(); ++m) {
-            if (!monitor_index[m].empty() && *iter_monitor_index[m] == i) {
-                output << '\t' << *iter_monitor_record[m]++;
-                ++iter_monitor_index[m];
-            } else {
-                output << '\t' << '.';
-            }
-        }
-
-        output << '\n';
-    }
+    sampler.print(output);
 
     return output;
 }

@@ -76,8 +76,8 @@ class Path
 
     /// \brief Get the iteration index
     ///
-    /// \return A vector of the index
-    std::vector<std::size_t> index () const
+    /// \return A const reference to the index
+    const std::vector<std::size_t> &index () const
     {
         return index_;
     }
@@ -95,8 +95,8 @@ class Path
 
     /// \brief Get the record of path sampling integrand
     ///
-    /// \return A vector of path sampling integrand
-    std::vector<double> integrand () const
+    /// \return A const reference to the integrand
+    const std::vector<double> &integrand () const
     {
         return integrand_;
     }
@@ -114,8 +114,8 @@ class Path
 
     /// \brief Get the record of path sampling width
     ///
-    /// \return A vector of path sampling width
-    std::vector<double> width () const
+    /// \return A const reference to the width
+    const std::vector<double> &width () const
     {
         return width_;
     }
@@ -133,8 +133,8 @@ class Path
 
     /// \brief Get the record of path sampling grid
     ///
-    /// \return A vector of path sampling grid
-    std::vector<double> grid () const
+    /// \return A const reference to the grid
+    const std::vector<double> &grid () const
     {
         return grid_;
     }
@@ -159,6 +159,15 @@ class Path
         index_.push_back(iter);
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());
+    }
+
+    double zconst () const
+    {
+	double sum = 0;
+	for (std::size_t i = 1; i != iter_size(); ++i)
+            sum += 0.5 * width_[i] * (integrand_[i-1] + integrand_[i]);
+
+        return sum;
     }
 
     /// \brief Clear the index and record
