@@ -4,8 +4,8 @@
 #include <vSMC/config.hpp>
 
 #include <iomanip>
+#include <iostream>
 #include <map>
-#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -89,8 +89,8 @@ class Sampler
 
     /// \brief Get all ESS
     ///
-    /// \return The history of ESS for all iterations
-    std::vector<double> ess_history () const
+    /// \return A const reference to the history of ESS
+    const std::vector<double> &ess_history () const
     {
         return ess_;
     }
@@ -116,8 +116,8 @@ class Sampler
 
     /// \brief Get the history of resampling
     ///
-    /// \return The history of resampling for all iterations
-    std::vector<bool> resampled_history () const
+    /// \return A const reference to the history of resampling
+    const std::vector<bool> &resampled_history () const
     {
         return resampled_;
     }
@@ -143,8 +143,8 @@ class Sampler
 
     /// \brief Get the history of accept count
     ///
-    /// \return The history of accept count for all iterations
-    std::vector<std::size_t> accept_history () const
+    /// \return A const reference to the history of accept count
+    const std::vector<std::size_t> &accept_history () const
     {
         return accept_;
     }
@@ -338,7 +338,7 @@ class Sampler
     /// \brief Path sampling estimate of normalizing constant
     ///
     /// \return The log ratio of normalizing constants
-    double path_sampling () const
+    double path_sampling_zconst () const
     {
         return path_.zconst();
     }
@@ -368,7 +368,7 @@ class Sampler
     }
 
     /// \brief Print the history of the sampler
-    void print (std::ostream &output) const
+    void print (std::ostream &output = std::cout) const
     {
         output
             << "iter ESS resample accept "
