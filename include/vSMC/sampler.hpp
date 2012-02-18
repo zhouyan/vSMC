@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -258,6 +259,7 @@ class Sampler
             const typename Monitor<T>::integral_type &integral)
     {
         monitor_.insert(std::make_pair(name, Monitor<T>(integral)));
+        monitor_name_.insert(name);
     }
 
     /// \brief Read and write access to a named monitor through iterator
@@ -302,12 +304,14 @@ class Sampler
     void erase_monitor (const std::string &name)
     {
         monitor_.erase(name);
+        monitor_name_.erase(name);
     }
 
     /// \brief Erase (clear) all monitors
     void clear_monitor ()
     {
         monitor_.clear();
+        monitor_name_.clear();
     }
 
     /// \brief Read and write access to Path sampling monitor
@@ -368,15 +372,29 @@ class Sampler
     }
 
     /// \brief Print the history of the sampler
-    void print (std::ostream &output = std::cout) const
+    ///
+    /// \param output The ostream to which the contents are printed
+    /// \param print_header Print header if \b true
+    void print (std::ostream &output = std::cout, bool print_header = true)
+        const
     {
-        output
-            << "iter ESS resample accept "
-            << "path.integrand path.width path.grid ";
-        for (typename std::map<std::string, Monitor<T> >::const_iterator
-                imap = monitor_.begin(); imap != monitor_.end(); ++imap)
-            output << imap->first << ' ';
-        output << std::endl;
+        print(output, print_header, !path_.index().empty(), monitor_name_);
+    }
+
+    /// \brief Print the history of the sampler
+    ///
+    /// \param output The ostream to which the contents are printed
+    /// \param print_path Print path sampling history if \b true
+    /// \param print_monitor A set of monitor names to be printed
+    /// \param print_header Print header if \b true
+    void print (std::ostream &output, bool print_header, bool print_path,
+            const std::set<std::string> &print_monitor) const
+    {
+        if (print_header) {
+            output << "iter\tESS\tresample\taccept\t";
+            if (print_path)
+                output << "path.integrand\tpath.width\tpath.grid\t";
+        }
 
         std::vector<std::size_t>::const_iterator iter_path_index
             = path_.index().begin();
@@ -387,17 +405,24 @@ class Sampler
         std::vector<double>::const_iterator iter_path_grid
             = path_.grid().begin();
 
+        std::vector<bool> monitor_index_empty;
         std::vector<std::vector<std::size_t>::const_iterator>
             iter_monitor_index;
         std::vector<std::vector<double>::const_iterator>
             iter_monitor_record;
         for (typename std::map<std::string, Monitor<T> >::const_iterator
                 imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
-            if (!imap->second.index().empty()) {
+            if (print_monitor.count(imap->first)) {
+                monitor_index_empty.push_back(imap->second.index().empty());
                 iter_monitor_index.push_back(imap->second.index().begin());
                 iter_monitor_record.push_back(imap->second.record().begin());
+                if (print_header)
+                    output << imap->first << '\t';
             }
         }
+
+        if (print_header)
+            output << '\n';
 
         for (std::size_t i = 0; i != iter_size(); ++i) {
             output
@@ -405,18 +430,20 @@ class Sampler
                 << '\t' << resampled_[i]
                 << '\t' << static_cast<double>(accept_[i]) / size();
 
-            if (!path_.index().empty() && *iter_path_index == i) {
-                output
-                    << '\t' << *iter_path_integrand++
-                    << '\t' << *iter_path_width++
-                    << '\t' << *iter_path_grid++;
-                ++iter_path_index;
-            } else {
-                output << '\t' << '.' << '\t' << '.' << '\t' << '.';
+            if (print_path) {
+                if (!path_.index().empty() && *iter_path_index == i) {
+                    output
+                        << '\t' << *iter_path_integrand++
+                        << '\t' << *iter_path_width++
+                        << '\t' << *iter_path_grid++;
+                    ++iter_path_index;
+                } else {
+                    output << '\t' << '.' << '\t' << '.' << '\t' << '.';
+                }
             }
 
-            for (std::size_t m = 0; m != iter_monitor_index.size(); ++m) {
-                if (*iter_monitor_index[m] == i) {
+            for (std::size_t m = 0; m != monitor_index_empty.size(); ++m) {
+                if (!monitor_index_empty[m] && *iter_monitor_index[m] == i) {
                     output << '\t' << *iter_monitor_record[m]++;
                     ++iter_monitor_index[m];
                 } else {
@@ -453,6 +480,7 @@ class Sampler
     /// Monte Carlo estimation by integration
     vDist::tool::Buffer<double> buffer_;
     std::map<std::string, Monitor<T> > monitor_;
+    std::set<std::string> monitor_name_;
 
     /// Path sampling
     Path<T> path_;
