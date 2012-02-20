@@ -127,7 +127,7 @@ class Monitor
                 particle.weight_ptr(), 1, buffer_, 1));
     }
 
-    /// \brief Clear the index and record
+    /// \brief Clear all recorded data
     void clear ()
     {
         index_.clear();

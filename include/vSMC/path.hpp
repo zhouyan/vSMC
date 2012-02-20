@@ -170,7 +170,7 @@ class Path
         return sum;
     }
 
-    /// \brief Clear the index and record
+    /// \brief Clear all recorded data
     void clear ()
     {
         index_.clear();
