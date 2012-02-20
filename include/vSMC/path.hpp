@@ -17,13 +17,13 @@ class Path
 {
     public :
 
-    /// The type of path sampling integration
+    /// The type of path sampling integral functor
     typedef boost::function<double
         (std::size_t, Particle<T> &, double *)> integral_type;
 
     /// \brief Construct a Path with an integral function
     ///
-    /// \param N The size of the particle set
+    /// \param integral The functor used to compute the integrands
     Path (const integral_type &integral = NULL) : integral_(integral) {}
 
     /// \brief Copy constructor
@@ -58,9 +58,9 @@ class Path
         return index_.size();
     }
 
-    /// \brief Set the integral function
+    /// \brief Set the integral functor
     ///
-    /// \param integral The function used to compute the integrands
+    /// \param integral The functor used to compute the integrands
     void integral (const integral_type &integral)
     {
         integral_ = integral;
@@ -68,13 +68,13 @@ class Path
 
     /// \brief Test if the path is empty
     ///
-    /// \return True if the path is empty
+    /// \return \b true if the path is empty
     bool empty () const
     {
         return integral_.empty();
     }
 
-    /// \brief Get the iteration index
+    /// \brief Iteration index
     ///
     /// \return A const reference to the index
     const std::vector<std::size_t> &index () const
@@ -82,7 +82,7 @@ class Path
         return index_;
     }
 
-    /// \brief Get the iteration index
+    /// \brief Iteration index
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -93,7 +93,7 @@ class Path
             *first++ = *iter;
     }
 
-    /// \brief Get the record of path sampling integrand
+    /// \brief Record of path sampling integrand
     ///
     /// \return A const reference to the integrand
     const std::vector<double> &integrand () const
@@ -101,7 +101,7 @@ class Path
         return integrand_;
     }
 
-    /// \brief Get the record of path sampling integrand
+    /// \brief Record of path sampling integrand
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -112,7 +112,7 @@ class Path
             *first++ = *iter;
     }
 
-    /// \brief Get the record of path sampling width
+    /// \brief Record of path sampling width
     ///
     /// \return A const reference to the width
     const std::vector<double> &width () const
@@ -120,7 +120,7 @@ class Path
         return width_;
     }
 
-    /// \brief Get the record of path sampling width
+    /// \brief Record of path sampling width
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -131,7 +131,7 @@ class Path
             *first++ = *iter;
     }
 
-    /// \brief Get the record of path sampling grid
+    /// \brief Record of path sampling grid
     ///
     /// \return A const reference to the grid
     const std::vector<double> &grid () const
@@ -139,7 +139,7 @@ class Path
         return grid_;
     }
 
-    /// \brief Get the record of path sampling grid
+    /// \brief Record of path sampling grid
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -150,6 +150,16 @@ class Path
             *first++ = *iter;
     }
 
+    /// \brief Evaluate the integration
+    ///
+    /// \param iter The iteration number
+    /// \param particle The particle set to be operated on by eval()
+    ///
+    /// \note The integral function has to be set through either the
+    /// constructor or integral() to a non-NULL value before calling eval().
+    /// Otherwise runtime_error exception will be raised when calling eval().
+    ///
+    /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
         buffer_.resize(particle.size());
@@ -161,6 +171,9 @@ class Path
                 grid_.back() + width_.back() : width_.back());
     }
 
+    /// \brief Path sampling estimate of normalizing constant
+    ///
+    /// \return The Path sampling normalzing constant estimate
     double zconst () const
     {
 	double sum = 0;

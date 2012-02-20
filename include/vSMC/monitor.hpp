@@ -17,13 +17,13 @@ class Monitor
 {
     public :
 
-    /// The type of monitor integration
+    /// The type of monitor integral functor
     typedef boost::function<void
         (std::size_t, Particle<T> &, double *)> integral_type;
 
     /// \brief Construct a Monitor with an integral function
     ///
-    /// \param integral The function used to compute the integrands
+    /// \param integral The functor used to compute the integrands
     Monitor (const integral_type &integral = NULL) : integral_(integral) {}
 
     /// \brief Copy constructor
@@ -56,9 +56,9 @@ class Monitor
         return index_.size();
     }
 
-    /// \brief Set the integral function
+    /// \brief Set the integral functor
     ///
-    /// \param integral The function used to compute the integrands
+    /// \param integral The functor used to compute the integrands
     void integral (const integral_type &integral)
     {
         integral_ = integral;
@@ -66,13 +66,13 @@ class Monitor
 
     /// \brief Test if the monitor is empty
     ///
-    /// \return True if the monitor is empty
+    /// \return \b true if the monitor is empty
     bool empty () const
     {
         return integral_.empty();
     }
 
-    /// \brief Get the iteration index
+    /// \brief Iteration index
     ///
     /// \return A const reference to the index
     const std::vector<std::size_t> &index () const
@@ -80,7 +80,7 @@ class Monitor
         return index_;
     }
 
-    /// \brief Get the iteration index
+    /// \brief Iteration index
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -91,7 +91,7 @@ class Monitor
             *first++ = *iter;
     }
 
-    /// \brief Get the record of Monte Carlo integration
+    /// \brief Record of Monte Carlo integration
     ///
     /// \return A const reference to the record
     const std::vector<double> &record () const
@@ -99,7 +99,7 @@ class Monitor
         return record_;
     }
 
-    /// \brief Get the record of Monte Carlo integrtion.
+    /// \brief Record of Monte Carlo integrtion.
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -114,9 +114,11 @@ class Monitor
     ///
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
+    ///
     /// \note The integral function has to be set through either the
     /// constructor or integral() to a non-NULL value before calling eval().
     /// Otherwise runtime_error exception will be raised when calling eval().
+    ///
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
