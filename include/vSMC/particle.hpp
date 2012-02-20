@@ -46,9 +46,10 @@ class Particle
     /// \brief Read and write access to particle values
     ///
     /// \return A reference to the particle values, type (T &)
+    ///
     /// \note The Particle class guarantee that during the life type of the
     /// object, the reference returned by this member will no be a dangle
-    /// handler
+    /// handler.
     T &value ()
     {
         return value_;
@@ -65,6 +66,7 @@ class Particle
     /// \brief Read only access to the weights
     ///
     /// \return A const pointer to the weights
+    ///
     /// \note The Particle class guarantee that during the life type of the
     /// object, the pointer returned by this always valid and point to the
     /// same address

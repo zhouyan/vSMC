@@ -25,20 +25,15 @@ class Sampler
 {
     public :
 
-    /// The type of particle values
-    typedef T value_type;
-    /// The type of particle set
-    typedef Particle<T> particle_type;
-    /// The type of initialize callable objects
+    /// The type of initialization functor
     typedef boost::function<std::size_t
         (Particle<T> &, void *)> init_type;
-    /// The type of move callable objects
+    /// The type of move functor
     typedef boost::function<std::size_t
         (std::size_t, Particle<T> &)> move_type;
-    /// The type of importance sampling integral
+    /// The type of importance sampling integral functor
     typedef boost::function<void
         (std::size_t, Particle<T> &, double *, void *)> integral_type;
-    /// The type of path sampling integration
 
     /// \brief Sampler does not have a default constructor
     ///
@@ -74,13 +69,13 @@ class Sampler
     /// \brief Size of records
     ///
     /// \return The number of iterations recorded (including the
-    /// initialization)
+    /// initialization step)
     std::size_t iter_size () const
     {
         return ess_.size();
     }
 
-    /// \brief Get ESS
+    /// \brief ESS
     ///
     /// \return The ESS value of the latest iteration
     double ess () const
@@ -88,7 +83,7 @@ class Sampler
         return ess_.back();
     }
 
-    /// \brief Get all ESS
+    /// \brief ESS history
     ///
     /// \return A const reference to the history of ESS
     const std::vector<double> &ess_history () const
@@ -96,7 +91,7 @@ class Sampler
         return ess_;
     }
 
-    /// \brief Get all ESS
+    /// \brief ESS history
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -107,7 +102,7 @@ class Sampler
             *first++ = *iter;
     }
 
-    /// \brief Get indicator of resampling
+    /// \brief Indicator of resampling
     ///
     /// \return A bool value, \b true if the latest iteration was resampled
     bool resampled () const
@@ -115,7 +110,7 @@ class Sampler
         return resampled_.back();
     }
 
-    /// \brief Get the history of resampling
+    /// \brief Resampling history
     ///
     /// \return A const reference to the history of resampling
     const std::vector<bool> &resampled_history () const
@@ -123,7 +118,7 @@ class Sampler
         return resampled_;
     }
 
-    /// \brief Get the history of resampling
+    /// \brief Resampling history
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -134,7 +129,7 @@ class Sampler
             *first++ = *iter;
     }
 
-    /// \brief Get accept count
+    /// \brief Accept count
     ///
     /// \return The accept count of the latest iteration
     std::size_t accept () const
@@ -142,7 +137,7 @@ class Sampler
         return accept_.back();
     }
 
-    /// \brief Get the history of accept count
+    /// \brief Accept count history
     ///
     /// \return A const reference to the history of accept count
     const std::vector<std::size_t> &accept_history () const
@@ -150,7 +145,7 @@ class Sampler
         return accept_;
     }
 
-    /// \brief Get the history of accept count
+    /// \brief Accept count history
     ///
     /// \param first An iterator point to where writing starts
     template<typename OIter>
@@ -163,9 +158,11 @@ class Sampler
 
     /// \brief Read and write access to the particle set
     ///
-    /// \return A reference to the latest particle set. Use it carefully
-    /// \note Any operations that change the state of the sampler (e.g., an
-    /// iteration) may invalidate the reference.
+    /// \return A reference to the latest particle set
+    ///
+    /// \note The Sampler class guarantee that during the life type of the
+    /// object, the reference returned by this member will no be a dangle
+    /// handler.
     Particle<T> &particle ()
     {
         return particle_;
@@ -174,17 +171,15 @@ class Sampler
     /// \brief Read only access to the particle set
     ///
     /// \return A const reference to the latest particle set.
-    /// \note Any operations that change the state of the sampler (e.g., an
-    /// iteration) may invalidate the reference.
     const Particle<T> &particle () const
     {
         return particle_;
     }
 
-    /// \brief (Re)initialize the particle set
+    /// \brief Initialize the particle set
     ///
-    /// \param param Additional parameters passed to initialization functor,
-    /// the default is NULL
+    /// \param param Additional parameters passed to the initialization
+    /// functor
     void initialize (void *param = NULL)
     {
         ess_.clear();
@@ -207,10 +202,11 @@ class Sampler
     /// \brief Perform iteration
     void iterate ()
     {
-        if (!initialized_)
+        if (!initialized_) {
             throw std::runtime_error(
                     "ERROR: vSMC::Sampler::iterate: "
                     "Sampler has not been initialized yet");
+        }
 
         ++iter_num_;
         accept_.push_back(move_(iter_num_, particle_));
@@ -242,7 +238,7 @@ class Sampler
     /// \brief Perform importance sampling integration
     ///
     /// \param integral The functor used to compute the integrands
-    /// \param param Additional parameters to be passed to integral
+    /// \param param Additional parameters passed to the integral functor
     double integrate (integral_type integral, void *param) const
     {
         buffer_.resize(size());
@@ -282,17 +278,17 @@ class Sampler
         return monitor_.find(name);
     }
 
-    /// \brief Read and write access to the monitors
+    /// \brief Read and write access to all monitors
     ///
-    /// \return The reference to the monitors
+    /// \return A reference to monitors
     std::map<std::string, Monitor<T> > &monitor ()
     {
         return monitor_;
     }
 
-    /// \brief Read only access to the monitors
+    /// \brief Read only access to all monitors
     ///
-    /// \return The const reference to the monitors
+    /// \return A const reference to monitors
     const std::map<std::string, Monitor<T> > &monitor () const
     {
         return monitor_;
@@ -314,17 +310,17 @@ class Sampler
         monitor_name_.clear();
     }
 
-    /// \brief Read and write access to Path sampling monitor
+    /// \brief Read and write access to the Path sampling monitor
     ///
-    /// \return An reference to the Path sampling object
+    /// \return A reference to the Path sampling monitor
     Path<T> &path ()
     {
         return path_;
     }
 
-    /// \brief Read only access to Path sampling monitor
+    /// \brief Read only access to the Path sampling monitor
     ///
-    /// \return An const reference to the Path sampling object
+    /// \return A const reference to the Path sampling monitor
     const Path<T> &path () const
     {
         return path_;
@@ -333,7 +329,8 @@ class Sampler
     /// \brief Set the path sampling integral
     ///
     /// \param integral The functor used to compute the integrands
-    /// \note Set integral = NULL will stop path sampling
+    ///
+    /// \note Set integral = NULL will stop path sampling recording
     void path_sampling (const typename Path<T>::integral_type &integral)
     {
         path_.integral(integral);
@@ -347,14 +344,6 @@ class Sampler
         return path_.zconst();
     }
 
-    /// \brief Toggle whether or not show progress information while iterating
-    ///
-    /// \param show_progress printing progress to standard error if true.
-    void show_progress (bool show_progress)
-    {
-        show_progress_ = show_progress;
-    }
-
     /// \brief Toggle whether or not record SMC normalizing constant
     ///
     /// \param estimate_zconst Start estimating normalzing constant if true.
@@ -363,9 +352,9 @@ class Sampler
         particle_.zconst(estimate_zconst);
     }
 
-    /// \brief Get the value of SMC normalizing constant
+    /// \brief SMC estimate of normalizing constant
     ///
-    /// \return SMC normalizng constant estimate
+    /// \return The SMC normalizng constant estimate
     double zconst () const
     {
         return particle_.zconst();
@@ -375,8 +364,8 @@ class Sampler
     ///
     /// \param output The ostream to which the contents are printed
     /// \param print_header Print header if \b true
-    void print (std::ostream &output = std::cout, bool print_header = true)
-        const
+    void print (std::ostream &output = std::cout,
+            bool print_header = true) const
     {
         print(output, print_header, !path_.index().empty(), monitor_name_);
     }
@@ -387,7 +376,8 @@ class Sampler
     /// \param print_path Print path sampling history if \b true
     /// \param print_monitor A set of monitor names to be printed
     /// \param print_header Print header if \b true
-    void print (std::ostream &output, bool print_header, bool print_path,
+    void print (std::ostream &output,
+            bool print_header, bool print_path,
             const std::set<std::string> &print_monitor) const
     {
         if (print_header) {
