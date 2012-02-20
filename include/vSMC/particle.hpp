@@ -31,8 +31,8 @@ class Particle
     ///
     /// \param N The number of particles
     Particle (std::size_t N) :
-        size_(N), value_(N), weight_(N), log_weight_(N), inc_weight_(N),
-        replication_(N),
+        size_(N), value_(N),
+        weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false) {}
 
     /// \brief Size of the particle set
@@ -46,8 +46,9 @@ class Particle
     /// \brief Read and write access to particle values
     ///
     /// \return A reference to the particle values, type (T &)
-    /// \note Any operations that change the state of the particle set (e.g.,
-    /// setting log weights or resampling) may invalidate the reference.
+    /// \note The Particle class guarantee that during the life type of the
+    /// object, the reference returned by this member will no be a dangle
+    /// handler
     T &value ()
     {
         return value_;
@@ -55,9 +56,7 @@ class Particle
 
     /// \brief Read only access to particle values
     ///
-    /// \return A const reference to the particle values, type (const T &)
-    /// \note Any operations that change the state of the particle set (e.g.,
-    /// setting log weights or resampling) may invalidate the reference.
+    /// \return A const reference to the particle values
     const T &value () const
     {
         return value_;
@@ -65,9 +64,10 @@ class Particle
 
     /// \brief Read only access to the weights
     ///
-    /// \return A const pointer to the weights, type (const double *)
-    /// \note Any operations that change the state of the particle set (e.g.,
-    /// setting log weights or resampling) may invalidate the pointer.
+    /// \return A const pointer to the weights
+    /// \note The Particle class guarantee that during the life type of the
+    /// object, the pointer returned by this always valid and point to the
+    /// same address
     const double *weight_ptr () const
     {
         return weight_.get();
@@ -75,9 +75,7 @@ class Particle
 
     /// \brief Read only access to the log weights
     ///
-    /// \return A const pointer to the log weights, type (const double *)
-    /// \note Any operations that change the state of the particle set (e.g.,
-    /// setting log weights or resampling) may invalidate the pointer.
+    /// \return A const pointer to the log weights
     const double *log_weight_ptr () const
     {
         return log_weight_.get();
@@ -116,7 +114,7 @@ class Particle
 
     /// \brief Get indicator of resampling
     ///
-    /// \return A bool value, \b true if the this iteration was resampled
+    /// \return A bool value, \b true if the current iteration was resampled
     bool resampled () const
     {
         return resampled_;
@@ -124,7 +122,7 @@ class Particle
 
     /// \brief Set indicator of resampling
     ///
-    /// \param resampled \b true if the this iteration was resampled
+    /// \param resampled \b true if the current iteration was resampled
     void resampled (bool resampled)
     {
         resampled_ = resampled;
@@ -140,7 +138,7 @@ class Particle
 
     /// \brief Toggle whether or not record SMC normalizing constant
     ///
-    /// \param estimate_zconst Start estimating normalzing constant if true.
+    /// \param estimate_zconst Start estimating normalzing constant if true
     void zconst (bool estimate_zconst)
     {
         estimate_zconst_ = estimate_zconst;
@@ -236,8 +234,7 @@ class Particle
         std::size_t from = 0;
         std::size_t time = 0;
 
-        for (std::size_t to = 0; to != size_; ++to)
-        {
+        for (std::size_t to = 0; to != size_; ++to) {
             if (!replication_[to]) {
                 // replication_[to] has zero child, copy from elsewhere
                 if (replication_[from] - time <= 1) {
