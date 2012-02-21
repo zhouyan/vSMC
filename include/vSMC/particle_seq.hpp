@@ -6,10 +6,12 @@ namespace vSMC {
 enum WeightAction {
     NO_ACTION, SET_WEIGHT, SET_LOG_WEIGHT, MUL_WEIGHT, ADD_LOG_WEIGHT};
 
-template <int Dim>
+template <int Dim, typename T = double>
 class ParticleSeq
 {
     public :
+
+    typedef T value_type;
 
     ParticleSeq (std::size_t N) : size_(N), state_(N * Dim) {}
 
@@ -18,12 +20,12 @@ class ParticleSeq
         return Dim;
     }
 
-    double *state ()
+    T *state ()
     {
         return state_.get();
     }
 
-    const double *state () const
+    const T *state () const
     {
         return state_.get();
     }
@@ -31,15 +33,15 @@ class ParticleSeq
     template<typename OIter> 
     void state (int id, OIter first) const
     {
-        const double *src = state_.get() + id;
+        const T *src = state_.get() + id;
         for (std::size_t i = 0; i != size_; ++i, src += Dim)
             *first++ = *src;
     }
 
     void copy (std::size_t from, std::size_t to)
     {
-        const double *state_from = state_.get() + from * Dim;
-        double *state_to = state_.get() + to * Dim;
+        const T *state_from = state_.get() + from * Dim;
+        T *state_to = state_.get() + to * Dim;
         for (int i = 0; i != Dim; ++i, ++state_from, ++state_to)
             *state_to = *state_from;
     }
@@ -47,7 +49,7 @@ class ParticleSeq
     private :
 
     std::size_t size_;
-    vDist::tool::Buffer<double> state_;
+    vDist::tool::Buffer<T> state_;
 }; // class ParticleSeq
 
 template <typename T>
@@ -60,7 +62,7 @@ class InitializeSeq
         initialize_param(particle, param);
 
         weight_.resize(particle.size());
-        double *state = particle.value().state();
+        typename T::value_type *state = particle.value().state();
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size();
                 ++i, state += T::dim()) {
@@ -73,7 +75,7 @@ class InitializeSeq
     }
 
     virtual int initialize_state (vSMC::Particle<T> &particle,
-            double *state, double &weight) = 0;
+            typename T::value_type *state, double &weight) = 0;
 
     virtual void initialize_param (vSMC::Particle<T> &particle,
             void *param) {};
@@ -91,7 +93,7 @@ class MoveSeq
     std::size_t operator () (std::size_t iter, vSMC::Particle<T> &particle)
     {
         weight_.resize(particle.size());
-        double *state = particle.value().state();
+        typename T::value_type *state = particle.value().state();
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size();
                 ++i, state += T::dim()) {
@@ -120,7 +122,7 @@ class MoveSeq
     }
 
     virtual int move_state (std::size_t iter, vSMC::Particle<T> &particle,
-            double *state, double &weight) = 0;
+            typename T::value_type *state, double &weight) = 0;
 
     virtual WeightAction weight_action ()
     {
