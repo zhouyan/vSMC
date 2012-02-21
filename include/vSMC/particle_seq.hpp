@@ -6,16 +6,16 @@ namespace vSMC {
 enum WeightAction {
     NO_ACTION, SET_WEIGHT, SET_LOG_WEIGHT, MUL_WEIGHT, ADD_LOG_WEIGHT};
 
-template <int dim_>
+template <int Dim>
 class ParticleSeq
 {
     public :
 
-    ParticleSeq (std::size_t N) : size_(N), state_(N * dim_) {}
+    ParticleSeq (std::size_t N) : size_(N), state_(N * Dim) {}
 
     static int dim ()
     {
-        return dim_;
+        return Dim;
     }
 
     double *state ()
@@ -32,15 +32,15 @@ class ParticleSeq
     void state (int id, OIter first) const
     {
         const double *src = state_.get() + id;
-        for (std::size_t i = 0; i != size_; ++i, src += dim_)
+        for (std::size_t i = 0; i != size_; ++i, src += Dim)
             *first++ = *src;
     }
 
     void copy (std::size_t from, std::size_t to)
     {
-        const double *state_from = state_.get() + from * dim_;
-        double *state_to = state_.get() + to * dim_;
-        for (int i = 0; i != dim_; ++i, ++state_from, ++state_to)
+        const double *state_from = state_.get() + from * Dim;
+        double *state_to = state_.get() + to * Dim;
+        for (int i = 0; i != Dim; ++i, ++state_from, ++state_to)
             *state_to = *state_from;
     }
 
