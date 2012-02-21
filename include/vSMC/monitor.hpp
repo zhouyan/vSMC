@@ -12,6 +12,12 @@
 
 namespace vSMC {
 
+/// \brief Monitor for Monte Carlo integration
+///
+/// Monitor record the Monte Carlo integration of certain function width when
+/// the Sampler progress. It is also used for retrieve information of
+/// integrations after the SMC iterations. A Sampler class can keep a std::map
+/// of zero, one or more Monitors
 template <typename T>
 class Monitor
 {

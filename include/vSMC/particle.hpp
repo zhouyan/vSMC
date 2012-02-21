@@ -27,7 +27,7 @@ class Particle
 {
     public :
 
-    /// \brief Particle does not have a default constructor
+    /// \brief Construct a Particle object with given number of particles
     ///
     /// \param N The number of particles
     Particle (std::size_t N) :

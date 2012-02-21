@@ -12,6 +12,11 @@
 
 namespace vSMC {
 
+/// \brief Monitor for path sampling
+///
+/// Path record the path sampling integrand and width when the Sampler
+/// progress. It is also used for retrieve information of path sampling after
+/// the SMC iterations.
 template <typename T>
 class Path
 {
