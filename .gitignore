@@ -17,9 +17,10 @@ example/pet/pet_mcmc
 example/pet/pet_mcmc_buster
 example/pet/PETData-Simulate.tab
 
-example/pf/pf
-example/pf/pf.pdf
-example/pf/pf.tab
+example/pf/pf_eigen
+example/pf/pf_seq
+example/pf/*.pdf
+example/pf/*.tab
 
 example/toy/EST*
 example/toy/PathTrace*
