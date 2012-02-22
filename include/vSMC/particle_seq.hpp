@@ -31,7 +31,7 @@ class ParticleSeq
     ParticleSeq (std::size_t N) : size_(N), state_(N * Dim) {}
 
     /// \brief Dimension of the problem
-    /// 
+    ///
     /// \return The dimension of the parameter vector
     static int dim ()
     {
@@ -109,7 +109,7 @@ class InitializeSeq
     /// \param param Additional parameters
     ///
     /// \return Accept count
-    std::size_t operator() (vSMC::Particle<T> &particle, void *param)
+    std::size_t operator() (Particle<T> &particle, void *param)
     {
         initialize_param(particle, param);
 
@@ -133,15 +133,14 @@ class InitializeSeq
     /// \param weight The log weight of the particle
     ///
     /// \return Accept count, normally should be zero or one
-    virtual int initialize_state (vSMC::Particle<T> &particle,
+    virtual int initialize_state (Particle<T> &particle,
             typename T::value_type *state, double &weight) = 0;
 
     /// \brief Initialize the Particle set
     ///
     /// \param particle The Particle set passed by Sampler
     /// \param param Additional parameter passed by Sampler
-    virtual void initialize_param (vSMC::Particle<T> &particle,
-            void *param) {};
+    virtual void initialize_param (Particle<T> &particle, void *param) {};
 
     private :
 
@@ -169,7 +168,7 @@ class MoveSeq
     /// \param particle The Particle set passed by Sampler
     ///
     /// \return Accept count
-    std::size_t operator () (std::size_t iter, vSMC::Particle<T> &particle)
+    std::size_t operator () (std::size_t iter, Particle<T> &particle)
     {
         weight_.resize(particle.size());
         typename T::value_type *state = particle.value().state();
@@ -212,7 +211,7 @@ class MoveSeq
     /// as multiplier to the original weight, or the acutal value of the (log
     /// of) weight. It can even be meaningless, namely no action is taken with
     /// this weight. See WeightAction and weight_action.
-    virtual int move_state (std::size_t iter, vSMC::Particle<T> &particle,
+    virtual int move_state (std::size_t iter, Particle<T> &particle,
             typename T::value_type *state, double &weight) = 0;
 
     /// \brief Determine how weight returned by move_state shall be treated
@@ -227,6 +226,43 @@ class MoveSeq
 
     vDist::tool::Buffer<double> weight_;
 }; // class MoveSeq
+
+/// \brief Monitor::integral_type class for helping implementing SMC
+/// sequentially
+///
+/// This is a abstract factory class. Object of its derived type can be used
+/// as the argument integral of Sampler::monitor(std::string,
+/// Monitor<T>::integral_type integral). The derived class need to at least
+/// define method monitor_state.
+template <typename T>
+class MonitorSeq
+{
+    public :
+
+    /// \brief Operator called by Monitor to record Monte Carlo integration
+    ///
+    /// \param iter The iteration number
+    /// \param particle The Particle set passed by Sampler
+    /// \param [out] res The integrands. Sum(res * weight) is the Monte Carlo
+    /// integration result.
+    void operator () (std::size_t iter, Particle<T> &particle, double *res)
+    {
+        typename T::value_type *state = particle.value().state();
+        for (std::size_t i = 0; i != particle.size();
+                ++i, state += T::dim()) {
+            res[i] = monitor_state(iter, particle, state);
+        }
+    }
+
+    /// \brief Record the integrand from a single particle
+    /// \param iter The iteration number
+    /// \param particle The Particle set passed by Sampler
+    /// \param state The array contains the states of a single particle
+    ///
+    /// \return The value to be estimated
+    virtual double monitor_state (std::size_t iter, Particle<T> &particle,
+            typename T::value_type *state) = 0;
+}; // class MonitorSeq
 
 } // namespace vSMC
 
