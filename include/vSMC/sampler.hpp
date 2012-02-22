@@ -361,7 +361,7 @@ class Sampler
     /// \brief Path sampling estimate of normalizing constant
     ///
     /// \return The log ratio of normalizing constants
-    double path_sampling_zconst () const
+    double path_sampling () const
     {
         return path_.zconst();
     }

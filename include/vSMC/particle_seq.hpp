@@ -264,6 +264,57 @@ class MonitorSeq
             typename T::value_type *state) = 0;
 }; // class MonitorSeq
 
+/// \brief Path::integral_type class for helping implementing SMC sequentially
+///
+/// This is a abstract factory class. Object of its derived type can be used
+/// as the argument integral of Sampler::path_sampling(Path<T>::integral_type
+/// integral). The derived class need to at least define method path_state and
+/// width_state.
+template <typename T>
+class PathSeq
+{
+    public :
+
+    /// \brief Operator called by Path to record path sampling integrands and
+    /// widths
+    ///
+    /// \param iter The iteration number
+    /// \param particle The particle set passed by Sampler
+    /// \param [out] res The integrands. Sum(res * weight) is the path
+    ///
+    /// \return The width
+    /// sampling integrand.
+    double operator () (std::size_t iter, Particle<T> &particle, double *res)
+    {
+        typename T::value_type *state = particle.value().state();
+        for (std::size_t i = 0; i != particle.size();
+                ++i, state += T::dim()) {
+            res[i] = path_state(iter, particle, state);
+        }
+
+        return width_state(iter, particle);
+    }
+
+    /// \brief Evaluate the path sampling integrand for a single particle
+    ///
+    ///
+    /// \param iter The iteration number
+    /// \param particle The particle set passed by Sampler
+    /// \param state The array contains the states of a single particle
+    ///
+    /// \return The value of the integrand
+    virtual double path_state (std::size_t iter, Particle<T> &particle,
+            typename T::value_type *state) = 0;
+
+    /// \brief Evaluate the path sampling width
+    ///
+    /// \param iter The iteration number
+    /// \param particle The particle set passed by Sampler
+    ///
+    /// \return The value of the width
+    virtual double width_state (std::size_t iter, Particle<T> &particle) = 0;
+};
+
 } // namespace vSMC
 
 #endif // V_SMC_PARTICLE_SEQ_HPP
