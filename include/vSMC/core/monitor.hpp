@@ -1,12 +1,12 @@
-#ifndef V_SMC_MONITOR_HPP
-#define V_SMC_MONITOR_HPP
+#ifndef V_SMC_CORE_MONITOR_HPP
+#define V_SMC_CORE_MONITOR_HPP
 
 #include <vector>
 #include <cstddef>
 #include <mkl_cblas.h>
 #include <boost/function.hpp>
 #include <vDist/tool/buffer.hpp>
-#include <vSMC/particle.hpp>
+#include <vSMC/core/particle.hpp>
 
 namespace vSMC {
 
@@ -150,4 +150,4 @@ class Monitor
 
 } // namespace vSMC
 
-#endif // V_SMC_MONITOR_HPP
+#endif // V_SMC_CORE_MONITOR_HPP

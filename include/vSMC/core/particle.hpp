@@ -1,5 +1,5 @@
-#ifndef V_SMC_PARTICLE_HPP
-#define V_SMC_PARTICLE_HPP
+#ifndef V_SMC_CORE_PARTICLE_HPP
+#define V_SMC_CORE_PARTICLE_HPP
 
 #include <algorithm>
 #include <limits>
@@ -258,4 +258,4 @@ class Particle
 
 } // namespace vSMC
 
-#endif // V_SMC_PARTICLE_HPP
+#endif // V_SMC_CORE_PARTICLE_HPP

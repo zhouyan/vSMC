@@ -1,5 +1,5 @@
-#ifndef V_SMC_PATH_HPP
-#define V_SMC_PATH_HPP
+#ifndef V_SMC_CORE_PATH_HPP
+#define V_SMC_CORE_PATH_HPP
 
 #include <vector>
 #include <cstddef>
@@ -207,4 +207,4 @@ class Path
 
 } // namespace vSMC
 
-#endif // V_SMC_PATH_HPP
+#endif // V_SMC_CORE_PATH_HPP

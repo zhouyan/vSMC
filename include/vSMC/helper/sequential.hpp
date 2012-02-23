@@ -1,5 +1,5 @@
-#ifndef V_SMC_PARTICLE_SEQ_HPP
-#define V_SMC_PARTICLE_SEQ_HPP
+#ifndef V_SMC_HELPER_SEQUENTIAL_HPP
+#define V_SMC_HELPER_SEQUENTIAL_HPP
 
 namespace vSMC {
 
@@ -317,4 +317,4 @@ class PathSeq
 
 } // namespace vSMC
 
-#endif // V_SMC_PARTICLE_SEQ_HPP
+#endif // V_SMC_HELPER_SEQUENTIAL_HPP
