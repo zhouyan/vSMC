@@ -1,8 +1,6 @@
 #ifndef V_SMC_MONITOR_HPP
 #define V_SMC_MONITOR_HPP
 
-#include <vSMC/config.hpp>
-
 #include <vector>
 #include <cstddef>
 #include <mkl_cblas.h>

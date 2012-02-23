@@ -1,14 +1,12 @@
 #ifndef V_SMC_PATH_HPP
 #define V_SMC_PATH_HPP
 
-#include <vSMC/config.hpp>
-
 #include <vector>
 #include <cstddef>
 #include <mkl_cblas.h>
 #include <boost/function.hpp>
 #include <vDist/tool/buffer.hpp>
-#include <vSMC/particle.hpp>
+#include <vSMC/core/particle.hpp>
 
 namespace vSMC {
 

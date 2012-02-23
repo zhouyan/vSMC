@@ -1,8 +1,6 @@
 #ifndef V_SMC_SAMPLER_HPP
 #define V_SMC_SAMPLER_HPP
 
-#include <vSMC/config.hpp>
-
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -14,9 +12,9 @@
 #include <boost/function.hpp>
 #include <vDist/rng/gsl.hpp>
 #include <vDist/tool/buffer.hpp>
-#include <vSMC/monitor.hpp>
-#include <vSMC/particle.hpp>
-#include <vSMC/path.hpp>
+#include <vSMC/core/particle.hpp>
+#include <vSMC/core/monitor.hpp>
+#include <vSMC/core/path.hpp>
 
 /*************************************************************************//**
  * \page pf_seq Sequential implementation of particle filter example
