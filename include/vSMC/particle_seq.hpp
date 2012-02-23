@@ -15,20 +15,20 @@ enum WeightAction {
 
 /// \brief Particle type for helping implementing SMC sequentially
 ///
-/// ParticleSeq or its derived class can be used as the template argument of
+/// StateSeq or its derived class can be used as the template argument of
 /// Particle. It targets the particular problems where the parameters to be
 /// sampled can be viewed as a vector of dimension Dim and type T.
 template <int Dim, typename T = double>
-class ParticleSeq
+class StateSeq
 {
     public :
 
     typedef T value_type;
 
-    /// \brief Construct a ParticleSeq object with given number of particles
+    /// \brief Construct a StateSeq object with given number of particles
     ///
     /// \param N The number of particles
-    ParticleSeq (std::size_t N) : size_(N), state_(N * Dim) {}
+    StateSeq (std::size_t N) : size_(N), state_(N * Dim) {}
 
     /// \brief Dimension of the problem
     ///
@@ -86,7 +86,7 @@ class ParticleSeq
 
     std::size_t size_;
     vDist::tool::Buffer<T> state_;
-}; // class ParticleSeq
+}; // class StateSeq
 
 /// \brief Sampler::init_type class for helping implementing SMC sequentially
 ///
@@ -96,7 +96,7 @@ class ParticleSeq
 /// method initialize_param, which will be called before initialization and
 /// accept the last argument of Sampler::init_type functor as its parameter.
 ///
-/// \note The template parameter has to be type ParticleSeq or its derived
+/// \note The template parameter has to be type StateSeq or its derived
 /// class.
 template <typename T>
 class InitializeSeq
@@ -155,7 +155,7 @@ class InitializeSeq
 /// the weight_action method to change how the returned weighted should be
 /// treated.
 ///
-/// \note The template parameter has to be type ParticleSeq or its derived
+/// \note The template parameter has to be type StateSeq or its derived
 /// class.
 template <typename T>
 class MoveSeq
