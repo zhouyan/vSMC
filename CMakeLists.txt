@@ -1,0 +1,34 @@
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+
+# disable in source build
+IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    MESSAGE(FATAL_ERROR "In-source builds not allowed. Please make a new directory and run CMake from there.")
+ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+
+PROJECT (vSMC CXX)
+
+# Global path configurations
+SET (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/local/lib64)
+SET (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/local/lib)
+SET (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/lib64)
+SET (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/lib)
+SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
+# Finding Packages
+SET (Boost_NO_BOOST_CMAKE ON)
+INCLUDE (FindBoost)
+INCLUDE (FindDoxygen)
+FIND_PACKAGE (Boost)
+FIND_PACKAGE (Doxygen)
+
+# Additional packages
+INCLUDE (FindEigen)
+INCLUDE (FindMKL)
+INCLUDE (FindGSL)
+
+# Include dirs
+INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
+
+# Testing
+ENABLE_TESTING ()
+ADD_SUBDIRECTORY (test EXCLUDE_FROM_ALL)
