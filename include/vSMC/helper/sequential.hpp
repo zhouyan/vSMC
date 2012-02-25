@@ -164,7 +164,7 @@ class InitializeSeq
     /// \param weight The log weight of the particle
     ///
     /// \return Accept count, normally should be zero or one
-    virtual int initialize_state (Particle<T> &particle,
+    virtual int initialize_state (const Particle<T> &particle,
             typename T::value_type *state, double &weight) = 0;
 
     /// \brief Initialize the Particle set
@@ -232,7 +232,7 @@ class MoveSeq
     /// as multiplier to the original weight, or the acutal value of the (log
     /// of) weight. It can even be meaningless, namely no action is taken with
     /// this weight. See WeightAction and weight_action.
-    virtual int move_state (std::size_t iter, Particle<T> &particle,
+    virtual int move_state (std::size_t iter, const Particle<T> &particle,
             typename T::value_type *state, double &weight) = 0;
 
     /// \brief Determine how weight returned by move_state shall be treated
@@ -300,8 +300,8 @@ class MonitorSeq
     /// \param state The array contains the states of a single particle
     ///
     /// \return The value to be estimated
-    virtual double monitor_state (std::size_t iter, Particle<T> &particle,
-            typename T::value_type *state) = 0;
+    virtual double monitor_state (std::size_t iter,
+            const Particle<T> &particle, typename T::value_type *state) = 0;
 }; // class MonitorSeq
 
 /// \brief Path::integral_type class for helping implementing SMC sequentially
@@ -341,7 +341,7 @@ class PathSeq
     /// \param state The array contains the states of a single particle
     ///
     /// \return The value of the integrand
-    virtual double path_state (std::size_t iter, Particle<T> &particle,
+    virtual double path_state (std::size_t iter, const Particle<T> &particle,
             typename T::value_type *state) = 0;
 
     /// \brief Evaluate the path sampling width
@@ -350,7 +350,8 @@ class PathSeq
     /// \param particle The particle set passed by Sampler
     ///
     /// \return The value of the width
-    virtual double width_state (std::size_t iter, Particle<T> &particle) = 0;
+    virtual double width_state (std::size_t iter,
+            const Particle<T> &particle) = 0;
 };
 
 } // namespace vSMC
