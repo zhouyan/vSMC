@@ -23,6 +23,7 @@ class StateSeq
 {
     public :
 
+    /// The type of parameters
     typedef T value_type;
 
     /// \brief Construct a StateSeq object with given number of particles
@@ -30,7 +31,7 @@ class StateSeq
     /// \param N The number of particles
     StateSeq (std::size_t N) : size_(N), state_(N * Dim) {}
 
-    /// \brief Dimension of the problem
+    /// \brief The dimension of the problem
     ///
     /// \return The dimension of the parameter vector
     static int dim ()
@@ -38,9 +39,33 @@ class StateSeq
         return Dim;
     }
 
-    /// \brief Read and write access to the array of particle states
+    /// \brief The number of particles
     ///
-    /// \return A pointer to the underlying array particle states
+    /// \return The number of particles in the current particle set
+    std::size_t size () const
+    {
+        return size_;
+    }
+
+    /// \brief Read and write access to the array of a single particle states
+    ///
+    /// \return A pointer to the states of a single particle
+    T *state (std::size_t n)
+    {
+        return state_.get() + n * dim();
+    }
+
+    /// \brief Read only access to the array of a single particle states
+    ///
+    /// \return A const pointer to the states of a single array particle
+    const T *state (std::size_t n) const
+    {
+        return state_.get() + n * dim();
+    }
+
+    /// \brief Read and write access to the array of all particle states
+    ///
+    /// \return A pointer to the states of all particles
     ///
     /// \note The array is of row major order. In other words, it is ordered
     /// as the first Dim elements are the states of first particle, the next
@@ -50,9 +75,9 @@ class StateSeq
         return state_.get();
     }
 
-    /// \brief Read only access to the array of particle states
+    /// \brief Read only access to the array of all particle states
     ///
-    /// \return A const pointer to the underlying array particle states
+    /// \return A const pointer to the states of all particles
     const T *state () const
     {
         return state_.get();
@@ -76,8 +101,8 @@ class StateSeq
     /// \param to The index of particle to which new state to be written
     void copy (std::size_t from, std::size_t to)
     {
-        const T *state_from = state_.get() + from * Dim;
-        T *state_to = state_.get() + to * Dim;
+        const T *state_from = state(from);
+        T *state_to = state(to);
         for (int i = 0; i != Dim; ++i, ++state_from, ++state_to)
             *state_to = *state_from;
     }
@@ -109,16 +134,16 @@ class InitializeSeq
     /// \param param Additional parameters
     ///
     /// \return Accept count
-    std::size_t operator() (Particle<T> &particle, void *param)
+    virtual std::size_t operator() (Particle<T> &particle, void *param)
     {
         initialize_param(particle, param);
 
         weight_.resize(particle.size());
-        typename T::value_type *state = particle.value().state();
         std::size_t accept = 0;
-        for (std::size_t i = 0; i != particle.size();
-                ++i, state += T::dim()) {
-            accept += initialize_state(particle, state, weight_[i]);
+
+        for (std::size_t i = 0; i != particle.size(); ++i) {
+            accept += initialize_state(particle,
+                    particle.value().state(i), weight_[i]);
         }
 
         particle.set_log_weight(weight_);
@@ -168,33 +193,17 @@ class MoveSeq
     /// \param particle The Particle set passed by Sampler
     ///
     /// \return Accept count
-    std::size_t operator () (std::size_t iter, Particle<T> &particle)
+    virtual std::size_t operator () (std::size_t iter, Particle<T> &particle)
     {
         weight_.resize(particle.size());
-        typename T::value_type *state = particle.value().state();
         std::size_t accept = 0;
-        for (std::size_t i = 0; i != particle.size();
-                ++i, state += T::dim()) {
-            accept += move_state(iter, particle, state, weight_[i]);
+
+        for (std::size_t i = 0; i != particle.size(); ++i) {
+            accept += move_state(iter, particle,
+                    particle.value().state(i), weight_[i]);
         }
 
-        switch (weight_action()) {
-            case NO_ACTION :
-                break;
-            case SET_WEIGHT :
-                vdLn(particle.size(), weight_, weight_);
-            case SET_LOG_WEIGHT :
-                particle.set_log_weight(weight_);
-                break;
-            case MUL_WEIGHT :
-                vdLn(particle.size(), weight_, weight_);
-            case ADD_LOG_WEIGHT :
-                particle.add_log_weight(weight_);
-                break;
-            default :
-                particle.add_log_weight(weight_);
-                break;
-        }
+        set_weight(particle);
 
         return accept;
     }
@@ -224,6 +233,27 @@ class MoveSeq
 
     private :
 
+    void set_weight (Particle<T> &particle)
+    {
+        switch (weight_action()) {
+            case NO_ACTION :
+                break;
+            case SET_WEIGHT :
+                vdLn(particle.size(), weight_, weight_);
+            case SET_LOG_WEIGHT :
+                particle.set_log_weight(weight_);
+                break;
+            case MUL_WEIGHT :
+                vdLn(particle.size(), weight_, weight_);
+            case ADD_LOG_WEIGHT :
+                particle.add_log_weight(weight_);
+                break;
+            default :
+                particle.add_log_weight(weight_);
+                break;
+        }
+    }
+
     vDist::tool::Buffer<double> weight_;
 }; // class MoveSeq
 
@@ -245,13 +275,11 @@ class MonitorSeq
     /// \param particle The Particle set passed by Sampler
     /// \param [out] res The integrands. Sum(res * weight) is the Monte Carlo
     /// integration result.
-    void operator () (std::size_t iter, Particle<T> &particle, double *res)
+    virtual void operator () (std::size_t iter, Particle<T> &particle,
+            double *res)
     {
-        typename T::value_type *state = particle.value().state();
-        for (std::size_t i = 0; i != particle.size();
-                ++i, state += T::dim()) {
-            res[i] = monitor_state(iter, particle, state);
-        }
+        for (std::size_t i = 0; i != particle.size(); ++i)
+            res[i] = monitor_state(iter, particle, particle.value().state(i));
     }
 
     /// \brief Record the integrand from a single particle
@@ -284,13 +312,11 @@ class PathSeq
     ///
     /// \return The width
     /// sampling integrand.
-    double operator () (std::size_t iter, Particle<T> &particle, double *res)
+    virtual double operator () (std::size_t iter, Particle<T> &particle,
+            double *res)
     {
-        typename T::value_type *state = particle.value().state();
-        for (std::size_t i = 0; i != particle.size();
-                ++i, state += T::dim()) {
-            res[i] = path_state(iter, particle, state);
-        }
+        for (std::size_t i = 0; i != particle.size(); ++i)
+            res[i] = path_state(iter, particle, particle.value().state(i));
 
         return width_state(iter, particle);
     }
