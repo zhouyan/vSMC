@@ -24,6 +24,7 @@ FIND_PACKAGE (Doxygen)
 # Additional packages
 INCLUDE (FindEigen)
 INCLUDE (FindMKL)
+INCLUDE (FindTBB)
 INCLUDE (FindGSL)
 
 # Include dirs
