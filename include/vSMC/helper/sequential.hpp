@@ -128,6 +128,12 @@ class InitializeSeq
 {
     public :
 
+    InitializeSeq () {}
+
+    InitializeSeq (const InitializeSeq<T> &init) {}
+
+    InitializeSeq<T> & operator= (const InitializeSeq<T> &init) {return *this;}
+
     /// \brief Operator called by Sampler for initialize the particle set
     ///
     /// \param particle The Particle set passed by Sampler
@@ -187,6 +193,12 @@ class MoveSeq
 {
     public :
 
+    MoveSeq () {}
+
+    MoveSeq (const MoveSeq<T> &move) {}
+
+    MoveSeq<T> & operator= (const MoveSeq<T> &move) {return *this;}
+
     /// \brief Operator called by Sampler for move the particle set
     ///
     /// \param iter The iteration number
@@ -233,6 +245,8 @@ class MoveSeq
 
     private :
 
+    vDist::tool::Buffer<double> weight_;
+
     void set_weight (Particle<T> &particle)
     {
         switch (weight_action()) {
@@ -253,8 +267,6 @@ class MoveSeq
                 break;
         }
     }
-
-    vDist::tool::Buffer<double> weight_;
 }; // class MoveSeq
 
 /// \brief Monitor::integral_type class for helping implementing SMC
