@@ -98,6 +98,34 @@ class MonitorTBBApply
     double *const res_;
 }; // class MonitorTBBApply
 
+template <typename T>
+class PathTBBApply
+{
+    public :
+
+    PathTBBApply (PathTBB<T> *path, std::size_t iter,
+            const Particle<T> *particle, typename T::value_type *state,
+            double *res) :
+        path_(path), iter_(iter), particle_(particle), state_(state),
+        res_(res) {}
+
+    void operator () (const tbb::blocked_range<std::size_t> &range) const
+    {
+        for (std::size_t i = range.begin(); i != range.end(); ++i) {
+            res_[i] = path_->path_state(iter_, *particle_,
+                    state_ + T::dim() * i);
+        }
+    }
+
+    private :
+
+    PathTBB<T> *const path_;
+    const std::size_t iter_;
+    const Particle<T> *const particle_;
+    typename T::value_type *const state_;
+    double *const res_;
+}; // class PathTBBApply
+
 } // namespace vSMC::internal
 
 /// \brief Particle type for helping implementing SMC using TBB
@@ -223,6 +251,26 @@ class MonitorTBB : public MonitorSeq<T>
 template <typename T>
 class PathTBB : public PathSeq<T>
 {
+    public :
+
+    /// \brief Operator called by Path to record path sampling integrands and
+    /// widths
+    ///
+    /// \param iter The iteration number
+    /// \param particle The particle set passed by Sampler
+    /// \param [out] res The integrands. Sum(res * weight) is the path
+    ///
+    /// \return The width
+    /// sampling integrand.
+    virtual double operator () (std::size_t iter, Particle<T> &particle,
+            double *res)
+    {
+        tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
+                internal::PathTBBApply<T>(
+                    this, iter, &particle, particle.value().state(), res));
+
+        return this->width_state(iter, particle);
+    }
 }; // PathTBB
 
 namespace internal {
