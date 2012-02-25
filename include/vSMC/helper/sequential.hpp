@@ -215,7 +215,7 @@ class MoveSeq
                     particle.value().state(i), weight_[i]);
         }
 
-        set_weight(particle);
+        set_weight(weight_action(), particle, weight_.get());
 
         return accept;
     }
@@ -243,30 +243,31 @@ class MoveSeq
         return ADD_LOG_WEIGHT;
     }
 
-    private :
-
-    vDist::tool::Buffer<double> weight_;
-
-    void set_weight (Particle<T> &particle)
+    void set_weight (WeightAction action,
+            Particle<T> &particle, double *weight)
     {
-        switch (weight_action()) {
+        switch (action) {
             case NO_ACTION :
                 break;
             case SET_WEIGHT :
-                vdLn(particle.size(), weight_, weight_);
+                vdLn(particle.size(), weight, weight);
             case SET_LOG_WEIGHT :
-                particle.set_log_weight(weight_);
+                particle.set_log_weight(weight);
                 break;
             case MUL_WEIGHT :
-                vdLn(particle.size(), weight_, weight_);
+                vdLn(particle.size(), weight, weight);
             case ADD_LOG_WEIGHT :
-                particle.add_log_weight(weight_);
+                particle.add_log_weight(weight);
                 break;
             default :
-                particle.add_log_weight(weight_);
+                particle.add_log_weight(weight);
                 break;
         }
     }
+
+    private :
+
+    vDist::tool::Buffer<double> weight_;
 }; // class MoveSeq
 
 /// \brief Monitor::integral_type class for helping implementing SMC
