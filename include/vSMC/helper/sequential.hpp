@@ -342,8 +342,8 @@ class PathSeq
     /// \param state The array contains the states of a single particle
     ///
     /// \return The value of the integrand
-    virtual double path_state (std::size_t iter, const Particle<T> &particle,
-            typename T::value_type *state) = 0;
+    virtual double path_state (std::size_t iter,
+            const Particle<T> &particle, typename T::value_type *state) = 0;
 
     /// \brief Evaluate the path sampling width
     ///
