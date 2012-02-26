@@ -7,9 +7,22 @@
 #include <mkl_cblas.h>
 #include <mkl_vml.h>
 #include <boost/function.hpp>
+#include <Random123/philox.h>
+#include <Random123/threefry.h>
 #include <vDist/rng/gsl.hpp>
 #include <vDist/tool/buffer.hpp>
 #include <vDist/tool/eblas.hpp>
+
+/// \brief The Parallel RNG (based on Rand123) seed
+#ifndef V_SMC_PRNG_SEED
+#define V_SMC_PRNG_SEED 0xdeadbeefL
+#endif // V_SMC_PRNG_SEED
+
+/// \brief The Parallel RNG (based on Rand123) type. One of 64 bit philox or
+/// threefry
+#ifndef V_SMC_PRNG_TYPE
+#define V_SMC_PRNG_TYPE Threefry4x64
+#endif // V_SMC_PRNG_TYPE
 
 namespace vSMC {
 
@@ -27,13 +40,29 @@ class Particle
 {
     public :
 
+    /// \brief Type of of the internal RNG, one of the 64 bit Rand123 type
+    typedef typename r123::V_SMC_PRNG_TYPE rng_type;
+
     /// \brief Construct a Particle object with given number of particles
     ///
     /// \param N The number of particles
     Particle (std::size_t N) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
-        ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false) {}
+        ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false),
+        u64base(0.5 / (1UL<<63)), uni_rng(N), uni_idx(N), ctr(N), key(N)
+    {
+        for (std::size_t i = 0; i != N; ++i) {
+            rng_type::ctr_type c = {{}};
+            rng_type::key_type k = {{}};
+            c[0] = i;
+            k[0] = V_SMC_PRNG_SEED + i;
+            ctr[i] = c;
+            key[i] = k;
+            uni_idx[i] = 0;
+            uni_rng[i].c = crng(ctr[i], key[i]);
+        }
+    }
 
     /// \brief Size of the particle set
     ///
@@ -178,6 +207,49 @@ class Particle
         }
     }
 
+    /// \brief Generate an [0,1] uniform random variate
+    ///
+    /// \param id Any integer. Usually the id of the particle.
+    ///
+    /// \return A random variate uniform distributed on [0,1]
+    double runif (std::size_t id)
+    {
+        if (uni_idx[id] == 3) {
+            uni_idx[id] = 0;
+            ++ctr[id][0];
+            uni_rng[id].c = crng(ctr[id], key[id]);
+        }
+
+        return u64base * uni_rng[id].n[uni_idx[id]++];
+    }
+
+    /// \brief Generate an uniform random variate
+    ///
+    /// \param id Any integer. Usually the id of the particle.
+    /// \param min The minimum
+    /// \param max The maximum
+    ///
+    /// \return A random variate uniform distributed on [min,max]
+    double runif (std::size_t id, double min, double max)
+    {
+        return runif(id) * (max - min) + min;
+    }
+
+    /// \brief Generate an Normal random variate
+    ///
+    /// \param id Any integer. Usually the id of the particle.
+    /// \param mean The mean
+    /// \param sd The SD
+    ///
+    /// \return A random variate Normally distributed as N(mean, sd^2) 
+    double rnorm (std::size_t id, double mean, double sd)
+    {
+        double u1 = runif(id);
+        double u2 = runif(id);
+
+        return std::sqrt(-2 * log(u1)) * std::cos(2 * M_PI * u2) * sd + mean;
+    }
+
     private :
 
     std::size_t size_;
@@ -190,6 +262,14 @@ class Particle
     bool resampled_;
     double zconst_;
     bool estimate_zconst_;
+
+    union uni {rng_type::ctr_type c; unsigned long n[4];};
+    double u64base;
+    rng_type crng;
+    vDist::tool::Buffer<uni> uni_rng;
+    vDist::tool::Buffer<int> uni_idx;
+    vDist::tool::Buffer<rng_type::ctr_type> ctr;
+    vDist::tool::Buffer<rng_type::key_type> key;
 
     void set_weight ()
     {

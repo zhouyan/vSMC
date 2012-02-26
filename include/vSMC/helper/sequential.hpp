@@ -1,10 +1,6 @@
 #ifndef V_SMC_HELPER_SEQUENTIAL_HPP
 #define V_SMC_HELPER_SEQUENTIAL_HPP
 
-#include <Random123/philox.h>
-#include <Random123/threefry.h>
-#include <vSMC/helper/common.hpp>
-
 namespace vSMC {
 
 /// \brief Type of weight returned by MoveSeq::move_state
@@ -29,26 +25,11 @@ class StateSeq
 
     /// The type of parameters
     typedef T value_type;
-    typedef typename r123::V_SMC_PRNG_TYPE rng_type;
 
     /// \brief Construct a StateSeq object with given number of particles
     ///
     /// \param N The number of particles
-    StateSeq (std::size_t N) :
-        size_(N), state_(N * Dim),
-        u64base(0.5 / (1UL<<63)), uni_rng(N), uni_idx(N), ctr(N), key(N)
-    {
-        for (std::size_t i = 0; i != N; ++i) {
-            rng_type::ctr_type c = {{}};
-            rng_type::key_type k = {{}};
-            c[0] = i;
-            k[0] = V_SMC_PRNG_SEED + i;
-            ctr[i] = c;
-            key[i] = k;
-            uni_idx[i] = 0;
-            uni_rng[i].c = crng(ctr[i], key[i]);
-        }
-    }
+    StateSeq (std::size_t N) : size_(N), state_(N * Dim) {}
 
     /// \brief The dimension of the problem
     ///
@@ -126,42 +107,10 @@ class StateSeq
             *state_to = *state_from;
     }
 
-    double runif (std::size_t id)
-    {
-        if (uni_idx[id] == 3) {
-            uni_idx[id] = 0;
-            ++ctr[id][0];
-            uni_rng[id].c = crng(ctr[id], key[id]);
-        }
-
-        return u64base * uni_rng[id].n[uni_idx[id]++];
-    }
-
-    double runif (std::size_t id, double min, double max)
-    {
-        return runif(id) * (max - min) + min;
-    }
-
-    double rnorm (std::size_t id, double mean, double sd)
-    {
-        double u1 = runif(id);
-        double u2 = runif(id);
-
-        return std::sqrt(-2 * log(u1)) * std::cos(2 * M_PI * u2) * sd + mean;
-    }
-
     private :
 
     std::size_t size_;
     vDist::tool::Buffer<T> state_;
-
-    union uni {rng_type::ctr_type c; unsigned long n[4];};
-    double u64base;
-    rng_type crng;
-    vDist::tool::Buffer<uni> uni_rng;
-    vDist::tool::Buffer<int> uni_idx;
-    vDist::tool::Buffer<rng_type::ctr_type> ctr;
-    vDist::tool::Buffer<rng_type::key_type> key;
 }; // class StateSeq
 
 /// \brief Sampler::init_type class for helping implementing SMC sequentially
