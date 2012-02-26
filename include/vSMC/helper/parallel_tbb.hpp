@@ -4,8 +4,6 @@
 #include <tbb/tbb.h>
 #include <vSMC/helper/common.hpp>
 #include <vSMC/helper/sequential.hpp>
-#include <Random123/philox.h>
-#include <Random123/threefry.h>
 
 namespace vSMC {
 
@@ -141,48 +139,11 @@ class StateTBB : public StateSeq<Dim, T>
 {
     public :
 
-    typedef typename r123::V_SMC_PRNG_TYPE rng_type;
 
     /// \brief Construct a StateTBB object with given number of particles
     ///
     /// \param N The number of particles
-    StateTBB (std::size_t N) :
-        StateSeq<Dim, T>(N), u64base(0.5 / (1UL<<63)),
-        uni_rng(N), uni_idx(N), ctr(N), key(N)
-    {
-        for (std::size_t i = 0; i != N; ++i) {
-            rng_type::ctr_type c = {{}};
-            rng_type::key_type k = {{}};
-            c[0] = i;
-            k[0] = V_SMC_PRNG_SEED + i;
-            ctr[i] = c;
-            key[i] = k;
-            uni_idx[i] = 0;
-            uni_rng[i].c = crng(ctr[i], key[i]);
-        }
-    }
-
-    double runif (std::size_t id)
-    {
-        if (uni_idx[id] == 3) {
-            uni_idx[id] = 0;
-            ++ctr[id][0];
-            uni_rng[id].c = crng(ctr[id], key[id]);
-        }
-
-        return u64base * uni_rng[id].n[uni_idx[id]++];
-    }
-
-    private :
-
-    union uni {rng_type::ctr_type c; unsigned long n[4];};
-    
-    double u64base;
-    rng_type crng;
-    vDist::tool::Buffer<uni> uni_rng;
-    vDist::tool::Buffer<int> uni_idx;
-    vDist::tool::Buffer<rng_type::ctr_type> ctr;
-    vDist::tool::Buffer<rng_type::key_type> key;
+    StateTBB (std::size_t N) : StateSeq<Dim, T>(N) {}
 }; // class StateTBB
 
 template <typename T>
