@@ -13,16 +13,23 @@
 #include <vDist/tool/buffer.hpp>
 #include <vDist/tool/eblas.hpp>
 
-/// \brief The Parallel RNG (based on Rand123) seed
+/// The Parallel RNG (based on Rand123) seed
 #ifndef V_SMC_PRNG_SEED
 #define V_SMC_PRNG_SEED 0xdeadbeefL
 #endif // V_SMC_PRNG_SEED
 
-/// \brief The Parallel RNG (based on Rand123) type. One of 64 bit philox or
-/// threefry
+/// The Parallel RNG (based on Rand123) type, philox or threefry
 #ifndef V_SMC_PRNG_TYPE
 #define V_SMC_PRNG_TYPE Threefry4x64
 #endif // V_SMC_PRNG_TYPE
+
+/// The type used to extract random bits
+#ifndef V_SMC_PRNG_UINT_TYPE
+#define V_SMC_PRNG_UINT_TYPE unsigned
+#endif // V_SMC_PRNG_UINT_TYPE
+
+#define V_SMC_PRNG_IDX_MAX \
+    (sizeof(rng_type::ctr_type) / sizeof(V_SMC_PRNG_UINT_TYPE))
 
 namespace vSMC {
 
@@ -41,7 +48,7 @@ class Particle
     public :
 
     /// \brief Type of of the internal RNG, one of the 64 bit Rand123 type
-    typedef typename r123::V_SMC_PRNG_TYPE rng_type;
+    typedef r123::V_SMC_PRNG_TYPE rng_type;
 
     /// \brief Construct a Particle object with given number of particles
     ///
@@ -50,17 +57,20 @@ class Particle
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false),
-        u64base(0.5 / (1UL<<63)), uni_rng(N), uni_idx(N), ctr(N), key(N)
+        rbase_(0), rbit_(N), ridx_(N), rctr_(N), rkey_(N)
     {
+        int shift = sizeof(V_SMC_PRNG_UINT_TYPE) * 8 - 1;
+        rbase_ = 0.5 / (1U<<shift);
+
         for (std::size_t i = 0; i != N; ++i) {
             rng_type::ctr_type c = {{}};
             rng_type::key_type k = {{}};
             c[0] = i;
             k[0] = V_SMC_PRNG_SEED + i;
-            ctr[i] = c;
-            key[i] = k;
-            uni_idx[i] = 0;
-            uni_rng[i].c = crng(ctr[i], key[i]);
+            rctr_[i] = c;
+            rkey_[i] = k;
+            ridx_[i] = 0;
+            rbit_[i].c = crng_(rctr_[i], rkey_[i]);
         }
     }
 
@@ -214,13 +224,13 @@ class Particle
     /// \return A random variate uniform distributed on [0,1]
     double runif (std::size_t id)
     {
-        if (uni_idx[id] == 3) {
-            uni_idx[id] = 0;
-            ++ctr[id][0];
-            uni_rng[id].c = crng(ctr[id], key[id]);
+        if (ridx_[id] == V_SMC_PRNG_IDX_MAX) {
+            ridx_[id] = 0;
+            ++rctr_[id][0];
+            rbit_[id].c = crng_(rctr_[id], rkey_[id]);
         }
 
-        return u64base * uni_rng[id].n[uni_idx[id]++];
+        return rbase_ * rbit_[id].n[ridx_[id]++];
     }
 
     /// \brief Generate an uniform random variate
@@ -263,13 +273,14 @@ class Particle
     double zconst_;
     bool estimate_zconst_;
 
-    union uni {rng_type::ctr_type c; unsigned long n[4];};
-    double u64base;
-    rng_type crng;
-    vDist::tool::Buffer<uni> uni_rng;
-    vDist::tool::Buffer<int> uni_idx;
-    vDist::tool::Buffer<rng_type::ctr_type> ctr;
-    vDist::tool::Buffer<rng_type::key_type> key;
+    union uni {
+        rng_type::ctr_type c; V_SMC_PRNG_UINT_TYPE n[V_SMC_PRNG_IDX_MAX];};
+    double rbase_;
+    rng_type crng_;
+    vDist::tool::Buffer<uni> rbit_;
+    vDist::tool::Buffer<int> ridx_;
+    vDist::tool::Buffer<rng_type::ctr_type> rctr_;
+    vDist::tool::Buffer<rng_type::key_type> rkey_;
 
     void set_weight ()
     {
