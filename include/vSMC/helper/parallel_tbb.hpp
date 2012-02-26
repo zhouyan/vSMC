@@ -2,7 +2,10 @@
 #define V_SMC_HELPER_PARALLEL_TBB_HPP
 
 #include <tbb/tbb.h>
+#include <vSMC/helper/common.hpp>
 #include <vSMC/helper/sequential.hpp>
+#include <Random123/philox.h>
+#include <Random123/threefry.h>
 
 namespace vSMC {
 
@@ -19,7 +22,7 @@ class InitializeTBBApply
     public :
 
     InitializeTBBApply (InitializeTBB<T> *init,
-            const Particle<T> *particle, typename T::value_type *state,
+            Particle<T> *particle, typename T::value_type *state,
             double *weight, int *accept) :
         init_(init), particle_(particle), state_(state),
         weight_(weight), accept_(accept) {}
@@ -27,7 +30,7 @@ class InitializeTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            accept_[i] = init_->initialize_state(*particle_,
+            accept_[i] = init_->initialize_state(i, *particle_,
                     state_ + T::dim() * i, weight_[i]);
         }
     }
@@ -35,7 +38,7 @@ class InitializeTBBApply
     private :
 
     InitializeTBB<T> *const init_; 
-    const Particle<T> *const particle_;
+    Particle<T> *const particle_;
     typename T::value_type *const state_;
     double *const weight_;
     int *const accept_;
@@ -47,7 +50,7 @@ class MoveTBBApply
     public :
 
     MoveTBBApply (MoveTBB<T> *move, std::size_t iter,
-            const Particle<T> *particle, typename T::value_type *state,
+            Particle<T> *particle, typename T::value_type *state,
             double *weight, int *accept) :
         move_(move), iter_(iter), particle_(particle), state_(state),
         weight_(weight), accept_(accept) {}
@@ -55,7 +58,7 @@ class MoveTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            accept_[i] = move_->move_state(iter_, *particle_,
+            accept_[i] = move_->move_state(i, iter_, *particle_,
                     state_ + T::dim() * i, weight_[i]);
         }
     }
@@ -64,7 +67,7 @@ class MoveTBBApply
 
     MoveTBB<T> *const move_; 
     const std::size_t iter_;
-    const Particle<T> *const particle_;
+    Particle<T> *const particle_;
     typename T::value_type *const state_;
     double *const weight_;
     int *const accept_;
@@ -76,7 +79,7 @@ class MonitorTBBApply
     public :
 
     MonitorTBBApply (MonitorTBB<T> *monitor, std::size_t iter,
-            const Particle<T> *particle, typename T::value_type *state,
+            Particle<T> *particle, typename T::value_type *state,
             double *res) :
         monitor_(monitor), iter_(iter), particle_(particle), state_(state),
         res_(res) {}
@@ -84,7 +87,7 @@ class MonitorTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            res_[i] = monitor_->monitor_state(iter_, *particle_,
+            res_[i] = monitor_->monitor_state(i, iter_, *particle_,
                     state_ + T::dim() * i);
         }
     }
@@ -93,7 +96,7 @@ class MonitorTBBApply
 
     MonitorTBB<T> *const monitor_;
     const std::size_t iter_;
-    const Particle<T> *const particle_;
+    Particle<T> *const particle_;
     typename T::value_type *const state_;
     double *const res_;
 }; // class MonitorTBBApply
@@ -104,7 +107,7 @@ class PathTBBApply
     public :
 
     PathTBBApply (PathTBB<T> *path, std::size_t iter,
-            const Particle<T> *particle, typename T::value_type *state,
+            Particle<T> *particle, typename T::value_type *state,
             double *res) :
         path_(path), iter_(iter), particle_(particle), state_(state),
         res_(res) {}
@@ -112,7 +115,7 @@ class PathTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            res_[i] = path_->path_state(iter_, *particle_,
+            res_[i] = path_->path_state(i, iter_, *particle_,
                     state_ + T::dim() * i);
         }
     }
@@ -121,7 +124,7 @@ class PathTBBApply
 
     PathTBB<T> *const path_;
     const std::size_t iter_;
-    const Particle<T> *const particle_;
+    Particle<T> *const particle_;
     typename T::value_type *const state_;
     double *const res_;
 }; // class PathTBBApply
@@ -138,10 +141,48 @@ class StateTBB : public StateSeq<Dim, T>
 {
     public :
 
+    typedef typename r123::V_SMC_PRNG_TYPE rng_type;
+
     /// \brief Construct a StateTBB object with given number of particles
     ///
     /// \param N The number of particles
-    StateTBB (std::size_t N) : StateSeq<Dim, T>(N) {}
+    StateTBB (std::size_t N) :
+        StateSeq<Dim, T>(N), u64base(0.5 / (1UL<<63)),
+        uni_rng(N), uni_idx(N), ctr(N), key(N)
+    {
+        for (std::size_t i = 0; i != N; ++i) {
+            rng_type::ctr_type c = {{}};
+            rng_type::key_type k = {{}};
+            c[0] = i;
+            k[0] = V_SMC_PRNG_SEED + i;
+            ctr[i] = c;
+            key[i] = k;
+            uni_idx[i] = 0;
+            uni_rng[i].c = crng(ctr[i], key[i]);
+        }
+    }
+
+    double runif (std::size_t id)
+    {
+        if (uni_idx[id] == 3) {
+            uni_idx[id] = 0;
+            ++ctr[id][0];
+            uni_rng[id].c = crng(ctr[id], key[id]);
+        }
+
+        return u64base * uni_rng[id].n[uni_idx[id]++];
+    }
+
+    private :
+
+    union uni {rng_type::ctr_type c; unsigned long n[4];};
+    
+    double u64base;
+    rng_type crng;
+    vDist::tool::Buffer<uni> uni_rng;
+    vDist::tool::Buffer<int> uni_idx;
+    vDist::tool::Buffer<rng_type::ctr_type> ctr;
+    vDist::tool::Buffer<rng_type::key_type> key;
 }; // class StateTBB
 
 template <typename T>
