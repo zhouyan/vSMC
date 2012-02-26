@@ -150,9 +150,7 @@ class InitializeTBB : public InitializeSeq<T>
     public :
 
     InitializeTBB () {}
-
     InitializeTBB (const InitializeTBB<T> &init) {}
-
     InitializeTBB<T> & operator= (const InitializeTBB<T> &init) {return *this;}
 
     /// \brief Operator called by Sampler for initialize the particle set
@@ -169,9 +167,8 @@ class InitializeTBB : public InitializeSeq<T>
         accept_.resize(particle.size());
 
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::InitializeTBBApply<T>(
-                    this, &particle, particle.value().state(),
-                    weight_, accept_));
+                internal::InitializeTBBApply<T>(this, &particle,
+                    particle.value().state(), weight_, accept_));
 
         particle.set_log_weight(weight_);
         std::size_t accept = 0;
@@ -193,9 +190,7 @@ class MoveTBB : public MoveSeq<T>
     public :
 
     MoveTBB () {}
-
     MoveTBB (const MoveTBB<T> &move) {}
-
     MoveTBB<T> & operator= (const MoveTBB<T> &move) {return *this;}
 
     /// \brief Operator called by Sampler for move the particle set
@@ -210,9 +205,8 @@ class MoveTBB : public MoveSeq<T>
         accept_.resize(particle.size());
 
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::MoveTBBApply<T>(
-                    this, iter, &particle, particle.value().state(),
-                    weight_, accept_));
+                internal::MoveTBBApply<T>(this, iter, &particle,
+                    particle.value().state(), weight_, accept_));
 
         MoveSeq<T>::set_weight(this->weight_action(), particle, weight_.get());
         std::size_t accept = 0;
@@ -243,8 +237,8 @@ class MonitorTBB : public MonitorSeq<T>
             double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::MonitorTBBApply<T>(
-                    this, iter, &particle, particle.value().state(), res));
+                internal::MonitorTBBApply<T>(this, iter, &particle,
+                    particle.value().state(), res));
     }
 }; // class MonitorTBB
 
@@ -266,8 +260,8 @@ class PathTBB : public PathSeq<T>
             double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::PathTBBApply<T>(
-                    this, iter, &particle, particle.value().state(), res));
+                internal::PathTBBApply<T>(this, iter, &particle,
+                    particle.value().state(), res));
 
         return this->width_state(iter, particle);
     }
