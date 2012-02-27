@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <mkl_cblas.h>
 #include <boost/function.hpp>
-#include <vDist/tool/buffer.hpp>
+#include <vSMC/core/buffer.hpp>
 #include <vSMC/core/particle.hpp>
 
 namespace vSMC {
@@ -142,7 +142,7 @@ class Monitor
 
     private :
 
-    vDist::tool::Buffer<double> buffer_;
+    internal::Buffer<double> buffer_;
     integral_type integral_;
     std::vector<std::size_t> index_;
     std::vector<double> record_;

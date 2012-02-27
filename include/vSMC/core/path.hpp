@@ -197,7 +197,7 @@ class Path
 
     private :
 
-    vDist::tool::Buffer<double> buffer_;
+    internal::Buffer<double> buffer_;
     integral_type integral_;
     std::vector<std::size_t> index_;
     std::vector<double> integrand_;

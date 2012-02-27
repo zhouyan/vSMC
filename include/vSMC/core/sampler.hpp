@@ -10,9 +10,9 @@
 #include <vector>
 #include <mkl_cblas.h>
 #include <boost/function.hpp>
-#include <vDist/tool/buffer.hpp>
-#include <vSMC/core/particle.hpp>
+#include <vSMC/core/buffer.hpp>
 #include <vSMC/core/monitor.hpp>
+#include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
 
 namespace vSMC {
@@ -460,7 +460,7 @@ class Sampler
     std::vector<std::size_t> accept_;
 
     /// Monte Carlo estimation by integration
-    vDist::tool::Buffer<double> buffer_;
+    internal::Buffer<double> buffer_;
     std::map<std::string, Monitor<T> > monitor_;
     std::set<std::string> monitor_name_;
 

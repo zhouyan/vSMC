@@ -180,8 +180,8 @@ class InitializeTBB : public InitializeSeq<T>
 
     private :
 
-    vDist::tool::Buffer<double> weight_;
-    vDist::tool::Buffer<int> accept_;
+    internal::Buffer<double> weight_;
+    internal::Buffer<int> accept_;
 }; // class InitializeTBB
 
 template <typename T>
@@ -218,8 +218,8 @@ class MoveTBB : public MoveSeq<T>
 
     private :
 
-    vDist::tool::Buffer<double> weight_;
-    vDist::tool::Buffer<int> accept_;
+    internal::Buffer<double> weight_;
+    internal::Buffer<int> accept_;
 }; // class MoveTBB
 
 template <typename T>

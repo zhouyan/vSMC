@@ -13,7 +13,7 @@
 #include <Random123/ars.h>
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
-#include <vDist/tool/buffer.hpp>
+#include <vSMC/core/buffer.hpp>
 
 /// The Parallel RNG (based on Rand123) seed, unsigned
 #ifndef V_SMC_PRNG_SEED
@@ -324,10 +324,10 @@ class Particle
     std::size_t size_;
     T value_;
 
-    vDist::tool::Buffer<double> weight_;
-    vDist::tool::Buffer<double> log_weight_;
-    vDist::tool::Buffer<double> inc_weight_;
-    vDist::tool::Buffer<int> replication_;
+    internal::Buffer<double> weight_;
+    internal::Buffer<double> log_weight_;
+    internal::Buffer<double> inc_weight_;
+    internal::Buffer<int> replication_;
 
     double ess_;
     bool resampled_;
@@ -343,10 +343,10 @@ class Particle
     unsigned ridx_max_;
     union uni {rng_type::ctr_type c; rint_type n[V_SMC_PRNG_IDX_MAX];};
 
-    vDist::tool::Buffer<unsigned> ridx_;
-    vDist::tool::Buffer<uni> rbit_;
-    vDist::tool::Buffer<rng_type::ctr_type> rctr_;
-    vDist::tool::Buffer<rng_type::key_type> rkey_;
+    internal::Buffer<unsigned> ridx_;
+    internal::Buffer<uni> rbit_;
+    internal::Buffer<rng_type::ctr_type> rctr_;
+    internal::Buffer<rng_type::key_type> rkey_;
 
     void set_weight ()
     {

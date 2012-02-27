@@ -110,7 +110,7 @@ class StateSeq
     private :
 
     std::size_t size_;
-    vDist::tool::Buffer<T> state_;
+    internal::Buffer<T> state_;
 }; // class StateSeq
 
 /// \brief Sampler::init_type class for helping implementing SMC sequentially
@@ -176,7 +176,7 @@ class InitializeSeq
 
     private :
 
-    vDist::tool::Buffer<double> weight_;
+    internal::Buffer<double> weight_;
 }; // class InitializeSeq
 
 /// \brief Sampler::move_type class for helping implementing SMC sequentially
@@ -272,7 +272,7 @@ class MoveSeq
 
     private :
 
-    vDist::tool::Buffer<double> weight_;
+    internal::Buffer<double> weight_;
 }; // class MoveSeq
 
 /// \brief Monitor::integral_type class for helping implementing SMC
