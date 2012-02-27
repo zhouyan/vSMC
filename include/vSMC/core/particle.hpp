@@ -5,7 +5,6 @@
 #include <limits>
 #include <cstddef>
 #include <mkl_cblas.h>
-#include <mkl_vml.h>
 #include <boost/function.hpp>
 #include <boost/math/special_functions/log1p.hpp>
 #include <boost/random/binomial_distribution.hpp>
@@ -15,8 +14,6 @@
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 #include <vDist/tool/buffer.hpp>
-#include <vDist/tool/constants.hpp>
-#include <vDist/tool/eblas.hpp>
 
 /// The Parallel RNG (based on Rand123) seed, unsigned
 #ifndef V_SMC_PRNG_SEED
@@ -79,8 +76,11 @@ class Particle
             rbit_[i].c = crng_(rctr_[i], rkey_[i]);
         }
 
-        vDist::tool::dfill(size_, 1.0 / size_, weight_, 1);
-        vDist::tool::dfill(size_, 0, log_weight_, 1);
+        double equal_weight = 1.0 / size_;
+        for (std::size_t i = 0; i != size_; ++i) {
+            weight_[i] = equal_weight;
+            log_weight_[i] = 0;
+        }
     }
 
     /// \brief Size of the particle set
@@ -146,11 +146,13 @@ class Particle
     void add_log_weight (const double *inc_weight)
     {
         if (estimate_zconst_) {
-            vdExp(size_, inc_weight, inc_weight_);
+            for (std::size_t i = 0; i != size_; ++i)
+                inc_weight_[i] = std::exp(inc_weight[i]);
             zconst_ += std::log(cblas_ddot(size_, weight_, 1, inc_weight_, 1));
         }
 
-        vdAdd(size_, log_weight_, inc_weight, log_weight_);
+        for (std::size_t i = 0; i != size_; ++i)
+            log_weight_[i] += inc_weight[i];
         set_weight();
     }
 
@@ -250,11 +252,12 @@ class Particle
 
     double rnorm (std::size_t id, double mean, double sd)
     {
+        static const double pi2 = 6.283185307179586476925286766559005768394;
+
         double u1 = runif(id);
         double u2 = runif(id);
 
-        return std::sqrt(-2 * std::log(u1)) *
-            std::sin(vDist::constants::pi2() * u2) * sd + mean;
+        return std::sqrt(-2 * std::log(u1)) * std::sin(pi2 * u2) * sd + mean;
     }
 
     double rlnorm (std::size_t id, double meanlog, double sdlog)
@@ -264,8 +267,9 @@ class Particle
 
     double rcauchy (std::size_t id, double location, double scale)
     {
-        return scale * std::tan(vDist::constants::pi() * (runif(id) - 0.5))
-            + location;
+        static const double pi = 3.141592653589793238462643383279502884197;
+
+        return scale * std::tan(pi * (runif(id) - 0.5)) + location;
     }
 
     double rexp (std::size_t id, double scale)
@@ -350,9 +354,10 @@ class Particle
 
         for (std::size_t i = 0; i != size_; ++i)
             max_weight = std::max(max_weight, log_weight_[i]);
-        for (std::size_t i = 0; i != size_; ++i)
+        for (std::size_t i = 0; i != size_; ++i) {
             log_weight_[i] -= max_weight;
-        vdExp(size_, log_weight_, weight_);
+            weight_[i] = std::exp(log_weight_[i]);
+        }
         double sum = cblas_dasum(size_, weight_, 1);
         cblas_dscal(size_, 1 / sum, weight_, 1);
         ess_ = 1 / cblas_ddot(size_, weight_, 1, weight_, 1);
@@ -390,8 +395,8 @@ class Particle
         // N * weight. log_weight: act as the integral part of N * weight.
         // They all will be reset to equal weights after resampling.  So it is
         // safe to modify them here.
-        vDist::tool::dyatx(size_, size_, weight_, 1, log_weight_, 1);
-        vdModf(size_, log_weight_, log_weight_, weight_);
+        for (std::size_t i = 0; i != size_; ++i)
+            weight_[i] = std::modf(size_ * weight_[i], log_weight_ + i);
         std::size_t size = size_;
         size -= cblas_dasum(size_, log_weight_, 1);
         weight2replication();
@@ -422,9 +427,13 @@ class Particle
                 ++time;
             }
         }
-        vDist::tool::dfill(size_, 1.0 / size_, weight_, 1);
-        vDist::tool::dfill(size_, 0, log_weight_, 1);
+
         ess_ = size_;
+        double equal_weight = 1.0 / size_;
+        for (std::size_t i = 0; i != size_; ++i) {
+            weight_[i] = equal_weight;
+            log_weight_[i] = 0;
+        }
     }
 }; // class Particle
 

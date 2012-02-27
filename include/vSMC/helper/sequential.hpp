@@ -253,12 +253,14 @@ class MoveSeq
             case NO_ACTION :
                 break;
             case SET_WEIGHT :
-                vdLn(particle.size(), weight, weight);
+                for (std::size_t i = 0; i != particle.size(); ++i)
+                    weight[i] = std::log(weight[i]);
             case SET_LOG_WEIGHT :
                 particle.set_log_weight(weight);
                 break;
             case MUL_WEIGHT :
-                vdLn(particle.size(), weight, weight);
+                for (std::size_t i = 0; i != particle.size(); ++i)
+                    weight[i] = std::log(weight[i]);
             case ADD_LOG_WEIGHT :
                 particle.add_log_weight(weight);
                 break;
