@@ -226,7 +226,7 @@ class Particle
     {
         if (ridx_[id] == V_SMC_PRNG_IDX_MAX) {
             ridx_[id] = 0;
-            ++rctr_[id][0];
+            rctr_[id][0] += size_;
             rbit_[id].c = crng_(rctr_[id], rkey_[id]);
         }
 
@@ -236,8 +236,8 @@ class Particle
     /// \brief Generate an uniform random variate
     ///
     /// \param id Any integer. Usually the id of the particle.
-    /// \param min The minimum
-    /// \param max The maximum
+    /// \param min The minimum of the random variable
+    /// \param max The maximum of the random variable
     ///
     /// \return A random variate uniform distributed on [min,max]
     double runif (std::size_t id, double min, double max)
@@ -248,8 +248,8 @@ class Particle
     /// \brief Generate an Normal random variate
     ///
     /// \param id Any integer. Usually the id of the particle.
-    /// \param mean The mean
-    /// \param sd The SD
+    /// \param mean The mean of the random variable
+    /// \param sd The SD of the random variable
     ///
     /// \return A random variate Normally distributed as N(mean, sd^2) 
     double rnorm (std::size_t id, double mean, double sd)
