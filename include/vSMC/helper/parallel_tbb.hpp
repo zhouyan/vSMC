@@ -138,7 +138,6 @@ class StateTBB : public StateSeq<Dim, T>
 {
     public :
 
-
     /// \brief Construct a StateTBB object with given number of particles
     ///
     /// \param N The number of particles
@@ -269,7 +268,6 @@ class PathTBB : public PathSeq<T>
 }; // PathTBB
 
 namespace internal {
-
 
 } } // namespace vSMC::internal
 
