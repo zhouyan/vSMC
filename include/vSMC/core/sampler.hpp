@@ -10,7 +10,6 @@
 #include <vector>
 #include <mkl_cblas.h>
 #include <boost/function.hpp>
-#include <vDist/rng/gsl.hpp>
 #include <vDist/tool/buffer.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/monitor.hpp>
@@ -41,19 +40,15 @@ class Sampler
     /// \param mcmc The functor used to perform MCMC move
     /// \param scheme The resampling scheme. See ResampleScheme
     /// \param threshold The threshold for performing resampling
-    /// \param seed The seed for the reampling RNG. See documentation of vDist
-    /// \param brng The basic RNG for resampling RNG. See documentation of GSL
     Sampler (
             std::size_t N,
             const init_type &init,
             const move_type &move,
             const move_type &mcmc = NULL,
             ResampleScheme scheme = RESIDUAL,
-            double threshold = 0.5,
-            const int seed = V_DIST_SEED,
-            const gsl_rng_type *brng = V_DIST_GSL_BRNG) :
+            double threshold = 0.5) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
-        rng_(seed, brng), scheme_(scheme), threshold_(threshold * N),
+        scheme_(scheme), threshold_(threshold * N),
         particle_(N), iter_num_(0), show_progress_(false) {}
 
     /// \brief Size of the particle set
@@ -454,7 +449,6 @@ class Sampler
     move_type mcmc_;
 
     /// Resampling
-    vDist::RngGSL rng_;
     ResampleScheme scheme_;
     double threshold_;
 
@@ -482,7 +476,7 @@ class Sampler
         particle_.resampled(ess_.back() < threshold_);
         resampled_.push_back(particle_.resampled());
         if (particle_.resampled())
-            particle_.resample(scheme_, rng_.get_rng());
+            particle_.resample(scheme_);
 
         if (!path_.empty())
             path_.eval(iter_num_, particle_);

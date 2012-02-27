@@ -8,16 +8,17 @@
 #include <mkl_vml.h>
 #include <boost/function.hpp>
 #include <boost/math/special_functions/log1p.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/binomial_distribution.hpp>
 #include <Random123/aes.h>
 #include <Random123/ars.h>
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
-#include <vDist/rng/gsl.hpp>
 #include <vDist/tool/buffer.hpp>
 #include <vDist/tool/constants.hpp>
 #include <vDist/tool/eblas.hpp>
 
-/// The Parallel RNG (based on Rand123) seed
+/// The Parallel RNG (based on Rand123) seed, unsigned
 #ifndef V_SMC_PRNG_SEED
 #define V_SMC_PRNG_SEED 0xdeadbeefL
 #endif // V_SMC_PRNG_SEED
@@ -61,6 +62,7 @@ class Particle
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false),
+        binom_(size_, 0.5), brng_(V_SMC_PRNG_SEED),
         rbase_(0), rbit_(N), ridx_(N), rctr_(N), rkey_(N)
     {
         int shift = sizeof(V_SMC_PRNG_UINT_TYPE) * 8 - 1;
@@ -201,21 +203,20 @@ class Particle
     /// \brief Perform resampling
     ///
     /// \param scheme The resampling scheme, see ResamplingScheme
-    /// \param [in] rng A gsl rng object pointer
-    void resample (ResampleScheme scheme, const gsl_rng *rng)
+    void resample (ResampleScheme scheme)
     {
         switch (scheme) {
             case MULTINOMIAL :
-                resample_multinomial(rng);
+                resample_multinomial();
                 break;
             case RESIDUAL :
-                resample_residual(rng);
+                resample_residual();
                 break;
             case STRATIFIED :
-                resample_stratified(rng);
+                resample_stratified();
                 break;
             case SYSTEMATIC :
-                resample_systematic(rng);
+                resample_systematic();
                 break;
             default :
                 throw std::runtime_error(
@@ -318,14 +319,20 @@ class Particle
 
     std::size_t size_;
     T value_;
+
     vDist::tool::Buffer<double> weight_;
     vDist::tool::Buffer<double> log_weight_;
     vDist::tool::Buffer<double> inc_weight_;
-    vDist::tool::Buffer<unsigned> replication_;
+    vDist::tool::Buffer<int> replication_;
+
     double ess_;
     bool resampled_;
     double zconst_;
     bool estimate_zconst_;
+
+    typedef boost::random::binomial_distribution<int> binom_type;
+    binom_type binom_;
+    boost::random::mt19937 brng_;
 
     union uni {
         rng_type::ctr_type c; V_SMC_PRNG_UINT_TYPE n[V_SMC_PRNG_IDX_MAX];};
@@ -350,13 +357,33 @@ class Particle
         ess_ = 1 / cblas_ddot(size_, weight_, 1, weight_, 1);
     }
 
-    void resample_multinomial (const gsl_rng *rng)
+    void weight2replication ()
     {
-        gsl_ran_multinomial(rng, size_, size_, weight_, replication_);
+        double tp = 0;
+        for (std::size_t i = 0; i != size_; ++i)
+            tp += weight_[i];
+
+        double sum_p = 0;
+        std::size_t sum_n = 0;
+        for (std::size_t i = 0; i != size_; ++i) {
+            replication_[i] = 0;
+            if (sum_n < size_ && weight_[i] > 0) {
+                binom_type::param_type
+                    param(size_ - sum_n, weight_[i] / (tp - sum_p));
+                replication_[i] = binom_(brng_, param);
+            }
+            sum_p += weight_[i];
+            sum_n += replication_[i];
+        }
+    }
+
+    void resample_multinomial ()
+    {
+        weight2replication();
         resample_do();
     }
 
-    void resample_residual (const gsl_rng *rng)
+    void resample_residual ()
     {
         // Reuse weight and log_weight. weight: act as the fractional part of
         // N * weight. log_weight: act as the integral part of N * weight.
@@ -366,14 +393,14 @@ class Particle
         vdModf(size_, log_weight_, log_weight_, weight_);
         std::size_t size = size_;
         size -= cblas_dasum(size_, log_weight_, 1);
-        gsl_ran_multinomial(rng, size_, size, weight_, replication_);
+        weight2replication();
         for (std::size_t i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
         resample_do();
     }
 
-    void resample_stratified (const gsl_rng *rng) {}
-    void resample_systematic (const gsl_rng *rng) {}
+    void resample_stratified () {}
+    void resample_systematic () {}
 
     void resample_do ()
     {
