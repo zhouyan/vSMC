@@ -217,12 +217,12 @@ class Particle
         }
     }
 
-    /// \brief Generate an [0,1] uniform random variate
+    /// \brief Generate an uniform random integer
     ///
-    /// \param id Any integer. Usually the id of the particle.
+    /// \param id Any integer, usually the id of the particle
     ///
-    /// \return A random variate uniform distributed on [0,1]
-    double runif (std::size_t id)
+    /// \return A random integer on the space of V_SMC_PRNG_UINT_TYPE
+    V_SMC_PRNG_UINT_TYPE ruint (std::size_t id)
     {
         if (ridx_[id] == V_SMC_PRNG_IDX_MAX) {
             ridx_[id] = 0;
@@ -230,24 +230,38 @@ class Particle
             rbit_[id].c = crng_(rctr_[id], rkey_[id]);
         }
 
-        return rbase_ * rbit_[id].n[ridx_[id]++];
+        return rbit_[id].n[ridx_[id]++];
     }
 
-    /// \brief Generate an uniform random variate
+    /// \brief Generate an [0,1] uniform random variate
     ///
-    /// \param id Any integer. Usually the id of the particle.
-    /// \param min The minimum of the random variable
-    /// \param max The maximum of the random variable
+    /// \param id Any integer, usually the id of the particle
     ///
-    /// \return A random variate uniform distributed on [min,max]
-    double runif (std::size_t id, double min, double max)
+    /// \return A random variate uniform distributed on [0,1]
+    double runif (std::size_t id)
     {
-        return runif(id) * (max - min) + min;
+        return ruint(id) * rbase_;
     }
+
+    double rbeta (std::size_t id, double a, double b) {return 0;}
+
+    double rcauchy (std::size_t id, double location, double scale) {return 0;}
+
+    double rchisq (std::size_t id, double a, double b) {return 0;}
+
+    double rexp (std::size_t id, double scale) {return 0;}
+
+    double rf (std::size_t id, double df1, double df2) {return 0;}
+
+    double rgamma (std::size_t id, double shape, double scale) {return 0;}
+
+    double rlaplace (std::size_t id, double location, double scale) {return 0;}
+
+    double rlnorm (std::size_t id, double mealog, double sdlog) {return 0;}
 
     /// \brief Generate an Normal random variate
     ///
-    /// \param id Any integer. Usually the id of the particle.
+    /// \param id Any integer, usually the id of the particle
     /// \param mean The mean of the random variable
     /// \param sd The SD of the random variable
     ///
@@ -259,6 +273,22 @@ class Particle
 
         return std::sqrt(-2 * log(u1)) * std::cos(2 * M_PI * u2) * sd + mean;
     }
+
+    double rt (std::size_t id, double df) {}
+
+    /// \brief Generate an uniform random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param min The minimum of the random variable
+    /// \param max The maximum of the random variable
+    ///
+    /// \return A random variate uniform distributed on [min,max]
+    double runif (std::size_t id, double min, double max)
+    {
+        return runif(id) * (max - min) + min;
+    }
+
+    double dweibull (std::size_t id, double df) {}
 
     private :
 
