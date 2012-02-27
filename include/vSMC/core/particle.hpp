@@ -77,10 +77,8 @@ class Particle
             rbit_[i].c = crng_(rctr_[i], rkey_[i]);
         }
 
-        for (std::size_t i = 0; i != size_; ++i) {
-            weight_[i] = 1;
-            log_weight_[i] = 0;
-        }
+        vDist::tool::dfill(size_, 1.0 / size_, weight_, 1);
+        vDist::tool::dfill(size_, 0, log_weight_, 1);
     }
 
     /// \brief Size of the particle set
@@ -360,11 +358,10 @@ class Particle
 
     void resample_residual (const gsl_rng *rng)
     {
-        /// \internal Reuse weight and log_weight.
-        /// weight: act as the fractional part of N * weight.
-        /// log_weight: act as the integral part of N * weight.
-        /// They all will be reset to equal weights after resampling.
-        /// So it is safe to modify them here.
+        // Reuse weight and log_weight. weight: act as the fractional part of
+        // N * weight. log_weight: act as the integral part of N * weight.
+        // They all will be reset to equal weights after resampling.  So it is
+        // safe to modify them here.
         vDist::tool::dyatx(size_, size_, weight_, 1, log_weight_, 1);
         vdModf(size_, log_weight_, log_weight_, weight_);
         std::size_t size = size_;
