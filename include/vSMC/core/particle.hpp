@@ -8,8 +8,8 @@
 #include <mkl_vml.h>
 #include <boost/function.hpp>
 #include <boost/math/special_functions/log1p.hpp>
-#include <boost/random/mersenne_twister.hpp>
 #include <boost/random/binomial_distribution.hpp>
+#include <boost/random/mersenne_twister.hpp>
 #include <Random123/aes.h>
 #include <Random123/ars.h>
 #include <Random123/philox.h>
@@ -33,8 +33,7 @@
 #define V_SMC_PRNG_UINT_TYPE unsigned
 #endif // V_SMC_PRNG_UINT_TYPE
 
-#define V_SMC_PRNG_IDX_MAX \
-    (sizeof(rng_type::ctr_type) / sizeof(V_SMC_PRNG_UINT_TYPE))
+#define V_SMC_PRNG_IDX_MAX sizeof(rng_type::ctr_type) / sizeof(rint_type)
 
 namespace vSMC {
 
@@ -52,8 +51,10 @@ class Particle
 {
     public :
 
-    /// \brief Type of of the internal RNG, one of the 64 bit Rand123 type
+    /// \brief Type of the internal RNG (Random123 C++ type)
     typedef r123::V_SMC_PRNG_TYPE rng_type;
+    /// \brief Type of the internal unsigned random integer
+    typedef V_SMC_PRNG_UINT_TYPE rint_type;
 
     /// \brief Construct a Particle object with given number of particles
     ///
@@ -63,11 +64,10 @@ class Particle
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false),
         binom_(size_, 0.5), brng_(V_SMC_PRNG_SEED),
-        rbase_(0), rbit_(N), ridx_(N), rctr_(N), rkey_(N)
+        rbase_(std::numeric_limits<rint_type>::max()),
+        ridx_max_(V_SMC_PRNG_IDX_MAX),
+        ridx_(N), rbit_(N), rctr_(N), rkey_(N)
     {
-        int shift = sizeof(V_SMC_PRNG_UINT_TYPE) * 8 - 1;
-        rbase_ = 0.5 / (1U<<shift);
-
         for (std::size_t i = 0; i != N; ++i) {
             rng_type::ctr_type c = {{}};
             rng_type::key_type k = {{}};
@@ -226,9 +226,9 @@ class Particle
     }
 
     /// \brief Generate an uniform random integer
-    V_SMC_PRNG_UINT_TYPE ruint (std::size_t id)
+    rint_type rint (std::size_t id)
     {
-        if (ridx_[id] == V_SMC_PRNG_IDX_MAX) {
+        if (ridx_[id] == ridx_max_) {
             ridx_[id] = 0;
             rctr_[id][0] += size_;
             rbit_[id].c = crng_(rctr_[id], rkey_[id]);
@@ -240,7 +240,7 @@ class Particle
     /// \brief Generate an [0,1] uniform random variate
     double runif (std::size_t id)
     {
-        return ruint(id) * rbase_;
+        return rint(id) / rbase_;
     }
 
     double runif (std::size_t id, double min, double max)
@@ -299,12 +299,12 @@ class Particle
         return rgamma(id, 0.5 * df, 2);
     }
 
-    double rf (std::size_t id, double df1, double df2)
+    double rfdist (std::size_t id, double df1, double df2)
     {
         return rchisq(id, df1) / rchisq(id, df2) * df2 / df1;
     }
 
-    double rt (std::size_t id, double df)
+    double rtdist (std::size_t id, double df)
     {
         return rnorm(id, 0, 1) / std::sqrt(rchisq(id, df) / df);
     }
@@ -330,16 +330,17 @@ class Particle
     double zconst_;
     bool estimate_zconst_;
 
-    typedef boost::random::binomial_distribution<int> binom_type;
+    typedef boost::random::binomial_distribution<int, double> binom_type;
     binom_type binom_;
     boost::random::mt19937 brng_;
 
-    union uni {
-        rng_type::ctr_type c; V_SMC_PRNG_UINT_TYPE n[V_SMC_PRNG_IDX_MAX];};
-    double rbase_;
     rng_type crng_;
+    double rbase_;
+    unsigned ridx_max_;
+    union uni {rng_type::ctr_type c; rint_type n[V_SMC_PRNG_IDX_MAX];};
+
+    vDist::tool::Buffer<unsigned> ridx_;
     vDist::tool::Buffer<uni> rbit_;
-    vDist::tool::Buffer<int> ridx_;
     vDist::tool::Buffer<rng_type::ctr_type> rctr_;
     vDist::tool::Buffer<rng_type::key_type> rkey_;
 
