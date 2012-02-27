@@ -7,10 +7,12 @@
 #include <mkl_cblas.h>
 #include <mkl_vml.h>
 #include <boost/function.hpp>
+#include <boost/math/special_functions/log1p.hpp>
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 #include <vDist/rng/gsl.hpp>
 #include <vDist/tool/buffer.hpp>
+#include <vDist/tool/constants.hpp>
 #include <vDist/tool/eblas.hpp>
 
 /// The Parallel RNG (based on Rand123) seed
@@ -243,39 +245,6 @@ class Particle
         return ruint(id) * rbase_;
     }
 
-    double rbeta (std::size_t id, double a, double b) {return 0;}
-
-    double rcauchy (std::size_t id, double location, double scale) {return 0;}
-
-    double rchisq (std::size_t id, double a, double b) {return 0;}
-
-    double rexp (std::size_t id, double scale) {return 0;}
-
-    double rf (std::size_t id, double df1, double df2) {return 0;}
-
-    double rgamma (std::size_t id, double shape, double scale) {return 0;}
-
-    double rlaplace (std::size_t id, double location, double scale) {return 0;}
-
-    double rlnorm (std::size_t id, double mealog, double sdlog) {return 0;}
-
-    /// \brief Generate an Normal random variate
-    ///
-    /// \param id Any integer, usually the id of the particle
-    /// \param mean The mean of the random variable
-    /// \param sd The SD of the random variable
-    ///
-    /// \return A random variate Normally distributed as N(mean, sd^2) 
-    double rnorm (std::size_t id, double mean, double sd)
-    {
-        double u1 = runif(id);
-        double u2 = runif(id);
-
-        return std::sqrt(-2 * log(u1)) * std::cos(2 * M_PI * u2) * sd + mean;
-    }
-
-    double rt (std::size_t id, double df) {}
-
     /// \brief Generate an uniform random variate
     ///
     /// \param id Any integer, usually the id of the particle
@@ -288,7 +257,146 @@ class Particle
         return runif(id) * (max - min) + min;
     }
 
-    double dweibull (std::size_t id, double df) {}
+    /// \brief Generate an Normal random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param mean The mean of the random variable
+    /// \param sd The SD of the random variable
+    ///
+    /// \return A random variate Normally distributed as N(mean, sd^2)
+    double rnorm (std::size_t id, double mean, double sd)
+    {
+        double u1 = runif(id);
+        double u2 = runif(id);
+
+        return std::sqrt(-2 * std::log(u1)) *
+            std::sin(vDist::constants::pi2() * u2) * sd + mean;
+    }
+
+    /// \brief Generate an Log Normal random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param meanlog The mean of log of the random variable
+    /// \param sdlog The SD of log of the random variable
+    ///
+    /// \return A random variate distributed as LogNormal(mean, sd^2)
+    double rlnorm (std::size_t id, double meanlog, double sdlog)
+    {
+        return std::exp(rnorm(id, meanlog, sdlog));
+    }
+
+    /// \brief Generate an Cauchy random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param location The location of the random variable
+    /// \param scale The scale of the random variable
+    ///
+    /// \return A random variate distributed as Cauchy(location, scale)
+    double rcauchy (std::size_t id, double location, double scale)
+    {
+        return scale * std::tan(vDist::constants::pi() * (runif(id) - 0.5))
+            + location;
+    }
+
+    /// \brief Generate an Exponential random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param scale The scale of the random variable
+    ///
+    /// \return A random variate distributed as Exponential(scale)
+    double rexp (std::size_t id, double scale)
+    {
+        return -scale * boost::math::log1p(-runif(id));
+    }
+
+    /// \brief Generate an Laplace random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param location The location of the random variable
+    /// \param scale The scale of the random variable
+    ///
+    /// \return A random variate distributed as Laplace(location, scale)
+    double rlaplace (std::size_t id, double location, double scale)
+    {
+        double u = runif(id) - 0.5;
+
+        return u > 0 ?
+            location - scale * boost::math::log1p(-2 * u):
+            location + scale * boost::math::log1p(2 * u);
+    }
+
+    /// \brief Generate an Weibull random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param shape The shape of the random variable
+    /// \param scale The scale of the random variable
+    ///
+    /// \return A random variate distributed as Weibull(shape, scale)
+    double rweibull (std::size_t id, double shape, double scale)
+    {
+        return scale * std::pow(
+                -boost::math::log1p(-runif(id)), 1 / shape);
+    }
+
+    /// \brief Generate an Gamma random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param shape The shape of the random variable
+    /// \param scale The scale of the random variable
+    ///
+    /// \return A random variate distributed as Gamma(shape, scale)
+    // TODO GAMMA
+    double rgamma (std::size_t id, double shape, double scale)
+    {
+        return 0;
+    }
+
+    /// \brief Generate an Chi-Square random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param df The degree of freedom of the random variable
+    ///
+    /// \return A random variate distributed as ChiSquare(df)
+    double rchisq (std::size_t id, double df)
+    {
+        return rgamma(id, 0.5 * df, 2);
+    }
+
+    /// \brief Generate an F random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param df1 The first degree of freedom of the random variable
+    /// \param df2 The second degree of freedom of the random variable
+    ///
+    /// \return A random variate distributed as F(df1, df2)
+    double rf (std::size_t id, double df1, double df2)
+    {
+        return rchisq(id, df1) / rchisq(id, df2) * df2 / df1;
+    }
+
+    /// \brief Generate an t random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param df The degree of freedom of the random variable
+    ///
+    /// \return A random variate distributed as t(df)
+    double rt (std::size_t id, double df)
+    {
+        return rnorm(id, 0, 1) / std::sqrt(rchisq(id, df) / df);
+    }
+
+    /// \brief Generate an Beta random variate
+    ///
+    /// \param id Any integer, usually the id of the particle
+    /// \param shape1 The shape of the random variable
+    /// \param shape2 The second shape of the random variable
+    ///
+    /// \return A random variate distributed as Beta(shape1, shape2)
+    // TODO BETA
+    double rbeta (std::size_t id, double shape1, double shape2)
+    {
+        return 0;
+    }
 
     private :
 
