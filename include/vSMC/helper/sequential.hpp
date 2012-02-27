@@ -159,6 +159,7 @@ class InitializeSeq
 
     /// \brief Initialize a single particle
     ///
+    /// \param id The id of the particle to be processed
     /// \param particle The Particle set passed by Sampler
     /// \param state The array contains the states of a single particle
     /// \param weight The log weight of the particle
@@ -222,6 +223,7 @@ class MoveSeq
 
     /// \brief Move a single particle
     ///
+    /// \param id The id of the particle to be processed
     /// \param iter The iteration number
     /// \param particle The Particle set passed by Sampler
     /// \param state The array contains the states of a single particle
@@ -298,6 +300,8 @@ class MonitorSeq
     }
 
     /// \brief Record the integrand from a single particle
+    ///
+    /// \param id The id of the particle to be processed
     /// \param iter The iteration number
     /// \param particle The Particle set passed by Sampler
     /// \param state The array contains the states of a single particle
@@ -338,7 +342,7 @@ class PathSeq
 
     /// \brief Evaluate the path sampling integrand for a single particle
     ///
-    ///
+    /// \param id The id of the particle to be processed
     /// \param iter The iteration number
     /// \param particle The particle set passed by Sampler
     /// \param state The array contains the states of a single particle
