@@ -8,6 +8,8 @@
 #include <mkl_vml.h>
 #include <boost/function.hpp>
 #include <boost/math/special_functions/log1p.hpp>
+#include <Random123/aes.h>
+#include <Random123/ars.h>
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 #include <vDist/rng/gsl.hpp>
@@ -73,6 +75,11 @@ class Particle
             rkey_[i] = k;
             ridx_[i] = 0;
             rbit_[i].c = crng_(rctr_[i], rkey_[i]);
+        }
+
+        for (std::size_t i = 0; i != size_; ++i) {
+            weight_[i] = 1;
+            log_weight_[i] = 0;
         }
     }
 
