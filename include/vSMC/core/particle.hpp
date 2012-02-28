@@ -3,34 +3,14 @@
 
 #include <algorithm>
 #include <limits>
+#include <cmath>
 #include <cstddef>
 #include <mkl_cblas.h>
 #include <boost/function.hpp>
-#include <boost/math/special_functions/log1p.hpp>
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
-#include <Random123/aes.h>
-#include <Random123/ars.h>
-#include <Random123/philox.h>
-#include <Random123/threefry.h>
 #include <vSMC/core/buffer.hpp>
-
-/// The Parallel RNG (based on Rand123) seed, unsigned
-#ifndef V_SMC_PRNG_SEED
-#define V_SMC_PRNG_SEED 0xdeadbeefL
-#endif // V_SMC_PRNG_SEED
-
-/// The Parallel RNG (based on Rand123) type, philox or threefry
-#ifndef V_SMC_PRNG_TYPE
-#define V_SMC_PRNG_TYPE Threefry4x64
-#endif // V_SMC_PRNG_TYPE
-
-/// The type used to extract random bits
-#ifndef V_SMC_PRNG_UINT_TYPE
-#define V_SMC_PRNG_UINT_TYPE unsigned
-#endif // V_SMC_PRNG_UINT_TYPE
-
-#define V_SMC_PRNG_IDX_MAX sizeof(rng_type::ctr_type) / sizeof(rint_type)
+#include <vSMC/core/rng.hpp>
 
 namespace vSMC {
 
@@ -48,32 +28,20 @@ class Particle
 {
     public :
 
-    /// \brief Type of the internal RNG (Random123 C++ type)
-    typedef r123::V_SMC_PRNG_TYPE rng_type;
-    /// \brief Type of the internal unsigned random integer
-    typedef V_SMC_PRNG_UINT_TYPE rint_type;
-
     /// \brief Construct a Particle object with given number of particles
     ///
     /// \param N The number of particles
-    Particle (std::size_t N) :
+    Particle (std::size_t N, unsigned seed = V_SMC_RNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false),
-        binom_(size_, 0.5), brng_(V_SMC_PRNG_SEED),
-        rbase_(std::numeric_limits<rint_type>::max()),
-        ridx_max_(V_SMC_PRNG_IDX_MAX),
-        ridx_(N), rbit_(N), rctr_(N), rkey_(N)
+        binom_(size_, 0.5), brng_(seed), prng_(N)
     {
-        for (std::size_t i = 0; i != N; ++i) {
-            rng_type::ctr_type c = {{}};
-            rng_type::key_type k = {{}};
-            c[0] = i;
-            k[0] = V_SMC_PRNG_SEED + i;
-            rctr_[i] = c;
-            rkey_[i] = k;
-            ridx_[i] = 0;
-            rbit_[i].c = crng_(rctr_[i], rkey_[i]);
+        Rng rng;
+        for (std::size_t i = 0; i != size_; ++i) {
+            prng_[i] = rng;
+            prng_[i].seed(i, seed + i);
+            prng_[i].step(size_);
         }
 
         double equal_weight = 1.0 / size_;
@@ -227,96 +195,14 @@ class Particle
         }
     }
 
-    /// \brief Generate an uniform random integer
-    rint_type rint (std::size_t id)
+    Rng *prng ()
     {
-        if (ridx_[id] == ridx_max_) {
-            ridx_[id] = 0;
-            rctr_[id][0] += size_;
-            rbit_[id].c = crng_(rctr_[id], rkey_[id]);
-        }
-
-        return rbit_[id].n[ridx_[id]++];
+        return prng_.get();
     }
 
-    /// \brief Generate an [0,1] uniform random variate
-    double runif (std::size_t id)
+    Rng &prng (std::size_t id)
     {
-        return rint(id) / rbase_;
-    }
-
-    double runif (std::size_t id, double min, double max)
-    {
-        return runif(id) * (max - min) + min;
-    }
-
-    double rnorm (std::size_t id, double mean, double sd)
-    {
-        static const double pi2 = 6.283185307179586476925286766559005768394;
-
-        double u1 = runif(id);
-        double u2 = runif(id);
-
-        return std::sqrt(-2 * std::log(u1)) * std::sin(pi2 * u2) * sd + mean;
-    }
-
-    double rlnorm (std::size_t id, double meanlog, double sdlog)
-    {
-        return std::exp(rnorm(id, meanlog, sdlog));
-    }
-
-    double rcauchy (std::size_t id, double location, double scale)
-    {
-        static const double pi = 3.141592653589793238462643383279502884197;
-
-        return scale * std::tan(pi * (runif(id) - 0.5)) + location;
-    }
-
-    double rexp (std::size_t id, double scale)
-    {
-        return -scale * boost::math::log1p(-runif(id));
-    }
-
-    double rlaplace (std::size_t id, double location, double scale)
-    {
-        double u = runif(id) - 0.5;
-
-        return u > 0 ?
-            location - scale * boost::math::log1p(-2 * u):
-            location + scale * boost::math::log1p(2 * u);
-    }
-
-    double rweibull (std::size_t id, double shape, double scale)
-    {
-        return scale * std::pow(
-                -boost::math::log1p(-runif(id)), 1 / shape);
-    }
-
-    // TODO GAMMA
-    double rgamma (std::size_t id, double shape, double scale)
-    {
-        return 0;
-    }
-
-    double rchisq (std::size_t id, double df)
-    {
-        return rgamma(id, 0.5 * df, 2);
-    }
-
-    double rfdist (std::size_t id, double df1, double df2)
-    {
-        return rchisq(id, df1) / rchisq(id, df2) * df2 / df1;
-    }
-
-    double rtdist (std::size_t id, double df)
-    {
-        return rnorm(id, 0, 1) / std::sqrt(rchisq(id, df) / df);
-    }
-
-    // TODO BETA
-    double rbeta (std::size_t id, double shape1, double shape2)
-    {
-        return 0;
+        return prng_[id];
     }
 
     private :
@@ -338,15 +224,7 @@ class Particle
     binom_type binom_;
     boost::random::mt19937 brng_;
 
-    rng_type crng_;
-    double rbase_;
-    unsigned ridx_max_;
-    union uni {rng_type::ctr_type c; rint_type n[V_SMC_PRNG_IDX_MAX];};
-
-    internal::Buffer<unsigned> ridx_;
-    internal::Buffer<uni> rbit_;
-    internal::Buffer<rng_type::ctr_type> rctr_;
-    internal::Buffer<rng_type::key_type> rkey_;
+    internal::Buffer<Rng> prng_;
 
     void set_weight ()
     {

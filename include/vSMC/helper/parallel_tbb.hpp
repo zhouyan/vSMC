@@ -27,8 +27,8 @@ class InitializeTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            accept_[i] = init_->initialize_state(i, *particle_,
-                    state_ + T::dim() * i, weight_[i]);
+            accept_[i] = init_->initialize_state(i, state_ + T::dim() * i,
+                    weight_[i], *particle_, particle_->prng(i));
         }
     }
 
@@ -55,8 +55,8 @@ class MoveTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            accept_[i] = move_->move_state(i, iter_, *particle_,
-                    state_ + T::dim() * i, weight_[i]);
+            accept_[i] = move_->move_state(i, iter_, state_ + T::dim() * i,
+                    weight_[i], *particle_, particle_->prng(i));
         }
     }
 
@@ -84,8 +84,8 @@ class MonitorTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            res_[i] = monitor_->monitor_state(i, iter_, *particle_,
-                    state_ + T::dim() * i);
+            res_[i] = monitor_->monitor_state(i, iter_, state_ + T::dim() * i,
+                    *particle_);
         }
     }
 
@@ -112,8 +112,8 @@ class PathTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            res_[i] = path_->path_state(i, iter_, *particle_,
-                    state_ + T::dim() * i);
+            res_[i] = path_->path_state(i, iter_, state_ + T::dim() * i,
+                    *particle_);
         }
     }
 

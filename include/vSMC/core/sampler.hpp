@@ -46,10 +46,11 @@ class Sampler
             const move_type &move,
             const move_type &mcmc = NULL,
             ResampleScheme scheme = RESIDUAL,
-            double threshold = 0.5) :
+            double threshold = 0.5,
+            unsigned seed = V_SMC_RNG_SEED) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         scheme_(scheme), threshold_(threshold * N),
-        particle_(N), iter_num_(0), show_progress_(false) {}
+        particle_(N, seed), iter_num_(0), show_progress_(false) {}
 
     /// \brief Size of the particle set
     ///

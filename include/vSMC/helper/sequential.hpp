@@ -151,8 +151,8 @@ class InitializeSeq
         std::size_t accept = 0;
 
         for (std::size_t i = 0; i != particle.size(); ++i) {
-            accept += initialize_state(i, particle,
-                    particle.value().state(i), weight_[i]);
+            accept += initialize_state(i, particle.value().state(i),
+                    weight_[i], particle, particle.prng(i));
         }
 
         particle.set_log_weight(weight_);
@@ -168,8 +168,9 @@ class InitializeSeq
     /// \param weight The log weight of the particle
     ///
     /// \return Accept count, normally should be zero or one
-    virtual int initialize_state (std::size_t id, Particle<T> &particle,
-            typename T::value_type *state, double &weight) = 0;
+    virtual int initialize_state (std::size_t id,
+            typename T::value_type *state, double &weight,
+            const Particle<T> &particle, Rng &rng) = 0;
 
     /// \brief Initialize the Particle set
     ///
@@ -213,8 +214,8 @@ class MoveSeq
         std::size_t accept = 0;
 
         for (std::size_t i = 0; i != particle.size(); ++i) {
-            accept += move_state(i, iter, particle,
-                    particle.value().state(i), weight_[i]);
+            accept += move_state(i, iter, particle.value().state(i),
+                    weight_[i], particle, particle.prng(i));
         }
 
         set_weight(weight_action(), particle, weight_.get());
@@ -236,8 +237,8 @@ class MoveSeq
     /// of) weight. It can even be meaningless, namely no action is taken with
     /// this weight. See WeightAction and weight_action.
     virtual int move_state (std::size_t id, std::size_t iter,
-            Particle<T> &particle,
-            typename T::value_type *state, double &weight) = 0;
+            typename T::value_type *state, double &weight,
+            const Particle<T> &particle, Rng &rng) = 0;
 
     /// \brief Determine how weight returned by move_state shall be treated
     ///
@@ -298,8 +299,8 @@ class MonitorSeq
             double *res)
     {
         for (std::size_t i = 0; i != particle.size(); ++i)
-            res[i] = monitor_state(i, iter, particle,
-                    particle.value().state(i));
+            res[i] = monitor_state(i, iter, particle.value().state(i),
+                    particle);
     }
 
     /// \brief Record the integrand from a single particle
@@ -311,7 +312,8 @@ class MonitorSeq
     ///
     /// \return The value to be estimated
     virtual double monitor_state (std::size_t id, std::size_t iter,
-            Particle<T> &particle, typename T::value_type *state) = 0;
+            const typename T::value_type *state,
+            const Particle<T> &particle) = 0;
 }; // class MonitorSeq
 
 /// \brief Path::integral_type class for helping implementing SMC sequentially
@@ -352,7 +354,8 @@ class PathSeq
     ///
     /// \return The value of the integrand
     virtual double path_state (std::size_t id, std::size_t iter,
-            Particle<T> &particle, typename T::value_type *state) = 0;
+            const typename T::value_type *state,
+            const Particle<T> &particle) = 0;
 
     /// \brief Evaluate the path sampling width
     ///
@@ -361,7 +364,7 @@ class PathSeq
     ///
     /// \return The value of the width
     virtual double width_state (std::size_t iter,
-            Particle<T> &particle) = 0;
+            const Particle<T> &particle) = 0;
 };
 
 } // namespace vSMC
