@@ -168,7 +168,7 @@ class Path
         buffer_.resize(particle.size());
         width_.push_back(integral_(iter, particle, buffer_));
         integrand_.push_back(cblas_ddot(particle.size(),
-                particle.weight_ptr(), 1, buffer_, 1));
+                buffer_, 1, particle.weight_ptr(), 1));
         index_.push_back(iter);
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());

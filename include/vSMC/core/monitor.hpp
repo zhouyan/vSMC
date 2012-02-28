@@ -28,13 +28,14 @@ class Monitor
     /// \brief Construct a Monitor with an integral function
     ///
     /// \param integral The functor used to compute the integrands
-    Monitor (const integral_type &integral = NULL) : integral_(integral) {}
+    Monitor (const integral_type &integral = NULL, unsigned dim = 1) :
+        integral_(integral), dim_(dim) {}
 
     /// \brief Copy constructor
     ///
     /// \param monitor The Monitor to by copied
     Monitor (const Monitor<T> &monitor) :
-        integral_(monitor.integral_),
+        integral_(monitor.integral_), dim_(monitor.dim_),
         index_(monitor.index_), record_(monitor.record_) {}
 
     /// \brief Assignment operator
@@ -45,11 +46,20 @@ class Monitor
     {
         if (&monitor != this) {
             integral_ = monitor.integral_;
+            dim_ = monitor.dim_;
             index_ = monitor.index_;
             record_ = monitor.record_;
         }
 
         return *this;
+    }
+
+    /// \brief Dimension of the monitor
+    ///
+    /// \return The number of parameters
+    unsigned dim () const
+    {
+        return dim_;
     }
 
     /// \brief Size of records
@@ -98,7 +108,7 @@ class Monitor
     /// \brief Record of Monte Carlo integration
     ///
     /// \return A const reference to the record
-    const std::vector<double> &record () const
+    const std::vector<internal::Buffer<double> > &record () const
     {
         return record_;
     }
@@ -126,11 +136,17 @@ class Monitor
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
-        buffer_.resize(particle.size());
+        buffer_.resize(particle.size() * dim_);
+        result_.resize(dim_);
+        for (unsigned d = 0; d != dim_; ++d)
+            result_[d] = 0;
+
         integral_(iter, particle, buffer_);
+        cblas_dgemv(CblasRowMajor, CblasTrans, particle.size(), dim_,
+                1, buffer_, dim_, particle.weight_ptr(), 1, 0, result_, 1);
+
         index_.push_back(iter);
-        record_.push_back(cblas_ddot(particle.size(),
-                particle.weight_ptr(), 1, buffer_, 1));
+        record_.push_back(result_);
     }
 
     /// \brief Clear all recorded data
@@ -143,9 +159,11 @@ class Monitor
     private :
 
     internal::Buffer<double> buffer_;
+    internal::Buffer<double> result_;
     integral_type integral_;
+    unsigned dim_;
     std::vector<std::size_t> index_;
-    std::vector<double> record_;
+    std::vector<internal::Buffer<double> > record_;
 }; // class Monitor
 
 } // namespace vSMC

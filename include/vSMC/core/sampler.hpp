@@ -389,18 +389,26 @@ class Sampler
             = path_.grid().begin();
 
         std::vector<bool> monitor_index_empty;
+        std::vector<unsigned> monitor_dim;
         std::vector<std::vector<std::size_t>::const_iterator>
             iter_monitor_index;
-        std::vector<std::vector<double>::const_iterator>
+        std::vector<std::vector<internal::Buffer<double> >::const_iterator>
             iter_monitor_record;
         for (typename std::map<std::string, Monitor<T> >::const_iterator
                 imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
             if (print_monitor.count(imap->first)) {
                 monitor_index_empty.push_back(imap->second.index().empty());
+                monitor_dim.push_back(imap->second.dim());
                 iter_monitor_index.push_back(imap->second.index().begin());
                 iter_monitor_record.push_back(imap->second.record().begin());
-                if (print_header)
-                    output << imap->first << '\t';
+                if (print_header) {
+                    if (monitor_dim.back() > 1) {
+                        for (unsigned d = 0; d != monitor_dim.back(); ++d)
+                            output << imap->first << d + 1 << '\t';
+                    } else {
+                        output << imap->first << '\t';
+                    }
+                }
             }
         }
 
@@ -427,10 +435,13 @@ class Sampler
 
             for (std::size_t m = 0; m != monitor_index_empty.size(); ++m) {
                 if (!monitor_index_empty[m] && *iter_monitor_index[m] == i) {
-                    output << '\t' << *iter_monitor_record[m]++;
+                    for (unsigned d = 0; d != monitor_dim[m]; ++d)
+                        output << '\t' << (*iter_monitor_record[m])[d];
                     ++iter_monitor_index[m];
+                    ++iter_monitor_record[m];
                 } else {
-                    output << '\t' << '.';
+                    for (unsigned d = 0; d != monitor_dim[m]; ++d)
+                        output << '\t' << '.';
                 }
             }
 
