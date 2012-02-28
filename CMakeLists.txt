@@ -25,9 +25,11 @@ FIND_PACKAGE (Threads)
 
 # Additional packages
 INCLUDE (FindEigen)
-INCLUDE (FindMKL)
-INCLUDE (FindTBB)
 INCLUDE (FindGSL)
+INCLUDE (FindMKL)
+INCLUDE (FindRandom123)
+INCLUDE (FindTBB)
+INCLUDE (FindvDist)
 
 # Include dirs
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
