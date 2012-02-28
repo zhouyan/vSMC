@@ -1,6 +1,11 @@
 #ifndef V_SMC_HELPER_SEQUENTIAL_HPP
 #define V_SMC_HELPER_SEQUENTIAL_HPP
 
+#include <vSMC/core/buffer.hpp>
+#include <vSMC/core/monitor.hpp>
+#include <vSMC/core/particle.hpp>
+#include <vSMC/core/path.hpp>
+
 namespace vSMC {
 
 /// \brief Type of weight returned by MoveSeq::move_state
@@ -129,9 +134,7 @@ class InitializeSeq
     public :
 
     InitializeSeq () {}
-
     InitializeSeq (const InitializeSeq<T> &init) {}
-
     InitializeSeq<T> & operator= (const InitializeSeq<T> &init) {return *this;}
 
     /// \brief Operator called by Sampler for initialize the particle set
@@ -195,9 +198,7 @@ class MoveSeq
     public :
 
     MoveSeq () {}
-
     MoveSeq (const MoveSeq<T> &move) {}
-
     MoveSeq<T> & operator= (const MoveSeq<T> &move) {return *this;}
 
     /// \brief Operator called by Sampler for move the particle set
