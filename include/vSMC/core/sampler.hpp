@@ -244,10 +244,10 @@ class Sampler
     ///
     /// \param name The name of the monitor
     /// \param integral The functor used to compute the integrands
-    void monitor (const std::string &name,
+    void monitor (const std::string &name, unsigned dim,
             const typename Monitor<T>::integral_type &integral)
     {
-        monitor_.insert(std::make_pair(name, Monitor<T>(integral)));
+        monitor_.insert(std::make_pair(name, Monitor<T>(dim, integral)));
         monitor_name_.insert(name);
     }
 

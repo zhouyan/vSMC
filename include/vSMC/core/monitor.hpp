@@ -28,14 +28,14 @@ class Monitor
     /// \brief Construct a Monitor with an integral function
     ///
     /// \param integral The functor used to compute the integrands
-    Monitor (const integral_type &integral = NULL, unsigned dim = 1) :
-        integral_(integral), dim_(dim) {}
+    Monitor (unsigned dim = 1, const integral_type &integral = NULL) :
+        dim_(dim), integral_(integral) {}
 
     /// \brief Copy constructor
     ///
     /// \param monitor The Monitor to by copied
     Monitor (const Monitor<T> &monitor) :
-        integral_(monitor.integral_), dim_(monitor.dim_),
+         dim_(monitor.dim_), integral_(monitor.integral_),
         index_(monitor.index_), record_(monitor.record_) {}
 
     /// \brief Assignment operator
@@ -45,8 +45,8 @@ class Monitor
     Monitor<T> & operator= (const Monitor<T> &monitor)
     {
         if (&monitor != this) {
-            integral_ = monitor.integral_;
             dim_ = monitor.dim_;
+            integral_ = monitor.integral_;
             index_ = monitor.index_;
             record_ = monitor.record_;
         }
@@ -160,8 +160,8 @@ class Monitor
 
     internal::Buffer<double> buffer_;
     internal::Buffer<double> result_;
-    integral_type integral_;
     unsigned dim_;
+    integral_type integral_;
     std::vector<std::size_t> index_;
     std::vector<internal::Buffer<double> > record_;
 }; // class Monitor
