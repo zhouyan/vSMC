@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <mkl_cblas.h>
 #include <boost/function.hpp>
-#include <vDist/tool/buffer.hpp>
 #include <vSMC/core/particle.hpp>
 
 namespace vSMC {
