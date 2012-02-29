@@ -22,7 +22,7 @@
 
 /// Maximum of results index used by the Boost.Random eigen
 #define BOOST_EIGEN_IDX_MAX \
-    sizeof(typename rng_type::ctr_type) / sizeof(result_type)
+    sizeof(typename cbrng_type::ctr_type) / sizeof(result_type)
 
 /// Initializer list for random123_eigen
 #define BOOST_EIGEN_INIT \
@@ -35,25 +35,19 @@ class random123_eigen
 {
     public :
     
-    typedef Random123Type rng_type;
+    typedef Random123Type cbrng_type;
     typedef UIntType result_type;
+    typedef typename cbrng_type::key_type::value_type seed_type;
 
     random123_eigen () : BOOST_EIGEN_INIT
     {
         seed();
     }
 
-    explicit random123_eigen (
-            typename rng_type::ctr_type::value_type k0) : BOOST_EIGEN_INIT
+    explicit random123_eigen (seed_type k0) :
+        BOOST_EIGEN_INIT
     {
         seed(k0);
-    }
-
-    explicit random123_eigen (
-            typename rng_type::ctr_type::value_type c0,
-            typename rng_type::ctr_type::value_type k0) : BOOST_EIGEN_INIT
-    {
-        seed(c0, k0);
     }
 
     template <typename SeedSeq>
@@ -62,11 +56,10 @@ class random123_eigen
         seed(seed_seq);
     }
 
-    template <typename CtrIter, typename KeyIter>
-    random123_eigen (CtrIter &first_ctr, CtrIter last_ctr,
-            KeyIter &first_key, KeyIter last_key) : BOOST_EIGEN_INIT
+    template <typename Iter>
+    random123_eigen (Iter &first, Iter last) : BOOST_EIGEN_INIT
     {
-        seed(first_ctr, last_ctr, first_key, last_key);
+        seed(first, last);
     }
 
     void seed ()
@@ -78,39 +71,24 @@ class random123_eigen
     template <typename SeedSeq>
     void seed (SeedSeq &seed_seq)
     {
-        ctr_ = rng_type::ctr_type::seed(seed_seq);
-        key_ = rng_type::key_type::seed(seed_seq);
+        seed();
+        key_ = cbrng_type::key_type::seed(seed_seq);
     }
 
-    void seed (typename rng_type::key_type::value_type k0)
+    void seed (seed_type k0)
     {
         seed();
         key_[0] = k0;
     }
 
-    void seed (
-            typename rng_type::ctr_type::value_type c0,
-            typename rng_type::key_type::value_type k0)
+    template <typename Iter>
+    void seed (Iter &first, Iter last)
     {
         seed();
-        ctr_[0] = c0;
-        key_[0] = k0;
-    }
-
-    template <typename CtrIter, typename KeyIter>
-    void seed (CtrIter &first_ctr, CtrIter last_ctr,
-            KeyIter &first_key, KeyIter last_key)
-    {
-        seed();
-        for (typename rng_type::ctr_type::iterator iter_ctr = ctr_.begin();
-                iter_ctr != ctr_.end && first_ctr != last_ctr;
-                ++iter_ctr, ++first_ctr) {
-            *iter_ctr = *first_ctr;
-        }
-        for (typename rng_type::key_type::iterator iter_key = key_.begin();
-                iter_key != key_.end && first_key != last_key;
-                ++iter_key, ++first_key) {
-            *iter_key = *first_key;
+        for (typename cbrng_type::key_type::iterator iter = key_.begin();
+                iter != key_.end() && first != last;
+                ++iter, ++first) {
+            *iter = *first;
         }
     }
 
@@ -134,29 +112,36 @@ class random123_eigen
         if (index_ == index_max_) {
             index_ = 0;
             advance_ctr();
-            state_.c = crng_(ctr_, key_);
+            state_.c = cbrng_(ctr_, key_);
         }
 
         return state_.n[index_++];
     }
 
-    private :
-
-    union {
-        typename rng_type::ctr_type c;
-        result_type n[BOOST_EIGEN_IDX_MAX];
-    } state_;
-    rng_type crng_;
-    typename rng_type::ctr_type ctr_;
-    typename rng_type::key_type key_;
-    unsigned index_max_;
-    unsigned index_; 
-    unsigned step_size_;
+    void dicard (unsigned step)
+    {
+        index_ = (index_ + step) % index_max_;
+        advance_ctr(step / index_max_);
+        state_.c = cbrng_(ctr_, key_);
+    }
 
     void advance_ctr (unsigned step = 1)
     {
         ctr_[0] += step * step_size_;
     }
+
+    private :
+
+    union {
+        typename cbrng_type::ctr_type c;
+        result_type n[BOOST_EIGEN_IDX_MAX];
+    } state_;
+    cbrng_type cbrng_;
+    typename cbrng_type::ctr_type ctr_;
+    typename cbrng_type::key_type key_;
+    unsigned index_max_;
+    unsigned index_; 
+    unsigned step_size_;
 };
 
 typedef random123_eigen<r123::Philox2x32, uint32_t> philox2x32_32;

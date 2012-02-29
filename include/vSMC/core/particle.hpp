@@ -33,17 +33,17 @@ class Particle
     /// \brief Construct a Particle object with given number of particles
     ///
     /// \param N The number of particles
-    Particle (std::size_t N, unsigned seed = V_SMC_RNG_SEED) :
+    Particle (std::size_t N, rng_type::seed_type seed = V_SMC_RNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false),
         prng_(N)
     {
-        rng_type rng;
+        rng_type rng(seed);
+        rng.step_size(size_);
         for (std::size_t i = 0; i != size_; ++i) {
+            rng.advance_ctr(i);
             prng_[i] = rng;
-            prng_[i].seed(seed + i);
-            prng_[i].step_size(size_);
         }
 
         double equal_weight = 1.0 / size_;
