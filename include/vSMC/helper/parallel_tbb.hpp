@@ -8,7 +8,7 @@ namespace vSMC {
 
 template <typename T> class InitializeTBB;
 template <typename T> class MoveTBB;
-template <typename T> class MonitorTBB;
+template <typename T, unsigned Dim> class MonitorTBB;
 template <typename T> class PathTBB;
 
 namespace internal {
@@ -20,7 +20,7 @@ class InitializeTBBApply
 
     InitializeTBBApply (InitializeTBB<T> *init,
             Particle<T> *particle, typename T::value_type *state,
-            double *weight, int *accept) :
+            double *weight, unsigned *accept) :
         init_(init), particle_(particle), state_(state),
         weight_(weight), accept_(accept) {}
 
@@ -38,7 +38,7 @@ class InitializeTBBApply
     Particle<T> *const particle_;
     typename T::value_type *const state_;
     double *const weight_;
-    int *const accept_;
+    unsigned *const accept_;
 }; // class InitializeTBBApply
 
 template <typename T>
@@ -48,7 +48,7 @@ class MoveTBBApply
 
     MoveTBBApply (MoveTBB<T> *move, std::size_t iter,
             Particle<T> *particle, typename T::value_type *state,
-            double *weight, int *accept) :
+            double *weight, unsigned *accept) :
         move_(move), iter_(iter), particle_(particle), state_(state),
         weight_(weight), accept_(accept) {}
 
@@ -67,15 +67,15 @@ class MoveTBBApply
     Particle<T> *const particle_;
     typename T::value_type *const state_;
     double *const weight_;
-    int *const accept_;
+    unsigned *const accept_;
 }; // class MoveTBBApply
 
-template <typename T>
+template <typename T, unsigned Dim>
 class MonitorTBBApply
 {
     public :
 
-    MonitorTBBApply (MonitorTBB<T> *monitor, std::size_t iter,
+    MonitorTBBApply (MonitorTBB<T, Dim> *monitor, std::size_t iter,
             Particle<T> *particle, typename T::value_type *state,
             double *res) :
         monitor_(monitor), iter_(iter), particle_(particle), state_(state),
@@ -84,14 +84,19 @@ class MonitorTBBApply
     void operator () (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            res_[i] = monitor_->monitor_state(i, iter_, state_ + T::dim() * i,
-                    *particle_);
+            monitor_->monitor_state(i, iter_, state_ + T::dim() * i,
+                    *particle_, res_ + i * dim());
         }
+    }
+
+    static unsigned dim ()
+    {
+        return Dim;
     }
 
     private :
 
-    MonitorTBB<T> *const monitor_;
+    MonitorTBB<T, Dim> *const monitor_;
     const std::size_t iter_;
     Particle<T> *const particle_;
     typename T::value_type *const state_;
@@ -133,7 +138,7 @@ class PathTBBApply
 /// StateTBB or its derived class can be used as the template argument of
 /// Particle. It targets the particular problems where the parameters to be
 /// sampled can be viewed as a vector of dimension Dim and type T.
-template <int Dim, typename T = double>
+template <unsigned Dim, typename T = double>
 class StateTBB : public StateSeq<Dim, T>
 {
     public :
@@ -181,7 +186,7 @@ class InitializeTBB : public InitializeSeq<T>
     private :
 
     internal::Buffer<double> weight_;
-    internal::Buffer<int> accept_;
+    internal::Buffer<unsigned> accept_;
 }; // class InitializeTBB
 
 template <typename T>
@@ -219,11 +224,11 @@ class MoveTBB : public MoveSeq<T>
     private :
 
     internal::Buffer<double> weight_;
-    internal::Buffer<int> accept_;
+    internal::Buffer<unsigned> accept_;
 }; // class MoveTBB
 
-template <typename T>
-class MonitorTBB : public MonitorSeq<T>
+template <typename T, unsigned Dim = 1>
+class MonitorTBB : public MonitorSeq<T, Dim>
 {
     public :
 
@@ -237,7 +242,7 @@ class MonitorTBB : public MonitorSeq<T>
             double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::MonitorTBBApply<T>(this, iter, &particle,
+                internal::MonitorTBBApply<T, Dim>(this, iter, &particle,
                     particle.value().state(), res));
     }
 }; // class MonitorTBB

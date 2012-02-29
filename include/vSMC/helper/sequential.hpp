@@ -23,7 +23,7 @@ enum WeightAction {
 /// StateSeq or its derived class can be used as the template argument of
 /// Particle. It targets the particular problems where the parameters to be
 /// sampled can be viewed as a vector of dimension Dim and type T.
-template <int Dim, typename T = double>
+template <unsigned Dim, typename T = double>
 class StateSeq
 {
     public :
@@ -39,7 +39,7 @@ class StateSeq
     /// \brief The dimension of the problem
     ///
     /// \return The dimension of the parameter vector
-    static int dim ()
+    static unsigned dim ()
     {
         return Dim;
     }
@@ -93,7 +93,7 @@ class StateSeq
     /// \param id The index, starting from 0, of the paramter
     /// \param first An iterator point to where writing starts
     template<typename OIter>
-    void state (int id, OIter first) const
+    void state (unsigned id, OIter first) const
     {
         const T *src = state_.get() + id;
         for (std::size_t i = 0; i != size_; ++i, src += Dim)
@@ -108,7 +108,7 @@ class StateSeq
     {
         const T *state_from = state(from);
         T *state_to = state(to);
-        for (int i = 0; i != Dim; ++i, ++state_from, ++state_to)
+        for (unsigned i = 0; i != Dim; ++i, ++state_from, ++state_to)
             *state_to = *state_from;
     }
 
@@ -286,7 +286,7 @@ class MoveSeq
 /// as the argument integral of Sampler::monitor(std::string,
 /// Monitor<T>::integral_type integral). The derived class need to at least
 /// define method monitor_state.
-template <typename T>
+template <typename T, unsigned Dim = 1>
 class MonitorSeq
 {
     public :
@@ -301,8 +301,8 @@ class MonitorSeq
             double *res)
     {
         for (std::size_t i = 0; i != particle.size(); ++i)
-            res[i] = monitor_state(i, iter, particle.value().state(i),
-                    particle);
+            monitor_state(i, iter, particle.value().state(i), particle,
+                    res + i * dim());
     }
 
     /// \brief Record the integrand from a single particle
@@ -313,9 +313,17 @@ class MonitorSeq
     /// \param state The array contains the states of a single particle
     ///
     /// \return The value to be estimated
-    virtual double monitor_state (std::size_t id, std::size_t iter,
+    virtual void monitor_state (std::size_t id, std::size_t iter,
             const typename T::value_type *state,
-            const Particle<T> &particle) = 0;
+            const Particle<T> &particle, double *res) = 0;
+
+    /// \brief The dimension of the Monitor
+    ///
+    /// \return The dimension of res arugment in monitor_state
+    static unsigned dim ()
+    {
+        return Dim;
+    }
 }; // class MonitorSeq
 
 /// \brief Path::integral_type class for helping implementing SMC sequentially
@@ -342,7 +350,7 @@ class PathSeq
             double *res)
     {
         for (std::size_t i = 0; i != particle.size(); ++i)
-            res[i] = path_state(i, iter, particle, particle.value().state(i));
+            res[i] = path_state(i, iter, particle.value().state(i), particle);
 
         return width_state(iter, particle);
     }
