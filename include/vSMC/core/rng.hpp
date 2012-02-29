@@ -17,16 +17,10 @@
 
 /// The Parallel RNG (based on Rand123) type, philox or threefry
 #ifndef V_SMC_RNG_TYPE
-#define V_SMC_RNG_TYPE vSMC::threefry4x64_32
+#define V_SMC_RNG_TYPE vSMC::threefry4x64_64
 #endif // V_SMC_RNG_TYPE
 
-/// The type used to extract random bits
-#ifndef V_SMC_RNG_UINT_TYPE
-#define V_SMC_RNG_UINT_TYPE unsigned
-#endif // V_SMC_RNG_UINT_TYPE
-
-#define V_SMC_RNG_IDX_MAX sizeof(rng_type::ctr_type) / sizeof(uint_type)
-
+/// Maximum of results index used by the Boost.Random eigen
 #define BOOST_EIGEN_IDX_MAX \
     sizeof(typename rng_type::ctr_type) / sizeof(result_type)
 
@@ -138,15 +132,6 @@ class random123_eigen
     unsigned step_;
 };
 
-typedef random123_eigen<r123::Threefry2x32, uint32_t> threefry2x32_32;
-typedef random123_eigen<r123::Threefry2x32, uint64_t> threefry2x32_64;
-typedef random123_eigen<r123::Threefry4x32, uint32_t> threefry4x32_32;
-typedef random123_eigen<r123::Threefry4x32, uint64_t> threefry4x32_64;
-typedef random123_eigen<r123::Threefry2x64, uint32_t> threefry2x64_32;
-typedef random123_eigen<r123::Threefry2x64, uint64_t> threefry2x64_64;
-typedef random123_eigen<r123::Threefry4x64, uint32_t> threefry4x64_32;
-typedef random123_eigen<r123::Threefry4x64, uint64_t> threefry4x64_64;
-
 typedef random123_eigen<r123::Philox2x32, uint32_t> philox2x32_32;
 typedef random123_eigen<r123::Philox2x32, uint64_t> philox2x32_64;
 typedef random123_eigen<r123::Philox4x32, uint32_t> philox4x32_32;
@@ -155,6 +140,15 @@ typedef random123_eigen<r123::Philox2x64, uint32_t> philox2x64_32;
 typedef random123_eigen<r123::Philox2x64, uint64_t> philox2x64_64;
 typedef random123_eigen<r123::Philox4x64, uint32_t> philox4x64_32;
 typedef random123_eigen<r123::Philox4x64, uint64_t> philox4x64_64;
+
+typedef random123_eigen<r123::Threefry2x32, uint32_t> threefry2x32_32;
+typedef random123_eigen<r123::Threefry2x32, uint64_t> threefry2x32_64;
+typedef random123_eigen<r123::Threefry4x32, uint32_t> threefry4x32_32;
+typedef random123_eigen<r123::Threefry4x32, uint64_t> threefry4x32_64;
+typedef random123_eigen<r123::Threefry2x64, uint32_t> threefry2x64_32;
+typedef random123_eigen<r123::Threefry2x64, uint64_t> threefry2x64_64;
+typedef random123_eigen<r123::Threefry4x64, uint32_t> threefry4x64_32;
+typedef random123_eigen<r123::Threefry4x64, uint64_t> threefry4x64_64;
 
 } // namespace vSMC
 

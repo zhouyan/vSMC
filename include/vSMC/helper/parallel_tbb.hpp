@@ -267,8 +267,6 @@ class PathTBB : public PathSeq<T>
     }
 }; // PathTBB
 
-namespace internal {
-
-} } // namespace vSMC::internal
+} // namespace vSMC
 
 #endif // V_SMC_HELPER_PARALLEL_TBB_HPP
