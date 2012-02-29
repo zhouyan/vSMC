@@ -26,7 +26,102 @@
 
 #define V_SMC_RNG_IDX_MAX sizeof(rng_type::ctr_type) / sizeof(uint_type)
 
+#define BOOST_EIGEN_IDX_MAX \
+    sizeof(typename rng_type::ctr_type) / sizeof(result_type)
+
 namespace vSMC {
+
+template <typename Random123Type, typename IntType>
+class boost_eigen
+{
+    public :
+    
+    typedef Random123Type rng_type;
+    typedef IntType result_type;
+
+    boost_eigen () :
+        index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
+    {
+        seed();
+    }
+
+    explicit boost_eigen (typename rng_type::ctr_type::value_type k0) :
+        index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
+    {
+        seed(k0);
+    }
+
+    template <typename CtrIter, typename KeyIter>
+    boost_eigen (CtrIter &first_ctr, CtrIter last_ctr,
+            KeyIter &first_key, KeyIter last_key) :
+        index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
+    {
+        seed(first_ctr, last_ctr, first_key, last_key);
+    }
+
+    void seed ()
+    {
+        ctr_.fill(101);
+        key_.fill(102);
+    }
+
+    void seed (typename rng_type::ctr_type::value_type k0)
+    {
+        seed();
+        key_[0] = k0;
+    }
+
+    template <typename CtrIter, typename KeyIter>
+    void seed (CtrIter &first_ctr, CtrIter last_ctr,
+            KeyIter &first_key, KeyIter last_key)
+    {
+        seed();
+        for (typename rng_type::ctr_type::iterator iter_ctr = ctr_.begin();
+                iter_ctr != ctr_.end && first_ctr != last_ctr;
+                ++iter_ctr, ++first_ctr) {
+            *iter_ctr = *first_ctr;
+        }
+        for (typename rng_type::key_type::iterator iter_key = key_.begin();
+                iter_key != key_.end && first_key != last_key;
+                ++iter_key, ++first_key) {
+            *iter_key = *first_key;
+        }
+    }
+
+    static result_type min ()
+    {
+        return std::numeric_limits<result_type>::min();
+    }
+
+    static result_type max ()
+    {
+        return std::numeric_limits<result_type>::max();
+    }
+
+    result_type operator () ()
+    {
+        if (index_ == index_max_) {
+            index_ = 0;
+            ++ctr_[0];
+            state_.c = crng_(ctr_, key_);
+        }
+
+        return state_.n[index_++];
+    }
+
+    private :
+
+    union {
+        typename rng_type::ctr_type c;
+        result_type n[BOOST_EIGEN_IDX_MAX];
+    } state_;
+    rng_type crng_;
+    typename rng_type::ctr_type ctr_;
+    typename rng_type::key_type key_;
+    unsigned index_max_;
+    unsigned index_; 
+    unsigned step_;
+};
 
 class Rng
 {
