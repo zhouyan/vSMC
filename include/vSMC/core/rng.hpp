@@ -21,12 +21,14 @@
 #endif // V_SMC_RNG_TYPE
 
 /// Maximum of results index used by the Boost.Random eigen
-#define BOOST_EIGEN_IDX_MAX \
+#define RANDOM123_EIGEN_IDX_MAX \
     sizeof(typename cbrng_type::ctr_type) / sizeof(result_type)
 
 /// Initializer list for random123_eigen
-#define BOOST_EIGEN_INIT \
-    index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_size_(1)
+#define RANDOM123_EIGEN_INIT \
+    index_max_(RANDOM123_EIGEN_IDX_MAX), index_(index_max_), \
+    step_size_(1), ctr_index_(0), \
+    ctr_max_(std::numeric_limits<ctr_value_type>::max())
 
 namespace vSMC {
 
@@ -38,26 +40,27 @@ class random123_eigen
     typedef Random123Type cbrng_type;
     typedef UIntType result_type;
     typedef typename cbrng_type::key_type::value_type seed_type;
+    typedef typename cbrng_type::ctr_type::value_type ctr_value_type;
 
-    random123_eigen () : BOOST_EIGEN_INIT
+    random123_eigen () : RANDOM123_EIGEN_INIT
     {
         seed();
     }
 
     explicit random123_eigen (seed_type k0) :
-        BOOST_EIGEN_INIT
+        RANDOM123_EIGEN_INIT
     {
         seed(k0);
     }
 
     template <typename SeedSeq>
-    random123_eigen (SeedSeq &seed_seq) : BOOST_EIGEN_INIT
+    random123_eigen (SeedSeq &seed_seq) : RANDOM123_EIGEN_INIT
     {
         seed(seed_seq);
     }
 
     template <typename Iter>
-    random123_eigen (Iter &first, Iter last) : BOOST_EIGEN_INIT
+    random123_eigen (Iter &first, Iter last) : RANDOM123_EIGEN_INIT
     {
         seed(first, last);
     }
@@ -127,14 +130,23 @@ class random123_eigen
 
     void advance_ctr (unsigned step = 1)
     {
-        ctr_[0] += step * step_size_;
+        ctr_value_type inc = step * step_size_;
+        if (ctr_max_ - ctr_[ctr_index_] < inc)
+            ++ctr_index_;
+
+        if (ctr_index_ == ctr_.size()) {
+            ctr_.fill(1);
+            ctr_index_ = 0;
+        }
+
+        ctr_[ctr_index_] += inc;
     }
 
     private :
 
     union {
         typename cbrng_type::ctr_type c;
-        result_type n[BOOST_EIGEN_IDX_MAX];
+        result_type n[RANDOM123_EIGEN_IDX_MAX];
     } state_;
     cbrng_type cbrng_;
     typename cbrng_type::ctr_type ctr_;
@@ -142,6 +154,8 @@ class random123_eigen
     unsigned index_max_;
     unsigned index_; 
     unsigned step_size_;
+    unsigned ctr_index_;
+    ctr_value_type ctr_max_;
 };
 
 typedef random123_eigen<r123::Philox2x32, uint32_t> philox2x32_32;
