@@ -2,6 +2,7 @@
 #define V_SMC_CORE_RNG_HPP
 
 #include <limits>
+#include <climits>
 #include <cmath>
 #include <boost/cstdint.hpp>
 #include <boost/math/special_functions/log1p.hpp>
@@ -12,7 +13,7 @@
 
 /// The Parallel RNG (based on Rand123) seed, unsigned
 #ifndef V_SMC_RNG_SEED
-#define V_SMC_RNG_SEED 0xdeadbeefL
+#define V_SMC_RNG_SEED 0xdeadbeefU
 #endif // V_SMC_RNG_SEED
 
 /// The Parallel RNG (based on Rand123) type, philox or threefry
@@ -67,32 +68,32 @@ class random123_eigen
 
     void seed ()
     {
+        seed(static_cast<seed_type>(V_SMC_RNG_SEED));
+    }
+
+    void seed (seed_type k0)
+    {
         ctr_.fill(0);
-        key_.fill(1);
+        key_[0] = k0;
+        for (unsigned i = 1; i != key_.size(); ++i) {
+            key_[i] = (key_[i-1]>>1) |
+                (key_[i-1]<<(sizeof(key_[0]) * CHAR_BIT - 1));
+        }
     }
 
     template <typename SeedSeq>
     void seed (SeedSeq &seed_seq)
     {
-        seed();
+        ctr_.fill(0);
         key_ = cbrng_type::key_type::seed(seed_seq);
-    }
-
-    void seed (seed_type k0)
-    {
-        seed();
-        key_[0] = k0;
     }
 
     template <typename Iter>
     void seed (Iter &first, Iter last)
     {
         seed();
-        for (typename cbrng_type::key_type::iterator iter = key_.begin();
-                iter != key_.end() && first != last;
-                ++iter, ++first) {
-            *iter = *first;
-        }
+        for (unsigned i = 0; i != key_.size() && first != last; ++i, ++first)
+            key_[i] = *first;
     }
 
     void step_size (unsigned size)
