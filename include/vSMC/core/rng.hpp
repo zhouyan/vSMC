@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <cmath>
+#include <boost/cstdint.hpp>
 #include <boost/math/special_functions/log1p.hpp>
 #include <Random123/aes.h>
 #include <Random123/ars.h>
@@ -16,7 +17,7 @@
 
 /// The Parallel RNG (based on Rand123) type, philox or threefry
 #ifndef V_SMC_RNG_TYPE
-#define V_SMC_RNG_TYPE Threefry4x64
+#define V_SMC_RNG_TYPE vSMC::threefry4x64_32
 #endif // V_SMC_RNG_TYPE
 
 /// The type used to extract random bits
@@ -31,28 +32,28 @@
 
 namespace vSMC {
 
-template <typename Random123Type, typename IntType>
-class boost_eigen
+template <typename Random123Type, typename UIntType>
+class random123_eigen
 {
     public :
     
     typedef Random123Type rng_type;
-    typedef IntType result_type;
+    typedef UIntType result_type;
 
-    boost_eigen () :
+    random123_eigen () :
         index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
     {
         seed();
     }
 
-    explicit boost_eigen (typename rng_type::ctr_type::value_type k0) :
+    explicit random123_eigen (typename rng_type::ctr_type::value_type k0) :
         index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
     {
         seed(k0);
     }
 
     template <typename CtrIter, typename KeyIter>
-    boost_eigen (CtrIter &first_ctr, CtrIter last_ctr,
+    random123_eigen (CtrIter &first_ctr, CtrIter last_ctr,
             KeyIter &first_key, KeyIter last_key) :
         index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
     {
@@ -61,13 +62,22 @@ class boost_eigen
 
     void seed ()
     {
-        ctr_.fill(101);
-        key_.fill(102);
+        ctr_.fill(1);
+        key_.fill(1);
     }
 
-    void seed (typename rng_type::ctr_type::value_type k0)
+    void seed (typename rng_type::key_type::value_type k0)
     {
         seed();
+        key_[0] = k0;
+    }
+
+    void seed (
+            typename rng_type::ctr_type::value_type c0,
+            typename rng_type::key_type::value_type k0)
+    {
+        seed();
+        ctr_[0] = c0;
         key_[0] = k0;
     }
 
@@ -88,6 +98,11 @@ class boost_eigen
         }
     }
 
+    void step_size (unsigned s)
+    {
+        step_ = s;
+    }
+
     static result_type min ()
     {
         return std::numeric_limits<result_type>::min();
@@ -102,7 +117,7 @@ class boost_eigen
     {
         if (index_ == index_max_) {
             index_ = 0;
-            ++ctr_[0];
+            ctr_[0] += step_;
             state_.c = crng_(ctr_, key_);
         }
 
@@ -123,180 +138,23 @@ class boost_eigen
     unsigned step_;
 };
 
-class Rng
-{
-    public :
+typedef random123_eigen<r123::Threefry2x32, uint32_t> threefry2x32_32;
+typedef random123_eigen<r123::Threefry2x32, uint64_t> threefry2x32_64;
+typedef random123_eigen<r123::Threefry4x32, uint32_t> threefry4x32_32;
+typedef random123_eigen<r123::Threefry4x32, uint64_t> threefry4x32_64;
+typedef random123_eigen<r123::Threefry2x64, uint32_t> threefry2x64_32;
+typedef random123_eigen<r123::Threefry2x64, uint64_t> threefry2x64_64;
+typedef random123_eigen<r123::Threefry4x64, uint32_t> threefry4x64_32;
+typedef random123_eigen<r123::Threefry4x64, uint64_t> threefry4x64_64;
 
-    /// \brief Type of the internal RNG (Random123 C++ type)
-    typedef r123::V_SMC_RNG_TYPE rng_type;
-    /// \brief Type of the internal unsigned random integer
-    typedef V_SMC_RNG_UINT_TYPE uint_type;
-
-    Rng (
-            unsigned ctr_seed = V_SMC_RNG_SEED,
-            unsigned key_seed = V_SMC_RNG_SEED,
-            unsigned step = 1) :
-        ctr_seed_(ctr_seed), key_seed_(key_seed), step_(step),
-        base_(std::numeric_limits<uint_type>::max()),
-        index_(0), index_max_(V_SMC_RNG_IDX_MAX)
-    {
-        rng_type::ctr_type c = {{}};
-        rng_type::key_type k = {{}};
-        c[0] = ctr_seed;
-        k[0] = key_seed;
-        ctr_ = c;
-        key_ = k;
-        state_.c = crng_(ctr_, key_);
-    }
-
-    unsigned ctr_seed () const
-    {
-        return ctr_seed_;
-    }
-
-    void ctr_seed (unsigned seed)
-    {
-        ctr_seed_ = seed;
-        ctr_[0] = seed;
-        state_.c = crng_(ctr_, key_);
-    }
-
-    unsigned key_seed () const
-    {
-        return key_seed_;
-    }
-
-    void key_seed (unsigned seed)
-    {
-        key_seed_ = seed;
-        key_[0] = seed;
-        state_.c = crng_(ctr_, key_);
-    }
-
-    void seed (unsigned c_seed, unsigned k_seed)
-    {
-        ctr_seed_ = c_seed;
-        key_seed_ = k_seed;
-        ctr_[0] = c_seed;
-        key_[0] = k_seed;
-        state_.c = crng_(ctr_, key_);
-    }
-
-    unsigned step () const
-    {
-        return step_;
-    }
-
-    void step (unsigned s)
-    {
-        step_ = s;
-    }
-
-    /// \brief Generate an uniform random integer
-    uint_type ruint ()
-    {
-        if (index_ == index_max_) {
-            index_ = 0;
-            ctr_[0] += step_;
-            state_.c = crng_(ctr_, key_);
-        }
-
-        return state_.n[index_++];
-    }
-
-    /// \brief Generate an [0,1] uniform random variate
-    double runif ()
-    {
-        return ruint() / base_;
-    }
-
-    double runif (double min, double max)
-    {
-        return runif() * (max - min) + min;
-    }
-
-    double rnorm (double mean, double sd)
-    {
-        static const double pi2 = 6.283185307179586476925286766559005768394;
-
-        double u1 = runif();
-        double u2 = runif();
-
-        return std::sqrt(-2 * std::log(u1)) * std::sin(pi2 * u2) * sd + mean;
-    }
-
-    double rlnorm (double meanlog, double sdlog)
-    {
-        return std::exp(rnorm(meanlog, sdlog));
-    }
-
-    double rcauchy (double location, double scale)
-    {
-        static const double pi = 3.141592653589793238462643383279502884197;
-
-        return scale * std::tan(pi * (runif() - 0.5)) + location;
-    }
-
-    double rexp (double scale)
-    {
-        return -scale * boost::math::log1p(-runif());
-    }
-
-    double rlaplace (double location, double scale)
-    {
-        double u = runif() - 0.5;
-
-        return u > 0 ?
-            location - scale * boost::math::log1p(-2 * u):
-            location + scale * boost::math::log1p(2 * u);
-    }
-
-    double rweibull (double shape, double scale)
-    {
-        return scale * std::pow(
-                -boost::math::log1p(-runif()), 1 / shape);
-    }
-
-    // TODO GAMMA
-    double rgamma (double shape, double scale)
-    {
-        return 0;
-    }
-
-    double rchisq (double df)
-    {
-        return rgamma(0.5 * df, 2);
-    }
-
-    double rf (double df1, double df2)
-    {
-        return rchisq(df1) / rchisq(df2) * df2 / df1;
-    }
-
-    double rt (double df)
-    {
-        return rnorm(0, 1) / std::sqrt(rchisq(df) / df);
-    }
-
-    // TODO BETA
-    double rbeta (double shape1, double shape2)
-    {
-        return 0;
-    }
-
-    private :
-
-    rng_type crng_;
-    rng_type::ctr_type ctr_;
-    rng_type::key_type key_;
-    unsigned ctr_seed_;
-    unsigned key_seed_;
-    unsigned step_;
-    double base_;
-    unsigned index_;
-    unsigned index_max_;
-    union {rng_type::ctr_type c; uint_type n[V_SMC_RNG_IDX_MAX];} state_;
-};
+typedef random123_eigen<r123::Philox2x32, uint32_t> philox2x32_32;
+typedef random123_eigen<r123::Philox2x32, uint64_t> philox2x32_64;
+typedef random123_eigen<r123::Philox4x32, uint32_t> philox4x32_32;
+typedef random123_eigen<r123::Philox4x32, uint64_t> philox4x32_64;
+typedef random123_eigen<r123::Philox2x64, uint32_t> philox2x64_32;
+typedef random123_eigen<r123::Philox2x64, uint64_t> philox2x64_64;
+typedef random123_eigen<r123::Philox4x64, uint32_t> philox4x64_32;
+typedef random123_eigen<r123::Philox4x64, uint64_t> philox4x64_64;
 
 } // namespace vSMC
 

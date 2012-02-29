@@ -170,7 +170,8 @@ class InitializeSeq
     /// \return Accept count, normally should be zero or one
     virtual int initialize_state (std::size_t id,
             typename T::value_type *state, double &weight,
-            const Particle<T> &particle, Rng &rng) = 0;
+            const Particle<T> &particle, 
+            typename Particle<T>::rng_type &rng) = 0;
 
     /// \brief Initialize the Particle set
     ///
@@ -238,7 +239,8 @@ class MoveSeq
     /// this weight. See WeightAction and weight_action.
     virtual int move_state (std::size_t id, std::size_t iter,
             typename T::value_type *state, double &weight,
-            const Particle<T> &particle, Rng &rng) = 0;
+            const Particle<T> &particle,
+            typename Particle<T>::rng_type &rng) = 0;
 
     /// \brief Determine how weight returned by move_state shall be treated
     ///

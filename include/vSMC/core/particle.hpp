@@ -28,6 +28,8 @@ class Particle
 {
     public :
 
+    typedef V_SMC_RNG_TYPE rng_type;
+
     /// \brief Construct a Particle object with given number of particles
     ///
     /// \param N The number of particles
@@ -37,11 +39,11 @@ class Particle
         ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false),
         binom_(size_, 0.5), brng_(seed), prng_(N)
     {
-        Rng rng;
+        rng_type rng;
         for (std::size_t i = 0; i != size_; ++i) {
             prng_[i] = rng;
             prng_[i].seed(i, seed + i);
-            prng_[i].step(size_);
+            prng_[i].step_size(size_);
         }
 
         double equal_weight = 1.0 / size_;
@@ -195,12 +197,12 @@ class Particle
         }
     }
 
-    Rng *prng ()
+    rng_type *prng ()
     {
         return prng_.get();
     }
 
-    Rng &prng (std::size_t id)
+    rng_type &prng (std::size_t id)
     {
         return prng_[id];
     }
@@ -224,7 +226,7 @@ class Particle
     binom_type binom_;
     boost::random::mt19937 brng_;
 
-    internal::Buffer<Rng> prng_;
+    internal::Buffer<rng_type> prng_;
 
     void set_weight ()
     {
