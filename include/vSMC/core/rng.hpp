@@ -67,7 +67,7 @@ class random123_eigen
 
     void seed ()
     {
-        ctr_.fill(1);
+        ctr_.fill(0);
         key_.fill(1);
     }
 
@@ -135,7 +135,7 @@ class random123_eigen
             ++ctr_index_;
 
         if (ctr_index_ == ctr_.size()) {
-            ctr_.fill(1);
+            ctr_.fill(0);
             ctr_index_ = 0;
         }
 
