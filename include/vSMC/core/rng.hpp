@@ -24,6 +24,10 @@
 #define BOOST_EIGEN_IDX_MAX \
     sizeof(typename rng_type::ctr_type) / sizeof(result_type)
 
+/// Initializer list for random123_eigen
+#define BOOST_EIGEN_INIT \
+    index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
+
 namespace vSMC {
 
 template <typename Random123Type, typename UIntType>
@@ -34,22 +38,33 @@ class random123_eigen
     typedef Random123Type rng_type;
     typedef UIntType result_type;
 
-    random123_eigen () :
-        index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
+    random123_eigen () : BOOST_EIGEN_INIT
     {
         seed();
     }
 
-    explicit random123_eigen (typename rng_type::ctr_type::value_type k0) :
-        index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
+    explicit random123_eigen (
+            typename rng_type::ctr_type::value_type k0) : BOOST_EIGEN_INIT
     {
         seed(k0);
     }
 
+    explicit random123_eigen (
+            typename rng_type::ctr_type::value_type c0,
+            typename rng_type::ctr_type::value_type k0) : BOOST_EIGEN_INIT
+    {
+        seed(c0, k0);
+    }
+
+    template <typename SeedSeq>
+    random123_eigen (SeedSeq &seed_seq) : BOOST_EIGEN_INIT
+    {
+        seed(seed_seq);
+    }
+
     template <typename CtrIter, typename KeyIter>
     random123_eigen (CtrIter &first_ctr, CtrIter last_ctr,
-            KeyIter &first_key, KeyIter last_key) :
-        index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
+            KeyIter &first_key, KeyIter last_key) : BOOST_EIGEN_INIT
     {
         seed(first_ctr, last_ctr, first_key, last_key);
     }
@@ -58,6 +73,13 @@ class random123_eigen
     {
         ctr_.fill(1);
         key_.fill(1);
+    }
+
+    template <typename SeedSeq>
+    void seed (SeedSeq &seed_seq)
+    {
+        ctr_ = rng_type::ctr_type::seed(seed_seq);
+        key_ = rng_type::key_type::seed(seed_seq);
     }
 
     void seed (typename rng_type::key_type::value_type k0)
@@ -92,9 +114,9 @@ class random123_eigen
         }
     }
 
-    void step_size (unsigned s)
+    void step (unsigned step_size)
     {
-        step_ = s;
+        step_ = step_size;
     }
 
     static result_type min ()
