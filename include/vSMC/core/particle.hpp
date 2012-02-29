@@ -37,7 +37,7 @@ class Particle
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), estimate_zconst_(false),
-        binom_(size_, 0.5), brng_(seed), prng_(N)
+        prng_(N)
     {
         rng_type rng;
         for (std::size_t i = 0; i != size_; ++i) {
@@ -222,11 +222,9 @@ class Particle
     double zconst_;
     bool estimate_zconst_;
 
+    internal::Buffer<rng_type> prng_;
     typedef boost::random::binomial_distribution<int, double> binom_type;
     binom_type binom_;
-    boost::random::mt19937 brng_;
-
-    internal::Buffer<rng_type> prng_;
 
     void set_weight ()
     {
@@ -256,7 +254,7 @@ class Particle
             if (sum_n < size_ && weight_[i] > 0) {
                 binom_type::param_type
                     param(size_ - sum_n, weight_[i] / (tp - sum_p));
-                replication_[i] = binom_(brng_, param);
+                replication_[i] = binom_(prng_[i], param);
             }
             sum_p += weight_[i];
             sum_n += replication_[i];
