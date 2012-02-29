@@ -26,7 +26,7 @@
 
 /// Initializer list for random123_eigen
 #define BOOST_EIGEN_INIT \
-    index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_(1)
+    index_max_(BOOST_EIGEN_IDX_MAX), index_(index_max_), step_size_(1)
 
 namespace vSMC {
 
@@ -114,9 +114,9 @@ class random123_eigen
         }
     }
 
-    void step (unsigned step_size)
+    void step_size (unsigned size)
     {
-        step_ = step_size;
+        step_size_ = size;
     }
 
     static result_type min ()
@@ -133,7 +133,7 @@ class random123_eigen
     {
         if (index_ == index_max_) {
             index_ = 0;
-            ctr_[0] += step_;
+            advance_ctr();
             state_.c = crng_(ctr_, key_);
         }
 
@@ -151,7 +151,12 @@ class random123_eigen
     typename rng_type::key_type key_;
     unsigned index_max_;
     unsigned index_; 
-    unsigned step_;
+    unsigned step_size_;
+
+    void advance_ctr (unsigned step = 1)
+    {
+        ctr_[0] += step * step_size_;
+    }
 };
 
 typedef random123_eigen<r123::Philox2x32, uint32_t> philox2x32_32;

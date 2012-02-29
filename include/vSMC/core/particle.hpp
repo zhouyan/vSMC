@@ -43,7 +43,7 @@ class Particle
         for (std::size_t i = 0; i != size_; ++i) {
             prng_[i] = rng;
             prng_[i].seed(seed + i);
-            prng_[i].step(size_);
+            prng_[i].step_size(size_);
         }
 
         double equal_weight = 1.0 / size_;
