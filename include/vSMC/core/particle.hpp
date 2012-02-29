@@ -150,20 +150,20 @@ class Particle
         resampled_ = resampled;
     }
 
-    /// \brief Get the value of SMC normalizing constant
-    ///
-    /// \return SMC normalizng constant estimate
-    double zconst () const
-    {
-        return zconst_;
-    }
-
     /// \brief Toggle whether or not record SMC normalizing constant
     ///
     /// \param estimate_zconst Start estimating normalzing constant if true
     void zconst (bool estimate_zconst)
     {
         estimate_zconst_ = estimate_zconst;
+    }
+
+    /// \brief Get the value of SMC normalizing constant
+    ///
+    /// \return SMC normalizng constant estimate
+    double zconst () const
+    {
+        return zconst_;
     }
 
     /// \brief Reset the value of SMC normalizing constant

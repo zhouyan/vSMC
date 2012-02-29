@@ -167,10 +167,9 @@ class InitializeTBB : public InitializeSeq<T>
     virtual std::size_t operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
-
+        this->pre_processor(particle);
         weight_.resize(particle.size());
         accept_.resize(particle.size());
-
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
                 internal::InitializeTBBApply<T>(this, &particle,
                     particle.value().state(), weight_, accept_));
@@ -179,6 +178,7 @@ class InitializeTBB : public InitializeSeq<T>
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i)
             accept += accept_[i];
+        this->post_processor(particle);
 
         return accept;
     }
@@ -206,17 +206,17 @@ class MoveTBB : public MoveSeq<T>
     /// \return Accept count
     virtual std::size_t operator () (std::size_t iter, Particle<T> &particle)
     {
+        this->pre_processor(particle);
         weight_.resize(particle.size());
         accept_.resize(particle.size());
-
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
                 internal::MoveTBBApply<T>(this, iter, &particle,
                     particle.value().state(), weight_, accept_));
-
         MoveSeq<T>::set_weight(this->weight_action(), particle, weight_.get());
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i)
             accept += accept_[i];
+        this->post_processor(particle);
 
         return accept;
     }
