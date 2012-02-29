@@ -45,35 +45,38 @@ class random123_eigen
 
     random123_eigen () : RANDOM123_EIGEN_INIT
     {
+        ctr_.fill(0);
         seed();
     }
 
-    explicit random123_eigen (seed_type k0) :
-        RANDOM123_EIGEN_INIT
+    explicit random123_eigen (seed_type k0) : RANDOM123_EIGEN_INIT
     {
+        ctr_.fill(0);
         seed(k0);
     }
 
     template <typename SeedSeq>
     random123_eigen (SeedSeq &seed_seq) : RANDOM123_EIGEN_INIT
     {
+        ctr_.fill(0);
         seed(seed_seq);
     }
 
     template <typename Iter>
     random123_eigen (Iter &first, Iter last) : RANDOM123_EIGEN_INIT
     {
+        ctr_.fill(0);
         seed(first, last);
     }
 
     void seed ()
     {
+        ctr_.fill(0);
         seed(static_cast<seed_type>(V_SMC_RNG_SEED));
     }
 
     void seed (seed_type k0)
     {
-        ctr_.fill(0);
         key_[0] = k0;
         for (unsigned i = 1; i != key_.size(); ++i) {
             key_[i] = (key_[i-1]>>1) |
@@ -84,7 +87,6 @@ class random123_eigen
     template <typename SeedSeq>
     void seed (SeedSeq &seed_seq)
     {
-        ctr_.fill(0);
         key_ = cbrng_type::key_type::seed(seed_seq);
     }
 
@@ -132,6 +134,7 @@ class random123_eigen
     void advance_ctr (unsigned step = 1)
     {
         ctr_value_type inc = step * step_size_;
+
         if (ctr_max_ - ctr_[ctr_index_] < inc)
             ++ctr_index_;
 
