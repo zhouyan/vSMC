@@ -220,25 +220,15 @@ class Sampler
 
     /// \brief Perform importance sampling integration
     ///
+    /// \param dim The dimension of the parameter
     /// \param integral The functor used to compute the integrands
-    double integrate (typename Monitor<T>::integral_type integral)
+    /// \param res The result, an array of length dim
+    void integrate (unsigned dim,
+            const typename Monitor<T>::integral_type &integral, double *res)
     {
-        buffer_.resize(size());
-        integral(iter_num_, particle_, buffer_);
-
-        return cblas_ddot(size(), particle_.weight_ptr(), 1, buffer_, 1);
-    }
-
-    /// \brief Perform importance sampling integration
-    ///
-    /// \param integral The functor used to compute the integrands
-    /// \param param Additional parameters passed to the integral functor
-    double integrate (integral_type integral, void *param) const
-    {
-        buffer_.resize(size());
-        integral(iter_num_, particle_, buffer_, param);
-
-        return cblas_ddot(size(), particle_.weight_ptr(), 1, buffer_, 1);
+        Monitor<T> m(dim, integral);
+        m.eval(iter_num_, particle_);
+        cblas_dcopy(dim, m.record().back().get(), 1, res, 1);
     }
 
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
