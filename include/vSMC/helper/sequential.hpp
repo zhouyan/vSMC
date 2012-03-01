@@ -212,7 +212,7 @@ class MoveSeq
     /// \return Accept count
     virtual std::size_t operator () (std::size_t iter, Particle<T> &particle)
     {
-        pre_processor(particle);
+        pre_processor(iter, particle);
         weight_.resize(particle.size());
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i) {
@@ -220,7 +220,7 @@ class MoveSeq
                     weight_[i], particle, particle.prng(i));
         }
         set_weight(weight_action(), particle, weight_.get());
-        post_processor(particle);
+        post_processor(iter, particle);
 
         return accept;
     }
@@ -251,8 +251,8 @@ class MoveSeq
         return ADD_LOG_WEIGHT;
     }
 
-    virtual void pre_processor (Particle<T> &particle) {}
-    virtual void post_processor (Particle<T> &particle) {}
+    virtual void pre_processor (std::size_t iter, Particle<T> &particle) {}
+    virtual void post_processor (std::size_t iter, Particle<T> &particle) {}
 
     void set_weight (WeightAction action,
             Particle<T> &particle, double *weight)

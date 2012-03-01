@@ -206,7 +206,7 @@ class MoveTBB : public MoveSeq<T>
     /// \return Accept count
     virtual std::size_t operator () (std::size_t iter, Particle<T> &particle)
     {
-        this->pre_processor(particle);
+        this->pre_processor(iter, particle);
         weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
@@ -216,7 +216,7 @@ class MoveTBB : public MoveSeq<T>
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i)
             accept += accept_[i];
-        this->post_processor(particle);
+        this->post_processor(iter, particle);
 
         return accept;
     }
