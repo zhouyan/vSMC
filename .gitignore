@@ -4,6 +4,9 @@
 doc/
 build/
 
+test/gmm/gmm-arnaud
+test/gmm/gmm-arnaud.save
+
 test/pet/ConfigureFile?*
 test/pet/input*
 test/pet/EST*
