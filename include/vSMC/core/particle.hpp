@@ -1,8 +1,6 @@
 #ifndef V_SMC_CORE_PARTICLE_HPP
 #define V_SMC_CORE_PARTICLE_HPP
 
-#include <algorithm>
-#include <limits>
 #include <cmath>
 #include <cstddef>
 #include <mkl_cblas.h>
@@ -229,10 +227,10 @@ class Particle
 
     void set_weight ()
     {
-        double max_weight = -std::numeric_limits<double>::infinity();
-
+        double max_weight = log_weight_[0];
         for (std::size_t i = 0; i != size_; ++i)
-            max_weight = std::max(max_weight, log_weight_[i]);
+            if (log_weight_[i] > max_weight)
+                max_weight = log_weight_[i];
         for (std::size_t i = 0; i != size_; ++i) {
             log_weight_[i] -= max_weight;
             weight_[i] = std::exp(log_weight_[i]);
