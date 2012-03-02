@@ -170,6 +170,14 @@ class Sampler
         return particle_;
     }
 
+    /// \brief Replace initialization functor
+    ///
+    /// \param init New Initialization functor
+    void initialize (init_type &init)
+    {
+        init_ = init;
+    }
+
     /// \brief Initialize the particle set
     ///
     /// \param param Additional parameters passed to the initialization
@@ -191,6 +199,16 @@ class Sampler
         particle_.reset_zconst();
 
         initialized_ = true;
+    }
+
+    /// \brief Replace iteration functor
+    ///
+    /// \param move New Move functor
+    /// \param mcmc New MCMC functor
+    void iterate (const move_type &move, const move_type &mcmc = NULL)
+    {
+        move_ = move;
+        mcmc_ = mcmc;
     }
 
     /// \brief Perform iteration
