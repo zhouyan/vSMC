@@ -57,7 +57,7 @@ class StateSeq
     /// \return A pointer to the states of a single particle
     T *state (std::size_t n)
     {
-        return state_.get() + n * dim();
+        return state_.data() + n * dim();
     }
 
     /// \brief Read only access to the array of a single particle states
@@ -65,7 +65,7 @@ class StateSeq
     /// \return A const pointer to the states of a single array particle
     const T *state (std::size_t n) const
     {
-        return state_.get() + n * dim();
+        return state_.data() + n * dim();
     }
 
     /// \brief Read and write access to the array of all particle states
@@ -77,7 +77,7 @@ class StateSeq
     /// Dim elements are the states of the second particle, and so on.
     T *state ()
     {
-        return state_.get();
+        return state_.data();
     }
 
     /// \brief Read only access to the array of all particle states
@@ -85,7 +85,7 @@ class StateSeq
     /// \return A const pointer to the states of all particles
     const T *state () const
     {
-        return state_.get();
+        return state_.data();
     }
 
     /// \brief Read only access to the states of a particular paramter
@@ -95,7 +95,7 @@ class StateSeq
     template<typename OIter>
     void state (unsigned id, OIter first) const
     {
-        const T *src = state_.get() + id;
+        const T *src = state_.data() + id;
         for (std::size_t i = 0; i != size_; ++i, src += Dim)
             *first++ = *src;
     }
@@ -153,7 +153,7 @@ class InitializeSeq
             accept += initialize_state(i, particle.value().state(i),
                     weight_[i], particle, particle.prng(i));
         }
-        particle.set_log_weight(weight_);
+        particle.set_log_weight(weight_.data());
         post_processor(particle);
 
         return accept;
@@ -219,7 +219,7 @@ class MoveSeq
             accept += move_state(i, iter, particle.value().state(i),
                     weight_[i], particle, particle.prng(i));
         }
-        set_weight(weight_action(), particle, weight_.get());
+        set_weight(weight_action(), particle, weight_.data());
         post_processor(iter, particle);
 
         return accept;

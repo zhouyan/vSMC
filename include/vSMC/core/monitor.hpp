@@ -141,9 +141,10 @@ class Monitor
         for (unsigned d = 0; d != dim_; ++d)
             result_[d] = 0;
 
-        integral_(iter, particle, buffer_);
+        integral_(iter, particle, buffer_.data());
         cblas_dgemv(CblasRowMajor, CblasTrans, particle.size(), dim_,
-                1, buffer_, dim_, particle.weight_ptr(), 1, 0, result_, 1);
+                1, buffer_.data(), dim_, particle.weight_ptr(), 1, 0,
+                result_.data(), 1);
 
         index_.push_back(iter);
         record_.push_back(result_);

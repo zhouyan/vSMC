@@ -90,7 +90,7 @@ class Particle
     /// same address
     const double *weight_ptr () const
     {
-        return weight_.get();
+        return weight_.data();
     }
 
     /// \brief Read only access to the log weights
@@ -98,7 +98,7 @@ class Particle
     /// \return A const pointer to the log weights
     const double *log_weight_ptr () const
     {
-        return log_weight_.get();
+        return log_weight_.data();
     }
 
     /// \brief Set the log weights
@@ -106,7 +106,7 @@ class Particle
     /// \param [in] new_weight New log weights
     void set_log_weight (const double *new_weight)
     {
-        cblas_dcopy(size_, new_weight, 1, log_weight_, 1);
+        cblas_dcopy(size_, new_weight, 1, log_weight_.data(), 1);
         set_weight();
     }
 
@@ -118,7 +118,8 @@ class Particle
         if (estimate_zconst_) {
             for (std::size_t i = 0; i != size_; ++i)
                 inc_weight_[i] = std::exp(inc_weight[i]);
-            zconst_ += std::log(cblas_ddot(size_, weight_, 1, inc_weight_, 1));
+            zconst_ += std::log(cblas_ddot(size_, weight_.data(), 1,
+                        inc_weight_.data(), 1));
         }
 
         for (std::size_t i = 0; i != size_; ++i)
@@ -199,7 +200,7 @@ class Particle
 
     rng_type *prng ()
     {
-        return prng_.get();
+        return prng_.data();
     }
 
     rng_type &prng (std::size_t id)
@@ -236,9 +237,9 @@ class Particle
             log_weight_[i] -= max_weight;
             weight_[i] = std::exp(log_weight_[i]);
         }
-        double sum = cblas_dasum(size_, weight_, 1);
-        cblas_dscal(size_, 1 / sum, weight_, 1);
-        ess_ = 1 / cblas_ddot(size_, weight_, 1, weight_, 1);
+        double sum = cblas_dasum(size_, weight_.data(), 1);
+        cblas_dscal(size_, 1 / sum, weight_.data(), 1);
+        ess_ = 1 / cblas_ddot(size_, weight_.data(), 1, weight_.data(), 1);
     }
 
     void weight2replication ()
@@ -274,9 +275,9 @@ class Particle
         // They all will be reset to equal weights after resampling.  So it is
         // safe to modify them here.
         for (std::size_t i = 0; i != size_; ++i)
-            weight_[i] = std::modf(size_ * weight_[i], log_weight_ + i);
+            weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
         std::size_t size = size_;
-        size -= cblas_dasum(size_, log_weight_, 1);
+        size -= cblas_dasum(size_, log_weight_.data(), 1);
         weight2replication();
         for (std::size_t i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];

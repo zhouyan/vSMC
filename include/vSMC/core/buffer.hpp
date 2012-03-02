@@ -102,37 +102,13 @@ class Buffer
     }
 
     /// \brief Get the internal pointer of the allocated array
-    T *get ()
+    T *data ()
     {
         return buffer_;
     }
 
     /// \brief Get the internal pointer of the allocated array
-    const T *get () const
-    {
-        return buffer_;
-    }
-
-    /// \brief Implicit convert Buffer to pointer
-    operator T* ()
-    {
-        return buffer_;
-    }
-
-    /// \brief Implicit convert Buffer to pointer
-    operator const T* () const
-    {
-        return buffer_;
-    }
-
-    /// \brief Implicit convert Buffer to a void pointer, prevent \b delete
-    operator void* ()
-    {
-        return buffer_;
-    }
-
-    /// \brief Implicit convert Buffer to a void pointer, prevent \b delete
-    operator const void* () const
+    const T *data () const
     {
         return buffer_;
     }

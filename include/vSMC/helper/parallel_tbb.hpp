@@ -172,9 +172,9 @@ class InitializeTBB : public InitializeSeq<T>
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
                 internal::InitializeTBBApply<T>(this, &particle,
-                    particle.value().state(), weight_, accept_));
+                    particle.value().state(), weight_.data(), accept_.data()));
 
-        particle.set_log_weight(weight_);
+        particle.set_log_weight(weight_.data());
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i)
             accept += accept_[i];
@@ -211,8 +211,9 @@ class MoveTBB : public MoveSeq<T>
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
                 internal::MoveTBBApply<T>(this, iter, &particle,
-                    particle.value().state(), weight_, accept_));
-        MoveSeq<T>::set_weight(this->weight_action(), particle, weight_.get());
+                    particle.value().state(), weight_.data(), accept_.data()));
+        MoveSeq<T>::set_weight(this->weight_action(), particle,
+                weight_.data());
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i)
             accept += accept_[i];

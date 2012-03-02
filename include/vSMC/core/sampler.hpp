@@ -246,7 +246,7 @@ class Sampler
     {
         Monitor<T> m(dim, integral);
         m.eval(iter_num_, particle_);
-        cblas_dcopy(dim, m.record().back().get(), 1, res, 1);
+        cblas_dcopy(dim, m.record().back().data(), 1, res, 1);
     }
 
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
