@@ -102,26 +102,27 @@ class Particle
     /// \brief Set the log weights
     ///
     /// \param [in] new_weight New log weights
-    void set_log_weight (const double *new_weight)
+    void set_log_weight (const double *new_weight, double delta = 1)
     {
         cblas_dcopy(size_, new_weight, 1, log_weight_.data(), 1);
+        cblas_dscal(size_, delta, log_weight_.data(), 1);
         set_weight();
     }
 
     /// \brief Add to the log weights
     ///
     /// \param [in] inc_weight Incremental log weights
-    void add_log_weight (const double *inc_weight)
+    void add_log_weight (const double *inc_weight, double delta = 1)
     {
         if (estimate_zconst_) {
             for (std::size_t i = 0; i != size_; ++i)
-                inc_weight_[i] = std::exp(inc_weight[i]);
+                inc_weight_[i] = std::exp(delta * inc_weight[i]);
             zconst_ += std::log(cblas_ddot(size_, weight_.data(), 1,
                         inc_weight_.data(), 1));
         }
 
         for (std::size_t i = 0; i != size_; ++i)
-            log_weight_[i] += inc_weight[i];
+            log_weight_[i] += delta * inc_weight[i];
         set_weight();
     }
 
