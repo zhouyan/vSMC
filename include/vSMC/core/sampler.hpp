@@ -346,14 +346,6 @@ class Sampler
         return path_.zconst();
     }
 
-    /// \brief Toggle whether or not record SMC normalizing constant
-    ///
-    /// \param estimate_zconst Start estimating normalzing constant if true.
-    void zconst (bool estimate_zconst)
-    {
-        particle_.zconst(estimate_zconst);
-    }
-
     /// \brief SMC estimate of normalizing constant
     ///
     /// \return The SMC normalizng constant estimate
