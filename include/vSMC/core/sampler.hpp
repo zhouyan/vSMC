@@ -69,6 +69,38 @@ class Sampler
         return ess_.size();
     }
 
+    /// \brief Query the the resampling scheme
+    ///
+    /// \return The current resampling scheme
+    ResampleScheme resample_scheme () const
+    {
+        return scheme_;
+    }
+
+    /// \brief Set new resampling scheme
+    ///
+    /// \param scheme The new scheme for resampling
+    void resample_scheme (ResampleScheme scheme)
+    {
+        scheme_ = scheme;
+    }
+
+    /// \brief Query the threshold
+    ///
+    /// \return The current threshold for resmapling
+    double resample_threshold () const
+    {
+        return threshold_;
+    }
+
+    /// \brief Set new resampling threshold
+    ///
+    /// \param threshold The new threshold for resampling
+    void resample_threshold (double threshold)
+    {
+        threshold_ = threshold;
+    }
+
     /// \brief ESS
     ///
     /// \return The ESS value of the latest iteration
