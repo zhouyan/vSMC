@@ -98,7 +98,7 @@ class Sampler
     /// \param threshold The new threshold for resampling
     void resample_threshold (double threshold)
     {
-        threshold_ = threshold;
+        threshold_ = threshold * particle_.size();
     }
 
     /// \brief ESS
