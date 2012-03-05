@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <cstddef>
-#include <mkl_cblas.h>
 #include <boost/function.hpp>
 #include <vSMC/core/buffer.hpp>
+#include <vSMC/core/cblas.hpp>
 #include <vSMC/core/particle.hpp>
 
 namespace vSMC {

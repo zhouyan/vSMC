@@ -3,11 +3,11 @@
 
 #include <cmath>
 #include <cstddef>
-#include <mkl_cblas.h>
 #include <boost/function.hpp>
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <vSMC/core/buffer.hpp>
+#include <vSMC/core/cblas.hpp>
 #include <vSMC/core/rng.hpp>
 
 namespace vSMC {
