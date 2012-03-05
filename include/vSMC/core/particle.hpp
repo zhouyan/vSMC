@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <boost/function.hpp>
 #include <boost/random/binomial_distribution.hpp>
-#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
 #include <vSMC/core/buffer.hpp>
 #include <vSMC/core/cblas.hpp>
 #include <vSMC/core/rng.hpp>
@@ -274,8 +274,46 @@ class Particle
         resample_do();
     }
 
-    void resample_stratified () {}
-    void resample_systematic () {}
+    void resample_stratified ()
+    {
+        for (std::size_t i = 0; i != size_; ++i)
+            replication_[i] = 0;
+        std::size_t j = 0;
+        std::size_t k = 0;
+        boost::random::uniform_01<> unif;
+        double u = unif(prng_[0]) / size_;
+        double cw = weight_[0];
+        while (j < size_) {
+            while (j < (cw - u) * size_  && j < size_) {
+                ++replication_[k];
+                ++j;
+                u = unif(prng_[j]) / size_;
+            }
+            ++k;
+            cw += weight_[k];
+        }
+        resample_do();
+    }
+
+    void resample_systematic ()
+    {
+        for (std::size_t i = 0; i != size_; ++i)
+            replication_[i] = 0;
+        std::size_t j = 0;
+        std::size_t k = 0;
+        boost::random::uniform_01<> unif;
+        double u = unif(prng_[0]) / size_;
+        double cw = weight_[0];
+        while (j < size_) {
+            while (j < (cw - u) * size_ && j < size_) {
+                ++replication_[k];
+                ++j;
+            }
+            ++k;
+            cw += weight_[k];
+        }
+        resample_do();
+    }
 
     void resample_do ()
     {
