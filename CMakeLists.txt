@@ -18,12 +18,9 @@ SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 # Finding Packages
 SET (Boost_NO_BOOST_CMAKE ON)
+INCLUDE (FindBLAS)
 INCLUDE (FindBoost)
 INCLUDE (FindDoxygen)
-INCLUDE (FindThreads)
-FIND_PACKAGE (Boost)
-FIND_PACKAGE (Doxygen)
-FIND_PACKAGE (Threads)
 
 # Additional packages
 INCLUDE (FindEigen)
