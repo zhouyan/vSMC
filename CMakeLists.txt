@@ -19,14 +19,21 @@ SET (Boost_NO_BOOST_CMAKE ON)
 INCLUDE (FindBLAS)
 INCLUDE (FindBoost)
 INCLUDE (FindDoxygen)
-
-# Additional packages
 INCLUDE (FindEigen)
 INCLUDE (FindGSL)
 INCLUDE (FindMKL)
 INCLUDE (FindRandom123)
 INCLUDE (FindTBB)
 INCLUDE (FindvDist)
+
+# Sometime FindBLAS does not work well
+IF (NOT BLAS_FOUND)
+    IF (MKL_FOUND)
+        SET (BLAS_LIBRARIES ${MKL_LINK_LIBRARIES})
+        SET (BLAS_FOUND TRUE)
+    ENDIF (MKL_FOUND)
+ENDIF (NOT BLAS_FOUND)
+MESSAGE (STATUS "Found BLAS: ${BLAS_LIBRARIES}")
 
 # Include dirs
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
