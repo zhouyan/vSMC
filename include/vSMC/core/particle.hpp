@@ -232,7 +232,7 @@ class Particle
         ess_ = 1 / cblas_ddot(size_, weight_.data(), 1, weight_.data(), 1);
     }
 
-    void weight2replication ()
+    void weight2replication (std::size_t size)
     {
         double tp = 0;
         for (std::size_t i = 0; i != size_; ++i)
@@ -242,9 +242,9 @@ class Particle
         std::size_t sum_n = 0;
         for (std::size_t i = 0; i != size_; ++i) {
             replication_[i] = 0;
-            if (sum_n < size_ && weight_[i] > 0) {
+            if (sum_n < size && weight_[i] > 0) {
                 binom_type::param_type
-                    param(size_ - sum_n, weight_[i] / (tp - sum_p));
+                    param(size - sum_n, weight_[i] / (tp - sum_p));
                 replication_[i] = binom_(prng_[i], param);
             }
             sum_p += weight_[i];
@@ -254,7 +254,7 @@ class Particle
 
     void resample_multinomial ()
     {
-        weight2replication();
+        weight2replication(size_);
         resample_do();
     }
 
@@ -266,9 +266,8 @@ class Particle
         // safe to modify them here.
         for (std::size_t i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
-        std::size_t size = size_;
-        size -= cblas_dasum(size_, log_weight_.data(), 1);
-        weight2replication();
+        std::size_t size = size_ - cblas_dasum(size_, log_weight_.data(), 1);
+        weight2replication(size);
         for (std::size_t i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
         resample_do();
@@ -284,7 +283,7 @@ class Particle
         double u = unif(prng_[0]) / size_;
         double cw = weight_[0];
         while (j < size_) {
-            while (j < (cw - u) * size_  && j < size_) {
+            while (j < (cw - u) * size_ && j < size_) {
                 ++replication_[k];
                 ++j;
                 u = unif(prng_[j]) / size_;
