@@ -280,16 +280,14 @@ class Particle
         std::size_t j = 0;
         std::size_t k = 0;
         boost::random::uniform_01<> unif;
-        double u = unif(prng_[0]) / size_;
+        double u = unif(prng_[0]);
         double cw = weight_[0];
-        while (j < size_) {
-            while (j < (cw - u) * size_ && j < size_) {
+        while (j != size_) {
+            while (j < cw * size_ - u && j != size_) {
                 ++replication_[k];
-                ++j;
-                u = unif(prng_[j]) / size_;
+                u = unif(prng_[j++]);
             }
-            ++k;
-            cw += weight_[k];
+            cw += weight_[++k];
         }
         resample_do();
     }
@@ -301,21 +299,23 @@ class Particle
         std::size_t j = 0;
         std::size_t k = 0;
         boost::random::uniform_01<> unif;
-        double u = unif(prng_[0]) / size_;
+        double u = unif(prng_[0]);
         double cw = weight_[0];
-        while (j < size_) {
-            while (j < (cw - u) * size_ && j < size_) {
+        while (j != size_) {
+            while (j < cw * size_ - u && j != size_) {
                 ++replication_[k];
-                ++j;
+		++j;
             }
-            ++k;
-            cw += weight_[k];
+            cw += weight_[++k];
         }
         resample_do();
     }
 
     void resample_do ()
     {
+	std::size_t sum = 0;
+	for (std::size_t i = 0; i != size_; ++i)
+	    sum += replication_[i];
         std::size_t from = 0;
         std::size_t time = 0;
 
