@@ -45,7 +45,7 @@ class Sampler
             const init_type &init,
             const move_type &move,
             const move_type &mcmc = NULL,
-            ResampleScheme scheme = RESIDUAL,
+            ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
             unsigned seed = V_SMC_RNG_SEED) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
