@@ -3,11 +3,6 @@
 
 #include <stdexcept>
 #include <cstddef>
-#include <mkl_service.h>
-
-#ifndef V_SMC_ALIGN_SIZE
-#define V_SMC_ALIGN_SIZE 16
-#endif // V_SMC_ALIGN_SIZE
 
 namespace vSMC { namespace internal {
 
@@ -34,8 +29,7 @@ class Buffer
     explicit Buffer (const size_type n = 0) : buffer_(NULL), size_(n)
     {
         if (size_)
-            buffer_ = static_cast<T *>(
-                    mkl_malloc(sizeof(T) * n, align_size()));
+            buffer_ = new T[size_];
     }
 
     /// \brief Copy constructor
@@ -43,10 +37,11 @@ class Buffer
     /// \param buffer The Buffer to be copied
     Buffer (const Buffer<T> &buffer) : buffer_(NULL), size_(buffer.size_)
     {
-        buffer_ = static_cast<T *>(
-                mkl_malloc(sizeof(T) * size_, align_size()));
-        for (size_type i = 0; i != size_; ++i)
-            buffer_[i] = buffer[i];
+        if (size_) {
+            buffer_ = new T[size_];
+            for (size_type i = 0; i != size_; ++i)
+                buffer_[i] = buffer[i];
+        }
     }
 
     /// \brief Assignment operator
@@ -56,12 +51,14 @@ class Buffer
     Buffer<T> & operator= (const Buffer<T> &buffer)
     {
         if (&buffer != this) {
-            mkl_free(buffer_);
-            buffer_ = static_cast<T *>(
-                    mkl_malloc(sizeof(T) * size_, align_size()));
+            if (size_)
+                delete [] buffer_;
             size_ = buffer.size_;
-            for (size_type i = 0; i != size_; ++i)
-                buffer_[i] = buffer[i];
+            if (size_) {
+                buffer_ = new T[size_];
+                for (size_type i = 0; i != size_; ++i)
+                    buffer_[i] = buffer[i];
+            }
         }
 
         return *this;
@@ -70,7 +67,7 @@ class Buffer
     ~Buffer ()
     {
         if (size_)
-            mkl_free(buffer_);
+            delete [] buffer_;
     }
 
     /// \brief Get the size of the internal array
@@ -93,11 +90,11 @@ class Buffer
     void resize (const size_type n)
     {
         if (size_ != n) {
+            if (size_)
+                delete [] buffer_;
             size_ = n;
             if (size_)
-                mkl_free(buffer_);
-            buffer_ = static_cast<T *>(
-                    mkl_malloc(sizeof(T) * size_, align_size()));
+                buffer_ = new T[size_];
         }
     }
 
@@ -159,14 +156,6 @@ class Buffer
 
     T *buffer_;
     size_type size_;
-
-    std::size_t align_size () const
-    {
-        if (sizeof(T) < V_SMC_ALIGN_SIZE && !(V_SMC_ALIGN_SIZE % sizeof(T)))
-            return V_SMC_ALIGN_SIZE;
-        else
-            return sizeof(T);
-    }
 }; // class Buffer
 
 } } // namespace vSMC::internal
