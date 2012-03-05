@@ -232,26 +232,6 @@ class Particle
         ess_ = 1 / cblas_ddot(size_, weight_.data(), 1, weight_.data(), 1);
     }
 
-    void weight2replication (std::size_t size)
-    {
-        double tp = 0;
-        for (std::size_t i = 0; i != size_; ++i)
-            tp += weight_[i];
-
-        double sum_p = 0;
-        std::size_t sum_n = 0;
-        for (std::size_t i = 0; i != size_; ++i) {
-            replication_[i] = 0;
-            if (sum_n < size && weight_[i] > 0) {
-                binom_type::param_type
-                    param(size - sum_n, weight_[i] / (tp - sum_p));
-                replication_[i] = binom_(prng_[i], param);
-            }
-            sum_p += weight_[i];
-            sum_n += replication_[i];
-        }
-    }
-
     void resample_multinomial ()
     {
         weight2replication(size_);
@@ -311,11 +291,45 @@ class Particle
         resample_do();
     }
 
+    void weight2replication (std::size_t size)
+    {
+        double tp = 0;
+        for (std::size_t i = 0; i != size_; ++i)
+            tp += weight_[i];
+
+        double sum_p = 0;
+        std::size_t sum_n = 0;
+        for (std::size_t i = 0; i != size_; ++i) {
+            replication_[i] = 0;
+            if (sum_n < size && weight_[i] > 0) {
+                binom_type::param_type
+                    param(size - sum_n, weight_[i] / (tp - sum_p));
+                replication_[i] = binom_(prng_[i], param);
+            }
+            sum_p += weight_[i];
+            sum_n += replication_[i];
+        }
+    }
+
     void resample_do ()
     {
+	// Some times the nuemrical round error can cause the total childs
+	// differ from number of particles
 	std::size_t sum = 0;
 	for (std::size_t i = 0; i != size_; ++i)
 	    sum += replication_[i];
+	if (sum != size_) {
+	    std::size_t max = replication_[0];
+	    std::size_t id_max = 0;
+	    for (std::size_t i = 0; i != size_; ++i) {
+		if (replication_[i] > max) {
+		    max = replication_[i];
+		    id_max = i;
+		}
+	    }
+	    replication_[id_max] += size_ - sum;
+	}
+
         std::size_t from = 0;
         std::size_t time = 0;
 
