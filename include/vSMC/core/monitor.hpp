@@ -114,17 +114,6 @@ class Monitor
         return record_;
     }
 
-    /// \brief Record of Monte Carlo integrtion.
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void record (OIter first) const
-    {
-        for (std::vector<double>::const_iterator iter = record_.begin();
-               iter != record_.end(); ++iter)
-            *first++ = *iter;
-    }
-
     /// \brief Evaluate the integration
     ///
     /// \param iter The iteration number
