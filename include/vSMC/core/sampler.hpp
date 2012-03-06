@@ -28,9 +28,6 @@ class Sampler
     /// The type of move functor
     typedef boost::function<std::size_t
         (std::size_t, Particle<T> &)> move_type;
-    /// The type of importance sampling integral functor
-    typedef boost::function<void
-        (std::size_t, Particle<T> &, double *, void *)> integral_type;
 
     /// \brief Sampler does not have a default constructor
     ///
@@ -271,11 +268,23 @@ class Sampler
 
     /// \brief Perform importance sampling integration
     ///
+    /// \param integral The functor used to compute the integrands
+    /// \param res The result, an array of length dim
+    template<typename MonitorType>
+    void integrate (const MonitorType &integral, double *res)
+    {
+        Monitor<T> m(integral.dim(), integral);
+        m.eval(iter_num_, particle_);
+        cblas_dcopy(dim, m.record().back().data(), 1, res, 1);
+    }
+
+    /// \brief Perform importance sampling integration
+    ///
     /// \param dim The dimension of the parameter
     /// \param integral The functor used to compute the integrands
     /// \param res The result, an array of length dim
-    void integrate (unsigned dim,
-            const typename Monitor<T>::integral_type &integral, double *res)
+    template<typename MonitorType>
+    void integrate (unsigned dim, const MonitorType &integral, double *res)
     {
         Monitor<T> m(dim, integral);
         m.eval(iter_num_, particle_);
@@ -285,10 +294,23 @@ class Sampler
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
     ///
     /// \param name The name of the monitor
+    /// \param integral The functor used to compute the integrands
+    template<typename MonitorType>
+    void monitor (const std::string &name, const MonitorType &integral)
+    {
+        monitor_.insert(std::make_pair(
+                    name, Monitor<T>(integral.dim(), integral)));
+        monitor_name_.insert(name);
+    }
+
+    /// \brief Add a monitor, similar to \b monitor in \b BUGS
+    ///
+    /// \param name The name of the monitor
     /// \param dim The dimension of the monitor
     /// \param integral The functor used to compute the integrands
+    template<typename MonitorType>
     void monitor (const std::string &name, unsigned dim,
-            const typename Monitor<T>::integral_type &integral)
+            const MonitorType &integral)
     {
         monitor_.insert(std::make_pair(name, Monitor<T>(dim, integral)));
         monitor_name_.insert(name);
@@ -367,7 +389,8 @@ class Sampler
     /// \param integral The functor used to compute the integrands
     ///
     /// \note Set integral = NULL will stop path sampling recording
-    void path_sampling (const typename Path<T>::integral_type &integral)
+    template<typename PathType>
+    void path_sampling (const PathType &integral)
     {
         path_.integral(integral);
     }
