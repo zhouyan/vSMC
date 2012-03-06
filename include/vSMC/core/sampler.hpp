@@ -40,6 +40,7 @@ class Sampler
     /// \param mcmc The functor used to perform MCMC move
     /// \param scheme The resampling scheme. See ResampleScheme
     /// \param threshold The threshold for performing resampling
+    /// \param seed The seed to the parallel RNG system
     Sampler (
             std::size_t N,
             const init_type &init,
@@ -284,6 +285,7 @@ class Sampler
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
     ///
     /// \param name The name of the monitor
+    /// \param dim The dimension of the monitor
     /// \param integral The functor used to compute the integrands
     void monitor (const std::string &name, unsigned dim,
             const typename Monitor<T>::integral_type &integral)

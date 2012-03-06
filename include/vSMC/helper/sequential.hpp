@@ -162,9 +162,10 @@ class InitializeSeq
     /// \brief Initialize a single particle
     ///
     /// \param id The id of the particle to be processed
+    /// \param weight The log weight of the particle
     /// \param particle The Particle set passed by Sampler
     /// \param state The array contains the states of a single particle
-    /// \param weight The log weight of the particle
+    /// \param rng A Boost Random eigen unique to the id'th particle
     ///
     /// \return Accept count, normally should be zero or one
     virtual int initialize_state (std::size_t id,
@@ -229,7 +230,6 @@ class MoveSeq
     ///
     /// \param id The id of the particle to be processed
     /// \param iter The iteration number
-    /// \param particle The Particle set passed by Sampler
     /// \param state The array contains the states of a single particle
     /// \param weight The weight of the particle. This may not be the actual
     /// weight. How the returned weight is treated depend on the return from
@@ -238,6 +238,8 @@ class MoveSeq
     /// as multiplier to the original weight, or the acutal value of the (log
     /// of) weight. It can even be meaningless, namely no action is taken with
     /// this weight. See WeightAction and weight_action.
+    /// \param particle The Particle set passed by Sampler
+    /// \param rng A Boost Random eigen unique to the id'th particle
     virtual int move_state (std::size_t id, std::size_t iter,
             typename T::value_type *state, double &weight,
             const Particle<T> &particle,
@@ -299,7 +301,7 @@ class MonitorSeq
     ///
     /// \param iter The iteration number
     /// \param particle The Particle set passed by Sampler
-    /// \param [out] res The integrands. Sum(res * weight) is the Monte Carlo
+    /// \param res The integrands. Sum(res * weight) is the Monte Carlo
     /// integration result.
     virtual void operator () (std::size_t iter, Particle<T> &particle,
             double *res)
@@ -313,8 +315,9 @@ class MonitorSeq
     ///
     /// \param id The id of the particle to be processed
     /// \param iter The iteration number
-    /// \param particle The Particle set passed by Sampler
     /// \param state The array contains the states of a single particle
+    /// \param particle The Particle set passed by Sampler
+    /// \param res The integrands
     ///
     /// \return The value to be estimated
     virtual void monitor_state (std::size_t id, std::size_t iter,
@@ -346,7 +349,7 @@ class PathSeq
     ///
     /// \param iter The iteration number
     /// \param particle The particle set passed by Sampler
-    /// \param [out] res The integrands. Sum(res * weight) is the path
+    /// \param res The integrands. Sum(res * weight) is the path
     ///
     /// \return The width
     /// sampling integrand.

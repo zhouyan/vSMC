@@ -31,6 +31,7 @@ class Particle
     /// \brief Construct a Particle object with given number of particles
     ///
     /// \param N The number of particles
+    /// \param seed The seed to the parallel RNG system
     Particle (std::size_t N, rng_type::seed_type seed = V_SMC_RNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
@@ -100,7 +101,8 @@ class Particle
 
     /// \brief Set the log weights
     ///
-    /// \param [in] new_weight New log weights
+    /// \param new_weight New log weights
+    /// \param delta A multiplier appiled to new_weight
     void set_log_weight (const double *new_weight, double delta = 1)
     {
         cblas_dcopy(size_, new_weight, 1, log_weight_.data(), 1);
@@ -110,7 +112,10 @@ class Particle
 
     /// \brief Add to the log weights
     ///
-    /// \param [in] inc_weight Incremental log weights
+    /// \param inc_weight Incremental log weights
+    /// \param delta A multiplier applied to inc_weight
+    /// \param add_zconst Whether this incremental weights should contribute
+    /// the esitmates of normalizing constants
     void add_log_weight (const double *inc_weight, double delta = 1,
             bool add_zconst = true)
     {

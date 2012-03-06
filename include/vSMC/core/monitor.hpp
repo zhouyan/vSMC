@@ -27,6 +27,7 @@ class Monitor
 
     /// \brief Construct a Monitor with an integral function
     ///
+    /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param integral The functor used to compute the integrands
     Monitor (unsigned dim = 1, const integral_type &integral = NULL) :
         dim_(dim), integral_(integral) {}
