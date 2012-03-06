@@ -2,7 +2,7 @@
 *.swp
 .R*
 doc/
-build/
+build*
 
 test/gmm/gmm-arnaud
 test/gmm/gmm-arnaud.save
