@@ -275,7 +275,7 @@ class Sampler
     {
         Monitor<T> m(integral.dim(), integral);
         m.eval(iter_num_, particle_);
-        cblas_dcopy(dim, m.record().back().data(), 1, res, 1);
+        cblas_dcopy(integral.dim(), m.record().back().data(), 1, res, 1);
     }
 
     /// \brief Perform importance sampling integration
