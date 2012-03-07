@@ -450,7 +450,7 @@ class Sampler
         std::vector<unsigned> monitor_dim;
         std::vector<std::vector<std::size_t>::const_iterator>
             iter_monitor_index;
-        std::vector<std::vector<internal::Buffer<double> >::const_iterator>
+        std::vector<std::vector<Eigen::VectorXd>::const_iterator>
             iter_monitor_record;
         for (typename std::map<std::string, Monitor<T> >::const_iterator
                 imap = monitor_.begin(); imap != monitor_.end(); ++imap) {

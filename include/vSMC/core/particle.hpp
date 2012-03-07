@@ -1,13 +1,13 @@
 #ifndef V_SMC_CORE_PARTICLE_HPP
 #define V_SMC_CORE_PARTICLE_HPP
 
+#include <vector>
 #include <cmath>
 #include <cstddef>
 #include <boost/function.hpp>
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/random/uniform_01.hpp>
-#include <vSMC/core/buffer.hpp>
-#include <vSMC/core/cblas.hpp>
+#include <Eigen/Dense>
 #include <vSMC/core/rng.hpp>
 
 namespace vSMC {
@@ -44,11 +44,8 @@ class Particle
             prng_[i] = rng;
         }
 
-        double equal_weight = 1.0 / size_;
-        for (std::size_t i = 0; i != size_; ++i) {
-            weight_[i] = equal_weight;
-            log_weight_[i] = 0;
-        }
+        weight_.setConstant(1.0 / size_);
+        log_weight_.setConstant(0);
     }
 
     /// \brief Size of the particle set
@@ -99,14 +96,24 @@ class Particle
         return log_weight_.data();
     }
 
+    const Eigen::VectorXd &weight () const
+    {
+        return weight_;
+    }
+
+    const Eigen::VectorXd &log_weight () const
+    {
+        return log_weight_;
+    }
+
     /// \brief Set the log weights
     ///
     /// \param new_weight New log weights
     /// \param delta A multiplier appiled to new_weight
     void set_log_weight (const double *new_weight, double delta = 1)
     {
-        cblas_dcopy(size_, new_weight, 1, log_weight_.data(), 1);
-        cblas_dscal(size_, delta, log_weight_.data(), 1);
+        Eigen::Map<const Eigen::VectorXd> w(new_weight, size_);
+        log_weight_ = delta * w;
         set_weight();
     }
 
@@ -119,15 +126,12 @@ class Particle
     void add_log_weight (const double *inc_weight, double delta = 1,
             bool add_zconst = true)
     {
+        Eigen::Map<const Eigen::VectorXd> w(inc_weight, size_);
         if (add_zconst) {
-            for (std::size_t i = 0; i != size_; ++i)
-                inc_weight_[i] = std::exp(delta * inc_weight[i]);
-            zconst_ += std::log(cblas_ddot(size_, weight_.data(), 1,
-                        inc_weight_.data(), 1));
+            inc_weight_ = (delta * w).array().exp();
+            zconst_ += std::log(weight_.dot(inc_weight_));
         }
-
-        for (std::size_t i = 0; i != size_; ++i)
-            log_weight_[i] += delta * inc_weight[i];
+        log_weight_ += delta * w;
         set_weight();
     }
 
@@ -209,32 +213,27 @@ class Particle
     std::size_t size_;
     T value_;
 
-    internal::Buffer<double> weight_;
-    internal::Buffer<double> log_weight_;
-    internal::Buffer<double> inc_weight_;
-    internal::Buffer<int> replication_;
+    Eigen::VectorXd weight_;
+    Eigen::VectorXd log_weight_;
+    Eigen::VectorXd inc_weight_;
+    Eigen::VectorXi replication_;
 
     double ess_;
     bool resampled_;
     double zconst_;
 
-    internal::Buffer<rng_type> prng_;
+    std::vector<rng_type> prng_;
     typedef boost::random::binomial_distribution<int, double> binom_type;
     binom_type binom_;
 
     void set_weight ()
     {
-        double max_weight = log_weight_[0];
-        for (std::size_t i = 0; i != size_; ++i)
-            if (log_weight_[i] > max_weight)
-                max_weight = log_weight_[i];
-        for (std::size_t i = 0; i != size_; ++i) {
-            log_weight_[i] -= max_weight;
-            weight_[i] = std::exp(log_weight_[i]);
-        }
-        double sum = cblas_dasum(size_, weight_.data(), 1);
-        cblas_dscal(size_, 1 / sum, weight_.data(), 1);
-        ess_ = 1 / cblas_ddot(size_, weight_.data(), 1, weight_.data(), 1);
+        double max_weight = log_weight_.maxCoeff();
+        log_weight_ = log_weight_.array() - max_weight;
+        weight_ = log_weight_.array().exp();
+        double sum = weight_.sum();
+        weight_ *= 1 / sum;
+        ess_ = 1 / weight_.squaredNorm();
     }
 
     void resample_multinomial ()
@@ -251,7 +250,7 @@ class Particle
         // safe to modify them here.
         for (std::size_t i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
-        std::size_t size = size_ - cblas_dasum(size_, log_weight_.data(), 1);
+        std::size_t size = size_ - log_weight_.sum();
         weight2replication(size);
         for (std::size_t i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
@@ -260,8 +259,7 @@ class Particle
 
     void resample_stratified ()
     {
-        for (std::size_t i = 0; i != size_; ++i)
-            replication_[i] = 0;
+        replication_.setConstant(0);
         std::size_t j = 0;
         std::size_t k = 0;
         boost::random::uniform_01<> unif;
@@ -279,8 +277,7 @@ class Particle
 
     void resample_systematic ()
     {
-        for (std::size_t i = 0; i != size_; ++i)
-            replication_[i] = 0;
+        replication_.setConstant(0);
         std::size_t j = 0;
         std::size_t k = 0;
         boost::random::uniform_01<> unif;
@@ -298,14 +295,11 @@ class Particle
 
     void weight2replication (std::size_t size)
     {
-        double tp = 0;
-        for (std::size_t i = 0; i != size_; ++i)
-            tp += weight_[i];
-
+        double tp = weight_.sum();
         double sum_p = 0;
         std::size_t sum_n = 0;
+        replication_.setConstant(0);
         for (std::size_t i = 0; i != size_; ++i) {
-            replication_[i] = 0;
             if (sum_n < size && weight_[i] > 0) {
                 binom_type::param_type
                     param(size - sum_n, weight_[i] / (tp - sum_p));
@@ -320,24 +314,15 @@ class Particle
     {
 	// Some times the nuemrical round error can cause the total childs
 	// differ from number of particles
-	std::size_t sum = 0;
-	for (std::size_t i = 0; i != size_; ++i)
-	    sum += replication_[i];
+	std::size_t sum = replication_.sum();
 	if (sum != size_) {
-	    std::size_t max = replication_[0];
-	    std::size_t id_max = 0;
-	    for (std::size_t i = 0; i != size_; ++i) {
-		if (replication_[i] > max) {
-		    max = replication_[i];
-		    id_max = i;
-		}
-	    }
-	    replication_[id_max] += size_ - sum;
+            Eigen::VectorXd::Index id_max;
+            replication_.maxCoeff(&id_max);
+            replication_[id_max] += size_ - sum;
 	}
 
         std::size_t from = 0;
         std::size_t time = 0;
-
         for (std::size_t to = 0; to != size_; ++to) {
             if (!replication_[to]) {
                 // replication_[to] has zero child, copy from elsewhere
@@ -354,11 +339,8 @@ class Particle
         }
 
         ess_ = size_;
-        double equal_weight = 1.0 / size_;
-        for (std::size_t i = 0; i != size_; ++i) {
-            weight_[i] = equal_weight;
-            log_weight_[i] = 0;
-        }
+        weight_.setConstant(1.0 / size_);
+        log_weight_.setConstant(0);
     }
 }; // class Particle
 

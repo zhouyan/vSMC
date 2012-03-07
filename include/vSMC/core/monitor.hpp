@@ -4,8 +4,7 @@
 #include <vector>
 #include <cstddef>
 #include <boost/function.hpp>
-#include <vSMC/core/buffer.hpp>
-#include <vSMC/core/cblas.hpp>
+#include <Eigen/Dense>
 #include <vSMC/core/particle.hpp>
 
 namespace vSMC {
@@ -36,7 +35,7 @@ class Monitor
     ///
     /// \param monitor The Monitor to by copied
     Monitor (const Monitor<T> &monitor) :
-         dim_(monitor.dim_), integral_(monitor.integral_),
+        dim_(monitor.dim_), integral_(monitor.integral_),
         index_(monitor.index_), record_(monitor.record_) {}
 
     /// \brief Assignment operator
@@ -95,21 +94,10 @@ class Monitor
         return index_;
     }
 
-    /// \brief Iteration index
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void index (OIter first) const
-    {
-        for (std::vector<std::size_t>::const_iterator iter = index_.begin();
-               iter != index_.end(); ++iter)
-            *first++ = *iter;
-    }
-
     /// \brief Record of Monte Carlo integration
     ///
     /// \return A const reference to the record
-    const std::vector<internal::Buffer<double> > &record () const
+    const std::vector<Eigen::VectorXd> &record () const
     {
         return record_;
     }
@@ -126,15 +114,9 @@ class Monitor
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
-        buffer_.resize(particle.size() * dim_);
-        result_.resize(dim_);
-        for (unsigned d = 0; d != dim_; ++d)
-            result_[d] = 0;
-
+        buffer_.resize(dim_, particle.size());
         integral_(iter, particle, buffer_.data());
-        cblas_dgemv(CblasRowMajor, CblasTrans, particle.size(), dim_,
-                1, buffer_.data(), dim_, particle.weight_ptr(), 1, 0,
-                result_.data(), 1);
+        result_ = buffer_ * particle.weight();
 
         index_.push_back(iter);
         record_.push_back(result_);
@@ -149,12 +131,12 @@ class Monitor
 
     private :
 
-    internal::Buffer<double> buffer_;
-    internal::Buffer<double> result_;
+    Eigen::MatrixXd buffer_;
+    Eigen::VectorXd result_;
     unsigned dim_;
     integral_type integral_;
     std::vector<std::size_t> index_;
-    std::vector<internal::Buffer<double> > record_;
+    std::vector<Eigen::VectorXd> record_;
 }; // class Monitor
 
 } // namespace vSMC
