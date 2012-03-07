@@ -22,11 +22,17 @@ class Sampler
     public :
 
     /// The type of initialization functor
-    typedef boost::function<std::size_t
-        (Particle<T> &, void *)> init_type;
+    typedef boost::function<std::size_t (Particle<T> &, void *)>
+        init_type;
     /// The type of move functor
-    typedef boost::function<std::size_t
-        (std::size_t, Particle<T> &)> move_type;
+    typedef boost::function<std::size_t (std::size_t, Particle<T> &)>
+        move_type;
+    /// The type ESS history vector
+    typedef std::vector<double> ess_type;
+    /// The type resampling history vector
+    typedef std::vector<bool> resampled_type;
+    /// The type accept count history vector
+    typedef std::vector<std::size_t> accept_type;
 
     /// \brief Sampler does not have a default constructor
     ///
@@ -101,7 +107,7 @@ class Sampler
     /// \brief ESS
     ///
     /// \return The ESS value of the latest iteration
-    double ess () const
+    ess_type::value_type ess () const
     {
         return ess_.back();
     }
@@ -109,7 +115,7 @@ class Sampler
     /// \brief ESS history
     ///
     /// \return A const reference to the history of ESS
-    const std::vector<double> &ess_history () const
+    const ess_type &ess_history () const
     {
         return ess_;
     }
@@ -117,7 +123,7 @@ class Sampler
     /// \brief Indicator of resampling
     ///
     /// \return A bool value, \b true if the latest iteration was resampled
-    bool resampled () const
+    resampled_type::value_type resampled () const
     {
         return resampled_.back();
     }
@@ -125,7 +131,7 @@ class Sampler
     /// \brief Resampling history
     ///
     /// \return A const reference to the history of resampling
-    const std::vector<bool> &resampled_history () const
+    const resampled_type &resampled_history () const
     {
         return resampled_;
     }
@@ -133,7 +139,7 @@ class Sampler
     /// \brief Accept count
     ///
     /// \return The accept count of the latest iteration
-    std::size_t accept () const
+    accept_type::value_type accept () const
     {
         return accept_.back();
     }
@@ -141,7 +147,7 @@ class Sampler
     /// \brief Accept count history
     ///
     /// \return A const reference to the history of accept count
-    const std::vector<std::size_t> &accept_history () const
+    const accept_type &accept_history () const
     {
         return accept_;
     }
@@ -379,20 +385,20 @@ class Sampler
                 output << "path.integrand\tpath.width\tpath.grid\t";
         }
 
-        std::vector<std::size_t>::const_iterator iter_path_index
+        typename Path<T>::index_type::const_iterator iter_path_index
             = path_.index().begin();
-        std::vector<double>::const_iterator iter_path_integrand
+        typename Path<T>::integrand_type::const_iterator iter_path_integrand
             = path_.integrand().begin();
-        std::vector<double>::const_iterator iter_path_width
+        typename Path<T>::width_type::const_iterator iter_path_width
             = path_.width().begin();
-        std::vector<double>::const_iterator iter_path_grid
+        typename Path<T>::grid_type::const_iterator iter_path_grid
             = path_.grid().begin();
 
         std::vector<bool> monitor_index_empty;
         std::vector<unsigned> monitor_dim;
-        std::vector<std::vector<std::size_t>::const_iterator>
+        std::vector<typename Monitor<T>::index_type::const_iterator>
             iter_monitor_index;
-        std::vector<std::vector<Eigen::VectorXd>::const_iterator>
+        std::vector<typename Monitor<T>::record_type::const_iterator>
             iter_monitor_record;
         for (typename std::map<std::string, Monitor<T> >::const_iterator
                 imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
@@ -466,9 +472,9 @@ class Sampler
     /// Particle sets
     Particle<T> particle_;
     std::size_t iter_num_;
-    std::vector<double> ess_;
-    std::vector<bool> resampled_;
-    std::vector<std::size_t> accept_;
+    ess_type ess_;
+    resampled_type resampled_;
+    accept_type accept_;
 
     /// Monte Carlo estimation by integration
     std::map<std::string, Monitor<T> > monitor_;
