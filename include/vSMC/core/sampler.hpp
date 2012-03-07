@@ -361,28 +361,26 @@ class Sampler
 
     /// \brief Print the history of the sampler
     ///
-    /// \param output The ostream to which the contents are printed
+    /// \param os The ostream to which the contents are printed
     /// \param print_header Print header if \b true
-    void print (std::ostream &output = std::cout,
-            bool print_header = true) const
+    void print (std::ostream &os = std::cout, bool print_header = true) const
     {
-        print(output, print_header, !path_.index().empty(), monitor_name_);
+        print(os, print_header, !path_.index().empty(), monitor_name_);
     }
 
     /// \brief Print the history of the sampler
     ///
-    /// \param output The ostream to which the contents are printed
+    /// \param os The ostream to which the contents are printed
     /// \param print_path Print path sampling history if \b true
     /// \param print_monitor A set of monitor names to be printed
     /// \param print_header Print header if \b true
-    void print (std::ostream &output,
-            bool print_header, bool print_path,
+    void print (std::ostream &os, bool print_header, bool print_path,
             const std::set<std::string> &print_monitor) const
     {
         if (print_header) {
-            output << "iter\tESS\tresample\taccept\t";
+            os << "iter\tESS\tresample\taccept\t";
             if (print_path)
-                output << "path.integrand\tpath.width\tpath.grid\t";
+                os << "path.integrand\tpath.width\tpath.grid\t";
         }
 
         typename Path<T>::index_type::const_iterator iter_path_index
@@ -410,48 +408,48 @@ class Sampler
                 if (print_header) {
                     if (monitor_dim.back() > 1) {
                         for (unsigned d = 0; d != monitor_dim.back(); ++d)
-                            output << imap->first << d + 1 << '\t';
+                            os << imap->first << d + 1 << '\t';
                     } else {
-                        output << imap->first << '\t';
+                        os << imap->first << '\t';
                     }
                 }
             }
         }
 
         if (print_header)
-            output << '\n';
+            os << '\n';
 
         for (std::size_t i = 0; i != iter_size(); ++i) {
-            output
+            os
                 << i << '\t' << ess_[i] / size()
                 << '\t' << resampled_[i]
                 << '\t' << static_cast<double>(accept_[i]) / size();
 
             if (print_path) {
                 if (!path_.index().empty() && *iter_path_index == i) {
-                    output
+                    os
                         << '\t' << *iter_path_integrand++
                         << '\t' << *iter_path_width++
                         << '\t' << *iter_path_grid++;
                     ++iter_path_index;
                 } else {
-                    output << '\t' << '.' << '\t' << '.' << '\t' << '.';
+                    os << '\t' << '.' << '\t' << '.' << '\t' << '.';
                 }
             }
 
             for (std::size_t m = 0; m != monitor_index_empty.size(); ++m) {
                 if (!monitor_index_empty[m] && *iter_monitor_index[m] == i) {
                     for (unsigned d = 0; d != monitor_dim[m]; ++d)
-                        output << '\t' << (*iter_monitor_record[m])[d];
+                        os << '\t' << (*iter_monitor_record[m])[d];
                     ++iter_monitor_index[m];
                     ++iter_monitor_record[m];
                 } else {
                     for (unsigned d = 0; d != monitor_dim[m]; ++d)
-                        output << '\t' << '.';
+                        os << '\t' << '.';
                 }
             }
 
-            output << '\n';
+            os << '\n';
         }
     }
 
@@ -518,12 +516,11 @@ class Sampler
 namespace std {
 
 template<typename T>
-std::ostream & operator<< (std::ostream &output,
-        const vSMC::Sampler<T> &sampler)
+std::ostream & operator<< (std::ostream &os, const vSMC::Sampler<T> &sampler)
 {
-    sampler.print(output);
+    sampler.print(os);
 
-    return output;
+    return os;
 }
 
 } // namespace std
