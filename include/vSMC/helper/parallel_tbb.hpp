@@ -1,6 +1,7 @@
 #ifndef V_SMC_HELPER_PARALLEL_TBB_HPP
 #define V_SMC_HELPER_PARALLEL_TBB_HPP
 
+#include <Eigen/Dense>
 #include <tbb/tbb.h>
 #include <vSMC/helper/sequential.hpp>
 
@@ -20,7 +21,7 @@ class InitializeTBBApply
 
     InitializeTBBApply (InitializeTBB<T> *init,
             Particle<T> *particle, typename T::value_type *state,
-            double *weight, unsigned *accept) :
+            double *weight, int *accept) :
         init_(init), particle_(particle), state_(state),
         weight_(weight), accept_(accept) {}
 
@@ -38,7 +39,7 @@ class InitializeTBBApply
     Particle<T> *const particle_;
     typename T::value_type *const state_;
     double *const weight_;
-    unsigned *const accept_;
+    int *const accept_;
 }; // class InitializeTBBApply
 
 template <typename T>
@@ -48,7 +49,7 @@ class MoveTBBApply
 
     MoveTBBApply (MoveTBB<T> *move, std::size_t iter,
             Particle<T> *particle, typename T::value_type *state,
-            double *weight, unsigned *accept) :
+            double *weight, int *accept) :
         move_(move), iter_(iter), particle_(particle), state_(state),
         weight_(weight), accept_(accept) {}
 
@@ -67,7 +68,7 @@ class MoveTBBApply
     Particle<T> *const particle_;
     typename T::value_type *const state_;
     double *const weight_;
-    unsigned *const accept_;
+    int *const accept_;
 }; // class MoveTBBApply
 
 template <typename T, unsigned Dim>
@@ -185,8 +186,8 @@ class InitializeTBB : public InitializeSeq<T>
 
     private :
 
-    internal::Buffer<double> weight_;
-    internal::Buffer<unsigned> accept_;
+    Eigen::VectorXd weight_;
+    Eigen::VectorXi accept_;
 }; // class InitializeTBB
 
 template <typename T>
@@ -224,8 +225,8 @@ class MoveTBB : public MoveSeq<T>
 
     private :
 
-    internal::Buffer<double> weight_;
-    internal::Buffer<unsigned> accept_;
+    Eigen::VectorXd weight_;
+    Eigen::VectorXi accept_;
 }; // class MoveTBB
 
 template <typename T, unsigned Dim = 1>

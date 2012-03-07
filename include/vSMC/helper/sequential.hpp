@@ -1,7 +1,7 @@
 #ifndef V_SMC_HELPER_SEQUENTIAL_HPP
 #define V_SMC_HELPER_SEQUENTIAL_HPP
 
-#include <vSMC/core/buffer.hpp>
+#include <Eigen/Dense>
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
@@ -34,7 +34,7 @@ class StateSeq
     /// \brief Construct a StateSeq object with given number of particles
     ///
     /// \param N The number of particles
-    StateSeq (std::size_t N) : size_(N), state_(N * Dim) {}
+    StateSeq (std::size_t N) : size_(N), state_(Dim, N) {}
 
     /// \brief The dimension of the problem
     ///
@@ -57,7 +57,7 @@ class StateSeq
     /// \return A pointer to the states of a single particle
     T *state (std::size_t n)
     {
-        return state_.data() + n * dim();
+        return state_.col(n).data();
     }
 
     /// \brief Read only access to the array of a single particle states
@@ -65,7 +65,7 @@ class StateSeq
     /// \return A const pointer to the states of a single array particle
     const T *state (std::size_t n) const
     {
-        return state_.data() + n * dim();
+        return state_.col(n).data();
     }
 
     /// \brief Read and write access to the array of all particle states
@@ -88,34 +88,19 @@ class StateSeq
         return state_.data();
     }
 
-    /// \brief Read only access to the states of a particular paramter
-    ///
-    /// \param id The index, starting from 0, of the paramter
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void state (unsigned id, OIter first) const
-    {
-        const T *src = state_.data() + id;
-        for (std::size_t i = 0; i != size_; ++i, src += Dim)
-            *first++ = *src;
-    }
-
     /// \brief The copy method used by the Sampler
     ///
     /// \param from The index of particle whose state to be copied
     /// \param to The index of particle to which new state to be written
     void copy (std::size_t from, std::size_t to)
     {
-        const T *state_from = state(from);
-        T *state_to = state(to);
-        for (unsigned i = 0; i != Dim; ++i, ++state_from, ++state_to)
-            *state_to = *state_from;
+	state_.col(to) = state_.col(from);
     }
 
     private :
 
     std::size_t size_;
-    internal::Buffer<T> state_;
+    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_;
 }; // class StateSeq
 
 /// \brief Sampler::init_type class for helping implementing SMC sequentially
@@ -183,7 +168,7 @@ class InitializeSeq
 
     private :
 
-    internal::Buffer<double> weight_;
+    Eigen::VectorXd weight_;
 }; // class InitializeSeq
 
 /// \brief Sampler::move_type class for helping implementing SMC sequentially
@@ -282,7 +267,7 @@ class MoveSeq
 
     private :
 
-    internal::Buffer<double> weight_;
+    Eigen::VectorXd weight_;
 }; // class MoveSeq
 
 /// \brief Monitor::integral_type class for helping implementing SMC
