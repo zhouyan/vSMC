@@ -114,17 +114,6 @@ class Sampler
         return ess_;
     }
 
-    /// \brief ESS history
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void ess_history (OIter first) const
-    {
-        for (std::vector<double>::const_iterator iter = ess_.begin();
-                iter != ess_.end(); ++iter)
-            *first++ = *iter;
-    }
-
     /// \brief Indicator of resampling
     ///
     /// \return A bool value, \b true if the latest iteration was resampled
@@ -141,17 +130,6 @@ class Sampler
         return resampled_;
     }
 
-    /// \brief Resampling history
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void resampled_history (OIter first) const
-    {
-        for (std::vector<bool>::const_iterator iter = resampled_.begin();
-                iter != resampled_.end(); ++iter)
-            *first++ = *iter;
-    }
-
     /// \brief Accept count
     ///
     /// \return The accept count of the latest iteration
@@ -166,17 +144,6 @@ class Sampler
     const std::vector<std::size_t> &accept_history () const
     {
         return accept_;
-    }
-
-    /// \brief Accept count history
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void accept_history (OIter first) const
-    {
-        for (std::vector<std::size_t>::const_iterator iter = accept_.begin();
-                iter != accept_.end(); ++iter)
-            *first++ = *iter;
     }
 
     /// \brief Read and write access to the particle set
@@ -317,16 +284,6 @@ class Sampler
         monitor_name_.insert(name);
     }
 
-    /// \brief Read and write access to a named monitor through iterator
-    ///
-    /// \param name The name of the monitor
-    /// \return An iterator point to the monitor for the given name
-    typename std::map<std::string, Monitor<T> >::iterator
-        monitor (const std::string &name)
-    {
-        return monitor_.find(name);
-    }
-
     /// \brief Read only access to a named monitor through iterator
     ///
     /// \param name The name of the monitor
@@ -335,14 +292,6 @@ class Sampler
         monitor (const std::string &name) const
     {
         return monitor_.find(name);
-    }
-
-    /// \brief Read and write access to all monitors
-    ///
-    /// \return A reference to monitors
-    std::map<std::string, Monitor<T> > &monitor ()
-    {
-        return monitor_;
     }
 
     /// \brief Read only access to all monitors
@@ -367,14 +316,6 @@ class Sampler
     {
         monitor_.clear();
         monitor_name_.clear();
-    }
-
-    /// \brief Read and write access to the Path sampling monitor
-    ///
-    /// \return A reference to the Path sampling monitor
-    Path<T> &path ()
-    {
-        return path_;
     }
 
     /// \brief Read only access to the Path sampling monitor
