@@ -21,8 +21,12 @@ class Monitor
     public :
 
     /// The type of monitor integral functor
-    typedef boost::function<void
-        (std::size_t, Particle<T> &, double *)> integral_type;
+    typedef boost::function<void (std::size_t, Particle<T> &, double *)>
+        integral_type;
+    /// The type of the index vector
+    typedef std::vector<std::size_t> index_type;
+    /// The type of the record vector
+    typedef std::vector<Eigen::VectorXd> record_type;
 
     /// \brief Construct a Monitor with an integral function
     ///
@@ -65,7 +69,7 @@ class Monitor
     /// \brief Size of records
     ///
     /// \return The number of iterations recorded
-    std::size_t iter_size () const
+    index_type::size_type iter_size () const
     {
         return index_.size();
     }
@@ -89,7 +93,7 @@ class Monitor
     /// \brief Iteration index
     ///
     /// \return A const reference to the index
-    const std::vector<std::size_t> &index () const
+    const index_type &index () const
     {
         return index_;
     }
@@ -97,7 +101,7 @@ class Monitor
     /// \brief Record of Monte Carlo integration
     ///
     /// \return A const reference to the record
-    const std::vector<Eigen::VectorXd> &record () const
+    const record_type &record () const
     {
         return record_;
     }
@@ -135,8 +139,8 @@ class Monitor
     Eigen::VectorXd result_;
     unsigned dim_;
     integral_type integral_;
-    std::vector<std::size_t> index_;
-    std::vector<Eigen::VectorXd> record_;
+    index_type index_;
+    record_type record_;
 }; // class Monitor
 
 } // namespace vSMC

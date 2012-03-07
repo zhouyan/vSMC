@@ -198,11 +198,6 @@ class Particle
         }
     }
 
-    rng_type *prng ()
-    {
-        return prng_.data();
-    }
-
     rng_type &prng (std::size_t id)
     {
         return prng_[id];
@@ -223,7 +218,7 @@ class Particle
     double zconst_;
 
     std::vector<rng_type> prng_;
-    typedef boost::random::binomial_distribution<int, double> binom_type;
+    typedef boost::random::binomial_distribution<> binom_type;
     binom_type binom_;
 
     void set_weight ()

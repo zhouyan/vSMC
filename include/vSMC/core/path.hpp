@@ -20,8 +20,16 @@ class Path
     public :
 
     /// The type of path sampling integral functor
-    typedef boost::function<double
-        (std::size_t, Particle<T> &, double *)> integral_type;
+    typedef boost::function<double (std::size_t, Particle<T> &, double *)>
+        integral_type;
+    /// The type of the index vector
+    typedef std::vector<std::size_t> index_type;
+    /// The type of the integrand vector
+    typedef std::vector<double> integrand_type;
+    /// The type of the width vector
+    typedef std::vector<double> width_type;
+    /// The type of the grid vector
+    typedef std::vector<double> grid_type;
 
     /// \brief Construct a Path with an integral function
     ///
@@ -55,7 +63,7 @@ class Path
     /// \brief Size of records
     ///
     /// \return The number of iterations recorded
-    std::size_t iter_size () const
+    index_type::size_type iter_size () const
     {
         return index_.size();
     }
@@ -79,7 +87,7 @@ class Path
     /// \brief Iteration index
     ///
     /// \return A const reference to the index
-    const std::vector<std::size_t> &index () const
+    const index_type &index () const
     {
         return index_;
     }
@@ -87,7 +95,7 @@ class Path
     /// \brief Record of path sampling integrand
     ///
     /// \return A const reference to the integrand
-    const std::vector<double> &integrand () const
+    const integrand_type &integrand () const
     {
         return integrand_;
     }
@@ -95,7 +103,7 @@ class Path
     /// \brief Record of path sampling width
     ///
     /// \return A const reference to the width
-    const std::vector<double> &width () const
+    const width_type &width () const
     {
         return width_;
     }
@@ -103,7 +111,7 @@ class Path
     /// \brief Record of path sampling grid
     ///
     /// \return A const reference to the grid
-    const std::vector<double> &grid () const
+    const grid_type &grid () const
     {
         return grid_;
     }
@@ -153,10 +161,10 @@ class Path
 
     Eigen::VectorXd buffer_;
     integral_type integral_;
-    std::vector<std::size_t> index_;
-    std::vector<double> integrand_;
-    std::vector<double> width_;
-    std::vector<double> grid_;
+    index_type index_;
+    integrand_type integrand_;
+    width_type width_;
+    grid_type grid_;
 }; // class PathSampling
 
 } // namespace vSMC
