@@ -9,8 +9,7 @@
 #include <string>
 #include <vector>
 #include <boost/function.hpp>
-#include <vSMC/core/buffer.hpp>
-#include <vSMC/core/cblas.hpp>
+#include <Eigen/Dense>
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
@@ -275,7 +274,8 @@ class Sampler
     {
         Monitor<T> m(integral.dim(), integral);
         m.eval(iter_num_, particle_);
-        cblas_dcopy(integral.dim(), m.record().back().data(), 1, res, 1);
+        Eigen::Map<Eigen::VectorXd> r(res, m.dim());
+        r = m.record().back();
     }
 
     /// \brief Perform importance sampling integration
@@ -288,7 +288,8 @@ class Sampler
     {
         Monitor<T> m(dim, integral);
         m.eval(iter_num_, particle_);
-        cblas_dcopy(dim, m.record().back().data(), 1, res, 1);
+        Eigen::Map<Eigen::VectorXd> r(res, m.dim());
+        r = m.record().back();
     }
 
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
@@ -529,7 +530,6 @@ class Sampler
     std::vector<std::size_t> accept_;
 
     /// Monte Carlo estimation by integration
-    internal::Buffer<double> buffer_;
     std::map<std::string, Monitor<T> > monitor_;
     std::set<std::string> monitor_name_;
 

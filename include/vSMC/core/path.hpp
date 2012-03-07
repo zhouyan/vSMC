@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstddef>
 #include <boost/function.hpp>
-#include <vSMC/core/cblas.hpp>
+#include <Eigen/Dense>
 #include <vSMC/core/particle.hpp>
 
 namespace vSMC {
@@ -84,34 +84,12 @@ class Path
         return index_;
     }
 
-    /// \brief Iteration index
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void index (OIter first) const
-    {
-        for (std::vector<std::size_t>::const_iterator iter = index_.begin();
-               iter != index_.end(); ++iter)
-            *first++ = *iter;
-    }
-
     /// \brief Record of path sampling integrand
     ///
     /// \return A const reference to the integrand
     const std::vector<double> &integrand () const
     {
         return integrand_;
-    }
-
-    /// \brief Record of path sampling integrand
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void integrand (OIter first) const
-    {
-        for (std::vector<double>::const_iterator iter = integrand_.begin();
-               iter != integrand_.end(); ++iter)
-            *first++ = *iter;
     }
 
     /// \brief Record of path sampling width
@@ -122,34 +100,12 @@ class Path
         return width_;
     }
 
-    /// \brief Record of path sampling width
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void width (OIter first) const
-    {
-        for (std::vector<double>::const_iterator iter = width_.begin();
-               iter != width_.end(); ++iter)
-            *first++ = *iter;
-    }
-
     /// \brief Record of path sampling grid
     ///
     /// \return A const reference to the grid
     const std::vector<double> &grid () const
     {
         return grid_;
-    }
-
-    /// \brief Record of path sampling grid
-    ///
-    /// \param first An iterator point to where writing starts
-    template<typename OIter>
-    void grid (OIter first) const
-    {
-        for (std::vector<double>::const_iterator iter = grid_.begin();
-               iter != grid_.end(); ++iter)
-            *first++ = *iter;
     }
 
     /// \brief Evaluate the integration
@@ -166,8 +122,7 @@ class Path
     {
         buffer_.resize(particle.size());
         width_.push_back(integral_(iter, particle, buffer_.data()));
-        integrand_.push_back(cblas_ddot(particle.size(),
-                buffer_.data(), 1, particle.weight_ptr(), 1));
+        integrand_.push_back(particle.weight().dot(buffer_));
         index_.push_back(iter);
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());
@@ -196,7 +151,7 @@ class Path
 
     private :
 
-    internal::Buffer<double> buffer_;
+    Eigen::VectorXd buffer_;
     integral_type integral_;
     std::vector<std::size_t> index_;
     std::vector<double> integrand_;
