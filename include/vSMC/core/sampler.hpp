@@ -256,8 +256,8 @@ class Sampler
     /// \param dim The dimension of the parameter
     /// \param integral The functor used to compute the integrands
     /// \param res The result, an array of length dim
-    template<typename MonitorType>
-    void integrate (unsigned dim, const MonitorType &integral, double *res)
+    void integrate (unsigned dim,
+            const typename Monitor<T>::integral_type &integral, double *res)
     {
         Monitor<T> m(dim, integral);
         m.eval(iter_num_, particle_);
@@ -282,9 +282,8 @@ class Sampler
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor
     /// \param integral The functor used to compute the integrands
-    template<typename MonitorType>
     void monitor (const std::string &name, unsigned dim,
-            const MonitorType &integral)
+            const typename Monitor<T>::integral_type &integral)
     {
         monitor_.insert(std::make_pair(name, Monitor<T>(dim, integral)));
         monitor_name_.insert(name);
@@ -337,8 +336,7 @@ class Sampler
     /// \param integral The functor used to compute the integrands
     ///
     /// \note Set integral = NULL will stop path sampling recording
-    template<typename PathType>
-    void path_sampling (const PathType &integral)
+    void path_sampling (const typename Path<T>::integral_type &integral)
     {
         path_.integral(integral);
     }
