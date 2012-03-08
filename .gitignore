@@ -6,6 +6,8 @@ build*
 
 test/gmm/gmm-arnaud
 test/gmm/gmm-arnaud.save
+test/gmm/config/
+test/gmm/batch.R
 
 test/pet/ConfigureFile?*
 test/pet/input*
