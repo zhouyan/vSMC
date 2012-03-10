@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = vSMC
-PROJECT_NUMBER         =
+PROJECT_NUMBER         = @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 PROJECT_BRIEF          = "Vectorized sequential Monte Carlo sampler"
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO

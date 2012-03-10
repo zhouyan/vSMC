@@ -8,7 +8,8 @@
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <Eigen/Dense>
-#include <vSMC/core/rng.hpp>
+#include <vSMC/internal/rng.hpp>
+#include <vSMC/internal/version.hpp>
 
 namespace vSMC {
 

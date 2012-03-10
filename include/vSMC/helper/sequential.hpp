@@ -5,6 +5,7 @@
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
+#include <vSMC/internal/version.hpp>
 
 namespace vSMC {
 

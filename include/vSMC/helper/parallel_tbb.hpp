@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <tbb/tbb.h>
 #include <vSMC/helper/sequential.hpp>
+#include <vSMC/internal/version.hpp>
 
 namespace vSMC {
 
