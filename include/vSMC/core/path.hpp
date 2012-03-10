@@ -6,6 +6,7 @@
 #include <boost/function.hpp>
 #include <Eigen/Dense>
 #include <vSMC/core/particle.hpp>
+#include <vSMC/internal/version.hpp>
 
 namespace vSMC {
 
