@@ -250,8 +250,7 @@ class Particle
         // safe to modify them here.
         for (std::size_t i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
-        std::size_t size = size_ - log_weight_.sum();
-        weight2replication(size);
+        weight2replication(weight_.sum());
         for (std::size_t i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
         resample_do();
@@ -295,9 +294,23 @@ class Particle
 
     void resample_residual_stratified ()
     {
+        replication_.setConstant(0);
         for (std::size_t i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
-        resample_stratified();
+        std::size_t size = weight_.sum(); 
+        weight_ /= size;
+        std::size_t j = 0;
+        std::size_t k = 0;
+        boost::random::uniform_01<> unif;
+        double u = unif(prng_[0]);
+        double cw = weight_[0];
+        while (j != size) {
+            while (j < cw * size_ - u && j != size) {
+                ++replication_[k];
+		++j;
+            }
+            cw += weight_[++k];
+        }
         for (std::size_t i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
         resample_do();
