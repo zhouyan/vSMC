@@ -14,7 +14,8 @@
 namespace vSMC {
 
 /// Resample scheme
-enum ResampleScheme {MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC};
+enum ResampleScheme {
+    MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC, RESIDUAL_STRATIFIED};
 
 /// \brief Particle class
 ///
@@ -192,6 +193,9 @@ class Particle
             case SYSTEMATIC :
                 resample_systematic();
                 break;
+            case RESIDUAL_STRATIFIED :
+                resample_residual_stratified ();
+                break;
             default :
                 throw std::runtime_error(
                         "ERROR: vSMC::Particle::resample: "
@@ -286,6 +290,16 @@ class Particle
             }
             cw += weight_[++k];
         }
+        resample_do();
+    }
+
+    void resample_residual_stratified ()
+    {
+        for (std::size_t i = 0; i != size_; ++i)
+            weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
+        resample_stratified();
+        for (std::size_t i = 0; i != size_; ++i)
+            replication_[i] += log_weight_[i];
         resample_do();
     }
 
