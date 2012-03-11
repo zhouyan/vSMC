@@ -305,7 +305,7 @@ class Particle
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size) {
-            while (j < cw * size_ - u && j != size) {
+            while (j < cw * size - u && j != size) {
                 ++replication_[k];
 		++j;
             }
