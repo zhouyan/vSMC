@@ -322,15 +322,6 @@ class Particle
 
     void resample_do ()
     {
-	// Some times the nuemrical round error can cause the total childs
-	// differ from number of particles
-	std::size_t sum = replication_.sum();
-	if (sum != size_) {
-            Eigen::VectorXd::Index id_max;
-            replication_.maxCoeff(&id_max);
-            replication_[id_max] += size_ - sum;
-	}
-
         std::size_t from = 0;
         std::size_t time = 0;
         for (std::size_t to = 0; to != size_; ++to) {
