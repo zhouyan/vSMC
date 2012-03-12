@@ -14,8 +14,8 @@
 namespace vSMC {
 
 /// Resample scheme
-enum ResampleScheme {
-    MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC, RESIDUAL_STRATIFIED};
+enum ResampleScheme {MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC,
+    RESIDUAL_STRATIFIED, RESIDUAL_SYSTEMATIC};
 
 /// \brief Particle class
 ///
@@ -197,10 +197,10 @@ class Particle
                 resample_residual_stratified ();
                 break;
             default :
-                throw std::runtime_error(
-                        "ERROR: vSMC::Particle::resample: "
-                        "Unknown Resample Scheme");
+                resample_stratified();
+                break;
         }
+        resample_do();
     }
 
     rng_type &prng (std::size_t id)
@@ -239,7 +239,6 @@ class Particle
     void resample_multinomial ()
     {
         weight2replication(size_);
-        resample_do();
     }
 
     void resample_residual ()
@@ -253,7 +252,6 @@ class Particle
         weight2replication(weight_.sum());
         for (std::size_t i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
-        resample_do();
     }
 
     void resample_stratified ()
@@ -271,7 +269,6 @@ class Particle
             }
             cw += weight_[++k];
         }
-        resample_do();
     }
 
     void resample_systematic ()
@@ -289,10 +286,32 @@ class Particle
             }
             cw += weight_[++k];
         }
-        resample_do();
     }
 
     void resample_residual_stratified ()
+    {
+        replication_.setConstant(0);
+        for (std::size_t i = 0; i != size_; ++i)
+            weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
+        std::size_t size = weight_.sum(); 
+        weight_ /= size;
+        std::size_t j = 0;
+        std::size_t k = 0;
+        boost::random::uniform_01<> unif;
+        double u = unif(prng_[0]);
+        double cw = weight_[0];
+        while (j != size) {
+            while (j < cw * size - u && j != size) {
+                ++replication_[k];
+                u = unif(prng_[j++]);
+            }
+            cw += weight_[++k];
+        }
+        for (std::size_t i = 0; i != size_; ++i)
+            replication_[i] += log_weight_[i];
+    }
+
+    void resample_residual_systematic ()
     {
         replication_.setConstant(0);
         for (std::size_t i = 0; i != size_; ++i)
@@ -313,7 +332,6 @@ class Particle
         }
         for (std::size_t i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
-        resample_do();
     }
 
     void weight2replication (std::size_t size)
