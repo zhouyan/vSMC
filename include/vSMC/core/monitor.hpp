@@ -121,7 +121,7 @@ class Monitor
     {
         buffer_.resize(dim_, particle.size());
         integral_(iter, particle, buffer_.data());
-        result_ = buffer_ * particle.weight();
+        result_.noalias() = buffer_ * particle.weight();
 
         index_.push_back(iter);
         record_.push_back(result_);
