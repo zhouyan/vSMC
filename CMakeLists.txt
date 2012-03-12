@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.6.4)
 
 # disable in source build
 IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -34,6 +34,11 @@ INCLUDE (FindvDist)
 CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/config/version.hpp.in
     ${PROJECT_SOURCE_DIR}/include/vSMC/internal/version.hpp)
+
+# Configuration files generation
+CONFIGURE_FILE (
+    ${PROJECT_SOURCE_DIR}/config/config.hpp.in
+    ${PROJECT_SOURCE_DIR}/include/vSMC/internal/config.hpp)
 
 # Include dirs
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
