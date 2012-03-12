@@ -1,6 +1,8 @@
 #ifndef V_SMC_CORE_PARTICLE_HPP
 #define V_SMC_CORE_PARTICLE_HPP
 
+#include <vSMC/internal/config.hpp>
+
 #include <vector>
 #include <cmath>
 #include <cstddef>
@@ -9,7 +11,6 @@
 #include <boost/random/uniform_01.hpp>
 #include <Eigen/Dense>
 #include <vSMC/internal/rng.hpp>
-#include <vSMC/internal/version.hpp>
 
 namespace vSMC {
 
@@ -219,8 +220,6 @@ class Particle
     double zconst_;
 
     std::vector<rng_type> prng_;
-    typedef boost::random::binomial_distribution<> binom_type;
-    binom_type binom_;
 
     void set_weight ()
     {
@@ -258,7 +257,7 @@ class Particle
         replication_.setConstant(0);
         std::size_t j = 0;
         std::size_t k = 0;
-        boost::random::uniform_01<> unif;
+        V_SMC_BOOST_RANDOM_NAMESPACE::uniform_01<> unif;
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size_) {
@@ -276,7 +275,7 @@ class Particle
         replication_.setConstant(0);
         std::size_t j = 0;
         std::size_t k = 0;
-        boost::random::uniform_01<> unif;
+        V_SMC_BOOST_RANDOM_NAMESPACE::uniform_01<> unif;
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size_) {
@@ -297,9 +296,9 @@ class Particle
         replication_.setConstant(0);
         for (std::size_t i = 0; i != size_; ++i) {
             if (sum_n < size && weight_[i] > 0) {
-                binom_type::param_type
-                    param(size - sum_n, weight_[i] / (tp - sum_p));
-                replication_[i] = binom_(prng_[i], param);
+                V_SMC_BOOST_RANDOM_NAMESPACE::binomial_distribution<>
+                    binom(size - sum_n, weight_[i] / (tp - sum_p));
+                replication_[i] = binom(prng_[i]);
             }
             sum_p += weight_[i];
             sum_n += replication_[i];

@@ -1,6 +1,8 @@
 #ifndef V_SMC_CORE_SAMPLER_HPP
 #define V_SMC_CORE_SAMPLER_HPP
 
+#include <vSMC/internal/config.hpp>
+
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -13,7 +15,6 @@
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
-#include <vSMC/internal/version.hpp>
 
 namespace vSMC {
 
