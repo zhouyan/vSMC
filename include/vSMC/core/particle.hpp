@@ -296,7 +296,7 @@ class Particle
         weight_ /= size;
         std::size_t j = 0;
         std::size_t k = 0;
-        boost::random::uniform_01<> unif;
+        V_SMC_BOOST_RANDOM_NAMESPACE::uniform_01<> unif;
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size) {
@@ -319,7 +319,7 @@ class Particle
         weight_ /= size;
         std::size_t j = 0;
         std::size_t k = 0;
-        boost::random::uniform_01<> unif;
+        V_SMC_BOOST_RANDOM_NAMESPACE::uniform_01<> unif;
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size) {
