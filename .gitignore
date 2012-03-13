@@ -1,7 +1,4 @@
-.DS_Store
-*.swp
 .R*
-doc/
 build*
 
 test/gmm/gmm-arnaud
