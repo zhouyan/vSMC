@@ -1,8 +1,6 @@
 #ifndef V_SMC_CORE_PARTICLE_HPP
 #define V_SMC_CORE_PARTICLE_HPP
 
-#include <vSMC/internal/config.hpp>
-
 #include <vector>
 #include <cmath>
 #include <cstddef>
@@ -10,6 +8,7 @@
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <Eigen/Dense>
+#include <vSMC/internal/config.hpp>
 #include <vSMC/internal/rng.hpp>
 
 namespace vSMC {
