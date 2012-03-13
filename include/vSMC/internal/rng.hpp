@@ -2,10 +2,6 @@
 #define V_SMC_CORE_RNG_HPP
 
 #include <limits>
-#include <climits>
-#include <cmath>
-#include <boost/cstdint.hpp>
-#include <boost/math/special_functions/log1p.hpp>
 #include <Random123/aes.h>
 #include <Random123/ars.h>
 #include <Random123/philox.h>
@@ -79,8 +75,7 @@ class random123_eigen
     {
         key_[0] = k0;
         for (unsigned i = 1; i != key_.size(); ++i) {
-            key_[i] = (key_[i-1]>>1) |
-                (key_[i-1]<<(sizeof(key_[0]) * CHAR_BIT - 1));
+            key_[i] = key_[i - 1] + 1;
         }
     }
 
