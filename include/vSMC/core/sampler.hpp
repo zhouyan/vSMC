@@ -1,8 +1,6 @@
 #ifndef V_SMC_CORE_SAMPLER_HPP
 #define V_SMC_CORE_SAMPLER_HPP
 
-#include <vSMC/internal/config.hpp>
-
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -12,6 +10,7 @@
 #include <vector>
 #include <boost/function.hpp>
 #include <Eigen/Dense>
+#include <vSMC/internal/config.hpp>
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>

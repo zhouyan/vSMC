@@ -1,9 +1,8 @@
 #ifndef V_SMC_HELPER_SEQUENTIAL_HPP
 #define V_SMC_HELPER_SEQUENTIAL_HPP
 
-#include <vSMC/internal/config.hpp>
-
 #include <Eigen/Dense>
+#include <vSMC/internal/config.hpp>
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
