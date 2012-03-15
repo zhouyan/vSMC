@@ -488,8 +488,10 @@ class Sampler
         ess_.push_back(particle_.ess());
         particle_.resampled(ess_.back() < threshold_);
         resampled_.push_back(particle_.resampled());
-        if (particle_.resampled())
+        if (particle_.resampled()) {
             particle_.resample(scheme_);
+            ess_.back() = particle_.size();
+        }
 
         if (!path_.empty())
             path_.eval(iter_num_, particle_);
