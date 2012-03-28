@@ -448,7 +448,8 @@ class Sampler
                 }
             }
 
-            os << '\n';
+	    if (i != iter_size() - 1)
+		os << '\n';
         }
     }
 
