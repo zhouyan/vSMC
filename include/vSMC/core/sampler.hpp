@@ -11,6 +11,7 @@
 #include <boost/function.hpp>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
+#include <vSMC/internal/fwd.hpp>
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
@@ -54,7 +55,7 @@ class Sampler
             unsigned seed = V_SMC_RNG_SEED) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         scheme_(scheme), threshold_(threshold * N),
-        particle_(N, seed), iter_num_(0), show_progress_(false) {}
+        particle_(N, seed, this), iter_num_(0), show_progress_(false) {}
 
     /// \brief Size of the particle set
     ///

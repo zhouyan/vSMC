@@ -9,6 +9,7 @@
 #include <boost/random/uniform_01.hpp>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
+#include <vSMC/internal/fwd.hpp>
 #include <vSMC/internal/rng.hpp>
 
 namespace vSMC {
@@ -34,8 +35,9 @@ class Particle
     ///
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
-    Particle (std::size_t N, rng_type::seed_type seed = V_SMC_RNG_SEED) :
-        size_(N), value_(N),
+    Particle (std::size_t N, rng_type::seed_type seed = V_SMC_RNG_SEED,
+            const vSMC::Sampler<T> *sampler = NULL) :
+        size_(N), value_(N), sampler_(sampler),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), prng_(N)
     {
@@ -161,6 +163,14 @@ class Particle
         resampled_ = resampled;
     }
 
+    /// \brief Read only access to the sampler containing this particle set
+    ///
+    /// \return A const reference to the sampler containing this particle set
+    const vSMC::Sampler<T> &sampler () const
+    {
+        return *sampler_;
+    }
+
     /// \brief Get the value of SMC normalizing constant
     ///
     /// \return SMC normalizng constant estimate
@@ -212,6 +222,7 @@ class Particle
 
     std::size_t size_;
     T value_;
+    const vSMC::Sampler<T> *sampler_;
 
     Eigen::VectorXd weight_;
     Eigen::VectorXd log_weight_;
