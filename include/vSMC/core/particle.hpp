@@ -35,6 +35,8 @@ class Particle
     ///
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
+    /// \param sampler The poiter to the Sampler which this particle set
+    /// belongs to
     Particle (std::size_t N, rng_type::seed_type seed = V_SMC_RNG_SEED,
             const vSMC::Sampler<T> *sampler = NULL) :
         size_(N), value_(N), sampler_(sampler),
