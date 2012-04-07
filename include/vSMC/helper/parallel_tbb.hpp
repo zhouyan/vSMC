@@ -8,133 +8,6 @@
 
 namespace vSMC {
 
-template <typename T> class InitializeTBB;
-template <typename T> class MoveTBB;
-template <typename T, unsigned Dim> class MonitorTBB;
-template <typename T> class PathTBB;
-
-namespace internal {
-
-template <typename T>
-class InitializeTBBApply
-{
-    public :
-
-    InitializeTBBApply (InitializeTBB<T> *init,
-            Particle<T> *particle, typename T::value_type *state,
-            double *weight, int *accept) :
-        init_(init), particle_(particle), state_(state),
-        weight_(weight), accept_(accept) {}
-
-    void operator () (const tbb::blocked_range<std::size_t> &range) const
-    {
-        for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            accept_[i] = init_->initialize_state(i, state_ + T::dim() * i,
-                    weight_[i], *particle_, particle_->prng(i));
-        }
-    }
-
-    private :
-
-    InitializeTBB<T> *const init_; 
-    Particle<T> *const particle_;
-    typename T::value_type *const state_;
-    double *const weight_;
-    int *const accept_;
-}; // class InitializeTBBApply
-
-template <typename T>
-class MoveTBBApply
-{
-    public :
-
-    MoveTBBApply (MoveTBB<T> *move, std::size_t iter,
-            Particle<T> *particle, typename T::value_type *state,
-            double *weight, int *accept) :
-        move_(move), iter_(iter), particle_(particle), state_(state),
-        weight_(weight), accept_(accept) {}
-
-    void operator () (const tbb::blocked_range<std::size_t> &range) const
-    {
-        for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            accept_[i] = move_->move_state(i, iter_, state_ + T::dim() * i,
-                    weight_[i], *particle_, particle_->prng(i));
-        }
-    }
-
-    private :
-
-    MoveTBB<T> *const move_; 
-    const std::size_t iter_;
-    Particle<T> *const particle_;
-    typename T::value_type *const state_;
-    double *const weight_;
-    int *const accept_;
-}; // class MoveTBBApply
-
-template <typename T, unsigned Dim>
-class MonitorTBBApply
-{
-    public :
-
-    MonitorTBBApply (MonitorTBB<T, Dim> *monitor, std::size_t iter,
-            Particle<T> *particle, typename T::value_type *state,
-            double *res) :
-        monitor_(monitor), iter_(iter), particle_(particle), state_(state),
-        res_(res) {}
-
-    void operator () (const tbb::blocked_range<std::size_t> &range) const
-    {
-        for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            monitor_->monitor_state(i, iter_, state_ + T::dim() * i,
-                    *particle_, res_ + i * dim());
-        }
-    }
-
-    static unsigned dim ()
-    {
-        return Dim;
-    }
-
-    private :
-
-    MonitorTBB<T, Dim> *const monitor_;
-    const std::size_t iter_;
-    Particle<T> *const particle_;
-    typename T::value_type *const state_;
-    double *const res_;
-}; // class MonitorTBBApply
-
-template <typename T>
-class PathTBBApply
-{
-    public :
-
-    PathTBBApply (PathTBB<T> *path, std::size_t iter,
-            Particle<T> *particle, typename T::value_type *state,
-            double *res) :
-        path_(path), iter_(iter), particle_(particle), state_(state),
-        res_(res) {}
-
-    void operator () (const tbb::blocked_range<std::size_t> &range) const
-    {
-        for (std::size_t i = range.begin(); i != range.end(); ++i) {
-            res_[i] = path_->path_state(i, iter_, state_ + T::dim() * i,
-                    *particle_);
-        }
-    }
-
-    private :
-
-    PathTBB<T> *const path_;
-    const std::size_t iter_;
-    Particle<T> *const particle_;
-    typename T::value_type *const state_;
-    double *const res_;
-}; // class PathTBBApply
-
-} // namespace vSMC::internal
-
 /// \brief Particle type for helping implementing SMC using TBB
 ///
 /// StateTBB or its derived class can be used as the template argument of
@@ -166,15 +39,15 @@ class InitializeTBB : public InitializeSeq<T>
     /// \param param Additional parameters
     ///
     /// \return Accept count
-    virtual std::size_t operator() (Particle<T> &particle, void *param)
+    std::size_t operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::InitializeTBBApply<T>(this, &particle,
-                    particle.value().state(), weight_.data(), accept_.data()));
+                Worker_(this, &particle, particle.value().state(),
+                    weight_.data(), accept_.data()));
 
         particle.set_log_weight(weight_.data());
         std::size_t accept = 0;
@@ -189,6 +62,33 @@ class InitializeTBB : public InitializeSeq<T>
 
     Eigen::VectorXd weight_;
     Eigen::VectorXi accept_;
+
+    class Worker_
+    {
+        public :
+
+        Worker_ (InitializeTBB<T> *init,
+                Particle<T> *particle, typename T::value_type *state,
+                double *weight, int *accept) :
+            init_(init), particle_(particle), state_(state),
+            weight_(weight), accept_(accept) {}
+
+        void operator () (const tbb::blocked_range<std::size_t> &range) const
+        {
+            for (std::size_t i = range.begin(); i != range.end(); ++i) {
+                accept_[i] = init_->initialize_state(i, state_ + T::dim() * i,
+                        weight_[i], *particle_, particle_->prng(i));
+            }
+        }
+
+        private :
+
+        InitializeTBB<T> *const init_;
+        Particle<T> *const particle_;
+        typename T::value_type *const state_;
+        double *const weight_;
+        int *const accept_;
+    }; // class Woker_
 }; // class InitializeTBB
 
 template <typename T>
@@ -206,14 +106,14 @@ class MoveTBB : public MoveSeq<T>
     /// \param particle The Particle set passed by Sampler
     ///
     /// \return Accept count
-    virtual std::size_t operator () (std::size_t iter, Particle<T> &particle)
+    std::size_t operator () (std::size_t iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
         weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::MoveTBBApply<T>(this, iter, &particle,
-                    particle.value().state(), weight_.data(), accept_.data()));
+                Worker_(this, iter, &particle, particle.value().state(),
+                    weight_.data(), accept_.data()));
         MoveSeq<T>::set_weight(this->weight_action(), particle,
                 weight_.data());
         std::size_t accept = 0;
@@ -228,6 +128,34 @@ class MoveTBB : public MoveSeq<T>
 
     Eigen::VectorXd weight_;
     Eigen::VectorXi accept_;
+
+    class Worker_
+    {
+        public :
+
+        Worker_ (MoveTBB<T> *move, std::size_t iter,
+                Particle<T> *particle, typename T::value_type *state,
+                double *weight, int *accept) :
+            move_(move), iter_(iter), particle_(particle), state_(state),
+            weight_(weight), accept_(accept) {}
+
+        void operator () (const tbb::blocked_range<std::size_t> &range) const
+        {
+            for (std::size_t i = range.begin(); i != range.end(); ++i) {
+                accept_[i] = move_->move_state(i, iter_, state_ + T::dim() * i,
+                        weight_[i], *particle_, particle_->prng(i));
+            }
+        }
+
+        private :
+
+        MoveTBB<T> *const move_;
+        const std::size_t iter_;
+        Particle<T> *const particle_;
+        typename T::value_type *const state_;
+        double *const weight_;
+        int *const accept_;
+    }; // class Woker_
 }; // class MoveTBB
 
 template <typename T, unsigned Dim = 1>
@@ -241,13 +169,40 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     /// \param particle The Particle set passed by Sampler
     /// \param [out] res The integrands. Sum(res * weight) is the Monte Carlo
     /// integration result.
-    virtual void operator () (std::size_t iter, Particle<T> &particle,
-            double *res)
+    void operator () (std::size_t iter, Particle<T> &particle, double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::MonitorTBBApply<T, Dim>(this, iter, &particle,
-                    particle.value().state(), res));
+                Worker_(this, iter, &particle, particle.value().state(), res));
     }
+
+    private :
+
+    class Worker_
+    {
+        public :
+
+        Worker_ (MonitorTBB<T, Dim> *monitor, std::size_t iter,
+                Particle<T> *particle, typename T::value_type *state,
+                double *res) :
+            monitor_(monitor), iter_(iter), particle_(particle), state_(state),
+            res_(res) {}
+
+        void operator () (const tbb::blocked_range<std::size_t> &range) const
+        {
+            for (std::size_t i = range.begin(); i != range.end(); ++i) {
+                monitor_->monitor_state(i, iter_, state_ + T::dim() * i,
+                        *particle_, res_ + i * Dim);
+            }
+        }
+
+        private :
+
+        MonitorTBB<T, Dim> *const monitor_;
+        const std::size_t iter_;
+        Particle<T> *const particle_;
+        typename T::value_type *const state_;
+        double *const res_;
+    }; // class Worker_
 }; // class MonitorTBB
 
 template <typename T>
@@ -264,15 +219,42 @@ class PathTBB : public PathSeq<T>
     ///
     /// \return The width
     /// sampling integrand.
-    virtual double operator () (std::size_t iter, Particle<T> &particle,
-            double *res)
+    double operator () (std::size_t iter, Particle<T> &particle, double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                internal::PathTBBApply<T>(this, iter, &particle,
-                    particle.value().state(), res));
+                Worker_(this, iter, &particle, particle.value().state(), res));
 
         return this->width_state(iter, particle);
     }
+
+    private :
+
+    class Worker_
+    {
+        public :
+
+        Worker_ (PathTBB<T> *path, std::size_t iter,
+                Particle<T> *particle, typename T::value_type *state,
+                double *res) :
+            path_(path), iter_(iter), particle_(particle), state_(state),
+            res_(res) {}
+
+        void operator () (const tbb::blocked_range<std::size_t> &range) const
+        {
+            for (std::size_t i = range.begin(); i != range.end(); ++i) {
+                res_[i] = path_->path_state(i, iter_, state_ + T::dim() * i,
+                        *particle_);
+            }
+        }
+
+        private :
+
+        PathTBB<T> *const path_;
+        const std::size_t iter_;
+        Particle<T> *const particle_;
+        typename T::value_type *const state_;
+        double *const res_;
+    }; // class Worker_
 }; // PathTBB
 
 } // namespace vSMC
