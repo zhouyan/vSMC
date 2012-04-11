@@ -1,7 +1,16 @@
-# Introduction
+# Installation
 
-vSMC is a library that helps constructing SMC samplers. It is not very different from SMCTC in functionality. The main focus is performance.
+To install the library just move the `include` folder into a proper place, e.g.
+`/usr/local/include` on Unix-alike systems.
 
-The SMC algorithm admits straightaway parallelization. However, to take this advantage, one need to be able to access the whole particle sets in order to divide and conquer them. Therefore, the core modules of vSMC provide such accesses for exactly this purpose. In simple case, this mean the user will have to write a loop manipulate the whole particle set instead of a single one. In more complicated case, one can parallelize the manipulation, take advantage of vector instructions like SSE which can be found in most modern computers.
+# Example
 
-In addition, the library provides a set helper modules which assist users to write codes that manipulate single particle but run the program in parallel mode. The current supported backend is Intel Threading Building Block. Others may follow shortly.
+To build the examples, one need the [CMake](http://www.cmake.org/) program.
+
+To build all the examples, one need the
+[vDist](https://github.com/zhouyan/vDist) library, [Intel Math Kernel
+Library](http://software.intel.com/en-us/articles/intel-mkl/), [Intel Threading
+Building Block](http://threadingbuildingblocks.org/),
+[Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) and
+[Boost](http://www.boost.org/). However, only the last two are required, others
+are optional.
