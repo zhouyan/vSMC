@@ -91,7 +91,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = include example/pf/pf.cpp
+INPUT                  = include example/pf/pf.hpp
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.cpp *.hpp
 RECURSIVE              = YES
