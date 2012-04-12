@@ -68,7 +68,8 @@ IF (DOXYGEN_FOUND)
 	${PROJECT_BINARY_DIR}/include)
     FILE (GLOB_RECURSE PF_SRC
 	${PROJECT_SOURCE_DIR}/test/pf/*.hpp
-	${PROJECT_SOURCE_DIR}/test/pf/*.cpp)
+	${PROJECT_SOURCE_DIR}/test/pf/*.cpp
+	${PROJECT_SOURCE_DIR}/test/pf/*.dox)
     ADD_CUSTOM_COMMAND (
 	OUTPUT  ${PROJECT_BINARY_DIR}/example/pf
         DEPENDS ${PF_SRC}
