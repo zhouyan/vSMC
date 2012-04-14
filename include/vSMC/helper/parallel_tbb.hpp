@@ -8,11 +8,10 @@
 
 namespace vSMC {
 
-/// \brief Particle type for helping implementing SMC using TBB
+/// \brief Particle type class for helping implementing SMC using TBB
 ///
-/// StateTBB or its derived class can be used as the template argument of
-/// Particle. It targets the particular problems where the parameters to be
-/// sampled can be viewed as a vector of dimension Dim and type T.
+/// \note The template parameter has to be type StateTBB or its derived class.
+/// \sa vSMC::StateSeq
 template <unsigned Dim, typename T = double>
 class StateTBB : public StateSeq<Dim, T>
 {
@@ -24,6 +23,10 @@ class StateTBB : public StateSeq<Dim, T>
     StateTBB (std::size_t N) : StateSeq<Dim, T>(N) {}
 }; // class StateTBB
 
+/// \brief Sampler::init_type class for helping implementing SMC using TBB
+///
+/// \note The template parameter has to be type StateTBB or its derived class.
+/// \sa vSMC::InitializeSeq
 template <typename T>
 class InitializeTBB : public InitializeSeq<T>
 {
@@ -91,6 +94,10 @@ class InitializeTBB : public InitializeSeq<T>
     }; // class Woker_
 }; // class InitializeTBB
 
+/// \brief Sampler::move_type class for helping implementing SMC using TBB
+///
+/// \note The template parameter has to be type StateTBB or its derived class.
+/// \sa vSMC::MoveSeq
 template <typename T>
 class MoveTBB : public MoveSeq<T>
 {
@@ -158,6 +165,10 @@ class MoveTBB : public MoveSeq<T>
     }; // class Woker_
 }; // class MoveTBB
 
+/// \brief Monitor::integral_type class for helping implementing SMC using TBB
+///
+/// \note The template parameter has to be type StateTBB or its derived class.
+/// \sa vSMC::MonitorSeq
 template <typename T, unsigned Dim = 1>
 class MonitorTBB : public MonitorSeq<T, Dim>
 {
@@ -205,6 +216,10 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     }; // class Worker_
 }; // class MonitorTBB
 
+/// \brief Path::integral_type class for helping implementing SMC using TBB
+///
+/// \note The template parameter has to be type StateTBB or its derived class.
+/// \sa vSMC::PathSeq
 template <typename T>
 class PathTBB : public PathSeq<T>
 {

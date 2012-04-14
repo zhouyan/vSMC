@@ -18,6 +18,7 @@
 
 namespace vSMC {
 
+/// \brief vSMC Sampler
 template <typename T>
 class Sampler
 {

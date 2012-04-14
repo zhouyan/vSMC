@@ -19,7 +19,7 @@ namespace vSMC {
 enum WeightAction {
     NO_ACTION, SET_WEIGHT, SET_LOG_WEIGHT, MUL_WEIGHT, ADD_LOG_WEIGHT};
 
-/// \brief Particle type for helping implementing SMC sequentially
+/// \brief Particle type class for helping implementing SMC sequentially
 ///
 /// StateSeq or its derived class can be used as the template argument of
 /// Particle. It targets the particular problems where the parameters to be
@@ -112,8 +112,7 @@ class StateSeq
 /// method initialize_param, which will be called before initialization and
 /// accept the last argument of Sampler::init_type functor as its parameter.
 ///
-/// \note The template parameter has to be type StateSeq or its derived
-/// class.
+/// \note The template parameter has to be type StateSeq or its derived class.
 template <typename T>
 class InitializeSeq
 {
@@ -180,8 +179,7 @@ class InitializeSeq
 /// the weight_action method to change how the returned weighted should be
 /// treated.
 ///
-/// \note The template parameter has to be type StateSeq or its derived
-/// class.
+/// \note The template parameter has to be type StateSeq or its derived class.
 template <typename T>
 class MoveSeq
 {
@@ -278,6 +276,8 @@ class MoveSeq
 /// as the argument integral of Sampler::monitor(std::string,
 /// Monitor<T>::integral_type integral). The derived class need to at least
 /// define method monitor_state.
+///
+/// \note The template parameter has to be type StateSeq or its derived class.
 template <typename T, unsigned Dim = 1>
 class MonitorSeq
 {
@@ -325,6 +325,8 @@ class MonitorSeq
 /// as the argument integral of Sampler::path_sampling(Path<T>::integral_type
 /// integral). The derived class need to at least define method path_state and
 /// width_state.
+///
+/// \note The template parameter has to be type StateSeq or its derived class.
 template <typename T>
 class PathSeq
 {
