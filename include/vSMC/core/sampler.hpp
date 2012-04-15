@@ -313,7 +313,7 @@ class Sampler
     /// \brief Erase a named monitor
     ///
     /// \param name The name of the monitor
-    void erase_monitor (const std::string &name)
+    void clear_monitor (const std::string &name)
     {
         monitor_.erase(name);
         monitor_name_.erase(name);
