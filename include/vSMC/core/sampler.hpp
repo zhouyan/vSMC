@@ -11,7 +11,6 @@
 #include <boost/function.hpp>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
-#include <vSMC/internal/fwd.hpp>
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
