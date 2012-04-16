@@ -46,13 +46,13 @@ class InitializeTBB : public InitializeSeq<T>
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        weight_.resize(particle.size());
+        log_weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
                 Worker_(this, &particle, particle.value().state(),
-                    weight_.data(), accept_.data()));
+                    log_weight_.data(), accept_.data()));
 
-        particle.set_log_weight(weight_.data());
+        particle.set_log_weight(log_weight_.data());
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i)
             accept += accept_[i];
@@ -63,7 +63,7 @@ class InitializeTBB : public InitializeSeq<T>
 
     private :
 
-    Eigen::VectorXd weight_;
+    Eigen::VectorXd log_weight_;
     Eigen::VectorXi accept_;
 
     class Worker_
@@ -72,15 +72,15 @@ class InitializeTBB : public InitializeSeq<T>
 
         Worker_ (InitializeTBB<T> *init,
                 Particle<T> *particle, typename T::value_type *state,
-                double *weight, int *accept) :
+                double *log_weight, int *accept) :
             init_(init), particle_(particle), state_(state),
-            weight_(weight), accept_(accept) {}
+            log_weight_(log_weight), accept_(accept) {}
 
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 accept_[i] = init_->initialize_state(i, state_ + T::dim() * i,
-                        weight_[i], *particle_, particle_->prng(i));
+                        log_weight_[i], *particle_, particle_->prng(i));
             }
         }
 
@@ -89,7 +89,7 @@ class InitializeTBB : public InitializeSeq<T>
         InitializeTBB<T> *const init_;
         Particle<T> *const particle_;
         typename T::value_type *const state_;
-        double *const weight_;
+        double *const log_weight_;
         int *const accept_;
     }; // class Woker_
 }; // class InitializeTBB

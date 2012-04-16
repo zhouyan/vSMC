@@ -132,13 +132,13 @@ class InitializeSeq
     {
         initialize_param(particle, param);
         pre_processor(particle);
-        weight_.resize(particle.size());
+        log_weight_.resize(particle.size());
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i) {
             accept += initialize_state(i, particle.value().state(i),
-                    weight_[i], particle, particle.prng(i));
+                    log_weight_[i], particle, particle.prng(i));
         }
-        particle.set_log_weight(weight_.data());
+        particle.set_log_weight(log_weight_.data());
         post_processor(particle);
 
         return accept;
@@ -147,14 +147,14 @@ class InitializeSeq
     /// \brief Initialize a single particle
     ///
     /// \param id The id of the particle to be processed
-    /// \param weight The log weight of the particle
+    /// \param log_weight The log weight of the particle
     /// \param particle The Particle set passed by Sampler
     /// \param state The array contains the states of a single particle
     /// \param rng A Boost Random eigen unique to the id'th particle
     ///
     /// \return Accept count, normally should be zero or one
     virtual int initialize_state (std::size_t id,
-            typename T::value_type *state, double &weight,
+            typename T::value_type *state, double &log_weight,
             const Particle<T> &particle, 
             typename Particle<T>::rng_type &rng) = 0;
 
@@ -168,7 +168,7 @@ class InitializeSeq
 
     private :
 
-    Eigen::VectorXd weight_;
+    Eigen::VectorXd log_weight_;
 }; // class InitializeSeq
 
 /// \brief Sampler::move_type class for helping implementing SMC sequentially
