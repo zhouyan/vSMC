@@ -67,7 +67,9 @@ IF (DOXYGEN_FOUND)
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_BINARY_DIR}/include)
     FILE (GLOB_RECURSE DOC_SRC
-	${PROJECT_SOURCE_DIR}/doc/*.markdown)
+	${PROJECT_SOURCE_DIR}/doc/*.markdown
+	${PROJECT_SOURCE_DIR}/doc/*.html
+	${PROJECT_SOURCE_DIR}/doc/*.css)
     ADD_CUSTOM_COMMAND (
 	OUTPUT  ${PROJECT_BINARY_DIR}/doc_src
         DEPENDS ${DOC_SRC}
