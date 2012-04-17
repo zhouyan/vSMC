@@ -43,6 +43,7 @@ class Particle
     public :
 
     typedef r123::Engine< V_SMC_CRNG_TYPE > rng_type;
+    typedef rng_type::result_type seed_type;
 
     /// \brief Construct a Particle object with given number of particles
     ///

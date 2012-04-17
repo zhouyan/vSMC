@@ -52,7 +52,7 @@ class Sampler
             const move_type &mcmc = NULL,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
-            Particle<T>::rng_type::result_type seed = V_SMC_CRNG_SEED) :
+            typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         scheme_(scheme), threshold_(threshold * N),
         particle_(N, seed, this), iter_num_(0), show_progress_(false) {}
