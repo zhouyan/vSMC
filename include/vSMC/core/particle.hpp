@@ -9,7 +9,7 @@
 #include <boost/random/uniform_01.hpp>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
-#include <vSMC/internal/rng.hpp>
+#include <vSMC/rng/rng.hpp>
 
 namespace vSMC {
 
