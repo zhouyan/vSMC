@@ -25,7 +25,8 @@
 #define RANDOM123_EIGEN_INIT \
     index_max_(RANDOM123_EIGEN_IDX_MAX), index_(index_max_), \
     step_size_(1), ctr_index_(0), \
-    ctr_max_(std::numeric_limits<ctr_value_type>::max())
+    ctr_max_(std::numeric_limits< \
+            typename cbrng_type::ctr_type::value_type>::max())
 
 namespace vSMC {
 
@@ -37,7 +38,6 @@ class random123_eigen
     typedef Random123Type cbrng_type;
     typedef UIntType result_type;
     typedef typename cbrng_type::key_type::value_type seed_type;
-    typedef typename cbrng_type::ctr_type::value_type ctr_value_type;
 
     random123_eigen () : RANDOM123_EIGEN_INIT
     {
@@ -128,7 +128,7 @@ class random123_eigen
 
     void advance_ctr (unsigned step = 1)
     {
-        ctr_value_type inc = step * step_size_;
+        typename cbrng_type::ctr_type::value_type inc = step * step_size_;
 
         if (ctr_max_ - ctr_[ctr_index_] < inc)
             ++ctr_index_;
@@ -154,7 +154,7 @@ class random123_eigen
     unsigned index_; 
     unsigned step_size_;
     unsigned ctr_index_;
-    ctr_value_type ctr_max_;
+    typename cbrng_type::ctr_type::value_type ctr_max_;
 };
 
 typedef random123_eigen<r123::Philox2x32, uint32_t> philox2x32_32;
