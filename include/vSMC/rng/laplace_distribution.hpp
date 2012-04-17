@@ -64,8 +64,8 @@ class laplace_distribution
     template <typename Engine>
     result_type operator() (Engine &eng)
     {
-        double u = boost::random::uniform_01<RealType>()(eng) - 0.5;
-        double r = -2 * std::abs(u);
+        RealType u = boost::random::uniform_01<RealType>()(eng) - 0.5;
+        RealType r = -2 * std::abs(u);
 
         r = boost::math::log1p(r);
         r = u > 0 ? r : -r;
@@ -76,7 +76,7 @@ class laplace_distribution
     template <typename Engine>
     result_type operator() (Eigen &eng, const param_type &param)
     {
-        return normal_distribution(param)(eng);
+        return laplace_distribution(param)(eng);
     }
 
     private :
