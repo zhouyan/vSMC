@@ -88,7 +88,7 @@ class Monitor
     /// \return \b true if the monitor is empty
     bool empty () const
     {
-        return bool(integral_);
+        return !bool(integral_);
     }
 
     /// \brief Iteration index

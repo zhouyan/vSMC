@@ -40,7 +40,8 @@ class Path
     /// \brief Copy constructor
     ///
     /// \param path The Path to by copied
-    Path (const Path<T> &path) : integral_(path.integral_),
+    Path (const Path<T> &path) :
+        integral_(path.integral_),
         index_(path.index_), integrand_(path.integrand_),
         width_(path.width_), grid_(path.grid_) {}
 
@@ -82,7 +83,7 @@ class Path
     /// \return \b true if the path is empty
     bool empty () const
     {
-        return bool(integral_);
+        return !bool(integral_);
     }
 
     /// \brief Iteration index
