@@ -25,7 +25,7 @@ class Sampler
 
     /// The type of initialization functor
     typedef internal::function<std::size_t (Particle<T> &, void *)>
-        init_type;
+        initialize_type;
     /// The type of move functor
     typedef internal::function<std::size_t (std::size_t, Particle<T> &)>
         move_type;
@@ -47,7 +47,7 @@ class Sampler
     /// \param seed The seed to the parallel RNG system
     Sampler (
             std::size_t N,
-            const init_type &init,
+            const initialize_type &init,
             const move_type &move,
             const move_type &mcmc = NULL,
             ResampleScheme scheme = STRATIFIED,
@@ -177,7 +177,7 @@ class Sampler
     /// \brief Replace initialization functor
     ///
     /// \param init New Initialization functor
-    void initialize (init_type &init)
+    void initialize (initialize_type &init)
     {
         init_ = init;
     }
@@ -460,7 +460,7 @@ class Sampler
     bool initialized_;
 
     /// Initialization and movement
-    init_type init_;
+    initialize_type init_;
     move_type move_;
     move_type mcmc_;
 
