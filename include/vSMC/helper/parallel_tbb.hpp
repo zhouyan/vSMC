@@ -18,8 +18,15 @@ class InitializeTBB : public InitializeSeq<T>
 {
     public :
 
-    InitializeTBB () {}
+    InitializeTBB (
+            typename InitializeSeq<T>::initialize_state_type init_state = NULL,
+            typename InitializeSeq<T>::initialize_param_type init_param = NULL,
+            typename InitializeSeq<T>::pre_processor_type pre = NULL,
+            typename InitializeSeq<T>::post_processor_type post = NULL) :
+        InitializeSeq<T>(init_state, init_param, pre, post) {}
+
     InitializeTBB (const InitializeTBB<T> &init) {}
+
     InitializeTBB<T> & operator= (const InitializeTBB<T> &init) {return *this;}
 
     /// \brief Operator called by Sampler for initialize the particle set
@@ -89,8 +96,15 @@ class MoveTBB : public MoveSeq<T>
 {
     public :
 
-    MoveTBB () {}
+    MoveTBB (
+            typename MoveSeq<T>::move_state_type move = NULL,
+            typename MoveSeq<T>::weight_action_type weight = NULL,
+            typename MoveSeq<T>::pre_processor_type pre = NULL,
+            typename MoveSeq<T>::post_processor_type post = NULL) :
+        MoveSeq<T>(move, weight, pre, post) {}
+
     MoveTBB (const MoveTBB<T> &move) {}
+
     MoveTBB<T> & operator= (const MoveTBB<T> &move) {return *this;}
 
     /// \brief Operator called by Sampler for move the particle set
@@ -160,6 +174,9 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 {
     public :
 
+    MonitorTBB (typename MonitorSeq<T>::monitor_state_type monitor = NULL) :
+        MonitorSeq<T, Dim>(monitor) {}
+
     /// \brief Operator called by Monitor to record Monte Carlo integration
     ///
     /// \param iter The iteration number
@@ -210,6 +227,11 @@ template <typename T>
 class PathTBB : public PathSeq<T>
 {
     public :
+
+    PathTBB (
+            typename PathSeq<T>::path_state_type path = NULL,
+            typename PathSeq<T>::width_state_type width = NULL) :
+        PathSeq<T>(path, width) {}
 
     /// \brief Operator called by Path to record path sampling integrands and
     /// widths
