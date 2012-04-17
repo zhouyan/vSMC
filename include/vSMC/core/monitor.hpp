@@ -2,6 +2,7 @@
 #define V_SMC_CORE_MONITOR_HPP
 
 #include <vector>
+#include <cassert>
 #include <cstddef>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
@@ -119,6 +120,8 @@ class Monitor
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
+        assert(bool(integral_));
+
         buffer_.resize(dim_, particle.size());
         integral_(iter, particle, buffer_.data());
         result_.noalias() = buffer_ * particle.weight();

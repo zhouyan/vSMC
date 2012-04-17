@@ -226,7 +226,7 @@ class Sampler
 
         ++iter_num_;
         accept_.push_back(move_(iter_num_, particle_));
-        if (mcmc_)
+        if (bool(mcmc_))
             accept_.back() = mcmc_(iter_num_, particle_);
         post_move();
     }
