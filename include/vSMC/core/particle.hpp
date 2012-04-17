@@ -8,8 +8,22 @@
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <Eigen/Dense>
+#include <Random123/aes.h>
+#include <Random123/ars.h>
+#include <Random123/philox.h>
+#include <Random123/threefry.h>
+#include <Random123/conventional/Engine.hpp>
 #include <vSMC/internal/config.hpp>
-#include <vSMC/rng/rng.hpp>
+
+/// The Parallel RNG (based on Rand123) seed, unsigned
+#ifndef V_SMC_CRNG_SEED
+#define V_SMC_CRNG_SEED 0xdeadbeefU
+#endif // V_SMC_CRNG_SEED
+
+/// The Parallel RNG (based on Rand123) type, philox or threefry
+#ifndef V_SMC_CRNG_TYPE
+#define V_SMC_CRNG_TYPE r123::Threefry4x64
+#endif // V_SMC_CRNG_TYPE
 
 namespace vSMC {
 
@@ -30,7 +44,7 @@ class Particle
 {
     public :
 
-    typedef V_SMC_RNG_TYPE rng_type;
+    typedef r123::Engine< V_SMC_CRNG_TYPE > rng_type;
 
     /// \brief Construct a Particle object with given number of particles
     ///
@@ -38,19 +52,13 @@ class Particle
     /// \param seed The seed to the parallel RNG system
     /// \param sampler The poiter to the Sampler which this particle set
     /// belongs to
-    Particle (std::size_t N, rng_type::seed_type seed = V_SMC_RNG_SEED,
+    Particle (std::size_t N, rng_type::result_type seed = V_SMC_CRNG_SEED,
             const Sampler<T> *sampler = NULL) :
         size_(N), value_(N), sampler_(sampler),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), prng_(N)
     {
-        rng_type rng(seed);
-        rng.step_size(size_);
-        for (std::size_t i = 0; i != size_; ++i) {
-            rng.advance_ctr(i);
-            prng_[i] = rng;
-        }
-
+        reset_prng(seed);
         weight_.setConstant(1.0 / size_);
         log_weight_.setConstant(0);
     }
@@ -219,6 +227,12 @@ class Particle
     rng_type &prng (std::size_t id)
     {
         return prng_[id];
+    }
+
+    void reset_prng (rng_type::result_type seed)
+    {
+        for (std::size_t i = 0; i != size_; ++i)
+            prng_[i] = rng_type(seed + i);
     }
 
     private :
