@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <cstddef>
-#include <boost/function.hpp>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
+#include <vSMC/internal/function.hpp>
 #include <vSMC/core/particle.hpp>
 
 namespace vSMC {
@@ -21,7 +21,7 @@ class Path
     public :
 
     /// The type of path sampling integral functor
-    typedef boost::function<double (std::size_t, Particle<T> &, double *)>
+    typedef internal::function<double (std::size_t, Particle<T> &, double *)>
         integral_type;
     /// The type of the index vector
     typedef std::vector<std::size_t> index_type;
@@ -82,7 +82,7 @@ class Path
     /// \return \b true if the path is empty
     bool empty () const
     {
-        return integral_.empty();
+        return bool(integral_);
     }
 
     /// \brief Iteration index

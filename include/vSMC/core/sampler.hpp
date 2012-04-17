@@ -8,9 +8,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <boost/function.hpp>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
+#include <vSMC/internal/function.hpp>
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
@@ -24,10 +24,10 @@ class Sampler
     public :
 
     /// The type of initialization functor
-    typedef boost::function<std::size_t (Particle<T> &, void *)>
+    typedef internal::function<std::size_t (Particle<T> &, void *)>
         init_type;
     /// The type of move functor
-    typedef boost::function<std::size_t (std::size_t, Particle<T> &)>
+    typedef internal::function<std::size_t (std::size_t, Particle<T> &)>
         move_type;
     /// The type ESS history vector
     typedef std::vector<double> ess_type;

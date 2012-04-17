@@ -4,9 +4,6 @@
 #include <vector>
 #include <cmath>
 #include <cstddef>
-#include <boost/function.hpp>
-#include <boost/random/binomial_distribution.hpp>
-#include <boost/random/uniform_01.hpp>
 #include <Eigen/Dense>
 #include <Random123/aes.h>
 #include <Random123/ars.h>
@@ -14,6 +11,7 @@
 #include <Random123/threefry.h>
 #include <Random123/conventional/Engine.hpp>
 #include <vSMC/internal/config.hpp>
+#include <vSMC/internal/random.hpp>
 
 /// The Parallel RNG (based on Rand123) seed, unsigned
 #ifndef V_SMC_CRNG_SEED
@@ -285,7 +283,7 @@ class Particle
         replication_.setConstant(0);
         std::size_t j = 0;
         std::size_t k = 0;
-        boost::random::uniform_01<> unif;
+        internal::uniform_real_distribution<> unif(0,1);
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size_) {
@@ -302,7 +300,7 @@ class Particle
         replication_.setConstant(0);
         std::size_t j = 0;
         std::size_t k = 0;
-        boost::random::uniform_01<> unif;
+        internal::uniform_real_distribution<> unif(0,1);
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size_) {
@@ -323,7 +321,7 @@ class Particle
         weight_ /= size;
         std::size_t j = 0;
         std::size_t k = 0;
-        boost::random::uniform_01<> unif;
+        internal::uniform_real_distribution<> unif(0,1);
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size) {
@@ -346,7 +344,7 @@ class Particle
         weight_ /= size;
         std::size_t j = 0;
         std::size_t k = 0;
-        boost::random::uniform_01<> unif;
+        internal::uniform_real_distribution<> unif(0,1);
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size) {
@@ -368,7 +366,7 @@ class Particle
         replication_.setConstant(0);
         for (std::size_t i = 0; i != size_; ++i) {
             if (sum_n < size && weight_[i] > 0) {
-                boost::random::binomial_distribution<>
+                internal::binomial_distribution<>
                     binom(size - sum_n, weight_[i] / (tp - sum_p));
                 replication_[i] = binom(prng_[i]);
             }

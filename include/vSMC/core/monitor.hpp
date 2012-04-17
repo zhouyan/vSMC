@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <cstddef>
-#include <boost/function.hpp>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
+#include <vSMC/internal/function.hpp>
 #include <vSMC/core/particle.hpp>
 
 namespace vSMC {
@@ -22,7 +22,7 @@ class Monitor
     public :
 
     /// The type of monitor integral functor
-    typedef boost::function<void (std::size_t, Particle<T> &, double *)>
+    typedef internal::function<void (std::size_t, Particle<T> &, double *)>
         integral_type;
     /// The type of the index vector
     typedef std::vector<std::size_t> index_type;
@@ -88,7 +88,7 @@ class Monitor
     /// \return \b true if the monitor is empty
     bool empty () const
     {
-        return integral_.empty();
+        return bool(integral_);
     }
 
     /// \brief Iteration index
