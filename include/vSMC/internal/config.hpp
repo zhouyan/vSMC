@@ -2,12 +2,14 @@
 #define V_SMC_CONFIG_CONFIG_HPP
 
 #include <vSMC/internal/version.hpp>
-#include <boost/version.hpp>
 
+#if !defined(V_SMC_USE_STD_FUNCITON) || !defined(V_SMC_USE_STD_RANDOM)
+#include <boost/version.hpp>
 #ifndef V_SMC_NDEBUG
 #if BOOST_VERSION < 104900
 #warning vSMC was only tested against Boost 1.49 and later
-#endif
-#endif
+#endif // BOOST_VERSION < 104900
+#endif // V_SMC_NDEBUG
+#endif // !defined(V_SMC_USE_STD_FUNCITON) || !defined(V_SMC_USE_STD_RANDOM)
 
 #endif // V_SMC_CONFIG_CONFIG_HPP

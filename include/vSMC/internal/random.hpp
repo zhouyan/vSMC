@@ -13,7 +13,6 @@ using std::uniform_real_distribution;
 
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
-
 namespace vSMC { namespace internal {
 #if BOOST_VERSION < 104700
 using boost::binomial_distribution;

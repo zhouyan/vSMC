@@ -5,9 +5,9 @@
 namespace vSMC { namespace internal {
 using std::function;
 } }
-#else
+#else // V_SMC_USE_STD_FUNCTION
 #include <boost/function.hpp>
 namespace vSMC { namespace internal {
 using boost::function;
 } }
-#endif
+#endif // V_SMC_USE_STD_FUNCTION
