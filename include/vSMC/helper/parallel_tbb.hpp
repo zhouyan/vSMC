@@ -5,27 +5,13 @@
 #include <tbb/tbb.h>
 #include <vSMC/internal/config.hpp>
 #include <vSMC/helper/sequential.hpp>
+#include <vSMC/helper/state_base.hpp>
 
 namespace vSMC {
 
-/// \brief Particle type class for helping implementing SMC using TBB
-///
-/// \note The template parameter has to be type StateTBB or its derived class.
-/// \sa vSMC::StateSeq
-template <unsigned Dim, typename T = double>
-class StateTBB : public StateSeq<Dim, T>
-{
-    public :
-
-    /// \brief Construct a StateTBB object with given number of particles
-    ///
-    /// \param N The number of particles
-    StateTBB (std::size_t N) : StateSeq<Dim, T>(N) {}
-}; // class StateTBB
-
 /// \brief Sampler::init_type class for helping implementing SMC using TBB
 ///
-/// \note The template parameter has to be type StateTBB or its derived class.
+/// \note The template parameter has to be type StateBase or its derived class.
 /// \sa vSMC::InitializeSeq
 template <typename T>
 class InitializeTBB : public InitializeSeq<T>
@@ -96,7 +82,7 @@ class InitializeTBB : public InitializeSeq<T>
 
 /// \brief Sampler::move_type class for helping implementing SMC using TBB
 ///
-/// \note The template parameter has to be type StateTBB or its derived class.
+/// \note The template parameter has to be type StateBase or its derived class.
 /// \sa vSMC::MoveSeq
 template <typename T>
 class MoveTBB : public MoveSeq<T>
@@ -167,7 +153,7 @@ class MoveTBB : public MoveSeq<T>
 
 /// \brief Monitor::integral_type class for helping implementing SMC using TBB
 ///
-/// \note The template parameter has to be type StateTBB or its derived class.
+/// \note The template parameter has to be type StateBase or its derived class.
 /// \sa vSMC::MonitorSeq
 template <typename T, unsigned Dim = 1>
 class MonitorTBB : public MonitorSeq<T, Dim>
@@ -218,7 +204,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 
 /// \brief Path::integral_type class for helping implementing SMC using TBB
 ///
-/// \note The template parameter has to be type StateTBB or its derived class.
+/// \note The template parameter has to be type StateBase or its derived class.
 /// \sa vSMC::PathSeq
 template <typename T>
 class PathTBB : public PathSeq<T>

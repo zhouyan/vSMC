@@ -6,6 +6,7 @@
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
+#include <vSMC/helper/state_base.hpp>
 
 namespace vSMC {
 
@@ -19,91 +20,6 @@ namespace vSMC {
 enum WeightAction {
     NO_ACTION, SET_WEIGHT, SET_LOG_WEIGHT, MUL_WEIGHT, ADD_LOG_WEIGHT};
 
-/// \brief Particle type class for helping implementing SMC sequentially
-///
-/// StateSeq or its derived class can be used as the template argument of
-/// Particle. It targets the particular problems where the parameters to be
-/// sampled can be viewed as a vector of dimension Dim and type T.
-template <unsigned Dim, typename T = double>
-class StateSeq
-{
-    public :
-
-    /// The type of parameters
-    typedef T value_type;
-
-    /// \brief Construct a StateSeq object with given number of particles
-    ///
-    /// \param N The number of particles
-    StateSeq (std::size_t N) : size_(N), state_(Dim, N) {}
-
-    /// \brief The dimension of the problem
-    ///
-    /// \return The dimension of the parameter vector
-    static unsigned dim ()
-    {
-        return Dim;
-    }
-
-    /// \brief The number of particles
-    ///
-    /// \return The number of particles in the current particle set
-    std::size_t size () const
-    {
-        return size_;
-    }
-
-    /// \brief Read and write access to the array of a single particle states
-    ///
-    /// \return A pointer to the states of a single particle
-    T *state (std::size_t n)
-    {
-        return state_.col(n).data();
-    }
-
-    /// \brief Read only access to the array of a single particle states
-    ///
-    /// \return A const pointer to the states of a single array particle
-    const T *state (std::size_t n) const
-    {
-        return state_.col(n).data();
-    }
-
-    /// \brief Read and write access to the array of all particle states
-    ///
-    /// \return A pointer to the states of all particles
-    ///
-    /// \note The array is of row major order. In other words, it is ordered
-    /// as the first Dim elements are the states of first particle, the next
-    /// Dim elements are the states of the second particle, and so on.
-    T *state ()
-    {
-        return state_.data();
-    }
-
-    /// \brief Read only access to the array of all particle states
-    ///
-    /// \return A const pointer to the states of all particles
-    const T *state () const
-    {
-        return state_.data();
-    }
-
-    /// \brief The copy method used by the Sampler
-    ///
-    /// \param from The index of particle whose state to be copied
-    /// \param to The index of particle to which new state to be written
-    void copy (std::size_t from, std::size_t to)
-    {
-	state_.col(to) = state_.col(from);
-    }
-
-    private :
-
-    std::size_t size_;
-    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_;
-}; // class StateSeq
-
 /// \brief Sampler::init_type class for helping implementing SMC sequentially
 ///
 /// This is a abstract factory class. Object of its derived type can used as
@@ -112,7 +28,7 @@ class StateSeq
 /// method initialize_param, which will be called before initialization and
 /// accept the last argument of Sampler::init_type functor as its parameter.
 ///
-/// \note The template parameter has to be type StateSeq or its derived class.
+/// \note The template parameter has to be type StateBase or its derived class.
 template <typename T>
 class InitializeSeq
 {
@@ -179,7 +95,7 @@ class InitializeSeq
 /// the weight_action method to change how the returned weighted should be
 /// treated.
 ///
-/// \note The template parameter has to be type StateSeq or its derived class.
+/// \note The template parameter has to be type StateBase or its derived class.
 template <typename T>
 class MoveSeq
 {
@@ -277,7 +193,7 @@ class MoveSeq
 /// Monitor<T>::integral_type integral). The derived class need to at least
 /// define method monitor_state.
 ///
-/// \note The template parameter has to be type StateSeq or its derived class.
+/// \note The template parameter has to be type StateBase or its derived class.
 template <typename T, unsigned Dim = 1>
 class MonitorSeq
 {
@@ -326,7 +242,7 @@ class MonitorSeq
 /// integral). The derived class need to at least define method path_state and
 /// width_state.
 ///
-/// \note The template parameter has to be type StateSeq or its derived class.
+/// \note The template parameter has to be type StateBase or its derived class.
 template <typename T>
 class PathSeq
 {
