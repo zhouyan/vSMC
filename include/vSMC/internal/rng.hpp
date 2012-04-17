@@ -30,6 +30,13 @@
 
 namespace vSMC {
 
+/// \brief A Boost.Random and C++ compatible RNG eigen
+///
+/// random123_eigne can be used as a Boost.Random or the new C++ 11 RNG eigen.
+/// The main difference between random123_eigen and the \c r123::Eigen and \c
+/// r123::MicroURNG eigens is that it provide a method \c step_size to specify
+/// how many steps should the counter be advanced when each time the eigen is
+/// used.
 template <typename Random123Type, typename UIntType>
 class random123_eigen
 {
