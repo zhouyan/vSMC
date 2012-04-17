@@ -55,7 +55,7 @@ class Sampler
             typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         scheme_(scheme), threshold_(threshold * N),
-        particle_(N, seed, this), iter_num_(0), show_progress_(false) {}
+        particle_(N, seed, this), iter_num_(0) {}
 
     /// \brief Size of the particle set
     ///
@@ -482,9 +482,6 @@ class Sampler
     /// Path sampling
     Path<T> path_;
 
-    /// Whether to show prograss while iterating
-    bool show_progress_;
-
     void post_move ()
     {
         ess_.push_back(particle_.ess());
@@ -502,14 +499,6 @@ class Sampler
                 imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
             if (!imap->second.empty())
                 imap->second.eval(iter_num_, particle_);
-        }
-
-        if (show_progress_) {
-            if (iter_num_)
-                std::cerr << '.';
-            else
-                std::cerr << '*';
-            std::cerr.flush();
         }
     }
 }; // class Sampler
