@@ -271,7 +271,7 @@ class Particle
         replication_.setConstant(0);
         std::size_t j = 0;
         std::size_t k = 0;
-        V_SMC_BOOST_RANDOM_NAMESPACE::uniform_01<> unif;
+        boost::random::uniform_01<> unif;
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size_) {
@@ -288,7 +288,7 @@ class Particle
         replication_.setConstant(0);
         std::size_t j = 0;
         std::size_t k = 0;
-        V_SMC_BOOST_RANDOM_NAMESPACE::uniform_01<> unif;
+        boost::random::uniform_01<> unif;
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size_) {
@@ -309,7 +309,7 @@ class Particle
         weight_ /= size;
         std::size_t j = 0;
         std::size_t k = 0;
-        V_SMC_BOOST_RANDOM_NAMESPACE::uniform_01<> unif;
+        boost::random::uniform_01<> unif;
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size) {
@@ -332,7 +332,7 @@ class Particle
         weight_ /= size;
         std::size_t j = 0;
         std::size_t k = 0;
-        V_SMC_BOOST_RANDOM_NAMESPACE::uniform_01<> unif;
+        boost::random::uniform_01<> unif;
         double u = unif(prng_[0]);
         double cw = weight_[0];
         while (j != size) {
@@ -354,7 +354,7 @@ class Particle
         replication_.setConstant(0);
         for (std::size_t i = 0; i != size_; ++i) {
             if (sum_n < size && weight_[i] > 0) {
-                V_SMC_BOOST_RANDOM_NAMESPACE::binomial_distribution<>
+                boost::random::binomial_distribution<>
                     binom(size - sum_n, weight_[i] / (tp - sum_p));
                 replication_[i] = binom(prng_[i]);
             }
