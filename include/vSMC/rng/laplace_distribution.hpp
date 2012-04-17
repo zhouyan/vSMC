@@ -39,13 +39,13 @@ class laplace_distribution
             RealType location = 0, RealType  scale = 1) :
         location_(location), scale_(scale)
     {
-        assert(scale_ > 0);
+        assert(scale_ >= 0);
     }
 
     explicit laplace_distribution (const param_type &param) :
         location_(param.location()), scale_(param.scale())
     {
-        assert(scale_ > 0);
+        assert(scale_ >= 0);
     }
 
     RealType min () const {return -std::numeric_limits<RealType>::infinity();}
