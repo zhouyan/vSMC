@@ -51,17 +51,15 @@ compilers. Others might work as well. [Boost](Boost) 1.4.9 is used.
 - Red Hat Enterprise Linux 6.2
   * Clang 2.8, -std=c++98 (Using [Boost](Boost))
   * GCC 4.4.6, -std=c++98 (Using [Boost](Boost))
-  * GCC 4.4.6, -std=c++0x (Using [Boost](Boost), `std::function` also work,
-    C++11 `<random>` broke, `std::uniform_real_distribution` mising)
+  * GCC 4.4.6, -std=c++0x (Using [Boost](Boost), C++11 `std::function` also works, C++11 `<random>` broke, `std::uniform_real_distribution` mising)
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost](Boost))
-  * Intel icpc 12.1.3, -std=c++0x (Using [Boost](Boost), `std::function` also
-    work, C++11 `<random>` broke, `std::uniform_real_distribution` mising)
+  * Intel icpc 12.1.3, -std=c++0x (Using [Boost](Boost), C++11 `std::function` also works, C++11 `<random>` broke, `std::uniform_real_distribution` mising)
 
 - Ubuntu 12.04
   * Clang 3.1, -std=c++98 (Using [Boost](Boost))
-  * Clang 3.1, -std=c++0x (Using [Boost](Boost) or C++ headers)
+  * Clang 3.1, -std=c++0x (Using [Boost](Boost) or C++11 headers)
   * GCC 4.6.3, -std=c++98 (Using [Boost](Boost))
-  * GCC 4.6.3, -std=c++0x (Using [Boost](Boost) or C++ headers)
+  * GCC 4.6.3, -std=c++0x (Using [Boost](Boost) or C++11 headers)
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost](Boost))
   * Intel icpc 12.1.3, -std=c++0x (Using [Boost](Boost))
 
@@ -70,9 +68,8 @@ Note that `icpc` use `libstdc++` distributed with the system.
 ## Mac OS X
 
 - Lion 10.7.3
-  * Clang 3.1, -std=c++98 -stdlib=libc++ (Using [Boost](Boost),
-    `std::function` also work, C++11 `<random>` broke, not standard comforming)
-  * Clang 3.1, -std=c++11 -stdlib=libc++ (Using [Boost](Boost))
+  * Clang 3.1, -std=c++98 -stdlib=libc++ (Using [Boost](Boost))
+  * Clang 3.1, -std=c++11 -stdlib=libc++ (Using [Boost](Boost), C++11 `std::function` also works, C++11 `<random>` broke, not standard comforming)
   * Clang 3.1, -std=c++98 -stdlib=libstc++(Using [Boost](Boost))
   * Clang 3.1, -std=c++11 -stdlib=libstc++(Using [Boost](Boost))
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost](Boost))
