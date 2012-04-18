@@ -107,7 +107,3 @@ Note that `icpc` use `libstdc++` distributed with the system.
   * Clang 3.1, -std=c++11 -stdlib=libstc++(Using [Boost][Boost])
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
   * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost])
-  
-
-# Examples
-
