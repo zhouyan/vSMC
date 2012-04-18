@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstddef>
 #include <vSMC/internal/function.hpp>
 
 int fn (int a)
