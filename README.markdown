@@ -12,29 +12,33 @@
 To install the library just move the `include` folder into a proper place, e.g.
 `/usr/local/include` on Unix-alike systems. Alternatively, one can use
 [CMake](CMake)
-```
+
     cd /path_to_vSMC_source 
     mkdir build
     cd build
     cmake .. -DCMAKE_BUILD_TYPE=Release
     sudo make install
-```
+
 To make the documentations one need [Doxygen](Doxygen) 1.8.0 or later.
-```
+
     make docs
-```
+
 To build examples,
-```
+
     make buildtests
-```
+
 To run the tests,
-```
+
     make test
-```
-or
+
+Or
+
     ctest
+
 To build and run tests in a single step
+
     make check
+
 Note that [CMake](CMake) generated `Makefile` does not build test executables
 before run `ctest`, so you need either run `make build tests` before `make
 test` or `ctest`, or run `make check`. To build all the examples, one may also
