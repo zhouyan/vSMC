@@ -43,7 +43,7 @@ Note that [CMake](CMake) generated `Makefile` does not build test executables
 before run `ctest`, so you need either run `make build tests` before `make
 test` or `ctest`, or run `make check`. To build all the examples, one may also
 need [Intel MKL](MKL), [Intel TBB](TBB) and [vDist](vDist) libraries.  They
-are only optional. To make examples (also serves as tests)
+are only optional.
 
 # Prerequisite 
 
