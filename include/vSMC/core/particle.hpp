@@ -292,6 +292,8 @@ class Particle
                 ++replication_[k];
                 u = unif(prng_[j++]);
             }
+            if (k == size_ - 1)
+                break;
             cw += weight_[++k];
         }
     }
@@ -309,6 +311,8 @@ class Particle
                 ++replication_[k];
 		++j;
             }
+            if (k == size_ - 1)
+                break;
             cw += weight_[++k];
         }
     }
@@ -330,6 +334,8 @@ class Particle
                 ++replication_[k];
                 u = unif(prng_[j++]);
             }
+            if (k == size_ - 1)
+                break;
             cw += weight_[++k];
         }
         for (std::size_t i = 0; i != size_; ++i)
@@ -353,6 +359,8 @@ class Particle
                 ++replication_[k];
 		++j;
             }
+            if (k == size_ - 1)
+                break;
             cw += weight_[++k];
         }
         for (std::size_t i = 0; i != size_; ++i)
