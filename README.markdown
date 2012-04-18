@@ -38,6 +38,14 @@ compiler flags.
 
 # Tested compilers
 
+The library itself only use standard C++98 features and is fairly portable.
+For compiler support of [Eigen](Eigen) and [Random123](Random123) see their
+pages respectively. In C++11 mode, the usability of `<functional>` and
+`<random>` headers distributed with various implementations differs
+significantly, especially `<random>`. However [Boost](Boost) can be used as a
+replacement and which is known for portability. The following summaries tested
+compilers. Others might work as well. [Boost](Boost) 1.4.9 is used.
+
 ## Linux
 
 - Red Hat Enterprise Linux 6.2
