@@ -1,12 +1,3 @@
-[CMake]: http://www.cmake.org/
-[Eigen 3]: http://eigen.tuxfamily.org/index.php
-[Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
-[Boost]: http://www.boost.org/
-[MKL]: http://software.intel.com/en-us/articles/intel-mkl/
-[TBB]: http://threadingbuildingblocks.org/
-[vDist]: https://github.com/zhouyan/vDist
-
-
 # Installation
 
 To install the library just move the `include` folder into a proper place, e.g.
@@ -109,3 +100,13 @@ Note that `icpc` use `libstdc++` distributed with the system.
   * Clang 3.1, -std=c++11 -stdlib=libstc++(Using [Boost][Boost])
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
   * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost])
+
+[CMake]: http://www.cmake.org/
+[Eigen 3]: http://eigen.tuxfamily.org/index.php
+[Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
+[Boost]: http://www.boost.org/
+[MKL]: http://software.intel.com/en-us/articles/intel-mkl/
+[TBB]: http://threadingbuildingblocks.org/
+[vDist]: https://github.com/zhouyan/vDist
+[Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
+

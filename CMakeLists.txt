@@ -63,7 +63,7 @@ IF (DOXYGEN_FOUND)
         ${PROJECT_BINARY_DIR}/include)
     FILE (READ ${PROJECT_SOURCE_DIR}/README.markdown README)
     FILE (WRITE ${PROJECT_SOURCE_DIR}/doc/main.markdown
-        "vSMC {#mainpage}\n====\n\n${README}\n\n")
+        "vSMC {#mainpage}\n================\n\n${README}\n\n")
     FILE (APPEND ${PROJECT_SOURCE_DIR}/doc/main.markdown
         "# Tutorials\n\n"
         "- \\ref tutorial-pf\n"
