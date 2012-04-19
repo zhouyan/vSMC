@@ -61,6 +61,15 @@ IF (DOXYGEN_FOUND)
         ARGS -E copy_directory
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_BINARY_DIR}/include)
+    FILE (READ ${PROJECT_SOURCE_DIR}/README.markdown README)
+    FILE (WRITE ${PROJECT_SOURCE_DIR}/doc/main.markdown
+        "vSMC {#mainpage}\n====\n\n${README}\n\n")
+    FILE (APPEND ${PROJECT_SOURCE_DIR}/doc/main.markdown
+        "# Tutorials\n\n"
+        "- \\ref tutorial-pf\n"
+        "- \\ref tutorial-gmm\n"
+        "- \\ref tutorial-sampler\n"
+        "- \\ref tutorial-monitor\n")
     FILE (GLOB_RECURSE DOC_SRC
         ${PROJECT_SOURCE_DIR}/doc/*.markdown
         ${PROJECT_SOURCE_DIR}/doc/*.html
@@ -116,7 +125,7 @@ SET (V_SMC_TEST TRUE)
 
 IF (Eigen_FOUND AND Random123_FOUND)
     # Test <functional>
-    FILE (READ "${PROJECT_SOURCE_DIR}/cmake/try_function.cpp" TRY_FUNCTION_CPP)
+    FILE (READ ${PROJECT_SOURCE_DIR}/cmake/try_function.cpp TRY_FUNCTION_CPP)
     CHECK_CXX_SOURCE_RUNS ("${TRY_FUNCTION_CPP}" V_SMC_USE_STD_FUNCTION)
     CHECK_CXX_SOURCE_RUNS ("${TRY_FUNCTION_CPP}" V_SMC_USE_BOOST_FUNCTION)
 
@@ -143,7 +152,7 @@ IF (Eigen_FOUND AND Random123_FOUND)
     ENDIF (V_SMC_STD_FUNCTION AND V_SMC_USE_STD_FUNCTION)
 
     # Test <random>
-    FILE (READ "${PROJECT_SOURCE_DIR}/cmake/try_random.cpp" TRY_RANDOM_CPP)
+    FILE (READ ${PROJECT_SOURCE_DIR}/cmake/try_random.cpp TRY_RANDOM_CPP)
     CHECK_CXX_SOURCE_RUNS ("${TRY_RANDOM_CPP}" V_SMC_USE_STD_RANDOM)
     CHECK_CXX_SOURCE_RUNS ("${TRY_RANDOM_CPP}" V_SMC_USE_BOOST_RANDOM)
 
