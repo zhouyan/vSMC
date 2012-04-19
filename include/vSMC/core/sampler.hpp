@@ -56,7 +56,10 @@ class Sampler
             typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         scheme_(scheme), threshold_(threshold * N),
-        particle_(N, seed, this), iter_num_(0) {}
+        particle_(N, seed), iter_num_(0)
+	{
+		particle_.sampler(this);
+	}
 
     /// \brief Size of the particle set
     ///

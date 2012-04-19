@@ -52,9 +52,8 @@ class Particle
     /// \param sampler The poiter to the Sampler which this particle set
     /// belongs to
     explicit Particle (std::size_t N,
-            rng_type::result_type seed = V_SMC_CRNG_SEED,
-            const Sampler<T> *sampler = NULL) :
-        size_(N), value_(N), sampler_(sampler),
+            rng_type::result_type seed = V_SMC_CRNG_SEED) :
+        size_(N), value_(N), sampler_(NULL),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(0), resampled_(false), zconst_(0), prng_(N)
     {
@@ -181,6 +180,14 @@ class Particle
     {
         return *sampler_;
     }
+
+	/// \brief Set which sampler this particle belongs to
+	///
+	/// \param samp A const pointer to the sampler
+	void sampler (const Sampler<T> *samp)
+	{
+		sampler_ = samp;
+	}
 
     /// \brief Get the value of SMC normalizing constant
     ///
