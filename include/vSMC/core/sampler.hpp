@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <cstddef>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
 #include <vSMC/internal/function.hpp>

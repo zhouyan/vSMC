@@ -2,6 +2,7 @@
 #define V_SMC_HELPER_SEQUENTIAL_HPP
 
 #include <cassert>
+#include <cstddef>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
 #include <vSMC/core/monitor.hpp>

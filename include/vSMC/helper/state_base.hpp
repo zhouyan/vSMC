@@ -1,6 +1,7 @@
 #ifndef V_SMC_HELPER_STATE_BASE_HPP
 #define V_SMC_HELPER_STATE_BASE_HPP
 
+#include <cstddef>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
 
