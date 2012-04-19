@@ -36,7 +36,8 @@ class Path
     /// \brief Construct a Path with an integral function
     ///
     /// \param integral The functor used to compute the integrands
-    Path (const integral_type &integral = NULL) : integral_(integral) {}
+    explicit Path (const integral_type &integral = integral_type(NULL)) :
+        integral_(integral) {}
 
     /// \brief Copy constructor
     ///

@@ -18,11 +18,20 @@ class InitializeTBB : public InitializeSeq<T>
 {
     public :
 
-    InitializeTBB (
-            typename InitializeSeq<T>::initialize_state_type init_state = NULL,
-            typename InitializeSeq<T>::initialize_param_type init_param = NULL,
-            typename InitializeSeq<T>::pre_processor_type pre = NULL,
-            typename InitializeSeq<T>::post_processor_type post = NULL) :
+    typedef typename InitializeSeq<T>::initialize_state_type
+        initialize_state_type;
+    typedef typename InitializeSeq<T>::initialize_param_type
+        initialize_param_type;
+    typedef typename InitializeSeq<T>::pre_processor_type
+        pre_processor_type;   
+    typedef typename InitializeSeq<T>::post_processor_type
+        post_processor_type;  
+
+    explicit InitializeTBB (
+            initialize_state_type init_state = initialize_state_type(NULL),
+            initialize_param_type init_param = initialize_param_type(NULL),
+            pre_processor_type    pre        = pre_processor_type(NULL),
+            post_processor_type   post       = post_processor_type(NULL)) :
         InitializeSeq<T>(init_state, init_param, pre, post) {}
 
     InitializeTBB (const InitializeTBB<T> &init) {}
@@ -96,11 +105,16 @@ class MoveTBB : public MoveSeq<T>
 {
     public :
 
-    MoveTBB (
-            typename MoveSeq<T>::move_state_type move = NULL,
-            typename MoveSeq<T>::weight_action_type weight = NULL,
-            typename MoveSeq<T>::pre_processor_type pre = NULL,
-            typename MoveSeq<T>::post_processor_type post = NULL) :
+    typedef typename MoveSeq<T>::move_state_type     move_state_type;
+    typedef typename MoveSeq<T>::weight_action_type  weight_action_type;
+    typedef typename MoveSeq<T>::pre_processor_type  pre_processor_type;
+    typedef typename MoveSeq<T>::post_processor_type post_processor_type;
+
+    explicit MoveTBB (
+            move_state_type     move   = move_state_type(NULL),
+            weight_action_type  weight = weight_action_type(NULL),
+            pre_processor_type  pre    = pre_processor_type(NULL),
+            post_processor_type post   = post_processor_type(NULL)) :
         MoveSeq<T>(move, weight, pre, post) {}
 
     MoveTBB (const MoveTBB<T> &move) {}
@@ -174,7 +188,10 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 {
     public :
 
-    MonitorTBB (typename MonitorSeq<T>::monitor_state_type monitor = NULL) :
+    typedef typename MonitorSeq<T>::monitor_state_type monitor_state_type;
+
+    explicit MonitorTBB (
+            monitor_state_type monitor = monitor_state_type(NULL)) :
         MonitorSeq<T, Dim>(monitor) {}
 
     /// \brief Operator called by Monitor to record Monte Carlo integration
@@ -228,9 +245,12 @@ class PathTBB : public PathSeq<T>
 {
     public :
 
-    PathTBB (
-            typename PathSeq<T>::path_state_type path = NULL,
-            typename PathSeq<T>::width_state_type width = NULL) :
+    typedef typename PathSeq<T>::path_state_type path_state_type;
+    typedef typename PathSeq<T>::width_state_type width_state_type;
+
+    explicit PathTBB (
+            path_state_type path = path_state_type(NULL),
+            width_state_type width = width_state_type(NULL)) :
         PathSeq<T>(path, width) {}
 
     /// \brief Operator called by Path to record path sampling integrands and

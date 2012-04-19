@@ -22,7 +22,7 @@ class StateBase
     /// \brief Construct a StateBase object with given number of particles
     ///
     /// \param N The number of particles
-    StateBase (std::size_t N) : size_(N), state_(Dim, N) {}
+    explicit StateBase (std::size_t N) : size_(N), state_(Dim, N) {}
 
     /// \brief The dimension of the problem
     ///

@@ -51,7 +51,8 @@ class Particle
     /// \param seed The seed to the parallel RNG system
     /// \param sampler The poiter to the Sampler which this particle set
     /// belongs to
-    Particle (std::size_t N, rng_type::result_type seed = V_SMC_CRNG_SEED,
+    explicit Particle (std::size_t N,
+            rng_type::result_type seed = V_SMC_CRNG_SEED,
             const Sampler<T> *sampler = NULL) :
         size_(N), value_(N), sampler_(sampler),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),

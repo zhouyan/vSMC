@@ -45,11 +45,11 @@ class Sampler
     /// \param scheme The resampling scheme. See ResampleScheme
     /// \param threshold The threshold for performing resampling
     /// \param seed The seed to the parallel RNG system
-    Sampler (
+    explicit Sampler (
             std::size_t N,
-            const initialize_type &init,
-            const move_type &move,
-            const move_type &mcmc = NULL,
+            const initialize_type &init = initialize_type(NULL),
+            const move_type &move = move_type(NULL),
+            const move_type &mcmc = move_type(NULL),
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
             typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
@@ -209,7 +209,9 @@ class Sampler
     ///
     /// \param move New Move functor
     /// \param mcmc New MCMC functor
-    void iterate (const move_type &move, const move_type &mcmc = NULL)
+    void iterate (
+            const move_type &move,
+            const move_type &mcmc = move_type(NULL))
     {
         move_ = move;
         mcmc_ = mcmc;
