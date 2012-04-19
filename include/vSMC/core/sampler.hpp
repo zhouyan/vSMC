@@ -57,9 +57,9 @@ class Sampler
         initialized_(false), init_(init), move_(move), mcmc_(mcmc),
         scheme_(scheme), threshold_(threshold * N),
         particle_(N, seed), iter_num_(0)
-	{
-		particle_.sampler(this);
-	}
+    {
+        particle_.sampler(this);
+    }
 
     /// \brief Size of the particle set
     ///
