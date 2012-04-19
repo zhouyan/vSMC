@@ -47,10 +47,10 @@ class InitializeSeq
         post_processor_type;
 
     explicit InitializeSeq (
-            initialize_state_type init_state = initialize_state_type(NULL),
-            initialize_param_type init_param = initialize_param_type(NULL),
-            pre_processor_type    pre        = pre_processor_type(NULL),
-            post_processor_type   post       = post_processor_type(NULL)) :
+            initialize_state_type init_state = NULL,
+            initialize_param_type init_param = NULL,
+            pre_processor_type    pre        = NULL,
+            post_processor_type   post       = NULL) :
         initialize_state_(init_state),
         initialize_param_(init_param),
         pre_processor_(pre),
@@ -172,10 +172,10 @@ class MoveSeq
         post_processor_type;
 
     explicit MoveSeq (
-            move_state_type     move   = move_state_type(NULL),
-            weight_action_type  weight = weight_action_type(NULL),
-            pre_processor_type  pre    = pre_processor_type(NULL),
-            post_processor_type post   = post_processor_type(NULL)) :
+            move_state_type     move   = NULL,
+            weight_action_type  weight = NULL,
+            pre_processor_type  pre    = NULL,
+            post_processor_type post   = NULL) :
         move_state_(move), weight_action_(weight),
         pre_processor_(pre), post_processor_(post) {}
 
@@ -316,8 +316,7 @@ class MonitorSeq
             const Particle<T> &, double *)>
         monitor_state_type;
 
-    explicit MonitorSeq (
-            monitor_state_type monitor = monitor_state_type (NULL)) :
+    explicit MonitorSeq (monitor_state_type monitor = NULL) :
         monitor_state_(monitor) {}
 
     /// \brief Operator called by Monitor to record Monte Carlo integration
@@ -387,8 +386,7 @@ class PathSeq
         width_state_type;
 
     explicit PathSeq (
-            path_state_type path = path_state_type(NULL),
-            width_state_type width = width_state_type(NULL)) :
+            path_state_type path = NULL, width_state_type width = NULL) :
         path_state_(path), width_state_(width) {}
 
     /// \brief Operator called by Path to record path sampling integrands and

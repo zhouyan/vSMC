@@ -28,10 +28,10 @@ class InitializeTBB : public InitializeSeq<T>
         post_processor_type;  
 
     explicit InitializeTBB (
-            initialize_state_type init_state = initialize_state_type(NULL),
-            initialize_param_type init_param = initialize_param_type(NULL),
-            pre_processor_type    pre        = pre_processor_type(NULL),
-            post_processor_type   post       = post_processor_type(NULL)) :
+            initialize_state_type init_state = NULL,
+            initialize_param_type init_param = NULL,
+            pre_processor_type    pre        = NULL,
+            post_processor_type   post       = NULL) :
         InitializeSeq<T>(init_state, init_param, pre, post) {}
 
     InitializeTBB (const InitializeTBB<T> &init) {}
@@ -111,10 +111,10 @@ class MoveTBB : public MoveSeq<T>
     typedef typename MoveSeq<T>::post_processor_type post_processor_type;
 
     explicit MoveTBB (
-            move_state_type     move   = move_state_type(NULL),
-            weight_action_type  weight = weight_action_type(NULL),
-            pre_processor_type  pre    = pre_processor_type(NULL),
-            post_processor_type post   = post_processor_type(NULL)) :
+            move_state_type     move   = NULL,
+            weight_action_type  weight = NULL,
+            pre_processor_type  pre    = NULL,
+            post_processor_type post   = NULL) :
         MoveSeq<T>(move, weight, pre, post) {}
 
     MoveTBB (const MoveTBB<T> &move) {}
@@ -190,8 +190,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 
     typedef typename MonitorSeq<T>::monitor_state_type monitor_state_type;
 
-    explicit MonitorTBB (
-            monitor_state_type monitor = monitor_state_type(NULL)) :
+    explicit MonitorTBB (monitor_state_type monitor = NULL) :
         MonitorSeq<T, Dim>(monitor) {}
 
     /// \brief Operator called by Monitor to record Monte Carlo integration
@@ -249,8 +248,7 @@ class PathTBB : public PathSeq<T>
     typedef typename PathSeq<T>::width_state_type width_state_type;
 
     explicit PathTBB (
-            path_state_type path = path_state_type(NULL),
-            width_state_type width = width_state_type(NULL)) :
+            path_state_type path = NULL, width_state_type width = NULL) :
         PathSeq<T>(path, width) {}
 
     /// \brief Operator called by Path to record path sampling integrands and

@@ -47,9 +47,9 @@ class Sampler
     /// \param seed The seed to the parallel RNG system
     explicit Sampler (
             std::size_t N,
-            const initialize_type &init = initialize_type(NULL),
-            const move_type &move = move_type(NULL),
-            const move_type &mcmc = move_type(NULL),
+            const initialize_type &init = NULL,
+            const move_type &move = NULL,
+            const move_type &mcmc = NULL,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
             typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
@@ -211,7 +211,7 @@ class Sampler
     /// \param mcmc New MCMC functor
     void iterate (
             const move_type &move,
-            const move_type &mcmc = move_type(NULL))
+            const move_type &mcmc = NULL)
     {
         move_ = move;
         mcmc_ = mcmc;

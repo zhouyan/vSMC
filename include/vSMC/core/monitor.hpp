@@ -34,8 +34,7 @@ class Monitor
     ///
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param integral The functor used to compute the integrands
-    explicit Monitor (unsigned dim = 1,
-            const integral_type &integral = integral_type(NULL)) :
+    explicit Monitor (unsigned dim = 1, const integral_type &integral = NULL) :
         dim_(dim), integral_(integral) {}
 
     /// \brief Copy constructor
