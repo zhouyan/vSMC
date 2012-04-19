@@ -100,7 +100,7 @@ Note that `icpc` use `libstdc++` distributed with the system.
 
 ## Mac OS X
 
-- Lion 10.7.3
+- Lion 10.7.3, Xcode 4.3.2
   * Clang 3.1, -std=c++98 -stdlib=libc++ (Using [Boost][Boost])
   * Clang 3.1, -std=c++11 -stdlib=libc++ (Using [Boost][Boost], C++11 `std::function` also works, C++11 `<random>` broke, not standard comforming)
   * Clang 3.1, -std=c++98 -stdlib=libstc++(Using [Boost][Boost])
