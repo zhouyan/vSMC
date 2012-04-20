@@ -53,7 +53,7 @@ class Particle
             rng_type::result_type seed = V_SMC_CRNG_SEED) :
         size_(N), value_(N), sampler_(NULL),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
-        ess_(0), resampled_(false), zconst_(0), prng_(N)
+        ess_(N), resampled_(false), zconst_(0), prng_(N)
     {
         reset_prng(seed);
         weight_.setConstant(1.0 / size_);
