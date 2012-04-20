@@ -69,6 +69,11 @@ test` or `ctest`, or run `make check`. To build all the examples, one may also
 need [Intel MKL][MKL], [Intel TBB][TBB] and [vDist][vDist] libraries. They are
 only optional.
 
+Also the Particle filter and Gaussian mixture model may take some non-trivial
+run-time, therefore, use `-DCMAKE_BUILD_TYPE=Rlease` to build optimized
+binary.  To run them, invoke `ctest -C Release` or `make check` to run the
+tests. Without the configuration these examples won't be run.
+
 ## Finding libraries
 
 Without any configuration, the distributed `cmake` script may not be able to
