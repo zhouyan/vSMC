@@ -2,7 +2,6 @@
 #define V_SMC_CORE_PARTICLE_HPP
 
 #include <cmath>
-#include <cstddef>
 #include <Eigen/Dense>
 #include <Random123/aes.h>
 #include <Random123/ars.h>
