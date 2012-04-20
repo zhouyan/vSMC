@@ -89,9 +89,16 @@ directories under `MKLROOT` environment variables. For [Intel TBB][Intel TBB]
 similar additional directories as for [Intel MKL][Intel MKL] are searched
 (replace `mkl` by `tbb`)
 
+In addition, on Windows when [Intel TBB][Intel TBB] or [Intel MKL][Intel MKL]
+are used, the DLL files also need to be found. However, currently examples
+that use [Intel MKL][Intel MKL] will not be built on Windows with the CMake
+scripts distributed with this library. However it can still be used in users'
+own project if one know how to link it.
+
 If the script cannot find the libraries, try set one or more of `BOOST_ROOT`,
 `Eigen_INC_PATH`, `Random123_INC_PATH`, `MKL_INC_PATH`, `MKL_LIB_PATH`,
-`TBB_INC_PATH` and `TBB_LIB_PATH` when invoking `cmake`. For example
+`TBB_INC_PATH`, `TBB_LIB_PATH` and `TBB_DLL_PATH` when invoking `cmake`. For
+example
 
     cmake .. -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/opt/boost/include
 
@@ -103,10 +110,14 @@ by the user, assuming one has installed these libraries in these directories,
 - `Random123_INC_PATH`: `C:/Program Files/Random123/include`
 - `TBB_INC_PATH`: `C:/Program Files/TBB/include`
 - `TBB_LIB_PATH`: `C:/Program Files/TBB/lib/intel64/vc10`
+- `TBB_DLL_PATH`: `C:/Program Files/TBB/bin/intel64/vc10`
 
-The last one will change depending on the system and compiler, for example
-with MSVC 2008 on a 32-bit system it will be
- `C:/Program Files/TBB/lib/ia32/vc9`.
+The last two will change depending on the system and compiler, for example
+with MSVC 2008 on a 32-bit system `TBB_LIB_PATH` will be
+ `C:/Program Files/TBB/lib/ia32/vc9`. However so far this library only works
+with MSVC 2010, due to problems with [Random123][Random123]. (Well, one can
+only blame Microsoft for not implement `stdint.h` in MSVC 2008, even after
+almost 10 years of C99 released.)
 
 # Tested compilers
 
@@ -156,7 +167,9 @@ Note that `icpc` use `libstdc++` distributed with the system.
 
 - Windows 7
   * MSVC 2010 (Version 10) (Using [Boost][Boost] or C++11 headers)
-  * MSVC 2008 (Version 9) (Using [Boost][Boost] or C++11 headers)
+
+Earlier versions of MSVC does not work, this is mainly a dependency problem of
+[Random123][Random123].
 
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/

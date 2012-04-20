@@ -49,8 +49,6 @@ class Particle
     ///
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
-    /// \param sampler The poiter to the Sampler which this particle set
-    /// belongs to
     explicit Particle (std::size_t N,
             rng_type::result_type seed = V_SMC_CRNG_SEED) :
         size_(N), value_(N), sampler_(NULL),
@@ -181,13 +179,13 @@ class Particle
         return *sampler_;
     }
 
-	/// \brief Set which sampler this particle belongs to
-	///
-	/// \param samp A const pointer to the sampler
-	void sampler (const Sampler<T> *samp)
-	{
-		sampler_ = samp;
-	}
+    /// \brief Set which sampler this particle belongs to
+    ///
+    /// \param samp A const pointer to the sampler
+    void sampler (const Sampler<T> *samp)
+    {
+        sampler_ = samp;
+    }
 
     /// \brief Get the value of SMC normalizing constant
     ///
