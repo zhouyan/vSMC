@@ -1,7 +1,6 @@
 #ifndef V_SMC_HELPER_SEQUENTIAL_HPP
 #define V_SMC_HELPER_SEQUENTIAL_HPP
 
-#include <cassert>
 #include <cstddef>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
@@ -111,8 +110,6 @@ class InitializeSeq
             const Particle<T> &particle,
             typename Particle<T>::rng_type &rng)
     {
-        assert(bool(initialize_state_));
-
         return initialize_state_(id, state, log_weight, particle, rng);
     }
 
@@ -237,8 +234,6 @@ class MoveSeq
             const Particle<T> &particle,
             typename Particle<T>::rng_type &rng)
     {
-        assert(bool(move_state_));
-
         return move_state_(id, iter, state, weight, particle, rng);
     }
 
@@ -347,8 +342,6 @@ class MonitorSeq
             const typename T::value_type *state,
             const Particle<T> &particle, double *res)
     {
-        assert(bool(monitor_state_));
-
         monitor_state_(id, iter, state, particle, res);
     }
 
@@ -420,8 +413,6 @@ class PathSeq
             const typename T::value_type *state,
             const Particle<T> &particle)
     {
-        assert(bool(path_state_));
-
         return path_state_(id, iter, state, particle);
     }
 
@@ -434,8 +425,6 @@ class PathSeq
     virtual double width_state (std::size_t iter,
             const Particle<T> &particle)
     {
-        assert(bool(width_state_));
-
         return width_state_(iter, particle);
     }
 
