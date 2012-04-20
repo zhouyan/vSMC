@@ -153,7 +153,9 @@ Note that `icpc` use `libstdc++` distributed with the system.
 
 - Windows 7
   * MSVC 2010 (Version 10) (Using [Boost][Boost] or C++11 headers)
-  * MSVC 2008 (Version 9) (Using [Boost][Boost] or C++11 headers)
+
+Earlier versions of MSVC does not work, this is mainly a dependency problem of
+[Random123][Random123].
 
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
