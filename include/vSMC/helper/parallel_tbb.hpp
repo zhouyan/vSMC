@@ -24,9 +24,9 @@ class InitializeTBB : public InitializeSeq<T>
     typedef typename InitializeSeq<T>::initialize_param_type
         initialize_param_type;
     typedef typename InitializeSeq<T>::pre_processor_type
-        pre_processor_type;   
+        pre_processor_type;
     typedef typename InitializeSeq<T>::post_processor_type
-        post_processor_type;  
+        post_processor_type;
 
     explicit InitializeTBB (
             initialize_state_type init_state = NULL,

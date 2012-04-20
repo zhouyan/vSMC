@@ -4,7 +4,7 @@ To install the library just move the `include` folder into a proper place,
 e.g. `/usr/local/include` in Unix-alike systems. Alternatively, one can use
 [CMake][CMake] (2.6.4 or later required),
 
-    cd /path_to_vSMC_source 
+    cd /path_to_vSMC_source
     mkdir build
     cd build
     cmake ..
@@ -18,7 +18,7 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.0 or later.
 
 # Testing
 
-## Prerequisite 
+## Prerequisite
 
 This library has only two mandatory requirements: the [Eigen][Eigen] linear
 algebra library and [Random123][Random123] parallel random number library.
@@ -130,7 +130,7 @@ works.
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
   * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost])
 
-Note that `icpc` use `libstdc++` distributed with the system. 
+Note that `icpc` use `libstdc++` distributed with the system.
 
 ## Mac OS X
 

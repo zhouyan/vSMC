@@ -328,7 +328,7 @@ class Particle
         replication_.setConstant(0);
         for (std::size_t i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
-        std::size_t size = weight_.sum(); 
+        std::size_t size = weight_.sum();
         weight_ /= size;
         std::size_t j = 0;
         std::size_t k = 0;
@@ -353,7 +353,7 @@ class Particle
         replication_.setConstant(0);
         for (std::size_t i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
-        std::size_t size = weight_.sum(); 
+        std::size_t size = weight_.sum();
         weight_ /= size;
         std::size_t j = 0;
         std::size_t k = 0;

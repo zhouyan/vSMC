@@ -108,7 +108,7 @@ class InitializeSeq
     /// \return Accept count, normally should be zero or one
     virtual int initialize_state (std::size_t id,
             typename T::value_type *state, double &log_weight,
-            const Particle<T> &particle, 
+            const Particle<T> &particle,
             typename Particle<T>::rng_type &rng)
     {
         assert(bool(initialize_state_));
