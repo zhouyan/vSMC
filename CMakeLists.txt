@@ -51,6 +51,7 @@ IF (MSVC)
             SET (TBB_MSVC_LIB "${TBB_MSVC_LIB}/vc8")
         ENDIF (MSVC_VERSION GREATER 1599)
         SET (TBB_LIB_PATH "C:/Program Files/TBB/lib/${TBB_MSVC_LIB}")
+        SET (TBB_DLL_PATH "C:/Program Files/TBB/bin/${TBB_MSVC_LIB}")
     ENDIF (NOT TBB_LIB_PATH)
 ENDIF (MSVC)
 
