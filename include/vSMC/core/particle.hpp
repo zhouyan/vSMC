@@ -156,7 +156,6 @@ class Particle
     /// \param delta A multiplier appiled to new_weight
     void set_log_weight (const weight_type &new_weight, double delta = 1)
     {
-        assert(new_weight.size() >= size_);
         log_weight_ = delta * new_weight.head(size_);
         set_weight();
     }
@@ -185,7 +184,6 @@ class Particle
     void add_log_weight (const weight_type &inc_weight, double delta = 1,
             bool add_zconst = true)
     {
-        assert(inc_weight.size() >= size_);
         if (add_zconst) {
             inc_weight_ = (delta * inc_weight.head(size_)).array().exp();
             zconst_ += std::log(weight_.dot(inc_weight_.head(size_)));
