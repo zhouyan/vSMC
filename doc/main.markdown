@@ -10,36 +10,18 @@ e.g. `/usr/local/include` on Unix-alike systems. Alternatively, one can use
     cd /path_to_vSMC_source 
     mkdir build
     cd build
-    cmake .. -DCMAKE_BUILD_TYPE=Release
+    cmake ..
     sudo make install
+
+# Documentation
 
 To make the documentations one need [Doxygen][Doxygen] 1.8.0 or later.
 
     make docs
 
-To build examples,
+# Testing
 
-    make buildtests
-
-To run the tests,
-
-    make test
-
-Or
-
-    ctest
-
-To build and run tests in a single step
-
-    make check
-
-Note that [CMake][CMake] generated `Makefile` does not build test executables
-before run `ctest`, so you need either run `make build tests` before `make
-test` or `ctest`, or run `make check`. To build all the examples, one may also
-need [Intel MKL][MKL], [Intel TBB][TBB] and [vDist][vDist] libraries. They are
-only optional.
-
-# Prerequisite 
+## Prerequisite 
 
 This library has only two mandatory requirements: the [Eigen][Eigen] linear
 algebra library and [Random123][Random123] parallel random number library.
@@ -62,6 +44,64 @@ Otherwise the library will use [Boost][Boost], in particular
 `boost::function`. The same procedure is followed for the `<random>` library.
 One can put appropriate macros in the `vSMC/internal/config.hpp` header or use
 compiler flags.
+
+## Building and testing
+
+To build test examples,
+
+    make buildtests
+
+To run the tests,
+
+    make test
+
+Or
+
+    ctest
+
+To build and run tests in a single step
+
+    make check
+
+Note that [CMake][CMake] generated `Makefile` does not build test executables
+before run `ctest`, so you need either run `make build tests` before `make
+test` or `ctest`, or run `make check`. To build all the examples, one may also
+need [Intel MKL][MKL], [Intel TBB][TBB] and [vDist][vDist] libraries. They are
+only optional.
+
+## Finding libraries
+
+Without any configuration, the distributed `cmake` script may not be able to
+find all the libraries.
+
+Under Unix-like system (Linux and Mac OS X) For [Boost][Boost], [Eigen][Eigen],
+[Random123][Random123], the following directories are searched,
+`/usr/local/include`, `/usr/local/lib`, `/usr/local/lib64`, and system
+directories and `INCLUDE` and `LIBRARY_PATH` environment variables For [Intel
+MKL][Intel MKL], additional directories searched are `/opt/intel/mkl/lib`,
+`/opt/intel/mkl/lib/ia32`, `/opt/intel/mkl/intel64` and corresponding `lib`
+directories under `MKLROOT` environment variables. For [Intel TBB][Intel TBB]
+similar additional directories as for [Intel MKL][Intel MKL] are searched
+(replace `mkl` by `tbb`)
+
+If the script cannot find the libraries, try set one or more of `BOOST_ROOT`,
+`Eigen_INC_PATH`, `Random123_INC_PATH`, `MKL_INC_PATH`, `MKL_LIB_PATH`,
+`TBB_INC_PATH` and `TBB_LIB_PATH` when invoking `cmake`. For example
+
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/opt/boost/include
+
+Default values are provided for these macros under Windows if they are not set
+by the user, assuming one has installed these libraries in these directories,
+
+- `BOOST_ROOT`: `C:/Program Files/Boost`
+- `Eigen_INC_PATH`: `C:/Program Files/Eigen`
+- `Random123_INC_PATH`: `C:/Program Files/Random123/include`
+- `TBB_INC_PATH`: `C:/Program Files/TBB/include`
+- `TBB_LIB_PATH`: `C:/Program Files/TBB/lib/intel64/vc10`
+
+The last one will change depending on the system and compiler, for example
+with MSVC 2008 on a 32-bit system it will be
+ `C:/Program Files/TBB/lib/ia32/vc9`.
 
 # Tested compilers
 
@@ -106,6 +146,12 @@ Note that `icpc` use `libstdc++` distributed with the system.
   * Clang 3.1, -std=c++11 -stdlib=libstc++(Using [Boost][Boost])
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
   * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost])
+
+## Windows
+
+- Windows 7
+  * MSVC 2010 (Version 10) (Using [Boost][Boost] or C++11 headers)
+  * MSVC 2008 (Version 9) (Using [Boost][Boost] or C++11 headers)
 
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
