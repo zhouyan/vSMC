@@ -52,7 +52,7 @@ class InitializeTBB : public InitializeSeq<T>
         log_weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, &particle, particle.value().state(),
+                Worker_(this, &particle, particle.value().state().data(),
                     log_weight_.data(), accept_.data()));
 
         particle.set_log_weight(log_weight_.data());
@@ -134,7 +134,7 @@ class MoveTBB : public MoveSeq<T>
         weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, iter, &particle, particle.value().state(),
+                Worker_(this, iter, &particle, particle.value().state().data(),
                     weight_.data(), accept_.data()));
         MoveSeq<T>::set_weight(this->weight_action(), particle,
                 weight_.data());
@@ -203,7 +203,8 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     void operator () (std::size_t iter, Particle<T> &particle, double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, iter, &particle, particle.value().state(), res));
+                Worker_(this, iter, &particle, particle.value().state().data(),
+                    res));
     }
 
     private :
@@ -264,7 +265,8 @@ class PathTBB : public PathSeq<T>
     double operator () (std::size_t iter, Particle<T> &particle, double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, iter, &particle, particle.value().state(), res));
+                Worker_(this, iter, &particle, particle.value().state().data(),
+                    res));
 
         return this->width_state(iter, particle);
     }
