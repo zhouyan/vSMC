@@ -1,7 +1,6 @@
 #ifndef V_SMC_CORE_PARTICLE_HPP
 #define V_SMC_CORE_PARTICLE_HPP
 
-#include <vector>
 #include <cmath>
 #include <cstddef>
 #include <Eigen/Dense>
@@ -42,15 +41,26 @@ class Particle
 {
     public :
 
+    /// The type of the particle values
+    typedef T value_type;
+
+    /// The type of the size of the particles
+    typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE size_type;
+
+    /// The type of the Counter-based random number generator
     typedef r123::Engine< V_SMC_CRNG_TYPE > rng_type;
+
+    /// The integer type of the seed
     typedef rng_type::result_type seed_type;
+
+    /// The type of the weight and log weight vectors
+    typedef Eigen::VectorXd weight_type;
 
     /// \brief Construct a Particle object with given number of particles
     ///
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
-    explicit Particle (std::size_t N,
-            rng_type::result_type seed = V_SMC_CRNG_SEED) :
+    explicit Particle (size_type N, seed_type seed = V_SMC_CRNG_SEED) :
         size_(N), value_(N), sampler_(NULL),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(N), resampled_(false), zconst_(0), prng_(N)
@@ -63,19 +73,19 @@ class Particle
     /// \brief Size of the particle set
     ///
     /// \return The number of particles
-    std::size_t size () const
+    size_type size () const
     {
         return size_;
     }
 
     /// \brief Read and write access to particle values
     ///
-    /// \return A reference to the particle values, type (T &)
+    /// \return A reference to the particle values, type (value_type &)
     ///
     /// \note The Particle class guarantee that during the life type of the
     /// object, the reference returned by this member will no be a dangle
     /// handler.
-    T &value ()
+    value_type &value ()
     {
         return value_;
     }
@@ -83,18 +93,16 @@ class Particle
     /// \brief Read only access to particle values
     ///
     /// \return A const reference to the particle values
-    const T &value () const
+    const value_type &value () const
     {
         return value_;
     }
 
     /// \brief Read only access to the weights
     ///
-    /// \return A const pointer to the weights
+    /// \return A const pointer to the weight array
     ///
-    /// \note The Particle class guarantee that during the life type of the
-    /// object, the pointer returned by this always valid and point to the
-    /// same address
+    /// \note When the system changes, this pointer may be invalidated
     const double *weight_ptr () const
     {
         return weight_.data();
@@ -102,18 +110,30 @@ class Particle
 
     /// \brief Read only access to the log weights
     ///
-    /// \return A const pointer to the log weights
+    /// \return A const pointer to the log weight array
+    ///
+    /// \note When the system changes, this pointer may be invalidated
     const double *log_weight_ptr () const
     {
         return log_weight_.data();
     }
 
-    const Eigen::VectorXd &weight () const
+    /// \brief Read only access to the weights
+    ///
+    /// \return A const reference to the weight vector
+    ///
+    /// \note When the system changes, this reference may be invalidated
+    const weight_type &weight () const
     {
         return weight_;
     }
 
-    const Eigen::VectorXd &log_weight () const
+    /// \brief Read only access to the log weights
+    ///
+    /// \return A const reference to the log weight vector
+    ///
+    /// \note When the system changes, this reference may be invalidated
+    const weight_type &log_weight () const
     {
         return log_weight_;
     }
@@ -174,7 +194,7 @@ class Particle
     /// \brief Read only access to the sampler containing this particle set
     ///
     /// \return A const reference to the sampler containing this particle set
-    const Sampler<T> &sampler () const
+    const Sampler<value_type> &sampler () const
     {
         return *sampler_;
     }
@@ -182,7 +202,7 @@ class Particle
     /// \brief Set which sampler this particle belongs to
     ///
     /// \param samp A const pointer to the sampler
-    void sampler (const Sampler<T> *samp)
+    void sampler (const Sampler<value_type> *samp)
     {
         sampler_ = samp;
     }
@@ -229,33 +249,36 @@ class Particle
         resample_do();
     }
 
-    rng_type &prng (std::size_t id)
+    rng_type &prng (size_type id)
     {
         return prng_[id];
     }
 
     void reset_prng (rng_type::result_type seed)
     {
-        for (std::size_t i = 0; i != size_; ++i)
+        for (size_type i = 0; i != size_; ++i)
             prng_[i] = rng_type(seed + i);
     }
 
     private :
 
-    std::size_t size_;
-    T value_;
-    const Sampler<T> *sampler_;
+    typedef Eigen::Matrix<size_type, Eigen::Dynamic, 1> replication_type;
+    typedef Eigen::Matrix<rng_type, Eigen::Dynamic, 1> prng_type;
 
-    Eigen::VectorXd weight_;
-    Eigen::VectorXd log_weight_;
-    Eigen::VectorXd inc_weight_;
-    Eigen::VectorXi replication_;
+    size_type size_;
+    value_type value_;
+    const Sampler<value_type> *sampler_;
+
+    weight_type weight_;
+    weight_type log_weight_;
+    weight_type inc_weight_;
+    replication_type replication_;
 
     double ess_;
     bool resampled_;
     double zconst_;
 
-    std::vector<rng_type> prng_;
+    prng_type prng_;
 
     void set_weight ()
     {
@@ -278,18 +301,18 @@ class Particle
         // N * weight. log_weight: act as the integral part of N * weight.
         // They all will be reset to equal weights after resampling.  So it is
         // safe to modify them here.
-        for (std::size_t i = 0; i != size_; ++i)
+        for (size_type i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
         weight2replication(weight_.sum());
-        for (std::size_t i = 0; i != size_; ++i)
+        for (size_type i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
     }
 
     void resample_stratified ()
     {
         replication_.setConstant(0);
-        std::size_t j = 0;
-        std::size_t k = 0;
+        size_type j = 0;
+        size_type k = 0;
         internal::uniform_real_distribution<> unif(0,1);
         double u = unif(prng_[0]);
         double cw = weight_[0];
@@ -307,8 +330,8 @@ class Particle
     void resample_systematic ()
     {
         replication_.setConstant(0);
-        std::size_t j = 0;
-        std::size_t k = 0;
+        size_type j = 0;
+        size_type k = 0;
         internal::uniform_real_distribution<> unif(0,1);
         double u = unif(prng_[0]);
         double cw = weight_[0];
@@ -326,12 +349,12 @@ class Particle
     void resample_residual_stratified ()
     {
         replication_.setConstant(0);
-        for (std::size_t i = 0; i != size_; ++i)
+        for (size_type i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
-        std::size_t size = weight_.sum();
+        size_type size = weight_.sum();
         weight_ /= size;
-        std::size_t j = 0;
-        std::size_t k = 0;
+        size_type j = 0;
+        size_type k = 0;
         internal::uniform_real_distribution<> unif(0,1);
         double u = unif(prng_[0]);
         double cw = weight_[0];
@@ -344,19 +367,19 @@ class Particle
                 break;
             cw += weight_[++k];
         }
-        for (std::size_t i = 0; i != size_; ++i)
+        for (size_type i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
     }
 
     void resample_residual_systematic ()
     {
         replication_.setConstant(0);
-        for (std::size_t i = 0; i != size_; ++i)
+        for (size_type i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
-        std::size_t size = weight_.sum();
+        size_type size = weight_.sum();
         weight_ /= size;
-        std::size_t j = 0;
-        std::size_t k = 0;
+        size_type j = 0;
+        size_type k = 0;
         internal::uniform_real_distribution<> unif(0,1);
         double u = unif(prng_[0]);
         double cw = weight_[0];
@@ -369,17 +392,17 @@ class Particle
                 break;
             cw += weight_[++k];
         }
-        for (std::size_t i = 0; i != size_; ++i)
+        for (size_type i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
     }
 
-    void weight2replication (std::size_t size)
+    void weight2replication (size_type size)
     {
         double tp = weight_.sum();
         double sum_p = 0;
-        std::size_t sum_n = 0;
+        size_type sum_n = 0;
         replication_.setConstant(0);
-        for (std::size_t i = 0; i != size_; ++i) {
+        for (size_type i = 0; i != size_; ++i) {
             if (sum_n < size && weight_[i] > 0) {
                 internal::binomial_distribution<>
                     binom(size - sum_n, weight_[i] / (tp - sum_p));
@@ -394,16 +417,16 @@ class Particle
     {
 	// Some times the nuemrical round error can cause the total childs
 	// differ from number of particles
-	std::size_t sum = replication_.sum();
+	size_type sum = replication_.sum();
 	if (sum != size_) {
-            Eigen::VectorXd::Index id_max;
+            size_type id_max;
             replication_.maxCoeff(&id_max);
             replication_[id_max] += size_ - sum;
 	}
 
-        std::size_t from = 0;
-        std::size_t time = 0;
-        for (std::size_t to = 0; to != size_; ++to) {
+        size_type from = 0;
+        size_type time = 0;
+        for (size_type to = 0; to != size_; ++to) {
             if (!replication_[to]) {
                 // replication_[to] has zero child, copy from elsewhere
                 if (replication_[from] - time <= 1) {
