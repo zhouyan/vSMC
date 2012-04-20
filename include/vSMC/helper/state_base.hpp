@@ -17,13 +17,19 @@ class StateBase
 {
     public :
 
-    /// The type of parameters
+    /// The type of state parameters
     typedef T value_type;
+
+    /// The type of the matrix of states
+    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_type;
+
+    /// The type of the size of the particle set
+    typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE size_type;
 
     /// \brief Construct a StateBase object with given number of particles
     ///
     /// \param N The number of particles
-    explicit StateBase (std::size_t N) : size_(N), state_(Dim, N) {}
+    explicit StateBase (size_type N) : size_(N), state_(Dim, N) {}
 
     /// \brief The dimension of the problem
     ///
@@ -36,7 +42,7 @@ class StateBase
     /// \brief The number of particles
     ///
     /// \return The number of particles in the current particle set
-    std::size_t size () const
+    size_type size () const
     {
         return size_;
     }
@@ -44,7 +50,7 @@ class StateBase
     /// \brief Read and write access to the array of a single particle states
     ///
     /// \return A pointer to the states of a single particle
-    T *state (std::size_t n)
+    T *state (size_type n)
     {
         return state_.col(n).data();
     }
@@ -52,44 +58,40 @@ class StateBase
     /// \brief Read only access to the array of a single particle states
     ///
     /// \return A const pointer to the states of a single array particle
-    const T *state (std::size_t n) const
+    const T *state (size_type n) const
     {
         return state_.col(n).data();
     }
 
-    /// \brief Read and write access to the array of all particle states
+    /// \brief Read and write access to the matrix of all particle states
     ///
-    /// \return A pointer to the states of all particles
-    ///
-    /// \note The array is of row major order. In other words, it is ordered
-    /// as the first Dim elements are the states of first particle, the next
-    /// Dim elements are the states of the second particle, and so on.
-    T *state ()
+    /// \return A reference to the states matrix
+    state_type &state ()
     {
-        return state_.data();
+        return state_;
     }
 
-    /// \brief Read only access to the array of all particle states
+    /// \brief Read only access to the matrix of all particle states
     ///
-    /// \return A const pointer to the states of all particles
-    const T *state () const
+    /// \return A const reference to the states matrix
+    const state_type &state () const
     {
-        return state_.data();
+        return state_;
     }
 
     /// \brief The copy method used by the Sampler
     ///
     /// \param from The index of particle whose state to be copied
     /// \param to The index of particle to which new state to be written
-    void copy (std::size_t from, std::size_t to)
+    void copy (size_type from, size_type to)
     {
 	state_.col(to) = state_.col(from);
     }
 
     private :
 
-    std::size_t size_;
-    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_;
+    size_type size_;
+    state_type state_;
 }; // class StateBase
 
 } // namespace vSMC
