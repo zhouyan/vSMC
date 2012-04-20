@@ -1,13 +1,12 @@
 #ifndef V_SMC_CORE_SAMPLER_HPP
 #define V_SMC_CORE_SAMPLER_HPP
 
-#include <iomanip>
 #include <iostream>
 #include <map>
 #include <set>
-#include <stdexcept>
 #include <string>
 #include <vector>
+#include <cassert>
 #include <cstddef>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
@@ -224,11 +223,7 @@ class Sampler
     /// \brief Perform iteration
     void iterate ()
     {
-        if (!initialized_) {
-            throw std::runtime_error(
-                    "ERROR: vSMC::Sampler::iterate: "
-                    "Sampler has not been initialized yet");
-        }
+        assert(initialized_);
 
         ++iter_num_;
         accept_.push_back(move_(iter_num_, particle_));
