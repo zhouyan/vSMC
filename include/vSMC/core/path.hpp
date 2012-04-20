@@ -2,7 +2,6 @@
 #define V_SMC_CORE_PATH_HPP
 
 #include <vector>
-#include <cassert>
 #include <cstddef>
 #include <Eigen/Dense>
 #include <vSMC/internal/config.hpp>
@@ -132,8 +131,6 @@ class Path
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
-        assert(bool(integral_));
-
         buffer_.resize(particle.size());
         width_.push_back(integral_(iter, particle, buffer_.data()));
         integrand_.push_back(particle.weight().dot(buffer_));
