@@ -142,10 +142,22 @@ class Particle
     ///
     /// \param new_weight New log weights
     /// \param delta A multiplier appiled to new_weight
+    ///
+    /// \note new_weight need to have length at least equatl to size().
     void set_log_weight (const double *new_weight, double delta = 1)
     {
-        Eigen::Map<const Eigen::VectorXd> w(new_weight, size_);
-        log_weight_ = delta * w;
+        Eigen::Map<const weight_type> w(new_weight, size_);
+        set_log_weight(w, delta);
+    }
+
+    /// \brief Set the log weights
+    ///
+    /// \param new_weight New log weights
+    /// \param delta A multiplier appiled to new_weight
+    void set_log_weight (const weight_type &new_weight, double delta = 1)
+    {
+        assert(new_weight.size() >= size_);
+        log_weight_ = delta * new_weight.head(size_);
         set_weight();
     }
 
@@ -155,15 +167,30 @@ class Particle
     /// \param delta A multiplier applied to inc_weight
     /// \param add_zconst Whether this incremental weights should contribute
     /// the esitmates of normalizing constants
+    ///
+    /// \note inc_weight need to have length at least equatl to size().
     void add_log_weight (const double *inc_weight, double delta = 1,
             bool add_zconst = true)
     {
-        Eigen::Map<const Eigen::VectorXd> w(inc_weight, size_);
+        Eigen::Map<const weight_type> w(inc_weight, size_);
+        add_log_weight(w, delta, add_zconst);
+    }
+
+    /// \brief Add to the log weights
+    ///
+    /// \param inc_weight Incremental log weights
+    /// \param delta A multiplier applied to inc_weight
+    /// \param add_zconst Whether this incremental weights should contribute
+    /// the esitmates of normalizing constants
+    void add_log_weight (const weight_type &inc_weight, double delta = 1,
+            bool add_zconst = true)
+    {
+        assert(inc_weight.size() >= size_);
         if (add_zconst) {
-            inc_weight_ = (delta * w).array().exp();
-            zconst_ += std::log(weight_.dot(inc_weight_));
+            inc_weight_ = (delta * inc_weight.head(size_)).array().exp();
+            zconst_ += std::log(weight_.dot(inc_weight_.head(size_)));
         }
-        log_weight_ += delta * w;
+        log_weight_ += delta * inc_weight.head(size_);
         set_weight();
     }
 
