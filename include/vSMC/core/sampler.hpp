@@ -26,13 +26,17 @@ class Sampler
     /// The type of initialization functor
     typedef internal::function<std::size_t (Particle<T> &, void *)>
         initialize_type;
+
     /// The type of move functor
     typedef internal::function<std::size_t (std::size_t, Particle<T> &)>
         move_type;
+
     /// The type ESS history vector
     typedef std::vector<double> ess_type;
+
     /// The type resampling history vector
     typedef std::vector<bool> resampled_type;
+
     /// The type accept count history vector
     typedef std::vector<std::size_t> accept_type;
 
@@ -77,7 +81,7 @@ class Sampler
         return ess_.size();
     }
 
-    /// \brief Query the the resampling scheme
+    /// \brief Get the current resampling scheme
     ///
     /// \return The current resampling scheme
     ResampleScheme resample_scheme () const
@@ -93,7 +97,7 @@ class Sampler
         scheme_ = scheme;
     }
 
-    /// \brief Query the threshold
+    /// \brief Get the current threshold
     ///
     /// \return The current threshold for resmapling
     double resample_threshold () const
@@ -161,9 +165,7 @@ class Sampler
     ///
     /// \return A reference to the latest particle set
     ///
-    /// \note The Sampler class guarantee that during the life type of the
-    /// object, the reference returned by this member will no be a dangle
-    /// handler.
+    /// \note When the system changes, this reference may be invalidated
     Particle<T> &particle ()
     {
         return particle_;
@@ -172,6 +174,8 @@ class Sampler
     /// \brief Read only access to the particle set
     ///
     /// \return A const reference to the latest particle set.
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const Particle<T> &particle () const
     {
         return particle_;
@@ -212,9 +216,7 @@ class Sampler
     ///
     /// \param move New Move functor
     /// \param mcmc New MCMC functor
-    void iterate (
-            const move_type &move,
-            const move_type &mcmc = NULL)
+    void iterate (const move_type &move, const move_type &mcmc = NULL)
     {
         move_ = move;
         mcmc_ = mcmc;
@@ -295,7 +297,10 @@ class Sampler
     /// \brief Read only access to a named monitor through iterator
     ///
     /// \param name The name of the monitor
+    ///
     /// \return An const_iterator point to the monitor for the given name
+    ///
+    /// \note When the system changes, this reference may be invalidated
     typename std::map<std::string, Monitor<T> >::const_iterator
         monitor (const std::string &name) const
     {
@@ -305,6 +310,8 @@ class Sampler
     /// \brief Read only access to all monitors
     ///
     /// \return A const reference to monitors
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const std::map<std::string, Monitor<T> > &monitor () const
     {
         return monitor_;
@@ -319,7 +326,7 @@ class Sampler
         monitor_name_.erase(name);
     }
 
-    /// \brief Erase (clear) all monitors
+    /// \brief Erase all monitors
     void clear_monitor ()
     {
         monitor_.clear();
@@ -329,6 +336,8 @@ class Sampler
     /// \brief Read only access to the Path sampling monitor
     ///
     /// \return A const reference to the Path sampling monitor
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const Path<T> &path () const
     {
         return path_;
@@ -354,7 +363,7 @@ class Sampler
 
     /// \brief SMC estimate of normalizing constant
     ///
-    /// \return The SMC normalizng constant estimate
+    /// \return The log of SMC normalizng constant estimate
     double zconst () const
     {
         return particle_.zconst();
@@ -508,6 +517,12 @@ class Sampler
 
 namespace std {
 
+/// \brief Print the sampler
+///
+/// \param os The ostream to which the contents are printed
+/// \param sampler The sampler to be printed
+///
+/// \note This is the same as <tt>sampler.print(os)</tt>
 template<typename T>
 std::ostream & operator<< (std::ostream &os, const vSMC::Sampler<T> &sampler)
 {
