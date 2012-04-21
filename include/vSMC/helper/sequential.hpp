@@ -68,7 +68,8 @@ class InitializeSeq
         pre_processor(particle);
         log_weight_.resize(particle.size());
         std::size_t accept = 0;
-        for (std::size_t i = 0; i != particle.size(); ++i) {
+        for (typename Particle<T>::size_type i = 0;
+                i != particle.size(); ++i) {
             accept += initialize_state(SingleParticle<T>(
                         i, log_weight_.data() + i, &particle));
         }
@@ -182,7 +183,8 @@ class MoveSeq
         pre_processor(iter, particle);
         weight_.resize(particle.size());
         std::size_t accept = 0;
-        for (std::size_t i = 0; i != particle.size(); ++i) {
+        for (typename Particle<T>::size_type i = 0;
+                i != particle.size(); ++i) {
             accept += move_state(iter, SingleParticle<T>(
                         i, weight_.data() + i, &particle));
         }
@@ -241,13 +243,15 @@ class MoveSeq
             case NO_ACTION :
                 break;
             case SET_WEIGHT :
-                for (std::size_t i = 0; i != particle.size(); ++i)
+                for (typename Particle<T>::size_type i = 0;
+                        i != particle.size(); ++i)
                     weight[i] = std::log(weight[i]);
             case SET_LOG_WEIGHT :
                 particle.set_log_weight(weight);
                 break;
             case MUL_WEIGHT :
-                for (std::size_t i = 0; i != particle.size(); ++i)
+                for (typename Particle<T>::size_type i = 0;
+                        i != particle.size(); ++i)
                     weight[i] = std::log(weight[i]);
             case ADD_LOG_WEIGHT :
                 particle.add_log_weight(weight);
@@ -296,9 +300,11 @@ class MonitorSeq
     virtual void operator () (std::size_t iter, Particle<T> &particle,
             double *res)
     {
-        for (std::size_t i = 0; i != particle.size(); ++i)
+        for (typename Particle<T>::size_type i = 0;
+                i != particle.size(); ++i) {
             monitor_state(iter, SingleParticle<T>(i, NULL, &particle),
                     res + i * dim());
+        }
     }
 
     /// \brief Record the integrand from a single particle
@@ -363,7 +369,7 @@ class PathSeq
     virtual double operator () (std::size_t iter, Particle<T> &particle,
             double *res)
     {
-        for (std::size_t i = 0; i != particle.size(); ++i)
+        for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
             res[i] = path_state(iter, SingleParticle<T>(i, NULL, &particle));
 
         return width_state(iter, particle);
