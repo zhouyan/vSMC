@@ -42,7 +42,7 @@ class Sampler
     /// \param threshold The threshold for performing resampling
     /// \param seed The seed to the parallel RNG system
     explicit Sampler (
-            std::size_t N,
+            typename Particle<T>::size_type N,
             const initialize_type &init = NULL,
             const move_type &move = NULL,
             const move_type &mcmc = NULL,
@@ -59,7 +59,7 @@ class Sampler
     /// \brief Size of the particle set
     ///
     /// \return The number of particles
-    std::size_t size () const
+    typename Particle<T>::size_type size () const
     {
         return particle_.size();
     }
