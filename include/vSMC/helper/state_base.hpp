@@ -17,10 +17,10 @@ class StateBase
     public :
 
     /// The type of state parameters
-    typedef T value_type;
+    typedef T state_type;
 
     /// The type of the matrix of states
-    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_type;
+    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
 
     /// The type of the size of the particle set
     typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE size_type;
@@ -49,7 +49,7 @@ class StateBase
     /// \brief Read and write access to the array of a single particle states
     ///
     /// \return A pointer to the states of a single particle
-    T *state (size_type n)
+    state_type *state (size_type n)
     {
         return state_.col(n).data();
     }
@@ -57,7 +57,7 @@ class StateBase
     /// \brief Read only access to the array of a single particle states
     ///
     /// \return A const pointer to the states of a single array particle
-    const T *state (size_type n) const
+    const state_type *state (size_type n) const
     {
         return state_.col(n).data();
     }
@@ -65,7 +65,7 @@ class StateBase
     /// \brief Read and write access to the matrix of all particle states
     ///
     /// \return A reference to the states matrix
-    state_type &state ()
+    state_mat_type &state ()
     {
         return state_;
     }
@@ -73,7 +73,7 @@ class StateBase
     /// \brief Read only access to the matrix of all particle states
     ///
     /// \return A const reference to the states matrix
-    const state_type &state () const
+    const state_mat_type &state () const
     {
         return state_;
     }
@@ -84,13 +84,13 @@ class StateBase
     /// \param to The index of particle to which new state to be written
     void copy (size_type from, size_type to)
     {
-	state_.col(to) = state_.col(from);
+        state_.col(to) = state_.col(from);
     }
 
     private :
 
     size_type size_;
-    state_type state_;
+    state_mat_type state_;
 }; // class StateBase
 
 } // namespace vSMC

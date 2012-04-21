@@ -362,7 +362,7 @@ class Particle
         while (j != size_) {
             while (j < cw * size_ - u && j != size_) {
                 ++replication_[k];
-		++j;
+                ++j;
             }
             if (k == size_ - 1)
                 break;
@@ -410,7 +410,7 @@ class Particle
         while (j != size) {
             while (j < cw * size - u && j != size) {
                 ++replication_[k];
-		++j;
+                ++j;
             }
             if (k == size_ - 1)
                 break;
@@ -439,14 +439,14 @@ class Particle
 
     void resample_do ()
     {
-	// Some times the nuemrical round error can cause the total childs
-	// differ from number of particles
-	size_type sum = replication_.sum();
-	if (sum != size_) {
+        // Some times the nuemrical round error can cause the total childs
+        // differ from number of particles
+        size_type sum = replication_.sum();
+        if (sum != size_) {
             size_type id_max;
             replication_.maxCoeff(&id_max);
             replication_[id_max] += size_ - sum;
-	}
+        }
 
         size_type from = 0;
         size_type time = 0;

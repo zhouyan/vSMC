@@ -7,6 +7,7 @@
 #include <vSMC/core/monitor.hpp>
 #include <vSMC/core/particle.hpp>
 #include <vSMC/core/path.hpp>
+#include <vSMC/helper/single_particle.hpp>
 #include <vSMC/helper/state_base.hpp>
 
 namespace vSMC {
@@ -35,9 +36,7 @@ class InitializeSeq
 {
     public :
 
-    typedef internal::function<int (
-            std::size_t, typename T::value_type *, double &,
-            const Particle<T> &, typename Particle<T>::rng_type &)>
+    typedef internal::function<int (SingleParticle<T>)>
         initialize_state_type;
     typedef internal::function<void (Particle<T> &, void *)>
         initialize_param_type;
@@ -47,14 +46,14 @@ class InitializeSeq
         post_processor_type;
 
     explicit InitializeSeq (
-            initialize_state_type init_state = NULL,
-            initialize_param_type init_param = NULL,
-            pre_processor_type    pre        = NULL,
-            post_processor_type   post       = NULL) :
-        initialize_state_(init_state),
-        initialize_param_(init_param),
-        pre_processor_(pre),
-        post_processor_(post) {}
+            initialize_state_type initialize_state = NULL,
+            initialize_param_type initialize_param = NULL,
+            pre_processor_type    pre_processor    = NULL,
+            post_processor_type   post_processor   = NULL) :
+        initialize_state_(initialize_state),
+        initialize_param_(initialize_param),
+        pre_processor_(pre_processor),
+        post_processor_(post_processor) {}
 
     InitializeSeq (const InitializeSeq<T> &init) :
         initialize_state_(init.initialize_state_),
@@ -87,8 +86,12 @@ class InitializeSeq
         log_weight_.resize(particle.size());
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i) {
-            accept += initialize_state(i, particle.value().state(i),
-                    log_weight_[i], particle, particle.prng(i));
+            accept += initialize_state(SingleParticle<T>(
+                        i, particle.value().state(i),
+                        particle.weight()[i],
+                        particle.log_weight()[i],
+                        log_weight_.data() + i,
+                        &particle, &particle.prng(i)));
         }
         particle.set_log_weight(log_weight_.data());
         post_processor(particle);
@@ -105,12 +108,9 @@ class InitializeSeq
     /// \param rng A Boost Random eigen unique to the id'th particle
     ///
     /// \return Accept count, normally should be zero or one
-    virtual int initialize_state (std::size_t id,
-            typename T::value_type *state, double &log_weight,
-            const Particle<T> &particle,
-            typename Particle<T>::rng_type &rng)
+    virtual int initialize_state (SingleParticle<T> part)
     {
-        return initialize_state_(id, state, log_weight, particle, rng);
+        return initialize_state_(part);
     }
 
     /// \brief Initialize the Particle set
@@ -158,9 +158,7 @@ class MoveSeq
 {
     public :
 
-    typedef internal::function<int (
-            std::size_t, std::size_t, typename T::value_type *, double &,
-            const Particle<T> &, typename Particle<T>::rng_type &)>
+    typedef internal::function<int (std::size_t, SingleParticle<T>)>
         move_state_type;
     typedef internal::function<WeightAction ()>
         weight_action_type;
@@ -170,12 +168,12 @@ class MoveSeq
         post_processor_type;
 
     explicit MoveSeq (
-            move_state_type     move   = NULL,
-            weight_action_type  weight = NULL,
-            pre_processor_type  pre    = NULL,
-            post_processor_type post   = NULL) :
-        move_state_(move), weight_action_(weight),
-        pre_processor_(pre), post_processor_(post) {}
+            move_state_type     move_state     = NULL,
+            weight_action_type  weight_action  = NULL,
+            pre_processor_type  pre_processor  = NULL,
+            post_processor_type post_processor = NULL) :
+        move_state_(move_state), weight_action_(weight_action),
+        pre_processor_(pre_processor), post_processor_(post_processor) {}
 
     MoveSeq (const MoveSeq<T> &move) :
         move_state_(move.move_state_), weight_action_(move.weight_action_),
@@ -206,8 +204,12 @@ class MoveSeq
         weight_.resize(particle.size());
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i) {
-            accept += move_state(i, iter, particle.value().state(i),
-                    weight_[i], particle, particle.prng(i));
+            accept += move_state(iter, SingleParticle<T>(
+                        i, particle.value().state(i),
+                        particle.weight()[i],
+                        particle.log_weight()[i],
+                        weight_.data() + i,
+                        &particle, &particle.prng(i)));
         }
         set_weight(weight_action(), particle, weight_.data());
         post_processor(iter, particle);
@@ -229,12 +231,9 @@ class MoveSeq
     /// this weight. See WeightAction and weight_action.
     /// \param particle The Particle set passed by Sampler
     /// \param rng A Boost Random eigen unique to the id'th particle
-    virtual int move_state (std::size_t id, std::size_t iter,
-            typename T::value_type *state, double &weight,
-            const Particle<T> &particle,
-            typename Particle<T>::rng_type &rng)
+    virtual int move_state (std::size_t iter, SingleParticle<T> part)
     {
-        return move_state_(id, iter, state, weight, particle, rng);
+        return move_state_(iter, part);
     }
 
     /// \brief Determine how weight returned by move_state shall be treated
@@ -307,9 +306,7 @@ class MonitorSeq
 {
     public :
 
-    typedef internal::function<void (
-            std::size_t, std::size_t, const typename T::value_type *,
-            const Particle<T> &, double *)>
+    typedef internal::function<void (std::size_t, SingleParticle<T>, double *)>
         monitor_state_type;
 
     explicit MonitorSeq (monitor_state_type monitor = NULL) :
@@ -325,7 +322,10 @@ class MonitorSeq
             double *res)
     {
         for (std::size_t i = 0; i != particle.size(); ++i)
-            monitor_state(i, iter, particle.value().state(i), particle,
+            monitor_state(iter, SingleParticle<T>(
+                        i, particle.value().state(i),
+                        particle.weight()[i], particle.log_weight()[i], NULL,
+                        &particle, &particle.prng(i)),
                     res + i * dim());
     }
 
@@ -338,11 +338,10 @@ class MonitorSeq
     /// \param res The integrands
     ///
     /// \return The value to be estimated
-    virtual void monitor_state (std::size_t id, std::size_t iter,
-            const typename T::value_type *state,
-            const Particle<T> &particle, double *res)
+    virtual void monitor_state (std::size_t iter, SingleParticle<T> part,
+            double *res)
     {
-        monitor_state_(id, iter, state, particle, res);
+        monitor_state_(iter, part, res);
     }
 
     /// \brief The dimension of the Monitor
@@ -371,12 +370,9 @@ class PathSeq
 {
     public :
 
-    typedef internal::function<double (
-            std::size_t, std::size_t, const typename T::value_type *,
-            const Particle<T> &)>
+    typedef internal::function<double (std::size_t, SingleParticle<T>)>
         path_state_type;
-    typedef internal::function<double (
-            std::size_t, const Particle<T> &)>
+    typedef internal::function<double (std::size_t, const Particle<T> &)>
         width_state_type;
 
     explicit PathSeq (
@@ -396,7 +392,10 @@ class PathSeq
             double *res)
     {
         for (std::size_t i = 0; i != particle.size(); ++i)
-            res[i] = path_state(i, iter, particle.value().state(i), particle);
+            res[i] = path_state(iter, SingleParticle<T>(
+                        i, particle.value().state(i),
+                        particle.weight()[i], particle.log_weight()[i], NULL,
+                        &particle, &particle.prng(i)));
 
         return width_state(iter, particle);
     }
@@ -409,11 +408,9 @@ class PathSeq
     /// \param state The array contains the states of a single particle
     ///
     /// \return The value of the integrand
-    virtual double path_state (std::size_t id, std::size_t iter,
-            const typename T::value_type *state,
-            const Particle<T> &particle)
+    virtual double path_state (std::size_t iter, SingleParticle<T> part)
     {
-        return path_state_(id, iter, state, particle);
+        return path_state_(iter, part);
     }
 
     /// \brief Evaluate the path sampling width
@@ -422,8 +419,7 @@ class PathSeq
     /// \param particle The particle set passed by Sampler
     ///
     /// \return The value of the width
-    virtual double width_state (std::size_t iter,
-            const Particle<T> &particle)
+    virtual double width_state (std::size_t iter, const Particle<T> &particle)
     {
         return width_state_(iter, particle);
     }

@@ -144,8 +144,8 @@ class Path
     /// \return The Path sampling normalzing constant estimate
     double zconst () const
     {
-	double sum = 0;
-	for (std::size_t i = 1; i != iter_size(); ++i)
+        double sum = 0;
+        for (std::size_t i = 1; i != iter_size(); ++i)
             sum += 0.5 * width_[i] * (integrand_[i-1] + integrand_[i]);
 
         return sum;
