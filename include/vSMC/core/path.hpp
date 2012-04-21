@@ -23,12 +23,16 @@ class Path
     /// The type of path sampling integral functor
     typedef internal::function<double (std::size_t, Particle<T> &, double *)>
         integral_type;
+
     /// The type of the index vector
     typedef std::vector<std::size_t> index_type;
+
     /// The type of the integrand vector
     typedef std::vector<double> integrand_type;
+
     /// The type of the width vector
     typedef std::vector<double> width_type;
+
     /// The type of the grid vector
     typedef std::vector<double> grid_type;
 
@@ -53,11 +57,11 @@ class Path
     Path<T> & operator= (const Path<T> &path)
     {
         if (&path != this) {
-            integral_ = path.integral_;
-            index_ = path.index_;
+            integral_  = path.integral_;
+            index_     = path.index_;
             integrand_ = path.integrand_;
-            width_ = path.width_;
-            grid_ = path.grid_;
+            width_     = path.width_;
+            grid_      = path.grid_;
         }
 
         return *this;
@@ -90,6 +94,8 @@ class Path
     /// \brief Iteration index
     ///
     /// \return A const reference to the index
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const index_type &index () const
     {
         return index_;
@@ -98,6 +104,8 @@ class Path
     /// \brief Record of path sampling integrand
     ///
     /// \return A const reference to the integrand
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const integrand_type &integrand () const
     {
         return integrand_;
@@ -106,6 +114,8 @@ class Path
     /// \brief Record of path sampling width
     ///
     /// \return A const reference to the width
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const width_type &width () const
     {
         return width_;
@@ -114,6 +124,8 @@ class Path
     /// \brief Record of path sampling grid
     ///
     /// \return A const reference to the grid
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const grid_type &grid () const
     {
         return grid_;
@@ -126,7 +138,7 @@ class Path
     ///
     /// \note The integral function has to be set through either the
     /// constructor or integral() to a non-NULL value before calling eval().
-    /// Otherwise runtime_error exception will be raised when calling eval().
+    /// Otherwise exception will be raised when calling eval().
     ///
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
@@ -152,6 +164,8 @@ class Path
     }
 
     /// \brief Clear all recorded data
+    ///
+    /// \note The integration function is not reset
     void clear ()
     {
         index_.clear();

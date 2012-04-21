@@ -24,8 +24,10 @@ class Monitor
     /// The type of monitor integral functor
     typedef internal::function<void (std::size_t, Particle<T> &, double *)>
         integral_type;
+
     /// The type of the index vector
     typedef std::vector<std::size_t> index_type;
+
     /// The type of the record vector
     typedef std::vector<Eigen::VectorXd> record_type;
 
@@ -46,6 +48,7 @@ class Monitor
     /// \brief Assignment operator
     ///
     /// \param monitor The Monitor to be assigned
+    ///
     /// \return The Monitor after assignemnt
     Monitor<T> & operator= (const Monitor<T> &monitor)
     {
@@ -94,6 +97,8 @@ class Monitor
     /// \brief Iteration index
     ///
     /// \return A const reference to the index
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const index_type &index () const
     {
         return index_;
@@ -102,6 +107,8 @@ class Monitor
     /// \brief Record of Monte Carlo integration
     ///
     /// \return A const reference to the record
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const record_type &record () const
     {
         return record_;
@@ -114,7 +121,7 @@ class Monitor
     ///
     /// \note The integral function has to be set through either the
     /// constructor or integral() to a non-NULL value before calling eval().
-    /// Otherwise runtime_error exception will be raised when calling eval().
+    /// Otherwise exception will be raised when calling eval().
     ///
     /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
@@ -128,6 +135,8 @@ class Monitor
     }
 
     /// \brief Clear all recorded data
+    ///
+    /// \note The integral function is not reset
     void clear ()
     {
         index_.clear();

@@ -17,7 +17,7 @@
 
 namespace vSMC {
 
-/// \brief vSMC Sampler
+/// \brief SMC Sampler
 template <typename T>
 class Sampler
 {
@@ -40,7 +40,7 @@ class Sampler
     /// The type accept count history vector
     typedef std::vector<std::size_t> accept_type;
 
-    /// \brief Sampler does not have a default constructor
+    /// \brief Construct a sampler with given number of particles
     ///
     /// \param N The number of particles
     /// \param init The functor used to initialize the particles
