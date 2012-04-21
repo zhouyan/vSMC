@@ -50,9 +50,9 @@ class Particle
     explicit Particle (size_type N, seed_type seed = V_SMC_CRNG_SEED) :
         size_(N), value_(N), sampler_(NULL),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
-        ess_(N), resampled_(false), zconst_(0), prng_(N)
+        ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N)
     {
-        reset_prng(seed);
+        reset_prng();
         weight_.setConstant(1.0 / size_);
         log_weight_.setConstant(0);
     }
@@ -69,9 +69,7 @@ class Particle
     ///
     /// \return A reference to the particle values, type (value_type &)
     ///
-    /// \note The Particle class guarantee that during the life type of the
-    /// object, the reference returned by this member will no be a dangle
-    /// handler.
+    /// \note When the system changes, this reference may be invalidated
     value_type &value ()
     {
         return value_;
@@ -80,12 +78,14 @@ class Particle
     /// \brief Read only access to particle values
     ///
     /// \return A const reference to the particle values
+    ///
+    /// \note When the system changes, this reference may be invalidated
     const value_type &value () const
     {
         return value_;
     }
 
-    /// \brief Read only access to the weights
+    /// \brief Read only access to the weights through pointer
     ///
     /// \return A const pointer to the weight array
     ///
@@ -95,7 +95,7 @@ class Particle
         return weight_.data();
     }
 
-    /// \brief Read only access to the log weights
+    /// \brief Read only access to the log weights through pointer
     ///
     /// \return A const pointer to the log weight array
     ///
@@ -105,7 +105,7 @@ class Particle
         return log_weight_.data();
     }
 
-    /// \brief Read only access to the weights
+    /// \brief Read only access to the weights through Eigen vector
     ///
     /// \return A const reference to the weight vector
     ///
@@ -115,7 +115,7 @@ class Particle
         return weight_;
     }
 
-    /// \brief Read only access to the log weights
+    /// \brief Read only access to the log weights through Eigen vector
     ///
     /// \return A const reference to the log weight vector
     ///
@@ -203,17 +203,17 @@ class Particle
         resampled_ = resampled;
     }
 
-    /// \brief Read only access to the sampler containing this particle set
+    /// \brief Read only access to the sampler this particle set belongs to
     ///
-    /// \return A const reference to the sampler containing this particle set
+    /// \return A const reference to the sampler this particle set belongs to
     const Sampler<value_type> &sampler () const
     {
         return *sampler_;
     }
 
-    /// \brief Set which sampler this particle belongs to
+    /// \brief Set the sampler this particle set belongs to
     ///
-    /// \param samp A const pointer to the sampler
+    /// \param samp A const pointer to the sampler this particle belongs to
     void sampler (const Sampler<value_type> *samp)
     {
         sampler_ = samp;
@@ -221,7 +221,7 @@ class Particle
 
     /// \brief Get the value of SMC normalizing constant
     ///
-    /// \return SMC normalizng constant estimate
+    /// \return Log of SMC normalizng constant estimate
     double zconst () const
     {
         return zconst_;
@@ -261,12 +261,28 @@ class Particle
         resample_do();
     }
 
+    /// \brief Get a C++11 RNG engine 
+    ///
+    /// \param id The id of the particle, 0 to size() - 1
+    ///
+    /// \return A reference to a C++11 RNG engine unique to particle id, and
+    /// independent of others
     rng_type &prng (size_type id)
     {
         return prng_[id];
     }
 
-    void reset_prng (rng_type::result_type seed)
+    /// \brief Reset the parallel RNG system
+    ///
+    /// \param seed The new seed to the system 
+    void reset_prng (seed_type seed)
+    {
+        seed_ = seed;
+        reset_prng();
+    }
+
+    /// \brief Reset the parallel RNG system using last time used seed
+    void reset_prng ()
     {
         for (size_type i = 0; i != size_; ++i)
             prng_[i] = rng_type(seed + i);
@@ -290,6 +306,7 @@ class Particle
     bool resampled_;
     double zconst_;
 
+    seed_type seed_;
     prng_type prng_;
 
     void set_weight ()
@@ -309,10 +326,10 @@ class Particle
 
     void resample_residual ()
     {
-        // Reuse weight and log_weight. weight: act as the fractional part of
-        // N * weight. log_weight: act as the integral part of N * weight.
-        // They all will be reset to equal weights after resampling.  So it is
-        // safe to modify them here.
+        /// \internal Reuse weight and log_weight. weight: act as the
+        /// fractional part of N * weight. log_weight: act as the integral
+        /// part of N * weight.  They all will be reset to equal weights after
+        /// resampling.  So it is safe to modify them here.
         for (size_type i = 0; i != size_; ++i)
             weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
         weight2replication(weight_.sum());
