@@ -14,7 +14,8 @@ class SingleParticle
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 
-    SingleParticle (std::size_t id, double *new_weight, Particle<T> *particle) :
+    SingleParticle (std::size_t id, double *new_weight,
+            Particle<T> *particle) :
         id_(id), new_weight_(new_weight), particle_(particle) {}
 
     std::size_t id () const
