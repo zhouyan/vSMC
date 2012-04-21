@@ -3,23 +3,8 @@
 
 #include <cmath>
 #include <Eigen/Dense>
-#include <Random123/aes.h>
-#include <Random123/ars.h>
-#include <Random123/philox.h>
-#include <Random123/threefry.h>
-#include <Random123/conventional/Engine.hpp>
 #include <vSMC/internal/config.hpp>
 #include <vSMC/internal/random.hpp>
-
-/// The Parallel RNG (based on Rand123) seed, unsigned
-#ifndef V_SMC_CRNG_SEED
-#define V_SMC_CRNG_SEED 0xdeadbeefU
-#endif // V_SMC_CRNG_SEED
-
-/// The Parallel RNG (based on Rand123) type, philox or threefry
-#ifndef V_SMC_CRNG_TYPE
-#define V_SMC_CRNG_TYPE r123::Threefry4x64
-#endif // V_SMC_CRNG_TYPE
 
 namespace vSMC {
 
