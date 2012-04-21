@@ -1,8 +1,8 @@
 #ifndef V_SMC_HELPER_PARALLEL_TBB_HPP
 #define V_SMC_HELPER_PARALLEL_TBB_HPP
 
-#include <tbb/tbb.h>
 #include <vSMC/internal/common.hpp>
+#include <tbb/tbb.h>
 
 namespace vSMC {
 
