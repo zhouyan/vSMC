@@ -1,26 +1,9 @@
 #ifndef V_SMC_HELPER_SEQUENTIAL_HPP
 #define V_SMC_HELPER_SEQUENTIAL_HPP
 
-#include <cstddef>
-#include <Eigen/Dense>
-#include <vSMC/internal/config.hpp>
-#include <vSMC/core/monitor.hpp>
-#include <vSMC/core/particle.hpp>
-#include <vSMC/core/path.hpp>
-#include <vSMC/helper/single_particle.hpp>
-#include <vSMC/helper/state_base.hpp>
+#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
-
-/// \brief Type of weight returned by MoveSeq::move_state
-///
-/// \li No_ACTION The weight is discarded without further action
-/// \li SET_WEIGHT The weight is set directly as the new weight
-/// \li SET_LOG_WEIGHT The weight is set direclty as the new log weight
-/// \li MUL_WEIGHT The weight is the incremental weight
-/// \li ADD_LOG_WEIGHT The weight is the log of the incremental weight
-enum WeightAction {
-    NO_ACTION, SET_WEIGHT, SET_LOG_WEIGHT, MUL_WEIGHT, ADD_LOG_WEIGHT};
 
 /// \brief Sampler::init_type class for helping implementing SMC sequentially
 ///
@@ -293,7 +276,7 @@ class MoveSeq
 /// define method monitor_state.
 ///
 /// \note The template parameter has to be type StateBase or its derived class.
-template <typename T, unsigned Dim = 1>
+template <typename T, unsigned Dim>
 class MonitorSeq
 {
     public :

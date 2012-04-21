@@ -1,18 +1,11 @@
 #ifndef V_SMC_CORE_PARTICLE_HPP
 #define V_SMC_CORE_PARTICLE_HPP
 
-#include <cmath>
-#include <Eigen/Dense>
-#include <vSMC/internal/config.hpp>
-#include <vSMC/internal/random.hpp>
+#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
 
 template <typename T> class Sampler;
-
-/// Resample scheme
-enum ResampleScheme {MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC,
-    RESIDUAL_STRATIFIED, RESIDUAL_SYSTEMATIC};
 
 /// \brief Particle class
 ///

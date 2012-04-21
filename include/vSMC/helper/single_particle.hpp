@@ -1,8 +1,7 @@
 #ifndef V_SMC_HELPER_SINGLE_PARTICLE_HPP
 #define V_SMC_HELPER_SINGLE_PARTICLE_HPP
 
-#include <vSMC/internal/config.hpp>
-#include <vSMC/core/particle.hpp>
+#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
 

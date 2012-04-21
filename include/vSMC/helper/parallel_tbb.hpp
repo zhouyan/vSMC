@@ -1,12 +1,8 @@
 #ifndef V_SMC_HELPER_PARALLEL_TBB_HPP
 #define V_SMC_HELPER_PARALLEL_TBB_HPP
 
-#include <cstddef>
-#include <Eigen/Dense>
 #include <tbb/tbb.h>
-#include <vSMC/internal/config.hpp>
-#include <vSMC/helper/sequential.hpp>
-#include <vSMC/helper/state_base.hpp>
+#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
 
@@ -174,7 +170,7 @@ class MoveTBB : public MoveSeq<T>
 ///
 /// \note The template parameter has to be type StateBase or its derived class.
 /// \sa vSMC::MonitorSeq
-template <typename T, unsigned Dim = 1>
+template <typename T, unsigned Dim>
 class MonitorTBB : public MonitorSeq<T, Dim>
 {
     public :

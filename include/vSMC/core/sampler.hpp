@@ -5,15 +5,7 @@
 #include <map>
 #include <set>
 #include <string>
-#include <vector>
-#include <cassert>
-#include <cstddef>
-#include <Eigen/Dense>
-#include <vSMC/internal/config.hpp>
-#include <vSMC/internal/function.hpp>
-#include <vSMC/core/monitor.hpp>
-#include <vSMC/core/particle.hpp>
-#include <vSMC/core/path.hpp>
+#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
 

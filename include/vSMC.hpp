@@ -2,6 +2,12 @@
 #define V_SMC_HPP
 
 #include <vSMC/core/sampler.hpp>
+#include <vSMC/core/particle.hpp>
+#include <vSMC/core/monitor.hpp>
+#include <vSMC/core/path.hpp>
+
+#include <vSMC/helper/single_particle.hpp>
+#include <vSMC/helper/state_base.hpp>
 
 #include <vSMC/helper/sequential.hpp>
 

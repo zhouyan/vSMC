@@ -1,12 +1,7 @@
 #ifndef V_SMC_CORE_PATH_HPP
 #define V_SMC_CORE_PATH_HPP
 
-#include <vector>
-#include <cstddef>
-#include <Eigen/Dense>
-#include <vSMC/internal/config.hpp>
-#include <vSMC/internal/function.hpp>
-#include <vSMC/core/particle.hpp>
+#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
 
@@ -165,7 +160,7 @@ class Path
 
     /// \brief Clear all recorded data
     ///
-    /// \note The integration function is not reset
+    /// \note The integral function is not reset
     void clear ()
     {
         index_.clear();

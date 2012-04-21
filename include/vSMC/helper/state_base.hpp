@@ -1,8 +1,7 @@
 #ifndef V_SMC_HELPER_STATE_BASE_HPP
 #define V_SMC_HELPER_STATE_BASE_HPP
 
-#include <Eigen/Dense>
-#include <vSMC/internal/config.hpp>
+#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
 
@@ -11,7 +10,7 @@ namespace vSMC {
 /// StateBase or its derived class can be used as the template argument of
 /// Particle. It targets the particular problems where the parameters to be
 /// sampled can be viewed as a vector of dimension Dim and type T.
-template <unsigned Dim, typename T = double>
+template <unsigned Dim, typename T>
 class StateBase
 {
     public :

@@ -1,8 +1,6 @@
 #ifndef V_SMC_CONFIG_CONFIG_HPP
 #define V_SMC_CONFIG_CONFIG_HPP
 
-#include <vSMC/internal/version.hpp>
-
 #if !defined(V_SMC_USE_STD_FUNCITON) || !defined(V_SMC_USE_STD_RANDOM)
 #include <boost/version.hpp>
 #ifndef V_SMC_NDEBUG

@@ -1,12 +1,7 @@
 #ifndef V_SMC_CORE_MONITOR_HPP
 #define V_SMC_CORE_MONITOR_HPP
 
-#include <vector>
-#include <cstddef>
-#include <Eigen/Dense>
-#include <vSMC/internal/config.hpp>
-#include <vSMC/internal/function.hpp>
-#include <vSMC/core/particle.hpp>
+#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
 
