@@ -53,8 +53,7 @@ class InitializeTBB : public InitializeSeq<T>
         log_weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, &particle, particle.value().state().data(),
-                    log_weight_.data(), accept_.data()));
+                Worker_(this, &particle, log_weight_.data(), accept_.data()));
 
         particle.set_log_weight(log_weight_.data());
         this->post_processor(particle);
@@ -72,19 +71,15 @@ class InitializeTBB : public InitializeSeq<T>
         public :
 
         Worker_ (InitializeTBB<T> *init,
-                Particle<T> *particle, typename T::state_type *state,
-                double *log_weight, int *accept) :
-            init_(init), particle_(particle), state_(state),
+                Particle<T> *particle, double *log_weight, int *accept) :
+            init_(init), particle_(particle),
             log_weight_(log_weight), accept_(accept) {}
 
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 accept_[i] = init_->initialize_state(SingleParticle<T>(
-                            i, state_ + T::dim() * i,
-                            particle_->weight()[i], particle_->log_weight()[i],
-                            log_weight_ + i, particle_,
-                            &(particle_->prng(i))));
+                            i, log_weight_ + i, particle_));
             }
         }
 
@@ -92,7 +87,6 @@ class InitializeTBB : public InitializeSeq<T>
 
         InitializeTBB<T> *const init_;
         Particle<T> *const particle_;
-        typename T::state_type *const state_;
         double *const log_weight_;
         int *const accept_;
     }; // class Woker_
@@ -135,8 +129,8 @@ class MoveTBB : public MoveSeq<T>
         weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, iter, &particle, particle.value().state().data(),
-                    weight_.data(), accept_.data()));
+                Worker_(this, iter, &particle, weight_.data(),
+                    accept_.data()));
         MoveSeq<T>::set_weight(this->weight_action(), particle,
                 weight_.data());
         this->post_processor(iter, particle);
@@ -154,18 +148,15 @@ class MoveTBB : public MoveSeq<T>
         public :
 
         Worker_ (MoveTBB<T> *move, std::size_t iter,
-                Particle<T> *particle, typename T::state_type *state,
-                double *weight, int *accept) :
-            move_(move), iter_(iter), particle_(particle), state_(state),
+                Particle<T> *particle, double *weight, int *accept) :
+            move_(move), iter_(iter), particle_(particle),
             weight_(weight), accept_(accept) {}
 
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 accept_[i] = move_->move_state(iter_, SingleParticle<T>(
-                            i, state_ + T::dim() * i,
-                            particle_->weight()[i], particle_->log_weight()[i],
-                            weight_ + i, particle_, &(particle_->prng(i))));
+                            i, weight_ + i, particle_));
             }
         }
 
@@ -174,7 +165,6 @@ class MoveTBB : public MoveSeq<T>
         MoveTBB<T> *const move_;
         const std::size_t iter_;
         Particle<T> *const particle_;
-        typename T::state_type *const state_;
         double *const weight_;
         int *const accept_;
     }; // class Woker_
@@ -203,8 +193,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     void operator () (std::size_t iter, Particle<T> &particle, double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, iter, &particle, particle.value().state().data(),
-                    res));
+                Worker_(this, iter, &particle, res));
     }
 
     private :
@@ -214,18 +203,14 @@ class MonitorTBB : public MonitorSeq<T, Dim>
         public :
 
         Worker_ (MonitorTBB<T, Dim> *monitor, std::size_t iter,
-                Particle<T> *particle, typename T::state_type *state,
-                double *res) :
-            monitor_(monitor), iter_(iter), particle_(particle), state_(state),
-            res_(res) {}
+                Particle<T> *particle, double *res) :
+            monitor_(monitor), iter_(iter), particle_(particle), res_(res) {}
 
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 monitor_->monitor_state(iter_, SingleParticle<T>(
-                            i, state_ + T::dim() * i,
-                            particle_->weight()[i], particle_->log_weight()[i],
-                            NULL, particle_, NULL), res_ + i * Dim);
+                            i, NULL, particle_), res_ + i * Dim);
             }
         }
 
@@ -234,7 +219,6 @@ class MonitorTBB : public MonitorSeq<T, Dim>
         MonitorTBB<T, Dim> *const monitor_;
         const std::size_t iter_;
         Particle<T> *const particle_;
-        typename T::state_type *const state_;
         double *const res_;
     }; // class Worker_
 }; // class MonitorTBB
@@ -267,8 +251,7 @@ class PathTBB : public PathSeq<T>
     double operator () (std::size_t iter, Particle<T> &particle, double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, iter, &particle, particle.value().state().data(),
-                    res));
+                Worker_(this, iter, &particle, res));
 
         return this->width_state(iter, particle);
     }
@@ -279,19 +262,15 @@ class PathTBB : public PathSeq<T>
     {
         public :
 
-        Worker_ (PathTBB<T> *path, std::size_t iter,
-                Particle<T> *particle, typename T::state_type *state,
+        Worker_ (PathTBB<T> *path, std::size_t iter, Particle<T> *particle,
                 double *res) :
-            path_(path), iter_(iter), particle_(particle), state_(state),
-            res_(res) {}
+            path_(path), iter_(iter), particle_(particle), res_(res) {}
 
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 res_[i] = path_->path_state(iter_, SingleParticle<T>(
-                            i, state_ + T::dim() * i,
-                            particle_->weight()[i], particle_->log_weight()[i],
-                            NULL, particle_, NULL));
+                            i, NULL, particle_));
             }
         }
 
@@ -300,7 +279,6 @@ class PathTBB : public PathSeq<T>
         PathTBB<T> *const path_;
         const std::size_t iter_;
         Particle<T> *const particle_;
-        typename T::state_type *const state_;
         double *const res_;
     }; // class Worker_
 }; // PathTBB

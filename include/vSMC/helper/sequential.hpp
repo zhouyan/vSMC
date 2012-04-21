@@ -87,11 +87,7 @@ class InitializeSeq
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i) {
             accept += initialize_state(SingleParticle<T>(
-                        i, particle.value().state(i),
-                        particle.weight()[i],
-                        particle.log_weight()[i],
-                        log_weight_.data() + i,
-                        &particle, &particle.prng(i)));
+                        i, log_weight_.data() + i, &particle));
         }
         particle.set_log_weight(log_weight_.data());
         post_processor(particle);
@@ -205,11 +201,7 @@ class MoveSeq
         std::size_t accept = 0;
         for (std::size_t i = 0; i != particle.size(); ++i) {
             accept += move_state(iter, SingleParticle<T>(
-                        i, particle.value().state(i),
-                        particle.weight()[i],
-                        particle.log_weight()[i],
-                        weight_.data() + i,
-                        &particle, &particle.prng(i)));
+                        i, weight_.data() + i, &particle));
         }
         set_weight(weight_action(), particle, weight_.data());
         post_processor(iter, particle);
@@ -322,10 +314,7 @@ class MonitorSeq
             double *res)
     {
         for (std::size_t i = 0; i != particle.size(); ++i)
-            monitor_state(iter, SingleParticle<T>(
-                        i, particle.value().state(i),
-                        particle.weight()[i], particle.log_weight()[i], NULL,
-                        &particle, &particle.prng(i)),
+            monitor_state(iter, SingleParticle<T>(i, NULL, &particle),
                     res + i * dim());
     }
 
@@ -392,10 +381,7 @@ class PathSeq
             double *res)
     {
         for (std::size_t i = 0; i != particle.size(); ++i)
-            res[i] = path_state(iter, SingleParticle<T>(
-                        i, particle.value().state(i),
-                        particle.weight()[i], particle.log_weight()[i], NULL,
-                        &particle, &particle.prng(i)));
+            res[i] = path_state(iter, SingleParticle<T>(i, NULL, &particle));
 
         return width_state(iter, particle);
     }
