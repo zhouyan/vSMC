@@ -32,7 +32,10 @@ class Particle
     typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE size_type;
 
     /// The type of the Counter-based random number generator
-    typedef r123::Engine< V_SMC_CRNG_TYPE > rng_type;
+    typedef V_SMC_CRNG_TYPE crng_type;
+
+    /// The type of the Counter-based random number generator C++11 engine
+    typedef r123::Engine<crng_type> rng_type;
 
     /// The integer type of the seed
     typedef rng_type::result_type seed_type;

@@ -8,12 +8,12 @@
 #include <Random123/conventional/Engine.hpp>
 #include <vSMC/internal/config.hpp>
 
-/// The Parallel RNG (based on Rand123) seed, unsigned
+/// The Parallel RNG (based on Random123) seed, unsigned
 #ifndef V_SMC_CRNG_SEED
 #define V_SMC_CRNG_SEED 0xdeadbeefU
 #endif // V_SMC_CRNG_SEED
 
-/// The Parallel RNG (based on Rand123) type, philox or threefry
+/// The Parallel RNG (based on Random123) type, philox or threefry
 #ifndef V_SMC_CRNG_TYPE
 #define V_SMC_CRNG_TYPE r123::Threefry4x64
 #endif // V_SMC_CRNG_TYPE
