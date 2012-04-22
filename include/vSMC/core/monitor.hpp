@@ -76,8 +76,9 @@ class Monitor
     /// \brief Set the integral functor
     ///
     /// \param integral The functor used to compute the integrands
-    void integral (const integral_type &integral)
+    void integral (unsigned dim, const integral_type &integral)
     {
+        dim_ = dim;
         integral_ = integral;
     }
 
