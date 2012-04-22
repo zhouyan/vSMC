@@ -5,7 +5,7 @@ vSMC {#mainpage}
 
 To install the library just move the `include` folder into a proper place,
 e.g. `/usr/local/include` in Unix-alike systems. Alternatively, one can use
-[CMake][CMake] (2.6.4 or later required),
+[CMake][CMake] (2.8 or later required),
 
     cd /path_to_vSMC_source
     mkdir build

@@ -2,6 +2,7 @@
 #define V_SMC_HELPER_PARALLEL_TBB_HPP
 
 #include <vSMC/internal/common.hpp>
+#include <vSMC/helper/sequential.hpp>
 #include <tbb/tbb.h>
 
 namespace vSMC {
