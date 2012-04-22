@@ -89,9 +89,6 @@ or [Boost][Boost].
 
 To build **pf_tbb** one also need the [Intel TBB][Intel TBB] library.
 
-To build **pf_vsl** one also need the [Intel MKL][Intel MKL] and [vDist][vDist]
-libraries.
-
 The Gaussian mixture model example can be built with or without the
 [Intel TBB][Intel TBB] library. If the library is found, by default it will be
 built with it. One can define `-DGMM_SEQUENTIAL=ON` when invoking `cmake` to
@@ -156,8 +153,6 @@ Earlier versions of MSVC does not work, this is mainly a dependency problem of
 [CMake]: http://www.cmake.org/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
 [Eigen]: http://eigen.tuxfamily.org/index.php
-[Intel MKL]: http://software.intel.com/en-us/articles/intel-mkl/
 [Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
 [SMCTC]: http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/smctc/
 [Intel TBB]: http://threadingbuildingblocks.org/
-[vDist]: https://github.com/zhouyan/vDist/

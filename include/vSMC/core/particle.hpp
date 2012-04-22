@@ -5,8 +5,6 @@
 
 namespace vSMC {
 
-template <typename T> class Sampler;
-
 /// \brief Particle class
 ///
 /// Particle class store the particle set and arrays of weights and log
