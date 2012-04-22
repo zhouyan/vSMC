@@ -117,13 +117,16 @@ works.
   * GCC 4.4.6, -std=c++0x (Using [Boost][Boost], C++11 `std::function` also
     works, C++11 `<random>` broke, `std::uniform_real_distribution` mising)
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
-  * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost], C++11 `std::function` also works, C++11 `<random>` broke, `std::uniform_real_distribution` mising)
+  * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost], C++11 `std::function`
+    also works, C++11 `<random>` broke, `std::uniform_real_distribution`
+    mising)
 
 - Ubuntu 12.04
-  * Clang 3.1, -std=c++98 (Using [Boost][Boost])
-  * Clang 3.1, -std=c++0x (Using [Boost][Boost] or C++11 headers)
-  * GCC 4.6.3, -std=c++98 (Using [Boost][Boost])
-  * GCC 4.6.3, -std=c++0x (Using [Boost][Boost] or C++11 headers)
+  * Clang 3.0, 3.1, 3.2 (svn), -std=c++98 (Using [Boost][Boost])
+  * Clang 3.0, 3.1, 3.2 (svn), -std=c++0x (Using [Boost][Boost] or C++11
+    headers)
+  * GCC 4.5.3, 4.6.3, -std=c++98 (Using [Boost][Boost])
+  * GCC 4.5.3, 4.6.3, -std=c++0x (Using [Boost][Boost] or C++11 headers)
   * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
   * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost])
 
