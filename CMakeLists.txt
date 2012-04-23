@@ -20,7 +20,7 @@ SET (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/lib)
 SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 # Finding Packages
-IF (MSVC)
+IF (WIN32)
     IF (NOT BOOST_ROOT)
         SET (BOOST_ROOT "C:/Program Files/Boost")
     ENDIF (NOT BOOST_ROOT)
@@ -33,27 +33,35 @@ IF (MSVC)
         SET (Random123_INC_PATH "C:/Program Files/Random123/include")
     ENDIF (NOT Random123_INC_PATH)
 
-    IF (NOT TBB_INC_PATH)
-        SET (TBB_INC_PATH "C:/Program Files/TBB/include")
-    ENDIF (NOT TBB_INC_PATH)
+    IF (MSVC)
+        IF ($ENV{TBBROOT})
+            FILE (TO_CMAKE_PATH $ENV{TBBROOT} TBB_ROOT)
+        ELSE ($ENV{TBBROOT})
+            SET (TBB_ROOT "C:/Program Files/TBB")
+        ENDIF ($ENV{TBBROOT})
 
-    IF (NOT TBB_LIB_PATH)
-        IF (CMAKE_CL_64)
-            SET (TBB_MSVC_LIB "intel64")
-        ELSE (CMAKE_CL_64)
-            SET (TBB_MSVC_LIB "ia32")
-        ENDIF (CMAKE_CL_64)
-        IF (MSVC_VERSION GREATER 1599)
-            SET (TBB_MSVC_LIB "${TBB_MSVC_LIB}/vc10")
-        ELSEIF (MSVC_VERSION GREATER 1499)
-            SET (TBB_MSVC_LIB "${TBB_MSVC_LIB}/vc9")
-        ELSEIF (MSVC_VERSION GREATER 1399)
-            SET (TBB_MSVC_LIB "${TBB_MSVC_LIB}/vc8")
-        ENDIF (MSVC_VERSION GREATER 1599)
-        SET (TBB_LIB_PATH "C:/Program Files/TBB/lib/${TBB_MSVC_LIB}")
-        SET (TBB_DLL_PATH "C:/Program Files/TBB/bin/${TBB_MSVC_LIB}")
-    ENDIF (NOT TBB_LIB_PATH)
-ENDIF (MSVC)
+        IF (NOT TBB_INC_PATH)
+            SET (TBB_INC_PATH "${TBB_ROOT}/include")
+        ENDIF (NOT TBB_INC_PATH)
+
+        IF (NOT TBB_LIB_PATH)
+            IF (CMAKE_CL_64)
+                SET (TBB_MSVC_LIB "intel64")
+            ELSE (CMAKE_CL_64)
+                SET (TBB_MSVC_LIB "ia32")
+            ENDIF (CMAKE_CL_64)
+            IF (MSVC_VERSION GREATER 1599)
+                SET (TBB_MSVC_LIB "${TBB_MSVC_LIB}/vc10")
+            ELSEIF (MSVC_VERSION GREATER 1499)
+                SET (TBB_MSVC_LIB "${TBB_MSVC_LIB}/vc9")
+            ELSEIF (MSVC_VERSION GREATER 1399)
+                SET (TBB_MSVC_LIB "${TBB_MSVC_LIB}/vc8")
+            ENDIF (MSVC_VERSION GREATER 1599)
+            SET (TBB_LIB_PATH "${TBB_ROOT}/lib/${TBB_MSVC_LIB}")
+            SET (TBB_DLL_PATH "${TBB_ROOT}/bin/${TBB_MSVC_LIB}")
+        ENDIF (NOT TBB_LIB_PATH)
+    ENDIF (MSVC)
+ENDIF (WIN32)
 
 SET (Boost_NO_BOOST_CMAKE ON)
 INCLUDE (FindBoost)
@@ -97,12 +105,6 @@ IF (DOXYGEN_FOUND)
     FILE (READ ${PROJECT_SOURCE_DIR}/README.markdown README)
     FILE (WRITE ${PROJECT_SOURCE_DIR}/doc/main.markdown
         "vSMC {#mainpage}\n================\n\n${README}\n\n")
-    FILE (APPEND ${PROJECT_SOURCE_DIR}/doc/main.markdown
-        "# Tutorials\n\n"
-        "- \\ref tutorial-pf\n"
-        "- \\ref tutorial-gmm\n"
-        "- \\ref tutorial-sampler\n"
-        "- \\ref tutorial-monitor\n")
     FILE (GLOB_RECURSE DOC_SRC
         ${PROJECT_SOURCE_DIR}/doc/*.markdown
         ${PROJECT_SOURCE_DIR}/doc/*.html

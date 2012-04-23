@@ -164,9 +164,3 @@ Earlier versions of MSVC does not work, this is mainly a dependency problem of
 [Intel TBB]: http://threadingbuildingblocks.org/
 
 
-# Tutorials
-
-- \ref tutorial-pf
-- \ref tutorial-gmm
-- \ref tutorial-sampler
-- \ref tutorial-monitor
