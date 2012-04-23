@@ -74,6 +74,7 @@ class Monitor
 
     /// \brief Set the integral functor
     ///
+    /// \param dim The dimension of the monitor
     /// \param integral The functor used to compute the integrands
     void integral (unsigned dim, const integral_type &integral)
     {
