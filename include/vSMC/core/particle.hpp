@@ -161,9 +161,11 @@ class Particle
     void add_log_weight (const weight_type &inc_weight, double delta = 1,
             bool add_zconst = true)
     {
+        using std::log;
+
         if (add_zconst) {
             inc_weight_ = (delta * inc_weight.head(size_)).array().exp();
-            zconst_ += std::log(weight_.dot(inc_weight_.head(size_)));
+            zconst_ += log(weight_.dot(inc_weight_.head(size_)));
         }
         log_weight_ += delta * inc_weight.head(size_);
         set_weight();
@@ -251,7 +253,7 @@ class Particle
         resample_do();
     }
 
-    /// \brief Get a C++11 RNG engine 
+    /// \brief Get a C++11 RNG engine
     ///
     /// \param id The id of the particle, 0 to size() - 1
     ///
@@ -264,7 +266,7 @@ class Particle
 
     /// \brief Reset the parallel RNG system
     ///
-    /// \param seed The new seed to the system 
+    /// \param seed The new seed to the system
     void reset_prng (seed_type seed)
     {
         seed_ = seed;
@@ -320,8 +322,10 @@ class Particle
         /// fractional part of N * weight. log_weight: act as the integral
         /// part of N * weight.  They all will be reset to equal weights after
         /// resampling.  So it is safe to modify them here.
+        using std::modf;
+
         for (size_type i = 0; i != size_; ++i)
-            weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
+            weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
         weight2replication(weight_.sum());
         for (size_type i = 0; i != size_; ++i)
             replication_[i] += log_weight_[i];
@@ -367,9 +371,11 @@ class Particle
 
     void resample_residual_stratified ()
     {
+        using std::modf;
+
         replication_.setConstant(0);
         for (size_type i = 0; i != size_; ++i)
-            weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
+            weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
         size_type size = weight_.sum();
         weight_ /= size;
         size_type j = 0;
@@ -392,9 +398,11 @@ class Particle
 
     void resample_residual_systematic ()
     {
+        using std::modf;
+
         replication_.setConstant(0);
         for (size_type i = 0; i != size_; ++i)
-            weight_[i] = std::modf(size_ * weight_[i], log_weight_.data() + i);
+            weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
         size_type size = weight_.sum();
         weight_ /= size;
         size_type j = 0;

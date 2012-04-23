@@ -186,20 +186,22 @@ class MoveSeq
     void set_weight (WeightAction action,
             Particle<T> &particle, double *weight)
     {
+        using std::log;
+
         switch (action) {
             case NO_ACTION :
                 break;
             case SET_WEIGHT :
                 for (typename Particle<T>::size_type i = 0;
                         i != particle.size(); ++i)
-                    weight[i] = std::log(weight[i]);
+                    weight[i] = log(weight[i]);
             case SET_LOG_WEIGHT :
                 particle.set_log_weight(weight);
                 break;
             case MUL_WEIGHT :
                 for (typename Particle<T>::size_type i = 0;
                         i != particle.size(); ++i)
-                    weight[i] = std::log(weight[i]);
+                    weight[i] = log(weight[i]);
             case ADD_LOG_WEIGHT :
                 particle.add_log_weight(weight);
                 break;
@@ -218,7 +220,7 @@ class MoveSeq
     Eigen::VectorXd weight_;
 }; // class MoveSeq
 
-/// \brief Monitor::integral_type subtype 
+/// \brief Monitor::integral_type subtype
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, unsigned Dim>

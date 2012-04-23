@@ -38,7 +38,7 @@ template <typename T> class PathTBB;
 /// \brief Resample scheme
 ///
 /// \li MULTINOMIAL Multinomial resampling
-/// \li RESIDUAL Reisudal resampling 
+/// \li RESIDUAL Reisudal resampling
 /// \li STRATIFIED Startified resampling
 /// \li SYSTEMATIC Systematic resampling
 /// \li RESIDUAL_STRATIFIED Stratified resampling on the residuals
