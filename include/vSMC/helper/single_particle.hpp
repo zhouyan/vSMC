@@ -5,6 +5,9 @@
 
 namespace vSMC {
 
+/// \brief A thin wrapper over a complete Particle
+///
+/// \tparam T A subtype of StateBase
 template <typename T>
 class SingleParticle
 {

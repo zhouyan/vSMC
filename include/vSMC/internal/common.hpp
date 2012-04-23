@@ -1,6 +1,10 @@
 #ifndef V_SMC_INTERNAL_COMMON_HPP
 #define V_SMC_INTERNAL_COMMON_HPP
 
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif // __STDC_CONSTANT_MACROS
+
 #include <vector>
 #include <cassert>
 #include <cmath>

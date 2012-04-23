@@ -7,10 +7,9 @@ namespace vSMC {
 
 /// \brief Particle class
 ///
-/// Particle class store the particle set and arrays of weights and log
-/// weights. It provides access to particle values as well as weights. It
-/// computes and manages resources for ESS, resampling, etc, tasks unique to
-/// each iteration.
+/// \tparam T State state type. Requiment:
+/// \li Consturctor: T (IntType N)
+/// \li Method: copy (IntType from, IntType to)
 template <typename T>
 class Particle
 {

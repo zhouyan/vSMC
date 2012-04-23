@@ -1,15 +1,19 @@
 #ifndef V_SMC_CORE_SAMPLER_HPP
 #define V_SMC_CORE_SAMPLER_HPP
 
+#include <vSMC/internal/common.hpp>
 #include <iostream>
 #include <map>
 #include <set>
 #include <string>
-#include <vSMC/internal/common.hpp>
 
 namespace vSMC {
 
 /// \brief SMC Sampler
+///
+/// \tparam T State state type. Requiment:
+/// \li Consturctor: T (IntType N)
+/// \li Method: copy (IntType from, IntType to)
 template <typename T>
 class Sampler
 {

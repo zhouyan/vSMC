@@ -7,9 +7,9 @@ namespace vSMC {
 
 /// \brief Monitor for path sampling
 ///
-/// Path record the path sampling integrand and width when the Sampler
-/// progress. It is also used for retrieve information of path sampling after
-/// the SMC iterations.
+/// \tparam T State state type. Requiment:
+/// \li Consturctor: T (IntType N)
+/// \li Method: copy (IntType from, IntType to)
 template <typename T>
 class Path
 {

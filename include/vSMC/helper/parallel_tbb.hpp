@@ -7,10 +7,9 @@
 
 namespace vSMC {
 
-/// \brief Sampler::init_type class for helping implementing SMC using TBB
+/// \brief Sampler::init_type subtype
 ///
-/// \note The template parameter has to be type StateBase or its derived class.
-/// \sa vSMC::InitializeSeq
+/// \tparam T A subtype of StateBase
 template <typename T>
 class InitializeTBB : public InitializeSeq<T>
 {
@@ -37,12 +36,6 @@ class InitializeTBB : public InitializeSeq<T>
 
     InitializeTBB<T> & operator= (const InitializeTBB<T> &init) {return *this;}
 
-    /// \brief Operator called by Sampler for initialize the particle set
-    ///
-    /// \param particle The Particle set passed by Sampler
-    /// \param param Additional parameters
-    ///
-    /// \return Accept count
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
@@ -89,10 +82,9 @@ class InitializeTBB : public InitializeSeq<T>
     }; // class Woker_
 }; // class InitializeTBB
 
-/// \brief Sampler::move_type class for helping implementing SMC using TBB
+/// \brief Sampler::move_type subtype
 ///
-/// \note The template parameter has to be type StateBase or its derived class.
-/// \sa vSMC::MoveSeq
+/// \tparam T A subtype of StateBase
 template <typename T>
 class MoveTBB : public MoveSeq<T>
 {
@@ -114,12 +106,6 @@ class MoveTBB : public MoveSeq<T>
 
     MoveTBB<T> & operator= (const MoveTBB<T> &move) {return *this;}
 
-    /// \brief Operator called by Sampler for move the particle set
-    ///
-    /// \param iter The iteration number
-    /// \param particle The Particle set passed by Sampler
-    ///
-    /// \return Accept count
     std::size_t operator () (std::size_t iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
@@ -167,10 +153,9 @@ class MoveTBB : public MoveSeq<T>
     }; // class Woker_
 }; // class MoveTBB
 
-/// \brief Monitor::integral_type class for helping implementing SMC using TBB
+/// \brief Monitor::integral_type subtype
 ///
-/// \note The template parameter has to be type StateBase or its derived class.
-/// \sa vSMC::MonitorSeq
+/// \tparam T A subtype of StateBase
 template <typename T, unsigned Dim>
 class MonitorTBB : public MonitorSeq<T, Dim>
 {
@@ -181,12 +166,6 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     explicit MonitorTBB (monitor_state_type monitor = NULL) :
         MonitorSeq<T, Dim>(monitor) {}
 
-    /// \brief Operator called by Monitor to record Monte Carlo integration
-    ///
-    /// \param iter The iteration number
-    /// \param particle The Particle set passed by Sampler
-    /// \param [out] res The integrands. Sum(res * weight) is the Monte Carlo
-    /// integration result.
     void operator () (std::size_t iter, Particle<T> &particle, double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
@@ -220,10 +199,9 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     }; // class Worker_
 }; // class MonitorTBB
 
-/// \brief Path::integral_type class for helping implementing SMC using TBB
+/// \brief Path::integral_type subtype
 ///
-/// \note The template parameter has to be type StateBase or its derived class.
-/// \sa vSMC::PathSeq
+/// \tparam T A subtype of StateBase
 template <typename T>
 class PathTBB : public PathSeq<T>
 {
@@ -236,15 +214,6 @@ class PathTBB : public PathSeq<T>
             path_state_type path = NULL, width_state_type width = NULL) :
         PathSeq<T>(path, width) {}
 
-    /// \brief Operator called by Path to record path sampling integrands and
-    /// widths
-    ///
-    /// \param iter The iteration number
-    /// \param particle The particle set passed by Sampler
-    /// \param [out] res The integrands. Sum(res * weight) is the path
-    ///
-    /// \return The width
-    /// sampling integrand.
     double operator () (std::size_t iter, Particle<T> &particle, double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),

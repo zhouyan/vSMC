@@ -7,9 +7,8 @@ namespace vSMC {
 
 /// \brief Particle type class for helping implementing SMC sequentially
 ///
-/// StateBase or its derived class can be used as the template argument of
-/// Particle. It targets the particular problems where the parameters to be
-/// sampled can be viewed as a vector of dimension Dim and type T.
+/// \tparam Dim The dimension of the state parameter vector
+/// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateBase
 {
