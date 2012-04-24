@@ -123,9 +123,9 @@ class Monitor
 #endif
         integral_(iter, particle, buffer_.data());
 #ifdef EIGEN_DEFAULT_TO_ROW_MAJOR
-        result_.noalias() = buffer_ * particle.weight();
-#else
         result_.noalias() = buffer_.transpose() * particle.weight();
+#else
+        result_.noalias() = buffer_ * particle.weight();
 #endif
 
         index_.push_back(iter);
