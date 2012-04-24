@@ -44,25 +44,56 @@ class StateBase
         return size_;
     }
 
+    /// \brief Read and write access to a signle particle state
+    ///
+    /// \param id The position of the particle
+    /// \param pos The position of the parameter in the state array
+    ///
+    /// \return A reference to the parameter at position pos of the states
+    /// array of the particle at position id
+    state_type &state (size_type id, unsigned pos)
+    {
+        return state_(pos, id);
+    }
+
+    /// \brief Read only access to a signle particle state
+    ///
+    /// \param id The position of the particle
+    /// \param pos The position of the parameter in the state array
+    ///
+    /// \return A const reference to the parameter at position pos of the
+    /// states array of the particle at position id
+    const state_type &state (size_type id, unsigned pos) const
+    {
+        return state_(pos, id);
+    }
+
     /// \brief Read and write access to the array of a single particle states
     ///
-    /// \return A pointer to the states of a single particle
-    state_type *state (size_type n)
+    /// \param id The position of the particle, 0 to size() - 1
+    ///
+    /// \return A pointer to the array of states of the particle at position id
+    state_type *state (size_type id)
     {
-        return state_.col(n).data();
+        return state_.col(id).data();
     }
 
     /// \brief Read only access to the array of a single particle states
     ///
-    /// \return A const pointer to the states of a single array particle
-    const state_type *state (size_type n) const
+    /// \param id The position of the particle, 0 to size() - 1
+    ///
+    /// \return A const pointer to the array of states of the particle at
+    /// position id
+    const state_type *state (size_type id) const
     {
-        return state_.col(n).data();
+        return state_.col(id).data();
     }
 
     /// \brief Read and write access to the matrix of all particle states
     ///
     /// \return A reference to the states matrix
+    ///
+    /// \note state()(pos, id) == state(id, pos). Best avoid this feature
     state_mat_type &state ()
     {
         return state_;
@@ -71,6 +102,8 @@ class StateBase
     /// \brief Read only access to the matrix of all particle states
     ///
     /// \return A const reference to the states matrix
+    ///
+    /// \note state()(pos, id) == state(id, pos). Best avoid this feature
     const state_mat_type &state () const
     {
         return state_;

@@ -160,8 +160,6 @@ class Sampler
     /// \brief Read and write access to the particle set
     ///
     /// \return A reference to the latest particle set
-    ///
-    /// \note When the system changes, this reference may be invalidated
     Particle<T> &particle ()
     {
         return particle_;
@@ -170,8 +168,6 @@ class Sampler
     /// \brief Read only access to the particle set
     ///
     /// \return A const reference to the latest particle set.
-    ///
-    /// \note When the system changes, this reference may be invalidated
     const Particle<T> &particle () const
     {
         return particle_;
@@ -295,8 +291,6 @@ class Sampler
     /// \param name The name of the monitor
     ///
     /// \return An const_iterator point to the monitor for the given name
-    ///
-    /// \note When the system changes, this reference may be invalidated
     typename std::map<std::string, Monitor<T> >::const_iterator
         monitor (const std::string &name) const
     {
@@ -306,8 +300,6 @@ class Sampler
     /// \brief Read only access to all monitors
     ///
     /// \return A const reference to monitors
-    ///
-    /// \note When the system changes, this reference may be invalidated
     const std::map<std::string, Monitor<T> > &monitor () const
     {
         return monitor_;
@@ -332,8 +324,6 @@ class Sampler
     /// \brief Read only access to the Path sampling monitor
     ///
     /// \return A const reference to the Path sampling monitor
-    ///
-    /// \note When the system changes, this reference may be invalidated
     const Path<T> &path () const
     {
         return path_;
@@ -342,8 +332,6 @@ class Sampler
     /// \brief Set the path sampling integral
     ///
     /// \param integral The functor used to compute the integrands
-    ///
-    /// \note Set integral = NULL will stop path sampling recording
     void path_sampling (const typename Path<T>::integral_type &integral)
     {
         path_.integral(integral);

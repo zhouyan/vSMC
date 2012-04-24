@@ -61,8 +61,6 @@ class Particle
     /// \brief Read and write access to particle values
     ///
     /// \return A reference to the particle values, type (value_type &)
-    ///
-    /// \note When the system changes, this reference may be invalidated
     value_type &value ()
     {
         return value_;
@@ -71,8 +69,6 @@ class Particle
     /// \brief Read only access to particle values
     ///
     /// \return A const reference to the particle values
-    ///
-    /// \note When the system changes, this reference may be invalidated
     const value_type &value () const
     {
         return value_;
@@ -80,9 +76,9 @@ class Particle
 
     /// \brief Get the weight of a single particle
     ///
-    /// \param id The id of the particle, 0 to size() - 1
+    /// \param id The position of the particle, 0 to size() - 1
     ///
-    /// \return The weight of the particle id
+    /// \return The weight of the particle at position id
     double weight (size_type id) const
     {
         return weight_[id];
@@ -91,8 +87,6 @@ class Particle
     /// \brief Read only access to the weights through pointer
     ///
     /// \return A const pointer to the weight array
-    ///
-    /// \note When the system changes, this pointer may be invalidated
     const double *weight_ptr () const
     {
         return weight_.data();
@@ -100,9 +94,9 @@ class Particle
 
     /// \brief Get the log weight of a single particle
     ///
-    /// \param id The id of the particle, 0 to size() - 1
+    /// \param id The position of the particle, 0 to size() - 1
     ///
-    /// \return The log weight of the particle id
+    /// \return The log weight of the particle at position id
     double log_weight (size_type id) const
     {
         return log_weight_[id];
@@ -111,8 +105,6 @@ class Particle
     /// \brief Read only access to the log weights through pointer
     ///
     /// \return A const pointer to the log weight array
-    ///
-    /// \note When the system changes, this pointer may be invalidated
     const double *log_weight_ptr () const
     {
         return log_weight_.data();
@@ -121,8 +113,6 @@ class Particle
     /// \brief Read only access to the weights through Eigen vector
     ///
     /// \return A const reference to the weight vector
-    ///
-    /// \note When the system changes, this reference may be invalidated
     const weight_type &weight () const
     {
         return weight_;
@@ -131,8 +121,6 @@ class Particle
     /// \brief Read only access to the log weights through Eigen vector
     ///
     /// \return A const reference to the log weight vector
-    ///
-    /// \note When the system changes, this reference may be invalidated
     const weight_type &log_weight () const
     {
         return log_weight_;
@@ -142,8 +130,6 @@ class Particle
     ///
     /// \param new_weight New log weights
     /// \param delta A multiplier appiled to new_weight
-    ///
-    /// \note new_weight need to have length at least equatl to size().
     void set_log_weight (const double *new_weight, double delta = 1)
     {
         Eigen::Map<const weight_type> w(new_weight, size_);
@@ -166,8 +152,6 @@ class Particle
     /// \param delta A multiplier applied to inc_weight
     /// \param add_zconst Whether this incremental weights should contribute
     /// the esitmates of normalizing constants
-    ///
-    /// \note inc_weight need to have length at least equatl to size().
     void add_log_weight (const double *inc_weight, double delta = 1,
             bool add_zconst = true)
     {
@@ -278,10 +262,10 @@ class Particle
 
     /// \brief Get a C++11 RNG engine
     ///
-    /// \param id The id of the particle, 0 to size() - 1
+    /// \param id The position of the particle, 0 to size() - 1
     ///
-    /// \return A reference to a C++11 RNG engine unique to particle id, and
-    /// independent of others
+    /// \return A reference to a C++11 RNG engine unique to particle at
+    /// position id, and independent of others
     rng_type &prng (size_type id)
     {
         return prng_[id];

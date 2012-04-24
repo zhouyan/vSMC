@@ -93,8 +93,6 @@ class Monitor
     /// \brief Iteration index
     ///
     /// \return A const reference to the index
-    ///
-    /// \note When the system changes, this reference may be invalidated
     const index_type &index () const
     {
         return index_;
@@ -103,8 +101,6 @@ class Monitor
     /// \brief Record of Monte Carlo integration
     ///
     /// \return A const reference to the record
-    ///
-    /// \note When the system changes, this reference may be invalidated
     const record_type &record () const
     {
         return record_;
@@ -118,8 +114,6 @@ class Monitor
     /// \note The integral function has to be set through either the
     /// constructor or integral() to a non-NULL value before calling eval().
     /// Otherwise exception will be raised when calling eval().
-    ///
-    /// \see Documentation for Boost::function
     void eval (std::size_t iter, Particle<T> &particle)
     {
         buffer_.resize(dim_, particle.size());

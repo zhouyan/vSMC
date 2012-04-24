@@ -25,6 +25,16 @@ class SingleParticle
         return id_;
     }
 
+    state_type &state (unsigned pos)
+    {
+        return particle_->value().state(id_, pos);
+    }
+
+    const state_type &state (unsigned pos) const
+    {
+        return particle_->value().state(id_, pos);
+    }
+
     state_type *state ()
     {
         return particle_->value().state(id_);
@@ -47,7 +57,7 @@ class SingleParticle
 
     void new_weight (double weight)
     {
-	assert(new_weight_);
+        assert(new_weight_);
         new_weight_[id_] = weight;
     }
 
