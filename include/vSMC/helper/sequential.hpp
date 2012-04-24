@@ -59,7 +59,7 @@ class InitializeSeq
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
             accept += initialize_state(SingleParticle<T>(
-                        i, log_weight_.data() + i, &particle));
+                        i, log_weight_.data(), &particle));
         }
         particle.set_log_weight(log_weight_.data());
         post_processor(particle);
@@ -150,7 +150,7 @@ class MoveSeq
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
             accept += move_state(iter, SingleParticle<T>(
-                        i, weight_.data() + i, &particle));
+                        i, weight_.data(), &particle));
         }
         set_weight(weight_action(), particle, weight_.data());
         post_processor(iter, particle);

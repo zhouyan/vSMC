@@ -37,17 +37,18 @@ class SingleParticle
 
     double weight () const
     {
-        return particle_->weight()[id_];
+        return particle_->weight(id_);
     }
 
     double log_weight () const
     {
-        return particle_->log_weight()[id_];
+        return particle_->log_weight(id_);
     }
 
     void new_weight (double weight)
     {
-        *new_weight_ = weight;
+	assert(new_weight_);
+        new_weight_[id_] = weight;
     }
 
     const Particle<T> &particle () const

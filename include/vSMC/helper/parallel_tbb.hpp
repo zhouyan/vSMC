@@ -69,7 +69,7 @@ class InitializeTBB : public InitializeSeq<T>
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 accept_[i] = init_->initialize_state(SingleParticle<T>(
-                            i, log_weight_ + i, particle_));
+                            i, log_weight_, particle_));
             }
         }
 
@@ -139,7 +139,7 @@ class MoveTBB : public MoveSeq<T>
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 accept_[i] = move_->move_state(iter_, SingleParticle<T>(
-                            i, weight_ + i, particle_));
+                            i, weight_, particle_));
             }
         }
 

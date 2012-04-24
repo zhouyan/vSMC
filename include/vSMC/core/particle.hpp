@@ -78,6 +78,16 @@ class Particle
         return value_;
     }
 
+    /// \brief Get the weight of a single particle
+    ///
+    /// \param id The id of the particle, 0 to size() - 1
+    ///
+    /// \return The weight of the particle id
+    double weight (size_type id) const
+    {
+        return weight_[id];
+    }
+
     /// \brief Read only access to the weights through pointer
     ///
     /// \return A const pointer to the weight array
@@ -86,6 +96,16 @@ class Particle
     const double *weight_ptr () const
     {
         return weight_.data();
+    }
+
+    /// \brief Get the log weight of a single particle
+    ///
+    /// \param id The id of the particle, 0 to size() - 1
+    ///
+    /// \return The log weight of the particle id
+    double log_weight (size_type id) const
+    {
+        return log_weight_[id];
     }
 
     /// \brief Read only access to the log weights through pointer
