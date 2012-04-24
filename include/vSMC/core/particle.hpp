@@ -30,8 +30,11 @@ class Particle
     /// The integer type of the seed
     typedef rng_type::result_type seed_type;
 
-    /// The type of the weight and log weight vectors
+    /// The type of the weight and log weight vector
     typedef Eigen::VectorXd weight_type;
+
+    /// The type of the parallel RNG vector
+    typedef Eigen::Matrix<rng_type, Eigen::Dynamic, 1> prng_type;
 
     /// \brief Construct a Particle object with given number of particles
     ///
@@ -264,6 +267,15 @@ class Particle
         return prng_[id];
     }
 
+    /// \brief Get a vector of C++11 RNG engines
+    ///
+    /// \return A reference to a vector of C++11 RNG engine, each one is
+    /// unique and independent of others for the corresponding particle
+    prng_type &prng ()
+    {
+        return prng_;
+    }
+
     /// \brief Reset the parallel RNG system
     ///
     /// \param seed The new seed to the system
@@ -283,7 +295,6 @@ class Particle
     private :
 
     typedef Eigen::Matrix<size_type, Eigen::Dynamic, 1> replication_type;
-    typedef Eigen::Matrix<rng_type, Eigen::Dynamic, 1> prng_type;
 
     size_type size_;
     value_type value_;
