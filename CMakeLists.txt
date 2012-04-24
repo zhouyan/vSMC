@@ -9,7 +9,7 @@ PROJECT (vSMC C CXX)
 
 # Version information
 SET (VERSION_MAJOR 0)
-SET (VERSION_MINOR 1)
+SET (VERSION_MINOR 5)
 SET (VERSION_PATCH 0)
 
 # Global path configurations
