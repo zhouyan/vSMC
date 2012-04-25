@@ -121,7 +121,7 @@ class StateBase
     ///
     /// \param from The index of particle whose state to be copied
     /// \param to The index of particle to which new state to be written
-    void copy (size_type from, size_type to)
+    virtual void copy (size_type from, size_type to)
     {
 #ifdef EIGEN_DEFAULT_TO_ROW_MAJOR
         state_.row(to) = state_.row(from);
