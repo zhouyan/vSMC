@@ -3,19 +3,31 @@
 
 #ifdef V_SMC_USE_STD_RANDOM
 using std::binomial_distribution;
+using std::discrete_distribution;
 using std::gamma_distribution;
 using std::lognormal_distribution;
 using std::normal_distribution;
 using std::uniform_real_distribution;
 #else
+#include <boost/random/discrete_distribution.hpp>
 #include <boost/random/gamma_distribution.hpp>
 #include <boost/random/lognormal_distribution.hpp>
 #include <boost/random/normal_distribution.hpp>
+#if BOOST_VERSION < 104700
+using boost::binomial_distribution;
+using boost::discrete_distribution;
+using boost::gamma_distribution;
+using boost::lognormal_distribution;
+using boost::normal_distribution;
+using boost::uniform_real_distribution;
+#else
 using boost::random::binomial_distribution;
+using boost::random::discrete_distribution;
 using boost::random::gamma_distribution;
 using boost::random::lognormal_distribution;
 using boost::random::normal_distribution;
 using boost::random::uniform_real_distribution;
+#endif
 #endif
 
 int main ()
