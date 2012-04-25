@@ -41,6 +41,13 @@ int main ()
         assert(b >= 0 && b <= 20);
     }
 
+    double prob[] = {1, 2, 3, 4};
+    discrete_distribution<> rsample(prob, prob + 4);
+    for (int i = 0; i != N; ++i) {
+        int s = rsample(eng);
+        assert(s >= 0 && s <= 3);
+    }
+
     gamma_distribution<> rgamma(1, 1);
     for (int i = 0; i != N; ++i) {
         double g = rgamma(eng);
