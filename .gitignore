@@ -19,6 +19,7 @@ test/pet/pet_smc_buster
 test/pet/pet_mcmc
 test/pet/pet_mcmc_buster
 test/pet/PETData-Simulate.tab
+test/pet/pet.R
 
 test/toy/EST*
 test/toy/PathTrace*
