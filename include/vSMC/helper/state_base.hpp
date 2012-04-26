@@ -9,7 +9,7 @@ namespace vSMC {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-template <unsigned Dim, typename T>
+template <unsigned Dim = 1, typename T>
 class StateBase
 {
     public :
