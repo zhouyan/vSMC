@@ -80,8 +80,8 @@ examples manually. For example,
 
 ## Additional libraries used by examples
 
-There are four versions of the particle filter example, **pf_seq**, **pf_tbb**,
-**pf_vec** and **pf_vsl**. See the tutorial for details.
+There are three versions of the particle filter example, **pf_seq**,
+**pf_tbb**, and **pf_vec**. See the tutorial for details.
 
 To build **pf_seq** and **pf_vec** one only need the required libraries, namely
 [Eigen][Eigen], [Random123][Random123] and suitable `<functional>`, `<random>`
