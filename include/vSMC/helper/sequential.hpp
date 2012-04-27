@@ -50,6 +50,8 @@ class InitializeSeq
         return *this;
     }
 
+    virtual ~InitializeSeq () {}
+
     virtual std::size_t operator() (Particle<T> &particle, void *param)
     {
         initialize_param(particle, param);
@@ -61,7 +63,7 @@ class InitializeSeq
             accept += initialize_state(SingleParticle<T>(
                         i, log_weight_.data(), &particle));
         }
-        particle.set_log_weight(log_weight_.data());
+        particle.set_log_weight(log_weight_);
         post_processor(particle);
 
         return accept;
@@ -96,7 +98,7 @@ class InitializeSeq
     initialize_param_type initialize_param_;
     pre_processor_type pre_processor_;
     post_processor_type post_processor_;
-    Eigen::VectorXd log_weight_;
+    typename Particle<T>::weight_type log_weight_;
 }; // class InitializeSeq
 
 /// \brief Sampler::move_type subtype
@@ -142,6 +144,8 @@ class MoveSeq
         return *this;
     }
 
+    virtual ~MoveSeq () {}
+
     virtual std::size_t operator () (std::size_t iter, Particle<T> &particle)
     {
         pre_processor(iter, particle);
@@ -152,7 +156,7 @@ class MoveSeq
             accept += move_state(iter, SingleParticle<T>(
                         i, weight_.data(), &particle));
         }
-        set_weight(weight_action(), particle, weight_.data());
+        set_weight(weight_action(), particle, weight_);
         post_processor(iter, particle);
 
         return accept;
@@ -183,25 +187,23 @@ class MoveSeq
             post_processor_(iter, particle);
     }
 
-    void set_weight (WeightAction action,
-            Particle<T> &particle, double *weight)
-    {
-        using std::log;
+    protected :
 
+    void set_weight (WeightAction action, Particle<T> &particle,
+            const typename Particle<T>::weight_type &weight)
+    {
         switch (action) {
             case NO_ACTION :
                 break;
             case SET_WEIGHT :
-                for (typename Particle<T>::size_type i = 0;
-                        i != particle.size(); ++i)
-                    weight[i] = log(weight[i]);
+                particle.set_log_weight(weight.array().log());
+                break;
             case SET_LOG_WEIGHT :
                 particle.set_log_weight(weight);
                 break;
             case MUL_WEIGHT :
-                for (typename Particle<T>::size_type i = 0;
-                        i != particle.size(); ++i)
-                    weight[i] = log(weight[i]);
+                particle.add_log_weight(weight.array().log());
+                break;
             case ADD_LOG_WEIGHT :
                 particle.add_log_weight(weight);
                 break;
@@ -217,7 +219,7 @@ class MoveSeq
     weight_action_type weight_action_;
     pre_processor_type pre_processor_;
     post_processor_type post_processor_;
-    Eigen::VectorXd weight_;
+    typename Particle<T>::weight_type weight_;
 }; // class MoveSeq
 
 /// \brief Monitor::integral_type subtype
@@ -233,6 +235,8 @@ class MonitorSeq
 
     explicit MonitorSeq (monitor_state_type monitor = NULL) :
         monitor_state_(monitor) {}
+
+    virtual ~MonitorSeq () {}
 
     virtual void operator () (std::size_t iter, Particle<T> &particle,
             double *res)
@@ -276,6 +280,8 @@ class PathSeq
     explicit PathSeq (
             path_state_type path = NULL, width_state_type width = NULL) :
         path_state_(path), width_state_(width) {}
+
+    virtual ~PathSeq () {}
 
     virtual double operator () (std::size_t iter, Particle<T> &particle,
             double *res)

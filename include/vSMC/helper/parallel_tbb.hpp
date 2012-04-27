@@ -45,7 +45,7 @@ class InitializeTBB : public InitializeSeq<T>
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
                 Worker_(this, &particle, log_weight_.data(), accept_.data()));
 
-        particle.set_log_weight(log_weight_.data());
+        particle.set_log_weight(log_weight_);
         this->post_processor(particle);
 
         return accept_.sum();
@@ -53,7 +53,7 @@ class InitializeTBB : public InitializeSeq<T>
 
     private :
 
-    Eigen::VectorXd log_weight_;
+    typename Particle<T>::weight_type log_weight_;
     Eigen::VectorXi accept_;
 
     class Worker_
@@ -112,10 +112,8 @@ class MoveTBB : public MoveSeq<T>
         weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
-                Worker_(this, iter, &particle, weight_.data(),
-                    accept_.data()));
-        MoveSeq<T>::set_weight(this->weight_action(), particle,
-                weight_.data());
+                Worker_(this, iter, &particle, weight_.data(), accept_.data()));
+        this->set_weight(this->weight_action(), particle, weight_);
         this->post_processor(iter, particle);
 
         return accept_.sum();
@@ -123,7 +121,7 @@ class MoveTBB : public MoveSeq<T>
 
     private :
 
-    Eigen::VectorXd weight_;
+    typename Particle<T>::weight_type weight_;
     Eigen::VectorXi accept_;
 
     class Worker_
