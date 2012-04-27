@@ -176,7 +176,7 @@ class Sampler
     /// \brief Replace initialization functor
     ///
     /// \param init New Initialization functor
-    void initialize (initialize_type &init)
+    void initialize (const initialize_type &init)
     {
         init_ = init;
     }
