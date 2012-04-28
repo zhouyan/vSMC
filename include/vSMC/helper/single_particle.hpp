@@ -58,7 +58,7 @@ class SingleParticle
     void new_weight (double weight)
     {
         assert(new_weight_);
-        new_weight_[id_] = weight;
+        *new_weight_ = weight;
     }
 
     const Particle<T> &particle () const
