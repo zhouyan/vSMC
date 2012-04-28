@@ -114,26 +114,19 @@ works.
 
 ## Linux
 
-- Red Hat Enterprise Linux 6.2
-  * Clang 2.8, -std=c++98 (Using [Boost][Boost])
-  * GCC 4.4.6, -std=c++98 (Using [Boost][Boost])
-  * GCC 4.4.6, -std=c++0x (Using [Boost][Boost], C++11 `std::function` also
-    works, C++11 `<random>` broke, `std::uniform_real_distribution` mising)
-  * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
-  * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost], C++11 `std::function`
-    also works, C++11 `<random>` broke, `std::uniform_real_distribution`
-    mising)
+- With [Boost][Boost]
+  * GCC 4.4, 4.5, 4.6,
+  * Intel icpc 12.0, 12.1
+    tested against GCC 4.4, 4.5, 4.6 
+  * Clang 2.8, 2.9, 3.0, 3.1, SVN
 
-- Ubuntu 12.04
-  * Clang 3.0, 3.1, 3.2 (svn), -std=c++98 (Using [Boost][Boost])
-  * Clang 3.0, 3.1, 3.2 (svn), -std=c++0x (Using [Boost][Boost] or C++11
-    headers)
-  * GCC 4.5.3, 4.6.3, -std=c++98 (Using [Boost][Boost])
-  * GCC 4.5.3, 4.6.3, -std=c++0x (Using [Boost][Boost] or C++11 headers)
-  * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
-  * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost])
-
-Note that `icpc` use `libstdc++` distributed with the system.
+The above compilers are also tested with flag `-std=c++98`, `-std=gnu98`, etc.
+and `-std=c++0x`, `-std=c++11` etc. Note that all compilers above use
+`libstdc++` as standard libraries. With `libstdc++` distributed by GCC 4.4 or
+later, and appropriate compiler flags, using C++11 `<functional>` instead of
+[Boost][Boost] also works. With `libstdc++` distributed by GCC 4.5 or later,
+C++11 `<random>` also works. Note that Intel icpc disable C++0x mode for
+GCC 4.6 system.
 
 ## Mac OS X
 
