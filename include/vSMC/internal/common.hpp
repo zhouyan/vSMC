@@ -23,7 +23,7 @@ template <typename T> class Monitor;
 template <typename T> class Path;
 
 template <typename T> class SingleParticle;
-template <unsigned, typename T = double> class StateBase;
+template <unsigned Dim = 1, typename T = double> class StateBase;
 
 template <typename T> class InitializeSeq;
 template <typename T> class MoveSeq;

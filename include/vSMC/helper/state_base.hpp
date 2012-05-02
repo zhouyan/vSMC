@@ -9,7 +9,7 @@ namespace vSMC {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-template <unsigned Dim = 1, typename T>
+template <unsigned Dim, typename T>
 class StateBase
 {
     public :
@@ -75,11 +75,7 @@ class StateBase
     /// \return A pointer to the array of states of the particle at position id
     state_type *state (size_type id)
     {
-#ifdef EIGEN_DEFAULT_TO_ROW_MAJOR
-        return state_.row(id).data();
-#else
         return state_.col(id).data();
-#endif
     }
 
     /// \brief Read only access to the array of a single particle states
@@ -90,11 +86,7 @@ class StateBase
     /// position id
     const state_type *state (size_type id) const
     {
-#ifdef EIGEN_DEFAULT_TO_ROW_MAJOR
-        return state_.row(id).data();
-#else
         return state_.col(id).data();
-#endif
     }
 
     /// \brief Read and write access to the matrix of all particle states
@@ -123,11 +115,7 @@ class StateBase
     /// \param to The index of particle to which new state to be written
     virtual void copy (size_type from, size_type to)
     {
-#ifdef EIGEN_DEFAULT_TO_ROW_MAJOR
-        state_.row(to) = state_.row(from);
-#else
         state_.col(to) = state_.col(from);
-#endif
     }
 
     private :
