@@ -241,7 +241,7 @@ class MonitorSeq
     virtual void operator () (std::size_t iter, Particle<T> &particle,
             double *res)
     {
-	double tmp = 0;
+        double tmp = 0;
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
             monitor_state(iter, SingleParticle<T>(i, &tmp, &particle),
@@ -287,7 +287,7 @@ class PathSeq
     virtual double operator () (std::size_t iter, Particle<T> &particle,
             double *res)
     {
-	double tmp = 0;
+        double tmp = 0;
         for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
             res[i] = path_state(iter, SingleParticle<T>(i, &tmp, &particle));
 
