@@ -105,10 +105,8 @@ IF (DOXYGEN_FOUND)
     FILE (READ ${PROJECT_SOURCE_DIR}/README.markdown README)
     FILE (WRITE ${PROJECT_SOURCE_DIR}/doc/main.markdown
         "vSMC {#mainpage}\n================\n\n${README}\n\n")
-    FILE (GLOB_RECURSE DOC_SRC
-        ${PROJECT_SOURCE_DIR}/doc/*.markdown
-        ${PROJECT_SOURCE_DIR}/doc/*.html
-        ${PROJECT_SOURCE_DIR}/doc/*.css)
+    FILE (GLOB_RECURSE DOC_SRC ${PROJECT_SOURCE_DIR}/doc
+        *.markdown *.html *.css)
     ADD_CUSTOM_COMMAND (
         OUTPUT  ${PROJECT_BINARY_DIR}/doc_src
         DEPENDS ${DOC_SRC}
