@@ -293,7 +293,7 @@ class Particle
     void reset_prng ()
     {
         for (size_type i = 0; i != size_; ++i)
-            prng_[i] = rng_type(seed_ + i * size_);
+            prng_[i] = rng_type(seed_ + i);
     }
 
     private :
