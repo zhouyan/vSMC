@@ -7,6 +7,7 @@ using std::discrete_distribution;
 using std::gamma_distribution;
 using std::lognormal_distribution;
 using std::normal_distribution;
+using std::uniform_int_distribution;
 using std::uniform_real_distribution;
 #else
 #include <boost/random/discrete_distribution.hpp>
@@ -19,6 +20,7 @@ using boost::discrete_distribution;
 using boost::gamma_distribution;
 using boost::lognormal_distribution;
 using boost::normal_distribution;
+using boost::uniform_int_distribution;
 using boost::uniform_real_distribution;
 #else
 using boost::random::binomial_distribution;
@@ -26,6 +28,7 @@ using boost::random::discrete_distribution;
 using boost::random::gamma_distribution;
 using boost::random::lognormal_distribution;
 using boost::random::normal_distribution;
+using boost::random::uniform_int_distribution;
 using boost::random::uniform_real_distribution;
 #endif
 #endif
@@ -63,6 +66,12 @@ int main ()
     normal_distribution<> rnorm(0, 1);
     for (int i = 0; i != N; ++i) {
         double n = rnorm(eng);
+    }
+
+    uniform_real_distribution<> ruint(1, 100);
+    for (int i = 0; i != N; ++i) {
+        int u = ruint(eng);
+        assert(u >= 1 && u <= 100);
     }
 
     uniform_real_distribution<> runif(0, 1);
