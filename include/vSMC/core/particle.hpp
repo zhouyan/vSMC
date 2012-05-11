@@ -34,7 +34,7 @@ class Particle
     typedef Eigen::VectorXd weight_type;
 
     /// The type of the parallel RNG vector
-    typedef Eigen::Matrix<rng_type, Eigen::Dynamic, 1> prng_type;
+    typedef std::vector<rng_type> prng_type;
 
     /// \brief Construct a Particle object with given number of particles
     ///

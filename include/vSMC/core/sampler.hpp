@@ -41,7 +41,6 @@ class Sampler
     /// \param N The number of particles
     /// \param init The functor used to initialize the particles
     /// \param move The functor used to move the particles and weights
-    /// \param mcmc The functor used to perform MCMC move
     /// \param scheme The resampling scheme. See ResampleScheme
     /// \param threshold The threshold for performing resampling
     /// \param seed The seed to the parallel RNG system
@@ -49,11 +48,10 @@ class Sampler
             typename Particle<T>::size_type N,
             const initialize_type &init = NULL,
             const move_type &move = NULL,
-            const move_type &mcmc = NULL,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
             typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
-        initialized_(false), init_(init), move_(move), mcmc_(mcmc),
+        initialized_(false), init_(init), move_(move),
         scheme_(scheme), threshold_(threshold * N),
         particle_(N, seed), iter_num_(0)
     {
@@ -206,12 +204,24 @@ class Sampler
 
     /// \brief Replace iteration functor
     ///
-    /// \param move New Move functor
-    /// \param mcmc New MCMC functor
-    void iterate (const move_type &move, const move_type &mcmc = NULL)
+    /// \param new_move New Move functor
+    void move (const move_type &new_move)
     {
-        move_ = move;
-        mcmc_ = mcmc;
+        move_ = new_move;
+    }
+
+    /// \brief Replace iteration functor
+    ///
+    /// \param new_move New MCMC Move functor
+    void mcmc (const move_type &new_mcmc)
+    {
+        mcmc_.push_back(new_mcmc);
+    }
+
+    /// \brief Clear all MCMC moves
+    void clear_mcmc ()
+    {
+        mcmc_.clear();
     }
 
     /// \brief Perform iteration
@@ -220,9 +230,11 @@ class Sampler
         assert(initialized_);
 
         ++iter_num_;
-        accept_.push_back(move_(iter_num_, particle_));
-        if (bool(mcmc_))
-            accept_.back() = mcmc_(iter_num_, particle_);
+        if (bool(move_))
+            accept_.push_back(move_(iter_num_, particle_));
+        for (typename std::vector<move_type>::iterator miter = mcmc_.begin();
+                miter != mcmc_.end(); ++miter)
+            accept_.back() = (*miter)(iter_num_, particle_);
         post_move();
     }
 
@@ -456,7 +468,7 @@ class Sampler
     /// Initialization and movement
     initialize_type init_;
     move_type move_;
-    move_type mcmc_;
+    std::vector<move_type> mcmc_;
 
     /// Resampling
     ResampleScheme scheme_;
