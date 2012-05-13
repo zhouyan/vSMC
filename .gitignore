@@ -1,6 +1,9 @@
 .R*
 build*
 
+test/gmm/config
+
+test/pet/config
 test/pet/pet_conv.data
 
 test/toy/EST*
