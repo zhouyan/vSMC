@@ -14,7 +14,7 @@ using std::uniform_real_distribution;
 #include <boost/random/gamma_distribution.hpp>
 #include <boost/random/lognormal_distribution.hpp>
 #include <boost/random/normal_distribution.hpp>
-#include <boost/ranodm/uniform_int_distribution.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
 #if BOOST_VERSION < 104700
 using boost::bernoulli_distribution;
 using boost::binomial_distribution;
