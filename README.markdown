@@ -114,7 +114,7 @@ works.
 - With [Boost][Boost]
   * GCC 4.4, 4.5, 4.6,
   * Intel icpc 12.0, 12.1
-    tested against GCC 4.4, 4.5, 4.6 
+    tested against GCC 4.4, 4.5, 4.6
   * Clang 2.8, 2.9, 3.0, 3.1, SVN
 
 The above compilers are also tested with flag `-std=c++98`, `-std=gnu98`, etc.

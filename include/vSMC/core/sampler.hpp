@@ -212,7 +212,7 @@ class Sampler
 
     /// \brief Replace iteration functor
     ///
-    /// \param new_move New MCMC Move functor
+    /// \param new_mcmc New MCMC Move functor
     void mcmc (const move_type &new_mcmc)
     {
         mcmc_.push_back(new_mcmc);
