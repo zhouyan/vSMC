@@ -116,17 +116,9 @@ class Monitor
     /// Otherwise exception will be raised when calling eval().
     void eval (std::size_t iter, Particle<T> &particle)
     {
-#ifdef EIGEN_DEFAULT_TO_ROW_MAJOR
-        buffer_.resize(particle.size(), dim_);
-#else
         buffer_.resize(dim_, particle.size());
-#endif
         integral_(iter, particle, buffer_.data());
-#ifdef EIGEN_DEFAULT_TO_ROW_MAJOR
-        result_.noalias() = buffer_.transpose() * particle.weight();
-#else
         result_.noalias() = buffer_ * particle.weight();
-#endif
 
         index_.push_back(iter);
         record_.push_back(result_);
