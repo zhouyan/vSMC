@@ -23,17 +23,17 @@ class Sampler
     typedef internal::function<std::size_t (Particle<T> &, void *)>
         initialize_type;
 
-    /// The type of move functor
+    /// The type of move and mcmc functor
     typedef internal::function<std::size_t (std::size_t, Particle<T> &)>
         move_type;
 
-    /// The type ESS history vector
+    /// The type of ESS history vector
     typedef std::vector<double> ess_type;
 
-    /// The type resampling history vector
+    /// The type of resampling history vector
     typedef std::vector<bool> resampled_type;
 
-    /// The type accept count history vector
+    /// The type of accept count history vector
     typedef std::vector<std::size_t> accept_type;
 
     /// \brief Construct a sampler with given number of particles
@@ -52,7 +52,7 @@ class Sampler
             double threshold = 0.5,
             typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
         initialized_(false), init_(init), move_(move),
-        scheme_(scheme), threshold_(threshold * N),
+        scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0)
     {
         particle_.sampler(this);
@@ -66,13 +66,22 @@ class Sampler
         return particle_.size();
     }
 
-    /// \brief Size of records
+    /// \brief The number of iterations recorded
     ///
-    /// \return The number of iterations recorded (including the
-    /// initialization step)
+    /// \return The number of iterations recorded so far (including the
+    /// initialization)
     std::size_t iter_size () const
     {
         return ess_.size();
+    }
+
+    /// \brief The number of iterations
+    ///
+    /// \return The number of iterations performed by iterate() so far (not
+    /// including the initialization)
+    std::size_t iter_num () const
+    {
+        return iter_num_;
     }
 
     /// \brief Get the current resampling scheme
@@ -104,53 +113,29 @@ class Sampler
     /// \param threshold The new threshold for resampling
     void resample_threshold (double threshold)
     {
-        threshold_ = threshold * particle_.size();
-    }
-
-    /// \brief ESS
-    ///
-    /// \return The ESS value of the latest iteration
-    ess_type::value_type ess () const
-    {
-        return ess_.back();
+        threshold_ = threshold;
     }
 
     /// \brief ESS history
     ///
     /// \return A const reference to the history of ESS
-    const ess_type &ess_history () const
+    const ess_type &ess () const
     {
         return ess_;
-    }
-
-    /// \brief Indicator of resampling
-    ///
-    /// \return A bool value, \b true if the latest iteration was resampled
-    resampled_type::value_type resampled () const
-    {
-        return resampled_.back();
     }
 
     /// \brief Resampling history
     ///
     /// \return A const reference to the history of resampling
-    const resampled_type &resampled_history () const
+    const resampled_type &resampled () const
     {
         return resampled_;
-    }
-
-    /// \brief Accept count
-    ///
-    /// \return The accept count of the latest iteration
-    accept_type::value_type accept () const
-    {
-        return accept_.back();
     }
 
     /// \brief Accept count history
     ///
     /// \return A const reference to the history of accept count
-    const accept_type &accept_history () const
+    const accept_type &accept () const
     {
         return accept_;
     }
@@ -490,13 +475,9 @@ class Sampler
 
     void post_move ()
     {
-        ess_.push_back(particle_.ess());
-        particle_.resampled(ess_.back() < threshold_);
-        resampled_.push_back(particle_.resampled());
-        if (particle_.resampled()) {
+        bool do_resample = particle_.ess() < threshold_ * size();
+        if (do_resample)
             particle_.resample(scheme_);
-            ess_.back() = particle_.size();
-        }
 
         if (!path_.empty())
             path_.eval(iter_num_, particle_);
@@ -506,6 +487,11 @@ class Sampler
             if (!imap->second.empty())
                 imap->second.eval(iter_num_, particle_);
         }
+
+        ess_.push_back(particle_.ess());
+        resampled_.push_back(do_resample);
+        particle_.resampled(resampled_.back());
+        particle_.accept(accept_.back());
     }
 }; // class Sampler
 

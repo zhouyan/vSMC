@@ -196,10 +196,26 @@ class Particle
 
     /// \brief Set indicator of resampling
     ///
-    /// \param resampled \b true if the current iteration was resampled
-    void resampled (bool resampled)
+    /// \param new_resampled \b true if the current iteration was resampled
+    void resampled (bool new_resampled)
     {
-        resampled_ = resampled;
+        resampled_ = new_resampled;
+    }
+
+    /// \brief Get accept count of the last iteration
+    ///
+    /// \return The number of acceptance of the last iteration
+    std::size_t accept () const
+    {
+        return accept_;
+    }
+
+    /// \brief Set accept count of the last iteration
+    ///
+    /// \param new_accept The number of acceptance of the last iteration
+    void accept (std::size_t new_accept)
+    {
+        accept_ = new_accept;
     }
 
     /// \brief Read only access to the sampler this particle set belongs to
@@ -311,6 +327,7 @@ class Particle
 
     double ess_;
     bool resampled_;
+    std::size_t accept_;
     double zconst_;
 
     seed_type seed_;
