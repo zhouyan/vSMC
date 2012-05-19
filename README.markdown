@@ -142,6 +142,8 @@ GCC 4.6 system.
 - Windows 7
   * MSVC 2010 (Version 10) (Using [Boost][Boost] or C++11 headers)
 
+Note that MSVC cannot compile all the examples.
+
 Earlier versions of MSVC does not work, this is mainly a dependency problem of
 [Random123][Random123].
 
