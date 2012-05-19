@@ -71,6 +71,7 @@ class InitializeSeq
 
     virtual int initialize_state (SingleParticle<T> part)
     {
+        assert(bool(initialize_state_));
         return initialize_state_(part);
     }
 
@@ -164,6 +165,7 @@ class MoveSeq
 
     virtual int move_state (std::size_t iter, SingleParticle<T> part)
     {
+        assert(bool(move_state_));
         return move_state_(iter, part);
     }
 
@@ -252,6 +254,7 @@ class MonitorSeq
     virtual void monitor_state (std::size_t iter, const SingleParticle<T> part,
             double *res)
     {
+        assert(bool(monitor_state_));
         monitor_state_(iter, part, res);
     }
 
@@ -296,11 +299,13 @@ class PathSeq
 
     virtual double path_state (std::size_t iter, const SingleParticle<T> part)
     {
+        assert(bool(path_state_));
         return path_state_(iter, part);
     }
 
     virtual double width_state (std::size_t iter, const Particle<T> &particle)
     {
+        assert(bool(width_state_));
         return width_state_(iter, particle);
     }
 
