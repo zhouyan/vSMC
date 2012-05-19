@@ -60,7 +60,7 @@ class InitializeSeq
         std::size_t accept = 0;
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
-            accept += initialize_state(SingleParticle<T>::create(
+            accept += initialize_state(SingleParticle<T>(
                         i, log_weight_.data() + i, &particle));
         }
         particle.set_log_weight(log_weight_);
@@ -154,7 +154,7 @@ class MoveSeq
         std::size_t accept = 0;
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
-            accept += move_state(iter, SingleParticle<T>::create(
+            accept += move_state(iter, SingleParticle<T>(
                         i, weight_.data() + i, &particle));
         }
         set_weight(weight_action(), particle, weight_);
@@ -233,8 +233,7 @@ class MonitorSeq
     public :
 
     typedef internal::function<void (
-            std::size_t, const SingleParticle<T>, double *)>
-        monitor_state_type;
+            std::size_t, ConstSingleParticle<T>, double *)> monitor_state_type;
 
     explicit MonitorSeq (monitor_state_type monitor = NULL) :
         monitor_state_(monitor) {}
@@ -246,12 +245,12 @@ class MonitorSeq
     {
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
-            monitor_state(iter, SingleParticle<T>::const_create(i, &particle),
+            monitor_state(iter, ConstSingleParticle<T>(i, &particle),
                     res + i * dim());
         }
     }
 
-    virtual void monitor_state (std::size_t iter, const SingleParticle<T> part,
+    virtual void monitor_state (std::size_t iter, ConstSingleParticle<T> part,
             double *res)
     {
         assert(bool(monitor_state_));
@@ -276,7 +275,7 @@ class PathSeq
 {
     public :
 
-    typedef internal::function<double (std::size_t, const SingleParticle<T>)>
+    typedef internal::function<double (std::size_t, ConstSingleParticle<T>)>
         path_state_type;
     typedef internal::function<double (std::size_t, const Particle<T> &)>
         width_state_type;
@@ -287,17 +286,16 @@ class PathSeq
 
     virtual ~PathSeq () {}
 
-    virtual double operator () (std::size_t iter, Particle<T> &particle,
+    virtual double operator () (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
         for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
-            res[i] = path_state(iter, SingleParticle<T>::const_create(
-                        i, &particle));
+            res[i] = path_state(iter, ConstSingleParticle<T>(i, &particle));
 
         return width_state(iter, particle);
     }
 
-    virtual double path_state (std::size_t iter, const SingleParticle<T> part)
+    virtual double path_state (std::size_t iter, ConstSingleParticle<T> part)
     {
         assert(bool(path_state_));
         return path_state_(iter, part);

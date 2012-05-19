@@ -16,17 +16,9 @@ class SingleParticle
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 
-    static SingleParticle<T> create (
-            std::size_t id, double *new_weight, Particle<T> *particle)
-    {
-        return SingleParticle<T>(id, new_weight, particle);
-    }
-
-    static SingleParticle<T> const_create (
-            std::size_t id, const Particle<T> *particle)
-    {
-        return SingleParticle<T>(id, particle);
-    }
+    SingleParticle (std::size_t id, double *new_weight,
+            Particle<T> *particle) :
+        id_(id), new_weight_(new_weight), particle_(particle) {}
 
     std::size_t id () const
     {
@@ -41,7 +33,7 @@ class SingleParticle
 
     const state_type &state (unsigned pos) const
     {
-        return const_particle_->value().state(id_, pos);
+        return particle_->value().state(id_, pos);
     }
 
     state_type *state ()
@@ -52,17 +44,17 @@ class SingleParticle
 
     const state_type *state () const
     {
-        return const_particle_->value().state(id_);
+        return particle_->value().state(id_);
     }
 
     double weight () const
     {
-        return const_particle_->weight(id_);
+        return particle_->weight(id_);
     }
 
     double log_weight () const
     {
-        return const_particle_->log_weight(id_);
+        return particle_->log_weight(id_);
     }
 
     void new_weight (double weight)
@@ -73,7 +65,7 @@ class SingleParticle
 
     const Particle<T> &particle () const
     {
-        return *const_particle_;
+        return *particle_;
     }
 
     rng_type &rng ()
@@ -87,16 +79,56 @@ class SingleParticle
     const std::size_t id_;
     double *const new_weight_;
     Particle<T> *const particle_;
-    const Particle<T> *const const_particle_;
+}; // class SingleParticle
 
-    SingleParticle (std::size_t id, double *new_weight,
-            Particle<T> *particle) :
-        id_(id), new_weight_(new_weight),
-        particle_(particle), const_particle_(particle) {}
+/// \brief A thin wrapper over a complete const Particle
+///
+/// \tparam T A subtype of StateBase
+template <typename T>
+class ConstSingleParticle
+{
+    public :
 
-    SingleParticle (std::size_t id, const Particle<T> *particle) :
-        id_(id), new_weight_(NULL),
-        particle_(NULL), const_particle_(particle) {}
+    typedef typename T::state_type state_type;
+    typedef typename Particle<T>::rng_type rng_type;
+
+    ConstSingleParticle (std::size_t id, const Particle<T> *particle) :
+        id_(id), particle_(particle) {}
+
+    std::size_t id () const
+    {
+        return id_;
+    }
+
+    const state_type &state (unsigned pos) const
+    {
+        return particle_->value().state(id_, pos);
+    }
+
+    const state_type *state () const
+    {
+        return particle_->value().state(id_);
+    }
+
+    double weight () const
+    {
+        return particle_->weight(id_);
+    }
+
+    double log_weight () const
+    {
+        return particle_->log_weight(id_);
+    }
+
+    const Particle<T> &particle () const
+    {
+        return *particle_;
+    }
+
+    private :
+
+    const std::size_t id_;
+    const Particle<T> *const particle_;
 }; // class SingleParticle
 
 } // namespace vSMC
