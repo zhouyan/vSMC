@@ -68,7 +68,7 @@ class InitializeTBB : public InitializeSeq<T>
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
-                accept_[i] = init_->initialize_state(SingleParticle<T>(
+                accept_[i] = init_->initialize_state(SingleParticle<T>::create(
                             i, log_weight_ + i, particle_));
             }
         }
@@ -136,8 +136,8 @@ class MoveTBB : public MoveSeq<T>
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
-                accept_[i] = move_->move_state(iter_, SingleParticle<T>(
-                            i, weight_ + i, particle_));
+                accept_[i] = move_->move_state(iter_,
+                        SingleParticle<T>::create(i, weight_ + i, particle_));
             }
         }
 
@@ -184,7 +184,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
-                monitor_->monitor_state(iter_, SingleParticle<T>(
+                monitor_->monitor_state(iter_, SingleParticle<T>::const_create(
                             i, particle_), res_ + i * Dim);
             }
         }
@@ -235,8 +235,8 @@ class PathTBB : public PathSeq<T>
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
-                res_[i] = path_->path_state(iter_, SingleParticle<T>(
-                            i, particle_));
+                res_[i] = path_->path_state(iter_,
+                        SingleParticle<T>::const_create(i, particle_));
             }
         }
 

@@ -16,14 +16,17 @@ class SingleParticle
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 
-    SingleParticle (std::size_t id, double *new_weight,
-            Particle<T> *particle) :
-        id_(id), new_weight_(new_weight),
-        particle_(particle), const_particle_(particle) {}
+    static SingleParticle<T> create (
+            std::size_t id, double *new_weight, Particle<T> *particle)
+    {
+        return SingleParticle<T>(id, new_weight, particle);
+    }
 
-    SingleParticle (std::size_t id, const Particle<T> *particle) :
-        id_(id), new_weight_(NULL),
-        particle_(NULL), const_particle_(particle) {}
+    static const SingleParticle<T> const_create (
+            std::size_t id, const Particle<T> *particle)
+    {
+        return SingleParticle<T>(id, particle);
+    }
 
     std::size_t id () const
     {
@@ -85,6 +88,15 @@ class SingleParticle
     double *const new_weight_;
     Particle<T> *const particle_;
     const Particle<T> *const const_particle_;
+
+    SingleParticle (std::size_t id, double *new_weight,
+            Particle<T> *particle) :
+        id_(id), new_weight_(new_weight),
+        particle_(particle), const_particle_(particle) {}
+
+    SingleParticle (std::size_t id, const Particle<T> *particle) :
+        id_(id), new_weight_(NULL),
+        particle_(NULL), const_particle_(particle) {}
 }; // class SingleParticle
 
 } // namespace vSMC

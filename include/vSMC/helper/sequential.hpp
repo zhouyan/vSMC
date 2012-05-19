@@ -60,7 +60,7 @@ class InitializeSeq
         std::size_t accept = 0;
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
-            accept += initialize_state(SingleParticle<T>(
+            accept += initialize_state(SingleParticle<T>::create(
                         i, log_weight_.data() + i, &particle));
         }
         particle.set_log_weight(log_weight_);
@@ -153,7 +153,7 @@ class MoveSeq
         std::size_t accept = 0;
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
-            accept += move_state(iter, SingleParticle<T>(
+            accept += move_state(iter, SingleParticle<T>::create(
                         i, weight_.data() + i, &particle));
         }
         set_weight(weight_action(), particle, weight_);
@@ -244,7 +244,7 @@ class MonitorSeq
     {
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
-            monitor_state(iter, SingleParticle<T>(i, &particle),
+            monitor_state(iter, SingleParticle<T>::const_create(i, &particle),
                     res + i * dim());
         }
     }
@@ -288,7 +288,8 @@ class PathSeq
             double *res)
     {
         for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
-            res[i] = path_state(iter, SingleParticle<T>(i, &particle));
+            res[i] = path_state(iter, SingleParticle<T>::const_create(
+                        i, &particle));
 
         return width_state(iter, particle);
     }
