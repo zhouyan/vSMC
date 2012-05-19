@@ -18,7 +18,12 @@ class SingleParticle
 
     SingleParticle (std::size_t id, double *new_weight,
             Particle<T> *particle) :
-        id_(id), new_weight_(new_weight), particle_(particle) {}
+        id_(id), new_weight_(new_weight),
+        particle_(particle), const_particle_(particle) {}
+
+    SingleParticle (std::size_t id, const Particle<T> *particle) :
+        id_(id), new_weight_(NULL),
+        particle_(NULL), const_particle_(particle) {}
 
     std::size_t id () const
     {
@@ -27,32 +32,34 @@ class SingleParticle
 
     state_type &state (unsigned pos)
     {
+        assert(particle_);
         return particle_->value().state(id_, pos);
     }
 
     const state_type &state (unsigned pos) const
     {
-        return particle_->value().state(id_, pos);
+        return const_particle_->value().state(id_, pos);
     }
 
     state_type *state ()
     {
+        assert(particle_);
         return particle_->value().state(id_);
     }
 
     const state_type *state () const
     {
-        return particle_->value().state(id_);
+        return const_particle_->value().state(id_);
     }
 
     double weight () const
     {
-        return particle_->weight(id_);
+        return const_particle_->weight(id_);
     }
 
     double log_weight () const
     {
-        return particle_->log_weight(id_);
+        return const_particle_->log_weight(id_);
     }
 
     void new_weight (double weight)
@@ -63,19 +70,21 @@ class SingleParticle
 
     const Particle<T> &particle () const
     {
-        return *particle_;
+        return *const_particle_;
     }
 
     rng_type &rng ()
     {
+        assert(particle_);
         return particle_->prng(id_);
     }
 
     private :
 
-    std::size_t id_;
+    const std::size_t id_;
     double *const new_weight_;
     Particle<T> *const particle_;
+    const Particle<T> *const const_particle_;
 }; // class SingleParticle
 
 } // namespace vSMC

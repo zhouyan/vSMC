@@ -230,7 +230,8 @@ class MonitorSeq
 {
     public :
 
-    typedef internal::function<void (std::size_t, SingleParticle<T>, double *)>
+    typedef internal::function<void (
+            std::size_t, const SingleParticle<T>, double *)>
         monitor_state_type;
 
     explicit MonitorSeq (monitor_state_type monitor = NULL) :
@@ -238,18 +239,17 @@ class MonitorSeq
 
     virtual ~MonitorSeq () {}
 
-    virtual void operator () (std::size_t iter, Particle<T> &particle,
+    virtual void operator () (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
-        double tmp = 0;
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
-            monitor_state(iter, SingleParticle<T>(i, &tmp, &particle),
+            monitor_state(iter, SingleParticle<T>(i, &particle),
                     res + i * dim());
         }
     }
 
-    virtual void monitor_state (std::size_t iter, SingleParticle<T> part,
+    virtual void monitor_state (std::size_t iter, const SingleParticle<T> part,
             double *res)
     {
         monitor_state_(iter, part, res);
@@ -273,7 +273,7 @@ class PathSeq
 {
     public :
 
-    typedef internal::function<double (std::size_t, SingleParticle<T>)>
+    typedef internal::function<double (std::size_t, const SingleParticle<T>)>
         path_state_type;
     typedef internal::function<double (std::size_t, const Particle<T> &)>
         width_state_type;
@@ -287,14 +287,13 @@ class PathSeq
     virtual double operator () (std::size_t iter, Particle<T> &particle,
             double *res)
     {
-        double tmp = 0;
         for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
-            res[i] = path_state(iter, SingleParticle<T>(i, &tmp, &particle));
+            res[i] = path_state(iter, SingleParticle<T>(i, &particle));
 
         return width_state(iter, particle);
     }
 
-    virtual double path_state (std::size_t iter, SingleParticle<T> part)
+    virtual double path_state (std::size_t iter, const SingleParticle<T> part)
     {
         return path_state_(iter, part);
     }

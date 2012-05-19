@@ -164,7 +164,8 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     explicit MonitorTBB (monitor_state_type monitor = NULL) :
         MonitorSeq<T, Dim>(monitor) {}
 
-    void operator () (std::size_t iter, Particle<T> &particle, double *res)
+    void operator () (std::size_t iter, const Particle<T> &particle,
+            double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
                 Worker_(this, iter, &particle, res));
@@ -177,15 +178,14 @@ class MonitorTBB : public MonitorSeq<T, Dim>
         public :
 
         Worker_ (MonitorTBB<T, Dim> *monitor, std::size_t iter,
-                Particle<T> *particle, double *res) :
+                const Particle<T> *particle, double *res) :
             monitor_(monitor), iter_(iter), particle_(particle), res_(res) {}
 
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
-            double tmp = 0;
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 monitor_->monitor_state(iter_, SingleParticle<T>(
-                            i, &tmp, particle_), res_ + i * Dim);
+                            i, particle_), res_ + i * Dim);
             }
         }
 
@@ -193,7 +193,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 
         MonitorTBB<T, Dim> *const monitor_;
         const std::size_t iter_;
-        Particle<T> *const particle_;
+        const Particle<T> *const particle_;
         double *const res_;
     }; // class Worker_
 }; // class MonitorTBB
@@ -213,7 +213,8 @@ class PathTBB : public PathSeq<T>
             path_state_type path = NULL, width_state_type width = NULL) :
         PathSeq<T>(path, width) {}
 
-    double operator () (std::size_t iter, Particle<T> &particle, double *res)
+    double operator () (std::size_t iter, const Particle<T> &particle,
+            double *res)
     {
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particle.size()),
                 Worker_(this, iter, &particle, res));
@@ -227,16 +228,15 @@ class PathTBB : public PathSeq<T>
     {
         public :
 
-        Worker_ (PathTBB<T> *path, std::size_t iter, Particle<T> *particle,
-                double *res) :
+        Worker_ (PathTBB<T> *path, std::size_t iter,
+                const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
         void operator () (const tbb::blocked_range<std::size_t> &range) const
         {
-            double tmp = 0;
             for (std::size_t i = range.begin(); i != range.end(); ++i) {
                 res_[i] = path_->path_state(iter_, SingleParticle<T>(
-                            i, &tmp, particle_));
+                            i, particle_));
             }
         }
 
@@ -244,7 +244,7 @@ class PathTBB : public PathSeq<T>
 
         PathTBB<T> *const path_;
         const std::size_t iter_;
-        Particle<T> *const particle_;
+        const Particle<T> *const particle_;
         double *const res_;
     }; // class Worker_
 }; // PathTBB
