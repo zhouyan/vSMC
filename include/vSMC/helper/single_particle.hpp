@@ -22,7 +22,7 @@ class SingleParticle
         return SingleParticle<T>(id, new_weight, particle);
     }
 
-    static const SingleParticle<T> const_create (
+    static SingleParticle<T> const_create (
             std::size_t id, const Particle<T> *particle)
     {
         return SingleParticle<T>(id, particle);
