@@ -41,7 +41,7 @@ class Particle
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
     explicit Particle (size_type N, seed_type seed = V_SMC_CRNG_SEED) :
-        size_(N), value_(N), sampler_(NULL),
+        size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N)
     {
@@ -218,22 +218,6 @@ class Particle
         accept_ = new_accept;
     }
 
-    /// \brief Read only access to the sampler this particle set belongs to
-    ///
-    /// \return A const reference to the sampler this particle set belongs to
-    const Sampler<value_type> &sampler () const
-    {
-        return *sampler_;
-    }
-
-    /// \brief Set the sampler this particle set belongs to
-    ///
-    /// \param samp A const pointer to the sampler this particle belongs to
-    void sampler (const Sampler<value_type> *samp)
-    {
-        sampler_ = samp;
-    }
-
     /// \brief Get the value of SMC normalizing constant
     ///
     /// \return Log of SMC normalizng constant estimate
@@ -318,7 +302,6 @@ class Particle
 
     size_type size_;
     value_type value_;
-    const Sampler<value_type> *sampler_;
 
     weight_type weight_;
     weight_type log_weight_;
