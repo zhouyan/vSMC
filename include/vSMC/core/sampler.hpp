@@ -20,11 +20,11 @@ class Sampler
     public :
 
     /// The type of initialization functor
-    typedef internal::function<std::size_t (Particle<T> &, void *)>
+    typedef internal::function<unsigned (Particle<T> &, void *)>
         initialize_type;
 
     /// The type of move and mcmc functor
-    typedef internal::function<std::size_t (std::size_t, Particle<T> &)>
+    typedef internal::function<unsigned (unsigned, Particle<T> &)>
         move_type;
 
     /// The type of ESS history vector
@@ -34,7 +34,7 @@ class Sampler
     typedef std::vector<bool> resampled_type;
 
     /// The type of accept count history vector
-    typedef std::vector<std::size_t> accept_type;
+    typedef std::vector<unsigned> accept_type;
 
     /// \brief Construct a sampler with given number of particles
     ///
@@ -67,7 +67,7 @@ class Sampler
     ///
     /// \return The number of iterations recorded so far (including the
     /// initialization)
-    std::size_t iter_size () const
+    unsigned iter_size () const
     {
         return ess_.size();
     }
@@ -76,7 +76,7 @@ class Sampler
     ///
     /// \return The number of iterations performed by iterate() so far (not
     /// including the initialization)
-    std::size_t iter_num () const
+    unsigned iter_num () const
     {
         return iter_num_;
     }
@@ -223,9 +223,9 @@ class Sampler
     /// \brief Perform iteration
     ///
     /// \param n The number of iterations to be performed
-    void iterate (std::size_t n)
+    void iterate (unsigned n)
     {
-        for (std::size_t i = 0; i != n; ++i)
+        for (unsigned i = 0; i != n; ++i)
             iterate();
     }
 
@@ -407,7 +407,7 @@ class Sampler
         if (print_header)
             os << '\n';
 
-        for (std::size_t i = 0; i != iter_size(); ++i) {
+        for (unsigned i = 0; i != iter_size(); ++i) {
             os
                 << i << '\t' << ess_[i] / size()
                 << '\t' << resampled_[i]
@@ -425,7 +425,7 @@ class Sampler
                 }
             }
 
-            for (std::size_t m = 0; m != monitor_index_empty.size(); ++m) {
+            for (unsigned m = 0; m != monitor_index_empty.size(); ++m) {
                 if (!monitor_index_empty[m] && *iter_monitor_index[m] == i) {
                     for (unsigned d = 0; d != monitor_dim[m]; ++d)
                         os << '\t' << (*iter_monitor_record[m])[d];
@@ -458,7 +458,7 @@ class Sampler
 
     /// Particle sets
     Particle<T> particle_;
-    std::size_t iter_num_;
+    unsigned iter_num_;
     ess_type ess_;
     resampled_type resampled_;
     accept_type accept_;

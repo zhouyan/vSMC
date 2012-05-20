@@ -205,7 +205,7 @@ class Particle
     /// \brief Get accept count of the last iteration
     ///
     /// \return The number of acceptance of the last iteration
-    std::size_t accept () const
+    unsigned accept () const
     {
         return accept_;
     }
@@ -213,7 +213,7 @@ class Particle
     /// \brief Set accept count of the last iteration
     ///
     /// \param new_accept The number of acceptance of the last iteration
-    void accept (std::size_t new_accept)
+    void accept (unsigned new_accept)
     {
         accept_ = new_accept;
     }
@@ -310,7 +310,7 @@ class Particle
 
     double ess_;
     bool resampled_;
-    std::size_t accept_;
+    unsigned accept_;
     double zconst_;
 
     seed_type seed_;

@@ -17,10 +17,10 @@ class Monitor
 
     /// The type of monitor integral functor
     typedef internal::function<void (
-            std::size_t, const Particle<T> &, double *)> integral_type;
+            unsigned, const Particle<T> &, double *)> integral_type;
 
     /// The type of the index vector
-    typedef std::vector<std::size_t> index_type;
+    typedef std::vector<unsigned> index_type;
 
     /// The type of the record vector
     typedef std::vector<Eigen::VectorXd> record_type;
@@ -114,7 +114,7 @@ class Monitor
     /// \note The integral function has to be set through either the
     /// constructor or integral() to a non-NULL value before calling eval().
     /// Otherwise exception will be raised when calling eval().
-    void eval (std::size_t iter, const Particle<T> &particle)
+    void eval (unsigned iter, const Particle<T> &particle)
     {
         buffer_.resize(dim_, particle.size());
         integral_(iter, particle, buffer_.data());

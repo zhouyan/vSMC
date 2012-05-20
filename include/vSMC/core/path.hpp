@@ -17,10 +17,10 @@ class Path
 
     /// The type of path sampling integral functor
     typedef internal::function<double (
-            std::size_t, const Particle<T> &, double *)> integral_type;
+            unsigned, const Particle<T> &, double *)> integral_type;
 
     /// The type of the index vector
-    typedef std::vector<std::size_t> index_type;
+    typedef std::vector<unsigned> index_type;
 
     /// The type of the integrand vector
     typedef std::vector<double> integrand_type;
@@ -126,7 +126,7 @@ class Path
     /// \note The integral function has to be set through either the
     /// constructor or integral() to a non-NULL value before calling eval().
     /// Otherwise exception will be raised when calling eval().
-    void eval (std::size_t iter, const Particle<T> &particle)
+    void eval (unsigned iter, const Particle<T> &particle)
     {
         buffer_.resize(particle.size());
         width_.push_back(integral_(iter, particle, buffer_.data()));
@@ -142,7 +142,7 @@ class Path
     double zconst () const
     {
         double sum = 0;
-        for (std::size_t i = 1; i != iter_size(); ++i)
+        for (unsigned i = 1; i != iter_size(); ++i)
             sum += 0.5 * width_[i] * (integrand_[i-1] + integrand_[i]);
 
         return sum;

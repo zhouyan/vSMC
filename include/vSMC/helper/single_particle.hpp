@@ -13,14 +13,15 @@ class SingleParticle
 {
     public :
 
+    typedef V_SMC_INDEX_TYPE size_type;
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 
-    SingleParticle (std::size_t id, double *new_weight,
+    SingleParticle (size_type id, double *new_weight,
             Particle<T> *particle) :
         id_(id), new_weight_(new_weight), particle_(particle) {}
 
-    std::size_t id () const
+    size_type id () const
     {
         return id_;
     }
@@ -76,7 +77,7 @@ class SingleParticle
 
     private :
 
-    const std::size_t id_;
+    const size_type id_;
     double *const new_weight_;
     Particle<T> *const particle_;
 }; // class SingleParticle
@@ -89,13 +90,14 @@ class ConstSingleParticle
 {
     public :
 
+    typedef V_SMC_INDEX_TYPE size_type;
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 
-    ConstSingleParticle (std::size_t id, const Particle<T> *particle) :
+    ConstSingleParticle (size_type id, const Particle<T> *particle) :
         id_(id), particle_(particle) {}
 
-    std::size_t id () const
+    size_type id () const
     {
         return id_;
     }
@@ -127,7 +129,7 @@ class ConstSingleParticle
 
     private :
 
-    const std::size_t id_;
+    const size_type id_;
     const Particle<T> *const particle_;
 }; // class SingleParticle
 

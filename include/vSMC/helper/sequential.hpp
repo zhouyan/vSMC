@@ -13,7 +13,7 @@ class InitializeSeq
 {
     public :
 
-    typedef internal::function<int (SingleParticle<T>)>
+    typedef internal::function<unsigned (SingleParticle<T>)>
         initialize_state_type;
     typedef internal::function<void (Particle<T> &, void *)>
         initialize_param_type;
@@ -27,12 +27,12 @@ class InitializeSeq
     InitializeSeq<T> & operator= (const InitializeSeq<T> &init) {return *this;}
     virtual ~InitializeSeq () {}
 
-    virtual std::size_t operator() (Particle<T> &particle, void *param)
+    virtual unsigned operator() (Particle<T> &particle, void *param)
     {
         initialize_param(particle, param);
         pre_processor(particle);
         log_weight_.resize(particle.size());
-        std::size_t accept = 0;
+        unsigned accept = 0;
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
             accept += initialize_state(SingleParticle<T>(
@@ -44,7 +44,7 @@ class InitializeSeq
         return accept;
     }
 
-    virtual int initialize_state (SingleParticle<T> part) = 0;
+    virtual unsigned initialize_state (SingleParticle<T> part) = 0;
     virtual void initialize_param (Particle<T> &particle, void *param) {}
     virtual void pre_processor (Particle<T> &particle) {}
     virtual void post_processor (Particle<T> &particle) {}
@@ -62,13 +62,13 @@ class MoveSeq
 {
     public :
 
-    typedef internal::function<int (std::size_t, SingleParticle<T>)>
+    typedef internal::function<unsigned (unsigned, SingleParticle<T>)>
         move_state_type;
     typedef internal::function<WeightAction ()>
         weight_action_type;
-    typedef internal::function<void (std::size_t, Particle<T> &)>
+    typedef internal::function<void (unsigned, Particle<T> &)>
         pre_processor_type;
-    typedef internal::function<void (std::size_t, Particle<T> &)>
+    typedef internal::function<void (unsigned, Particle<T> &)>
         post_processor_type;
 
     MoveSeq () {}
@@ -76,11 +76,11 @@ class MoveSeq
     MoveSeq<T> & operator= (const MoveSeq<T> &move) {return *this;}
     virtual ~MoveSeq () {}
 
-    virtual std::size_t operator () (std::size_t iter, Particle<T> &particle)
+    virtual unsigned operator () (unsigned iter, Particle<T> &particle)
     {
         pre_processor(iter, particle);
         weight_.resize(particle.size());
-        std::size_t accept = 0;
+        unsigned accept = 0;
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
             accept += move_state(iter, SingleParticle<T>(
@@ -92,9 +92,9 @@ class MoveSeq
         return accept;
     }
 
-    virtual int move_state (std::size_t iter, SingleParticle<T> part) = 0;
-    virtual void pre_processor (std::size_t iter, Particle<T> &particle) {}
-    virtual void post_processor (std::size_t iter, Particle<T> &particle) {}
+    virtual unsigned move_state (unsigned iter, SingleParticle<T> part) = 0;
+    virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
+    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
 
     virtual WeightAction weight_action ()
     {
@@ -142,11 +142,11 @@ class MonitorSeq
     public :
 
     typedef internal::function<void (
-            std::size_t, ConstSingleParticle<T>, double *)> monitor_state_type;
+            unsigned, ConstSingleParticle<T>, double *)> monitor_state_type;
 
     virtual ~MonitorSeq () {}
 
-    virtual void operator () (std::size_t iter, const Particle<T> &particle,
+    virtual void operator () (unsigned iter, const Particle<T> &particle,
             double *res)
     {
         for (typename Particle<T>::size_type i = 0;
@@ -156,7 +156,7 @@ class MonitorSeq
         }
     }
 
-    virtual void monitor_state (std::size_t iter, ConstSingleParticle<T> part,
+    virtual void monitor_state (unsigned iter, ConstSingleParticle<T> part,
             double *res) = 0;
 
     static unsigned dim ()
@@ -173,14 +173,14 @@ class PathSeq
 {
     public :
 
-    typedef internal::function<double (std::size_t, ConstSingleParticle<T>)>
+    typedef internal::function<double (unsigned, ConstSingleParticle<T>)>
         path_state_type;
-    typedef internal::function<double (std::size_t, const Particle<T> &)>
+    typedef internal::function<double (unsigned, const Particle<T> &)>
         width_state_type;
 
     virtual ~PathSeq () {}
 
-    virtual double operator () (std::size_t iter, const Particle<T> &particle,
+    virtual double operator () (unsigned iter, const Particle<T> &particle,
             double *res)
     {
         for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
@@ -189,9 +189,9 @@ class PathSeq
         return width_state(iter, particle);
     }
 
-    virtual double path_state (std::size_t iter,
+    virtual double path_state (unsigned iter,
             ConstSingleParticle<T> part) = 0;
-    virtual double width_state (std::size_t iter,
+    virtual double width_state (unsigned iter,
             const Particle<T> &particle) = 0;
 };
 
