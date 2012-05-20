@@ -24,16 +24,8 @@ class InitializeTBB : public InitializeSeq<T>
     typedef typename InitializeSeq<T>::post_processor_type
         post_processor_type;
 
-    explicit InitializeTBB (
-            initialize_state_type initialize_state = NULL,
-            initialize_param_type initialize_param = NULL,
-            pre_processor_type    pre_processor    = NULL,
-            post_processor_type   post_processor   = NULL) :
-        InitializeSeq<T>(initialize_state, initialize_param,
-                pre_processor, post_processor) {}
-
+    InitializeTBB () {}
     InitializeTBB (const InitializeTBB<T> &init) {}
-
     InitializeTBB<T> & operator= (const InitializeTBB<T> &init) {return *this;}
 
     std::size_t operator() (Particle<T> &particle, void *param)
@@ -95,15 +87,8 @@ class MoveTBB : public MoveSeq<T>
     typedef typename MoveSeq<T>::pre_processor_type  pre_processor_type;
     typedef typename MoveSeq<T>::post_processor_type post_processor_type;
 
-    explicit MoveTBB (
-            move_state_type     move_state     = NULL,
-            weight_action_type  weight_action  = NULL,
-            pre_processor_type  pre_processor  = NULL,
-            post_processor_type post_processor = NULL) :
-        MoveSeq<T>(move_state, weight_action, pre_processor, post_processor) {}
-
+    MoveTBB () {}
     MoveTBB (const MoveTBB<T> &move) {}
-
     MoveTBB<T> & operator= (const MoveTBB<T> &move) {return *this;}
 
     std::size_t operator () (std::size_t iter, Particle<T> &particle)
@@ -161,9 +146,6 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 
     typedef typename MonitorSeq<T>::monitor_state_type monitor_state_type;
 
-    explicit MonitorTBB (monitor_state_type monitor = NULL) :
-        MonitorSeq<T, Dim>(monitor) {}
-
     void operator () (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
@@ -208,10 +190,6 @@ class PathTBB : public PathSeq<T>
 
     typedef typename PathSeq<T>::path_state_type path_state_type;
     typedef typename PathSeq<T>::width_state_type width_state_type;
-
-    explicit PathTBB (
-            path_state_type path = NULL, width_state_type width = NULL) :
-        PathSeq<T>(path, width) {}
 
     double operator () (std::size_t iter, const Particle<T> &particle,
             double *res)

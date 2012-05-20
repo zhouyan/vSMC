@@ -22,34 +22,9 @@ class InitializeSeq
     typedef internal::function<void (Particle<T> &)>
         post_processor_type;
 
-    explicit InitializeSeq (
-            initialize_state_type initialize_state = NULL,
-            initialize_param_type initialize_param = NULL,
-            pre_processor_type    pre_processor    = NULL,
-            post_processor_type   post_processor   = NULL) :
-        initialize_state_(initialize_state),
-        initialize_param_(initialize_param),
-        pre_processor_(pre_processor),
-        post_processor_(post_processor) {}
-
-    InitializeSeq (const InitializeSeq<T> &init) :
-        initialize_state_(init.initialize_state_),
-        initialize_param_(init.initialize_param_),
-        pre_processor_(init.pre_processor_),
-        post_processor_(init.post_processor_) {}
-
-    InitializeSeq<T> & operator= (const InitializeSeq<T> &init)
-    {
-        if (this != &init) {
-            initialize_state_ = init.initialize_state_;
-            initialize_param_ = init.initialize_param_;
-            pre_processor_    = init.pre_processor_;
-            post_processor_   = init.post_processor_;
-        }
-
-        return *this;
-    }
-
+    InitializeSeq () {}
+    InitializeSeq (const InitializeSeq<T> &init) {}
+    InitializeSeq<T> & operator= (const InitializeSeq<T> &init) {return *this;}
     virtual ~InitializeSeq () {}
 
     virtual std::size_t operator() (Particle<T> &particle, void *param)
@@ -69,36 +44,13 @@ class InitializeSeq
         return accept;
     }
 
-    virtual int initialize_state (SingleParticle<T> part)
-    {
-        assert(bool(initialize_state_));
-        return initialize_state_(part);
-    }
-
-    virtual void initialize_param (Particle<T> &particle, void *param)
-    {
-        if (bool(initialize_param_))
-            initialize_param_(particle, param);
-    }
-
-    virtual void pre_processor (Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(particle);
-    }
-
-    virtual void post_processor (Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(particle);
-    }
+    virtual int initialize_state (SingleParticle<T> part) = 0;
+    virtual void initialize_param (Particle<T> &particle, void *param) {}
+    virtual void pre_processor (Particle<T> &particle) {}
+    virtual void post_processor (Particle<T> &particle) {}
 
     private :
 
-    initialize_state_type initialize_state_;
-    initialize_param_type initialize_param_;
-    pre_processor_type pre_processor_;
-    post_processor_type post_processor_;
     typename Particle<T>::weight_type log_weight_;
 }; // class InitializeSeq
 
@@ -119,32 +71,9 @@ class MoveSeq
     typedef internal::function<void (std::size_t, Particle<T> &)>
         post_processor_type;
 
-    explicit MoveSeq (
-            move_state_type     move_state     = NULL,
-            weight_action_type  weight_action  = NULL,
-            pre_processor_type  pre_processor  = NULL,
-            post_processor_type post_processor = NULL) :
-        move_state_(move_state), weight_action_(weight_action),
-        pre_processor_(pre_processor), post_processor_(post_processor) {}
-
-    MoveSeq (const MoveSeq<T> &move) :
-        move_state_(move.move_state_),
-        weight_action_(move.weight_action_),
-        pre_processor_(move.pre_processor_),
-        post_processor_(move.post_processor_) {}
-
-    MoveSeq<T> & operator= (const MoveSeq<T> &move)
-    {
-        if (this != &move) {
-            move_state_     = move.move_state_;
-            weight_action_  = move.weight_action_;
-            pre_processor_  = move.pre_processor_;
-            post_processor_ = move.post_processor_;
-        }
-
-        return *this;
-    }
-
+    MoveSeq () {}
+    MoveSeq (const MoveSeq<T> &move) {}
+    MoveSeq<T> & operator= (const MoveSeq<T> &move) {return *this;}
     virtual ~MoveSeq () {}
 
     virtual std::size_t operator () (std::size_t iter, Particle<T> &particle)
@@ -163,31 +92,15 @@ class MoveSeq
         return accept;
     }
 
-    virtual int move_state (std::size_t iter, SingleParticle<T> part)
-    {
-        assert(bool(move_state_));
-        return move_state_(iter, part);
-    }
+    virtual int move_state (std::size_t iter, SingleParticle<T> part) = 0;
+    virtual void pre_processor (std::size_t iter, Particle<T> &particle) {}
+    virtual void post_processor (std::size_t iter, Particle<T> &particle) {}
 
     virtual WeightAction weight_action ()
     {
-        if (bool(weight_action_))
-            return weight_action_();
-        else
-            return ADD_LOG_WEIGHT;
+        return ADD_LOG_WEIGHT;
     }
 
-    virtual void pre_processor (std::size_t iter, Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(iter, particle);
-    }
-
-    virtual void post_processor (std::size_t iter, Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(iter, particle);
-    }
 
     protected :
 
@@ -217,10 +130,6 @@ class MoveSeq
 
     private :
 
-    move_state_type move_state_;
-    weight_action_type weight_action_;
-    pre_processor_type pre_processor_;
-    post_processor_type post_processor_;
     typename Particle<T>::weight_type weight_;
 }; // class MoveSeq
 
@@ -235,9 +144,6 @@ class MonitorSeq
     typedef internal::function<void (
             std::size_t, ConstSingleParticle<T>, double *)> monitor_state_type;
 
-    explicit MonitorSeq (monitor_state_type monitor = NULL) :
-        monitor_state_(monitor) {}
-
     virtual ~MonitorSeq () {}
 
     virtual void operator () (std::size_t iter, const Particle<T> &particle,
@@ -251,20 +157,12 @@ class MonitorSeq
     }
 
     virtual void monitor_state (std::size_t iter, ConstSingleParticle<T> part,
-            double *res)
-    {
-        assert(bool(monitor_state_));
-        monitor_state_(iter, part, res);
-    }
+            double *res) = 0;
 
     static unsigned dim ()
     {
         return Dim;
     }
-
-    private :
-
-    monitor_state_type monitor_state_;
 }; // class MonitorSeq
 
 /// \brief Path::integral_type subtype
@@ -280,10 +178,6 @@ class PathSeq
     typedef internal::function<double (std::size_t, const Particle<T> &)>
         width_state_type;
 
-    explicit PathSeq (
-            path_state_type path = NULL, width_state_type width = NULL) :
-        path_state_(path), width_state_(width) {}
-
     virtual ~PathSeq () {}
 
     virtual double operator () (std::size_t iter, const Particle<T> &particle,
@@ -295,22 +189,10 @@ class PathSeq
         return width_state(iter, particle);
     }
 
-    virtual double path_state (std::size_t iter, ConstSingleParticle<T> part)
-    {
-        assert(bool(path_state_));
-        return path_state_(iter, part);
-    }
-
-    virtual double width_state (std::size_t iter, const Particle<T> &particle)
-    {
-        assert(bool(width_state_));
-        return width_state_(iter, particle);
-    }
-
-    private :
-
-    path_state_type path_state_;
-    width_state_type width_state_;
+    virtual double path_state (std::size_t iter,
+            ConstSingleParticle<T> part) = 0;
+    virtual double width_state (std::size_t iter,
+            const Particle<T> &particle) = 0;
 };
 
 } // namespace vSMC
