@@ -14,14 +14,14 @@ class StateBase
 {
     public :
 
+    /// The type of the size of the particle set
+    typedef V_SMC_INDEX_TYPE size_type;
+
     /// The type of state parameters
     typedef T state_type;
 
     /// The type of the matrix of states
     typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
-
-    /// The type of the size of the particle set
-    typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE size_type;
 
     /// \brief Construct a StateBase object with given number of particles
     ///
