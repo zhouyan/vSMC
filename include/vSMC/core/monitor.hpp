@@ -90,6 +90,15 @@ class Monitor
         return !bool(integral_);
     }
 
+    /// \brief Reserve space for histories
+    ///
+    /// \param num Expected iteration number
+    void reserve (unsigned num)
+    {
+        index_.reserve(num);
+        record_.reserve(num);
+    }
+
     /// \brief Iteration index
     ///
     /// \return A const reference to the index
