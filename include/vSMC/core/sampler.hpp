@@ -189,6 +189,8 @@ class Sampler
     /// functor
     void initialize (void *param = NULL)
     {
+        assert(bool(init_));
+
         ess_.clear();
         resampled_.clear();
         accept_.clear();
@@ -210,6 +212,7 @@ class Sampler
     void iterate ()
     {
         assert(initialized_);
+        assert(bool(move_));
 
         ++iter_num_;
         if (bool(move_))
@@ -250,6 +253,8 @@ class Sampler
     void integrate (unsigned dim,
             const typename Monitor<T>::integral_type &integral, double *res)
     {
+        assert(bool(integral));
+
         Monitor<T> m(dim, integral);
         m.eval(iter_num_, particle_);
         Eigen::Map<Eigen::VectorXd> r(res, m.dim());
