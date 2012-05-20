@@ -155,10 +155,32 @@ class Sampler
 
     /// \brief Replace initialization functor
     ///
-    /// \param init New Initialization functor
-    void initialize (const initialize_type &init)
+    /// \param new_init New Initialization functor
+    void init (const initialize_type &new_init)
     {
-        init_ = init;
+        init_ = new_init;
+    }
+
+    /// \brief Replace iteration functor
+    ///
+    /// \param new_move New Move functor
+    void move (const move_type &new_move)
+    {
+        move_ = new_move;
+    }
+
+    /// \brief Replace iteration functor
+    ///
+    /// \param new_mcmc New MCMC Move functor
+    void mcmc (const move_type &new_mcmc)
+    {
+        mcmc_.push_back(new_mcmc);
+    }
+
+    /// \brief Clear all MCMC moves
+    void clear_mcmc ()
+    {
+        mcmc_.clear();
     }
 
     /// \brief Initialize the particle set
@@ -182,28 +204,6 @@ class Sampler
         particle_.reset_zconst();
 
         initialized_ = true;
-    }
-
-    /// \brief Replace iteration functor
-    ///
-    /// \param new_move New Move functor
-    void move (const move_type &new_move)
-    {
-        move_ = new_move;
-    }
-
-    /// \brief Replace iteration functor
-    ///
-    /// \param new_mcmc New MCMC Move functor
-    void mcmc (const move_type &new_mcmc)
-    {
-        mcmc_.push_back(new_mcmc);
-    }
-
-    /// \brief Clear all MCMC moves
-    void clear_mcmc ()
-    {
-        mcmc_.clear();
     }
 
     /// \brief Perform iteration
