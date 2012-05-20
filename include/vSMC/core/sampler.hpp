@@ -113,6 +113,25 @@ class Sampler
         threshold_ = threshold;
     }
 
+    /// \brief Reserve space for histories
+    ///
+    /// \param num Expected iteration number
+    void reserve (unsigned num)
+    {
+        ess_.reserve(num);
+        resampled_.reserve(num);
+        accept_.reserve(num);
+
+        for (typename std::map<std::string, Monitor<T> >::iterator
+                imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
+            if (!imap->second.empty())
+                imap->second.reserve(num);
+        }
+
+        if (!path_.empty())
+            path_.reserve(num);
+    }
+
     /// \brief ESS history
     ///
     /// \return A const reference to the history of ESS
@@ -412,7 +431,7 @@ class Sampler
         if (print_header)
             os << '\n';
 
-        for (unsigned i = 0; i != iter_size(); ++i) {
+        for (unsigned i = 0; i != iter_num_ + 1; ++i) {
             os
                 << i << '\t' << ess_[i] / size()
                 << '\t' << resampled_[i]
@@ -442,8 +461,7 @@ class Sampler
                 }
             }
 
-            if (i != iter_size() - 1)
-                os << '\n';
+            os << '\n';
         }
     }
 
