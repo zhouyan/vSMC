@@ -16,7 +16,7 @@
 #include <vSMC/internal/random.hpp>
 
 #ifndef V_SMC_INDEX_TYPE
-#define V_SMC_INDEX_TYPE EIGEN_DEFAULT_DENSE_INDEX_TYPE 
+#define V_SMC_INDEX_TYPE EIGEN_DEFAULT_DENSE_INDEX_TYPE
 #endif // V_SMC_INDEX_TYPE
 
 namespace vSMC {
@@ -38,6 +38,11 @@ template <typename T> class InitializeTBB;
 template <typename T> class MoveTBB;
 template <typename T, unsigned Dim = 1> class MonitorTBB;
 template <typename T> class PathTBB;
+
+template <typename Base> class InitializeBase;
+template <typename Base> class MoveBase;
+template <typename Base> class MonitorBase;
+template <typename Base> class PathBase;
 
 /// \brief Resample scheme
 ///
