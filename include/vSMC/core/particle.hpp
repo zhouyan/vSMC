@@ -19,7 +19,7 @@ class Particle
     typedef T value_type;
 
     /// The type of the size of the particle set
-    typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE size_type;
+    typedef V_SMC_INDEX_TYPE size_type;
 
     /// The type of the Counter-based random number generator
     typedef V_SMC_CRNG_TYPE crng_type;
