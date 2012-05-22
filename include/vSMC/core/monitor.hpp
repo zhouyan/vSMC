@@ -20,17 +20,17 @@ class Monitor
             unsigned, const Particle<T> &, double *)> integral_type;
 
     /// The type of the index vector
-    typedef std::vector<unsigned> index_type;
+    typedef std::deque<unsigned> index_type;
 
     /// The type of the record vector
-    typedef std::vector<Eigen::VectorXd> record_type;
+    typedef std::deque<std::deque<double> > record_type;
 
     /// \brief Construct a Monitor with an integral function
     ///
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param integral The functor used to compute the integrands
     explicit Monitor (unsigned dim = 1, const integral_type &integral = NULL) :
-        dim_(dim), integral_(integral) {}
+        dim_(dim), integral_(integral), record_(dim) {}
 
     /// \brief Copy constructor
     ///
@@ -90,15 +90,6 @@ class Monitor
         return !bool(integral_);
     }
 
-    /// \brief Reserve space for histories
-    ///
-    /// \param num Expected iteration number
-    void reserve (unsigned num)
-    {
-        index_.reserve(num);
-        record_.reserve(num);
-    }
-
     /// \brief Iteration index
     ///
     /// \return A const reference to the index
@@ -130,7 +121,8 @@ class Monitor
         result_.noalias() = buffer_ * particle.weight();
 
         index_.push_back(iter);
-        record_.push_back(result_);
+        for (unsigned d = 0; d != dim_; ++d)
+            record_[d].push_back(result_[d]);
     }
 
     /// \brief Clear all recorded data
