@@ -28,13 +28,16 @@ class Sampler
         move_type;
 
     /// The type of ESS history vector
-    typedef std::vector<double> ess_type;
+    typedef std::deque<double> ess_type;
 
     /// The type of resampling history vector
-    typedef std::vector<bool> resampled_type;
+    typedef std::deque<bool> resampled_type;
 
     /// The type of accept count history vector
-    typedef std::vector<unsigned> accept_type;
+    typedef std::deque<std::deque<unsigned> > accept_type;
+
+    /// The type of Monitor map
+    typedef std::map<std::string, Monitor<T> > monitor_map;
 
     /// \brief Construct a sampler with given number of particles
     ///
@@ -111,25 +114,6 @@ class Sampler
     void resample_threshold (double threshold)
     {
         threshold_ = threshold;
-    }
-
-    /// \brief Reserve space for histories
-    ///
-    /// \param num Expected iteration number
-    void reserve (unsigned num)
-    {
-        ess_.reserve(num);
-        resampled_.reserve(num);
-        accept_.reserve(num);
-
-        for (typename std::map<std::string, Monitor<T> >::iterator
-                imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
-            if (!imap->second.empty())
-                imap->second.reserve(num);
-        }
-
-        if (!path_.empty())
-            path_.reserve(num);
     }
 
     /// \brief ESS history
@@ -215,12 +199,12 @@ class Sampler
         accept_.clear();
         path_.clear();
 
-        for (typename std::map<std::string, Monitor<T> >::iterator
-                imap = monitor_.begin(); imap != monitor_.end(); ++imap)
-            imap->second.clear();
+        for (typename monitor_map::iterator miter = monitor_.begin();
+                miter != monitor_.end(); ++miter)
+            miter->second.clear();
 
         iter_num_ = 0;
-        accept_.push_back(init_(particle_, param));
+        accept_.push_back(std::deque<unsigned>(1, init_(particle_, param)));
         post_move();
         particle_.reset_zconst();
 
@@ -230,15 +214,14 @@ class Sampler
     /// \brief Perform iteration
     void iterate ()
     {
-        assert(initialized_);
-        assert(bool(move_));
-
         ++iter_num_;
+        std::deque<unsigned> acc;
         if (bool(move_))
-            accept_.push_back(move_(iter_num_, particle_));
-        for (typename std::vector<move_type>::iterator miter = mcmc_.begin();
+            acc.push_back(move_(iter_num_, particle_));
+        for (typename std::deque<move_type>::iterator miter = mcmc_.begin();
                 miter != mcmc_.end(); ++miter)
-            accept_.back() = (*miter)(iter_num_, particle_);
+            acc.push_back((*miter)(iter_num_, particle_));
+        accept_.push_back(acc);
         post_move();
     }
 
@@ -253,19 +236,6 @@ class Sampler
 
     /// \brief Perform importance sampling integration
     ///
-    /// \param integral The functor used to compute the integrands
-    /// \param res The result, an array of length dim
-    template<typename MonitorType>
-    void integrate (const MonitorType &integral, double *res)
-    {
-        Monitor<T> m(integral.dim(), integral);
-        m.eval(iter_num_, particle_);
-        Eigen::Map<Eigen::VectorXd> r(res, m.dim());
-        r = m.record().back();
-    }
-
-    /// \brief Perform importance sampling integration
-    ///
     /// \param dim The dimension of the parameter
     /// \param integral The functor used to compute the integrands
     /// \param res The result, an array of length dim
@@ -273,19 +243,20 @@ class Sampler
             const typename Monitor<T>::integral_type &integral, double *res)
     {
         assert(bool(integral));
+        assert(dim > 0);
 
         Monitor<T> m(dim, integral);
         m.eval(iter_num_, particle_);
-        Eigen::Map<Eigen::VectorXd> r(res, m.dim());
-        r = m.record().back();
+        for (unsigned d = 0; d += dim; ++d)
+            res[d] = m.record()[d].back();
     }
 
     /// \brief Add a monitor, similar to \b monitor in \b BUGS
     ///
     /// \param name The name of the monitor
     /// \param integral The functor used to compute the integrands
-    template<typename MonitorType>
-    void monitor (const std::string &name, const MonitorType &integral)
+    template<typename MonitorIntegralType>
+    void monitor (const std::string &name, const MonitorIntegralType &integral)
     {
         monitor_.insert(std::make_pair(
                     name, Monitor<T>(integral.dim(), integral)));
@@ -309,8 +280,18 @@ class Sampler
     /// \param name The name of the monitor
     ///
     /// \return An const_iterator point to the monitor for the given name
-    typename std::map<std::string, Monitor<T> >::const_iterator
-        monitor (const std::string &name) const
+    typename monitor_map::const_iterator monitor (
+            const std::string &name) const
+    {
+        return monitor_.find(name);
+    }
+
+    /// \brief Read and write access to a named monitor through iterator
+    ///
+    /// \param name The name of the monitor
+    ///
+    /// \return An iterator point to the monitor for the given name
+    typename monitor_map::iterator monitor (const std::string &name)
     {
         return monitor_.find(name);
     }
@@ -318,7 +299,15 @@ class Sampler
     /// \brief Read only access to all monitors
     ///
     /// \return A const reference to monitors
-    const std::map<std::string, Monitor<T> > &monitor () const
+    const monitor_map &monitor () const
+    {
+        return monitor_;
+    }
+
+    /// \brief Read and write access to all monitors
+    ///
+    /// \return A reference to monitors
+    monitor_map &monitor ()
     {
         return monitor_;
     }
@@ -377,90 +366,104 @@ class Sampler
     /// \param print_header Print header if \b true
     void print (std::ostream &os = std::cout, bool print_header = true) const
     {
-        print(os, print_header, !path_.index().empty(), monitor_name_);
-    }
+        // Accept count
+        unsigned accept_dim = 0;
+        for (accept_type::const_iterator aiter = accept_.begin();
+                aiter != accept_.end(); ++aiter)
+            if (aiter->size() > accept_dim)
+                accept_dim = aiter->size();
+        Eigen::MatrixXd accept_data(iter_num_ + 1, accept_dim);
+        accept_data.setConstant(0);
+        double anorm = static_cast<double>(size());
+        for (unsigned r = 0; r != iter_num_ + 1; ++r)
+            for (unsigned c = 0; c != accept_[r].size(); ++c)
+                accept_data(r, c) = accept_[r][c] / anorm;
 
-    /// \brief Print the history of the sampler
-    ///
-    /// \param os The ostream to which the contents are printed
-    /// \param print_path Print path sampling history if \b true
-    /// \param print_monitor A set of monitor names to be printed
-    /// \param print_header Print header if \b true
-    void print (std::ostream &os, bool print_header, bool print_path,
-            const std::set<std::string> &print_monitor) const
-    {
+        // Path sampling
+        Eigen::MatrixXd path_data(iter_num_ + 1, 3);
+        Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic>
+            path_mask(iter_num_ + 1, 1);
+        path_mask.setConstant(false);
+        for (unsigned d = 0; d != path_.iter_size(); ++d) {
+            unsigned prow = path_.index()[d];
+            path_data(prow, 0) = path_.integrand()[d];
+            path_data(prow, 1) = path_.width()[d];
+            path_data(prow, 2) = path_.grid()[d];
+            path_mask(prow) = true;
+        }
+
+        // Monitors
+        unsigned monitor_dim = 0;
+        for (typename monitor_map::const_iterator miter = monitor_.begin();
+                miter != monitor_.end(); ++miter)
+            monitor_dim += miter->second.dim();
+        Eigen::MatrixXd monitor_data(iter_num_ + 1, monitor_dim);
+        Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic>
+            monitor_mask(iter_num_ + 1, monitor_.size());
+        unsigned mcol = 0;
+        unsigned mmask = 0;
+        for (typename monitor_map::const_iterator miter = monitor_.begin();
+                miter != monitor_.end(); ++miter) {
+            unsigned mdim = miter->second.dim();
+            for (unsigned d = 0; d != miter->second.iter_size(); ++d) {
+                unsigned mrow = miter->second.index()[d];
+                for (unsigned c = 0; c != mdim; ++c) {
+                    monitor_data(mrow, c + mcol) =
+                        miter->second.record()[c][d];
+                }
+                monitor_mask(mrow, mmask) = true;
+            }
+            mcol += miter->second.dim();
+            ++mmask;
+        }
+
+        // Print header
         if (print_header) {
-            os << "iter\tESS\tresample\taccept\t";
-            if (print_path)
-                os << "path.integrand\tpath.width\tpath.grid\t";
-        }
-
-        typename Path<T>::index_type::const_iterator iter_path_index
-            = path_.index().begin();
-        typename Path<T>::integrand_type::const_iterator iter_path_integrand
-            = path_.integrand().begin();
-        typename Path<T>::width_type::const_iterator iter_path_width
-            = path_.width().begin();
-        typename Path<T>::grid_type::const_iterator iter_path_grid
-            = path_.grid().begin();
-
-        std::vector<bool> monitor_index_empty;
-        std::vector<unsigned> monitor_dim;
-        std::vector<typename Monitor<T>::index_type::const_iterator>
-            iter_monitor_index;
-        std::vector<typename Monitor<T>::record_type::const_iterator>
-            iter_monitor_record;
-        for (typename std::map<std::string, Monitor<T> >::const_iterator
-                imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
-            if (print_monitor.count(imap->first)) {
-                monitor_index_empty.push_back(imap->second.index().empty());
-                monitor_dim.push_back(imap->second.dim());
-                iter_monitor_index.push_back(imap->second.index().begin());
-                iter_monitor_record.push_back(imap->second.record().begin());
-                if (print_header) {
-                    if (monitor_dim.back() > 1) {
-                        for (unsigned d = 0; d != monitor_dim.back(); ++d)
-                            os << imap->first << d + 1 << '\t';
-                    } else {
-                        os << imap->first << '\t';
-                    }
+            os << "iter\tESS\tresample\t";
+            if (accept_dim == 1) {
+                os << "accept\t";
+            }
+            else {
+                for (unsigned d = 0; d != accept_dim; ++d)
+                    os << "accept" << d + 1 << '\t';
+            }
+            os << "path.integrand\tpath.width\tpath.grid\t";
+            for (typename monitor_map::const_iterator miter = monitor_.begin();
+                    miter != monitor_.end(); ++miter) {
+                if (miter->second.dim() == 1) {
+                    os << miter->first << '\t';
+                } else {
+                    for (unsigned d = 0; d != miter->second.dim(); ++d)
+                        os << miter->first << d + 1 << '\t';
                 }
             }
-        }
-
-        if (print_header)
             os << '\n';
+        }
 
-        for (unsigned i = 0; i != iter_num_ + 1; ++i) {
-            os
-                << i << '\t' << ess_[i] / size()
-                << '\t' << resampled_[i]
-                << '\t' << static_cast<double>(accept_[i]) / size();
-
-            if (print_path) {
-                if (!path_.index().empty() && *iter_path_index == i) {
-                    os
-                        << '\t' << *iter_path_integrand++
-                        << '\t' << *iter_path_width++
-                        << '\t' << *iter_path_grid++;
-                    ++iter_path_index;
+        // Print data
+        for (unsigned iter = 0; iter != iter_num_ + 1; ++iter) {
+            os << iter << '\t';
+            os << ess_[iter] / size() << '\t';
+            os << resampled_[iter] << '\t';
+            os << accept_data.row(iter) << '\t';
+            if (path_mask(iter))
+                os << path_data.row(iter) << '\t';
+            else
+                os << ".\t.\t.\t";
+            unsigned mcol = 0;
+            unsigned mmask = 0;
+            for (typename monitor_map::const_iterator miter = monitor_.begin();
+                    miter != monitor_.end(); ++miter) {
+                unsigned mdim = miter->second.dim();
+                if (monitor_mask(iter, mmask)) {
+                    os << monitor_data.block(iter, mcol, 1, mdim) << '\t';
                 } else {
-                    os << '\t' << '.' << '\t' << '.' << '\t' << '.';
+                    for (unsigned m = 0; m != mdim; ++m)
+                        os << ".\t";
                 }
+                mcol += miter->second.dim();
+                ++mmask;
             }
-
-            for (unsigned m = 0; m != monitor_index_empty.size(); ++m) {
-                if (!monitor_index_empty[m] && *iter_monitor_index[m] == i) {
-                    for (unsigned d = 0; d != monitor_dim[m]; ++d)
-                        os << '\t' << (*iter_monitor_record[m])[d];
-                    ++iter_monitor_index[m];
-                    ++iter_monitor_record[m];
-                } else {
-                    for (unsigned d = 0; d != monitor_dim[m]; ++d)
-                        os << '\t' << '.';
-                }
-            }
-
             os << '\n';
         }
     }
@@ -473,7 +476,7 @@ class Sampler
     /// Initialization and movement
     initialize_type init_;
     move_type move_;
-    std::vector<move_type> mcmc_;
+    std::deque<move_type> mcmc_;
 
     /// Resampling
     ResampleScheme scheme_;
@@ -487,7 +490,7 @@ class Sampler
     accept_type accept_;
 
     /// Monte Carlo estimation by integration
-    std::map<std::string, Monitor<T> > monitor_;
+    monitor_map monitor_;
     std::set<std::string> monitor_name_;
 
     /// Path sampling
@@ -511,7 +514,7 @@ class Sampler
         ess_.push_back(particle_.ess());
         resampled_.push_back(do_resample);
         particle_.resampled(resampled_.back());
-        particle_.accept(accept_.back());
+        particle_.accept(accept_.back().back());
     }
 }; // class Sampler
 
