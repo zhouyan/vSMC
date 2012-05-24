@@ -15,9 +15,9 @@ class Path
 {
     public :
 
-    /// The type of path sampling integral functor
+    /// The type of path sampling evaluation functor
     typedef internal::function<double (
-            unsigned, const Particle<T> &, double *)> integral_type;
+            unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
     typedef std::deque<unsigned> index_type;
@@ -31,17 +31,19 @@ class Path
     /// The type of the grid vector
     typedef std::deque<double> grid_type;
 
-    /// \brief Construct a Path with an integral function
+    /// \brief Construct a Path with an evaluation function
     ///
-    /// \param integral The functor used to compute the integrands
-    explicit Path (const integral_type &integral = NULL) :
-        integral_(integral) {}
+    /// \param eval The functor used to compute the integrands
+    /// \param direct Whether or not eval return the integrands or the final
+    /// results
+    explicit Path (const eval_type &eval = NULL, bool direct = false) :
+        direct_(direct), eval_(eval) {}
 
     /// \brief Copy constructor
     ///
     /// \param path The Path to by copied
     Path (const Path<T> &path) :
-        integral_(path.integral_),
+        eval_(path.eval_),
         index_(path.index_), integrand_(path.integrand_),
         width_(path.width_), grid_(path.grid_) {}
 
@@ -52,7 +54,7 @@ class Path
     Path<T> & operator= (const Path<T> &path)
     {
         if (&path != this) {
-            integral_  = path.integral_;
+            eval_      = path.eval_;
             index_     = path.index_;
             integrand_ = path.integrand_;
             width_     = path.width_;
@@ -70,20 +72,12 @@ class Path
         return index_.size();
     }
 
-    /// \brief Set the integral functor
-    ///
-    /// \param integral The functor used to compute the integrands
-    void integral (const integral_type &integral)
-    {
-        integral_ = integral;
-    }
-
     /// \brief Test if the path is empty
     ///
     /// \return \b true if the path is empty
     bool empty () const
     {
-        return !bool(integral_);
+        return !bool(eval_);
     }
 
     /// \brief Iteration index
@@ -118,19 +112,37 @@ class Path
         return grid_;
     }
 
+    /// \brief Set the evaluation functor
+    ///
+    /// \param new_eval The functor used to compute the integrands
+    /// \param direct Whether or not eval return the integrands or the final
+    /// results
+    void eval (const eval_type &new_eval, bool direct = false)
+    {
+        direct_ = direct;
+        eval_ = new_eval;
+    }
+
     /// \brief Evaluate the integration
     ///
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
     ///
-    /// \note The integral function has to be set through either the
-    /// constructor or integral() to a non-NULL value before calling eval().
+    /// \note The evaluaiton functor has to be set through either the
+    /// constructor or eval() to a non-NULL value before calling eval().
     /// Otherwise exception will be raised when calling eval().
     void eval (unsigned iter, const Particle<T> &particle)
     {
-        buffer_.resize(particle.size());
-        width_.push_back(integral_(iter, particle, buffer_.data()));
-        integrand_.push_back(particle.weight().dot(buffer_));
+        double w, p;
+        if (direct_) {
+            w = eval_(iter, particle, &p);
+        } else {
+            buffer_.resize(particle.size());
+            w = eval_(iter, particle, buffer_.data());
+            p = particle.weight().dot(buffer_);
+        }
+        width_.push_back(w);
+        integrand_.push_back(p);
         index_.push_back(iter);
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());
@@ -150,7 +162,7 @@ class Path
 
     /// \brief Clear all recorded data
     ///
-    /// \note The integral function is not reset
+    /// \note The evaluation functor is not reset
     void clear ()
     {
         index_.clear();
@@ -162,7 +174,8 @@ class Path
     private :
 
     Eigen::VectorXd buffer_;
-    integral_type integral_;
+    bool direct_;
+    eval_type eval_;
     index_type index_;
     integrand_type integrand_;
     width_type width_;

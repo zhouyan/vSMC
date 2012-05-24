@@ -234,44 +234,26 @@ class Sampler
             iterate();
     }
 
-    /// \brief Perform importance sampling integration
-    ///
-    /// \param dim The dimension of the parameter
-    /// \param integral The functor used to compute the integrands
-    /// \param res The result, an array of length dim
-    void integrate (unsigned dim,
-            const typename Monitor<T>::integral_type &integral, double *res)
-    {
-        assert(bool(integral));
-        assert(dim > 0);
-
-        Monitor<T> m(dim, integral);
-        m.eval(iter_num_, particle_);
-        for (unsigned d = 0; d += dim; ++d)
-            res[d] = m.record()[d].back();
-    }
-
-    /// \brief Add a monitor, similar to \b monitor in \b BUGS
+    /// \brief Add a monitor
     ///
     /// \param name The name of the monitor
-    /// \param integral The functor used to compute the integrands
-    template<typename MonitorIntegralType>
-    void monitor (const std::string &name, const MonitorIntegralType &integral)
+    /// \param new_monitor The monitor
+    void monitor (const std::string &name, const Monitor<T> &new_monitor)
     {
-        monitor_.insert(std::make_pair(
-                    name, Monitor<T>(integral.dim(), integral)));
+        monitor_.insert(std::make_pair(name, new_monitor));
         monitor_name_.insert(name);
     }
 
-    /// \brief Add a monitor, similar to \b monitor in \b BUGS
+    /// \brief Add a monitor with an evaluation functor
     ///
     /// \param name The name of the monitor
-    /// \param dim The dimension of the monitor
-    /// \param integral The functor used to compute the integrands
+    /// \param dim The dimension of the monitor, i.e., the number of variables
+    /// \param eval The functor used to directly evaluate the results
+    /// \param direct Whether or not eval return the integrands or the final
     void monitor (const std::string &name, unsigned dim,
-            const typename Monitor<T>::integral_type &integral)
+            const typename Monitor<T>::eval_type &eval, bool direct = false)
     {
-        monitor_.insert(std::make_pair(name, Monitor<T>(dim, integral)));
+        monitor_.insert(std::make_pair(name, Monitor<T>(dim, eval, direct)));
         monitor_name_.insert(name);
     }
 
@@ -336,12 +318,15 @@ class Sampler
         return path_;
     }
 
-    /// \brief Set the path sampling integral
+    /// \brief Set the path sampling evaluation functor
     ///
-    /// \param integral The functor used to compute the integrands
-    void path_sampling (const typename Path<T>::integral_type &integral)
+    /// \param eval The functor used to compute the integrands or results
+    /// \param direct Whether or not eval return the integrands or the final
+    /// results
+    void path_sampling (const typename Path<T>::eval_type &eval,
+            bool direct = false)
     {
-        path_.integral(integral);
+        path_.eval(eval, direct);
     }
 
     /// \brief Path sampling estimate of normalizing constant

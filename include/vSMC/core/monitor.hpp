@@ -15,9 +15,9 @@ class Monitor
 {
     public :
 
-    /// The type of monitor integral functor
+    /// The type of evaluation functor
     typedef internal::function<void (
-            unsigned, const Particle<T> &, double *)> integral_type;
+            unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
     typedef std::deque<unsigned> index_type;
@@ -25,18 +25,22 @@ class Monitor
     /// The type of the record vector
     typedef std::deque<std::deque<double> > record_type;
 
-    /// \brief Construct a Monitor with an integral function
+    /// \brief Construct a Monitor with an evaluation functor
     ///
     /// \param dim The dimension of the monitor, i.e., the number of variables
-    /// \param integral The functor used to compute the integrands
-    explicit Monitor (unsigned dim = 1, const integral_type &integral = NULL) :
-        dim_(dim), integral_(integral), record_(dim) {}
+    /// \param eval The functor used to evaluate the results
+    /// \param direct Whether or not eval return the integrands or the final
+    /// results
+    explicit Monitor (unsigned dim = 1,
+            const eval_type &eval = NULL, bool direct = false) :
+        dim_(dim), direct_(direct), eval_(eval), record_(dim) {}
 
     /// \brief Copy constructor
     ///
     /// \param monitor The Monitor to by copied
     Monitor (const Monitor<T> &monitor) :
-        dim_(monitor.dim_), integral_(monitor.integral_),
+        dim_(monitor.dim_), direct_(monitor.direct_),
+        eval_(monitor.eval_),
         index_(monitor.index_), record_(monitor.record_) {}
 
     /// \brief Assignment operator
@@ -47,10 +51,11 @@ class Monitor
     Monitor<T> & operator= (const Monitor<T> &monitor)
     {
         if (&monitor != this) {
-            dim_ = monitor.dim_;
-            integral_ = monitor.integral_;
-            index_ = monitor.index_;
-            record_ = monitor.record_;
+            dim_      = monitor.dim_;
+            direct_   = monitor.direct_;
+            eval_     = monitor.eval_;
+            index_    = monitor.index_;
+            record_   = monitor.record_;
         }
 
         return *this;
@@ -72,22 +77,12 @@ class Monitor
         return index_.size();
     }
 
-    /// \brief Set the integral functor
-    ///
-    /// \param dim The dimension of the monitor
-    /// \param integral The functor used to compute the integrands
-    void integral (unsigned dim, const integral_type &integral)
-    {
-        dim_ = dim;
-        integral_ = integral;
-    }
-
     /// \brief Test if the monitor is empty
     ///
     /// \return \b true if the monitor is empty
     bool empty () const
     {
-        return !bool(integral_);
+        return !bool(eval_);
     }
 
     /// \brief Iteration index
@@ -106,19 +101,38 @@ class Monitor
         return record_;
     }
 
+    /// \brief Set a new evaluation functor
+    ///
+    /// \param dim The dimension of the monitor, i.e., the number of variables
+    /// \param new_eval The functor used to directly evaluate the results
+    /// \param direct Whether or not eval return the integrands or the final
+    void eval (unsigned dim, const eval_type &new_eval, bool direct = false)
+    {
+        dim_ = dim;
+        direct_ = direct;
+        eval_ = new_eval;
+    }
+
     /// \brief Evaluate the integration
     ///
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
     ///
-    /// \note The integral function has to be set through either the
-    /// constructor or integral() to a non-NULL value before calling eval().
-    /// Otherwise exception will be raised when calling eval().
+    /// \note The evaluation functor has to be set through either the
+    /// constructor or eval() to a non-NULL value before calling eval(). The
+    /// direct evaluation functor is prefered when both are available.
     void eval (unsigned iter, const Particle<T> &particle)
     {
-        buffer_.resize(dim_, particle.size());
-        integral_(iter, particle, buffer_.data());
-        result_.noalias() = buffer_ * particle.weight();
+        assert(eval_);
+
+        if (bool(direct_)) {
+            result_.resize(dim_);
+            eval_(iter, particle, result_.data());
+        } else {
+            buffer_.resize(dim_, particle.size());
+            eval_(iter, particle, buffer_.data());
+            result_.noalias() = buffer_ * particle.weight();
+        }
 
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
@@ -127,7 +141,7 @@ class Monitor
 
     /// \brief Clear all recorded data
     ///
-    /// \note The integral function is not reset
+    /// \note The evaluation functor is not reset
     void clear ()
     {
         index_.clear();
@@ -139,7 +153,8 @@ class Monitor
     Eigen::MatrixXd buffer_;
     Eigen::VectorXd result_;
     unsigned dim_;
-    integral_type integral_;
+    bool direct_;
+    eval_type eval_;
     index_type index_;
     record_type record_;
 }; // class Monitor
