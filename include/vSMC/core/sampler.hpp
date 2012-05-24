@@ -344,7 +344,7 @@ class Sampler
     void print (std::basic_ostream<CharT, Traits> &os = std::cout,
             bool print_header = true) const
     {
-        std::string sep = "\t";
+        const char sep = '\t';
 
         // Accept count
         unsigned accd = 0;
