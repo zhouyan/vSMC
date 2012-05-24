@@ -2,7 +2,7 @@
 #define V_SMC_CORE_SAMPLER_HPP
 
 #include <vSMC/internal/common.hpp>
-#include <iostream>
+#include <ostream>
 #include <map>
 #include <set>
 #include <string>
@@ -340,9 +340,11 @@ class Sampler
     ///
     /// \param os The ostream to which the contents are printed
     /// \param print_header Print header if \b true
-    void print (std::ostream &os = std::cout, bool print_header = true) const
+    template<typename CharT, typename Traits>
+    void print (std::basic_ostream<CharT, Traits> &os = std::cout,
+            bool print_header = true) const
     {
-        std::string sep = " ";
+        std::string sep = "\t";
 
         // Accept count
         unsigned accd = 0;
@@ -506,11 +508,11 @@ namespace std {
 /// \param sampler The sampler to be printed
 ///
 /// \note This is the same as <tt>sampler.print(os)</tt>
-template<typename T>
-std::ostream & operator<< (std::ostream &os, const vSMC::Sampler<T> &sampler)
+template<typename T, typename CharT, typename Traits>
+std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os, const vSMC::Sampler<T> &sampler)
 {
-    sampler.print(os);
-
+    sampler.print(os, true);
     return os;
 }
 
