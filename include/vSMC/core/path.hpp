@@ -41,24 +41,23 @@ class Path
 
     /// \brief Copy constructor
     ///
-    /// \param path The Path to by copied
-    Path (const Path<T> &path) :
-        eval_(path.eval_),
-        index_(path.index_), integrand_(path.integrand_),
-        width_(path.width_), grid_(path.grid_) {}
+    /// \param other The Path to by copied
+    Path (const Path<T> &other) :
+        eval_(other.eval_), index_(other.index_), integrand_(other.integrand_),
+        width_(other.width_), grid_(other.grid_) {}
 
     /// \brief Assignment operator
     ///
-    /// \param path The Path to be assigned
+    /// \param other The Path to be assigned
     /// \return The Path after assignemnt
-    Path<T> & operator= (const Path<T> &path)
+    Path<T> & operator= (const Path<T> &other)
     {
-        if (&path != this) {
-            eval_      = path.eval_;
-            index_     = path.index_;
-            integrand_ = path.integrand_;
-            width_     = path.width_;
-            grid_      = path.grid_;
+        if (&other != this) {
+            eval_      = other.eval_;
+            index_     = other.index_;
+            integrand_ = other.integrand_;
+            width_     = other.width_;
+            grid_      = other.grid_;
         }
 
         return *this;
@@ -128,12 +127,13 @@ class Path
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
     ///
-    /// \note The evaluaiton functor has to be set through either the
-    /// constructor or eval() to a non-NULL value before calling eval().
-    /// Otherwise exception will be raised when calling eval().
+    /// \note The evaluaiton functor has to be set to a non-NULL value before
+    /// calling eval().  Otherwise exception will be raised when calling
+    /// eval().
     void eval (unsigned iter, const Particle<T> &particle)
     {
-        double w, p;
+        double w = 0;
+        double p = 0;
         if (direct_) {
             w = eval_(iter, particle, &p);
         } else {

@@ -37,25 +37,25 @@ class Monitor
 
     /// \brief Copy constructor
     ///
-    /// \param monitor The Monitor to by copied
-    Monitor (const Monitor<T> &monitor) :
-        dim_(monitor.dim_), direct_(monitor.direct_),
-        eval_(monitor.eval_),
-        index_(monitor.index_), record_(monitor.record_) {}
+    /// \param other The Monitor to by copied
+    Monitor (const Monitor<T> &other) :
+        dim_(other.dim_), direct_(other.direct_),
+        eval_(other.eval_),
+        index_(other.index_), record_(other.record_) {}
 
     /// \brief Assignment operator
     ///
-    /// \param monitor The Monitor to be assigned
+    /// \param other The Monitor to be assigned
     ///
     /// \return The Monitor after assignemnt
-    Monitor<T> & operator= (const Monitor<T> &monitor)
+    Monitor<T> & operator= (const Monitor<T> &other)
     {
-        if (&monitor != this) {
-            dim_      = monitor.dim_;
-            direct_   = monitor.direct_;
-            eval_     = monitor.eval_;
-            index_    = monitor.index_;
-            record_   = monitor.record_;
+        if (&other != this) {
+            dim_      = other.dim_;
+            direct_   = other.direct_;
+            eval_     = other.eval_;
+            index_    = other.index_;
+            record_   = other.record_;
         }
 
         return *this;
@@ -72,7 +72,7 @@ class Monitor
     /// \brief Size of records
     ///
     /// \return The number of iterations recorded
-    index_type::size_type iter_size () const
+    unsigned iter_size () const
     {
         return index_.size();
     }
@@ -93,12 +93,22 @@ class Monitor
         return index_;
     }
 
-    /// \brief Record of Monte Carlo integration
+    /// \brief Record
     ///
     /// \return A const reference to the record
     const record_type &record () const
     {
         return record_;
+    }
+
+    /// \brief Record of the a specific variable
+    ///
+    /// \param id The id the variable starting with zero
+    ///
+    /// \return A const reference to the record or variable id
+    const record_type::value_type &record (unsigned id) const
+    {
+        return record_[id];
     }
 
     /// \brief Set a new evaluation functor
@@ -113,14 +123,14 @@ class Monitor
         eval_ = new_eval;
     }
 
-    /// \brief Evaluate the integration
+    /// \brief Evaluate
     ///
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
     ///
-    /// \note The evaluation functor has to be set through either the
-    /// constructor or eval() to a non-NULL value before calling eval(). The
-    /// direct evaluation functor is prefered when both are available.
+    /// \note The evaluation functor has to be set to a non-NULL value before
+    /// calling eval(). The direct evaluation functor is prefered when both are
+    /// available.
     void eval (unsigned iter, const Particle<T> &particle)
     {
         assert(eval_);

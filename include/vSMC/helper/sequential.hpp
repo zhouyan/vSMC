@@ -23,8 +23,8 @@ class InitializeSeq
         post_processor_type;
 
     InitializeSeq () {}
-    InitializeSeq (const InitializeSeq<T> &init) {}
-    InitializeSeq<T> & operator= (const InitializeSeq<T> &init) {return *this;}
+    InitializeSeq (const InitializeSeq<T> &other) {}
+    InitializeSeq<T> &operator= (const InitializeSeq<T> &other) {return *this;}
     virtual ~InitializeSeq () {}
 
     virtual unsigned operator() (Particle<T> &particle, void *param)
@@ -72,11 +72,11 @@ class MoveSeq
         post_processor_type;
 
     MoveSeq () {}
-    MoveSeq (const MoveSeq<T> &move) {}
-    MoveSeq<T> & operator= (const MoveSeq<T> &move) {return *this;}
+    MoveSeq (const MoveSeq<T> &other) {}
+    MoveSeq<T> &operator= (const MoveSeq<T> &other) {return *this;}
     virtual ~MoveSeq () {}
 
-    virtual unsigned operator () (unsigned iter, Particle<T> &particle)
+    virtual unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         pre_processor(iter, particle);
         weight_.resize(particle.size());
@@ -100,7 +100,6 @@ class MoveSeq
     {
         return ADD_LOG_WEIGHT;
     }
-
 
     protected :
 
@@ -146,7 +145,7 @@ class MonitorSeq
 
     virtual ~MonitorSeq () {}
 
-    virtual void operator () (unsigned iter, const Particle<T> &particle,
+    virtual void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
         for (typename Particle<T>::size_type i = 0;
@@ -180,7 +179,7 @@ class PathSeq
 
     virtual ~PathSeq () {}
 
-    virtual double operator () (unsigned iter, const Particle<T> &particle,
+    virtual double operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
         for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
