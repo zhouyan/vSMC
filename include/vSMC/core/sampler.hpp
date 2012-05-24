@@ -37,7 +37,7 @@ class Sampler
     typedef std::deque<std::deque<unsigned> > accept_type;
 
     /// The type of Monitor map
-    typedef std::map<std::string, Monitor<T> > monitor_map;
+    typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
     /// \brief Construct a sampler with given number of particles
     ///
@@ -73,15 +73,6 @@ class Sampler
     unsigned iter_size () const
     {
         return ess_.size();
-    }
-
-    /// \brief The number of iterations
-    ///
-    /// \return The number of iterations performed by iterate() so far (not
-    /// including the initialization)
-    unsigned iter_num () const
-    {
-        return iter_num_;
     }
 
     /// \brief Get the current resampling scheme
@@ -199,9 +190,9 @@ class Sampler
         accept_.clear();
         path_.clear();
 
-        for (typename monitor_map::iterator miter = monitor_.begin();
-                miter != monitor_.end(); ++miter)
-            miter->second.clear();
+        for (typename monitor_map_type::iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m)
+            m->second.clear();
 
         iter_num_ = 0;
         accept_.push_back(std::deque<unsigned>(1, init_(particle_, param)));
@@ -218,9 +209,9 @@ class Sampler
         std::deque<unsigned> acc;
         if (bool(move_))
             acc.push_back(move_(iter_num_, particle_));
-        for (typename std::deque<move_type>::iterator miter = mcmc_.begin();
-                miter != mcmc_.end(); ++miter)
-            acc.push_back((*miter)(iter_num_, particle_));
+        for (typename std::deque<move_type>::iterator
+                m = mcmc_.begin(); m != mcmc_.end(); ++m)
+            acc.push_back((*m)(iter_num_, particle_));
         accept_.push_back(acc);
         post_move();
     }
@@ -262,7 +253,7 @@ class Sampler
     /// \param name The name of the monitor
     ///
     /// \return An const_iterator point to the monitor for the given name
-    typename monitor_map::const_iterator monitor (
+    typename monitor_map_type::const_iterator monitor (
             const std::string &name) const
     {
         return monitor_.find(name);
@@ -273,7 +264,7 @@ class Sampler
     /// \param name The name of the monitor
     ///
     /// \return An iterator point to the monitor for the given name
-    typename monitor_map::iterator monitor (const std::string &name)
+    typename monitor_map_type::iterator monitor (const std::string &name)
     {
         return monitor_.find(name);
     }
@@ -281,7 +272,7 @@ class Sampler
     /// \brief Read only access to all monitors
     ///
     /// \return A const reference to monitors
-    const monitor_map &monitor () const
+    const monitor_map_type &monitor () const
     {
         return monitor_;
     }
@@ -289,7 +280,7 @@ class Sampler
     /// \brief Read and write access to all monitors
     ///
     /// \return A reference to monitors
-    monitor_map &monitor ()
+    monitor_map_type &monitor ()
     {
         return monitor_;
     }
@@ -351,103 +342,105 @@ class Sampler
     /// \param print_header Print header if \b true
     void print (std::ostream &os = std::cout, bool print_header = true) const
     {
+        std::string sep = " ";
+
         // Accept count
-        unsigned accept_dim = 0;
-        for (accept_type::const_iterator aiter = accept_.begin();
-                aiter != accept_.end(); ++aiter)
-            if (aiter->size() > accept_dim)
-                accept_dim = aiter->size();
-        Eigen::MatrixXd accept_data(iter_num_ + 1, accept_dim);
-        accept_data.setConstant(0);
-        double anorm = static_cast<double>(size());
-        for (unsigned r = 0; r != iter_num_ + 1; ++r)
+        unsigned accd = 0;
+        for (accept_type::const_iterator
+                a = accept_.begin(); a != accept_.end(); ++a) {
+            if (a->size() > accd)
+                accd = a->size();
+        }
+        Eigen::MatrixXd acc(iter_size(), accd);
+        acc.setConstant(0);
+        double accdnorm = static_cast<double>(size());
+        for (unsigned r = 0; r != iter_size(); ++r)
             for (unsigned c = 0; c != accept_[r].size(); ++c)
-                accept_data(r, c) = accept_[r][c] / anorm;
+                acc(r, c) = accept_[r][c] / accdnorm;
 
         // Path sampling
-        Eigen::MatrixXd path_data(iter_num_ + 1, 3);
-        Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic>
-            path_mask(iter_num_ + 1, 1);
-        path_mask.setConstant(false);
+        Eigen::MatrixXd pa(iter_size(), 3);
+        Eigen::MatrixXi pmask(iter_size(), 1);
+        pmask.setConstant(false);
         for (unsigned d = 0; d != path_.iter_size(); ++d) {
-            unsigned prow = path_.index()[d];
-            path_data(prow, 0) = path_.integrand()[d];
-            path_data(prow, 1) = path_.width()[d];
-            path_data(prow, 2) = path_.grid()[d];
-            path_mask(prow) = true;
+            unsigned pr = path_.index()[d];
+            pa(pr, 0) = path_.integrand()[d];
+            pa(pr, 1) = path_.width()[d];
+            pa(pr, 2) = path_.grid()[d];
+            pmask(pr) = true;
         }
 
         // Monitors
-        unsigned monitor_dim = 0;
-        for (typename monitor_map::const_iterator miter = monitor_.begin();
-                miter != monitor_.end(); ++miter)
-            monitor_dim += miter->second.dim();
-        Eigen::MatrixXd monitor_data(iter_num_ + 1, monitor_dim);
-        Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic>
-            monitor_mask(iter_num_ + 1, monitor_.size());
-        unsigned mcol = 0;
-        unsigned mmask = 0;
-        for (typename monitor_map::const_iterator miter = monitor_.begin();
-                miter != monitor_.end(); ++miter) {
-            unsigned mdim = miter->second.dim();
-            for (unsigned d = 0; d != miter->second.iter_size(); ++d) {
-                unsigned mrow = miter->second.index()[d];
-                for (unsigned c = 0; c != mdim; ++c) {
-                    monitor_data(mrow, c + mcol) =
-                        miter->second.record()[c][d];
-                }
-                monitor_mask(mrow, mmask) = true;
+        unsigned mond = 0;
+        for (typename monitor_map_type::const_iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+            mond += m->second.dim();
+        }
+        Eigen::MatrixXd mon(iter_size(), mond);
+        Eigen::MatrixXi mmask(iter_size(), monitor_.size());
+        unsigned mc = 0;
+        unsigned mm = 0;
+        for (typename monitor_map_type::const_iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+            unsigned md = m->second.dim();
+            for (unsigned d = 0; d != m->second.iter_size(); ++d) {
+                unsigned mr = m->second.index()[d];
+                for (unsigned c = 0; c != md; ++c)
+                    mon(mr, c + mc) = m->second.record()[c][d];
+                mmask(mr, mm) = true;
             }
-            mcol += miter->second.dim();
-            ++mmask;
+            mc += md;
+            ++mm;
         }
 
         // Print header
         if (print_header) {
-            os << "iter\tESS\tresample\t";
-            if (accept_dim == 1) {
-                os << "accept\t";
+            os << "Iter" << sep << "ESS" << sep << "ResSam" << sep;
+            if (accd == 1) {
+                os << "Accept" << sep;
+            } else {
+                for (unsigned d = 0; d != accd; ++d)
+                    os << "Accept." << d + 1 << sep;
             }
-            else {
-                for (unsigned d = 0; d != accept_dim; ++d)
-                    os << "accept" << d + 1 << '\t';
-            }
-            os << "path.integrand\tpath.width\tpath.grid\t";
-            for (typename monitor_map::const_iterator miter = monitor_.begin();
-                    miter != monitor_.end(); ++miter) {
-                if (miter->second.dim() == 1) {
-                    os << miter->first << '\t';
+            os
+                << "Path.Integrand" << sep
+                << "Path.Width" << sep
+                << "Path.Grid" << sep << "";
+            for (typename monitor_map_type::const_iterator
+                    m = monitor_.begin(); m != monitor_.end(); ++m) {
+                if (m->second.dim() == 1) {
+                    os << m->first << sep;
                 } else {
-                    for (unsigned d = 0; d != miter->second.dim(); ++d)
-                        os << miter->first << d + 1 << '\t';
+                    for (unsigned d = 0; d != m->second.dim(); ++d)
+                        os << m->first << '.' << d + 1 << sep;
                 }
             }
             os << '\n';
         }
 
         // Print data
-        for (unsigned iter = 0; iter != iter_num_ + 1; ++iter) {
-            os << iter << '\t';
-            os << ess_[iter] / size() << '\t';
-            os << resampled_[iter] << '\t';
-            os << accept_data.row(iter) << '\t';
-            if (path_mask(iter))
-                os << path_data.row(iter) << '\t';
+        for (unsigned iter = 0; iter != iter_size(); ++iter) {
+            os << iter << sep;
+            os << ess_[iter] / size() << sep;
+            os << resampled_[iter] << sep;
+            os << acc.row(iter) << sep;
+            if (pmask(iter))
+                os << pa.row(iter) << sep;
             else
-                os << ".\t.\t.\t";
-            unsigned mcol = 0;
-            unsigned mmask = 0;
-            for (typename monitor_map::const_iterator miter = monitor_.begin();
-                    miter != monitor_.end(); ++miter) {
-                unsigned mdim = miter->second.dim();
-                if (monitor_mask(iter, mmask)) {
-                    os << monitor_data.block(iter, mcol, 1, mdim) << '\t';
+                os << '.' << sep << '.' << sep << '.' << sep;
+            unsigned mc = 0;
+            unsigned mm = 0;
+            for (typename monitor_map_type::const_iterator
+                    m = monitor_.begin(); m != monitor_.end(); ++m) {
+                unsigned md = m->second.dim();
+                if (mmask(iter, mm)) {
+                    os << mon.block(iter, mc, 1, md) << sep;
                 } else {
-                    for (unsigned m = 0; m != mdim; ++m)
-                        os << ".\t";
+                    for (unsigned m = 0; m != md; ++m)
+                        os << '.' << sep;
                 }
-                mcol += miter->second.dim();
-                ++mmask;
+                mc += md;
+                ++mm;
             }
             os << '\n';
         }
@@ -475,7 +468,7 @@ class Sampler
     accept_type accept_;
 
     /// Monte Carlo estimation by integration
-    monitor_map monitor_;
+    monitor_map_type monitor_;
     std::set<std::string> monitor_name_;
 
     /// Path sampling
@@ -490,10 +483,10 @@ class Sampler
         if (!path_.empty())
             path_.eval(iter_num_, particle_);
 
-        for (typename std::map<std::string, Monitor<T> >::iterator
-                imap = monitor_.begin(); imap != monitor_.end(); ++imap) {
-            if (!imap->second.empty())
-                imap->second.eval(iter_num_, particle_);
+        for (typename monitor_map_type::iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+            if (!m->second.empty())
+                m->second.eval(iter_num_, particle_);
         }
 
         ess_.push_back(particle_.ess());
