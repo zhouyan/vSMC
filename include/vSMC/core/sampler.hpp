@@ -183,8 +183,6 @@ class Sampler
     /// functor
     void initialize (void *param = NULL)
     {
-        assert(bool(init_));
-
         ess_.clear();
         resampled_.clear();
         accept_.clear();
@@ -195,11 +193,21 @@ class Sampler
             m->second.clear();
 
         iter_num_ = 0;
-        accept_.push_back(std::deque<unsigned>(1, init_(particle_, param)));
+        if (bool(init_)) {
+            accept_.push_back(
+                    std::deque<unsigned>(1, init_(particle_, param)));
+        }
+#ifndef NDEBUG
+        else {
+            std::cerr << "vSMC Warning:" << std::endl;
+            std::cerr << "\tSampler::initiliaize" << std::end;
+            std::cerr
+                << "\Attempt Initialization without a callable object"
+                << std::endl;
+        }
+#endif
         post_move();
         particle_.reset_zconst();
-
-        initialized_ = true;
     }
 
     /// \brief Perform iteration
@@ -207,11 +215,33 @@ class Sampler
     {
         ++iter_num_;
         std::deque<unsigned> acc;
-        if (bool(move_))
+        if (bool(move_)) {
             acc.push_back(move_(iter_num_, particle_));
+        }
+#ifndef NDEBUG
+        else {
+            std::cerr << "vSMC Warning:" << std::endl;
+            std::cerr << "\tSampler::iterate" << std::end;
+            std::cerr
+                << "\tAttempt Move without a callable object"
+                << std::endl;
+        }
+#endif
         for (typename std::deque<move_type>::iterator
-                m = mcmc_.begin(); m != mcmc_.end(); ++m)
-            acc.push_back((*m)(iter_num_, particle_));
+                m = mcmc_.begin(); m != mcmc_.end(); ++m) {
+            if (bool(*m)) {
+                acc.push_back((*m)(iter_num_, particle_));
+            }
+#ifndef NDEBUG
+            else {
+                std::cerr << "vSMC Warning:" << std::endl;
+                std::cerr << "\tSampler::iterate" << std::end;
+                std::cerr
+                    << "\tAttempt MCMC without a callable object"
+                    << std::endl;
+            }
+#endif
+        }
         accept_.push_back(acc);
         post_move();
     }

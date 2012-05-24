@@ -46,8 +46,7 @@ class Particle
         ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N)
     {
         reset_prng();
-        weight_.setConstant(1.0 / size_);
-        log_weight_.setConstant(0);
+        set_equal_weight();
     }
 
     /// \brief Size of the particle set

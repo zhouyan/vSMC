@@ -132,6 +132,8 @@ class Path
     /// eval().
     void eval (unsigned iter, const Particle<T> &particle)
     {
+        assert(eval_);
+
         double w = 0;
         double p = 0;
         if (direct_) {
