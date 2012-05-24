@@ -54,7 +54,7 @@ class Sampler
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
             typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
-        initialized_(false), init_(init), move_(move),
+        init_(init), move_(move),
         scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0) {}
 
@@ -479,9 +479,6 @@ class Sampler
     }
 
     private :
-
-    /// Initialization indicator
-    bool initialized_;
 
     /// Initialization and movement
     initialize_type init_;
