@@ -126,13 +126,12 @@ class Particle
         return log_weight_;
     }
 
-    /// \brief Set the log weights
-    ///
-    /// \param new_weight New log weights (same for all particles)
-    void set_log_weight (double new_weight)
+    /// \brief Set equal weights for all particles
+    void set_equal_weight ()
     {
-        log_weight_.setConstant(new_weight);
-        set_weight();
+        ess_ = size_;
+        weight_.setConstant(1.0 / size_);
+        log_weight_.setConstant(0);
     }
 
     /// \brief Set the log weights
@@ -492,9 +491,7 @@ class Particle
             }
         }
 
-        ess_ = size_;
-        weight_.setConstant(1.0 / size_);
-        log_weight_.setConstant(0);
+        set_equal_weight();
     }
 }; // class Particle
 
