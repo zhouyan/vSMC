@@ -17,9 +17,8 @@ class SingleParticle
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 
-    SingleParticle (size_type id, double *new_weight,
-            Particle<T> *particle) :
-        id_(id), new_weight_(new_weight), particle_(particle) {}
+    SingleParticle (size_type id, Particle<T> *particle) :
+        id_(id), particle_(particle) {}
 
     size_type id () const
     {
@@ -34,6 +33,7 @@ class SingleParticle
 
     const state_type &state (unsigned pos) const
     {
+        assert(particle_);
         return particle_->value().state(id_, pos);
     }
 
@@ -45,27 +45,19 @@ class SingleParticle
 
     const state_type *state () const
     {
+        assert(particle_);
         return particle_->value().state(id_);
-    }
-
-    double weight () const
-    {
-        return particle_->weight(id_);
     }
 
     double log_weight () const
     {
+        assert(particle_);
         return particle_->log_weight(id_);
-    }
-
-    void new_weight (double weight)
-    {
-        assert(new_weight_);
-        *new_weight_ = weight;
     }
 
     const Particle<T> &particle () const
     {
+        assert(particle_);
         return *particle_;
     }
 
@@ -78,7 +70,6 @@ class SingleParticle
     private :
 
     const size_type id_;
-    double *const new_weight_;
     Particle<T> *const particle_;
 }; // class SingleParticle
 
@@ -104,26 +95,31 @@ class ConstSingleParticle
 
     const state_type &state (unsigned pos) const
     {
+        assert(particle_);
         return particle_->value().state(id_, pos);
     }
 
     const state_type *state () const
     {
+        assert(particle_);
         return particle_->value().state(id_);
     }
 
     double weight () const
     {
+        assert(particle_);
         return particle_->weight(id_);
     }
 
     double log_weight () const
     {
+        assert(particle_);
         return particle_->log_weight(id_);
     }
 
     const Particle<T> &particle () const
     {
+        assert(particle_);
         return *particle_;
     }
 

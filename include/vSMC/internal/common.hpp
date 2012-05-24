@@ -61,21 +61,6 @@ enum ResampleScheme {
     RESIDUAL_SYSTEMATIC
 };
 
-/// \brief Type of weight returned by MoveSeq::move_state
-///
-/// \li No_ACTION The weight is discarded without further action
-/// \li SET_WEIGHT The weight is set directly as the new weight
-/// \li SET_LOG_WEIGHT The weight is set direclty as the new log weight
-/// \li MUL_WEIGHT The weight is the incremental weight
-/// \li ADD_LOG_WEIGHT The weight is the log of the incremental weight
-enum WeightAction {
-    NO_ACTION,
-    SET_WEIGHT,
-    SET_LOG_WEIGHT,
-    MUL_WEIGHT,
-    ADD_LOG_WEIGHT
-};
-
 } // namespace vSMC
 
 #endif // V_SMC_INTERNAL_COMMON_HPP

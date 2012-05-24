@@ -32,12 +32,9 @@ class InitializeTBB : public InitializeSeq<T>
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        log_weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
-                work_(this, &particle, log_weight_.data(), accept_.data()));
-
-        particle.set_log_weight(log_weight_);
+                work_(this, &particle, accept_.data()));
         this->post_processor(particle);
 
         return accept_.sum();
@@ -46,7 +43,6 @@ class InitializeTBB : public InitializeSeq<T>
     private :
 
     typedef V_SMC_INDEX_TYPE size_type;
-    typename Particle<T>::weight_type log_weight_;
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
 
     class work_
@@ -54,15 +50,14 @@ class InitializeTBB : public InitializeSeq<T>
         public :
 
         work_ (InitializeTBB<T> *init,
-                Particle<T> *particle, double *log_weight, unsigned *accept) :
-            init_(init), particle_(particle),
-            log_weight_(log_weight), accept_(accept) {}
+		Particle<T> *particle, unsigned *accept) :
+            init_(init), particle_(particle), accept_(accept) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                accept_[i] = init_->initialize_state(SingleParticle<T>(
-                            i, log_weight_ + i, particle_));
+                accept_[i] = init_->initialize_state(
+			SingleParticle<T>(i, particle_));
             }
         }
 
@@ -70,7 +65,6 @@ class InitializeTBB : public InitializeSeq<T>
 
         InitializeTBB<T> *const init_;
         Particle<T> *const particle_;
-        double *const log_weight_;
         unsigned *const accept_;
     }; // class Woker_
 }; // class InitializeTBB
@@ -84,7 +78,6 @@ class MoveTBB : public MoveSeq<T>
     public :
 
     typedef typename MoveSeq<T>::move_state_type     move_state_type;
-    typedef typename MoveSeq<T>::weight_action_type  weight_action_type;
     typedef typename MoveSeq<T>::pre_processor_type  pre_processor_type;
     typedef typename MoveSeq<T>::post_processor_type post_processor_type;
 
@@ -95,11 +88,9 @@ class MoveTBB : public MoveSeq<T>
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
-        weight_.resize(particle.size());
         accept_.resize(particle.size());
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
-                work_(this, iter, &particle, weight_.data(), accept_.data()));
-        this->set_weight(this->weight_action(), particle, weight_);
+                work_(this, iter, &particle, accept_.data()));
         this->post_processor(iter, particle);
 
         return accept_.sum();
@@ -108,7 +99,6 @@ class MoveTBB : public MoveSeq<T>
     private :
 
     typedef V_SMC_INDEX_TYPE size_type;
-    typename Particle<T>::weight_type weight_;
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
 
     class work_
@@ -116,15 +106,14 @@ class MoveTBB : public MoveSeq<T>
         public :
 
         work_ (MoveTBB<T> *move, unsigned iter,
-                Particle<T> *particle, double *weight, unsigned *accept) :
-            move_(move), iter_(iter), particle_(particle),
-            weight_(weight), accept_(accept) {}
+                Particle<T> *particle, unsigned *accept) :
+            move_(move), iter_(iter), particle_(particle), accept_(accept) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                accept_[i] = move_->move_state(iter_, SingleParticle<T>(
-                            i, weight_ + i, particle_));
+                accept_[i] = move_->move_state(iter_,
+			SingleParticle<T>(i, particle_));
             }
         }
 
@@ -133,7 +122,6 @@ class MoveTBB : public MoveSeq<T>
         MoveTBB<T> *const move_;
         const unsigned iter_;
         Particle<T> *const particle_;
-        double *const weight_;
         unsigned *const accept_;
     }; // class Woker_
 }; // class MoveTBB
@@ -170,8 +158,8 @@ class MonitorTBB : public MonitorSeq<T, Dim>
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                monitor_->monitor_state(iter_, ConstSingleParticle<T>(
-                            i, particle_), res_ + i * Dim);
+                monitor_->monitor_state(iter_,
+			ConstSingleParticle<T>(i, particle_), res_ + i * Dim);
             }
         }
 
@@ -219,8 +207,8 @@ class PathTBB : public PathSeq<T>
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                res_[i] = path_->path_state(iter_, ConstSingleParticle<T>(
-                            i, particle_));
+                res_[i] = path_->path_state(iter_,
+			ConstSingleParticle<T>(i, particle_));
             }
         }
 

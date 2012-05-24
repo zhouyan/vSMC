@@ -128,6 +128,15 @@ class Particle
 
     /// \brief Set the log weights
     ///
+    /// \param new_weight New log weights (same for all particles)
+    void set_log_weight (double new_weight)
+    {
+        log_weight_.setConstant(new_weight);
+        set_weight();
+    }
+
+    /// \brief Set the log weights
+    ///
     /// \param new_weight New log weights
     /// \param delta A multiplier appiled to new_weight
     void set_log_weight (const double *new_weight, double delta = 1)
