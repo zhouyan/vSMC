@@ -202,7 +202,7 @@ class Sampler
             std::cerr << "vSMC Warning:" << std::endl;
             std::cerr << "\tSampler::initiliaize" << std::endl;
             std::cerr
-                << "\Attempt Initialization without a callable object"
+                << "\tAttempt Initialization without a callable object"
                 << std::endl;
         }
 #endif
