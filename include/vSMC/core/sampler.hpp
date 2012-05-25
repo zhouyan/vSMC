@@ -200,7 +200,7 @@ class Sampler
 #ifndef NDEBUG
         else {
             std::cerr << "vSMC Warning:" << std::endl;
-            std::cerr << "\tSampler::initiliaize" << std::end;
+            std::cerr << "\tSampler::initiliaize" << std::endl;
             std::cerr
                 << "\Attempt Initialization without a callable object"
                 << std::endl;
@@ -221,7 +221,7 @@ class Sampler
 #ifndef NDEBUG
         else {
             std::cerr << "vSMC Warning:" << std::endl;
-            std::cerr << "\tSampler::iterate" << std::end;
+            std::cerr << "\tSampler::iterate" << std::endl;
             std::cerr
                 << "\tAttempt Move without a callable object"
                 << std::endl;
@@ -235,7 +235,7 @@ class Sampler
 #ifndef NDEBUG
             else {
                 std::cerr << "vSMC Warning:" << std::endl;
-                std::cerr << "\tSampler::iterate" << std::end;
+                std::cerr << "\tSampler::iterate" << std::endl;
                 std::cerr
                     << "\tAttempt MCMC without a callable object"
                     << std::endl;
