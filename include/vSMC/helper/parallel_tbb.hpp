@@ -50,14 +50,14 @@ class InitializeTBB : public InitializeSeq<T>
         public :
 
         work_ (InitializeTBB<T> *init,
-		Particle<T> *particle, unsigned *accept) :
+                Particle<T> *particle, unsigned *accept) :
             init_(init), particle_(particle), accept_(accept) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 accept_[i] = init_->initialize_state(
-			SingleParticle<T>(i, particle_));
+                        SingleParticle<T>(i, particle_));
             }
         }
 
@@ -113,7 +113,7 @@ class MoveTBB : public MoveSeq<T>
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 accept_[i] = move_->move_state(iter_,
-			SingleParticle<T>(i, particle_));
+                        SingleParticle<T>(i, particle_));
             }
         }
 
@@ -159,7 +159,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 monitor_->monitor_state(iter_,
-			ConstSingleParticle<T>(i, particle_), res_ + i * Dim);
+                        ConstSingleParticle<T>(i, particle_), res_ + i * Dim);
             }
         }
 
@@ -208,7 +208,7 @@ class PathTBB : public PathSeq<T>
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 res_[i] = path_->path_state(iter_,
-			ConstSingleParticle<T>(i, particle_));
+                        ConstSingleParticle<T>(i, particle_));
             }
         }
 

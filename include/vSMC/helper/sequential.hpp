@@ -136,7 +136,7 @@ class PathSeq
     }
 
     virtual double path_state (unsigned iter,
-	    ConstSingleParticle<T> part) = 0;
+            ConstSingleParticle<T> part) = 0;
     virtual double width_state (unsigned iter,
             const Particle<T> &particle) = 0;
 };
