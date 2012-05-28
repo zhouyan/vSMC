@@ -66,7 +66,7 @@ class InitializeTBB : public InitializeSeq<T>
         InitializeTBB<T> *const init_;
         Particle<T> *const particle_;
         unsigned *const accept_;
-    }; // class Woker_
+    }; // class work_
 }; // class InitializeTBB
 
 /// \brief Sampler::move_type subtype
@@ -123,7 +123,7 @@ class MoveTBB : public MoveSeq<T>
         const unsigned iter_;
         Particle<T> *const particle_;
         unsigned *const accept_;
-    }; // class Woker_
+    }; // class work_
 }; // class MoveTBB
 
 /// \brief Non-direct Monitor::eval_type subtype
