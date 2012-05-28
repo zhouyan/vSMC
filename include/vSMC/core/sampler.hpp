@@ -218,7 +218,7 @@ class Sampler
         if (bool(move_)) {
             acc.push_back(move_(iter_num_, particle_));
         }
-#ifndef NDEBUG
+#ifndef V_SMC_NDEBUG
         else {
             std::cerr << "vSMC Warning:" << std::endl;
             std::cerr << "\tSampler::iterate" << std::endl;
@@ -226,13 +226,13 @@ class Sampler
                 << "\tAttempt Move without a callable object"
                 << std::endl;
         }
-#endif
+#endif // V_SMC_NDEBUG
         for (typename std::vector<move_type>::iterator
                 m = mcmc_.begin(); m != mcmc_.end(); ++m) {
             if (bool(*m)) {
                 acc.push_back((*m)(iter_num_, particle_));
             }
-#ifndef NDEBUG
+#ifndef V_SMC_NDEBUG
             else {
                 std::cerr << "vSMC Warning:" << std::endl;
                 std::cerr << "\tSampler::iterate" << std::endl;
@@ -240,7 +240,7 @@ class Sampler
                     << "\tAttempt MCMC without a callable object"
                     << std::endl;
             }
-#endif
+#endif // V_SMC_NDEBUG
         }
         accept_.push_back(acc);
         post_move();
