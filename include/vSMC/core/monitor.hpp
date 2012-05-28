@@ -20,10 +20,10 @@ class Monitor
             unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
-    typedef std::vector<unsigned> index_type;
+    typedef std::deque<unsigned> index_type;
 
     /// The type of the record vector
-    typedef std::vector<std::vector<double> > record_type;
+    typedef std::deque<std::deque<double> > record_type;
 
     /// \brief Construct a Monitor with an evaluation functor
     ///
@@ -144,6 +144,8 @@ class Monitor
             result_.noalias() = buffer_ * particle.weight();
         }
 
+        assert(result_.size() >= dim_);
+        assert(record_.size() == dim_);
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
             record_[d].push_back(result_[d]);
@@ -155,7 +157,10 @@ class Monitor
     void clear ()
     {
         index_.clear();
-        record_.clear();
+        for (record_type::iterator r = record_.begin();
+                r != record_.end(); ++r) {
+            r->clear();
+        }
     }
 
     private :
