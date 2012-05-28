@@ -126,9 +126,10 @@ class MoveTBB : public MoveSeq<T>
     }; // class Woker_
 }; // class MoveTBB
 
-/// \brief Monitor::integral_type subtype
+/// \brief Non-direct Monitor::eval_type subtype
 ///
 /// \tparam T A subtype of StateBase
+/// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
 class MonitorTBB : public MonitorSeq<T, Dim>
 {
@@ -172,7 +173,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     }; // class work_
 }; // class MonitorTBB
 
-/// \brief Path::integral_type subtype
+/// \brief Non-direct Path::eval_type subtype
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>

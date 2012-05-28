@@ -79,9 +79,10 @@ class MoveSeq
     virtual void post_processor (unsigned iter, Particle<T> &particle) {}
 }; // class MoveSeq
 
-/// \brief Monitor::integral_type subtype
+/// \brief Non-direct Monitor::eval_type subtype
 ///
 /// \tparam T A subtype of StateBase
+/// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
 class MonitorSeq
 {
@@ -98,7 +99,7 @@ class MonitorSeq
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
             monitor_state(iter, ConstSingleParticle<T>(i, &particle),
-                    res + i * dim());
+                    res + i * Dim);
         }
     }
 
@@ -111,7 +112,7 @@ class MonitorSeq
     }
 }; // class MonitorSeq
 
-/// \brief Path::integral_type subtype
+/// \brief Non-direct Path::eval_type subtype
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
