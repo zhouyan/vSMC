@@ -360,6 +360,12 @@ class Sampler
     ///
     /// \param os The ostream to which the contents are printed
     /// \param print_header Print header if \b true
+    /// \param print_path Print path sampling if \b true
+    /// \param print_monitor Print monitors if \b true
+    ///
+    /// \note \c print_path and \c print_monitor are only used to hint the
+    /// print process. If there is no record at all, then they won't be printed
+    /// even set to \b true.
     template<typename CharT, typename Traits>
     void print (std::basic_ostream<CharT, Traits> &os = std::cout,
             bool print_header = true,

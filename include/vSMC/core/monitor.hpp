@@ -112,6 +112,7 @@ class Monitor
         return record_[id];
     }
 
+    /// \brief Print the index and record matrix
     template<typename CharT, typename Traits>
     void print (std::basic_ostream<CharT, Traits> &os = std::cout)
     {
