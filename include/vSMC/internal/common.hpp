@@ -6,6 +6,7 @@
 #endif // __STDC_CONSTANT_MACROS
 
 #include <deque>
+#include <vector>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
