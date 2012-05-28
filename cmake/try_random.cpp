@@ -39,6 +39,12 @@ int main ()
     int N = 100000;
     r123::Engine<V_SMC_CRNG_TYPE> eng(V_SMC_CRNG_SEED);
 
+    bernoulli_distribution<> rbern(0.5);
+    for (int i = 0; i != N; ++i){
+        int b = rbern(eng);
+        assert(b == 0 || b == 1);
+    }
+
     binomial_distribution<> rbinom(20, 0.7);
     for (int i = 0; i != N; ++i) {
         int b = rbinom(eng);
