@@ -96,6 +96,8 @@ class Monitor
     /// \brief Record
     ///
     /// \return A const reference to the record
+    ///
+    /// \note record()[c][r] will be the r'th record of the c'th variable
     const record_type &record () const
     {
         return record_;
@@ -116,9 +118,8 @@ class Monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param new_eval The functor used to directly evaluate the results
     /// \param direct Whether or not eval return the integrands or the final
-    void eval (unsigned dim, const eval_type &new_eval, bool direct = false)
+    void eval (const eval_type &new_eval, bool direct = false)
     {
-        dim_ = dim;
         direct_ = direct;
         eval_ = new_eval;
     }
@@ -135,7 +136,7 @@ class Monitor
     {
         assert(eval_);
 
-        if (bool(direct_)) {
+        if (direct_) {
             result_.resize(dim_);
             eval_(iter, particle, result_.data());
         } else {

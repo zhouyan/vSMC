@@ -255,16 +255,6 @@ class Sampler
             iterate();
     }
 
-    /// \brief Add a monitor
-    ///
-    /// \param name The name of the monitor
-    /// \param new_monitor The monitor
-    void monitor (const std::string &name, const Monitor<T> &new_monitor)
-    {
-        monitor_.insert(std::make_pair(name, new_monitor));
-        monitor_name_.insert(name);
-    }
-
     /// \brief Add a monitor with an evaluation functor
     ///
     /// \param name The name of the monitor
@@ -418,7 +408,7 @@ class Sampler
             for (unsigned d = 0; d != m->second.iter_size(); ++d) {
                 unsigned mr = m->second.index()[d];
                 for (unsigned c = 0; c != md; ++c)
-                    mon(mr, c + mc) = m->second.record()[c][d];
+                    mon(mr, c + mc) = m->second.record(c)[d];
                 mmask(mr, mm) = true;
             }
             mc += md;

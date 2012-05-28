@@ -43,7 +43,8 @@ class Path
     ///
     /// \param other The Path to by copied
     Path (const Path<T> &other) :
-        eval_(other.eval_), index_(other.index_), integrand_(other.integrand_),
+        direct_(other.direct_), eval_(other.eval_),
+        index_(other.index_), integrand_(other.integrand_),
         width_(other.width_), grid_(other.grid_) {}
 
     /// \brief Assignment operator
@@ -53,6 +54,7 @@ class Path
     Path<T> & operator= (const Path<T> &other)
     {
         if (&other != this) {
+            direct_    = other.direct_;
             eval_      = other.eval_;
             index_     = other.index_;
             integrand_ = other.integrand_;
