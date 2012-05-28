@@ -23,7 +23,7 @@ class Monitor
     typedef std::deque<unsigned> index_type;
 
     /// The type of the record vector
-    typedef std::deque<std::deque<double> > record_type;
+    typedef std::vector<std::deque<double> > record_type;
 
     /// \brief Construct a Monitor with an evaluation functor
     ///
@@ -111,6 +111,21 @@ class Monitor
     {
         return record_[id];
     }
+
+    template<typename CharT, typename Traits>
+    void print (std::basic_ostream<CharT, Traits> &os = std::cout)
+    {
+        const char sep = '\t';
+
+        for (unsigned i = 0; i != iter_size(); ++i) {
+            os << index_[i] << sep;
+            for (unsigned d = 0; d != dim_; ++d)
+                os << record_[d][i] << sep;
+            if (i + 1 < iter_size())
+                os << '\n';
+        }
+    }
+
 
     /// \brief Set a new evaluation functor
     ///

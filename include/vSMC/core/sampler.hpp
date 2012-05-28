@@ -362,7 +362,8 @@ class Sampler
     /// \param print_header Print header if \b true
     template<typename CharT, typename Traits>
     void print (std::basic_ostream<CharT, Traits> &os = std::cout,
-            bool print_header = true) const
+            bool print_header = true,
+            bool print_path = true, bool print_monitor = true) const
     {
         const char sep = '\t';
 
@@ -387,7 +388,7 @@ class Sampler
         // Path sampling
         Eigen::MatrixXd pa;
         Eigen::MatrixXi pmask;
-        bool print_path = path_.iter_size() > 0 && iter_size() > 0;
+        print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
         if (print_path) {
             pa.resize(iter_size(), 3);
             pmask.resize(iter_size(), 1);
@@ -409,7 +410,7 @@ class Sampler
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             mond += m->second.dim();
         }
-        bool print_monitor = mond > 0 && iter_size() > 0;
+        print_monitor = print_monitor && mond > 0 && iter_size() > 0;
         if (print_monitor) {
             mon.resize(iter_size(), mond);
             mmask.resize(iter_size(), monitor_.size());
@@ -491,7 +492,7 @@ class Sampler
                     ++mn;
                 }
             }
-            if (iter < iter_size() - 1)
+            if (iter + 1 < iter_size())
                 os << '\n';
         }
     }
