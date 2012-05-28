@@ -364,6 +364,7 @@ class Sampler
     void print (std::basic_ostream<CharT, Traits> &os = std::cout,
             bool print_header = true) const
     {
+        /*
         const char sep = '\t';
 
         // Accept count
@@ -467,6 +468,7 @@ class Sampler
             }
             os << '\n';
         }
+        */
     }
 
     private :
