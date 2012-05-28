@@ -39,8 +39,7 @@ class Monitor
     ///
     /// \param other The Monitor to by copied
     Monitor (const Monitor<T> &other) :
-        dim_(other.dim_), direct_(other.direct_),
-        eval_(other.eval_),
+        dim_(other.dim_), direct_(other.direct_), eval_(other.eval_),
         index_(other.index_), record_(other.record_) {}
 
     /// \brief Assignment operator

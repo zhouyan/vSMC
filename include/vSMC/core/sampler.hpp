@@ -383,13 +383,13 @@ class Sampler
         // Path sampling
         Eigen::MatrixXd pa(iter_size(), 3);
         Eigen::MatrixXi pmask(iter_size(), 1);
-        pmask.setConstant(false);
+        pmask.setConstant(0);
         for (unsigned d = 0; d != path_.iter_size(); ++d) {
             unsigned pr = path_.index()[d];
             pa(pr, 0) = path_.integrand()[d];
             pa(pr, 1) = path_.width()[d];
             pa(pr, 2) = path_.grid()[d];
-            pmask(pr) = true;
+            pmask(pr) = 1;
         }
 
         // Monitors
@@ -400,8 +400,9 @@ class Sampler
         }
         Eigen::MatrixXd mon(iter_size(), mond);
         Eigen::MatrixXi mmask(iter_size(), monitor_.size());
+        mmask.setConstant(0);
         unsigned mc = 0;
-        unsigned mm = 0;
+        unsigned mn = 0;
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             unsigned md = m->second.dim();
@@ -409,10 +410,10 @@ class Sampler
                 unsigned mr = m->second.index()[d];
                 for (unsigned c = 0; c != md; ++c)
                     mon(mr, c + mc) = m->second.record(c)[d];
-                mmask(mr, mm) = true;
+                mmask(mr, mn) = 1;
             }
             mc += md;
-            ++mm;
+            ++mn;
         }
 
         // Print header
@@ -451,18 +452,18 @@ class Sampler
             else
                 os << '.' << sep << '.' << sep << '.' << sep;
             unsigned mc = 0;
-            unsigned mm = 0;
+            unsigned mn = 0;
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
                 unsigned md = m->second.dim();
-                if (mmask(iter, mm)) {
+                if (mmask(iter, mn)) {
                     os << mon.block(iter, mc, 1, md) << sep;
                 } else {
                     for (unsigned m = 0; m != md; ++m)
                         os << '.' << sep;
                 }
                 mc += md;
-                ++mm;
+                ++mn;
             }
             os << '\n';
         }
