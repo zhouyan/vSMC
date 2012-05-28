@@ -367,75 +367,95 @@ class Sampler
         const char sep = '\t';
 
         // Accept count
+        Eigen::MatrixXd acc;
         unsigned accd = 0;
         for (accept_type::const_iterator
                 a = accept_.begin(); a != accept_.end(); ++a) {
             if (a->size() > accd)
                 accd = a->size();
         }
-        Eigen::MatrixXd acc(iter_size(), accd);
-        acc.setConstant(0);
-        double accdnorm = static_cast<double>(size());
-        for (unsigned r = 0; r != iter_size(); ++r)
-            for (unsigned c = 0; c != accept_[r].size(); ++c)
-                acc(r, c) = accept_[r][c] / accdnorm;
+        bool print_accept = accd > 0 && iter_size() > 0;
+        if (print_accept) {
+            acc.resize(iter_size(), accd);
+            acc.setConstant(0);
+            double accdnorm = static_cast<double>(size());
+            for (unsigned r = 0; r != iter_size(); ++r)
+                for (unsigned c = 0; c != accept_[r].size(); ++c)
+                    acc(r, c) = accept_[r][c] / accdnorm;
+        }
 
         // Path sampling
-        Eigen::MatrixXd pa(iter_size(), 3);
-        Eigen::MatrixXi pmask(iter_size(), 1);
-        pmask.setConstant(0);
-        for (unsigned d = 0; d != path_.iter_size(); ++d) {
-            unsigned pr = path_.index()[d];
-            pa(pr, 0) = path_.integrand()[d];
-            pa(pr, 1) = path_.width()[d];
-            pa(pr, 2) = path_.grid()[d];
-            pmask(pr) = 1;
+        Eigen::MatrixXd pa;
+        Eigen::MatrixXi pmask;
+        bool print_path = path_.iter_size() > 0 && iter_size() > 0;
+        if (print_path) {
+            pa.resize(iter_size(), 3);
+            pmask.resize(iter_size(), 1);
+            pmask.setConstant(0);
+            for (unsigned d = 0; d != path_.iter_size(); ++d) {
+                unsigned pr = path_.index()[d];
+                pa(pr, 0) = path_.integrand()[d];
+                pa(pr, 1) = path_.width()[d];
+                pa(pr, 2) = path_.grid()[d];
+                pmask(pr) = 1;
+            }
         }
 
         // Monitors
+        Eigen::MatrixXd mon;
+        Eigen::MatrixXi mmask;
         unsigned mond = 0;
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             mond += m->second.dim();
         }
-        Eigen::MatrixXd mon(iter_size(), mond);
-        Eigen::MatrixXi mmask(iter_size(), monitor_.size());
-        mmask.setConstant(0);
-        unsigned mc = 0;
-        unsigned mn = 0;
-        for (typename monitor_map_type::const_iterator
-                m = monitor_.begin(); m != monitor_.end(); ++m) {
-            unsigned md = m->second.dim();
-            for (unsigned d = 0; d != m->second.iter_size(); ++d) {
-                unsigned mr = m->second.index()[d];
-                for (unsigned c = 0; c != md; ++c)
-                    mon(mr, c + mc) = m->second.record(c)[d];
-                mmask(mr, mn) = 1;
+        bool print_monitor = mond > 0 && iter_size() > 0;
+        if (print_monitor) {
+            mon.resize(iter_size(), mond);
+            mmask.resize(iter_size(), monitor_.size());
+            mmask.setConstant(0);
+            unsigned mc = 0;
+            unsigned mn = 0;
+            for (typename monitor_map_type::const_iterator
+                    m = monitor_.begin(); m != monitor_.end(); ++m) {
+                unsigned md = m->second.dim();
+                for (unsigned d = 0; d != m->second.iter_size(); ++d) {
+                    unsigned mr = m->second.index()[d];
+                    for (unsigned c = 0; c != md; ++c)
+                        mon(mr, c + mc) = m->second.record(c)[d];
+                    mmask(mr, mn) = 1;
+                }
+                mc += md;
+                ++mn;
             }
-            mc += md;
-            ++mn;
         }
 
         // Print header
         if (print_header) {
             os << "Iter" << sep << "ESS" << sep << "ResSam" << sep;
-            if (accd == 1) {
-                os << "Accept" << sep;
-            } else {
-                for (unsigned d = 0; d != accd; ++d)
-                    os << "Accept." << d + 1 << sep;
-            }
-            os
-                << "Path.Integrand" << sep
-                << "Path.Width" << sep
-                << "Path.Grid" << sep << "";
-            for (typename monitor_map_type::const_iterator
-                    m = monitor_.begin(); m != monitor_.end(); ++m) {
-                if (m->second.dim() == 1) {
-                    os << m->first << sep;
+            if (print_accept) {
+                if (accd == 1) {
+                    os << "Accept" << sep;
                 } else {
-                    for (unsigned d = 0; d != m->second.dim(); ++d)
-                        os << m->first << '.' << d + 1 << sep;
+                    for (unsigned d = 0; d != accd; ++d)
+                        os << "Accept." << d + 1 << sep;
+                }
+            }
+            if (print_path) {
+                os
+                    << "Path.Integrand" << sep
+                    << "Path.Width" << sep
+                    << "Path.Grid" << sep << "";
+            }
+            if (print_monitor) {
+                for (typename monitor_map_type::const_iterator
+                        m = monitor_.begin(); m != monitor_.end(); ++m) {
+                    if (m->second.dim() == 1) {
+                        os << m->first << sep;
+                    } else {
+                        for (unsigned d = 0; d != m->second.dim(); ++d)
+                            os << m->first << '.' << d + 1 << sep;
+                    }
                 }
             }
             os << '\n';
@@ -446,24 +466,29 @@ class Sampler
             os << iter << sep;
             os << ess_[iter] / size() << sep;
             os << resampled_[iter] << sep;
-            os << acc.row(iter) << sep;
-            if (pmask(iter))
-                os << pa.row(iter) << sep;
-            else
-                os << '.' << sep << '.' << sep << '.' << sep;
-            unsigned mc = 0;
-            unsigned mn = 0;
-            for (typename monitor_map_type::const_iterator
-                    m = monitor_.begin(); m != monitor_.end(); ++m) {
-                unsigned md = m->second.dim();
-                if (mmask(iter, mn)) {
-                    os << mon.block(iter, mc, 1, md) << sep;
-                } else {
-                    for (unsigned m = 0; m != md; ++m)
-                        os << '.' << sep;
+            if (print_accept)
+                os << acc.row(iter) << sep;
+            if (print_path) {
+                if (pmask(iter))
+                    os << pa.row(iter) << sep;
+                else
+                    os << '.' << sep << '.' << sep << '.' << sep;
+            }
+            if (print_monitor) {
+                unsigned mc = 0;
+                unsigned mn = 0;
+                for (typename monitor_map_type::const_iterator
+                        m = monitor_.begin(); m != monitor_.end(); ++m) {
+                    unsigned md = m->second.dim();
+                    if (mmask(iter, mn)) {
+                        os << mon.block(iter, mc, 1, md) << sep;
+                    } else {
+                        for (unsigned m = 0; m != md; ++m)
+                            os << '.' << sep;
+                    }
+                    mc += md;
+                    ++mn;
                 }
-                mc += md;
-                ++mn;
             }
             os << '\n';
         }
