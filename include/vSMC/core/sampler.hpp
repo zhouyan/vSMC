@@ -2,10 +2,6 @@
 #define V_SMC_CORE_SAMPLER_HPP
 
 #include <vSMC/internal/common.hpp>
-#include <ostream>
-#include <map>
-#include <set>
-#include <string>
 
 namespace vSMC {
 

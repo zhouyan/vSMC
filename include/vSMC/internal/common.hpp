@@ -5,10 +5,15 @@
 #define __STDC_CONSTANT_MACROS
 #endif // __STDC_CONSTANT_MACROS
 
-#include <deque>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <deque>
+#include <map>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
 #include <Eigen/Dense>
 #include <vSMC/internal/version.hpp>
 #include <vSMC/internal/config.hpp>
@@ -27,6 +32,7 @@ template <typename T> class Monitor;
 template <typename T> class Path;
 
 template <typename T> class SingleParticle;
+template <typename T> class ConstSingleParticle;
 template <unsigned Dim = 1, typename T = double> class StateBase;
 
 template <typename T> class InitializeSeq;
