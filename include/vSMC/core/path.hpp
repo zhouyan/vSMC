@@ -76,6 +76,10 @@ class Path
     /// \brief Test if the path is empty
     ///
     /// \return \b true if the path is empty
+    ///
+    /// \note A path is empty means it has no valid evaluation functions.
+    /// However its record may not be empty. Call eval(iter, particle) on an
+    /// empty path is a runtime error.
     bool empty () const
     {
         return !bool(eval_);
