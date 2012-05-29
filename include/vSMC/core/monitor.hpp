@@ -113,6 +113,8 @@ class Monitor
     }
 
     /// \brief Print the index and record matrix
+    ///
+    /// \param os The ostream to which the contents are printed
     template<typename CharT, typename Traits>
     void print (std::basic_ostream<CharT, Traits> &os = std::cout)
     {
