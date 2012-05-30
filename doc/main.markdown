@@ -15,7 +15,7 @@ e.g. `/usr/local/include` in Unix-alike systems. Alternatively, one can use
 
 # Documentation
 
-To make the documentations one need [Doxygen][Doxygen] 1.8.0 or later.
+To make the documentations one need [Doxygen][Doxygen] 1.8.1 or later.
 
     make docs
 
