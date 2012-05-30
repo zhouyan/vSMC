@@ -14,7 +14,38 @@
 #include <set>
 #include <string>
 #include <vector>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4521)
+#endif // _MSC_VER
+
+#ifdef __INTEL_COMPILER
+// #pragma warning(push)
+#pragma warning(disable:2196)
+#pragma warning(disable:2536)
+#endif // __INTEL_COMPILER
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wall"
+#pragma clang diagnostic ignored "-Wunique-enum"
+#endif // __clang__
+
 #include <Eigen/Dense>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // _MSC_VER
+
+#ifdef __INTEL_COMPILER
+// #pragma warning(pop)
+#endif // __INTEL_COMPILER
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
+
 #include <vSMC/internal/version.hpp>
 #include <vSMC/internal/config.hpp>
 #include <vSMC/internal/function.hpp>
