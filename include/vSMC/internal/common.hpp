@@ -15,11 +15,6 @@
 #include <string>
 #include <vector>
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4521)
-#endif // _MSC_VER
-
 #ifdef __INTEL_COMPILER
 // #pragma warning(push)
 #pragma warning(disable:2196)
@@ -34,10 +29,6 @@
 
 #include <Eigen/Dense>
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-
 #ifdef __INTEL_COMPILER
 // #pragma warning(pop)
 #endif // __INTEL_COMPILER
@@ -46,7 +37,6 @@
 #pragma clang diagnostic pop
 #endif // __clang__
 
-#include <vSMC/internal/version.hpp>
 #include <vSMC/internal/config.hpp>
 #include <vSMC/internal/function.hpp>
 #include <vSMC/internal/random.hpp>
