@@ -96,7 +96,7 @@ using boost::random::piecewise_linear_distribution;
 
 } } // namespace vSMC::rng
 
-// #include <vSMC/rng/beta_distribution.hpp>
-// #include <vSMC/rng/laplace_distribution.hpp>
+#include <vSMC/rng/beta_distribution.hpp>
+#include <vSMC/rng/laplace_distribution.hpp>
 
 #endif // V_SMC_RNG_RANDOM_HPP
