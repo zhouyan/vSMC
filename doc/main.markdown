@@ -32,14 +32,14 @@ are C++11 standard libraries or can be found in [Boost][Boost]. By default the
 library will use the [Boost][Boost] library. But if the C++ implementation has
 them correctly implemented, the standard headers can also be used.
 
-Note that this library is only tested with [Boost][Boost] 1.49 or later.  Also
+Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 (or C++0x) implementations of `<functional`> and `<random>` work
 properly.
 
 The library will first look for the macro `V_SMC_USE_STD_FUNCTION`. If it is
 defined, `std::function` will be used. Otherwise the library will use
 [Boost][Boost], in particular `boost::function`. The same procedure is followed
-for the `<random>` library.  One can put appropriate macros in the
+for the `<random>` library. One can put appropriate macros in the
 `vSMC/internal/config.hpp` header or use compiler flags.
 
 ## Building and testing
@@ -62,10 +62,10 @@ before `make test` or `ctest`.
 
 `make buildtests` will also build the examples, one is a simple particle
 filter, in `test/pf`, the others are a Gaussian mixture model and Positron
-Emission Tomography compartmental model with SMC, in `test/gmm`. The examples
-may take some non-trivial run-time, therefore they are not run when invoking
-`make test` or `ctest`. To run the example, one can invoke `ctest -C Release`.
-Alternatively, one can use
+Emission Tomography compartmental model with SMC, in `test/gmm` and `test/pet`
+respectively. The examples may take some non-trivial run-time, therefore they
+are not run when invoking `make test` or `ctest`. To run the example, one can
+invoke `ctest -C Release`. Alternatively, one can use
 
     make check
 
@@ -85,21 +85,18 @@ examples manually. For example,
 ## Additional libraries used by examples
 
 There are three versions of the particle filter example, **pf_seq**,
-**pf_tbb**, and **pf_vec**. See the tutorial for details.
+**pf_tbb**, and **pf_vec**. To build **pf_seq** and **pf_vec** one only need
+the required libraries, namely [Eigen][Eigen], [Random123][Random123] and
+suitable `<functional>`, `<random>` or [Boost][Boost]. To build **pf_tbb** one
+also need the [Intel TBB][Intel TBB] library.
 
-To build **pf_seq** and **pf_vec** one only need the required libraries, namely
-[Eigen][Eigen], [Random123][Random123] and suitable `<functional>`, `<random>`
-or [Boost][Boost].
-
-To build **pf_tbb** one also need the [Intel TBB][Intel TBB] library.
-
-The Gaussian mixture model example can be built with or without the
-[Intel TBB][Intel TBB] library. If the library is found, by default it will be
-built with it. One can define `-DGMM_SEQUENTIAL=ON` when invoking `cmake` to
-disable the parallelization. If one also define `-DGMM_STATIC=ON` then the
-examples without [Intel TBB][Intel TBB] and linked statically. Similar options
-are available for the Positron Emission Tomography compartmental model example,
-just replace `GMM` with `PET`.
+The Gaussian mixture model example can be built with or without the [Intel
+TBB][Intel TBB] library. If the library is found, by default it will be built
+with it. One can define `-DGMM_SEQUENTIAL=ON` when invoking `cmake` to disable
+the parallelization. If one also define `-DGMM_STATIC=ON` then the examples
+will be built without [Intel TBB][Intel TBB] and linked statically. Similar
+options are available for the Positron Emission Tomography compartmental model
+example, just replace `GMM` with `PET`.
 
 For how to find the libraries see files in `cmake/` and see [CMake][CMake]'s
 documentation for general usage of this tool.
