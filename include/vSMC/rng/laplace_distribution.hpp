@@ -1,5 +1,5 @@
-#ifndef BOOST_RANDOM_LAPLACE_DISTRIBUTION_HPP
-#define BOOST_RANDOM_LAPLACE_DISTRIBUTION_HPP
+#ifndef V_SMC_RANDOM_LAPLACE_DISTRIBUTION_HPP
+#define V_SMC_RANDOM_LAPLACE_DISTRIBUTION_HPP
 
 #include <boost/config/no_tr1/cmath.hpp>
 #include <istream>
@@ -12,7 +12,7 @@
 #include <boost/random/detail/operators.hpp>
 #include <boost/random/uniform_01.hpp>
 
-namespace boost { namespace random {
+namespace vSMC { namespace rng {
 
 /**
  * Instantiations of class template laplace_distribution model a
@@ -183,10 +183,6 @@ class laplace_distribution
     RealType _scale;
 }; // class laplace_distribution
 
-} // namespace random
+} } // namespace vSMC::rng
 
-using random::laplace_distribution;
-
-} // namespace boost
-
-#endif // BOOST_RANDOM_LAPLACE_DISTRIBUTION_HPP
+#endif // V_SMC_RANDOM_LAPLACE_DISTRIBUTION_HPP
