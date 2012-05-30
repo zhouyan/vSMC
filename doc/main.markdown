@@ -61,10 +61,11 @@ before run `ctest` in the `test` target, so you need run `make buildtests`
 before `make test` or `ctest`.
 
 `make buildtests` will also build the examples, one is a simple particle
-filter, in `test/pf`, the other is a Gaussian mixture model with SMC, in
-`test/gmm`. The examples may take some non-trivial run-time, therefore they are
-not run when invoking `make test` or `ctest`. To run the example, one can
-invoke `ctest -C Release`. Alternatively, one can use
+filter, in `test/pf`, the others are a Gaussian mixture model and Positron
+Emission Tomography compartmental model with SMC, in `test/gmm`. The examples
+may take some non-trivial run-time, therefore they are not run when invoking
+`make test` or `ctest`. To run the example, one can invoke `ctest -C Release`.
+Alternatively, one can use
 
     make check
 
@@ -95,7 +96,10 @@ To build **pf_tbb** one also need the [Intel TBB][Intel TBB] library.
 The Gaussian mixture model example can be built with or without the
 [Intel TBB][Intel TBB] library. If the library is found, by default it will be
 built with it. One can define `-DGMM_SEQUENTIAL=ON` when invoking `cmake` to
-disable the parallelization.
+disable the parallelization. If one also define `-DGMM_STATIC=ON` then the
+examples without [Intel TBB][Intel TBB] and linked statically. Similar options
+are available for the Positron Emission Tomography compartmental model example,
+just replace `GMM` with `PET`.
 
 For how to find the libraries see files in `cmake/` and see [CMake][CMake]'s
 documentation for general usage of this tool.
