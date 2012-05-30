@@ -1,8 +1,7 @@
 #ifndef V_SMC_RANDOM_BETA_DISTRIBUTION_HPP
 #define V_SMC_RANDOM_BETA_DISTRIBUTION_HPP
 
-#include <cassert>
-#define V_SMC_PREVENT_MIN_MAX
+#include <vSMC/rng/common.hpp>
 
 namespace vSMC { namespace rng {
 
@@ -172,7 +171,7 @@ class beta_distribution
     // {
     //     return lhs._shape1 == rhs._shape2 && lhs._shape1 == rhs._shape2;
     // }
-    // 
+
     // ///
     // /// Returns true if the two instances of @c beta_distribution will
     // /// return different sequences of values given equal generators.

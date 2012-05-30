@@ -1,5 +1,5 @@
-#ifndef V_SMC_INTERNAL_RANDOM_HPP
-#define V_SMC_INTERNAL_RANDOM_HPP
+#ifndef V_SMC_RNG_RANDOM_HPP
+#define V_SMC_RNG_RANDOM_HPP
 
 // #include <Random123/aes.h>
 // #include <Random123/ars.h>
@@ -18,6 +18,7 @@
 #endif // _MSC_VER
 
 #include <vSMC/internal/config.hpp>
+#include <vSMC/rng/common.hpp>
 
 /// The parallel RNG (based on Random123) seed, unsigned
 #ifndef V_SMC_CRNG_SEED
@@ -98,4 +99,4 @@ using boost::random::piecewise_linear_distribution;
 // #include <vSMC/rng/beta_distribution.hpp>
 // #include <vSMC/rng/laplace_distribution.hpp>
 
-#endif // V_SMC_INTERNAL_RANDOM_HPP
+#endif // V_SMC_RNG_RANDOM_HPP
