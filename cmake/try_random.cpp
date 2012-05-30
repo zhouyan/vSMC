@@ -6,11 +6,7 @@ int main ()
     int N = 100000;
     r123::Engine<V_SMC_CRNG_TYPE> eng(V_SMC_CRNG_SEED);
 
-#ifdef V_SMC_USE_BOOST_RANDOM
-    vSMC::rng::bernoulli_distribution<> rbern(0.5);
-#else
     vSMC::rng::bernoulli_distribution rbern(0.5);
-#endif
     for (int i = 0; i != N; ++i){
         int b = rbern(eng);
         assert(b == 0 || b == 1);
