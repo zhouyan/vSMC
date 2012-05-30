@@ -546,17 +546,13 @@ class Sampler
     }
 }; // class Sampler
 
-} // namespace vSMC
-
-namespace std {
-
 /// \brief Print the sampler
 ///
 /// \param os The ostream to which the contents are printed
 /// \param sampler The sampler to be printed
 ///
 /// \note This is the same as <tt>sampler.print(os)</tt>
-template<typename T, typename CharT, typename Traits>
+template<typename CharT, typename Traits, typename T>
 std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const vSMC::Sampler<T> &sampler)
 {
@@ -564,6 +560,6 @@ std::basic_ostream<CharT, Traits> &operator<< (
     return os;
 }
 
-} // namespace std
+} // namespace vSMC
 
 #endif // V_SMC_CORE_SAMPLER_HPP

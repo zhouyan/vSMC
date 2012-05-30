@@ -111,36 +111,51 @@ class laplace_distribution
         return laplace_distribution(parm)(urng);
     }
 
-    // FIXME
-    // /** Writes a \c laplace_distribution to a \c std::ostream. */
-    // BOOST_RANDOM_DETAIL_OSTREAM_OPERATOR(os, laplace_distribution, nd)
-    // {
-    //     os << nd._location << " " << nd._scale << " ";
-    //     return os;
-    // }
-
-    // /** Reads a \c laplace_distribution from a \c std::istream. */
-    // BOOST_RANDOM_DETAIL_ISTREAM_OPERATOR(is, laplace_distribution, nd)
-    // {
-    //     is >> std::ws >> nd._location >> std::ws >> nd._scale;
-    //     return is;
-    // }
-
-    bool operator== (laplace_distribution<RealType> &other)
-    {
-        return location_ == other.location_ && scale_ == other.scale_;
-    }
-
-    bool operator!= (laplace_distribution<RealType> &other)
-    {
-        return location_ != other.location_ || scale_ != other.scale_;
-    }
-
     private :
 
     RealType location_;
     RealType scale_;
 }; // class laplace_distribution
+
+template<typename RealType>
+bool operator== (
+        laplace_distribution<RealType> &lhs,
+        laplace_distribution<RealType> &rhs)
+{
+    return lhs.location() == rhs.location() && lhs.scale() == rhs.scale();
+}
+
+template<typename RealType>
+bool operator!= (
+        laplace_distribution<RealType> &lhs,
+        laplace_distribution<RealType> &rhs)
+{
+    return lhs.location() != rhs.location() || lhs.scale() != rhs.scale();
+}
+
+template<typename T, typename CharT, typename Traits, typename RealType>
+std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os,
+        laplace_distribution<RealType> &dist)
+{
+    os << dist.location() << " " << dist.scale() << " ";
+
+    return os;
+}
+
+template<typename T, typename CharT, typename Traits, typename RealType>
+std::basic_istream<CharT, Traits> &operator<< (
+        std::basic_istream<CharT, Traits> &is,
+        laplace_distribution<RealType> &dist)
+{
+    RealType location = 0;
+    RealType scale = 1;
+    is >> std::ws >> location >> std::ws  >> scale;
+    dist.param(typename laplace_distribution<RealType>::param_type(
+                location, scale));
+
+    return is;
+}
 
 } } // namespace vSMC::rng
 

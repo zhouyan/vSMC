@@ -107,36 +107,51 @@ class beta_distribution
         return beta_distribution(parm)(urng);
     }
 
-    // FIXME
-    // /// Writes a @c beta_distribution to a @c std::ostream.
-    // BOOST_RANDOM_DETAIL_OSTREAM_OPERATOR(os, beta_distribution, nd)
-    // {
-    //     os << nd._shape1 << " " << nd._shape2 << " ";
-    //     return os;
-    // }
-
-    // /// Reads a @c beta_distribution from a @c std::istream.
-    // BOOST_RANDOM_DETAIL_ISTREAM_OPERATOR(is, beta_distribution, nd)
-    // {
-    //     is >> std::ws >> nd._shape1 >> std::ws >> nd._shape2;
-    //     return is;
-    // }
-
-    bool operator== (beta_distribution<RealType> &other)
-    {
-        return shape1_ == other.shape1_ && shape2_ == other.shape2_;
-    }
-
-    bool operator!= (beta_distribution<RealType> &other)
-    {
-        return shape1_ != other.shape1_ || shape2_ != other.shape2_;
-    }
-
     private :
 
     RealType shape1_;
     RealType shape2_;
 }; // class beta_distribution
+
+template<typename RealType>
+bool operator== (
+        beta_distribution<RealType> &lhs,
+        beta_distribution<RealType> &rhs)
+{
+    return lhs.shape1() == rhs.shape1() && lhs.shape2() == rhs.shape2();
+}
+
+template<typename RealType>
+bool operator!= (
+        beta_distribution<RealType> &lhs,
+        beta_distribution<RealType> &rhs)
+{
+    return lhs.shape1() != rhs.shape1() || lhs.shape2() != rhs.shape2();
+}
+
+template<typename T, typename CharT, typename Traits, typename RealType>
+std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os,
+        beta_distribution<RealType> &dist)
+{
+    os << dist.shape1() << " " << dist.shape2() << " ";
+
+    return os;
+}
+
+template<typename T, typename CharT, typename Traits, typename RealType>
+std::basic_istream<CharT, Traits> &operator<< (
+        std::basic_istream<CharT, Traits> &is,
+        beta_distribution<RealType> &dist)
+{
+    RealType shape1 = 0;
+    RealType shape2 = 1;
+    is >> std::ws >> shape1 >> std::ws >> shape2;
+    dist.param(typename beta_distribution<RealType>::param_type(
+                shape1, shape2));
+
+    return is;
+}
 
 } } // namespace vSMC::rng
 
