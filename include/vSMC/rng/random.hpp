@@ -69,7 +69,7 @@ using std::piecewise_linear_distribution;
 using boost::random::uniform_int_distribution;
 using boost::random::uniform_real_distribution;
 
-typedef boost::random::bernoulli_distribution<> bernoulli_distribution;
+typedef boost::random::bernoulli_distribution<double> bernoulli_distribution;
 using boost::random::binomial_distribution;
 using boost::random::extreme_value_distribution;
 using boost::random::geometric_distribution;
