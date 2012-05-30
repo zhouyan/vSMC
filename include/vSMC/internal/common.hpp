@@ -39,7 +39,7 @@
 
 #include <vSMC/internal/config.hpp>
 #include <vSMC/internal/function.hpp>
-#include <vSMC/internal/random.hpp>
+#include <vSMC/rng/random.hpp>
 
 #ifndef V_SMC_INDEX_TYPE
 #define V_SMC_INDEX_TYPE EIGEN_DEFAULT_DENSE_INDEX_TYPE
