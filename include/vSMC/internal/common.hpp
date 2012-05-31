@@ -8,12 +8,13 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <deque>
 #include <map>
-#include <ostream>
 #include <set>
-#include <string>
+#include <deque>
 #include <vector>
+#include <istream>
+#include <ostream>
+#include <string>
 
 #ifdef __INTEL_COMPILER
 // #pragma warning(push)
