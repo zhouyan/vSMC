@@ -18,9 +18,25 @@
 #endif // _MSC_VER
 
 namespace vSMC { namespace rng {
-
 #ifdef V_SMC_USE_CONSTEXPR_ENGINE
 
+/// \brief An Engine with constexpr min() and max()
+///
+/// vSMC::rng::Engine is an alias to r123::Engine unless the macro
+/// V_SMC_USE_CONSTEXPR_ENGINE is explicited defined before the including of
+/// this header. One shall never define this macro unless it is absolutely
+/// needed as explained below.
+///
+/// The Engine distributed Random123 does not return min() and max() as
+/// constexpr for a good reason. However this will be needed if libc++ is
+/// used.  This mini Engine is derived from r123::Engine. The base type is not
+/// actually intended to be used as a base class. As this derived class does
+/// not have any data of its own. It shall be fine to use it even through base
+/// type pointers, though that is certainly a bad practice. However when min()
+/// and max() are of concern, one shall use the derived type to invoke the
+/// static members. In furture we may write a entirely new class for this case
+/// but that will be reinventing the wheel which Random123 has already done.
+/// So that won't happen in any near future.
 template <typename CBRNG>
 class Engine : public r123::Engine<CBRNG>
 {

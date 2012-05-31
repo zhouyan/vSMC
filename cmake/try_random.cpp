@@ -4,7 +4,7 @@
 int main ()
 {
     int N = 10000;
-    r123::Engine<V_SMC_CRNG_TYPE> eng(V_SMC_CRNG_SEED);
+    r123::Engine<V_SMC_CBRNG_TYPE> eng(V_SMC_CBRNG_SEED);
 
     vSMC::rng::uniform_real_distribution<> runif(0, 1);
     for (int i = 0; i != N; ++i) {
