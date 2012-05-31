@@ -46,14 +46,16 @@ class beta_distribution
     };
 
     explicit beta_distribution (RealType shape1 = 1, RealType shape2 = 1) :
-        shape1_(shape1), shape2_(shape2)
+        shape1_(shape1), shape2_(shape2),
+        rgamma1_(shape1_, 1), rgamma2_(shape2_, 1)
     {
         assert(shape1_ > 0);
         assert(shape2_ > 0);
     }
 
     explicit beta_distribution (const param_type &parm) :
-        shape1_(parm.shape1()), shape2_(parm.shape2())
+        shape1_(parm.shape1()), shape2_(parm.shape2()),
+        rgamma1_(shape1_, 1), rgamma2_(shape2_, 1)
     {
         assert(shape1_ > 0);
         assert(shape2_ > 0);
@@ -88,15 +90,23 @@ class beta_distribution
     {
         shape1_ = parm.shape1();
         shape2_ = parm.shape2();
+        rgamma1_.param(typename gamma_distribution<RealType>::param_type(
+                    shape1_, 1));
+        rgamma2_.param(typename gamma_distribution<RealType>::param_type(
+                    shape2_, 1));
     }
 
-    void reset () {}
+    void reset ()
+    {
+        rgamma1_.reset();
+        rgamma2_.reset();
+    }
 
     template <typename URNG>
     result_type operator() (URNG &urng)
     {
-        RealType x = gamma_distribution<RealType>(shape1_, 1)(urng);
-        RealType y = gamma_distribution<RealType>(shape2_, 1)(urng);
+        RealType x = rgamma1_(urng);
+        RealType y = rgamma2_(urng);
 
         return x / (x + y);
     }
@@ -111,6 +121,8 @@ class beta_distribution
 
     RealType shape1_;
     RealType shape2_;
+    gamma_distribution<RealType> rgamma1_;
+    gamma_distribution<RealType> rgamma2_;
 }; // class beta_distribution
 
 template<typename RealType>

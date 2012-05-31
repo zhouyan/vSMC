@@ -46,13 +46,13 @@ class laplace_distribution
     }; // class param_type
 
     explicit laplace_distribution (RealType location = 0, RealType scale = 1) :
-        location_(location), scale_(scale)
+        location_(location), scale_(scale), runif_(0, 1)
     {
         assert(scale_ >= 0);
     }
 
     explicit laplace_distribution (const param_type &parm) :
-        location_(parm.location()), scale_(parm.scale())
+        location_(parm.location()), scale_(parm.scale()), runif_(0, 1)
     {
         assert(scale_ >= 0);
     }
@@ -88,7 +88,10 @@ class laplace_distribution
         scale_ = parm.scale();
     }
 
-    void reset () {}
+    void reset ()
+    {
+        runif_.reset();
+    }
 
     template <typename URNG>
     result_type operator() (URNG &urng)
@@ -96,7 +99,7 @@ class laplace_distribution
         using std::abs;
         using std::log;
 
-        RealType u = uniform_real_distribution<RealType>()(urng) - 0.5;
+        RealType u = runif_(urng) - 0.5;
         RealType r = -2 * std::abs(u);
 
         r = log(1 + r);
@@ -115,6 +118,7 @@ class laplace_distribution
 
     RealType location_;
     RealType scale_;
+    uniform_real_distribution<RealType> runif_;
 }; // class laplace_distribution
 
 template<typename RealType>
