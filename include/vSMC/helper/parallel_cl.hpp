@@ -33,7 +33,7 @@ class StateCL
 
     explicit StateBase (size_type N) :
         size_(N), program_created_(false),
-        state_host_(Dim, N), weight_host_(N), accept_host_(N)
+        state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
     {
         try {
             cl_initialize();
