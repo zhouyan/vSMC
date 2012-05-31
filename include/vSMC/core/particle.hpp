@@ -5,6 +5,9 @@
 
 namespace vSMC {
 
+template <T> void pre_copy (Particle<T> &particle) {}
+template <T> void post_copy (Particle<T> &particle) {}
+
 /// \brief Particle class
 ///
 /// \tparam T State state type. Requiment:
@@ -473,6 +476,7 @@ class Particle
             replication_[id_max] += size_ - sum;
         }
 
+        pre_copy(*this);
         size_type from = 0;
         size_type time = 0;
         for (size_type to = 0; to != size_; ++to) {
@@ -489,7 +493,7 @@ class Particle
                 ++time;
             }
         }
-
+        post_copy(*this);
         set_equal_weight();
     }
 }; // class Particle

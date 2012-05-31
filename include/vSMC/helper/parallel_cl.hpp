@@ -6,6 +6,18 @@
 
 namespace vSMC {
 
+template <unsigned Dim, typename T>
+void pre_copy (Particle<StateCL<Dim, T> > &particle)
+{
+    particle.value().pre_copy();
+}
+
+template <unsigned Dim, typename T>
+void post_copy (Particle<StateCL<Dim, T> > &particle)
+{
+    particle.value().post_copy();
+}
+
 /// \tparam T CL type
 template <unsigned Dim, typename T>
 class StateCL
@@ -17,9 +29,11 @@ class StateCL
     typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynmaic> state_mat_type;
     typedef Eigen::Matrix<T, Eigen::Dynamic, 1> weight_vec_type;
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> accept_vec_type;
+    typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> copy_vec_type;
 
     explicit StateBase (size_type N) :
-        size_(N), state_host_(Dim, N), weight_host_(N), accept_host_(N)
+        size_(N), program_created_(false),
+        state_host_(Dim, N), weight_host_(N), accept_host_(N)
     {
         try {
             cl_initialize();
@@ -71,16 +85,6 @@ class StateCL
         return program_;
     }
 
-    std::vector<cl::Device> &device ()
-    {
-        return device_;
-    }
-
-    const std::vector<cl::Device> &device () const
-    {
-        return device_;
-    }
-
     std::vector<cl::Platform> &platform ()
     {
         return platform_;
@@ -91,9 +95,19 @@ class StateCL
         return platform_;
     }
 
+    std::vector<cl::Device> &device ()
+    {
+        return device_;
+    }
+
+    const std::vector<cl::Device> &device () const
+    {
+        return device_;
+    }
+
     const state_mat_type &state_host () const
     {
-        command_queue_.enqueueReadBuffer(state_device_, 1, 0, size() * dim(),
+        command_queue_.enqueueReadBuffer(state_device_, 1, 0, size_ * Dim,
                 (void *) state_host_.data());
         return state_host_;
     }
@@ -105,7 +119,7 @@ class StateCL
 
     const weight_vec_type &weight_host () const
     {
-        command_queue_.enqueueReadBuffer(weight_device_, 1, 0, size() * dim(),
+        command_queue_.enqueueReadBuffer(weight_device_, 1, 0, size_,
                 (void *) weight_host_.data());
         return weight_host_;
     }
@@ -117,7 +131,7 @@ class StateCL
 
     const accept_vec_type &accept_host () const
     {
-        command_queue_.enqueueReadBuffer(accept_device_, 1, 0, size() * dim(),
+        command_queue_.enqueueReadBuffer(accept_device_, 1, 0, size_,
                 (void *) accept_host_.data());
         return accept_host_;
     }
@@ -127,24 +141,60 @@ class StateCL
         return accept_device_;
     }
 
-    // TODO copy
+    void compile ()
+    {
+        // TODO compile
+    }
+
+    bool program_created () const
+    {
+        return program_created_;
+    }
+
+    void copy (size_type from, size_type to)
+    {
+        copy_host_[to] = from;
+    }
+
+    void pre_copy ()
+    {
+        for (size_type i = 0; i != size_; ++i)
+            copy_host_[i] = i;
+    }
+
+    void post_copy ()
+    {
+        assert(program_created_);
+
+        kernel_copy_.setArg(0, state_device_);
+        kernel_copy_.setArg(1, copy_device_);
+        command_queue_.enqueueWriteBuffer(copy_device_, 1, 0, size_,
+                (void *) copy_host_.data());
+        command_queue_.enqueueNDRangeKernel(kernel_copy_,
+                cl::NullRange, cl::NDRange(cl::NullRange), cl::NullRange);
+    }
 
     private :
 
     size_type size_;
+
     cl::CommandQueue command_queue_;
     cl::Context context_;
     cl::Program program_;
-    std::vector<cl::Device> device_;
     std::vector<cl::Platform> platform_;
+    std::vector<cl::Device> device_;
+
+    bool program_created_;
 
     state_mat_type state_host_;
     weight_vec_type weight_host_;
     accept_vec_type accept_host_;
+    copy_vec_type copy_host_;
 
     cl::Buffer state_device_;
     cl::Buffer weight_device_;
     cl::Buffer accept_device_;
+    cl::Buffer copy_device_;
 
     void cl_initialize ()
     {
@@ -191,11 +241,13 @@ class StateCL
         command_queue_ = cl::CommandQueue(context_, device_[0], 0);
 
         state_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(T) * size() * dim(), state_host_.data());
+                sizeof(T) * size_ * Dim, state_host_.data());
         weight_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(T) * size(), weight_host_.data());
+                sizeof(T) * size_, weight_host_.data());
         accept_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(cl_uint) * size(), accept_host_.data());
+                sizeof(cl_uint) * size_, accept_host_.data());
+        copy_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
+                sizeof(cl_uint) * size_, copy_host_.data());
     }
 }; // class StateCL
 
@@ -223,26 +275,7 @@ class InitializeCL
 
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
-        if (param) {
-            param = static_cast<const char *>(param);
-            std::stringstream ss;
-
-            if (sizeof(typename T::state_type) == sizeof(cl_float))
-                ss << "typedef float state_type\n";
-            else if (sizeof(typename T::state_type) == sizeof(cl_double))
-                ss << "typedef double state_type\n";
-            else
-                throw std::runtime_error("Unsupported OpenCL types");
-
-            ss << "struct state_vector {\n";
-            for (unsigned d = 0; d != particle.value().dim(); ++d)
-                ss << "state_type param" << d + 1 << ";\n";
-            ss << "}\n";
-
-            // TODO create program
-
-            kernel_created_ = false;
-        }
+        assert(particle.value().program_created());
 
         if (!kernel_created_) {
             kernel_ = cl::Kernel(
@@ -298,6 +331,8 @@ class MoveCL
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
+        assert(particle.value().program_created());
+
         if (!kernel_created_) {
             kernel_ = cl::Kernel(
                     particle.value().program(), kernel_name_.c_str());
