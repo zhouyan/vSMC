@@ -13,14 +13,10 @@ class InitializeSeq
 {
     public :
 
-    typedef internal::function<unsigned (SingleParticle<T>)>
-        initialize_state_type;
-    typedef internal::function<void (Particle<T> &, void *)>
-        initialize_param_type;
-    typedef internal::function<void (Particle<T> &)>
-        pre_processor_type;
-    typedef internal::function<void (Particle<T> &)>
-        post_processor_type;
+    typedef function<unsigned (SingleParticle<T>)> initialize_state_type;
+    typedef function<void (Particle<T> &, void *)> initialize_param_type;
+    typedef function<void (Particle<T> &)> pre_processor_type;
+    typedef function<void (Particle<T> &)> post_processor_type;
 
     virtual ~InitializeSeq () {}
 
@@ -52,12 +48,9 @@ class MoveSeq
 {
     public :
 
-    typedef internal::function<unsigned (unsigned, SingleParticle<T>)>
-        move_state_type;
-    typedef internal::function<void (unsigned, Particle<T> &)>
-        pre_processor_type;
-    typedef internal::function<void (unsigned, Particle<T> &)>
-        post_processor_type;
+    typedef function<unsigned (unsigned, SingleParticle<T>)> move_state_type;
+    typedef function<void (unsigned, Particle<T> &)> pre_processor_type;
+    typedef function<void (unsigned, Particle<T> &)> post_processor_type;
 
     virtual ~MoveSeq () {}
 
@@ -88,8 +81,8 @@ class MonitorSeq
 {
     public :
 
-    typedef internal::function<void (
-            unsigned, ConstSingleParticle<T>, double *)> monitor_state_type;
+    typedef function<void (unsigned, ConstSingleParticle<T>, double *)>
+        monitor_state_type;
 
     virtual ~MonitorSeq () {}
 
@@ -120,9 +113,9 @@ class PathSeq
 {
     public :
 
-    typedef internal::function<double (unsigned, ConstSingleParticle<T>)>
+    typedef function<double (unsigned, ConstSingleParticle<T>)>
         path_state_type;
-    typedef internal::function<double (unsigned, const Particle<T> &)>
+    typedef function<double (unsigned, const Particle<T> &)>
         width_state_type;
 
     virtual ~PathSeq () {}

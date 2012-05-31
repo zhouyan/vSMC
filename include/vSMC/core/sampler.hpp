@@ -16,12 +16,10 @@ class Sampler
     public :
 
     /// The type of initialization functor
-    typedef internal::function<unsigned (Particle<T> &, void *)>
-        initialize_type;
+    typedef function<unsigned (Particle<T> &, void *)> initialize_type;
 
     /// The type of move and mcmc functor
-    typedef internal::function<unsigned (unsigned, Particle<T> &)>
-        move_type;
+    typedef function<unsigned (unsigned, Particle<T> &)> move_type;
 
     /// The type of ESS history vector
     typedef std::deque<double> ess_type;

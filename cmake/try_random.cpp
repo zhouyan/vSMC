@@ -1,5 +1,5 @@
 #include <cassert>
-#include <vSMC/internal/random.hpp>
+#include <vSMC/rng/random.hpp>
 
 int main ()
 {
