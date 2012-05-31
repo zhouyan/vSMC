@@ -9,13 +9,15 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <pair>
 #include <map>
 #include <set>
 #include <deque>
 #include <vector>
-#include <istream>
-#include <ostream>
+#include <iostream>
+#include <stringstream>
 #include <string>
+#include <stdexcept>
 
 #ifdef __INTEL_COMPILER
 // #pragma warning(push)

@@ -32,7 +32,7 @@ class StateCL
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> copy_vec_type;
 
     explicit StateBase (size_type N) :
-        size_(N), program_created_(false),
+        size_(N), build_(false),
         state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
     {
         try {
@@ -41,6 +41,7 @@ class StateCL
             std::cerr << err.what() << std::endl;
             std::abort();
         }
+        // TODO Assert that T is either cl_float of cl_double
     }
 
     virtual ~StateCL () {}
@@ -141,14 +142,35 @@ class StateCL
         return accept_device_;
     }
 
-    void compile ()
+    void build (const char *source, const char *flags)
     {
-        // TODO compile
+        std::stringstream ss;
+        ss << "#include <vSMC/helper/parallel_cl/common.h>\n";
+        if (sizeof(T) == sizeof(cl_float))
+            ss << "typedef float state_type;\n";
+        else if (sizeof(T) == sizeof(cl_double))
+            ss << "typedef double state_type;\n";
+        ss << "struct state_struct {\n";
+        for (unsigned d = 0; d != Dim; ++d)
+            ss << "state_type param" << d + 1 << ";\n";
+        ss << "};\n";
+        ss << source << '\n';
+
+        try {
+            cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
+            program_ = cl::Program(context_, src);
+            program_.build(device_);
+        } catch (cl::Error err) {
+            build_ = false;
+            throw cl::Error(err);
+        }
+
+        build_ = true;
     }
 
-    bool program_created () const
+    bool build () const
     {
-        return program_created_;
+        return build_;
     }
 
     void copy (size_type from, size_type to)
@@ -164,7 +186,7 @@ class StateCL
 
     void post_copy ()
     {
-        assert(program_created_);
+        assert(build_);
 
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
@@ -184,7 +206,7 @@ class StateCL
     std::vector<cl::Platform> platform_;
     std::vector<cl::Device> device_;
 
-    bool program_created_;
+    bool build_;
 
     state_mat_type state_host_;
     weight_vec_type weight_host_;
@@ -275,7 +297,7 @@ class InitializeCL
 
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
-        assert(particle.value().program_created());
+        assert(particle.value().build());
 
         if (!kernel_created_) {
             kernel_ = cl::Kernel(
@@ -331,7 +353,7 @@ class MoveCL
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        assert(particle.value().program_created());
+        assert(particle.value().build());
 
         if (!kernel_created_) {
             kernel_ = cl::Kernel(
