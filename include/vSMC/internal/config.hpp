@@ -11,6 +11,10 @@
 // Uncomment the following line to use C++11 <random>
 // #define V_SMC_USE_STD_RANDOM
 
+#ifdef V_SMC_USE_CONSTEXPR_ENGINE
+#define V_SMC_USE_STD_RANDOM
+#endif // V_SMC_USE_CONSTEXPR_ENGINE
+
 #if !defined(V_SMC_USE_STD_FUNCITON) || !defined(V_SMC_USE_STD_RANDOM)
 #include <boost/version.hpp>
 #ifndef V_SMC_NDEBUG

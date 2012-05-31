@@ -5,8 +5,8 @@
 
 namespace vSMC {
 
-template <T> void pre_copy (Particle<T> &particle) {}
-template <T> void post_copy (Particle<T> &particle) {}
+template <typename T> void pre_copy (Particle<T> &particle) {}
+template <typename T> void post_copy (Particle<T> &particle) {}
 
 /// \brief Particle class
 ///
