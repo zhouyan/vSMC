@@ -47,7 +47,7 @@ class Sampler
             const move_type &move = NULL,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
-            typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
+            typename Particle<T>::seed_type seed = V_SMC_CBRNG_SEED) :
         init_(init), move_(move),
         scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0) {}

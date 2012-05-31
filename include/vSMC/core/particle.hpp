@@ -22,10 +22,10 @@ class Particle
     typedef T value_type;
 
     /// The type of the Counter-based random number generator
-    typedef V_SMC_CRNG_TYPE crng_type;
+    typedef V_SMC_CBRNG_TYPE cbrng_type;
 
     /// The type of the Counter-based random number generator C++11 engine
-    typedef r123::Engine<crng_type> rng_type;
+    typedef r123::Engine<cbrng_type> rng_type;
 
     /// The integer type of the seed
     typedef rng_type::result_type seed_type;
@@ -40,7 +40,7 @@ class Particle
     ///
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
-    explicit Particle (size_type N, seed_type seed = V_SMC_CRNG_SEED) :
+    explicit Particle (size_type N, seed_type seed = V_SMC_CBRNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N)
