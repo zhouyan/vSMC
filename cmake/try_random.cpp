@@ -3,8 +3,20 @@
 
 int main ()
 {
-    int N = 100000;
+    int N = 10000;
     r123::Engine<V_SMC_CRNG_TYPE> eng(V_SMC_CRNG_SEED);
+
+    vSMC::rng::uniform_real_distribution<> runif(0, 1);
+    for (int i = 0; i != N; ++i) {
+        int u = runif(eng);
+        assert(u >= 0 && u <= 100);
+    }
+
+    vSMC::rng::uniform_int_distribution<> ruint(1, 100);
+    for (int i = 0; i != N; ++i) {
+        int u = ruint(eng);
+        assert(u >= 1 && u <= 100);
+    }
 
     vSMC::rng::bernoulli_distribution rbern(0.5);
     for (int i = 0; i != N; ++i){
@@ -33,18 +45,6 @@ int main ()
     vSMC::rng::normal_distribution<> rnorm(0, 1);
     for (int i = 0; i != N; ++i) {
         double n = rnorm(eng);
-    }
-
-    vSMC::rng::uniform_real_distribution<> ruint(1, 100);
-    for (int i = 0; i != N; ++i) {
-        int u = ruint(eng);
-        assert(u >= 1 && u <= 100);
-    }
-
-    vSMC::rng::uniform_real_distribution<> runif(0, 1);
-    for (int i = 0; i != N; ++i) {
-        double u = runif(eng);
-        assert(u >= 0 && u <= 1);
     }
 
     return 0;
