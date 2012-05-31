@@ -45,11 +45,11 @@ using std::uniform_real_distribution;
 
 using std::bernoulli_distribution;
 using std::binomial_distribution;
-using std::extreme_value_distribution;
 using std::geometric_distribution;
 using std::negative_binomial_distribution;
 
 using std::exponential_distribution;
+using std::extreme_value_distribution;
 using std::gamma_distribution;
 using std::poisson_distribution;
 using std::weibull_distribution;
@@ -72,11 +72,11 @@ using boost::random::uniform_real_distribution;
 
 typedef boost::random::bernoulli_distribution<double> bernoulli_distribution;
 using boost::random::binomial_distribution;
-using boost::random::extreme_value_distribution;
 using boost::random::geometric_distribution;
 using boost::random::negative_binomial_distribution;
 
 using boost::random::exponential_distribution;
+using boost::random::extreme_value_distribution;
 using boost::random::gamma_distribution;
 using boost::random::poisson_distribution;
 using boost::random::weibull_distribution;
