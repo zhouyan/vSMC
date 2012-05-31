@@ -1,24 +1,9 @@
 #ifndef V_SMC_RNG_RANDOM_HPP
 #define V_SMC_RNG_RANDOM_HPP
 
-// #include <Random123/aes.h>
-// #include <Random123/ars.h>
-#include <Random123/philox.h>
-#include <Random123/threefry.h>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4521)
-#endif // _MSC_VER
-
-#include <Random123/conventional/Engine.hpp>
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-
 #include <vSMC/internal/config.hpp>
 #include <vSMC/rng/common.hpp>
+#include <vSMC/rng/r123_engine.hpp>
 
 /// The parallel RNG (based on Random123) seed, unsigned
 #ifndef V_SMC_CBRNG_SEED

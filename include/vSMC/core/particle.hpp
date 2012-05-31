@@ -25,7 +25,7 @@ class Particle
     typedef V_SMC_CBRNG_TYPE cbrng_type;
 
     /// The type of the Counter-based random number generator C++11 engine
-    typedef r123::Engine<cbrng_type> rng_type;
+    typedef rng::Engine<cbrng_type> rng_type;
 
     /// The integer type of the seed
     typedef rng_type::result_type seed_type;
