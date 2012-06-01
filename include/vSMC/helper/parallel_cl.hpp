@@ -11,7 +11,7 @@ namespace vSMC {
 template <typename T>
 void cl_pre_resampling (T &state)
 {
-    state.pre_resampling
+    state.pre_resampling();
 }
 
 template <typename T>
@@ -41,18 +41,13 @@ class StateCL
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> copy_vec_type;
 
     explicit StateCL (size_type N) :
-        size_(N), build_(false), context_created_(false),
+        size_(N),
+        platform_created_(false), context_created_(false),
+        device_created_(false), command_queue_created_(false),
+        program_created_(false), build_(false),
         global_size_(N), local_size_(0),
         state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
-    {
-        try {
-            create_context();
-        } catch (cl::Error err) {
-            std::cerr << err.what() << std::endl;
-            std::abort();
-        }
-        // TODO Assert that T is either cl_float of cl_double
-    }
+    {}
 
     virtual ~StateCL () {}
 
@@ -65,41 +60,6 @@ class StateCL
     {
         return size_;
     }
-    const cl::CommandQueue &command_queue () const
-    {
-        return command_queue_;
-    }
-
-    void command_queue (const cl::CommandQueue &queue)
-    {
-        command_queue_ = queue;
-    }
-
-    const cl::Context &context () const
-    {
-        return context_;
-    }
-
-    void context (const cl::CommandQueue &ctx)
-    {
-        context_ = ctx;
-        context_created_ = true;
-    }
-
-    const bool context_created () const
-    {
-        return context_created_;
-    }
-
-    const cl::Program &program () const
-    {
-        return program_;
-    }
-
-    void program (const cl::CommandQueue &prg)
-    {
-        program_ = prg;
-    }
 
     const std::vector<cl::Platform> &platform () const
     {
@@ -109,6 +69,29 @@ class StateCL
     void platform (const std::vector<cl::Platform> &plat)
     {
         platform_ = plat;
+        platform_created_ = true;
+    }
+
+    bool platform_created () const
+    {
+        return platform_created_;
+    }
+
+    const cl::Context &context () const
+    {
+        return context_;
+    }
+
+    void context (const cl::Context &ctx)
+    {
+        context_ = ctx;
+        setup_buffer();
+        context_created_ = true;
+    }
+
+    const bool context_created () const
+    {
+        return context_created_;
     }
 
     const std::vector<cl::Device> &device () const
@@ -119,6 +102,43 @@ class StateCL
     void device (const std::vector<cl::Device> &dev)
     {
         device_ = dev;
+    }
+
+    bool device_created () const
+    {
+        return device_created_;
+    }
+
+    const cl::CommandQueue &command_queue () const
+    {
+        return command_queue_;
+    }
+
+    void command_queue (const cl::CommandQueue &queue)
+    {
+        command_queue_ = queue;
+        command_queue_created_ = true;
+    }
+
+    bool command_queue_created () const
+    {
+        return command_queue_created_;
+    }
+
+    const cl::Program &program () const
+    {
+        return program_;
+    }
+
+    void program (const cl::Program &prg)
+    {
+        program_ = prg;
+        program_created_ = true;
+    }
+
+    bool program_created () const
+    {
+        return program_created_;
     }
 
     cl::NDRange global_nd_range () const
@@ -143,6 +163,11 @@ class StateCL
             global_size_ = size_;
     }
 
+    const cl::Buffer &state_device () const
+    {
+        return state_device_;
+    }
+
     const state_mat_type &state_host () const
     {
         command_queue_.enqueueReadBuffer(state_device_, 1, 0,
@@ -150,9 +175,9 @@ class StateCL
         return state_host_;
     }
 
-    const cl::Buffer &state_device () const
+    const cl::Buffer &weight_device () const
     {
-        return state_device_;
+        return weight_device_;
     }
 
     const weight_vec_type &weight_host () const
@@ -162,9 +187,9 @@ class StateCL
         return weight_host_;
     }
 
-    const cl::Buffer &weight_device () const
+    const cl::Buffer &accept_device () const
     {
-        return weight_device_;
+        return accept_device_;
     }
 
     const accept_vec_type &accept_host () const
@@ -174,20 +199,27 @@ class StateCL
         return accept_host_;
     }
 
-    const cl::Buffer &accept_device () const
+    void setup (cl_device_type dev_type = CL_DEVICE_TYPE_GPU)
     {
-        return accept_device_;
-    }
+        cl::Platform::get(&platform_);
+        platform_created_ = true;
 
-    template <typename State>
-    void build (const char *source, const char *flags, Sampler<State> &sampler)
-    {
-        assert(context_created_);
+        cl_context_properties context_properties[] = {
+            CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_[0])(), 0
+        };
+        context_ = cl::Context(dev_type, context_properties);
+        setup_buffer();
+        context_created_ = true;
 
         device_= context_.getInfo<CL_CONTEXT_DEVICES>();
+        device_created_ = true;
 
         command_queue_ = cl::CommandQueue(context_, device_[0], 0);
+        command_queue_created_ = true;
+    }
 
+    void setup_buffer ()
+    {
         state_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
                 sizeof(T) * size_ * Dim);
         weight_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
@@ -196,45 +228,42 @@ class StateCL
                 sizeof(cl_uint) * size_);
         copy_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
                 sizeof(cl_uint) * size_);
+    }
 
-        std::stringstream ss;
-        ss << "__constant uint Dim = " << Dim << ";\n";
-        if (sizeof(T) == sizeof(cl_float))
-            ss << "typedef float state_type;\n";
-        else if (sizeof(T) == sizeof(cl_double))
-            ss << "typedef double state_type;\n";
-        ss << "typedef struct {\n";
-        for (unsigned d = 0; d != Dim; ++d)
-            ss << "state_type param" << d + 1 << ";\n";
-        ss << "} state_struct;\n";
-        ss << "#include <vSMC/helper/parallel_cl/common.cl>\n";
-        ss << source << '\n';
+    template <typename State>
+    void build (const char *source, const char *flags, Sampler<State> &sampler)
+    {
+        if (!(platform_created_ && context_created_ &&
+                    command_queue_created_ && device_created_))
+        {
+            setup();
+        }
 
+        if (!program_created_) {
+            std::stringstream ss;
+            ss << "__constant uint Dim = " << Dim << ";\n";
+            if (sizeof(T) == sizeof(cl_float))
+                ss << "typedef float state_type;\n";
+            else if (sizeof(T) == sizeof(cl_double))
+                ss << "typedef double state_type;\n";
+            ss << "typedef struct {\n";
+            for (unsigned d = 0; d != Dim; ++d)
+                ss << "state_type param" << d + 1 << ";\n";
+            ss << "} state_struct;\n";
+            ss << "#include <vSMC/helper/parallel_cl/common.cl>\n";
+            ss << source << '\n';
+            cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
+            program_ = cl::Program(context_, src);
+            program_created_ = true;
+        }
+
+        program_.build(device_, flags);
+
+        kernel_copy_ = cl::Kernel(program_, "copy");
         sampler.particle().pre_resampling(
                 cl_pre_resampling<StateCL<Dim, T> >);
         sampler.particle().post_resampling(
                 cl_post_resampling<StateCL<Dim, T> >);
-
-        try {
-            cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
-            program_ = cl::Program(context_, src);
-            program_.build(device_, flags);
-            kernel_copy_ = cl::Kernel(program_, "copy");
-        } catch (cl::Error err) {
-            std::string str;
-            device_[0].getInfo((cl_device_info) CL_DEVICE_NAME, &str);
-            std::cerr
-                << "Device: " << str << std::endl
-                << "Build options: "
-                << program_.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(device_[0])
-                << std::endl
-                << "Build log: "
-                << program_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_[0])
-                << std::endl;
-            build_ = false;
-            throw cl::Error(err);
-        }
-
         build_ = true;
     }
 
@@ -243,7 +272,7 @@ class StateCL
         return build_;
     }
 
-    void copy (size_type from, size_type to)
+    virtual void copy (size_type from, size_type to)
     {
         copy_host_[to] = from;
     }
@@ -260,7 +289,6 @@ class StateCL
 
         command_queue_.enqueueWriteBuffer(copy_device_, 1, 0,
                 sizeof(cl_uint) * size_, (void *) copy_host_.data());
-
         kernel_copy_.setArg(0, (std::size_t) size_);
         kernel_copy_.setArg(1, state_device_);
         kernel_copy_.setArg(2, copy_device_);
@@ -272,73 +300,32 @@ class StateCL
 
     size_type size_;
 
-    cl::CommandQueue command_queue_;
-    cl::Context context_;
-    cl::Program program_;
     std::vector<cl::Platform> platform_;
+    cl::Context context_;
     std::vector<cl::Device> device_;
-
+    cl::CommandQueue command_queue_;
+    cl::Program program_;
     cl::Kernel kernel_copy_;
 
-    bool build_;
+    bool platform_created_;
     bool context_created_;
+    bool device_created_;
+    bool command_queue_created_;
+    bool program_created_;
+    bool build_;
 
     std::size_t global_size_;
     std::size_t local_size_;
-
-    mutable state_mat_type state_host_;
-    mutable weight_vec_type weight_host_;
-    mutable accept_vec_type accept_host_;
-    mutable copy_vec_type copy_host_;
 
     cl::Buffer state_device_;
     cl::Buffer weight_device_;
     cl::Buffer accept_device_;
     cl::Buffer copy_device_;
 
-    void create_context ()
-    {
-        cl::Platform::get(&platform_);
-
-        cl_context_properties context_properties[] = {
-            CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_[0])(), 0
-        };
-
-        if (!context_created_) {
-            try {
-                context_ = cl::Context(CL_DEVICE_TYPE_GPU, context_properties);
-                context_created_ = true;
-            } catch (cl::Error err) {
-                std::cerr << "Failed to create context for GPU." << std::endl;
-                std::cerr << "Continue with trying CPU." << std::endl;
-                std::cerr << "Error message:" << std::endl;
-                std::cerr << err.what() << std::endl;
-            }
-        }
-
-        if (!context_created_) {
-            try {
-                context_ = cl::Context(CL_DEVICE_TYPE_CPU, context_properties);
-                context_created_ = true;
-            } catch (cl::Error err) {
-                std::cerr << "Failed to create context for CPU." << std::endl;
-                std::cerr << "Continue with trying ALL." << std::endl;
-                std::cerr << "Error message:" << std::endl;
-                std::cerr << err.what() << std::endl;
-            }
-        }
-
-        if (!context_created_) {
-            try {
-                context_ = cl::Context(CL_DEVICE_TYPE_ALL, context_properties);
-                context_created_ = true;
-            } catch (cl::Error err) {
-                std::cerr << "Failed to create context for ALL." << std::endl;
-                std::cerr << "Error message:" << std::endl;
-                std::cerr << err.what() << std::endl;
-            }
-        }
-    }
+    mutable state_mat_type state_host_;
+    mutable weight_vec_type weight_host_;
+    mutable accept_vec_type accept_host_;
+    mutable copy_vec_type copy_host_;
 }; // class StateCL
 
 /// \brief Sampler::init_type subtype
