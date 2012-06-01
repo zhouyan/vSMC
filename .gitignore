@@ -6,10 +6,6 @@ test/gmm/config
 test/pet/config
 test/pet/pet_conv.data
 
-test/toy/EST*
-test/toy/PathTrace*
-test/toy/toy-dn-mn
-test/toy/toy-dn-ml
-test/toy/toy-dl-mn
-test/toy/toy-dl-ml
-test/toy/*.txt
+test/pf/pf_cl
+test/pf/pf_cl.save
+test/pf/pf_cl.pdf

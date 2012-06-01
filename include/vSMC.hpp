@@ -13,6 +13,10 @@
 
 #ifdef V_SMC_USE_TBB
 #include <vSMC/helper/parallel_tbb.hpp>
-#endif
+#endif // V_SMC_USE_TBB
+
+#ifdef V_SMC_USE_CL
+#include <vSMC/helper/paralle_cl.hpp>
+#endif // V_SMC_USE_CL
 
 #endif // V_SMC_HPP

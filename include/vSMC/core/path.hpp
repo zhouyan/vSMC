@@ -16,8 +16,8 @@ class Path
     public :
 
     /// The type of path sampling evaluation functor
-    typedef internal::function<double (
-            unsigned, const Particle<T> &, double *)> eval_type;
+    typedef function<double (unsigned, const Particle<T> &, double *)>
+        eval_type;
 
     /// The type of the index vector
     typedef std::deque<unsigned> index_type;

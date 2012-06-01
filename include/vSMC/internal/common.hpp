@@ -8,17 +8,42 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <deque>
+#include <cstdlib>
+#include <utility>
 #include <map>
-#include <ostream>
 #include <set>
-#include <string>
+#include <deque>
 #include <vector>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <stdexcept>
+
+#ifdef __INTEL_COMPILER
+// #pragma warning(push)
+#pragma warning(disable:2196)
+#pragma warning(disable:2536)
+#endif // __INTEL_COMPILER
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wall"
+#pragma clang diagnostic ignored "-Wunique-enum"
+#endif // __clang__
+
 #include <Eigen/Dense>
-#include <vSMC/internal/version.hpp>
+
+#ifdef __INTEL_COMPILER
+// #pragma warning(pop)
+#endif // __INTEL_COMPILER
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
+
 #include <vSMC/internal/config.hpp>
 #include <vSMC/internal/function.hpp>
-#include <vSMC/internal/random.hpp>
+#include <vSMC/rng/random.hpp>
 
 #ifndef V_SMC_INDEX_TYPE
 #define V_SMC_INDEX_TYPE EIGEN_DEFAULT_DENSE_INDEX_TYPE
@@ -40,15 +65,20 @@ template <typename T> class MoveSeq;
 template <typename T, unsigned Dim = 1> class MonitorSeq;
 template <typename T> class PathSeq;
 
+#ifdef V_SMC_USE_TBB
 template <typename T> class InitializeTBB;
 template <typename T> class MoveTBB;
 template <typename T, unsigned Dim = 1> class MonitorTBB;
 template <typename T> class PathTBB;
+#endif // V_SMC_USE_TBB
 
-template <typename Base> class InitializeBase;
-template <typename Base> class MoveBase;
-template <typename Base> class MonitorBase;
-template <typename Base> class PathBase;
+#ifdef V_SMC_USE_CL
+template <unsigned Dim = 1, typename T = cl_float> class StateCL;
+template <typename T> class InitializeCL;
+template <typename T> class MoveCL;
+template <typename T, unsigned Dim = 1> class MonitorCL;
+template <typename T> class PathCL;
+#endif // V_SMC_USE_CL
 
 /// \brief Resample scheme
 ///
@@ -65,7 +95,7 @@ enum ResampleScheme {
     SYSTEMATIC,
     RESIDUAL_STRATIFIED,
     RESIDUAL_SYSTEMATIC
-};
+}; // enum ResamleScheme
 
 } // namespace vSMC
 

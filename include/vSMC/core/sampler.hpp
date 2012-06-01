@@ -16,12 +16,10 @@ class Sampler
     public :
 
     /// The type of initialization functor
-    typedef internal::function<unsigned (Particle<T> &, void *)>
-        initialize_type;
+    typedef function<unsigned (Particle<T> &, void *)> initialize_type;
 
     /// The type of move and mcmc functor
-    typedef internal::function<unsigned (unsigned, Particle<T> &)>
-        move_type;
+    typedef function<unsigned (unsigned, Particle<T> &)> move_type;
 
     /// The type of ESS history vector
     typedef std::deque<double> ess_type;
@@ -49,7 +47,7 @@ class Sampler
             const move_type &move = NULL,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
-            typename Particle<T>::seed_type seed = V_SMC_CRNG_SEED) :
+            typename Particle<T>::seed_type seed = V_SMC_CBRNG_SEED) :
         init_(init), move_(move),
         scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0) {}
@@ -527,8 +525,13 @@ class Sampler
     void post_move ()
     {
         bool do_resample = particle_.ess() < threshold_ * size();
+        resampled_.push_back(do_resample);
+        particle_.resampled(do_resample);
+        particle_.accept(accept_.back().back());
+
         if (do_resample)
             particle_.resample(scheme_);
+        ess_.push_back(particle_.ess());
 
         if (!path_.empty())
             path_.eval(iter_num_, particle_);
@@ -538,17 +541,8 @@ class Sampler
             if (!m->second.empty())
                 m->second.eval(iter_num_, particle_);
         }
-
-        ess_.push_back(particle_.ess());
-        resampled_.push_back(do_resample);
-        particle_.resampled(resampled_.back());
-        particle_.accept(accept_.back().back());
     }
 }; // class Sampler
-
-} // namespace vSMC
-
-namespace std {
 
 /// \brief Print the sampler
 ///
@@ -556,7 +550,7 @@ namespace std {
 /// \param sampler The sampler to be printed
 ///
 /// \note This is the same as <tt>sampler.print(os)</tt>
-template<typename T, typename CharT, typename Traits>
+template<typename CharT, typename Traits, typename T>
 std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const vSMC::Sampler<T> &sampler)
 {
@@ -564,6 +558,6 @@ std::basic_ostream<CharT, Traits> &operator<< (
     return os;
 }
 
-} // namespace std
+} // namespace vSMC
 
 #endif // V_SMC_CORE_SAMPLER_HPP
