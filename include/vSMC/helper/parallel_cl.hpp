@@ -386,13 +386,6 @@ class InitializeCL
         return kernel_;
     }
 
-    private :
-
-    cl::Kernel kernel_;
-    std::string kernel_name_;
-    bool kernel_created_;
-    typename Particle<T>::weight_type weight_;
-
     void create_kernel (const Particle<T> &particle)
     {
         assert(particle.value().build());
@@ -408,6 +401,13 @@ class InitializeCL
         kernel_.setArg(2, particle.value().weight_device());
         kernel_.setArg(3, particle.value().accept_device());
     }
+
+    private :
+
+    cl::Kernel kernel_;
+    std::string kernel_name_;
+    bool kernel_created_;
+    typename Particle<T>::weight_type weight_;
 };
 
 /// \brief Sampler::move_type subtype
@@ -480,13 +480,6 @@ class MoveCL
         return kernel_;
     }
 
-    private :
-
-    cl::Kernel kernel_;
-    std::string kernel_name_;
-    bool kernel_created_;
-    typename Particle<T>::weight_type weight_;
-
     void create_kernel (unsigned iter, const Particle<T> &particle)
     {
         assert(particle.value().build());
@@ -503,9 +496,16 @@ class MoveCL
         kernel_.setArg(3, particle.value().weight_device());
         kernel_.setArg(4, particle.value().accept_device());
     }
+
+    private :
+
+    cl::Kernel kernel_;
+    std::string kernel_name_;
+    bool kernel_created_;
+    typename Particle<T>::weight_type weight_;
 }; // class MoveCL
 
-/// \brief Direct Monitor::eval_type subtype
+/// \brief Non-direct Monitor::eval_type subtype
 ///
 /// \tparam T A Subtype of StateCL
 /// \tparam Dim The dimension of the monitor
@@ -519,7 +519,26 @@ class MonitorCL
     explicit MonitorCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
 
-    void operator() (unsigned iter, const Particle<T> &particle,
+    MonitorCL (const MonitorCL<T, Dim> &other) :
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
+        kernel_created_(other.kernel_created_),
+        buffer_device_(other.buffer_device_) {}
+
+    const MonitorCL<T, Dim> &operator= (const MonitorCL<T, Dim> &other)
+    {
+        if (this != &other) {
+            kernel_         = other.kernel_;
+            kernel_name_    = other.kernel_name_;
+            kernel_created_ = other.kernel_created_;
+            buffer_device_  = other.buffer_device_;
+        }
+
+        return *this;
+    }
+
+    virtual ~MonitorCL () {}
+
+    virtual void operator() (unsigned iter, const Particle<T> &particle,
         double *res)
     {
         create_kernel(iter, particle);
@@ -550,13 +569,15 @@ class MonitorCL
         return Dim;
     }
 
-    private :
+    cl::Kernel kernel ()
+    {
+        return kernel_;
+    }
 
-    cl::Kernel kernel_;
-    std::string kernel_name_;
-    bool kernel_created_;
-    cl::Buffer buffer_device_;
-    typename T::state_mat_type buffer_host_;
+    const cl::Kernel kernel () const
+    {
+        return kernel_;
+    }
 
     void create_kernel (unsigned iter, const Particle<T> &particle)
     {
@@ -577,7 +598,118 @@ class MonitorCL
         kernel_.setArg(3, particle.value().state_device());
         kernel_.setArg(4, buffer_device_);
     }
+
+    private :
+
+    cl::Kernel kernel_;
+    std::string kernel_name_;
+    bool kernel_created_;
+    cl::Buffer buffer_device_;
+    typename T::state_mat_type buffer_host_;
 }; // class MonitorCL
+
+/// \brief Non-direct Path::eval_type subtype
+///
+/// \tparam T A subtype of StateCL
+template <typename T>
+class PathCL
+{
+    public :
+
+    typedef function<double (unsigned, const Particle<T> &)>
+        width_state_type;
+
+    explicit PathCL (const char *kernel_name) :
+        kernel_name_(kernel_name), kernel_created_(false) {}
+
+    PathCL (const PathCL<T> &other) :
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
+        kernel_created_(other.kernel_created_),
+        buffer_device_(other.buffer_device_) {}
+
+    const PathCL<T> &operator= (const PathCL<T> &other)
+    {
+        if (this != &other) {
+            kernel_         = other.kernel_;
+            kernel_name_    = other.kernel_name_;
+            kernel_created_ = other.kernel_created_;
+            buffer_device_  = other.buffer_device_;
+        }
+
+        return *this;
+    }
+
+    virtual ~PathCL () {}
+
+    virtual double operator() (unsigned iter, const Particle<T> &particle,
+        double *res)
+    {
+        create_kernel(iter, particle);
+        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
+                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+        if (sizeof(typename T::state_type) == sizeof(double)) {
+            particle.value().command_queue().enqueueReadBuffer(buffer_device_,
+                    1, 0,
+                    sizeof(typename T::state_type) * particle.size() * Dim,
+                    (void *) res);
+        } else {
+            buffer_host_.resize(Dim, particle.size());
+            particle.value().command_queue().enqueueReadBuffer(buffer_device_,
+                    1, 0,
+                    sizeof(typename T::state_type) * particle.size() * Dim,
+                    (void *) buffer_host_.data());
+            Eigen::Map<Eigen::MatrixXd> res_mat(res, Dim, particle.size());
+            for (unsigned d = 0; d != Dim; ++d) {
+                for (typename Particle<T>::size_type i = 0;
+                        i != particle.size(); ++i)
+                    res_mat(d, i) = buffer_host_(d, i);
+            }
+        }
+
+        return this->width_state(iter, particle);
+    }
+
+    virtual double width_state (unsigned iter,
+            const Particle<T> &particle) = 0;
+
+    cl::Kernel kernel ()
+    {
+        return kernel_;
+    }
+
+    const cl::Kernel kernel () const
+    {
+        return kernel_;
+    }
+
+    void create_kernel (unsigned iter, const Particle<T> &particle)
+    {
+        assert(particle.value().build());
+
+        if (!kernel_created_) {
+            kernel_ = cl::Kernel(
+                    particle.value().program(), kernel_name_.c_str());
+            buffer_device_ = cl::Buffer(particle.value().context(),
+                    CL_MEM_READ_WRITE,
+                    sizeof(typename T::state_type) * Dim * particle.size());
+            kernel_created_ = true;
+        }
+
+        kernel_.setArg(0, (std::size_t) particle.size());
+        kernel_.setArg(1, (cl_uint) iter);
+        kernel_.setArg(2, (cl_uint) Dim);
+        kernel_.setArg(3, particle.value().state_device());
+        kernel_.setArg(4, buffer_device_);
+    }
+
+    private :
+
+    cl::Kernel kernel_;
+    std::string kernel_name_;
+    bool kernel_created_;
+    cl::Buffer buffer_device_;
+    typename T::state_mat_type buffer_host_;
+}; // class PathCL
 
 } // namespace vSMC
 
