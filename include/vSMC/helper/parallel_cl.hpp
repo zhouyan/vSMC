@@ -158,12 +158,13 @@ class StateCL
         for (unsigned d = 0; d != Dim; ++d)
             ss << "state_type param" << d + 1 << ";\n";
         ss << "} state_struct;\n";
-        ss << "__kernel void copy\n";
-        ss << "(__global state_struct *state, __global uint *from)\n";
-        ss << "{\n";
-        ss << "size_t i = get_global_id(0);\n";
-        ss << "state[i] = state[from[i]];\n";
-        ss << "}\n";
+        ss << "__kernel void copy                                   \n";
+        ss << "(__global state_struct *state, __global uint *source)\n";
+        ss << "{                                                    \n";
+        ss << "    size_t to = get_global_id(0);                    \n";
+        ss << "    size_t from = source[to];                        \n";
+        ss << "    state[to] = state[from];                         \n";
+        ss << "}                                                    \n";
         ss << source << '\n';
 
         sampler.particle().pre_resampling(cl_pre_copy<StateCL<Dim, T> >);
