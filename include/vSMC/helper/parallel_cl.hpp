@@ -345,6 +345,37 @@ class InitializeCL
 
     virtual ~InitializeCL () {}
 
+    virtual unsigned operator() (Particle<T> &particle, void *param)
+    {
+        create_kernel(particle);
+        initialize_param(particle, param);
+        pre_processor(particle);
+        // TODO more control over local size
+        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
+                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+        // TODO more efficient weight copying
+        const typename T::weight_vec_type &weight =
+            particle.value().weight_host();
+        if (sizeof(typename T::state_type) == sizeof(double)) {
+            particle.set_log_weight(
+                    reinterpret_cast<const double *>(weight.data()));
+        } else {
+            weight_.resize(particle.size());
+            for (typename Particle<T>::size_type i = 0;
+                    i != particle.size(); ++i) {
+                weight_[i] = weight[i];
+            }
+            particle.set_log_weight(weight_);
+        }
+        post_processor(particle);
+
+        return particle.value().accept_host().sum();
+    }
+
+    virtual void initialize_param (Particle<T> &particle, void *param) {}
+    virtual void pre_processor (Particle<T> &particle) {}
+    virtual void post_processor (Particle<T> &particle) {}
+
     cl::Kernel &kernel ()
     {
         return kernel_;
@@ -354,6 +385,13 @@ class InitializeCL
     {
         return kernel_;
     }
+
+    private :
+
+    cl::Kernel kernel_;
+    std::string kernel_name_;
+    bool kernel_created_;
+    typename Particle<T>::weight_type weight_;
 
     void create_kernel (const Particle<T> &particle)
     {
@@ -370,37 +408,6 @@ class InitializeCL
         kernel_.setArg(2, particle.value().weight_device());
         kernel_.setArg(3, particle.value().accept_device());
     }
-
-    virtual unsigned operator() (Particle<T> &particle, void *param)
-    {
-        create_kernel(particle);
-        initialize_param(particle, param);
-        pre_processor(particle);
-        // TODO more control over local size
-        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
-        // TODO more efficient weight copying
-        const typename T::weight_vec_type &weight =
-            particle.value().weight_host();
-        weight_.resize(particle.size());
-        for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
-            weight_[i] = weight[i];
-        particle.set_log_weight(weight_);
-        post_processor(particle);
-
-        return particle.value().accept_host().sum();
-    }
-
-    virtual void initialize_param (Particle<T> &particle, void *param) {}
-    virtual void pre_processor (Particle<T> &particle) {}
-    virtual void post_processor (Particle<T> &particle) {}
-
-    private :
-
-    cl::Kernel kernel_;
-    std::string kernel_name_;
-    bool kernel_created_;
-    typename Particle<T>::weight_type weight_;
 };
 
 /// \brief Sampler::move_type subtype
@@ -434,6 +441,35 @@ class MoveCL
 
     virtual ~MoveCL () {}
 
+    virtual unsigned operator() (unsigned iter, Particle<T> &particle)
+    {
+        create_kernel(iter, particle);
+        pre_processor(iter, particle);
+        // TODO more control over local size
+        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
+                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+        // TODO more efficient weight copying
+        const typename T::weight_vec_type &weight =
+            particle.value().weight_host();
+        if (sizeof(typename T::state_type) == sizeof(double)) {
+            particle.add_log_weight(
+                    reinterpret_cast<const double *>(weight.data()));
+        } else {
+            weight_.resize(particle.size());
+            for (typename Particle<T>::size_type i = 0;
+                    i != particle.size(); ++i) {
+                weight_[i] = weight[i];
+            }
+            particle.add_log_weight(weight_);
+        }
+        post_processor(iter, particle);
+
+        return particle.value().accept_host().sum();
+    }
+
+    virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
+    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
+
     cl::Kernel &kernel ()
     {
         return kernel_;
@@ -443,6 +479,13 @@ class MoveCL
     {
         return kernel_;
     }
+
+    private :
+
+    cl::Kernel kernel_;
+    std::string kernel_name_;
+    bool kernel_created_;
+    typename Particle<T>::weight_type weight_;
 
     void create_kernel (unsigned iter, const Particle<T> &particle)
     {
@@ -460,35 +503,6 @@ class MoveCL
         kernel_.setArg(3, particle.value().weight_device());
         kernel_.setArg(4, particle.value().accept_device());
     }
-
-    virtual unsigned operator() (unsigned iter, Particle<T> &particle)
-    {
-        create_kernel(iter, particle);
-        pre_processor(iter, particle);
-        // TODO more control over local size
-        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
-        // TODO more efficient weight copying
-        const typename T::weight_vec_type &weight =
-            particle.value().weight_host();
-        weight_.resize(particle.size());
-        for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
-            weight_[i] = weight[i];
-        particle.add_log_weight(weight_);
-        post_processor(iter, particle);
-
-        return particle.value().accept_host().sum();
-    }
-
-    virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
-
-    private :
-
-    cl::Kernel kernel_;
-    std::string kernel_name_;
-    bool kernel_created_;
-    typename Particle<T>::weight_type weight_;
 }; // class MoveCL
 
 /// \brief Direct Monitor::eval_type subtype
@@ -503,7 +517,7 @@ class MonitorCL
     public :
 
     explicit MonitorCL (const char *kernel_name) :
-        kernel_name_(kernel_name), kernel_created_(false), result_host_(Dim) {}
+        kernel_name_(kernel_name), kernel_created_(false) {}
 
     void operator() (unsigned iter, const Particle<T> &particle,
         double *res)
@@ -511,21 +525,24 @@ class MonitorCL
         create_kernel(iter, particle);
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
-
-        weight_host_.resize(particle.size());
-        for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
-            weight_host_[i] = particle.weight()[i];
-        particle.value().command_queue().enqueueWriteBuffer(
-                particle.value().weight_device(), 1, 0,
-                sizeof(typename T::state_type) * particle.size(),
-                (void *) weight_host_.data());
-        particle.value().command_queue().enqueueNDRangeKernel(kernel_eval_,
-                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
-        particle.value().command_queue().enqueueReadBuffer(result_device_,
-                1, 0, sizeof(typename T::state_type) * Dim,
-                (void *) result_host_.data());
-        for (unsigned i = 0; i != Dim; ++i)
-            res[i] = result_host_[i];
+        if (sizeof(typename T::state_type) == sizeof(double)) {
+            particle.value().command_queue().enqueueReadBuffer(buffer_device_,
+                    1, 0,
+                    sizeof(typename T::state_type) * particle.size() * Dim,
+                    (void *) res);
+        } else {
+            buffer_host_.resize(Dim, particle.size());
+            particle.value().command_queue().enqueueReadBuffer(buffer_device_,
+                    1, 0,
+                    sizeof(typename T::state_type) * particle.size() * Dim,
+                    (void *) buffer_host_.data());
+            Eigen::Map<Eigen::MatrixXd> res_mat(res, Dim, particle.size());
+            for (unsigned d = 0; d != Dim; ++d) {
+                for (typename Particle<T>::size_type i = 0;
+                        i != particle.size(); ++i)
+                    res_mat(d, i) = buffer_host_(d, i);
+            }
+        }
     }
 
     static unsigned dim ()
@@ -539,11 +556,7 @@ class MonitorCL
     std::string kernel_name_;
     bool kernel_created_;
     cl::Buffer buffer_device_;
-
-    cl::Kernel kernel_eval_;
-    cl::Buffer result_device_;
-    Eigen::Matrix<typename T::state_type, Eigen::Dynamic, 1> result_host_;
-    Eigen::Matrix<typename T::state_type, Eigen::Dynamic, 1> weight_host_;
+    typename T::state_mat_type buffer_host_;
 
     void create_kernel (unsigned iter, const Particle<T> &particle)
     {
@@ -552,13 +565,9 @@ class MonitorCL
         if (!kernel_created_) {
             kernel_ = cl::Kernel(
                     particle.value().program(), kernel_name_.c_str());
-            kernel_eval_ = cl::Kernel(
-                    particle.value().program(), "monitor_eval");
             buffer_device_ = cl::Buffer(particle.value().context(),
                     CL_MEM_READ_WRITE,
                     sizeof(typename T::state_type) * Dim * particle.size());
-            result_device_ = cl::Buffer(particle.value().context(),
-                    CL_MEM_READ_WRITE, sizeof(typename T::state_type) * Dim);
             kernel_created_ = true;
         }
 
@@ -567,12 +576,6 @@ class MonitorCL
         kernel_.setArg(2, (cl_uint) Dim);
         kernel_.setArg(3, particle.value().state_device());
         kernel_.setArg(4, buffer_device_);
-
-        kernel_eval_.setArg(0, (std::size_t) particle.size());
-        kernel_eval_.setArg(1, (cl_uint) Dim);
-        kernel_eval_.setArg(2, buffer_device_);
-        kernel_eval_.setArg(3, particle.value().weight_device());
-        kernel_eval_.setArg(4, result_device_);
     }
 }; // class MonitorCL
 
