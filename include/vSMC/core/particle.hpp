@@ -288,7 +288,7 @@ class Particle
 
     /// \brief Set the new functor called after resampling
     ///
-    /// \param pre The functor called right after resampling
+    /// \param post The functor called right after resampling
     void post_resampling (const post_resampling_type &post)
     {
         post_resampling_ = post;
