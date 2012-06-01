@@ -292,6 +292,7 @@ class InitializeCL
 {
     public :
 
+    typedef function<void (Particle<T> &, void *)> initialize_param_type;
     typedef function<void (Particle<T> &)> pre_processor_type;
     typedef function<void (Particle<T> &)> post_processor_type;
 
@@ -304,9 +305,13 @@ class InitializeCL
 
     const InitializeCL<T> &operator= (const InitializeCL<T> &other)
     {
-        kernel_ = other.kernel_;
-        kernel_name_ = other.kernel_name_;
-        kernel_created_ = other.kernel_created_;
+        if (this != &other) {
+            kernel_ = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+            kernel_created_ = other.kernel_created_;
+        }
+
+        return *this;
     }
 
     virtual ~InitializeCL () {}
@@ -321,7 +326,7 @@ class InitializeCL
         return kernel_;
     }
 
-    virtual void create_kernel (Particle<T> &particle)
+    void create_kernel (Particle<T> &particle)
     {
         assert(particle.value().build());
 
@@ -338,6 +343,7 @@ class InitializeCL
 
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
+        initialize_param(particle, param);
         pre_processor(particle);
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
@@ -346,13 +352,15 @@ class InitializeCL
         const typename T::weight_vec_type &weight =
             particle.value().weight_host();
         weight_.resize(particle.size());
-        for (typename T::size_type i = 0; i != particle.size(); ++i)
+        for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
             weight_[i] = weight[i];
         particle.set_log_weight(weight_);
         post_processor(particle);
 
         return particle.value().accept_host().sum();
     }
+
+    virtual void initialize_param (Particle<T> &particle, void *param) {}
 
     virtual void pre_processor (Particle<T> &particle)
     {
@@ -387,9 +395,13 @@ class MoveCL
 
     const MoveCL<T> &operator= (const MoveCL<T> &other)
     {
-        kernel_ = other.kernel_;
-        kernel_name_ = other.kernel_name_;
-        kernel_created_ = other.kernel_created_;
+        if (this != &other) {
+            kernel_ = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+            kernel_created_ = other.kernel_created_;
+        }
+
+        return *this;
     }
 
     virtual ~MoveCL () {}
@@ -399,7 +411,7 @@ class MoveCL
         return kernel_;
     }
 
-    virtual const cl::Kernel &kernel () const
+    const cl::Kernel &kernel () const
     {
         return kernel_;
     }
@@ -430,7 +442,7 @@ class MoveCL
         const typename T::weight_vec_type &weight =
             particle.value().weight_host();
         weight_.resize(particle.size());
-        for (typename T::size_type i = 0; i != particle.size(); ++i)
+        for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
             weight_[i] = weight[i];
         particle.add_log_weight(weight_);
         post_processor(iter, particle);
