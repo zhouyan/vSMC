@@ -65,15 +65,12 @@ template <typename T> class MoveSeq;
 template <typename T, unsigned Dim = 1> class MonitorSeq;
 template <typename T> class PathSeq;
 
+#ifdef V_SMC_USE_TBB
 template <typename T> class InitializeTBB;
 template <typename T> class MoveTBB;
 template <typename T, unsigned Dim = 1> class MonitorTBB;
 template <typename T> class PathTBB;
-
-template <typename Base> class InitializeBase;
-template <typename Base> class MoveBase;
-template <typename Base> class MonitorBase;
-template <typename Base> class PathBase;
+#endif // V_SMC_USE_TBB
 
 /// \brief Resample scheme
 ///
@@ -90,7 +87,7 @@ enum ResampleScheme {
     SYSTEMATIC,
     RESIDUAL_STRATIFIED,
     RESIDUAL_SYSTEMATIC
-};
+}; // enum ResamleScheme
 
 } // namespace vSMC
 

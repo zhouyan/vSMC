@@ -124,7 +124,6 @@ class StateCL
     {
         command_queue_.enqueueReadBuffer(accept_device_, 1, 0,
                 sizeof(cl_uint) * size_, (void *) accept_host_.data());
-        static bool out = false;
         return accept_host_;
     }
 
@@ -196,10 +195,11 @@ class StateCL
 
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
-        command_queue_.enqueueWriteBuffer(copy_device_, 1, 0, size_,
-                (void *) copy_host_.data());
+        command_queue_.enqueueWriteBuffer(copy_device_, 1, 0,
+                sizeof(cl_uint) * size_, (void *) copy_host_.data());
         command_queue_.enqueueNDRangeKernel(kernel_copy_,
                 cl::NullRange, cl::NDRange(size_), cl::NullRange);
+        command_queue_.enqueueBarrier();
     }
 
     private :
@@ -281,18 +281,6 @@ class StateCL
     }
 }; // class StateCL
 
-template <unsigned Dim, typename T>
-void pre_copy (Particle<StateCL<Dim, T> > &particle)
-{
-    particle.value().pre_copy();
-}
-
-template <unsigned Dim, typename T>
-void post_copy (Particle<StateCL<Dim, T> > &particle)
-{
-    particle.value().post_copy();
-}
-
 /// \tparam T A subtype of StateCL
 template <typename T>
 class InitializeCL
@@ -355,6 +343,7 @@ class InitializeCL
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+        particle.value().command_queue().enqueueBarrier();
         // TODO more efficient weight copying
         const typename T::weight_vec_type &weight =
             particle.value().weight_host();
@@ -445,6 +434,7 @@ class MoveCL
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+        particle.value().command_queue().enqueueBarrier();
         // TODO more efficient weight copying
         const typename T::weight_vec_type &weight =
             particle.value().weight_host();
