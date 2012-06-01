@@ -98,8 +98,8 @@ class StateCL
 
     const state_mat_type &state_host () const
     {
-        command_queue_.enqueueReadBuffer(state_device_, 1, 0, size_ * Dim,
-                (void *) state_host_.data());
+        command_queue_.enqueueReadBuffer(state_device_, 1, 0,
+                sizeof(T) * size_ * Dim, (void *) state_host_.data());
         return state_host_;
     }
 
@@ -110,8 +110,8 @@ class StateCL
 
     const weight_vec_type &weight_host () const
     {
-        command_queue_.enqueueReadBuffer(weight_device_, 1, 0, size_,
-                (void *) weight_host_.data());
+        command_queue_.enqueueReadBuffer(weight_device_, 1, 0,
+                sizeof(T) * size_, (void *) weight_host_.data());
         return weight_host_;
     }
 
@@ -122,8 +122,9 @@ class StateCL
 
     const accept_vec_type &accept_host () const
     {
-        command_queue_.enqueueReadBuffer(accept_device_, 1, 0, size_,
-                (void *) accept_host_.data());
+        command_queue_.enqueueReadBuffer(accept_device_, 1, 0,
+                sizeof(cl_uint) * size_, (void *) accept_host_.data());
+        static bool out = false;
         return accept_host_;
     }
 
@@ -136,6 +137,7 @@ class StateCL
     {
         std::stringstream ss;
         ss << "#include <vSMC/helper/parallel_cl/common.h>\n";
+        ss << "__constant uint Dim = " << Dim << ";\n";
         if (sizeof(T) == sizeof(cl_float))
             ss << "typedef float state_type;\n";
         else if (sizeof(T) == sizeof(cl_double))
@@ -144,14 +146,19 @@ class StateCL
         for (unsigned d = 0; d != Dim; ++d)
             ss << "state_type param" << d + 1 << ";\n";
         ss << "} state_struct;\n";
-        ss << "#include <vSMC/helper/parallel_cl/copy.cl>\n";
+        ss << "__kernel void copy\n";
+        ss << "(__global state_struct *state, __global uint *from)\n";
+        ss << "{\n";
+        ss << "size_t i = get_global_id(0);\n";
+        ss << "state[i] = state[from[i]];\n";
+        ss << "}\n";
         ss << source << '\n';
 
         try {
             cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
             program_ = cl::Program(context_, src);
             program_.build(device_, flags);
-            kernel_copy_ = cl::Kernel(program_, "vSMC_copy");
+            kernel_copy_ = cl::Kernel(program_, "copy");
         } catch (cl::Error err) {
             std::cerr
                 << "Build options: "
