@@ -36,6 +36,12 @@ class Particle
     /// The type of the parallel RNG vector
     typedef std::deque<rng_type> prng_type;
 
+    /// The type of the functor invoked right before resampling
+    typedef function<void (T &)> pre_resampling_type;
+
+    /// The type of the functor invoked right after resampling
+    typedef function<void (T &)> post_resampling_type;
+
     /// \brief Construct a Particle object with given number of particles
     ///
     /// \param N The number of particles
@@ -43,7 +49,8 @@ class Particle
     explicit Particle (size_type N, seed_type seed = V_SMC_CBRNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
-        ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N)
+        ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N),
+        pre_resampling_(NULL), post_resampling_(NULL)
     {
         reset_prng();
         set_equal_weight();
@@ -244,6 +251,8 @@ class Particle
     /// \param scheme The resampling scheme, see ResamplingScheme
     void resample (ResampleScheme scheme)
     {
+        if (bool(pre_resampling_))
+            pre_resampling_(value_);
         switch (scheme) {
             case MULTINOMIAL :
                 resample_multinomial();
@@ -265,6 +274,24 @@ class Particle
                 break;
         }
         resample_do();
+        if (bool(post_resampling_))
+            post_resampling_(value_);
+    }
+
+    /// \brief Set the new functor called before resampling
+    ///
+    /// \param pre The functor called right before resampling
+    void pre_resampling (const pre_resampling_type &pre)
+    {
+        pre_resampling_ = pre;
+    }
+
+    /// \brief Set the new functor called after resampling
+    ///
+    /// \param pre The functor called right after resampling
+    void post_resampling (const post_resampling_type &post)
+    {
+        post_resampling_ = post;
     }
 
     /// \brief Get a C++11 RNG engine
@@ -322,6 +349,9 @@ class Particle
 
     seed_type seed_;
     prng_type prng_;
+
+    pre_resampling_type pre_resampling_;
+    post_resampling_type post_resampling_;
 
     void set_weight ()
     {

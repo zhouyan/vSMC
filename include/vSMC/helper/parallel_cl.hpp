@@ -8,6 +8,18 @@
 
 namespace vSMC {
 
+template <typename T>
+void cl_pre_copy (T &state)
+{
+    state.pre_copy();
+}
+
+template <typename T>
+void cl_post_copy (T &state)
+{
+    state.post_copy();
+}
+
 /// \tparam T CL type
 template <unsigned Dim, typename T>
 class StateCL
@@ -132,7 +144,8 @@ class StateCL
         return accept_device_;
     }
 
-    void build (const char *source, const char *flags)
+    template <typename State>
+    void build (const char *source, const char *flags, Sampler<State> &sampler)
     {
         std::stringstream ss;
         ss << "#include <vSMC/helper/parallel_cl/common.h>\n";
@@ -153,13 +166,19 @@ class StateCL
         ss << "}\n";
         ss << source << '\n';
 
+        sampler.particle().pre_resampling(cl_pre_copy<StateCL<Dim, T> >);
+        sampler.particle().post_resampling(cl_post_copy<StateCL<Dim, T> >);
+
         try {
             cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
             program_ = cl::Program(context_, src);
             program_.build(device_, flags);
             kernel_copy_ = cl::Kernel(program_, "copy");
         } catch (cl::Error err) {
+            std::string str;
+            device_[0].getInfo((cl_device_info) CL_DEVICE_NAME, &str);
             std::cerr
+                << "Device: " << str << std::endl
                 << "Build options: "
                 << program_.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(device_[0])
                 << std::endl
@@ -193,13 +212,13 @@ class StateCL
     {
         assert(build_);
 
-        kernel_copy_.setArg(0, state_device_);
-        kernel_copy_.setArg(1, copy_device_);
         command_queue_.enqueueWriteBuffer(copy_device_, 1, 0,
                 sizeof(cl_uint) * size_, (void *) copy_host_.data());
+
+        kernel_copy_.setArg(0, state_device_);
+        kernel_copy_.setArg(1, copy_device_);
         command_queue_.enqueueNDRangeKernel(kernel_copy_,
                 cl::NullRange, cl::NDRange(size_), cl::NullRange);
-        command_queue_.enqueueBarrier();
     }
 
     private :
@@ -346,7 +365,6 @@ class InitializeCL
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
-        particle.value().command_queue().enqueueBarrier();
         // TODO more efficient weight copying
         const typename T::weight_vec_type &weight =
             particle.value().weight_host();
@@ -437,7 +455,6 @@ class MoveCL
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
-        particle.value().command_queue().enqueueBarrier();
         // TODO more efficient weight copying
         const typename T::weight_vec_type &weight =
             particle.value().weight_host();
