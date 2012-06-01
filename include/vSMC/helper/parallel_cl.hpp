@@ -9,15 +9,15 @@
 namespace vSMC {
 
 template <typename T>
-void cl_pre_copy (T &state)
+void cl_pre_resampling (T &state)
 {
-    state.pre_copy();
+    state.pre_resampling
 }
 
 template <typename T>
-void cl_post_copy (T &state)
+void cl_post_resampling (T &state)
 {
-    state.post_copy();
+    state.post_resampling();
 }
 
 /// \brief Particle type class for helping implementing SMC using OpenCL
@@ -210,8 +210,10 @@ class StateCL
         ss << "#include <vSMC/helper/parallel_cl/common.cl>\n";
         ss << source << '\n';
 
-        sampler.particle().pre_resampling(cl_pre_copy<StateCL<Dim, T> >);
-        sampler.particle().post_resampling(cl_post_copy<StateCL<Dim, T> >);
+        sampler.particle().pre_resampling(
+                cl_pre_resampling<StateCL<Dim, T> >);
+        sampler.particle().post_resampling(
+                cl_post_resampling<StateCL<Dim, T> >);
 
         try {
             cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
@@ -246,13 +248,13 @@ class StateCL
         copy_host_[to] = from;
     }
 
-    void pre_copy ()
+    void pre_resampling ()
     {
         for (size_type i = 0; i != size_; ++i)
             copy_host_[i] = i;
     }
 
-    void post_copy ()
+    void post_resampling ()
     {
         assert(build_);
 
