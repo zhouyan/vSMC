@@ -495,6 +495,8 @@ class MoveCL
 ///
 /// \tparam T A Subtype of StateCL
 /// \tparam Dim The dimension of the monitor
+///
+/// \note Currently Dim cannot be larger than particle set size
 template <typename T, unsigned Dim>
 class MonitorCL
 {
@@ -506,9 +508,17 @@ class MonitorCL
     void operator() (unsigned iter, const Particle<T> &particle,
         double *res)
     {
-        create_kernel();
+        create_kernel(iter, particle);
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+
+        weight_host_.resize(particle.size());
+        for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
+            weight_host_[i] = particle.weight()[i];
+        particle.value().command_queue().enqueueWriteBuffer(
+                particle.value().weight_device(), 1, 0,
+                sizeof(typename T::state_type) * particle.size(),
+                (void *) weight_host_.data());
         particle.value().command_queue().enqueueNDRangeKernel(kernel_eval_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
         particle.value().command_queue().enqueueReadBuffer(result_device_,
@@ -533,6 +543,7 @@ class MonitorCL
     cl::Kernel kernel_eval_;
     cl::Buffer result_device_;
     Eigen::Matrix<typename T::state_type, Eigen::Dynamic, 1> result_host_;
+    Eigen::Matrix<typename T::state_type, Eigen::Dynamic, 1> weight_host_;
 
     void create_kernel (unsigned iter, const Particle<T> &particle)
     {
@@ -543,21 +554,22 @@ class MonitorCL
                     particle.value().program(), kernel_name_.c_str());
             kernel_eval_ = cl::Kernel(
                     particle.value().program(), "monitor_eval");
-            kernel_created_ = true;
             buffer_device_ = cl::Buffer(particle.value().context(),
                     CL_MEM_READ_WRITE,
                     sizeof(typename T::state_type) * Dim * particle.size());
             result_device_ = cl::Buffer(particle.value().context(),
                     CL_MEM_READ_WRITE, sizeof(typename T::state_type) * Dim);
+            kernel_created_ = true;
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
         kernel_.setArg(1, (cl_uint) iter);
-        kernel_.setArg(2, particle.value().state_device());
-        kernel_.setArg(3, buffer_device_);
+        kernel_.setArg(2, (cl_uint) Dim);
+        kernel_.setArg(3, particle.value().state_device());
+        kernel_.setArg(4, buffer_device_);
 
         kernel_eval_.setArg(0, (std::size_t) particle.size());
-        kernel_eval_.setArg(1, (cl_int) particle.resampled());
+        kernel_eval_.setArg(1, (cl_uint) Dim);
         kernel_eval_.setArg(2, buffer_device_);
         kernel_eval_.setArg(3, particle.value().weight_device());
         kernel_eval_.setArg(4, result_device_);
