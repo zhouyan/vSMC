@@ -233,8 +233,8 @@ class StateCL
     template <typename State>
     void build (const char *source, const char *flags, Sampler<State> &sampler)
     {
-        if (!(platform_created_ && context_created_ &&
-                    command_queue_created_ && device_created_))
+        if (!(platform_created_ && context_created_ && device_created_ &&
+                    command_queue_created_))
         {
             setup();
         }
