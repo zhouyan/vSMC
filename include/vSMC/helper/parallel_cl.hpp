@@ -546,6 +546,9 @@ class MonitorCL
 {
     public :
 
+    typedef function<void (unsigned, const Particle<T> &)> pre_processor_type;
+    typedef function<void (unsigned, const Particle<T> &)> post_processor_type;
+
     explicit MonitorCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
 
@@ -572,6 +575,7 @@ class MonitorCL
         double *res)
     {
         create_kernel(iter, particle);
+        pre_processor(iter, particle);
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange,
                 particle.value().global_nd_range(),
@@ -594,7 +598,11 @@ class MonitorCL
                     res_mat(d, i) = buffer_host_(d, i);
             }
         }
+        post_processor(iter, particle);
     }
+
+    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
+    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
 
     static unsigned dim ()
     {
@@ -650,6 +658,8 @@ class PathCL
 
     typedef function<double (unsigned, const Particle<T> &)>
         width_state_type;
+    typedef function<void (unsigned, const Particle<T> &)> pre_processor_type;
+    typedef function<void (unsigned, const Particle<T> &)> post_processor_type;
 
     explicit PathCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
@@ -677,6 +687,7 @@ class PathCL
         double *res)
     {
         create_kernel(iter, particle);
+        pre_processor(iter, particle);
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange,
                 particle.value().global_nd_range(),
@@ -695,12 +706,15 @@ class PathCL
                     res[i] = buffer_host_[i];
             }
         }
+        post_processor(iter, particle);
 
         return this->width_state(iter, particle);
     }
 
     virtual double width_state (unsigned iter,
             const Particle<T> &particle) = 0;
+    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
+    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
 
     cl::Kernel kernel ()
     {

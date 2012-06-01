@@ -136,12 +136,16 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     public :
 
     typedef typename MonitorSeq<T>::monitor_state_type monitor_state_type;
+    typedef typename MonitorSeq<T>::pre_processor_type pre_processor_type;
+    typedef typename MonitorSeq<T>::post_processor_type post_processor_type;
 
     void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
+        this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
                 work_(this, iter, &particle, res));
+        this->post_processor(iter, particle);
     }
 
     private :
@@ -183,12 +187,16 @@ class PathTBB : public PathSeq<T>
 
     typedef typename PathSeq<T>::path_state_type path_state_type;
     typedef typename PathSeq<T>::width_state_type width_state_type;
+    typedef typename PathSeq<T>::pre_processor_type pre_processor_type;
+    typedef typename PathSeq<T>::post_processor_type post_processor_type;
 
     double operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
+        this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
                 work_(this, iter, &particle, res));
+        this->post_processor(iter, particle);
 
         return this->width_state(iter, particle);
     }
