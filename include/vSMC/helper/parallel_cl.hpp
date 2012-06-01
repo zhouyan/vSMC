@@ -238,6 +238,7 @@ class StateCL
         if (!context_created) {
             try {
                 context_ = cl::Context(CL_DEVICE_TYPE_GPU, context_properties);
+                context_created = true;
             } catch (cl::Error err) {
                 std::cerr << "Failed to create context for GPU." << std::endl;
                 std::cerr << "Continue with trying CPU." << std::endl;
@@ -249,6 +250,7 @@ class StateCL
         if (!context_created) {
             try {
                 context_ = cl::Context(CL_DEVICE_TYPE_CPU, context_properties);
+                context_created = true;
             } catch (cl::Error err) {
                 std::cerr << "Failed to create context for CPU." << std::endl;
                 std::cerr << "Continue with trying ALL." << std::endl;
@@ -260,6 +262,7 @@ class StateCL
         if (!context_created) {
             try {
                 context_ = cl::Context(CL_DEVICE_TYPE_ALL, context_properties);
+                context_created = true;
             } catch (cl::Error err) {
                 std::cerr << "Failed to create context for ALL." << std::endl;
                 throw cl::Error(err);
