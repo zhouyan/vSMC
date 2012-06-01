@@ -42,10 +42,11 @@ class StateCL
 
     explicit StateCL (size_type N) :
         size_(N), build_(false), context_created_(false),
+        global_size_(N), local_size_(0),
         state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
     {
         try {
-            cl_initialize();
+            create_context();
         } catch (cl::Error err) {
             std::cerr << err.what() << std::endl;
             std::abort();
@@ -118,6 +119,28 @@ class StateCL
     void device (const std::vector<cl::Device> &dev)
     {
         device_ = dev;
+    }
+
+    cl::NDRange global_nd_range () const
+    {
+        return cl::NDRange(global_size_);
+    }
+
+    cl::NDRange local_nd_range () const
+    {
+        if (local_size_)
+            return cl::NDRange(local_size_);
+        else
+            return cl::NullRange;
+    }
+
+    void local_size (std::size_t size)
+    {
+        local_size_ = size;
+        if (local_size_ && size_ % local_size_)
+            global_size_ = (size_ / local_size_ + 1) * local_size_;
+        else
+            global_size_ = size_;
     }
 
     const state_mat_type &state_host () const
@@ -239,8 +262,8 @@ class StateCL
         kernel_copy_.setArg(0, (std::size_t) size_);
         kernel_copy_.setArg(1, state_device_);
         kernel_copy_.setArg(2, copy_device_);
-        command_queue_.enqueueNDRangeKernel(kernel_copy_,
-                cl::NullRange, cl::NDRange(size_), cl::NullRange);
+        command_queue_.enqueueNDRangeKernel(kernel_copy_, cl::NullRange,
+                global_nd_range(), local_nd_range());
     }
 
     private :
@@ -253,10 +276,13 @@ class StateCL
     std::vector<cl::Platform> platform_;
     std::vector<cl::Device> device_;
 
+    cl::Kernel kernel_copy_;
+
     bool build_;
     bool context_created_;
 
-    cl::Kernel kernel_copy_;
+    std::size_t global_size_;
+    std::size_t local_size_;
 
     mutable state_mat_type state_host_;
     mutable weight_vec_type weight_host_;
@@ -268,7 +294,7 @@ class StateCL
     cl::Buffer accept_device_;
     cl::Buffer copy_device_;
 
-    void cl_initialize ()
+    void create_context ()
     {
         cl::Platform::get(&platform_);
 
@@ -352,7 +378,9 @@ class InitializeCL
         pre_processor(particle);
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+                cl::NullRange,
+                particle.value().global_nd_range(),
+                particle.value().local_nd_range());
         // TODO more efficient weight copying
         const typename T::weight_vec_type &weight =
             particle.value().weight_host();
@@ -447,7 +475,9 @@ class MoveCL
         pre_processor(iter, particle);
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+                cl::NullRange,
+                particle.value().global_nd_range(),
+                particle.value().local_nd_range());
         // TODO more efficient weight copying
         const typename T::weight_vec_type &weight =
             particle.value().weight_host();
@@ -543,7 +573,9 @@ class MonitorCL
     {
         create_kernel(iter, particle);
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+                cl::NullRange,
+                particle.value().global_nd_range(),
+                particle.value().local_nd_range());
         if (sizeof(typename T::state_type) == sizeof(double)) {
             particle.value().command_queue().enqueueReadBuffer(buffer_device_,
                     1, 0,
@@ -646,7 +678,9 @@ class PathCL
     {
         create_kernel(iter, particle);
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
+                cl::NullRange,
+                particle.value().global_nd_range(),
+                particle.value().local_nd_range());
         if (sizeof(typename T::state_type) == sizeof(double)) {
             particle.value().command_queue().enqueueReadBuffer(buffer_device_,
                     1, 0, sizeof(typename T::state_type) * particle.size(),
