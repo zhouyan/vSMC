@@ -150,16 +150,18 @@ class StateCL
             ss << "typedef float state_type;\n";
         else if (sizeof(T) == sizeof(cl_double))
             ss << "typedef double state_type;\n";
-        ss << "struct state_struct {\n";
+        ss << "typedef struct {\n";
         for (unsigned d = 0; d != Dim; ++d)
             ss << "state_type param" << d + 1 << ";\n";
-        ss << "};\n";
+        ss << "} state_struct;\n";
+        ss << "#include <vSMC/helper/parallel_cl/copy.cl>\n";
         ss << source << '\n';
 
         try {
             cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
             program_ = cl::Program(context_, src);
             program_.build(device_);
+            kernel_copy_ = cl::Kernel(program_, "vSMC_copy")
         } catch (cl::Error err) {
             build_ = false;
             throw cl::Error(err);
@@ -193,7 +195,7 @@ class StateCL
         command_queue_.enqueueWriteBuffer(copy_device_, 1, 0, size_,
                 (void *) copy_host_.data());
         command_queue_.enqueueNDRangeKernel(kernel_copy_,
-                cl::NullRange, cl::NDRange(cl::NullRange), cl::NullRange);
+                cl::NullRange, cl::NDRange(size_), cl::NullRange);
     }
 
     private :
@@ -207,6 +209,8 @@ class StateCL
     std::vector<cl::Device> device_;
 
     bool build_;
+
+    cl::Kernel kernel_copy_;
 
     state_mat_type state_host_;
     weight_vec_type weight_host_;
@@ -263,13 +267,13 @@ class StateCL
         command_queue_ = cl::CommandQueue(context_, device_[0], 0);
 
         state_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(T) * size_ * Dim, state_host_.data());
+                sizeof(T) * size_ * Dim);
         weight_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(T) * size_, weight_host_.data());
+                sizeof(T) * size_);
         accept_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(cl_uint) * size_, accept_host_.data());
+                sizeof(cl_uint) * size_);
         copy_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(cl_uint) * size_, copy_host_.data());
+                sizeof(cl_uint) * size_);
     }
 }; // class StateCL
 
@@ -302,6 +306,7 @@ class InitializeCL
         if (!kernel_created_) {
             kernel_ = cl::Kernel(
                     particle.value().program(), kernel_name_.c_str());
+            kernel_created_ = true;
         }
 
         kernel_.setArg(0, particle.value().state_device());
@@ -358,9 +363,10 @@ class MoveCL
         if (!kernel_created_) {
             kernel_ = cl::Kernel(
                     particle.value().program(), kernel_name_.c_str());
+            kernel_created_ = true;
         }
 
-        kernel_.setArg(0, iter);
+        kernel_.setArg(0, (cl_uint) iter);
         kernel_.setArg(1, particle.value().state_device());
         kernel_.setArg(2, particle.value().weight_device());
         kernel_.setArg(3, particle.value().accept_device());
