@@ -1,22 +1,12 @@
 #ifndef V_SMC_HELPER_PARALLEL_CL_HPP
 #define V_SMC_HELPER_PARALLEL_CL_HPP
 
+#define __CL_ENABLE_EXCEPTIONS
+
 #include <vSMC/internal/common.hpp>
 #include <vSMC/helper/parallel_cl/cl.hpp>
 
 namespace vSMC {
-
-template <unsigned Dim, typename T>
-void pre_copy (Particle<StateCL<Dim, T> > &particle)
-{
-    particle.value().pre_copy();
-}
-
-template <unsigned Dim, typename T>
-void post_copy (Particle<StateCL<Dim, T> > &particle)
-{
-    particle.value().post_copy();
-}
 
 /// \tparam T CL type
 template <unsigned Dim, typename T>
@@ -26,12 +16,12 @@ class StateCL
 
     typedef V_SMC_INDEX_TYPE size_type;
     typedef T state_type;
-    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynmaic> state_mat_type;
+    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
     typedef Eigen::Matrix<T, Eigen::Dynamic, 1> weight_vec_type;
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> accept_vec_type;
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> copy_vec_type;
 
-    explicit StateBase (size_type N) :
+    explicit StateCL (size_type N) :
         size_(N), build_(false),
         state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
     {
@@ -160,9 +150,16 @@ class StateCL
         try {
             cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
             program_ = cl::Program(context_, src);
-            program_.build(device_);
-            kernel_copy_ = cl::Kernel(program_, "vSMC_copy")
+            program_.build(device_, flags);
+            kernel_copy_ = cl::Kernel(program_, "vSMC_copy");
         } catch (cl::Error err) {
+            std::cerr
+                << "Build options: "
+                << program_.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(device_[0])
+                << std::endl
+                << "Build log: "
+                << program_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_[0])
+                << std::endl;
             build_ = false;
             throw cl::Error(err);
         }
@@ -277,18 +274,33 @@ class StateCL
     }
 }; // class StateCL
 
+template <unsigned Dim, typename T>
+void pre_copy (Particle<StateCL<Dim, T> > &particle)
+{
+    particle.value().pre_copy();
+}
+
+template <unsigned Dim, typename T>
+void post_copy (Particle<StateCL<Dim, T> > &particle)
+{
+    particle.value().post_copy();
+}
+
 /// \tparam T A subtype of StateCL
 template <typename T>
 class InitializeCL
 {
     public :
 
+    typedef function<void (Particle<T> &)> pre_processor_type;
+    typedef function<void (Particle<T> &)> post_processor_type;
+
     explicit InitializeCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
 
     InitializeCL (const InitializeCL<T> &other) :
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        kernel_created_(other.kerenel_created_) {}
+        kernel_created_(other.kernel_created_) {}
 
     const InitializeCL<T> &operator= (const InitializeCL<T> &other)
     {
@@ -299,7 +311,17 @@ class InitializeCL
 
     virtual ~InitializeCL () {}
 
-    virtual unsigned operator() (Particle<T> &particle, void *param)
+    cl::Kernel &kernel ()
+    {
+        return kernel_;
+    }
+
+    const cl::Kernel &kernel () const
+    {
+        return kernel_;
+    }
+
+    virtual void create_kernel (Particle<T> &particle)
     {
         assert(particle.value().build());
 
@@ -312,19 +334,32 @@ class InitializeCL
         kernel_.setArg(0, particle.value().state_device());
         kernel_.setArg(1, particle.value().weight_device());
         kernel_.setArg(2, particle.value().accept_device());
+    }
 
+    virtual unsigned operator() (Particle<T> &particle, void *param)
+    {
+        pre_processor(particle);
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
-
         // TODO more efficient weight copying
-        typename T::weight_vec_type &weight = particle.value().weight_host();
+        const typename T::weight_vec_type &weight =
+            particle.value().weight_host();
+        weight_.resize(particle.size());
         for (typename T::size_type i = 0; i != particle.size(); ++i)
             weight_[i] = weight[i];
         particle.set_log_weight(weight_);
+        post_processor(particle);
 
         return particle.value().accept_host().sum();
     }
+
+    virtual void pre_processor (Particle<T> &particle)
+    {
+        create_kernel(particle);
+    }
+
+    virtual void post_processor (Particle<T> &particle) {}
 
     private :
 
@@ -332,7 +367,7 @@ class InitializeCL
     std::string kernel_name_;
     bool kernel_created_;
     typename Particle<T>::weight_type weight_;
-}
+};
 
 /// \tparam T A subtype of StateCL
 template <typename T>
@@ -340,12 +375,15 @@ class MoveCL
 {
     public :
 
+    typedef function<void (unsigned, Particle<T> &)> pre_processor_type;
+    typedef function<void (unsigned, Particle<T> &)> post_processor_type;
+
     explicit MoveCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
 
     MoveCL (const MoveCL<T> &other) :
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        kernel_created_(other.kerenel_created_) {}
+        kernel_created_(other.kernel_created_) {}
 
     const MoveCL<T> &operator= (const MoveCL<T> &other)
     {
@@ -356,7 +394,17 @@ class MoveCL
 
     virtual ~MoveCL () {}
 
-    unsigned operator() (unsigned iter, Particle<T> &particle)
+    cl::Kernel &kernel ()
+    {
+        return kernel_;
+    }
+
+    virtual const cl::Kernel &kernel () const
+    {
+        return kernel_;
+    }
+
+    void create_kernel (unsigned iter, Particle<T> &particle)
     {
         assert(particle.value().build());
 
@@ -370,19 +418,32 @@ class MoveCL
         kernel_.setArg(1, particle.value().state_device());
         kernel_.setArg(2, particle.value().weight_device());
         kernel_.setArg(3, particle.value().accept_device());
+    }
 
+    virtual unsigned operator() (unsigned iter, Particle<T> &particle)
+    {
+        pre_processor(iter, particle);
         // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(kernel_,
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
-
         // TODO more efficient weight copying
-        typename T::weight_vec_type &weight = particle.value().weight_host();
+        const typename T::weight_vec_type &weight =
+            particle.value().weight_host();
+        weight_.resize(particle.size());
         for (typename T::size_type i = 0; i != particle.size(); ++i)
             weight_[i] = weight[i];
         particle.add_log_weight(weight_);
+        post_processor(iter, particle);
 
         return particle.value().accept_host().sum();
     }
+
+    virtual void pre_processor (unsigned iter, Particle<T> &particle)
+    {
+        create_kernel(iter, particle);
+    }
+
+    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
 
     private :
 
