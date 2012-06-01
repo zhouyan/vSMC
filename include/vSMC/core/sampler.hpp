@@ -525,8 +525,13 @@ class Sampler
     void post_move ()
     {
         bool do_resample = particle_.ess() < threshold_ * size();
+        resampled_.push_back(do_resample);
+        particle_.resampled(do_resample);
+        particle_.accept(accept_.back().back());
+
         if (do_resample)
             particle_.resample(scheme_);
+        ess_.push_back(particle_.ess());
 
         if (!path_.empty())
             path_.eval(iter_num_, particle_);
@@ -536,11 +541,6 @@ class Sampler
             if (!m->second.empty())
                 m->second.eval(iter_num_, particle_);
         }
-
-        ess_.push_back(particle_.ess());
-        resampled_.push_back(do_resample);
-        particle_.resampled(resampled_.back());
-        particle_.accept(accept_.back().back());
     }
 }; // class Sampler
 

@@ -72,6 +72,14 @@ template <typename T, unsigned Dim = 1> class MonitorTBB;
 template <typename T> class PathTBB;
 #endif // V_SMC_USE_TBB
 
+#ifdef V_SMC_USE_CL
+template <unsigned Dim = 1, typename T = cl_float> class StateCL;
+template <typename T> class InitializeCL;
+template <typename T> class MoveCL;
+template <typename T, unsigned Dim = 1> class MonitorCL;
+template <typename T> class PathCL;
+#endif // V_SMC_USE_CL
+
 /// \brief Resample scheme
 ///
 /// \li MULTINOMIAL Multinomial resampling
