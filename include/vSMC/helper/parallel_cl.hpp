@@ -649,20 +649,16 @@ class PathCL
                 cl::NullRange, cl::NDRange(particle.size()), cl::NullRange);
         if (sizeof(typename T::state_type) == sizeof(double)) {
             particle.value().command_queue().enqueueReadBuffer(buffer_device_,
-                    1, 0,
-                    sizeof(typename T::state_type) * particle.size() * Dim,
+                    1, 0, sizeof(typename T::state_type) * particle.size(),
                     (void *) res);
         } else {
-            buffer_host_.resize(Dim, particle.size());
+            buffer_host_.resize(particle.size());
             particle.value().command_queue().enqueueReadBuffer(buffer_device_,
-                    1, 0,
-                    sizeof(typename T::state_type) * particle.size() * Dim,
+                    1, 0, sizeof(typename T::state_type) * particle.size(),
                     (void *) buffer_host_.data());
-            Eigen::Map<Eigen::MatrixXd> res_mat(res, Dim, particle.size());
-            for (unsigned d = 0; d != Dim; ++d) {
-                for (typename Particle<T>::size_type i = 0;
-                        i != particle.size(); ++i)
-                    res_mat(d, i) = buffer_host_(d, i);
+            for (typename Particle<T>::size_type i = 0;
+                        i != particle.size(); ++i) {
+                    res[i] = buffer_host_[i];
             }
         }
 
@@ -691,15 +687,14 @@ class PathCL
                     particle.value().program(), kernel_name_.c_str());
             buffer_device_ = cl::Buffer(particle.value().context(),
                     CL_MEM_READ_WRITE,
-                    sizeof(typename T::state_type) * Dim * particle.size());
+                    sizeof(typename T::state_type) * particle.size());
             kernel_created_ = true;
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
         kernel_.setArg(1, (cl_uint) iter);
-        kernel_.setArg(2, (cl_uint) Dim);
-        kernel_.setArg(3, particle.value().state_device());
-        kernel_.setArg(4, buffer_device_);
+        kernel_.setArg(2, particle.value().state_device());
+        kernel_.setArg(3, buffer_device_);
     }
 
     private :
@@ -708,7 +703,7 @@ class PathCL
     std::string kernel_name_;
     bool kernel_created_;
     cl::Buffer buffer_device_;
-    typename T::state_mat_type buffer_host_;
+    typename T::weight_vec_type buffer_host_;
 }; // class PathCL
 
 } // namespace vSMC
