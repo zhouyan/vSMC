@@ -336,7 +336,7 @@ class Sampler
     void path_sampling (const typename Path<T>::eval_type &eval,
             bool direct = false)
     {
-        path_.eval(eval, direct);
+        path_.set_eval(eval, direct);
     }
 
     /// \brief Path sampling estimate of normalizing constant

@@ -80,8 +80,9 @@ class Monitor
     /// \return \b true if the monitor is empty
     ///
     /// \note A monitor is empty means it has no valid evaluation functions.
-    /// However its record may not be empty. Call eval(iter, particle) on an
-    /// empty monitor is a runtime error.
+    /// However its record may not be empty (for that purpose call iter_size()
+    /// to see). Call eval(iter, particle) on an empty monitor is a runtime
+    /// error.
     bool empty () const
     {
         return !bool(eval_);
