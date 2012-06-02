@@ -15,11 +15,14 @@ class Sampler
 {
     public :
 
-    /// The type of initialization functor
+    /// The type of Initialization functor
     typedef function<unsigned (Particle<T> &, void *)> initialize_type;
 
-    /// The type of move and mcmc functor
+    /// The type of Move functor
     typedef function<unsigned (unsigned, Particle<T> &)> move_type;
+
+    /// The type of the MCMC moves queue
+    typedef std::deque<move_type> mcmc_queue_type;
 
     /// The type of ESS history vector
     typedef std::deque<double> ess_type;
@@ -157,18 +160,20 @@ class Sampler
         move_ = new_move;
     }
 
-    /// \brief Replace iteration functor
+    /// \brief Read and write access to the MCMC moves queue
     ///
-    /// \param new_mcmc New MCMC Move functor
-    void mcmc (const move_type &new_mcmc)
+    /// \return A reference to the MCMC moves queue
+    mcmc_queue_type &mcmc ()
     {
-        mcmc_.push_back(new_mcmc);
+        return mcmc_;
     }
 
-    /// \brief Clear all MCMC moves
-    void clear_mcmc ()
+    /// \brief Read only access to the MCMC moves queue
+    ///
+    /// \return A const reference to the MCMC moves queue
+    const mcmc_queue_type &mcmc () const
     {
-        mcmc_.clear();
+        return mcmc_;
     }
 
     /// \brief Initialize the particle set
@@ -221,7 +226,7 @@ class Sampler
                 << std::endl;
         }
 #endif // V_SMC_NDEBUG
-        for (typename std::deque<move_type>::iterator
+        for (typename mcmc_queue_type::iterator
                 m = mcmc_.begin(); m != mcmc_.end(); ++m) {
             if (bool(*m)) {
                 acc.push_back((*m)(iter_num_, particle_));
@@ -502,7 +507,7 @@ class Sampler
     /// Initialization and movement
     initialize_type init_;
     move_type move_;
-    std::deque<move_type> mcmc_;
+    mcmc_queue_type mcmc_;
 
     /// Resampling
     ResampleScheme scheme_;
