@@ -328,6 +328,14 @@ class Sampler
         return path_;
     }
 
+    /// \brief Read and write access to the Path sampling monitor
+    ///
+    /// \return A reference to the Path sampling monitor
+    Path<T> &path ()
+    {
+        return path_;
+    }
+
     /// \brief Set the path sampling evaluation functor
     ///
     /// \param eval The functor used to compute the integrands or results
@@ -355,7 +363,7 @@ class Sampler
         return particle_.zconst();
     }
 
-    /// \brief Print the history of the sampler
+    /// \brief Print the history of the Sampler
     ///
     /// \param os The ostream to which the contents are printed
     /// \param print_header Print header if \b true
@@ -549,10 +557,10 @@ class Sampler
     }
 }; // class Sampler
 
-/// \brief Print the sampler
+/// \brief Print the Sampler
 ///
 /// \param os The ostream to which the contents are printed
-/// \param sampler The sampler to be printed
+/// \param sampler The Sampler to be printed
 ///
 /// \note This is the same as <tt>sampler.print(os)</tt>
 template<typename CharT, typename Traits, typename T>

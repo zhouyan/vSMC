@@ -195,6 +195,20 @@ class Monitor
     record_type record_;
 }; // class Monitor
 
+/// \brief Print the Monitor
+///
+/// \param os The ostream to which the contents are printed
+/// \param monitor The Monitor to be printed
+///
+/// \note This is the same as <tt>monitor.print(os)</tt>
+template<typename CharT, typename Traits, typename T>
+std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os, const vSMC::Monitor<T> &monitor)
+{
+    monitor.print(os);
+    return os;
+}
+
 } // namespace vSMC
 
 #endif // V_SMC_CORE_MONITOR_HPP
