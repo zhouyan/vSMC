@@ -7,5 +7,6 @@ test/pet/config
 test/pet/pet_conv.data
 
 test/pf/pf_cl
+test/pf/pf_cl.o
 test/pf/pf_cl.save
 test/pf/pf_cl.pdf
