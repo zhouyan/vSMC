@@ -24,7 +24,7 @@ void cl_post_resampling (T &state)
     state.post_resampling();
 }
 
-/// \brief Particle type class for helping implementing SMC using OpenCL
+/// \brief Particle::value_type subtype
 /// \ingroup OpenCL
 ///
 /// \tparam Dim The dimension of the state parameter vector

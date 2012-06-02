@@ -8,9 +8,7 @@ namespace vSMC {
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
 ///
-/// \tparam T State type. Requiment:
-/// \li Consturctor: T (IntType N)
-/// \li Method: copy (IntType from, IntType to)
+/// \tparam T Particle<T>::value_type
 template <typename T>
 class Particle
 {

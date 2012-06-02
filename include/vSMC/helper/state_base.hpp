@@ -5,7 +5,7 @@
 
 namespace vSMC {
 
-/// \brief Particle type class for helping implementing SMC sequentially
+/// \brief Particle::value_type subtype
 /// \ingroup Helper
 ///
 /// \tparam Dim The dimension of the state parameter vector
