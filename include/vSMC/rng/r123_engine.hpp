@@ -51,7 +51,7 @@ class Engine : public r123::Engine<CBRNG>
     typedef typename engine_type::result_type result_type;
     typedef typename engine_type::elem_type   elem_type;
 
-    explicit r123_engine () : engine_type() {} 
+    explicit r123_engine () : engine_type() {}
     explicit r123_engine (result_type r) : engine_type(r) {}
 
     template <typename SeedSeq>
