@@ -385,13 +385,13 @@ class StateCL
         copy_host_[to] = from;
     }
 
-    void pre_resampling ()
+    virtual void pre_resampling ()
     {
         for (size_type i = 0; i != size_; ++i)
             copy_host_[i] = i;
     }
 
-    void post_resampling ()
+    virtual void post_resampling ()
     {
         assert(build_);
 
