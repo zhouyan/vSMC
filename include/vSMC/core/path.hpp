@@ -122,7 +122,7 @@ class Path
     /// \param new_eval The functor used to compute the integrands
     /// \param direct Whether or not eval return the integrands or the final
     /// results
-    void eval (const eval_type &new_eval, bool direct = false)
+    void set_eval (const eval_type &new_eval, bool direct = false)
     {
         direct_ = direct;
         eval_ = new_eval;

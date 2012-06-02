@@ -137,7 +137,7 @@ class Monitor
     ///
     /// \param new_eval The functor used to directly evaluate the results
     /// \param direct Whether or not eval return the integrands or the final
-    void eval (const eval_type &new_eval, bool direct = false)
+    void set_eval (const eval_type &new_eval, bool direct = false)
     {
         direct_ = direct;
         eval_ = new_eval;
