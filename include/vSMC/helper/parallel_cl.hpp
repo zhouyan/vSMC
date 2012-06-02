@@ -33,11 +33,22 @@ class StateCL
 {
     public :
 
+    /// The type of the size of the particle set
     typedef V_SMC_INDEX_TYPE size_type;
+
+    /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
+
+    /// The type of the matrix of states returned by state_host()
     typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
+
+    /// The type of the vector of weights returned by weight_host()
     typedef Eigen::Matrix<T, Eigen::Dynamic, 1> weight_vec_type;
+
+    /// The type of the vector of accept counts returned by accept_host()
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> accept_vec_type;
+
+    /// The type of the vector of copy sources
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> copy_vec_type;
 
     explicit StateCL (size_type N) :
@@ -51,11 +62,17 @@ class StateCL
 
     virtual ~StateCL () {}
 
+    /// \brief The dimension of the problem
+    ///
+    /// \return The dimension of the parameter vector
     static unsigned dim ()
     {
         return Dim;
     }
 
+    /// \brief The dimension of the problem
+    ///
+    /// \return The dimension of the parameter vector
     size_type size () const
     {
         return size_;
@@ -141,11 +158,32 @@ class StateCL
         return program_created_;
     }
 
+    /// \brief Set a new local group size
+    ///
+    /// \param lsize The size of the work group.
+    void local_size (std::size_t lsize)
+    {
+        local_size_ = lsize;
+        if (local_size_ && size_ % local_size_)
+            global_size_ = (size_ / local_size_ + 1) * local_size_;
+        else
+            global_size_ = size_;
+    }
+
+    /// \brief The global cl::NDRange used by kernel calls
+    ///
+    /// \return A cl::NDRange object that is valid for the current setting of
+    /// local group size and larger than the particle set size.
     cl::NDRange global_nd_range () const
     {
         return cl::NDRange(global_size_);
     }
 
+    /// \brief The local cl::NDRange used by kernel calls
+    ///
+    /// \return A cl::NDRange object that can be used as the group size when
+    /// call a kernel. It is the same size of set by local_size() or
+    /// cl::NullRange if local_size() is set with zero.
     cl::NDRange local_nd_range () const
     {
         if (local_size_)
@@ -154,20 +192,24 @@ class StateCL
             return cl::NullRange;
     }
 
-    void local_size (std::size_t size)
-    {
-        local_size_ = size;
-        if (local_size_ && size_ % local_size_)
-            global_size_ = (size_ / local_size_ + 1) * local_size_;
-        else
-            global_size_ = size_;
-    }
-
+    /// \brief Read only access to the memory buffer on the device that stores
+    /// the states
+    ///
+    /// \return A const reference to the cl::Buffer object. It is read only
+    /// only with regard to the host code. The device code have read and write
+    /// access to the buffer.
     const cl::Buffer &state_device () const
     {
         return state_device_;
     }
 
+    /// \brief Read only access to the states
+    ///
+    /// \return A const reference to a matrix of the states which have the same
+    /// contents as stored in the device memory buffer of state_device().
+    ///
+    /// \note This call will read the buffer from the device first, and
+    /// therefore is expensive.
     const state_mat_type &state_host () const
     {
         command_queue_.enqueueReadBuffer(state_device_, 1, 0,
@@ -175,11 +217,30 @@ class StateCL
         return state_host_;
     }
 
+    /// \brief Read only access to the memory buffer on the device that stores
+    /// the weights
+    ///
+    /// \return A const reference to the cl::Buffer object. It is read only
+    /// only with regard to the host code. The device code have read and write
+    /// access to the buffer.
+    ///
+    /// \note Despite the names, this is not the current weights of the
+    /// particle system. It is intended to be used by clients to store and
+    /// manipulate the weights, for example the incremental weights. For access
+    /// to actual weights and log weights, always use the interface of
+    /// Particle.
     const cl::Buffer &weight_device () const
     {
         return weight_device_;
     }
 
+    /// \brief Read only access to the weights
+    ///
+    /// \return A const reference to a matrix of the states which have the same
+    /// contents as stored in the device memory buffer of weight_device().
+    ///
+    /// \note This call will read the buffer from the device first, and
+    /// therefore is expensive.
     const weight_vec_type &weight_host () const
     {
         command_queue_.enqueueReadBuffer(weight_device_, 1, 0,
@@ -187,11 +248,28 @@ class StateCL
         return weight_host_;
     }
 
+    /// \brief Read only access to the memory buffer on the device that stores
+    /// the accept counts
+    ///
+    /// \return A const reference to the cl::Buffer object. It is read only
+    /// only with regard to the host code. The device code have read and write
+    /// access to the buffer.
+    ///
+    /// \note Despite the names, this is not the current accept counts of the
+    /// particle system. It is intended to be used by clients to store and
+    /// manipulate the accept counts.
     const cl::Buffer &accept_device () const
     {
         return accept_device_;
     }
 
+    /// \brief Read only access to the accept counts
+    ///
+    /// \return A const reference to a matrix of the states which have the same
+    /// contents as stored in the device memory buffer of accept_device().
+    ///
+    /// \note This call will read the buffer from the device first, and
+    /// therefore is expensive.
     const accept_vec_type &accept_host () const
     {
         command_queue_.enqueueReadBuffer(accept_device_, 1, 0,
@@ -199,6 +277,9 @@ class StateCL
         return accept_host_;
     }
 
+    /// \brief Setup the OpenCL environment
+    ///
+    /// \param dev_type The type of the device intended to use
     void setup (cl_device_type dev_type = CL_DEVICE_TYPE_GPU)
     {
         cl::Platform::get(&platform_);
@@ -218,18 +299,16 @@ class StateCL
         command_queue_created_ = true;
     }
 
-    void setup_buffer ()
-    {
-        state_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(T) * size_ * Dim);
-        weight_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(T) * size_);
-        accept_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(cl_uint) * size_);
-        copy_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(cl_uint) * size_);
-    }
-
+    /// \brief Build the program
+    ///
+    /// \param source The source in C-Style string format (NOT THE FILE NAME)
+    /// \param flags The compiler flags passed to the OpenCL compiler
+    /// \param sampler A reference to a sampler which will manipulate this
+    /// particle set.
+    ///
+    /// \note The call to build() will call setup() unless the user have set
+    /// platform, context, device and command_queue correctly himself. If these
+    /// are set by the user, than the library does not check for its validity.
     template <typename State>
     void build (const char *source, const char *flags, Sampler<State> &sampler)
     {
@@ -267,6 +346,9 @@ class StateCL
         build_ = true;
     }
 
+    /// \brief Check the status of build
+    ///
+    /// \return \b true If the last call to build is successful.
     bool build () const
     {
         return build_;
@@ -326,6 +408,18 @@ class StateCL
     mutable weight_vec_type weight_host_;
     mutable accept_vec_type accept_host_;
     mutable copy_vec_type copy_host_;
+
+    void setup_buffer ()
+    {
+        state_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
+                sizeof(T) * size_ * Dim);
+        weight_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
+                sizeof(T) * size_);
+        accept_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
+                sizeof(cl_uint) * size_);
+        copy_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
+                sizeof(cl_uint) * size_);
+    }
 }; // class StateCL
 
 /// \brief Sampler::init_type subtype
