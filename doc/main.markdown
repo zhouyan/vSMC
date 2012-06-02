@@ -101,12 +101,24 @@ example, just replace `GMM` with `PET`.
 For how to find these libraries see files in `cmake/` and see [CMake][CMake]'s
 documentation for general usage of this tool.
 
-There is another example that will not be built by the `cmake` system is
+There is another example that will not be built by the `cmake` system,
 **pf_cl**, which use OpenCL for parallelization. This is due to the fact that
-finding OpenCL runtime is a quite non-portable thing and we don't have the
-time to deal with all those different OpenCL implementations for now. However,
-the OpenCL back end is intended to be usable by any OpenCL standard conforming
-implementation.
+finding OpenCL runtime is a quite non-portable thing and we don't have the time
+to deal with all those different OpenCL implementations for now. However, the
+OpenCL back end is intended to be usable by any OpenCL standard conforming
+implementation. To build this example on a Mac, one can ues
+
+    cd /test/pf
+    clang++ -O3 \
+      -I /path_to_v_smc_headers \
+      -I /path_to_eigen_headers \
+      -I /path_to_random123_headers \
+      -framework OpenCL
+      -o pf_cl pf_cl.cpp
+
+The compiler flags may need to be changed for different OpenCL implementations.
+Also you may need to change the compiler flags for OpenCL in the source file,
+`pf.hpp`, search for `FIXME`. 
 
 # Tested compilers
 
