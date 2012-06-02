@@ -6,6 +6,7 @@
 namespace vSMC {
 
 /// \brief A thin wrapper over a complete Particle
+/// \ingroup Helper
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
@@ -127,6 +128,7 @@ class SingleParticle
 }; // class SingleParticle
 
 /// \brief A const variant to SingleParticle
+/// \ingroup Helper
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>

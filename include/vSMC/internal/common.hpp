@@ -81,20 +81,14 @@ template <typename T> class PathCL;
 #endif // V_SMC_USE_CL
 
 /// \brief Resample scheme
-///
-/// \li MULTINOMIAL Multinomial resampling
-/// \li RESIDUAL Reisudal resampling
-/// \li STRATIFIED Startified resampling
-/// \li SYSTEMATIC Systematic resampling
-/// \li RESIDUAL_STRATIFIED Stratified resampling on the residuals
-/// \li RESIDUAL_SYSTEMATIC Systematic resampling on the residuals
+/// \ingroup Core
 enum ResampleScheme {
-    MULTINOMIAL,
-    RESIDUAL,
-    STRATIFIED,
-    SYSTEMATIC,
-    RESIDUAL_STRATIFIED,
-    RESIDUAL_SYSTEMATIC
+    MULTINOMIAL,         ///< Multinomial resampling
+    RESIDUAL,            ///< Reisudal resampling
+    STRATIFIED,          ///< Startified resampling
+    SYSTEMATIC,          ///< Systematic resampling
+    RESIDUAL_STRATIFIED, ///< Stratified resampling on the residuals
+    RESIDUAL_SYSTEMATIC  ///< Systematic resampling on the residuals
 }; // enum ResamleScheme
 
 } // namespace vSMC

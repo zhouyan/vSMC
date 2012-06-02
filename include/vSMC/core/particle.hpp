@@ -5,9 +5,10 @@
 
 namespace vSMC {
 
-/// \brief Particle class
+/// \brief Particle class representing the whole particle set
+/// \ingroup Core
 ///
-/// \tparam T State state type. Requiment:
+/// \tparam T State type. Requiment:
 /// \li Consturctor: T (IntType N)
 /// \li Method: copy (IntType from, IntType to)
 template <typename T>
@@ -42,10 +43,12 @@ class Particle
     /// The type of the functor invoked right after resampling
     typedef function<void (T &)> post_resampling_type;
 
-    /// \brief Construct a Particle object with given number of particles
+    /// \brief Construct a Particle object with a given number of particles
     ///
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
+    ///
+    /// \post All weights are initialized to be euqal to each other
     explicit Particle (size_type N, seed_type seed = V_SMC_CBRNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
@@ -66,7 +69,7 @@ class Particle
 
     /// \brief Read and write access to particle values
     ///
-    /// \return A reference to the particle values, type (value_type &)
+    /// \return A reference to the particle values
     value_type &value ()
     {
         return value_;
@@ -98,6 +101,14 @@ class Particle
         return weight_.data();
     }
 
+    /// \brief Read only access to the weights through Eigen vector
+    ///
+    /// \return A const reference to the weight vector
+    const weight_type &weight () const
+    {
+        return weight_;
+    }
+
     /// \brief Get the log weight of a single particle
     ///
     /// \param id The position of the particle, 0 to size() - 1
@@ -114,14 +125,6 @@ class Particle
     const double *log_weight_ptr () const
     {
         return log_weight_.data();
-    }
-
-    /// \brief Read only access to the weights through Eigen vector
-    ///
-    /// \return A const reference to the weight vector
-    const weight_type &weight () const
-    {
-        return weight_;
     }
 
     /// \brief Read only access to the log weights through Eigen vector
@@ -202,7 +205,7 @@ class Particle
 
     /// \brief Get indicator of resampling
     ///
-    /// \return A bool value, \b true if the current iteration was resampled
+    /// \return \b true if the current iteration was resampled
     bool resampled () const
     {
         return resampled_;
@@ -218,7 +221,7 @@ class Particle
 
     /// \brief Get accept count of the last iteration
     ///
-    /// \return The number of acceptance of the last iteration
+    /// \return The number of acceptance of the last iterations
     unsigned accept () const
     {
         return accept_;

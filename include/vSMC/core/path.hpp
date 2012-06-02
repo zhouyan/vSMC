@@ -6,16 +6,20 @@
 namespace vSMC {
 
 /// \brief Monitor for path sampling
+/// \ingroup Core
 ///
-/// \tparam T State state type. Requiment:
-/// \li Consturctor: T (IntType N)
-/// \li Method: copy (IntType from, IntType to)
+/// \tparam T Particle<T>::value_type
 template <typename T>
 class Path
 {
     public :
 
-    /// The type of path sampling evaluation functor
+    /// \brief The type of path sampling evaluation functor
+    ///
+    /// \details
+    /// Similar to Monitor<T>::eval_type, there are two evaluation functor
+    /// types. One is non-direct, which output the path sampling integrands.
+    /// The other is direct, which output the integrated value.
     typedef function<double (unsigned, const Particle<T> &, double *)>
         eval_type;
 

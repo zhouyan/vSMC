@@ -8,12 +8,16 @@
 
 namespace vSMC {
 
+/// Called before resampling in an OpenCL sampler
+/// \ingroup OpenCL
 template <typename T>
 void cl_pre_resampling (T &state)
 {
     state.pre_resampling();
 }
 
+/// Called after resampling in an OpenCL sampler
+/// \ingroup OpenCL
 template <typename T>
 void cl_post_resampling (T &state)
 {
@@ -21,6 +25,7 @@ void cl_post_resampling (T &state)
 }
 
 /// \brief Particle type class for helping implementing SMC using OpenCL
+/// \ingroup OpenCL
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
@@ -369,7 +374,7 @@ class StateCL
 
     /// \brief Check the status of build
     ///
-    /// \return \b true If the last call to build is successful.
+    /// \return \b true if the last call to build is successful.
     bool build () const
     {
         return build_;
@@ -444,6 +449,7 @@ class StateCL
 }; // class StateCL
 
 /// \brief Sampler::init_type subtype
+/// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
 template <typename T>
@@ -557,6 +563,7 @@ class InitializeCL
 };
 
 /// \brief Sampler::move_type subtype
+/// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
 template <typename T>
@@ -668,6 +675,7 @@ class MoveCL
 }; // class MoveCL
 
 /// \brief Non-direct Monitor::eval_type subtype
+/// \ingroup OpenCL
 ///
 /// \tparam T A Subtype of StateCL
 /// \tparam Dim The dimension of the monitor
@@ -796,6 +804,7 @@ class MonitorCL
 }; // class MonitorCL
 
 /// \brief Non-direct Path::eval_type subtype
+/// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
 template <typename T>

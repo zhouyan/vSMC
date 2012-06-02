@@ -21,7 +21,9 @@ namespace vSMC { namespace rng {
 #ifdef V_SMC_USE_CONSTEXPR_ENGINE
 
 /// \brief An Engine with constexpr min() and max()
+/// \ingroup RNG
 ///
+/// \details
 /// vSMC::rng::Engine is an alias to r123::Engine unless the macro
 /// V_SMC_USE_CONSTEXPR_ENGINE is explicited defined before the including of
 /// this header. One shall never define this macro unless it is absolutely

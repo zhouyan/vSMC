@@ -6,16 +6,64 @@
 namespace vSMC {
 
 /// \brief Monitor for Monte Carlo integration
+/// \ingroup Core
 ///
-/// \tparam T State state type. Requiment:
-/// \li Consturctor: T (IntType N)
-/// \li Method: copy (IntType from, IntType to)
+/// \tparam T Particle<T>::value_type
 template <typename T>
 class Monitor
 {
     public :
 
-    /// The type of evaluation functor
+    /// \brief The type of evaluation functor
+    ///
+    /// \details
+    /// There are two types of evaluation functor, which unfortunately cannot
+    /// be distinguished by their C++ types. The primary use of Monitor is to
+    /// record the importance sampling integration along the way of iterations.
+    /// So say one want to monitor two parameters, \f$x = E[g(\theta)]\f$ and
+    /// \f$y = E[h(\theta)]\f$, and this is done through importance sampling
+    /// integration. Then one need first compute two vectors, \f$\{x_i\}\f$ and
+    /// \f$\{y_i\}\f$ where \f$x_i = g(\theta_i)\f$
+    /// and \f$y_i = h(\theta_i)\f$, and then compute the weighted sum.
+    /// With Monitor there are two ways to do this.
+    ///
+    /// First, called \b non-direct type monitor, one can create a 2 dimension
+    /// monitor. When the evaluation function is called, the last output
+    /// arguments, say \c buffer will be a row major matrix of dimension N by 2
+    /// where N is the number of particles. That is, <tt>buffer[i * 2] =
+    /// xi</tt> and <tt>buffer[i * 2 + 1] = yi</tt>. After that, the Monitor
+    /// will take care of the imporatance sampling. This is called the
+    /// Non-direct type evaluation.
+    ///
+    /// The other way, called \b direct type monitor, is the user can return
+    /// the results final results direclty, and simply return the values
+    /// directly and having the job of the Monitor is simply to archive these
+    /// information and be ready to provide them after we are done with all the
+    /// iterations. In this case, one still create a 2 dimension monitor, but
+    /// now the previous \c buffer will be an array of length 2. The other use
+    /// of this kind of monitor is that one are not monitoring the importance
+    /// sampling estimates at all but some other quantities of the sampler.
+    ///
+    /// Which kind of evaluation to be used are determined by the way the
+    /// monitro is constructed. After the construction, it cannot be changed.
+    /// See the documentation of the constructor.
+    ///
+    /// Ideally we shall create two classes for these two types of Monitors.
+    /// This is a much better practice is the view of programming since it
+    /// makes the interface more difficult to use wrongly. However, that also
+    /// means we need a lot more methods in the Sampler which manages all
+    /// monitors and it can be much more difficult. Another solution is to
+    /// requires the evaluation functors to have some type traits. However that
+    /// means you need to specifialize the traits for your own type of
+    /// evluation functors, and more difficult if you want to use a simple
+    /// function pointer.
+    ///
+    /// The current way vSMC do these kind of things is following a "least
+    /// surprise" principle. If one come from BUGS, then he knows what \c
+    /// monitor does, recording \c x_i and \c y_i as in the non-direct type
+    /// monitors. And this is the default behavior of Monitor. In fact, if one
+    /// check out the Helper module, all backends only provide non-direct type
+    /// monitor.
     typedef function<void (unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
@@ -148,10 +196,6 @@ class Monitor
     ///
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
-    ///
-    /// \note The evaluation functor has to be set to a non-NULL value before
-    /// calling eval(). The direct evaluation functor is prefered when both are
-    /// available.
     void eval (unsigned iter, const Particle<T> &particle)
     {
         assert(eval_);
@@ -196,6 +240,7 @@ class Monitor
 }; // class Monitor
 
 /// \brief Print the Monitor
+/// \ingroup Core
 ///
 /// \param os The ostream to which the contents are printed
 /// \param monitor The Monitor to be printed

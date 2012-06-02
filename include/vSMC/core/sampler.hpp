@@ -6,17 +6,16 @@
 namespace vSMC {
 
 /// \brief SMC Sampler
+/// \ingroup Core
 ///
-/// \tparam T State state type. Requiment:
-/// \li Consturctor: T (IntType N)
-/// \li Method: copy (IntType from, IntType to)
+/// \tparam T Particle<T>::value_type
 template <typename T>
 class Sampler
 {
     public :
 
     /// The type of Initialization functor
-    typedef function<unsigned (Particle<T> &, void *)> initialize_type;
+    typedef function<unsigned (Particle<T> &, void *)> init_type;
 
     /// The type of Move functor
     typedef function<unsigned (unsigned, Particle<T> &)> move_type;
@@ -36,23 +35,24 @@ class Sampler
     /// The type of Monitor map
     typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
-    /// \brief Construct a sampler with given number of particles
+    /// \brief Construct a sampler with a given number of particles
     ///
     /// \param N The number of particles
     /// \param init The functor used to initialize the particles
     /// \param move The functor used to move the particles and weights
     /// \param scheme The resampling scheme. See ResampleScheme
-    /// \param threshold The threshold for performing resampling
+    /// \param threshold The threshold of ESS/N for performing resampling. It
+    /// shall be a number between [0, 1]. Less than zero means never
+    /// resampling, bigger than one means always resampling.
     /// \param seed The seed to the parallel RNG system
     explicit Sampler (
             typename Particle<T>::size_type N,
-            const initialize_type &init = NULL,
+            const init_type &init = NULL,
             const move_type &move = NULL,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
             typename Particle<T>::seed_type seed = V_SMC_CBRNG_SEED) :
-        init_(init), move_(move),
-        scheme_(scheme), threshold_(threshold),
+        init_(init), move_(move), scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0) {}
 
     /// \brief Size of the particle set
@@ -144,15 +144,15 @@ class Sampler
         return particle_;
     }
 
-    /// \brief Replace initialization functor
+    /// \brief Set new initialization functor
     ///
     /// \param new_init New Initialization functor
-    void init (const initialize_type &new_init)
+    void init (const init_type &new_init)
     {
         init_ = new_init;
     }
 
-    /// \brief Replace iteration functor
+    /// \brief Set new move functor
     ///
     /// \param new_move New Move functor
     void move (const move_type &new_move)
@@ -160,18 +160,18 @@ class Sampler
         move_ = new_move;
     }
 
-    /// \brief Read and write access to the MCMC moves queue
-    ///
-    /// \return A reference to the MCMC moves queue
-    mcmc_queue_type &mcmc ()
-    {
-        return mcmc_;
-    }
-
     /// \brief Read only access to the MCMC moves queue
     ///
     /// \return A const reference to the MCMC moves queue
     const mcmc_queue_type &mcmc () const
+    {
+        return mcmc_;
+    }
+
+    /// \brief Read and write access to the MCMC moves queue
+    ///
+    /// \return A reference to the MCMC moves queue
+    mcmc_queue_type &mcmc ()
     {
         return mcmc_;
     }
@@ -260,6 +260,8 @@ class Sampler
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The functor used to directly evaluate the results
     /// \param direct Whether or not eval return the integrands or the final
+    ///
+    /// \sa Monitor::eval_type
     void monitor (const std::string &name, unsigned dim,
             const typename Monitor<T>::eval_type &eval, bool direct = false)
     {
@@ -267,7 +269,7 @@ class Sampler
         monitor_name_.insert(name);
     }
 
-    /// \brief Read only access to a named monitor through iterator
+    /// \brief Read only access to a named monitor through an iterator
     ///
     /// \param name The name of the monitor
     ///
@@ -341,6 +343,8 @@ class Sampler
     /// \param eval The functor used to compute the integrands or results
     /// \param direct Whether or not eval return the integrands or the final
     /// results
+    ///
+    /// \sa Path::eval_type
     void path_sampling (const typename Path<T>::eval_type &eval,
             bool direct = false)
     {
@@ -357,7 +361,7 @@ class Sampler
 
     /// \brief SMC estimate of normalizing constant
     ///
-    /// \return The log of SMC normalizng constant estimate
+    /// \return The log ratio of normalizng constants
     double zconst () const
     {
         return particle_.zconst();
@@ -512,27 +516,21 @@ class Sampler
 
     private :
 
-    /// Initialization and movement
-    initialize_type init_;
+    init_type init_;
     move_type move_;
     mcmc_queue_type mcmc_;
 
-    /// Resampling
     ResampleScheme scheme_;
     double threshold_;
 
-    /// Particle sets
     Particle<T> particle_;
     unsigned iter_num_;
     ess_type ess_;
     resampled_type resampled_;
     accept_type accept_;
 
-    /// Monte Carlo estimation by integration
     monitor_map_type monitor_;
     std::set<std::string> monitor_name_;
-
-    /// Path sampling
     Path<T> path_;
 
     void post_move ()
@@ -558,6 +556,7 @@ class Sampler
 }; // class Sampler
 
 /// \brief Print the Sampler
+/// \ingroup Core
 ///
 /// \param os The ostream to which the contents are printed
 /// \param sampler The Sampler to be printed

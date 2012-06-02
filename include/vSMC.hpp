@@ -20,3 +20,18 @@
 #endif // V_SMC_USE_CL
 
 #endif // V_SMC_HPP
+
+/// \defgroup Core Core
+///
+/// \defgroup Helper Helper
+///
+/// \defgroup Sequential Sequential
+/// \ingroup Helper
+///
+/// \defgroup TBB Intel Threading Buidling Block
+/// \ingroup Helper
+///
+/// \defgroup OpenCL OpenCL
+/// \ingroup Helper
+///
+/// \defgroup RNG Random number generating

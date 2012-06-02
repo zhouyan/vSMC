@@ -6,6 +6,7 @@
 namespace vSMC {
 
 /// \brief Sampler::init_type subtype
+/// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
@@ -41,6 +42,7 @@ class InitializeSeq
 }; // class InitializeSeq
 
 /// \brief Sampler::move_type subtype
+/// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
@@ -73,6 +75,7 @@ class MoveSeq
 }; // class MoveSeq
 
 /// \brief Non-direct Monitor::eval_type subtype
+/// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
@@ -112,6 +115,7 @@ class MonitorSeq
 }; // class MonitorSeq
 
 /// \brief Non-direct Path::eval_type subtype
+/// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>

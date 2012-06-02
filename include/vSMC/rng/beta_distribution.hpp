@@ -6,6 +6,9 @@
 namespace vSMC { namespace rng {
 
 /// \brief Beta distribution
+/// \ingroup RNG
+///
+/// \tparam RealType A floating point type
 ///
 /// Instantiations of class template beta_distribution model a random
 /// distribiton. Such a distribution produces random numbers \c x distributed
