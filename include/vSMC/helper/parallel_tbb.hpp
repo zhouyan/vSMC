@@ -16,18 +16,17 @@ class InitializeTBB : public InitializeSeq<T>
 {
     public :
 
-    typedef typename InitializeSeq<T>::initialize_state_type
-        initialize_state_type;
-    typedef typename InitializeSeq<T>::initialize_param_type
-        initialize_param_type;
-    typedef typename InitializeSeq<T>::pre_processor_type
-        pre_processor_type;
-    typedef typename InitializeSeq<T>::post_processor_type
-        post_processor_type;
+    InitializeTBB () :
+        InitializeSeq<T>() {}
 
-    InitializeTBB () {}
-    InitializeTBB (const InitializeTBB<T> &other) {}
-    InitializeTBB<T> &operator= (const InitializeTBB<T> &other) {return *this;}
+    InitializeTBB (const InitializeTBB<T> &other) :
+        InitializeSeq<T>(other) {}
+
+    InitializeTBB<T> &operator= (const InitializeTBB<T> &other)
+    {
+        InitializeSeq<T>::operator=(other);
+        return *this;
+    }
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
@@ -79,13 +78,17 @@ class MoveTBB : public MoveSeq<T>
 {
     public :
 
-    typedef typename MoveSeq<T>::move_state_type     move_state_type;
-    typedef typename MoveSeq<T>::pre_processor_type  pre_processor_type;
-    typedef typename MoveSeq<T>::post_processor_type post_processor_type;
+    MoveTBB () :
+        MoveSeq<T>() {}
 
-    MoveTBB () {}
-    MoveTBB (const MoveTBB<T> &other) {}
-    MoveTBB<T> &operator= (const MoveTBB<T> &other) {return *this;}
+    MoveTBB (const MoveTBB<T> &other) :
+        MoveSeq<T>(other) {}
+
+    MoveTBB<T> &operator= (const MoveTBB<T> &other)
+    {
+        MoveSeq<T>::operator=(other);
+        return *this;
+    }
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
@@ -138,10 +141,6 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 {
     public :
 
-    typedef typename MonitorSeq<T>::monitor_state_type monitor_state_type;
-    typedef typename MonitorSeq<T>::pre_processor_type pre_processor_type;
-    typedef typename MonitorSeq<T>::post_processor_type post_processor_type;
-
     void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
@@ -188,11 +187,6 @@ template <typename T>
 class PathTBB : public PathSeq<T>
 {
     public :
-
-    typedef typename PathSeq<T>::path_state_type path_state_type;
-    typedef typename PathSeq<T>::width_state_type width_state_type;
-    typedef typename PathSeq<T>::pre_processor_type pre_processor_type;
-    typedef typename PathSeq<T>::post_processor_type post_processor_type;
 
     double operator() (unsigned iter, const Particle<T> &particle,
             double *res)

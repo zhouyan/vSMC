@@ -14,11 +14,6 @@ class InitializeSeq
 {
     public :
 
-    typedef function<unsigned (SingleParticle<T>)> initialize_state_type;
-    typedef function<void (Particle<T> &, void *)> initialize_param_type;
-    typedef function<void (Particle<T> &)> pre_processor_type;
-    typedef function<void (Particle<T> &)> post_processor_type;
-
     virtual ~InitializeSeq () {}
 
     virtual unsigned operator() (Particle<T> &particle, void *param)
@@ -50,10 +45,6 @@ class MoveSeq
 {
     public :
 
-    typedef function<unsigned (unsigned, SingleParticle<T>)> move_state_type;
-    typedef function<void (unsigned, Particle<T> &)> pre_processor_type;
-    typedef function<void (unsigned, Particle<T> &)> post_processor_type;
-
     virtual ~MoveSeq () {}
 
     virtual unsigned operator() (unsigned iter, Particle<T> &particle)
@@ -83,11 +74,6 @@ template <typename T, unsigned Dim>
 class MonitorSeq
 {
     public :
-
-    typedef function<void (unsigned, ConstSingleParticle<T>, double *)>
-        monitor_state_type;
-    typedef function<void (unsigned, const Particle<T> &)> pre_processor_type;
-    typedef function<void (unsigned, const Particle<T> &)> post_processor_type;
 
     virtual ~MonitorSeq () {}
 
@@ -122,13 +108,6 @@ template <typename T>
 class PathSeq
 {
     public :
-
-    typedef function<double (unsigned, ConstSingleParticle<T>)>
-        path_state_type;
-    typedef function<double (unsigned, const Particle<T> &)>
-        width_state_type;
-    typedef function<void (unsigned, const Particle<T> &)> pre_processor_type;
-    typedef function<void (unsigned, const Particle<T> &)> post_processor_type;
 
     virtual ~PathSeq () {}
 

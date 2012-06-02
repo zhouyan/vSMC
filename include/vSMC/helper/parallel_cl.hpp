@@ -457,10 +457,6 @@ class InitializeCL
 {
     public :
 
-    typedef function<void (Particle<T> &, void *)> initialize_param_type;
-    typedef function<void (Particle<T> &)> pre_processor_type;
-    typedef function<void (Particle<T> &)> post_processor_type;
-
     /// \brief Construct a InitializeCL object from the name of the kernel
     ///
     /// \param kernel_name The name of the kernel in the source file build by
@@ -570,9 +566,6 @@ template <typename T>
 class MoveCL
 {
     public :
-
-    typedef function<void (unsigned, Particle<T> &)> pre_processor_type;
-    typedef function<void (unsigned, Particle<T> &)> post_processor_type;
 
     /// \brief Construct a MoveCL object from the name of the kernel
     ///
@@ -685,9 +678,6 @@ template <typename T, unsigned Dim>
 class MonitorCL
 {
     public :
-
-    typedef function<void (unsigned, const Particle<T> &)> pre_processor_type;
-    typedef function<void (unsigned, const Particle<T> &)> post_processor_type;
 
     /// \brief Construct a MonitorCL object from the name of the kernel
     ///
@@ -811,11 +801,6 @@ template <typename T>
 class PathCL
 {
     public :
-
-    typedef function<double (unsigned, const Particle<T> &)>
-        width_state_type;
-    typedef function<void (unsigned, const Particle<T> &)> pre_processor_type;
-    typedef function<void (unsigned, const Particle<T> &)> post_processor_type;
 
     /// \brief Construct a PathCL object from the name of the kernel
     ///
