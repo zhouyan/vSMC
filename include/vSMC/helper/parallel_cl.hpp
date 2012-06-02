@@ -24,7 +24,7 @@ void cl_post_resampling (T &state)
     state.post_resampling();
 }
 
-/// \brief Particle::value_type subtype
+/// \brief Particle<T>::value_type subtype
 /// \ingroup OpenCL
 ///
 /// \tparam Dim The dimension of the state parameter vector
@@ -400,8 +400,8 @@ class StateCL
         kernel_copy_.setArg(0, (std::size_t) size_);
         kernel_copy_.setArg(1, state_device_);
         kernel_copy_.setArg(2, copy_device_);
-        command_queue_.enqueueNDRangeKernel(kernel_copy_, cl::NullRange,
-                global_nd_range(), local_nd_range());
+        command_queue_.enqueueNDRangeKernel(kernel_copy_,
+                cl::NullRange, global_nd_range(), local_nd_range());
     }
 
     private :
@@ -448,7 +448,7 @@ class StateCL
     }
 }; // class StateCL
 
-/// \brief Sampler::init_type subtype
+/// \brief Sampler<T>::init_type subtype
 /// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
@@ -497,8 +497,8 @@ class InitializeCL
         initialize_param(particle, param);
         pre_processor(particle);
         // TODO more control over local size
-        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange,
+        particle.value().command_queue().enqueueNDRangeKernel(
+                kernel_, cl::NullRange,
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
         // TODO more efficient weight copying
@@ -558,7 +558,7 @@ class InitializeCL
     typename Particle<T>::weight_type weight_;
 };
 
-/// \brief Sampler::move_type subtype
+/// \brief Sampler<T>::move_type subtype
 /// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
@@ -606,8 +606,8 @@ class MoveCL
         create_kernel(iter, particle);
         pre_processor(iter, particle);
         // TODO more control over local size
-        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange,
+        particle.value().command_queue().enqueueNDRangeKernel(
+                kernel_, cl::NullRange,
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
         // TODO more efficient weight copying
@@ -667,7 +667,7 @@ class MoveCL
     typename Particle<T>::weight_type weight_;
 }; // class MoveCL
 
-/// \brief Non-direct Monitor::eval_type subtype
+/// \brief Monitor<T>::indirect_eval_type subtype
 /// \ingroup OpenCL
 ///
 /// \tparam T A Subtype of StateCL
@@ -717,29 +717,30 @@ class MonitorCL
     virtual ~MonitorCL () {}
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
-        typename Monitor<T>::integrand_mat_type &res)
+            double *res)
     {
         create_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange,
+        particle.value().command_queue().enqueueNDRangeKernel(
+                kernel_, cl::NullRange,
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
         if (sizeof(typename T::state_type) == sizeof(double)) {
             particle.value().command_queue().enqueueReadBuffer(buffer_device_,
                     1, 0,
                     sizeof(typename T::state_type) * particle.size() * Dim,
-                    (void *) res.data());
+                    (void *) res);
         } else {
             buffer_host_.resize(Dim, particle.size());
             particle.value().command_queue().enqueueReadBuffer(buffer_device_,
                     1, 0,
                     sizeof(typename T::state_type) * particle.size() * Dim,
                     (void *) buffer_host_.data());
+            Eigen::Map<Eigen::MatrixXd> res_mat(res, Dim, particle.size());
             for (unsigned d = 0; d != Dim; ++d) {
                 for (typename Particle<T>::size_type i = 0;
                         i != particle.size(); ++i)
-                    res(d, i) = buffer_host_(d, i);
+                    res_mat(d, i) = buffer_host_(d, i);
             }
         }
         post_processor(iter, particle);
@@ -792,7 +793,7 @@ class MonitorCL
     typename T::state_mat_type buffer_host_;
 }; // class MonitorCL
 
-/// \brief Non-direct Path::eval_type subtype
+/// \brief Path<T>::eval_type subtype
 /// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
@@ -841,8 +842,8 @@ class PathCL
     {
         create_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().command_queue().enqueueNDRangeKernel(kernel_,
-                cl::NullRange,
+        particle.value().command_queue().enqueueNDRangeKernel(
+                kernel_, cl::NullRange,
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
         if (sizeof(typename T::state_type) == sizeof(double)) {

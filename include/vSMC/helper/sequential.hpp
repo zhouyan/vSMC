@@ -5,7 +5,7 @@
 
 namespace vSMC {
 
-/// \brief Sampler::init_type subtype
+/// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
@@ -36,7 +36,7 @@ class InitializeSeq
     virtual void post_processor (Particle<T> &particle) {}
 }; // class InitializeSeq
 
-/// \brief Sampler::move_type subtype
+/// \brief Sampler<T>::move_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
@@ -65,7 +65,7 @@ class MoveSeq
     virtual void post_processor (unsigned iter, Particle<T> &particle) {}
 }; // class MoveSeq
 
-/// \brief Non-direct Monitor::eval_type subtype
+/// \brief Monitor<T>::indirect_eval_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
@@ -78,15 +78,13 @@ class MonitorSeq
     virtual ~MonitorSeq () {}
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
-            typename Monitor<T>::integrand_mat_type &res)
+	    double *res)
     {
-        assert(res.rows() == Dim);
-        assert(res.cols() == particle.size());
         pre_processor(iter, particle);
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
             monitor_state(iter, ConstSingleParticle<T>(i, &particle),
-                    res.col(i).data());
+                    res + i * Dim);
         }
         post_processor(iter, particle);
     }
@@ -102,7 +100,7 @@ class MonitorSeq
     }
 }; // class MonitorSeq
 
-/// \brief Non-direct Path::eval_type subtype
+/// \brief Path<T>::eval_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase

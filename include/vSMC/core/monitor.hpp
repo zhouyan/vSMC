@@ -14,46 +14,22 @@ namespace vSMC {
 /// distinguished by their C++ types. The primary use of Monitor is to record
 /// the importance sampling integration along the way of iterations.  So say
 /// one want to monitor two parameters, \f$x = E[g(\theta)]\f$ and \f$y =
-/// E[h(\theta)]\f$, and this is done through importance sampling integration.
-/// Then one need first compute two vectors, \f$\{x_i\}\f$ and \f$\{y_i\}\f$
-/// where \f$x_i = g(\theta_i)\f$ and \f$y_i = h(\theta_i)\f$, and then
-/// compute the weighted sum.  With Monitor there are two ways to do this.
-///
-/// First, called \b indirect type monitor, one can create a 2 dimension
-/// monitor. When the evaluation function is called, the last output
+/// E[h(\theta)]\f$, and this is done through importance sampling
+/// integration.  Then one need first compute two vectors, \f$\{x_i\}\f$ and
+/// \f$\{y_i\}\f$ where \f$x_i = g(\theta_i)\f$ and \f$y_i = h(\theta_i)\f$,
+/// and then compute the weighted sum.  With Monitor one can create a 2
+/// dimension monitor. When the evaluation function is called, the last output
 /// arguments, say \c buffer will be a row major matrix of dimension N by 2
 /// where N is the number of particles. That is, <tt>buffer[i * 2] = xi</tt>
 /// and <tt>buffer[i * 2 + 1] = yi</tt>. After that, the Monitor will take
-/// care of the imporatance sampling. The monitor will be constructed with a
-/// Monitor::indirect_eval_type type functor
-///
-/// The other way, called \b direct type monitor, is the user can return the
-/// results final results direclty, and simply return the values directly and
-/// having the job of the Monitor is simply to archive these information and
-/// be ready to provide them after we are done with all the iterations. In
-/// this case, one still create a 2 dimension monitor, but now the previous \c
-/// buffer will be an array of length 2. The other use of this kind of monitor
-/// is that one are not monitoring the importance sampling estimates at all
-/// but some other quantities of the sampler. This is constructed with a
-/// Monitor::direct_eval_type functor.
+/// care of the imporatance sampling.
 template <typename T>
 class Monitor
 {
     public :
 
-    /// The type of the result vector in direct_eval_type functor
-    typedef Eigen::VectorXd result_vec_type;
-
-    /// The type of the integrand matrix in indirect_eval_type functor
-    typedef Eigen::MatrixXd integrand_mat_type;
-
-    /// The type of direct evaluation functor
-    typedef function<void (unsigned, const Particle<T> &,
-            result_vec_type &)> direct_eval_type;
-
-    /// The type of indirect evaluation functor
-    typedef function<void (unsigned, const Particle<T> &,
-            integrand_mat_type &)> indirect_eval_type;
+    /// The type of evaluation functor
+    typedef function<void (unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
     typedef std::deque<unsigned> index_type;
@@ -61,35 +37,18 @@ class Monitor
     /// The type of the record vector
     typedef std::vector<std::deque<double> > record_type;
 
-    /// \brief Construct a Monitor without a evaluation functor
-    ///
-    /// \param dim The dimension of the monitor
-    explicit Monitor (unsigned dim = 1) :
-        dim_(dim), direct_(false),
-        direct_eval_(NULL), indirect_eval_(NULL), record_(dim) {}
-
-    /// \brief Construct a Monitor with a direct evaluation functor
+    /// \brief Construct a Monitor with an evaluation functor
     ///
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The functor used to evaluate the results
-    explicit Monitor (unsigned dim, const direct_eval_type &eval) :
-        dim_(dim), direct_(true),
-        direct_eval_(eval), indirect_eval_(NULL), record_(dim) {}
-
-    /// \brief Construct a Monitor with an indirect evaluation functor
-    ///
-    /// \param dim The dimension of the monitor, i.e., the number of variables
-    /// \param eval The functor used to evaluate the results
-    explicit Monitor (unsigned dim, const indirect_eval_type &eval) :
-        dim_(dim), direct_(false),
-        direct_eval_(NULL), indirect_eval_(eval), record_(dim) {}
+    explicit Monitor (unsigned dim = 1, const eval_type &eval = NULL) :
+        dim_(dim), eval_(eval), record_(dim) {}
 
     /// \brief Copy constructor
     ///
     /// \param other The Monitor to by copied
     Monitor (const Monitor<T> &other) :
-        dim_(other.dim_), direct_(other.direct_),
-        direct_eval_(other.direct_eval_), indirect_eval_(other.indirect_eval_),
+        dim_(other.dim_), eval_(other.eval_),
         index_(other.index_), record_(other.record_) {}
 
     /// \brief Assignment operator
@@ -100,12 +59,10 @@ class Monitor
     Monitor<T> &operator= (const Monitor<T> &other)
     {
         if (&other != this) {
-            dim_           = other.dim_;
-            direct_        = other.direct_;
-            direct_eval_   = other.direct_eval_;
-            indirect_eval_ = other.indirect_eval_;
-            index_         = other.index_;
-            record_        = other.record_;
+            dim_    = other.dim_;
+            eval_   = other.eval_;
+            index_  = other.index_;
+            record_ = other.record_;
         }
 
         return *this;
@@ -137,10 +94,7 @@ class Monitor
     /// error.
     bool empty () const
     {
-        if (direct_)
-            return !bool(direct_eval_);
-        else
-            return !bool(indirect_eval_);
+        return !bool(eval_);
     }
 
     /// \brief Iteration index
@@ -188,22 +142,12 @@ class Monitor
         }
     }
 
-    /// \brief Set a new direct evaluation functor
+    /// \brief Set a new evaluation functor
     ///
-    /// \param new_eval The functor used to directly evaluate the results
-    void set_eval (const direct_eval_type &new_eval)
+    /// \param new_eval The functor used to evaluate the results
+    void set_eval (const eval_type &new_eval)
     {
-        direct_ = true;
-        direct_eval_ = new_eval;
-    }
-
-    /// \brief Set a new indirect evaluation functor
-    ///
-    /// \param new_eval The functor used to indirectly evaluate the results
-    void set_eval (const indirect_eval_type &new_eval)
-    {
-        direct_ = false;
-        indirect_eval_ = new_eval;
+        eval_ = new_eval;
     }
 
     /// \brief Evaluate
@@ -211,28 +155,20 @@ class Monitor
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
     ///
-    /// \pre If this is a direct monitor, a vector of size Dim is passed to
-    /// the evaluation functor
-    /// \pre If this is a indirect monitor, a matrix of size Dim by N is
-    /// passed to the evaluation functor, where N is the number of particles.
+    /// \pre A matrix of size Dim by N is passed to the evaluation functor,
+    /// where N is the number of particles. The array of matrix elements is of
+    /// row major
     void eval (unsigned iter, const Particle<T> &particle)
     {
+        assert(bool(eval_));
 
-        if (direct_) {
-            assert(bool(direct_eval_));
-            result_.resize(dim_);
-            direct_eval_(iter, particle, result_);
-        } else {
-            assert(bool(indirect_eval_));
-            buffer_.resize(dim_, particle.size());
-            indirect_eval_(iter, particle, buffer_);
-            assert(buffer_.cols() == particle.size());
-            assert(buffer_.rows() == dim_);
-            result_.noalias() = buffer_ * particle.weight();
-        }
+        buffer_.resize(dim_, particle.size());
+        eval_(iter, particle, buffer_.data());
+        result_.noalias() = buffer_ * particle.weight();
 
         assert(result_.size() == dim_);
         assert(record_.size() == dim_);
+
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
             record_[d].push_back(result_[d]);
@@ -255,9 +191,7 @@ class Monitor
     Eigen::MatrixXd buffer_;
     Eigen::VectorXd result_;
     unsigned dim_;
-    bool direct_;
-    direct_eval_type direct_eval_;
-    indirect_eval_type indirect_eval_;
+    eval_type eval_;
     index_type index_;
     record_type record_;
 }; // class Monitor

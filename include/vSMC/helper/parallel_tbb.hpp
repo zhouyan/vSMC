@@ -7,7 +7,7 @@
 
 namespace vSMC {
 
-/// \brief Sampler::init_type subtype
+/// \brief Sampler<T>::init_type subtype
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
@@ -69,7 +69,7 @@ class InitializeTBB : public InitializeSeq<T>
     }; // class work_
 }; // class InitializeTBB
 
-/// \brief Sampler::move_type subtype
+/// \brief Sampler<T>::move_type subtype
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
@@ -131,7 +131,7 @@ class MoveTBB : public MoveSeq<T>
     }; // class work_
 }; // class MoveTBB
 
-/// \brief Non-direct Monitor::eval_type subtype
+/// \brief Monitor<T>::indirect_eval_type subtype
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
@@ -141,12 +141,11 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 {
     public :
 
-    void operator() (unsigned iter, const Particle<T> &particle,
-            typename Monitor<T>::integrand_mat_type &res)
+    void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
-                work_(this, iter, &particle, res.data()));
+                work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
     }
 
@@ -179,7 +178,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     }; // class work_
 }; // class MonitorTBB
 
-/// \brief Non-direct Path::eval_type subtype
+/// \brief Path<T>::eval_type subtype
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase

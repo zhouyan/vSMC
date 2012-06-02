@@ -15,11 +15,6 @@ class Path
     public :
 
     /// \brief The type of path sampling evaluation functor
-    ///
-    /// \details
-    /// Similar to Monitor<T>::eval_type, there are two evaluation functor
-    /// types. One is non-direct, which output the path sampling integrands.
-    /// The other is direct, which output the integrated value.
     typedef function<double (unsigned, const Particle<T> &, double *)>
         eval_type;
 
@@ -38,16 +33,13 @@ class Path
     /// \brief Construct a Path with an evaluation function
     ///
     /// \param eval The functor used to compute the integrands
-    /// \param direct Whether or not eval return the integrands or the final
-    /// results
-    explicit Path (const eval_type &eval = NULL, bool direct = false) :
-        direct_(direct), eval_(eval) {}
+    explicit Path (const eval_type &eval = NULL) : eval_(eval) {}
 
     /// \brief Copy constructor
     ///
     /// \param other The Path to by copied
     Path (const Path<T> &other) :
-        direct_(other.direct_), eval_(other.eval_),
+        eval_(other.eval_),
         index_(other.index_), integrand_(other.integrand_),
         width_(other.width_), grid_(other.grid_) {}
 
@@ -58,7 +50,6 @@ class Path
     Path<T> & operator= (const Path<T> &other)
     {
         if (&other != this) {
-            direct_    = other.direct_;
             eval_      = other.eval_;
             index_     = other.index_;
             integrand_ = other.integrand_;
@@ -124,11 +115,8 @@ class Path
     /// \brief Set the evaluation functor
     ///
     /// \param new_eval The functor used to compute the integrands
-    /// \param direct Whether or not eval return the integrands or the final
-    /// results
-    void set_eval (const eval_type &new_eval, bool direct = false)
+    void set_eval (const eval_type &new_eval)
     {
-        direct_ = direct;
         eval_ = new_eval;
     }
 
@@ -146,13 +134,9 @@ class Path
 
         double w = 0;
         double p = 0;
-        if (direct_) {
-            w = eval_(iter, particle, &p);
-        } else {
-            buffer_.resize(particle.size());
-            w = eval_(iter, particle, buffer_.data());
-            p = particle.weight().dot(buffer_);
-        }
+	buffer_.resize(particle.size());
+	w = eval_(iter, particle, buffer_.data());
+	p = particle.weight().dot(buffer_);
         width_.push_back(w);
         integrand_.push_back(p);
         index_.push_back(iter);
@@ -186,7 +170,6 @@ class Path
     private :
 
     Eigen::VectorXd buffer_;
-    bool direct_;
     eval_type eval_;
     index_type index_;
     integrand_type integrand_;
