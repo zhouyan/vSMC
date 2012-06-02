@@ -65,7 +65,7 @@ class MoveSeq
     virtual void post_processor (unsigned iter, Particle<T> &particle) {}
 }; // class MoveSeq
 
-/// \brief Monitor<T>::indirect_eval_type subtype
+/// \brief Monitor<T>::eval_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase

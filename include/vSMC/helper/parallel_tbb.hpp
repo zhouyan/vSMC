@@ -131,7 +131,7 @@ class MoveTBB : public MoveSeq<T>
     }; // class work_
 }; // class MoveTBB
 
-/// \brief Monitor<T>::indirect_eval_type subtype
+/// \brief Monitor<T>::eval_type subtype
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase

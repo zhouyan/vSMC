@@ -667,7 +667,7 @@ class MoveCL
     typename Particle<T>::weight_type weight_;
 }; // class MoveCL
 
-/// \brief Monitor<T>::indirect_eval_type subtype
+/// \brief Monitor<T>::eval_type subtype
 /// \ingroup OpenCL
 ///
 /// \tparam T A Subtype of StateCL
