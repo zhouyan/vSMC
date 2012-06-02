@@ -226,10 +226,12 @@ class Monitor
             assert(bool(indirect_eval_));
             buffer_.resize(dim_, particle.size());
             indirect_eval_(iter, particle, buffer_);
+            assert(buffer_.cols() == particle.size());
+            assert(buffer_.rows() == dim_);
             result_.noalias() = buffer_ * particle.weight();
         }
 
-        assert(result_.size() >= dim_);
+        assert(result_.size() == dim_);
         assert(record_.size() == dim_);
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
