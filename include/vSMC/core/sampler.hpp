@@ -254,18 +254,31 @@ class Sampler
             iterate();
     }
 
-    /// \brief Add a monitor with an evaluation functor
+    /// \brief Add a monitor with a direct evaluation functor
     ///
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The functor used to directly evaluate the results
-    /// \param direct Whether or not eval return the integrands or the final
     ///
     /// \sa Monitor::eval_type
     void monitor (const std::string &name, unsigned dim,
-            const typename Monitor<T>::eval_type &eval, bool direct = false)
+            const typename Monitor<T>::direct_eval_type &eval)
     {
-        monitor_.insert(std::make_pair(name, Monitor<T>(dim, eval, direct)));
+        monitor_.insert(std::make_pair(name, Monitor<T>(dim, eval)));
+        monitor_name_.insert(name);
+    }
+
+    /// \brief Add a monitor with an indirect evaluation functor
+    ///
+    /// \param name The name of the monitor
+    /// \param dim The dimension of the monitor, i.e., the number of variables
+    /// \param eval The functor used to indirectly evaluate the results
+    ///
+    /// \sa Monitor::eval_type
+    void monitor (const std::string &name, unsigned dim,
+            const typename Monitor<T>::indirect_eval_type &eval)
+    {
+        monitor_.insert(std::make_pair(name, Monitor<T>(dim, eval)));
         monitor_name_.insert(name);
     }
 

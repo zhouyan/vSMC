@@ -42,7 +42,7 @@ class InitializeTBB : public InitializeSeq<T>
 
     private :
 
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef typename Particle<T>::size_type size_type;
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
 
     class work_
@@ -103,7 +103,7 @@ class MoveTBB : public MoveSeq<T>
 
     private :
 
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef typename Particle<T>::size_type size_type;
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
 
     class work_
@@ -142,17 +142,17 @@ class MonitorTBB : public MonitorSeq<T, Dim>
     public :
 
     void operator() (unsigned iter, const Particle<T> &particle,
-            double *res)
+            typename Monitor<T>::integrand_mat_type &res)
     {
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
-                work_(this, iter, &particle, res));
+                work_(this, iter, &particle, res.data()));
         this->post_processor(iter, particle);
     }
 
     private :
 
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef typename Particle<T>::size_type size_type;
 
     class work_
     {
@@ -201,7 +201,7 @@ class PathTBB : public PathSeq<T>
 
     private :
 
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef typename Particle<T>::size_type size_type;
 
     class work_
     {

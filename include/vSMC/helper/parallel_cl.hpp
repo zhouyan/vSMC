@@ -717,7 +717,7 @@ class MonitorCL
     virtual ~MonitorCL () {}
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
-        double *res)
+        typename Monitor<T>::integrand_mat_type &res)
     {
         create_kernel(iter, particle);
         pre_processor(iter, particle);
@@ -729,18 +729,17 @@ class MonitorCL
             particle.value().command_queue().enqueueReadBuffer(buffer_device_,
                     1, 0,
                     sizeof(typename T::state_type) * particle.size() * Dim,
-                    (void *) res);
+                    (void *) res.data());
         } else {
             buffer_host_.resize(Dim, particle.size());
             particle.value().command_queue().enqueueReadBuffer(buffer_device_,
                     1, 0,
                     sizeof(typename T::state_type) * particle.size() * Dim,
                     (void *) buffer_host_.data());
-            Eigen::Map<Eigen::MatrixXd> res_mat(res, Dim, particle.size());
             for (unsigned d = 0; d != Dim; ++d) {
                 for (typename Particle<T>::size_type i = 0;
                         i != particle.size(); ++i)
-                    res_mat(d, i) = buffer_host_(d, i);
+                    res(d, i) = buffer_host_(d, i);
             }
         }
         post_processor(iter, particle);

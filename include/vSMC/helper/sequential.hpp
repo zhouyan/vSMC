@@ -78,13 +78,15 @@ class MonitorSeq
     virtual ~MonitorSeq () {}
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
-            double *res)
+            typename Monitor<T>::integrand_mat_type &res)
     {
+        assert(res.rows() == Dim);
+        assert(res.cols() == particle.size());
         pre_processor(iter, particle);
         for (typename Particle<T>::size_type i = 0;
                 i != particle.size(); ++i) {
             monitor_state(iter, ConstSingleParticle<T>(i, &particle),
-                    res + i * Dim);
+                    res.col(i).data());
         }
         post_processor(iter, particle);
     }
