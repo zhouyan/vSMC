@@ -98,8 +98,15 @@ will be built without [Intel TBB][Intel TBB] and linked statically. Similar
 options are available for the Positron Emission Tomography compartmental model
 example, just replace `GMM` with `PET`.
 
-For how to find the libraries see files in `cmake/` and see [CMake][CMake]'s
+For how to find these libraries see files in `cmake/` and see [CMake][CMake]'s
 documentation for general usage of this tool.
+
+There is another example that will not be built by the `cmake` system is
+**pf_cl**, which use OpenCL for parallelization. This is due to the fact that
+finding OpenCL runtime is a quite non-portable thing and we don't have the
+time to deal with all those different OpenCL implementations for now. However,
+the OpenCL back end is intended to be usable by any OpenCL standard conforming
+implementation.
 
 # Tested compilers
 
