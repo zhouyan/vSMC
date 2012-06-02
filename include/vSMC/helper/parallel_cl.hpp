@@ -309,6 +309,27 @@ class StateCL
     /// \note The call to build() will call setup() unless the user have set
     /// platform, context, device and command_queue correctly himself. If these
     /// are set by the user, than the library does not check for its validity.
+    ///
+    /// \note When building the program, the user can assume the following
+    /// things,
+    /// \li The Rand123 library's \c philox.h, \c threefry.h, and \c u01.h
+    /// headers are included before the source.
+    /// \li A type \c state_type which is the same as the host \c state_type
+    /// are defined before the source.
+    /// \li A type \c state_struct which looks like the following are defined
+    /// before the souce.
+    /// \code
+    /// typedef {
+    ///     state_type param1;
+    ///     state_type param2;
+    ///     ...
+    ///     state_type paramDim;
+    /// } state_struct;
+    /// \endcode
+    /// where The last \c paramDim will clearly be replaced by the proper
+    /// number.
+    /// \li A constant \c Dim of type \c uint is defined before the source
+    /// which is the same as the dimension of this StateCL object.
     template <typename State>
     void build (const char *source, const char *flags, Sampler<State> &sampler)
     {
@@ -434,6 +455,20 @@ class InitializeCL
     typedef function<void (Particle<T> &)> pre_processor_type;
     typedef function<void (Particle<T> &)> post_processor_type;
 
+    /// \brief Construct a InitializeCL object from the name of the kernel
+    ///
+    /// \param kernel_name The name of the kernel in the source file build by
+    /// StateCL::build. Note that the first four arguments to the kernel are
+    /// set automatically and are size of the particle set, the states, output
+    /// buffer for the log_weights, and output buffer for the accept counts,
+    /// respectively.
+    ///
+    /// A valid kernel declaration looks like
+    /// \code
+    /// __kernel void init (
+    ///     size_t size, state_struct *state,
+    ///     state_type *weight, uint *accept)
+    /// \endcode
     explicit InitializeCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
 
@@ -532,6 +567,20 @@ class MoveCL
     typedef function<void (unsigned, Particle<T> &)> pre_processor_type;
     typedef function<void (unsigned, Particle<T> &)> post_processor_type;
 
+    /// \brief Construct a MoveCL object from the name of the kernel
+    ///
+    /// \param kernel_name The name of the kernel in the source file build by
+    /// StateCL::build. Note that the first five arguments to the kernel are
+    /// set automatically and are size of the particle set, the iteration
+    /// number, the states, output buffer for the log_weights, and output
+    /// buffer for the accept counts, respectively.
+    ///
+    /// A valid kernel declaration looks like
+    /// \code
+    /// __kernel void move (
+    ///     size_t size, uint iter, state_struct *state,
+    ///     state_type *weight, uint *accept)
+    /// \endcode
     explicit MoveCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
 
@@ -632,6 +681,21 @@ class MonitorCL
     typedef function<void (unsigned, const Particle<T> &)> pre_processor_type;
     typedef function<void (unsigned, const Particle<T> &)> post_processor_type;
 
+    /// \brief Construct a MonitorCL object from the name of the kernel
+    ///
+    /// \param kernel_name The name of the kernel in the source file build by
+    /// StateCL::build. Note that the first five arguments to the kernel are
+    /// set automatically and are size of the particle set, the iteration
+    /// number, the dimension of the monitor, the states, and output buffer for
+    /// results, respectively.
+    ///
+    /// A valid kernel declaration looks like
+    /// \code
+    /// __kernel void monitor_eval (
+    ///     size_t size, uint iter, uint dim, state_struct *state,
+    ///     state_type *buffer)
+    /// \endcode
+    /// where \c buffer is a row major \c dim by \c size matrix
     explicit MonitorCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
 
@@ -744,6 +808,19 @@ class PathCL
     typedef function<void (unsigned, const Particle<T> &)> pre_processor_type;
     typedef function<void (unsigned, const Particle<T> &)> post_processor_type;
 
+    /// \brief Construct a PathCL object from the name of the kernel
+    ///
+    /// \param kernel_name The name of the kernel in the source file build by
+    /// StateCL::build. Note that the first four arguments to the kernel are
+    /// set automatically and are size of the particle set, the iteration
+    /// number, the states, and output buffer for results, respectively.
+    ///
+    /// A valid kernel declaration looks like
+    /// \code
+    /// __kernel void path_eval (
+    ///     size_t size, uint iter, state_struct *state,
+    ///     state_type *buffer)
+    /// \endcode
     explicit PathCL (const char *kernel_name) :
         kernel_name_(kernel_name), kernel_created_(false) {}
 
