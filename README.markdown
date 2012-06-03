@@ -167,6 +167,11 @@ Note that MSVC cannot compile all the examples.
 Earlier versions of MSVC does not work, this is mainly a dependency problem of
 [Random123][Random123].
 
+# License
+
+The vSMC library is distributed with a two-clauses BSD license which can be
+found in the COPYING file distributed with the source.
+
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
