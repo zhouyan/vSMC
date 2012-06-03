@@ -1,6 +1,10 @@
 #ifndef V_SMC_HELPER_PARALLEL_CL_QUERY_HPP
 #define V_SMC_HELPER_PARALLEL_CL_QUERY_HPP
 
+#include <vSMC/helper/parallel_cl/cl.hpp>
+#include <iostream>
+#include <iomanip>
+
 namespace vSMC {
 
 class QueryCL
@@ -62,6 +66,7 @@ class QueryCL
     {
         print_dev<std::string>(os, dev,
                 CL_DEVICE_NAME, "CL_DEVICE_NAME");
+        print_dev_type(os, dev);
         print_dev<std::string>(os, dev,
                 CL_DEVICE_VENDOR, "CL_DEVICE_VENDOR");
         print_dev<cl_uint>(os, dev,
@@ -83,13 +88,6 @@ class QueryCL
                 CL_DEVICE_AVAILABLE, "CL_DEVICE_AVAILABLE");
         print_dev<cl_bool>(os, dev,
                 CL_DEVICE_COMPILER_AVAILABLE, "CL_DEVICE_COMPILER_AVAILABLE");
-        // print_dev<cl_bool>(os, dev,
-        //         CL_DEVICE_LINKER_AVAILABLE, "CL_DEVICE_LINKER_AVAILABLE");
-        // print_dev<std::string>(os, dev,
-        //         CL_DEVICE_BUILT_IN_KERNELS, "CL_DEVICE_BUILT_IN_KERNELS");
-        // print_dev<std::size_t>(os, dev,
-        //         CL_DEVICE_PRINTF_BUFFER_SIZE,
-        //         "CL_DEVICE_PRINTF_BUFFER_SIZE", "bytes");
         print_dev<cl_uint>(os, dev,
                 CL_DEVICE_MAX_CLOCK_FREQUENCY,
                 "CL_DEVICE_MAX_CLOCK_FREQUENCY", "MHz");
@@ -99,6 +97,8 @@ class QueryCL
         print_dev<cl_ulong>(os, dev,
                 CL_DEVICE_MAX_MEM_ALLOC_SIZE,
                 "CL_DEVICE_MAX_MEM_ALLOC_SIZE", "bytes");
+        print_dev_sfp_config(os, dev);
+        print_dev_dfp_config(os, dev);
 
         os << '\n';
 
@@ -108,6 +108,9 @@ class QueryCL
         print_dev<cl_uint>(os, dev,
                 CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
                 "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS");
+        print_dev<std::vector<std::size_t> >(os, dev,
+                CL_DEVICE_MAX_WORK_ITEM_SIZES,
+                "CL_DEVICE_MAX_WORK_ITEM_SIZES");
         print_dev<std::size_t>(os, dev,
                 CL_DEVICE_MAX_WORK_GROUP_SIZE,
                 "CL_DEVICE_MAX_WORK_GROUP_SIZE");
@@ -256,16 +259,6 @@ class QueryCL
         os << '\n';
     }
 
-    template<typename CharT, typename Traits, typename T>
-    static void print_vec (std::basic_ostream<CharT, Traits> &os,
-            std::vector<T> &vec)
-    {
-        for (typename std::vector<T>::const_iterator v = vec.begin();
-                v != vec.end(); ++v)
-            os << *v;
-        os << '\n';
-    }
-
     template<typename T, typename CharT, typename Traits>
     static void print_dev (std::basic_ostream<CharT, Traits> &os,
             const cl::Device &dev,
@@ -275,7 +268,112 @@ class QueryCL
         T val;
         dev.getInfo(info, &val);
         os << std::setw(40) << std::left
-            << name << val << ' ' << unit << '\n';
+            << name;
+        print_val(os, val);
+        os << ' ' << unit << '\n';
+    }
+
+    template<typename CharT, typename Traits>
+    static void print_dev_type (std::basic_ostream<CharT, Traits> &os,
+            const cl::Device &dev)
+    {
+        cl_device_type type;
+        dev.getInfo(CL_DEVICE_TYPE, &type);
+        std::string info;
+        switch (type) {
+            case CL_DEVICE_TYPE_CPU :
+                info = "CL_DEVICE_TYPE_CPU";
+                break;
+            case CL_DEVICE_TYPE_GPU :
+                info = "CL_DEVICE_TYPE_GPU";
+                break;
+            case CL_DEVICE_TYPE_ACCELERATOR :
+                info = "CL_DEVICE_TYPE_ACCELERATOR";
+                break;
+            case CL_DEVICE_TYPE_DEFAULT :
+                info = "CL_DEVICE_TYPE_DEFAULT";
+                break;
+        }
+        os << std::setw(40) << std::left << "CL_DEVICE_TYPE" << info << '\n';
+    }
+
+    template<typename CharT, typename Traits>
+    static void print_dev_sfp_config (std::basic_ostream<CharT, Traits> &os,
+            const cl::Device &dev)
+    {
+        cl_device_fp_config val;
+        std::string info;
+        dev.getInfo(CL_DEVICE_SINGLE_FP_CONFIG, &val);
+        append_bit_field<cl_device_fp_config>(CL_FP_DENORM,
+                val, "CL_FP_DENORM", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_INF_NAN,
+                val, "CL_FP_INF_NAN", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_ROUND_TO_NEAREST,
+                val, "CL_FP_ROUND_TO_NEAREST", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_ROUND_TO_ZERO,
+                val, "CL_FP_ROUND_TO_ZERO", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_ROUND_TO_INF,
+                val, "CL_FP_ROUND_TO_INF", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_FMA,
+                val, "CL_FP_FMA", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_SOFT_FLOAT,
+                val, "CL_FP_SOFT_FLOAT", info);
+        // append_bit_field<cl_device_fp_config>(
+        //         CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT,
+        //         val, "CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT", info);
+        os << std::setw(40) << std::left
+            << "CL_DEVICE_SINGLE_FP_CONFIG" << info << '\n';
+    }
+
+    template<typename CharT, typename Traits>
+    static void print_dev_dfp_config (std::basic_ostream<CharT, Traits> &os,
+            const cl::Device &dev)
+    {
+        cl_device_fp_config val;
+        std::string info;
+        dev.getInfo(CL_DEVICE_DOUBLE_FP_CONFIG, &val);
+        append_bit_field<cl_device_fp_config>(CL_FP_DENORM,
+                val, "CL_FP_DENORM", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_INF_NAN,
+                val, "CL_FP_INF_NAN", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_ROUND_TO_NEAREST,
+                val, "CL_FP_ROUND_TO_NEAREST", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_ROUND_TO_ZERO,
+                val, "CL_FP_ROUND_TO_ZERO", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_ROUND_TO_INF,
+                val, "CL_FP_ROUND_TO_INF", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_FMA,
+                val, "CL_FP_FMA", info);
+        append_bit_field<cl_device_fp_config>(CL_FP_SOFT_FLOAT,
+                val, "CL_FP_SOFT_FLOAT", info);
+        os << std::setw(40) << std::left
+            << "CL_DEVICE_DOUBLE_FP_CONFIG" << info << '\n';
+    }
+
+    template <typename T>
+    static void append_bit_field (T info, T val,
+            const std::string &name, std::string &orig)
+    {
+        if (info & val) {
+            if (orig.length())
+                orig.append(" | ");
+            orig.append(name);
+        }
+    }
+
+    template<typename T, typename CharT, typename Traits>
+    static void print_val (std::basic_ostream<CharT, Traits> &os, const T &val)
+    {
+        os << val;
+    }
+
+    template<typename CharT, typename Traits>
+    static void print_val (std::basic_ostream<CharT, Traits> &os,
+            const std::vector<std::size_t> &val)
+    {
+        for (std::vector<std::size_t>::const_iterator v = val.begin();
+                v != val.end(); ++v)
+            os << *v << ' ';
     }
 
 }; //class QueryCL
