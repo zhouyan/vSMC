@@ -5,6 +5,7 @@
 
 #include <vSMC/internal/common.hpp>
 #include <vSMC/helper/parallel_cl/cl.hpp>
+#include <vSMC/helper/parallel_cl/query.hpp>
 
 namespace vSMC {
 
