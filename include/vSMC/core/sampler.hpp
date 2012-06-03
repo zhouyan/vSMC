@@ -210,48 +210,43 @@ class Sampler
     }
 
     /// \brief Perform iteration
-    void iterate ()
+    ///
+    /// \param num The number of iterations to be performed
+    void iterate (unsigned num = 1)
     {
-        ++iter_num_;
-        std::deque<unsigned> acc;
-        if (bool(move_)) {
-            acc.push_back(move_(iter_num_, particle_));
-        }
-#ifndef V_SMC_NDEBUG
-        else {
-            std::cerr << "vSMC Warning:" << std::endl;
-            std::cerr << "\tSampler::iterate" << std::endl;
-            std::cerr
-                << "\tAttempt Move without a callable object"
-                << std::endl;
-        }
-#endif // V_SMC_NDEBUG
-        for (typename mcmc_queue_type::iterator
-                m = mcmc_.begin(); m != mcmc_.end(); ++m) {
-            if (bool(*m)) {
-                acc.push_back((*m)(iter_num_, particle_));
+        for (unsigned i = 0; i != num; ++i) {
+            ++iter_num_;
+            std::deque<unsigned> acc;
+            if (bool(move_)) {
+                acc.push_back(move_(iter_num_, particle_));
             }
 #ifndef V_SMC_NDEBUG
             else {
                 std::cerr << "vSMC Warning:" << std::endl;
                 std::cerr << "\tSampler::iterate" << std::endl;
                 std::cerr
-                    << "\tAttempt MCMC without a callable object"
+                    << "\tAttempt Move without a callable object"
                     << std::endl;
             }
 #endif // V_SMC_NDEBUG
+            for (typename mcmc_queue_type::iterator
+                    m = mcmc_.begin(); m != mcmc_.end(); ++m) {
+                if (bool(*m)) {
+                    acc.push_back((*m)(iter_num_, particle_));
+                }
+#ifndef V_SMC_NDEBUG
+                else {
+                    std::cerr << "vSMC Warning:" << std::endl;
+                    std::cerr << "\tSampler::iterate" << std::endl;
+                    std::cerr
+                        << "\tAttempt MCMC without a callable object"
+                        << std::endl;
+                }
+#endif // V_SMC_NDEBUG
+            }
+            accept_.push_back(acc);
+            post_move();
         }
-        accept_.push_back(acc);
-        post_move();
-    }
-
-    /// \brief Perform iteration
-    ///
-    /// \param n The number of iterations to be performed
-    void iterate (unsigned n)
-    {
-        for (unsigned i = 0; i != n; ++i)
-            iterate();
     }
 
     /// \brief Add a monitor with a evaluation functor

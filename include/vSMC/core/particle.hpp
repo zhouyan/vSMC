@@ -8,7 +8,11 @@ namespace vSMC {
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
 ///
-/// \tparam T Particle<T>::value_type
+/// \tparam T Requirement:
+/// \li Constructor compatible with
+/// \code T(Particle<T>::size_type N) \endcode
+/// \li member function copy method compatible with
+/// \code copy(Particle<T>::size_type from, Particle<T>::size_type to) \endcode
 template <typename T>
 class Particle
 {
