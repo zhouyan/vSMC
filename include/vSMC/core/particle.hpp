@@ -6,31 +6,31 @@
 namespace vSMC { namespace internal {
 
 template <bool if_cl>
-void pre_resampling_cl (void *value) {}
+inline void pre_resampling_cl (void *value) {}
 
 template <>
-void pre_resampling_cl<true> (void *value)
+inline void pre_resampling_cl<true> (void *value)
 {
     reinterpret_cast<StateCLTrait *>(value)->pre_resampling();
 }
 
 template <typename T>
-void pre_resampling (T *value)
+inline void pre_resampling (T *value)
 {
     pre_resampling_cl<internal::is_base_of<StateCLTrait, T>::value>(value);
 }
 
 template <bool if_cl>
-void post_resampling_cl (void *value) {}
+inline void post_resampling_cl (void *value) {}
 
 template <>
-void post_resampling_cl<true> (void *value)
+inline void post_resampling_cl<true> (void *value)
 {
     reinterpret_cast<StateCLTrait *>(value)->post_resampling();
 }
 
 template <typename T>
-void post_resampling (T *value)
+inline void post_resampling (T *value)
 {
     post_resampling_cl<internal::is_base_of<StateCLTrait, T>::value>(value);
 }
