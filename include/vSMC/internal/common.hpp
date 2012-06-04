@@ -42,6 +42,7 @@
 #endif // __clang__
 
 #include <vSMC/internal/config.hpp>
+#include <vSMC/internal/version.hpp>
 #include <vSMC/internal/function.hpp>
 #include <vSMC/internal/type_traits.hpp>
 #include <vSMC/rng/random.hpp>
