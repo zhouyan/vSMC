@@ -9,22 +9,6 @@
 
 namespace vSMC {
 
-/// Called before resampling in an OpenCL sampler
-/// \ingroup OpenCL
-template <typename T>
-void cl_pre_resampling (T &state)
-{
-    state.pre_resampling();
-}
-
-/// Called after resampling in an OpenCL sampler
-/// \ingroup OpenCL
-template <typename T>
-void cl_post_resampling (T &state)
-{
-    state.post_resampling();
-}
-
 /// \brief Particle<T>::value_type subtype
 /// \ingroup OpenCL
 ///
@@ -35,7 +19,7 @@ void cl_post_resampling (T &state)
 /// are not fine for the derived class, the derived class has to copy this base
 /// class itself.
 template <unsigned Dim, typename T>
-class StateCL
+class StateCL : public StateCLTrait
 {
     public :
 
@@ -309,8 +293,6 @@ class StateCL
     ///
     /// \param source The source in C-Style string format (NOT THE FILE NAME)
     /// \param flags The compiler flags passed to the OpenCL compiler
-    /// \param sampler A reference to a sampler which will manipulate this
-    /// particle set.
     ///
     /// \note The call to build() will call setup() unless the user have set
     /// platform, context, device and command_queue correctly himself. If these
@@ -337,7 +319,7 @@ class StateCL
     /// \li A constant \c Dim of type \c uint is defined before the source
     /// which is the same as the dimension of this StateCL object.
     template <typename State>
-    void build (const char *source, const char *flags, Sampler<State> &sampler)
+    void build (const char *source, const char *flags)
     {
         if (!(platform_created_ && context_created_ && device_created_ &&
                     command_queue_created_))
@@ -366,10 +348,6 @@ class StateCL
         program_.build(device_, flags);
 
         kernel_copy_ = cl::Kernel(program_, "copy");
-        sampler.particle().pre_resampling(
-                cl_pre_resampling<StateCL<Dim, T> >);
-        sampler.particle().post_resampling(
-                cl_post_resampling<StateCL<Dim, T> >);
         build_ = true;
     }
 
@@ -386,13 +364,13 @@ class StateCL
         copy_host_[to] = from;
     }
 
-    virtual void pre_resampling ()
+    void pre_resampling ()
     {
         for (size_type i = 0; i != size_; ++i)
             copy_host_[i] = i;
     }
 
-    virtual void post_resampling ()
+    void post_resampling ()
     {
         assert(build_);
 
@@ -464,7 +442,7 @@ class StateCL
 /// There can has other user supplied arguments as long as the first four is as
 /// above
 template <typename T>
-class InitializeCL
+class InitializeCL : public InitializeCLTrait
 {
     public :
 
@@ -570,7 +548,7 @@ class InitializeCL
 /// There can has other user supplied arguments as long as the first five is as
 /// above
 template <typename T>
-class MoveCL
+class MoveCL : public MoveCLTrait
 {
     public :
 
@@ -678,7 +656,7 @@ class MoveCL
 ///
 /// \note Currently Dim cannot be larger than particle set size
 template <typename T, unsigned Dim>
-class MonitorCL
+class MonitorCL : public MonitorCLTrait;
 {
     public :
 
@@ -796,7 +774,7 @@ class MonitorCL
 /// There can has other user supplied arguments as long as the first four is as
 /// above
 template <typename T>
-class PathCL
+class PathCL : public PathCLTrait
 {
     public :
 

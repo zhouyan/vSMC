@@ -3,7 +3,39 @@
 
 #include <vSMC/internal/common.hpp>
 
-namespace vSMC {
+namespace vSMC { namespace internal {
+
+template <bool if_cl>
+void pre_resampling_cl (void *value) {}
+
+template <>
+void pre_resampling_cl<true> (void *value)
+{
+    reinterpret_cast<StateCLTrait *>(value)->pre_resampling();
+}
+
+template <typename T>
+void pre_resampling (T *value)
+{
+    pre_resampling_cl<internal::is_base_of<StateCLTrait, T>::value>(value);
+}
+
+template <bool if_cl>
+void post_resampling_cl (void *value) {}
+
+template <>
+void post_resampling_cl<true> (void *value)
+{
+    reinterpret_cast<StateCLTrait *>(value)->post_resampling();
+}
+
+template <typename T>
+void post_resampling (T *value)
+{
+    post_resampling_cl<internal::is_base_of<StateCLTrait, T>::value>(value);
+}
+
+} // namespace vSMC::internal
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
@@ -39,12 +71,6 @@ class Particle
     /// The type of the parallel RNG vector
     typedef std::deque<rng_type> prng_type;
 
-    /// The type of the functor invoked right before resampling
-    typedef internal::function<void (T &)> pre_resampling_type;
-
-    /// The type of the functor invoked right after resampling
-    typedef internal::function<void (T &)> post_resampling_type;
-
     /// \brief Construct a Particle object with a given number of particles
     ///
     /// \param N The number of particles
@@ -54,8 +80,7 @@ class Particle
     explicit Particle (size_type N, seed_type seed = V_SMC_CBRNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
-        ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N),
-        pre_resampling_(NULL), post_resampling_(NULL)
+        ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N)
     {
         reset_prng();
         set_equal_weight();
@@ -256,8 +281,7 @@ class Particle
     /// \param scheme The resampling scheme, see ResamplingScheme
     void resample (ResampleScheme scheme)
     {
-        if (bool(pre_resampling_))
-            pre_resampling_(value_);
+        internal::pre_resampling(&value_);
         switch (scheme) {
             case MULTINOMIAL :
                 resample_multinomial();
@@ -279,24 +303,7 @@ class Particle
                 break;
         }
         resample_do();
-        if (bool(post_resampling_))
-            post_resampling_(value_);
-    }
-
-    /// \brief Set the new functor called before resampling
-    ///
-    /// \param pre The functor called right before resampling
-    void pre_resampling (const pre_resampling_type &pre)
-    {
-        pre_resampling_ = pre;
-    }
-
-    /// \brief Set the new functor called after resampling
-    ///
-    /// \param post The functor called right after resampling
-    void post_resampling (const post_resampling_type &post)
-    {
-        post_resampling_ = post;
+        internal::post_resampling(&value_);
     }
 
     /// \brief Get a C++11 RNG engine
@@ -354,9 +361,6 @@ class Particle
 
     seed_type seed_;
     prng_type prng_;
-
-    pre_resampling_type pre_resampling_;
-    post_resampling_type post_resampling_;
 
     void set_weight ()
     {

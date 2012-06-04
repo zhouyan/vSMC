@@ -12,7 +12,7 @@ namespace vSMC {
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class InitializeTBB : public InitializeSeq<T>
+class InitializeTBB : public InitializeSeq<T>, InitializeTBBTrait
 {
     public :
 
@@ -74,7 +74,7 @@ class InitializeTBB : public InitializeSeq<T>
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class MoveTBB : public MoveSeq<T>
+class MoveTBB : public MoveSeq<T>, MoveTBBTrait
 {
     public :
 
@@ -137,7 +137,7 @@ class MoveTBB : public MoveSeq<T>
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
-class MonitorTBB : public MonitorSeq<T, Dim>
+class MonitorTBB : public MonitorSeq<T, Dim>, MonitorTBBTrait
 {
     public :
 
@@ -183,7 +183,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class PathTBB : public PathSeq<T>
+class PathTBB : public PathSeq<T>, PathTBBTrait
 {
     public :
 

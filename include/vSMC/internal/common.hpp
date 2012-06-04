@@ -43,6 +43,7 @@
 
 #include <vSMC/internal/config.hpp>
 #include <vSMC/internal/function.hpp>
+#include <vSMC/internal/type_traits.hpp>
 #include <vSMC/rng/random.hpp>
 
 #ifndef V_SMC_INDEX_TYPE
@@ -58,12 +59,25 @@ template <typename T> class Path;
 
 template <typename T> class SingleParticle;
 template <typename T> class ConstSingleParticle;
+
+class StateBaseTrait {};
+
 template <unsigned Dim = 1, typename T = double> class StateBase;
+
+class InitializeSeqTrait {};
+class MoveSeqTrait {};
+class MonitorSeqTrait {};
+class PathSeqTrait {};
 
 template <typename T> class InitializeSeq;
 template <typename T> class MoveSeq;
 template <typename T, unsigned Dim = 1> class MonitorSeq;
 template <typename T> class PathSeq;
+
+class InitializeTBBTrait {};
+class MoveTBBTrait {};
+class MonitorTBBTrait {};
+class PathTBBTrait {};
 
 #ifdef V_SMC_USE_TBB
 template <typename T> class InitializeTBB;
@@ -71,6 +85,19 @@ template <typename T> class MoveTBB;
 template <typename T, unsigned Dim = 1> class MonitorTBB;
 template <typename T> class PathTBB;
 #endif // V_SMC_USE_TBB
+
+class StateCLTrait
+{
+    public :
+
+    virtual void pre_resampling () = 0;
+    virtual void post_resampling () = 0;
+};
+
+class IntializeCLTrait {};
+class MoveCLTrait {};
+class MonitorCLTrait {};
+class PathCLTrait {};
 
 #ifdef V_SMC_USE_CL
 template <unsigned Dim = 1, typename T = cl_float> class StateCL;

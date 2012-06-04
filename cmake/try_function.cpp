@@ -11,7 +11,7 @@ class cl
 {
     public :
 
-    typedef vSMC::function<int (int)> f_type;
+    typedef vSMC::internal::function<int (int)> f_type;
 
     cl (f_type f = NULL) : f_(f) {}
 
@@ -27,7 +27,7 @@ class cl
 
 int main ()
 {
-    vSMC::function<int (int)> f;
+    vSMC::internal::function<int (int)> f;
     assert(!bool(f));
 
     f = fn;

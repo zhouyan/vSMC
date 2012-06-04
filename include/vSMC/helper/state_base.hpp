@@ -15,7 +15,7 @@ namespace vSMC {
 /// are not fine for the derived class, the derived class has to copy this base
 /// class itself.
 template <unsigned Dim, typename T>
-class StateBase
+class StateBase : public StateBaseTrait
 {
     public :
 
