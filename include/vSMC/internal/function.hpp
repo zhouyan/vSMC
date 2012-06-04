@@ -6,16 +6,16 @@
 #ifdef V_SMC_USE_STD_FUNCTION
 
 #include <functional>
-namespace vSMC {
+namespace vSMC { namespace internal {
 using std::function;
-}
+} }
 
 #else // V_SMC_USE_STD_FUNCTION
 
 #include <boost/function.hpp>
-namespace vSMC {
+namespace vSMC { namespace internal {
 using boost::function;
-}
+} }
 
 #endif // V_SMC_USE_STD_FUNCTION
 

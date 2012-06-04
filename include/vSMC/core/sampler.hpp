@@ -15,10 +15,10 @@ class Sampler
     public :
 
     /// The type of Initialization functor
-    typedef function<unsigned (Particle<T> &, void *)> init_type;
+    typedef internal::function<unsigned (Particle<T> &, void *)> init_type;
 
     /// The type of Move functor
-    typedef function<unsigned (unsigned, Particle<T> &)> move_type;
+    typedef internal::function<unsigned (unsigned, Particle<T> &)> move_type;
 
     /// The type of the MCMC moves queue
     typedef std::deque<move_type> mcmc_queue_type;

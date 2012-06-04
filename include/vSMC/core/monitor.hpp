@@ -29,7 +29,8 @@ class Monitor
     public :
 
     /// The type of evaluation functor
-    typedef function<void (unsigned, const Particle<T> &, double *)> eval_type;
+    typedef internal::function<void (
+            unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
     typedef std::deque<unsigned> index_type;

@@ -40,10 +40,10 @@ class Particle
     typedef std::deque<rng_type> prng_type;
 
     /// The type of the functor invoked right before resampling
-    typedef function<void (T &)> pre_resampling_type;
+    typedef internal::function<void (T &)> pre_resampling_type;
 
     /// The type of the functor invoked right after resampling
-    typedef function<void (T &)> post_resampling_type;
+    typedef internal::function<void (T &)> post_resampling_type;
 
     /// \brief Construct a Particle object with a given number of particles
     ///
