@@ -14,8 +14,6 @@ class InitializeSeq : public InitializeSeqTrait
 {
     public :
 
-    virtual ~InitializeSeq () {}
-
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
         initialize_param(particle, param);
@@ -45,8 +43,6 @@ class MoveSeq : public MoveSeqTrait
 {
     public :
 
-    virtual ~MoveSeq () {}
-
     virtual unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         pre_processor(iter, particle);
@@ -74,8 +70,6 @@ template <typename T, unsigned Dim>
 class MonitorSeq : public MonitorSeqTrait
 {
     public :
-
-    virtual ~MonitorSeq () {}
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
@@ -108,8 +102,6 @@ template <typename T>
 class PathSeq : public PathSeqTrait
 {
     public :
-
-    virtual ~PathSeq () {}
 
     virtual double operator() (unsigned iter, const Particle<T> &particle,
             double *res)

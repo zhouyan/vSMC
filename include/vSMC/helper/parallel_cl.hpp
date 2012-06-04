@@ -50,8 +50,6 @@ class StateCL : public StateCLTrait
         state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
     {}
 
-    virtual ~StateCL () {}
-
     /// \brief The dimension of the problem
     ///
     /// \return The dimension of the parameter vector
@@ -460,8 +458,6 @@ class InitializeCL : public InitializeCLTrait
         return *this;
     }
 
-    virtual ~InitializeCL () {}
-
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
         create_kernel(particle);
@@ -565,8 +561,6 @@ class MoveCL : public MoveCLTrait
 
         return *this;
     }
-
-    virtual ~MoveCL () {}
 
     virtual unsigned operator() (unsigned iter, Particle<T> &particle)
     {
@@ -675,8 +669,6 @@ class MonitorCL : public MonitorCLTrait
 
         return *this;
     }
-
-    virtual ~MonitorCL () {}
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
@@ -793,8 +785,6 @@ class PathCL : public PathCLTrait
 
         return *this;
     }
-
-    virtual ~PathCL () {}
 
     virtual double operator() (unsigned iter, const Particle<T> &particle,
         double *res)
