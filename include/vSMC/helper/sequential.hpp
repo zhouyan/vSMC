@@ -78,7 +78,7 @@ class MonitorSeq
     virtual ~MonitorSeq () {}
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
-	    double *res)
+            double *res)
     {
         pre_processor(iter, particle);
         for (typename Particle<T>::size_type i = 0;

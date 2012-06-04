@@ -134,9 +134,9 @@ class Path
 
         double w = 0;
         double p = 0;
-	buffer_.resize(particle.size());
-	w = eval_(iter, particle, buffer_.data());
-	p = particle.weight().dot(buffer_);
+        buffer_.resize(particle.size());
+        w = eval_(iter, particle, buffer_.data());
+        p = particle.weight().dot(buffer_);
         width_.push_back(w);
         integrand_.push_back(p);
         index_.push_back(iter);

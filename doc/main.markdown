@@ -118,7 +118,7 @@ implementation. To build this example on a Mac, one can ues
 
 The compiler flags may need to be changed for different OpenCL implementations.
 Also you may need to change the compiler flags for OpenCL in the source file,
-`pf.hpp`, search for `FIXME`. 
+`pf.hpp`, search for `FIXME`.
 
 # Tested compilers
 
