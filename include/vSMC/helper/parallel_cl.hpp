@@ -318,7 +318,6 @@ class StateCL : public StateCLTrait
     /// number.
     /// \li A constant \c Dim of type \c uint is defined before the source
     /// which is the same as the dimension of this StateCL object.
-    template <typename State>
     void build (const char *source, const char *flags)
     {
         if (!(platform_created_ && context_created_ && device_created_ &&
@@ -656,7 +655,7 @@ class MoveCL : public MoveCLTrait
 ///
 /// \note Currently Dim cannot be larger than particle set size
 template <typename T, unsigned Dim>
-class MonitorCL : public MonitorCLTrait;
+class MonitorCL : public MonitorCLTrait
 {
     public :
 

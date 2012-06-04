@@ -94,7 +94,7 @@ class StateCLTrait
     virtual void post_resampling () = 0;
 };
 
-class IntializeCLTrait {};
+class InitializeCLTrait {};
 class MoveCLTrait {};
 class MonitorCLTrait {};
 class PathCLTrait {};
