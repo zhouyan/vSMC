@@ -453,38 +453,31 @@ class StateCL
 /// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
+///
+/// \note
+/// A valid kernel declaration looks like
+/// \code
+/// __kernel void init (
+///     size_t size, state_struct *state,
+///     state_type *weight, uint *accept)
+/// \endcode
+/// There can has other user supplied arguments as long as the first four is as
+/// above
 template <typename T>
 class InitializeCL
 {
     public :
 
-    /// \brief Construct a InitializeCL object from the name of the kernel
-    ///
-    /// \param kernel_name The name of the kernel in the source file build by
-    /// StateCL::build. Note that the first four arguments to the kernel are
-    /// set automatically and are size of the particle set, the states, output
-    /// buffer for the log_weights, and output buffer for the accept counts,
-    /// respectively.
-    ///
-    /// A valid kernel declaration looks like
-    /// \code
-    /// __kernel void init (
-    ///     size_t size, state_struct *state,
-    ///     state_type *weight, uint *accept)
-    /// \endcode
-    explicit InitializeCL (const char *kernel_name) :
-        kernel_name_(kernel_name), kernel_created_(false) {}
+    InitializeCL () {}
 
     InitializeCL (const InitializeCL<T> &other) :
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        kernel_created_(other.kernel_created_) {}
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
 
     const InitializeCL<T> &operator= (const InitializeCL<T> &other)
     {
         if (this != &other) {
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
-            kernel_created_ = other.kernel_created_;
         }
 
         return *this;
@@ -522,6 +515,7 @@ class InitializeCL
     }
 
     virtual void initialize_param (Particle<T> &particle, void *param) {}
+    virtual void initialize_state (std::string &kernel_name) = 0;
     virtual void pre_processor (Particle<T> &particle) {}
     virtual void post_processor (Particle<T> &particle) {}
 
@@ -537,12 +531,15 @@ class InitializeCL
 
     void create_kernel (const Particle<T> &particle)
     {
+        // TODO More robust checking of kernel change
         assert(particle.value().build());
+        std::string kname;
+        initialize_state(kname);
 
-        if (!kernel_created_) {
+        if (kernel_name_ != kname) {
+            kernel_name_ = kname;
             kernel_ = cl::Kernel(
                     particle.value().program(), kernel_name_.c_str());
-            kernel_created_ = true;
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
@@ -555,7 +552,6 @@ class InitializeCL
 
     cl::Kernel kernel_;
     std::string kernel_name_;
-    bool kernel_created_;
     typename Particle<T>::weight_type weight_;
 };
 
@@ -563,38 +559,31 @@ class InitializeCL
 /// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
+///
+/// \note
+/// A valid kernel declaration looks like
+/// \code
+/// __kernel void move (
+///     size_t size, uint iter, state_struct *state,
+///     state_type *weight, uint *accept)
+/// \endcode
+/// There can has other user supplied arguments as long as the first five is as
+/// above
 template <typename T>
 class MoveCL
 {
     public :
 
-    /// \brief Construct a MoveCL object from the name of the kernel
-    ///
-    /// \param kernel_name The name of the kernel in the source file build by
-    /// StateCL::build. Note that the first five arguments to the kernel are
-    /// set automatically and are size of the particle set, the iteration
-    /// number, the states, output buffer for the log_weights, and output
-    /// buffer for the accept counts, respectively.
-    ///
-    /// A valid kernel declaration looks like
-    /// \code
-    /// __kernel void move (
-    ///     size_t size, uint iter, state_struct *state,
-    ///     state_type *weight, uint *accept)
-    /// \endcode
-    explicit MoveCL (const char *kernel_name) :
-        kernel_name_(kernel_name), kernel_created_(false) {}
+    MoveCL () {}
 
     MoveCL (const MoveCL<T> &other) :
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        kernel_created_(other.kernel_created_) {}
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
 
     const MoveCL<T> &operator= (const MoveCL<T> &other)
     {
         if (this != &other) {
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
-            kernel_created_ = other.kernel_created_;
         }
 
         return *this;
@@ -630,6 +619,7 @@ class MoveCL
         return particle.value().accept_host().sum();
     }
 
+    virtual void move_state (unsigned iter, std::string &kernel_name) = 0;
     virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
     virtual void post_processor (unsigned iter, Particle<T> &particle) {}
 
@@ -645,12 +635,15 @@ class MoveCL
 
     void create_kernel (unsigned iter, const Particle<T> &particle)
     {
+        // TODO More robust checking of kernel change
         assert(particle.value().build());
+        std::string kname;
+        move_state(iter, kname);
 
-        if (!kernel_created_) {
+        if (kernel_name_ != kname) {
+            kernel_name_ = kname;
             kernel_ = cl::Kernel(
                     particle.value().program(), kernel_name_.c_str());
-            kernel_created_ = true;
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
@@ -664,7 +657,6 @@ class MoveCL
 
     cl::Kernel kernel_;
     std::string kernel_name_;
-    bool kernel_created_;
     typename Particle<T>::weight_type weight_;
 }; // class MoveCL
 
@@ -674,33 +666,26 @@ class MoveCL
 /// \tparam T A Subtype of StateCL
 /// \tparam Dim The dimension of the monitor
 ///
+/// \note
+/// A valid kernel declaration looks like
+/// \code
+/// __kernel void monitor_eval (
+///     size_t size, uint iter, uint dim, state_struct *state,
+///     state_type *buffer)
+/// \endcode
+/// where \c buffer is a row major \c dim by \c size matrix. There can has
+/// other user supplied arguments as long as the first five is as above
+///
 /// \note Currently Dim cannot be larger than particle set size
 template <typename T, unsigned Dim>
 class MonitorCL
 {
     public :
 
-    /// \brief Construct a MonitorCL object from the name of the kernel
-    ///
-    /// \param kernel_name The name of the kernel in the source file build by
-    /// StateCL::build. Note that the first five arguments to the kernel are
-    /// set automatically and are size of the particle set, the iteration
-    /// number, the dimension of the monitor, the states, and output buffer for
-    /// results, respectively.
-    ///
-    /// A valid kernel declaration looks like
-    /// \code
-    /// __kernel void monitor_eval (
-    ///     size_t size, uint iter, uint dim, state_struct *state,
-    ///     state_type *buffer)
-    /// \endcode
-    /// where \c buffer is a row major \c dim by \c size matrix
-    explicit MonitorCL (const char *kernel_name) :
-        kernel_name_(kernel_name), kernel_created_(false) {}
+    MonitorCL () {}
 
     MonitorCL (const MonitorCL<T, Dim> &other) :
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        kernel_created_(other.kernel_created_),
         buffer_device_(other.buffer_device_) {}
 
     const MonitorCL<T, Dim> &operator= (const MonitorCL<T, Dim> &other)
@@ -708,7 +693,6 @@ class MonitorCL
         if (this != &other) {
             kernel_         = other.kernel_;
             kernel_name_    = other.kernel_name_;
-            kernel_created_ = other.kernel_created_;
             buffer_device_  = other.buffer_device_;
         }
 
@@ -747,6 +731,7 @@ class MonitorCL
         post_processor(iter, particle);
     }
 
+    virtual void monitor_state (unsigned iter, std::string &kernel_name) = 0;
     virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
     virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
 
@@ -767,15 +752,18 @@ class MonitorCL
 
     void create_kernel (unsigned iter, const Particle<T> &particle)
     {
+        // TODO More robust checking of kernel change
         assert(particle.value().build());
+        std::string kname;
+        monitor_state(iter, kname);
 
-        if (!kernel_created_) {
+        if (kernel_name_ != kname) {
+            kernel_name_ = kname;
             kernel_ = cl::Kernel(
                     particle.value().program(), kernel_name_.c_str());
             buffer_device_ = cl::Buffer(particle.value().context(),
                     CL_MEM_READ_WRITE,
                     sizeof(typename T::state_type) * Dim * particle.size());
-            kernel_created_ = true;
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
@@ -789,7 +777,6 @@ class MonitorCL
 
     cl::Kernel kernel_;
     std::string kernel_name_;
-    bool kernel_created_;
     cl::Buffer buffer_device_;
     typename T::state_mat_type buffer_host_;
 }; // class MonitorCL
@@ -798,30 +785,25 @@ class MonitorCL
 /// \ingroup OpenCL
 ///
 /// \tparam T A subtype of StateCL
+///
+/// \note
+/// A valid kernel declaration looks like
+/// \code
+/// __kernel void path_eval (
+///     size_t size, uint iter, state_struct *state,
+///     state_type *buffer)
+/// \endcode
+/// There can has other user supplied arguments as long as the first four is as
+/// above
 template <typename T>
 class PathCL
 {
     public :
 
-    /// \brief Construct a PathCL object from the name of the kernel
-    ///
-    /// \param kernel_name The name of the kernel in the source file build by
-    /// StateCL::build. Note that the first four arguments to the kernel are
-    /// set automatically and are size of the particle set, the iteration
-    /// number, the states, and output buffer for results, respectively.
-    ///
-    /// A valid kernel declaration looks like
-    /// \code
-    /// __kernel void path_eval (
-    ///     size_t size, uint iter, state_struct *state,
-    ///     state_type *buffer)
-    /// \endcode
-    explicit PathCL (const char *kernel_name) :
-        kernel_name_(kernel_name), kernel_created_(false) {}
+    PathCL () {}
 
     PathCL (const PathCL<T> &other) :
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        kernel_created_(other.kernel_created_),
         buffer_device_(other.buffer_device_) {}
 
     const PathCL<T> &operator= (const PathCL<T> &other)
@@ -829,7 +811,6 @@ class PathCL
         if (this != &other) {
             kernel_         = other.kernel_;
             kernel_name_    = other.kernel_name_;
-            kernel_created_ = other.kernel_created_;
             buffer_device_  = other.buffer_device_;
         }
 
@@ -866,6 +847,7 @@ class PathCL
         return this->width_state(iter, particle);
     }
 
+    virtual void path_state (unsigned iter, std::string &kernel_name) = 0;
     virtual double width_state (unsigned iter,
             const Particle<T> &particle) = 0;
     virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
@@ -883,15 +865,18 @@ class PathCL
 
     void create_kernel (unsigned iter, const Particle<T> &particle)
     {
+        // TODO More robust checking of kernel change
         assert(particle.value().build());
+        std::string kname;
+        path_state(iter, kname);
 
-        if (!kernel_created_) {
+        if (kernel_name_ != kname) {
+            kernel_name_ = kname;
             kernel_ = cl::Kernel(
                     particle.value().program(), kernel_name_.c_str());
             buffer_device_ = cl::Buffer(particle.value().context(),
                     CL_MEM_READ_WRITE,
                     sizeof(typename T::state_type) * particle.size());
-            kernel_created_ = true;
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
@@ -904,7 +889,6 @@ class PathCL
 
     cl::Kernel kernel_;
     std::string kernel_name_;
-    bool kernel_created_;
     cl::Buffer buffer_device_;
     typename T::weight_vec_type buffer_host_;
 }; // class PathCL
