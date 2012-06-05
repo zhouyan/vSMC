@@ -38,8 +38,8 @@ class StateCL : public StateCLTrait
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> copy_vec_type;
 
     explicit StateCL (size_type N) :
-        size_(N), read_pool_bytes_(0), write_pool_bytes_(0),
-        read_pool_(NULL), write_pool_(NULL),
+        size_(N), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
+        read_buffer_pool_(NULL), write_buffer_pool_(NULL),
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
@@ -49,8 +49,8 @@ class StateCL : public StateCLTrait
 
     ~StateCL ()
     {
-        std::free(read_pool_);
-        std::free(write_pool_);
+        std::free(read_buffer_pool_);
+        std::free(write_buffer_pool_);
     }
 
     /// \brief The dimension of the problem
@@ -434,7 +434,7 @@ class StateCL : public StateCLTrait
             }
         }
 
-        CLType *temp = read_pool<CLType>(num);
+        CLType *temp = read_buffer_pool<CLType>(num);
         command_queue_.enqueueReadBuffer(buf, 1, 0,
                 sizeof(CLType) * num, (void *) temp);
         std::copy(temp, temp + num, first);
@@ -495,10 +495,10 @@ class StateCL : public StateCLTrait
 
     size_type size_;
 
-    mutable std::size_t read_pool_bytes_;
-    mutable std::size_t write_pool_bytes_;
-    mutable void *read_pool_;
-    mutable void *write_pool_;
+    mutable std::size_t read_buffer_pool_bytes_;
+    mutable std::size_t write_buffer_pool_bytes_;
+    mutable void *read_buffer_pool_;
+    mutable void *write_buffer_pool_;
 
     std::vector<cl::Platform> platform_;
     cl::Context context_;
@@ -540,33 +540,33 @@ class StateCL : public StateCLTrait
     }
 
     template <typename HostType>
-    HostType *read_pool(std::size_t num) const
+    HostType *read_buffer_pool(std::size_t num) const
     {
         std::size_t new_bytes = num * sizeof(HostType);
-        if (new_bytes > read_pool_bytes_) {
-            read_pool_bytes_ = new_bytes;
-            std::free(read_pool_);
-            read_pool_ = std::malloc(read_pool_bytes_);
-            if (!read_pool_ && read_pool_bytes_)
+        if (new_bytes > read_buffer_pool_bytes_) {
+            read_buffer_pool_bytes_ = new_bytes;
+            std::free(read_buffer_pool_);
+            read_buffer_pool_ = std::malloc(read_buffer_pool_bytes_);
+            if (!read_buffer_pool_ && read_buffer_pool_bytes_)
                 throw std::bad_alloc();
         }
 
-        return reinterpret_cast<HostType *>(read_pool_);
+        return reinterpret_cast<HostType *>(read_buffer_pool_);
     }
 
     template <typename HostType>
     HostType *write_pool(std::size_t num) const
     {
         std::size_t new_bytes = num * sizeof(HostType);
-        if (new_bytes > write_pool_bytes_) {
-            write_pool_bytes_ = new_bytes;
-            std::free(write_pool_);
-            write_pool_ = std::malloc(write_pool_bytes_);
-            if (!write_pool_ && write_pool_bytes_)
+        if (new_bytes > write_buffer_pool_bytes_) {
+            write_buffer_pool_bytes_ = new_bytes;
+            std::free(write_buffer_pool_);
+            write_buffer_pool_ = std::malloc(write_buffer_pool_bytes_);
+            if (!write_buffer_pool_ && write_buffer_pool_bytes_)
                 throw std::bad_alloc();
         }
 
-        return reinterpret_cast<HostType *>(write_pool_);
+        return reinterpret_cast<HostType *>(write_buffer_pool_);
     }
 }; // class StateCL
 
