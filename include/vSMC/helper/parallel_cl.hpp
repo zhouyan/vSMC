@@ -539,6 +539,12 @@ class StateCL : public StateCLTrait
                 sizeof(cl_uint) * size_);
     }
 
+    /// \internal The reallocation of read_buffer_pool and write_buffer_pool
+    /// shall not impact the performance significantly. They only expand and
+    /// never shrink. In addition, sicne num is usually the size of particle
+    /// set or with a multiple of Dim, after a few times (usually after the
+    /// initialization), the memory will not be needed to expand anymore
+
     template <typename HostType>
     HostType *read_buffer_pool(std::size_t num) const
     {
