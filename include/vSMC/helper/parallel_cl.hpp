@@ -38,13 +38,20 @@ class StateCL : public StateCLTrait
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> copy_vec_type;
 
     explicit StateCL (size_type N) :
-        size_(N),
+        size_(N), read_pool_bytes_(0), write_pool_bytes_(0),
+        read_pool_(NULL), write_pool_(NULL),
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
         global_size_(N), local_size_(0),
         state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
     {}
+
+    ~StateCL ()
+    {
+        std::free(read_pool_);
+        std::free(write_pool_);
+    }
 
     /// \brief The dimension of the problem
     ///
@@ -427,11 +434,10 @@ class StateCL : public StateCLTrait
             }
         }
 
-
-        std::vector<CLType> temp(num);
+        CLType *temp = read_pool<CLType>(num);
         command_queue_.enqueueReadBuffer(buf, 1, 0,
-                sizeof(CLType) * num, (void *) temp.data());
-        std::copy(temp.begin(), temp.end(), first);
+                sizeof(CLType) * num, (void *) temp);
+        std::copy(temp, temp + num, first);
     }
 
     /// \brief Write to a device buffer from a host iterator
@@ -456,10 +462,10 @@ class StateCL : public StateCLTrait
             }
         }
 
-        std::vector<CLType> temp(num);
-        std::copy(first, first + num, temp.begin());
+        CLType *temp = write_pool<CLType>(num);
+        std::copy(first, first + num, temp);
         command_queue_.enqueueWriteBuffer(buf, 1, 0,
-                sizeof(CLType) * num, (void *) temp.data());
+                sizeof(CLType) * num, (void *) temp);
     }
 
     virtual void copy (size_type from, size_type to)
@@ -488,6 +494,11 @@ class StateCL : public StateCLTrait
     private :
 
     size_type size_;
+
+    mutable std::size_t read_pool_bytes_;
+    mutable std::size_t write_pool_bytes_;
+    mutable void *read_pool_;
+    mutable void *write_pool_;
 
     std::vector<cl::Platform> platform_;
     cl::Context context_;
@@ -526,6 +537,36 @@ class StateCL : public StateCLTrait
                 sizeof(cl_uint) * size_);
         copy_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
                 sizeof(cl_uint) * size_);
+    }
+
+    template <typename HostType>
+    HostType *read_pool(std::size_t num) const
+    {
+        std::size_t new_bytes = num * sizeof(HostType);
+        if (new_bytes > read_pool_bytes_) {
+            read_pool_bytes_ = new_bytes;
+            std::free(read_pool_);
+            read_pool_ = std::malloc(read_pool_bytes_);
+            if (!read_pool_ && read_pool_bytes_)
+                throw std::bad_alloc();
+        }
+
+        return reinterpret_cast<HostType *>(read_pool_);
+    }
+
+    template <typename HostType>
+    HostType *write_pool(std::size_t num) const
+    {
+        std::size_t new_bytes = num * sizeof(HostType);
+        if (new_bytes > write_pool_bytes_) {
+            write_pool_bytes_ = new_bytes;
+            std::free(write_pool_);
+            write_pool_ = std::malloc(write_pool_bytes_);
+            if (!write_pool_ && write_pool_bytes_)
+                throw std::bad_alloc();
+        }
+
+        return reinterpret_cast<HostType *>(write_pool_);
     }
 }; // class StateCL
 
@@ -737,17 +778,8 @@ class MonitorCL : public MonitorCLTrait
                 kernel_, cl::NullRange,
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
-        if (sizeof(typename T::state_type) == sizeof(double)) {
-            particle.value().template read_buffer<typename T::state_type>(
-                    buffer_device_, particle.size() * Dim, res);
-        } else {
-            buffer_host_.resize(Dim, particle.size());
-            particle.value().template read_buffer<typename T::state_type>(
-                    buffer_device_,
-                    particle.size() * Dim, buffer_host_.data());
-            std::copy(buffer_host_.data(),
-                    buffer_host_.data() + particle.size() * Dim, res);
-        }
+        particle.value().template read_buffer<typename T::state_type>(
+                buffer_device_, particle.size() * Dim, res);
         post_processor(iter, particle);
     }
 
@@ -798,7 +830,6 @@ class MonitorCL : public MonitorCLTrait
     cl::Kernel kernel_;
     std::string kernel_name_;
     cl::Buffer buffer_device_;
-    typename T::state_mat_type buffer_host_;
 }; // class MonitorCL
 
 /// \brief Path<T>::eval_type subtype
@@ -829,16 +860,8 @@ class PathCL : public PathCLTrait
                 kernel_, cl::NullRange,
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
-        if (sizeof(typename T::state_type) == sizeof(double)) {
-            particle.value().template read_buffer<typename T::state_type>(
-                    buffer_device_, particle.size(), res);
-        } else {
-            buffer_host_.resize(particle.size());
-            particle.value().template read_buffer<typename T::state_type>(
-                    buffer_device_, particle.size(), buffer_host_.data());
-            std::copy(buffer_host_.data(),
-                    buffer_host_.data() + particle.size(), res);
-        }
+        particle.value().template read_buffer<typename T::state_type>(
+                buffer_device_, particle.size(), res);
         post_processor(iter, particle);
 
         return this->width_state(iter, particle);
@@ -887,7 +910,6 @@ class PathCL : public PathCLTrait
     cl::Kernel kernel_;
     std::string kernel_name_;
     cl::Buffer buffer_device_;
-    typename T::weight_vec_type buffer_host_;
 }; // class PathCL
 
 } // namespace vSMC
