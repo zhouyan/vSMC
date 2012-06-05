@@ -20,14 +20,15 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.1 or later.
 
 ## Prerequisite
 
-This library has only two mandatory requirements: the [Eigen][Eigen] linear
-algebra library and [Random123][Random123] parallel random number library.
-Both of them are very portable.
+This library has two mandatory requirements other than standard libraries: the
+[Eigen][Eigen] linear algebra library and [Random123][Random123] parallel
+random number library. Both of them are very portable.
 
-In addition, the library use the `<functional>` and `<random>` libraries, which
-are C++11 standard libraries or can be found in [Boost][Boost]. By default the
-library will use the [Boost][Boost] library. But if the C++ implementation has
-them correctly implemented, the standard headers can also be used.
+In addition, the library use the `<functional>`, `<random>` and `<type_traits>`
+headers, which are parts of the  C++11 standard libraries or can be found in
+[Boost][Boost]. By default the library will use the [Boost][Boost] library. But
+if the C++ implementation has them correctly implemented, the standard headers
+can also be used.
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 (or C++0x) implementations of `<functional`> and `<random>` work
@@ -36,7 +37,8 @@ properly.
 The library will first look for the macro `V_SMC_USE_STD_FUNCTION`. If it is
 defined, `std::function` will be used. Otherwise the library will use
 [Boost][Boost], in particular `boost::function`. The same procedure is followed
-for the `<random>` library. One can put appropriate macros in the
+for the `<random>` library with `V_SMC_USE_STD_RANDOM` and `<type_traits>` with
+`V_SMC_USE_STD_TYPE_TRAITS` macros One can put appropriate macros in the
 `vSMC/internal/config.hpp` header or use compiler flags.
 
 ## Building and testing
