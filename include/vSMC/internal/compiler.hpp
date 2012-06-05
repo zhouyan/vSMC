@@ -7,7 +7,7 @@
 #include <vSMC/internal/compiler/clang.hpp>
 #elif defined(__GNUC__)
 #include <vSMC/internal/compiler/gcc.hpp>
-#elif defined(_MSC_FULL_VER)
+#elif defined(_MSC_VER)
 #include <vSMC/internal/compiler/msvc.hpp>
 #endif
 
