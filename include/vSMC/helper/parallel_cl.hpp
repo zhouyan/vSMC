@@ -196,8 +196,8 @@ class StateCL : public StateCLTrait
     /// therefore is expensive.
     const state_mat_type &state_host () const
     {
-        command_queue_.enqueueReadBuffer(state_device_, 1, 0,
-                sizeof(T) * size_ * Dim, (void *) state_host_.data());
+        read_buffer<state_type>(state_device_, size_*Dim, state_host_.data());
+
         return state_host_;
     }
 
@@ -227,8 +227,8 @@ class StateCL : public StateCLTrait
     /// therefore is expensive.
     const weight_vec_type &weight_host () const
     {
-        command_queue_.enqueueReadBuffer(weight_device_, 1, 0,
-                sizeof(T) * size_, (void *) weight_host_.data());
+        read_buffer<state_type>(weight_device_, size_, weight_host_.data());
+
         return weight_host_;
     }
 
@@ -256,15 +256,15 @@ class StateCL : public StateCLTrait
     /// therefore is expensive.
     const accept_vec_type &accept_host () const
     {
-        command_queue_.enqueueReadBuffer(accept_device_, 1, 0,
-                sizeof(cl_uint) * size_, (void *) accept_host_.data());
+        read_buffer<cl_uint>(accept_device_, size_, accept_host_.data());
+
         return accept_host_;
     }
 
     /// \brief Setup the OpenCL environment
     ///
     /// \param dev_type The type of the device intended to use
-    void setup (cl_device_type dev_type = CL_DEVICE_TYPE_GPU)
+    void setup (cl_device_type dev_type)
     {
         cl::Platform::get(&platform_);
         platform_created_ = true;
@@ -281,6 +281,16 @@ class StateCL : public StateCLTrait
 
         command_queue_ = cl::CommandQueue(context_, device_[0], 0);
         command_queue_created_ = true;
+    }
+
+    /// \brief Check the status of build
+    ///
+    /// \return \b true if the platform, context, device and command queue are
+    /// all created, either by call setup(cl_device_type) or set by user.
+    bool setup () const
+    {
+        return platform_created_ && context_created_ && device_created_ &&
+            command_queue_created_;
     }
 
     /// \brief Build the program
@@ -321,11 +331,7 @@ class StateCL : public StateCLTrait
     /// given that the template parameter \c T is \c cl_float
     void build (const char *source, const char *flags)
     {
-        if (!(platform_created_ && context_created_ && device_created_ &&
-                    command_queue_created_))
-        {
-            setup();
-        }
+        assert(setup());
 
         if (!program_created_) {
             std::stringstream ss;
@@ -359,6 +365,103 @@ class StateCL : public StateCLTrait
         return build_;
     }
 
+    /// \brief Create a device buffer with given number of elements and type
+    ///
+    /// \tparam CLType An OpenCL type
+    /// \param num The number of elements
+    ///
+    /// \return A cl::Buffer object corresponding to the newly created buffer
+    template<typename CLType>
+    cl::Buffer buffer (std::size_t num) const
+    {
+        assert(setup());
+
+        return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
+    }
+
+    /// \brief Create a device buffer with input from host iterators
+    ///
+    /// \tparam CLType An OpenCL Type
+    /// \tparam InputIter The type of input iterator reading the host data
+    /// \param first The begin of the input
+    /// \param last The end of the input
+    ///
+    /// \return A cl::Buffer object corresponding to the newly created buffer
+    /// which contains the input from the host. 
+    template<typename CLType, typename InputIter>
+    cl::Buffer buffer (InputIter first, InputIter last) const
+    {
+        assert(setup());
+
+        std::size_t num = 0;
+        for (InputIter i = first; i != last; ++i)
+            ++num;
+        cl::Buffer buf(buffer<CLType>(num));
+        if (!num)
+            return buf;
+
+        write_buffer<CLType>(buf, num, first);
+
+        return buf;
+    }
+
+    /// \brief Read a device buffer input a host iterator
+    ///
+    /// \tparam CLType An OpenCL Type
+    /// \tparam OutputIter The type of output iterator writing the host data
+    /// \param buf The device buffer to be read
+    /// \param num The number of elements in the device buffer
+    /// \param first The begin of the output
+    template <typename CLType, typename OutputIter>
+    void read_buffer (const cl::Buffer &buf, std::size_t num,
+            OutputIter first) const
+    {
+        assert(setup());
+
+        if (internal::is_pointer<OutputIter>::value) {
+            if (sizeof(typename internal::remove_pointer<OutputIter>::type) ==
+                    sizeof(CLType)) {
+                command_queue_.enqueueReadBuffer(buf, 1, 0,
+                        sizeof(CLType) * num, (void *) first);
+                return;
+            }
+        }
+
+
+        std::vector<CLType> temp(num);
+        command_queue_.enqueueReadBuffer(buf, 1, 0,
+                sizeof(CLType) * num, (void *) temp.data());
+        std::copy(temp.begin(), temp.end(), first);
+    }
+
+    /// \brief Write to a device buffer from a host iterator
+    ///
+    /// \tparam CLType An OpenCL Type
+    /// \tparam Input The type of input iterator reading the host data
+    /// \param buf The device buffer to be write
+    /// \param num The number of elements in the device buffer
+    /// \param first The begin of the input
+    template <typename CLType, typename InputIter>
+    void write_buffer (const cl::Buffer &buf, std::size_t num,
+            InputIter first) const
+    {
+        assert(setup());
+
+        if (internal::is_pointer<InputIter>::value) {
+            if (sizeof(typename internal::remove_pointer<InputIter>::type) ==
+                    sizeof(CLType)) {
+                command_queue_.enqueueWriteBuffer(buf, 1, 0,
+                        sizeof(CLType) * num, (void *) first);
+                return;
+            }
+        }
+
+        std::vector<CLType> temp(num);
+        std::copy(first, first + num, temp.begin());
+        command_queue_.enqueueWriteBuffer(buf, 1, 0,
+                sizeof(CLType) * num, (void *) temp.data());
+    }
+
     virtual void copy (size_type from, size_type to)
     {
         copy_host_[to] = from;
@@ -374,8 +477,7 @@ class StateCL : public StateCLTrait
     {
         assert(build_);
 
-        command_queue_.enqueueWriteBuffer(copy_device_, 1, 0,
-                sizeof(cl_uint) * size_, (void *) copy_host_.data());
+        write_buffer<cl_uint>(copy_device_, size_, copy_host_.data());
         kernel_copy_.setArg(0, (std::size_t) size_);
         kernel_copy_.setArg(1, state_device_);
         kernel_copy_.setArg(2, copy_device_);
@@ -636,22 +738,15 @@ class MonitorCL : public MonitorCLTrait
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
         if (sizeof(typename T::state_type) == sizeof(double)) {
-            particle.value().command_queue().enqueueReadBuffer(buffer_device_,
-                    1, 0,
-                    sizeof(typename T::state_type) * particle.size() * Dim,
-                    (void *) res);
+            particle.value().template read_buffer<typename T::state_type>(
+                    buffer_device_, particle.size() * Dim, res);
         } else {
             buffer_host_.resize(Dim, particle.size());
-            particle.value().command_queue().enqueueReadBuffer(buffer_device_,
-                    1, 0,
-                    sizeof(typename T::state_type) * particle.size() * Dim,
-                    (void *) buffer_host_.data());
-            Eigen::Map<Eigen::MatrixXd> res_mat(res, Dim, particle.size());
-            for (unsigned d = 0; d != Dim; ++d) {
-                for (typename Particle<T>::size_type i = 0;
-                        i != particle.size(); ++i)
-                    res_mat(d, i) = buffer_host_(d, i);
-            }
+            particle.value().template read_buffer<typename T::state_type>(
+                    buffer_device_,
+                    particle.size() * Dim, buffer_host_.data());
+            std::copy(buffer_host_.data(),
+                    buffer_host_.data() + particle.size() * Dim, res);
         }
         post_processor(iter, particle);
     }
@@ -735,18 +830,14 @@ class PathCL : public PathCLTrait
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
         if (sizeof(typename T::state_type) == sizeof(double)) {
-            particle.value().command_queue().enqueueReadBuffer(buffer_device_,
-                    1, 0, sizeof(typename T::state_type) * particle.size(),
-                    (void *) res);
+            particle.value().template read_buffer<typename T::state_type>(
+                    buffer_device_, particle.size(), res);
         } else {
             buffer_host_.resize(particle.size());
-            particle.value().command_queue().enqueueReadBuffer(buffer_device_,
-                    1, 0, sizeof(typename T::state_type) * particle.size(),
-                    (void *) buffer_host_.data());
-            for (typename Particle<T>::size_type i = 0;
-                        i != particle.size(); ++i) {
-                    res[i] = buffer_host_[i];
-            }
+            particle.value().template read_buffer<typename T::state_type>(
+                    buffer_device_, particle.size(), buffer_host_.data());
+            std::copy(buffer_host_.data(),
+                    buffer_host_.data() + particle.size(), res);
         }
         post_processor(iter, particle);
 
