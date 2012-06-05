@@ -88,7 +88,10 @@ class Monitor
     /// \brief Test if the monitor is valid
     ///
     /// \return \b true if the monitor is valid
-    explicit operator bool () const
+#ifdef V_SMC_HAS_CXX11_EXPLICIT_CONVERSION
+    explicit
+#endif
+        operator bool () const
     {
         return bool(eval_);
     }
