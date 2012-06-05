@@ -60,27 +60,23 @@ template <typename T> class Path;
 
 template <typename T> class SingleParticle;
 template <typename T> class ConstSingleParticle;
-template <unsigned Dim = 1, typename T = double> class StateBase;
+template <unsigned Dim, typename T> class StateBase;
 
 template <typename T> class InitializeSeq;
 template <typename T> class MoveSeq;
-template <typename T, unsigned Dim = 1> class MonitorSeq;
+template <typename T, unsigned Dim> class MonitorSeq;
 template <typename T> class PathSeq;
 
-#ifdef V_SMC_USE_TBB
 template <typename T> class InitializeTBB;
 template <typename T> class MoveTBB;
-template <typename T, unsigned Dim = 1> class MonitorTBB;
+template <typename T, unsigned Dim> class MonitorTBB;
 template <typename T> class PathTBB;
-#endif // V_SMC_USE_TBB
 
-#ifdef V_SMC_USE_CL
-template <unsigned Dim = 1, typename T = cl_float> class StateCL;
+template <unsigned Dim, typename T> class StateCL;
 template <typename T> class InitializeCL;
 template <typename T> class MoveCL;
-template <typename T, unsigned Dim = 1> class MonitorCL;
+template <typename T, unsigned Dim> class MonitorCL;
 template <typename T> class PathCL;
-#endif // V_SMC_USE_CL
 
 struct StateBaseTrait
 {
