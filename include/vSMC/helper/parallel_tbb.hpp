@@ -16,18 +16,6 @@ class InitializeTBB : public InitializeSeq<T>, InitializeTBBTrait
 {
     public :
 
-    InitializeTBB () :
-        InitializeSeq<T>() {}
-
-    InitializeTBB (const InitializeTBB<T> &other) :
-        InitializeSeq<T>(other) {}
-
-    InitializeTBB<T> &operator= (const InitializeTBB<T> &other)
-    {
-        InitializeSeq<T>::operator=(other);
-        return *this;
-    }
-
     unsigned operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
@@ -77,18 +65,6 @@ template <typename T>
 class MoveTBB : public MoveSeq<T>, MoveTBBTrait
 {
     public :
-
-    MoveTBB () :
-        MoveSeq<T>() {}
-
-    MoveTBB (const MoveTBB<T> &other) :
-        MoveSeq<T>(other) {}
-
-    MoveTBB<T> &operator= (const MoveTBB<T> &other)
-    {
-        MoveSeq<T>::operator=(other);
-        return *this;
-    }
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {

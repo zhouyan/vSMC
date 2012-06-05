@@ -14,10 +14,6 @@ namespace vSMC {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-///
-/// \note If the compiler generated copy construtor and assignement operator
-/// are not fine for the derived class, the derived class has to copy this base
-/// class itself.
 template <unsigned Dim, typename T>
 class StateCL : public StateCLTrait
 {
@@ -443,21 +439,6 @@ class InitializeCL : public InitializeCLTrait
 {
     public :
 
-    InitializeCL () {}
-
-    InitializeCL (const InitializeCL<T> &other) :
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
-
-    const InitializeCL<T> &operator= (const InitializeCL<T> &other)
-    {
-        if (this != &other) {
-            kernel_ = other.kernel_;
-            kernel_name_ = other.kernel_name_;
-        }
-
-        return *this;
-    }
-
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
         create_kernel(particle);
@@ -546,21 +527,6 @@ template <typename T>
 class MoveCL : public MoveCLTrait
 {
     public :
-
-    MoveCL () {}
-
-    MoveCL (const MoveCL<T> &other) :
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
-
-    const MoveCL<T> &operator= (const MoveCL<T> &other)
-    {
-        if (this != &other) {
-            kernel_ = other.kernel_;
-            kernel_name_ = other.kernel_name_;
-        }
-
-        return *this;
-    }
 
     virtual unsigned operator() (unsigned iter, Particle<T> &particle)
     {
@@ -652,23 +618,6 @@ template <typename T, unsigned Dim>
 class MonitorCL : public MonitorCLTrait
 {
     public :
-
-    MonitorCL () {}
-
-    MonitorCL (const MonitorCL<T, Dim> &other) :
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        buffer_device_(other.buffer_device_) {}
-
-    const MonitorCL<T, Dim> &operator= (const MonitorCL<T, Dim> &other)
-    {
-        if (this != &other) {
-            kernel_         = other.kernel_;
-            kernel_name_    = other.kernel_name_;
-            buffer_device_  = other.buffer_device_;
-        }
-
-        return *this;
-    }
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
@@ -768,23 +717,6 @@ template <typename T>
 class PathCL : public PathCLTrait
 {
     public :
-
-    PathCL () {}
-
-    PathCL (const PathCL<T> &other) :
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        buffer_device_(other.buffer_device_) {}
-
-    const PathCL<T> &operator= (const PathCL<T> &other)
-    {
-        if (this != &other) {
-            kernel_         = other.kernel_;
-            kernel_name_    = other.kernel_name_;
-            buffer_device_  = other.buffer_device_;
-        }
-
-        return *this;
-    }
 
     virtual double operator() (unsigned iter, const Particle<T> &particle,
         double *res)
