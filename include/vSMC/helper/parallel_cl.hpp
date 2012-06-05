@@ -293,25 +293,32 @@ class StateCL : public StateCLTrait
     /// are set by the user, than the library does not check for its validity.
     ///
     /// \note When building the program, the user can assume the following
-    /// things,
     /// \li The Rand123 library's \c philox.h, \c threefry.h, and \c u01.h
-    /// headers are included before the source.
+    /// headers are included before the user source.
     /// \li A type \c state_type which is the same as the host \c state_type
-    /// are defined before the source.
+    /// are defined before the user source and looks like
+    /// \code
+    /// typedef cl_float state_type;
+    /// \endcode
+    /// given that the template parameter \c T is \c cl_float
     /// \li A type \c state_struct which looks like the following are defined
-    /// before the souce.
+    /// before the user souce.
     /// \code
     /// typedef {
     ///     state_type param1;
     ///     state_type param2;
-    ///     ...
-    ///     state_type paramDim;
+    ///     state_type param3;
+    ///     state_type param4;
     /// } state_struct;
     /// \endcode
-    /// where The last \c paramDim will clearly be replaced by the proper
-    /// number.
-    /// \li A constant \c Dim of type \c uint is defined before the source
-    /// which is the same as the dimension of this StateCL object.
+    /// given that the template parameter \c Dim is 4.
+    /// \li A constant \c Dim of type \c uint is defined before the user source
+    /// which is the same as the dimension of this StateCL object and looks
+    /// like
+    /// \code
+    /// __constant uint Dim = 4;
+    /// \endcode
+    /// given that the template parameter \c T is \c cl_float
     void build (const char *source, const char *flags)
     {
         if (!(platform_created_ && context_created_ && device_created_ &&
