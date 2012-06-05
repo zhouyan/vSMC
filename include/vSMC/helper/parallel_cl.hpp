@@ -600,25 +600,15 @@ class InitializeCL : public InitializeCLTrait
         create_kernel(particle);
         initialize_param(particle, param);
         pre_processor(particle);
-        // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(
                 kernel_, cl::NullRange,
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
-        // TODO more efficient weight copying
-        const typename T::weight_vec_type &weight =
-            particle.value().weight_host();
-        if (sizeof(typename T::state_type) == sizeof(double)) {
-            particle.set_log_weight(
-                    reinterpret_cast<const double *>(weight.data()));
-        } else {
-            weight_.resize(particle.size());
-            for (typename Particle<T>::size_type i = 0;
-                    i != particle.size(); ++i) {
-                weight_[i] = weight[i];
-            }
-            particle.set_log_weight(weight_);
-        }
+        weight_.resize(particle.size());
+        particle.value().template read_buffer<typename T::state_type>(
+                particle.value().weight_device(), particle.size(),
+                weight_.data());
+        particle.set_log_weight(weight_);
         post_processor(particle);
 
         return particle.value().accept_host().sum();
@@ -688,25 +678,15 @@ class MoveCL : public MoveCLTrait
     {
         create_kernel(iter, particle);
         pre_processor(iter, particle);
-        // TODO more control over local size
         particle.value().command_queue().enqueueNDRangeKernel(
                 kernel_, cl::NullRange,
                 particle.value().global_nd_range(),
                 particle.value().local_nd_range());
-        // TODO more efficient weight copying
-        const typename T::weight_vec_type &weight =
-            particle.value().weight_host();
-        if (sizeof(typename T::state_type) == sizeof(double)) {
-            particle.add_log_weight(
-                    reinterpret_cast<const double *>(weight.data()));
-        } else {
-            weight_.resize(particle.size());
-            for (typename Particle<T>::size_type i = 0;
-                    i != particle.size(); ++i) {
-                weight_[i] = weight[i];
-            }
-            particle.add_log_weight(weight_);
-        }
+        weight_.resize(particle.size());
+        particle.value().template read_buffer<typename T::state_type>(
+                particle.value().weight_device(), particle.size(),
+                weight_.data());
+        particle.add_log_weight(weight_);
         post_processor(iter, particle);
 
         return particle.value().accept_host().sum();
