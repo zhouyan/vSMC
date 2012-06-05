@@ -535,12 +535,12 @@ class Sampler
             particle_.resample(scheme_);
         ess_.push_back(particle_.ess());
 
-        if (!path_.empty())
+        if (bool(path_))
             path_.eval(iter_num_, particle_);
 
         for (typename monitor_map_type::iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
-            if (!m->second.empty())
+            if (bool(m->second))
                 m->second.eval(iter_num_, particle_);
         }
     }
