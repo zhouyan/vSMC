@@ -78,76 +78,104 @@ template <typename T> class MoveCL;
 template <typename T, unsigned Dim> class MonitorCL;
 template <typename T> class PathCL;
 
-struct StateBaseTrait
+class StateBaseTrait
 {
+    public :
+
     virtual ~StateBaseTrait () {}
 };
 
-struct InitializeSeqTrait
+class InitializeSeqTrait
 {
+    public :
+
     virtual ~InitializeSeqTrait () {}
 };
 
-struct MoveSeqTrait
+class MoveSeqTrait
 {
+    public :
+
     virtual ~MoveSeqTrait () {}
 };
 
-struct MonitorSeqTrait
+class MonitorSeqTrait
 {
+    public :
+
     virtual ~MonitorSeqTrait () {}
 };
 
-struct PathSeqTrait
+class PathSeqTrait
 {
+    public :
+
     virtual ~PathSeqTrait () {}
 };
 
-struct InitializeTBBTrait
+class InitializeTBBTrait
 {
+    public :
+
     virtual ~InitializeTBBTrait () {}
 };
 
-struct MoveTBBTrait
+class MoveTBBTrait
 {
+    public :
+
     virtual ~MoveTBBTrait () {}
 };
 
-struct MonitorTBBTrait
+class MonitorTBBTrait
 {
+    public :
+
     virtual ~MonitorTBBTrait () {}
 };
 
-struct PathTBBTrait
+class PathTBBTrait
 {
+    public :
+
     virtual ~PathTBBTrait () {}
 };
 
-struct StateCLTrait
+class StateCLTrait
 {
+    public :
+
     virtual ~StateCLTrait () {}
 
     virtual void pre_resampling () = 0;
     virtual void post_resampling () = 0;
 };
 
-struct InitializeCLTrait
+class InitializeCLTrait
 {
+    public :
+
     virtual ~InitializeCLTrait () {}
 };
 
-struct MoveCLTrait
+class MoveCLTrait
 {
+    public :
+
     virtual ~MoveCLTrait () {}
 };
 
-struct MonitorCLTrait
+class MonitorCLTrait
 {
+    public :
+
     virtual ~MonitorCLTrait () {}
 };
 
-struct PathCLTrait
+class PathCLTrait
 {
+    public :
+
     virtual ~PathCLTrait () {}
 };
 
