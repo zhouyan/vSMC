@@ -634,7 +634,7 @@ class StateCL : public StateCLTrait
 /// A valid kernel declaration looks like
 /// \code
 /// __kernel void init (
-///     size_t size, state_struct *state,
+///     ulong size, state_struct *state,
 ///     state_type *weight, uint *accept)
 /// \endcode
 /// There can has other user supplied arguments as long as the first four is as
@@ -703,7 +703,7 @@ class InitializeCL : public InitializeCLTrait
 /// A valid kernel declaration looks like
 /// \code
 /// __kernel void move (
-///     size_t size, uint iter, state_struct *state,
+///     ulong size, uint iter, state_struct *state,
 ///     state_type *weight, uint *accept)
 /// \endcode
 /// There can has other user supplied arguments as long as the first five is as
@@ -772,7 +772,7 @@ class MoveCL : public MoveCLTrait
 /// A valid kernel declaration looks like
 /// \code
 /// __kernel void monitor_eval (
-///     size_t size, uint iter, uint dim, state_struct *state,
+///     ulong size, uint iter, uint dim, state_struct *state,
 ///     state_type *buffer)
 /// \endcode
 /// where \c buffer is a row major \c dim by \c size matrix. There can has
@@ -851,7 +851,7 @@ class MonitorCL : public MonitorCLTrait
 /// A valid kernel declaration looks like
 /// \code
 /// __kernel void path_eval (
-///     size_t size, uint iter, state_struct *state,
+///     ulong size, uint iter, state_struct *state,
 ///     state_type *buffer)
 /// \endcode
 /// There can has other user supplied arguments as long as the first four is as
