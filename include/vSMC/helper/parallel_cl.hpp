@@ -93,11 +93,11 @@ class StateCL : public StateCLTrait
     void context (const cl::Context &ctx)
     {
         context_ = ctx;
-        setup_buffer();
         context_created_ = true;
+        setup_buffer();
     }
 
-    const bool context_created () const
+    bool context_created () const
     {
         return context_created_;
     }
@@ -280,8 +280,8 @@ class StateCL : public StateCLTrait
             CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_[0])(), 0
         };
         context_ = cl::Context(dev_type, context_properties);
-        setup_buffer();
         context_created_ = true;
+        setup_buffer();
 
         device_= context_.getInfo<CL_CONTEXT_DEVICES>();
         device_created_ = true;
@@ -380,7 +380,7 @@ class StateCL : public StateCLTrait
     template<typename CLType>
     cl::Buffer create_buffer (std::size_t num) const
     {
-        assert(setup());
+        assert(context_created_);
 
         return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
     }
