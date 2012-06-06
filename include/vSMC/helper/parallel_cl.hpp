@@ -393,7 +393,7 @@ class StateCL : public StateCLTrait
     /// \param last The end of the input
     ///
     /// \return A cl::Buffer object corresponding to the newly created buffer
-    /// which contains the input from the host. 
+    /// which contains the input from the host.
     template<typename CLType, typename InputIter>
     cl::Buffer create_buffer (InputIter first, InputIter last) const
     {
