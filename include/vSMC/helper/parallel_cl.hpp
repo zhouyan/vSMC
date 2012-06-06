@@ -187,7 +187,7 @@ class StateCL : public StateCLTrait
     /// the states
     ///
     /// \return A const reference to the cl::Buffer object. It is read only
-    /// only with regard to the host code. The device code have read and write
+    /// with regard to the host code. The device code have read and write
     /// access to the buffer.
     const cl::Buffer &state_device () const
     {
@@ -212,10 +212,10 @@ class StateCL : public StateCLTrait
     /// the weights
     ///
     /// \return A const reference to the cl::Buffer object. It is read only
-    /// only with regard to the host code. The device code have read and write
+    /// with regard to the host code. The device code have read and write
     /// access to the buffer.
     ///
-    /// \note Despite the names, this is not the current weights of the
+    /// \note Despite the name, this is not the current weights of the
     /// particle system. It is intended to be used by clients to store and
     /// manipulate the weights, for example the incremental weights. For access
     /// to actual weights and log weights, always use the interface of
@@ -243,10 +243,10 @@ class StateCL : public StateCLTrait
     /// the accept counts
     ///
     /// \return A const reference to the cl::Buffer object. It is read only
-    /// only with regard to the host code. The device code have read and write
+    /// with regard to the host code. The device code have read and write
     /// access to the buffer.
     ///
-    /// \note Despite the names, this is not the current accept counts of the
+    /// \note Despite the name, this is not the current accept counts of the
     /// particle system. It is intended to be used by clients to store and
     /// manipulate the accept counts.
     const cl::Buffer &accept_device () const
@@ -305,9 +305,8 @@ class StateCL : public StateCLTrait
     /// \param source The source in C-Style string format (NOT THE FILE NAME)
     /// \param flags The compiler flags passed to the OpenCL compiler
     ///
-    /// \note The call to build() will call setup() unless the user have set
-    /// platform, context, device and command_queue correctly himself. If these
-    /// are set by the user, than the library does not check for its validity.
+    /// \note The environment has to be setup properly either through
+    /// setup(cl_device_type) or set by user.
     ///
     /// \note When building the program, the user can assume the following
     /// \li The Rand123 library's \c philox.h, \c threefry.h, and \c u01.h
