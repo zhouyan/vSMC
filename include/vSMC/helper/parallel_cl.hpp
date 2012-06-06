@@ -359,9 +359,9 @@ class StateCL : public StateCLTrait
         }
 
         program_.build(device_, flags);
-
-        kernel_copy_ = cl::Kernel(program_, "copy");
         build_ = true;
+
+        kernel_copy_ = create_kernel("copy");
     }
 
     /// \brief Check the status of build
@@ -379,7 +379,7 @@ class StateCL : public StateCLTrait
     ///
     /// \return A cl::Buffer object corresponding to the newly created buffer
     template<typename CLType>
-    cl::Buffer buffer (std::size_t num) const
+    cl::Buffer create_buffer (std::size_t num) const
     {
         assert(setup());
 
@@ -396,14 +396,14 @@ class StateCL : public StateCLTrait
     /// \return A cl::Buffer object corresponding to the newly created buffer
     /// which contains the input from the host. 
     template<typename CLType, typename InputIter>
-    cl::Buffer buffer (InputIter first, InputIter last) const
+    cl::Buffer create_buffer (InputIter first, InputIter last) const
     {
         assert(setup());
 
         std::size_t num = 0;
         for (InputIter i = first; i != last; ++i)
             ++num;
-        cl::Buffer buf(buffer<CLType>(num));
+        cl::Buffer buf(create_buffer<CLType>(num));
         if (!num)
             return buf;
 
@@ -468,6 +468,33 @@ class StateCL : public StateCLTrait
                 sizeof(CLType) * num, (void *) temp);
     }
 
+    /// \brief Create a kernel from a given name
+    ///
+    /// \param name The name of the kernel
+    ///
+    /// \note The program has to be built before call this member
+    cl::Kernel create_kernel (const char *name) const
+    {
+        assert(build());
+
+        return cl::Kernel(program_, name);
+    }
+
+    /// \brief Run a kernel
+    ///
+    /// \param ker The kernel to run
+    ///
+    /// \note The program has to be built before call this member. The kernel
+    /// will be run with global size returned by global_nd_range() and local
+    /// size returned by local_nd_range(), which shall be suitable for most use
+    /// case. For more control over running a kernel, user need to call OpenCL
+    /// API himself.
+    void run_kernel (const cl::Kernel &ker) const
+    {
+        command_queue_.enqueueNDRangeKernel(ker,
+                cl::NullRange, global_nd_range(), local_nd_range());
+    }
+
     virtual void copy (size_type from, size_type to)
     {
         copy_host_[to] = from;
@@ -487,8 +514,7 @@ class StateCL : public StateCLTrait
         kernel_copy_.setArg(0, (std::size_t) size_);
         kernel_copy_.setArg(1, state_device_);
         kernel_copy_.setArg(2, copy_device_);
-        command_queue_.enqueueNDRangeKernel(kernel_copy_,
-                cl::NullRange, global_nd_range(), local_nd_range());
+        run_kernel(kernel_copy_);
     }
 
     private :
@@ -529,14 +555,10 @@ class StateCL : public StateCLTrait
 
     void setup_buffer ()
     {
-        state_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(T) * size_ * Dim);
-        weight_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(T) * size_);
-        accept_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(cl_uint) * size_);
-        copy_device_ = cl::Buffer(context_, CL_MEM_READ_WRITE,
-                sizeof(cl_uint) * size_);
+        state_device_  = create_buffer<T>(size_ * Dim);
+        weight_device_ = create_buffer<T>(size_);
+        accept_device_ = create_buffer<cl_uint>(size_);
+        copy_device_   = create_buffer<cl_uint>(size_);
     }
 
     /// \internal The reallocation of read_buffer_pool and write_buffer_pool
@@ -597,13 +619,10 @@ class InitializeCL : public InitializeCLTrait
 
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
-        create_kernel(particle);
+        set_kernel(particle);
         initialize_param(particle, param);
         pre_processor(particle);
-        particle.value().command_queue().enqueueNDRangeKernel(
-                kernel_, cl::NullRange,
-                particle.value().global_nd_range(),
-                particle.value().local_nd_range());
+        particle.value().run_kernel(kernel_);
         weight_.resize(particle.size());
         particle.value().template read_buffer<typename T::state_type>(
                 particle.value().weight_device(), particle.size(),
@@ -629,7 +648,7 @@ class InitializeCL : public InitializeCLTrait
         return kernel_;
     }
 
-    void create_kernel (const Particle<T> &particle)
+    void set_kernel (const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
         assert(particle.value().build());
@@ -638,8 +657,7 @@ class InitializeCL : public InitializeCLTrait
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = cl::Kernel(
-                    particle.value().program(), kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
@@ -676,12 +694,9 @@ class MoveCL : public MoveCLTrait
 
     virtual unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        create_kernel(iter, particle);
+        set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().command_queue().enqueueNDRangeKernel(
-                kernel_, cl::NullRange,
-                particle.value().global_nd_range(),
-                particle.value().local_nd_range());
+        particle.value().run_kernel(kernel_);
         weight_.resize(particle.size());
         particle.value().template read_buffer<typename T::state_type>(
                 particle.value().weight_device(), particle.size(),
@@ -706,7 +721,7 @@ class MoveCL : public MoveCLTrait
         return kernel_;
     }
 
-    void create_kernel (unsigned iter, const Particle<T> &particle)
+    void set_kernel (unsigned iter, const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
         assert(particle.value().build());
@@ -715,8 +730,7 @@ class MoveCL : public MoveCLTrait
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = cl::Kernel(
-                    particle.value().program(), kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
@@ -758,12 +772,9 @@ class MonitorCL : public MonitorCLTrait
     virtual void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
-        create_kernel(iter, particle);
+        set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().command_queue().enqueueNDRangeKernel(
-                kernel_, cl::NullRange,
-                particle.value().global_nd_range(),
-                particle.value().local_nd_range());
+        particle.value().run_kernel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
                 buffer_device_, particle.size() * Dim, res);
         post_processor(iter, particle);
@@ -788,7 +799,7 @@ class MonitorCL : public MonitorCLTrait
         return kernel_;
     }
 
-    void create_kernel (unsigned iter, const Particle<T> &particle)
+    void set_kernel (unsigned iter, const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
         assert(particle.value().build());
@@ -797,11 +808,9 @@ class MonitorCL : public MonitorCLTrait
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = cl::Kernel(
-                    particle.value().program(), kernel_name_.c_str());
-            buffer_device_ = cl::Buffer(particle.value().context(),
-                    CL_MEM_READ_WRITE,
-                    sizeof(typename T::state_type) * Dim * particle.size());
+            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            buffer_device_ = particle.value().template
+                create_buffer<typename T::state_type>(particle.size() * Dim);
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
@@ -840,12 +849,9 @@ class PathCL : public PathCLTrait
     virtual double operator() (unsigned iter, const Particle<T> &particle,
         double *res)
     {
-        create_kernel(iter, particle);
+        set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().command_queue().enqueueNDRangeKernel(
-                kernel_, cl::NullRange,
-                particle.value().global_nd_range(),
-                particle.value().local_nd_range());
+        particle.value().run_kernel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
                 buffer_device_, particle.size(), res);
         post_processor(iter, particle);
@@ -869,7 +875,7 @@ class PathCL : public PathCLTrait
         return kernel_;
     }
 
-    void create_kernel (unsigned iter, const Particle<T> &particle)
+    void set_kernel (unsigned iter, const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
         assert(particle.value().build());
@@ -878,11 +884,9 @@ class PathCL : public PathCLTrait
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = cl::Kernel(
-                    particle.value().program(), kernel_name_.c_str());
-            buffer_device_ = cl::Buffer(particle.value().context(),
-                    CL_MEM_READ_WRITE,
-                    sizeof(typename T::state_type) * particle.size());
+            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            buffer_device_ = particle.value().template
+                create_buffer<typename T::state_type>(particle.size());
         }
 
         kernel_.setArg(0, (std::size_t) particle.size());
