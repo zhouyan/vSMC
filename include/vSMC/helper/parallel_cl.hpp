@@ -622,11 +622,6 @@ class InitializeCL : public InitializeCLTrait
         initialize_param(particle, param);
         pre_processor(particle);
         particle.value().run_kernel(kernel_);
-        weight_.resize(particle.size());
-        particle.value().template read_buffer<typename T::state_type>(
-                particle.value().weight_device(), particle.size(),
-                weight_.data());
-        particle.set_log_weight(weight_);
         post_processor(particle);
 
         return particle.value().accept_host().sum();
@@ -669,7 +664,6 @@ class InitializeCL : public InitializeCLTrait
 
     cl::Kernel kernel_;
     std::string kernel_name_;
-    typename Particle<T>::weight_type weight_;
 };
 
 /// \brief Sampler<T>::move_type subtype
@@ -696,11 +690,6 @@ class MoveCL : public MoveCLTrait
         set_kernel(iter, particle);
         pre_processor(iter, particle);
         particle.value().run_kernel(kernel_);
-        weight_.resize(particle.size());
-        particle.value().template read_buffer<typename T::state_type>(
-                particle.value().weight_device(), particle.size(),
-                weight_.data());
-        particle.add_log_weight(weight_);
         post_processor(iter, particle);
 
         return particle.value().accept_host().sum();
@@ -743,7 +732,6 @@ class MoveCL : public MoveCLTrait
 
     cl::Kernel kernel_;
     std::string kernel_name_;
-    typename Particle<T>::weight_type weight_;
 }; // class MoveCL
 
 /// \brief Monitor<T>::eval_type subtype
