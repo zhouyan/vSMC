@@ -341,23 +341,42 @@ class StateCL : public StateCLTrait
 
         if (!program_created_) {
             std::stringstream ss;
+            if (sizeof(T) == sizeof(cl_double))
+                ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
             if (sizeof(T) == sizeof(cl_float))
                 ss << "typedef float state_type;\n";
             else if (sizeof(T) == sizeof(cl_double))
                 ss << "typedef double state_type;\n";
+            else
+                throw std::runtime_error("Unsupported CL data type");
             ss << "typedef struct {\n";
             for (unsigned d = 0; d != Dim; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
             ss << "} state_struct;\n";
             ss << "#include <vSMC/helper/parallel_cl/common.cl>\n";
             ss << source << '\n';
-            cl::Program::Sources src(1, std::make_pair(ss.str().c_str(), 0));
-            program_ = cl::Program(context_, src);
+            program_ = cl::Program(context_, ss.str());
             program_created_ = true;
         }
 
-        program_.build(device_, flags);
+        try {
+            program_.build(device_, flags);
+            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG, &build_log_);
+        } catch (cl::Error err) {
+            std::string log;
+            std::cerr << "Error: vSMC: OpenCL program Build failed" << std::endl;
+            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_OPTIONS, &log);
+            std::cerr << "Build options:" << std::endl;
+            std::cerr << log << std::endl;
+            program_.getInfo(CL_PROGRAM_SOURCE, &log);
+            std::cerr << "Build source:" << std::endl;
+            std::cerr << log << std::endl;
+            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG, &build_log_);
+            std::cerr << "Build log:" << std::endl;
+            std::cerr << log << std::endl;
+            throw err;
+        }
         build_ = true;
 
         kernel_copy_ = create_kernel("copy");
@@ -369,6 +388,14 @@ class StateCL : public StateCLTrait
     bool build () const
     {
         return build_;
+    }
+
+    /// \brief Get the build log
+    ///
+    /// \return The compiler log of the last build.
+    std::string build_log () const
+    {
+        return build_log_;
     }
 
     /// \brief Create a device buffer with given number of elements and type
@@ -510,7 +537,7 @@ class StateCL : public StateCLTrait
         assert(build_);
 
         write_buffer<cl_uint>(copy_device_, size_, copy_host_.data());
-        kernel_copy_.setArg(0, (std::size_t) size_);
+        kernel_copy_.setArg(0, (cl_ulong) size_);
         kernel_copy_.setArg(1, state_device_);
         kernel_copy_.setArg(2, copy_device_);
         run_kernel(kernel_copy_);
@@ -538,6 +565,7 @@ class StateCL : public StateCLTrait
     bool command_queue_created_;
     bool program_created_;
     bool build_;
+    std::string build_log_;
 
     std::size_t global_size_;
     std::size_t local_size_;
@@ -654,7 +682,7 @@ class InitializeCL : public InitializeCLTrait
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
         }
 
-        kernel_.setArg(0, (std::size_t) particle.size());
+        kernel_.setArg(0, (cl_ulong) particle.size());
         kernel_.setArg(1, particle.value().state_device());
         kernel_.setArg(2, particle.value().weight_device());
         kernel_.setArg(3, particle.value().accept_device());
@@ -721,7 +749,7 @@ class MoveCL : public MoveCLTrait
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
         }
 
-        kernel_.setArg(0, (std::size_t) particle.size());
+        kernel_.setArg(0, (cl_ulong) particle.size());
         kernel_.setArg(1, (cl_uint) iter);
         kernel_.setArg(2, particle.value().state_device());
         kernel_.setArg(3, particle.value().weight_device());
@@ -800,7 +828,7 @@ class MonitorCL : public MonitorCLTrait
                 create_buffer<typename T::state_type>(particle.size() * Dim);
         }
 
-        kernel_.setArg(0, (std::size_t) particle.size());
+        kernel_.setArg(0, (cl_ulong) particle.size());
         kernel_.setArg(1, (cl_uint) iter);
         kernel_.setArg(2, (cl_uint) Dim);
         kernel_.setArg(3, particle.value().state_device());
@@ -876,7 +904,7 @@ class PathCL : public PathCLTrait
                 create_buffer<typename T::state_type>(particle.size());
         }
 
-        kernel_.setArg(0, (std::size_t) particle.size());
+        kernel_.setArg(0, (cl_ulong) particle.size());
         kernel_.setArg(1, (cl_uint) iter);
         kernel_.setArg(2, particle.value().state_device());
         kernel_.setArg(3, buffer_device_);
