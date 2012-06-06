@@ -61,9 +61,9 @@ class StateCL : public StateCLTrait
         return Dim;
     }
 
-    /// \brief The dimension of the problem
+    /// \brief The number of particles
     ///
-    /// \return The dimension of the parameter vector
+    /// \return The number of particles in the current particle set
     size_type size () const
     {
         return size_;
