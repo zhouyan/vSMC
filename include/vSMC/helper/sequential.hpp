@@ -19,7 +19,7 @@ class StateSeq : public StateBase<Dim, T>, StateSeqTrait
     typedef T state_type;
 
     explicit StateSeq (size_type N) : StateBase<Dim, T>(N) {}
-};
+}; // class StateSeq
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential

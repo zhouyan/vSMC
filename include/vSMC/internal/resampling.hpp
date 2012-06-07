@@ -18,7 +18,7 @@ inline void pre_resampling_tbb (void *value) {}
 template <>
 inline void pre_resampling_tbb<true> (void *value)
 {
-    reinterpret_cast<StateTBBTrait *>(value)->pre_resampling();
+    // reinterpret_cast<StateTBBTrait *>(value)->pre_resampling();
 }
 
 template <typename T>
@@ -43,7 +43,7 @@ inline void post_resampling_tbb (void *value) {}
 template <>
 inline void post_resampling_tbb<true> (void *value)
 {
-    reinterpret_cast<StateTBBTrait *>(value)->post_resampling();
+    // reinterpret_cast<StateTBBTrait *>(value)->post_resampling();
 }
 
 template <typename T>

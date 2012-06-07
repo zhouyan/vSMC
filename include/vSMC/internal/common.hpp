@@ -125,9 +125,6 @@ class StateTBBTrait
     public :
 
     virtual ~StateTBBTrait () {}
-
-    virtual void pre_resampling () = 0;
-    virtual void post_resampling () = 0;
 };
 
 class InitializeTBBTrait
