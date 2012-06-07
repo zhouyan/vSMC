@@ -196,8 +196,8 @@ class StateCL : public StateCLTrait
 
     /// \brief Read only access to the states
     ///
-    /// \return A const reference to a matrix of the states which have the same
-    /// contents as stored in the device memory buffer of state_device().
+    /// \return A const reference to a matrix of the states which have the
+    /// same contents as stored in the device memory buffer of state_device().
     ///
     /// \note This call will read the buffer from the device first, and
     /// therefore is expensive.
@@ -217,8 +217,8 @@ class StateCL : public StateCLTrait
     ///
     /// \note Despite the name, this is not the current weights of the
     /// particle system. It is intended to be used by clients to store and
-    /// manipulate the weights, for example the incremental weights. For access
-    /// to actual weights and log weights, always use the interface of
+    /// manipulate the weights, for example the incremental weights. For
+    /// access to actual weights and log weights, always use the interface of
     /// Particle.
     const cl::Buffer &weight_device () const
     {
@@ -227,8 +227,8 @@ class StateCL : public StateCLTrait
 
     /// \brief Read only access to the weights
     ///
-    /// \return A const reference to a matrix of the states which have the same
-    /// contents as stored in the device memory buffer of weight_device().
+    /// \return A const reference to a matrix of the states which have the
+    /// same contents as stored in the device memory buffer of weight_device().
     ///
     /// \note This call will read the buffer from the device first, and
     /// therefore is expensive.
@@ -256,8 +256,8 @@ class StateCL : public StateCLTrait
 
     /// \brief Read only access to the accept counts
     ///
-    /// \return A const reference to a matrix of the states which have the same
-    /// contents as stored in the device memory buffer of accept_device().
+    /// \return A const reference to a matrix of the states which have the
+    /// same contents as stored in the device memory buffer of accept_device().
     ///
     /// \note This call will read the buffer from the device first, and
     /// therefore is expensive.
@@ -308,11 +308,11 @@ class StateCL : public StateCLTrait
     /// \note The environment has to be setup properly either through
     /// setup(cl_device_type) or set by user.
     ///
-    /// \note When building the program, the user can assume the following
-    /// \li The Rand123 library's \c philox.h, \c threefry.h, and \c u01.h
-    /// headers are included before the user source.
-    /// \li A type \c state_type which is the same as the host \c state_type
-    /// are defined before the user source and looks like
+    /// \note When building the program, the user can assume the following \li
+    /// The Rand123 library's \c philox.h, \c threefry.h, and \c u01.h headers
+    /// are included before the user source.  \li A type \c state_type which
+    /// is the same as the host \c state_type are defined before the user
+    /// source and looks like
     /// \code
     /// typedef cl_float state_type;
     /// \endcode
@@ -362,17 +362,20 @@ class StateCL : public StateCLTrait
 
         try {
             program_.build(device_, flags);
-            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG, &build_log_);
+            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
+                    &build_log_);
         } catch (cl::Error err) {
             std::string log;
-            std::cerr << "Error: vSMC: OpenCL program Build failed" << std::endl;
+            std::cerr << "Error: vSMC: OpenCL program Build failed"
+                << std::endl;
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_OPTIONS, &log);
             std::cerr << "Build options:" << std::endl;
             std::cerr << log << std::endl;
             program_.getInfo(CL_PROGRAM_SOURCE, &log);
             std::cerr << "Build source:" << std::endl;
             std::cerr << log << std::endl;
-            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG, &build_log_);
+            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
+                    &build_log_);
             std::cerr << "Build log:" << std::endl;
             std::cerr << log << std::endl;
             throw err;
@@ -512,9 +515,9 @@ class StateCL : public StateCLTrait
     ///
     /// \note The program has to be built before call this member. The kernel
     /// will be run with global size returned by global_nd_range() and local
-    /// size returned by local_nd_range(), which shall be suitable for most use
-    /// case. For more control over running a kernel, user need to call OpenCL
-    /// API himself.
+    /// size returned by local_nd_range(), which shall be suitable for most
+    /// use case. For more control over running a kernel, user need to call
+    /// OpenCL API himself.
     void run_kernel (const cl::Kernel &ker) const
     {
         command_queue_.enqueueNDRangeKernel(ker,
@@ -637,8 +640,8 @@ class StateCL : public StateCLTrait
 ///     ulong size, state_struct *state,
 ///     state_type *weight, uint *accept)
 /// \endcode
-/// There can has other user supplied arguments as long as the first four is as
-/// above
+/// There can has other user supplied arguments as long as the first four is
+/// as above
 template <typename T>
 class InitializeCL : public InitializeCLTrait
 {
@@ -706,8 +709,8 @@ class InitializeCL : public InitializeCLTrait
 ///     ulong size, uint iter, state_struct *state,
 ///     state_type *weight, uint *accept)
 /// \endcode
-/// There can has other user supplied arguments as long as the first five is as
-/// above
+/// There can has other user supplied arguments as long as the first five is
+/// as above
 template <typename T>
 class MoveCL : public MoveCLTrait
 {
@@ -854,8 +857,8 @@ class MonitorCL : public MonitorCLTrait
 ///     ulong size, uint iter, state_struct *state,
 ///     state_type *buffer)
 /// \endcode
-/// There can has other user supplied arguments as long as the first four is as
-/// above
+/// There can has other user supplied arguments as long as the first four is
+/// as above
 template <typename T>
 class PathCL : public PathCLTrait
 {
