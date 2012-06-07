@@ -85,7 +85,6 @@ class StateBaseTrait
     virtual ~StateBaseTrait () {}
 };
 
-
 class StateSeqTrait
 {
     public :
