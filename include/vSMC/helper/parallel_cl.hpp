@@ -20,7 +20,7 @@ class StateCL : public StateCLTrait
     public :
 
     /// The type of the size of the particle set
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef cl_ulong size_type;
 
     /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
@@ -33,9 +33,6 @@ class StateCL : public StateCLTrait
 
     /// The type of the vector of accept counts returned by accept_host()
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> accept_vec_type;
-
-    /// The type of the vector of copy sources
-    typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> copy_vec_type;
 
     explicit StateCL (size_type N) :
         size_(N), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
@@ -344,6 +341,7 @@ class StateCL : public StateCLTrait
             if (sizeof(T) == sizeof(cl_double))
                 ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
+            ss << "typedef ulong size_type;\n";
             if (sizeof(T) == sizeof(cl_float))
                 ss << "typedef float state_type;\n";
             else if (sizeof(T) == sizeof(cl_double))
@@ -539,8 +537,8 @@ class StateCL : public StateCLTrait
     {
         assert(build_);
 
-        write_buffer<cl_uint>(copy_device_, size_, copy_host_.data());
-        kernel_copy_.setArg(0, (cl_ulong) size_);
+        write_buffer<size_type>(copy_device_, size_, copy_host_.data());
+        kernel_copy_.setArg(0, size_);
         kernel_copy_.setArg(1, state_device_);
         kernel_copy_.setArg(2, copy_device_);
         run_kernel(kernel_copy_);
@@ -576,19 +574,20 @@ class StateCL : public StateCLTrait
     cl::Buffer state_device_;
     cl::Buffer weight_device_;
     cl::Buffer accept_device_;
-    cl::Buffer copy_device_;
 
     mutable state_mat_type state_host_;
     mutable weight_vec_type weight_host_;
     mutable accept_vec_type accept_host_;
-    mutable copy_vec_type copy_host_;
+
+    cl::Buffer copy_device_;
+    std::vector<size_type> copy_host_;
 
     void setup_buffer ()
     {
         state_device_  = create_buffer<T>(size_ * Dim);
         weight_device_ = create_buffer<T>(size_);
         accept_device_ = create_buffer<cl_uint>(size_);
-        copy_device_   = create_buffer<cl_uint>(size_);
+        copy_device_   = create_buffer<size_type>(size_);
     }
 
     /// \internal The reallocation of read_buffer_pool and write_buffer_pool
@@ -637,7 +636,7 @@ class StateCL : public StateCLTrait
 /// A valid kernel declaration looks like
 /// \code
 /// __kernel void init (
-///     ulong size, state_struct *state,
+///     size_type size, state_struct *state,
 ///     state_type *weight, uint *accept)
 /// \endcode
 /// There can has other user supplied arguments as long as the first four is
@@ -685,7 +684,7 @@ class InitializeCL : public InitializeCLTrait
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
         }
 
-        kernel_.setArg(0, (cl_ulong) particle.size());
+        kernel_.setArg(0, (typename T::size_type) particle.size());
         kernel_.setArg(1, particle.value().state_device());
         kernel_.setArg(2, particle.value().weight_device());
         kernel_.setArg(3, particle.value().accept_device());
@@ -706,7 +705,7 @@ class InitializeCL : public InitializeCLTrait
 /// A valid kernel declaration looks like
 /// \code
 /// __kernel void move (
-///     ulong size, uint iter, state_struct *state,
+///     size_type size, uint iter, state_struct *state,
 ///     state_type *weight, uint *accept)
 /// \endcode
 /// There can has other user supplied arguments as long as the first five is
@@ -752,7 +751,7 @@ class MoveCL : public MoveCLTrait
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
         }
 
-        kernel_.setArg(0, (cl_ulong) particle.size());
+        kernel_.setArg(0, (typename T::size_type) particle.size());
         kernel_.setArg(1, (cl_uint) iter);
         kernel_.setArg(2, particle.value().state_device());
         kernel_.setArg(3, particle.value().weight_device());
@@ -775,7 +774,7 @@ class MoveCL : public MoveCLTrait
 /// A valid kernel declaration looks like
 /// \code
 /// __kernel void monitor_eval (
-///     ulong size, uint iter, uint dim, state_struct *state,
+///     size_type size, uint iter, uint dim, state_struct *state,
 ///     state_type *buffer)
 /// \endcode
 /// where \c buffer is a row major \c dim by \c size matrix. There can has
@@ -831,7 +830,7 @@ class MonitorCL : public MonitorCLTrait
                 create_buffer<typename T::state_type>(particle.size() * Dim);
         }
 
-        kernel_.setArg(0, (cl_ulong) particle.size());
+        kernel_.setArg(0, (typename T::size_type) particle.size());
         kernel_.setArg(1, (cl_uint) iter);
         kernel_.setArg(2, (cl_uint) Dim);
         kernel_.setArg(3, particle.value().state_device());
@@ -854,7 +853,7 @@ class MonitorCL : public MonitorCLTrait
 /// A valid kernel declaration looks like
 /// \code
 /// __kernel void path_eval (
-///     ulong size, uint iter, state_struct *state,
+///     size_type size, uint iter, state_struct *state,
 ///     state_type *buffer)
 /// \endcode
 /// There can has other user supplied arguments as long as the first four is
@@ -907,7 +906,7 @@ class PathCL : public PathCLTrait
                 create_buffer<typename T::state_type>(particle.size());
         }
 
-        kernel_.setArg(0, (cl_ulong) particle.size());
+        kernel_.setArg(0, (typename T::size_type) particle.size());
         kernel_.setArg(1, (cl_uint) iter);
         kernel_.setArg(2, particle.value().state_device());
         kernel_.setArg(3, buffer_device_);

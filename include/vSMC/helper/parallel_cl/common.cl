@@ -6,7 +6,7 @@
 #include <Random123/u01.h>
 
 __kernel
-void copy (ulong size, __global state_struct *state, __global uint *source)
+void copy (size_type size, __global state_struct *state, __global uint *source)
 {
     ulong to = get_global_id(0);
 
