@@ -3,54 +3,72 @@
 
 namespace vSMC { namespace internal {
 
-template <bool if_cl>
-inline void pre_resampling_cl (void *value) {}
-
-template <>
-inline void pre_resampling_cl<true> (void *value)
+template <bool if_cl, typename T>
+class resampling_cl
 {
-    reinterpret_cast<StateCLTrait *>(value)->pre_resampling();
-}
+    public :
 
-template <bool if_tbb>
-inline void pre_resampling_tbb (void *value) {}
+    static void pre_resampling (T &value) {}
+    static void post_resampling (T &value) {}
+};
 
-template <>
-inline void pre_resampling_tbb<true> (void *value)
+template <typename T>
+class resampling_cl<true, T>
 {
-    reinterpret_cast<StateTBBTrait *>(value)->pre_resampling();
+    public :
+
+    static void pre_resampling (T &value)
+    {
+        value.pre_resampling();
+    }
+
+    static void post_resampling (T &value)
+    {
+        value.post_resampling();
+    }
+};
+
+template <bool if_tbb, typename T>
+class resampling_tbb
+{
+    public :
+
+    static void pre_resampling (T &value) {}
+    static void post_resampling (T &value) {}
+};
+
+template <typename T>
+class resampling_tbb<true, T>
+{
+    public :
+
+    static void pre_resampling (T &value)
+    {
+        value.pre_resampling();
+    }
+
+    static void post_resampling (T &value)
+    {
+        value.post_resampling();
+    }
+};
+
+template <typename T>
+inline void pre_resampling (T &value)
+{
+    resampling_tbb<internal::is_base_of<StateCLTrait, T>::value, T>::
+        pre_resampling(value);
+    resampling_tbb<internal::is_base_of<StateTBBTrait, T>::value, T>::
+        pre_resampling(value);
 }
 
 template <typename T>
-inline void pre_resampling (T *value)
+inline void post_resampling (T &value)
 {
-    pre_resampling_cl<internal::is_base_of<StateCLTrait, T>::value>(value);
-    pre_resampling_tbb<internal::is_base_of<StateTBBTrait, T>::value>(value);
-}
-
-template <bool if_cl>
-inline void post_resampling_cl (void *value) {}
-
-template <>
-inline void post_resampling_cl<true> (void *value)
-{
-    reinterpret_cast<StateCLTrait *>(value)->post_resampling();
-}
-
-template <bool if_tbb>
-inline void post_resampling_tbb (void *value) {}
-
-template <>
-inline void post_resampling_tbb<true> (void *value)
-{
-    reinterpret_cast<StateTBBTrait *>(value)->post_resampling();
-}
-
-template <typename T>
-inline void post_resampling (T *value)
-{
-    post_resampling_cl<internal::is_base_of<StateCLTrait, T>::value>(value);
-    post_resampling_tbb<internal::is_base_of<StateTBBTrait, T>::value>(value);
+    resampling_tbb<internal::is_base_of<StateCLTrait, T>::value, T>::
+        post_resampling(value);
+    resampling_tbb<internal::is_base_of<StateTBBTrait, T>::value, T>::
+        post_resampling(value);
 }
 
 } } // namesapce vSMC::internal

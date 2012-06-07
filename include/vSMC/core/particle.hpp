@@ -250,7 +250,7 @@ class Particle
     /// \param scheme The resampling scheme, see ResamplingScheme
     void resample (ResampleScheme scheme)
     {
-        internal::pre_resampling(&value_);
+        internal::pre_resampling(value_);
         switch (scheme) {
             case MULTINOMIAL :
                 resample_multinomial();
@@ -272,7 +272,7 @@ class Particle
                 break;
         }
         resample_do();
-        internal::post_resampling(&value_);
+        internal::post_resampling(value_);
     }
 
     /// \brief Get a C++11 RNG engine

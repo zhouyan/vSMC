@@ -13,14 +13,14 @@ namespace vSMC {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
-class StateTBB : public StateBase<Dim, T>, StateTBBTrait
+class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 {
     public :
 
     typedef typename StateBase<Dim, T>::size_type size_type;
     typedef T state_type;
 
-    explicit StateTBB (size_type N) : StateBase<Dim, T>(N), copy_(N) {}
+    explicit StateTBB (size_type N) : StateSeq<Dim, T>(N), copy_(N) {}
 
     void copy (size_type from, size_type to)
     {
@@ -71,7 +71,7 @@ class StateTBB : public StateBase<Dim, T>, StateTBBTrait
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class InitializeTBB : public InitializeSeq<T>, InitializeTBBTrait
+class InitializeTBB : public InitializeSeq<T>, public InitializeTBBTrait
 {
     public :
 
@@ -121,7 +121,7 @@ class InitializeTBB : public InitializeSeq<T>, InitializeTBBTrait
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class MoveTBB : public MoveSeq<T>, MoveTBBTrait
+class MoveTBB : public MoveSeq<T>, public MoveTBBTrait
 {
     public :
 
@@ -172,7 +172,7 @@ class MoveTBB : public MoveSeq<T>, MoveTBBTrait
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
-class MonitorTBB : public MonitorSeq<T, Dim>, MonitorTBBTrait
+class MonitorTBB : public MonitorSeq<T, Dim>, public MonitorTBBTrait
 {
     public :
 
@@ -218,7 +218,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>, MonitorTBBTrait
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class PathTBB : public PathSeq<T>, PathTBBTrait
+class PathTBB : public PathSeq<T>, public PathTBBTrait
 {
     public :
 
