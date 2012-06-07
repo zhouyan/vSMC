@@ -85,6 +85,14 @@ class StateBaseTrait
     virtual ~StateBaseTrait () {}
 };
 
+
+class StateSeqTrait
+{
+    public :
+
+    virtual ~StateSeqTrait () {}
+};
+
 class InitializeSeqTrait
 {
     public :
@@ -111,6 +119,16 @@ class PathSeqTrait
     public :
 
     virtual ~PathSeqTrait () {}
+};
+
+class StateTBBTrait
+{
+    public :
+
+    virtual ~StateTBBTrait () {}
+
+    virtual void pre_resampling () = 0;
+    virtual void post_resampling () = 0;
 };
 
 class InitializeTBBTrait

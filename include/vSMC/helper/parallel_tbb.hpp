@@ -7,6 +7,65 @@
 
 namespace vSMC {
 
+/// \brief Particle::value_type subtype
+/// \ingroup Helper
+///
+/// \tparam Dim The dimension of the state parameter vector
+/// \tparam T The type of the value of the state parameter vector
+template <unsigned Dim, typename T>
+class StateTBB : public StateBase<Dim, T>, StateTBBTrait
+{
+    public :
+
+    typedef typename StateBase<Dim, T>::size_type size_type;
+    typedef T state_type;
+
+    explicit StateTBB (size_type N) : StateBase<Dim, T>(N), copy_(N) {}
+
+    void copy (size_type from, size_type to)
+    {
+        copy_[to] = from;
+    }
+
+    void pre_resampling ()
+    {
+        for (size_type i = 0; i != this->size(); ++i)
+            copy_[i] = i;
+    }
+
+    void post_resampling ()
+    {
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+                work_(this, copy_.data()));
+    }
+
+    private :
+
+    std::vector<size_type> copy_;
+
+    class work_
+    {
+        public :
+
+        work_ (StateTBB<Dim, T> *state, const size_type *from) :
+            state_(state), from_(from) {}
+
+        void operator () (const tbb::blocked_range<size_type> &range) const
+        {
+            for (size_type i = range.begin(); i != range.end(); ++i) {
+                size_type from = from_[i];
+                if (from != i)
+                    state_->state().col(i) = state_->state().col(from);
+            }
+        }
+
+        private :
+
+        StateTBB<Dim, T> *const state_;
+        const size_type *const from_;
+    }; // class work_
+}; // class StateTBB
+
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup TBB
 ///

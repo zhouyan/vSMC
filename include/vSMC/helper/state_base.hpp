@@ -10,10 +10,6 @@ namespace vSMC {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-///
-/// \note If the compiler generated copy construtor and assignement operator
-/// are not fine for the derived class, the derived class has to copy this base
-/// class itself.
 template <unsigned Dim, typename T>
 class StateBase : public StateBaseTrait
 {

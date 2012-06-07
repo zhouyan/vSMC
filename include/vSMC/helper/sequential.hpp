@@ -5,6 +5,22 @@
 
 namespace vSMC {
 
+/// \brief Particle::value_type subtype
+/// \ingroup Helper
+///
+/// \tparam Dim The dimension of the state parameter vector
+/// \tparam T The type of the value of the state parameter vector
+template <unsigned Dim, typename T>
+class StateSeq : public StateBase<Dim, T>, StateSeqTrait
+{
+    public :
+
+    typedef typename StateBase<Dim, T>::size_type size_type;
+    typedef T state_type;
+
+    explicit StateSeq (size_type N) : StateBase<Dim, T>(N) {}
+};
+
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
 ///
