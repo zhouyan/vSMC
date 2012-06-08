@@ -287,7 +287,7 @@ class StateCL : public StateCLTrait
         command_queue_created_ = true;
     }
 
-    /// \brief Check the status of build
+    /// \brief Check the status of setup
     ///
     /// \return \b true if the platform, context, device and command queue are
     /// all created, either by call setup(cl_device_type) or set by user.
@@ -490,7 +490,7 @@ class StateCL : public StateCLTrait
     /// \brief Write to a device buffer from a host iterator
     ///
     /// \tparam CLType An OpenCL Type
-    /// \tparam Input The type of input iterator reading the host data
+    /// \tparam InputIter The type of input iterator reading the host data
     /// \param buf The device buffer to be write
     /// \param num The number of elements in the device buffer
     /// \param first The begin of the input
