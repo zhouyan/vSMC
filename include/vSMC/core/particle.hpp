@@ -224,9 +224,10 @@ class Particle
     /// \brief Perform resampling
     ///
     /// \param scheme The resampling scheme, see ResamplingScheme
-    void resample (ResampleScheme scheme, double threshold_)
+    /// \param threshold The threshold for resampling
+    void resample (ResampleScheme scheme, double threshold)
     {
-        resampled_ = ess_ < threshold_ * size_;
+        resampled_ = ess_ < threshold * size_;
 
         if (resampled_) {
             internal::pre_resampling(value_);
