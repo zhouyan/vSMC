@@ -526,14 +526,9 @@ class Sampler
 
     void post_move ()
     {
-        bool do_resample = particle_.ess() < threshold_ * size();
-        resampled_.push_back(do_resample);
-        particle_.resampled(do_resample);
-        particle_.accept(accept_.back().back());
-
-        if (do_resample)
-            particle_.resample(scheme_);
+        particle_.resample(scheme_, threshold_);
         ess_.push_back(particle_.ess());
+        resampled_.push_back(particle_.resampled());
 
         if (bool(path_))
             path_.eval(iter_num_, particle_);

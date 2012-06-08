@@ -207,30 +207,6 @@ class Particle
         return resampled_;
     }
 
-    /// \brief Set indicator of resampling
-    ///
-    /// \param new_resampled \b true if the current iteration was resampled
-    void resampled (bool new_resampled)
-    {
-        resampled_ = new_resampled;
-    }
-
-    /// \brief Get accept count of the last iteration
-    ///
-    /// \return The number of acceptance of the last iterations
-    unsigned accept () const
-    {
-        return accept_;
-    }
-
-    /// \brief Set accept count of the last iteration
-    ///
-    /// \param new_accept The number of acceptance of the last iteration
-    void accept (unsigned new_accept)
-    {
-        accept_ = new_accept;
-    }
-
     /// \brief Get the value of SMC normalizing constant
     ///
     /// \return Log of SMC normalizng constant estimate
@@ -248,31 +224,35 @@ class Particle
     /// \brief Perform resampling
     ///
     /// \param scheme The resampling scheme, see ResamplingScheme
-    void resample (ResampleScheme scheme)
+    void resample (ResampleScheme scheme, double threshold_)
     {
-        internal::pre_resampling(value_);
-        switch (scheme) {
-            case MULTINOMIAL :
-                resample_multinomial();
-                break;
-            case RESIDUAL :
-                resample_residual();
-                break;
-            case STRATIFIED :
-                resample_stratified();
-                break;
-            case SYSTEMATIC :
-                resample_systematic();
-                break;
-            case RESIDUAL_STRATIFIED :
-                resample_residual_stratified ();
-                break;
-            default :
-                resample_stratified();
-                break;
+        resampled_ = ess_ < threshold_ * size_;
+
+        if (resampled_) {
+            internal::pre_resampling(value_);
+            switch (scheme) {
+                case MULTINOMIAL :
+                    resample_multinomial();
+                    break;
+                case RESIDUAL :
+                    resample_residual();
+                    break;
+                case STRATIFIED :
+                    resample_stratified();
+                    break;
+                case SYSTEMATIC :
+                    resample_systematic();
+                    break;
+                case RESIDUAL_STRATIFIED :
+                    resample_residual_stratified ();
+                    break;
+                default :
+                    resample_stratified();
+                    break;
+            }
+            resample_do();
+            internal::post_resampling(value_);
         }
-        resample_do();
-        internal::post_resampling(value_);
     }
 
     /// \brief Get a C++11 RNG engine
@@ -325,7 +305,6 @@ class Particle
 
     double ess_;
     bool resampled_;
-    unsigned accept_;
     double zconst_;
 
     seed_type seed_;
