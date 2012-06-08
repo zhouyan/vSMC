@@ -2,9 +2,9 @@
 #include <limits>
 #include <cmath>
 
-#ifdef V_SMC_USE_STD_ISINF
+#ifdef VSMC_USE_STD_ISINF
 using std::isinf;
-#elif defined(V_SMC_USE_BOOST_ISINF)
+#elif defined(VSMC_USE_BOOST_ISINF)
 #include <boost/math/special_functions/fpclassify.hpp>
 using boost::math::isinf;
 #endif

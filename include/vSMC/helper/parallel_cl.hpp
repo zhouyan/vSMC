@@ -1,13 +1,13 @@
-#ifndef V_SMC_HELPER_PARALLEL_CL_HPP
-#define V_SMC_HELPER_PARALLEL_CL_HPP
+#ifndef VSMC_HELPER_PARALLEL_CL_HPP
+#define VSMC_HELPER_PARALLEL_CL_HPP
 
 #define __CL_ENABLE_EXCEPTIONS
 
-#include <vSMC/internal/common.hpp>
-#include <vSMC/helper/parallel_cl/cl.hpp>
-#include <vSMC/helper/parallel_cl/query.hpp>
+#include <vsmc/internal/common.hpp>
+#include <vsmc/helper/parallel_cl/cl.hpp>
+#include <vsmc/helper/parallel_cl/query.hpp>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief Particle<T>::value_type subtype
 /// \ingroup OpenCL
@@ -323,7 +323,7 @@ class StateCL : public StateCLTrait
     /// parameter \c Dim is defined
     ///
     /// \li A constant \c Seed of type \c uint which is the same as
-    /// V_SMC_CBRNG_SEED is defined
+    /// VSMC_CBRNG_SEED is defined
     ///
     /// \li The Random123 library's \c philox.h, \c threefry.h, and \c u01.h
     /// headers are included.
@@ -371,8 +371,8 @@ class StateCL : public StateCLTrait
             ss << "__constant size_type Size = " << size_ << ";\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
             ss << "__constant uint Seed = " <<
-                V_SMC_CBRNG_SEED << "U + " << size_ << "U;\n";
-            ss << "#include <vSMC/helper/parallel_cl/common.cl>\n";
+                VSMC_CBRNG_SEED << "U + " << size_ << "U;\n";
+            ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";
             ss << source << '\n';
             program_ = cl::Program(context_, ss.str());
             program_created_ = true;
@@ -384,7 +384,7 @@ class StateCL : public StateCLTrait
                     &build_log_);
         } catch (cl::Error &err) {
             std::string log;
-            std::cerr << "Error: vSMC: OpenCL program Build failed"
+            std::cerr << "Error: vsmc: OpenCL program Build failed"
                 << std::endl;
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_OPTIONS, &log);
             std::cerr << "Build options:" << std::endl;
@@ -929,6 +929,6 @@ class PathCL : public PathCLTrait
     cl::Buffer buffer_device_;
 }; // class PathCL
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_HELPER_PARALLEL_CL_HPP
+#endif // VSMC_HELPER_PARALLEL_CL_HPP

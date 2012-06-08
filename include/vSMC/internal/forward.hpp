@@ -1,7 +1,7 @@
-#ifndef V_SMC_INTERNAL_FORWARD_HPP
-#define V_SMC_INTERNAL_FORWARD_HPP
+#ifndef VSMC_INTERNAL_FORWARD_HPP
+#define VSMC_INTERNAL_FORWARD_HPP
 
-namespace vSMC {
+namespace vsmc {
 
 template <typename T> class Sampler;
 template <typename T> class Particle;
@@ -28,6 +28,6 @@ template <typename T> class MoveCL;
 template <typename T, unsigned Dim> class MonitorCL;
 template <typename T> class PathCL;
 
-} // namesapce vSMC
+} // namesapce vsmc
 
-#endif // V_SMC_INTERNAL_FORWARD_HPP
+#endif // VSMC_INTERNAL_FORWARD_HPP

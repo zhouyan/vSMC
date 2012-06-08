@@ -1,9 +1,9 @@
-#ifndef V_SMC_CORE_MONITOR_HPP
-#define V_SMC_CORE_MONITOR_HPP
+#ifndef VSMC_CORE_MONITOR_HPP
+#define VSMC_CORE_MONITOR_HPP
 
-#include <vSMC/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief Monitor for Monte Carlo integration
 /// \ingroup Core
@@ -88,7 +88,7 @@ class Monitor
     /// \brief Test if the monitor is valid
     ///
     /// \return \b true if the monitor is valid
-#ifdef V_SMC_HAS_CXX11_EXPLICIT_CONVERSION
+#ifdef VSMC_HAS_CXX11_EXPLICIT_CONVERSION
     explicit
 #endif
         operator bool () const
@@ -204,12 +204,12 @@ class Monitor
 /// \note This is the same as <tt>monitor.print(os)</tt>
 template<typename CharT, typename Traits, typename T>
 std::basic_ostream<CharT, Traits> &operator<< (
-        std::basic_ostream<CharT, Traits> &os, const vSMC::Monitor<T> &monitor)
+        std::basic_ostream<CharT, Traits> &os, const vsmc::Monitor<T> &monitor)
 {
     monitor.print(os);
     return os;
 }
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_CORE_MONITOR_HPP
+#endif // VSMC_CORE_MONITOR_HPP

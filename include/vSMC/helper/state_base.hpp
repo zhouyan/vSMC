@@ -1,9 +1,9 @@
-#ifndef V_SMC_HELPER_STATE_BASE_HPP
-#define V_SMC_HELPER_STATE_BASE_HPP
+#ifndef VSMC_HELPER_STATE_BASE_HPP
+#define VSMC_HELPER_STATE_BASE_HPP
 
-#include <vSMC/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup Helper
@@ -16,7 +16,7 @@ class StateBase : public StateBaseTrait
     public :
 
     /// The type of the size of the particle set
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef VSMC_INDEX_TYPE size_type;
 
     /// The type of state parameters
     typedef T state_type;
@@ -125,6 +125,6 @@ class StateBase : public StateBaseTrait
     state_mat_type state_;
 }; // class StateBase
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_HELPER_STATE_BASE_HPP
+#endif // VSMC_HELPER_STATE_BASE_HPP

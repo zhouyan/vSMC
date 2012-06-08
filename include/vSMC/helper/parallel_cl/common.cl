@@ -1,5 +1,5 @@
-#ifndef V_SMC_HELPER_PARALLEL_CL_COMMON_CL
-#define V_SMC_HELPER_PARALLEL_CL_COMMON_CL
+#ifndef VSMC_HELPER_PARALLEL_CL_COMMON_CL
+#define VSMC_HELPER_PARALLEL_CL_COMMON_CL
 
 #if defined(cl_khr_fp64)
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -25,4 +25,4 @@ void copy (__global state_struct *state, __global uint *source)
     state[to] = state[from];
 }
 
-#endif // V_SMC_HELPER_PARALLEL_CL_COMMON_CL
+#endif // VSMC_HELPER_PARALLEL_CL_COMMON_CL

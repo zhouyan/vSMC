@@ -1,9 +1,9 @@
-#ifndef V_SMC_HELPER_SINGLE_PARTICLE_HPP
-#define V_SMC_HELPER_SINGLE_PARTICLE_HPP
+#ifndef VSMC_HELPER_SINGLE_PARTICLE_HPP
+#define VSMC_HELPER_SINGLE_PARTICLE_HPP
 
-#include <vSMC/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Helper
@@ -15,7 +15,7 @@ class SingleParticle
     public :
 
     /// The type of the size of the particle set
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef VSMC_INDEX_TYPE size_type;
 
     /// The type of the state parameters
     typedef typename T::state_type state_type;
@@ -30,7 +30,7 @@ class SingleParticle
     ///
     /// \note particle cannot be a const pointer. Unless one explicitly cast
     /// out the constness of the pointer, otherwise this shall results in a
-    /// compile time error. vSMC itself will never do this. When one need
+    /// compile time error. vsmc itself will never do this. When one need
     /// access to a const particle set, use the ConstSingleParticle variant
     /// which is exaclty for this purpose, which does not have the mutator like
     /// rng() and write access to states.
@@ -136,7 +136,7 @@ class ConstSingleParticle
 {
     public :
 
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef VSMC_INDEX_TYPE size_type;
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 
@@ -184,6 +184,6 @@ class ConstSingleParticle
     const Particle<T> *const particle_;
 }; // class SingleParticle
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_HELPER_SINGLE_PARTICLE_HPP
+#endif // VSMC_HELPER_SINGLE_PARTICLE_HPP

@@ -1,5 +1,5 @@
-#ifndef V_SMC_RNG_R123_ENGINE_HPP
-#define V_SMC_RNG_R123_ENGINE_HPP
+#ifndef VSMC_RNG_R123_ENGINE_HPP
+#define VSMC_RNG_R123_ENGINE_HPP
 
 // #include <Random123/aes.h>
 // #include <Random123/ars.h>
@@ -17,15 +17,15 @@
 #pragma warning(pop)
 #endif // _MSC_VER
 
-namespace vSMC { namespace rng {
-#ifdef V_SMC_USE_CONSTEXPR_ENGINE
+namespace vsmc { namespace rng {
+#ifdef VSMC_USE_CONSTEXPR_ENGINE
 
 /// \brief An Engine with constexpr min() and max()
 /// \ingroup RNG
 ///
 /// \details
-/// vSMC::rng::Engine is an alias to r123::Engine unless the macro \c
-/// V_SMC_USE_CONSTEXPR_ENGINE is explicited defined before the including of
+/// vsmc::rng::Engine is an alias to r123::Engine unless the macro \c
+/// VSMC_USE_CONSTEXPR_ENGINE is explicited defined before the including of
 /// this header. One shall never define this macro unless it is absolutely
 /// needed as explained below.
 ///
@@ -59,24 +59,24 @@ class Engine : public r123::Engine<CBRNG>
     template <typename SeedSeq>
     explicit r123_engine (SeedSeq &seed_seq) : engine_type(seed_seq) {}
 
-    static constexpr result_type min V_SMC_PREVENT_MIN_MAX ()
+    static constexpr result_type min VSMC_PREVENT_MIN_MAX ()
     {
         return 0;
     }
 
-    static constexpr result_type max V_SMC_PREVENT_MIN_MAX ()
+    static constexpr result_type max VSMC_PREVENT_MIN_MAX ()
     {
-        return std::numeric_limits<result_type>::max V_SMC_PREVENT_MIN_MAX ();
+        return std::numeric_limits<result_type>::max VSMC_PREVENT_MIN_MAX ();
     }
 
 }; // class r123_engine
 
-#else // V_SMC_USE_CONSTEXPR_ENGINE
+#else // VSMC_USE_CONSTEXPR_ENGINE
 
 using r123::Engine;
 
-#endif // V_SMC_USE_CONSTEXPR_ENGINE
+#endif // VSMC_USE_CONSTEXPR_ENGINE
 
-} } // namespae vSMC::rng
+} } // namespae vsmc::rng
 
-#endif // V_SMC_RNG_R123_ENGINE_HPP
+#endif // VSMC_RNG_R123_ENGINE_HPP

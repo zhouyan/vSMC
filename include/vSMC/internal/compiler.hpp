@@ -1,14 +1,14 @@
-#ifndef V_SMC_INTERNAL_COMPILER_HPP
-#define V_SMC_INTERNAL_COMPILER_HPP
+#ifndef VSMC_INTERNAL_COMPILER_HPP
+#define VSMC_INTERNAL_COMPILER_HPP
 
 #if defined(__INTEL_COMPILER)
-#include <vSMC/internal/compiler/intel.hpp>
+#include <vsmc/internal/compiler/intel.hpp>
 #elif defined(__clang__)
-#include <vSMC/internal/compiler/clang.hpp>
+#include <vsmc/internal/compiler/clang.hpp>
 #elif defined(__GNUC__)
-#include <vSMC/internal/compiler/gcc.hpp>
+#include <vsmc/internal/compiler/gcc.hpp>
 #elif defined(_MSC_VER)
-#include <vSMC/internal/compiler/msvc.hpp>
+#include <vsmc/internal/compiler/msvc.hpp>
 #endif
 
-#endif // V_SMC_INTERNAL_COMPILER_HPP
+#endif // VSMC_INTERNAL_COMPILER_HPP

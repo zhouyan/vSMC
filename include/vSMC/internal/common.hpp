@@ -1,5 +1,5 @@
-#ifndef V_SMC_INTERNAL_COMMON_HPP
-#define V_SMC_INTERNAL_COMMON_HPP
+#ifndef VSMC_INTERNAL_COMMON_HPP
+#define VSMC_INTERNAL_COMMON_HPP
 
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
@@ -41,14 +41,14 @@
 #pragma clang diagnostic pop
 #endif // __clang__
 
-#include <vSMC/internal/config.hpp>
-#include <vSMC/internal/version.hpp>
-#include <vSMC/internal/function.hpp>
-#include <vSMC/internal/type_traits.hpp>
-#include <vSMC/rng/random.hpp>
+#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/version.hpp>
+#include <vsmc/internal/function.hpp>
+#include <vsmc/internal/type_traits.hpp>
+#include <vsmc/rng/random.hpp>
 
-#include <vSMC/internal/types.hpp>
-#include <vSMC/internal/traits.hpp>
-#include <vSMC/internal/forward.hpp>
+#include <vsmc/internal/types.hpp>
+#include <vsmc/internal/traits.hpp>
+#include <vsmc/internal/forward.hpp>
 
-#endif // V_SMC_INTERNAL_COMMON_HPP
+#endif // VSMC_INTERNAL_COMMON_HPP

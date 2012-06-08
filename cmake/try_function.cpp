@@ -1,6 +1,6 @@
 #include <cassert>
 #include <cstddef>
-#include <vSMC/internal/function.hpp>
+#include <vsmc/internal/function.hpp>
 
 int fn (int a)
 {
@@ -11,7 +11,7 @@ class cl
 {
     public :
 
-    typedef vSMC::internal::function<int (int)> f_type;
+    typedef vsmc::internal::function<int (int)> f_type;
 
     cl (f_type f = NULL) : f_(f) {}
 
@@ -27,7 +27,7 @@ class cl
 
 int main ()
 {
-    vSMC::internal::function<int (int)> f;
+    vsmc::internal::function<int (int)> f;
     assert(!bool(f));
 
     f = fn;

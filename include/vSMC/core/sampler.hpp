@@ -1,9 +1,9 @@
-#ifndef V_SMC_CORE_SAMPLER_HPP
-#define V_SMC_CORE_SAMPLER_HPP
+#ifndef VSMC_CORE_SAMPLER_HPP
+#define VSMC_CORE_SAMPLER_HPP
 
-#include <vSMC/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief SMC Sampler
 /// \ingroup Core
@@ -51,7 +51,7 @@ class Sampler
             const move_type &move = NULL,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
-            typename Particle<T>::seed_type seed = V_SMC_CBRNG_SEED) :
+            typename Particle<T>::seed_type seed = VSMC_CBRNG_SEED) :
         init_(init), move_(move), scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0) {}
 
@@ -198,7 +198,7 @@ class Sampler
         }
 #ifndef NDEBUG
         else {
-            std::cerr << "vSMC Warning:" << std::endl;
+            std::cerr << "vsmc Warning:" << std::endl;
             std::cerr << "\tSampler::initiliaize" << std::endl;
             std::cerr
                 << "\tAttempt Initialization without a callable object"
@@ -220,29 +220,29 @@ class Sampler
             if (bool(move_)) {
                 acc.push_back(move_(iter_num_, particle_));
             }
-#ifndef V_SMC_NDEBUG
+#ifndef VSMC_NDEBUG
             else {
-                std::cerr << "vSMC Warning:" << std::endl;
+                std::cerr << "vsmc Warning:" << std::endl;
                 std::cerr << "\tSampler::iterate" << std::endl;
                 std::cerr
                     << "\tAttempt Move without a callable object"
                     << std::endl;
             }
-#endif // V_SMC_NDEBUG
+#endif // VSMC_NDEBUG
             for (typename mcmc_queue_type::iterator
                     m = mcmc_.begin(); m != mcmc_.end(); ++m) {
                 if (bool(*m)) {
                     acc.push_back((*m)(iter_num_, particle_));
                 }
-#ifndef V_SMC_NDEBUG
+#ifndef VSMC_NDEBUG
                 else {
-                    std::cerr << "vSMC Warning:" << std::endl;
+                    std::cerr << "vsmc Warning:" << std::endl;
                     std::cerr << "\tSampler::iterate" << std::endl;
                     std::cerr
                         << "\tAttempt MCMC without a callable object"
                         << std::endl;
                 }
-#endif // V_SMC_NDEBUG
+#endif // VSMC_NDEBUG
             }
             accept_.push_back(acc);
             post_move();
@@ -550,12 +550,12 @@ class Sampler
 /// \note This is the same as <tt>sampler.print(os)</tt>
 template<typename CharT, typename Traits, typename T>
 std::basic_ostream<CharT, Traits> &operator<< (
-        std::basic_ostream<CharT, Traits> &os, const vSMC::Sampler<T> &sampler)
+        std::basic_ostream<CharT, Traits> &os, const vsmc::Sampler<T> &sampler)
 {
     sampler.print(os, true);
     return os;
 }
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_CORE_SAMPLER_HPP
+#endif // VSMC_CORE_SAMPLER_HPP

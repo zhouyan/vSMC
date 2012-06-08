@@ -1,9 +1,9 @@
-#ifndef V_SMC_RNG_BETA_DISTRIBUTION_HPP
-#define V_SMC_RNG_BETA_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_BETA_DISTRIBUTION_HPP
+#define VSMC_RNG_BETA_DISTRIBUTION_HPP
 
-#include <vSMC/rng/common.hpp>
+#include <vsmc/rng/common.hpp>
 
-namespace vSMC { namespace rng {
+namespace vsmc { namespace rng {
 
 /// \brief Beta distribution
 /// \ingroup RNG
@@ -74,12 +74,12 @@ class beta_distribution
         return shape2_;
     }
 
-    RealType min V_SMC_PREVENT_MIN_MAX () const
+    RealType min VSMC_PREVENT_MIN_MAX () const
     {
         return 0;
     }
 
-    RealType max V_SMC_PREVENT_MIN_MAX () const
+    RealType max VSMC_PREVENT_MIN_MAX () const
     {
         return 1;
     }
@@ -168,6 +168,6 @@ std::basic_istream<CharT, Traits> &operator<< (
     return is;
 }
 
-} } // namespace vSMC::rng
+} } // namespace vsmc::rng
 
-#endif // V_SMC_RNG_BETA_DISTRIBUTION_HPP
+#endif // VSMC_RNG_BETA_DISTRIBUTION_HPP

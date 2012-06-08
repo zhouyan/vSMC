@@ -1,7 +1,7 @@
-#ifndef V_SMC_INTERNAL_RESAMPLING_HPP
-#define V_SMC_INTERNAL_RESAMPLING_HPP
+#ifndef VSMC_INTERNAL_RESAMPLING_HPP
+#define VSMC_INTERNAL_RESAMPLING_HPP
 
-namespace vSMC { namespace internal {
+namespace vsmc { namespace internal {
 
 template <bool if_cl, typename T>
 class resampling_cl
@@ -71,6 +71,6 @@ inline void post_resampling (T &value)
         post_resampling(value);
 }
 
-} } // namesapce vSMC::internal
+} } // namesapce vsmc::internal
 
-#endif // V_SMC_INTERNAL_RESAMPLING_HPP
+#endif // VSMC_INTERNAL_RESAMPLING_HPP

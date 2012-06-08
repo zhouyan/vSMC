@@ -1,22 +1,22 @@
-#ifndef V_SMC_INTERNAL_FUNCTION_HPP
-#define V_SMC_INTERNAL_FUNCTION_HPP
+#ifndef VSMC_INTERNAL_FUNCTION_HPP
+#define VSMC_INTERNAL_FUNCTION_HPP
 
-#include <vSMC/internal/config.hpp>
+#include <vsmc/internal/config.hpp>
 
-#ifdef V_SMC_USE_STD_FUNCTION
+#ifdef VSMC_USE_STD_FUNCTION
 
 #include <functional>
-namespace vSMC { namespace internal {
+namespace vsmc { namespace internal {
 using std::function;
 } }
 
-#else // V_SMC_USE_STD_FUNCTION
+#else // VSMC_USE_STD_FUNCTION
 
 #include <boost/function.hpp>
-namespace vSMC { namespace internal {
+namespace vsmc { namespace internal {
 using boost::function;
 } }
 
-#endif // V_SMC_USE_STD_FUNCTION
+#endif // VSMC_USE_STD_FUNCTION
 
-#endif // V_SMC_INTERNAL_FUNCTION_HPP
+#endif // VSMC_INTERNAL_FUNCTION_HPP

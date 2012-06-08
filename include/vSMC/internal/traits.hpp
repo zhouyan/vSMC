@@ -1,7 +1,7 @@
-#ifndef V_SMC_INTERNAL_TRAITS_HPP
-#define V_SMC_INTERNAL_TRAITS_HPP
+#ifndef VSMC_INTERNAL_TRAITS_HPP
+#define VSMC_INTERNAL_TRAITS_HPP
 
-namespace vSMC {
+namespace vsmc {
 
 class StateBaseTrait
 {
@@ -121,6 +121,6 @@ class PathCLTrait
     virtual ~PathCLTrait () {}
 };
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_INTERNAL_TRAITS_HPP
+#endif // VSMC_INTERNAL_TRAITS_HPP

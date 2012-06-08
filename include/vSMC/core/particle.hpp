@@ -1,10 +1,10 @@
-#ifndef V_SMC_CORE_PARTICLE_HPP
-#define V_SMC_CORE_PARTICLE_HPP
+#ifndef VSMC_CORE_PARTICLE_HPP
+#define VSMC_CORE_PARTICLE_HPP
 
-#include <vSMC/internal/common.hpp>
-#include <vSMC/internal/resampling.hpp>
+#include <vsmc/internal/common.hpp>
+#include <vsmc/internal/resampling.hpp>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
@@ -20,13 +20,13 @@ class Particle
     public :
 
     /// The type of the size of the particle set
-    typedef V_SMC_INDEX_TYPE size_type;
+    typedef VSMC_INDEX_TYPE size_type;
 
     /// The type of the particle values
     typedef T value_type;
 
     /// The type of the Counter-based random number generator
-    typedef V_SMC_CBRNG_TYPE cbrng_type;
+    typedef VSMC_CBRNG_TYPE cbrng_type;
 
     /// The type of the Counter-based random number generator C++11 engine
     typedef rng::Engine<cbrng_type> rng_type;
@@ -46,7 +46,7 @@ class Particle
     /// \param seed The seed to the parallel RNG system
     ///
     /// \post All weights are initialized to be euqal to each other
-    explicit Particle (size_type N, seed_type seed = V_SMC_CBRNG_SEED) :
+    explicit Particle (size_type N, seed_type seed = VSMC_CBRNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(N), resampled_(false), zconst_(0), seed_(seed), prng_(N)
@@ -480,6 +480,6 @@ class Particle
     }
 }; // class Particle
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_CORE_PARTICLE_HPP
+#endif // VSMC_CORE_PARTICLE_HPP

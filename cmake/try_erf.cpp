@@ -1,9 +1,9 @@
 #include <cassert>
 #include <cmath>
 
-#ifdef V_SMC_USE_STD_ERF
+#ifdef VSMC_USE_STD_ERF
 using std::erf;
-#elif defined(V_SMC_USE_BOOST_ERF)
+#elif defined(VSMC_USE_BOOST_ERF)
 #include <boost/math/special_functions/erf.hpp>
 using boost::math::erf;
 #endif

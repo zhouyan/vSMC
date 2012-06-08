@@ -1,9 +1,9 @@
-#ifndef V_SMC_RNG_LAPLACE_DISTRIBUTION_HPP
-#define V_SMC_RNG_LAPLACE_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_LAPLACE_DISTRIBUTION_HPP
+#define VSMC_RNG_LAPLACE_DISTRIBUTION_HPP
 
-#include <vSMC/rng/common.hpp>
+#include <vsmc/rng/common.hpp>
 
-namespace vSMC { namespace rng {
+namespace vsmc { namespace rng {
 
 /// \brief Laplace distribution
 /// \ingroup RNG
@@ -70,12 +70,12 @@ class laplace_distribution
         return scale_;
     }
 
-    RealType min V_SMC_PREVENT_MIN_MAX () const
+    RealType min VSMC_PREVENT_MIN_MAX () const
     {
         return -std::numeric_limits<RealType>::infinity();
     }
 
-    RealType max V_SMC_PREVENT_MIN_MAX () const
+    RealType max VSMC_PREVENT_MIN_MAX () const
     {
         return std::numeric_limits<RealType>::infinity();
     }
@@ -164,6 +164,6 @@ std::basic_istream<CharT, Traits> &operator<< (
     return is;
 }
 
-} } // namespace vSMC::rng
+} } // namespace vsmc::rng
 
-#endif // V_SMC_RNG_LAPLACE_DISTRIBUTION_HPP
+#endif // VSMC_RNG_LAPLACE_DISTRIBUTION_HPP

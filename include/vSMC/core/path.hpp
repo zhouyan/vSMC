@@ -1,9 +1,9 @@
-#ifndef V_SMC_CORE_PATH_HPP
-#define V_SMC_CORE_PATH_HPP
+#ifndef VSMC_CORE_PATH_HPP
+#define VSMC_CORE_PATH_HPP
 
-#include <vSMC/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief Monitor for path sampling
 /// \ingroup Core
@@ -71,7 +71,7 @@ class Path
     /// \brief Test if the monitor is valid
     ///
     /// \return \b true if the monitor is valid
-#ifdef V_SMC_HAS_CXX11_EXPLICIT_CONVERSION
+#ifdef VSMC_HAS_CXX11_EXPLICIT_CONVERSION
     explicit
 #endif
         operator bool () const
@@ -176,6 +176,6 @@ class Path
     grid_type grid_;
 }; // class PathSampling
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_CORE_PATH_HPP
+#endif // VSMC_CORE_PATH_HPP

@@ -1,11 +1,11 @@
-#ifndef V_SMC_INTERNAL_TYPES_HPP
-#define V_SMC_INTERNAL_TYPES_HPP
+#ifndef VSMC_INTERNAL_TYPES_HPP
+#define VSMC_INTERNAL_TYPES_HPP
 
-#ifndef V_SMC_INDEX_TYPE
-#define V_SMC_INDEX_TYPE EIGEN_DEFAULT_DENSE_INDEX_TYPE
-#endif // V_SMC_INDEX_TYPE
+#ifndef VSMC_INDEX_TYPE
+#define VSMC_INDEX_TYPE EIGEN_DEFAULT_DENSE_INDEX_TYPE
+#endif // VSMC_INDEX_TYPE
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief Resample scheme
 /// \ingroup Core
@@ -18,6 +18,6 @@ enum ResampleScheme {
     RESIDUAL_SYSTEMATIC  ///< Systematic resampling on the residuals
 }; // enum ResamleScheme
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_INTERNAL_TYPES_HPP
+#endif // VSMC_INTERNAL_TYPES_HPP

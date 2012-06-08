@@ -1,11 +1,11 @@
-#ifndef V_SMC_HELPER_PARALLEL_TBB_HPP
-#define V_SMC_HELPER_PARALLEL_TBB_HPP
+#ifndef VSMC_HELPER_PARALLEL_TBB_HPP
+#define VSMC_HELPER_PARALLEL_TBB_HPP
 
-#include <vSMC/internal/common.hpp>
-#include <vSMC/helper/sequential.hpp>
+#include <vsmc/internal/common.hpp>
+#include <vsmc/helper/sequential.hpp>
 #include <tbb/tbb.h>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup Helper
@@ -262,6 +262,6 @@ class PathTBB : public PathSeq<T>, public PathTBBTrait
     }; // class work_
 }; // PathTBB
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_HELPER_PARALLEL_TBB_HPP
+#endif // VSMC_HELPER_PARALLEL_TBB_HPP

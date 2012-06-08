@@ -1,9 +1,9 @@
-#ifndef V_SMC_HELPER_SEQUENTIAL_HPP
-#define V_SMC_HELPER_SEQUENTIAL_HPP
+#ifndef VSMC_HELPER_SEQUENTIAL_HPP
+#define VSMC_HELPER_SEQUENTIAL_HPP
 
-#include <vSMC/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 
-namespace vSMC {
+namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup Helper
@@ -138,6 +138,6 @@ class PathSeq : public PathSeqTrait
     virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
 };
 
-} // namespace vSMC
+} // namespace vsmc
 
-#endif // V_SMC_HELPER_SEQUENTIAL_HPP
+#endif // VSMC_HELPER_SEQUENTIAL_HPP

@@ -1,19 +1,19 @@
-#ifndef V_SMC_RNG_RANDOM_HPP
-#define V_SMC_RNG_RANDOM_HPP
+#ifndef VSMC_RNG_RANDOM_HPP
+#define VSMC_RNG_RANDOM_HPP
 
-#include <vSMC/internal/config.hpp>
-#include <vSMC/rng/common.hpp>
-#include <vSMC/rng/r123_engine.hpp>
+#include <vsmc/internal/config.hpp>
+#include <vsmc/rng/common.hpp>
+#include <vsmc/rng/r123_engine.hpp>
 
-#ifdef V_SMC_USE_STD_RANDOM
+#ifdef VSMC_USE_STD_RANDOM
 #include <random>
-#else // V_SMC_USE_STD_RANDOM
+#else // VSMC_USE_STD_RANDOM
 #include <boost/random.hpp>
-#endif // V_SMC_USE_STD_RANDOM
+#endif // VSMC_USE_STD_RANDOM
 
-namespace vSMC { namespace rng {
+namespace vsmc { namespace rng {
 
-#ifdef V_SMC_USE_STD_RANDOM
+#ifdef VSMC_USE_STD_RANDOM
 
 using std::uniform_int_distribution;
 using std::uniform_real_distribution;
@@ -40,7 +40,7 @@ using std::discrete_distribution;
 using std::piecewise_constant_distribution;
 using std::piecewise_linear_distribution;
 
-#else // V_SMC_USE_STD_RANDOM
+#else // VSMC_USE_STD_RANDOM
 
 using boost::random::uniform_int_distribution;
 using boost::random::uniform_real_distribution;
@@ -67,11 +67,11 @@ using boost::random::discrete_distribution;
 using boost::random::piecewise_constant_distribution;
 using boost::random::piecewise_linear_distribution;
 
-#endif // V_SMC_USE_STD_RANDOM
+#endif // VSMC_USE_STD_RANDOM
 
-} } // namespace vSMC::rng
+} } // namespace vsmc::rng
 
-#include <vSMC/rng/beta_distribution.hpp>
-#include <vSMC/rng/laplace_distribution.hpp>
+#include <vsmc/rng/beta_distribution.hpp>
+#include <vsmc/rng/laplace_distribution.hpp>
 
-#endif // V_SMC_RNG_RANDOM_HPP
+#endif // VSMC_RNG_RANDOM_HPP

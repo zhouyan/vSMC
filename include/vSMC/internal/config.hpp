@@ -14,7 +14,7 @@
 // Uncomment the following line to use C++11 <type_traits>
 // #define V_SMC_USE_STD_TYPE_TRAITS
 
-#include <vSMC/internal/compiler.hpp>
+#include <vsmc/internal/compiler.hpp>
 
 #ifdef V_SMC_USE_CONSTEXPR_ENGINE
 #define V_SMC_USE_STD_RANDOM
