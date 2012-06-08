@@ -357,8 +357,6 @@ class StateCL : public StateCLTrait
 
         if (!program_created_) {
             std::stringstream ss;
-            if (sizeof(T) == sizeof(cl_double))
-                ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
             if (sizeof(T) == sizeof(cl_float))
                 ss << "typedef float state_type;\n";
             else if (sizeof(T) == sizeof(cl_double))
