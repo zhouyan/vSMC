@@ -5,16 +5,6 @@
 #include <vSMC/rng/common.hpp>
 #include <vSMC/rng/r123_engine.hpp>
 
-/// The parallel RNG (based on Random123) seed, unsigned
-#ifndef V_SMC_CBRNG_SEED
-#define V_SMC_CBRNG_SEED 0xdeadbeefU
-#endif // V_SMC_CBRNG_SEED
-
-/// The parallel RNG (based on Random123) type, philox or threefry
-#ifndef V_SMC_CBRNG_TYPE
-#define V_SMC_CBRNG_TYPE r123::Threefry4x64
-#endif // V_SMC_CBRNG_TYPE
-
 #ifdef V_SMC_USE_STD_RANDOM
 #include <random>
 #else // V_SMC_USE_STD_RANDOM
