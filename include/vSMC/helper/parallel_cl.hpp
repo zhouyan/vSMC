@@ -20,7 +20,7 @@ class StateCL : public StateCLTrait
     public :
 
     /// The type of the size of the particle set
-    typedef cl_ulong size_type;
+    typedef cl_uint size_type;
 
     /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
@@ -305,33 +305,52 @@ class StateCL : public StateCLTrait
     /// \note The environment has to be setup properly either through
     /// setup(cl_device_type) or set by user.
     ///
-    /// \note When building the program, the user can assume the following \li
-    /// The Rand123 library's \c philox.h, \c threefry.h, and \c u01.h headers
-    /// are included before the user source.  \li A type \c state_type which
-    /// is the same as the host \c state_type are defined before the user
-    /// source and looks like
-    /// \code
-    /// typedef cl_float state_type;
-    /// \endcode
-    /// given that the template parameter \c T is \c cl_float
+    /// \note When building the program, the user can assume the following
+    /// happen before the user source being processed.
+    ///
+    /// \li A type \c state_type which is the same as the template parameter T,
+    /// and thus StateCL<Dim, T>::size_type is defined
+    ///
     /// \li A type \c state_struct which looks like the following are defined
-    /// before the user souce.
+    ///
+    /// \li A type \c size_type which is the same as the host \c size_type is
+    /// defined
+    ///
+    /// \li A constant \c Size of type \c size_type which the same as the size
+    /// of this particle set is defined
+    ///
+    /// \li A constant \c Dim of type \c uint which is the same as the template
+    /// parameter \c Dim is defined
+    ///
+    /// \li A constant \c Seed of type \c uint which is the same as
+    /// V_SMC_CBRNG_SEED is defined
+    ///
+    /// \li The Random123 library's \c philox.h, \c threefry.h, and \c u01.h
+    /// headers are included.
+    ///
+    /// The following is how the above looks like, assuming we constructed a
+    /// particle set with type StateCL<4, cl_float>(1000). It is as if the user
+    /// source implicitly included a header file containing the following code.
     /// \code
+    /// typedef float state_type;
+    ///
     /// typedef {
     ///     state_type param1;
     ///     state_type param2;
     ///     state_type param3;
     ///     state_type param4;
     /// } state_struct;
-    /// \endcode
-    /// given that the template parameter \c Dim is 4.
-    /// \li A constant \c Dim of type \c uint is defined before the user source
-    /// which is the same as the dimension of this StateCL object and looks
-    /// like
-    /// \code
+    ///
+    /// typedef uint size_type;
+    ///
+    /// __constant size_type Size = 1000;
     /// __constant uint Dim = 4;
+    /// __constant uint Seed = 0xdeadbeefU + Size;
+    ///
+    /// #include <Random123/philox.h>
+    /// #include <Random123/threefry.h>
+    /// #include <Random123/u01.h>
     /// \endcode
-    /// given that the template parameter \c T is \c cl_float
     void build (const char *source, const char *flags)
     {
         assert(setup());
@@ -340,18 +359,21 @@ class StateCL : public StateCLTrait
             std::stringstream ss;
             if (sizeof(T) == sizeof(cl_double))
                 ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
-            ss << "__constant uint Dim = " << Dim << ";\n";
-            ss << "typedef ulong size_type;\n";
             if (sizeof(T) == sizeof(cl_float))
                 ss << "typedef float state_type;\n";
             else if (sizeof(T) == sizeof(cl_double))
                 ss << "typedef double state_type;\n";
             else
                 throw std::runtime_error("Unsupported CL data type");
-            ss << "typedef struct {\n";
+            ss << "typedef struct state_struct {\n";
             for (unsigned d = 0; d != Dim; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
             ss << "} state_struct;\n";
+            ss << "typedef uint size_type;\n";
+            ss << "__constant size_type Size = " << size_ << ";\n";
+            ss << "__constant uint Dim = " << Dim << ";\n";
+            ss << "__constant uint Seed = " <<
+                V_SMC_CBRNG_SEED << "U + " << size_ << "U;\n";
             ss << "#include <vSMC/helper/parallel_cl/common.cl>\n";
             ss << source << '\n';
             program_ = cl::Program(context_, ss.str());
@@ -362,7 +384,7 @@ class StateCL : public StateCLTrait
             program_.build(device_, flags);
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
                     &build_log_);
-        } catch (cl::Error err) {
+        } catch (cl::Error &err) {
             std::string log;
             std::cerr << "Error: vSMC: OpenCL program Build failed"
                 << std::endl;
@@ -375,7 +397,7 @@ class StateCL : public StateCLTrait
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             std::cerr << "Build log:" << std::endl;
-            std::cerr << log << std::endl;
+            std::cerr << build_log_ << std::endl;
             throw err;
         }
         build_ = true;
@@ -538,9 +560,8 @@ class StateCL : public StateCLTrait
         assert(build_);
 
         write_buffer<size_type>(copy_device_, size_, copy_host_.data());
-        kernel_copy_.setArg(0, size_);
-        kernel_copy_.setArg(1, state_device_);
-        kernel_copy_.setArg(2, copy_device_);
+        kernel_copy_.setArg(0, state_device_);
+        kernel_copy_.setArg(1, copy_device_);
         run_kernel(kernel_copy_);
     }
 
@@ -635,11 +656,9 @@ class StateCL : public StateCLTrait
 /// \note
 /// A valid kernel declaration looks like
 /// \code
-/// __kernel void init (
-///     size_type size, state_struct *state,
-///     state_type *weight, uint *accept)
+/// __kernel void init ( state_struct *state, state_type *weight, uint *accept)
 /// \endcode
-/// There can has other user supplied arguments as long as the first four is
+/// There can has other user supplied arguments as long as the first three is
 /// as above
 template <typename T>
 class InitializeCL : public InitializeCLTrait
@@ -684,10 +703,9 @@ class InitializeCL : public InitializeCLTrait
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
         }
 
-        kernel_.setArg(0, (typename T::size_type) particle.size());
-        kernel_.setArg(1, particle.value().state_device());
-        kernel_.setArg(2, particle.value().weight_device());
-        kernel_.setArg(3, particle.value().accept_device());
+        kernel_.setArg(0, particle.value().state_device());
+        kernel_.setArg(1, particle.value().weight_device());
+        kernel_.setArg(2, particle.value().accept_device());
     }
 
     private :
@@ -704,11 +722,10 @@ class InitializeCL : public InitializeCLTrait
 /// \note
 /// A valid kernel declaration looks like
 /// \code
-/// __kernel void move (
-///     size_type size, uint iter, state_struct *state,
+/// __kernel void move (uint iter, state_struct *state,
 ///     state_type *weight, uint *accept)
 /// \endcode
-/// There can has other user supplied arguments as long as the first five is
+/// There can has other user supplied arguments as long as the first four is
 /// as above
 template <typename T>
 class MoveCL : public MoveCLTrait
@@ -751,11 +768,10 @@ class MoveCL : public MoveCLTrait
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
         }
 
-        kernel_.setArg(0, (typename T::size_type) particle.size());
-        kernel_.setArg(1, (cl_uint) iter);
-        kernel_.setArg(2, particle.value().state_device());
-        kernel_.setArg(3, particle.value().weight_device());
-        kernel_.setArg(4, particle.value().accept_device());
+        kernel_.setArg(0, (cl_uint) iter);
+        kernel_.setArg(1, particle.value().state_device());
+        kernel_.setArg(2, particle.value().weight_device());
+        kernel_.setArg(3, particle.value().accept_device());
     }
 
     private :
@@ -773,12 +789,11 @@ class MoveCL : public MoveCLTrait
 /// \note
 /// A valid kernel declaration looks like
 /// \code
-/// __kernel void monitor_eval (
-///     size_type size, uint iter, uint dim, state_struct *state,
+/// __kernel void monitor_eval (uint iter, uint dim, state_struct *state,
 ///     state_type *buffer)
 /// \endcode
 /// where \c buffer is a row major \c dim by \c size matrix. There can has
-/// other user supplied arguments as long as the first five is as above
+/// other user supplied arguments as long as the first four is as above
 ///
 /// \note Currently Dim cannot be larger than particle set size
 template <typename T, unsigned Dim>
@@ -830,11 +845,10 @@ class MonitorCL : public MonitorCLTrait
                 create_buffer<typename T::state_type>(particle.size() * Dim);
         }
 
-        kernel_.setArg(0, (typename T::size_type) particle.size());
-        kernel_.setArg(1, (cl_uint) iter);
-        kernel_.setArg(2, (cl_uint) Dim);
-        kernel_.setArg(3, particle.value().state_device());
-        kernel_.setArg(4, buffer_device_);
+        kernel_.setArg(0, (cl_uint) iter);
+        kernel_.setArg(1, (cl_uint) Dim);
+        kernel_.setArg(2, particle.value().state_device());
+        kernel_.setArg(3, buffer_device_);
     }
 
     private :
@@ -852,11 +866,10 @@ class MonitorCL : public MonitorCLTrait
 /// \note
 /// A valid kernel declaration looks like
 /// \code
-/// __kernel void path_eval (
-///     size_type size, uint iter, state_struct *state,
+/// __kernel void path_eval (uint iter, state_struct *state,
 ///     state_type *buffer)
 /// \endcode
-/// There can has other user supplied arguments as long as the first four is
+/// There can has other user supplied arguments as long as the first three is
 /// as above
 template <typename T>
 class PathCL : public PathCLTrait
@@ -906,10 +919,9 @@ class PathCL : public PathCLTrait
                 create_buffer<typename T::state_type>(particle.size());
         }
 
-        kernel_.setArg(0, (typename T::size_type) particle.size());
-        kernel_.setArg(1, (cl_uint) iter);
-        kernel_.setArg(2, particle.value().state_device());
-        kernel_.setArg(3, buffer_device_);
+        kernel_.setArg(0, (cl_uint) iter);
+        kernel_.setArg(1, particle.value().state_device());
+        kernel_.setArg(2, buffer_device_);
     }
 
     private :

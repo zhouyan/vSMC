@@ -6,11 +6,11 @@
 #include <Random123/u01.h>
 
 __kernel
-void copy (size_type size, __global state_struct *state, __global uint *source)
+void copy (__global state_struct *state, __global uint *source)
 {
     ulong to = get_global_id(0);
 
-    if (to >= size)
+    if (to >= Size)
         return;
 
     size_t from = source[to];
