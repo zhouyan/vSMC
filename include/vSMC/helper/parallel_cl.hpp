@@ -40,7 +40,6 @@ class StateCL : public StateCLTrait
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
-        global_size_(N), local_size_(0),
         state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
     {}
 
@@ -151,11 +150,15 @@ class StateCL : public StateCLTrait
     /// \param lsize The size of the work group.
     void local_size (std::size_t lsize)
     {
-        local_size_ = lsize;
-        if (local_size_ && size_ % local_size_)
-            global_size_ = (size_ / local_size_ + 1) * local_size_;
+        if (lsize)
+            local_nd_range_ = cl::NDRange(lsize);
         else
-            global_size_ = size_;
+            local_nd_range_ = cl::NullRange;
+
+        if (lsize && size_ % lsize)
+            global_nd_range_ = cl::NDRange((size_ / lsize + 1) * lsize);
+        else
+            global_nd_range_ = cl::NDRange(size_);
     }
 
     /// \brief The global cl::NDRange used by kernel calls
@@ -164,7 +167,7 @@ class StateCL : public StateCLTrait
     /// local group size and larger than the particle set size.
     cl::NDRange global_nd_range () const
     {
-        return cl::NDRange(global_size_);
+        return global_nd_range_;
     }
 
     /// \brief The local cl::NDRange used by kernel calls
@@ -174,10 +177,7 @@ class StateCL : public StateCLTrait
     /// cl::NullRange if local_size() is set with zero.
     cl::NDRange local_nd_range () const
     {
-        if (local_size_)
-            return cl::NDRange(local_size_);
-        else
-            return cl::NullRange;
+        return local_nd_range_;
     }
 
     /// \brief Read only access to the memory buffer on the device that stores
@@ -589,8 +589,8 @@ class StateCL : public StateCLTrait
     bool build_;
     std::string build_log_;
 
-    std::size_t global_size_;
-    std::size_t local_size_;
+    cl::NDRange global_nd_range_;
+    cl::NDRange local_nd_range_;
 
     cl::Buffer state_device_;
     cl::Buffer weight_device_;

@@ -8,7 +8,7 @@
 __kernel
 void copy (__global state_struct *state, __global uint *source)
 {
-    ulong to = get_global_id(0);
+    size_type to = get_global_id(0);
 
     if (to >= Size)
         return;
