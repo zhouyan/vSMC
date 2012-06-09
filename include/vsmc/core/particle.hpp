@@ -356,7 +356,7 @@ class Particle
         replication_.setConstant(0);
         size_type j = 0;
         size_type k = 0;
-        rng::uniform_real_distribution<> unif(0,1);
+        rng::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng(0));
         double cw = weight_[0];
         while (j != size_) {
@@ -376,7 +376,7 @@ class Particle
         replication_.setConstant(0);
         size_type j = 0;
         size_type k = 0;
-        rng::uniform_real_distribution<> unif(0,1);
+        rng::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng(0));
         double cw = weight_[0];
         while (j != size_) {
@@ -401,7 +401,7 @@ class Particle
         weight_ /= size;
         size_type j = 0;
         size_type k = 0;
-        rng::uniform_real_distribution<> unif(0,1);
+        rng::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng(0));
         double cw = weight_[0];
         while (j != size) {
@@ -429,7 +429,7 @@ class Particle
         weight_ /= size;
         size_type j = 0;
         size_type k = 0;
-        rng::uniform_real_distribution<> unif(0,1);
+        rng::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng(0));
         double cw = weight_[0];
         while (j != size) {
@@ -453,7 +453,7 @@ class Particle
         replication_.setConstant(0);
         for (size_type i = 0; i != size_; ++i) {
             if (sum_n < size && weight_[i] > 0) {
-                rng::binomial_distribution<> binom(
+                rng::binomial_distribution<size_type> binom(
                         size - sum_n, weight_[i] / (tp - sum_p));
                 replication_[i] = binom(rng(i));
             }

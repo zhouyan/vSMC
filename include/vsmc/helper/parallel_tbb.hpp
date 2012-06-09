@@ -75,6 +75,8 @@ class InitializeTBB : public InitializeSeq<T>, public InitializeTBBTrait
 {
     public :
 
+    typedef typename Particle<T>::size_type size_type;
+
     unsigned operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
@@ -89,7 +91,6 @@ class InitializeTBB : public InitializeSeq<T>, public InitializeTBBTrait
 
     private :
 
-    typedef typename Particle<T>::size_type size_type;
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
 
     class work_
@@ -125,6 +126,8 @@ class MoveTBB : public MoveSeq<T>, public MoveTBBTrait
 {
     public :
 
+    typedef typename Particle<T>::size_type size_type;
+
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
@@ -138,7 +141,6 @@ class MoveTBB : public MoveSeq<T>, public MoveTBBTrait
 
     private :
 
-    typedef typename Particle<T>::size_type size_type;
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
 
     class work_
@@ -176,6 +178,8 @@ class MonitorTBB : public MonitorSeq<T, Dim>, public MonitorTBBTrait
 {
     public :
 
+    typedef typename Particle<T>::size_type size_type;
+
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
@@ -185,8 +189,6 @@ class MonitorTBB : public MonitorSeq<T, Dim>, public MonitorTBBTrait
     }
 
     private :
-
-    typedef typename Particle<T>::size_type size_type;
 
     class work_
     {
@@ -222,6 +224,8 @@ class PathTBB : public PathSeq<T>, public PathTBBTrait
 {
     public :
 
+    typedef typename Particle<T>::size_type size_type;
+
     double operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
@@ -234,8 +238,6 @@ class PathTBB : public PathSeq<T>, public PathTBBTrait
     }
 
     private :
-
-    typedef typename Particle<T>::size_type size_type;
 
     class work_
     {

@@ -30,15 +30,15 @@ class InitializeSeq : public InitializeSeqTrait
 {
     public :
 
+    typedef typename Particle<T>::size_type size_type;
+
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
         initialize_param(particle, param);
         pre_processor(particle);
         unsigned accept = 0;
-        for (typename Particle<T>::size_type i = 0;
-                i != particle.size(); ++i) {
+        for (size_type i = 0; i != particle.size(); ++i)
             accept += initialize_state(SingleParticle<T>(i, &particle));
-        }
         post_processor(particle);
 
         return accept;
@@ -59,14 +59,14 @@ class MoveSeq : public MoveSeqTrait
 {
     public :
 
+    typedef typename Particle<T>::size_type size_type;
+
     virtual unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         pre_processor(iter, particle);
         unsigned accept = 0;
-        for (typename Particle<T>::size_type i = 0;
-                i != particle.size(); ++i) {
+        for (size_type i = 0; i != particle.size(); ++i)
             accept += move_state(iter, SingleParticle<T>(i, &particle));
-        }
         post_processor(iter, particle);
 
         return accept;
@@ -87,12 +87,13 @@ class MonitorSeq : public MonitorSeqTrait
 {
     public :
 
+    typedef typename Particle<T>::size_type size_type;
+
     virtual void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
         pre_processor(iter, particle);
-        for (typename Particle<T>::size_type i = 0;
-                i != particle.size(); ++i) {
+        for (size_type i = 0; i != particle.size(); ++i) {
             monitor_state(iter, ConstSingleParticle<T>(i, &particle),
                     res + i * Dim);
         }
@@ -119,11 +120,13 @@ class PathSeq : public PathSeqTrait
 {
     public :
 
+    typedef typename Particle<T>::size_type size_type;
+
     virtual double operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
         pre_processor(iter, particle);
-        for (typename Particle<T>::size_type i = 0; i != particle.size(); ++i)
+        for (size_type i = 0; i != particle.size(); ++i)
             res[i] = path_state(iter, ConstSingleParticle<T>(i, &particle));
         post_processor(iter, particle);
 

@@ -14,6 +14,9 @@ class Sampler
 {
     public :
 
+    /// The type of the size of the particle set
+    typedef typename Particle<T>::size_type size_type;
+
     /// The type of Initialization functor
     typedef internal::function<unsigned (Particle<T> &, void *)> init_type;
 
@@ -46,7 +49,7 @@ class Sampler
     /// resampling, bigger than one means always resampling.
     /// \param seed The seed to the parallel RNG system
     explicit Sampler (
-            typename Particle<T>::size_type N,
+            size_type N,
             const init_type &init = NULL,
             const move_type &move = NULL,
             ResampleScheme scheme = STRATIFIED,
@@ -58,7 +61,7 @@ class Sampler
     /// \brief Size of the particle set
     ///
     /// \return The number of particles
-    typename Particle<T>::size_type size () const
+    size_type size () const
     {
         return particle_.size();
     }
@@ -193,8 +196,8 @@ class Sampler
 
         iter_num_ = 0;
         if (bool(init_)) {
-            accept_.push_back(
-                    std::deque<unsigned>(1, init_(particle_, param)));
+            accept_.push_back(std::deque<unsigned>(
+                        1, init_(particle_, param)));
         }
 #ifndef NDEBUG
         else {
