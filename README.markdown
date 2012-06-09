@@ -101,11 +101,11 @@ For how to find these libraries see files in `cmake/` and see [CMake][CMake]'s
 documentation for general usage of this tool.
 
 There is another example that will not be built by the `cmake` system,
-**pf_cl**, which use OpenCL for parallelization. This is due to the fact that
-finding OpenCL runtime is a quite non-portable thing and we don't have the time
-to deal with all those different OpenCL implementations for now. However, the
-OpenCL backend is intended to be usable by any OpenCL standard conforming
-implementation. To build this example on a Mac, one can ues
+**pf_cl**, which use [OpenCL][OpenCL] for parallelization. This is due to the
+fact that finding OpenCL runtime is a quite non-portable thing and we don't
+have the time to deal with all those different OpenCL implementations for now.
+However, the OpenCL backend is intended to be usable by any OpenCL standard
+conforming implementation. To build this example on a Mac, one can ues
 
     cd /test/pf
     clang++ -O3 \
@@ -115,9 +115,9 @@ implementation. To build this example on a Mac, one can ues
       -framework OpenCL
       -o pf_cl pf_cl.cpp
 
-The compiler flags may need to be changed for different OpenCL implementations.
-Also you may need to change the compiler flags for OpenCL in the source file,
-`pf.hpp`, search for `FIXME`.
+The compiler flags may need to be changed for different [OpenCL][OpenCL]
+implementations.  Also you may need to change the compiler flags for OpenCL in
+the source file, `pf.hpp`, search for `FIXME`.
 
 # Tested compilers
 
@@ -181,3 +181,4 @@ found in the COPYING file distributed with the source.
 [Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
 [SMCTC]: http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/smctc/
 [Intel TBB]: http://threadingbuildingblocks.org/
+[OpenCL]: http://www.khronos.org/opencl/

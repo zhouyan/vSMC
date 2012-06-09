@@ -48,7 +48,7 @@ class Particle
     /// \param seed The seed to the parallel RNG system
     ///
     /// \post All weights are initialized to be euqal to each other
-    explicit Particle (size_type N, seed_type seed = VSMC_CBRNG_SEED) :
+    explicit Particle (size_type N, seed_type seed = VSMC_RNG_SEED) :
         size_(N), value_(N),
         weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
         ess_(N), resampled_(false), zconst_(0), seed_(seed)
@@ -266,7 +266,9 @@ class Particle
     /// \param id The position of the particle, 0 to size() - 1
     ///
     /// \return A reference to a C++11 RNG engine unique to particle at
-    /// position id, and independent of others
+    /// position id, and independent of others if \c VSMC_USE_SEQUENTIAL_RNG is
+    /// not defined. Otherwise, it is the same pseudo RNG for any value of \c
+    /// id
     rng_type &rng (size_type id)
     {
 #ifdef VSMC_USE_SEQUENTIAL_RNG

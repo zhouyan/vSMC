@@ -8,8 +8,8 @@
 #define VSMC_PREVENT_MIN_MAX
 
 /// The RNG  seed, unsigned
-#ifndef VSMC_CBRNG_SEED
-#define VSMC_CBRNG_SEED 0xdeadbeefU
+#ifndef VSMC_RNG_SEED
+#define VSMC_RNG_SEED 0xdeadbeefU
 #endif // VSMC_CBRNG_SEED
 
 /// The parallel RNG (based on Random123) type, philox or threefry
