@@ -323,7 +323,7 @@ class StateCL : public StateCLTrait
     /// parameter \c Dim is defined
     ///
     /// \li A constant \c Seed of type \c uint which is the same as
-    /// VSMC_CBRNG_SEED is defined
+    /// VSMC_RNG_SEED with an offset equal to the size of the particle set
     ///
     /// \li The Random123 library's \c philox.h, \c threefry.h, and \c u01.h
     /// headers are included.
@@ -371,7 +371,7 @@ class StateCL : public StateCLTrait
             ss << "__constant size_type Size = " << size_ << ";\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
             ss << "__constant uint Seed = " <<
-                VSMC_CBRNG_SEED << "U + " << size_ << "U;\n";
+                VSMC_RNG_SEED << "U + " << size_ << "U;\n";
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";
             ss << source << '\n';
             program_ = cl::Program(context_, ss.str());

@@ -3,7 +3,7 @@
 
 namespace vsmc { namespace internal {
 
-template <bool if_cl, typename T>
+template <bool IsCL, typename T>
 class resampling_cl
 {
     public :
@@ -28,7 +28,7 @@ class resampling_cl<true, T>
     }
 };
 
-template <bool if_tbb, typename T>
+template <bool IsTBB, typename T>
 class resampling_tbb
 {
     public :
