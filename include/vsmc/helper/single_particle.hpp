@@ -118,7 +118,7 @@ class SingleParticle
     rng_type &rng ()
     {
         assert(particle_);
-        return particle_->prng(id_);
+        return particle_->rng(id_);
     }
 
     private :

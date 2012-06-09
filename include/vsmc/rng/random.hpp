@@ -15,6 +15,16 @@ namespace vsmc { namespace rng {
 
 #ifdef VSMC_USE_STD_RANDOM
 
+using std::minstd_rand0;
+using std::minstd_rand;
+using std::mt19937;
+using std::mt19937_64;
+using std::ranlux24_base;
+using std::ranlux48_base;
+using std::ranlux24;
+using std::ranlux48;
+using std::knuth_b;
+
 using std::uniform_int_distribution;
 using std::uniform_real_distribution;
 
@@ -41,6 +51,20 @@ using std::piecewise_constant_distribution;
 using std::piecewise_linear_distribution;
 
 #else // VSMC_USE_STD_RANDOM
+
+using boost::random::minstd_rand0;
+using boost::random::minstd_rand;
+using boost::random::mt19937;
+using boost::random::mt19937_64;
+using boost::random::ranlux24_base;
+using boost::random::ranlux48_base;
+typedef boost::random::subtract_with_carry_engine<uint32_t, 24, 10, 24>
+    ranlux24_base;
+typedef boost::random::subtract_with_carry_engine<uint64_t, 48, 5, 12>
+    ranlux48_base;
+using boost::random::ranlux24;
+using boost::random::ranlux48;
+using boost::random::knuth_b;
 
 using boost::random::uniform_int_distribution;
 using boost::random::uniform_real_distribution;
