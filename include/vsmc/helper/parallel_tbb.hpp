@@ -17,7 +17,6 @@ class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 {
     public :
 
-    typedef typename StateBase<Dim, T>::size_type size_type;
     typedef T state_type;
 
     explicit StateTBB (size_type N) : StateSeq<Dim, T>(N), copy_(N) {}
@@ -27,13 +26,13 @@ class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
         copy_[to] = from;
     }
 
-    void pre_resampling ()
+    virtual void pre_resampling ()
     {
         for (size_type i = 0; i != this->size(); ++i)
             copy_[i] = i;
     }
 
-    void post_resampling ()
+    virtual void post_resampling ()
     {
         tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
                 work_(this, copy_.data()));
@@ -74,8 +73,6 @@ template <typename T>
 class InitializeTBB : public InitializeSeq<T>, public InitializeTBBTrait
 {
     public :
-
-    typedef typename Particle<T>::size_type size_type;
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
@@ -125,8 +122,6 @@ template <typename T>
 class MoveTBB : public MoveSeq<T>, public MoveTBBTrait
 {
     public :
-
-    typedef typename Particle<T>::size_type size_type;
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
@@ -178,8 +173,6 @@ class MonitorTBB : public MonitorSeq<T, Dim>, public MonitorTBBTrait
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
-
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
@@ -223,8 +216,6 @@ template <typename T>
 class PathTBB : public PathSeq<T>, public PathTBBTrait
 {
     public :
-
-    typedef typename Particle<T>::size_type size_type;
 
     double operator() (unsigned iter, const Particle<T> &particle,
             double *res)

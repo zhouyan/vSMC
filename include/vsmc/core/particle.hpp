@@ -15,12 +15,9 @@ namespace vsmc {
 /// \li member function copy method compatible with
 /// \code copy(Particle<T>::size_type from, Particle<T>::size_type to) \endcode
 template <typename T>
-class Particle
+class Particle : public ParticleTrait
 {
     public :
-
-    /// The type of the size of the particle set
-    typedef VSMC_INDEX_TYPE size_type;
 
     /// The type of the particle values
     typedef T value_type;

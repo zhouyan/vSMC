@@ -15,9 +15,6 @@ class StateBase : public StateBaseTrait
 {
     public :
 
-    /// The type of the size of the particle set
-    typedef VSMC_INDEX_TYPE size_type;
-
     /// The type of state parameters
     typedef T state_type;
 

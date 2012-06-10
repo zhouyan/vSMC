@@ -10,7 +10,7 @@ namespace vsmc {
 ///
 /// \tparam T Particle<T>::value_type
 template <typename T>
-class Path
+class Path : public PathTrait
 {
     public :
 
@@ -63,7 +63,7 @@ class Path
     /// \brief Size of records
     ///
     /// \return The number of iterations recorded
-    index_type::size_type iter_size () const
+    unsigned iter_size () const
     {
         return index_.size();
     }

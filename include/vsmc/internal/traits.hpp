@@ -3,123 +3,40 @@
 
 namespace vsmc {
 
-class StateBaseTrait
+class SizeTypeTrait
 {
     public :
 
-    virtual ~StateBaseTrait () {}
+    /// The type of the size of the particle set
+    typedef VSMC_INDEX_TYPE size_type;
 };
 
-class StateSeqTrait
-{
-    public :
+class SamplerTrait :            public SizeTypeTrait {};
+class ParticleTrait :           public SizeTypeTrait {};
+class MonitorTrait :            public SizeTypeTrait {};
+class PathTrait :               public SizeTypeTrait {};
 
-    virtual ~StateSeqTrait () {}
-};
+class StateBaseTrait :          public SizeTypeTrait {};
+class SingleParticleTrait:      public SizeTypeTrait {};
+class ConstSingleParticleTrait: public SizeTypeTrait {};
 
-class InitializeSeqTrait
-{
-    public :
+class StateSeqTrait :           public SizeTypeTrait {};
+class InitializeSeqTrait :      public SizeTypeTrait {};
+class MoveSeqTrait :            public SizeTypeTrait {};
+class MonitorSeqTrait :         public SizeTypeTrait {};
+class PathSeqTrait :            public SizeTypeTrait {};
 
-    virtual ~InitializeSeqTrait () {}
-};
+class StateTBBTrait :           public SizeTypeTrait {};
+class InitializeTBBTrait :      public SizeTypeTrait {};
+class MoveTBBTrait :            public SizeTypeTrait {};
+class MonitorTBBTrait :         public SizeTypeTrait {};
+class PathTBBTrait :            public SizeTypeTrait {};
 
-class MoveSeqTrait
-{
-    public :
-
-    virtual ~MoveSeqTrait () {}
-};
-
-class MonitorSeqTrait
-{
-    public :
-
-    virtual ~MonitorSeqTrait () {}
-};
-
-class PathSeqTrait
-{
-    public :
-
-    virtual ~PathSeqTrait () {}
-};
-
-class StateTBBTrait
-{
-    public :
-
-    virtual ~StateTBBTrait () {}
-
-    virtual void pre_resampling () = 0;
-    virtual void post_resampling () = 0;
-};
-
-class InitializeTBBTrait
-{
-    public :
-
-    virtual ~InitializeTBBTrait () {}
-};
-
-class MoveTBBTrait
-{
-    public :
-
-    virtual ~MoveTBBTrait () {}
-};
-
-class MonitorTBBTrait
-{
-    public :
-
-    virtual ~MonitorTBBTrait () {}
-};
-
-class PathTBBTrait
-{
-    public :
-
-    virtual ~PathTBBTrait () {}
-};
-
-class StateCLTrait
-{
-    public :
-
-    virtual ~StateCLTrait () {}
-
-    virtual void pre_resampling () = 0;
-    virtual void post_resampling () = 0;
-};
-
-class InitializeCLTrait
-{
-    public :
-
-    virtual ~InitializeCLTrait () {}
-};
-
-class MoveCLTrait
-{
-    public :
-
-    virtual ~MoveCLTrait () {}
-};
-
-class MonitorCLTrait
-{
-    public :
-
-    virtual ~MonitorCLTrait () {}
-};
-
-class PathCLTrait
-{
-    public :
-
-    virtual ~PathCLTrait () {}
-};
+class StateCLTrait      {};
+class InitializeCLTrait {};
+class MoveCLTrait       {};
+class MonitorCLTrait    {};
+class PathCLTrait       {};
 
 } // namespace vsmc
 

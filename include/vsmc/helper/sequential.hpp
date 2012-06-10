@@ -15,7 +15,6 @@ class StateSeq : public StateBase<Dim, T>, public StateSeqTrait
 {
     public :
 
-    typedef typename StateBase<Dim, T>::size_type size_type;
     typedef T state_type;
 
     explicit StateSeq (size_type N) : StateBase<Dim, T>(N) {}
@@ -29,8 +28,6 @@ template <typename T>
 class InitializeSeq : public InitializeSeqTrait
 {
     public :
-
-    typedef typename Particle<T>::size_type size_type;
 
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
@@ -59,8 +56,6 @@ class MoveSeq : public MoveSeqTrait
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
-
     virtual unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         pre_processor(iter, particle);
@@ -86,8 +81,6 @@ template <typename T, unsigned Dim>
 class MonitorSeq : public MonitorSeqTrait
 {
     public :
-
-    typedef typename Particle<T>::size_type size_type;
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
@@ -119,8 +112,6 @@ template <typename T>
 class PathSeq : public PathSeqTrait
 {
     public :
-
-    typedef typename Particle<T>::size_type size_type;
 
     virtual double operator() (unsigned iter, const Particle<T> &particle,
             double *res)

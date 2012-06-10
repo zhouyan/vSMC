@@ -10,12 +10,9 @@ namespace vsmc {
 ///
 /// \tparam T Particle<T>::value_type
 template <typename T>
-class Sampler
+class Sampler : public SamplerTrait
 {
     public :
-
-    /// The type of the size of the particle set
-    typedef typename Particle<T>::size_type size_type;
 
     /// The type of Initialization functor
     typedef internal::function<unsigned (Particle<T> &, void *)> init_type;
