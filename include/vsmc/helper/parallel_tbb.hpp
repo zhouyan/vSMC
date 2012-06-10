@@ -16,7 +16,7 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-template <unsigned Dim, typename T>
+template <unsigned Dim, typename T, typename Profiler>
 class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 {
     public :
@@ -31,7 +31,14 @@ class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
     template <typename Work>
     void run_parallel_for (const Work &work) const
     {
+        profiler_.start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work);
+        profiler_.stop();
+    }
+
+    Profiler &profiler () const
+    {
+        return profiler_;
     }
 
     void copy (size_type from, size_type to)
@@ -54,6 +61,7 @@ class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 
     size_type size_;
     std::vector<size_type> copy_;
+    mutable Profiler profiler_;
 
     class copy_work_
     {

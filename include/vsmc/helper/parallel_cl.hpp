@@ -18,7 +18,7 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-template <unsigned Dim, typename T>
+template <unsigned Dim, typename T, typename Profiler>
 class StateCL : public StateCLTrait
 {
     public :
@@ -543,8 +543,10 @@ class StateCL : public StateCLTrait
     /// OpenCL API himself.
     void run_kernel (const cl::Kernel &ker) const
     {
+        profiler_.start();
         command_queue_.enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
+        profiler_.stop();
     }
 
     virtual void copy (size_type from, size_type to)
@@ -605,6 +607,8 @@ class StateCL : public StateCLTrait
 
     cl::Buffer copy_device_;
     std::vector<size_type> copy_host_;
+
+    Profiler profiler_;
 
     void setup_buffer ()
     {
