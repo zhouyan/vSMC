@@ -25,6 +25,8 @@ class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 
     explicit StateTBB (size_type N) : StateSeq<Dim, T>(N), copy_(N) {}
 
+    virtual ~StateTBB () {}
+
     void copy (size_type from, size_type to)
     {
         copy_[to] = from;
@@ -78,6 +80,8 @@ class InitializeTBB : public InitializeSeq<T>, public InitializeTBBTrait
 {
     public :
 
+    virtual ~InitializeTBB () {}
+
     unsigned operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
@@ -126,6 +130,8 @@ template <typename T>
 class MoveTBB : public MoveSeq<T>, public MoveTBBTrait
 {
     public :
+
+    virtual ~MoveTBB () {}
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
@@ -177,6 +183,8 @@ class MonitorTBB : public MonitorSeq<T, Dim>, public MonitorTBBTrait
 {
     public :
 
+    virtual ~MonitorTBB () {}
+
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
@@ -220,6 +228,8 @@ template <typename T>
 class PathTBB : public PathSeq<T>, public PathTBBTrait
 {
     public :
+
+    virtual ~PathTBB () {}
 
     double operator() (unsigned iter, const Particle<T> &particle,
             double *res)

@@ -14,9 +14,6 @@ class SingleParticle : public SingleParticleTrait
 {
     public :
 
-    /// The type of the size of the particle set
-    typedef typename Particle<T>::size_type size_type;
-
     /// The type of the state parameters
     typedef typename T::state_type state_type;
 
@@ -136,7 +133,6 @@ class ConstSingleParticle : public ConstSingleParticleTrait
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 

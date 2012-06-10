@@ -44,7 +44,7 @@ class StateCL : public StateCLTrait
         state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
     {}
 
-    ~StateCL ()
+    virtual ~StateCL ()
     {
         std::free(read_buffer_pool_);
         std::free(write_buffer_pool_);
@@ -668,6 +668,8 @@ class InitializeCL : public InitializeCLTrait
 {
     public :
 
+    virtual ~InitializeCL () {}
+
     virtual unsigned operator() (Particle<T> &particle, void *param)
     {
         set_kernel(particle);
@@ -734,6 +736,8 @@ template <typename T>
 class MoveCL : public MoveCLTrait
 {
     public :
+
+    virtual ~MoveCL () {}
 
     virtual unsigned operator() (unsigned iter, Particle<T> &particle)
     {
@@ -803,6 +807,8 @@ template <typename T, unsigned Dim>
 class MonitorCL : public MonitorCLTrait
 {
     public :
+
+    virtual ~MonitorCL () {}
 
     virtual void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
@@ -878,6 +884,8 @@ template <typename T>
 class PathCL : public PathCLTrait
 {
     public :
+
+    virtual ~PathCL () {}
 
     virtual double operator() (unsigned iter, const Particle<T> &particle,
         double *res)

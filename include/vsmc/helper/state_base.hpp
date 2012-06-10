@@ -26,6 +26,8 @@ class StateBase : public StateBaseTrait
     /// \param N The number of particles
     explicit StateBase (size_type N) : size_(N), state_(Dim, N) {}
 
+    virtual ~StateBase () {}
+
     /// \brief The dimension of the problem
     ///
     /// \return The dimension of the parameter vector
