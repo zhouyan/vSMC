@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <utility>
+#include <limits>
 #include <map>
 #include <set>
 #include <deque>

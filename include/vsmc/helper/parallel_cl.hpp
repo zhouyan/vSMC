@@ -19,9 +19,6 @@ class StateCL : public StateCLTrait
 {
     public :
 
-    /// The type of the size of the particle set
-    typedef cl_uint size_type;
-
     /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
 
@@ -309,11 +306,12 @@ class StateCL : public StateCLTrait
     /// happen before the user source being processed.
     ///
     /// \li A type \c state_type which is the same as the template parameter T,
-    /// and thus StateCL<Dim, T>::size_type is defined
+    /// and thus StateCL<Dim, T>::state_type is defined
     ///
     /// \li A type \c state_struct which looks like the following are defined
     ///
-    /// \li A type \c size_type which is the same as the host \c size_type is
+    /// \li A type \c size_type which is large enough to hold the number of
+    /// particles and unlike \c size_t, can be passed as kernel argumentsa, is
     /// defined
     ///
     /// \li A constant \c Size of type \c size_type which the same as the size
@@ -367,8 +365,11 @@ class StateCL : public StateCLTrait
             for (unsigned d = 0; d != Dim; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
             ss << "} state_struct;\n";
-            ss << "typedef uint size_type;\n";
-            ss << "__constant size_type Size = " << size_ << ";\n";
+            if (size_ < std::numeric_limits<cl_uint>::max())
+                ss << "typedef uint size_type;\n";
+            else
+                ss << "typedef ulong size_type;\n";
+            ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
             ss << "__constant uint Seed = " <<
                 VSMC_RNG_SEED << "U + " << size_ << "U;\n";

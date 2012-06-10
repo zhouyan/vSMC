@@ -32,11 +32,11 @@ class MoveTBBTrait :            public SizeTypeTrait {};
 class MonitorTBBTrait :         public SizeTypeTrait {};
 class PathTBBTrait :            public SizeTypeTrait {};
 
-class StateCLTrait      {};
-class InitializeCLTrait {};
-class MoveCLTrait       {};
-class MonitorCLTrait    {};
-class PathCLTrait       {};
+class StateCLTrait :            public SizeTypeTrait {};
+class InitializeCLTrait :       public SizeTypeTrait {};
+class MoveCLTrait :             public SizeTypeTrait {};
+class MonitorCLTrait :          public SizeTypeTrait {};
+class PathCLTrait :             public SizeTypeTrait {};
 
 } // namespace vsmc
 
