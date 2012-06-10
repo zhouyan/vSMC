@@ -20,7 +20,7 @@ class StateCL : public StateCLTrait
     public :
 
     /// The type of the size of the particle set
-    typedef cl_ulong size_type;
+    typedef cl_uint size_type;
 
     /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
