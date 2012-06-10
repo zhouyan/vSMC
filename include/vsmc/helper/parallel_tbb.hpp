@@ -23,9 +23,16 @@ class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 
     typedef T state_type;
 
-    explicit StateTBB (size_type N) : StateSeq<Dim, T>(N), copy_(N) {}
+    explicit StateTBB (size_type N) :
+        StateSeq<Dim, T>(N), size_(N), copy_(N) {}
 
     virtual ~StateTBB () {}
+
+    template <typename Work>
+    void run_parallel_for (const Work &work) const
+    {
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work);
+    }
 
     void copy (size_type from, size_type to)
     {
@@ -40,19 +47,19 @@ class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 
     virtual void post_resampling ()
     {
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
-                work_(this, copy_.data()));
+        run_parallel_for(copy_work_(this, copy_.data()));
     }
 
     private :
 
+    size_type size_;
     std::vector<size_type> copy_;
 
-    class work_
+    class copy_work_
     {
         public :
 
-        work_ (StateTBB<Dim, T> *state, const size_type *from) :
+        copy_work_ (StateTBB<Dim, T> *state, const size_type *from) :
             state_(state), from_(from) {}
 
         void operator () (const tbb::blocked_range<size_type> &range) const
@@ -87,7 +94,7 @@ class InitializeTBB : public InitializeSeq<T>, public InitializeTBBTrait
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         accept_.resize(particle.size());
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
+        particle.value().run_parallel_for(
                 work_(this, &particle, accept_.data()));
         this->post_processor(particle);
 
@@ -137,7 +144,7 @@ class MoveTBB : public MoveSeq<T>, public MoveTBBTrait
     {
         this->pre_processor(iter, particle);
         accept_.resize(particle.size());
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
+        particle.value().run_parallel_for(
                 work_(this, iter, &particle, accept_.data()));
         this->post_processor(iter, particle);
 
@@ -188,7 +195,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>, public MonitorTBBTrait
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
+        particle.value().run_parallel_for(
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
     }
@@ -235,7 +242,7 @@ class PathTBB : public PathSeq<T>, public PathTBBTrait
             double *res)
     {
         this->pre_processor(iter, particle);
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
+        particle.value().run_parallel_for(
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 
