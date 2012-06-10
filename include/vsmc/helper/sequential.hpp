@@ -10,7 +10,7 @@
 namespace vsmc {
 
 /// \brief Particle::value_type subtype
-/// \ingroup Helper
+/// \ingroup Sequential
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector

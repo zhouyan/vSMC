@@ -17,7 +17,12 @@ namespace vsmc {
 /// \ingroup OpenCL
 ///
 /// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector
+/// \tparam T The type of the value of the state parameter vector The default
+/// \tparam Profiler class The profiler used for profiling run_kernel().
+/// The default is NullProfiler, which does nothing but provide the compatible
+/// inteferce.  Profiler::start() and Profiler::stop() are called automatically
+/// when entering and exiting run_kernel(). This shall provide how much time
+/// are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
 class StateCL : public StateCLTrait
 {

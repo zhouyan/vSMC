@@ -12,10 +12,15 @@
 namespace vsmc {
 
 /// \brief Particle::value_type subtype
-/// \ingroup Helper
+/// \ingroup TBB
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
+/// \tparam Profiler class The profiler used for profiling run_parallel_for().
+/// The default is NullProfiler, which does nothing but provide the compatible
+/// inteferce. Profiler::start() and Profiler::stop() are called automatically
+/// when entering and exiting run_parallel_for(). This shall provide how much
+/// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
 class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 {
