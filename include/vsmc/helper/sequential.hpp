@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+/// \defgroup Sequential Sequential
+/// \ingroup Helper
+/// \brief Single threaded sampler
+
 namespace vsmc {
 
 /// \brief Particle::value_type subtype

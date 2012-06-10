@@ -22,16 +22,10 @@
 #endif // VSMC_HPP
 
 /// \defgroup Core Core
+/// \brief Constructing samplers with operations on the whole particle set 
 ///
 /// \defgroup Helper Helper
-///
-/// \defgroup Sequential Sequential
-/// \ingroup Helper
-///
-/// \defgroup TBB Intel Threading Buidling Block
-/// \ingroup Helper
-///
-/// \defgroup OpenCL OpenCL
-/// \ingroup Helper
+/// \brief Constructing samplers with operations on a single particle
 ///
 /// \defgroup RNG Random number generating
+/// \brief RNG engines and random variates distributions

@@ -7,6 +7,10 @@
 #include <vsmc/helper/parallel_cl/cl.hpp>
 #include <vsmc/helper/parallel_cl/query.hpp>
 
+/// \defgroup OpenCL OpenCL
+/// \ingroup Helper
+/// \brief Parallelized sampler with OpenCL 
+
 namespace vsmc {
 
 /// \brief Particle<T>::value_type subtype
