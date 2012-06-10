@@ -49,8 +49,8 @@ class Particle
     ///
     /// \post All weights are initialized to be euqal to each other
     explicit Particle (size_type N, seed_type seed = VSMC_RNG_SEED) :
-        size_(N), value_(N), log_weight_(N), replication_(N),
-        weight_(N), weight_cached_(false), inc_weight_(N),
+        size_(N), value_(N), weight_(N), weight_cached_(false),
+        log_weight_(N), inc_weight_(N), replication_(N),
         ess_(N), ess_cached_(false), resampled_(false), zconst_(0), seed_(seed)
 #ifndef VSMC_USE_SEQUENTIAL_RNG
         , prng_(N)
@@ -108,6 +108,8 @@ class Particle
     const weight_type &weight () const
     {
         if (!weight_cached_) {
+            double max_weight = log_weight_.maxCoeff();
+            log_weight_ = log_weight_.array() - max_weight;
             weight_ = log_weight_.array().exp();
             double sum = weight_.sum();
             weight_ *= 1 / sum;
@@ -319,12 +321,11 @@ class Particle
     size_type size_;
     value_type value_;
 
-    weight_type log_weight_;
-    replication_type replication_;
-
     mutable weight_type weight_;
     mutable bool weight_cached_;
-    weight_type inc_weight_;
+    mutable weight_type log_weight_;
+    mutable weight_type inc_weight_;
+    mutable replication_type replication_;
 
     mutable double ess_;
     mutable bool ess_cached_;
@@ -341,8 +342,6 @@ class Particle
 
     void set_log_weight ()
     {
-        double max_weight = log_weight_.maxCoeff();
-        log_weight_ = log_weight_.array() - max_weight;
         weight_cached_ = false;
         ess_cached_ = false;
     }
