@@ -367,7 +367,7 @@ class StateCL : public StateCLTrait
             for (unsigned d = 0; d != Dim; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
             ss << "} state_struct;\n";
-            ss << "typedef uint size_type;\n";
+            ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << ";\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
             ss << "__constant uint Seed = " <<
