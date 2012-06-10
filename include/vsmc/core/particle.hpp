@@ -49,9 +49,9 @@ class Particle
     ///
     /// \post All weights are initialized to be euqal to each other
     explicit Particle (size_type N, seed_type seed = VSMC_RNG_SEED) :
-        size_(N), value_(N),
-        weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
-        ess_(N), resampled_(false), zconst_(0), seed_(seed)
+        size_(N), value_(N), log_weight_(N), replication_(N),
+        weight_(N), weight_cached_(false), inc_weight_(N),
+        ess_(N), ess_cached_(false), resampled_(false), zconst_(0), seed_(seed)
 #ifndef VSMC_USE_SEQUENTIAL_RNG
         , prng_(N)
 #endif
@@ -91,7 +91,7 @@ class Particle
     /// \return The weight of the particle at position id
     double weight (size_type id) const
     {
-        return weight_[id];
+        return weight()[id];
     }
 
     /// \brief Read only access to the weights through pointer
@@ -99,7 +99,7 @@ class Particle
     /// \return A const pointer to the weight array
     const double *weight_ptr () const
     {
-        return weight_.data();
+        return weight().data();
     }
 
     /// \brief Read only access to the weights through Eigen vector
@@ -107,6 +107,13 @@ class Particle
     /// \return A const reference to the weight vector
     const weight_type &weight () const
     {
+        if (!weight_cached_) {
+            weight_ = log_weight_.array().exp();
+            double sum = weight_.sum();
+            weight_ *= 1 / sum;
+            weight_cached_ = true;
+        }
+
         return weight_;
     }
 
@@ -117,7 +124,7 @@ class Particle
     /// \return The log weight of the particle at position id
     double log_weight (size_type id) const
     {
-        return log_weight_[id];
+        return log_weight()[id];
     }
 
     /// \brief Read only access to the log weights through pointer
@@ -125,7 +132,7 @@ class Particle
     /// \return A const pointer to the log weight array
     const double *log_weight_ptr () const
     {
-        return log_weight_.data();
+        return log_weight().data();
     }
 
     /// \brief Read only access to the log weights through Eigen vector
@@ -139,9 +146,11 @@ class Particle
     /// \brief Set equal weights for all particles
     void set_equal_weight ()
     {
-        ess_ = size_;
-        weight_.setConstant(1.0 / size_);
         log_weight_.setConstant(0);
+        weight_.setConstant(1.0 / size_);
+        weight_cached_ = true;
+        ess_ = size_;
+        ess_cached_ = true;
     }
 
     /// \brief Set the log weights
@@ -161,7 +170,7 @@ class Particle
     void set_log_weight (const weight_type &new_weight, double delta = 1)
     {
         log_weight_ = delta * new_weight.head(size_);
-        set_weight();
+        set_log_weight();
     }
 
     /// \brief Add to the log weights
@@ -193,7 +202,7 @@ class Particle
             zconst_ += log(weight_.dot(inc_weight_.head(size_)));
         }
         log_weight_ += delta * inc_weight.head(size_);
-        set_weight();
+        set_log_weight();
     }
 
     /// \brief The ESS (Effective Sample Size)
@@ -201,6 +210,11 @@ class Particle
     /// \return The value of ESS for current particle set
     double ess () const
     {
+        if (!ess_cached_) {
+            ess_ = 1 / weight().squaredNorm();
+            ess_cached_ = true;
+        }
+
         return ess_;
     }
 
@@ -232,7 +246,7 @@ class Particle
     /// \param threshold The threshold for resampling
     void resample (ResampleScheme scheme, double threshold)
     {
-        resampled_ = ess_ < threshold * size_;
+        resampled_ = ess() < threshold * size_;
 
         if (resampled_) {
             internal::pre_resampling(value_);
@@ -305,12 +319,16 @@ class Particle
     size_type size_;
     value_type value_;
 
-    weight_type weight_;
     weight_type log_weight_;
-    weight_type inc_weight_;
     replication_type replication_;
 
-    double ess_;
+    mutable weight_type weight_;
+    mutable bool weight_cached_;
+    weight_type inc_weight_;
+
+    mutable double ess_;
+    mutable bool ess_cached_;
+
     bool resampled_;
     double zconst_;
 
@@ -321,14 +339,12 @@ class Particle
     std::deque<rng_type> prng_;
 #endif
 
-    void set_weight ()
+    void set_log_weight ()
     {
         double max_weight = log_weight_.maxCoeff();
         log_weight_ = log_weight_.array() - max_weight;
-        weight_ = log_weight_.array().exp();
-        double sum = weight_.sum();
-        weight_ *= 1 / sum;
-        ess_ = 1 / weight_.squaredNorm();
+        weight_cached_ = false;
+        ess_cached_ = false;
     }
 
     void resample_multinomial ()
