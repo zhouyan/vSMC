@@ -10,9 +10,12 @@ namespace vsmc {
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class SingleParticle : public internal::Types
+class SingleParticle
 {
     public :
+
+    /// The type of the number of particles
+    typedef VSMC_SIZE_TYPE size_type;
 
     /// The type of the state parameters
     typedef typename T::state_type state_type;
@@ -129,10 +132,11 @@ class SingleParticle : public internal::Types
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class ConstSingleParticle : public internal::Types
+class ConstSingleParticle
 {
     public :
 
+    typedef VSMC_SIZE_TYPE size_type;
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 

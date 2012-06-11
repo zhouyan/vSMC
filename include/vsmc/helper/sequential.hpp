@@ -15,10 +15,11 @@ namespace vsmc {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
-class StateSeq : public StateBase<Dim, T>,
-    public internal::StateSeqTag, virtual public internal::Types
+class StateSeq : public StateBase<Dim, T>, public internal::StateSeqTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     typedef T state_type;
 
@@ -32,9 +33,11 @@ class StateSeq : public StateBase<Dim, T>,
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class InitializeSeq : public internal::InitializeSeqTag, public internal::Types
+class InitializeSeq : public internal::InitializeSeqTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     virtual ~InitializeSeq () {}
 
@@ -61,9 +64,11 @@ class InitializeSeq : public internal::InitializeSeqTag, public internal::Types
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class MoveSeq : public internal::MoveSeqTag, public internal::Types
+class MoveSeq : public internal::MoveSeqTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     virtual ~MoveSeq () {}
 
@@ -89,9 +94,11 @@ class MoveSeq : public internal::MoveSeqTag, public internal::Types
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
-class MonitorSeq : public internal::MonitorSeqTag, public internal::Types
+class MonitorSeq : public internal::MonitorSeqTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     virtual ~MonitorSeq () {}
 
@@ -122,9 +129,11 @@ class MonitorSeq : public internal::MonitorSeqTag, public internal::Types
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class PathSeq : public internal::PathSeqTag, public internal::Types
+class PathSeq : public internal::PathSeqTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     virtual ~PathSeq () {}
 

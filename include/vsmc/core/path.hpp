@@ -10,11 +10,11 @@ namespace vsmc {
 ///
 /// \tparam T Particle<T>::value_type
 template <typename T>
-class Path : public internal::Types
+class Path
 {
     public :
 
-    /// \brief The type of path sampling evaluation functor
+    /// The type of path sampling evaluation functor
     typedef internal::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;
 

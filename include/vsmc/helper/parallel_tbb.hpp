@@ -22,10 +22,11 @@ namespace vsmc {
 /// when entering and exiting run_parallel_for(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
-class StateTBB : public StateBase<Dim, T>,
-    public internal::StateTBBTag, virtual public internal::Types
+class StateTBB : public StateBase<Dim, T>, public internal::StateTBBTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     typedef T state_type;
 
@@ -97,9 +98,11 @@ class StateTBB : public StateBase<Dim, T>,
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class InitializeTBB : public internal::InitializeTBBTag, public internal::Types
+class InitializeTBB : public internal::InitializeTBBTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     virtual ~InitializeTBB () {}
 
@@ -153,9 +156,11 @@ class InitializeTBB : public internal::InitializeTBBTag, public internal::Types
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class MoveTBB : public internal::MoveTBBTag, public internal::Types
+class MoveTBB : public internal::MoveTBBTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     virtual ~MoveTBB () {}
 
@@ -209,9 +214,11 @@ class MoveTBB : public internal::MoveTBBTag, public internal::Types
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
-class MonitorTBB : public internal::MonitorTBBTag, public internal::Types
+class MonitorTBB : public internal::MonitorTBBTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     virtual ~MonitorTBB () {}
 
@@ -265,9 +272,11 @@ class MonitorTBB : public internal::MonitorTBBTag, public internal::Types
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class PathTBB : public internal::PathTBBTag, public internal::Types
+class PathTBB : public internal::PathTBBTag
 {
     public :
+
+    typedef VSMC_SIZE_TYPE size_type;
 
     virtual ~PathTBB () {}
 
