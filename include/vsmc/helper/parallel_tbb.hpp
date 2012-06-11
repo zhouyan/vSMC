@@ -23,7 +23,7 @@ namespace vsmc {
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
 class StateTBB : public StateBase<Dim, T>,
-    public internal::StateTBBTag, public internal::Types
+    public internal::StateTBBTag, virtual public internal::Types
 {
     public :
 

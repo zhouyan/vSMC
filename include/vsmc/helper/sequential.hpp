@@ -16,7 +16,7 @@ namespace vsmc {
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateSeq : public StateBase<Dim, T>,
-    public internal::StateSeqTag, public internal::Types
+    public internal::StateSeqTag, virtual public internal::Types
 {
     public :
 
