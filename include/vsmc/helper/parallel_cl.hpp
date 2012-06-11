@@ -24,7 +24,7 @@ namespace vsmc {
 /// when entering and exiting run_kernel(). This shall provide how much time
 /// are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
-class StateCL : public StateCLTrait
+class StateCL : public StateCLTag, public internal::Types
 {
     public :
 
@@ -673,7 +673,7 @@ class StateCL : public StateCLTrait
 /// There can has other user supplied arguments as long as the first three is
 /// as above
 template <typename T>
-class InitializeCL : public InitializeCLTrait
+class InitializeCL : public InitializeCLTag, public internal::Types
 {
     public :
 
@@ -742,7 +742,7 @@ class InitializeCL : public InitializeCLTrait
 /// There can has other user supplied arguments as long as the first four is
 /// as above
 template <typename T>
-class MoveCL : public MoveCLTrait
+class MoveCL : public MoveCLTag, public internal::Types
 {
     public :
 
@@ -813,7 +813,7 @@ class MoveCL : public MoveCLTrait
 ///
 /// \note Currently Dim cannot be larger than particle set size
 template <typename T, unsigned Dim>
-class MonitorCL : public MonitorCLTrait
+class MonitorCL : public MonitorCLTag, public internal::Types
 {
     public :
 
@@ -890,7 +890,7 @@ class MonitorCL : public MonitorCLTrait
 /// There can has other user supplied arguments as long as the first three is
 /// as above
 template <typename T>
-class PathCL : public PathCLTrait
+class PathCL : public PathCLTag, public internal::Types
 {
     public :
 

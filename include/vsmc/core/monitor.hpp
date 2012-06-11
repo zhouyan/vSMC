@@ -24,7 +24,7 @@ namespace vsmc {
 /// and <tt>buffer[i * 2 + 1] = yi</tt>. After that, the Monitor will take
 /// care of the imporatance sampling.
 template <typename T>
-class Monitor : public MonitorTrait
+class Monitor : public internal::Types
 {
     public :
 

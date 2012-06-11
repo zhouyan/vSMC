@@ -10,7 +10,7 @@ namespace vsmc {
 ///
 /// \tparam T Particle<T>::value_type
 template <typename T>
-class Path : public PathTrait
+class Path : public internal::Types
 {
     public :
 

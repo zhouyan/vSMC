@@ -15,7 +15,7 @@ namespace vsmc {
 /// \li member function copy method compatible with
 /// \code copy(Particle<T>::size_type from, Particle<T>::size_type to) \endcode
 template <typename T>
-class Particle : public ParticleTrait
+class Particle : public internal::Types
 {
     public :
 

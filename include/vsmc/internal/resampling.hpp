@@ -56,18 +56,18 @@ class resampling_tbb<true, T>
 template <typename T>
 inline void pre_resampling (T &value)
 {
-    resampling_tbb<internal::is_base_of<StateCLTrait, T>::value, T>::
+    resampling_tbb<internal::is_base_of<StateCLTag, T>::value, T>::
         pre_resampling(value);
-    resampling_tbb<internal::is_base_of<StateTBBTrait, T>::value, T>::
+    resampling_tbb<internal::is_base_of<StateTBBTag, T>::value, T>::
         pre_resampling(value);
 }
 
 template <typename T>
 inline void post_resampling (T &value)
 {
-    resampling_tbb<internal::is_base_of<StateCLTrait, T>::value, T>::
+    resampling_tbb<internal::is_base_of<StateCLTag, T>::value, T>::
         post_resampling(value);
-    resampling_tbb<internal::is_base_of<StateTBBTrait, T>::value, T>::
+    resampling_tbb<internal::is_base_of<StateTBBTag, T>::value, T>::
         post_resampling(value);
 }
 

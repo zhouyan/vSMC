@@ -22,7 +22,8 @@ namespace vsmc {
 /// when entering and exiting run_parallel_for(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
-class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
+class StateTBB :
+    public StateSeq<Dim, T>, public StateTBBTag, public internal::Types
 {
     public :
 
@@ -96,7 +97,8 @@ class StateTBB : public StateSeq<Dim, T>, public StateTBBTrait
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class InitializeTBB : public InitializeSeq<T>, public InitializeTBBTrait
+class InitializeTBB :
+    public InitializeSeq<T>, public InitializeTBBTag, public internal::Types
 {
     public :
 
@@ -147,7 +149,7 @@ class InitializeTBB : public InitializeSeq<T>, public InitializeTBBTrait
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class MoveTBB : public MoveSeq<T>, public MoveTBBTrait
+class MoveTBB : public MoveSeq<T>, public MoveTBBTag, public internal::Types
 {
     public :
 
@@ -199,7 +201,8 @@ class MoveTBB : public MoveSeq<T>, public MoveTBBTrait
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
-class MonitorTBB : public MonitorSeq<T, Dim>, public MonitorTBBTrait
+class MonitorTBB :
+    public MonitorSeq<T, Dim>, public MonitorTBBTag, public internal::Types
 {
     public :
 
@@ -245,7 +248,7 @@ class MonitorTBB : public MonitorSeq<T, Dim>, public MonitorTBBTrait
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class PathTBB : public PathSeq<T>, public PathTBBTrait
+class PathTBB : public PathSeq<T>, public PathTBBTag, public internal::Types
 {
     public :
 

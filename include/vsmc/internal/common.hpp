@@ -50,7 +50,7 @@
 #include <vsmc/rng/random.hpp>
 
 #include <vsmc/internal/types.hpp>
-#include <vsmc/internal/traits.hpp>
+#include <vsmc/internal/tags.hpp>
 #include <vsmc/internal/profiler.hpp>
 #include <vsmc/internal/forward.hpp>
 

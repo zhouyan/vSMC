@@ -18,6 +18,18 @@ enum ResampleScheme {
     RESIDUAL_SYSTEMATIC  ///< Systematic resampling on the residuals
 }; // enum ResamleScheme
 
+namespace internal {
+
+class Types
+{
+    public :
+
+    /// The type of the size of the particle set
+    typedef VSMC_INDEX_TYPE size_type;
+}; // class Types
+
+} // namespace vsmc::internal
+
 } // namespace vsmc
 
 #endif // VSMC_INTERNAL_TYPES_HPP

@@ -10,7 +10,7 @@ namespace vsmc {
 ///
 /// \tparam T Particle<T>::value_type
 template <typename T>
-class Sampler : public SamplerTrait
+class Sampler : public internal::Types
 {
     public :
 

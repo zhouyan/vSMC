@@ -11,7 +11,7 @@ namespace vsmc {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
-class StateBase : public StateBaseTrait
+class StateBase : public StateBaseTag, public internal::Types
 {
     public :
 

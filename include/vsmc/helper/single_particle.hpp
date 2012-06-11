@@ -10,7 +10,7 @@ namespace vsmc {
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class SingleParticle : public SingleParticleTrait
+class SingleParticle : public internal::Types
 {
     public :
 
@@ -129,7 +129,7 @@ class SingleParticle : public SingleParticleTrait
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class ConstSingleParticle : public ConstSingleParticleTrait
+class ConstSingleParticle : public internal::Types
 {
     public :
 
