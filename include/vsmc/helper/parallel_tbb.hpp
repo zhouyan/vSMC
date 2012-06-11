@@ -22,15 +22,15 @@ namespace vsmc {
 /// when entering and exiting run_parallel_for(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
-class StateTBB :
-    public StateSeq<Dim, T>, public StateTBBTag, public internal::Types
+class StateTBB : public StateBase<Dim, T>,
+    public internal::StateTBBTag, public internal::Types
 {
     public :
 
     typedef T state_type;
 
     explicit StateTBB (size_type N) :
-        StateSeq<Dim, T>(N), size_(N), copy_(N) {}
+        StateBase<Dim, T>(N), size_(N), copy_(N) {}
 
     virtual ~StateTBB () {}
 
@@ -97,8 +97,7 @@ class StateTBB :
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class InitializeTBB :
-    public InitializeSeq<T>, public InitializeTBBTag, public internal::Types
+class InitializeTBB : public internal::InitializeTBBTag, public internal::Types
 {
     public :
 
@@ -115,6 +114,11 @@ class InitializeTBB :
 
         return accept_.sum();
     }
+
+    virtual unsigned initialize_state (SingleParticle<T> part) = 0;
+    virtual void initialize_param (Particle<T> &particle, void *param) {}
+    virtual void pre_processor (Particle<T> &particle) {}
+    virtual void post_processor (Particle<T> &particle) {}
 
     private :
 
@@ -149,7 +153,7 @@ class InitializeTBB :
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class MoveTBB : public MoveSeq<T>, public MoveTBBTag, public internal::Types
+class MoveTBB : public internal::MoveTBBTag, public internal::Types
 {
     public :
 
@@ -165,6 +169,10 @@ class MoveTBB : public MoveSeq<T>, public MoveTBBTag, public internal::Types
 
         return accept_.sum();
     }
+
+    virtual unsigned move_state (unsigned iter, SingleParticle<T> part) = 0;
+    virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
+    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
 
     private :
 
@@ -201,8 +209,7 @@ class MoveTBB : public MoveSeq<T>, public MoveTBBTag, public internal::Types
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
-class MonitorTBB :
-    public MonitorSeq<T, Dim>, public MonitorTBBTag, public internal::Types
+class MonitorTBB : public internal::MonitorTBBTag, public internal::Types
 {
     public :
 
@@ -214,6 +221,16 @@ class MonitorTBB :
         particle.value().run_parallel_for(
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
+    }
+
+    virtual void monitor_state (unsigned iter, ConstSingleParticle<T> part,
+            double *res) = 0;
+    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
+    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
+
+    static unsigned dim ()
+    {
+        return Dim;
     }
 
     private :
@@ -248,7 +265,7 @@ class MonitorTBB :
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class PathTBB : public PathSeq<T>, public PathTBBTag, public internal::Types
+class PathTBB : public internal::PathTBBTag, public internal::Types
 {
     public :
 
@@ -264,6 +281,13 @@ class PathTBB : public PathSeq<T>, public PathTBBTag, public internal::Types
 
         return this->width_state(iter, particle);
     }
+
+    virtual double path_state (unsigned iter,
+            ConstSingleParticle<T> part) = 0;
+    virtual double width_state (unsigned iter,
+            const Particle<T> &particle) = 0;
+    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
+    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
 
     private :
 

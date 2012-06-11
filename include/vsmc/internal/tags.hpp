@@ -1,7 +1,7 @@
 #ifndef VSMC_INTERNAL_TAGS_HPP
 #define VSMC_INTERNAL_TAGS_HPP
 
-namespace vsmc {
+namespace vsmc { namespace internal {
 
 class StateBaseTag {};
 class ParallelTag  {};
@@ -24,6 +24,6 @@ class MoveCLTag :        public ParallelTag {};
 class MonitorCLTag :     public ParallelTag {};
 class PathCLTag :        public ParallelTag {};
 
-} // namespace vsmc
+} } // namespace vsmc::internal
 
 #endif // VSMC_INTERNAL_TAGS_HPP
