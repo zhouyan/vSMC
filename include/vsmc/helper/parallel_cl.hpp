@@ -13,7 +13,7 @@
 
 namespace vsmc {
 
-/// \brief Particle<T>::value_type subtype
+/// \brief Particle::value_type subtype
 /// \ingroup OpenCL
 ///
 /// \tparam Dim The dimension of the state parameter vector

@@ -3,25 +3,26 @@
 
 namespace vsmc {
 
-class StateBaseTag           {};
+class StateBaseTag {};
+class ParallelTag  {};
 
-class StateSeqTag            {};
-class InitializeSeqTag       {};
-class MoveSeqTag             {};
-class MonitorSeqTag          {};
-class PathSeqTag             {};
+class StateSeqTag      {};
+class InitializeSeqTag {};
+class MoveSeqTag       {};
+class MonitorSeqTag    {};
+class PathSeqTag       {};
 
-class StateTBBTag            {};
-class InitializeTBBTag       {};
-class MoveTBBTag             {};
-class MonitorTBBTag          {};
-class PathTBBTag             {};
+class StateTBBTag :      public ParallelTag {};
+class InitializeTBBTag : public ParallelTag {};
+class MoveTBBTag :       public ParallelTag {};
+class MonitorTBBTag :    public ParallelTag {};
+class PathTBBTag :       public ParallelTag {};
 
-class StateCLTag             {};
-class InitializeCLTag        {};
-class MoveCLTag              {};
-class MonitorCLTag           {};
-class PathCLTag              {};
+class StateCLTag :       public ParallelTag {};
+class InitializeCLTag :  public ParallelTag {};
+class MoveCLTag :        public ParallelTag {};
+class MonitorCLTag :     public ParallelTag {};
+class PathCLTag :        public ParallelTag {};
 
 } // namespace vsmc
 
