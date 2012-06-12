@@ -28,6 +28,9 @@ class Monitor
 {
     public :
 
+    /// The type of the particle values
+    typedef T value_type;
+
     /// The type of evaluation functor
     typedef internal::function<void (
             unsigned, const Particle<T> &, double *)> eval_type;

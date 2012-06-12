@@ -14,6 +14,9 @@ class Path
 {
     public :
 
+    /// The type of the particle values
+    typedef T value_type;
+
     /// The type of path sampling evaluation functor
     typedef internal::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;

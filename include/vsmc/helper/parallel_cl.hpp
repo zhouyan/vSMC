@@ -34,6 +34,9 @@ class StateCL : public internal::StateCLTag
     /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
 
+    /// The type of profiler
+    typedef Profiler profiler_type;
+
     /// The type of the matrix of states returned by state_host()
     typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
 
@@ -616,7 +619,7 @@ class StateCL : public internal::StateCLTag
     cl::Buffer copy_device_;
     std::vector<size_type> copy_host_;
 
-    Profiler profiler_;
+    profiler_type profiler_;
 
     void setup_buffer ()
     {
@@ -681,6 +684,7 @@ class InitializeCL : public internal::InitializeCLTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~InitializeCL () {}
 
@@ -752,6 +756,7 @@ class MoveCL : public internal::MoveCLTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~MoveCL () {}
 
@@ -825,6 +830,7 @@ class MonitorCL : public internal::MonitorCLTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~MonitorCL () {}
 
@@ -904,6 +910,7 @@ class PathCL : public internal::PathCLTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~PathCL () {}
 

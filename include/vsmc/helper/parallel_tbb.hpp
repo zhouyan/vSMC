@@ -27,8 +27,8 @@ class StateTBB : public StateBase<Dim, T>, public internal::StateTBBTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
-
     typedef T state_type;
+    typedef Profiler profiler_type;
 
     explicit StateTBB (size_type N) :
         StateBase<Dim, T>(N), size_(N), copy_(N) {}
@@ -68,7 +68,7 @@ class StateTBB : public StateBase<Dim, T>, public internal::StateTBBTag
 
     size_type size_;
     std::vector<size_type> copy_;
-    mutable Profiler profiler_;
+    profiler_type profiler_;
 
     class copy_work_
     {
@@ -103,6 +103,7 @@ class InitializeTBB : public internal::InitializeTBBTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~InitializeTBB () {}
 
@@ -161,6 +162,7 @@ class MoveTBB : public internal::MoveTBBTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~MoveTBB () {}
 
@@ -219,6 +221,7 @@ class MonitorTBB : public internal::MonitorTBBTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~MonitorTBB () {}
 
@@ -277,6 +280,7 @@ class PathTBB : public internal::PathTBBTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~PathTBB () {}
 

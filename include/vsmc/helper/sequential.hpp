@@ -20,7 +20,6 @@ class StateSeq : public StateBase<Dim, T>, public internal::StateSeqTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
-
     typedef T state_type;
 
     explicit StateSeq (size_type N) : StateBase<Dim, T>(N) {}
@@ -38,6 +37,7 @@ class InitializeSeq : public internal::InitializeSeqTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~InitializeSeq () {}
 
@@ -69,6 +69,7 @@ class MoveSeq : public internal::MoveSeqTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~MoveSeq () {}
 
@@ -99,6 +100,7 @@ class MonitorSeq : public internal::MonitorSeqTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~MonitorSeq () {}
 
@@ -134,6 +136,7 @@ class PathSeq : public internal::PathSeqTag
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
 
     virtual ~PathSeq () {}
 

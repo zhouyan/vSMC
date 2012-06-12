@@ -17,6 +17,9 @@ class SingleParticle
     /// The type of the number of particles
     typedef VSMC_SIZE_TYPE size_type;
 
+    /// The type of the particle values
+    typedef T value_type;
+
     /// The type of the state parameters
     typedef typename T::state_type state_type;
 
@@ -137,6 +140,7 @@ class ConstSingleParticle
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
+    typedef T value_type;
     typedef typename T::state_type state_type;
     typedef typename Particle<T>::rng_type rng_type;
 

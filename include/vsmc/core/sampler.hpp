@@ -17,11 +17,23 @@ class Sampler
     /// The type of the number of particles
     typedef typename Particle<T>::size_type size_type;
 
+    /// The type of the particle values
+    typedef T value_type;
+
+    /// The type of the particle set
+    typedef Particle<T> particle_type;
+
+    /// The type of the monitor
+    typedef Monitor<T> monitor_type;
+
+    /// The type of the path
+    typedef Path<T> path_type;
+
     /// The type of Initialization functor
-    typedef internal::function<unsigned (Particle<T> &, void *)> init_type;
+    typedef internal::function<unsigned (particle_type &, void *)> init_type;
 
     /// The type of Move functor
-    typedef internal::function<unsigned (unsigned, Particle<T> &)> move_type;
+    typedef internal::function<unsigned (unsigned, particle_type &)> move_type;
 
     /// The type of the MCMC moves queue
     typedef std::deque<move_type> mcmc_queue_type;
@@ -36,7 +48,7 @@ class Sampler
     typedef std::deque<std::deque<unsigned> > accept_type;
 
     /// The type of Monitor map
-    typedef std::map<std::string, Monitor<T> > monitor_map_type;
+    typedef std::map<std::string, monitor_type> monitor_map_type;
 
     /// \brief Construct a sampler with a given number of particles
     ///
@@ -54,7 +66,7 @@ class Sampler
             const move_type &move = NULL,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5,
-            typename Particle<T>::seed_type seed = VSMC_RNG_SEED) :
+            typename particle_type::seed_type seed = VSMC_RNG_SEED) :
         init_(init), move_(move), scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0) {}
 
@@ -134,7 +146,7 @@ class Sampler
     /// \brief Read and write access to the particle set
     ///
     /// \return A reference to the latest particle set
-    Particle<T> &particle ()
+    particle_type &particle ()
     {
         return particle_;
     }
@@ -142,7 +154,7 @@ class Sampler
     /// \brief Read only access to the particle set
     ///
     /// \return A const reference to the latest particle set.
-    const Particle<T> &particle () const
+    const particle_type &particle () const
     {
         return particle_;
     }
@@ -260,9 +272,9 @@ class Sampler
     ///
     /// \sa Monitor<T>
     void monitor (const std::string &name, unsigned dim,
-            const typename Monitor<T>::eval_type &eval)
+            const typename monitor_type::eval_type &eval)
     {
-        monitor_.insert(std::make_pair(name, Monitor<T>(dim, eval)));
+        monitor_.insert(std::make_pair(name, monitor_type(dim, eval)));
         monitor_name_.insert(name);
     }
 
@@ -322,7 +334,7 @@ class Sampler
     /// \brief Read only access to the Path sampling monitor
     ///
     /// \return A const reference to the Path sampling monitor
-    const Path<T> &path () const
+    const path_type &path () const
     {
         return path_;
     }
@@ -330,7 +342,7 @@ class Sampler
     /// \brief Read and write access to the Path sampling monitor
     ///
     /// \return A reference to the Path sampling monitor
-    Path<T> &path ()
+    path_type &path ()
     {
         return path_;
     }
@@ -340,7 +352,7 @@ class Sampler
     /// \param eval The functor used to compute the integrands or results
     ///
     /// \sa Path::eval_type
-    void path_sampling (const typename Path<T>::eval_type &eval)
+    void path_sampling (const typename path_type::eval_type &eval)
     {
         path_.set_eval(eval);
     }
@@ -517,7 +529,7 @@ class Sampler
     ResampleScheme scheme_;
     double threshold_;
 
-    Particle<T> particle_;
+    particle_type particle_;
     unsigned iter_num_;
     ess_type ess_;
     resampled_type resampled_;
@@ -525,7 +537,7 @@ class Sampler
 
     monitor_map_type monitor_;
     std::set<std::string> monitor_name_;
-    Path<T> path_;
+    path_type path_;
 
     void post_move ()
     {
