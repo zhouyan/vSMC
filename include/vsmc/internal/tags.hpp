@@ -3,7 +3,6 @@
 
 namespace vsmc { namespace internal {
 
-class StateBaseTag {};
 class ParallelTag  {};
 
 class StateSeqTag      {};

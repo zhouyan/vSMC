@@ -560,18 +560,18 @@ class StateCL : public internal::StateCLTag
         profiler_.stop();
     }
 
-    virtual void copy (size_type from, size_type to)
+    void copy (size_type from, size_type to)
     {
         copy_host_[to] = from;
     }
 
-    virtual void pre_resampling ()
+    void pre_resampling ()
     {
         for (size_type i = 0; i != size_; ++i)
             copy_host_[i] = i;
     }
 
-    virtual void post_resampling ()
+    void post_resampling ()
     {
         assert(build_);
 
@@ -688,7 +688,7 @@ class InitializeCL : public internal::InitializeCLTag
 
     virtual ~InitializeCL () {}
 
-    virtual unsigned operator() (Particle<T> &particle, void *param)
+    unsigned operator() (Particle<T> &particle, void *param)
     {
         set_kernel(particle);
         initialize_param(particle, param);
@@ -760,7 +760,7 @@ class MoveCL : public internal::MoveCLTag
 
     virtual ~MoveCL () {}
 
-    virtual unsigned operator() (unsigned iter, Particle<T> &particle)
+    unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         set_kernel(iter, particle);
         pre_processor(iter, particle);
@@ -834,7 +834,7 @@ class MonitorCL : public internal::MonitorCLTag
 
     virtual ~MonitorCL () {}
 
-    virtual void operator() (unsigned iter, const Particle<T> &particle,
+    void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
         set_kernel(iter, particle);
@@ -914,7 +914,7 @@ class PathCL : public internal::PathCLTag
 
     virtual ~PathCL () {}
 
-    virtual double operator() (unsigned iter, const Particle<T> &particle,
+    double operator() (unsigned iter, const Particle<T> &particle,
         double *res)
     {
         set_kernel(iter, particle);

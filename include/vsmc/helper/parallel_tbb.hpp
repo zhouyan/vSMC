@@ -22,7 +22,8 @@ namespace vsmc {
 /// when entering and exiting run_parallel_for(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
-class StateTBB : public StateBase<Dim, T>, public internal::StateTBBTag
+class StateTBB :
+    public internal::StateBase<Dim, T>, public internal::StateTBBTag
 {
     public :
 
@@ -31,7 +32,7 @@ class StateTBB : public StateBase<Dim, T>, public internal::StateTBBTag
     typedef Profiler profiler_type;
 
     explicit StateTBB (size_type N) :
-        StateBase<Dim, T>(N), size_(N), copy_(N) {}
+        internal::StateBase<Dim, T>(N), size_(N), copy_(N) {}
 
     virtual ~StateTBB () {}
 
@@ -53,13 +54,13 @@ class StateTBB : public StateBase<Dim, T>, public internal::StateTBBTag
         copy_[to] = from;
     }
 
-    virtual void pre_resampling ()
+    void pre_resampling ()
     {
         for (size_type i = 0; i != this->size(); ++i)
             copy_[i] = i;
     }
 
-    virtual void post_resampling ()
+    void post_resampling ()
     {
         run_parallel_for(copy_work_(this, copy_.data()));
     }
@@ -284,8 +285,7 @@ class PathTBB : public internal::PathTBBTag
 
     virtual ~PathTBB () {}
 
-    double operator() (unsigned iter, const Particle<T> &particle,
-            double *res)
+    double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
         particle.value().run_parallel_for(

@@ -15,16 +15,22 @@ namespace vsmc {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
-class StateSeq : public StateBase<Dim, T>, public internal::StateSeqTag
+class StateSeq :
+    public internal::StateBase<Dim, T>, public internal::StateSeqTag
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T state_type;
 
-    explicit StateSeq (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateSeq (size_type N) : internal::StateBase<Dim, T>(N) {}
 
     virtual ~StateSeq () {}
+
+    void copy (size_type from, size_type to)
+    {
+        this->state().col(to) = this->state().col(from);
+    }
 }; // class StateSeq
 
 /// \brief Sampler<T>::init_type subtype
@@ -41,7 +47,7 @@ class InitializeSeq : public internal::InitializeSeqTag
 
     virtual ~InitializeSeq () {}
 
-    virtual unsigned operator() (Particle<T> &particle, void *param)
+    unsigned operator() (Particle<T> &particle, void *param)
     {
         initialize_param(particle, param);
         pre_processor(particle);
@@ -73,7 +79,7 @@ class MoveSeq : public internal::MoveSeqTag
 
     virtual ~MoveSeq () {}
 
-    virtual unsigned operator() (unsigned iter, Particle<T> &particle)
+    unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         pre_processor(iter, particle);
         unsigned accept = 0;
@@ -104,8 +110,7 @@ class MonitorSeq : public internal::MonitorSeqTag
 
     virtual ~MonitorSeq () {}
 
-    virtual void operator() (unsigned iter, const Particle<T> &particle,
-            double *res)
+    void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         pre_processor(iter, particle);
         for (size_type i = 0; i != particle.size(); ++i) {
@@ -140,8 +145,7 @@ class PathSeq : public internal::PathSeqTag
 
     virtual ~PathSeq () {}
 
-    virtual double operator() (unsigned iter, const Particle<T> &particle,
-            double *res)
+    double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         pre_processor(iter, particle);
         for (size_type i = 0; i != particle.size(); ++i)

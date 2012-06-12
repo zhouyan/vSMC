@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 
-namespace vsmc {
+namespace vsmc { namespace internal {
 
 /// \brief Particle::value_type subtype
 /// \ingroup Helper
@@ -11,7 +11,7 @@ namespace vsmc {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
-class StateBase : public internal::StateBaseTag
+class StateBase
 {
     public :
 
@@ -112,21 +112,12 @@ class StateBase : public internal::StateBaseTag
         return state_;
     }
 
-    /// \brief The copy method used by the Sampler
-    ///
-    /// \param from The index of particle whose state to be copied
-    /// \param to The index of particle to which new state to be written
-    virtual void copy (size_type from, size_type to)
-    {
-        state_.col(to) = state_.col(from);
-    }
-
     private :
 
     size_type size_;
     state_mat_type state_;
 }; // class StateBase
 
-} // namespace vsmc
+} } // namespace vsmc::internal
 
 #endif // VSMC_HELPER_STATE_BASE_HPP
