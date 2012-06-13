@@ -8,15 +8,15 @@
 #include <vsmc/rng/r123_engine.hpp>
 #endif // VSMC_USE_SEQUENTIAL_RNG
 
-#ifdef VSMC_USE_STD_RANDOM
+#if VSMC_HAS_CXX11LIB_RANDOM
 #include <random>
-#else // VSMC_USE_STD_RANDOM
+#else // VSMC_USE_CXX11LIB_RANDOM
 #include <boost/random.hpp>
-#endif // VSMC_USE_STD_RANDOM
+#endif // VSMC_USE_CXX11LIB_RANDOM
 
 namespace vsmc { namespace rng {
 
-#ifdef VSMC_USE_STD_RANDOM
+#if VSMC_HAS_CXX11LIB_RANDOM
 
 using std::minstd_rand0;
 using std::minstd_rand;
@@ -53,7 +53,7 @@ using std::discrete_distribution;
 using std::piecewise_constant_distribution;
 using std::piecewise_linear_distribution;
 
-#else // VSMC_USE_STD_RANDOM
+#else // VSMC_HAS_CXX11LIB_RANDOM
 
 using boost::random::minstd_rand0;
 using boost::random::minstd_rand;
@@ -94,7 +94,7 @@ using boost::random::discrete_distribution;
 using boost::random::piecewise_constant_distribution;
 using boost::random::piecewise_linear_distribution;
 
-#endif // VSMC_USE_STD_RANDOM
+#endif // VSMC_HAS_CXX11LIB_RANDOM
 
 } } // namespace vsmc::rng
 

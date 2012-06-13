@@ -3,33 +3,48 @@
 
 #ifdef NDEBUG
 #define VSMC_NDEBUG
-#endif // NDEBUG
+#endif
 
-// Uncomment the following line to use C++11 <functional>
-// #define VSMC_USE_STD_FUNCTION
+#ifdef VSMC_USE_STD_FUNCTION
+#define VSMC_HAS_CXX11LIB_FUNCTION 1
+#endif
 
-// Uncomment the following line to use C++11 <random>
-// #define VSMC_USE_STD_RANDOM
+#ifdef VSMC_USE_STD_RANDOM
+#define VSMC_HAS_CXX11LIB_RANDOM 1
+#endif
 
-// Uncomment the following line to use C++11 <type_traits>
-// #define VSMC_USE_STD_TYPE_TRAITS
-
-// Uncomment the following line to use sequential pseudo RNG
-// #define VSMC_USE_SEQUENTIAL_RNG
+#ifdef VSMC_USE_STD_TYEP_TRAITS
+#define VSMC_HAS_CXX11LIB_TYEP_TRAITS 1
+#endif
 
 #include <vsmc/internal/compiler.hpp>
 
-#if defined(VSMC_USE_CONSTEXPR_ENGINE) && !defined(VSMC_USE_SEQUENTIAL_RNG)
-#define VSMC_USE_STD_RANDOM
-#endif // VSMC_USE_CONSTEXPR_ENGINE
+#ifndef VSMC_HAS_CXX11_AUTO_TYPE
+#define VSMC_HAS_CXX11_AUTO_TYPE 0
+#endif
 
-#if !defined(VSMC_USE_STD_FUNCITON) || !defined(VSMC_USE_STD_RANDOM)
-#include <boost/version.hpp>
-#ifndef VSMC_NDEBUG
-#if BOOST_VERSION < 104900
-#warning vSMC was only tested against Boost 1.49 and later
-#endif // BOOST_VERSION < 104900
-#endif // VSMC_NDEBUG
-#endif // !defined(VSMC_USE_STD_FUNCITON) || !defined(VSMC_USE_STD_RANDOM)
+#ifndef VSMC_HAS_CXX11_CONSTEXPR
+#define VSMC_HAS_CXX11_CONSTEXPR 0
+#endif
+
+#ifndef VSMC_HAS_CXX11_DECLTYPE
+#define VSMC_HAS_CXX11_DECLTYPE 0
+#endif
+
+#ifndef VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
+#define VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_FUNCTION
+#define VSMC_HAS_CXX11LIB_FUNCTION 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_RANDOM
+#define VSMC_HAS_CXX11LIB_RANDOM 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
+#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
+#endif
 
 #endif // VSMC_INTERNAL_CONFIG_HPP

@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/config.hpp>
 
-#ifdef VSMC_USE_STD_TYPE_TRAITS
+#if VSMC_HAS_CXX11LIB_TYPE_TRAITS
 
 #include <type_traits>
 namespace vsmc { namespace internal {
@@ -14,7 +14,7 @@ using std::is_pointer;
 using std::remove_pointer;
 } }
 
-#else // VSMC_USE_STD_TYPE_TRAITS
+#else // VSMC_HAS_CXX11LIB_TYPE_TRAITS
 
 #include <boost/type_traits.hpp>
 namespace vsmc { namespace internal {
@@ -25,6 +25,6 @@ using boost::is_pointer;
 using boost::remove_pointer;
 } }
 
-#endif // VSMC_USE_STD_TYPE_TRAITS
+#endif // VSMC_HAS_CXX11LIB_TYPE_TRAITS
 
 #endif // VSMC_INTERNAL_TYPE_TRATIS
