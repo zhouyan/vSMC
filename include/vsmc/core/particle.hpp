@@ -251,7 +251,7 @@ class Particle
         resampled_ = ess() < threshold * size_;
 
         if (resampled_) {
-            internal::pre_resampling(value_);
+            internal::pre_resampling(&value_);
             switch (scheme) {
                 case MULTINOMIAL :
                     resample_multinomial();
@@ -273,7 +273,7 @@ class Particle
                     break;
             }
             resample_do();
-            internal::post_resampling(value_);
+            internal::post_resampling(&value_);
         }
     }
 

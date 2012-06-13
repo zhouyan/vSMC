@@ -24,7 +24,10 @@ namespace vsmc {
 /// when entering and exiting run_kernel(). This shall provide how much time
 /// are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
-class StateCL : public internal::ParallelTag
+class StateCL
+#if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
+    : public internal::ParallelTag
+#endif
 {
     public :
 

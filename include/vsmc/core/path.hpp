@@ -74,7 +74,7 @@ class Path
     /// \brief Test if the monitor is valid
     ///
     /// \return \b true if the monitor is valid
-#ifdef VSMC_HAS_CXX11_EXPLICIT_CONVERSION
+#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
     explicit
 #endif
         operator bool () const
