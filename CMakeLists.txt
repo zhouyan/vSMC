@@ -74,10 +74,6 @@ CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/config/version.hpp.in
     ${PROJECT_SOURCE_DIR}/include/vsmc/internal/version.hpp)
 
-CONFIGURE_FILE (
-    ${PROJECT_SOURCE_DIR}/config/config.hpp.in
-    ${PROJECT_SOURCE_DIR}/include/vsmc/internal/config.hpp)
-
 # Installation
 IF (NOT INSTALL_INCLUDE_DIR)
     SET (INSTALL_INCLUDE_DIR include)
