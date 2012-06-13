@@ -1,7 +1,7 @@
 #ifndef VSMC_INTERNAL_COMPILER_INTEL_HPP
 #define VSMC_INTERNAL_COMPILER_INTEL_HPP
 
-#if __cplusplus >= 201103L
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
 
 #if __INTEL_COMPILER >= 1100
 #ifndef VSMC_HAS_CXX11_AUTO_TYPE
@@ -43,6 +43,6 @@
 #endif
 #endif // __INTEL_COMPILER >= 1300
 
-#endif // __cplusplus >= 201103L
+#endif // __GXX_EXPERIMENTAL_CXX0X__
 
 #endif // VSMC_INTERNAL_COMPILER_INTEL_HPP

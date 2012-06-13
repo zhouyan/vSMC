@@ -91,6 +91,8 @@ class Monitor
     /// \brief Test if the monitor is valid
     ///
     /// \return \b true if the monitor is valid
+    ///
+    /// \note This operator will be \c explicit if the C++11 feature is enabled
 #if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
     explicit
 #endif
