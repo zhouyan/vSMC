@@ -82,14 +82,14 @@ class SingleParticle
     double weight () const
     {
         assert(particle_);
-        return particle_->weight(id_);
+        return particle_->weight()[id_];
     }
 
     /// The log weight of this particle
     double log_weight () const
     {
         assert(particle_);
-        return particle_->log_weight(id_);
+        return particle_->log_weight()[id_];
     }
 
     /// Read only access to all particles
@@ -149,13 +149,13 @@ class ConstSingleParticle
     double weight () const
     {
         assert(particle_);
-        return particle_->weight(id_);
+        return particle_->weight()[id_];
     }
 
     double log_weight () const
     {
         assert(particle_);
-        return particle_->log_weight(id_);
+        return particle_->log_weight()[id_];
     }
 
     const Particle<T> &particle () const

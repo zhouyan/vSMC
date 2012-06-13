@@ -78,21 +78,7 @@ class Particle
         return value_;
     }
 
-    /// \brief Get the weight of a single particle
-    ///
-    /// \param id The position of the particle, 0 to size() - 1
-    double weight (size_type id) const
-    {
-        return weight()[id];
-    }
-
-    /// Read only access to the weights through pointer
-    const double *weight_ptr () const
-    {
-        return weight().data();
-    }
-
-    /// Read only access to the weights through Eigen vector
+    /// Read only access to the weights
     const weight_type &weight () const
     {
         if (!weight_cached_) {
@@ -107,21 +93,7 @@ class Particle
         return weight_;
     }
 
-    /// \brief Get the log weight of a single particle
-    ///
-    /// \param id The position of the particle, 0 to size() - 1
-    double log_weight (size_type id) const
-    {
-        return log_weight()[id];
-    }
-
-    /// Read only access to the log weights through pointer
-    const double *log_weight_ptr () const
-    {
-        return log_weight().data();
-    }
-
-    /// Read only access to the log weights through Eigen vector
+    /// Read only access to the log weights
     const weight_type &log_weight () const
     {
         return log_weight_;
