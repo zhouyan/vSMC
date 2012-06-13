@@ -18,7 +18,13 @@
 #endif // _MSC_VER
 
 namespace vsmc { namespace rng {
+
 #ifdef VSMC_USE_CONSTEXPR_ENGINE
+
+#if !VSMC_HAS_CXX11_CONSTEXPR
+#error VSMC_HAS_CXX11_CONSTEXPR has to be defined to a\
+    non-zero value to enable VSMC_USE_CONSTEXPR_ENGINE
+#endif
 
 /// \brief An Engine with constexpr min() and max()
 /// \ingroup RNG

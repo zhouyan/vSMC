@@ -13,6 +13,16 @@
 #endif
 #endif // __has_feature(cxx_auto_type)
 
+#if __has_feature(cxx_constexpr)
+#ifndef VSMC_HAS_CXX11_CONSTEXPR
+#define VSMC_HAS_CXX11_CONSTEXPR 1
+#endif
+#else // __has_feature(cxx_constexpr)
+#ifndef VSMC_HAS_CXX11_CONSTEXPR
+#define VSMC_HAS_CXX11_CONSTEXPR 0
+#endif
+#endif // __has_feature(cxx_constexpr)
+
 #if __has_feature(cxx_decltype)
 #ifndef VSMC_HAS_CXX11_DECLTYPE
 #define VSMC_HAS_CXX11_DECLTYPE 1

@@ -13,6 +13,16 @@
 #endif
 #endif // __GNUC__ >= 4 && __GNUC_MINOR >= 3
 
+#if __GNUC__ >= 4 && __GNUC_MINOR >= 6
+#ifndef VSMC_HAS_CXX11_CONSTEXPR
+#define VSMC_HAS_CXX11_CONSTEXPR 1
+#endif
+#else // __GNUC__ >= 4 && __GNUC_MINOR >= 6
+#ifndef VSMC_HAS_CXX11_CONSTEXPR
+#define VSMC_HAS_CXX11_CONSTEXPR 0
+#endif
+#endif // __GNUC__ >= 4 && __GNUC_MINOR >= 6
+
 #if __GNUC__ >= 4 && __GNUC_MINOR >= 4
 #ifndef VSMC_HAS_CXX11_DECLTYPE
 #define VSMC_HAS_CXX11_DECLTYPE 1
