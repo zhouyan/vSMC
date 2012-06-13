@@ -116,25 +116,11 @@ class Particle
         log_weight_cached_ = true;
     }
 
-    /// \brief Set the log weights with an iterator
+    /// \brief Set the log weights with a pointer
     ///
-    /// \param first The position to start the reading, it shall be valid after
-    /// increments of size() times.
+    /// \param new_weight The position to start the reading, it shall be valid
+    /// after increments of size() times.
     /// \param delta A multiplier appiled to the new log weights
-    template <typename InputIter>
-    void set_log_weight (InputIter first, double delta = 1)
-    {
-        size_type i = 0;
-        while (i != size_) {
-            log_weight_[i] = *first;
-            ++first;
-            ++i;
-        }
-        log_weight_ *= delta;
-        set_log_weight();
-    }
-
-    /// Set the log weights with a pointer
     void set_log_weight (const double *new_weight, double delta = 1)
     {
         Eigen::Map<const weight_type> w(new_weight, size_);
@@ -148,33 +134,13 @@ class Particle
         set_log_weight();
     }
 
-    /// \brief Add to the log weights with an iterator
+    /// \brief Add to the log weights with a pointer
     ///
-    /// \param first The position to start the reading, it shall be valid after
-    /// increments of size() times.
+    /// \param inc_weight The position to start the reading, it shall be valid
+    /// after increments of size() times.
     /// \param delta A multiplier appiled to the new incremental log weights
     /// \param add_zconst Whether this incremental weights shall contribute to
     /// the SMC normalizing constant estimate
-    template <typename InputIter>
-    void add_log_weight (InputIter first, double delta = 1,
-            bool add_zconst = true)
-    {
-        using std::log;
-
-        size_type i = 0;
-        while (i != size_) {
-            inc_weight_[i] = *first;
-            ++first;
-            ++i;
-        }
-        inc_weight_ *= delta;
-        log_weight_ += inc_weight_;
-        if (add_zconst)
-            zconst_ += log(weight().dot(inc_weight_.array().exp().matrix()));
-        set_log_weight();
-    }
-
-    /// Add to the log weights with a pointer
     void add_log_weight (const double *inc_weight, double delta = 1,
             bool add_zconst = true)
     {
