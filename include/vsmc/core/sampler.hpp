@@ -70,122 +70,91 @@ class Sampler
         init_(init), move_(move), scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0) {}
 
-    /// \brief Size of the particle set
-    ///
-    /// \return The number of particles
+    /// Size of the particle set
     size_type size () const
     {
         return particle_.size();
     }
 
-    /// \brief The number of iterations recorded
-    ///
-    /// \return The number of iterations recorded so far (including the
-    /// initialization)
+    /// The number of iterations recorded (including initialization)
     unsigned iter_size () const
     {
         return ess_.size();
     }
 
-    /// \brief Get the current resampling scheme
-    ///
-    /// \return The current resampling scheme
+    /// The current resampling scheme
     ResampleScheme resample_scheme () const
     {
         return scheme_;
     }
 
-    /// \brief Set new resampling scheme
-    ///
-    /// \param scheme The new scheme for resampling
+    /// Set new resampling scheme
     void resample_scheme (ResampleScheme scheme)
     {
         scheme_ = scheme;
     }
 
-    /// \brief Get the current threshold
-    ///
-    /// \return The current threshold for resmapling
+    /// The current threshold
     double resample_threshold () const
     {
         return threshold_;
     }
 
-    /// \brief Set new resampling threshold
-    ///
-    /// \param threshold The new threshold for resampling
+    /// Set new resampling threshold
     void resample_threshold (double threshold)
     {
         threshold_ = threshold;
     }
 
-    /// \brief ESS history
-    ///
-    /// \return A const reference to the history of ESS
+    /// ESS history
     const ess_type &ess () const
     {
         return ess_;
     }
 
-    /// \brief Resampling history
-    ///
-    /// \return A const reference to the history of resampling
+    /// Resampling history
     const resampled_type &resampled () const
     {
         return resampled_;
     }
 
-    /// \brief Accept count history
-    ///
-    /// \return A const reference to the history of accept count
+    /// Accept count history
     const accept_type &accept () const
     {
         return accept_;
     }
 
-    /// \brief Read and write access to the particle set
-    ///
-    /// \return A reference to the latest particle set
+    /// Read and write access to the particle set
     particle_type &particle ()
     {
         return particle_;
     }
 
-    /// \brief Read only access to the particle set
-    ///
-    /// \return A const reference to the latest particle set.
+    /// Read only access to the particle set
     const particle_type &particle () const
     {
         return particle_;
     }
 
-    /// \brief Set new initialization functor
-    ///
-    /// \param new_init New Initialization functor
+    /// Set new initialization functor
     void init (const init_type &new_init)
     {
         init_ = new_init;
     }
 
-    /// \brief Set new move functor
-    ///
-    /// \param new_move New Move functor
+    /// Set new move functor
     void move (const move_type &new_move)
     {
         move_ = new_move;
     }
 
-    /// \brief Read only access to the MCMC moves queue
-    ///
-    /// \return A const reference to the MCMC moves queue
+    /// Read only access to the MCMC moves queue
     const mcmc_queue_type &mcmc () const
     {
         return mcmc_;
     }
 
-    /// \brief Read and write access to the MCMC moves queue
-    ///
-    /// \return A reference to the MCMC moves queue
+    /// Read and write access to the MCMC moves queue
     mcmc_queue_type &mcmc ()
     {
         return mcmc_;
@@ -224,9 +193,7 @@ class Sampler
         particle_.reset_zconst();
     }
 
-    /// \brief Perform iteration
-    ///
-    /// \param num The number of iterations to be performed
+    /// Perform iteration for a given number times
     void iterate (unsigned num = 1)
     {
         for (unsigned i = 0; i != num; ++i) {
@@ -278,70 +245,52 @@ class Sampler
         monitor_name_.insert(name);
     }
 
-    /// \brief Read only access to a named monitor through an iterator
-    ///
-    /// \param name The name of the monitor
-    ///
-    /// \return An const_iterator point to the monitor for the given name
+    /// Read only access to a named monitor through an iterator
     typename monitor_map_type::const_iterator monitor (
             const std::string &name) const
     {
         return monitor_.find(name);
     }
 
-    /// \brief Read and write access to a named monitor through iterator
-    ///
-    /// \param name The name of the monitor
-    ///
-    /// \return An iterator point to the monitor for the given name
+    /// Read and write access to a named monitor through iterator
     typename monitor_map_type::iterator monitor (const std::string &name)
     {
         return monitor_.find(name);
     }
 
-    /// \brief Read only access to all monitors
-    ///
-    /// \return A const reference to monitors
+    /// Read only access to all monitors
     const monitor_map_type &monitor () const
     {
         return monitor_;
     }
 
-    /// \brief Read and write access to all monitors
-    ///
-    /// \return A reference to monitors
+    /// Read and write access to all monitors
     monitor_map_type &monitor ()
     {
         return monitor_;
     }
 
-    /// \brief Erase a named monitor
-    ///
-    /// \param name The name of the monitor
+    /// Erase a named monitor
     void clear_monitor (const std::string &name)
     {
         monitor_.erase(name);
         monitor_name_.erase(name);
     }
 
-    /// \brief Erase all monitors
+    /// Erase all monitors
     void clear_monitor ()
     {
         monitor_.clear();
         monitor_name_.clear();
     }
 
-    /// \brief Read only access to the Path sampling monitor
-    ///
-    /// \return A const reference to the Path sampling monitor
+    /// Read only access to the Path sampling monitor
     const path_type &path () const
     {
         return path_;
     }
 
-    /// \brief Read and write access to the Path sampling monitor
-    ///
-    /// \return A reference to the Path sampling monitor
+    /// Read and write access to the Path sampling monitor
     path_type &path ()
     {
         return path_;
@@ -357,17 +306,13 @@ class Sampler
         path_.set_eval(eval);
     }
 
-    /// \brief Path sampling estimate of normalizing constant
-    ///
-    /// \return The log ratio of normalizing constants
+    /// Path sampling estimate of the logarithm of normalizing constants ratio
     double path_sampling () const
     {
         return path_.zconst();
     }
 
-    /// \brief SMC estimate of normalizing constant
-    ///
-    /// \return The log ratio of normalizng constants
+    /// SMC estimate of the logarithm of normalizing constants ratio
     double zconst () const
     {
         return particle_.zconst();

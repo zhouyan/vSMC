@@ -26,7 +26,7 @@ class Particle
     typedef T value_type;
 
 #ifdef VSMC_USE_SEQUENTIAL_RNG
-    /// The type of the Counter-based random number generator C++11 engine
+    /// The type of the sequential pseudo random number generator C++11 engine
     typedef VSMC_SEQRNG_TYPE rng_type;
 #else
     /// The type of the Counter-based random number generator
@@ -39,7 +39,7 @@ class Particle
     /// The integer type of the seed
     typedef rng_type::result_type seed_type;
 
-    /// The type of the weight and log weight vector
+    /// The type of the weight and log weight vectors
     typedef Eigen::VectorXd weight_type;
 
     /// \brief Construct a Particle object with a given number of particles
@@ -60,25 +60,19 @@ class Particle
         set_equal_weight();
     }
 
-    /// \brief Size of the particle set
-    ///
-    /// \return The number of particles
+    /// Size of the particle set
     size_type size () const
     {
         return size_;
     }
 
-    /// \brief Read and write access to particle values
-    ///
-    /// \return A reference to the particle values
+    /// Read and write access to particle values
     value_type &value ()
     {
         return value_;
     }
 
-    /// \brief Read only access to particle values
-    ///
-    /// \return A const reference to the particle values
+    /// Read only access to particle values
     const value_type &value () const
     {
         return value_;
@@ -87,24 +81,18 @@ class Particle
     /// \brief Get the weight of a single particle
     ///
     /// \param id The position of the particle, 0 to size() - 1
-    ///
-    /// \return The weight of the particle at position id
     double weight (size_type id) const
     {
         return weight()[id];
     }
 
-    /// \brief Read only access to the weights through pointer
-    ///
-    /// \return A const pointer to the weight array
+    /// Read only access to the weights through pointer
     const double *weight_ptr () const
     {
         return weight().data();
     }
 
-    /// \brief Read only access to the weights through Eigen vector
-    ///
-    /// \return A const reference to the weight vector
+    /// Read only access to the weights through Eigen vector
     const weight_type &weight () const
     {
         if (!weight_cached_) {
@@ -122,30 +110,24 @@ class Particle
     /// \brief Get the log weight of a single particle
     ///
     /// \param id The position of the particle, 0 to size() - 1
-    ///
-    /// \return The log weight of the particle at position id
     double log_weight (size_type id) const
     {
         return log_weight()[id];
     }
 
-    /// \brief Read only access to the log weights through pointer
-    ///
-    /// \return A const pointer to the log weight array
+    /// Read only access to the log weights through pointer
     const double *log_weight_ptr () const
     {
         return log_weight().data();
     }
 
-    /// \brief Read only access to the log weights through Eigen vector
-    ///
-    /// \return A const reference to the log weight vector
+    /// Read only access to the log weights through Eigen vector
     const weight_type &log_weight () const
     {
         return log_weight_;
     }
 
-    /// \brief Set equal weights for all particles
+    /// Set equal weights for all particles
     void set_equal_weight ()
     {
         log_weight_.setConstant(0);
@@ -155,7 +137,7 @@ class Particle
         ess_cached_ = true;
     }
 
-    /// \brief Set the log weights
+    /// \brief Set the log weights with a pointer
     ///
     /// \param new_weight New log weights
     /// \param delta A multiplier appiled to new_weight
@@ -165,17 +147,14 @@ class Particle
         set_log_weight(w, delta);
     }
 
-    /// \brief Set the log weights
-    ///
-    /// \param new_weight New log weights
-    /// \param delta A multiplier appiled to new_weight
+    /// Set the log weights with a weight_type object
     void set_log_weight (const weight_type &new_weight, double delta = 1)
     {
         log_weight_ = delta * new_weight.head(size_);
         set_log_weight();
     }
 
-    /// \brief Add to the log weights
+    /// \brief Add to the log weights with a pointer
     ///
     /// \param inc_weight Incremental log weights
     /// \param delta A multiplier applied to inc_weight
@@ -188,12 +167,7 @@ class Particle
         add_log_weight(w, delta, add_zconst);
     }
 
-    /// \brief Add to the log weights
-    ///
-    /// \param inc_weight Incremental log weights
-    /// \param delta A multiplier applied to inc_weight
-    /// \param add_zconst Whether this incremental weights should contribute
-    /// the esitmates of normalizing constants
+    /// Add to the log weights with a weight_object object
     void add_log_weight (const weight_type &inc_weight, double delta = 1,
             bool add_zconst = true)
     {
@@ -207,9 +181,7 @@ class Particle
         set_log_weight();
     }
 
-    /// \brief The ESS (Effective Sample Size)
-    ///
-    /// \return The value of ESS for current particle set
+    /// The current ESS (Effective Sample Size)
     double ess () const
     {
         if (!ess_cached_) {
@@ -220,29 +192,26 @@ class Particle
         return ess_;
     }
 
-    /// \brief Get indicator of resampling
-    ///
-    /// \return \b true if the current iteration was resampled
+    /// Whether resampling was performed when resampling(scheme, threshold) was
+    /// last called.
     bool resampled () const
     {
         return resampled_;
     }
 
-    /// \brief Get the value of SMC normalizing constant
-    ///
-    /// \return Log of SMC normalizng constant estimate
+    /// Get the value of the logarithm of SMC normalizing constant
     double zconst () const
     {
         return zconst_;
     }
 
-    /// \brief Reset the value of SMC normalizing constant
+    /// Reset the value of logarithm of SMC normalizing constant to zero
     void reset_zconst ()
     {
         zconst_ = 0;
     }
 
-    /// \brief Perform resampling
+    /// \brief Perform resampling if ess() < threshold * size()
     ///
     /// \param scheme The resampling scheme, see ResamplingScheme
     /// \param threshold The threshold for resampling
@@ -294,16 +263,14 @@ class Particle
 #endif
     }
 
-    /// \brief Reset the parallel RNG system
-    ///
-    /// \param seed The new seed to the system
+    /// Reset the RNG system with a given seed
     void reset_rng (seed_type seed)
     {
         seed_ = seed;
         reset_rng();
     }
 
-    /// \brief Reset the parallel RNG system using last time used seed
+    /// Reset the parallel RNG system with the last used seed
     void reset_rng ()
     {
 #ifdef VSMC_USE_SEQUENTIAL_RNG

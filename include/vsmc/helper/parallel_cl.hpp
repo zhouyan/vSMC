@@ -64,17 +64,13 @@ class StateCL
         std::free(write_buffer_pool_);
     }
 
-    /// \brief The dimension of the problem
-    ///
-    /// \return The dimension of the parameter vector
+    /// The dimension of the problem
     static unsigned dim ()
     {
         return Dim;
     }
 
-    /// \brief The number of particles
-    ///
-    /// \return The number of particles in the current particle set
+    /// The number of particles
     size_type size () const
     {
         return size_;
@@ -176,43 +172,26 @@ class StateCL
             global_nd_range_ = cl::NDRange(size_);
     }
 
-    /// \brief The global cl::NDRange used by kernel calls
-    ///
-    /// \return A cl::NDRange object that is valid for the current setting of
-    /// local group size and larger than the particle set size.
+    /// The global cl::NDRange used by kernel calls
     cl::NDRange global_nd_range () const
     {
         return global_nd_range_;
     }
 
-    /// \brief The local cl::NDRange used by kernel calls
-    ///
-    /// \return A cl::NDRange object that can be used as the group size when
-    /// call a kernel. It is the same size of set by local_size() or
-    /// cl::NullRange if local_size() is set with zero.
+    /// The local cl::NDRange used by kernel calls
     cl::NDRange local_nd_range () const
     {
         return local_nd_range_;
     }
 
-    /// \brief Read only access to the memory buffer on the device that stores
-    /// the states
-    ///
-    /// \return A const reference to the cl::Buffer object. It is read only
-    /// with regard to the host code. The device code have read and write
-    /// access to the buffer.
+    /// Read only access to the memory buffer on the device that stores the
+    /// states
     const cl::Buffer &state_device () const
     {
         return state_device_;
     }
 
-    /// \brief Read only access to the states
-    ///
-    /// \return A const reference to a matrix of the states which have the
-    /// same contents as stored in the device memory buffer of state_device().
-    ///
-    /// \note This call will read the buffer from the device first, and
-    /// therefore is expensive.
+    /// Read only access to the states
     const state_mat_type &state_host () const
     {
         read_buffer<state_type>(state_device_, size_*Dim, state_host_.data());
@@ -220,30 +199,18 @@ class StateCL
         return state_host_;
     }
 
-    /// \brief Read only access to the memory buffer on the device that stores
-    /// the weights
+    /// \brief Read only access to the device buffer object that stores the
+    /// weights temparorie.
     ///
-    /// \return A const reference to the cl::Buffer object. It is read only
-    /// with regard to the host code. The device code have read and write
-    /// access to the buffer.
-    ///
-    /// \note Despite the name, this is not the current weights of the
-    /// particle system. It is intended to be used by clients to store and
-    /// manipulate the weights, for example the incremental weights. For
-    /// access to actual weights and log weights, always use the interface of
-    /// Particle.
+    /// \sa InitializeCL, MoveCL
     const cl::Buffer &weight_device () const
     {
         return weight_device_;
     }
 
-    /// \brief Read only access to the weights
+    /// \brief Read only access to the weights stored by weight_device()
     ///
-    /// \return A const reference to a matrix of the states which have the
-    /// same contents as stored in the device memory buffer of weight_device().
-    ///
-    /// \note This call will read the buffer from the device first, and
-    /// therefore is expensive.
+    /// \sa InitializeCL, MoveCL
     const weight_vec_type &weight_host () const
     {
         read_buffer<state_type>(weight_device_, size_, weight_host_.data());
@@ -251,28 +218,18 @@ class StateCL
         return weight_host_;
     }
 
-    /// \brief Read only access to the memory buffer on the device that stores
-    /// the accept counts
+    /// \brief Read only access to the device buffer object that stores the
+    /// accept counts temparorie.
     ///
-    /// \return A const reference to the cl::Buffer object. It is read only
-    /// with regard to the host code. The device code have read and write
-    /// access to the buffer.
-    ///
-    /// \note Despite the name, this is not the current accept counts of the
-    /// particle system. It is intended to be used by clients to store and
-    /// manipulate the accept counts.
+    /// \sa InitializeCL, MoveCL
     const cl::Buffer &accept_device () const
     {
         return accept_device_;
     }
 
-    /// \brief Read only access to the accept counts
+    /// \brief Read only access to the accept counts stored by accept_device()
     ///
-    /// \return A const reference to a matrix of the states which have the
-    /// same contents as stored in the device memory buffer of accept_device().
-    ///
-    /// \note This call will read the buffer from the device first, and
-    /// therefore is expensive.
+    /// \sa InitializeCL, MoveCL
     const accept_vec_type &accept_host () const
     {
         read_buffer<cl_uint>(accept_device_, size_, accept_host_.data());
@@ -430,9 +387,7 @@ class StateCL
         return build_;
     }
 
-    /// \brief Get the build log
-    ///
-    /// \return The compiler log of the last build.
+    /// The last build log
     std::string build_log () const
     {
         return build_log_;
@@ -442,8 +397,6 @@ class StateCL
     ///
     /// \tparam CLType An OpenCL type
     /// \param num The number of elements
-    ///
-    /// \return A cl::Buffer object corresponding to the newly created buffer
     template<typename CLType>
     cl::Buffer create_buffer (std::size_t num) const
     {
@@ -458,9 +411,6 @@ class StateCL
     /// \tparam InputIter The type of input iterator reading the host data
     /// \param first The begin of the input
     /// \param last The end of the input
-    ///
-    /// \return A cl::Buffer object corresponding to the newly created buffer
-    /// which contains the input from the host.
     template<typename CLType, typename InputIter>
     cl::Buffer create_buffer (InputIter first, InputIter last) const
     {
@@ -478,7 +428,7 @@ class StateCL
         return buf;
     }
 
-    /// \brief Read a device buffer input a host iterator
+    /// \brief Read a device buffer into a host iterator
     ///
     /// \tparam CLType An OpenCL Type
     /// \tparam OutputIter The type of output iterator writing the host data
@@ -679,8 +629,11 @@ class StateCL
 /// \code
 /// __kernel void init ( state_struct *state, state_type *weight, uint *accept)
 /// \endcode
-/// There can has other user supplied arguments as long as the first three is
-/// as above
+/// There can has other user supplied arguments as long as the first three are
+/// as above. Among them, \c state is StateCL::state_device(), \c weight is
+/// StateCL::weight_device() and \c accept is StateCL::accept_device(). After
+/// the call to the operator(), they can be read into the host through
+/// StateCL::weight_host() etc.
 template <typename T>
 class InitializeCL
 {
@@ -751,8 +704,11 @@ class InitializeCL
 /// __kernel void move (uint iter, state_struct *state,
 ///     state_type *weight, uint *accept)
 /// \endcode
-/// There can has other user supplied arguments as long as the first four is
-/// as above
+/// There can has other user supplied arguments as long as the first four are
+/// as above. Among them, \c state is StateCL::state_device(), \c weight is
+/// StateCL::weight_device() and \c accept is StateCL::accept_device(). After
+/// the call to the operator(), they can be read into the host through
+/// StateCL::weight_host() etc.
 template <typename T>
 class MoveCL
 {

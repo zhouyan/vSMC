@@ -10,19 +10,18 @@ namespace vsmc {
 ///
 /// \tparam T Particle<T>::value_type
 ///
-/// There are two types of evaluation functor, which unfortunately cannot be
-/// distinguished by their C++ types. The primary use of Monitor is to record
-/// the importance sampling integration along the way of iterations.  So say
-/// one want to monitor two parameters, \f$x = E[g(\theta)]\f$ and \f$y =
-/// E[h(\theta)]\f$, and this is done through importance sampling
-/// integration.  Then one need first compute two vectors, \f$\{x_i\}\f$ and
-/// \f$\{y_i\}\f$ where \f$x_i = g(\theta_i)\f$ and \f$y_i = h(\theta_i)\f$,
-/// and then compute the weighted sum.  With Monitor one can create a 2
-/// dimension monitor. When the evaluation function is called, the last output
-/// arguments, say \c buffer will be a row major matrix of dimension N by 2
-/// where N is the number of particles. That is, <tt>buffer[i * 2] = xi</tt>
-/// and <tt>buffer[i * 2 + 1] = yi</tt>. After that, the Monitor will take
-/// care of the imporatance sampling.
+/// The primary use of Monitor is to record the importance sampling integration
+/// along the way of iterations. So say one want to monitor two parameters,
+/// \f$x = E[g(\theta)]\f$ and \f$y = E[h(\theta)]\f$, and this is done through
+/// importance sampling integration. Then one need first compute two vectors,
+/// \f$\{x_i\}\f$ and \f$\{y_i\}\f$ where \f$x_i = g(\theta_i)\f$ and
+/// \f$y_i = h(\theta_i)\f$, and then compute the weighted sum. With Monitor
+/// one can create a 2 dimension monitor with an evaluation functor. When the
+/// evaluation functro is called, the last output arguments, say \c buffer will
+/// be a row major matrix of dimension N by 2 where N is the number of
+/// particles. That is, <tt>buffer[i * 2] = xi</tt> and <tt>buffer[i * 2 + 1] =
+/// yi</tt>. After that, the Monitor will take care of the imporatance
+/// sampling.
 template <typename T>
 class Monitor
 {
@@ -48,18 +47,10 @@ class Monitor
     explicit Monitor (unsigned dim = 1, const eval_type &eval = NULL) :
         dim_(dim), eval_(eval), record_(dim) {}
 
-    /// \brief Copy constructor
-    ///
-    /// \param other The Monitor to by copied
     Monitor (const Monitor<T> &other) :
         dim_(other.dim_), eval_(other.eval_),
         index_(other.index_), record_(other.record_) {}
 
-    /// \brief Assignment operator
-    ///
-    /// \param other The Monitor to be assigned
-    ///
-    /// \return The Monitor after assignemnt
     Monitor<T> &operator= (const Monitor<T> &other)
     {
         if (&other != this) {
@@ -72,25 +63,19 @@ class Monitor
         return *this;
     }
 
-    /// \brief Dimension of the monitor
-    ///
-    /// \return The number of parameters
+    /// Dimension of the monitor
     unsigned dim () const
     {
         return dim_;
     }
 
-    /// \brief Size of records
-    ///
-    /// \return The number of iterations recorded
+    /// The size of records
     unsigned iter_size () const
     {
         return index_.size();
     }
 
     /// \brief Test if the monitor is valid
-    ///
-    /// \return \b true if the monitor is valid
     ///
     /// \note This operator will be \c explicit if the C++11 feature is enabled
 #if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
@@ -101,17 +86,13 @@ class Monitor
         return bool(eval_);
     }
 
-    /// \brief Iteration index
-    ///
-    /// \return A const reference to the index
+    /// Iteration index
     const index_type &index () const
     {
         return index_;
     }
 
-    /// \brief Record
-    ///
-    /// \return A const reference to the record
+    /// \brief Record of the importance sampling integration
     ///
     /// \note record()[c][r] will be the r'th record of the c'th variable
     const record_type &record () const
@@ -122,16 +103,12 @@ class Monitor
     /// \brief Record of the a specific variable
     ///
     /// \param id The id the variable starting with zero
-    ///
-    /// \return A const reference to the record or variable id
     const record_type::value_type &record (unsigned id) const
     {
         return record_[id];
     }
 
-    /// \brief Print the index and record matrix
-    ///
-    /// \param os The ostream to which the contents are printed
+    /// Print the index and record matrix
     template<typename CharT, typename Traits>
     void print (std::basic_ostream<CharT, Traits> &os = std::cout)
     {
@@ -146,9 +123,7 @@ class Monitor
         }
     }
 
-    /// \brief Set a new evaluation functor
-    ///
-    /// \param new_eval The functor used to evaluate the results
+    /// Set a new evaluation functor
     void set_eval (const eval_type &new_eval)
     {
         eval_ = new_eval;
@@ -159,9 +134,10 @@ class Monitor
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
     ///
-    /// \pre A matrix of size Dim by N is passed to the evaluation functor,
-    /// where N is the number of particles. The array of matrix elements is of
-    /// row major
+    /// \pre A matrix of size Dim by N is passed to the evaluation functor used
+    /// to construct this monitor or set by set_eval() as its last output
+    /// parameter, where N is the number of particles. The array of matrix
+    /// elements is of row major.
     void eval (unsigned iter, const Particle<T> &particle)
     {
         assert(bool(eval_));

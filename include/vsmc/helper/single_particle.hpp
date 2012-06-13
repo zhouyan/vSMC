@@ -40,9 +40,7 @@ class SingleParticle
     SingleParticle (size_type id, Particle<T> *particle) :
         id_(id), particle_(particle) {}
 
-    /// \brief The id of the particle
-    ///
-    /// \return The id of the particle this SingleParticle object represents
+    /// The id of the particle
     size_type id () const
     {
         return id_;
@@ -51,8 +49,6 @@ class SingleParticle
     /// \brief Read and write access to a single parameter
     ///
     /// \param pos The position of the parameter
-    ///
-    /// \return A reference to the parameter
     state_type &state (unsigned pos)
     {
         assert(particle_);
@@ -62,62 +58,48 @@ class SingleParticle
     /// \brief Read only access to a single parameter
     ///
     /// \param pos The position of the parameter
-    ///
-    /// \return A const reference to the parameter
     const state_type &state (unsigned pos) const
     {
         assert(particle_);
         return particle_->value().state(id_, pos);
     }
 
-    /// \brief Read and write access to all parameters
-    ///
-    /// \return A pointer to the parameter array
+    /// Read and write access to all parameters through pointer
     state_type *state ()
     {
         assert(particle_);
         return particle_->value().state(id_);
     }
 
-    /// \brief Read only access to all parameters
-    ///
-    /// \return A const pointer to the parameter array
+    /// Read only access to all parameters through pointer
     const state_type *state () const
     {
         assert(particle_);
         return particle_->value().state(id_);
     }
 
-    /// \brief The weight
-    ///
-    /// \return The weight of the particle this SingleParticle represent
+    /// The weight of this particle
     double weight () const
     {
         assert(particle_);
         return particle_->weight(id_);
     }
 
-    /// \brief The log weight
-    ///
-    /// \return The log weight of the particle this SingleParticle represent
+    /// The log weight of this particle
     double log_weight () const
     {
         assert(particle_);
         return particle_->log_weight(id_);
     }
 
-    /// \brief Read only access to all particles
-    ///
-    /// \return A const reference to the whole particle set
+    /// Read only access to all particles
     const Particle<T> &particle () const
     {
         assert(particle_);
         return *particle_;
     }
 
-    /// \brief RNG engine
-    ///
-    /// \return A reference to a C++11 RNG engine that unique to this particle
+    /// A unique RNG engine for this particle
     rng_type &rng ()
     {
         assert(particle_);

@@ -38,18 +38,11 @@ class Path
     /// \param eval The functor used to compute the integrands
     explicit Path (const eval_type &eval = NULL) : eval_(eval) {}
 
-    /// \brief Copy constructor
-    ///
-    /// \param other The Path to by copied
     Path (const Path<T> &other) :
         eval_(other.eval_),
         index_(other.index_), integrand_(other.integrand_),
         width_(other.width_), grid_(other.grid_) {}
 
-    /// \brief Assignment operator
-    ///
-    /// \param other The Path to be assigned
-    /// \return The Path after assignemnt
     Path<T> & operator= (const Path<T> &other)
     {
         if (&other != this) {
@@ -63,17 +56,13 @@ class Path
         return *this;
     }
 
-    /// \brief Size of records
-    ///
-    /// \return The number of iterations recorded
+    /// Size of records
     unsigned iter_size () const
     {
         return index_.size();
     }
 
     /// \brief Test if the monitor is valid
-    ///
-    /// \return \b true if the monitor is valid
     ///
     /// \note This operator will be \c explicit if the C++11 feature is enabled
 #if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
@@ -84,41 +73,31 @@ class Path
         return bool(eval_);
     }
 
-    /// \brief Iteration index
-    ///
-    /// \return A const reference to the index
+    /// Iteration index
     const index_type &index () const
     {
         return index_;
     }
 
-    /// \brief Record of path sampling integrand
-    ///
-    /// \return A const reference to the integrand
+    /// Record of path sampling integrands
     const integrand_type &integrand () const
     {
         return integrand_;
     }
 
-    /// \brief Record of path sampling width
-    ///
-    /// \return A const reference to the width
+    /// Record of path sampling width
     const width_type &width () const
     {
         return width_;
     }
 
-    /// \brief Record of path sampling grid
-    ///
-    /// \return A const reference to the grid
+    /// Record of path sampling grid (accumulated width)
     const grid_type &grid () const
     {
         return grid_;
     }
 
-    /// \brief Set the evaluation functor
-    ///
-    /// \param new_eval The functor used to compute the integrands
+    /// Set the evaluation functor
     void set_eval (const eval_type &new_eval)
     {
         eval_ = new_eval;
@@ -128,10 +107,6 @@ class Path
     ///
     /// \param iter The iteration number
     /// \param particle The particle set to be operated on by eval()
-    ///
-    /// \note The evaluaiton functor has to be set to a non-NULL value before
-    /// calling eval().  Otherwise exception will be raised when calling
-    /// eval().
     void eval (unsigned iter, const Particle<T> &particle)
     {
         assert(eval_);
@@ -148,9 +123,7 @@ class Path
                 grid_.back() + width_.back() : width_.back());
     }
 
-    /// \brief Path sampling estimate of normalizing constant
-    ///
-    /// \return The Path sampling normalzing constant estimate
+    /// Path sampling estimate of normalizing constant
     double zconst () const
     {
         double sum = 0;
