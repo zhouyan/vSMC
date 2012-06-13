@@ -19,6 +19,8 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.1 or later.
 
     make docs
 
+The documentation can also be found [here][vSMCDoc].
+
 # Testing
 
 ## Prerequisite
@@ -185,5 +187,6 @@ found in the COPYING file distributed with the source.
 [SMCTC]: http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/smctc/
 [Intel TBB]: http://threadingbuildingblocks.org/
 [OpenCL]: http://www.khronos.org/opencl/
+[vSMCDoc]: http://zhouyan.github.com/vSMC/doc/html/index.html
 
 
