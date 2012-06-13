@@ -1,7 +1,7 @@
 #ifndef VSMC_INTERNAL_COMPILER_GCC_HPP
 #define VSMC_INTERNAL_COMPILER_GCC_HPP
 
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 
 #if __GNUC__ >= 4 && __GNUC_MINOR >= 3
 #ifndef VSMC_HAS_CXX11_AUTO_TYPE
@@ -43,6 +43,6 @@
 #endif
 #endif // __GNUC__ >= 4 && __GNUC_MINOR >= 5
 
-#endif // __GXX_EXPERIMENTAL_CXX0X__
+#endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 
 #endif // VSMC_INTERNAL_COMPILER_GCC_HPP
