@@ -22,8 +22,8 @@ namespace vsmc {
 /// when entering and exiting run_parallel_for(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
-class StateTBB :
-    public internal::StateBase<Dim, T>, public internal::StateTBBTag
+class StateTBB : public internal::StateBase<Dim, T>,
+    public internal::ParallelTag
 {
     public :
 
@@ -99,7 +99,7 @@ class StateTBB :
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class InitializeTBB : public internal::InitializeTBBTag
+class InitializeTBB
 {
     public :
 
@@ -158,7 +158,7 @@ class InitializeTBB : public internal::InitializeTBBTag
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class MoveTBB : public internal::MoveTBBTag
+class MoveTBB
 {
     public :
 
@@ -217,7 +217,7 @@ class MoveTBB : public internal::MoveTBBTag
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
-class MonitorTBB : public internal::MonitorTBBTag
+class MonitorTBB
 {
     public :
 
@@ -276,7 +276,7 @@ class MonitorTBB : public internal::MonitorTBBTag
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class PathTBB : public internal::PathTBBTag
+class PathTBB
 {
     public :
 

@@ -30,6 +30,10 @@ template <typename T> class MoveCL;
 template <typename T, unsigned Dim> class MonitorCL;
 template <typename T> class PathCL;
 
-} // namesapce vsmc
+namespace internal {
+
+class ParallelTag {};
+
+} } // namesapce vsmc
 
 #endif // VSMC_INTERNAL_FORWARD_HPP

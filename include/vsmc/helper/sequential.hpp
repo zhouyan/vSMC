@@ -15,8 +15,7 @@ namespace vsmc {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
-class StateSeq :
-    public internal::StateBase<Dim, T>, public internal::StateSeqTag
+class StateSeq : public internal::StateBase<Dim, T>
 {
     public :
 
@@ -38,7 +37,7 @@ class StateSeq :
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class InitializeSeq : public internal::InitializeSeqTag
+class InitializeSeq
 {
     public :
 
@@ -70,7 +69,7 @@ class InitializeSeq : public internal::InitializeSeqTag
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class MoveSeq : public internal::MoveSeqTag
+class MoveSeq
 {
     public :
 
@@ -101,7 +100,7 @@ class MoveSeq : public internal::MoveSeqTag
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim>
-class MonitorSeq : public internal::MonitorSeqTag
+class MonitorSeq
 {
     public :
 
@@ -136,7 +135,7 @@ class MonitorSeq : public internal::MonitorSeqTag
 ///
 /// \tparam T A subtype of StateBase
 template <typename T>
-class PathSeq : public internal::PathSeqTag
+class PathSeq
 {
     public :
 
