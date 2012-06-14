@@ -37,8 +37,8 @@ class StateSeq : public internal::StateBase<Dim, T>
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Derived>
-class InitializeSeq : public internal::InitializeBase<T, Derived>
+template <typename T, typename Impl>
+class InitializeSeq : public internal::InitializeBase<T, Impl>
 {
     public :
 
@@ -64,8 +64,8 @@ class InitializeSeq : public internal::InitializeBase<T, Derived>
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Derived>
-class MoveSeq : public internal::MoveBase<T, Derived>
+template <typename T, typename Impl>
+class MoveSeq : public internal::MoveBase<T, Impl>
 {
     public :
 
@@ -91,8 +91,8 @@ class MoveSeq : public internal::MoveBase<T, Derived>
 ///
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
-template <typename T, unsigned Dim, typename Derived>
-class MonitorSeq : public internal::MonitorBase<T, Derived>
+template <typename T, unsigned Dim, typename Impl>
+class MonitorSeq : public internal::MonitorBase<T, Impl>
 {
     public :
 
@@ -121,8 +121,8 @@ class MonitorSeq : public internal::MonitorBase<T, Derived>
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Derived>
-class PathSeq : public internal::PathBase<T, Derived>
+template <typename T, typename Impl>
+class PathSeq : public internal::PathBase<T, Impl>
 {
     public :
 

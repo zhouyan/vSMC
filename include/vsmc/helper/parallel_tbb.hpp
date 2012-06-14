@@ -128,8 +128,8 @@ class StateTBB : public internal::StateBase<Dim, T>
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Derived>
-class InitializeTBB : public internal::InitializeBase<T, Derived>
+template <typename T, typename Impl>
+class InitializeTBB : public internal::InitializeBase<T, Impl>
 {
     public :
 
@@ -157,7 +157,7 @@ class InitializeTBB : public internal::InitializeBase<T, Derived>
     {
         public :
 
-        work_ (InitializeTBB<T, Derived> *init,
+        work_ (InitializeTBB<T, Impl> *init,
                 Particle<T> *particle, unsigned *accept) :
             init_(init), particle_(particle), accept_(accept) {}
 
@@ -172,7 +172,7 @@ class InitializeTBB : public internal::InitializeBase<T, Derived>
 
         private :
 
-        InitializeTBB<T, Derived> *const init_;
+        InitializeTBB<T, Impl> *const init_;
         Particle<T> *const particle_;
         unsigned *const accept_;
     }; // class work_
@@ -182,8 +182,8 @@ class InitializeTBB : public internal::InitializeBase<T, Derived>
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Derived>
-class MoveTBB : public internal::MoveBase<T, Derived>
+template <typename T, typename Impl>
+class MoveTBB : public internal::MoveBase<T, Impl>
 {
     public :
 
@@ -211,7 +211,7 @@ class MoveTBB : public internal::MoveBase<T, Derived>
     {
         public :
 
-        work_ (MoveTBB<T, Derived> *move, unsigned iter,
+        work_ (MoveTBB<T, Impl> *move, unsigned iter,
                 Particle<T> *particle, unsigned *accept) :
             move_(move), iter_(iter), particle_(particle), accept_(accept) {}
 
@@ -226,7 +226,7 @@ class MoveTBB : public internal::MoveBase<T, Derived>
 
         private :
 
-        MoveTBB<T, Derived> *const move_;
+        MoveTBB<T, Impl> *const move_;
         const unsigned iter_;
         Particle<T> *const particle_;
         unsigned *const accept_;
@@ -238,8 +238,8 @@ class MoveTBB : public internal::MoveBase<T, Derived>
 ///
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
-template <typename T, unsigned Dim, typename Derived>
-class MonitorTBB : public internal::MonitorBase<T, Derived>
+template <typename T, unsigned Dim, typename Impl>
+class MonitorTBB : public internal::MonitorBase<T, Impl>
 {
     public :
 
@@ -266,7 +266,7 @@ class MonitorTBB : public internal::MonitorBase<T, Derived>
     {
         public :
 
-        work_ (MonitorTBB<T, Dim, Derived> *monitor, unsigned iter,
+        work_ (MonitorTBB<T, Dim, Impl> *monitor, unsigned iter,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), iter_(iter), particle_(particle), res_(res) {}
 
@@ -282,7 +282,7 @@ class MonitorTBB : public internal::MonitorBase<T, Derived>
 
         private :
 
-        MonitorTBB<T, Dim, Derived> *const monitor_;
+        MonitorTBB<T, Dim, Impl> *const monitor_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;
@@ -293,8 +293,8 @@ class MonitorTBB : public internal::MonitorBase<T, Derived>
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Derived>
-class PathTBB : public internal::PathBase<T, Derived>
+template <typename T, typename Impl>
+class PathTBB : public internal::PathBase<T, Impl>
 {
     public :
 
@@ -318,7 +318,7 @@ class PathTBB : public internal::PathBase<T, Derived>
     {
         public :
 
-        work_ (PathTBB<T, Derived> *path, unsigned iter,
+        work_ (PathTBB<T, Impl> *path, unsigned iter,
                 const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
@@ -333,7 +333,7 @@ class PathTBB : public internal::PathBase<T, Derived>
 
         private :
 
-        PathTBB<T, Derived> *const path_;
+        PathTBB<T, Impl> *const path_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;

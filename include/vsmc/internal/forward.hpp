@@ -24,16 +24,16 @@ template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 
 template <unsigned, typename> class StateSeq;
-template <typename, typename D = internal::VBase> class InitializeSeq;
-template <typename, typename D = internal::VBase> class MoveSeq;
-template <typename, unsigned, typename D = internal::VBase> class MonitorSeq;
-template <typename, typename D = internal::VBase> class PathSeq;
+template <typename, typename I = internal::VBase> class InitializeSeq;
+template <typename, typename I = internal::VBase> class MoveSeq;
+template <typename, unsigned, typename I = internal::VBase> class MonitorSeq;
+template <typename, typename I = internal::VBase> class PathSeq;
 
 template <unsigned, typename, typename P = NullProfiler> class StateTBB;
-template <typename, typename D = internal::VBase> class InitializeTBB;
-template <typename, typename D = internal::VBase> class MoveTBB;
-template <typename, unsigned, typename D = internal::VBase> class MonitorTBB;
-template <typename, typename D = internal::VBase> class PathTBB;
+template <typename, typename I = internal::VBase> class InitializeTBB;
+template <typename, typename I = internal::VBase> class MoveTBB;
+template <typename, unsigned, typename I = internal::VBase> class MonitorTBB;
+template <typename, typename I = internal::VBase> class PathTBB;
 
 template <unsigned, typename, typename P = NullProfiler> class StateCL;
 template <typename> class InitializeCL;
