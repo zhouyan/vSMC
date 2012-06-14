@@ -513,6 +513,11 @@ class StateCL
         timer_.stop();
     }
 
+    const Timer &timer () const
+    {
+        return timer_;
+    }
+
     void copy (size_type from, size_type to)
     {
         copy_host_[to] = from;

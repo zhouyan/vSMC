@@ -81,7 +81,7 @@ class StateTBB : public internal::StateBase<Dim, T>
         timer_.stop();
     }
 
-    Timer &timer () const
+    const Timer &timer () const
     {
         return timer_;
     }
