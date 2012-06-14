@@ -507,6 +507,7 @@ class StateCL
     /// patterns, users need to call OpenCL API themselves.
     void run_parallel (const cl::Kernel &ker) const
     {
+        command_queue_.finish();
         timer_.start();
         command_queue_.enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
