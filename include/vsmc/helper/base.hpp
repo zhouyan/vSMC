@@ -180,7 +180,7 @@ class InitializeBase<T, internal::VBase>
     public :
 
     virtual unsigned initialize_state (SingleParticle<T>) {return 0;}
-    virtual void initialize_param (Particle<T>, void *) {}
+    virtual void initialize_param (Particle<T> &, void *) {}
     virtual void post_processor (Particle<T> &) {}
     virtual void pre_processor (Particle<T> &) {}
 }; // class InitializeBase<T, internal::VBase>

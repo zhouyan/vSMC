@@ -30,10 +30,10 @@ template <typename, unsigned, typename D = internal::VBase> class MonitorSeq;
 template <typename, typename D = internal::VBase> class PathSeq;
 
 template <unsigned, typename, typename P = NullProfiler> class StateTBB;
-template <typename> class InitializeTBB;
-template <typename> class MoveTBB;
-template <typename, unsigned> class MonitorTBB;
-template <typename> class PathTBB;
+template <typename, typename D = internal::VBase> class InitializeTBB;
+template <typename, typename D = internal::VBase> class MoveTBB;
+template <typename, unsigned, typename D = internal::VBase> class MonitorTBB;
+template <typename, typename D = internal::VBase> class PathTBB;
 
 template <unsigned, typename, typename P = NullProfiler> class StateCL;
 template <typename> class InitializeCL;

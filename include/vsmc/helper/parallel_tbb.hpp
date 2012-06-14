@@ -128,8 +128,8 @@ class StateTBB : public internal::StateBase<Dim, T>
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T>
-class InitializeTBB
+template <typename T, typename Derived>
+class InitializeTBB : public internal::InitializeBase<T, Derived>
 {
     public :
 
@@ -149,11 +149,6 @@ class InitializeTBB
         return accept_.sum();
     }
 
-    virtual unsigned initialize_state (SingleParticle<T> part) = 0;
-    virtual void initialize_param (Particle<T> &particle, void *param) {}
-    virtual void pre_processor (Particle<T> &particle) {}
-    virtual void post_processor (Particle<T> &particle) {}
-
     private :
 
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
@@ -162,7 +157,7 @@ class InitializeTBB
     {
         public :
 
-        work_ (InitializeTBB<T> *init,
+        work_ (InitializeTBB<T, Derived> *init,
                 Particle<T> *particle, unsigned *accept) :
             init_(init), particle_(particle), accept_(accept) {}
 
@@ -177,7 +172,7 @@ class InitializeTBB
 
         private :
 
-        InitializeTBB<T> *const init_;
+        InitializeTBB<T, Derived> *const init_;
         Particle<T> *const particle_;
         unsigned *const accept_;
     }; // class work_
@@ -187,8 +182,8 @@ class InitializeTBB
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T>
-class MoveTBB
+template <typename T, typename Derived>
+class MoveTBB : public internal::MoveBase<T, Derived>
 {
     public :
 
@@ -208,10 +203,6 @@ class MoveTBB
         return accept_.sum();
     }
 
-    virtual unsigned move_state (unsigned iter, SingleParticle<T> part) = 0;
-    virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
-
     private :
 
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
@@ -220,7 +211,7 @@ class MoveTBB
     {
         public :
 
-        work_ (MoveTBB<T> *move, unsigned iter,
+        work_ (MoveTBB<T, Derived> *move, unsigned iter,
                 Particle<T> *particle, unsigned *accept) :
             move_(move), iter_(iter), particle_(particle), accept_(accept) {}
 
@@ -235,7 +226,7 @@ class MoveTBB
 
         private :
 
-        MoveTBB<T> *const move_;
+        MoveTBB<T, Derived> *const move_;
         const unsigned iter_;
         Particle<T> *const particle_;
         unsigned *const accept_;
@@ -247,8 +238,8 @@ class MoveTBB
 ///
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
-template <typename T, unsigned Dim>
-class MonitorTBB
+template <typename T, unsigned Dim, typename Derived>
+class MonitorTBB : public internal::MonitorBase<T, Derived>
 {
     public :
 
@@ -264,11 +255,6 @@ class MonitorTBB
         this->post_processor(iter, particle);
     }
 
-    virtual void monitor_state (unsigned iter, ConstSingleParticle<T> part,
-            double *res) = 0;
-    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
-
     static unsigned dim ()
     {
         return Dim;
@@ -280,7 +266,7 @@ class MonitorTBB
     {
         public :
 
-        work_ (MonitorTBB<T, Dim> *monitor, unsigned iter,
+        work_ (MonitorTBB<T, Dim, Derived> *monitor, unsigned iter,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), iter_(iter), particle_(particle), res_(res) {}
 
@@ -296,7 +282,7 @@ class MonitorTBB
 
         private :
 
-        MonitorTBB<T, Dim> *const monitor_;
+        MonitorTBB<T, Dim, Derived> *const monitor_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;
@@ -307,8 +293,8 @@ class MonitorTBB
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T>
-class PathTBB
+template <typename T, typename Derived>
+class PathTBB : public internal::PathBase<T, Derived>
 {
     public :
 
@@ -326,20 +312,13 @@ class PathTBB
         return this->path_width(iter, particle);
     }
 
-    virtual double path_state (unsigned iter,
-            ConstSingleParticle<T> part) = 0;
-    virtual double path_width (unsigned iter,
-            const Particle<T> &particle) = 0;
-    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
-
     private :
 
     class work_
     {
         public :
 
-        work_ (PathTBB<T> *path, unsigned iter,
+        work_ (PathTBB<T, Derived> *path, unsigned iter,
                 const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
@@ -354,7 +333,7 @@ class PathTBB
 
         private :
 
-        PathTBB<T> *const path_;
+        PathTBB<T, Derived> *const path_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;
