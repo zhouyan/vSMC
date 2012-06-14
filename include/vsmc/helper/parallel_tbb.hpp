@@ -65,12 +65,19 @@ class StateTBB : public internal::StateBase<Dim, T>
     /// \brief Run a worker in parallel with tbb::parallel_for
     ///
     /// \param work The worker object
-    /// \param part The affinity partitioner
+    /// \param ap The affinity partitioner
+    ///
+    /// \note This is only useful when the all the data can fit into system
+    /// cache and the computation to memeory access ratio is low. This is
+    /// usually not common in an SMC sampler. There can be situations that
+    /// such operations appears, for example, a simple Monitor. But usually
+    /// these operations cost such a small fraction of time of the whole
+    /// sampler that we don't find they worth the time of optimization.
     template <typename Work>
-    void run_parallel (const Work &work, tbb::affinity_partitioner &part) const
+    void run_parallel (const Work &work, tbb::affinity_partitioner &ap) const
     {
         profiler_.start();
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work, part);
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work, ap);
         profiler_.stop();
     }
 
