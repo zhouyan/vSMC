@@ -91,8 +91,8 @@ class MoveSeq : public internal::MoveBase<T, Derived>
 ///
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
-template <typename T, unsigned Dim>
-class MonitorSeq
+template <typename T, unsigned Dim, typename Derived>
+class MonitorSeq : public internal::MonitorBase<T, Derived>
 {
     public :
 
@@ -103,18 +103,13 @@ class MonitorSeq
 
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        pre_processor(iter, particle);
+        this->pre_processor(iter, particle);
         for (size_type i = 0; i != particle.size(); ++i) {
-            monitor_state(iter, ConstSingleParticle<T>(i, &particle),
+            this->monitor_state(iter, ConstSingleParticle<T>(i, &particle),
                     res + i * Dim);
         }
-        post_processor(iter, particle);
+        this->post_processor(iter, particle);
     }
-
-    virtual void monitor_state (unsigned iter, ConstSingleParticle<T> part,
-            double *res) = 0;
-    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
 
     static unsigned dim ()
     {
@@ -126,8 +121,8 @@ class MonitorSeq
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
-template <typename T>
-class PathSeq
+template <typename T, typename Derived>
+class PathSeq : public internal::PathBase<T, Derived>
 {
     public :
 
@@ -138,20 +133,15 @@ class PathSeq
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        pre_processor(iter, particle);
-        for (size_type i = 0; i != particle.size(); ++i)
-            res[i] = path_state(iter, ConstSingleParticle<T>(i, &particle));
-        post_processor(iter, particle);
+        this->pre_processor(iter, particle);
+        for (size_type i = 0; i != particle.size(); ++i) {
+            res[i] = this->path_state(iter,
+                    ConstSingleParticle<T>(i, &particle));
+        }
+        this->post_processor(iter, particle);
 
-        return width_state(iter, particle);
+        return this->path_width(iter, particle);
     }
-
-    virtual double path_state (unsigned iter,
-            ConstSingleParticle<T> part) = 0;
-    virtual double width_state (unsigned iter,
-            const Particle<T> &particle) = 0;
-    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
 };
 
 } // namespace vsmc

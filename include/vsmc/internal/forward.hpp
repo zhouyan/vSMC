@@ -7,39 +7,39 @@ namespace internal {
 
 class VBase {};
 
-template <typename T, typename Derived> class InitializeBase;
-template <typename T, typename Derived> class MoveBase;
-template <typename T, typename Derived> class MonitorBase;
-template <typename T, typename Derived> class PathBase;
+template <typename, typename> class InitializeBase;
+template <typename, typename> class MoveBase;
+template <typename, typename> class MonitorBase;
+template <typename, typename> class PathBase;
 
 } // namespace vsmc::internal
 
-template <typename T> class Sampler;
-template <typename T> class Particle;
-template <typename T> class Monitor;
-template <typename T> class Path;
+template <typename> class Sampler;
+template <typename> class Particle;
+template <typename> class Monitor;
+template <typename> class Path;
 
-template <unsigned Dim, typename T> class StateBase;
-template <typename T> class SingleParticle;
-template <typename T> class ConstSingleParticle;
+template <unsigned, typename> class StateBase;
+template <typename> class SingleParticle;
+template <typename> class ConstSingleParticle;
 
-template <unsigned Dim, typename T> class StateSeq;
-template <typename T, typename Derived = internal::VBase> class InitializeSeq;
-template <typename T, typename Derived = internal::VBase> class MoveSeq;
-template <typename T, unsigned Dim> class MonitorSeq;
-template <typename T> class PathSeq;
+template <unsigned, typename> class StateSeq;
+template <typename, typename D = internal::VBase> class InitializeSeq;
+template <typename, typename D = internal::VBase> class MoveSeq;
+template <typename, unsigned, typename D = internal::VBase> class MonitorSeq;
+template <typename, typename D = internal::VBase> class PathSeq;
 
-template <unsigned Dim, typename T, typename P = NullProfiler> class StateTBB;
-template <typename T> class InitializeTBB;
-template <typename T> class MoveTBB;
-template <typename T, unsigned Dim> class MonitorTBB;
-template <typename T> class PathTBB;
+template <unsigned, typename, typename P = NullProfiler> class StateTBB;
+template <typename> class InitializeTBB;
+template <typename> class MoveTBB;
+template <typename, unsigned> class MonitorTBB;
+template <typename> class PathTBB;
 
-template <unsigned Dim, typename T, typename P = NullProfiler> class StateCL;
-template <typename T> class InitializeCL;
-template <typename T> class MoveCL;
-template <typename T, unsigned Dim> class MonitorCL;
-template <typename T> class PathCL;
+template <unsigned, typename, typename P = NullProfiler> class StateCL;
+template <typename> class InitializeCL;
+template <typename> class MoveCL;
+template <typename, unsigned> class MonitorCL;
+template <typename> class PathCL;
 
 namespace internal {
 

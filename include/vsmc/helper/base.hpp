@@ -96,76 +96,6 @@ class StateBase
 }; // class StateBase
 
 template <typename T, typename Derived>
-class MoveBase
-{
-
-    public :
-
-    unsigned move_state (unsigned iter, SingleParticle<T> part)
-    {
-        return move_state<Derived>(iter, part, 0);
-    }
-
-    void post_processor (unsigned iter, Particle<T> &particle)
-    {
-        post_processor<Derived>(iter, particle, 0);
-    }
-
-    void pre_processor (unsigned iter, Particle<T> &particle)
-    {
-        pre_processor<Derived>(iter, particle, 0);
-    }
-
-    private :
-
-    template <typename D, unsigned (D::*)(unsigned, SingleParticle<T>)>
-    class move_state_sfinae_ {};
-
-    template <typename D, void (D::*)(unsigned, Particle<T> &)>
-    class processor_sfinae_ {};
-
-    template <typename D>
-    unsigned move_state (unsigned iter, SingleParticle<T> part,
-            move_state_sfinae_<D, &D::move_state> *)
-    {
-        return static_cast<Derived *>(this)->move_state(iter, part);
-    }
-
-    template <typename D>
-    void pre_processor (unsigned iter, Particle<T> &particle,
-            processor_sfinae_<D, &D::pre_processor> *)
-    {
-        static_cast<Derived *>(this)->pre_processor(iter, particle);
-    }
-
-    template <typename D>
-    void post_processor (unsigned iter, Particle<T> &particle,
-            processor_sfinae_<D, &D::post_processor> *)
-    {
-        static_cast<Derived *>(this)->post_processor(iter, particle);
-    }
-
-    template <typename D>
-    unsigned move_state (unsigned, SingleParticle<T>, ...) {return 0;}
-
-    template <typename D>
-    void pre_processor (unsigned iter, Particle<T> &, ...) {}
-
-    template <typename D>
-    void post_processor (unsigned iter, Particle<T> &, ...) {}
-}; // class MoveBase
-
-template <typename T>
-class MoveBase<T, internal::VBase>
-{
-    public :
-
-    virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
-    virtual void post_processor (unsigned, Particle<T> &) {}
-    virtual void pre_processor (unsigned, Particle<T> &) {}
-}; // class MoveBase<T, internal::VBase>
-
-template <typename T, typename Derived>
 class InitializeBase
 {
 
@@ -255,6 +185,235 @@ class InitializeBase<T, internal::VBase>
     virtual void pre_processor (Particle<T> &) {}
 }; // class InitializeBase<T, internal::VBase>
 
+template <typename T, typename Derived>
+class MoveBase
+{
+
+    public :
+
+    unsigned move_state (unsigned iter, SingleParticle<T> part)
+    {
+        return move_state<Derived>(iter, part, 0);
+    }
+
+    void post_processor (unsigned iter, Particle<T> &particle)
+    {
+        post_processor<Derived>(iter, particle, 0);
+    }
+
+    void pre_processor (unsigned iter, Particle<T> &particle)
+    {
+        pre_processor<Derived>(iter, particle, 0);
+    }
+
+    private :
+
+    template <typename D, unsigned (D::*)(unsigned, SingleParticle<T>)>
+    class move_state_sfinae_ {};
+
+    template <typename D, void (D::*)(unsigned, Particle<T> &)>
+    class processor_sfinae_ {};
+
+    template <typename D>
+    unsigned move_state (unsigned iter, SingleParticle<T> part,
+            move_state_sfinae_<D, &D::move_state> *)
+    {
+        return static_cast<Derived *>(this)->move_state(iter, part);
+    }
+
+    template <typename D>
+    void pre_processor (unsigned iter, Particle<T> &particle,
+            processor_sfinae_<D, &D::pre_processor> *)
+    {
+        static_cast<Derived *>(this)->pre_processor(iter, particle);
+    }
+
+    template <typename D>
+    void post_processor (unsigned iter, Particle<T> &particle,
+            processor_sfinae_<D, &D::post_processor> *)
+    {
+        static_cast<Derived *>(this)->post_processor(iter, particle);
+    }
+
+    template <typename D>
+    unsigned move_state (unsigned, SingleParticle<T>, ...) {return 0;}
+
+    template <typename D>
+    void pre_processor (unsigned iter, Particle<T> &, ...) {}
+
+    template <typename D>
+    void post_processor (unsigned iter, Particle<T> &, ...) {}
+}; // class MoveBase
+
+template <typename T>
+class MoveBase<T, internal::VBase>
+{
+    public :
+
+    virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
+    virtual void post_processor (unsigned, Particle<T> &) {}
+    virtual void pre_processor (unsigned, Particle<T> &) {}
+}; // class MoveBase<T, internal::VBase>
+
+template <typename T, typename Derived>
+class MonitorBase
+{
+    public :
+
+    void monitor_state (unsigned iter, ConstSingleParticle<T> part,
+            double *res)
+    {
+        monitor_state<Derived>(iter, part, res, 0);
+    }
+
+    void pre_processor (unsigned iter, const Particle<T> &particle)
+    {
+        pre_processor<Derived>(iter, particle);
+    }
+
+    void post_processor (unsigned iter, const Particle<T> &particle)
+    {
+        post_processor<Derived>(iter, particle);
+    }
+
+    private :
+
+    template <typename D, void (D::*)(unsigned, ConstSingleParticle<T>,
+            double *)>
+    class monitor_state_sfinae_ {};
+
+    template <typename D, void (D::*)(unsigned, const Particle<T> &)>
+    class processor_sfinae_ {};
+
+    template <typename D>
+    void monitor_state (unsigned iter, ConstSingleParticle<T> part,
+            double *res, monitor_state_sfinae_<D, &D::monitor_state> *)
+    {
+        static_cast<Derived *>(this)->monitor_state(iter, part, res);
+    }
+
+    template <typename D>
+    void pre_processor (unsigned iter, const Particle<T> &particle,
+            processor_sfinae_<D, &D::pre_processor> *)
+    {
+        static_cast<Derived *>(this)->pre_processor(iter, particle);
+    }
+
+    template <typename D>
+    void post_processor (unsigned iter, const Particle<T> &particle,
+            processor_sfinae_<D, &D::post_processor> *)
+    {
+        static_cast<Derived *>(this)->post_processor(iter, particle);
+    }
+
+    template <typename D>
+    void monitor_state (unsigned, ConstSingleParticle<T>, double *, ...) {}
+
+    template <typename D>
+    void pre_processor (unsigned iter, const Particle<T> &, ...) {}
+
+    template <typename D>
+    void post_processor (unsigned iter, const Particle<T> &, ...) {}
+}; // class MonitorBase
+
+template <typename T>
+class MonitorBase<T, internal::VBase>
+{
+    public :
+
+    virtual void monitor_state (unsigned, ConstSingleParticle<T>,
+            double *) {}
+    virtual void post_processor (unsigned, const Particle<T> &) {}
+    virtual void pre_processor (unsigned, const Particle<T> &) {}
+}; // class MonitorBase<T, internal::VBase>
+
+template <typename T, typename Derived>
+class PathBase
+{
+    public :
+
+    double path_state (unsigned iter, ConstSingleParticle<T> part)
+    {
+        return path_state<Derived>(iter, part, 0);
+    }
+
+    double path_width (unsigned iter, Particle<T> &particle)
+    {
+        return path_width<Derived>(iter, particle, 0);
+    }
+
+    void pre_processor (unsigned iter, const Particle<T> &particle)
+    {
+        pre_processor<Derived>(iter, particle);
+    }
+
+    void post_processor (unsigned iter, const Particle<T> &particle)
+    {
+        post_processor<Derived>(iter, particle);
+    }
+
+    private :
+
+    template <typename D, double (D::*)(unsigned, ConstSingleParticle<T>)>
+    class path_state_sfinae_ {};
+
+    template <typename D, double (D::*)(unsigned, const Particle<T> &)>
+    class path_width_sfinae_ {};
+
+    template <typename D, void (D::*)(unsigned, const Particle<T> &)>
+    class processor_sfinae_ {};
+
+    template <typename D>
+    double path_state (unsigned iter, ConstSingleParticle<T> part,
+            path_state_sfinae_<D, &D::path_state> *)
+    {
+        static_cast<Derived *>(this)->path_state(iter, part);
+    }
+
+    template <typename D>
+    double path_width (unsigned iter, const Particle<T> &particle,
+            path_width_sfinae_<D, &D::path_state> *)
+    {
+        static_cast<Derived *>(this)->path_width(iter, particle);
+    }
+
+    template <typename D>
+    void pre_processor (unsigned iter, const Particle<T> &particle,
+            processor_sfinae_<D, &D::pre_processor> *)
+    {
+        static_cast<Derived *>(this)->pre_processor(iter, particle);
+    }
+
+    template <typename D>
+    void post_processor (unsigned iter, const Particle<T> &particle,
+            processor_sfinae_<D, &D::post_processor> *)
+    {
+        static_cast<Derived *>(this)->post_processor(iter, particle);
+    }
+
+    template <typename D>
+    double path_state (unsigned, ConstSingleParticle<T>, ...) {return 0;}
+
+    template <typename D>
+    double path_width (unsigned, const Particle<T> &) {return 0;}
+
+    template <typename D>
+    void pre_processor (unsigned iter, const Particle<T> &, ...) {}
+
+    template <typename D>
+    void post_processor (unsigned iter, const Particle<T> &, ...) {}
+}; // class PathBase
+
+template <typename T>
+class PathBase<T, internal::VBase>
+{
+    public :
+
+    virtual double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
+    virtual double path_width (unsigned, const Particle<T> &) {return 0;}
+    virtual void post_processor (unsigned, const Particle<T> &) {}
+    virtual void pre_processor (unsigned, const Particle<T> &) {}
+}; // class MonitorBase<T, internal::VBase>
 
 } } // namespace vsmc::internal
 

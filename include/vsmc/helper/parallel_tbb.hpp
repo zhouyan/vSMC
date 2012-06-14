@@ -323,12 +323,12 @@ class PathTBB
         particle.value().run_parallel(work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 
-        return this->width_state(iter, particle);
+        return this->path_width(iter, particle);
     }
 
     virtual double path_state (unsigned iter,
             ConstSingleParticle<T> part) = 0;
-    virtual double width_state (unsigned iter,
+    virtual double path_width (unsigned iter,
             const Particle<T> &particle) = 0;
     virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
     virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
