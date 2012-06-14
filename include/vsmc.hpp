@@ -6,6 +6,7 @@
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/path.hpp>
 
+#include <vsmc/helper/timer.hpp>
 #include <vsmc/helper/sequential.hpp>
 
 #ifdef VSMC_USE_TBB

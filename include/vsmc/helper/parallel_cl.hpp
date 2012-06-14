@@ -18,12 +18,12 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector The default
-/// \tparam Profiler class The profiler used for profiling run_parallel().
-/// The default is NullProfiler, which does nothing but provide the compatible
-/// inteferce.  Profiler::start() and Profiler::stop() are called automatically
+/// \tparam Timer class The timer used for profiling run_parallel().
+/// The default is NullTimer, which does nothing but provide the compatible
+/// inteferce.  Timer::start() and Timer::stop() are called automatically
 /// when entering and exiting run_parallel(). This shall provide how much time
 /// are spent on the parallel code (plus a small overhead of scheduling).
-template <unsigned Dim, typename T, typename Profiler>
+template <unsigned Dim, typename T, typename Timer>
 class StateCL
 #if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
     : public internal::ParallelTag
@@ -37,8 +37,8 @@ class StateCL
     /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
 
-    /// The type of profiler
-    typedef Profiler profiler_type;
+    /// The type of timer
+    typedef Timer timer_type;
 
     /// The type of the matrix of states returned by state_host()
     typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
@@ -507,10 +507,10 @@ class StateCL
     /// patterns, users need to call OpenCL API themselves.
     void run_parallel (const cl::Kernel &ker) const
     {
-        profiler_.start();
+        timer_.start();
         command_queue_.enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
-        profiler_.stop();
+        timer_.stop();
     }
 
     void copy (size_type from, size_type to)
@@ -572,7 +572,7 @@ class StateCL
     cl::Buffer copy_device_;
     std::vector<size_type> copy_host_;
 
-    profiler_type profiler_;
+    timer_type timer_;
 
     void setup_buffer ()
     {

@@ -16,12 +16,12 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-/// \tparam Profiler class The profiler used for profiling run_parallel().
-/// The default is NullProfiler, which does nothing but provide the compatible
-/// inteferce. Profiler::start() and Profiler::stop() are called automatically
+/// \tparam Timer class The timer used for profiling run_parallel().
+/// The default is NullTimer, which does nothing but provide the compatible
+/// inteferce. Timer::start() and Timer::stop() are called automatically
 /// when entering and exiting run_parallel(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
-template <unsigned Dim, typename T, typename Profiler>
+template <unsigned Dim, typename T, typename Timer>
 class StateTBB : public internal::StateBase<Dim, T>
 #if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
     , public internal::ParallelTag
@@ -31,7 +31,7 @@ class StateTBB : public internal::StateBase<Dim, T>
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T state_type;
-    typedef Profiler profiler_type;
+    typedef Timer timer_type;
 
     explicit StateTBB (size_type N) :
         internal::StateBase<Dim, T>(N), size_(N), copy_(N) {}
@@ -57,9 +57,9 @@ class StateTBB : public internal::StateBase<Dim, T>
     template <typename Work>
     void run_parallel (const Work &work) const
     {
-        profiler_.start();
+        timer_.start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work);
-        profiler_.stop();
+        timer_.stop();
     }
 
     /// \brief Run a worker in parallel with tbb::parallel_for
@@ -76,14 +76,14 @@ class StateTBB : public internal::StateBase<Dim, T>
     template <typename Work>
     void run_parallel (const Work &work, tbb::affinity_partitioner &ap) const
     {
-        profiler_.start();
+        timer_.start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work, ap);
-        profiler_.stop();
+        timer_.stop();
     }
 
-    Profiler &profiler () const
+    Timer &timer () const
     {
-        return profiler_;
+        return timer_;
     }
 
     void copy (size_type from, size_type to)
@@ -106,7 +106,7 @@ class StateTBB : public internal::StateBase<Dim, T>
 
     size_type size_;
     std::vector<size_type> copy_;
-    profiler_type profiler_;
+    timer_type timer_;
 
     class copy_work_
     {

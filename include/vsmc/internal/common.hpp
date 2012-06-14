@@ -50,7 +50,6 @@
 #include <vsmc/rng/random.hpp>
 
 #include <vsmc/internal/types.hpp>
-#include <vsmc/internal/profiler.hpp>
 #include <vsmc/internal/forward.hpp>
 
 #endif // VSMC_INTERNAL_COMMON_HPP

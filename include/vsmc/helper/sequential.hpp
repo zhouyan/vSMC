@@ -15,22 +15,32 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-template <unsigned Dim, typename T>
+template <unsigned Dim, typename T, typename Timer>
 class StateSeq : public internal::StateBase<Dim, T>
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T state_type;
+    typedef Timer timer_type;
 
     explicit StateSeq (size_type N) : internal::StateBase<Dim, T>(N) {}
 
     virtual ~StateSeq () {}
 
+    const Timer &timer () const
+    {
+        return timer_;
+    }
+
     void copy (size_type from, size_type to)
     {
         this->state().col(to) = this->state().col(from);
     }
+
+    private :
+
+    timer_type timer_;
 }; // class StateSeq
 
 /// \brief Sampler<T>::init_type subtype
@@ -52,8 +62,10 @@ class InitializeSeq : public internal::InitializeBase<T, Impl>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
+        particle.value().timer().start();
         for (size_type i = 0; i != particle.size(); ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
+        particle.value().timer().stop();
         this->post_processor(particle);
 
         return accept;
@@ -78,8 +90,10 @@ class MoveSeq : public internal::MoveBase<T, Impl>
     {
         this->pre_processor(iter, particle);
         unsigned accept = 0;
+        particle.value().timer().start();
         for (size_type i = 0; i != particle.size(); ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
+        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return accept;
@@ -104,10 +118,12 @@ class MonitorSeq : public internal::MonitorBase<T, Impl>
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
+        particle.value().timer().start();
         for (size_type i = 0; i != particle.size(); ++i) {
             this->monitor_state(iter, ConstSingleParticle<T>(i, &particle),
                     res + i * Dim);
         }
+        particle.value().timer().stop();
         this->post_processor(iter, particle);
     }
 
@@ -134,10 +150,12 @@ class PathSeq : public internal::PathBase<T, Impl>
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
+        particle.value().timer().start();
         for (size_type i = 0; i != particle.size(); ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }
+        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return this->path_width(iter, particle);
