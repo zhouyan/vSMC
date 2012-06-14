@@ -128,7 +128,9 @@ class Particle
     }
 
     /// Set the log weights with a weight_type object
-    void set_log_weight (const weight_type &new_weight, double delta = 1)
+    template <typename Derived>
+    void set_log_weight (const Eigen::DenseBase<Derived> &new_weight,
+            double delta = 1)
     {
         log_weight_ = delta * new_weight.head(size_);
         set_log_weight();
@@ -149,8 +151,9 @@ class Particle
     }
 
     /// Add to the log weights with a weight_object object
-    void add_log_weight (const weight_type &inc_weight, double delta = 1,
-            bool add_zconst = true)
+    template <typename Derived>
+    void add_log_weight (const Eigen::DenseBase<Derived> &inc_weight,
+            double delta = 1, bool add_zconst = true)
     {
         using std::log;
 
