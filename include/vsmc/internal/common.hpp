@@ -46,9 +46,6 @@
 #include <vsmc/internal/version.hpp>
 #include <vsmc/internal/function.hpp>
 #include <vsmc/internal/type_traits.hpp>
-
-#include <vsmc/rng/random.hpp>
-
 #include <vsmc/internal/types.hpp>
 #include <vsmc/internal/forward.hpp>
 

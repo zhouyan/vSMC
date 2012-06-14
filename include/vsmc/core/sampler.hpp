@@ -2,6 +2,7 @@
 #define VSMC_CORE_SAMPLER_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/rng/random.hpp>
 
 namespace vsmc {
 

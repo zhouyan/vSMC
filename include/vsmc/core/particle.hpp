@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/internal/resampling.hpp>
+#include <vsmc/rng/random.hpp>
 
 namespace vsmc {
 
