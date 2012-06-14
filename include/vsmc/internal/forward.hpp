@@ -5,7 +5,7 @@ namespace vsmc {
 
 namespace internal {
 
-class VirtualBase {};
+class VBase {};
 
 template <typename T, typename Derived> class InitializeBase;
 template <typename T, typename Derived> class MoveBase;
@@ -24,8 +24,8 @@ template <typename T> class SingleParticle;
 template <typename T> class ConstSingleParticle;
 
 template <unsigned Dim, typename T> class StateSeq;
-template <typename T> class InitializeSeq;
-template <typename T, typename Derived = internal::VirtualBase> class MoveSeq;
+template <typename T, typename Derived = internal::VBase> class InitializeSeq;
+template <typename T, typename Derived = internal::VBase> class MoveSeq;
 template <typename T, unsigned Dim> class MonitorSeq;
 template <typename T> class PathSeq;
 

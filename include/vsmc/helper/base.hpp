@@ -132,20 +132,11 @@ class MoveBase
     }
 
     template <typename D>
-    unsigned move_state (unsigned, SingleParticle<T>, ...)
-    {
-        return 0;
-    }
-
-    template <typename D>
     void pre_processor (unsigned iter, Particle<T> &particle,
             processor_sfinae_<D, &D::pre_processor> *)
     {
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
-
-    template <typename D>
-    void pre_processor (unsigned iter, Particle<T> &particle, ...) {}
 
     template <typename D>
     void post_processor (unsigned iter, Particle<T> &particle,
@@ -155,22 +146,115 @@ class MoveBase
     }
 
     template <typename D>
-    void post_processor (unsigned iter, Particle<T> &particle, ...) {}
+    unsigned move_state (unsigned, SingleParticle<T>, ...) {return 0;}
+
+    template <typename D>
+    void pre_processor (unsigned iter, Particle<T> &, ...) {}
+
+    template <typename D>
+    void post_processor (unsigned iter, Particle<T> &, ...) {}
 }; // class MoveBase
 
 template <typename T>
-class MoveBase<T, internal::VirtualBase>
+class MoveBase<T, internal::VBase>
 {
     public :
 
-    virtual unsigned move_state (unsigned iter, SingleParticle<T> part)
+    virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
+    virtual void post_processor (unsigned, Particle<T> &) {}
+    virtual void pre_processor (unsigned, Particle<T> &) {}
+}; // class MoveBase<T, internal::VBase>
+
+template <typename T, typename Derived>
+class InitializeBase
+{
+
+    public :
+
+    unsigned initialize_state (SingleParticle<T> part)
     {
-        return 0;
+        return initialize_state<Derived>(part, 0);
     }
 
-    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
-    virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
-}; // class MoveBase<T, internal::VirtualBase>
+    void initialize_param (Particle<T> &particle, void *param)
+    {
+        initialize_param<Derived>(particle, param, 0);
+    }
+
+    void post_processor (Particle<T> &particle)
+    {
+        post_processor<Derived>(particle, 0);
+    }
+
+    void pre_processor (Particle<T> &particle)
+    {
+        pre_processor<Derived>(particle, 0);
+    }
+
+    private :
+
+    template <typename D, unsigned (D::*)(SingleParticle<T>)>
+    class initialize_state_sfinae_ {};
+
+    template <typename D, void (D::*)(Particle<T> &, void *)>
+    class initialize_param_sfinae_ {};
+
+    template <typename D, void (D::*)(Particle<T> &)>
+    class processor_sfinae_ {};
+
+    template <typename D>
+    unsigned initialize_state (SingleParticle<T> part,
+            initialize_state_sfinae_<D, &D::initialize_state> *)
+    {
+        return static_cast<Derived *>(this)->initialize_state(part);
+    }
+
+    template <typename D>
+    void initialize_param (Particle<T> &particle, void *param,
+            initialize_param_sfinae_<D, &D::initialize_param> *)
+    {
+        static_cast<Derived *>(this)->initialize_param(particle, param);
+    }
+
+    template <typename D>
+    void pre_processor (Particle<T> &particle,
+            processor_sfinae_<D, &D::pre_processor> *)
+    {
+        static_cast<Derived *>(this)->pre_processor(particle);
+    }
+
+
+    template <typename D>
+    void post_processor (Particle<T> &particle,
+            processor_sfinae_<D, &D::post_processor> *)
+    {
+        static_cast<Derived *>(this)->post_processor(particle);
+    }
+
+    template <typename D>
+    unsigned initialize_state (SingleParticle<T>, ...) {return 0;}
+
+    template <typename D>
+    void initialize_param (Particle<T>, void *, ...) {}
+
+    template <typename D>
+    void pre_processor (Particle<T> &, ...) {}
+
+    template <typename D>
+    void post_processor (Particle<T> &, ...) {}
+}; // class InitializeBase
+
+template <typename T>
+class InitializeBase<T, internal::VBase>
+{
+    public :
+
+    virtual unsigned initialize_state (SingleParticle<T>) {return 0;}
+    virtual void initialize_param (Particle<T>, void *) {}
+    virtual void post_processor (Particle<T> &) {}
+    virtual void pre_processor (Particle<T> &) {}
+}; // class InitializeBase<T, internal::VBase>
+
 
 } } // namespace vsmc::internal
 

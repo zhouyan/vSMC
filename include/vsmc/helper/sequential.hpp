@@ -37,8 +37,8 @@ class StateSeq : public internal::StateBase<Dim, T>
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
-template <typename T>
-class InitializeSeq
+template <typename T, typename Derived>
+class InitializeSeq : public internal::InitializeBase<T, Derived>
 {
     public :
 
@@ -49,20 +49,15 @@ class InitializeSeq
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        initialize_param(particle, param);
-        pre_processor(particle);
+        this->initialize_param(particle, param);
+        this->pre_processor(particle);
         unsigned accept = 0;
         for (size_type i = 0; i != particle.size(); ++i)
-            accept += initialize_state(SingleParticle<T>(i, &particle));
-        post_processor(particle);
+            accept += this->initialize_state(SingleParticle<T>(i, &particle));
+        this->post_processor(particle);
 
         return accept;
     }
-
-    virtual unsigned initialize_state (SingleParticle<T> part) = 0;
-    virtual void initialize_param (Particle<T> &particle, void *param) {}
-    virtual void pre_processor (Particle<T> &particle) {}
-    virtual void post_processor (Particle<T> &particle) {}
 }; // class InitializeSeq
 
 /// \brief Sampler<T>::move_type subtype
