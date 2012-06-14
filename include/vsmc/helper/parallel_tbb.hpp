@@ -16,10 +16,10 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-/// \tparam Profiler class The profiler used for profiling run_parallel_for().
+/// \tparam Profiler class The profiler used for profiling run_parallel().
 /// The default is NullProfiler, which does nothing but provide the compatible
 /// inteferce. Profiler::start() and Profiler::stop() are called automatically
-/// when entering and exiting run_parallel_for(). This shall provide how much
+/// when entering and exiting run_parallel(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
 class StateTBB : public internal::StateBase<Dim, T>
@@ -39,7 +39,7 @@ class StateTBB : public internal::StateBase<Dim, T>
     virtual ~StateTBB () {}
 
     template <typename Work>
-    void run_parallel_for (const Work &work) const
+    void run_parallel (const Work &work) const
     {
         profiler_.start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work);
@@ -64,7 +64,7 @@ class StateTBB : public internal::StateBase<Dim, T>
 
     void post_resampling ()
     {
-        run_parallel_for(copy_work_(this, copy_.data()));
+        run_parallel(copy_work_(this, copy_.data()));
     }
 
     private :
@@ -115,8 +115,7 @@ class InitializeTBB
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         accept_.resize(particle.size());
-        particle.value().run_parallel_for(
-                work_(this, &particle, accept_.data()));
+        particle.value().run_parallel(work_(this, &particle, accept_.data()));
         this->post_processor(particle);
 
         return accept_.sum();
@@ -173,7 +172,7 @@ class MoveTBB
     {
         this->pre_processor(iter, particle);
         accept_.resize(particle.size());
-        particle.value().run_parallel_for(
+        particle.value().run_parallel(
                 work_(this, iter, &particle, accept_.data()));
         this->post_processor(iter, particle);
 
@@ -231,8 +230,7 @@ class MonitorTBB
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        particle.value().run_parallel_for(
-                work_(this, iter, &particle, res));
+        particle.value().run_parallel(work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
     }
 
@@ -290,8 +288,7 @@ class PathTBB
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        particle.value().run_parallel_for(
-                work_(this, iter, &particle, res));
+        particle.value().run_parallel(work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 
         return this->width_state(iter, particle);

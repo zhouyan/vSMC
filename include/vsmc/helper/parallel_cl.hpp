@@ -18,10 +18,10 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector The default
-/// \tparam Profiler class The profiler used for profiling run_kernel().
+/// \tparam Profiler class The profiler used for profiling run_parallel().
 /// The default is NullProfiler, which does nothing but provide the compatible
 /// inteferce.  Profiler::start() and Profiler::stop() are called automatically
-/// when entering and exiting run_kernel(). This shall provide how much time
+/// when entering and exiting run_parallel(). This shall provide how much time
 /// are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Profiler>
 class StateCL
@@ -505,7 +505,7 @@ class StateCL
     /// size returned by local_nd_range(), which shall be suitable for most
     /// use case. For more control over running a kernel, user need to call
     /// OpenCL API himself.
-    void run_kernel (const cl::Kernel &ker) const
+    void run_parallel (const cl::Kernel &ker) const
     {
         profiler_.start();
         command_queue_.enqueueNDRangeKernel(ker,
@@ -531,7 +531,7 @@ class StateCL
         write_buffer<size_type>(copy_device_, size_, copy_host_.data());
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
-        run_kernel(kernel_copy_);
+        run_parallel(kernel_copy_);
     }
 
     private :
@@ -649,7 +649,7 @@ class InitializeCL
         set_kernel(particle);
         initialize_param(particle, param);
         pre_processor(particle);
-        particle.value().run_kernel(kernel_);
+        particle.value().run_parallel(kernel_);
         post_processor(particle);
 
         return particle.value().accept_host().sum();
@@ -723,7 +723,7 @@ class MoveCL
     {
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().run_kernel(kernel_);
+        particle.value().run_parallel(kernel_);
         post_processor(iter, particle);
 
         return particle.value().accept_host().sum();
@@ -798,7 +798,7 @@ class MonitorCL
     {
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().run_kernel(kernel_);
+        particle.value().run_parallel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
                 buffer_device_, particle.size() * Dim, res);
         post_processor(iter, particle);
@@ -878,7 +878,7 @@ class PathCL
     {
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().run_kernel(kernel_);
+        particle.value().run_parallel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
                 buffer_device_, particle.size(), res);
         post_processor(iter, particle);
