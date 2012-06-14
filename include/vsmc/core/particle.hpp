@@ -319,9 +319,9 @@ class Particle
 
         for (size_type i = 0; i != size_; ++i)
             weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
-        weight2replication(weight_.sum());
+        weight2replication(static_cast<size_type>(weight_.sum()));
         for (size_type i = 0; i != size_; ++i)
-            replication_[i] += log_weight_[i];
+            replication_[i] += static_cast<size_type>(log_weight_[i]);
     }
 
     void resample_stratified ()
@@ -370,7 +370,7 @@ class Particle
         replication_.setConstant(0);
         for (size_type i = 0; i != size_; ++i)
             weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
-        size_type size = weight_.sum();
+        size_type size = static_cast<size_type>(weight_.sum());
         weight_ /= size;
         size_type j = 0;
         size_type k = 0;
@@ -388,7 +388,7 @@ class Particle
             cw += weight_[++k];
         }
         for (size_type i = 0; i != size_; ++i)
-            replication_[i] += log_weight_[i];
+            replication_[i] += static_cast<size_type>(log_weight_[i]);
     }
 
     void resample_residual_systematic ()
