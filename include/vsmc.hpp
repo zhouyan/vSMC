@@ -6,9 +6,6 @@
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/path.hpp>
 
-#include <vsmc/helper/single_particle.hpp>
-#include <vsmc/helper/state_base.hpp>
-
 #include <vsmc/helper/sequential.hpp>
 
 #ifdef VSMC_USE_TBB

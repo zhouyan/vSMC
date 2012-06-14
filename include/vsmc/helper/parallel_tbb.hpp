@@ -2,7 +2,7 @@
 #define VSMC_HELPER_PARALLEL_TBB_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/helper/sequential.hpp>
+#include <vsmc/helper/base.hpp>
 #include <tbb/tbb.h>
 
 /// \defgroup TBB Intel Threading Buidling Block

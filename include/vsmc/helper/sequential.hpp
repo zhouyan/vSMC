@@ -2,6 +2,7 @@
 #define VSMC_HELPER_SEQUENTIAL_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/helper/base.hpp>
 
 /// \defgroup Sequential Sequential
 /// \ingroup Helper
@@ -68,8 +69,8 @@ class InitializeSeq
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
-template <typename T>
-class MoveSeq
+template <typename T, typename Derived>
+class MoveSeq : public internal::MoveBase<T, Derived>
 {
     public :
 
@@ -80,18 +81,14 @@ class MoveSeq
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        pre_processor(iter, particle);
+        this->pre_processor(iter, particle);
         unsigned accept = 0;
         for (size_type i = 0; i != particle.size(); ++i)
-            accept += move_state(iter, SingleParticle<T>(i, &particle));
-        post_processor(iter, particle);
+            accept += this->move_state(iter, SingleParticle<T>(i, &particle));
+        this->post_processor(iter, particle);
 
         return accept;
     }
-
-    virtual unsigned move_state (unsigned iter, SingleParticle<T> part) = 0;
-    virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
 }; // class MoveSeq
 
 /// \brief Monitor<T>::eval_type subtype
