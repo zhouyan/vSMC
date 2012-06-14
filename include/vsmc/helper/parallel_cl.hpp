@@ -510,6 +510,7 @@ class StateCL
         timer_.start();
         command_queue_.enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
+        command_queue_.finish();
         timer_.stop();
     }
 
