@@ -503,8 +503,8 @@ class StateCL
     /// \note The program has to be built before call this member. The kernel
     /// will be run with global size returned by global_nd_range() and local
     /// size returned by local_nd_range(), which shall be suitable for most
-    /// use case. Both are one dimension NDRange For more control over running
-    /// a kernel, user need to call OpenCL API himself.
+    /// use case. Both are one dimension NDRange. For more complex parallel
+    /// patterns, users need to call OpenCL API themselves.
     void run_parallel (const cl::Kernel &ker) const
     {
         profiler_.start();

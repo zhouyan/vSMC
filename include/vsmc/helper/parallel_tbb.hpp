@@ -48,11 +48,29 @@ class StateTBB : public internal::StateBase<Dim, T>
     /// \endcode
     /// where \c size_type is StateTBB::size_type. There are equivalent
     /// typedefs in InitializeTBB etc.
+    ///
+    /// \note The range form of tbb::parallel_for is used by run_parallel.
+    /// This is the most commonly used in the context of SMC. The range is
+    /// constructed as <tt>tbb::blocked_range<size_type>(0, size())</tt>. For
+    /// more complex parallel patterns, users need to call Intel TBB API
+    /// themselves.
     template <typename Work>
     void run_parallel (const Work &work) const
     {
         profiler_.start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work);
+        profiler_.stop();
+    }
+
+    /// \brief Run a worker in parallel with tbb::parallel_for
+    ///
+    /// \param work The worker object
+    /// \param part The affinity partitioner
+    template <typename Work>
+    void run_parallel (const Work &work, tbb::affinity_partitioner &part) const
+    {
+        profiler_.start();
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work, part);
         profiler_.stop();
     }
 
