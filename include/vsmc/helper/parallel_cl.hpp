@@ -496,15 +496,15 @@ class StateCL
         return cl::Kernel(program_, name);
     }
 
-    /// \brief Run a kernel
+    /// \brief Run a kernel in parallel on the device
     ///
     /// \param ker The kernel to run
     ///
     /// \note The program has to be built before call this member. The kernel
     /// will be run with global size returned by global_nd_range() and local
     /// size returned by local_nd_range(), which shall be suitable for most
-    /// use case. For more control over running a kernel, user need to call
-    /// OpenCL API himself.
+    /// use case. Both are one dimension NDRange For more control over running
+    /// a kernel, user need to call OpenCL API himself.
     void run_parallel (const cl::Kernel &ker) const
     {
         profiler_.start();

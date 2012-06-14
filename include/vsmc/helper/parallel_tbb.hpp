@@ -38,6 +38,16 @@ class StateTBB : public internal::StateBase<Dim, T>
 
     virtual ~StateTBB () {}
 
+    /// \brief Run a worker in parallel with tbb::parallel_for
+    ///
+    /// \param work The worker object
+    ///
+    /// \note The kernel shall implement
+    /// \code
+    /// void operator () (const tbb::blocked_range<size_type> &range) const
+    /// \endcode
+    /// where \c size_type is StateTBB::size_type. There are equivalent
+    /// typedefs in InitializeTBB etc.
     template <typename Work>
     void run_parallel (const Work &work) const
     {
