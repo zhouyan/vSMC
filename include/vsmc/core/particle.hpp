@@ -50,9 +50,10 @@ class Particle
     ///
     /// \post All weights are initialized to be euqal to each other
     explicit Particle (size_type N, seed_type seed = VSMC_RNG_SEED) :
-        size_(N), value_(N), ess_(N),
-        weight_(N), log_weight_(N), inc_weight_(N), replication_(N),
+        size_(N), value_(N),
+        ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
         ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
+        inc_weight_(N), replication_(N),
         resampled_(false), zconst_(0), seed_(seed)
 #ifndef VSMC_USE_SEQUENTIAL_RNG
         , prng_(N)
@@ -108,7 +109,7 @@ class Particle
     /// Set equal weights for all particles
     void set_equal_weight ()
     {
-        ess_ = size_;
+        ess_ = static_cast<double>(size_);
         weight_.setConstant(1.0 / size_);
         log_weight_.setConstant(0);
 
@@ -271,16 +272,17 @@ class Particle
 
     size_type size_;
     value_type value_;
-    mutable double ess_;
 
+    mutable double ess_;
     mutable weight_type weight_;
     mutable weight_type log_weight_;
-    mutable weight_type inc_weight_;
-    mutable replication_type replication_;
 
     mutable bool ess_cached_;
     mutable bool weight_cached_;
     mutable bool log_weight_cached_;
+
+    mutable weight_type inc_weight_;
+    mutable replication_type replication_;
 
     bool resampled_;
     double zconst_;
@@ -371,7 +373,7 @@ class Particle
         for (size_type i = 0; i != size_; ++i)
             weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
         size_type size = static_cast<size_type>(weight_.sum());
-        weight_ /= size;
+        weight_ /= static_cast<double>(size);
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);

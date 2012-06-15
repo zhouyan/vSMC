@@ -72,7 +72,7 @@ class Monitor
     /// The size of records
     unsigned iter_size () const
     {
-        return index_.size();
+        return static_cast<unsigned>(index_.size());
     }
 
     /// \brief Test if the monitor is valid

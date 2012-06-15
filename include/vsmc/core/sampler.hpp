@@ -80,7 +80,7 @@ class Sampler
     /// The number of iterations recorded (including initialization)
     unsigned iter_size () const
     {
-        return ess_.size();
+        return static_cast<unsigned>(ess_.size());
     }
 
     /// The current resampling scheme
@@ -342,7 +342,7 @@ class Sampler
         for (accept_type::const_iterator
                 a = accept_.begin(); a != accept_.end(); ++a) {
             if (a->size() > accd)
-                accd = a->size();
+                accd = static_cast<unsigned>(a->size());
         }
         bool print_accept = accd > 0 && iter_size() > 0;
         if (print_accept) {
