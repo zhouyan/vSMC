@@ -4,7 +4,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/single_particle.hpp>
 
-namespace vsmc { namespace internal {
+namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup Helper
@@ -161,10 +161,10 @@ class InitializeBase
 
     void post_processor_dispatch (Particle<T> &particle,
             void (InitializeBase::*) (Particle<T> &)) {}
-}; // class InitializeBase<T, Derived>
+}; // class InitializeBase
 
 template <typename T>
-class InitializeBase<T, internal::VBase>
+class InitializeBase<T, internal::VirtualDerived>
 {
     public :
 
@@ -172,7 +172,7 @@ class InitializeBase<T, internal::VBase>
     virtual void initialize_param (Particle<T> &, void *) {}
     virtual void post_processor (Particle<T> &) {}
     virtual void pre_processor (Particle<T> &) {}
-}; // class InitializeBase<T>
+}; // class InitializeBase<T, internal::VirtualDerived>
 
 template <typename T, typename Derived>
 class MoveBase
@@ -225,20 +225,20 @@ class MoveBase
 
     void post_processor_dispatch (unsigned iter, Particle<T> &,
             void (MoveBase::*) (unsigned, Particle<T> &)) {}
-}; // class MoveBase<T, Derived>
+}; // class MoveBase
 
 template <typename T>
-class MoveBase<T, internal::VBase>
+class MoveBase<T, internal::VirtualDerived>
 {
     public :
 
     virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
     virtual void post_processor (unsigned, Particle<T> &) {}
     virtual void pre_processor (unsigned, Particle<T> &) {}
-}; // class MoveBase<T>
+}; // class MoveBase<T, internal::VirtualDerived>
 
-template <typename T, typename Derived>
-class MonitorBase
+template <typename T, unsigned, typename Derived>
+class MonitorEvalBase
 {
     public :
 
@@ -283,18 +283,18 @@ class MonitorBase
     }
 
     void monitor_state_dispatch (unsigned, ConstSingleParticle<T>, double *res,
-            void (MonitorBase::*) (unsigned, ConstSingleParticle<T>, double *))
-    {}
+            void (MonitorEvalBase::*)
+            (unsigned, ConstSingleParticle<T>, double *)) {}
 
     void pre_processor_dispatch (unsigned iter, const Particle<T> &,
-            void (MonitorBase::*) (unsigned, const Particle<T> &)) {}
+            void (MonitorEvalBase::*) (unsigned, const Particle<T> &)) {}
 
     void post_processor_dispatch (unsigned iter, const Particle<T> &,
-            void (MonitorBase::*) (unsigned, const Particle<T> &)) {}
-}; // class MonitorBase<T, Derived>
+            void (MonitorEvalBase::*) (unsigned, const Particle<T> &)) {}
+}; // class MonitorBase
 
-template <typename T>
-class MonitorBase<T, internal::VBase>
+template <typename T, unsigned Dim>
+class MonitorEvalBase<T, Dim, internal::VirtualDerived>
 {
     public :
 
@@ -302,10 +302,10 @@ class MonitorBase<T, internal::VBase>
             double *) {}
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
-}; // class MonitorBase<T>
+}; // class MonitorEvalBase<T, internal::VirtualDerived>
 
 template <typename T, typename Derived>
-class PathBase
+class PathEvalBase
 {
     public :
 
@@ -360,20 +360,22 @@ class PathBase
     }
 
     double path_state_dispatch (unsigned, ConstSingleParticle<T>,
-            double (PathBase::*) (unsigned, ConstSingleParticle<T>)) {return 0;}
+            double (PathEvalBase::*) (unsigned, ConstSingleParticle<T>))
+    {return 0;}
 
     double path_width_dispatch (unsigned, const Particle<T> &,
-            double (PathBase::*) (unsigned, const Particle<T> &)) {return 0;}
+            double (PathEvalBase::*) (unsigned, const Particle<T> &))
+    {return 0;}
 
     void pre_processor_dispatch (unsigned iter, const Particle<T> &,
-            void (PathBase::*) (unsigned, const Particle<T> &)) {}
+            void (PathEvalBase::*) (unsigned, const Particle<T> &)) {}
 
     void post_processor_dispatch (unsigned iter, const Particle<T> &,
-            void (PathBase::*) (unsigned, const Particle<T> &)) {}
-}; // class PathBase<T, Derived>
+            void (PathEvalBase::*) (unsigned, const Particle<T> &)) {}
+}; // class PathEvalBase
 
 template <typename T>
-class PathBase<T, internal::VBase>
+class PathEvalBase<T, internal::VirtualDerived>
 {
     public :
 
@@ -381,8 +383,8 @@ class PathBase<T, internal::VBase>
     virtual double path_width (unsigned, const Particle<T> &) {return 0;}
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
-}; // class MonitorBase<T>
+}; // class PathEval<T, internal::VirtualDerived>
 
-} } // namespace vsmc::internal
+} // namespace vsmc
 
 #endif // VSMC_HELPER_BASE_HPP

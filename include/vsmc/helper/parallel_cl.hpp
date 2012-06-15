@@ -791,14 +791,14 @@ class MoveCL
 ///
 /// \note Currently Dim cannot be larger than particle set size
 template <typename T, unsigned Dim>
-class MonitorCL
+class MonitorEvalCL
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~MonitorCL () {}
+    virtual ~MonitorEvalCL () {}
 
     void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
@@ -855,7 +855,7 @@ class MonitorCL
     cl::Kernel kernel_;
     std::string kernel_name_;
     cl::Buffer buffer_device_;
-}; // class MonitorCL
+}; // class MonitorEvalCL
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup OpenCL
@@ -871,14 +871,14 @@ class MonitorCL
 /// There can has other user supplied arguments as long as the first three is
 /// as above
 template <typename T>
-class PathCL
+class PathEvalCL
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~PathCL () {}
+    virtual ~PathEvalCL () {}
 
     double operator() (unsigned iter, const Particle<T> &particle,
         double *res)
@@ -933,7 +933,7 @@ class PathCL
     cl::Kernel kernel_;
     std::string kernel_name_;
     cl::Buffer buffer_device_;
-}; // class PathCL
+}; // class PathEvalCL
 
 } // namespace vsmc
 

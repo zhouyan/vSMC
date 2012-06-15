@@ -22,7 +22,7 @@ namespace vsmc {
 /// when entering and exiting run_parallel(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Timer>
-class StateTBB : public internal::StateBase<Dim, T>
+class StateTBB : public StateBase<Dim, T>
 #if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
     , public internal::PreResamplingTag, public internal::PostResamplingTag
 #endif
@@ -34,7 +34,7 @@ class StateTBB : public internal::StateBase<Dim, T>
     typedef Timer timer_type;
 
     explicit StateTBB (size_type N) :
-        internal::StateBase<Dim, T>(N), size_(N), copy_(N) {}
+        StateBase<Dim, T>(N), size_(N), copy_(N) {}
 
     virtual ~StateTBB () {}
 
@@ -136,7 +136,7 @@ class StateTBB : public internal::StateBase<Dim, T>
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class InitializeTBB : public internal::InitializeBase<T, Derived>
+class InitializeTBB : public InitializeBase<T, Derived>
 {
     public :
 
@@ -190,7 +190,7 @@ class InitializeTBB : public internal::InitializeBase<T, Derived>
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class MoveTBB : public internal::MoveBase<T, Derived>
+class MoveTBB : public MoveBase<T, Derived>
 {
     public :
 
@@ -246,14 +246,14 @@ class MoveTBB : public internal::MoveBase<T, Derived>
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim, typename Derived>
-class MonitorTBB : public internal::MonitorBase<T, Derived>
+class MonitorEvalTBB : public MonitorEvalBase<T, Dim, Derived>
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~MonitorTBB () {}
+    virtual ~MonitorEvalTBB () {}
 
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
@@ -273,7 +273,7 @@ class MonitorTBB : public internal::MonitorBase<T, Derived>
     {
         public :
 
-        work_ (MonitorTBB<T, Dim, Derived> *monitor, unsigned iter,
+        work_ (MonitorEvalTBB<T, Dim, Derived> *monitor, unsigned iter,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), iter_(iter), particle_(particle), res_(res) {}
 
@@ -289,26 +289,26 @@ class MonitorTBB : public internal::MonitorBase<T, Derived>
 
         private :
 
-        MonitorTBB<T, Dim, Derived> *const monitor_;
+        MonitorEvalTBB<T, Dim, Derived> *const monitor_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;
     }; // class work_
-}; // class MonitorTBB
+}; // class MonitorEvalTBB
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class PathTBB : public internal::PathBase<T, Derived>
+class PathEvalTBB : public PathEvalBase<T, Derived>
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~PathTBB () {}
+    virtual ~PathEvalTBB () {}
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
@@ -325,7 +325,7 @@ class PathTBB : public internal::PathBase<T, Derived>
     {
         public :
 
-        work_ (PathTBB<T, Derived> *path, unsigned iter,
+        work_ (PathEvalTBB<T, Derived> *path, unsigned iter,
                 const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
@@ -340,12 +340,12 @@ class PathTBB : public internal::PathBase<T, Derived>
 
         private :
 
-        PathTBB<T, Derived> *const path_;
+        PathEvalTBB<T, Derived> *const path_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;
     }; // class work_
-}; // PathTBB
+}; // PathEvalTBB
 
 } // namespace vsmc
 

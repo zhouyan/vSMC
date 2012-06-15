@@ -16,7 +16,7 @@ namespace vsmc {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T, typename Timer>
-class StateSeq : public internal::StateBase<Dim, T>
+class StateSeq : public StateBase<Dim, T>
 {
     public :
 
@@ -24,7 +24,7 @@ class StateSeq : public internal::StateBase<Dim, T>
     typedef T state_type;
     typedef Timer timer_type;
 
-    explicit StateSeq (size_type N) : internal::StateBase<Dim, T>(N) {}
+    explicit StateSeq (size_type N) : StateBase<Dim, T>(N) {}
 
     virtual ~StateSeq () {}
 
@@ -48,7 +48,7 @@ class StateSeq : public internal::StateBase<Dim, T>
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class InitializeSeq : public internal::InitializeBase<T, Derived>
+class InitializeSeq : public InitializeBase<T, Derived>
 {
     public :
 
@@ -77,7 +77,7 @@ class InitializeSeq : public internal::InitializeBase<T, Derived>
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class MoveSeq : public internal::MoveBase<T, Derived>
+class MoveSeq : public MoveBase<T, Derived>
 {
     public :
 
@@ -106,14 +106,14 @@ class MoveSeq : public internal::MoveBase<T, Derived>
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
 template <typename T, unsigned Dim, typename Derived>
-class MonitorSeq : public internal::MonitorBase<T, Derived>
+class MonitorEvalSeq : public MonitorEvalBase<T, Dim, Derived>
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~MonitorSeq () {}
+    virtual ~MonitorEvalSeq () {}
 
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
@@ -131,21 +131,21 @@ class MonitorSeq : public internal::MonitorBase<T, Derived>
     {
         return Dim;
     }
-}; // class MonitorSeq
+}; // class MonitorEvalSeq
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class PathSeq : public internal::PathBase<T, Derived>
+class PathEvalSeq : public PathEvalBase<T, Derived>
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~PathSeq () {}
+    virtual ~PathEvalSeq () {}
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
@@ -160,7 +160,7 @@ class PathSeq : public internal::PathBase<T, Derived>
 
         return this->path_width(iter, particle);
     }
-};
+}; // class PathEvalSeq
 
 } // namespace vsmc
 

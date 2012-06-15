@@ -5,14 +5,14 @@ namespace vsmc {
 
 namespace internal {
 
-class VBase {};
+class VirtualDerived {};
 class PreResamplingTag {};
 class PostResamplingTag {};
 
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
-template <typename, typename> class MonitorBase;
-template <typename, typename> class PathBase;
+template <typename, unsigned, typename> class MonitorEvalBase;
+template <typename, typename> class PathEvalBase;
 
 } // namespace vsmc::internal
 
@@ -28,22 +28,24 @@ template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 
 template <unsigned, typename, typename P = NullTimer> class StateSeq;
-template <typename, typename I = internal::VBase> class InitializeSeq;
-template <typename, typename I = internal::VBase> class MoveSeq;
-template <typename, unsigned, typename I = internal::VBase> class MonitorSeq;
-template <typename, typename I = internal::VBase> class PathSeq;
+template <typename, typename D = internal::VirtualDerived> class InitializeSeq;
+template <typename, typename D = internal::VirtualDerived> class MoveSeq;
+template <typename, unsigned, typename D = internal::VirtualDerived>
+class MonitorEvalSeq;
+template <typename, typename D = internal::VirtualDerived> class PathEvalSeq;
 
 template <unsigned, typename, typename P = NullTimer> class StateTBB;
-template <typename, typename I = internal::VBase> class InitializeTBB;
-template <typename, typename I = internal::VBase> class MoveTBB;
-template <typename, unsigned, typename I = internal::VBase> class MonitorTBB;
-template <typename, typename I = internal::VBase> class PathTBB;
+template <typename, typename D = internal::VirtualDerived> class InitializeTBB;
+template <typename, typename D = internal::VirtualDerived> class MoveTBB;
+template <typename, unsigned, typename D = internal::VirtualDerived>
+class MonitorEvalTBB;
+template <typename, typename D = internal::VirtualDerived> class PathEvalTBB;
 
 template <unsigned, typename, typename P = NullTimer> class StateCL;
 template <typename> class InitializeCL;
 template <typename> class MoveCL;
-template <typename, unsigned> class MonitorCL;
-template <typename> class PathCL;
+template <typename, unsigned> class MonitorEvalCL;
+template <typename> class PathEvalCL;
 
 } // namesapce vsmc
 
