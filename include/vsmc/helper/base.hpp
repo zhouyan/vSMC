@@ -98,7 +98,6 @@ class StateBase
 template <typename T, typename Derived>
 class InitializeBase
 {
-
     public :
 
     unsigned initialize_state (SingleParticle<T> part)

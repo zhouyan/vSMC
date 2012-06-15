@@ -26,7 +26,7 @@ namespace vsmc {
 template <unsigned Dim, typename T, typename Timer>
 class StateCL
 #if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
-    : public internal::ParallelTag
+    : public internal::PreResamplingTag, public internal::PostResamplingTag
 #endif
 {
     public :

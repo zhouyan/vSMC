@@ -13,8 +13,8 @@
 #define VSMC_HAS_CXX11LIB_RANDOM 1
 #endif
 
-#ifdef VSMC_USE_STD_TYEP_TRAITS
-#define VSMC_HAS_CXX11LIB_TYEP_TRAITS 1
+#ifdef VSMC_USE_STD_TYPE_TRAITS
+#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 1
 #endif
 
 #include <vsmc/internal/compiler.hpp>

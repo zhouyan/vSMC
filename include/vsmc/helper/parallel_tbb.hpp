@@ -24,7 +24,7 @@ namespace vsmc {
 template <unsigned Dim, typename T, typename Timer>
 class StateTBB : public internal::StateBase<Dim, T>
 #if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
-    , public internal::ParallelTag
+    , public internal::PreResamplingTag, public internal::PostResamplingTag
 #endif
 {
     public :
@@ -135,8 +135,8 @@ class StateTBB : public internal::StateBase<Dim, T>
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Impl>
-class InitializeTBB : public internal::InitializeBase<T, Impl>
+template <typename T, typename Derived>
+class InitializeTBB : public internal::InitializeBase<T, Derived>
 {
     public :
 
@@ -164,7 +164,7 @@ class InitializeTBB : public internal::InitializeBase<T, Impl>
     {
         public :
 
-        work_ (InitializeTBB<T, Impl> *init,
+        work_ (InitializeTBB<T, Derived> *init,
                 Particle<T> *particle, unsigned *accept) :
             init_(init), particle_(particle), accept_(accept) {}
 
@@ -179,7 +179,7 @@ class InitializeTBB : public internal::InitializeBase<T, Impl>
 
         private :
 
-        InitializeTBB<T, Impl> *const init_;
+        InitializeTBB<T, Derived> *const init_;
         Particle<T> *const particle_;
         unsigned *const accept_;
     }; // class work_
@@ -189,8 +189,8 @@ class InitializeTBB : public internal::InitializeBase<T, Impl>
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Impl>
-class MoveTBB : public internal::MoveBase<T, Impl>
+template <typename T, typename Derived>
+class MoveTBB : public internal::MoveBase<T, Derived>
 {
     public :
 
@@ -218,7 +218,7 @@ class MoveTBB : public internal::MoveBase<T, Impl>
     {
         public :
 
-        work_ (MoveTBB<T, Impl> *move, unsigned iter,
+        work_ (MoveTBB<T, Derived> *move, unsigned iter,
                 Particle<T> *particle, unsigned *accept) :
             move_(move), iter_(iter), particle_(particle), accept_(accept) {}
 
@@ -233,7 +233,7 @@ class MoveTBB : public internal::MoveBase<T, Impl>
 
         private :
 
-        MoveTBB<T, Impl> *const move_;
+        MoveTBB<T, Derived> *const move_;
         const unsigned iter_;
         Particle<T> *const particle_;
         unsigned *const accept_;
@@ -245,8 +245,8 @@ class MoveTBB : public internal::MoveBase<T, Impl>
 ///
 /// \tparam T A subtype of StateBase
 /// \tparam Dim The dimension of the monitor
-template <typename T, unsigned Dim, typename Impl>
-class MonitorTBB : public internal::MonitorBase<T, Impl>
+template <typename T, unsigned Dim, typename Derived>
+class MonitorTBB : public internal::MonitorBase<T, Derived>
 {
     public :
 
@@ -273,7 +273,7 @@ class MonitorTBB : public internal::MonitorBase<T, Impl>
     {
         public :
 
-        work_ (MonitorTBB<T, Dim, Impl> *monitor, unsigned iter,
+        work_ (MonitorTBB<T, Dim, Derived> *monitor, unsigned iter,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), iter_(iter), particle_(particle), res_(res) {}
 
@@ -289,7 +289,7 @@ class MonitorTBB : public internal::MonitorBase<T, Impl>
 
         private :
 
-        MonitorTBB<T, Dim, Impl> *const monitor_;
+        MonitorTBB<T, Dim, Derived> *const monitor_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;
@@ -300,8 +300,8 @@ class MonitorTBB : public internal::MonitorBase<T, Impl>
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-template <typename T, typename Impl>
-class PathTBB : public internal::PathBase<T, Impl>
+template <typename T, typename Derived>
+class PathTBB : public internal::PathBase<T, Derived>
 {
     public :
 
@@ -325,7 +325,7 @@ class PathTBB : public internal::PathBase<T, Impl>
     {
         public :
 
-        work_ (PathTBB<T, Impl> *path, unsigned iter,
+        work_ (PathTBB<T, Derived> *path, unsigned iter,
                 const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
@@ -340,7 +340,7 @@ class PathTBB : public internal::PathBase<T, Impl>
 
         private :
 
-        PathTBB<T, Impl> *const path_;
+        PathTBB<T, Derived> *const path_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;

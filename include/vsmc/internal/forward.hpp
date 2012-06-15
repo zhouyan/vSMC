@@ -6,6 +6,8 @@ namespace vsmc {
 namespace internal {
 
 class VBase {};
+class PreResamplingTag {};
+class PostResamplingTag {};
 
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
@@ -43,10 +45,6 @@ template <typename> class MoveCL;
 template <typename, unsigned> class MonitorCL;
 template <typename> class PathCL;
 
-namespace internal {
-
-class ParallelTag {};
-
-} } // namesapce vsmc
+} // namesapce vsmc
 
 #endif // VSMC_INTERNAL_FORWARD_HPP
