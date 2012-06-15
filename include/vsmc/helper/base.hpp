@@ -123,13 +123,13 @@ class InitializeBase
 
     private :
 
-    template <typename D, unsigned (D::*)(SingleParticle<T>)>
+    template <typename D, unsigned (D::*) (SingleParticle<T>)>
     class initialize_state_sfinae_ {};
 
-    template <typename D, void (D::*)(Particle<T> &, void *)>
+    template <typename D, void (D::*) (Particle<T> &, void *)>
     class initialize_param_sfinae_ {};
 
-    template <typename D, void (D::*)(Particle<T> &)>
+    template <typename D, void (D::*) (Particle<T> &)>
     class processor_sfinae_ {};
 
     template <typename D>
@@ -210,10 +210,10 @@ class MoveBase
 
     private :
 
-    template <typename D, unsigned (D::*)(unsigned, SingleParticle<T>)>
+    template <typename D, unsigned (D::*) (unsigned, SingleParticle<T>)>
     class move_state_sfinae_ {};
 
-    template <typename D, void (D::*)(unsigned, Particle<T> &)>
+    template <typename D, void (D::*) (unsigned, Particle<T> &)>
     class processor_sfinae_ {};
 
     template <typename D>
@@ -283,11 +283,11 @@ class MonitorBase
 
     private :
 
-    template <typename D, void (D::*)(unsigned, ConstSingleParticle<T>,
+    template <typename D, void (D::*) (unsigned, ConstSingleParticle<T>,
             double *)>
     class monitor_state_sfinae_ {};
 
-    template <typename D, void (D::*)(unsigned, const Particle<T> &)>
+    template <typename D, void (D::*) (unsigned, const Particle<T> &)>
     class processor_sfinae_ {};
 
     template <typename D>
@@ -360,13 +360,13 @@ class PathBase
 
     private :
 
-    template <typename D, double (D::*)(unsigned, ConstSingleParticle<T>)>
+    template <typename D, double (D::*) (unsigned, ConstSingleParticle<T>)>
     class path_state_sfinae_ {};
 
-    template <typename D, double (D::*)(unsigned, const Particle<T> &)>
+    template <typename D, double (D::*) (unsigned, const Particle<T> &)>
     class path_width_sfinae_ {};
 
-    template <typename D, void (D::*)(unsigned, const Particle<T> &)>
+    template <typename D, void (D::*) (unsigned, const Particle<T> &)>
     class processor_sfinae_ {};
 
     template <typename D>
