@@ -189,7 +189,7 @@ class InitializeBase
 }; // class InitializeBase
 
 template <typename T>
-class InitializeBase<T, internal::VirtualDerived>
+class InitializeBase<T, VirtualDerivedTag>
 {
     public :
 
@@ -197,10 +197,10 @@ class InitializeBase<T, internal::VirtualDerived>
     virtual void initialize_param (Particle<T> &, void *) {}
     virtual void post_processor (Particle<T> &) {}
     virtual void pre_processor (Particle<T> &) {}
-}; // class InitializeBase<T, internal::VirtualDerived>
+}; // class InitializeBase<T, VirtualDerivedTag>
 
 template <typename T>
-class InitializeBase<T, internal::StaticDerived>
+class InitializeBase<T, StaticDerivedTag>
 {
     public :
 
@@ -208,7 +208,7 @@ class InitializeBase<T, internal::StaticDerived>
     static void initialize_param (Particle<T> &, void *) {}
     static void post_processor (Particle<T> &) {}
     static void pre_processor (Particle<T> &) {}
-}; // class InitializeBase<T, internal::StaticDerived>
+}; // class InitializeBase<T, StaticDerivedTag>
 
 template <typename T, typename Derived>
 class MoveBase
@@ -282,24 +282,24 @@ class MoveBase
 }; // class MoveBase
 
 template <typename T>
-class MoveBase<T, internal::VirtualDerived>
+class MoveBase<T, VirtualDerivedTag>
 {
     public :
 
     virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
     virtual void post_processor (unsigned, Particle<T> &) {}
     virtual void pre_processor (unsigned, Particle<T> &) {}
-}; // class MoveBase<T, internal::VirtualDerived>
+}; // class MoveBase<T, VirtualDerivedTag>
 
 template <typename T>
-class MoveBase<T, internal::StaticDerived>
+class MoveBase<T, StaticDerivedTag>
 {
     public :
 
     static unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
     static void post_processor (unsigned, Particle<T> &) {}
     static void pre_processor (unsigned, Particle<T> &) {}
-}; // class MoveBase<T, internal::StaticDerived>
+}; // class MoveBase<T, StaticDerivedTag>
 
 template <typename T, unsigned, typename Derived>
 class MonitorEvalBase
@@ -377,7 +377,7 @@ class MonitorEvalBase
 }; // class MonitorBase
 
 template <typename T, unsigned Dim>
-class MonitorEvalBase<T, Dim, internal::VirtualDerived>
+class MonitorEvalBase<T, Dim, VirtualDerivedTag>
 {
     public :
 
@@ -385,10 +385,10 @@ class MonitorEvalBase<T, Dim, internal::VirtualDerived>
             double *) {}
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
-}; // class MonitorEvalBase<T, internal::VirtualDerived>
+}; // class MonitorEvalBase<T, VirtualDerivedTag>
 
 template <typename T, unsigned Dim>
-class MonitorEvalBase<T, Dim, internal::StaticDerived>
+class MonitorEvalBase<T, Dim, StaticDerivedTag>
 {
     public :
 
@@ -396,7 +396,7 @@ class MonitorEvalBase<T, Dim, internal::StaticDerived>
             double *) {}
     static void post_processor (unsigned, const Particle<T> &) {}
     static void pre_processor (unsigned, const Particle<T> &) {}
-}; // class MonitorEvalBase<T, internal::StaticDerived>
+}; // class MonitorEvalBase<T, StaticDerivedTag>
 
 template <typename T, typename Derived>
 class PathEvalBase
@@ -497,7 +497,7 @@ class PathEvalBase
 }; // class PathEvalBase
 
 template <typename T>
-class PathEvalBase<T, internal::VirtualDerived>
+class PathEvalBase<T, VirtualDerivedTag>
 {
     public :
 
@@ -505,10 +505,10 @@ class PathEvalBase<T, internal::VirtualDerived>
     virtual double path_width (unsigned, const Particle<T> &) {return 0;}
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
-}; // class PathEval<T, internal::VirtualDerived>
+}; // class PathEval<T, VirtualDerivedTag>
 
 template <typename T>
-class PathEvalBase<T, internal::StaticDerived>
+class PathEvalBase<T, StaticDerivedTag>
 {
     public :
 
@@ -516,7 +516,7 @@ class PathEvalBase<T, internal::StaticDerived>
     static double path_width (unsigned, const Particle<T> &) {return 0;}
     static void post_processor (unsigned, const Particle<T> &) {}
     static void pre_processor (unsigned, const Particle<T> &) {}
-}; // class PathEval<T, internal::StaticDerived>
+}; // class PathEval<T, StaticDerivedTag>
 
 } // namespace vsmc
 

@@ -93,7 +93,7 @@ inline void pre_resampling (T *value)
 {
     PrePostResampling<
         internal::HasPreResampling<T>::value ||
-        internal::is_base_of<internal::PreResamplingTag, T>::value,
+        internal::is_base_of<PreResamplingTag, T>::value,
         T>::pre_resampling(value);
 }
 
@@ -102,7 +102,7 @@ inline void post_resampling (T *value)
 {
     PrePostResampling<
         internal::HasPostResampling<T>::value ||
-        internal::is_base_of<internal::PostResamplingTag, T>::value,
+        internal::is_base_of<PostResamplingTag, T>::value,
         T>::post_resampling(value);
 }
 

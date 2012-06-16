@@ -24,7 +24,7 @@ namespace vsmc {
 template <unsigned Dim, typename T, typename Timer>
 class StateTBB : public StateBase<Dim, T>
 #if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
-    , public internal::PreResamplingTag, public internal::PostResamplingTag
+    , public PreResamplingTag, public PostResamplingTag
 #endif
 {
     public :
