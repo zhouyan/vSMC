@@ -6,6 +6,7 @@ namespace vsmc {
 namespace internal {
 
 class VirtualDerived {};
+class StaticDerived {};
 class PreResamplingTag {};
 class PostResamplingTag {};
 

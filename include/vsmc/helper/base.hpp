@@ -151,6 +151,31 @@ class InitializeBase
     }
 
     unsigned initialize_state_dispatch (SingleParticle<T> part,
+            unsigned (*) (SingleParticle<T>))
+    {
+        return Derived::initialize_state(part);
+    }
+
+    void initialize_param_dispatch (Particle<T> &particle, void *param,
+            void (*) (Particle<T> &, void *))
+    {
+        Derived::initialize_param(particle, param);
+    }
+
+    void pre_processor_dispatch (Particle<T> &particle,
+            void (*) (Particle<T> &))
+    {
+        Derived::pre_processor(particle);
+    }
+
+    template <typename D>
+    void post_processor_dispatch (Particle<T> &particle,
+            void (*) (Particle<T> &))
+    {
+        Derived::post_processor(particle);
+    }
+
+    unsigned initialize_state_dispatch (SingleParticle<T> part,
             unsigned (InitializeBase::*) (SingleParticle<T>)) {return 0;}
 
     void initialize_param_dispatch (Particle<T> &particle, void *param,
@@ -173,6 +198,17 @@ class InitializeBase<T, internal::VirtualDerived>
     virtual void post_processor (Particle<T> &) {}
     virtual void pre_processor (Particle<T> &) {}
 }; // class InitializeBase<T, internal::VirtualDerived>
+
+template <typename T>
+class InitializeBase<T, internal::StaticDerived>
+{
+    public :
+
+    static unsigned initialize_state (SingleParticle<T>) {return 0;}
+    static void initialize_param (Particle<T> &, void *) {}
+    static void post_processor (Particle<T> &) {}
+    static void pre_processor (Particle<T> &) {}
+}; // class InitializeBase<T, internal::StaticDerived>
 
 template <typename T, typename Derived>
 class MoveBase
@@ -217,6 +253,24 @@ class MoveBase
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
+    unsigned move_state_dispatch (unsigned iter, SingleParticle<T> part,
+            unsigned (*) (unsigned, SingleParticle<T>))
+    {
+        return Derived::move_state(iter, part);
+    }
+
+    void pre_processor_dispatch (unsigned iter, Particle<T> &particle,
+            void (*) (unsigned, Particle<T> &))
+    {
+        Derived::pre_processor(iter, particle);
+    }
+
+    void post_processor_dispatch (unsigned iter, Particle<T> &particle,
+            void (*) (unsigned, Particle<T> &))
+    {
+        Derived::post_processor(iter, particle);
+    }
+
     unsigned move_state_dispatch (unsigned, SingleParticle<T>,
             unsigned (MoveBase::*) (unsigned, SingleParticle<T>)) {return 0;}
 
@@ -236,6 +290,16 @@ class MoveBase<T, internal::VirtualDerived>
     virtual void post_processor (unsigned, Particle<T> &) {}
     virtual void pre_processor (unsigned, Particle<T> &) {}
 }; // class MoveBase<T, internal::VirtualDerived>
+
+template <typename T>
+class MoveBase<T, internal::StaticDerived>
+{
+    public :
+
+    static unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
+    static void post_processor (unsigned, Particle<T> &) {}
+    static void pre_processor (unsigned, Particle<T> &) {}
+}; // class MoveBase<T, internal::StaticDerived>
 
 template <typename T, unsigned, typename Derived>
 class MonitorEvalBase
@@ -282,6 +346,25 @@ class MonitorEvalBase
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
+    void monitor_state_dispatch (unsigned iter, ConstSingleParticle<T> part,
+            double *res,
+            void (*) (unsigned, ConstSingleParticle<T>, double *))
+    {
+        Derived::monitor_state(iter, part, res);
+    }
+
+    void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
+            void (*) (unsigned, const Particle<T> &))
+    {
+        Derived::pre_processor(iter, particle);
+    }
+
+    void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
+            void (*) (unsigned, const Particle<T> &))
+    {
+        Derived::post_processor(iter, particle);
+    }
+
     void monitor_state_dispatch (unsigned, ConstSingleParticle<T>, double *res,
             void (MonitorEvalBase::*)
             (unsigned, ConstSingleParticle<T>, double *)) {}
@@ -303,6 +386,17 @@ class MonitorEvalBase<T, Dim, internal::VirtualDerived>
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
 }; // class MonitorEvalBase<T, internal::VirtualDerived>
+
+template <typename T, unsigned Dim>
+class MonitorEvalBase<T, Dim, internal::StaticDerived>
+{
+    public :
+
+    static void monitor_state (unsigned, ConstSingleParticle<T>,
+            double *) {}
+    static void post_processor (unsigned, const Particle<T> &) {}
+    static void pre_processor (unsigned, const Particle<T> &) {}
+}; // class MonitorEvalBase<T, internal::StaticDerived>
 
 template <typename T, typename Derived>
 class PathEvalBase
@@ -359,6 +453,34 @@ class PathEvalBase
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
+    template <typename D>
+    double path_state_dispatch (unsigned iter, ConstSingleParticle<T> part,
+            double (*) (unsigned, ConstSingleParticle<T>))
+    {
+        return Derived::path_state(iter, part);
+    }
+
+    template <typename D>
+    double path_width_dispatch (unsigned iter, const Particle<T> &particle,
+            double (*) (unsigned, const Particle<T> &))
+    {
+        return Derived::path_width(iter, particle);
+    }
+
+    template <typename D>
+    void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
+            void (*) (unsigned, const Particle<T> &))
+    {
+        Derived::pre_processor(iter, particle);
+    }
+
+    template <typename D>
+    void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
+            void (*) (unsigned, const Particle<T> &))
+    {
+        Derived::post_processor(iter, particle);
+    }
+
     double path_state_dispatch (unsigned, ConstSingleParticle<T>,
             double (PathEvalBase::*) (unsigned, ConstSingleParticle<T>))
     {return 0;}
@@ -384,6 +506,17 @@ class PathEvalBase<T, internal::VirtualDerived>
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
 }; // class PathEval<T, internal::VirtualDerived>
+
+template <typename T>
+class PathEvalBase<T, internal::StaticDerived>
+{
+    public :
+
+    static double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
+    static double path_width (unsigned, const Particle<T> &) {return 0;}
+    static void post_processor (unsigned, const Particle<T> &) {}
+    static void pre_processor (unsigned, const Particle<T> &) {}
+}; // class PathEval<T, internal::StaticDerived>
 
 } // namespace vsmc
 
