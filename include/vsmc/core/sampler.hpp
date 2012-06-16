@@ -150,15 +150,15 @@ class Sampler
     }
 
     /// Read only access to the MCMC moves queue
-    const mcmc_queue_type &mcmc () const
+    const mcmc_queue_type &mcmc_queue () const
     {
-        return mcmc_;
+        return mcmc_queue_;
     }
 
     /// Read and write access to the MCMC moves queue
-    mcmc_queue_type &mcmc ()
+    mcmc_queue_type &mcmc_queue ()
     {
-        return mcmc_;
+        return mcmc_queue_;
     }
 
     /// \brief Initialize the particle set
@@ -213,7 +213,7 @@ class Sampler
             }
 #endif // VSMC_NDEBUG
             for (typename mcmc_queue_type::iterator
-                    m = mcmc_.begin(); m != mcmc_.end(); ++m) {
+                    m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 if (bool(*m)) {
                     acc.push_back((*m)(iter_num_, particle_));
                 }
@@ -470,7 +470,7 @@ class Sampler
 
     init_type init_;
     move_type move_;
-    mcmc_queue_type mcmc_;
+    mcmc_queue_type mcmc_queue_;
 
     ResampleScheme scheme_;
     double threshold_;
