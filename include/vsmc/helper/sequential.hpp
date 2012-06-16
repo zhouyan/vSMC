@@ -16,7 +16,7 @@ namespace vsmc {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T, typename Timer>
-class StateSeq : public StateBase<Dim, T>
+class StateSeq : public StateBase<Dim, T, Timer>
 {
     public :
 
@@ -24,23 +24,14 @@ class StateSeq : public StateBase<Dim, T>
     typedef T state_type;
     typedef Timer timer_type;
 
-    explicit StateSeq (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateSeq (size_type N) : StateBase<Dim, T, Timer>(N) {}
 
     virtual ~StateSeq () {}
-
-    const Timer &timer () const
-    {
-        return timer_;
-    }
 
     void copy (size_type from, size_type to)
     {
         this->state().col(to) = this->state().col(from);
     }
-
-    private :
-
-    timer_type timer_;
 }; // class StateSeq
 
 /// \brief Sampler<T>::init_type subtype

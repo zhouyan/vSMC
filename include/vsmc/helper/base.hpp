@@ -11,7 +11,7 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-template <unsigned Dim, typename T>
+template <unsigned Dim, typename T, typename Timer>
 class StateBase
 {
     public :
@@ -21,6 +21,9 @@ class StateBase
 
     /// The type of state parameters
     typedef T state_type;
+
+    /// The type of the timer
+    typedef Timer timer_type;
 
     /// The type of the matrix of states
     typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
@@ -40,6 +43,12 @@ class StateBase
     size_type size () const
     {
         return size_;
+    }
+
+    /// The timer
+    const Timer &timer () const
+    {
+        return timer_;
     }
 
     /// \brief Read and write access to a signle particle state
@@ -93,6 +102,7 @@ class StateBase
 
     size_type size_;
     state_mat_type state_;
+    timer_type timer_;
 }; // class StateBase
 
 template <typename T, typename Derived>

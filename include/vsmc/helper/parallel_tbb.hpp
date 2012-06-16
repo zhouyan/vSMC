@@ -22,7 +22,7 @@ namespace vsmc {
 /// when entering and exiting run_parallel(). This shall provide how much
 /// time are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Timer>
-class StateTBB : public StateBase<Dim, T>
+class StateTBB : public StateBase<Dim, T, Timer>
 #if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
     , public PreResamplingTag, public PostResamplingTag
 #endif
@@ -34,7 +34,7 @@ class StateTBB : public StateBase<Dim, T>
     typedef Timer timer_type;
 
     explicit StateTBB (size_type N) :
-        StateBase<Dim, T>(N), size_(N), copy_(N) {}
+        StateBase<Dim, T, Timer>(N), size_(N), copy_(N) {}
 
     virtual ~StateTBB () {}
 
@@ -57,9 +57,7 @@ class StateTBB : public StateBase<Dim, T>
     template <typename Work>
     void run_parallel (const Work &work) const
     {
-        timer_.start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work);
-        timer_.stop();
     }
 
     /// \brief Run a worker in parallel with tbb::parallel_for
@@ -76,14 +74,7 @@ class StateTBB : public StateBase<Dim, T>
     template <typename Work>
     void run_parallel (const Work &work, tbb::affinity_partitioner &ap) const
     {
-        timer_.start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work, ap);
-        timer_.stop();
-    }
-
-    const Timer &timer () const
-    {
-        return timer_;
     }
 
     void copy (size_type from, size_type to)
@@ -106,7 +97,6 @@ class StateTBB : public StateBase<Dim, T>
 
     size_type size_;
     std::vector<size_type> copy_;
-    timer_type timer_;
 
     class copy_work_
     {
@@ -150,7 +140,10 @@ class InitializeTBB : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         accept_.resize(particle.size());
-        particle.value().run_parallel(work_(this, &particle, accept_.data()));
+        particle.value().timer().start();
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()), 
+                work_(this, &particle, accept_.data()));
+        particle.value().timer().stop();
         this->post_processor(particle);
 
         return accept_.sum();
@@ -203,8 +196,10 @@ class MoveTBB : public MoveBase<T, Derived>
     {
         this->pre_processor(iter, particle);
         accept_.resize(particle.size());
-        particle.value().run_parallel(
+        particle.value().timer().start();
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()), 
                 work_(this, iter, &particle, accept_.data()));
+        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return accept_.sum();
@@ -258,7 +253,10 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Dim, Derived>
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        particle.value().run_parallel(work_(this, iter, &particle, res));
+        particle.value().timer().start();
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()), 
+                work_(this, iter, &particle, res));
+        particle.value().timer().stop();
         this->post_processor(iter, particle);
     }
 
@@ -313,7 +311,10 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        particle.value().run_parallel(work_(this, iter, &particle, res));
+        particle.value().timer().start();
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()), 
+                work_(this, iter, &particle, res));
+        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return this->path_width(iter, particle);

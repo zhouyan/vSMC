@@ -24,7 +24,7 @@ template <typename> class Particle;
 template <typename> class Monitor;
 template <typename> class Path;
 
-template <unsigned, typename> class StateBase;
+template <unsigned, typename, typename> class StateBase;
 template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 
