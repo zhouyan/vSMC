@@ -26,8 +26,6 @@ class StateSeq : public StateBase<Dim, T, Timer>
 
     explicit StateSeq (size_type N) : StateBase<Dim, T, Timer>(N) {}
 
-    virtual ~StateSeq () {}
-
     void copy (size_type from, size_type to)
     {
         this->state().col(to) = this->state().col(from);
@@ -45,8 +43,6 @@ class InitializeSeq : public InitializeBase<T, Derived>
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
-
-    virtual ~InitializeSeq () {}
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
@@ -75,8 +71,6 @@ class MoveSeq : public MoveBase<T, Derived>
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~MoveSeq () {}
-
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
@@ -103,8 +97,6 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Dim, Derived>
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
-
-    virtual ~MonitorEvalSeq () {}
 
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
@@ -135,8 +127,6 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
-
-    virtual ~PathEvalSeq () {}
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {

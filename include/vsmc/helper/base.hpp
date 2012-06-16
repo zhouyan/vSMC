@@ -110,6 +110,8 @@ class InitializeBase
 {
     public :
 
+    virtual ~InitializeBase () {}
+
     unsigned initialize_state (SingleParticle<T> part)
     {
         return initialize_state_dispatch(part, &Derived::initialize_state);
@@ -203,6 +205,7 @@ class InitializeBase<T, VirtualDerivedTag>
 {
     public :
 
+    virtual ~InitializeBase () {}
     virtual unsigned initialize_state (SingleParticle<T>) {return 0;}
     virtual void initialize_param (Particle<T> &, void *) {}
     virtual void post_processor (Particle<T> &) {}
@@ -214,6 +217,7 @@ class InitializeBase<T, StaticDerivedTag>
 {
     public :
 
+    virtual ~InitializeBase () {}
     static unsigned initialize_state (SingleParticle<T>) {return 0;}
     static void initialize_param (Particle<T> &, void *) {}
     static void post_processor (Particle<T> &) {}
@@ -224,6 +228,8 @@ template <typename T, typename Derived>
 class MoveBase
 {
     public :
+
+    virtual ~MoveBase () {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> part)
     {
@@ -296,6 +302,7 @@ class MoveBase<T, VirtualDerivedTag>
 {
     public :
 
+    virtual ~MoveBase () {}
     virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
     virtual void post_processor (unsigned, Particle<T> &) {}
     virtual void pre_processor (unsigned, Particle<T> &) {}
@@ -306,6 +313,7 @@ class MoveBase<T, StaticDerivedTag>
 {
     public :
 
+    virtual ~MoveBase () {}
     static unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
     static void post_processor (unsigned, Particle<T> &) {}
     static void pre_processor (unsigned, Particle<T> &) {}
@@ -315,6 +323,8 @@ template <typename T, unsigned, typename Derived>
 class MonitorEvalBase
 {
     public :
+
+    virtual ~MonitorEvalBase () {}
 
     void monitor_state (unsigned iter, ConstSingleParticle<T> part,
             double *res)
@@ -391,6 +401,7 @@ class MonitorEvalBase<T, Dim, VirtualDerivedTag>
 {
     public :
 
+    virtual ~MonitorEvalBase () {}
     virtual void monitor_state (unsigned, ConstSingleParticle<T>,
             double *) {}
     virtual void post_processor (unsigned, const Particle<T> &) {}
@@ -402,6 +413,7 @@ class MonitorEvalBase<T, Dim, StaticDerivedTag>
 {
     public :
 
+    virtual ~MonitorEvalBase () {}
     static void monitor_state (unsigned, ConstSingleParticle<T>,
             double *) {}
     static void post_processor (unsigned, const Particle<T> &) {}
@@ -412,6 +424,8 @@ template <typename T, typename Derived>
 class PathEvalBase
 {
     public :
+
+    virtual ~PathEvalBase () {}
 
     double path_state (unsigned iter, ConstSingleParticle<T> part)
     {
@@ -511,6 +525,7 @@ class PathEvalBase<T, VirtualDerivedTag>
 {
     public :
 
+    virtual ~PathEvalBase () {}
     virtual double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
     virtual double path_width (unsigned, const Particle<T> &) {return 0;}
     virtual void post_processor (unsigned, const Particle<T> &) {}
@@ -522,6 +537,7 @@ class PathEvalBase<T, StaticDerivedTag>
 {
     public :
 
+    virtual ~PathEvalBase () {}
     static double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
     static double path_width (unsigned, const Particle<T> &) {return 0;}
     static void post_processor (unsigned, const Particle<T> &) {}

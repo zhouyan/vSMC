@@ -36,8 +36,6 @@ class StateTBB : public StateBase<Dim, T, Timer>
     explicit StateTBB (size_type N) :
         StateBase<Dim, T, Timer>(N), size_(N), copy_(N) {}
 
-    virtual ~StateTBB () {}
-
     /// \brief Run a worker in parallel with tbb::parallel_for
     ///
     /// \param work The worker object
@@ -133,8 +131,6 @@ class InitializeTBB : public InitializeBase<T, Derived>
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~InitializeTBB () {}
-
     unsigned operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
@@ -189,8 +185,6 @@ class MoveTBB : public MoveBase<T, Derived>
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
-
-    virtual ~MoveTBB () {}
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
@@ -248,8 +242,6 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Dim, Derived>
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~MonitorEvalTBB () {}
-
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
@@ -305,8 +297,6 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
-
-    virtual ~PathEvalTBB () {}
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
