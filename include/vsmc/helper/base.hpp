@@ -110,8 +110,6 @@ class InitializeBase
 {
     public :
 
-    virtual ~InitializeBase () {}
-
     unsigned initialize_state (SingleParticle<T> part)
     {
         return initialize_state_dispatch(part, &Derived::initialize_state);
@@ -131,6 +129,14 @@ class InitializeBase
     {
         pre_processor_dispatch(particle, &Derived::post_processor);
     }
+
+    protected :
+
+    InitializeBase () {}
+    InitializeBase (const InitializeBase<T, Derived> &) {}
+    InitializeBase<T, Derived> &operator=
+        (const InitializeBase<T, Derived> &) {return *this;}
+    ~InitializeBase () {}
 
     private :
 
@@ -201,35 +207,28 @@ class InitializeBase
 }; // class InitializeBase
 
 template <typename T>
-class InitializeBase<T, VirtualDerivedTag>
+class InitializeBase<T, VBase>
 {
     public :
 
-    virtual ~InitializeBase () {}
     virtual unsigned initialize_state (SingleParticle<T>) {return 0;}
     virtual void initialize_param (Particle<T> &, void *) {}
     virtual void post_processor (Particle<T> &) {}
     virtual void pre_processor (Particle<T> &) {}
-}; // class InitializeBase<T, VirtualDerivedTag>
 
-template <typename T>
-class InitializeBase<T, StaticDerivedTag>
-{
-    public :
+    protected :
 
-    virtual ~InitializeBase () {}
-    static unsigned initialize_state (SingleParticle<T>) {return 0;}
-    static void initialize_param (Particle<T> &, void *) {}
-    static void post_processor (Particle<T> &) {}
-    static void pre_processor (Particle<T> &) {}
-}; // class InitializeBase<T, StaticDerivedTag>
+    InitializeBase () {}
+    InitializeBase (const InitializeBase<T, VBase> &) {}
+    InitializeBase<T, VBase> &operator=
+        (const InitializeBase<T, VBase> &) {return *this;}
+    ~InitializeBase () {}
+}; // class InitializeBase<T, VBase>
 
 template <typename T, typename Derived>
 class MoveBase
 {
     public :
-
-    virtual ~MoveBase () {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> part)
     {
@@ -245,6 +244,14 @@ class MoveBase
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
+
+    protected :
+
+    MoveBase () {}
+    MoveBase (const MoveBase<T, Derived> &) {}
+    MoveBase<T, Derived> &operator=
+        (const MoveBase<T, Derived> &) {return *this;}
+    ~MoveBase () {}
 
     private :
 
@@ -298,33 +305,27 @@ class MoveBase
 }; // class MoveBase
 
 template <typename T>
-class MoveBase<T, VirtualDerivedTag>
+class MoveBase<T, VBase>
 {
     public :
 
-    virtual ~MoveBase () {}
     virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
     virtual void post_processor (unsigned, Particle<T> &) {}
     virtual void pre_processor (unsigned, Particle<T> &) {}
-}; // class MoveBase<T, VirtualDerivedTag>
 
-template <typename T>
-class MoveBase<T, StaticDerivedTag>
-{
-    public :
+    protected :
 
-    virtual ~MoveBase () {}
-    static unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
-    static void post_processor (unsigned, Particle<T> &) {}
-    static void pre_processor (unsigned, Particle<T> &) {}
-}; // class MoveBase<T, StaticDerivedTag>
+    MoveBase () {}
+    MoveBase (const MoveBase<T, VBase> &) {}
+    MoveBase<T, VBase> &operator=
+        (const MoveBase<T, VBase> &) {return *this;}
+    ~MoveBase () {}
+}; // class MoveBase<T, VBase>
 
-template <typename T, unsigned, typename Derived>
+template <typename T, unsigned Dim, typename Derived>
 class MonitorEvalBase
 {
     public :
-
-    virtual ~MonitorEvalBase () {}
 
     void monitor_state (unsigned iter, ConstSingleParticle<T> part,
             double *res)
@@ -341,6 +342,14 @@ class MonitorEvalBase
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
+
+    protected :
+
+    MonitorEvalBase () {}
+    MonitorEvalBase (const MonitorEvalBase<T, Dim, Derived> &) {}
+    MonitorEvalBase<T, Dim, Derived> &operator=
+        (const MonitorEvalBase<T, Dim, Derived> &) {return *this;}
+    ~MonitorEvalBase () {}
 
     private :
 
@@ -397,35 +406,28 @@ class MonitorEvalBase
 }; // class MonitorBase
 
 template <typename T, unsigned Dim>
-class MonitorEvalBase<T, Dim, VirtualDerivedTag>
+class MonitorEvalBase<T, Dim, VBase>
 {
     public :
 
-    virtual ~MonitorEvalBase () {}
     virtual void monitor_state (unsigned, ConstSingleParticle<T>,
             double *) {}
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
-}; // class MonitorEvalBase<T, VirtualDerivedTag>
 
-template <typename T, unsigned Dim>
-class MonitorEvalBase<T, Dim, StaticDerivedTag>
-{
-    public :
+    protected :
 
-    virtual ~MonitorEvalBase () {}
-    static void monitor_state (unsigned, ConstSingleParticle<T>,
-            double *) {}
-    static void post_processor (unsigned, const Particle<T> &) {}
-    static void pre_processor (unsigned, const Particle<T> &) {}
-}; // class MonitorEvalBase<T, StaticDerivedTag>
+    MonitorEvalBase () {}
+    MonitorEvalBase (const MonitorEvalBase<T, Dim, VBase> &) {}
+    MonitorEvalBase<T, Dim, VBase> &operator=
+        (const MonitorEvalBase<T, Dim, VBase> &) {return *this;}
+    ~MonitorEvalBase () {}
+}; // class MonitorEvalBase<T, VBase>
 
 template <typename T, typename Derived>
 class PathEvalBase
 {
     public :
-
-    virtual ~PathEvalBase () {}
 
     double path_state (unsigned iter, ConstSingleParticle<T> part)
     {
@@ -446,6 +448,14 @@ class PathEvalBase
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
+
+    protected :
+
+    PathEvalBase () {}
+    PathEvalBase (const PathEvalBase<T, Derived> &) {}
+    PathEvalBase<T, Derived> &operator=
+        (const PathEvalBase<T, Derived> &) {return *this;}
+    ~PathEvalBase () {}
 
     private :
 
@@ -521,28 +531,23 @@ class PathEvalBase
 }; // class PathEvalBase
 
 template <typename T>
-class PathEvalBase<T, VirtualDerivedTag>
+class PathEvalBase<T, VBase>
 {
     public :
 
-    virtual ~PathEvalBase () {}
     virtual double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
     virtual double path_width (unsigned, const Particle<T> &) {return 0;}
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
-}; // class PathEval<T, VirtualDerivedTag>
 
-template <typename T>
-class PathEvalBase<T, StaticDerivedTag>
-{
-    public :
+    protected :
 
-    virtual ~PathEvalBase () {}
-    static double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
-    static double path_width (unsigned, const Particle<T> &) {return 0;}
-    static void post_processor (unsigned, const Particle<T> &) {}
-    static void pre_processor (unsigned, const Particle<T> &) {}
-}; // class PathEval<T, StaticDerivedTag>
+    PathEvalBase () {}
+    PathEvalBase (const PathEvalBase<T, VBase> &) {}
+    PathEvalBase<T, VBase> &operator=
+        (const PathEvalBase<T, VBase> &) {return *this;}
+    ~PathEvalBase () {}
+}; // class PathEval<T, VBase>
 
 } // namespace vsmc
 

@@ -14,8 +14,7 @@ template <typename, typename> class PathEvalBase;
 
 class NullTimer;
 
-class VirtualDerivedTag {};
-class StaticDerivedTag  {};
+class VBase {};
 class PreResamplingTag  {};
 class PostResamplingTag {};
 
@@ -29,18 +28,18 @@ template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 
 template <unsigned, typename, typename P = NullTimer> class StateSeq;
-template <typename, typename D = VirtualDerivedTag> class InitializeSeq;
-template <typename, typename D = VirtualDerivedTag> class MoveSeq;
-template <typename, unsigned, typename D = VirtualDerivedTag>
+template <typename, typename D = VBase> class InitializeSeq;
+template <typename, typename D = VBase> class MoveSeq;
+template <typename, unsigned, typename D = VBase>
 class MonitorEvalSeq;
-template <typename, typename D = VirtualDerivedTag> class PathEvalSeq;
+template <typename, typename D = VBase> class PathEvalSeq;
 
 template <unsigned, typename, typename P = NullTimer> class StateTBB;
-template <typename, typename D = VirtualDerivedTag> class InitializeTBB;
-template <typename, typename D = VirtualDerivedTag> class MoveTBB;
-template <typename, unsigned, typename D = VirtualDerivedTag>
+template <typename, typename D = VBase> class InitializeTBB;
+template <typename, typename D = VBase> class MoveTBB;
+template <typename, unsigned, typename D = VBase>
 class MonitorEvalTBB;
-template <typename, typename D = VirtualDerivedTag> class PathEvalTBB;
+template <typename, typename D = VBase> class PathEvalTBB;
 
 template <unsigned, typename, typename P = NullTimer> class StateCL;
 template <typename> class InitializeCL;

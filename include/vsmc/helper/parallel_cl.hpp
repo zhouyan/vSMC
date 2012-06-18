@@ -649,8 +649,6 @@ class InitializeCL
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~InitializeCL () {}
-
     unsigned operator() (Particle<T> &particle, void *param)
     {
         set_kernel(particle);
@@ -662,10 +660,10 @@ class InitializeCL
         return particle.value().accept_host().sum();
     }
 
-    virtual void initialize_param (Particle<T> &particle, void *param) {}
-    virtual void initialize_state (std::string &kernel_name) = 0;
-    virtual void pre_processor (Particle<T> &particle) {}
-    virtual void post_processor (Particle<T> &particle) {}
+    virtual void initialize_param (Particle<T> &, void *) {}
+    virtual void initialize_state (std::string &) = 0;
+    virtual void pre_processor (Particle<T> &) {}
+    virtual void post_processor (Particle<T> &) {}
 
     cl::Kernel &kernel ()
     {
@@ -694,11 +692,31 @@ class InitializeCL
         kernel_.setArg(2, particle.value().accept_device());
     }
 
+    protected :
+
+    InitializeCL () {}
+
+    InitializeCL (const InitializeCL<T> &other) :
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
+        buffer_device_(other.buffer_device_) {}
+
+    InitializeCL<T> &operator= (const InitializeCL<T> &other)
+    {
+        if (this != &other) {
+            kernel_ = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+        }
+
+        return *this;
+    }
+
+    ~InitializeCL () {}
+
     private :
 
     cl::Kernel kernel_;
     std::string kernel_name_;
-};
+}; // class InitializeCL
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup OpenCL
@@ -724,8 +742,6 @@ class MoveCL
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~MoveCL () {}
-
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         set_kernel(iter, particle);
@@ -736,9 +752,9 @@ class MoveCL
         return particle.value().accept_host().sum();
     }
 
-    virtual void move_state (unsigned iter, std::string &kernel_name) = 0;
-    virtual void pre_processor (unsigned iter, Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, Particle<T> &particle) {}
+    virtual void move_state (unsigned iter, std::string &) = 0;
+    virtual void pre_processor (unsigned iter, Particle<T> &) {}
+    virtual void post_processor (unsigned iter, Particle<T> &) {}
 
     cl::Kernel &kernel ()
     {
@@ -767,6 +783,25 @@ class MoveCL
         kernel_.setArg(2, particle.value().weight_device());
         kernel_.setArg(3, particle.value().accept_device());
     }
+
+    protected :
+
+    MoveCL () {}
+
+    MoveCL (const MoveCL<T> &other) :
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
+
+    MoveCL<T> &operator= (const MoveCL<T> &)
+    {
+        if (this != &other) {
+            kernel_ = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+        }
+
+        return *this;
+    }
+
+    ~MoveCL () {}
 
     private :
 
@@ -798,8 +833,6 @@ class MonitorEvalCL
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
 
-    virtual ~MonitorEvalCL () {}
-
     void operator() (unsigned iter, const Particle<T> &particle,
             double *res)
     {
@@ -811,9 +844,9 @@ class MonitorEvalCL
         post_processor(iter, particle);
     }
 
-    virtual void monitor_state (unsigned iter, std::string &kernel_name) = 0;
-    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
+    virtual void monitor_state (unsigned iter, std::string &) = 0;
+    virtual void pre_processor (unsigned iter, const Particle<T> &) {}
+    virtual void post_processor (unsigned iter, const Particle<T> &) {}
 
     static unsigned dim ()
     {
@@ -849,6 +882,27 @@ class MonitorEvalCL
         kernel_.setArg(2, particle.value().state_device());
         kernel_.setArg(3, buffer_device_);
     }
+
+    protected :
+
+    MonitorEvalCL () {}
+
+    MonitorEvalCL (const MonitorEvalCL<T> &other) :
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
+        buffer_device_(other.buffer_device_) {}
+
+    MonitorEvalCL<T> &operator= (const MonitorEvalCL<T> &other)
+    {
+        if (this != &other) {
+            kernel_ = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+            buffer_device_ = other.buffer_device_;
+        }
+
+        return *this;
+    }
+
+    ~MonitorEvalCL () {}
 
     private :
 
@@ -893,11 +947,10 @@ class PathEvalCL
         return this->path_width(iter, particle);
     }
 
-    virtual void path_state (unsigned iter, std::string &kernel_name) = 0;
-    virtual double path_width (unsigned iter,
-            const Particle<T> &particle) = 0;
-    virtual void pre_processor (unsigned iter, const Particle<T> &particle) {}
-    virtual void post_processor (unsigned iter, const Particle<T> &particle) {}
+    virtual void path_state (unsigned iter, std::string &) = 0;
+    virtual double path_width (unsigned iter, const Particle<T> &) = 0;
+    virtual void pre_processor (unsigned iter, const Particle<T> &) {}
+    virtual void post_processor (unsigned iter, const Particle<T> &) {}
 
     cl::Kernel kernel ()
     {
@@ -927,6 +980,27 @@ class PathEvalCL
         kernel_.setArg(1, particle.value().state_device());
         kernel_.setArg(2, buffer_device_);
     }
+
+    protected :
+
+    PathEvalCL () {}
+
+    PathEvalCL (const PathEvalCL<T> &other) :
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
+        buffer_device_(other.buffer_device_) {}
+
+    PathEvalCL<T> &operator= (const PathEvalCL<T> &other)
+    {
+        if (this != &other) {
+            kernel_ = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+            buffer_device_ = other.buffer_device_;
+        }
+
+        return *this;
+    }
+
+    ~PathEvalCL () {}
 
     private :
 

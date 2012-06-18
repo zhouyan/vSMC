@@ -145,6 +145,14 @@ class InitializeTBB : public InitializeBase<T, Derived>
         return accept_.sum();
     }
 
+    protected :
+
+    InitializeTBB () {}
+    InitializeTBB (const InitializeTBB<T, Derived> &) {}
+    const InitializeTBB<T, Derived> &operator=
+        (const InitializeTBB<T, Derived> &) {return *this;}
+    ~InitializeTBB () {}
+
     private :
 
     Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
@@ -198,6 +206,14 @@ class MoveTBB : public MoveBase<T, Derived>
 
         return accept_.sum();
     }
+
+    protected :
+
+    MoveTBB () {}
+    MoveTBB (const MoveTBB<T, Derived> &) {}
+    const MoveTBB<T, Derived> &operator=
+        (const MoveTBB<T, Derived> &) {return *this;}
+    ~MoveTBB () {}
 
     private :
 
@@ -257,6 +273,14 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Dim, Derived>
         return Dim;
     }
 
+    protected :
+
+    MonitorEvalTBB () {}
+    MonitorEvalTBB (const MonitorEvalTBB<T, Dim, Derived> &) {}
+    const MonitorEvalTBB<T, Dim, Derived> &operator=
+        (const MonitorEvalTBB<T, Dim, Derived> &) {return *this;}
+    ~MonitorEvalTBB () {}
+
     private :
 
     class work_
@@ -309,6 +333,14 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
         return this->path_width(iter, particle);
     }
+
+    protected :
+
+    PathEvalTBB () {}
+    PathEvalTBB (const PathEvalTBB<T, Derived> &) {}
+    const PathEvalTBB<T, Derived> &operator=
+        (const PathEvalTBB<T, Derived> &) {return *this;}
+    ~PathEvalTBB () {}
 
     private :
 

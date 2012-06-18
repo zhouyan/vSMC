@@ -57,6 +57,14 @@ class InitializeSeq : public InitializeBase<T, Derived>
 
         return accept;
     }
+
+    protected :
+
+    InitializeSeq () {}
+    InitializeSeq (const InitializeSeq<T, Derived> &) {}
+    const InitializeSeq<T, Derived> &operator=
+        (const InitializeSeq<T, Derived> &) {return *this;}
+    ~InitializeSeq () {}
 }; // class InitializeSeq
 
 /// \brief Sampler<T>::move_type subtype
@@ -83,6 +91,14 @@ class MoveSeq : public MoveBase<T, Derived>
 
         return accept;
     }
+
+    protected :
+
+    MoveSeq () {}
+    MoveSeq (const MoveSeq<T, Derived> &) {}
+    const MoveSeq<T, Derived> &operator=
+        (const MoveSeq<T, Derived> &) {return *this;}
+    ~MoveSeq () {}
 }; // class MoveSeq
 
 /// \brief Monitor<T>::eval_type subtype
@@ -114,6 +130,14 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Dim, Derived>
     {
         return Dim;
     }
+
+    protected :
+
+    MonitorEvalSeq () {}
+    MonitorEvalSeq (const MonitorEvalSeq<T, Dim, Derived> &) {}
+    const MonitorEvalSeq<T, Dim, Derived> &operator=
+        (const MonitorEvalSeq<T, Dim, Derived> &) {return *this;}
+    ~MonitorEvalSeq () {}
 }; // class MonitorEvalSeq
 
 /// \brief Path<T>::eval_type subtype
@@ -141,6 +165,14 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
         return this->path_width(iter, particle);
     }
+
+    protected :
+
+    PathEvalSeq () {}
+    PathEvalSeq (const PathEvalSeq<T, Derived> &) {}
+    const PathEvalSeq<T, Derived> &operator=
+        (const PathEvalSeq<T, Derived> &) {return *this;}
+    ~PathEvalSeq () {}
 }; // class PathEvalSeq
 
 } // namespace vsmc
