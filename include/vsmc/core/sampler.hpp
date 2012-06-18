@@ -212,6 +212,7 @@ class Sampler
                     << std::endl;
             }
 #endif // VSMC_NDEBUG
+            post_move();
             for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 if (bool(*m)) {
@@ -228,7 +229,6 @@ class Sampler
 #endif // VSMC_NDEBUG
             }
             accept_.push_back(acc);
-            post_move();
         }
     }
 
