@@ -697,8 +697,7 @@ class InitializeCL
     InitializeCL () {}
 
     InitializeCL (const InitializeCL<T> &other) :
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_),
-        buffer_device_(other.buffer_device_) {}
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
 
     InitializeCL<T> &operator= (const InitializeCL<T> &other)
     {
@@ -791,7 +790,7 @@ class MoveCL
     MoveCL (const MoveCL<T> &other) :
         kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
 
-    MoveCL<T> &operator= (const MoveCL<T> &)
+    MoveCL<T> &operator= (const MoveCL<T> &other)
     {
         if (this != &other) {
             kernel_ = other.kernel_;
@@ -887,11 +886,11 @@ class MonitorEvalCL
 
     MonitorEvalCL () {}
 
-    MonitorEvalCL (const MonitorEvalCL<T> &other) :
+    MonitorEvalCL (const MonitorEvalCL<T, Dim> &other) :
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
         buffer_device_(other.buffer_device_) {}
 
-    MonitorEvalCL<T> &operator= (const MonitorEvalCL<T> &other)
+    MonitorEvalCL<T, Dim> &operator= (const MonitorEvalCL<T, Dim> &other)
     {
         if (this != &other) {
             kernel_ = other.kernel_;
@@ -931,8 +930,6 @@ class PathEvalCL
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T value_type;
-
-    virtual ~PathEvalCL () {}
 
     double operator() (unsigned iter, const Particle<T> &particle,
         double *res)
