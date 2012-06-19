@@ -16,11 +16,7 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-/// \tparam Timer class The timer used for profiling run_parallel().
-/// The default is NullTimer, which does nothing but provide the compatible
-/// inteferce. Timer::start() and Timer::stop() are called automatically
-/// when entering and exiting run_parallel(). This shall provide how much
-/// time are spent on the parallel code (plus a small overhead of scheduling).
+/// \tparam Timer The timer
 template <unsigned Dim, typename T, typename Timer>
 class StateTBB : public StateBase<Dim, T, Timer>
 #if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
@@ -36,45 +32,6 @@ class StateTBB : public StateBase<Dim, T, Timer>
     explicit StateTBB (size_type N) :
         StateBase<Dim, T, Timer>(N), size_(N), copy_(N) {}
 
-    /// \brief Run a worker in parallel with tbb::parallel_for
-    ///
-    /// \param work The worker object
-    ///
-    /// \note The kernel shall implement
-    /// \code
-    /// void operator () (const tbb::blocked_range<size_type> &range) const
-    /// \endcode
-    /// where \c size_type is StateTBB::size_type. There are equivalent
-    /// typedefs in InitializeTBB etc.
-    ///
-    /// \note The range form of tbb::parallel_for is used by run_parallel.
-    /// This is the most commonly used in the context of SMC. The range is
-    /// constructed as <tt>tbb::blocked_range<size_type>(0, size())</tt>. For
-    /// more complex parallel patterns, users need to call Intel TBB API
-    /// themselves.
-    template <typename Work>
-    void run_parallel (const Work &work) const
-    {
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work);
-    }
-
-    /// \brief Run a worker in parallel with tbb::parallel_for
-    ///
-    /// \param work The worker object
-    /// \param ap The affinity partitioner
-    ///
-    /// \note This is only useful when the all the data can fit into system
-    /// cache and the computation to memeory access ratio is low. This is
-    /// usually not common in an SMC sampler. There can be situations that
-    /// such operations appears, for example, a simple Monitor. But usually
-    /// these operations cost such a small fraction of time of the whole
-    /// sampler that we don't find they worth the time of optimization.
-    template <typename Work>
-    void run_parallel (const Work &work, tbb::affinity_partitioner &ap) const
-    {
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), work, ap);
-    }
-
     void copy (size_type from, size_type to)
     {
         copy_[to] = from;
@@ -88,7 +45,10 @@ class StateTBB : public StateBase<Dim, T, Timer>
 
     void post_resampling ()
     {
-        run_parallel(copy_work_(this, copy_.data()));
+        this->timer().start();
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), 
+                copy_work_(this, copy_.data()));
+        this->timer().stop();
     }
 
     private :
@@ -135,14 +95,14 @@ class InitializeTBB : public InitializeBase<T, Derived>
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        accept_.resize(particle.size());
         particle.value().timer().start();
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()), 
-                work_(this, &particle, accept_.data()));
+        work_ work(this, &particle);
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(
+                    0, particle.size()), work);
         particle.value().timer().stop();
         this->post_processor(particle);
 
-        return accept_.sum();
+        return work.accept();
     }
 
     protected :
@@ -155,30 +115,42 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
     private :
 
-    Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
-
     class work_
     {
         public :
 
         work_ (InitializeTBB<T, Derived> *init,
-                Particle<T> *particle, unsigned *accept) :
-            init_(init), particle_(particle), accept_(accept) {}
+                Particle<T> *particle) :
+            init_(init), particle_(particle), accept_(0) {}
 
-        void operator() (const tbb::blocked_range<size_type> &range) const
+        work_ (const work_ &other, tbb::split) :
+            init_(other.init_), particle_(other.particle_), accept_(0) {}
+
+        void operator() (const tbb::blocked_range<size_type> &range)
         {
+            unsigned acc = accept_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                unsigned *const acc = accept_;
                 Particle<T> *const part = particle_;
-                acc[i] = init_->initialize_state(SingleParticle<T>(i, part));
+                acc += init_->initialize_state(SingleParticle<T>(i, part));
             }
+            accept_ = acc;
+        }
+
+        void join (const work_ &other)
+        {
+            accept_ += other.accept_;
+        }
+
+        unsigned accept () const
+        {
+            return accept_;
         }
 
         private :
 
         InitializeTBB<T, Derived> *const init_;
         Particle<T> *const particle_;
-        unsigned *const accept_;
+        unsigned accept_;
     }; // class work_
 }; // class InitializeTBB
 
@@ -197,14 +169,14 @@ class MoveTBB : public MoveBase<T, Derived>
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
-        accept_.resize(particle.size());
         particle.value().timer().start();
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()), 
-                work_(this, iter, &particle, accept_.data()));
+        work_ work(this, iter, &particle);
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(
+                    0, particle.size()), work);
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
-        return accept_.sum();
+        return work.accept();
     }
 
     protected :
@@ -217,23 +189,36 @@ class MoveTBB : public MoveBase<T, Derived>
 
     private :
 
-    Eigen::Matrix<unsigned, Eigen::Dynamic, 1> accept_;
-
     class work_
     {
         public :
 
         work_ (MoveTBB<T, Derived> *move, unsigned iter,
-                Particle<T> *particle, unsigned *accept) :
-            move_(move), iter_(iter), particle_(particle), accept_(accept) {}
+                Particle<T> *particle):
+            move_(move), iter_(iter), particle_(particle), accept_(0) {}
 
-        void operator() (const tbb::blocked_range<size_type> &range) const
+        work_ (const work_ &other, tbb::split) :
+            move_(other.move_), iter_(other.iter_),
+            particle_(other.particle_), accept_(0) {}
+
+        void operator() (const tbb::blocked_range<size_type> &range)
         {
+            unsigned acc = accept_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                unsigned *const acc = accept_;
                 Particle<T> *const part = particle_;
-                acc[i] = move_->move_state(iter_, SingleParticle<T>(i, part));
+                acc += move_->move_state(iter_, SingleParticle<T>(i, part));
             }
+            accept_ = acc;
+        }
+
+        void join (const work_ &other)
+        {
+            accept_ += other.accept_;
+        }
+
+        unsigned accept () const
+        {
+            return accept_;
         }
 
         private :
@@ -241,7 +226,7 @@ class MoveTBB : public MoveBase<T, Derived>
         MoveTBB<T, Derived> *const move_;
         const unsigned iter_;
         Particle<T> *const particle_;
-        unsigned *const accept_;
+        unsigned accept_;
     }; // class work_
 }; // class MoveTBB
 
