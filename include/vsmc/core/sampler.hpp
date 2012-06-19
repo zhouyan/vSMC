@@ -33,11 +33,11 @@ class Sampler
     /// The type of Initialization functor
     typedef internal::function<unsigned (particle_type &, void *)> init_type;
 
-    /// The type of Move functor
+    /// The type of Move/MCMC functor
     typedef internal::function<unsigned (unsigned, particle_type &)> move_type;
 
-    /// The type of the MCMC moves queue
-    typedef std::deque<move_type> mcmc_queue_type;
+    /// The type of the Move/MCMC queue
+    typedef std::deque<move_type> move_queue_type;
 
     /// The type of ESS history vector
     typedef std::deque<double> ess_type;
@@ -54,21 +54,15 @@ class Sampler
     /// \brief Construct a sampler with a given number of particles
     ///
     /// \param N The number of particles
-    /// \param init The functor used to initialize the particles
-    /// \param move The functor used to move the particles and weights
     /// \param scheme The resampling scheme. See ResampleScheme
     /// \param threshold The threshold of ESS/N for performing resampling. It
     /// shall be a number between [0, 1]. Less than zero means never
     /// resampling, bigger than one means always resampling.
     /// \param seed The seed to the parallel RNG system
-    explicit Sampler (
-            size_type N,
-            const init_type &init = NULL,
-            const move_type &move = NULL,
-            ResampleScheme scheme = STRATIFIED,
-            double threshold = 0.5,
+    explicit Sampler (size_type N,
+            ResampleScheme scheme = STRATIFIED, double threshold = 0.5,
             typename particle_type::seed_type seed = VSMC_RNG_SEED) :
-        init_(init), move_(move), scheme_(scheme), threshold_(threshold),
+        scheme_(scheme), threshold_(threshold),
         particle_(N, seed), iter_num_(0) {}
 
     /// Size of the particle set
@@ -143,20 +137,40 @@ class Sampler
         init_ = new_init;
     }
 
-    /// Set new move functor
+    /// Clear the Move queue and add a single new Move
     void move (const move_type &new_move)
     {
-        move_ = new_move;
+        move_queue_.clear();
+        move_queue_.push_back(new_move);
     }
 
-    /// Read only access to the MCMC moves queue
-    const mcmc_queue_type &mcmc_queue () const
+    /// Read and write access to the Move queue
+    move_queue_type &move_queue ()
+    {
+        return move_queue_;
+    }
+
+    /// Read only access to the Move queue
+    const move_queue_type &move_queue () const
+    {
+        return move_queue_;
+    }
+
+    /// Clear the MCMC queue and add a single new MCMC
+    void mcmc (const move_type &new_mcmc)
+    {
+        mcmc_queue_.clear();
+        mcmc_queue_.push_back(new_mcmc);
+    }
+
+    /// Read and write access to the MCMC queue
+    move_queue_type &mcmc_queue ()
     {
         return mcmc_queue_;
     }
 
-    /// Read and write access to the MCMC moves queue
-    mcmc_queue_type &mcmc_queue ()
+    /// Read only access to the MCMC queue
+    const move_queue_type &mcmc_queue () const
     {
         return mcmc_queue_;
     }
@@ -200,20 +214,26 @@ class Sampler
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
             std::deque<unsigned> acc;
-            if (bool(move_)) {
-                acc.push_back(move_(iter_num_, particle_));
-            }
+
+            for (typename move_queue_type::iterator
+                    m = move_queue_.begin(); m != move_queue_.end(); ++m) {
+                if (bool(*m)) {
+                    acc.push_back((*m)(iter_num_, particle_));
+                }
 #ifndef VSMC_NDEBUG
-            else {
-                std::cerr << "vsmc Warning:" << std::endl;
-                std::cerr << "\tSampler::iterate" << std::endl;
-                std::cerr
-                    << "\tAttempt Move without a callable object"
-                    << std::endl;
-            }
+                else {
+                    std::cerr << "vsmc Warning:" << std::endl;
+                    std::cerr << "\tSampler::iterate" << std::endl;
+                    std::cerr
+                        << "\tAttempt Move without a callable object"
+                        << std::endl;
+                }
 #endif // VSMC_NDEBUG
+            }
+
             post_move();
-            for (typename mcmc_queue_type::iterator
+
+            for (typename move_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 if (bool(*m)) {
                     acc.push_back((*m)(iter_num_, particle_));
@@ -228,6 +248,7 @@ class Sampler
                 }
 #endif // VSMC_NDEBUG
             }
+
             accept_.push_back(acc);
         }
     }
@@ -469,8 +490,8 @@ class Sampler
     private :
 
     init_type init_;
-    move_type move_;
-    mcmc_queue_type mcmc_queue_;
+    move_queue_type move_queue_;
+    move_queue_type mcmc_queue_;
 
     ResampleScheme scheme_;
     double threshold_;
