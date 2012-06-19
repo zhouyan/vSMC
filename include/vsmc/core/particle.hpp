@@ -132,7 +132,9 @@ class Particle
     /// Set the log weights with a weight_type object
     void set_log_weight (const weight_type &new_weight, double delta = 1)
     {
-        log_weight_ = delta * new_weight.head(size_);
+        log_weight_ = new_weight.head(size_);
+        if (delta != 1)
+            log_weight_ *= delta;
         set_log_weight();
     }
 
@@ -156,7 +158,9 @@ class Particle
     {
         using std::log;
 
-        inc_weight_ = delta * inc_weight.head(size_);
+        inc_weight_ = inc_weight.head(size_);
+        if (delta != 1)
+            inc_weight_ *= delta;
         log_weight_ += inc_weight_;
         if (add_zconst)
             zconst_ += log(weight().dot(inc_weight_.array().exp().matrix()));
