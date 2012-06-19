@@ -33,11 +33,17 @@ class Sampler
     /// The type of Initialization functor
     typedef internal::function<unsigned (particle_type &, void *)> init_type;
 
-    /// The type of Move/MCMC functor
+    /// The type of Move functor
     typedef internal::function<unsigned (unsigned, particle_type &)> move_type;
 
-    /// The type of the Move/MCMC queue
+    /// The type of MCMC functor
+    typedef internal::function<unsigned (unsigned, particle_type &)> mcmc_type;
+
+    /// The type of the Move queue
     typedef std::deque<move_type> move_queue_type;
+
+    /// The type of the MCMC queue
+    typedef std::deque<mcmc_type> mcmc_queue_type;
 
     /// The type of ESS history vector
     typedef std::deque<double> ess_type;
@@ -131,13 +137,13 @@ class Sampler
         return particle_;
     }
 
-    /// Set new initialization functor
+    /// Set a new Initialization
     void init (const init_type &new_init)
     {
         init_ = new_init;
     }
 
-    /// Clear the Move queue and add a single new Move
+    /// Clear the Move queue and set a single new Move
     void move (const move_type &new_move)
     {
         move_queue_.clear();
@@ -156,21 +162,21 @@ class Sampler
         return move_queue_;
     }
 
-    /// Clear the MCMC queue and add a single new MCMC
-    void mcmc (const move_type &new_mcmc)
+    /// Clear the MCMC queue and set a single new MCMC
+    void mcmc (const mcmc_type &new_mcmc)
     {
         mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
     }
 
     /// Read and write access to the MCMC queue
-    move_queue_type &mcmc_queue ()
+    mcmc_queue_type &mcmc_queue ()
     {
         return mcmc_queue_;
     }
 
     /// Read only access to the MCMC queue
-    const move_queue_type &mcmc_queue () const
+    const mcmc_queue_type &mcmc_queue () const
     {
         return mcmc_queue_;
     }
@@ -233,7 +239,7 @@ class Sampler
 
             post_move();
 
-            for (typename move_queue_type::iterator
+            for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 if (bool(*m)) {
                     acc.push_back((*m)(iter_num_, particle_));
@@ -491,7 +497,7 @@ class Sampler
 
     init_type init_;
     move_queue_type move_queue_;
-    move_queue_type mcmc_queue_;
+    mcmc_queue_type mcmc_queue_;
 
     ResampleScheme scheme_;
     double threshold_;
