@@ -187,10 +187,10 @@ class Weight : public WeightBase
 
 /// \brief Copy weight
 ///
-/// \tparam SRC Requirement: support index operation src[i]
-/// \tparam DES Requirement: support index operation des[i]
-template <typename SRC, typename DES>
-void copy_weight (const SRC &src, DES &des)
+/// \tparam T1 Requirement: support index operation src[i]
+/// \tparam T2 Requirement: support index operation des[i]
+template <typename T1, typename T2>
+void copy_weight (const T1 &src, T2 &des)
 {
     for (std::size_t i = 0; i != src.size(); ++i)
         des[i] = src[i];

@@ -90,12 +90,16 @@ class Particle : public internal::Weight<T>
     /// \param threshold The threshold for resampling
     void resample (ResampleScheme scheme, double threshold)
     {
+        using internal::copy_weight;
+        using internal::pre_resampling;
+        using internal::post_resampling;
+
         assert(replication_.size() == size());
 
         resampled_ = this->ess() < threshold * size_;
         if (resampled_) {
-            internal::copy_weight(this->weight(), weight_);
-            internal::pre_resampling(&value_);
+            copy_weight(this->weight(), weight_);
+            pre_resampling(&value_);
             switch (scheme) {
                 case MULTINOMIAL :
                     resample_multinomial();
@@ -117,7 +121,7 @@ class Particle : public internal::Weight<T>
                     break;
             }
             resample_do();
-            internal::post_resampling(&value_);
+            post_resampling(&value_);
         }
     }
 
