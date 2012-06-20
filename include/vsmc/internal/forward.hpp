@@ -5,6 +5,8 @@ namespace vsmc {
 
 namespace internal {
 
+class WeightBase;
+template <typename> class Weight;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
 template <typename, unsigned, typename> class MonitorEvalBase;

@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/internal/resampling.hpp>
+#include <vsmc/internal/weight.hpp>
 #include <vsmc/rng/random.hpp>
 
 namespace vsmc {
@@ -16,7 +17,7 @@ namespace vsmc {
 /// \li member function copy method compatible with
 /// \code copy(Particle<T>::size_type from, Particle<T>::size_type to) \endcode
 template <typename T>
-class Particle
+class Particle : public internal::Weight<T>
 {
     public :
 
@@ -25,6 +26,9 @@ class Particle
 
     /// The type of the particle values
     typedef T value_type;
+
+    /// The type of the weight
+    typedef Eigen::VectorXd weight_type;
 
 #ifdef VSMC_USE_SEQUENTIAL_RNG
     /// The type of the sequential pseudo random number generator C++11 engine
@@ -40,27 +44,19 @@ class Particle
     /// The integer type of the seed
     typedef rng_type::result_type seed_type;
 
-    /// The type of the weight and log weight vectors
-    typedef Eigen::VectorXd weight_type;
-
     /// \brief Construct a Particle object with a given number of particles
     ///
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
-    ///
-    /// \post All weights are initialized to be euqal to each other
     explicit Particle (size_type N, seed_type seed = VSMC_RNG_SEED) :
-        size_(N), value_(N),
-        ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
-        ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
-        inc_weight_(N), replication_(N),
-        resampled_(false), zconst_(0), seed_(seed)
+        internal::Weight<T>(N), size_(N), value_(N), replication_(N),
+        weight_(N), remain_(N), resampled_(false), seed_(seed)
 #ifndef VSMC_USE_SEQUENTIAL_RNG
         , prng_(N)
 #endif
     {
         reset_rng();
-        set_equal_weight();
+        this->set_equal_weight();
     }
 
     /// Size of the particle set
@@ -81,120 +77,11 @@ class Particle
         return value_;
     }
 
-    /// Read only access to the weights
-    const weight_type &weight () const
-    {
-        if (!weight_cached_) {
-            weight_ = log_weight().array().exp();
-            double sum = weight_.sum();
-            weight_ *= 1 / sum;
-            weight_cached_ = true;
-        }
-
-        return weight_;
-    }
-
-    /// Read only access to the log weights
-    const weight_type &log_weight () const
-    {
-        if (!log_weight_cached_) {
-            double max_weight = log_weight_.maxCoeff();
-            log_weight_ = log_weight_.array() - max_weight;
-            log_weight_cached_ = true;
-        }
-
-        return log_weight_;
-    }
-
-    /// Set equal weights for all particles
-    void set_equal_weight ()
-    {
-        ess_ = static_cast<double>(size_);
-        weight_.setConstant(1.0 / size_);
-        log_weight_.setConstant(0);
-
-        ess_cached_ = true;
-        weight_cached_ = true;
-        log_weight_cached_ = true;
-    }
-
-    /// \brief Set the log weights with a pointer
-    ///
-    /// \param new_weight The position to start the reading, it shall be valid
-    /// after increments of size() times.
-    /// \param delta A multiplier appiled to the new log weights
-    void set_log_weight (const double *new_weight, double delta = 1)
-    {
-        Eigen::Map<const weight_type> w(new_weight, size_);
-        set_log_weight(w, delta);
-    }
-
-    /// Set the log weights with a weight_type object
-    void set_log_weight (const weight_type &new_weight, double delta = 1)
-    {
-        log_weight_ = new_weight.head(size_);
-        if (delta != 1)
-            log_weight_ *= delta;
-        set_log_weight();
-    }
-
-    /// \brief Add to the log weights with a pointer
-    ///
-    /// \param inc_weight The position to start the reading, it shall be valid
-    /// after increments of size() times.
-    /// \param delta A multiplier appiled to the new incremental log weights
-    /// \param add_zconst Whether this incremental weights shall contribute to
-    /// the SMC normalizing constant estimate
-    void add_log_weight (const double *inc_weight, double delta = 1,
-            bool add_zconst = true)
-    {
-        Eigen::Map<const weight_type> w(inc_weight, size_);
-        add_log_weight(w, delta, add_zconst);
-    }
-
-    /// Add to the log weights with a weight_object object
-    void add_log_weight (const weight_type &inc_weight, double delta = 1,
-            bool add_zconst = true)
-    {
-        using std::log;
-
-        inc_weight_ = inc_weight.head(size_);
-        if (delta != 1)
-            inc_weight_ *= delta;
-        log_weight_ += inc_weight_;
-        if (add_zconst)
-            zconst_ += log(weight().dot(inc_weight_.array().exp().matrix()));
-        set_log_weight();
-    }
-
-    /// The current ESS (Effective Sample Size)
-    double ess () const
-    {
-        if (!ess_cached_) {
-            ess_ = 1 / weight().squaredNorm();
-            ess_cached_ = true;
-        }
-
-        return ess_;
-    }
-
     /// Whether resampling was performed when resampling(scheme, threshold) was
     /// last called.
     bool resampled () const
     {
         return resampled_;
-    }
-
-    /// Get the value of the logarithm of SMC normalizing constant
-    double zconst () const
-    {
-        return zconst_;
-    }
-
-    /// Reset the value of logarithm of SMC normalizing constant to zero
-    void reset_zconst ()
-    {
-        zconst_ = 0;
     }
 
     /// \brief Perform resampling if ess() < threshold * size()
@@ -205,10 +92,9 @@ class Particle
     {
         assert(replication_.size() == size());
 
-        // call to ess() will normalize weight first
-        resampled_ = ess() < threshold * size_;
-
+        resampled_ = this->ess() < threshold * size_;
         if (resampled_) {
+            internal::copy_weight(this->weight(), weight_);
             internal::pre_resampling(&value_);
             switch (scheme) {
                 case MULTINOMIAL :
@@ -272,24 +158,13 @@ class Particle
 
     private :
 
-    typedef Eigen::Matrix<size_type, Eigen::Dynamic, 1> replication_type;
-
     size_type size_;
     value_type value_;
 
-    mutable double ess_;
-    mutable weight_type weight_;
-    mutable weight_type log_weight_;
-
-    mutable bool ess_cached_;
-    mutable bool weight_cached_;
-    mutable bool log_weight_cached_;
-
-    mutable weight_type inc_weight_;
-    mutable replication_type replication_;
-
+    Eigen::Matrix<size_type, Eigen::Dynamic, 1> replication_;
+    weight_type weight_;
+    weight_type remain_;
     bool resampled_;
-    double zconst_;
 
     seed_type seed_;
 #ifdef VSMC_USE_SEQUENTIAL_RNG
@@ -298,17 +173,6 @@ class Particle
     std::deque<rng_type> prng_;
 #endif
 
-    void set_log_weight ()
-    {
-        ess_cached_ = false;
-        weight_cached_ = false;
-        log_weight_cached_ = false;
-
-        assert(weight_.size() == size_);
-        assert(log_weight_.size() == size_);
-        assert(inc_weight_.size() == size_);
-    }
-
     void resample_multinomial ()
     {
         weight2replication(size_);
@@ -316,18 +180,18 @@ class Particle
 
     void resample_residual ()
     {
-        /// \internal Reuse weight and log_weight. weight: act as the
+        /// \internal Reuse weight and log_weight, weight: act as the
         /// fractional part of N * weight. log_weight: act as the integral
-        /// part of N * weight.  They all will be reset to equal weights after
-        /// resampling.  So it is safe to modify them here.
+        /// part of N * weight. They all will be reset to equal weights after
+        /// resampling. So it is safe to modify them here.
 
         using std::modf;
 
         for (size_type i = 0; i != size_; ++i)
-            weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
+            weight_[i] = modf(size_ * weight_[i], &remain_[i]);
         weight2replication(static_cast<size_type>(weight_.sum()));
         for (size_type i = 0; i != size_; ++i)
-            replication_[i] += static_cast<size_type>(log_weight_[i]);
+            replication_[i] += static_cast<size_type>(remain_[i]);
     }
 
     void resample_stratified ()
@@ -375,9 +239,10 @@ class Particle
 
         replication_.setConstant(0);
         for (size_type i = 0; i != size_; ++i)
-            weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
-        size_type size = static_cast<size_type>(weight_.sum());
-        weight_ /= static_cast<double>(size);
+            weight_[i] = modf(size_ * weight_[i], &remain_[i]);
+        double dsize = (weight_.sum());
+        size_type size = static_cast<size_type>(dsize);
+        weight_ /= dsize;
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
@@ -394,7 +259,7 @@ class Particle
             cw += weight_[++k];
         }
         for (size_type i = 0; i != size_; ++i)
-            replication_[i] += static_cast<size_type>(log_weight_[i]);
+            replication_[i] += static_cast<size_type>(remain_[i]);
     }
 
     void resample_residual_systematic ()
@@ -403,9 +268,10 @@ class Particle
 
         replication_.setConstant(0);
         for (size_type i = 0; i != size_; ++i)
-            weight_[i] = modf(size_ * weight_[i], log_weight_.data() + i);
-        size_type size = weight_.sum();
-        weight_ /= size;
+            weight_[i] = modf(size_ * weight_[i], &remain_[i]);
+        double dsize = (weight_.sum());
+        size_type size = static_cast<size_type>(dsize);
+        weight_ /= dsize;
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
@@ -421,7 +287,7 @@ class Particle
             cw += weight_[++k];
         }
         for (size_type i = 0; i != size_; ++i)
-            replication_[i] += log_weight_[i];
+            replication_[i] += remain_[i];
     }
 
     void weight2replication (size_type size)
@@ -468,7 +334,7 @@ class Particle
                 ++time;
             }
         }
-        set_equal_weight();
+        this->set_equal_weight();
     }
 }; // class Particle
 
