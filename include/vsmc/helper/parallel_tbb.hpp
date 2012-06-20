@@ -19,9 +19,6 @@ namespace vsmc {
 /// \tparam Timer The timer
 template <unsigned Dim, typename T, typename Timer>
 class StateTBB : public StateBase<Dim, T, Timer>
-#if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
-    , public PreResamplingTag, public PostResamplingTag
-#endif
 {
     public :
 
@@ -29,53 +26,42 @@ class StateTBB : public StateBase<Dim, T, Timer>
     typedef T state_type;
     typedef Timer timer_type;
 
-    explicit StateTBB (size_type N) :
-        StateBase<Dim, T, Timer>(N), size_(N), copy_(N) {}
+    explicit StateTBB (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
-    void copy (size_type from, size_type to)
-    {
-        copy_[to] = from;
-    }
-
-    void pre_resampling ()
-    {
-        for (size_type i = 0; i != this->size(); ++i)
-            copy_[i] = i;
-    }
-
-    void post_resampling ()
+    template <typename SizeType>
+    void copy (const SizeType *copy_from)
     {
         this->timer().start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), 
-                copy_work_(this, copy_.data()));
+                copy_work_<SizeType>(this, copy_from));
         this->timer().stop();
     }
 
     private :
 
     size_type size_;
-    std::vector<size_type> copy_;
 
+    template <typename SizeType>
     class copy_work_
     {
         public :
 
-        copy_work_ (StateTBB<Dim, T> *state, const size_type *from) :
-            state_(state), from_(from) {}
+        copy_work_ (StateTBB<Dim, T> *state, const SizeType *copy_from) :
+            state_(state), copy_from_(copy_from) {}
 
         void operator () (const tbb::blocked_range<size_type> &range) const
         {
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                size_type from = from_[i];
-                if (from != i)
-                    state_->state().col(i) = state_->state().col(from);
+            for (size_type to = range.begin(); to != range.end(); ++to) {
+                size_type from = copy_from_[to];
+                if (from != to)
+                    state_->state().col(to) = state_->state().col(from);
             }
         }
 
         private :
 
         StateTBB<Dim, T> *const state_;
-        const size_type *const from_;
+        const SizeType *const copy_from_;
     }; // class work_
 }; // class StateTBB
 

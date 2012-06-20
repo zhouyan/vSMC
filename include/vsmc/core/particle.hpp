@@ -2,7 +2,6 @@
 #define VSMC_CORE_PARTICLE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/internal/resampling.hpp>
 #include <vsmc/internal/weight.hpp>
 #include <vsmc/rng/random.hpp>
 
@@ -15,7 +14,12 @@ namespace vsmc {
 /// \li Constructor compatible with
 /// \code T(Particle<T>::size_type N) \endcode
 /// \li member function copy method compatible with
-/// \code copy(Particle<T>::size_type from, Particle<T>::size_type to) \endcode
+/// \code
+/// copy(const size_type *copy_from)
+/// \endcode
+/// where <tt>copy_from[to]</tt> is the index of the particle to be copied into
+/// position to. That is you should replace particle at position \c to with
+/// another at position <tt>from = copy_from[to]</tt>.
 template <typename T>
 class Particle : public internal::Weight<T>
 {
@@ -49,8 +53,9 @@ class Particle : public internal::Weight<T>
     /// \param N The number of particles
     /// \param seed The seed to the parallel RNG system
     explicit Particle (size_type N, seed_type seed = VSMC_RNG_SEED) :
-        internal::Weight<T>(N), size_(N), value_(N), replication_(N),
-        weight_(N), remain_(N), resampled_(false), seed_(seed)
+        internal::Weight<T>(N), size_(N), value_(N),
+        replication_(N), copy_from_(N), weight_(N), remain_(N),
+        resampled_(false), seed_(seed)
 #ifndef VSMC_USE_SEQUENTIAL_RNG
         , prng_(N)
 #endif
@@ -91,15 +96,12 @@ class Particle : public internal::Weight<T>
     void resample (ResampleScheme scheme, double threshold)
     {
         using internal::copy_weight;
-        using internal::pre_resampling;
-        using internal::post_resampling;
 
         assert(replication_.size() == size());
 
         resampled_ = this->ess() < threshold * size_;
         if (resampled_) {
             copy_weight(this->weight(), weight_);
-            pre_resampling(&value_);
             switch (scheme) {
                 case MULTINOMIAL :
                     resample_multinomial();
@@ -121,7 +123,6 @@ class Particle : public internal::Weight<T>
                     break;
             }
             resample_do();
-            post_resampling(&value_);
         }
     }
 
@@ -166,6 +167,7 @@ class Particle : public internal::Weight<T>
     value_type value_;
 
     Eigen::Matrix<size_type, Eigen::Dynamic, 1> replication_;
+    Eigen::Matrix<size_type, Eigen::Dynamic, 1> copy_from_;
     weight_type weight_;
     weight_type remain_;
     bool resampled_;
@@ -325,7 +327,9 @@ class Particle : public internal::Weight<T>
         size_type from = 0;
         size_type time = 0;
         for (size_type to = 0; to != size_; ++to) {
-            if (!replication_[to]) {
+            if (replication_[to]) {
+                copy_from_[to] = to;
+            } else {
                 // replication_[to] has zero child, copy from elsewhere
                 if (replication_[from] - time <= 1) {
                     // only 1 child left on replication_[from]
@@ -334,10 +338,13 @@ class Particle : public internal::Weight<T>
                         ++from;
                     while (replication_[from] < 2);
                 }
-                value_.copy(from, to);
+                copy_from_[to] = from;
                 ++time;
             }
         }
+
+        const size_type *cf = copy_from_.data();
+        value_.copy(cf);
         this->set_equal_weight();
     }
 }; // class Particle

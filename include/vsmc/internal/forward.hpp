@@ -17,8 +17,6 @@ template <typename, typename> class PathEvalBase;
 class NullTimer;
 
 class VBase {};
-class PreResamplingTag  {};
-class PostResamplingTag {};
 
 template <typename> class Sampler;
 template <typename> class Particle;

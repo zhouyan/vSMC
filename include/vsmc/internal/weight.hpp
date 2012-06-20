@@ -27,12 +27,6 @@ class WeightBase
         return size_;
     }
 
-    /// Read only access to individua weight
-    double weight (size_type id) const
-    {
-        return weight()[id];
-    }
-
     /// Read only access to the weights
     const weight_type &weight () const
     {

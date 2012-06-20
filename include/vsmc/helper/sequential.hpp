@@ -24,12 +24,21 @@ class StateSeq : public StateBase<Dim, T, Timer>
     typedef T state_type;
     typedef Timer timer_type;
 
-    explicit StateSeq (size_type N) : StateBase<Dim, T, Timer>(N) {}
+    explicit StateSeq (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
-    void copy (size_type from, size_type to)
+    template <typename SizeType>
+    void copy (const SizeType *copy_from)
     {
-        this->state().col(to) = this->state().col(from);
+        for (size_type to = 0; to != size_; ++to) {
+            size_type from = copy_from[to];
+            if (from != to)
+                this->state().col(to) = this->state().col(from);
+        }
     }
+
+    private :
+
+    size_type size_;
 }; // class StateSeq
 
 /// \brief Sampler<T>::init_type subtype

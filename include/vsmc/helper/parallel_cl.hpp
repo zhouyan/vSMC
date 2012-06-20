@@ -25,9 +25,6 @@ namespace vsmc {
 /// are spent on the parallel code (plus a small overhead of scheduling).
 template <unsigned Dim, typename T, typename Timer>
 class StateCL
-#if !VSMC_HAS_CXX11_DECLTYPE || !VSMC_HAS_CXX11_AUTO_TYPE
-    : public PreResamplingTag, public PostResamplingTag
-#endif
 {
     public :
 
@@ -55,8 +52,7 @@ class StateCL
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
-        state_host_(Dim, N), weight_host_(N), accept_host_(N), copy_host_(N)
-    {}
+        state_host_(Dim, N), weight_host_(N), accept_host_(N) {}
 
     virtual ~StateCL ()
     {
@@ -280,8 +276,8 @@ class StateCL
     /// \note When building the program, the user can assume the following
     /// happen before the user source being processed.
     ///
-    /// \li A type \c state_type which is the same as the template parameter T,
-    /// and thus StateCL<Dim, T>::state_type is defined
+    /// \li A type \c state_type which is the same as the template parameter
+    /// T, and thus StateCL<Dim, T>::state_type is defined
     ///
     /// \li A type \c state_struct which looks like the following are defined
     ///
@@ -292,8 +288,8 @@ class StateCL
     /// \li A constant \c Size of type \c size_type which the same as the size
     /// of this particle set is defined
     ///
-    /// \li A constant \c Dim of type \c uint which is the same as the template
-    /// parameter \c Dim is defined
+    /// \li A constant \c Dim of type \c uint which is the same as the
+    /// template parameter \c Dim is defined
     ///
     /// \li A constant \c Seed of type \c uint which is the same as
     /// VSMC_RNG_SEED with an offset equal to the size of the particle set
@@ -302,8 +298,9 @@ class StateCL
     /// headers are included.
     ///
     /// The following is how the above looks like, assuming we constructed a
-    /// particle set with type StateCL<4, cl_float>(1000). It is as if the user
-    /// source implicitly included a header file containing the following code.
+    /// particle set with type StateCL<4, cl_float>(1000). It is as if the
+    /// user source implicitly included a header file containing the
+    /// following code.
     /// \code
     /// typedef float state_type;
     ///
@@ -441,9 +438,12 @@ class StateCL
     {
         assert(setup());
 
+        typedef typename internal::remove_pointer<OutputIter>::type val_type;
+        typedef typename internal::remove_cv<val_type>::type host_type;
+        typedef typename internal::remove_cv<CLType>::type device_type;
+
         if (internal::is_pointer<OutputIter>::value) {
-            if (sizeof(typename internal::remove_pointer<OutputIter>::type) ==
-                    sizeof(CLType)) {
+            if (internal::is_same<host_type, device_type>::value) {
                 command_queue_.enqueueReadBuffer(buf, 1, 0,
                         sizeof(CLType) * num, (void *) first);
                 return;
@@ -469,9 +469,12 @@ class StateCL
     {
         assert(setup());
 
+        typedef typename internal::remove_pointer<InputIter>::type val_type;
+        typedef typename internal::remove_cv<val_type>::type host_type;
+        typedef typename internal::remove_cv<CLType>::type device_type;
+
         if (internal::is_pointer<InputIter>::value) {
-            if (sizeof(typename internal::remove_pointer<InputIter>::type) ==
-                    sizeof(CLType)) {
+            if (internal::is_same<host_type, device_type>::value) {
                 command_queue_.enqueueWriteBuffer(buf, 1, 0,
                         sizeof(CLType) * num, (void *) first);
                 return;
@@ -520,22 +523,12 @@ class StateCL
         return timer_;
     }
 
-    void copy (size_type from, size_type to)
-    {
-        copy_host_[to] = from;
-    }
-
-    void pre_resampling ()
-    {
-        for (size_type i = 0; i != size_; ++i)
-            copy_host_[i] = i;
-    }
-
-    void post_resampling ()
+    template<typename SizeType>
+    void copy (const SizeType *copy_from)
     {
         assert(build_);
 
-        write_buffer<size_type>(copy_device_, size_, copy_host_.data());
+        write_buffer<size_type>(copy_device_, size_, copy_from);
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
         run_parallel(kernel_copy_);
@@ -577,7 +570,6 @@ class StateCL
     mutable accept_vec_type accept_host_;
 
     cl::Buffer copy_device_;
-    std::vector<size_type> copy_host_;
 
     timer_type timer_;
 
