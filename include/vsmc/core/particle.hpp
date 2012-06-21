@@ -31,9 +31,6 @@ class Particle : public internal::Weight<T>
     /// The type of the particle values
     typedef T value_type;
 
-    /// The type of the weight
-    typedef Eigen::VectorXd weight_type;
-
     /// The type of the Counter-based random number generator
     typedef VSMC_CBRNG_TYPE cbrng_type;
 
@@ -123,7 +120,7 @@ class Particle : public internal::Weight<T>
     /// \param id The position of the particle, 0 to size() - 1
     ///
     /// \return A reference to a C++11 RNG engine unique to particle at
-    /// position id, and independent of others 
+    /// position id, and independent of others
     rng_type &rng (size_type id)
     {
         return rng_[id];
@@ -136,8 +133,8 @@ class Particle : public internal::Weight<T>
 
     Eigen::Matrix<size_type, Eigen::Dynamic, 1> replication_;
     Eigen::Matrix<size_type, Eigen::Dynamic, 1> copy_from_;
-    weight_type weight_;
-    weight_type remain_;
+    Eigen::VectorXd weight_;
+    Eigen::VectorXd remain_;
     bool resampled_;
 
     std::vector<rng_type> rng_;

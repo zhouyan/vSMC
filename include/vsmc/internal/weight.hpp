@@ -72,19 +72,25 @@ class WeightBase
 
     /// \brief Set the log weights with a pointer
     ///
-    /// \param new_weight The position to start the reading, it shall be valid
+    /// \param nw The position to start the reading, it shall be valid
     /// after increments of size() times.
     /// \param delta A multiplier appiled to the new log weights
-    void set_log_weight (const double *new_weight, double delta = 1)
+    void set_log_weight (const double *nw, double delta = 1)
     {
-        Eigen::Map<const weight_type> w(new_weight, size_);
+        Eigen::Map<const weight_type> w(nw, size_);
         set_log_weight(w, delta);
     }
 
-    /// Set the log weights with a weight_type object
-    void set_log_weight (const weight_type &new_weight, double delta = 1)
+    /// \brief Set the log weights with a Eigen object
+    ///
+    /// \param nw An Eigen::DenseBase object. One dimension Array, Vector,
+    /// RowVector are supported. The Scalar type also need to be \c double.
+    /// Otherwise it will be a compile-time error
+    /// \param delta A multiplier appiled to the new log weights
+    template <typename D>
+    void set_log_weight (const Eigen::DenseBase<D> &nw, double delta = 1)
     {
-        log_weight_ = new_weight.head(size_);
+        log_weight_ = nw.head(size_);
         if (delta != 1)
             log_weight_ *= delta;
         set_log_weight();
@@ -92,25 +98,33 @@ class WeightBase
 
     /// \brief Add to the log weights with a pointer
     ///
-    /// \param inc_weight The position to start the reading, it shall be valid
+    /// \param iw The position to start the reading, it shall be valid
     /// after increments of size() times.
     /// \param delta A multiplier appiled to the new incremental log weights
     /// \param add_zconst Whether this incremental weights shall contribute to
     /// the SMC normalizing constant estimate
-    void add_log_weight (const double *inc_weight, double delta = 1,
+    void add_log_weight (const double *iw, double delta = 1,
             bool add_zconst = true)
     {
-        Eigen::Map<const weight_type> w(inc_weight, size_);
+        Eigen::Map<const weight_type> w(iw, size_);
         add_log_weight(w, delta, add_zconst);
     }
 
-    /// Add to the log weights with a weight_object object
-    void add_log_weight (const weight_type &inc_weight, double delta = 1,
+    /// \brief Add to the log weights with a weight_object object
+    ///
+    /// \param nw An Eigen::DenseBase object. One dimension Array, Vector,
+    /// RowVector are supported. The Scalar type also need to be \c double.
+    /// Otherwise it will be a compile-time error
+    /// \param delta A multiplier appiled to the new incremental log weights
+    /// \param add_zconst Whether this incremental weights shall contribute to
+    /// the SMC normalizing constant estimate
+    template <typename D>
+    void add_log_weight (const Eigen::DenseBase<D> &iw, double delta = 1,
             bool add_zconst = true)
     {
         using std::log;
 
-        inc_weight_ = inc_weight.head(size_);
+        inc_weight_ = iw.head(size_);
         if (delta != 1)
             inc_weight_ *= delta;
         log_weight_ += inc_weight_;
