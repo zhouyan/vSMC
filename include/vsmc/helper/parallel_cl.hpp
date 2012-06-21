@@ -30,7 +30,7 @@ class StateCL
     public :
 
     /// The type of the number of particles
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef cl_ulong size_type;
 
     /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
@@ -317,7 +317,7 @@ class StateCL
     ///     state_type param4;
     /// } state_struct;
     ///
-    /// typedef uint size_type;
+    /// typedef ulong size_type;
     ///
     /// __constant size_type Size = 1000;
     /// __constant uint Dim = 4;
@@ -343,10 +343,7 @@ class StateCL
             for (unsigned d = 0; d != Dim; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
             ss << "} state_struct;\n";
-            if (size_ < std::numeric_limits<cl_uint>::max())
-                ss << "typedef uint size_type;\n";
-            else
-                ss << "typedef ulong size_type;\n";
+            ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
             rng::Seed &seed = rng::Seed::create();
@@ -643,7 +640,7 @@ class StateCL
 /// \note
 /// A valid kernel declaration looks like
 /// \code
-/// __kernel void init ( state_struct *state, state_type *weight, uint *accept)
+/// __kernel void init (state_struct *state, state_type *weight, uint *accept)
 /// \endcode
 /// There can has other user supplied arguments as long as the first three are
 /// as above. Among them, \c state is StateCL::state_device(), \c weight is

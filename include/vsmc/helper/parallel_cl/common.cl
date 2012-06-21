@@ -14,14 +14,14 @@
 #include <Random123/u01.h>
 
 __kernel
-void copy (__global state_struct *state, __global uint *source)
+void copy (__global state_struct *state, __global size_type *copy_from)
 {
     size_type to = get_global_id(0);
 
     if (to >= Size)
         return;
 
-    size_t from = source[to];
+    size_t from = copy_from[to];
     if (to != from)
         state[to] = state[from];
 }
