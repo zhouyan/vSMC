@@ -22,7 +22,8 @@ void copy (__global state_struct *state, __global uint *source)
         return;
 
     size_t from = source[to];
-    state[to] = state[from];
+    if (to != form)
+        state[to] = state[from];
 }
 
 #endif // VSMC_HELPER_PARALLEL_CL_COMMON_CL
