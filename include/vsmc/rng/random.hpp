@@ -4,6 +4,7 @@
 #include <vsmc/internal/config.hpp>
 #include <vsmc/rng/common.hpp>
 #include <vsmc/rng/r123_engine.hpp>
+#include <vsmc/rng/seed.hpp>
 
 #if VSMC_HAS_CXX11LIB_RANDOM
 #include <random>

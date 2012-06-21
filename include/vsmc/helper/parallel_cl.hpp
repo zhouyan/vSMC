@@ -6,10 +6,11 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
 #include <vsmc/helper/parallel_cl/query.hpp>
+#include <vsmc/rng/seed.hpp>
 
 /// \defgroup OpenCL OpenCL
 /// \ingroup Helper
-/// \brief Parallelized sampler with OpenCL 
+/// \brief Parallelized sampler with OpenCL
 
 namespace vsmc {
 
@@ -291,8 +292,10 @@ class StateCL
     /// \li A constant \c Dim of type \c uint which is the same as the
     /// template parameter \c Dim is defined
     ///
-    /// \li A constant \c Seed of type \c uint which is the same as
-    /// VSMC_RNG_SEED with an offset equal to the size of the particle set
+    /// \li A constant \c Seed of type \c ulong which is not used by the host.
+    /// And the next size() seeds will be reserved for the the device. In
+    /// other words, when next time the host request a seed, it will
+    /// be <tt>Seed + size()</tt>.
     ///
     /// \li The Random123 library's \c philox.h, \c threefry.h, and \c u01.h
     /// headers are included.
@@ -315,7 +318,7 @@ class StateCL
     ///
     /// __constant size_type Size = 1000;
     /// __constant uint Dim = 4;
-    /// __constant uint Seed = 0xdeadbeefU + Size;
+    /// __constant ulong Seed = 0xdeadbeefU + Size;
     ///
     /// #include <Random123/philox.h>
     /// #include <Random123/threefry.h>
@@ -343,8 +346,9 @@ class StateCL
                 ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
-            ss << "__constant uint Seed = " <<
-                VSMC_RNG_SEED << "U + " << size_ << "U;\n";
+            rng::Seed &seed = rng::Seed::create();
+            ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
+            seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";
             ss << source << '\n';
             program_ = cl::Program(context_, ss.str());
@@ -564,6 +568,8 @@ class StateCL
     cl::Buffer state_device_;
     cl::Buffer weight_device_;
     cl::Buffer accept_device_;
+
+    rng::Seed &seed_;
 
     mutable state_mat_type state_host_;
     mutable weight_vec_type weight_host_;

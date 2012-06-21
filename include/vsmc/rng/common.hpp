@@ -8,15 +8,11 @@
 #define VSMC_PREVENT_MIN_MAX
 
 #ifndef VSMC_RNG_SEED
-#define VSMC_RNG_SEED 0xdeadbeefU
+#define VSMC_RNG_SEED 0UL
 #endif // VSMC_CBRNG_SEED
 
 #ifndef VSMC_CBRNG_TYPE
 #define VSMC_CBRNG_TYPE r123::Threefry4x64
 #endif // VSMC_CBRNG_TYPE
-
-#ifndef VSMC_PRNG_TYPE
-#define VSMC_PRNG_TYPE rng::mt19937
-#endif // VSMC_PRNG_TYPE
 
 #endif // VSMC_RNG_COMMON_HPP

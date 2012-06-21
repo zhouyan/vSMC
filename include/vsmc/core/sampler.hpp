@@ -64,12 +64,9 @@ class Sampler
     /// \param threshold The threshold of ESS/N for performing resampling. It
     /// shall be a number between [0, 1]. Less than zero means never
     /// resampling, bigger than one means always resampling.
-    /// \param seed The seed to the parallel RNG system
     explicit Sampler (size_type N,
-            ResampleScheme scheme = STRATIFIED, double threshold = 0.5,
-            typename particle_type::seed_type seed = VSMC_RNG_SEED) :
-        scheme_(scheme), threshold_(threshold),
-        particle_(N, seed), iter_num_(0) {}
+            ResampleScheme scheme = STRATIFIED, double threshold = 0.5) :
+        scheme_(scheme), threshold_(threshold), particle_(N), iter_num_(0) {}
 
     /// Size of the particle set
     size_type size () const

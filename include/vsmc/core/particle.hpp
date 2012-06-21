@@ -34,28 +34,25 @@ class Particle : public internal::Weight<T>
     /// The type of the weight
     typedef Eigen::VectorXd weight_type;
 
-    /// The type of the pseudo random number generator C++11 engine
-    typedef VSMC_PRNG_TYPE prng_type;
-
     /// The type of the Counter-based random number generator
     typedef VSMC_CBRNG_TYPE cbrng_type;
 
     /// The type of the Counter-based random number generator C++11 engine
     typedef rng::Engine<VSMC_CBRNG_TYPE> rng_type;
 
-    /// The integer type of the seed
-    typedef rng_type::result_type seed_type;
-
     /// \brief Construct a Particle object with a given number of particles
     ///
     /// \param N The number of particles
-    /// \param seed The seed to the parallel RNG system
-    explicit Particle (size_type N, seed_type seed = VSMC_RNG_SEED) :
+    explicit Particle (size_type N) :
         internal::Weight<T>(N), size_(N), value_(N),
         replication_(N), copy_from_(N), weight_(N), remain_(N),
-        resampled_(false), seed_(seed), rng_(N)
+        resampled_(false), rng_(N)
     {
-        reset_rng();
+        rng::Seed &seed = rng::Seed::create();
+        for (size_type i = 0; i != size_; ++i) {
+            rng_[i] = rng_type(
+                    static_cast<rng_type::result_type>(seed.get()));
+        }
         this->set_equal_weight();
     }
 
@@ -132,21 +129,6 @@ class Particle : public internal::Weight<T>
         return rng_[id];
     }
 
-    /// Reset the RNG system with a given seed
-    void reset_rng (seed_type seed)
-    {
-        seed_ = seed;
-        reset_rng();
-    }
-
-    /// Reset the parallel RNG system with the last used seed
-    void reset_rng ()
-    {
-        prng_ = prng_type(seed_);
-        for (size_type i = 0; i != size_; ++i)
-            rng_[i] = rng_type(seed_ + i);
-    }
-
     private :
 
     size_type size_;
@@ -158,8 +140,6 @@ class Particle : public internal::Weight<T>
     weight_type remain_;
     bool resampled_;
 
-    seed_type seed_;
-    prng_type prng_;
     std::deque<rng_type> rng_;
 
     void resample_multinomial ()
@@ -169,11 +149,6 @@ class Particle : public internal::Weight<T>
 
     void resample_residual ()
     {
-        /// \internal Reuse weight and log_weight, weight: act as the
-        /// fractional part of N * weight. log_weight: act as the integral
-        /// part of N * weight. They all will be reset to equal weights after
-        /// resampling. So it is safe to modify them here.
-
         using std::modf;
 
         for (size_type i = 0; i != size_; ++i)
@@ -189,12 +164,12 @@ class Particle : public internal::Weight<T>
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(prng_);
+        double u = unif(rng_[j]);
         double cw = weight_[0];
         while (j != size_) {
             while (j < cw * size_ - u && j != size_) {
                 ++replication_[k];
-                u = unif(prng_);
+                u = unif(rng_[j]);
                 ++j;
             }
             if (k == size_ - 1)
@@ -209,7 +184,7 @@ class Particle : public internal::Weight<T>
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(prng_);
+        double u = unif(rng_[j]);
         double cw = weight_[0];
         while (j != size_) {
             while (j < cw * size_ - u && j != size_) {
@@ -235,12 +210,12 @@ class Particle : public internal::Weight<T>
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(prng_);
+        double u = unif(rng_[j]);
         double cw = weight_[0];
         while (j != size) {
             while (j < cw * size - u && j != size) {
                 ++replication_[k];
-                u = unif(prng_);
+                u = unif(rng_[j]);
                 ++j;
             }
             if (k == size_ - 1)
@@ -264,7 +239,7 @@ class Particle : public internal::Weight<T>
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(prng_);
+        double u = unif(rng_[j]);
         double cw = weight_[0];
         while (j != size) {
             while (j < cw * size - u && j != size) {
@@ -289,7 +264,7 @@ class Particle : public internal::Weight<T>
             if (sum_n < size && weight_[i] > 0) {
                 rng::binomial_distribution<size_type> binom(
                         size - sum_n, weight_[i] / (tp - sum_p));
-                replication_[i] = binom(prng_);
+                replication_[i] = binom(rng_[i]);
             }
             sum_p += weight_[i];
             sum_n += replication_[i];
