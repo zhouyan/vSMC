@@ -108,7 +108,13 @@ class StateBase
 template <typename T, typename Derived>
 class InitializeBase
 {
-    public :
+    protected :
+
+    InitializeBase () {}
+    InitializeBase (const InitializeBase<T, Derived> &) {}
+    InitializeBase<T, Derived> &operator=
+        (const InitializeBase<T, Derived> &) {return *this;}
+    ~InitializeBase () {}
 
     unsigned initialize_state (SingleParticle<T> part)
     {
@@ -129,14 +135,6 @@ class InitializeBase
     {
         pre_processor_dispatch(particle, &Derived::post_processor);
     }
-
-    protected :
-
-    InitializeBase () {}
-    InitializeBase (const InitializeBase<T, Derived> &) {}
-    InitializeBase<T, Derived> &operator=
-        (const InitializeBase<T, Derived> &) {return *this;}
-    ~InitializeBase () {}
 
     private :
 
@@ -228,7 +226,13 @@ class InitializeBase<T, VBase>
 template <typename T, typename Derived>
 class MoveBase
 {
-    public :
+    protected :
+
+    MoveBase () {}
+    MoveBase (const MoveBase<T, Derived> &) {}
+    MoveBase<T, Derived> &operator=
+        (const MoveBase<T, Derived> &) {return *this;}
+    ~MoveBase () {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> part)
     {
@@ -244,14 +248,6 @@ class MoveBase
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
-
-    protected :
-
-    MoveBase () {}
-    MoveBase (const MoveBase<T, Derived> &) {}
-    MoveBase<T, Derived> &operator=
-        (const MoveBase<T, Derived> &) {return *this;}
-    ~MoveBase () {}
 
     private :
 
@@ -325,7 +321,13 @@ class MoveBase<T, VBase>
 template <typename T, unsigned Dim, typename Derived>
 class MonitorEvalBase
 {
-    public :
+    protected :
+
+    MonitorEvalBase () {}
+    MonitorEvalBase (const MonitorEvalBase<T, Dim, Derived> &) {}
+    MonitorEvalBase<T, Dim, Derived> &operator=
+        (const MonitorEvalBase<T, Dim, Derived> &) {return *this;}
+    ~MonitorEvalBase () {}
 
     void monitor_state (unsigned iter, ConstSingleParticle<T> part,
             double *res)
@@ -342,14 +344,6 @@ class MonitorEvalBase
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
-
-    protected :
-
-    MonitorEvalBase () {}
-    MonitorEvalBase (const MonitorEvalBase<T, Dim, Derived> &) {}
-    MonitorEvalBase<T, Dim, Derived> &operator=
-        (const MonitorEvalBase<T, Dim, Derived> &) {return *this;}
-    ~MonitorEvalBase () {}
 
     private :
 
@@ -427,7 +421,13 @@ class MonitorEvalBase<T, Dim, VBase>
 template <typename T, typename Derived>
 class PathEvalBase
 {
-    public :
+    protected :
+
+    PathEvalBase () {}
+    PathEvalBase (const PathEvalBase<T, Derived> &) {}
+    PathEvalBase<T, Derived> &operator=
+        (const PathEvalBase<T, Derived> &) {return *this;}
+    ~PathEvalBase () {}
 
     double path_state (unsigned iter, ConstSingleParticle<T> part)
     {
@@ -448,14 +448,6 @@ class PathEvalBase
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
-
-    protected :
-
-    PathEvalBase () {}
-    PathEvalBase (const PathEvalBase<T, Derived> &) {}
-    PathEvalBase<T, Derived> &operator=
-        (const PathEvalBase<T, Derived> &) {return *this;}
-    ~PathEvalBase () {}
 
     private :
 
