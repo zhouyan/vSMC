@@ -140,7 +140,7 @@ class Particle : public internal::Weight<T>
     weight_type remain_;
     bool resampled_;
 
-    std::deque<rng_type> rng_;
+    std::vector<rng_type> rng_;
 
     void resample_multinomial ()
     {
