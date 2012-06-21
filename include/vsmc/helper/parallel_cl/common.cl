@@ -22,7 +22,7 @@ void copy (__global state_struct *state, __global uint *source)
         return;
 
     size_t from = source[to];
-    if (to != form)
+    if (to != from)
         state[to] = state[from];
 }
 
