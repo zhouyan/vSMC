@@ -52,7 +52,7 @@ class Sampler
     typedef std::vector<bool> resampled_type;
 
     /// The type of accept count history vector
-    typedef std::vector<std::vector<unsigned> > accept_type;
+    typedef std::vector<std::deque<unsigned> > accept_type;
 
     /// The type of Monitor map
     typedef std::map<std::string, monitor_type> monitor_map_type;
@@ -194,19 +194,8 @@ class Sampler
             m->second.clear();
 
         iter_num_ = 0;
-        if (bool(init_)) {
-            accept_.push_back(std::vector<unsigned>(
-                        1, init_(particle_, param)));
-        }
-#ifndef NDEBUG
-        else {
-            std::cerr << "vsmc Warning:" << std::endl;
-            std::cerr << "\tSampler::initiliaize" << std::endl;
-            std::cerr
-                << "\tAttempt Initialization without a callable object"
-                << std::endl;
-        }
-#endif
+        assert(bool(init_));
+        accept_.push_back(std::deque<unsigned>(1, init_(particle_, param)));
         post_move();
         particle_.reset_zconst();
     }
@@ -216,40 +205,23 @@ class Sampler
     {
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
-            std::vector<unsigned> acc;
+            unsigned ia = 0;
+            std::deque<unsigned> acc(move_queue_.size() + mcmc_queue_.size());
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
-                if (bool(*m)) {
-                    acc.push_back((*m)(iter_num_, particle_));
-                }
-#ifndef VSMC_NDEBUG
-                else {
-                    std::cerr << "vsmc Warning:" << std::endl;
-                    std::cerr << "\tSampler::iterate" << std::endl;
-                    std::cerr
-                        << "\tAttempt Move without a callable object"
-                        << std::endl;
-                }
-#endif // VSMC_NDEBUG
+                assert(bool(*m));
+                acc[ia] = (*m)(iter_num_, particle_);
+                ++ia;
             }
 
             post_move();
 
             for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
-                if (bool(*m)) {
-                    acc.push_back((*m)(iter_num_, particle_));
-                }
-#ifndef VSMC_NDEBUG
-                else {
-                    std::cerr << "vsmc Warning:" << std::endl;
-                    std::cerr << "\tSampler::iterate" << std::endl;
-                    std::cerr
-                        << "\tAttempt MCMC without a callable object"
-                        << std::endl;
-                }
-#endif // VSMC_NDEBUG
+                assert(bool(*m));
+                acc[ia] = (*m)(iter_num_, particle_);
+                ++ia;
             }
 
             accept_.push_back(acc);
