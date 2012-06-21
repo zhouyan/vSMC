@@ -12,3 +12,6 @@ test/pf/*.save
 test/pf/pf_cl
 test/pf/pf_cl_cpu
 test/pf/pf_cl_gpu
+
+test/cl_rng/cl_rng
+test/cl_rng/cl_rng.save
