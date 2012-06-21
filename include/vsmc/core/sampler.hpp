@@ -46,13 +46,13 @@ class Sampler
     typedef std::deque<mcmc_type> mcmc_queue_type;
 
     /// The type of ESS history vector
-    typedef std::deque<double> ess_type;
+    typedef std::vector<double> ess_type;
 
     /// The type of resampling history vector
-    typedef std::deque<bool> resampled_type;
+    typedef std::vector<bool> resampled_type;
 
     /// The type of accept count history vector
-    typedef std::deque<std::deque<unsigned> > accept_type;
+    typedef std::vector<std::vector<unsigned> > accept_type;
 
     /// The type of Monitor map
     typedef std::map<std::string, monitor_type> monitor_map_type;
@@ -195,7 +195,7 @@ class Sampler
 
         iter_num_ = 0;
         if (bool(init_)) {
-            accept_.push_back(std::deque<unsigned>(
+            accept_.push_back(std::vector<unsigned>(
                         1, init_(particle_, param)));
         }
 #ifndef NDEBUG
@@ -216,7 +216,7 @@ class Sampler
     {
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
-            std::deque<unsigned> acc;
+            std::vector<unsigned> acc;
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {

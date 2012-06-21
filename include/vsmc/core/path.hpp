@@ -22,16 +22,16 @@ class Path
             unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
-    typedef std::deque<unsigned> index_type;
+    typedef std::vector<unsigned> index_type;
 
     /// The type of the integrand vector
-    typedef std::deque<double> integrand_type;
+    typedef std::vector<double> integrand_type;
 
     /// The type of the width vector
-    typedef std::deque<double> width_type;
+    typedef std::vector<double> width_type;
 
     /// The type of the grid vector
-    typedef std::deque<double> grid_type;
+    typedef std::vector<double> grid_type;
 
     /// \brief Construct a Path with an evaluation function
     ///
