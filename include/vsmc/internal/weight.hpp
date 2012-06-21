@@ -112,7 +112,7 @@ class WeightBase
 
     /// \brief Add to the log weights with a weight_object object
     ///
-    /// \param nw An Eigen::DenseBase object. One dimension Array, Vector,
+    /// \param iw An Eigen::DenseBase object. One dimension Array, Vector,
     /// RowVector are supported. The Scalar type also need to be \c double.
     /// Otherwise it will be a compile-time error
     /// \param delta A multiplier appiled to the new incremental log weights
