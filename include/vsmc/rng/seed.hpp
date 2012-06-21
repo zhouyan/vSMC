@@ -16,28 +16,28 @@ class Seed
         return seed;
     }
 
-    unsigned long get ()
+    result_type get ()
     {
         return ++seed_;
     }
 
-    void set (unsigned long seed)
+    void set (result_type seed)
     {
         seed_ = seed;
     }
 
-    void skip (unsigned long steps)
+    void skip (result_type steps)
     {
         seed_ += steps;
     }
 
     private :
 
+    result_type seed_;
+
     Seed () : seed_(VSMC_RNG_SEED) {}
     Seed (const Seed &) {}
     const Seed &operator= (const Seed &) {return *this;}
-
-    unsigned long seed_;
 };
 
 } } // namespace vsmc::rng

@@ -14,7 +14,7 @@
 #endif // VSMC_USE_TBB
 
 #ifdef VSMC_USE_CL
-#include <vsmc/helper/paralle_cl.hpp>
+#include <vsmc/helper/parallel_cl.hpp>
 #endif // VSMC_USE_CL
 
 #endif // VSMC_HPP

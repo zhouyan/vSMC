@@ -53,7 +53,10 @@ class StateCL
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
-        state_host_(Dim, N), weight_host_(N), accept_host_(N) {}
+        state_host_(Dim, N), weight_host_(N), accept_host_(N)
+    {
+        local_size(0);
+    }
 
     virtual ~StateCL ()
     {
@@ -318,7 +321,7 @@ class StateCL
     ///
     /// __constant size_type Size = 1000;
     /// __constant uint Dim = 4;
-    /// __constant ulong Seed = 0xdeadbeefU + Size;
+    /// __constant ulong Seed = 0;
     ///
     /// #include <Random123/philox.h>
     /// #include <Random123/threefry.h>
@@ -361,18 +364,26 @@ class StateCL
                     &build_log_);
         } catch (cl::Error &err) {
             std::string log;
+            std::cerr << "===========================" << std::endl;
             std::cerr << "Error: vsmc: OpenCL program Build failed"
                 << std::endl;
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_OPTIONS, &log);
+            std::cerr << "===========================" << std::endl;
             std::cerr << "Build options:" << std::endl;
+            std::cerr << "---------------------------" << std::endl;
             std::cerr << log << std::endl;
             program_.getInfo(CL_PROGRAM_SOURCE, &log);
+            std::cerr << "===========================" << std::endl;
             std::cerr << "Build source:" << std::endl;
+            std::cerr << "---------------------------" << std::endl;
             std::cerr << log << std::endl;
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
                     &build_log_);
+            std::cerr << "===========================" << std::endl;
             std::cerr << "Build log:" << std::endl;
+            std::cerr << "---------------------------" << std::endl;
             std::cerr << build_log_ << std::endl;
+            std::cerr << "===========================" << std::endl;
             throw err;
         }
         build_ = true;
@@ -568,8 +579,6 @@ class StateCL
     cl::Buffer state_device_;
     cl::Buffer weight_device_;
     cl::Buffer accept_device_;
-
-    rng::Seed &seed_;
 
     mutable state_mat_type state_host_;
     mutable weight_vec_type weight_host_;
