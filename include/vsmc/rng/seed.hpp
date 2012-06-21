@@ -7,6 +7,8 @@ class Seed
 {
     public :
 
+    typedef unsigned long result_type;
+
     static Seed &create ()
     {
         static Seed seed;
