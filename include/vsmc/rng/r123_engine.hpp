@@ -1,6 +1,8 @@
 #ifndef VSMC_RNG_R123_ENGINE_HPP
 #define VSMC_RNG_R123_ENGINE_HPP
 
+#include <vsmc/internal/config.hpp>
+
 // #include <Random123/aes.h>
 // #include <Random123/ars.h>
 #include <Random123/philox.h>
@@ -12,8 +14,6 @@
 #endif // _MSC_VER
 
 #include <Random123/conventional/Engine.hpp>
-
-#include <vsmc/internal/config.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
