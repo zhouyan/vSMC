@@ -15,8 +15,8 @@
 #define VSMC_CBRNG_TYPE r123::Threefry4x64
 #endif // VSMC_CBRNG_TYPE
 
-#ifndef VSMC_SEQRNG_TYPE
-#define VSMC_SEQRNG_TYPE rng::mt19937
-#endif
+#ifndef VSMC_PRNG_TYPE
+#define VSMC_PRNG_TYPE rng::mt19937
+#endif // VSMC_PRNG_TYPE
 
 #endif // VSMC_RNG_COMMON_HPP

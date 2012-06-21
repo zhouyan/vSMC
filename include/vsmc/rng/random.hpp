@@ -3,10 +3,7 @@
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/rng/common.hpp>
-
-#ifndef VSMC_USE_SEQUENTIAL_RNG
 #include <vsmc/rng/r123_engine.hpp>
-#endif // VSMC_USE_SEQUENTIAL_RNG
 
 #if VSMC_HAS_CXX11LIB_RANDOM
 #include <random>
