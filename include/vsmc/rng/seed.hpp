@@ -1,6 +1,10 @@
 #ifndef VSMC_RNG_SEED_HPP
 #define VSMC_RNG_SEED_HPP
 
+#include <vsmc/rng/common.hpp>
+#include <ctime>
+#include <cstdlib>
+
 namespace vsmc { namespace rng {
 
 class Seed
@@ -18,6 +22,9 @@ class Seed
 
     result_type get ()
     {
+        if (seed_  >= std::numeric_limits<result_type>::max() - 1)
+            seed_ = 0;
+
         return ++seed_;
     }
 
@@ -28,15 +35,24 @@ class Seed
 
     void skip (result_type steps)
     {
-        seed_ += steps;
+        if (seed_ >= std::numeric_limits<result_type>::max() - steps)
+            seed_ = steps;
+        else
+            seed_ += steps;
     }
 
     private :
 
     result_type seed_;
 
-    Seed () : seed_(VSMC_RNG_SEED) {}
+    Seed () : seed_(VSMC_RNG_SEED)
+    {
+        if (!seed_)
+            seed_ = std::rand();
+    }
+
     Seed (const Seed &) {}
+
     const Seed &operator= (const Seed &) {return *this;}
 };
 

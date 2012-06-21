@@ -8,7 +8,7 @@
 #define VSMC_PREVENT_MIN_MAX
 
 #ifndef VSMC_RNG_SEED
-#define VSMC_RNG_SEED 0UL
+#define VSMC_RNG_SEED 0
 #endif // VSMC_CBRNG_SEED
 
 #ifndef VSMC_CBRNG_TYPE
