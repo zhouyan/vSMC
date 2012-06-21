@@ -453,7 +453,8 @@ class StateCL
     {
         assert(setup());
 
-        typedef typename internal::remove_pointer<OutputIter>::type val_type;
+        typedef typename internal::remove_cv<OutputIter>::type ptr_type;
+        typedef typename internal::remove_pointer<ptr_type>::type val_type;
         typedef typename internal::remove_cv<val_type>::type host_type;
         typedef typename internal::remove_cv<CLType>::type device_type;
 
@@ -484,7 +485,8 @@ class StateCL
     {
         assert(setup());
 
-        typedef typename internal::remove_pointer<InputIter>::type val_type;
+        typedef typename internal::remove_cv<InputIter>::type ptr_type;
+        typedef typename internal::remove_pointer<ptr_type>::type val_type;
         typedef typename internal::remove_cv<val_type>::type host_type;
         typedef typename internal::remove_cv<CLType>::type device_type;
 
