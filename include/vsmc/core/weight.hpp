@@ -7,20 +7,16 @@ namespace vsmc {
 
 /// \brief Base weight set class
 /// \ingroup Core
-class WeightBase
+template <typename T>
+class Weight
 {
     public :
 
     /// The type of the size of weight and log weight vectors
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef typename SizeTypeTrait<T>::type size_type;
 
     /// The type of the weight and log weight vectors
     typedef Eigen::VectorXd weight_type;
-
-    explicit WeightBase (size_type N) :
-        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
-        ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
-        zconst_(0), inc_weight_(N) {}
 
     /// Read only access to the weights
     const weight_type &weight () const
@@ -145,6 +141,13 @@ class WeightBase
         zconst_ = 0;
     }
 
+    protected :
+
+    explicit Weight (size_type N) :
+        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
+        ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
+        zconst_(0), inc_weight_(N) {}
+
     private :
 
     size_type size_;
@@ -170,18 +173,6 @@ class WeightBase
         assert(log_weight_.size() == size_);
         assert(inc_weight_.size() == size_);
     }
-}; // class WeightBase
-
-/// \brief Generic weight set class
-/// \ingroup Core
-///
-/// \tparam T Particle::value_type
-template <typename T>
-class Weight : public WeightBase
-{
-    protected :
-
-    Weight (size_type N) : WeightBase(N) {}
 }; // class Weight
 
 namespace internal {

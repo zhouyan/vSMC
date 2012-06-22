@@ -26,7 +26,7 @@ class Particle : public Weight<T>
     public :
 
     /// The type of the number of particles
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef typename SizeTypeTrait<T>::type size_type;
 
     /// The type of the particle values
     typedef T value_type;
@@ -259,8 +259,9 @@ class Particle : public Weight<T>
         replication_.setConstant(0);
         for (size_type i = 0; i != size_; ++i) {
             if (sum_n < size && weight_[i] > 0) {
-                rng::binomial_distribution<size_type> binom(
-                        size - sum_n, weight_[i] / (tp - sum_p));
+                rng::binomial_distribution<
+                    typename internal::make_signed<size_type>::type>
+                    binom(size - sum_n, weight_[i] / (tp - sum_p));
                 replication_[i] = binom(rng_[i]);
             }
             sum_p += weight_[i];

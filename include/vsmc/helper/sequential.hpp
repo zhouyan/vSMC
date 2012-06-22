@@ -20,7 +20,7 @@ class StateSeq : public StateBase<Dim, T, Timer>
 {
     public :
 
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef typename StateBase<Dim, T, Timer>::size_type size_type;
     typedef T state_type;
     typedef Timer timer_type;
 
@@ -50,7 +50,7 @@ class InitializeSeq : public InitializeBase<T, Derived>
 {
     public :
 
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
 
     unsigned operator() (Particle<T> &particle, void *param)
@@ -85,7 +85,7 @@ class MoveSeq : public MoveBase<T, Derived>
 {
     public :
 
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
@@ -120,7 +120,7 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Dim, Derived>
 {
     public :
 
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
 
     void operator() (unsigned iter, const Particle<T> &particle, double *res)
@@ -158,7 +158,7 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 {
     public :
 
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
