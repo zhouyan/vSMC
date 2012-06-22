@@ -466,6 +466,9 @@ class StateCL
         typedef typename internal::remove_cv<val_type>::type host_type;
         typedef typename internal::remove_cv<CLType>::type device_type;
 
+        command_queue_.finish();
+        timer_read_buffer_.start();
+
         if (internal::is_pointer<OutputIter>::value) {
             if (internal::is_same<host_type, device_type>::value) {
                 command_queue_.enqueueReadBuffer(buf, 1, 0,
@@ -478,6 +481,8 @@ class StateCL
         command_queue_.enqueueReadBuffer(buf, 1, 0,
                 sizeof(CLType) * num, (void *) temp);
         std::copy(temp, temp + num, first);
+
+        timer_read_buffer_.stop();
     }
 
     /// \brief Write to a device buffer from a host iterator
@@ -498,6 +503,9 @@ class StateCL
         typedef typename internal::remove_cv<val_type>::type host_type;
         typedef typename internal::remove_cv<CLType>::type device_type;
 
+        command_queue_.finish();
+        timer_write_buffer_.start();
+
         if (internal::is_pointer<InputIter>::value) {
             if (internal::is_same<host_type, device_type>::value) {
                 command_queue_.enqueueWriteBuffer(buf, 1, 0,
@@ -510,6 +518,8 @@ class StateCL
         std::copy(first, first + num, temp);
         command_queue_.enqueueWriteBuffer(buf, 1, 0,
                 sizeof(CLType) * num, (void *) temp);
+
+        timer_write_buffer_.stop();
     }
 
     /// \brief Create a kernel from a given name
@@ -543,9 +553,19 @@ class StateCL
         timer_.stop();
     }
 
-    const Timer &timer () const
+    const timer_type &timer () const
     {
         return timer_;
+    }
+
+    const timer_type &timer_read_buffer () const
+    {
+        return timer_read_buffer_;
+    }
+
+    const timer_type &timer_write_buffer () const
+    {
+        return timer_write_buffer_;
     }
 
     template<typename SizeType>
@@ -597,6 +617,8 @@ class StateCL
     cl::Buffer copy_device_;
 
     timer_type timer_;
+    timer_type timer_read_buffer_;
+    timer_type timer_write_buffe_;
 
     void setup_buffer ()
     {

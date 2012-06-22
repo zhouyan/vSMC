@@ -46,7 +46,7 @@ class StateBase
     }
 
     /// The timer
-    const Timer &timer () const
+    const timer_type &timer () const
     {
         return timer_;
     }
