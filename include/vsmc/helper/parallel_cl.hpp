@@ -618,7 +618,7 @@ class StateCL
 
     timer_type timer_;
     timer_type timer_read_buffer_;
-    timer_type timer_write_buffe_;
+    timer_type timer_write_buffer_;
 
     void setup_buffer ()
     {
