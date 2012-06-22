@@ -22,12 +22,6 @@ class WeightBase
         ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
         zconst_(0), inc_weight_(N) {}
 
-    /// Size of the weight set
-    size_type size () const
-    {
-        return size_;
-    }
-
     /// Read only access to the weights
     const weight_type &weight () const
     {
@@ -39,12 +33,6 @@ class WeightBase
         }
 
         return weight_;
-    }
-
-    /// Read only access to individua log weight
-    double log_weight (size_type id) const
-    {
-        return log_weight()[id];
     }
 
     /// Read only access to the log weights
@@ -191,9 +179,7 @@ class WeightBase
 template <typename T>
 class Weight : public WeightBase
 {
-    public :
-
-    typedef VSMC_SIZE_TYPE size_type;
+    protected :
 
     Weight (size_type N) : WeightBase(N) {}
 }; // class Weight
