@@ -473,8 +473,8 @@ class StateCL
                 timer_read_buffer_.start();
                 command_queue_.enqueueReadBuffer(buf, 1, 0,
                         sizeof(CLType) * num, (void *) first);
-                return;
                 timer_read_buffer_.stop();
+                return;
             }
         }
 
@@ -504,7 +504,6 @@ class StateCL
         typedef typename internal::remove_pointer<ptr_type>::type val_type;
         typedef typename internal::remove_cv<val_type>::type host_type;
         typedef typename internal::remove_cv<CLType>::type device_type;
-
 
         if (internal::is_pointer<InputIter>::value) {
             if (internal::is_same<host_type, device_type>::value) {
