@@ -46,11 +46,14 @@ class SizeTypeDispatch<T, false>
 
 } // namesapce vsmc::internal
 
+/// \brief Trait class of size_type
+/// \ingroup Core
 template <typename T>
 class SizeTypeTrait
 {
     public :
 
+    /// \brief Type of T::size_type if it exist, otherwise VSMC_SIZE_TYPE
     typedef typename internal::SizeTypeDispatch<T,
             internal::HasSizeType<T>::value>::type type;
 };
