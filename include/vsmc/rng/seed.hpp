@@ -28,8 +28,10 @@ class Seed
 {
     public :
 
+    /// The type of the seed generated
     typedef unsigned result_type;
 
+    /// Get a reference to a Seed object
     static Seed &create ()
     {
         static Seed seed;
@@ -37,6 +39,10 @@ class Seed
         return seed;
     }
 
+    /// \brief Get a seed
+    ///
+    /// \note If the integer space is exhausted, then it will start form zero
+    /// and continue.
     result_type get ()
     {
         if (seed_  >= std::numeric_limits<result_type>::max() - 1)
@@ -45,11 +51,23 @@ class Seed
         return ++seed_;
     }
 
+    /// \brief Set the seed
+    ///
+    /// \param seed The new seed
+    ///
+    /// \note The next call to get() will return <tt>seed + 1</tt> or \c 1
+    /// if <tt>seed >= std::numeric_limits<result_type>::max() - 1)</tt>
     void set (result_type seed)
     {
         seed_ = seed;
     }
 
+    /// \brief Skip a sequence of seeds
+    ///
+    /// \param steps The number of steps to skip
+    ///
+    /// \note This operation is of constant complexity, but it is equivalent to
+    /// call get() \c steps times.
     void skip (result_type steps)
     {
         if (seed_ >= std::numeric_limits<result_type>::max() - steps)
