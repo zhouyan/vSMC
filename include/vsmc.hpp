@@ -20,10 +20,7 @@
 #endif // VSMC_HPP
 
 /// \defgroup Core Core
-/// \brief Constructing samplers with operations on the whole particle set 
+/// \brief Constructing samplers with operations on the whole particle set
 ///
 /// \defgroup Helper Helper
 /// \brief Constructing samplers with operations on a single particle
-///
-/// \defgroup RNG Random number generating
-/// \brief RNG engines and random variates distributions

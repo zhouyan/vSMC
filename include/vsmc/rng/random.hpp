@@ -12,6 +12,9 @@
 #include <boost/random.hpp>
 #endif // VSMC_USE_CXX11LIB_RANDOM
 
+/// \defgroup RNG Random number generating
+/// \brief RNG engines and random variates distributions
+
 namespace vsmc { namespace rng {
 
 #if VSMC_HAS_CXX11LIB_RANDOM

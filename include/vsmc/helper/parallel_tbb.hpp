@@ -32,7 +32,7 @@ class StateTBB : public StateBase<Dim, T, Timer>
     void copy (const SizeType *copy_from)
     {
         this->timer().start();
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_), 
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size_),
                 copy_work_<SizeType>(this, copy_from));
         this->timer().stop();
     }
@@ -234,7 +234,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Dim, Derived>
     {
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()), 
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
                 work_(this, iter, &particle, res));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
@@ -298,7 +298,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     {
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()), 
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
                 work_(this, iter, &particle, res));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
