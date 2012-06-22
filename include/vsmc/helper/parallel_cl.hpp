@@ -466,22 +466,24 @@ class StateCL
         typedef typename internal::remove_cv<val_type>::type host_type;
         typedef typename internal::remove_cv<CLType>::type device_type;
 
-        command_queue_.finish();
-        timer_read_buffer_.start();
 
         if (internal::is_pointer<OutputIter>::value) {
             if (internal::is_same<host_type, device_type>::value) {
+                command_queue_.finish();
+                timer_read_buffer_.start();
                 command_queue_.enqueueReadBuffer(buf, 1, 0,
                         sizeof(CLType) * num, (void *) first);
                 return;
+                timer_read_buffer_.stop();
             }
         }
 
+        command_queue_.finish();
+        timer_read_buffer_.start();
         CLType *temp = read_buffer_pool<CLType>(num);
         command_queue_.enqueueReadBuffer(buf, 1, 0,
                 sizeof(CLType) * num, (void *) temp);
         std::copy(temp, temp + num, first);
-
         timer_read_buffer_.stop();
     }
 
@@ -503,22 +505,24 @@ class StateCL
         typedef typename internal::remove_cv<val_type>::type host_type;
         typedef typename internal::remove_cv<CLType>::type device_type;
 
-        command_queue_.finish();
-        timer_write_buffer_.start();
 
         if (internal::is_pointer<InputIter>::value) {
             if (internal::is_same<host_type, device_type>::value) {
+                command_queue_.finish();
+                timer_write_buffer_.start();
                 command_queue_.enqueueWriteBuffer(buf, 1, 0,
                         sizeof(CLType) * num, (void *) first);
+                timer_write_buffer_.stop();
                 return;
             }
         }
 
+        command_queue_.finish();
+        timer_write_buffer_.start();
         CLType *temp = write_pool<CLType>(num);
         std::copy(first, first + num, temp);
         command_queue_.enqueueWriteBuffer(buf, 1, 0,
                 sizeof(CLType) * num, (void *) temp);
-
         timer_write_buffer_.stop();
     }
 
