@@ -4,6 +4,7 @@
 namespace vsmc {
 
 /// \brief A null timer
+/// \ingroup Timer
 ///
 /// This is the default timer for StateTBB and StateCL, which does exactly
 /// nothing but provides an interface.

@@ -6,6 +6,7 @@ extern "C" { double dsecnd(void); }
 namespace vsmc {
 
 /// A timer use Lapack dsecnd
+/// \ingroup Timer
 class LapackTimer
 {
     public :

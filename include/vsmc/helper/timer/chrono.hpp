@@ -19,6 +19,8 @@ using boost::chrono::duration;
 
 namespace vsmc {
 
+/// A timer use C++11/Boost chrono
+/// \ingroup Timer
 class ChronoTimer
 {
     public :
