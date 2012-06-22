@@ -8,9 +8,9 @@
 
 #if VSMC_HAS_CXX11LIB_RANDOM
 #include <random>
-#else // VSMC_USE_CXX11LIB_RANDOM
+#else // VSMC_HAS_CXX11LIB_RANDOM
 #include <boost/random.hpp>
-#endif // VSMC_USE_CXX11LIB_RANDOM
+#endif // VSMC_HAS_CXX11LIB_RANDOM
 
 /// \defgroup RNG Random number generating
 /// \brief RNG engines and random variates distributions

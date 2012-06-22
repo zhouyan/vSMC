@@ -1,5 +1,5 @@
-#ifndef VSMC_INTERNAL_TIMER_LAPACK_HPP
-#define VSMC_INTERNAL_TIMER_LAPACK_HPP
+#ifndef VSMC_HELPER_TIMER_LAPACK_HPP
+#define VSMC_HELPER_TIMER_LAPACK_HPP
 
 extern "C" { double dsecnd(void); }
 
@@ -31,6 +31,7 @@ class LapackTimer
     void reset () const
     {
         time_ = 0;
+        running_ = false;
     }
 
     double duration () const
@@ -47,4 +48,4 @@ class LapackTimer
 
 } // namespace vsmc
 
-#endif // VSMC_INTERNAL_TIMER_LAPACK_HPP
+#endif // VSMC_HELPER_TIMER_LAPACK_HPP
