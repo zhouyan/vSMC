@@ -7,11 +7,28 @@
 
 namespace vsmc { namespace rng {
 
+/// \brief Seed generator
+/// \ingroup RNG
+///
+/// \details
+/// A Seed object cannot be created, copied, or assigned to/from by user.
+/// Instead, user can only get a reference to a \c static Seed object through
+/// \c Seed::create(). It is intended to generate distinct seed for the
+/// Counter-based random number generator provided by Random123 library. The
+/// seed generated from the Seed object shall not be used by other Pseudo
+/// random number generator. The seed sequence is just a sequence of \c
+/// unsigned integers. On most platforms this means it can used to create
+/// \f$2^32 - 1\f$ independent random streams when used with Random123. All
+/// public options are of constant complexity. For Pseudo random number
+/// generators, independent seeds would need much higher computational
+/// complexity to generate.
+///
+/// \note Note that currently all interface of Seed are \b not thread-safe.
 class Seed
 {
     public :
 
-    typedef unsigned long result_type;
+    typedef unsigned result_type;
 
     static Seed &create ()
     {
