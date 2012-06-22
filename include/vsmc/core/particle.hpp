@@ -2,7 +2,7 @@
 #define VSMC_CORE_PARTICLE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/internal/weight.hpp>
+#include <vsmc/core/weight.hpp>
 #include <vsmc/rng/random.hpp>
 
 namespace vsmc {
@@ -21,7 +21,7 @@ namespace vsmc {
 /// position to. That is you should replace particle at position \c to with
 /// another at position <tt>from = copy_from[to]</tt>.
 template <typename T>
-class Particle : public internal::Weight<T>
+class Particle : public Weight<T>
 {
     public :
 
@@ -41,7 +41,7 @@ class Particle : public internal::Weight<T>
     ///
     /// \param N The number of particles
     explicit Particle (size_type N) :
-        internal::Weight<T>(N), size_(N), value_(N),
+        Weight<T>(N), size_(N), value_(N),
         replication_(N), copy_from_(N), weight_(N), remain_(N),
         resampled_(false), rng_(N)
     {

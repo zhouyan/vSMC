@@ -1,11 +1,12 @@
-#ifndef VSMC_INTERNAL_WEIGHT_HPP
-#define VSMC_INTERNAL_WEIGHT_HPP
+#ifndef VSMC_CORE_WEIGHT_HPP
+#define VSMC_CORE_WEIGHT_HPP
 
 #include <vsmc/internal/common.hpp>
 
-namespace vsmc { namespace internal {
+namespace vsmc {
 
-/// \brief Base weight set
+/// \brief Base weight set class
+/// \ingroup Core
 class WeightBase
 {
     public :
@@ -183,6 +184,10 @@ class WeightBase
     }
 }; // class WeightBase
 
+/// \brief Generic weight set class
+/// \ingroup Core
+///
+/// \tparam T Particle::value_type
 template <typename T>
 class Weight : public WeightBase
 {
@@ -193,10 +198,8 @@ class Weight : public WeightBase
     Weight (size_type N) : WeightBase(N) {}
 }; // class Weight
 
-/// \brief Copy weight
-///
-/// \tparam T1 Requirement: support index operation src[i]
-/// \tparam T2 Requirement: support index operation des[i]
+namespace internal {
+
 template <typename T1, typename T2>
 void copy_weight (const T1 &src, T2 &des)
 {
@@ -210,6 +213,8 @@ void copy_weight (const T &src, T &des)
     des = src;
 }
 
-} } // namespace vsmc::internal
+} // namespace vsmc::internal
 
-#endif // VSMC_INTERNAL_WEIGHT_HPP
+} // namespace vsmc
+
+#endif // VSMC_CORE_WEIGHT_HPP
