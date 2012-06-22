@@ -4,7 +4,18 @@
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
+
+#ifdef __INTEL_COMPILER
+// #pragma warning(push)
+#pragma warning(disable:411)
+#endif // __INTEL_COMPILER
+
 #include <vsmc/helper/parallel_cl/cl.hpp>
+
+#ifdef __INTEL_COMPILER
+// #pragma warning(pop)
+#endif // __INTEL_COMPILER
+
 #include <vsmc/helper/parallel_cl/query.hpp>
 #include <vsmc/rng/seed.hpp>
 
