@@ -4,9 +4,12 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/base.hpp>
 
+#ifdef __clang__
 #ifndef TBB_USE_CAPTURED_EXCEPTION
 #define TBB_USE_CAPTURED_EXCEPTION 1
 #endif
+#endif // __clang__
+
 #include <tbb/tbb.h>
 
 /// \defgroup TBB Intel Threading Buidling Block
