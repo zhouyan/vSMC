@@ -19,7 +19,7 @@ namespace vsmc { namespace rng {
 /// random number generator. The seed sequence is just a sequence of \c
 /// unsigned integers. On most platforms this means it can used to create
 /// \f$2^{32} - 1\f$ independent random streams when used with Random123. All
-/// public options are of constant complexity. For Pseudo random number
+/// public members are of constant complexity. For Pseudo random number
 /// generators, independent seeds would need much higher computational
 /// complexity to generate.
 ///
