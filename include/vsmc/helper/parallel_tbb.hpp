@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/base.hpp>
+
+#ifndef TBB_USE_CAPTURED_EXCEPTION
+#define TBB_USE_CAPTURED_EXCEPTION 1
+#endif
 #include <tbb/tbb.h>
 
 /// \defgroup TBB Intel Threading Buidling Block
