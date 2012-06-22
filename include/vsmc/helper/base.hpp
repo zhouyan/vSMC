@@ -105,6 +105,12 @@ class StateBase
     timer_type timer_;
 }; // class StateBase
 
+/// \brief Base Initialize class
+/// \ingroup Helper
+///
+/// \tparam T Particle::value_type
+/// \tparam Derived InitializeBase<T, Derived> subclass or a subtype with all
+/// and only static member functions
 template <typename T, typename Derived>
 class InitializeBase
 {
@@ -204,6 +210,10 @@ class InitializeBase
             void (InitializeBase::*) (Particle<T> &)) {}
 }; // class InitializeBase
 
+/// \brief Base Initialize class with virtual interface
+/// \ingroup Helper
+///
+/// \tparam T Particle::value_type
 template <typename T>
 class InitializeBase<T, VBase>
 {
@@ -223,6 +233,12 @@ class InitializeBase<T, VBase>
     ~InitializeBase () {}
 }; // class InitializeBase<T, VBase>
 
+/// \brief Base Move class
+/// \ingroup Helper
+///
+/// \tparam T Particle::value_type
+/// \tparam Derived MoveBase<T, Derived> subclass or a subtype with all
+/// and only static member functions
 template <typename T, typename Derived>
 class MoveBase
 {
@@ -300,6 +316,10 @@ class MoveBase
             void (MoveBase::*) (unsigned, Particle<T> &)) {}
 }; // class MoveBase
 
+/// \brief Base Move class with virtual interface
+/// \ingroup Helper
+///
+/// \tparam T Particle::value_type
 template <typename T>
 class MoveBase<T, VBase>
 {
@@ -318,6 +338,13 @@ class MoveBase<T, VBase>
     ~MoveBase () {}
 }; // class MoveBase<T, VBase>
 
+/// \brief Base Monitor evaluation class
+/// \ingroup Helper
+///
+/// \tparam T Particle::value_type
+/// \tparam Dim The dimension of the Monitor
+/// \tparam Derived MonitorBase<T, Derived> subclass or a subtype with all
+/// and only static member functions
 template <typename T, unsigned Dim, typename Derived>
 class MonitorEvalBase
 {
@@ -399,6 +426,11 @@ class MonitorEvalBase
             void (MonitorEvalBase::*) (unsigned, const Particle<T> &)) {}
 }; // class MonitorBase
 
+/// \brief Base Monitor evaluation class with virtual interface
+/// \ingroup Helper
+///
+/// \tparam T Particle::value_type
+/// \tparam Dim The dimension of the Monitor
 template <typename T, unsigned Dim>
 class MonitorEvalBase<T, Dim, VBase>
 {
@@ -418,6 +450,12 @@ class MonitorEvalBase<T, Dim, VBase>
     ~MonitorEvalBase () {}
 }; // class MonitorEvalBase<T, VBase>
 
+/// \brief Base Path evaluation class
+/// \ingroup Helper
+///
+/// \tparam T Particle::value_type
+/// \tparam Derived PathBase<T, Derived> subclass or a subtype with all
+/// and only static member functions
 template <typename T, typename Derived>
 class PathEvalBase
 {
@@ -522,6 +560,10 @@ class PathEvalBase
             void (PathEvalBase::*) (unsigned, const Particle<T> &)) {}
 }; // class PathEvalBase
 
+/// \brief Base Path evaluation class with virtual interface
+/// \ingroup Helper
+///
+/// \tparam T Particle::value_type
 template <typename T>
 class PathEvalBase<T, VBase>
 {

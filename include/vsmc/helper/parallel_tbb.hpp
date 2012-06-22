@@ -46,7 +46,8 @@ class StateTBB : public StateBase<Dim, T, Timer>
     {
         public :
 
-        copy_work_ (StateTBB<Dim, T> *state, const SizeType *copy_from) :
+        copy_work_ (StateTBB<Dim, T, Timer> *state,
+                const SizeType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
         void operator () (const tbb::blocked_range<size_type> &range) const
@@ -60,7 +61,7 @@ class StateTBB : public StateBase<Dim, T, Timer>
 
         private :
 
-        StateTBB<Dim, T> *const state_;
+        StateTBB<Dim, T, Timer> *const state_;
         const SizeType *const copy_from_;
     }; // class work_
 }; // class StateTBB
