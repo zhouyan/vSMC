@@ -20,27 +20,31 @@
 #include <string>
 #include <stdexcept>
 
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER)
 // #pragma warning(push)
 #pragma warning(disable:2196)
 #pragma warning(disable:2536)
-#endif // __INTEL_COMPILER
-
-#ifdef __clang__
+#elif defined(__clang__)
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wall"
-#pragma clang diagnostic ignored "-Wunique-enum"
-#endif // __clang__
+#pragma clang diagnostic warning "-w"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-w"
+#elif defined(_MSC_VER)
+// #pragma warning(push)
+#endif
 
 #include <Eigen/Dense>
 
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER)
 // #pragma warning(pop)
-#endif // __INTEL_COMPILER
-
-#ifdef __clang__
+#elif defined(__clang__)
 #pragma clang diagnostic pop
-#endif // __clang__
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+// #pragma warning(pop)
+#endif
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/version.hpp>
