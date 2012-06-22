@@ -466,7 +466,6 @@ class StateCL
         typedef typename internal::remove_cv<val_type>::type host_type;
         typedef typename internal::remove_cv<CLType>::type device_type;
 
-
         if (internal::is_pointer<OutputIter>::value) {
             if (internal::is_same<host_type, device_type>::value) {
                 command_queue_.finish();
