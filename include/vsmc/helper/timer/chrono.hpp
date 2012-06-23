@@ -29,30 +29,30 @@ class ChronoTimer
 
     void start () const
     {
-	if (!running_) {
-	    running_ = true;
-	    last_ = internal::chrono::system_clock::now();
-	}
+        if (!running_) {
+            running_ = true;
+            last_ = internal::chrono::system_clock::now();
+        }
     }
 
     void stop () const
     {
-	if (running_) {
-	    time_ += internal::chrono::duration<double>(
-		    internal::chrono::system_clock::now() - last_).count();
-	    running_ = false;
-	}
+        if (running_) {
+            time_ += internal::chrono::duration<double>(
+                    internal::chrono::system_clock::now() - last_).count();
+            running_ = false;
+        }
     }
 
     void reset () const
     {
-	time_ = 0;
-	running_ = false;
+        time_ = 0;
+        running_ = false;
     }
 
     double duration () const
     {
-	return time_;
+        return time_;
     }
 
     private :

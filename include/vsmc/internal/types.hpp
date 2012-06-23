@@ -41,7 +41,7 @@ class SizeTypeDispatch<T, false>
 {
     public :
 
-    typedef VSMC_SIZE_TYPE type; 
+    typedef VSMC_SIZE_TYPE type;
 };
 
 } // namesapce vsmc::internal
