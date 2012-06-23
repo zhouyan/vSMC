@@ -172,6 +172,8 @@ class StateCL
     /// \param lsize The size of the work group.
     void local_size (std::size_t lsize)
     {
+        local_size_ = lsize;
+
         if (lsize)
             local_nd_range_ = cl::NDRange(lsize);
         else
@@ -181,6 +183,12 @@ class StateCL
             global_nd_range_ = cl::NDRange((size_ / lsize + 1) * lsize);
         else
             global_nd_range_ = cl::NDRange(size_);
+    }
+
+    /// The current local size as set by local_size(lsize)
+    void local_size () const
+    {
+        return local_size_;
     }
 
     /// The global cl::NDRange used by kernel calls
@@ -584,6 +592,8 @@ class StateCL
     private :
 
     size_type size_;
+
+    std::size_t local_size_;
 
     mutable std::size_t read_buffer_pool_bytes_;
     mutable std::size_t write_buffer_pool_bytes_;
