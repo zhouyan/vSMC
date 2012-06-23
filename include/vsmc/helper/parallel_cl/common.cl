@@ -21,9 +21,7 @@ void copy (__global state_struct *state, __global size_type *copy_from)
     if (to >= Size)
         return;
 
-    size_t from = copy_from[to];
-    if (to != from)
-        state[to] = state[from];
+    state[to] = state[copy_from[to]];
 }
 
 #endif // VSMC_HELPER_PARALLEL_CL_COMMON_CL
