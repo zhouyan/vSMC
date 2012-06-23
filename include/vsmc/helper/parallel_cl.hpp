@@ -5,16 +5,21 @@
 
 #include <vsmc/internal/common.hpp>
 
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER)
 // #pragma warning(push)
 #pragma warning(disable:411)
-#endif // __INTEL_COMPILER
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wall"
+#endif
 
 #include <vsmc/helper/parallel_cl/cl.hpp>
 
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER)
 // #pragma warning(pop)
-#endif // __INTEL_COMPILER
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 #include <vsmc/helper/parallel_cl/query.hpp>
 #include <vsmc/rng/seed.hpp>
