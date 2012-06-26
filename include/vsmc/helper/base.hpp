@@ -190,7 +190,6 @@ class InitializeBase
         Derived::pre_processor(particle);
     }
 
-    template <typename D>
     void post_processor_dispatch (Particle<T> &particle,
             void (*) (Particle<T> &))
     {
@@ -516,28 +515,24 @@ class PathEvalBase
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
-    template <typename D>
     double path_state_dispatch (unsigned iter, ConstSingleParticle<T> part,
             double (*) (unsigned, ConstSingleParticle<T>))
     {
         return Derived::path_state(iter, part);
     }
 
-    template <typename D>
     double path_width_dispatch (unsigned iter, const Particle<T> &particle,
             double (*) (unsigned, const Particle<T> &))
     {
         return Derived::path_width(iter, particle);
     }
 
-    template <typename D>
     void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
             void (*) (unsigned, const Particle<T> &))
     {
         Derived::pre_processor(iter, particle);
     }
 
-    template <typename D>
     void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
             void (*) (unsigned, const Particle<T> &))
     {
