@@ -32,7 +32,7 @@ class Monitor
 
     /// The type of evaluation functor
     typedef internal::function<void (
-            unsigned, const Particle<T> &, double *)> eval_type;
+            unsigned, unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
     typedef std::vector<unsigned> index_type;
@@ -143,7 +143,7 @@ class Monitor
         assert(bool(eval_));
 
         buffer_.resize(dim_, particle.size());
-        eval_(iter, particle, buffer_.data());
+        eval_(iter, dim_, particle, buffer_.data());
         result_.noalias() = buffer_ * particle.weight();
 
         assert(result_.size() == dim_);

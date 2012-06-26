@@ -868,7 +868,6 @@ class MoveCL
 /// \ingroup OpenCL
 ///
 /// \tparam T A Subtype of StateCL
-/// \tparam Dim The dimension of the monitor
 ///
 /// \note
 /// A valid kernel declaration looks like
@@ -878,9 +877,7 @@ class MoveCL
 /// \endcode
 /// where \c buffer is a row major \c dim by \c size matrix. There can has
 /// other user supplied arguments as long as the first four is as above
-///
-/// \note Currently Dim cannot be larger than particle set size
-template <typename T, unsigned Dim>
+template <typename T>
 class MonitorEvalCL
 {
     public :
@@ -888,25 +885,20 @@ class MonitorEvalCL
     typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, const Particle<T> &particle,
+    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        set_kernel(iter, particle);
+        set_kernel(iter, dim, particle);
         pre_processor(iter, particle);
         particle.value().run_parallel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
-                buffer_device_, particle.size() * Dim, res);
+                buffer_device_, particle.size() * dim, res);
         post_processor(iter, particle);
     }
 
     virtual void monitor_state (unsigned iter, std::string &) = 0;
     virtual void pre_processor (unsigned iter, const Particle<T> &) {}
     virtual void post_processor (unsigned iter, const Particle<T> &) {}
-
-    static unsigned dim ()
-    {
-        return Dim;
-    }
 
     cl::Kernel kernel ()
     {
@@ -918,7 +910,7 @@ class MonitorEvalCL
         return kernel_;
     }
 
-    void set_kernel (unsigned iter, const Particle<T> &particle)
+    void set_kernel (unsigned iter, unsigned dim, const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
         assert(particle.value().build());
@@ -929,11 +921,11 @@ class MonitorEvalCL
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
             buffer_device_ = particle.value().template
-                create_buffer<typename T::state_type>(particle.size() * Dim);
+                create_buffer<typename T::state_type>(particle.size() * dim);
         }
 
         kernel_.setArg(0, (cl_uint) iter);
-        kernel_.setArg(1, (cl_uint) Dim);
+        kernel_.setArg(1, (cl_uint) dim);
         kernel_.setArg(2, particle.value().state_device());
         kernel_.setArg(3, buffer_device_);
     }
@@ -942,11 +934,11 @@ class MonitorEvalCL
 
     MonitorEvalCL () {}
 
-    MonitorEvalCL (const MonitorEvalCL<T, Dim> &other) :
+    MonitorEvalCL (const MonitorEvalCL<T> &other) :
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
         buffer_device_(other.buffer_device_) {}
 
-    MonitorEvalCL<T, Dim> &operator= (const MonitorEvalCL<T, Dim> &other)
+    MonitorEvalCL<T> &operator= (const MonitorEvalCL<T> &other)
     {
         if (this != &other) {
             kernel_ = other.kernel_;

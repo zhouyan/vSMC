@@ -342,24 +342,23 @@ class MoveBase<T, VBase>
 /// \ingroup Helper
 ///
 /// \tparam T Particle::value_type
-/// \tparam Dim The dimension of the Monitor
 /// \tparam Derived MonitorBase<T, Derived> subclass or a subtype with all
 /// and only static member functions
-template <typename T, unsigned Dim, typename Derived>
+template <typename T, typename Derived>
 class MonitorEvalBase
 {
     protected :
 
     MonitorEvalBase () {}
-    MonitorEvalBase (const MonitorEvalBase<T, Dim, Derived> &) {}
-    MonitorEvalBase<T, Dim, Derived> &operator=
-        (const MonitorEvalBase<T, Dim, Derived> &) {return *this;}
+    MonitorEvalBase (const MonitorEvalBase<T, Derived> &) {}
+    MonitorEvalBase<T, Derived> &operator=
+        (const MonitorEvalBase<T, Derived> &) {return *this;}
     ~MonitorEvalBase () {}
 
-    void monitor_state (unsigned iter, ConstSingleParticle<T> part,
-            double *res)
+    void monitor_state (unsigned iter, unsigned dim,
+            ConstSingleParticle<T> part, double *res)
     {
-        monitor_state_dispatch(iter, part, res, &Derived::monitor_state);
+        monitor_state_dispatch(iter, dim, part, res, &Derived::monitor_state);
     }
 
     void pre_processor (unsigned iter, const Particle<T> &particle)
@@ -375,11 +374,11 @@ class MonitorEvalBase
     private :
 
     template <typename D>
-    void monitor_state_dispatch (unsigned iter, ConstSingleParticle<T> part,
-            double *res,
-            void (D::*) (unsigned, ConstSingleParticle<T>, double *))
+    void monitor_state_dispatch (unsigned iter, unsigned dim,
+            ConstSingleParticle<T> part, double *res,
+            void (D::*) (unsigned, unsigned, ConstSingleParticle<T>, double *))
     {
-        static_cast<Derived *>(this)->monitor_state(iter, part, res);
+        static_cast<Derived *>(this)->monitor_state(iter, dim, part, res);
     }
 
     template <typename D>
@@ -396,11 +395,11 @@ class MonitorEvalBase
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
-    void monitor_state_dispatch (unsigned iter, ConstSingleParticle<T> part,
-            double *res,
-            void (*) (unsigned, ConstSingleParticle<T>, double *))
+    void monitor_state_dispatch (unsigned iter, unsigned dim,
+            ConstSingleParticle<T> part, double *res,
+            void (*) (unsigned, unsigned, ConstSingleParticle<T>, double *))
     {
-        Derived::monitor_state(iter, part, res);
+        Derived::monitor_state(iter, dim, part, res);
     }
 
     void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
@@ -415,9 +414,10 @@ class MonitorEvalBase
         Derived::post_processor(iter, particle);
     }
 
-    void monitor_state_dispatch (unsigned, ConstSingleParticle<T>, double *res,
+    void monitor_state_dispatch (unsigned, unsigned dim,
+            ConstSingleParticle<T>, double *res,
             void (MonitorEvalBase::*)
-            (unsigned, ConstSingleParticle<T>, double *)) {}
+            (unsigned, unsigned, ConstSingleParticle<T>, double *)) {}
 
     void pre_processor_dispatch (unsigned iter, const Particle<T> &,
             void (MonitorEvalBase::*) (unsigned, const Particle<T> &)) {}
@@ -430,13 +430,12 @@ class MonitorEvalBase
 /// \ingroup Helper
 ///
 /// \tparam T Particle::value_type
-/// \tparam Dim The dimension of the Monitor
-template <typename T, unsigned Dim>
-class MonitorEvalBase<T, Dim, VBase>
+template <typename T>
+class MonitorEvalBase<T, VBase>
 {
     public :
 
-    virtual void monitor_state (unsigned, ConstSingleParticle<T>,
+    virtual void monitor_state (unsigned, unsigned, ConstSingleParticle<T>,
             double *) {}
     virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
@@ -444,9 +443,9 @@ class MonitorEvalBase<T, Dim, VBase>
     protected :
 
     MonitorEvalBase () {}
-    MonitorEvalBase (const MonitorEvalBase<T, Dim, VBase> &) {}
-    MonitorEvalBase<T, Dim, VBase> &operator=
-        (const MonitorEvalBase<T, Dim, VBase> &) {return *this;}
+    MonitorEvalBase (const MonitorEvalBase<T, VBase> &) {}
+    MonitorEvalBase<T, VBase> &operator=
+        (const MonitorEvalBase<T, VBase> &) {return *this;}
     ~MonitorEvalBase () {}
 }; // class MonitorEvalBase<T, VBase>
 

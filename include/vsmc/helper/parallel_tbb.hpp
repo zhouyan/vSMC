@@ -228,36 +228,31 @@ class MoveTBB : public MoveBase<T, Derived>
 /// \ingroup TBB
 ///
 /// \tparam T A subtype of StateBase
-/// \tparam Dim The dimension of the monitor
-template <typename T, unsigned Dim, typename Derived>
-class MonitorEvalTBB : public MonitorEvalBase<T, Dim, Derived>
+template <typename T, typename Derived>
+class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 {
     public :
 
     typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, const Particle<T> &particle, double *res)
+    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
+            double *res)
     {
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
-                work_(this, iter, &particle, res));
+                work_(this, iter, dim, &particle, res));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
-    }
-
-    static unsigned dim ()
-    {
-        return Dim;
     }
 
     protected :
 
     MonitorEvalTBB () {}
-    MonitorEvalTBB (const MonitorEvalTBB<T, Dim, Derived> &) {}
-    const MonitorEvalTBB<T, Dim, Derived> &operator=
-        (const MonitorEvalTBB<T, Dim, Derived> &) {return *this;}
+    MonitorEvalTBB (const MonitorEvalTBB<T, Derived> &) {}
+    const MonitorEvalTBB<T, Derived> &operator=
+        (const MonitorEvalTBB<T, Derived> &) {return *this;}
     ~MonitorEvalTBB () {}
 
     private :
@@ -266,24 +261,27 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Dim, Derived>
     {
         public :
 
-        work_ (MonitorEvalTBB<T, Dim, Derived> *monitor, unsigned iter,
+        work_ (MonitorEvalTBB<T, Derived> *monitor,
+                unsigned iter, unsigned dim, 
                 const Particle<T> *particle, double *res) :
-            monitor_(monitor), iter_(iter), particle_(particle), res_(res) {}
+            monitor_(monitor), iter_(iter), dim_(dim), particle_(particle),
+            res_(res) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                double *const r = res_ + i * Dim;
+                double *const r = res_ + i * dim_;
                 const Particle<T> *const part = particle_;
-                monitor_->monitor_state(iter_,
+                monitor_->monitor_state(iter_, dim_,
                         ConstSingleParticle<T>(i, part), r);
             }
         }
 
         private :
 
-        MonitorEvalTBB<T, Dim, Derived> *const monitor_;
+        MonitorEvalTBB<T, Derived> *const monitor_;
         const unsigned iter_;
+        const unsigned dim_;
         const Particle<T> *const particle_;
         double *const res_;
     }; // class work_

@@ -9,7 +9,7 @@ class WeightBase;
 template <typename> class Weight;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
-template <typename, unsigned, typename> class MonitorEvalBase;
+template <typename, typename> class MonitorEvalBase;
 template <typename, typename> class PathEvalBase;
 
 } // namespace vsmc::internal
@@ -30,21 +30,19 @@ template <typename> class ConstSingleParticle;
 template <unsigned, typename, typename P = NullTimer> class StateSeq;
 template <typename, typename D = VBase> class InitializeSeq;
 template <typename, typename D = VBase> class MoveSeq;
-template <typename, unsigned, typename D = VBase>
-class MonitorEvalSeq;
+template <typename, typename D = VBase> class MonitorEvalSeq;
 template <typename, typename D = VBase> class PathEvalSeq;
 
 template <unsigned, typename, typename P = NullTimer> class StateTBB;
 template <typename, typename D = VBase> class InitializeTBB;
 template <typename, typename D = VBase> class MoveTBB;
-template <typename, unsigned, typename D = VBase>
-class MonitorEvalTBB;
+template <typename, typename D = VBase> class MonitorEvalTBB;
 template <typename, typename D = VBase> class PathEvalTBB;
 
 template <unsigned, typename, typename P = NullTimer> class StateCL;
 template <typename> class InitializeCL;
 template <typename> class MoveCL;
-template <typename, unsigned> class MonitorEvalCL;
+template <typename> class MonitorEvalCL;
 template <typename> class PathEvalCL;
 
 } // namesapce vsmc

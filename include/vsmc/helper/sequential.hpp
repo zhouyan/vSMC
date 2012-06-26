@@ -114,38 +114,33 @@ class MoveSeq : public MoveBase<T, Derived>
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
-/// \tparam Dim The dimension of the monitor
-template <typename T, unsigned Dim, typename Derived>
-class MonitorEvalSeq : public MonitorEvalBase<T, Dim, Derived>
+template <typename T, typename Derived>
+class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
 {
     public :
 
     typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, const Particle<T> &particle, double *res)
+    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
+            double *res)
     {
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         for (size_type i = 0; i != particle.size(); ++i) {
-            this->monitor_state(iter, ConstSingleParticle<T>(i, &particle),
-                    res + i * Dim);
+            this->monitor_state(iter, dim,
+                    ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
         particle.value().timer().stop();
         this->post_processor(iter, particle);
     }
 
-    static unsigned dim ()
-    {
-        return Dim;
-    }
-
     protected :
 
     MonitorEvalSeq () {}
-    MonitorEvalSeq (const MonitorEvalSeq<T, Dim, Derived> &) {}
-    const MonitorEvalSeq<T, Dim, Derived> &operator=
-        (const MonitorEvalSeq<T, Dim, Derived> &) {return *this;}
+    MonitorEvalSeq (const MonitorEvalSeq<T, Derived> &) {}
+    const MonitorEvalSeq<T, Derived> &operator=
+        (const MonitorEvalSeq<T, Derived> &) {return *this;}
     ~MonitorEvalSeq () {}
 }; // class MonitorEvalSeq
 
