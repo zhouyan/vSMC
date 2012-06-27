@@ -198,7 +198,8 @@ class Sampler
                 ("CALL **Sampler::initialize** WITH AN INVALID "
                  "INITIALIZE FUNCTOR"));
         accept_.push_back(std::deque<unsigned>(1, init_(particle_, param)));
-        post_move();
+        do_resampling();
+        do_monitoring();
         particle_.reset_zconst();
     }
 
@@ -219,7 +220,7 @@ class Sampler
                 ++ia;
             }
 
-            post_move();
+            do_resampling();
 
             for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
@@ -231,6 +232,8 @@ class Sampler
             }
 
             accept_.push_back(acc);
+
+            do_monitoring();
         }
     }
 
@@ -487,12 +490,15 @@ class Sampler
     std::set<std::string> monitor_name_;
     path_type path_;
 
-    void post_move ()
+    void do_resampling ()
     {
         particle_.resample(scheme_, threshold_);
         ess_.push_back(particle_.ess());
         resampled_.push_back(particle_.resampled());
+    }
 
+    void do_monitoring ()
+    {
         if (bool(path_))
             path_.eval(iter_num_, particle_);
 
