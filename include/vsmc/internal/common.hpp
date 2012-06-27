@@ -51,7 +51,9 @@
 #define VSMC_RUNTIME_ASSERT(cond, message) \
 { \
     if (!(cond)) \
-        std::cerr << message << std::endl; \
+        std::cerr \
+            << "vSMC runtime assertion failed:" << std::endl \
+            << message << std::endl; \
     else \
         ; \
     assert(cond); \

@@ -5,12 +5,9 @@
 #include <vsmc/helper/single_particle.hpp>
 
 #define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename) \
-{ \
-    VSMC_RUNTIME_ASSERT( \
-            (dynamic_cast<Derived *>(this)), \
-            "YOU DERIVED FROM " #basename \
-            " WITH INCORRECT **Derived** TEMPLATE PARAMTER"); \
-}
+    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)), ( \
+                "YOU DERIVED FROM " #basename \
+                " WITH INCORRECT **Derived** TEMPLATE PARAMTER")); \
 
 #ifdef NDEBUG
 #define VSMC_VIRTUAL_BASE_DESTRUCTOR

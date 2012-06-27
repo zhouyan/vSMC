@@ -24,6 +24,16 @@
 #include <vsmc/helper/parallel_cl/query.hpp>
 #include <vsmc/rng/seed.hpp>
 
+#define VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(func) \
+    VSMC_RUNTIME_ASSERT((setup()), ( \
+                "**StateCL::"#func"** can only be called after successful " \
+                "**StateCL::setup**")); \
+
+#define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func) \
+    VSMC_RUNTIME_ASSERT((build()), ( \
+                "**StateCL::"#func"** can only be called after successful " \
+                "**StateCL::setup**")); \
+
 /// \defgroup OpenCL OpenCL
 /// \ingroup Helper
 /// \brief Parallelized sampler with OpenCL
@@ -266,7 +276,8 @@ class StateCL
     /// \param dev_type The type of the device intended to use
     void setup (cl_device_type dev_type)
     {
-        cl::Platform::get(&platform_);
+        if (!platform_created_ || !platform_.size())
+            cl::Platform::get(&platform_);
         platform_created_ = true;
 
         cl_context_properties context_properties[] = {
@@ -353,7 +364,7 @@ class StateCL
     /// \endcode
     void build (const char *source, const char *flags)
     {
-        assert(setup());
+        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(build);
 
         if (!program_created_) {
             std::stringstream ss;
@@ -433,7 +444,7 @@ class StateCL
     template<typename CLType>
     cl::Buffer create_buffer (std::size_t num) const
     {
-        assert(context_created_);
+        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
         return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
     }
@@ -447,7 +458,7 @@ class StateCL
     template<typename CLType, typename InputIter>
     cl::Buffer create_buffer (InputIter first, InputIter last) const
     {
-        assert(setup());
+        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
         std::size_t num = 0;
         for (InputIter i = first; i != last; ++i)
@@ -472,7 +483,7 @@ class StateCL
     void read_buffer (const cl::Buffer &buf, std::size_t num,
             OutputIter first) const
     {
-        assert(setup());
+        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
         typedef typename internal::remove_cv<OutputIter>::type ptr_type;
         typedef typename internal::remove_pointer<ptr_type>::type val_type;
@@ -510,7 +521,7 @@ class StateCL
     void write_buffer (const cl::Buffer &buf, std::size_t num,
             InputIter first) const
     {
-        assert(setup());
+        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
         typedef typename internal::remove_cv<InputIter>::type ptr_type;
         typedef typename internal::remove_pointer<ptr_type>::type val_type;
@@ -544,7 +555,7 @@ class StateCL
     /// \note The program has to be built before call this member
     cl::Kernel create_kernel (const char *name) const
     {
-        assert(build());
+        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel)
 
         return cl::Kernel(program_, name);
     }
@@ -586,7 +597,7 @@ class StateCL
     template<typename SizeType>
     void copy (const SizeType *copy_from)
     {
-        assert(build_);
+        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel)
 
         write_buffer<size_type>(copy_device_, size_, copy_from);
         kernel_copy_.setArg(0, state_device_);
@@ -734,7 +745,6 @@ class InitializeCL
     void set_kernel (const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
-        assert(particle.value().build());
         std::string kname;
         initialize_state(kname);
 
@@ -824,7 +834,6 @@ class MoveCL
     void set_kernel (unsigned iter, const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
-        assert(particle.value().build());
         std::string kname;
         move_state(iter, kname);
 
@@ -913,7 +922,6 @@ class MonitorEvalCL
     void set_kernel (unsigned iter, unsigned dim, const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
-        assert(particle.value().build());
         std::string kname;
         monitor_state(iter, kname);
 
@@ -1010,7 +1018,6 @@ class PathEvalCL
     void set_kernel (unsigned iter, const Particle<T> &particle)
     {
         // TODO More robust checking of kernel change
-        assert(particle.value().build());
         std::string kname;
         path_state(iter, kname);
 

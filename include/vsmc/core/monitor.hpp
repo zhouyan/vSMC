@@ -140,7 +140,9 @@ class Monitor
     /// elements is of row major.
     void eval (unsigned iter, const Particle<T> &particle)
     {
-        assert(bool(eval_));
+        VSMC_RUNTIME_ASSERT((bool(eval_)),
+                ("CALL **Monitor::eval** WITH AN INVALID "
+                 "EVALUATION FUNCTOR"));
 
         buffer_.resize(dim_, particle.size());
         eval_(iter, dim_, particle, buffer_.data());

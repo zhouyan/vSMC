@@ -38,7 +38,15 @@ class SingleParticle
     /// which is exaclty for this purpose, which does not have the mutator like
     /// rng() and write access to states.
     SingleParticle (size_type id, Particle<T> *particle) :
-        id_(id), particle_(particle) {}
+        id_(id), particle_(particle)
+    {
+        VSMC_RUNTIME_ASSERT(particle_,
+                ("A **SingleParticle** object "
+                 "is contructed with NULL **Particle** pointer"));
+        VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ < particle_->size()),
+                ("A **SignleParticle** object "
+                 "is contructed with an out of range id"));
+    }
 
     /// The id of the particle
     size_type id () const
@@ -51,7 +59,6 @@ class SingleParticle
     /// \param pos The position of the parameter
     state_type &state (unsigned pos)
     {
-        assert(particle_);
         return particle_->value().state(id_, pos);
     }
 
@@ -60,49 +67,42 @@ class SingleParticle
     /// \param pos The position of the parameter
     const state_type &state (unsigned pos) const
     {
-        assert(particle_);
         return particle_->value().state(id_, pos);
     }
 
     /// Read and write access to all parameters through pointer
     state_type *state ()
     {
-        assert(particle_);
         return particle_->value().state(id_);
     }
 
     /// Read only access to all parameters through pointer
     const state_type *state () const
     {
-        assert(particle_);
         return particle_->value().state(id_);
     }
 
     /// The weight of this particle
     double weight () const
     {
-        assert(particle_);
         return particle_->weight()[id_];
     }
 
     /// The log weight of this particle
     double log_weight () const
     {
-        assert(particle_);
         return particle_->log_weight()[id_];
     }
 
     /// Read only access to all particles
     const Particle<T> &particle () const
     {
-        assert(particle_);
         return *particle_;
     }
 
     /// A unique RNG engine for this particle
     rng_type &rng ()
     {
-        assert(particle_);
         return particle_->rng(id_);
     }
 
@@ -127,7 +127,15 @@ class ConstSingleParticle
     typedef typename Particle<T>::rng_type rng_type;
 
     ConstSingleParticle (size_type id, const Particle<T> *particle) :
-        id_(id), particle_(particle) {}
+        id_(id), particle_(particle)
+    {
+        VSMC_RUNTIME_ASSERT(particle_,
+                ("A **SingleParticle** object "
+                 "is contructed with NULL **Particle** pointer"));
+        VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ < particle_->size()),
+                ("A **SignleParticle** object "
+                 "is contructed with an out of range id"));
+    }
 
     size_type id () const
     {
@@ -136,31 +144,26 @@ class ConstSingleParticle
 
     const state_type &state (unsigned pos) const
     {
-        assert(particle_);
         return particle_->value().state(id_, pos);
     }
 
     const state_type *state () const
     {
-        assert(particle_);
         return particle_->value().state(id_);
     }
 
     double weight () const
     {
-        assert(particle_);
         return particle_->weight()[id_];
     }
 
     double log_weight () const
     {
-        assert(particle_);
         return particle_->log_weight()[id_];
     }
 
     const Particle<T> &particle () const
     {
-        assert(particle_);
         return *particle_;
     }
 

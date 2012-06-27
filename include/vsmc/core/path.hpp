@@ -109,7 +109,9 @@ class Path
     /// \param particle The particle set to be operated on by eval()
     void eval (unsigned iter, const Particle<T> &particle)
     {
-        assert(eval_);
+        VSMC_RUNTIME_ASSERT((bool(eval_)),
+                ("CALL **Path::eval** WITH AN INVALID "
+                 "EVALUATION FUNCTOR"));
 
         double w = 0;
         double p = 0;

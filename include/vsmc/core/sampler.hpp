@@ -194,7 +194,9 @@ class Sampler
             m->second.clear();
 
         iter_num_ = 0;
-        assert(bool(init_));
+        VSMC_RUNTIME_ASSERT((bool(init_)),
+                ("CALL **Sampler::initialize** WITH AN INVALID "
+                 "INITIALIZE FUNCTOR"));
         accept_.push_back(std::deque<unsigned>(1, init_(particle_, param)));
         post_move();
         particle_.reset_zconst();
@@ -210,7 +212,9 @@ class Sampler
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
-                assert(bool(*m));
+                VSMC_RUNTIME_ASSERT((bool(*m)),
+                        ("CALL **Sampler::iterate** WITH AN INVALID "
+                         "MOVE FUNCTOR"));
                 acc[ia] = (*m)(iter_num_, particle_);
                 ++ia;
             }
@@ -219,7 +223,9 @@ class Sampler
 
             for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
-                assert(bool(*m));
+                VSMC_RUNTIME_ASSERT((bool(*m)),
+                        ("CALL **Sampler::iterate** WITH AN INVALID "
+                         "MCMC FUNCTOR"));
                 acc[ia] = (*m)(iter_num_, particle_);
                 ++ia;
             }
