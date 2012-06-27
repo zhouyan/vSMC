@@ -24,6 +24,11 @@
 #include <vsmc/helper/parallel_cl/query.hpp>
 #include <vsmc/rng/seed.hpp>
 
+#define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \
+    VSMC_RUNTIME_ASSERT((context_created()), ( \
+                "**StateCL::"#func"** can only be called after successful " \
+                "**StateCL::context_created**")); \
+
 #define VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(func) \
     VSMC_RUNTIME_ASSERT((setup()), ( \
                 "**StateCL::"#func"** can only be called after successful " \
@@ -444,7 +449,7 @@ class StateCL
     template<typename CLType>
     cl::Buffer create_buffer (std::size_t num) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
+        VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(create_buffer);
 
         return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
     }
