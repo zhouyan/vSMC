@@ -45,4 +45,17 @@
 #include <vsmc/internal/types.hpp>
 #include <vsmc/internal/forward.hpp>
 
+#ifdef NDEBUG
+#define VSMC_RUNTIME_ASSERT(cond, message)
+#else // NDEBUG
+#define VSMC_RUNTIME_ASSERT(cond, message) \
+{ \
+    if (!(cond)) \
+        std::cerr << message << std::endl; \
+    else \
+        ; \
+    assert(cond); \
+}
+#endif // NDEBUG
+
 #endif // VSMC_INTERNAL_COMMON_HPP

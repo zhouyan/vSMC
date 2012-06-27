@@ -4,6 +4,20 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/single_particle.hpp>
 
+#define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename) \
+{ \
+    VSMC_RUNTIME_ASSERT( \
+            (dynamic_cast<Derived *>(this)), \
+            "YOU DERIVED FROM " #basename \
+            " WITH INCORRECT **Derived** TEMPLATE PARAMTER"); \
+}
+
+#ifdef NDEBUG
+#define VSMC_VIRTUAL_BASE_DESTRUCTOR
+#else
+#define VSMC_VIRTUAL_BASE_DESTRUCTOR virtual
+#endif
+
 namespace vsmc {
 
 /// \brief Particle::value_type subtype
@@ -120,7 +134,7 @@ class InitializeBase
     InitializeBase (const InitializeBase<T, Derived> &) {}
     InitializeBase<T, Derived> &operator=
         (const InitializeBase<T, Derived> &) {return *this;}
-    ~InitializeBase () {}
+    VSMC_VIRTUAL_BASE_DESTRUCTOR ~InitializeBase () {}
 
     unsigned initialize_state (SingleParticle<T> part)
     {
@@ -148,6 +162,7 @@ class InitializeBase
     unsigned initialize_state_dispatch (SingleParticle<T> part,
             unsigned (D::*) (SingleParticle<T>))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(InitializeBase);
         return static_cast<Derived *>(this)->initialize_state(part);
     }
 
@@ -155,6 +170,7 @@ class InitializeBase
     void initialize_param_dispatch (Particle<T> &particle, void *param,
             void (D::*) (Particle<T> &, void *))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(InitializeBase);
         static_cast<Derived *>(this)->initialize_param(particle, param);
     }
 
@@ -162,6 +178,7 @@ class InitializeBase
     void pre_processor_dispatch (Particle<T> &particle,
             void (D::*) (Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(InitializeBase);
         static_cast<Derived *>(this)->pre_processor(particle);
     }
 
@@ -169,6 +186,7 @@ class InitializeBase
     void post_processor_dispatch (Particle<T> &particle,
             void (D::*) (Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(InitializeBase);
         static_cast<Derived *>(this)->post_processor(particle);
     }
 
@@ -247,7 +265,7 @@ class MoveBase
     MoveBase (const MoveBase<T, Derived> &) {}
     MoveBase<T, Derived> &operator=
         (const MoveBase<T, Derived> &) {return *this;}
-    ~MoveBase () {}
+    VSMC_VIRTUAL_BASE_DESTRUCTOR ~MoveBase () {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> part)
     {
@@ -270,6 +288,7 @@ class MoveBase
     unsigned move_state_dispatch (unsigned iter, SingleParticle<T> part,
             unsigned (D::*) (unsigned, SingleParticle<T>))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(MoveBase);
         return static_cast<Derived *>(this)->move_state(iter, part);
     }
 
@@ -277,6 +296,7 @@ class MoveBase
     void pre_processor_dispatch (unsigned iter, Particle<T> &particle,
             void (D::*) (unsigned, Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(MoveBase);
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
@@ -284,6 +304,7 @@ class MoveBase
     void post_processor_dispatch (unsigned iter, Particle<T> &particle,
             void (D::*) (unsigned, Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(MoveBase);
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
@@ -352,7 +373,7 @@ class MonitorEvalBase
     MonitorEvalBase (const MonitorEvalBase<T, Derived> &) {}
     MonitorEvalBase<T, Derived> &operator=
         (const MonitorEvalBase<T, Derived> &) {return *this;}
-    ~MonitorEvalBase () {}
+    VSMC_VIRTUAL_BASE_DESTRUCTOR ~MonitorEvalBase () {}
 
     void monitor_state (unsigned iter, unsigned dim,
             ConstSingleParticle<T> part, double *res)
@@ -377,6 +398,7 @@ class MonitorEvalBase
             ConstSingleParticle<T> part, double *res,
             void (D::*) (unsigned, unsigned, ConstSingleParticle<T>, double *))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(MonitorEvalBase);
         static_cast<Derived *>(this)->monitor_state(iter, dim, part, res);
     }
 
@@ -384,6 +406,7 @@ class MonitorEvalBase
     void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
             void (D::*) (unsigned, const Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(MonitorEvalBase);
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
@@ -391,6 +414,7 @@ class MonitorEvalBase
     void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
             void (D::*) (unsigned, const Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(MonitorEvalBase);
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
@@ -463,7 +487,7 @@ class PathEvalBase
     PathEvalBase (const PathEvalBase<T, Derived> &) {}
     PathEvalBase<T, Derived> &operator=
         (const PathEvalBase<T, Derived> &) {return *this;}
-    ~PathEvalBase () {}
+    VSMC_VIRTUAL_BASE_DESTRUCTOR ~PathEvalBase () {}
 
     double path_state (unsigned iter, ConstSingleParticle<T> part)
     {
@@ -491,6 +515,7 @@ class PathEvalBase
     double path_state_dispatch (unsigned iter, ConstSingleParticle<T> part,
             double (D::*) (unsigned, ConstSingleParticle<T>))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
         return static_cast<Derived *>(this)->path_state(iter, part);
     }
 
@@ -498,6 +523,7 @@ class PathEvalBase
     double path_width_dispatch (unsigned iter, const Particle<T> &particle,
             double (D::*) (unsigned, const Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
         return static_cast<Derived *>(this)->path_width(iter, particle);
     }
 
@@ -505,6 +531,7 @@ class PathEvalBase
     void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
             void (D::*) (unsigned, const Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
@@ -512,6 +539,7 @@ class PathEvalBase
     void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
             void (D::*) (unsigned, const Particle<T> &))
     {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 

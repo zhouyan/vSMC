@@ -1,10 +1,6 @@
 #ifndef VSMC_INTERNAL_CONFIG_HPP
 #define VSMC_INTERNAL_CONFIG_HPP
 
-#ifdef NDEBUG
-#define VSMC_NDEBUG
-#endif
-
 #ifdef VSMC_USE_STD_CHRONO
 #define VSMC_HAS_CXX11LIB_CHRONO 1
 #endif
