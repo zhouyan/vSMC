@@ -253,19 +253,28 @@ class Particle : public Weight<T>
 
     void weight2replication (size_type size)
     {
-        double tp = weight_.sum();
-        double sum_p = 0;
-        size_type sum_n = 0;
+        double sum_w = weight_.sum();
+        double acc_w = 0;
+        size_type acc_s = 0;
         replication_.setConstant(0);
         for (size_type i = 0; i != size_; ++i) {
-            if (sum_n < size && weight_[i] > 0) {
-                rng::binomial_distribution<
-                    typename internal::make_signed<size_type>::type>
-                    binom(size - sum_n, weight_[i] / (tp - sum_p));
+            if (acc_s < size && weight_[i] > 0) {
+                typedef typename internal::make_signed<size_type>::type s_t;
+                s_t s = size - acc_s;
+                double p = weight_[i] / (sum_w - acc_w);
+#ifndef NDEBUG
+                if (p < 0)
+                    assert(p > -1e-6);
+                if (p > 1)
+                    assert(p - 1 < 1e-6);
+#endif
+                p = std::max(p, 0.0);
+                p = std::min(p, 1.0);
+                rng::binomial_distribution<s_t> binom(s, p);
                 replication_[i] = binom(rng_[i]);
             }
-            sum_p += weight_[i];
-            sum_n += replication_[i];
+            acc_w += weight_[i];
+            acc_s += replication_[i];
         }
     }
 
