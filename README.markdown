@@ -108,7 +108,7 @@ works.
   * Intel icpc 12.1
 
 - Windows
-  * MSVC 2010 (Version 10) (Using [Boost][Boost] or C++11 headers)
+  * MSVC 2010
 
 # License
 
