@@ -64,7 +64,7 @@ class StateCL
 
     explicit StateCL (size_type N) :
         size_(N), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
-        read_buffer_pool_(NULL), write_buffer_pool_(NULL),
+        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),

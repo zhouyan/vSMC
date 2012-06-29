@@ -44,7 +44,7 @@ class Monitor
     ///
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The functor used to evaluate the results
-    explicit Monitor (unsigned dim = 1, const eval_type &eval = NULL) :
+    explicit Monitor (unsigned dim = 1, const eval_type &eval = VSMC_NULLPTR) :
         dim_(dim), eval_(eval), record_(dim) {}
 
     Monitor (const Monitor<T> &other) :

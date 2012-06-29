@@ -36,7 +36,7 @@ class Path
     /// \brief Construct a Path with an evaluation function
     ///
     /// \param eval The functor used to compute the integrands
-    explicit Path (const eval_type &eval = NULL) : eval_(eval) {}
+    explicit Path (const eval_type &eval = VSMC_NULLPTR) : eval_(eval) {}
 
     Path (const Path<T> &other) :
         eval_(other.eval_),

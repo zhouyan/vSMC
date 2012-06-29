@@ -7,25 +7,31 @@
 #ifndef VSMC_HAS_CXX11_AUTO_TYPE
 #define VSMC_HAS_CXX11_AUTO_TYPE 1
 #endif
-#endif // __GNUC__ >= 4 && __GNUC_MINOR >= 3
+#endif
 
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
 #ifndef VSMC_HAS_CXX11_CONSTEXPR
 #define VSMC_HAS_CXX11_CONSTEXPR 1
 #endif
-#endif // __GNUC__ >= 4 && __GNUC_MINOR >= 6
+#endif
 
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
 #ifndef VSMC_HAS_CXX11_DECLTYPE
 #define VSMC_HAS_CXX11_DECLTYPE 1
 #endif
-#endif // __GNUC__ >= 4 && __GNUC_MINOR >= 4
+#endif
 
 #if __GNUC__ >= 4 && __GNUC_MINOR >= 5
 #ifndef VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
 #define VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS 1
 #endif
-#endif // __GNUC__ >= 4 && __GNUC_MINOR >= 5
+#endif
+
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
+#ifndef VSMC_HAS_CXX11_NULLPTR
+#define VSMC_HAS_CXX11_NULLPTR 1
+#endif
+#endif
 
 #endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 

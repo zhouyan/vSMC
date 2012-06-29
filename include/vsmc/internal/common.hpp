@@ -29,6 +29,12 @@
 #include <vsmc/internal/types.hpp>
 #include <vsmc/internal/forward.hpp>
 
+#if VSMC_HAS_CXX11_NULLPTR
+#define VSMC_NULLPTR nullptr
+#else
+#define VSMC_NULLPTR NULL
+#endif
+
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, message)
 #else // NDEBUG

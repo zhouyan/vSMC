@@ -42,7 +42,7 @@ class SingleParticle
     {
         VSMC_RUNTIME_ASSERT(particle_,
                 ("A **SingleParticle** object "
-                 "is contructed with NULL **Particle** pointer"));
+                 "is contructed with 0 **Particle** pointer"));
         VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ < particle_->size()),
                 ("A **SignleParticle** object "
                  "is contructed with an out of range id"));
@@ -131,7 +131,7 @@ class ConstSingleParticle
     {
         VSMC_RUNTIME_ASSERT(particle_,
                 ("A **SingleParticle** object "
-                 "is contructed with NULL **Particle** pointer"));
+                 "is contructed with 0 **Particle** pointer"));
         VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ < particle_->size()),
                 ("A **SignleParticle** object "
                  "is contructed with an out of range id"));

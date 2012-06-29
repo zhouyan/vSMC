@@ -7,25 +7,31 @@
 #ifndef VSMC_HAS_CXX11_AUTO_TYPE
 #define VSMC_HAS_CXX11_AUTO_TYPE 1
 #endif
-#endif // __INTEL_COMPILER >= 1100
+#endif
 
 #if __INTEL_COMPILER >= 1300
 #ifndef VSMC_HAS_CXX11_CONSTEXPR
 #define VSMC_HAS_CXX11_CONSTEXPR 1
 #endif
-#endif // __INTEL_COMPILER >= 1300
+#endif
 
 #if __INTEL_COMPILER >= 1100
 #ifndef VSMC_HAS_CXX11_DECLTYPE
 #define VSMC_HAS_CXX11_DECLTYPE 1
 #endif
-#endif // __INTEL_COMPILER >= 1100
+#endif
 
 #if __INTEL_COMPILER >= 1300
 #ifndef VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
 #define VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS 1
 #endif
-#endif // __INTEL_COMPILER >= 1300
+#endif
+
+#if __INTEL_COMPILER >= 1210
+#ifndef VSMC_HAS_CXX11_NULLPTR
+#define VSMC_HAS_CXX11_NULLPTR 1
+#endif
+#endif
 
 #endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 

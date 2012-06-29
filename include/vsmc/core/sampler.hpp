@@ -182,7 +182,7 @@ class Sampler
     ///
     /// \param param Additional parameters passed to the initialization
     /// functor
-    void initialize (void *param = NULL)
+    void initialize (void *param = VSMC_NULLPTR)
     {
         ess_.clear();
         resampled_.clear();
