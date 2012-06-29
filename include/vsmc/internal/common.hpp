@@ -24,7 +24,7 @@
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/version.hpp>
-#include <vsmc/internal/function.hpp>
+#include <vsmc/internal/functional.hpp>
 #include <vsmc/internal/type_traits.hpp>
 #include <vsmc/internal/types.hpp>
 #include <vsmc/internal/forward.hpp>
