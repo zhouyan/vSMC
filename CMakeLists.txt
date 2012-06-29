@@ -44,35 +44,19 @@ INSTALL (DIRECTORY include/vsmc/    DESTINATION ${INSTALL_INCLUDE_DIR}/vsmc
 
 # Documentations
 IF (DOXYGEN_FOUND)
+    SET (DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
+    SET (DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
+    FILE (GLOB_RECURSE DOC_SOURCE_FILES
+        ${PROJECT_SOURCE_DIR}/doc/*.markdown)
+    FILE (GLOB_RECURSE DOC_INCLUDE_FILES
+        ${PROJECT_SOURCE_DIR}/include/*.hpp)
     CONFIGURE_FILE (
         ${PROJECT_SOURCE_DIR}/config/Doxyfile.in
         ${PROJECT_BINARY_DIR}/Doxyfile)
-    FILE (GLOB_RECURSE INCLUDE_SRC
-        ${PROJECT_SOURCE_DIR}/include/*.hpp)
-    ADD_CUSTOM_COMMAND (
-        OUTPUT  ${PROJECT_BINARY_DIR}/include
-        DEPENDS ${INCLUDE_SRC}
-        COMMAND ${CMAKE_COMMAND}
-        ARGS -E copy_directory
-        ${PROJECT_SOURCE_DIR}/include
-        ${PROJECT_BINARY_DIR}/include)
-    FILE (READ ${PROJECT_SOURCE_DIR}/README.markdown README)
-    FILE (WRITE ${PROJECT_SOURCE_DIR}/doc/main.markdown
-        "vSMC {#mainpage}\n================\n\n${README}\n\n")
-    FILE (GLOB_RECURSE DOC_SRC ${PROJECT_SOURCE_DIR}/doc
-        *.markdown *.html *.css)
-    ADD_CUSTOM_COMMAND (
-        OUTPUT  ${PROJECT_BINARY_DIR}/doc_src
-        DEPENDS ${DOC_SRC}
-        COMMAND ${CMAKE_COMMAND}
-        ARGS -E copy_directory
-        ${PROJECT_SOURCE_DIR}/doc
-        ${PROJECT_BINARY_DIR}/doc_src)
     ADD_CUSTOM_COMMAND (
         OUTPUT  ${PROJECT_BINARY_DIR}/doc
         DEPENDS ${PROJECT_BINARY_DIR}/Doxyfile
-        ${PROJECT_BINARY_DIR}/include
-        ${PROJECT_BINARY_DIR}/doc_src
+        ${DOC_SOURCE_FILES} ${DOC_INCLUDE_FILES}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         COMMAND ${DOXYGEN_EXECUTABLE} ARGS Doxyfile)
     ADD_CUSTOM_TARGET(docs DEPENDS ${PROJECT_BINARY_DIR}/doc)
