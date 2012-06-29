@@ -29,9 +29,9 @@
 #include <vsmc/internal/types.hpp>
 #include <vsmc/internal/forward.hpp>
 
-#if VSMC_HAS_CXX11_NULLPTR
+#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTION
 #define VSMC_NULLPTR nullptr
-#else
+#else // VSMC_HAS_CXX11_NULLPTR
 #define VSMC_NULLPTR NULL
 #endif
 
