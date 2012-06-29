@@ -33,8 +33,8 @@ if the C++ implementation has them correctly implemented, the standard headers
 can also be used.
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
-not all C++11 (or C++0x) implementations of `<functional`> and `<random>` work
-properly.
+not all C++11 (or C++0x) implementations of `<functional`>, `<random>` and
+`<type_traits>` work properly.
 
 The library will first look for the macro `VSMC_USE_STD_FUNCTION`. If it is
 defined, `std::function` will be used. Otherwise the library will use
@@ -76,50 +76,15 @@ Without [CMake][CMake] one can go to the `test` directory and build the
 examples manually. For example,
 
     cd test/pf
-    g++ -O3 \
+    g++ -std=c++0x -O3 \
       -I /path_to_v_smc_headers \
       -I /path_to_eigen_headers \
       -I /path_to_random123_headers \
-      -I /path_to_tbb_headers -L /path_to_tbb_libraries \
+      -I /path_to_tbb_headers -L /path_to_tbb_libraries -ltbb \
       -o pf_tbb pf_tbb.cpp
 
-## Additional libraries used by examples
-
-There are three versions of the particle filter example, **pf_seq**,
-**pf_tbb**, and **pf_vec**. To build **pf_seq** and **pf_vec** one only need
-the required libraries, namely [Eigen][Eigen], [Random123][Random123] and
-suitable `<functional>`, `<random>` or [Boost][Boost]. To build **pf_tbb** one
-also need the [Intel TBB][Intel TBB] library.
-
-The Gaussian mixture model example can be built with or without the [Intel
-TBB][Intel TBB] library. If the library is found, by default it will be built
-with it. One can define `-DGMM_SEQUENTIAL=ON` when invoking `cmake` to disable
-the parallelization. If one also define `-DGMM_STATIC=ON` then the examples
-will be built without [Intel TBB][Intel TBB] and linked statically. Similar
-options are available for the Positron Emission Tomography compartmental model
-example, just replace `GMM` with `PET`.
-
-For how to find these libraries see files in `cmake/` and see [CMake][CMake]'s
-documentation for general usage of this tool.
-
-There is another example that will not be built by the `cmake` system,
-**pf_cl**, which use [OpenCL][OpenCL] for parallelization. This is due to the
-fact that finding OpenCL runtime is a quite non-portable thing and we don't
-have the time to deal with all those different OpenCL implementations for now.
-However, the OpenCL backend is intended to be usable by any OpenCL standard
-conforming implementation. To build this example on a Mac, one can ues
-
-    cd /test/pf
-    clang++ -O3 \
-      -I /path_to_v_smc_headers \
-      -I /path_to_eigen_headers \
-      -I /path_to_random123_headers \
-      -framework OpenCL
-      -o pf_cl pf_cl.cpp
-
-The compiler flags may need to be changed for different [OpenCL][OpenCL]
-implementations.  Also you may need to change the compiler flags for OpenCL in
-the source file, `pf.hpp`, search for `FIXME`.
+There are some other more complex realistic examples and other configurations
+for the simple particle filter. They may require additional optional libraries.
 
 # Tested compilers
 
