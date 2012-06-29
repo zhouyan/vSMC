@@ -1,9 +1,7 @@
 #ifndef VSMC_RNG_RANDOM_HPP
 #define VSMC_RNG_RANDOM_HPP
 
-#include <vsmc/internal/config.hpp>
 #include <vsmc/rng/common.hpp>
-#include <vsmc/rng/r123_engine.hpp>
 #include <vsmc/rng/seed.hpp>
 
 #if VSMC_HAS_CXX11LIB_RANDOM
@@ -11,6 +9,18 @@
 #else // VSMC_HAS_CXX11LIB_RANDOM
 #include <boost/random.hpp>
 #endif // VSMC_HAS_CXX11LIB_RANDOM
+
+#ifndef VSMC_RNG_TYPE
+#if VSMC_USE_RANDOM123
+#include <vsmc/rng/r123_engine.hpp>
+#ifndef VSMC_CBRNG_TYPE
+#define VSMC_CBRNG_TYPE r123::Threefry4x64
+#endif
+#define VSMC_RNG_TYPE vsmc::rng::Engine<VSMC_CBRNG_TYPE>
+#else // VSMC_USE_RANDOM123
+#define VSMC_RNG_TYPE vsmc::rng::mt19937
+#endif // VSMC_USE_RANDOM123
+#endif // VSMC_RNG_TYPE
 
 /// \defgroup RNG Random number generating
 /// \brief RNG engines and random variates distributions

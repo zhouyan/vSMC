@@ -6,7 +6,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
 #include <vsmc/helper/parallel_cl/query.hpp>
-#include <vsmc/rng/seed.hpp>
+#include <vsmc/rng/random.hpp>
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \
     VSMC_RUNTIME_ASSERT((context_created()), ( \
@@ -325,13 +325,17 @@ class StateCL
     /// be <tt>Seed + size()</tt>.
     ///
     /// \li The Random123 library's \c philox.h, \c threefry.h, and \c u01.h
-    /// headers are included.
+    /// headers are included unless <tt>VSMC_USE_RANDOM123=0</tt>.
     ///
     /// The following is how the above looks like, assuming we constructed a
     /// particle set with type StateCL<4, cl_float>(1000). It is as if the
     /// user source implicitly included a header file containing the
     /// following code.
     /// \code
+    /// #ifndef VSMC_USE_RANDOM123
+    /// #define VSMC_USE_RANDOM123 1
+    /// #endif
+    ///
     /// typedef float state_type;
     ///
     /// typedef {
@@ -347,9 +351,11 @@ class StateCL
     /// __constant uint Dim = 4;
     /// __constant ulong Seed = 0;
     ///
+    /// #if VSMC_USE_RANDOM123
     /// #include <Random123/philox.h>
     /// #include <Random123/threefry.h>
     /// #include <Random123/u01.h>
+    /// #endif
     /// \endcode
     void build (const char *source, const char *flags)
     {
@@ -357,6 +363,9 @@ class StateCL
 
         if (!program_created_) {
             std::stringstream ss;
+            ss << "#ifndef VSMC_USE_RANDOM123\n";
+            ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
+            ss << "#endif\n";
             if (sizeof(T) == sizeof(cl_float))
                 ss << "typedef float state_type;\n";
             else if (sizeof(T) == sizeof(cl_double))
@@ -370,7 +379,8 @@ class StateCL
             ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
-            rng::Seed &seed = rng::Seed::create();
+            rng::Seed<VSMC_RNG_TYPE> &seed =
+                rng::Seed<VSMC_RNG_TYPE>::create();
             ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
             seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";

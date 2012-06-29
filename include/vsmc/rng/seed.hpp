@@ -2,8 +2,6 @@
 #define VSMC_RNG_SEED_HPP
 
 #include <vsmc/rng/common.hpp>
-#include <ctime>
-#include <cstdlib>
 
 namespace vsmc { namespace rng {
 
@@ -24,6 +22,7 @@ namespace vsmc { namespace rng {
 /// complexity to generate.
 ///
 /// \note Note that currently all interface of Seed are \b not thread-safe.
+template <typename T>
 class Seed
 {
     public :

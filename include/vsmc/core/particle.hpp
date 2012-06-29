@@ -31,11 +31,8 @@ class Particle : public Weight<T>
     /// The type of the particle values
     typedef T value_type;
 
-    /// The type of the Counter-based random number generator
-    typedef VSMC_CBRNG_TYPE cbrng_type;
-
     /// The type of the Counter-based random number generator C++11 engine
-    typedef rng::Engine<VSMC_CBRNG_TYPE> rng_type;
+    typedef VSMC_RNG_TYPE rng_type;
 
     /// \brief Construct a Particle object with a given number of particles
     ///
@@ -45,11 +42,15 @@ class Particle : public Weight<T>
         replication_(N), copy_from_(N), weight_(N), remain_(N),
         resampled_(false), rng_(N)
     {
-        rng::Seed &seed = rng::Seed::create();
+        rng::Seed<rng_type> &seed = rng::Seed<rng_type>::create();
+#if VSMC_USE_RANDOM123
         for (size_type i = 0; i != size_; ++i) {
             rng_[i] = rng_type(
                     static_cast<rng_type::result_type>(seed.get()));
         }
+#else
+        rng_ = rng_type(static_cast<rng_type::result_type>(seed.get()));
+#endif
         this->set_equal_weight();
     }
 
@@ -123,7 +124,11 @@ class Particle : public Weight<T>
     /// position id, and independent of others
     rng_type &rng (size_type id)
     {
+#if VSMC_USE_RANDOM123
         return rng_[id];
+#else
+        return rng_;
+#endif
     }
 
     private :
@@ -137,7 +142,11 @@ class Particle : public Weight<T>
     Eigen::VectorXd remain_;
     bool resampled_;
 
+#if VSMC_USE_RANDOM123
     std::vector<rng_type> rng_;
+#else
+    rng_type rng_;
+#endif
 
     void resample_multinomial ()
     {
@@ -161,12 +170,12 @@ class Particle : public Weight<T>
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng_[j]);
+        double u = unif(rng(j));
         double cw = weight_[0];
         while (j != size_) {
             while (j < cw * size_ - u && j != size_) {
                 ++replication_[k];
-                u = unif(rng_[j]);
+                u = unif(rng(j));
                 ++j;
             }
             if (k == size_ - 1)
@@ -181,7 +190,7 @@ class Particle : public Weight<T>
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng_[j]);
+        double u = unif(rng(j));
         double cw = weight_[0];
         while (j != size_) {
             while (j < cw * size_ - u && j != size_) {
@@ -207,12 +216,12 @@ class Particle : public Weight<T>
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng_[j]);
+        double u = unif(rng(j));
         double cw = weight_[0];
         while (j != size) {
             while (j < cw * size - u && j != size) {
                 ++replication_[k];
-                u = unif(rng_[j]);
+                u = unif(rng(j));
                 ++j;
             }
             if (k == size_ - 1)
@@ -236,7 +245,7 @@ class Particle : public Weight<T>
         size_type j = 0;
         size_type k = 0;
         rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng_[j]);
+        double u = unif(rng(j));
         double cw = weight_[0];
         while (j != size) {
             while (j < cw * size - u && j != size) {
@@ -271,7 +280,7 @@ class Particle : public Weight<T>
                 p = std::max(p, 0.0);
                 p = std::min(p, 1.0);
                 rng::binomial_distribution<s_t> binom(s, p);
-                replication_[i] = binom(rng_[i]);
+                replication_[i] = binom(rng(i));
             }
             acc_w += weight_[i];
             acc_s += replication_[i];

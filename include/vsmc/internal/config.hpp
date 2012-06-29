@@ -3,6 +3,14 @@
 
 #include <vsmc/internal/compiler.hpp>
 
+#ifndef VSMC_RNG_SEED
+#define VSMC_RNG_SEED 0
+#endif
+
+#ifndef VSMC_USE_RANDOM123
+#define VSMC_USE_RANDOM123 1
+#endif
+
 #ifndef VSMC_HAS_CXX11_AUTO_TYPE
 #define VSMC_HAS_CXX11_AUTO_TYPE 0
 #endif
