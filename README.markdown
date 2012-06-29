@@ -90,13 +90,10 @@ for the simple particle filter. They may require additional optional libraries.
 
 The library itself only use standard C++98 features and is fairly portable.
 For compiler support of [Eigen][Eigen] and [Random123][Random123] see their
-pages respectively. In C++11 mode, the usability of `<functional>` and
-`<random>` headers distributed with various implementations differs
+pages respectively. In C++11 mode, the usability of `<functional>`, `<random>`
+and `<type_traits>` headers distributed with various implementations differs
 significantly. However [Boost][Boost] can be used as a replacement and which is
-well known for portability. The following summaries tested compilers.
-[Boost][Boost] 1.49 is used. Others might work as well. The aim is that vSMC
-shall work anywhere [Eigen][Eigen], [Random123][Random123] and [Boost][Boost]
-works.
+well known for portability.
 
 - Linux
   * GCC 4.4, 4.5, 4.6,
