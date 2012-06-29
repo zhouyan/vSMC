@@ -4,23 +4,7 @@
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
-
-#if defined(__INTEL_COMPILER)
-// #pragma warning(push)
-#pragma warning(disable:411)
-#elif defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wall"
-#endif
-
 #include <vsmc/helper/parallel_cl/cl.hpp>
-
-#if defined(__INTEL_COMPILER)
-// #pragma warning(pop)
-#elif defined(__clang__)
-#pragma clang diagnostic pop
-#endif
-
 #include <vsmc/helper/parallel_cl/query.hpp>
 #include <vsmc/rng/seed.hpp>
 
