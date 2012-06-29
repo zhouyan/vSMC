@@ -98,43 +98,17 @@ well known for portability. The following summaries tested compilers.
 shall work anywhere [Eigen][Eigen], [Random123][Random123] and [Boost][Boost]
 works.
 
-## Linux
-
-- With [Boost][Boost]
+- Linux
   * GCC 4.4, 4.5, 4.6,
   * Intel icpc 12.0, 12.1
-    tested against GCC 4.4, 4.5, 4.6
   * Clang 2.8, 2.9, 3.0, 3.1, SVN
 
-The above compilers are also tested with flag `-std=c++98`, `-std=gnu98`, etc.
-and `-std=c++0x`, `-std=c++11` etc. Note that all compilers above use
-`libstdc++` as standard libraries. With `libstdc++` distributed by GCC 4.4 or
-later, and appropriate compiler flags, using C++11 `<functional>` instead of
-[Boost][Boost] also works. With `libstdc++` distributed by GCC 4.5 or later,
-C++11 `<random>` also works. Note that Intel icpc disable C++0x mode for
-GCC 4.6 system.
+- Mac OS X
+  * Clang 3.1
+  * Intel icpc 12.1
 
-## Mac OS X
-
-- Lion 10.7.3, Xcode 4.3.2
-  * Clang 3.1, -std=c++98 -stdlib=libc++ (Using [Boost][Boost])
-  * Clang 3.1, -std=c++11 -stdlib=libc++ (Using [Boost][Boost], C++11
-    `std::function` also works, C++11 `<random>` broke, not standard
-    comforming)
-  * Clang 3.1, -std=c++98 -stdlib=libstc++(Using [Boost][Boost])
-  * Clang 3.1, -std=c++11 -stdlib=libstc++(Using [Boost][Boost])
-  * Intel icpc 12.1.3, -std=c++98 (Using [Boost][Boost])
-  * Intel icpc 12.1.3, -std=c++0x (Using [Boost][Boost])
-
-## Windows
-
-- Windows 7
+- Windows
   * MSVC 2010 (Version 10) (Using [Boost][Boost] or C++11 headers)
-
-Note that MSVC cannot compile all the examples.
-
-Earlier versions of MSVC does not work, this is mainly a dependency problem of
-[Random123][Random123].
 
 # License
 
