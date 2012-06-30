@@ -244,7 +244,7 @@ class InitializeBase<T, VBase>
     InitializeBase (const InitializeBase<T, VBase> &) {}
     InitializeBase<T, VBase> &operator=
         (const InitializeBase<T, VBase> &) {return *this;}
-    ~InitializeBase () {}
+    virtual ~InitializeBase () {}
 }; // class InitializeBase<T, VBase>
 
 /// \brief Base Move class
@@ -352,7 +352,7 @@ class MoveBase<T, VBase>
     MoveBase (const MoveBase<T, VBase> &) {}
     MoveBase<T, VBase> &operator=
         (const MoveBase<T, VBase> &) {return *this;}
-    ~MoveBase () {}
+    virtual ~MoveBase () {}
 }; // class MoveBase<T, VBase>
 
 /// \brief Base Monitor evaluation class
@@ -466,7 +466,7 @@ class MonitorEvalBase<T, VBase>
     MonitorEvalBase (const MonitorEvalBase<T, VBase> &) {}
     MonitorEvalBase<T, VBase> &operator=
         (const MonitorEvalBase<T, VBase> &) {return *this;}
-    ~MonitorEvalBase () {}
+    virtual ~MonitorEvalBase () {}
 }; // class MonitorEvalBase<T, VBase>
 
 /// \brief Base Path evaluation class
@@ -599,7 +599,7 @@ class PathEvalBase<T, VBase>
     PathEvalBase (const PathEvalBase<T, VBase> &) {}
     PathEvalBase<T, VBase> &operator=
         (const PathEvalBase<T, VBase> &) {return *this;}
-    ~PathEvalBase () {}
+    virtual ~PathEvalBase () {}
 }; // class PathEval<T, VBase>
 
 } // namespace vsmc
