@@ -1,22 +1,32 @@
 #ifndef VSMC_CORE_WEIGHT_HPP
+
 #define VSMC_CORE_WEIGHT_HPP
 
 #include <vsmc/internal/common.hpp>
 
 namespace vsmc {
 
-/// \brief Base weight set class
+/// \brief Weight set class
 /// \ingroup Core
+///
+/// \tparam T Particle<T>::value_type
 template <typename T>
 class Weight
 {
-    public :
-
-    /// The type of the size of weight and log weight vectors
-    typedef typename SizeTypeTrait<T>::type size_type;
+    protected :
 
     /// The type of the weight and log weight vectors
     typedef Eigen::VectorXd weight_type;
+
+    typedef typename SizeTypeTrait<T>::type size_type;
+
+    explicit Weight (size_type N) :
+        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
+        ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
+        zconst_(0), inc_weight_(N)
+    {
+        set_equal_weight();
+    }
 
     /// Read only access to the weights
     const weight_type &weight () const
@@ -78,7 +88,7 @@ class Weight
         log_weight_ = nw.head(size_);
         if (delta != 1)
             log_weight_ *= delta;
-        set_log_weight();
+        set_weight();
     }
 
     /// \brief Add to the log weights with a pointer
@@ -115,7 +125,7 @@ class Weight
         log_weight_ += inc_weight_;
         if (add_zconst)
             zconst_ += log(weight().dot(inc_weight_.array().exp().matrix()));
-        set_log_weight();
+        set_weight();
     }
 
     /// The current ESS (Effective Sample Size)
@@ -141,13 +151,6 @@ class Weight
         zconst_ = 0;
     }
 
-    protected :
-
-    explicit Weight (size_type N) :
-        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
-        ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
-        zconst_(0), inc_weight_(N) {}
-
     private :
 
     size_type size_;
@@ -163,7 +166,7 @@ class Weight
     double zconst_;
     weight_type inc_weight_;
 
-    void set_log_weight ()
+    void set_weight ()
     {
         ess_cached_ = false;
         weight_cached_ = false;
