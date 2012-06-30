@@ -2,8 +2,8 @@
 #define VSMC_CORE_PARTICLE_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/core/parallel_rng.hpp>
 #include <vsmc/core/weight.hpp>
-#include <vsmc/rng/random.hpp>
 
 namespace vsmc {
 
@@ -21,7 +21,7 @@ namespace vsmc {
 /// position to. That is you should replace particle at position \c to with
 /// another at position <tt>from = copy_from[to]</tt>.
 template <typename T>
-class Particle : public Weight<T>
+class Particle : public ParallelRNG<T>, public Weight<T>
 {
     public :
 
@@ -31,27 +31,28 @@ class Particle : public Weight<T>
     /// The type of the particle values
     typedef T value_type;
 
-    /// The type of the Counter-based random number generator C++11 engine
-    typedef VSMC_RNG_TYPE rng_type;
+    using typename ParallelRNG<T>::rng_type;
+    using typename Weight<T>::weight_type;
+
+    using ParallelRNG<T>::rng;
+    using Weight<T>::weight;
+    using Weight<T>::log_weight;
+    using Weight<T>::set_equal_weight;
+    using Weight<T>::set_log_weight;
+    using Weight<T>::add_log_weight;
+    using Weight<T>::ess;
+    using Weight<T>::zconst;
+    using Weight<T>::reset_zconst;
 
     /// \brief Construct a Particle object with a given number of particles
     ///
     /// \param N The number of particles
     explicit Particle (size_type N) :
-        Weight<T>(N), size_(N), value_(N),
+        ParallelRNG<T>(N), Weight<T>(N), size_(N), value_(N),
         replication_(N), copy_from_(N), weight_(N), remain_(N),
-        resampled_(false), rng_(N)
+        resampled_(false)
     {
-        rng::Seed<rng_type> &seed = rng::Seed<rng_type>::create();
-#if VSMC_USE_RANDOM123
-        for (size_type i = 0; i != size_; ++i) {
-            rng_[i] = rng_type(
-                    static_cast<rng_type::result_type>(seed.get()));
-        }
-#else
-        rng_ = rng_type(static_cast<rng_type::result_type>(seed.get()));
-#endif
-        this->set_equal_weight();
+        set_equal_weight();
     }
 
     /// Size of the particle set
@@ -89,9 +90,9 @@ class Particle : public Weight<T>
 
         assert(replication_.size() == size());
 
-        resampled_ = this->ess() < threshold * size_;
+        resampled_ = ess() < threshold * size_;
         if (resampled_) {
-            copy_weight(this->weight(), weight_);
+            copy_weight(weight(), weight_);
             switch (scheme) {
                 case MULTINOMIAL :
                     resample_multinomial();
@@ -116,21 +117,6 @@ class Particle : public Weight<T>
         }
     }
 
-    /// \brief Get a C++11 RNG engine
-    ///
-    /// \param id The position of the particle, 0 to size() - 1
-    ///
-    /// \return A reference to a C++11 RNG engine unique to particle at
-    /// position id, and independent of others
-    rng_type &rng (size_type id)
-    {
-#if VSMC_USE_RANDOM123
-        return rng_[id];
-#else
-        return rng_;
-#endif
-    }
-
     private :
 
     size_type size_;
@@ -141,12 +127,6 @@ class Particle : public Weight<T>
     Eigen::VectorXd weight_;
     Eigen::VectorXd remain_;
     bool resampled_;
-
-#if VSMC_USE_RANDOM123
-    std::vector<rng_type> rng_;
-#else
-    rng_type rng_;
-#endif
 
     void resample_multinomial ()
     {
@@ -319,7 +299,7 @@ class Particle : public Weight<T>
 
         const size_type *cf = copy_from_.data();
         value_.copy(cf);
-        this->set_equal_weight();
+        set_equal_weight();
     }
 }; // class Particle
 
