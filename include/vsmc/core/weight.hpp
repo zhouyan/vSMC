@@ -186,7 +186,7 @@ class HasWeightSetType
 
     struct char2 {char c1; char c2;};
 
-    template<typename S>
+    template <typename S>
     static char test (typename S::weight_set_type *);
 
     template <typename S>

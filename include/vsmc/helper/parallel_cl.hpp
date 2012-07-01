@@ -698,6 +698,26 @@ class StateCL
     }
 }; // class StateCL
 
+/// \brief Test if a state type is derived of StateCL
+/// \ingroup OpenCL
+template <typename D>
+class IsDerivedOfStateCL
+{
+    private :
+
+    struct char2 {char c1; char c2;};
+
+    template <unsigned Dim, typename T, typename Timer>
+    static char test (StateCL<Dim, T, Timer> *);
+
+    static char2 test (...);
+
+    public :
+
+    static const bool value =
+        sizeof(test(static_cast<D *>(0))) == sizeof(char);
+};
+
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup OpenCL
 ///
@@ -723,6 +743,8 @@ class InitializeCL
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateCL, T, InitializeCL);
+
         set_kernel(particle);
         initialize_param(particle, param);
         pre_processor(particle);
@@ -814,6 +836,8 @@ class MoveCL
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateCL, T, MoveCL);
+
         set_kernel(iter, particle);
         pre_processor(iter, particle);
         particle.value().run_parallel(kernel_);
@@ -902,6 +926,8 @@ class MonitorEvalCL
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateCL, T, MonitorEvalCL);
+
         set_kernel(iter, dim, particle);
         pre_processor(iter, particle);
         particle.value().run_parallel(kernel_);
@@ -995,6 +1021,8 @@ class PathEvalCL
     double operator() (unsigned iter, const Particle<T> &particle,
         double *res)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateCL, T, PathEvalCL);
+
         set_kernel(iter, particle);
         pre_processor(iter, particle);
         particle.value().run_parallel(kernel_);

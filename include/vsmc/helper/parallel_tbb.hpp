@@ -73,6 +73,26 @@ class StateTBB : public StateBase<Dim, T, Timer>
     }; // class work_
 }; // class StateTBB
 
+/// \brief Test if a state type is derived of StateTBB
+/// \ingroup TBB
+template <typename D>
+class IsDerivedOfStateTBB
+{
+    private :
+
+    struct char2 {char c1; char c2;};
+
+    template <unsigned Dim, typename T, typename Timer>
+    static char test (StateTBB<Dim, T, Timer> *);
+
+    static char2 test (...);
+
+    public :
+
+    static const bool value =
+        sizeof(test(static_cast<D *>(0))) == sizeof(char);
+};
+
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup TBB
 ///
@@ -87,6 +107,8 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateTBB, T, InitializeTBB);
+
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         particle.value().timer().start();
@@ -162,6 +184,8 @@ class MoveTBB : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateTBB, T, MoveTBB);
+
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         work_ work(this, iter, &particle);
@@ -239,6 +263,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateTBB, T, MonitorEvalTBB);
+
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
@@ -301,6 +327,8 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateTBB, T, PathEvalTBB);
+
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),

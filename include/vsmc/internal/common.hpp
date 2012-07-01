@@ -50,4 +50,45 @@
 }
 #endif // NDEBUG
 
+namespace vsmc { namespace internal {
+
+template <bool> class StaticAssert {};
+
+template <>
+class StaticAssert<true>
+{
+    public :
+
+    enum {
+        USE_InitializeSeq_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSeq,
+        USE_MoveSeq_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSeq,
+        USE_MonitorEvalSeq_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSeq,
+        USE_PathEvalSeq_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSeq,
+
+        USE_InitializeTBB_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateTBB,
+        USE_MoveTBB_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateTBB,
+        USE_MonitorEvalTBB_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateTBB,
+        USE_PathEvalTBB_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateTBB,
+
+        USE_InitializeCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
+        USE_MoveCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
+        USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
+        USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL
+    };
+};
+
+} } //namespace vsmc::internal
+
+#ifdef _MSC_VER
+#define VSMC_STATIC_ASSERT(cond, message) \
+    {vsmc::internal::StaticAssert<bool(cond)>::message;}
+#else
+#define VSMC_STATIC_ASSERT(cond, message) \
+    if (vsmc::internal::StaticAssert<bool(cond)>::message) {};
+#endif
+
+#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user) \
+    VSMC_STATIC_ASSERT(vsmc::IsDerivedOf##base<derived>::value, \
+            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
+
 #endif // VSMC_INTERNAL_COMMON_HPP

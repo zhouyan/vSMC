@@ -41,6 +41,26 @@ class StateSeq : public StateBase<Dim, T, Timer>
     size_type size_;
 }; // class StateSeq
 
+/// \brief Test if a state type is derived of StateSeq
+/// \ingroup Sequential
+template <typename D>
+class IsDerivedOfStateSeq
+{
+    private :
+
+    struct char2 {char c1; char c2;};
+
+    template <unsigned Dim, typename T, typename Timer>
+    static char test (StateSeq<Dim, T, Timer> *);
+
+    static char2 test (...);
+
+    public :
+
+    static const bool value =
+        sizeof(test(static_cast<D *>(0))) == sizeof(char);
+};
+
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
 ///
@@ -55,6 +75,8 @@ class InitializeSeq : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, InitializeSeq);
+
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
@@ -90,6 +112,8 @@ class MoveSeq : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, MoveSeq);
+
         this->pre_processor(iter, particle);
         unsigned accept = 0;
         particle.value().timer().start();
@@ -125,6 +149,8 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, MonitorEvalSeq);
+
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         for (size_type i = 0; i != particle.size(); ++i) {
@@ -158,6 +184,8 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, PathEvalSeq);
+
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         for (size_type i = 0; i != particle.size(); ++i) {
