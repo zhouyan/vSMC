@@ -30,24 +30,69 @@
 
 #if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_NULLPTR nullptr
-#else // VSMC_HAS_CXX11_NULLPTR
-#define VSMC_NULLPTR NULL
+#else
+#define VSMC_NULLPTR 0
 #endif
 
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, message)
 #else // NDEBUG
-#define VSMC_RUNTIME_ASSERT(cond, message) \
-{ \
-    if (!(cond)) \
-        std::cerr \
+#define VSMC_RUNTIME_ASSERT(cond, message)                   \
+{                                                            \
+    if (!(cond)) {                                           \
+        std::cerr                                            \
             << "vSMC runtime assertion failed:" << std::endl \
-            << message << std::endl; \
-    else \
-        ; \
-    assert(cond); \
+            << message << std::endl;                         \
+    };                                                       \
+    assert(cond);                                            \
 }
 #endif // NDEBUG
+
+#ifdef _MSC_VER
+#define VSMC_STATIC_ASSERT(cond, message) \
+    {vsmc::internal::StaticAssert<bool(cond)>::message;}
+#else
+#define VSMC_STATIC_ASSERT(cond, message) \
+    if (vsmc::internal::StaticAssert<bool(cond)>::message) {};
+#endif
+
+#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, inner_type, default_type) \
+namespace vsmc {                                                             \
+                                                                             \
+namespace internal {                                                         \
+                                                                             \
+template <typename T>                                                        \
+class Has##OuterType                                                         \
+{                                                                            \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename U> static char test (typename U::inner_type *);       \
+    template <typename U> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    static const bool value =                                                \
+        sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);                       \
+};                                                                           \
+                                                                             \
+template <typename T, bool> struct OuterType##Dispatch;                      \
+                                                                             \
+template <typename T> struct OuterType##Dispatch<T, true>                    \
+{typedef typename T::inner_type type;};                                      \
+                                                                             \
+template <typename T> struct OuterType##Dispatch<T, false>                   \
+{typedef default_type type;};                                                \
+                                                                             \
+}                                                                            \
+                                                                             \
+template <typename T> struct OuterType##Trait                                \
+{                                                                            \
+    typedef typename internal::OuterType##Dispatch<T,                        \
+        internal::Has##OuterType<T>::value>::type type;                      \
+};                                                                           \
+                                                                             \
+}
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 
 namespace vsmc { namespace internal {
 
@@ -93,39 +138,5 @@ enum ResampleScheme {
 }; // enum ResamleScheme
 
 } // namespace vsmc
-
-#ifdef _MSC_VER
-#define VSMC_STATIC_ASSERT(cond, message) \
-    {vsmc::internal::StaticAssert<bool(cond)>::message;}
-#else
-#define VSMC_STATIC_ASSERT(cond, message) \
-    if (vsmc::internal::StaticAssert<bool(cond)>::message) {};
-#endif
-
-// IMPORTANT: this macro shall only be inserted at global scope
-#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(outer_type, inner_type, default_type) \
-namespace vsmc { namespace internal { \
-\
-template <typename T> \
-class Has##outer_type \
-{ \
-    struct char2 {char c1; char c2;}; \
-    template <typename U> static char test (typename U::inner_type *); \
-    template <typename U> static char2 test (...); \
-    public : \
-    static const bool value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char); \
-}; \
-\
-template <typename T, bool> struct outer_type##Dispatch; \
-template <typename T> struct outer_type##Dispatch<T, true> \
-{typedef typename T::inner_type type; }; \
-template <typename T> struct outer_type##Dispatch<T, false> \
-{typedef default_type type;}; } \
-\
-template <typename T> struct outer_type##Trait \
-{typedef typename internal::outer_type##Dispatch<T, \
-    internal::Has##outer_type<T>::value>::type type;}; }
-
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 
 #endif // VSMC_INTERNAL_COMMON_HPP

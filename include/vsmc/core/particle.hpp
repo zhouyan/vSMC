@@ -22,7 +22,8 @@ namespace vsmc {
 /// another at position <tt>from = copy_from[to]</tt>.
 template <typename T>
 class Particle :
-    public RngSetTypeTrait<T>::type, public WeightSetTypeTrait<T>::type
+    public RngSetTypeTrait<T>::type,
+    public WeightSetTypeTrait<T>::type
 {
     public :
 
