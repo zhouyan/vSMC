@@ -14,11 +14,13 @@ class HasSizeType
 {
     private :
 
+    struct char2 {char c1; char c2;};
+
     template<typename S>
     static char test (typename S::size_type);
 
     template <typename S>
-    static long test (...);
+    static char2 test (...);
 
     public :
 
@@ -56,7 +58,7 @@ class SizeTypeTrait
     /// \brief Type of T::size_type if it exist, otherwise VSMC_SIZE_TYPE
     typedef typename internal::SizeTypeDispatch<T,
             internal::HasSizeType<T>::value>::type type;
-};
+}; // class SizeTypeTrait
 
 /// \brief Resample scheme
 /// \ingroup Core

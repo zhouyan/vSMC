@@ -2,7 +2,7 @@
 #define VSMC_CORE_PARTICLE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/parallel_rng.hpp>
+#include <vsmc/core/rng.hpp>
 #include <vsmc/core/weight.hpp>
 
 namespace vsmc {
@@ -21,7 +21,8 @@ namespace vsmc {
 /// position to. That is you should replace particle at position \c to with
 /// another at position <tt>from = copy_from[to]</tt>.
 template <typename T>
-class Particle : public ParallelRNG<T>, public Weight<T>
+class Particle :
+    public RngSetTypeTrait<T>::type, public WeightSetTypeTrait<T>::type
 {
     public :
 
@@ -31,24 +32,30 @@ class Particle : public ParallelRNG<T>, public Weight<T>
     /// The type of the particle values
     typedef T value_type;
 
-    using typename ParallelRNG<T>::rng_type;
-    using typename Weight<T>::weight_type;
+    /// The type of the RNG set
+    typedef typename RngSetTypeTrait<T>::type rng_set_type;
 
-    using ParallelRNG<T>::rng;
-    using Weight<T>::weight;
-    using Weight<T>::log_weight;
-    using Weight<T>::set_equal_weight;
-    using Weight<T>::set_log_weight;
-    using Weight<T>::add_log_weight;
-    using Weight<T>::ess;
-    using Weight<T>::zconst;
-    using Weight<T>::reset_zconst;
+    /// The type of the particle weights set
+    typedef typename WeightSetTypeTrait<T>::type weight_set_type;
+
+    using typename rng_set_type::rng_type;
+    using typename weight_set_type::weight_type;
+
+    using rng_set_type::rng;
+    using weight_set_type::weight;
+    using weight_set_type::log_weight;
+    using weight_set_type::set_equal_weight;
+    using weight_set_type::set_log_weight;
+    using weight_set_type::add_log_weight;
+    using weight_set_type::ess;
+    using weight_set_type::zconst;
+    using weight_set_type::reset_zconst;
 
     /// \brief Construct a Particle object with a given number of particles
     ///
     /// \param N The number of particles
     explicit Particle (size_type N) :
-        ParallelRNG<T>(N), Weight<T>(N), size_(N), value_(N),
+        rng_set_type(N), weight_set_type(N), size_(N), value_(N),
         replication_(N), copy_from_(N), weight_(N), remain_(N),
         resampled_(false)
     {

@@ -4,9 +4,9 @@
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/core/rng.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
 #include <vsmc/helper/parallel_cl/query.hpp>
-#include <vsmc/rng/random.hpp>
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \
     VSMC_RUNTIME_ASSERT((context_created()), ( \
@@ -61,6 +61,9 @@ class StateCL
 
     /// The type of the vector of accept counts returned by accept_host()
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> accept_vec_type;
+
+    /// The type of the host RNG type
+    typedef RngSetSeq rng_set_type;
 
     explicit StateCL (size_type N) :
         size_(N), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
@@ -319,10 +322,13 @@ class StateCL
     /// \li A constant \c Dim of type \c uint which is the same as the
     /// template parameter \c Dim is defined
     ///
-    /// \li A constant \c Seed of type \c ulong which is not used by the host.
-    /// And the next size() seeds will be reserved for the the device. In
-    /// other words, when next time the host request a seed, it will
-    /// be <tt>Seed + size()</tt>.
+    /// \li A constant \c Seed of type \c ulong which is not used by the
+    /// host.  And the next size() seeds will be reserved for the the device.
+    /// In other words, when next time the host request a seed, it will
+    /// be <tt>Seed + size()</tt>. It is only relevant if RngSetPrl is used
+    /// in the host Particle and the same parallel RNG is going to be used in
+    /// the device. The default is that the host Particle StateCL will use
+    /// RngSetSeq.
     ///
     /// \li The Random123 library's \c philox.h, \c threefry.h, and \c u01.h
     /// headers are included unless <tt>VSMC_USE_RANDOM123=0</tt>.
@@ -379,8 +385,9 @@ class StateCL
             ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
-            rng::Seed<VSMC_RNG_TYPE> &seed =
-                rng::Seed<VSMC_RNG_TYPE>::create();
+            // TODO Fix Seed
+            rng::Seed<VSMC_PRLRNG_TYPE> &seed =
+                rng::Seed<VSMC_PRLRNG_TYPE>::create();
             ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
             seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";

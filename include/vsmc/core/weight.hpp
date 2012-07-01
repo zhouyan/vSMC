@@ -8,19 +8,16 @@ namespace vsmc {
 
 /// \brief Weight set class
 /// \ingroup Core
-///
-/// \tparam T Particle<T>::value_type
-template <typename T>
-class Weight
+class WeightSetBase
 {
     protected :
 
     /// The type of the weight and log weight vectors
     typedef Eigen::VectorXd weight_type;
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef VSMC_SIZE_TYPE size_type;
 
-    explicit Weight (size_type N) :
+    explicit WeightSetBase (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
         ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
         zconst_(0), inc_weight_(N)
@@ -176,9 +173,46 @@ class Weight
         assert(log_weight_.size() == size_);
         assert(inc_weight_.size() == size_);
     }
-}; // class Weight
+}; // class WeightSetBase
 
 namespace internal {
+
+template <typename T>
+class HasWeightSetType
+{
+    private :
+
+    struct char2 {char c1; char c2;};
+
+    template<typename S>
+    static char test (typename S::weight_set_type *);
+
+    template <typename S>
+    static char2 test (...);
+
+    public :
+
+    static const bool value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);
+};
+
+template <typename T, bool>
+class WeightSetTypeDispatch;
+
+template <typename T>
+class WeightSetTypeDispatch<T, true>
+{
+    public :
+
+    typedef typename T::weight_set_type type;
+};
+
+template <typename T>
+class WeightSetTypeDispatch<T, false>
+{
+    public :
+
+    typedef WeightSetBase type;
+};
 
 template <typename T1, typename T2>
 void copy_weight (const T1 &src, T2 &des)
@@ -194,6 +228,18 @@ void copy_weight (const T &src, T &des)
 }
 
 } // namespace vsmc::internal
+
+/// \brief Trait class of weight_set_type
+/// \ingroup Core
+template <typename T>
+class WeightSetTypeTrait
+{
+    public :
+
+    /// \brief Type of T::weight_set_type if it exist, otherwise WeightSetBase
+    typedef typename internal::WeightSetTypeDispatch<T,
+            internal::HasWeightSetType<T>::value>::type type;
+}; // class WeightSetTypeTrait
 
 } // namespace vsmc
 
