@@ -17,9 +17,8 @@ class RngSetSeq
 
     protected :
 
-    typedef std::size_t size_type;
-
-    RngSetSeq (size_type N) : rng_(N)
+    template <typename SizeType>
+    RngSetSeq (SizeType N)
     {
         rng::Seed<rng_type> &seed = rng::Seed<rng_type>::create();
         rng_ = rng_type(static_cast<rng_type::result_type>(seed.get()));
@@ -31,7 +30,8 @@ class RngSetSeq
     ///
     /// \return A reference to a C++11 RNG engine unique to particle at
     /// position id, and independent of others
-    rng_type &rng (size_type id)
+    template <typename SizeType>
+    rng_type &rng (SizeType id)
     {
         return rng_;
     }
@@ -50,12 +50,11 @@ class RngSetPrl
     /// The type of the random number generator C++11 engine
     typedef VSMC_PRLRNG_TYPE rng_type;
 
-    typedef std::vector<rng_type>::size_type size_type;
-
-    RngSetPrl (size_type N) : rng_(N)
+    template <typename SizeType>
+    RngSetPrl (SizeType N) : rng_(N)
     {
         rng::Seed<rng_type> &seed = rng::Seed<rng_type>::create();
-        for (size_type i = 0; i != N; ++i)
+        for (SizeType i = 0; i != N; ++i)
             rng_[i] = rng_type(static_cast<rng_type::result_type>(seed.get()));
     }
 
@@ -65,7 +64,8 @@ class RngSetPrl
     ///
     /// \return A reference to a C++11 RNG engine unique to particle at
     /// position id, and independent of others
-    rng_type &rng (size_type id)
+    template <typename SizeType>
+    rng_type &rng (SizeType id)
     {
         return rng_[id];
     }

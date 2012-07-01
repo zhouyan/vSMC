@@ -17,10 +17,9 @@ class WeightSetBase
 
     protected :
 
-    typedef VSMC_SIZE_TYPE size_type;
-
-    explicit WeightSetBase (size_type N) :
-        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
+    template <typename SizeType>
+    explicit WeightSetBase (SizeType N) :
+        ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
         ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
         zconst_(0), inc_weight_(N)
     {
@@ -40,6 +39,14 @@ class WeightSetBase
         return weight_;
     }
 
+    /// Read only access to the weights
+    template <typename SizeType, typename OutputIter>
+    const void weight (SizeType N, OutputIter *first) const
+    {
+        assert(weight_.size() >= N);
+        std::copy(weight().data(), weight().data() + N, first);
+    }
+
     /// Read only access to the log weights
     const weight_type &log_weight () const
     {
@@ -52,11 +59,21 @@ class WeightSetBase
         return log_weight_;
     }
 
+    /// Read only access to the log weights
+    template <typename SizeType, typename OutputIter>
+    const void log_weight (SizeType N, OutputIter *first) const
+    {
+        VSMC_RUNTIME_ASSERT((log_weight_.size() >= N),
+                "Size of weight set is too small")
+
+        std::copy(log_weight().data(), log_weight().data() + N, first);
+    }
+
     /// Set equal weights for all particles
     void set_equal_weight ()
     {
-        ess_ = static_cast<double>(size_);
-        weight_.setConstant(1.0 / size_);
+        ess_ = static_cast<double>(weight_.size());
+        weight_.setConstant(1.0 / weight_.size());
         log_weight_.setConstant(0);
 
         ess_cached_ = true;
@@ -71,7 +88,7 @@ class WeightSetBase
     /// \param delta A multiplier appiled to the new log weights
     void set_log_weight (const double *nw, double delta = 1)
     {
-        Eigen::Map<const weight_type> w(nw, size_);
+        Eigen::Map<const weight_type> w(nw, log_weight_.size());
         set_log_weight(w, delta);
     }
 
@@ -84,7 +101,7 @@ class WeightSetBase
     template <typename D>
     void set_log_weight (const Eigen::DenseBase<D> &nw, double delta = 1)
     {
-        log_weight_ = nw.head(size_);
+        log_weight_ = nw.head(log_weight_.size());
         if (delta != 1)
             log_weight_ *= delta;
         set_weight();
@@ -100,7 +117,7 @@ class WeightSetBase
     void add_log_weight (const double *iw, double delta = 1,
             bool add_zconst = true)
     {
-        Eigen::Map<const weight_type> w(iw, size_);
+        Eigen::Map<const weight_type> w(iw, log_weight_.size());
         add_log_weight(w, delta, add_zconst);
     }
 
@@ -118,7 +135,7 @@ class WeightSetBase
     {
         using std::log;
 
-        inc_weight_ = iw.head(size_);
+        inc_weight_ = iw.head(log_weight_.size());
         if (delta != 1)
             inc_weight_ *= delta;
         log_weight_ += inc_weight_;
@@ -152,8 +169,6 @@ class WeightSetBase
 
     private :
 
-    size_type size_;
-
     mutable double ess_;
     mutable weight_type weight_;
     mutable weight_type log_weight_;
@@ -170,10 +185,6 @@ class WeightSetBase
         ess_cached_ = false;
         weight_cached_ = false;
         log_weight_cached_ = false;
-
-        assert(weight_.size() == size_);
-        assert(log_weight_.size() == size_);
-        assert(inc_weight_.size() == size_);
     }
 }; // class WeightSetBase
 
@@ -215,19 +226,6 @@ class WeightSetTypeDispatch<T, false>
 
     typedef WeightSetBase type;
 };
-
-template <typename T1, typename T2>
-void copy_weight (const T1 &src, T2 &des)
-{
-    for (std::size_t i = 0; i != src.size(); ++i)
-        des[i] = src[i];
-}
-
-template <typename T>
-void copy_weight (const T &src, T &des)
-{
-    des = src;
-}
 
 } // namespace vsmc::internal
 
