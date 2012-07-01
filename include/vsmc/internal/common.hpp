@@ -50,10 +50,10 @@
 
 #ifdef _MSC_VER
 #define VSMC_STATIC_ASSERT(cond, message) \
-    {vsmc::internal::StaticAssert<bool(cond)>::message;}
+    {vsmc::StaticAssert<bool(cond)>::message;}
 #else
 #define VSMC_STATIC_ASSERT(cond, message) \
-    if (vsmc::internal::StaticAssert<bool(cond)>::message) {};
+    if (vsmc::StaticAssert<bool(cond)>::message) {};
 #endif
 
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, inner_type, default_type) \
@@ -99,7 +99,7 @@ template <typename T> struct OuterType##Trait                                \
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 
-namespace vsmc { namespace internal {
+namespace vsmc {
 
 template <bool> class StaticAssert {};
 
@@ -128,8 +128,6 @@ class StaticAssert<true>
         USE_ConstSingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase
     };
 };
-
-} // namespace vsmc::internal
 
 /// \brief Resample scheme
 /// \ingroup Core
