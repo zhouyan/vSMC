@@ -41,7 +41,7 @@ class WeightSetBase
 
     /// Read only access to the weights
     template <typename SizeType, typename OutputIter>
-    const void weight (SizeType N, OutputIter *first) const
+    void weight (SizeType N, OutputIter *first) const
     {
         assert(weight_.size() >= N);
         std::copy(weight().data(), weight().data() + N, first);
@@ -61,7 +61,7 @@ class WeightSetBase
 
     /// Read only access to the log weights
     template <typename SizeType, typename OutputIter>
-    const void log_weight (SizeType N, OutputIter *first) const
+    void log_weight (SizeType N, OutputIter *first) const
     {
         VSMC_RUNTIME_ASSERT((log_weight_.size() >= N),
                 "Size of weight set is too small")
