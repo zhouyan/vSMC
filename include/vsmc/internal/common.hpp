@@ -62,7 +62,7 @@ namespace vsmc {                                                             \
 namespace internal {                                                         \
                                                                              \
 template <typename T>                                                        \
-class Has##OuterType                                                         \
+class Has##OuterType##Impl                                                   \
 {                                                                            \
     struct char2 {char c1; char c2;};                                        \
     template <typename U> static char test (typename U::inner_type *);       \
@@ -73,6 +73,11 @@ class Has##OuterType                                                         \
     static const bool value =                                                \
         sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);                       \
 };                                                                           \
+                                                                             \
+template <typename T>                                                        \
+class Has##OuterType :                                                       \
+    public integral_constant<bool, Has##OuterType##Impl<T>::value>           \
+{};                                                                          \
                                                                              \
 template <typename T, bool> struct OuterType##Dispatch;                      \
                                                                              \

@@ -268,7 +268,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         public :
 
         work_ (MonitorEvalTBB<T, Derived> *monitor,
-                unsigned iter, unsigned dim, 
+                unsigned iter, unsigned dim,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), iter_(iter), dim_(dim), particle_(particle),
             res_(res) {}
