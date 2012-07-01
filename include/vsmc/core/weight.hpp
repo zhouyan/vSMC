@@ -10,10 +10,12 @@ namespace vsmc {
 /// \ingroup Core
 class WeightSetBase
 {
-    protected :
+    public :
 
     /// The type of the weight and log weight vectors
     typedef Eigen::VectorXd weight_type;
+
+    protected :
 
     typedef VSMC_SIZE_TYPE size_type;
 

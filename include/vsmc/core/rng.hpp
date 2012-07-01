@@ -10,10 +10,12 @@ namespace vsmc {
 /// \ingroup Core
 class RngSetSeq
 {
-    protected :
+    public :
 
     /// The type of the random number generator C++11 engine
     typedef VSMC_SEQRNG_TYPE rng_type;
+
+    protected :
 
     typedef std::size_t size_type;
 
