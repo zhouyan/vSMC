@@ -26,7 +26,6 @@
 #include <vsmc/internal/version.hpp>
 #include <vsmc/internal/functional.hpp>
 #include <vsmc/internal/type_traits.hpp>
-#include <vsmc/internal/types.hpp>
 #include <vsmc/internal/forward.hpp>
 
 #if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
@@ -73,11 +72,27 @@ class StaticAssert<true>
         USE_InitializeCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_MoveCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
-        USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL
+        USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
+
+        USE_SingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
+        USE_ConstSingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase
     };
 };
 
-} } //namespace vsmc::internal
+} // namespace vsmc::internal
+
+/// \brief Resample scheme
+/// \ingroup Core
+enum ResampleScheme {
+    MULTINOMIAL,         ///< Multinomial resampling
+    RESIDUAL,            ///< Reisudal resampling
+    STRATIFIED,          ///< Startified resampling
+    SYSTEMATIC,          ///< Systematic resampling
+    RESIDUAL_STRATIFIED, ///< Stratified resampling on the residuals
+    RESIDUAL_SYSTEMATIC  ///< Systematic resampling on the residuals
+}; // enum ResamleScheme
+
+} // namespace vsmc
 
 #ifdef _MSC_VER
 #define VSMC_STATIC_ASSERT(cond, message) \
@@ -87,8 +102,30 @@ class StaticAssert<true>
     if (vsmc::internal::StaticAssert<bool(cond)>::message) {};
 #endif
 
-#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user) \
-    VSMC_STATIC_ASSERT(vsmc::IsDerivedOf##base<derived>::value, \
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
+// IMPORTANT: this macro shall only be inserted at global scope
+#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(outer_type, inner_type, default_type) \
+namespace vsmc { namespace internal { \
+\
+template <typename T> \
+class Has##outer_type \
+{ \
+    struct char2 {char c1; char c2;}; \
+    template <typename U> static char test (typename U::inner_type *); \
+    template <typename U> static char2 test (...); \
+    public : \
+    static const bool value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char); \
+}; \
+\
+template <typename T, bool> struct outer_type##Dispatch; \
+template <typename T> struct outer_type##Dispatch<T, true> \
+{typedef typename T::inner_type type; }; \
+template <typename T> struct outer_type##Dispatch<T, false> \
+{typedef default_type type;}; } \
+\
+template <typename T> struct outer_type##Trait \
+{typedef typename internal::outer_type##Dispatch<T, \
+    internal::Has##outer_type<T>::value>::type type;}; }
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 
 #endif // VSMC_INTERNAL_COMMON_HPP

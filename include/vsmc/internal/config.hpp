@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/compiler.hpp>
 
+#ifndef VSMC_SIZE_TYPE
+#define VSMC_SIZE_TYPE std::ptrdiff_t
+#endif
+
 #ifndef VSMC_USE_RANDOM123
 #define VSMC_USE_RANDOM123 1
 #endif

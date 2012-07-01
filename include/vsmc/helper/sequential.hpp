@@ -41,26 +41,6 @@ class StateSeq : public StateBase<Dim, T, Timer>
     size_type size_;
 }; // class StateSeq
 
-/// \brief Test if a state type is derived of StateSeq
-/// \ingroup Sequential
-template <typename D>
-class IsDerivedOfStateSeq
-{
-    private :
-
-    struct char2 {char c1; char c2;};
-
-    template <unsigned Dim, typename T, typename Timer>
-    static char test (StateSeq<Dim, T, Timer> *);
-
-    static char2 test (...);
-
-    public :
-
-    static const bool value =
-        sizeof(test(static_cast<D *>(0))) == sizeof(char);
-};
-
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
 ///

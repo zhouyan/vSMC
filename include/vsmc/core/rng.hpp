@@ -75,64 +75,12 @@ class RngSetPrl
     std::vector<rng_type> rng_;
 }; // class RngSetPrl
 
-namespace internal {
-
-template <typename T>
-class HasRngSetType
-{
-    private :
-
-    struct char2 {char c1; char c2;};
-
-    template <typename S>
-    static char test (typename S::rng_set_type *);
-
-    template <typename S>
-    static char2 test (...);
-
-    public :
-
-    static const bool value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);
-};
-
-template <typename T, bool>
-class RngSetTypeDispatch;
-
-template <typename T>
-class RngSetTypeDispatch<T, true>
-{
-    public :
-
-    typedef typename T::rng_set_type type;
-};
-
-template <typename T>
-class RngSetTypeDispatch<T, false>
-{
-    public :
+} // namespace vsmc
 
 #if VSMC_USE_RANDOM123
-    typedef RngSetPrl type;
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl);
 #else
-    typedef RngSetSeq type;
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetSeq);
 #endif
-};
-
-} // namespace vsmc::internal
-
-/// \brief Trait class of rng_set_type
-/// \ingroup Core
-template <typename T>
-class RngSetTypeTrait
-{
-    public :
-
-    /// \brief Type of T::rng_set_type if it exist, otherwise RngSetSeq or
-    /// RngSetPrl depending on \c VSMC_USE_RANDOM123
-    typedef typename internal::RngSetTypeDispatch<T,
-            internal::HasRngSetType<T>::value>::type type;
-}; // class RngSetTypeTrait
-
-} // namespace vsmc
 
 #endif // VSMC_CORE_RNG_HPP

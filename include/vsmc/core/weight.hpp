@@ -188,59 +188,8 @@ class WeightSetBase
     }
 }; // class WeightSetBase
 
-namespace internal {
-
-template <typename T>
-class HasWeightSetType
-{
-    private :
-
-    struct char2 {char c1; char c2;};
-
-    template <typename S>
-    static char test (typename S::weight_set_type *);
-
-    template <typename S>
-    static char2 test (...);
-
-    public :
-
-    static const bool value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);
-};
-
-template <typename T, bool>
-class WeightSetTypeDispatch;
-
-template <typename T>
-class WeightSetTypeDispatch<T, true>
-{
-    public :
-
-    typedef typename T::weight_set_type type;
-};
-
-template <typename T>
-class WeightSetTypeDispatch<T, false>
-{
-    public :
-
-    typedef WeightSetBase type;
-};
-
-} // namespace vsmc::internal
-
-/// \brief Trait class of weight_set_type
-/// \ingroup Core
-template <typename T>
-class WeightSetTypeTrait
-{
-    public :
-
-    /// \brief Type of T::weight_set_type if it exist, otherwise WeightSetBase
-    typedef typename internal::WeightSetTypeDispatch<T,
-            internal::HasWeightSetType<T>::value>::type type;
-}; // class WeightSetTypeTrait
-
 } // namespace vsmc
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSetBase);
 
 #endif // VSMC_CORE_WEIGHT_HPP

@@ -5,6 +5,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/rng.hpp>
+#include <vsmc/helper/base.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
 #include <vsmc/helper/parallel_cl/query.hpp>
 
@@ -697,26 +698,6 @@ class StateCL
         return reinterpret_cast<HostType *>(write_buffer_pool_);
     }
 }; // class StateCL
-
-/// \brief Test if a state type is derived of StateCL
-/// \ingroup OpenCL
-template <typename D>
-class IsDerivedOfStateCL
-{
-    private :
-
-    struct char2 {char c1; char c2;};
-
-    template <unsigned Dim, typename T, typename Timer>
-    static char test (StateCL<Dim, T, Timer> *);
-
-    static char2 test (...);
-
-    public :
-
-    static const bool value =
-        sizeof(test(static_cast<D *>(0))) == sizeof(char);
-};
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup OpenCL
