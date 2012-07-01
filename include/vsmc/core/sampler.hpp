@@ -2,7 +2,7 @@
 #define VSMC_CORE_SAMPLER_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/rng/random.hpp>
+#include <vsmc/core/particle.hpp>
 
 namespace vsmc {
 
@@ -60,13 +60,30 @@ class Sampler
     /// \brief Construct a sampler with a given number of particles
     ///
     /// \param N The number of particles
-    /// \param scheme The resampling scheme. See ResampleScheme
+    /// \param scheme The built-in resampling scheme. See Resample
     /// \param threshold The threshold of ESS/N for performing resampling. It
     /// shall be a number between [0, 1]. Less than zero means never
     /// resampling, bigger than one means always resampling.
     explicit Sampler (size_type N,
-            ResampleScheme scheme = STRATIFIED, double threshold = 0.5) :
-        scheme_(scheme), threshold_(threshold), particle_(N), iter_num_(0) {}
+            ResampleScheme scheme = STRATIFIED,
+            double threshold = 0.5) :
+        threshold_(threshold), particle_(N), iter_num_(0)
+    {
+        resample_scheme(scheme);
+    }
+
+    /// \brief Construct a sampler with a given number of particles
+    ///
+    /// \param N The number of particles
+    /// \param res_op A resampling operation functor
+    /// \param threshold The threshold of ESS/N for performing resampling.
+    explicit Sampler (size_type N,
+            const typename particle_type::resample_op_type &res_op,
+            double threshold = 0.5) :
+        threshold_(threshold), particle_(N), iter_num_(0)
+    {
+        resample_scheme(res_op);
+    }
 
     /// Size of the particle set
     size_type size () const
@@ -80,16 +97,31 @@ class Sampler
         return static_cast<unsigned>(ess_.size());
     }
 
-    /// The current resampling scheme
-    ResampleScheme resample_scheme () const
+    /// See Particle::resample_scheme
+    void resample_scheme (
+            const typename particle_type::resample_op_type &res_op)
     {
-        return scheme_;
+        particle_.resample_scheme(res_op);
     }
 
-    /// Set new resampling scheme
+    /// See Particle::resample_scheme
     void resample_scheme (ResampleScheme scheme)
     {
-        scheme_ = scheme;
+        particle_.resample_scheme(scheme);
+    }
+
+    /// See Particle::resample_scheme
+    template <typename EnumType, EnumType S>
+    void resample_scheme ()
+    {
+        particle_.template resample_scheme<EnumType, S>();
+    }
+
+    /// See Particle::resample_scheme
+    template <typename ResType>
+    void resample_scheme ()
+    {
+        particle_.template resample_scheme<ResType>();
     }
 
     /// The current threshold
@@ -477,7 +509,6 @@ class Sampler
     move_queue_type move_queue_;
     mcmc_queue_type mcmc_queue_;
 
-    ResampleScheme scheme_;
     double threshold_;
 
     particle_type particle_;
@@ -492,7 +523,7 @@ class Sampler
 
     void do_resampling ()
     {
-        particle_.resample(scheme_, threshold_);
+        particle_.resample(threshold_);
         ess_.push_back(particle_.ess());
         resampled_.push_back(particle_.resampled());
     }

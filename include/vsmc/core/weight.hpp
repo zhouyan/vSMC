@@ -15,8 +15,6 @@ class WeightSetBase
     /// The type of the weight and log weight vectors
     typedef Eigen::VectorXd weight_type;
 
-    protected :
-
     template <typename SizeType>
     explicit WeightSetBase (SizeType N) :
         ess_(static_cast<double>(N)), weight_(N), log_weight_(N),

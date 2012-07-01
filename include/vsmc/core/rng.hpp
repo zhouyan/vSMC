@@ -15,8 +15,6 @@ class RngSetSeq
     /// The type of the random number generator C++11 engine
     typedef VSMC_SEQRNG_TYPE rng_type;
 
-    protected :
-
     template <typename SizeType>
     RngSetSeq (SizeType N)
     {
@@ -45,7 +43,7 @@ class RngSetSeq
 /// \ingroup Core
 class RngSetPrl
 {
-    protected :
+    public :
 
     /// The type of the random number generator C++11 engine
     typedef VSMC_PRLRNG_TYPE rng_type;

@@ -2,6 +2,7 @@
 #define VSMC_CORE_PARTICLE_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/core/resample.hpp>
 #include <vsmc/core/rng.hpp>
 #include <vsmc/core/weight.hpp>
 
@@ -39,6 +40,10 @@ class Particle :
     /// The type of the particle weights set
     typedef typename WeightSetTypeTrait<T>::type weight_set_type;
 
+    /// The type of resampling operation functor
+    typedef internal::function<void
+        (size_type, rng_set_type &, double *, size_type *)> resample_op_type;
+
     using typename rng_set_type::rng_type;
     using typename weight_set_type::weight_type;
 
@@ -57,8 +62,7 @@ class Particle :
     /// \param N The number of particles
     explicit Particle (size_type N) :
         rng_set_type(N), weight_set_type(N), size_(N), value_(N),
-        replication_(N), copy_from_(N), weight_(N), remain_(N),
-        resampled_(false)
+        replication_(N), copy_from_(N), weight_(N), resampled_(false)
     {
         set_equal_weight();
     }
@@ -81,46 +85,133 @@ class Particle :
         return value_;
     }
 
-    /// Whether resampling was performed when resampling(scheme, threshold) was
-    /// last called.
+    /// \brief Try resampling with current scheme
+    ///
+    /// \param threshold The threshold for resampling
+    void resample (double threshold)
+    {
+        resample(resample_op_, threshold);
+    }
+
+    /// \brief Try resampling with an external resampling operation functor
+    ///
+    /// \param res_op The resampling operation functor (will be used and not
+    /// copied)
+    /// \param threshold The threshold for resampling
+    void resample (resample_op_type &res_op, double threshold)
+    {
+        resampled_ = ess() < threshold * size_;
+        if (resampled_) {
+            weight(size_, weight_.data());
+            resample_op_(size_, *this, weight_.data(), replication_.data());
+            resample_do();
+        }
+    }
+
+    /// \brief Try resampling with a new resampling operation functor
+    ///
+    /// \param res_op The new resampling operation functor (will be copied and
+    /// replace the old one)
+    /// \param threshold The threshold for resampling
+    void resample (const resample_op_type &res_op, double threshold)
+    {
+        resample_scheme(res_op);
+        resample(threshold);
+    }
+
+    /// \brief Try resampling with a new resampling built-in scheme
+    ///
+    /// \param scheme The new resampling scheme
+    /// \param threshold The threshold for resampling
+    void resample (ResampleScheme scheme, double threshold)
+    {
+        resample_scheme(scheme);
+        resample(threshold);
+    }
+
+    /// Whether resampling was performed when resampling(threshold) was last
+    /// called.
     bool resampled () const
     {
         return resampled_;
     }
 
-    /// \brief Perform resampling if ess() < threshold * size()
-    ///
-    /// \param scheme The resampling scheme, see ResamplingScheme
-    /// \param threshold The threshold for resampling
-    void resample (ResampleScheme scheme, double threshold)
+    /// Replace the resampling operation functor with a new one
+    void resample_scheme (const resample_op_type &res_op)
     {
-        assert(replication_.size() == size());
+        resample_op_ = res_op;
+    }
 
-        resampled_ = ess() < threshold * size_;
-        if (resampled_) {
-            weight(size_, weight_.data());
-            switch (scheme) {
-                case MULTINOMIAL :
-                    resample_multinomial();
-                    break;
-                case RESIDUAL :
-                    resample_residual();
-                    break;
-                case STRATIFIED :
-                    resample_stratified();
-                    break;
-                case SYSTEMATIC :
-                    resample_systematic();
-                    break;
-                case RESIDUAL_STRATIFIED :
-                    resample_residual_stratified ();
-                    break;
-                default :
-                    resample_stratified();
-                    break;
-            }
-            resample_do();
+    /// Replace the resampling operation functor with a new built-in scheme
+    void resample_scheme (ResampleScheme scheme)
+    {
+        switch (scheme) {
+            case MULTINOMIAL :
+                resample_op_ =
+                    Resample<ResampleType<ResampleScheme, MULTINOMIAL>,
+                    size_type, rng_set_type>();
+                break;
+            case RESIDUAL :
+                resample_op_ =
+                    Resample<ResampleType<ResampleScheme, RESIDUAL>,
+                    size_type, rng_set_type>();
+                break;
+            case STRATIFIED :
+                resample_op_ =
+                    Resample<ResampleType<ResampleScheme, STRATIFIED>,
+                    size_type, rng_set_type>();
+                break;
+            case SYSTEMATIC :
+                resample_op_ =
+                    Resample<ResampleType<ResampleScheme, SYSTEMATIC>,
+                    size_type, rng_set_type>();
+                break;
+            case RESIDUAL_STRATIFIED :
+                resample_op_ =
+                    Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
+                    size_type, rng_set_type>();
+                break;
+            case RESIDUAL_SYSTEMATIC :
+                resample_op_ =
+                    Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
+                    size_type, rng_set_type>();
+                break;
+            default :
+                resample_op_ =
+                    Resample<ResampleType<ResampleScheme, STRATIFIED>,
+                    size_type, rng_set_type>();
+                break;
         }
+    }
+
+    /// \brief Replace the resampling operation functor with a new user defined
+    /// scheme
+    ///
+    /// \tparam EnumType The enumeration type of the scheme
+    /// \tparam S The name of the scheme
+    ///
+    /// \details
+    /// A partial specialization
+    /// of <tt>Resample<ResampleType<EnumType, S>, SizeType, RngSetType></tt>
+    /// shall exist
+    template <typename EnumType, EnumType S>
+    void resample_scheme ()
+    {
+        resample_scheme<ResampleType<EnumType, S> >();
+    }
+
+    /// \brief Replace the resampling operation functor with a new user defined
+    /// type
+    ///
+    /// \tparam ResType The type of the resampling specialization
+    ///
+    /// \details
+    /// A partial specialization
+    /// of <tt>Resample<ResType, SizeType, RngSetType></tt> shall exist
+    template <typename ResType>
+    void resample_scheme ()
+    {
+        resample_op_ = Resample<ResType, size_type, rng_set_type>();
     }
 
     private :
@@ -131,147 +222,8 @@ class Particle :
     Eigen::Matrix<size_type, Eigen::Dynamic, 1> replication_;
     Eigen::Matrix<size_type, Eigen::Dynamic, 1> copy_from_;
     Eigen::VectorXd weight_;
-    Eigen::VectorXd remain_;
     bool resampled_;
-
-    void resample_multinomial ()
-    {
-        weight2replication(size_);
-    }
-
-    void resample_residual ()
-    {
-        using std::modf;
-
-        for (size_type i = 0; i != size_; ++i)
-            weight_[i] = modf(size_ * weight_[i], &remain_[i]);
-        weight2replication(static_cast<size_type>(weight_.sum()));
-        for (size_type i = 0; i != size_; ++i)
-            replication_[i] += static_cast<size_type>(remain_[i]);
-    }
-
-    void resample_stratified ()
-    {
-        replication_.setConstant(0);
-        size_type j = 0;
-        size_type k = 0;
-        rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng(j));
-        double cw = weight_[0];
-        while (j != size_) {
-            while (j < cw * size_ - u && j != size_) {
-                ++replication_[k];
-                u = unif(rng(j));
-                ++j;
-            }
-            if (k == size_ - 1)
-                break;
-            cw += weight_[++k];
-        }
-    }
-
-    void resample_systematic ()
-    {
-        replication_.setConstant(0);
-        size_type j = 0;
-        size_type k = 0;
-        rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng(j));
-        double cw = weight_[0];
-        while (j != size_) {
-            while (j < cw * size_ - u && j != size_) {
-                ++replication_[k];
-                ++j;
-            }
-            if (k == size_ - 1)
-                break;
-            cw += weight_[++k];
-        }
-    }
-
-    void resample_residual_stratified ()
-    {
-        using std::modf;
-
-        replication_.setConstant(0);
-        for (size_type i = 0; i != size_; ++i)
-            weight_[i] = modf(size_ * weight_[i], &remain_[i]);
-        double dsize = (weight_.sum());
-        size_type size = static_cast<size_type>(dsize);
-        weight_ /= dsize;
-        size_type j = 0;
-        size_type k = 0;
-        rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng(j));
-        double cw = weight_[0];
-        while (j != size) {
-            while (j < cw * size - u && j != size) {
-                ++replication_[k];
-                u = unif(rng(j));
-                ++j;
-            }
-            if (k == size_ - 1)
-                break;
-            cw += weight_[++k];
-        }
-        for (size_type i = 0; i != size_; ++i)
-            replication_[i] += static_cast<size_type>(remain_[i]);
-    }
-
-    void resample_residual_systematic ()
-    {
-        using std::modf;
-
-        replication_.setConstant(0);
-        for (size_type i = 0; i != size_; ++i)
-            weight_[i] = modf(size_ * weight_[i], &remain_[i]);
-        double dsize = (weight_.sum());
-        size_type size = static_cast<size_type>(dsize);
-        weight_ /= dsize;
-        size_type j = 0;
-        size_type k = 0;
-        rng::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng(j));
-        double cw = weight_[0];
-        while (j != size) {
-            while (j < cw * size - u && j != size) {
-                ++replication_[k];
-                ++j;
-            }
-            if (k == size_ - 1)
-                break;
-            cw += weight_[++k];
-        }
-        for (size_type i = 0; i != size_; ++i)
-            replication_[i] += remain_[i];
-    }
-
-    void weight2replication (size_type size)
-    {
-        double sum_w = weight_.sum();
-        double acc_w = 0;
-        size_type acc_s = 0;
-        replication_.setConstant(0);
-        for (size_type i = 0; i != size_; ++i) {
-            if (acc_s < size && weight_[i] > 0) {
-                typedef typename internal::make_signed<size_type>::type s_t;
-                s_t s = size - acc_s;
-                double p = weight_[i] / (sum_w - acc_w);
-#ifndef NDEBUG
-                if (p < 0)
-                    assert(p > -1e-6);
-                if (p > 1)
-                    assert(p - 1 < 1e-6);
-#endif
-                p = std::max(p, 0.0);
-                p = std::min(p, 1.0);
-                rng::binomial_distribution<s_t> binom(s, p);
-                replication_[i] = binom(rng(i));
-            }
-            acc_w += weight_[i];
-            acc_s += replication_[i];
-        }
-    }
+    resample_op_type resample_op_;
 
     void resample_do ()
     {
