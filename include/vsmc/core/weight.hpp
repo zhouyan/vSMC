@@ -1,5 +1,4 @@
 #ifndef VSMC_CORE_WEIGHT_HPP
-
 #define VSMC_CORE_WEIGHT_HPP
 
 #include <vsmc/internal/common.hpp>
