@@ -16,8 +16,10 @@ inline void weight2replication (SizeType N, SizeType S, RngSetType &rng_set,
         double acc_w = 0;
         SizeType acc_s = 0;
 
-        for (SizeType i = 0; i != N; ++i)
+        for (SizeType i = 0; i != N; ++i) {
+            replication[i] = 0;
             sum_w += weight[i];
+        }
 
         for (SizeType i = 0; i != N; ++i) {
             if (acc_s < S && weight[i] > 0) {
@@ -34,8 +36,6 @@ inline void weight2replication (SizeType N, SizeType S, RngSetType &rng_set,
                 }
                 rng::binomial_distribution<s_t> binom(s, p);
                 replication[i] = binom(rng_set.rng(i));
-            } else {
-                replication[i] = 0;
             }
             acc_w += weight[i];
             acc_s += replication[i];
@@ -91,9 +91,9 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL>,
             const double *weight, SizeType *replication)
     {
         using std::modf;
+
         residual_.resize(N);
         integral_.resize(N);
-
         for (SizeType i = 0; i != N; ++i)
             residual_[i] = modf(N * weight[i], &integral_[i]);
         SizeType S = static_cast<SizeType>(residual_.sum());
@@ -190,6 +190,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
             replication[i] = 0;
             residual_[i] = modf(N * weight[i], &integral_[i]);
         }
+
         double dsize = (residual_.sum());
         SizeType size = static_cast<SizeType>(dsize);
         residual_ /= dsize;
@@ -237,6 +238,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
             replication[i] = 0;
             residual_[i] = modf(N * weight[i], &integral_[i]);
         }
+
         double dsize = (residual_.sum());
         SizeType size = static_cast<SizeType>(dsize);
         residual_ /= dsize;

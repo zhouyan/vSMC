@@ -15,9 +15,12 @@ class RngSetSeq
     /// The type of the random number generator C++11 engine
     typedef VSMC_SEQRNG_TYPE rng_type;
 
+    /// The type of the seed sequence
+    typedef rng::Seed<rng_type> seed_type;
+
     template <typename SizeType>
     RngSetSeq (SizeType N) : rng_(static_cast<rng_type::result_type>(
-                rng::Seed<rng_type>::create().get())) {}
+                seed_type::create().get())) {}
 
     /// \brief Get a C++11 RNG engine
     ///
@@ -45,10 +48,13 @@ class RngSetPrl
     /// The type of the random number generator C++11 engine
     typedef VSMC_PRLRNG_TYPE rng_type;
 
+    /// The type of the seed sequence
+    typedef rng::Seed<rng_type> seed_type;
+
     template <typename SizeType>
     RngSetPrl (SizeType N)
     {
-        rng::Seed<rng_type> &seed = rng::Seed<rng_type>::create();
+        seed_type &seed = rng::Seed<rng_type>::create();
         for (SizeType i = 0; i != N; ++i)
             rng_.push_back(
                     rng_type(static_cast<rng_type::result_type>(seed.get())));
