@@ -46,13 +46,13 @@ class Sampler
     typedef std::deque<mcmc_type> mcmc_queue_type;
 
     /// The type of ESS history vector
-    typedef std::vector<double> ess_type;
+    typedef std::vector<double> ess_history_type;
 
     /// The type of resampling history vector
-    typedef std::vector<bool> resampled_type;
+    typedef std::vector<bool> resampled_history_type;
 
     /// The type of accept count history vector
-    typedef std::vector<std::deque<unsigned> > accept_type;
+    typedef std::vector<std::deque<unsigned> > accept_history_type;
 
     /// The type of Monitor map
     typedef std::map<std::string, monitor_type> monitor_map_type;
@@ -94,7 +94,7 @@ class Sampler
     /// The number of iterations recorded (including initialization)
     unsigned iter_size () const
     {
-        return static_cast<unsigned>(ess_.size());
+        return static_cast<unsigned>(ess_history_.size());
     }
 
     /// See Particle::resample_scheme
@@ -137,21 +137,21 @@ class Sampler
     }
 
     /// ESS history
-    const ess_type &ess () const
+    const ess_history_type &ess_history () const
     {
-        return ess_;
+        return ess_history_;
     }
 
     /// Resampling history
-    const resampled_type &resampled () const
+    const resampled_history_type &resampled_history () const
     {
-        return resampled_;
+        return resampled_history_;
     }
 
     /// Accept count history
-    const accept_type &accept () const
+    const accept_history_type &accept_history () const
     {
-        return accept_;
+        return accept_history_;
     }
 
     /// Read and write access to the particle set
@@ -216,9 +216,9 @@ class Sampler
     /// functor
     void initialize (void *param = VSMC_NULLPTR)
     {
-        ess_.clear();
-        resampled_.clear();
-        accept_.clear();
+        ess_history_.clear();
+        resampled_history_.clear();
+        accept_history_.clear();
         path_.clear();
 
         for (typename monitor_map_type::iterator
@@ -229,7 +229,8 @@ class Sampler
         VSMC_RUNTIME_ASSERT((bool(init_)),
                 ("CALL **Sampler::initialize** WITH AN INVALID "
                  "INITIALIZE FUNCTOR"));
-        accept_.push_back(std::deque<unsigned>(1, init_(particle_, param)));
+        accept_history_.push_back(
+                std::deque<unsigned>(1, init_(particle_, param)));
         do_resampling();
         do_monitoring();
         particle_.reset_zconst();
@@ -263,7 +264,7 @@ class Sampler
                 ++ia;
             }
 
-            accept_.push_back(acc);
+            accept_history_.push_back(acc);
 
             do_monitoring();
         }
@@ -376,8 +377,8 @@ class Sampler
         // Accept count
         Eigen::MatrixXd acc;
         unsigned accd = 0;
-        for (accept_type::const_iterator
-                a = accept_.begin(); a != accept_.end(); ++a) {
+        for (accept_history_type::const_iterator
+                a = accept_history_.begin(); a != accept_history_.end(); ++a) {
             if (a->size() > accd)
                 accd = static_cast<unsigned>(a->size());
         }
@@ -387,8 +388,8 @@ class Sampler
             acc.setConstant(0);
             double accdnorm = static_cast<double>(size());
             for (unsigned r = 0; r != iter_size(); ++r)
-                for (unsigned c = 0; c != accept_[r].size(); ++c)
-                    acc(r, c) = accept_[r][c] / accdnorm;
+                for (unsigned c = 0; c != accept_history_[r].size(); ++c)
+                    acc(r, c) = accept_history_[r][c] / accdnorm;
         }
 
         // Path sampling
@@ -472,8 +473,8 @@ class Sampler
         // Print data
         for (unsigned iter = 0; iter != iter_size(); ++iter) {
             os << iter << sep;
-            os << ess_[iter] / size() << sep;
-            os << resampled_[iter] << sep;
+            os << ess_history_[iter] / size() << sep;
+            os << resampled_history_[iter] << sep;
             if (print_accept)
                 os << acc.row(iter) << sep;
             if (print_path) {
@@ -513,9 +514,9 @@ class Sampler
 
     particle_type particle_;
     unsigned iter_num_;
-    ess_type ess_;
-    resampled_type resampled_;
-    accept_type accept_;
+    ess_history_type ess_history_;
+    resampled_history_type resampled_history_;
+    accept_history_type accept_history_;
 
     monitor_map_type monitor_;
     std::set<std::string> monitor_name_;
@@ -524,8 +525,8 @@ class Sampler
     void do_resampling ()
     {
         particle_.resample(threshold_);
-        ess_.push_back(particle_.ess());
-        resampled_.push_back(particle_.resampled());
+        ess_history_.push_back(particle_.ess());
+        resampled_history_.push_back(particle_.resampled());
     }
 
     void do_monitoring ()
