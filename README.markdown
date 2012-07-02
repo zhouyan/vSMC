@@ -33,15 +33,8 @@ if the C++ implementation has them correctly implemented, the standard headers
 can also be used.
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
-not all C++11 (or C++0x) implementations of `<functional`>, `<random>` and
+not all C++11 (or C++0x) implementations of `<functional>`, `<random>` and
 `<type_traits>` work properly.
-
-The library will first look for the macro `VSMC_USE_STD_FUNCTION`. If it is
-defined, `std::function` will be used. Otherwise the library will use
-[Boost][Boost], in particular `boost::function`. The same procedure is followed
-for the `<random>` library with `VSMC_USE_STD_RANDOM` and `<type_traits>` with
-`VSMC_USE_STD_TYPE_TRAITS` macros One can put appropriate macros in the
-`vsmc/internal/config.hpp` header or use compiler flags.
 
 ## Building and testing
 
