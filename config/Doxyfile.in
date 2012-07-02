@@ -1509,16 +1509,7 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator
 # instead of the = operator.
 
-PREDEFINED            += V_SMC_USE_CONSTEXPR_ENGINE
-PREDEFINED            += VSMC_HAS_CXX11_AUTO_TYPE
-PREDEFINED            += VSMC_HAS_CXX11_CONSTEXPR
-PREDEFINED            += VSMC_HAS_CXX11_DECLTYPE
-PREDEFINED            += VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
-PREDEFINED            += VSMC_HAS_CXX11_NULLPTR
-PREDEFINED            += VSMC_HAS_CXX11LIB_CHRONO
-PREDEFINED            += VSMC_HAS_CXX11LIB_FUNCTIONAL
-PREDEFINED            += VSMC_HAS_CXX11LIB_RANDOM
-PREDEFINED            += VSMC_HAS_CXX11LIB_TYPE_TRAITS
+PREDEFINED             =
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.
