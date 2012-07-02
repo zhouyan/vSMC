@@ -643,6 +643,7 @@ div.directory {
 }
 
 .directory table {
+    width: 100%;
     border-collapse:collapse;
 }
 
@@ -653,7 +654,7 @@ div.directory {
 }
 
 .directory td.entry {
-    width: 100%;
+    white-space: nowrap;
     padding-right: 6px;
 }
 
@@ -662,6 +663,7 @@ div.directory {
 }
 
 .directory td.desc {
+    display: none;
     padding-left: 6px;
     padding-right: 6px;
     border-left: 1px solid rgba(0,0,0,0.05);
