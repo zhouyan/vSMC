@@ -913,7 +913,7 @@ class MonitorEvalCL
         pre_processor(iter, particle);
         particle.value().run_parallel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
-                buffer_device_, particle.size() * dim, res);
+                    buffer_device_, particle.value().size() * dim, res);
         post_processor(iter, particle);
     }
 
@@ -941,7 +941,8 @@ class MonitorEvalCL
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
             buffer_device_ = particle.value().template
-                create_buffer<typename T::state_type>(particle.size() * dim);
+                create_buffer<typename T::state_type>(
+                        particle.value().size() * dim);
         }
 
         kernel_.setArg(0, (cl_uint) iter);
@@ -1008,7 +1009,7 @@ class PathEvalCL
         pre_processor(iter, particle);
         particle.value().run_parallel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
-                buffer_device_, particle.size(), res);
+                buffer_device_, particle.value().size(), res);
         post_processor(iter, particle);
 
         return this->path_width(iter, particle);
@@ -1039,7 +1040,8 @@ class PathEvalCL
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_.c_str());
             buffer_device_ = particle.value().template
-                create_buffer<typename T::state_type>(particle.size());
+                create_buffer<typename T::state_type>(
+                        particle.value().size());
         }
 
         kernel_.setArg(0, (cl_uint) iter);

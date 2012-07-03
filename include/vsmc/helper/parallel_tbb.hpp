@@ -94,7 +94,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
         particle.value().timer().start();
         work_ work(this, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.size()), work);
+                    0, particle.value().size()), work);
         particle.value().timer().stop();
         this->post_processor(particle);
 
@@ -170,7 +170,7 @@ class MoveTBB : public MoveBase<T, Derived>
         particle.value().timer().start();
         work_ work(this, iter, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.size()), work);
+                    0, particle.value().size()), work);
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
@@ -247,7 +247,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
+        tbb::parallel_for(tbb::blocked_range<size_type>(
+                    0, particle.value().size()),
                 work_(this, iter, dim, &particle, res));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
@@ -311,7 +312,8 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
+        tbb::parallel_for(tbb::blocked_range<size_type>(
+                    0, particle.value().size()),
                 work_(this, iter, &particle, res));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
