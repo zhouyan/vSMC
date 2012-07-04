@@ -22,7 +22,6 @@ namespace vsmc { namespace rng {
 /// complexity to generate.
 ///
 /// \note Note that currently all interface of Seed are \b not thread-safe.
-template <typename T>
 class Seed
 {
     public :

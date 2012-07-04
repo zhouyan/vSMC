@@ -16,7 +16,7 @@ class RngSetSeq
     typedef VSMC_SEQRNG_TYPE rng_type;
 
     /// The type of the seed sequence
-    typedef rng::Seed<rng_type> seed_type;
+    typedef rng::Seed seed_type;
 
     template <typename SizeType>
     RngSetSeq (SizeType N) : rng_(static_cast<rng_type::result_type>(
@@ -49,12 +49,12 @@ class RngSetPrl
     typedef VSMC_PRLRNG_TYPE rng_type;
 
     /// The type of the seed sequence
-    typedef rng::Seed<rng_type> seed_type;
+    typedef rng::Seed seed_type;
 
     template <typename SizeType>
     RngSetPrl (SizeType N)
     {
-        seed_type &seed = rng::Seed<rng_type>::create();
+        seed_type &seed = seed_type::create();
         for (SizeType i = 0; i != N; ++i)
             rng_.push_back(
                     rng_type(static_cast<rng_type::result_type>(seed.get())));
