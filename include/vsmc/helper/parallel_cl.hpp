@@ -63,9 +63,6 @@ class StateCL
     /// The type of the vector of accept counts returned by accept_host()
     typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> accept_vec_type;
 
-    /// The type of the host RNG type
-    typedef RngSetSeq rng_set_type;
-
     explicit StateCL (size_type N) :
         size_(N), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
@@ -386,8 +383,8 @@ class StateCL
             ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
-            rng::Seed<rng_set_type::rng_type> &seed =
-                rng::Seed<rng_set_type::rng_type>::create();
+            rng::Seed<VSMC_PRLRNG_TYPE> &seed =
+                rng::Seed<VSMC_PRLRNG_TYPE>::create();
             ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
             seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";

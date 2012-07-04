@@ -26,6 +26,7 @@ INCLUDE (FindRandom123)
 INCLUDE (FindDoxygen)
 INCLUDE (FindTBB)
 INCLUDE (FindOpenCL)
+INCLUDE (FindOpenMP)
 
 # Configuration files generation
 CONFIGURE_FILE (

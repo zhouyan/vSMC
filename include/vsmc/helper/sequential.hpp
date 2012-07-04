@@ -6,7 +6,7 @@
 
 /// \defgroup Sequential Sequential
 /// \ingroup Helper
-/// \brief Single threaded sampler
+/// \brief Single threaded sampler (or parallelized with OpenMP)
 
 namespace vsmc {
 
@@ -29,7 +29,11 @@ class StateSeq : public StateBase<Dim, T, Timer>
     template <typename SizeType>
     void copy (const SizeType *copy_from)
     {
-        for (size_type to = 0; to != size_; ++to) {
+        size_type to = 0;
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+        for (to = 0; to < size_; ++to) {
             size_type from = copy_from[to];
             if (from != to)
                 this->state().col(to) = this->state().col(from);
@@ -61,7 +65,12 @@ class InitializeSeq : public InitializeBase<T, Derived>
         this->pre_processor(particle);
         unsigned accept = 0;
         particle.value().timer().start();
-        for (size_type i = 0; i != particle.value().size(); ++i)
+        size_type i = 0;
+        size_type N = particle.value().size();
+#ifdef _OPENMP
+#pragma omp parallel for reduction(+ : accept)
+#endif
+        for (i = 0; i < N; ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
         particle.value().timer().stop();
         this->post_processor(particle);
@@ -97,7 +106,12 @@ class MoveSeq : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         unsigned accept = 0;
         particle.value().timer().start();
-        for (size_type i = 0; i != particle.value().size(); ++i)
+        size_type i = 0;
+        size_type N = particle.value().size();
+#ifdef _OPENMP
+#pragma omp parallel for reduction(+ : accept)
+#endif
+        for (i = 0; i < N; ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
@@ -133,7 +147,12 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        for (size_type i = 0; i != particle.value().size(); ++i) {
+        size_type i = 0;
+        size_type N = particle.value().size();
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+        for (i = 0; i < N; ++i) {
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
@@ -168,7 +187,12 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        for (size_type i = 0; i != particle.value().size(); ++i) {
+        size_type i = 0;
+        size_type N = particle.value().size();
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+        for (i = 0; i < N; ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }
