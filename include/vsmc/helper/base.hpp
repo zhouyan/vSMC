@@ -60,11 +60,6 @@ class StateBase
     /// The type of the matrix of states
     typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
 
-    /// Construct a StateBase object with given number of particles
-    explicit StateBase (size_type N) : size_(N), state_(Dim, N) {}
-
-    virtual ~StateBase () {}
-
     /// The dimension of the problem
     static unsigned dim ()
     {
@@ -128,6 +123,16 @@ class StateBase
     const state_mat_type &state () const
     {
         return state_;
+    }
+
+    protected :
+
+    explicit StateBase (size_type N) : size_(N), state_(Dim, N) {}
+
+    void resize (size_type N)
+    {
+        size_ = N;
+        state_.resize(Dim, N);
     }
 
     private :
