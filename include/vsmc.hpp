@@ -9,6 +9,10 @@
 #include <vsmc/helper/timer/null.hpp>
 #include <vsmc/helper/sequential.hpp>
 
+#ifdef VSMC_USE_OMP
+#include <vsmc/helper/parallel_omp.hpp>
+#endif // VSMC_USE_OMP
+
 #ifdef VSMC_USE_TBB
 #include <vsmc/helper/parallel_tbb.hpp>
 #endif // VSMC_USE_TBB

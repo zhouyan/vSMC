@@ -1,22 +1,22 @@
-#ifndef VSMC_HELPER_SEQUENTIAL_HPP
-#define VSMC_HELPER_SEQUENTIAL_HPP
+#ifndef VSMC_HELPER_PARALLEL_OMP_HPP
+#define VSMC_HELPER_PARALLEL_OMP_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/base.hpp>
 
-/// \defgroup Sequential Sequential
+/// \defgroup OpenMP OpenMP
 /// \ingroup Helper
-/// \brief Single threaded sampler
+/// \brief Parallelized samplers with OpenMP
 
 namespace vsmc {
 
 /// \brief Particle::value_type subtype
-/// \ingroup Sequential
+/// \ingroup OpenMP
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T, typename Timer>
-class StateSeq : public StateBase<Dim, T, Timer>
+class StateOMP : public StateBase<Dim, T, Timer>
 {
     public :
 
@@ -24,12 +24,13 @@ class StateSeq : public StateBase<Dim, T, Timer>
     typedef T state_type;
     typedef Timer timer_type;
 
-    explicit StateSeq (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
+    explicit StateOMP (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
     template <typename SizeType>
     void copy (const SizeType *copy_from)
     {
-        for (size_type to = 0; to != size_; ++to) {
+#pragma omp parallel for
+        for (size_type to = 0; to < size_; ++to) {
             size_type from = copy_from[to];
             if (from != to)
                 this->state().col(to) = this->state().col(from);
@@ -39,14 +40,14 @@ class StateSeq : public StateBase<Dim, T, Timer>
     private :
 
     size_type size_;
-}; // class StateSeq
+}; // class StateOMP
 
 /// \brief Sampler<T>::init_type subtype
-/// \ingroup Sequential
+/// \ingroup OpenMP
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class InitializeSeq : public InitializeBase<T, Derived>
+class InitializeOMP : public InitializeBase<T, Derived>
 {
     public :
 
@@ -55,13 +56,14 @@ class InitializeSeq : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, InitializeSeq);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, InitializeOMP);
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
         particle.value().timer().start();
-        for (size_type i = 0; i != particle.value().size(); ++i)
+#pragma omp parallel for reduction(+ : accept)
+        for (size_type i = 0; i < particle.value().size(); ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
         particle.value().timer().stop();
         this->post_processor(particle);
@@ -71,19 +73,19 @@ class InitializeSeq : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeSeq () {}
-    InitializeSeq (const InitializeSeq<T, Derived> &) {}
-    const InitializeSeq<T, Derived> &operator=
-        (const InitializeSeq<T, Derived> &) {return *this;}
-    ~InitializeSeq () {}
-}; // class InitializeSeq
+    InitializeOMP () {}
+    InitializeOMP (const InitializeOMP<T, Derived> &) {}
+    const InitializeOMP<T, Derived> &operator=
+        (const InitializeOMP<T, Derived> &) {return *this;}
+    ~InitializeOMP () {}
+}; // class InitializeOMP
 
 /// \brief Sampler<T>::move_type subtype
-/// \ingroup Sequential
+/// \ingroup OpenMP
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class MoveSeq : public MoveBase<T, Derived>
+class MoveOMP : public MoveBase<T, Derived>
 {
     public :
 
@@ -92,12 +94,13 @@ class MoveSeq : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, MoveSeq);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MoveOMP);
 
         this->pre_processor(iter, particle);
         unsigned accept = 0;
         particle.value().timer().start();
-        for (size_type i = 0; i != particle.value().size(); ++i)
+#pragma omp parallel for reduction(+ : accept)
+        for (size_type i = 0; i < particle.value().size(); ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
@@ -107,19 +110,19 @@ class MoveSeq : public MoveBase<T, Derived>
 
     protected :
 
-    MoveSeq () {}
-    MoveSeq (const MoveSeq<T, Derived> &) {}
-    const MoveSeq<T, Derived> &operator=
-        (const MoveSeq<T, Derived> &) {return *this;}
-    ~MoveSeq () {}
-}; // class MoveSeq
+    MoveOMP () {}
+    MoveOMP (const MoveOMP<T, Derived> &) {}
+    const MoveOMP<T, Derived> &operator=
+        (const MoveOMP<T, Derived> &) {return *this;}
+    ~MoveOMP () {}
+}; // class MoveOMP
 
 /// \brief Monitor<T>::eval_type subtype
-/// \ingroup Sequential
+/// \ingroup OpenMP
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
+class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
     public :
 
@@ -129,11 +132,12 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, MonitorEvalSeq);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MonitorEvalOMP);
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        for (size_type i = 0; i != particle.value().size(); ++i) {
+#pragma omp parallel for
+        for (size_type i = 0; i < particle.value().size(); ++i) {
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
@@ -143,19 +147,19 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalSeq () {}
-    MonitorEvalSeq (const MonitorEvalSeq<T, Derived> &) {}
-    const MonitorEvalSeq<T, Derived> &operator=
-        (const MonitorEvalSeq<T, Derived> &) {return *this;}
-    ~MonitorEvalSeq () {}
-}; // class MonitorEvalSeq
+    MonitorEvalOMP () {}
+    MonitorEvalOMP (const MonitorEvalOMP<T, Derived> &) {}
+    const MonitorEvalOMP<T, Derived> &operator=
+        (const MonitorEvalOMP<T, Derived> &) {return *this;}
+    ~MonitorEvalOMP () {}
+}; // class MonitorEvalOMP
 
 /// \brief Path<T>::eval_type subtype
-/// \ingroup Sequential
+/// \ingroup OpenMP
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class PathEvalSeq : public PathEvalBase<T, Derived>
+class PathEvalOMP : public PathEvalBase<T, Derived>
 {
     public :
 
@@ -164,11 +168,12 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, PathEvalSeq);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, PathEvalOMP);
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        for (size_type i = 0; i != particle.value().size(); ++i) {
+#pragma omp parallel for
+        for (size_type i = 0; i < particle.value().size(); ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }
@@ -180,13 +185,13 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalSeq () {}
-    PathEvalSeq (const PathEvalSeq<T, Derived> &) {}
-    const PathEvalSeq<T, Derived> &operator=
-        (const PathEvalSeq<T, Derived> &) {return *this;}
-    ~PathEvalSeq () {}
-}; // class PathEvalSeq
+    PathEvalOMP () {}
+    PathEvalOMP (const PathEvalOMP<T, Derived> &) {}
+    const PathEvalOMP<T, Derived> &operator=
+        (const PathEvalOMP<T, Derived> &) {return *this;}
+    ~PathEvalOMP () {}
+}; // class PathEvalOMP
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_SEQUENTIAL_HPP
+#endif // VSMC_HELPER_PARALLEL_OMP_HPP
