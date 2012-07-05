@@ -191,6 +191,12 @@ class BayesianState : public State<1, BayesianParam, Timer>
         }
     }
 
+    void scale (double s, unsigned d)
+    {
+        for (unsigned i = 0; i != n; ++i)
+            this->state(i, 0).scale(d) = s;
+    }
+
     void param_num (unsigned num)
     {
         const unsigned n = this->size();
