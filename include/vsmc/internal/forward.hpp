@@ -27,19 +27,19 @@ template <unsigned, typename, typename> class StateBase;
 template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 
-template <unsigned, typename, typename P = NullTimer> class StateSeq;
+template <unsigned, typename, typename T = NullTimer> class StateSeq;
 template <typename, typename D = VBase> class InitializeSeq;
 template <typename, typename D = VBase> class MoveSeq;
 template <typename, typename D = VBase> class MonitorEvalSeq;
 template <typename, typename D = VBase> class PathEvalSeq;
 
-template <unsigned, typename, typename P = NullTimer> class StateOMP;
+template <unsigned, typename, typename T = NullTimer> class StateOMP;
 template <typename, typename D = VBase> class InitializeOMP;
 template <typename, typename D = VBase> class MoveOMP;
 template <typename, typename D = VBase> class MonitorEvalOMP;
 template <typename, typename D = VBase> class PathEvalOMP;
 
-template <unsigned, typename, typename P = NullTimer> class StateTBB;
+template <unsigned, typename, typename T = NullTimer> class StateTBB;
 template <typename, typename D = VBase> class InitializeTBB;
 template <typename, typename D = VBase> class MoveTBB;
 template <typename, typename D = VBase> class MonitorEvalTBB;
@@ -50,6 +50,13 @@ template <typename> class InitializeCL;
 template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;
 template <typename> class PathEvalCL;
+
+template <unsigned> struct BayesianParamID;
+template <typename, template <unsigned, typename, typename> class,
+         typename T = NullTimer>
+class BayesianState;
+template <typename T, template <typename, typename> class, typename>
+class BayesianMove;
 
 } // namesapce vsmc
 

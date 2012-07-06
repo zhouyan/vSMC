@@ -1,6 +1,8 @@
 #ifndef VSMC_HELPER_BAYESIAN_HPP
 #define VSMC_HELPER_BAYESIAN_HPP
 
+namespace vsmc {
+
 template <unsigned ID>
 struct BayesianParamID
 {
@@ -35,28 +37,6 @@ class BayesianParam
     double param () const
     {
         return param_[Param::value];
-    }
-
-    double &scale (unsigned d)
-    {
-        return scale_[d];
-    }
-
-    double scale (unsigned d) const
-    {
-        return scale_[d];
-    }
-
-    template <typename scale>
-    double &scale ()
-    {
-        return scale_[scale::value];
-    }
-
-    template <typename scale>
-    double scale () const
-    {
-        return scale_[scale::value];
     }
 
     double &log_prior ()
@@ -94,30 +74,10 @@ class BayesianParam
         return log_target_ - log_target_old_;
     }
 
-    double &alpha ()
-    {
-        return alpha_;
-    }
-
-    double alpha () const
-    {
-        return alpha_;
-    }
-
-    double alpha_inc ()
-    {
-        return alpha_inc_;
-    }
-
-    double alpha_inc () const
-    {
-        return alpha_inc_;
-    }
-
     void param_num (unsigned num)
     {
         param_.resize(num);
-        scale_.resize(num);
+        param_old_.resize(num);
     }
 
     unsigned param_num () const
@@ -126,25 +86,32 @@ class BayesianParam
     }
 
     template <typename InputIter>
-    void save_old (InputIter first, InputIter last)
+    void mh_save (InputIter first, InputIter last)
     {
         log_prior_old_       = log_prior_;
         log_likelihood_old_  = log_likelihood_;
         log_target_old_      = log_target_;
-        for (InputIter i = first; i != last; ++i)
-            param_old_[*i] = param_[*i];
+        for (InputIter i = first; i != last; ++i) {
+            unsigned d = *i;
+            param_old_[d] = param_[d];
+        }
     }
 
     template <typename InputIter>
-    void mh_reject (double p, double u, InputIter first, InputIter last)
+    unsigned mh_reject (double p, double u, InputIter first, InputIter last)
     {
         if (p < u) {
             log_prior_       = log_prior_old_;
             log_likelihood_  = log_likelihood_old_;
             log_target_      = log_target_old_;
-            for (InputIter i = first; i != last; ++i)
-                param_[*i] = param_old_[*i];
+            for (InputIter i = first; i != last; ++i) {
+                unsigned d = *i;
+                param_[d] = param_old_[d];
+            }
+            return 0;
         }
+
+        return 1;
     }
 
     private :
@@ -158,140 +125,167 @@ class BayesianParam
     double log_prior_old_;
     double log_likelihood_old_;
     double log_target_old_;
-
-    Eigen::VectorXd scale_;
-    double alpha_;
-    double alpha_inc_;
 }; // class BayesianParam
 
-template <template <typename, typename, typename> class State, typename Timer>
-class BayesianState : public State<1, BayesianParam, Timer>
+template <typename T, template <unsigned, typename, typename> class State,
+         typename Timer>
+class BayesianState : public State<1, T, Timer>
 {
     public :
 
-    typedef State<1, BayesianParam, Timer> state_base_type;
+    typedef State<1, T, Timer> state_base_type;
     typedef typename state_base_type::size_type size_type;
-    typedef Eigen::MatrixXd data_type;
-    typedef internal::function<double (const BayesianParam &)>
+    typedef typename state_base_type::state_type state_type;
+    typedef internal::function<double (const state_type &)>
         log_prior_eval_type;
-    typedef internal::function<double (const BayesianParam &,
-            const data_type &)> log_likelihood_eval_type;
+    typedef internal::function<double (const state_type &)>
+        log_likelihood_eval_type;
 
     explicit BayesianState (size_type N) : state_base_type(N) {}
 
+    /// Set new alpha, change both alpha and alpha_inc
     void alpha (double a)
     {
-        a = a < 1 ? a : 1;
-        a = a > 0 ? a : 0;
-        double a_inc = a > 0 ? a - this->state(0, 0).alpha() : 0;
-        unsigned n = this->size();
-        for (unsigned i = 0; i != n; ++i) {
-            this->state(i, 0).alpha() = a;
-            this->state(i, 0).alpha_inc() = a_inc;
-        }
+        a = std::max(a, 0);
+        a = std::min(a, 1);
+        alpha_inc_ = a > 0 ? a - alpha_ : 0;
+        alpha_ = a;
     }
 
-    void scale (double s, unsigned d)
+    double alpha () const
     {
-        for (unsigned i = 0; i != n; ++i)
-            this->state(i, 0).scale(d) = s;
+        return alpha_;
+    }
+
+    double alpha_inc () const
+    {
+        return alpha_inc_;
+    }
+
+    double &scale (unsigned d)
+    {
+        return scale_[d];
+    }
+
+    double scale (unsigned d) const
+    {
+        return scale_[d];
+    }
+
+    template <typename Scale>
+    double &scale ()
+    {
+        return scale_[Scale::value];
+    }
+
+    template <typename Scale>
+    double scale () const
+    {
+        return scale_[Scale::value];
     }
 
     void param_num (unsigned num)
     {
-        const unsigned n = this->size();
-        for (unsigned i = 0; i != n; ++i)
+        for (size_type i = 0; i != this->size(); ++i)
             this->state(i, 0).param_num(num);
+        scale_.resize(num);
     }
 
-    double log_prior (log_prior_eval_type &eval)
+    unsigned param_num () const
+    {
+        return this->state(0, 0).param_num();
+    }
+
+    void log_prior (const log_prior_eval_type &eval)
     {
         log_prior_eval_ = eval;
     }
 
-    double log_likelihood (log_likelihood_eval_type &eval)
+    void log_likelihood (const log_likelihood_eval_type &eval)
     {
         log_likelihood_eval_ = eval;
     }
 
-    double log_prior (BayesianParam &param) const
+    double log_prior (state_type &param) const
     {
         return param.log_prior() = log_prior_eval_(param);
     }
 
-    double log_likelihood (BayesianParam &param) const
+    double log_likelihood (state_type &param) const
     {
-        return param.log_likelihood() = log_likelihood_eval_(param, data_);
+        return param.log_likelihood() = log_likelihood_eval_(param);
     }
 
-    double log_target (BayesianParam &param) const
+    double log_target (state_type &param) const
     {
         return param.log_target() =
-            log_prior(param) + param.alpha() * log_likelihood(param);
-    }
-
-    data_type &data ()
-    {
-        return data_;
-    }
-
-    const data_type &data () const
-    {
-        return data_;
-    }
-
-    // TODO We really need a much more flexible read_data
-    void read_data (const char *filename, size_type rows, size_type cols)
-    {
-        std::ifstream input;
-        input.open(filename);
-        if (!input) {
-            input.close();
-            input.clear();
-            throw std::runtime_error("Failed to open data file");
-        }
-
-        data_.resize(rows, cols);
-        for (size_type r = 0; r != rows; ++r)
-            for (size_type c = 0; c != cols; ++c)
-                input >> data_[r, c];
+            log_prior(param) + alpha() * log_likelihood(param);
     }
 
     private :
 
-    data_type data_;
     log_prior_eval_type log_prior_eval_;
     log_likelihood_eval_type log_likelihood_eval_;
+
+    double alpha_;
+    double alpha_inc_;
+    Eigen::VectorXd scale_;
 }; // class BayesianState
 
-template <typename T, template <typename, typename> Move, typename Scale>
-class BayesianMove
+template <typename T,
+         template <typename> class Alpha, template <typename> class Scale>
+class BayesianSMCMove
 {
     public :
 
-    typedef internal::function<unsigned (BayesianParam &)> move_type;
-    typedef std::deque<param_move_type> move_queue_type;
+    typedef internal::function<void (unsigned, Particle<T> &)> config_type;
 
-    unsigned move_state (unsigned iter, SingleParticle<T> sp)
+    typedef typename Alpha<T>::value_type alpha_value_type;
+    typedef typename Scale<T>::value_type scale_value_type;
+
+    explicit BayesianSMCMove (
+            const alpha_value_type &alpha_config,
+            const scale_value_type &scale_config) :
+        alpha_(alpha_config), scale_(scale_config) {}
+
+    unsigned operator() (unsigned iter, vsmc::Particle<T> &particle)
     {
-        unsigned accept;
+        alpha_(iter, particle);
+        scale_(iter, particle);
 
-        for (move_queue_type::iterator m = move_queue_.begin();
-                m != move_queue_.end(); ++m)
-            accept += (*m)(iter, sp);
+        llh_.resize(particle.size());
+        for (typename vsmc::Particle<T>::size_type i = 0;
+                i != particle.size(); ++i) {
+            llh_[i] = particle.value().state(i, 0).log_likelihood();
+        }
+        particle.add_log_weight(llh_, particle.value().alpha_inc());
 
-        return accept;
-    }
-
-    void pre_processor (unsigned iter, Particle<T> &particle)
-    {
-        scale_(iter, particle.value());
+        return 0;
     }
 
     private :
 
-    Scale scale_;
-    move_queue_type move_queue_;
-}
+    Alpha<T> alpha_;
+    Scale<T> scale_;
+    Eigen::VectorXd llh_;
+};
+
+template <typename T, template <typename, typename> class PathEval>
+class BayesianPathEval : public PathEval<T, BayesianPathEval<T, PathEval> >
+{
+    public :
+
+    double path_state (unsigned iter, vsmc::ConstSingleParticle<T> part)
+    {
+        return part.state(0).log_likelihood();
+    }
+
+    double path_width (unsigned iter, const vsmc::Particle<T> &particle)
+    {
+        return particle.value().alpha_inc();
+    }
+}; // class BayesianPath
+
+} // namespace vsmc
 
 #endif // VSMC_HELPER_BAYESIAN_HPP

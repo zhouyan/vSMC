@@ -1,28 +1,28 @@
 #ifndef VSMC_HELPER_BAYESIAN_RANDOM_WALK_HPP
 #define VSMC_HELPER_BAYESIAN_RANDOM_WALK_HPP
 
-namespace vsmc { namespace rwm {
+namespace vsmc {
 
 template <typename T, template <typename, typename> class Move>
-class Normal : public Move<T, Normal<T, Move> >
+class NormalRWM : public Move<T, NormalRWM<T, Move> >
 {
     public :
 
     template <typename InputIter>
-    Normal (InputIter first, InputIter last) : index_(first, last) {}
+    NormalRWM (InputIter first, InputIter last) : index_(first, last) {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> sp)
     {
         using std::log;
 
-        sp.state(0).save_old(index_.begin(); index_.end());
+        sp.state(0).mh_save(index_.begin(), index_.end());
 
         for (std::vector<unsigned>::const_iterator d = index_.begin();
                 d != index_.end(); ++d) {
-            rng::normal_distribution<double> r(0, sp.state(0).scale(*d));
+            rng::normal_distribution<double>
+                r(0, sp.particle().value().scale(*d));
             sp.state(0).param(*d) += r(sp.rng());
         }
-
         sp.particle().value().log_target(sp.state(0));
         double p = sp.state(0).log_target_diff();
 
@@ -35,30 +35,33 @@ class Normal : public Move<T, Normal<T, Move> >
     private :
 
     std::vector<unsigned> index_;
-}; // class Normal
+}; // class NormalRWM
 
 template <typename T, template <typename, typename> class Move>
-class LogNormal : public Move<T, LogNormal<T, Move> >
+class LogNormalRWM : public Move<T, LogNormalRWM<T, Move> >
 {
     public :
 
     template <typename InputIter>
-    LogNormal (InputIter first, InputIter last) : index_(first, last) {}
+    LogNormalRWM (InputIter first, InputIter last) : index_(first, last) {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> sp)
     {
         using std::log;
 
 
-        sp.state(0).save_old(index_.begin(); index_.end());
+        sp.state(0).mh_save(index_.begin(), index_.end());
 
         double log_diff = 0;
         for (std::vector<unsigned>::const_iterator d = index_.begin();
                 d != index_.end(); ++d) {
-            log_diff -= log(sp.state(0).param(*d));
-            rng::log_normal_distribution<double> r(0, sp.state(0).scale(*d));
-            sp.state(0).param(*d) *= rnorm(sp.rng());
-            log_diff += log(sp.state(0).param(*d));
+            double x = sp.state(0).param(*d);
+            log_diff -= log(x);
+            rng::lognormal_distribution<double>
+                r(0, sp.particle().value().scale(*d));
+            x *= r(sp.rng());
+            log_diff += x;
+            sp.state(0).param(*d) = x;
         }
 
         sp.particle().value().log_target(sp.state(0));
@@ -73,22 +76,22 @@ class LogNormal : public Move<T, LogNormal<T, Move> >
     private :
 
     std::vector<unsigned> index_;
-}; // class LogNormal
+}; // class LogNormalRWM
 
 template <typename T, template <typename, typename> class Move>
-class LogitNormal : public Move<T, LogitNormal<T, Move> >
+class LogitNormalRWM : public Move<T, LogitNormalRWM<T, Move> >
 {
     public :
 
     template <typename InputIter>
-    LogitNormal (InputIter first, InputIter last) : index_(first, last) {}
+    LogitNormalRWM (InputIter first, InputIter last) : index_(first, last) {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> sp)
     {
         using std::log;
         using std::exp;
 
-        sp.state(0).save_old(index_.begin(); index_.end());
+        sp.state(0).mh_save(index_.begin(), index_.end());
 
         double logit_sw = 1;
         double logit_slw = 0;
@@ -97,12 +100,14 @@ class LogitNormal : public Move<T, LogitNormal<T, Move> >
         double sw = 1;
         for (std::vector<unsigned>::const_iterator d = index_.begin();
                 d != index_.end() - 1; ++d) {
-            double w = sp.state(0).param(*d) / sp.state(0).param(index.back());
+            double w = sp.state(0).param(*d) /
+                sp.state(0).param(index_.back());
             double lw = log(w);
 
             logit_sw_old += w;
             logit_slw_old += lw;
-            rng::normal_distribution<double> r(0, sp.state(0).scale(*d));
+            rng::normal_distribution<double>
+                r(0, sp.particle().value().scale(*d));
             lw += r(sp.rng());
             w = exp(lw);
             logit_sw += w;
@@ -116,7 +121,7 @@ class LogitNormal : public Move<T, LogitNormal<T, Move> >
         double logit_diff = logit_slw - logit_slw_old;
         double sw_inv = 1 / sw;
         for (std::vector<unsigned>::const_iterator d = index_.begin();
-                d != index_.end() - 1; ++d) {
+                d != index_.end() - 1 && *d < sp.state(0).param_num(); ++d) {
             sp.state(0).param(*d) *= sw_inv;
         }
         sp.state(0).param(index_.back()) = sw_inv;
@@ -133,8 +138,8 @@ class LogitNormal : public Move<T, LogitNormal<T, Move> >
     private :
 
     std::vector<unsigned> index_;
-}; // class LogitNormal
+}; // class LogitNormalRWM
 
-} } // namespace vsmc::rwm
+} // namespace vsmc
 
 #endif // VSMC_HELPER_BAYESIAN_RANDOM_WALK_HPP
