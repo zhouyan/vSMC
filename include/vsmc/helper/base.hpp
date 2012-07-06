@@ -128,8 +128,8 @@ class StateBase
 
     void copy_particle (size_type from, size_type to)
     {
-	if (from != to)
-	    state_.col(to) = state_.col(from);
+        if (from != to)
+            state_.col(to) = state_.col(from);
     }
 
     private :
