@@ -3,7 +3,7 @@
 #include <cmath>
 
 #ifdef VSMC_USE_STD_ISFINITE
-using std::isfintie;
+using std::isfinite;
 #elif defined(VSMC_USE_BOOST_ISFINITE)
 #include <boost/math/special_functions/fpclassify.hpp>
 using boost::math::isfinite;
