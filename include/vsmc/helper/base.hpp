@@ -142,6 +142,68 @@ class StateBase
     timer_type timer_;
 }; // class StateBase
 
+/// \brief A const variant to SingleParticle
+/// \ingroup Helper
+///
+/// \tparam T A subtype of StateBase
+template <typename T>
+class ConstSingleParticle
+{
+    public :
+
+    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef T value_type;
+    typedef typename T::state_type state_type;
+    typedef typename Particle<T>::rng_type rng_type;
+
+    ConstSingleParticle (size_type id, const Particle<T> *particle) :
+        id_(id), particle_(particle)
+    {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, ConstSingleParticle);
+        VSMC_RUNTIME_ASSERT(particle_,
+                ("A **SingleParticle** object "
+                 "is contructed with 0 **Particle** pointer"));
+        VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ < particle_->size()),
+                ("A **SignleParticle** object "
+                 "is contructed with an out of range id"));
+    }
+
+    size_type id () const
+    {
+        return id_;
+    }
+
+    const state_type &state (unsigned pos) const
+    {
+        return particle_->value().state(id_, pos);
+    }
+
+    const state_type *state () const
+    {
+        return particle_->value().state(id_);
+    }
+
+    double weight () const
+    {
+        return particle_->weight()[id_];
+    }
+
+    double log_weight () const
+    {
+        return particle_->log_weight()[id_];
+    }
+
+    const Particle<T> &particle () const
+    {
+        return *particle_;
+    }
+
+    private :
+
+    const size_type id_;
+    const Particle<T> *const particle_;
+}; // class ConstSingleParticle
+
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Helper
 ///
@@ -244,73 +306,16 @@ class SingleParticle
         return particle_->rng(id_);
     }
 
+    operator ConstSingleParticle<T>()
+    {
+        return ConstSingleParticle<T>(id_, particle_);
+    }
+
     private :
 
     const size_type id_;
     Particle<T> *const particle_;
 }; // class SingleParticle
-
-/// \brief A const variant to SingleParticle
-/// \ingroup Helper
-///
-/// \tparam T A subtype of StateBase
-template <typename T>
-class ConstSingleParticle
-{
-    public :
-
-    typedef typename SizeTypeTrait<T>::type size_type;
-    typedef T value_type;
-    typedef typename T::state_type state_type;
-    typedef typename Particle<T>::rng_type rng_type;
-
-    ConstSingleParticle (size_type id, const Particle<T> *particle) :
-        id_(id), particle_(particle)
-    {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, ConstSingleParticle);
-        VSMC_RUNTIME_ASSERT(particle_,
-                ("A **SingleParticle** object "
-                 "is contructed with 0 **Particle** pointer"));
-        VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ < particle_->size()),
-                ("A **SignleParticle** object "
-                 "is contructed with an out of range id"));
-    }
-
-    size_type id () const
-    {
-        return id_;
-    }
-
-    const state_type &state (unsigned pos) const
-    {
-        return particle_->value().state(id_, pos);
-    }
-
-    const state_type *state () const
-    {
-        return particle_->value().state(id_);
-    }
-
-    double weight () const
-    {
-        return particle_->weight()[id_];
-    }
-
-    double log_weight () const
-    {
-        return particle_->log_weight()[id_];
-    }
-
-    const Particle<T> &particle () const
-    {
-        return *particle_;
-    }
-
-    private :
-
-    const size_type id_;
-    const Particle<T> *const particle_;
-}; // class ConstSingleParticle
 
 /// \brief Base Initialize class
 /// \ingroup Helper
@@ -339,14 +344,14 @@ class InitializeBase
         initialize_param_dispatch(particle, param, &Derived::initialize_param);
     }
 
-    void post_processor (Particle<T> &particle)
-    {
-        post_processor_dispatch(particle, &Derived::pre_processor);
-    }
-
     void pre_processor (Particle<T> &particle)
     {
-        pre_processor_dispatch(particle, &Derived::post_processor);
+        pre_processor_dispatch(particle, &Derived::pre_processor);
+    }
+
+    void post_processor (Particle<T> &particle)
+    {
+        post_processor_dispatch(particle, &Derived::post_processor);
     }
 
     private :
@@ -687,7 +692,7 @@ class PathEvalBase
         return path_state_dispatch(iter, part, &Derived::path_state);
     }
 
-    double path_width (unsigned iter, Particle<T> &particle)
+    double path_width (unsigned iter, const Particle<T> &particle)
     {
         return path_width_dispatch(iter, particle, &Derived::path_width);
     }
