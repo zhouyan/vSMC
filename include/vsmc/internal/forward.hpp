@@ -15,7 +15,7 @@ template <typename, typename> class PathEvalBase;
 } // namespace vsmc::internal
 
 class NullTimer;
-class VBase {};
+class VBase;
 
 template <typename> class Sampler;
 template <typename> class Particle;
