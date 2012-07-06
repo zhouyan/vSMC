@@ -59,11 +59,8 @@ class StateTBB : public StateBase<Dim, T, Timer>
 
         void operator () (const tbb::blocked_range<size_type> &range) const
         {
-            for (size_type to = range.begin(); to != range.end(); ++to) {
-                size_type from = copy_from_[to];
-                if (from != to)
-                    state_->state().col(to) = state_->state().col(from);
-            }
+            for (size_type to = range.begin(); to != range.end(); ++to)
+                state_->copy_particle(copy_from_[to], to);
         }
 
         private :

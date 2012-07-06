@@ -30,11 +30,8 @@ class StateOMP : public StateBase<Dim, T, Timer>
     void copy (const SizeType *copy_from)
     {
 #pragma omp parallel for
-        for (size_type to = 0; to < size_; ++to) {
-            size_type from = copy_from[to];
-            if (from != to)
-                this->state().col(to) = this->state().col(from);
-        }
+        for (size_type to = 0; to < size_; ++to)
+            this->copy_particle(copy_from[to], to);
     }
 
     private :

@@ -110,15 +110,6 @@ class StateBase
         return state_.col(id).data();
     }
 
-    /// \brief Read and write access to the matrix of all particle states
-    ///
-    /// \note The matrix is of column marjor as it's the default of Eigen.
-    /// Therefore state()(pos, id) == state(id, pos). Best avoid this feature.
-    state_mat_type &state ()
-    {
-        return state_;
-    }
-
     /// Read only access to the matrix of all particle states
     const state_mat_type &state () const
     {
@@ -133,6 +124,12 @@ class StateBase
     {
         size_ = N;
         state_.resize(Dim, N);
+    }
+
+    void copy_particle (size_type from, size_type to)
+    {
+	if (from != to)
+	    state_.col(to) = state_.col(from);
     }
 
     private :
