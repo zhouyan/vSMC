@@ -15,7 +15,6 @@ template <typename, typename> class PathEvalBase;
 } // namespace vsmc::internal
 
 class NullTimer;
-
 class VBase {};
 
 template <typename> class Sampler;
@@ -50,13 +49,6 @@ template <typename> class InitializeCL;
 template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;
 template <typename> class PathEvalCL;
-
-template <unsigned> struct BayesianParamID;
-template <typename, template <unsigned, typename, typename> class,
-         typename T = NullTimer>
-class BayesianState;
-template <typename T, template <typename, typename> class, typename>
-class BayesianMove;
 
 } // namesapce vsmc
 
