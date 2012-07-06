@@ -5,10 +5,3 @@ test/gmm/config
 
 test/pet/config
 test/pet/pet_conv.data
-
-test/pf/*.o
-test/pf/*.pdf
-test/pf/*.save
-test/pf/pf_cl
-test/pf/pf_cl_cpu
-test/pf/pf_cl_gpu
