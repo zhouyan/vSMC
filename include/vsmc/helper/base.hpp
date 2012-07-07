@@ -148,9 +148,9 @@ class ConstSingleParticle
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
     typedef typename T::state_type state_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef typename Particle<T>::rng_type rng_type;
 
     ConstSingleParticle (size_type id, const Particle<T> *particle) :
@@ -210,14 +210,14 @@ class SingleParticle
 {
     public :
 
-    /// The type of the number of particles
-    typedef typename SizeTypeTrait<T>::type size_type;
-
     /// The type of the particle values
     typedef T value_type;
 
     /// The type of the state parameters
     typedef typename T::state_type state_type;
+
+    /// The type of the number of particles
+    typedef typename Particle<T>::size_type size_type;
 
     /// The type of RNG engine
     typedef typename Particle<T>::rng_type rng_type;
