@@ -169,9 +169,10 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
+        double *r = res;
 #pragma omp parallel for
         for (size_type i = 0; i < particle.value().size(); ++i) {
-            res[i] = this->path_state(iter,
+            r[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }
         particle.value().timer().stop();
