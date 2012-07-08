@@ -17,11 +17,7 @@ class WeightSetBase
     template <typename SizeType>
     explicit WeightSetBase (SizeType N) :
         ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
-        ess_cached_(false), weight_cached_(false), log_weight_cached_(false),
-        zconst_(0), inc_weight_(N)
-    {
-        set_equal_weight();
-    }
+        ess_cached_(false), weight_cached_(false), log_weight_cached_(false) {}
 
     /// Read only access to the weights
     const weight_type &weight () const
@@ -104,12 +100,10 @@ class WeightSetBase
     ///
     /// \param iw The position to start the reading, it shall be valid
     /// after increments of size() times.
-    /// \param add_zconst Whether this incremental weights shall contribute to
-    /// the SMC normalizing constant estimate
-    void add_log_weight (const double *iw, bool add_zconst = true)
+    void add_log_weight (const double *iw)
     {
         Eigen::Map<const weight_type> w(iw, log_weight_.size());
-        add_log_weight(w, add_zconst);
+        add_log_weight(w);
     }
 
     /// \brief Add to the log weights with a weight_object object
@@ -117,17 +111,10 @@ class WeightSetBase
     /// \param iw An Eigen::DenseBase object. One dimension Array, Vector,
     /// RowVector are supported. The Scalar type also need to be \c double.
     /// Otherwise it will be a compile-time error
-    /// \param add_zconst Whether this incremental weights shall contribute to
-    /// the SMC normalizing constant estimate
     template <typename D>
-    void add_log_weight (const Eigen::DenseBase<D> &iw, bool add_zconst = true)
+    void add_log_weight (const Eigen::DenseBase<D> &iw)
     {
-        using std::log;
-
-        inc_weight_ = iw.head(log_weight_.size());
-        log_weight_ += inc_weight_;
-        if (add_zconst)
-            zconst_ += log(weight().dot(inc_weight_.array().exp().matrix()));
+        log_weight_ += iw.head(log_weight_.size());
         set_weight();
     }
 
@@ -142,18 +129,6 @@ class WeightSetBase
         return ess_;
     }
 
-    /// Get the value of the logarithm of SMC normalizing constant
-    double zconst () const
-    {
-        return zconst_;
-    }
-
-    /// Reset the value of logarithm of SMC normalizing constant to zero
-    void reset_zconst ()
-    {
-        zconst_ = 0;
-    }
-
     private :
 
     mutable double ess_;
@@ -163,9 +138,6 @@ class WeightSetBase
     mutable bool ess_cached_;
     mutable bool weight_cached_;
     mutable bool log_weight_cached_;
-
-    double zconst_;
-    weight_type inc_weight_;
 
     void set_weight ()
     {

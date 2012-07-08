@@ -54,8 +54,6 @@ class Particle :
     using weight_set_type::set_log_weight;
     using weight_set_type::add_log_weight;
     using weight_set_type::ess;
-    using weight_set_type::zconst;
-    using weight_set_type::reset_zconst;
 
     /// \brief Construct a Particle object with a given number of particles
     ///

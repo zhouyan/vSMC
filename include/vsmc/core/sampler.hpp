@@ -233,7 +233,6 @@ class Sampler
                 std::deque<unsigned>(1, init_(particle_, param)));
         do_resampling();
         do_monitoring();
-        particle_.reset_zconst();
     }
 
     /// Perform iteration for a given number times
@@ -349,12 +348,6 @@ class Sampler
     double path_sampling () const
     {
         return path_.zconst();
-    }
-
-    /// SMC estimate of the logarithm of normalizing constants ratio
-    double zconst () const
-    {
-        return particle_.zconst();
     }
 
     /// \brief Print the history of the Sampler
