@@ -36,14 +36,8 @@ class Sampler
     /// The type of Move functor
     typedef internal::function<unsigned (unsigned, particle_type &)> move_type;
 
-    /// The type of MCMC functor
-    typedef internal::function<unsigned (unsigned, particle_type &)> mcmc_type;
-
     /// The type of the Move queue
-    typedef std::deque<move_type> move_queue_type;
-
-    /// The type of the MCMC queue
-    typedef std::deque<mcmc_type> mcmc_queue_type;
+    typedef std::vector<move_type> move_queue_type;
 
     /// The type of ESS history vector
     typedef std::vector<double> ess_history_type;
@@ -52,7 +46,7 @@ class Sampler
     typedef std::vector<bool> resampled_history_type;
 
     /// The type of accept count history vector
-    typedef std::vector<std::deque<unsigned> > accept_history_type;
+    typedef std::vector<std::vector<unsigned> > accept_history_type;
 
     /// The type of Monitor map
     typedef std::map<std::string, monitor_type> monitor_map_type;
@@ -192,20 +186,20 @@ class Sampler
     }
 
     /// Clear the MCMC queue and set a single new MCMC
-    void mcmc (const mcmc_type &new_mcmc)
+    void mcmc (const move_type &new_mcmc)
     {
         mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
     }
 
     /// Read and write access to the MCMC queue
-    mcmc_queue_type &mcmc_queue ()
+    move_queue_type &mcmc_queue ()
     {
         return mcmc_queue_;
     }
 
     /// Read only access to the MCMC queue
-    const mcmc_queue_type &mcmc_queue () const
+    const move_queue_type &mcmc_queue () const
     {
         return mcmc_queue_;
     }
@@ -230,7 +224,7 @@ class Sampler
                 ("CALL **Sampler::initialize** WITH AN INVALID "
                  "INITIALIZE FUNCTOR"));
         accept_history_.push_back(
-                std::deque<unsigned>(1, init_(particle_, param)));
+                std::vector<unsigned>(1, init_(particle_, param)));
         do_resampling();
         do_monitoring();
     }
@@ -241,7 +235,7 @@ class Sampler
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
             unsigned ia = 0;
-            std::deque<unsigned> acc(move_queue_.size() + mcmc_queue_.size());
+            std::vector<unsigned> acc(move_queue_.size() + mcmc_queue_.size());
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
@@ -254,7 +248,7 @@ class Sampler
 
             do_resampling();
 
-            for (typename mcmc_queue_type::iterator
+            for (typename move_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 VSMC_RUNTIME_ASSERT((bool(*m)),
                         ("CALL **Sampler::iterate** WITH AN INVALID "
@@ -501,7 +495,7 @@ class Sampler
 
     init_type init_;
     move_queue_type move_queue_;
-    mcmc_queue_type mcmc_queue_;
+    move_queue_type mcmc_queue_;
 
     double threshold_;
 
