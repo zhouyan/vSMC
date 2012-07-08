@@ -79,10 +79,6 @@ class RngSetPrl
 
 } // namespace vsmc
 
-#if VSMC_USE_RANDOM123
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl);
-#else
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetSeq);
-#endif
 
 #endif // VSMC_CORE_RNG_HPP
