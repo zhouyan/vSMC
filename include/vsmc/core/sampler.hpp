@@ -263,13 +263,22 @@ class Sampler
         }
     }
 
+    /// \brief Add a monitor
+    ///
+    /// \param name The name of the monitor
+    /// \param mon The new monitor to be added
+    void monitor (const std::string &name, const monitor_type &mon)
+    {
+        monitor_.insert(std::make_pair(name, mon));
+    }
+
     /// \brief Add a monitor with a evaluation functor
     ///
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The functor used to evaluate the results
     ///
-    /// \sa Monitor<T>
+    /// \sa Monitor::eval_type
     void monitor (const std::string &name, unsigned dim,
             const typename monitor_type::eval_type &eval)
     {
