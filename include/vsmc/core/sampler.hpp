@@ -274,7 +274,6 @@ class Sampler
             const typename monitor_type::eval_type &eval)
     {
         monitor_.insert(std::make_pair(name, monitor_type(dim, eval)));
-        monitor_name_.insert(name);
     }
 
     /// Read only access to a named monitor through an iterator
@@ -306,14 +305,12 @@ class Sampler
     void clear_monitor (const std::string &name)
     {
         monitor_.erase(name);
-        monitor_name_.erase(name);
     }
 
     /// Erase all monitors
     void clear_monitor ()
     {
         monitor_.clear();
-        monitor_name_.clear();
     }
 
     /// Read only access to the Path sampling monitor
@@ -506,7 +503,6 @@ class Sampler
     accept_history_type accept_history_;
 
     monitor_map_type monitor_;
-    std::set<std::string> monitor_name_;
     path_type path_;
 
     void do_resampling ()

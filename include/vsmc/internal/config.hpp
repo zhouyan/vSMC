@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/compiler.hpp>
 
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
+
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_HAS_CXX11LIB_CHRONO 0
 #endif

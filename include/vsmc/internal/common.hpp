@@ -1,19 +1,12 @@
 #ifndef VSMC_INTERNAL_COMMON_HPP
 #define VSMC_INTERNAL_COMMON_HPP
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif // __STDC_CONSTANT_MACROS
-
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <utility>
-#include <limits>
 #include <map>
-#include <set>
-#include <deque>
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -62,8 +55,10 @@ namespace vsmc {                                                             \
 namespace internal {                                                         \
                                                                              \
 template <typename T>                                                        \
-class Has##OuterType##Impl                                                   \
+struct Has##OuterType##Impl                                                  \
 {                                                                            \
+    private :                                                                \
+                                                                             \
     struct char2 {char c1; char c2;};                                        \
     template <typename U> static char test (typename U::inner_type *);       \
     template <typename U> static char2 test (...);                           \
@@ -75,7 +70,7 @@ class Has##OuterType##Impl                                                   \
 };                                                                           \
                                                                              \
 template <typename T>                                                        \
-class Has##OuterType :                                                       \
+struct Has##OuterType :                                                      \
     public integral_constant<bool, Has##OuterType##Impl<T>::value>           \
 {};                                                                          \
                                                                              \
@@ -129,8 +124,8 @@ class StaticAssert<true>
         USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
 
-        USE_SingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
-        USE_ConstSingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase
+        USE_ConstSingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
+        USE_SingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase
     };
 };
 
