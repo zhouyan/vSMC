@@ -91,8 +91,8 @@ template <typename T> struct OuterType##Dispatch<T, false>                   \
                                                                              \
 template <typename T> struct OuterType##Trait                                \
 {                                                                            \
-    typedef typename internal::OuterType##Dispatch<T,                        \
-        internal::Has##OuterType<T>::value>::type type;                      \
+    static const bool value = internal::Has##OuterType<T>::value;            \
+    typedef typename internal::OuterType##Dispatch<T, value>::type type;     \
 };                                                                           \
                                                                              \
 }

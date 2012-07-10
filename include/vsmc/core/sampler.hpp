@@ -16,7 +16,7 @@ class Sampler
     public :
 
     /// The type of the number of particles
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
 
     /// The type of the particle values
     typedef T value_type;

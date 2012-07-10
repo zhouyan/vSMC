@@ -715,7 +715,7 @@ class InitializeCL
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (Particle<T> &particle, void *param)
@@ -808,7 +808,7 @@ class MoveCL
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
@@ -897,7 +897,7 @@ class MonitorEvalCL
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
@@ -993,7 +993,7 @@ class PathEvalCL
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     double operator() (unsigned iter, const Particle<T> &particle,

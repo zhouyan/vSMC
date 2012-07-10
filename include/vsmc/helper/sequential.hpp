@@ -47,7 +47,7 @@ class InitializeSeq : public InitializeBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (Particle<T> &particle, void *param)
@@ -84,7 +84,7 @@ class MoveSeq : public MoveBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
@@ -120,7 +120,7 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
@@ -156,7 +156,7 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
