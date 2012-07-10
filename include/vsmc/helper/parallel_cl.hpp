@@ -361,7 +361,7 @@ class StateCL
     /// #include <Random123/u01.h>
     /// #endif
     /// \endcode
-    void build (const char *source, const char *flags)
+    void build (const std::string &source, const std::string &flags)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(build);
 
@@ -393,7 +393,7 @@ class StateCL
         }
 
         try {
-            program_.build(device_, flags);
+            program_.build(device_, flags.c_str());
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
                     &build_log_);
         } catch (cl::Error &err) {
@@ -555,11 +555,11 @@ class StateCL
     /// \param name The name of the kernel
     ///
     /// \note The program has to be built before call this member
-    cl::Kernel create_kernel (const char *name) const
+    cl::Kernel create_kernel (const std::string &name) const
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel)
 
-        return cl::Kernel(program_, name);
+        return cl::Kernel(program_, name.c_str());
     }
 
     /// \brief Run a kernel in parallel on the device
@@ -754,7 +754,7 @@ class InitializeCL
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_);
         }
 
         kernel_.setArg(0, particle.value().state_device());
@@ -845,7 +845,7 @@ class MoveCL
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_);
         }
 
         kernel_.setArg(0, (cl_uint) iter);
@@ -935,7 +935,7 @@ class MonitorEvalCL
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_);
             buffer_device_ = particle.value().template
                 create_buffer<typename T::state_type>(
                         particle.value().size() * dim);
@@ -1034,7 +1034,7 @@ class PathEvalCL
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_);
             buffer_device_ = particle.value().template
                 create_buffer<typename T::state_type>(
                         particle.value().size());
