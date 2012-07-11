@@ -257,7 +257,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
             cw += residual_[++k];
         }
         for (SizeType i = 0; i != N; ++i)
-            replication[i] += integral_[i];
+            replication[i] += static_cast<SizeType>(integral_[i]);
     }
 
     private :
