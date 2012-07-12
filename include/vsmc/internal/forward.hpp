@@ -4,14 +4,11 @@
 namespace vsmc {
 
 class NullTimer;
-class NullMutex;
-template <typename Mutex> class NullLockGuard;
-
 class VBase;
 
 class RngSetSeq;
 class RngSetPrl;
-template <typename, template <typename> class> class WeightSetBase;
+class WeightSetBase;
 template <typename> class Sampler;
 template <typename> class Particle;
 template <typename> class Monitor;

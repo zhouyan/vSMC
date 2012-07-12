@@ -24,22 +24,8 @@
 #define VSMC_HAS_CXX11LIB_RANDOM 0
 #endif
 
-#ifndef VSMC_HAS_CXX11LIB_THREAD
-#define VSMC_HAS_CXX11LIB_THREAD 0
-#endif
-
 #ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
 #define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
-#endif
-
-// Thread support
-
-#if VSMC_HAS_CXX11LIB_THREAD
-#define VSMC_HAS_LIB_THREAD 1
-#endif
-
-#ifndef VSMC_HAS_LIB_THREAD
-#define VSMC_HAS_LIB_THREAD 0
 #endif
 
 // size_type

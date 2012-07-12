@@ -20,7 +20,6 @@
 
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/cxx11/random.hpp>
-#include <vsmc/cxx11/thread.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
 #if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
