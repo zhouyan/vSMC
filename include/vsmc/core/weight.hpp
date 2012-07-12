@@ -46,60 +46,33 @@ class WeightSetBase
     }
 
     /// Read only access to the weights
-    const weight_type &weight () const
+    template <typename OutputIter>
+    void read_weight (OutputIter first) const
     {
-        if (weight_new_) {
-            LockGuard<Mutex> lock(weight_mutex_);
-            if (weight_new_) {
-                weight_ = log_weight().array().exp();
-                double sum = weight_.sum();
-                weight_ *= 1 / sum;
-                weight_new_ = false;
-            }
-        }
-
-        return weight_;
+        std::copy(weight_vec().data(),
+                weight_vec().data() + weight_.size(), first);
     }
 
-    /// Read only access to the weights
-    template <typename SizeType, typename OutputIter>
-    void weight (SizeType N, OutputIter *first) const
+    /// Read only access to the log weights
+    template <typename OutputIter>
+    void read_log_weight (OutputIter first) const
     {
-        std::copy(weight().data(), weight().data() + N, first);
+        std::copy(log_weight_vec().data(),
+                log_weight_vec().data() + log_weight_.size(), first);
     }
 
+    /// Read only access to the weight of a particle
     template <typename SizeType>
     double weight (SizeType id) const
     {
-        return weight()[id];
+        return weight_vec()[id];
     }
 
-    /// Read only access to the log weights
-    const weight_type &log_weight () const
-    {
-        if (log_weight_new_) {
-            LockGuard<Mutex> lock(log_weight_mutex_);
-            if (log_weight_new_) {
-                double max_weight = log_weight_.maxCoeff();
-                log_weight_ = log_weight_.array() - max_weight;
-                log_weight_new_ = false;
-            }
-        }
-
-        return log_weight_;
-    }
-
-    /// Read only access to the log weights
-    template <typename SizeType, typename OutputIter>
-    void log_weight (SizeType N, OutputIter *first) const
-    {
-        std::copy(log_weight().data(), log_weight().data() + N, first);
-    }
-
+    /// Read only access to the log weight of a particle
     template <typename SizeType>
     double log_weight (SizeType id) const
     {
-        return log_weight()[id];
+        return log_weight_vec()[id];
     }
 
     /// Set equal weights for all particles
@@ -179,7 +152,7 @@ class WeightSetBase
         if (ess_new_) {
             LockGuard<Mutex> lock(ess_mutex_);
             if (ess_new_) {
-                ess_ = 1 / weight().squaredNorm();
+                ess_ = 1 / weight_vec().squaredNorm();
                 ess_new_ = false;
             }
         }
@@ -206,6 +179,35 @@ class WeightSetBase
         ess_new_ = true;
         weight_new_ = true;
         log_weight_new_ = true;
+    }
+
+    const weight_type &weight_vec () const
+    {
+        if (weight_new_) {
+            LockGuard<Mutex> lock(weight_mutex_);
+            if (weight_new_) {
+                weight_ = log_weight_vec().array().exp();
+                double sum = weight_.sum();
+                weight_ *= 1 / sum;
+                weight_new_ = false;
+            }
+        }
+
+        return weight_;
+    }
+
+    const weight_type &log_weight_vec () const
+    {
+        if (log_weight_new_) {
+            LockGuard<Mutex> lock(log_weight_mutex_);
+            if (log_weight_new_) {
+                double max_weight = log_weight_.maxCoeff();
+                log_weight_ = log_weight_.array() - max_weight;
+                log_weight_new_ = false;
+            }
+        }
+
+        return log_weight_;
     }
 }; // class WeightSetBase
 

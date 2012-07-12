@@ -50,6 +50,8 @@ class Particle :
     using rng_set_type::rng;
     using weight_set_type::weight;
     using weight_set_type::log_weight;
+    using weight_set_type::read_weight;
+    using weight_set_type::read_log_weight;
     using weight_set_type::set_equal_weight;
     using weight_set_type::set_log_weight;
     using weight_set_type::add_log_weight;
@@ -100,7 +102,7 @@ class Particle :
     {
         resampled_ = ess() < threshold * size_;
         if (resampled_) {
-            weight(size_, weight_.data());
+            read_weight(weight_.data());
             resample_op_(size_, *this, weight_.data(), replication_.data());
             resample_do();
         }

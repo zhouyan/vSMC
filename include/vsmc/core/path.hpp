@@ -116,8 +116,10 @@ class Path
         double w = 0;
         double p = 0;
         buffer_.resize(particle.size());
+        weight_.resize(particle.size());
         w = eval_(iter, particle, buffer_.data());
-        p = particle.weight().dot(buffer_);
+        particle.read_weight(weight_.data());
+        p = weight_.dot(buffer_);
         width_.push_back(w);
         integrand_.push_back(p);
         index_.push_back(iter);
@@ -149,6 +151,7 @@ class Path
     private :
 
     Eigen::VectorXd buffer_;
+    Eigen::VectorXd weight_;
     eval_type eval_;
     index_type index_;
     integrand_type integrand_;
