@@ -6,7 +6,6 @@
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/path.hpp>
 
-#include <vsmc/helper/timer/null.hpp>
 #include <vsmc/helper/sequential.hpp>
 
 #ifdef VSMC_USE_OMP

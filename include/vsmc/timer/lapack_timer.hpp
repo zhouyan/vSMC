@@ -1,5 +1,5 @@
-#ifndef VSMC_HELPER_TIMER_LAPACK_HPP
-#define VSMC_HELPER_TIMER_LAPACK_HPP
+#ifndef VSMC_TIMER_LAPACK_TIMER_HPP
+#define VSMC_TIMER_LAPACK_TIMER_HPP
 
 extern "C" { double dsecnd(void); }
 
@@ -52,4 +52,4 @@ class LapackTimer
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_TIMER_LAPACK_HPP
+#endif // VSMC_TIMER_LAPACK_TIMER_HPP
