@@ -4,10 +4,7 @@
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/rng.hpp>
-#include <vsmc/helper/base.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
-#include <vsmc/helper/parallel_cl/query.hpp>
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \
     VSMC_RUNTIME_ASSERT((context_created()), ( \
@@ -383,7 +380,7 @@ class StateCL
             ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
-            rng::Seed &seed = rng::Seed::create();
+            Seed &seed = Seed::create();
             ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
             seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";

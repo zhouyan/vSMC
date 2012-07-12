@@ -2,7 +2,6 @@
 #define VSMC_CORE_RNG_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/rng/random.hpp>
 
 namespace vsmc {
 
@@ -16,7 +15,7 @@ class RngSetSeq
     typedef VSMC_SEQRNG_TYPE rng_type;
 
     /// The type of the seed sequence
-    typedef rng::Seed seed_type;
+    typedef Seed seed_type;
 
     template <typename SizeType>
     RngSetSeq (SizeType N) : rng_(static_cast<rng_type::result_type>(
@@ -49,7 +48,7 @@ class RngSetPrl
     typedef VSMC_PRLRNG_TYPE rng_type;
 
     /// The type of the seed sequence
-    typedef rng::Seed seed_type;
+    typedef Seed seed_type;
 
     template <typename SizeType>
     RngSetPrl (SizeType N)

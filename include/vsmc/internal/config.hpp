@@ -8,6 +8,8 @@
 #define __STDC_CONSTANT_MACROS
 #endif
 
+#define VSMC_PREVENT_MIN_MAX
+
 // C++11 Libraries
 
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
@@ -57,7 +59,7 @@
 #endif
 
 #ifndef VSMC_SEQRNG_TYPE
-#define VSMC_SEQRNG_TYPE vsmc::rng::mt19937
+#define VSMC_SEQRNG_TYPE vsmc::cxx11::mt19937
 #endif
 
 #ifndef VSMC_CBRNG_TYPE
@@ -65,9 +67,9 @@
 #endif
 
 #if VSMC_USE_RANDOM123
-#define VSMC_PRLRNG_TYPE vsmc::rng::Engine<VSMC_CBRNG_TYPE>
+#define VSMC_PRLRNG_TYPE vsmc::cxx11::Engine<VSMC_CBRNG_TYPE>
 #else
-#define VSMC_PRLRNG_TYPE vsmc::rng::mt19937
+#define VSMC_PRLRNG_TYPE vsmc::cxx11::mt19937
 #endif
 
 #endif // VSMC_INTERNAL_CONFIG_HPP

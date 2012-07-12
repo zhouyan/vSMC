@@ -3,7 +3,7 @@
 
 #include <vsmc/rng/common.hpp>
 
-namespace vsmc { namespace rng {
+namespace vsmc {
 
 /// \brief Beta distribution
 /// \ingroup RNG
@@ -168,6 +168,6 @@ std::basic_istream<CharT, Traits> &operator<< (
     return is;
 }
 
-} } // namespace vsmc::rng
+} // namespace vsmc
 
 #endif // VSMC_RNG_BETA_DISTRIBUTION_HPP

@@ -19,6 +19,7 @@
 #include <vsmc/internal/forward.hpp>
 
 #include <vsmc/cxx11/functional.hpp>
+#include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/thread.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
