@@ -210,7 +210,7 @@ class WeightSetBase
 }; // class WeightSetBase
 
 #if VSMC_HAS_LIB_THREAD
-typedef WeightSetBase<internal::mutex, internal::lock_guard> WeightSetPrl;
+typedef WeightSetBase<cxx11::mutex, cxx11::lock_guard> WeightSetPrl;
 #endif
 typedef WeightSetBase<NullMutex, NullLockGuard> WeightSetSeq;
 

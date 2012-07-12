@@ -18,7 +18,7 @@ class Path
     typedef T value_type;
 
     /// The type of path sampling evaluation functor
-    typedef internal::function<double (
+    typedef cxx11::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector

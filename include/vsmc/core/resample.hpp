@@ -23,7 +23,7 @@ inline void weight2replication (SizeType N, SizeType S, RngSetType &rng_set,
 
         for (SizeType i = 0; i != N; ++i) {
             if (acc_s < S && weight[i] > 0) {
-                typedef typename make_signed<SizeType>::type s_t;
+                typedef typename cxx11::make_signed<SizeType>::type s_t;
                 s_t s = S - acc_s;
                 double p = weight[i] / (sum_w - acc_w);
                 if (p < 0) {

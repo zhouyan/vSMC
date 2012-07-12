@@ -26,7 +26,7 @@ class IsBaseOfState
     private :
 
     struct char2 {char c1; char c2;};
-    typedef typename internal::remove_cv<D>::type derived_type;
+    typedef typename cxx11::remove_cv<D>::type derived_type;
 
     template <unsigned Dim, typename T, typename Timer>
     static char test (State<Dim, T, Timer> *);

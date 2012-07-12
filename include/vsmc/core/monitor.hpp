@@ -31,7 +31,7 @@ class Monitor
     typedef T value_type;
 
     /// The type of evaluation functor
-    typedef internal::function<void (
+    typedef cxx11::function<void (
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector

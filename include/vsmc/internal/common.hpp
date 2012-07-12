@@ -16,10 +16,11 @@
 #include <Eigen/Dense>
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/functional.hpp>
-#include <vsmc/internal/thread.hpp>
-#include <vsmc/internal/type_traits.hpp>
 #include <vsmc/internal/forward.hpp>
+
+#include <vsmc/cxx11/functional.hpp>
+#include <vsmc/cxx11/thread.hpp>
+#include <vsmc/cxx11/type_traits.hpp>
 
 #if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_NULLPTR nullptr
@@ -71,8 +72,7 @@ struct Has##OuterType##Impl                                                  \
                                                                              \
 template <typename T>                                                        \
 struct Has##OuterType :                                                      \
-    public vsmc::internal::integral_constant                                 \
-            <bool, Has##OuterType##Impl<T>::value>                           \
+    public cxx11::integral_constant <bool, Has##OuterType##Impl<T>::value>   \
 {};                                                                          \
                                                                              \
 template <typename T, bool> struct OuterType##Dispatch;                      \

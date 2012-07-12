@@ -41,7 +41,7 @@ class Particle :
     typedef typename WeightSetTypeTrait<T>::type weight_set_type;
 
     /// The type of resampling operation functor
-    typedef internal::function<void
+    typedef cxx11::function<void
         (size_type, rng_set_type &, double *, size_type *)> resample_op_type;
 
     using typename rng_set_type::rng_type;

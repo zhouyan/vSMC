@@ -487,13 +487,13 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
-        typedef typename internal::remove_cv<OutputIter>::type ptr_type;
-        typedef typename internal::remove_pointer<ptr_type>::type val_type;
-        typedef typename internal::remove_cv<val_type>::type host_type;
-        typedef typename internal::remove_cv<CLType>::type device_type;
+        typedef typename cxx11::remove_cv<OutputIter>::type ptr_type;
+        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
+        typedef typename cxx11::remove_cv<val_type>::type host_type;
+        typedef typename cxx11::remove_cv<CLType>::type device_type;
 
-        if (internal::is_pointer<OutputIter>::value) {
-            if (internal::is_same<host_type, device_type>::value) {
+        if (cxx11::is_pointer<OutputIter>::value) {
+            if (cxx11::is_same<host_type, device_type>::value) {
                 command_queue_.finish();
                 timer_read_buffer_.start();
                 command_queue_.enqueueReadBuffer(buf, 1, 0,
@@ -525,13 +525,13 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
-        typedef typename internal::remove_cv<InputIter>::type ptr_type;
-        typedef typename internal::remove_pointer<ptr_type>::type val_type;
-        typedef typename internal::remove_cv<val_type>::type host_type;
-        typedef typename internal::remove_cv<CLType>::type device_type;
+        typedef typename cxx11::remove_cv<InputIter>::type ptr_type;
+        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
+        typedef typename cxx11::remove_cv<val_type>::type host_type;
+        typedef typename cxx11::remove_cv<CLType>::type device_type;
 
-        if (internal::is_pointer<InputIter>::value) {
-            if (internal::is_same<host_type, device_type>::value) {
+        if (cxx11::is_pointer<InputIter>::value) {
+            if (cxx11::is_same<host_type, device_type>::value) {
                 command_queue_.finish();
                 timer_write_buffer_.start();
                 command_queue_.enqueueWriteBuffer(buf, 1, 0,

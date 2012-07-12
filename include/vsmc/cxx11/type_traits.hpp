@@ -1,5 +1,5 @@
-#ifndef VSMC_INTERNAL_TYPE_TRATIS
-#define VSMC_INTERNAL_TYPE_TRATIS
+#ifndef VSMC_CXX11_TYPE_TRATIS
+#define VSMC_CXX11_TYPE_TRATIS
 
 #include <vsmc/internal/config.hpp>
 
@@ -9,7 +9,7 @@
 #include <boost/type_traits.hpp>
 #endif // VSMC_HAS_CXX11LIB_TYPE_TRAITS
 
-namespace vsmc { namespace internal {
+namespace vsmc { namespace cxx11 {
 
 #if VSMC_HAS_CXX11LIB_TYPE_TRAITS
 
@@ -37,6 +37,6 @@ using boost::remove_pointer;
 
 #endif // VSMC_HAS_CXX11LIB_TYPE_TRAITS
 
-} } // namespace vsmc::internal
+} } // namespace vsmc::cxx11
 
-#endif // VSMC_INTERNAL_TYPE_TRATIS
+#endif // VSMC_CXX11_TYPE_TRATIS

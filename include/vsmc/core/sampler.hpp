@@ -31,10 +31,10 @@ class Sampler
     typedef Path<T> path_type;
 
     /// The type of Initialization functor
-    typedef internal::function<unsigned (particle_type &, void *)> init_type;
+    typedef cxx11::function<unsigned (particle_type &, void *)> init_type;
 
     /// The type of Move functor
-    typedef internal::function<unsigned (unsigned, particle_type &)> move_type;
+    typedef cxx11::function<unsigned (unsigned, particle_type &)> move_type;
 
     /// The type of the Move queue
     typedef std::vector<move_type> move_queue_type;
