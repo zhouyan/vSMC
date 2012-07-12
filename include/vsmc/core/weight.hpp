@@ -7,6 +7,7 @@ namespace vsmc {
 
 /// \brief Weight set class
 /// \ingroup Core
+template <typename Mutex, template <typename> class LockGuard>
 class WeightSetBase
 {
     public :
@@ -17,16 +18,44 @@ class WeightSetBase
     template <typename SizeType>
     explicit WeightSetBase (SizeType N) :
         ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
-        ess_cached_(false), weight_cached_(false), log_weight_cached_(false) {}
+        ess_new_(true), weight_new_(true), log_weight_new_(true) {}
+
+    WeightSetBase (const WeightSetBase &other) :
+        ess_(other.ess_),
+        weight_(other.weight_), log_weight_(other.log_weight_),
+        ess_new_(other.ess_new_),
+        weight_new_(other.weight_new_), log_weight_new_(other.log_weight_new_)
+    {}
+
+    const WeightSetBase &operator= (const WeightSetBase &other)
+    {
+        if (&other != this) {
+            LockGuard<Mutex> lock_e(ess_mutex_);
+            LockGuard<Mutex> lock_w(weight_mutex_);
+            LockGuard<Mutex> lock_l(log_weight_mutex_);
+
+            ess_            = other.ess_;
+            weight_         = other.weight_;
+            log_weight_     = other.log_weight_;
+            ess_new_        = other.ess_new_;
+            weight_new_     = other.weight_new_;
+            log_weight_new_ = other.log_weight_new_;
+        }
+
+        return *this;
+    }
 
     /// Read only access to the weights
     const weight_type &weight () const
     {
-        if (!weight_cached_) {
-            weight_ = log_weight().array().exp();
-            double sum = weight_.sum();
-            weight_ *= 1 / sum;
-            weight_cached_ = true;
+        if (weight_new_) {
+            LockGuard<Mutex> lock(weight_mutex_);
+            if (weight_new_) {
+                weight_ = log_weight().array().exp();
+                double sum = weight_.sum();
+                weight_ *= 1 / sum;
+                weight_new_ = false;
+            }
         }
 
         return weight_;
@@ -36,17 +65,25 @@ class WeightSetBase
     template <typename SizeType, typename OutputIter>
     void weight (SizeType N, OutputIter *first) const
     {
-        assert(weight_.size() >= N);
         std::copy(weight().data(), weight().data() + N, first);
+    }
+
+    template <typename SizeType>
+    double weight (SizeType id) const
+    {
+        return weight()[id];
     }
 
     /// Read only access to the log weights
     const weight_type &log_weight () const
     {
-        if (!log_weight_cached_) {
-            double max_weight = log_weight_.maxCoeff();
-            log_weight_ = log_weight_.array() - max_weight;
-            log_weight_cached_ = true;
+        if (log_weight_new_) {
+            LockGuard<Mutex> lock(log_weight_mutex_);
+            if (log_weight_new_) {
+                double max_weight = log_weight_.maxCoeff();
+                log_weight_ = log_weight_.array() - max_weight;
+                log_weight_new_ = false;
+            }
         }
 
         return log_weight_;
@@ -56,22 +93,38 @@ class WeightSetBase
     template <typename SizeType, typename OutputIter>
     void log_weight (SizeType N, OutputIter *first) const
     {
-        VSMC_RUNTIME_ASSERT((log_weight_.size() >= N),
-                "Size of weight set is too small")
-
         std::copy(log_weight().data(), log_weight().data() + N, first);
+    }
+
+    template <typename SizeType>
+    double log_weight (SizeType id) const
+    {
+        return log_weight()[id];
     }
 
     /// Set equal weights for all particles
     void set_equal_weight ()
     {
-        ess_ = static_cast<double>(weight_.size());
-        weight_.setConstant(1.0 / weight_.size());
-        log_weight_.setConstant(0);
+        ess_new_ = true;
+        LockGuard<Mutex> lock_e(ess_mutex_);
+        if (ess_new_) {
+            ess_ = static_cast<double>(weight_.size());
+            ess_new_ = false;
+        }
 
-        ess_cached_ = true;
-        weight_cached_ = true;
-        log_weight_cached_ = true;
+        weight_new_ = true;
+        LockGuard<Mutex> lock_w(weight_mutex_);
+        if (weight_new_) {
+            weight_.setConstant(1.0 / weight_.size());
+            weight_new_ = false;
+        }
+
+        log_weight_new_ = true;
+        LockGuard<Mutex> lock_l(log_weight_mutex_);
+        if (log_weight_new_) {
+            log_weight_.setConstant(0);
+            log_weight_new_ = false;
+        }
     }
 
     /// \brief Set the log weights with a pointer
@@ -92,6 +145,7 @@ class WeightSetBase
     template <typename D>
     void set_log_weight (const Eigen::DenseBase<D> &nw)
     {
+        LockGuard<Mutex> lock(log_weight_mutex_);
         log_weight_ = nw.head(log_weight_.size());
         set_weight();
     }
@@ -114,6 +168,7 @@ class WeightSetBase
     template <typename D>
     void add_log_weight (const Eigen::DenseBase<D> &iw)
     {
+        LockGuard<Mutex> lock(log_weight_mutex_);
         log_weight_ += iw.head(log_weight_.size());
         set_weight();
     }
@@ -121,9 +176,12 @@ class WeightSetBase
     /// The current ESS (Effective Sample Size)
     double ess () const
     {
-        if (!ess_cached_) {
-            ess_ = 1 / weight().squaredNorm();
-            ess_cached_ = true;
+        if (ess_new_) {
+            LockGuard<Mutex> lock(ess_mutex_);
+            if (ess_new_) {
+                ess_ = 1 / weight().squaredNorm();
+                ess_new_ = false;
+            }
         }
 
         return ess_;
@@ -135,20 +193,33 @@ class WeightSetBase
     mutable weight_type weight_;
     mutable weight_type log_weight_;
 
-    mutable bool ess_cached_;
-    mutable bool weight_cached_;
-    mutable bool log_weight_cached_;
+    mutable bool ess_new_;
+    mutable bool weight_new_;
+    mutable bool log_weight_new_;
+
+    mutable Mutex ess_mutex_;
+    mutable Mutex weight_mutex_;
+    mutable Mutex log_weight_mutex_;
 
     void set_weight ()
     {
-        ess_cached_ = false;
-        weight_cached_ = false;
-        log_weight_cached_ = false;
+        ess_new_ = true;
+        weight_new_ = true;
+        log_weight_new_ = true;
     }
 }; // class WeightSetBase
 
+#if VSMC_HAS_LIB_THREAD
+typedef WeightSetBase<internal::mutex, internal::lock_guard> WeightSetPrl;
+#endif
+typedef WeightSetBase<NullMutex, NullLockGuard> WeightSetSeq;
+
 } // namespace vsmc
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSetBase);
+#if VSMC_HAS_LIB_THREAD
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSetPrl);
+#else
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSetSeq);
+#endif
 
 #endif // VSMC_CORE_WEIGHT_HPP

@@ -16,8 +16,8 @@
 #include <Eigen/Dense>
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/version.hpp>
 #include <vsmc/internal/functional.hpp>
+#include <vsmc/internal/thread.hpp>
 #include <vsmc/internal/type_traits.hpp>
 #include <vsmc/internal/forward.hpp>
 
@@ -52,7 +52,7 @@
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, inner_type, default_type) \
 namespace vsmc {                                                             \
                                                                              \
-namespace internal {                                                         \
+namespace traits {                                                           \
                                                                              \
 template <typename T>                                                        \
 struct Has##OuterType##Impl                                                  \
@@ -71,7 +71,8 @@ struct Has##OuterType##Impl                                                  \
                                                                              \
 template <typename T>                                                        \
 struct Has##OuterType :                                                      \
-    public integral_constant<bool, Has##OuterType##Impl<T>::value>           \
+    public vsmc::internal::integral_constant                                 \
+            <bool, Has##OuterType##Impl<T>::value>                           \
 {};                                                                          \
                                                                              \
 template <typename T, bool> struct OuterType##Dispatch;                      \
@@ -86,8 +87,8 @@ template <typename T> struct OuterType##Dispatch<T, false>                   \
                                                                              \
 template <typename T> struct OuterType##Trait                                \
 {                                                                            \
-    static const bool value = internal::Has##OuterType<T>::value;            \
-    typedef typename internal::OuterType##Dispatch<T, value>::type type;     \
+    static const bool value = traits::Has##OuterType<T>::value;              \
+    typedef typename traits::OuterType##Dispatch<T, value>::type type;       \
 };                                                                           \
                                                                              \
 }
