@@ -50,7 +50,7 @@
     if (vsmc::StaticAssert<bool(cond)>::message) {};
 #endif
 
-#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, inner_type, default_type) \
+#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)   \
 namespace vsmc {                                                             \
                                                                              \
 namespace traits {                                                           \
@@ -61,7 +61,7 @@ struct Has##OuterType##Impl                                                  \
     private :                                                                \
                                                                              \
     struct char2 {char c1; char c2;};                                        \
-    template <typename U> static char test (typename U::inner_type *);       \
+    template <typename U> static char test (typename U::InnerType *);        \
     template <typename U> static char2 test (...);                           \
                                                                              \
     public :                                                                 \
@@ -78,10 +78,10 @@ struct Has##OuterType :                                                      \
 template <typename T, bool> struct OuterType##Dispatch;                      \
                                                                              \
 template <typename T> struct OuterType##Dispatch<T, true>                    \
-{typedef typename T::inner_type type;};                                      \
+{typedef typename T::InnerType type;};                                       \
                                                                              \
 template <typename T> struct OuterType##Dispatch<T, false>                   \
-{typedef default_type type;};                                                \
+{typedef DefaultType type;};                                                 \
                                                                              \
 }                                                                            \
                                                                              \

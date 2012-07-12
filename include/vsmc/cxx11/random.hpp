@@ -136,12 +136,12 @@ class Engine : public r123::Engine<CBRNG>
 
     typedef typename r123:Engine<CBRNG> engine_type;
 
-    typedef typename engine_type::cbrng_type  cbrng_type;
-    typedef typename engine_type::ctr_type    ctr_type;
-    typedef typename engine_type::key_type    key_type;
-    typedef typename engine_type::ukey_type   ukey_type;
-    typedef typename engine_type::result_type result_type;
-    typedef typename engine_type::elem_type   elem_type;
+    using typename engine_type::cbrng_type;
+    using typename engine_type::ctr_type;
+    using typename engine_type::key_type;
+    using typename engine_type::ukey_type;
+    using typename engine_type::result_type;
+    using typename engine_type::elem_type;
 
     explicit r123_engine () : engine_type() {}
     explicit r123_engine (result_type r) : engine_type(r) {}

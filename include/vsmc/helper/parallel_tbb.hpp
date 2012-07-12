@@ -29,9 +29,10 @@ class StateTBB : public StateBase<Dim, T, Timer>
 {
     public :
 
-    typedef typename StateBase<Dim, T, Timer>::size_type size_type;
-    typedef T state_type;
-    typedef Timer timer_type;
+    typedef StateBase<Dim, T, Timer> state_base_type;
+    using typename state_base_type::size_type;
+    using typename state_base_type::state_type;
+    using typename state_base_type::timer_type;
 
     explicit StateTBB (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
