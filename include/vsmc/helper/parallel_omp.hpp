@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/base.hpp>
+#include <omp.h>
 
 /// \defgroup OpenMP OpenMP
 /// \ingroup Helper
@@ -30,12 +31,9 @@ class StateOMP : public StateBase<Dim, T, Timer>
     template <typename SizeType>
     void copy (const SizeType *copy_from)
     {
-        const size_type N = size_;
-#pragma omp parallel for
-        for (size_type to = 0; to < N; ++to) {
-            SizeType from = copy_from[to];
-            this->copy_particle(from, to);
-        }
+#pragma omp parallel for default(none) shared(copy_from)
+        for (size_type to = 0; to < size_; ++to)
+            this->copy_particle(copy_from[to], to);
     }
 
     private :
@@ -62,12 +60,12 @@ class InitializeOMP : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
-        const size_type N = particle.value().size();
-        Particle<T> *const p = &particle;
         particle.value().timer().start();
-#pragma omp parallel for reduction(+ : accept)
-        for (size_type i = 0; i < N; ++i)
-            accept += this->initialize_state(SingleParticle<T>(i, p));
+#pragma omp parallel for reduction(+ : accept) default(none) shared(particle)
+        for (size_type i = 0; i < particle.size(); ++i) {
+            SingleParticle<T> sp(i, &particle);
+            accept += this->initialize_state(sp);
+        }
         particle.value().timer().stop();
         this->post_processor(particle);
 
@@ -101,12 +99,13 @@ class MoveOMP : public MoveBase<T, Derived>
 
         this->pre_processor(iter, particle);
         unsigned accept = 0;
-        const size_type N = particle.value().size();
-        Particle<T> *const p = &particle;
         particle.value().timer().start();
-#pragma omp parallel for reduction(+ : accept)
-        for (size_type i = 0; i < N; ++i)
-            accept += this->move_state(iter, SingleParticle<T>(i, p));
+#pragma omp parallel for reduction(+ : accept) default(none) \
+        shared(particle, iter)
+        for (size_type i = 0; i < particle.size(); ++i) {
+            SingleParticle<T> sp(i, &particle);
+            accept += this->move_state(iter, sp);
+        }
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
@@ -140,14 +139,12 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MonitorEvalOMP);
 
         this->pre_processor(iter, particle);
-        const size_type N = particle.value().size();
-        const Particle<T> *const p = &particle;
-        double *const r = res;
         particle.value().timer().start();
-#pragma omp parallel for
-        for (size_type i = 0; i < N; ++i) {
-            double *rr = r + i * dim;
-            this->monitor_state(iter, dim, ConstSingleParticle<T>(i, p), rr);
+#pragma omp parallel for default(none) shared(particle, iter, dim, res)
+        for (size_type i = 0; i < particle.size(); ++i) {
+            double *rr = res + i * dim;
+            ConstSingleParticle<T> sp(i, &particle);
+            this->monitor_state(iter, dim, sp, rr);
         }
         particle.value().timer().stop();
         this->post_processor(iter, particle);
@@ -179,13 +176,12 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, PathEvalOMP);
 
         this->pre_processor(iter, particle);
-        const size_type N = particle.value().size();
-        const Particle<T> *const p = &particle;
         particle.value().timer().start();
-        double *const r = res;
-#pragma omp parallel for
-        for (size_type i = 0; i < N; ++i)
-            r[i] = this->path_state(iter, ConstSingleParticle<T>(i, p));
+#pragma omp parallel for default(none) shared(particle, iter, res)
+        for (size_type i = 0; i < particle.size(); ++i) {
+            ConstSingleParticle<T> sp(i, &particle);
+            res[i] = this->path_state(iter, sp);
+        }
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
