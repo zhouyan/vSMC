@@ -30,9 +30,12 @@ class StateOMP : public StateBase<Dim, T, Timer>
     template <typename SizeType>
     void copy (const SizeType *copy_from)
     {
+        const size_type N = size_;
 #pragma omp parallel for
-        for (size_type to = 0; to < size_; ++to)
-            this->copy_particle(copy_from[to], to);
+        for (size_type to = 0; to < N; ++to) {
+            SizeType from = copy_from[to];
+            this->copy_particle(from, to);
+        }
     }
 
     private :
@@ -59,10 +62,12 @@ class InitializeOMP : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
+        const size_type N = particle.value().size();
+        Particle<T> *const p = &particle;
         particle.value().timer().start();
 #pragma omp parallel for reduction(+ : accept)
-        for (size_type i = 0; i < particle.value().size(); ++i)
-            accept += this->initialize_state(SingleParticle<T>(i, &particle));
+        for (size_type i = 0; i < N; ++i)
+            accept += this->initialize_state(SingleParticle<T>(i, p));
         particle.value().timer().stop();
         this->post_processor(particle);
 
@@ -96,10 +101,12 @@ class MoveOMP : public MoveBase<T, Derived>
 
         this->pre_processor(iter, particle);
         unsigned accept = 0;
+        const size_type N = particle.value().size();
+        Particle<T> *const p = &particle;
         particle.value().timer().start();
 #pragma omp parallel for reduction(+ : accept)
-        for (size_type i = 0; i < particle.value().size(); ++i)
-            accept += this->move_state(iter, SingleParticle<T>(i, &particle));
+        for (size_type i = 0; i < N; ++i)
+            accept += this->move_state(iter, SingleParticle<T>(i, p));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
@@ -133,11 +140,14 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MonitorEvalOMP);
 
         this->pre_processor(iter, particle);
+        const size_type N = particle.value().size();
+        const Particle<T> *const p = &particle;
+        double *const r = res;
         particle.value().timer().start();
 #pragma omp parallel for
-        for (size_type i = 0; i < particle.value().size(); ++i) {
-            this->monitor_state(iter, dim,
-                    ConstSingleParticle<T>(i, &particle), res + i * dim);
+        for (size_type i = 0; i < N; ++i) {
+            double *rr = r + i * dim;
+            this->monitor_state(iter, dim, ConstSingleParticle<T>(i, p), rr);
         }
         particle.value().timer().stop();
         this->post_processor(iter, particle);
@@ -169,13 +179,13 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, PathEvalOMP);
 
         this->pre_processor(iter, particle);
+        const size_type N = particle.value().size();
+        const Particle<T> *const p = &particle;
         particle.value().timer().start();
-        double *r = res;
+        double *const r = res;
 #pragma omp parallel for
-        for (size_type i = 0; i < particle.value().size(); ++i) {
-            r[i] = this->path_state(iter,
-                    ConstSingleParticle<T>(i, &particle));
-        }
+        for (size_type i = 0; i < N; ++i)
+            r[i] = this->path_state(iter, ConstSingleParticle<T>(i, p));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
