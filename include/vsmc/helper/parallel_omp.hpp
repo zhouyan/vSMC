@@ -22,9 +22,9 @@ class StateOMP : public StateBase<Dim, T, Timer>
     public :
 
     typedef StateBase<Dim, T, Timer> state_base_type;
-    using typename state_base_type::size_type;
-    using typename state_base_type::state_type;
-    using typename state_base_type::timer_type;
+    typedef typename state_base_type::size_type  size_type;
+    typedef typename state_base_type::state_type state_type;
+    typedef typename state_base_type::timer_type timer_type;
 
     explicit StateOMP (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
