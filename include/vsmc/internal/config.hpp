@@ -4,11 +4,33 @@
 #include <vsmc/internal/version.hpp>
 #include <vsmc/internal/compiler.hpp>
 
+// cstdint
+
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
 #endif
 
+// min and max
+
 #define VSMC_PREVENT_MIN_MAX
+
+// Optional features
+
+#ifndef VSMC_USE_OMP
+#define VSMC_USE_OMP 0
+#endif
+
+#ifndef VSMC_USE_MSVC_OMP
+#define VSMC_USE_MSVC_OMP 0
+#endif
+
+#ifndef VSMC_USE_TBB
+#define VSMC_USE_TBB 0
+#endif
+
+#ifndef VSMC_USE_CL
+#define VSMC_USE_CL 0
+#endif
 
 // C++11 Libraries
 

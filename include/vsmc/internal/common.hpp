@@ -126,7 +126,9 @@ class StaticAssert<true>
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
 
         USE_ConstSingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
-        USE_SingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase
+        USE_SingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
+
+        USE_OpenMP_WITH_MSVC_IS_NOT_SUPPORTED_UNLESS_VSMC_USE_MSVC_OMP_NONZERO
     };
 };
 

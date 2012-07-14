@@ -8,15 +8,15 @@
 
 #include <vsmc/helper/sequential.hpp>
 
-#ifdef VSMC_USE_OMP
+#if VSMC_USE_OMP
 #include <vsmc/helper/parallel_omp.hpp>
 #endif // VSMC_USE_OMP
 
-#ifdef VSMC_USE_TBB
+#if VSMC_USE_TBB
 #include <vsmc/helper/parallel_tbb.hpp>
 #endif // VSMC_USE_TBB
 
-#ifdef VSMC_USE_CL
+#if VSMC_USE_CL
 #include <vsmc/helper/parallel_cl.hpp>
 #endif // VSMC_USE_CL
 
