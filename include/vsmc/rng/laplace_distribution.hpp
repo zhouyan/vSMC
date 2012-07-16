@@ -3,7 +3,7 @@
 
 #include <vsmc/rng/common.hpp>
 
-namespace vsmc { namespace rng {
+namespace vsmc { namespace cxx11 {
 
 /// \brief Laplace distribution
 /// \ingroup RNG
@@ -164,6 +164,6 @@ std::basic_istream<CharT, Traits> &operator<< (
     return is;
 }
 
-} } // namespace vsmc::rng
+} } // namespace vsmc::cxx11
 
 #endif // VSMC_RNG_LAPLACE_DISTRIBUTION_HPP

@@ -1,5 +1,5 @@
 #include <cassert>
-#include <vsmc/internal/type_traits.hpp>
+#include <vsmc/cxx11/type_traits.hpp>
 
 class Base
 {
@@ -35,7 +35,7 @@ int func_impl<true>(void *value)
 template <typename T>
 int func (T *value)
 {
-    return func_impl<vsmc::internal::is_base_of<Base, T>::value>(value);
+    return func_impl<vsmc::cxx11::is_base_of<Base, T>::value>(value);
 }
 
 int main ()

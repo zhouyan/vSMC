@@ -3,6 +3,14 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/base.hpp>
+#include <omp.h>
+
+#if defined(_MSC_VER) && !VSMC_USE_MSVC_OMP
+#define VSMC_STATIC_ASSERT_MSVC_OMP STATIC_ASSERT(0, \
+        USE_OpenMP_WITH_MSVC_IS_NOT_SUPPORTED_UNLESS_VSMC_USE_MSVC_OMP_NONZERO)
+#else
+#define VSMC_STATIC_ASSERT_MSVC_OMP
+#endif
 
 /// \defgroup OpenMP OpenMP
 /// \ingroup Helper
@@ -20,16 +28,18 @@ class StateOMP : public StateBase<Dim, T, Timer>
 {
     public :
 
-    typedef typename StateBase<Dim, T, Timer>::size_type size_type;
-    typedef T state_type;
-    typedef Timer timer_type;
+    typedef StateBase<Dim, T, Timer> state_base_type;
+    typedef typename state_base_type::size_type  size_type;
+    typedef typename state_base_type::state_type state_type;
+    typedef typename state_base_type::timer_type timer_type;
 
     explicit StateOMP (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
     template <typename SizeType>
     void copy (const SizeType *copy_from)
     {
-#pragma omp parallel for
+        VSMC_STATIC_ASSERT_MSVC_OMP;
+#pragma omp parallel for default(none) shared(copy_from)
         for (size_type to = 0; to < size_; ++to)
             this->copy_particle(copy_from[to], to);
     }
@@ -48,20 +58,23 @@ class InitializeOMP : public InitializeBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
+        VSMC_STATIC_ASSERT_MSVC_OMP;
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, InitializeOMP);
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
         particle.value().timer().start();
-#pragma omp parallel for reduction(+ : accept)
-        for (size_type i = 0; i < particle.value().size(); ++i)
-            accept += this->initialize_state(SingleParticle<T>(i, &particle));
+#pragma omp parallel for reduction(+ : accept) default(none) shared(particle)
+        for (size_type i = 0; i < particle.size(); ++i) {
+            SingleParticle<T> sp(i, &particle);
+            accept += this->initialize_state(sp);
+        }
         particle.value().timer().stop();
         this->post_processor(particle);
 
@@ -86,19 +99,23 @@ class MoveOMP : public MoveBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
+        VSMC_STATIC_ASSERT_MSVC_OMP;
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MoveOMP);
 
         this->pre_processor(iter, particle);
         unsigned accept = 0;
         particle.value().timer().start();
-#pragma omp parallel for reduction(+ : accept)
-        for (size_type i = 0; i < particle.value().size(); ++i)
-            accept += this->move_state(iter, SingleParticle<T>(i, &particle));
+#pragma omp parallel for reduction(+ : accept) default(none) \
+        shared(particle, iter)
+        for (size_type i = 0; i < particle.size(); ++i) {
+            SingleParticle<T> sp(i, &particle);
+            accept += this->move_state(iter, sp);
+        }
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
@@ -123,20 +140,22 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
+        VSMC_STATIC_ASSERT_MSVC_OMP;
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MonitorEvalOMP);
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-#pragma omp parallel for
-        for (size_type i = 0; i < particle.value().size(); ++i) {
-            this->monitor_state(iter, dim,
-                    ConstSingleParticle<T>(i, &particle), res + i * dim);
+#pragma omp parallel for default(none) shared(particle, iter, dim, res)
+        for (size_type i = 0; i < particle.size(); ++i) {
+            double *rr = res + i * dim;
+            ConstSingleParticle<T> sp(i, &particle);
+            this->monitor_state(iter, dim, sp, rr);
         }
         particle.value().timer().stop();
         this->post_processor(iter, particle);
@@ -160,20 +179,20 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
+        VSMC_STATIC_ASSERT_MSVC_OMP;
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, PathEvalOMP);
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        double *r = res;
-#pragma omp parallel for
-        for (size_type i = 0; i < particle.value().size(); ++i) {
-            r[i] = this->path_state(iter,
-                    ConstSingleParticle<T>(i, &particle));
+#pragma omp parallel for default(none) shared(particle, iter, res)
+        for (size_type i = 0; i < particle.size(); ++i) {
+            ConstSingleParticle<T> sp(i, &particle);
+            res[i] = this->path_state(iter, sp);
         }
         particle.value().timer().stop();
         this->post_processor(iter, particle);

@@ -16,7 +16,7 @@ class Sampler
     public :
 
     /// The type of the number of particles
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
 
     /// The type of the particle values
     typedef T value_type;
@@ -31,19 +31,13 @@ class Sampler
     typedef Path<T> path_type;
 
     /// The type of Initialization functor
-    typedef internal::function<unsigned (particle_type &, void *)> init_type;
+    typedef cxx11::function<unsigned (particle_type &, void *)> init_type;
 
     /// The type of Move functor
-    typedef internal::function<unsigned (unsigned, particle_type &)> move_type;
-
-    /// The type of MCMC functor
-    typedef internal::function<unsigned (unsigned, particle_type &)> mcmc_type;
+    typedef cxx11::function<unsigned (unsigned, particle_type &)> move_type;
 
     /// The type of the Move queue
-    typedef std::deque<move_type> move_queue_type;
-
-    /// The type of the MCMC queue
-    typedef std::deque<mcmc_type> mcmc_queue_type;
+    typedef std::vector<move_type> move_queue_type;
 
     /// The type of ESS history vector
     typedef std::vector<double> ess_history_type;
@@ -52,7 +46,7 @@ class Sampler
     typedef std::vector<bool> resampled_history_type;
 
     /// The type of accept count history vector
-    typedef std::vector<std::deque<unsigned> > accept_history_type;
+    typedef std::vector<std::vector<unsigned> > accept_history_type;
 
     /// The type of Monitor map
     typedef std::map<std::string, monitor_type> monitor_map_type;
@@ -192,20 +186,20 @@ class Sampler
     }
 
     /// Clear the MCMC queue and set a single new MCMC
-    void mcmc (const mcmc_type &new_mcmc)
+    void mcmc (const move_type &new_mcmc)
     {
         mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
     }
 
     /// Read and write access to the MCMC queue
-    mcmc_queue_type &mcmc_queue ()
+    move_queue_type &mcmc_queue ()
     {
         return mcmc_queue_;
     }
 
     /// Read only access to the MCMC queue
-    const mcmc_queue_type &mcmc_queue () const
+    const move_queue_type &mcmc_queue () const
     {
         return mcmc_queue_;
     }
@@ -230,7 +224,7 @@ class Sampler
                 ("CALL **Sampler::initialize** WITH AN INVALID "
                  "INITIALIZE FUNCTOR"));
         accept_history_.push_back(
-                std::deque<unsigned>(1, init_(particle_, param)));
+                std::vector<unsigned>(1, init_(particle_, param)));
         do_resampling();
         do_monitoring();
     }
@@ -241,7 +235,7 @@ class Sampler
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
             unsigned ia = 0;
-            std::deque<unsigned> acc(move_queue_.size() + mcmc_queue_.size());
+            std::vector<unsigned> acc(move_queue_.size() + mcmc_queue_.size());
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
@@ -254,7 +248,7 @@ class Sampler
 
             do_resampling();
 
-            for (typename mcmc_queue_type::iterator
+            for (typename move_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 VSMC_RUNTIME_ASSERT((bool(*m)),
                         ("CALL **Sampler::iterate** WITH AN INVALID "
@@ -269,18 +263,26 @@ class Sampler
         }
     }
 
+    /// \brief Add a monitor
+    ///
+    /// \param name The name of the monitor
+    /// \param mon The new monitor to be added
+    void monitor (const std::string &name, const monitor_type &mon)
+    {
+        monitor_.insert(std::make_pair(name, mon));
+    }
+
     /// \brief Add a monitor with a evaluation functor
     ///
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The functor used to evaluate the results
     ///
-    /// \sa Monitor<T>
+    /// \sa Monitor::eval_type
     void monitor (const std::string &name, unsigned dim,
             const typename monitor_type::eval_type &eval)
     {
         monitor_.insert(std::make_pair(name, monitor_type(dim, eval)));
-        monitor_name_.insert(name);
     }
 
     /// Read only access to a named monitor through an iterator
@@ -312,14 +314,12 @@ class Sampler
     void clear_monitor (const std::string &name)
     {
         monitor_.erase(name);
-        monitor_name_.erase(name);
     }
 
     /// Erase all monitors
     void clear_monitor ()
     {
         monitor_.clear();
-        monitor_name_.clear();
     }
 
     /// Read only access to the Path sampling monitor
@@ -501,7 +501,7 @@ class Sampler
 
     init_type init_;
     move_queue_type move_queue_;
-    mcmc_queue_type mcmc_queue_;
+    move_queue_type mcmc_queue_;
 
     double threshold_;
 
@@ -512,7 +512,6 @@ class Sampler
     accept_history_type accept_history_;
 
     monitor_map_type monitor_;
-    std::set<std::string> monitor_name_;
     path_type path_;
 
     void do_resampling ()

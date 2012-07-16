@@ -2,7 +2,6 @@
 #define VSMC_CORE_RESAMPLE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/rng/random.hpp>
 
 namespace vsmc {
 
@@ -23,7 +22,7 @@ inline void weight2replication (SizeType N, SizeType S, RngSetType &rng_set,
 
         for (SizeType i = 0; i != N; ++i) {
             if (acc_s < S && weight[i] > 0) {
-                typedef typename make_signed<SizeType>::type s_t;
+                typedef typename cxx11::make_signed<SizeType>::type s_t;
                 s_t s = S - acc_s;
                 double p = weight[i] / (sum_w - acc_w);
                 if (p < 0) {
@@ -34,7 +33,7 @@ inline void weight2replication (SizeType N, SizeType S, RngSetType &rng_set,
                     p = 1;
                     assert(p - 1 < 1e-6);
                 }
-                rng::binomial_distribution<s_t> binom(s, p);
+                cxx11::binomial_distribution<s_t> binom(s, p);
                 replication[i] = binom(rng_set.rng(i));
             }
             acc_w += weight[i];
@@ -124,7 +123,7 @@ class Resample<ResampleType<ResampleScheme, STRATIFIED>,
 
         SizeType j = 0;
         SizeType k = 0;
-        rng::uniform_real_distribution<double> unif(0,1);
+        cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng_set.rng(0));
         double cw = weight[0];
         while (j != N) {
@@ -156,7 +155,7 @@ class Resample<ResampleType<ResampleScheme, SYSTEMATIC>,
 
         SizeType j = 0;
         SizeType k = 0;
-        rng::uniform_real_distribution<double> unif(0,1);
+        cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng_set.rng(0));
         double cw = weight[0];
         while (j != N) {
@@ -196,7 +195,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
         residual_ /= dsize;
         SizeType j = 0;
         SizeType k = 0;
-        rng::uniform_real_distribution<double> unif(0,1);
+        cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng_set.rng(0));
         double cw = residual_[0];
         while (j != size) {
@@ -244,7 +243,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
         residual_ /= dsize;
         SizeType j = 0;
         SizeType k = 0;
-        rng::uniform_real_distribution<double> unif(0,1);
+        cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng_set.rng(0));
         double cw = residual_[0];
         while (j != size) {
@@ -257,7 +256,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
             cw += residual_[++k];
         }
         for (SizeType i = 0; i != N; ++i)
-            replication[i] += integral_[i];
+            replication[i] += static_cast<SizeType>(integral_[i]);
     }
 
     private :

@@ -1,6 +1,5 @@
 #include <cassert>
-#include <cstddef>
-#include <vsmc/internal/functional.hpp>
+#include <vsmc/cxx11/functional.hpp>
 
 int fn (int a)
 {
@@ -11,9 +10,9 @@ class cl
 {
     public :
 
-    typedef vsmc::internal::function<int (int)> f_type;
+    typedef vsmc::cxx11::function<int (int)> f_type;
 
-    cl (f_type f = NULL) : f_(f) {}
+    cl (f_type f = 0) : f_(f) {}
 
     int operator() (int a)
     {
@@ -27,14 +26,14 @@ class cl
 
 int main ()
 {
-    vsmc::internal::function<int (int)> f;
+    vsmc::cxx11::function<int (int)> f;
     assert(!bool(f));
 
     f = fn;
     assert(bool(f));
     assert(f(2) == 4);
 
-    f = NULL;
+    f = 0;
     assert(!bool(f));
 
     cl c;

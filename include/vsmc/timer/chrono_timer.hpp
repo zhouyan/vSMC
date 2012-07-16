@@ -1,21 +1,7 @@
-#ifndef VSMC_HELPER_TIMER_CHRONO_HPP
-#define VSMC_HELPER_TIMER_CHRONO_HPP
+#ifndef VSMC_TIMER_CHRONO_TIMER_HPP
+#define VSMC_TIMER_CHRONO_TIMER_HPP
 
-#include <vsmc/internal/config.hpp>
-
-#if VSMC_HAS_CXX11LIB_CHRONO
-#include <chrono>
-namespace vsmc { namespace internal { namespace chrono {
-using std::chrono::system_clock;
-using std::chrono::duration;
-} } }
-#else
-#include <boost/chrono.hpp>
-namespace vsmc { namespace internal { namespace chrono {
-using boost::chrono::system_clock;
-using boost::chrono::duration;
-} } }
-#endif // VSMC_USE_
+#include <vsmc/cxx11/chrono.hpp>
 
 namespace vsmc {
 
@@ -36,15 +22,15 @@ class ChronoTimer
     {
         if (!running_) {
             running_ = true;
-            last_ = internal::chrono::system_clock::now();
+            last_ = cxx11::chrono::system_clock::now();
         }
     }
 
     void stop () const
     {
         if (running_) {
-            time_ += internal::chrono::duration<double>(
-                    internal::chrono::system_clock::now() - last_).count();
+            time_ += cxx11::chrono::duration<double>(
+                    cxx11::chrono::system_clock::now() - last_).count();
             running_ = false;
         }
     }
@@ -63,10 +49,10 @@ class ChronoTimer
     private :
 
     mutable double time_;
-    mutable internal::chrono::system_clock::time_point last_;
+    mutable cxx11::chrono::system_clock::time_point last_;
     mutable bool running_;
 }; // class ChronoTimer
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_TIMER_CHRONO_HPP
+#endif // VSMC_TIMER_CHRONO_TIMER_HPP

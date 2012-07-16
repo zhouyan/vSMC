@@ -1,5 +1,5 @@
-#ifndef VSMC_HELPER_TIMER_NULL_HPP
-#define VSMC_HELPER_TIMER_NULL_HPP
+#ifndef VSMC_TIMER_NULL_TIMER_HPP
+#define VSMC_TIMER_NULL_TIMER_HPP
 
 namespace vsmc {
 
@@ -37,4 +37,4 @@ class NullTimer
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_TIMER_NULL_HPP
+#endif // VSMC_TIMER_NULL_TIMER_HPP

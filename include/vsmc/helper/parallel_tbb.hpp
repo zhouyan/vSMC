@@ -29,9 +29,10 @@ class StateTBB : public StateBase<Dim, T, Timer>
 {
     public :
 
-    typedef typename StateBase<Dim, T, Timer>::size_type size_type;
-    typedef T state_type;
-    typedef Timer timer_type;
+    typedef StateBase<Dim, T, Timer> state_base_type;
+    typedef typename state_base_type::size_type  size_type;
+    typedef typename state_base_type::state_type state_type;
+    typedef typename state_base_type::timer_type timer_type;
 
     explicit StateTBB (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
@@ -79,7 +80,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (Particle<T> &particle, void *param)
@@ -156,7 +157,7 @@ class MoveTBB : public MoveBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
@@ -234,7 +235,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
@@ -300,7 +301,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)

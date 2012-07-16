@@ -1,19 +1,12 @@
 #ifndef VSMC_INTERNAL_COMMON_HPP
 #define VSMC_INTERNAL_COMMON_HPP
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif // __STDC_CONSTANT_MACROS
-
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <utility>
-#include <limits>
 #include <map>
-#include <set>
-#include <deque>
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -23,10 +16,11 @@
 #include <Eigen/Dense>
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/version.hpp>
-#include <vsmc/internal/functional.hpp>
-#include <vsmc/internal/type_traits.hpp>
 #include <vsmc/internal/forward.hpp>
+
+#include <vsmc/cxx11/functional.hpp>
+#include <vsmc/cxx11/random.hpp>
+#include <vsmc/cxx11/type_traits.hpp>
 
 #if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_NULLPTR nullptr
@@ -56,16 +50,18 @@
     if (vsmc::StaticAssert<bool(cond)>::message) {};
 #endif
 
-#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, inner_type, default_type) \
+#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)   \
 namespace vsmc {                                                             \
                                                                              \
-namespace internal {                                                         \
+namespace traits {                                                           \
                                                                              \
 template <typename T>                                                        \
-class Has##OuterType##Impl                                                   \
+struct Has##OuterType##Impl                                                  \
 {                                                                            \
+    private :                                                                \
+                                                                             \
     struct char2 {char c1; char c2;};                                        \
-    template <typename U> static char test (typename U::inner_type *);       \
+    template <typename U> static char test (typename U::InnerType *);        \
     template <typename U> static char2 test (...);                           \
                                                                              \
     public :                                                                 \
@@ -75,24 +71,24 @@ class Has##OuterType##Impl                                                   \
 };                                                                           \
                                                                              \
 template <typename T>                                                        \
-class Has##OuterType :                                                       \
-    public integral_constant<bool, Has##OuterType##Impl<T>::value>           \
+struct Has##OuterType :                                                      \
+    public cxx11::integral_constant <bool, Has##OuterType##Impl<T>::value>   \
 {};                                                                          \
                                                                              \
 template <typename T, bool> struct OuterType##Dispatch;                      \
                                                                              \
 template <typename T> struct OuterType##Dispatch<T, true>                    \
-{typedef typename T::inner_type type;};                                      \
+{typedef typename T::InnerType type;};                                       \
                                                                              \
 template <typename T> struct OuterType##Dispatch<T, false>                   \
-{typedef default_type type;};                                                \
+{typedef DefaultType type;};                                                 \
                                                                              \
 }                                                                            \
                                                                              \
 template <typename T> struct OuterType##Trait                                \
 {                                                                            \
-    typedef typename internal::OuterType##Dispatch<T,                        \
-        internal::Has##OuterType<T>::value>::type type;                      \
+    static const bool value = traits::Has##OuterType<T>::value;              \
+    typedef typename traits::OuterType##Dispatch<T, value>::type type;       \
 };                                                                           \
                                                                              \
 }
@@ -129,8 +125,10 @@ class StaticAssert<true>
         USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
 
+        USE_ConstSingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
         USE_SingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
-        USE_ConstSingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase
+
+        USE_OpenMP_WITH_MSVC_IS_NOT_SUPPORTED_UNLESS_VSMC_USE_MSVC_OMP_NONZERO
     };
 };
 

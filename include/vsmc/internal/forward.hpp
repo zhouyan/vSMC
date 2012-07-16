@@ -3,26 +3,23 @@
 
 namespace vsmc {
 
-namespace internal {
-
-class WeightBase;
-template <typename> class Weight;
-template <typename, typename> class InitializeBase;
-template <typename, typename> class MoveBase;
-template <typename, typename> class MonitorEvalBase;
-template <typename, typename> class PathEvalBase;
-
-} // namespace vsmc::internal
-
 class NullTimer;
 class VBase;
 
+class RngSetSeq;
+class RngSetPrl;
+class WeightSetBase;
 template <typename> class Sampler;
 template <typename> class Particle;
 template <typename> class Monitor;
 template <typename> class Path;
 
 template <unsigned, typename, typename> class StateBase;
+template <typename, typename> class InitializeBase;
+template <typename, typename> class MoveBase;
+template <typename, typename> class MonitorEvalBase;
+template <typename, typename> class PathEvalBase;
+
 template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 

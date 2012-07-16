@@ -16,46 +16,35 @@ class WeightSetBase
 
     template <typename SizeType>
     explicit WeightSetBase (SizeType N) :
-        ess_(static_cast<double>(N)), weight_(N), log_weight_(N),
-        ess_cached_(false), weight_cached_(false), log_weight_cached_(false) {}
+        ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
     /// Read only access to the weights
-    const weight_type &weight () const
+    template <typename OutputIter>
+    void read_weight (OutputIter first) const
     {
-        if (!weight_cached_) {
-            weight_ = log_weight().array().exp();
-            double sum = weight_.sum();
-            weight_ *= 1 / sum;
-            weight_cached_ = true;
-        }
-
-        return weight_;
-    }
-
-    /// Read only access to the weights
-    template <typename SizeType, typename OutputIter>
-    void weight (SizeType N, OutputIter *first) const
-    {
-        std::copy(weight().data(), weight().data() + N, first);
+        std::copy(weight_.data(), weight_.data() + weight_.size(), first);
     }
 
     /// Read only access to the log weights
-    const weight_type &log_weight () const
+    template <typename OutputIter>
+    void read_log_weight (OutputIter first) const
     {
-        if (!log_weight_cached_) {
-            double max_weight = log_weight_.maxCoeff();
-            log_weight_ = log_weight_.array() - max_weight;
-            log_weight_cached_ = true;
-        }
-
-        return log_weight_;
+        std::copy(log_weight_.data(), log_weight_.data() + log_weight_.size(),
+                first);
     }
 
-    /// Read only access to the log weights
-    template <typename SizeType, typename OutputIter>
-    void log_weight (SizeType N, OutputIter *first) const
+    /// Read only access to the weight of a particle
+    template <typename SizeType>
+    double weight (SizeType id) const
     {
-        std::copy(log_weight().data(), log_weight().data() + N, first);
+        return weight_[id];
+    }
+
+    /// Read only access to the log weight of a particle
+    template <typename SizeType>
+    double log_weight (SizeType id) const
+    {
+        return log_weight_[id];
     }
 
     /// Set equal weights for all particles
@@ -64,10 +53,6 @@ class WeightSetBase
         ess_ = static_cast<double>(weight_.size());
         weight_.setConstant(1.0 / weight_.size());
         log_weight_.setConstant(0);
-
-        ess_cached_ = true;
-        weight_cached_ = true;
-        log_weight_cached_ = true;
     }
 
     /// \brief Set the log weights with a pointer
@@ -117,11 +102,6 @@ class WeightSetBase
     /// The current ESS (Effective Sample Size)
     double ess () const
     {
-        if (!ess_cached_) {
-            ess_ = 1 / weight().squaredNorm();
-            ess_cached_ = true;
-        }
-
         return ess_;
     }
 
@@ -131,15 +111,16 @@ class WeightSetBase
     mutable weight_type weight_;
     mutable weight_type log_weight_;
 
-    mutable bool ess_cached_;
-    mutable bool weight_cached_;
-    mutable bool log_weight_cached_;
-
     void set_weight ()
     {
-        ess_cached_ = false;
-        weight_cached_ = false;
-        log_weight_cached_ = false;
+        double max_weight = log_weight_.maxCoeff();
+        log_weight_ = log_weight_.array() - max_weight;
+
+        weight_ = log_weight_.array().exp();
+        double sum = weight_.sum();
+        weight_ *= 1 / sum;
+
+        ess_ = 1 / weight_.squaredNorm();
     }
 }; // class WeightSetBase
 

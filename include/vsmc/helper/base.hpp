@@ -2,6 +2,7 @@
 #define VSMC_HELPER_BASE_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/timer/null_timer.hpp>
 
 #define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename) \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)), ( \
@@ -26,7 +27,7 @@ class IsBaseOfState
     private :
 
     struct char2 {char c1; char c2;};
-    typedef typename internal::remove_cv<D>::type derived_type;
+    typedef typename cxx11::remove_cv<D>::type derived_type;
 
     template <unsigned Dim, typename T, typename Timer>
     static char test (State<Dim, T, Timer> *);

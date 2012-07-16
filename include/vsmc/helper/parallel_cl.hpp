@@ -4,10 +4,7 @@
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/rng.hpp>
-#include <vsmc/helper/base.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
-#include <vsmc/helper/parallel_cl/query.hpp>
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \
     VSMC_RUNTIME_ASSERT((context_created()), ( \
@@ -361,7 +358,7 @@ class StateCL
     /// #include <Random123/u01.h>
     /// #endif
     /// \endcode
-    void build (const char *source, const char *flags)
+    void build (const std::string &source, const std::string &flags)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(build);
 
@@ -383,7 +380,7 @@ class StateCL
             ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << Dim << ";\n";
-            rng::Seed &seed = rng::Seed::create();
+            Seed &seed = Seed::create();
             ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
             seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";
@@ -393,7 +390,7 @@ class StateCL
         }
 
         try {
-            program_.build(device_, flags);
+            program_.build(device_, flags.c_str());
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
                     &build_log_);
         } catch (cl::Error &err) {
@@ -487,13 +484,13 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
-        typedef typename internal::remove_cv<OutputIter>::type ptr_type;
-        typedef typename internal::remove_pointer<ptr_type>::type val_type;
-        typedef typename internal::remove_cv<val_type>::type host_type;
-        typedef typename internal::remove_cv<CLType>::type device_type;
+        typedef typename cxx11::remove_cv<OutputIter>::type ptr_type;
+        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
+        typedef typename cxx11::remove_cv<val_type>::type host_type;
+        typedef typename cxx11::remove_cv<CLType>::type device_type;
 
-        if (internal::is_pointer<OutputIter>::value) {
-            if (internal::is_same<host_type, device_type>::value) {
+        if (cxx11::is_pointer<OutputIter>::value) {
+            if (cxx11::is_same<host_type, device_type>::value) {
                 command_queue_.finish();
                 timer_read_buffer_.start();
                 command_queue_.enqueueReadBuffer(buf, 1, 0,
@@ -525,13 +522,13 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
-        typedef typename internal::remove_cv<InputIter>::type ptr_type;
-        typedef typename internal::remove_pointer<ptr_type>::type val_type;
-        typedef typename internal::remove_cv<val_type>::type host_type;
-        typedef typename internal::remove_cv<CLType>::type device_type;
+        typedef typename cxx11::remove_cv<InputIter>::type ptr_type;
+        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
+        typedef typename cxx11::remove_cv<val_type>::type host_type;
+        typedef typename cxx11::remove_cv<CLType>::type device_type;
 
-        if (internal::is_pointer<InputIter>::value) {
-            if (internal::is_same<host_type, device_type>::value) {
+        if (cxx11::is_pointer<InputIter>::value) {
+            if (cxx11::is_same<host_type, device_type>::value) {
                 command_queue_.finish();
                 timer_write_buffer_.start();
                 command_queue_.enqueueWriteBuffer(buf, 1, 0,
@@ -555,11 +552,11 @@ class StateCL
     /// \param name The name of the kernel
     ///
     /// \note The program has to be built before call this member
-    cl::Kernel create_kernel (const char *name) const
+    cl::Kernel create_kernel (const std::string &name) const
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel)
 
-        return cl::Kernel(program_, name);
+        return cl::Kernel(program_, name.c_str());
     }
 
     /// \brief Run a kernel in parallel on the device
@@ -715,7 +712,7 @@ class InitializeCL
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (Particle<T> &particle, void *param)
@@ -754,7 +751,7 @@ class InitializeCL
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_);
         }
 
         kernel_.setArg(0, particle.value().state_device());
@@ -808,7 +805,7 @@ class MoveCL
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
@@ -845,7 +842,7 @@ class MoveCL
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_);
         }
 
         kernel_.setArg(0, (cl_uint) iter);
@@ -897,7 +894,7 @@ class MonitorEvalCL
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
@@ -935,7 +932,7 @@ class MonitorEvalCL
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_);
             buffer_device_ = particle.value().template
                 create_buffer<typename T::state_type>(
                         particle.value().size() * dim);
@@ -993,7 +990,7 @@ class PathEvalCL
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
     double operator() (unsigned iter, const Particle<T> &particle,
@@ -1034,7 +1031,7 @@ class PathEvalCL
 
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_.c_str());
+            kernel_ = particle.value().create_kernel(kernel_name_);
             buffer_device_ = particle.value().template
                 create_buffer<typename T::state_type>(
                         particle.value().size());

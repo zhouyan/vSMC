@@ -31,7 +31,7 @@ class Monitor
     typedef T value_type;
 
     /// The type of evaluation functor
-    typedef internal::function<void (
+    typedef cxx11::function<void (
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
 
     /// The type of the index vector
@@ -145,8 +145,10 @@ class Monitor
                  "EVALUATION FUNCTOR"));
 
         buffer_.resize(dim_, particle.size());
+        weight_.resize(particle.size());
         eval_(iter, dim_, particle, buffer_.data());
-        result_.noalias() = buffer_ * particle.weight();
+        particle.read_weight(weight_.data());
+        result_.noalias() = buffer_ * weight_;
 
         assert(result_.size() == dim_);
         assert(record_.size() == dim_);
@@ -172,6 +174,7 @@ class Monitor
 
     Eigen::MatrixXd buffer_;
     Eigen::VectorXd result_;
+    Eigen::VectorXd weight_;
     unsigned dim_;
     eval_type eval_;
     index_type index_;

@@ -9,6 +9,4 @@
 
 #include <vsmc/internal/config.hpp>
 
-#define VSMC_PREVENT_MIN_MAX
-
 #endif // VSMC_RNG_COMMON_HPP

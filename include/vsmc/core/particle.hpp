@@ -41,15 +41,17 @@ class Particle :
     typedef typename WeightSetTypeTrait<T>::type weight_set_type;
 
     /// The type of resampling operation functor
-    typedef internal::function<void
+    typedef cxx11::function<void
         (size_type, rng_set_type &, double *, size_type *)> resample_op_type;
 
-    using typename rng_set_type::rng_type;
-    using typename weight_set_type::weight_type;
+    typedef typename rng_set_type::rng_type        rng_type;
+    typedef typename weight_set_type::weight_type  weight_type;
 
     using rng_set_type::rng;
     using weight_set_type::weight;
     using weight_set_type::log_weight;
+    using weight_set_type::read_weight;
+    using weight_set_type::read_log_weight;
     using weight_set_type::set_equal_weight;
     using weight_set_type::set_log_weight;
     using weight_set_type::add_log_weight;
@@ -100,7 +102,7 @@ class Particle :
     {
         resampled_ = ess() < threshold * size_;
         if (resampled_) {
-            weight(size_, weight_.data());
+            read_weight(weight_.data());
             resample_op_(size_, *this, weight_.data(), replication_.data());
             resample_do();
         }
