@@ -36,7 +36,6 @@ class WeightSetBase
     template <typename SizeType, typename OutputIter>
     void weight (SizeType N, OutputIter *first) const
     {
-        assert(weight_.size() >= N);
         std::copy(weight().data(), weight().data() + N, first);
     }
 
@@ -56,9 +55,6 @@ class WeightSetBase
     template <typename SizeType, typename OutputIter>
     void log_weight (SizeType N, OutputIter *first) const
     {
-        VSMC_RUNTIME_ASSERT((log_weight_.size() >= N),
-                "Size of weight set is too small")
-
         std::copy(log_weight().data(), log_weight().data() + N, first);
     }
 
