@@ -97,6 +97,8 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 
 namespace vsmc {
 
+enum {Dynamic};
+
 template <bool> class StaticAssert {};
 
 template <>
@@ -126,7 +128,10 @@ class StaticAssert<true>
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
 
         USE_ConstSingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
-        USE_SingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase
+        USE_SingleParticle_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateBase,
+
+        USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT,
+        USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT
     };
 };
 

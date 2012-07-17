@@ -62,9 +62,19 @@ class StateBase
     typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
 
     /// The dimension of the problem
-    static unsigned dim ()
+    unsigned dim ()
     {
-        return Dim;
+        return dim_;
+    }
+
+    /// Resize the dimension of the problem
+    void resize_dim (unsigned dim)
+    {
+        VSMC_STATIC_ASSERT((!Dim),
+                USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT);
+
+        dim_ = dim;
+        state_.resize(dim_, size_);
     }
 
     /// The number of particles
@@ -119,13 +129,7 @@ class StateBase
 
     protected :
 
-    explicit StateBase (size_type N) : size_(N), state_(Dim, N) {}
-
-    void resize (size_type N)
-    {
-        size_ = N;
-        state_.resize(Dim, N);
-    }
+    explicit StateBase (size_type N) : size_(N), dim_(Dim), state_(dim_, N) {}
 
     void copy_particle (size_type from, size_type to)
     {
@@ -136,6 +140,7 @@ class StateBase
     private :
 
     size_type size_;
+    unsigned dim_;
     state_mat_type state_;
     timer_type timer_;
 }; // class StateBase
