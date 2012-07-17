@@ -62,10 +62,8 @@ class InitializeOMP : public InitializeBase<T, Derived>
         unsigned accept = 0;
         particle.value().timer().start();
 #pragma omp parallel for reduction(+ : accept) default(none) shared(particle)
-        for (size_type i = 0; i < particle.size(); ++i) {
-            SingleParticle<T> sp(i, &particle);
-            accept += this->initialize_state(sp);
-        }
+        for (size_type i = 0; i < particle.size(); ++i)
+            accept += this->initialize_state(SingleParticle<T>(i, &particle));
         particle.value().timer().stop();
         this->post_processor(particle);
 
@@ -102,10 +100,8 @@ class MoveOMP : public MoveBase<T, Derived>
         particle.value().timer().start();
 #pragma omp parallel for reduction(+ : accept) default(none) \
         shared(particle, iter)
-        for (size_type i = 0; i < particle.size(); ++i) {
-            SingleParticle<T> sp(i, &particle);
-            accept += this->move_state(iter, sp);
-        }
+        for (size_type i = 0; i < particle.size(); ++i)
+            accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
@@ -142,9 +138,8 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
         particle.value().timer().start();
 #pragma omp parallel for default(none) shared(particle, iter, dim, res)
         for (size_type i = 0; i < particle.size(); ++i) {
-            double *rr = res + i * dim;
-            ConstSingleParticle<T> sp(i, &particle);
-            this->monitor_state(iter, dim, sp, rr);
+            this->monitor_state(iter, dim,
+                    ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
         particle.value().timer().stop();
         this->post_processor(iter, particle);
@@ -179,8 +174,8 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
         particle.value().timer().start();
 #pragma omp parallel for default(none) shared(particle, iter, res)
         for (size_type i = 0; i < particle.size(); ++i) {
-            ConstSingleParticle<T> sp(i, &particle);
-            res[i] = this->path_state(iter, sp);
+            res[i] = this->path_state(iter,
+                    ConstSingleParticle<T>(i, &particle));
         }
         particle.value().timer().stop();
         this->post_processor(iter, particle);

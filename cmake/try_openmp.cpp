@@ -48,8 +48,6 @@ class Base
     void eval_dispatch(int dim, Element elem, int *res,
             void (Base::*) (int, Element, int *))
     {
-        assert(elem.i() >= 0);
-        assert(elem.i() < elem.size());
         for (int d = 0; d != dim; ++d)
             res[d] = elem.src();
     }
@@ -78,14 +76,8 @@ class Evaluator : public Base<Derived>
             src[i] = i;
 
 #pragma omp parallel for default(none) shared(N, dim, src, res)
-        for (int i = 0; i < src.size(); ++i) {
-            int *r = res + i * dim;
-            Element elem(i, &src);
-            assert(i >= 0);
-            assert(i < N);
-            assert(elem.i() == i);
-            this->eval(dim, elem, r);
-        }
+        for (int i = 0; i < src.size(); ++i)
+            this->eval(dim, Element(i, &src), res + i * dim);
     }
 };
 
@@ -95,8 +87,6 @@ class StaticImpl : public Evaluator<StaticImpl>
 
     static void eval (int dim, Element elem, int *res)
     {
-        assert(elem.i() >= 0);
-        assert(elem.i() < elem.size());
         for (int d = 0; d != dim; ++d)
             res[d] = elem.src();
     }
@@ -108,8 +98,6 @@ class NonStaticImpl : public Evaluator<NonStaticImpl>
 
     void eval (int dim, Element elem, int *r)
     {
-        assert(elem.i() >= 0);
-        assert(elem.i() < elem.size());
         for (int d = 0; d != dim; ++d)
             r[d] = elem.src();
     }
@@ -121,8 +109,6 @@ class VirtualImpl : public Evaluator<VirtualImpl>
 
     void eval (int dim, Element elem, int *r)
     {
-        assert(elem.i() >= 0);
-        assert(elem.i() < elem.size());
         for (int d = 0; d != dim; ++d)
             r[d] = elem.src();
     }
@@ -133,6 +119,10 @@ class DefaultImpl : public Evaluator<DefaultImpl>
 
 int main ()
 {
+#ifndef _OPENMP
+    assert(0);
+#endif
+
     const int N = 5000000;
     const int Dim = 4;
     int *res = new int[N * Dim];
