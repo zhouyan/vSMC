@@ -20,10 +20,6 @@
 #define VSMC_USE_OMP 0
 #endif
 
-#ifndef VSMC_USE_MSVC_OMP
-#define VSMC_USE_MSVC_OMP 0
-#endif
-
 #ifndef VSMC_USE_TBB
 #define VSMC_USE_TBB 0
 #endif

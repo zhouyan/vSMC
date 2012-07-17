@@ -5,13 +5,6 @@
 #include <vsmc/helper/base.hpp>
 #include <omp.h>
 
-#if defined(_MSC_VER) && !VSMC_USE_MSVC_OMP
-#define VSMC_STATIC_ASSERT_MSVC_OMP STATIC_ASSERT(0, \
-        USE_OpenMP_WITH_MSVC_IS_NOT_SUPPORTED_UNLESS_VSMC_USE_MSVC_OMP_NONZERO)
-#else
-#define VSMC_STATIC_ASSERT_MSVC_OMP
-#endif
-
 /// \defgroup OpenMP OpenMP
 /// \ingroup Helper
 /// \brief Parallelized samplers with OpenMP
@@ -38,7 +31,6 @@ class StateOMP : public StateBase<Dim, T, Timer>
     template <typename SizeType>
     void copy (const SizeType *copy_from)
     {
-        VSMC_STATIC_ASSERT_MSVC_OMP;
 #pragma omp parallel for default(none) shared(copy_from)
         for (size_type to = 0; to < size_; ++to)
             this->copy_particle(copy_from[to], to);
@@ -63,7 +55,6 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_MSVC_OMP;
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, InitializeOMP);
 
         this->initialize_param(particle, param);
@@ -104,7 +95,6 @@ class MoveOMP : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_MSVC_OMP;
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MoveOMP);
 
         this->pre_processor(iter, particle);
@@ -146,7 +136,6 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_MSVC_OMP;
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MonitorEvalOMP);
 
         this->pre_processor(iter, particle);
@@ -184,7 +173,6 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_MSVC_OMP;
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, PathEvalOMP);
 
         this->pre_processor(iter, particle);
