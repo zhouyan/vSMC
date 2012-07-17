@@ -70,7 +70,7 @@ class StateBase
     /// Resize the dimension of the problem
     void resize_dim (unsigned dim)
     {
-        VSMC_STATIC_ASSERT((!Dim),
+        VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT);
 
         dim_ = dim;
