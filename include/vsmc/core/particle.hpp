@@ -44,8 +44,7 @@ class Particle :
     typedef cxx11::function<void
         (size_type, rng_set_type &, double *, size_type *)> resample_op_type;
 
-    typedef typename rng_set_type::rng_type        rng_type;
-    typedef typename weight_set_type::weight_type  weight_type;
+    typedef typename rng_set_type::rng_type rng_type;
 
     using rng_set_type::rng;
     using weight_set_type::weight;
@@ -219,9 +218,9 @@ class Particle :
     size_type size_;
     value_type value_;
 
-    std::vector<size_type> replication_;
-    std::vector<size_type> copy_from_;
-    std::vector<double> weight_;
+    std::valarray<size_type> replication_;
+    std::valarray<size_type> copy_from_;
+    std::valarray<double> weight_;
     bool resampled_;
     resample_op_type resample_op_;
 
@@ -229,11 +228,10 @@ class Particle :
     {
         // Some times the nuemrical round error can cause the total childs
         // differ from number of particles
-        size_type sum = std::accumulate(
-                replication_.begin(), replication_.end(), 0);
+        size_type sum = replication_.sum();
         if (sum != size_) {
-            typename std::vector<size_type>::iterator id_max =
-                std::max_element(replication_.begin(), replication_.end());
+            size_type *id_max = std::max_element(
+                    &replication_[0], &replication_[0] + size_);
             *id_max += size_ - sum;
         }
 
