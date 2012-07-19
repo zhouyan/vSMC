@@ -8,7 +8,7 @@ namespace vsmc {
 namespace internal {
 
 template <typename SizeType, typename RngSetType>
-inline void multinomial (SizeType N, SizeType S, RngSetType &rng_set,
+inline void weight2replication (SizeType N, SizeType S, RngSetType &rng_set,
         const double *weight, SizeType *replication)
 {
         double sum_w = 0;
@@ -74,7 +74,7 @@ class Resample<ResampleType<ResampleScheme, MULTINOMIAL>,
     void operator() (SizeType N, RngSetType &rng_set,
             const double *weight, SizeType *replication)
     {
-        internal::multinomial(N, N, rng_set, weight, replication);
+        internal::weight2replication(N, N, rng_set, weight, replication);
     }
 }; // Mulitnomial resampling
 
@@ -98,7 +98,8 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL>,
         double dsize = residual_.sum();
         SizeType size = static_cast<SizeType>(dsize);
         residual_ /= dsize;
-        internal::multinomial(N, size, rng_set, residual_.data(), replication);
+        internal::weight2replication(N, size, rng_set, residual_.data(),
+                replication);
         for (SizeType i = 0; i != N; ++i)
             replication[i] += static_cast<SizeType>(integral_[i]);
     }
