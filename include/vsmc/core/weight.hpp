@@ -91,9 +91,7 @@ class WeightSetBase
         using std::exp;
 
         double max_weight = log_weight_.max();
-        for (size_type i = 0; i != log_weight_.size(); ++i)
-            log_weight_[i] -= max_weight;
-
+        log_weight_ -= max_weight;
         weight_ = exp(log_weight_);
         double sum = weight_.sum();
         weight_ *= 1 / sum;
