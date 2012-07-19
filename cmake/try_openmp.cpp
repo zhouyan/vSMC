@@ -7,6 +7,8 @@ class Element
 
     Element (int i, std::vector<int> *src) : i_(i), src_(src) {}
 
+    Element (const Element &other) : i_(other.i_), src_(other.src_) {}
+
     int i () const {return i_;}
     int size () const {return src_->size();}
     int src () const {return (*src_)[i_];}
