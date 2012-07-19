@@ -92,7 +92,6 @@ class WeightSetBase
 
         double max_weight = log_weight_.max();
         log_weight_ -= max_weight;
-        /// \todo valarray performance may not be portable here
         weight_ = exp(log_weight_);
         double sum = weight_.sum();
         weight_ *= 1 / sum;
