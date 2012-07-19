@@ -95,7 +95,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL>,
         integral_.resize(N);
         for (SizeType i = 0; i != N; ++i)
             residual_[i] = modf(N * weight[i], &integral_[i]);
-        double dsize = residual_.sum();
+        double dsize = std::accumulate(residual_.begin(), residual_.end(), 0);
         SizeType S = static_cast<SizeType>(dsize);
         internal::weight2replication(N, S, rng_set, weight, replication);
         for (SizeType i = 0; i != N; ++i)
@@ -104,8 +104,8 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL>,
 
     private :
 
-    std::valarray<double> residual_;
-    std::valarray<double> integral_;
+    std::vector<double> residual_;
+    std::vector<double> integral_;
 }; // Residual resampling
 
 /// \brief Stratified resampling
@@ -191,9 +191,10 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
             residual_[i] = modf(N * weight[i], &integral_[i]);
         }
 
-        double dsize = residual_.sum();
+        double dsize = std::accumulate(residual_.begin(), residual_.end(), 0);
         SizeType size = static_cast<SizeType>(dsize);
-        residual_ /= dsize;
+        for (SizeType i = 0; i != N; ++i)
+            residual_[i] /= dsize;
         SizeType j = 0;
         SizeType k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
@@ -215,8 +216,8 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
 
     private :
 
-    std::valarray<double> residual_;
-    std::valarray<double> integral_;
+    std::vector<double> residual_;
+    std::vector<double> integral_;
 }; // Residual stratified resampling
 
 /// \brief Residual systematic resampling
@@ -239,9 +240,10 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
             residual_[i] = modf(N * weight[i], &integral_[i]);
         }
 
-        double dsize = residual_.sum();
+        double dsize = std::accumulate(residual_.begin(), residual_.end(), 0);
         SizeType size = static_cast<SizeType>(dsize);
-        residual_ /= dsize;
+        for (SizeType i = 0; i != N; ++i)
+            residual_[i] /= dsize;
         SizeType j = 0;
         SizeType k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
@@ -262,8 +264,8 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
 
     private :
 
-    std::valarray<double> residual_;
-    std::valarray<double> integral_;
+    std::vector<double> residual_;
+    std::vector<double> integral_;
 }; // Residual systematic resampling
 
 } // namespace vsmc
