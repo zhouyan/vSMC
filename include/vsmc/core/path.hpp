@@ -120,9 +120,10 @@ class Path
         double p = 0;
         for (std::vector<double>::size_type i = 0; i != weight_.size(); ++i)
             p += weight_[i] * buffer_[i];
-        width_.push_back(w);
-        integrand_.push_back(p);
+
         index_.push_back(iter);
+        integrand_.push_back(p);
+        width_.push_back(w);
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());
     }
