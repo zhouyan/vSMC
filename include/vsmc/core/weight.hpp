@@ -12,7 +12,7 @@ class WeightSetBase
     public :
 
     /// The type of the size of the weight set
-    typedef std::size_t size_type;
+    typedef std::vector<double>::size_type size_type;
 
     explicit WeightSetBase (size_type N) :
         ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
@@ -21,15 +21,14 @@ class WeightSetBase
     template <typename OutputIter>
     void read_weight (OutputIter first) const
     {
-        std::copy(&weight_[0], &weight_[0] + weight_.size(), first);
+        std::copy(weight_.begin(), weight_.end(), first);
     }
 
     /// Read only access to the log weights
     template <typename OutputIter>
     void read_log_weight (OutputIter first) const
     {
-        std::copy(&log_weight_[0], &log_weight_[0] + log_weight_.size(),
-                first);
+        std::copy(log_weight_.begin(), log_weight_.end(), first);
     }
 
     /// Read only access to the weight of a particle
@@ -48,9 +47,8 @@ class WeightSetBase
     void set_equal_weight ()
     {
         ess_ = static_cast<double>(weight_.size());
-        std::fill(&weight_[0], &weight_[0] + weight_.size(),
-                1.0 / weight_.size());
-        std::fill(&log_weight_[0], &log_weight_[0] + log_weight_.size(), 0);
+        std::fill(weight_.begin(), weight_.end(), 1.0 / weight_.size());
+        std::fill(log_weight_.begin(), log_weight_.end(), 0);
     }
 
     /// \brief Set the log weights with a pointer
@@ -59,7 +57,7 @@ class WeightSetBase
     /// after increments of size() times.
     void set_log_weight (const double *nw)
     {
-        std::copy(nw, nw + log_weight_.size(), &log_weight_[0]);
+        std::copy(nw, nw + log_weight_.size(), log_weight_.begin());
         set_weight();
     }
 
@@ -83,21 +81,30 @@ class WeightSetBase
     private :
 
     mutable double ess_;
-    mutable std::valarray<double> weight_;
-    mutable std::valarray<double> log_weight_;
+    mutable std::vector<double> weight_;
+    mutable std::vector<double> log_weight_;
 
     void set_weight ()
     {
         using std::exp;
 
-        double max_weight = log_weight_.max();
-        log_weight_ -= max_weight;
-        /// \todo valarray performance may not be portable here
-        weight_ = exp(log_weight_);
-        double sum = weight_.sum();
-        weight_ *= 1 / sum;
+        std::vector<double>::const_iterator id_max = std::max_element(
+                log_weight_.begin(), log_weight_.end());
+        double max_weight = *id_max;
+        for (size_type i = 0; i != log_weight_.size(); ++i)
+            log_weight_[i] -= max_weight;
 
-        ess_ = 1 / (weight_ * weight_).sum();
+        for (size_type i = 0; i != weight_.size(); ++i)
+            weight_[i] = exp(log_weight_[i]);
+        double coeff = std::accumulate(weight_.begin(), weight_.end(), 0);
+        coeff = 1 / coeff;
+        for (size_type i = 0; i != weight_.size(); ++i)
+            weight_[i] *= coeff;
+
+        ess_ = 0;
+        for (size_type i = 0; i != weight_.size(); ++i)
+            ess_ += weight_[i] * weight_[i];
+        ess_ = 1/ ess_;
     }
 }; // class WeightSetBase
 
