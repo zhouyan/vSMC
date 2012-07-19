@@ -113,13 +113,13 @@ class Path
                 ("CALL **Path::eval** WITH AN INVALID "
                  "EVALUATION FUNCTOR"));
 
-        double w = 0;
-        double p = 0;
         buffer_.resize(particle.size());
         weight_.resize(particle.size());
-        w = eval_(iter, particle, buffer_.data());
-        particle.read_weight(weight_.data());
-        p = weight_.dot(buffer_);
+        double w = eval_(iter, particle, &buffer_[0]);
+        particle.read_weight(weight_.begin());
+        double p = 0;
+        for (std::vector<double>::size_type i = 0; i != weight_.size(); ++i)
+            p += weight_[i] * buffer_[i];
         width_.push_back(w);
         integrand_.push_back(p);
         index_.push_back(iter);
@@ -150,8 +150,8 @@ class Path
 
     private :
 
-    Eigen::VectorXd buffer_;
-    Eigen::VectorXd weight_;
+    std::vector<double> buffer_;
+    std::vector<double> weight_;
     eval_type eval_;
     index_type index_;
     integrand_type integrand_;
