@@ -27,6 +27,51 @@
 
 namespace vsmc {
 
+namespace internal {
+
+template <bool, bool, typename IterType>
+class GetHostPtrDispatch
+{
+    public :
+
+    static void *get (IterType iter)
+    {
+        return VSMC_NULLPTR;
+    }
+};
+
+template <typename IterType>
+class GetHostPtrDispatch<true, true, IterType>
+{
+    public :
+
+    static void *get (IterType iter)
+    {
+        return (void *) iter;
+    }
+};
+
+template <typename CLType, typename IterType>
+class GetHostPtr
+{
+    public :
+
+    static void *get (IterType iter)
+    {
+        typedef typename cxx11::remove_cv<IterType>::type ptr_type;
+        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
+        typedef typename cxx11::remove_cv<val_type>::type host_type;
+        typedef typename cxx11::remove_cv<CLType>::type device_type;
+
+        return GetHostPtrDispatch<
+            cxx11::is_pointer<IterType>::value,
+            cxx11::is_same<host_type, device_type>::value,
+            IterType>::get(iter);
+    }
+};
+
+} // namespace vsmc::internal
+
 /// \brief Particle::value_type subtype
 /// \ingroup OpenCL
 ///
@@ -51,22 +96,13 @@ class StateCL
     /// The type of timer
     typedef Timer timer_type;
 
-    /// The type of the matrix of states returned by state_host()
-    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
-
-    /// The type of the vector of weights returned by weight_host()
-    typedef Eigen::Matrix<T, Eigen::Dynamic, 1> weight_vec_type;
-
-    /// The type of the vector of accept counts returned by accept_host()
-    typedef Eigen::Matrix<cl_uint, Eigen::Dynamic, 1> accept_vec_type;
-
     explicit StateCL (size_type N) :
         size_(N), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
-        state_host_(Dim, N), weight_host_(N), accept_host_(N)
+        state_host_(Dim * N), weight_host_(N), accept_host_(N)
     {
         local_size(0);
     }
@@ -213,11 +249,11 @@ class StateCL
     }
 
     /// Read only access to the states
-    const state_mat_type &state_host () const
+    const double *state_host () const
     {
-        read_buffer<state_type>(state_device_, size_*Dim, state_host_.data());
+        read_buffer<state_type>(state_device_, size_ * Dim, &state_host_[0]);
 
-        return state_host_;
+        return &state_host_[0];
     }
 
     /// \brief Read only access to the device buffer object that stores the
@@ -232,11 +268,11 @@ class StateCL
     /// \brief Read only access to the weights stored by weight_device()
     ///
     /// \sa InitializeCL, MoveCL
-    const weight_vec_type &weight_host () const
+    const double *weight_host () const
     {
-        read_buffer<state_type>(weight_device_, size_, weight_host_.data());
+        read_buffer<state_type>(weight_device_, size_, &weight_host_[0]);
 
-        return weight_host_;
+        return &weight_host_[0];
     }
 
     /// \brief Read only access to the device buffer object that stores the
@@ -251,11 +287,11 @@ class StateCL
     /// \brief Read only access to the accept counts stored by accept_device()
     ///
     /// \sa InitializeCL, MoveCL
-    const accept_vec_type &accept_host () const
+    const cl_uint *accept_host () const
     {
-        read_buffer<cl_uint>(accept_device_, size_, accept_host_.data());
+        read_buffer<cl_uint>(accept_device_, size_, &accept_host_[0]);
 
-        return accept_host_;
+        return &accept_host_[0];
     }
 
     /// \brief Setup the OpenCL environment
@@ -482,30 +518,20 @@ class StateCL
     void read_buffer (const cl::Buffer &buf, std::size_t num,
             OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
+        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(read_buffer);
 
-        typedef typename cxx11::remove_cv<OutputIter>::type ptr_type;
-        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
-        typedef typename cxx11::remove_cv<val_type>::type host_type;
-        typedef typename cxx11::remove_cv<CLType>::type device_type;
-
-        if (cxx11::is_pointer<OutputIter>::value) {
-            if (cxx11::is_same<host_type, device_type>::value) {
-                command_queue_.finish();
-                timer_read_buffer_.start();
-                command_queue_.enqueueReadBuffer(buf, 1, 0,
-                        sizeof(CLType) * num, (void *) first);
-                timer_read_buffer_.stop();
-                return;
-            }
-        }
-
+        void *host_ptr = internal::GetHostPtr<CLType, OutputIter>::get(first);
         command_queue_.finish();
         timer_read_buffer_.start();
-        CLType *temp = read_buffer_pool<CLType>(num);
-        command_queue_.enqueueReadBuffer(buf, 1, 0,
-                sizeof(CLType) * num, (void *) temp);
-        std::copy(temp, temp + num, first);
+        if (host_ptr) {
+            command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
+                    host_ptr);
+        } else {
+            CLType *temp = read_buffer_pool<CLType>(num);
+            command_queue_.enqueueReadBuffer(buf, 1, 0,
+                    sizeof(CLType) * num, (void *) temp);
+            std::copy(temp, temp + num, first);
+        }
         timer_read_buffer_.stop();
     }
 
@@ -520,30 +546,20 @@ class StateCL
     void write_buffer (const cl::Buffer &buf, std::size_t num,
             InputIter first) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
+        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(write_buffer);
 
-        typedef typename cxx11::remove_cv<InputIter>::type ptr_type;
-        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
-        typedef typename cxx11::remove_cv<val_type>::type host_type;
-        typedef typename cxx11::remove_cv<CLType>::type device_type;
-
-        if (cxx11::is_pointer<InputIter>::value) {
-            if (cxx11::is_same<host_type, device_type>::value) {
-                command_queue_.finish();
-                timer_write_buffer_.start();
-                command_queue_.enqueueWriteBuffer(buf, 1, 0,
-                        sizeof(CLType) * num, (void *) first);
-                timer_write_buffer_.stop();
-                return;
-            }
-        }
-
+        void *host_ptr = internal::GetHostPtr<CLType, InputIter>::get(first);
         command_queue_.finish();
         timer_write_buffer_.start();
-        CLType *temp = write_pool<CLType>(num);
-        std::copy(first, first + num, temp);
-        command_queue_.enqueueWriteBuffer(buf, 1, 0,
-                sizeof(CLType) * num, (void *) temp);
+        if (host_ptr) {
+            command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
+                    host_ptr);
+        } else {
+            CLType *temp = write_buffer_pool<CLType>(num);
+            std::copy(first, first + num, temp);
+            command_queue_.enqueueWriteBuffer(buf, 1, 0,
+                    sizeof(CLType) * num, (void *) temp);
+        }
         timer_write_buffer_.stop();
     }
 
@@ -637,9 +653,9 @@ class StateCL
     cl::Buffer weight_device_;
     cl::Buffer accept_device_;
 
-    mutable state_mat_type state_host_;
-    mutable weight_vec_type weight_host_;
-    mutable accept_vec_type accept_host_;
+    mutable std::vector<double> state_host_;
+    mutable std::vector<double> weight_host_;
+    mutable std::vector<cl_uint> accept_host_;
 
     cl::Buffer copy_device_;
 
@@ -662,7 +678,7 @@ class StateCL
     /// initialization), the memory will not be needed to expand anymore
 
     template <typename HostType>
-    HostType *read_buffer_pool(std::size_t num) const
+    HostType *read_buffer_pool (std::size_t num) const
     {
         std::size_t new_bytes = num * sizeof(HostType);
         if (new_bytes > read_buffer_pool_bytes_) {
@@ -677,7 +693,7 @@ class StateCL
     }
 
     template <typename HostType>
-    HostType *write_pool(std::size_t num) const
+    HostType *write_buffer_pool (std::size_t num) const
     {
         std::size_t new_bytes = num * sizeof(HostType);
         if (new_bytes > write_buffer_pool_bytes_) {
@@ -724,8 +740,10 @@ class InitializeCL
         pre_processor(particle);
         particle.value().run_parallel(kernel_);
         post_processor(particle);
+        const cl_uint *accept = particle.value().accept_host();
 
-        return particle.value().accept_host().sum();
+        return std::accumulate(accept, accept + particle.size(),
+                static_cast<cl_uint>(0));
     }
 
     virtual void initialize_param (Particle<T> &, void *) {}
@@ -816,8 +834,10 @@ class MoveCL
         pre_processor(iter, particle);
         particle.value().run_parallel(kernel_);
         post_processor(iter, particle);
+        const cl_uint *accept = particle.value().accept_host();
 
-        return particle.value().accept_host().sum();
+        return std::accumulate(accept, accept + particle.size(),
+                static_cast<cl_uint>(0));
     }
 
     virtual void move_state (unsigned iter, std::string &) = 0;
