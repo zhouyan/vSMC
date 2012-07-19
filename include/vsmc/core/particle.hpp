@@ -102,8 +102,8 @@ class Particle :
     {
         resampled_ = ess() < threshold * size_;
         if (resampled_) {
-            read_weight(&weight_[0]);
-            resample_op_(size_, *this, &weight_[0], &replication_[0]);
+            read_weight(weight_.data());
+            resample_op_(size_, *this, weight_.data(), replication_.data());
             resample_do();
         }
     }
@@ -219,9 +219,9 @@ class Particle :
     size_type size_;
     value_type value_;
 
-    std::vector<size_type> replication_;
-    std::vector<size_type> copy_from_;
-    std::vector<double> weight_;
+    Eigen::Matrix<size_type, Eigen::Dynamic, 1> replication_;
+    Eigen::Matrix<size_type, Eigen::Dynamic, 1> copy_from_;
+    Eigen::VectorXd weight_;
     bool resampled_;
     resample_op_type resample_op_;
 
@@ -229,12 +229,11 @@ class Particle :
     {
         // Some times the nuemrical round error can cause the total childs
         // differ from number of particles
-        size_type sum = std::accumulate(
-                replication_.begin(), replication_.end(), 0);
+        size_type sum = replication_.sum();
         if (sum != size_) {
-            typename std::vector<size_type>::iterator id_max =
-                std::max_element(replication_.begin(), replication_.end());
-            *id_max += size_ - sum;
+            size_type id_max;
+            replication_.maxCoeff(&id_max);
+            replication_[id_max] += size_ - sum;
         }
 
         size_type from = 0;
@@ -256,7 +255,8 @@ class Particle :
             }
         }
 
-        value_.copy(&copy_from_[0]);
+        const size_type *cf = copy_from_.data();
+        value_.copy(cf);
         set_equal_weight();
     }
 }; // class Particle

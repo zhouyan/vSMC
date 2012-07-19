@@ -95,8 +95,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL>,
         integral_.resize(N);
         for (SizeType i = 0; i != N; ++i)
             residual_[i] = modf(N * weight[i], &integral_[i]);
-        double dsize = residual_.sum();
-        SizeType S = static_cast<SizeType>(dsize);
+        SizeType S = static_cast<SizeType>(residual_.sum());
         internal::weight2replication(N, S, rng_set, weight, replication);
         for (SizeType i = 0; i != N; ++i)
             replication[i] += static_cast<SizeType>(integral_[i]);
@@ -104,8 +103,8 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL>,
 
     private :
 
-    std::valarray<double> residual_;
-    std::valarray<double> integral_;
+    Eigen::VectorXd residual_;
+    Eigen::VectorXd integral_;
 }; // Residual resampling
 
 /// \brief Stratified resampling
@@ -191,7 +190,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
             residual_[i] = modf(N * weight[i], &integral_[i]);
         }
 
-        double dsize = residual_.sum();
+        double dsize = (residual_.sum());
         SizeType size = static_cast<SizeType>(dsize);
         residual_ /= dsize;
         SizeType j = 0;
@@ -215,8 +214,8 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
 
     private :
 
-    std::valarray<double> residual_;
-    std::valarray<double> integral_;
+    Eigen::VectorXd residual_;
+    Eigen::VectorXd integral_;
 }; // Residual stratified resampling
 
 /// \brief Residual systematic resampling
@@ -239,7 +238,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
             residual_[i] = modf(N * weight[i], &integral_[i]);
         }
 
-        double dsize = residual_.sum();
+        double dsize = (residual_.sum());
         SizeType size = static_cast<SizeType>(dsize);
         residual_ /= dsize;
         SizeType j = 0;
@@ -262,8 +261,8 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
 
     private :
 
-    std::valarray<double> residual_;
-    std::valarray<double> integral_;
+    Eigen::VectorXd residual_;
+    Eigen::VectorXd integral_;
 }; // Residual systematic resampling
 
 } // namespace vsmc
