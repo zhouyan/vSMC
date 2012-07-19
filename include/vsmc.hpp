@@ -29,5 +29,4 @@
 /// \brief Constructing samplers with operations on a single particle
 
 /// \defgroup Timer Timer
-/// \ingroup Helper
 /// \brief Timer used by Helper classes

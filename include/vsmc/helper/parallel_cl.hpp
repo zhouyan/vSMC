@@ -363,37 +363,6 @@ class StateCL
     ///
     /// \li The Random123 library's \c philox.h, \c threefry.h, and \c u01.h
     /// headers are included unless <tt>VSMC_USE_RANDOM123=0</tt>.
-    ///
-    /// The following is how the above looks like, assuming we constructed a
-    /// particle set with type StateCL<4, cl_float>(1000). It is as if the
-    /// user source implicitly included a header file containing the
-    /// following code.
-    /// \code
-    /// #ifndef VSMC_USE_RANDOM123
-    /// #define VSMC_USE_RANDOM123 1
-    /// #endif
-    ///
-    /// typedef float state_type;
-    ///
-    /// typedef {
-    ///     state_type param1;
-    ///     state_type param2;
-    ///     state_type param3;
-    ///     state_type param4;
-    /// } state_struct;
-    ///
-    /// typedef ulong size_type;
-    ///
-    /// __constant size_type Size = 1000;
-    /// __constant uint Dim = 4;
-    /// __constant ulong Seed = 0;
-    ///
-    /// #if VSMC_USE_RANDOM123
-    /// #include <Random123/philox.h>
-    /// #include <Random123/threefry.h>
-    /// #include <Random123/u01.h>
-    /// #endif
-    /// \endcode
     void build (const std::string &source, const std::string &flags)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(build);
