@@ -28,26 +28,38 @@
 #endif
 
 #ifdef NDEBUG
-#define VSMC_RUNTIME_ASSERT(cond, message)
+#define VSMC_RUNTIME_ASSERT(cond, msg)
 #else // NDEBUG
-#define VSMC_RUNTIME_ASSERT(cond, message)                   \
+#define VSMC_RUNTIME_ASSERT(cond, msg)                       \
 {                                                            \
     if (!(cond)) {                                           \
         std::cerr                                            \
             << "vSMC runtime assertion failed:" << std::endl \
-            << message << std::endl;                         \
+            << msg << std::endl;                             \
     };                                                       \
     assert(cond);                                            \
 }
 #endif // NDEBUG
 
+#if VSMC_HAS_CXX11_STATIC_ASSERT
+
+#define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, #msg)
+
+#elif defined(BOOST_STATIC_ASSERT) // VSMC_HAS_CXX11_STATIC_ASSERT
+
+#define VSMC_STATIC_ASSERT(cond, msg) BOOST_STATIC_ASSERT_MSG(cond, #msg)
+
+#else // VSMC_HAS_CXX11_STATIC_ASSERT
+
 #ifdef _MSC_VER
-#define VSMC_STATIC_ASSERT(cond, message) \
-    {vsmc::StaticAssert<bool(cond)>::message;}
-#else
-#define VSMC_STATIC_ASSERT(cond, message) \
-    if (vsmc::StaticAssert<bool(cond)>::message) {};
-#endif
+#define VSMC_STATIC_ASSERT(cond, msg) \
+    {vsmc::StaticAssert<bool(cond)>::msg;}
+#else // _MSC_VER
+#define VSMC_STATIC_ASSERT(cond, msg) \
+    if (vsmc::StaticAssert<bool(cond)>::msg) {};
+#endif // _MSC_VER
+
+#endif // VSMC_HAS_CXX11_STATIC_ASSERT
 
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)   \
 namespace vsmc {                                                             \
