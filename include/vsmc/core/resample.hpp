@@ -95,8 +95,11 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL>,
         integral_.resize(N);
         for (SizeType i = 0; i != N; ++i)
             residual_[i] = modf(N * weight[i], &integral_[i]);
-        SizeType S = static_cast<SizeType>(residual_.sum());
-        internal::weight2replication(N, S, rng_set, weight, replication);
+        double dsize = residual_.sum();
+        SizeType size = static_cast<SizeType>(dsize);
+        residual_ /= dsize;
+        internal::weight2replication(N, size, rng_set, residual_.data(),
+                replication);
         for (SizeType i = 0; i != N; ++i)
             replication[i] += static_cast<SizeType>(integral_[i]);
     }
