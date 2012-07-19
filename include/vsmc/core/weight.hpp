@@ -96,7 +96,8 @@ class WeightSetBase
 
         for (size_type i = 0; i != weight_.size(); ++i)
             weight_[i] = exp(log_weight_[i]);
-        double coeff = std::accumulate(weight_.begin(), weight_.end(), 0);
+        double coeff = std::accumulate(weight_.begin(), weight_.end(),
+                static_cast<double>(0));
         coeff = 1 / coeff;
         for (size_type i = 0; i != weight_.size(); ++i)
             weight_[i] *= coeff;

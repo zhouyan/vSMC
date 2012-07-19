@@ -229,7 +229,8 @@ class Particle :
         // Some times the nuemrical round error can cause the total childs
         // differ from number of particles
         size_type sum = std::accumulate(
-                replication_.begin(), replication_.end(), 0);
+                replication_.begin(), replication_.end(),
+                static_cast<size_type>(0));
         if (sum != size_) {
             typename std::vector<size_type>::iterator id_max =
                 std::max_element(replication_.begin(), replication_.end());
