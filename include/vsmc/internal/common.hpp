@@ -7,7 +7,6 @@
 #include <cstdlib>
 #include <utility>
 #include <map>
-#include <valarray>
 #include <vector>
 #include <iostream>
 #include <sstream>
