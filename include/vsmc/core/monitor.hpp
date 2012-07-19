@@ -2,7 +2,44 @@
 #define VSMC_CORE_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <Eigen/Dense>
+
+namespace vsmc {
+
+/// \brief A simple GEMV functor for Monitor
+///
+/// \details
+/// The actual GEMV used by Monitor<T> is based in GEMVTypeTrait<T>::type,
+/// which default to this one. A replacement shall provide the same interface
+/// documented below. The functor does not have to be \c const. However it
+/// does need to have a default constructor
+class GEMVSimple
+{
+    public :
+
+    /// \brief Simple GEMV operator
+    ///
+    /// \param N Number of columns of A and elements of X (number of particles)
+    /// \param M Number of rows of A (Monitor's dimension)
+    /// \param A [in] The matrix
+    /// \param X [in] The vector
+    /// \param res [out] Results
+    ///
+    /// \note \c A and \c X are assumed to be column major.
+    void operator() (std::size_t N, std::size_t M,
+            const double *A, const double *X, double *res) const
+    {
+        for (std::size_t m = 0; m != M; ++m) {
+            double r = 0;
+            for (std::size_t n = 0; n != N; ++n)
+                r += X[n] * A[n * M + m];
+            res[m] = r;
+        }
+    }
+}; // class GEMVSimple
+
+} // namespace vsmc
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(GEMVType, gemv_type, GEMVSimple);
 
 namespace vsmc {
 
@@ -34,6 +71,9 @@ class Monitor
     /// The type of evaluation functor
     typedef cxx11::function<void (
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
+
+    /// The type of the GEMV functor
+    typedef typename GEMVTypeTrait<T>::type gemv_type;
 
     /// The type of the index vector
     typedef std::vector<unsigned> index_type;
@@ -145,18 +185,26 @@ class Monitor
                 ("CALL **Monitor::eval** WITH AN INVALID "
                  "EVALUATION FUNCTOR"));
 
-        buffer_.resize(dim_, particle.size());
+        buffer_.resize(dim_ * particle.size());
+        result_.resize(dim_);
         weight_.resize(particle.size());
-        eval_(iter, dim_, particle, buffer_.data());
-        particle.read_weight(weight_.data());
-        result_.noalias() = buffer_ * weight_;
-
-        assert(result_.size() == dim_);
-        assert(record_.size() == dim_);
+        eval_(iter, dim_, particle, &buffer_[0]);
+        particle.read_weight(weight_.begin());
+        gemv_(particle.size(), dim_, &buffer_[0], &weight_[0], &result_[0]);
 
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
             record_[d].push_back(result_[d]);
+    }
+
+    gemv_type &gemv ()
+    {
+        return gemv_;
+    }
+
+    const gemv_type &gemv () const
+    {
+        return gemv_;
     }
 
     /// \brief Clear all recorded data
@@ -173,13 +221,15 @@ class Monitor
 
     private :
 
-    Eigen::MatrixXd buffer_;
-    Eigen::VectorXd result_;
-    Eigen::VectorXd weight_;
+    std::vector<double> buffer_;
+    std::vector<double> result_;
+    std::vector<double> weight_;
     unsigned dim_;
     eval_type eval_;
     index_type index_;
     record_type record_;
+
+    gemv_type gemv_;
 }; // class Monitor
 
 /// \brief Print the Monitor
