@@ -58,6 +58,9 @@ class StateBase
     /// The type of the timer
     typedef Timer timer_type;
 
+    /// The type of the matrix of states
+    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> state_mat_type;
+
     /// The dimension of the problem
     unsigned dim ()
     {
@@ -71,7 +74,7 @@ class StateBase
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT);
 
         dim_ = dim;
-        state_.resize(dim_ * size_);
+        state_.resize(dim_, size_);
     }
 
     /// The number of particles
@@ -95,13 +98,13 @@ class StateBase
     /// array of the particle at position id
     state_type &state (size_type id, unsigned pos)
     {
-        return state_[id * dim_ + pos];
+        return state_(pos, id);
     }
 
     /// Read only access to a signle particle state
     const state_type &state (size_type id, unsigned pos) const
     {
-        return state_[id * dim_ + pos];
+        return state_(pos, id);
     }
 
     /// \brief Read and write access to the array of a single particle states
@@ -109,30 +112,36 @@ class StateBase
     /// \param id The position of the particle, 0 to size() - 1
     state_type *state (size_type id)
     {
-        return &state_[id * dim_];
+        return state_.col(id).data();
     }
 
     /// Read only access to the array of a single particle states
     const state_type *state (size_type id) const
     {
-        return &state_[id * dim_];
+        return state_.col(id).data();
+    }
+
+    /// Read only access to the matrix of all particle states
+    const state_mat_type &state () const
+    {
+        return state_;
     }
 
     protected :
 
-    explicit StateBase (size_type N) : size_(N), dim_(Dim), state_(N * Dim) {}
+    explicit StateBase (size_type N) : size_(N), dim_(Dim), state_(dim_, N) {}
 
     void copy_particle (size_type from, size_type to)
     {
         if (from != to)
-            std::copy(state(from), state(from) + dim_, state(to));
+            state_.col(to) = state_.col(from);
     }
 
     private :
 
     size_type size_;
     unsigned dim_;
-    std::vector<T> state_;
+    state_mat_type state_;
     timer_type timer_;
 }; // class StateBase
 
