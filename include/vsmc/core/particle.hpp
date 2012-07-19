@@ -44,7 +44,8 @@ class Particle :
     typedef cxx11::function<void
         (size_type, rng_set_type &, double *, size_type *)> resample_op_type;
 
-    typedef typename rng_set_type::rng_type rng_type;
+    typedef typename rng_set_type::rng_type        rng_type;
+    typedef typename weight_set_type::weight_type  weight_type;
 
     using rng_set_type::rng;
     using weight_set_type::weight;
