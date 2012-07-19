@@ -13,8 +13,6 @@
 #include <string>
 #include <stdexcept>
 
-#include <Eigen/Dense>
-
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/forward.hpp>
 

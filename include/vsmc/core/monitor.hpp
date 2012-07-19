@@ -2,6 +2,7 @@
 #define VSMC_CORE_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <Eigen/Dense>
 
 namespace vsmc {
 

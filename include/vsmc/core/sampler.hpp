@@ -368,43 +368,27 @@ class Sampler
         const char sep = '\t';
 
         // Accept count
-        Eigen::MatrixXd acc;
+        std::vector<double> acc;
         unsigned accd = 0;
-        for (accept_history_type::const_iterator
-                a = accept_history_.begin(); a != accept_history_.end(); ++a) {
-            if (a->size() > accd)
-                accd = static_cast<unsigned>(a->size());
+        for (unsigned iter = 0; iter != iter_size(); ++iter) {
+            accd = std::max(accd, static_cast<unsigned>(
+                        accept_history_[iter].size()));
         }
         bool print_accept = accd > 0 && iter_size() > 0;
-        if (print_accept) {
-            acc.resize(iter_size(), accd);
-            acc.setConstant(0);
-            double accdnorm = static_cast<double>(size());
-            for (unsigned r = 0; r != iter_size(); ++r)
-                for (unsigned c = 0; c != accept_history_[r].size(); ++c)
-                    acc(r, c) = accept_history_[r][c] / accdnorm;
-        }
 
         // Path sampling
-        Eigen::MatrixXd pa;
-        Eigen::MatrixXi pmask;
+        std::vector<long> pmask;
         print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
         if (print_path) {
-            pa.resize(iter_size(), 3);
-            pmask.resize(iter_size(), 1);
-            pmask.setConstant(0);
-            for (unsigned d = 0; d != path_.iter_size(); ++d) {
-                unsigned pr = path_.index()[d];
-                pa(pr, 0) = path_.integrand()[d];
-                pa(pr, 1) = path_.width()[d];
-                pa(pr, 2) = path_.grid()[d];
-                pmask(pr) = 1;
-            }
+            pmask.resize(iter_size());
+            for (unsigned d = 0; d != iter_size(); ++d)
+                pmask[d] = -1;
+            for (unsigned d = 0; d != path_.iter_size(); ++d)
+                pmask[path_.index()[d]] = d;
         }
 
         // Monitors
-        Eigen::MatrixXd mon;
-        Eigen::MatrixXi mmask;
+        std::vector<std::vector<long> > mmask;
         unsigned mond = 0;
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
@@ -412,22 +396,16 @@ class Sampler
         }
         print_monitor = print_monitor && mond > 0 && iter_size() > 0;
         if (print_monitor) {
-            mon.resize(iter_size(), mond);
-            mmask.resize(iter_size(), monitor_.size());
-            mmask.setConstant(0);
-            unsigned mc = 0;
-            unsigned mn = 0;
+            mmask.resize(monitor_.size());
+            unsigned mm = 0;
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
-                unsigned md = m->second.dim();
-                for (unsigned d = 0; d != m->second.iter_size(); ++d) {
-                    unsigned mr = m->second.index()[d];
-                    for (unsigned c = 0; c != md; ++c)
-                        mon(mr, c + mc) = m->second.record(c)[d];
-                    mmask(mr, mn) = 1;
-                }
-                mc += md;
-                ++mn;
+                mmask[mm].resize(iter_size());
+                for (unsigned d = 0; d != iter_size(); ++d)
+                    mmask[mm][d] = -1;
+                for (unsigned d = 0; d != m->second.iter_size(); ++d)
+                    mmask[mm][m->second.index()[d]] = d;
+                ++mm;
             }
         }
 
@@ -468,28 +446,38 @@ class Sampler
             os << iter << sep;
             os << ess_history_[iter] / size() << sep;
             os << resampled_history_[iter] << sep;
-            if (print_accept)
-                os << acc.row(iter) << sep;
+            if (print_accept) {
+                for (unsigned c = 0; c != accept_history_[iter].size(); ++c)
+                    os << accept_history_[iter][c] / size() << sep;
+                unsigned diff = accd - accept_history_[iter].size();
+                for (unsigned c = 0; c != diff; ++c)
+                    os << '.' << sep;
+            }
             if (print_path) {
-                if (pmask(iter))
-                    os << pa.row(iter) << sep;
-                else
-                    os << '.' << sep << '.' << sep << '.' << sep;
+                long pr = pmask[iter];
+                if (pr >= 0) {
+                    os << path_.integrand()[pr] << sep;
+                    os << path_.width()[pr] << sep;
+                    os << path_.grid()[pr] << sep;
+                } else {
+                    for (int i = 0; i != 3; ++i)
+                        os << '.' << sep;
+                }
             }
             if (print_monitor) {
-                unsigned mc = 0;
-                unsigned mn = 0;
+                unsigned mm = 0;
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
+                    long mr = mmask[mm][iter];
                     unsigned md = m->second.dim();
-                    if (mmask(iter, mn)) {
-                        os << mon.block(iter, mc, 1, md) << sep;
+                    if (mr >= 0) {
+                        for (unsigned d = 0; d != md; ++d)
+                            os << m->second.record(d)[mr] << sep;
                     } else {
-                        for (unsigned m = 0; m != md; ++m)
+                        for (unsigned d = 0; d != md; ++d)
                             os << '.' << sep;
                     }
-                    mc += md;
-                    ++mn;
+                    ++mm;
                 }
             }
             if (iter + 1 < iter_size())
