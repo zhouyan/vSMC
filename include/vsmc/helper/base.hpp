@@ -164,23 +164,11 @@ class ConstSingleParticle
     {
         VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, ConstSingleParticle);
         VSMC_RUNTIME_ASSERT(particle_,
-                ("A **ConstSingleParticle** object "
+                ("A **SingleParticle** object "
                  "is contructed with 0 **Particle** pointer"));
         VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ < particle_->size()),
-                ("A **ConstSignleParticle** object "
+                ("A **SignleParticle** object "
                  "is contructed with an out of range id"));
-    }
-
-    ConstSingleParticle (const ConstSingleParticle<T> &other) :
-        id_(other.id_), particle_(other.particle_) {}
-
-    ConstSingleParticle (const SingleParticle<T> &other) :
-        id_(other.id_), particle_(other.particle_) {}
-
-    const ConstSingleParticle &operator= (const ConstSingleParticle<T> &other)
-    {
-        id_ = other.id_;
-        particle_ = other.particle_;
     }
 
     size_type id () const
@@ -261,15 +249,6 @@ class SingleParticle
         VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ < particle_->size()),
                 ("A **SignleParticle** object "
                  "is contructed with an out of range id"));
-    }
-
-    SingleParticle (const SingleParticle<T> &other) :
-        id_(other.id_), particle_(other.particle_) {}
-
-    const SingleParticle &operator= (const SingleParticle<T> &other)
-    {
-        id_ = other.id_;
-        particle_ = other.particle_;
     }
 
     /// The id of the particle
