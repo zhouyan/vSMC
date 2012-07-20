@@ -7,7 +7,9 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
+#include <limits>
 #include <map>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
 #include <string>
