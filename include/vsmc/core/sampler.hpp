@@ -449,7 +449,8 @@ class Sampler
             if (print_accept) {
                 for (unsigned c = 0; c != accept_history_[iter].size(); ++c)
                     os << accept_history_[iter][c] / size() << sep;
-                unsigned diff = accd - accept_history_[iter].size();
+                unsigned diff = static_cast<unsigned>(
+                        accd - accept_history_[iter].size());
                 for (unsigned c = 0; c != diff; ++c)
                     os << '.' << sep;
             }
