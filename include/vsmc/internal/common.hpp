@@ -5,16 +5,19 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+
 #include <algorithm>
-#include <iostream>
-#include <limits>
-#include <map>
 #include <numeric>
-#include <sstream>
-#include <stdexcept>
+
+#include <map>
 #include <string>
-#include <utility>
 #include <vector>
+
+#include <iostream>
+#include <sstream>
+
+#include <stdexcept>
+#include <utility>
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/forward.hpp>
