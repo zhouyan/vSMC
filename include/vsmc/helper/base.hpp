@@ -70,8 +70,8 @@ class StateBase
         VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT);
 
+        state_.resize(dim * size_);
         dim_ = dim;
-        state_.resize(dim_ * size_);
     }
 
     /// The number of particles

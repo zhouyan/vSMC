@@ -1,4 +1,5 @@
 #ifndef VSMC_HELPER_PARALLEL_CL_HPP
+    /// Resize the dimension of the problem
 #define VSMC_HELPER_PARALLEL_CL_HPP
 
 #define __CL_ENABLE_EXCEPTIONS
@@ -97,12 +98,13 @@ class StateCL
     typedef Timer timer_type;
 
     explicit StateCL (size_type N) :
-        size_(N), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
+        dim_(Dim), size_(N), local_size_(0),
+        read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
-        state_host_(Dim * N), weight_host_(N), accept_host_(N)
+        state_host_(dim_ * N), weight_host_(N), accept_host_(N)
     {
         local_size(0);
     }
@@ -114,9 +116,21 @@ class StateCL
     }
 
     /// The dimension of the problem
-    static unsigned dim ()
+    unsigned dim () const
     {
-        return Dim;
+        return dim_;
+    }
+
+    /// Resize the dimension of the problem
+    void resize_dim (unsigned dim)
+    {
+        VSMC_STATIC_ASSERT((Dim == Dynamic),
+                USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
+        VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(resize_dim);
+
+        state_host_.resize(dim * size_);
+        state_device_ = create_buffer<T>(dim * size_);
+        dim_ = dim;
     }
 
     /// The number of particles
@@ -251,7 +265,7 @@ class StateCL
     /// Read only access to the states
     const double *state_host () const
     {
-        read_buffer<state_type>(state_device_, size_ * Dim, &state_host_[0]);
+        read_buffer<state_type>(state_device_, dim_ * size_, &state_host_[0]);
 
         return &state_host_[0];
     }
@@ -379,12 +393,12 @@ class StateCL
             else
                 throw std::runtime_error("Unsupported CL data type");
             ss << "typedef struct state_struct {\n";
-            for (unsigned d = 0; d != Dim; ++d)
+            for (unsigned d = 0; d != dim_; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
             ss << "} state_struct;\n";
             ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
-            ss << "__constant uint Dim = " << Dim << ";\n";
+            ss << "__constant uint Dim = " << dim_ << ";\n";
             Seed &seed = Seed::create();
             ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
             seed.skip(size_);
@@ -591,8 +605,8 @@ class StateCL
 
     private :
 
+    unsigned dim_;
     size_type size_;
-
     std::size_t local_size_;
 
     mutable std::size_t read_buffer_pool_bytes_;
@@ -634,7 +648,7 @@ class StateCL
 
     void setup_buffer ()
     {
-        state_device_  = create_buffer<T>(size_ * Dim);
+        state_device_  = create_buffer<T>(dim_ * size_);
         weight_device_ = create_buffer<T>(size_);
         accept_device_ = create_buffer<cl_uint>(size_);
         copy_device_   = create_buffer<size_type>(size_);
