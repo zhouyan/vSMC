@@ -21,22 +21,22 @@ class Sampler
     /// The type of the particle values
     typedef T value_type;
 
-    /// The type of the particle set
+    /// The type of the Particle set
     typedef Particle<T> particle_type;
 
-    /// The type of the monitor
+    /// The type of the Monitor
     typedef Monitor<T> monitor_type;
 
-    /// The type of the path
+    /// The type of the Path sampling monitor
     typedef Path<T> path_type;
 
-    /// The type of Initialization functor
+    /// The type of initialization functor
     typedef cxx11::function<unsigned (particle_type &, void *)> init_type;
 
-    /// The type of Move functor
+    /// The type of movement functor
     typedef cxx11::function<unsigned (unsigned, particle_type &)> move_type;
 
-    /// The type of the Move queue
+    /// The type of the movement queue
     typedef std::vector<move_type> move_queue_type;
 
     /// The type of ESS history vector
@@ -51,7 +51,7 @@ class Sampler
     /// The type of Monitor map
     typedef std::map<std::string, monitor_type> monitor_map_type;
 
-    /// \brief Construct a sampler with a given number of particles
+    /// \brief Construct a sampler with a built-in resampling scheme
     ///
     /// \param N The number of particles
     /// \param scheme The built-in resampling scheme. See Resample
@@ -66,7 +66,7 @@ class Sampler
         resample_scheme(scheme);
     }
 
-    /// \brief Construct a sampler with a given number of particles
+    /// \brief Construct a sampler with an user defined resampling scheme
     ///
     /// \param N The number of particles
     /// \param res_op A resampling operation functor
@@ -79,13 +79,16 @@ class Sampler
         resample_scheme(res_op);
     }
 
-    /// Size of the particle set
+    /// Size of the Particle set
     size_type size () const
     {
         return particle_.size();
     }
 
-    /// The number of iterations recorded (including initialization)
+    /// The number of iterations recorded
+    ///
+    /// \details
+    /// This includes the initialization step and started at zero
     unsigned iter_size () const
     {
         return static_cast<unsigned>(ess_history_.size());
@@ -160,45 +163,45 @@ class Sampler
         return particle_;
     }
 
-    /// Set a new Initialization
+    /// Set a new initialization functor
     void init (const init_type &new_init)
     {
         init_ = new_init;
     }
 
-    /// Clear the Move queue and set a single new Move
+    /// Clear the movement queue and set a new movement functor
     void move (const move_type &new_move)
     {
         move_queue_.clear();
         move_queue_.push_back(new_move);
     }
 
-    /// Read and write access to the Move queue
+    /// Read and write access to the movement queue
     move_queue_type &move_queue ()
     {
         return move_queue_;
     }
 
-    /// Read only access to the Move queue
+    /// Read only access to the movement queue
     const move_queue_type &move_queue () const
     {
         return move_queue_;
     }
 
-    /// Clear the MCMC queue and set a single new MCMC
+    /// Clear the MCMC movement queue and set a new MCMC movement functor
     void mcmc (const move_type &new_mcmc)
     {
         mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
     }
 
-    /// Read and write access to the MCMC queue
+    /// Read and write access to the MCMC movement queue
     move_queue_type &mcmc_queue ()
     {
         return mcmc_queue_;
     }
 
-    /// Read only access to the MCMC queue
+    /// Read only access to the MCMC movement queue
     const move_queue_type &mcmc_queue () const
     {
         return mcmc_queue_;
@@ -208,6 +211,11 @@ class Sampler
     ///
     /// \param param Additional parameters passed to the initialization
     /// functor
+    ///
+    /// \details
+    /// Before calling the initialization functor, set by Sampler::init, all
+    /// histories (ESS, resampling, accet counts) are cleared. Monitor::clear
+    /// are called upon each monitor as well.
     void initialize (void *param = VSMC_NULLPTR)
     {
         ess_history_.clear();
@@ -230,6 +238,12 @@ class Sampler
     }
 
     /// Perform iteration for a given number times
+    ///
+    /// \details
+    /// Movements set through Sampler::move and Sampler::move_queue are
+    /// performed first. Then threshold of ESS/N is checked and possible
+    /// resampling is performed. After that, movements set through
+    /// Sampler::mcmc and Sampler::mcmc_queue are performed.
     void iterate (unsigned num = 1)
     {
         for (unsigned i = 0; i != num; ++i) {
