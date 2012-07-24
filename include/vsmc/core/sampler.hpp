@@ -377,9 +377,11 @@ class Sampler
     template<typename CharT, typename Traits>
     void print (std::basic_ostream<CharT, Traits> &os = std::cout,
             bool print_header = true,
-            bool print_path = true, bool print_monitor = true) const
+            bool print_path = true, bool print_monitor = true,
+            char sepchar = '\t', char nachar = '.') const
     {
-        const char sep = '\t';
+        if (sepchar == ',')
+            nachar = 0;
 
         // Accept count
         std::vector<double> acc;
@@ -425,29 +427,29 @@ class Sampler
 
         // Print header
         if (print_header) {
-            os << "Iter" << sep << "ESS" << sep << "ResSam" << sep;
+            os << "Iter" << sepchar << "ESS" << sepchar << "ResSam" << sepchar;
             if (print_accept) {
                 if (accd == 1) {
-                    os << "Accept" << sep;
+                    os << "Accept" << sepchar;
                 } else {
                     for (unsigned d = 0; d != accd; ++d)
-                        os << "Accept." << d + 1 << sep;
+                        os << "Accept." << d + 1 << sepchar;
                 }
             }
             if (print_path) {
                 os
-                    << "Path.Integrand" << sep
-                    << "Path.Width" << sep
-                    << "Path.Grid" << sep << "";
+                    << "Path.Integrand" << sepchar
+                    << "Path.Width" << sepchar
+                    << "Path.Grid" << sepchar << "";
             }
             if (print_monitor) {
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
                     if (m->second.dim() == 1) {
-                        os << m->first << sep;
+                        os << m->first << sepchar;
                     } else {
                         for (unsigned d = 0; d != m->second.dim(); ++d)
-                            os << m->first << '.' << d + 1 << sep;
+                            os << m->first << nachar << d + 1 << sepchar;
                     }
                 }
             }
@@ -457,27 +459,27 @@ class Sampler
 
         // Print data
         for (unsigned iter = 0; iter != iter_size(); ++iter) {
-            os << iter << sep;
-            os << ess_history_[iter] / size() << sep;
-            os << resampled_history_[iter] << sep;
+            os << iter << sepchar;
+            os << ess_history_[iter] / size() << sepchar;
+            os << resampled_history_[iter] << sepchar;
             if (print_accept) {
                 for (unsigned c = 0; c != accept_history_[iter].size(); ++c)
                     os << accept_history_[iter][c] /
-                        static_cast<double>(size()) << sep;
+                        static_cast<double>(size()) << sepchar;
                 unsigned diff = static_cast<unsigned>(
                         accd - accept_history_[iter].size());
                 for (unsigned c = 0; c != diff; ++c)
-                    os << '.' << sep;
+                    os << nachar << sepchar;
             }
             if (print_path) {
                 long pr = pmask[iter];
                 if (pr >= 0) {
-                    os << path_.integrand()[pr] << sep;
-                    os << path_.width()[pr] << sep;
-                    os << path_.grid()[pr] << sep;
+                    os << path_.integrand()[pr] << sepchar;
+                    os << path_.width()[pr] << sepchar;
+                    os << path_.grid()[pr] << sepchar;
                 } else {
                     for (int i = 0; i != 3; ++i)
-                        os << '.' << sep;
+                        os << nachar << sepchar;
                 }
             }
             if (print_monitor) {
@@ -488,10 +490,10 @@ class Sampler
                     unsigned md = m->second.dim();
                     if (mr >= 0) {
                         for (unsigned d = 0; d != md; ++d)
-                            os << m->second.record(d)[mr] << sep;
+                            os << m->second.record(d)[mr] << sepchar;
                     } else {
                         for (unsigned d = 0; d != md; ++d)
-                            os << '.' << sep;
+                            os << nachar << sepchar;
                     }
                     ++mm;
                 }
