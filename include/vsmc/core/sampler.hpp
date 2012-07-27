@@ -370,6 +370,8 @@ class Sampler
     /// \param print_header Print header if \b true
     /// \param print_path Print path sampling if \b true
     /// \param print_monitor Print monitors if \b true
+    /// \param sepchar The character used to seperate fields
+    /// \param nachar The character used to represent missing values
     ///
     /// \note \c print_path and \c print_monitor are only used to hint the
     /// print process. If there is no record at all, then they won't be printed
