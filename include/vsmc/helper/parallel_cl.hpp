@@ -777,7 +777,7 @@ class InitializeCL
         return *this;
     }
 
-    ~InitializeCL () {}
+    virtual ~InitializeCL () {}
 
     private :
 
@@ -871,7 +871,7 @@ class MoveCL
         return *this;
     }
 
-    ~MoveCL () {}
+    virtual ~MoveCL () {}
 
     private :
 
@@ -966,7 +966,7 @@ class MonitorEvalCL
         return *this;
     }
 
-    ~MonitorEvalCL () {}
+    virtual ~MonitorEvalCL () {}
 
     private :
 
@@ -1064,7 +1064,7 @@ class PathEvalCL
         return *this;
     }
 
-    ~PathEvalCL () {}
+    virtual ~PathEvalCL () {}
 
     private :
 
