@@ -1,32 +1,37 @@
-FUNCTION (ADD_ALGORITHMS basename exes algs compile_flags ld_flags)
-    FOREACH (exe ${exes})
+FUNCTION (ADD_EXAMPLE basename algs)
+    FOREACH (exe ${EXAMPLE_EXECUTABLES})
         STRING (TOUPPER "-DUSE_${exe}" flags)
+
+        IF (${exe} STREQUAL "tbb")
+            ADD_TBB_RUNTIME(${basename})
+        ENDIF (${exe} STREQUAL "tbb")
+
         FOREACH (alg ${algs})
             SET (exe_name ${basename}-${alg}-${exe})
             ADD_EXECUTABLE (${exe_name} ${basename}-${alg}.cpp)
 
             IF (${exe} STREQUAL "omp")
                 SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
-                    "${compile_flags} ${flags} ${OpenMP_CXX_FLAGS}")
+                    "${VSMC_TEST_FLAGS} ${flags} ${OpenMP_CXX_FLAGS}")
             ELSE (${exe} STREQUAL "omp")
                 SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
-                    "${compile_flags} ${flags}")
+                    "${VSMC_TEST_FLAGS} ${flags}")
             ENDIF (${exe} STREQUAL "omp")
 
             IF (${exe} STREQUAL "tbb")
                 TARGET_LINK_LIBRARIES (${exe_name}
-                    ${ld_flags} ${TBB_LINK_LIBRARIES})
+                    ${EXAMPLE_LINK_LIBRARIES} ${TBB_LINK_LIBRARIES})
             ELSEIF (${exe} STREQUAL "omp")
                 TARGET_LINK_LIBRARIES (${exe_name}
-                    ${ld_flags} ${OpenMP_LINK_LIBRARIES})
+                    ${EXAMPLE_LINK_LIBRARIES} ${OpenMP_LINK_LIBRARIES})
             ELSE (${exe} STREQUAL "tbb")
-                TARGET_LINK_LIBRARIES (${exe_name} ${ld_flags})
+                TARGET_LINK_LIBRARIES (${exe_name} ${EXAMPLE_LINK_LIBRARIES})
             ENDIF (${exe} STREQUAL "tbb")
 
             ADD_DEPENDENCIES (${basename} ${exe_name})
         ENDFOREACH(alg)
     ENDFOREACH (exe)
-ENDFUNCTION (ADD_ALGORITHMS)
+ENDFUNCTION (ADD_EXAMPLE)
 
 FUNCTION (COPY_FILE basename filename)
     ADD_CUSTOM_COMMAND (
