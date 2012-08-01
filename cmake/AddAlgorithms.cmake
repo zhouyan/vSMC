@@ -4,8 +4,15 @@ FUNCTION (ADD_ALGORITHMS basename exes algs compile_flags ld_flags)
         FOREACH (alg ${algs})
             SET (exe_name ${basename}-${alg}-${exe})
             ADD_EXECUTABLE (${exe_name} ${basename}-${alg}.cpp)
-            SET_TARGET_PROPERTIES (${exe_name}
-                PROPERTIES COMPILE_FLAGS "${compile_flags} ${flags}")
+
+            IF (${exe} STREQUAL "omp")
+                SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
+                    "${compile_flags} ${flags} ${OpenMP_CXX_FLAGS}")
+            ELSE (${exe} STREQUAL "omp")
+                SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
+                    "${compile_flags} ${flags}")
+            ENDIF (${exe} STREQUAL "omp")
+
             IF (${exe} STREQUAL "tbb")
                 TARGET_LINK_LIBRARIES (${exe_name}
                     ${ld_flags} ${TBB_LINK_LIBRARIES})
@@ -15,6 +22,7 @@ FUNCTION (ADD_ALGORITHMS basename exes algs compile_flags ld_flags)
             ELSE (${exe} STREQUAL "tbb")
                 TARGET_LINK_LIBRARIES (${exe_name} ${ld_flags})
             ENDIF (${exe} STREQUAL "tbb")
+
             ADD_DEPENDENCIES (${basename} ${exe_name})
         ENDFOREACH(alg)
     ENDFOREACH (exe)
