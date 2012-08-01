@@ -15,7 +15,7 @@ SET (VERSION_PATCH 0)
 # Module path
 SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-# Finding packages
+# Included scripts
 SET (Boost_NO_BOOST_CMAKE     ON)
 SET (Boost_USE_STATIC_LIBS    ON)
 SET (Boost_USE_MULTITHREADED  ON)
@@ -27,6 +27,7 @@ INCLUDE (FindDoxygen)
 INCLUDE (FindTBB)
 INCLUDE (FindOpenCL)
 INCLUDE (FindOpenMP)
+INCLUDE (vSMCFunctions)
 
 # Configuration files
 CONFIGURE_FILE (
