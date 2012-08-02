@@ -22,11 +22,9 @@ The documentation can also be found [here][vSMCDoc].
 
 ## Prerequisite
 
-This library has two mandatory requirements other than standard libraries: the
-[Eigen][Eigen] linear algebra library and [Random123][Random123] parallel
-random number library. Both of them are very portable.
+This library has no dependences other than C++11 standard libraries.
 
-In addition, the library use the `<functional>`, `<random>` and `<type_traits>`
+In particular, the library use the `<functional>`, `<random>` and `<type_traits>`
 headers, which are parts of the  C++11 standard libraries or can be found in
 [Boost][Boost]. By default the library will use the [Boost][Boost] library. But
 if the C++ implementation has them correctly implemented, the standard headers
@@ -36,6 +34,8 @@ Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 (or C++0x) implementations of `<functional>`, `<random>` and
 `<type_traits>` work properly.
 
+Any C++11 language features are optional.
+
 ## Building and testing
 
 To build test examples,
@@ -44,61 +44,41 @@ To build test examples,
 
 To run the tests,
 
-    make test
-
-Or
-
-    ctest
+    ctest -C Release
 
 Note that [CMake][CMake] generated `Makefile` does not build test executables
 before run `ctest` in the `test` target, so you need run `make buildtests`
-before `make test` or `ctest`.
+manually first
 
 `make buildtests` will also build the examples, one is a simple particle
-filter, in `test/pf`, the others are a Gaussian mixture model and Positron
-Emission Tomography compartmental model with SMC, in `test/gmm` and `test/pet`
-respectively. The examples may take some non-trivial run-time, therefore they
-are not run when invoking `make test` or `ctest`. To run the example, one can
-invoke `ctest -C Release`. Alternatively, one can use
-
-    make check
-
-to build all tests and examples, and run all of them.
+filter, in `test/pf`, the others are a Gaussian mixture model, non-linear
+ordinary differential equations models and Positron Emission Tomography
+compartmental model with SMC, in `test/gmm` and `test/pet` respectively. The
+examples may take some non-trivial run-time, therefore they are not run when
+invoking `ctest`.
 
 Without [CMake][CMake] one can go to the `test` directory and build the
 examples manually. For example,
 
     cd test/pf
-    g++ -std=c++0x -O3 \
+    g++ -O3 \
       -I /path_to_v_smc_headers \
       -I /path_to_eigen_headers \
       -I /path_to_random123_headers \
       -I /path_to_tbb_headers -L /path_to_tbb_libraries -ltbb \
       -o pf_tbb pf_tbb.cpp
 
-There are some other more complex realistic examples and other configurations
-for the simple particle filter. They may require additional optional libraries.
-
-# Tested compilers
-
-The library itself only use standard C++98 features and is fairly portable.
-For compiler support of [Eigen][Eigen] and [Random123][Random123] see their
-pages respectively. In C++11 mode, the usability of `<functional>`, `<random>`
-and `<type_traits>` headers distributed with various implementations differs
-significantly. However [Boost][Boost] can be used as a replacement and which is
-well known for portability.
-
-- Linux
-  * GCC 4.4, 4.5, 4.6,
-  * Intel icpc 12.0, 12.1
-  * Clang 2.8, 2.9, 3.0, 3.1, SVN
-
-- Mac OS X
-  * Clang 3.1
-  * Intel icpc 12.1
-
-- Windows
-  * MSVC 2010
+For every example, they can be possibly built with [OpenMP][OpenMP], [Intel
+TBB][Intel TBB] support in addition to sequential implementations. These will
+require [OpenMP][OpenMP] compiler support and the [Intel TBB][Intel TBB]
+library support respectively. The particle filter example can also be built
+[OpenCL][OpenCL] for a GPU implementation. All examples other than the particle
+filter requires the [Eigen][Eigen] library and [Boost][Boost] Program Options
+library. They may also require some additional C99 math functions. When the
+[Eigen][Eigen] library is available, a vectorized implementation of the
+particle filter can also be built. Last, if C++11 `<chrono>` or corresponding
+[Boost][Boost] library is available, then the particle filter will also be
+timed.
 
 # License
 
@@ -113,4 +93,5 @@ found in the COPYING file distributed with the source.
 [SMCTC]: http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/smctc/
 [Intel TBB]: http://threadingbuildingblocks.org/
 [OpenCL]: http://www.khronos.org/opencl/
+[OpenMP]: http://www.openmp.org/
 [vSMCDoc]: http://zhouyan.github.com/vSMC/doc/html/index.html
