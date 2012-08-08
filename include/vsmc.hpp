@@ -1,6 +1,8 @@
 #ifndef VSMC_HPP
 #define VSMC_HPP
 
+#include <vsmc/internal/config.hpp>
+
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/monitor.hpp>
@@ -19,6 +21,10 @@
 #if VSMC_USE_CL
 #include <vsmc/helper/parallel_cl.hpp>
 #endif // VSMC_USE_CL
+
+#if VSMC_HAS_CXX11LIB_CHRONO
+#include <vsmc/timer/chrono_timer.hpp>
+#endif // VSMC_HAS_CXX11LIB_CHRONO
 
 #endif // VSMC_HPP
 
