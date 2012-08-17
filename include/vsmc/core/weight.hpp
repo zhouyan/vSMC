@@ -51,6 +51,27 @@ class WeightSetBase
         std::fill(log_weight_.begin(), log_weight_.end(), 0);
     }
 
+    /// \brief Set the weights with a pointer
+    ///
+    /// \param nw The position to start the reading, it shall be valid
+    /// after increments of size() times.
+    void set_weight (const double *nw)
+    {
+        std::copy(nw, nw + weight_.size(), weight_.begin());
+        weight2log_weight();
+    }
+
+    /// \brief Multiple the weight with a pointer
+    ///
+    /// \param iw The position to start the reading, it shall be valid
+    /// after increments of size() times.
+    void mul_weight (const double *iw)
+    {
+        for (size_type i = 0; i != log_weight_.size(); ++i)
+            weight_[i] *= iw[i];
+        weight2log_weight();
+    }
+
     /// \brief Set the log weights with a pointer
     ///
     /// \param nw The position to start the reading, it shall be valid
@@ -58,7 +79,7 @@ class WeightSetBase
     void set_log_weight (const double *nw)
     {
         std::copy(nw, nw + log_weight_.size(), log_weight_.begin());
-        set_weight();
+        log_weight2weight();
     }
 
     /// \brief Add to the log weights with a pointer
@@ -69,7 +90,7 @@ class WeightSetBase
     {
         for (size_type i = 0; i != log_weight_.size(); ++i)
             log_weight_[i] += iw[i];
-        set_weight();
+        log_weight2weight();
     }
 
     /// The current ESS (Effective Sample Size)
@@ -84,7 +105,7 @@ class WeightSetBase
     mutable std::vector<double> weight_;
     mutable std::vector<double> log_weight_;
 
-    void set_weight ()
+    void log_weight2weight ()
     {
         using std::exp;
 
@@ -101,6 +122,25 @@ class WeightSetBase
         coeff = 1 / coeff;
         for (size_type i = 0; i != weight_.size(); ++i)
             weight_[i] *= coeff;
+
+        ess_ = 0;
+        for (size_type i = 0; i != weight_.size(); ++i)
+            ess_ += weight_[i] * weight_[i];
+        ess_ = 1/ ess_;
+    }
+
+    void weight2log_weight ()
+    {
+        using std::log;
+
+        double coeff = std::accumulate(weight_.begin(), weight_.end(),
+                static_cast<double>(0));
+        coeff = 1 / coeff;
+        for (size_type i = 0; i != weight_.size(); ++i)
+            weight_[i] *= coeff;
+
+        for (size_type i = 0; i != weight_.size(); ++i)
+            log_weight_[i] = log(weight_[i]);
 
         ess_ = 0;
         for (size_type i = 0; i != weight_.size(); ++i)

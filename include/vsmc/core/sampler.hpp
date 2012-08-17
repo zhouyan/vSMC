@@ -451,7 +451,7 @@ class Sampler
                         os << m->first << sepchar;
                     } else {
                         for (unsigned d = 0; d != m->second.dim(); ++d)
-                            os << m->first << nachar << d + 1 << sepchar;
+                            os << m->first << '.' << d + 1 << sepchar;
                     }
                 }
             }
@@ -471,7 +471,7 @@ class Sampler
                 unsigned diff = static_cast<unsigned>(
                         accd - accept_history_[iter].size());
                 for (unsigned c = 0; c != diff; ++c)
-                    os << nachar << sepchar;
+                    os << 0 << sepchar;
             }
             if (print_path) {
                 long pr = pmask[iter];

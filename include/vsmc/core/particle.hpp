@@ -52,6 +52,8 @@ class Particle :
     using weight_set_type::read_weight;
     using weight_set_type::read_log_weight;
     using weight_set_type::set_equal_weight;
+    using weight_set_type::set_weight;
+    using weight_set_type::mul_weight;
     using weight_set_type::set_log_weight;
     using weight_set_type::add_log_weight;
     using weight_set_type::ess;
