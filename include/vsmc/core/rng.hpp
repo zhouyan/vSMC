@@ -17,9 +17,11 @@ class RngSetSeq
     /// The type of the seed sequence
     typedef Seed seed_type;
 
-    template <typename SizeType>
-    RngSetSeq (SizeType N) : rng_(static_cast<rng_type::result_type>(
-                seed_type::create().get())) {}
+    /// The type of the size of the rng set
+    typedef std::size_t size_type;
+
+    explicit RngSetSeq (size_type N) :
+        rng_(static_cast<rng_type::result_type>(seed_type::create().get())) {}
 
     /// \brief Get a C++11 RNG engine
     ///
@@ -27,8 +29,7 @@ class RngSetSeq
     ///
     /// \return A reference to a C++11 RNG engine unique to particle at
     /// position id, and independent of others
-    template <typename SizeType>
-    rng_type &rng (SizeType id)
+    rng_type &rng (size_type id)
     {
         return rng_;
     }
@@ -50,11 +51,13 @@ class RngSetPrl
     /// The type of the seed sequence
     typedef Seed seed_type;
 
-    template <typename SizeType>
-    RngSetPrl (SizeType N)
+    /// The type of the size of the rng set
+    typedef std::vector<rng_type>::size_type size_type;
+
+    explicit RngSetPrl (size_type N)
     {
         seed_type &seed = seed_type::create();
-        for (SizeType i = 0; i != N; ++i)
+        for (size_type i = 0; i != N; ++i)
             rng_.push_back(
                     rng_type(static_cast<rng_type::result_type>(seed.get())));
     }
@@ -65,8 +68,7 @@ class RngSetPrl
     ///
     /// \return A reference to a C++11 RNG engine unique to particle at
     /// position id, and independent of others
-    template <typename SizeType>
-    rng_type &rng (SizeType id)
+    rng_type &rng (size_type id)
     {
         return rng_[id];
     }
