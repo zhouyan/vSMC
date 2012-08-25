@@ -71,7 +71,7 @@
 #endif
 
 #if VSMC_USE_RANDOM123
-#define VSMC_PRLRNG_TYPE vsmc::cxx11::Engine<VSMC_CBRNG_TYPE>
+#define VSMC_PRLRNG_TYPE r123::Engine<VSMC_CBRNG_TYPE>
 #else
 #define VSMC_PRLRNG_TYPE vsmc::cxx11::mt19937
 #endif
