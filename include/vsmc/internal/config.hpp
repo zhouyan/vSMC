@@ -10,10 +10,6 @@
 #define __STDC_CONSTANT_MACROS
 #endif
 
-// min and max
-
-#define VSMC_PREVENT_MIN_MAX
-
 // Optional features
 
 #ifndef VSMC_USE_OMP
