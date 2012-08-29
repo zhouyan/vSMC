@@ -261,6 +261,7 @@ class Sampler
             }
 
             do_resampling();
+            do_monitoring();
 
             for (typename move_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
@@ -272,8 +273,6 @@ class Sampler
             }
 
             accept_history_.push_back(acc);
-
-            do_monitoring();
         }
     }
 
