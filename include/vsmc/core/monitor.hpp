@@ -16,6 +16,8 @@ class GEMVSimple
 {
     public :
 
+    typedef VSMC_SIZE_TYPE size_type;
+
     /// \brief Simple GEMV operator
     ///
     /// \param N Number of columns of A and elements of X (number of particles)
@@ -25,12 +27,12 @@ class GEMVSimple
     /// \param res [out] Results
     ///
     /// \note \c A and \c X are assumed to be column major.
-    void operator() (std::size_t N, std::size_t M,
+    void operator() (size_type N, size_type M,
             const double *A, const double *X, double *res) const
     {
-        for (std::size_t m = 0; m != M; ++m) {
+        for (size_type m = 0; m != M; ++m) {
             double r = 0;
-            for (std::size_t n = 0; n != N; ++n)
+            for (size_type n = 0; n != N; ++n)
                 r += X[n] * A[n * M + m];
             res[m] = r;
         }

@@ -18,7 +18,7 @@ class RngSetSeq
     typedef Seed seed_type;
 
     /// The type of the size of the rng set
-    typedef std::size_t size_type;
+    typedef VSMC_SIZE_TYPE size_type;
 
     explicit RngSetSeq (size_type N) :
         rng_(static_cast<rng_type::result_type>(seed_type::create().get())) {}

@@ -222,7 +222,7 @@ class StateCL
     /// \brief Set a new local group size
     ///
     /// \param lsize The size of the work group.
-    void local_size (std::size_t lsize)
+    void local_size (size_type lsize)
     {
         local_size_ = lsize;
 
@@ -460,7 +460,7 @@ class StateCL
     /// \tparam CLType An OpenCL type
     /// \param num The number of elements
     template<typename CLType>
-    cl::Buffer create_buffer (std::size_t num) const
+    cl::Buffer create_buffer (size_type num) const
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(create_buffer);
 
@@ -478,7 +478,7 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
 
-        std::size_t num = 0;
+        size_type num = 0;
         for (InputIter i = first; i != last; ++i)
             ++num;
         cl::Buffer buf(create_buffer<CLType>(num));
@@ -498,7 +498,7 @@ class StateCL
     /// \param num The number of elements in the device buffer
     /// \param first The begin of the output
     template <typename CLType, typename OutputIter>
-    void read_buffer (const cl::Buffer &buf, std::size_t num,
+    void read_buffer (const cl::Buffer &buf, size_type num,
             OutputIter first) const
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(read_buffer);
@@ -526,7 +526,7 @@ class StateCL
     /// \param num The number of elements in the device buffer
     /// \param first The begin of the input
     template <typename CLType, typename InputIter>
-    void write_buffer (const cl::Buffer &buf, std::size_t num,
+    void write_buffer (const cl::Buffer &buf, size_type num,
             InputIter first) const
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(write_buffer);
@@ -607,10 +607,10 @@ class StateCL
 
     unsigned dim_;
     size_type size_;
-    std::size_t local_size_;
+    size_type local_size_;
 
-    mutable std::size_t read_buffer_pool_bytes_;
-    mutable std::size_t write_buffer_pool_bytes_;
+    mutable size_type read_buffer_pool_bytes_;
+    mutable size_type write_buffer_pool_bytes_;
     mutable void *read_buffer_pool_;
     mutable void *write_buffer_pool_;
 
@@ -661,9 +661,9 @@ class StateCL
     /// initialization), the memory will not be needed to expand anymore
 
     template <typename HostType>
-    HostType *read_buffer_pool (std::size_t num) const
+    HostType *read_buffer_pool (size_type num) const
     {
-        std::size_t new_bytes = num * sizeof(HostType);
+        size_type new_bytes = num * sizeof(HostType);
         if (new_bytes > read_buffer_pool_bytes_) {
             read_buffer_pool_bytes_ = new_bytes;
             std::free(read_buffer_pool_);
@@ -676,9 +676,9 @@ class StateCL
     }
 
     template <typename HostType>
-    HostType *write_buffer_pool (std::size_t num) const
+    HostType *write_buffer_pool (size_type num) const
     {
-        std::size_t new_bytes = num * sizeof(HostType);
+        size_type new_bytes = num * sizeof(HostType);
         if (new_bytes > write_buffer_pool_bytes_) {
             write_buffer_pool_bytes_ = new_bytes;
             std::free(write_buffer_pool_);
