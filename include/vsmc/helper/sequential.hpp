@@ -27,8 +27,8 @@ class StateSeq : public StateBase<Dim, T, Timer>
 
     explicit StateSeq (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
-    template <typename SizeType>
-    void copy (const SizeType *copy_from)
+    template <typename IntType>
+    void copy (const IntType *copy_from)
     {
         for (size_type to = 0; to != size_; ++to)
             this->copy_particle(copy_from[to], to);

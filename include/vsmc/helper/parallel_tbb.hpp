@@ -36,12 +36,12 @@ class StateTBB : public StateBase<Dim, T, Timer>
 
     explicit StateTBB (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
-    template <typename SizeType>
-    void copy (const SizeType *copy_from)
+    template <typename IntType>
+    void copy (const IntType *copy_from)
     {
         this->timer().start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_),
-                copy_work_<SizeType>(this, copy_from));
+                copy_work_<IntType>(this, copy_from));
         this->timer().stop();
     }
 
@@ -49,13 +49,13 @@ class StateTBB : public StateBase<Dim, T, Timer>
 
     size_type size_;
 
-    template <typename SizeType>
+    template <typename IntType>
     class copy_work_
     {
         public :
 
         copy_work_ (StateTBB<Dim, T, Timer> *state,
-                const SizeType *copy_from) :
+                const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
         void operator () (const tbb::blocked_range<size_type> &range) const
@@ -67,7 +67,7 @@ class StateTBB : public StateBase<Dim, T, Timer>
         private :
 
         StateTBB<Dim, T, Timer> *const state_;
-        const SizeType *const copy_from_;
+        const IntType *const copy_from_;
     }; // class work_
 }; // class StateTBB
 

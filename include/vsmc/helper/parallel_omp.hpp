@@ -28,8 +28,8 @@ class StateOMP : public StateBase<Dim, T, Timer>
 
     explicit StateOMP (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
-    template <typename SizeType>
-    void copy (const SizeType *copy_from)
+    template <typename IntType>
+    void copy (const IntType *copy_from)
     {
 #pragma omp parallel for default(none) shared(copy_from)
         for (size_type to = 0; to < size_; ++to)

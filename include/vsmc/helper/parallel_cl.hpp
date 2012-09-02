@@ -592,8 +592,8 @@ class StateCL
         return timer_write_buffer_;
     }
 
-    template<typename SizeType>
-    void copy (const SizeType *copy_from)
+    template<typename IntType>
+    void copy (const IntType *copy_from)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel)
 
