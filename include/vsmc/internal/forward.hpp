@@ -41,6 +41,12 @@ template <typename, typename D = VBase> class MoveTBB;
 template <typename, typename D = VBase> class MonitorEvalTBB;
 template <typename, typename D = VBase> class PathEvalTBB;
 
+template <unsigned, typename, typename T = NullTimer> class StateCilk;
+template <typename, typename D = VBase> class InitializeCilk;
+template <typename, typename D = VBase> class MoveCilk;
+template <typename, typename D = VBase> class MonitorEvalCilk;
+template <typename, typename D = VBase> class PathEvalCilk;
+
 template <unsigned, typename, typename P = NullTimer> class StateCL;
 template <typename> class InitializeCL;
 template <typename> class MoveCL;

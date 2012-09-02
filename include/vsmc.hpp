@@ -18,6 +18,10 @@
 #include <vsmc/helper/parallel_tbb.hpp>
 #endif // VSMC_USE_TBB
 
+#if VSMC_USE_CILK
+#include <vsmc/helper/parallel_cilk.hpp>
+#endif // VSMC_USE_CILK
+
 #if VSMC_USE_CL
 #include <vsmc/helper/parallel_cl.hpp>
 #endif // VSMC_USE_CL
