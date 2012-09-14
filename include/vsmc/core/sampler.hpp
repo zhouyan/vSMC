@@ -379,6 +379,7 @@ class Sampler
     void print (std::basic_ostream<CharT, Traits> &os = std::cout,
             bool print_header = true,
             bool print_path = true, bool print_monitor = true,
+            bool print_id = false, int id = 0,
             char sepchar = '\t', char nachar = '.') const
     {
         if (sepchar == ',')
@@ -428,6 +429,8 @@ class Sampler
 
         // Print header
         if (print_header) {
+            if (print_id)
+                os << "Sampler.ID" << sepchar;
             os << "Iter" << sepchar << "ESS" << sepchar << "ResSam" << sepchar;
             if (print_accept) {
                 if (accd == 1) {
@@ -441,7 +444,7 @@ class Sampler
                 os
                     << "Path.Integrand" << sepchar
                     << "Path.Width" << sepchar
-                    << "Path.Grid" << sepchar << "";
+                    << "Path.Grid" << sepchar;
             }
             if (print_monitor) {
                 for (typename monitor_map_type::const_iterator
@@ -460,6 +463,8 @@ class Sampler
 
         // Print data
         for (unsigned iter = 0; iter != iter_size(); ++iter) {
+            if (print_id)
+                os << id << sepchar;
             os << iter << sepchar;
             os << ess_history_[iter] / size() << sepchar;
             os << resampled_history_[iter] << sepchar;
