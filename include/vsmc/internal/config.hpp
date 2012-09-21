@@ -4,6 +4,14 @@
 #include <vsmc/internal/version.hpp>
 #include <vsmc/internal/compiler.hpp>
 
+// nullptr
+
+#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_NULLPTR nullptr
+#else
+#define VSMC_NULLPTR 0
+#endif
+
 // cstdint
 
 #ifndef __STDC_CONSTANT_MACROS

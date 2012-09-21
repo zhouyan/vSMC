@@ -1,7 +1,7 @@
 #include <cassert>
 #include <vsmc/cxx11/functional.hpp>
 
-int fn (int a)
+int fn (int a, double, double, double)
 {
     return 2 * a;
 }
@@ -10,13 +10,13 @@ class cl
 {
     public :
 
-    typedef vsmc::cxx11::function<int (int)> f_type;
+    typedef vsmc::cxx11::function<int (int, double, double, double)> f_type;
 
     cl (f_type f = 0) : f_(f) {}
 
-    int operator() (int a)
+    int operator() (int a, double, double, double)
     {
-        return f_(a);
+        return f_(a, 0, 0, 0);
     }
 
     private :
@@ -26,19 +26,19 @@ class cl
 
 int main ()
 {
-    vsmc::cxx11::function<int (int)> f;
+    vsmc::cxx11::function<int (int, double, double, double)> f;
     assert(!bool(f));
 
     f = fn;
     assert(bool(f));
-    assert(f(2) == 4);
+    assert(f(2, 0, 0, 0) == 4);
 
     f = 0;
     assert(!bool(f));
 
     cl c;
     c = cl(fn);
-    assert(c(2) == 4);
+    assert(c(2, 0, 0, 0) == 4);
 
     return 0;
 }

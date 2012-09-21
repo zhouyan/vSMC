@@ -26,12 +26,6 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
-#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
-#define VSMC_NULLPTR nullptr
-#else
-#define VSMC_NULLPTR 0
-#endif
-
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)
 #else // NDEBUG
