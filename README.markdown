@@ -49,7 +49,9 @@ work properly even they are present.
 
 The library can optionally use the [Random123][Random123] library for
 parallelized random number generator, and the default behavior is assuming this
-is available.
+is available. The library distribute a modified version [Random123][Random123]
+in the `third-party` directory. The only modification is to make it work with
+[libc++][libc++].
 
 The library support using [Intel TBB][Intel TBB], [OpenMP][OpenMP] or
 [OpenCL][OpenCL] as parallelization backends. To enable this features suitable
@@ -60,14 +62,15 @@ present of course.
 # License
 
 The vSMC library is distributed with a Boost license which can be found in the
-`COPYING` file distributed with the source.
+`LICENSE` file distributed with the source.
 
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
-[Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
 [Intel TBB]: http://threadingbuildingblocks.org/
-[OpenMP]: http://www.openmp.org/
 [OpenCL]: http://www.khronos.org/opencl/
+[OpenMP]: http://www.openmp.org/
+[Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
+[libc++]: http://libcxx.llvm.org
 [vSMCDoc]: http://zhouyan.github.com/vSMC/doc/html/index.html
 [vSMCMacro]: https://github.com/zhouyan/vSMC/wiki/Macros
