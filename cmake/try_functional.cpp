@@ -12,7 +12,7 @@ class cl
 
     typedef vsmc::cxx11::function<int (int, double, double, double)> f_type;
 
-    cl (f_type f = 0) : f_(f) {}
+    cl (f_type f = VSMC_NULLPTR) : f_(f) {}
 
     int operator() (int a, double, double, double)
     {
