@@ -33,7 +33,7 @@ int main ()
     assert(bool(f));
     assert(f(2, 0, 0, 0) == 4);
 
-    f = 0;
+    f = VSMC_NULLPTR;
     assert(!bool(f));
 
     cl c;

@@ -6,10 +6,12 @@
 
 // nullptr
 
+#ifndef VSMC_NULLPTR
 #if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_NULLPTR nullptr
 #else
 #define VSMC_NULLPTR 0
+#endif
 #endif
 
 // cstdint
