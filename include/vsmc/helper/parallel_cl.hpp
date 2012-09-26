@@ -1,5 +1,4 @@
 #ifndef VSMC_HELPER_PARALLEL_CL_HPP
-    /// Resize the dimension of the problem
 #define VSMC_HELPER_PARALLEL_CL_HPP
 
 #define __CL_ENABLE_EXCEPTIONS
