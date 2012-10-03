@@ -43,7 +43,7 @@ class Path
         index_(other.index_), integrand_(other.integrand_),
         width_(other.width_), grid_(other.grid_) {}
 
-    Path<T> & operator= (const Path<T> &other)
+    const Path<T> &operator= (const Path<T> &other)
     {
         if (&other != this) {
             eval_      = other.eval_;

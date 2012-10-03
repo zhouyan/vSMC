@@ -58,7 +58,7 @@ class StateTBB : public StateBase<Dim, T, Timer>
                 const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
-        void operator () (const tbb::blocked_range<size_type> &range) const
+        void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type to = range.begin(); to != range.end(); ++to)
                 state_->copy_particle(copy_from_[to], to);
@@ -68,7 +68,7 @@ class StateTBB : public StateBase<Dim, T, Timer>
 
         StateTBB<Dim, T, Timer> *const state_;
         const IntType *const copy_from_;
-    }; // class work_
+    }; // class copy_work_
 }; // class StateTBB
 
 /// \brief Sampler<T>::init_type subtype

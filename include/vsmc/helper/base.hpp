@@ -345,7 +345,7 @@ class InitializeBase
 
     InitializeBase () {}
     InitializeBase (const InitializeBase<T, Derived> &) {}
-    InitializeBase<T, Derived> &operator=
+    const InitializeBase<T, Derived> &operator=
         (const InitializeBase<T, Derived> &) {return *this;}
     VSMC_VIRTUAL_BASE_DESTRUCTOR ~InitializeBase () {}
 
@@ -458,7 +458,7 @@ class InitializeBase<T, VBase>
 
     InitializeBase () {}
     InitializeBase (const InitializeBase<T, VBase> &) {}
-    InitializeBase<T, VBase> &operator=
+    const InitializeBase<T, VBase> &operator=
         (const InitializeBase<T, VBase> &) {return *this;}
     virtual ~InitializeBase () {}
 }; // class InitializeBase<T, VBase>
@@ -476,7 +476,7 @@ class MoveBase
 
     MoveBase () {}
     MoveBase (const MoveBase<T, Derived> &) {}
-    MoveBase<T, Derived> &operator=
+    const MoveBase<T, Derived> &operator=
         (const MoveBase<T, Derived> &) {return *this;}
     VSMC_VIRTUAL_BASE_DESTRUCTOR ~MoveBase () {}
 
@@ -566,7 +566,7 @@ class MoveBase<T, VBase>
 
     MoveBase () {}
     MoveBase (const MoveBase<T, VBase> &) {}
-    MoveBase<T, VBase> &operator=
+    const MoveBase<T, VBase> &operator=
         (const MoveBase<T, VBase> &) {return *this;}
     virtual ~MoveBase () {}
 }; // class MoveBase<T, VBase>
@@ -584,7 +584,7 @@ class MonitorEvalBase
 
     MonitorEvalBase () {}
     MonitorEvalBase (const MonitorEvalBase<T, Derived> &) {}
-    MonitorEvalBase<T, Derived> &operator=
+    const MonitorEvalBase<T, Derived> &operator=
         (const MonitorEvalBase<T, Derived> &) {return *this;}
     VSMC_VIRTUAL_BASE_DESTRUCTOR ~MonitorEvalBase () {}
 
@@ -680,7 +680,7 @@ class MonitorEvalBase<T, VBase>
 
     MonitorEvalBase () {}
     MonitorEvalBase (const MonitorEvalBase<T, VBase> &) {}
-    MonitorEvalBase<T, VBase> &operator=
+    const MonitorEvalBase<T, VBase> &operator=
         (const MonitorEvalBase<T, VBase> &) {return *this;}
     virtual ~MonitorEvalBase () {}
 }; // class MonitorEvalBase<T, VBase>
@@ -698,7 +698,7 @@ class PathEvalBase
 
     PathEvalBase () {}
     PathEvalBase (const PathEvalBase<T, Derived> &) {}
-    PathEvalBase<T, Derived> &operator=
+    const PathEvalBase<T, Derived> &operator=
         (const PathEvalBase<T, Derived> &) {return *this;}
     VSMC_VIRTUAL_BASE_DESTRUCTOR ~PathEvalBase () {}
 
@@ -813,7 +813,7 @@ class PathEvalBase<T, VBase>
 
     PathEvalBase () {}
     PathEvalBase (const PathEvalBase<T, VBase> &) {}
-    PathEvalBase<T, VBase> &operator=
+    const PathEvalBase<T, VBase> &operator=
         (const PathEvalBase<T, VBase> &) {return *this;}
     virtual ~PathEvalBase () {}
 }; // class PathEval<T, VBase>
