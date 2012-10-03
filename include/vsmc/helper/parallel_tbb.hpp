@@ -4,7 +4,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/base.hpp>
 
-#ifdef __clang__
+#if defined(__clang__) && !defined(_LIBCPP_VERSION) && (__GLIBCXX__ < 20100429)
 #ifndef TBB_USE_CAPTURED_EXCEPTION
 #define TBB_USE_CAPTURED_EXCEPTION 1
 #endif
