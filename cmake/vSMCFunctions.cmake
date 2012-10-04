@@ -18,7 +18,10 @@ FUNCTION (ADD_EXAMPLE basename algs)
                     "${VSMC_TEST_FLAGS} ${flags}")
             ENDIF (${exe} STREQUAL "omp")
 
-            IF (${exe} STREQUAL "tbb")
+            IF (${exe} STREQUAL "std")
+                TARGET_LINK_LIBRARIES (${exe_name}
+                    ${EXAMPLE_LINK_LIBRARIES} ${THREAD_LINK_LIBRARIES})
+            ELSEIF (${exe} STREQUAL "tbb")
                 TARGET_LINK_LIBRARIES (${exe_name}
                     ${EXAMPLE_LINK_LIBRARIES} ${TBB_LINK_LIBRARIES})
             ELSEIF (${exe} STREQUAL "omp")
@@ -26,7 +29,7 @@ FUNCTION (ADD_EXAMPLE basename algs)
                     ${EXAMPLE_LINK_LIBRARIES} ${OpenMP_LINK_LIBRARIES})
             ELSE (${exe} STREQUAL "tbb")
                 TARGET_LINK_LIBRARIES (${exe_name} ${EXAMPLE_LINK_LIBRARIES})
-            ENDIF (${exe} STREQUAL "tbb")
+            ENDIF (${exe} STREQUAL "std")
 
             ADD_DEPENDENCIES (${basename} ${exe_name})
         ENDFOREACH(alg)
