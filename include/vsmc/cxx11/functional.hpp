@@ -8,6 +8,8 @@
 #include <functional>
 namespace vsmc { namespace cxx11 {
 using std::function;
+using std::ref;
+using std::cref;
 } }
 
 #else // VSMC_HAS_CXX11LIB_FUNCTIONAL
@@ -15,6 +17,12 @@ using std::function;
 #include <boost/function.hpp>
 namespace vsmc { namespace cxx11 {
 using boost::function;
+} }
+
+#include <boost/ref.hpp>
+namespace vsmc { namespace cxx11 {
+using boost::ref;
+using boost::cref;
 } }
 
 #endif // VSMC_HAS_CXX11LIB_FUNCTIONAL

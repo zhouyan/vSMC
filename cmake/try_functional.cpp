@@ -6,6 +6,11 @@ int fn (int a, double, double, double)
     return 2 * a;
 }
 
+void gn (int &a)
+{
+    a *= 2;
+}
+
 class cl
 {
     public :
@@ -39,6 +44,10 @@ int main ()
     cl c;
     c = cl(fn);
     assert(c(2, 0, 0, 0) == 4);
+
+    int a = 1;
+    gn(vsmc::cxx11::ref(a));
+    assert(a == 2);
 
     return 0;
 }
