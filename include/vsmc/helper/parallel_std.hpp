@@ -17,7 +17,7 @@ class ThreadManager
 {
     public :
 
-    static ThreadManager &create ()
+    static ThreadManager &reference ()
     {
         static ThreadManager manager;
 
@@ -104,7 +104,7 @@ class BlockedRange
 template <typename SizeType, typename WorkType>
 void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
 {
-    const ThreadManager &manager = ThreadManager::create();
+    const ThreadManager &manager = ThreadManager::reference();
     unsigned thread_num = manager.get_thread_num();
     std::vector<SizeType> b(thread_num);
     std::vector<SizeType> e(thread_num);
@@ -133,7 +133,7 @@ template <typename SizeType, typename WorkType, typename ResultType>
 void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
         ResultType &res)
 {
-    const ThreadManager &manager = ThreadManager::create();
+    const ThreadManager &manager = ThreadManager::reference();
     unsigned thread_num = manager.get_thread_num();
     std::vector<SizeType> b(thread_num);
     std::vector<SizeType> e(thread_num);

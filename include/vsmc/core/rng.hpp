@@ -17,7 +17,7 @@ namespace vsmc {
 /// \details
 /// A Seed object cannot be created, copied, or assigned to/from by user.
 /// Instead, user can only get a reference to a \c static Seed object through
-/// \c Seed::create(). It is intended to generate distinct seed for the
+/// \c Seed::reference(). It is intended to generate distinct seed for the
 /// Counter-based random number generator provided by Random123 library. The
 /// seed generated from the Seed object shall not be used by other Pseudo
 /// random number generator. The seed sequence is just a sequence of \c
@@ -36,7 +36,7 @@ class Seed
     typedef unsigned result_type;
 
     /// Get a reference to a Seed object
-    static Seed &create ()
+    static Seed &reference ()
     {
         static Seed seed;
 
@@ -111,7 +111,9 @@ class RngSetSeq
     typedef VSMC_SIZE_TYPE size_type;
 
     explicit RngSetSeq (size_type N) :
-        rng_(static_cast<rng_type::result_type>(seed_type::create().get())) {}
+        rng_(static_cast<rng_type::result_type>(
+                    seed_type::reference().get()))
+    {}
 
     /// \brief Get a C++11 RNG engine
     ///
@@ -146,7 +148,7 @@ class RngSetPrl
 
     explicit RngSetPrl (size_type N)
     {
-        seed_type &seed = seed_type::create();
+        seed_type &seed = seed_type::reference();
         for (size_type i = 0; i != N; ++i)
             rng_.push_back(
                     rng_type(static_cast<rng_type::result_type>(seed.get())));
