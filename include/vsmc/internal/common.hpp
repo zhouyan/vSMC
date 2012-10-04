@@ -5,8 +5,10 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <ctime>
 
 #include <algorithm>
+#include <limits>
 #include <numeric>
 
 #include <map>

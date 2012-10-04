@@ -4,6 +4,7 @@
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/core/rng.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \

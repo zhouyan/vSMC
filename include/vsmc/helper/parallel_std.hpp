@@ -5,7 +5,7 @@
 #include <vsmc/helper/base.hpp>
 #include <vsmc/cxx11/thread.hpp>
 
-/// \defgroup StdTherad C++11 Multithread Support
+/// \defgroup STDThread C++11 Multithread Support
 /// \ingroup Helper
 /// \brief Parallelized samplers with C++11 multithread support
 
@@ -167,6 +167,12 @@ void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
 
 } // namespace thread
 
+/// \brief Particle::value_type subtype
+/// \ingroup STDThread
+///
+/// \tparam Dim The dimension of the state parameter vector
+/// \tparam T The type of the value of the state parameter vector
+/// \tparam Timer The timer
 template <unsigned Dim, typename T, typename Timer>
 class StateSTD : public StateBase<Dim, T, Timer>
 {
@@ -214,6 +220,10 @@ class StateSTD : public StateBase<Dim, T, Timer>
     }; // class copy_work_
 }; // class StateSTD
 
+/// \brief Sampler<T>::init_type subtype
+/// \ingroup STDThread
+///
+/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class InitializeSTD : public InitializeBase<T, Derived>
 {
@@ -275,6 +285,10 @@ class InitializeSTD : public InitializeBase<T, Derived>
     }; // class work_
 }; // class InitializeSTD
 
+/// \brief Sampler<T>::move_type subtype
+/// \ingroup STDThread
+///
+/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MoveSTD : public MoveBase<T, Derived>
 {
@@ -336,6 +350,10 @@ class MoveSTD : public MoveBase<T, Derived>
     }; // class work_
 }; // class MoveSTD
 
+/// \brief Monitor<T>::eval_type subtype
+/// \ingroup STDThread
+///
+/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 {
@@ -398,6 +416,10 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
     }; // class work_
 }; // class MonitorEvalSTD
 
+/// \brief Path<T>::eval_type subtype
+/// \ingroup STDThread
+///
+/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class PathEvalSTD : public PathEvalBase<T, Derived>
 {
