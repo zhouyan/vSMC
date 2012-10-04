@@ -1,5 +1,6 @@
 #include <cassert>
 #include <vsmc/cxx11/random.hpp>
+#include <vsmc/core/rng.hpp>
 
 int main ()
 {
