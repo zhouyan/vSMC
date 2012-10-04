@@ -4,9 +4,164 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/base.hpp>
 #include <vsmc/cxx11/thread.hpp>
-#include <tbb/tbb.h>
 
 namespace vsmc {
+
+namespace thread {
+
+class ThreadManager
+{
+    public :
+
+    static ThreadManager &create ()
+    {
+        static ThreadManager manager;
+
+        return manager;
+    }
+
+    unsigned get_thread_num () const
+    {
+        return thread_num_;
+    }
+
+    void set_thread_num (unsigned num)
+    {
+        thread_num_ = num;
+    }
+
+    template <typename SizeType, typename OutputIter>
+    unsigned partition (SizeType begin, SizeType end,
+            OutputIter begin_iter, OutputIter end_iter) const
+    {
+        VSMC_RUNTIME_ASSERT((begin < end),
+                "WRONG RANGE PASSED TO **ThreadManager::partition**");
+
+        SizeType N = end - begin;
+        SizeType block_size = std::max(static_cast<SizeType>(1),
+                N / static_cast<SizeType>(get_thread_num()));
+
+        SizeType current = 0;
+        unsigned num = 0;
+        while (N > 0) {
+            SizeType next_size = std::min(N, block_size);
+            *begin_iter = current;
+            *end_iter = current = *begin_iter + block_size;
+            ++begin_iter;
+            ++end_iter;
+            ++num;
+            N -= next_size;
+        }
+
+        VSMC_RUNTIME_ASSERT((num <= get_thread_num()),
+                "WRONG THREAD NUMBER **ThreadManager::partition**");
+
+        return num;
+    }
+
+    private :
+
+    unsigned thread_num_;
+
+    ThreadManager () : thread_num_(std::max(1U, static_cast<unsigned>(
+                    cxx11::thread::hardware_concurrency()))) {}
+
+    ThreadManager (const ThreadManager &) {}
+
+    const ThreadManager &operator= (const ThreadManager &) {return *this;}
+}; // class ThreadManager
+
+template <typename SizeType>
+class BlockedRange
+{
+    public :
+
+    typedef SizeType size_type;
+
+    BlockedRange (size_type begin, size_type end) :
+        begin_(begin), end_(end) {}
+
+    size_type begin () const
+    {
+        return begin_;
+    }
+
+    size_type end () const
+    {
+        return end_;
+    }
+
+    private :
+
+    size_type begin_;
+    size_type end_;
+}; // class BlockedRange
+
+template <typename SizeType, typename WorkType>
+void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
+{
+    const ThreadManager &manager = ThreadManager::create();
+    unsigned thread_num = manager.get_thread_num();
+    std::vector<SizeType> b(thread_num);
+    std::vector<SizeType> e(thread_num);
+    unsigned num = manager.partition(range.begin(), range.end(),
+            b.begin(), e.begin());
+#if VSMC_HAS_CXX11LIB_THREAD
+    // TODO safer management of threads group
+    std::vector<std::thread> tg;
+    for (unsigned i = 0; i != num; ++i) {
+        tg.push_back(std::thread(work,
+                    BlockedRange<SizeType>(b[i], e[i])));
+    }
+    for (unsigned i = 0; i != num; ++i)
+        tg[i].join();
+#else // VSMC_HAS_CXX11LIB_THREAD
+    boost::thread_group tg;
+    for (unsigned i = 0; i != num; ++i) {
+        tg.add_thread(new boost::thread(work,
+                    BlockedRange<SizeType>(b[i], e[i])));
+    }
+    tg.join_all();
+#endif // VSMC_HAS_CXX11LIB_THREAD
+}
+
+template <typename SizeType, typename WorkType, typename ResultType>
+void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
+        ResultType &res)
+{
+    const ThreadManager &manager = ThreadManager::create();
+    unsigned thread_num = manager.get_thread_num();
+    std::vector<SizeType> b(thread_num);
+    std::vector<SizeType> e(thread_num);
+    std::vector<ResultType> result(thread_num);
+    unsigned num = manager.partition(range.begin(), range.end(),
+            b.begin(), e.begin());
+#if VSMC_HAS_CXX11LIB_THREAD
+    // TODO safer management of threads group
+    std::vector<std::thread> tg;
+    for (unsigned i = 0; i != num; ++i) {
+        tg.push_back(std::thread(work,
+                    BlockedRange<SizeType>(b[i], e[i]),
+                    cxx11::ref(result[i])));
+    }
+    for (unsigned i = 0; i != num; ++i)
+        tg[i].join();
+#else // VSMC_HAS_CXX11LIB_THREAD
+    boost::thread_group tg;
+    for (unsigned i = 0; i != num; ++i) {
+        tg.add_thread(new boost::thread(work,
+                    BlockedRange<SizeType>(b[i], e[i]),
+                    cxx11::ref(result[i])));
+    }
+    tg.join_all();
+#endif // VSMC_HAS_CXX11LIB_THREAD
+    for (unsigned i = 1; i != num; ++i)
+        result[0] += result[i];
+
+    res = result[0];
+}
+
+} // namespace thread
 
 template <unsigned Dim, typename T, typename Timer>
 class StateSTD : public StateBase<Dim, T, Timer>
@@ -24,7 +179,7 @@ class StateSTD : public StateBase<Dim, T, Timer>
     void copy (const IntType *copy_from)
     {
         this->timer().start();
-        thread::parallel_for(thread::blocked_range<size_type>(0, size_),
+        thread::parallel_for(thread::BlockedRange<size_type>(0, size_),
                 copy_work_<IntType>(this, copy_from));
         this->timer().stop();
     }
@@ -42,7 +197,7 @@ class StateSTD : public StateBase<Dim, T, Timer>
                 const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
-        void operator() (const thread::blocked_range<size_type> &range) const
+        void operator() (const thread::BlockedRange<size_type> &range) const
         {
             for (size_type to = range.begin(); to != range.end(); ++to)
                 state_->copy_particle(copy_from_[to], to);
@@ -69,12 +224,13 @@ class InitializeSTD : public InitializeBase<T, Derived>
         this->pre_processor(particle);
         particle.value().timer().start();
         work_ work(this, &particle);
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.value().size()), work);
+        unsigned accept;
+        thread::parallel_sum(thread::BlockedRange<size_type>(
+                    0, particle.value().size()), work, accept);
         particle.value().timer().stop();
         this->post_processor(particle);
 
-        return work.accept();
+        return accept;
     }
 
     protected :
@@ -93,36 +249,23 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
         work_ (InitializeSTD<T, Derived> *init,
                 Particle<T> *particle) :
-            init_(init), particle_(particle), accept_(0) {}
+            init_(init), particle_(particle) {}
 
-        work_ (const work_ &other, tbb::split) :
-            init_(other.init_), particle_(other.particle_), accept_(0) {}
-
-        void operator() (const tbb::blocked_range<size_type> &range)
+        void operator() (const thread::BlockedRange<size_type> &range,
+                unsigned &accept)
         {
-            unsigned acc = accept_;
+            unsigned acc = 0;
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 Particle<T> *const part = particle_;
                 acc += init_->initialize_state(SingleParticle<T>(i, part));
             }
-            accept_ = acc;
-        }
-
-        void join (const work_ &other)
-        {
-            accept_ += other.accept_;
-        }
-
-        unsigned accept () const
-        {
-            return accept_;
+            accept = acc;
         }
 
         private :
 
         InitializeSTD<T, Derived> *const init_;
         Particle<T> *const particle_;
-        unsigned accept_;
     }; // class work_
 }; // class InitializeSTD
 
@@ -139,12 +282,13 @@ class MoveSTD : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         work_ work(this, iter, &particle);
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.value().size()), work);
+        unsigned accept;
+        thread::parallel_sum(thread::BlockedRange<size_type>(
+                    0, particle.value().size()), work, accept);
         particle.value().timer().stop();
         this->post_processor(iter, particle);
 
-        return work.accept();
+        return accept;
     }
 
     protected :
@@ -163,30 +307,17 @@ class MoveSTD : public MoveBase<T, Derived>
 
         work_ (MoveSTD<T, Derived> *move, unsigned iter,
                 Particle<T> *particle):
-            move_(move), iter_(iter), particle_(particle), accept_(0) {}
+            move_(move), iter_(iter), particle_(particle) {}
 
-        work_ (const work_ &other, tbb::split) :
-            move_(other.move_), iter_(other.iter_),
-            particle_(other.particle_), accept_(0) {}
-
-        void operator() (const tbb::blocked_range<size_type> &range)
+        void operator() (const thread::BlockedRange<size_type> &range,
+                unsigned &accept)
         {
-            unsigned acc = accept_;
+            unsigned acc = 0;
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 Particle<T> *const part = particle_;
                 acc += move_->move_state(iter_, SingleParticle<T>(i, part));
             }
-            accept_ = acc;
-        }
-
-        void join (const work_ &other)
-        {
-            accept_ += other.accept_;
-        }
-
-        unsigned accept () const
-        {
-            return accept_;
+            accept = acc;
         }
 
         private :
@@ -194,7 +325,6 @@ class MoveSTD : public MoveBase<T, Derived>
         MoveSTD<T, Derived> *const move_;
         const unsigned iter_;
         Particle<T> *const particle_;
-        unsigned accept_;
     }; // class work_
 }; // class MoveSTD
 
@@ -213,7 +343,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        thread::parallel_for(thread::blocked_range<size_type>(
+        thread::parallel_for(thread::BlockedRange<size_type>(
                     0, particle.value().size()),
                 work_(this, iter, dim, &particle, res));
         particle.value().timer().stop();
@@ -240,7 +370,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
             monitor_(monitor), iter_(iter), dim_(dim), particle_(particle),
             res_(res) {}
 
-        void operator() (const thread::blocked_range<size_type> &range) const
+        void operator() (const thread::BlockedRange<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 double *const r = res_ + i * dim_;
@@ -274,7 +404,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
-        thread::parallel_for(thread::blocked_range<size_type>(
+        thread::parallel_for(thread::BlockedRange<size_type>(
                     0, particle.value().size()),
                 work_(this, iter, &particle, res));
         particle.value().timer().stop();
@@ -301,7 +431,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
                 const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
-        void operator() (const thread::blocked_range<size_type> &range) const
+        void operator() (const thread::BlockedRange<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 const Particle<T> *const part = particle_;
