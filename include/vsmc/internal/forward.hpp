@@ -29,6 +29,12 @@ template <typename, typename D = VBase> class MoveSeq;
 template <typename, typename D = VBase> class MonitorEvalSeq;
 template <typename, typename D = VBase> class PathEvalSeq;
 
+template <unsigned, typename, typename T = NullTimer> class StateSTD;
+template <typename, typename D = VBase> class InitializeSTD;
+template <typename, typename D = VBase> class MoveSTD;
+template <typename, typename D = VBase> class MonitorEvalSTD;
+template <typename, typename D = VBase> class PathEvalSTD;
+
 template <unsigned, typename, typename T = NullTimer> class StateOMP;
 template <typename, typename D = VBase> class InitializeOMP;
 template <typename, typename D = VBase> class MoveOMP;

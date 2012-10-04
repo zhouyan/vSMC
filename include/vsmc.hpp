@@ -10,6 +10,10 @@
 
 #include <vsmc/helper/sequential.hpp>
 
+#if VSMC_USE_STD_THREAD
+#include <vsmc/helper/parallel_std.hpp>
+#endif // VSMC_USE_STD_THREAD
+
 #if VSMC_USE_OMP
 #include <vsmc/helper/parallel_omp.hpp>
 #endif // VSMC_USE_OMP
