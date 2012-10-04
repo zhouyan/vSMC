@@ -2,14 +2,6 @@
 #include <iostream>
 #include <vsmc/cxx11/thread.hpp>
 
-#ifndef _GLIBCXX_HAS_GTHREADS
-#warning _GLIBCXX_HAS_GTHREADS
-#endif
-
-#ifndef _GLIBCXX_USE_C99_STDINT_TR1
-#warning _GLIBCXX_USE_C99_STDINT_TR1
-#endif
-
 class work
 {
     public :
