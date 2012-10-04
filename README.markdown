@@ -53,11 +53,16 @@ is available. The library distribute a modified version [Random123][Random123]
 in the `third-party` directory. The only modification is to make it work with
 [libc++][libc++].
 
-The library support using [Intel TBB][Intel TBB], [OpenMP][OpenMP] or
-[OpenCL][OpenCL] as parallelization backends. To enable this features suitable
-macros has to be defined (`VSMC_USE_TBB`, `VSMC_USE_OMP` or `VSMC_USE_CL`
-respectively) and the corresponding compiler or library support has to be
-present of course.
+The library support various back-ends for multi-thread parallelization, unified
+under a uniform interface. One is C++11 `<thread>` (or [Boost][Boost] Thread
+library as a replacement). For a full C++11 implementation, this means no
+third-party dependency is required to write parallel a SMC sampler. Other
+third-party parallelization include, [Intel Cilk Plus][Intel Cilk Plus],
+[Intel TBB][Intel TBB] and [OpenMP][OpenMP]. In addition, this library also
+support using [OpenCL][OpenCL] for GPGPU computing, though the interface is
+different than others. To enable any of these, one need to define specific
+macros, `VSMC_USE_STD_THREAD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`,
+and `VSMC_USE_CL`, respectively.
 
 # License
 
@@ -67,6 +72,7 @@ The vSMC library is distributed with a Boost license which can be found in the
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
+[Intel Cilk Plus]: http://www.cilk.com/
 [Intel TBB]: http://threadingbuildingblocks.org/
 [OpenCL]: http://www.khronos.org/opencl/
 [OpenMP]: http://www.openmp.org/
