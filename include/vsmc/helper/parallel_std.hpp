@@ -220,6 +220,8 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, InitializeSTD);
+
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         particle.value().timer().start();
@@ -279,6 +281,8 @@ class MoveSTD : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, MoveSTD);
+
         this->pre_processor(iter, particle);
         particle.value().timer().start();
         work_ work(this, iter, &particle);
