@@ -5,10 +5,6 @@
 #include <vsmc/helper/base.hpp>
 #include <omp.h>
 
-/// \defgroup OpenMP OpenMP
-/// \ingroup Helper
-/// \brief Parallelized samplers with OpenMP
-
 namespace vsmc {
 
 /// \brief Particle::value_type subtype

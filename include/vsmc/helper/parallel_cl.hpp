@@ -22,10 +22,6 @@
                 "**StateCL::"#func"** can only be called after successful " \
                 "**StateCL::setup**")); \
 
-/// \defgroup OpenCL OpenCL
-/// \ingroup Helper
-/// \brief Parallelized sampler with OpenCL
-
 namespace vsmc {
 
 namespace internal {

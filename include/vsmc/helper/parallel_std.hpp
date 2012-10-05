@@ -5,10 +5,6 @@
 #include <vsmc/helper/base.hpp>
 #include <vsmc/cxx11/thread.hpp>
 
-/// \defgroup STDThread C++11 Multithread Support
-/// \ingroup Helper
-/// \brief Parallelized samplers with C++11 multithread support
-
 namespace vsmc {
 
 namespace thread {

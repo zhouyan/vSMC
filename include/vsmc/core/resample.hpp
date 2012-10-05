@@ -43,10 +43,6 @@ inline void multinomial (SizeType N, SizeType S, RngSetType &rng_set,
 
 } // namespace vsmc::internal
 
-/// \defgroup Resampling Resampling
-/// \ingroup Core
-/// \brief Various resampling methods
-
 /// \brief Resample scheme
 /// \ingroup Resampling
 enum ResampleScheme {

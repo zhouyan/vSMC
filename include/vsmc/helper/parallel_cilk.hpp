@@ -6,10 +6,6 @@
 #include <cilk/cilk.h>
 #include <cilk/reducer_opadd.h>
 
-/// \defgroup CILK Intel Cilk Plus
-/// \ingroup Helper
-/// \brief Parallelized samplers with Intel Cilk Plus
-
 namespace vsmc {
 
 /// \brief Particle::value_type subtype

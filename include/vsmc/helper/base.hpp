@@ -2,7 +2,7 @@
 #define VSMC_HELPER_BASE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/timer/null_timer.hpp>
+#include <vsmc/helper/timer/null_timer.hpp>
 
 #define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename) \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)), ( \

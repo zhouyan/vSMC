@@ -12,10 +12,6 @@
 
 #include <tbb/tbb.h>
 
-/// \defgroup TBB Intel Threading Buidling Block
-/// \ingroup Helper
-/// \brief Parallelized samplers with Intel TBB
-
 namespace vsmc {
 
 /// \brief Particle::value_type subtype
