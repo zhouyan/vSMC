@@ -72,7 +72,7 @@ The vSMC library is distributed with a Boost license which can be found in the
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
-[Intel Cilk Plus]: http://www.cilk.com/
+[Intel Cilk Plus]: http://en.wikipedia.org/wiki/Intel_Cilk_Plus
 [Intel TBB]: http://threadingbuildingblocks.org/
 [OpenCL]: http://www.khronos.org/opencl/
 [OpenMP]: http://www.openmp.org/
