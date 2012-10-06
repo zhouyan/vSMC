@@ -72,12 +72,12 @@
 #define VSMC_RNG_SEED 0
 #endif
 
-#ifndef VSMC_SEQRNG_TYPE
-#define VSMC_SEQRNG_TYPE vsmc::cxx11::mt19937
-#endif
-
 #ifndef VSMC_CBRNG_TYPE
 #define VSMC_CBRNG_TYPE r123::Threefry4x64
+#endif
+
+#ifndef VSMC_SEQRNG_TYPE
+#define VSMC_SEQRNG_TYPE vsmc::cxx11::mt19937
 #endif
 
 #if VSMC_USE_RANDOM123
