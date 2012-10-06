@@ -70,7 +70,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     InitializeOMP () {}
     InitializeOMP (const InitializeOMP<T, Derived> &) {}
-    const InitializeOMP<T, Derived> &operator=
+    InitializeOMP<T, Derived> &operator=
         (const InitializeOMP<T, Derived> &) {return *this;}
     ~InitializeOMP () {}
 }; // class InitializeOMP
@@ -108,7 +108,7 @@ class MoveOMP : public MoveBase<T, Derived>
 
     MoveOMP () {}
     MoveOMP (const MoveOMP<T, Derived> &) {}
-    const MoveOMP<T, Derived> &operator=
+    MoveOMP<T, Derived> &operator=
         (const MoveOMP<T, Derived> &) {return *this;}
     ~MoveOMP () {}
 }; // class MoveOMP
@@ -145,7 +145,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 
     MonitorEvalOMP () {}
     MonitorEvalOMP (const MonitorEvalOMP<T, Derived> &) {}
-    const MonitorEvalOMP<T, Derived> &operator=
+    MonitorEvalOMP<T, Derived> &operator=
         (const MonitorEvalOMP<T, Derived> &) {return *this;}
     ~MonitorEvalOMP () {}
 }; // class MonitorEvalOMP
@@ -183,7 +183,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 
     PathEvalOMP () {}
     PathEvalOMP (const PathEvalOMP<T, Derived> &) {}
-    const PathEvalOMP<T, Derived> &operator=
+    PathEvalOMP<T, Derived> &operator=
         (const PathEvalOMP<T, Derived> &) {return *this;}
     ~PathEvalOMP () {}
 }; // class PathEvalOMP

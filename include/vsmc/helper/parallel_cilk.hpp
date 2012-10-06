@@ -70,7 +70,7 @@ class InitializeCilk : public InitializeBase<T, Derived>
 
     InitializeCilk () {}
     InitializeCilk (const InitializeCilk<T, Derived> &) {}
-    const InitializeCilk<T, Derived> &operator=
+    InitializeCilk<T, Derived> &operator=
         (const InitializeCilk<T, Derived> &) {return *this;}
     ~InitializeCilk () {}
 }; // class InitializeCilk
@@ -106,7 +106,7 @@ class MoveCilk : public MoveBase<T, Derived>
 
     MoveCilk () {}
     MoveCilk (const MoveCilk<T, Derived> &) {}
-    const MoveCilk<T, Derived> &operator=
+    MoveCilk<T, Derived> &operator=
         (const MoveCilk<T, Derived> &) {return *this;}
     ~MoveCilk () {}
 }; // class MoveCilk
@@ -142,7 +142,7 @@ class MonitorEvalCilk : public MonitorEvalBase<T, Derived>
 
     MonitorEvalCilk () {}
     MonitorEvalCilk (const MonitorEvalCilk<T, Derived> &) {}
-    const MonitorEvalCilk<T, Derived> &operator=
+    MonitorEvalCilk<T, Derived> &operator=
         (const MonitorEvalCilk<T, Derived> &) {return *this;}
     ~MonitorEvalCilk () {}
 }; // class MonitorEvalCilk
@@ -179,7 +179,7 @@ class PathEvalCilk : public PathEvalBase<T, Derived>
 
     PathEvalCilk () {}
     PathEvalCilk (const PathEvalCilk<T, Derived> &) {}
-    const PathEvalCilk<T, Derived> &operator=
+    PathEvalCilk<T, Derived> &operator=
         (const PathEvalCilk<T, Derived> &) {return *this;}
     ~PathEvalCilk () {}
 }; // class PathEvalCilk

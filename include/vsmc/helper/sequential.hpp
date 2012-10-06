@@ -67,7 +67,7 @@ class InitializeSeq : public InitializeBase<T, Derived>
 
     InitializeSeq () {}
     InitializeSeq (const InitializeSeq<T, Derived> &) {}
-    const InitializeSeq<T, Derived> &operator=
+    InitializeSeq<T, Derived> &operator=
         (const InitializeSeq<T, Derived> &) {return *this;}
     ~InitializeSeq () {}
 }; // class InitializeSeq
@@ -103,7 +103,7 @@ class MoveSeq : public MoveBase<T, Derived>
 
     MoveSeq () {}
     MoveSeq (const MoveSeq<T, Derived> &) {}
-    const MoveSeq<T, Derived> &operator=
+    MoveSeq<T, Derived> &operator=
         (const MoveSeq<T, Derived> &) {return *this;}
     ~MoveSeq () {}
 }; // class MoveSeq
@@ -139,7 +139,7 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
 
     MonitorEvalSeq () {}
     MonitorEvalSeq (const MonitorEvalSeq<T, Derived> &) {}
-    const MonitorEvalSeq<T, Derived> &operator=
+    MonitorEvalSeq<T, Derived> &operator=
         (const MonitorEvalSeq<T, Derived> &) {return *this;}
     ~MonitorEvalSeq () {}
 }; // class MonitorEvalSeq
@@ -176,7 +176,7 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
     PathEvalSeq () {}
     PathEvalSeq (const PathEvalSeq<T, Derived> &) {}
-    const PathEvalSeq<T, Derived> &operator=
+    PathEvalSeq<T, Derived> &operator=
         (const PathEvalSeq<T, Derived> &) {return *this;}
     ~PathEvalSeq () {}
 }; // class PathEvalSeq

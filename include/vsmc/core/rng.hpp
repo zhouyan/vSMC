@@ -90,9 +90,8 @@ class Seed
             seed_ = std::rand();
     }
 
-    Seed (const Seed &) {}
-
-    const Seed &operator= (const Seed &) {return *this;}
+    Seed (const Seed &);
+    Seed &operator= (const Seed &);
 }; // class Seed
 
 /// \brief Sequential RNG set class

@@ -99,7 +99,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
     InitializeTBB () {}
     InitializeTBB (const InitializeTBB<T, Derived> &) {}
-    const InitializeTBB<T, Derived> &operator=
+    InitializeTBB<T, Derived> &operator=
         (const InitializeTBB<T, Derived> &) {return *this;}
     ~InitializeTBB () {}
 
@@ -175,7 +175,7 @@ class MoveTBB : public MoveBase<T, Derived>
 
     MoveTBB () {}
     MoveTBB (const MoveTBB<T, Derived> &) {}
-    const MoveTBB<T, Derived> &operator=
+    MoveTBB<T, Derived> &operator=
         (const MoveTBB<T, Derived> &) {return *this;}
     ~MoveTBB () {}
 
@@ -252,7 +252,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
     MonitorEvalTBB () {}
     MonitorEvalTBB (const MonitorEvalTBB<T, Derived> &) {}
-    const MonitorEvalTBB<T, Derived> &operator=
+    MonitorEvalTBB<T, Derived> &operator=
         (const MonitorEvalTBB<T, Derived> &) {return *this;}
     ~MonitorEvalTBB () {}
 
@@ -319,7 +319,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
     PathEvalTBB () {}
     PathEvalTBB (const PathEvalTBB<T, Derived> &) {}
-    const PathEvalTBB<T, Derived> &operator=
+    PathEvalTBB<T, Derived> &operator=
         (const PathEvalTBB<T, Derived> &) {return *this;}
     ~PathEvalTBB () {}
 

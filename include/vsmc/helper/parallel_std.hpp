@@ -66,9 +66,8 @@ class ThreadManager
     ThreadManager () : thread_num_(std::max(1U, static_cast<unsigned>(
                     cxx11::thread::hardware_concurrency()))) {}
 
-    ThreadManager (const ThreadManager &) {}
-
-    const ThreadManager &operator= (const ThreadManager &) {return *this;}
+    ThreadManager (const ThreadManager &);
+    ThreadManager &operator= (const ThreadManager &);
 }; // class ThreadManager
 
 template <typename SizeType>
@@ -249,7 +248,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
     InitializeSTD () {}
     InitializeSTD (const InitializeSTD<T, Derived> &) {}
-    const InitializeSTD<T, Derived> &operator=
+    InitializeSTD<T, Derived> &operator=
         (const InitializeSTD<T, Derived> &) {return *this;}
     ~InitializeSTD () {}
 
@@ -313,7 +312,7 @@ class MoveSTD : public MoveBase<T, Derived>
 
     MoveSTD () {}
     MoveSTD (const MoveSTD<T, Derived> &) {}
-    const MoveSTD<T, Derived> &operator=
+    MoveSTD<T, Derived> &operator=
         (const MoveSTD<T, Derived> &) {return *this;}
     ~MoveSTD () {}
 
@@ -376,7 +375,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 
     MonitorEvalSTD () {}
     MonitorEvalSTD (const MonitorEvalSTD<T, Derived> &) {}
-    const MonitorEvalSTD<T, Derived> &operator=
+    MonitorEvalSTD<T, Derived> &operator=
         (const MonitorEvalSTD<T, Derived> &) {return *this;}
     ~MonitorEvalSTD () {}
 
@@ -443,7 +442,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
 
     PathEvalSTD () {}
     PathEvalSTD (const PathEvalSTD<T, Derived> &) {}
-    const PathEvalSTD<T, Derived> &operator=
+    PathEvalSTD<T, Derived> &operator=
         (const PathEvalSTD<T, Derived> &) {return *this;}
     ~PathEvalSTD () {}
 
