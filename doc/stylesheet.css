@@ -2,8 +2,7 @@
 
 body, table, div, p, dl {
     font: 400 14px/19px
-    'Lucida Grande', 'Lucida Sans', 'Lucida',
-    Geneva, Helvetica, Arial, sans-serif;
+    'Lucida Grande', 'Lucida Sans', Geneva, Helvetica, Arial, sans-serif;
 }
 
 /* @group Heading Levels */
