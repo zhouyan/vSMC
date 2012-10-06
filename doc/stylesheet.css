@@ -2,7 +2,7 @@
 
 body, table, div, p, dl {
     font: 400 14px/19px
-    Lucida Grande, Verdana, Geneva, Arial, sans-serif;
+    'Lucida Grande', Geneva, Helvetica, Arial, sans-serif;
 }
 
 /* @group Heading Levels */
@@ -373,6 +373,25 @@ blockquote {
 }
 
 /* @end */
+
+/*
+.search {
+color: #003399;
+font-weight: bold;
+}
+
+form.search {
+margin-bottom: 0px;
+margin-top: 0px;
+}
+
+input.search {
+font-size: 75%;
+color: #000080;
+font-weight: normal;
+background-color: #e8eef2;
+}
+ */
 
 td.tiny {
     font-size: 75%;
@@ -898,7 +917,7 @@ div.header
     background-repeat:repeat-x;
     background-color: #F9FAFC;
     width: 900px;
-    margin:  auto;
+    margin: auto;
     border-bottom: 1px solid #C4CFE5;
 }
 
