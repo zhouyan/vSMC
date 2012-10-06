@@ -395,7 +395,7 @@ class StateCL
             ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << dim_ << ";\n";
-            Seed &seed = Seed::reference();
+            VSMC_SEED_TYPE &seed = VSMC_SEED_TYPE::reference();
             ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
             seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";

@@ -104,7 +104,7 @@ class RngSetSeq
     typedef VSMC_SEQRNG_TYPE rng_type;
 
     /// The type of the seed sequence
-    typedef Seed seed_type;
+    typedef VSMC_SEED_TYPE seed_type;
 
     /// The type of the size of the rng set
     typedef VSMC_SIZE_TYPE size_type;
@@ -140,7 +140,7 @@ class RngSetPrl
     typedef VSMC_PRLRNG_TYPE rng_type;
 
     /// The type of the seed sequence
-    typedef Seed seed_type;
+    typedef VSMC_SEED_TYPE seed_type;
 
     /// The type of the size of the rng set
     typedef std::vector<rng_type>::size_type size_type;

@@ -68,6 +68,10 @@
 #define VSMC_USE_RANDOM123 1
 #endif
 
+#ifndef VSMC_SEED_TYPE
+#define VSMC_SEED_TYPE vsmc::Seed
+#endif
+
 #ifndef VSMC_RNG_SEED
 #define VSMC_RNG_SEED 0
 #endif
