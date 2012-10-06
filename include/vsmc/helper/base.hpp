@@ -13,12 +13,6 @@
     VSMC_STATIC_ASSERT((vsmc::IsBaseOfState<base, derived>::value), \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
 
-#ifdef NDEBUG
-#define VSMC_VIRTUAL_BASE_DESTRUCTOR
-#else
-#define VSMC_VIRTUAL_BASE_DESTRUCTOR virtual
-#endif
-
 namespace vsmc {
 
 template <template <unsigned, typename, typename> class State, typename D>
@@ -347,7 +341,7 @@ class InitializeBase
     InitializeBase (const InitializeBase<T, Derived> &) {}
     InitializeBase<T, Derived> &operator=
         (const InitializeBase<T, Derived> &) {return *this;}
-    VSMC_VIRTUAL_BASE_DESTRUCTOR ~InitializeBase () {}
+    ~InitializeBase () {}
 
     unsigned initialize_state (SingleParticle<T> part)
     {
@@ -478,7 +472,7 @@ class MoveBase
     MoveBase (const MoveBase<T, Derived> &) {}
     MoveBase<T, Derived> &operator=
         (const MoveBase<T, Derived> &) {return *this;}
-    VSMC_VIRTUAL_BASE_DESTRUCTOR ~MoveBase () {}
+    ~MoveBase () {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> part)
     {
@@ -586,7 +580,7 @@ class MonitorEvalBase
     MonitorEvalBase (const MonitorEvalBase<T, Derived> &) {}
     MonitorEvalBase<T, Derived> &operator=
         (const MonitorEvalBase<T, Derived> &) {return *this;}
-    VSMC_VIRTUAL_BASE_DESTRUCTOR ~MonitorEvalBase () {}
+    ~MonitorEvalBase () {}
 
     void monitor_state (unsigned iter, unsigned dim,
             ConstSingleParticle<T> part, double *res)
@@ -700,7 +694,7 @@ class PathEvalBase
     PathEvalBase (const PathEvalBase<T, Derived> &) {}
     PathEvalBase<T, Derived> &operator=
         (const PathEvalBase<T, Derived> &) {return *this;}
-    VSMC_VIRTUAL_BASE_DESTRUCTOR ~PathEvalBase () {}
+    ~PathEvalBase () {}
 
     double path_state (unsigned iter, ConstSingleParticle<T> part)
     {
