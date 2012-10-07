@@ -99,7 +99,7 @@
 #endif
 
 #ifndef VSMC_HAS_LIB_FUNCTIONAL
-#define VSMC_HAS_LIB_FUNCTIONAL 0
+#define VSMC_HAS_LIB_FUNCTIONAL 1
 #endif
 
 #ifndef VSMC_HAS_LIB_MUTEX
@@ -107,7 +107,7 @@
 #endif
 
 #ifndef VSMC_HAS_LIB_RANDOM
-#define VSMC_HAS_LIB_RANDOM 0
+#define VSMC_HAS_LIB_RANDOM 1
 #endif
 
 #ifndef VSMC_HAS_LIB_THREAD
@@ -115,7 +115,7 @@
 #endif
 
 #ifndef VSMC_HAS_LIB_TYPE_TRAITS
-#define VSMC_HAS_LIB_TYPE_TRAITS 0
+#define VSMC_HAS_LIB_TYPE_TRAITS 1
 #endif
 
 // If the type_traits implementation is complete
