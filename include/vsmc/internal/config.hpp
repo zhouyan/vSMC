@@ -23,7 +23,7 @@
 // Optional features
 
 #ifndef VSMC_USE_STD_THREAD
-#define VSMC_USE_STD_THREAD
+#define VSMC_USE_STD_THREAD 0
 #endif
 
 #ifndef VSMC_USE_OMP
@@ -116,6 +116,12 @@
 
 #ifndef VSMC_HAS_LIB_TYPE_TRAITS
 #define VSMC_HAS_LIB_TYPE_TRAITS 0
+#endif
+
+// If the type_traits implementation is complete
+
+#ifndef VSMC_HAS_LIB_TYPE_TRAITS_COMPLETE
+#define VSMC_HAS_LIB_TYPE_TRAITS_COMPLETE 0
 #endif
 
 // size_type
