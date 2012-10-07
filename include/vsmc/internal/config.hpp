@@ -42,7 +42,7 @@
 #define VSMC_USE_CL 0
 #endif
 
-// C++11 Libraries
+// C++11 Libraries from the standard library
 
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_HAS_CXX11LIB_CHRONO 0
@@ -50,6 +50,10 @@
 
 #ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_HAS_CXX11LIB_FUNCTIONAL 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_MUTEX
+#define VSMC_HAS_CXX11LIB_MUTEX 0
 #endif
 
 #ifndef VSMC_HAS_CXX11LIB_RANDOM
@@ -62,6 +66,56 @@
 
 #ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
 #define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
+#endif
+
+#if VSMC_HAS_CXX11LIB_CHRONO
+#define VSMC_HAS_LIB_CHRONO 1
+#endif
+
+#if VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_HAS_LIB_FUNCTIONAL 1
+#endif
+
+#if VSMC_HAS_CXX11LIB_MUTEX
+#define VSMC_HAS_LIB_MUTEX 1
+#endif
+
+#if VSMC_HAS_CXX11LIB_RANDOM
+#define VSMC_HAS_LIB_RANDOM 1
+#endif
+
+#if VSMC_HAS_CXX11LIB_THREAD
+#define VSMC_HAS_LIB_THREAD 1
+#endif
+
+#if VSMC_HAS_CXX11LIB_TYPE_TRAITS
+#define VSMC_HAS_LIB_TYPE_TRAITS 1
+#endif
+
+// C++11 Libraries from eithr the standard library or Boost
+
+#ifndef VSMC_HAS_LIB_CHRONO
+#define VSMC_HAS_LIB_CHRONO 0
+#endif
+
+#ifndef VSMC_HAS_LIB_FUNCTIONAL
+#define VSMC_HAS_LIB_FUNCTIONAL 0
+#endif
+
+#ifndef VSMC_HAS_LIB_MUTEX
+#define VSMC_HAS_LIB_MUTEX 0
+#endif
+
+#ifndef VSMC_HAS_LIB_RANDOM
+#define VSMC_HAS_LIB_RANDOM 0
+#endif
+
+#ifndef VSMC_HAS_LIB_THREAD
+#define VSMC_HAS_LIB_THREAD 0
+#endif
+
+#ifndef VSMC_HAS_LIB_TYPE_TRAITS
+#define VSMC_HAS_LIB_TYPE_TRAITS 0
 #endif
 
 // size_type
