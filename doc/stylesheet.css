@@ -255,8 +255,7 @@ div.groupText {
 body {
     background-color: white;
     color: black;
-    width: 900px;
-    margin: auto;
+    margin: 0;
 }
 
 div.contents {
@@ -916,8 +915,7 @@ div.header
     background-image:url('nav_h.png');
     background-repeat:repeat-x;
     background-color: #F9FAFC;
-    width: 900px;
-    margin: auto;
+    margin: 0;
     border-bottom: 1px solid #C4CFE5;
 }
 
