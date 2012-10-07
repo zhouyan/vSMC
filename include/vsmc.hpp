@@ -10,9 +10,13 @@
 
 #include <vsmc/helper/sequential.hpp>
 
-#if VSMC_USE_STD_THREAD
-#include <vsmc/helper/parallel_std.hpp>
-#endif // VSMC_USE_STD_THREAD
+#if VSMC_USE_CILK
+#include <vsmc/helper/parallel_cilk.hpp>
+#endif // VSMC_USE_CILK
+
+#if VSMC_USE_CL
+#include <vsmc/helper/parallel_cl.hpp>
+#endif // VSMC_USE_CL
 
 #if VSMC_USE_OMP
 #include <vsmc/helper/parallel_omp.hpp>
@@ -22,13 +26,9 @@
 #include <vsmc/helper/parallel_tbb.hpp>
 #endif // VSMC_USE_TBB
 
-#if VSMC_USE_CILK
-#include <vsmc/helper/parallel_cilk.hpp>
-#endif // VSMC_USE_CILK
-
-#if VSMC_USE_CL
-#include <vsmc/helper/parallel_cl.hpp>
-#endif // VSMC_USE_CL
+#if VSMC_USE_THREAD
+#include <vsmc/helper/parallel_std.hpp>
+#endif // VSMC_USE_THREAD
 
 #endif // VSMC_HPP
 
