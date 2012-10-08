@@ -101,9 +101,9 @@ class WeightSetBase
 
     private :
 
-    mutable double ess_;
-    mutable std::vector<double> weight_;
-    mutable std::vector<double> log_weight_;
+    double ess_;
+    std::vector<double> weight_;
+    std::vector<double> log_weight_;
 
     void log_weight2weight ()
     {
