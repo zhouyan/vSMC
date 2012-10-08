@@ -28,6 +28,18 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
+#if VSMC_USE_CHRONO
+#include <vsmc/cxx11/chrono.hpp>
+#endif
+
+#if VSMC_USE_MUTEX
+#include <vsmc/cxx11/mutex.hpp>
+#endif
+
+#if VSMC_USE_THREAD
+#include <vsmc/cxx11/thread.hpp>
+#endif
+
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)
 #else // NDEBUG
