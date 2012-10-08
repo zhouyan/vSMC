@@ -74,8 +74,11 @@
 
 #ifndef VSMC_USE_MULTITHREAD
 #define VSMC_USE_MULTITHREAD 0
+#endif
+
+#if VSMC_USE_MULTITHREAD
 #define VSMC_USE_MUTEX 1
-#endif // VSMC_USE_MULTITHREAD
+#endif
 
 // C++11 Libraries from the standard library
 
