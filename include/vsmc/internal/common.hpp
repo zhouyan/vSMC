@@ -30,6 +30,7 @@
 
 #if VSMC_USE_CHRONO
 #include <vsmc/cxx11/chrono.hpp>
+#include <vsmc/helper/timer/chrono_timer.hpp>
 #endif
 
 #if VSMC_USE_MUTEX
@@ -39,6 +40,8 @@
 #if VSMC_USE_THREAD
 #include <vsmc/cxx11/thread.hpp>
 #endif
+
+#include <vsmc/helper/timer/null_timer.hpp>
 
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)
