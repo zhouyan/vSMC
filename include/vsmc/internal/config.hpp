@@ -23,7 +23,7 @@
 // size_type
 
 #ifndef VSMC_SIZE_TYPE
-#define VSMC_SIZE_TYPE std::ptrdiff_t
+#define VSMC_SIZE_TYPE std::size_t
 #endif
 
 // RNG types
@@ -72,12 +72,8 @@
 #define VSMC_USE_TBB 0
 #endif
 
-#ifndef VSMC_USE_MULTITHREAD
-#define VSMC_USE_MULTITHREAD 0
-#endif
-
-#if VSMC_USE_MULTITHREAD
-#define VSMC_USE_MUTEX 1
+#ifndef VSMC_USE_THREAD
+#define VSMC_USE_THREAD 0
 #endif
 
 // C++11 Libraries from the standard library
