@@ -61,7 +61,8 @@ class Sampler
     explicit Sampler (size_type N,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5) :
-        threshold_(threshold), particle_(N), iter_num_(0)
+        threshold_(threshold), particle_(N), iter_num_(0),
+        show_progress_(false)
     {
         resample_scheme(scheme);
     }
@@ -235,6 +236,7 @@ class Sampler
                 std::vector<unsigned>(1, init_(particle_, param)));
         do_resampling();
         do_monitoring();
+        print_progress();
     }
 
     /// Perform iteration for a given number times
@@ -274,6 +276,7 @@ class Sampler
             do_monitoring();
             accept_history_.push_back(acc);
         }
+        print_progress();
     }
 
     /// \brief Add a monitor
@@ -511,6 +514,11 @@ class Sampler
         }
     }
 
+    void show_progress (bool show)
+    {
+        show_progress_ = show;
+    }
+
     private :
 
     init_type init_;
@@ -527,6 +535,8 @@ class Sampler
 
     monitor_map_type monitor_;
     path_type path_;
+
+    bool show_progress_;
 
     void do_resampling ()
     {
@@ -545,6 +555,28 @@ class Sampler
             if (bool(m->second))
                 m->second.eval(iter_num_, particle_);
         }
+    }
+
+    void print_progress () const
+    {
+        if (!show_progress_)
+            return;
+
+        if (iter_num_ == 0) {
+            std::cout << std::endl;
+            for (int i = 0; i != 60; ++i)
+                std::cout << '=';
+            std::cout << std::endl;
+            std::cout << std::setw(6) << iter_num_;
+            return;
+        }
+
+        if (!(iter_num_ % 50))
+            std::cout << std::endl << std::setw(6) << iter_num_;
+        else
+            std::cout << ".";
+
+        std::cout.flush();
     }
 }; // class Sampler
 

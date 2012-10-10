@@ -72,10 +72,6 @@
 #define VSMC_USE_TBB 0
 #endif
 
-#ifndef VSMC_USE_THREAD
-#define VSMC_USE_THREAD 0
-#endif
-
 // C++11 Libraries from the standard library
 
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
