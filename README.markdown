@@ -28,8 +28,6 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.1 or later.
 
     make docs
 
-The documentation can also be found [here][vSMCDoc].
-
 # Third-party dependencies and parallelization
 
 This library has no dependences other than C++ standard libraries (C++11). Any
