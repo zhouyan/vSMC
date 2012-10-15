@@ -28,8 +28,16 @@ typedef struct
     int sampler_type;
 } vsmcSamplerInfo;
 
-vsmcSamplerInfo vsmc_new_sampler (size_t, unsigned, int, double, int);
-void vsmc_delete_sampler (VSMC_SAMPLER_PTR);
+vsmcSamplerInfo vsmc_sampler_new (size_t, unsigned, int, double, int);
+void vsmc_sampler_delete                 (vsmcSamplerInfo);
+size_t vsmc_sampler_size                 (vsmcSamplerInfo);
+unsigned vsmc_sampler_iter_size          (vsmcSamplerInfo);
+void vsmc_sampler_resample_scheme        (vsmcSamplerInfo, int);
+double vsmc_sampler_resample_threshold   (vsmcSamplerInfo, double);
+void vsmc_sampler_read_ess_history       (vsmcSamplerInfo, double *);
+void vsmc_sampler_read_resampled_history (vsmcSamplerInfo, int *);
+void vsmc_sampler_initialize             (vsmcSamplerInfo, void *);
+void vsmc_sampler_iterate                (vsmcSamplerInfo, unsigned);
 
 #ifdef __cplusplus
 }
