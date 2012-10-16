@@ -32,86 +32,6 @@ typedef Path<vsmc::StateTBB <vsmc::Dynamic, double> > PathTBB;
 
 } } // namespace vsmc::capi
 
-/* Sequential */
-#define VSMC_SAMPLER_PTR_CASE_SEQ(ptr, prefix, postfix) \
-    case VSMC_BASE_SEQ : \
-        prefix reinterpret_cast<vsmc::capi::SamplerSEQ *>(ptr) postfix ;\
-        break;
-#define VSMC_PARTICLE_PTR_CASE_SEQ(ptr, prefix, postfix) \
-    case VSMC_BASE_SEQ : \
-        prefix reinterpret_cast<vsmc::capi::ParticleSEQ *>(ptr) postfix ;\
-        break;
-
-/* Default */
-#define VSMC_SAMPLER_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
-    default : \
-        prefix reinterpret_cast<vsmc::capi::SamplerSEQ *>(ptr) postfix ;\
-        break;
-#define VSMC_PARTICLE_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
-    default : \
-        prefix reinterpret_cast<vsmc::capi::ParticleSEQ *>(ptr) postfix ;\
-        break;
-
-/* Intel Cilk */
-#if VSMC_USE_CILK
-#define VSMC_SAMPLER_PTR_CASE_CILK(ptr, prefix, postfix) \
-    case VSMC_BASE_CILK : \
-        prefix reinterpret_cast<vsmc::capi::SamplerCILK *>(ptr) postfix ;\
-        break;
-#define VSMC_PARTICLE_PTR_CASE_CILK(ptr, prefix, postfix) \
-    case VSMC_BASE_CILK : \
-        prefix reinterpret_cast<vsmc::capi::ParticleCILK *>(ptr) postfix ;\
-        break;
-#else // VSMC_USE_CIL
-#define VSMC_SAMPLER_PTR_CASE_CILK(ptr, prefix, postfix)
-#define VSMC_PARTICLE_PTR_CASE_CILK(ptr, prefix, postfix)
-#endif // VSMC_USE_CILK
-
-/* OpenMP */
-#if VSMC_USE_OMP
-#define VSMC_SAMPLER_PTR_CASE_OMP(ptr, prefix, postfix) \
-    case VSMC_BASE_OMP : \
-        prefix reinterpret_cast<vsmc::capi::SamplerOMP *>(ptr) postfix ;\
-        break;
-#define VSMC_PARTICLE_PTR_CASE_OMP(ptr, prefix, postfix) \
-    case VSMC_BASE_OMP : \
-        prefix reinterpret_cast<vsmc::capi::ParticleOMP *>(ptr) postfix ;\
-        break;
-#else // VSMC_USE_OMP
-#define VSMC_SAMPLER_PTR_CASE_OMP(ptr, prefix, postfix)
-#define VSMC_PARTICLE_PTR_CASE_OMP(ptr, prefix, postfix)
-#endif // VSMC_USE_OMP
-
-/* std::thread */
-#if VSMC_USE_STD
-#define VSMC_SAMPLER_PTR_CASE_STD(ptr, prefix, postfix) \
-    case VSMC_BASE_STD : \
-        prefix reinterpret_cast<vsmc::capi::SamplerSTD *>(ptr) postfix ;\
-        break;
-#define VSMC_PARTICLE_PTR_CASE_STD(ptr, prefix, postfix) \
-    case VSMC_BASE_STD : \
-        prefix reinterpret_cast<vsmc::capi::ParticleSTD *>(ptr) postfix ;\
-        break;
-#else // VSMC_USE_STD
-#define VSMC_SAMPLER_PTR_CASE_STD(ptr, prefix, postfix)
-#define VSMC_PARTICLE_PTR_CASE_STD(ptr, prefix, postfix)
-#endif // VSMC_USE_STD
-
-/* Intel TBB */
-#if VSMC_USE_TBB
-#define VSMC_SAMPLER_PTR_CASE_TBB(ptr, prefix, postfix) \
-    case VSMC_BASE_TBB : \
-        prefix reinterpret_cast<vsmc::capi::SamplerTBB *>(ptr) postfix ;\
-        break;
-#define VSMC_PARTICLE_PTR_CASE_TBB(ptr, prefix, postfix) \
-    case VSMC_BASE_TBB : \
-        prefix reinterpret_cast<vsmc::capi::ParticleTBB *>(ptr) postfix ;\
-        break;
-#else // VSMC_USE_TBB
-#define VSMC_SAMPLER_PTR_CASE_TBB(ptr, prefix, postfix)
-#define VSMC_PARTICLE_PTR_CASE_TBB(ptr, prefix, postfix)
-#endif // VSMC_USE_TBB
-
 /* Resample scheme switch */
 #define VSMC_RESAMPLE_SCHEME_SWITCH(scheme, valid, scheme_macro) \
     switch (scheme_macro) { \
@@ -144,6 +64,113 @@ typedef Path<vsmc::StateTBB <vsmc::Dynamic, double> > PathTBB;
             valid = 0;                           \
     }
 
+/* Sequential */
+#define VSMC_SAMPLER_PTR_CASE_SEQ(ptr, prefix, postfix) \
+    case VSMC_BASE_SEQ : \
+        prefix reinterpret_cast<vsmc::capi::SamplerSEQ *>(ptr) postfix ;\
+        break;
+#define VSMC_PARTICLE_PTR_CASE_SEQ(ptr, prefix, postfix) \
+    case VSMC_BASE_SEQ : \
+        prefix reinterpret_cast<vsmc::capi::ParticleSEQ *>(ptr) postfix ;\
+        break;
+#define VSMC_MONITOR_PTR_CASE_SEQ(ptr, prefix, postfix) \
+    case VSMC_BASE_SEQ : \
+        prefix reinterpret_cast<vsmc::capi::MonitorSEQ *>(ptr) postfix ;\
+        break;
+
+/* Default */
+#define VSMC_SAMPLER_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
+    default : \
+        prefix reinterpret_cast<vsmc::capi::SamplerSEQ *>(ptr) postfix ;\
+        break;
+#define VSMC_PARTICLE_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
+    default : \
+        prefix reinterpret_cast<vsmc::capi::ParticleSEQ *>(ptr) postfix ;\
+        break;
+#define VSMC_MONITOR_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
+    default : \
+        prefix reinterpret_cast<vsmc::capi::MonitorSEQ *>(ptr) postfix ;\
+        break;
+
+/* Intel Cilk */
+#if VSMC_USE_CILK
+#define VSMC_SAMPLER_PTR_CASE_CILK(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::SamplerCILK *>(ptr) postfix ;\
+        break;
+#define VSMC_PARTICLE_PTR_CASE_CILK(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::ParticleCILK *>(ptr) postfix ;\
+        break;
+#define VSMC_MONITOR_PTR_CASE_CILK(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::MonitorCILK *>(ptr) postfix ;\
+        break;
+#else // VSMC_USE_CIL
+#define VSMC_SAMPLER_PTR_CASE_CILK(ptr, prefix, postfix)
+#define VSMC_PARTICLE_PTR_CASE_CILK(ptr, prefix, postfix)
+#define VSMC_MONITOR_PTR_CASE_CILK(ptr, prefix, postfix)
+#endif // VSMC_USE_CILK
+
+/* OpenMP */
+#if VSMC_USE_OMP
+#define VSMC_SAMPLER_PTR_CASE_OMP(ptr, prefix, postfix) \
+    case VSMC_BASE_OMP : \
+        prefix reinterpret_cast<vsmc::capi::SamplerOMP *>(ptr) postfix ;\
+        break;
+#define VSMC_PARTICLE_PTR_CASE_OMP(ptr, prefix, postfix) \
+    case VSMC_BASE_OMP : \
+        prefix reinterpret_cast<vsmc::capi::ParticleOMP *>(ptr) postfix ;\
+        break;
+#define VSMC_MONITOR_PTR_CASE_OMP(ptr, prefix, postfix) \
+    case VSMC_BASE_OMP : \
+        prefix reinterpret_cast<vsmc::capi::MonitorOMP *>(ptr) postfix ;\
+        break;
+#else // VSMC_USE_OMP
+#define VSMC_SAMPLER_PTR_CASE_OMP(ptr, prefix, postfix)
+#define VSMC_PARTICLE_PTR_CASE_OMP(ptr, prefix, postfix)
+#define VSMC_MONITOR_PTR_CASE_OMP(ptr, prefix, postfix)
+#endif // VSMC_USE_OMP
+
+/* std::thread */
+#if VSMC_USE_STD
+#define VSMC_SAMPLER_PTR_CASE_STD(ptr, prefix, postfix) \
+    case VSMC_BASE_STD : \
+        prefix reinterpret_cast<vsmc::capi::SamplerSTD *>(ptr) postfix ;\
+        break;
+#define VSMC_PARTICLE_PTR_CASE_STD(ptr, prefix, postfix) \
+    case VSMC_BASE_STD : \
+        prefix reinterpret_cast<vsmc::capi::ParticleSTD *>(ptr) postfix ;\
+        break;
+#define VSMC_MONITOR_PTR_CASE_STD(ptr, prefix, postfix) \
+    case VSMC_BASE_STD : \
+        prefix reinterpret_cast<vsmc::capi::MonitorSTD *>(ptr) postfix ;\
+        break;
+#else // VSMC_USE_STD
+#define VSMC_SAMPLER_PTR_CASE_STD(ptr, prefix, postfix)
+#define VSMC_PARTICLE_PTR_CASE_STD(ptr, prefix, postfix)
+#define VSMC_MONITOR_PTR_CASE_STD(ptr, prefix, postfix)
+#endif // VSMC_USE_STD
+
+/* Intel TBB */
+#if VSMC_USE_TBB
+#define VSMC_SAMPLER_PTR_CASE_TBB(ptr, prefix, postfix) \
+    case VSMC_BASE_TBB : \
+        prefix reinterpret_cast<vsmc::capi::SamplerTBB *>(ptr) postfix ;\
+        break;
+#define VSMC_PARTICLE_PTR_CASE_TBB(ptr, prefix, postfix) \
+    case VSMC_BASE_TBB : \
+        prefix reinterpret_cast<vsmc::capi::ParticleTBB *>(ptr) postfix ;\
+        break;
+#define VSMC_MONITOR_PTR_CASE_TBB(ptr, prefix, postfix) \
+    case VSMC_BASE_TBB : \
+        prefix reinterpret_cast<vsmc::capi::MonitorTBB *>(ptr) postfix ;\
+        break;
+#else // VSMC_USE_TBB
+#define VSMC_SAMPLER_PTR_CASE_TBB(ptr, prefix, postfix)
+#define VSMC_PARTICLE_PTR_CASE_TBB(ptr, prefix, postfix)
+#define VSMC_MONITOR_PTR_CASE_TBB(ptr, prefix, postfix)
+#endif // VSMC_USE_TBB
 
 /* Sampler switch */
 #define VSMC_SAMPLER_PTR_SWITCH(ptr, base_type, prefix, postfix) \
@@ -172,5 +199,19 @@ typedef Path<vsmc::StateTBB <vsmc::Dynamic, double> > PathTBB;
 #define VSMC_PARTICLE_SWITCH(particle, prefix, postfix) \
     VSMC_PARTICLE_PTR_SWITCH( \
             particle.particle_ptr, particle.base_type, prefix, postfix)
+
+/* Monitor switch */
+#define VSMC_MONITOR_PTR_SWITCH(ptr, base_type, prefix, postfix) \
+    switch (base_type) { \
+        VSMC_MONITOR_PTR_CASE_SEQ(ptr, prefix, postfix); \
+        VSMC_MONITOR_PTR_CASE_CILK(ptr, prefix, postfix);    \
+        VSMC_MONITOR_PTR_CASE_OMP(ptr, prefix, postfix);     \
+        VSMC_MONITOR_PTR_CASE_STD(ptr, prefix, postfix);     \
+        VSMC_MONITOR_PTR_CASE_TBB(ptr, prefix, postfix);     \
+        VSMC_MONITOR_PTR_CASE_DEFAULT(ptr, prefix, postfix); \
+    }
+#define VSMC_MONITOR_SWITCH(monitor, prefix, postfix) \
+    VSMC_MONITOR_PTR_SWITCH( \
+            monitor.particle_ptr, monitor.base_type, prefix, postfix)
 
 #endif // VSMC_CAPI_CORE_DEF_HPP

@@ -90,6 +90,15 @@ void   vsmc_particle_set_log_weight   (vsmcParticle, const double *, int);
 void   vsmc_particle_add_log_weight   (vsmcParticle, const double *, int);
 double vsmc_particle_ess              (vsmcParticle);
 
+/* vsmc::Monitor */
+vsmcMonitor vsmc_monitor_new (vsmcSampler, unsigned, vsmcMonitorEval);
+void     vsmc_monitor_delete         (vsmcMonitor);
+unsigned vsmc_monitor_dim            (vsmcMonitor);
+unsigned vsmc_monitor_iter_size      (vsmcMonitor);
+void     vsmc_monitor_read_index     (vsmcMonitor, unsigned *);
+void     vsmc_monitor_read_record    (vsmcMonitor, double **);
+void     vsmc_monitor_read_record_id (vsmcMonitor, unsigned, double *);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
