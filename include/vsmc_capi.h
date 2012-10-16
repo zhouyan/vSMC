@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#define VSMC_SAMPLER_PTR  void *
+/* Resample scheme */
 
 #define VSMC_RESAMPLE_MULTINOMIAL           101
 #define VSMC_RESAMPLE_RESIDUAL              102
@@ -11,6 +11,8 @@
 #define VSMC_RESAMPLE_SYSTEMATIC            104
 #define VSMC_RESAMPLE_RESIDUAL_STRATIFIED   105
 #define VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC   106
+
+/* Base class types */
 
 #define VSMC_BASE_SEQUENTIAL 201
 #define VSMC_BASE_CILK       202
@@ -25,8 +27,16 @@ extern "C" {
 typedef struct
 {
     void *sampler_ptr;
-    int sampler_type;
+    int base_type;
 } vsmcSamplerInfo;
+
+typedef struct
+{
+    void *particle_ptr;
+    int base_type;
+} vsmcParticleInfo;
+
+/* vsmc::Sampler */
 
 vsmcSamplerInfo vsmc_sampler_new (size_t, unsigned, int, double, int);
 void vsmc_sampler_delete                 (vsmcSamplerInfo);
@@ -38,6 +48,8 @@ void vsmc_sampler_read_ess_history       (vsmcSamplerInfo, double *);
 void vsmc_sampler_read_resampled_history (vsmcSamplerInfo, int *);
 void vsmc_sampler_initialize             (vsmcSamplerInfo, void *);
 void vsmc_sampler_iterate                (vsmcSamplerInfo, unsigned);
+
+/* vsmc::Particle */
 
 #ifdef __cplusplus
 }
