@@ -44,9 +44,21 @@ typedef struct
 
 typedef struct
 {
-    void *monitor_ptr;
+    void *path_ptr;
     int base_type;
 } vsmcPathInfo;
+
+typedef struct
+{
+    void *monitor_eval_ptr;
+    int base_type;
+} vsmcMonitorEvalInfo;
+
+typedef struct
+{
+    void *path_eval_ptr;
+    int base_type;
+} vsmcPathEvalInfo;
 
 /* vsmc::Sampler */
 vsmcSamplerInfo  vsmc_sampler_new (size_t, unsigned, int, double, int);
@@ -72,10 +84,10 @@ void   vsmc_particle_read_log_weight  (vsmcParticleInfo, double *);
 double vsmc_particle_weight           (vsmcParticleInfo, size_t);
 double vsmc_particle_log_weight       (vsmcParticleInfo, size_t);
 void   vsmc_particle_set_equal_weight (vsmcParticleInfo);
-void   vsmc_particle_set_weight       (vsmcParticleInfo, const double *);
-void   vsmc_particle_mul_weight       (vsmcParticleInfo, const double *);
-void   vsmc_particle_set_log_weight   (vsmcParticleInfo, const double *);
-void   vsmc_particle_add_log_weight   (vsmcParticleInfo, const double *);
+void   vsmc_particle_set_weight       (vsmcParticleInfo, const double *, int);
+void   vsmc_particle_mul_weight       (vsmcParticleInfo, const double *, int);
+void   vsmc_particle_set_log_weight   (vsmcParticleInfo, const double *, int);
+void   vsmc_particle_add_log_weight   (vsmcParticleInfo, const double *, int);
 double vsmc_particle_ess              (vsmcParticleInfo info);
 
 #ifdef __cplusplus
