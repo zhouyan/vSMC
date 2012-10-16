@@ -14,11 +14,11 @@
 
 /* Base class types */
 
-#define VSMC_BASE_SEQUENTIAL 201
-#define VSMC_BASE_CILK       202
-#define VSMC_BASE_OMP        203
-#define VSMC_BASE_TBB        204
-#define VSMC_BASE_THREAD     205
+#define VSMC_BASE_SEQ  201
+#define VSMC_BASE_CILK 202
+#define VSMC_BASE_OMP  203
+#define VSMC_BASE_STD  204
+#define VSMC_BASE_TBB  205
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,20 +63,20 @@ void     vsmc_sampler_iterate                (vsmcSamplerInfo, unsigned);
 void     vsmc_sampler_show_progress          (vsmcSamplerInfo, int);
 
 /* vsmc::Particle */
-size_t vsmc_particle_size             (vsmcParticleInfo)
-void   vsmc_particle_resample         (vsmcParticleInfo, double)
-int    vsmc_particle_resampled        (vsmcParticleInfo)
-void   vsmc_particle_resample_scheme  (vsmcParticleInfo, int)
-void   vsmc_particle_read_weight      (vsmcParticleInfo, double *)
-void   vsmc_particle_read_log_weight  (vsmcParticleInfo, double *)
-double vsmc_particle_weight           (vsmcParticleInfo, size_t)
-double vsmc_particle_log_weight       (vsmcParticleInfo, size_t)
-void   vsmc_particle_set_equal_weight (vsmcParticleInfo)
-void   vsmc_particle_set_weight       (vsmcParticleInfo, const double *)
-void   vsmc_particle_mul_weight       (vsmcParticleInfo, const double *)
-void   vsmc_particle_set_log_weight   (vsmcParticleInfo, const double *)
-void   vsmc_particle_add_log_weight   (vsmcParticleInfo, const double *)
-double vsmc_particle_ess              (vsmcParticleInfo info)
+size_t vsmc_particle_size             (vsmcParticleInfo);
+void   vsmc_particle_resample         (vsmcParticleInfo, double);
+int    vsmc_particle_resampled        (vsmcParticleInfo);
+void   vsmc_particle_resample_scheme  (vsmcParticleInfo, int);
+void   vsmc_particle_read_weight      (vsmcParticleInfo, double *);
+void   vsmc_particle_read_log_weight  (vsmcParticleInfo, double *);
+double vsmc_particle_weight           (vsmcParticleInfo, size_t);
+double vsmc_particle_log_weight       (vsmcParticleInfo, size_t);
+void   vsmc_particle_set_equal_weight (vsmcParticleInfo);
+void   vsmc_particle_set_weight       (vsmcParticleInfo, const double *);
+void   vsmc_particle_mul_weight       (vsmcParticleInfo, const double *);
+void   vsmc_particle_set_log_weight   (vsmcParticleInfo, const double *);
+void   vsmc_particle_add_log_weight   (vsmcParticleInfo, const double *);
+double vsmc_particle_ess              (vsmcParticleInfo info);
 
 #ifdef __cplusplus
 }
