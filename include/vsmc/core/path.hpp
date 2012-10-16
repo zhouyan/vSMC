@@ -97,28 +97,28 @@ class Path
         return grid_;
     }
 
-    /// Read only access to iteration index 
+    /// Read only access to iteration index
     template <typename OutputIter>
     void read_index (OutputIter first) const
     {
         std::copy(index_.begin(), index_.end(), first);
     }
 
-    /// Read only access to iteration integrand 
+    /// Read only access to iteration integrand
     template <typename OutputIter>
     void read_integrand (OutputIter first) const
     {
         std::copy(integrand_.begin(), integrand_.end(), first);
     }
 
-    /// Read only access to iteration width 
+    /// Read only access to iteration width
     template <typename OutputIter>
     void read_width (OutputIter first) const
     {
         std::copy(width_.begin(), width_.end(), first);
     }
 
-    /// Read only access to iteration grid 
+    /// Read only access to iteration grid
     template <typename OutputIter>
     void read_grid (OutputIter first) const
     {
