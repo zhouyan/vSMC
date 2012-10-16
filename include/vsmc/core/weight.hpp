@@ -15,7 +15,7 @@ class WeightSetBase
     typedef std::vector<double>::size_type size_type;
 
     explicit WeightSetBase (size_type N) :
-        ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
+        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
     /// Read only access to the weights
     template <typename OutputIter>
@@ -57,18 +57,19 @@ class WeightSetBase
     /// after increments of size() times.
     void set_weight (const double *nw, int inc = 1)
     {
-        std::copy(nw, nw + weight_.size(), weight_.begin());
+        for (size_type i = 0; i != size_; ++i, nw += inc)
+            weight_[i] = *nw;
         weight2log_weight();
     }
 
     /// \brief Multiple the weight with a pointer
     ///
-    /// \param iw The position to start the reading, it shall be valid
+    /// \param nw The position to start the reading, it shall be valid
     /// after increments of size() times.
-    void mul_weight (const double *iw, int inc = 1)
+    void mul_weight (const double *nw, int inc = 1)
     {
-        for (size_type i = 0; i != log_weight_.size(); ++i)
-            weight_[i] *= iw[i];
+        for (size_type i = 0; i != size_; ++i, nw += inc)
+            weight_[i] *= *nw;
         weight2log_weight();
     }
 
@@ -78,18 +79,19 @@ class WeightSetBase
     /// after increments of size() times.
     void set_log_weight (const double *nw, int inc = 1)
     {
-        std::copy(nw, nw + log_weight_.size(), log_weight_.begin());
+        for (size_type i = 0; i != size_; ++i, nw += inc)
+            log_weight_[i] = *nw;
         log_weight2weight();
     }
 
     /// \brief Add to the log weights with a pointer
     ///
-    /// \param iw The position to start the reading, it shall be valid
+    /// \param nw The position to start the reading, it shall be valid
     /// after increments of size() times.
-    void add_log_weight (const double *iw, int inc = 1)
+    void add_log_weight (const double *nw, int inc = 1)
     {
-        for (size_type i = 0; i != log_weight_.size(); ++i)
-            log_weight_[i] += iw[i];
+        for (size_type i = 0; i != size_; ++i, nw += inc)
+            log_weight_[i] += *nw;
         log_weight2weight();
     }
 
@@ -101,6 +103,7 @@ class WeightSetBase
 
     private :
 
+    size_type size_;
     double ess_;
     std::vector<double> weight_;
     std::vector<double> log_weight_;
