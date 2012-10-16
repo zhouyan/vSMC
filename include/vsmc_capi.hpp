@@ -155,9 +155,9 @@ typedef Path<vsmc::StateTBB <vsmc::Dynamic, double> > PathTBB;
         VSMC_SAMPLER_PTR_CASE_TBB(ptr, prefix, postfix);     \
         VSMC_SAMPLER_PTR_CASE_DEFAULT(ptr, prefix, postfix); \
     }
-#define VSMC_SAMPLER_INFO_SWITCH(info, prefix, postfix) \
+#define VSMC_SAMPLER_SWITCH(sampler, prefix, postfix) \
     VSMC_SAMPLER_PTR_SWITCH( \
-            info.sampler_ptr, info.base_type, prefix, postfix)
+            sampler.sampler_ptr, sampler.base_type, prefix, postfix)
 
 /* Particle switch */
 #define VSMC_PARTICLE_PTR_SWITCH(ptr, base_type, prefix, postfix) \
@@ -169,8 +169,8 @@ typedef Path<vsmc::StateTBB <vsmc::Dynamic, double> > PathTBB;
         VSMC_PARTICLE_PTR_CASE_TBB(ptr, prefix, postfix);     \
         VSMC_PARTICLE_PTR_CASE_DEFAULT(ptr, prefix, postfix); \
     }
-#define VSMC_PARTICLE_INFO_SWITCH(info, prefix, postfix) \
+#define VSMC_PARTICLE_SWITCH(particle, prefix, postfix) \
     VSMC_PARTICLE_PTR_SWITCH( \
-            info.particle_ptr, info.base_type, prefix, postfix)
+            particle.particle_ptr, particle.base_type, prefix, postfix)
 
 #endif // VSMC_CAPI_CORE_DEF_HPP
