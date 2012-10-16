@@ -26,9 +26,9 @@
 #include <vsmc/helper/parallel_tbb.hpp>
 #endif // VSMC_USE_TBB
 
-#if VSMC_USE_THREAD
+#if VSMC_USE_STD
 #include <vsmc/helper/parallel_std.hpp>
-#endif // VSMC_USE_THREAD
+#endif // VSMC_USE_STD
 
 #endif // VSMC_HPP
 

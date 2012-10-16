@@ -29,20 +29,6 @@
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
-
-#if VSMC_USE_CHRONO
-#include <vsmc/cxx11/chrono.hpp>
-#include <vsmc/helper/timer/chrono_timer.hpp>
-#endif
-
-#if VSMC_USE_MUTEX
-#include <vsmc/cxx11/mutex.hpp>
-#endif
-
-#if VSMC_USE_THREAD
-#include <vsmc/cxx11/thread.hpp>
-#endif
-
 #include <vsmc/helper/timer/null_timer.hpp>
 
 #ifdef NDEBUG
@@ -136,10 +122,10 @@ class StaticAssert<true>
     public :
 
     enum {
-        USE_InitializeSeq_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSeq,
-        USE_MoveSeq_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSeq,
-        USE_MonitorEvalSeq_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSeq,
-        USE_PathEvalSeq_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSeq,
+        USE_InitializeSEQ_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSEQ,
+        USE_MoveSEQ_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSEQ,
+        USE_MonitorEvalSEQ_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSEQ,
+        USE_PathEvalSEQ_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSEQ,
 
         USE_InitializeSTD_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSTD,
         USE_MoveSTD_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateSTD,
@@ -156,10 +142,10 @@ class StaticAssert<true>
         USE_MonitorEvalTBB_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateTBB,
         USE_PathEvalTBB_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateTBB,
 
-        USE_InitializeCilk_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCilk,
-        USE_MoveCilk_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCilk,
-        USE_MonitorEvalCilk_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCilk,
-        USE_PathEvalCilk_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCilk,
+        USE_InitializeCILK_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCILK,
+        USE_MoveCILK_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCILK,
+        USE_MonitorEvalCILK_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCILK,
+        USE_PathEvalCILK_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCILK,
 
         USE_InitializeCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_MoveCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,

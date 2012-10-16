@@ -140,10 +140,24 @@ class Sampler
         return ess_history_;
     }
 
+    /// Read ESS hisotry
+    template <typename OutputIter>
+    void read_ess_history (OutputIter first) const
+    {
+        std::copy(ess_history_.begin(), ess_history_.end(), first);
+    }
+
     /// Resampling history
     const resampled_history_type &resampled_history () const
     {
         return resampled_history_;
+    }
+
+    /// Read ESS hisotry
+    template <typename OutputIter>
+    void read_resampled_history (OutputIter first) const
+    {
+        std::copy(resampled_history_.begin(), resampled_history_.end(), first);
     }
 
     /// Accept count history

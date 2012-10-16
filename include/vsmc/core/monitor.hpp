@@ -135,6 +135,13 @@ class Monitor
         return index_;
     }
 
+    /// Read only access to iteration index 
+    template <typename OutputIter>
+    void read_index (OutputIter first) const
+    {
+        std::copy(index_.begin(), index_.end(), first);
+    }
+
     /// \brief Record of the importance sampling integration
     ///
     /// \note record()[c][r] will be the r'th record of the c'th variable
@@ -143,12 +150,32 @@ class Monitor
         return record_;
     }
 
-    /// \brief Record of the a specific variable
+    /// \brief Record of a specific variable
     ///
     /// \param id The id the variable starting with zero
     const record_type::value_type &record (unsigned id) const
     {
         return record_[id];
+    }
+
+    /// \brief Read only access to record of importance sampling integration
+    ///
+    /// \param first A pointer to an array of begins of output.
+    /// For example, say \c OutpuIiter is \c double \c *, then first[c][r]
+    /// will be the r'th record of the c'th variable. In general, first[c]
+    /// will be the begin of the reading of the record of the c'th variable.
+    template <typename OutputIter>
+    void read_record (OutputIter *first) const
+    {
+        for (unsigned d = 0; d != dim_; ++d)
+            std::copy(record_[d].begin(), record_[d].end(), first[d]);
+    }
+
+    /// Read only access to record of a specific variable 
+    template <typename OutputIter>
+    void read_record (unsigned id, OutputIter first) const
+    {
+        std::copy(record_[id].begin(), record_[id].end(), first);
     }
 
     /// Print the index and record matrix
