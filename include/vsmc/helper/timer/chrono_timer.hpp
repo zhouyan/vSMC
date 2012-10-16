@@ -10,8 +10,8 @@ namespace vsmc {
 ///
 /// \details
 /// This timer use the C++11 or Boost \c chrono library. The default behavior
-/// is use the Boost version. To select the C++11 version define \c
-/// VSMC_USE_STD_CHRONO or define \c VSMC_HAS_CXX11LIB_CHRONO to non-zero value
+/// is use the Boost version. To select the C++11 version, define \c
+/// VSMC_HAS_CXX11LIB_CHRONO
 class ChronoTimer
 {
     public :
