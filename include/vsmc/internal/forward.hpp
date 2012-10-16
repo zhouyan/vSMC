@@ -23,11 +23,11 @@ template <typename, typename> class PathEvalBase;
 template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 
-template <unsigned, typename, typename T = NullTimer> class StateSeq;
-template <typename, typename D = VBase> class InitializeSeq;
-template <typename, typename D = VBase> class MoveSeq;
-template <typename, typename D = VBase> class MonitorEvalSeq;
-template <typename, typename D = VBase> class PathEvalSeq;
+template <unsigned, typename, typename T = NullTimer> class StateSEQ;
+template <typename, typename D = VBase> class InitializeSEQ;
+template <typename, typename D = VBase> class MoveSEQ;
+template <typename, typename D = VBase> class MonitorEvalSEQ;
+template <typename, typename D = VBase> class PathEvalSEQ;
 
 template <unsigned, typename, typename T = NullTimer> class StateSTD;
 template <typename, typename D = VBase> class InitializeSTD;
@@ -47,11 +47,11 @@ template <typename, typename D = VBase> class MoveTBB;
 template <typename, typename D = VBase> class MonitorEvalTBB;
 template <typename, typename D = VBase> class PathEvalTBB;
 
-template <unsigned, typename, typename T = NullTimer> class StateCilk;
-template <typename, typename D = VBase> class InitializeCilk;
-template <typename, typename D = VBase> class MoveCilk;
-template <typename, typename D = VBase> class MonitorEvalCilk;
-template <typename, typename D = VBase> class PathEvalCilk;
+template <unsigned, typename, typename T = NullTimer> class StateCILK;
+template <typename, typename D = VBase> class InitializeCILK;
+template <typename, typename D = VBase> class MoveCILK;
+template <typename, typename D = VBase> class MonitorEvalCILK;
+template <typename, typename D = VBase> class PathEvalCILK;
 
 template <unsigned, typename, typename P = NullTimer> class StateCL;
 template <typename> class InitializeCL;

@@ -55,7 +55,7 @@ class WeightSetBase
     ///
     /// \param nw The position to start the reading, it shall be valid
     /// after increments of size() times.
-    void set_weight (const double *nw)
+    void set_weight (const double *nw, int inc = 1)
     {
         std::copy(nw, nw + weight_.size(), weight_.begin());
         weight2log_weight();
@@ -65,7 +65,7 @@ class WeightSetBase
     ///
     /// \param iw The position to start the reading, it shall be valid
     /// after increments of size() times.
-    void mul_weight (const double *iw)
+    void mul_weight (const double *iw, int inc = 1)
     {
         for (size_type i = 0; i != log_weight_.size(); ++i)
             weight_[i] *= iw[i];
@@ -76,7 +76,7 @@ class WeightSetBase
     ///
     /// \param nw The position to start the reading, it shall be valid
     /// after increments of size() times.
-    void set_log_weight (const double *nw)
+    void set_log_weight (const double *nw, int inc = 1)
     {
         std::copy(nw, nw + log_weight_.size(), log_weight_.begin());
         log_weight2weight();
@@ -86,7 +86,7 @@ class WeightSetBase
     ///
     /// \param iw The position to start the reading, it shall be valid
     /// after increments of size() times.
-    void add_log_weight (const double *iw)
+    void add_log_weight (const double *iw, int inc = 1)
     {
         for (size_type i = 0; i != log_weight_.size(); ++i)
             log_weight_[i] += iw[i];

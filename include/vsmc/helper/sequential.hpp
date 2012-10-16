@@ -12,7 +12,7 @@ namespace vsmc {
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T, typename Timer>
-class StateSeq : public StateBase<Dim, T, Timer>
+class StateSEQ : public StateBase<Dim, T, Timer>
 {
     public :
 
@@ -21,7 +21,7 @@ class StateSeq : public StateBase<Dim, T, Timer>
     typedef typename state_base_type::state_type state_type;
     typedef typename state_base_type::timer_type timer_type;
 
-    explicit StateSeq (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
+    explicit StateSEQ (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
@@ -33,14 +33,14 @@ class StateSeq : public StateBase<Dim, T, Timer>
     private :
 
     size_type size_;
-}; // class StateSeq
+}; // class StateSEQ
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class InitializeSeq : public InitializeBase<T, Derived>
+class InitializeSEQ : public InitializeBase<T, Derived>
 {
     public :
 
@@ -49,7 +49,7 @@ class InitializeSeq : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, InitializeSeq);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSEQ, T, InitializeSEQ);
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -65,19 +65,19 @@ class InitializeSeq : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeSeq () {}
-    InitializeSeq (const InitializeSeq<T, Derived> &) {}
-    InitializeSeq<T, Derived> &operator=
-        (const InitializeSeq<T, Derived> &) {return *this;}
-    ~InitializeSeq () {}
-}; // class InitializeSeq
+    InitializeSEQ () {}
+    InitializeSEQ (const InitializeSEQ<T, Derived> &) {}
+    InitializeSEQ<T, Derived> &operator=
+        (const InitializeSEQ<T, Derived> &) {return *this;}
+    ~InitializeSEQ () {}
+}; // class InitializeSEQ
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class MoveSeq : public MoveBase<T, Derived>
+class MoveSEQ : public MoveBase<T, Derived>
 {
     public :
 
@@ -86,7 +86,7 @@ class MoveSeq : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, MoveSeq);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSEQ, T, MoveSEQ);
 
         this->pre_processor(iter, particle);
         unsigned accept = 0;
@@ -101,19 +101,19 @@ class MoveSeq : public MoveBase<T, Derived>
 
     protected :
 
-    MoveSeq () {}
-    MoveSeq (const MoveSeq<T, Derived> &) {}
-    MoveSeq<T, Derived> &operator=
-        (const MoveSeq<T, Derived> &) {return *this;}
-    ~MoveSeq () {}
-}; // class MoveSeq
+    MoveSEQ () {}
+    MoveSEQ (const MoveSEQ<T, Derived> &) {}
+    MoveSEQ<T, Derived> &operator=
+        (const MoveSEQ<T, Derived> &) {return *this;}
+    ~MoveSEQ () {}
+}; // class MoveSEQ
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
+class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
     public :
 
@@ -123,7 +123,7 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, MonitorEvalSeq);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSEQ, T, MonitorEvalSEQ);
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
@@ -137,19 +137,19 @@ class MonitorEvalSeq : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalSeq () {}
-    MonitorEvalSeq (const MonitorEvalSeq<T, Derived> &) {}
-    MonitorEvalSeq<T, Derived> &operator=
-        (const MonitorEvalSeq<T, Derived> &) {return *this;}
-    ~MonitorEvalSeq () {}
-}; // class MonitorEvalSeq
+    MonitorEvalSEQ () {}
+    MonitorEvalSEQ (const MonitorEvalSEQ<T, Derived> &) {}
+    MonitorEvalSEQ<T, Derived> &operator=
+        (const MonitorEvalSEQ<T, Derived> &) {return *this;}
+    ~MonitorEvalSEQ () {}
+}; // class MonitorEvalSEQ
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup Sequential
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class PathEvalSeq : public PathEvalBase<T, Derived>
+class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
     public :
 
@@ -158,7 +158,7 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSeq, T, PathEvalSeq);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateSEQ, T, PathEvalSEQ);
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
@@ -174,12 +174,12 @@ class PathEvalSeq : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalSeq () {}
-    PathEvalSeq (const PathEvalSeq<T, Derived> &) {}
-    PathEvalSeq<T, Derived> &operator=
-        (const PathEvalSeq<T, Derived> &) {return *this;}
-    ~PathEvalSeq () {}
-}; // class PathEvalSeq
+    PathEvalSEQ () {}
+    PathEvalSEQ (const PathEvalSEQ<T, Derived> &) {}
+    PathEvalSEQ<T, Derived> &operator=
+        (const PathEvalSEQ<T, Derived> &) {return *this;}
+    ~PathEvalSEQ () {}
+}; // class PathEvalSEQ
 
 } // namespace vsmc
 

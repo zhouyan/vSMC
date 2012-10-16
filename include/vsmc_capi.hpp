@@ -6,26 +6,26 @@
 
 namespace vsmc { namespace capi {
 
-typedef Sampler<vsmc::StateSeq <vsmc::Dynamic, double> > SamplerSeq;
-typedef Sampler<vsmc::StateCilk<vsmc::Dynamic, double> > SamplerCilk;
+typedef Sampler<vsmc::StateSEQ <vsmc::Dynamic, double> > SamplerSEQ;
+typedef Sampler<vsmc::StateCILK<vsmc::Dynamic, double> > SamplerCILK;
 typedef Sampler<vsmc::StateOMP <vsmc::Dynamic, double> > SamplerOMP;
 typedef Sampler<vsmc::StateSTD <vsmc::Dynamic, double> > SamplerSTD;
 typedef Sampler<vsmc::StateTBB <vsmc::Dynamic, double> > SamplerTBB;
 
-typedef Particle<vsmc::StateSeq <vsmc::Dynamic, double> > ParticleSeq;
-typedef Particle<vsmc::StateCilk<vsmc::Dynamic, double> > ParticleCilk;
+typedef Particle<vsmc::StateSEQ <vsmc::Dynamic, double> > ParticleSEQ;
+typedef Particle<vsmc::StateCILK<vsmc::Dynamic, double> > ParticleCILK;
 typedef Particle<vsmc::StateOMP <vsmc::Dynamic, double> > ParticleOMP;
 typedef Particle<vsmc::StateSTD <vsmc::Dynamic, double> > ParticleSTD;
 typedef Particle<vsmc::StateTBB <vsmc::Dynamic, double> > ParticleTBB;
 
-typedef Monitor<vsmc::StateSeq <vsmc::Dynamic, double> > MonitorSeq;
-typedef Monitor<vsmc::StateCilk<vsmc::Dynamic, double> > MonitorCilk;
+typedef Monitor<vsmc::StateSEQ <vsmc::Dynamic, double> > MonitorSEQ;
+typedef Monitor<vsmc::StateCILK<vsmc::Dynamic, double> > MonitorCILK;
 typedef Monitor<vsmc::StateOMP <vsmc::Dynamic, double> > MonitorOMP;
 typedef Monitor<vsmc::StateSTD <vsmc::Dynamic, double> > MonitorSTD;
 typedef Monitor<vsmc::StateTBB <vsmc::Dynamic, double> > MonitorTBB;
 
-typedef Path<vsmc::StateSeq <vsmc::Dynamic, double> > PathSeq;
-typedef Path<vsmc::StateCilk<vsmc::Dynamic, double> > PathCilk;
+typedef Path<vsmc::StateSEQ <vsmc::Dynamic, double> > PathSEQ;
+typedef Path<vsmc::StateCILK<vsmc::Dynamic, double> > PathCILK;
 typedef Path<vsmc::StateOMP <vsmc::Dynamic, double> > PathOMP;
 typedef Path<vsmc::StateSTD <vsmc::Dynamic, double> > PathSTD;
 typedef Path<vsmc::StateTBB <vsmc::Dynamic, double> > PathTBB;
@@ -35,32 +35,32 @@ typedef Path<vsmc::StateTBB <vsmc::Dynamic, double> > PathTBB;
 /* Sequential */
 #define VSMC_SAMPLER_PTR_CASE_SEQ(ptr, prefix, postfix) \
     case VSMC_BASE_SEQ : \
-        prefix reinterpret_cast<vsmc::capi::SamplerSeq *>(ptr) postfix ;\
+        prefix reinterpret_cast<vsmc::capi::SamplerSEQ *>(ptr) postfix ;\
         break;
 #define VSMC_PARTICLE_PTR_CASE_SEQ(ptr, prefix, postfix) \
     case VSMC_BASE_SEQ : \
-        prefix reinterpret_cast<vsmc::capi::ParticleSeq *>(ptr) postfix ;\
+        prefix reinterpret_cast<vsmc::capi::ParticleSEQ *>(ptr) postfix ;\
         break;
 
 /* Default */
 #define VSMC_SAMPLER_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
     default : \
-        prefix reinterpret_cast<vsmc::capi::SamplerSeq *>(ptr) postfix ;\
+        prefix reinterpret_cast<vsmc::capi::SamplerSEQ *>(ptr) postfix ;\
         break;
 #define VSMC_PARTICLE_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
     default : \
-        prefix reinterpret_cast<vsmc::capi::ParticleSeq *>(ptr) postfix ;\
+        prefix reinterpret_cast<vsmc::capi::ParticleSEQ *>(ptr) postfix ;\
         break;
 
 /* Intel Cilk */
 #if VSMC_USE_CILK
 #define VSMC_SAMPLER_PTR_CASE_CILK(ptr, prefix, postfix) \
     case VSMC_BASE_CILK : \
-        prefix reinterpret_cast<vsmc::capi::SamplerCilk *>(ptr) postfix ;\
+        prefix reinterpret_cast<vsmc::capi::SamplerCILK *>(ptr) postfix ;\
         break;
 #define VSMC_PARTICLE_PTR_CASE_CILK(ptr, prefix, postfix) \
     case VSMC_BASE_CILK : \
-        prefix reinterpret_cast<vsmc::capi::ParticleCilk *>(ptr) postfix ;\
+        prefix reinterpret_cast<vsmc::capi::ParticleCILK *>(ptr) postfix ;\
         break;
 #else // VSMC_USE_CIL
 #define VSMC_SAMPLER_PTR_CASE_CILK(ptr, prefix, postfix)
