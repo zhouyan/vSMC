@@ -48,6 +48,8 @@ void vsmc_sampler_read_ess_history       (vsmcSamplerInfo, double *);
 void vsmc_sampler_read_resampled_history (vsmcSamplerInfo, int *);
 void vsmc_sampler_initialize             (vsmcSamplerInfo, void *);
 void vsmc_sampler_iterate                (vsmcSamplerInfo, unsigned);
+void vsmc_sampler_show_progress          (vsmcSamplerInfo, int);
+vsmcParticleInfo vsmc_sampler_particle   (vsmcSamplerInfo);
 
 /* vsmc::Particle */
 
