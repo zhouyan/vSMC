@@ -135,7 +135,7 @@ class Monitor
         return index_;
     }
 
-    /// Read iteration index 
+    /// Read only access to iteration index 
     template <typename OutputIter>
     void read_index (OutputIter first) const
     {
@@ -158,7 +158,7 @@ class Monitor
         return record_[id];
     }
 
-    /// \brief Read record of importance sampling integration
+    /// \brief Read only access to record of importance sampling integration
     ///
     /// \param first A pointer to an array of begins of output.
     /// For example, say \c OutpuIiter is \c double \c *, then first[c][r]
@@ -171,7 +171,7 @@ class Monitor
             std::copy(record_[d].begin(), record_[d].end(), first[d]);
     }
 
-    /// Read record of a specific variable 
+    /// Read only access to record of a specific variable 
     template <typename OutputIter>
     void read_record (unsigned id, OutputIter first) const
     {

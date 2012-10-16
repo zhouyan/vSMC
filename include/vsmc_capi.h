@@ -99,6 +99,15 @@ void     vsmc_monitor_read_index     (vsmcMonitor, unsigned *);
 void     vsmc_monitor_read_record    (vsmcMonitor, double **);
 void     vsmc_monitor_read_record_id (vsmcMonitor, unsigned, double *);
 
+/* vsmc::Path */
+vsmcPath vsmc_path_new (vsmcSampler, vsmcPathEval);
+void     vsmc_path_delete         (vsmcPath);
+unsigned vsmc_path_iter_size      (vsmcPath);
+void     vsmc_path_read_index     (vsmcPath, unsigned *);
+void     vsmc_path_read_integrand (vsmcPath, double *);
+void     vsmc_path_read_width     (vsmcPath, double *);
+void     vsmc_path_read_grid      (vsmcPath, double *);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
