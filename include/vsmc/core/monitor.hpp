@@ -135,7 +135,7 @@ class Monitor
         return index_;
     }
 
-    /// Read only access to iteration index 
+    /// Read only access to iteration index
     template <typename OutputIter>
     void read_index (OutputIter first) const
     {
@@ -171,7 +171,7 @@ class Monitor
             std::copy(record_[d].begin(), record_[d].end(), first[d]);
     }
 
-    /// Read only access to record of a specific variable 
+    /// Read only access to record of a specific variable
     template <typename OutputIter>
     void read_record (unsigned id, OutputIter first) const
     {
