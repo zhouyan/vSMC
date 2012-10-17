@@ -15,7 +15,7 @@ namespace vsmc {
 /// \tparam T The type of the value of the state parameter vector
 /// \tparam Timer The timer
 template <unsigned Dim, typename T, typename Timer>
-class StateCilk : public StateBase<Dim, T, Timer>
+class StateCILK : public StateBase<Dim, T, Timer>
 {
     public :
 
@@ -24,7 +24,7 @@ class StateCilk : public StateBase<Dim, T, Timer>
     typedef typename state_base_type::state_type state_type;
     typedef typename state_base_type::timer_type timer_type;
 
-    explicit StateCilk (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
+    explicit StateCILK (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
@@ -36,14 +36,14 @@ class StateCilk : public StateBase<Dim, T, Timer>
     private :
 
     size_type size_;
-}; // class StateCilk
+}; // class StateCILK
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup CILK
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class InitializeCilk : public InitializeBase<T, Derived>
+class InitializeCILK : public InitializeBase<T, Derived>
 {
     public :
 
@@ -52,7 +52,7 @@ class InitializeCilk : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateCilk, T, InitializeCilk);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateCILK, T, InitializeCILK);
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -68,19 +68,19 @@ class InitializeCilk : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeCilk () {}
-    InitializeCilk (const InitializeCilk<T, Derived> &) {}
-    InitializeCilk<T, Derived> &operator=
-        (const InitializeCilk<T, Derived> &) {return *this;}
-    ~InitializeCilk () {}
-}; // class InitializeCilk
+    InitializeCILK () {}
+    InitializeCILK (const InitializeCILK<T, Derived> &) {}
+    InitializeCILK<T, Derived> &operator=
+        (const InitializeCILK<T, Derived> &) {return *this;}
+    ~InitializeCILK () {}
+}; // class InitializeCILK
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup CILK
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class MoveCilk : public MoveBase<T, Derived>
+class MoveCILK : public MoveBase<T, Derived>
 {
     public :
 
@@ -89,7 +89,7 @@ class MoveCilk : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateCilk, T, MoveCilk);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateCILK, T, MoveCILK);
 
         this->pre_processor(iter, particle);
         cilk::reducer_opadd<unsigned> accept;
@@ -104,19 +104,19 @@ class MoveCilk : public MoveBase<T, Derived>
 
     protected :
 
-    MoveCilk () {}
-    MoveCilk (const MoveCilk<T, Derived> &) {}
-    MoveCilk<T, Derived> &operator=
-        (const MoveCilk<T, Derived> &) {return *this;}
-    ~MoveCilk () {}
-}; // class MoveCilk
+    MoveCILK () {}
+    MoveCILK (const MoveCILK<T, Derived> &) {}
+    MoveCILK<T, Derived> &operator=
+        (const MoveCILK<T, Derived> &) {return *this;}
+    ~MoveCILK () {}
+}; // class MoveCILK
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup CILK
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class MonitorEvalCilk : public MonitorEvalBase<T, Derived>
+class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
 {
     public :
 
@@ -126,7 +126,7 @@ class MonitorEvalCilk : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateCilk, T, MonitorEvalCilk);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateCILK, T, MonitorEvalCILK);
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
@@ -140,19 +140,19 @@ class MonitorEvalCilk : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalCilk () {}
-    MonitorEvalCilk (const MonitorEvalCilk<T, Derived> &) {}
-    MonitorEvalCilk<T, Derived> &operator=
-        (const MonitorEvalCilk<T, Derived> &) {return *this;}
-    ~MonitorEvalCilk () {}
-}; // class MonitorEvalCilk
+    MonitorEvalCILK () {}
+    MonitorEvalCILK (const MonitorEvalCILK<T, Derived> &) {}
+    MonitorEvalCILK<T, Derived> &operator=
+        (const MonitorEvalCILK<T, Derived> &) {return *this;}
+    ~MonitorEvalCILK () {}
+}; // class MonitorEvalCILK
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup CILK
 ///
 /// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
-class PathEvalCilk : public PathEvalBase<T, Derived>
+class PathEvalCILK : public PathEvalBase<T, Derived>
 {
     public :
 
@@ -161,7 +161,7 @@ class PathEvalCilk : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateCilk, T, PathEvalCilk);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateCILK, T, PathEvalCILK);
 
         this->pre_processor(iter, particle);
         particle.value().timer().start();
@@ -177,12 +177,12 @@ class PathEvalCilk : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalCilk () {}
-    PathEvalCilk (const PathEvalCilk<T, Derived> &) {}
-    PathEvalCilk<T, Derived> &operator=
-        (const PathEvalCilk<T, Derived> &) {return *this;}
-    ~PathEvalCilk () {}
-}; // class PathEvalCilk
+    PathEvalCILK () {}
+    PathEvalCILK (const PathEvalCILK<T, Derived> &) {}
+    PathEvalCILK<T, Derived> &operator=
+        (const PathEvalCILK<T, Derived> &) {return *this;}
+    ~PathEvalCILK () {}
+}; // class PathEvalCILK
 
 } // namespace vsmc
 

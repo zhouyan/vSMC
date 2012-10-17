@@ -97,6 +97,34 @@ class Path
         return grid_;
     }
 
+    /// Read only access to iteration index
+    template <typename OutputIter>
+    void read_index (OutputIter first) const
+    {
+        std::copy(index_.begin(), index_.end(), first);
+    }
+
+    /// Read only access to iteration integrand
+    template <typename OutputIter>
+    void read_integrand (OutputIter first) const
+    {
+        std::copy(integrand_.begin(), integrand_.end(), first);
+    }
+
+    /// Read only access to iteration width
+    template <typename OutputIter>
+    void read_width (OutputIter first) const
+    {
+        std::copy(width_.begin(), width_.end(), first);
+    }
+
+    /// Read only access to iteration grid
+    template <typename OutputIter>
+    void read_grid (OutputIter first) const
+    {
+        std::copy(grid_.begin(), grid_.end(), first);
+    }
+
     /// Set the evaluation functor
     void set_eval (const eval_type &new_eval)
     {
