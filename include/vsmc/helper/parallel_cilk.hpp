@@ -13,18 +13,16 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-/// \tparam Timer The timer
-template <unsigned Dim, typename T, typename Timer>
-class StateCILK : public StateBase<Dim, T, Timer>
+template <unsigned Dim, typename T>
+class StateCILK : public StateBase<Dim, T>
 {
     public :
 
-    typedef StateBase<Dim, T, Timer> state_base_type;
+    typedef StateBase<Dim, T> state_base_type;
     typedef typename state_base_type::size_type  size_type;
     typedef typename state_base_type::state_type state_type;
-    typedef typename state_base_type::timer_type timer_type;
 
-    explicit StateCILK (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
+    explicit StateCILK (size_type N) : StateBase<Dim, T>(N), size_(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
@@ -57,10 +55,8 @@ class InitializeCILK : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         cilk::reducer_opadd<unsigned> accept;
-        particle.value().timer().start();
         cilk_for (size_type i = 0; i != particle.value().size(); ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
-        particle.value().timer().stop();
         this->post_processor(particle);
 
         return accept.get_value();
@@ -93,10 +89,8 @@ class MoveCILK : public MoveBase<T, Derived>
 
         this->pre_processor(iter, particle);
         cilk::reducer_opadd<unsigned> accept;
-        particle.value().timer().start();
         cilk_for (size_type i = 0; i != particle.value().size(); ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return accept.get_value();
@@ -129,12 +123,10 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateCILK, T, MonitorEvalCILK);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
         cilk_for (size_type i = 0; i != particle.value().size(); ++i) {
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
     }
 
@@ -164,12 +156,10 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateCILK, T, PathEvalCILK);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
         cilk_for (size_type i = 0; i != particle.value().size(); ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return this->path_width(iter, particle);

@@ -19,26 +19,22 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-/// \tparam Timer The timer
-template <unsigned Dim, typename T, typename Timer>
-class StateTBB : public StateBase<Dim, T, Timer>
+template <unsigned Dim, typename T>
+class StateTBB : public StateBase<Dim, T>
 {
     public :
 
-    typedef StateBase<Dim, T, Timer> state_base_type;
+    typedef StateBase<Dim, T> state_base_type;
     typedef typename state_base_type::size_type  size_type;
     typedef typename state_base_type::state_type state_type;
-    typedef typename state_base_type::timer_type timer_type;
 
-    explicit StateTBB (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
+    explicit StateTBB (size_type N) : StateBase<Dim, T>(N), size_(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
     {
-        this->timer().start();
         tbb::parallel_for(tbb::blocked_range<size_type>(0, size_),
                 copy_work_<IntType>(this, copy_from));
-        this->timer().stop();
     }
 
     private :
@@ -50,8 +46,7 @@ class StateTBB : public StateBase<Dim, T, Timer>
     {
         public :
 
-        copy_work_ (StateTBB<Dim, T, Timer> *state,
-                const IntType *copy_from) :
+        copy_work_ (StateTBB<Dim, T> *state, const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
@@ -62,7 +57,7 @@ class StateTBB : public StateBase<Dim, T, Timer>
 
         private :
 
-        StateTBB<Dim, T, Timer> *const state_;
+        StateTBB<Dim, T> *const state_;
         const IntType *const copy_from_;
     }; // class copy_work_
 }; // class StateTBB
@@ -85,11 +80,9 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        particle.value().timer().start();
         work_ work(this, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(
                     0, particle.value().size()), work);
-        particle.value().timer().stop();
         this->post_processor(particle);
 
         return work.accept();
@@ -161,11 +154,9 @@ class MoveTBB : public MoveBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateTBB, T, MoveTBB);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
         work_ work(this, iter, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(
                     0, particle.value().size()), work);
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return work.accept();
@@ -240,11 +231,9 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateTBB, T, MonitorEvalTBB);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
         tbb::parallel_for(tbb::blocked_range<size_type>(
                     0, particle.value().size()),
                 work_(this, iter, dim, &particle, res));
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
     }
 
@@ -305,11 +294,9 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateTBB, T, PathEvalTBB);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
         tbb::parallel_for(tbb::blocked_range<size_type>(
                     0, particle.value().size()),
                 work_(this, iter, &particle, res));
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return this->path_width(iter, particle);

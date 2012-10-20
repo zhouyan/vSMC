@@ -29,7 +29,6 @@
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
-#include <vsmc/helper/timer/null_timer.hpp>
 
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)

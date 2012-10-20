@@ -12,17 +12,16 @@ namespace vsmc {
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-template <unsigned Dim, typename T, typename Timer>
-class StateOMP : public StateBase<Dim, T, Timer>
+template <unsigned Dim, typename T>
+class StateOMP : public StateBase<Dim, T>
 {
     public :
 
-    typedef StateBase<Dim, T, Timer> state_base_type;
+    typedef StateBase<Dim, T> state_base_type;
     typedef typename state_base_type::size_type  size_type;
     typedef typename state_base_type::state_type state_type;
-    typedef typename state_base_type::timer_type timer_type;
 
-    explicit StateOMP (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
+    explicit StateOMP (size_type N) : StateBase<Dim, T>(N), size_(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
@@ -56,11 +55,9 @@ class InitializeOMP : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
-        particle.value().timer().start();
 #pragma omp parallel for reduction(+ : accept) default(none) shared(particle)
         for (size_type i = 0; i < particle.size(); ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
-        particle.value().timer().stop();
         this->post_processor(particle);
 
         return accept;
@@ -93,12 +90,10 @@ class MoveOMP : public MoveBase<T, Derived>
 
         this->pre_processor(iter, particle);
         unsigned accept = 0;
-        particle.value().timer().start();
 #pragma omp parallel for reduction(+ : accept) default(none) \
         shared(particle, iter)
         for (size_type i = 0; i < particle.size(); ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return accept;
@@ -131,13 +126,11 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MonitorEvalOMP);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
 #pragma omp parallel for default(none) shared(particle, iter, dim, res)
         for (size_type i = 0; i < particle.size(); ++i) {
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
     }
 
@@ -167,13 +160,11 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, PathEvalOMP);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
 #pragma omp parallel for default(none) shared(particle, iter, res)
         for (size_type i = 0; i < particle.size(); ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return this->path_width(iter, particle);
