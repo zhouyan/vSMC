@@ -36,8 +36,14 @@ class Sampler
     /// The type of movement functor
     typedef cxx11::function<unsigned (unsigned, particle_type &)> move_type;
 
+    /// An alias to move_type
+    typedef move_type mcmc_type;
+
     /// The type of the movement queue
     typedef std::vector<move_type> move_queue_type;
+
+    /// An alias to move_queue_type
+    typedef move_queue_type mcmc_queue_type;
 
     /// The type of ESS history vector
     typedef std::vector<double> ess_history_type;
@@ -204,7 +210,7 @@ class Sampler
     }
 
     /// Clear the MCMC movement queue and set a new MCMC movement functor
-    void mcmc (const move_type &new_mcmc)
+    void mcmc (const mcmc_type &new_mcmc)
     {
         mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
@@ -265,7 +271,8 @@ class Sampler
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
             unsigned ia = 0;
-            std::vector<unsigned> acc(move_queue_.size() + mcmc_queue_.size());
+            std::vector<unsigned>
+                acc(0, move_queue_.size() + mcmc_queue_.size());
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
@@ -278,7 +285,7 @@ class Sampler
 
             do_resampling();
 
-            for (typename move_queue_type::iterator
+            for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 VSMC_RUNTIME_ASSERT((bool(*m)),
                         ("CALL **Sampler::iterate** WITH AN INVALID "
@@ -537,7 +544,7 @@ class Sampler
 
     init_type init_;
     move_queue_type move_queue_;
-    move_queue_type mcmc_queue_;
+    mcmc_queue_type mcmc_queue_;
 
     double threshold_;
 
