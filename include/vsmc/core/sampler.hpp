@@ -406,11 +406,8 @@ class Sampler
             bool print_header = true,
             bool print_path = true, bool print_monitor = true,
             bool print_id = false, int id = 0,
-            char sepchar = '\t', char nachar = '.') const
+            char sepchar = ',', char nachar = '\0') const
     {
-        if (sepchar == ',')
-            nachar = 0;
-
         // Accept count
         std::vector<double> acc;
         unsigned accd = 0;
