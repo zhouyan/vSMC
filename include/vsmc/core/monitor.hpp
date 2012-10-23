@@ -77,12 +77,6 @@ class Monitor
     /// The type of the GEMV functor
     typedef typename GEMVTypeTrait<T>::type gemv_type;
 
-    /// The type of the index vector
-    typedef std::vector<unsigned> index_type;
-
-    /// The type of the record vector
-    typedef std::vector<std::vector<double> > record_type;
-
     /// \brief Construct a Monitor with an evaluation functor
     ///
     /// \param dim The dimension of the monitor, i.e., the number of variables
@@ -129,68 +123,94 @@ class Monitor
         return bool(eval_);
     }
 
-    /// Iteration index
-    const index_type &index () const
+    unsigned index (unsigned iter) const
     {
-        return index_;
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Monitor::index** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return index_[iter];
     }
 
-    /// Read only access to iteration index
+    double record (unsigned id, unsigned iter) const
+    {
+        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
+                ("CALL **Monitor::record** WITH AN INVALID "
+                 "ID NUMBER"));
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Monitor::record** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return record_[id][iter];
+    }
+
+    /// \brief Read only access to iteration index
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_index (OutputIter first) const
+    OutputIter read_index (OutputIter first) const
     {
-        std::copy(index_.begin(), index_.end(), first);
+        return std::copy(index_.begin(), index_.end(), first);
     }
 
-    /// \brief Record of the importance sampling integration
+    /// \brief Read only access to record of a specific variable
     ///
-    /// \note record()[c][r] will be the r'th record of the c'th variable
-    const record_type &record () const
-    {
-        return record_;
-    }
-
-    /// \brief Record of a specific variable
+    /// \param id The ID of the variable, 0 to dim() - 1
+    /// \param first The beginning of the destination range
     ///
-    /// \param id The id the variable starting with zero
-    const record_type::value_type &record (unsigned id) const
-    {
-        return record_[id];
-    }
-
-    /// \brief Read only access to record of importance sampling integration
-    ///
-    /// \param first A pointer to an array of begins of output.
-    /// For example, say \c OutpuIiter is \c double \c *, then first[c][r]
-    /// will be the r'th record of the c'th variable. In general, first[c]
-    /// will be the begin of the reading of the record of the c'th variable.
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_record (OutputIter *first) const
+    OutputIter read_record (unsigned id, OutputIter first) const
+    {
+        return std::copy(record_[id].begin(), record_[id].end(), first);
+    }
+
+    /// \brief Read only access to record of all variables
+    ///
+    /// \param first A pointer to an array of the beginning of the destination
+    /// range. For example, say \c OutpuIiter is \c double \c *, then
+    /// first[c][r] will be the r'th record of the c'th variable. In general,
+    /// first[c] will be the begin of the reading of the record of the c'th
+    /// variable.
+    template <typename OutputIter>
+    void read_record_matrix (OutputIter *first) const
     {
         for (unsigned d = 0; d != dim_; ++d)
             std::copy(record_[d].begin(), record_[d].end(), first[d]);
     }
 
-    /// Read only access to record of a specific variable
+    /// \brief Read only access to record of all variables
+    ///
+    /// \param order Either vsmc::ColumnMajor or vsmc::RowMajor. With any other
+    /// value, this method does nothing and simply return the original \c
+    /// first. In debug mode an assert also will be issued.
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
+    ///
+    /// \note The record is considered as a iter_size() by dim() matrix
     template <typename OutputIter>
-    void read_record (unsigned id, OutputIter first) const
+    OutputIter read_record_matrix (MatrixOrder order, OutputIter first) const
     {
-        std::copy(record_[id].begin(), record_[id].end(), first);
-    }
+        VSMC_RUNTIME_ASSERT((order == ColumnMajor || order == RowMajor),
+                "CALL **Monitor::read_record_matrix** with and INVALID "
+                "MatrixOrder");
 
-    /// Print the index and record matrix
-    template<typename CharT, typename Traits>
-    void print (std::basic_ostream<CharT, Traits> &os = std::cout)
-    {
-        const char sep = '\t';
-
-        for (unsigned i = 0; i != iter_size(); ++i) {
-            os << index_[i] << sep;
+        if (order == ColumnMajor)
             for (unsigned d = 0; d != dim_; ++d)
-                os << record_[d][i] << sep;
-            if (i + 1 < iter_size())
-                os << '\n';
-        }
+                first = std::copy(record_[d].begin(), record_[d].end(), first);
+
+        if (order == RowMajor)
+            for (unsigned d = 0; d != dim_; ++d)
+                for (unsigned iter = 0; iter != iter_size(); ++iter)
+                    *first++ = record(d, iter);
+
+        return first;
     }
 
     /// Set a new evaluation functor
@@ -242,7 +262,7 @@ class Monitor
     void clear ()
     {
         index_.clear();
-        for (record_type::iterator r = record_.begin();
+        for (std::vector<std::vector<double> >::iterator r = record_.begin();
                 r != record_.end(); ++r) {
             r->clear();
         }
@@ -255,26 +275,11 @@ class Monitor
     std::vector<double> weight_;
     unsigned dim_;
     eval_type eval_;
-    index_type index_;
-    record_type record_;
+    std::vector<unsigned> index_;
+    std::vector<std::vector<double> > record_;
 
     gemv_type gemv_;
 }; // class Monitor
-
-/// \brief Print the Monitor
-/// \ingroup Core
-///
-/// \param os The ostream to which the contents are printed
-/// \param monitor The Monitor to be printed
-///
-/// \note This is the same as <tt>monitor.print(os)</tt>
-template<typename CharT, typename Traits, typename T>
-std::basic_ostream<CharT, Traits> &operator<< (
-        std::basic_ostream<CharT, Traits> &os, const vsmc::Monitor<T> &monitor)
-{
-    monitor.print(os);
-    return os;
-}
 
 } // namespace vsmc
 

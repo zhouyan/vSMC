@@ -17,18 +17,28 @@ class WeightSetBase
     explicit WeightSetBase (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
-    /// Read only access to the weights
+    /// \brief Read only access to the weights
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_weight (OutputIter first) const
+    OutputIter read_weight (OutputIter first) const
     {
-        std::copy(weight_.begin(), weight_.end(), first);
+        return std::copy(weight_.begin(), weight_.end(), first);
     }
 
-    /// Read only access to the log weights
+    /// \brief Read only access to the log weights
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_log_weight (OutputIter first) const
+    OutputIter read_log_weight (OutputIter first) const
     {
-        std::copy(log_weight_.begin(), log_weight_.end(), first);
+        return std::copy(log_weight_.begin(), log_weight_.end(), first);
     }
 
     /// Read only access to the weight of a particle
@@ -53,8 +63,8 @@ class WeightSetBase
 
     /// \brief Set the weights with a pointer
     ///
-    /// \param nw The position to start the reading, it shall be valid
-    /// after increments of size() times.
+    /// \param nw The position to start the reading
+    /// \param inc The stride of the array
     void set_weight (const double *nw, int inc = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += inc)
@@ -64,8 +74,8 @@ class WeightSetBase
 
     /// \brief Multiple the weight with a pointer
     ///
-    /// \param nw The position to start the reading, it shall be valid
-    /// after increments of size() times.
+    /// \param nw The position to start the reading
+    /// \param inc The stride of the array
     void mul_weight (const double *nw, int inc = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += inc)
@@ -75,8 +85,8 @@ class WeightSetBase
 
     /// \brief Set the log weights with a pointer
     ///
-    /// \param nw The position to start the reading, it shall be valid
-    /// after increments of size() times.
+    /// \param nw The position to start the reading
+    /// \param inc The stride of the array
     void set_log_weight (const double *nw, int inc = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += inc)
@@ -86,8 +96,8 @@ class WeightSetBase
 
     /// \brief Add to the log weights with a pointer
     ///
-    /// \param nw The position to start the reading, it shall be valid
-    /// after increments of size() times.
+    /// \param nw The position to start the reading
+    /// \param inc The stride of the array
     void add_log_weight (const double *nw, int inc = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += inc)

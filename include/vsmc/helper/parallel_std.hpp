@@ -167,26 +167,22 @@ void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-/// \tparam Timer The timer
-template <unsigned Dim, typename T, typename Timer>
-class StateSTD : public StateBase<Dim, T, Timer>
+template <unsigned Dim, typename T>
+class StateSTD : public StateBase<Dim, T>
 {
     public :
 
-    typedef StateBase<Dim, T, Timer> state_base_type;
+    typedef StateBase<Dim, T> state_base_type;
     typedef typename state_base_type::size_type  size_type;
     typedef typename state_base_type::state_type state_type;
-    typedef typename state_base_type::timer_type timer_type;
 
-    explicit StateSTD (size_type N) : StateBase<Dim, T, Timer>(N), size_(N) {}
+    explicit StateSTD (size_type N) : StateBase<Dim, T>(N), size_(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
     {
-        this->timer().start();
         thread::parallel_for(thread::BlockedRange<size_type>(0, size_),
                 copy_work_<IntType>(this, copy_from));
-        this->timer().stop();
     }
 
     private :
@@ -198,7 +194,7 @@ class StateSTD : public StateBase<Dim, T, Timer>
     {
         public :
 
-        copy_work_ (StateSTD<Dim, T, Timer> *state,
+        copy_work_ (StateSTD<Dim, T> *state,
                 const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
@@ -210,7 +206,7 @@ class StateSTD : public StateBase<Dim, T, Timer>
 
         private :
 
-        StateSTD<Dim, T, Timer> *const state_;
+        StateSTD<Dim, T> *const state_;
         const IntType *const copy_from_;
     }; // class copy_work_
 }; // class StateSTD
@@ -233,12 +229,10 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        particle.value().timer().start();
         work_ work(this, &particle);
         unsigned accept;
         thread::parallel_sum(thread::BlockedRange<size_type>(
                     0, particle.value().size()), work, accept);
-        particle.value().timer().stop();
         this->post_processor(particle);
 
         return accept;
@@ -297,12 +291,10 @@ class MoveSTD : public MoveBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, MoveSTD);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
         work_ work(this, iter, &particle);
         unsigned accept;
         thread::parallel_sum(thread::BlockedRange<size_type>(
                     0, particle.value().size()), work, accept);
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return accept;
@@ -363,11 +355,9 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, MonitorEvalSTD);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
         thread::parallel_for(thread::BlockedRange<size_type>(
                     0, particle.value().size()),
                 work_(this, iter, dim, &particle, res));
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
     }
 
@@ -428,11 +418,9 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
         VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, PathEvalSTD);
 
         this->pre_processor(iter, particle);
-        particle.value().timer().start();
         thread::parallel_for(thread::BlockedRange<size_type>(
                     0, particle.value().size()),
                 work_(this, iter, &particle, res));
-        particle.value().timer().stop();
         this->post_processor(iter, particle);
 
         return this->path_width(iter, particle);

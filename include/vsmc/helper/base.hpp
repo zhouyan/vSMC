@@ -20,7 +20,7 @@
 
 namespace vsmc {
 
-template <template <unsigned, typename, typename> class State, typename D>
+template <template <unsigned, typename> class State, typename D>
 class IsBaseOfState
 {
     private :
@@ -28,8 +28,8 @@ class IsBaseOfState
     struct char2 {char c1; char c2;};
     typedef typename cxx11::remove_cv<D>::type derived_type;
 
-    template <unsigned Dim, typename T, typename Timer>
-    static char test (State<Dim, T, Timer> *);
+    template <unsigned Dim, typename T>
+    static char test (State<Dim, T> *);
     static char2 test (...);
 
     public :
@@ -43,7 +43,7 @@ class IsBaseOfState
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector
-template <unsigned Dim, typename T, typename Timer>
+template <unsigned Dim, typename T>
 class StateBase
 {
     public :
@@ -53,9 +53,6 @@ class StateBase
 
     /// The type of state parameters
     typedef T state_type;
-
-    /// The type of the timer
-    typedef Timer timer_type;
 
     /// The dimension of the problem
     unsigned dim ()
@@ -77,12 +74,6 @@ class StateBase
     size_type size () const
     {
         return size_;
-    }
-
-    /// The timer
-    const timer_type &timer () const
-    {
-        return timer_;
     }
 
     /// \brief Read and write access to a signle particle state
@@ -132,7 +123,6 @@ class StateBase
     size_type size_;
     unsigned dim_;
     std::vector<T> state_;
-    timer_type timer_;
 }; // class StateBase
 
 /// \brief A const variant to SingleParticle

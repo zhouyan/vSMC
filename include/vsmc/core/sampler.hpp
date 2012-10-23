@@ -36,8 +36,14 @@ class Sampler
     /// The type of movement functor
     typedef cxx11::function<unsigned (unsigned, particle_type &)> move_type;
 
+    /// An alias to move_type
+    typedef move_type mcmc_type;
+
     /// The type of the movement queue
-    typedef std::vector<move_type> move_queue_type;
+    typedef std::deque<move_type> move_queue_type;
+
+    /// An alias to move_queue_type
+    typedef move_queue_type mcmc_queue_type;
 
     /// The type of ESS history vector
     typedef std::vector<double> ess_history_type;
@@ -204,7 +210,7 @@ class Sampler
     }
 
     /// Clear the MCMC movement queue and set a new MCMC movement functor
-    void mcmc (const move_type &new_mcmc)
+    void mcmc (const mcmc_type &new_mcmc)
     {
         mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
@@ -265,7 +271,8 @@ class Sampler
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
             unsigned ia = 0;
-            std::vector<unsigned> acc(move_queue_.size() + mcmc_queue_.size());
+            std::vector<unsigned>
+                acc(move_queue_.size() + mcmc_queue_.size(), 0);
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
@@ -278,7 +285,7 @@ class Sampler
 
             do_resampling();
 
-            for (typename move_queue_type::iterator
+            for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 VSMC_RUNTIME_ASSERT((bool(*m)),
                         ("CALL **Sampler::iterate** WITH AN INVALID "
@@ -386,93 +393,86 @@ class Sampler
     /// \param print_header Print header if \b true
     /// \param print_path Print path sampling if \b true
     /// \param print_monitor Print monitors if \b true
-    /// \param print_id Print an unique ID for this sampler if \b true
-    /// \param id The ID to be printed if \c print_id is \b true
+    /// \param sampler_id The ID to be printed if \c print_id is \b true
     /// \param sepchar The character used to seperate fields
     /// \param nachar The character used to represent missing values
     ///
     /// \note \c print_path and \c print_monitor are only used to hint the
     /// print process. If there is no record at all, then they won't be printed
     /// even set to \b true.
-    template<typename CharT, typename Traits>
-    void print (std::basic_ostream<CharT, Traits> &os = std::cout,
+    template<typename OutputStream>
+    void print (OutputStream &os = std::cout,
             bool print_header = true,
             bool print_path = true, bool print_monitor = true,
-            bool print_id = false, int id = 0,
-            char sepchar = '\t', char nachar = '.') const
+            int sampler_id = 0, char sepchar = ',', char nachar = '\0') const
     {
-        if (sepchar == ',')
-            nachar = 0;
-
         // Accept count
         std::vector<double> acc;
         unsigned accd = 0;
         for (unsigned iter = 0; iter != iter_size(); ++iter) {
-            accd = std::max(accd, static_cast<unsigned>(
-                        accept_history_[iter].size()));
+            accd = std::max(
+                    accd, static_cast<unsigned>(accept_history_[iter].size()));
         }
         bool print_accept = accd > 0 && iter_size() > 0;
 
         // Path sampling
-        std::vector<long> pmask;
         print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
+        std::vector<long> path_mask;
         if (print_path) {
-            pmask.resize(iter_size());
-            for (unsigned d = 0; d != iter_size(); ++d)
-                pmask[d] = -1;
+            path_mask.resize(iter_size(), -1);
             for (unsigned d = 0; d != path_.iter_size(); ++d)
-                pmask[path_.index()[d]] = d;
+                path_mask[path_.index(d)] = d;
         }
 
         // Monitors
-        std::vector<std::vector<long> > mmask;
         unsigned mond = 0;
+        unsigned mi = 0;
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             mond += m->second.dim();
+            mi = std::max(mi, static_cast<unsigned>(m->second.iter_size()));
         }
-        print_monitor = print_monitor && mond > 0 && iter_size() > 0;
+        print_monitor = print_monitor && mond > 0 && mi > 0 && iter_size() > 0;
+        std::vector<std::vector<long> > monitor_mask;
         if (print_monitor) {
-            mmask.resize(monitor_.size());
+            monitor_mask.resize(monitor_.size());
             unsigned mm = 0;
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
-                mmask[mm].resize(iter_size());
-                for (unsigned d = 0; d != iter_size(); ++d)
-                    mmask[mm][d] = -1;
+                monitor_mask[mm].resize(iter_size(), -1);
                 for (unsigned d = 0; d != m->second.iter_size(); ++d)
-                    mmask[mm][m->second.index()[d]] = d;
+                    monitor_mask[mm][m->second.index(d)] = d;
                 ++mm;
             }
         }
 
         // Print header
         if (print_header) {
-            if (print_id)
-                os << "Sampler.ID" << sepchar;
-            os << "Iter" << sepchar << "ESS" << sepchar << "ResSam" << sepchar;
+            os << "Sampler.ID";
+            os << sepchar << "Iter";
+            os << sepchar << "ESS";
+            os << sepchar << "ResSam";
             if (print_accept) {
                 if (accd == 1) {
-                    os << "Accept" << sepchar;
+                    os << sepchar << "Accept";
                 } else {
                     for (unsigned d = 0; d != accd; ++d)
-                        os << "Accept." << d + 1 << sepchar;
+                        os << sepchar << "Accept." << d + 1;
                 }
             }
             if (print_path) {
-                os
-                    << "Path.Integrand" << sepchar
-                    << "Path.Width" << sepchar
-                    << "Path.Grid" << sepchar;
+                os << sepchar << "Path.Integrand";
+                os << sepchar << "Path.Width";
+                os << sepchar << "Path.Grid";
             }
             if (print_monitor) {
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
                     if (m->second.dim() == 1) {
-                        os << m->first << sepchar;
+                        os << sepchar << m->first;
                     } else {
                         for (unsigned d = 0; d != m->second.dim(); ++d)
-                            os << m->first << '.' << d + 1 << sepchar;
+                            os << sepchar << m->first << '.' << d + 1;
                     }
                 }
             }
@@ -482,47 +482,50 @@ class Sampler
 
         // Print data
         for (unsigned iter = 0; iter != iter_size(); ++iter) {
-            if (print_id)
-                os << id << sepchar;
-            os << iter << sepchar;
-            os << ess_history_[iter] / size() << sepchar;
-            os << resampled_history_[iter] << sepchar;
+            os << sampler_id;
+            os << sepchar << iter;
+            os << sepchar << ess_history_[iter] / size();
+            os << sepchar << resampled_history_[iter];
+
             if (print_accept) {
                 for (unsigned c = 0; c != accept_history_[iter].size(); ++c)
-                    os << accept_history_[iter][c] /
-                        static_cast<double>(size()) << sepchar;
+                    os << sepchar <<
+                        accept_history_[iter][c] / static_cast<double>(size());
                 unsigned diff = static_cast<unsigned>(
                         accd - accept_history_[iter].size());
                 for (unsigned c = 0; c != diff; ++c)
-                    os << 0 << sepchar;
+                    os << sepchar << 0;
             }
+
             if (print_path) {
-                long pr = pmask[iter];
+                long pr = path_mask[iter];
                 if (pr >= 0) {
-                    os << path_.integrand()[pr] << sepchar;
-                    os << path_.width()[pr] << sepchar;
-                    os << path_.grid()[pr] << sepchar;
+                    os << sepchar << path_.integrand(pr);
+                    os << sepchar << path_.width(pr);
+                    os << sepchar << path_.grid(pr);
                 } else {
-                    for (int i = 0; i != 3; ++i)
-                        os << nachar << sepchar;
+                    os << sepchar << nachar;
+                    os << sepchar << nachar;
+                    os << sepchar << nachar;
                 }
             }
+
             if (print_monitor) {
                 unsigned mm = 0;
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
-                    long mr = mmask[mm][iter];
-                    unsigned md = m->second.dim();
+                    long mr = monitor_mask[mm][iter];
                     if (mr >= 0) {
-                        for (unsigned d = 0; d != md; ++d)
-                            os << m->second.record(d)[mr] << sepchar;
+                        for (unsigned d = 0; d != m->second.dim(); ++d)
+                            os << sepchar << m->second.record(d, mr);
                     } else {
-                        for (unsigned d = 0; d != md; ++d)
-                            os << nachar << sepchar;
+                        for (unsigned d = 0; d != m->second.dim(); ++d)
+                            os << sepchar << nachar;
                     }
                     ++mm;
                 }
             }
+
             if (iter + 1 < iter_size())
                 os << '\n';
         }
@@ -537,7 +540,7 @@ class Sampler
 
     init_type init_;
     move_queue_type move_queue_;
-    move_queue_type mcmc_queue_;
+    mcmc_queue_type mcmc_queue_;
 
     double threshold_;
 
@@ -601,9 +604,8 @@ class Sampler
 /// \param sampler The Sampler to be printed
 ///
 /// \note This is the same as <tt>sampler.print(os)</tt>
-template<typename CharT, typename Traits, typename T>
-std::basic_ostream<CharT, Traits> &operator<< (
-        std::basic_ostream<CharT, Traits> &os, const vsmc::Sampler<T> &sampler)
+template<typename OutputStream, typename T>
+OutputStream &operator<< (OutputStream &os, const vsmc::Sampler<T> &sampler)
 {
     sampler.print(os, true);
     return os;

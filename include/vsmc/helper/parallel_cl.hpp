@@ -74,12 +74,7 @@ class GetHostPtr
 ///
 /// \tparam Dim The dimension of the state parameter vector
 /// \tparam T The type of the value of the state parameter vector The default
-/// \tparam Timer class The timer used for profiling run_parallel().
-/// The default is NullTimer, which does nothing but provide the compatible
-/// inteferce.  Timer::start() and Timer::stop() are called automatically
-/// when entering and exiting run_parallel(). This shall provide how much time
-/// are spent on the parallel code (plus a small overhead of scheduling).
-template <unsigned Dim, typename T, typename Timer>
+template <unsigned Dim, typename T>
 class StateCL
 {
     public :
@@ -89,9 +84,6 @@ class StateCL
 
     /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
-
-    /// The type of timer
-    typedef Timer timer_type;
 
     explicit StateCL (size_type N) :
         dim_(Dim), size_(N), local_size_(0),
@@ -453,7 +445,6 @@ class StateCL
 
     /// \brief Create a device buffer with given number of elements and type
     ///
-    /// \tparam CLType An OpenCL type
     /// \param num The number of elements
     template<typename CLType>
     cl::Buffer create_buffer (size_type num) const
@@ -465,8 +456,6 @@ class StateCL
 
     /// \brief Create a device buffer with input from host iterators
     ///
-    /// \tparam CLType An OpenCL Type
-    /// \tparam InputIter The type of input iterator reading the host data
     /// \param first The begin of the input
     /// \param last The end of the input
     template<typename CLType, typename InputIter>
@@ -488,8 +477,6 @@ class StateCL
 
     /// \brief Read a device buffer into a host iterator
     ///
-    /// \tparam CLType An OpenCL Type
-    /// \tparam OutputIter The type of output iterator writing the host data
     /// \param buf The device buffer to be read
     /// \param num The number of elements in the device buffer
     /// \param first The begin of the output
@@ -501,7 +488,6 @@ class StateCL
 
         void *host_ptr = internal::GetHostPtr<CLType, OutputIter>::get(first);
         command_queue_.finish();
-        timer_read_buffer_.start();
         if (host_ptr) {
             command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
                     host_ptr);
@@ -511,13 +497,10 @@ class StateCL
                     sizeof(CLType) * num, (void *) temp);
             std::copy(temp, temp + num, first);
         }
-        timer_read_buffer_.stop();
     }
 
     /// \brief Write to a device buffer from a host iterator
     ///
-    /// \tparam CLType An OpenCL Type
-    /// \tparam InputIter The type of input iterator reading the host data
     /// \param buf The device buffer to be write
     /// \param num The number of elements in the device buffer
     /// \param first The begin of the input
@@ -529,7 +512,6 @@ class StateCL
 
         void *host_ptr = internal::GetHostPtr<CLType, InputIter>::get(first);
         command_queue_.finish();
-        timer_write_buffer_.start();
         if (host_ptr) {
             command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
                     host_ptr);
@@ -539,7 +521,6 @@ class StateCL
             command_queue_.enqueueWriteBuffer(buf, 1, 0,
                     sizeof(CLType) * num, (void *) temp);
         }
-        timer_write_buffer_.stop();
     }
 
     /// \brief Create a kernel from a given name
@@ -566,26 +547,9 @@ class StateCL
     void run_parallel (const cl::Kernel &ker) const
     {
         command_queue_.finish();
-        timer_.start();
         command_queue_.enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
         command_queue_.finish();
-        timer_.stop();
-    }
-
-    const timer_type &timer () const
-    {
-        return timer_;
-    }
-
-    const timer_type &timer_read_buffer () const
-    {
-        return timer_read_buffer_;
-    }
-
-    const timer_type &timer_write_buffer () const
-    {
-        return timer_write_buffer_;
     }
 
     template<typename IntType>
@@ -638,10 +602,6 @@ class StateCL
 
     cl::Buffer copy_device_;
 
-    timer_type timer_;
-    timer_type timer_read_buffer_;
-    timer_type timer_write_buffer_;
-
     void setup_buffer ()
     {
         state_device_  = create_buffer<T>(dim_ * size_);
@@ -656,10 +616,10 @@ class StateCL
     /// set or with a multiple of Dim, after a few times (usually after the
     /// initialization), the memory will not be needed to expand anymore
 
-    template <typename HostType>
-    HostType *read_buffer_pool (size_type num) const
+    template <typename CLType>
+    CLType *read_buffer_pool (size_type num) const
     {
-        size_type new_bytes = num * sizeof(HostType);
+        size_type new_bytes = num * sizeof(CLType);
         if (new_bytes > read_buffer_pool_bytes_) {
             read_buffer_pool_bytes_ = new_bytes;
             std::free(read_buffer_pool_);
@@ -668,13 +628,13 @@ class StateCL
                 throw std::bad_alloc();
         }
 
-        return reinterpret_cast<HostType *>(read_buffer_pool_);
+        return reinterpret_cast<CLType *>(read_buffer_pool_);
     }
 
-    template <typename HostType>
-    HostType *write_buffer_pool (size_type num) const
+    template <typename CLType>
+    CLType *write_buffer_pool (size_type num) const
     {
-        size_type new_bytes = num * sizeof(HostType);
+        size_type new_bytes = num * sizeof(CLType);
         if (new_bytes > write_buffer_pool_bytes_) {
             write_buffer_pool_bytes_ = new_bytes;
             std::free(write_buffer_pool_);
@@ -683,7 +643,7 @@ class StateCL
                 throw std::bad_alloc();
         }
 
-        return reinterpret_cast<HostType *>(write_buffer_pool_);
+        return reinterpret_cast<CLType *>(write_buffer_pool_);
     }
 }; // class StateCL
 

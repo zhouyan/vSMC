@@ -1,4 +1,4 @@
-#include <vsmc/helper/timer/chrono_timer.hpp>
+#include <vsmc/utility/timer/chrono_timer.hpp>
 
 int main ()
 {

@@ -21,18 +21,6 @@ class Path
     typedef cxx11::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;
 
-    /// The type of the index vector
-    typedef std::vector<unsigned> index_type;
-
-    /// The type of the integrand vector
-    typedef std::vector<double> integrand_type;
-
-    /// The type of the width vector
-    typedef std::vector<double> width_type;
-
-    /// The type of the grid vector
-    typedef std::vector<double> grid_type;
-
     /// \brief Construct a Path with an evaluation function
     ///
     /// \param eval The functor used to compute the integrands
@@ -73,56 +61,88 @@ class Path
         return bool(eval_);
     }
 
-    /// Iteration index
-    const index_type &index () const
+    unsigned index (unsigned iter) const
     {
-        return index_;
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Path::index** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return index_[iter];
     }
 
-    /// Record of path sampling integrands
-    const integrand_type &integrand () const
+    double integrand (unsigned iter) const
     {
-        return integrand_;
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Path::integrand** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return integrand_[iter];
     }
 
-    /// Record of path sampling width
-    const width_type &width () const
+    double width (unsigned iter) const
     {
-        return width_;
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Path::width** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return width_[iter];
     }
 
-    /// Record of path sampling grid (accumulated width)
-    const grid_type &grid () const
+    double grid (unsigned iter) const
     {
-        return grid_;
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Path::grid** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return grid_[iter];
     }
 
-    /// Read only access to iteration index
+    /// \brief Read only access to iteration index
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_index (OutputIter first) const
+    OutputIter read_index (OutputIter first) const
     {
-        std::copy(index_.begin(), index_.end(), first);
+        return std::copy(index_.begin(), index_.end(), first);
     }
 
-    /// Read only access to iteration integrand
+    /// \brief Read only access to iteration integrand
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_integrand (OutputIter first) const
+    OutputIter read_integrand (OutputIter first) const
     {
-        std::copy(integrand_.begin(), integrand_.end(), first);
+        return std::copy(integrand_.begin(), integrand_.end(), first);
     }
 
-    /// Read only access to iteration width
+    /// \brief Read only access to iteration width
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_width (OutputIter first) const
+    OutputIter read_width (OutputIter first) const
     {
-        std::copy(width_.begin(), width_.end(), first);
+        return std::copy(width_.begin(), width_.end(), first);
     }
 
-    /// Read only access to iteration grid
+    /// \brief Read only access to iteration grid
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_grid (OutputIter first) const
+    OutputIter read_grid (OutputIter first) const
     {
-        std::copy(grid_.begin(), grid_.end(), first);
+        return std::copy(grid_.begin(), grid_.end(), first);
     }
 
     /// Set the evaluation functor
@@ -182,10 +202,10 @@ class Path
     std::vector<double> buffer_;
     std::vector<double> weight_;
     eval_type eval_;
-    index_type index_;
-    integrand_type integrand_;
-    width_type width_;
-    grid_type grid_;
+    std::vector<unsigned> index_;
+    std::vector<double> integrand_;
+    std::vector<double> width_;
+    std::vector<double> grid_;
 }; // class PathSampling
 
 } // namespace vsmc

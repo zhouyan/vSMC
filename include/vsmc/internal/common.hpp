@@ -11,6 +11,7 @@
 #include <limits>
 #include <numeric>
 
+#include <deque>
 #include <map>
 #include <string>
 #include <vector>
@@ -29,7 +30,6 @@
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
-#include <vsmc/helper/timer/null_timer.hpp>
 
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)
@@ -113,6 +113,8 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 namespace vsmc {
 
 enum {Dynamic};
+
+enum MatrixOrder {ColumnMajor, RowMajor};
 
 template <bool> class StaticAssert {};
 
