@@ -61,6 +61,38 @@ class Path
         return bool(eval_);
     }
 
+    unsigned index (unsigned iter) const
+    {
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Path::index** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+        return index_[iter];
+    }
+
+    double integrand (unsigned iter) const
+    {
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Path::integrand** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+        return integrand_[iter];
+    }
+
+    double width (unsigned iter) const
+    {
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Path::width** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+        return width_[iter];
+    }
+
+    double grid (unsigned iter) const
+    {
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Path::grid** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+        return grid_[iter];
+    }
+
     /// Read only access to iteration index
     template <typename OutputIter>
     void read_index (OutputIter first) const
