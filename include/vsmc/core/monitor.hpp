@@ -132,7 +132,7 @@ class Monitor
         return index_[iter];
     }
 
-    unsigned record (unsigned id, unsigned iter) const
+    double record (unsigned id, unsigned iter) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
                 ("CALL **Monitor::record** WITH AN INVALID "
