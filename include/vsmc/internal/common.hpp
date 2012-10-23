@@ -11,6 +11,7 @@
 #include <limits>
 #include <numeric>
 
+#include <deque>
 #include <map>
 #include <string>
 #include <vector>

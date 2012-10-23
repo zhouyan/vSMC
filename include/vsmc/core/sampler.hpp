@@ -40,7 +40,7 @@ class Sampler
     typedef move_type mcmc_type;
 
     /// The type of the movement queue
-    typedef std::vector<move_type> move_queue_type;
+    typedef std::deque<move_type> move_queue_type;
 
     /// An alias to move_queue_type
     typedef move_queue_type mcmc_queue_type;
