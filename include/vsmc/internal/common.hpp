@@ -114,6 +114,8 @@ namespace vsmc {
 
 enum {Dynamic};
 
+enum MatrixOrder {ColumnMajor, RowMajor};
+
 template <bool> class StaticAssert {};
 
 template <>

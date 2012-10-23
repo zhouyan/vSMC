@@ -171,6 +171,19 @@ class Monitor
         std::copy(record_[id].begin(), record_[id].end(), first);
     }
 
+    template <typename OutputIter>
+    void read_record (MatrixOrder order, OutputIter first) const
+    {
+        if (order == ColumnMajor)
+            for (unsigned d = 0; d != dim_; ++d)
+                first = std::copy(record_[d].begin(), record_[d].end(), first);
+
+        if (order == RowMajor)
+            for (unsigned d = 0; d != dim_; ++d)
+                for (unsigned iter = 0; iter != iter_size(); ++iter)
+                    *first++ = record(d, iter);
+    }
+
     /// Set a new evaluation functor
     void set_eval (const eval_type &new_eval)
     {
