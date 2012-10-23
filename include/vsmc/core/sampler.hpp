@@ -412,8 +412,8 @@ class Sampler
         std::vector<double> acc;
         unsigned accd = 0;
         for (unsigned iter = 0; iter != iter_size(); ++iter) {
-            accd = std::max(accd, static_cast<unsigned>(
-                        accept_history_[iter].size()));
+            accd = std::max(
+                    accd, static_cast<unsigned>(accept_history_[iter].size()));
         }
         bool print_accept = accd > 0 && iter_size() > 0;
 
