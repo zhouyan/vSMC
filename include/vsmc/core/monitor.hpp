@@ -77,12 +77,6 @@ class Monitor
     /// The type of the GEMV functor
     typedef typename GEMVTypeTrait<T>::type gemv_type;
 
-    /// The type of the index vector
-    typedef std::vector<unsigned> index_type;
-
-    /// The type of the record vector
-    typedef std::vector<std::vector<double> > record_type;
-
     /// \brief Construct a Monitor with an evaluation functor
     ///
     /// \param dim The dimension of the monitor, i.e., the number of variables
@@ -129,33 +123,11 @@ class Monitor
         return bool(eval_);
     }
 
-    /// Iteration index
-    const index_type &index () const
-    {
-        return index_;
-    }
-
     /// Read only access to iteration index
     template <typename OutputIter>
     void read_index (OutputIter first) const
     {
         std::copy(index_.begin(), index_.end(), first);
-    }
-
-    /// \brief Record of the importance sampling integration
-    ///
-    /// \note record()[c][r] will be the r'th record of the c'th variable
-    const record_type &record () const
-    {
-        return record_;
-    }
-
-    /// \brief Record of a specific variable
-    ///
-    /// \param id The id the variable starting with zero
-    const record_type::value_type &record (unsigned id) const
-    {
-        return record_[id];
     }
 
     /// \brief Read only access to record of importance sampling integration
@@ -242,7 +214,7 @@ class Monitor
     void clear ()
     {
         index_.clear();
-        for (record_type::iterator r = record_.begin();
+        for (std::vector<std::vector<double> >::iterator r = record_.begin();
                 r != record_.end(); ++r) {
             r->clear();
         }
@@ -255,8 +227,8 @@ class Monitor
     std::vector<double> weight_;
     unsigned dim_;
     eval_type eval_;
-    index_type index_;
-    record_type record_;
+    std::vector<unsigned> index_;
+    std::vector<std::vector<double> > record_;
 
     gemv_type gemv_;
 }; // class Monitor
