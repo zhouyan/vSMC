@@ -272,7 +272,7 @@ class Sampler
             ++iter_num_;
             unsigned ia = 0;
             std::vector<unsigned>
-                acc(0, move_queue_.size() + mcmc_queue_.size());
+                acc(move_queue_.size() + mcmc_queue_.size(), 0);
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
