@@ -156,20 +156,6 @@ class Monitor
         return std::copy(index_.begin(), index_.end(), first);
     }
 
-    /// \brief Read only access to record of all variables
-    ///
-    /// \param first A pointer to an array of the beginning of the destination
-    /// range. For example, say \c OutpuIiter is \c double \c *, then
-    /// first[c][r] will be the r'th record of the c'th variable. In general,
-    /// first[c] will be the begin of the reading of the record of the c'th
-    /// variable.
-    template <typename OutputIter>
-    void read_record (OutputIter *first) const
-    {
-        for (unsigned d = 0; d != dim_; ++d)
-            std::copy(record_[d].begin(), record_[d].end(), first[d]);
-    }
-
     /// \brief Read only access to record of a specific variable
     ///
     /// \param id The ID of the variable, 0 to dim() - 1
@@ -185,7 +171,23 @@ class Monitor
 
     /// \brief Read only access to record of all variables
     ///
-    /// \param order Either vsmc::ColumnMajor or vsmc::RowMajor
+    /// \param first A pointer to an array of the beginning of the destination
+    /// range. For example, say \c OutpuIiter is \c double \c *, then
+    /// first[c][r] will be the r'th record of the c'th variable. In general,
+    /// first[c] will be the begin of the reading of the record of the c'th
+    /// variable.
+    template <typename OutputIter>
+    void read_record_matrix (OutputIter *first) const
+    {
+        for (unsigned d = 0; d != dim_; ++d)
+            std::copy(record_[d].begin(), record_[d].end(), first[d]);
+    }
+
+    /// \brief Read only access to record of all variables
+    ///
+    /// \param order Either vsmc::ColumnMajor or vsmc::RowMajor. With any other
+    /// value, this method does nothing and simply return the original \c
+    /// first. In debug mode an assert also will be issued.
     /// \param first The beginning of the destination range
     ///
     /// \return Output iterator to the element in the destination range, one
@@ -193,8 +195,12 @@ class Monitor
     ///
     /// \note The record is considered as a iter_size() by dim() matrix
     template <typename OutputIter>
-    OutputIter read_record (MatrixOrder order, OutputIter first) const
+    OutputIter read_record_matrix (MatrixOrder order, OutputIter first) const
     {
+        VSMC_RUNTIME_ASSERT((order == ColumnMajor || order == RowMajor),
+                "CALL **Monitor::read_record_matrix** with and INVALID "
+                "MatrixOrder");
+
         if (order == ColumnMajor)
             for (unsigned d = 0; d != dim_; ++d)
                 first = std::copy(record_[d].begin(), record_[d].end(), first);
