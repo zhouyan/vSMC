@@ -144,19 +144,25 @@ class Monitor
         return record_[id][iter];
     }
 
-    /// Read only access to iteration index
+    /// \brief Read only access to iteration index
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_index (OutputIter first) const
+    OutputIter read_index (OutputIter first) const
     {
-        std::copy(index_.begin(), index_.end(), first);
+        return std::copy(index_.begin(), index_.end(), first);
     }
 
-    /// \brief Read only access to record of importance sampling integration
+    /// \brief Read only access to record of all variables
     ///
-    /// \param first A pointer to an array of begins of output.
-    /// For example, say \c OutpuIiter is \c double \c *, then first[c][r]
-    /// will be the r'th record of the c'th variable. In general, first[c]
-    /// will be the begin of the reading of the record of the c'th variable.
+    /// \param first A pointer to an array of the beginning of the destination
+    /// range. For example, say \c OutpuIiter is \c double \c *, then
+    /// first[c][r] will be the r'th record of the c'th variable. In general,
+    /// first[c] will be the begin of the reading of the record of the c'th
+    /// variable.
     template <typename OutputIter>
     void read_record (OutputIter *first) const
     {
@@ -164,15 +170,30 @@ class Monitor
             std::copy(record_[d].begin(), record_[d].end(), first[d]);
     }
 
-    /// Read only access to record of a specific variable
+    /// \brief Read only access to record of a specific variable
+    ///
+    /// \param id The ID of the variable, 0 to dim() - 1
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_record (unsigned id, OutputIter first) const
+    OutputIter read_record (unsigned id, OutputIter first) const
     {
-        std::copy(record_[id].begin(), record_[id].end(), first);
+        return std::copy(record_[id].begin(), record_[id].end(), first);
     }
 
+    /// \brief Read only access to record of all variables
+    ///
+    /// \param order Either vsmc::ColumnMajor or vsmc::RowMajor
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
+    ///
+    /// \note The record is considered as a iter_size() by dim() matrix
     template <typename OutputIter>
-    void read_record (MatrixOrder order, OutputIter first) const
+    OutputIter read_record (MatrixOrder order, OutputIter first) const
     {
         if (order == ColumnMajor)
             for (unsigned d = 0; d != dim_; ++d)
@@ -182,6 +203,8 @@ class Monitor
             for (unsigned d = 0; d != dim_; ++d)
                 for (unsigned iter = 0; iter != iter_size(); ++iter)
                     *first++ = record(d, iter);
+
+        return first;
     }
 
     /// Set a new evaluation functor

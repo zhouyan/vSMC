@@ -17,18 +17,28 @@ class WeightSetBase
     explicit WeightSetBase (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
-    /// Read only access to the weights
+    /// \brief Read only access to the weights
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_weight (OutputIter first) const
+    OutputIter read_weight (OutputIter first) const
     {
-        std::copy(weight_.begin(), weight_.end(), first);
+        return std::copy(weight_.begin(), weight_.end(), first);
     }
 
-    /// Read only access to the log weights
+    /// \brief Read only access to the log weights
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_log_weight (OutputIter first) const
+    OutputIter read_log_weight (OutputIter first) const
     {
-        std::copy(log_weight_.begin(), log_weight_.end(), first);
+        return std::copy(log_weight_.begin(), log_weight_.end(), first);
     }
 
     /// Read only access to the weight of a particle

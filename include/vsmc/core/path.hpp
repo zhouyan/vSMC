@@ -97,32 +97,52 @@ class Path
         return grid_[iter];
     }
 
-    /// Read only access to iteration index
+    /// \brief Read only access to iteration index
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_index (OutputIter first) const
+    OutputIter read_index (OutputIter first) const
     {
-        std::copy(index_.begin(), index_.end(), first);
+        return std::copy(index_.begin(), index_.end(), first);
     }
 
-    /// Read only access to iteration integrand
+    /// \brief Read only access to iteration integrand
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_integrand (OutputIter first) const
+    OutputIter read_integrand (OutputIter first) const
     {
-        std::copy(integrand_.begin(), integrand_.end(), first);
+        return std::copy(integrand_.begin(), integrand_.end(), first);
     }
 
-    /// Read only access to iteration width
+    /// \brief Read only access to iteration width
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_width (OutputIter first) const
+    OutputIter read_width (OutputIter first) const
     {
-        std::copy(width_.begin(), width_.end(), first);
+        return std::copy(width_.begin(), width_.end(), first);
     }
 
-    /// Read only access to iteration grid
+    /// \brief Read only access to iteration grid
+    ///
+    /// \param first The beginning of the destination range
+    ///
+    /// \return Output iterator to the element in the destination range, one
+    /// past the last element copied
     template <typename OutputIter>
-    void read_grid (OutputIter first) const
+    OutputIter read_grid (OutputIter first) const
     {
-        std::copy(grid_.begin(), grid_.end(), first);
+        return std::copy(grid_.begin(), grid_.end(), first);
     }
 
     /// Set the evaluation functor
