@@ -150,21 +150,6 @@ class Monitor
         std::copy(record_[id].begin(), record_[id].end(), first);
     }
 
-    /// Print the index and record matrix
-    template<typename OutputStream>
-    void print (OutputStream &os = std::cout)
-    {
-        const char sep = '\t';
-
-        for (unsigned i = 0; i != iter_size(); ++i) {
-            os << index_[i] << sep;
-            for (unsigned d = 0; d != dim_; ++d)
-                os << record_[d][i] << sep;
-            if (i + 1 < iter_size())
-                os << '\n';
-        }
-    }
-
     /// Set a new evaluation functor
     void set_eval (const eval_type &new_eval)
     {
@@ -232,20 +217,6 @@ class Monitor
 
     gemv_type gemv_;
 }; // class Monitor
-
-/// \brief Print the Monitor
-/// \ingroup Core
-///
-/// \param os The ostream to which the contents are printed
-/// \param monitor The Monitor to be printed
-///
-/// \note This is the same as <tt>monitor.print(os)</tt>
-template<typename OutputStream, typename T>
-OutputStream &operator<< (OutputStream &os, const vsmc::Monitor<T> &monitor)
-{
-    monitor.print(os);
-    return os;
-}
 
 } // namespace vsmc
 
