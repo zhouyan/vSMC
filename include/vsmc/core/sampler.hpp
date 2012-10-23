@@ -419,26 +419,11 @@ class Sampler
 
         // Path sampling
         print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
-
-        std::vector<long>     path_mask;
-        std::vector<unsigned> path_index;
-        std::vector<double>   path_integrand;
-        std::vector<double>   path_width;
-        std::vector<double>   path_grid;
+        std::vector<long> path_mask;
         if (print_path) {
-            path_index    .resize(path_.iter_size());
-            path_integrand.resize(path_.iter_size());
-            path_width    .resize(path_.iter_size());
-            path_grid     .resize(path_.iter_size());
-
-            path_.read_index    (path_index.begin());
-            path_.read_integrand(path_integrand.begin());
-            path_.read_width    (path_width.begin());
-            path_.read_grid     (path_grid.begin());
-
             path_mask.resize(iter_size(), -1);
             for (unsigned d = 0; d != path_.iter_size(); ++d)
-                path_mask[path_index[d]] = d;
+                path_mask[path_.index(d)] = d;
         }
 
         // Monitors
@@ -447,34 +432,18 @@ class Sampler
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             mond += m->second.dim();
-            mi = std::max(
-                    mi, static_cast<unsigned>(m->second.iter_size()));
+            mi = std::max(mi, static_cast<unsigned>(m->second.iter_size()));
         }
         print_monitor = print_monitor && mond > 0 && mi > 0 && iter_size() > 0;
-
-        std::vector<std::vector<long> >                 monitor_mask;
-        std::vector<std::vector<unsigned> >             monitor_index;
-        std::vector<std::vector<std::vector<double> > > monitor_record;
+        std::vector<std::vector<long> > monitor_mask;
         if (print_monitor) {
-            monitor_mask  .resize(monitor_.size());
-            monitor_index .resize(monitor_.size());
-            monitor_record.resize(monitor_.size());
-
+            monitor_mask.resize(monitor_.size());
             unsigned mm = 0;
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
-                monitor_index[mm].resize(m->second.iter_size());
-                m->second.read_index(monitor_index[mm].begin());
-
-                monitor_record[mm].resize(m->second.dim());
-                for (unsigned d = 0; d != m->second.dim(); ++d) {
-                    monitor_record[mm][d].resize(m->second.iter_size());
-                    m->second.read_record(d, monitor_record[mm][d].begin());
-                }
-
                 monitor_mask[mm].resize(iter_size(), -1);
                 for (unsigned d = 0; d != m->second.iter_size(); ++d)
-                    monitor_mask[mm][monitor_index[mm][d]] = d;
+                    monitor_mask[mm][m->second.index(d)] = d;
                 ++mm;
             }
         }
@@ -493,10 +462,9 @@ class Sampler
                 }
             }
             if (print_path) {
-                os
-                    << "Path.Integrand" << sepchar
-                    << "Path.Width" << sepchar
-                    << "Path.Grid" << sepchar;
+                os << "Path.Integrand" << sepchar;
+                os << "Path.Width"     << sepchar;
+                os << "Path.Grid"      << sepchar;
             }
             if (print_monitor) {
                 for (typename monitor_map_type::const_iterator
@@ -534,9 +502,9 @@ class Sampler
             if (print_path) {
                 long pr = path_mask[iter];
                 if (pr >= 0) {
-                    os << path_integrand[pr] << sepchar;
-                    os << path_width[pr]     << sepchar;
-                    os << path_grid[pr]      << sepchar;
+                    os << path_.integrand(pr) << sepchar;
+                    os << path_.width(pr)     << sepchar;
+                    os << path_.grid(pr)      << sepchar;
                 } else {
                     os << nachar << sepchar;
                     os << nachar << sepchar;
@@ -551,7 +519,7 @@ class Sampler
                     long mr = monitor_mask[mm][iter];
                     if (mr >= 0) {
                         for (unsigned d = 0; d != m->second.dim(); ++d)
-                            os << monitor_record[mm][d][mr] << sepchar;
+                            os << m->second.record(d, mr) << sepchar;
                     } else {
                         for (unsigned d = 0; d != m->second.dim(); ++d)
                             os << nachar << sepchar;
