@@ -445,7 +445,6 @@ class StateCL
 
     /// \brief Create a device buffer with given number of elements and type
     ///
-    /// \tparam CLType An OpenCL type
     /// \param num The number of elements
     template<typename CLType>
     cl::Buffer create_buffer (size_type num) const
@@ -457,8 +456,6 @@ class StateCL
 
     /// \brief Create a device buffer with input from host iterators
     ///
-    /// \tparam CLType An OpenCL Type
-    /// \tparam InputIter The type of input iterator reading the host data
     /// \param first The begin of the input
     /// \param last The end of the input
     template<typename CLType, typename InputIter>
@@ -480,8 +477,6 @@ class StateCL
 
     /// \brief Read a device buffer into a host iterator
     ///
-    /// \tparam CLType An OpenCL Type
-    /// \tparam OutputIter The type of output iterator writing the host data
     /// \param buf The device buffer to be read
     /// \param num The number of elements in the device buffer
     /// \param first The begin of the output
@@ -506,8 +501,6 @@ class StateCL
 
     /// \brief Write to a device buffer from a host iterator
     ///
-    /// \tparam CLType An OpenCL Type
-    /// \tparam InputIter The type of input iterator reading the host data
     /// \param buf The device buffer to be write
     /// \param num The number of elements in the device buffer
     /// \param first The begin of the input
@@ -623,10 +616,10 @@ class StateCL
     /// set or with a multiple of Dim, after a few times (usually after the
     /// initialization), the memory will not be needed to expand anymore
 
-    template <typename HostType>
-    HostType *read_buffer_pool (size_type num) const
+    template <typename CLType>
+    CLType *read_buffer_pool (size_type num) const
     {
-        size_type new_bytes = num * sizeof(HostType);
+        size_type new_bytes = num * sizeof(CLType);
         if (new_bytes > read_buffer_pool_bytes_) {
             read_buffer_pool_bytes_ = new_bytes;
             std::free(read_buffer_pool_);
@@ -635,13 +628,13 @@ class StateCL
                 throw std::bad_alloc();
         }
 
-        return reinterpret_cast<HostType *>(read_buffer_pool_);
+        return reinterpret_cast<CLType *>(read_buffer_pool_);
     }
 
-    template <typename HostType>
-    HostType *write_buffer_pool (size_type num) const
+    template <typename CLType>
+    CLType *write_buffer_pool (size_type num) const
     {
-        size_type new_bytes = num * sizeof(HostType);
+        size_type new_bytes = num * sizeof(CLType);
         if (new_bytes > write_buffer_pool_bytes_) {
             write_buffer_pool_bytes_ = new_bytes;
             std::free(write_buffer_pool_);
@@ -650,7 +643,7 @@ class StateCL
                 throw std::bad_alloc();
         }
 
-        return reinterpret_cast<HostType *>(write_buffer_pool_);
+        return reinterpret_cast<CLType *>(write_buffer_pool_);
     }
 }; // class StateCL
 
