@@ -66,6 +66,7 @@ class Path
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Path::index** WITH AN INVALID "
                  "ITERATION NUMBER"));
+
         return index_[iter];
     }
 
@@ -74,6 +75,7 @@ class Path
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Path::integrand** WITH AN INVALID "
                  "ITERATION NUMBER"));
+
         return integrand_[iter];
     }
 
@@ -82,6 +84,7 @@ class Path
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Path::width** WITH AN INVALID "
                  "ITERATION NUMBER"));
+
         return width_[iter];
     }
 
@@ -90,6 +93,7 @@ class Path
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Path::grid** WITH AN INVALID "
                  "ITERATION NUMBER"));
+
         return grid_[iter];
     }
 
