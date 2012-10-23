@@ -151,8 +151,8 @@ class Monitor
     }
 
     /// Print the index and record matrix
-    template<typename CharT, typename Traits>
-    void print (std::basic_ostream<CharT, Traits> &os = std::cout)
+    template<typename OutputStream>
+    void print (OutputStream &os = std::cout)
     {
         const char sep = '\t';
 
@@ -240,9 +240,8 @@ class Monitor
 /// \param monitor The Monitor to be printed
 ///
 /// \note This is the same as <tt>monitor.print(os)</tt>
-template<typename CharT, typename Traits, typename T>
-std::basic_ostream<CharT, Traits> &operator<< (
-        std::basic_ostream<CharT, Traits> &os, const vsmc::Monitor<T> &monitor)
+template<typename OutputStream, typename T>
+OutputStream &operator<< (OutputStream &os, const vsmc::Monitor<T> &monitor)
 {
     monitor.print(os);
     return os;

@@ -401,8 +401,8 @@ class Sampler
     /// \note \c print_path and \c print_monitor are only used to hint the
     /// print process. If there is no record at all, then they won't be printed
     /// even set to \b true.
-    template<typename CharT, typename Traits>
-    void print (std::basic_ostream<CharT, Traits> &os = std::cout,
+    template<typename OutputStream>
+    void print (OutputStream &os = std::cout,
             bool print_header = true,
             bool print_path = true, bool print_monitor = true,
             bool print_id = false, int id = 0,
@@ -638,9 +638,8 @@ class Sampler
 /// \param sampler The Sampler to be printed
 ///
 /// \note This is the same as <tt>sampler.print(os)</tt>
-template<typename CharT, typename Traits, typename T>
-std::basic_ostream<CharT, Traits> &operator<< (
-        std::basic_ostream<CharT, Traits> &os, const vsmc::Sampler<T> &sampler)
+template<typename OutputStream, typename T>
+OutputStream &operator<< (OutputStream &os, const vsmc::Sampler<T> &sampler)
 {
     sampler.print(os, true);
     return os;
