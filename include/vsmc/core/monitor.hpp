@@ -123,6 +123,27 @@ class Monitor
         return bool(eval_);
     }
 
+    unsigned index (unsigned iter) const
+    {
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Monitor::index** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return index_[iter];
+    }
+
+    unsigned record (unsigned id, unsigned iter) const
+    {
+        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
+                ("CALL **Monitor::record** WITH AN INVALID "
+                 "ID NUMBER"));
+        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
+                ("CALL **Monitor::record** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return record_[id][iter];
+    }
+
     /// Read only access to iteration index
     template <typename OutputIter>
     void read_index (OutputIter first) const
