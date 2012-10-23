@@ -405,8 +405,7 @@ class Sampler
     void print (OutputStream &os = std::cout,
             bool print_header = true,
             bool print_path = true, bool print_monitor = true,
-            bool print_id = false, int id = 0,
-            char sepchar = ',', char nachar = '\0') const
+            int sampler_id = 0, char sepchar = ',', char nachar = '\0') const
     {
         // Accept count
         std::vector<double> acc;
@@ -450,30 +449,31 @@ class Sampler
 
         // Print header
         if (print_header) {
-            if (print_id)
-                os << "Sampler.ID" << sepchar;
-            os << "Iter" << sepchar << "ESS" << sepchar << "ResSam" << sepchar;
+            os << "Sampler.ID";
+            os << sepchar << "Iter";
+            os << sepchar << "ESS";
+            os << sepchar << "ResSam";
             if (print_accept) {
                 if (accd == 1) {
-                    os << "Accept" << sepchar;
+                    os << sepchar << "Accept";
                 } else {
                     for (unsigned d = 0; d != accd; ++d)
-                        os << "Accept." << d + 1 << sepchar;
+                        os << sepchar << "Accept." << d + 1;
                 }
             }
             if (print_path) {
-                os << "Path.Integrand" << sepchar;
-                os << "Path.Width"     << sepchar;
-                os << "Path.Grid"      << sepchar;
+                os << sepchar << "Path.Integrand";
+                os << sepchar << "Path.Width";
+                os << sepchar << "Path.Grid";
             }
             if (print_monitor) {
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
                     if (m->second.dim() == 1) {
-                        os << m->first << sepchar;
+                        os << sepchar << m->first;
                     } else {
                         for (unsigned d = 0; d != m->second.dim(); ++d)
-                            os << m->first << '.' << d + 1 << sepchar;
+                            os << sepchar << m->first << '.' << d + 1;
                     }
                 }
             }
@@ -483,32 +483,31 @@ class Sampler
 
         // Print data
         for (unsigned iter = 0; iter != iter_size(); ++iter) {
-            if (print_id)
-                os << id << sepchar;
-            os << iter << sepchar;
-            os << ess_history_[iter] / size() << sepchar;
-            os << resampled_history_[iter] << sepchar;
+            os << sampler_id;
+            os << sepchar << iter;
+            os << sepchar << ess_history_[iter] / size();
+            os << sepchar << resampled_history_[iter];
 
             if (print_accept) {
                 for (unsigned c = 0; c != accept_history_[iter].size(); ++c)
-                    os << accept_history_[iter][c] /
-                        static_cast<double>(size()) << sepchar;
+                    os << sepchar <<
+                        accept_history_[iter][c] / static_cast<double>(size());
                 unsigned diff = static_cast<unsigned>(
                         accd - accept_history_[iter].size());
                 for (unsigned c = 0; c != diff; ++c)
-                    os << 0 << sepchar;
+                    os << sepchar << 0;
             }
 
             if (print_path) {
                 long pr = path_mask[iter];
                 if (pr >= 0) {
-                    os << path_.integrand(pr) << sepchar;
-                    os << path_.width(pr)     << sepchar;
-                    os << path_.grid(pr)      << sepchar;
+                    os << sepchar << path_.integrand(pr);
+                    os << sepchar << path_.width(pr);
+                    os << sepchar << path_.grid(pr);
                 } else {
-                    os << nachar << sepchar;
-                    os << nachar << sepchar;
-                    os << nachar << sepchar;
+                    os << sepchar << nachar;
+                    os << sepchar << nachar;
+                    os << sepchar << nachar;
                 }
             }
 
@@ -519,10 +518,10 @@ class Sampler
                     long mr = monitor_mask[mm][iter];
                     if (mr >= 0) {
                         for (unsigned d = 0; d != m->second.dim(); ++d)
-                            os << m->second.record(d, mr) << sepchar;
+                            os << sepchar << m->second.record(d, mr);
                     } else {
                         for (unsigned d = 0; d != m->second.dim(); ++d)
-                            os << nachar << sepchar;
+                            os << sepchar << nachar;
                     }
                     ++mm;
                 }
