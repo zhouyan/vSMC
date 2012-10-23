@@ -423,12 +423,26 @@ class Sampler
         // Path sampling
         std::vector<long> pmask;
         print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
+        std::vector<unsigned> path_index;
+        std::vector<double> path_integrand;
+        std::vector<double> path_width;
+        std::vector<double> path_grid;
         if (print_path) {
+            path_index.resize(path_.iter_size());
+            path_integrand.resize(path_.iter_size());
+            path_width.resize(path_.iter_size());
+            path_grid.resize(path_.iter_size());
+
+            path_.read_index(path_index.begin());
+            path_.read_integrand(path_integrand.begin());
+            path_.read_width(path_width.begin());
+            path_.read_grid(path_grid.begin());
+
             pmask.resize(iter_size());
             for (unsigned d = 0; d != iter_size(); ++d)
                 pmask[d] = -1;
             for (unsigned d = 0; d != path_.iter_size(); ++d)
-                pmask[path_.index()[d]] = d;
+                pmask[path_index[d]] = d;
         }
 
         // Monitors
@@ -506,12 +520,13 @@ class Sampler
             if (print_path) {
                 long pr = pmask[iter];
                 if (pr >= 0) {
-                    os << path_.integrand()[pr] << sepchar;
-                    os << path_.width()[pr] << sepchar;
-                    os << path_.grid()[pr] << sepchar;
+                    os << path_integrand[pr] << sepchar;
+                    os << path_width[pr] << sepchar;
+                    os << path_grid[pr] << sepchar;
                 } else {
-                    for (int i = 0; i != 3; ++i)
-                        os << nachar << sepchar;
+                    os << nachar << sepchar;
+                    os << nachar << sepchar;
+                    os << nachar << sepchar;
                 }
             }
             if (print_monitor) {

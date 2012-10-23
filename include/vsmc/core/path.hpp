@@ -21,18 +21,6 @@ class Path
     typedef cxx11::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;
 
-    /// The type of the index vector
-    typedef std::vector<unsigned> index_type;
-
-    /// The type of the integrand vector
-    typedef std::vector<double> integrand_type;
-
-    /// The type of the width vector
-    typedef std::vector<double> width_type;
-
-    /// The type of the grid vector
-    typedef std::vector<double> grid_type;
-
     /// \brief Construct a Path with an evaluation function
     ///
     /// \param eval The functor used to compute the integrands
@@ -71,30 +59,6 @@ class Path
         operator bool () const
     {
         return bool(eval_);
-    }
-
-    /// Iteration index
-    const index_type &index () const
-    {
-        return index_;
-    }
-
-    /// Record of path sampling integrands
-    const integrand_type &integrand () const
-    {
-        return integrand_;
-    }
-
-    /// Record of path sampling width
-    const width_type &width () const
-    {
-        return width_;
-    }
-
-    /// Record of path sampling grid (accumulated width)
-    const grid_type &grid () const
-    {
-        return grid_;
     }
 
     /// Read only access to iteration index
@@ -182,10 +146,10 @@ class Path
     std::vector<double> buffer_;
     std::vector<double> weight_;
     eval_type eval_;
-    index_type index_;
-    integrand_type integrand_;
-    width_type width_;
-    grid_type grid_;
+    std::vector<unsigned> index_;
+    std::vector<double> integrand_;
+    std::vector<double> width_;
+    std::vector<double> grid_;
 }; // class PathSampling
 
 } // namespace vsmc
