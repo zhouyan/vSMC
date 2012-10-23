@@ -393,8 +393,7 @@ class Sampler
     /// \param print_header Print header if \b true
     /// \param print_path Print path sampling if \b true
     /// \param print_monitor Print monitors if \b true
-    /// \param print_id Print an unique ID for this sampler if \b true
-    /// \param id The ID to be printed if \c print_id is \b true
+    /// \param sampler_id The ID to be printed if \c print_id is \b true
     /// \param sepchar The character used to seperate fields
     /// \param nachar The character used to represent missing values
     ///
