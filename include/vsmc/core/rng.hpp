@@ -92,6 +92,7 @@ class Seed
 
     Seed (const Seed &);
     Seed &operator= (const Seed &);
+    ~Seed () {};
 }; // class Seed
 
 /// \brief Sequential RNG set class
