@@ -31,6 +31,8 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
+#include <vsmc/utility/seed.hpp>
+
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)
 #else // NDEBUG
