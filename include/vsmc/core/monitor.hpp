@@ -229,7 +229,7 @@ class Monitor
     /// \pre A matrix of size Dim by N is passed to the evaluation functor used
     /// to construct this monitor or set by set_eval() as its last output
     /// parameter, where N is the number of particles. The array of matrix
-    /// elements is of row major.
+    /// elements is of column major.
     void eval (unsigned iter, const Particle<T> &particle)
     {
         VSMC_RUNTIME_ASSERT((bool(eval_)),
