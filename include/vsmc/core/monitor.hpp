@@ -32,8 +32,10 @@ class GEMVSimple
     {
         for (size_type m = 0; m != M; ++m) {
             double r = 0;
-            for (size_type n = 0; n != N; ++n)
-                r += X[n] * A[n * M + m];
+            const double *a = &A[m];
+            const double *x = X;
+            for (size_type n = 0; n != N; ++n, ++x, a += M)
+                r += (*a) * (*x);
             res[m] = r;
         }
     }
