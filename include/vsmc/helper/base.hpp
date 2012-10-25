@@ -108,6 +108,40 @@ class StateBase
         return &state_[id * dim_];
     }
 
+    template <typename OutputIter>
+    OutputIter read_state (unsigned pos, OutputIter first) const
+    {
+        const T *siter = state_() + pos;
+        for (size_type i = 0; i != size_; ++i, ++first, siter += dim_)
+            *first = *siter;
+
+        return first;
+    }
+
+    template <typename OutputIter>
+    void read_state_matrix (OutputIter *first) const
+    {
+        for (unsigned d = 0; d != dim_; ++d)
+            read_state(d, first[d]);
+    }
+
+    template <typename OutputIter>
+    OutputIter read_state_matrix (MatrixOrder order, OutputIter first) const
+    {
+        VSMC_RUNTIME_ASSERT((order == ColumnMajor || order == RowMajor),
+                "CALL **Monitor::read_record_matrix** with and INVALID "
+                "MatrixOrder");
+
+        if (order == ColumnMajor)
+            for (unsigned d = 0; d != dim_; ++d)
+                first = read_state(d, first);
+
+        if (order == RowMajor)
+            first = std::copy(state_.begin(), state_.end(), first);
+
+        return first;
+    }
+
     protected :
 
     explicit StateBase (size_type N) : size_(N), dim_(Dim), state_(N * Dim) {}
