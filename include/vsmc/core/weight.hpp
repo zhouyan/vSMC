@@ -14,9 +14,6 @@ class WeightSetBase
     /// The type of the size of the weight set
     typedef std::vector<double>::size_type size_type;
 
-    explicit WeightSetBase (size_type N) :
-        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
-
     /// \brief Read only access to the weights
     ///
     /// \param first The beginning of the destination range
@@ -110,6 +107,11 @@ class WeightSetBase
     {
         return ess_;
     }
+
+    protected :
+
+    explicit WeightSetBase (size_type N) :
+        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
     private :
 
