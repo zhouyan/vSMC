@@ -84,7 +84,7 @@ class Monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The functor used to evaluate the results
     explicit Monitor (unsigned dim = 1, const eval_type &eval = VSMC_NULLPTR) :
-        dim_(dim), eval_(eval), record_(dim) {}
+        dim_(dim), eval_(eval) {}
 
     Monitor (const Monitor<T> &other) :
         dim_(other.dim_), eval_(other.eval_),
@@ -248,16 +248,6 @@ class Monitor
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
             record_.push_back(result_[d]);
-    }
-
-    gemv_type &gemv ()
-    {
-        return gemv_;
-    }
-
-    const gemv_type &gemv () const
-    {
-        return gemv_;
     }
 
     /// \brief Clear all recorded data
