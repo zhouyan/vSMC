@@ -12,26 +12,6 @@ SET (VERSION_MAJOR 0)
 SET (VERSION_MINOR 9)
 SET (VERSION_PATCH 0)
 
-# Module path
-SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
-
-# Included scripts
-SET (Boost_NO_BOOST_CMAKE     ON)
-SET (Boost_USE_STATIC_LIBS    ON)
-SET (Boost_USE_MULTITHREADED  ON)
-SET (Boost_USE_STATIC_RUNTIME OFF)
-SET (Boost_ADDITIONAL_VERSIONS
-    "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0"
-    "1.50" "1.50.0" "1.51" "1.51.0")
-INCLUDE (FindBoost)
-INCLUDE (FindDoxygen)
-INCLUDE (FindTBB)
-INCLUDE (FindCilk)
-INCLUDE (FindOpenCL)
-INCLUDE (FindOpenMP)
-INCLUDE (FindThreads)
-INCLUDE (vSMCFunctions)
-
 # Configuration files
 SET (DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
 SET (DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
@@ -54,6 +34,7 @@ INSTALL (DIRECTORY include/vsmc/    DESTINATION ${INSTALL_INCLUDE_DIR}/vsmc
     PATTERN "*.swp"     EXCLUDE)
 
 # Documentations
+INCLUDE (FindDoxygen)
 IF (DOXYGEN_FOUND)
     ADD_CUSTOM_COMMAND (
         OUTPUT  ${PROJECT_BINARY_DIR}/doc
@@ -63,6 +44,32 @@ IF (DOXYGEN_FOUND)
         COMMAND ${DOXYGEN_EXECUTABLE} ARGS Doxyfile)
     ADD_CUSTOM_TARGET(docs DEPENDS ${PROJECT_BINARY_DIR}/doc)
 ENDIF (DOXYGEN_FOUND)
+
+OPTION (VSMC_DISABLE_TEST
+    "Disable building tests, examples and C API libraries")
+
+IF (VSMC_DISABLE_TEST)
+    RETURN ()
+ENDIF (VSMC_DISABLE_TEST)
+
+# Module path
+SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
+# Included scripts
+SET (Boost_NO_BOOST_CMAKE     ON)
+SET (Boost_USE_STATIC_LIBS    ON)
+SET (Boost_USE_MULTITHREADED  ON)
+SET (Boost_USE_STATIC_RUNTIME OFF)
+SET (Boost_ADDITIONAL_VERSIONS
+    "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0"
+    "1.50" "1.50.0" "1.51" "1.51.0")
+INCLUDE (FindBoost)
+INCLUDE (FindTBB)
+INCLUDE (FindCilk)
+INCLUDE (FindOpenCL)
+INCLUDE (FindOpenMP)
+INCLUDE (FindThreads)
+INCLUDE (vSMCFunctions)
 
 # Testing
 INCLUDE (CheckCXXSourceRuns)
