@@ -141,7 +141,7 @@ class Monitor
                 ("CALL **Monitor::record** WITH AN INVALID "
                  "ITERATION NUMBER"));
 
-        return record_[id][iter];
+        return record_[iter * dim_ + id];
     }
 
     /// \brief Read only access to iteration index
@@ -166,7 +166,11 @@ class Monitor
     template <typename OutputIter>
     OutputIter read_record (unsigned id, OutputIter first) const
     {
-        return std::copy(record_[id].begin(), record_[id].end(), first);
+        const double *riter = &record_[id];
+        for (unsigned i = 0; i != iter_size(); ++i, ++first, riter += dim_)
+            *first = *riter;
+
+        return first;
     }
 
     /// \brief Read only access to record of all variables
@@ -180,7 +184,7 @@ class Monitor
     void read_record_matrix (OutputIter *first) const
     {
         for (unsigned d = 0; d != dim_; ++d)
-            std::copy(record_[d].begin(), record_[d].end(), first[d]);
+            read_record(d, first[d]);
     }
 
     /// \brief Read only access to record of all variables
@@ -203,12 +207,10 @@ class Monitor
 
         if (order == ColumnMajor)
             for (unsigned d = 0; d != dim_; ++d)
-                first = std::copy(record_[d].begin(), record_[d].end(), first);
+                first = read_record(d, first);
 
         if (order == RowMajor)
-            for (unsigned d = 0; d != dim_; ++d)
-                for (unsigned iter = 0; iter != iter_size(); ++iter)
-                    *first++ = record(d, iter);
+            first = std::copy(record_.begin(), record_.end(), first);
 
         return first;
     }
@@ -243,7 +245,7 @@ class Monitor
 
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
-            record_[d].push_back(result_[d]);
+            record_.push_back(result_[d]);
     }
 
     gemv_type &gemv ()
@@ -262,10 +264,7 @@ class Monitor
     void clear ()
     {
         index_.clear();
-        for (std::vector<std::vector<double> >::iterator r = record_.begin();
-                r != record_.end(); ++r) {
-            r->clear();
-        }
+        record_.clear();
     }
 
     private :
@@ -276,7 +275,7 @@ class Monitor
     unsigned dim_;
     eval_type eval_;
     std::vector<unsigned> index_;
-    std::vector<std::vector<double> > record_;
+    std::vector<double> record_;
 
     gemv_type gemv_;
 }; // class Monitor
