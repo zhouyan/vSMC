@@ -17,7 +17,7 @@ class QueryCL
     ///
     /// \param os The ostream to which the contents are printed
     template<typename CharT, typename Traits>
-    static void print (std::basic_ostream<CharT, Traits> &os = std::cout)
+    static void print (std::basic_ostream<CharT, Traits> &os)
     {
         std::vector<cl::Platform> platform;
         cl::Platform::get(&platform);
