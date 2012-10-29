@@ -29,13 +29,12 @@ class WeightSetBase
     double *read_weight (double *first) const
     {
         const double *const weight_ptr = &weight_[0];
-        const std::size_t size = weight_.size();
-        if (std::abs(first - weight_ptr) > size)
-            std::memcpy(first, weight_ptr, sizeof(double) * size);
+        if (std::abs(first - weight_ptr) > size_)
+            std::memcpy(first, weight_ptr, sizeof(double) * size_);
         else
-            std::memmove(first, weight_ptr, sizeof(double) * size);
+            std::memmove(first, weight_ptr, sizeof(double) * size_);
 
-        return first + size;
+        return first + size_;
     }
 
     /// \brief Read only access to the log weights
@@ -53,13 +52,12 @@ class WeightSetBase
     double *read_log_weight (double *first) const
     {
         const double *const log_weight_ptr = &log_weight_[0];
-        const std::size_t size = log_weight_.size();
-        if (std::abs(first - log_weight_ptr) > size)
-            std::memcpy(first, log_weight_ptr, sizeof(double) * size);
+        if (std::abs(first - log_weight_ptr) > size_)
+            std::memcpy(first, log_weight_ptr, sizeof(double) * size_);
         else
-            std::memmove(first, log_weight_ptr, sizeof(double) * size);
+            std::memmove(first, log_weight_ptr, sizeof(double) * size_);
 
-        return first + size;
+        return first + size_;
     }
 
     /// Read only access to the weight of a particle
