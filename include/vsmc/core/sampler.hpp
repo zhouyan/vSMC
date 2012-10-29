@@ -45,15 +45,6 @@ class Sampler
     /// An alias to move_queue_type
     typedef move_queue_type mcmc_queue_type;
 
-    /// The type of ESS history vector
-    typedef std::vector<double> ess_history_type;
-
-    /// The type of resampling history vector
-    typedef std::vector<bool> resampled_history_type;
-
-    /// The type of accept count history vector
-    typedef std::vector<std::vector<unsigned> > accept_history_type;
-
     /// The type of Monitor map
     typedef std::map<std::string, monitor_type> monitor_map_type;
 
@@ -141,35 +132,42 @@ class Sampler
     }
 
     /// ESS history
-    const ess_history_type &ess_history () const
+    double ess_history (unsigned iter) const
     {
-        return ess_history_;
+        return ess_history_[iter];
     }
 
     /// Read ESS hisotry
     template <typename OutputIter>
-    void read_ess_history (OutputIter first) const
+    OutputIter read_ess_history (OutputIter first) const
     {
-        std::copy(ess_history_.begin(), ess_history_.end(), first);
+        return std::copy(ess_history_.begin(), ess_history_.end(), first);
     }
 
     /// Resampling history
-    const resampled_history_type &resampled_history () const
+    bool resampled_history (unsigned iter) const
     {
-        return resampled_history_;
+        return resampled_history_[iter];
     }
 
     /// Read ESS hisotry
     template <typename OutputIter>
-    void read_resampled_history (OutputIter first) const
+    OutputIter read_resampled_history (OutputIter first) const
     {
-        std::copy(resampled_history_.begin(), resampled_history_.end(), first);
+        return std::copy(resampled_history_.begin(), resampled_history_.end(),
+		first);
+    }
+
+    /// Number of moves
+    unsigned move_num (unsigned iter) const
+    {
+	return accept_history_[iter].size();
     }
 
     /// Accept count history
-    const accept_history_type &accept_history () const
+    unsigned accept_history (unsigned iter, unsigned move_num) const
     {
-        return accept_history_;
+        return accept_history_[iter][move_num];
     }
 
     /// Read and write access to the particle set
@@ -546,9 +544,9 @@ class Sampler
 
     particle_type particle_;
     unsigned iter_num_;
-    ess_history_type ess_history_;
-    resampled_history_type resampled_history_;
-    accept_history_type accept_history_;
+    std::vector<double> ess_history_;
+    std::vector<bool> resampled_history_;
+    std::vector<std::vector<unsigned> > accept_history_;
 
     monitor_map_type monitor_;
     path_type path_;
