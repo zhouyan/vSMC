@@ -155,13 +155,13 @@ class Sampler
     OutputIter read_resampled_history (OutputIter first) const
     {
         return std::copy(resampled_history_.begin(), resampled_history_.end(),
-		first);
+                first);
     }
 
     /// Number of moves
     unsigned move_num (unsigned iter) const
     {
-	return accept_history_[iter].size();
+        return accept_history_[iter].size();
     }
 
     /// Accept count history

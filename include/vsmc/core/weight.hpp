@@ -26,6 +26,18 @@ class WeightSetBase
         return std::copy(weight_.begin(), weight_.end(), first);
     }
 
+    double *read_weight (double *first) const
+    {
+        const double *const weight_ptr = &weight_[0];
+        const std::size_t size = weight_.size();
+        if (std::abs(first - weight_ptr) > size)
+            std::memcpy(first, weight_ptr, sizeof(double) * size);
+        else
+            std::memmove(first, weight_ptr, sizeof(double) * size);
+
+        return first + size;
+    }
+
     /// \brief Read only access to the log weights
     ///
     /// \param first The beginning of the destination range
@@ -36,6 +48,18 @@ class WeightSetBase
     OutputIter read_log_weight (OutputIter first) const
     {
         return std::copy(log_weight_.begin(), log_weight_.end(), first);
+    }
+
+    double *read_log_weight (double *first) const
+    {
+        const double *const log_weight_ptr = &log_weight_[0];
+        const std::size_t size = log_weight_.size();
+        if (std::abs(first - log_weight_ptr) > size)
+            std::memcpy(first, log_weight_ptr, sizeof(double) * size);
+        else
+            std::memmove(first, log_weight_ptr, sizeof(double) * size);
+
+        return first + size;
     }
 
     /// Read only access to the weight of a particle

@@ -164,7 +164,7 @@ class Path
         buffer_.resize(particle.size());
         weight_.resize(particle.size());
         double w = eval_(iter, particle, &buffer_[0]);
-        particle.read_weight(weight_.begin());
+        particle.read_weight(&weight_[0]);
         double p = 0;
         for (std::vector<double>::size_type i = 0; i != weight_.size(); ++i)
             p += weight_[i] * buffer_[i];

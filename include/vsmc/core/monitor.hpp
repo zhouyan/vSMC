@@ -271,7 +271,7 @@ class Monitor
         result_.resize(dim_);
         weight_.resize(particle.size());
         eval_(iter, dim_, particle, &buffer_[0]);
-        particle.read_weight(weight_.begin());
+        particle.read_weight(&weight_[0]);
         gemv_(particle.size(), dim_, &buffer_[0], &weight_[0], &result_[0]);
 
         index_.push_back(iter);
