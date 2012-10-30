@@ -29,10 +29,12 @@ class WeightSetBase
     double *read_weight (double *first) const
     {
         const double *const wptr = &weight_[0];
-        if (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_))
-            std::memcpy(first, wptr, sizeof(double) * size_);
-        else
-            std::memmove(first, wptr, sizeof(double) * size_);
+        VSMC_RUNTIME_ASSERT(
+                (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_)),
+                "The destination of **WeightBase::read_weight** is "
+                "overlapping with the source\n"
+                "How did you get this address?");
+        std::memcpy(first, wptr, sizeof(double) * size_);
 
         return first + size_;
     }
@@ -52,10 +54,12 @@ class WeightSetBase
     double *read_log_weight (double *first) const
     {
         const double *const lwptr = &log_weight_[0];
-        if (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_))
-            std::memcpy(first, lwptr, sizeof(double) * size_);
-        else
-            std::memmove(first, lwptr, sizeof(double) * size_);
+        VSMC_RUNTIME_ASSERT(
+                (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_)),
+                "The destination of **WeightBase::read_weight** is "
+                "overlapping with the source\n"
+                "How did you get this address?");
+        std::memcpy(first, lwptr, sizeof(double) * size_);
 
         return first + size_;
     }
