@@ -28,11 +28,11 @@ class WeightSetBase
 
     double *read_weight (double *first) const
     {
-        const double *const weight_ptr = &weight_[0];
-        if (std::abs(first - weight_ptr) > size_)
-            std::memcpy(first, weight_ptr, sizeof(double) * size_);
+        const double *const wptr = &weight_[0];
+        if (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_))
+            std::memcpy(first, wptr, sizeof(double) * size_);
         else
-            std::memmove(first, weight_ptr, sizeof(double) * size_);
+            std::memmove(first, wptr, sizeof(double) * size_);
 
         return first + size_;
     }
@@ -51,11 +51,11 @@ class WeightSetBase
 
     double *read_log_weight (double *first) const
     {
-        const double *const log_weight_ptr = &log_weight_[0];
-        if (std::abs(first - log_weight_ptr) > size_)
-            std::memcpy(first, log_weight_ptr, sizeof(double) * size_);
+        const double *const lwptr = &log_weight_[0];
+        if (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_))
+            std::memcpy(first, lwptr, sizeof(double) * size_);
         else
-            std::memmove(first, log_weight_ptr, sizeof(double) * size_);
+            std::memmove(first, lwptr, sizeof(double) * size_);
 
         return first + size_;
     }

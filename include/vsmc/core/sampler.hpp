@@ -241,7 +241,6 @@ class Sampler
         resampled_history_.clear();
         accept_history_.clear();
         path_.clear();
-
         for (typename monitor_map_type::iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m)
             m->second.clear();
@@ -250,8 +249,8 @@ class Sampler
         VSMC_RUNTIME_ASSERT((bool(init_)),
                 ("CALL **Sampler::initialize** WITH AN INVALID "
                  "INITIALIZE FUNCTOR"));
-        accept_history_.push_back(
-                std::vector<unsigned>(1, init_(particle_, param)));
+        accept_history_.push_back(std::vector<unsigned>(1,
+                    init_(particle_, param)));
         do_resampling();
         do_monitoring();
         print_progress();
@@ -266,36 +265,33 @@ class Sampler
     /// Sampler::mcmc and Sampler::mcmc_queue are performed.
     void iterate (unsigned num = 1)
     {
+        std::vector<unsigned> accept_count;
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
             unsigned ia = 0;
-            std::vector<unsigned>
-                acc(move_queue_.size() + mcmc_queue_.size(), 0);
+            accept_count.resize(move_queue_.size() + mcmc_queue_.size());
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
                 VSMC_RUNTIME_ASSERT((bool(*m)),
                         ("CALL **Sampler::iterate** WITH AN INVALID "
                          "MOVE FUNCTOR"));
-                acc[ia] = (*m)(iter_num_, particle_);
+                accept_count[ia] = (*m)(iter_num_, particle_);
                 ++ia;
             }
-
             do_resampling();
-
             for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 VSMC_RUNTIME_ASSERT((bool(*m)),
                         ("CALL **Sampler::iterate** WITH AN INVALID "
                          "MCMC FUNCTOR"));
-                acc[ia] = (*m)(iter_num_, particle_);
+                accept_count[ia] = (*m)(iter_num_, particle_);
                 ++ia;
             }
-
             do_monitoring();
-            accept_history_.push_back(acc);
+            accept_history_.push_back(accept_count);
+            print_progress();
         }
-        print_progress();
     }
 
     /// \brief Add a monitor
