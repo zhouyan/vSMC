@@ -87,10 +87,10 @@ class WeightSetBase
     /// \brief Set the weights with a pointer
     ///
     /// \param nw The position to start the reading
-    /// \param inc The stride of the array
-    void set_weight (const double *nw, int inc = 1)
+    /// \param stride The stride of the array
+    void set_weight (const double *nw, int stride = 1)
     {
-        for (size_type i = 0; i != size_; ++i, nw += inc)
+        for (size_type i = 0; i != size_; ++i, nw += stride)
             weight_[i] = *nw;
         weight2log_weight();
     }
@@ -98,10 +98,10 @@ class WeightSetBase
     /// \brief Multiple the weight with a pointer
     ///
     /// \param nw The position to start the reading
-    /// \param inc The stride of the array
-    void mul_weight (const double *nw, int inc = 1)
+    /// \param stride The stride of the array
+    void mul_weight (const double *nw, int stride = 1)
     {
-        for (size_type i = 0; i != size_; ++i, nw += inc)
+        for (size_type i = 0; i != size_; ++i, nw += stride)
             weight_[i] *= *nw;
         weight2log_weight();
     }
@@ -109,10 +109,10 @@ class WeightSetBase
     /// \brief Set the log weights with a pointer
     ///
     /// \param nw The position to start the reading
-    /// \param inc The stride of the array
-    void set_log_weight (const double *nw, int inc = 1)
+    /// \param stride The stride of the array
+    void set_log_weight (const double *nw, int stride = 1)
     {
-        for (size_type i = 0; i != size_; ++i, nw += inc)
+        for (size_type i = 0; i != size_; ++i, nw += stride)
             log_weight_[i] = *nw;
         log_weight2weight();
     }
@@ -120,10 +120,10 @@ class WeightSetBase
     /// \brief Add to the log weights with a pointer
     ///
     /// \param nw The position to start the reading
-    /// \param inc The stride of the array
-    void add_log_weight (const double *nw, int inc = 1)
+    /// \param stride The stride of the array
+    void add_log_weight (const double *nw, int stride = 1)
     {
-        for (size_type i = 0; i != size_; ++i, nw += inc)
+        for (size_type i = 0; i != size_; ++i, nw += stride)
             log_weight_[i] += *nw;
         log_weight2weight();
     }
