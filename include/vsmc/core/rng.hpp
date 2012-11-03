@@ -7,12 +7,14 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:4521)
+#endif // _MSC_VER
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 #include <Random123/conventional/Engine.hpp>
+#ifdef _MSC_VER
 #pragma warning(pop)
-#endif
-#endif
+#endif // _MSC_VER
+#endif // VSMC_USE_RANDOM123
 
 namespace vsmc {
 /// \brief Sequential RNG set class
