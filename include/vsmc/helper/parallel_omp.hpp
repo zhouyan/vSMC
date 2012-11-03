@@ -18,7 +18,11 @@ class StateOMP : public StateBase<Dim, T>
     public :
 
     typedef StateBase<Dim, T> state_base_type;
-    typedef typename state_base_type::size_type  size_type;
+#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
+    typedef typename state_base_type::size_type size_type;
+#else
+    typedef std::ptrdiff_t size_type;
+#endif
     typedef typename state_base_type::state_type state_type;
 
     explicit StateOMP (size_type N) : StateBase<Dim, T>(N), size_(N) {}
