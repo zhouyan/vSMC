@@ -161,7 +161,7 @@ class Sampler
     /// Number of moves
     unsigned move_num (unsigned iter) const
     {
-        return accept_history_[iter].size();
+        return static_cast<unsigned>(accept_history_[iter].size());
     }
 
     /// Accept count history

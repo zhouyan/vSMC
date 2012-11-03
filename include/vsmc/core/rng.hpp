@@ -4,9 +4,14 @@
 #include <vsmc/internal/common.hpp>
 
 #if VSMC_USE_RANDOM123
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4521)
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 #include <Random123/conventional/Engine.hpp>
+#pragma warning(pop)
+#endif
 #endif
 
 namespace vsmc {

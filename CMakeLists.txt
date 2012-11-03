@@ -370,6 +370,12 @@ ENDIF (APPLE)
 # Make sure __STDC_CONSTANT_MACROS is defined
 SET (VSMC_TEST_FLAGS "${VSMC_TEST_FLAGS} -D__STDC_CONSTANT_MACROS")
 
+# Disable MSVC studip iterator warning.
+# Of course caller are responsible for checking bounds!
+IF (MSVC)
+    SET (VSMC_TEST_FLAGS "${VSMC_TEST_FLAGS} -D_SCL_SECURE_NO_WARNINGS")
+ENDIF (MSVC)
+
 IF (VSMC_TEST)
     ENABLE_TESTING ()
     ADD_SUBDIRECTORY (test EXCLUDE_FROM_ALL)
