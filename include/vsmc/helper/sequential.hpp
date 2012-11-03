@@ -43,6 +43,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 {
     public :
 
+    typedef InitializeBase<T, Derived> initialize_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -78,6 +79,7 @@ class MoveSEQ : public MoveBase<T, Derived>
 {
     public :
 
+    typedef MoveBase<T, Derived> move_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -112,6 +114,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
     public :
 
+    typedef MonitorEvalBase<T, Derived> monitor_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -146,6 +149,7 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
     public :
 
+    typedef PathEvalBase<T, Derived> path_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 

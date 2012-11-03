@@ -474,8 +474,8 @@ class InitializeBase<T, VBase>
 
     virtual unsigned initialize_state (SingleParticle<T>) {return 0;}
     virtual void initialize_param (Particle<T> &, void *) {}
-    virtual void post_processor (Particle<T> &) {}
     virtual void pre_processor (Particle<T> &) {}
+    virtual void post_processor (Particle<T> &) {}
 
     protected :
 
@@ -582,8 +582,8 @@ class MoveBase<T, VBase>
     public :
 
     virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
-    virtual void post_processor (unsigned, Particle<T> &) {}
     virtual void pre_processor (unsigned, Particle<T> &) {}
+    virtual void post_processor (unsigned, Particle<T> &) {}
 
     protected :
 
@@ -696,8 +696,8 @@ class MonitorEvalBase<T, VBase>
 
     virtual void monitor_state (unsigned, unsigned, ConstSingleParticle<T>,
             double *) {}
-    virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
+    virtual void post_processor (unsigned, const Particle<T> &) {}
 
     protected :
 
@@ -829,8 +829,8 @@ class PathEvalBase<T, VBase>
 
     virtual double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
     virtual double path_width (unsigned, const Particle<T> &) {return 0;}
-    virtual void post_processor (unsigned, const Particle<T> &) {}
     virtual void pre_processor (unsigned, const Particle<T> &) {}
+    virtual void post_processor (unsigned, const Particle<T> &) {}
 
     protected :
 

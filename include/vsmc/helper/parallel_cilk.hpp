@@ -45,6 +45,7 @@ class InitializeCILK : public InitializeBase<T, Derived>
 {
     public :
 
+    typedef InitializeBase<T, Derived> initialize_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -80,6 +81,7 @@ class MoveCILK : public MoveBase<T, Derived>
 {
     public :
 
+    typedef MoveBase<T, Derived> move_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -114,6 +116,7 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
 {
     public :
 
+    typedef MonitorEvalBase<T, Derived> monitor_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -148,6 +151,7 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
 {
     public :
 
+    typedef PathEvalBase<T, Derived> path_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 

@@ -9,6 +9,7 @@
 #include <vsmc/core/path.hpp>
 
 #include <vsmc/helper/sequential.hpp>
+#include <vsmc/helper/adaptor.hpp>
 
 #if VSMC_USE_CILK
 #include <vsmc/helper/parallel_cilk.hpp>
