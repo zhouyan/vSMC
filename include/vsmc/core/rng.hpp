@@ -72,7 +72,7 @@ class RngSetPrl
     {
         return rng_[id];
     }
-    
+
     protected :
 
     explicit RngSetPrl (size_type N)

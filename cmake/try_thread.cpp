@@ -1,31 +1,39 @@
-#include <vector>
 #include <iostream>
-#include <vsmc/cxx11/thread.hpp>
+#include <vsmc/utility/stdtbb.hpp>
 
-class work
+class say
 {
     public :
 
-    void operator() ()
+    template <typename IntType>
+    void operator() (const vsmc::thread::BlockedRange<IntType> &block)
     {
-        std::cout << "Hello" << std::endl;
+        IntType sum = 0;
+        for (IntType i = block.begin(); i != block.end(); ++i)
+            sum += i;
+        std::cout << sum << std::endl;
+    }
+};
+
+class sum
+{
+    public :
+
+    template <typename IntType>
+    void operator() (const vsmc::thread::BlockedRange<IntType> &block,
+            int &res)
+    {
+        res = 0;
+        for (IntType i = block.begin(); i != block.end(); ++i)
+            res += i;
     }
 };
 
 int main ()
 {
-#if VSMC_HAS_CXX11LIB_THREAD
-    std::vector<std::thread> tg;
-    for (unsigned i = 0; i != 4; ++i)
-        tg.push_back(std::thread(work()));
-    for (unsigned i = 0; i != 4; ++i)
-        tg[i].join();
-#else
-    boost::thread_group tg;
-    for (unsigned i = 0; i != 4; ++i)
-        tg.create_thread(work());
-    tg.join_all();
-#endif
-
+    int r;
+    vsmc::thread::parallel_for(vsmc::thread::BlockedRange<int>(0, 100), say());
+    vsmc::thread::parallel_sum(vsmc::thread::BlockedRange<int>(0, 100), sum(), r);
+    assert(r == 4950);
     return 0;
 }

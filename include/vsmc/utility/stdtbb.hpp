@@ -1,6 +1,7 @@
 #ifndef VSMC_UTILITY_STDTBB_HPP
 #define VSMC_UTILITY_STDTBB_HPP
 
+#include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/thread.hpp>
 
 namespace vsmc { namespace thread {
