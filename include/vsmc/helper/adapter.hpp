@@ -1,15 +1,15 @@
-#ifndef VSMC_HELPER_ADAPTOR_HPP
-#define VSMC_HELPER_ADAPTOR_HPP
+#ifndef VSMC_HELPER_ADAPTER_HPP
+#define VSMC_HELPER_ADAPTER_HPP
 
 namespace vsmc {
 
 template <typename T, template <typename, typename> class InitializeImpl>
-class InitializeAdaptor :
-    public InitializeImpl<T, InitializeAdaptor<T, InitializeImpl> >
+class InitializeAdapter :
+    public InitializeImpl<T, InitializeAdapter<T, InitializeImpl> >
 {
     public :
 
-    typedef InitializeImpl<T, InitializeAdaptor<T, InitializeImpl> >
+    typedef InitializeImpl<T, InitializeAdapter<T, InitializeImpl> >
         initialize_impl_type;
     typedef cxx11::function<unsigned (SingleParticle<T>)>
         initialize_state_type;
@@ -20,7 +20,7 @@ class InitializeAdaptor :
     typedef cxx11::function<void (Particle<T> &)>
         post_processor_type;
 
-    InitializeAdaptor (const initialize_state_type &init_state,
+    InitializeAdapter (const initialize_state_type &init_state,
             const initialize_param_type &init_param = VSMC_NULLPTR,
             const pre_processor_type &pre = VSMC_NULLPTR,
             const post_processor_type &post = VSMC_NULLPTR) :
@@ -56,15 +56,15 @@ class InitializeAdaptor :
     initialize_param_type initialize_param_;
     pre_processor_type pre_processor_;
     post_processor_type post_processor_;
-}; // class InitializeAdaptor
+}; // class InitializeAdapter
 
 template <typename T, template <typename, typename> class MoveImpl>
-class MoveAdaptor :
-    public MoveImpl<T, MoveAdaptor<T, MoveImpl> >
+class MoveAdapter :
+    public MoveImpl<T, MoveAdapter<T, MoveImpl> >
 {
     public :
 
-    typedef MoveImpl<T, MoveAdaptor<T, MoveImpl> >
+    typedef MoveImpl<T, MoveAdapter<T, MoveImpl> >
         move_impl_type;
     typedef cxx11::function<unsigned (unsigned, SingleParticle<T>)>
         move_state_type;
@@ -73,7 +73,7 @@ class MoveAdaptor :
     typedef cxx11::function<void (unsigned, Particle<T> &)>
         post_processor_type;
 
-    MoveAdaptor (const move_state_type &move_state,
+    MoveAdapter (const move_state_type &move_state,
             const pre_processor_type &pre = VSMC_NULLPTR,
             const post_processor_type &post = VSMC_NULLPTR) :
         move_state_(move_state), pre_processor_(pre), post_processor_(post) {}
@@ -100,15 +100,15 @@ class MoveAdaptor :
     move_state_type move_state_;
     pre_processor_type pre_processor_;
     post_processor_type post_processor_;
-}; // class MoveAdaptor
+}; // class MoveAdapter
 
 template <typename T, template <typename, typename> class MonitorEvalImpl>
-class MonitorEvalAdaptor :
-    public MonitorEvalImpl<T, MonitorEvalAdaptor<T, MonitorEvalImpl> >
+class MonitorEvalAdapter :
+    public MonitorEvalImpl<T, MonitorEvalAdapter<T, MonitorEvalImpl> >
 {
     public :
 
-    typedef MonitorEvalImpl<T, MonitorEvalAdaptor<T, MonitorEvalImpl> >
+    typedef MonitorEvalImpl<T, MonitorEvalAdapter<T, MonitorEvalImpl> >
         monitor_eval_impl_type;
     typedef cxx11::function<
         void (unsigned, unsigned, ConstSingleParticle<T>, double *)>
@@ -118,7 +118,7 @@ class MonitorEvalAdaptor :
     typedef cxx11::function<void (unsigned, const Particle<T> &)>
         post_processor_type;
 
-    MonitorEvalAdaptor (const monitor_state_type &monitor_state,
+    MonitorEvalAdapter (const monitor_state_type &monitor_state,
             const pre_processor_type &pre = VSMC_NULLPTR,
             const post_processor_type &post = VSMC_NULLPTR) :
         monitor_state_(monitor_state),
@@ -147,15 +147,15 @@ class MonitorEvalAdaptor :
     monitor_state_type monitor_state_;
     pre_processor_type pre_processor_;
     post_processor_type post_processor_;
-}; // class MonitorEvalAdaptor
+}; // class MonitorEvalAdapter
 
 template <typename T, template <typename, typename> class PathEvalImpl>
-class PathEvalAdaptor :
-    public PathEvalImpl<T, PathEvalAdaptor<T, PathEvalImpl> >
+class PathEvalAdapter :
+    public PathEvalImpl<T, PathEvalAdapter<T, PathEvalImpl> >
 {
     public :
 
-    typedef PathEvalImpl<T, PathEvalAdaptor<T, PathEvalImpl> >
+    typedef PathEvalImpl<T, PathEvalAdapter<T, PathEvalImpl> >
         path_eval_impl_type;
     typedef cxx11::function<double (unsigned, ConstSingleParticle<T>)>
         path_state_type;
@@ -166,7 +166,7 @@ class PathEvalAdaptor :
     typedef cxx11::function<void (unsigned, const Particle<T> &)>
         post_processor_type;
 
-    PathEvalAdaptor (const path_state_type &path_state,
+    PathEvalAdapter (const path_state_type &path_state,
             const path_width_type &path_width,
             const pre_processor_type &pre = VSMC_NULLPTR,
             const post_processor_type &post = VSMC_NULLPTR) :
@@ -201,8 +201,8 @@ class PathEvalAdaptor :
     path_width_type path_width_;
     pre_processor_type pre_processor_;
     post_processor_type post_processor_;
-}; // class PathEvalAdaptor
+}; // class PathEvalAdapter
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_ADAPTOR_HPP
+#endif // VSMC_HELPER_ADAPTER_HPP

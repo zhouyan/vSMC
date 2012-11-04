@@ -13,14 +13,23 @@ template <typename> class Particle;
 template <typename> class Monitor;
 template <typename> class Path;
 
+template <typename> class SingleParticle;
+template <typename> class ConstSingleParticle;
+
+template <typename, template <typename, typename> class>
+class InitializeAdapter;
+template <typename, template <typename, typename> class>
+class MoveAdapter;
+template <typename, template <typename, typename> class>
+class MonitorEvalAdapter;
+template <typename, template <typename, typename> class>
+class PathEvalAdapter;
+
 template <unsigned, typename> class StateBase;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
 template <typename, typename> class MonitorEvalBase;
 template <typename, typename> class PathEvalBase;
-
-template <typename> class SingleParticle;
-template <typename> class ConstSingleParticle;
 
 template <unsigned, typename> class StateSEQ;
 template <typename, typename D = VBase> class InitializeSEQ;
