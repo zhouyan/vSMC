@@ -97,7 +97,7 @@ class StateBase
         return state_[id * dim_ + pos];
     }
 
-    /// Read only access to a signle particle state
+    /// Read only access to a single particle state
     const state_type &state (size_type id, unsigned pos) const
     {
         return state_[id * dim_ + pos];
@@ -457,16 +457,16 @@ class InitializeBase
         Derived::post_processor(particle);
     }
 
-    unsigned initialize_state_dispatch (SingleParticle<T> part,
+    unsigned initialize_state_dispatch (SingleParticle<T>,
             unsigned (InitializeBase::*) (SingleParticle<T>)) {return 0;}
 
-    void initialize_param_dispatch (Particle<T> &particle, void *param,
+    void initialize_param_dispatch (Particle<T> &, void *,
             void (InitializeBase::*) (Particle<T> &, void *)) {}
 
-    void pre_processor_dispatch (Particle<T> &particle,
+    void pre_processor_dispatch (Particle<T> &,
             void (InitializeBase::*) (Particle<T> &)) {}
 
-    void post_processor_dispatch (Particle<T> &particle,
+    void post_processor_dispatch (Particle<T> &,
             void (InitializeBase::*) (Particle<T> &)) {}
 }; // class InitializeBase
 
@@ -572,10 +572,10 @@ class MoveBase
     unsigned move_state_dispatch (unsigned, SingleParticle<T>,
             unsigned (MoveBase::*) (unsigned, SingleParticle<T>)) {return 0;}
 
-    void pre_processor_dispatch (unsigned iter, Particle<T> &,
+    void pre_processor_dispatch (unsigned, Particle<T> &,
             void (MoveBase::*) (unsigned, Particle<T> &)) {}
 
-    void post_processor_dispatch (unsigned iter, Particle<T> &,
+    void post_processor_dispatch (unsigned, Particle<T> &,
             void (MoveBase::*) (unsigned, Particle<T> &)) {}
 }; // class MoveBase
 
@@ -685,10 +685,10 @@ class MonitorEvalBase
             void (MonitorEvalBase::*)
             (unsigned, unsigned, ConstSingleParticle<T>, double *)) {}
 
-    void pre_processor_dispatch (unsigned iter, const Particle<T> &,
+    void pre_processor_dispatch (unsigned, const Particle<T> &,
             void (MonitorEvalBase::*) (unsigned, const Particle<T> &)) {}
 
-    void post_processor_dispatch (unsigned iter, const Particle<T> &,
+    void post_processor_dispatch (unsigned, const Particle<T> &,
             void (MonitorEvalBase::*) (unsigned, const Particle<T> &)) {}
 }; // class MonitorBase
 
@@ -818,10 +818,10 @@ class PathEvalBase
             double (PathEvalBase::*) (unsigned, const Particle<T> &))
     {return 0;}
 
-    void pre_processor_dispatch (unsigned iter, const Particle<T> &,
+    void pre_processor_dispatch (unsigned, const Particle<T> &,
             void (PathEvalBase::*) (unsigned, const Particle<T> &)) {}
 
-    void post_processor_dispatch (unsigned iter, const Particle<T> &,
+    void post_processor_dispatch (unsigned, const Particle<T> &,
             void (PathEvalBase::*) (unsigned, const Particle<T> &)) {}
 }; // class PathEvalBase
 

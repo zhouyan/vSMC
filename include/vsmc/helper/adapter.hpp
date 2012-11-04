@@ -130,13 +130,13 @@ class MonitorEvalAdapter :
         monitor_state_(iter, dim, part, res);
     }
 
-    void pre_processor (unsigned iter, Particle<T> &particle)
+    void pre_processor (unsigned iter, const Particle<T> &particle)
     {
         if (bool(pre_processor_))
             pre_processor_(iter, particle);
     }
 
-    void post_processor (unsigned iter, Particle<T> &particle)
+    void post_processor (unsigned iter, const Particle<T> &particle)
     {
         if (bool(post_processor_))
             post_processor_(iter, particle);
