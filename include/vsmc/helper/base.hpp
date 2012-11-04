@@ -54,6 +54,15 @@ class StateBase
     /// The type of state parameters
     typedef T state_type;
 
+    explicit StateBase (size_type N) : size_(N), dim_(Dim), state_(N * Dim) {}
+
+    template <typename IntType>
+    void copy (const IntType *copy_from)
+    {
+        for (size_type to = 0; to != size_; ++to)
+            this->copy_particle(copy_from[to], to);
+    }
+
     /// The dimension of the problem
     unsigned dim ()
     {
@@ -143,8 +152,6 @@ class StateBase
     }
 
     protected :
-
-    explicit StateBase (size_type N) : size_(N), dim_(Dim), state_(N * Dim) {}
 
     void copy_particle (size_type from, size_type to)
     {
