@@ -1,6 +1,8 @@
 #ifndef VSMC_HELPER_ADAPTER_HPP
 #define VSMC_HELPER_ADAPTER_HPP
 
+#include <vsmc/internal/common.hpp>
+
 namespace vsmc {
 
 template <typename T, template <typename, typename> class InitializeImpl>
