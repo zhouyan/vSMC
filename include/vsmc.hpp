@@ -70,3 +70,14 @@
 /// \defgroup OpenCL OpenCL
 /// \ingroup Helper
 /// \brief Parallelized sampler with OpenCL
+
+/// \defgroup Utility Utility
+/// \brief Utilities
+
+/// \defgroup RNG RNG
+/// \ingroup Utility
+/// \brief Random Number Generation utitilites
+
+/// \defgroup Thread Thread
+/// \ingroup Utility
+/// \brief C++11 Thread utilities

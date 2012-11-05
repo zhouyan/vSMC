@@ -16,15 +16,6 @@ template <typename> class Path;
 template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 
-template <typename, template <typename, typename> class>
-class InitializeAdapter;
-template <typename, template <typename, typename> class>
-class MoveAdapter;
-template <typename, template <typename, typename> class>
-class MonitorEvalAdapter;
-template <typename, template <typename, typename> class>
-class PathEvalAdapter;
-
 template <unsigned, typename> class StateBase;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
@@ -66,6 +57,15 @@ template <typename> class InitializeCL;
 template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;
 template <typename> class PathEvalCL;
+
+template <typename, template <typename, typename> class I = InitializeSEQ>
+class InitializeAdapter;
+template <typename, template <typename, typename> class I = MoveSEQ>
+class MoveAdapter;
+template <typename, template <typename, typename> class I = MonitorEvalSEQ>
+class MonitorEvalAdapter;
+template <typename, template <typename, typename> class I = PathEvalSEQ>
+class PathEvalAdapter;
 
 } // namesapce vsmc
 

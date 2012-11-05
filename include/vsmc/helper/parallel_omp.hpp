@@ -9,9 +9,6 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateOMP : public StateBase<Dim, T>
 {
@@ -42,8 +39,6 @@ class StateOMP : public StateBase<Dim, T>
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class InitializeOMP : public InitializeBase<T, Derived>
 {
@@ -79,8 +74,6 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MoveOMP : public MoveBase<T, Derived>
 {
@@ -116,8 +109,6 @@ class MoveOMP : public MoveBase<T, Derived>
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
@@ -152,8 +143,6 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class PathEvalOMP : public PathEvalBase<T, Derived>
 {

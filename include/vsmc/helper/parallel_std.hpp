@@ -9,9 +9,6 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup STDThread
-///
-/// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateSTD : public StateBase<Dim, T>
 {
@@ -58,8 +55,6 @@ class StateSTD : public StateBase<Dim, T>
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup STDThread
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class InitializeSTD : public InitializeBase<T, Derived>
 {
@@ -122,8 +117,6 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup STDThread
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MoveSTD : public MoveBase<T, Derived>
 {
@@ -186,8 +179,6 @@ class MoveSTD : public MoveBase<T, Derived>
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup STDThread
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 {
@@ -251,8 +242,6 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup STDThread
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class PathEvalSTD : public PathEvalBase<T, Derived>
 {

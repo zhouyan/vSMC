@@ -6,6 +6,8 @@
 
 namespace vsmc { namespace thread {
 
+/// \brief C++11 Thread manager
+/// \ingroup Thread
 class ThreadManager
 {
     public :
@@ -67,6 +69,8 @@ class ThreadManager
     ThreadManager &operator= (const ThreadManager &);
 }; // class ThreadManager
 
+/// \brief Blocked range
+/// \ingroup Thread
 template <typename SizeType>
 class BlockedRange
 {
@@ -93,6 +97,8 @@ class BlockedRange
     size_type end_;
 }; // class BlockedRange
 
+/// \brief Parallel for using C++11 thread
+/// \ingroup Thread
 template <typename SizeType, typename WorkType>
 void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
 {
@@ -121,6 +127,8 @@ void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
 #endif // VSMC_HAS_CXX11LIB_THREAD
 }
 
+/// \brief Parallel sum using C++11 thread
+/// \ingroup Thread
 template <typename SizeType, typename WorkType, typename ResultType>
 void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
         ResultType &res)

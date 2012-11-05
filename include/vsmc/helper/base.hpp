@@ -40,20 +40,13 @@ class IsBaseOfState
 
 /// \brief Particle::value_type subtype
 /// \ingroup Helper
-///
-/// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateBase
 {
     public :
 
-    /// The type of the number of particles
     typedef VSMC_SIZE_TYPE size_type;
-
-    /// The type of state parameters
     typedef T state_type;
-
     explicit StateBase (size_type N) : size_(N), dim_(Dim), state_(N * Dim) {}
 
     template <typename IntType>
@@ -63,13 +56,11 @@ class StateBase
             this->copy_particle(copy_from[to], to);
     }
 
-    /// The dimension of the problem
     unsigned dim ()
     {
         return dim_;
     }
 
-    /// Resize the dimension of the problem
     void resize_dim (unsigned dim)
     {
         VSMC_STATIC_ASSERT((Dim == Dynamic),
@@ -79,39 +70,26 @@ class StateBase
         dim_ = dim;
     }
 
-    /// The number of particles
     size_type size () const
     {
         return size_;
     }
 
-    /// \brief Read and write access to a signle particle state
-    ///
-    /// \param id The position of the particle
-    /// \param pos The position of the parameter in the state array
-    ///
-    /// \return A reference to the parameter at position pos of the states
-    /// array of the particle at position id
     state_type &state (size_type id, unsigned pos)
     {
         return state_[id * dim_ + pos];
     }
 
-    /// Read only access to a single particle state
     const state_type &state (size_type id, unsigned pos) const
     {
         return state_[id * dim_ + pos];
     }
 
-    /// \brief Read and write access to the array of a single particle states
-    ///
-    /// \param id The position of the particle, 0 to size() - 1
     state_type *state (size_type id)
     {
         return &state_[id * dim_];
     }
 
-    /// Read only access to the array of a single particle states
     const state_type *state (size_type id) const
     {
         return &state_[id * dim_];
@@ -168,8 +146,6 @@ class StateBase
 
 /// \brief A const variant to SingleParticle
 /// \ingroup Helper
-///
-/// \tparam T A subtype of StateBase
 template <typename T>
 class ConstSingleParticle
 {
@@ -242,36 +218,16 @@ class ConstSingleParticle
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Helper
-///
-/// \tparam T A subtype of StateBase
 template <typename T>
 class SingleParticle
 {
     public :
 
-    /// The type of the particle values
     typedef T value_type;
-
-    /// The type of the state parameters
     typedef typename T::state_type state_type;
-
-    /// The type of the number of particles
     typedef typename Particle<T>::size_type size_type;
-
-    /// The type of RNG engine
     typedef typename Particle<T>::rng_type rng_type;
 
-    /// \brief Construct a SingleParticle with a given id and a particle set
-    ///
-    /// \param id The id of the particle, start with zero
-    /// \param particle A pointer to the particle set
-    ///
-    /// \note particle cannot be a const pointer. Unless one explicitly cast
-    /// out the constness of the pointer, otherwise this shall results in a
-    /// compile time error. vsmc itself will never do this. When one need
-    /// access to a const particle set, use the ConstSingleParticle variant
-    /// which is exaclty for this purpose, which does not have the mutator like
-    /// rng() and write access to states.
     SingleParticle (size_type id, Particle<T> *particle) :
         id_(id), particle_(particle)
     {
@@ -293,59 +249,46 @@ class SingleParticle
         particle_ = other.particle_;
     }
 
-    /// The id of the particle
     size_type id () const
     {
         return id_;
     }
 
-    /// \brief Read and write access to a single parameter
-    ///
-    /// \param pos The position of the parameter
     state_type &state (unsigned pos)
     {
         return particle_->value().state(id_, pos);
     }
 
-    /// \brief Read only access to a single parameter
-    ///
-    /// \param pos The position of the parameter
     const state_type &state (unsigned pos) const
     {
         return particle_->value().state(id_, pos);
     }
 
-    /// Read and write access to all parameters through pointer
     state_type *state ()
     {
         return particle_->value().state(id_);
     }
 
-    /// Read only access to all parameters through pointer
     const state_type *state () const
     {
         return particle_->value().state(id_);
     }
 
-    /// The weight of this particle
     double weight () const
     {
         return particle_->weight()[id_];
     }
 
-    /// The log weight of this particle
     double log_weight () const
     {
         return particle_->log_weight()[id_];
     }
 
-    /// Read only access to all particles
     const Particle<T> &particle () const
     {
         return *particle_;
     }
 
-    /// A unique RNG engine for this particle
     rng_type &rng ()
     {
         return particle_->rng(id_);
@@ -364,10 +307,6 @@ class SingleParticle
 
 /// \brief Base Initialize class
 /// \ingroup Helper
-///
-/// \tparam T Particle::value_type
-/// \tparam Derived InitializeBase<T, Derived> subclass or a subtype with all
-/// and only static member functions
 template <typename T, typename Derived>
 class InitializeBase
 {
@@ -472,8 +411,6 @@ class InitializeBase
 
 /// \brief Base Initialize class with virtual interface
 /// \ingroup Helper
-///
-/// \tparam T Particle::value_type
 template <typename T>
 class InitializeBase<T, VBase>
 {
@@ -495,10 +432,6 @@ class InitializeBase<T, VBase>
 
 /// \brief Base Move class
 /// \ingroup Helper
-///
-/// \tparam T Particle::value_type
-/// \tparam Derived MoveBase<T, Derived> subclass or a subtype with all
-/// and only static member functions
 template <typename T, typename Derived>
 class MoveBase
 {
@@ -581,8 +514,6 @@ class MoveBase
 
 /// \brief Base Move class with virtual interface
 /// \ingroup Helper
-///
-/// \tparam T Particle::value_type
 template <typename T>
 class MoveBase<T, VBase>
 {
@@ -603,10 +534,6 @@ class MoveBase<T, VBase>
 
 /// \brief Base Monitor evaluation class
 /// \ingroup Helper
-///
-/// \tparam T Particle::value_type
-/// \tparam Derived MonitorBase<T, Derived> subclass or a subtype with all
-/// and only static member functions
 template <typename T, typename Derived>
 class MonitorEvalBase
 {
@@ -694,8 +621,6 @@ class MonitorEvalBase
 
 /// \brief Base Monitor evaluation class with virtual interface
 /// \ingroup Helper
-///
-/// \tparam T Particle::value_type
 template <typename T>
 class MonitorEvalBase<T, VBase>
 {
@@ -717,10 +642,6 @@ class MonitorEvalBase<T, VBase>
 
 /// \brief Base Path evaluation class
 /// \ingroup Helper
-///
-/// \tparam T Particle::value_type
-/// \tparam Derived PathBase<T, Derived> subclass or a subtype with all
-/// and only static member functions
 template <typename T, typename Derived>
 class PathEvalBase
 {
@@ -827,8 +748,6 @@ class PathEvalBase
 
 /// \brief Base Path evaluation class with virtual interface
 /// \ingroup Helper
-///
-/// \tparam T Particle::value_type
 template <typename T>
 class PathEvalBase<T, VBase>
 {

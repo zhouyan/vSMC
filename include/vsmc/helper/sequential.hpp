@@ -8,9 +8,6 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup Sequential
-///
-/// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateSEQ : public StateBase<Dim, T>
 {
@@ -36,8 +33,6 @@ class StateSEQ : public StateBase<Dim, T>
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class InitializeSEQ : public InitializeBase<T, Derived>
 {
@@ -72,8 +67,6 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup Sequential
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MoveSEQ : public MoveBase<T, Derived>
 {
@@ -107,8 +100,6 @@ class MoveSEQ : public MoveBase<T, Derived>
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup Sequential
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
@@ -142,8 +133,6 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup Sequential
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class PathEvalSEQ : public PathEvalBase<T, Derived>
 {

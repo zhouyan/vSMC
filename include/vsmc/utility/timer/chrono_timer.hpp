@@ -7,11 +7,6 @@ namespace vsmc {
 
 /// \brief A timer use C++11/Boost chrono
 /// \ingroup Timer
-///
-/// \details
-/// This timer use the C++11 or Boost \c chrono library. The default behavior
-/// is use the Boost version. To select the C++11 version, define \c
-/// VSMC_HAS_CXX11LIB_CHRONO
 class ChronoTimer
 {
     public :

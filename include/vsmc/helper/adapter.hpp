@@ -5,6 +5,8 @@
 
 namespace vsmc {
 
+/// \brief Initialize class adapter
+/// \ingroup Helper
 template <typename T, template <typename, typename> class InitializeImpl>
 class InitializeAdapter :
     public InitializeImpl<T, InitializeAdapter<T, InitializeImpl> >
@@ -60,6 +62,8 @@ class InitializeAdapter :
     post_processor_type post_processor_;
 }; // class InitializeAdapter
 
+/// \brief Move class adapter
+/// \ingroup Helper
 template <typename T, template <typename, typename> class MoveImpl>
 class MoveAdapter :
     public MoveImpl<T, MoveAdapter<T, MoveImpl> >
@@ -104,6 +108,8 @@ class MoveAdapter :
     post_processor_type post_processor_;
 }; // class MoveAdapter
 
+/// \brief Monitor evaluation class adapter
+/// \ingroup Helper
 template <typename T, template <typename, typename> class MonitorEvalImpl>
 class MonitorEvalAdapter :
     public MonitorEvalImpl<T, MonitorEvalAdapter<T, MonitorEvalImpl> >
@@ -151,6 +157,8 @@ class MonitorEvalAdapter :
     post_processor_type post_processor_;
 }; // class MonitorEvalAdapter
 
+/// \brief Path evaluation class adapter
+/// \ingroup Helper
 template <typename T, template <typename, typename> class PathEvalImpl>
 class PathEvalAdapter :
     public PathEvalImpl<T, PathEvalAdapter<T, PathEvalImpl> >
