@@ -6,7 +6,7 @@
 namespace vsmc {
 
 /// \brief Weight set class
-/// \ingroup Core
+/// \ingroup WeightSet
 class WeightSetBase
 {
     public :

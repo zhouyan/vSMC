@@ -40,6 +40,14 @@
 /// \ingroup Core
 /// \brief Various resampling methods
 
+/// \defgroup WeightSet Weight Set
+/// \ingroup Core
+/// \brief Weight set classes
+
+/// \defgroup RNGSet RNG Set
+/// \ingroup Core
+/// \brief RNG set classes
+
 /// \defgroup Helper Helper
 /// \brief Constructing samplers with operations on a single particle
 

@@ -18,7 +18,7 @@
 
 namespace vsmc {
 /// \brief Sequential RNG set class
-/// \ingroup Core
+/// \ingroup RNGSet
 class RngSetSeq
 {
     public :
@@ -53,7 +53,7 @@ class RngSetSeq
 }; // class RngSetSeq
 
 /// \brief Parallel RNG set class
-/// \ingroup Core
+/// \ingroup RNGSet
 class RngSetPrl
 {
     public :
