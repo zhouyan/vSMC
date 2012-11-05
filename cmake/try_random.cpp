@@ -4,7 +4,7 @@
 
 int main ()
 {
-    const int N = 10000;
+    const int N = 1000;
     vsmc::RngSetPrl eng(N);
 
     vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
