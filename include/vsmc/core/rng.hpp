@@ -23,25 +23,14 @@ class RngSetSeq
 {
     public :
 
-    /// The type of the random number generator C++11 engine
     typedef VSMC_SEQRNG_TYPE rng_type;
-
-    /// The type of the seed sequence
     typedef VSMC_SEED_TYPE seed_type;
-
-    /// The type of the size of the rng set
     typedef VSMC_SIZE_TYPE size_type;
 
     explicit RngSetSeq (size_type N) :
         rng_(static_cast<rng_type::result_type>(seed_type::instance().get()))
     {}
 
-    /// \brief Get a C++11 RNG engine
-    ///
-    /// \param id The position of the particle, 0 to size() - 1
-    ///
-    /// \return A reference to a C++11 RNG engine unique to particle at
-    /// position id, and independent of others
     rng_type &rng (size_type id)
     {
         return rng_;
@@ -58,13 +47,8 @@ class RngSetPrl
 {
     public :
 
-    /// The type of the random number generator C++11 engine
     typedef VSMC_PRLRNG_TYPE rng_type;
-
-    /// The type of the seed sequence
     typedef VSMC_SEED_TYPE seed_type;
-
-    /// The type of the size of the rng set
     typedef std::vector<rng_type>::size_type size_type;
 
     explicit RngSetPrl (size_type N)
@@ -75,12 +59,6 @@ class RngSetPrl
                             seed.get())));
     }
 
-    /// \brief Get a C++11 RNG engine
-    ///
-    /// \param id The position of the particle, 0 to size() - 1
-    ///
-    /// \return A reference to a C++11 RNG engine unique to particle at
-    /// position id, and independent of others
     rng_type &rng (size_type id)
     {
         return rng_[id];

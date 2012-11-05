@@ -34,6 +34,12 @@
 
 #include <vsmc/utility/seed.hpp>
 
+#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
+#define VSMC_EXPLICIT_OPERATOR explicit
+#else
+#define VSMC_EXPLICIT_OPERATOR
+#endif
+
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)
 #else // NDEBUG

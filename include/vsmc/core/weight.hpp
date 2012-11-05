@@ -11,18 +11,11 @@ class WeightSetBase
 {
     public :
 
-    /// The type of the size of the weight set
     typedef std::vector<double>::size_type size_type;
 
     explicit WeightSetBase (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
-    /// \brief Read only access to the weights
-    ///
-    /// \param first The beginning of the destination range
-    ///
-    /// \return Output iterator to the element in the destination range, one
-    /// past the last element copied
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
     {
@@ -42,12 +35,6 @@ class WeightSetBase
         return first + size_;
     }
 
-    /// \brief Read only access to the log weights
-    ///
-    /// \param first The beginning of the destination range
-    ///
-    /// \return Output iterator to the element in the destination range, one
-    /// past the last element copied
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
     {
@@ -67,19 +54,16 @@ class WeightSetBase
         return first + size_;
     }
 
-    /// Read only access to the weight of a particle
     double weight (size_type id) const
     {
         return weight_[id];
     }
 
-    /// Read only access to the log weight of a particle
     double log_weight (size_type id) const
     {
         return log_weight_[id];
     }
 
-    /// Set equal weights for all particles
     void set_equal_weight ()
     {
         ess_ = static_cast<double>(weight_.size());
@@ -87,10 +71,6 @@ class WeightSetBase
         std::fill(log_weight_.begin(), log_weight_.end(), 0);
     }
 
-    /// \brief Set the weights with a pointer
-    ///
-    /// \param nw The position to start the reading
-    /// \param stride The stride of the array
     void set_weight (const double *nw, int stride = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += stride)
@@ -98,10 +78,6 @@ class WeightSetBase
         weight2log_weight();
     }
 
-    /// \brief Multiple the weight with a pointer
-    ///
-    /// \param nw The position to start the reading
-    /// \param stride The stride of the array
     void mul_weight (const double *nw, int stride = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += stride)
@@ -109,10 +85,6 @@ class WeightSetBase
         weight2log_weight();
     }
 
-    /// \brief Set the log weights with a pointer
-    ///
-    /// \param nw The position to start the reading
-    /// \param stride The stride of the array
     void set_log_weight (const double *nw, int stride = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += stride)
@@ -120,10 +92,6 @@ class WeightSetBase
         log_weight2weight();
     }
 
-    /// \brief Add to the log weights with a pointer
-    ///
-    /// \param nw The position to start the reading
-    /// \param stride The stride of the array
     void add_log_weight (const double *nw, int stride = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += stride)
@@ -131,7 +99,6 @@ class WeightSetBase
         log_weight2weight();
     }
 
-    /// The current ESS (Effective Sample Size)
     double ess () const
     {
         return ess_;
