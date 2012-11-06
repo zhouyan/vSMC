@@ -34,6 +34,8 @@
 
 #include <vsmc/utility/seed.hpp>
 
+#define VSMC_MINMAX_NO_EXPANSION
+
 #if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
 #define VSMC_EXPLICIT_OPERATOR explicit
 #else
