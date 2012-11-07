@@ -1,3 +1,19 @@
+# Find Intel Threading Building Blocks library
+#
+# This module can be used to find TBB headers and libraries
+#
+# The following variables are set
+#
+# TBB_FOUND          - TRUE if TBB is found and work correctly
+# TBB_INCLUDE_DIR    - The directory containing TBB headers, e.g., tbb/tbb.h
+# TBB_LINK_LIBRARIES - TBB libraries that shall be linked to
+#
+# The following variables affect the behavior of this module
+# TBB_ROOT    - The root to the TBB headers and libraries, e.g., /opt/intel/tbb
+#             - Under which one can find include, lib or lib/intel64 etc.
+# TBB_INC_DIR - The path to which CMake shall attempt to find headers first
+# TBB_LIB_DIR - The path to which CMake shall attempt to find libraries first 
+
 IF (TBB_FOUND)
     RETURN ()
 ELSE (TBB_FOUND)
