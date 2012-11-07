@@ -1,4 +1,3 @@
-INCLUDE (CheckCXXSourceRuns)
 
 SET (TRY_CILK_CPP "
 #include <cilk/cilk.h>
@@ -15,6 +14,7 @@ int main ()
 }")
 
 IF (NOT CILK_FOUND)
+    INCLUDE (CheckCXXSourceRuns)
     UNSET (CILK_FOUND CACHE)
     MESSAGE (STATUS "Try Cilk Plus extension")
     CHECK_CXX_SOURCE_RUNS ("${TRY_CILK_CPP}" CILK_FOUND)
