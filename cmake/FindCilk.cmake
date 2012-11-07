@@ -1,5 +1,11 @@
+# Find Intel Cilk Plus support
+#
+# The following variable is set
+#
+# CILK_FOUND - TRUE if Cilk Plus is found and work correctly. Currently only
+#              Intel compiler has this feature
 
-SET (TRY_CILK_CPP "
+SET (CILK_TEST_SOURCE "
 #include <cilk/cilk.h>
 #include <cilk/reducer_opadd.h>
 
@@ -16,11 +22,12 @@ int main ()
 IF (NOT CILK_FOUND)
     INCLUDE (CheckCXXSourceRuns)
     UNSET (CILK_FOUND CACHE)
-    MESSAGE (STATUS "Try Cilk Plus extension")
-    CHECK_CXX_SOURCE_RUNS ("${TRY_CILK_CPP}" CILK_FOUND)
-    IF (CILK_FOUND)
-        MESSAGE (STATUS "Cilk Plus supported")
-    ELSE (CILK_FOUND)
-        MESSAGE (STATUS "Cilk Plus NOT supported")
-    ENDIF (CILK_FOUND)
+    CHECK_CXX_SOURCE_RUNS ("${CILK_TEST_SOURCE}" CILK_TEST_SOURCE_RUNS)
+    IF (CILK_TEST_SOURCE_RUNS)
+        SET (CILK_FOUND TRUE)
+        MESSAGE (STATUS "Find Cilk Plus support")
+    ELSE (CILK_TEST_SOURCE_RUNS)
+        SET (CILK_FOUND FALSE)
+        MESSAGE (STATUS "NOT Find Cilk Plus support")
+    ENDIF (CILK_TEST_SOURCE_RUNS)
 ENDIF (NOT CILK_FOUND)
