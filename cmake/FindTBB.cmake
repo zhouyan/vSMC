@@ -12,7 +12,7 @@
 # TBB_ROOT    - The root to the TBB headers and libraries, e.g., /opt/intel/tbb
 #             - Under which one can find include, lib or lib/intel64 etc.
 # TBB_INC_DIR - The path to which CMake shall attempt to find headers first
-# TBB_LIB_DIR - The path to which CMake shall attempt to find libraries first 
+# TBB_LIB_DIR - The path to which CMake shall attempt to find libraries first
 
 IF (TBB_FOUND)
     RETURN ()
