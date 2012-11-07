@@ -1,3 +1,4 @@
+SET (VSMC_OBJC_TEST_SOURCE "
 int main ()
 {
     int r = -1;
@@ -16,3 +17,7 @@ int main ()
 
     return r;
 }
+")
+
+CHECK_CXX_SOURCE_RUNS ("${VSMC_OBJC_TEST_SOURCE}" VSMC_HAS_OBJC_MACRO)
+CHECK_CXX_SOURCE_RUNS ("${VSMC_OBJC_TEST_SOURCE}" VSMC_HAS_OBJC2_MACRO)

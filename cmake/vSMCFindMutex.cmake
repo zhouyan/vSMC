@@ -1,3 +1,4 @@
+SET (VSMC_MUTEX_TEST_SOURCE "
 #include <vsmc/cxx11/mutex.hpp>
 
 vsmc::cxx11::mutex mtx;
@@ -22,3 +23,4 @@ int main ()
 
     return 0;
 }
+")

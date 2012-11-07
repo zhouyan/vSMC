@@ -1,3 +1,4 @@
+SET (VSMC_THREAD_TEST_SOURCE "
 #include <iostream>
 #include <vsmc/utility/stdtbb.hpp>
 
@@ -37,3 +38,4 @@ int main ()
     assert(r == 4950);
     return 0;
 }
+")
