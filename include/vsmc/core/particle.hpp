@@ -20,10 +20,10 @@ class Particle :
     typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
     typedef typename RngSetTypeTrait<T>::type rng_set_type;
+    typedef typename ResampleRngSetTypeTrait<T>::type resample_rng_set_type;
     typedef typename WeightSetTypeTrait<T>::type weight_set_type;
-    typedef cxx11::function<void
-        (size_type, rng_set_type &, double *, size_type *)> resample_op_type;
-
+    typedef cxx11::function<void (size_type, resample_rng_set_type &,
+            double *, size_type *)> resample_op_type;
     typedef typename rng_set_type::rng_type rng_type;
 
     using rng_set_type::rng;
@@ -40,7 +40,8 @@ class Particle :
 
     explicit Particle (size_type N) :
         rng_set_type(N), weight_set_type(N), size_(N), value_(N),
-        replication_(N), copy_from_(N), weight_(N), resampled_(false)
+        replication_(N), copy_from_(N), weight_(N), resampled_(false),
+        resample_rng_set_(N)
     {
         set_equal_weight();
     }
@@ -70,7 +71,8 @@ class Particle :
         resampled_ = ess() < threshold * size_;
         if (resampled_) {
             read_weight(&weight_[0]);
-            resample_op_(size_, *this, &weight_[0], &replication_[0]);
+            resample_op_(size_, resample_rng_set_,
+                    &weight_[0], &replication_[0]);
             resample_do();
         }
     }
@@ -103,37 +105,37 @@ class Particle :
             case MULTINOMIAL :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, MULTINOMIAL>,
-                    size_type, rng_set_type>();
+                    size_type, resample_rng_set_type>();
                 break;
             case RESIDUAL :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, RESIDUAL>,
-                    size_type, rng_set_type>();
+                    size_type, resample_rng_set_type>();
                 break;
             case STRATIFIED :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, STRATIFIED>,
-                    size_type, rng_set_type>();
+                    size_type, resample_rng_set_type>();
                 break;
             case SYSTEMATIC :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, SYSTEMATIC>,
-                    size_type, rng_set_type>();
+                    size_type, resample_rng_set_type>();
                 break;
             case RESIDUAL_STRATIFIED :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
-                    size_type, rng_set_type>();
+                    size_type, resample_rng_set_type>();
                 break;
             case RESIDUAL_SYSTEMATIC :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
-                    size_type, rng_set_type>();
+                    size_type, resample_rng_set_type>();
                 break;
             default :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, STRATIFIED>,
-                    size_type, rng_set_type>();
+                    size_type, resample_rng_set_type>();
                 break;
         }
     }
@@ -147,7 +149,7 @@ class Particle :
     template <typename ResType>
     void resample_scheme ()
     {
-        resample_op_ = Resample<ResType, size_type, rng_set_type>();
+        resample_op_ = Resample<ResType, size_type, resample_rng_set_type>();
     }
 
     private :
@@ -160,6 +162,7 @@ class Particle :
     std::vector<double> weight_;
     bool resampled_;
     resample_op_type resample_op_;
+    resample_rng_set_type resample_rng_set_;
 
     void resample_do ()
     {
