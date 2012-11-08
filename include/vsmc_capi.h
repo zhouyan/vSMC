@@ -62,12 +62,6 @@ typdef struct
     int base_type;
 } vsmcInitialize;
 
-typdef struct
-{
-    void *move_ptr;
-    int base_type;
-} vsmcMove;
-
 typedef struct
 {
     void *monitor_eval_ptr;
@@ -79,6 +73,18 @@ typedef struct
     void *path_eval_ptr;
     int base_type;
 } vsmcPathEval;
+
+typdef struct
+{
+    void *init_ptr;
+    int base_type;
+} vsmcInit;
+
+typdef struct
+{
+    void *move_ptr;
+    int base_type;
+} vsmcMove;
 
 // vsmc::Sampler
 vsmcSampler  vsmc_sampler_new (size_t, unsigned, int, double, int);

@@ -6,11 +6,28 @@
 
 namespace vsmc { namespace capi {
 
-typedef vsmc::ValueSEQ <vsmc::Dynamic, double> ValueSEQ;
-typedef vsmc::ValueCILK<vsmc::Dynamic, double> ValueCILK;
-typedef vsmc::ValueOMP <vsmc::Dynamic, double> ValueOMP;
-typedef vsmc::ValueSTD <vsmc::Dynamic, double> ValueSTD;
-typedef vsmc::ValueTBB <vsmc::Dynamic, double> ValueTBB;
+template <template <unsigned, typename> class> struct BaseType;
+
+template <vsmc::StateSEQ>
+struct BaseType { enum {base_type = VSMC_BASE_SEQ}; };
+
+template <vsmc::StateCILK>
+struct BaseType { enum {base_type = VSMC_BASE_CILK}; };
+
+template <vsmc::StateOMP>
+struct BaseType { enum {base_type = VSMC_BASE_OMP}; };
+
+template <vsmc::StateSTD>
+struct BaseType { enum {base_type = VSMC_BASE_STD}; };
+
+template <vsmc::StateTBB>
+struct BaseType { enum {base_type = VSMC_BASE_TBB}; };
+
+typedef vsmc::StateSEQ <vsmc::Dynamic, double> ValueSEQ;
+typedef vsmc::StateCILK<vsmc::Dynamic, double> ValueCILK;
+typedef vsmc::StateOMP <vsmc::Dynamic, double> ValueOMP;
+typedef vsmc::StateSTD <vsmc::Dynamic, double> ValueSTD;
+typedef vsmc::StateTBB <vsmc::Dynamic, double> ValueTBB;
 
 typedef Sampler<ValueSEQ>  SamplerSEQ;
 typedef Sampler<ValueCILK> SamplerCILK;
@@ -24,12 +41,6 @@ typedef Particle<ValueOMP>  ParticleOMP;
 typedef Particle<ValueSTD>  ParticleSTD;
 typedef Particle<ValueTBB>  ParticleTBB;
 
-typedef MoveAdapter<ValueSEQ,  MoveSEQ>  MoveAdapterSEQ;
-typedef MoveAdapter<ValueCILK, MoveCILK> MoveAdapterCILK;
-typedef MoveAdapter<ValueOMP,  MoveOMP>  MoveAdapterOMP;
-typedef MoveAdapter<ValueSTD,  MoveSTD>  MoveAdapterSTD;
-typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
-
 typedef Monitor<ValueSEQ>  MonitorSEQ;
 typedef Monitor<ValueCILK> MonitorCILK;
 typedef Monitor<ValueOMP>  MonitorOMP;
@@ -41,6 +52,18 @@ typedef Path<ValueCILK> PathCILK;
 typedef Path<ValueOMP>  PathOMP;
 typedef Path<ValueSTD>  PathSTD;
 typedef Path<ValueTBB>  PathTBB;
+
+typedef InitAdapter<ValueSEQ,  InitializeSEQ>  InitAdapterSEQ;
+typedef InitAdapter<ValueCILK, InitializeCILK> InitAdapterCILK;
+typedef InitAdapter<ValueOMP,  InitializeOMP>  InitAdapterOMP;
+typedef InitAdapter<ValueSTD,  InitializeSTD>  InitAdapterSTD;
+typedef InitAdapter<ValueTBB,  InitializeTBB>  InitAdapterTBB;
+
+typedef MoveAdapter<ValueSEQ,  MoveSEQ>  MoveAdapterSEQ;
+typedef MoveAdapter<ValueCILK, MoveCILK> MoveAdapterCILK;
+typedef MoveAdapter<ValueOMP,  MoveOMP>  MoveAdapterOMP;
+typedef MoveAdapter<ValueSTD,  MoveSTD>  MoveAdapterSTD;
+typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
 
 } } // namespace vsmc::capi
 
@@ -97,6 +120,14 @@ typedef Path<ValueTBB>  PathTBB;
     default : \
         prefix reinterpret_cast<vsmc::capi::PathSEQ *>(ptr) postfix ;\
         break;
+#define VSMC_INIT_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
+    default : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterSEQ *>(ptr) postfix;\
+        break;
+#define VSMC_MOVE_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
+    default : \
+        prefix reinterpret_cast<vsmc::capi::MoveAdapterSEQ *>(ptr) postfix;\
+        break;
 
 // case VSMC_BASE_SEQ
 #define VSMC_VALUE_PTR_CASE_SEQ(ptr, prefix, postfix) \
@@ -118,6 +149,14 @@ typedef Path<ValueTBB>  PathTBB;
 #define VSMC_PATH_PTR_CASE_SEQ(ptr, prefix, postfix) \
     case VSMC_BASE_SEQ : \
         prefix reinterpret_cast<vsmc::capi::PathSEQ *>(ptr) postfix ;\
+        break;
+#define VSMC_INIT_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
+    case VSMC_BASE_SEQ : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterSEQ *>(ptr) postfix;\
+        break;
+#define VSMC_MOVE_PTR_CASE_SEQ(ptr, prefix, postfix) \
+    case VSMC_BASE_SEQ : \
+        prefix reinterpret_cast<vsmc::capi::MoveAdapterSEQ *>(ptr) postfix;\
         break;
 
 // case VSMC_BASE_CILK
@@ -142,12 +181,22 @@ typedef Path<ValueTBB>  PathTBB;
     case VSMC_BASE_CILK : \
         prefix reinterpret_cast<vsmc::capi::PathCILK *>(ptr) postfix ;\
         break;
+#define VSMC_INIT_PTR_CASE_CILK(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterCILK *>(ptr) postfix;\
+        break;
+#define VSMC_MOVE_PTR_CASE_CILK(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::MoveAdapterCILK *>(ptr) postfix;\
+        break;
 #else // VSMC_USE_CILK
 #define VSMC_VALUE_PTR_CASE_CILK(ptr, prefix, postfix)
 #define VSMC_SAMPLER_PTR_CASE_CILK(ptr, prefix, postfix)
 #define VSMC_PARTICLE_PTR_CASE_CILK(ptr, prefix, postfix)
 #define VSMC_MONITOR_PTR_CASE_CILK(ptr, prefix, postfix)
 #define VSMC_PATH_PTR_CASE_CILK(ptr, prefix, postfix)
+#define VSMC_INIT_PTR_CASE_CILK(ptr, prefix, postfix)
+#define VSMC_MOVE_PTR_CASE_CILK(ptr, prefix, postfix)
 #endif // VSMC_USE_CILK
 
 // cast VSMC_BASE_OMP
@@ -172,12 +221,22 @@ typedef Path<ValueTBB>  PathTBB;
     case VSMC_BASE_OMP : \
         prefix reinterpret_cast<vsmc::capi::PathOMP *>(ptr) postfix ;\
         break;
+#define VSMC_INIT_PTR_CASE_OMP(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterCILK *>(ptr) postfix;\
+        break;
+#define VSMC_MOVE_PTR_CASE_OMP(ptr, prefix, postfix) \
+    case VSMC_BASE_OMP : \
+        prefix reinterpret_cast<vsmc::capi::MoveAdapterOMP *>(ptr) postfix;\
+        break;
 #else // VSMC_USE_OMP
 #define VSMC_VALUE_PTR_CASE_OMP(ptr, prefix, postfix)
 #define VSMC_SAMPLER_PTR_CASE_OMP(ptr, prefix, postfix)
 #define VSMC_PARTICLE_PTR_CASE_OMP(ptr, prefix, postfix)
 #define VSMC_MONITOR_PTR_CASE_OMP(ptr, prefix, postfix)
 #define VSMC_PATH_PTR_CASE_OMP(ptr, prefix, postfix)
+#define VSMC_INIT_PTR_CASE_OMP(ptr, prefix, postfix)
+#define VSMC_MOVE_PTR_CASE_OMP(ptr, prefix, postfix)
 #endif // VSMC_USE_OMP
 
 // case VSMC_BASE_STD
@@ -202,12 +261,22 @@ typedef Path<ValueTBB>  PathTBB;
     case VSMC_BASE_STD : \
         prefix reinterpret_cast<vsmc::capi::PathSTD *>(ptr) postfix ;\
         break;
+#define VSMC_INIT_PTR_CASE_STD(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterCILK *>(ptr) postfix;\
+        break;
+#define VSMC_MOVE_PTR_CASE_STD(ptr, prefix, postfix) \
+    case VSMC_BASE_STD : \
+        prefix reinterpret_cast<vsmc::capi::MoveAdapterSTD *>(ptr) postfix;\
+        break;
 #else // VSMC_USE_STD
 #define VSMC_VALUE_PTR_CASE_STD(ptr, prefix, postfix)
 #define VSMC_SAMPLER_PTR_CASE_STD(ptr, prefix, postfix)
 #define VSMC_PARTICLE_PTR_CASE_STD(ptr, prefix, postfix)
 #define VSMC_MONITOR_PTR_CASE_STD(ptr, prefix, postfix)
 #define VSMC_PATH_PTR_CASE_STD(ptr, prefix, postfix)
+#define VSMC_INIT_PTR_CASE_STD(ptr, prefix, postfix)
+#define VSMC_MOVE_PTR_CASE_STD(ptr, prefix, postfix)
 #endif // VSMC_USE_STD
 
 // case VSMC_BASE_TBB
@@ -232,12 +301,22 @@ typedef Path<ValueTBB>  PathTBB;
     case VSMC_BASE_TBB : \
         prefix reinterpret_cast<vsmc::capi::PathTBB *>(ptr) postfix ;\
         break;
+#define VSMC_INIT_PTR_CASE_TBB(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterCILK *>(ptr) postfix;\
+        break;
+#define VSMC_MOVE_PTR_CASE_TBB(ptr, prefix, postfix) \
+    case VSMC_BASE_TBB : \
+        prefix reinterpret_cast<vsmc::capi::MoveAdapterTBB *>(ptr) postfix;\
+        break;
 #else // VSMC_USE_TBB
 #define VSMC_VALUE_PTR_CASE_TBB(ptr, prefix, postfix)
 #define VSMC_SAMPLER_PTR_CASE_TBB(ptr, prefix, postfix)
 #define VSMC_PARTICLE_PTR_CASE_TBB(ptr, prefix, postfix)
 #define VSMC_MONITOR_PTR_CASE_TBB(ptr, prefix, postfix)
 #define VSMC_PATH_PTR_CASE_TBB(ptr, prefix, postfix)
+#define VSMC_INIT_PTR_CASE_TBB(ptr, prefix, postfix)
+#define VSMC_MOVE_PTR_CASE_TBB(ptr, prefix, postfix)
 #endif // VSMC_USE_TBB
 
 // Value switch
@@ -309,5 +388,33 @@ typedef Path<ValueTBB>  PathTBB;
 #define VSMC_PATH_SWITCH(path, prefix, postfix) \
     VSMC_PATH_PTR_SWITCH( \
             path.path_ptr, path.base_type, prefix, postfix)
+
+// Init switch
+#define VSMC_INIT_PTR_SWITCH(ptr, base_type, prefix, postfix) \
+    switch (base_type) { \
+        VSMC_INIT_PTR_CASE_SEQ(ptr, prefix, postfix); \
+        VSMC_INIT_PTR_CASE_CILK(ptr, prefix, postfix);    \
+        VSMC_INIT_PTR_CASE_OMP(ptr, prefix, postfix);     \
+        VSMC_INIT_PTR_CASE_STD(ptr, prefix, postfix);     \
+        VSMC_INIT_PTR_CASE_TBB(ptr, prefix, postfix);     \
+        VSMC_INIT_PTR_CASE_DEFAULT(ptr, prefix, postfix); \
+    }
+#define VSMC_INIT_SWITCH(init, prefix, postfix) \
+    VSMC_INIT_PTR_SWITCH( \
+            init.init_ptr, init.base_type, prefix, postfix)
+
+// Move switch
+#define VSMC_MOVE_PTR_SWITCH(ptr, base_type, prefix, postfix) \
+    switch (base_type) { \
+        VSMC_MOVE_PTR_CASE_SEQ(ptr, prefix, postfix); \
+        VSMC_MOVE_PTR_CASE_CILK(ptr, prefix, postfix);    \
+        VSMC_MOVE_PTR_CASE_OMP(ptr, prefix, postfix);     \
+        VSMC_MOVE_PTR_CASE_STD(ptr, prefix, postfix);     \
+        VSMC_MOVE_PTR_CASE_TBB(ptr, prefix, postfix);     \
+        VSMC_MOVE_PTR_CASE_DEFAULT(ptr, prefix, postfix); \
+    }
+#define VSMC_MOVE_SWITCH(move, prefix, postfix) \
+    VSMC_MOVE_PTR_SWITCH( \
+            move.move_ptr, move.base_type, prefix, postfix)
 
 #endif // VSMC_CAPI_CORE_DEF_HPP
