@@ -102,7 +102,8 @@ void     vsmc_sampler_mcmc_queue_clear       (vsmcSampler);
 void     vsmc_sampler_mcmc_queue_push_back   (vsmcSampler, vsmcMove);
 void     vsmc_sampler_add_monitor            (vsmcSampler, const char *,
         unsigned , vsmcMonitorEval);
-void     vsmc_sampler_print                  (vsmcSampler, const char *);
+void     vsmc_sampler_print                  (vsmcSampler, const char *,
+        unsigned);
 
 /* vsmc::Particle */
 vsmcValue vsmc_particle_value (vsmcParticle);
