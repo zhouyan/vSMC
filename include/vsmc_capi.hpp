@@ -7,27 +7,17 @@
 namespace vsmc { namespace capi {
 
 template <template <unsigned, typename> class> struct BaseType;
+template<> struct BaseType<StateSEQ>  {enum {base_type = VSMC_BASE_SEQ}; };
+template<> struct BaseType<StateCILK> {enum {base_type = VSMC_BASE_CILK};};
+template<> struct BaseType<StateOMP>  {enum {base_type = VSMC_BASE_OMP}; };
+template<> struct BaseType<StateSTD>  {enum {base_type = VSMC_BASE_STD}; };
+template<> struct BaseType<StateTBB>  {enum {base_type = VSMC_BASE_TBB}; };
 
-template<>
-struct BaseType<vsmc::StateSEQ> { enum {base_type = VSMC_BASE_SEQ}; };
-
-template<>
-struct BaseType<vsmc::StateCILK> { enum {base_type = VSMC_BASE_CILK}; };
-
-template<>
-struct BaseType<vsmc::StateOMP> { enum {base_type = VSMC_BASE_OMP}; };
-
-template<>
-struct BaseType<vsmc::StateSTD> { enum {base_type = VSMC_BASE_STD}; };
-
-template<>
-struct BaseType<vsmc::StateTBB> { enum {base_type = VSMC_BASE_TBB}; };
-
-typedef vsmc::StateSEQ <vsmc::Dynamic, double> ValueSEQ;
-typedef vsmc::StateCILK<vsmc::Dynamic, double> ValueCILK;
-typedef vsmc::StateOMP <vsmc::Dynamic, double> ValueOMP;
-typedef vsmc::StateSTD <vsmc::Dynamic, double> ValueSTD;
-typedef vsmc::StateTBB <vsmc::Dynamic, double> ValueTBB;
+typedef StateSEQ <Dynamic, double> ValueSEQ;
+typedef StateCILK<Dynamic, double> ValueCILK;
+typedef StateOMP <Dynamic, double> ValueOMP;
+typedef StateSTD <Dynamic, double> ValueSTD;
+typedef StateTBB <Dynamic, double> ValueTBB;
 
 typedef Sampler<ValueSEQ>  SamplerSEQ;
 typedef Sampler<ValueCILK> SamplerCILK;
@@ -64,6 +54,18 @@ typedef MoveAdapter<ValueCILK, MoveCILK> MoveAdapterCILK;
 typedef MoveAdapter<ValueOMP,  MoveOMP>  MoveAdapterOMP;
 typedef MoveAdapter<ValueSTD,  MoveSTD>  MoveAdapterSTD;
 typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
+
+typedef MonitorEvalAdapter<ValueSEQ,  MonitorEvalSEQ>  MonitorEvalAdapterSEQ;
+typedef MonitorEvalAdapter<ValueCILK, MonitorEvalCILK> MonitorEvalAdapterCILK;
+typedef MonitorEvalAdapter<ValueOMP,  MonitorEvalOMP>  MonitorEvalAdapterOMP;
+typedef MonitorEvalAdapter<ValueSTD,  MonitorEvalSTD>  MonitorEvalAdapterSTD;
+typedef MonitorEvalAdapter<ValueTBB,  MonitorEvalTBB>  MonitorEvalAdapterTBB;
+
+typedef PathEvalAdapter<ValueSEQ,  PathEvalSEQ>  PathEvalAdapterSEQ;
+typedef PathEvalAdapter<ValueCILK, PathEvalCILK> PathEvalAdapterCILK;
+typedef PathEvalAdapter<ValueOMP,  PathEvalOMP>  PathEvalAdapterOMP;
+typedef PathEvalAdapter<ValueSTD,  PathEvalSTD>  PathEvalAdapterSTD;
+typedef PathEvalAdapter<ValueTBB,  PathEvalTBB>  PathEvalAdapterTBB;
 
 } } // namespace vsmc::capi
 
@@ -128,6 +130,10 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
     default : \
         prefix reinterpret_cast<vsmc::capi::MoveAdapterSEQ *>(ptr) postfix;\
         break;
+#define VSMC_MEVAL_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
+    default : \
+        prefix reinterpret_cast<vsmc::capi::MonitorEvalAdapterSEQ *>(ptr) \
+        postfix; break;
 
 // case VSMC_BASE_SEQ
 #define VSMC_VALUE_PTR_CASE_SEQ(ptr, prefix, postfix) \
@@ -158,6 +164,10 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
     case VSMC_BASE_SEQ : \
         prefix reinterpret_cast<vsmc::capi::MoveAdapterSEQ *>(ptr) postfix;\
         break;
+#define VSMC_MEVAL_PTR_CASE_SEQ(ptr, prefix, postfix) \
+    case VSMC_BASE_SEQ : \
+        prefix reinterpret_cast<vsmc::capi::MonitorEvalAdapterSEQ *>(ptr) \
+        postfix; break;
 
 // case VSMC_BASE_CILK
 #if VSMC_USE_CILK
@@ -189,6 +199,10 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
     case VSMC_BASE_CILK : \
         prefix reinterpret_cast<vsmc::capi::MoveAdapterCILK *>(ptr) postfix;\
         break;
+#define VSMC_MEVAL_PTR_CASE_CILK(ptr, prefix, postfix) \
+    case VSMC_BASE_CILK : \
+        prefix reinterpret_cast<vsmc::capi::MonitorEvalAdapterCILK *>(ptr) \
+        postfix; break;
 #else // VSMC_USE_CILK
 #define VSMC_VALUE_PTR_CASE_CILK(ptr, prefix, postfix)
 #define VSMC_SAMPLER_PTR_CASE_CILK(ptr, prefix, postfix)
@@ -197,6 +211,7 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
 #define VSMC_PATH_PTR_CASE_CILK(ptr, prefix, postfix)
 #define VSMC_INIT_PTR_CASE_CILK(ptr, prefix, postfix)
 #define VSMC_MOVE_PTR_CASE_CILK(ptr, prefix, postfix)
+#define VSMC_MEVAL_PTR_CASE_CILK(ptr, prefix, postfix)
 #endif // VSMC_USE_CILK
 
 // cast VSMC_BASE_OMP
@@ -229,6 +244,10 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
     case VSMC_BASE_OMP : \
         prefix reinterpret_cast<vsmc::capi::MoveAdapterOMP *>(ptr) postfix;\
         break;
+#define VSMC_MEVAL_PTR_CASE_OMP(ptr, prefix, postfix) \
+    case VSMC_BASE_OMP : \
+        prefix reinterpret_cast<vsmc::capi::MonitorEvalAdapterOMP *>(ptr) \
+        postfix; break;
 #else // VSMC_USE_OMP
 #define VSMC_VALUE_PTR_CASE_OMP(ptr, prefix, postfix)
 #define VSMC_SAMPLER_PTR_CASE_OMP(ptr, prefix, postfix)
@@ -237,6 +256,7 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
 #define VSMC_PATH_PTR_CASE_OMP(ptr, prefix, postfix)
 #define VSMC_INIT_PTR_CASE_OMP(ptr, prefix, postfix)
 #define VSMC_MOVE_PTR_CASE_OMP(ptr, prefix, postfix)
+#define VSMC_MEVAL_PTR_CASE_OMP(ptr, prefix, postfix)
 #endif // VSMC_USE_OMP
 
 // case VSMC_BASE_STD
@@ -269,6 +289,10 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
     case VSMC_BASE_STD : \
         prefix reinterpret_cast<vsmc::capi::MoveAdapterSTD *>(ptr) postfix;\
         break;
+#define VSMC_MEVAL_PTR_CASE_STD(ptr, prefix, postfix) \
+    case VSMC_BASE_STD : \
+        prefix reinterpret_cast<vsmc::capi::MonitorEvalAdapterSTD *>(ptr) \
+        postfix; break;
 #else // VSMC_USE_STD
 #define VSMC_VALUE_PTR_CASE_STD(ptr, prefix, postfix)
 #define VSMC_SAMPLER_PTR_CASE_STD(ptr, prefix, postfix)
@@ -277,6 +301,7 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
 #define VSMC_PATH_PTR_CASE_STD(ptr, prefix, postfix)
 #define VSMC_INIT_PTR_CASE_STD(ptr, prefix, postfix)
 #define VSMC_MOVE_PTR_CASE_STD(ptr, prefix, postfix)
+#define VSMC_MEVAL_PTR_CASE_STD(ptr, prefix, postfix)
 #endif // VSMC_USE_STD
 
 // case VSMC_BASE_TBB
@@ -309,6 +334,10 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
     case VSMC_BASE_TBB : \
         prefix reinterpret_cast<vsmc::capi::MoveAdapterTBB *>(ptr) postfix;\
         break;
+#define VSMC_MEVAL_PTR_CASE_TBB(ptr, prefix, postfix) \
+    case VSMC_BASE_TBB : \
+        prefix reinterpret_cast<vsmc::capi::MonitorEvalAdapterTBB *>(ptr) \
+        postfix; break;
 #else // VSMC_USE_TBB
 #define VSMC_VALUE_PTR_CASE_TBB(ptr, prefix, postfix)
 #define VSMC_SAMPLER_PTR_CASE_TBB(ptr, prefix, postfix)
@@ -317,6 +346,7 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
 #define VSMC_PATH_PTR_CASE_TBB(ptr, prefix, postfix)
 #define VSMC_INIT_PTR_CASE_TBB(ptr, prefix, postfix)
 #define VSMC_MOVE_PTR_CASE_TBB(ptr, prefix, postfix)
+#define VSMC_MEVAL_PTR_CASE_TBB(ptr, prefix, postfix)
 #endif // VSMC_USE_TBB
 
 // Value switch
@@ -401,7 +431,7 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
     }
 #define VSMC_INIT_SWITCH(init, prefix, postfix) \
     VSMC_INIT_PTR_SWITCH( \
-            init.init_ptr, init.base_type, prefix, postfix)
+            init.initialize_ptr, init.base_type, prefix, postfix)
 
 // Move switch
 #define VSMC_MOVE_PTR_SWITCH(ptr, base_type, prefix, postfix) \
@@ -416,5 +446,19 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
 #define VSMC_MOVE_SWITCH(move, prefix, postfix) \
     VSMC_MOVE_PTR_SWITCH( \
             move.move_ptr, move.base_type, prefix, postfix)
+
+// MonitorEval switch
+#define VSMC_MEVAL_PTR_SWITCH(ptr, base_type, prefix, postfix) \
+    switch (base_type) { \
+        VSMC_MEVAL_PTR_CASE_SEQ(ptr, prefix, postfix); \
+        VSMC_MEVAL_PTR_CASE_CILK(ptr, prefix, postfix);    \
+        VSMC_MEVAL_PTR_CASE_OMP(ptr, prefix, postfix);     \
+        VSMC_MEVAL_PTR_CASE_STD(ptr, prefix, postfix);     \
+        VSMC_MEVAL_PTR_CASE_TBB(ptr, prefix, postfix);     \
+        VSMC_MEVAL_PTR_CASE_DEFAULT(ptr, prefix, postfix); \
+    }
+#define VSMC_MEVAL_SWITCH(meval, prefix, postfix) \
+    VSMC_MEVAL_PTR_SWITCH( \
+            meval.monitor_eval_ptr, meval.base_type, prefix, postfix)
 
 #endif // VSMC_CAPI_CORE_DEF_HPP
