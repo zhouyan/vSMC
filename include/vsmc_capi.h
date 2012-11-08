@@ -148,13 +148,13 @@ unsigned vsmc_value_dim              (vsmcValue);
 void     vsmc_value_rezie_dim        (vsmcValue, unsigned);
 size_t   vsmc_value_size             (vsmcValue);
 double   vsmc_value_state            (vsmcValue, size_t, unsigned);
-double  *vsmc_value_ptr              (vsmcValue, size_t);
+double  *vsmc_value_state_ptr        (vsmcValue, size_t);
 double  *vsmc_value_read_state       (vsmcValue, unsigned, double *);
 double  *vsmc_value_read_state_matrix(vsmcValue, int, double *);
 
 // vsmc::Sampler::init_type
 vsmcInit vsmc_init_new (vsmcSampler,
-        unsigned (*) (unsigned, double *),
+        unsigned (*) (size_t, unsigned, double *),
         void (*) (vsmcParticle, void *),
         void (*) (vsmcParticle),
         void (*) (vsmcParticle));
@@ -162,7 +162,7 @@ void vsmc_init_delete (vsmcInit);
 
 // vsmc::Sampler::move_type
 vsmcMove vsmc_move_new (vsmcSampler,
-        unsigned (*) (unsigned, unsigned, double *),
+        unsigned (*) (size_t, unsigned, unsigned, double *),
         void (*) (unsigned, vsmcParticle),
         void (*) (unsigned, vsmcParticle));
 void vsmc_move_delete (vsmcMove);
