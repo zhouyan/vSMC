@@ -6,54 +6,64 @@
 namespace vsmc {
 
 /// \brief Weight set class
-/// \ingroup Core
+/// \ingroup WeightSet
 class WeightSetBase
 {
     public :
 
-    /// The type of the size of the weight set
     typedef std::vector<double>::size_type size_type;
 
     explicit WeightSetBase (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
-    /// \brief Read only access to the weights
-    ///
-    /// \param first The beginning of the destination range
-    ///
-    /// \return Output iterator to the element in the destination range, one
-    /// past the last element copied
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
     {
         return std::copy(weight_.begin(), weight_.end(), first);
     }
 
-    /// \brief Read only access to the log weights
-    ///
-    /// \param first The beginning of the destination range
-    ///
-    /// \return Output iterator to the element in the destination range, one
-    /// past the last element copied
+    double *read_weight (double *first) const
+    {
+        const double *const wptr = &weight_[0];
+        VSMC_RUNTIME_ASSERT(
+                (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_)),
+                "The destination of **WeightBase::read_weight** is "
+                "overlapping with the source\n"
+                "How did you get this address?");
+        std::memcpy(first, wptr, sizeof(double) * size_);
+
+        return first + size_;
+    }
+
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
     {
         return std::copy(log_weight_.begin(), log_weight_.end(), first);
     }
 
-    /// Read only access to the weight of a particle
+    double *read_log_weight (double *first) const
+    {
+        const double *const lwptr = &log_weight_[0];
+        VSMC_RUNTIME_ASSERT(
+                (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_)),
+                "The destination of **WeightBase::read_weight** is "
+                "overlapping with the source\n"
+                "How did you get this address?");
+        std::memcpy(first, lwptr, sizeof(double) * size_);
+
+        return first + size_;
+    }
+
     double weight (size_type id) const
     {
         return weight_[id];
     }
 
-    /// Read only access to the log weight of a particle
     double log_weight (size_type id) const
     {
         return log_weight_[id];
     }
 
-    /// Set equal weights for all particles
     void set_equal_weight ()
     {
         ess_ = static_cast<double>(weight_.size());
@@ -61,51 +71,34 @@ class WeightSetBase
         std::fill(log_weight_.begin(), log_weight_.end(), 0);
     }
 
-    /// \brief Set the weights with a pointer
-    ///
-    /// \param nw The position to start the reading
-    /// \param inc The stride of the array
-    void set_weight (const double *nw, int inc = 1)
+    void set_weight (const double *nw, int stride = 1)
     {
-        for (size_type i = 0; i != size_; ++i, nw += inc)
+        for (size_type i = 0; i != size_; ++i, nw += stride)
             weight_[i] = *nw;
         weight2log_weight();
     }
 
-    /// \brief Multiple the weight with a pointer
-    ///
-    /// \param nw The position to start the reading
-    /// \param inc The stride of the array
-    void mul_weight (const double *nw, int inc = 1)
+    void mul_weight (const double *nw, int stride = 1)
     {
-        for (size_type i = 0; i != size_; ++i, nw += inc)
+        for (size_type i = 0; i != size_; ++i, nw += stride)
             weight_[i] *= *nw;
         weight2log_weight();
     }
 
-    /// \brief Set the log weights with a pointer
-    ///
-    /// \param nw The position to start the reading
-    /// \param inc The stride of the array
-    void set_log_weight (const double *nw, int inc = 1)
+    void set_log_weight (const double *nw, int stride = 1)
     {
-        for (size_type i = 0; i != size_; ++i, nw += inc)
+        for (size_type i = 0; i != size_; ++i, nw += stride)
             log_weight_[i] = *nw;
         log_weight2weight();
     }
 
-    /// \brief Add to the log weights with a pointer
-    ///
-    /// \param nw The position to start the reading
-    /// \param inc The stride of the array
-    void add_log_weight (const double *nw, int inc = 1)
+    void add_log_weight (const double *nw, int stride = 1)
     {
-        for (size_type i = 0; i != size_; ++i, nw += inc)
+        for (size_type i = 0; i != size_; ++i, nw += stride)
             log_weight_[i] += *nw;
         log_weight2weight();
     }
 
-    /// The current ESS (Effective Sample Size)
     double ess () const
     {
         return ess_;

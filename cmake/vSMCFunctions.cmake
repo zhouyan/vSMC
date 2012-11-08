@@ -12,15 +12,15 @@ FUNCTION (ADD_EXAMPLE basename algs)
 
             IF (${exe} STREQUAL "omp")
                 SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
-                    "${VSMC_TEST_FLAGS} ${flags} ${OpenMP_CXX_FLAGS}")
+                    "${flags} ${OpenMP_CXX_FLAGS}")
             ELSE (${exe} STREQUAL "omp")
                 SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
-                    "${VSMC_TEST_FLAGS} ${flags}")
+                    "${flags}")
             ENDIF (${exe} STREQUAL "omp")
 
             IF (${exe} STREQUAL "std")
                 TARGET_LINK_LIBRARIES (${exe_name}
-                    ${EXAMPLE_LINK_LIBRARIES} ${THREAD_LINK_LIBRARIES})
+                    ${EXAMPLE_LINK_LIBRARIES} ${VSMC_THREAD_LINK_LIBRARIES})
             ELSEIF (${exe} STREQUAL "tbb")
                 TARGET_LINK_LIBRARIES (${exe_name}
                     ${EXAMPLE_LINK_LIBRARIES} ${TBB_LINK_LIBRARIES})

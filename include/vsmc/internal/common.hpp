@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 
 #include <algorithm>
@@ -30,6 +31,16 @@
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
+
+#include <vsmc/utility/seed.hpp>
+
+#define VSMC_MINMAX_NO_EXPANSION
+
+#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
+#define VSMC_EXPLICIT_OPERATOR explicit
+#else
+#define VSMC_EXPLICIT_OPERATOR
+#endif
 
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)

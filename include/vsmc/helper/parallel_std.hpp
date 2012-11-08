@@ -3,170 +3,12 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/helper/base.hpp>
-#include <vsmc/cxx11/thread.hpp>
+#include <vsmc/utility/stdtbb.hpp>
 
 namespace vsmc {
 
-namespace thread {
-
-class ThreadManager
-{
-    public :
-
-    static ThreadManager &reference ()
-    {
-        static ThreadManager manager;
-
-        return manager;
-    }
-
-    unsigned get_thread_num () const
-    {
-        return thread_num_;
-    }
-
-    void set_thread_num (unsigned num)
-    {
-        thread_num_ = num;
-    }
-
-    template <typename SizeType, typename OutputIter>
-    unsigned partition (SizeType begin, SizeType end,
-            OutputIter begin_iter, OutputIter end_iter) const
-    {
-        VSMC_RUNTIME_ASSERT((begin < end),
-                "WRONG RANGE PASSED TO **ThreadManager::partition**");
-
-        SizeType N = end - begin;
-        SizeType block_size = std::max(static_cast<SizeType>(1),
-                N / static_cast<SizeType>(get_thread_num()));
-
-        SizeType current = 0;
-        unsigned num = 0;
-        while (N > 0) {
-            SizeType next_size = std::min(N, block_size);
-            *begin_iter = current;
-            *end_iter = current = *begin_iter + block_size;
-            ++begin_iter;
-            ++end_iter;
-            ++num;
-            N -= next_size;
-        }
-
-        VSMC_RUNTIME_ASSERT((num <= get_thread_num()),
-                "WRONG THREAD NUMBER **ThreadManager::partition**");
-
-        return num;
-    }
-
-    private :
-
-    unsigned thread_num_;
-
-    ThreadManager () : thread_num_(std::max(1U, static_cast<unsigned>(
-                    cxx11::thread::hardware_concurrency()))) {}
-
-    ThreadManager (const ThreadManager &);
-    ThreadManager &operator= (const ThreadManager &);
-}; // class ThreadManager
-
-template <typename SizeType>
-class BlockedRange
-{
-    public :
-
-    typedef SizeType size_type;
-
-    BlockedRange (size_type begin, size_type end) :
-        begin_(begin), end_(end) {}
-
-    size_type begin () const
-    {
-        return begin_;
-    }
-
-    size_type end () const
-    {
-        return end_;
-    }
-
-    private :
-
-    size_type begin_;
-    size_type end_;
-}; // class BlockedRange
-
-template <typename SizeType, typename WorkType>
-void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
-{
-    const ThreadManager &manager = ThreadManager::reference();
-    unsigned thread_num = manager.get_thread_num();
-    std::vector<SizeType> b(thread_num);
-    std::vector<SizeType> e(thread_num);
-    unsigned num = manager.partition(range.begin(), range.end(),
-            b.begin(), e.begin());
-#if VSMC_HAS_CXX11LIB_THREAD
-    // TODO safer management of threads group
-    std::vector<std::thread> tg;
-    for (unsigned i = 0; i != num; ++i) {
-        tg.push_back(std::thread(work,
-                    BlockedRange<SizeType>(b[i], e[i])));
-    }
-    for (unsigned i = 0; i != num; ++i)
-        tg[i].join();
-#else // VSMC_HAS_CXX11LIB_THREAD
-    boost::thread_group tg;
-    for (unsigned i = 0; i != num; ++i) {
-        tg.add_thread(new boost::thread(work,
-                    BlockedRange<SizeType>(b[i], e[i])));
-    }
-    tg.join_all();
-#endif // VSMC_HAS_CXX11LIB_THREAD
-}
-
-template <typename SizeType, typename WorkType, typename ResultType>
-void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
-        ResultType &res)
-{
-    const ThreadManager &manager = ThreadManager::reference();
-    unsigned thread_num = manager.get_thread_num();
-    std::vector<SizeType> b(thread_num);
-    std::vector<SizeType> e(thread_num);
-    std::vector<ResultType> result(thread_num);
-    unsigned num = manager.partition(range.begin(), range.end(),
-            b.begin(), e.begin());
-#if VSMC_HAS_CXX11LIB_THREAD
-    // TODO safer management of threads group
-    std::vector<std::thread> tg;
-    for (unsigned i = 0; i != num; ++i) {
-        tg.push_back(std::thread(work,
-                    BlockedRange<SizeType>(b[i], e[i]),
-                    cxx11::ref(result[i])));
-    }
-    for (unsigned i = 0; i != num; ++i)
-        tg[i].join();
-#else // VSMC_HAS_CXX11LIB_THREAD
-    boost::thread_group tg;
-    for (unsigned i = 0; i != num; ++i) {
-        tg.add_thread(new boost::thread(work,
-                    BlockedRange<SizeType>(b[i], e[i]),
-                    cxx11::ref(result[i])));
-    }
-    tg.join_all();
-#endif // VSMC_HAS_CXX11LIB_THREAD
-    for (unsigned i = 1; i != num; ++i)
-        result[0] += result[i];
-
-    res = result[0];
-}
-
-} // namespace thread
-
 /// \brief Particle::value_type subtype
 /// \ingroup STDThread
-///
-/// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateSTD : public StateBase<Dim, T>
 {
@@ -213,13 +55,12 @@ class StateSTD : public StateBase<Dim, T>
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup STDThread
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class InitializeSTD : public InitializeBase<T, Derived>
 {
     public :
 
+    typedef InitializeBase<T, Derived> initialize_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -276,13 +117,12 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup STDThread
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MoveSTD : public MoveBase<T, Derived>
 {
     public :
 
+    typedef MoveBase<T, Derived> move_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -339,13 +179,12 @@ class MoveSTD : public MoveBase<T, Derived>
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup STDThread
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 {
     public :
 
+    typedef MonitorEvalBase<T, Derived> monitor_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -403,13 +242,12 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup STDThread
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class PathEvalSTD : public PathEvalBase<T, Derived>
 {
     public :
 
+    typedef PathEvalBase<T, Derived> path_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 

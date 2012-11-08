@@ -8,62 +8,23 @@ namespace vsmc {
 
 /// \brief SMC Sampler
 /// \ingroup Core
-///
-/// \tparam T Particle<T>::value_type
 template <typename T>
 class Sampler
 {
     public :
 
-    /// The type of the number of particles
     typedef typename Particle<T>::size_type size_type;
-
-    /// The type of the particle values
     typedef T value_type;
-
-    /// The type of the Particle set
     typedef Particle<T> particle_type;
-
-    /// The type of the Monitor
     typedef Monitor<T> monitor_type;
-
-    /// The type of the Path sampling monitor
     typedef Path<T> path_type;
-
-    /// The type of initialization functor
     typedef cxx11::function<unsigned (particle_type &, void *)> init_type;
-
-    /// The type of movement functor
     typedef cxx11::function<unsigned (unsigned, particle_type &)> move_type;
-
-    /// An alias to move_type
     typedef move_type mcmc_type;
-
-    /// The type of the movement queue
     typedef std::deque<move_type> move_queue_type;
-
-    /// An alias to move_queue_type
     typedef move_queue_type mcmc_queue_type;
-
-    /// The type of ESS history vector
-    typedef std::vector<double> ess_history_type;
-
-    /// The type of resampling history vector
-    typedef std::vector<bool> resampled_history_type;
-
-    /// The type of accept count history vector
-    typedef std::vector<std::vector<unsigned> > accept_history_type;
-
-    /// The type of Monitor map
     typedef std::map<std::string, monitor_type> monitor_map_type;
 
-    /// \brief Construct a sampler with a built-in resampling scheme
-    ///
-    /// \param N The number of particles
-    /// \param scheme The built-in resampling scheme. See Resample
-    /// \param threshold The threshold of ESS/N for performing resampling. It
-    /// shall be a number between [0, 1]. Less than zero means never
-    /// resampling, bigger than one means always resampling.
     explicit Sampler (size_type N,
             ResampleScheme scheme = STRATIFIED,
             double threshold = 0.5) :
@@ -73,11 +34,6 @@ class Sampler
         resample_scheme(scheme);
     }
 
-    /// \brief Construct a sampler with an user defined resampling scheme
-    ///
-    /// \param N The number of particles
-    /// \param res_op A resampling operation functor
-    /// \param threshold The threshold of ESS/N for performing resampling.
     explicit Sampler (size_type N,
             const typename particle_type::resample_op_type &res_op,
             double threshold = 0.5) :
@@ -86,118 +42,103 @@ class Sampler
         resample_scheme(res_op);
     }
 
-    /// Size of the Particle set
     size_type size () const
     {
         return particle_.size();
     }
 
-    /// The number of iterations recorded
-    ///
-    /// \details
-    /// This includes the initialization step and started at zero
     unsigned iter_size () const
     {
         return static_cast<unsigned>(ess_history_.size());
     }
 
-    /// See Particle::resample_scheme
     void resample_scheme (
             const typename particle_type::resample_op_type &res_op)
     {
         particle_.resample_scheme(res_op);
     }
 
-    /// See Particle::resample_scheme
     void resample_scheme (ResampleScheme scheme)
     {
         particle_.resample_scheme(scheme);
     }
 
-    /// See Particle::resample_scheme
     template <typename EnumType, EnumType S>
     void resample_scheme ()
     {
         particle_.template resample_scheme<EnumType, S>();
     }
 
-    /// See Particle::resample_scheme
     template <typename ResType>
     void resample_scheme ()
     {
         particle_.template resample_scheme<ResType>();
     }
 
-    /// The current threshold
     double resample_threshold () const
     {
         return threshold_;
     }
 
-    /// Set new resampling threshold
     void resample_threshold (double threshold)
     {
         threshold_ = threshold;
     }
 
-    /// ESS history
-    const ess_history_type &ess_history () const
+    double ess_history (unsigned iter) const
     {
-        return ess_history_;
+        return ess_history_[iter];
     }
 
-    /// Read ESS hisotry
     template <typename OutputIter>
-    void read_ess_history (OutputIter first) const
+    OutputIter read_ess_history (OutputIter first) const
     {
-        std::copy(ess_history_.begin(), ess_history_.end(), first);
+        return std::copy(ess_history_.begin(), ess_history_.end(), first);
     }
 
-    /// Resampling history
-    const resampled_history_type &resampled_history () const
+    bool resampled_history (unsigned iter) const
     {
-        return resampled_history_;
+        return resampled_history_[iter];
     }
 
-    /// Read ESS hisotry
     template <typename OutputIter>
-    void read_resampled_history (OutputIter first) const
+    OutputIter read_resampled_history (OutputIter first) const
     {
-        std::copy(resampled_history_.begin(), resampled_history_.end(), first);
+        return std::copy(resampled_history_.begin(), resampled_history_.end(),
+                first);
     }
 
-    /// Accept count history
-    const accept_history_type &accept_history () const
+    unsigned move_num (unsigned iter) const
     {
-        return accept_history_;
+        return static_cast<unsigned>(accept_history_[iter].size());
     }
 
-    /// Read and write access to the particle set
+    unsigned accept_history (unsigned iter, unsigned move_num) const
+    {
+        return accept_history_[iter][move_num];
+    }
+
     particle_type &particle ()
     {
         return particle_;
     }
 
-    /// Read only access to the particle set
     const particle_type &particle () const
     {
         return particle_;
     }
 
-    /// Set a new initialization functor
     void init (const init_type &new_init)
     {
         init_ = new_init;
     }
 
-    /// Clear the movement queue and set a new movement functor
     void move (const move_type &new_move)
     {
         move_queue_.clear();
         move_queue_.push_back(new_move);
     }
 
-    /// Read and write access to the movement queue
     move_queue_type &move_queue ()
     {
         return move_queue_;
@@ -243,7 +184,6 @@ class Sampler
         resampled_history_.clear();
         accept_history_.clear();
         path_.clear();
-
         for (typename monitor_map_type::iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m)
             m->second.clear();
@@ -252,8 +192,8 @@ class Sampler
         VSMC_RUNTIME_ASSERT((bool(init_)),
                 ("CALL **Sampler::initialize** WITH AN INVALID "
                  "INITIALIZE FUNCTOR"));
-        accept_history_.push_back(
-                std::vector<unsigned>(1, init_(particle_, param)));
+        accept_history_.push_back(std::vector<unsigned>(1,
+                    init_(particle_, param)));
         do_resampling();
         do_monitoring();
         print_progress();
@@ -268,36 +208,33 @@ class Sampler
     /// Sampler::mcmc and Sampler::mcmc_queue are performed.
     void iterate (unsigned num = 1)
     {
+        std::vector<unsigned> accept_count;
         for (unsigned i = 0; i != num; ++i) {
             ++iter_num_;
             unsigned ia = 0;
-            std::vector<unsigned>
-                acc(move_queue_.size() + mcmc_queue_.size(), 0);
+            accept_count.resize(move_queue_.size() + mcmc_queue_.size());
 
             for (typename move_queue_type::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
                 VSMC_RUNTIME_ASSERT((bool(*m)),
                         ("CALL **Sampler::iterate** WITH AN INVALID "
                          "MOVE FUNCTOR"));
-                acc[ia] = (*m)(iter_num_, particle_);
+                accept_count[ia] = (*m)(iter_num_, particle_);
                 ++ia;
             }
-
             do_resampling();
-
             for (typename mcmc_queue_type::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
                 VSMC_RUNTIME_ASSERT((bool(*m)),
                         ("CALL **Sampler::iterate** WITH AN INVALID "
                          "MCMC FUNCTOR"));
-                acc[ia] = (*m)(iter_num_, particle_);
+                accept_count[ia] = (*m)(iter_num_, particle_);
                 ++ia;
             }
-
             do_monitoring();
-            accept_history_.push_back(acc);
+            accept_history_.push_back(accept_count);
+            print_progress();
         }
-        print_progress();
     }
 
     /// \brief Add a monitor
@@ -546,9 +483,9 @@ class Sampler
 
     particle_type particle_;
     unsigned iter_num_;
-    ess_history_type ess_history_;
-    resampled_history_type resampled_history_;
-    accept_history_type accept_history_;
+    std::vector<double> ess_history_;
+    std::vector<bool> resampled_history_;
+    std::vector<std::vector<unsigned> > accept_history_;
 
     monitor_map_type monitor_;
     path_type path_;
@@ -599,11 +536,6 @@ class Sampler
 
 /// \brief Print the Sampler
 /// \ingroup Core
-///
-/// \param os The ostream to which the contents are printed
-/// \param sampler The Sampler to be printed
-///
-/// \note This is the same as <tt>sampler.print(os)</tt>
 template<typename OutputStream, typename T>
 OutputStream &operator<< (OutputStream &os, const vsmc::Sampler<T> &sampler)
 {

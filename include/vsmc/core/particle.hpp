@@ -10,17 +10,6 @@ namespace vsmc {
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
-///
-/// \tparam T Requirement:
-/// \li Constructor compatible with
-/// \code T(Particle<T>::size_type N) \endcode
-/// \li member function copy method compatible with
-/// \code
-/// copy(const size_type *copy_from)
-/// \endcode
-/// where <tt>copy_from[to]</tt> is the index of the particle to be copied into
-/// position to. That is you should replace particle at position \c to with
-/// another at position <tt>from = copy_from[to]</tt>.
 template <typename T>
 class Particle :
     public RngSetTypeTrait<T>::type,
@@ -28,19 +17,10 @@ class Particle :
 {
     public :
 
-    /// The type of the number of particles
     typedef typename SizeTypeTrait<T>::type size_type;
-
-    /// The type of the particle values
     typedef T value_type;
-
-    /// The type of the RNG set
     typedef typename RngSetTypeTrait<T>::type rng_set_type;
-
-    /// The type of the particle weights set
     typedef typename WeightSetTypeTrait<T>::type weight_set_type;
-
-    /// The type of resampling operation functor
     typedef cxx11::function<void
         (size_type, rng_set_type &, double *, size_type *)> resample_op_type;
 
@@ -58,9 +38,6 @@ class Particle :
     using weight_set_type::add_log_weight;
     using weight_set_type::ess;
 
-    /// \brief Construct a Particle object with a given number of particles
-    ///
-    /// \param N The number of particles
     explicit Particle (size_type N) :
         rng_set_type(N), weight_set_type(N), size_(N), value_(N),
         replication_(N), copy_from_(N), weight_(N), resampled_(false)
@@ -68,37 +45,26 @@ class Particle :
         set_equal_weight();
     }
 
-    /// Size of the particle set
     size_type size () const
     {
         return size_;
     }
 
-    /// Read and write access to particle values
     value_type &value ()
     {
         return value_;
     }
 
-    /// Read only access to particle values
     const value_type &value () const
     {
         return value_;
     }
 
-    /// \brief Try resampling with current scheme
-    ///
-    /// \param threshold The threshold for resampling
     void resample (double threshold)
     {
         resample(resample_op_, threshold);
     }
 
-    /// \brief Try resampling with an external resampling operation functor
-    ///
-    /// \param res_op The resampling operation functor (will be used and not
-    /// copied)
-    /// \param threshold The threshold for resampling
     void resample (resample_op_type &res_op, double threshold)
     {
         resampled_ = ess() < threshold * size_;
@@ -109,41 +75,28 @@ class Particle :
         }
     }
 
-    /// \brief Try resampling with a new resampling operation functor
-    ///
-    /// \param res_op The new resampling operation functor (will be copied and
-    /// replace the old one)
-    /// \param threshold The threshold for resampling
     void resample (const resample_op_type &res_op, double threshold)
     {
         resample_scheme(res_op);
         resample(threshold);
     }
 
-    /// \brief Try resampling with a new resampling built-in scheme
-    ///
-    /// \param scheme The new resampling scheme
-    /// \param threshold The threshold for resampling
     void resample (ResampleScheme scheme, double threshold)
     {
         resample_scheme(scheme);
         resample(threshold);
     }
 
-    /// Whether resampling was performed when resampling(threshold) was last
-    /// called.
     bool resampled () const
     {
         return resampled_;
     }
 
-    /// Replace the resampling operation functor with a new one
     void resample_scheme (const resample_op_type &res_op)
     {
         resample_op_ = res_op;
     }
 
-    /// Replace the resampling operation functor with a new built-in scheme
     void resample_scheme (ResampleScheme scheme)
     {
         switch (scheme) {
@@ -185,30 +138,12 @@ class Particle :
         }
     }
 
-    /// \brief Replace the resampling operation functor with a new user defined
-    /// scheme
-    ///
-    /// \tparam EnumType The enumeration type of the scheme
-    /// \tparam S The name of the scheme
-    ///
-    /// \details
-    /// A partial specialization
-    /// of <tt>Resample<ResampleType<EnumType, S>, SizeType, RngSetType></tt>
-    /// shall exist
     template <typename EnumType, EnumType S>
     void resample_scheme ()
     {
         resample_scheme<ResampleType<EnumType, S> >();
     }
 
-    /// \brief Replace the resampling operation functor with a new user defined
-    /// type
-    ///
-    /// \tparam ResType The type of the resampling specialization
-    ///
-    /// \details
-    /// A partial specialization
-    /// of <tt>Resample<ResType, SizeType, RngSetType></tt> shall exist
     template <typename ResType>
     void resample_scheme ()
     {
@@ -228,8 +163,6 @@ class Particle :
 
     void resample_do ()
     {
-        // Some times the nuemrical round error can cause the total childs
-        // differ from number of particles
         size_type sum = std::accumulate(
                 replication_.begin(), replication_.end(),
                 static_cast<size_type>(0));

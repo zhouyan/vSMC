@@ -9,16 +9,17 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateOMP : public StateBase<Dim, T>
 {
     public :
 
     typedef StateBase<Dim, T> state_base_type;
-    typedef typename state_base_type::size_type  size_type;
+#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
+    typedef typename state_base_type::size_type size_type;
+#else
+    typedef std::ptrdiff_t size_type;
+#endif
     typedef typename state_base_type::state_type state_type;
 
     explicit StateOMP (size_type N) : StateBase<Dim, T>(N), size_(N) {}
@@ -38,13 +39,12 @@ class StateOMP : public StateBase<Dim, T>
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class InitializeOMP : public InitializeBase<T, Derived>
 {
     public :
 
+    typedef InitializeBase<T, Derived> initialize_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -74,13 +74,12 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MoveOMP : public MoveBase<T, Derived>
 {
     public :
 
+    typedef MoveBase<T, Derived> move_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -110,13 +109,12 @@ class MoveOMP : public MoveBase<T, Derived>
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
     public :
 
+    typedef MonitorEvalBase<T, Derived> monitor_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -145,13 +143,12 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup OpenMP
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class PathEvalOMP : public PathEvalBase<T, Derived>
 {
     public :
 
+    typedef PathEvalBase<T, Derived> path_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 

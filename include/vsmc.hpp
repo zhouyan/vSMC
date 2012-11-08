@@ -9,6 +9,7 @@
 #include <vsmc/core/path.hpp>
 
 #include <vsmc/helper/sequential.hpp>
+#include <vsmc/helper/adapter.hpp>
 
 #if VSMC_USE_CILK
 #include <vsmc/helper/parallel_cilk.hpp>
@@ -39,12 +40,16 @@
 /// \ingroup Core
 /// \brief Various resampling methods
 
+/// \defgroup WeightSet Weight Set
+/// \ingroup Core
+/// \brief Weight set classes
+
+/// \defgroup RNGSet RNG Set
+/// \ingroup Core
+/// \brief RNG set classes
+
 /// \defgroup Helper Helper
 /// \brief Constructing samplers with operations on a single particle
-
-/// \defgroup Timer Timer
-/// \ingroup Helper
-/// \brief Timer used by Helper classes
 
 /// \defgroup Sequential Sequential
 /// \ingroup Helper
@@ -69,3 +74,14 @@
 /// \defgroup OpenCL OpenCL
 /// \ingroup Helper
 /// \brief Parallelized sampler with OpenCL
+
+/// \defgroup Utility Utility
+/// \brief Utilities
+
+/// \defgroup RNG RNG
+/// \ingroup Utility
+/// \brief Random Number Generation utitilites
+
+/// \defgroup Thread Thread
+/// \ingroup Utility
+/// \brief C++11 Thread utilities

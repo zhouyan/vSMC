@@ -8,9 +8,6 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup Sequential
-///
-/// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector
 template <unsigned Dim, typename T>
 class StateSEQ : public StateBase<Dim, T>
 {
@@ -36,13 +33,12 @@ class StateSEQ : public StateBase<Dim, T>
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class InitializeSEQ : public InitializeBase<T, Derived>
 {
     public :
 
+    typedef InitializeBase<T, Derived> initialize_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -71,13 +67,12 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup Sequential
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MoveSEQ : public MoveBase<T, Derived>
 {
     public :
 
+    typedef MoveBase<T, Derived> move_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -105,13 +100,12 @@ class MoveSEQ : public MoveBase<T, Derived>
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup Sequential
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
     public :
 
+    typedef MonitorEvalBase<T, Derived> monitor_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
@@ -139,13 +133,12 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup Sequential
-///
-/// \tparam T A subtype of StateBase
 template <typename T, typename Derived>
 class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
     public :
 
+    typedef PathEvalBase<T, Derived> path_eval_base_type;
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 

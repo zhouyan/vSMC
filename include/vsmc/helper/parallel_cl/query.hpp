@@ -13,11 +13,8 @@ class QueryCL
 {
     public :
 
-    /// \brief Print information of all platforms and devices
-    ///
-    /// \param os The ostream to which the contents are printed
     template<typename CharT, typename Traits>
-    static void print (std::basic_ostream<CharT, Traits> &os = std::cout)
+    static void print (std::basic_ostream<CharT, Traits> &os)
     {
         std::vector<cl::Platform> platform;
         cl::Platform::get(&platform);
@@ -26,10 +23,6 @@ class QueryCL
             print(os, *p);
     }
 
-    /// \brief Print information of all devices in a given platform
-    ///
-    /// \param os The ostream to which the contents are printed
-    /// \param plat A const reference to the platform to query informations
     template<typename CharT, typename Traits>
     static void print (std::basic_ostream<CharT, Traits> &os,
             const cl::Platform &plat)
@@ -43,10 +36,6 @@ class QueryCL
             print(os, *d);
     }
 
-    /// \brief Print information of all devices in a given context
-    ///
-    /// \param os The ostream to which the contents are printed
-    /// \param ctx A const reference to the context to query informations
     template <typename CharT, typename Traits>
     static void print (std::basic_ostream<CharT, Traits> &os,
             const cl::Context &ctx)
@@ -71,10 +60,6 @@ class QueryCL
             print(os, *d);
     }
 
-    /// \brief Print information a given device
-    ///
-    /// \param os The ostream to which the contents are printed
-    /// \param dev A const reference to the device to query informations
     template<typename CharT, typename Traits>
     static void print (std::basic_ostream<CharT, Traits> &os,
             const cl::Device &dev)
@@ -424,9 +409,6 @@ class QueryCL
 
 /// \brief Print information of all platforms and devices
 /// \ingroup OpenCL
-///
-/// \param os The ostream to which the contents are printed
-/// \param query A QueryCL object
 template<typename CharT, typename Traits>
 std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const vsmc::QueryCL &query)
@@ -441,9 +423,6 @@ namespace std {
 
 /// \brief Print information of all devices in a given platform
 /// \ingroup OpenCL
-///
-/// \param os The ostream to which the contents are printed
-/// \param plat A const reference to the platform to query informations
 template<typename CharT, typename Traits>
 basic_ostream<CharT, Traits> &operator<< (
         basic_ostream<CharT, Traits> &os, const cl::Platform &plat)
@@ -454,9 +433,6 @@ basic_ostream<CharT, Traits> &operator<< (
 
 /// \brief Print information of all devices in a given context
 /// \ingroup OpenCL
-///
-/// \param os The ostream to which the contents are printed
-/// \param ctx A const reference to the context to query informations
 template<typename CharT, typename Traits>
 basic_ostream<CharT, Traits> &operator<< (
         basic_ostream<CharT, Traits> &os, const cl::Context &ctx)
@@ -467,9 +443,6 @@ basic_ostream<CharT, Traits> &operator<< (
 
 /// \brief Print information a given device
 /// \ingroup OpenCL
-///
-/// \param os The ostream to which the contents are printed
-/// \param dev A const reference to the device to query informations
 template<typename CharT, typename Traits>
 basic_ostream<CharT, Traits> &operator<< (
         basic_ostream<CharT, Traits> &os, const cl::Device &dev)

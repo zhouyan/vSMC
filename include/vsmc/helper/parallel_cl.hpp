@@ -71,18 +71,12 @@ class GetHostPtr
 
 /// \brief Particle::value_type subtype
 /// \ingroup OpenCL
-///
-/// \tparam Dim The dimension of the state parameter vector
-/// \tparam T The type of the value of the state parameter vector The default
 template <unsigned Dim, typename T>
 class StateCL
 {
     public :
 
-    /// The type of the number of particles
     typedef cl_ulong size_type;
-
-    /// The type of state parameters (cl_float or cl_double)
     typedef T state_type;
 
     explicit StateCL (size_type N) :
@@ -103,13 +97,11 @@ class StateCL
         std::free(write_buffer_pool_);
     }
 
-    /// The dimension of the problem
     unsigned dim () const
     {
         return dim_;
     }
 
-    /// Resize the dimension of the problem
     void resize_dim (unsigned dim)
     {
         VSMC_STATIC_ASSERT((Dim == Dynamic),
@@ -121,7 +113,6 @@ class StateCL
         dim_ = dim;
     }
 
-    /// The number of particles
     size_type size () const
     {
         return size_;
@@ -207,9 +198,6 @@ class StateCL
         return program_created_;
     }
 
-    /// \brief Set a new local group size
-    ///
-    /// \param lsize The size of the work group.
     void local_size (size_type lsize)
     {
         local_size_ = lsize;
@@ -225,32 +213,26 @@ class StateCL
             global_nd_range_ = cl::NDRange(size_);
     }
 
-    /// The current local size as set by local_size(lsize)
     void local_size () const
     {
         return local_size_;
     }
 
-    /// The global cl::NDRange used by kernel calls
     cl::NDRange global_nd_range () const
     {
         return global_nd_range_;
     }
 
-    /// The local cl::NDRange used by kernel calls
     cl::NDRange local_nd_range () const
     {
         return local_nd_range_;
     }
 
-    /// Read only access to the memory buffer on the device that stores the
-    /// states
     const cl::Buffer &state_device () const
     {
         return state_device_;
     }
 
-    /// Read only access to the states
     const double *state_host () const
     {
         read_buffer<state_type>(state_device_, dim_ * size_, &state_host_[0]);
@@ -258,18 +240,11 @@ class StateCL
         return &state_host_[0];
     }
 
-    /// \brief Read only access to the device buffer object that stores the
-    /// weights temparorie.
-    ///
-    /// \sa InitializeCL, MoveCL
     const cl::Buffer &weight_device () const
     {
         return weight_device_;
     }
 
-    /// \brief Read only access to the weights stored by weight_device()
-    ///
-    /// \sa InitializeCL, MoveCL
     const double *weight_host () const
     {
         read_buffer<state_type>(weight_device_, size_, &weight_host_[0]);
@@ -277,18 +252,11 @@ class StateCL
         return &weight_host_[0];
     }
 
-    /// \brief Read only access to the device buffer object that stores the
-    /// accept counts temparorie.
-    ///
-    /// \sa InitializeCL, MoveCL
     const cl::Buffer &accept_device () const
     {
         return accept_device_;
     }
 
-    /// \brief Read only access to the accept counts stored by accept_device()
-    ///
-    /// \sa InitializeCL, MoveCL
     const cl_uint *accept_host () const
     {
         read_buffer<cl_uint>(accept_device_, size_, &accept_host_[0]);
@@ -296,9 +264,6 @@ class StateCL
         return &accept_host_[0];
     }
 
-    /// \brief Setup the OpenCL environment
-    ///
-    /// \param dev_type The type of the device intended to use
     void setup (cl_device_type dev_type)
     {
         if (!platform_created_ || !platform_.size())
@@ -319,52 +284,12 @@ class StateCL
         command_queue_created_ = true;
     }
 
-    /// \brief Check the status of setup
-    ///
-    /// \return \b true if the platform, context, device and command queue are
-    /// all created, either by call setup(cl_device_type) or set by user.
     bool setup () const
     {
         return platform_created_ && context_created_ && device_created_ &&
             command_queue_created_;
     }
 
-    /// \brief Build the program
-    ///
-    /// \param source The source in C-Style string format (NOT THE FILE NAME)
-    /// \param flags The compiler flags passed to the OpenCL compiler
-    ///
-    /// \note The environment has to be setup properly either through
-    /// setup(cl_device_type) or set by user.
-    ///
-    /// \note When building the program, the user can assume the following
-    /// happen before the user source being processed.
-    ///
-    /// \li A type \c state_type which is the same as the template parameter
-    /// T, and thus StateCL<Dim, T>::state_type is defined
-    ///
-    /// \li A type \c state_struct which looks like the following are defined
-    ///
-    /// \li A type \c size_type which is large enough to hold the number of
-    /// particles and unlike \c size_t, can be passed as kernel argumentsa, is
-    /// defined
-    ///
-    /// \li A constant \c Size of type \c size_type which the same as the size
-    /// of this particle set is defined
-    ///
-    /// \li A constant \c Dim of type \c uint which is the same as the
-    /// template parameter \c Dim is defined
-    ///
-    /// \li A constant \c Seed of type \c ulong which is not used by the
-    /// host.  And the next size() seeds will be reserved for the the device.
-    /// In other words, when next time the host request a seed, it will
-    /// be <tt>Seed + size()</tt>. It is only relevant if RngSetPrl is used
-    /// in the host Particle and the same parallel RNG is going to be used in
-    /// the device. The default is that the host Particle StateCL will use
-    /// RngSetSeq.
-    ///
-    /// \li The Random123 library's \c philox.h, \c threefry.h, and \c u01.h
-    /// headers are included unless <tt>VSMC_USE_RANDOM123=0</tt>.
     void build (const std::string &source, const std::string &flags)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(build);
@@ -387,7 +312,7 @@ class StateCL
             ss << "typedef ulong size_type;\n";
             ss << "__constant size_type Size = " << size_ << "UL;\n";
             ss << "__constant uint Dim = " << dim_ << ";\n";
-            VSMC_SEED_TYPE &seed = VSMC_SEED_TYPE::reference();
+            VSMC_SEED_TYPE &seed = VSMC_SEED_TYPE::instance();
             ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
             seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";
@@ -429,23 +354,16 @@ class StateCL
         kernel_copy_ = create_kernel("copy");
     }
 
-    /// \brief Check the status of build
-    ///
-    /// \return \b true if the last call to build is successful.
     bool build () const
     {
         return build_;
     }
 
-    /// The last build log
     std::string build_log () const
     {
         return build_log_;
     }
 
-    /// \brief Create a device buffer with given number of elements and type
-    ///
-    /// \param num The number of elements
     template<typename CLType>
     cl::Buffer create_buffer (size_type num) const
     {
@@ -454,10 +372,6 @@ class StateCL
         return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
     }
 
-    /// \brief Create a device buffer with input from host iterators
-    ///
-    /// \param first The begin of the input
-    /// \param last The end of the input
     template<typename CLType, typename InputIter>
     cl::Buffer create_buffer (InputIter first, InputIter last) const
     {
@@ -475,11 +389,6 @@ class StateCL
         return buf;
     }
 
-    /// \brief Read a device buffer into a host iterator
-    ///
-    /// \param buf The device buffer to be read
-    /// \param num The number of elements in the device buffer
-    /// \param first The begin of the output
     template <typename CLType, typename OutputIter>
     void read_buffer (const cl::Buffer &buf, size_type num,
             OutputIter first) const
@@ -499,11 +408,6 @@ class StateCL
         }
     }
 
-    /// \brief Write to a device buffer from a host iterator
-    ///
-    /// \param buf The device buffer to be write
-    /// \param num The number of elements in the device buffer
-    /// \param first The begin of the input
     template <typename CLType, typename InputIter>
     void write_buffer (const cl::Buffer &buf, size_type num,
             InputIter first) const
@@ -523,11 +427,6 @@ class StateCL
         }
     }
 
-    /// \brief Create a kernel from a given name
-    ///
-    /// \param name The name of the kernel
-    ///
-    /// \note The program has to be built before call this member
     cl::Kernel create_kernel (const std::string &name) const
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel)
@@ -535,15 +434,6 @@ class StateCL
         return cl::Kernel(program_, name.c_str());
     }
 
-    /// \brief Run a kernel in parallel on the device
-    ///
-    /// \param ker The kernel to run
-    ///
-    /// \note The program has to be built before call this member. The kernel
-    /// will be run with global size returned by global_nd_range() and local
-    /// size returned by local_nd_range(), which shall be suitable for most
-    /// use case. Both are one dimension NDRange. For more complex parallel
-    /// patterns, users need to call OpenCL API themselves.
     void run_parallel (const cl::Kernel &ker) const
     {
         command_queue_.finish();
@@ -610,12 +500,6 @@ class StateCL
         copy_device_   = create_buffer<size_type>(size_);
     }
 
-    /// \internal The reallocation of read_buffer_pool and write_buffer_pool
-    /// shall not impact the performance significantly. They only expand and
-    /// never shrink. In addition, sicne num is usually the size of particle
-    /// set or with a multiple of Dim, after a few times (usually after the
-    /// initialization), the memory will not be needed to expand anymore
-
     template <typename CLType>
     CLType *read_buffer_pool (size_type num) const
     {
@@ -649,19 +533,6 @@ class StateCL
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup OpenCL
-///
-/// \tparam T A subtype of StateCL
-///
-/// \note
-/// A valid kernel declaration looks like
-/// \code
-/// __kernel void init (state_struct *state, state_type *weight, uint *accept)
-/// \endcode
-/// There can has other user supplied arguments as long as the first three are
-/// as above. Among them, \c state is StateCL::state_device(), \c weight is
-/// StateCL::weight_device() and \c accept is StateCL::accept_device(). After
-/// the call to the operator(), they can be read into the host through
-/// StateCL::weight_host() etc.
 template <typename T>
 class InitializeCL
 {
@@ -702,7 +573,6 @@ class InitializeCL
 
     void set_kernel (const Particle<T> &particle)
     {
-        // TODO More robust checking of kernel change
         std::string kname;
         initialize_state(kname);
 
@@ -743,20 +613,6 @@ class InitializeCL
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup OpenCL
-///
-/// \tparam T A subtype of StateCL
-///
-/// \note
-/// A valid kernel declaration looks like
-/// \code
-/// __kernel void move (uint iter, state_struct *state,
-///     state_type *weight, uint *accept)
-/// \endcode
-/// There can has other user supplied arguments as long as the first four are
-/// as above. Among them, \c state is StateCL::state_device(), \c weight is
-/// StateCL::weight_device() and \c accept is StateCL::accept_device(). After
-/// the call to the operator(), they can be read into the host through
-/// StateCL::weight_host() etc.
 template <typename T>
 class MoveCL
 {
@@ -795,7 +651,6 @@ class MoveCL
 
     void set_kernel (unsigned iter, const Particle<T> &particle)
     {
-        // TODO More robust checking of kernel change
         std::string kname;
         move_state(iter, kname);
 
@@ -837,17 +692,6 @@ class MoveCL
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup OpenCL
-///
-/// \tparam T A Subtype of StateCL
-///
-/// \note
-/// A valid kernel declaration looks like
-/// \code
-/// __kernel void monitor_eval (uint iter, uint dim, state_struct *state,
-///     state_type *buffer)
-/// \endcode
-/// where \c buffer is a row major \c dim by \c size matrix. There can has
-/// other user supplied arguments as long as the first four is as above
 template <typename T>
 class MonitorEvalCL
 {
@@ -885,7 +729,6 @@ class MonitorEvalCL
 
     void set_kernel (unsigned iter, unsigned dim, const Particle<T> &particle)
     {
-        // TODO More robust checking of kernel change
         std::string kname;
         monitor_state(iter, kname);
 
@@ -933,17 +776,6 @@ class MonitorEvalCL
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup OpenCL
-///
-/// \tparam T A subtype of StateCL
-///
-/// \note
-/// A valid kernel declaration looks like
-/// \code
-/// __kernel void path_eval (uint iter, state_struct *state,
-///     state_type *buffer)
-/// \endcode
-/// There can has other user supplied arguments as long as the first three is
-/// as above
 template <typename T>
 class PathEvalCL
 {
@@ -984,7 +816,6 @@ class PathEvalCL
 
     void set_kernel (unsigned iter, const Particle<T> &particle)
     {
-        // TODO More robust checking of kernel change
         std::string kname;
         path_state(iter, kname);
 
