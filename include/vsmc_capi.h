@@ -28,9 +28,9 @@ extern "C" {
 
 typedef struct
 {
-    void *state_ptr;
+    void *value_ptr;
     int base_type;
-} vsmcState;
+} vsmcValue;
 
 typedef struct
 {
