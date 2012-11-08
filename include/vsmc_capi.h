@@ -26,6 +26,12 @@ extern "C" {
 
 typedef struct
 {
+    void *state_ptr;
+    int base_type;
+} vsmcState;
+
+typedef struct
+{
     void *sampler_ptr;
     int base_type;
 } vsmcSampler;
