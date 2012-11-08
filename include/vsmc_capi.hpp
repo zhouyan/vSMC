@@ -8,20 +8,20 @@ namespace vsmc { namespace capi {
 
 template <template <unsigned, typename> class> struct BaseType;
 
-template <vsmc::StateSEQ>
-struct BaseType { enum {base_type = VSMC_BASE_SEQ}; };
+template<>
+struct BaseType<vsmc::StateSEQ> { enum {base_type = VSMC_BASE_SEQ}; };
 
-template <vsmc::StateCILK>
-struct BaseType { enum {base_type = VSMC_BASE_CILK}; };
+template<>
+struct BaseType<vsmc::StateCILK> { enum {base_type = VSMC_BASE_CILK}; };
 
-template <vsmc::StateOMP>
-struct BaseType { enum {base_type = VSMC_BASE_OMP}; };
+template<>
+struct BaseType<vsmc::StateOMP> { enum {base_type = VSMC_BASE_OMP}; };
 
-template <vsmc::StateSTD>
-struct BaseType { enum {base_type = VSMC_BASE_STD}; };
+template<>
+struct BaseType<vsmc::StateSTD> { enum {base_type = VSMC_BASE_STD}; };
 
-template <vsmc::StateTBB>
-struct BaseType { enum {base_type = VSMC_BASE_TBB}; };
+template<>
+struct BaseType<vsmc::StateTBB> { enum {base_type = VSMC_BASE_TBB}; };
 
 typedef vsmc::StateSEQ <vsmc::Dynamic, double> ValueSEQ;
 typedef vsmc::StateCILK<vsmc::Dynamic, double> ValueCILK;
@@ -53,11 +53,11 @@ typedef Path<ValueOMP>  PathOMP;
 typedef Path<ValueSTD>  PathSTD;
 typedef Path<ValueTBB>  PathTBB;
 
-typedef InitAdapter<ValueSEQ,  InitializeSEQ>  InitAdapterSEQ;
-typedef InitAdapter<ValueCILK, InitializeCILK> InitAdapterCILK;
-typedef InitAdapter<ValueOMP,  InitializeOMP>  InitAdapterOMP;
-typedef InitAdapter<ValueSTD,  InitializeSTD>  InitAdapterSTD;
-typedef InitAdapter<ValueTBB,  InitializeTBB>  InitAdapterTBB;
+typedef InitializeAdapter<ValueSEQ,  InitializeSEQ>  InitAdapterSEQ;
+typedef InitializeAdapter<ValueCILK, InitializeCILK> InitAdapterCILK;
+typedef InitializeAdapter<ValueOMP,  InitializeOMP>  InitAdapterOMP;
+typedef InitializeAdapter<ValueSTD,  InitializeSTD>  InitAdapterSTD;
+typedef InitializeAdapter<ValueTBB,  InitializeTBB>  InitAdapterTBB;
 
 typedef MoveAdapter<ValueSEQ,  MoveSEQ>  MoveAdapterSEQ;
 typedef MoveAdapter<ValueCILK, MoveCILK> MoveAdapterCILK;
@@ -150,7 +150,7 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
     case VSMC_BASE_SEQ : \
         prefix reinterpret_cast<vsmc::capi::PathSEQ *>(ptr) postfix ;\
         break;
-#define VSMC_INIT_PTR_CASE_DEFAULT(ptr, prefix, postfix) \
+#define VSMC_INIT_PTR_CASE_SEQ(ptr, prefix, postfix) \
     case VSMC_BASE_SEQ : \
         prefix reinterpret_cast<vsmc::capi::InitAdapterSEQ *>(ptr) postfix;\
         break;
@@ -222,8 +222,8 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
         prefix reinterpret_cast<vsmc::capi::PathOMP *>(ptr) postfix ;\
         break;
 #define VSMC_INIT_PTR_CASE_OMP(ptr, prefix, postfix) \
-    case VSMC_BASE_CILK : \
-        prefix reinterpret_cast<vsmc::capi::InitAdapterCILK *>(ptr) postfix;\
+    case VSMC_BASE_OMP : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterOMP *>(ptr) postfix;\
         break;
 #define VSMC_MOVE_PTR_CASE_OMP(ptr, prefix, postfix) \
     case VSMC_BASE_OMP : \
@@ -262,8 +262,8 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
         prefix reinterpret_cast<vsmc::capi::PathSTD *>(ptr) postfix ;\
         break;
 #define VSMC_INIT_PTR_CASE_STD(ptr, prefix, postfix) \
-    case VSMC_BASE_CILK : \
-        prefix reinterpret_cast<vsmc::capi::InitAdapterCILK *>(ptr) postfix;\
+    case VSMC_BASE_STD : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterSTD *>(ptr) postfix;\
         break;
 #define VSMC_MOVE_PTR_CASE_STD(ptr, prefix, postfix) \
     case VSMC_BASE_STD : \
@@ -302,8 +302,8 @@ typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
         prefix reinterpret_cast<vsmc::capi::PathTBB *>(ptr) postfix ;\
         break;
 #define VSMC_INIT_PTR_CASE_TBB(ptr, prefix, postfix) \
-    case VSMC_BASE_CILK : \
-        prefix reinterpret_cast<vsmc::capi::InitAdapterCILK *>(ptr) postfix;\
+    case VSMC_BASE_TBB : \
+        prefix reinterpret_cast<vsmc::capi::InitAdapterTBB *>(ptr) postfix;\
         break;
 #define VSMC_MOVE_PTR_CASE_TBB(ptr, prefix, postfix) \
     case VSMC_BASE_TBB : \

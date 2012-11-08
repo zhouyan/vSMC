@@ -56,7 +56,7 @@ class StateBase
             this->copy_particle(copy_from[to], to);
     }
 
-    unsigned dim ()
+    unsigned dim () const
     {
         return dim_;
     }

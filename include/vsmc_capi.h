@@ -19,8 +19,8 @@
 #define VSMC_BASE_TBB  205
 
 // Matrix order
-#define VSMC_MATRIX_COL_MAJOR 301
-#define VSMC_MATRIX_ROW_MAJOR 302
+#define VSMC_COLUMN_MAJOR 301
+#define VSMC_ROW_MAJOR    302
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,7 +56,7 @@ typedef struct
     int base_type;
 } vsmcPath;
 
-typdef struct
+typedef struct
 {
     void *initialize_ptr;
     int base_type;
@@ -74,13 +74,13 @@ typedef struct
     int base_type;
 } vsmcPathEval;
 
-typdef struct
+typedef struct
 {
     void *init_ptr;
     int base_type;
 } vsmcInit;
 
-typdef struct
+typedef struct
 {
     void *move_ptr;
     int base_type;
@@ -88,8 +88,8 @@ typdef struct
 
 // vsmc::Sampler
 vsmcSampler  vsmc_sampler_new (size_t, unsigned, int, double, int);
+void vsmc_sampler_delete (vsmcSampler);
 vsmcParticle vsmc_sampler_particle (vsmcSampler);
-void     vsmc_sampler_delete                 (vsmcSampler);
 size_t   vsmc_sampler_size                   (vsmcSampler);
 unsigned vsmc_sampler_iter_size              (vsmcSampler);
 void     vsmc_sampler_resample_scheme        (vsmcSampler, int);
@@ -99,8 +99,17 @@ void     vsmc_sampler_read_resampled_history (vsmcSampler, int *);
 void     vsmc_sampler_initialize             (vsmcSampler, void *);
 void     vsmc_sampler_iterate                (vsmcSampler, unsigned);
 void     vsmc_sampler_show_progress          (vsmcSampler, int);
+void     vsmc_sampler_init                   (vsmcSampler, vsmcInit);
+void     vsmc_sampler_move                   (vsmcSampler, vsmcMove);
+void     vsmc_sampler_move_queue_clear       (vsmcSampler);
+void     vsmc_sampler_move_queue_push_back   (vsmcSampler, vsmcMove);
+void     vsmc_sampler_mcmc                   (vsmcSampler, vsmcMove);
+void     vsmc_sampler_mcmc_queue_clear       (vsmcSampler);
+void     vsmc_sampler_mcmc_queue_push_back   (vsmcSampler, vsmcMove);
+void     vsmc_sampler_print                  (vsmcSampler, const char *);
 
 // vsmc::Particle
+vsmcValue vsmc_particle_value (vsmcParticle);
 size_t vsmc_particle_size             (vsmcParticle);
 void   vsmc_particle_resample         (vsmcParticle, double);
 int    vsmc_particle_resampled        (vsmcParticle);
@@ -118,12 +127,12 @@ double vsmc_particle_ess              (vsmcParticle);
 
 // vsmc::Monitor
 vsmcMonitor vsmc_monitor_new (vsmcSampler, unsigned, vsmcMonitorEval);
-void     vsmc_monitor_delete         (vsmcMonitor);
-unsigned vsmc_monitor_dim            (vsmcMonitor);
-unsigned vsmc_monitor_iter_size      (vsmcMonitor);
-void     vsmc_monitor_read_index     (vsmcMonitor, unsigned *);
-void     vsmc_monitor_read_record    (vsmcMonitor, double **);
-void     vsmc_monitor_read_record_id (vsmcMonitor, unsigned, double *);
+void     vsmc_monitor_delete             (vsmcMonitor);
+unsigned vsmc_monitor_dim                (vsmcMonitor);
+unsigned vsmc_monitor_iter_size          (vsmcMonitor);
+void     vsmc_monitor_read_index         (vsmcMonitor, unsigned *);
+double  *vsmc_monitor_read_record        (vsmcMonitor, unsigned, double *);
+double  *vsmc_monitor_read_record_matrix (vsmcMonitor, int, double *);
 
 // vsmc::Path
 vsmcPath vsmc_path_new (vsmcSampler, vsmcPathEval);
@@ -133,6 +142,30 @@ void     vsmc_path_read_index     (vsmcPath, unsigned *);
 void     vsmc_path_read_integrand (vsmcPath, double *);
 void     vsmc_path_read_width     (vsmcPath, double *);
 void     vsmc_path_read_grid      (vsmcPath, double *);
+
+// vsmc::Samler::value_type
+unsigned vsmc_value_dim              (vsmcValue);
+void     vsmc_value_rezie_dim        (vsmcValue, unsigned);
+size_t   vsmc_value_size             (vsmcValue);
+double   vsmc_value_state            (vsmcValue, size_t, unsigned);
+double  *vsmc_value_ptr              (vsmcValue, size_t);
+double  *vsmc_value_read_state       (vsmcValue, unsigned, double *);
+double  *vsmc_value_read_state_matrix(vsmcValue, int, double *);
+
+// vsmc::Sampler::init_type
+vsmcInit vsmc_init_new (vsmcSampler,
+        unsigned (*) (unsigned, double *),
+        void (*) (vsmcParticle, void *),
+        void (*) (vsmcParticle),
+        void (*) (vsmcParticle));
+void vsmc_init_delete (vsmcInit);
+
+// vsmc::Sampler::move_type
+vsmcMove vsmc_move_new (vsmcSampler,
+        unsigned (*) (unsigned, unsigned, double *),
+        void (*) (unsigned, vsmcParticle),
+        void (*) (unsigned, vsmcParticle));
+void vsmc_move_delete (vsmcMove);
 
 #ifdef __cplusplus
 }
