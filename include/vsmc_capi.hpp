@@ -24,6 +24,12 @@ typedef Particle<ValueOMP>  ParticleOMP;
 typedef Particle<ValueSTD>  ParticleSTD;
 typedef Particle<ValueTBB>  ParticleTBB;
 
+typedef MoveAdapter<ValueSEQ,  MoveSEQ>  MoveAdapterSEQ;
+typedef MoveAdapter<ValueCILK, MoveCILK> MoveAdapterCILK;
+typedef MoveAdapter<ValueOMP,  MoveOMP>  MoveAdapterOMP;
+typedef MoveAdapter<ValueSTD,  MoveSTD>  MoveAdapterSTD;
+typedef MoveAdapter<ValueTBB,  MoveTBB>  MoveAdapterTBB;
+
 typedef Monitor<ValueSEQ>  MonitorSEQ;
 typedef Monitor<ValueCILK> MonitorCILK;
 typedef Monitor<ValueOMP>  MonitorOMP;

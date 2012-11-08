@@ -56,6 +56,18 @@ typedef struct
     int base_type;
 } vsmcPath;
 
+typdef struct
+{
+    void *initialize_ptr;
+    int base_type;
+} vsmcInitialize;
+
+typdef struct
+{
+    void *move_ptr;
+    int base_type;
+} vsmcMove;
+
 typedef struct
 {
     void *monitor_eval_ptr;
