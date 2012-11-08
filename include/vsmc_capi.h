@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-// Resample scheme
+/* Resample scheme */
 #define VSMC_RESAMPLE_MULTINOMIAL          101
 #define VSMC_RESAMPLE_RESIDUAL             102
 #define VSMC_RESAMPLE_STRATIFIED           103
@@ -11,20 +11,20 @@
 #define VSMC_RESAMPLE_RESIDUAL_STRATIFIED  105
 #define VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC  106
 
-// Base class types
+/* Base class types */
 #define VSMC_BASE_SEQ  201
 #define VSMC_BASE_CILK 202
 #define VSMC_BASE_OMP  203
 #define VSMC_BASE_STD  204
 #define VSMC_BASE_TBB  205
 
-// Matrix order
+/* Matrix order */
 #define VSMC_COLUMN_MAJOR 301
 #define VSMC_ROW_MAJOR    302
 
 #ifdef __cplusplus
 extern "C" {
-#endif // __cplusplus
+#endif /* __cplusplus */
 
 typedef struct
 {
@@ -80,7 +80,7 @@ typedef struct
     int base_type;
 } vsmcPathEval;
 
-// vsmc::Sampler
+/* vsmc::Sampler */
 vsmcSampler  vsmc_sampler_new (size_t, unsigned, int, double, int);
 void vsmc_sampler_delete (vsmcSampler);
 vsmcParticle vsmc_sampler_particle (vsmcSampler);
@@ -104,7 +104,7 @@ void     vsmc_sampler_add_monitor            (vsmcSampler, const char *,
         unsigned , vsmcMonitorEval);
 void     vsmc_sampler_print                  (vsmcSampler, const char *);
 
-// vsmc::Particle
+/* vsmc::Particle */
 vsmcValue vsmc_particle_value (vsmcParticle);
 size_t vsmc_particle_size             (vsmcParticle);
 void   vsmc_particle_resample         (vsmcParticle, double);
@@ -121,7 +121,7 @@ void   vsmc_particle_set_log_weight   (vsmcParticle, const double *, int);
 void   vsmc_particle_add_log_weight   (vsmcParticle, const double *, int);
 double vsmc_particle_ess              (vsmcParticle);
 
-// vsmc::Monitor
+/* vsmc::Monitor */
 vsmcMonitor vsmc_monitor_new (vsmcSampler, unsigned, vsmcMonitorEval);
 void     vsmc_monitor_delete             (vsmcMonitor);
 unsigned vsmc_monitor_dim                (vsmcMonitor);
@@ -130,7 +130,7 @@ void     vsmc_monitor_read_index         (vsmcMonitor, unsigned *);
 double  *vsmc_monitor_read_record        (vsmcMonitor, unsigned, double *);
 double  *vsmc_monitor_read_record_matrix (vsmcMonitor, int, double *);
 
-// vsmc::Path
+/* vsmc::Path */
 vsmcPath vsmc_path_new (vsmcSampler, vsmcPathEval);
 void     vsmc_path_delete         (vsmcPath);
 unsigned vsmc_path_iter_size      (vsmcPath);
@@ -139,7 +139,7 @@ void     vsmc_path_read_integrand (vsmcPath, double *);
 void     vsmc_path_read_width     (vsmcPath, double *);
 void     vsmc_path_read_grid      (vsmcPath, double *);
 
-// vsmc::Samler::value_type
+/* vsmc::Samler::value_type */
 unsigned vsmc_value_dim              (vsmcValue);
 void     vsmc_value_rezie_dim        (vsmcValue, unsigned);
 size_t   vsmc_value_size             (vsmcValue);
@@ -148,31 +148,36 @@ double  *vsmc_value_state_ptr        (vsmcValue, size_t);
 double  *vsmc_value_read_state       (vsmcValue, unsigned, double *);
 double  *vsmc_value_read_state_matrix(vsmcValue, int, double *);
 
-// vsmc::Sampler::init_type
+/* vsmc::Sampler::init_type */
 vsmcInitialize vsmc_init_new (vsmcSampler,
-        unsigned (*) (size_t, unsigned, double *),
+        unsigned (*) (size_t, size_t, unsigned, double *),
         void (*) (vsmcParticle, void *),
         void (*) (vsmcParticle),
         void (*) (vsmcParticle));
 void vsmc_init_delete (vsmcInitialize);
 
-// vsmc::Sampler::move_type
+/* vsmc::Sampler::move_type */
 vsmcMove vsmc_move_new (vsmcSampler,
-        unsigned (*) (size_t, unsigned, unsigned, double *),
+        unsigned (*) (size_t, size_t, unsigned, unsigned, double *),
         void (*) (unsigned, vsmcParticle),
         void (*) (unsigned, vsmcParticle));
 void vsmc_move_delete (vsmcMove);
 
-// vsmc::Monitor::eval_type
+/* vsmc::Monitor::eval_type */
 vsmcMonitorEval vsmc_monitor_eval_new (vsmcSampler,
-        void (*) (size_t, unsigned, unsigned, unsigned,
+        void (*) (size_t, size_t, unsigned, unsigned, unsigned,
             const double *, double *),
         void (*) (unsigned, vsmcParticle),
         void (*) (unsigned, vsmcParticle));
 void vsmc_monitor_eval_delete (vsmcMonitorEval eval);
 
+/* vsmc::Seed */
+unsigned vsmc_seed_get  (void);
+void     vsmc_seed_set  (unsigned);
+void     vsmc_seed_skip (unsigned);
+
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif /* __cplusplus */
 
-#endif // VSMC_CAPI_H
+#endif /* VSMC_CAPI_H */
