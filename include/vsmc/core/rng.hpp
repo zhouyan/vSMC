@@ -8,8 +8,11 @@
 #pragma warning(push)
 #pragma warning(disable:4521)
 #endif // _MSC_VER
+#define R123_USE_U01_DOUBLE 1
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
+#include <Random123/u01.h>
+#include <Random123/MicroURNG.hpp>
 #include <Random123/conventional/Engine.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
