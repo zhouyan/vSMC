@@ -195,14 +195,14 @@ class PathEvalAdapter :
 
     void pre_processor (unsigned iter, const Particle<T> &particle)
     {
-        if (bool(pre_processor))
-            pre_processor(iter, particle);
+        if (bool(pre_processor_))
+            pre_processor_(iter, particle);
     }
 
     void post_processor (unsigned iter, const Particle<T> &particle)
     {
-        if (bool(post_processor))
-            post_processor(iter, particle);
+        if (bool(post_processor_))
+            post_processor_(iter, particle);
     }
 
     private :
