@@ -41,6 +41,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* Info */
+int vsmc_has_base_type (int);
+
 /* C type of vSMC templates */
 typedef struct {
     void *value_ptr;
@@ -106,7 +109,7 @@ vsmcSampler  vsmc_sampler_new (size_t, unsigned, int, double, int);
 void         vsmc_sampler_delete                 (vsmcSampler);
 size_t       vsmc_sampler_size                   (vsmcSampler);
 unsigned     vsmc_sampler_iter_size              (vsmcSampler);
-void         vsmc_sampler_resample_scheme        (vsmcSampler, int);
+int          vsmc_sampler_resample_scheme        (vsmcSampler, int);
 double       vsmc_sampler_resample_threshold     (vsmcSampler, double);
 double       vsmc_sampler_ess_history            (vsmcSampler, unsigned);
 void         vsmc_sampler_read_ess_history       (vsmcSampler, double *);
@@ -139,7 +142,7 @@ size_t    vsmc_particle_size             (vsmcParticle);
 vsmcValue vsmc_particle_value            (vsmcParticle);
 void      vsmc_particle_resample         (vsmcParticle, double);
 int       vsmc_particle_resampled        (vsmcParticle);
-void      vsmc_particle_resample_scheme  (vsmcParticle, int);
+int       vsmc_particle_resample_scheme  (vsmcParticle, int);
 void      vsmc_particle_read_weight      (vsmcParticle, double *);
 void      vsmc_particle_read_log_weight  (vsmcParticle, double *);
 double    vsmc_particle_weight           (vsmcParticle, size_t);
