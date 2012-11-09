@@ -20,87 +20,117 @@ class Sampler
     typedef Path<T> path_type;
     typedef cxx11::function<unsigned (particle_type &, void *)> init_type;
     typedef cxx11::function<unsigned (unsigned, particle_type &)> move_type;
-    typedef move_type mcmc_type;
+    typedef cxx11::function<unsigned (unsigned, particle_type &)> mcmc_type;
     typedef std::deque<move_type> move_queue_type;
-    typedef move_queue_type mcmc_queue_type;
+    typedef std::deque<mcmc_type> mcmc_queue_type;
+    typedef typename particle_type::resample_op_type resample_op_type;
+    typedef typename particle_type::rng_set_type rng_set_type;
+    typedef typename particle_type::resample_rng_set_type
+        resample_rng_set_type;
+    typedef typename particle_type::rng_type rng_type;
+    typedef typename particle_type::weight_set_type weight_set_type;
     typedef std::map<std::string, monitor_type> monitor_map_type;
 
     explicit Sampler (size_type N,
-            ResampleScheme scheme = STRATIFIED,
-            double threshold = 0.5) :
-        threshold_(threshold), particle_(N), iter_num_(0),
-        show_progress_(false)
+            ResampleScheme scheme = STRATIFIED, double threshold = 0.5) :
+        threshold_(threshold), particle_(N), iter_num_(0), show_(false)
     {
         resample_scheme(scheme);
     }
 
     explicit Sampler (size_type N,
-            const typename particle_type::resample_op_type &res_op,
-            double threshold = 0.5) :
+            const resample_op_type &res_op, double threshold = 0.5) :
         threshold_(threshold), particle_(N), iter_num_(0)
     {
         resample_scheme(res_op);
     }
 
+    /// \brief Number of particles
     size_type size () const
     {
         return particle_.size();
     }
 
+    /// \brief Number of iterations (including initialization)
     unsigned iter_size () const
     {
         return static_cast<unsigned>(ess_history_.size());
     }
 
-    void resample_scheme (
-            const typename particle_type::resample_op_type &res_op)
+    /// \brief Set resampling method by a resample_op_type object
+    void resample_scheme (const resample_op_type &res_op)
     {
         particle_.resample_scheme(res_op);
     }
 
+    /// \brief Set resampling method by a built-in scheme name
     void resample_scheme (ResampleScheme scheme)
     {
         particle_.resample_scheme(scheme);
     }
 
+    /// \brief Set resampling method by a scheme name from a collection
+    ///
+    /// \detail
+    /// An object of type
+    /// vsmc::Resample<ResampleType<EnumType, S>, size_type,
+    /// resample_rng_set_type> will constructed as the resampling method. This
+    /// can be a user defined partial specializing of vsmc::Resample clas
+    /// template
+    ///
+    /// For example, resample_scheme<vsmc::ResampleScheme, vsmc::STRATIFIED>()
+    /// is equivalent to resample_scheme(vsmc::STRATIFIED)
     template <typename EnumType, EnumType S>
     void resample_scheme ()
     {
         particle_.template resample_scheme<EnumType, S>();
     }
 
+    /// \brief Set resampling method by a scheme name from a collection
+    ///
+    /// \detail
+    /// An object of type
+    /// vsmc::Resample<ResType, size_type, resample_rng_set_type>, will
+    /// constructed as the resampling method. This can be a user defined
+    /// partial specializing of vsmc::Resample class template
     template <typename ResType>
     void resample_scheme ()
     {
         particle_.template resample_scheme<ResType>();
     }
 
+    /// \brief Get resampling threshold
     double resample_threshold () const
     {
         return threshold_;
     }
 
+    /// \brief Set resampling threshold
     void resample_threshold (double threshold)
     {
         threshold_ = threshold;
     }
 
+    /// \brief Get ESS of a given iteration, initialization count as iter 0
     double ess_history (unsigned iter) const
     {
         return ess_history_[iter];
     }
 
+    /// \brief Read ESS history into an output iterator
     template <typename OutputIter>
     OutputIter read_ess_history (OutputIter first) const
     {
         return std::copy(ess_history_.begin(), ess_history_.end(), first);
     }
 
+    /// \brief Get resampling indicator of a given iteration
     bool resampled_history (unsigned iter) const
     {
         return resampled_history_[iter];
     }
 
+    /// \brief Read resampling indicator history into an output iterator
     template <typename OutputIter>
     OutputIter read_resampled_history (OutputIter first) const
     {
@@ -108,37 +138,45 @@ class Sampler
                 first);
     }
 
+    /// \brief Get number of moves (bosth move and mcmc) of a given iteration
     unsigned move_num (unsigned iter) const
     {
         return static_cast<unsigned>(accept_history_[iter].size());
     }
 
-    unsigned accept_history (unsigned iter, unsigned move_num) const
+    /// \brief Get the accept count of a given iteration and id of the move at
+    /// that iteration.
+    unsigned accept_history (unsigned iter, unsigned id) const
     {
-        return accept_history_[iter][move_num];
+        return accept_history_[iter][id];
     }
 
+    /// \brief Get a reference to the particle_type object
     particle_type &particle ()
     {
         return particle_;
     }
 
+    /// \brief Get a const reference to the particle_type object
     const particle_type &particle () const
     {
         return particle_;
     }
 
+    /// \brief Set the initialization object which is init_type
     void init (const init_type &new_init)
     {
         init_ = new_init;
     }
 
+    /// \brief Clear the move queue and set add a move object of type move_type
     void move (const move_type &new_move)
     {
         move_queue_.clear();
         move_queue_.push_back(new_move);
     }
 
+    /// \brief Get 
     move_queue_type &move_queue ()
     {
         return move_queue_;
@@ -470,7 +508,7 @@ class Sampler
 
     void show_progress (bool show)
     {
-        show_progress_ = show;
+        show_ = show;
     }
 
     private :
@@ -490,7 +528,7 @@ class Sampler
     monitor_map_type monitor_;
     path_type path_;
 
-    bool show_progress_;
+    bool show_;
 
     void do_resampling ()
     {
@@ -513,7 +551,7 @@ class Sampler
 
     void print_progress () const
     {
-        if (!show_progress_)
+        if (!show_)
             return;
 
         if (iter_num_ == 0) {
