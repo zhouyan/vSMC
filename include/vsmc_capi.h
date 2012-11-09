@@ -3,6 +3,21 @@
 
 #include <stddef.h>
 
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
+
+#ifndef VSMC_USE_RANDOM123
+#define VSMC_USE_RANDOM123 1
+#endif
+
+#if VSMC_USE_RANDOM123
+#define R123_USE_U01_DOUBLE 1
+#include <Random123/philox.h>
+#include <Random123/threefry.h>
+#include <Random123/u01.h>
+#endif // VSMC_USE_RANDOM123
+
 /* Resample scheme */
 #define VSMC_RESAMPLE_MULTINOMIAL          101
 #define VSMC_RESAMPLE_RESIDUAL             102
