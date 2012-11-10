@@ -15,31 +15,23 @@ class Sampler
 
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
-    typedef Particle<T> particle_type;
-    typedef Monitor<T> monitor_type;
-    typedef Path<T> path_type;
-    typedef cxx11::function<unsigned (particle_type &, void *)> init_type;
-    typedef cxx11::function<unsigned (unsigned, particle_type &)> move_type;
-    typedef cxx11::function<unsigned (unsigned, particle_type &)> mcmc_type;
+    typedef cxx11::function<unsigned (Particle<T> &, void *)> init_type;
+    typedef cxx11::function<unsigned (unsigned, Particle<T> &)> move_type;
+    typedef cxx11::function<unsigned (unsigned, Particle<T> &)> mcmc_type;
     typedef std::deque<move_type> move_queue_type;
     typedef std::deque<mcmc_type> mcmc_queue_type;
-    typedef typename particle_type::resample_op_type resample_op_type;
-    typedef typename particle_type::rng_set_type rng_set_type;
-    typedef typename particle_type::resample_rng_set_type
-        resample_rng_set_type;
-    typedef typename particle_type::rng_type rng_type;
-    typedef typename particle_type::weight_set_type weight_set_type;
-    typedef std::map<std::string, monitor_type> monitor_map_type;
+    typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
     explicit Sampler (size_type N,
-            ResampleScheme scheme = STRATIFIED, double threshold = 0.5) :
+            ResampleScheme scheme = Stratified, double threshold = 0.5) :
         threshold_(threshold), particle_(N), iter_num_(0), show_(false)
     {
         resample_scheme(scheme);
     }
 
     explicit Sampler (size_type N,
-            const resample_op_type &res_op, double threshold = 0.5) :
+            const typename Particle<T>::resample_op_type &res_op,
+            double threshold = 0.5) :
         threshold_(threshold), particle_(N), iter_num_(0)
     {
         resample_scheme(res_op);
@@ -57,13 +49,14 @@ class Sampler
         return static_cast<unsigned>(ess_history_.size());
     }
 
-    /// \brief Set resampling method by a resample_op_type object
-    void resample_scheme (const resample_op_type &res_op)
+    /// \brief Set resampling method by a Particle<T>::resample_op_type object
+    void resample_scheme (const typename Particle<T>::resample_op_type &res_op)
     {
         particle_.resample_scheme(res_op);
     }
 
-    /// \brief Set resampling method by a built-in scheme name
+    /// \brief Set resampling method by a built-in ResampleScheme scheme
+    /// name
     void resample_scheme (ResampleScheme scheme)
     {
         particle_.resample_scheme(scheme);
@@ -71,28 +64,27 @@ class Sampler
 
     /// \brief Set resampling method by a scheme name from a collection
     ///
-    /// \detail
-    /// An object of type
-    /// vsmc::Resample<ResampleType<EnumType, S>, size_type,
-    /// resample_rng_set_type> will constructed as the resampling method. This
-    /// can be a user defined partial specializing of vsmc::Resample clas
-    /// template
+    /// \details
+    /// An object of type Resample<ResampleType<EnumType, S>, size_type,
+    /// Particle<T>::resample_rng_set_type> will constructed as the resampling
+    /// method. This can be a user defined partial specializing of Resample
+    /// class template
     ///
-    /// For example, resample_scheme<vsmc::ResampleScheme, vsmc::STRATIFIED>()
-    /// is equivalent to resample_scheme(vsmc::STRATIFIED)
+    /// For example, resample_scheme<ResampleScheme, Stratified>() is
+    /// equivalent to resample_scheme(Stratified)
     template <typename EnumType, EnumType S>
     void resample_scheme ()
     {
         particle_.template resample_scheme<EnumType, S>();
     }
 
-    /// \brief Set resampling method by a scheme name from a collection
+    /// \brief Set resampling method by the type of resampling object
     ///
-    /// \detail
-    /// An object of type
-    /// vsmc::Resample<ResType, size_type, resample_rng_set_type>, will
-    /// constructed as the resampling method. This can be a user defined
-    /// partial specializing of vsmc::Resample class template
+    /// \details
+    /// An object of type Resample<ResType, size_type,
+    /// Particle<T>::rng_set_type>, will constructed as the resampling method.
+    /// This can be a user defined partial specializing of Resample class
+    /// template
     template <typename ResType>
     void resample_scheme ()
     {
@@ -117,7 +109,7 @@ class Sampler
         return ess_history_[iter];
     }
 
-    /// \brief Read ESS history into an output iterator
+    /// \brief Read ESS history through an output iterator
     template <typename OutputIter>
     OutputIter read_ess_history (OutputIter first) const
     {
@@ -130,7 +122,7 @@ class Sampler
         return resampled_history_[iter];
     }
 
-    /// \brief Read resampling indicator history into an output iterator
+    /// \brief Read resampling indicator history through an output iterator
     template <typename OutputIter>
     OutputIter read_resampled_history (OutputIter first) const
     {
@@ -138,84 +130,88 @@ class Sampler
                 first);
     }
 
-    /// \brief Get number of moves (bosth move and mcmc) of a given iteration
+    /// \brief Get the number of moves (bosth move and mcmc) of a given
+    /// iteration
     unsigned move_num (unsigned iter) const
     {
         return static_cast<unsigned>(accept_history_[iter].size());
     }
 
-    /// \brief Get the accept count of a given iteration and id of the move at
-    /// that iteration.
-    unsigned accept_history (unsigned iter, unsigned id) const
+    /// \brief Get the accept count of a given move id and the iteration
+    ///
+    /// \details
+    /// The total number of move can be get through move_num(). The first move
+    /// performed (either a move or a mcmc) has `id` 0 and so on.
+    unsigned accept_history (unsigned id, unsigned iter) const
     {
         return accept_history_[iter][id];
     }
 
-    /// \brief Get a reference to the particle_type object
-    particle_type &particle ()
+    /// \brief Read and write access to the Particle<T> object
+    Particle<T> &particle ()
     {
         return particle_;
     }
 
-    /// \brief Get a const reference to the particle_type object
-    const particle_type &particle () const
+    /// \brief Read only access to the Particle<T> object
+    const Particle<T> &particle () const
     {
         return particle_;
     }
 
-    /// \brief Set the initialization object which is init_type
+    /// \brief Set the initialization object of type init_type
     void init (const init_type &new_init)
     {
         init_ = new_init;
     }
 
-    /// \brief Clear the move queue and set add a move object of type move_type
+    /// \brief Clear the move queue and add a move object of type move_type
     void move (const move_type &new_move)
     {
         move_queue_.clear();
         move_queue_.push_back(new_move);
     }
 
-    /// \brief Get 
+    /// \brief Read and write access to the move queue of type move_queue_type
     move_queue_type &move_queue ()
     {
         return move_queue_;
     }
 
-    /// Read only access to the movement queue
+    /// \brief Read only access to the move queue of type move_queue_type
     const move_queue_type &move_queue () const
     {
         return move_queue_;
     }
 
-    /// Clear the MCMC movement queue and set a new MCMC movement functor
+    /// \brief Clear the mcmc queue and add a mcmc object of type mcmc_type
     void mcmc (const mcmc_type &new_mcmc)
     {
         mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
     }
 
-    /// Read and write access to the MCMC movement queue
+    /// \brief Read and write access to the mcmc queue of type mcmc_queue_type
     move_queue_type &mcmc_queue ()
     {
         return mcmc_queue_;
     }
 
-    /// Read only access to the MCMC movement queue
+    /// \brief Read only access to the mcmc queue of type mcmc_queue_type
     const move_queue_type &mcmc_queue () const
     {
         return mcmc_queue_;
     }
 
-    /// \brief Initialize the particle set
+    /// \brief Initialization
     ///
-    /// \param param Additional parameters passed to the initialization
-    /// functor
+    /// \param param Additional parameters passed to the initialization object
+    /// of type init_type
     ///
-    /// \details
-    /// Before calling the initialization functor, set by Sampler::init, all
-    /// histories (ESS, resampling, accet counts) are cleared. Monitor::clear
-    /// are called upon each monitor as well.
+    /// \note
+    /// All histories (ESS, resampled, accept, monitors and path) are clared
+    /// before callling the initialization object. Monitors and path's
+    /// evaluation objects are untouched.
     void initialize (void *param = VSMC_NULLPTR)
     {
         ess_history_.clear();
@@ -237,13 +233,12 @@ class Sampler
         print_progress();
     }
 
-    /// Perform iteration for a given number times
+    /// \brief Iteration
     ///
     /// \details
-    /// Movements set through Sampler::move and Sampler::move_queue are
-    /// performed first. Then threshold of ESS/N is checked and possible
-    /// resampling is performed. After that, movements set through
-    /// Sampler::mcmc and Sampler::mcmc_queue are performed.
+    /// Moves performed first. Then ESS/N is compared to the threshold and
+    /// possible resampling is performed. Then mcmcs are performed. Then
+    /// monitors and path are computed
     void iterate (unsigned num = 1)
     {
         std::vector<unsigned> accept_count;
@@ -279,84 +274,85 @@ class Sampler
     ///
     /// \param name The name of the monitor
     /// \param mon The new monitor to be added
-    void monitor (const std::string &name, const monitor_type &mon)
+    void monitor (const std::string &name, const Monitor<T> &mon)
     {
         monitor_.insert(std::make_pair(name, mon));
     }
 
-    /// \brief Add a monitor with a evaluation functor
+    /// \brief Add a monitor with an evaluation object
     ///
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
-    /// \param eval The functor used to evaluate the results
-    ///
-    /// \sa Monitor::eval_type
+    /// \param eval The evaluation object of type Monitor::eval_type
     void monitor (const std::string &name, unsigned dim,
-            const typename monitor_type::eval_type &eval)
+            const typename Monitor<T>::eval_type &eval)
     {
-        monitor_.insert(std::make_pair(name, monitor_type(dim, eval)));
+        monitor_.insert(std::make_pair(name, Monitor<T>(dim, eval)));
     }
 
-    /// Read only access to a named monitor through an iterator
+    /// \brief Read and write access to a named monitor through an iterator for
+    /// the monitor_map_type object
+    typename monitor_map_type::iterator monitor (const std::string &name)
+    {
+        return monitor_.find(name);
+    }
+
+    /// \brief Read only access to a named monitor through an iterator for the
+    /// monitor_map_type object
     typename monitor_map_type::const_iterator monitor (
             const std::string &name) const
     {
         return monitor_.find(name);
     }
 
-    /// Read and write access to a named monitor through iterator
-    typename monitor_map_type::iterator monitor (const std::string &name)
-    {
-        return monitor_.find(name);
-    }
-
-    /// Read only access to all monitors
-    const monitor_map_type &monitor () const
-    {
-        return monitor_;
-    }
-
-    /// Read and write access to all monitors
+    /// \brief Read and write access to all monitors to the monitor_map_type
+    /// object
     monitor_map_type &monitor ()
     {
         return monitor_;
     }
 
-    /// Erase a named monitor
+    /// \brief Read only access to all monitors to the the monitor_map_type
+    /// object
+    const monitor_map_type &monitor () const
+    {
+        return monitor_;
+    }
+
+    /// \brief Erase a named monitor
     void clear_monitor (const std::string &name)
     {
         monitor_.erase(name);
     }
 
-    /// Erase all monitors
+    /// \brief Erase all monitors
     void clear_monitor ()
     {
         monitor_.clear();
     }
 
-    /// Read only access to the Path sampling monitor
-    const path_type &path () const
+    /// \brief Read and write access to the Path sampling monitor
+    Path<T> &path ()
     {
         return path_;
     }
 
-    /// Read and write access to the Path sampling monitor
-    path_type &path ()
+    /// \brief Read only access to the Path sampling monitor
+    const Path<T> &path () const
     {
         return path_;
     }
 
-    /// \brief Set the path sampling evaluation functor
+    /// \brief Set the path sampling evaluation object
     ///
-    /// \param eval The functor used to compute the integrands or results
-    ///
-    /// \sa Path::eval_type
-    void path_sampling (const typename path_type::eval_type &eval)
+    /// \param eval The evaluation objet of type Path::eval_type
+    void path_sampling (const typename Path<T>::eval_type &eval)
     {
         path_.set_eval(eval);
     }
 
-    /// Path sampling estimate of the logarithm of normalizing constants ratio
+    /// \brief Path sampling estimate of the logarithm of normalizing constants
+    /// ratio
     double path_sampling () const
     {
         return path_.zconst();
@@ -368,13 +364,13 @@ class Sampler
     /// \param print_header Print header if \b true
     /// \param print_path Print path sampling if \b true
     /// \param print_monitor Print monitors if \b true
-    /// \param sampler_id The ID to be printed if \c print_id is \b true
+    /// \param sampler_id The ID of the sampler
     /// \param sepchar The character used to seperate fields
     /// \param nachar The character used to represent missing values
     ///
     /// \note \c print_path and \c print_monitor are only used to hint the
     /// print process. If there is no record at all, then they won't be printed
-    /// even set to \b true.
+    /// even set to \b true instead of being printed all as NA's.
     template<typename OutputStream>
     void print (OutputStream &os = std::cout,
             bool print_header = true,
@@ -506,6 +502,7 @@ class Sampler
         }
     }
 
+    /// \brief Set if the sampler shall print dots at each iteration
     void show_progress (bool show)
     {
         show_ = show;
@@ -519,14 +516,14 @@ class Sampler
 
     double threshold_;
 
-    particle_type particle_;
+    Particle<T> particle_;
     unsigned iter_num_;
     std::vector<double> ess_history_;
     std::vector<bool> resampled_history_;
     std::vector<std::vector<unsigned> > accept_history_;
 
     monitor_map_type monitor_;
-    path_type path_;
+    Path<T> path_;
 
     bool show_;
 
@@ -575,7 +572,7 @@ class Sampler
 /// \brief Print the Sampler
 /// \ingroup Core
 template<typename OutputStream, typename T>
-OutputStream &operator<< (OutputStream &os, const vsmc::Sampler<T> &sampler)
+OutputStream &operator<< (OutputStream &os, const Sampler<T> &sampler)
 {
     sampler.print(os, true);
     return os;

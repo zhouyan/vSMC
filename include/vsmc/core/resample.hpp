@@ -46,15 +46,15 @@ inline void multinomial (SizeType N, SizeType S, RngSetType &rng_set,
 /// \brief Resample scheme
 /// \ingroup Resampling
 enum ResampleScheme {
-    MULTINOMIAL,         ///< Multinomial resampling
-    RESIDUAL,            ///< Reisudal resampling
-    STRATIFIED,          ///< Startified resampling
-    SYSTEMATIC,          ///< Systematic resampling
-    RESIDUAL_STRATIFIED, ///< Stratified resampling on the residuals
-    RESIDUAL_SYSTEMATIC  ///< Systematic resampling on the residuals
+    Multinomial,         ///< Multinomial resampling
+    Residual,            ///< Reisudal resampling
+    Stratified,          ///< Startified resampling
+    Systematic,          ///< Systematic resampling
+    ResidualStratified , ///< Stratified resampling on the residuals
+    ResidualSystematic   ///< Systematic resampling on the residuals
 }; // enum ResamleScheme
 
-/// \brief Int-to-Type struct template for resampling scheme
+/// \brief Int-to-Type struct template for identifying a resampling scheme
 /// \ingroup Resampling
 template <typename EnumType, EnumType S> struct ResampleType {};
 
@@ -66,7 +66,7 @@ class Resample {};
 /// \brief Multinomial resampling
 /// \ingroup Resampling
 template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, MULTINOMIAL>,
+class Resample<ResampleType<ResampleScheme, Multinomial>,
       SizeType, RngSetType>
 {
     public :
@@ -81,7 +81,7 @@ class Resample<ResampleType<ResampleScheme, MULTINOMIAL>,
 /// \brief Residual resampling
 /// \ingroup Resampling
 template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, RESIDUAL>,
+class Resample<ResampleType<ResampleScheme, Residual>,
       SizeType, RngSetType>
 {
     public :
@@ -115,7 +115,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL>,
 /// \brief Stratified resampling
 /// \ingroup Resampling
 template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, STRATIFIED>,
+class Resample<ResampleType<ResampleScheme, Stratified>,
       SizeType, RngSetType>
 {
     public :
@@ -147,7 +147,7 @@ class Resample<ResampleType<ResampleScheme, STRATIFIED>,
 /// \brief Systematic resampling
 /// \ingroup Resampling
 template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, SYSTEMATIC>,
+class Resample<ResampleType<ResampleScheme, Systematic>,
       SizeType, RngSetType>
 {
     public :
@@ -178,7 +178,7 @@ class Resample<ResampleType<ResampleScheme, SYSTEMATIC>,
 /// \brief Residual stratified resampling
 /// \ingroup Resampling
 template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
+class Resample<ResampleType<ResampleScheme, ResidualStratified>,
       SizeType, RngSetType>
 {
     public :
@@ -228,7 +228,7 @@ class Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
 /// \brief Residual systematic resampling
 /// \ingroup Resampling
 template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
+class Resample<ResampleType<ResampleScheme, ResidualSystematic>,
       SizeType, RngSetType>
 {
     public :

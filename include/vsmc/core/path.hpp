@@ -36,16 +36,31 @@ class Path
         return *this;
     }
 
+    /// \brief The number of iterations has been recorded
+    ///
+    /// \note This is not necessarily the same as Sampler<T>::iter_size. For
+    /// example, a path sampling monitor can be set only after a certain time
+    /// point of the sampler's iterations.
     unsigned iter_size () const
     {
         return static_cast<unsigned>(index_.size());
     }
 
+    /// \brief Whether the evaluation object is valid
     VSMC_EXPLICIT_OPERATOR operator bool () const
     {
         return bool(eval_);
     }
 
+    /// \brief Get the iteration index of the sampler of a given monitor
+    /// iteration
+    ///
+    /// \details
+    /// For example, if a path sampling monitor is only set at the sampler's
+    /// iteration `siter`. Then index(0) will be `siter` and so on. If the path
+    /// sampling monitor is set before the sampler's initialization and
+    /// continued to be evaluated during the iterations, then iter(iter) shall
+    /// just be `iter`.
     unsigned index (unsigned iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -55,6 +70,7 @@ class Path
         return index_[iter];
     }
 
+    /// \brief Get the path sampling integrand of a given path iteration
     double integrand (unsigned iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -64,6 +80,7 @@ class Path
         return integrand_[iter];
     }
 
+    /// \brief Get the path sampling width of a given path iteration
     double width (unsigned iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -73,6 +90,10 @@ class Path
         return width_[iter];
     }
 
+    /// \brief Get the path sampling grid value of a given path iteration
+    ///
+    /// \details
+    /// This shall be sum of width's from zero up to the given iteration
     double grid (unsigned iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -82,35 +103,41 @@ class Path
         return grid_[iter];
     }
 
+    /// \brief Read the index history through an output iterator
     template <typename OutputIter>
     OutputIter read_index (OutputIter first) const
     {
         return std::copy(index_.begin(), index_.end(), first);
     }
 
+    /// \brief Read the integrand history through an output iterator
     template <typename OutputIter>
     OutputIter read_integrand (OutputIter first) const
     {
         return std::copy(integrand_.begin(), integrand_.end(), first);
     }
 
+    /// \brief Read the width history through an output iterator
     template <typename OutputIter>
     OutputIter read_width (OutputIter first) const
     {
         return std::copy(width_.begin(), width_.end(), first);
     }
 
+    /// \brief Read the grid history through an output iterator
     template <typename OutputIter>
     OutputIter read_grid (OutputIter first) const
     {
         return std::copy(grid_.begin(), grid_.end(), first);
     }
 
+    /// \brief Set a new evaluation object of type eval_type
     void set_eval (const eval_type &new_eval)
     {
         eval_ = new_eval;
     }
 
+    /// Perform the evaluation for a given iteration and a Particle<T> object
     void eval (unsigned iter, const Particle<T> &particle)
     {
         VSMC_RUNTIME_ASSERT((bool(eval_)),
@@ -132,6 +159,7 @@ class Path
                 grid_.back() + width_.back() : width_.back());
     }
 
+    /// \brief Get the logarithm nomralizing constants ratio estimates
     double zconst () const
     {
         double sum = 0;
@@ -141,6 +169,7 @@ class Path
         return sum;
     }
 
+    /// \brief Clear all records of the index and integrations
     void clear ()
     {
         index_.clear();

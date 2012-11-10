@@ -62,21 +62,37 @@ class Monitor
         return *this;
     }
 
+    /// \brief The dimension of the monitor
     unsigned dim () const
     {
         return dim_;
     }
 
+    /// \brief The number of iterations has been recorded
+    ///
+    /// \note This is not necessarily the same as Sampler<T>::iter_size. For
+    /// example, a monitor can be added only after a certain time point of the
+    /// sampler's iterations.
     unsigned iter_size () const
     {
         return static_cast<unsigned>(index_.size());
     }
 
+    /// \brief Whether the evaluation object is valid
     VSMC_EXPLICIT_OPERATOR operator bool () const
     {
         return bool(eval_);
     }
 
+    /// \brief Get the iteration index of the sampler of a given monitor
+    /// iteration
+    ///
+    /// \details
+    /// For example, if a monitor is only added to the sampler at the sampler's
+    /// iteration `siter`. Then index(0) will be `siter` and so on. If the
+    /// monitor is added before the sampler's initialization and continued to
+    /// be evaluated during the iterations, then iter(iter) shall just be
+    /// `iter`.
     unsigned index (unsigned iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -86,6 +102,11 @@ class Monitor
         return index_[iter];
     }
 
+    /// \brief Get the Monte Carlo integration record of a given variable and
+    /// the monitor iteration
+    ///
+    /// \details
+    /// For a `Dim` dimension monitor, `id` shall be 0 to `Dim` - 1
     double record (unsigned id, unsigned iter) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
@@ -98,12 +119,15 @@ class Monitor
         return record_[iter * dim_ + id];
     }
 
+    /// \brief Read the index history through an output iterator
     template <typename OutputIter>
     OutputIter read_index (OutputIter first) const
     {
         return std::copy(index_.begin(), index_.end(), first);
     }
 
+    /// \brief Read the record history for a given variable through an output
+    /// iterator
     template <typename OutputIter>
     OutputIter read_record (unsigned id, OutputIter first) const
     {
@@ -114,6 +138,13 @@ class Monitor
         return first;
     }
 
+    /// \brief Read the record history of all variables through an array of
+    /// output iterators
+    ///
+    /// \param first A pointer to an array of output iterators
+    ///
+    /// \details
+    /// The record of variable `id` will be read through `first[id]`
     template <typename OutputIter>
     void read_record_matrix (OutputIter *first) const
     {
@@ -121,6 +152,17 @@ class Monitor
             read_record(d, first[d]);
     }
 
+    /// \brief Read the record history of all variables through an output
+    /// iterator
+    ///
+    /// \param order Either ColumnMajor or RowMajor
+    /// \param first The output iterator
+    ///
+    /// \note For example, say `first` is of type `double *`, then if `order ==
+    /// ColumnMajor`, then, `first[j * iter_size() + i] == record(i, j)`.
+    /// Otherwise, if `order == RowMajor`, then `first[i * dim() + j] ==
+    /// record(i, j)`. That is, the output is an `iter_size()` by `dim()`
+    /// matrix, with the usual meaning of column or row major order.
     template <typename OutputIter>
     OutputIter read_record_matrix (MatrixOrder order, OutputIter first) const
     {
@@ -138,12 +180,14 @@ class Monitor
         return first;
     }
 
-    /// Set a new evaluation functor
+    /// \brief Set a new evaluation object of type eval_type
     void set_eval (const eval_type &new_eval)
     {
         eval_ = new_eval;
     }
 
+    /// \brief Perform the evaluation for a given iteration and a Particle<T>
+    /// object
     void eval (unsigned iter, const Particle<T> &particle)
     {
         VSMC_RUNTIME_ASSERT((bool(eval_)),
@@ -162,6 +206,7 @@ class Monitor
             record_.push_back(result_[d]);
     }
 
+    /// \brief Clear all records of the index and integrations
     void clear ()
     {
         index_.clear();

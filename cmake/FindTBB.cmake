@@ -14,6 +14,38 @@
 # TBB_INC_DIR - The path to which CMake shall attempt to find headers first
 # TBB_LIB_DIR - The path to which CMake shall attempt to find libraries first
 
+FUNCTION (ADD_TBB_RUNTIME exe_name)
+    IF (MSVC)
+        ADD_CUSTOM_COMMAND (
+            OUTPUT ${PROJECT_BINARY_DIR}/tbb.dll
+            DEPENDS ${TBB_DLL}
+            COMMAND ${CMAKE_COMMAND} ARGS -E copy
+            ${TBB_DLL_RELEASE} ${PROJECT_BINARY_DIR}/tbb.dll)
+        ADD_CUSTOM_TARGET (${exe_name}_tbb_dll
+            DEPENDS ${PROJECT_BINARY_DIR}/tbb.dll)
+        ADD_DEPENDENCIES (${exe_name} ${exe_name}_tbb_dll)
+        ADD_CUSTOM_COMMAND (
+            OUTPUT ${PROJECT_BINARY_DIR}/tbb_debug.dll
+            DEPENDS ${TBB_DLL_DEBUG}
+            COMMAND ${CMAKE_COMMAND} ARGS -E copy
+            ${TBB_DLL_DEBUG} ${PROJECT_BINARY_DIR}/tbb_debug.dll)
+        ADD_CUSTOM_TARGET (${exe_name}_tbb_debug_dll
+            DEPENDS ${PROJECT_BINARY_DIR}/tbb_debug.dll)
+        ADD_DEPENDENCIES (${exe_name} ${exe_name}_tbb_debug_dll)
+    ENDIF (MSVC)
+
+    IF (XCODE_VERSION)
+        ADD_CUSTOM_COMMAND (
+            OUTPUT ${PROJECT_BINARY_DIR}/libtbb.dylib
+            DEPENDS ${TBB_LINK_LIBRARIES_RELEASE}
+            COMMAND ${CMAKE_COMMAND} ARGS -E copy
+            ${TBB_LINK_LIBRARIES_RELEASE} ${PROJECT_BINARY_DIR}/libtbb.dylib)
+        ADD_CUSTOM_TARGET (${exe_name}_tbb_dylib
+            DEPENDS ${PROJECT_BINARY_DIR}/libtbb.dylib)
+        ADD_DEPENDENCIES (${exe_name} ${exe_name}_tbb_dylib)
+    ENDIF (XCODE_VERSION)
+ENDFUNCTION (ADD_TBB_RUNTIME)
+
 IF (TBB_FOUND)
     RETURN ()
 ELSE (TBB_FOUND)
@@ -214,35 +246,3 @@ IF (MSVC)
         SET (TBB_DLL ${TBB_DLL_RELEASE} ${TBB_DLL_DEBUG})
     ENDIF (TBB_DLL_RELEASE AND TBB_DLL_DEBUG)
 ENDIF (MSVC)
-
-FUNCTION (ADD_TBB_RUNTIME exe_name)
-    IF (MSVC)
-        ADD_CUSTOM_COMMAND (
-            OUTPUT ${PROJECT_BINARY_DIR}/tbb.dll
-            DEPENDS ${TBB_DLL}
-            COMMAND ${CMAKE_COMMAND} ARGS -E copy
-            ${TBB_DLL_RELEASE} ${PROJECT_BINARY_DIR}/tbb.dll)
-        ADD_CUSTOM_TARGET (${exe_name}_tbb_dll
-            DEPENDS ${PROJECT_BINARY_DIR}/tbb.dll)
-        ADD_DEPENDENCIES (${exe_name} ${exe_name}_tbb_dll)
-        ADD_CUSTOM_COMMAND (
-            OUTPUT ${PROJECT_BINARY_DIR}/tbb_debug.dll
-            DEPENDS ${TBB_DLL_DEBUG}
-            COMMAND ${CMAKE_COMMAND} ARGS -E copy
-            ${TBB_DLL_DEBUG} ${PROJECT_BINARY_DIR}/tbb_debug.dll)
-        ADD_CUSTOM_TARGET (${exe_name}_tbb_debug_dll
-            DEPENDS ${PROJECT_BINARY_DIR}/tbb_debug.dll)
-        ADD_DEPENDENCIES (${exe_name} ${exe_name}_tbb_debug_dll)
-    ENDIF (MSVC)
-
-    IF (XCODE_VERSION)
-        ADD_CUSTOM_COMMAND (
-            OUTPUT ${PROJECT_BINARY_DIR}/libtbb.dylib
-            DEPENDS ${TBB_LINK_LIBRARIES_RELEASE}
-            COMMAND ${CMAKE_COMMAND} ARGS -E copy
-            ${TBB_LINK_LIBRARIES_RELEASE} ${PROJECT_BINARY_DIR}/libtbb.dylib)
-        ADD_CUSTOM_TARGET (${exe_name}_tbb_dylib
-            DEPENDS ${PROJECT_BINARY_DIR}/libtbb.dylib)
-        ADD_DEPENDENCIES (${exe_name} ${exe_name}_tbb_dylib)
-    ENDIF (XCODE_VERSION)
-ENDFUNCTION (ADD_TBB_RUNTIME)

@@ -130,7 +130,7 @@ void         vsmc_sampler_initialize             (vsmcSampler, void *);
 void         vsmc_sampler_iterate                (vsmcSampler, unsigned);
 vsmcMonitor  vsmc_sampler_monitor                (vsmcSampler, const char *,
                                                   unsigned, vsmcMonitorEval);
-void         vsmc_sampler_clear_monitor          (vsmcSampler);
+void         vsmc_sampler_clear_monitor          (vsmcSampler, const char *);
 vsmcPath     vsmc_sampler_path                   (vsmcSampler);
 double       vsmc_sampler_path_sampling          (vsmcSampler, vsmcPathEval);
 void         vsmc_sampler_print                  (vsmcSampler, const char *,

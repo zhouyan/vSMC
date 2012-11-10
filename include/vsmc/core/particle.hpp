@@ -21,7 +21,6 @@ class Particle :
     typedef T value_type;
     typedef typename RngSetTypeTrait<T>::type rng_set_type;
     typedef typename ResampleRngSetTypeTrait<T>::type resample_rng_set_type;
-    typedef typename rng_set_type::rng_type rng_type;
     typedef typename WeightSetTypeTrait<T>::type weight_set_type;
     typedef cxx11::function<void (size_type, resample_rng_set_type &,
             double *, size_type *)> resample_op_type;
@@ -46,27 +45,31 @@ class Particle :
         set_equal_weight();
     }
 
+    /// \brief Number of particles
     size_type size () const
     {
         return size_;
     }
 
+    /// \brief Read and write access to the value collection object
     value_type &value ()
     {
         return value_;
     }
 
+    /// \brief Read only access to the value collection object
     const value_type &value () const
     {
         return value_;
     }
 
-    void resample (double threshold)
-    {
-        resample(resample_op_, threshold);
-    }
-
-    void resample (resample_op_type &res_op, double threshold)
+    /// \brief Performing resampling if ESS/N < threshold
+    ///
+    /// \param threshold The threshold of ESS/N below which resampling will be
+    /// performed
+    ///
+    /// \return true if resampling was performed
+    bool resample (double threshold)
     {
         resampled_ = ess() < threshold * size_;
         if (resampled_) {
@@ -75,77 +78,90 @@ class Particle :
                     &weight_[0], &replication_[0]);
             resample_do();
         }
+
+        return resampled_;
     }
 
-    void resample (const resample_op_type &res_op, double threshold)
-    {
-        resample_scheme(res_op);
-        resample(threshold);
-    }
-
-    void resample (ResampleScheme scheme, double threshold)
-    {
-        resample_scheme(scheme);
-        resample(threshold);
-    }
-
+    /// \brief Whether last attempt of resample is actually performed
     bool resampled () const
     {
         return resampled_;
     }
 
+    /// \brief Set resampling method by a resample_op_type object
     void resample_scheme (const resample_op_type &res_op)
     {
         resample_op_ = res_op;
     }
 
-    void resample_scheme (ResampleScheme scheme)
+    /// \brief Set resampling method by a built-in scheme name
+    ///
+    /// \param scheme A ResampleScheme scheme name 
+    ///
+    /// \return  true if scheme is valid and the resampling scheme is actually
+    /// changed, false otherwise
+    bool resample_scheme (ResampleScheme scheme)
     {
         switch (scheme) {
-            case MULTINOMIAL :
+            case Multinomial :
                 resample_op_ =
-                    Resample<ResampleType<ResampleScheme, MULTINOMIAL>,
+                    Resample<ResampleType<ResampleScheme, Multinomial>,
                     size_type, resample_rng_set_type>();
                 break;
-            case RESIDUAL :
+            case Residual :
                 resample_op_ =
-                    Resample<ResampleType<ResampleScheme, RESIDUAL>,
+                    Resample<ResampleType<ResampleScheme, Residual>,
                     size_type, resample_rng_set_type>();
                 break;
-            case STRATIFIED :
+            case Stratified :
                 resample_op_ =
-                    Resample<ResampleType<ResampleScheme, STRATIFIED>,
+                    Resample<ResampleType<ResampleScheme, Stratified>,
                     size_type, resample_rng_set_type>();
                 break;
-            case SYSTEMATIC :
+            case Systematic :
                 resample_op_ =
-                    Resample<ResampleType<ResampleScheme, SYSTEMATIC>,
+                    Resample<ResampleType<ResampleScheme, Systematic>,
                     size_type, resample_rng_set_type>();
                 break;
-            case RESIDUAL_STRATIFIED :
+            case ResidualStratified :
                 resample_op_ =
-                    Resample<ResampleType<ResampleScheme, RESIDUAL_STRATIFIED>,
+                    Resample<ResampleType<ResampleScheme, ResidualStratified>,
                     size_type, resample_rng_set_type>();
                 break;
-            case RESIDUAL_SYSTEMATIC :
+            case ResidualSystematic :
                 resample_op_ =
-                    Resample<ResampleType<ResampleScheme, RESIDUAL_SYSTEMATIC>,
+                    Resample<ResampleType<ResampleScheme, ResidualSystematic>,
                     size_type, resample_rng_set_type>();
                 break;
             default :
-                resample_op_ =
-                    Resample<ResampleType<ResampleScheme, STRATIFIED>,
-                    size_type, resample_rng_set_type>();
+                return false;
                 break;
         }
+
+        return true;
     }
 
+    /// \brief Set resampling method by a scheme name from a collection
+    ///
+    /// \details
+    /// An object of type Resample<ResampleType<EnumType, S>, size_type,
+    /// resample_rng_set_type> will constructed as the resampling method. This
+    /// can be a user defined partial specializing of Resample clas template
+    ///
+    /// For example, resample_scheme<ResampleScheme, Stratified>() is
+    /// equivalent to resample_scheme(Stratified)
     template <typename EnumType, EnumType S>
     void resample_scheme ()
     {
         resample_scheme<ResampleType<EnumType, S> >();
     }
 
+    /// \brief Set resampling method by the type of resampling object
+    ///
+    /// \details
+    /// An object of type Resample<ResType, size_type, resample_rng_set_type>,
+    /// will constructed as the resampling method. This can be a user defined
+    /// partial specializing of Resample class template
     template <typename ResType>
     void resample_scheme ()
     {
