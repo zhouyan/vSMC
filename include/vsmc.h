@@ -24,30 +24,18 @@
  *
  * \details
  * The C API can be used to access vSMC when the value collection is of a class
- * of particular types, subclasses of `vsmc::StateBase<vsmc::Dynamic, double>`,
- * namely `vsmc::StateSEQ<vsmc::Dynamic, double>` etc. For example if one use
- * the C API to construct a sampler of type VSMC_BASE_SEQ, then it will be a
- * sampler for `vsmc::StateSEQ<vsmc::Dynamic, double>` value collection.  Only
- * those features avaiable when compiling the C library are accessible. The
+ * of particular types, subclasses of vsmc::StateBase<vsmc::Dynamic, double>,
+ * namely vsmc::StateSEQ<vsmc::Dynamic, double> etc. For example if one use the
+ * C API to construct a sampler of type VSMC_BASE_SEQ, then it will be a
+ * sampler for vsmc::StateSEQ<vsmc::Dynamic, double> value collection. Only
+ * those features available when compiling the C library are accessible. The
  * avaible base types can be tested through vsmc_has_base_type(int).
  * */
 
 /**
- * \defgroup CResample Resample scheme
+ * \defgroup CMacro Macros
  * \ingroup CAPI
- * \brief Macro definitions of resample scheme
- * */
-
-/**
- * \defgroup CBase Base class types
- * \ingroup CAPI
- * \brief Macro definitions of base class types
- * */
-
-/**
- * \defgroup MatrixOrder Matrix order
- * \ingroup CAPI
- * \brief Macro definitions of matrix orders used by some output functions
+ * \brief Macro definitions
  * */
 
 /**
@@ -56,112 +44,100 @@
  * \brief C types representing vSMC class templates objects
  *
  * \details
- * Each type has two memebers, a pointer of type `void *` and an integer
- * `base_type`. The pointer points to a vSMC class object. For example,
- * `sampler_ptr` of vsmcSampler pionts to an `vsmc::Sampler<T>` object, where
- * `T`'s type is determined by the `base_type`. For instance, if `base_type` is
- * `VSMC_BASE_SEQ`, then `T` will be `vsmc::StateSEQ<vsmc::Dynamic, double>`
+ * Each type has two members, a pointer of type `void *` and an integer
+ * `base_type`. The pointer points to a vSMC class object. For example, the
+ * pointer `sampler_ptr` of a vsmcSampler objectt points to an
+ * `vsmc::Sampler<T>` object, where `T`'s type is determined by the
+ * `base_type`. For instance, if `base_type` is VSMC_BASE_SEQ, then `T` will
+ * be vsmc::StateSEQ<vsmc::Dynamic, double>
  *
  * In the documents of this module, when we refer to a class templates defined
  * in vSMC C++ headers, by `T` we refer to such a class specialization whose
  * actual type depends on the `base_type` member of the C type object involved.
  * By `Impl` we refer to a class template in the vSMC helper module that
- * implement the functionality. For example, when documting vsmcInitialize, we
- * say that it representing `vsmc::InitializeAdapter<T, Impl>`, then if
- * `base_type` is VSMC_BASE_SEQ, then `T` is `vsmc::StateSEQ<vsmc::Dynamic,
- * double>` and `Impl` is `vsmc::InitializeSEQ`.
+ * implement the functionality. For example, when documenting vsmcInitialize, we
+ * say that it representing vsmc::InitializeAdapter<T, Impl>, then if
+ * `base_type` is VSMC_BASE_SEQ, then `T` is vsmc::StateSEQ<vsmc::Dynamic,
+ * double> and `Impl` is vsmc::InitializeSEQ.
  * */
+
+/**
+  * \defgroup CSeed C API to vsmc::Seed
+  * \ingroup CAPI
+  * \brief C functions for accessing vsmc::Seed singleton
+  * */
 
 /**
  * \defgroup CValue C API to vsmc::StateBase<vsmc::Dynamic, double>
  * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::StateBase<vsmc::Dynamic, double>
+ * \brief C functions for accessing a vsmc::StateBase<vsmc::Dynamic, double>
  * object
  * */
 
 /**
  * \defgroup CSampler C API to vsmc::Sampler<T>
  * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::Sampler<T> object
+ * \brief C functions for accessing a vsmc::Sampler<T> object
  * */
 
 /**
  * \defgroup CParticle C API to vsmc::Particle<T>
  * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::Particle<T> object
+ * \brief C functions for accessing a vsmc::Particle<T> object
  * */
 
 /**
  * \defgroup CMonitor C API to vsmc::Monitor<T>
  * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::Monitor<T> object
+ * \brief C functions for accessing a vsmc::Monitor<T> object
  * */
 
 /**
  * \defgroup CPath C API to vsmc::Path<T>
  * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::Path<T> object
+ * \brief C functions for accessing a vsmc::Path<T> object
  * */
 
 /**
- * \defgroup CInitializeAdapter C API to vsmc::InitializeAdapter<T>
+ * \defgroup CAdapter C API to vSMC Adapter module
  * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::InitializeAdapter<T, Impl> object
- * */
-
-/**
- * \defgroup CMoveAdapter C API to vsmc::MoveAdapter<T>
- * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::MoveAdapter<T, Impl> object
- * */
-
-/**
- * \defgroup CMonitorEvalAdapter C API to vsmc::MonitorEvalAdapter<T>
- * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::MonitorEvalAdapter<T, Impl>
- * object
- * */
-
-/**
- * \defgroup CPathEvalAdapter C API to vsmc::PathEvalAdapter<T>
- * \ingroup CAPI
- * \brief C functions that manipulate a vsmc::PathEvalAdapter<T, Impl> object
+ * \brief C functions for creating vSMC adapter objects
  * */
 
 /****************************************************************************/
 
 /**
  * \brief Multinomial resampling
- * \ingroup CResample
+ * \ingroup CMacro
  * */
 #define VSMC_RESAMPLE_MULTINOMIAL 101
 
 /**
  * \brief Residual resampling
- * \ingroup CResample
+ * \ingroup CMacro
  * */
 #define VSMC_RESAMPLE_RESIDUAL 102
 
 /**
  * \brief Stratified resampling
- * \ingroup CResample
+ * \ingroup CMacro
  * */
 #define VSMC_RESAMPLE_STRATIFIED 103
 /**
  * \brief Systematic resampling
- * \ingroup CResample
+ * \ingroup CMacro
  * */
 #define VSMC_RESAMPLE_SYSTEMATIC 104
 
 /**
  * \brief Residual stratified resampling
- * \ingroup CResample
+ * \ingroup CMacro
  * */
 #define VSMC_RESAMPLE_RESIDUAL_STRATIFIED 105
 
 /**
  * \brief Residual systematic resampling
- * \ingroup CResample
+ * \ingroup CMacro
  * */
 #define VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC 106
 
@@ -169,27 +145,27 @@
 
 /**
  * \brief Sequential implementation
- * \ingroup CBase
+ * \ingroup CMacro
  * */
 #define VSMC_BASE_SEQ 201
 /**
  * \brief Parallel implementation using Intel Cilk Plus
- * \ingroup CBase
+ * \ingroup CMacro
  * */
 #define VSMC_BASE_CILK 202
 /**
  * \brief Parallel implementation using OpenMP
- * \ingroup CBase
+ * \ingroup CMacro
  * */
 #define VSMC_BASE_OMP 203
 /**
  * \brief Parallel implementation using C++11 threads
- * \ingroup CBase
+ * \ingroup CMacro
  * */
 #define VSMC_BASE_STD 204
 /**
  * \brief Parallel implementation using Intel Threading Building Blocks
- * \ingroup CBase
+ * \ingroup CMacro
  * */
 #define VSMC_BASE_TBB 205
 
@@ -197,12 +173,12 @@
 
 /**
  * \brief Column major matrix
- * \ingroup MatrixOrder
+ * \ingroup CMacro
  * */
 #define VSMC_COLUMN_MAJOR 301
 /**
  * \brief Row major matrix
- * \ingroup MatrixOrder
+ * \ingroup CMacro
  * */
 #define VSMC_ROW_MAJOR 302
 
@@ -305,19 +281,19 @@ typedef struct {
 
 /**
  * \brief Get a seed for a RNG
- * \ingroup CAPI
+ * \ingroup CSeed
  * */
 unsigned vsmc_seed_get (void);
 
 /**
  * \brief Set the seed for a program
- * \ingroup CAPI
+ * \ingroup CSeed
  * */
 void vsmc_seed_set (unsigned seed);
 
 /**
  * \brief Skip a given steps of seeds
- * \ingroup CAPI
+ * \ingroup CSeed
  * */
 void vsmc_seed_skip (unsigned steps);
 
@@ -365,9 +341,11 @@ double *vsmc_value_read_state (vsmcValue value, unsigned id, double *first);
   *
   * \param value A vsmcValue object
   * \param order Either VSMC_COLUMN_MAJOR or VSMC_ROW_MAJOR. It will be
-  * `vsmc::ColumnMajor` or `vsmc::RowMajor` passed to the underlying C++ call,
+  * vsmc::ColumnMajor or vsmc::RowMajor passed to the underlying C++ call,
   * respectively
   * \param first The output pointer
+  *
+  * \return An one-pass-end pointer to the position after the reading
   * */
 double *vsmc_value_read_state_matrix(vsmcValue value, int order,
         double *first);
@@ -381,16 +359,16 @@ double *vsmc_value_read_state_matrix(vsmcValue value, int order,
   * \param N Number of particles
   * \param Dim The initial dimension of the value collection. Since within the
   * CAPI, the value collection type is a subclass of
-  * `vsmc::StateBase<vsmc::Dynamic, double>`, the value collection's dimension
+  * vsmc::StateBase<vsmc::Dynamic, double>, the value collection's dimension
   * can be resized.
   * \param scheme VSMC_RESAMPLE_MULTINOMIAL etc. It will be corresponding C++
-  * name, `vsmc::Multinomial` etc. passed to the constructor of the C++ class.
+  * name, vsmc::Multinomial etc. passed to the constructor of the C++ class.
   * \param threshold The initial threshold of ESS/N below which resampling will
   * be performed
   * \param base_type The value collection type of the sampler
   *
   * \return An vsmcSampler object, with `sampler.sampler_ptr` be the address of
-  * the newly created `vsmc::Sampler<T>` object if the constructing is sucessful,
+  * the newly created vsmc::Sampler<T> object if the constructing is sucessful,
   * or zero otherwise. `sampler.base_type` is the `base_type` passed to the
   * function.
   * */
@@ -421,7 +399,7 @@ unsigned vsmc_sampler_iter_size (vsmcSampler sampler);
   *
   * \param sampler A vsmcSampler object
   * \param scheme VSMC_RESAMPLE_MULTINOMIAL etc. It will be corresponding C++
-  * name, `vsmc::Multinomial` etc. passed to the C++ call.
+  * name, vsmc::Multinomial etc. passed to the C++ call.
   *
   * \return Non-zero value if the `scheme` is valid and the changing of
   * resampling scheme is actually changed, otherwise zero.
@@ -485,7 +463,7 @@ unsigned vsmc_sampler_accept_history (vsmcSampler sampler,
   * \param sampler A vsmcSampler object
   *
   * \return A vsmcParticle object, say `particle`. `particle.particle_ptr`
-  * points to the `vsmc::Particle<T>` object returned by the C++ call.
+  * points to the vsmc::Particle<T> object returned by the C++ call.
   * `particle.base_type` is `sampler.base_type`.
   * */
 vsmcParticle vsmc_sampler_particle (vsmcSampler sampler);
@@ -579,8 +557,7 @@ void vsmc_sampler_iterate (vsmcSampler sampler, unsigned num);
   *
   * \note It is possible that a runtime whill happen during this function call
   * if `name` does not name an existing montior, nor does
-  * `eval.monitor_eval_ptr` point to a valid `vsmc::Monitor::eval_type`
-  * object
+  * `eval.monitor_eval_ptr` point to a valid vsmc::Monitor::eval_type object
   * */
 vsmcMonitor vsmc_sampler_monitor (vsmcSampler sampler, const char *name,
         unsigned dim, vsmcMonitorEval eval);
@@ -603,7 +580,7 @@ void vsmc_sampler_clear_monitor (vsmcSampler sampler, const char *name);
   * \param sampler A vsmcSampler object
   *
   * \return A vsmcPath object, say `path`. `path.path_ptr` points to the
-  * `vsmc::Path<T>` object returned by the C++ call. `path.base_type` is
+  * vsmc::Path<T> object returned by the C++ call. `path.base_type` is
   * `sampler.base_type`.
   * */
 vsmcPath vsmc_sampler_path (vsmcSampler sampler);
@@ -643,84 +620,597 @@ void vsmc_sampler_show_progress (vsmcSampler sampler, int show);
 
 /****************************************************************************/
 
-size_t    vsmc_particle_size             (vsmcParticle);
-vsmcValue vsmc_particle_value            (vsmcParticle);
-void      vsmc_particle_resample         (vsmcParticle, double);
-int       vsmc_particle_resampled        (vsmcParticle);
-int       vsmc_particle_resample_scheme  (vsmcParticle, int);
-void      vsmc_particle_read_weight      (vsmcParticle, double *);
-void      vsmc_particle_read_log_weight  (vsmcParticle, double *);
-double    vsmc_particle_weight           (vsmcParticle, size_t);
-double    vsmc_particle_log_weight       (vsmcParticle, size_t);
-void      vsmc_particle_set_equal_weight (vsmcParticle);
-void      vsmc_particle_set_weight       (vsmcParticle, const double *, int);
-void      vsmc_particle_mul_weight       (vsmcParticle, const double *, int);
-void      vsmc_particle_set_log_weight   (vsmcParticle, const double *, int);
-void      vsmc_particle_add_log_weight   (vsmcParticle, const double *, int);
-double    vsmc_particle_ess              (vsmcParticle);
+/**
+  * \brief particle.particle_ptr->size()
+  * \ingroup CParticle
+  * */
+size_t vsmc_particle_size (vsmcParticle particle);
+
+/**
+  * \brief particle.particle_ptr->value()
+  * \ingroup CParticle
+  *
+  * \param particle A vsmcParticle object
+  *
+  * \return A vsmcValue object, say `value`. `value.value_ptr` point to a
+  * vsmc::StateBase<vsmc::Dynamic, double> object, whose actual type depends
+  * on `value.base_type`, which is `particle.base_type`
+  * */
+vsmcValue vsmc_particle_value (vsmcParticle particle);
+
+/**
+  * \brief particle.particle_ptr->resample(threshold)
+  * \ingroup CParticle
+  * */
+void vsmc_particle_resample (vsmcParticle particle, double threshold);
+
+/**
+  * \brief particle.particle_ptr->resampled()
+  * \ingroup CParticle
+  * */
+int vsmc_particle_resampled (vsmcParticle particle);
+
+/**
+  * \brief particle.particle_ptr->resample_scheme(scheme)
+  * \ingroup CParticle
+  *
+  * \param particle A vsmcParticle object
+  * \param scheme VSMC_RESAMPLE_MULTINOMIAL etc. It will be corresponding C++
+  * name, vsmc::Multinomial etc. passed to the C++ call.
+  *
+  * \return Non-zero value if the `scheme` is valid and the changing of
+  * resampling scheme is actually changed, otherwise zero.
+  * */
+int vsmc_particle_resample_scheme (vsmcParticle particle, int scheme);
+
+/**
+  * \brief particle.particle_ptr->read_weight(first)
+  * \ingroup CParticle
+  * */
+void vsmc_particle_read_weight (vsmcParticle particle, double *first);
+
+/**
+  * \brief particle.particle_ptr->read_log_weight(first)
+  * \ingroup CParticle
+  * */
+void vsmc_particle_read_log_weight (vsmcParticle particle, double *first);
+
+/**
+  * \brief particle.particle_ptr->weight(id)
+  * \ingroup CParticle
+  * */
+double vsmc_particle_weight (vsmcParticle particle, size_t id);
+
+/**
+  * \brief particle.particle_ptr->log_weight(id)
+  * \ingroup CParticle
+  * */
+double vsmc_particle_log_weight (vsmcParticle particle, size_t id);
+
+/**
+  * \brief particle.particle_ptr->set_equal_weight()
+  * \ingroup CParticle
+  * */
+void vsmc_particle_set_equal_weight (vsmcParticle particle);
+
+/**
+ * \brief particle.particle_ptr->set_weight(nw, stride)
+ * \ingroup CParticle
+ * */
+void vsmc_particle_set_weight (vsmcParticle particle,
+        const double *nw, int stride);
+
+/**
+ * \brief particle.particle_ptr->mul_weight(nw, stride)
+ * \ingroup CParticle
+ * */
+void vsmc_particle_mul_weight (vsmcParticle particle,
+        const double *nw, int stride);
+
+/**
+ * \brief particle.particle_ptr->set_log_weight(nw, stride)
+ * \ingroup CParticle
+ * */
+void vsmc_particle_set_log_weight (vsmcParticle particle,
+        const double *nw, int stride);
+
+/**
+ * \brief particle.particle_ptr->add_log_weight(nw, stride)
+ * \ingroup CParticle
+ * */
+void vsmc_particle_add_log_weight (vsmcParticle particle,
+        const double *nw, int stride);
+
+/**
+  * \brief particle.particle_ptr->ess()
+  * \ingroup CParticle
+  * */
+double vsmc_particle_ess (vsmcParticle particle);
+
 
 /****************************************************************************/
 
-vsmcMonitor vsmc_monitor_new (vsmcSampler, unsigned, vsmcMonitorEval);
-void      vsmc_monitor_delete             (vsmcMonitor);
-unsigned  vsmc_monitor_dim                (vsmcMonitor);
-unsigned  vsmc_monitor_iter_size          (vsmcMonitor);
-unsigned  vsmc_monitor_index              (vsmcMonitor, unsigned);
-double    vsmc_monitor_record             (vsmcMonitor, unsigned, unsigned);
-unsigned *vsmc_monitor_read_index         (vsmcMonitor, unsigned *);
-double   *vsmc_monitor_read_record        (vsmcMonitor, unsigned, double *);
-double   *vsmc_monitor_read_record_matrix (vsmcMonitor, int, double *);
-void      vsmc_monitor_clear              (vsmcMonitor);
+/**
+  * \brief monitor.monitor_ptr->dim()
+  * \ingroup CMonitor
+  * */
+unsigned vsmc_monitor_dim (vsmcMonitor monitor);
+
+/**
+  * \brief monitor.monitor_ptr->iter_size()
+  * \ingroup CMonitor
+  * */
+unsigned vsmc_monitor_iter_size (vsmcMonitor monitor);
+
+/**
+  * \brief monitor.monitor_ptr->index(iter)
+  * \ingroup CMonitor
+  * */
+unsigned vsmc_monitor_index (vsmcMonitor monitor, unsigned iter);
+
+/**
+  * \brief monitor.monitor_ptr->record(id, iter)
+  * \ingroup CMonitor
+  * */
+double vsmc_monitor_record (vsmcMonitor monitor, unsigned id, unsigned iter);
+
+/**
+  * \brief monitor.monitor_ptr->read_index(first)
+  * \ingroup CMonitor
+  * */
+unsigned *vsmc_monitor_read_index (vsmcMonitor monitor, unsigned *first);
+
+/**
+  * \brief monitor.monitor_ptr->read_record(id, first)
+  * \ingroup CMonitor
+  * */
+double *vsmc_monitor_read_record (vsmcMonitor monitor,
+        unsigned id, double *first);
+
+/**
+  * \brief monitor.monitor_ptr->read_record_matrix(order, first)
+  * \ingroup CMonitor
+  *
+  * \param monitor A vsmcMonitor object
+  * \param order Either VSMC_COLUMN_MAJOR or VSMC_ROW_MAJOR. It will be
+  * vsmc::ColumnMajor or vsmc::RowMajor passed to the underlying C++ call,
+  * respectively
+  * \param first The output pointer
+  *
+  * \return An one-pass-end pointer to the position after the reading
+  * */
+double *vsmc_monitor_read_record_matrix (vsmcMonitor monitor,
+        int order, double *first);
+
+/**
+  * \brief monitor.monitor_ptr->clear()
+  * \ingroup CMonitor
+  * */
+void vsmc_monitor_clear (vsmcMonitor monitor);
 
 /****************************************************************************/
 
-vsmcPath vsmc_path_new (vsmcSampler, vsmcPathEval);
-void      vsmc_path_delete         (vsmcPath);
-unsigned  vsmc_path_iter_size      (vsmcPath);
-unsigned  vsmc_path_index          (vsmcPath, unsigned);
-double    vsmc_path_integrand      (vsmcPath, unsigned);
-double    vsmc_path_width          (vsmcPath, unsigned);
-double    vsmc_path_grid           (vsmcPath, unsigned);
-unsigned *vsmc_path_read_index     (vsmcPath, unsigned *);
-double   *vsmc_path_read_integrand (vsmcPath, double *);
-double   *vsmc_path_read_width     (vsmcPath, double *);
-double   *vsmc_path_read_grid      (vsmcPath, double *);
-void      vsmc_path_clear          (vsmcPath);
+/**
+  * \brief path.path_ptr->iter_size()
+  * \ingroup CPath
+  * */
+unsigned vsmc_path_iter_size (vsmcPath path);
+
+/**
+  * \brief path.path_ptr->index(iter)
+  * \ingroup CPath
+  * */
+unsigned vsmc_path_index (vsmcPath path, unsigned iter);
+
+/**
+  * \brief path.path_ptr->integrand(iter)
+  * \ingroup CPath
+  * */
+double vsmc_path_integrand (vsmcPath path, unsigned iter);
+
+/**
+  * \brief path.path_ptr->width(iter)
+  * \ingroup CPath
+  * */
+double vsmc_path_width (vsmcPath path, unsigned iter);
+
+/**
+  * \brief path.path_ptr->grid(iter)
+  * \ingroup CPath
+  * */
+double vsmc_path_grid (vsmcPath path, unsigned iter);
+
+/**
+  * \brief path.path_ptr->read_index(first)
+  * \ingroup CPath
+  * */
+unsigned *vsmc_path_read_index (vsmcPath path, unsigned *first);
+
+/**
+  * \brief path.path_ptr->read_integrand(first)
+  * \ingroup CPath
+  * */
+double *vsmc_path_read_integrand (vsmcPath path, double *first);
+
+/**
+  * \brief path.path_ptr->read_width(first)
+  * \ingroup CPath
+  * */
+double *vsmc_path_read_width (vsmcPath path, double *first);
+
+/**
+  * \brief path.path_ptr->read_grid(first)
+  * \ingroup CPath
+  * */
+double *vsmc_path_read_grid (vsmcPath path, double *first);
+
+/**
+  * \brief path.path_ptr->clear()
+  * \ingroup CPath
+  * */
+void vsmc_path_clear (vsmcPath path);
 
 /****************************************************************************/
 
-vsmcInitialize vsmc_init_new (vsmcSampler,
-        unsigned (*) (size_t, size_t, unsigned, double *),
-        void (*) (vsmcParticle, void *),
-        void (*) (vsmcParticle),
-        void (*) (vsmcParticle));
-void vsmc_init_delete (vsmcInitialize);
+/**
+  * \brief new vsmc::InitiaizeAdapter<T, Impl>(initialize_state,
+  * initialize_param, pre_processor, post_processor)
+  * \ingroup CAdapter
+  *
+  * \param sampler A vsmcSampler object. A vsmc::InitializeAdatper<T, Impl>
+  * object will be created whose actual type will be determined by
+  * `sampler.base_type`
+  *
+  * \param initialize_state A pointer to a function with the signature
+  * ~~~c
+  * unsigned initialize_state (size_t id, size_t N, unsigned dim, double *val);
+  * ~~~
+  * A vsmc::InitializeAdapter::initialize_state_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * unsigned operator() (vsmc::SingleParticle<T> sp);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `id`, `N`,
+  * `dim` and `val` are as if they are defiened as the following
+  * ~~~cpp
+  * size_t id    = sp.id();
+  * size_t N     = sp.particle().size();
+  * unsigned dim = sp.particle().value().dim();
+  * double *val  = sp.state();
+  * ~~~
+  *
+  * \param initialize_param A pointer to a function with the signature
+  * ~~~c
+  * void initialize_param (vsmcParticle part, void *par);
+  * ~~~
+  * A vsmc::InitializeAdapter::initialize_param_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (vsmc::Particle<T> &particle, void *param);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `part` and
+  * `par` are as if they are defined as the following
+  * ~~~cpp
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * void *par         = param;
+  * ~~~
+  *
+  * \param pre_processor A pointer to a function with the signature
+  * ~~~c
+  * void pre_processor (vsmcParticle part);
+  * ~~~
+  * A vsmc::InitializeAdapter::pre_processor_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, argument `part` is as
+  * if it is defined as the following
+  * ~~~cpp
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \param post_processor A pointer to a function with the signature
+  * ~~~c
+  * void post_processor (vsmcParticle part);
+  * ~~~
+  * A vsmc::InitializeAdapter::post_processor_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, argument `part` is as
+  * if it is defined as the following
+  * ~~~cpp
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \return A vsmcInitialize object, say `initialize`.
+  * `initialize.initialize_ptr` points to the newly created
+  * vsmc::InitializeAdapter<T, Impl> object and `initialize.base_type` is
+  * `sampler.base_type`.
+  * */
+vsmcInitialize vsmc_initialize_new (vsmcSampler sampler,
+        unsigned (*initialize_state) (size_t, size_t, unsigned, double *),
+        void (*initialize_param) (vsmcParticle, void *),
+        void (*pre_processor) (vsmcParticle),
+        void (*post_processor) (vsmcParticle));
 
-/****************************************************************************/
+/**
+  * \brief delete initialize.initialize_ptr
+  * \ingroup CAdapter
+  * */
+void vsmc_initialize_delete (vsmcInitialize initialize);
 
-vsmcMove vsmc_move_new (vsmcSampler,
-        unsigned (*) (size_t, size_t, unsigned, unsigned, double *),
-        void (*) (unsigned, vsmcParticle),
-        void (*) (unsigned, vsmcParticle));
-void vsmc_move_delete (vsmcMove);
+/**
+  * \brief new vsmc::MoveAdapter<T, Impl>(move_state, pre_processor,
+  * post_processor)
+  * \ingroup CAdapter
+  *
+  * \param sampler A vsmcSampler object. A vsmc::MoveAdapter<T, Impl> object
+  * will be created whose actual type will be determined by `sampler.base_type`
+  *
+  * \param move_state A pointer to a function with the signature
+  * ~~~c
+  * unsigned move_state (size_t id, size_t N, unsigned it, unsigned dim, double *val);
+  * ~~~
+  * A vsmc::MoveAdatper::move_state_type object will be created to wrap this
+  * function pointer and passed to the C++ class constructor. The C++ object
+  * defines the required operator
+  * ~~~cpp
+  * unsigned operator() (unsigned iter, vsmc::SingleParticle<T> sp);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `id`, `N`,
+  * `it` `dim` and `val` are as if they are defiened as the following
+  * ~~~cpp
+  * size_t id     = sp.id();
+  * size_t N      = sp.particle().size();
+  * unsigned it   = iter;
+  * unsigned dim  = sp.particle().value().dim();
+  * double *val   = sp.state();
+  * ~~~
+  *
+  * \param pre_processor A pointer to a function with the signature
+  * ~~~c
+  * void pre_processor (unsigned it, vsmcParticle part);
+  * ~~~
+  * A vsmc::MoveAdapter::pre_processor_type object will be created to wrap this
+  * function pointer and passed to the C++ class constructor. The C++ object
+  * defines the required operator
+  * ~~~cpp
+  * void operator() (unsigned iter, vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `it` and
+  * `part` are as if they are defined as the following
+  * ~~~cpp
+  * unsigned it       = iter;
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \param post_processor A pointer to a function with the signature
+  * ~~~c
+  * void post_processor (unsigned it, vsmcParticle part);
+  * ~~~
+  * A vsmc::MoveAdapter::post_processor_type object will be created to wrap
+  * this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (unsigned iter, vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `it and
+  * `part` are as if they are defined as the following
+  * ~~~cpp
+  * unsigned it       = iter;
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \return A vsmcMove object, say `move`. `move.move_ptr` points to the newly
+  * created vsmc::MoveAdapter<T, Impl> object and `move.base_type` is
+  * `sampler.base_type`.
+  * */
+vsmcMove vsmc_move_new (vsmcSampler sampler,
+        unsigned (*move_state) (size_t, size_t, unsigned, unsigned, double *),
+        void (*pre_processor) (unsigned, vsmcParticle),
+        void (*post_processor) (unsigned, vsmcParticle));
 
-/****************************************************************************/
+/**
+  * \brief delete move.move_ptr
+  * \ingroup CAdapter
+  * */
+void vsmc_move_delete (vsmcMove move);
 
-vsmcMonitorEval vsmc_monitor_eval_new (vsmcSampler,
-        void (*) (size_t, size_t, unsigned, unsigned, unsigned,
+/**
+  * \brief new vsmc::MonitorEvalAdatper<T, Impl>(monitor_state, pre_processor,
+  * post_processor)
+  * \ingroup CAdapter
+  *
+  * \param sampler A vsmcSampler object. A vsmc::MonitorEvalAdatper<T, Impl>
+  * object will be created whose actual type will be determined by
+  * `sampler.base_type`
+  *
+  * \param monitor_state A pointer to a function with the signature
+  * ~~~c
+  * void monitor_state (size_t id, size_t N, unsigned it, unsigned mdim, unsigned sdim, const double *val, double *r);
+  * ~~~
+  * A vsmc::MonitorEvalAdapter::monitor_state_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (unsigned iter, unsigned dim, vsmc::ConstSingleParticle<T> csp, double *res);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `id`, `N`,
+  * `it`, `mdim`,  `sdim`, `val` and `r` are as if they are defiened as the
+  * following
+  * ~~~cpp
+  * size_t id         = sp.id();
+  * size_t N          = sp.particle().size();
+  * unsigned it       = iter;
+  * unsigned mdim     = dim;
+  * unsigned sdim     = sp.particle().value().dim();
+  * cosnt double *val = sp.state();
+  * double *r         = res;
+  * ~~~
+  *
+  * \param pre_processor A pointer to a function with the signature
+  * ~~~c
+  * void pre_processor (unsigned it, vsmcParticle part);
+  * ~~~
+  * A vsmc::MonitorEvalAdatper::pre_processor_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (unsigned iter, const vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `it` and
+  * `part` are as if they are defined as the following
+  * ~~~cpp
+  * unsigned it       = iter;
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \param post_processor A pointer to a function with the signature
+  * ~~~c
+  * void post_processor (unsigned it, vsmcParticle part);
+  * ~~~
+  * A vsmc::MonitorEvalAdapter::post_processor_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (unsigned iter, vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `it and
+  * `part` are as if they are defined as the following
+  * ~~~cpp
+  * unsigned it       = iter;
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \return A vsmcMonitorEval object, say `meval`. `meval.monitor_eval_ptr`
+  * points to the newly created vsmc::MonitorEvalAdapter<T, Impl> object and
+  * `meval.base_type` is `sampler.base_type`.
+  * */
+vsmcMonitorEval vsmc_monitor_eval_new (vsmcSampler sampler,
+        void (*monitor_state) (size_t, size_t, unsigned, unsigned, unsigned,
             const double *, double *),
-        void (*) (unsigned, vsmcParticle),
-        void (*) (unsigned, vsmcParticle));
+        void (*pre_processor) (unsigned, vsmcParticle),
+        void (*post_processor) (unsigned, vsmcParticle));
+
+/**
+  * \brief delete eval.monitor_eval_ptr
+  * \ingroup CAdapter
+  * */
 void vsmc_monitor_eval_delete (vsmcMonitorEval eval);
 
-/****************************************************************************/
+/**
+  * \brief new vsmc::PathEvalAdatper<T, Impl>(path_state, path_width,
+  * pre_processor, post_processor)
+  * \ingroup CAdapter
+  *
+  * \param sampler A vsmcSampler object. A vsmc::PathEvalAdatper<T, Impl>
+  * object will be created whose actual type will be determined by
+  * `sampler.base_type`
+  *
+  * \param path_state A pointer to a function with the signature
+  * ~~~c
+  * double path_state (size_t id, size_t N, unsigned it, const double *val);
+  * ~~~
+  * A vsmc::PathEvalAdapter::path_state object will be created to wrap this
+  * function pointer and passed to the C++ class constructor. The C++ object
+  * defines the required operator
+  * ~~~cpp
+  * double operator() (unsigned iter, vsmc::ConstSingleParticle<T> csp);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `id`, `N`,
+  * `it` and `val` are as if they are defiened as the
+  * following
+  * ~~~cpp
+  * size_t id         = sp.id();
+  * size_t N          = sp.particle().size();
+  * unsigned it       = iter;
+  * cosnt double *val = sp.state();
+  * ~~~
+  *
+  * \param path_width A pointer to a function with the signature
+  * ~~~c
+  * double path_width (unsigned it, vsmcParticle part);
+  * ~~~
+  * A vsmc::PathEvalAdatper::path_width_type object will be created to wrap
+  * this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * double operator() (unsigned iter, const vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `it` and
+  * `part` are as if they are defined as the following
+  * ~~~cpp
+  * unsigned it       = iter;
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \param pre_processor A pointer to a function with the signature
+  * ~~~c
+  * void pre_processor (unsigned it, vsmcParticle part);
+  * ~~~
+  * A vsmc::PathEvalAdatper::pre_processor_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (unsigned iter, const vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `it` and
+  * `part` are as if they are defined as the following
+  * ~~~cpp
+  * unsigned it       = iter;
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \param post_processor A pointer to a function with the signature
+  * ~~~c
+  * void post_processor (unsigned it, vsmcParticle part);
+  * ~~~
+  * A vsmc::PathEvalAdapter::post_processor_type object will be created to
+  * wrap this function pointer and passed to the C++ class constructor. The C++
+  * object defines the required operator
+  * ~~~cpp
+  * void operator() (unsigned iter, vsmc::Particle<T> &particle);
+  * ~~~
+  * When the C++ functor call the user defined function, arguments `it and
+  * `part` are as if they are defined as the following
+  * ~~~cpp
+  * unsigned it       = iter;
+  * void *ptr         = (void *) &particle;
+  * vsmcParticle part = {ptr, sampler.base_type};
+  * ~~~
+  *
+  * \return A vsmcPathEval object, say `peval`. `peval.path_eval_ptr` points to
+  * the newly created vsmc::PathEvalAdapter<T, Impl> object and
+  * `peval.base_type` is `sampler.base_type`.
+  * */
+vsmcPathEval vsmc_path_eval_new (vsmcSampler sampler,
+        double (*path_state) (size_t, size_t, unsigned, unsigned,
+            const double *),
+        double (*path_width) (unsigned, vsmcParticle),
+        void (*pre_processor) (unsigned, vsmcParticle),
+        void (*post_processor) (unsigned, vsmcParticle));
 
-vsmcPathEval vsmc_path_eval_new (vsmcSampler,
-        double (*) (size_t, size_t, unsigned, unsigned, const double *),
-        double (*) (unsigned, vsmcParticle),
-        void (*) (unsigned, vsmcParticle),
-        void (*) (unsigned, vsmcParticle));
-void vsmc_path_eval_delete (vsmcPathEval);
+/**
+  * \brief delete eval.path_eval_ptr
+  * \ingroup CAdapter
+  * */
+void vsmc_path_eval_delete (vsmcPathEval eval);
 
 /****************************************************************************/
 
