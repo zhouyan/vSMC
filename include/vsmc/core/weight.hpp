@@ -6,7 +6,7 @@
 namespace vsmc {
 
 /// \brief Weight set class
-/// \ingroup WeightSet
+/// \ingroup Core
 class WeightSetBase
 {
     public :
@@ -16,12 +16,14 @@ class WeightSetBase
     explicit WeightSetBase (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
+    /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
     {
         return std::copy(weight_.begin(), weight_.end(), first);
     }
 
+    /// \brief Read normalized weights through a pointer
     double *read_weight (double *first) const
     {
         const double *const wptr = &weight_[0];
@@ -35,12 +37,14 @@ class WeightSetBase
         return first + size_;
     }
 
+    /// \brief Read unnormalized logarithm weights through an output iterator
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
     {
         return std::copy(log_weight_.begin(), log_weight_.end(), first);
     }
 
+    /// \brief Read unnormalized logarithm weights through a pointer
     double *read_log_weight (double *first) const
     {
         const double *const lwptr = &log_weight_[0];
@@ -54,16 +58,20 @@ class WeightSetBase
         return first + size_;
     }
 
+    /// \brief Get the normalized weight of the id'th particle
     double weight (size_type id) const
     {
         return weight_[id];
     }
 
+    /// \brief Get the unnormalized logarithm weight of the id'th particle
     double log_weight (size_type id) const
     {
         return log_weight_[id];
     }
 
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS
+    /// such that each particle has a equal weight
     void set_equal_weight ()
     {
         ess_ = static_cast<double>(weight_.size());
@@ -71,6 +79,8 @@ class WeightSetBase
         std::fill(log_weight_.begin(), log_weight_.end(), 0);
     }
 
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) weights directly
     void set_weight (const double *nw, int stride = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += stride)
@@ -78,6 +88,9 @@ class WeightSetBase
         weight2log_weight();
     }
 
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// multiply the normalized weight with (possible unnormalized) incremental
+    /// weights
     void mul_weight (const double *nw, int stride = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += stride)
@@ -85,6 +98,8 @@ class WeightSetBase
         weight2log_weight();
     }
 
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) logartihm weights directly
     void set_log_weight (const double *nw, int stride = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += stride)
@@ -92,6 +107,9 @@ class WeightSetBase
         log_weight2weight();
     }
 
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// adding to the unnormalized logarithm weights with (possible
+    /// unormalized) logarithm incremental weights
     void add_log_weight (const double *nw, int stride = 1)
     {
         for (size_type i = 0; i != size_; ++i, nw += stride)
@@ -99,6 +117,8 @@ class WeightSetBase
         log_weight2weight();
     }
 
+    /// \brief Get the ESS of the particle collection based on the current
+    /// weights
     double ess () const
     {
         return ess_;
