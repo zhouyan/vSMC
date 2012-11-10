@@ -193,6 +193,7 @@ extern "C" {
 /**
  * \brief Given an integer value, determine if it equals to one of the valid
  * base type class macros
+ * \ingroup CAPI
  * */
 int vsmc_has_base_type (int);
 
