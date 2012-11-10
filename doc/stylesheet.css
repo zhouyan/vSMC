@@ -255,7 +255,8 @@ div.groupText {
 body {
     background-color: white;
     color: black;
-    margin: 0;
+    margin: auto;
+    width: 900px;
 }
 
 div.contents {
