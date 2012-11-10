@@ -44,7 +44,7 @@ Equivalences can be found in [Boost][Boost]. By default the library will use
 the [Boost][Boost] library as C++11 implementations are not mature at the time
 writing. But if the C++ implementation has them correctly implemented, the
 standard headers can also be used by defining suitable macros (see the
-[this page][vSMCMacro]).
+[vSMC Macros][vSMCMacro]).
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 implementations of `<functional>`, `<random>` and `<type_traits>`
@@ -75,7 +75,7 @@ The vSMC library is distributed with a Boost license which can be found in the
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
-[Intel Cilk Plus]: http://www.cilk.com/
+[Intel Cilk Plus]: http://en.wikipedia.org/wiki/Intel_Cilk_Plus
 [Intel TBB]: http://threadingbuildingblocks.org/
 [OpenCL]: http://www.khronos.org/opencl/
 [OpenMP]: http://www.openmp.org/

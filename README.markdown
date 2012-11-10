@@ -28,6 +28,8 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.1 or later.
 
     make docs
 
+The documentation can also be found [here][vSMCDoc].
+
 # Third-party dependencies and parallelization
 
 This library has no dependences other than C++ standard libraries (C++11). Any
@@ -39,7 +41,7 @@ Equivalences can be found in [Boost][Boost]. By default the library will use
 the [Boost][Boost] library as C++11 implementations are not mature at the time
 writing. But if the C++ implementation has them correctly implemented, the
 standard headers can also be used by defining suitable macros (see the
-[this page][vSMCMacro]).
+[vSMC Macros][vSMCMacro]).
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 implementations of `<functional>`, `<random>` and `<type_traits>`
@@ -59,8 +61,8 @@ third-party parallelization include, [Intel Cilk Plus][Intel Cilk Plus],
 [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. In addition, this library also
 support using [OpenCL][OpenCL] for GPGPU computing, though the interface is
 different than others. To enable any of these, one need to define specific
-macros, `VSMC_USE_STD_THREAD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`,
-and `VSMC_USE_CL`, respectively.
+macros, `VSMC_USE_STD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`, and
+`VSMC_USE_CL`, respectively.
 
 # License
 
