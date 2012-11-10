@@ -15,6 +15,10 @@ SET (VERSION_PATCH 5)
 # Configuration files
 SET (DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
 SET (DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
+FILE (READ ${PROJECT_SOURCE_DIR}/README.md README)
+CONFIGURE_FILE (
+    ${PROJECT_SOURCE_DIR}/doc/main.md.in
+    ${PROJECT_SOURCE_DIR}/doc/main.md)
 CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/config/version.hpp.in
     ${PROJECT_SOURCE_DIR}/include/vsmc/internal/version.hpp)
