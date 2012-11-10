@@ -15,25 +15,21 @@ This is a header only template C++ library. To install the library just move
 the contents of the `include` directory into a proper place, e.g.,
 `/usr/local/include` in Unix-alike systems. Alternatively, one can use
 [CMake][CMake] (2.8 or later required),
-
-    ```sh
-    cd /path_to_vSMC_source
-    mkdir build
-    cd build
-    cmake ..
-    make install
-    ```
-
+```sh
+cd /path_to_vSMC_source
+mkdir build
+cd build
+cmake ..
+make install
+```
 One may need `su` or `sudo` permissions to perform the last installation step.
 
 # Documentation
 
 To make the documentations one need [Doxygen][Doxygen] 1.8.1 or later.
-
-    ```sh
-    make docs
-    ```
-
+```sh
+make docs
+```
 The documentation can also be found [here][vSMCDoc].
 
 # Third-party dependencies and parallelization
