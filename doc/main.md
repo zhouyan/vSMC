@@ -1,3 +1,6 @@
+vSMC {#mainpage}
+================
+
 # Introduction
 
 vSMC library provide a framework for implementing SMC algorithms. It provides a
@@ -81,3 +84,4 @@ The vSMC library is distributed with a Boost license which can be found in the
 [libc++]: http://libcxx.llvm.org
 [vSMCDoc]: http://zhouyan.github.com/vSMC/doc/html/index.html
 [vSMCMacro]: https://github.com/zhouyan/vSMC/wiki/Macros
+
