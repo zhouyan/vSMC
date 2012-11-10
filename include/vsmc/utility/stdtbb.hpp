@@ -37,13 +37,15 @@ class ThreadManager
                 "WRONG RANGE PASSED TO **ThreadManager::partition**");
 
         SizeType N = end - begin;
-        SizeType block_size = std::max(static_cast<SizeType>(1),
+        SizeType block_size = std::max VSMC_MINMAX_NO_EXPANSION (
+                static_cast<SizeType>(1),
                 N / static_cast<SizeType>(get_thread_num()));
 
         SizeType current = 0;
         unsigned num = 0;
         while (N > 0) {
-            SizeType next_size = std::min(N, block_size);
+            SizeType next_size = std::min VSMC_MINMAX_NO_EXPANSION (
+                    N, block_size);
             *begin_iter = current;
             *end_iter = current = *begin_iter + block_size;
             ++begin_iter;
@@ -62,8 +64,8 @@ class ThreadManager
 
     unsigned thread_num_;
 
-    ThreadManager () : thread_num_(std::max(1U, static_cast<unsigned>(
-                    cxx11::thread::hardware_concurrency()))) {}
+    ThreadManager () : thread_num_(std::max VSMC_MINMAX_NO_EXPANSION (1U,
+             static_cast<unsigned>(cxx11::thread::hardware_concurrency()))) {}
 
     ThreadManager (const ThreadManager &);
     ThreadManager &operator= (const ThreadManager &);
