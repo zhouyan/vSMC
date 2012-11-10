@@ -20,6 +20,9 @@
 
 namespace vsmc {
 
+/// \brief Trait that determine if a given class is derived from a base state
+/// class template
+/// \ingroup Base
 template <template <unsigned, typename> class State, typename D>
 class IsBaseOfState
 {
@@ -39,7 +42,7 @@ class IsBaseOfState
 };
 
 /// \brief Particle::value_type subtype
-/// \ingroup Helper
+/// \ingroup Base
 template <unsigned Dim, typename T>
 class StateBase
 {
@@ -145,7 +148,7 @@ class StateBase
 }; // class StateBase
 
 /// \brief A const variant to SingleParticle
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T>
 class ConstSingleParticle
 {
@@ -217,7 +220,7 @@ class ConstSingleParticle
 }; // class ConstSingleParticle
 
 /// \brief A thin wrapper over a complete Particle
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T>
 class SingleParticle
 {
@@ -306,7 +309,7 @@ class SingleParticle
 }; // class SingleParticle
 
 /// \brief Base Initialize class
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T, typename Derived>
 class InitializeBase
 {
@@ -410,7 +413,7 @@ class InitializeBase
 }; // class InitializeBase
 
 /// \brief Base Initialize class with virtual interface
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T>
 class InitializeBase<T, VBase>
 {
@@ -431,7 +434,7 @@ class InitializeBase<T, VBase>
 }; // class InitializeBase<T, VBase>
 
 /// \brief Base Move class
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T, typename Derived>
 class MoveBase
 {
@@ -513,7 +516,7 @@ class MoveBase
 }; // class MoveBase
 
 /// \brief Base Move class with virtual interface
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T>
 class MoveBase<T, VBase>
 {
@@ -533,7 +536,7 @@ class MoveBase<T, VBase>
 }; // class MoveBase<T, VBase>
 
 /// \brief Base Monitor evaluation class
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T, typename Derived>
 class MonitorEvalBase
 {
@@ -620,7 +623,7 @@ class MonitorEvalBase
 }; // class MonitorBase
 
 /// \brief Base Monitor evaluation class with virtual interface
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T>
 class MonitorEvalBase<T, VBase>
 {
@@ -641,7 +644,7 @@ class MonitorEvalBase<T, VBase>
 }; // class MonitorEvalBase<T, VBase>
 
 /// \brief Base Path evaluation class
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T, typename Derived>
 class PathEvalBase
 {
@@ -747,7 +750,7 @@ class PathEvalBase
 }; // class PathEvalBase
 
 /// \brief Base Path evaluation class with virtual interface
-/// \ingroup Helper
+/// \ingroup Base
 template <typename T>
 class PathEvalBase<T, VBase>
 {

@@ -8,7 +8,7 @@
 namespace vsmc {
 
 /// \brief Particle::value_type subtype
-/// \ingroup STDThread
+/// \ingroup STD
 template <unsigned Dim, typename T>
 class StateSTD : public StateBase<Dim, T>
 {
@@ -54,7 +54,7 @@ class StateSTD : public StateBase<Dim, T>
 }; // class StateSTD
 
 /// \brief Sampler<T>::init_type subtype
-/// \ingroup STDThread
+/// \ingroup STD
 template <typename T, typename Derived>
 class InitializeSTD : public InitializeBase<T, Derived>
 {
@@ -116,7 +116,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
 }; // class InitializeSTD
 
 /// \brief Sampler<T>::move_type subtype
-/// \ingroup STDThread
+/// \ingroup STD
 template <typename T, typename Derived>
 class MoveSTD : public MoveBase<T, Derived>
 {
@@ -178,7 +178,7 @@ class MoveSTD : public MoveBase<T, Derived>
 }; // class MoveSTD
 
 /// \brief Monitor<T>::eval_type subtype
-/// \ingroup STDThread
+/// \ingroup STD
 template <typename T, typename Derived>
 class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 {
@@ -241,7 +241,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 }; // class MonitorEvalSTD
 
 /// \brief Path<T>::eval_type subtype
-/// \ingroup STDThread
+/// \ingroup STD
 template <typename T, typename Derived>
 class PathEvalSTD : public PathEvalBase<T, Derived>
 {

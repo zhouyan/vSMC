@@ -10,6 +10,8 @@ namespace vsmc {
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
+/// \sa WeightSetBase
+/// \sa RngSetSeq RngSetPrl
 template <typename T>
 class Particle :
     public RngSetTypeTrait<T>::type,
