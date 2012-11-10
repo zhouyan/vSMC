@@ -64,8 +64,8 @@ third-party parallelization include, [Intel Cilk Plus][Intel Cilk Plus],
 [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. In addition, this library also
 support using [OpenCL][OpenCL] for GPGPU computing, though the interface is
 different than others. To enable any of these, one need to define specific
-macros, `VSMC_USE_STD_THREAD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`,
-and `VSMC_USE_CL`, respectively.
+macros, `VSMC_USE_STD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`, and
+`VSMC_USE_CL`, respectively.
 
 # License
 
