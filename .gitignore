@@ -1,7 +1,7 @@
 .R*
 build*
 
-test/gmm/config
+example/gmm/config
 
-test/pet/config
-test/pet/pet_conv.data
+example/pet/config
+example/pet/pet_conv.data
