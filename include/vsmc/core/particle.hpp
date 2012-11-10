@@ -10,6 +10,8 @@ namespace vsmc {
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
+/// \sa WeightSetBase
+/// \sa RngSetSeq RngSetPrl
 template <typename T>
 class Particle :
     public RngSetTypeTrait<T>::type,
@@ -96,7 +98,7 @@ class Particle :
 
     /// \brief Set resampling method by a built-in scheme name
     ///
-    /// \param scheme A ResampleScheme scheme name 
+    /// \param scheme A ResampleScheme scheme name
     ///
     /// \return  true if scheme is valid and the resampling scheme is actually
     /// changed, false otherwise

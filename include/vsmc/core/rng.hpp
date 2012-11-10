@@ -45,7 +45,7 @@ class RngSetSeq
 }; // class RngSetSeq
 
 /// \brief Parallel RNG set class
-/// \ingroup RNGSet
+/// \ingroup Core
 class RngSetPrl
 {
     public :

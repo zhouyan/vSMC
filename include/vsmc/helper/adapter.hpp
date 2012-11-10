@@ -6,7 +6,7 @@
 namespace vsmc {
 
 /// \brief Initialize class adapter
-/// \ingroup Helper
+/// \ingroup Adapter
 template <typename T, template <typename, typename> class InitializeImpl>
 class InitializeAdapter :
     public InitializeImpl<T, InitializeAdapter<T, InitializeImpl> >
@@ -63,7 +63,7 @@ class InitializeAdapter :
 }; // class InitializeAdapter
 
 /// \brief Move class adapter
-/// \ingroup Helper
+/// \ingroup Adapter
 template <typename T, template <typename, typename> class MoveImpl>
 class MoveAdapter :
     public MoveImpl<T, MoveAdapter<T, MoveImpl> >
@@ -109,7 +109,7 @@ class MoveAdapter :
 }; // class MoveAdapter
 
 /// \brief Monitor evaluation class adapter
-/// \ingroup Helper
+/// \ingroup Adapter
 template <typename T, template <typename, typename> class MonitorEvalImpl>
 class MonitorEvalAdapter :
     public MonitorEvalImpl<T, MonitorEvalAdapter<T, MonitorEvalImpl> >
@@ -158,7 +158,7 @@ class MonitorEvalAdapter :
 }; // class MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter
-/// \ingroup Helper
+/// \ingroup Adapter
 template <typename T, template <typename, typename> class PathEvalImpl>
 class PathEvalAdapter :
     public PathEvalImpl<T, PathEvalAdapter<T, PathEvalImpl> >

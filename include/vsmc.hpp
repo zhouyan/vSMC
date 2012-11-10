@@ -41,30 +41,46 @@
 /// \brief Various resampling methods
 
 /// \defgroup Helper Helper
-/// \brief Constructing samplers with operations on a single particle
+/// \brief Single threaded and parallel samplers based on a single particle
+/// operations
+
+/// \defgroup Base Dispatcher
+/// \ingroup Helper
+/// \brief Base class templates that dispatch computing tasks based on
+/// implementations
+
+/// \defgroup Adapter Adapter
+/// \ingroup Helper
+/// \brief Adapter class templates for constructing concrete objects from
+/// implementation base class templates
+
+/// \defgroup Implementation Implementation
+/// \ingroup Helper
+/// \brief Implementation class templates that parallelize user defined
+/// computing tasks
 
 /// \defgroup Sequential Sequential
-/// \ingroup Helper
+/// \ingroup Implementation
 /// \brief Single threaded sampler
 
-/// \defgroup STDThread C++11 Multithread Support
-/// \ingroup Helper
+/// \defgroup STD C++11 Multithread Support
+/// \ingroup Implementation
 /// \brief Parallelized samplers with C++11 multithread support
 
 /// \defgroup TBB Intel Threading Buidling Block
-/// \ingroup Helper
+/// \ingroup Implementation
 /// \brief Parallelized samplers with Intel TBB
 
 /// \defgroup CILK Intel Cilk Plus
-/// \ingroup Helper
+/// \ingroup Implementation
 /// \brief Parallelized samplers with Intel Cilk Plus
 
 /// \defgroup OpenMP OpenMP
-/// \ingroup Helper
+/// \ingroup Implementation
 /// \brief Parallelized samplers with OpenMP
 
 /// \defgroup OpenCL OpenCL
-/// \ingroup Helper
+/// \ingroup Implementation
 /// \brief Parallelized sampler with OpenCL
 
 /// \defgroup Utility Utility
