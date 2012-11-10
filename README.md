@@ -10,7 +10,6 @@ interface, and thus increases code reuse.
 
 # Installation
 
-
 This is a header only template C++ library. To install the library just move
 the contents of the `include` directory into a proper place, e.g.,
 `/usr/local/include` in Unix-alike systems. Alternatively, one can use
