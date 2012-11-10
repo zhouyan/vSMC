@@ -12,22 +12,24 @@ interface, and thus increases code reuse.
 
 
 This is a header only template C++ library. To install the library just move
-the `include` folder into a proper place, e.g., `/usr/local/include` in
-Unix-alike systems. Alternatively, one can use [CMake][CMake] (2.8 or later
-required),
-
+the contents of the `include` directory into a proper place, e.g.,
+`/usr/local/include` in Unix-alike systems. Alternatively, one can use
+[CMake][CMake] (2.8 or later required),
+    ```sh
     cd /path_to_vSMC_source
     mkdir build
     cd build
     cmake ..
-    sudo make install
+    make install
+    ```
+One may need `su` or `sudo` permissions to perform the last installation step.
 
 # Documentation
 
 To make the documentations one need [Doxygen][Doxygen] 1.8.1 or later.
-
+    ```sh
     make docs
-
+    ```
 The documentation can also be found [here][vSMCDoc].
 
 # Third-party dependencies and parallelization
@@ -40,8 +42,8 @@ In particular, the library use the `<functional>`, `<random>` and
 Equivalences can be found in [Boost][Boost]. By default the library will use
 the [Boost][Boost] library as C++11 implementations are not mature at the time
 writing. But if the C++ implementation has them correctly implemented, the
-standard headers can also be used by defining suitable macros (see the
-[vSMC Macros][vSMCMacro]).
+standard headers can also be used by defining suitable macros (see the [vSMC
+Macros][vSMCMacro]).
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 implementations of `<functional>`, `<random>` and `<type_traits>`
@@ -57,11 +59,11 @@ The library support various back-ends for multi-thread parallelization, unified
 under a uniform interface. One is C++11 `<thread>` (or [Boost][Boost] Thread
 library as a replacement). For a full C++11 implementation, this means no
 third-party dependency is required to write parallel a SMC sampler. Other
-third-party parallelization include, [Intel Cilk Plus][Intel Cilk Plus],
-[Intel TBB][Intel TBB] and [OpenMP][OpenMP]. In addition, this library also
-support using [OpenCL][OpenCL] for GPGPU computing, though the interface is
-different than others. To enable any of these, one need to define specific
-macros, `VSMC_USE_STD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`, and
+third-party parallelization include, [Intel Cilk Plus][Intel Cilk Plus], [Intel
+TBB][Intel TBB] and [OpenMP][OpenMP]. In addition, this library also support
+using [OpenCL][OpenCL] for GPGPU computing, though the interface is different
+than others. To enable any of these, one need to define specific macros,
+`VSMC_USE_STD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`, and
 `VSMC_USE_CL`, respectively.
 
 # License
