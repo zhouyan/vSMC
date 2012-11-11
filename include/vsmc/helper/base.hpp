@@ -417,13 +417,6 @@ class InitializeBase
 template <typename T>
 class InitializeBase<T, VBase>
 {
-    public :
-
-    virtual unsigned initialize_state (SingleParticle<T>) {return 0;}
-    virtual void initialize_param (Particle<T> &, void *) {}
-    virtual void pre_processor (Particle<T> &) {}
-    virtual void post_processor (Particle<T> &) {}
-
     protected :
 
     InitializeBase () {}
@@ -431,6 +424,10 @@ class InitializeBase<T, VBase>
     InitializeBase<T, VBase> &operator=
         (const InitializeBase<T, VBase> &) {return *this;}
     virtual ~InitializeBase () {}
+    virtual unsigned initialize_state (SingleParticle<T>) {return 0;}
+    virtual void initialize_param (Particle<T> &, void *) {}
+    virtual void pre_processor (Particle<T> &) {}
+    virtual void post_processor (Particle<T> &) {}
 }; // class InitializeBase<T, VBase>
 
 /// \brief Base Move class
@@ -520,12 +517,6 @@ class MoveBase
 template <typename T>
 class MoveBase<T, VBase>
 {
-    public :
-
-    virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
-    virtual void pre_processor (unsigned, Particle<T> &) {}
-    virtual void post_processor (unsigned, Particle<T> &) {}
-
     protected :
 
     MoveBase () {}
@@ -533,6 +524,9 @@ class MoveBase<T, VBase>
     MoveBase<T, VBase> &operator=
         (const MoveBase<T, VBase> &) {return *this;}
     virtual ~MoveBase () {}
+    virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
+    virtual void pre_processor (unsigned, Particle<T> &) {}
+    virtual void post_processor (unsigned, Particle<T> &) {}
 }; // class MoveBase<T, VBase>
 
 /// \brief Base Monitor evaluation class
@@ -627,13 +621,6 @@ class MonitorEvalBase
 template <typename T>
 class MonitorEvalBase<T, VBase>
 {
-    public :
-
-    virtual void monitor_state (unsigned, unsigned, ConstSingleParticle<T>,
-            double *) {}
-    virtual void pre_processor (unsigned, const Particle<T> &) {}
-    virtual void post_processor (unsigned, const Particle<T> &) {}
-
     protected :
 
     MonitorEvalBase () {}
@@ -641,6 +628,10 @@ class MonitorEvalBase<T, VBase>
     MonitorEvalBase<T, VBase> &operator=
         (const MonitorEvalBase<T, VBase> &) {return *this;}
     virtual ~MonitorEvalBase () {}
+    virtual void monitor_state (unsigned, unsigned, ConstSingleParticle<T>,
+            double *) {}
+    virtual void pre_processor (unsigned, const Particle<T> &) {}
+    virtual void post_processor (unsigned, const Particle<T> &) {}
 }; // class MonitorEvalBase<T, VBase>
 
 /// \brief Base Path evaluation class
@@ -754,13 +745,6 @@ class PathEvalBase
 template <typename T>
 class PathEvalBase<T, VBase>
 {
-    public :
-
-    virtual double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
-    virtual double path_width (unsigned, const Particle<T> &) {return 0;}
-    virtual void pre_processor (unsigned, const Particle<T> &) {}
-    virtual void post_processor (unsigned, const Particle<T> &) {}
-
     protected :
 
     PathEvalBase () {}
@@ -768,6 +752,10 @@ class PathEvalBase<T, VBase>
     PathEvalBase<T, VBase> &operator=
         (const PathEvalBase<T, VBase> &) {return *this;}
     virtual ~PathEvalBase () {}
+    virtual double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
+    virtual double path_width (unsigned, const Particle<T> &) {return 0;}
+    virtual void pre_processor (unsigned, const Particle<T> &) {}
+    virtual void post_processor (unsigned, const Particle<T> &) {}
 }; // class PathEval<T, VBase>
 
 } // namespace vsmc
