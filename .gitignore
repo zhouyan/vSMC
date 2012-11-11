@@ -1,7 +1,4 @@
 .R*
 build*
-
-example/gmm/config
-
-example/pet/config
 example/pet/pet_conv.data
+user_options.cmake

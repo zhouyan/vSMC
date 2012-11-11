@@ -12,6 +12,11 @@ SET (VERSION_MAJOR 0)
 SET (VERSION_MINOR 9)
 SET (VERSION_PATCH 5)
 
+# User configurations
+IF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
+    INCLUDE (${PROJECT_SOURCE_DIR}/user_options.cmake)
+ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
+
 # Configuration files
 SET (DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
 SET (DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
