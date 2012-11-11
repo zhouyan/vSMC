@@ -32,6 +32,11 @@ FUNCTION (ADD_EXAMPLE basename algs)
             ENDIF (${exe} STREQUAL "std")
 
             ADD_DEPENDENCIES (${basename} ${exe_name})
+            ADD_TEST (NAME ${exe_name} COMMAND ${exe_name}
+                "--partile_num 100 --prior2 100"
+                "--burnin_num 1000 --iter_num 1000"
+                WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+                CONFIGURATIONS Debug Release RelWithDebInfo MinSizeRel)
         ENDFOREACH(alg)
     ENDFOREACH (exe)
 ENDFUNCTION (ADD_EXAMPLE)
