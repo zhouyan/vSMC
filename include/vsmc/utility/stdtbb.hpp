@@ -2,7 +2,7 @@
 #define VSMC_UTILITY_STDTBB_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/cxx11/thread.hpp>
+#include <thread>
 
 namespace vsmc { namespace thread {
 
@@ -65,7 +65,7 @@ class ThreadManager
     unsigned thread_num_;
 
     ThreadManager () : thread_num_(std::max VSMC_MINMAX_NO_EXPANSION (1U,
-             static_cast<unsigned>(cxx11::thread::hardware_concurrency()))) {}
+             static_cast<unsigned>(std::thread::hardware_concurrency()))) {}
 
     ThreadManager (const ThreadManager &);
     ThreadManager &operator= (const ThreadManager &);
@@ -110,7 +110,6 @@ void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
     std::vector<SizeType> e(thread_num);
     unsigned num = manager.partition(range.begin(), range.end(),
             b.begin(), e.begin());
-#if VSMC_HAS_CXX11LIB_THREAD
     // TODO safer management of threads group
     std::vector<std::thread> tg;
     for (unsigned i = 0; i != num; ++i) {
@@ -119,14 +118,6 @@ void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
     }
     for (unsigned i = 0; i != num; ++i)
         tg[i].join();
-#else // VSMC_HAS_CXX11LIB_THREAD
-    boost::thread_group tg;
-    for (unsigned i = 0; i != num; ++i) {
-        tg.add_thread(new boost::thread(work,
-                    BlockedRange<SizeType>(b[i], e[i])));
-    }
-    tg.join_all();
-#endif // VSMC_HAS_CXX11LIB_THREAD
 }
 
 /// \brief Parallel sum using C++11 thread
@@ -142,25 +133,14 @@ void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
     std::vector<ResultType> result(thread_num);
     unsigned num = manager.partition(range.begin(), range.end(),
             b.begin(), e.begin());
-#if VSMC_HAS_CXX11LIB_THREAD
     // TODO safer management of threads group
     std::vector<std::thread> tg;
     for (unsigned i = 0; i != num; ++i) {
-        tg.push_back(std::thread(work,
-                    BlockedRange<SizeType>(b[i], e[i]),
-                    cxx11::ref(result[i])));
+        tg.push_back(std::thread(work, BlockedRange<SizeType>(b[i], e[i]),
+                    std::ref(result[i])));
     }
     for (unsigned i = 0; i != num; ++i)
         tg[i].join();
-#else // VSMC_HAS_CXX11LIB_THREAD
-    boost::thread_group tg;
-    for (unsigned i = 0; i != num; ++i) {
-        tg.add_thread(new boost::thread(work,
-                    BlockedRange<SizeType>(b[i], e[i]),
-                    cxx11::ref(result[i])));
-    }
-    tg.join_all();
-#endif // VSMC_HAS_CXX11LIB_THREAD
     for (unsigned i = 1; i != num; ++i)
         result[0] += result[i];
 
