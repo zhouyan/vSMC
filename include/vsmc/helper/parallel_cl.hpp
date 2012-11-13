@@ -80,7 +80,7 @@ class StateCL
     typedef T state_type;
 
     explicit StateCL (size_type N) :
-        dim_(Dim), size_(N), local_size_(0),
+        dim_(Dim > 0 ? Dim : 1), size_(N), local_size_(0),
         read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
         platform_created_(false), context_created_(false),
@@ -296,6 +296,11 @@ class StateCL
 
         if (!program_created_) {
             std::stringstream ss;
+            ss << "#if defined(cl_khr_fp64)\n";
+            ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
+            ss << "#elif defined(cl_amd_fp64)\n";
+            ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
+            ss << "#endif\n";
             ss << "#ifndef VSMC_USE_RANDOM123\n";
             ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
             ss << "#endif\n";
@@ -310,10 +315,10 @@ class StateCL
                 ss << "state_type param" << d + 1 << ";\n";
             ss << "} state_struct;\n";
             ss << "typedef ulong size_type;\n";
-            ss << "__constant size_type Size = " << size_ << "UL;\n";
-            ss << "__constant uint Dim = " << dim_ << ";\n";
+            ss << "#define Size " << size_ << "UL\n";
+            ss << "#define Dim  " << dim_  << "U\n";
             VSMC_SEED_TYPE &seed = VSMC_SEED_TYPE::instance();
-            ss << "__constant ulong Seed = " << seed.get() << "UL;\n";
+            ss << "#define Seed " << seed.get() << "UL\n";
             seed.skip(size_);
             ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";
             ss << source << '\n';
@@ -635,9 +640,9 @@ class MoveCL
                 static_cast<cl_uint>(0));
     }
 
-    virtual void move_state (unsigned iter, std::string &) = 0;
-    virtual void pre_processor (unsigned iter, Particle<T> &) {}
-    virtual void post_processor (unsigned iter, Particle<T> &) {}
+    virtual void move_state (unsigned, std::string &) = 0;
+    virtual void pre_processor (unsigned, Particle<T> &) {}
+    virtual void post_processor (unsigned, Particle<T> &) {}
 
     cl::Kernel &kernel ()
     {
@@ -713,9 +718,9 @@ class MonitorEvalCL
         post_processor(iter, particle);
     }
 
-    virtual void monitor_state (unsigned iter, std::string &) = 0;
-    virtual void pre_processor (unsigned iter, const Particle<T> &) {}
-    virtual void post_processor (unsigned iter, const Particle<T> &) {}
+    virtual void monitor_state (unsigned, std::string &) = 0;
+    virtual void pre_processor (unsigned, const Particle<T> &) {}
+    virtual void post_processor (unsigned, const Particle<T> &) {}
 
     cl::Kernel kernel ()
     {
@@ -799,10 +804,10 @@ class PathEvalCL
         return this->path_width(iter, particle);
     }
 
-    virtual void path_state (unsigned iter, std::string &) = 0;
-    virtual double path_width (unsigned iter, const Particle<T> &) = 0;
-    virtual void pre_processor (unsigned iter, const Particle<T> &) {}
-    virtual void post_processor (unsigned iter, const Particle<T> &) {}
+    virtual void path_state (unsigned, std::string &) = 0;
+    virtual double path_width (unsigned, const Particle<T> &) = 0;
+    virtual void pre_processor (unsigned, const Particle<T> &) {}
+    virtual void post_processor (unsigned, const Particle<T> &) {}
 
     cl::Kernel kernel ()
     {

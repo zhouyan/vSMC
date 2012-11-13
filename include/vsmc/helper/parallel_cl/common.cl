@@ -1,14 +1,6 @@
 #ifndef VSMC_HELPER_PARALLEL_CL_COMMON_CL
 #define VSMC_HELPER_PARALLEL_CL_COMMON_CL
 
-#if defined(cl_khr_fp64)
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#elif defined(cl_amd_fp64)
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
-#else
-#define R123_USE_U01_DOUBLE 0
-#endif
-
 #if VSMC_USE_RANDOM123
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
