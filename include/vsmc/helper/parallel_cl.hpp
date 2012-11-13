@@ -7,6 +7,12 @@
 #include <vsmc/core/rng.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
 
+#define VSMC_STATIC_ASSERT_CL_TYPE(type) \
+    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value \
+             || cxx11::is_same<type, cl_double>::value), \
+            USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
+            
+
 #define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \
     VSMC_RUNTIME_ASSERT((context_created()), ( \
                 "**StateCL::"#func"** can only be called after successful " \
@@ -67,6 +73,20 @@ class GetHostPtr
     }
 };
 
+template <typename> void set_cl_state_type (std::stringstream &);
+
+template<>
+void set_cl_state_type<cl_float>(std::stringstream &ss)
+{
+    ss << "typedef float state_type;\n";
+}
+
+template<>
+void set_cl_state_type<cl_double>(std::stringstream &ss)
+{
+    ss << "typedef double state_type;\n";
+}
+
 } // namespace vsmc::internal
 
 /// \brief Particle::value_type subtype
@@ -88,6 +108,7 @@ class StateCL
         program_created_(false), build_(false),
         state_host_(dim_ * N), weight_host_(N), accept_host_(N)
     {
+        VSMC_STATIC_ASSERT_CL_TYPE(T);
         local_size(0);
     }
 
@@ -298,26 +319,26 @@ class StateCL
             std::stringstream ss;
             ss << "#if defined(cl_khr_fp64)\n";
             ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
-            ss << "#define R123_USE_U01_DOUBLE 1\n";
             ss << "#elif defined(cl_amd_fp64)\n";
             ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
+            ss << "#endif\n";
+
+            ss << "#if defined(cl_khr_fp64) || defined(cl_amd_fp64)\n";
             ss << "#define R123_USE_U01_DOUBLE 1\n";
             ss << "#else\n";
             ss << "#define R123_USE_U01_DOUBLE 0\n";
             ss << "#endif\n";
+
             ss << "#ifndef VSMC_USE_RANDOM123\n";
             ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
             ss << "#endif\n";
-            if (sizeof(T) == sizeof(cl_float))
-                ss << "typedef float state_type;\n";
-            else if (sizeof(T) == sizeof(cl_double))
-                ss << "typedef double state_type;\n";
-            else
-                throw std::runtime_error("Unsupported CL data type");
+
+            internal::set_cl_state_type<T>(ss);
             ss << "typedef struct state_struct {\n";
             for (unsigned d = 0; d != dim_; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
             ss << "} state_struct;\n";
+
             ss << "typedef ulong size_type;\n";
             ss << "#define Size " << size_ << "UL\n";
             ss << "#define Dim  " << dim_  << "U\n";
@@ -438,9 +459,19 @@ class StateCL
 
     cl::Kernel create_kernel (const std::string &name) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel)
+        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel);
 
-        return cl::Kernel(program_, name.c_str());
+        cl::Kernel kernel;
+        try {
+            kernel = cl::Kernel(program_, name.c_str());
+        } catch (cl::Error &err) {
+            std::cerr << "Failed to create kernel: \""
+                << name <<  "\"" << std::endl;
+            std::cerr << err.err() << " : " << err.what() << std::endl;
+            throw err;
+        }
+
+        return kernel;
     }
 
     void run_parallel (const cl::Kernel &ker) const
