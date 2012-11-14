@@ -117,7 +117,8 @@ class StateCL
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
-        state_host_(dim_ * N), weight_host_(N), accept_host_(N)
+        state_host_(dim_ * N), weight_host_(N), accept_host_(N),
+        time_run_kernel_(0), time_read_buffer_(0), time_write_buffer_(0)
     {
         VSMC_STATIC_ASSERT_CL_TYPE(T);
         local_size(0);
@@ -441,6 +442,7 @@ class StateCL
 
         void *host_ptr = internal::GetHostPtr<CLType, OutputIter>::get(first);
         command_queue_.finish();
+        std::clock_t start = std::clock();
         if (host_ptr) {
             command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
                     host_ptr);
@@ -450,6 +452,7 @@ class StateCL
                     sizeof(CLType) * num, (void *) temp);
             std::copy(temp, temp + num, first);
         }
+        time_read_buffer_ += std::clock() - start;
     }
 
     template <typename CLType, typename InputIter>
@@ -460,6 +463,7 @@ class StateCL
 
         void *host_ptr = internal::GetHostPtr<CLType, InputIter>::get(first);
         command_queue_.finish();
+        std::clock_t start = std::clock();
         if (host_ptr) {
             command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
                     host_ptr);
@@ -469,6 +473,7 @@ class StateCL
             command_queue_.enqueueWriteBuffer(buf, 1, 0,
                     sizeof(CLType) * num, (void *) temp);
         }
+        time_write_buffer_ += std::clock() - start;
     }
 
     cl::Kernel create_kernel (const std::string &name) const
@@ -491,9 +496,11 @@ class StateCL
     void run_kernel (const cl::Kernel &ker) const
     {
         command_queue_.finish();
+        std::clock_t start = std::clock();
         command_queue_.enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
         command_queue_.finish();
+        time_run_kernel_ += std::clock() - start;
     }
 
     template<typename IntType>
@@ -505,6 +512,28 @@ class StateCL
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
         run_kernel(kernel_copy_);
+    }
+
+    void reset_timer ()
+    {
+        time_run_kernel_ = 0;
+        time_read_buffer_ = 0;
+        time_write_buffer_ = 0;
+    }
+
+    double time_run_kernel ()
+    {
+        return time_run_kernel_ / static_cast<double>(CLOCKS_PER_SEC);
+    }
+
+    double time_read_buffer ()
+    {
+        return time_read_buffer_ / static_cast<double>(CLOCKS_PER_SEC);
+    }
+
+    double time_write_buffer ()
+    {
+        return time_write_buffer_ / static_cast<double>(CLOCKS_PER_SEC);
     }
 
     private :
@@ -545,6 +574,10 @@ class StateCL
     mutable std::vector<cl_uint> accept_host_;
 
     cl::Buffer copy_device_;
+
+    mutable std::clock_t time_run_kernel_;
+    mutable std::clock_t time_read_buffer_;
+    mutable std::clock_t time_write_buffer_;
 
     void setup_buffer ()
     {
