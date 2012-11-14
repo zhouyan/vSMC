@@ -11,7 +11,6 @@
     VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value \
              || cxx11::is_same<type, cl_double>::value), \
             USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
-            
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \
     VSMC_RUNTIME_ASSERT((context_created()), ( \
@@ -79,12 +78,24 @@ template<>
 void set_cl_state_type<cl_float>(std::stringstream &ss)
 {
     ss << "typedef float state_type;\n";
+    ss << "#define U01_OPEN_OPEN_32     u01_open_open_32_24\n";
+    ss << "#define U01_OPEN_CLOSED_32   u01_open_closed_32_24\n";
+    ss << "#define U01_CLOSED_OPEN_32   u01_closed_closed_32_24\n";
+    ss << "#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_24\n";
 }
 
 template<>
 void set_cl_state_type<cl_double>(std::stringstream &ss)
 {
     ss << "typedef double state_type;\n";
+    ss << "#define U01_OPEN_OPEN_32     u01_open_open_32_53\n";
+    ss << "#define U01_OPEN_CLOSED_32   u01_open_closed_32_53\n";
+    ss << "#define U01_CLOSED_OPEN_32   u01_closed_closed_32_53\n";
+    ss << "#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_53\n";
+    ss << "#define U01_OPEN_OPEN_64     u01_open_open_64_53\n";
+    ss << "#define U01_OPEN_CLOSED_64   u01_open_closed_64_53\n";
+    ss << "#define U01_CLOSED_OPEN_64   u01_closed_closed_64_53\n";
+    ss << "#define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53\n";
 }
 
 } // namespace vsmc::internal
@@ -314,6 +325,8 @@ class StateCL
     void build (const std::string &source, const std::string &flags)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(build);
+        VSMC_RUNTIME_ASSERT((!build_),
+                "**StateCL::build**: Program already build");
 
         if (!program_created_) {
             std::stringstream ss;
@@ -358,8 +371,9 @@ class StateCL
         } catch (cl::Error &err) {
             std::string log;
             std::cerr << "===========================" << std::endl;
-            std::cerr << "Error: vsmc: OpenCL program Build failed"
+            std::cerr << "Error: vSMC: OpenCL program Build failed"
                 << std::endl;
+            std::cerr << err.err() << " : " << err.what() << std::endl;
             program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_OPTIONS, &log);
             std::cerr << "===========================" << std::endl;
             std::cerr << "Build options:" << std::endl;
@@ -474,7 +488,7 @@ class StateCL
         return kernel;
     }
 
-    void run_parallel (const cl::Kernel &ker) const
+    void run_kernel (const cl::Kernel &ker) const
     {
         command_queue_.finish();
         command_queue_.enqueueNDRangeKernel(ker,
@@ -490,7 +504,7 @@ class StateCL
         write_buffer<size_type>(copy_device_, size_, copy_from);
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
-        run_parallel(kernel_copy_);
+        run_kernel(kernel_copy_);
     }
 
     private :
@@ -588,7 +602,7 @@ class InitializeCL
         set_kernel(particle);
         initialize_param(particle, param);
         pre_processor(particle);
-        particle.value().run_parallel(kernel_);
+        particle.value().run_kernel(kernel_);
         post_processor(particle);
         const cl_uint *accept = particle.value().accept_host();
 
@@ -667,7 +681,7 @@ class MoveCL
 
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().run_parallel(kernel_);
+        particle.value().run_kernel(kernel_);
         post_processor(iter, particle);
         const cl_uint *accept = particle.value().accept_host();
 
@@ -747,7 +761,7 @@ class MonitorEvalCL
 
         set_kernel(iter, dim, particle);
         pre_processor(iter, particle);
-        particle.value().run_parallel(kernel_);
+        particle.value().run_kernel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
                     buffer_device_, particle.value().size() * dim, res);
         post_processor(iter, particle);
@@ -831,7 +845,7 @@ class PathEvalCL
 
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().run_parallel(kernel_);
+        particle.value().run_kernel(kernel_);
         particle.value().template read_buffer<typename T::state_type>(
                 buffer_device_, particle.value().size(), res);
         post_processor(iter, particle);
