@@ -31,36 +31,6 @@ FUNCTION (ADD_EXAMPLE basename algs)
                 TARGET_LINK_LIBRARIES (${exe_name} ${EXAMPLE_LINK_LIBRARIES})
             ENDIF (${exe} STREQUAL "std")
 
-            IF (${basename} STREQUAL "gmm")
-                ADD_TEST (NAME ${exe_name} COMMAND ${exe_name}
-                    "--particle_num" "1000"
-                    "--prior2" "100"
-                    "--burnin_num" "100"
-                    "--iter_num" "100"
-                    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-                    CONFIGURATIONS Debug Release RelWithDebInfo MinSizeRel)
-            ENDIF (${basename} STREQUAL "gmm")
-
-            IF (${basename} STREQUAL "node")
-                ADD_TEST (NAME ${exe_name} COMMAND ${exe_name}
-                    "--particle_num" "100"
-                    "--prior2" "30"
-                    "--burnin_num" "100"
-                    "--iter_num" "100"
-                    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-                    CONFIGURATIONS Debug Release RelWithDebInfo MinSizeRel)
-            ENDIF (${basename} STREQUAL "node")
-
-            IF (${basename} STREQUAL "pet")
-                ADD_TEST (NAME ${exe_name} COMMAND ${exe_name}
-                    "--particle_num" "1000"
-                    "--prior2" "500"
-                    "--burnin_num" "100"
-                    "--iter_num" "100"
-                    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-                    CONFIGURATIONS Debug Release RelWithDebInfo MinSizeRel)
-            ENDIF (${basename} STREQUAL "pet")
-
             ADD_DEPENDENCIES (${basename} ${exe_name})
         ENDFOREACH(alg)
     ENDFOREACH (exe)
