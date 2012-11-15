@@ -7,7 +7,7 @@
 #include <vsmc/core/rng.hpp>
 #include <vsmc/helper/parallel_cl/cl.hpp>
 
-#define VSMC_STATIC_ASSERT_CL_TYPE(type) \
+#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(type) \
     VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value \
              || cxx11::is_same<type, cl_double>::value), \
             USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
@@ -120,7 +120,7 @@ class StateCL
         state_host_(dim_ * N), accept_host_(N),
         time_run_kernel_(0), time_read_buffer_(0), time_write_buffer_(0)
     {
-        VSMC_STATIC_ASSERT_CL_TYPE(T);
+        VSMC_STATIC_ASSERT_STATE_CL_TYPE(T);
         local_size(0);
     }
 
