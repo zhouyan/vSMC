@@ -730,7 +730,7 @@ class MoveCL
             kernel_ = particle.value().create_kernel(kernel_name_);
         }
 
-        kernel_.setArg(0, (cl_uint) iter);
+        kernel_.setArg<cl_uint>(0, iter);
         kernel_.setArg(1, particle.value().state_device());
         kernel_.setArg(2, particle.value().accept_device());
     }
@@ -810,8 +810,8 @@ class MonitorEvalCL
                         particle.value().size() * dim);
         }
 
-        kernel_.setArg(0, (cl_uint) iter);
-        kernel_.setArg(1, (cl_uint) dim);
+        kernel_.setArg<cl_uint>(0, iter);
+        kernel_.setArg<cl_uint>(1, dim);
         kernel_.setArg(2, particle.value().state_device());
         kernel_.setArg(3, buffer_device_);
     }
@@ -897,7 +897,7 @@ class PathEvalCL
                         particle.value().size());
         }
 
-        kernel_.setArg(0, (cl_uint) iter);
+        kernel_.setArg<cl_uint>(0, iter);
         kernel_.setArg(1, particle.value().state_device());
         kernel_.setArg(2, buffer_device_);
     }
