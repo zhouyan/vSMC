@@ -117,7 +117,7 @@ class StateCL
         platform_created_(false), context_created_(false),
         device_created_(false), command_queue_created_(false),
         program_created_(false), build_(false),
-        state_host_(dim_ * N), weight_host_(N), accept_host_(N),
+        state_host_(dim_ * N), accept_host_(N),
         time_run_kernel_(0), time_read_buffer_(0), time_write_buffer_(0)
     {
         VSMC_STATIC_ASSERT_CL_TYPE(T);
@@ -271,18 +271,6 @@ class StateCL
         read_buffer<state_type>(state_device_, dim_ * size_, &state_host_[0]);
 
         return &state_host_[0];
-    }
-
-    const cl::Buffer &weight_device () const
-    {
-        return weight_device_;
-    }
-
-    const double *weight_host () const
-    {
-        read_buffer<state_type>(weight_device_, size_, &weight_host_[0]);
-
-        return &weight_host_[0];
     }
 
     const cl::Buffer &accept_device () const
@@ -566,11 +554,9 @@ class StateCL
     cl::NDRange local_nd_range_;
 
     cl::Buffer state_device_;
-    cl::Buffer weight_device_;
     cl::Buffer accept_device_;
 
     mutable std::vector<double> state_host_;
-    mutable std::vector<double> weight_host_;
     mutable std::vector<cl_uint> accept_host_;
 
     cl::Buffer copy_device_;
@@ -582,7 +568,6 @@ class StateCL
     void setup_buffer ()
     {
         state_device_  = create_buffer<T>(dim_ * size_);
-        weight_device_ = create_buffer<T>(size_);
         accept_device_ = create_buffer<cl_uint>(size_);
         copy_device_   = create_buffer<size_type>(size_);
     }
@@ -669,8 +654,7 @@ class InitializeCL
         }
 
         kernel_.setArg(0, particle.value().state_device());
-        kernel_.setArg(1, particle.value().weight_device());
-        kernel_.setArg(2, particle.value().accept_device());
+        kernel_.setArg(1, particle.value().accept_device());
     }
 
     protected :
@@ -748,8 +732,7 @@ class MoveCL
 
         kernel_.setArg(0, (cl_uint) iter);
         kernel_.setArg(1, particle.value().state_device());
-        kernel_.setArg(2, particle.value().weight_device());
-        kernel_.setArg(3, particle.value().accept_device());
+        kernel_.setArg(2, particle.value().accept_device());
     }
 
     protected :
