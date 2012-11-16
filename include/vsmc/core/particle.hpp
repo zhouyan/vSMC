@@ -44,6 +44,10 @@ class Particle :
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
         resample_rng_set_(N)
     {
+        weight_set_value_ptr(
+                typename has_set_value_ptr_<weight_set_type>::value_type());
+        rng_set_value_ptr(
+                typename has_set_value_ptr_<rng_set_type>::value_type());
         set_equal_weight();
     }
 
@@ -181,6 +185,33 @@ class Particle :
     bool resampled_;
     resample_op_type resample_op_;
     resample_rng_set_type resample_rng_set_;
+
+    template <typename U>
+    struct has_set_value_ptr_
+    {
+        struct char2 {char c1; char c2;};
+        template <typename V, void (V::*) (T *)> struct sfinae;
+        template <typename V> static char test (sfinae<V, &V::set_value_ptr> *);
+        template <typename V> static char2 test (...);
+
+        static const bool value =
+            sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char);
+        typedef cxx11::integral_constant<bool, value> value_type;
+    };
+
+    void weight_set_value_ptr (cxx11::true_type)
+    {
+        weight_set_type::set_value_ptr(&value_);
+    }
+
+    void weight_set_value_ptr (cxx11::false_type) {}
+
+    void rng_set_value_ptr (cxx11::true_type)
+    {
+        rng_set_type::set_value_ptr(&value_);
+    }
+
+    void rng_set_value_ptr (cxx11::false_type) {}
 
     void resample_do ()
     {
