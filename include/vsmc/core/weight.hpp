@@ -124,6 +124,10 @@ class WeightSetBase
         return ess_;
     }
 
+    protected :
+
+    template <typename T> void set_value_ptr (T *) {}
+
     private :
 
     size_type size_;

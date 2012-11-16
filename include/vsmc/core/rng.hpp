@@ -39,6 +39,10 @@ class RngSetSeq
         return rng_;
     }
 
+    protected :
+
+    template <typename T> void set_value_ptr (T *) {}
+
     private :
 
     rng_type rng_;
@@ -66,6 +70,10 @@ class RngSetPrl
     {
         return rng_[id];
     }
+
+    protected :
+
+    template <typename T> void set_value_ptr (T *) {}
 
     private :
 

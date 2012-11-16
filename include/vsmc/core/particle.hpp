@@ -45,6 +45,8 @@ class Particle :
         resample_rng_set_(N)
     {
         set_equal_weight();
+        rng_set_type::set_value_ptr(&value_);
+        weight_set_type::set_value_ptr(&value_);
     }
 
     /// \brief Number of particles
