@@ -23,6 +23,17 @@ class WeightSetBase
         return std::copy(weight_.begin(), weight_.end(), first);
     }
 
+    /// \brief Read normalized weights through a random access iterator with
+    /// (possible non-uniform stride)
+    template <typename RandomIter>
+    RandomIter read_weight (RandomIter first, int stride) const
+    {
+        for (size_type i = 0; i != size_; ++i, first += stride)
+            *first = weight_[i];
+
+        return first;
+    }
+
     /// \brief Read normalized weights through a pointer
     double *read_weight (double *first) const
     {
@@ -42,6 +53,17 @@ class WeightSetBase
     OutputIter read_log_weight (OutputIter first) const
     {
         return std::copy(log_weight_.begin(), log_weight_.end(), first);
+    }
+
+    /// \brief Read unnormalized logarithm weights through a random access
+    /// iterator with (possible non-uniform stride)
+    template <typename RandomIter>
+    RandomIter read_log_weight (RandomIter first, int stride) const
+    {
+        for (size_type i = 0; i != size_; ++i, first += stride)
+            *first = log_weight_[i];
+
+        return first;
     }
 
     /// \brief Read unnormalized logarithm weights through a pointer
