@@ -92,8 +92,7 @@ struct Has##OuterType##Impl                                                  \
                                                                              \
     public :                                                                 \
                                                                              \
-    static const bool value =                                                \
-        sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);                       \
+    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
 };                                                                           \
                                                                              \
 template <typename T>                                                        \
@@ -113,7 +112,7 @@ template <typename T> struct OuterType##Dispatch<T, false>                   \
                                                                              \
 template <typename T> struct OuterType##Trait                                \
 {                                                                            \
-    static const bool value = traits::Has##OuterType<T>::value;              \
+    enum {value = traits::Has##OuterType<T>::value};                         \
     typedef typename traits::OuterType##Dispatch<T, value>::type type;       \
 };                                                                           \
                                                                              \

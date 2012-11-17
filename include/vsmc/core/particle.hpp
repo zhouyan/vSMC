@@ -194,8 +194,7 @@ class Particle :
         template <typename V> static char test (sfinae<V, &V::set_value_ptr> *);
         template <typename V> static char2 test (...);
 
-        static const bool value =
-            sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char);
+        enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};
         typedef cxx11::integral_constant<bool, value> value_type;
     };
 

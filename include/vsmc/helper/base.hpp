@@ -37,8 +37,7 @@ class IsBaseOfState
 
     public :
 
-    static const bool value =
-        sizeof(test(static_cast<derived_type *>(0))) == sizeof(char);
+   enum {value = sizeof(test(static_cast<derived_type *>(0))) == sizeof(char)};
 };
 
 /// \brief Particle::value_type subtype
