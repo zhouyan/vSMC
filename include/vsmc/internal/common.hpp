@@ -77,9 +77,7 @@
 #endif // VSMC_HAS_CXX11_STATIC_ASSERT
 
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)   \
-namespace vsmc {                                                             \
-                                                                             \
-namespace traits {                                                           \
+namespace vsmc { namespace traits {                                          \
                                                                              \
 template <typename T>                                                        \
 struct Has##OuterType##Impl                                                  \
@@ -108,7 +106,6 @@ template <typename T> struct OuterType##Dispatch<T, true>                    \
 template <typename T> struct OuterType##Dispatch<T, false>                   \
 {typedef DefaultType type;};                                                 \
                                                                              \
-}                                                                            \
                                                                              \
 template <typename T> struct OuterType##Trait                                \
 {                                                                            \
@@ -116,7 +113,7 @@ template <typename T> struct OuterType##Trait                                \
     typedef typename traits::OuterType##Dispatch<T, value>::type type;       \
 };                                                                           \
                                                                              \
-}
+} }
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 

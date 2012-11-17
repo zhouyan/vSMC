@@ -41,7 +41,7 @@ class Monitor
     typedef T value_type;
     typedef cxx11::function<void (
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
-    typedef typename GEMVTypeTrait<T>::type gemv_type;
+    typedef typename traits::GEMVTypeTrait<T>::type gemv_type;
 
     explicit Monitor (unsigned dim = 1, const eval_type &eval = VSMC_NULLPTR) :
         dim_(dim), eval_(eval) {}

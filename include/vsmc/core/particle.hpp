@@ -14,18 +14,22 @@ namespace vsmc {
 /// \sa RngSetSeq RngSetPrl
 template <typename T>
 class Particle :
-    public RngSetTypeTrait<T>::type,
-    public WeightSetTypeTrait<T>::type
+    public traits::RngSetTypeTrait<T>::type,
+    public traits::WeightSetTypeTrait<T>::type
 {
     public :
 
-    typedef typename SizeTypeTrait<T>::type size_type;
+    typedef typename traits::SizeTypeTrait<T>::type size_type;
     typedef T value_type;
-    typedef typename RngSetTypeTrait<T>::type rng_set_type;
-    typedef typename ResampleRngSetTypeTrait<T>::type resample_rng_set_type;
-    typedef typename WeightSetTypeTrait<T>::type weight_set_type;
-    typedef cxx11::function<void (size_type, resample_rng_set_type &,
-            double *, size_type *)> resample_op_type;
+    typedef typename traits::RngSetTypeTrait<T>::type
+        rng_set_type;
+    typedef typename traits::ResampleRngSetTypeTrait<T>::type
+        resample_rng_set_type;
+    typedef typename traits::WeightSetTypeTrait<T>::type
+        weight_set_type;
+    typedef cxx11::function<
+        void (size_type, resample_rng_set_type &, double *, size_type *)>
+        resample_op_type;
 
     using rng_set_type::rng;
     using weight_set_type::weight;

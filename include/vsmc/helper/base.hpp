@@ -9,7 +9,7 @@
                 " WITH INCORRECT **Derived** TEMPLATE PARAMTER")); \
 
 #define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user) \
-    VSMC_STATIC_ASSERT((vsmc::IsBaseOfState<base, derived>::value), \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value), \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
 
 #ifdef NDEBUG
@@ -18,11 +18,8 @@
 #define VSMC_HELPER_BASE_DESTRUCTOR_PREFIX virtual
 #endif
 
-namespace vsmc {
+namespace vsmc { namespace traits {
 
-/// \brief Trait that determine if a given class is derived from a base state
-/// class template
-/// \ingroup Base
 template <template <unsigned, typename> class State, typename D>
 class IsBaseOfState
 {
@@ -39,6 +36,8 @@ class IsBaseOfState
 
    enum {value = sizeof(test(static_cast<derived_type *>(0))) == sizeof(char)};
 };
+
+} // namespace vsmc::traits
 
 /// \brief Particle::value_type subtype
 /// \ingroup Base
