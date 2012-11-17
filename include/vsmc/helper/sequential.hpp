@@ -6,6 +6,7 @@
 
 namespace vsmc {
 
+#if !VSMC_HAS_CXX11_ALIAS_TEMPLATES
 /// \brief Particle::value_type subtype
 /// \ingroup Sequential
 template <unsigned Dim, typename T>
@@ -17,19 +18,9 @@ class StateSEQ : public StateBase<Dim, T>
     typedef typename state_base_type::size_type  size_type;
     typedef typename state_base_type::state_type state_type;
 
-    explicit StateSEQ (size_type N) : StateBase<Dim, T>(N), size_(N) {}
-
-    template <typename IntType>
-    void copy (const IntType *copy_from)
-    {
-        for (size_type to = 0; to != size_; ++to)
-            this->copy_particle(copy_from[to], to);
-    }
-
-    private :
-
-    size_type size_;
+    explicit StateSEQ (size_type N) : StateBase<Dim, T>(N) {}
 }; // class StateSEQ
+#endif // VSMC_HAS_CXX11_ALIAS_TEMPLATES
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
@@ -44,7 +35,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSEQ, T, InitializeSEQ);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, InitializeSEQ);
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -78,7 +69,7 @@ class MoveSEQ : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSEQ, T, MoveSEQ);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MoveSEQ);
 
         this->pre_processor(iter, particle);
         unsigned accept = 0;
@@ -112,7 +103,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSEQ, T, MonitorEvalSEQ);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MonitorEvalSEQ);
 
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != particle.value().size(); ++i) {
@@ -144,7 +135,7 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSEQ, T, PathEvalSEQ);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, PathEvalSEQ);
 
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != particle.value().size(); ++i) {

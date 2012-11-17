@@ -66,7 +66,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, InitializeSTD);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, InitializeSTD);
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -128,7 +128,7 @@ class MoveSTD : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, MoveSTD);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MoveSTD);
 
         this->pre_processor(iter, particle);
         work_ work(this, iter, &particle);
@@ -191,7 +191,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, MonitorEvalSTD);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MonitorEvalSTD);
 
         this->pre_processor(iter, particle);
         thread::parallel_for(thread::BlockedRange<size_type>(
@@ -253,7 +253,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateSTD, T, PathEvalSTD);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, PathEvalSTD);
 
         this->pre_processor(iter, particle);
         thread::parallel_for(thread::BlockedRange<size_type>(

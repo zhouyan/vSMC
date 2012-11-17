@@ -22,7 +22,11 @@ template <typename, typename> class MoveBase;
 template <typename, typename> class MonitorEvalBase;
 template <typename, typename> class PathEvalBase;
 
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <unsigned Dim, typename T> using StateSEQ = StateBase<Dim, T>;
+#else
 template <unsigned, typename> class StateSEQ;
+#endif
 template <typename, typename D = VBase> class InitializeSEQ;
 template <typename, typename D = VBase> class MoveSEQ;
 template <typename, typename D = VBase> class MonitorEvalSEQ;

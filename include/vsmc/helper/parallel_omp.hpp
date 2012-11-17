@@ -50,7 +50,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, InitializeOMP);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, InitializeOMP);
 
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -85,7 +85,7 @@ class MoveOMP : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MoveOMP);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MoveOMP);
 
         this->pre_processor(iter, particle);
         unsigned accept = 0;
@@ -121,7 +121,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, MonitorEvalOMP);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MonitorEvalOMP);
 
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(none) shared(particle, iter, dim, res)
@@ -154,7 +154,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateOMP, T, PathEvalOMP);
+        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, PathEvalOMP);
 
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(none) shared(particle, iter, res)
