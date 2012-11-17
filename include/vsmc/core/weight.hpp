@@ -30,7 +30,7 @@ class WeightSetBase
         VSMC_RUNTIME_ASSERT(
                 (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_)),
                 "The destination of **WeightBase::read_weight** is "
-                "overlapping with the source\n"
+                "overlapping with the source.\n"
                 "How did you get this address?");
         std::memcpy(first, wptr, sizeof(double) * size_);
 
@@ -51,7 +51,7 @@ class WeightSetBase
         VSMC_RUNTIME_ASSERT(
                 (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_)),
                 "The destination of **WeightBase::read_weight** is "
-                "overlapping with the source\n"
+                "overlapping with the source.\n"
                 "How did you get this address?");
         std::memcpy(first, lwptr, sizeof(double) * size_);
 
@@ -80,40 +80,121 @@ class WeightSetBase
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) weights directly
-    void set_weight (const double *nw, int stride = 1)
+    /// changing the (possible unnormalized) weights directly through an input
+    /// iterator
+    template <typename InputIter>
+    void set_weight (InputIter first)
     {
-        for (size_type i = 0; i != size_; ++i, nw += stride)
-            weight_[i] = *nw;
+        for (size_type i = 0; i != size_; ++i, ++first)
+            weight_[i] = *first;
+        weight2log_weight();
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) weights directly through a random
+    /// access iterator with (possible non-uniform) stride
+    template <typename RandomIter>
+    void set_weight (RandomIter first, int stride)
+    {
+        for (size_type i = 0; i != size_; ++i, first += stride)
+            weight_[i] = *first;
+        weight2log_weight();
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) weights directly through a pointer
+    void set_weight (const double *first)
+    {
+        double *const wptr = &weight_[0];
+        VSMC_RUNTIME_ASSERT(
+                (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_)),
+                "The source of **WeightBase::set_weight** is "
+                "overlapping with the destination.\n"
+                "How did you get this address?");
+        std::memcpy(wptr, first, sizeof(double) * size_);
         weight2log_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// multiply the normalized weight with (possible unnormalized) incremental
-    /// weights
-    void mul_weight (const double *nw, int stride = 1)
+    /// weights through an input iterator
+    template <typename InputIter>
+    void mul_weight (InputIter first)
     {
-        for (size_type i = 0; i != size_; ++i, nw += stride)
-            weight_[i] *= *nw;
+        for (size_type i = 0; i != size_; ++i, ++first)
+            weight_[i] *= *first;
         weight2log_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) logartihm weights directly
-    void set_log_weight (const double *nw, int stride = 1)
+    /// multiply the normalized weight with (possible unnormalized) incremental
+    /// weights through a random access iterator with (possible non-uniform)
+    /// stride
+    template <typename RandomIter>
+    void mul_weight (RandomIter first, int stride)
     {
-        for (size_type i = 0; i != size_; ++i, nw += stride)
-            log_weight_[i] = *nw;
+        for (size_type i = 0; i != size_; ++i, first += stride)
+            weight_[i] *= *first;
+        weight2log_weight();
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) logarithm weights directly through
+    /// an input iterator
+    template <typename InputIter>
+    void set_log_weight (InputIter first)
+    {
+        for (size_type i = 0; i != size_; ++i, ++first)
+            log_weight_[i] = *first;
+        log_weight2weight();
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) logarithm weights directly through
+    /// a random access iterator with (possible non-uniform) stride
+    template <typename RandomIter>
+    void set_log_weight (RandomIter first, int stride)
+    {
+        for (size_type i = 0; i != size_; ++i, first += stride)
+            log_weight_[i] = *first;
+        log_weight2weight();
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) logarithm weights directly through
+    /// a pointer
+    void set_log_weight (const double *first)
+    {
+        double *const lwptr = &log_weight_[0];
+        VSMC_RUNTIME_ASSERT(
+                (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_)),
+                "The source of **WeightBase::set_log_weight** is "
+                "overlapping with the destination.\n"
+                "How did you get this address?");
+        std::memcpy(lwptr, first, sizeof(double) * size_);
         log_weight2weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// adding to the unnormalized logarithm weights with (possible
-    /// unormalized) logarithm incremental weights
-    void add_log_weight (const double *nw, int stride = 1)
+    /// unormalized) logarithm incremental weights through an input iterator
+    template <typename InputIter>
+    void add_log_weight (InputIter first)
     {
-        for (size_type i = 0; i != size_; ++i, nw += stride)
-            log_weight_[i] += *nw;
+        for (size_type i = 0; i != size_; ++i, ++first)
+            log_weight_[i] += *first;
+        log_weight2weight();
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// adding to the unnormalized logarithm weights with (possible
+    /// unormalized) logarithm incremental weights through a ranodm access
+    /// iterator with (possible non-uniform) stride
+    template <typename RandomIter>
+    void add_log_weight (RandomIter first, int stride)
+    {
+        for (size_type i = 0; i != size_; ++i, first += stride)
+            log_weight_[i] += *first;
         log_weight2weight();
     }
 
