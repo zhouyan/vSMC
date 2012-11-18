@@ -19,12 +19,12 @@ class ThreadManager
         return manager;
     }
 
-    unsigned get_thread_num () const
+    unsigned thread_num () const
     {
         return thread_num_;
     }
 
-    void set_thread_num (unsigned num)
+    void thread_num (unsigned num)
     {
         thread_num_ = num;
     }
@@ -39,7 +39,7 @@ class ThreadManager
         SizeType N = end - begin;
         SizeType block_size = std::max VSMC_MINMAX_NO_EXPANSION (
                 static_cast<SizeType>(1),
-                N / static_cast<SizeType>(get_thread_num()));
+                N / static_cast<SizeType>(thread_num()));
 
         SizeType current = 0;
         unsigned num = 0;
@@ -54,7 +54,7 @@ class ThreadManager
             N -= next_size;
         }
 
-        VSMC_RUNTIME_ASSERT((num <= get_thread_num()),
+        VSMC_RUNTIME_ASSERT((num <= thread_num()),
                 "INVALID THREAD NUMBER **ThreadManager::partition**");
 
         return num;
@@ -80,8 +80,7 @@ class BlockedRange
 
     typedef SizeType size_type;
 
-    BlockedRange (size_type begin, size_type end) :
-        begin_(begin), end_(end) {}
+    BlockedRange (size_type begin, size_type end) : begin_(begin), end_(end) {}
 
     size_type begin () const
     {
@@ -105,17 +104,15 @@ template <typename SizeType, typename WorkType>
 void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
 {
     const ThreadManager &manager = ThreadManager::instance();
-    unsigned thread_num = manager.get_thread_num();
+    unsigned thread_num = manager.thread_num();
     std::vector<SizeType> b(thread_num);
     std::vector<SizeType> e(thread_num);
     unsigned num = manager.partition(range.begin(), range.end(),
             b.begin(), e.begin());
     // TODO safer management of threads group
     std::vector<std::thread> tg;
-    for (unsigned i = 0; i != num; ++i) {
-        tg.push_back(std::thread(work,
-                    BlockedRange<SizeType>(b[i], e[i])));
-    }
+    for (unsigned i = 0; i != num; ++i)
+        tg.push_back(std::thread(work, BlockedRange<SizeType>(b[i], e[i])));
     for (unsigned i = 0; i != num; ++i)
         tg[i].join();
 }
@@ -127,7 +124,7 @@ void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
         ResultType &res)
 {
     const ThreadManager &manager = ThreadManager::instance();
-    unsigned thread_num = manager.get_thread_num();
+    unsigned thread_num = manager.thread_num();
     std::vector<SizeType> b(thread_num);
     std::vector<SizeType> e(thread_num);
     std::vector<ResultType> result(thread_num);
