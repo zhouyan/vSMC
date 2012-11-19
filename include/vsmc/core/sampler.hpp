@@ -18,8 +18,8 @@ class Sampler
     typedef cxx11::function<unsigned (Particle<T> &, void *)> init_type;
     typedef cxx11::function<unsigned (unsigned, Particle<T> &)> move_type;
     typedef cxx11::function<unsigned (unsigned, Particle<T> &)> mcmc_type;
-    typedef std::deque<move_type> move_queue_type;
-    typedef std::deque<mcmc_type> mcmc_queue_type;
+    typedef std::vector<move_type> move_queue_type;
+    typedef std::vector<mcmc_type> mcmc_queue_type;
     typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
     explicit Sampler (size_type N,
