@@ -50,9 +50,7 @@ work properly even they are present.
 
 The library can optionally use the [Random123][Random123] library for
 parallelized random number generator, and the default behavior is assuming this
-is available. The library distribute a modified version [Random123][Random123]
-in the `third-party` directory. The only modification is to make it work with
-[libc++][libc++].
+is available.
 
 The library support various back-ends for multi-thread parallelization, unified
 under a uniform interface. One is C++11 `<thread>` (or [Boost][Boost] Thread
