@@ -72,8 +72,6 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, InitializeTBB);
-
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         work_ work(this, &particle);
@@ -146,8 +144,6 @@ class MoveTBB : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MoveTBB);
-
         this->pre_processor(iter, particle);
         work_ work(this, iter, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(
@@ -222,8 +218,6 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MonitorEvalTBB);
-
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(
                     0, particle.value().size()),
@@ -284,8 +278,6 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, PathEvalTBB);
-
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(
                     0, particle.value().size()),

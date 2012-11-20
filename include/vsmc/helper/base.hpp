@@ -8,10 +8,6 @@
                 "YOU DERIVED FROM " #basename \
                 " WITH INCORRECT **Derived** TEMPLATE PARAMTER")); \
 
-#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user) \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value), \
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
-
 #ifdef NDEBUG
 #define VSMC_HELPER_BASE_DESTRUCTOR_PREFIX
 #else
@@ -160,7 +156,6 @@ class ConstSingleParticle
     ConstSingleParticle (size_type id, const Particle<T> *particle) :
         id_(id), particle_(particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, ConstSingleParticle);
         VSMC_RUNTIME_ASSERT(particle_,
                 ("A **ConstSingleParticle** object "
                  "is contructed with 0 **Particle** pointer"));
@@ -232,7 +227,6 @@ class SingleParticle
     SingleParticle (size_type id, Particle<T> *particle) :
         id_(id), particle_(particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, SingleParticle);
         VSMC_RUNTIME_ASSERT(particle_,
                 ("A **SingleParticle** object "
                  "is contructed with 0 **Particle** pointer"));

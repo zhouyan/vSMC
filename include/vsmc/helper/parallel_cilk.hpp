@@ -46,8 +46,6 @@ class InitializeCILK : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, InitializeCILK);
-
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         cilk::reducer_opadd<unsigned> accept;
@@ -80,8 +78,6 @@ class MoveCILK : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MoveCILK);
-
         this->pre_processor(iter, particle);
         cilk::reducer_opadd<unsigned> accept;
         cilk_for (size_type i = 0; i != particle.value().size(); ++i)
@@ -114,8 +110,6 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MonitorEvalCILK);
-
         this->pre_processor(iter, particle);
         cilk_for (size_type i = 0; i != particle.value().size(); ++i) {
             this->monitor_state(iter, dim,
@@ -146,8 +140,6 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, PathEvalCILK);
-
         this->pre_processor(iter, particle);
         cilk_for (size_type i = 0; i != particle.value().size(); ++i) {
             res[i] = this->path_state(iter,

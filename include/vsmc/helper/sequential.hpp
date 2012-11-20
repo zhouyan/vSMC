@@ -35,8 +35,6 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 
     unsigned operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, InitializeSEQ);
-
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
@@ -69,8 +67,6 @@ class MoveSEQ : public MoveBase<T, Derived>
 
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MoveSEQ);
-
         this->pre_processor(iter, particle);
         unsigned accept = 0;
         for (size_type i = 0; i != particle.value().size(); ++i)
@@ -103,8 +99,6 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
     void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
             double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, MonitorEvalSEQ);
-
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != particle.value().size(); ++i) {
             this->monitor_state(iter, dim,
@@ -135,8 +129,6 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
 
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_TYPE(StateBase, T, PathEvalSEQ);
-
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != particle.value().size(); ++i) {
             res[i] = this->path_state(iter,
