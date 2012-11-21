@@ -186,11 +186,6 @@ class ConstSingleParticle
         return particle_->value().state(id_, pos);
     }
 
-    const state_type *state () const
-    {
-        return particle_->value().state(id_);
-    }
-
     double weight () const
     {
         return particle_->weight()[id_];
@@ -257,16 +252,6 @@ class SingleParticle
     const state_type &state (unsigned pos) const
     {
         return particle_->value().state(id_, pos);
-    }
-
-    state_type *state ()
-    {
-        return particle_->value().state(id_);
-    }
-
-    const state_type *state () const
-    {
-        return particle_->value().state(id_);
     }
 
     double weight () const
