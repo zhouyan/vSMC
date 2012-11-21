@@ -35,10 +35,6 @@ class Particle
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
         resample_rng_set_(N)
     {
-        weight_set_value_ptr(
-                typename has_set_value_ptr_<weight_set_type>::value_type());
-        rng_set_value_ptr(
-                typename has_set_value_ptr_<rng_set_type>::value_type());
         weight_set_.set_equal_weight();
     }
 
