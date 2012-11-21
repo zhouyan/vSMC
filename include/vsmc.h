@@ -494,13 +494,13 @@ void vsmc_sampler_init (vsmcSampler sampler, vsmcInitialize new_init);
 void vsmc_sampler_move (vsmcSampler sampler, vsmcMove new_move);
 
 /**
-  * \brief sampler.sampler_ptr->move_queue().clear()
+  * \brief sampler.sampler_ptr->move_queue_clear()
   * \ingroup CSampler
   * */
 void vsmc_sampler_move_queue_clear (vsmcSampler sampler);
 
 /**
-  * \brief sampler.sampler_ptr->move_queue().push_back(move)
+  * \brief sampler.sampler_ptr->move_queue_push_back(move)
   * \ingroup CSampler
   * */
 void vsmc_sampler_move_queue_push_back (vsmcSampler sampler, vsmcMove move);
@@ -518,13 +518,13 @@ void vsmc_sampler_move_queue_push_back (vsmcSampler sampler, vsmcMove move);
 void vsmc_sampler_mcmc (vsmcSampler sampler, vsmcMove new_mcmc);
 
 /**
-  * \brief sampler.sampler_ptr->mcmc_queue().clear()
+  * \brief sampler.sampler_ptr->mcmc_queue_clear()
   * \ingroup CSampler
   * */
 void vsmc_sampler_mcmc_queue_clear (vsmcSampler sampler);
 
 /**
-  * \brief sampler.sampler_ptr->mcmc_queue().push_back(mcmc)
+  * \brief sampler.sampler_ptr->mcmc_queue_push_back(mcmc)
   * \ingroup CSampler
   * */
 void vsmc_sampler_mcmc_queue_push_back (vsmcSampler sampler, vsmcMove mcmc);

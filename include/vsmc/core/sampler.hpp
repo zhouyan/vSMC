@@ -18,8 +18,6 @@ class Sampler
     typedef cxx11::function<unsigned (Particle<T> &, void *)> init_type;
     typedef cxx11::function<unsigned (unsigned, Particle<T> &)> move_type;
     typedef cxx11::function<unsigned (unsigned, Particle<T> &)> mcmc_type;
-    typedef std::vector<move_type> move_queue_type;
-    typedef std::vector<mcmc_type> mcmc_queue_type;
     typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
     explicit Sampler (size_type N,
@@ -165,42 +163,68 @@ class Sampler
         init_ = new_init;
     }
 
-    /// \brief Clear the move queue and add a move object of type move_type
-    void move (const move_type &new_move)
+    /// \brief Clear the move queue
+    void move_queue_clear ()
     {
         move_queue_.clear();
+    }
+
+    /// \brief Add a new move
+    void move_queue_push_back (const move_type &new_move)
+    {
+        VSMC_RUNTIME_ASSERT((bool(*new_move)),
+                ("CALL **Sampler::move_queue_push_back** WITH AN INVALID "
+                 "MOVE FUNCTOR"));
         move_queue_.push_back(new_move);
     }
 
-    /// \brief Read and write access to the move queue of type move_queue_type
-    move_queue_type &move_queue ()
+    /// \brief Add a sequence of new moves
+    template <typename InputIter>
+    void move_queue_push_back (InputIter first, InputIter last)
     {
-        return move_queue_;
+        while (first != last) {
+            move_queue_push_back(*first);
+            ++first;
+        }
     }
 
-    /// \brief Read only access to the move queue of type move_queue_type
-    const move_queue_type &move_queue () const
+    /// \brief Clear the move queue and add a move object of type move_type
+    void move (const move_type &new_move)
     {
-        return move_queue_;
+        move_queue_clear();
+        move_queue_push_back(new_move);
+    }
+
+    /// \brief Clear the mcmc queue
+    void mcmc_queue_clear ()
+    {
+        mcmc_queue_.clear();
+    }
+
+    /// \brief Add a new mcmc
+    void mcmc_queue_push_back (const mcmc_type &new_mcmc)
+    {
+        VSMC_RUNTIME_ASSERT((bool(*new_mcmc)),
+                ("CALL **Sampler::mcmc_queue_push_back** WITH AN INVALID "
+                 "MCMC FUNCTOR"));
+        mcmc_queue_.push_back(new_mcmc);
+    }
+
+    /// \brief Add a sequence of new mcmcs
+    template <typename InputIter>
+    void mcmc_queue_push_back (InputIter first, InputIter last)
+    {
+        while (first != last) {
+            mcmc_queue_push_back(*first);
+            ++first;
+        }
     }
 
     /// \brief Clear the mcmc queue and add a mcmc object of type mcmc_type
     void mcmc (const mcmc_type &new_mcmc)
     {
-        mcmc_queue_.clear();
-        mcmc_queue_.push_back(new_mcmc);
-    }
-
-    /// \brief Read and write access to the mcmc queue of type mcmc_queue_type
-    move_queue_type &mcmc_queue ()
-    {
-        return mcmc_queue_;
-    }
-
-    /// \brief Read only access to the mcmc queue of type mcmc_queue_type
-    const move_queue_type &mcmc_queue () const
-    {
-        return mcmc_queue_;
+        mcmc_queue_clear();
+        mcmc_queue_push_back(new_mcmc);
     }
 
     /// \brief Initialization
@@ -247,20 +271,14 @@ class Sampler
             unsigned ia = 0;
             accept_count.resize(move_queue_.size() + mcmc_queue_.size());
 
-            for (typename move_queue_type::iterator
+            for (typename std::vector<move_type>::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
-                VSMC_RUNTIME_ASSERT((bool(*m)),
-                        ("CALL **Sampler::iterate** WITH AN INVALID "
-                         "MOVE FUNCTOR"));
                 accept_count[ia] = (*m)(iter_num_, particle_);
                 ++ia;
             }
             do_resampling();
-            for (typename mcmc_queue_type::iterator
+            for (typename std::vector<mcmc_type>::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
-                VSMC_RUNTIME_ASSERT((bool(*m)),
-                        ("CALL **Sampler::iterate** WITH AN INVALID "
-                         "MCMC FUNCTOR"));
                 accept_count[ia] = (*m)(iter_num_, particle_);
                 ++ia;
             }
@@ -511,8 +529,8 @@ class Sampler
     private :
 
     init_type init_;
-    move_queue_type move_queue_;
-    mcmc_queue_type mcmc_queue_;
+    std::vector<move_type> move_queue_;
+    std::vector<mcmc_type> mcmc_queue_;
 
     double threshold_;
 
