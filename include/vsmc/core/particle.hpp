@@ -13,7 +13,7 @@ namespace vsmc {
 /// \sa WeightSetBase
 /// \sa RngSetSeq RngSetPrl
 template <typename T>
-class Particle : public traits::WeightSetTypeTrait<T>::type
+class Particle
 {
     public :
 
@@ -30,12 +30,8 @@ class Particle : public traits::WeightSetTypeTrait<T>::type
         void (size_type, resample_rng_set_type &, double *, size_type *)>
         resample_op_type;
 
-    using weight_set_type::read_weight;
-    using weight_set_type::set_equal_weight;
-    using weight_set_type::ess;
-
     explicit Particle (size_type N) :
-        weight_set_type(N), size_(N), value_(N), rng_set_(N),
+        size_(N), value_(N), weight_set_(N), rng_set_(N),
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
         resample_rng_set_(N)
     {
@@ -43,7 +39,7 @@ class Particle : public traits::WeightSetTypeTrait<T>::type
                 typename has_set_value_ptr_<weight_set_type>::value_type());
         rng_set_value_ptr(
                 typename has_set_value_ptr_<rng_set_type>::value_type());
-        set_equal_weight();
+        weight_set_.set_equal_weight();
     }
 
     /// \brief Number of particles
@@ -64,6 +60,187 @@ class Particle : public traits::WeightSetTypeTrait<T>::type
         return value_;
     }
 
+    /// \brief Read and write access to the weight collection object
+    weight_set_type &weight_set ()
+    {
+        return weight_set_;
+    }
+
+    /// \brief Read only access to the weight collection object
+    const weight_set_type &weight_set () const
+    {
+        return weight_set_;
+    }
+
+    /// \brief Read and write access to the RNG collection object
+    rng_set_type &rng_set ()
+    {
+        return rng_set_;
+    }
+
+    /// \brief Read only access to the RNG collection object
+    const rng_set_type &rng_set () const
+    {
+        return rng_set_;
+    }
+
+    /// \brief Read normalized weights through an output iterator
+    template <typename OutputIter>
+    OutputIter read_weight (OutputIter first) const
+    {
+        return weight_set_.read_weight(first);
+    }
+
+    /// \brief Read normalized weights through a random access iterator with
+    /// (possible non-uniform stride)
+    template <typename RandomIter>
+    RandomIter read_weight (RandomIter first, int stride) const
+    {
+        return weight_set_.read_weight(first, stride);
+    }
+
+    /// \brief Read normalized weights through a pointer
+    double *read_weight (double *first) const
+    {
+        return weight_set_.read_weight(first);
+    }
+
+    /// \brief Read unnormalized logarithm weights through an output iterator
+    template <typename OutputIter>
+    OutputIter read_log_weight (OutputIter first) const
+    {
+        return weight_set_.read_log_weight(first);
+    }
+
+    /// \brief Read unnormalized logarithm weights through a random access
+    /// iterator with (possible non-uniform stride)
+    template <typename RandomIter>
+    RandomIter read_log_weight (RandomIter first, int stride) const
+    {
+        return weight_set_.read_log_weight(first, stride);
+    }
+
+    /// \brief Read unnormalized logarithm weights through a pointer
+    double *read_log_weight (double *first) const
+    {
+        return weight_set_.read_log_weight(first);
+    }
+
+    /// \brief Get the normalized weight of the id'th particle
+    double weight (size_type id) const
+    {
+        return weight_set_.weight(id);
+    }
+
+    /// \brief Get the unnormalized logarithm weight of the id'th particle
+    double log_weight (size_type id) const
+    {
+        return weight_set_.log_weight(id);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS
+    /// such that each particle has a equal weight
+    void set_equal_weight ()
+    {
+        weight_set_.set_equal_weight();
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) weights directly through an input
+    /// iterator
+    template <typename InputIter>
+    void set_weight (InputIter first)
+    {
+        weight_set_.set_weight(first);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) weights directly through a random
+    /// access iterator with (possible non-uniform) stride
+    template <typename RandomIter>
+    void set_weight (RandomIter first, int stride)
+    {
+        weight_set_.set_weight(first, stride);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) weights directly through a pointer
+    void set_weight (const double *first)
+    {
+        weight_set_.set_weight(first);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// multiply the normalized weight with (possible unnormalized) incremental
+    /// weights through an input iterator
+    template <typename InputIter>
+    void mul_weight (InputIter first)
+    {
+        weight_set_.mul_weight(first);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// multiply the normalized weight with (possible unnormalized) incremental
+    /// weights through a random access iterator with (possible non-uniform)
+    /// stride
+    template <typename RandomIter>
+    void mul_weight (RandomIter first, int stride)
+    {
+        weight_set_.mul_weight(first, stride);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) logarithm weights directly through
+    /// an input iterator
+    template <typename InputIter>
+    void set_log_weight (InputIter first)
+    {
+        weight_set_.set_log_weight(first);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) logarithm weights directly through
+    /// a random access iterator with (possible non-uniform) stride
+    template <typename RandomIter>
+    void set_log_weight (RandomIter first, int stride)
+    {
+        weight_set_.set_log_weight(first, stride);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// changing the (possible unnormalized) logarithm weights directly through
+    /// a pointer
+    void set_log_weight (const double *first)
+    {
+        weight_set_.set_log_weight(first);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// adding to the unnormalized logarithm weights with (possible
+    /// unormalized) logarithm incremental weights through an input iterator
+    template <typename InputIter>
+    void add_log_weight (InputIter first)
+    {
+        weight_set_.add_log_weight(first);
+    }
+
+    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
+    /// adding to the unnormalized logarithm weights with (possible
+    /// unormalized) logarithm incremental weights through a ranodm access
+    /// iterator with (possible non-uniform) stride
+    template <typename RandomIter>
+    void add_log_weight (RandomIter first, int stride)
+    {
+        weight_set_.add_log_weight(first, stride);
+    }
+
+    /// \brief Get the ESS of the particle collection based on the current
+    /// weights
+    double ess () const
+    {
+        return weight_set_.ess();
+    }
+
     /// \brief Get an RNG stream for a given particle
     rng_type &rng (size_type id)
     {
@@ -78,9 +255,9 @@ class Particle : public traits::WeightSetTypeTrait<T>::type
     /// \return true if resampling was performed
     bool resample (double threshold)
     {
-        resampled_ = ess() < threshold * size_;
+        resampled_ = weight_set_.ess() < threshold * size_;
         if (resampled_) {
-            read_weight(&weight_[0]);
+            weight_set_.read_weight(&weight_[0]);
             resample_op_(size_, resample_rng_set_,
                     &weight_[0], &replication_[0]);
             resample_do();
@@ -179,6 +356,7 @@ class Particle : public traits::WeightSetTypeTrait<T>::type
 
     size_type size_;
     value_type value_;
+    weight_set_type weight_set_;
     rng_set_type rng_set_;
 
     std::vector<size_type> replication_;
@@ -187,32 +365,6 @@ class Particle : public traits::WeightSetTypeTrait<T>::type
     bool resampled_;
     resample_op_type resample_op_;
     resample_rng_set_type resample_rng_set_;
-
-    template <typename U>
-    struct has_set_value_ptr_
-    {
-        struct char2 {char c1; char c2;};
-        template <typename V, void (V::*) (T *)> struct sfinae;
-        template <typename V> static char test (sfinae<V, &V::set_value_ptr> *);
-        template <typename V> static char2 test (...);
-
-        enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};
-        typedef cxx11::integral_constant<bool, value> value_type;
-    };
-
-    void weight_set_value_ptr (cxx11::true_type)
-    {
-        weight_set_type::set_value_ptr(&value_);
-    }
-
-    void weight_set_value_ptr (cxx11::false_type) {}
-
-    void rng_set_value_ptr (cxx11::true_type)
-    {
-        rng_set_.set_value_ptr(&value_);
-    }
-
-    void rng_set_value_ptr (cxx11::false_type) {}
 
     void resample_do ()
     {
@@ -245,7 +397,7 @@ class Particle : public traits::WeightSetTypeTrait<T>::type
         }
 
         value_.copy(&copy_from_[0]);
-        set_equal_weight();
+        weight_set_.set_equal_weight();
     }
 }; // class Particle
 
