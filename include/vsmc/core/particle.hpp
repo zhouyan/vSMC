@@ -13,38 +13,29 @@ namespace vsmc {
 /// \sa WeightSetBase
 /// \sa RngSetSeq RngSetPrl
 template <typename T>
-class Particle :
-    public traits::RngSetTypeTrait<T>::type,
-    public traits::WeightSetTypeTrait<T>::type
+class Particle : public traits::WeightSetTypeTrait<T>::type
 {
     public :
 
     typedef typename traits::SizeTypeTrait<T>::type size_type;
     typedef T value_type;
-    typedef typename traits::RngSetTypeTrait<T>::type
-        rng_set_type;
-    typedef typename traits::ResampleRngSetTypeTrait<T>::type
-        resample_rng_set_type;
     typedef typename traits::WeightSetTypeTrait<T>::type
         weight_set_type;
+    typedef typename traits::RngSetTypeTrait<T>::type
+        rng_set_type;
+    typedef typename rng_set_type::rng_type rng_type;
+    typedef typename traits::ResampleRngSetTypeTrait<T>::type
+        resample_rng_set_type;
     typedef cxx11::function<
         void (size_type, resample_rng_set_type &, double *, size_type *)>
         resample_op_type;
 
-    using rng_set_type::rng;
-    using weight_set_type::weight;
-    using weight_set_type::log_weight;
     using weight_set_type::read_weight;
-    using weight_set_type::read_log_weight;
     using weight_set_type::set_equal_weight;
-    using weight_set_type::set_weight;
-    using weight_set_type::mul_weight;
-    using weight_set_type::set_log_weight;
-    using weight_set_type::add_log_weight;
     using weight_set_type::ess;
 
     explicit Particle (size_type N) :
-        rng_set_type(N), weight_set_type(N), size_(N), value_(N),
+        weight_set_type(N), size_(N), value_(N), rng_set_(N),
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
         resample_rng_set_(N)
     {
@@ -71,6 +62,12 @@ class Particle :
     const value_type &value () const
     {
         return value_;
+    }
+
+    /// \brief Get an RNG stream for a given particle
+    rng_type &rng (size_type id)
+    {
+        return rng_set_.rng(id);
     }
 
     /// \brief Performing resampling if ESS/N < threshold
@@ -182,6 +179,7 @@ class Particle :
 
     size_type size_;
     value_type value_;
+    rng_set_type rng_set_;
 
     std::vector<size_type> replication_;
     std::vector<size_type> copy_from_;
@@ -211,7 +209,7 @@ class Particle :
 
     void rng_set_value_ptr (cxx11::true_type)
     {
-        rng_set_type::set_value_ptr(&value_);
+        rng_set_.set_value_ptr(&value_);
     }
 
     void rng_set_value_ptr (cxx11::false_type) {}
