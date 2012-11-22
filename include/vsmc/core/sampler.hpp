@@ -172,7 +172,7 @@ class Sampler
     /// \brief Add a new move
     void move_queue_push_back (const move_type &new_move)
     {
-        VSMC_RUNTIME_ASSERT((bool(*new_move)),
+        VSMC_RUNTIME_ASSERT((bool(new_move)),
                 ("CALL **Sampler::move_queue_push_back** WITH AN INVALID "
                  "MOVE FUNCTOR"));
         move_queue_.push_back(new_move);
@@ -204,7 +204,7 @@ class Sampler
     /// \brief Add a new mcmc
     void mcmc_queue_push_back (const mcmc_type &new_mcmc)
     {
-        VSMC_RUNTIME_ASSERT((bool(*new_mcmc)),
+        VSMC_RUNTIME_ASSERT((bool(new_mcmc)),
                 ("CALL **Sampler::mcmc_queue_push_back** WITH AN INVALID "
                  "MCMC FUNCTOR"));
         mcmc_queue_.push_back(new_mcmc);

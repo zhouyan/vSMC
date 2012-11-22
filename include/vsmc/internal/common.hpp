@@ -12,6 +12,7 @@
 #include <limits>
 #include <numeric>
 
+#include <iterator>
 #include <map>
 #include <string>
 #include <vector>
