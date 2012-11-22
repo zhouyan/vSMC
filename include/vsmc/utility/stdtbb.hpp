@@ -37,9 +37,11 @@ class ThreadManager
                 "WRONG RANGE PASSED TO **ThreadManager::partition**");
 
         SizeType N = end - begin;
-        SizeType block_size = std::max VSMC_MINMAX_NO_EXPANSION (
-                static_cast<SizeType>(1),
-                N / static_cast<SizeType>(thread_num()));
+        SizeType block_size = N / static_cast<SizeType>(thread_num());
+        if (block_size == 0)
+            block_size = N;
+        else if (N % static_cast<SizeType>(thread_num()))
+            ++block_size;
 
         SizeType current = 0;
         unsigned num = 0;
@@ -47,7 +49,7 @@ class ThreadManager
             SizeType next_size = std::min VSMC_MINMAX_NO_EXPANSION (
                     N, block_size);
             *begin_iter = current;
-            *end_iter = current = *begin_iter + block_size;
+            *end_iter = current = *begin_iter + next_size;
             ++begin_iter;
             ++end_iter;
             ++num;
