@@ -1,4 +1,5 @@
 .R*
 build*
+doc/main.md
 example/pet/pet_conv.data
 user_options.cmake
