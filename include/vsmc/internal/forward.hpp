@@ -7,7 +7,7 @@ class VBase;
 
 class RngSetSeq;
 class RngSetPrl;
-class WeightSetBase;
+template <typename> class WeightSetBase;
 template <typename> class Sampler;
 template <typename> class Particle;
 template <typename> class Monitor;

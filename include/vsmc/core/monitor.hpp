@@ -2,32 +2,7 @@
 #define VSMC_CORE_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
-
-namespace vsmc {
-
-class GEMVSimple
-{
-    public :
-
-    typedef VSMC_SIZE_TYPE size_type;
-
-    void operator() (size_type N, size_type M,
-            const double *A, const double *X, double *res) const
-    {
-        for (size_type m = 0; m != M; ++m) {
-            double r = 0;
-            const double *a = &A[m];
-            const double *x = X;
-            for (size_type n = 0; n != N; ++n, ++x, a += M)
-                r += (*a) * (*x);
-            res[m] = r;
-        }
-    }
-}; // class GEMVSimple
-
-} // namespace vsmc
-
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(GEMVType, gemv_type, GEMVSimple);
+#include <vsmc/utility/cblas_op.hpp>
 
 namespace vsmc {
 
@@ -41,7 +16,7 @@ class Monitor
     typedef T value_type;
     typedef cxx11::function<void (
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
-    typedef typename traits::GEMVTypeTrait<T>::type gemv_type;
+    typedef typename traits::DGEMVTypeTrait<T>::type dgemv_type;
 
     explicit Monitor (unsigned dim = 1, const eval_type &eval = VSMC_NULLPTR) :
         dim_(dim), eval_(eval) {}
@@ -199,7 +174,9 @@ class Monitor
         weight_.resize(particle.size());
         eval_(iter, dim_, particle, &buffer_[0]);
         particle.read_weight(&weight_[0]);
-        gemv_(particle.size(), dim_, &buffer_[0], &weight_[0], &result_[0]);
+        dgemv_(RowMajor, Trans, particle.size(), dim_,
+                1, &buffer_[0], dim_, &weight_[0], 1,
+                0, &result_[0], 1);
 
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
@@ -223,7 +200,7 @@ class Monitor
     std::vector<unsigned> index_;
     std::vector<double> record_;
 
-    gemv_type gemv_;
+    dgemv_type dgemv_;
 }; // class Monitor
 
 } // namespace vsmc

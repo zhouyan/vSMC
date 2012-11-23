@@ -2,16 +2,19 @@
 #define VSMC_CORE_WEIGHT_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/utility/cblas_op.hpp>
 
 namespace vsmc {
 
 /// \brief Weight set class
 /// \ingroup Core
+template <typename T>
 class WeightSetBase
 {
     public :
 
-    typedef std::vector<double>::size_type size_type;
+    typedef typename traits::SizeTypeTrait<T>::type size_type;
+    typedef typename traits::DDOTTypeTrait<T>::type ddot_type;
 
     explicit WeightSetBase (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
@@ -233,6 +236,7 @@ class WeightSetBase
     double ess_;
     std::vector<double> weight_;
     std::vector<double> log_weight_;
+    ddot_type ddot_;
 
     void log_weight2weight ()
     {
@@ -252,10 +256,7 @@ class WeightSetBase
         for (size_type i = 0; i != weight_.size(); ++i)
             weight_[i] *= coeff;
 
-        ess_ = 0;
-        for (size_type i = 0; i != weight_.size(); ++i)
-            ess_ += weight_[i] * weight_[i];
-        ess_ = 1/ ess_;
+        ess_ = 1 / ddot_(weight_.size(), &weight_[0], 1, &weight_[0], 1);
     }
 
     void weight2log_weight ()
@@ -271,15 +272,13 @@ class WeightSetBase
         for (size_type i = 0; i != weight_.size(); ++i)
             log_weight_[i] = log(weight_[i]);
 
-        ess_ = 0;
-        for (size_type i = 0; i != weight_.size(); ++i)
-            ess_ += weight_[i] * weight_[i];
-        ess_ = 1/ ess_;
+        ess_ = 1 / ddot_(weight_.size(), &weight_[0], 1, &weight_[0], 1);
     }
 }; // class WeightSetBase
 
 } // namespace vsmc
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSetBase);
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type,
+        WeightSetBase<T>);
 
 #endif // VSMC_CORE_WEIGHT_HPP

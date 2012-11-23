@@ -2,6 +2,7 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/utility/cblas_op.hpp>
 
 namespace vsmc {
 
@@ -13,6 +14,7 @@ class Path
     public :
 
     typedef T value_type;
+    typedef typename traits::DDOTTypeTrait<T>::type ddot_type;
     typedef cxx11::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;
 
@@ -146,17 +148,14 @@ class Path
 
         buffer_.resize(particle.size());
         weight_.resize(particle.size());
-        double w = eval_(iter, particle, &buffer_[0]);
         particle.read_weight(&weight_[0]);
-        double p = 0;
-        for (std::vector<double>::size_type i = 0; i != weight_.size(); ++i)
-            p += weight_[i] * buffer_[i];
 
         index_.push_back(iter);
-        integrand_.push_back(p);
-        width_.push_back(w);
+        width_.push_back(eval_(iter, particle, &buffer_[0]));
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());
+        integrand_.push_back(
+                ddot_(weight_.size(), &weight_[0], 1, &buffer_[0], 1));
     }
 
     /// \brief Get the logarithm nomralizing constants ratio estimates
@@ -187,6 +186,7 @@ class Path
     std::vector<double> integrand_;
     std::vector<double> width_;
     std::vector<double> grid_;
+    ddot_type ddot_;
 }; // class PathSampling
 
 } // namespace vsmc
