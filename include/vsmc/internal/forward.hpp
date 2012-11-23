@@ -3,8 +3,11 @@
 
 namespace vsmc {
 
+// Placeholders
 class VBase;
 class NullType;
+
+// Utilities
 class Seed;
 template <typename T = NullType> class DDOT;
 template <typename T = NullType> class DGEMV;
@@ -22,6 +25,7 @@ void parallel_sum (const BlockedRange<S> &, const W &, R &);
 
 } // namespace vsmc::thread
 
+// Core module
 class RngSetSeq;
 class RngSetPrl;
 template <typename> class WeightSetBase;
@@ -29,10 +33,10 @@ template <typename> class Sampler;
 template <typename> class Particle;
 template <typename> class Monitor;
 template <typename> class Path;
-
 template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 
+// Helper
 template <unsigned, typename> class StateBase;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
