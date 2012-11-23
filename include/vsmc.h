@@ -175,7 +175,7 @@
  * \brief Column major matrix
  * \ingroup CMacro
  * */
-#define VSMC_COLUMN_MAJOR 301
+#define VSMC_COL_MAJOR 301
 /**
  * \brief Row major matrix
  * \ingroup CMacro
@@ -341,8 +341,8 @@ double *vsmc_value_read_state (vsmcValue value, unsigned id, double *first);
   * \ingroup CValue
   *
   * \param value A vsmcValue object
-  * \param order Either VSMC_COLUMN_MAJOR or VSMC_ROW_MAJOR. It will be
-  * vsmc::ColumnMajor or vsmc::RowMajor passed to the underlying C++ call,
+  * \param order Either VSMC_COL_MAJOR or VSMC_ROW_MAJOR. It will be
+  * vsmc::ColMajor or vsmc::RowMajor passed to the underlying C++ call,
   * respectively
   * \param first The output pointer
   *
@@ -773,8 +773,8 @@ double *vsmc_monitor_read_record (vsmcMonitor monitor,
   * \ingroup CMonitor
   *
   * \param monitor A vsmcMonitor object
-  * \param order Either VSMC_COLUMN_MAJOR or VSMC_ROW_MAJOR. It will be
-  * vsmc::ColumnMajor or vsmc::RowMajor passed to the underlying C++ call,
+  * \param order Either VSMC_COL_MAJOR or VSMC_ROW_MAJOR. It will be
+  * vsmc::ColMajor or vsmc::RowMajor passed to the underlying C++ call,
   * respectively
   * \param first The output pointer
   *

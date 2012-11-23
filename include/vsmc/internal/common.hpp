@@ -120,8 +120,8 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 namespace vsmc {
 
 enum {Dynamic};
-
-enum MatrixOrder {ColumnMajor, RowMajor};
+enum MatrixOrder     {RowMajor = 101, ColMajor = 102};
+enum MatrixTranspose {NoTrans = 111, Trans = 112, ConjTrans = 113};
 
 template <bool> class StaticAssert {};
 

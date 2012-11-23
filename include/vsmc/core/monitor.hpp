@@ -155,22 +155,22 @@ class Monitor
     /// \brief Read the record history of all variables through an output
     /// iterator
     ///
-    /// \param order Either ColumnMajor or RowMajor
+    /// \param order Either ColMajor or RowMajor
     /// \param first The output iterator
     ///
     /// \note For example, say `first` is of type `double *`, then if `order ==
-    /// ColumnMajor`, then, `first[j * iter_size() + i] == record(i, j)`.
+    /// ColMajor`, then, `first[j * iter_size() + i] == record(i, j)`.
     /// Otherwise, if `order == RowMajor`, then `first[i * dim() + j] ==
     /// record(i, j)`. That is, the output is an `iter_size()` by `dim()`
     /// matrix, with the usual meaning of column or row major order.
     template <typename OutputIter>
     OutputIter read_record_matrix (MatrixOrder order, OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT((order == ColumnMajor || order == RowMajor),
+        VSMC_RUNTIME_ASSERT((order == ColMajor || order == RowMajor),
                 "CALL **Monitor::read_record_matrix** with and INVALID "
                 "MatrixOrder");
 
-        if (order == ColumnMajor)
+        if (order == ColMajor)
             for (unsigned d = 0; d != dim_; ++d)
                 first = read_record(d, first);
 

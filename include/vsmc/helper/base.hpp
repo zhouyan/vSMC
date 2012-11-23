@@ -112,11 +112,11 @@ class StateBase
     template <typename OutputIter>
     OutputIter read_state_matrix (MatrixOrder order, OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT((order == ColumnMajor || order == RowMajor),
+        VSMC_RUNTIME_ASSERT((order == ColMajor || order == RowMajor),
                 "CALL **StateBase::read_state_matrix** with and INVALID "
                 "MatrixOrder");
 
-        if (order == ColumnMajor)
+        if (order == ColMajor)
             for (unsigned d = 0; d != dim_; ++d)
                 first = read_state(d, first);
 
