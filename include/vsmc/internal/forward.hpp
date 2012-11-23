@@ -4,6 +4,21 @@
 namespace vsmc {
 
 class VBase;
+class NullType;
+class Seed;
+template <typename T = NullType> class DDOT;
+template <typename T = NullType> class DGEMV;
+
+namespace thread {
+class ThreadManager;
+template <typename> class BlockedRange;
+
+template <typename S, typename W>
+void parallel_for (const BlockedRange<S> &, const W &);
+
+template <typename S, typename W, typename R>
+void parallel_sum (const BlockedRange<S> &, const W &, R &);
+} // namespace vsmc::thread
 
 class RngSetSeq;
 class RngSetPrl;
