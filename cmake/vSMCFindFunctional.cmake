@@ -32,7 +32,8 @@ class cl
 
 int main ()
 {
-    vsmc::cxx11::function<int (int, double, double, double)> f;
+    typedef vsmc::cxx11::function<int (int, double, double, double)> f_type;
+    f_type f;
     assert(!bool(f));
 
     f = fn;
@@ -41,6 +42,12 @@ int main ()
 
     f = VSMC_NULLPTR;
     assert(!bool(f));
+    f_type f1 = f_type();
+    assert(!bool(f1));
+    f_type f2(f1);
+    assert(!bool(f2));
+    f_type f3(f2);
+    assert(!bool(f3));
 
     cl c;
     c = cl(fn);

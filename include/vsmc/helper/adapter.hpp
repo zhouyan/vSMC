@@ -25,9 +25,9 @@ class InitializeAdapter :
         post_processor_type;
 
     InitializeAdapter (const initialize_state_type &init_state,
-            const initialize_param_type &init_param = VSMC_NULLPTR,
-            const pre_processor_type &pre = VSMC_NULLPTR,
-            const post_processor_type &post = VSMC_NULLPTR) :
+            const initialize_param_type &init_param = initialize_param_type(),
+            const pre_processor_type &pre = pre_processor_type(),
+            const post_processor_type &post = post_processor_type()) :
         initialize_state_(init_state), initialize_param_(init_param),
         pre_processor_(pre), post_processor_(post) {}
 
@@ -80,8 +80,8 @@ class MoveAdapter :
         post_processor_type;
 
     MoveAdapter (const move_state_type &move_state,
-            const pre_processor_type &pre = VSMC_NULLPTR,
-            const post_processor_type &post = VSMC_NULLPTR) :
+            const pre_processor_type &pre = pre_processor_type(),
+            const post_processor_type &post = post_processor_type()) :
         move_state_(move_state), pre_processor_(pre), post_processor_(post) {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> part)
@@ -127,8 +127,8 @@ class MonitorEvalAdapter :
         post_processor_type;
 
     MonitorEvalAdapter (const monitor_state_type &monitor_state,
-            const pre_processor_type &pre = VSMC_NULLPTR,
-            const post_processor_type &post = VSMC_NULLPTR) :
+            const pre_processor_type &pre = pre_processor_type(),
+            const post_processor_type &post = post_processor_type()) :
         monitor_state_(monitor_state),
         pre_processor_(pre), post_processor_(post) {}
 
@@ -178,8 +178,8 @@ class PathEvalAdapter :
 
     PathEvalAdapter (const path_state_type &path_state,
             const path_width_type &path_width,
-            const pre_processor_type &pre = VSMC_NULLPTR,
-            const post_processor_type &post = VSMC_NULLPTR) :
+            const pre_processor_type &pre = pre_processor_type(),
+            const post_processor_type &post = post_processor_type()) :
         path_state_(path_state), path_width_(path_width),
         pre_processor_(pre), post_processor_(post) {}
 

@@ -18,7 +18,7 @@ class Path
     typedef cxx11::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;
 
-    explicit Path (const eval_type &eval = VSMC_NULLPTR) : eval_(eval) {}
+    explicit Path (const eval_type &eval = eval_type()) : eval_(eval) {}
 
     Path (const Path<T> &other) :
         eval_(other.eval_),

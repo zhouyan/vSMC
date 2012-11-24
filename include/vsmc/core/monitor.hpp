@@ -18,7 +18,7 @@ class Monitor
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
     typedef typename traits::DGEMVTypeTrait<T>::type dgemv_type;
 
-    explicit Monitor (unsigned dim = 1, const eval_type &eval = VSMC_NULLPTR) :
+    explicit Monitor (unsigned dim = 1, const eval_type &eval = eval_type()) :
         dim_(dim), eval_(eval) {}
 
     Monitor (const Monitor<T> &other) :
