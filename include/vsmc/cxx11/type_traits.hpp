@@ -27,7 +27,7 @@ using boost::false_type;
 using boost::is_base_of;
 using boost::is_pointer;
 using boost::is_same;
-using std::is_signed;
+using boost::is_signed;
 using boost::make_signed;
 using boost::remove_cv;
 using boost::remove_pointer;
