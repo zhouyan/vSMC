@@ -48,6 +48,7 @@ using std::piecewise_linear_distribution;
 } }
 #else // VSMC_HAS_CXX11LIB_RANDOM
 #include <boost/random.hpp>
+#include <boost/cstdint.hpp>
 namespace vsmc { namespace cxx11 {
 using boost::random::linear_congruential_engine;
 using boost::random::mersenne_twister_engine;
@@ -60,10 +61,10 @@ using boost::random::minstd_rand;
 using boost::random::mt19937;
 using boost::random::mt19937_64;
 // using boost::random::ranlux24_base;
-typedef boost::random::subtract_with_carry_engine<uint32_t, 24, 10, 24>
+typedef boost::random::subtract_with_carry_engine<boost::uint32_t, 24, 10, 24>
     ranlux24_base;
 // using boost::random::ranlux48_base;
-typedef boost::random::subtract_with_carry_engine<uint64_t, 48, 5, 12>
+typedef boost::random::subtract_with_carry_engine<boost::uint64_t, 48, 5, 12>
     ranlux48_base;
 using boost::random::ranlux24;
 using boost::random::ranlux48;

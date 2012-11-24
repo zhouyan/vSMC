@@ -348,7 +348,7 @@ class ConstSingleParticle
 
     template <typename UIntType>
     const typename cxx11::enable_if<
-        traits::HasStateType<T>::value && static_cast<UIntType>(1U),
+        traits::HasStateType<T>::value && sizeof(UIntType),
         typename traits::StateTypeTrait<T>::type>::type
     &state (UIntType pos) const
     {
@@ -431,7 +431,7 @@ class SingleParticle
 
     template <typename UIntType>
     typename cxx11::enable_if<
-        traits::HasStateType<T>::value && static_cast<UIntType>(1U),
+        traits::HasStateType<T>::value && sizeof(UIntType),
         typename traits::StateTypeTrait<T>::type>::type
     &state (UIntType pos) const
     {

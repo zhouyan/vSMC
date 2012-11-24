@@ -56,10 +56,10 @@ class InitializeAdapter :
 
     private :
 
-    initialize_state_type initialize_state_;
-    initialize_param_type initialize_param_;
-    pre_processor_type pre_processor_;
-    post_processor_type post_processor_;
+    const initialize_state_type initialize_state_;
+    const initialize_param_type initialize_param_;
+    const pre_processor_type pre_processor_;
+    const post_processor_type post_processor_;
 }; // class InitializeAdapter
 
 /// \brief Move class adapter
@@ -103,9 +103,9 @@ class MoveAdapter :
 
     private :
 
-    move_state_type move_state_;
-    pre_processor_type pre_processor_;
-    post_processor_type post_processor_;
+    const move_state_type move_state_;
+    const pre_processor_type pre_processor_;
+    const post_processor_type post_processor_;
 }; // class MoveAdapter
 
 /// \brief Monitor evaluation class adapter
@@ -152,9 +152,9 @@ class MonitorEvalAdapter :
 
     private :
 
-    monitor_state_type monitor_state_;
-    pre_processor_type pre_processor_;
-    post_processor_type post_processor_;
+    const monitor_state_type monitor_state_;
+    const pre_processor_type pre_processor_;
+    const post_processor_type post_processor_;
 }; // class MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter
@@ -207,10 +207,10 @@ class PathEvalAdapter :
 
     private :
 
-    path_state_type path_state_;
-    path_width_type path_width_;
-    pre_processor_type pre_processor_;
-    post_processor_type post_processor_;
+    const path_state_type path_state_;
+    const path_width_type path_width_;
+    const pre_processor_type pre_processor_;
+    const post_processor_type post_processor_;
 }; // class PathEvalAdapter
 
 } // namespace vsmc
