@@ -184,6 +184,7 @@ IF (OPENCL_FOUND)
     INCLUDE_DIRECTORIES (SYSTEM ${OpenCL_INCLUDE_DIR})
     SET (VSMC_CL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
+    INCLUDE (CheckCXXSourceRuns)
     SET (OPENCL_TEST_SOURCE "
     #include <vsmc/helper/parallel_cl/query.hpp>
     int main () {
