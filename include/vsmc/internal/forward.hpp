@@ -35,6 +35,7 @@ template <typename> class Monitor;
 template <typename> class Path;
 template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
+template <typename, template <typename> class> class ParticleIterator;
 
 // Helper
 template <unsigned, typename> class StateBase;
