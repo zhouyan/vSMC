@@ -99,8 +99,8 @@ class WeightSetBase
     /// such that each particle has a equal weight
     void set_equal_weight ()
     {
-        ess_ = static_cast<double>(weight_.size());
-        std::fill(weight_.begin(), weight_.end(), 1.0 / weight_.size());
+        ess_ = static_cast<double>(size_);
+        std::fill(weight_.begin(), weight_.end(), 1.0 / size_);
         std::fill(log_weight_.begin(), log_weight_.end(), 0);
     }
 
@@ -245,18 +245,18 @@ class WeightSetBase
         std::vector<double>::const_iterator id_max = std::max_element(
                 log_weight_.begin(), log_weight_.end());
         double max_weight = *id_max;
-        for (size_type i = 0; i != log_weight_.size(); ++i)
+        for (size_type i = 0; i != size_; ++i)
             log_weight_[i] -= max_weight;
 
-        for (size_type i = 0; i != weight_.size(); ++i)
+        for (size_type i = 0; i != size_; ++i)
             weight_[i] = exp(log_weight_[i]);
         double coeff = std::accumulate(weight_.begin(), weight_.end(),
                 static_cast<double>(0));
         coeff = 1 / coeff;
-        for (size_type i = 0; i != weight_.size(); ++i)
+        for (size_type i = 0; i != size_; ++i)
             weight_[i] *= coeff;
 
-        ess_ = 1 / ddot_(weight_.size(), &weight_[0], 1, &weight_[0], 1);
+        ess_ = 1 / ddot_(size_, &weight_[0], 1, &weight_[0], 1);
     }
 
     void weight2log_weight ()
@@ -266,13 +266,13 @@ class WeightSetBase
         double coeff = std::accumulate(weight_.begin(), weight_.end(),
                 static_cast<double>(0));
         coeff = 1 / coeff;
-        for (size_type i = 0; i != weight_.size(); ++i)
+        for (size_type i = 0; i != size_; ++i)
             weight_[i] *= coeff;
 
-        for (size_type i = 0; i != weight_.size(); ++i)
+        for (size_type i = 0; i != size_; ++i)
             log_weight_[i] = log(weight_[i]);
 
-        ess_ = 1 / ddot_(weight_.size(), &weight_[0], 1, &weight_[0], 1);
+        ess_ = 1 / ddot_(size_, &weight_[0], 1, &weight_[0], 1);
     }
 }; // class WeightSetBase
 
