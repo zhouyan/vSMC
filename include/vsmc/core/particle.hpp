@@ -22,10 +22,105 @@
             ("A **SignleParticle** object "                         \
              "is contructed with an out of range id"));
 
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void);
+
 namespace vsmc {
 
-namespace internal {
+namespace traits {
 
+/// \brief Particle iterator trait
+/// \ingroup Core
+template <bool, typename> struct ParticleIteratorTrait;
+
+/// \brief Particle iterator trait, size_type unsigned
+/// \ingroup Core
+template <typename T>
+struct ParticleIteratorTrait<false, T>
+{
+    typedef ParticleIterator<T, SingleParticle> iterator;
+    typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
+
+    iterator begin()
+    {
+        return iterator(0, static_cast<Particle<T> *>(this));
+    }
+
+    iterator end()
+    {
+        return iterator(static_cast<Particle<T> *>(this)->size(),
+                static_cast<Particle<T> *>(this));
+    }
+
+    const_iterator begin() const
+    {
+        return iterator(0, static_cast<const Particle<T> *>(this));
+    }
+
+    const_iterator end() const
+    {
+        return iterator(static_cast<const Particle<T> *>(this)->size(),
+                static_cast<const Particle<T> *>(this));
+    }
+
+    const_iterator cbegin() const
+    {
+        return const_iterator(0, static_cast<const Particle<T> *>(this));
+    }
+
+    const_iterator cend() const
+    {
+        return const_iterator(static_cast<const Particle<T> *>(this)->size(),
+                static_cast<const Particle<T> *>(this));
+    }
+};
+
+/// \brief Particle iterator trait, size_type signed
+/// \ingroup Core
+template <typename T>
+struct ParticleIteratorTrait<true, T> : public ParticleIteratorTrait<false, T>
+{
+    typedef std::reverse_iterator<
+        typename ParticleIteratorTrait<false, T>::iterator>
+        reverse_iterator;
+    typedef std::reverse_iterator<
+        typename ParticleIteratorTrait<false, T>::const_iterator>
+        const_reverse_iterator;
+
+    reverse_iterator rbegin()
+    {
+        return reverse_iterator(this->end());
+    }
+
+    reverse_iterator rend()
+    {
+        return reverse_iterator(this->begin());
+    }
+
+    const_reverse_iterator rbegin() const
+    {
+        return const_reverse_iterator(this->end());
+    }
+
+    const_reverse_iterator rend() const
+    {
+        return const_reverse_iterator(this->begin());
+    }
+
+    const_reverse_iterator crbegin() const
+    {
+        return const_reverse_iterator(this->cend());
+    }
+
+    const_reverse_iterator crend() const
+    {
+        return const_reverse_iterator(this->cbegin());
+    }
+}; // class ParticleIteratorTrait
+
+} // namespace vsmc::traits
+
+/// \brief Particle iterator
+/// \ingroup Core
 template <typename T, template <typename> class SPType>
 class ParticleIterator :
     public std::iterator<std::random_access_iterator_tag, SPType<T>,
@@ -128,6 +223,8 @@ class ParticleIterator :
     SPType<T> sp_;
 };
 
+/// \brief Particle iterator operator==
+/// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
 bool operator== (
@@ -139,6 +236,8 @@ bool operator== (
         (iter1->particle_ptr() == iter2->particle_ptr());
 }
 
+/// \brief Particle iterator operator!=
+/// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
 bool operator!= (
@@ -150,6 +249,8 @@ bool operator!= (
         (iter1->particle_ptr() != iter2->particle_ptr());
 }
 
+/// \brief Particle iterator operator-
+/// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
 std::ptrdiff_t operator- (
@@ -163,6 +264,8 @@ std::ptrdiff_t operator- (
     return iter1->id() - iter2->id();
 }
 
+/// \brief Particle iterator operator+
+/// \ingroup Core
 template <typename T, template <typename> class SPType>
 ParticleIterator<T, SPType> operator+ (
         const ParticleIterator<T, SPType> &iter,
@@ -174,6 +277,8 @@ ParticleIterator<T, SPType> operator+ (
     return new_iter;
 }
 
+/// \brief Particle iterator operator+
+/// \ingroup Core
 template <typename T, template <typename> class SPType>
 ParticleIterator<T, SPType> operator+ (
         typename ParticleIterator<T, SPType>::difference_type diff,
@@ -185,6 +290,8 @@ ParticleIterator<T, SPType> operator+ (
     return new_iter;
 }
 
+/// \brief Particle iterator operator-
+/// \ingroup Core
 template <typename T, template <typename> class SPType>
 ParticleIterator<T, SPType> operator- (
         const ParticleIterator<T, SPType> &iter,
@@ -196,8 +303,6 @@ ParticleIterator<T, SPType> operator- (
     return new_iter;
 }
 
-} // namespace vsmc::internal
-
 /// \brief A const variant to SingleParticle
 /// \ingroup Core
 template <typename T>
@@ -208,7 +313,6 @@ class ConstSingleParticle
     typedef T value_type;
     typedef Particle<T> particle_type;
     typedef const particle_type * particle_ptr_type;
-    typedef typename T::state_type state_type;
     typedef typename particle_type::size_type size_type;
     typedef typename particle_type::rng_type rng_type;
 
@@ -242,7 +346,11 @@ class ConstSingleParticle
         return id_;
     }
 
-    const state_type &state (unsigned pos) const
+    template <typename UIntType>
+    const typename cxx11::enable_if<
+        traits::HasStateType<T>::value && static_cast<UIntType>(1U),
+        typename traits::StateTypeTrait<T>::type>::type
+    &state (UIntType pos) const
     {
 
         return particle_ptr_->value().state(id_, pos);
@@ -276,12 +384,12 @@ class ConstSingleParticle
         return particle_ptr_;
     }
 
-    friend class internal::ParticleIterator<T, vsmc::ConstSingleParticle>;
+    friend class ParticleIterator<T, vsmc::ConstSingleParticle>;
 
     private :
 
     size_type id_;
-    const particle_ptr_type particle_ptr_;
+    particle_ptr_type particle_ptr_;
 
     void update_id (size_type new_id)
     {
@@ -299,7 +407,6 @@ class SingleParticle
     typedef T value_type;
     typedef Particle<T> particle_type;
     typedef particle_type * particle_ptr_type;
-    typedef typename T::state_type state_type;
     typedef typename particle_type::size_type size_type;
     typedef typename particle_type::rng_type rng_type;
 
@@ -322,7 +429,11 @@ class SingleParticle
         return id_;
     }
 
-    state_type &state (unsigned pos) const
+    template <typename UIntType>
+    typename cxx11::enable_if<
+        traits::HasStateType<T>::value && static_cast<UIntType>(1U),
+        typename traits::StateTypeTrait<T>::type>::type
+    &state (UIntType pos) const
     {
         VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
 
@@ -364,12 +475,12 @@ class SingleParticle
         return particle_ptr_->rng(id_);
     }
 
-    friend class internal::ParticleIterator<T, vsmc::SingleParticle>;
+    friend class ParticleIterator<T, vsmc::SingleParticle>;
 
     private :
 
     size_type id_;
-    const particle_ptr_type particle_ptr_;
+    particle_ptr_type particle_ptr_;
 
     void update_id (size_type new_id)
     {
@@ -382,7 +493,9 @@ class SingleParticle
 /// \sa WeightSetBase
 /// \sa RngSetSeq RngSetPrl
 template <typename T>
-class Particle
+class Particle :
+    public traits::ParticleIteratorTrait<
+    cxx11::is_signed<typename traits::SizeTypeTrait<T>::type>::value, T>
 {
     public :
 
@@ -398,8 +511,6 @@ class Particle
     typedef cxx11::function<
         void (size_type, resample_rng_set_type &, double *, size_type *)>
         resample_op_type;
-    typedef internal::ParticleIterator<T, SingleParticle>      iterator;
-    typedef internal::ParticleIterator<T, ConstSingleParticle> const_iterator;
 
     explicit Particle (size_type N) :
         size_(N), value_(N), weight_set_(N), rng_set_(N),
@@ -413,36 +524,6 @@ class Particle
     size_type size () const
     {
         return size_;
-    }
-
-    iterator begin()
-    {
-        return iterator(0, this);
-    }
-
-    iterator end()
-    {
-        return iterator(size_, this);
-    }
-
-    const_iterator begin() const
-    {
-        return iterator(0, this);
-    }
-
-    const_iterator end() const
-    {
-        return iterator(size_, this);
-    }
-
-    const_iterator cbegin() const
-    {
-        return iterator(0, this);
-    }
-
-    const_iterator cend() const
-    {
-        return iterator(size_, this);
     }
 
     /// \brief Read and write access to the value collection object
