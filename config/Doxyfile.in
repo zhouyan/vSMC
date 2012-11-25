@@ -1509,7 +1509,11 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator
 # instead of the = operator.
 
-PREDEFINED             =NDEBUG
+PREDEFINED            +=NDEBUG
+PREDEFINED            +=VSMC_USE_RANDOM123=1
+PREDEFINED            +=VSMC_HAS_CXX11LIB_FUNCTIONAL=1
+PREDEFINED            +=VSMC_HAS_CXX11LIB_RANDOM=1
+PREDEFINED            +=VSMC_HAS_CXX11LIB_TYPE_TRAITS=1
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.
