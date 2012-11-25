@@ -83,13 +83,13 @@ class DGEMV
 
         // y := beta * y
         if (beta == 0) {
-            double *py = Y;
-            for (size_type i = 0; i != lenY; ++i, py += incY)
-                *py = 0;
+            size_type iy = 0;
+            for (size_type i = 0; i != lenY; ++i, iy += incY)
+                Y[iy] = 0;
         } else {
-            double *py = Y;
-            for (size_type i = 0; i != lenY; ++i, py += incY)
-                *py = beta * (*py);
+            size_type iy = 0;
+            for (size_type i = 0; i != lenY; ++i, iy += incY)
+                Y[iy] = beta * Y[iy];
         }
 
         if (alpha == 0)
@@ -97,23 +97,22 @@ class DGEMV
         // y += alpha * AX
         if ((order == RowMajor && trans == NoTrans) ||
                 (order == ColMajor && trans == Trans)) {
-            double *py = Y;
-            for (size_type i = 0; i != lenY; ++i, py += incY) {
+            size_type iy = 0;
+            for (size_type i = 0; i != lenY; ++i, iy += incY) {
                 double res = 0;
-                const double *px = X;
-                for (size_type j = 0; j != lenX; ++j, px += incX)
-                    res += (*px) * A[i * lda + j];
-                *py += alpha * res;
+                size_type ix = 0;
+                for (size_type j = 0; j != lenX; ++j, ix += incX)
+                    res += X[ix] * A[i * lda + j];
+                Y[iy] += alpha * res;
             }
         } else if ((order == RowMajor && trans == Trans) ||
                 (order == ColMajor && trans == NoTrans)) {
-            double *py = Y;
-            for (size_type i = 0; i != lenY; ++i, py += incY) {
-                double res = 0;
-                const double *px = X;
-                for (size_type j = 0; j != lenX; ++j, px += incX)
-                    res += (*px) * A[j * lda + i];
-                *py += alpha * res;
+            size_type ix = 0;
+            for (size_type j = 0; j != lenX; ++j, ix += incX) {
+                double ax = alpha * X[ix];
+                size_type iy = 0;
+                for (size_type i = 0; i != lenY; ++i, iy += incY)
+                    Y[iy] += ax * A[j * lda + i];
             }
         } else {
             VSMC_RUNTIME_ASSERT(false, "INVALID INPUT TO **vsmc::DGEMV**");
