@@ -225,7 +225,6 @@ class ConstSingleParticle
 {
     public :
 
-    typedef T value_type;
     typedef Particle<T> particle_type;
     typedef const particle_type * particle_ptr_type;
     typedef typename particle_type::size_type size_type;
@@ -319,7 +318,6 @@ class SingleParticle
 {
     public :
 
-    typedef T value_type;
     typedef Particle<T> particle_type;
     typedef particle_type * particle_ptr_type;
     typedef typename particle_type::size_type size_type;
@@ -433,8 +431,8 @@ class Particle
         size_(N), value_(N), weight_set_(N), rng_set_(N),
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
         resample_rng_set_(N),
-        sp_(N + 2, SingleParticle<value_type>(0, this)),
-        csp_(N + 2, ConstSingleParticle<value_type>(0, this))
+        sp_(N + 2, SingleParticle<T>(0, this)),
+        csp_(N + 2, ConstSingleParticle<T>(0, this))
     {
         weight_set_.set_equal_weight();
         if (cxx11::is_signed<size_type>::value) {
@@ -845,8 +843,8 @@ class Particle
     bool resampled_;
     resample_op_type resample_op_;
     resample_rng_set_type resample_rng_set_;
-    std::vector<SingleParticle<value_type> > sp_;
-    std::vector<ConstSingleParticle<value_type> > csp_;
+    std::vector<SingleParticle<T> > sp_;
+    std::vector<ConstSingleParticle<T> > csp_;
 
     void resample_do ()
     {
