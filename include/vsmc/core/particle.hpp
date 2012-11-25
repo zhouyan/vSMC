@@ -26,99 +26,6 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void);
 
 namespace vsmc {
 
-namespace traits {
-
-/// \brief Particle iterator trait
-/// \ingroup Core
-template <bool, typename> struct ParticleIteratorTrait;
-
-/// \brief Particle iterator trait, size_type unsigned
-/// \ingroup Core
-template <typename T>
-struct ParticleIteratorTrait<false, T>
-{
-    typedef ParticleIterator<T, SingleParticle> iterator;
-    typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
-
-    iterator begin()
-    {
-        return iterator(0, static_cast<Particle<T> *>(this));
-    }
-
-    iterator end()
-    {
-        return iterator(static_cast<Particle<T> *>(this)->size(),
-                static_cast<Particle<T> *>(this));
-    }
-
-    const_iterator begin() const
-    {
-        return iterator(0, static_cast<const Particle<T> *>(this));
-    }
-
-    const_iterator end() const
-    {
-        return iterator(static_cast<const Particle<T> *>(this)->size(),
-                static_cast<const Particle<T> *>(this));
-    }
-
-    const_iterator cbegin() const
-    {
-        return const_iterator(0, static_cast<const Particle<T> *>(this));
-    }
-
-    const_iterator cend() const
-    {
-        return const_iterator(static_cast<const Particle<T> *>(this)->size(),
-                static_cast<const Particle<T> *>(this));
-    }
-};
-
-/// \brief Particle iterator trait, size_type signed
-/// \ingroup Core
-template <typename T>
-struct ParticleIteratorTrait<true, T> : public ParticleIteratorTrait<false, T>
-{
-    typedef std::reverse_iterator<
-        typename ParticleIteratorTrait<false, T>::iterator>
-        reverse_iterator;
-    typedef std::reverse_iterator<
-        typename ParticleIteratorTrait<false, T>::const_iterator>
-        const_reverse_iterator;
-
-    reverse_iterator rbegin()
-    {
-        return reverse_iterator(this->end());
-    }
-
-    reverse_iterator rend()
-    {
-        return reverse_iterator(this->begin());
-    }
-
-    const_reverse_iterator rbegin() const
-    {
-        return const_reverse_iterator(this->end());
-    }
-
-    const_reverse_iterator rend() const
-    {
-        return const_reverse_iterator(this->begin());
-    }
-
-    const_reverse_iterator crbegin() const
-    {
-        return const_reverse_iterator(this->cend());
-    }
-
-    const_reverse_iterator crend() const
-    {
-        return const_reverse_iterator(this->cbegin());
-    }
-}; // class ParticleIteratorTrait
-
-} // namespace vsmc::traits
-
 /// \brief Particle iterator
 /// \ingroup Core
 template <typename T, template <typename> class SPType>
@@ -136,46 +43,59 @@ class ParticleIterator :
     typedef typename base_iterator_type::pointer         pointer;
     typedef typename base_iterator_type::reference       reference;
 
-    ParticleIterator () : sp_(0, VSMC_NULLPTR) {}
+    ParticleIterator () : ptr_(VSMC_NULLPTR) {}
 
-    ParticleIterator (typename value_type::size_type id,
-            typename value_type::particle_ptr_type particle) :
-        sp_(id, particle) {}
+    ParticleIterator (pointer ptr) : ptr_(ptr) {}
+
+    ParticleIterator (const ParticleIterator<T, SPType> &other) :
+        ptr_(other.ptr_) {}
 
     template <template <typename> class OtherSPType>
     ParticleIterator (const ParticleIterator<T, OtherSPType> &other) :
-        sp_(other.sp_) {}
+        ptr_(&other->particle().sp(other->id())) {}
+
+    ParticleIterator<T, SPType> &operator= (
+            const ParticleIterator<T, SPType> &other)
+    {
+        ptr_ = other.ptr_;
+
+        return *this;
+    }
 
     template <template <typename> class OtherSPType>
     ParticleIterator<T, SPType> &operator= (
             const ParticleIterator<T, OtherSPType> &other)
     {
-        sp_ = other.sp_;
+        /// \internal
+        /// If SPType is SingleParticle, OtherSPType is ConstSingleParticle,
+        /// The following shall results in a compile time error.
+        /// If SPType is ConstSingleParticle, OtherSPType is SingleParticle,
+        /// The following shall be fine.
+        /// The copy constructor is similar.
+        /// It is still a little too tricky here.
+        ptr_ = &other->particle().sp(other->id());
 
         return *this;
     }
 
     reference operator* () const
     {
-        return sp_;
+        return *ptr_;
     }
 
     pointer operator-> () const
     {
-        return &sp_;
+        return ptr_;
     }
 
     value_type operator[] (difference_type diff) const
     {
-        value_type sp(sp_);
-        sp.update_id(sp_.id() + diff);
-
-        return sp;
+        return *(ptr_ + diff);
     }
 
     ParticleIterator<T, SPType> &operator++ ()
     {
-        sp_.update_id(sp_.id() + 1);
+        ++ptr_;
 
         return *this;
     }
@@ -183,14 +103,13 @@ class ParticleIterator :
     ParticleIterator<T, SPType> operator++ (int)
     {
         ParticleIterator<T, SPType> iter(*this);
-        sp_.update_id(sp_.id() + 1);
 
-        return iter;
+        return ++iter;
     }
 
     ParticleIterator<T, SPType> &operator-- ()
     {
-        sp_.update_id(sp_.id() - 1);
+        --ptr_;
 
         return *this;
     }
@@ -198,14 +117,13 @@ class ParticleIterator :
     ParticleIterator<T, SPType> operator-- (int)
     {
         ParticleIterator<T, SPType> iter(*this);
-        sp_.update_id(sp_.id() - 1);
 
-        return iter;
+        return --iter;
     }
 
     ParticleIterator<T, SPType> &operator+= (difference_type diff)
     {
-        sp_.update_id(sp_.id() + diff);
+        ptr_ += diff;
 
         return *this;
     }
@@ -213,15 +131,15 @@ class ParticleIterator :
 
     ParticleIterator<T, SPType> &operator-= (difference_type diff)
     {
-        sp_.update_id(sp_.id() - diff);
+        ptr_ -= diff;
 
         return *this;
     }
 
     private :
 
-    SPType<T> sp_;
-};
+    pointer ptr_;
+}; // class ParticleIterator
 
 /// \brief Particle iterator operator==
 /// \ingroup Core
@@ -272,7 +190,7 @@ ParticleIterator<T, SPType> operator+ (
         typename ParticleIterator<T, SPType>::difference_type diff)
 {
     ParticleIterator<T, SPType> new_iter(iter);
-    new_iter->update_id(iter->id() + diff);
+    new_iter += diff;
 
     return new_iter;
 }
@@ -284,10 +202,7 @@ ParticleIterator<T, SPType> operator+ (
         typename ParticleIterator<T, SPType>::difference_type diff,
         const ParticleIterator<T, SPType> &iter)
 {
-    ParticleIterator<T, SPType> new_iter(iter);
-    new_iter->update_id(iter->id() + diff);
-
-    return new_iter;
+    return iter + diff;
 }
 
 /// \brief Particle iterator operator-
@@ -298,7 +213,7 @@ ParticleIterator<T, SPType> operator- (
         typename ParticleIterator<T, SPType>::difference_type diff)
 {
     ParticleIterator<T, SPType> new_iter(iter);
-    new_iter->update_id(iter->id() - diff);
+    new_iter -= diff;
 
     return new_iter;
 }
@@ -323,7 +238,7 @@ class ConstSingleParticle
         id_(other.id_), particle_ptr_(other.particle_ptr_) {}
 
     ConstSingleParticle (const SingleParticle<T> &other) :
-        id_(other.id_), particle_ptr_(other.particle_ptr_) {}
+        id_(other.id()), particle_ptr_(other.particle_ptr()) {}
 
     ConstSingleParticle &operator= (const ConstSingleParticle<T> &other)
     {
@@ -384,14 +299,14 @@ class ConstSingleParticle
         return particle_ptr_;
     }
 
-    friend class ParticleIterator<T, vsmc::ConstSingleParticle>;
+    friend class Particle<T>;
 
     private :
 
     size_type id_;
     particle_ptr_type particle_ptr_;
 
-    void update_id (size_type new_id)
+    void set_id (size_type new_id)
     {
         id_ = new_id;
     }
@@ -454,7 +369,7 @@ class SingleParticle
         return particle_ptr_->log_weight()[id_];
     }
 
-    particle_type &particle () const
+    const particle_type &particle () const
     {
         VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
 
@@ -475,14 +390,14 @@ class SingleParticle
         return particle_ptr_->rng(id_);
     }
 
-    friend class ParticleIterator<T, vsmc::SingleParticle>;
+    friend class Particle<T>;
 
     private :
 
     size_type id_;
     particle_ptr_type particle_ptr_;
 
-    void update_id (size_type new_id)
+    void set_id (size_type new_id)
     {
         id_ = new_id;
     }
@@ -493,9 +408,7 @@ class SingleParticle
 /// \sa WeightSetBase
 /// \sa RngSetSeq RngSetPrl
 template <typename T>
-class Particle :
-    public traits::ParticleIteratorTrait<
-    cxx11::is_signed<typename traits::SizeTypeTrait<T>::type>::value, T>
+class Particle
 {
     public :
 
@@ -511,19 +424,108 @@ class Particle :
     typedef cxx11::function<
         void (size_type, resample_rng_set_type &, double *, size_type *)>
         resample_op_type;
+    typedef ParticleIterator<T, SingleParticle> iterator;
+    typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     explicit Particle (size_type N) :
         size_(N), value_(N), weight_set_(N), rng_set_(N),
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
-        resample_rng_set_(N)
+        resample_rng_set_(N),
+        sp_(N + 2, SingleParticle<value_type>(0, this)),
+        csp_(N + 2, ConstSingleParticle<value_type>(0, this))
     {
         weight_set_.set_equal_weight();
+        if (cxx11::is_signed<size_type>::value) {
+            sp_[0].set_id(-1);
+            csp_[0].set_id(-1);
+        } else {
+            sp_[0].set_id(std::numeric_limits<size_type>::max
+                    VSMC_MINMAX_NO_EXPANSION ());
+            csp_[0].set_id(std::numeric_limits<size_type>::max
+                    VSMC_MINMAX_NO_EXPANSION ());
+        }
+        for (size_type i = 1; i != size_ + 2; ++i) {
+            sp_[i].set_id(i - 1);
+            csp_[i].set_id(i - 1);
+        }
     }
 
     /// \brief Number of particles
     size_type size () const
     {
         return size_;
+    }
+
+    const SingleParticle<T> &sp (size_type id)
+    {
+        return sp_[id + 1];
+    }
+
+    const ConstSingleParticle<T> &sp (size_type id) const
+    {
+        return csp_[id + 1];
+    }
+
+    iterator begin()
+    {
+        return iterator(&sp(0));
+    }
+
+    iterator end()
+    {
+        return iterator(&sp(size_));
+    }
+
+    const_iterator begin() const
+    {
+        return cosnt_iterator(&sp(0));
+    }
+
+    const_iterator end() const
+    {
+        return const_iterator(&sp(size_));
+    }
+
+    const_iterator cbegin() const
+    {
+        return const_iterator(&sp(0));
+    }
+
+    const_iterator cend() const
+    {
+        return const_iterator(&sp(size_));
+    }
+
+    reverse_iterator rbegin()
+    {
+        return reverse_iterator(end());
+    }
+
+    reverse_iterator rend()
+    {
+        return reverse_iterator(begin());
+    }
+
+    const_reverse_iterator rbegin() const
+    {
+        return const_reverse_iterator(end());
+    }
+
+    const_reverse_iterator rend() const
+    {
+        return const_reverse_iterator(begin());
+    }
+
+    const_reverse_iterator crbegin() const
+    {
+        return const_reverse_iterator(cend());
+    }
+
+    const_reverse_iterator crend() const
+    {
+        return const_reverse_iterator(cbegin());
     }
 
     /// \brief Read and write access to the value collection object
@@ -843,6 +845,8 @@ class Particle :
     bool resampled_;
     resample_op_type resample_op_;
     resample_rng_set_type resample_rng_set_;
+    std::vector<SingleParticle<value_type> > sp_;
+    std::vector<ConstSingleParticle<value_type> > csp_;
 
     void resample_do ()
     {
