@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_STATIC_ASSERT_BASE_STATE_TYPE(base, derived, user) \
+    VSMC_STATIC_ASSERT(vsmc::traits::IsBaseOfState<base, derived>::value, \
+            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
+
 #define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename) \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)), ( \
                 "YOU DERIVED FROM " #basename \
@@ -14,7 +18,9 @@
 #define VSMC_HELPER_BASE_DESTRUCTOR_PREFIX virtual
 #endif
 
-namespace vsmc { namespace traits {
+namespace vsmc {
+
+namespace traits {
 
 template <template <unsigned, typename> class State, typename D>
 class IsBaseOfState
@@ -32,6 +38,18 @@ class IsBaseOfState
 
    enum {value = sizeof(test(static_cast<derived_type *>(0))) == sizeof(char)};
 };
+
+template <template <typename, typename> class>
+struct IsInitializeImpl : public cxx11::false_type {};
+
+template <template <typename, typename> class>
+struct IsMoveImpl : public cxx11::false_type {};
+
+template <template <typename, typename> class>
+struct IsMonitorEvalImpl : public cxx11::false_type {};
+
+template <template <typename, typename> class>
+struct IsPathEvalImpl : public cxx11::false_type {};
 
 } // namespace vsmc::traits
 

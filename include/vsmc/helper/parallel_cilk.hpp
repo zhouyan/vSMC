@@ -8,6 +8,22 @@
 
 namespace vsmc {
 
+namespace traits {
+
+template <>
+struct IsInitializeImpl<InitializeCILK> : public cxx11::true_type {};
+
+template <>
+struct IsMoveImpl<MoveCILK> : public cxx11::true_type {};
+
+template <>
+struct IsMonitorEvalImpl<MonitorEvalCILK> : public cxx11::true_type {};
+
+template <>
+struct IsPathEvalImpl<PathEvalCILK> : public cxx11::true_type {};
+
+} // namespace vsmc::traits
+
 /// \brief Particle::value_type subtype
 /// \ingroup CILK
 template <unsigned Dim, typename T>
