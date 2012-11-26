@@ -172,9 +172,9 @@ class InitializeBase
         (const InitializeBase<T, Derived> &) {return *this;}
     VSMC_HELPER_BASE_DESTRUCTOR_PREFIX ~InitializeBase () {}
 
-    unsigned initialize_state (SingleParticle<T> part)
+    unsigned initialize_state (SingleParticle<T> sp)
     {
-        return initialize_state_dispatch(part, &Derived::initialize_state);
+        return initialize_state_dispatch(sp, &Derived::initialize_state);
     }
 
     void initialize_param (Particle<T> &particle, void *param)
@@ -195,11 +195,11 @@ class InitializeBase
     private :
 
     template <typename D>
-    unsigned initialize_state_dispatch (SingleParticle<T> part,
+    unsigned initialize_state_dispatch (SingleParticle<T> sp,
             unsigned (D::*) (SingleParticle<T>))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(InitializeBase);
-        return static_cast<Derived *>(this)->initialize_state(part);
+        return static_cast<Derived *>(this)->initialize_state(sp);
     }
 
     template <typename D>
@@ -226,10 +226,10 @@ class InitializeBase
         static_cast<Derived *>(this)->post_processor(particle);
     }
 
-    unsigned initialize_state_dispatch (SingleParticle<T> part,
+    unsigned initialize_state_dispatch (SingleParticle<T> sp,
             unsigned (*) (SingleParticle<T>))
     {
-        return Derived::initialize_state(part);
+        return Derived::initialize_state(sp);
     }
 
     void initialize_param_dispatch (Particle<T> &particle, void *param,
@@ -294,9 +294,9 @@ class MoveBase
         (const MoveBase<T, Derived> &) {return *this;}
     VSMC_HELPER_BASE_DESTRUCTOR_PREFIX ~MoveBase () {}
 
-    unsigned move_state (unsigned iter, SingleParticle<T> part)
+    unsigned move_state (unsigned iter, SingleParticle<T> sp)
     {
-        return move_state_dispatch(iter, part, &Derived::move_state);
+        return move_state_dispatch(iter, sp, &Derived::move_state);
     }
 
     void pre_processor (unsigned iter, Particle<T> &particle)
@@ -312,11 +312,11 @@ class MoveBase
     private :
 
     template <typename D>
-    unsigned move_state_dispatch (unsigned iter, SingleParticle<T> part,
+    unsigned move_state_dispatch (unsigned iter, SingleParticle<T> sp,
             unsigned (D::*) (unsigned, SingleParticle<T>))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(MoveBase);
-        return static_cast<Derived *>(this)->move_state(iter, part);
+        return static_cast<Derived *>(this)->move_state(iter, sp);
     }
 
     template <typename D>
@@ -335,10 +335,10 @@ class MoveBase
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
-    unsigned move_state_dispatch (unsigned iter, SingleParticle<T> part,
+    unsigned move_state_dispatch (unsigned iter, SingleParticle<T> sp,
             unsigned (*) (unsigned, SingleParticle<T>))
     {
-        return Derived::move_state(iter, part);
+        return Derived::move_state(iter, sp);
     }
 
     void pre_processor_dispatch (unsigned iter, Particle<T> &particle,
@@ -394,9 +394,9 @@ class MonitorEvalBase
     VSMC_HELPER_BASE_DESTRUCTOR_PREFIX ~MonitorEvalBase () {}
 
     void monitor_state (unsigned iter, unsigned dim,
-            ConstSingleParticle<T> part, double *res)
+            ConstSingleParticle<T> csp, double *res)
     {
-        monitor_state_dispatch(iter, dim, part, res, &Derived::monitor_state);
+        monitor_state_dispatch(iter, dim, csp, res, &Derived::monitor_state);
     }
 
     void pre_processor (unsigned iter, const Particle<T> &particle)
@@ -413,11 +413,11 @@ class MonitorEvalBase
 
     template <typename D>
     void monitor_state_dispatch (unsigned iter, unsigned dim,
-            ConstSingleParticle<T> part, double *res,
+            ConstSingleParticle<T> csp, double *res,
             void (D::*) (unsigned, unsigned, ConstSingleParticle<T>, double *))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(MonitorEvalBase);
-        static_cast<Derived *>(this)->monitor_state(iter, dim, part, res);
+        static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);
     }
 
     template <typename D>
@@ -437,10 +437,10 @@ class MonitorEvalBase
     }
 
     void monitor_state_dispatch (unsigned iter, unsigned dim,
-            ConstSingleParticle<T> part, double *res,
+            ConstSingleParticle<T> csp, double *res,
             void (*) (unsigned, unsigned, ConstSingleParticle<T>, double *))
     {
-        Derived::monitor_state(iter, dim, part, res);
+        Derived::monitor_state(iter, dim, csp, res);
     }
 
     void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
@@ -498,9 +498,9 @@ class PathEvalBase
         (const PathEvalBase<T, Derived> &) {return *this;}
     VSMC_HELPER_BASE_DESTRUCTOR_PREFIX ~PathEvalBase () {}
 
-    double path_state (unsigned iter, ConstSingleParticle<T> part)
+    double path_state (unsigned iter, ConstSingleParticle<T> csp)
     {
-        return path_state_dispatch(iter, part, &Derived::path_state);
+        return path_state_dispatch(iter, csp, &Derived::path_state);
     }
 
     double path_width (unsigned iter, const Particle<T> &particle)
@@ -521,11 +521,11 @@ class PathEvalBase
     private :
 
     template <typename D>
-    double path_state_dispatch (unsigned iter, ConstSingleParticle<T> part,
+    double path_state_dispatch (unsigned iter, ConstSingleParticle<T> csp,
             double (D::*) (unsigned, ConstSingleParticle<T>))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
-        return static_cast<Derived *>(this)->path_state(iter, part);
+        return static_cast<Derived *>(this)->path_state(iter, csp);
     }
 
     template <typename D>
@@ -552,10 +552,10 @@ class PathEvalBase
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
-    double path_state_dispatch (unsigned iter, ConstSingleParticle<T> part,
+    double path_state_dispatch (unsigned iter, ConstSingleParticle<T> csp,
             double (*) (unsigned, ConstSingleParticle<T>))
     {
-        return Derived::path_state(iter, part);
+        return Derived::path_state(iter, csp);
     }
 
     double path_width_dispatch (unsigned iter, const Particle<T> &particle,
