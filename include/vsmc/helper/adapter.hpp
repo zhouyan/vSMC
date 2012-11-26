@@ -5,15 +5,44 @@
 
 namespace vsmc {
 
+namespace traits {
+
+template <typename, template <typename, typename> class,
+         template <typename, template <typename, typename> class, typename>
+             class, typename>
+struct AdapImplTrait;
+
+template <typename T,
+         template <typename, typename> class Impl,
+         template <typename, template <typename, typename> class, typename>
+             class Adapter>
+struct AdapImplTrait<T, Impl, Adapter, VBase>
+{
+    typedef Impl<T, VBase> type;
+};
+
+template <typename T,
+         template <typename, typename> class Impl,
+         template <typename, template <typename, typename> class, typename>
+         class Adapter>
+struct AdapImplTrait<T, Impl, Adapter, CBase>
+{
+    typedef Impl<T, Adapter<T, Impl, CBase> > type;
+};
+
+} // namesapce vsmc::traits
+
 /// \brief Initialize class adapter
 /// \ingroup Adapter
-template <typename T, template <typename, typename> class InitializeImpl>
+template <typename T, template <typename, typename> class Impl,
+         typename BaseType>
 class InitializeAdapter :
-    public InitializeImpl<T, InitializeAdapter<T, InitializeImpl> >
+    public traits::AdapImplTrait<T, Impl, InitializeAdapter, BaseType>::type
 {
     public :
 
-    typedef InitializeImpl<T, InitializeAdapter<T, InitializeImpl> >
+    typedef typename traits::AdapImplTrait<
+        T, Impl, vsmc::InitializeAdapter, BaseType>::type
         initialize_impl_type;
     typedef cxx11::function<unsigned (SingleParticle<T>)>
         initialize_state_type;
@@ -29,7 +58,11 @@ class InitializeAdapter :
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
         initialize_state_(init_state), initialize_param_(init_param),
-        pre_processor_(pre), post_processor_(post) {}
+        pre_processor_(pre), post_processor_(post)
+    {
+        VSMC_STATIC_ASSERT(traits::IsInitializeImpl<Impl>::value,
+                USE_InitializeAdapter_WITHOUT_AN_INITIAILIZE_IMPLEMENTATION);
+    }
 
     unsigned initialize_state (SingleParticle<T> part)
     {
@@ -64,13 +97,15 @@ class InitializeAdapter :
 
 /// \brief Move class adapter
 /// \ingroup Adapter
-template <typename T, template <typename, typename> class MoveImpl>
+template <typename T, template <typename, typename> class Impl,
+         typename BaseType>
 class MoveAdapter :
-    public MoveImpl<T, MoveAdapter<T, MoveImpl> >
+    public traits::AdapImplTrait<T, Impl, MoveAdapter, BaseType>::type
 {
     public :
 
-    typedef MoveImpl<T, MoveAdapter<T, MoveImpl> >
+    typedef typename traits::AdapImplTrait<
+        T, Impl, vsmc::MoveAdapter, BaseType>::type
         move_impl_type;
     typedef cxx11::function<unsigned (unsigned, SingleParticle<T>)>
         move_state_type;
@@ -82,7 +117,11 @@ class MoveAdapter :
     MoveAdapter (const move_state_type &move_state,
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
-        move_state_(move_state), pre_processor_(pre), post_processor_(post) {}
+        move_state_(move_state), pre_processor_(pre), post_processor_(post)
+    {
+        VSMC_STATIC_ASSERT(traits::IsMoveImpl<Impl>::value,
+                USE_MoveAdapter_WITHOUT_A_MOVE_IMPLEMENTATION);
+    }
 
     unsigned move_state (unsigned iter, SingleParticle<T> part)
     {
@@ -110,13 +149,15 @@ class MoveAdapter :
 
 /// \brief Monitor evaluation class adapter
 /// \ingroup Adapter
-template <typename T, template <typename, typename> class MonitorEvalImpl>
+template <typename T, template <typename, typename> class Impl,
+         typename BaseType>
 class MonitorEvalAdapter :
-    public MonitorEvalImpl<T, MonitorEvalAdapter<T, MonitorEvalImpl> >
+    public traits::AdapImplTrait<T, Impl, MonitorEvalAdapter, BaseType>::type
 {
     public :
 
-    typedef MonitorEvalImpl<T, MonitorEvalAdapter<T, MonitorEvalImpl> >
+    typedef typename traits::AdapImplTrait<
+        T, Impl, vsmc::MonitorEvalAdapter, BaseType>::type
         monitor_eval_impl_type;
     typedef cxx11::function<
         void (unsigned, unsigned, ConstSingleParticle<T>, double *)>
@@ -130,7 +171,11 @@ class MonitorEvalAdapter :
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
         monitor_state_(monitor_state),
-        pre_processor_(pre), post_processor_(post) {}
+        pre_processor_(pre), post_processor_(post)
+    {
+        VSMC_STATIC_ASSERT(traits::IsMonitorEvalImpl<Impl>::value,
+                USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION);
+    }
 
     void monitor_state (unsigned iter, unsigned dim,
             ConstSingleParticle<T> part, double *res)
@@ -159,13 +204,15 @@ class MonitorEvalAdapter :
 
 /// \brief Path evaluation class adapter
 /// \ingroup Adapter
-template <typename T, template <typename, typename> class PathEvalImpl>
+template <typename T, template <typename, typename> class Impl,
+         typename BaseType>
 class PathEvalAdapter :
-    public PathEvalImpl<T, PathEvalAdapter<T, PathEvalImpl> >
+    public traits::AdapImplTrait<T, Impl, PathEvalAdapter, BaseType>::type
 {
     public :
 
-    typedef PathEvalImpl<T, PathEvalAdapter<T, PathEvalImpl> >
+    typedef typename traits::AdapImplTrait<
+        T, Impl, vsmc::PathEvalAdapter, BaseType>::type
         path_eval_impl_type;
     typedef cxx11::function<double (unsigned, ConstSingleParticle<T>)>
         path_state_type;
@@ -181,7 +228,11 @@ class PathEvalAdapter :
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
         path_state_(path_state), path_width_(path_width),
-        pre_processor_(pre), post_processor_(post) {}
+        pre_processor_(pre), post_processor_(post)
+    {
+        VSMC_STATIC_ASSERT(traits::IsPathEvalImpl<Impl>::value,
+                USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION);
+    }
 
     double path_state (unsigned iter, ConstSingleParticle<T> part)
     {

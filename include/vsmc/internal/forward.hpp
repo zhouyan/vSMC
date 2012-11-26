@@ -5,6 +5,7 @@ namespace vsmc {
 
 // Placeholders
 class VBase;
+class CBase;
 class NullType;
 
 // Utilities
@@ -84,14 +85,14 @@ template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;
 template <typename> class PathEvalCL;
 
-template <typename, template <typename, typename> class I = InitializeSEQ>
-class InitializeAdapter;
-template <typename, template <typename, typename> class I = MoveSEQ>
-class MoveAdapter;
-template <typename, template <typename, typename> class I = MonitorEvalSEQ>
-class MonitorEvalAdapter;
-template <typename, template <typename, typename> class I = PathEvalSEQ>
-class PathEvalAdapter;
+template <typename T, template <typename, typename> class I = InitializeSEQ,
+         typename B = CBase> class InitializeAdapter;
+template <typename, template <typename, typename> class I = MoveSEQ,
+         typename B = CBase> class MoveAdapter;
+template <typename, template <typename, typename> class I = MonitorEvalSEQ,
+         typename B = CBase> class MonitorEvalAdapter;
+template <typename, template <typename, typename> class I = PathEvalSEQ,
+         typename B = CBase> class PathEvalAdapter;
 
 } // namesapce vsmc
 
