@@ -33,8 +33,10 @@ class sum
 int main ()
 {
     int r;
-    vsmc::thread::parallel_for(vsmc::thread::BlockedRange<int>(0, 100), say());
-    vsmc::thread::parallel_sum(vsmc::thread::BlockedRange<int>(0, 100), sum(), r);
+    vsmc::thread::parallel_for(
+        vsmc::thread::BlockedRange<int>(0, 100), say());
+    vsmc::thread::parallel_accumulate(
+        vsmc::thread::BlockedRange<int>(0, 100), sum(), r);
     assert(r == 4950);
     return 0;
 }
