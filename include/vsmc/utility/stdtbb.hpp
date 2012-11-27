@@ -6,6 +6,39 @@
 
 namespace vsmc { namespace thread {
 
+/// \brief C++11 Thread guard
+class ThreadGuard
+{
+    public :
+
+    ThreadGuard () {}
+
+    ThreadGuard (ThreadGuard &&other) : thread_(std::move(other.thread_)) {}
+
+    ThreadGuard (const ThreadGuard &) = delete;
+
+    ThreadGuard &operator= (const ThreadGuard &) = delete;
+
+    ThreadGuard &operator= (ThreadGuard &&other)
+    {
+        thread_ = std::move(other.thread_);
+
+        return *this;
+    }
+
+    ThreadGuard (std::thread &&thr) : thread_(std::move(thr)) {}
+
+    ~ThreadGuard ()
+    {
+        if (thread_.joinable())
+            thread_.join();
+    }
+
+    private :
+
+    std::thread thread_;
+};
+
 /// \brief C++11 Thread manager
 /// \ingroup Thread
 class ThreadManager
@@ -111,12 +144,13 @@ void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
     std::vector<SizeType> e(thread_num);
     unsigned num = manager.partition(range.begin(), range.end(),
             b.begin(), e.begin());
-    // TODO safer management of threads group
-    std::vector<std::thread> tg;
-    for (unsigned i = 0; i != num; ++i)
-        tg.push_back(std::thread(work, BlockedRange<SizeType>(b[i], e[i])));
-    for (unsigned i = 0; i != num; ++i)
-        tg[i].join();
+    std::vector<ThreadGuard> tg;
+    { // start parallelization
+        for (unsigned i = 0; i != num; ++i) {
+            tg.push_back(ThreadGuard(std::thread(
+                            work, BlockedRange<SizeType>(b[i], e[i]))));
+        }
+    } // end parallelization
 }
 
 /// \brief Parallel sum using C++11 thread
@@ -132,17 +166,16 @@ void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
     std::vector<ResultType> result(thread_num);
     unsigned num = manager.partition(range.begin(), range.end(),
             b.begin(), e.begin());
-    // TODO safer management of threads group
-    std::vector<std::thread> tg;
-    for (unsigned i = 0; i != num; ++i) {
-        tg.push_back(std::thread(work, BlockedRange<SizeType>(b[i], e[i]),
-                    std::ref(result[i])));
-    }
-    for (unsigned i = 0; i != num; ++i)
-        tg[i].join();
+    { // start parallelization
+        std::vector<ThreadGuard> tg;
+        for (unsigned i = 0; i != num; ++i) {
+            tg.push_back(ThreadGuard(std::thread(
+                            work, BlockedRange<SizeType>(b[i], e[i]),
+                            std::ref(result[i]))));
+        }
+    } // end parallelization
     for (unsigned i = 1; i != num; ++i)
         result[0] += result[i];
-
     res = result[0];
 }
 
