@@ -136,7 +136,7 @@ class BlockedRange
 /// \brief Parallel for using C++11 thread
 /// \ingroup Thread
 template <typename SizeType, typename WorkType>
-void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
+void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 {
     const ThreadManager &manager = ThreadManager::instance();
     unsigned thread_num = manager.thread_num();
@@ -147,8 +147,8 @@ void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
     std::vector<ThreadGuard> tg;
     { // start parallelization
         for (unsigned i = 0; i != num; ++i) {
-            tg.push_back(ThreadGuard(std::thread(
-                            work, BlockedRange<SizeType>(b[i], e[i]))));
+            tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
+                            BlockedRange<SizeType>(b[i], e[i]))));
         }
     } // end parallelization
 }
@@ -156,7 +156,7 @@ void parallel_for (const BlockedRange<SizeType> &range, const WorkType &work)
 /// \brief Parallel sum using C++11 thread
 /// \ingroup Thread
 template <typename SizeType, typename WorkType, typename ResultType>
-void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
+void parallel_sum (const BlockedRange<SizeType> &range, WorkType &&work,
         ResultType &res)
 {
     const ThreadManager &manager = ThreadManager::instance();
@@ -169,8 +169,8 @@ void parallel_sum (const BlockedRange<SizeType> &range, const WorkType &work,
     { // start parallelization
         std::vector<ThreadGuard> tg;
         for (unsigned i = 0; i != num; ++i) {
-            tg.push_back(ThreadGuard(std::thread(
-                            work, BlockedRange<SizeType>(b[i], e[i]),
+            tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
+                            BlockedRange<SizeType>(b[i], e[i]),
                             std::ref(result[i]))));
         }
     } // end parallelization
