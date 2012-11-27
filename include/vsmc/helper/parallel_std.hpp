@@ -86,7 +86,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
         this->pre_processor(particle);
         work_ work(this, &particle);
         unsigned accept;
-        thread::parallel_sum(thread::BlockedRange<size_type>(
+        thread::parallel_accumulate(thread::BlockedRange<size_type>(
                     0, particle.value().size()), work, accept);
         this->post_processor(particle);
 
@@ -145,7 +145,7 @@ class MoveSTD : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         work_ work(this, iter, &particle);
         unsigned accept;
-        thread::parallel_sum(thread::BlockedRange<size_type>(
+        thread::parallel_accumulate(thread::BlockedRange<size_type>(
                     0, particle.value().size()), work, accept);
         this->post_processor(iter, particle);
 

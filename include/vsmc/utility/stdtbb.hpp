@@ -135,6 +135,10 @@ class BlockedRange
 
 /// \brief Parallel for using C++11 thread
 /// \ingroup Thread
+///
+/// \details
+/// Requirement: WorkType:
+/// void work (const thread::BlockedRange<size_type> &range);
 template <typename SizeType, typename WorkType>
 void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 {
@@ -153,10 +157,14 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
     } // end parallelization
 }
 
-/// \brief Parallel sum using C++11 thread
+/// \brief Parallel accumulate using C++11 thread
 /// \ingroup Thread
+///
+/// \details
+/// Requirement: WorkType:
+/// void work (const thread::BlockedRange<size_type> &range, ResultType &res);
 template <typename SizeType, typename WorkType, typename ResultType>
-void parallel_sum (const BlockedRange<SizeType> &range, WorkType &&work,
+void parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         ResultType &res)
 {
     const ThreadManager &manager = ThreadManager::instance();
@@ -176,6 +184,37 @@ void parallel_sum (const BlockedRange<SizeType> &range, WorkType &&work,
     } // end parallelization
     for (unsigned i = 1; i != num; ++i)
         result[0] += result[i];
+    res = result[0];
+}
+
+/// \brief Parallel accumulate using C++11 thread
+/// \ingroup Thread
+///
+/// \details
+/// Requirement: WorkType:
+/// void work (const thread::BlockedRange<size_type> &range, ResultType &res);
+template <typename SizeType, typename WorkType,
+    typename ResultType, typename BinaryOpType>
+void parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
+        ResultType &res, BinaryOpType bin_op)
+{
+    const ThreadManager &manager = ThreadManager::instance();
+    unsigned thread_num = manager.thread_num();
+    std::vector<SizeType> b(thread_num);
+    std::vector<SizeType> e(thread_num);
+    std::vector<ResultType> result(thread_num);
+    unsigned num = manager.partition(range.begin(), range.end(),
+            b.begin(), e.begin());
+    { // start parallelization
+        std::vector<ThreadGuard> tg;
+        for (unsigned i = 0; i != num; ++i) {
+            tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
+                            BlockedRange<SizeType>(b[i], e[i]),
+                            std::ref(result[i]))));
+        }
+    } // end parallelization
+    for (unsigned i = 1; i != num; ++i)
+        result[0] = bin_op(result[0], result[i]);
     res = result[0];
 }
 
