@@ -11,11 +11,15 @@ class ThreadGuard
 {
     public :
 
-    ThreadGuard () {}
+    ThreadGuard () noexcept = default;
+    ThreadGuard (ThreadGuard &) = delete;
+    ThreadGuard (const ThreadGuard &) = delete;
+    ThreadGuard &operator= (const ThreadGuard &) = delete;
 
-    ThreadGuard (ThreadGuard &&other) : thread_(std::move(other.thread_)) {}
+    ThreadGuard (ThreadGuard &&other) noexcept :
+        thread_(std::move(other.thread_)) {}
 
-    ThreadGuard &operator= (ThreadGuard &&other)
+    ThreadGuard &operator= (ThreadGuard &&other) noexcept
     {
         thread_ = std::move(other.thread_);
 
@@ -33,9 +37,6 @@ class ThreadGuard
     private :
 
     std::thread thread_;
-
-    ThreadGuard (const ThreadGuard &) {}
-    ThreadGuard &operator= (const ThreadGuard &) {return *this;}
 };
 
 /// \brief C++11 Thread manager
