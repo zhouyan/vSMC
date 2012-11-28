@@ -113,7 +113,7 @@
 #endif
 #endif
 
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= VSMC_GNUC_NONEXIST
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
 #ifndef VSMC_HAS_CXX11_NOEXCEPT
 #define VSMC_HAS_CXX11_NOEXCEPT 1
 #endif

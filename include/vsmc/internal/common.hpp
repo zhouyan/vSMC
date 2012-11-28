@@ -42,6 +42,12 @@
 #define VSMC_EXPLICIT_OPERATOR
 #endif
 
+#if VSMC_HAS_CXX11_NOEXCEPT
+#define VSMC_NOEXCEPT noexcept
+#else
+#define VSMC_NOEXCEPT
+#endif
+
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)
 #else // NDEBUG
