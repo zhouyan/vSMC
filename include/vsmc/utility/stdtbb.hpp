@@ -34,8 +34,8 @@ class ThreadGuard
 
     std::thread thread_;
 
-    ThreadGuard (const ThreadGuard &) {};
-    ThreadGuard &operator= (const ThreadGuard &) {};
+    ThreadGuard (const ThreadGuard &) {}
+    ThreadGuard &operator= (const ThreadGuard &) {return *this;}
 };
 
 /// \brief C++11 Thread manager
