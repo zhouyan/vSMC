@@ -9,12 +9,23 @@ namespace vsmc { namespace thread {
 /// \brief C++11 Thread guard
 class ThreadGuard
 {
+#ifdef __INTEL_COMPILER
+    private :
+
+    ThreadGuard (ThreadGuard &) {}
+    ThreadGuard (const ThreadGuard &)  {}
+    ThreadGuard &operator= (ThreadGuard &) {return *this;}
+    ThreadGuard &operator= (const ThreadGuard &) {return *this;}
+#else
     public :
 
     ThreadGuard (ThreadGuard &) = delete;
     ThreadGuard (const ThreadGuard &) = delete;
     ThreadGuard &operator= (ThreadGuard &) = delete;
     ThreadGuard &operator= (const ThreadGuard &) = delete;
+#endif
+
+    public :
 
     ThreadGuard () VSMC_NOEXCEPT {}
 
