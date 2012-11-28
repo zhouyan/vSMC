@@ -6,6 +6,12 @@
 
 namespace vsmc { namespace thread {
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4521)
+#pragma warning(disable:4522)
+#endif // _MSC_VER
+
 /// \brief C++11 Thread guard
 class ThreadGuard
 {
@@ -50,7 +56,11 @@ class ThreadGuard
     private :
 
     std::thread thread_;
-};
+}; // class ThreadGuard
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // _MSC_VER
 
 /// \brief C++11 Thread manager
 /// \ingroup Thread
