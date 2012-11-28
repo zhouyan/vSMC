@@ -11,10 +11,12 @@ class ThreadGuard
 {
     public :
 
-    ThreadGuard () noexcept = default;
     ThreadGuard (ThreadGuard &) = delete;
     ThreadGuard (const ThreadGuard &) = delete;
+    ThreadGuard &operator= (ThreadGuard &) = delete;
     ThreadGuard &operator= (const ThreadGuard &) = delete;
+
+    ThreadGuard () noexcept {}
 
     ThreadGuard (ThreadGuard &&other) noexcept :
         thread_(std::move(other.thread_)) {}
