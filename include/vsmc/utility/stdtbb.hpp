@@ -15,10 +15,6 @@ class ThreadGuard
 
     ThreadGuard (ThreadGuard &&other) : thread_(std::move(other.thread_)) {}
 
-    ThreadGuard (const ThreadGuard &) = delete;
-
-    ThreadGuard &operator= (const ThreadGuard &) = delete;
-
     ThreadGuard &operator= (ThreadGuard &&other)
     {
         thread_ = std::move(other.thread_);
@@ -37,6 +33,9 @@ class ThreadGuard
     private :
 
     std::thread thread_;
+
+    ThreadGuard (const ThreadGuard &) {};
+    ThreadGuard &operator= (const ThreadGuard &) {};
 };
 
 /// \brief C++11 Thread manager
