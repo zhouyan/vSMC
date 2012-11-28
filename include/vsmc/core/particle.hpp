@@ -298,17 +298,10 @@ class ConstSingleParticle
         return particle_ptr_;
     }
 
-    friend class Particle<T>;
-
     private :
 
     size_type id_;
     particle_ptr_type particle_ptr_;
-
-    void set_id (size_type new_id)
-    {
-        id_ = new_id;
-    }
 }; // class ConstSingleParticle
 
 /// \brief A thin wrapper over a complete Particle
@@ -388,17 +381,10 @@ class SingleParticle
         return particle_ptr_->rng(id_);
     }
 
-    friend class Particle<T>;
-
     private :
 
     size_type id_;
     particle_ptr_type particle_ptr_;
-
-    void set_id (size_type new_id)
-    {
-        id_ = new_id;
-    }
 }; // class SingleParticle
 
 /// \brief Particle class representing the whole particle set
@@ -431,22 +417,22 @@ class Particle
         size_(N), value_(N), weight_set_(N), rng_set_(N),
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
         resample_rng_set_(N),
-        sp_(N + 2, SingleParticle<T>(0, this)),
-        csp_(N + 2, ConstSingleParticle<T>(0, this))
+        sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
+        csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {
         weight_set_.set_equal_weight();
         if (cxx11::is_signed<size_type>::value) {
-            sp_[0].set_id(-1);
-            csp_[0].set_id(-1);
+            sp_[0] = SingleParticle<T>(-1, this);
+            csp_[0] = ConstSingleParticle<T>(-1, this);
         } else {
-            sp_[0].set_id(std::numeric_limits<size_type>::max
-                    VSMC_MINMAX_NO_EXPANSION ());
-            csp_[0].set_id(std::numeric_limits<size_type>::max
-                    VSMC_MINMAX_NO_EXPANSION ());
+            sp_[0] = SingleParticle<T>(std::numeric_limits<size_type>::max
+                    VSMC_MINMAX_NO_EXPANSION (), this);
+            csp_[0] = ConstSingleParticle<T>(std::numeric_limits<size_type>::max
+                    VSMC_MINMAX_NO_EXPANSION (), this);
         }
         for (size_type i = 1; i != size_ + 2; ++i) {
-            sp_[i].set_id(i - 1);
-            csp_[i].set_id(i - 1);
+            sp_[i] = SingleParticle<T>(i - 1, this);
+            csp_[i] = ConstSingleParticle<T>(i - 1, this);
         }
     }
 
