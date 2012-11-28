@@ -9,7 +9,7 @@ namespace vsmc { namespace thread {
 /// \brief C++11 Thread guard
 class ThreadGuard
 {
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER) || !VSMC_HAS_CXX11_DELETED_FUNCTIONS
     private :
 
     ThreadGuard (ThreadGuard &) {}
