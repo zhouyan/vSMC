@@ -176,7 +176,8 @@ class Monitor
         particle.read_weight(&weight_[0]);
         dgemv_(RowMajor, Trans,
                 static_cast<typename dgemv_type::size_type>(particle.size()),
-                dim_, 1, &buffer_[0], dim_, &weight_[0], 1, 0, &result_[0], 1);
+                static_cast<typename dgemv_type::size_type>(dim_),
+                1, &buffer_[0], dim_, &weight_[0], 1, 0, &result_[0], 1);
 
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
