@@ -34,23 +34,20 @@
 
 #include <vsmc/utility/seed.hpp>
 
+// Avoid MSVC stupid behavior
 #define VSMC_MINMAX_NO_EXPANSION
 
-#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
-#define VSMC_EXPLICIT_OPERATOR explicit
-#else
-#define VSMC_EXPLICIT_OPERATOR
-#endif
-
-#if VSMC_HAS_CXX11_NOEXCEPT
-#define VSMC_NOEXCEPT noexcept
-#else
-#define VSMC_NOEXCEPT
-#endif
-
+// Runtime assertion
 #ifdef NDEBUG
 #define VSMC_RUNTIME_ASSERT(cond, msg)
-#else // NDEBUG
+#elif VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#define VSMC_RUNTIME_ASSERT(cond, msg)  \
+{                                       \
+    if (!(cond)) {                      \
+        throw vsmc::RuntimeAssert(msg); \
+    };                                  \
+}
+#else // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg)                       \
 {                                                            \
     if (!(cond)) {                                           \
@@ -62,16 +59,12 @@
 }
 #endif // NDEBUG
 
+// Static assertion
 #if VSMC_HAS_CXX11_STATIC_ASSERT
-
 #define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, #msg)
-
 #elif defined(BOOST_STATIC_ASSERT) // VSMC_HAS_CXX11_STATIC_ASSERT
-
 #define VSMC_STATIC_ASSERT(cond, msg) BOOST_STATIC_ASSERT_MSG(cond, #msg)
-
 #else // VSMC_HAS_CXX11_STATIC_ASSERT
-
 #ifdef _MSC_VER
 #define VSMC_STATIC_ASSERT(cond, msg) \
     {vsmc::StaticAssert<bool(cond)>::msg;}
@@ -79,9 +72,9 @@
 #define VSMC_STATIC_ASSERT(cond, msg) \
     if (vsmc::StaticAssert<bool(cond)>::msg) {};
 #endif // _MSC_VER
-
 #endif // VSMC_HAS_CXX11_STATIC_ASSERT
 
+// Type dispatcher
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)   \
 namespace vsmc { namespace traits {                                          \
                                                                              \
@@ -121,6 +114,10 @@ template <typename T> struct OuterType##Trait                                \
                                                                              \
 } }
 
+#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user)                   \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value),  \
+            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
+
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 
 namespace vsmc {
@@ -129,7 +126,16 @@ enum {Dynamic};
 enum MatrixOrder     {RowMajor = 101, ColMajor = 102};
 enum MatrixTranspose {NoTrans = 111, Trans = 112, ConjTrans = 113};
 
-template <bool> class StaticAssert {};
+class RuntimeAssert : public std::runtime_error
+{
+    public :
+
+    RuntimeAssert (const std::string &msg) : std::runtime_error(msg) {}
+
+    RuntimeAssert (const char *msg) : std::runtime_error(msg) {}
+}; // class RuntimeAssert
+
+template <bool> class StaticAssert;
 
 template <>
 class StaticAssert<true>
@@ -151,11 +157,7 @@ class StaticAssert<true>
         USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION,
         USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION
     };
-};
-
-#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user) \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value), \
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
+}; // class StaticAssert
 
 } // namespace vsmc
 

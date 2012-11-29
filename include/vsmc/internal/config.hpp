@@ -4,6 +4,11 @@
 #include <vsmc/internal/version.hpp>
 #include <vsmc/internal/compiler.hpp>
 
+// exception
+#ifndef VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#define VSMC_RUNTIME_ASSERT_AS_EXCEPTION 0
+#endif
+
 // nullptr
 
 #ifndef VSMC_NULLPTR
@@ -74,6 +79,19 @@
 
 #ifndef VSMC_USE_CL
 #define VSMC_USE_CL 0
+#endif
+
+// C++ Language features
+#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
+#define VSMC_EXPLICIT_OPERATOR explicit
+#else
+#define VSMC_EXPLICIT_OPERATOR
+#endif
+
+#if VSMC_HAS_CXX11_NOEXCEPT
+#define VSMC_NOEXCEPT noexcept
+#else
+#define VSMC_NOEXCEPT
 #endif
 
 // C++11 Libraries from the standard library
