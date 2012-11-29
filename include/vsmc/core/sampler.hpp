@@ -173,8 +173,8 @@ class Sampler
     void move_queue_push_back (const move_type &new_move)
     {
         VSMC_RUNTIME_ASSERT((bool(new_move)),
-                ("CALL **Sampler::move_queue_push_back** WITH AN INVALID "
-                 "MOVE FUNCTOR"));
+                "CALL **Sampler::move_queue_push_back** WITH AN INVALID "
+                "MOVE FUNCTOR");
         move_queue_.push_back(new_move);
     }
 
@@ -205,8 +205,8 @@ class Sampler
     void mcmc_queue_push_back (const mcmc_type &new_mcmc)
     {
         VSMC_RUNTIME_ASSERT((bool(new_mcmc)),
-                ("CALL **Sampler::mcmc_queue_push_back** WITH AN INVALID "
-                 "MCMC FUNCTOR"));
+                "CALL **Sampler::mcmc_queue_push_back** WITH AN INVALID "
+                "MCMC FUNCTOR");
         mcmc_queue_.push_back(new_mcmc);
     }
 
@@ -248,8 +248,8 @@ class Sampler
 
         iter_num_ = 0;
         VSMC_RUNTIME_ASSERT((bool(init_)),
-                ("CALL **Sampler::initialize** WITH AN INVALID "
-                 "INITIALIZE FUNCTOR"));
+                "CALL **Sampler::initialize** WITH AN INVALID "
+                "INITIALIZE FUNCTOR");
         accept_history_.push_back(std::vector<unsigned>(1,
                     init_(particle_, param)));
         do_resampling();
@@ -314,7 +314,11 @@ class Sampler
     /// the monitor_map_type object
     typename monitor_map_type::iterator monitor (const std::string &name)
     {
-        return monitor_.find(name);
+        typename monitor_map_type::iterator iter = monitor_.find(name);
+        VSMC_RUNTIME_ASSERT((iter != monitor.end()),
+                "CALL **Sampler::monitor** WITH AN INVALID MONITOR NAME");
+
+        return iter;
     }
 
     /// \brief Read only access to a named monitor through an iterator for the
@@ -322,7 +326,11 @@ class Sampler
     typename monitor_map_type::const_iterator monitor (
             const std::string &name) const
     {
-        return monitor_.find(name);
+        typename monitor_map_type::const_iterator citer = monitor_.find(name);
+        VSMC_RUNTIME_ASSERT((citer != monitor.cend()),
+                "CALL **Sampler::monitor** WITH AN INVALID MONITOR NAME");
+
+        return citer;
     }
 
     /// \brief Read and write access to all monitors to the monitor_map_type
