@@ -340,9 +340,10 @@ class Sampler
     }
 
     /// \brief Erase a named monitor
-    void clear_monitor (const std::string &name)
+    bool clear_monitor (const std::string &name)
     {
-        monitor_.erase(name);
+        return monitor_.erase(name) ==
+            static_cast<typename monitor_map_type::size_type>(1);
     }
 
     /// \brief Erase all monitors
