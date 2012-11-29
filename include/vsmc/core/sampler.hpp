@@ -302,10 +302,12 @@ class Sampler
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
-    void monitor (const std::string &name, unsigned dim,
+    std::pair<typename monitor_map_type::iterator, bool> monitor (
+            const std::string &name, unsigned dim,
             const typename Monitor<T>::eval_type &eval)
     {
-        monitor_.insert(std::make_pair(name, Monitor<T>(dim, eval)));
+        return monitor_.insert(typename monitor_map_type::value_type(
+                    name, Monitor<T>(dim, eval)));
     }
 
     /// \brief Read and write access to a named monitor through an iterator for
