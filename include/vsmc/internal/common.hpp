@@ -38,16 +38,16 @@
 #define VSMC_MINMAX_NO_EXPANSION
 
 // Runtime assertion
-#ifdef NDEBUG
-#define VSMC_RUNTIME_ASSERT(cond, msg)
-#elif VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg)  \
 {                                       \
     if (!(cond)) {                      \
         throw vsmc::RuntimeAssert(msg); \
     };                                  \
 }
-#else // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#elif defined(NDEBUG) // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#define VSMC_RUNTIME_ASSERT(cond, msg)
+#else
 #define VSMC_RUNTIME_ASSERT(cond, msg)                       \
 {                                                            \
     if (!(cond)) {                                           \
@@ -57,7 +57,7 @@
     };                                                       \
     assert(cond);                                            \
 }
-#endif // NDEBUG
+#endif // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 
 // Static assertion
 #if VSMC_HAS_CXX11_STATIC_ASSERT
