@@ -6,48 +6,29 @@
 
 namespace vsmc { namespace thread {
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4521)
-#pragma warning(disable:4522)
-#endif // _MSC_VER
-
 /// \brief C++11 Thread guard
 class ThreadGuard
 {
-#if defined(__INTEL_COMPILER) || !VSMC_HAS_CXX11_DELETED_FUNCTIONS
-    private :
-
-    ThreadGuard (ThreadGuard &) {}
-    ThreadGuard (const ThreadGuard &)  {}
-    ThreadGuard &operator= (ThreadGuard &) {return *this;}
-    ThreadGuard &operator= (const ThreadGuard &) {return *this;}
-#else
     public :
 
-    ThreadGuard (ThreadGuard &) = delete;
     ThreadGuard (const ThreadGuard &) = delete;
-    ThreadGuard &operator= (ThreadGuard &) = delete;
     ThreadGuard &operator= (const ThreadGuard &) = delete;
-#endif
 
-    public :
+    ThreadGuard () noexcept {}
 
-    ThreadGuard () VSMC_NOEXCEPT {}
-
-    ThreadGuard (ThreadGuard &&other) VSMC_NOEXCEPT :
+    ThreadGuard (ThreadGuard &&other) noexcept :
         thread_(std::move(other.thread_)) {}
 
-    ThreadGuard &operator= (ThreadGuard &&other) VSMC_NOEXCEPT
+    ThreadGuard &operator= (ThreadGuard &&other) noexcept
     {
         thread_ = std::move(other.thread_);
 
         return *this;
     }
 
-    ThreadGuard (std::thread &&thr) VSMC_NOEXCEPT : thread_(std::move(thr)) {}
+    ThreadGuard (std::thread &&thr) noexcept : thread_(std::move(thr)) {}
 
-    ~ThreadGuard () VSMC_NOEXCEPT
+    ~ThreadGuard () noexcept
     {
         if (thread_.joinable())
             thread_.join();

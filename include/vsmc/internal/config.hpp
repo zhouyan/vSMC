@@ -4,11 +4,6 @@
 #include <vsmc/internal/version.hpp>
 #include <vsmc/internal/compiler.hpp>
 
-// exception
-#ifndef VSMC_RUNTIME_ASSERT_AS_EXCEPTION
-#define VSMC_RUNTIME_ASSERT_AS_EXCEPTION 0
-#endif
-
 // nullptr
 
 #ifndef VSMC_NULLPTR
