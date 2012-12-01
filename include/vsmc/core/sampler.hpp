@@ -315,7 +315,7 @@ class Sampler
     typename monitor_map_type::iterator monitor (const std::string &name)
     {
         typename monitor_map_type::iterator iter = monitor_.find(name);
-        VSMC_RUNTIME_ASSERT((iter != monitor.end()),
+        VSMC_RUNTIME_ASSERT((iter != monitor_.end()),
                 "CALL **Sampler::monitor** WITH AN INVALID MONITOR NAME");
 
         return iter;
@@ -327,7 +327,7 @@ class Sampler
             const std::string &name) const
     {
         typename monitor_map_type::const_iterator citer = monitor_.find(name);
-        VSMC_RUNTIME_ASSERT((citer != monitor.cend()),
+        VSMC_RUNTIME_ASSERT((citer != monitor_.cend()),
                 "CALL **Sampler::monitor** WITH AN INVALID MONITOR NAME");
 
         return citer;
