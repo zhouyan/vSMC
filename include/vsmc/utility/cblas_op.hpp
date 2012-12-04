@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+#if VSMC_HAS_CBLAS
+#include VSMC_CBLAS_HEADER
+#endif // VSMC_HAS_CBLAS
+
 namespace vsmc {
 
 template <typename T>
@@ -10,10 +14,21 @@ class DDOT
 {
     public :
 
+#if VSMC_HAS_CBLAS
+    typedef VSMC_CBLAS_INT_TYPE size_type;
+
+    double operator() (const size_type N,
+            const double *X, const int incX,
+            const double *Y, const int incY) const
+    {
+        return cblas_ddot(N, X, incX, Y, incY);
+    }
+#else // VSMC_HAS_CBLAS
     typedef typename traits::SizeTypeTrait<T>::type size_type;
 
-    double operator() (size_type N,
-            const double *X, const int incX, const double *Y, const int incY)
+    double operator() (const size_type N,
+            const double *X, const int incX,
+            const double *Y, const int incY) const
     {
         if (N == 0)
             return 0;
@@ -50,6 +65,7 @@ class DDOT
 
         return res;
     }
+#endif // VSMC_HAS_CBLAS
 }; // class DDOT
 
 template <typename T>
@@ -57,10 +73,44 @@ class DGEMV
 {
     public :
 
+#if VSMC_HAS_CBLAS
+    typedef VSMC_CBLAS_INT_TYPE size_type;
+
+    void operator() (MatrixOrder order, MatrixTranspose trans,
+            const size_type M, const size_type N, const double alpha,
+            const double *A, const int lda,
+            const double *X, const int incX,
+            const double beta, double *Y, const int incY) const
+    {
+        CBLAS_ORDER cblas_order;
+        switch (order) {
+            case RowMajor :
+                cblas_order = CblasRowMajor;
+                break;
+            case ColMajor :
+                cblas_order = CblasColMajor;
+        }
+
+        CBLAS_TRANSPOSE cblas_trans;
+        switch (trans) {
+            case NoTrans :
+                cblas_trans = CblasNoTrans;
+                break;
+            case Trans :
+                cblas_trans = CblasTrans;
+                break;
+            case ConjTrans :
+                cblas_trans = CblasConjTrans;
+                break;
+        }
+        cblas_dgemv(cblas_order, cblas_trans, M, N,
+                alpha, A, lda, X, incX, beta, Y, incY);
+    }
+#else // VSMC_HAS_CBLAS
     typedef typename traits::SizeTypeTrait<T>::type size_type;
 
     void operator() (MatrixOrder order, MatrixTranspose trans,
-            size_type M, size_type N, const double alpha,
+            const size_type M, const size_type N, const double alpha,
             const double *A, const int lda,
             const double *X, const int incX,
             const double beta, double *Y, const int incY) const
@@ -118,6 +168,7 @@ class DGEMV
             VSMC_RUNTIME_ASSERT(false, "INVALID INPUT TO **vsmc::DGEMV**");
         }
     }
+#endif // VSMC_HAS_CBLAS
 }; // class DGEMV
 
 } // namespace vsmc
