@@ -77,6 +77,23 @@ class Monitor
         return index_[iter];
     }
 
+    /// \brief Get the latest Monte Carlo integration record of a given
+    /// variable
+    ///
+    /// \details
+    /// For a `Dim` dimension monitor, `id` shall be 0 to `Dim` - 1
+    double record (unsigned id) const
+    {
+        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
+                ("CALL **Monitor::record** WITH AN INVALID "
+                 "ID NUMBER"));
+        VSMC_RUNTIME_ASSERT((iter_size() > 0),
+                ("CALL **Monitor::record** WITH AN INVALID "
+                 "ITERATION NUMBER"));
+
+        return record_[(iter_size() - 1) * dim_ + id];
+    }
+
     /// \brief Get the Monte Carlo integration record of a given variable and
     /// the monitor iteration
     ///
