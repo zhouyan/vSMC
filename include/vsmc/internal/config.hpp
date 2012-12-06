@@ -94,7 +94,13 @@
 #define VSMC_USE_CL 0
 #endif
 
-// C++ Language features
+// C++11 Language features
+#ifndef VSMC_HAS_CXX11_CONSTEXPR
+#define VSMC_CONSTEXPER constexpr
+#else
+#define VSMC_CONSTEXPER
+#endif
+
 #if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
 #define VSMC_EXPLICIT_OPERATOR explicit
 #else
