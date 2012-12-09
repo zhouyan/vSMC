@@ -49,16 +49,40 @@ struct IsPathEvalImpl : public cxx11::false_type {};
 
 } // namespace vsmc::traits
 
+template <unsigned Dim>
+class StateBaseDim
+{
+    public :
+
+    static VSMC_CONSTEXPR unsigned dim () {return Dim;}
+};
+
+template <>
+class StateBaseDim<Dynamic>
+{
+    public :
+
+    StateBaseDim () : dim_(Dynamic) {}
+
+    unsigned dim () const {return dim_;}
+
+    void resize_dim (unsigned dim) {dim_ = dim;}
+
+    private :
+
+    unsigned dim_;
+};
+
 /// \brief Particle::value_type subtype
 /// \ingroup Base
 template <unsigned Dim, typename T>
-class StateBase
+class StateBase : public StateBaseDim<Dim>
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef T state_type;
-    explicit StateBase (size_type N) : size_(N), dim_(Dim), state_(N * Dim) {}
+    explicit StateBase (size_type N) : size_(N), state_(N * Dim) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
@@ -67,18 +91,13 @@ class StateBase
             this->copy_particle(copy_from[to], to);
     }
 
-    unsigned dim () const
-    {
-        return dim_;
-    }
-
     void resize_dim (unsigned dim)
     {
         VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT);
 
+        StateBaseDim<Dim>::resize_dim(dim);
         state_.resize(dim * size_);
-        dim_ = dim;
     }
 
     size_type size () const
@@ -88,29 +107,29 @@ class StateBase
 
     state_type &state (size_type id, unsigned pos)
     {
-        return state_[id * dim_ + pos];
+        return state_[id * this->dim() + pos];
     }
 
     const state_type &state (size_type id, unsigned pos) const
     {
-        return state_[id * dim_ + pos];
+        return state_[id * this->dim() + pos];
     }
 
     state_type *state (size_type id)
     {
-        return &state_[id * dim_];
+        return &state_[id * this->dim()];
     }
 
     const state_type *state (size_type id) const
     {
-        return &state_[id * dim_];
+        return &state_[id * this->dim()];
     }
 
     template <typename OutputIter>
     OutputIter read_state (unsigned pos, OutputIter first) const
     {
         const T *siter = &state_[pos];
-        for (size_type i = 0; i != size_; ++i, ++first, siter += dim_)
+        for (size_type i = 0; i != size_; ++i, ++first, siter += this->dim())
             *first = *siter;
 
         return first;
@@ -119,7 +138,7 @@ class StateBase
     template <typename OutputIter>
     void read_state_matrix (OutputIter *first) const
     {
-        for (unsigned d = 0; d != dim_; ++d)
+        for (unsigned d = 0; d != this->dim(); ++d)
             read_state(d, first[d]);
     }
 
@@ -131,7 +150,7 @@ class StateBase
                 "MatrixOrder");
 
         if (order == ColMajor)
-            for (unsigned d = 0; d != dim_; ++d)
+            for (unsigned d = 0; d != this->dim(); ++d)
                 first = read_state(d, first);
 
         if (order == RowMajor)
@@ -145,13 +164,12 @@ class StateBase
     void copy_particle (size_type from, size_type to)
     {
         if (from != to)
-            std::copy(state(from), state(from) + dim_, state(to));
+            std::copy(state(from), state(from) + this->dim(), state(to));
     }
 
     private :
 
     size_type size_;
-    unsigned dim_;
     std::vector<T> state_;
 }; // class StateBase
 

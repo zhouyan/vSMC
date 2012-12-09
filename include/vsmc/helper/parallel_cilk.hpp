@@ -32,21 +32,17 @@ class StateCILK : public StateBase<Dim, T>
     public :
 
     typedef StateBase<Dim, T> state_base_type;
-    typedef typename state_base_type::size_type  size_type;
+    typedef typename state_base_type::size_type size_type;
     typedef typename state_base_type::state_type state_type;
 
-    explicit StateCILK (size_type N) : StateBase<Dim, T>(N), size_(N) {}
+    explicit StateCILK (size_type N) : StateBase<Dim, T>(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
     {
-        cilk_for (size_type to = 0; to != size_; ++to)
+        cilk_for (size_type to = 0; to != this->size(); ++to)
             this->copy_particle(copy_from[to], to);
     }
-
-    private :
-
-    size_type size_;
 }; // class StateCILK
 
 /// \brief Sampler<T>::init_type subtype

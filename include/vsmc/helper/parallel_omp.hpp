@@ -38,19 +38,15 @@ class StateOMP : public StateBase<Dim, T>
 #endif
     typedef typename state_base_type::state_type state_type;
 
-    explicit StateOMP (size_type N) : StateBase<Dim, T>(N), size_(N) {}
+    explicit StateOMP (size_type N) : StateBase<Dim, T>(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
     {
 #pragma omp parallel for default(none) shared(copy_from)
-        for (size_type to = 0; to < size_; ++to)
+        for (size_type to = 0; to < this->size(); ++to)
             this->copy_particle(copy_from[to], to);
     }
-
-    private :
-
-    size_type size_;
 }; // class StateOMP
 
 /// \brief Sampler<T>::init_type subtype

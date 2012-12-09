@@ -96,9 +96,9 @@
 
 // C++11 Language features
 #ifndef VSMC_HAS_CXX11_CONSTEXPR
-#define VSMC_CONSTEXPER constexpr
+#define VSMC_CONSTEXPR constexpr
 #else
-#define VSMC_CONSTEXPER
+#define VSMC_CONSTEXPR
 #endif
 
 #if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS

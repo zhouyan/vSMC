@@ -31,21 +31,19 @@ class StateSTD : public StateBase<Dim, T>
     public :
 
     typedef StateBase<Dim, T> state_base_type;
-    typedef typename state_base_type::size_type  size_type;
+    typedef typename state_base_type::size_type size_type;
     typedef typename state_base_type::state_type state_type;
 
-    explicit StateSTD (size_type N) : StateBase<Dim, T>(N), size_(N) {}
+    explicit StateSTD (size_type N) : StateBase<Dim, T>(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
     {
-        thread::parallel_for(thread::BlockedRange<size_type>(0, size_),
+        thread::parallel_for(thread::BlockedRange<size_type>(0, this->size()),
                 copy_work_<IntType>(this, copy_from));
     }
 
     private :
-
-    size_type size_;
 
     template <typename IntType>
     class copy_work_

@@ -31,7 +31,7 @@ class StateSEQ : public StateBase<Dim, T>
     public :
 
     typedef StateBase<Dim, T> state_base_type;
-    typedef typename state_base_type::size_type  size_type;
+    typedef typename state_base_type::size_type size_type;
     typedef typename state_base_type::state_type state_type;
 
     explicit StateSEQ (size_type N) : StateBase<Dim, T>(N) {}
