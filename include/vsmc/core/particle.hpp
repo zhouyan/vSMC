@@ -425,9 +425,11 @@ class Particle
             sp_[0] = SingleParticle<T>(-1, this);
             csp_[0] = ConstSingleParticle<T>(-1, this);
         } else {
-            sp_[0] = SingleParticle<T>(std::numeric_limits<size_type>::max
+            sp_[0] = SingleParticle<T>(
+                    std::numeric_limits<size_type>::max
                     VSMC_MINMAX_NO_EXPANSION (), this);
-            csp_[0] = ConstSingleParticle<T>(std::numeric_limits<size_type>::max
+            csp_[0] = ConstSingleParticle<T>(
+                    std::numeric_limits<size_type>::max
                     VSMC_MINMAX_NO_EXPANSION (), this);
         }
         for (size_type i = 1; i != size_ + 2; ++i) {
