@@ -114,6 +114,31 @@ template <typename T> struct OuterType##Trait                                \
                                                                              \
 } }
 
+#define VSMC_DEFINE_MEMBER_FUNCTION_CHECKER(OuterMF, InnerMF, RT, Args)      \
+namespace vsmc { namespace traits {                                          \
+                                                                             \
+template <typename T>                                                        \
+struct Has##OuterMF##Impl                                                    \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename U, RT (U::*) Args> struct sfinae_;                    \
+    template <typename U> static char test (sfinae_<U, &U::InnerMF> *);      \
+    template <typename U> static char2 test(...);                            \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename T>                                                        \
+struct Has##OuterMF :                                                        \
+    public cxx11::integral_constant<bool, Has##OuterMF##Impl<T>::value>      \
+{};                                                                          \
+                                                                             \
+} }
+
 #define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user)                   \
     VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value),  \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
