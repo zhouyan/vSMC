@@ -158,9 +158,11 @@ class Sampler
     }
 
     /// \brief Set the initialization object of type init_type
-    void init (const init_type &new_init)
+    Sampler<T> &init (const init_type &new_init)
     {
         init_ = new_init;
+
+        return *this;
     }
 
     /// \brief Clear the move queue
@@ -169,30 +171,44 @@ class Sampler
         move_queue_.clear();
     }
 
+    /// \brief Check if move queue is empty
+    bool move_queue_empty () const
+    {
+        return move_queue_.empty();
+    }
+
+    /// \brief Check the size of the move queue
+    unsigned move_queue_size () const
+    {
+        return static_cast<unsigned>(move_queue_.size());
+    }
+
     /// \brief Add a new move
-    void move_queue_push_back (const move_type &new_move)
+    Sampler<T> &move (const move_type &new_move, bool append)
     {
         VSMC_RUNTIME_ASSERT((bool(new_move)),
-                "CALL **Sampler::move_queue_push_back** WITH AN INVALID "
-                "MOVE FUNCTOR");
+                "CALL **Sampler::move** WITH AN INVALID MOVE FUNCTOR");
+        if (!append)
+            move_queue_.clear();
         move_queue_.push_back(new_move);
+
+        return *this;
     }
 
     /// \brief Add a sequence of new moves
     template <typename InputIter>
-    void move_queue_push_back (InputIter first, InputIter last)
+    Sampler<T> &move (InputIter first, InputIter last, bool append)
     {
+        if (!append)
+            move_queue_.clear();
         while (first != last) {
-            move_queue_push_back(*first);
+            VSMC_RUNTIME_ASSERT((bool(new_move)),
+                    "CALL **Sampler::move** WITH AN INVALID MOVE FUNCTOR");
+            move_queue_.push_back(*first);
             ++first;
         }
-    }
 
-    /// \brief Clear the move queue and add a move object of type move_type
-    void move (const move_type &new_move)
-    {
-        move_queue_clear();
-        move_queue_push_back(new_move);
+        return *this;
     }
 
     /// \brief Clear the mcmc queue
@@ -201,30 +217,44 @@ class Sampler
         mcmc_queue_.clear();
     }
 
+    /// \brief Check if mcmc queue is empty
+    bool mcmc_queue_empty () const
+    {
+        return mcmc_queue_.empty();
+    }
+
+    /// \brief Check the size of the mcmc queue
+    unsigned mcmc_queue_size () const
+    {
+        return static_cast<unsigned>(mcmc_queue_.size());
+    }
+
     /// \brief Add a new mcmc
-    void mcmc_queue_push_back (const mcmc_type &new_mcmc)
+    Sampler<T> &mcmc (const mcmc_type &new_mcmc, bool append)
     {
         VSMC_RUNTIME_ASSERT((bool(new_mcmc)),
-                "CALL **Sampler::mcmc_queue_push_back** WITH AN INVALID "
-                "MCMC FUNCTOR");
+                "CALL **Sampler::mcmc** WITH AN INVALID MCMC FUNCTOR");
+        if (!append)
+            mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
+
+        return *this;
     }
 
     /// \brief Add a sequence of new mcmcs
     template <typename InputIter>
-    void mcmc_queue_push_back (InputIter first, InputIter last)
+    Sampler<T> &mcmc (InputIter first, InputIter last, bool append)
     {
+        if (!append)
+            mcmc_queue_.clear();
         while (first != last) {
-            mcmc_queue_push_back(*first);
+            VSMC_RUNTIME_ASSERT((bool(new_mcmc)),
+                    "CALL **Sampler::mcmc** WITH AN INVALID MCMC FUNCTOR");
+            mcmc_queue_.push_back(*first);
             ++first;
         }
-    }
 
-    /// \brief Clear the mcmc queue and add a mcmc object of type mcmc_type
-    void mcmc (const mcmc_type &new_mcmc)
-    {
-        mcmc_queue_clear();
-        mcmc_queue_push_back(new_mcmc);
+        return *this;
     }
 
     /// \brief Initialization
@@ -292,9 +322,11 @@ class Sampler
     ///
     /// \param name The name of the monitor
     /// \param mon The new monitor to be added
-    void monitor (const std::string &name, const Monitor<T> &mon)
+    Sampler<T> &monitor (const std::string &name, const Monitor<T> &mon)
     {
         monitor_.insert(std::make_pair(name, mon));
+
+        return *this;
     }
 
     /// \brief Add a monitor with an evaluation object
@@ -302,12 +334,13 @@ class Sampler
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
-    std::pair<typename monitor_map_type::iterator, bool> monitor (
-            const std::string &name, unsigned dim,
+    Sampler<T> &monitor (const std::string &name, unsigned dim,
             const typename Monitor<T>::eval_type &eval)
     {
-        return monitor_.insert(typename monitor_map_type::value_type(
+        monitor_.insert(typename monitor_map_type::value_type(
                     name, Monitor<T>(dim, eval)));
+
+        return *this;
     }
 
     /// \brief Read and write access to a named monitor through an iterator for
@@ -375,9 +408,11 @@ class Sampler
     /// \brief Set the path sampling evaluation object
     ///
     /// \param eval The evaluation objet of type Path::eval_type
-    void path_sampling (const typename Path<T>::eval_type &eval)
+    Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval)
     {
         path_.set_eval(eval);
+
+        return *this;
     }
 
     /// \brief Path sampling estimate of the logarithm of normalizing constants
