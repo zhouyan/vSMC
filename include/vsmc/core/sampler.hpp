@@ -48,16 +48,21 @@ class Sampler
     }
 
     /// \brief Set resampling method by a Particle<T>::resample_op_type object
-    void resample_scheme (const typename Particle<T>::resample_op_type &res_op)
+    Sampler<T> &resample_scheme (
+            const typename Particle<T>::resample_op_type &res_op)
     {
         particle_.resample_scheme(res_op);
+
+        return *this;
     }
 
     /// \brief Set resampling method by a built-in ResampleScheme scheme
     /// name
-    void resample_scheme (ResampleScheme scheme)
+    Sampler<T> &resample_scheme (ResampleScheme scheme)
     {
         particle_.resample_scheme(scheme);
+
+        return *this;
     }
 
     /// \brief Set resampling method by a scheme name from a collection
@@ -71,9 +76,11 @@ class Sampler
     /// For example, resample_scheme<ResampleScheme, Stratified>() is
     /// equivalent to resample_scheme(Stratified)
     template <typename EnumType, EnumType S>
-    void resample_scheme ()
+    Sampler<T> &resample_scheme ()
     {
         particle_.template resample_scheme<EnumType, S>();
+
+        return *this;
     }
 
     /// \brief Set resampling method by the type of resampling object
@@ -84,9 +91,11 @@ class Sampler
     /// This can be a user defined partial specializing of Resample class
     /// template
     template <typename ResType>
-    void resample_scheme ()
+    Sampler<T> &resample_scheme ()
     {
         particle_.template resample_scheme<ResType>();
+
+        return *this;
     }
 
     /// \brief Get resampling threshold
@@ -96,9 +105,11 @@ class Sampler
     }
 
     /// \brief Set resampling threshold
-    void resample_threshold (double threshold)
+    Sampler<T> &resample_threshold (double threshold)
     {
         threshold_ = threshold;
+
+        return *this;
     }
 
     /// \brief Get ESS of a given iteration, initialization count as iter 0
@@ -166,9 +177,11 @@ class Sampler
     }
 
     /// \brief Clear the move queue
-    void move_queue_clear ()
+    Sampler<T> &move_queue_clear ()
     {
         move_queue_.clear();
+
+        return *this;
     }
 
     /// \brief Check if move queue is empty
@@ -212,9 +225,11 @@ class Sampler
     }
 
     /// \brief Clear the mcmc queue
-    void mcmc_queue_clear ()
+    Sampler<T> &mcmc_queue_clear ()
     {
         mcmc_queue_.clear();
+
+        return *this;
     }
 
     /// \brief Check if mcmc queue is empty
@@ -266,7 +281,7 @@ class Sampler
     /// All histories (ESS, resampled, accept, monitors and path) are clared
     /// before callling the initialization object. Monitors and path's
     /// evaluation objects are untouched.
-    void initialize (void *param = VSMC_NULLPTR)
+    Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
         ess_history_.clear();
         resampled_history_.clear();
@@ -285,6 +300,8 @@ class Sampler
         do_resampling();
         do_monitoring();
         print_progress();
+
+        return *this;
     }
 
     /// \brief Iteration
@@ -293,7 +310,7 @@ class Sampler
     /// Moves performed first. Then ESS/N is compared to the threshold and
     /// possible resampling is performed. Then mcmcs are performed. Then
     /// monitors and path are computed
-    void iterate (unsigned num = 1)
+    Sampler<T> &iterate (unsigned num = 1)
     {
         std::vector<unsigned> accept_count;
         for (unsigned i = 0; i != num; ++i) {
@@ -316,6 +333,8 @@ class Sampler
             accept_history_.push_back(accept_count);
             print_progress();
         }
+
+        return *this;
     }
 
     /// \brief Add a monitor
@@ -388,9 +407,11 @@ class Sampler
     }
 
     /// \brief Erase all monitors
-    void clear_monitor ()
+    Sampler<T> &clear_monitor ()
     {
         monitor_.clear();
+
+        return *this;
     }
 
     /// \brief Read and write access to the Path sampling monitor
@@ -436,7 +457,7 @@ class Sampler
     /// print process. If there is no record at all, then they won't be printed
     /// even set to \b true instead of being printed all as NA's.
     template<typename OutputStream>
-    void print (OutputStream &os = std::cout,
+    Sampler<T> &print (OutputStream &os = std::cout,
             bool print_header = true,
             bool print_path = true, bool print_monitor = true,
             int sampler_id = 0, char sepchar = ',', char nachar = '\0') const
@@ -564,12 +585,16 @@ class Sampler
             if (iter + 1 < iter_size())
                 os << '\n';
         }
+
+        return *this;
     }
 
     /// \brief Set if the sampler shall print dots at each iteration
-    void show_progress (bool show)
+    Sampler<T> &show_progress (bool show)
     {
         show_ = show;
+
+        return *this;
     }
 
     private :
