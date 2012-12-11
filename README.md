@@ -65,8 +65,8 @@ than others. To enable any of these, one need to define specific macros,
 
 # License
 
-The vSMC library is distributed with a Boost license which can be found in the
-`LICENSE` file distributed with the source.
+The vSMC library is distributed with a 2-clause BSD license which can be found
+in the `LICENSE` file distributed with the source.
 
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
