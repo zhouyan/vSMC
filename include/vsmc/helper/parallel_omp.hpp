@@ -43,9 +43,15 @@ class StateOMP : public StateBase<Dim, T>
     template <typename IntType>
     void copy (const IntType *copy_from)
     {
+#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 #pragma omp parallel for default(none) shared(copy_from)
         for (size_type to = 0; to < this->size(); ++to)
             this->copy_particle(copy_from[to], to);
+#else
+#pragma omp parallel for default(none) shared(copy_from)
+        for (size_type to = 0; to < static_cast<size_type>(this->size()); ++to)
+            this->copy_particle(copy_from[to], to);
+#endif
     }
 }; // class StateOMP
 
