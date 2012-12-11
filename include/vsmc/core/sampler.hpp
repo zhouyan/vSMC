@@ -457,7 +457,7 @@ class Sampler
     /// print process. If there is no record at all, then they won't be printed
     /// even set to \b true instead of being printed all as NA's.
     template<typename OutputStream>
-    Sampler<T> &print (OutputStream &os = std::cout,
+    void print (OutputStream &os = std::cout,
             bool print_header = true,
             bool print_path = true, bool print_monitor = true,
             int sampler_id = 0, char sepchar = ',', char nachar = '\0') const
@@ -585,8 +585,6 @@ class Sampler
             if (iter + 1 < iter_size())
                 os << '\n';
         }
-
-        return *this;
     }
 
     /// \brief Set if the sampler shall print dots at each iteration
