@@ -1,5 +1,5 @@
-#ifndef VSMC_HELPER_BASE_HPP
-#define VSMC_HELPER_BASE_HPP
+#ifndef VSMC_SMP_BASE_HPP
+#define VSMC_SMP_BASE_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -9,9 +9,9 @@
                 " WITH INCORRECT **Derived** TEMPLATE PARAMTER")); \
 
 #ifdef NDEBUG
-#define VSMC_HELPER_BASE_DESTRUCTOR_PREFIX
+#define VSMC_SMP_BASE_DESTRUCTOR_PREFIX
 #else
-#define VSMC_HELPER_BASE_DESTRUCTOR_PREFIX virtual
+#define VSMC_SMP_BASE_DESTRUCTOR_PREFIX virtual
 #endif
 
 namespace vsmc {
@@ -184,7 +184,7 @@ class InitializeBase
     InitializeBase (const InitializeBase<T, Derived> &) {}
     InitializeBase<T, Derived> &operator=
         (const InitializeBase<T, Derived> &) {return *this;}
-    VSMC_HELPER_BASE_DESTRUCTOR_PREFIX ~InitializeBase () {}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~InitializeBase () {}
 
     unsigned initialize_state (SingleParticle<T> sp)
     {
@@ -306,7 +306,7 @@ class MoveBase
     MoveBase (const MoveBase<T, Derived> &) {}
     MoveBase<T, Derived> &operator=
         (const MoveBase<T, Derived> &) {return *this;}
-    VSMC_HELPER_BASE_DESTRUCTOR_PREFIX ~MoveBase () {}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MoveBase () {}
 
     unsigned move_state (unsigned iter, SingleParticle<T> sp)
     {
@@ -405,7 +405,7 @@ class MonitorEvalBase
     MonitorEvalBase (const MonitorEvalBase<T, Derived> &) {}
     MonitorEvalBase<T, Derived> &operator=
         (const MonitorEvalBase<T, Derived> &) {return *this;}
-    VSMC_HELPER_BASE_DESTRUCTOR_PREFIX ~MonitorEvalBase () {}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MonitorEvalBase () {}
 
     void monitor_state (unsigned iter, unsigned dim,
             ConstSingleParticle<T> csp, double *res)
@@ -510,7 +510,7 @@ class PathEvalBase
     PathEvalBase (const PathEvalBase<T, Derived> &) {}
     PathEvalBase<T, Derived> &operator=
         (const PathEvalBase<T, Derived> &) {return *this;}
-    VSMC_HELPER_BASE_DESTRUCTOR_PREFIX ~PathEvalBase () {}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~PathEvalBase () {}
 
     double path_state (unsigned iter, ConstSingleParticle<T> csp)
     {
@@ -625,4 +625,4 @@ class PathEvalBase<T, VBase>
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_BASE_HPP
+#endif // VSMC_SMP_BASE_HPP

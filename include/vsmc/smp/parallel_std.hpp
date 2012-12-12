@@ -1,39 +1,32 @@
-#ifndef VSMC_HELPER_PARALLEL_TBB_HPP
-#define VSMC_HELPER_PARALLEL_TBB_HPP
+#ifndef VSMC_SMP_PARALLEL_STD_HPP
+#define VSMC_SMP_PARALLEL_STD_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/helper/base.hpp>
-
-#if defined(__clang__) && !defined(_LIBCPP_VERSION) && (__GLIBCXX__ < 20100429)
-#ifndef TBB_USE_CAPTURED_EXCEPTION
-#define TBB_USE_CAPTURED_EXCEPTION 1
-#endif
-#endif // __clang__
-
-#include <tbb/tbb.h>
+#include <vsmc/smp/base.hpp>
+#include <vsmc/utility/stdtbb.hpp>
 
 namespace vsmc {
 
 namespace traits {
 
 template <>
-struct IsInitializeImpl<InitializeTBB> : public cxx11::true_type {};
+struct IsInitializeImpl<InitializeSTD> : public cxx11::true_type {};
 
 template <>
-struct IsMoveImpl<MoveTBB> : public cxx11::true_type {};
+struct IsMoveImpl<MoveSTD> : public cxx11::true_type {};
 
 template <>
-struct IsMonitorEvalImpl<MonitorEvalTBB> : public cxx11::true_type {};
+struct IsMonitorEvalImpl<MonitorEvalSTD> : public cxx11::true_type {};
 
 template <>
-struct IsPathEvalImpl<PathEvalTBB> : public cxx11::true_type {};
+struct IsPathEvalImpl<PathEvalSTD> : public cxx11::true_type {};
 
 } // namespace vsmc::traits
 
 /// \brief Particle::value_type subtype
-/// \ingroup TBB
+/// \ingroup STD
 template <unsigned Dim, typename T>
-class StateTBB : public StateBase<Dim, T>
+class StateSTD : public StateBase<Dim, T>
 {
     public :
 
@@ -41,12 +34,12 @@ class StateTBB : public StateBase<Dim, T>
     typedef typename state_base_type::size_type size_type;
     typedef typename state_base_type::state_type state_type;
 
-    explicit StateTBB (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateSTD (size_type N) : StateBase<Dim, T>(N) {}
 
     template <typename IntType>
     void copy (const IntType *copy_from)
     {
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+        thread::parallel_for(thread::BlockedRange<size_type>(0, this->size()),
                 copy_work_<IntType>(this, copy_from));
     }
 
@@ -57,10 +50,11 @@ class StateTBB : public StateBase<Dim, T>
     {
         public :
 
-        copy_work_ (StateTBB<Dim, T> *state, const IntType *copy_from) :
+        copy_work_ (StateSTD<Dim, T> *state,
+                const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
-        void operator() (const tbb::blocked_range<size_type> &range) const
+        void operator() (const thread::BlockedRange<size_type> &range) const
         {
             for (size_type to = range.begin(); to != range.end(); ++to)
                 state_->copy_particle(copy_from_[to], to);
@@ -68,15 +62,15 @@ class StateTBB : public StateBase<Dim, T>
 
         private :
 
-        StateTBB<Dim, T> *const state_;
+        StateSTD<Dim, T> *const state_;
         const IntType *const copy_from_;
     }; // class copy_work_
-}; // class StateTBB
+}; // class StateSTD
 
 /// \brief Sampler<T>::init_type subtype
-/// \ingroup TBB
+/// \ingroup STD
 template <typename T, typename Derived>
-class InitializeTBB : public InitializeBase<T, Derived>
+class InitializeSTD : public InitializeBase<T, Derived>
 {
     public :
 
@@ -89,20 +83,21 @@ class InitializeTBB : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         work_ work(this, &particle);
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.value().size()), work);
+        unsigned accept;
+        thread::parallel_accumulate(thread::BlockedRange<size_type>(
+                    0, particle.value().size()), work, accept);
         this->post_processor(particle);
 
-        return work.accept();
+        return accept;
     }
 
     protected :
 
-    InitializeTBB () {}
-    InitializeTBB (const InitializeTBB<T, Derived> &) {}
-    InitializeTBB<T, Derived> &operator=
-        (const InitializeTBB<T, Derived> &) {return *this;}
-    ~InitializeTBB () {}
+    InitializeSTD () {}
+    InitializeSTD (const InitializeSTD<T, Derived> &) {}
+    InitializeSTD<T, Derived> &operator=
+        (const InitializeSTD<T, Derived> &) {return *this;}
+    ~InitializeSTD () {}
 
     private :
 
@@ -110,45 +105,32 @@ class InitializeTBB : public InitializeBase<T, Derived>
     {
         public :
 
-        work_ (InitializeTBB<T, Derived> *init,
+        work_ (InitializeSTD<T, Derived> *init,
                 Particle<T> *particle) :
-            init_(init), particle_(particle), accept_(0) {}
+            init_(init), particle_(particle) {}
 
-        work_ (const work_ &other, tbb::split) :
-            init_(other.init_), particle_(other.particle_), accept_(0) {}
-
-        void operator() (const tbb::blocked_range<size_type> &range)
+        void operator() (const thread::BlockedRange<size_type> &range,
+                unsigned &accept)
         {
-            unsigned acc = accept_;
+            unsigned acc = 0;
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 Particle<T> *const part = particle_;
                 acc += init_->initialize_state(SingleParticle<T>(i, part));
             }
-            accept_ = acc;
-        }
-
-        void join (const work_ &other)
-        {
-            accept_ += other.accept_;
-        }
-
-        unsigned accept () const
-        {
-            return accept_;
+            accept = acc;
         }
 
         private :
 
-        InitializeTBB<T, Derived> *const init_;
+        InitializeSTD<T, Derived> *const init_;
         Particle<T> *const particle_;
-        unsigned accept_;
     }; // class work_
-}; // class InitializeTBB
+}; // class InitializeSTD
 
 /// \brief Sampler<T>::move_type subtype
-/// \ingroup TBB
+/// \ingroup STD
 template <typename T, typename Derived>
-class MoveTBB : public MoveBase<T, Derived>
+class MoveSTD : public MoveBase<T, Derived>
 {
     public :
 
@@ -160,20 +142,21 @@ class MoveTBB : public MoveBase<T, Derived>
     {
         this->pre_processor(iter, particle);
         work_ work(this, iter, &particle);
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.value().size()), work);
+        unsigned accept;
+        thread::parallel_accumulate(thread::BlockedRange<size_type>(
+                    0, particle.value().size()), work, accept);
         this->post_processor(iter, particle);
 
-        return work.accept();
+        return accept;
     }
 
     protected :
 
-    MoveTBB () {}
-    MoveTBB (const MoveTBB<T, Derived> &) {}
-    MoveTBB<T, Derived> &operator=
-        (const MoveTBB<T, Derived> &) {return *this;}
-    ~MoveTBB () {}
+    MoveSTD () {}
+    MoveSTD (const MoveSTD<T, Derived> &) {}
+    MoveSTD<T, Derived> &operator=
+        (const MoveSTD<T, Derived> &) {return *this;}
+    ~MoveSTD () {}
 
     private :
 
@@ -181,47 +164,33 @@ class MoveTBB : public MoveBase<T, Derived>
     {
         public :
 
-        work_ (MoveTBB<T, Derived> *move, unsigned iter,
+        work_ (MoveSTD<T, Derived> *move, unsigned iter,
                 Particle<T> *particle):
-            move_(move), iter_(iter), particle_(particle), accept_(0) {}
+            move_(move), iter_(iter), particle_(particle) {}
 
-        work_ (const work_ &other, tbb::split) :
-            move_(other.move_), iter_(other.iter_),
-            particle_(other.particle_), accept_(0) {}
-
-        void operator() (const tbb::blocked_range<size_type> &range)
+        void operator() (const thread::BlockedRange<size_type> &range,
+                unsigned &accept)
         {
-            unsigned acc = accept_;
+            unsigned acc = 0;
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 Particle<T> *const part = particle_;
                 acc += move_->move_state(iter_, SingleParticle<T>(i, part));
             }
-            accept_ = acc;
-        }
-
-        void join (const work_ &other)
-        {
-            accept_ += other.accept_;
-        }
-
-        unsigned accept () const
-        {
-            return accept_;
+            accept = acc;
         }
 
         private :
 
-        MoveTBB<T, Derived> *const move_;
+        MoveSTD<T, Derived> *const move_;
         const unsigned iter_;
         Particle<T> *const particle_;
-        unsigned accept_;
     }; // class work_
-}; // class MoveTBB
+}; // class MoveSTD
 
 /// \brief Monitor<T>::eval_type subtype
-/// \ingroup TBB
+/// \ingroup STD
 template <typename T, typename Derived>
-class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
+class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 {
     public :
 
@@ -233,7 +202,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
             double *res)
     {
         this->pre_processor(iter, particle);
-        tbb::parallel_for(tbb::blocked_range<size_type>(
+        thread::parallel_for(thread::BlockedRange<size_type>(
                     0, particle.value().size()),
                 work_(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
@@ -241,11 +210,11 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalTBB () {}
-    MonitorEvalTBB (const MonitorEvalTBB<T, Derived> &) {}
-    MonitorEvalTBB<T, Derived> &operator=
-        (const MonitorEvalTBB<T, Derived> &) {return *this;}
-    ~MonitorEvalTBB () {}
+    MonitorEvalSTD () {}
+    MonitorEvalSTD (const MonitorEvalSTD<T, Derived> &) {}
+    MonitorEvalSTD<T, Derived> &operator=
+        (const MonitorEvalSTD<T, Derived> &) {return *this;}
+    ~MonitorEvalSTD () {}
 
     private :
 
@@ -253,13 +222,13 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     {
         public :
 
-        work_ (MonitorEvalTBB<T, Derived> *monitor,
+        work_ (MonitorEvalSTD<T, Derived> *monitor,
                 unsigned iter, unsigned dim,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), iter_(iter), dim_(dim), particle_(particle),
             res_(res) {}
 
-        void operator() (const tbb::blocked_range<size_type> &range) const
+        void operator() (const thread::BlockedRange<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 double *const r = res_ + i * dim_;
@@ -271,18 +240,18 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
         private :
 
-        MonitorEvalTBB<T, Derived> *const monitor_;
+        MonitorEvalSTD<T, Derived> *const monitor_;
         const unsigned iter_;
         const unsigned dim_;
         const Particle<T> *const particle_;
         double *const res_;
     }; // class work_
-}; // class MonitorEvalTBB
+}; // class MonitorEvalSTD
 
 /// \brief Path<T>::eval_type subtype
-/// \ingroup TBB
+/// \ingroup STD
 template <typename T, typename Derived>
-class PathEvalTBB : public PathEvalBase<T, Derived>
+class PathEvalSTD : public PathEvalBase<T, Derived>
 {
     public :
 
@@ -293,7 +262,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        tbb::parallel_for(tbb::blocked_range<size_type>(
+        thread::parallel_for(thread::BlockedRange<size_type>(
                     0, particle.value().size()),
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
@@ -303,11 +272,11 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalTBB () {}
-    PathEvalTBB (const PathEvalTBB<T, Derived> &) {}
-    PathEvalTBB<T, Derived> &operator=
-        (const PathEvalTBB<T, Derived> &) {return *this;}
-    ~PathEvalTBB () {}
+    PathEvalSTD () {}
+    PathEvalSTD (const PathEvalSTD<T, Derived> &) {}
+    PathEvalSTD<T, Derived> &operator=
+        (const PathEvalSTD<T, Derived> &) {return *this;}
+    ~PathEvalSTD () {}
 
     private :
 
@@ -315,11 +284,11 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     {
         public :
 
-        work_ (PathEvalTBB<T, Derived> *path, unsigned iter,
+        work_ (PathEvalSTD<T, Derived> *path, unsigned iter,
                 const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
-        void operator() (const tbb::blocked_range<size_type> &range) const
+        void operator() (const thread::BlockedRange<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 const Particle<T> *const part = particle_;
@@ -330,13 +299,13 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
         private :
 
-        PathEvalTBB<T, Derived> *const path_;
+        PathEvalSTD<T, Derived> *const path_;
         const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;
     }; // class work_
-}; // PathEvalTBB
+}; // PathEvalSTD
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_PARALLEL_TBB_HPP
+#endif // VSMC_SMP_PARALLEL_STD_HPP

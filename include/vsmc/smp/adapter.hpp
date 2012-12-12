@@ -1,5 +1,5 @@
-#ifndef VSMC_HELPER_ADAPTER_HPP
-#define VSMC_HELPER_ADAPTER_HPP
+#ifndef VSMC_SMP_ADAPTER_HPP
+#define VSMC_SMP_ADAPTER_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -266,4 +266,4 @@ class PathEvalAdapter :
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_ADAPTER_HPP
+#endif // VSMC_SMP_ADAPTER_HPP

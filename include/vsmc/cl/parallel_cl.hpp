@@ -1,11 +1,11 @@
-#ifndef VSMC_HELPER_PARALLEL_CL_HPP
-#define VSMC_HELPER_PARALLEL_CL_HPP
+#ifndef VSMC_CL_PARALLEL_CL_HPP
+#define VSMC_CL_PARALLEL_CL_HPP
 
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/rng.hpp>
-#include <vsmc/helper/parallel_cl/cl.hpp>
+#include <vsmc/cl/cl.hpp>
 
 #define VSMC_STATIC_ASSERT_STATE_CL_TYPE(type) \
     VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value \
@@ -347,7 +347,7 @@ class StateCL
             VSMC_SEED_TYPE &seed = VSMC_SEED_TYPE::instance();
             ss << "#define Seed " << seed.get() << "UL\n";
             seed.skip(size_);
-            ss << "#include <vsmc/helper/parallel_cl/common.cl>\n";
+            ss << "#include <vsmc/cl/device.h>\n";
             ss << source << '\n';
             program_ = cl::Program(context_, ss.str());
             program_created_ = true;
@@ -932,4 +932,4 @@ class PathEvalCL
 
 } // namespace vsmc
 
-#endif // VSMC_HELPER_PARALLEL_CL_HPP
+#endif // VSMC_CL_PARALLEL_CL_HPP

@@ -1,5 +1,5 @@
-#ifndef VSMC_HELPER_PARALLEL_CL_QUERY_HPP
-#define VSMC_HELPER_PARALLEL_CL_QUERY_HPP
+#ifndef VSMC_CL_QUERY_HPP
+#define VSMC_CL_QUERY_HPP
 
 #include <vsmc/helper/parallel_cl/cl.hpp>
 #include <iostream>
@@ -453,4 +453,4 @@ basic_ostream<CharT, Traits> &operator<< (
 
 } // namespace std
 
-#endif // VSMC_HELPER_PARALLEL_CL_QUERY_HPP
+#endif // VSMC_CL_QUERY_HPP

@@ -39,7 +39,7 @@ template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 template <typename, template <typename> class> class ParticleIterator;
 
-// Helper
+// SMP
 template <unsigned, typename> class StateBase;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
@@ -80,6 +80,7 @@ template <typename, typename D = VBase> class MoveCILK;
 template <typename, typename D = VBase> class MonitorEvalCILK;
 template <typename, typename D = VBase> class PathEvalCILK;
 
+// OCL
 template <unsigned, typename> class StateCL;
 template <typename> class InitializeCL;
 template <typename> class MoveCL;

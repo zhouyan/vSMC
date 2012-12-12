@@ -8,28 +8,28 @@
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/path.hpp>
 
-#include <vsmc/helper/sequential.hpp>
-#include <vsmc/helper/adapter.hpp>
+#include <vsmc/smp/sequential.hpp>
+#include <vsmc/smp/adapter.hpp>
 
 #if VSMC_USE_CILK
-#include <vsmc/helper/parallel_cilk.hpp>
+#include <vsmc/smp/parallel_cilk.hpp>
 #endif // VSMC_USE_CILK
 
-#if VSMC_USE_CL
-#include <vsmc/helper/parallel_cl.hpp>
-#endif // VSMC_USE_CL
-
 #if VSMC_USE_OMP
-#include <vsmc/helper/parallel_omp.hpp>
+#include <vsmc/smp/parallel_omp.hpp>
 #endif // VSMC_USE_OMP
 
 #if VSMC_USE_TBB
-#include <vsmc/helper/parallel_tbb.hpp>
+#include <vsmc/smp/parallel_tbb.hpp>
 #endif // VSMC_USE_TBB
 
 #if VSMC_USE_STD
-#include <vsmc/helper/parallel_std.hpp>
+#include <vsmc/smp/parallel_std.hpp>
 #endif // VSMC_USE_STD
+
+#if VSMC_USE_CL
+#include <vsmc/cl/parallel_cl.hpp>
+#endif // VSMC_USE_CL
 
 #endif // VSMC_HPP
 
@@ -40,22 +40,22 @@
 /// \ingroup Core
 /// \brief Various resampling methods
 
-/// \defgroup Helper Helper
+/// \defgroup SMP Symmetric Multiprocessing
 /// \brief Single threaded and parallel samplers based on a single particle
 /// operations
 
 /// \defgroup Base Dispatcher
-/// \ingroup Helper
+/// \ingroup SMP
 /// \brief Base class templates that dispatch computing tasks based on
 /// implementations
 
 /// \defgroup Adapter Adapter
-/// \ingroup Helper
+/// \ingroup SMP
 /// \brief Adapter class templates for constructing concrete objects from
 /// implementation base class templates
 
 /// \defgroup Implementation Implementation
-/// \ingroup Helper
+/// \ingroup SMP
 /// \brief Implementation class templates that parallelize user defined
 /// computing tasks
 
@@ -80,7 +80,6 @@
 /// \brief Parallelized samplers with OpenMP
 
 /// \defgroup OpenCL OpenCL
-/// \ingroup Implementation
 /// \brief Parallelized sampler with OpenCL
 
 /// \defgroup Utility Utility

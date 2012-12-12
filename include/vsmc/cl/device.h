@@ -1,5 +1,5 @@
-#ifndef VSMC_HELPER_PARALLEL_CL_COMMON_CL
-#define VSMC_HELPER_PARALLEL_CL_COMMON_CL
+#ifndef VSMC_CL_PARALLEL_CL_H
+#define VSMC_CL_PARALLEL_CL_H
 
 #if VSMC_USE_RANDOM123
 #include <Random123/philox.h>
@@ -18,4 +18,4 @@ void copy (__global state_struct *state, __global size_type *copy_from)
     state[to] = state[copy_from[to]];
 }
 
-#endif // VSMC_HELPER_PARALLEL_CL_COMMON_CL
+#endif // VSMC_CL_PARALLEL_CL_H
