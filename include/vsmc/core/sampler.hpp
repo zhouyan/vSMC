@@ -215,7 +215,7 @@ class Sampler
         if (!append)
             move_queue_.clear();
         while (first != last) {
-            VSMC_RUNTIME_ASSERT((bool(new_move)),
+            VSMC_RUNTIME_ASSERT((bool(*first)),
                     "CALL **Sampler::move** WITH AN INVALID MOVE FUNCTOR");
             move_queue_.push_back(*first);
             ++first;
@@ -263,7 +263,7 @@ class Sampler
         if (!append)
             mcmc_queue_.clear();
         while (first != last) {
-            VSMC_RUNTIME_ASSERT((bool(new_mcmc)),
+            VSMC_RUNTIME_ASSERT((bool(*first)),
                     "CALL **Sampler::mcmc** WITH AN INVALID MCMC FUNCTOR");
             mcmc_queue_.push_back(*first);
             ++first;
