@@ -59,7 +59,7 @@ class StateCL
     explicit StateCL (size_type N) :
         dim_(Dim == Dynamic ? 1 : Dim), size_(N), local_size_(0),
         program_created_(false), build_(false),
-        state_host_(dim_ * N), accept_host_(N)
+        state_host_(dim_ * N), accept_host_(N), time_running_kernel_(0)
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T);
         local_size(0);
@@ -78,11 +78,10 @@ class StateCL
     {
         VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
-        VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(resize_dim);
 
-        clmgr::CLManager &manager = clmgr::CLManager::instance();
+        state_device_ = clmgr::CLManager::instance()
+            .create_buffer<T>(dim * size_);
         state_host_.resize(dim * size_);
-        state_device_ = manager.create_buffer<T>(dim * size_);
         dim_ = dim;
     }
 
@@ -246,9 +245,21 @@ class StateCL
     {
         clmgr::CLManager &manager = clmgr::CLManager::instance();
         manager.command_queue().finish();
+        std::clock_t start = std::clock();
         manager.command_queue().enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
         manager.command_queue().finish();
+        time_running_kernel_ += std::clock() - start;
+    }
+
+    void reset_timer ()
+    {
+        time_running_kernel_ = 0;
+    }
+
+    double time_running_kernel () const
+    {
+        return static_cast<double>(time_running_kernel_) / CLOCKS_PER_SEC;
     }
 
     template<typename IntType>
@@ -286,6 +297,8 @@ class StateCL
     mutable std::vector<cl_uint> accept_host_;
 
     cl::Buffer copy_device_;
+
+    mutable std::clock_t time_running_kernel_;
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype
@@ -577,8 +590,8 @@ class PathEvalCL
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            buffer_device_ = particle.value().template
-                create_buffer<typename T::state_type>(
+            buffer_device_ = clmgr::CLManager::instance()
+                .create_buffer<typename T::state_type>(
                         particle.value().size());
         }
 

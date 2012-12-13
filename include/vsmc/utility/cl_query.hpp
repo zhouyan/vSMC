@@ -1,14 +1,14 @@
-#ifndef VSMC_CL_QUERY_HPP
-#define VSMC_CL_QUERY_HPP
+#ifndef VSMC_UTILITY_CL_QUERY_HPP
+#define VSMC_UTILITY_CL_QUERY_HPP
 
-#include <vsmc/helper/parallel_cl/cl.hpp>
+#include <vsmc/utility/cl.hpp>
 #include <iostream>
 #include <iomanip>
 
-namespace vsmc {
+namespace vsmc { namespace clmgr {
 
 /// \brief Query information of OpenCL devices
-/// \ingroup OpenCL
+/// \ingroup CLMGR
 class QueryCL
 {
     public :
@@ -417,7 +417,7 @@ std::basic_ostream<CharT, Traits> &operator<< (
     return os;
 }
 
-} // namespace vsmc
+} } // namespace vsmc::clmgr
 
 namespace std {
 
@@ -427,7 +427,7 @@ template<typename CharT, typename Traits>
 basic_ostream<CharT, Traits> &operator<< (
         basic_ostream<CharT, Traits> &os, const cl::Platform &plat)
 {
-    vsmc::QueryCL::print(os, plat);
+    vsmc::clmgr::QueryCL::print(os, plat);
     return os;
 }
 
@@ -437,7 +437,7 @@ template<typename CharT, typename Traits>
 basic_ostream<CharT, Traits> &operator<< (
         basic_ostream<CharT, Traits> &os, const cl::Context &ctx)
 {
-    vsmc::QueryCL::print(os, ctx);
+    vsmc::clmgr::QueryCL::print(os, ctx);
     return os;
 }
 
@@ -447,10 +447,10 @@ template<typename CharT, typename Traits>
 basic_ostream<CharT, Traits> &operator<< (
         basic_ostream<CharT, Traits> &os, const cl::Device &dev)
 {
-    vsmc::QueryCL::print(os, dev);
+    vsmc::clmgr::QueryCL::print(os, dev);
     return os;
 }
 
 } // namespace std
 
-#endif // VSMC_CL_QUERY_HPP
+#endif // VSMC_UTILITY_CL_QUERY_HPP

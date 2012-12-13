@@ -185,9 +185,9 @@ IF (OPENCL_FOUND)
         UNSET (VSMC_OPENCL_FOUND CACHE)
         INCLUDE (CheckCXXSourceRuns)
         SET (OPENCL_TEST_SOURCE "
-        #include <vsmc/helper/parallel_cl/query.hpp>
+        #include <vsmc/utility/cl_query.hpp>
         int main () {
-            vsmc::QueryCL q;
+            vsmc::clmgr::QueryCL q;
             std::cout << q << std::endl;
         }")
         SET (SAFE_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
