@@ -6,27 +6,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <typename D>
-class IsBaseOfStateCL
-{
-    private :
-
-    struct char2 {char c1; char c2;};
-    typedef typename cxx11::remove_cv<D>::type derived_type;
-
-    template <unsigned Dim, typename T, typename ID>
-    static char test (StateCL<Dim, T, ID> *);
-    static char2 test (...);
-
-    public :
-
-   enum {value = sizeof(test(static_cast<derived_type *>(0))) == sizeof(char)};
-};
-
-} // namespace vsmc::traits
-
 namespace internal {
 
 template <typename> void set_cl_state_type (std::stringstream &);

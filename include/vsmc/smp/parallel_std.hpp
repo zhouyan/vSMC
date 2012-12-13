@@ -7,22 +7,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <>
-struct IsInitializeImpl<InitializeSTD> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveSTD> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalSTD> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalSTD> : public cxx11::true_type {};
-
-} // namespace vsmc::traits
-
 /// \brief Particle::value_type subtype
 /// \ingroup STD
 template <unsigned Dim, typename T>

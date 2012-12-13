@@ -7,22 +7,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <>
-struct IsInitializeImpl<InitializeOMP> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveOMP> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalOMP> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalOMP> : public cxx11::true_type {};
-
-} // namespace vsmc::traits
-
 /// \brief Particle::value_type subtype
 /// \ingroup OMP
 template <unsigned Dim, typename T>

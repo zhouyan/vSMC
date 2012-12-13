@@ -11,39 +11,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <template <unsigned, typename> class State, typename D>
-class IsBaseOfState
-{
-    private :
-
-    struct char2 {char c1; char c2;};
-    typedef typename cxx11::remove_cv<D>::type derived_type;
-
-    template <unsigned Dim, typename T>
-    static char test (State<Dim, T> *);
-    static char2 test (...);
-
-    public :
-
-   enum {value = sizeof(test(static_cast<derived_type *>(0))) == sizeof(char)};
-};
-
-template <template <typename, typename> class>
-struct IsInitializeImpl : public cxx11::false_type {};
-
-template <template <typename, typename> class>
-struct IsMoveImpl : public cxx11::false_type {};
-
-template <template <typename, typename> class>
-struct IsMonitorEvalImpl : public cxx11::false_type {};
-
-template <template <typename, typename> class>
-struct IsPathEvalImpl : public cxx11::false_type {};
-
-} // namespace vsmc::traits
-
 template <unsigned Dim>
 class StateBaseDim
 {

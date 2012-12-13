@@ -14,22 +14,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <>
-struct IsInitializeImpl<InitializeTBB> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveTBB> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalTBB> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalTBB> : public cxx11::true_type {};
-
-} // namespace vsmc::traits
-
 /// \brief Particle::value_type subtype
 /// \ingroup TBB
 template <unsigned Dim, typename T>

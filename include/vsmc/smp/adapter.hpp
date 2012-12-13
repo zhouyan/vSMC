@@ -5,33 +5,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <typename, template <typename, typename> class,
-         template <typename, template <typename, typename> class, typename>
-             class, typename>
-struct AdapImplTrait;
-
-template <typename T,
-         template <typename, typename> class Impl,
-         template <typename, template <typename, typename> class, typename>
-             class Adapter>
-struct AdapImplTrait<T, Impl, Adapter, VBase>
-{
-    typedef Impl<T, VBase> type;
-};
-
-template <typename T,
-         template <typename, typename> class Impl,
-         template <typename, template <typename, typename> class, typename>
-         class Adapter>
-struct AdapImplTrait<T, Impl, Adapter, CBase>
-{
-    typedef Impl<T, Adapter<T, Impl, CBase> > type;
-};
-
-} // namesapce vsmc::traits
-
 /// \brief Initialize class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl,

@@ -6,22 +6,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <>
-struct IsInitializeImpl<InitializeSEQ> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveSEQ> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalSEQ> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalSEQ> : public cxx11::true_type {};
-
-} // namespace vsmc::traits
-
 #if !VSMC_HAS_CXX11_ALIAS_TEMPLATES
 /// \brief Particle::value_type subtype
 /// \ingroup Sequential

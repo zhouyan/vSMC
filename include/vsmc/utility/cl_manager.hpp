@@ -8,51 +8,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <bool, bool, typename IterType>
-class GetHostPtrDispatch
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        return VSMC_NULLPTR;
-    }
-};
-
-template <typename IterType>
-class GetHostPtrDispatch<true, true, IterType>
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        return (void *) iter;
-    }
-};
-
-template <typename CLType, typename IterType>
-class GetHostPtr
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        typedef typename cxx11::remove_cv<IterType>::type ptr_type;
-        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
-        typedef typename cxx11::remove_cv<val_type>::type host_type;
-        typedef typename cxx11::remove_cv<CLType>::type device_type;
-
-        return GetHostPtrDispatch<
-            cxx11::is_pointer<IterType>::value,
-            cxx11::is_same<host_type, device_type>::value,
-            IterType>::get(iter);
-    }
-};
-
-} // namespace vsmc::traits
-
 namespace opencl {
 
 /// \brief OpenCL Manager
