@@ -80,12 +80,12 @@ class CLManager
         return manager;
     }
 
-    const std::vector<cl::Platform> &platform () const
+    const cl::Platform &platform () const
     {
         return platform_;
     }
 
-    void platform (const std::vector<cl::Platform> &plat)
+    void platform (const cl::Platform &plat)
     {
         platform_ = plat;
         platform_created_ = true;
@@ -112,12 +112,12 @@ class CLManager
         return context_created_;
     }
 
-    const std::vector<cl::Device> &device () const
+    const cl::Device &device () const
     {
         return device_;
     }
 
-    void device (const std::vector<cl::Device> &dev)
+    void device (const cl::Device &dev)
     {
         device_ = dev;
         device_created_ = true;
@@ -126,6 +126,16 @@ class CLManager
     bool device_created () const
     {
         return device_created_;
+    }
+
+    const std::vector<cl::Device> &device_vec () const
+    {
+        return device_vec_;
+    }
+
+    void device_vec (const std::vector<cl::Device> &dev_vec)
+    {
+        device_vec_ = dev_vec;
     }
 
     const cl::CommandQueue &command_queue () const
@@ -146,24 +156,28 @@ class CLManager
 
     void setup (cl_device_type dev_type)
     {
-        if (!platform_created_ || !platform_.size())
-            cl::Platform::get(&platform_);
+        if (platform_vec_.empty())
+            cl::Platform::get(&platform_vec_);
+        if (!platform_created_)
+            platform_ = platform_vec_[0];
         platform_created_ = true;
 
         if (!context_created_) {
             cl_context_properties context_properties[] = {
-                CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_[0])(), 0
+                CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_)(), 0
             };
             context_ = cl::Context(dev_type, context_properties);
         }
         context_created_ = true;
 
+        if (device_vec_.empty())
+            device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
         if (!device_created_)
-            device_= context_.getInfo<CL_CONTEXT_DEVICES>();
+            device_ = device_vec_[0];
         device_created_ = true;
 
         if (!command_queue_created_)
-            command_queue_ = cl::CommandQueue(context_, device_[0], 0);
+            command_queue_ = cl::CommandQueue(context_, device_, 0);
         command_queue_created_ = true;
     }
 
@@ -273,9 +287,11 @@ class CLManager
 
     private :
 
-    std::vector<cl::Platform> platform_;
+    std::vector<cl::Platform> platform_vec_;
+    std::vector<cl::Device> device_vec_;
+    cl::Platform platform_;
     cl::Context context_;
-    std::vector<cl::Device> device_;
+    cl::Device device_;
     cl::CommandQueue command_queue_;
 
     bool platform_created_;
@@ -308,9 +324,11 @@ class CLManager
             try {
                 setup(dev_type[i]);
             } catch (cl::Error) {
-                platform_.clear();
+                platform_vec_.clear();
+                device_vec_.clear();
+                platform_ = cl::Platform();
                 context_ = cl::Context();
-                device_.clear();
+                device_ = cl::Device();
                 command_queue_ = cl::CommandQueue();
 
                 platform_created_ = false;

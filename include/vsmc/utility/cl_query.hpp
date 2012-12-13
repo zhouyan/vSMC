@@ -409,9 +409,8 @@ class QueryCL
 
 /// \brief Print information of all platforms and devices
 /// \ingroup OpenCL
-template<typename CharT, typename Traits>
-std::basic_ostream<CharT, Traits> &operator<< (
-        std::basic_ostream<CharT, Traits> &os, const vsmc::QueryCL &query)
+template<typename OutputStream>
+OutputStream &operator<< (OutputStream &os, const vsmc::clmgr::QueryCL &query)
 {
     query.print(os);
     return os;
@@ -423,9 +422,8 @@ namespace std {
 
 /// \brief Print information of all devices in a given platform
 /// \ingroup OpenCL
-template<typename CharT, typename Traits>
-basic_ostream<CharT, Traits> &operator<< (
-        basic_ostream<CharT, Traits> &os, const cl::Platform &plat)
+template <typename OutputStream>
+OutputStream &operator<< (OutputStream &os, const cl::Platform &plat)
 {
     vsmc::clmgr::QueryCL::print(os, plat);
     return os;
@@ -433,9 +431,8 @@ basic_ostream<CharT, Traits> &operator<< (
 
 /// \brief Print information of all devices in a given context
 /// \ingroup OpenCL
-template<typename CharT, typename Traits>
-basic_ostream<CharT, Traits> &operator<< (
-        basic_ostream<CharT, Traits> &os, const cl::Context &ctx)
+template <typename OutputStream>
+OutputStream &operator<< (OutputStream &os, const cl::Context &ctx)
 {
     vsmc::clmgr::QueryCL::print(os, ctx);
     return os;
@@ -443,9 +440,8 @@ basic_ostream<CharT, Traits> &operator<< (
 
 /// \brief Print information a given device
 /// \ingroup OpenCL
-template<typename CharT, typename Traits>
-basic_ostream<CharT, Traits> &operator<< (
-        basic_ostream<CharT, Traits> &os, const cl::Device &dev)
+template <typename OutputStream>
+OutputStream &operator<< (OutputStream &os, const cl::Device &dev)
 {
     vsmc::clmgr::QueryCL::print(os, dev);
     return os;

@@ -190,8 +190,8 @@ class StateCL
         }
 
         try {
-            program_.build(manager.device(), flags.c_str());
-            program_.getBuildInfo(manager.device()[0], CL_PROGRAM_BUILD_LOG,
+            program_.build(manager.device_vec(), flags.c_str());
+            program_.getBuildInfo(manager.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
         } catch (cl::Error &err) {
             std::string log;
@@ -199,7 +199,7 @@ class StateCL
             std::cerr << "Error: vSMC: OpenCL program Build failed"
                 << std::endl;
             std::cerr << err.err() << " : " << err.what() << std::endl;
-            program_.getBuildInfo(manager.device()[0],
+            program_.getBuildInfo(manager.device(),
                     CL_PROGRAM_BUILD_OPTIONS, &log);
             std::cerr << "===========================" << std::endl;
             std::cerr << "Build options:" << std::endl;
@@ -210,7 +210,7 @@ class StateCL
             std::cerr << "Build source:" << std::endl;
             std::cerr << "---------------------------" << std::endl;
             std::cerr << log << std::endl;
-            program_.getBuildInfo(manager.device()[0], CL_PROGRAM_BUILD_LOG,
+            program_.getBuildInfo(manager.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             std::cerr << "===========================" << std::endl;
             std::cerr << "Build log:" << std::endl;
