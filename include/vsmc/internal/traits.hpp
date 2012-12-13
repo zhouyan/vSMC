@@ -77,7 +77,7 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGEMVType, dgemv_type, DGEMV<T>);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDOTType, ddot_type, DDOT<T>);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngSetType, resample_rng_set_type,
-	RngSetSeq);
+        RngSetSeq);
 
 namespace vsmc { namespace traits {
 
@@ -100,7 +100,7 @@ class IsBaseOfStateImpl
 
 template <template <unsigned, typename> class State, typename D>
 class IsBaseOfState :
-    public cxx11::integral_constant<bool, IsBaseOfStateImpl<State, D>::value> 
+    public cxx11::integral_constant<bool, IsBaseOfStateImpl<State, D>::value>
 {};
 
 template <typename D>
@@ -167,7 +167,7 @@ class GetHostPtr
 };
 
 template <typename, template <typename, typename> class, template <typename,
-	 template <typename, typename> class, typename> class, typename>
+         template <typename, typename> class, typename> class, typename>
 struct AdapImplTrait;
 
 template <typename T, template <typename, typename> class Impl,
