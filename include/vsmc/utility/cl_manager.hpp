@@ -58,7 +58,6 @@ class CLManager
 
     void setup (cl_device_type type)
     {
-        reset_timer();
         setup_ = false;
         std::vector<cl_device_type> dev_type;
         dev_type.push_back(type);
@@ -68,7 +67,6 @@ class CLManager
     void setup (const cl::Platform &plat, const cl::Context &ctx,
             const cl::Device &dev, const cl::CommandQueue &cmd)
     {
-        reset_timer();
         setup_ = false;
         platform_ = plat;
         cl::Platform::get(&platform_vec_);
