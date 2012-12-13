@@ -80,11 +80,6 @@ class CLManager
         return manager;
     }
 
-    const cl::Platform &platform () const
-    {
-        return platform_;
-    }
-
     const std::vector<cl::Platform> &platform_vec () const
     {
         return platform_vec_;
@@ -113,6 +108,29 @@ class CLManager
     bool setup () const
     {
         return setup_;
+    }
+
+    void setup (cl_device_type type)
+    {
+        reset_timer();
+        setup_ = false;
+        std::vector<cl_device_type> dev_type;
+        dev_type.push_back(type);
+        setup_cl_manager(dev_type);
+    }
+
+    void setup (const cl::Platform &plat, const cl::Context &ctx,
+            const cl::Device &dev, const cl::CommandQueue &cmd)
+    {
+        reset_timer();
+        setup_ = false;
+        platform_ = plat;
+        cl::Platform::get(&platform_vec_);
+        context_ = ctx;
+        device_ = dev;
+        device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
+        command_queue_ = cmd;
+        setup_ = true;
     }
 
     template<typename CLType>
@@ -243,27 +261,6 @@ class CLManager
         dev_type.push_back(CL_DEVICE_TYPE_ALL);
         setup_cl_manager(dev_type);
     }
-
-    CLManager (cl_device_type type) :
-        setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
-        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
-        time_reading_buffer_(0), time_writing_buffer_(0)
-    {
-        std::vector<cl_device_type> dev_type;
-        dev_type.push_back(type);
-        setup_cl_manager(dev_type);
-    }
-
-    CLManager (const cl::Platform &plat, const cl::Context &ctx,
-            const cl::Device &dev, const cl::CommandQueue &cmd) :
-        platform_(plat), context_(ctx), device_(dev), command_queue_(cmd),
-        setup_(true), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
-        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
-        time_reading_buffer_(0), time_writing_buffer_(0)
-   {
-       cl::Platform::get(&platform_vec_);
-       device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
-   }
 
     CLManager (const CLManager &);
     CLManager &operator= (const CLManager &);

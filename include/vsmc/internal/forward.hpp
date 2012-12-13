@@ -27,6 +27,12 @@ void parallel_sum (const BlockedRange<S> &, const W &, R &);
 
 } // namespace vsmc::thread
 
+namespace opencl {
+
+class CLManager;
+
+} // namespace vsmc::opencl
+
 // Core module
 class RngSetSeq;
 class RngSetPrl;
