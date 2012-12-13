@@ -2,72 +2,21 @@
 #define VSMC_CL_PARALLEL_CL_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/rng.hpp>
+#include <vsmc/utility/cl_manager.hpp>
 
 #define VSMC_STATIC_ASSERT_STATE_CL_TYPE(type) \
     VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value \
              || cxx11::is_same<type, cl_double>::value), \
             USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
-#define VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(func) \
-    VSMC_RUNTIME_ASSERT((context_created()), ( \
-                "**StateCL::"#func"** can only be called after successful " \
-                "**StateCL::context_created**")); \
-
-#define VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(func) \
-    VSMC_RUNTIME_ASSERT((setup()), ( \
-                "**StateCL::"#func"** can only be called after successful " \
-                "**StateCL::setup**")); \
-
 #define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func) \
     VSMC_RUNTIME_ASSERT((build()), ( \
-                "**StateCL::"#func"** can only be called after successful " \
-                "**StateCL::setup**")); \
+                "**CLManager::"#func"** can only be called after true " \
+                "**CLManager::setup**")); \
 
 namespace vsmc {
 
-namespace traits {
-
-template <bool, bool, typename IterType>
-class GetHostPtrDispatch
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        return VSMC_NULLPTR;
-    }
-};
-
-template <typename IterType>
-class GetHostPtrDispatch<true, true, IterType>
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        return (void *) iter;
-    }
-};
-
-template <typename CLType, typename IterType>
-class GetHostPtr
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        typedef typename cxx11::remove_cv<IterType>::type ptr_type;
-        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
-        typedef typename cxx11::remove_cv<val_type>::type host_type;
-        typedef typename cxx11::remove_cv<CLType>::type device_type;
-
-        return GetHostPtrDispatch<
-            cxx11::is_pointer<IterType>::value,
-            cxx11::is_same<host_type, device_type>::value,
-            IterType>::get(iter);
-    }
-};
+namespace internal {
 
 template <typename> void set_cl_state_type (std::stringstream &);
 
@@ -95,7 +44,7 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
     ss << "#define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53\n";
 }
 
-} // namespace vsmc::traits
+} // namespace vsmc::internal
 
 /// \brief Particle::value_type subtype
 /// \ingroup OpenCL
@@ -114,6 +63,10 @@ class StateCL
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T);
         local_size(0);
+        clmgr::CLManager &manager = clmgr::CLManager::instance();
+        state_device_  = manager.create_buffer<state_type>(dim_ * size_);
+        accept_device_ = manager.create_buffer<state_type>(size_);
+        copy_device_   = manager.create_buffer<size_type>(size_);
     }
 
     unsigned dim () const
@@ -127,30 +80,15 @@ class StateCL
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
         VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(resize_dim);
 
+        clmgr::CLManager &manager = clmgr::CLManager::instance();
         state_host_.resize(dim * size_);
-        state_device_ = create_buffer<T>(dim * size_);
+        state_device_ = manager.create_buffer<T>(dim * size_);
         dim_ = dim;
     }
 
     size_type size () const
     {
         return size_;
-    }
-
-    const cl::Program &program () const
-    {
-        return program_;
-    }
-
-    void program (const cl::Program &prg)
-    {
-        program_ = prg;
-        program_created_ = true;
-    }
-
-    bool program_created () const
-    {
-        return program_created_;
     }
 
     void local_size (size_type lsize)
@@ -190,7 +128,8 @@ class StateCL
 
     const double *state_host () const
     {
-        read_buffer<state_type>(state_device_, dim_ * size_, &state_host_[0]);
+        clmgr::CLManager::instance().read_buffer<state_type>(
+                state_device_, dim_ * size_, &state_host_[0]);
 
         return &state_host_[0];
     }
@@ -202,16 +141,18 @@ class StateCL
 
     const cl_uint *accept_host () const
     {
-        read_buffer<cl_uint>(accept_device_, size_, &accept_host_[0]);
+        clmgr::CLManager::instance().read_buffer<cl_uint>(
+                accept_device_, size_, &accept_host_[0]);
 
         return &accept_host_[0];
     }
 
     void build (const std::string &source, const std::string &flags)
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(build);
         VSMC_RUNTIME_ASSERT((!build_),
                 "**StateCL::build**: Program already build");
+
+        clmgr::CLManager &manager = clmgr::CLManager::instance();
 
         if (!program_created_) {
             std::stringstream ss;
@@ -231,7 +172,7 @@ class StateCL
             ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
             ss << "#endif\n";
 
-            traits::set_cl_state_type<T>(ss);
+            internal::set_cl_state_type<T>(ss);
             ss << "typedef struct state_struct {\n";
             for (unsigned d = 0; d != dim_; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
@@ -245,14 +186,13 @@ class StateCL
             seed.skip(size_);
             ss << "#include <vsmc/cl/device.h>\n";
             ss << source << '\n';
-            program_ = cl::Program(cl::DeviceManager::instance().context(),
-                    ss.str());
+            program_ = manager.create_program(ss.str());
             program_created_ = true;
         }
 
         try {
-            program_.build(device_, flags.c_str());
-            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
+            program_.build(manager.device(), flags.c_str());
+            program_.getBuildInfo(manager.device()[0], CL_PROGRAM_BUILD_LOG,
                     &build_log_);
         } catch (cl::Error &err) {
             std::string log;
@@ -260,7 +200,8 @@ class StateCL
             std::cerr << "Error: vSMC: OpenCL program Build failed"
                 << std::endl;
             std::cerr << err.err() << " : " << err.what() << std::endl;
-            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_OPTIONS, &log);
+            program_.getBuildInfo(manager.device()[0],
+                    CL_PROGRAM_BUILD_OPTIONS, &log);
             std::cerr << "===========================" << std::endl;
             std::cerr << "Build options:" << std::endl;
             std::cerr << "---------------------------" << std::endl;
@@ -270,7 +211,7 @@ class StateCL
             std::cerr << "Build source:" << std::endl;
             std::cerr << "---------------------------" << std::endl;
             std::cerr << log << std::endl;
-            program_.getBuildInfo(device_[0], CL_PROGRAM_BUILD_LOG,
+            program_.getBuildInfo(manager.device()[0], CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             std::cerr << "===========================" << std::endl;
             std::cerr << "Build log:" << std::endl;
@@ -294,12 +235,29 @@ class StateCL
         return build_log_;
     }
 
+    cl::Kernel create_kernel (const std::string &name) const
+    {
+        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel);
+
+        return cl::Kernel(program_, name.c_str());
+    }
+
+    void run_kernel (const cl::Kernel &ker) const
+    {
+        clmgr::CLManager &manager = clmgr::CLManager::instance();
+        manager.command_queue().finish();
+        manager.command_queue().enqueueNDRangeKernel(ker,
+                cl::NullRange, global_nd_range(), local_nd_range());
+        manager.command_queue().finish();
+    }
+
     template<typename IntType>
     void copy (const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel)
+        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(copy);
 
-        write_buffer<size_type>(copy_device_, size_, copy_from);
+        clmgr::CLManager::instance().write_buffer<size_type>(
+                copy_device_, size_, copy_from);
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
         run_kernel(kernel_copy_);
@@ -328,13 +286,6 @@ class StateCL
     mutable std::vector<cl_uint> accept_host_;
 
     cl::Buffer copy_device_;
-
-    void setup_buffer ()
-    {
-        state_device_  = create_buffer<T>(dim_ * size_);
-        accept_device_ = create_buffer<cl_uint>(size_);
-        copy_device_   = create_buffer<size_type>(size_);
-    }
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype
@@ -512,7 +463,7 @@ class MonitorEvalCL
         set_kernel(iter, dim, particle);
         pre_processor(iter, particle);
         particle.value().run_kernel(kernel_);
-        particle.value().template read_buffer<typename T::state_type>(
+        clmgr::CLManager::instance().read_buffer<typename T::state_type>(
                     buffer_device_, particle.value().size() * dim, res);
         post_processor(iter, particle);
     }
@@ -539,8 +490,8 @@ class MonitorEvalCL
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            buffer_device_ = particle.value().template
-                create_buffer<typename T::state_type>(
+            buffer_device_ = clmgr::CLManager::instance()
+                .create_buffer<typename T::state_type>(
                         particle.value().size() * dim);
         }
 
@@ -596,7 +547,7 @@ class PathEvalCL
         set_kernel(iter, particle);
         pre_processor(iter, particle);
         particle.value().run_kernel(kernel_);
-        particle.value().template read_buffer<typename T::state_type>(
+        clmgr::CLManager::instance().read_buffer<typename T::state_type>(
                 buffer_device_, particle.value().size(), res);
         post_processor(iter, particle);
 

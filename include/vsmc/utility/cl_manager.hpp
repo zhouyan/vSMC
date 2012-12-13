@@ -6,13 +6,72 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl.hpp>
 
-namespace vsmc { namespace clmgr {
+#define VSMC_RUNTIME_ASSERT_CL_MANAGER_CONTEXT(func) \
+    VSMC_RUNTIME_ASSERT((context_created()), ( \
+                "**vsmc::CLManager::"#func"** can only be called after true " \
+                "**vsmc::CLManager::context_created**")); \
+
+#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
+    VSMC_RUNTIME_ASSERT((setup()), ( \
+                "**vsmc::CLManager::"#func"** can only be called after true " \
+                "**vsmc::CLManager::setup**")); \
+
+namespace vsmc {
+
+namespace traits {
+
+template <bool, bool, typename IterType>
+class GetHostPtrDispatch
+{
+    public :
+
+    static void *get (IterType iter)
+    {
+        return VSMC_NULLPTR;
+    }
+};
+
+template <typename IterType>
+class GetHostPtrDispatch<true, true, IterType>
+{
+    public :
+
+    static void *get (IterType iter)
+    {
+        return (void *) iter;
+    }
+};
+
+template <typename CLType, typename IterType>
+class GetHostPtr
+{
+    public :
+
+    static void *get (IterType iter)
+    {
+        typedef typename cxx11::remove_cv<IterType>::type ptr_type;
+        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
+        typedef typename cxx11::remove_cv<val_type>::type host_type;
+        typedef typename cxx11::remove_cv<CLType>::type device_type;
+
+        return GetHostPtrDispatch<
+            cxx11::is_pointer<IterType>::value,
+            cxx11::is_same<host_type, device_type>::value,
+            IterType>::get(iter);
+    }
+};
+
+} // namespace vsmc::traits
+
+namespace clmgr {
 
 /// \brief OpenCL Manager
 /// \ingroup CLMGR
 class CLManager
 {
     public :
+
+    typedef std::size_t size_type;
 
     static CLManager &instance ()
     {
@@ -91,17 +150,20 @@ class CLManager
             cl::Platform::get(&platform_);
         platform_created_ = true;
 
-        cl_context_properties context_properties[] = {
-            CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_[0])(), 0
-        };
-        context_ = cl::Context(dev_type, context_properties);
+        if (!context_created_) {
+            cl_context_properties context_properties[] = {
+                CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_[0])(), 0
+            };
+            context_ = cl::Context(dev_type, context_properties);
+        }
         context_created_ = true;
-        setup_buffer();
 
-        device_= context_.getInfo<CL_CONTEXT_DEVICES>();
+        if (!device_created_)
+            device_= context_.getInfo<CL_CONTEXT_DEVICES>();
         device_created_ = true;
 
-        command_queue_ = cl::CommandQueue(context_, device_[0], 0);
+        if (!command_queue_created_)
+            command_queue_ = cl::CommandQueue(context_, device_[0], 0);
         command_queue_created_ = true;
     }
 
@@ -114,7 +176,13 @@ class CLManager
     template<typename CLType>
     cl::Buffer create_buffer (size_type num) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(create_buffer);
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_CONTEXT(create_buffer);
+        VSMC_RUNTIME_ASSERT((num),
+                "ATTEMPT TO CALL vsmc::CLManager::crate_buffer "
+                "WITH ZERO SIZE");
+
+        if (!num)
+            return cl::Buffer();
 
         return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
     }
@@ -122,15 +190,19 @@ class CLManager
     template<typename CLType, typename InputIter>
     cl::Buffer create_buffer (InputIter first, InputIter last) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
 
         size_type num = 0;
         for (InputIter i = first; i != last; ++i)
             ++num;
-        cl::Buffer buf(create_buffer<CLType>(num));
-        if (!num)
-            return buf;
+        VSMC_RUNTIME_ASSERT((num),
+                "ATTEMPT TO CALL vsmc::CLManager::crate_buffer "
+                "WITH ZERO SIZE")
 
+        if (!num)
+            return cl::Buffer();
+
+        cl::Buffer buf(create_buffer<CLType>(num));
         write_buffer<CLType>(buf, num, first);
 
         return buf;
@@ -140,9 +212,9 @@ class CLManager
     void read_buffer (const cl::Buffer &buf, size_type num,
             OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(read_buffer);
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
-        void *host_ptr = internal::GetHostPtr<CLType, OutputIter>::get(first);
+        void *host_ptr = traits::GetHostPtr<CLType, OutputIter>::get(first);
         command_queue_.finish();
         if (host_ptr) {
             command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
@@ -159,9 +231,9 @@ class CLManager
     void write_buffer (const cl::Buffer &buf, size_type num,
             InputIter first) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(write_buffer);
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
-        void *host_ptr = internal::GetHostPtr<CLType, InputIter>::get(first);
+        void *host_ptr = traits::GetHostPtr<CLType, InputIter>::get(first);
         command_queue_.finish();
         if (host_ptr) {
             command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
@@ -174,29 +246,9 @@ class CLManager
         }
     }
 
-    cl::Kernel create_kernel (const std::string &name) const
+    cl::Program create_program (const std::string &source) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel);
-
-        cl::Kernel kernel;
-        try {
-            kernel = cl::Kernel(program_, name.c_str());
-        } catch (cl::Error &err) {
-            std::cerr << "Failed to create kernel: \""
-                << name <<  "\"" << std::endl;
-            std::cerr << err.err() << " : " << err.what() << std::endl;
-            throw err;
-        }
-
-        return kernel;
-    }
-
-    void run_kernel (const cl::Kernel &ker) const
-    {
-        command_queue_.finish();
-        command_queue_.enqueueNDRangeKernel(ker,
-                cl::NullRange, global_nd_range(), local_nd_range());
-        command_queue_.finish();
+        return cl::Program(context_, source);
     }
 
     private :
@@ -262,11 +314,11 @@ class CLManager
     {
         size_type new_bytes = num * sizeof(CLType);
         if (new_bytes > read_buffer_pool_bytes_) {
-            read_buffer_pool_bytes_ = new_bytes;
             std::free(read_buffer_pool_);
-            read_buffer_pool_ = std::malloc(read_buffer_pool_bytes_);
-            if (!read_buffer_pool_ && read_buffer_pool_bytes_)
+            read_buffer_pool_ = std::malloc(new_bytes);
+            if (!read_buffer_pool_ && new_bytes)
                 throw std::bad_alloc();
+            read_buffer_pool_bytes_ = new_bytes;
         }
 
         return reinterpret_cast<CLType *>(read_buffer_pool_);
@@ -277,11 +329,11 @@ class CLManager
     {
         size_type new_bytes = num * sizeof(CLType);
         if (new_bytes > write_buffer_pool_bytes_) {
-            write_buffer_pool_bytes_ = new_bytes;
             std::free(write_buffer_pool_);
-            write_buffer_pool_ = std::malloc(write_buffer_pool_bytes_);
-            if (!write_buffer_pool_ && write_buffer_pool_bytes_)
+            write_buffer_pool_ = std::malloc(new_bytes);
+            if (!write_buffer_pool_ && new_bytes)
                 throw std::bad_alloc();
+            write_buffer_pool_bytes_ = new_bytes;
         }
 
         return reinterpret_cast<CLType *>(write_buffer_pool_);
