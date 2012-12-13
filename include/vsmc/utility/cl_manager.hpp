@@ -384,4 +384,9 @@ class CLManager
 
 } } // namespace vsmc::clmgr
 
+namespace {
+vsmc::clmgr::CLManager &vSMCCLMGRCLManagerInstance =
+    vsmc::clmgr::CLManager::instance();
+}
+
 #endif // VSMC_UTILITY_CL_MANAGER_HPP

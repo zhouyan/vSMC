@@ -56,4 +56,8 @@ class Seed
 
 } // namespace vsmc
 
+namespace {
+vsmc::Seed &vSMCSeedInstance = vsmc::Seed::instance();
+}
+
 #endif // VSMC_UTILITY_SEED_HPP

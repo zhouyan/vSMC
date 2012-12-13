@@ -225,4 +225,9 @@ void parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
 
 } } // namespace vsmc::thread
 
+namespace {
+vsmc::thread::ThreadManager &vSMCThreadThreadManagerInstance =
+    vsmc::thread::ThreadManager::instance();
+}
+
 #endif // VSMC_UTILITY_STDTBB_HPP
