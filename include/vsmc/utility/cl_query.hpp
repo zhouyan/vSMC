@@ -5,10 +5,10 @@
 #include <iostream>
 #include <iomanip>
 
-namespace vsmc { namespace clmgr {
+namespace vsmc { namespace opencl {
 
 /// \brief Query information of OpenCL devices
-/// \ingroup CLMGR
+/// \ingroup OpenCL
 class QueryCL
 {
     public :
@@ -410,13 +410,13 @@ class QueryCL
 /// \brief Print information of all platforms and devices
 /// \ingroup OpenCL
 template<typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const vsmc::clmgr::QueryCL &query)
+OutputStream &operator<< (OutputStream &os, const vsmc::opencl::QueryCL &query)
 {
     query.print(os);
     return os;
 }
 
-} } // namespace vsmc::clmgr
+} } // namespace vsmc::opencl
 
 namespace std {
 
@@ -425,7 +425,7 @@ namespace std {
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const cl::Platform &plat)
 {
-    vsmc::clmgr::QueryCL::print(os, plat);
+    vsmc::opencl::QueryCL::print(os, plat);
     return os;
 }
 
@@ -434,7 +434,7 @@ OutputStream &operator<< (OutputStream &os, const cl::Platform &plat)
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const cl::Context &ctx)
 {
-    vsmc::clmgr::QueryCL::print(os, ctx);
+    vsmc::opencl::QueryCL::print(os, ctx);
     return os;
 }
 
@@ -443,7 +443,7 @@ OutputStream &operator<< (OutputStream &os, const cl::Context &ctx)
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const cl::Device &dev)
 {
-    vsmc::clmgr::QueryCL::print(os, dev);
+    vsmc::opencl::QueryCL::print(os, dev);
     return os;
 }
 

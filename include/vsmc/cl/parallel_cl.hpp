@@ -47,7 +47,7 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 } // namespace vsmc::internal
 
 /// \brief Particle::value_type subtype
-/// \ingroup OpenCL
+/// \ingroup CL
 template <unsigned Dim, typename T>
 class StateCL
 {
@@ -63,7 +63,7 @@ class StateCL
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T);
         local_size(0);
-        clmgr::CLManager &manager = clmgr::CLManager::instance();
+        opencl::CLManager &manager = opencl::CLManager::instance();
         state_device_  = manager.create_buffer<state_type>(dim_ * size_);
         accept_device_ = manager.create_buffer<state_type>(size_);
         copy_device_   = manager.create_buffer<size_type>(size_);
@@ -79,7 +79,7 @@ class StateCL
         VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
 
-        state_device_ = clmgr::CLManager::instance()
+        state_device_ = opencl::CLManager::instance()
             .create_buffer<T>(dim * size_);
         state_host_.resize(dim * size_);
         dim_ = dim;
@@ -127,7 +127,7 @@ class StateCL
 
     const double *state_host () const
     {
-        clmgr::CLManager::instance().read_buffer<state_type>(
+        opencl::CLManager::instance().read_buffer<state_type>(
                 state_device_, dim_ * size_, &state_host_[0]);
 
         return &state_host_[0];
@@ -140,7 +140,7 @@ class StateCL
 
     const cl_uint *accept_host () const
     {
-        clmgr::CLManager::instance().read_buffer<cl_uint>(
+        opencl::CLManager::instance().read_buffer<cl_uint>(
                 accept_device_, size_, &accept_host_[0]);
 
         return &accept_host_[0];
@@ -151,7 +151,7 @@ class StateCL
         VSMC_RUNTIME_ASSERT((!build_),
                 "**StateCL::build**: Program already build");
 
-        clmgr::CLManager &manager = clmgr::CLManager::instance();
+        opencl::CLManager &manager = opencl::CLManager::instance();
 
         if (!program_created_) {
             std::stringstream ss;
@@ -243,7 +243,7 @@ class StateCL
 
     void run_kernel (const cl::Kernel &ker) const
     {
-        clmgr::CLManager &manager = clmgr::CLManager::instance();
+        opencl::CLManager &manager = opencl::CLManager::instance();
         manager.command_queue().finish();
         std::clock_t start = std::clock();
         manager.command_queue().enqueueNDRangeKernel(ker,
@@ -267,7 +267,7 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(copy);
 
-        clmgr::CLManager::instance().write_buffer<size_type>(
+        opencl::CLManager::instance().write_buffer<size_type>(
                 copy_device_, size_, copy_from);
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
@@ -302,7 +302,7 @@ class StateCL
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype
-/// \ingroup OpenCL
+/// \ingroup CL
 template <typename T>
 class InitializeCL
 {
@@ -381,7 +381,7 @@ class InitializeCL
 }; // class InitializeCL
 
 /// \brief Sampler<T>::move_type subtype
-/// \ingroup OpenCL
+/// \ingroup CL
 template <typename T>
 class MoveCL
 {
@@ -459,7 +459,7 @@ class MoveCL
 }; // class MoveCL
 
 /// \brief Monitor<T>::eval_type subtype
-/// \ingroup OpenCL
+/// \ingroup CL
 template <typename T>
 class MonitorEvalCL
 {
@@ -476,7 +476,7 @@ class MonitorEvalCL
         set_kernel(iter, dim, particle);
         pre_processor(iter, particle);
         particle.value().run_kernel(kernel_);
-        clmgr::CLManager::instance().read_buffer<typename T::state_type>(
+        opencl::CLManager::instance().read_buffer<typename T::state_type>(
                     buffer_device_, particle.value().size() * dim, res);
         post_processor(iter, particle);
     }
@@ -503,7 +503,7 @@ class MonitorEvalCL
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            buffer_device_ = clmgr::CLManager::instance()
+            buffer_device_ = opencl::CLManager::instance()
                 .create_buffer<typename T::state_type>(
                         particle.value().size() * dim);
         }
@@ -543,7 +543,7 @@ class MonitorEvalCL
 }; // class MonitorEvalCL
 
 /// \brief Path<T>::eval_type subtype
-/// \ingroup OpenCL
+/// \ingroup CL
 template <typename T>
 class PathEvalCL
 {
@@ -560,7 +560,7 @@ class PathEvalCL
         set_kernel(iter, particle);
         pre_processor(iter, particle);
         particle.value().run_kernel(kernel_);
-        clmgr::CLManager::instance().read_buffer<typename T::state_type>(
+        opencl::CLManager::instance().read_buffer<typename T::state_type>(
                 buffer_device_, particle.value().size(), res);
         post_processor(iter, particle);
 
@@ -590,7 +590,7 @@ class PathEvalCL
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            buffer_device_ = clmgr::CLManager::instance()
+            buffer_device_ = opencl::CLManager::instance()
                 .create_buffer<typename T::state_type>(
                         particle.value().size());
         }

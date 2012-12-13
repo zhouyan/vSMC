@@ -63,10 +63,10 @@ class GetHostPtr
 
 } // namespace vsmc::traits
 
-namespace clmgr {
+namespace opencl {
 
 /// \brief OpenCL Manager
-/// \ingroup CLMGR
+/// \ingroup OpenCL
 class CLManager
 {
     public :
@@ -382,11 +382,11 @@ class CLManager
     }
 }; // clss CLManager
 
-} } // namespace vsmc::clmgr
+} } // namespace vsmc::opencl
 
 namespace {
-vsmc::clmgr::CLManager &vSMCCLMGRCLManagerInstance =
-    vsmc::clmgr::CLManager::instance();
+vsmc::opencl::CLManager &vSMCOpenCLCLManagerInstance =
+    vsmc::opencl::CLManager::instance();
 }
 
 #endif // VSMC_UTILITY_CL_MANAGER_HPP
