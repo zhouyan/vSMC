@@ -8,23 +8,23 @@
 
 // Runtime assertion
 #if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
-#define VSMC_RUNTIME_ASSERT(cond, msg)  \
-{                                       \
-    if (!(cond)) {                      \
-        throw vsmc::RuntimeAssert(msg); \
-    };                                  \
+#define VSMC_RUNTIME_ASSERT(cond, msg)                                       \
+{                                                                            \
+    if (!(cond)) {                                                           \
+        throw vsmc::RuntimeAssert(msg);                                      \
+    };                                                                       \
 }
 #elif defined(NDEBUG) // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg)
 #else
-#define VSMC_RUNTIME_ASSERT(cond, msg)                       \
-{                                                            \
-    if (!(cond)) {                                           \
-        std::cerr                                            \
-            << "vSMC runtime assertion failed:" << std::endl \
-            << msg << std::endl;                             \
-    };                                                       \
-    assert(cond);                                            \
+#define VSMC_RUNTIME_ASSERT(cond, msg)                                       \
+{                                                                            \
+    if (!(cond)) {                                                           \
+        std::cerr                                                            \
+            << "vSMC runtime assertion failed:" << std::endl                 \
+            << msg << std::endl;                                             \
+    };                                                                       \
+    assert(cond);                                                            \
 }
 #endif // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 
@@ -80,53 +80,48 @@ class StaticAssert<true>
 
 } // namespace vsmc
 
-#define VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(type) \
-    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value \
-             || cxx11::is_same<type, cl_double>::value), \
-            USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
-
-#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfStateCL<derived>::value),\
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
-
-#define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func) \
-    VSMC_RUNTIME_ASSERT((build()), ( \
-                "**StateCL::"#func"** can only be called after true " \
-                "**StateCL::build**")); \
-
-#define VSMC_CONST_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT \
-    VSMC_RUNTIME_ASSERT(particle_ptr_,                              \
-            ("A **ConstSingleParticle** object "                    \
-             "is contructed with 0 **Particle** pointer"));         \
-    VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()), \
-            ("A **ConstSignleParticle** object "                    \
-             "is contructed with an out of range id"));
-
-#define VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT \
-    VSMC_RUNTIME_ASSERT(particle_ptr_,                              \
-            ("A **SingleParticle** object "                         \
-             "is contructed with 0 **Particle** pointer"));         \
-    VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()), \
-            ("A **SignleParticle** object "                         \
-             "is contructed with an out of range id"));
-
 #define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user)                   \
     VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value),  \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
 
-#define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename) \
-    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)), ( \
-                "DERIVED FROM " #basename \
-                " WITH INCORRECT **Derived** TEMPLATE PARAMTER")); \
+#define VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(type)                         \
+    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value                \
+             || cxx11::is_same<type, cl_double>::value),                     \
+            USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_CONTEXT(func) \
-    VSMC_RUNTIME_ASSERT((context_created()), ( \
-                "**vsmc::CLManager::"#func"** can only be called after true " \
-                "**vsmc::CLManager::context_created**")); \
+#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                      \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfStateCL<derived>::value),      \
+            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
-    VSMC_RUNTIME_ASSERT((setup()), ( \
-                "**vsmc::CLManager::"#func"** can only be called after true " \
-                "**vsmc::CLManager::setup**")); \
+#define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func)                             \
+    VSMC_RUNTIME_ASSERT((build()), (                                         \
+                "**StateCL::"#func"** can only be called after true "        \
+                "**StateCL::build**"));
+
+#define VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID                      \
+    VSMC_RUNTIME_ASSERT(particle_ptr_,                                       \
+            ("A **ConstSingleParticle** object "                             \
+             "is contructed with 0 **Particle** pointer"));                  \
+    VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),          \
+            ("A **ConstSignleParticle** object "                             \
+             "is contructed with an out of range id"));
+
+#define VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID                            \
+    VSMC_RUNTIME_ASSERT(particle_ptr_,                                       \
+            ("A **SingleParticle** object "                                  \
+             "is contructed with 0 **Particle** pointer"));                  \
+    VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),          \
+            ("A **SignleParticle** object "                                  \
+             "is contructed with an out of range id"));
+
+#define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename)                           \
+    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)), (                   \
+                "DERIVED FROM " #basename                                    \
+                " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
+
+#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func)                           \
+    VSMC_RUNTIME_ASSERT((setup()), (                                         \
+                "**vsmc::CLManager::"#func"** can only be called after true "\
+                "**vsmc::CLManager::setup**"));
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

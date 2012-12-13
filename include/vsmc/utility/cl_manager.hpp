@@ -82,7 +82,7 @@ class CLManager
     template<typename CLType>
     cl::Buffer create_buffer (size_type num) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_CONTEXT(create_buffer);
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
         VSMC_RUNTIME_ASSERT((num),
                 "ATTEMPT TO CALL vsmc::CLManager::crate_buffer "
                 "WITH ZERO SIZE");
@@ -126,7 +126,7 @@ class CLManager
         if (host_ptr) {
             command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
                     host_ptr);
-	    return first + num;
+            return first + num;
         } else {
             CLType *temp = read_buffer_pool<CLType>(num);
             command_queue_.enqueueReadBuffer(buf, 1, 0,
@@ -156,7 +156,7 @@ class CLManager
         }
         time_writing_buffer_ += std::clock() - start;
 
-	return first + num;
+        return first + num;
     }
 
     void reset_timer ()

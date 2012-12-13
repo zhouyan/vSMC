@@ -254,28 +254,28 @@ class ConstSingleParticle
 
     double weight () const
     {
-        VSMC_CONST_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_->weight()[id_];
     }
 
     double log_weight () const
     {
-        VSMC_CONST_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_->log_weight()[id_];
     }
 
     const particle_type &particle () const
     {
-        VSMC_CONST_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID;
 
         return *particle_ptr_;
     }
 
     particle_ptr_type particle_ptr () const
     {
-        VSMC_CONST_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_;
     }
@@ -323,42 +323,42 @@ class SingleParticle
         typename traits::StateTypeTrait<T>::type>::type
     &state (UIntType pos) const
     {
-        VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_->value().state(id_, pos);
     }
 
     double weight () const
     {
-        VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_->weight()[id_];
     }
 
     double log_weight () const
     {
-        VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_->log_weight()[id_];
     }
 
     const particle_type &particle () const
     {
-        VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
 
         return *particle_ptr_;
     }
 
     particle_ptr_type particle_ptr () const
     {
-        VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_;
     }
 
     rng_type &rng () const
     {
-        VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT;
+        VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_->rng(id_);
     }
