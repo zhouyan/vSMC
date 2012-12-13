@@ -9,14 +9,14 @@ namespace vsmc {
 /// \brief Weight set class
 /// \ingroup Core
 template <typename T>
-class WeightSetBase
+class WeightSet
 {
     public :
 
     typedef typename traits::SizeTypeTrait<T>::type size_type;
     typedef typename traits::DDOTTypeTrait<T>::type ddot_type;
 
-    explicit WeightSetBase (size_type N) :
+    explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
     /// \brief Read normalized weights through an output iterator
@@ -43,7 +43,7 @@ class WeightSetBase
         const double *const wptr = &weight_[0];
         VSMC_RUNTIME_ASSERT(
                 (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_)),
-                "The destination of **WeightBase::read_weight** is "
+                "The destination of **WeightSet::read_weight** is "
                 "overlapping with the source.\n"
                 "How did you get this address?");
         std::memcpy(first, wptr, sizeof(double) * size_);
@@ -75,7 +75,7 @@ class WeightSetBase
         const double *const lwptr = &log_weight_[0];
         VSMC_RUNTIME_ASSERT(
                 (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_)),
-                "The destination of **WeightBase::read_weight** is "
+                "The destination of **WeightSet::read_weight** is "
                 "overlapping with the source.\n"
                 "How did you get this address?");
         std::memcpy(first, lwptr, sizeof(double) * size_);
@@ -133,7 +133,7 @@ class WeightSetBase
         double *const wptr = &weight_[0];
         VSMC_RUNTIME_ASSERT(
                 (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_)),
-                "The source of **WeightBase::set_weight** is "
+                "The source of **WeightSet::set_weight** is "
                 "overlapping with the destination.\n"
                 "How did you get this address?");
         std::memcpy(wptr, first, sizeof(double) * size_);
@@ -193,7 +193,7 @@ class WeightSetBase
         double *const lwptr = &log_weight_[0];
         VSMC_RUNTIME_ASSERT(
                 (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_)),
-                "The source of **WeightBase::set_log_weight** is "
+                "The source of **WeightSet::set_log_weight** is "
                 "overlapping with the destination.\n"
                 "How did you get this address?");
         std::memcpy(lwptr, first, sizeof(double) * size_);
@@ -276,11 +276,10 @@ class WeightSetBase
         ess_ = 1 / ddot_(static_cast<typename ddot_type::size_type>(size_),
                 &weight_[0], 1, &weight_[0], 1);
     }
-}; // class WeightSetBase
+}; // class WeightSet
 
 } // namespace vsmc
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type,
-        WeightSetBase<T>);
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet<T>);
 
 #endif // VSMC_CORE_WEIGHT_HPP
