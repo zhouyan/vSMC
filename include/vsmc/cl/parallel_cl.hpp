@@ -1,11 +1,8 @@
 #ifndef VSMC_CL_PARALLEL_CL_HPP
 #define VSMC_CL_PARALLEL_CL_HPP
 
-#define __CL_ENABLE_EXCEPTIONS
-
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/rng.hpp>
-#include <vsmc/cl/cl.hpp>
 
 #define VSMC_STATIC_ASSERT_STATE_CL_TYPE(type) \
     VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value \
@@ -29,7 +26,7 @@
 
 namespace vsmc {
 
-namespace internal {
+namespace traits {
 
 template <bool, bool, typename IterType>
 class GetHostPtrDispatch
@@ -98,7 +95,7 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
     ss << "#define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53\n";
 }
 
-} // namespace vsmc::internal
+} // namespace vsmc::traits
 
 /// \brief Particle::value_type subtype
 /// \ingroup OpenCL
@@ -111,23 +108,12 @@ class StateCL
     typedef T state_type;
 
     explicit StateCL (size_type N) :
-        dim_(Dim > 0 ? Dim : 1), size_(N), local_size_(0),
-        read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
-        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
-        platform_created_(false), context_created_(false),
-        device_created_(false), command_queue_created_(false),
+        dim_(Dim == Dynamic ? 1 : Dim), size_(N), local_size_(0),
         program_created_(false), build_(false),
-        state_host_(dim_ * N), accept_host_(N),
-        time_run_kernel_(0), time_read_buffer_(0), time_write_buffer_(0)
+        state_host_(dim_ * N), accept_host_(N)
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T);
         local_size(0);
-    }
-
-    virtual ~StateCL ()
-    {
-        std::free(read_buffer_pool_);
-        std::free(write_buffer_pool_);
     }
 
     unsigned dim () const
@@ -149,70 +135,6 @@ class StateCL
     size_type size () const
     {
         return size_;
-    }
-
-    const std::vector<cl::Platform> &platform () const
-    {
-        return platform_;
-    }
-
-    void platform (const std::vector<cl::Platform> &plat)
-    {
-        platform_ = plat;
-        platform_created_ = true;
-    }
-
-    bool platform_created () const
-    {
-        return platform_created_;
-    }
-
-    const cl::Context &context () const
-    {
-        return context_;
-    }
-
-    void context (const cl::Context &ctx)
-    {
-        context_ = ctx;
-        context_created_ = true;
-        setup_buffer();
-    }
-
-    bool context_created () const
-    {
-        return context_created_;
-    }
-
-    const std::vector<cl::Device> &device () const
-    {
-        return device_;
-    }
-
-    void device (const std::vector<cl::Device> &dev)
-    {
-        device_ = dev;
-    }
-
-    bool device_created () const
-    {
-        return device_created_;
-    }
-
-    const cl::CommandQueue &command_queue () const
-    {
-        return command_queue_;
-    }
-
-    void command_queue (const cl::CommandQueue &queue)
-    {
-        command_queue_ = queue;
-        command_queue_created_ = true;
-    }
-
-    bool command_queue_created () const
-    {
-        return command_queue_created_;
     }
 
     const cl::Program &program () const
@@ -285,32 +207,6 @@ class StateCL
         return &accept_host_[0];
     }
 
-    void setup (cl_device_type dev_type)
-    {
-        if (!platform_created_ || !platform_.size())
-            cl::Platform::get(&platform_);
-        platform_created_ = true;
-
-        cl_context_properties context_properties[] = {
-            CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_[0])(), 0
-        };
-        context_ = cl::Context(dev_type, context_properties);
-        context_created_ = true;
-        setup_buffer();
-
-        device_= context_.getInfo<CL_CONTEXT_DEVICES>();
-        device_created_ = true;
-
-        command_queue_ = cl::CommandQueue(context_, device_[0], 0);
-        command_queue_created_ = true;
-    }
-
-    bool setup () const
-    {
-        return platform_created_ && context_created_ && device_created_ &&
-            command_queue_created_;
-    }
-
     void build (const std::string &source, const std::string &flags)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(build);
@@ -335,7 +231,7 @@ class StateCL
             ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
             ss << "#endif\n";
 
-            internal::set_cl_state_type<T>(ss);
+            traits::set_cl_state_type<T>(ss);
             ss << "typedef struct state_struct {\n";
             for (unsigned d = 0; d != dim_; ++d)
                 ss << "state_type param" << d + 1 << ";\n";
@@ -349,7 +245,8 @@ class StateCL
             seed.skip(size_);
             ss << "#include <vsmc/cl/device.h>\n";
             ss << source << '\n';
-            program_ = cl::Program(context_, ss.str());
+            program_ = cl::Program(cl::DeviceManager::instance().context(),
+                    ss.str());
             program_created_ = true;
         }
 
@@ -397,100 +294,6 @@ class StateCL
         return build_log_;
     }
 
-    template<typename CLType>
-    cl::Buffer create_buffer (size_type num) const
-    {
-        VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(create_buffer);
-
-        return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
-    }
-
-    template<typename CLType, typename InputIter>
-    cl::Buffer create_buffer (InputIter first, InputIter last) const
-    {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(create_buffer);
-
-        size_type num = 0;
-        for (InputIter i = first; i != last; ++i)
-            ++num;
-        cl::Buffer buf(create_buffer<CLType>(num));
-        if (!num)
-            return buf;
-
-        write_buffer<CLType>(buf, num, first);
-
-        return buf;
-    }
-
-    template <typename CLType, typename OutputIter>
-    void read_buffer (const cl::Buffer &buf, size_type num,
-            OutputIter first) const
-    {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(read_buffer);
-
-        void *host_ptr = internal::GetHostPtr<CLType, OutputIter>::get(first);
-        command_queue_.finish();
-        std::clock_t start = std::clock();
-        if (host_ptr) {
-            command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
-                    host_ptr);
-        } else {
-            CLType *temp = read_buffer_pool<CLType>(num);
-            command_queue_.enqueueReadBuffer(buf, 1, 0,
-                    sizeof(CLType) * num, (void *) temp);
-            std::copy(temp, temp + num, first);
-        }
-        time_read_buffer_ += std::clock() - start;
-    }
-
-    template <typename CLType, typename InputIter>
-    void write_buffer (const cl::Buffer &buf, size_type num,
-            InputIter first) const
-    {
-        VSMC_RUNTIME_ASSERT_STATE_CL_SETUP(write_buffer);
-
-        void *host_ptr = internal::GetHostPtr<CLType, InputIter>::get(first);
-        command_queue_.finish();
-        std::clock_t start = std::clock();
-        if (host_ptr) {
-            command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
-                    host_ptr);
-        } else {
-            CLType *temp = write_buffer_pool<CLType>(num);
-            std::copy(first, first + num, temp);
-            command_queue_.enqueueWriteBuffer(buf, 1, 0,
-                    sizeof(CLType) * num, (void *) temp);
-        }
-        time_write_buffer_ += std::clock() - start;
-    }
-
-    cl::Kernel create_kernel (const std::string &name) const
-    {
-        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel);
-
-        cl::Kernel kernel;
-        try {
-            kernel = cl::Kernel(program_, name.c_str());
-        } catch (cl::Error &err) {
-            std::cerr << "Failed to create kernel: \""
-                << name <<  "\"" << std::endl;
-            std::cerr << err.err() << " : " << err.what() << std::endl;
-            throw err;
-        }
-
-        return kernel;
-    }
-
-    void run_kernel (const cl::Kernel &ker) const
-    {
-        command_queue_.finish();
-        std::clock_t start = std::clock();
-        command_queue_.enqueueNDRangeKernel(ker,
-                cl::NullRange, global_nd_range(), local_nd_range());
-        command_queue_.finish();
-        time_run_kernel_ += std::clock() - start;
-    }
-
     template<typename IntType>
     void copy (const IntType *copy_from)
     {
@@ -502,50 +305,15 @@ class StateCL
         run_kernel(kernel_copy_);
     }
 
-    void reset_timer ()
-    {
-        time_run_kernel_ = 0;
-        time_read_buffer_ = 0;
-        time_write_buffer_ = 0;
-    }
-
-    double time_run_kernel ()
-    {
-        return time_run_kernel_ / static_cast<double>(CLOCKS_PER_SEC);
-    }
-
-    double time_read_buffer ()
-    {
-        return time_read_buffer_ / static_cast<double>(CLOCKS_PER_SEC);
-    }
-
-    double time_write_buffer ()
-    {
-        return time_write_buffer_ / static_cast<double>(CLOCKS_PER_SEC);
-    }
-
     private :
 
     unsigned dim_;
     size_type size_;
     size_type local_size_;
 
-    mutable size_type read_buffer_pool_bytes_;
-    mutable size_type write_buffer_pool_bytes_;
-    mutable void *read_buffer_pool_;
-    mutable void *write_buffer_pool_;
-
-    std::vector<cl::Platform> platform_;
-    cl::Context context_;
-    std::vector<cl::Device> device_;
-    cl::CommandQueue command_queue_;
     cl::Program program_;
     cl::Kernel kernel_copy_;
 
-    bool platform_created_;
-    bool context_created_;
-    bool device_created_;
-    bool command_queue_created_;
     bool program_created_;
     bool build_;
     std::string build_log_;
@@ -561,45 +329,11 @@ class StateCL
 
     cl::Buffer copy_device_;
 
-    mutable std::clock_t time_run_kernel_;
-    mutable std::clock_t time_read_buffer_;
-    mutable std::clock_t time_write_buffer_;
-
     void setup_buffer ()
     {
         state_device_  = create_buffer<T>(dim_ * size_);
         accept_device_ = create_buffer<cl_uint>(size_);
         copy_device_   = create_buffer<size_type>(size_);
-    }
-
-    template <typename CLType>
-    CLType *read_buffer_pool (size_type num) const
-    {
-        size_type new_bytes = num * sizeof(CLType);
-        if (new_bytes > read_buffer_pool_bytes_) {
-            read_buffer_pool_bytes_ = new_bytes;
-            std::free(read_buffer_pool_);
-            read_buffer_pool_ = std::malloc(read_buffer_pool_bytes_);
-            if (!read_buffer_pool_ && read_buffer_pool_bytes_)
-                throw std::bad_alloc();
-        }
-
-        return reinterpret_cast<CLType *>(read_buffer_pool_);
-    }
-
-    template <typename CLType>
-    CLType *write_buffer_pool (size_type num) const
-    {
-        size_type new_bytes = num * sizeof(CLType);
-        if (new_bytes > write_buffer_pool_bytes_) {
-            write_buffer_pool_bytes_ = new_bytes;
-            std::free(write_buffer_pool_);
-            write_buffer_pool_ = std::malloc(write_buffer_pool_bytes_);
-            if (!write_buffer_pool_ && write_buffer_pool_bytes_)
-                throw std::bad_alloc();
-        }
-
-        return reinterpret_cast<CLType *>(write_buffer_pool_);
     }
 }; // class StateCL
 
