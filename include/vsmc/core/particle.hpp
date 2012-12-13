@@ -6,8 +6,6 @@
 #include <vsmc/core/rng.hpp>
 #include <vsmc/core/weight.hpp>
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void);
-
 namespace vsmc {
 
 /// \brief Particle iterator

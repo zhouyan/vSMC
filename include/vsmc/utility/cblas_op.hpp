@@ -173,7 +173,4 @@ class DGEMV
 
 } // namespace vsmc
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGEMVType, dgemv_type, DGEMV<T>);
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDOTType, ddot_type, DDOT<T>);
-
 #endif // VSMC_UTILITY_CBLAS_OP_HPP
