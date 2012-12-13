@@ -6,16 +6,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_CONTEXT(func) \
-    VSMC_RUNTIME_ASSERT((context_created()), ( \
-                "**vsmc::CLManager::"#func"** can only be called after true " \
-                "**vsmc::CLManager::context_created**")); \
-
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
-    VSMC_RUNTIME_ASSERT((setup()), ( \
-                "**vsmc::CLManager::"#func"** can only be called after true " \
-                "**vsmc::CLManager::setup**")); \
-
 namespace vsmc {
 
 namespace traits {

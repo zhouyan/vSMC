@@ -6,22 +6,6 @@
 #include <vsmc/core/rng.hpp>
 #include <vsmc/core/weight.hpp>
 
-#define VSMC_CONST_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT \
-    VSMC_RUNTIME_ASSERT(particle_ptr_,                              \
-            ("A **ConstSingleParticle** object "                    \
-             "is contructed with 0 **Particle** pointer"));         \
-    VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()), \
-            ("A **ConstSignleParticle** object "                    \
-             "is contructed with an out of range id"));
-
-#define VSMC_SINGLE_PARTICLE_VALID_RUNTIME_ASSERT \
-    VSMC_RUNTIME_ASSERT(particle_ptr_,                              \
-            ("A **SingleParticle** object "                         \
-             "is contructed with 0 **Particle** pointer"));         \
-    VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()), \
-            ("A **SignleParticle** object "                         \
-             "is contructed with an out of range id"));
-
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void);
 
 namespace vsmc {

@@ -1,5 +1,5 @@
-#ifndef VSMC_CXX11_TYPE_TRATIS
-#define VSMC_CXX11_TYPE_TRATIS
+#ifndef VSMC_CXX11_TYPE_TRATIS_HPP
+#define VSMC_CXX11_TYPE_TRATIS_HPP
 
 #include <vsmc/internal/config.hpp>
 
@@ -36,4 +36,4 @@ template<class T> struct enable_if<true, T> {typedef T type;};
 } }
 #endif // VSMC_HAS_CXX11LIB_TYPE_TRAITS
 
-#endif // VSMC_CXX11_TYPE_TRATIS
+#endif // VSMC_CXX11_TYPE_TRATIS_HPP

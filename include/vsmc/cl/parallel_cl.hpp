@@ -4,20 +4,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl_manager.hpp>
 
-#define VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(type) \
-    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value \
-             || cxx11::is_same<type, cl_double>::value), \
-            USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
-
-#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfStateCL<derived>::value),\
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
-
-#define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func) \
-    VSMC_RUNTIME_ASSERT((build()), ( \
-                "**StateCL::"#func"** can only be called after true " \
-                "**StateCL::build**")); \
-
 namespace vsmc {
 
 namespace traits {
