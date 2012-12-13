@@ -7,6 +7,7 @@
 namespace vsmc { namespace thread {
 
 /// \brief C++11 Thread guard
+/// \ingroup Thread
 class ThreadGuard
 {
     public :
