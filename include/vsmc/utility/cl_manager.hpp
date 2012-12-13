@@ -6,17 +6,17 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl.hpp>
 
-namespace vsmc { namespace cl {
+namespace vsmc { namespace clmgr {
 
-/// \brief OpenCL Device Manager
-/// \ingroup CLMG
-class DeviceManager
+/// \brief OpenCL Manager
+/// \ingroup CLMGR
+class CLManager
 {
     public :
 
-    static DeviceManager &instance ()
+    static CLManager &instance ()
     {
-        static DeviceManager manager;
+        static CLManager manager;
 
         return manager;
     }
@@ -46,7 +46,6 @@ class DeviceManager
     {
         context_ = ctx;
         context_created_ = true;
-        setup_buffer();
     }
 
     bool context_created () const
@@ -62,6 +61,7 @@ class DeviceManager
     void device (const std::vector<cl::Device> &dev)
     {
         device_ = dev;
+        device_created_ = true;
     }
 
     bool device_created () const
@@ -116,8 +116,7 @@ class DeviceManager
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_CONTEXT(create_buffer);
 
-        return cl::Buffer(cl::DeviceManager::instance().context(),
-                CL_MEM_READ_WRITE, sizeof(CLType) * num);
+        return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
     }
 
     template<typename CLType, typename InputIter>
@@ -207,20 +206,52 @@ class DeviceManager
     std::vector<cl::Device> device_;
     cl::CommandQueue command_queue_;
 
+    bool platform_created_;
+    bool context_created_;
+    bool device_created_;
+    bool command_queue_created_;
+
     mutable size_type read_buffer_pool_bytes_;
     mutable size_type write_buffer_pool_bytes_;
     mutable void *read_buffer_pool_;
     mutable void *write_buffer_pool_;
 
-    DeviceManager () :
+    CLManager () :
         platform_created_(false), context_created_(false),
-        device_created_(false), command_queue_created_(false)
-    {}
+        device_created_(false), command_queue_created_(false),
+        read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
+        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR)
+    {
+        cl_device_type dev_type[] = {
+            CL_DEVICE_TYPE_GPU,
+            CL_DEVICE_TYPE_CPU,
+            CL_DEVICE_TYPE_ALL
+        };
 
-    DeviceManager (const DeviceManager &);
-    DeviceManager &operator= (const DeviceManager &);
+        for (int i = 0; i != 3; ++i) {
+            try {
+                setup(dev_type[i]);
+            } catch (cl::Error) {
+                platform_.clear();
+                context_ = cl::Context();
+                device_.clear();
+                command_queue_ = cl::CommandQueue();
 
-    ~DeviceManager ()
+                platform_created_ = false;
+                context_created_ = false;
+                device_created_ = false;
+                command_queue_created_ = false;
+            }
+
+            if (setup())
+                break;
+        }
+    }
+
+    CLManager (const CLManager &);
+    CLManager &operator= (const CLManager &);
+
+    ~CLManager ()
     {
         std::free(read_buffer_pool_);
         std::free(write_buffer_pool_);
@@ -255,8 +286,8 @@ class DeviceManager
 
         return reinterpret_cast<CLType *>(write_buffer_pool_);
     }
-}; // clss DeviceManager
+}; // clss CLManager
 
-} } // namespace vsmc::cl
+} } // namespace vsmc::clmgr
 
 #endif // VSMC_UTILITY_CL_MANAGER_HPP
