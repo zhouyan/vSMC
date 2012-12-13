@@ -80,20 +80,20 @@ class StateCL
 
     typedef cl_ulong size_type;
     typedef T state_type;
-    typedef opencl::CLManager<CLManagerID> cl_manager;
+    typedef opencl::CLManager<CLManagerID> cl_manager_type;
 
     explicit StateCL (size_type N) :
         dim_(Dim == Dynamic ? 1 : Dim), size_(N), local_size_(0),
+        cl_manager_(cl_manager_type::instance()),
         program_created_(false), build_(false),
         state_host_(dim_ * N), accept_host_(N), time_running_kernel_(0)
     {
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
         local_size(0);
-        cl_manager &manager = cl_manager::instance();
-        state_device_  = manager.template create_buffer<state_type>(
+        state_device_  = cl_manager_.template create_buffer<state_type>(
                 dim_ * size_);
-        accept_device_ = manager.template create_buffer<state_type>(size_);
-        copy_device_   = manager.template create_buffer<size_type>(size_);
+        accept_device_ = cl_manager_.template create_buffer<state_type>(size_);
+        copy_device_   = cl_manager_.template create_buffer<size_type>(size_);
     }
 
     unsigned dim () const
@@ -106,8 +106,7 @@ class StateCL
         VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
 
-        state_device_ = cl_manager::instance().template create_buffer<T>(
-                dim * size_);
+        state_device_ = cl_manager_.template create_buffer<T>(dim * size_);
         state_host_.resize(dim * size_);
         dim_ = dim;
     }
@@ -115,6 +114,11 @@ class StateCL
     size_type size () const
     {
         return size_;
+    }
+
+    cl_manager_type &cl_manager () const
+    {
+        return cl_manager_;
     }
 
     void local_size (size_type lsize)
@@ -154,7 +158,7 @@ class StateCL
 
     const double *state_host () const
     {
-        cl_manager::instance().template read_buffer<state_type>(
+        cl_manager_.template read_buffer<state_type>(
                 state_device_, dim_ * size_, &state_host_[0]);
 
         return &state_host_[0];
@@ -167,7 +171,7 @@ class StateCL
 
     const cl_uint *accept_host () const
     {
-        cl_manager::instance().template read_buffer<cl_uint>(
+        cl_manager_.template read_buffer<cl_uint>(
                 accept_device_, size_, &accept_host_[0]);
 
         return &accept_host_[0];
@@ -177,8 +181,6 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT((!build_),
                 "**StateCL::build**: Program already build");
-
-        cl_manager &manager = cl_manager::instance();
 
         if (!program_created_) {
             std::stringstream ss;
@@ -212,13 +214,13 @@ class StateCL
             seed.skip(size_);
             ss << "#include <vsmc/cl/device.h>\n";
             ss << source << '\n';
-            program_ = manager.create_program(ss.str());
+            program_ = cl_manager_.create_program(ss.str());
             program_created_ = true;
         }
 
         try {
-            program_.build(manager.device_vec(), flags.c_str());
-            program_.getBuildInfo(manager.device(), CL_PROGRAM_BUILD_LOG,
+            program_.build(cl_manager_.device_vec(), flags.c_str());
+            program_.getBuildInfo(cl_manager_.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
         } catch (cl::Error &err) {
             std::string log;
@@ -226,7 +228,7 @@ class StateCL
             std::cerr << "Error: vSMC: OpenCL program Build failed"
                 << std::endl;
             std::cerr << err.err() << " : " << err.what() << std::endl;
-            program_.getBuildInfo(manager.device(),
+            program_.getBuildInfo(cl_manager_.device(),
                     CL_PROGRAM_BUILD_OPTIONS, &log);
             std::cerr << "===========================" << std::endl;
             std::cerr << "Build options:" << std::endl;
@@ -237,7 +239,7 @@ class StateCL
             std::cerr << "Build source:" << std::endl;
             std::cerr << "---------------------------" << std::endl;
             std::cerr << log << std::endl;
-            program_.getBuildInfo(manager.device(), CL_PROGRAM_BUILD_LOG,
+            program_.getBuildInfo(cl_manager_.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             std::cerr << "===========================" << std::endl;
             std::cerr << "Build log:" << std::endl;
@@ -270,12 +272,11 @@ class StateCL
 
     void run_kernel (const cl::Kernel &ker) const
     {
-        cl_manager &manager = cl_manager::instance();
-        manager.command_queue().finish();
+        cl_manager_.command_queue().finish();
         std::clock_t start = std::clock();
-        manager.command_queue().enqueueNDRangeKernel(ker,
+        cl_manager_.command_queue().enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
-        manager.command_queue().finish();
+        cl_manager_.command_queue().finish();
         time_running_kernel_ += std::clock() - start;
     }
 
@@ -294,7 +295,7 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(copy);
 
-        cl_manager::instance().template write_buffer<size_type>(
+        cl_manager_.template write_buffer<size_type>(
                 copy_device_, size_, copy_from);
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
@@ -306,6 +307,8 @@ class StateCL
     unsigned dim_;
     size_type size_;
     size_type local_size_;
+
+    cl_manager_type &cl_manager_;
 
     cl::Program program_;
     cl::Kernel kernel_copy_;
@@ -503,7 +506,7 @@ class MonitorEvalCL
         set_kernel(iter, dim, particle);
         pre_processor(iter, particle);
         particle.value().run_kernel(kernel_);
-        value_type::cl_manager::instance().template
+        particle.value().cl_manager().template
             read_buffer<typename T::state_type>(
                     buffer_device_, particle.value().size() * dim, res);
         post_processor(iter, particle);
@@ -531,7 +534,7 @@ class MonitorEvalCL
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            buffer_device_ = value_type::cl_manager::instance().template
+            buffer_device_ = particle.value().cl_manager().template
                 create_buffer<typename T::state_type>(
                         particle.value().size() * dim);
         }
@@ -588,7 +591,7 @@ class PathEvalCL
         set_kernel(iter, particle);
         pre_processor(iter, particle);
         particle.value().run_kernel(kernel_);
-        value_type::cl_manager::instance().template
+        particle.value().cl_manager().template
             read_buffer<typename T::state_type>(
                     buffer_device_, particle.value().size(), res);
         post_processor(iter, particle);
@@ -619,7 +622,7 @@ class PathEvalCL
         if (kernel_name_ != kname) {
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            buffer_device_ = value_type::cl_manager::instance().template
+            buffer_device_ = particle.value().cl_manager().template
                 create_buffer<typename T::state_type>(particle.value().size());
         }
 
