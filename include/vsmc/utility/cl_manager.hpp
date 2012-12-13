@@ -115,7 +115,7 @@ class CLManager
     }
 
     template <typename CLType, typename OutputIter>
-    void read_buffer (const cl::Buffer &buf, size_type num,
+    OutputIter read_buffer (const cl::Buffer &buf, size_type num,
             OutputIter first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
@@ -126,17 +126,18 @@ class CLManager
         if (host_ptr) {
             command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
                     host_ptr);
+	    return first + num;
         } else {
             CLType *temp = read_buffer_pool<CLType>(num);
             command_queue_.enqueueReadBuffer(buf, 1, 0,
                     sizeof(CLType) * num, (void *) temp);
-            std::copy(temp, temp + num, first);
+            return std::copy(temp, temp + num, first);
         }
         time_reading_buffer_ += std::clock() - start;
     }
 
     template <typename CLType, typename InputIter>
-    void write_buffer (const cl::Buffer &buf, size_type num,
+    InputIter write_buffer (const cl::Buffer &buf, size_type num,
             InputIter first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
@@ -154,6 +155,8 @@ class CLManager
                     sizeof(CLType) * num, (void *) temp);
         }
         time_writing_buffer_ += std::clock() - start;
+
+	return first + num;
     }
 
     void reset_timer ()
