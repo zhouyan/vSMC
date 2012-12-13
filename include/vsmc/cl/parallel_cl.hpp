@@ -86,14 +86,76 @@ class StateCL
         dim_(Dim == Dynamic ? 1 : Dim), size_(N), local_size_(0),
         cl_manager_(cl_manager_type::instance()),
         program_created_(false), build_(false),
+        state_device_(cl_manager_.template create_buffer<state_type>(
+                dim_ * size_)),
+        accept_device_(cl_manager_.template create_buffer<state_type>(size_)),
+        copy_device_(cl_manager_.template create_buffer<size_type>(size_)),
         state_host_(dim_ * N), accept_host_(N), time_running_kernel_(0)
     {
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
         local_size(0);
-        state_device_  = cl_manager_.template create_buffer<state_type>(
-                dim_ * size_);
-        accept_device_ = cl_manager_.template create_buffer<state_type>(size_);
-        copy_device_   = cl_manager_.template create_buffer<size_type>(size_);
+    }
+
+    StateCL (const StateCL<Dim, T, CLManagerID> &other) :
+        dim_(other.dim_), size_(other.size_), local_size_(other.local_size_),
+        cl_manager_(other.cl_manager_),
+        program_(other.program_), kernel_copy_(other.kernel_copy_),
+        program_created_(other.program_created_), build_(other.build_),
+        global_nd_range_(other.global_nd_range_),
+        local_nd_range_(other.local_nd_range_),
+        state_device_(cl_manager_.template create_buffer<state_type>(
+                dim_ * size_)),
+        accept_device_(cl_manager_.template create_buffer<state_type>(size_)),
+        copy_device_(cl_manager_.template create_buffer<size_type>(size_)),
+        state_host_(dim_ * size_), accept_host_(size_),
+        time_running_kernel_(other.time_running_kernel_)
+    {
+        cl_manager_.template read_buffer<state_type>(
+                other.state_device_, dim_ * size_, &state_host_[0]);
+        cl_manager_.template read_buffer<cl_uint>(
+                other.accept_device_, size_, &accept_host_[0]);
+        cl_manager_.template write_buffer<state_type>(
+                state_device_, dim_ * size_, &state_host_[0]);
+        cl_manager_.template write_buffer<cl_uint>(
+                accept_device_, size_, &accept_host_[0]);
+    }
+
+    StateCL<Dim, T, CLManagerID> &operator= (
+            const StateCL<Dim, T, CLManagerID> &other)
+    {
+        if (this != &other) {
+            dim_             = other.dim_;
+            size_            = other.size_;
+            local_size_      = other.local_size_;
+            program_         = other.program_;
+            kernel_copy_     = other.kernel_copy_;
+            program_created_ = other.program_created_;
+            build_           = other.build_;
+            global_nd_range_ = other.global_nd_range_;
+            local_nd_range_  = other.local_nd_range_;
+
+            state_host_.resize(dim_ * size_);
+            accept_host_.resize(size_);
+            time_running_kernel_ = other.time_running_kernel_;
+
+            state_device_ =
+                cl_manager_.template create_buffer<state_type>(dim_ * size_);
+            accept_device_ =
+                cl_manager_.template create_buffer<state_type>(size_);
+            copy_device_ =
+                cl_manager_.template create_buffer<size_type>(size_);
+
+            cl_manager_.template read_buffer<state_type>(
+                    other.state_device_, dim_ * size_, &state_host_[0]);
+            cl_manager_.template read_buffer<cl_uint>(
+                    other.accept_device_, size_, &accept_host_[0]);
+            cl_manager_.template write_buffer<state_type>(
+                    state_device_, dim_ * size_, &state_host_[0]);
+            cl_manager_.template write_buffer<cl_uint>(
+                    accept_device_, size_, &accept_host_[0]);
+        }
+
+        return *this;
     }
 
     unsigned dim () const
@@ -322,11 +384,10 @@ class StateCL
 
     cl::Buffer state_device_;
     cl::Buffer accept_device_;
+    cl::Buffer copy_device_;
 
     mutable std::vector<double> state_host_;
     mutable std::vector<cl_uint> accept_host_;
-
-    cl::Buffer copy_device_;
 
     mutable std::clock_t time_running_kernel_;
 }; // class StateCL
