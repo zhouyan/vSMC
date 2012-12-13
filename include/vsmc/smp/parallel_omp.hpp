@@ -24,7 +24,7 @@ struct IsPathEvalImpl<PathEvalOMP> : public cxx11::true_type {};
 } // namespace vsmc::traits
 
 /// \brief Particle::value_type subtype
-/// \ingroup OpenMP
+/// \ingroup OMP
 template <unsigned Dim, typename T>
 class StateOMP : public StateBase<Dim, T>
 {
@@ -56,7 +56,7 @@ class StateOMP : public StateBase<Dim, T>
 }; // class StateOMP
 
 /// \brief Sampler<T>::init_type subtype
-/// \ingroup OpenMP
+/// \ingroup OMP
 template <typename T, typename Derived>
 class InitializeOMP : public InitializeBase<T, Derived>
 {
@@ -89,7 +89,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
 }; // class InitializeOMP
 
 /// \brief Sampler<T>::move_type subtype
-/// \ingroup OpenMP
+/// \ingroup OMP
 template <typename T, typename Derived>
 class MoveOMP : public MoveBase<T, Derived>
 {
@@ -122,7 +122,7 @@ class MoveOMP : public MoveBase<T, Derived>
 }; // class MoveOMP
 
 /// \brief Monitor<T>::eval_type subtype
-/// \ingroup OpenMP
+/// \ingroup OMP
 template <typename T, typename Derived>
 class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
@@ -154,7 +154,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 }; // class MonitorEvalOMP
 
 /// \brief Path<T>::eval_type subtype
-/// \ingroup OpenMP
+/// \ingroup OMP
 template <typename T, typename Derived>
 class PathEvalOMP : public PathEvalBase<T, Derived>
 {

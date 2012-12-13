@@ -75,11 +75,11 @@
 /// \ingroup Implementation
 /// \brief Parallelized samplers with Intel Cilk Plus
 
-/// \defgroup OpenMP OpenMP
+/// \defgroup OMP OpenMP
 /// \ingroup Implementation
 /// \brief Parallelized samplers with OpenMP
 
-/// \defgroup OpenCL OpenCL
+/// \defgroup CL OpenCL
 /// \brief Parallelized sampler with OpenCL
 
 /// \defgroup Utility Utility
@@ -93,6 +93,6 @@
 /// \ingroup Utility
 /// \brief C++11 Thread utilities
 
-/// \defgroup OpenCL OpenCL Device Managerment
+/// \defgroup OpenCL OpenCL
 /// \ingroup Utility
 /// \brief OpenCL device management utilities
