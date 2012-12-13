@@ -84,8 +84,7 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
         VSMC_RUNTIME_ASSERT((num),
-                "ATTEMPT TO CALL vsmc::CLManager::crate_buffer "
-                "WITH ZERO SIZE");
+                "CALL vsmc::CLManager::crate_buffer WITH ZERO SIZE");
 
         if (!num)
             return cl::Buffer();
@@ -122,7 +121,6 @@ class CLManager
 
         void *host_ptr = traits::GetHostPtr<CLType, OutputIter>::get(first);
         command_queue_.finish();
-        std::clock_t start = std::clock();
         if (host_ptr) {
             command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
                     host_ptr);
@@ -133,7 +131,6 @@ class CLManager
                     sizeof(CLType) * num, (void *) temp);
             return std::copy(temp, temp + num, first);
         }
-        time_reading_buffer_ += std::clock() - start;
     }
 
     template <typename CLType, typename InputIter>
@@ -144,7 +141,6 @@ class CLManager
 
         void *host_ptr = traits::GetHostPtr<CLType, InputIter>::get(first);
         command_queue_.finish();
-        std::clock_t start = std::clock();
         if (host_ptr) {
             command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
                     host_ptr);
@@ -154,25 +150,8 @@ class CLManager
             command_queue_.enqueueWriteBuffer(buf, 1, 0,
                     sizeof(CLType) * num, (void *) temp);
         }
-        time_writing_buffer_ += std::clock() - start;
 
         return first + num;
-    }
-
-    void reset_timer ()
-    {
-        time_reading_buffer_ = 0;
-        time_writing_buffer_ = 0;
-    }
-
-    double time_reading_buffer () const
-    {
-        return static_cast<double>(time_reading_buffer_) / CLOCKS_PER_SEC;
-    }
-
-    double time_writing_buffer () const
-    {
-        return static_cast<double>(time_writing_buffer_) / CLOCKS_PER_SEC;
     }
 
     cl::Program create_program (const std::string &source) const
@@ -196,13 +175,9 @@ class CLManager
     mutable void *read_buffer_pool_;
     mutable void *write_buffer_pool_;
 
-    mutable std::clock_t time_reading_buffer_;
-    mutable std::clock_t time_writing_buffer_;
-
     CLManager () :
         setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
-        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
-        time_reading_buffer_(0), time_writing_buffer_(0)
+        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR)
     {
         std::vector<cl_device_type> dev_type;
         dev_type.push_back(CL_DEVICE_TYPE_GPU);
