@@ -139,10 +139,6 @@ struct Has##OuterMF :                                                        \
                                                                              \
 } }
 
-#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user)                   \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value),  \
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
-
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 
 namespace vsmc {

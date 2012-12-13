@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user)                   \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value),  \
+            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
+
 #define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename) \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)), ( \
                 "DERIVED FROM " #basename \

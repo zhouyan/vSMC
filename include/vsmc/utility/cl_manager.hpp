@@ -67,15 +67,16 @@ namespace opencl {
 
 /// \brief OpenCL Manager
 /// \ingroup OpenCL
+template <typename ID>
 class CLManager
 {
     public :
 
     typedef std::size_t size_type;
 
-    static CLManager &instance ()
+    static CLManager<ID> &instance ()
     {
-        static CLManager manager;
+        static CLManager<ID> manager;
 
         return manager;
     }
@@ -262,8 +263,8 @@ class CLManager
         setup_cl_manager(dev_type);
     }
 
-    CLManager (const CLManager &);
-    CLManager &operator= (const CLManager &);
+    CLManager (const CLManager<ID> &);
+    CLManager<ID> &operator= (const CLManager<ID> &);
 
     ~CLManager ()
     {
@@ -299,9 +300,6 @@ class CLManager
                 device_ = cl::Device();
                 device_vec_.clear();
                 command_queue_ = cl::CommandQueue();
-
-                if (i == dev_type.size() - 1)
-                    throw err;
             }
         }
     }
@@ -340,8 +338,8 @@ class CLManager
 } } // namespace vsmc::opencl
 
 namespace {
-vsmc::opencl::CLManager &vSMCOpenCLCLManagerInstance =
-    vsmc::opencl::CLManager::instance();
+vsmc::opencl::CLManager<vsmc::Default> &vSMCOpenCLDefaultCLManagerInstance =
+    vsmc::opencl::CLManager<vsmc::Default>::instance();
 }
 
 #endif // VSMC_UTILITY_CL_MANAGER_HPP
