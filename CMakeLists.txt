@@ -187,7 +187,7 @@ IF (OPENCL_FOUND)
         SET (OPENCL_TEST_SOURCE "
         #include <vsmc/utility/cl_query.hpp>
         int main () {
-            vsmc::clmgr::QueryCL q;
+            vsmc::opencl::QueryCL q;
             std::cout << q << std::endl;
         }")
         SET (SAFE_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
