@@ -42,7 +42,7 @@
 
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Single threaded and parallel samplers based on a single particle
-/// operations
+/// operations using SMP implementations
 
 /// \defgroup Base Dispatcher
 /// \ingroup SMP
