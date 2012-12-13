@@ -85,15 +85,9 @@ class CLManager
         return platform_;
     }
 
-    void platform (const cl::Platform &plat)
+    const std::vector<cl::Platform> &platform_vec () const
     {
-        platform_ = plat;
-        platform_created_ = true;
-    }
-
-    bool platform_created () const
-    {
-        return platform_created_;
+        return platform_vec_;
     }
 
     const cl::Context &context () const
@@ -101,31 +95,9 @@ class CLManager
         return context_;
     }
 
-    void context (const cl::Context &ctx)
-    {
-        context_ = ctx;
-        context_created_ = true;
-    }
-
-    bool context_created () const
-    {
-        return context_created_;
-    }
-
     const cl::Device &device () const
     {
         return device_;
-    }
-
-    void device (const cl::Device &dev)
-    {
-        device_ = dev;
-        device_created_ = true;
-    }
-
-    bool device_created () const
-    {
-        return device_created_;
     }
 
     const std::vector<cl::Device> &device_vec () const
@@ -133,58 +105,14 @@ class CLManager
         return device_vec_;
     }
 
-    void device_vec (const std::vector<cl::Device> &dev_vec)
-    {
-        device_vec_ = dev_vec;
-    }
-
     const cl::CommandQueue &command_queue () const
     {
         return command_queue_;
     }
 
-    void command_queue (const cl::CommandQueue &queue)
-    {
-        command_queue_ = queue;
-        command_queue_created_ = true;
-    }
-
-    bool command_queue_created () const
-    {
-        return command_queue_created_;
-    }
-
-    void setup (cl_device_type dev_type)
-    {
-        if (platform_vec_.empty())
-            cl::Platform::get(&platform_vec_);
-        if (!platform_created_)
-            platform_ = platform_vec_[0];
-        platform_created_ = true;
-
-        if (!context_created_) {
-            cl_context_properties context_properties[] = {
-                CL_CONTEXT_PLATFORM, (cl_context_properties)(platform_)(), 0
-            };
-            context_ = cl::Context(dev_type, context_properties);
-        }
-        context_created_ = true;
-
-        if (device_vec_.empty())
-            device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
-        if (!device_created_)
-            device_ = device_vec_[0];
-        device_created_ = true;
-
-        if (!command_queue_created_)
-            command_queue_ = cl::CommandQueue(context_, device_, 0);
-        command_queue_created_ = true;
-    }
-
     bool setup () const
     {
-        return platform_created_ && context_created_ && device_created_ &&
-            command_queue_created_;
+        return setup_;
     }
 
     template<typename CLType>
@@ -287,17 +215,14 @@ class CLManager
 
     private :
 
-    std::vector<cl::Platform> platform_vec_;
-    std::vector<cl::Device> device_vec_;
     cl::Platform platform_;
+    std::vector<cl::Platform> platform_vec_;
     cl::Context context_;
     cl::Device device_;
+    std::vector<cl::Device> device_vec_;
     cl::CommandQueue command_queue_;
 
-    bool platform_created_;
-    bool context_created_;
-    bool device_created_;
-    bool command_queue_created_;
+    bool setup_;
 
     mutable size_type read_buffer_pool_bytes_;
     mutable size_type write_buffer_pool_bytes_;
@@ -308,39 +233,37 @@ class CLManager
     mutable std::clock_t time_writing_buffer_;
 
     CLManager () :
-        platform_created_(false), context_created_(false),
-        device_created_(false), command_queue_created_(false),
-        read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
+        setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
         time_reading_buffer_(0), time_writing_buffer_(0)
     {
-        cl_device_type dev_type[] = {
-            CL_DEVICE_TYPE_GPU,
-            CL_DEVICE_TYPE_CPU,
-            CL_DEVICE_TYPE_ALL
-        };
-
-        for (int i = 0; i != 3; ++i) {
-            try {
-                setup(dev_type[i]);
-            } catch (cl::Error) {
-                platform_vec_.clear();
-                device_vec_.clear();
-                platform_ = cl::Platform();
-                context_ = cl::Context();
-                device_ = cl::Device();
-                command_queue_ = cl::CommandQueue();
-
-                platform_created_ = false;
-                context_created_ = false;
-                device_created_ = false;
-                command_queue_created_ = false;
-            }
-
-            if (setup())
-                break;
-        }
+        std::vector<cl_device_type> dev_type;
+        dev_type.push_back(CL_DEVICE_TYPE_GPU);
+        dev_type.push_back(CL_DEVICE_TYPE_CPU);
+        dev_type.push_back(CL_DEVICE_TYPE_ALL);
+        setup_cl_manager(dev_type);
     }
+
+    CLManager (cl_device_type type) :
+        setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
+        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
+        time_reading_buffer_(0), time_writing_buffer_(0)
+    {
+        std::vector<cl_device_type> dev_type;
+        dev_type.push_back(type);
+        setup_cl_manager(dev_type);
+    }
+
+    CLManager (const cl::Platform &plat, const cl::Context &ctx,
+            const cl::Device &dev, const cl::CommandQueue &cmd) :
+        platform_(plat), context_(ctx), device_(dev), command_queue_(cmd),
+        setup_(true), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
+        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR),
+        time_reading_buffer_(0), time_writing_buffer_(0)
+   {
+       cl::Platform::get(&platform_vec_);
+       device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
+   }
 
     CLManager (const CLManager &);
     CLManager &operator= (const CLManager &);
@@ -349,6 +272,41 @@ class CLManager
     {
         std::free(read_buffer_pool_);
         std::free(write_buffer_pool_);
+    }
+
+    void setup_cl_manager (const std::vector<cl_device_type> &dev_type)
+    {
+        for (std::vector<cl_device_type>::size_type i = 0;
+                i != dev_type.size(); ++i) {
+            try {
+                cl::Platform::get(&platform_vec_);
+                platform_ = platform_vec_[0];
+
+                cl_context_properties context_properties[] = {
+                    CL_CONTEXT_PLATFORM,
+                    (cl_context_properties)(platform_)(), 0
+                };
+                context_ = cl::Context(dev_type[i], context_properties);
+
+                device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
+                device_ = device_vec_[0];
+
+                command_queue_ = cl::CommandQueue(context_, device_, 0);
+
+                setup_ = true;
+                break;
+            } catch (cl::Error &err) {
+                platform_ = cl::Platform();
+                platform_vec_.clear();
+                context_ = cl::Context();
+                device_ = cl::Device();
+                device_vec_.clear();
+                command_queue_ = cl::CommandQueue();
+
+                if (i == dev_type.size() - 1)
+                    throw err;
+            }
+        }
     }
 
     template <typename CLType>
