@@ -79,7 +79,7 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngSetType, resample_rng_set_type,
         RngSetSeq);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
-	cxx11::false_type);
+        cxx11::false_type);
 
 namespace vsmc { namespace traits {
 
