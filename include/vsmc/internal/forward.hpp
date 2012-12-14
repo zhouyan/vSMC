@@ -7,7 +7,6 @@ namespace vsmc {
 class CBase;
 class VBase;
 class NullType;
-class Default;
 
 // Utilities
 class Seed;
@@ -35,6 +34,10 @@ void parallel_sum (const BlockedRange<S> &, const W &, R &);
 
 namespace opencl {
 
+struct Default;
+struct CPU;
+struct GPU;
+struct Accelerator;
 template <typename ID = Default> class CLManager;
 
 } // namespace vsmc::opencl
@@ -93,7 +96,7 @@ template <typename, typename D = VBase> class MonitorEvalCILK;
 template <typename, typename D = VBase> class PathEvalCILK;
 
 // OCL
-template <unsigned, typename, typename CLMGRID = Default> class StateCL;
+template <unsigned, typename, typename ID = opencl::Default> class StateCL;
 template <typename> class InitializeCL;
 template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;

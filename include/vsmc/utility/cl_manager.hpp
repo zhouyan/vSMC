@@ -6,9 +6,66 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl.hpp>
 
-namespace vsmc {
+namespace vsmc { namespace opencl {
 
-namespace opencl {
+template <bool, bool, typename IterType>
+struct GetHostPtrDispatch
+{
+    static void *get (IterType iter)
+    {
+        return VSMC_NULLPTR;
+    }
+};
+
+template <typename IterType>
+struct GetHostPtrDispatch<true, true, IterType>
+{
+    static void *get (IterType iter)
+    {
+        return (void *) iter;
+    }
+};
+
+template <typename CLType, typename IterType>
+struct GetHostPtr
+{
+    static void *get (IterType iter)
+    {
+        typedef typename cxx11::remove_cv<IterType>::type ptr_type;
+        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
+        typedef typename cxx11::remove_cv<val_type>::type host_type;
+        typedef typename cxx11::remove_cv<CLType>::type device_type;
+
+        return GetHostPtrDispatch<
+            cxx11::is_pointer<IterType>::value,
+            cxx11::is_same<host_type, device_type>::value,
+            IterType>::get(iter);
+    }
+};
+
+struct Default
+{
+    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_DEFAULT>
+        opencl_device_type;
+};
+
+struct CPU
+{
+    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_CPU>
+        opencl_device_type;
+};
+
+struct GPU
+{
+    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_GPU>
+        opencl_device_type;
+};
+
+struct Accelerator
+{
+    typedef cxx11::integral_constant<
+        cl_device_type, CL_DEVICE_TYPE_ACCELERATOR> opencl_device_type;
+};
 
 /// \brief OpenCL Manager
 /// \ingroup OpenCL
@@ -61,12 +118,10 @@ class CLManager
         return setup_;
     }
 
-    void setup (cl_device_type type)
+    void setup (cl_device_type dev)
     {
         setup_ = false;
-        std::vector<cl_device_type> dev_type;
-        dev_type.push_back(type);
-        setup_cl_manager(dev_type);
+        setup_cl_manager(dev);
     }
 
     void setup (const cl::Platform &plat, const cl::Context &ctx,
@@ -122,7 +177,7 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
-        void *host_ptr = traits::GetHostPtr<CLType, OutputIter>::get(first);
+        void *host_ptr = GetHostPtr<CLType, OutputIter>::get(first);
         command_queue_.finish();
         if (host_ptr) {
             command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
@@ -142,7 +197,7 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
-        void *host_ptr = traits::GetHostPtr<CLType, InputIter>::get(first);
+        void *host_ptr = GetHostPtr<CLType, InputIter>::get(first);
         command_queue_.finish();
         if (host_ptr) {
             command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
@@ -182,11 +237,10 @@ class CLManager
         setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR)
     {
-        std::vector<cl_device_type> dev_type;
-        dev_type.push_back(CL_DEVICE_TYPE_GPU);
-        dev_type.push_back(CL_DEVICE_TYPE_CPU);
-        dev_type.push_back(CL_DEVICE_TYPE_ALL);
-        setup_cl_manager(dev_type);
+        cl_device_type dev = traits::OpenCLDeviceTypeTrait<ID>::type::value;
+        if (!dev)
+            dev = Default::opencl_device_type::value;
+        setup_cl_manager(dev);
     }
 
     CLManager (const CLManager<ID> &);
@@ -198,19 +252,24 @@ class CLManager
         std::free(write_buffer_pool_);
     }
 
-    void setup_cl_manager (const std::vector<cl_device_type> &dev_type)
+    void setup_cl_manager (cl_device_type dev)
     {
-        for (std::vector<cl_device_type>::size_type i = 0;
-                i != dev_type.size(); ++i) {
+        try {
+            cl::Platform::get(&platform_vec_);
+        } catch (cl::Error) {
+            platform_vec_.clear();
+        }
+
+        for (std::vector<cl::Platform>::size_type p = 0;
+                p != platform_vec_.size(); ++p) {
             try {
-                cl::Platform::get(&platform_vec_);
-                platform_ = platform_vec_[0];
+                platform_ = platform_vec_[p];
 
                 cl_context_properties context_properties[] = {
                     CL_CONTEXT_PLATFORM,
                     (cl_context_properties)(platform_)(), 0
                 };
-                context_ = cl::Context(dev_type[i], context_properties);
+                context_ = cl::Context(dev, context_properties);
 
                 device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
                 device_ = device_vec_[0];
@@ -219,13 +278,12 @@ class CLManager
 
                 setup_ = true;
                 break;
-            } catch (cl::Error &err) {
-                platform_ = cl::Platform();
-                platform_vec_.clear();
-                context_ = cl::Context();
-                device_ = cl::Device();
-                device_vec_.clear();
+            } catch (cl::Error) {
+                platform_      = cl::Platform();
+                context_       = cl::Context();
+                device_        = cl::Device();
                 command_queue_ = cl::CommandQueue();
+                device_vec_.clear();
             }
         }
     }
@@ -264,8 +322,22 @@ class CLManager
 } } // namespace vsmc::opencl
 
 namespace {
-vsmc::opencl::CLManager<vsmc::Default> &vSMCOpenCLDefaultCLManagerInstance =
-    vsmc::opencl::CLManager<vsmc::Default>::instance();
+
+vsmc::opencl::CLManager<vsmc::opencl::Default>
+    &vSMCOpenCLCLManagerInstanceDefault =
+    vsmc::opencl::CLManager<vsmc::opencl::Default>::instance();
+
+vsmc::opencl::CLManager<vsmc::opencl::CPU>
+    &vSMCOpenCLCLManagerInstanceCPU =
+    vsmc::opencl::CLManager<vsmc::opencl::CPU>::instance();
+
+vsmc::opencl::CLManager<vsmc::opencl::GPU>
+    &vSMCOpenCLCLManagerInstanceGPU =
+    vsmc::opencl::CLManager<vsmc::opencl::GPU>::instance();
+
+vsmc::opencl::CLManager<vsmc::opencl::Accelerator>
+    &vSMCOpenCLCLManagerInstanceAccelerator =
+    vsmc::opencl::CLManager<vsmc::opencl::Accelerator>::instance();
 }
 
 #endif // VSMC_UTILITY_CL_MANAGER_HPP

@@ -78,6 +78,8 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGemvType, dgemv_type, cxxblas::DGemv<T>);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngSetType, resample_rng_set_type,
         RngSetSeq);
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
+	cxx11::false_type);
 
 namespace vsmc { namespace traits {
 
@@ -124,47 +126,6 @@ template <typename D>
 class IsBaseOfStateCL :
     public cxx11::integral_constant<bool, IsBaseOfStateCLImpl<D>::value>
 {};
-
-template <bool, bool, typename IterType>
-class GetHostPtrDispatch
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        return VSMC_NULLPTR;
-    }
-};
-
-template <typename IterType>
-class GetHostPtrDispatch<true, true, IterType>
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        return (void *) iter;
-    }
-};
-
-template <typename CLType, typename IterType>
-class GetHostPtr
-{
-    public :
-
-    static void *get (IterType iter)
-    {
-        typedef typename cxx11::remove_cv<IterType>::type ptr_type;
-        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
-        typedef typename cxx11::remove_cv<val_type>::type host_type;
-        typedef typename cxx11::remove_cv<CLType>::type device_type;
-
-        return GetHostPtrDispatch<
-            cxx11::is_pointer<IterType>::value,
-            cxx11::is_same<host_type, device_type>::value,
-            IterType>::get(iter);
-    }
-};
 
 template <typename, template <typename, typename> class, template <typename,
          template <typename, typename> class, typename> class, typename>
