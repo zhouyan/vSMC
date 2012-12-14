@@ -7,7 +7,7 @@
 #include VSMC_CBLAS_HEADER
 #endif // VSMC_HAS_CBLAS
 
-namespace vsmc {
+namespace vsmc { namespace cblas {
 
 template <typename T>
 class DDOT
@@ -171,6 +171,6 @@ class DGEMV
 #endif // VSMC_HAS_CBLAS
 }; // class DGEMV
 
-} // namespace vsmc
+} } // namespace vsmc::cblas
 
 #endif // VSMC_UTILITY_CBLAS_OP_HPP

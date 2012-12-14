@@ -11,8 +11,13 @@ class Default;
 
 // Utilities
 class Seed;
+
+namespace cblas {
+
 template <typename T = NullType> class DDOT;
 template <typename T = NullType> class DGEMV;
+
+} // namespace vsmc::cblas
 
 namespace thread {
 
