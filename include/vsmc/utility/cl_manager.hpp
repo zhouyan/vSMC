@@ -26,6 +26,11 @@ class CLManager
         return manager;
     }
 
+    const cl::Platform &platform () const
+    {
+        return platform_;
+    }
+
     const std::vector<cl::Platform> &platform_vec () const
     {
         return platform_vec_;

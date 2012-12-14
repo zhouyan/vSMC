@@ -35,7 +35,7 @@ void parallel_sum (const BlockedRange<S> &, const W &, R &);
 
 namespace opencl {
 
-template <typename> class CLManager;
+template <typename ID = Default> class CLManager;
 
 } // namespace vsmc::opencl
 

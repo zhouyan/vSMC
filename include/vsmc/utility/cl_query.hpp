@@ -418,12 +418,12 @@ OutputStream &operator<< (OutputStream &os, const vsmc::opencl::QueryCL &query)
 
 } } // namespace vsmc::opencl
 
-namespace std {
+namespace cl {
 
 /// \brief Print information of all devices in a given platform
 /// \ingroup OpenCL
 template <typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const cl::Platform &plat)
+OutputStream &operator<< (OutputStream &os, const Platform &plat)
 {
     vsmc::opencl::QueryCL::print(os, plat);
     return os;
@@ -432,7 +432,7 @@ OutputStream &operator<< (OutputStream &os, const cl::Platform &plat)
 /// \brief Print information of all devices in a given context
 /// \ingroup OpenCL
 template <typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const cl::Context &ctx)
+OutputStream &operator<< (OutputStream &os, const Context &ctx)
 {
     vsmc::opencl::QueryCL::print(os, ctx);
     return os;
@@ -441,12 +441,12 @@ OutputStream &operator<< (OutputStream &os, const cl::Context &ctx)
 /// \brief Print information a given device
 /// \ingroup OpenCL
 template <typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const cl::Device &dev)
+OutputStream &operator<< (OutputStream &os, const Device &dev)
 {
     vsmc::opencl::QueryCL::print(os, dev);
     return os;
 }
 
-} // namespace std
+} // namespace cl
 
 #endif // VSMC_UTILITY_CL_QUERY_HPP
