@@ -2,7 +2,7 @@
 #define VSMC_CORE_WEIGHT_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cblas_op.hpp>
+#include <vsmc/utility/cblas.hpp>
 
 namespace vsmc {
 

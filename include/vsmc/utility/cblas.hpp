@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_CBLAS_OP_HPP
-#define VSMC_UTILITY_CBLAS_OP_HPP
+#ifndef VSMC_UTILITY_CBLAS_HPP
+#define VSMC_UTILITY_CBLAS_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -173,4 +173,4 @@ class DGEMV
 
 } } // namespace vsmc::cblas
 
-#endif // VSMC_UTILITY_CBLAS_OP_HPP
+#endif // VSMC_UTILITY_CBLAS_HPP
