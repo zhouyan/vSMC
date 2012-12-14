@@ -2,7 +2,7 @@
 #define VSMC_CORE_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cblas.hpp>
+#include <vsmc/utility/cxxblas.hpp>
 
 namespace vsmc {
 
@@ -16,7 +16,7 @@ class Monitor
     typedef T value_type;
     typedef cxx11::function<void (
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
-    typedef typename traits::DGEMVTypeTrait<T>::type dgemv_type;
+    typedef typename traits::DGemvTypeTrait<T>::type dgemv_type;
 
     explicit Monitor (unsigned dim = 1, const eval_type &eval = eval_type()) :
         dim_(dim), eval_(eval) {}

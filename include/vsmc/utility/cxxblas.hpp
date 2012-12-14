@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_CBLAS_HPP
-#define VSMC_UTILITY_CBLAS_HPP
+#ifndef VSMC_UTILITY_CXXBLAS_HPP
+#define VSMC_UTILITY_CXXBLAS_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -7,10 +7,10 @@
 #include VSMC_CBLAS_HEADER
 #endif // VSMC_HAS_CBLAS
 
-namespace vsmc { namespace cblas {
+namespace vsmc { namespace cxxblas {
 
 template <typename T>
-class DDOT
+class DDot
 {
     public :
 
@@ -34,9 +34,9 @@ class DDOT
             return 0;
 
         VSMC_RUNTIME_ASSERT((incX > 0),
-                "NON-POSITIVE STRIDE OF X IN **vsmc::DDOT**");
+                "NON-POSITIVE STRIDE OF X IN **vsmc::DDot**");
         VSMC_RUNTIME_ASSERT((incY > 0),
-                "NON-POSITIVE STRIDE OF Y IN **vsmc::DDOT**");
+                "NON-POSITIVE STRIDE OF Y IN **vsmc::DDot**");
 
         if (X == Y && incX == incY) {
             double res = 0;
@@ -66,10 +66,10 @@ class DDOT
         return res;
     }
 #endif // VSMC_HAS_CBLAS
-}; // class DDOT
+}; // class DDot
 
 template <typename T>
-class DGEMV
+class DGemv
 {
     public :
 
@@ -122,11 +122,11 @@ class DGEMV
             return;
 
         VSMC_RUNTIME_ASSERT((lda > 0),
-                "NON-POSITIVE STRIDE OF A IN **vsmc::DGEMV**");
+                "NON-POSITIVE STRIDE OF A IN **vsmc::DGemv**");
         VSMC_RUNTIME_ASSERT((incX > 0),
-                "NON-POSITIVE STRIDE OF X IN **vsmc::DGEMV**");
+                "NON-POSITIVE STRIDE OF X IN **vsmc::DGemv**");
         VSMC_RUNTIME_ASSERT((incY > 0),
-                "NON-POSITIVE STRIDE OF Y IN **vsmc::DGEMV**");
+                "NON-POSITIVE STRIDE OF Y IN **vsmc::DGemv**");
 
         const size_type lenX = (trans == NoTrans) ? N : M;
         const size_type lenY = (trans == NoTrans) ? M : N;
@@ -165,12 +165,12 @@ class DGEMV
                     Y[iy] += ax * A[j * lda + i];
             }
         } else {
-            VSMC_RUNTIME_ASSERT(false, "INVALID INPUT TO **vsmc::DGEMV**");
+            VSMC_RUNTIME_ASSERT(false, "INVALID INPUT TO **vsmc::DGemv**");
         }
     }
 #endif // VSMC_HAS_CBLAS
-}; // class DGEMV
+}; // class DGemv
 
-} } // namespace vsmc::cblas
+} } // namespace vsmc::cxxblas
 
-#endif // VSMC_UTILITY_CBLAS_HPP
+#endif // VSMC_UTILITY_CXXBLAS_HPP

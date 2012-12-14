@@ -73,8 +73,8 @@ struct Has##OuterMF :                                                        \
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void);
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGEMVType, dgemv_type, cblas::DGEMV<T>);
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDOTType, ddot_type, cblas::DDOT<T>);
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDotType, ddot_type, cxxblas::DDot<T>);
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGemvType, dgemv_type, cxxblas::DGemv<T>);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngSetType, resample_rng_set_type,
         RngSetSeq);

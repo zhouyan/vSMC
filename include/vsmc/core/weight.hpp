@@ -2,7 +2,7 @@
 #define VSMC_CORE_WEIGHT_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cblas.hpp>
+#include <vsmc/utility/cxxblas.hpp>
 
 namespace vsmc {
 
@@ -14,7 +14,7 @@ class WeightSet
     public :
 
     typedef typename traits::SizeTypeTrait<T>::type size_type;
-    typedef typename traits::DDOTTypeTrait<T>::type ddot_type;
+    typedef typename traits::DDotTypeTrait<T>::type ddot_type;
 
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}

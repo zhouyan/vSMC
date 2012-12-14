@@ -2,7 +2,7 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cblas.hpp>
+#include <vsmc/utility/cxxblas.hpp>
 
 namespace vsmc {
 
@@ -14,7 +14,7 @@ class Path
     public :
 
     typedef T value_type;
-    typedef typename traits::DDOTTypeTrait<T>::type ddot_type;
+    typedef typename traits::DDotTypeTrait<T>::type ddot_type;
     typedef cxx11::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;
 

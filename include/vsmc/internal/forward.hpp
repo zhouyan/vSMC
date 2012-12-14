@@ -12,12 +12,12 @@ class Default;
 // Utilities
 class Seed;
 
-namespace cblas {
+namespace cxxblas {
 
-template <typename T = NullType> class DDOT;
-template <typename T = NullType> class DGEMV;
+template <typename T = NullType> class DDot;
+template <typename T = NullType> class DGemv;
 
-} // namespace vsmc::cblas
+} // namespace vsmc::cxxblas
 
 namespace thread {
 
