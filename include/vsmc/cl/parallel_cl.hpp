@@ -55,7 +55,7 @@ class StateCL
                 dim_ * size_)),
         accept_device_(cl_manager_.template create_buffer<state_type>(size_)),
         copy_device_(cl_manager_.template create_buffer<size_type>(size_)),
-        state_host_(dim_ * N), accept_host_(N), time_running_kernel_(0)
+        state_host_(dim_ * N), accept_host_(N)
     {
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
         local_size(0);
@@ -72,8 +72,7 @@ class StateCL
                 dim_ * size_)),
         accept_device_(cl_manager_.template create_buffer<state_type>(size_)),
         copy_device_(cl_manager_.template create_buffer<size_type>(size_)),
-        state_host_(dim_ * size_), accept_host_(size_),
-        time_running_kernel_(other.time_running_kernel_)
+        state_host_(dim_ * size_), accept_host_(size_)
     {
         cl_manager_.template read_buffer<state_type>(
                 other.state_device_, dim_ * size_, &state_host_[0]);
@@ -101,7 +100,6 @@ class StateCL
 
             state_host_.resize(dim_ * size_);
             accept_host_.resize(size_);
-            time_running_kernel_ = other.time_running_kernel_;
 
             state_device_ =
                 cl_manager_.template create_buffer<state_type>(dim_ * size_);
@@ -300,21 +298,9 @@ class StateCL
     void run_kernel (const cl::Kernel &ker) const
     {
         cl_manager_.command_queue().finish();
-        std::clock_t start = std::clock();
         cl_manager_.command_queue().enqueueNDRangeKernel(ker,
                 cl::NullRange, global_nd_range(), local_nd_range());
         cl_manager_.command_queue().finish();
-        time_running_kernel_ += std::clock() - start;
-    }
-
-    void reset_timer ()
-    {
-        time_running_kernel_ = 0;
-    }
-
-    double time_running_kernel () const
-    {
-        return static_cast<double>(time_running_kernel_) / CLOCKS_PER_SEC;
     }
 
     template<typename IntType>
@@ -353,8 +339,6 @@ class StateCL
 
     mutable std::vector<double> state_host_;
     mutable std::vector<cl_uint> accept_host_;
-
-    mutable std::clock_t time_running_kernel_;
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype
