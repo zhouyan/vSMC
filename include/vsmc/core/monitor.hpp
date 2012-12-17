@@ -18,11 +18,12 @@ class Monitor
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
     typedef typename traits::DGemvTypeTrait<T>::type dgemv_type;
 
-    explicit Monitor (unsigned dim = 1, const eval_type &eval = eval_type()) :
-        dim_(dim), eval_(eval) {}
+    explicit Monitor (unsigned dim = 1, const eval_type &eval = eval_type(),
+            MonitorMethod method = ImportanceSampling) :
+        dim_(dim), eval_(eval), method_(method) {}
 
     Monitor (const Monitor<T> &other) :
-        dim_(other.dim_), eval_(other.eval_),
+        dim_(other.dim_), eval_(other.eval_), method_(other.method_),
         index_(other.index_), record_(other.record_) {}
 
     Monitor<T> &operator= (const Monitor<T> &other)
@@ -30,6 +31,7 @@ class Monitor
         if (&other != this) {
             dim_    = other.dim_;
             eval_   = other.eval_;
+            method_ = other.method_;
             index_  = other.index_;
             record_ = other.record_;
         }
@@ -173,9 +175,11 @@ class Monitor
     }
 
     /// \brief Set a new evaluation object of type eval_type
-    void set_eval (const eval_type &new_eval)
+    void set_eval (const eval_type &new_eval,
+            MonitorMethod method = ImportanceSampling)
     {
         eval_ = new_eval;
+        method_ = method;
     }
 
     /// \brief Perform the evaluation for a given iteration and a Particle<T>
@@ -186,15 +190,24 @@ class Monitor
                 ("CALL **Monitor::eval** WITH AN INVALID "
                  "EVALUATION FUNCTOR"));
 
-        buffer_.resize(dim_ * particle.size());
         result_.resize(dim_);
-        weight_.resize(particle.size());
-        eval_(iter, dim_, particle, &buffer_[0]);
-        particle.read_weight(&weight_[0]);
-        dgemv_(RowMajor, Trans,
-                static_cast<typename dgemv_type::size_type>(particle.size()),
-                static_cast<typename dgemv_type::size_type>(dim_),
-                1, &buffer_[0], dim_, &weight_[0], 1, 0, &result_[0], 1);
+        switch (method_) {
+            case ImportanceSampling :
+                weight_.resize(particle.size());
+                buffer_.resize(dim_ * particle.size());
+                eval_(iter, dim_, particle, &buffer_[0]);
+                particle.read_weight(&weight_[0]);
+                dgemv_(RowMajor, Trans,
+                        static_cast<typename dgemv_type::size_type>(
+                            particle.size()),
+                        static_cast<typename dgemv_type::size_type>(dim_),
+                        1, &buffer_[0], dim_, &weight_[0], 1, 0,
+                        &result_[0], 1);
+                break;
+            case Simple :
+                eval_(iter, dim_, particle, &result_[0]);
+                break;
+        }
 
         index_.push_back(iter);
         for (unsigned d = 0; d != dim_; ++d)
@@ -210,13 +223,14 @@ class Monitor
 
     private :
 
-    std::vector<double> buffer_;
-    std::vector<double> result_;
-    std::vector<double> weight_;
     unsigned dim_;
     eval_type eval_;
+    MonitorMethod method_;
     std::vector<unsigned> index_;
     std::vector<double> record_;
+    std::vector<double> result_;
+    std::vector<double> weight_;
+    std::vector<double> buffer_;
 
     dgemv_type dgemv_;
 }; // class Monitor
