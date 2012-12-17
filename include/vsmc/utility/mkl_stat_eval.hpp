@@ -18,10 +18,9 @@ class MKLStatEval
     explicit MKLStatEval (unsigned dim, const eval_type &eval) :
         size_(2), dim_(static_cast<MKL_INT>(dim)), eval_(eval),
         weight_(size_), buffer_(size_), task_(NULL), est_(0),
-        monitor_dim_(0)
+        monitor_dim_(0), storage_(VSL_SS_MATRIX_STORAGE_COLS)
     {
-        MKL_INT storage = VSL_SS_MATRIX_STORAGE_COLS;
-        int status = vsldSSNewTask(&task_, &dim_, &size_, &storage,
+        int status = vsldSSNewTask(&task_, &dim_, &size_, &storage_,
                 &buffer_[0], &weight_[0], NULL);
         VSMC_RUNTIME_ASSERT((status == VSL_STATUS_OK),
                 "CALLING **vsldSSNewTask** failed");
@@ -31,10 +30,9 @@ class MKLStatEval
     MKLStatEval (const MKLStatEval<T> &other) :
         size_(other.size_), dim_(other.dim_), eval_(other.eval_),
         weight_(size_), buffer_(size_), est_(other.est_),
-        monitor_dim_(other.monitor_dim_)
+        monitor_dim_(other.monitor_dim_), storage_(VSL_SS_MATRIX_STORAGE_COLS)
     {
-        MKL_INT storage = VSL_SS_MATRIX_STORAGE_COLS;
-        int status = vsldSSNewTask(&task_, &dim_, &size_, &storage,
+        int status = vsldSSNewTask(&task_, &dim_, &size_, &storage_,
                 &buffer_[0], &weight_[0], NULL);
         VSMC_RUNTIME_ASSERT((status == VSL_STATUS_OK),
                 "CALLING **vsldSSNewTask** failed");
@@ -97,7 +95,6 @@ class MKLStatEval
 
         edit_output(res);
         int status = vsldSSCompute(task_, est_, VSL_SS_METHOD_1PASS);
-        std::cout << status << std::endl;
         VSMC_RUNTIME_ASSERT((status == VSL_STATUS_OK),
                 "CALLING **vsldSSComputeTask** failed");
     }
@@ -112,6 +109,7 @@ class MKLStatEval
     VSLSSTaskPtr task_;
     MKL_INT64 est_;
     unsigned monitor_dim_;
+    MKL_INT storage_;
 
     void edit_task ()
     {
