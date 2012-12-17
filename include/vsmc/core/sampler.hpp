@@ -22,7 +22,8 @@ class Sampler
 
     explicit Sampler (size_type N,
             ResampleScheme scheme = Stratified, double threshold = 0.5) :
-        threshold_(threshold), particle_(N), iter_num_(0), show_(false)
+        threshold_(threshold), particle_(N), iter_num_(0),
+        path_(typename Path<T>::eval_type()), show_(false)
     {
         resample_scheme(scheme);
     }

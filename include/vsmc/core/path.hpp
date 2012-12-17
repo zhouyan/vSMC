@@ -18,12 +18,12 @@ class Path
     typedef cxx11::function<double (
             unsigned, const Particle<T> &, double *)> eval_type;
 
-    explicit Path (const eval_type &eval = eval_type()) : eval_(eval) {}
+    explicit Path (const eval_type &eval) : eval_(eval) {}
 
     Path (const Path<T> &other) :
-        eval_(other.eval_),
-        index_(other.index_), integrand_(other.integrand_),
-        width_(other.width_), grid_(other.grid_) {}
+        eval_(other.eval_), index_(other.index_), integrand_(other.integrand_),
+        width_(other.width_), grid_(other.grid_)
+    {}
 
     Path<T> &operator= (const Path<T> &other)
     {

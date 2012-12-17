@@ -94,9 +94,9 @@ class StaticAssert<true>
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func)                             \
-    VSMC_RUNTIME_ASSERT((build()), (                                         \
-                "**StateCL::"#func"** can only be called after true "        \
-                "**StateCL::build**"));
+    VSMC_RUNTIME_ASSERT((build()),                                           \
+            ("**StateCL::"#func"** can only be called after true "           \
+             "**StateCL::build**"));
 
 #define VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID                      \
     VSMC_RUNTIME_ASSERT(particle_ptr_,                                       \
@@ -115,13 +115,17 @@ class StaticAssert<true>
              "is contructed with an out of range id"));
 
 #define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename)                           \
-    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)), (                   \
-                "DERIVED FROM " #basename                                    \
-                " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
+    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                     \
+            ("DERIVED FROM " #basename                                       \
+            " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func)                           \
-    VSMC_RUNTIME_ASSERT((setup()), (                                         \
-                "**vsmc::CLManager::"#func"** can only be called after true "\
-                "**vsmc::CLManager::setup**"));
+    VSMC_RUNTIME_ASSERT((setup()),                                           \
+            ("**vsmc::CLManager::"#func"** can only be called after true "   \
+             "**vsmc::CLManager::setup**"));
+
+#define VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status)                  \
+    VSMC_RUNTIME_ASSERT((status == VSL_STATUS_OK),                           \
+            ("CALLING **vsldSSEditTask** failed"));
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

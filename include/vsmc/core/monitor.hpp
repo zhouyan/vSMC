@@ -18,7 +18,7 @@ class Monitor
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
     typedef typename traits::DGemvTypeTrait<T>::type dgemv_type;
 
-    explicit Monitor (unsigned dim = 1, const eval_type &eval = eval_type(),
+    explicit Monitor (unsigned dim, const eval_type &eval,
             MonitorMethod method = ImportanceSampling) :
         dim_(dim), eval_(eval), method_(method) {}
 
@@ -194,7 +194,7 @@ class Monitor
         switch (method_) {
             case ImportanceSampling :
                 weight_.resize(particle.size());
-                buffer_.resize(dim_ * particle.size());
+                buffer_.resize(particle.size() * dim_);
                 eval_(iter, dim_, particle, &buffer_[0]);
                 particle.read_weight(&weight_[0]);
                 dgemv_(RowMajor, Trans,
