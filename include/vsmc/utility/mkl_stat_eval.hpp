@@ -33,8 +33,9 @@ class MKLStatEval
         weight_(size_), buffer_(size_), est_(other.est_),
         monitor_dim_(other.monitor_dim_)
     {
-        int status = vsldSSNewTask(&task_, &dim_, &size_,
-                VSL_SS_MATRIX_STORAGE_COLS, &buffer_[0], &weight_[0], NULL);
+        MKL_INT storage = VSL_SS_MATRIX_STORAGE_COLS;
+        int status = vsldSSNewTask(&task_, &dim_, &size_, &storage,
+                &buffer_[0], &weight_[0], NULL);
         VSMC_RUNTIME_ASSERT((status == VSL_STATUS_OK),
                 "CALLING **vsldSSNewTask** failed");
         edit_task();
@@ -74,7 +75,7 @@ class MKLStatEval
         return monitor_dim_;
     }
 
-    void eval (unsigned iter, unsigned dim,
+    void operator() (unsigned iter, unsigned dim,
             const Particle<T> &particle, double *res)
     {
         VSMC_RUNTIME_ASSERT((dim >= monitor_dim_),
@@ -95,7 +96,8 @@ class MKLStatEval
             return;
 
         edit_output(res);
-        int status vsldSSCompute(task_, est_, VSL_SS_METHOD_1PASS);
+        int status = vsldSSCompute(task_, est_, VSL_SS_METHOD_1PASS);
+        std::cout << status << std::endl;
         VSMC_RUNTIME_ASSERT((status == VSL_STATUS_OK),
                 "CALLING **vsldSSComputeTask** failed");
     }
@@ -115,7 +117,7 @@ class MKLStatEval
     {
         int status = VSL_STATUS_OK;
 
-        status = vsldSSEditTask(task_, VSL_SS_ED_OBSERV_N, &size_);
+        status = vsliSSEditTask(task_, VSL_SS_ED_OBSERV_N, &size_);
         VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
 
         status = vsldSSEditTask(task_, VSL_SS_ED_OBSERV, &buffer_[0]);
@@ -145,91 +147,91 @@ class MKLStatEval
         monitor_dim_ = static_cast<unsigned>(d);
     }
 
-    void edit_ouptut (double *res)
+    void edit_output (double *res)
     {
         int status = VSL_STATUS_OK;
         std::size_t offset = 0;
 
         if (est_ & VSL_SS_MEAN) {
-            status = vsldSSEditTask(VSL_SS_ED_MEAN, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_MEAN, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_2R_MOM) {
-            vsldSSEditTask(VSL_SS_ED_2R_MOM, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_2R_MOM, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_3R_MOM) {
-            vsldSSEditTask(VSL_SS_ED_3R_MOM, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_3R_MOM, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_4R_MOM) {
-            vsldSSEditTask(VSL_SS_ED_4R_MOM, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_4R_MOM, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_2C_MOM) {
-            vsldSSEditTask(VSL_SS_ED_2C_MOM, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_2C_MOM, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_3C_MOM) {
-            vsldSSEditTask(VSL_SS_ED_3C_MOM, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_3C_MOM, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_4C_MOM) {
-            vsldSSEditTask(VSL_SS_ED_4C_MOM, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_4C_MOM, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_KURTOSIS) {
-            vsldSSEditTask(VSL_SS_ED_KURTOSIS, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_KURTOSIS, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_SKEWNESS) {
-            vsldSSEditTask(VSL_SS_ED_SKEWNESS, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_SKEWNESS, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_MIN) {
-            vsldSSEditTask(VSL_SS_ED_MIN, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_MIN, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_MAX) {
-            vsldSSEditTask(VSL_SS_ED_MAX, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_MAX, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_VARIATION) {
-            vsldSSEditTask(VSL_SS_ED_VARIATION, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_VARIATION, res + offset);
             offset += dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_COV) {
-            vsldSSEditTask(VSL_SS_ED_COV, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_COV, res + offset);
             offset += dim_ * dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
 
         if (est_ & VSL_SS_COR) {
-            vsldSSEditTask(VSL_SS_ED_COR, res + offset);
+            status = vsldSSEditTask(task_, VSL_SS_ED_COR, res + offset);
             offset += dim_ * dim_;
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
