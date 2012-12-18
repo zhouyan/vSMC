@@ -20,20 +20,22 @@ class Monitor
 
     explicit Monitor (unsigned dim, const eval_type &eval,
             MonitorMethod method = ImportanceSampling) :
-        dim_(dim), eval_(eval), method_(method) {}
+        dim_(dim), eval_(eval), method_(method), var_name_(dim_) {}
 
     Monitor (const Monitor<T> &other) :
         dim_(other.dim_), eval_(other.eval_), method_(other.method_),
+        var_name_(other.var_name_),
         index_(other.index_), record_(other.record_) {}
 
     Monitor<T> &operator= (const Monitor<T> &other)
     {
         if (&other != this) {
-            dim_    = other.dim_;
-            eval_   = other.eval_;
-            method_ = other.method_;
-            index_  = other.index_;
-            record_ = other.record_;
+            dim_      = other.dim_;
+            eval_     = other.eval_;
+            method_   = other.method_;
+            var_name_ = other.var_name_;
+            index_    = other.index_;
+            record_   = other.record_;
         }
 
         return *this;
@@ -59,6 +61,36 @@ class Monitor
     VSMC_EXPLICIT_OPERATOR operator bool () const
     {
         return bool(eval_);
+    }
+
+    /// \brief Read and write access to the variable names of the monitor
+    std::string &var_name (unsigned id)
+    {
+        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
+                "**vsmc::Monitor::var_name** output of range id");
+
+        return var_name_[id];
+    }
+
+    /// \brief Read only access to the variable names of the monitor
+    const std::string &var_name (unsigned id) const
+    {
+        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
+                "**vsmc::Monitor::var_name** output of range id");
+
+        return var_name_[id];
+    }
+
+    /// \brief Set all variable names
+    template <typename InputIter>
+    void var_name (InputIter first, InputIter last)
+    {
+        var_name_.clear();
+        for (unsigned i = 0; i != dim_ && first != last; ++i, ++first)
+            var_name_.push_back(*first);
+        unsigned diff = dim_ - static_cast<unsigned>(var_name_.size());
+        for (unsigned i = 0; i != diff; ++i)
+            var_name_.push_back(std::string());
     }
 
     /// \brief Get the iteration index of the sampler of a given monitor
@@ -226,6 +258,7 @@ class Monitor
     unsigned dim_;
     eval_type eval_;
     MonitorMethod method_;
+    std::vector<std::string> var_name_;
     std::vector<unsigned> index_;
     std::vector<double> record_;
     std::vector<double> result_;

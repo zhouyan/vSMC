@@ -364,27 +364,24 @@ class Sampler
         return *this;
     }
 
-    /// \brief Read and write access to a named monitor through an iterator for
-    /// the monitor_map_type object
-    typename monitor_map_type::iterator monitor (const std::string &name)
+    /// \brief Read and write access to a named monitor
+    Monitor<T> &monitor (const std::string &name)
     {
         typename monitor_map_type::iterator iter = monitor_.find(name);
         VSMC_RUNTIME_ASSERT((iter != monitor_.end()),
                 "CALL **Sampler::monitor** WITH AN INVALID MONITOR NAME");
 
-        return iter;
+        return iter->second;
     }
 
-    /// \brief Read only access to a named monitor through an iterator for the
-    /// monitor_map_type object
-    typename monitor_map_type::const_iterator monitor (
-            const std::string &name) const
+    /// \brief Read only access to a named monitor
+    const Monitor<T> &monitor (const std::string &name) const
     {
         typename monitor_map_type::const_iterator citer = monitor_.find(name);
         VSMC_RUNTIME_ASSERT((citer != monitor_.end()),
                 "CALL **Sampler::monitor** WITH AN INVALID MONITOR NAME");
 
-        return citer;
+        return citer->second;
     }
 
     /// \brief Read and write access to all monitors to the monitor_map_type
@@ -527,10 +524,21 @@ class Sampler
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
                     if (m->second.dim() == 1) {
-                        os << sepchar << m->first;
+                        if (m->second.var_name(0).empty()) {
+                            os << sepchar << m->first;
+                        } else {
+                            os << sepchar << m->first << '.'
+                                << m->second.var_name(0);
+                        }
                     } else {
-                        for (unsigned d = 0; d != m->second.dim(); ++d)
-                            os << sepchar << m->first << '.' << d + 1;
+                        for (unsigned d = 0; d != m->second.dim(); ++d) {
+                            if (m->second.var_name(d).empty()) {
+                                os << sepchar << m->first << '.' << d + 1;
+                            } else {
+                                os << sepchar << m->first << '.'
+                                    << m->second.var_name(d);
+                            }
+                        }
                     }
                 }
             }
