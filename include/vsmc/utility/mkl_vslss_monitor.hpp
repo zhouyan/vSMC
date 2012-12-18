@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_MKL_STAT_EVAL_HPP
-#define VSMC_UTILITY_MKL_STAT_EVAL_HPP
+#ifndef VSMC_UTILITY_MKL_VSLSS_MONITOR_HPP
+#define VSMC_UTILITY_MKL_VSLSS_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <mkl_vsl.h>
@@ -7,7 +7,7 @@
 namespace vsmc {
 
 template <typename T>
-class MKLStatEval
+class MKLVSLSSMonitor
 {
     public :
 
@@ -15,7 +15,7 @@ class MKLStatEval
     typedef cxx11::function<void (
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
 
-    explicit MKLStatEval (unsigned dim, const eval_type &eval) :
+    explicit MKLVSLSSMonitor (unsigned dim, const eval_type &eval) :
         size_(2), dim_(static_cast<MKL_INT>(dim)), eval_(eval),
         weight_(size_), buffer_(size_), task_(NULL), est_(0), monitor_dim_(0),
         dat_store_(VSL_SS_MATRIX_STORAGE_COLS),
@@ -28,7 +28,7 @@ class MKLStatEval
         edit_task();
     }
 
-    MKLStatEval (const MKLStatEval<T> &other) :
+    MKLVSLSSMonitor (const MKLVSLSSMonitor<T> &other) :
         size_(other.size_), dim_(other.dim_), eval_(other.eval_),
         weight_(size_), buffer_(size_), est_(other.est_),
         monitor_dim_(other.monitor_dim_),
@@ -42,7 +42,7 @@ class MKLStatEval
         edit_task();
     }
 
-    MKLStatEval<T> &operator= (const MKLStatEval<T> &other)
+    MKLVSLSSMonitor<T> &operator= (const MKLVSLSSMonitor<T> &other)
     {
         if (this != &other) {
             size_ = other.size_;
@@ -58,7 +58,7 @@ class MKLStatEval
         return *this;
     }
 
-    ~MKLStatEval ()
+    ~MKLVSLSSMonitor ()
     {
         int status = vslSSDeleteTask(&task_);
         VSMC_RUNTIME_ASSERT((status == VSL_STATUS_OK),
@@ -85,7 +85,7 @@ class MKLStatEval
             const Particle<T> &particle, double *res)
     {
         VSMC_RUNTIME_ASSERT((dim >= monitor_dim_),
-                "DIMENSION OF OUTPUT PARAMETER IN **vsmc::MKLStatEval::eval**"
+                "DIMENSION OF OUTPUT IN **vsmc::MKLVSLSSMonitor::eval**"
                 "TOO SMALL");
 
         if (size_ != static_cast<MKL_INT>(particle.size())) {
@@ -367,8 +367,8 @@ class MKLStatEval
             VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status);
         }
     }
-}; // class MKLStatEval
+}; // class MKLVSLSSMonitor
 
 }
 
-#endif // VSMC_UTILITY_MKL_STAT_EVAL_HPP
+#endif // VSMC_UTILITY_MKL_VSLSS_MONITOR_HPP
