@@ -16,7 +16,7 @@ class MKLVSLSSMonitor
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
 
     explicit MKLVSLSSMonitor (unsigned dim, const eval_type &eval) :
-        size_(2), dim_(static_cast<MKL_INT>(dim)), eval_(eval),
+        size_(1), dim_(static_cast<MKL_INT>(dim)), eval_(eval),
         weight_(size_), buffer_(size_), task_(NULL), est_(0), monitor_dim_(0),
         dat_store_(VSL_SS_MATRIX_STORAGE_COLS),
         cov_store_(VSL_SS_MATRIX_STORAGE_FULL)
