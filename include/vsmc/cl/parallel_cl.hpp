@@ -181,7 +181,7 @@ class StateCL
         return state_device_;
     }
 
-    const double *state_host () const
+    const state_type *state_host () const
     {
         cl_manager_.template read_buffer<state_type>(
                 state_device_, dim_ * size_, &state_host_[0]);
@@ -337,7 +337,7 @@ class StateCL
     cl::Buffer accept_device_;
     cl::Buffer copy_device_;
 
-    mutable std::vector<double> state_host_;
+    mutable std::vector<state_type> state_host_;
     mutable std::vector<cl_uint> accept_host_;
 }; // class StateCL
 

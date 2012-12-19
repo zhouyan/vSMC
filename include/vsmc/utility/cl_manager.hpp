@@ -8,41 +8,6 @@
 
 namespace vsmc { namespace opencl {
 
-template <bool, bool, typename IterType>
-struct GetHostPtrDispatch
-{
-    static void *get (IterType iter)
-    {
-        return VSMC_NULLPTR;
-    }
-};
-
-template <typename IterType>
-struct GetHostPtrDispatch<true, true, IterType>
-{
-    static void *get (IterType iter)
-    {
-        return (void *) iter;
-    }
-};
-
-template <typename CLType, typename IterType>
-struct GetHostPtr
-{
-    static void *get (IterType iter)
-    {
-        typedef typename cxx11::remove_cv<IterType>::type ptr_type;
-        typedef typename cxx11::remove_pointer<ptr_type>::type val_type;
-        typedef typename cxx11::remove_cv<val_type>::type host_type;
-        typedef typename cxx11::remove_cv<CLType>::type device_type;
-
-        return GetHostPtrDispatch<
-            cxx11::is_pointer<IterType>::value,
-            cxx11::is_same<host_type, device_type>::value,
-            IterType>::get(iter);
-    }
-};
-
 struct Default
 {
     typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_DEFAULT>
@@ -158,9 +123,6 @@ class CLManager
         size_type num = 0;
         for (InputIter i = first; i != last; ++i)
             ++num;
-        VSMC_RUNTIME_ASSERT((num),
-                "ATTEMPT TO CALL vsmc::CLManager::crate_buffer "
-                "WITH ZERO SIZE")
 
         if (!num)
             return cl::Buffer();
@@ -175,39 +137,69 @@ class CLManager
     OutputIter read_buffer (const cl::Buffer &buf, size_type num,
             OutputIter first) const
     {
+        std::cout << "Read Buffer" << std::endl;
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
-        void *host_ptr = GetHostPtr<CLType, OutputIter>::get(first);
+        CLType *temp = read_buffer_pool<CLType>(num);
         command_queue_.finish();
-        if (host_ptr) {
-            command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
-                    host_ptr);
-            return first + num;
-        } else {
-            CLType *temp = read_buffer_pool<CLType>(num);
-            command_queue_.enqueueReadBuffer(buf, 1, 0,
-                    sizeof(CLType) * num, (void *) temp);
-            return std::copy(temp, temp + num, first);
-        }
+        command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
+                (void *) temp);
+
+        return std::copy(temp, temp + num, first);
+    }
+
+    template <typename CLType>
+    CLType *read_buffer (const cl::Buffer &buf, size_type num,
+            CLType *first) const
+    {
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
+
+        command_queue_.finish();
+        command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
+                (void *) first);
+
+        return first + num;
     }
 
     template <typename CLType, typename InputIter>
     InputIter write_buffer (const cl::Buffer &buf, size_type num,
             InputIter first) const
     {
+        std::cout << "Write Buffer" << std::endl;
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
-        void *host_ptr = GetHostPtr<CLType, InputIter>::get(first);
+        CLType *temp = write_buffer_pool<CLType>(num);
+        for (size_type i = 0; i != num; ++i, ++first)
+            temp[i] = *first;
         command_queue_.finish();
-        if (host_ptr) {
-            command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
-                    host_ptr);
-        } else {
-            CLType *temp = write_buffer_pool<CLType>(num);
-            std::copy(first, first + num, temp);
-            command_queue_.enqueueWriteBuffer(buf, 1, 0,
-                    sizeof(CLType) * num, (void *) temp);
-        }
+        command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
+                (void *) temp);
+
+        return first;
+    }
+
+    template <typename CLType>
+    const CLType *write_buffer (const cl::Buffer &buf, size_type num,
+            const CLType *first) const
+    {
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
+
+        command_queue_.finish();
+        command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
+                (void *) first);
+
+        return first + num;
+    }
+
+    template <typename CLType>
+    CLType *write_buffer (const cl::Buffer &buf, size_type num,
+            CLType *first) const
+    {
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
+
+        command_queue_.finish();
+        command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
+                (void *) first);
 
         return first + num;
     }
