@@ -18,6 +18,16 @@ class Monitor
             unsigned, unsigned, const Particle<T> &, double *)> eval_type;
     typedef typename traits::DGemvTypeTrait<T>::type dgemv_type;
 
+    /// \brief Construct a monitor with an evaluation object
+    ///
+    /// \param dim The dimension of the monitor, i.e., the number of variables
+    /// \param eval The evaluation object of type Monitor::eval_type
+    /// \param method The method of the monitor evaluation.
+    /// - _ImportanceSampling_ The evalution object return the integrands whose
+    /// weighted average (the importance sampling estimate) will be calculated
+    /// later by the Monitor object
+    /// - _Simple_ The evalution object returnt the `dim` length record
+    /// directly.
     explicit Monitor (unsigned dim, const eval_type &eval,
             MonitorMethod method = ImportanceSampling) :
         dim_(dim), eval_(eval), method_(method), var_name_(dim_) {}

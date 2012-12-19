@@ -354,6 +354,7 @@ class Sampler
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
+    /// \param method The method of the monitor evaluation
     Sampler<T> &monitor (const std::string &name, unsigned dim,
             const typename Monitor<T>::eval_type &eval,
             MonitorMethod method = ImportanceSampling)
