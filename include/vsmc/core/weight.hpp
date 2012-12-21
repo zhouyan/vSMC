@@ -249,7 +249,7 @@ class WeightSet
 
     protected :
 
-    set_ess (double new_ess) {ess_ = new_ess;}
+    void set_ess (double new_ess) {ess_ = new_ess;}
 
     double *weight_ptr     () {return &weight_[0];}
     double *log_weight_ptr () {return &log_weight_[0];}
