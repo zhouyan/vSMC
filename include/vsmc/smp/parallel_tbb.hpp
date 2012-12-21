@@ -28,8 +28,11 @@ class StateTBB : public StateBase<Dim, T>
     explicit StateTBB (size_type N) : StateBase<Dim, T>(N) {}
 
     template <typename IntType>
-    void copy (const IntType *copy_from)
+    void copy (size_type N, const IntType *copy_from)
     {
+        VSMC_RUNTIME_ASSERT((N == this->size()),
+                "**StateTBB::copy** SIZE MISMATCH");
+
         tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
                 copy_work_<IntType>(this, copy_from));
     }

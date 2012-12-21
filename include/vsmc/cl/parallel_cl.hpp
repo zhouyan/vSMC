@@ -304,9 +304,10 @@ class StateCL
     }
 
     template<typename IntType>
-    void copy (const IntType *copy_from)
+    void copy (size_type N, const IntType *copy_from)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(copy);
+        VSMC_RUNTIME_ASSERT((N == size_), "**StateCL::copy** SIZE MISMATCH");
 
         cl_manager_.template write_buffer<size_type>(
                 copy_device_, size_, copy_from);

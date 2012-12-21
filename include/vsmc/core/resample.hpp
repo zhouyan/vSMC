@@ -34,7 +34,7 @@ inline void multinomial (SizeType N, SizeType S, RngSetType &rng_set,
                     assert(p - 1 < 1e-6);
                 }
                 cxx11::binomial_distribution<s_t> binom(s, p);
-                replication[i] = binom(rng_set.rng(i));
+                replication[i] = binom(rng_set.rng(0));
             }
             acc_w += weight[i];
             acc_s += replication[i];
@@ -134,7 +134,7 @@ class Resample<ResampleType<ResampleScheme, Stratified>,
         while (j != N) {
             while (j < cw * N - u && j != N) {
                 ++replication[k];
-                u = unif(rng_set.rng(j));
+                u = unif(rng_set.rng(0));
                 ++j;
             }
             if (k == N - 1)
@@ -208,7 +208,7 @@ class Resample<ResampleType<ResampleScheme, ResidualStratified>,
         while (j != size) {
             while (j < cw * size - u && j != size) {
                 ++replication[k];
-                u = unif(rng_set.rng(j));
+                u = unif(rng_set.rng(0));
                 ++j;
             }
             if (k == N - 1)

@@ -47,8 +47,10 @@ class StateBase : public StateBaseDim<Dim>
     explicit StateBase (size_type N) : size_(N), state_(N * Dim) {}
 
     template <typename IntType>
-    void copy (const IntType *copy_from)
+    void copy (size_type N, const IntType *copy_from)
     {
+        VSMC_RUNTIME_ASSERT((N == size_), "**StateBase::copy** SIZE MISMATCH");
+
         for (size_type to = 0; to != size_; ++to)
             this->copy_particle(copy_from[to], to);
     }

@@ -25,17 +25,14 @@ class StateOMP : public StateBase<Dim, T>
     explicit StateOMP (size_type N) : StateBase<Dim, T>(N) {}
 
     template <typename IntType>
-    void copy (const IntType *copy_from)
+    void copy (size_type N, const IntType *copy_from)
     {
-#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
-#pragma omp parallel for default(none) shared(copy_from)
-        for (size_type to = 0; to < this->size(); ++to)
-            this->copy_particle(copy_from[to], to);
-#else
+        VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),
+                "**StateOMP::copy** SIZE MISMATCH");
+
 #pragma omp parallel for default(none) shared(copy_from)
         for (size_type to = 0; to < static_cast<size_type>(this->size()); ++to)
             this->copy_particle(copy_from[to], to);
-#endif
     }
 }; // class StateOMP
 

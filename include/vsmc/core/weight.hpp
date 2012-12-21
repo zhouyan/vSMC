@@ -19,6 +19,23 @@ class WeightSet
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
+    size_type resample_size () const
+    {
+        return size_;
+    }
+
+    template <typename OutputIter>
+    OutputIter read_resample_weight (OutputIter first) const
+    {
+        return read_weight(first);
+    }
+
+    template <typename RandomIter>
+    RandomIter read_resample_weight (RandomIter first, int stride) const
+    {
+        return read_weight(first, stride);
+    }
+
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const

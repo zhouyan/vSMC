@@ -252,20 +252,6 @@ class ConstSingleParticle
         return particle_ptr_->value().state(id_, pos);
     }
 
-    double weight () const
-    {
-        VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID;
-
-        return particle_ptr_->weight()[id_];
-    }
-
-    double log_weight () const
-    {
-        VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID;
-
-        return particle_ptr_->log_weight()[id_];
-    }
-
     const particle_type &particle () const
     {
         VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID;
@@ -326,20 +312,6 @@ class SingleParticle
         VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
 
         return particle_ptr_->value().state(id_, pos);
-    }
-
-    double weight () const
-    {
-        VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
-
-        return particle_ptr_->weight()[id_];
-    }
-
-    double log_weight () const
-    {
-        VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
-
-        return particle_ptr_->log_weight()[id_];
     }
 
     const particle_type &particle () const
@@ -532,60 +504,6 @@ class Particle
         return rng_set_;
     }
 
-    /// \brief Read normalized weights through an output iterator
-    template <typename OutputIter>
-    OutputIter read_weight (OutputIter first) const
-    {
-        return weight_set_.read_weight(first);
-    }
-
-    /// \brief Read normalized weights through a random access iterator with
-    /// (possible non-uniform stride)
-    template <typename RandomIter>
-    RandomIter read_weight (RandomIter first, int stride) const
-    {
-        return weight_set_.read_weight(first, stride);
-    }
-
-    /// \brief Read normalized weights through a pointer
-    double *read_weight (double *first) const
-    {
-        return weight_set_.read_weight(first);
-    }
-
-    /// \brief Read unnormalized logarithm weights through an output iterator
-    template <typename OutputIter>
-    OutputIter read_log_weight (OutputIter first) const
-    {
-        return weight_set_.read_log_weight(first);
-    }
-
-    /// \brief Read unnormalized logarithm weights through a random access
-    /// iterator with (possible non-uniform stride)
-    template <typename RandomIter>
-    RandomIter read_log_weight (RandomIter first, int stride) const
-    {
-        return weight_set_.read_log_weight(first, stride);
-    }
-
-    /// \brief Read unnormalized logarithm weights through a pointer
-    double *read_log_weight (double *first) const
-    {
-        return weight_set_.read_log_weight(first);
-    }
-
-    /// \brief Get the normalized weight of the id'th particle
-    double weight (size_type id) const
-    {
-        return weight_set_.weight(id);
-    }
-
-    /// \brief Get the unnormalized logarithm weight of the id'th particle
-    double log_weight (size_type id) const
-    {
-        return weight_set_.log_weight(id);
-    }
-
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS
     /// such that each particle has a equal weight
     void set_equal_weight ()
@@ -593,93 +511,11 @@ class Particle
         weight_set_.set_equal_weight();
     }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) weights directly through an input
-    /// iterator
-    template <typename InputIter>
-    void set_weight (InputIter first)
+    /// \brief Read normalized weights through an output iterator
+    template <typename OutputIter>
+    OutputIter read_weight (OutputIter first) const
     {
-        weight_set_.set_weight(first);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) weights directly through a random
-    /// access iterator with (possible non-uniform) stride
-    template <typename RandomIter>
-    void set_weight (RandomIter first, int stride)
-    {
-        weight_set_.set_weight(first, stride);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) weights directly through a pointer
-    void set_weight (const double *first)
-    {
-        weight_set_.set_weight(first);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// multiply the normalized weight with (possible unnormalized) incremental
-    /// weights through an input iterator
-    template <typename InputIter>
-    void mul_weight (InputIter first)
-    {
-        weight_set_.mul_weight(first);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// multiply the normalized weight with (possible unnormalized) incremental
-    /// weights through a random access iterator with (possible non-uniform)
-    /// stride
-    template <typename RandomIter>
-    void mul_weight (RandomIter first, int stride)
-    {
-        weight_set_.mul_weight(first, stride);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) logarithm weights directly through
-    /// an input iterator
-    template <typename InputIter>
-    void set_log_weight (InputIter first)
-    {
-        weight_set_.set_log_weight(first);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) logarithm weights directly through
-    /// a random access iterator with (possible non-uniform) stride
-    template <typename RandomIter>
-    void set_log_weight (RandomIter first, int stride)
-    {
-        weight_set_.set_log_weight(first, stride);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) logarithm weights directly through
-    /// a pointer
-    void set_log_weight (const double *first)
-    {
-        weight_set_.set_log_weight(first);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// adding to the unnormalized logarithm weights with (possible
-    /// unormalized) logarithm incremental weights through an input iterator
-    template <typename InputIter>
-    void add_log_weight (InputIter first)
-    {
-        weight_set_.add_log_weight(first);
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// adding to the unnormalized logarithm weights with (possible
-    /// unormalized) logarithm incremental weights through a ranodm access
-    /// iterator with (possible non-uniform) stride
-    template <typename RandomIter>
-    void add_log_weight (RandomIter first, int stride)
-    {
-        weight_set_.add_log_weight(first, stride);
+        return weight_set_.read_weight(first);
     }
 
     /// \brief Get the ESS of the particle collection based on the current
@@ -704,11 +540,16 @@ class Particle
     bool resample (double threshold)
     {
         resampled_ = weight_set_.ess() < threshold * size_;
-        if (resampled_) {
-            weight_set_.read_weight(&weight_[0]);
+        size_type N = weight_set_.resample_size();
+        if (resampled_ && N > 0) {
+            weight_.resize(N);
+            replication_.resize(N);
+            weight_set_.read_resample_weight(&weight_[0]);
             resample_op_(size_, resample_rng_set_,
                     &weight_[0], &replication_[0]);
-            resample_do();
+            replication2copy_from(N);
+            value_.copy(N, &copy_from_[0]);
+            weight_set_.set_equal_weight();
         }
 
         return resampled_;
@@ -816,20 +657,21 @@ class Particle
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
 
-    void resample_do ()
+    void replication2copy_from (size_type N)
     {
+        copy_from_.resize(N);
         size_type sum = std::accumulate(
                 replication_.begin(), replication_.end(),
                 static_cast<size_type>(0));
-        if (sum != size_) {
+        if (sum != N) {
             typename std::vector<size_type>::iterator id_max =
                 std::max_element(replication_.begin(), replication_.end());
-            *id_max += size_ - sum;
+            *id_max += N - sum;
         }
 
         size_type from = 0;
         size_type time = 0;
-        for (size_type to = 0; to != size_; ++to) {
+        for (size_type to = 0; to != N; ++to) {
             if (replication_[to]) {
                 copy_from_[to] = to;
             } else {
@@ -845,9 +687,6 @@ class Particle
                 ++time;
             }
         }
-
-        value_.copy(&copy_from_[0]);
-        weight_set_.set_equal_weight();
     }
 }; // class Particle
 

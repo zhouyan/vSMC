@@ -21,8 +21,11 @@ class StateSTD : public StateBase<Dim, T>
     explicit StateSTD (size_type N) : StateBase<Dim, T>(N) {}
 
     template <typename IntType>
-    void copy (const IntType *copy_from)
+    void copy (size_type N, const IntType *copy_from)
     {
+        VSMC_RUNTIME_ASSERT((N == this->size()),
+                "**StateSTD::copy** SIZE MISMATCH");
+
         thread::parallel_for(thread::BlockedRange<size_type>(0, this->size()),
                 copy_work_<IntType>(this, copy_from));
     }

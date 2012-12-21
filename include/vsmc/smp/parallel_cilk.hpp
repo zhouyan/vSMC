@@ -22,8 +22,11 @@ class StateCILK : public StateBase<Dim, T>
     explicit StateCILK (size_type N) : StateBase<Dim, T>(N) {}
 
     template <typename IntType>
-    void copy (const IntType *copy_from)
+    void copy (size_type N, const IntType *copy_from)
     {
+        VSMC_RUNTIME_ASSERT((N == this->size()),
+                "**StateCILK::copy** SIZE MISMATCH");
+
         cilk_for (size_type to = 0; to != this->size(); ++to)
             this->copy_particle(copy_from[to], to);
     }
