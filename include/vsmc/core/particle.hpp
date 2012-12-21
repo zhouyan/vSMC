@@ -357,10 +357,10 @@ class Particle
     typedef typename traits::RngSetTypeTrait<T>::type
         rng_set_type;
     typedef typename rng_set_type::rng_type rng_type;
-    typedef typename traits::ResampleRngSetTypeTrait<T>::type
-        resample_rng_set_type;
+    typedef typename traits::ResampleRngTypeTrait<T>::type
+        resample_rng_type;
     typedef cxx11::function<
-        void (size_type, resample_rng_set_type &, double *, size_type *)>
+        void (size_type, resample_rng_type &, double *, size_type *)>
         resample_op_type;
     typedef ParticleIterator<T, SingleParticle> iterator;
     typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
@@ -370,7 +370,7 @@ class Particle
     explicit Particle (size_type N) :
         size_(N), value_(N), weight_set_(N), rng_set_(N),
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
-        resample_rng_set_(N),
+        resample_rng_(vsmc::Seed::instance().get()),
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
         csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {
@@ -545,7 +545,7 @@ class Particle
             weight_.resize(N);
             replication_.resize(N);
             weight_set_.read_resample_weight(&weight_[0]);
-            resample_op_(size_, resample_rng_set_,
+            resample_op_(size_, resample_rng_,
                     &weight_[0], &replication_[0]);
             replication2copy_from(N);
             value_.copy(N, &copy_from_[0]);
@@ -579,32 +579,32 @@ class Particle
             case Multinomial :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, Multinomial>,
-                    size_type, resample_rng_set_type>();
+                    size_type, resample_rng_type>();
                 break;
             case Residual :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, Residual>,
-                    size_type, resample_rng_set_type>();
+                    size_type, resample_rng_type>();
                 break;
             case Stratified :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, Stratified>,
-                    size_type, resample_rng_set_type>();
+                    size_type, resample_rng_type>();
                 break;
             case Systematic :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, Systematic>,
-                    size_type, resample_rng_set_type>();
+                    size_type, resample_rng_type>();
                 break;
             case ResidualStratified :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, ResidualStratified>,
-                    size_type, resample_rng_set_type>();
+                    size_type, resample_rng_type>();
                 break;
             case ResidualSystematic :
                 resample_op_ =
                     Resample<ResampleType<ResampleScheme, ResidualSystematic>,
-                    size_type, resample_rng_set_type>();
+                    size_type, resample_rng_type>();
                 break;
             default :
                 return false;
@@ -618,7 +618,7 @@ class Particle
     ///
     /// \details
     /// An object of type Resample<ResampleType<EnumType, S>, size_type,
-    /// resample_rng_set_type> will constructed as the resampling method. This
+    /// resample_rng_type> will constructed as the resampling method. This
     /// can be a user defined partial specializing of Resample clas template
     ///
     /// For example, resample_scheme<ResampleScheme, Stratified>() is
@@ -632,13 +632,13 @@ class Particle
     /// \brief Set resampling method by the type of resampling object
     ///
     /// \details
-    /// An object of type Resample<ResType, size_type, resample_rng_set_type>,
+    /// An object of type Resample<ResType, size_type, resample_rng_type>,
     /// will constructed as the resampling method. This can be a user defined
     /// partial specializing of Resample class template
     template <typename ResType>
     void resample_scheme ()
     {
-        resample_op_ = Resample<ResType, size_type, resample_rng_set_type>();
+        resample_op_ = Resample<ResType, size_type, resample_rng_type>();
     }
 
     private :
@@ -653,7 +653,7 @@ class Particle
     std::vector<double> weight_;
     bool resampled_;
     resample_op_type resample_op_;
-    resample_rng_set_type resample_rng_set_;
+    resample_rng_type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
 

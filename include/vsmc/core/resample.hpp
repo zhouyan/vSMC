@@ -7,8 +7,8 @@ namespace vsmc {
 
 namespace internal {
 
-template <typename SizeType, typename RngSetType>
-inline void multinomial (SizeType N, SizeType S, RngSetType &rng_set,
+template <typename SizeType, typename RngType>
+inline void multinomial (SizeType N, SizeType S, RngType &rng,
         const double *weight, SizeType *replication)
 {
         double sum_w = 0;
@@ -34,7 +34,7 @@ inline void multinomial (SizeType N, SizeType S, RngSetType &rng_set,
                     assert(p - 1 < 1e-6);
                 }
                 cxx11::binomial_distribution<s_t> binom(s, p);
-                replication[i] = binom(rng_set.rng(0));
+                replication[i] = binom(rng);
             }
             acc_w += weight[i];
             acc_s += replication[i];
@@ -60,34 +60,32 @@ template <typename EnumType, EnumType S> struct ResampleType {};
 
 /// \brief Resample class template
 /// \ingroup Resampling
-template <typename ResType, typename SizeType, typename RngSetType>
+template <typename ResType, typename SizeType, typename RngType>
 class Resample {};
 
 /// \brief Multinomial resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, Multinomial>,
-      SizeType, RngSetType>
+template <typename SizeType, typename RngType>
+class Resample<ResampleType<ResampleScheme, Multinomial>, SizeType, RngType>
 {
     public :
 
-    void operator() (SizeType N, RngSetType &rng_set,
-            const double *weight, SizeType *replication)
+    void operator() (SizeType N, RngType &rng, const double *weight,
+            SizeType *replication)
     {
-        internal::multinomial(N, N, rng_set, weight, replication);
+        internal::multinomial(N, N, rng, weight, replication);
     }
 }; // Mulitnomial resampling
 
 /// \brief Residual resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, Residual>,
-      SizeType, RngSetType>
+template <typename SizeType, typename RngType>
+class Resample<ResampleType<ResampleScheme, Residual>, SizeType, RngType>
 {
     public :
 
-    void operator() (SizeType N, RngSetType &rng_set,
-            const double *weight, SizeType *replication)
+    void operator() (SizeType N, RngType &rng, const double *weight,
+            SizeType *replication)
     {
         using std::modf;
 
@@ -100,8 +98,7 @@ class Resample<ResampleType<ResampleScheme, Residual>,
         SizeType size = static_cast<SizeType>(dsize);
         for (SizeType i = 0; i != N; ++i)
             residual_[i] /= dsize;
-        internal::multinomial(N, size, rng_set, &residual_[0],
-                replication);
+        internal::multinomial(N, size, rng, &residual_[0], replication);
         for (SizeType i = 0; i != N; ++i)
             replication[i] += static_cast<SizeType>(integral_[i]);
     }
@@ -114,14 +111,13 @@ class Resample<ResampleType<ResampleScheme, Residual>,
 
 /// \brief Stratified resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, Stratified>,
-      SizeType, RngSetType>
+template <typename SizeType, typename RngType>
+class Resample<ResampleType<ResampleScheme, Stratified>, SizeType, RngType>
 {
     public :
 
-    void operator() (SizeType N, RngSetType &rng_set,
-            const double *weight, SizeType *replication)
+    void operator() (SizeType N, RngType &rng, const double *weight,
+            SizeType *replication)
     {
         for (SizeType i = 0; i != N; ++i)
             replication[i] = 0;
@@ -129,12 +125,12 @@ class Resample<ResampleType<ResampleScheme, Stratified>,
         SizeType j = 0;
         SizeType k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng_set.rng(0));
+        double u = unif(rng);
         double cw = weight[0];
         while (j != N) {
             while (j < cw * N - u && j != N) {
                 ++replication[k];
-                u = unif(rng_set.rng(0));
+                u = unif(rng);
                 ++j;
             }
             if (k == N - 1)
@@ -146,14 +142,13 @@ class Resample<ResampleType<ResampleScheme, Stratified>,
 
 /// \brief Systematic resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngSetType>
-class Resample<ResampleType<ResampleScheme, Systematic>,
-      SizeType, RngSetType>
+template <typename SizeType, typename RngType>
+class Resample<ResampleType<ResampleScheme, Systematic>, SizeType, RngType>
 {
     public :
 
-    void operator() (SizeType N, RngSetType &rng_set,
-            const double *weight, SizeType *replication)
+    void operator() (SizeType N, RngType &rng, const double *weight,
+            SizeType *replication)
     {
         for (SizeType i = 0; i != N; ++i)
             replication[i] = 0;
@@ -161,7 +156,7 @@ class Resample<ResampleType<ResampleScheme, Systematic>,
         SizeType j = 0;
         SizeType k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng_set.rng(0));
+        double u = unif(rng);
         double cw = weight[0];
         while (j != N) {
             while (j < cw * N - u && j != N) {
@@ -177,14 +172,14 @@ class Resample<ResampleType<ResampleScheme, Systematic>,
 
 /// \brief Residual stratified resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngSetType>
+template <typename SizeType, typename RngType>
 class Resample<ResampleType<ResampleScheme, ResidualStratified>,
-      SizeType, RngSetType>
+      SizeType, RngType>
 {
     public :
 
-    void operator() (SizeType N, RngSetType &rng_set,
-            const double *weight, SizeType *replication)
+    void operator() (SizeType N, RngType &rng, const double *weight,
+            SizeType *replication)
     {
         using std::modf;
 
@@ -203,12 +198,12 @@ class Resample<ResampleType<ResampleScheme, ResidualStratified>,
         SizeType j = 0;
         SizeType k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng_set.rng(0));
+        double u = unif(rng);
         double cw = residual_[0];
         while (j != size) {
             while (j < cw * size - u && j != size) {
                 ++replication[k];
-                u = unif(rng_set.rng(0));
+                u = unif(rng);
                 ++j;
             }
             if (k == N - 1)
@@ -227,14 +222,14 @@ class Resample<ResampleType<ResampleScheme, ResidualStratified>,
 
 /// \brief Residual systematic resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngSetType>
+template <typename SizeType, typename RngType>
 class Resample<ResampleType<ResampleScheme, ResidualSystematic>,
-      SizeType, RngSetType>
+      SizeType, RngType>
 {
     public :
 
-    void operator() (SizeType N, RngSetType &rng_set,
-            const double *weight, SizeType *replication)
+    void operator() (SizeType N, RngType &rng, const double *weight,
+            SizeType *replication)
     {
         using std::modf;
 
@@ -253,7 +248,7 @@ class Resample<ResampleType<ResampleScheme, ResidualSystematic>,
         SizeType j = 0;
         SizeType k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng_set.rng(0));
+        double u = unif(rng);
         double cw = residual_[0];
         while (j != size) {
             while (j < cw * size - u && j != size) {
