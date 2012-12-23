@@ -28,8 +28,8 @@ struct GPU
 
 struct Accelerator
 {
-    typedef cxx11::integral_constant<
-        cl_device_type, CL_DEVICE_TYPE_ACCELERATOR> opencl_device_type;
+    typedef cxx11::integral_constant<cl_device_type,
+        CL_DEVICE_TYPE_ACCELERATOR> opencl_device_type;
 };
 
 /// \brief OpenCL Manager
@@ -137,7 +137,6 @@ class CLManager
     OutputIter read_buffer (const cl::Buffer &buf, size_type num,
             OutputIter first) const
     {
-        std::cout << "Read Buffer" << std::endl;
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
         CLType *temp = read_buffer_pool<CLType>(num);
@@ -165,7 +164,6 @@ class CLManager
     InputIter write_buffer (const cl::Buffer &buf, size_type num,
             InputIter first) const
     {
-        std::cout << "Write Buffer" << std::endl;
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
         CLType *temp = write_buffer_pool<CLType>(num);
