@@ -577,34 +577,28 @@ class Particle
     {
         switch (scheme) {
             case Multinomial :
-                resample_op_ =
-                    Resample<ResampleType<ResampleScheme, Multinomial>,
-                    size_type, resample_rng_type>();
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, Multinomial> >();
                 break;
             case Residual :
-                resample_op_ =
-                    Resample<ResampleType<ResampleScheme, Residual>,
-                    size_type, resample_rng_type>();
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, Residual> >();
                 break;
             case Stratified :
-                resample_op_ =
-                    Resample<ResampleType<ResampleScheme, Stratified>,
-                    size_type, resample_rng_type>();
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, Stratified> >();
                 break;
             case Systematic :
-                resample_op_ =
-                    Resample<ResampleType<ResampleScheme, Systematic>,
-                    size_type, resample_rng_type>();
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, Systematic> >();
                 break;
             case ResidualStratified :
-                resample_op_ =
-                    Resample<ResampleType<ResampleScheme, ResidualStratified>,
-                    size_type, resample_rng_type>();
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, ResidualStratified> >();
                 break;
             case ResidualSystematic :
-                resample_op_ =
-                    Resample<ResampleType<ResampleScheme, ResidualSystematic>,
-                    size_type, resample_rng_type>();
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, ResidualSystematic> >();
                 break;
             default :
                 return false;
@@ -638,7 +632,7 @@ class Particle
     template <typename ResType>
     void resample_scheme ()
     {
-        resample_op_ = Resample<ResType, size_type, resample_rng_type>();
+        resample_op_ = Resample<ResType>();
     }
 
     private :
@@ -660,14 +654,6 @@ class Particle
     void replication2copy_from (size_type N)
     {
         copy_from_.resize(N);
-        size_type sum = std::accumulate(
-                replication_.begin(), replication_.end(),
-                static_cast<size_type>(0));
-        if (sum != N) {
-            typename std::vector<size_type>::iterator id_max =
-                std::max_element(replication_.begin(), replication_.end());
-            *id_max += N - sum;
-        }
 
         size_type from = 0;
         size_type time = 0;

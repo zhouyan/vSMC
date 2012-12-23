@@ -41,6 +41,17 @@ inline void multinomial (SizeType N, SizeType S, RngType &rng,
         }
 }
 
+template <typename SizeType>
+inline void normalize_replication (SizeType N, SizeType *replication)
+{
+    SizeType sum = std::accumulate(replication, replication + N,
+            static_cast<SizeType>(0));
+    if (sum != N) {
+        SizeType *id_max = std::max_element(replication, replication + N);
+        *id_max += N - sum;
+    }
+}
+
 } // namespace vsmc::internal
 
 /// \brief Resample scheme
@@ -60,30 +71,33 @@ template <typename EnumType, EnumType S> struct ResampleType {};
 
 /// \brief Resample class template
 /// \ingroup Resampling
-template <typename ResType, typename SizeType, typename RngType>
+template <typename ResType>
 class Resample {};
 
 /// \brief Multinomial resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngType>
-class Resample<ResampleType<ResampleScheme, Multinomial>, SizeType, RngType>
+template <>
+class Resample<ResampleType<ResampleScheme, Multinomial> >
 {
     public :
 
+    template <typename SizeType, typename RngType>
     void operator() (SizeType N, RngType &rng, const double *weight,
             SizeType *replication)
     {
         internal::multinomial(N, N, rng, weight, replication);
+        internal::normalize_replication(N, replication);
     }
 }; // Mulitnomial resampling
 
 /// \brief Residual resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngType>
-class Resample<ResampleType<ResampleScheme, Residual>, SizeType, RngType>
+template <>
+class Resample<ResampleType<ResampleScheme, Residual> >
 {
     public :
 
+    template <typename SizeType, typename RngType>
     void operator() (SizeType N, RngType &rng, const double *weight,
             SizeType *replication)
     {
@@ -101,6 +115,7 @@ class Resample<ResampleType<ResampleScheme, Residual>, SizeType, RngType>
         internal::multinomial(N, size, rng, &residual_[0], replication);
         for (SizeType i = 0; i != N; ++i)
             replication[i] += static_cast<SizeType>(integral_[i]);
+        internal::normalize_replication(N, replication);
     }
 
     private :
@@ -111,11 +126,12 @@ class Resample<ResampleType<ResampleScheme, Residual>, SizeType, RngType>
 
 /// \brief Stratified resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngType>
-class Resample<ResampleType<ResampleScheme, Stratified>, SizeType, RngType>
+template <>
+class Resample<ResampleType<ResampleScheme, Stratified> >
 {
     public :
 
+    template <typename SizeType, typename RngType>
     void operator() (SizeType N, RngType &rng, const double *weight,
             SizeType *replication)
     {
@@ -137,16 +153,18 @@ class Resample<ResampleType<ResampleScheme, Stratified>, SizeType, RngType>
                 break;
             cw += weight[++k];
         }
+        internal::normalize_replication(N, replication);
     }
 }; // Stratified resampling
 
 /// \brief Systematic resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngType>
-class Resample<ResampleType<ResampleScheme, Systematic>, SizeType, RngType>
+template <>
+class Resample<ResampleType<ResampleScheme, Systematic> >
 {
     public :
 
+    template <typename SizeType, typename RngType>
     void operator() (SizeType N, RngType &rng, const double *weight,
             SizeType *replication)
     {
@@ -167,17 +185,18 @@ class Resample<ResampleType<ResampleScheme, Systematic>, SizeType, RngType>
                 break;
             cw += weight[++k];
         }
+        internal::normalize_replication(N, replication);
     }
 }; // Systematic resampling
 
 /// \brief Residual stratified resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngType>
-class Resample<ResampleType<ResampleScheme, ResidualStratified>,
-      SizeType, RngType>
+template <>
+class Resample<ResampleType<ResampleScheme, ResidualStratified> >
 {
     public :
 
+    template <typename SizeType, typename RngType>
     void operator() (SizeType N, RngType &rng, const double *weight,
             SizeType *replication)
     {
@@ -212,6 +231,7 @@ class Resample<ResampleType<ResampleScheme, ResidualStratified>,
         }
         for (SizeType i = 0; i != N; ++i)
             replication[i] += static_cast<SizeType>(integral_[i]);
+        internal::normalize_replication(N, replication);
     }
 
     private :
@@ -222,12 +242,12 @@ class Resample<ResampleType<ResampleScheme, ResidualStratified>,
 
 /// \brief Residual systematic resampling
 /// \ingroup Resampling
-template <typename SizeType, typename RngType>
-class Resample<ResampleType<ResampleScheme, ResidualSystematic>,
-      SizeType, RngType>
+template <>
+class Resample<ResampleType<ResampleScheme, ResidualSystematic> >
 {
     public :
 
+    template <typename SizeType, typename RngType>
     void operator() (SizeType N, RngType &rng, const double *weight,
             SizeType *replication)
     {
@@ -261,6 +281,7 @@ class Resample<ResampleType<ResampleScheme, ResidualSystematic>,
         }
         for (SizeType i = 0; i != N; ++i)
             replication[i] += static_cast<SizeType>(integral_[i]);
+        internal::normalize_replication(N, replication);
     }
 
     private :
