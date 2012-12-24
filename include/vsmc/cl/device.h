@@ -18,7 +18,7 @@
 #define CBRNG4x64_CTR_T threefry4x64_ctr_t
 #endif
 
-#if STATE_TYPE_IS_FLOAT
+#if VSMC_STATE_TYPE_IS_FLOAT
 #define U01_OPEN_OPEN_32     u01_open_open_32_24
 #define U01_OPEN_CLOSED_32   u01_open_closed_32_24
 #define U01_CLOSED_OPEN_32   u01_closed_closed_32_24
@@ -27,9 +27,9 @@
 #define NORMAL01_32      normal01_32_24
 #define NORMAL01_32_INIT normal01_32_24_init
 #define NORMAL01_32_RAND normal01_32_24_rand
-#endif // float
+#endif // VSMC_STATE_TYPE_IS_FLOAT
 
-#if STATE_TYPE_IS_DOUBLE
+#if VSMC_STATE_TYPE_IS_DOUBLE
 #define U01_OPEN_OPEN_32     u01_open_open_32_53
 #define U01_OPEN_CLOSED_32   u01_open_closed_32_53
 #define U01_CLOSED_OPEN_32   u01_closed_closed_32_53
@@ -47,7 +47,7 @@
 #define NORMAL01_64      normal01_64_53
 #define NORMAL01_64_INIT normal01_64_53_init
 #define NORMAL01_64_RAND normal01_64_53_rand
-#endif
+#endif // VSMC_STATE_TYPE_IS_DOUBLE
 
 // W  Integer width
 // F  Float width

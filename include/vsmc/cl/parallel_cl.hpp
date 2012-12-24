@@ -14,16 +14,16 @@ template<>
 void set_cl_state_type<cl_float>(std::stringstream &ss)
 {
     ss << "typedef float state_type;\n";
-    ss << "#define STATE_TYPE_IS_FLOAT  1\n";
-    ss << "#define STATE_TYPE_IS_DOUBLE 0\n";
+    ss << "#define VSMC_STATE_TYPE_IS_FLOAT  1\n";
+    ss << "#define VSMC_STATE_TYPE_IS_DOUBLE 0\n";
 }
 
 template<>
 void set_cl_state_type<cl_double>(std::stringstream &ss)
 {
     ss << "typedef double state_type;\n";
-    ss << "#define STATE_TYPE_IS_FLOAT  0\n";
-    ss << "#define STATE_TYPE_IS_DOUBLE 1\n";
+    ss << "#define VSMC_STATE_TYPE_IS_FLOAT  0\n";
+    ss << "#define VSMC_STATE_TYPE_IS_DOUBLE 1\n";
 }
 
 } // namespace vsmc::internal
