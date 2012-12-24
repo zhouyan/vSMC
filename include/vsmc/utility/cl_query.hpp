@@ -95,10 +95,10 @@ class QueryCL
                 "CL_DEVICE_MAX_CLOCK_FREQUENCY", "MHz");
         print_dev_val<cl_uint>(os, dev,
                 CL_DEVICE_ADDRESS_BITS,
-                "CL_DEVICE_ADDRESS_BITS", "bits");
+                "CL_DEVICE_ADDRESS_BITS", "bit");
         print_dev_val<cl_ulong>(os, dev,
                 CL_DEVICE_MAX_MEM_ALLOC_SIZE,
-                "CL_DEVICE_MAX_MEM_ALLOC_SIZE", "bytes");
+                "CL_DEVICE_MAX_MEM_ALLOC_SIZE", "byte");
         print_dev_sfp_config(os, dev);
         print_dev_dfp_config(os, dev);
 
@@ -178,19 +178,19 @@ class QueryCL
                 "CL_DEVICE_MAX_WRITE_IMAGE_ARGS");
         print_dev_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE2D_MAX_WIDTH,
-                "CL_DEVICE_IMAGE2D_MAX_WIDTH");
+                "CL_DEVICE_IMAGE2D_MAX_WIDTH", "pixel");
         print_dev_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE2D_MAX_HEIGHT,
-                "CL_DEVICE_IMAGE2D_MAX_HEIGHT");
+                "CL_DEVICE_IMAGE2D_MAX_HEIGHT", "pixel");
         print_dev_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE3D_MAX_WIDTH,
-                "CL_DEVICE_IMAGE3D_MAX_WIDTH");
+                "CL_DEVICE_IMAGE3D_MAX_WIDTH", "pixel");
         print_dev_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE3D_MAX_HEIGHT,
-                "CL_DEVICE_IMAGE3D_MAX_HEIGHT");
+                "CL_DEVICE_IMAGE3D_MAX_HEIGHT", "pixel");
         print_dev_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE3D_MAX_DEPTH,
-                "CL_DEVICE_IMAGE3D_MAX_DEPTH");
+                "CL_DEVICE_IMAGE3D_MAX_DEPTH", "pixel");
         // print_dev_val<std::size_t>(os, dev,
         //         CL_DEVICE_IMAGE_MAX_BUFFER_SIZE,
         //         "CL_DEVICE_IMAGE_MAX_BUFFER_SIZE");
@@ -205,28 +205,28 @@ class QueryCL
 
         print_dev_val<std::size_t>(os, dev,
                 CL_DEVICE_MAX_PARAMETER_SIZE,
-                "CL_DEVICE_MAX_PARAMETER_SIZE", "bytes");
+                "CL_DEVICE_MAX_PARAMETER_SIZE", "byte");
         print_dev_val<cl_uint>(os, dev,
                 CL_DEVICE_MEM_BASE_ADDR_ALIGN,
-                "CL_DEVICE_MEM_BASE_ADDR_ALIGN", "bits");
+                "CL_DEVICE_MEM_BASE_ADDR_ALIGN", "bit");
         print_dev_val<cl_uint>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
-                "CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE", "bytes");
+                "CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE", "byte");
         print_dev_val<cl_ulong>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
-                "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE", "bytes");
+                "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE", "byte");
         print_dev_val<cl_ulong>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_SIZE,
-                "CL_DEVICE_GLOBAL_MEM_SIZE", "bytes");
+                "CL_DEVICE_GLOBAL_MEM_SIZE", "byte");
         print_dev_val<cl_ulong>(os, dev,
                 CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
-                "CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE", "bytes");
+                "CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE", "byte");
         print_dev_val<cl_uint>(os, dev,
                 CL_DEVICE_MAX_CONSTANT_ARGS,
                 "CL_DEVICE_MAX_CONSTANT_ARGS");
         print_dev_val<cl_ulong>(os, dev,
                 CL_DEVICE_LOCAL_MEM_SIZE,
-                "CL_DEVICE_LOCAL_MEM_SIZE");
+                "CL_DEVICE_LOCAL_MEM_SIZE", "byte");
         print_dev_val<cl_bool>(os, dev,
                 CL_DEVICE_ERROR_CORRECTION_SUPPORT,
                 "CL_DEVICE_ERROR_CORRECTION_SUPPORT");
