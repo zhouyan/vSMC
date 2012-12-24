@@ -13,8 +13,8 @@ class QueryCL
 {
     public :
 
-    template<typename CharT, typename Traits>
-    static void print (std::basic_ostream<CharT, Traits> &os)
+    template<typename OutputStream>
+    static void print (OutputStream &os)
     {
         std::vector<cl::Platform> platform;
         cl::Platform::get(&platform);
@@ -23,9 +23,8 @@ class QueryCL
             print(os, *p);
     }
 
-    template<typename CharT, typename Traits>
-    static void print (std::basic_ostream<CharT, Traits> &os,
-            const cl::Platform &plat)
+    template<typename OutputStream>
+    static void print (OutputStream &os, const cl::Platform &plat)
     {
         print_equal(os);
         print_plat(os, plat);
@@ -36,9 +35,8 @@ class QueryCL
             print(os, *d);
     }
 
-    template <typename CharT, typename Traits>
-    static void print (std::basic_ostream<CharT, Traits> &os,
-            const cl::Context &ctx)
+    template <typename OutputStream>
+    static void print (OutputStream &os, const cl::Context &ctx)
     {
         print_equal(os);
 
@@ -60,9 +58,8 @@ class QueryCL
             print(os, *d);
     }
 
-    template<typename CharT, typename Traits>
-    static void print (std::basic_ostream<CharT, Traits> &os,
-            const cl::Device &dev)
+    template<typename OutputStream>
+    static void print (OutputStream &os, const cl::Device &dev)
     {
         print_dash(os);
 
@@ -243,27 +240,24 @@ class QueryCL
 
     private :
 
-    template<typename CharT, typename Traits>
-    static void print_equal (std::basic_ostream<CharT, Traits> &os,
-            unsigned length = 78)
+    template<typename OutputStream>
+    static void print_equal (OutputStream &os, unsigned length = 78)
     {
         for (unsigned l = 0; l != length; ++l)
             os << '=';
         os << '\n';
     }
 
-    template<typename CharT, typename Traits>
-    static void print_dash (std::basic_ostream<CharT, Traits> &os,
-            unsigned length = 78)
+    template<typename OutputStream>
+    static void print_dash (OutputStream &os, unsigned length = 78)
     {
         for (unsigned l = 0; l != length; ++l)
             os << '-';
         os << '\n';
     }
 
-    template<typename CharT, typename Traits>
-    static void print_plat (std::basic_ostream<CharT, Traits> &os,
-            const cl::Platform &plat)
+    template<typename OutputStream>
+    static void print_plat (OutputStream &os, const cl::Platform &plat)
     {
         std::string info;
 
@@ -288,9 +282,8 @@ class QueryCL
             << "CL_PLATFORM_EXTENSIONS" << info << '\n';
     }
 
-    template<typename T, typename CharT, typename Traits>
-    static void print_dev_val (std::basic_ostream<CharT, Traits> &os,
-            const cl::Device &dev,
+    template<typename T, typename OutputStream>
+    static void print_dev_val (OutputStream &os, const cl::Device &dev,
             cl_device_info info, const std::string &name,
             const std::string &unit = "")
     {
@@ -302,9 +295,8 @@ class QueryCL
         os << ' ' << unit << '\n';
     }
 
-    template<typename CharT, typename Traits>
-    static void print_dev_type (std::basic_ostream<CharT, Traits> &os,
-            const cl::Device &dev)
+    template<typename OutputStream>
+    static void print_dev_type (OutputStream &os, const cl::Device &dev)
     {
         cl_device_type type;
         dev.getInfo(CL_DEVICE_TYPE, &type);
@@ -326,9 +318,8 @@ class QueryCL
         os << std::setw(40) << std::left << "CL_DEVICE_TYPE" << info << '\n';
     }
 
-    template<typename CharT, typename Traits>
-    static void print_dev_sfp_config (std::basic_ostream<CharT, Traits> &os,
-            const cl::Device &dev)
+    template<typename OutputStream>
+    static void print_dev_sfp_config (OutputStream &os, const cl::Device &dev)
     {
         cl_device_fp_config val;
         std::string info;
@@ -354,9 +345,8 @@ class QueryCL
             << "CL_DEVICE_SINGLE_FP_CONFIG" << info << '\n';
     }
 
-    template<typename CharT, typename Traits>
-    static void print_dev_dfp_config (std::basic_ostream<CharT, Traits> &os,
-            const cl::Device &dev)
+    template<typename OutputStream>
+    static void print_dev_dfp_config (OutputStream &os, const cl::Device &dev)
     {
         cl_device_fp_config val;
         std::string info;
@@ -390,21 +380,20 @@ class QueryCL
         }
     }
 
-    template<typename T, typename CharT, typename Traits>
-    static void print_val (std::basic_ostream<CharT, Traits> &os, const T &val)
+    template<typename T, typename OutputStream>
+    static void print_val (OutputStream &os, const T &val)
     {
         os << val;
     }
 
-    template<typename CharT, typename Traits>
-    static void print_val (std::basic_ostream<CharT, Traits> &os,
+    template<typename OutputStream>
+    static void print_val (OutputStream &os,
             const std::vector<std::size_t> &val)
     {
         for (std::vector<std::size_t>::const_iterator v = val.begin();
                 v != val.end(); ++v)
             os << *v << ' ';
     }
-
 }; //class QueryCL
 
 /// \brief Print information of all platforms and devices
