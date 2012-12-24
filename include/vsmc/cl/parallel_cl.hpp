@@ -14,24 +14,16 @@ template<>
 void set_cl_state_type<cl_float>(std::stringstream &ss)
 {
     ss << "typedef float state_type;\n";
-    ss << "#define U01_OPEN_OPEN_32     u01_open_open_32_24\n";
-    ss << "#define U01_OPEN_CLOSED_32   u01_open_closed_32_24\n";
-    ss << "#define U01_CLOSED_OPEN_32   u01_closed_closed_32_24\n";
-    ss << "#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_24\n";
+    ss << "#define STATE_TYPE_IS_FLOAT  1\n";
+    ss << "#define STATE_TYPE_IS_DOUBLE 0\n";
 }
 
 template<>
 void set_cl_state_type<cl_double>(std::stringstream &ss)
 {
     ss << "typedef double state_type;\n";
-    ss << "#define U01_OPEN_OPEN_32     u01_open_open_32_53\n";
-    ss << "#define U01_OPEN_CLOSED_32   u01_open_closed_32_53\n";
-    ss << "#define U01_CLOSED_OPEN_32   u01_closed_closed_32_53\n";
-    ss << "#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_53\n";
-    ss << "#define U01_OPEN_OPEN_64     u01_open_open_64_53\n";
-    ss << "#define U01_OPEN_CLOSED_64   u01_open_closed_64_53\n";
-    ss << "#define U01_CLOSED_OPEN_64   u01_closed_closed_64_53\n";
-    ss << "#define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53\n";
+    ss << "#define STATE_TYPE_IS_FLOAT  0\n";
+    ss << "#define STATE_TYPE_IS_DOUBLE 1\n";
 }
 
 } // namespace vsmc::internal
