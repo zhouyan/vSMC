@@ -38,7 +38,7 @@ struct Default;
 struct CPU;
 struct GPU;
 struct Accelerator;
-template <typename ID = Default> class CLManager;
+template <typename> class CLManager;
 
 } // namespace vsmc::opencl
 
@@ -96,7 +96,7 @@ template <typename, typename D = VBase> class MonitorEvalCILK;
 template <typename, typename D = VBase> class PathEvalCILK;
 
 // OCL
-template <unsigned, typename, typename ID = opencl::Default> class StateCL;
+template <unsigned, typename, typename ID = VSMC_CL_DEFAULT_ID> class StateCL;
 template <typename> class InitializeCL;
 template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;

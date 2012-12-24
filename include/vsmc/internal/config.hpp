@@ -43,6 +43,12 @@
 #define VSMC_SIZE_TYPE std::size_t
 #endif
 
+// OpenCL Device type
+
+#ifndef VSMC_CL_DEFAULT_ID
+#define VSMC_CL_DEFAULT_ID vsmc::opencl::Default
+#endif // VSMC_CL_DEFAULT_ID
+
 // RNG types
 
 #ifndef VSMC_USE_RANDOM123
