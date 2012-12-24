@@ -201,6 +201,11 @@ class StateCL
         return &accept_host_[0];
     }
 
+    const cl::Program &program () const
+    {
+        return program_;
+    }
+
     void build (const std::string &source, const std::string &flags)
     {
         ++build_id_;

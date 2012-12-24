@@ -27,7 +27,18 @@ class QueryCL
     static void print (OutputStream &os, const cl::Platform &plat)
     {
         print_equal(os);
-        print_plat(os, plat);
+
+        print_info_val<std::string>(os, plat,
+                CL_PLATFORM_NAME, "CL_PLATFORM_NAME");
+        print_info_val<std::string>(os, plat,
+                CL_PLATFORM_VENDOR, "CL_PLATFORM_VENDOR");
+        print_info_val<std::string>(os, plat,
+                CL_PLATFORM_VERSION, "CL_PLATFORM_VERSION");
+        print_info_val<std::string>(os, plat,
+                CL_PLATFORM_PROFILE, "CL_PLATFORM_PROFILE");
+        print_info_val<std::string>(os, plat,
+                CL_PLATFORM_EXTENSIONS, "CL_PLATFORM_EXTENSIONS");
+
         std::vector<cl::Device> device;
         plat.getDevices(CL_DEVICE_TYPE_ALL, &device);
         for (std::vector<cl::Device>::const_iterator d = device.begin();
@@ -39,17 +50,6 @@ class QueryCL
     static void print (OutputStream &os, const cl::Context &ctx)
     {
         print_equal(os);
-
-        std::vector<cl_context_properties> info;
-        ctx.getInfo(CL_CONTEXT_PROPERTIES, &info);
-        if (!(info.size() % 3)) {
-            for (std::vector<cl_context_properties>::const_iterator
-                    i = info.begin(); i != info.end(); i += 3)
-            {
-                if (*i == CL_CONTEXT_PLATFORM )
-                    print_plat(os, cl::Platform((cl_platform_id)*(i + 1)));
-            }
-        }
 
         std::vector<cl::Device> device;
         ctx.getInfo(CL_CONTEXT_DEVICES, &device);
@@ -63,37 +63,37 @@ class QueryCL
     {
         print_dash(os);
 
-        print_dev_val<std::string>(os, dev,
+        print_info_val<std::string>(os, dev,
                 CL_DEVICE_NAME, "CL_DEVICE_NAME");
         print_dev_type(os, dev);
-        print_dev_val<std::string>(os, dev,
+        print_info_val<std::string>(os, dev,
                 CL_DEVICE_VENDOR, "CL_DEVICE_VENDOR");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_VENDOR_ID, "CL_DEVICE_VENDOR_ID");
-        print_dev_val<std::string>(os, dev,
+        print_info_val<std::string>(os, dev,
                 CL_DRIVER_VERSION, "CL_DRIVER_VERSION");
-        print_dev_val<std::string>(os, dev,
+        print_info_val<std::string>(os, dev,
                 CL_DEVICE_PROFILE, "CL_DEVICE_PROFILE");
-        print_dev_val<std::string>(os, dev,
+        print_info_val<std::string>(os, dev,
                 CL_DEVICE_VERSION, "CL_DEVICE_VERSION");
-        print_dev_val<std::string>(os, dev,
+        print_info_val<std::string>(os, dev,
                 CL_DEVICE_OPENCL_C_VERSION, "CL_DEVICE_OPENCL_C_VERSION");
-        print_dev_val<std::string>(os, dev,
+        print_info_val<std::string>(os, dev,
                 CL_DEVICE_EXTENSIONS, "CL_DEVICE_EXTENSIONS");
 
         os << '\n';
 
-        print_dev_val<cl_bool>(os, dev,
+        print_info_val<cl_bool>(os, dev,
                 CL_DEVICE_AVAILABLE, "CL_DEVICE_AVAILABLE");
-        print_dev_val<cl_bool>(os, dev,
+        print_info_val<cl_bool>(os, dev,
                 CL_DEVICE_COMPILER_AVAILABLE, "CL_DEVICE_COMPILER_AVAILABLE");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_MAX_CLOCK_FREQUENCY,
                 "CL_DEVICE_MAX_CLOCK_FREQUENCY", "MHz");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_ADDRESS_BITS,
                 "CL_DEVICE_ADDRESS_BITS", "bit");
-        print_dev_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong>(os, dev,
                 CL_DEVICE_MAX_MEM_ALLOC_SIZE,
                 "CL_DEVICE_MAX_MEM_ALLOC_SIZE", "byte");
         print_dev_sfp_config(os, dev);
@@ -101,198 +101,201 @@ class QueryCL
 
         os << '\n';
 
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_MAX_COMPUTE_UNITS,
                 "CL_DEVICE_MAX_COMPUTE_UNITS");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
                 "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS");
-        print_dev_val<std::vector<std::size_t> >(os, dev,
+        print_info_val<std::vector<std::size_t> >(os, dev,
                 CL_DEVICE_MAX_WORK_ITEM_SIZES,
                 "CL_DEVICE_MAX_WORK_ITEM_SIZES");
-        print_dev_val<std::size_t>(os, dev,
+        print_info_val<std::size_t>(os, dev,
                 CL_DEVICE_MAX_WORK_GROUP_SIZE,
                 "CL_DEVICE_MAX_WORK_GROUP_SIZE");
 
         os << '\n';
 
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF");
 
         os << '\n';
 
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_INT,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_INT");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF");
 
         os << '\n';
 
-        print_dev_val<cl_bool>(os, dev,
+        print_info_val<cl_bool>(os, dev,
                 CL_DEVICE_IMAGE_SUPPORT,
                 "CL_DEVICE_IMAGE_SUPPORT");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_MAX_READ_IMAGE_ARGS,
                 "CL_DEVICE_MAX_READ_IMAGE_ARGS");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_MAX_WRITE_IMAGE_ARGS,
                 "CL_DEVICE_MAX_WRITE_IMAGE_ARGS");
-        print_dev_val<std::size_t>(os, dev,
+        print_info_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE2D_MAX_WIDTH,
                 "CL_DEVICE_IMAGE2D_MAX_WIDTH", "pixel");
-        print_dev_val<std::size_t>(os, dev,
+        print_info_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE2D_MAX_HEIGHT,
                 "CL_DEVICE_IMAGE2D_MAX_HEIGHT", "pixel");
-        print_dev_val<std::size_t>(os, dev,
+        print_info_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE3D_MAX_WIDTH,
                 "CL_DEVICE_IMAGE3D_MAX_WIDTH", "pixel");
-        print_dev_val<std::size_t>(os, dev,
+        print_info_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE3D_MAX_HEIGHT,
                 "CL_DEVICE_IMAGE3D_MAX_HEIGHT", "pixel");
-        print_dev_val<std::size_t>(os, dev,
+        print_info_val<std::size_t>(os, dev,
                 CL_DEVICE_IMAGE3D_MAX_DEPTH,
                 "CL_DEVICE_IMAGE3D_MAX_DEPTH", "pixel");
-        // print_dev_val<std::size_t>(os, dev,
+        // print_info_val<std::size_t>(os, dev,
         //         CL_DEVICE_IMAGE_MAX_BUFFER_SIZE,
         //         "CL_DEVICE_IMAGE_MAX_BUFFER_SIZE");
-        // print_dev_val<std::size_t>(os, dev,
+        // print_info_val<std::size_t>(os, dev,
         //         CL_DEVICE_IMAGE_MAX_ARRAY_SIZE,
         //         "CL_DEVICE_IMAGE_MAX_ARRAY_SIZE");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_MAX_SAMPLERS,
                 "CL_DEVICE_MAX_SAMPLERS");
 
         os << '\n';
 
-        print_dev_val<std::size_t>(os, dev,
+        print_info_val<std::size_t>(os, dev,
                 CL_DEVICE_MAX_PARAMETER_SIZE,
                 "CL_DEVICE_MAX_PARAMETER_SIZE", "byte");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_MEM_BASE_ADDR_ALIGN,
                 "CL_DEVICE_MEM_BASE_ADDR_ALIGN", "bit");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
                 "CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE", "byte");
-        print_dev_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
                 "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE", "byte");
-        print_dev_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_SIZE,
                 "CL_DEVICE_GLOBAL_MEM_SIZE", "byte");
-        print_dev_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong>(os, dev,
                 CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
                 "CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE", "byte");
-        print_dev_val<cl_uint>(os, dev,
+        print_info_val<cl_uint>(os, dev,
                 CL_DEVICE_MAX_CONSTANT_ARGS,
                 "CL_DEVICE_MAX_CONSTANT_ARGS");
-        print_dev_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong>(os, dev,
                 CL_DEVICE_LOCAL_MEM_SIZE,
                 "CL_DEVICE_LOCAL_MEM_SIZE", "byte");
-        print_dev_val<cl_bool>(os, dev,
+        print_info_val<cl_bool>(os, dev,
                 CL_DEVICE_ERROR_CORRECTION_SUPPORT,
                 "CL_DEVICE_ERROR_CORRECTION_SUPPORT");
-        print_dev_val<cl_bool>(os, dev,
+        print_info_val<cl_bool>(os, dev,
                 CL_DEVICE_HOST_UNIFIED_MEMORY,
                 "CL_DEVICE_HOST_UNIFIED_MEMORY");
-        print_dev_val<std::size_t>(os, dev,
+        print_info_val<std::size_t>(os, dev,
                 CL_DEVICE_PROFILING_TIMER_RESOLUTION,
                 "CL_DEVICE_PROFILING_TIMER_RESOLUTION", "ns");
-        print_dev_val<cl_bool>(os, dev,
+        print_info_val<cl_bool>(os, dev,
                 CL_DEVICE_ENDIAN_LITTLE,
                 "CL_DEVICE_ENDIAN_LITTLE");
+    }
+
+    template <typename OutputStream>
+    static void print (OutputStream &os, const cl::Program &prog)
+    {
+        print_dash(os);
+
+        print_info_val<cl_uint>(os, prog,
+                CL_PROGRAM_NUM_DEVICES, "CL_PROGRAM_NUM_DEVICES");
+        print_info_val<std::size_t>(os, prog,
+                CL_PROGRAM_BINARY_SIZES, "CL_PROGRAM_BINARY_SIZES", "byte");
+    }
+
+    template <typename OutputStream>
+    static void print (OutputStream &os, const cl::Kernel &kern)
+    {
+        print_dash(os);
+
+        cl::Context ctx;
+        kern.getInfo(CL_KERNEL_CONTEXT, &ctx);
+        std::vector<cl::Device> device;
+        ctx.getInfo(CL_CONTEXT_DEVICES, &device);
+        for (std::vector<cl::Device>::const_iterator d = device.begin();
+                d != device.end(); ++d) {
+            print_info_val<std::string>(os, *d,
+                    CL_DEVICE_NAME, "CL_DEVICE_NAME");
+            print_info_val<std::string>(os, kern,
+                    CL_KERNEL_FUNCTION_NAME, "CL_KERNEL_FUNCTION_NAME");
+            print_info_val<cl_uint>(os, kern,
+                    CL_KERNEL_NUM_ARGS, "CL_KERNEL_NUM_ARGS");
+            print_kernwginfo_val<std::size_t>(os, kern, *d,
+                    CL_KERNEL_WORK_GROUP_SIZE, "CL_KERNEL_WORK_GROUP_SIZE");
+            print_kernwginfo_val<std::size_t>(os, kern, *d,
+                    CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
+                    "CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE");
+            print_kernwginfo_val<cl_ulong>(os, kern, *d,
+                    CL_KERNEL_LOCAL_MEM_SIZE, "CL_KERNEL_LOCAL_MEM_SIZE",
+                    "byte");
+            print_kernwginfo_val<cl_ulong>(os, kern, *d,
+                    CL_KERNEL_PRIVATE_MEM_SIZE, "CL_KERNEL_PRIVATE_MEM_SIZE",
+                    "byte");
+        }
     }
 
     private :
 
     template<typename OutputStream>
-    static void print_equal (OutputStream &os, unsigned length = 78)
+    static void print_equal (OutputStream &os)
     {
-        for (unsigned l = 0; l != length; ++l)
+        for (unsigned l = 0; l != 78; ++l)
             os << '=';
         os << '\n';
     }
 
     template<typename OutputStream>
-    static void print_dash (OutputStream &os, unsigned length = 78)
+    static void print_dash (OutputStream &os)
     {
-        for (unsigned l = 0; l != length; ++l)
+        for (unsigned l = 0; l != 78; ++l)
             os << '-';
         os << '\n';
-    }
-
-    template<typename OutputStream>
-    static void print_plat (OutputStream &os, const cl::Platform &plat)
-    {
-        std::string info;
-
-        plat.getInfo(CL_PLATFORM_NAME, &info);
-        os << std::setw(40) << std::left
-            << "CL_PLATFORM_NAME" << info << '\n';
-
-        plat.getInfo(CL_PLATFORM_VENDOR, &info);
-        os << std::setw(40) << std::left
-            << "CL_PLATFORM_VENDOR" << info << '\n';
-
-        plat.getInfo(CL_PLATFORM_VERSION, &info);
-        os << std::setw(40) << std::left
-            << "CL_PLATFORM_VERSION" << info << '\n';
-
-        plat.getInfo(CL_PLATFORM_PROFILE, &info);
-        os << std::setw(40) << std::left
-            << "CL_PLATFORM_PROFILE" << info << '\n';
-
-        plat.getInfo(CL_PLATFORM_EXTENSIONS, &info);
-        os << std::setw(40) << std::left
-            << "CL_PLATFORM_EXTENSIONS" << info << '\n';
-    }
-
-    template<typename T, typename OutputStream>
-    static void print_dev_val (OutputStream &os, const cl::Device &dev,
-            cl_device_info info, const std::string &name,
-            const std::string &unit = "")
-    {
-        T val;
-        dev.getInfo(info, &val);
-        os << std::setw(40) << std::left
-            << name;
-        print_val(os, val);
-        os << ' ' << unit << '\n';
     }
 
     template<typename OutputStream>
@@ -380,6 +383,32 @@ class QueryCL
         }
     }
 
+    template<typename T, typename OutputStream,
+        typename CLObj, typename InfoType>
+    static void print_info_val (OutputStream &os,
+            const CLObj &obj, InfoType info,
+            const std::string &name, const std::string &unit = "")
+    {
+        T val;
+        obj.getInfo(info, &val);
+        os << std::setw(40) << std::left << name;
+        print_val(os, val);
+        os << ' ' << unit << '\n';
+    }
+
+    template <typename T, typename OutputStream>
+    static void print_kernwginfo_val (OutputStream &os,
+            const cl::Kernel &kern, const cl::Device &dev,
+            cl_kernel_work_group_info info,
+            const std::string &name, const std::string &unit = "")
+    {
+        T val;
+        kern.getWorkGroupInfo(dev, info, &val);
+        os << std::setw(40) << std::left << name;
+        print_val(os, val);
+        os << ' ' << unit << '\n';
+    }
+
     template<typename T, typename OutputStream>
     static void print_val (OutputStream &os, const T &val)
     {
@@ -433,6 +462,24 @@ template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Device &dev)
 {
     vsmc::opencl::QueryCL::print(os, dev);
+    return os;
+}
+
+/// \brief Print information a given program
+/// \ingroup OpenCL
+template <typename OutputStream>
+OutputStream &operator<< (OutputStream &os, const Program &prog)
+{
+    vsmc::opencl::QueryCL::print(os, prog);
+    return os;
+}
+
+/// \brief Print information a given kernel
+/// \ingroup OpenCL
+template <typename OutputStream>
+OutputStream &operator<< (OutputStream &os, const Kernel &kern)
+{
+    vsmc::opencl::QueryCL::print(os, kern);
     return os;
 }
 
