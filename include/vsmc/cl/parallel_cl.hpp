@@ -49,8 +49,7 @@ class StateCL
 
     explicit StateCL (size_type N) :
         dim_(Dim == Dynamic ? 1 : Dim), size_(N), local_size_(0),
-        cl_manager_(cl_manager_type::instance()),
-        program_created_(false), build_(false),
+        cl_manager_(cl_manager_type::instance()), build_(false), build_id_(0),
         state_device_(cl_manager_.template create_buffer<state_type>(
                 dim_ * size_)),
         accept_device_(cl_manager_.template create_buffer<state_type>(size_)),
@@ -65,7 +64,7 @@ class StateCL
         dim_(other.dim_), size_(other.size_), local_size_(other.local_size_),
         cl_manager_(other.cl_manager_),
         program_(other.program_), kernel_copy_(other.kernel_copy_),
-        program_created_(other.program_created_), build_(other.build_),
+        build_(other.build_), build_id_(0),
         global_nd_range_(other.global_nd_range_),
         local_nd_range_(other.local_nd_range_),
         state_device_(cl_manager_.template create_buffer<state_type>(
@@ -93,8 +92,8 @@ class StateCL
             local_size_      = other.local_size_;
             program_         = other.program_;
             kernel_copy_     = other.kernel_copy_;
-            program_created_ = other.program_created_;
             build_           = other.build_;
+            build_id_        = 0;
             global_nd_range_ = other.global_nd_range_;
             local_nd_range_  = other.local_nd_range_;
 
@@ -204,49 +203,47 @@ class StateCL
 
     void build (const std::string &source, const std::string &flags)
     {
-        VSMC_RUNTIME_ASSERT((!build_),
-                "**StateCL::build**: Program already build");
+        ++build_id_;
 
-        if (!program_created_) {
-            std::stringstream ss;
-            ss << "#if defined(cl_khr_fp64)\n";
-            ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
-            ss << "#elif defined(cl_amd_fp64)\n";
-            ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
-            ss << "#endif\n";
+        std::stringstream ss;
+        ss << "#if defined(cl_khr_fp64)\n";
+        ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
+        ss << "#elif defined(cl_amd_fp64)\n";
+        ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
+        ss << "#endif\n";
 
-            ss << "#if defined(cl_khr_fp64) || defined(cl_amd_fp64)\n";
-            ss << "#define R123_USE_U01_DOUBLE 1\n";
-            ss << "#else\n";
-            ss << "#define R123_USE_U01_DOUBLE 0\n";
-            ss << "#endif\n";
+        ss << "#if defined(cl_khr_fp64) || defined(cl_amd_fp64)\n";
+        ss << "#define R123_USE_U01_DOUBLE 1\n";
+        ss << "#else\n";
+        ss << "#define R123_USE_U01_DOUBLE 0\n";
+        ss << "#endif\n";
 
-            ss << "#ifndef VSMC_USE_RANDOM123\n";
-            ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
-            ss << "#endif\n";
+        ss << "#ifndef VSMC_USE_RANDOM123\n";
+        ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
+        ss << "#endif\n";
 
-            internal::set_cl_state_type<T>(ss);
-            ss << "typedef struct state_struct {\n";
-            for (unsigned d = 0; d != dim_; ++d)
-                ss << "state_type param" << d + 1 << ";\n";
-            ss << "} state_struct;\n";
+        internal::set_cl_state_type<T>(ss);
+        ss << "typedef struct state_struct {\n";
+        for (unsigned d = 0; d != dim_; ++d)
+            ss << "state_type param" << d + 1 << ";\n";
+        ss << "} state_struct;\n";
 
-            ss << "typedef ulong size_type;\n";
-            ss << "#define Size " << size_ << "UL\n";
-            ss << "#define Dim  " << dim_  << "U\n";
-            VSMC_SEED_TYPE &seed = VSMC_SEED_TYPE::instance();
-            ss << "#define Seed " << seed.get() << "UL\n";
-            seed.skip(size_);
-            ss << "#include <vsmc/cl/device.h>\n";
-            ss << source << '\n';
-            program_ = cl_manager_.create_program(ss.str());
-            program_created_ = true;
-        }
+        ss << "typedef ulong size_type;\n";
+        ss << "#define Size " << size_ << "UL\n";
+        ss << "#define Dim  " << dim_  << "U\n";
+        VSMC_SEED_TYPE &seed = VSMC_SEED_TYPE::instance();
+        ss << "#define Seed " << seed.get() << "UL\n";
+        seed.skip(size_);
+        ss << "#include <vsmc/cl/device.h>\n";
+        ss << source << '\n';
 
         try {
+            program_ = cl_manager_.create_program(ss.str());
             program_.build(cl_manager_.device_vec(), flags.c_str());
             program_.getBuildInfo(cl_manager_.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
+            kernel_copy_ = create_kernel("copy");
+            build_ = true;
         } catch (cl::Error &err) {
             std::string log;
             std::cerr << "===========================" << std::endl;
@@ -273,14 +270,16 @@ class StateCL
             std::cerr << "===========================" << std::endl;
             throw err;
         }
-        build_ = true;
-
-        kernel_copy_ = create_kernel("copy");
     }
 
     bool build () const
     {
         return build_;
+    }
+
+    int build_id () const
+    {
+        return build_id_;
     }
 
     std::string build_log () const
@@ -327,8 +326,8 @@ class StateCL
     cl::Program program_;
     cl::Kernel kernel_copy_;
 
-    bool program_created_;
     bool build_;
+    int build_id_;
     std::string build_log_;
 
     cl::NDRange global_nd_range_;
@@ -387,7 +386,9 @@ class InitializeCL
         std::string kname;
         initialize_state(kname);
 
-        if (kernel_name_ != kname) {
+        if (build_id_ != particle.value().build_id()
+                || kernel_name_ != kname) {
+            build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
         }
@@ -398,14 +399,16 @@ class InitializeCL
 
     protected :
 
-    InitializeCL () {}
+    InitializeCL () : build_id_(-1) {}
 
     InitializeCL (const InitializeCL<T> &other) :
+        build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
 
     InitializeCL<T> &operator= (const InitializeCL<T> &other)
     {
         if (this != &other) {
+            build_id_ = other.build_id_;
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
         }
@@ -417,6 +420,7 @@ class InitializeCL
 
     private :
 
+    int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
 }; // class InitializeCL
@@ -464,7 +468,9 @@ class MoveCL
         std::string kname;
         move_state(iter, kname);
 
-        if (kernel_name_ != kname) {
+        if (build_id_ != particle.value().build_id()
+                || kernel_name_ != kname) {
+            build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
         }
@@ -479,11 +485,13 @@ class MoveCL
     MoveCL () {}
 
     MoveCL (const MoveCL<T> &other) :
+        build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
 
     MoveCL<T> &operator= (const MoveCL<T> &other)
     {
         if (this != &other) {
+            build_id_ = other.build_id_;
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
         }
@@ -495,6 +503,7 @@ class MoveCL
 
     private :
 
+    int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
 }; // class MoveCL
@@ -542,7 +551,9 @@ class MonitorEvalCL
         std::string kname;
         monitor_state(iter, kname);
 
-        if (kernel_name_ != kname) {
+        if (build_id_ != particle.value().build_id()
+                || kernel_name_ != kname) {
+            build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
             buffer_device_ = particle.value().cl_manager().template
@@ -561,12 +572,14 @@ class MonitorEvalCL
     MonitorEvalCL () {}
 
     MonitorEvalCL (const MonitorEvalCL<T> &other) :
+        build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
         buffer_device_(other.buffer_device_) {}
 
     MonitorEvalCL<T> &operator= (const MonitorEvalCL<T> &other)
     {
         if (this != &other) {
+            build_id_ = other.build_id_;
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
             buffer_device_ = other.buffer_device_;
@@ -579,6 +592,7 @@ class MonitorEvalCL
 
     private :
 
+    int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
     cl::Buffer buffer_device_;
@@ -630,7 +644,9 @@ class PathEvalCL
         std::string kname;
         path_state(iter, kname);
 
-        if (kernel_name_ != kname) {
+        if (build_id_ != particle.value().build_id()
+                || kernel_name_ != kname) {
+            build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
             buffer_device_ = particle.value().cl_manager().template
@@ -647,12 +663,14 @@ class PathEvalCL
     PathEvalCL () {}
 
     PathEvalCL (const PathEvalCL<T> &other) :
+        build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
         buffer_device_(other.buffer_device_) {}
 
     PathEvalCL<T> &operator= (const PathEvalCL<T> &other)
     {
         if (this != &other) {
+            build_id_ = other.build_id_;
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
             buffer_device_ = other.buffer_device_;
@@ -665,6 +683,7 @@ class PathEvalCL
 
     private :
 
+    int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
     cl::Buffer buffer_device_;
