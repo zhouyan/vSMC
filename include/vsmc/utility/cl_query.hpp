@@ -318,7 +318,9 @@ class QueryCL
                 info = "CL_DEVICE_TYPE_DEFAULT";
                 break;
         }
-        os << std::setw(40) << std::left << "CL_DEVICE_TYPE" << info << '\n';
+        print_name(os, "CL_DEVICE_TYPE");
+        print_val(os, info);
+        os << '\n';
     }
 
     template<typename OutputStream>
@@ -327,6 +329,7 @@ class QueryCL
         cl_device_fp_config val;
         std::string info;
         dev.getInfo(CL_DEVICE_SINGLE_FP_CONFIG, &val);
+
         append_bit_field<cl_device_fp_config>(CL_FP_DENORM,
                 val, "CL_FP_DENORM", info);
         append_bit_field<cl_device_fp_config>(CL_FP_INF_NAN,
@@ -344,8 +347,10 @@ class QueryCL
         // append_bit_field<cl_device_fp_config>(
         //         CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT,
         //         val, "CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT", info);
-        os << std::setw(40) << std::left
-            << "CL_DEVICE_SINGLE_FP_CONFIG" << info << '\n';
+
+        print_name(os, "CL_DEVICE_SINGLE_FP_CONFIG");
+        print_val(os, info);
+        os << '\n';
     }
 
     template<typename OutputStream>
@@ -354,6 +359,7 @@ class QueryCL
         cl_device_fp_config val;
         std::string info;
         dev.getInfo(CL_DEVICE_DOUBLE_FP_CONFIG, &val);
+
         append_bit_field<cl_device_fp_config>(CL_FP_DENORM,
                 val, "CL_FP_DENORM", info);
         append_bit_field<cl_device_fp_config>(CL_FP_INF_NAN,
@@ -368,8 +374,10 @@ class QueryCL
                 val, "CL_FP_FMA", info);
         append_bit_field<cl_device_fp_config>(CL_FP_SOFT_FLOAT,
                 val, "CL_FP_SOFT_FLOAT", info);
-        os << std::setw(40) << std::left
-            << "CL_DEVICE_DOUBLE_FP_CONFIG" << info << '\n';
+
+        print_name(os, "CL_DEVICE_DOUBLE_FP_CONFIG");
+        print_val(os, info);
+        os << '\n';
     }
 
     template <typename T>
@@ -391,7 +399,7 @@ class QueryCL
     {
         T val;
         obj.getInfo(info, &val);
-        os << std::setw(40) << std::left << name;
+        print_name(os, name);
         print_val(os, val);
         os << ' ' << unit << '\n';
     }
@@ -404,22 +412,27 @@ class QueryCL
     {
         T val;
         kern.getWorkGroupInfo(dev, info, &val);
-        os << std::setw(40) << std::left << name;
+        print_name(os, name);
         print_val(os, val);
         os << ' ' << unit << '\n';
     }
 
-    template<typename T, typename OutputStream>
+    template <typename OutputStream>
+    static void print_name (OutputStream &os, const std::string &name)
+    {
+        os << std::setw(40) << std::left << name << ' ';
+    }
+
+    template <typename OutputStream, typename T>
     static void print_val (OutputStream &os, const T &val)
     {
         os << val;
     }
 
-    template<typename OutputStream>
-    static void print_val (OutputStream &os,
-            const std::vector<std::size_t> &val)
+    template<typename OutputStream, typename T>
+    static void print_val (OutputStream &os, const std::vector<T> &val)
     {
-        for (std::vector<std::size_t>::const_iterator v = val.begin();
+        for (typename std::vector<T>::const_iterator v = val.begin();
                 v != val.end(); ++v)
             os << *v << ' ';
     }
