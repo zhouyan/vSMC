@@ -8,8 +8,7 @@
         CBRNG4x##W##_KEY_T *k;                                               \
         CBRNG4x##W##_CTR_T *c;                                               \
         CBRNG4x##W##_CTR_T r;                                                \
-        FT##4 u;                                                             \
-        FT##4 z;                                                             \
+        FT u[4];                                                             \
         uint8_t count;                                                       \
     } normal01_##W##_##F;                                                    \
                                                                              \
@@ -28,27 +27,27 @@
         if (!norm->count) {                                                  \
             norm->c->v[0]++;                                                 \
             norm->r = CBRNG4x##W(*(norm->c), *(norm->k));                    \
-            norm->u.x = u01_open_closed_##W##_##F(norm->r.v[0]);             \
-            norm->u.y = u01_open_closed_##W##_##F(norm->r.v[1]);             \
-            norm->u.z = u01_open_closed_##W##_##F(norm->r.v[2]);             \
-            norm->u.w = u01_open_closed_##W##_##F(norm->r.v[3]);             \
+            norm->u[0] = u01_open_closed_##W##_##F(norm->r.v[0]);            \
+            norm->u[1] = u01_open_closed_##W##_##F(norm->r.v[1]);            \
+            norm->u[2] = u01_open_closed_##W##_##F(norm->r.v[2]);            \
+            norm->u[3] = u01_open_closed_##W##_##F(norm->r.v[3]);            \
             norm->count = 4;                                                 \
         }                                                                    \
                                                                              \
         --norm->count;                                                       \
         switch (norm->count) {                                               \
             case 0 :                                                         \
-                return sqrt(-2 * log(norm->u.x)) *                           \
-                    cos(2 * M_PI_##F * norm->u.y);                           \
+                return sqrt(-2 * log(norm->u[0])) *                          \
+                    cos(2 * M_PI_##F * norm->u[1]);                          \
             case 1 :                                                         \
-                return sqrt(-2 * log(norm->u.x)) *                           \
-                    sin(2 * M_PI_##F * norm->u.y);                           \
+                return sqrt(-2 * log(norm->u[0])) *                          \
+                    sin(2 * M_PI_##F * norm->u[1]);                          \
             case 2 :                                                         \
-                return sqrt(-2 * log(norm->u.z)) *                           \
-                    cos(2 * M_PI_##F * norm->u.w);                           \
+                return sqrt(-2 * log(norm->u[2])) *                          \
+                    cos(2 * M_PI_##F * norm->u[3]);                          \
             case 3 :                                                         \
-                return sqrt(-2 * log(norm->u.z)) *                           \
-                    sin(2 * M_PI_##F * norm->u.w);                           \
+                return sqrt(-2 * log(norm->u[2])) *                          \
+                    sin(2 * M_PI_##F * norm->u[3]);                          \
             default :                                                        \
                 return 0;                                                    \
         }                                                                    \
