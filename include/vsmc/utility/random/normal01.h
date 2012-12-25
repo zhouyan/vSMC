@@ -9,48 +9,54 @@
         CBRNG4x##W##_CTR_T *c;                                               \
         CBRNG4x##W##_CTR_T r;                                                \
         FT u[4];                                                             \
-        uint8_t count;                                                       \
+        uint8_t remain;                                                      \
     } normal01_##W##_##F;                                                    \
                                                                              \
     VSMC_STATIC_INLINE void normal01_##W##_##F##_init (                      \
-            normal01_##W##_##F *norm,                                        \
+            normal01_##W##_##F *rnorm,                                       \
             CBRNG4x##W##_KEY_T *k, CBRNG4x##W##_CTR_T *c)                    \
     {                                                                        \
-        norm->k = k;                                                         \
-        norm->c = c;                                                         \
-        norm->count = 0;                                                     \
+        rnorm->k = k;                                                        \
+        rnorm->c = c;                                                        \
+        rnorm->c->v[0]++;                                                    \
+        rnorm->r = CBRNG4x##W(*(rnorm->c), *(rnorm->k));                     \
+        rnorm->u[0] = u01_open_closed_##W##_##F(rnorm->r.v[0]);              \
+        rnorm->u[1] = u01_open_closed_##W##_##F(rnorm->r.v[1]);              \
+        rnorm->u[2] = u01_open_closed_##W##_##F(rnorm->r.v[2]);              \
+        rnorm->u[3] = u01_open_closed_##W##_##F(rnorm->r.v[3]);              \
+        rnorm->remain = 4;                                                   \
     }                                                                        \
                                                                              \
     VSMC_STATIC_INLINE FT normal01_##W##_##F##_rand (                        \
-            normal01_##W##_##F *norm)                                        \
+            normal01_##W##_##F *rnorm)                                       \
     {                                                                        \
-        if (!norm->count) {                                                  \
-            norm->c->v[0]++;                                                 \
-            norm->r = CBRNG4x##W(*(norm->c), *(norm->k));                    \
-            norm->u[0] = u01_open_closed_##W##_##F(norm->r.v[0]);            \
-            norm->u[1] = u01_open_closed_##W##_##F(norm->r.v[1]);            \
-            norm->u[2] = u01_open_closed_##W##_##F(norm->r.v[2]);            \
-            norm->u[3] = u01_open_closed_##W##_##F(norm->r.v[3]);            \
-            norm->count = 4;                                                 \
+        if (!rnorm->remain) {                                                \
+            rnorm->c->v[0]++;                                                \
+            rnorm->r = CBRNG4x##W(*(rnorm->c), *(rnorm->k));                 \
+            rnorm->u[0] = u01_open_closed_##W##_##F(rnorm->r.v[0]);          \
+            rnorm->u[1] = u01_open_closed_##W##_##F(rnorm->r.v[1]);          \
+            rnorm->u[2] = u01_open_closed_##W##_##F(rnorm->r.v[2]);          \
+            rnorm->u[3] = u01_open_closed_##W##_##F(rnorm->r.v[3]);          \
+            rnorm->remain = 4;                                               \
         }                                                                    \
                                                                              \
-        --norm->count;                                                       \
-        switch (norm->count) {                                               \
-            case 0 :                                                         \
-                return sqrt(-2 * log(norm->u[0])) *                          \
-                    cos(2 * M_PI_##F * norm->u[1]);                          \
+        switch (rnorm->remain) {                                             \
             case 1 :                                                         \
-                return sqrt(-2 * log(norm->u[0])) *                          \
-                    sin(2 * M_PI_##F * norm->u[1]);                          \
+                return sqrt(-2 * log(rnorm->u[0])) *                         \
+                    cos(2 * M_PI_##F * rnorm->u[1]);                         \
             case 2 :                                                         \
-                return sqrt(-2 * log(norm->u[2])) *                          \
-                    cos(2 * M_PI_##F * norm->u[3]);                          \
+                return sqrt(-2 * log(rnorm->u[0])) *                         \
+                    sin(2 * M_PI_##F * rnorm->u[1]);                         \
             case 3 :                                                         \
-                return sqrt(-2 * log(norm->u[2])) *                          \
-                    sin(2 * M_PI_##F * norm->u[3]);                          \
+                return sqrt(-2 * log(rnorm->u[2])) *                         \
+                    cos(2 * M_PI_##F * rnorm->u[3]);                         \
+            case 4 :                                                         \
+                return sqrt(-2 * log(rnorm->u[2])) *                         \
+                    sin(2 * M_PI_##F * rnorm->u[3]);                         \
             default :                                                        \
                 return 0;                                                    \
         }                                                                    \
+        --rnorm->remain;                                                     \
     }
 
 VSMC_DEFINE_NORMAL01(32, 24, float);
