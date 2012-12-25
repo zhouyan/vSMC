@@ -203,17 +203,6 @@ class StateCL
         ++build_id_;
 
         std::stringstream ss;
-        ss << "#if defined(cl_khr_fp64)\n";
-        ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
-        ss << "#elif defined(cl_amd_fp64)\n";
-        ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
-        ss << "#endif\n";
-
-        ss << "#if defined(cl_khr_fp64) || defined(cl_amd_fp64)\n";
-        ss << "#define R123_USE_U01_DOUBLE 1\n";
-        ss << "#else\n";
-        ss << "#define R123_USE_U01_DOUBLE 0\n";
-        ss << "#endif\n";
 
         ss << "#ifndef VSMC_USE_RANDOM123\n";
         ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
