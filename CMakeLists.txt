@@ -75,6 +75,23 @@ SET (CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES}
 # Includes
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 
+# C99 Compiler
+IF (NOT VSMC_C99_FOUND)
+    UNSET (VSMC_C99_FOUND CACHE)
+    INCLUDE (CheckCSourceRuns)
+    SET (C99_TEST_SOURCE "
+    int main ()
+    {
+        for (int i = 0; i != 100; ++i) {
+            double x = i;
+            x = x * x;
+            double y = x;
+        }
+    }")
+    CHECK_C_SOURCE_RUNS ("${C99_TEST_SOURCE}" VSMC_C99_FOUND)
+ENDIF (NOT VSMC_C99_FOUND)
+
+# Boost
 SET (Boost_NO_BOOST_CMAKE ON)
 SET (Boost_ADDITIONAL_VERSIONS
     "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0", "1.52", "1.52.0")
