@@ -9,7 +9,7 @@
         CBRNG4x##W##_CTR_T *c;                                               \
         CBRNG4x##W##_CTR_T r;                                                \
         FT u[4];                                                             \
-        uint8_t remain;                                                      \
+        char remain;                                                         \
     } normal01_##W##_##F;                                                    \
                                                                              \
     VSMC_STATIC_INLINE void normal01_##W##_##F##_init (                      \
@@ -40,23 +40,23 @@
             rnorm->remain = 4;                                               \
         }                                                                    \
                                                                              \
+        rnorm->remain--;                                                     \
         switch (rnorm->remain) {                                             \
-            case 1 :                                                         \
+            case 0 :                                                         \
                 return sqrt(-2 * log(rnorm->u[0])) *                         \
                     cos(2 * M_PI_##F * rnorm->u[1]);                         \
-            case 2 :                                                         \
+            case 1 :                                                         \
                 return sqrt(-2 * log(rnorm->u[0])) *                         \
                     sin(2 * M_PI_##F * rnorm->u[1]);                         \
-            case 3 :                                                         \
+            case 2 :                                                         \
                 return sqrt(-2 * log(rnorm->u[2])) *                         \
                     cos(2 * M_PI_##F * rnorm->u[3]);                         \
-            case 4 :                                                         \
+            case 3 :                                                         \
                 return sqrt(-2 * log(rnorm->u[2])) *                         \
                     sin(2 * M_PI_##F * rnorm->u[3]);                         \
             default :                                                        \
                 return 0;                                                    \
         }                                                                    \
-        --rnorm->remain;                                                     \
     }
 
 VSMC_DEFINE_NORMAL01(32, 24, float);
