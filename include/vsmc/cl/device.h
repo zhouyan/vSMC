@@ -2,7 +2,6 @@
 #define VSMC_CL_DEVICE_H
 
 #include <vsmc/cl/config.h>
-#include <vsmc/cl/random.h>
 
 __kernel
 void copy (__global state_struct *state, __global size_type *copy_from)

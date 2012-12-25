@@ -7,31 +7,6 @@
 #pragma OPENCL EXTENSION cl_amd_fp64 : enable
 #endif
 
-#if defined(cl_khr_fp64) || defined(cl_amd_fp64)
-#define R123_USE_U01_DOUBLE 1
-#else
-#define R123_USE_U01_DOUBLE 0
-#endif
-
-#define M_PI_24 3.1415926535897932385F
-#define M_PI_53 3.1415926535897932385
-
-#ifndef CBRNG2x32
-#define CBRNG2x32 threefry2x32
-#endif
-
-#ifndef CBRNG2x64
-#define CBRNG2x64 threefry2x64
-#endif
-
-#ifndef CBRNG4x32
-#define CBRNG4x32 threefry4x32
-#endif
-
-#ifndef CBRNG4x64
-#define CBRNG4x64 threefry4x64
-#endif
-
 #if VSMC_STATE_TYPE_IS_FLOAT
 #define U01_OPEN_OPEN_32     u01_open_open_32_24
 #define U01_OPEN_CLOSED_32   u01_open_closed_32_24

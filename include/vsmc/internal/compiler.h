@@ -1,14 +1,20 @@
 #ifndef VSMC_INTERNAL_COMPILER_HPP
 #define VSMC_INTERNAL_COMPILER_HPP
 
-#if defined(__INTEL_COMPILER)
-#include <vsmc/internal/compiler/intel.hpp>
+#if defined(__OPENCL_VERSION__)
+#include <vsmc/internal/compiler/opencl.h>
+#elif defined(__INTEL_COMPILER)
+#include <vsmc/internal/compiler/intel.h>
 #elif defined(__clang__)
-#include <vsmc/internal/compiler/clang.hpp>
+#include <vsmc/internal/compiler/clang.h>
 #elif defined(__GNUC__)
-#include <vsmc/internal/compiler/gcc.hpp>
+#include <vsmc/internal/compiler/gcc.h>
 #elif defined(_MSC_VER)
-#include <vsmc/internal/compiler/msvc.hpp>
+#include <vsmc/internal/compiler/msvc.h>
+#endif
+
+#ifndef VSMC_STATIC_INLINE
+#define VSMC_STATIC_INLINE static inline
 #endif
 
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
