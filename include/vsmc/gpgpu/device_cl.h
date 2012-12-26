@@ -1,7 +1,7 @@
 #ifndef VSMC_GPGPU_DEVICE_CL_H
 #define VSMC_GPGPU_DEVICE_CL_H
 
-#include <vsmc/cl/config.h>
+#include <vsmc/gpgpu/config_cl.h>
 
 __kernel
 void copy (__global state_struct *state, __global size_type *copy_from)

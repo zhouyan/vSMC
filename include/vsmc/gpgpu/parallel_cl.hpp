@@ -181,7 +181,7 @@ class StateCL
         ss << "typedef ulong size_type;\n";
         ss << "#define Size " << size_ << "UL\n";
         ss << "#define Dim  " << dim_  << "U\n";
-        ss << "#include <vsmc/cl/device.h>\n";
+        ss << "#include <vsmc/gpgpu/device_cl.h>\n";
         ss << source << '\n';
 
         try {
