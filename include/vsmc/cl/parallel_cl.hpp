@@ -31,7 +31,7 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 /// \brief Particle::value_type subtype
 /// \ingroup CL
 template <unsigned Dim, typename T, typename CLManagerID>
-class StateCL : public opencl::LocalSize
+class StateCL
 {
     public :
 
@@ -253,7 +253,7 @@ class StateCL : public opencl::LocalSize
                 copy_device_, size_, copy_from);
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
-        cl_manager_.run_kernel(kernel_copy_, size_, local_size());
+        cl_manager_.run_kernel(kernel_copy_, size_, 0);
     }
 
     private :

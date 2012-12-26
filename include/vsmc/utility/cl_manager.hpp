@@ -36,23 +36,33 @@ class LocalSize
 {
     public :
 
-    typedef std::size_t size_type;
-
     LocalSize () : local_size_(0) {}
 
-    size_type local_size () const
+    std::size_t local_size () const
     {
         return local_size_;
     }
 
-    void local_size (size_type new_size)
+    void local_size (std::size_t new_size)
     {
         local_size_ = new_size;
     }
 
+    static std::size_t preferred_local_size (
+            const cl::Kernel &kern, const cl::Device &dev)
+    {
+        std::size_t max_s;
+        std::size_t mul_s;
+        kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &max_s);
+        kern.getWorkGroupInfo(dev,
+                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
+
+        return max_s >= mul_s ? (max_s / mul_s) * mul_s : max_s;
+    }
+
     private :
 
-    size_type local_size_;
+    std::size_t local_size_;
 }; // class LocalSize
 
 /// \brief OpenCL Manager
@@ -240,11 +250,11 @@ class CLManager
         return cl::Program(context_, source);
     }
 
-    void run_kernel (const cl::Kernel &ker,
+    void run_kernel (const cl::Kernel &kern,
             size_type global_size, size_type local_size) const
     {
         command_queue_.finish();
-        command_queue_.enqueueNDRangeKernel(ker, cl::NullRange,
+        command_queue_.enqueueNDRangeKernel(kern, cl::NullRange,
                 get_global_nd_range(global_size, local_size),
                 get_local_nd_range(global_size, local_size));
     }
