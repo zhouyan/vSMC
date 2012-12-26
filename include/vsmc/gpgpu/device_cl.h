@@ -1,5 +1,5 @@
-#ifndef VSMC_CL_DEVICE_H
-#define VSMC_CL_DEVICE_H
+#ifndef VSMC_GPGPU_DEVICE_CL_H
+#define VSMC_GPGPU_DEVICE_CL_H
 
 #include <vsmc/cl/config.h>
 
@@ -14,6 +14,4 @@ void copy (__global state_struct *state, __global size_type *copy_from)
     state[to] = state[copy_from[to]];
 }
 
-#endif // VSMC_CL_DEVICE_H
-
-// vim:ft=opencl
+#endif // VSMC_GPGPU_DEVICE_CL_H

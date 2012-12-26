@@ -1,10 +1,10 @@
-#ifndef VSMC_UTILITY_CL_MANAGER_HPP
-#define VSMC_UTILITY_CL_MANAGER_HPP
+#ifndef VSMC_UTILITY_OPENCL_MANAGER_HPP
+#define VSMC_UTILITY_OPENCL_MANAGER_HPP
 
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cl.hpp>
+#include <vsmc/utility/opencl/cl.hpp>
 
 namespace vsmc { namespace opencl {
 
@@ -57,7 +57,7 @@ class LocalSize
         kern.getWorkGroupInfo(dev,
                 CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
 
-        return max_s >= mul_s ? (max_s / mul_s) * mul_s : max_s;
+        return (max_s / mul_s) * mul_s;
     }
 
     private :
@@ -377,4 +377,4 @@ class CLManager
 
 } } // namespace vsmc::opencl
 
-#endif // VSMC_UTILITY_CL_MANAGER_HPP
+#endif // VSMC_UTILITY_OPENCL_MANAGER_HPP

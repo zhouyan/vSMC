@@ -10,8 +10,9 @@
         CBRNG4x##W##_CTR_T r;                                                \
         FT u[4];                                                             \
         unsigned char remain;                                                \
-    } normal01_##W##_##F;                                                    \
-                                                                             \
+    } normal01_##W##_##F;
+
+#define VSMC_DEFINE_NORMAL01_STEP(W, F, FT) \
     VSMC_STATIC_INLINE void normal01_##W##_##F##_step (                      \
             normal01_##W##_##F *rnorm)                                       \
     {                                                                        \
@@ -22,8 +23,9 @@
         rnorm->u[2] = u01_open_closed_##W##_##F(rnorm->r.v[2]);              \
         rnorm->u[3] = u01_open_closed_##W##_##F(rnorm->r.v[3]);              \
         rnorm->remain = 4;                                                   \
-    }                                                                        \
-                                                                             \
+    }
+
+#define VSMC_DEFINE_NORMAL01_INIT(W, F, FT) \
     VSMC_STATIC_INLINE void normal01_##W##_##F##_init (                      \
             normal01_##W##_##F *rnorm,                                       \
             CBRNG4x##W##_KEY_T *k, CBRNG4x##W##_CTR_T *c)                    \
@@ -31,8 +33,9 @@
         rnorm->k = k;                                                        \
         rnorm->c = c;                                                        \
         normal01_##W##_##F##_step(rnorm);                                    \
-    }                                                                        \
-                                                                             \
+    }
+
+#define VSMC_DEFINE_NORMAL01_RAND(W, F, FT) \
     VSMC_STATIC_INLINE FT normal01_##W##_##F##_rand (                        \
             normal01_##W##_##F *rnorm)                                       \
     {                                                                        \
@@ -47,11 +50,30 @@
             sqrt(-2 * log(rnorm->u[i])) * sin(2 * M_PI_##F * rnorm->u[i+1]); \
     }
 
+/// \ingroup Random
 VSMC_DEFINE_NORMAL01(32, 24, float);
+VSMC_DEFINE_NORMAL01_STEP(32, 24, float);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_INIT(32, 24, float);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_RAND(32, 24, float);
 
 #if R123_USE_U01_DOUBLE
+/// \ingroup Random
 VSMC_DEFINE_NORMAL01(32, 53, float);
+VSMC_DEFINE_NORMAL01_STEP(32, 53, float);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_INIT(32, 53, float);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_RAND(32, 53, float);
+
+/// \ingroup Random
 VSMC_DEFINE_NORMAL01(64, 53, double);
+VSMC_DEFINE_NORMAL01_STEP(64, 53, double);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_INIT(64, 53, double);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_RAND(64, 53, double);
 #endif
 
 #endif // VSMC_UTILITY_RANDOM_NORMAL01_H

@@ -13,23 +13,23 @@
 
 #if VSMC_USE_CILK
 #include <vsmc/smp/parallel_cilk.hpp>
-#endif // VSMC_USE_CILK
+#endif
 
 #if VSMC_USE_OMP
 #include <vsmc/smp/parallel_omp.hpp>
-#endif // VSMC_USE_OMP
+#endif
 
 #if VSMC_USE_TBB
 #include <vsmc/smp/parallel_tbb.hpp>
-#endif // VSMC_USE_TBB
+#endif
 
 #if VSMC_USE_STD
 #include <vsmc/smp/parallel_std.hpp>
-#endif // VSMC_USE_STD
+#endif
 
 #if VSMC_USE_CL
-#include <vsmc/cl/parallel_cl.hpp>
-#endif // VSMC_USE_CL
+#include <vsmc/gpgpu/parallel_cl.hpp>
+#endif
 
 #endif // VSMC_HPP
 
@@ -85,10 +85,6 @@
 /// \defgroup Utility Utility
 /// \brief Utilities
 
-/// \defgroup RNG RNG
-/// \ingroup Utility
-/// \brief Random Number Generation utitilites
-
 /// \defgroup Thread Thread
 /// \ingroup Utility
 /// \brief C++11 Thread utilities
@@ -96,3 +92,7 @@
 /// \defgroup OpenCL OpenCL
 /// \ingroup Utility
 /// \brief OpenCL device management utilities
+
+/// \defgroup Random Random
+/// \ingroup Utility
+/// \brief Generating distribution random variates using Random123 CBRNG

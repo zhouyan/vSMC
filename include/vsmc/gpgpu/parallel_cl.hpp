@@ -1,8 +1,9 @@
-#ifndef VSMC_CL_PARALLEL_CL_HPP
-#define VSMC_CL_PARALLEL_CL_HPP
+#ifndef VSMC_GPGPU_PARALLEL_CL_HPP
+#define VSMC_GPGPU_PARALLEL_CL_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cl_manager.hpp>
+#include <vsmc/core/rng.hpp>
+#include <vsmc/utility/opencl/manager.hpp>
 
 namespace vsmc {
 
@@ -180,9 +181,6 @@ class StateCL
         ss << "typedef ulong size_type;\n";
         ss << "#define Size " << size_ << "UL\n";
         ss << "#define Dim  " << dim_  << "U\n";
-        VSMC_SEED_TYPE &seed = VSMC_SEED_TYPE::instance();
-        ss << "#define Seed " << seed.get() << "UL\n";
-        seed.skip(size_);
         ss << "#include <vsmc/cl/device.h>\n";
         ss << source << '\n';
 
@@ -632,4 +630,4 @@ class PathEvalCL : public opencl::LocalSize
 
 } // namespace vsmc
 
-#endif // VSMC_CL_PARALLEL_CL_HPP
+#endif // VSMC_GPGPU_PARALLEL_CL_HPP

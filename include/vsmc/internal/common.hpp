@@ -36,6 +36,4 @@
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/traits.hpp>
 
-#include <vsmc/utility/seed.hpp>
-
 #endif // VSMC_INTERNAL_COMMON_HPP

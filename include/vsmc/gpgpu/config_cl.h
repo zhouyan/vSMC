@@ -1,5 +1,5 @@
-#ifndef VSMC_CL_CONFIG_H
-#define VSMC_CL_CONFIG_H
+#ifndef VSMC_GPGPU_CONFIG_CL_H
+#define VSMC_GPGPU_CONFIG_CL_H
 
 #if defined(cl_khr_fp64)
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -38,4 +38,4 @@
 #define NORMAL01_64_RAND normal01_64_53_rand
 #endif // VSMC_STATE_TYPE_IS_DOUBLE
 
-#endif // VSMC_CL_CONFIG_H
+#endif // VSMC_GPGPU_CONFIG_CL_H
