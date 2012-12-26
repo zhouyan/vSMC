@@ -236,7 +236,7 @@ class CLManager
     }
 
     template <typename CLType>
-    void *copy_buffer (const cl::Buffer &src, const cl::Buffer &dst,
+    void copy_buffer (const cl::Buffer &src, const cl::Buffer &dst,
             size_type num) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
