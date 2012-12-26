@@ -39,8 +39,6 @@
     VSMC_STATIC_INLINE FT normal01_##W##_##F##_rand (                        \
             normal01_##W##_##F *rnorm)                                       \
     {                                                                        \
-        const static FT pi2 = 6.2831853071795865;                            \
-                                                                             \
         if (!rnorm->remain)                                                  \
             normal01_##W##_##F##_step(rnorm);                                \
         rnorm->remain--;                                                     \
@@ -48,8 +46,8 @@
         unsigned char i = (k>>1)<<1;                                         \
                                                                              \
         return k == i ?                                                      \
-            sqrt(-2 * log(rnorm->u[i])) * cos(pi2 * rnorm->u[i+1]):          \
-            sqrt(-2 * log(rnorm->u[i])) * sin(pi2 * rnorm->u[i+1]);          \
+            sqrt(-2 * log(rnorm->u[i])) * cos(M_2PI_##F * rnorm->u[i+1]):    \
+            sqrt(-2 * log(rnorm->u[i])) * sin(M_2PI_##F * rnorm->u[i+1]);    \
     }
 
 /// \ingroup Random

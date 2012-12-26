@@ -1,8 +1,14 @@
 #ifndef VSMC_INTERNAL_COMPILER_OPENCL_H
 #define VSMC_INTERNAL_COMPILER_OPENCL_H
 
+#ifdef CL_VERSION_1_2
+#ifndef VSMC_STATIC_INLINE
+#define VSMC_STATIC_INLINE static inline
+#endif
+#else // CL_VERSION_1_2
 #ifndef VSMC_STATIC_INLINE
 #define VSMC_STATIC_INLINE inline
 #endif
+#endif // CL_VERSION_1_2
 
 #endif // VSMC_INTERNAL_COMPILER_OPENCL_H

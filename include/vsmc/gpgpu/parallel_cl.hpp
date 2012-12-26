@@ -181,6 +181,7 @@ class StateCL
         ss << "typedef ulong size_type;\n";
         ss << "#define Size " << size_ << "UL\n";
         ss << "#define Dim  " << dim_  << "U\n";
+        ss << "#define Seed " << VSMC_SEED_TYPE::instance().get() << "UL\n";
         ss << "#include <vsmc/gpgpu/device_cl.h>\n";
         ss << source << '\n';
 
