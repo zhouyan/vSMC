@@ -377,23 +377,4 @@ class CLManager
 
 } } // namespace vsmc::opencl
 
-namespace {
-
-vsmc::opencl::CLManager<vsmc::opencl::Default>
-    &vSMCOpenCLCLManagerInstanceDefault =
-    vsmc::opencl::CLManager<vsmc::opencl::Default>::instance();
-
-vsmc::opencl::CLManager<vsmc::opencl::CPU>
-    &vSMCOpenCLCLManagerInstanceCPU =
-    vsmc::opencl::CLManager<vsmc::opencl::CPU>::instance();
-
-vsmc::opencl::CLManager<vsmc::opencl::GPU>
-    &vSMCOpenCLCLManagerInstanceGPU =
-    vsmc::opencl::CLManager<vsmc::opencl::GPU>::instance();
-
-vsmc::opencl::CLManager<vsmc::opencl::Accelerator>
-    &vSMCOpenCLCLManagerInstanceAccelerator =
-    vsmc::opencl::CLManager<vsmc::opencl::Accelerator>::instance();
-}
-
 #endif // VSMC_UTILITY_CL_MANAGER_HPP
