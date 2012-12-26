@@ -27,9 +27,6 @@
 #include <Random123/u01.h>
 #include <vsmc/internal/compiler.h>
 
-#define M_PI_24 3.1415926535897932385F
-#define M_PI_53 3.1415926535897932385
-
 #ifndef CBRNG2x32
 #define CBRNG2x32 threefry2x32
 #endif
