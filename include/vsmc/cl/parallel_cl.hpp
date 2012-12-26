@@ -31,7 +31,7 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 /// \brief Particle::value_type subtype
 /// \ingroup CL
 template <unsigned Dim, typename T, typename CLManagerID>
-class StateCL
+class StateCL : public opencl::LocalSize
 {
     public :
 
@@ -40,7 +40,7 @@ class StateCL
     typedef opencl::CLManager<CLManagerID> cl_manager_type;
 
     explicit StateCL (size_type N) :
-        dim_(Dim == Dynamic ? 1 : Dim), size_(N), local_size_(0),
+        dim_(Dim == Dynamic ? 1 : Dim), size_(N),
         cl_manager_(cl_manager_type::instance()), build_(false), build_id_(0),
         state_device_(cl_manager_.template create_buffer<state_type>(
                 dim_ * size_)),
@@ -49,16 +49,12 @@ class StateCL
         state_host_(dim_ * N), accept_host_(N)
     {
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
-        local_size(0);
     }
 
     StateCL (const StateCL<Dim, T, CLManagerID> &other) :
-        dim_(other.dim_), size_(other.size_), local_size_(other.local_size_),
-        cl_manager_(other.cl_manager_),
+        dim_(other.dim_), size_(other.size_), cl_manager_(other.cl_manager_),
         program_(other.program_), kernel_copy_(other.kernel_copy_),
         build_(other.build_), build_id_(0),
-        global_nd_range_(other.global_nd_range_),
-        local_nd_range_(other.local_nd_range_),
         state_device_(cl_manager_.template create_buffer<state_type>(
                 dim_ * size_)),
         accept_device_(cl_manager_.template create_buffer<state_type>(size_)),
@@ -79,15 +75,12 @@ class StateCL
             const StateCL<Dim, T, CLManagerID> &other)
     {
         if (this != &other) {
-            dim_             = other.dim_;
-            size_            = other.size_;
-            local_size_      = other.local_size_;
-            program_         = other.program_;
-            kernel_copy_     = other.kernel_copy_;
-            build_           = other.build_;
-            build_id_        = 0;
-            global_nd_range_ = other.global_nd_range_;
-            local_nd_range_  = other.local_nd_range_;
+            dim_         = other.dim_;
+            size_        = other.size_;
+            program_     = other.program_;
+            kernel_copy_ = other.kernel_copy_;
+            build_       = other.build_;
+            build_id_    = 0;
 
             state_host_.resize(dim_ * size_);
             accept_host_.resize(size_);
@@ -135,36 +128,6 @@ class StateCL
     cl_manager_type &cl_manager () const
     {
         return cl_manager_;
-    }
-
-    void local_size (size_type lsize)
-    {
-        local_size_ = lsize;
-
-        if (lsize)
-            local_nd_range_ = cl::NDRange(lsize);
-        else
-            local_nd_range_ = cl::NullRange;
-
-        if (lsize && size_ % lsize)
-            global_nd_range_ = cl::NDRange((size_ / lsize + 1) * lsize);
-        else
-            global_nd_range_ = cl::NDRange(size_);
-    }
-
-    void local_size () const
-    {
-        return local_size_;
-    }
-
-    cl::NDRange global_nd_range () const
-    {
-        return global_nd_range_;
-    }
-
-    cl::NDRange local_nd_range () const
-    {
-        return local_nd_range_;
     }
 
     const cl::Buffer &state_device () const
@@ -280,14 +243,6 @@ class StateCL
         return cl::Kernel(program_, name.c_str());
     }
 
-    void run_kernel (const cl::Kernel &ker) const
-    {
-        cl_manager_.command_queue().finish();
-        cl_manager_.command_queue().enqueueNDRangeKernel(ker,
-                cl::NullRange, global_nd_range(), local_nd_range());
-        cl_manager_.command_queue().finish();
-    }
-
     template<typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
@@ -298,14 +253,13 @@ class StateCL
                 copy_device_, size_, copy_from);
         kernel_copy_.setArg(0, state_device_);
         kernel_copy_.setArg(1, copy_device_);
-        run_kernel(kernel_copy_);
+        cl_manager_.run_kernel(kernel_copy_, size_, local_size());
     }
 
     private :
 
     unsigned dim_;
     size_type size_;
-    size_type local_size_;
 
     cl_manager_type &cl_manager_;
 
@@ -315,9 +269,6 @@ class StateCL
     bool build_;
     int build_id_;
     std::string build_log_;
-
-    cl::NDRange global_nd_range_;
-    cl::NDRange local_nd_range_;
 
     cl::Buffer state_device_;
     cl::Buffer accept_device_;
@@ -330,7 +281,7 @@ class StateCL
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup CL
 template <typename T>
-class InitializeCL
+class InitializeCL : public opencl::LocalSize
 {
     public :
 
@@ -344,7 +295,8 @@ class InitializeCL
         set_kernel(particle);
         initialize_param(particle, param);
         pre_processor(particle);
-        particle.value().run_kernel(kernel_);
+        particle.value().cl_manager().run_kernel(
+                kernel_, particle.size(), local_size());
         post_processor(particle);
         const cl_uint *accept = particle.value().accept_host();
 
@@ -414,7 +366,7 @@ class InitializeCL
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup CL
 template <typename T>
-class MoveCL
+class MoveCL : public opencl::LocalSize
 {
     public :
 
@@ -427,7 +379,8 @@ class MoveCL
 
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().run_kernel(kernel_);
+        particle.value().cl_manager().run_kernel(
+                kernel_, particle.size(), local_size());
         post_processor(iter, particle);
         const cl_uint *accept = particle.value().accept_host();
 
@@ -497,7 +450,7 @@ class MoveCL
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup CL
 template <typename T>
-class MonitorEvalCL
+class MonitorEvalCL : public opencl::LocalSize
 {
     public :
 
@@ -511,7 +464,8 @@ class MonitorEvalCL
 
         set_kernel(iter, dim, particle);
         pre_processor(iter, particle);
-        particle.value().run_kernel(kernel_);
+        particle.value().cl_manager().run_kernel(
+                kernel_, particle.size(), local_size());
         particle.value().cl_manager().template
             read_buffer<typename T::state_type>(
                     buffer_device_, particle.value().size() * dim, res);
@@ -587,7 +541,7 @@ class MonitorEvalCL
 /// \brief Path<T>::eval_type subtype
 /// \ingroup CL
 template <typename T>
-class PathEvalCL
+class PathEvalCL : public opencl::LocalSize
 {
     public :
 
@@ -601,7 +555,8 @@ class PathEvalCL
 
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().run_kernel(kernel_);
+        particle.value().cl_manager().run_kernel(
+                kernel_, particle.size(), local_size());
         particle.value().cl_manager().template
             read_buffer<typename T::state_type>(
                     buffer_device_, particle.value().size(), res);

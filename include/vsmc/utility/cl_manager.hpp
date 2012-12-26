@@ -32,6 +32,29 @@ struct Accelerator
         CL_DEVICE_TYPE_ACCELERATOR> opencl_device_type;
 };
 
+class LocalSize
+{
+    public :
+
+    typedef std::size_t size_type;
+
+    LocalSize () : local_size_(0) {}
+
+    size_type local_size () const
+    {
+        return local_size_;
+    }
+
+    void local_size (size_type new_size)
+    {
+        local_size_ = new_size;
+    }
+
+    private :
+
+    size_type local_size_;
+}; // class LocalSize
+
 /// \brief OpenCL Manager
 /// \ingroup OpenCL
 template <typename ID>
@@ -202,9 +225,28 @@ class CLManager
         return first + num;
     }
 
+    template <typename CLType>
+    void *copy_buffer (const cl::Buffer &src, const cl::Buffer &dst,
+            size_type num) const
+    {
+        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
+
+        command_queue_.finish();
+        command_queue_.enqueueCopyBuffer(src, dst, 0, 0, num * sizeof(CLType));
+    }
+
     cl::Program create_program (const std::string &source) const
     {
         return cl::Program(context_, source);
+    }
+
+    void run_kernel (const cl::Kernel &ker,
+            size_type global_size, size_type local_size) const
+    {
+        command_queue_.finish();
+        command_queue_.enqueueNDRangeKernel(ker, cl::NullRange,
+                get_global_nd_range(global_size, local_size),
+                get_local_nd_range(global_size, local_size));
     }
 
     private :
@@ -306,6 +348,20 @@ class CLManager
         }
 
         return reinterpret_cast<CLType *>(write_buffer_pool_);
+    }
+
+    cl::NDRange get_global_nd_range (
+            size_type global_size, size_type local_size) const
+    {
+        return (local_size && global_size % local_size) ?
+            cl::NDRange((global_size / local_size + 1) * local_size):
+            cl::NDRange(global_size);
+    }
+
+    cl::NDRange get_local_nd_range (
+            size_type global_size, size_type local_size) const
+    {
+        return local_size ? cl::NDRange(local_size) : cl::NullRange;
     }
 }; // clss CLManager
 
