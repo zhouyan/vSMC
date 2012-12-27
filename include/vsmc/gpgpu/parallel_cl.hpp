@@ -184,6 +184,8 @@ class StateCL
         ss << "#define Seed " << VSMC_SEED_TYPE::instance().get() << "UL\n";
         ss << "#include <vsmc/gpgpu/device_cl.h>\n";
         ss << source << '\n';
+        VSMC_SEED_TYPE::instance().skip(
+                static_cast<VSMC_SEED_TYPE::result_type>(size_));
 
         try {
             program_ = cl_manager_.create_program(ss.str());
