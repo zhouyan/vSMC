@@ -44,9 +44,8 @@
             rng->ctr.v[0]++;                                                 \
             cburng##N##x##W##_init(rng);                                     \
         }                                                                    \
-        rng->remain--;                                                       \
                                                                              \
-        return rng->rnd.v[rng->remain];                                      \
+        return rng->rnd.v[--rng->remain];                                    \
     }
 
 /// \ingroup Random

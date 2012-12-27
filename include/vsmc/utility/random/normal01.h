@@ -5,7 +5,8 @@
 
 #define VSMC_DEFINE_NORMAL01(N, W, F, FT) \
     typedef struct {                                                         \
-        FT u[2];                                                             \
+        FT u1;                                                               \
+        FT u2;                                                               \
         unsigned char saved;                                                 \
     } normal01_##N##x##W##_##F;
 
@@ -13,8 +14,8 @@
     VSMC_STATIC_INLINE void normal01_##N##x##W##_##F##_init (                \
             normal01_##N##x##W##_##F *rnorm, cburng##N##x##W *rng)           \
     {                                                                        \
-        rnorm->u[0] = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));\
-        rnorm->u[1] = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));\
+        rnorm->u1 = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));  \
+        rnorm->u2 = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));  \
         rnorm->saved = 1;                                                    \
     }
 
@@ -24,10 +25,10 @@
     {                                                                        \
         if (rnorm->saved) {                                                  \
             rnorm->saved = 0;                                                \
-            return sqrt(-2 * log(rnorm->u[0])) * cos(M_2PI_##F * rnorm->u[1]);\
+            return sqrt(-2 * log(rnorm->u1)) * cos(M_2PI_##F * rnorm->u2);   \
         } else {                                                             \
             normal01_##N##x##W##_##F##_init(rnorm, rng);                     \
-            return sqrt(-2 * log(rnorm->u[0])) * sin(M_2PI_##F * rnorm->u[1]);\
+            return sqrt(-2 * log(rnorm->u1)) * sin(M_2PI_##F * rnorm->u2);   \
         }                                                                    \
     }
 
