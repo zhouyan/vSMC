@@ -42,8 +42,7 @@
     {                                                                        \
         if (!rng->remain) {                                                  \
             rng->ctr.v[0]++;                                                 \
-            rng->rnd = CBRNG##N##x##W(rng->ctr, rng->key);                   \
-            rng->remain = N;                                                 \
+            cburng##N##x##W##_init(rng);                                     \
         }                                                                    \
         rng->remain--;                                                       \
                                                                              \
