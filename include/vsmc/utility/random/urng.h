@@ -32,8 +32,9 @@
 #define VSMC_DEFINE_CBURNG_INIT(N, W) \
     VSMC_STATIC_INLINE void cburng##N##x##W##_init(cburng##N##x##W *rng)     \
     {                                                                        \
-        rng->rnd = CBRNG##N##x##W(rng->ctr, rng->key);                       \
-        rng->remain = N;                                                     \
+        struct r123array##N##x##W v = {{}};                                  \
+        rng->key = rng->ctr = rng->rnd = v;                                  \
+        rng->remain = 0;                                                     \
     }
 
 #define VSMC_DEFINE_CBURNG_RAND(N, W) \
@@ -42,10 +43,12 @@
     {                                                                        \
         if (!rng->remain) {                                                  \
             rng->ctr.v[0]++;                                                 \
-            cburng##N##x##W##_init(rng);                                     \
+            rng->rnd = CBRNG##N##x##W(rng->ctr, rng->key);                   \
+            rng->remain = N;                                                 \
         }                                                                    \
+        rng->remain--;                                                       \
                                                                              \
-        return rng->rnd.v[--rng->remain];                                    \
+        return rng->rnd.v[rng->remain];                                      \
     }
 
 /// \ingroup Random
