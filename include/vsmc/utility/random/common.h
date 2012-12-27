@@ -3,16 +3,16 @@
 
 #ifdef __OPENCL_VERSION__
 
-#if defined(cl_khr_fp64)
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#elif defined(cl_amd_fp64)
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
-#endif
-
 #if defined(cl_khr_fp64) || defined(cl_amd_fp64)
 #define R123_USE_U01_DOUBLE 1
 #else
 #define R123_USE_U01_DOUBLE 0
+#endif
+
+#if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
+#ifndef R123_STATIC_INLINE
+#define R123_STATIC_INLINE static inline
+#endif
 #endif
 
 #else // __OPENCL_VERSION__
