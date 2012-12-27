@@ -3,77 +3,79 @@
 
 #include <vsmc/utility/random/common.h>
 
-#define VSMC_DEFINE_NORMAL01(W, F, FT) \
+#define VSMC_DEFINE_NORMAL01(N, W, F, FT) \
     typedef struct {                                                         \
-        CBRNG4x##W##_KEY_T *k;                                               \
-        CBRNG4x##W##_CTR_T *c;                                               \
-        CBRNG4x##W##_CTR_T r;                                                \
-        FT u[4];                                                             \
-        unsigned char remain;                                                \
-    } normal01_##W##_##F;
+        FT u[2];                                                             \
+        unsigned char saved;                                                 \
+    } normal01_##N##x##W##_##F;
 
-#define VSMC_DEFINE_NORMAL01_STEP(W, F, FT) \
-    VSMC_STATIC_INLINE void normal01_##W##_##F##_step (                      \
-            normal01_##W##_##F *rnorm)                                       \
+#define VSMC_DEFINE_NORMAL01_INIT(N, W, F, FT) \
+    VSMC_STATIC_INLINE void normal01_##N##x##W##_##F##_init (                \
+            normal01_##N##x##W##_##F *rnorm, cburng##N##x##W *rng)           \
     {                                                                        \
-        rnorm->c->v[0]++;                                                    \
-        rnorm->r = CBRNG4x##W(*(rnorm->c), *(rnorm->k));                     \
-        rnorm->u[0] = u01_open_closed_##W##_##F(rnorm->r.v[0]);              \
-        rnorm->u[1] = u01_open_closed_##W##_##F(rnorm->r.v[1]);              \
-        rnorm->u[2] = u01_open_closed_##W##_##F(rnorm->r.v[2]);              \
-        rnorm->u[3] = u01_open_closed_##W##_##F(rnorm->r.v[3]);              \
-        rnorm->remain = 4;                                                   \
+        rnorm->u[0] = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));\
+        rnorm->u[1] = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));\
+        rnorm->saved = 1;                                                    \
     }
 
-#define VSMC_DEFINE_NORMAL01_INIT(W, F, FT) \
-    VSMC_STATIC_INLINE void normal01_##W##_##F##_init (                      \
-            normal01_##W##_##F *rnorm,                                       \
-            CBRNG4x##W##_KEY_T *k, CBRNG4x##W##_CTR_T *c)                    \
+#define VSMC_DEFINE_NORMAL01_RAND(N, W, F, FT) \
+    VSMC_STATIC_INLINE FT normal01_##N##x##W##_##F##_rand (                  \
+            normal01_##N##x##W##_##F *rnorm, cburng##N##x##W *rng)           \
     {                                                                        \
-        rnorm->k = k;                                                        \
-        rnorm->c = c;                                                        \
-        normal01_##W##_##F##_step(rnorm);                                    \
-    }
-
-#define VSMC_DEFINE_NORMAL01_RAND(W, F, FT) \
-    VSMC_STATIC_INLINE FT normal01_##W##_##F##_rand (                        \
-            normal01_##W##_##F *rnorm)                                       \
-    {                                                                        \
-        if (!rnorm->remain)                                                  \
-            normal01_##W##_##F##_step(rnorm);                                \
-        rnorm->remain--;                                                     \
-        unsigned char k = rnorm->remain;                                     \
-        unsigned char i = (k>>1)<<1;                                         \
-                                                                             \
-        return k == i ?                                                      \
-            sqrt(-2 * log(rnorm->u[i])) * cos(M_2PI_##F * rnorm->u[i+1]):    \
-            sqrt(-2 * log(rnorm->u[i])) * sin(M_2PI_##F * rnorm->u[i+1]);    \
+        if (rnorm->saved) {                                                  \
+            rnorm->saved = 0;                                                \
+            return sqrt(-2 * log(rnorm->u[0])) * cos(M_2PI_##F * rnorm->u[1]);\
+        } else {                                                             \
+            normal01_##N##x##W##_##F##_init(rnorm, rng);                     \
+            return sqrt(-2 * log(rnorm->u[0])) * sin(M_2PI_##F * rnorm->u[1]);\
+        }                                                                    \
     }
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(32, 24, float);
-VSMC_DEFINE_NORMAL01_STEP(32, 24, float);
+VSMC_DEFINE_NORMAL01(2, 32, 24, float);
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(32, 24, float);
+VSMC_DEFINE_NORMAL01(4, 32, 24, float);
+
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(32, 24, float);
+VSMC_DEFINE_NORMAL01_INIT(2, 32, 24, float);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_INIT(4, 32, 24, float);
+
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_RAND(2, 32, 24, float);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_RAND(4, 32, 24, float);
 
 #if R123_USE_U01_DOUBLE
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(32, 53, float);
-VSMC_DEFINE_NORMAL01_STEP(32, 53, float);
+VSMC_DEFINE_NORMAL01(2, 32, 53, double);
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(32, 53, float);
-/// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(32, 53, float);
+VSMC_DEFINE_NORMAL01(4, 32, 53, double);
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(64, 53, double);
-VSMC_DEFINE_NORMAL01_STEP(64, 53, double);
+VSMC_DEFINE_NORMAL01_INIT(2, 32, 53, double);
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(64, 53, double);
+VSMC_DEFINE_NORMAL01_INIT(4, 32, 53, double);
+
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(64, 53, double);
+VSMC_DEFINE_NORMAL01_RAND(2, 32, 53, double);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_RAND(4, 32, 53, double);
+
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01(2, 64, 53, double);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01(4, 64, 53, double);
+
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_INIT(2, 64, 53, double);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_INIT(4, 64, 53, double);
+
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_RAND(2, 64, 53, double);
+/// \ingroup Random
+VSMC_DEFINE_NORMAL01_RAND(4, 64, 53, double);
 #endif
 
 #endif // VSMC_UTILITY_RANDOM_NORMAL01_H
