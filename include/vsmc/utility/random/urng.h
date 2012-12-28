@@ -1,6 +1,8 @@
 #ifndef VSMC_UTILITY_RANDOM_URNG_H
 #define VSMC_UTILITY_RANDOM_URNG_H
 
+#include <vsmc/utility/random/common.h>
+
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 #include <Random123/u01.h>
