@@ -69,11 +69,6 @@ enum ResampleScheme {
 /// \ingroup Resampling
 template <typename EnumType, EnumType S> struct ResampleType {};
 
-/// \brief Resample class template
-/// \ingroup Resampling
-template <typename ResType>
-class Resample {};
-
 /// \brief Multinomial resampling
 /// \ingroup Resampling
 template <>

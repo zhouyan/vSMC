@@ -45,6 +45,7 @@ template <typename> class CLManager;
 // Core module
 class RngSetSeq;
 class RngSetPrl;
+template <typename ResType> class Resample;
 template <typename> class WeightSetBase;
 template <typename> class Sampler;
 template <typename> class Particle;
