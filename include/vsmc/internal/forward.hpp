@@ -46,7 +46,7 @@ template <typename> class CLManager;
 class RngSetSeq;
 class RngSetPrl;
 template <typename ResType> class Resample;
-template <typename> class WeightSetBase;
+template <typename> class WeightSet;
 template <typename> class Sampler;
 template <typename> class Particle;
 template <typename> class Monitor;
