@@ -173,11 +173,6 @@ class StateCL
         ss << "#endif\n";
 
         internal::set_cl_state_type<T>(ss);
-        ss << "typedef struct state_struct {\n";
-        for (unsigned d = 0; d != dim_; ++d)
-            ss << "state_type param" << d + 1 << ";\n";
-        ss << "} state_struct;\n";
-
         ss << "typedef ulong size_type;\n";
         ss << "#define Size " << size_ << "UL\n";
         ss << "#define Dim  " << dim_  << "U\n";
