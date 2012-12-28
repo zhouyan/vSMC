@@ -42,7 +42,8 @@ template <typename> class CLManager;
 
 } // namespace vsmc::opencl
 
-// Core module
+// Core
+class Seed;
 class RngSetSeq;
 class RngSetPrl;
 template <typename ResType> class Resample;
@@ -56,12 +57,25 @@ template <typename> class ConstSingleParticle;
 template <typename, template <typename> class> class ParticleIterator;
 
 // SMP
+
+// Base
 template <unsigned, typename> class StateBase;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
 template <typename, typename> class MonitorEvalBase;
 template <typename, typename> class PathEvalBase;
 
+// Adapter
+template <typename, template <typename, typename> class, typename B = CBase>
+         class InitializeAdapter;
+template <typename, template <typename, typename> class, typename B = CBase>
+         class MoveAdapter;
+template <typename, template <typename, typename> class, typename B = CBase>
+         class MonitorEvalAdapter;
+template <typename, template <typename, typename> class, typename B = CBase>
+         class PathEvalAdapter;
+
+// Sequential
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <unsigned Dim, typename T> using StateSEQ = StateBase<Dim, T>;
 #else
@@ -72,45 +86,40 @@ template <typename, typename D = VBase> class MoveSEQ;
 template <typename, typename D = VBase> class MonitorEvalSEQ;
 template <typename, typename D = VBase> class PathEvalSEQ;
 
-template <unsigned, typename> class StateSTD;
-template <typename, typename D = VBase> class InitializeSTD;
-template <typename, typename D = VBase> class MoveSTD;
-template <typename, typename D = VBase> class MonitorEvalSTD;
-template <typename, typename D = VBase> class PathEvalSTD;
-
-template <unsigned, typename> class StateOMP;
-template <typename, typename D = VBase> class InitializeOMP;
-template <typename, typename D = VBase> class MoveOMP;
-template <typename, typename D = VBase> class MonitorEvalOMP;
-template <typename, typename D = VBase> class PathEvalOMP;
-
-template <unsigned, typename> class StateTBB;
-template <typename, typename D = VBase> class InitializeTBB;
-template <typename, typename D = VBase> class MoveTBB;
-template <typename, typename D = VBase> class MonitorEvalTBB;
-template <typename, typename D = VBase> class PathEvalTBB;
-
+// Intel Cilk Plus
 template <unsigned, typename> class StateCILK;
 template <typename, typename D = VBase> class InitializeCILK;
 template <typename, typename D = VBase> class MoveCILK;
 template <typename, typename D = VBase> class MonitorEvalCILK;
 template <typename, typename D = VBase> class PathEvalCILK;
 
-// OCL
+// OpenMP
+template <unsigned, typename> class StateOMP;
+template <typename, typename D = VBase> class InitializeOMP;
+template <typename, typename D = VBase> class MoveOMP;
+template <typename, typename D = VBase> class MonitorEvalOMP;
+template <typename, typename D = VBase> class PathEvalOMP;
+
+// C++11 <thread>
+template <unsigned, typename> class StateSTD;
+template <typename, typename D = VBase> class InitializeSTD;
+template <typename, typename D = VBase> class MoveSTD;
+template <typename, typename D = VBase> class MonitorEvalSTD;
+template <typename, typename D = VBase> class PathEvalSTD;
+
+// Intel TBB
+template <unsigned, typename> class StateTBB;
+template <typename, typename D = VBase> class InitializeTBB;
+template <typename, typename D = VBase> class MoveTBB;
+template <typename, typename D = VBase> class MonitorEvalTBB;
+template <typename, typename D = VBase> class PathEvalTBB;
+
+// OpenCL
 template <unsigned, typename, typename ID = VSMC_CL_DEFAULT_ID> class StateCL;
 template <typename> class InitializeCL;
 template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;
 template <typename> class PathEvalCL;
-
-template <typename T, template <typename, typename> class I = InitializeSEQ,
-         typename B = CBase> class InitializeAdapter;
-template <typename, template <typename, typename> class I = MoveSEQ,
-         typename B = CBase> class MoveAdapter;
-template <typename, template <typename, typename> class I = MonitorEvalSEQ,
-         typename B = CBase> class MonitorEvalAdapter;
-template <typename, template <typename, typename> class I = PathEvalSEQ,
-         typename B = CBase> class PathEvalAdapter;
 
 } // namesapce vsmc
 
