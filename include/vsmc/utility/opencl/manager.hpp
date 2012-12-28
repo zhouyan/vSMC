@@ -243,6 +243,7 @@ class CLManager
 
         command_queue_.finish();
         command_queue_.enqueueCopyBuffer(src, dst, 0, 0, num * sizeof(CLType));
+        command_queue_.finish();
     }
 
     cl::Program create_program (const std::string &source) const
@@ -257,6 +258,7 @@ class CLManager
         command_queue_.enqueueNDRangeKernel(kern, cl::NullRange,
                 get_global_nd_range(global_size, local_size),
                 get_local_nd_range(global_size, local_size));
+        command_queue_.finish();
     }
 
     private :
