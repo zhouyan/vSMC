@@ -4,7 +4,7 @@
 #define __CL_ENABLE_EXCEPTIONS
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/opencl/cl.hpp>
+#include <vsmc/utility/opencl/cl_wrapper.hpp>
 
 namespace vsmc { namespace opencl {
 
