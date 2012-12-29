@@ -8,7 +8,7 @@
 #include <vsmc/internal/forward.hpp>
 
 // Type dispatcher
-#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)   \
+#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType) \
 namespace vsmc { namespace traits {                                          \
                                                                              \
 template <typename T>                                                        \
@@ -47,7 +47,7 @@ template <typename T> struct OuterType##Trait                                \
                                                                              \
 } }
 
-#define VSMC_DEFINE_MEMBER_FUNCTION_CHECKER(OuterMF, InnerMF, RT, Args)      \
+#define VSMC_DEFINE_MF_CHECKER(OuterMF, InnerMF, RT, Args) \
 namespace vsmc { namespace traits {                                          \
                                                                              \
 template <typename T>                                                        \
@@ -72,6 +72,31 @@ struct Has##OuterMF :                                                        \
                                                                              \
 } }
 
+#define VSMC_DEFINE_STATIC_MF_CHECKER(OuterMF, InnerMF, RT, Args) \
+namespace vsmc { namespace traits {                                          \
+                                                                             \
+template <typename T>                                                        \
+struct HasStatic##OuterMF##Impl                                              \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename U, RT (*) Args> struct sfinae_;                       \
+    template <typename U> static char test (sfinae_<U, &U::InnerMF> *);      \
+    template <typename U> static char2 test(...);                            \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename T>                                                        \
+struct HasStatic##OuterMF :                                                  \
+    public cxx11::integral_constant<bool, HasStatic##OuterMF##Impl<T>::value>\
+{};                                                                          \
+                                                                             \
+} }
+
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDotType, ddot_type, cxxblas::DDot<T>);
@@ -81,6 +106,11 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
         cxx11::mt19937);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type);
+
+VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLVendor, check_opencl_vendor,
+        bool, (const std::string &));
+VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDevice, check_opencl_device,
+        bool, (const std::string &));
 
 namespace vsmc { namespace traits {
 
@@ -132,49 +162,44 @@ struct IsBaseOfStateCL :
     public cxx11::integral_constant<bool, IsBaseOfStateCLImpl<D>::value>
 {};
 
+// CheckOpenCLVendorTrait
+
+template <typename ID, bool> struct CheckOpenCLVendorDispatch;
+
 template <typename ID>
-struct HasStaticCheckStringImpl
+struct CheckOpenCLVendorDispatch<ID, true>
 {
-    private :
-
-    struct char2 {char c1; char c2;};
-    template <typename U, bool (*) (const std::string &)> struct sfinae_;
-    template <typename U> static char test (sfinae_<U, &U::check> *);
-    template <typename U> static char2 test(...);
-
-    public :
-
-    enum {value = sizeof(test<ID>(VSMC_NULLPTR)) == sizeof(char)};
+    static bool check (const std::string &name)
+    {return ID::check_opencl_vendor(name);}
 };
 
 template <typename ID>
-struct HasStaticCheckString :
-    public cxx11::integral_constant<bool, HasStaticCheckStringImpl<ID>::value>
+struct CheckOpenCLVendorDispatch<ID, false>
+{static bool check (const std::string &name) {return true;}};
+
+template <typename ID>
+struct CheckOpenCLVendorTrait :
+    public CheckOpenCLVendorDispatch<ID, HasStaticCheckOpenCLVendor<ID>::value>
 {};
 
-template <typename ID, bool> struct IsOpenCLVendorImpl;
+// CheckOpenCLDeviceTrait
+
+template <typename ID, bool> struct CheckOpenCLDeviceDispatch;
 
 template <typename ID>
-struct IsOpenCLVendorImpl<ID, true>
+struct CheckOpenCLDeviceDispatch<ID, true>
 {
     static bool check (const std::string &name)
-    {
-        return ID::check(name);
-    }
+    {return ID::check_opencl_device(name);}
 };
 
 template <typename ID>
-struct IsOpenCLVendorImpl<ID, false>
-{
-    static bool check (const std::string &name)
-    {
-        return true;
-    }
-};
+struct CheckOpenCLDeviceDispatch<ID, false>
+{static bool check (const std::string &name) {return true;}};
 
 template <typename ID>
-struct IsOpenCLVendor :
-    public IsOpenCLVendorImpl<ID, HasStaticCheckString<ID>::value>
+struct CheckOpenCLDeviceTrait :
+    public CheckOpenCLDeviceDispatch<ID, HasStaticCheckOpenCLDevice<ID>::value>
 {};
 
 // AdaptImplTrait

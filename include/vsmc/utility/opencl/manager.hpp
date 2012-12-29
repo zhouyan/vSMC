@@ -14,6 +14,12 @@ struct Default
         opencl_device_type;
 };
 
+struct All
+{
+    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_ALL>
+        opencl_device_type;
+};
+
 struct CPU
 {
     typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_CPU>
@@ -34,34 +40,26 @@ struct Accelerator
 
 struct Apple
 {
-    static bool check (const std::string &name)
-    {
-        return name == std::string("Apple");
-    }
+    static bool check_opencl_vendor (const std::string &name)
+    {return name == std::string("Apple");}
 };
 
 struct Intel
 {
-    static bool check (const std::string &name)
-    {
-        return name == std::string("Intel Corporation");
-    }
+    static bool check_opencl_vendor (const std::string &name)
+    {return name == std::string("Intel Corporation");}
 };
 
 struct AMD
 {
-    static bool check (const std::string &name)
-    {
-        return name == std::string("AMD");
-    }
+    static bool check_opencl_vendor (const std::string &name)
+    {return name == std::string("AMD");}
 };
 
 struct NVIDIA
 {
-    static bool check (const std::string &name)
-    {
-        return name == std::string("NVIDIA");
-    }
+    static bool check_opencl_vendor (const std::string &name)
+    {return name == std::string("NVIDIA");}
 };
 
 struct AppleCPU : public Apple, public CPU {};
@@ -352,9 +350,9 @@ class CLManager
                 p != platform_vec_.size(); ++p) {
             try {
                 platform_ = platform_vec_[p];
-                std::string name;
-                platform_.getInfo(CL_PLATFORM_VENDOR, &name);
-                if (!traits::IsOpenCLVendor<ID>::check(name)) {
+                std::string pname;
+                platform_.getInfo(CL_PLATFORM_VENDOR, &pname);
+                if (!traits::CheckOpenCLVendorTrait<ID>::check(pname)) {
                     platform_ = cl::Platform();
                     continue;
                 }
@@ -364,17 +362,28 @@ class CLManager
                     (cl_context_properties)(platform_)(), 0
                 };
                 context_ = cl::Context(dev, context_properties);
-
                 device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
-                if (!device_vec_.size()) {
+
+                bool device_found = false;
+                std::cout << device_vec_.size() << std::endl;
+                for (std::vector<cl::Device>::size_type d = 0;
+                        d != device_vec_.size(); ++d) {
+                    std::string dname;
+                    device_vec_[d].getInfo(CL_DEVICE_NAME, &dname);
+                    if (traits::CheckOpenCLDeviceTrait<ID>::check(dname)) {
+                        device_ = device_vec_[d];
+                        device_found = true;
+                        break;
+                    }
+                }
+                if (!device_found) {
                     platform_ = cl::Platform();
                     context_  = cl::Context();
+                    device_   = cl::Device();
                     continue;
                 }
-                device_ = device_vec_[0];
 
                 command_queue_ = cl::CommandQueue(context_, device_, 0);
-
                 setup_ = true;
                 break;
             } catch (cl::Error) {
