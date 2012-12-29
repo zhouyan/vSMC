@@ -75,6 +75,35 @@ SET (CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES}
 # Includes
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 
+# C Compiler need libm
+IF (NOT VSMC_C_MATH_FOUND)
+    UNSET (VSMC_C_MATH_FOUND CACHE)
+    INCLUDE (CheckCSourceRuns)
+    SET (C_MATH_TEST_SOURCE "
+    #include <math.h>
+    int main ()
+    {
+        int i = 0;
+        double x = 0;
+        for (i = 0; i != 3; ++i)
+            x = exp(log(sqrt(1 + x)));
+        return x == 0;
+    }")
+    CHECK_C_SOURCE_RUNS ("${C_MATH_TEST_SOURCE}" VSMC_C_MATH_FOUND)
+    IF (NOT VSMC_C_MATH_FOUND)
+        UNSET (VSMC_C_MATH_FOUND CACHE)
+        SET (SAFE_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+        SET (CMAKE_REQUIRED_LIBRARIES ${SAFE_CMAKE_REQUIRED_LIBRARIES} -lm)
+        CHECK_C_SOURCE_RUNS ("${C_MATH_TEST_SOURCE}" VSMC_C_MATH_FOUND)
+    ENDIF (NOT VSMC_C_MATH_FOUND)
+    IF (VSMC_C_MATH_FOUND)
+        SET (VSMC_C_REQUIRED_LIBRARIES -lm)
+    ELSE (VSMC_C_MATH_FOUND)
+        SET (VSMC_C_REQUIRED_LIBRARIES)
+        SET (CMAKE_REQUIRED_LIBRARIES ${SAFE_CMAKE_REQUIRED_LIBRARIES})
+    ENDIF (VSMC_C_MATH_FOUND)
+ENDIF (NOT VSMC_C_MATH_FOUND)
+
 # C99 Compiler
 IF (NOT VSMC_C99_FOUND)
     UNSET (VSMC_C99_FOUND CACHE)
@@ -82,11 +111,13 @@ IF (NOT VSMC_C99_FOUND)
     SET (C99_TEST_SOURCE "
     int main ()
     {
+        double y = 0;
         for (int i = 0; i != 100; ++i) {
             double x = i;
             x = x * x;
-            double y = x;
+            y += log(sqrt(exp(x)));
         }
+        return y == 0;
     }")
     CHECK_C_SOURCE_RUNS ("${C99_TEST_SOURCE}" VSMC_C99_FOUND)
 ENDIF (NOT VSMC_C99_FOUND)
