@@ -40,25 +40,25 @@ struct Accelerator
 
 struct Apple
 {
-    static bool check_opencl_vendor (const std::string &name)
+    static bool check_opencl_platform (const std::string &name)
     {return name == std::string("Apple");}
 };
 
 struct Intel
 {
-    static bool check_opencl_vendor (const std::string &name)
+    static bool check_opencl_platform (const std::string &name)
     {return name == std::string("Intel Corporation");}
 };
 
 struct AMD
 {
-    static bool check_opencl_vendor (const std::string &name)
+    static bool check_opencl_platform (const std::string &name)
     {return name == std::string("AMD");}
 };
 
 struct NVIDIA
 {
-    static bool check_opencl_vendor (const std::string &name)
+    static bool check_opencl_platform (const std::string &name)
     {return name == std::string("NVIDIA");}
 };
 
@@ -351,8 +351,8 @@ class CLManager
             try {
                 platform_ = platform_vec_[p];
                 std::string pname;
-                platform_.getInfo(CL_PLATFORM_VENDOR, &pname);
-                if (!traits::CheckOpenCLVendorTrait<ID>::check(pname)) {
+                platform_.getInfo(CL_PLATFORM_NAME, &pname);
+                if (!traits::CheckOpenCLPlatformTrait<ID>::check(pname)) {
                     platform_ = cl::Platform();
                     continue;
                 }

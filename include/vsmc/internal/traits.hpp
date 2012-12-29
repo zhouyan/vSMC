@@ -107,7 +107,7 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type);
 
-VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLVendor, check_opencl_vendor,
+VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
         bool, (const std::string &));
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDevice, check_opencl_device,
         bool, (const std::string &));
@@ -162,24 +162,25 @@ struct IsBaseOfStateCL :
     public cxx11::integral_constant<bool, IsBaseOfStateCLImpl<D>::value>
 {};
 
-// CheckOpenCLVendorTrait
+// CheckOpenCLPlatformTrait
 
-template <typename ID, bool> struct CheckOpenCLVendorDispatch;
+template <typename ID, bool> struct CheckOpenCLPlatformDispatch;
 
 template <typename ID>
-struct CheckOpenCLVendorDispatch<ID, true>
+struct CheckOpenCLPlatformDispatch<ID, true>
 {
     static bool check (const std::string &name)
-    {return ID::check_opencl_vendor(name);}
+    {return ID::check_opencl_platform(name);}
 };
 
 template <typename ID>
-struct CheckOpenCLVendorDispatch<ID, false>
+struct CheckOpenCLPlatformDispatch<ID, false>
 {static bool check (const std::string &name) {return true;}};
 
 template <typename ID>
-struct CheckOpenCLVendorTrait :
-    public CheckOpenCLVendorDispatch<ID, HasStaticCheckOpenCLVendor<ID>::value>
+struct CheckOpenCLPlatformTrait :
+    public CheckOpenCLPlatformDispatch
+    <ID, HasStaticCheckOpenCLPlatform<ID>::value>
 {};
 
 // CheckOpenCLDeviceTrait
