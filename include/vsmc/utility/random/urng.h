@@ -34,7 +34,7 @@
 #define VSMC_DEFINE_CBURNG_INIT(N, W) \
     VSMC_STATIC_INLINE void cburng##N##x##W##_init(cburng##N##x##W *rng)     \
     {                                                                        \
-        struct r123array##N##x##W v = {{}};                                  \
+        struct r123array##N##x##W v = {{0}};                                 \
         rng->key = rng->ctr = rng->rnd = v;                                  \
         rng->remain = 0;                                                     \
     }
@@ -54,30 +54,30 @@
     }
 
 /// \ingroup Random
-VSMC_DEFINE_CBURNG(2, 32);
+VSMC_DEFINE_CBURNG(2, 32)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG(2, 64);
+VSMC_DEFINE_CBURNG(2, 64)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG(4, 32);
+VSMC_DEFINE_CBURNG(4, 32)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG(4, 64);
+VSMC_DEFINE_CBURNG(4, 64)
 
 /// \ingroup Random
-VSMC_DEFINE_CBURNG_INIT(2, 32);
+VSMC_DEFINE_CBURNG_INIT(2, 32)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG_INIT(2, 64);
+VSMC_DEFINE_CBURNG_INIT(2, 64)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG_INIT(4, 32);
+VSMC_DEFINE_CBURNG_INIT(4, 32)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG_INIT(4, 64);
+VSMC_DEFINE_CBURNG_INIT(4, 64)
 
 /// \ingroup Random
-VSMC_DEFINE_CBURNG_RAND(2, 32);
+VSMC_DEFINE_CBURNG_RAND(2, 32)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG_RAND(2, 64);
+VSMC_DEFINE_CBURNG_RAND(2, 64)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG_RAND(4, 32);
+VSMC_DEFINE_CBURNG_RAND(4, 32)
 /// \ingroup Random
-VSMC_DEFINE_CBURNG_RAND(4, 64);
+VSMC_DEFINE_CBURNG_RAND(4, 64)
 
 #endif // VSMC_UTILITY_RANDOM_URNG_H

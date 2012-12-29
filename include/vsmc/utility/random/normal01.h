@@ -33,50 +33,50 @@
     }
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(2, 32, 24, float);
+VSMC_DEFINE_NORMAL01(2, 32, 24, float)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(4, 32, 24, float);
+VSMC_DEFINE_NORMAL01(4, 32, 24, float)
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(2, 32, 24, float);
+VSMC_DEFINE_NORMAL01_INIT(2, 32, 24, float)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(4, 32, 24, float);
+VSMC_DEFINE_NORMAL01_INIT(4, 32, 24, float)
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(2, 32, 24, float);
+VSMC_DEFINE_NORMAL01_RAND(2, 32, 24, float)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(4, 32, 24, float);
+VSMC_DEFINE_NORMAL01_RAND(4, 32, 24, float)
 
 #if R123_USE_U01_DOUBLE
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(2, 32, 53, double);
+VSMC_DEFINE_NORMAL01(2, 32, 53, double)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(4, 32, 53, double);
+VSMC_DEFINE_NORMAL01(4, 32, 53, double)
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(2, 32, 53, double);
+VSMC_DEFINE_NORMAL01_INIT(2, 32, 53, double)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(4, 32, 53, double);
+VSMC_DEFINE_NORMAL01_INIT(4, 32, 53, double)
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(2, 32, 53, double);
+VSMC_DEFINE_NORMAL01_RAND(2, 32, 53, double)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(4, 32, 53, double);
+VSMC_DEFINE_NORMAL01_RAND(4, 32, 53, double)
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(2, 64, 53, double);
+VSMC_DEFINE_NORMAL01(2, 64, 53, double)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01(4, 64, 53, double);
+VSMC_DEFINE_NORMAL01(4, 64, 53, double)
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(2, 64, 53, double);
+VSMC_DEFINE_NORMAL01_INIT(2, 64, 53, double)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_INIT(4, 64, 53, double);
+VSMC_DEFINE_NORMAL01_INIT(4, 64, 53, double)
 
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(2, 64, 53, double);
+VSMC_DEFINE_NORMAL01_RAND(2, 64, 53, double)
 /// \ingroup Random
-VSMC_DEFINE_NORMAL01_RAND(4, 64, 53, double);
+VSMC_DEFINE_NORMAL01_RAND(4, 64, 53, double)
 #endif
 
 #endif // VSMC_UTILITY_RANDOM_NORMAL01_H
