@@ -99,6 +99,10 @@
 #define VSMC_USE_CL 0
 #endif
 
+#ifndef VSMC_RESTRICTED_ADAPTER
+#define VSMC_RESTRICTED_ADAPTER 1
+#endif
+
 // C++11 Language features
 #ifndef VSMC_HAS_CXX11_CONSTEXPR
 #define VSMC_CONSTEXPR constexpr

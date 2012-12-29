@@ -1,6 +1,10 @@
 #ifndef VSMC_UTILITY_RANDOM_COMMON_H
 #define VSMC_UTILITY_RANDOM_COMMON_H
 
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
+
 #ifdef __OPENCL_VERSION__
 
 #if defined(cl_khr_fp64) || defined(cl_amd_fp64)

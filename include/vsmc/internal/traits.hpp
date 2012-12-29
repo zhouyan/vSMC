@@ -97,20 +97,57 @@ struct HasStatic##OuterMF :                                                  \
                                                                              \
 } }
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE);
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void);
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDotType, ddot_type, cxxblas::DDot<T>);
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGemvType, dgemv_type, cxxblas::DGemv<T>);
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl);
+#if VSMC_RESTRICTED_ADAPTER
+#define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName) \
+namespace vsmc { namespace traits {                                          \
+    template <template <typename, typename> class>                           \
+    struct Is##BaseName##Impl : public cxx11::false_type {};                 \
+} }
+#else // VSMC_RESTRICTED_ADAPTER
+#define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName) \
+namespace vsmc { namespace traits {                                          \
+    template <template <typename, typename> class>                           \
+    struct Is##BaseName##Impl : public cxx11::true_type {};                  \
+} }
+#endif // VSMC_RESTRICTED_ADAPTER
+
+#define VSMC_DEFINE_SMP_IS_IMPL_TRUE(Name) \
+namespace vsmc { namespace traits {                                          \
+    template <>                                                              \
+    struct IsInitializeImpl<Initialize##Name> : public cxx11::true_type {};  \
+    template <>                                                              \
+    struct IsMoveImpl<Move##Name> : public cxx11::true_type {};              \
+    template <>                                                              \
+    struct IsMonitorEvalImpl<MonitorEval##Name> : public cxx11::true_type {};\
+    template <>                                                              \
+    struct IsPathEvalImpl<PathEval##Name> : public cxx11::true_type {};      \
+} }
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDotType, ddot_type, cxxblas::DDot<T>)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGemvType, dgemv_type, cxxblas::DGemv<T>)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
-        cxx11::mt19937);
+        cxx11::mt19937)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
-        cxx11::false_type);
+        cxx11::false_type)
 
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
-        bool, (const std::string &));
+        bool, (const std::string &))
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDevice, check_opencl_device,
-        bool, (const std::string &));
+        bool, (const std::string &))
+
+VSMC_DEFINE_SMP_IS_IMPL_GENERIC(Initialize)
+VSMC_DEFINE_SMP_IS_IMPL_GENERIC(Move)
+VSMC_DEFINE_SMP_IS_IMPL_GENERIC(MonitorEval)
+VSMC_DEFINE_SMP_IS_IMPL_GENERIC(PathEval)
+
+VSMC_DEFINE_SMP_IS_IMPL_TRUE(SEQ)
+VSMC_DEFINE_SMP_IS_IMPL_TRUE(CILK)
+VSMC_DEFINE_SMP_IS_IMPL_TRUE(OMP)
+VSMC_DEFINE_SMP_IS_IMPL_TRUE(STD)
+VSMC_DEFINE_SMP_IS_IMPL_TRUE(TBB)
 
 namespace vsmc { namespace traits {
 
@@ -224,83 +261,6 @@ struct AdapImplTrait<T, Impl, Adapter, CBase>
 {
     typedef Impl<T, Adapter<T, Impl, CBase> > type;
 };
-
-template <template <typename, typename> class>
-struct IsInitializeImpl : public cxx11::false_type {};
-
-template <template <typename, typename> class>
-struct IsMoveImpl : public cxx11::false_type {};
-
-template <template <typename, typename> class>
-struct IsMonitorEvalImpl : public cxx11::false_type {};
-
-template <template <typename, typename> class>
-struct IsPathEvalImpl : public cxx11::false_type {};
-
-// SEQ
-template <>
-struct IsInitializeImpl<InitializeSEQ> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveSEQ> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalSEQ> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalSEQ> : public cxx11::true_type {};
-
-// CILK
-template <>
-struct IsInitializeImpl<InitializeCILK> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveCILK> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalCILK> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalCILK> : public cxx11::true_type {};
-
-// OMP
-template <>
-struct IsInitializeImpl<InitializeOMP> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveOMP> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalOMP> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalOMP> : public cxx11::true_type {};
-
-// STD
-template <>
-struct IsInitializeImpl<InitializeSTD> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveSTD> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalSTD> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalSTD> : public cxx11::true_type {};
-
-// TBB
-template <>
-struct IsInitializeImpl<InitializeTBB> : public cxx11::true_type {};
-
-template <>
-struct IsMoveImpl<MoveTBB> : public cxx11::true_type {};
-
-template <>
-struct IsMonitorEvalImpl<MonitorEvalTBB> : public cxx11::true_type {};
-
-template <>
-struct IsPathEvalImpl<PathEvalTBB> : public cxx11::true_type {};
 
 } } // namespace vsmc::traits
 
