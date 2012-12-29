@@ -47,7 +47,7 @@ struct Apple
 struct Intel
 {
     static bool check_opencl_platform (const std::string &name)
-    {return name == std::string("Intel Corporation");}
+    {return name == std::string("Intel(R) OpenCL");}
 };
 
 struct AMD
