@@ -365,7 +365,6 @@ class CLManager
                 device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
 
                 bool device_found = false;
-                std::cout << device_vec_.size() << std::endl;
                 for (std::vector<cl::Device>::size_type d = 0;
                         d != device_vec_.size(); ++d) {
                     std::string dname;
