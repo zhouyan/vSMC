@@ -84,8 +84,10 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
 
 namespace vsmc { namespace traits {
 
+// IsBaseOfState
+
 template <template <unsigned, typename> class State, typename D>
-class IsBaseOfStateImpl
+struct IsBaseOfStateImpl
 {
     private :
 
@@ -102,12 +104,14 @@ class IsBaseOfStateImpl
 };
 
 template <template <unsigned, typename> class State, typename D>
-class IsBaseOfState :
+struct IsBaseOfState :
     public cxx11::integral_constant<bool, IsBaseOfStateImpl<State, D>::value>
 {};
 
+// IsBaseOfStateCL
+
 template <typename D>
-class IsBaseOfStateCLImpl
+struct IsBaseOfStateCLImpl
 {
     private :
 
@@ -124,9 +128,56 @@ class IsBaseOfStateCLImpl
 };
 
 template <typename D>
-class IsBaseOfStateCL :
+struct IsBaseOfStateCL :
     public cxx11::integral_constant<bool, IsBaseOfStateCLImpl<D>::value>
 {};
+
+template <typename ID>
+struct HasStaticCheckStringImpl
+{
+    private :
+
+    struct char2 {char c1; char c2;};
+    template <typename U, bool (*) (const std::string &)> struct sfinae_;
+    template <typename U> static char test (sfinae_<U, &U::check> *);
+    template <typename U> static char2 test(...);
+
+    public :
+
+    enum {value = sizeof(test<ID>(VSMC_NULLPTR)) == sizeof(char)};
+};
+
+template <typename ID>
+struct HasStaticCheckString :
+    public cxx11::integral_constant<bool, HasStaticCheckStringImpl<ID>::value>
+{};
+
+template <typename ID, bool> struct IsOpenCLVendorImpl;
+
+template <typename ID>
+struct IsOpenCLVendorImpl<ID, true>
+{
+    static bool check (const std::string &name)
+    {
+        return ID::check(name);
+    }
+};
+
+template <typename ID>
+struct IsOpenCLVendorImpl<ID, false>
+{
+    static bool check (const std::string &name)
+    {
+        return true;
+    }
+};
+
+template <typename ID>
+struct IsOpenCLVendor :
+    public IsOpenCLVendorImpl<ID, HasStaticCheckString<ID>::value>
+{};
+
+// AdaptImplTrait
 
 template <typename, template <typename, typename> class, template <typename,
          template <typename, typename> class, typename> class, typename>

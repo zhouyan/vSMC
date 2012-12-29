@@ -32,6 +32,50 @@ struct Accelerator
         CL_DEVICE_TYPE_ACCELERATOR> opencl_device_type;
 };
 
+struct Apple
+{
+    static bool check (const std::string &name)
+    {
+        return name == std::string("Apple");
+    }
+};
+
+struct Intel
+{
+    static bool check (const std::string &name)
+    {
+        return name == std::string("Intel Corporation");
+    }
+};
+
+struct AMD
+{
+    static bool check (const std::string &name)
+    {
+        return name == std::string("AMD");
+    }
+};
+
+struct NVIDIA
+{
+    static bool check (const std::string &name)
+    {
+        return name == std::string("NVIDIA");
+    }
+};
+
+struct AppleCPU : public Apple, public CPU {};
+struct AppleGPU : public Apple, public GPU {};
+
+struct IntelCPU : public Intel, public CPU {};
+struct IntelGPU : public Intel, public GPU {};
+
+struct AMDCPU : public AMD, public CPU {};
+struct AMDGPU : public AMD, public GPU {};
+
+struct NVIDIACPU : public NVIDIA, public CPU {};
+struct NVIDIAGPU : public NVIDIA, public GPU {};
+
 class LocalSize
 {
     public :
@@ -308,6 +352,12 @@ class CLManager
                 p != platform_vec_.size(); ++p) {
             try {
                 platform_ = platform_vec_[p];
+                std::string name;
+                platform_.getInfo(CL_PLATFORM_VENDOR, &name);
+                if (!traits::IsOpenCLVendor<ID>::check(name)) {
+                    platform_ = cl::Platform();
+                    continue;
+                }
 
                 cl_context_properties context_properties[] = {
                     CL_CONTEXT_PLATFORM,
@@ -316,6 +366,11 @@ class CLManager
                 context_ = cl::Context(dev, context_properties);
 
                 device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
+                if (!device_vec_.size()) {
+                    platform_ = cl::Platform();
+                    context_  = cl::Context();
+                    continue;
+                }
                 device_ = device_vec_[0];
 
                 command_queue_ = cl::CommandQueue(context_, device_, 0);
