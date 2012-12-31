@@ -1,12 +1,6 @@
 #ifndef VSMC_GPGPU_CONFIG_CL_H
 #define VSMC_GPGPU_CONFIG_CL_H
 
-#if defined(cl_khr_fp64)
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#elif defined(cl_amd_fp64)
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
-#endif
-
 #if VSMC_STATE_TYPE_IS_FLOAT
 #define U01_OPEN_OPEN_32     u01_open_open_32_24
 #define U01_OPEN_CLOSED_32   u01_open_closed_32_24

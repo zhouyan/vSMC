@@ -171,6 +171,11 @@ class StateCL
         ss << "#ifndef VSMC_USE_RANDOM123\n";
         ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
         ss << "#endif\n";
+        ss << "#if defined(cl_khr_fp64)\n";
+        ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
+        ss << "#elif defined(cl_amd_fp64)\n";
+        ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
+        ss << "#endif\n";
 
         internal::set_cl_state_type<T>(ss);
         ss << "typedef ulong size_type;\n";
@@ -187,7 +192,6 @@ class StateCL
             program_.build(cl_manager_.device_vec(), flags.c_str());
             program_.getBuildInfo(cl_manager_.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
-            kernel_copy_ = create_kernel("copy");
             build_ = true;
         } catch (cl::Error &err) {
             std::string log;
@@ -215,6 +219,8 @@ class StateCL
             std::cerr << "===========================" << std::endl;
             throw err;
         }
+
+        kernel_copy_ = create_kernel("copy");
     }
 
     bool build () const
