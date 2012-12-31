@@ -41,25 +41,25 @@ struct Accelerator
 struct Apple
 {
     static bool check_opencl_platform (const std::string &name)
-    {return name == std::string("Apple");}
+    {return name.find(std::string("Apple")) != std::string::npos;}
 };
 
 struct Intel
 {
     static bool check_opencl_platform (const std::string &name)
-    {return name == std::string("Intel(R) OpenCL");}
+    {return name.find(std::string("Intel")) != std::string::npos;}
 };
 
 struct AMD
 {
     static bool check_opencl_platform (const std::string &name)
-    {return name == std::string("AMD");}
+    {return name.find(std::string("AMD")) != std::string::npos;}
 };
 
 struct NVIDIA
 {
     static bool check_opencl_platform (const std::string &name)
-    {return name == std::string("NVIDIA");}
+    {return name.find(std::string("NVIDIA")) != std::string::npos;}
 };
 
 struct AppleCPU : public Apple, public CPU {};
