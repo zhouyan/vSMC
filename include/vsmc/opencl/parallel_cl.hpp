@@ -45,7 +45,7 @@ class StateCL
         cl_manager_(cl_manager_type::instance()), build_(false), build_id_(0),
         state_buffer_(cl_manager_.template create_buffer<state_type>(
                 dim_ * size_)),
-        copy_buffer_(cl_manager_.template create_buffer<size_type>(size_))
+        copy_from_buffer_(cl_manager_.template create_buffer<size_type>(size_))
     {
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
     }
@@ -56,10 +56,10 @@ class StateCL
         build_(other.build_), build_id_(0),
         state_buffer_(cl_manager_.template create_buffer<state_type>(
                 dim_ * size_)),
-        copy_buffer_(cl_manager_.template create_buffer<size_type>(size_))
+        copy_from_buffer_(cl_manager_.template create_buffer<size_type>(size_))
     {
         cl_manager_.template copy_buffer<state_type>(
-                other.state_buffer_, state_buffer_, dim_ * size_);
+                other.state_buffer_, dim_ * size_, state_buffer_);
     }
 
     StateCL<Dim, T, CLManagerID> &operator= (
@@ -75,10 +75,10 @@ class StateCL
 
             state_buffer_ =
                 cl_manager_.template create_buffer<state_type>(dim_ * size_);
-            copy_buffer_ =
+            copy_from_buffer_ =
                 cl_manager_.template create_buffer<size_type>(size_);
             cl_manager_.template copy_buffer<state_type>(
-                    other.state_buffer_, state_buffer_, dim_ * size_);
+                    other.state_buffer_, dim_ * size_, state_buffer_);
         }
 
         return *this;
@@ -208,9 +208,9 @@ class StateCL
         VSMC_RUNTIME_ASSERT((N == size_), "**StateCL::copy** SIZE MISMATCH");
 
         cl_manager_.template write_buffer<size_type>(
-                copy_buffer_, size_, copy_from);
+                copy_from_buffer_, size_, copy_from);
         kernel_copy_.setArg(0, state_buffer_);
-        kernel_copy_.setArg(1, copy_buffer_);
+        kernel_copy_.setArg(1, copy_from_buffer_);
         cl_manager_.run_kernel(kernel_copy_, size_, 0);
     }
 
@@ -229,7 +229,7 @@ class StateCL
     std::string build_log_;
 
     cl::Buffer state_buffer_;
-    cl::Buffer copy_buffer_;
+    cl::Buffer copy_from_buffer_;
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype
