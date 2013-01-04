@@ -41,8 +41,7 @@
 /// \brief Various resampling methods
 
 /// \defgroup SMP Symmetric Multiprocessing
-/// \brief Single threaded and parallel samplers based on a single particle
-/// operations using SMP implementations
+/// \brief Single threaded and parallel samplers using SMP implementations
 
 /// \defgroup Base Dispatcher
 /// \ingroup SMP
@@ -51,8 +50,7 @@
 
 /// \defgroup Adapter Adapter
 /// \ingroup SMP
-/// \brief Adapter class templates for constructing concrete objects from
-/// implementation base class templates
+/// \brief Adapter class templates for constructing concrete objects
 
 /// \defgroup Implementation Implementation
 /// \ingroup SMP
