@@ -1,7 +1,7 @@
-#ifndef VSMC_GPGPU_DEVICE_CL_H
-#define VSMC_GPGPU_DEVICE_CL_H
+#ifndef VSMC_OPENCL_DEVICE_CL_H
+#define VSMC_OPENCL_DEVICE_CL_H
 
-#include <vsmc/gpgpu/config_cl.h>
+#include <vsmc/opencl/config_cl.h>
 
 __kernel
 void copy (__global state_type *state, __global size_type *copy_from)
@@ -17,4 +17,4 @@ void copy (__global state_type *state, __global size_type *copy_from)
         state_to[i] = state_from[i];
 }
 
-#endif // VSMC_GPGPU_DEVICE_CL_H
+#endif // VSMC_OPENCL_DEVICE_CL_H

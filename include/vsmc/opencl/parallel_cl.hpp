@@ -1,5 +1,5 @@
-#ifndef VSMC_GPGPU_PARALLEL_CL_HPP
-#define VSMC_GPGPU_PARALLEL_CL_HPP
+#ifndef VSMC_OPENCL_PARALLEL_CL_HPP
+#define VSMC_OPENCL_PARALLEL_CL_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/rng.hpp>
@@ -182,7 +182,7 @@ class StateCL
         ss << "#define Size " << size_ << "UL\n";
         ss << "#define Dim  " << dim_  << "U\n";
         ss << "#define Seed " << VSMC_SEED_TYPE::instance().get() << "UL\n";
-        ss << "#include <vsmc/gpgpu/device_cl.h>\n";
+        ss << "#include <vsmc/opencl/device_cl.h>\n";
         ss << source << '\n';
         VSMC_SEED_TYPE::instance().skip(
                 static_cast<VSMC_SEED_TYPE::result_type>(size_));
@@ -634,4 +634,4 @@ class PathEvalCL : public opencl::LocalSize
 
 } // namespace vsmc
 
-#endif // VSMC_GPGPU_PARALLEL_CL_HPP
+#endif // VSMC_OPENCL_PARALLEL_CL_HPP

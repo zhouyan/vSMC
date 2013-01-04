@@ -28,7 +28,7 @@
 #endif
 
 #if VSMC_USE_CL
-#include <vsmc/gpgpu/parallel_cl.hpp>
+#include <vsmc/opencl/parallel_cl.hpp>
 #endif
 
 #endif // VSMC_HPP
