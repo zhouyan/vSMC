@@ -25,7 +25,7 @@ One may need `su` or `sudo` permissions to perform the last installation step.
 
 # Documentation
 
-To make the documentations one need [Doxygen][Doxygen] 1.8.1 or later.
+To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
 ~~~sh
 make docs
 ~~~
