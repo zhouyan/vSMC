@@ -1,7 +1,10 @@
 #ifndef VSMC_UTILITY_CXXBLAS_HPP
 #define VSMC_UTILITY_CXXBLAS_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/traits.hpp>
 
 #if VSMC_HAS_CBLAS
 #include VSMC_CBLAS_HEADER

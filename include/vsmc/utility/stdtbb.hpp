@@ -1,8 +1,13 @@
 #ifndef VSMC_UTILITY_STDTBB_HPP
 #define VSMC_UTILITY_STDTBB_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <algorithm>
 #include <thread>
+#include <vector>
+
+#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/defines.hpp>
 
 namespace vsmc { namespace thread {
 

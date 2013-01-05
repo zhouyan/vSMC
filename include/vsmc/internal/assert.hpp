@@ -2,6 +2,7 @@
 #define VSMC_INTERNAL_ASSERT_HPP
 
 #include <stdexcept>
+#include <cassert>
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/forward.hpp>

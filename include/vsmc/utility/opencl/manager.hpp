@@ -3,7 +3,11 @@
 
 #define __CL_ENABLE_EXCEPTIONS
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/traits.hpp>
+
 #include <vsmc/utility/opencl/cl_wrapper.hpp>
 
 namespace vsmc { namespace opencl {

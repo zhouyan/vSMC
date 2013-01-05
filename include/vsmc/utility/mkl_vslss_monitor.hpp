@@ -1,8 +1,9 @@
 #ifndef VSMC_UTILITY_MKL_VSLSS_MONITOR_HPP
 #define VSMC_UTILITY_MKL_VSLSS_MONITOR_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <mkl_vsl.h>
+
+#include <vsmc/internal/common.hpp>
 
 namespace vsmc {
 
