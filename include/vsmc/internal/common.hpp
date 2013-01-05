@@ -30,7 +30,6 @@
 #include <vsmc/cxx11/type_traits.hpp>
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/version.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>

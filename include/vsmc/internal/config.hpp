@@ -2,6 +2,7 @@
 #define VSMC_INTERNAL_CONFIG_HPP
 
 #include <vsmc/internal/compiler.h>
+#include <vsmc/internal/version.hpp>
 
 // BLAS support
 
