@@ -226,8 +226,8 @@ class CLManager
 
         CLType *temp = read_buffer_pool<CLType>(num);
         command_queue_.finish();
-        command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
-                (void *) temp);
+        command_queue_.enqueueReadBuffer(buf, CL_TRUE, 0,
+                sizeof(CLType) * num, (void *) temp);
 
         return std::copy(temp, temp + num, first);
     }
@@ -239,8 +239,8 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
         command_queue_.finish();
-        command_queue_.enqueueReadBuffer(buf, 1, 0, sizeof(CLType) * num,
-                (void *) first);
+        command_queue_.enqueueReadBuffer(buf, CL_TRUE, 0,
+                sizeof(CLType) * num, (void *) first);
 
         return first + num;
     }
@@ -255,8 +255,8 @@ class CLManager
         for (size_type i = 0; i != num; ++i, ++first)
             temp[i] = *first;
         command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
-                (void *) temp);
+        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, 0,
+                sizeof(CLType) * num, (void *) temp);
 
         return first;
     }
@@ -268,8 +268,8 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
         command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
-                (void *) first);
+        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, 0,
+                sizeof(CLType) * num, (void *) first);
 
         return first + num;
     }
@@ -281,8 +281,8 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
         command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, 1, 0, sizeof(CLType) * num,
-                (void *) first);
+        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, 0,
+                sizeof(CLType) * num, (void *) first);
 
         return first + num;
     }
@@ -294,7 +294,7 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
 
         command_queue_.finish();
-        command_queue_.enqueueCopyBuffer(src, dst, 0, 0, num * sizeof(CLType));
+        command_queue_.enqueueCopyBuffer(src, dst, 0, 0, sizeof(CLType) * num);
         command_queue_.finish();
     }
 
