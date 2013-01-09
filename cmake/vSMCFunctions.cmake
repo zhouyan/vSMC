@@ -50,7 +50,7 @@ ENDFUNCTION (COPY_FILE)
 FUNCTION (COPY_DIRECTORY basename dirname fullpath)
     FILE (GLOB_RECURSE dirfiles ${fullpath}/*)
     ADD_CUSTOM_COMMAND (
-        OUTPUT ${PROJECT_BINARY_DIR}/${dirname} DEPENDS dirfiles
+        OUTPUT ${PROJECT_BINARY_DIR}/${dirname} DEPENDS ${dirfiles}
         COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
         ${fullpath} ${PROJECT_BINARY_DIR}/${dirname})
     ADD_CUSTOM_TARGET (${basename}-${dirname}
