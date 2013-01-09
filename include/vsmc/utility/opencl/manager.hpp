@@ -94,7 +94,13 @@ class LocalSize
         local_size_ = new_size;
     }
 
-    static std::size_t preferred_local_size (
+    void set_preferred_local_size (
+            const cl::Kernel &kern, const cl::Device &dev)
+    {
+        local_size(get_preferred_local_size(kern, dev));
+    }
+
+    static std::size_t get_preferred_local_size (
             const cl::Kernel &kern, const cl::Device &dev)
     {
         std::size_t max_s;
