@@ -118,7 +118,8 @@ class StateCL
         return program_;
     }
 
-    void build (const std::string &source, const std::string &flags)
+    void build (const std::string &source,
+            const std::string &flags = std::string())
     {
         ++build_id_;
 
