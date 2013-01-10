@@ -214,12 +214,8 @@ IF (OPENCL_FOUND)
     IF (NOT VSMC_OPENCL_FOUND)
         UNSET (VSMC_OPENCL_FOUND CACHE)
         INCLUDE (CheckCXXSourceRuns)
-        SET (OPENCL_TEST_SOURCE "
-        #include <vsmc/utility/opencl/query.hpp>
-        int main () {
-            vsmc::opencl::Query q;
-            std::cout << q << std::endl;
-        }")
+        FILE (READ ${PROJECT_SOURCE_DIR}/test/utility/utility_cl_query.cpp
+            OPENCL_TEST_SOURCE)
         SET (SAFE_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
         SET (CMAKE_REQUIRED_INCLUDES ${SAFE_CMAKE_REQUIRED_INCLUDES}
             ${OpenCL_INCLUDE_DIR})
