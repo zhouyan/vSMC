@@ -45,10 +45,6 @@ class ThreadGuard
     std::thread thread_;
 }; // class ThreadGuard
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-
 /// \brief C++11 Thread manager
 /// \ingroup Thread
 class ThreadManager
