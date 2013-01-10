@@ -6,7 +6,6 @@
 #include <stdexcept>
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/forward.hpp>
 
 // Runtime assertion
 #if VSMC_RUNTIME_ASSERT_AS_EXCEPTION

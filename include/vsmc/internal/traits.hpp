@@ -1,9 +1,7 @@
 #ifndef VSMC_INTERNAL_TRAITS_HPP
 #define VSMC_INTERNAL_TRAITS_HPP
 
-#include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
-
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/forward.hpp>
 
@@ -127,9 +125,6 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDotType, ddot_type, cxxblas::DDot<T>)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGemvType, dgemv_type, cxxblas::DGemv<T>)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
-        cxx11::mt19937)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type)
 

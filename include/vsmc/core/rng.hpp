@@ -126,4 +126,8 @@ class RngSetPrl
 
 } // namespace vsmc
 
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
+        cxx11::mt19937)
+
 #endif // VSMC_CORE_RNG_HPP
