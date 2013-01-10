@@ -117,7 +117,14 @@ class ThreadManager
     ThreadManager () : thread_num_(std::max VSMC_MINMAX_NO_EXPANSION (1U,
              static_cast<unsigned>(std::thread::hardware_concurrency())))
     {
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4996)
+#endif
         const char *num_str = std::getenv("VSMC_STD_NUM_THREADS");
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
         if (num_str) {
             unsigned num = std::atoi(num_str);
             if (num)
