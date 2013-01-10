@@ -1,3 +1,19 @@
+# Find OpenCL
+#
+# This module can be used to find OpenCL headers and libraries
+#
+# The following variables are set
+#
+# OPENCL_FOUND          - TRUE if OpenCL headers and libraries are found
+#                         But it is untested by real OpenCL programs
+# OpenCL_INCLUDE_DIR    - The directory containing OpenCL headers
+# OpenCL_LINK_LIBRARIES - TBB libraries that shall be linked to
+#
+# The following variables affect the behavior of this module
+#
+# OpenCL_INC_PATH - The path CMake shall try to find headers first
+# OpenCL_LIB_PATH - The path CMake shall try to find libraries first
+
 IF (NOT OPENCL_FOUND)
     UNSET (OPENCL_FOUND CACHE)
     IF (NOT OpenCL_LINK_LIBRARIES)

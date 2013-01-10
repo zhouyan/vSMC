@@ -7,12 +7,17 @@
 # TBB_FOUND          - TRUE if TBB is found and work correctly
 # TBB_INCLUDE_DIR    - The directory containing TBB headers, e.g., tbb/tbb.h
 # TBB_LINK_LIBRARIES - TBB libraries that shall be linked to
+# TBB_DLL            - TBB DLL files (MSVC only)
 #
 # The following variables affect the behavior of this module
-# TBB_ROOT    - The root to the TBB headers and libraries, e.g., /opt/intel/tbb
-#             - Under which one can find include, lib or lib/intel64 etc.
-# TBB_INC_DIR - The path to which CMake shall attempt to find headers first
-# TBB_LIB_DIR - The path to which CMake shall attempt to find libraries first
+# TBB_ROOT     - The root to the TBB files, e.g., /opt/intel/tbb
+#                Under which one can find include, lib or lib/intel64 etc.
+# TBB_INC_PATH - The path CMake shall try to find headers first
+# TBB_LIB_PATH - The path CMake shall try to find libraries first
+# TBB_DLL_PATH - The path CMake shall try to find DLL files first
+#                 This variable is only used in MSVC build.
+#                 If found, one can use the function ADD_TBB_RUNTIME
+#                 to copy the the DLL files into build directory
 
 FUNCTION (ADD_TBB_RUNTIME exe_name)
     IF (MSVC)
