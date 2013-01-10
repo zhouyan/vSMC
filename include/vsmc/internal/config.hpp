@@ -22,16 +22,6 @@
 #endif
 #endif
 
-// nullptr
-
-#ifndef VSMC_NULLPTR
-#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
-#define VSMC_NULLPTR nullptr
-#else
-#define VSMC_NULLPTR 0
-#endif
-#endif
-
 // cstdint
 
 #ifndef __STDC_CONSTANT_MACROS
@@ -104,6 +94,20 @@
 #define VSMC_RESTRICTED_ADAPTER 1
 #endif
 
+// C++11 Libraries from the standard library
+
+#ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_HAS_CXX11LIB_FUNCTIONAL 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_RANDOM
+#define VSMC_HAS_CXX11LIB_RANDOM 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
+#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
+#endif
+
 // C++11 Language features
 #ifndef VSMC_HAS_CXX11_CONSTEXPR
 #define VSMC_CONSTEXPR constexpr
@@ -123,18 +127,10 @@
 #define VSMC_NOEXCEPT
 #endif
 
-// C++11 Libraries from the standard library
-
-#ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
-#define VSMC_HAS_CXX11LIB_FUNCTIONAL 0
-#endif
-
-#ifndef VSMC_HAS_CXX11LIB_RANDOM
-#define VSMC_HAS_CXX11LIB_RANDOM 0
-#endif
-
-#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
-#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
+#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_NULLPTR nullptr
+#else
+#define VSMC_NULLPTR 0
 #endif
 
 #endif // VSMC_INTERNAL_CONFIG_HPP

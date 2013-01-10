@@ -15,26 +15,35 @@ namespace vsmc { namespace thread {
 /// \ingroup Thread
 class ThreadGuard
 {
+#if VSMC_HAS_CXX11_DELETED_FUNCTIONS
     public :
 
     ThreadGuard (const ThreadGuard &) = delete;
     ThreadGuard &operator= (const ThreadGuard &) = delete;
+#else
+    private :
 
-    ThreadGuard () noexcept {}
+    ThreadGuard (const ThreadGuard &);
+    ThreadGuard &operator= (const ThreadGuard &);
+#endif
 
-    ThreadGuard (ThreadGuard &&other) noexcept :
+    public :
+
+    ThreadGuard () VSMC_NOEXCEPT {}
+
+    ThreadGuard (ThreadGuard &&other) VSMC_NOEXCEPT :
         thread_(std::move(other.thread_)) {}
 
-    ThreadGuard &operator= (ThreadGuard &&other) noexcept
+    ThreadGuard &operator= (ThreadGuard &&other) VSMC_NOEXCEPT
     {
         thread_ = std::move(other.thread_);
 
         return *this;
     }
 
-    ThreadGuard (std::thread &&thr) noexcept : thread_(std::move(thr)) {}
+    ThreadGuard (std::thread &&thr) VSMC_NOEXCEPT : thread_(std::move(thr)) {}
 
-    ~ThreadGuard () noexcept
+    ~ThreadGuard () VSMC_NOEXCEPT
     {
         if (thread_.joinable())
             thread_.join();
