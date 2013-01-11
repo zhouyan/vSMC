@@ -93,13 +93,13 @@ class ThreadGuard
 
 /// \brief C++11 Thread manager
 /// \ingroup STDTBB
-class ThreadManager
+class ThreadInfo
 {
     public :
 
-    static ThreadManager &instance ()
+    static ThreadInfo &instance ()
     {
-        static ThreadManager manager;
+        static ThreadInfo manager;
 
         return manager;
     }
@@ -140,7 +140,7 @@ class ThreadManager
             N -= next;
         }
         VSMC_RUNTIME_ASSERT((range_vec.back().end() == range.end()),
-                "INVALID PARTITION **ThreadManager::partition**");
+                "INVALID PARTITION **ThreadInfo::partition**");
 
         return range_vec;
     }
@@ -149,7 +149,7 @@ class ThreadManager
 
     unsigned thread_num_;
 
-    ThreadManager () : thread_num_(std::max VSMC_MINMAX_NO_EXPANSION (1U,
+    ThreadInfo () : thread_num_(std::max VSMC_MINMAX_NO_EXPANSION (1U,
              static_cast<unsigned>(std::thread::hardware_concurrency())))
     {
 #ifdef _MSC_VER
@@ -167,9 +167,9 @@ class ThreadManager
         }
     }
 
-    ThreadManager (const ThreadManager &);
-    ThreadManager &operator= (const ThreadManager &);
-}; // class ThreadManager
+    ThreadInfo (const ThreadInfo &);
+    ThreadInfo &operator= (const ThreadInfo &);
+}; // class ThreadInfo
 
 /// \brief Parallel for using C++11 thread
 /// \ingroup STDTBB
@@ -181,7 +181,7 @@ template <typename SizeType, typename WorkType>
 void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 {
     std::vector<BlockedRange<SizeType> > range_vec(
-            ThreadManager::instance().partition(range));
+            ThreadInfo::instance().partition(range));
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator
@@ -215,7 +215,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         T init)
 {
     std::vector<BlockedRange<SizeType> > range_vec(
-            ThreadManager::instance().partition(range));
+            ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
     unsigned i = 0;
 #if VSMC_HAS_CXX11LIB_FUTURE
@@ -254,7 +254,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         T init, BinOp bin_op)
 {
     std::vector<BlockedRange<SizeType> > range_vec(
-            ThreadManager::instance().partition(range));
+            ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
     unsigned i =0;
 #if VSMC_HAS_CXX11LIB_FUTURE

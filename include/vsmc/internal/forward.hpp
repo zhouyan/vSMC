@@ -21,7 +21,7 @@ template <typename T = NullType> class DGemv;
 namespace thread {
 
 class ThreadGuard;
-class ThreadManager;
+class ThreadInfo;
 template <typename> class BlockedRange;
 
 template <typename S, typename W>
