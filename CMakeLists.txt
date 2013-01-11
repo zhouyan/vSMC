@@ -32,10 +32,10 @@ CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/doc/main.md)
 
 # Options
-OPTION (VSMC_DISABLE_BUILD   "Disable building tests, examples and libraries")
+OPTION (VSMC_DISABLE_BUILD   "Disable building all")
 OPTION (VSMC_DISABLE_TEST    "Disable building tests")
 OPTION (VSMC_DISABLE_EXAMPLE "Disable building examples")
-OPTION (VSMC_TRY_FUTURE      "Try to use C++11 <future> instead of <thread>")
+OPTION (VSMC_TRY_FUTURE      "Try C++11 <future>")
 
 IF (NOT VSMC_INSTALL_INC_DIR)
     SET (VSMC_INSTALL_INC_DIR include)

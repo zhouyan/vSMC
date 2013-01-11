@@ -6,13 +6,11 @@
 
 # Whether to use static boost libs
 # Recommanded
-SET (Boost_USE_STATIC_LIBS ON
-    CACHE BOOL "Boost use static libraries")
+SET (Boost_USE_STATIC_LIBS ON CACHE BOOL "Boost use static libraries")
 
 # The Root directory to find Boost
 # Under this directory `include/boost` and `lib` directory shall be found
-SET (BOOST_ROOT "C:/Program Files/Boost"
-    CACHE PATH "Boost ROOT")
+SET (BOOST_ROOT "C:/Program Files/Boost" CACHE PATH "Boost ROOT")
 
 # For additional Boost related variables see the CMake official FindBoost.cmake
 
@@ -40,3 +38,12 @@ SET (OpenCL_INC_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.0/include"
 # The path to libOpenCL.so (Unix like) or OpenCL.lib (Windows)
 SET (OpenCL_LIB_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.0/lib/x64"
     CACHE PATH "OpenCL lib path")
+
+##############################################################################
+
+# vSMC options
+
+SET (VSMC_DISABLE_BUILD   OFF CACHE BOOL "Disable building all")
+SET (VSMC_DISABLE_TEST    OFF CACHE BOOL "Disable building tests")
+SET (VSMC_DISABLE_EXAMPLE OFF CACHE BOOL "Disable building examples")
+SET (VSMC_TRY_FUTURE      OFF CACHE BOOL "Try C++11 <future>")
