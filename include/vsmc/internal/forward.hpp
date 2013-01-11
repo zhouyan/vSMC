@@ -21,10 +21,11 @@ template <typename T = NullType> class DGemv;
 namespace thread {
 
 template <typename> class BlockedRange;
-template <typename> class LockBasedStack;
-template <typename> class LockFreeStack;
-template <typename> class LockBasedQueue;
-template <typename> class LockFreeQueue;
+
+struct EmptyStack;
+struct EmptyQueue;
+template <typename, typename> class Stack;
+template <typename, typename> class Queue;
 
 class ThreadGuard;
 class ThreadInfo;

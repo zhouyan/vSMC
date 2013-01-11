@@ -3,11 +3,15 @@
 
 #include <atomic>
 #include <cstdlib>
+#include <exception>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <numeric>
-#include <utility>
+#include <queue>
+#include <stack>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include <vsmc/internal/config.hpp>
@@ -51,33 +55,180 @@ class BlockedRange
     size_type end_;
 }; // class BlockedRange
 
+
+/// \brief Empty stack exception
+/// \ingroup STDTBB
+struct EmptyStack : std::exception
+{
+    const char* what () const throw();
+};
+
 /// \brief C++11 Thread safe lock-based stack
 /// \ingroup STDTBB
-template <typename T>
-class LockBasedStack
+template <typename T, typename Container = std::deque<T> >
+class Stack
 {
-}; // class LockBasedStack
+    public :
 
-/// \brief C++11 Thread safe lock-free stack
+    Stack () {}
+
+    void push (T value)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        data_.push(std::move(value));
+    }
+
+    std::shared_ptr<T> pop ()
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (data_.empty())
+            throw EmptyStack();
+
+        const std::shared_ptr<T> ptr(
+                std::make_shared<T>(std::move(data_.top())));
+        data_.pop();
+
+        return ptr;
+    }
+
+    void pop (T &dst)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (data_.empty())
+            throw EmptyStack();
+
+        dst = std::move(data_.top());
+        data_.pop();
+    }
+
+    std::shared_ptr<T> try_pop ()
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (data_.empty())
+            return std::shared_ptr<T>();
+
+        const std::shared_ptr<T> ptr(
+                std::make_shared<T>(std::move(data_.top())));
+        data_.pop();
+
+        return ptr;
+    }
+
+    bool try_pop (T &dst)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (data_.empty())
+            return false;
+
+        dst = std::move(data_.top());
+        data_.pop();
+
+        return true;
+    }
+
+    bool empty () const
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+
+        return data_.empty();
+    }
+
+    private :
+
+    mutable std::mutex mtx_;
+    std::stack<T, Container> data_;
+
+    Stack (const Stack &);
+    Stack &operator= (const Stack &);
+}; // class Stack
+
+/// \brief Empty queue exception
 /// \ingroup STDTBB
-template <typename T>
-class LockFreeStack
+struct EmptyQueue : std::exception
 {
-}; // class LockFreeStack
+    const char* what () const throw();
+};
 
 /// \brief C++11 Thread safe lock-based queue
 /// \ingroup STDTBB
-template <typename T>
-class LockBasedQueue
+template <typename T, typename Container = std::deque<T> >
+class Queue
 {
-}; // class LockBasedQuque
+    public :
 
-/// \brief C++11 Thread safe lock-free queue
-/// \ingroup STDTBB
-template <typename T>
-class LockFreeQueue
-{
-}; // class LockFreeQueue
+    Queue () {}
+
+    void push (T value)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        data_.push(std::move(value));
+        cond_.notify_one();
+    }
+
+    std::shared_ptr<T> pop ()
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (data_.empty())
+            throw EmptyQueue();
+
+        const std::shared_ptr<T> ptr(
+                std::make_shared<T>(std::move(data_.front())));
+        data_.pop();
+
+        return ptr;
+    }
+
+    void pop (T &dst)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (data_.empty())
+            throw EmptyQueue();
+
+        dst = std::move(data_.front());
+        data_.pop();
+    }
+
+    std::shared_ptr<T> try_pop ()
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (data_.empty())
+            return std::shared_ptr<T>();
+
+        const std::shared_ptr<T> ptr(
+                std::make_shared<T>(std::move(data_.front())));
+        data_.pop();
+
+        return ptr;
+    }
+
+    bool try_pop (T &dst)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (data_.empty())
+            return false;
+
+        dst = std::move(data_.front());
+        data_.pop();
+
+        return true;
+    }
+
+    bool empty () const
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+
+        return data_.empty();
+    }
+
+    private :
+
+    mutable std::mutex mtx_;
+    std::queue<T, Container> data_;
+    std::condition_variable cond_;
+
+    Queue (const Queue &);
+    Queue &operator= (const Queue &);
+}; // class Queue
 
 /// \brief C++11 Thread guard
 /// \ingroup STDTBB
