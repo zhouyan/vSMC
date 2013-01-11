@@ -195,7 +195,7 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 /// \details
 /// Requirement: WorkType:
 /// void work (const thread::BlockedRange<size_type> &range, T &res);
-template <typename SizeType, typename WorkType, typename T>
+template <typename SizeType, typename T, typename WorkType>
 T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         T init)
 {
@@ -221,7 +221,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
 /// \details
 /// Requirement: WorkType:
 /// void work (const thread::BlockedRange<size_type> &range, T &res);
-template <typename SizeType, typename WorkType, typename T, typename BinOp>
+template <typename SizeType, typename T, typename BinOp, typename WorkType>
 T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         T init, BinOp bin_op)
 {
