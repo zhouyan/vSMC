@@ -1,8 +1,10 @@
 #ifndef VSMC_UTILITY_STDTBB_HPP
 #define VSMC_UTILITY_STDTBB_HPP
 
+#include <atomic>
 #include <cstdlib>
 #include <functional>
+#include <memory>
 #include <numeric>
 #include <utility>
 #include <thread>
@@ -48,6 +50,34 @@ class BlockedRange
     size_type end_;
 }; // class BlockedRange
 
+/// \brief C++11 Thread safe lock-based stack
+/// \ingroup STDTBB
+template <typename T>
+class LockBasedStack
+{
+}; // class LockBasedStack
+
+/// \brief C++11 Thread safe lock-free stack
+/// \ingroup STDTBB
+template <typename T>
+class LockFreeStack
+{
+}; // class LockFreeStack
+
+/// \brief C++11 Thread safe lock-based queue
+/// \ingroup STDTBB
+template <typename T>
+class LockBasedQueue
+{
+}; // class LockBasedQuque
+
+/// \brief C++11 Thread safe lock-free queue
+/// \ingroup STDTBB
+template <typename T>
+class LockFreeQueue
+{
+}; // class LockFreeQueue
+
 /// \brief C++11 Thread guard
 /// \ingroup STDTBB
 class ThreadGuard
@@ -91,7 +121,7 @@ class ThreadGuard
     std::thread thread_;
 }; // class ThreadGuard
 
-/// \brief C++11 Thread manager
+/// \brief C++11 Thread informations
 /// \ingroup STDTBB
 class ThreadInfo
 {
@@ -99,9 +129,9 @@ class ThreadInfo
 
     static ThreadInfo &instance ()
     {
-        static ThreadInfo manager;
+        static ThreadInfo info;
 
-        return manager;
+        return info;
     }
 
     unsigned thread_num () const
@@ -170,6 +200,29 @@ class ThreadInfo
     ThreadInfo (const ThreadInfo &);
     ThreadInfo &operator= (const ThreadInfo &);
 }; // class ThreadInfo
+
+/// \brief C++11 Thread pool
+/// \ingroup STDTBB
+class ThreadPool
+{
+    public :
+
+    static ThreadPool &instance ()
+    {
+        static ThreadPool pool;
+
+        return pool;
+    }
+
+    void submit ();
+    void barrier ();
+
+    private :
+
+    ThreadPool ();
+    ThreadPool (const ThreadPool &);
+    ThreadPool &operator= (const ThreadPool &);
+}; // class ThreadPool
 
 /// \brief Parallel for using C++11 thread
 /// \ingroup STDTBB
