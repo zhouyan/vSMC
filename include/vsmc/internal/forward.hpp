@@ -83,6 +83,13 @@ template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 template <typename, template <typename> class> class ParticleIterator;
 
+// OpenCL
+template <unsigned, typename, typename ID = VSMC_CL_DEFAULT_ID> class StateCL;
+template <typename> class InitializeCL;
+template <typename> class MoveCL;
+template <typename> class MonitorEvalCL;
+template <typename> class PathEvalCL;
+
 // SMP
 
 // Base
@@ -140,13 +147,6 @@ template <typename, typename D = VBase> class InitializeTBB;
 template <typename, typename D = VBase> class MoveTBB;
 template <typename, typename D = VBase> class MonitorEvalTBB;
 template <typename, typename D = VBase> class PathEvalTBB;
-
-// OpenCL
-template <unsigned, typename, typename ID = VSMC_CL_DEFAULT_ID> class StateCL;
-template <typename> class InitializeCL;
-template <typename> class MoveCL;
-template <typename> class MonitorEvalCL;
-template <typename> class PathEvalCL;
 
 } // namesapce vsmc
 
