@@ -217,7 +217,7 @@
 #endif
 #endif
 
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
 #ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_HAS_CXX11LIB_FUNCTIONAL 0
 #endif
@@ -235,7 +235,7 @@
 #endif
 #endif
 
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
 #ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
 #define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
 #endif
