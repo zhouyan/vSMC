@@ -48,7 +48,9 @@ FUNCTION (COPY_FILE basename filename)
 ENDFUNCTION (COPY_FILE)
 
 FUNCTION (COPY_DIRECTORY basename dirname fullpath)
-    FILE (GLOB_RECURSE dirfiles ${fullpath}/*)
+    FILE (GLOB_RECURSE dirfiles
+        ${fullpath}/*.h ${fullpath}/*.hpp
+        ${fullpath}/*.c ${fullpath}/*.cpp ${fullpath}/*.cl)
     ADD_CUSTOM_COMMAND (
         OUTPUT ${PROJECT_BINARY_DIR}/${dirname} DEPENDS ${dirfiles}
         COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
