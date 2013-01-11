@@ -83,9 +83,9 @@
 /// \defgroup Utility Utility
 /// \brief Utilities
 
-/// \defgroup Thread Thread
+/// \defgroup STDTBB STDTBB
 /// \ingroup Utility
-/// \brief C++11 Thread utilities
+/// \brief C++11 parallelization
 
 /// \defgroup OpenCL OpenCL
 /// \ingroup Utility
