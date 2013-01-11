@@ -3,6 +3,11 @@
 
 #define __CL_ENABLE_EXCEPTIONS
 
+#include <algorithm>
+#include <cstdlib>
+#include <string>
+#include <vector>
+
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
