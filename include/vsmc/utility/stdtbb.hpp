@@ -13,7 +13,7 @@
 
 #if VSMC_STDTBB_USE_FUTURE
 #include <future>
-#elif VSMC_STDTBB_USE_THREAD
+#else
 #include <thread>
 #endif
 
@@ -195,7 +195,7 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
-#elif VSMC_STDTBB_USE_THREAD
+#else
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
@@ -232,7 +232,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
-#elif VSMC_STDTBB_USE_THREAD
+#else
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
@@ -271,7 +271,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
-#elif VSMC_STDTBB_USE_THREAD
+#else
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
