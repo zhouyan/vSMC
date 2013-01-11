@@ -13,6 +13,7 @@
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/forward.hpp>
 
 #if VSMC_HAS_CXX11LIB_FUTURE
 #include <future>

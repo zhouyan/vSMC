@@ -4,6 +4,7 @@
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
 #if VSMC_HAS_CBLAS

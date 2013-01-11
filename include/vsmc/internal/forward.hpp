@@ -25,24 +25,46 @@ template <typename> class LockBasedStack;
 template <typename> class LockFreeStack;
 template <typename> class LockBasedQueue;
 template <typename> class LockFreeQueue;
+
 class ThreadGuard;
 class ThreadInfo;
 class ThreadPool;
 
 template <typename S, typename W>
-void parallel_for (const BlockedRange<S> &, const W &);
+void parallel_for (const BlockedRange<S> &, W &&);
 
-template <typename S, typename W, typename R>
-void parallel_sum (const BlockedRange<S> &, const W &, R &);
+template <typename S, typename T, typename W>
+T parallel_accumulate (const BlockedRange<S> &, W &&, T);
+
+template <typename S, typename T, typename B, typename W>
+T parallel_accumulate (const BlockedRange<S> &, W &&, T, B);
 
 } // namespace vsmc::thread
 
 namespace opencl {
 
 struct Default;
+struct All;
 struct CPU;
 struct GPU;
 struct Accelerator;
+
+struct AMD;
+struct Apple;
+struct Intel;
+struct NVIDIA;
+
+struct AMDCPU;
+struct AMDGPU;
+struct AppleCPU;
+struct AppleGPU;
+struct IntelCPU;
+struct IntelGPU;
+struct NVIDIACPU;
+struct NVIDIAGPU;
+
+class LocalSize;
+
 template <typename> class CLManager;
 
 } // namespace vsmc::opencl
