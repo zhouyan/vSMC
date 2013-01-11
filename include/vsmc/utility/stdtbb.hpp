@@ -255,6 +255,11 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
         }
     }
     // stop parallelization
+    // for (typename std::vector<BlockedRange<SizeType> >::iterator
+    //         r = range_vec.begin(); r != range_vec.end(); ++r) {
+    //     ThreadPool::instance().submit(std::forward<WorkType>(work), *r);
+    // }
+    // ThreadPool::instance().barrier();
 #endif
 }
 
@@ -292,6 +297,12 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         }
     }
     // stop parallelization
+    // for (typename std::vector<BlockedRange<SizeType> >::iterator
+    //         r = range_vec.begin(); r != range_vec.end(); ++r) {
+    //     ThreadPool::instance().submit(std::forward<WorkType>(work), *r,
+    //             std::ref(result[i]));
+    // }
+    // ThreadPool::instance().barrier();
 #endif
 
     return std::accumulate(result.begin(), result.end(), init);
@@ -331,6 +342,12 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         }
     }
     // stop parallelization
+    // for (typename std::vector<BlockedRange<SizeType> >::iterator
+    //         r = range_vec.begin(); r != range_vec.end(); ++r) {
+    //     ThreadPool::instance().submit(std::forward<WorkType>(work), *r,
+    //             std::ref(result[i]));
+    // }
+    // ThreadPool::instance().barrier();
 #endif
 
     return std::accumulate(result.begin(), result.end(), init, bin_op);
