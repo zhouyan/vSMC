@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
-#include <thread>
 #include <utility>
 #include <vector>
 
@@ -12,8 +11,10 @@
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
 
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_STDTBB_USE_FUTURE
 #include <future>
+#elif VSMC_STDTBB_USE_THREAD
+#include <thread>
 #endif
 
 namespace vsmc { namespace thread {
@@ -47,6 +48,8 @@ class BlockedRange
     size_type begin_;
     size_type end_;
 }; // class BlockedRange
+
+#if !VSMC_STDTBB_USE_FUTURE
 
 /// \brief C++11 Thread guard
 /// \ingroup Thread
@@ -90,6 +93,8 @@ class ThreadGuard
 
     std::thread thread_;
 }; // class ThreadGuard
+
+#endif // !VSMC_STDTBB_USE_FUTURE
 
 /// \brief C++11 Thread manager
 /// \ingroup Thread
@@ -182,7 +187,7 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 {
     std::vector<BlockedRange<SizeType> > range_vec(
             ThreadManager::instance().partition(range));
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_STDTBB_USE_FUTURE
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r) {
@@ -190,7 +195,7 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
-#else
+#elif VSMC_STDTBB_USE_THREAD
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
@@ -218,7 +223,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
             ThreadManager::instance().partition(range));
     std::vector<T> result(range_vec.size());
     unsigned i = 0;
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_STDTBB_USE_FUTURE
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r, ++i) {
@@ -227,7 +232,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
-#else
+#elif VSMC_STDTBB_USE_THREAD
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
@@ -257,7 +262,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
             ThreadManager::instance().partition(range));
     std::vector<T> result(range_vec.size());
     unsigned i =0;
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_STDTBB_USE_FUTURE
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r, ++i) {
@@ -266,7 +271,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
-#else
+#elif VSMC_STDTBB_USE_THREAD
     // start parallelization
     {
         std::vector<ThreadGuard> tg;

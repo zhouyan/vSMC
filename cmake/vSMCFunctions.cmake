@@ -10,15 +10,24 @@ FUNCTION (ADD_EXAMPLE basename algs)
             SET (exe_name ${basename}-${alg}-${exe})
             ADD_EXECUTABLE (${exe_name} ${basename}-${alg}.cpp)
 
-            IF (${exe} STREQUAL "omp")
+            IF (${exe} STREQUAL "fur")
+                SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
+                    "-DUSE_STD -DVSMC_STDTBB_USE_FUTURE=1")
+            ELSEIF (${exe} STREQUAL "thr")
+                SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
+                    "-DUSE_STD -DVSMC_STDTBB_USE_THREAD=1")
+            ELSEIF (${exe} STREQUAL "omp")
                 SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
                     "${flags} ${OpenMP_CXX_FLAGS}")
             ELSE (${exe} STREQUAL "omp")
                 SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
                     "${flags}")
-            ENDIF (${exe} STREQUAL "omp")
+            ENDIF (${exe} STREQUAL "fur")
 
-            IF (${exe} STREQUAL "std")
+            IF (${exe} STREQUAL "fur")
+                TARGET_LINK_LIBRARIES (${exe_name}
+                    ${EXAMPLE_LINK_LIBRARIES} ${VSMC_THREAD_LINK_LIBRARIES})
+            ELSEIF (${exe} STREQUAL "thr")
                 TARGET_LINK_LIBRARIES (${exe_name}
                     ${EXAMPLE_LINK_LIBRARIES} ${VSMC_THREAD_LINK_LIBRARIES})
             ELSEIF (${exe} STREQUAL "tbb")
@@ -29,7 +38,7 @@ FUNCTION (ADD_EXAMPLE basename algs)
                     ${EXAMPLE_LINK_LIBRARIES} ${OpenMP_LINK_LIBRARIES})
             ELSE (${exe} STREQUAL "tbb")
                 TARGET_LINK_LIBRARIES (${exe_name} ${EXAMPLE_LINK_LIBRARIES})
-            ENDIF (${exe} STREQUAL "std")
+            ENDIF (${exe} STREQUAL "fur")
 
             ADD_DEPENDENCIES (${basename} ${exe_name})
         ENDFOREACH(alg)
