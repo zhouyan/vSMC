@@ -13,6 +13,8 @@
 #include <vsmc/internal/compiler/msvc.h>
 #endif
 
+//  C++11 language features
+
 #ifndef VSMC_STATIC_INLINE
 #define VSMC_STATIC_INLINE static inline
 #endif
@@ -147,6 +149,32 @@
 
 #ifndef VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 #define VSMC_HAS_CXX11_VARIADIC_TEMPLATES 0
+#endif
+
+//  C++11 library features
+
+#ifndef VSMC_HAS_CXX11LIB_CHRONO
+#define VSMC_HAS_CXX11LIB_CHRONO 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_HAS_CXX11LIB_FUNCTIONAL 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_FUTURE
+#define VSMC_HAS_CXX11LIB_FUTURE 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_RANDOM
+#define VSMC_HAS_CXX11LIB_RANDOM 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
+#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_THREAD
+#define VSMC_HAS_CXX11LIB_THREAD 0
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

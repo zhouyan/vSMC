@@ -9,6 +9,8 @@
 
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 
+// C++11 language features
+
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= VSMC_GNUC_NONEXIST
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
 #define VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE 1
@@ -204,6 +206,44 @@
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
 #ifndef VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 #define VSMC_HAS_CXX11_VARIADIC_TEMPLATES 1
+#endif
+#endif
+
+// C++11 library features
+
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
+#ifndef VSMC_HAS_CXX11LIB_CHRONO
+#define VSMC_HAS_CXX11LIB_CHRONO 0
+#endif
+#endif
+
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_HAS_CXX11LIB_FUNCTIONAL 0
+#endif
+#endif
+
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#ifndef VSMC_HAS_CXX11LIB_FUTURE
+#define VSMC_HAS_CXX11LIB_FUTURE 0
+#endif
+#endif
+
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#ifndef VSMC_HAS_CXX11LIB_RANDOM
+#define VSMC_HAS_CXX11LIB_RANDOM 0
+#endif
+#endif
+
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
+#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
+#endif
+#endif
+
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#ifndef VSMC_HAS_CXX11LIB_THREAD
+#define VSMC_HAS_CXX11LIB_THREAD 0
 #endif
 #endif
 

@@ -7,6 +7,8 @@
 #define VSMC_STATIC_INLINE static __inline
 #endif
 
+// C++11 language features
+
 #if _MSC_VER >= VSMC_MSVC_NONEXIST
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
 #define VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE 1
@@ -202,6 +204,44 @@
 #if _MSC_VER >= VSMC_MSVC_NONEXIST
 #ifndef VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 #define VSMC_HAS_CXX11_VARIADIC_TEMPLATES 1
+#endif
+#endif
+
+// C++11 library features
+
+#if _MSC_VER >= 1700
+#ifndef VSMC_HAS_CXX11LIB_CHRONO
+#define VSMC_HAS_CXX11LIB_CHRONO 0
+#endif
+#endif
+
+#if _MSC_VER >= 1600
+#ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_HAS_CXX11LIB_FUNCTIONAL 0
+#endif
+#endif
+
+#if _MSC_VER >= 1700
+#ifndef VSMC_HAS_CXX11LIB_FUTURE
+#define VSMC_HAS_CXX11LIB_FUTURE 0
+#endif
+#endif
+
+#if _MSC_VER >= 1600
+#ifndef VSMC_HAS_CXX11LIB_RANDOM
+#define VSMC_HAS_CXX11LIB_RANDOM 0
+#endif
+#endif
+
+#if _MSC_VER >= 1600
+#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
+#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
+#endif
+#endif
+
+#if _MSC_VER >= 1700
+#ifndef VSMC_HAS_CXX11LIB_THREAD
+#define VSMC_HAS_CXX11LIB_THREAD 0
 #endif
 #endif
 

@@ -94,20 +94,6 @@
 #define VSMC_RESTRICTED_ADAPTER 1
 #endif
 
-// C++11 Libraries from the standard library
-
-#ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
-#define VSMC_HAS_CXX11LIB_FUNCTIONAL 0
-#endif
-
-#ifndef VSMC_HAS_CXX11LIB_RANDOM
-#define VSMC_HAS_CXX11LIB_RANDOM 0
-#endif
-
-#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
-#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 0
-#endif
-
 // C++11 Language features
 #ifndef VSMC_HAS_CXX11_CONSTEXPR
 #define VSMC_CONSTEXPR constexpr
