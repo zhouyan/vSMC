@@ -366,14 +366,61 @@ class ThreadPool
         return pool;
     }
 
-    void submit ();
-    void barrier ();
+    template <typename WorkType>
+    void submit (WorkType &&work)
+    {
+        task_queue_.push(std::function<void ()>(std::forward<work>));
+        ++task_num_;
+    }
+
+    void barrier ()
+    {
+        while (task_num_.load()) {
+            std::this_thread::yield();
+        }
+    }
 
     private :
 
-    ThreadPool ();
+    std::atomic<bool> done_;
+    std::atomic<unsigned> task_num_;
+    Queue<std::function<void ()> > task_queue_;
+    std::vector<ThreadGuard> thread_queue_;
+
+    void do_task ()
+    {
+        while (!done_) {
+            std::function<void ()> task;
+            if (task_queue_.try_pop(task)) {
+                task();
+                --task_num_;
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    }
+
+    ThreadPool () : done_(false)
+    {
+        try {
+            unsigned num = ThreadInfo::instance().thread_num();
+            for (unsigned i = 0; i != num; ++i) {
+                thread_queue_.push_back(ThreadGuard(std::thread(
+                                &ThreadPool::do_task, this)));
+            }
+        } catch (...) {
+            done_.store(true);
+            throw;
+        }
+    }
+
     ThreadPool (const ThreadPool &);
     ThreadPool &operator= (const ThreadPool &);
+
+    ~ThreadPool ()
+    {
+        done_.store(true);
+    }
 }; // class ThreadPool
 
 /// \brief Parallel for using C++11 thread
