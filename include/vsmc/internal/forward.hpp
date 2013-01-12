@@ -24,15 +24,6 @@ template <typename> class BlockedRange;
 class ThreadGuard;
 class ThreadInfo;
 
-template <typename S, typename W>
-void parallel_for (const BlockedRange<S> &, W &&);
-
-template <typename S, typename T, typename W>
-T parallel_accumulate (const BlockedRange<S> &, W &&, T);
-
-template <typename S, typename T, typename B, typename W>
-T parallel_accumulate (const BlockedRange<S> &, W &&, T, B);
-
 } // namespace vsmc::thread
 
 namespace opencl {
