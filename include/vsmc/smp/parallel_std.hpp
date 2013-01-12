@@ -97,7 +97,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
             init_(init), particle_(particle) {}
 
         void operator() (const thread::BlockedRange<size_type> &range,
-                unsigned &accept)
+                unsigned &accept) const
         {
             unsigned acc = 0;
             for (size_type i = range.begin(); i != range.end(); ++i) {
@@ -155,7 +155,7 @@ class MoveSTD : public MoveBase<T, Derived>
             move_(move), iter_(iter), particle_(particle) {}
 
         void operator() (const thread::BlockedRange<size_type> &range,
-                unsigned &accept)
+                unsigned &accept) const
         {
             unsigned acc = 0;
             for (size_type i = range.begin(); i != range.end(); ++i) {

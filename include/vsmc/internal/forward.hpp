@@ -21,15 +21,8 @@ template <typename T = NullType> class DGemv;
 namespace thread {
 
 template <typename> class BlockedRange;
-
-struct EmptyStack;
-struct EmptyQueue;
-template <typename, typename> class Stack;
-template <typename, typename> class Queue;
-
 class ThreadGuard;
 class ThreadInfo;
-class ThreadPool;
 
 template <typename S, typename W>
 void parallel_for (const BlockedRange<S> &, W &&);
