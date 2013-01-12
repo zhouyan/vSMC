@@ -187,7 +187,8 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r) {
-        wg.push_back(std::async(std::forward<WorkType>(work), *r));
+        wg.push_back(std::async(std::launch::async,
+                    std::forward<WorkType>(work), *r));
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
@@ -223,8 +224,8 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r, ++i) {
-        wg.push_back(std::async(std::forward<WorkType>(work),
-                    *r, std::ref(result[i])));
+        wg.push_back(std::async(std::launch::async,
+                    std::forward<WorkType>(work), *r, std::ref(result[i])));
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
@@ -262,8 +263,8 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r, ++i) {
-        wg.push_back(std::async(std::forward<WorkType>(work),
-                    *r, std::ref(result[i])));
+        wg.push_back(std::async(std::launch::async,
+                    std::forward<WorkType>(work), *r, std::ref(result[i])));
     }
     for (std::vector<std::future<void> >::iterator
             w = wg.begin(); w != wg.end(); ++w) { w->get(); }
