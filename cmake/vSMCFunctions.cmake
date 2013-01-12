@@ -27,7 +27,7 @@ FUNCTION (ADD_EXAMPLE basename algs)
             ELSEIF (${exe} STREQUAL "omp")
                 TARGET_LINK_LIBRARIES (${exe_name}
                     ${EXAMPLE_LINK_LIBRARIES} ${OpenMP_LINK_LIBRARIES})
-            ELSE (${exe} STREQUAL "tbb")
+            ELSE (${exe} STREQUAL "std")
                 TARGET_LINK_LIBRARIES (${exe_name} ${EXAMPLE_LINK_LIBRARIES})
             ENDIF (${exe} STREQUAL "std")
 
