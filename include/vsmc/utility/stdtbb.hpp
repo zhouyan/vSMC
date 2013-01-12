@@ -172,7 +172,6 @@ class ThreadInfo
     ThreadInfo &operator= (const ThreadInfo &);
 }; // class ThreadInfo
 
-
 /// \brief Parallel for using C++11 thread
 /// \ingroup STDTBB
 ///
