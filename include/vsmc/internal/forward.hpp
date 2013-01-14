@@ -18,6 +18,12 @@ template <typename T = NullType> class DGemv;
 
 } // namespace vsmc::cxxblas
 
+namespace gcd {
+
+class DispatchQueue;
+
+} // namespace vsmc::gcd
+
 namespace thread {
 
 template <typename> class BlockedRange;
