@@ -7,6 +7,44 @@
 
 namespace vsmc {
 
+namespace gcd {
+
+/// \brief Apple GCD informations
+/// \ingroup GCD
+class DispatchQueue
+{
+    public :
+
+    static DispatchQueue &instance ()
+    {
+        static DispatchQueue queue;
+
+        return queue;
+    }
+
+    dispatch_queue_t queue () const
+    {
+        return queue_;
+    }
+
+    void dispatch_queue (dispatch_queue_t queue)
+    {
+        queue_ = queue;
+    }
+
+    private :
+
+    dispatch_queue_t queue_;
+
+    DispatchQueue () : queue_(
+            dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {}
+
+    DispatchQueue (const DispatchQueue &);
+    DispatchQueue &operator= (const DispatchQueue &);
+}; // class DispatchQueue
+
+} // namespace vsmc::gcd
+
 #if !VSMC_HAS_CXX11_ALIAS_TEMPLATES
 /// \brief Particle::value_type subtype
 /// \ingroup GCD
@@ -41,7 +79,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
         accept_.resize(particle.size());
         work_param_ wp = {this, &particle, &accept_[0]};
         dispatch_apply_f(particle.size(),
-                dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                gcd::DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(particle);
 
@@ -94,7 +132,7 @@ class MoveGCD : public MoveBase<T, Derived>
         accept_.resize(particle.size());
         work_param_ wp = {this, &particle, &accept_[0], iter};
         dispatch_apply_f(particle.size(),
-                dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                gcd::DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
 
@@ -148,7 +186,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter, dim};
         dispatch_apply_f(particle.size(),
-                dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                gcd::DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
     }
@@ -199,7 +237,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter};
         dispatch_apply_f(particle.size(),
-                dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                gcd::DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
 
