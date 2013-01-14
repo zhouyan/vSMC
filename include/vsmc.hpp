@@ -64,14 +64,10 @@
 /// \defgroup Sequential Sequential
 /// \ingroup Implementation
 /// \brief Single threaded sampler
-
-/// \defgroup STD C++11 Multithread Support
+///
+/// \defgroup GCD Apple GCD
 /// \ingroup Implementation
-/// \brief Parallelized samplers with C++11 multithread support
-
-/// \defgroup TBB Intel Threading Buidling Block
-/// \ingroup Implementation
-/// \brief Parallelized samplers with Intel TBB
+/// \brief Parallelized samplers with Apple GCD
 
 /// \defgroup CILK Intel Cilk Plus
 /// \ingroup Implementation
@@ -80,6 +76,14 @@
 /// \defgroup OMP OpenMP
 /// \ingroup Implementation
 /// \brief Parallelized samplers with OpenMP
+
+/// \defgroup STD C++11 Multithread Support
+/// \ingroup Implementation
+/// \brief Parallelized samplers with C++11 multithread support
+
+/// \defgroup TBB Intel Threading Buidling Block
+/// \ingroup Implementation
+/// \brief Parallelized samplers with Intel TBB
 
 /// \defgroup CL OpenCL
 /// \brief Parallelized sampler with OpenCL

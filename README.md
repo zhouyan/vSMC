@@ -57,17 +57,19 @@ under a uniform interface. One is C++11 `<thread>` (or [Boost][Boost] Thread
 library as a replacement). For a full C++11 implementation, this means no
 third-party dependency is required to write parallel a SMC sampler. Other
 third-party parallelization include, [Intel Cilk Plus][Intel Cilk Plus], [Intel
-TBB][Intel TBB] and [OpenMP][OpenMP]. In addition, this library also support
-using [OpenCL][OpenCL] for GPGPU computing, though the interface is different
-than others. To enable any of these, one need to define specific macros,
-`VSMC_USE_STD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`, and
-`VSMC_USE_CL`, respectively.
+TBB][Intel TBB] and [OpenMP][OpenMP]. On Mac OS X, [Apple GCD][Apple GCD] is
+also supported. In addition, this library also support using [OpenCL][OpenCL]
+for GPGPU computing, though the interface is different than others. To enable
+any of these, one need to define specific macros, `VSMC_USE_STD`,
+`VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`, and `VSMC_USE_CL`,
+respectively.
 
 # License
 
 The vSMC library is distributed with a 2-clause BSD license which can be found
 in the `LICENSE` file distributed with the source.
 
+[Apple GCD]: http://en.wikipedia.org/wiki/Grand_Central_Dispatch
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
