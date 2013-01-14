@@ -39,10 +39,10 @@ class InitializeGCD : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         accept_.resize(particle.size());
-        work_info_ info = {this, &particle};
+        work_param_ wp = {this, &particle, &accept_[0]};
         dispatch_apply_f(particle.size(),
                 dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                (void *) &info, work_);
+                (void *) &wp, work_);
         this->post_processor(particle);
 
         return std::accumulate(accept_.begin(), accept_.end(),
@@ -61,19 +61,19 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     std::vector<unsigned> accept_;
 
-    struct work_info_
+    struct work_param_
     {
         InitializeGCD<T, Derived> *const dispatcher;
         Particle<T> *const particle;
+        unsigned *const accept;
     };
 
-    static void work_ (void *info, std::size_t i)
+    static void work_ (void *wp, std::size_t i)
     {
-        const work_info_ *const wptr =
-            reinterpret_cast<const work_info_ *>(info);
-        wptr->dispatcher->accept_[i] =
-            wptr->dispatcher->initialize_state(SingleParticle<T>(
-                        static_cast<size_type>(i), wptr->particle));
+        const work_param_ *const wptr =
+            reinterpret_cast<const work_param_ *>(wp);
+        wptr->accept[i] = wptr->dispatcher->initialize_state(
+                SingleParticle<T>(static_cast<size_type>(i), wptr->particle));
     }
 }; // class InitializeGCD
 
@@ -91,12 +91,11 @@ class MoveGCD : public MoveBase<T, Derived>
     unsigned operator() (unsigned iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
-        iter_ = iter;
         accept_.resize(particle.size());
-        work_info_ info = {this, &particle};
+        work_param_ wp = {this, &particle, &accept_[0], iter};
         dispatch_apply_f(particle.size(),
                 dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                (void *) &info, work_);
+                (void *) &wp, work_);
         this->post_processor(iter, particle);
 
         return std::accumulate(accept_.begin(), accept_.end(),
@@ -113,23 +112,22 @@ class MoveGCD : public MoveBase<T, Derived>
 
     private :
 
-    unsigned iter_;
     std::vector<unsigned> accept_;
 
-    struct work_info_
+    struct work_param_
     {
         MoveGCD<T, Derived> *const dispatcher;
         Particle<T> *const particle;
+        unsigned *const accept;
+        unsigned iter;
     };
 
-    static void work_ (void *info, std::size_t i)
+    static void work_ (void *wp, std::size_t i)
     {
-        const work_info_ *const wptr =
-            reinterpret_cast<const work_info_ *>(info);
-        wptr->dispatcher->accept_[i] =
-            wptr->dispatcher->move_state(wptr->dispatcher->iter_,
-                    SingleParticle<T>(
-                        static_cast<size_type>(i), wptr->particle));
+        const work_param_ *const wptr =
+            reinterpret_cast<const work_param_ *>(wp);
+        wptr->accept[i] = wptr->dispatcher->move_state(wptr->iter,
+                SingleParticle<T>(static_cast<size_type>(i), wptr->particle));
     }
 }; // class MoveGCD
 
@@ -148,13 +146,10 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
             double *res)
     {
         this->pre_processor(iter, particle);
-        iter_ = iter;
-        dim_ = dim;
-        res_ = res;
-        work_info_ info = {this, &particle};
+        work_param_ wp = {this, &particle, res, iter, dim};
         dispatch_apply_f(particle.size(),
                 dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                (void *) &info, work_);
+                (void *) &wp, work_);
         this->post_processor(iter, particle);
     }
 
@@ -168,25 +163,23 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 
     private :
 
-    unsigned iter_;
-    unsigned dim_;
-    double *res_;
-
-    struct work_info_
+    struct work_param_
     {
         MonitorEvalGCD<T, Derived> *const dispatcher;
         const Particle<T> *const particle;
+        double *const res;
+        unsigned iter;
+        unsigned dim;
     };
 
-    static void work_ (void *info, std::size_t i)
+    static void work_ (void *wp, std::size_t i)
     {
-        const work_info_ *const wptr =
-            reinterpret_cast<const work_info_ *>(info);
-        wptr->dispatcher->monitor_state(
-                wptr->dispatcher->iter_, wptr->dispatcher->dim_,
+        const work_param_ *const wptr =
+            reinterpret_cast<const work_param_ *>(wp);
+        wptr->dispatcher->monitor_state(wptr->iter, wptr->dim,
                 ConstSingleParticle<T>(
                     static_cast<size_type>(i), wptr->particle),
-                wptr->dispatcher->res_ + i * wptr->dispatcher->dim_);
+                wptr->res + i * wptr->dim);
     }
 }; // class MonitorEvalGCD
 
@@ -204,12 +197,10 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        iter_ = iter;
-        res_ = res;
-        work_info_ info = {this, &particle};
+        work_param_ wp = {this, &particle, res, iter};
         dispatch_apply_f(particle.size(),
                 dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                (void *) &info, work_);
+                (void *) &wp, work_);
         this->post_processor(iter, particle);
 
         return this->path_width(iter, particle);
@@ -225,21 +216,19 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
 
     private :
 
-    unsigned iter_;
-    double *res_;
-
-    struct work_info_
+    struct work_param_
     {
         PathEvalGCD<T, Derived> *const dispatcher;
         const Particle<T> *const particle;
+        double *const res;
+        unsigned iter;
     };
 
-    static void work_ (void *info, std::size_t i)
+    static void work_ (void *wp, std::size_t i)
     {
-        const work_info_ *const wptr =
-            reinterpret_cast<const work_info_ *>(info);
-        wptr->dispatcher->res_[i] = wptr->dispatcher->path_state(
-                wptr->dispatcher->iter_,
+        const work_param_ *const wptr =
+            reinterpret_cast<const work_param_ *>(wp);
+        wptr->res[i] = wptr->dispatcher->path_state(wptr->iter,
                 ConstSingleParticle<T>(
                     static_cast<size_type>(i), wptr->particle));
     }
