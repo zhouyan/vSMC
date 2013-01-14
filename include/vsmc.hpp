@@ -15,6 +15,10 @@
 #include <vsmc/smp/parallel_cilk.hpp>
 #endif
 
+#if VSMC_USE_GCD
+#include <vsmc/smp/parallel_gcd.hpp>
+#endif
+
 #if VSMC_USE_OMP
 #include <vsmc/smp/parallel_omp.hpp>
 #endif

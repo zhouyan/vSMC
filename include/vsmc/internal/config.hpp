@@ -74,6 +74,10 @@
 #define VSMC_USE_CILK 0
 #endif
 
+#ifndef VSMC_USE_GCD
+#define VSMC_USE_GCD 0
+#endif
+
 #ifndef VSMC_USE_OMP
 #define VSMC_USE_OMP 0
 #endif

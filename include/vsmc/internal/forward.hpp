@@ -112,6 +112,17 @@ template <typename, typename D = VBase> class MoveCILK;
 template <typename, typename D = VBase> class MonitorEvalCILK;
 template <typename, typename D = VBase> class PathEvalCILK;
 
+// Apple GCD
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <unsigned Dim, typename T> using StateGCD = StateBase<Dim, T>;
+#else
+template <unsigned, typename> class StateGCD;
+#endif
+template <typename, typename D = VBase> class InitializeGCD;
+template <typename, typename D = VBase> class MoveGCD;
+template <typename, typename D = VBase> class MonitorEvalGCD;
+template <typename, typename D = VBase> class PathEvalGCD;
+
 // OpenMP
 template <unsigned, typename> class StateOMP;
 template <typename, typename D = VBase> class InitializeOMP;
