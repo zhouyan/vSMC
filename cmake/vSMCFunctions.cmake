@@ -21,6 +21,9 @@ FUNCTION (ADD_EXAMPLE basename algs)
             IF (${exe} STREQUAL "std")
                 TARGET_LINK_LIBRARIES (${exe_name}
                     ${EXAMPLE_LINK_LIBRARIES} ${VSMC_THREAD_LINK_LIBRARIES})
+            ELSEIF (${exe} STREQUAL "gcd")
+                TARGET_LINK_LIBRARIES (${exe_name}
+                    ${EXAMPLE_LINK_LIBRARIES} ${GCD_LINK_LIBRARIES})
             ELSEIF (${exe} STREQUAL "tbb")
                 TARGET_LINK_LIBRARIES (${exe_name}
                     ${EXAMPLE_LINK_LIBRARIES} ${TBB_LINK_LIBRARIES})

@@ -2,61 +2,64 @@
 #
 # The following variable is set
 #
-# GCD_FOUND - TRUE if Apple GCD is found and work correctly. Currently only
-#             supported on Mac OS X
-
-SET (GCD_TEST_SOURCE "
-#include <dispatch/dispatch.h>
-#include <cassert>
-#include <cstdlib>
-
-template <typename IntType>
-class TestGCD
-{
-    public :
-
-    IntType norm (IntType begin, IntType end)
-    {
-        std::size_t num = static_cast<std::size_t>(end - begin);
-        begin_ = begin;
-        dispatch_apply_f(num,
-                dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                (void *) this, norm_work);
-        IntType sum = 0;
-        for (IntType i = 0; i != num; ++i)
-            sum += square_[i];
-
-        return sum;
-    }
-
-    private :
-
-    static void norm_work (void *test, std::size_t i)
-    {
-        TestGCD<IntType> *pt = reinterpret_cast<TestGCD<IntType> *>(test);
-        IntType n = static_cast<IntType>(i) + pt->begin_;
-        pt->square_[i] = n * n;
-    }
-
-    IntType square_[100];
-    IntType begin_;
-};
-
-int main ()
-{
-    TestGCD<int> test;
-    assert(test.norm(1, 11) == 385);
-
-    return 0;
-}")
+# GCD_FOUND          - TRUE if Apple GCD is found and work correctly.
+#                      But it is untested by real GCD programs
+# GCD_INCLUDE_DIR    - The directory containing GCD headers
+# GCD_LINK_LIBRARIES - TBB libraries that shall be linked to
+#
+# The following variables affect the behavior of this module
+#
+# GCD_INC_PATH - The path CMake shall try to find headers first
+# GCD_LIB_PATH - The path CMake shall try to find libraries first
 
 IF (NOT GCD_FOUND)
     UNSET (GCD_FOUND CACHE)
-    INCLUDE (CheckCXXSourceRuns)
-    CHECK_CXX_SOURCE_RUNS ("${GCD_TEST_SOURCE}" GCD_FOUND)
-    IF (GCD_FOUND)
-        MESSAGE (STATUS "Find Apple GCD support")
-    ELSE (GCD_FOUND)
-        MESSAGE (STATUS "NOT Find GCD Plus support")
-    ENDIF (GCD_FOUND)
+    IF (NOT GCD_LINK_LIBRARIES)
+        UNSET (GCD_LINK_LIBRARIES CACHE)
+        IF (APPLE)
+            SET (GCD_LINK_LIBRARIES_RELEASE)
+            SET (GCD_LINK_LIBRARIES_DEBUG)
+            MESSAGE (STATUS "GCD link libraries not need (Mac OS X)")
+        ELSE (APPLE)
+            FIND_LIBRARY (GCD_LINK_LIBRARIES dispatch
+                PATHS ${GCD_LIB_PATH} ENV LIBRARY_PATH)
+            IF (GCD_LINK_LIBRARIES)
+                SET (GCD_LINK_LIBRARIES_RELEASE ${GCD_LINK_LIBRARIES})
+                SET (GCD_LINK_LIBRARIES_DEBUG ${GCD_LINK_LIBRARIES})
+                MESSAGE (STATUS "Found GCD libraries: ${GCD_LINK_LIBRARIES}")
+            ELSE (GCD_LINK_LIBRARIES)
+                MESSAGE (STATUS "NOT Found GCD libraries")
+            ENDIF (GCD_LINK_LIBRARIES)
+        ENDIF (APPLE)
+    ENDIF (NOT GCD_LINK_LIBRARIES)
+
+    IF (NOT GCD_INCLUDE_DIR)
+        UNSET (GCD_INCLUDE_DIR CACHE)
+        FIND_PATH (GCD_INCLUDE_DIR dispatch/dispatch.h
+            PATHS ${GCD_INC_PATH} ENV CPATH)
+        IF (GCD_INCLUDE_DIR)
+            MESSAGE (STATUS "Found GCD headers: ${GCD_INCLUDE_DIR}")
+        ELSE (GCD_INCLUDE_DIR)
+            MESSAGE (STATUS "NOT Found GCD headers")
+            SET (GCD_FOUND FALSE)
+        ENDIF (GCD_INCLUDE_DIR)
+    ENDIF (NOT GCD_INCLUDE_DIR)
+
+    IF (APPLE)
+        IF (GCD_INCLUDE_DIR)
+            MESSAGE (STATUS "Found GCD")
+            SET (GCD_FOUND TRUE CACHE BOOL "Found GCD")
+        ELSE (GCD_INCLUDE_DIR)
+            MESSAGE (STATUS "NOT Found GCD")
+            SET (GCD_FOUND FALSE CACHE BOOL "Not Found GCD")
+        ENDIF (GCD_INCLUDE_DIR)
+    ELSE (APPLE)
+        IF (GCD_LINK_LIBRARIES AND GCD_INCLUDE_DIR)
+            MESSAGE (STATUS "Found GCD")
+            SET (GCD_FOUND TRUE CACHE BOOL "Found GCD")
+        ELSE (GCD_LINK_LIBRARIES AND GCD_INCLUDE_DIR)
+            MESSAGE (STATUS "NOT Found GCD")
+            SET (GCD_FOUND FALSE CACHE BOOL "Not Found GCD")
+        ENDIF (GCD_LINK_LIBRARIES AND GCD_INCLUDE_DIR)
+    ENDIF (APPLE)
 ENDIF (NOT GCD_FOUND)
