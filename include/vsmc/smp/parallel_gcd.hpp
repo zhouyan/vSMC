@@ -27,9 +27,9 @@ class DispatchQueue
         return queue_;
     }
 
-    void dispatch_queue (dispatch_queue_t queue)
+    void queue (dispatch_queue_t new_queue)
     {
-        queue_ = queue;
+        queue_ = new_queue;
     }
 
     private :
