@@ -10,14 +10,6 @@ namespace vsmc {                                                             \
     template <typename, typename D = VBase> class PathEval##Name;            \
 }
 
-VSMC_DEFINE_SMP_FORWARD(SEQ)
-VSMC_DEFINE_SMP_FORWARD(CILK)
-VSMC_DEFINE_SMP_FORWARD(GCD)
-VSMC_DEFINE_SMP_FORWARD(OMP)
-VSMC_DEFINE_SMP_FORWARD(PPL)
-VSMC_DEFINE_SMP_FORWARD(STD)
-VSMC_DEFINE_SMP_FORWARD(TBB)
-
 namespace vsmc {
 
 // Placeholders
@@ -115,5 +107,14 @@ template <typename, template <typename, typename> class, typename B = CBase>
 template <typename, template <typename, typename> class, typename B = CBase>
          class PathEvalAdapter;
 } // namesapce vsmc
+
+// SMP Implementations
+VSMC_DEFINE_SMP_FORWARD(SEQ)
+VSMC_DEFINE_SMP_FORWARD(CILK)
+VSMC_DEFINE_SMP_FORWARD(GCD)
+VSMC_DEFINE_SMP_FORWARD(OMP)
+VSMC_DEFINE_SMP_FORWARD(PPL)
+VSMC_DEFINE_SMP_FORWARD(STD)
+VSMC_DEFINE_SMP_FORWARD(TBB)
 
 #endif // VSMC_INTERNAL_FORWARD_HPP
