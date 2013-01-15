@@ -33,7 +33,7 @@ class StopWatchChrono
 
     void reset () const
     {
-        elapsed_ = ClockType::duration(0);
+        elapsed_ = typename ClockType::duration(0);
     }
 
     double nanoseconds () const
