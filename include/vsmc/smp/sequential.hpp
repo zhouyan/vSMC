@@ -6,7 +6,6 @@
 
 namespace vsmc {
 
-#if !VSMC_HAS_CXX11_ALIAS_TEMPLATES
 /// \brief Particle::value_type subtype
 /// \ingroup Sequential
 template <unsigned Dim, typename T>
@@ -20,7 +19,6 @@ class StateSEQ : public StateBase<Dim, T>
 
     explicit StateSEQ (size_type N) : StateBase<Dim, T>(N) {}
 }; // class StateSEQ
-#endif // VSMC_HAS_CXX11_ALIAS_TEMPLATES
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup Sequential
@@ -38,7 +36,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         unsigned accept = 0;
-        for (size_type i = 0; i != particle.value().size(); ++i)
+        for (size_type i = 0; i != particle.size(); ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
         this->post_processor(particle);
 
@@ -69,7 +67,7 @@ class MoveSEQ : public MoveBase<T, Derived>
     {
         this->pre_processor(iter, particle);
         unsigned accept = 0;
-        for (size_type i = 0; i != particle.value().size(); ++i)
+        for (size_type i = 0; i != particle.size(); ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         this->post_processor(iter, particle);
 
@@ -100,7 +98,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
             double *res)
     {
         this->pre_processor(iter, particle);
-        for (size_type i = 0; i != particle.value().size(); ++i) {
+        for (size_type i = 0; i != particle.size(); ++i) {
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
@@ -130,7 +128,7 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        for (size_type i = 0; i != particle.value().size(); ++i) {
+        for (size_type i = 0; i != particle.size(); ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }

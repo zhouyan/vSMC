@@ -1,6 +1,23 @@
 #ifndef VSMC_INTERNAL_FORWARD_HPP
 #define VSMC_INTERNAL_FORWARD_HPP
 
+#define VSMC_DEFINE_SMP_FORWARD(Name) \
+namespace vsmc {                                                             \
+    template <unsigned, typename> class State##Name;                         \
+    template <typename, typename D = VBase> class Initialize##Name;          \
+    template <typename, typename D = VBase> class Move##Name;                \
+    template <typename, typename D = VBase> class MonitorEval##Name;         \
+    template <typename, typename D = VBase> class PathEval##Name;            \
+}
+
+VSMC_DEFINE_SMP_FORWARD(SEQ)
+VSMC_DEFINE_SMP_FORWARD(CILK)
+VSMC_DEFINE_SMP_FORWARD(GCD)
+VSMC_DEFINE_SMP_FORWARD(OMP)
+VSMC_DEFINE_SMP_FORWARD(PPL)
+VSMC_DEFINE_SMP_FORWARD(STD)
+VSMC_DEFINE_SMP_FORWARD(TBB)
+
 namespace vsmc {
 
 // Placeholders
@@ -81,16 +98,14 @@ template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;
 template <typename> class PathEvalCL;
 
-// SMP
-
-// Base
+// SMP Base
 template <unsigned, typename> class StateBase;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
 template <typename, typename> class MonitorEvalBase;
 template <typename, typename> class PathEvalBase;
 
-// Adapter
+// SMP Adapter
 template <typename, template <typename, typename> class, typename B = CBase>
          class InitializeAdapter;
 template <typename, template <typename, typename> class, typename B = CBase>
@@ -99,57 +114,6 @@ template <typename, template <typename, typename> class, typename B = CBase>
          class MonitorEvalAdapter;
 template <typename, template <typename, typename> class, typename B = CBase>
          class PathEvalAdapter;
-
-// Sequential
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <unsigned Dim, typename T> using StateSEQ = StateBase<Dim, T>;
-#else
-template <unsigned, typename> class StateSEQ;
-#endif
-template <typename, typename D = VBase> class InitializeSEQ;
-template <typename, typename D = VBase> class MoveSEQ;
-template <typename, typename D = VBase> class MonitorEvalSEQ;
-template <typename, typename D = VBase> class PathEvalSEQ;
-
-// Intel Cilk Plus
-template <unsigned, typename> class StateCILK;
-template <typename, typename D = VBase> class InitializeCILK;
-template <typename, typename D = VBase> class MoveCILK;
-template <typename, typename D = VBase> class MonitorEvalCILK;
-template <typename, typename D = VBase> class PathEvalCILK;
-
-// Apple GCD
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <unsigned Dim, typename T> using StateGCD = StateBase<Dim, T>;
-#else
-template <unsigned, typename> class StateGCD;
-#endif
-template <typename, typename D = VBase> class InitializeGCD;
-template <typename, typename D = VBase> class MoveGCD;
-template <typename, typename D = VBase> class MonitorEvalGCD;
-template <typename, typename D = VBase> class PathEvalGCD;
-
-// OpenMP
-template <unsigned, typename> class StateOMP;
-template <typename, typename D = VBase> class InitializeOMP;
-template <typename, typename D = VBase> class MoveOMP;
-template <typename, typename D = VBase> class MonitorEvalOMP;
-template <typename, typename D = VBase> class PathEvalOMP;
-
-// C++11 <thread>
-template <unsigned, typename> class StateSTD;
-template <typename, typename D = VBase> class InitializeSTD;
-template <typename, typename D = VBase> class MoveSTD;
-template <typename, typename D = VBase> class MonitorEvalSTD;
-template <typename, typename D = VBase> class PathEvalSTD;
-
-// Intel TBB
-template <unsigned, typename> class StateTBB;
-template <typename, typename D = VBase> class InitializeTBB;
-template <typename, typename D = VBase> class MoveTBB;
-template <typename, typename D = VBase> class MonitorEvalTBB;
-template <typename, typename D = VBase> class PathEvalTBB;
-
 } // namesapce vsmc
 
 #endif // VSMC_INTERNAL_FORWARD_HPP

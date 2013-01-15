@@ -45,7 +45,6 @@ class DispatchQueue
 
 } // namespace vsmc::gcd
 
-#if !VSMC_HAS_CXX11_ALIAS_TEMPLATES
 /// \brief Particle::value_type subtype
 /// \ingroup GCD
 template <unsigned Dim, typename T>
@@ -59,7 +58,6 @@ class StateGCD : public StateBase<Dim, T>
 
     explicit StateGCD (size_type N) : StateBase<Dim, T>(N) {}
 }; // class StateGCD
-#endif // VSMC_HAS_CXX11_ALIAS_TEMPLATES
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup GCD

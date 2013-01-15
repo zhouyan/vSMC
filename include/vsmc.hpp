@@ -23,6 +23,10 @@
 #include <vsmc/smp/parallel_omp.hpp>
 #endif
 
+#if VSMC_USE_PPL
+#include <vsmc/smp/parallel_ppl.hpp>
+#endif
+
 #if VSMC_USE_TBB
 #include <vsmc/smp/parallel_tbb.hpp>
 #endif
@@ -76,6 +80,10 @@
 /// \defgroup OMP OpenMP
 /// \ingroup Implementation
 /// \brief Parallelized samplers with OpenMP
+
+/// \defgroup PPL Microsoft Parallel Pattern Library
+/// \ingroup Implementation
+/// \brief Parallelized samplers with Microsoft PPL
 
 /// \defgroup STD C++11 Multithread Support
 /// \ingroup Implementation

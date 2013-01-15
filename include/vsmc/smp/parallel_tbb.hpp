@@ -77,7 +77,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
         this->pre_processor(particle);
         work_ work(this, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.value().size()), work);
+                    0, particle.size()), work);
         this->post_processor(particle);
 
         return work.accept();
@@ -108,8 +108,8 @@ class InitializeTBB : public InitializeBase<T, Derived>
         {
             unsigned acc = accept_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                Particle<T> *const part = particle_;
-                acc += init_->initialize_state(SingleParticle<T>(i, part));
+                acc += init_->initialize_state(
+                        SingleParticle<T>(i, particle_));
             }
             accept_ = acc;
         }
@@ -148,7 +148,7 @@ class MoveTBB : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         work_ work(this, iter, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.value().size()), work);
+                    0, particle.size()), work);
         this->post_processor(iter, particle);
 
         return work.accept();
@@ -180,8 +180,8 @@ class MoveTBB : public MoveBase<T, Derived>
         {
             unsigned acc = accept_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                Particle<T> *const part = particle_;
-                acc += move_->move_state(iter_, SingleParticle<T>(i, part));
+                acc += move_->move_state(iter_,
+                        SingleParticle<T>(i, particle_));
             }
             accept_ = acc;
         }
@@ -220,8 +220,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
             double *res)
     {
         this->pre_processor(iter, particle);
-        tbb::parallel_for(tbb::blocked_range<size_type>(
-                    0, particle.value().size()),
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
                 work_(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
@@ -243,26 +242,24 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         work_ (MonitorEvalTBB<T, Derived> *monitor,
                 unsigned iter, unsigned dim,
                 const Particle<T> *particle, double *res) :
-            monitor_(monitor), iter_(iter), dim_(dim), particle_(particle),
-            res_(res) {}
+            monitor_(monitor), particle_(particle), res_(res),
+            iter_(iter), dim_(dim) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                double *const r = res_ + i * dim_;
-                const Particle<T> *const part = particle_;
                 monitor_->monitor_state(iter_, dim_,
-                        ConstSingleParticle<T>(i, part), r);
+                        ConstSingleParticle<T>(i, particle_), res_ + i * dim_);
             }
         }
 
         private :
 
         MonitorEvalTBB<T, Derived> *const monitor_;
-        const unsigned iter_;
-        const unsigned dim_;
         const Particle<T> *const particle_;
         double *const res_;
+        const unsigned iter_;
+        const unsigned dim_;
     }; // class work_
 }; // class MonitorEvalTBB
 
@@ -280,8 +277,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     double operator() (unsigned iter, const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
-        tbb::parallel_for(tbb::blocked_range<size_type>(
-                    0, particle.value().size()),
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 
@@ -304,23 +300,22 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
         work_ (PathEvalTBB<T, Derived> *path, unsigned iter,
                 const Particle<T> *particle, double *res) :
-            path_(path), iter_(iter), particle_(particle), res_(res) {}
+            path_(path), particle_(particle), res_(res), iter_(iter) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                const Particle<T> *const part = particle_;
                 res_[i] = path_->path_state(iter_,
-                        ConstSingleParticle<T>(i, part));
+                        ConstSingleParticle<T>(i, particle_));
             }
         }
 
         private :
 
         PathEvalTBB<T, Derived> *const path_;
-        const unsigned iter_;
         const Particle<T> *const particle_;
         double *const res_;
+        const unsigned iter_;
     }; // class work_
 }; // PathEvalTBB
 
