@@ -57,12 +57,14 @@ under a uniform interface. One is C++11 `<thread>` (or [Boost][Boost] Thread
 library as a replacement). For a full C++11 implementation, this means no
 third-party dependency is required to write parallel a SMC sampler. Other
 third-party parallelization include, [Intel Cilk Plus][Intel Cilk Plus], [Intel
-TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple GCD][Apple GCD] is also supported
-on Mac OS X and on Linux via [libdispatch][libdispatch] . In addition, this
-library also support using [OpenCL][OpenCL] for GPGPU computing, though the
-interface is different than others. To enable any of these, one need to define
-specific macros, `VSMC_USE_STD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`,
-`VSMC_USE_OMP`, and `VSMC_USE_CL`, respectively.
+TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple Grand Central Dispatch][Apple GCD]
+is also supported on Mac OS X and on Linux via [libdispatch][libdispatch].
+[Microsoft Parallel Patterns Library][MS PPL] is supported on Windows when
+compiled with MSVC 2010 or later. In addition, this library also support using
+[OpenCL][OpenCL] for GPGPU computing, though the interface is different than
+others. To enable any of these, one need to define specific macros,
+`VSMC_USE_STD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`, and
+`VSMC_USE_CL`, respectively.
 
 # License
 
@@ -75,6 +77,7 @@ in the `LICENSE` file distributed with the source.
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
 [Intel Cilk Plus]: http://en.wikipedia.org/wiki/Intel_Cilk_Plus
 [Intel TBB]: http://threadingbuildingblocks.org/
+[MS PPL]: http://msdn.microsoft.com/en-us/library/dd492418.aspx
 [OpenCL]: http://www.khronos.org/opencl/
 [OpenMP]: http://www.openmp.org/
 [Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
