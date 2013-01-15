@@ -62,9 +62,7 @@ is also supported on Mac OS X and on Linux via [libdispatch][libdispatch].
 [Microsoft Parallel Patterns Library][MS PPL] is supported on Windows when
 compiled with MSVC 2010 or later. In addition, this library also support using
 [OpenCL][OpenCL] for GPGPU computing, though the interface is different than
-others. To enable any of these, one need to define specific macros,
-`VSMC_USE_STD`, `VSMC_USE_CILK`, `VSMC_USE_TBB`, `VSMC_USE_OMP`, and
-`VSMC_USE_CL`, respectively.
+others.
 
 # License
 
