@@ -80,7 +80,7 @@ class StopWatch
 
 } // namespace vsmc
 
-#else
+#elif defined(__APPLE__) || defined(__MACOSX)
 
 namespace vsmc {
 
@@ -102,6 +102,72 @@ class StopWatch
 
 } // namespace vsmc
 
-#endif
+#elif defined(__linux__)
+
+namespace vsmc {
+
+class StopWatch
+{
+    public :
+
+    void start () const {}
+    void stop () const {}
+    void reset () const {}
+
+    double nanoseconds () const { return 0; }
+    double microseconds () const { return 0; }
+    double milliseconds () const { return 0; }
+    double seconds () const { return 0; }
+    double minutes () const { return 0; }
+    double hours () const { return 0; }
+}; // class StopWatch
+
+} // namespace vsmc
+
+#elif defined(__posix__)
+
+namespace vsmc {
+
+class StopWatch
+{
+    public :
+
+    void start () const {}
+    void stop () const {}
+    void reset () const {}
+
+    double nanoseconds () const { return 0; }
+    double microseconds () const { return 0; }
+    double milliseconds () const { return 0; }
+    double seconds () const { return 0; }
+    double minutes () const { return 0; }
+    double hours () const { return 0; }
+}; // class StopWatch
+
+} // namespace vsmc
+
+#else // VSMC_HAS_CXX11LIB_CHRONO
+
+namespace vsmc {
+
+class StopWatch
+{
+    public :
+
+    void start () const {}
+    void stop () const {}
+    void reset () const {}
+
+    double nanoseconds () const { return 0; }
+    double microseconds () const { return 0; }
+    double milliseconds () const { return 0; }
+    double seconds () const { return 0; }
+    double minutes () const { return 0; }
+    double hours () const { return 0; }
+}; // class StopWatch
+
+} // namespace vsmc
+
+#endif // VSMC_HAS_CXX11LIB_CHRONO
 
 #endif // VSMC_UTILITY_STOP_WATCH_HPP
