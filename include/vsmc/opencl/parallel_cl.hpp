@@ -147,33 +147,36 @@ class StateCL
         try {
             program_ = cl_manager_.create_program(ss.str());
             program_.build(cl_manager_.device_vec(), flags.c_str());
+            program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
+            program_.getBuildInfo(cl_manager_.device(),
+                    CL_PROGRAM_BUILD_OPTIONS, &build_options_);
             program_.getBuildInfo(cl_manager_.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             build_ = true;
         } catch (cl::Error &err) {
-            std::string log;
-            std::cerr << "===========================" << std::endl;
-            std::cerr << "Error: vSMC: OpenCL program Build failed"
-                << std::endl;
-            std::cerr << err.err() << " : " << err.what() << std::endl;
+            program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
             program_.getBuildInfo(cl_manager_.device(),
-                    CL_PROGRAM_BUILD_OPTIONS, &log);
-            std::cerr << "===========================" << std::endl;
-            std::cerr << "Build options:" << std::endl;
-            std::cerr << "---------------------------" << std::endl;
-            std::cerr << log << std::endl;
-            program_.getInfo(CL_PROGRAM_SOURCE, &log);
-            std::cerr << "===========================" << std::endl;
-            std::cerr << "Build source:" << std::endl;
-            std::cerr << "---------------------------" << std::endl;
-            std::cerr << log << std::endl;
+                    CL_PROGRAM_BUILD_OPTIONS, &build_options_);
             program_.getBuildInfo(cl_manager_.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
-            std::cerr << "===========================" << std::endl;
-            std::cerr << "Build log:" << std::endl;
-            std::cerr << "---------------------------" << std::endl;
-            std::cerr << build_log_ << std::endl;
-            std::cerr << "===========================" << std::endl;
+            std::stringstream log_ss;
+            log_ss << "====================================================\n";
+            log_ss << "Error: vSMC: OpenCL program Build failed\n";
+            log_ss << err.err() << " : " << err.what() << '\n';
+            log_ss << "====================================================\n";
+            log_ss << "Build options:\n";
+            log_ss << "----------------------------------------------------\n";
+            log_ss << build_options_ << '\n';
+            log_ss << "====================================================\n";
+            log_ss << "Build source:\n";
+            log_ss << "----------------------------------------------------\n";
+            log_ss << build_source_ << '\n';
+            log_ss << "====================================================\n";
+            log_ss << "Build log:\n";
+            log_ss << "----------------------------------------------------\n";
+            log_ss << build_log_ << '\n';
+            log_ss << "====================================================\n";
+            std::fprintf(stderr, "%s", log_ss.str().c_str());
             throw err;
         }
 
@@ -188,6 +191,16 @@ class StateCL
     int build_id () const
     {
         return build_id_;
+    }
+
+    std::string build_source () const
+    {
+        return build_source_;
+    }
+
+    std::string build_options () const
+    {
+        return build_options_;
     }
 
     std::string build_log () const
@@ -227,6 +240,8 @@ class StateCL
 
     bool build_;
     int build_id_;
+    std::string build_source_;
+    std::string build_options_;
     std::string build_log_;
 
     cl::Buffer state_buffer_;

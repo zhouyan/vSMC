@@ -664,18 +664,18 @@ class Sampler
             return;
 
         if (iter_num_ == 0) {
-            std::cout << std::endl;
-            for (int i = 0; i != 60; ++i)
-                std::cout << '=';
-            std::cout << std::endl;
-            std::cout << std::setw(6) << iter_num_;
+            std::fprintf(stderr, "\n");
+            for (int i = 0; i != 78; ++i)
+                std::fprintf(stderr, "=");
+            std::fprintf(stderr, "\n");
+            std::fprintf(stderr, "%6d", iter_num_);
             return;
         }
 
         if (!(iter_num_ % 50))
-            std::cout << std::endl << std::setw(6) << iter_num_;
+            std::fprintf(stderr, "%6d", iter_num_);
         else
-            std::cout << ".";
+            std::fprintf(stderr, ".");
 
         std::cout.flush();
     }

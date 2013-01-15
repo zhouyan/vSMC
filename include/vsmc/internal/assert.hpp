@@ -2,7 +2,7 @@
 #define VSMC_INTERNAL_ASSERT_HPP
 
 #include <cassert>
-#include <iostream>
+#include <cstdio>
 #include <stdexcept>
 
 #include <vsmc/internal/config.hpp>
@@ -21,9 +21,9 @@
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                       \
 {                                                                            \
     if (!(cond)) {                                                           \
-        std::cerr                                                            \
-            << "vSMC runtime assertion failed:" << std::endl                 \
-            << msg << std::endl;                                             \
+        std::fprintf(stderr,                                                 \
+                "vSMC runtime assertion failed; File: %s; Line: %d\n%s\n",   \
+                __FILE__, __LINE__, msg);                                    \
     };                                                                       \
     assert(cond);                                                            \
 }
