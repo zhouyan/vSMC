@@ -53,16 +53,15 @@ parallelized random number generator, and the default behavior is assuming this
 is available.
 
 The library support various back-ends for multi-thread parallelization, unified
-under a uniform interface. One is C++11 `<thread>` (or [Boost][Boost] Thread
-library as a replacement). For a full C++11 implementation, this means no
-third-party dependency is required to write a parallel SMC sampler. Other
-third-party parallelization include, [Intel Cilk Plus][Intel Cilk Plus], [Intel
-TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple Grand Central Dispatch][Apple GCD]
-is also supported on Mac OS X and on Linux via [libdispatch][libdispatch].
-[Microsoft Parallel Patterns Library][MS PPL] is supported on Windows when
-compiled with MSVC 2010 or later. In addition, this library also support using
-[OpenCL][OpenCL] for GPGPU computing, though the interface is different than
-others.
+under a uniform interface. One is C++11 `<thread>`. For a full C++11
+implementation, this means no third-party dependency is required to write a
+parallel SMC sampler. Other third-party parallelization include, [Intel Cilk
+Plus][Intel Cilk Plus], [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple
+Grand Central Dispatch][Apple GCD] is also supported on Mac OS X and on Linux
+via [libdispatch][libdispatch].  [Microsoft Parallel Patterns Library][MS PPL]
+is supported on Windows when compiled with MSVC 2010 or later. In addition,
+this library also support using [OpenCL][OpenCL] for GPGPU computing, though
+the interface is different than others.
 
 # License
 
