@@ -13,28 +13,27 @@
 
 namespace vsmc {
 
-class StopWatch
+template <typename ClockType>
+class StopWatchChrono
 {
     public :
 
-    typedef std::chrono::high_resolution_clock clock_type;
-
-    StopWatch () : elapsed_(0) {}
+    StopWatchChrono () : elapsed_(0) {}
 
     void start () const
     {
-        start_time_ = clock_type::now();
+        start_time_ = ClockType::now();
     }
 
     void stop () const
     {
-        clock_type::time_point stop_time = clock_type::now();
+        typename ClockType::time_point stop_time = ClockType::now();
         elapsed_ += stop_time - start_time_;
     }
 
     void reset () const
     {
-        elapsed_ = clock_type::duration(0);
+        elapsed_ = ClockType::duration(0);
     }
 
     double nanoseconds () const
@@ -75,9 +74,11 @@ class StopWatch
 
     private :
 
-    mutable clock_type::duration elapsed_;
-    mutable clock_type::time_point start_time_;
+    mutable typename ClockType::duration elapsed_;
+    mutable typename ClockType::time_point start_time_;
 }; // class StopWatch
+
+typedef StopWatchChrono<std::chrono::high_resolution_clock> StopWatch;
 
 } // namespace vsmc
 
