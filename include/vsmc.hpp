@@ -85,9 +85,9 @@
 /// \ingroup Implementation
 /// \brief Parallelized samplers with Microsoft PPL
 
-/// \defgroup STD C++11 Multithread Support
+/// \defgroup STD C++11 Concurrency Support
 /// \ingroup Implementation
-/// \brief Parallelized samplers with C++11 multithread support
+/// \brief Parallelized samplers with C++11 concurrency support
 
 /// \defgroup TBB Intel Threading Buidling Block
 /// \ingroup Implementation
