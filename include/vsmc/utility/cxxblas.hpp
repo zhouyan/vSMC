@@ -7,10 +7,6 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
-#if VSMC_HAS_CBLAS
-#include VSMC_CBLAS_HEADER
-#endif // VSMC_HAS_CBLAS
-
 namespace vsmc { namespace cxxblas {
 
 template <typename T>
@@ -18,16 +14,6 @@ class DDot
 {
     public :
 
-#if VSMC_HAS_CBLAS
-    typedef VSMC_CBLAS_INT_TYPE size_type;
-
-    double operator() (const size_type N,
-            const double *X, const int incX,
-            const double *Y, const int incY) const
-    {
-        return cblas_ddot(N, X, incX, Y, incY);
-    }
-#else // VSMC_HAS_CBLAS
     typedef typename traits::SizeTypeTrait<T>::type size_type;
 
     double operator() (const size_type N,
@@ -69,7 +55,6 @@ class DDot
 
         return res;
     }
-#endif // VSMC_HAS_CBLAS
 }; // class DDot
 
 template <typename T>
@@ -77,40 +62,6 @@ class DGemv
 {
     public :
 
-#if VSMC_HAS_CBLAS
-    typedef VSMC_CBLAS_INT_TYPE size_type;
-
-    void operator() (MatrixOrder order, MatrixTranspose trans,
-            const size_type M, const size_type N, const double alpha,
-            const double *A, const int lda,
-            const double *X, const int incX,
-            const double beta, double *Y, const int incY) const
-    {
-        CBLAS_ORDER cblas_order;
-        switch (order) {
-            case RowMajor :
-                cblas_order = CblasRowMajor;
-                break;
-            case ColMajor :
-                cblas_order = CblasColMajor;
-        }
-
-        CBLAS_TRANSPOSE cblas_trans;
-        switch (trans) {
-            case NoTrans :
-                cblas_trans = CblasNoTrans;
-                break;
-            case Trans :
-                cblas_trans = CblasTrans;
-                break;
-            case ConjTrans :
-                cblas_trans = CblasConjTrans;
-                break;
-        }
-        cblas_dgemv(cblas_order, cblas_trans, M, N,
-                alpha, A, lda, X, incX, beta, Y, incY);
-    }
-#else // VSMC_HAS_CBLAS
     typedef typename traits::SizeTypeTrait<T>::type size_type;
 
     void operator() (MatrixOrder order, MatrixTranspose trans,
@@ -172,7 +123,6 @@ class DGemv
             VSMC_RUNTIME_ASSERT(false, "INVALID INPUT TO **vsmc::DGemv**");
         }
     }
-#endif // VSMC_HAS_CBLAS
 }; // class DGemv
 
 } } // namespace vsmc::cxxblas

@@ -4,24 +4,6 @@
 #include <vsmc/internal/compiler.h>
 #include <vsmc/internal/version.hpp>
 
-// BLAS support
-
-#ifndef VSMC_HAS_CBLAS
-#define VSMC_HAS_CBLAS 0
-#endif
-
-#ifndef VSMC_CBLAS_INT_TYPE
-#define VSMC_CBLAS_INT_TYPE int
-#endif
-
-#ifndef VSMC_CBLAS_HEADER
-#if defined(__APPLE__) || defined(__MACOSX)
-#define VSMC_CBLAS_HEADER <vecLib/cblas.h>
-#else
-#define VSMC_CBLAS_HEADER <cblas.h>
-#endif
-#endif
-
 // cstdint
 
 #ifndef __STDC_CONSTANT_MACROS
