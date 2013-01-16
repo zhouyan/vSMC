@@ -99,9 +99,9 @@
 /// \defgroup Utility Utility
 /// \brief Utilities
 
-/// \defgroup STDTBB STDTBB
+/// \defgroup CXXBLAS C++ BLAS wrapper
 /// \ingroup Utility
-/// \brief C++11 parallelization
+/// \brief C++ thin wrapper around the C BLAS API
 
 /// \defgroup OpenCL OpenCL
 /// \ingroup Utility
@@ -110,3 +110,7 @@
 /// \defgroup Random Random
 /// \ingroup Utility
 /// \brief Generating distribution random variates using Random123 CBRNG
+
+/// \defgroup STDTBB STDTBB
+/// \ingroup Utility
+/// \brief C++11 parallelization

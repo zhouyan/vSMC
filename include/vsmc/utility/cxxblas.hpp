@@ -9,6 +9,8 @@
 
 namespace vsmc { namespace cxxblas {
 
+/// \brief C++ wrapper of cblas_ddot
+/// \ingroup CXXBLAS
 template <typename T>
 class DDot
 {
@@ -57,6 +59,8 @@ class DDot
     }
 }; // class DDot
 
+/// \brief C++ wrapper of cblas_dgemv
+/// \ingroup CXXBLAS
 template <typename T>
 class DGemv
 {
