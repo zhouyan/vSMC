@@ -53,7 +53,7 @@ parallelized random number generator, and the default behavior is assuming this
 is available.
 
 The library support various back-ends for multi-thread parallelization, unified
-under a uniform interface. One is C++11 `<thread>`. For a full C++11
+under a uniform interface. One is C++11 concurrency. For a full C++11
 implementation, this means no third-party dependency is required to write a
 parallel SMC sampler. Other third-party parallelization include, [Intel Cilk
 Plus][Intel Cilk Plus], [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple
