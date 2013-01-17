@@ -6,6 +6,46 @@
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 
+namespace vsmc {
+
+template <typename ClockType>
+class StopWatchClockWrapper
+{
+    public :
+
+    typedef ClockType clock_type;
+
+    StopWatchClockWrapper () : elapsed_(0) {}
+
+    void start () const
+    {
+        start_time_ = clock_type::now();
+    }
+
+    void stop () const
+    {
+        typename clock_type::time_point stop_time = clock_type::now();
+        elapsed_ += stop_time - start_time_;
+    }
+
+    void reset () const
+    {
+        elapsed_ = typename clock_type::duration(0);
+    }
+
+    typename clock_type::duration elapsed () const
+    {
+        return elapsed_;
+    }
+
+    private :
+
+    mutable typename clock_type::duration elapsed_;
+    mutable typename clock_type::time_point start_time_;
+}; // class StopWatchClockWrapper
+
+} // namespace vsmc
+
 #if VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_STOP_WATCH_DEFINED
 
@@ -13,72 +53,47 @@
 
 namespace vsmc {
 
-template <typename ClockType>
-class StopWatchChrono
+class StopWatch :
+    public StopWatchClockWrapper<std::chrono::high_resolution_clock>
 {
     public :
-
-    StopWatchChrono () : elapsed_(0) {}
-
-    void start () const
-    {
-        start_time_ = ClockType::now();
-    }
-
-    void stop () const
-    {
-        typename ClockType::time_point stop_time = ClockType::now();
-        elapsed_ += stop_time - start_time_;
-    }
-
-    void reset () const
-    {
-        elapsed_ = typename ClockType::duration(0);
-    }
 
     double nanoseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::nano> >(elapsed_).count();
+            double, std::nano> >(this->elapsed()).count();
     }
 
     double microseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::micro> >(elapsed_).count();
+            double, std::micro> >(this->elapsed()).count();
     }
 
     double milliseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::milli> >(elapsed_).count();
+            double, std::milli> >(this->elapsed()).count();
     }
 
     double seconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::ratio<1> > >(elapsed_).count();
+            double, std::ratio<1> > >(this->elapsed()).count();
     }
 
     double minutes () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::ratio<60> > >(elapsed_).count();
+            double, std::ratio<60> > >(this->elapsed()).count();
     }
 
     double hours () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::ratio<3600> > >(elapsed_).count();
+            double, std::ratio<3600> > >(this->elapsed()).count();
     }
-
-    private :
-
-    mutable typename ClockType::duration elapsed_;
-    mutable typename ClockType::time_point start_time_;
 }; // class StopWatch
-
-typedef StopWatchChrono<std::chrono::high_resolution_clock> StopWatch;
 
 } // namespace vsmc
 
@@ -147,13 +162,13 @@ class StopWatch
 
     double minutes () const
     {
-        return static_cast<double>(elapsed_sec_) / 60.0+
+        return static_cast<double>(elapsed_sec_) / 60.0 +
             static_cast<double>(elapsed_nsec_) / 1e9 / 60.0;
     }
 
     double hours () const
     {
-        return static_cast<double>(elapsed_sec_) / 3600.0+
+        return static_cast<double>(elapsed_sec_) / 3600.0 +
             static_cast<double>(elapsed_nsec_) / 1e9 / 3600.0;
     }
 
@@ -238,13 +253,13 @@ class StopWatch
 
     double minutes () const
     {
-        return static_cast<double>(elapsed_.tv_sec) / 60.0+
+        return static_cast<double>(elapsed_.tv_sec) / 60.0 +
             static_cast<double>(elapsed_.tv_nsec) / 1e9 / 60.0;
     }
 
     double hours () const
     {
-        return static_cast<double>(elapsed_.tv_sec) / 3600.0+
+        return static_cast<double>(elapsed_.tv_sec) / 3600.0 +
             static_cast<double>(elapsed_.tv_nsec) / 1e9 / 3600.0;
     }
 
