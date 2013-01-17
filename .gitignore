@@ -2,5 +2,6 @@
 build*
 doc/main.md
 example/pet/pet_conv.data
+example/pet/PETReal.data
 user_options.cmake
 include/cl.hpp
