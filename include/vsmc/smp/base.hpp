@@ -125,13 +125,13 @@ class StateBase : public StateBaseDim<Dim>
 
     template <typename OutputStream>
     OutputStream &print (OutputStream &os, unsigned iter = 0,
-            char sepchar = '\t', char eolchar = '\n') const
+            char sepchar = ' ', char eolchar = '\n') const
     {
         for (size_type i = 0; i != size_; ++i) {
             os << iter << sepchar;
             for (unsigned d = 0; d != this->dim() - 1; ++d)
                 os << state(i, d) << sepchar;
-            os << state(i, this->dim()) << eolchar;
+            os << state(i, this->dim() - 1) << eolchar;
         }
 
         return os;
