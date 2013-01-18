@@ -123,6 +123,20 @@ class StateBase : public StateBaseDim<Dim>
         return first;
     }
 
+    template <typename OutputStream>
+    OutputStream &print (OutputStream &os, unsigned iter = 0,
+            char sepchar = '\t', char eolchar = '\n')
+    {
+        for (size_type i = 0; i != size_; ++i) {
+            os << iter << sepchar;
+            for (unsigned d = 0; d != this->dim() - 1; ++d)
+                os << state(i, d) << sepchar;
+            os << state(i, this->dim()) << eolchar;
+        }
+
+        return os;
+    }
+
     protected :
 
     void copy_particle (size_type from, size_type to)
