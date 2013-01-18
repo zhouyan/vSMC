@@ -211,9 +211,7 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
 
-        size_type num = 0;
-        for (InputIter i = first; i != last; ++i)
-            ++num;
+        size_type num = static_cast<size_type>(std::distance(first, last));
 
         if (!num)
             return cl::Buffer();
