@@ -125,7 +125,7 @@ class StateBase : public StateBaseDim<Dim>
 
     template <typename OutputStream>
     OutputStream &print (OutputStream &os, unsigned iter = 0,
-            char sepchar = '\t', char eolchar = '\n')
+            char sepchar = '\t', char eolchar = '\n') const
     {
         for (size_type i = 0; i != size_; ++i) {
             os << iter << sepchar;

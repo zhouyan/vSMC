@@ -457,7 +457,7 @@ class Sampler
     /// print process. If there is no record at all, then they won't be printed
     /// even set to \b true instead of being printed all as NA's.
     template<typename OutputStream>
-    const Sampler<T> &print (OutputStream &os = std::cout,
+    OutputStream &print (OutputStream &os = std::cout,
             bool print_header = true,
             bool print_path = true, bool print_monitor = true,
             int sampler_id = 0, char sepchar = ',', char nachar = '\0') const
@@ -593,11 +593,10 @@ class Sampler
                 }
             }
 
-            if (iter + 1 < iter_size())
-                os << '\n';
+            os << '\n';
         }
 
-        return *this;
+        return os;
     }
 
     template<typename OutputStream>
@@ -686,8 +685,7 @@ class Sampler
 template<typename OutputStream, typename T>
 OutputStream &operator<< (OutputStream &os, const Sampler<T> &sampler)
 {
-    sampler.print(os, true);
-    return os;
+    return sampler.print(os, true);
 }
 
 } // namespace vsmc
