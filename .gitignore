@@ -3,5 +3,7 @@ build*
 doc/main.md
 example/pet/pet_conv.data
 example/pet/pet_real.data
+example/pet/pet_conv.data.bin
+example/pet/pet_real.data.bin
 user_options.cmake
 include/cl.hpp
