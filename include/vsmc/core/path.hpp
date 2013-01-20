@@ -154,9 +154,9 @@ class Path
         width_.push_back(eval_(iter, particle, &buffer_[0]));
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());
-        integrand_.push_back(ddot_(
-                    static_cast<typename ddot_type::size_type>(weight_.size()),
-                    &weight_[0], 1, &buffer_[0], 1));
+        integrand_.push_back(ddot_(static_cast<
+                    typename traits::BlasSizeTypeTrait<ddot_type>::type>(
+                        weight_.size()), &weight_[0], 1, &buffer_[0], 1));
     }
 
     /// \brief Get the logarithm nomralizing constants ratio estimates

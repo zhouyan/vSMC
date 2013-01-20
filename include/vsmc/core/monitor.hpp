@@ -239,11 +239,11 @@ class Monitor
                 buffer_.resize(particle.size() * dim_);
                 eval_(iter, dim_, particle, &buffer_[0]);
                 particle.read_weight(&weight_[0]);
-                dgemv_(RowMajor, Trans,
-                        static_cast<typename dgemv_type::size_type>(
-                            particle.size()),
-                        static_cast<typename dgemv_type::size_type>(dim_),
-                        1, &buffer_[0], dim_, &weight_[0], 1, 0,
+                dgemv_(RowMajor, Trans, static_cast<
+                        typename traits::BlasSizeTypeTrait<dgemv_type>::type>(
+                            particle.size()), static_cast<
+                        typename traits::BlasSizeTypeTrait<dgemv_type>::type>(
+                            dim_), 1, &buffer_[0], dim_, &weight_[0], 1, 0,
                         &result_[0], 1);
                 break;
             case Simple :

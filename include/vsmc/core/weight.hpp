@@ -283,7 +283,8 @@ class WeightSet
         for (size_type i = 0; i != size_; ++i)
             weight_[i] *= coeff;
 
-        ess_ = 1 / ddot_(static_cast<typename ddot_type::size_type>(size_),
+        ess_ = 1 / ddot_(static_cast<
+                typename traits::BlasSizeTypeTrait<ddot_type>::type>(size_),
                 &weight_[0], 1, &weight_[0], 1);
     }
 
@@ -300,7 +301,7 @@ class WeightSet
         for (size_type i = 0; i != size_; ++i)
             log_weight_[i] = log(weight_[i]);
 
-        ess_ = 1 / ddot_(static_cast<typename ddot_type::size_type>(size_),
+        ess_ = 1 / ddot_(static_cast<ddot_size_type>(size_),
                 &weight_[0], 1, &weight_[0], 1);
     }
 }; // class WeightSet
