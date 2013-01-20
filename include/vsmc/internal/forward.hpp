@@ -22,8 +22,9 @@ class Seed;
 
 namespace cxxblas {
 
-template <typename T = NullType> class DDot;
-template <typename T = NullType> class DGemv;
+class DDot;
+class DScal;
+class DGemv;
 
 } // namespace vsmc::cxxblas
 

@@ -122,10 +122,10 @@ namespace vsmc { namespace traits {                                          \
 } }
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(BlasSizeType, size_type, int)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDotType, ddot_type, cxxblas::DDot<T>)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGemvType, dgemv_type, cxxblas::DGemv<T>)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDotType, ddot_type, cxxblas::DDot)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DScalType, dscal_type, cxxblas::DScal)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGemvType, dgemv_type, cxxblas::DGemv)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type)
 

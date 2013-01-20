@@ -155,7 +155,7 @@ class Path
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());
         integrand_.push_back(ddot_(static_cast<
-                    typename traits::BlasSizeTypeTrait<ddot_type>::type>(
+                    typename traits::SizeTypeTrait<ddot_type>::type>(
                         weight_.size()), &weight_[0], 1, &buffer_[0], 1));
     }
 

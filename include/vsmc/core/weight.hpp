@@ -4,6 +4,10 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cxxblas.hpp>
 
+#if VSMC_USE_MKL
+#include <mkl_vml.h>
+#endif
+
 namespace vsmc {
 
 /// \brief Weight set class
@@ -15,6 +19,7 @@ class WeightSet
 
     typedef typename traits::SizeTypeTrait<T>::type size_type;
     typedef typename traits::DDotTypeTrait<T>::type ddot_type;
+    typedef typename traits::DScalTypeTrait<T>::type dscal_type;
 
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
@@ -264,6 +269,7 @@ class WeightSet
     std::vector<double> weight_;
     std::vector<double> log_weight_;
     ddot_type ddot_;
+    dscal_type dscal_;
 
     void log_weight2weight ()
     {
@@ -275,16 +281,20 @@ class WeightSet
         for (size_type i = 0; i != size_; ++i)
             log_weight_[i] -= max_weight;
 
+#if VSMC_USE_MKL
+        vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
+#else
         for (size_type i = 0; i != size_; ++i)
             weight_[i] = exp(log_weight_[i]);
+#endif
         double coeff = std::accumulate(weight_.begin(), weight_.end(),
                 static_cast<double>(0));
         coeff = 1 / coeff;
-        for (size_type i = 0; i != size_; ++i)
-            weight_[i] *= coeff;
-
+        dscal_(static_cast<
+                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
+                coeff, &weight_[0], 1);
         ess_ = 1 / ddot_(static_cast<
-                typename traits::BlasSizeTypeTrait<ddot_type>::type>(size_),
+                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
                 &weight_[0], 1, &weight_[0], 1);
     }
 
@@ -295,15 +305,18 @@ class WeightSet
         double coeff = std::accumulate(weight_.begin(), weight_.end(),
                 static_cast<double>(0));
         coeff = 1 / coeff;
-        for (size_type i = 0; i != size_; ++i)
-            weight_[i] *= coeff;
-
+        dscal_(static_cast<
+                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
+                coeff, &weight_[0], 1);
+        ess_ = 1 / ddot_(static_cast<
+                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
+                &weight_[0], 1, &weight_[0], 1);
+#if VSMC_USE_MKL
+        vdLog(static_cast<MKL_INT>(size_), &weight_[0], &log_weight_[0]);
+#else
         for (size_type i = 0; i != size_; ++i)
             log_weight_[i] = log(weight_[i]);
-
-        ess_ = 1 / ddot_(static_cast<
-                typename traits::BlasSizeTypeTrait<ddot_type>::type>(size_),
-                &weight_[0], 1, &weight_[0], 1);
+#endif
     }
 }; // class WeightSet
 

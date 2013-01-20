@@ -7,21 +7,66 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
+#if VSMC_USE_MKL
+#include <mkl_cblas.h>
+#endif
+
 namespace vsmc { namespace cxxblas {
+
+/// \brief C++ wrapper of cblas_dscal
+class DScal
+{
+    public :
+
+#if VSMC_USE_MKL
+    typedef MKL_INT size_type;
+#else
+    typedef std::size_t size_type;
+#endif
+
+    void operator() (const size_type N,
+            const double alpha, double *X, const size_type incX) const
+    {
+#if VSMC_USE_MKL
+        ::cblas_dscal(N, alpha, X, incX);
+#else // VSMC_USE_MKL
+        if (N == 0)
+            return;
+
+        VSMC_RUNTIME_ASSERT((incX > 0),
+                "NON-POSITIVE STRIDE OF X IN **vsmc::DDot**");
+
+        if (incX == 1) {
+            for (size_type i = 0; i != N; ++i, ++X)
+                *X *= alpha;
+            return;
+        }
+
+        for (size_type i = 0; i != N; ++i, X += incX)
+            *X *= alpha;
+#endif // VSMC_USE_MKL
+    }
+}; // class DScal
 
 /// \brief C++ wrapper of cblas_ddot
 /// \ingroup CXXBLAS
-template <typename T>
 class DDot
 {
     public :
 
-    typedef typename traits::SizeTypeTrait<T>::type size_type;
+#if VSMC_USE_MKL
+    typedef MKL_INT size_type;
+#else
+    typedef std::size_t size_type;
+#endif
 
     double operator() (const size_type N,
-            const double *X, const int incX,
-            const double *Y, const int incY) const
+            const double *X, const size_type incX,
+            const double *Y, const size_type incY) const
     {
+#if VSMC_USE_MKL
+        return ::cblas_ddot(N, X, incX, Y, incY);
+#else // VSMC_USE_MKL
         if (N == 0)
             return 0;
 
@@ -56,24 +101,61 @@ class DDot
             res += (*X) * (*Y);
 
         return res;
+#endif // VSMC_USE_MKL
     }
 }; // class DDot
 
 /// \brief C++ wrapper of cblas_dgemv
 /// \ingroup CXXBLAS
-template <typename T>
 class DGemv
 {
     public :
 
-    typedef typename traits::SizeTypeTrait<T>::type size_type;
+#if VSMC_USE_MKL
+    typedef MKL_INT size_type;
+#else
+    typedef std::size_t size_type;
+#endif
 
     void operator() (MatrixOrder order, MatrixTranspose trans,
             const size_type M, const size_type N, const double alpha,
-            const double *A, const int lda,
-            const double *X, const int incX,
-            const double beta, double *Y, const int incY) const
+            const double *A, const size_type lda,
+            const double *X, const size_type incX,
+            const double beta, double *Y, const size_type incY) const
     {
+#if VSMC_USE_MKL
+        ::CBLAS_ORDER cblas_order;
+        switch (order) {
+            case vsmc::RowMajor :
+                cblas_order = ::CblasRowMajor;
+                break;
+            case vsmc::ColMajor :
+                cblas_order = ::CblasColMajor;
+                break;
+            default :
+                cblas_order = ::CblasRowMajor;
+                break;
+        }
+
+        ::CBLAS_TRANSPOSE cblas_trans;
+        switch (trans) {
+            case vsmc::NoTrans :
+                cblas_trans = ::CblasNoTrans;
+                break;
+            case vsmc::Trans :
+                cblas_trans = ::CblasTrans;
+                break;
+            case vsmc::ConjTrans :
+                cblas_trans = ::CblasConjTrans;
+                break;
+            default :
+                cblas_trans = ::CblasNoTrans;
+                break;
+        }
+
+        ::cblas_dgemv(cblas_order, cblas_trans,
+                M, N, alpha, A, lda, X, incX, beta, Y, incY);
+#else // VSMC_USE_MKL
         if (M == 0 || N == 0)
             return;
 
@@ -126,6 +208,7 @@ class DGemv
         } else {
             VSMC_RUNTIME_ASSERT(false, "INVALID INPUT TO **vsmc::DGemv**");
         }
+#endif // VSMC_USE_MKL
     }
 }; // class DGemv
 
