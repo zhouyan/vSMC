@@ -47,7 +47,7 @@ FUNCTION (COPY_FILE basename filename)
         ${PROJECT_SOURCE_DIR}/${filename} ${PROJECT_BINARY_DIR}/${filename})
     ADD_CUSTOM_TARGET (${basename}-${filename}
         DEPENDS ${PROJECT_BINARY_DIR}/${filename})
-    ADD_DEPENDENCIES (${basename} ${basename}-${filename})
+    ADD_DEPENDENCIES (${basename}-files ${basename}-${filename})
 ENDFUNCTION (COPY_FILE)
 
 FUNCTION (COPY_DIRECTORY basename dirname fullpath)
@@ -60,7 +60,7 @@ FUNCTION (COPY_DIRECTORY basename dirname fullpath)
         ${fullpath} ${PROJECT_BINARY_DIR}/${dirname})
     ADD_CUSTOM_TARGET (${basename}-${dirname}
         DEPENDS ${PROJECT_BINARY_DIR}/${dirname})
-    ADD_DEPENDENCIES (${basename} ${basename}-${dirname})
+    ADD_DEPENDENCIES (${basename}-files ${basename}-${dirname})
 ENDFUNCTION (COPY_DIRECTORY)
 
 FUNCTION (COPY_FILE_OPTIONAL basename filename)
