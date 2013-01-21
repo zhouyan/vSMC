@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/smp/base.hpp>
-#include <vsmc/utility/dispatch.hh>
+#include <vsmc/utility/dispatch.hpp>
 
 namespace vsmc {
 
