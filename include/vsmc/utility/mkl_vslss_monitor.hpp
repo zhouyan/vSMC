@@ -13,10 +13,11 @@ class MKLVSLSSMonitor
     public :
 
     typedef T value_type;
-    typedef cxx11::function<void (
-            unsigned, unsigned, const Particle<T> &, double *)> eval_type;
+    typedef cxx11::function<
+        void (std::size_t, std::size_t, const Particle<T> &, double *)>
+        eval_type;
 
-    explicit MKLVSLSSMonitor (unsigned dim, const eval_type &eval) :
+    explicit MKLVSLSSMonitor (std::size_t dim, const eval_type &eval) :
         size_(1), dim_(static_cast<MKL_INT>(dim)), eval_(eval),
         weight_(size_), buffer_(size_), task_(NULL), est_(0), monitor_dim_(0),
         dat_store_(VSL_SS_MATRIX_STORAGE_COLS),
@@ -72,7 +73,7 @@ class MKLVSLSSMonitor
         edit_est_();
     }
 
-    unsigned monitor_dim () const
+    std::size_t monitor_dim () const
     {
         return monitor_dim_;
     }
@@ -82,7 +83,7 @@ class MKLVSLSSMonitor
         return monitor_var_name_;
     }
 
-    void operator() (unsigned iter, unsigned dim,
+    void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
         VSMC_RUNTIME_ASSERT((dim >= monitor_dim_),
@@ -117,7 +118,7 @@ class MKLVSLSSMonitor
     std::vector<double> buffer_;
     VSLSSTaskPtr task_;
     MKL_INT64 est_;
-    unsigned monitor_dim_;
+    std::size_t monitor_dim_;
     std::vector<std::string> monitor_var_name_;
     MKL_INT dat_store_;
     MKL_INT cov_store_;

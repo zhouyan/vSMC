@@ -286,7 +286,7 @@ class Query
     template<typename OutputStream>
     static void print_equal (OutputStream &os)
     {
-        for (unsigned l = 0; l != 78; ++l)
+        for (int l = 0; l != 78; ++l)
             os << '=';
         os << '\n';
     }
@@ -294,7 +294,7 @@ class Query
     template<typename OutputStream>
     static void print_dash (OutputStream &os)
     {
-        for (unsigned l = 0; l != 78; ++l)
+        for (int l = 0; l != 78; ++l)
             os << '-';
         os << '\n';
     }

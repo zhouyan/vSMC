@@ -105,12 +105,12 @@ class ThreadInfo
         return info;
     }
 
-    unsigned thread_num () const
+    std::size_t thread_num () const
     {
         return thread_num_;
     }
 
-    void thread_num (unsigned num)
+    void thread_num (std::size_t num)
     {
         thread_num_ = num;
     }
@@ -148,10 +148,11 @@ class ThreadInfo
 
     private :
 
-    unsigned thread_num_;
+    std::size_t thread_num_;
 
-    ThreadInfo () : thread_num_(std::max VSMC_MACRO_NO_EXPANSION (1U,
-             static_cast<unsigned>(std::thread::hardware_concurrency())))
+    ThreadInfo () : thread_num_(std::max VSMC_MACRO_NO_EXPANSION (
+                static_cast<std::size_t>(1),
+                static_cast<std::size_t>(std::thread::hardware_concurrency())))
     {
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -162,7 +163,7 @@ class ThreadInfo
 #pragma warning(pop)
 #endif
         if (num_str) {
-            unsigned num = std::atoi(num_str);
+            std::size_t num = std::atoi(num_str);
             if (num)
                 thread_num_ = num;
         }
@@ -219,7 +220,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     std::vector<BlockedRange<SizeType> > range_vec(
             ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
-    unsigned i = 0;
+    std::size_t i = 0;
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator
@@ -258,7 +259,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     std::vector<BlockedRange<SizeType> > range_vec(
             ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
-    unsigned i =0;
+    std::size_t i =0;
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
     for (typename std::vector<BlockedRange<SizeType> >::iterator

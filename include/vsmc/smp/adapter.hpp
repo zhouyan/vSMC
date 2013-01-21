@@ -17,7 +17,7 @@ class InitializeAdapter :
     typedef typename traits::AdapImplTrait<
         T, Impl, vsmc::InitializeAdapter, BaseType>::type
         initialize_impl_type;
-    typedef cxx11::function<unsigned (SingleParticle<T>)>
+    typedef cxx11::function<std::size_t (SingleParticle<T>)>
         initialize_state_type;
     typedef cxx11::function<void (Particle<T> &, void *)>
         initialize_param_type;
@@ -37,7 +37,7 @@ class InitializeAdapter :
                 USE_InitializeAdapter_WITHOUT_AN_INITIAILIZE_IMPLEMENTATION);
     }
 
-    unsigned initialize_state (SingleParticle<T> part)
+    std::size_t initialize_state (SingleParticle<T> part)
     {
         return initialize_state_(part);
     }
@@ -80,11 +80,11 @@ class MoveAdapter :
     typedef typename traits::AdapImplTrait<
         T, Impl, vsmc::MoveAdapter, BaseType>::type
         move_impl_type;
-    typedef cxx11::function<unsigned (unsigned, SingleParticle<T>)>
+    typedef cxx11::function<std::size_t (std::size_t, SingleParticle<T>)>
         move_state_type;
-    typedef cxx11::function<void (unsigned, Particle<T> &)>
+    typedef cxx11::function<void (std::size_t, Particle<T> &)>
         pre_processor_type;
-    typedef cxx11::function<void (unsigned, Particle<T> &)>
+    typedef cxx11::function<void (std::size_t, Particle<T> &)>
         post_processor_type;
 
     MoveAdapter (const move_state_type &move_state,
@@ -96,18 +96,18 @@ class MoveAdapter :
                 USE_MoveAdapter_WITHOUT_A_MOVE_IMPLEMENTATION);
     }
 
-    unsigned move_state (unsigned iter, SingleParticle<T> part)
+    std::size_t move_state (std::size_t iter, SingleParticle<T> part)
     {
         return move_state_(iter, part);
     }
 
-    void pre_processor (unsigned iter, Particle<T> &particle)
+    void pre_processor (std::size_t iter, Particle<T> &particle)
     {
         if (bool(pre_processor_))
             pre_processor_(iter, particle);
     }
 
-    void post_processor (unsigned iter, Particle<T> &particle)
+    void post_processor (std::size_t iter, Particle<T> &particle)
     {
         if (bool(post_processor_))
             post_processor_(iter, particle);
@@ -133,11 +133,11 @@ class MonitorEvalAdapter :
         T, Impl, vsmc::MonitorEvalAdapter, BaseType>::type
         monitor_eval_impl_type;
     typedef cxx11::function<
-        void (unsigned, unsigned, ConstSingleParticle<T>, double *)>
+        void (std::size_t, std::size_t, ConstSingleParticle<T>, double *)>
         monitor_state_type;
-    typedef cxx11::function<void (unsigned, const Particle<T> &)>
+    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
         pre_processor_type;
-    typedef cxx11::function<void (unsigned, const Particle<T> &)>
+    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
         post_processor_type;
 
     MonitorEvalAdapter (const monitor_state_type &monitor_state,
@@ -150,19 +150,19 @@ class MonitorEvalAdapter :
                 USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION);
     }
 
-    void monitor_state (unsigned iter, unsigned dim,
+    void monitor_state (std::size_t iter, std::size_t dim,
             ConstSingleParticle<T> part, double *res)
     {
         monitor_state_(iter, dim, part, res);
     }
 
-    void pre_processor (unsigned iter, const Particle<T> &particle)
+    void pre_processor (std::size_t iter, const Particle<T> &particle)
     {
         if (bool(pre_processor_))
             pre_processor_(iter, particle);
     }
 
-    void post_processor (unsigned iter, const Particle<T> &particle)
+    void post_processor (std::size_t iter, const Particle<T> &particle)
     {
         if (bool(post_processor_))
             post_processor_(iter, particle);
@@ -187,13 +187,13 @@ class PathEvalAdapter :
     typedef typename traits::AdapImplTrait<
         T, Impl, vsmc::PathEvalAdapter, BaseType>::type
         path_eval_impl_type;
-    typedef cxx11::function<double (unsigned, ConstSingleParticle<T>)>
+    typedef cxx11::function<double (std::size_t, ConstSingleParticle<T>)>
         path_state_type;
-    typedef cxx11::function<double (unsigned, const Particle<T> &)>
+    typedef cxx11::function<double (std::size_t, const Particle<T> &)>
         path_width_type;
-    typedef cxx11::function<void (unsigned, const Particle<T> &)>
+    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
         pre_processor_type;
-    typedef cxx11::function<void (unsigned, const Particle<T> &)>
+    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
         post_processor_type;
 
     PathEvalAdapter (const path_state_type &path_state,
@@ -207,23 +207,23 @@ class PathEvalAdapter :
                 USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION);
     }
 
-    double path_state (unsigned iter, ConstSingleParticle<T> part)
+    double path_state (std::size_t iter, ConstSingleParticle<T> part)
     {
         return path_state_(iter, part);
     }
 
-    double path_width (unsigned iter, const Particle<T> &particle)
+    double path_width (std::size_t iter, const Particle<T> &particle)
     {
         return path_width_(iter, particle);
     }
 
-    void pre_processor (unsigned iter, const Particle<T> &particle)
+    void pre_processor (std::size_t iter, const Particle<T> &particle)
     {
         if (bool(pre_processor_))
             pre_processor_(iter, particle);
     }
 
-    void post_processor (unsigned iter, const Particle<T> &particle)
+    void post_processor (std::size_t iter, const Particle<T> &particle)
     {
         if (bool(post_processor_))
             post_processor_(iter, particle);

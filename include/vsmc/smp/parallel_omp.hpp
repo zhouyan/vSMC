@@ -25,7 +25,7 @@ template <typename T> struct OMPSizeTypeTrait
 
 /// \brief Particle::value_type subtype
 /// \ingroup OMP
-template <unsigned Dim, typename T>
+template <std::size_t Dim, typename T>
 class StateOMP : public StateBase<Dim, T>
 {
     public :
@@ -61,11 +61,11 @@ class InitializeOMP : public InitializeBase<T, Derived>
         typename Particle<T>::size_type>::type size_type;
     typedef T value_type;
 
-    unsigned operator() (Particle<T> &particle, void *param)
+    std::size_t operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        unsigned accept = 0;
+        std::size_t accept = 0;
 #pragma omp parallel for reduction(+ : accept) default(none) shared(particle)
         for (size_type i = 0; i < static_cast<size_type>(particle.size()); ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
@@ -95,10 +95,10 @@ class MoveOMP : public MoveBase<T, Derived>
         typename Particle<T>::size_type>::type size_type;
     typedef T value_type;
 
-    unsigned operator() (unsigned iter, Particle<T> &particle)
+    std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
-        unsigned accept = 0;
+        std::size_t accept = 0;
 #pragma omp parallel for reduction(+ : accept) default(none) \
         shared(particle, iter)
         for (size_type i = 0; i < static_cast<size_type>(particle.size()); ++i)
@@ -129,8 +129,8 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
         typename Particle<T>::size_type>::type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
-            double *res)
+    void operator() (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(none) shared(particle, iter, dim, res)
@@ -161,7 +161,8 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
         typename Particle<T>::size_type>::type size_type;
     typedef T value_type;
 
-    double operator() (unsigned iter, const Particle<T> &particle, double *res)
+    double operator() (std::size_t iter, const Particle<T> &particle,
+            double *res)
     {
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(none) shared(particle, iter, res)

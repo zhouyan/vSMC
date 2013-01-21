@@ -11,12 +11,12 @@
 
 namespace vsmc {
 
-template <unsigned Dim>
+template <std::size_t Dim>
 class StateBaseDim
 {
     public :
 
-    static VSMC_CONSTEXPR unsigned dim () {return Dim;}
+    static VSMC_CONSTEXPR std::size_t dim () {return Dim;}
 };
 
 template <>
@@ -26,18 +26,18 @@ class StateBaseDim<Dynamic>
 
     StateBaseDim () : dim_(Dynamic) {}
 
-    unsigned dim () const {return dim_;}
+    std::size_t dim () const {return dim_;}
 
-    void resize_dim (unsigned dim) {dim_ = dim;}
+    void resize_dim (std::size_t dim) {dim_ = dim;}
 
     private :
 
-    unsigned dim_;
+    std::size_t dim_;
 };
 
 /// \brief Particle::value_type subtype
 /// \ingroup Base
-template <unsigned Dim, typename T>
+template <std::size_t Dim, typename T>
 class StateBase : public StateBaseDim<Dim>
 {
     public :
@@ -55,7 +55,7 @@ class StateBase : public StateBaseDim<Dim>
             this->copy_particle(copy_from[to], to);
     }
 
-    void resize_dim (unsigned dim)
+    void resize_dim (std::size_t dim)
     {
         VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT);
@@ -69,12 +69,12 @@ class StateBase : public StateBaseDim<Dim>
         return size_;
     }
 
-    state_type &state (size_type id, unsigned pos)
+    state_type &state (size_type id, std::size_t pos)
     {
         return state_[id * this->dim() + pos];
     }
 
-    const state_type &state (size_type id, unsigned pos) const
+    const state_type &state (size_type id, std::size_t pos) const
     {
         return state_[id * this->dim() + pos];
     }
@@ -90,7 +90,7 @@ class StateBase : public StateBaseDim<Dim>
     }
 
     template <typename OutputIter>
-    OutputIter read_state (unsigned pos, OutputIter first) const
+    OutputIter read_state (std::size_t pos, OutputIter first) const
     {
         const T *siter = &state_[pos];
         for (size_type i = 0; i != size_; ++i, ++first, siter += this->dim())
@@ -102,7 +102,7 @@ class StateBase : public StateBaseDim<Dim>
     template <typename OutputIter>
     void read_state_matrix (OutputIter *first) const
     {
-        for (unsigned d = 0; d != this->dim(); ++d)
+        for (std::size_t d = 0; d != this->dim(); ++d)
             read_state(d, first[d]);
     }
 
@@ -114,7 +114,7 @@ class StateBase : public StateBaseDim<Dim>
                 "MatrixOrder");
 
         if (order == ColMajor)
-            for (unsigned d = 0; d != this->dim(); ++d)
+            for (std::size_t d = 0; d != this->dim(); ++d)
                 first = read_state(d, first);
 
         if (order == RowMajor)
@@ -124,12 +124,12 @@ class StateBase : public StateBaseDim<Dim>
     }
 
     template <typename OutputStream>
-    OutputStream &print (OutputStream &os, unsigned iter = 0,
+    OutputStream &print (OutputStream &os, std::size_t iter = 0,
             char sepchar = ' ', char eolchar = '\n') const
     {
         for (size_type i = 0; i != size_; ++i) {
             os << iter << sepchar;
-            for (unsigned d = 0; d != this->dim() - 1; ++d)
+            for (std::size_t d = 0; d != this->dim() - 1; ++d)
                 os << state(i, d) << sepchar;
             os << state(i, this->dim() - 1) << eolchar;
         }
@@ -164,7 +164,7 @@ class InitializeBase
         (const InitializeBase<T, Derived> &) {return *this;}
     VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~InitializeBase () {}
 
-    unsigned initialize_state (SingleParticle<T> sp)
+    std::size_t initialize_state (SingleParticle<T> sp)
     {
         return initialize_state_dispatch(sp, &Derived::initialize_state);
     }
@@ -187,8 +187,8 @@ class InitializeBase
     private :
 
     template <typename D>
-    unsigned initialize_state_dispatch (SingleParticle<T> sp,
-            unsigned (D::*) (SingleParticle<T>))
+    std::size_t initialize_state_dispatch (SingleParticle<T> sp,
+            std::size_t (D::*) (SingleParticle<T>))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(InitializeBase);
         return static_cast<Derived *>(this)->initialize_state(sp);
@@ -218,8 +218,8 @@ class InitializeBase
         static_cast<Derived *>(this)->post_processor(particle);
     }
 
-    unsigned initialize_state_dispatch (SingleParticle<T> sp,
-            unsigned (*) (SingleParticle<T>))
+    std::size_t initialize_state_dispatch (SingleParticle<T> sp,
+            std::size_t (*) (SingleParticle<T>))
     {
         return Derived::initialize_state(sp);
     }
@@ -242,8 +242,8 @@ class InitializeBase
         Derived::post_processor(particle);
     }
 
-    unsigned initialize_state_dispatch (SingleParticle<T>,
-            unsigned (InitializeBase::*) (SingleParticle<T>)) {return 0;}
+    std::size_t initialize_state_dispatch (SingleParticle<T>,
+            std::size_t (InitializeBase::*) (SingleParticle<T>)) {return 0;}
 
     void initialize_param_dispatch (Particle<T> &, void *,
             void (InitializeBase::*) (Particle<T> &, void *)) {}
@@ -267,7 +267,7 @@ class InitializeBase<T, VBase>
     InitializeBase<T, VBase> &operator=
         (const InitializeBase<T, VBase> &) {return *this;}
     virtual ~InitializeBase () {}
-    virtual unsigned initialize_state (SingleParticle<T>) {return 0;}
+    virtual std::size_t initialize_state (SingleParticle<T>) {return 0;}
     virtual void initialize_param (Particle<T> &, void *) {}
     virtual void pre_processor (Particle<T> &) {}
     virtual void post_processor (Particle<T> &) {}
@@ -286,17 +286,17 @@ class MoveBase
         (const MoveBase<T, Derived> &) {return *this;}
     VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MoveBase () {}
 
-    unsigned move_state (unsigned iter, SingleParticle<T> sp)
+    std::size_t move_state (std::size_t iter, SingleParticle<T> sp)
     {
         return move_state_dispatch(iter, sp, &Derived::move_state);
     }
 
-    void pre_processor (unsigned iter, Particle<T> &particle)
+    void pre_processor (std::size_t iter, Particle<T> &particle)
     {
         pre_processor_dispatch(iter, particle, &Derived::pre_processor);
     }
 
-    void post_processor (unsigned iter, Particle<T> &particle)
+    void post_processor (std::size_t iter, Particle<T> &particle)
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
@@ -304,55 +304,56 @@ class MoveBase
     private :
 
     template <typename D>
-    unsigned move_state_dispatch (unsigned iter, SingleParticle<T> sp,
-            unsigned (D::*) (unsigned, SingleParticle<T>))
+    std::size_t move_state_dispatch (std::size_t iter, SingleParticle<T> sp,
+            std::size_t (D::*) (std::size_t, SingleParticle<T>))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(MoveBase);
         return static_cast<Derived *>(this)->move_state(iter, sp);
     }
 
     template <typename D>
-    void pre_processor_dispatch (unsigned iter, Particle<T> &particle,
-            void (D::*) (unsigned, Particle<T> &))
+    void pre_processor_dispatch (std::size_t iter, Particle<T> &particle,
+            void (D::*) (std::size_t, Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(MoveBase);
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
     template <typename D>
-    void post_processor_dispatch (unsigned iter, Particle<T> &particle,
-            void (D::*) (unsigned, Particle<T> &))
+    void post_processor_dispatch (std::size_t iter, Particle<T> &particle,
+            void (D::*) (std::size_t, Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(MoveBase);
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
-    unsigned move_state_dispatch (unsigned iter, SingleParticle<T> sp,
-            unsigned (*) (unsigned, SingleParticle<T>))
+    std::size_t move_state_dispatch (std::size_t iter, SingleParticle<T> sp,
+            std::size_t (*) (std::size_t, SingleParticle<T>))
     {
         return Derived::move_state(iter, sp);
     }
 
-    void pre_processor_dispatch (unsigned iter, Particle<T> &particle,
-            void (*) (unsigned, Particle<T> &))
+    void pre_processor_dispatch (std::size_t iter, Particle<T> &particle,
+            void (*) (std::size_t, Particle<T> &))
     {
         Derived::pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch (unsigned iter, Particle<T> &particle,
-            void (*) (unsigned, Particle<T> &))
+    void post_processor_dispatch (std::size_t iter, Particle<T> &particle,
+            void (*) (std::size_t, Particle<T> &))
     {
         Derived::post_processor(iter, particle);
     }
 
-    unsigned move_state_dispatch (unsigned, SingleParticle<T>,
-            unsigned (MoveBase::*) (unsigned, SingleParticle<T>)) {return 0;}
+    std::size_t move_state_dispatch (std::size_t, SingleParticle<T>,
+            std::size_t (MoveBase::*) (std::size_t, SingleParticle<T>))
+    {return 0;}
 
-    void pre_processor_dispatch (unsigned, Particle<T> &,
-            void (MoveBase::*) (unsigned, Particle<T> &)) {}
+    void pre_processor_dispatch (std::size_t, Particle<T> &,
+            void (MoveBase::*) (std::size_t, Particle<T> &)) {}
 
-    void post_processor_dispatch (unsigned, Particle<T> &,
-            void (MoveBase::*) (unsigned, Particle<T> &)) {}
+    void post_processor_dispatch (std::size_t, Particle<T> &,
+            void (MoveBase::*) (std::size_t, Particle<T> &)) {}
 }; // class MoveBase
 
 /// \brief Base Move class with virtual interface
@@ -367,9 +368,9 @@ class MoveBase<T, VBase>
     MoveBase<T, VBase> &operator=
         (const MoveBase<T, VBase> &) {return *this;}
     virtual ~MoveBase () {}
-    virtual unsigned move_state (unsigned, SingleParticle<T>) {return 0;}
-    virtual void pre_processor (unsigned, Particle<T> &) {}
-    virtual void post_processor (unsigned, Particle<T> &) {}
+    virtual std::size_t move_state (std::size_t, SingleParticle<T>) {return 0;}
+    virtual void pre_processor (std::size_t, Particle<T> &) {}
+    virtual void post_processor (std::size_t, Particle<T> &) {}
 }; // class MoveBase<T, VBase>
 
 /// \brief Base Monitor evaluation class
@@ -385,18 +386,18 @@ class MonitorEvalBase
         (const MonitorEvalBase<T, Derived> &) {return *this;}
     VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MonitorEvalBase () {}
 
-    void monitor_state (unsigned iter, unsigned dim,
+    void monitor_state (std::size_t iter, std::size_t dim,
             ConstSingleParticle<T> csp, double *res)
     {
         monitor_state_dispatch(iter, dim, csp, res, &Derived::monitor_state);
     }
 
-    void pre_processor (unsigned iter, const Particle<T> &particle)
+    void pre_processor (std::size_t iter, const Particle<T> &particle)
     {
         pre_processor_dispatch(iter, particle, &Derived::pre_processor);
     }
 
-    void post_processor (unsigned iter, const Particle<T> &particle)
+    void post_processor (std::size_t iter, const Particle<T> &particle)
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
@@ -404,59 +405,63 @@ class MonitorEvalBase
     private :
 
     template <typename D>
-    void monitor_state_dispatch (unsigned iter, unsigned dim,
+    void monitor_state_dispatch (std::size_t iter, std::size_t dim,
             ConstSingleParticle<T> csp, double *res,
-            void (D::*) (unsigned, unsigned, ConstSingleParticle<T>, double *))
+            void (D::*) (std::size_t, std::size_t, ConstSingleParticle<T>,
+                double *))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(MonitorEvalBase);
         static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);
     }
 
     template <typename D>
-    void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
-            void (D::*) (unsigned, const Particle<T> &))
+    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+            void (D::*) (std::size_t, const Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(MonitorEvalBase);
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
     template <typename D>
-    void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
-            void (D::*) (unsigned, const Particle<T> &))
+    void post_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
+            void (D::*) (std::size_t, const Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(MonitorEvalBase);
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
-    void monitor_state_dispatch (unsigned iter, unsigned dim,
+    void monitor_state_dispatch (std::size_t iter, std::size_t dim,
             ConstSingleParticle<T> csp, double *res,
-            void (*) (unsigned, unsigned, ConstSingleParticle<T>, double *))
+            void (*) (std::size_t, std::size_t, ConstSingleParticle<T>,
+                double *))
     {
         Derived::monitor_state(iter, dim, csp, res);
     }
 
-    void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
-            void (*) (unsigned, const Particle<T> &))
+    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+            void (*) (std::size_t, const Particle<T> &))
     {
         Derived::pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
-            void (*) (unsigned, const Particle<T> &))
+    void post_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
+            void (*) (std::size_t, const Particle<T> &))
     {
         Derived::post_processor(iter, particle);
     }
 
-    void monitor_state_dispatch (unsigned, unsigned dim,
+    void monitor_state_dispatch (std::size_t, std::size_t dim,
             ConstSingleParticle<T>, double *res,
             void (MonitorEvalBase::*)
-            (unsigned, unsigned, ConstSingleParticle<T>, double *)) {}
+            (std::size_t, std::size_t, ConstSingleParticle<T>, double *)) {}
 
-    void pre_processor_dispatch (unsigned, const Particle<T> &,
-            void (MonitorEvalBase::*) (unsigned, const Particle<T> &)) {}
+    void pre_processor_dispatch (std::size_t, const Particle<T> &,
+            void (MonitorEvalBase::*) (std::size_t, const Particle<T> &)) {}
 
-    void post_processor_dispatch (unsigned, const Particle<T> &,
-            void (MonitorEvalBase::*) (unsigned, const Particle<T> &)) {}
+    void post_processor_dispatch (std::size_t, const Particle<T> &,
+            void (MonitorEvalBase::*) (std::size_t, const Particle<T> &)) {}
 }; // class MonitorBase
 
 /// \brief Base Monitor evaluation class with virtual interface
@@ -471,10 +476,10 @@ class MonitorEvalBase<T, VBase>
     MonitorEvalBase<T, VBase> &operator=
         (const MonitorEvalBase<T, VBase> &) {return *this;}
     virtual ~MonitorEvalBase () {}
-    virtual void monitor_state (unsigned, unsigned, ConstSingleParticle<T>,
-            double *) {}
-    virtual void pre_processor (unsigned, const Particle<T> &) {}
-    virtual void post_processor (unsigned, const Particle<T> &) {}
+    virtual void monitor_state (std::size_t, std::size_t,
+            ConstSingleParticle<T>, double *) {}
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
 }; // class MonitorEvalBase<T, VBase>
 
 /// \brief Base Path evaluation class
@@ -490,22 +495,22 @@ class PathEvalBase
         (const PathEvalBase<T, Derived> &) {return *this;}
     VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~PathEvalBase () {}
 
-    double path_state (unsigned iter, ConstSingleParticle<T> csp)
+    double path_state (std::size_t iter, ConstSingleParticle<T> csp)
     {
         return path_state_dispatch(iter, csp, &Derived::path_state);
     }
 
-    double path_width (unsigned iter, const Particle<T> &particle)
+    double path_width (std::size_t iter, const Particle<T> &particle)
     {
         return path_width_dispatch(iter, particle, &Derived::path_width);
     }
 
-    void pre_processor (unsigned iter, const Particle<T> &particle)
+    void pre_processor (std::size_t iter, const Particle<T> &particle)
     {
         pre_processor_dispatch(iter, particle, &Derived::pre_processor);
     }
 
-    void post_processor (unsigned iter, const Particle<T> &particle)
+    void post_processor (std::size_t iter, const Particle<T> &particle)
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
@@ -513,74 +518,76 @@ class PathEvalBase
     private :
 
     template <typename D>
-    double path_state_dispatch (unsigned iter, ConstSingleParticle<T> csp,
-            double (D::*) (unsigned, ConstSingleParticle<T>))
+    double path_state_dispatch (std::size_t iter, ConstSingleParticle<T> csp,
+            double (D::*) (std::size_t, ConstSingleParticle<T>))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
         return static_cast<Derived *>(this)->path_state(iter, csp);
     }
 
     template <typename D>
-    double path_width_dispatch (unsigned iter, const Particle<T> &particle,
-            double (D::*) (unsigned, const Particle<T> &))
+    double path_width_dispatch (std::size_t iter, const Particle<T> &particle,
+            double (D::*) (std::size_t, const Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
         return static_cast<Derived *>(this)->path_width(iter, particle);
     }
 
     template <typename D>
-    void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
-            void (D::*) (unsigned, const Particle<T> &))
+    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+            void (D::*) (std::size_t, const Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
     template <typename D>
-    void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
-            void (D::*) (unsigned, const Particle<T> &))
+    void post_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
+            void (D::*) (std::size_t, const Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
-    double path_state_dispatch (unsigned iter, ConstSingleParticle<T> csp,
-            double (*) (unsigned, ConstSingleParticle<T>))
+    double path_state_dispatch (std::size_t iter, ConstSingleParticle<T> csp,
+            double (*) (std::size_t, ConstSingleParticle<T>))
     {
         return Derived::path_state(iter, csp);
     }
 
-    double path_width_dispatch (unsigned iter, const Particle<T> &particle,
-            double (*) (unsigned, const Particle<T> &))
+    double path_width_dispatch (std::size_t iter, const Particle<T> &particle,
+            double (*) (std::size_t, const Particle<T> &))
     {
         return Derived::path_width(iter, particle);
     }
 
-    void pre_processor_dispatch (unsigned iter, const Particle<T> &particle,
-            void (*) (unsigned, const Particle<T> &))
+    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+            void (*) (std::size_t, const Particle<T> &))
     {
         Derived::pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch (unsigned iter, const Particle<T> &particle,
-            void (*) (unsigned, const Particle<T> &))
+    void post_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
+            void (*) (std::size_t, const Particle<T> &))
     {
         Derived::post_processor(iter, particle);
     }
 
-    double path_state_dispatch (unsigned, ConstSingleParticle<T>,
-            double (PathEvalBase::*) (unsigned, ConstSingleParticle<T>))
+    double path_state_dispatch (std::size_t, ConstSingleParticle<T>,
+            double (PathEvalBase::*) (std::size_t, ConstSingleParticle<T>))
     {return 0;}
 
-    double path_width_dispatch (unsigned, const Particle<T> &,
-            double (PathEvalBase::*) (unsigned, const Particle<T> &))
+    double path_width_dispatch (std::size_t, const Particle<T> &,
+            double (PathEvalBase::*) (std::size_t, const Particle<T> &))
     {return 0;}
 
-    void pre_processor_dispatch (unsigned, const Particle<T> &,
-            void (PathEvalBase::*) (unsigned, const Particle<T> &)) {}
+    void pre_processor_dispatch (std::size_t, const Particle<T> &,
+            void (PathEvalBase::*) (std::size_t, const Particle<T> &)) {}
 
-    void post_processor_dispatch (unsigned, const Particle<T> &,
-            void (PathEvalBase::*) (unsigned, const Particle<T> &)) {}
+    void post_processor_dispatch (std::size_t, const Particle<T> &,
+            void (PathEvalBase::*) (std::size_t, const Particle<T> &)) {}
 }; // class PathEvalBase
 
 /// \brief Base Path evaluation class with virtual interface
@@ -595,10 +602,10 @@ class PathEvalBase<T, VBase>
     PathEvalBase<T, VBase> &operator=
         (const PathEvalBase<T, VBase> &) {return *this;}
     virtual ~PathEvalBase () {}
-    virtual double path_state (unsigned, ConstSingleParticle<T>) {return 0;}
-    virtual double path_width (unsigned, const Particle<T> &) {return 0;}
-    virtual void pre_processor (unsigned, const Particle<T> &) {}
-    virtual void post_processor (unsigned, const Particle<T> &) {}
+    virtual double path_state (std::size_t, ConstSingleParticle<T>) {return 0;}
+    virtual double path_width (std::size_t, const Particle<T> &) {return 0;}
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
 }; // class PathEval<T, VBase>
 
 } // namespace vsmc

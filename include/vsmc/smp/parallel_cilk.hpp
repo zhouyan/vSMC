@@ -10,7 +10,7 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup CILK
-template <unsigned Dim, typename T>
+template <std::size_t Dim, typename T>
 class StateCILK : public StateBase<Dim, T>
 {
     public :
@@ -43,11 +43,11 @@ class InitializeCILK : public InitializeBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (Particle<T> &particle, void *param)
+    std::size_t operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        cilk::reducer_opadd<unsigned> accept;
+        cilk::reducer_opadd<std::size_t> accept;
         cilk_for (size_type i = 0; i != particle.size(); ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
         this->post_processor(particle);
@@ -75,10 +75,10 @@ class MoveCILK : public MoveBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (unsigned iter, Particle<T> &particle)
+    std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
-        cilk::reducer_opadd<unsigned> accept;
+        cilk::reducer_opadd<std::size_t> accept;
         cilk_for (size_type i = 0; i != particle.size(); ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         this->post_processor(iter, particle);
@@ -106,8 +106,8 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
-            double *res)
+    void operator() (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
         cilk_for (size_type i = 0; i != particle.size(); ++i) {
@@ -137,7 +137,8 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    double operator() (unsigned iter, const Particle<T> &particle, double *res)
+    double operator() (std::size_t iter, const Particle<T> &particle,
+            double *res)
     {
         this->pre_processor(iter, particle);
         cilk_for (size_type i = 0; i != particle.size(); ++i) {

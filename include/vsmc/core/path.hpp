@@ -16,7 +16,7 @@ class Path
     typedef T value_type;
     typedef typename traits::DDotTypeTrait<T>::type ddot_type;
     typedef cxx11::function<double (
-            unsigned, const Particle<T> &, double *)> eval_type;
+            std::size_t, const Particle<T> &, double *)> eval_type;
 
     explicit Path (const eval_type &eval) : eval_(eval) {}
 
@@ -43,9 +43,9 @@ class Path
     /// \note This is not necessarily the same as Sampler<T>::iter_size. For
     /// example, a path sampling monitor can be set only after a certain time
     /// point of the sampler's iterations.
-    unsigned iter_size () const
+    std::size_t iter_size () const
     {
-        return static_cast<unsigned>(index_.size());
+        return index_.size();
     }
 
     /// \brief Whether the evaluation object is valid
@@ -63,7 +63,7 @@ class Path
     /// sampling monitor is set before the sampler's initialization and
     /// continued to be evaluated during the iterations, then iter(iter) shall
     /// just be `iter`.
-    unsigned index (unsigned iter) const
+    std::size_t index (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Path::index** WITH AN INVALID "
@@ -73,7 +73,7 @@ class Path
     }
 
     /// \brief Get the path sampling integrand of a given path iteration
-    double integrand (unsigned iter) const
+    double integrand (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Path::integrand** WITH AN INVALID "
@@ -83,7 +83,7 @@ class Path
     }
 
     /// \brief Get the path sampling width of a given path iteration
-    double width (unsigned iter) const
+    double width (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Path::width** WITH AN INVALID "
@@ -96,7 +96,7 @@ class Path
     ///
     /// \details
     /// This shall be sum of width's from zero up to the given iteration
-    double grid (unsigned iter) const
+    double grid (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Path::grid** WITH AN INVALID "
@@ -140,7 +140,7 @@ class Path
     }
 
     /// Perform the evaluation for a given iteration and a Particle<T> object
-    void eval (unsigned iter, const Particle<T> &particle)
+    void eval (std::size_t iter, const Particle<T> &particle)
     {
         VSMC_RUNTIME_ASSERT((bool(eval_)),
                 ("CALL **Path::eval** WITH AN INVALID "
@@ -163,7 +163,7 @@ class Path
     double zconst () const
     {
         double sum = 0;
-        for (unsigned i = 1; i != iter_size(); ++i)
+        for (std::size_t i = 1; i != iter_size(); ++i)
             sum += 0.5 * width_[i] * (integrand_[i-1] + integrand_[i]);
 
         return sum;
@@ -183,7 +183,7 @@ class Path
     std::vector<double> buffer_;
     std::vector<double> weight_;
     eval_type eval_;
-    std::vector<unsigned> index_;
+    std::vector<std::size_t> index_;
     std::vector<double> integrand_;
     std::vector<double> width_;
     std::vector<double> grid_;

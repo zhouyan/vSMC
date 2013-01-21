@@ -31,7 +31,7 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 
 /// \brief Particle::value_type subtype
 /// \ingroup CL
-template <unsigned Dim, typename T, typename CLManagerID>
+template <std::size_t Dim, typename T, typename CLManagerID>
 class StateCL
 {
     public :
@@ -84,12 +84,12 @@ class StateCL
         return *this;
     }
 
-    unsigned dim () const
+    std::size_t dim () const
     {
         return dim_;
     }
 
-    void resize_dim (unsigned dim)
+    void resize_dim (std::size_t dim)
     {
         VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
@@ -230,7 +230,7 @@ class StateCL
 
     private :
 
-    unsigned dim_;
+    std::size_t dim_;
     size_type size_;
 
     cl_manager_type &cl_manager_;
@@ -258,7 +258,7 @@ class InitializeCL : public opencl::LocalSize
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (Particle<T> &particle, void *param)
+    std::size_t operator() (Particle<T> &particle, void *param)
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, InitializeCL);
 
@@ -353,7 +353,7 @@ class MoveCL : public opencl::LocalSize
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (unsigned iter, Particle<T> &particle)
+    std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, MoveCL);
 
@@ -376,9 +376,9 @@ class MoveCL : public opencl::LocalSize
                 static_cast<cl_uint>(0));
     }
 
-    virtual void move_state (unsigned, std::string &) = 0;
-    virtual void pre_processor (unsigned, Particle<T> &) {}
-    virtual void post_processor (unsigned, Particle<T> &) {}
+    virtual void move_state (std::size_t, std::string &) = 0;
+    virtual void pre_processor (std::size_t, Particle<T> &) {}
+    virtual void post_processor (std::size_t, Particle<T> &) {}
 
     cl::Kernel &kernel ()
     {
@@ -390,7 +390,7 @@ class MoveCL : public opencl::LocalSize
         return kernel_;
     }
 
-    void set_kernel (unsigned iter, const Particle<T> &particle)
+    void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
         move_state(iter, kname);
@@ -447,8 +447,8 @@ class MonitorEvalCL : public opencl::LocalSize
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
-            double *res)
+    void operator() (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle, double *res)
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, MonitorEvalCL);
 
@@ -469,9 +469,9 @@ class MonitorEvalCL : public opencl::LocalSize
         post_processor(iter, particle);
     }
 
-    virtual void monitor_state (unsigned, std::string &) = 0;
-    virtual void pre_processor (unsigned, const Particle<T> &) {}
-    virtual void post_processor (unsigned, const Particle<T> &) {}
+    virtual void monitor_state (std::size_t, std::string &) = 0;
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
 
     cl::Kernel kernel ()
     {
@@ -483,7 +483,8 @@ class MonitorEvalCL : public opencl::LocalSize
         return kernel_;
     }
 
-    void set_kernel (unsigned iter, unsigned dim, const Particle<T> &particle)
+    void set_kernel (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle)
     {
         std::string kname;
         monitor_state(iter, kname);
@@ -544,7 +545,7 @@ class PathEvalCL : public opencl::LocalSize
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    double operator() (unsigned iter, const Particle<T> &particle,
+    double operator() (std::size_t iter, const Particle<T> &particle,
         double *res)
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, PathEvalCL);
@@ -567,10 +568,10 @@ class PathEvalCL : public opencl::LocalSize
         return this->path_width(iter, particle);
     }
 
-    virtual void path_state (unsigned, std::string &) = 0;
-    virtual double path_width (unsigned, const Particle<T> &) = 0;
-    virtual void pre_processor (unsigned, const Particle<T> &) {}
-    virtual void post_processor (unsigned, const Particle<T> &) {}
+    virtual void path_state (std::size_t, std::string &) = 0;
+    virtual double path_width (std::size_t, const Particle<T> &) = 0;
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
 
     cl::Kernel kernel ()
     {
@@ -582,7 +583,7 @@ class PathEvalCL : public opencl::LocalSize
         return kernel_;
     }
 
-    void set_kernel (unsigned iter, const Particle<T> &particle)
+    void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
         path_state(iter, kname);

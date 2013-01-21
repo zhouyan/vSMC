@@ -15,7 +15,7 @@ namespace ppl = ::Concurrency;
 
 /// \brief Particle::value_type subtype
 /// \ingroup PPL
-template <unsigned Dim, typename T>
+template <std::size_t Dim, typename T>
 class StatePPL : public StateBase<Dim, T>
 {
     public :
@@ -69,7 +69,7 @@ class InitializePPL : public InitializeBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (Particle<T> &particle, void *param)
+    std::size_t operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -79,7 +79,7 @@ class InitializePPL : public InitializeBase<T, Derived>
         this->post_processor(particle);
 
         return std::accumulate(accept_.begin(), accept_.end(),
-                static_cast<unsigned>(0));
+                static_cast<std::size_t>(0));
     }
 
     protected :
@@ -92,14 +92,14 @@ class InitializePPL : public InitializeBase<T, Derived>
 
     private :
 
-    std::vector<unsigned> accept_;
+    std::vector<std::size_t> accept_;
 
     class work_
     {
         public :
 
         work_ (InitializePPL<T, Derived> *init,
-                Particle<T> *particle, unsigned *accept) :
+                Particle<T> *particle, std::size_t *accept) :
             init_(init), particle_(particle), accept_(accept) {}
 
         void operator() (size_type i) const
@@ -112,7 +112,7 @@ class InitializePPL : public InitializeBase<T, Derived>
 
         InitializePPL<T, Derived> *const init_;
         Particle<T> *const particle_;
-        unsigned *const accept_;
+        std::size_t *const accept_;
     }; // class work_
 }; // class InitializePPL
 
@@ -127,7 +127,7 @@ class MovePPL : public MoveBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (unsigned iter, Particle<T> &particle)
+    std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
         accept_.resize(particle.size());
@@ -136,7 +136,7 @@ class MovePPL : public MoveBase<T, Derived>
         this->post_processor(iter, particle);
 
         return std::accumulate(accept_.begin(), accept_.end(),
-                static_cast<unsigned>(0));
+                static_cast<std::size_t>(0));
     }
 
     protected :
@@ -149,14 +149,14 @@ class MovePPL : public MoveBase<T, Derived>
 
     private :
 
-    std::vector<unsigned> accept_;
+    std::vector<std::size_t> accept_;
 
     class work_
     {
         public :
 
-        work_ (MovePPL<T, Derived> *move, unsigned iter,
-                Particle<T> *particle, unsigned *accept):
+        work_ (MovePPL<T, Derived> *move, std::size_t iter,
+                Particle<T> *particle, std::size_t *accept):
             move_(move), particle_(particle), accept_(accept), iter_(iter) {}
 
         void operator() (size_type i) const
@@ -169,8 +169,8 @@ class MovePPL : public MoveBase<T, Derived>
 
         MovePPL<T, Derived> *const move_;
         Particle<T> *const particle_;
-        unsigned *const accept_;
-        const unsigned iter_;
+        std::size_t *const accept_;
+        const std::size_t iter_;
     }; // class work_
 }; // class MovePPL
 
@@ -185,8 +185,8 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
-            double *res)
+    void operator() (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
         ppl::parallel_for(static_cast<size_type>(0), particle.size(),
@@ -209,7 +209,7 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
         public :
 
         work_ (MonitorEvalPPL<T, Derived> *monitor,
-                unsigned iter, unsigned dim,
+                std::size_t iter, std::size_t dim,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), particle_(particle), res_(res),
             iter_(iter), dim_(dim) {}
@@ -225,8 +225,8 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
         MonitorEvalPPL<T, Derived> *const monitor_;
         const Particle<T> *const particle_;
         double *const res_;
-        const unsigned iter_;
-        const unsigned dim_;
+        const std::size_t iter_;
+        const std::size_t dim_;
     }; // class work_
 }; // class MonitorEvalPPL
 
@@ -241,7 +241,8 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    double operator() (unsigned iter, const Particle<T> &particle, double *res)
+    double operator() (std::size_t iter, const Particle<T> &particle,
+            double *res)
     {
         this->pre_processor(iter, particle);
         ppl::parallel_for(static_cast<size_type>(0), particle.size(),
@@ -265,7 +266,7 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
     {
         public :
 
-        work_ (PathEvalPPL<T, Derived> *path, unsigned iter,
+        work_ (PathEvalPPL<T, Derived> *path, std::size_t iter,
                 const Particle<T> *particle, double *res) :
             path_(path), particle_(particle), res_(res), iter_(iter) {}
 
@@ -280,7 +281,7 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
         PathEvalPPL<T, Derived> *const path_;
         const Particle<T> *const particle_;
         double *const res_;
-        const unsigned iter_;
+        const std::size_t iter_;
     }; // class work_
 }; // PathEvalPPL
 

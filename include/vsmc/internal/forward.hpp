@@ -3,7 +3,7 @@
 
 #define VSMC_DEFINE_SMP_FORWARD(Name) \
 namespace vsmc {                                                             \
-    template <unsigned, typename> class State##Name;                         \
+    template <std::size_t, typename> class State##Name;                      \
     template <typename, typename D = VBase> class Initialize##Name;          \
     template <typename, typename D = VBase> class Move##Name;                \
     template <typename, typename D = VBase> class MonitorEval##Name;         \
@@ -85,14 +85,15 @@ template <typename> class ConstSingleParticle;
 template <typename, template <typename> class> class ParticleIterator;
 
 // OpenCL
-template <unsigned, typename, typename ID = VSMC_CL_DEFAULT_ID> class StateCL;
+template <std::size_t, typename, typename ID = VSMC_CL_DEFAULT_ID>
+class StateCL;
 template <typename> class InitializeCL;
 template <typename> class MoveCL;
 template <typename> class MonitorEvalCL;
 template <typename> class PathEvalCL;
 
 // SMP Base
-template <unsigned, typename> class StateBase;
+template <std::size_t, typename> class StateBase;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
 template <typename, typename> class MonitorEvalBase;

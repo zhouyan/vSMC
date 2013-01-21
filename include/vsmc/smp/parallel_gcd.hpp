@@ -9,7 +9,7 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup GCD
-template <unsigned Dim, typename T>
+template <std::size_t Dim, typename T>
 class StateGCD : public StateBase<Dim, T>
 {
     public :
@@ -32,7 +32,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (Particle<T> &particle, void *param)
+    std::size_t operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -44,7 +44,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
         this->post_processor(particle);
 
         return std::accumulate(accept_.begin(), accept_.end(),
-                static_cast<unsigned>(0));
+                static_cast<std::size_t>(0));
     }
 
     protected :
@@ -57,13 +57,13 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     private :
 
-    std::vector<unsigned> accept_;
+    std::vector<std::size_t> accept_;
 
     struct work_param_
     {
         InitializeGCD<T, Derived> *const dispatcher;
         Particle<T> *const particle;
-        unsigned *const accept;
+        std::size_t *const accept;
     };
 
     static void work_ (void *wp, std::size_t i)
@@ -86,7 +86,7 @@ class MoveGCD : public MoveBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (unsigned iter, Particle<T> &particle)
+    std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
         accept_.resize(particle.size());
@@ -97,7 +97,7 @@ class MoveGCD : public MoveBase<T, Derived>
         this->post_processor(iter, particle);
 
         return std::accumulate(accept_.begin(), accept_.end(),
-                static_cast<unsigned>(0));
+                static_cast<std::size_t>(0));
     }
 
     protected :
@@ -110,14 +110,14 @@ class MoveGCD : public MoveBase<T, Derived>
 
     private :
 
-    std::vector<unsigned> accept_;
+    std::vector<std::size_t> accept_;
 
     struct work_param_
     {
         MoveGCD<T, Derived> *const dispatcher;
         Particle<T> *const particle;
-        unsigned *const accept;
-        unsigned iter;
+        std::size_t *const accept;
+        std::size_t iter;
     };
 
     static void work_ (void *wp, std::size_t i)
@@ -140,8 +140,8 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
-            double *res)
+    void operator() (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter, dim};
@@ -166,8 +166,8 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         MonitorEvalGCD<T, Derived> *const dispatcher;
         const Particle<T> *const particle;
         double *const res;
-        unsigned iter;
-        unsigned dim;
+        std::size_t iter;
+        std::size_t dim;
     };
 
     static void work_ (void *wp, std::size_t i)
@@ -192,7 +192,8 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    double operator() (unsigned iter, const Particle<T> &particle, double *res)
+    double operator() (std::size_t iter, const Particle<T> &particle,
+            double *res)
     {
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter};
@@ -219,7 +220,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         PathEvalGCD<T, Derived> *const dispatcher;
         const Particle<T> *const particle;
         double *const res;
-        unsigned iter;
+        std::size_t iter;
     };
 
     static void work_ (void *wp, std::size_t i)

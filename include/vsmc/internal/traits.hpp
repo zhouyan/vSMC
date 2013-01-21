@@ -151,7 +151,7 @@ namespace vsmc { namespace traits {
 
 // IsBaseOfState
 
-template <template <unsigned, typename> class State, typename D>
+template <template <std::size_t, typename> class State, typename D>
 struct IsBaseOfStateImpl
 {
     private :
@@ -159,7 +159,7 @@ struct IsBaseOfStateImpl
     struct char2 {char c1; char c2;};
     typedef typename cxx11::remove_cv<D>::type derived_type;
 
-    template <unsigned Dim, typename T>
+    template <std::size_t Dim, typename T>
     static char test (State<Dim, T> *);
     static char2 test (...);
 
@@ -168,7 +168,7 @@ struct IsBaseOfStateImpl
    enum {value = sizeof(test(static_cast<derived_type *>(0))) == sizeof(char)};
 };
 
-template <template <unsigned, typename> class State, typename D>
+template <template <std::size_t, typename> class State, typename D>
 struct IsBaseOfState :
     public cxx11::integral_constant<bool, IsBaseOfStateImpl<State, D>::value>
 {};
@@ -183,7 +183,7 @@ struct IsBaseOfStateCLImpl
     struct char2 {char c1; char c2;};
     typedef typename cxx11::remove_cv<D>::type derived_type;
 
-    template <unsigned Dim, typename T, typename ID>
+    template <std::size_t Dim, typename T, typename ID>
     static char test (StateCL<Dim, T, ID> *);
     static char2 test (...);
 

@@ -14,8 +14,9 @@ class Monitor
     public :
 
     typedef T value_type;
-    typedef cxx11::function<void (
-            unsigned, unsigned, const Particle<T> &, double *)> eval_type;
+    typedef cxx11::function<
+        void (std::size_t, std::size_t, const Particle<T> &, double *)>
+        eval_type;
     typedef typename traits::DGemvTypeTrait<T>::type dgemv_type;
 
     /// \brief Construct a monitor with an evaluation object
@@ -28,7 +29,7 @@ class Monitor
     /// later by the Monitor object
     /// - _Simple_ The evalution object returnt the `dim` length record
     /// directly.
-    explicit Monitor (unsigned dim, const eval_type &eval,
+    explicit Monitor (std::size_t dim, const eval_type &eval,
             MonitorMethod method = ImportanceSampling) :
         dim_(dim), eval_(eval), method_(method), var_name_(dim_) {}
 
@@ -52,7 +53,7 @@ class Monitor
     }
 
     /// \brief The dimension of the monitor
-    unsigned dim () const
+    std::size_t dim () const
     {
         return dim_;
     }
@@ -62,9 +63,9 @@ class Monitor
     /// \note This is not necessarily the same as Sampler<T>::iter_size. For
     /// example, a monitor can be added only after a certain time point of the
     /// sampler's iterations.
-    unsigned iter_size () const
+    std::size_t iter_size () const
     {
-        return static_cast<unsigned>(index_.size());
+        return index_.size();
     }
 
     /// \brief Whether the evaluation object is valid
@@ -74,7 +75,7 @@ class Monitor
     }
 
     /// \brief Read and write access to the variable names of the monitor
-    std::string &var_name (unsigned id)
+    std::string &var_name (std::size_t id)
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
                 "**vsmc::Monitor::var_name** output of range id");
@@ -83,7 +84,7 @@ class Monitor
     }
 
     /// \brief Read only access to the variable names of the monitor
-    const std::string &var_name (unsigned id) const
+    const std::string &var_name (std::size_t id) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
                 "**vsmc::Monitor::var_name** output of range id");
@@ -96,10 +97,10 @@ class Monitor
     void var_name (InputIter first, InputIter last)
     {
         var_name_.clear();
-        for (unsigned i = 0; i != dim_ && first != last; ++i, ++first)
+        for (std::size_t i = 0; i != dim_ && first != last; ++i, ++first)
             var_name_.push_back(*first);
-        unsigned diff = dim_ - static_cast<unsigned>(var_name_.size());
-        for (unsigned i = 0; i != diff; ++i)
+        std::size_t diff = dim_ - var_name_.size();
+        for (std::size_t i = 0; i != diff; ++i)
             var_name_.push_back(std::string());
     }
 
@@ -112,7 +113,7 @@ class Monitor
     /// monitor is added before the sampler's initialization and continued to
     /// be evaluated during the iterations, then iter(iter) shall just be
     /// `iter`.
-    unsigned index (unsigned iter) const
+    std::size_t index (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
                 ("CALL **Monitor::index** WITH AN INVALID "
@@ -126,7 +127,7 @@ class Monitor
     ///
     /// \details
     /// For a `Dim` dimension monitor, `id` shall be 0 to `Dim` - 1
-    double record (unsigned id) const
+    double record (std::size_t id) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
                 ("CALL **Monitor::record** WITH AN INVALID "
@@ -143,7 +144,7 @@ class Monitor
     ///
     /// \details
     /// For a `Dim` dimension monitor, `id` shall be 0 to `Dim` - 1
-    double record (unsigned id, unsigned iter) const
+    double record (std::size_t id, std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
                 ("CALL **Monitor::record** WITH AN INVALID "
@@ -165,10 +166,10 @@ class Monitor
     /// \brief Read the record history for a given variable through an output
     /// iterator
     template <typename OutputIter>
-    OutputIter read_record (unsigned id, OutputIter first) const
+    OutputIter read_record (std::size_t id, OutputIter first) const
     {
         const double *riter = &record_[id];
-        for (unsigned i = 0; i != iter_size(); ++i, ++first, riter += dim_)
+        for (std::size_t i = 0; i != iter_size(); ++i, ++first, riter += dim_)
             *first = *riter;
 
         return first;
@@ -184,7 +185,7 @@ class Monitor
     template <typename OutputIter>
     void read_record_matrix (OutputIter *first) const
     {
-        for (unsigned d = 0; d != dim_; ++d)
+        for (std::size_t d = 0; d != dim_; ++d)
             read_record(d, first[d]);
     }
 
@@ -207,7 +208,7 @@ class Monitor
                 "MatrixOrder");
 
         if (order == ColMajor)
-            for (unsigned d = 0; d != dim_; ++d)
+            for (std::size_t d = 0; d != dim_; ++d)
                 first = read_record(d, first);
 
         if (order == RowMajor)
@@ -226,7 +227,7 @@ class Monitor
 
     /// \brief Perform the evaluation for a given iteration and a Particle<T>
     /// object
-    void eval (unsigned iter, const Particle<T> &particle)
+    void eval (std::size_t iter, const Particle<T> &particle)
     {
         VSMC_RUNTIME_ASSERT((bool(eval_)),
                 ("CALL **Monitor::eval** WITH AN INVALID "
@@ -252,7 +253,7 @@ class Monitor
         }
 
         index_.push_back(iter);
-        for (unsigned d = 0; d != dim_; ++d)
+        for (std::size_t d = 0; d != dim_; ++d)
             record_.push_back(result_[d]);
     }
 
@@ -265,11 +266,11 @@ class Monitor
 
     private :
 
-    unsigned dim_;
+    std::size_t dim_;
     eval_type eval_;
     MonitorMethod method_;
     std::vector<std::string> var_name_;
-    std::vector<unsigned> index_;
+    std::vector<std::size_t> index_;
     std::vector<double> record_;
     std::vector<double> result_;
     std::vector<double> weight_;

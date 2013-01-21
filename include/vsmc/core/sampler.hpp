@@ -15,9 +15,11 @@ class Sampler
 
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
-    typedef cxx11::function<unsigned (Particle<T> &, void *)> init_type;
-    typedef cxx11::function<unsigned (unsigned, Particle<T> &)> move_type;
-    typedef cxx11::function<unsigned (unsigned, Particle<T> &)> mcmc_type;
+    typedef cxx11::function<std::size_t (Particle<T> &, void *)> init_type;
+    typedef cxx11::function<std::size_t (std::size_t, Particle<T> &)>
+        move_type;
+    typedef cxx11::function<std::size_t (std::size_t, Particle<T> &)>
+        mcmc_type;
     typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
     explicit Sampler (size_type N,
@@ -43,9 +45,9 @@ class Sampler
     }
 
     /// \brief Number of iterations (including initialization)
-    unsigned iter_size () const
+    std::size_t iter_size () const
     {
-        return static_cast<unsigned>(ess_history_.size());
+        return ess_history_.size();
     }
 
     /// \brief Set resampling method by a Particle<T>::resample_op_type object
@@ -114,7 +116,7 @@ class Sampler
     }
 
     /// \brief Get ESS of a given iteration, initialization count as iter 0
-    double ess_history (unsigned iter) const
+    double ess_history (std::size_t iter) const
     {
         return ess_history_[iter];
     }
@@ -127,7 +129,7 @@ class Sampler
     }
 
     /// \brief Get resampling indicator of a given iteration
-    bool resampled_history (unsigned iter) const
+    bool resampled_history (std::size_t iter) const
     {
         return resampled_history_[iter];
     }
@@ -142,9 +144,9 @@ class Sampler
 
     /// \brief Get the number of moves (bosth move and mcmc) of a given
     /// iteration
-    unsigned move_num (unsigned iter) const
+    std::size_t move_num (std::size_t iter) const
     {
-        return static_cast<unsigned>(accept_history_[iter].size());
+        return accept_history_[iter].size();
     }
 
     /// \brief Get the accept count of a given move id and the iteration
@@ -152,7 +154,7 @@ class Sampler
     /// \details
     /// The total number of move can be get through move_num(). The first move
     /// performed (either a move or a mcmc) has `id` 0 and so on.
-    unsigned accept_history (unsigned id, unsigned iter) const
+    std::size_t accept_history (std::size_t id, std::size_t iter) const
     {
         return accept_history_[iter][id];
     }
@@ -192,9 +194,9 @@ class Sampler
     }
 
     /// \brief Check the size of the move queue
-    unsigned move_queue_size () const
+    std::size_t move_queue_size () const
     {
-        return static_cast<unsigned>(move_queue_.size());
+        return move_queue_.size();
     }
 
     /// \brief Add a new move
@@ -240,9 +242,9 @@ class Sampler
     }
 
     /// \brief Check the size of the mcmc queue
-    unsigned mcmc_queue_size () const
+    std::size_t mcmc_queue_size () const
     {
-        return static_cast<unsigned>(mcmc_queue_.size());
+        return mcmc_queue_.size();
     }
 
     /// \brief Add a new mcmc
@@ -296,7 +298,7 @@ class Sampler
         VSMC_RUNTIME_ASSERT((bool(init_)),
                 "CALL **Sampler::initialize** WITH AN INVALID "
                 "INITIALIZE FUNCTOR");
-        accept_history_.push_back(std::vector<unsigned>(1,
+        accept_history_.push_back(std::vector<std::size_t>(1,
                     init_(particle_, param)));
         do_resampling();
         do_monitoring();
@@ -311,12 +313,12 @@ class Sampler
     /// Moves performed first. Then ESS/N is compared to the threshold and
     /// possible resampling is performed. Then mcmcs are performed. Then
     /// monitors and path are computed
-    Sampler<T> &iterate (unsigned num = 1)
+    Sampler<T> &iterate (std::size_t num = 1)
     {
-        std::vector<unsigned> accept_count;
-        for (unsigned i = 0; i != num; ++i) {
+        std::vector<std::size_t> accept_count;
+        for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
-            unsigned ia = 0;
+            std::size_t ia = 0;
             accept_count.resize(move_queue_.size() + mcmc_queue_.size());
 
             for (typename std::vector<move_type>::iterator
@@ -355,7 +357,7 @@ class Sampler
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
     /// \param method The method of the monitor evaluation
-    Sampler<T> &monitor (const std::string &name, unsigned dim,
+    Sampler<T> &monitor (const std::string &name, std::size_t dim,
             const typename Monitor<T>::eval_type &eval,
             MonitorMethod method = ImportanceSampling)
     {
@@ -464,10 +466,10 @@ class Sampler
     {
         // Accept count
         std::vector<double> acc;
-        unsigned accd = 0;
-        for (unsigned iter = 0; iter != iter_size(); ++iter) {
+        std::size_t accd = 0;
+        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             accd = std::max VSMC_MACRO_NO_EXPANSION (
-                    accd, static_cast<unsigned>(accept_history_[iter].size()));
+                    accd, accept_history_[iter].size());
         }
         bool print_accept = accd > 0 && iter_size() > 0;
 
@@ -476,28 +478,28 @@ class Sampler
         std::vector<long> path_mask;
         if (print_path) {
             path_mask.resize(iter_size(), -1);
-            for (unsigned d = 0; d != path_.iter_size(); ++d)
+            for (std::size_t d = 0; d != path_.iter_size(); ++d)
                 path_mask[path_.index(d)] = d;
         }
 
         // Monitors
-        unsigned mond = 0;
-        unsigned mi = 0;
+        std::size_t mond = 0;
+        std::size_t mi = 0;
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             mond += m->second.dim();
             mi = std::max VSMC_MACRO_NO_EXPANSION (
-                    mi, static_cast<unsigned>(m->second.iter_size()));
+                    mi, m->second.iter_size());
         }
         print_monitor = print_monitor && mond > 0 && mi > 0 && iter_size() > 0;
         std::vector<std::vector<long> > monitor_mask;
         if (print_monitor) {
             monitor_mask.resize(monitor_.size());
-            unsigned mm = 0;
+            std::size_t mm = 0;
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
                 monitor_mask[mm].resize(iter_size(), -1);
-                for (unsigned d = 0; d != m->second.iter_size(); ++d)
+                for (std::size_t d = 0; d != m->second.iter_size(); ++d)
                     monitor_mask[mm][m->second.index(d)] = d;
                 ++mm;
             }
@@ -513,7 +515,7 @@ class Sampler
                 if (accd == 1) {
                     os << sepchar << "Accept";
                 } else {
-                    for (unsigned d = 0; d != accd; ++d)
+                    for (std::size_t d = 0; d != accd; ++d)
                         os << sepchar << "Accept." << d + 1;
                 }
             }
@@ -533,7 +535,7 @@ class Sampler
                                 << m->second.var_name(0);
                         }
                     } else {
-                        for (unsigned d = 0; d != m->second.dim(); ++d) {
+                        for (std::size_t d = 0; d != m->second.dim(); ++d) {
                             if (m->second.var_name(d).empty()) {
                                 os << sepchar << m->first << '.' << d + 1;
                             } else {
@@ -549,19 +551,18 @@ class Sampler
         }
 
         // Print data
-        for (unsigned iter = 0; iter != iter_size(); ++iter) {
+        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             os << sampler_id;
             os << sepchar << iter;
             os << sepchar << ess_history_[iter] / size();
             os << sepchar << resampled_history_[iter];
 
             if (print_accept) {
-                for (unsigned c = 0; c != accept_history_[iter].size(); ++c)
+                for (std::size_t c = 0; c != accept_history_[iter].size(); ++c)
                     os << sepchar <<
                         accept_history_[iter][c] / static_cast<double>(size());
-                unsigned diff = static_cast<unsigned>(
-                        accd - accept_history_[iter].size());
-                for (unsigned c = 0; c != diff; ++c)
+                std::size_t diff = accd - accept_history_[iter].size();
+                for (std::size_t c = 0; c != diff; ++c)
                     os << sepchar << 0;
             }
 
@@ -579,15 +580,15 @@ class Sampler
             }
 
             if (print_monitor) {
-                unsigned mm = 0;
+                std::size_t mm = 0;
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
                     long mr = monitor_mask[mm][iter];
                     if (mr >= 0) {
-                        for (unsigned d = 0; d != m->second.dim(); ++d)
+                        for (std::size_t d = 0; d != m->second.dim(); ++d)
                             os << sepchar << m->second.record(d, mr);
                     } else {
-                        for (unsigned d = 0; d != m->second.dim(); ++d)
+                        for (std::size_t d = 0; d != m->second.dim(); ++d)
                             os << sepchar << nachar;
                     }
                     ++mm;
@@ -629,10 +630,10 @@ class Sampler
     double threshold_;
 
     Particle<T> particle_;
-    unsigned iter_num_;
+    std::size_t iter_num_;
     std::vector<double> ess_history_;
     std::vector<bool> resampled_history_;
-    std::vector<std::vector<unsigned> > accept_history_;
+    std::vector<std::vector<std::size_t> > accept_history_;
 
     monitor_map_type monitor_;
     Path<T> path_;
@@ -668,12 +669,12 @@ class Sampler
             for (int i = 0; i != 78; ++i)
                 std::fprintf(stderr, "=");
             std::fprintf(stderr, "\n");
-            std::fprintf(stderr, "%6d", iter_num_);
+            std::fprintf(stderr, "%6zu", iter_num_);
             return;
         }
 
         if (!(iter_num_ % 50))
-            std::fprintf(stderr, "%6d", iter_num_);
+            std::fprintf(stderr, "%6zu", iter_num_);
         else
             std::fprintf(stderr, ".");
 

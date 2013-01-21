@@ -21,7 +21,7 @@ class DScal
 #if VSMC_USE_MKL
     typedef MKL_INT size_type;
 #else
-    typedef std::size_t size_type;
+    typedef VSMC_SIZE_TYPE size_type;
 #endif
 
     void operator() (const size_type N,
@@ -57,7 +57,7 @@ class DDot
 #if VSMC_USE_MKL
     typedef MKL_INT size_type;
 #else
-    typedef std::size_t size_type;
+    typedef VSMC_SIZE_TYPE size_type;
 #endif
 
     double operator() (const size_type N,
@@ -114,7 +114,7 @@ class DGemv
 #if VSMC_USE_MKL
     typedef MKL_INT size_type;
 #else
-    typedef std::size_t size_type;
+    typedef VSMC_SIZE_TYPE size_type;
 #endif
 
     void operator() (MatrixOrder order, MatrixTranspose trans,

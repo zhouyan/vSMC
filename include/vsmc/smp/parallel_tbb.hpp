@@ -16,7 +16,7 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup TBB
-template <unsigned Dim, typename T>
+template <std::size_t Dim, typename T>
 class StateTBB : public StateBase<Dim, T>
 {
     public :
@@ -71,7 +71,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (Particle<T> &particle, void *param)
+    std::size_t operator() (Particle<T> &particle, void *param)
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -106,7 +106,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
         void operator() (const tbb::blocked_range<size_type> &range)
         {
-            unsigned acc = accept_;
+            std::size_t acc = accept_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 acc += init_->initialize_state(
                         SingleParticle<T>(i, particle_));
@@ -119,7 +119,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
             accept_ += other.accept_;
         }
 
-        unsigned accept () const
+        std::size_t accept () const
         {
             return accept_;
         }
@@ -128,7 +128,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
         InitializeTBB<T, Derived> *const init_;
         Particle<T> *const particle_;
-        unsigned accept_;
+        std::size_t accept_;
     }; // class work_
 }; // class InitializeTBB
 
@@ -143,7 +143,7 @@ class MoveTBB : public MoveBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    unsigned operator() (unsigned iter, Particle<T> &particle)
+    std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
         work_ work(this, iter, &particle);
@@ -168,7 +168,7 @@ class MoveTBB : public MoveBase<T, Derived>
     {
         public :
 
-        work_ (MoveTBB<T, Derived> *move, unsigned iter,
+        work_ (MoveTBB<T, Derived> *move, std::size_t iter,
                 Particle<T> *particle):
             move_(move), iter_(iter), particle_(particle), accept_(0) {}
 
@@ -178,7 +178,7 @@ class MoveTBB : public MoveBase<T, Derived>
 
         void operator() (const tbb::blocked_range<size_type> &range)
         {
-            unsigned acc = accept_;
+            std::size_t acc = accept_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 acc += move_->move_state(iter_,
                         SingleParticle<T>(i, particle_));
@@ -191,7 +191,7 @@ class MoveTBB : public MoveBase<T, Derived>
             accept_ += other.accept_;
         }
 
-        unsigned accept () const
+        std::size_t accept () const
         {
             return accept_;
         }
@@ -199,9 +199,9 @@ class MoveTBB : public MoveBase<T, Derived>
         private :
 
         MoveTBB<T, Derived> *const move_;
-        const unsigned iter_;
+        const std::size_t iter_;
         Particle<T> *const particle_;
-        unsigned accept_;
+        std::size_t accept_;
     }; // class work_
 }; // class MoveTBB
 
@@ -216,8 +216,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    void operator() (unsigned iter, unsigned dim, const Particle<T> &particle,
-            double *res)
+    void operator() (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle, double *res)
     {
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
@@ -240,7 +240,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         public :
 
         work_ (MonitorEvalTBB<T, Derived> *monitor,
-                unsigned iter, unsigned dim,
+                std::size_t iter, std::size_t dim,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), particle_(particle), res_(res),
             iter_(iter), dim_(dim) {}
@@ -258,8 +258,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         MonitorEvalTBB<T, Derived> *const monitor_;
         const Particle<T> *const particle_;
         double *const res_;
-        const unsigned iter_;
-        const unsigned dim_;
+        const std::size_t iter_;
+        const std::size_t dim_;
     }; // class work_
 }; // class MonitorEvalTBB
 
@@ -274,7 +274,8 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
-    double operator() (unsigned iter, const Particle<T> &particle, double *res)
+    double operator() (std::size_t iter, const Particle<T> &particle,
+            double *res)
     {
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
@@ -298,7 +299,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     {
         public :
 
-        work_ (PathEvalTBB<T, Derived> *path, unsigned iter,
+        work_ (PathEvalTBB<T, Derived> *path, std::size_t iter,
                 const Particle<T> *particle, double *res) :
             path_(path), particle_(particle), res_(res), iter_(iter) {}
 
@@ -315,7 +316,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         PathEvalTBB<T, Derived> *const path_;
         const Particle<T> *const particle_;
         double *const res_;
-        const unsigned iter_;
+        const std::size_t iter_;
     }; // class work_
 }; // PathEvalTBB
 
