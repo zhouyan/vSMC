@@ -134,7 +134,7 @@ class ThreadInfo
         range_vec.reserve(thread_num());
         SizeType B = range.begin();
         while (N > 0) {
-            SizeType next = std::min VSMC_MINMAX_NO_EXPANSION (
+            SizeType next = std::min VSMC_MACRO_NO_EXPANSION (
                     N, block_size);
             range_vec.push_back(BlockedRange<SizeType>(B, B + next));
             B += next;
@@ -150,7 +150,7 @@ class ThreadInfo
 
     unsigned thread_num_;
 
-    ThreadInfo () : thread_num_(std::max VSMC_MINMAX_NO_EXPANSION (1U,
+    ThreadInfo () : thread_num_(std::max VSMC_MACRO_NO_EXPANSION (1U,
              static_cast<unsigned>(std::thread::hardware_concurrency())))
     {
 #ifdef _MSC_VER

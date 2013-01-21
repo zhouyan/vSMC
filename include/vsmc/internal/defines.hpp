@@ -4,7 +4,7 @@
 #include <vsmc/internal/config.hpp>
 
 // Avoid MSVC stupid behavior
-#define VSMC_MINMAX_NO_EXPANSION
+#define VSMC_MACRO_NO_EXPANSION
 
 namespace vsmc {
 
