@@ -466,7 +466,7 @@ class Sampler
         std::vector<double> acc;
         unsigned accd = 0;
         for (unsigned iter = 0; iter != iter_size(); ++iter) {
-            accd = std::max(
+            accd = std::max VSMC_MACRO_NO_EXPANSION (
                     accd, static_cast<unsigned>(accept_history_[iter].size()));
         }
         bool print_accept = accd > 0 && iter_size() > 0;
@@ -486,7 +486,8 @@ class Sampler
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             mond += m->second.dim();
-            mi = std::max(mi, static_cast<unsigned>(m->second.iter_size()));
+            mi = std::max VSMC_MACRO_NO_EXPANSION (
+                    mi, static_cast<unsigned>(m->second.iter_size()));
         }
         print_monitor = print_monitor && mond > 0 && mi > 0 && iter_size() > 0;
         std::vector<std::vector<long> > monitor_mask;
