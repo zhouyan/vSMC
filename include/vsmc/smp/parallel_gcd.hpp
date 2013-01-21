@@ -3,47 +3,9 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/smp/base.hpp>
-#include <dispatch/dispatch.h>
+#include <vsmc/utility/dispatch.hh>
 
 namespace vsmc {
-
-namespace gcd {
-
-/// \brief Apple GCD informations
-/// \ingroup GCD
-class DispatchQueue
-{
-    public :
-
-    static DispatchQueue &instance ()
-    {
-        static DispatchQueue queue;
-
-        return queue;
-    }
-
-    dispatch_queue_t queue () const
-    {
-        return queue_;
-    }
-
-    void queue (dispatch_queue_t new_queue)
-    {
-        queue_ = new_queue;
-    }
-
-    private :
-
-    dispatch_queue_t queue_;
-
-    DispatchQueue () : queue_(
-            dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {}
-
-    DispatchQueue (const DispatchQueue &);
-    DispatchQueue &operator= (const DispatchQueue &);
-}; // class DispatchQueue
-
-} // namespace vsmc::gcd
 
 /// \brief Particle::value_type subtype
 /// \ingroup GCD

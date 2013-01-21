@@ -1,9 +1,10 @@
+div.contents {
+    width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 body, table, div, p, dl {
     font: 400 14px/19px
     'Lucida Grande', 'Lucida Sans', Geneva, Helvetica, Arial, sans-serif;
-}
-
-body {
-    margin: auto;
-    width: 900px;
 }
