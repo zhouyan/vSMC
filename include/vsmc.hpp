@@ -117,4 +117,4 @@
 
 /// \defgroup STDTBB STDTBB
 /// \ingroup Utility
-/// \brief C++11 parallelization
+/// \brief C++11 concurrency utilities
