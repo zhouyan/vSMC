@@ -240,7 +240,7 @@ struct CheckOpenCLDeviceTrait :
 template <typename, template <typename, typename> class, template <typename,
          template <typename, typename> class, typename> class, typename>
 struct AdapImplTrait;
-/// \endcond
+/// \endcond HIDDEN_SYMBOLS
 
 template <typename T, template <typename, typename> class Impl,
          template <typename, template <typename, typename> class, typename>

@@ -1,6 +1,8 @@
 #ifndef VSMC_INTERNAL_FORWARD_HPP
 #define VSMC_INTERNAL_FORWARD_HPP
 
+/// \cond HIDDEN_SYMBOLS
+
 #define VSMC_DEFINE_SMP_FORWARD(Name) \
 namespace vsmc {                                                             \
     template <std::size_t, typename> class State##Name;                      \
@@ -119,5 +121,7 @@ VSMC_DEFINE_SMP_FORWARD(OMP)
 VSMC_DEFINE_SMP_FORWARD(PPL)
 VSMC_DEFINE_SMP_FORWARD(STD)
 VSMC_DEFINE_SMP_FORWARD(TBB)
+
+/// \endcond HIDDEN_SYMBOLS
 
 #endif // VSMC_INTERNAL_FORWARD_HPP
