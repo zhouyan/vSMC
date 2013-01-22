@@ -28,14 +28,11 @@ struct Has##OuterType :                                                      \
     public cxx11::integral_constant <bool, Has##OuterType##Impl<T>::value>   \
 {};                                                                          \
                                                                              \
-template <typename T, bool> struct OuterType##Dispatch;                      \
+template <typename T, bool> struct OuterType##Dispatch                       \
+{typedef DefaultType type;};                                                 \
                                                                              \
 template <typename T> struct OuterType##Dispatch<T, true>                    \
 {typedef typename T::InnerType type;};                                       \
-                                                                             \
-template <typename T> struct OuterType##Dispatch<T, false>                   \
-{typedef DefaultType type;};                                                 \
-                                                                             \
                                                                              \
 template <typename T> struct OuterType##Trait                                \
 {                                                                            \
@@ -43,7 +40,7 @@ template <typename T> struct OuterType##Trait                                \
     typedef typename traits::OuterType##Dispatch<T, value>::type type;       \
 };                                                                           \
                                                                              \
-} }
+} } // namespace vsmc::traits
 
 #define VSMC_DEFINE_MF_CHECKER(OuterMF, InnerMF, RT, Args) \
 namespace vsmc { namespace traits {                                          \
@@ -68,7 +65,7 @@ struct Has##OuterMF :                                                        \
     public cxx11::integral_constant<bool, Has##OuterMF##Impl<T>::value>      \
 {};                                                                          \
                                                                              \
-} }
+} } // namespace vsmc::traits
 
 #define VSMC_DEFINE_STATIC_MF_CHECKER(OuterMF, InnerMF, RT, Args) \
 namespace vsmc { namespace traits {                                          \
@@ -93,20 +90,20 @@ struct HasStatic##OuterMF :                                                  \
     public cxx11::integral_constant<bool, HasStatic##OuterMF##Impl<T>::value>\
 {};                                                                          \
                                                                              \
-} }
+} } // namespace vsmc::traits
 
 #if VSMC_RESTRICTED_ADAPTER
 #define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName) \
 namespace vsmc { namespace traits {                                          \
     template <template <typename, typename> class>                           \
     struct Is##BaseName##Impl : public cxx11::false_type {};                 \
-} }
+} } //namespace vsmc::traits
 #else // VSMC_RESTRICTED_ADAPTER
 #define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName) \
 namespace vsmc { namespace traits {                                          \
     template <template <typename, typename> class>                           \
     struct Is##BaseName##Impl : public cxx11::true_type {};                  \
-} }
+} } //namespace vsmc::traits
 #endif // VSMC_RESTRICTED_ADAPTER
 
 #define VSMC_DEFINE_SMP_IS_IMPL_TRUE(Name) \
@@ -119,7 +116,7 @@ namespace vsmc { namespace traits {                                          \
     struct IsMonitorEvalImpl<MonitorEval##Name> : public cxx11::true_type {};\
     template <>                                                              \
     struct IsPathEvalImpl<PathEval##Name> : public cxx11::true_type {};      \
-} }
+} } //namespace vsmc::traits
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
@@ -199,7 +196,11 @@ struct IsBaseOfStateCL :
 
 // CheckOpenCLPlatformTrait
 
-template <typename ID, bool> struct CheckOpenCLPlatformDispatch;
+template <typename ID, bool>
+struct CheckOpenCLPlatformDispatch
+{
+    static bool check (const std::string &name) {return true;}
+};
 
 template <typename ID>
 struct CheckOpenCLPlatformDispatch<ID, true>
@@ -209,18 +210,17 @@ struct CheckOpenCLPlatformDispatch<ID, true>
 };
 
 template <typename ID>
-struct CheckOpenCLPlatformDispatch<ID, false>
-{static bool check (const std::string &name) {return true;}};
-
-template <typename ID>
 struct CheckOpenCLPlatformTrait :
     public CheckOpenCLPlatformDispatch
-    <ID, HasStaticCheckOpenCLPlatform<ID>::value>
-{};
+    <ID, HasStaticCheckOpenCLPlatform<ID>::value> {};
 
 // CheckOpenCLDeviceTrait
 
-template <typename ID, bool> struct CheckOpenCLDeviceDispatch;
+template <typename ID, bool>
+struct CheckOpenCLDeviceDispatch
+{
+    static bool check (const std::string &name) {return true;}
+};
 
 template <typename ID>
 struct CheckOpenCLDeviceDispatch<ID, true>
@@ -230,19 +230,17 @@ struct CheckOpenCLDeviceDispatch<ID, true>
 };
 
 template <typename ID>
-struct CheckOpenCLDeviceDispatch<ID, false>
-{static bool check (const std::string &name) {return true;}};
-
-template <typename ID>
 struct CheckOpenCLDeviceTrait :
-    public CheckOpenCLDeviceDispatch<ID, HasStaticCheckOpenCLDevice<ID>::value>
-{};
+    public CheckOpenCLDeviceDispatch
+    <ID, HasStaticCheckOpenCLDevice<ID>::value> {};
 
 // AdaptImplTrait
 
+/// \cond HIDDEN_SYMBOLS
 template <typename, template <typename, typename> class, template <typename,
          template <typename, typename> class, typename> class, typename>
 struct AdapImplTrait;
+/// \endcond
 
 template <typename T, template <typename, typename> class Impl,
          template <typename, template <typename, typename> class, typename>

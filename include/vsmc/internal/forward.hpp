@@ -108,6 +108,7 @@ template <typename, template <typename, typename> class, typename B = CBase>
          class MonitorEvalAdapter;
 template <typename, template <typename, typename> class, typename B = CBase>
          class PathEvalAdapter;
+
 } // namesapce vsmc
 
 // SMP Implementations
