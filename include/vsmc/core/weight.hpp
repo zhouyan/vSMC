@@ -282,7 +282,7 @@ class WeightSet
             log_weight_[i] -= max_weight;
 
 #if VSMC_USE_MKL
-        vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
+        ::vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
 #else
         for (size_type i = 0; i != size_; ++i)
             weight_[i] = exp(log_weight_[i]);
@@ -312,7 +312,7 @@ class WeightSet
                 typename traits::SizeTypeTrait<ddot_type>::type>(size_),
                 &weight_[0], 1, &weight_[0], 1);
 #if VSMC_USE_MKL
-        vdLn(static_cast<MKL_INT>(size_), &weight_[0], &log_weight_[0]);
+        ::vdLn(static_cast<MKL_INT>(size_), &weight_[0], &log_weight_[0]);
 #else
         for (size_type i = 0; i != size_; ++i)
             log_weight_[i] = log(weight_[i]);
