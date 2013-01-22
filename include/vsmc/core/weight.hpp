@@ -275,48 +275,51 @@ class WeightSet
     {
         using std::exp;
 
-        std::vector<double>::const_iterator id_max = std::max_element(
-                log_weight_.begin(), log_weight_.end());
-        double max_weight = *id_max;
-        for (size_type i = 0; i != size_; ++i)
-            log_weight_[i] -= max_weight;
-
+        normalize_log_weight();
 #if VSMC_USE_MKL
         ::vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
 #else
         for (size_type i = 0; i != size_; ++i)
             weight_[i] = exp(log_weight_[i]);
 #endif
-        double coeff = std::accumulate(weight_.begin(), weight_.end(),
-                static_cast<double>(0));
-        coeff = 1 / coeff;
-        dscal_(static_cast<
-                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
-                coeff, &weight_[0], 1);
-        ess_ = 1 / ddot_(static_cast<
-                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
-                &weight_[0], 1, &weight_[0], 1);
+        normalize_weight();
     }
 
     void weight2log_weight ()
     {
         using std::log;
 
-        double coeff = std::accumulate(weight_.begin(), weight_.end(),
-                static_cast<double>(0));
-        coeff = 1 / coeff;
-        dscal_(static_cast<
-                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
-                coeff, &weight_[0], 1);
-        ess_ = 1 / ddot_(static_cast<
-                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
-                &weight_[0], 1, &weight_[0], 1);
+        normalize_weight();
 #if VSMC_USE_MKL
         ::vdLn(static_cast<MKL_INT>(size_), &weight_[0], &log_weight_[0]);
 #else
         for (size_type i = 0; i != size_; ++i)
             log_weight_[i] = log(weight_[i]);
 #endif
+        normalize_log_weight();
+    }
+
+    void normalize_weight ()
+    {
+        double alpha = 0;
+        for (size_type i = 0; i != size_; ++i)
+            alpha += weight_[i];
+        dscal_(static_cast<
+                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
+                1 / alpha, &weight_[0], 1);
+        ess_ = 1 / ddot_(static_cast<
+                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
+                &weight_[0], 1, &weight_[0], 1);
+    }
+
+    void normalize_log_weight ()
+    {
+        double max_weight = log_weight_[0];
+        for (size_type i = 0; i != size_; ++i)
+            if (log_weight_[i] > max_weight)
+                max_weight = log_weight_[i];
+        for (size_type i = 0; i != size_; ++i)
+            log_weight_[i] -= max_weight;
     }
 }; // class WeightSet
 
