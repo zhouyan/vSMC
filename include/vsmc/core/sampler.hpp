@@ -475,11 +475,12 @@ class Sampler
 
         // Path sampling
         print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
-        std::vector<long> path_mask;
+        std::vector<std::size_t> path_mask;
         if (print_path) {
-            path_mask.resize(iter_size(), -1);
+            path_mask.resize(iter_size(),
+                    std::numeric_limits<std::size_t>::max());
             for (std::size_t d = 0; d != path_.iter_size(); ++d)
-                path_mask[path_.index(d)] = static_cast<long>(d);
+                path_mask[path_.index(d)] = d;
         }
 
         // Monitors
@@ -492,16 +493,16 @@ class Sampler
                     mi, m->second.iter_size());
         }
         print_monitor = print_monitor && mond > 0 && mi > 0 && iter_size() > 0;
-        std::vector<std::vector<long> > monitor_mask;
+        std::vector<std::vector<std::size_t> > monitor_mask;
         if (print_monitor) {
             monitor_mask.resize(monitor_.size());
             std::size_t mm = 0;
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
-                monitor_mask[mm].resize(iter_size(), -1);
+                monitor_mask[mm].resize(iter_size(),
+                        std::numeric_limits<std::size_t>::max());
                 for (std::size_t d = 0; d != m->second.iter_size(); ++d)
-                    monitor_mask[mm][m->second.index(d)] =
-                        static_cast<long>(d);
+                    monitor_mask[mm][m->second.index(d)] = d;
                 ++mm;
             }
         }
@@ -568,8 +569,8 @@ class Sampler
             }
 
             if (print_path) {
-                long pr = path_mask[iter];
-                if (pr >= 0) {
+                std::size_t pr = path_mask[iter];
+                if (pr < std::numeric_limits<std::size_t>::max()) {
                     os << sepchar << path_.integrand(pr);
                     os << sepchar << path_.width(pr);
                     os << sepchar << path_.grid(pr);
@@ -584,8 +585,8 @@ class Sampler
                 std::size_t mm = 0;
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
-                    long mr = monitor_mask[mm][iter];
-                    if (mr >= 0) {
+                    std::size_t mr = monitor_mask[mm][iter];
+                    if (mr < std::numeric_limits<std::size_t>::max()) {
                         for (std::size_t d = 0; d != m->second.dim(); ++d)
                             os << sepchar << m->second.record(d, mr);
                     } else {
