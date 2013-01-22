@@ -15,6 +15,10 @@
 #include <vecLib/cblas.h>
 #define VSMC_CBLAS_INT int
 #define VSMC_USE_CBLAS 1
+#elif VSMC_USE_GENERIC_CBLAS // Generic CBlas
+#define VSMC_USE_CBLAS 1
+#elif VSMC_USE_GENERIC_CBLAS_INT64 // Generic CBlas int64
+#define VSMC_USE_CBLAS 1
 #else // No known CBlas
 #define VSMC_CBLAS_INT VSMC_SIZE_TYPE
 #define VSMC_USE_CBLAS 0
