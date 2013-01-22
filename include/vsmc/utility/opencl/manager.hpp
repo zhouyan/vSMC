@@ -209,9 +209,11 @@ class CLManager
     template<typename CLType, typename InputIter>
     cl::Buffer create_buffer (InputIter first, InputIter last) const
     {
+        using std::distance;
+
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
 
-        size_type num = static_cast<size_type>(std::distance(first, last));
+        size_type num = static_cast<size_type>(distance(first, last));
 
         if (!num)
             return cl::Buffer();
