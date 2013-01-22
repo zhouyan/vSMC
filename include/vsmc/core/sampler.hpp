@@ -479,7 +479,7 @@ class Sampler
         if (print_path) {
             path_mask.resize(iter_size(), -1);
             for (std::size_t d = 0; d != path_.iter_size(); ++d)
-                path_mask[path_.index(d)] = d;
+                path_mask[path_.index(d)] = static_cast<long>(d);
         }
 
         // Monitors
@@ -500,7 +500,8 @@ class Sampler
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
                 monitor_mask[mm].resize(iter_size(), -1);
                 for (std::size_t d = 0; d != m->second.iter_size(); ++d)
-                    monitor_mask[mm][m->second.index(d)] = d;
+                    monitor_mask[mm][m->second.index(d)] =
+                        static_cast<long>(d);
                 ++mm;
             }
         }

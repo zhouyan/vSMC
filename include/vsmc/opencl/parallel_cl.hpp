@@ -265,7 +265,7 @@ class InitializeCL : public opencl::LocalSize
         if (accept_host_.size() != particle.size()) {
             accept_host_.resize(particle.size());
             accept_buffer_ = particle.value().cl_manager().template
-                create_buffer<cl_uint>(particle.size());
+                create_buffer<cl_ulong>(particle.size());
         }
 
         set_kernel(particle);
@@ -275,11 +275,11 @@ class InitializeCL : public opencl::LocalSize
                 kernel_, particle.size(), local_size());
         post_processor(particle);
 
-        particle.value().cl_manager().template read_buffer<cl_uint>(
+        particle.value().cl_manager().template read_buffer<cl_ulong>(
                 accept_buffer_, particle.size(), &accept_host_[0]);
 
         return std::accumulate(accept_host_.begin(), accept_host_.end(),
-                static_cast<cl_uint>(0));
+                static_cast<cl_ulong>(0));
     }
 
     virtual void initialize_param (Particle<T> &, void *) {}
@@ -339,7 +339,7 @@ class InitializeCL : public opencl::LocalSize
     int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
-    std::vector<cl_uint> accept_host_;
+    std::vector<cl_ulong> accept_host_;
     cl::Buffer accept_buffer_;
 }; // class InitializeCL
 
@@ -360,7 +360,7 @@ class MoveCL : public opencl::LocalSize
         if (accept_host_.size() != particle.size()) {
             accept_host_.resize(particle.size());
             accept_buffer_ = particle.value().cl_manager().template
-                create_buffer<cl_uint>(particle.size());
+                create_buffer<cl_ulong>(particle.size());
         }
 
         set_kernel(iter, particle);
@@ -369,11 +369,11 @@ class MoveCL : public opencl::LocalSize
                 kernel_, particle.size(), local_size());
         post_processor(iter, particle);
 
-        particle.value().cl_manager().template read_buffer<cl_uint>(
+        particle.value().cl_manager().template read_buffer<cl_ulong>(
                 accept_buffer_, particle.size(), &accept_host_[0]);
 
         return std::accumulate(accept_host_.begin(), accept_host_.end(),
-                static_cast<cl_uint>(0));
+                static_cast<cl_ulong>(0));
     }
 
     virtual void move_state (std::size_t, std::string &) = 0;
@@ -402,7 +402,7 @@ class MoveCL : public opencl::LocalSize
             kernel_ = particle.value().create_kernel(kernel_name_);
         }
 
-        kernel_.setArg<cl_uint>(0, iter);
+        kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
         kernel_.setArg(1, particle.value().state_buffer());
         kernel_.setArg(2, accept_buffer_);
     }
@@ -433,7 +433,7 @@ class MoveCL : public opencl::LocalSize
     int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
-    std::vector<cl_uint> accept_host_;
+    std::vector<cl_ulong> accept_host_;
     cl::Buffer accept_buffer_;
 }; // class MoveCL
 
@@ -496,8 +496,8 @@ class MonitorEvalCL : public opencl::LocalSize
             kernel_ = particle.value().create_kernel(kernel_name_);
         }
 
-        kernel_.setArg<cl_uint>(0, iter);
-        kernel_.setArg<cl_uint>(1, dim);
+        kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
+        kernel_.setArg<cl_ulong>(1, static_cast<cl_ulong>(dim));
         kernel_.setArg(2, particle.value().state_buffer());
         kernel_.setArg(3, buffer_);
     }
@@ -595,7 +595,7 @@ class PathEvalCL : public opencl::LocalSize
             kernel_ = particle.value().create_kernel(kernel_name_);
         }
 
-        kernel_.setArg<cl_uint>(0, iter);
+        kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
         kernel_.setArg(1, particle.value().state_buffer());
         kernel_.setArg(2, buffer_);
     }
