@@ -80,6 +80,10 @@
 #define VSMC_USE_MKL 0
 #endif
 
+#ifndef VSMC_USE_VECLIB
+#define VSMC_USE_VECLIB 0
+#endif
+
 #ifndef VSMC_RESTRICTED_ADAPTER
 #define VSMC_RESTRICTED_ADAPTER 1
 #endif

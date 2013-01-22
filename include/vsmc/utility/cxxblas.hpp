@@ -7,8 +7,17 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
-#if VSMC_USE_MKL
+#if VSMC_USE_MKL // MKL
 #include <mkl_cblas.h>
+#define VSMC_CBLAS_INT MKL_INT
+#define VSMC_USE_CBLAS 1
+#elif VSMC_USE_VECLIB // vecLib
+#include <vecLib/cblas.h>
+#define VSMC_CBLAS_INT int
+#define VSMC_USE_CBLAS 1
+#else // No known CBlas
+#define VSMC_CBLAS_INT VSMC_SIZE_TYPE
+#define VSMC_USE_CBLAS 0
 #endif
 
 namespace vsmc { namespace cxxblas {
@@ -18,18 +27,14 @@ class DScal
 {
     public :
 
-#if VSMC_USE_MKL
-    typedef MKL_INT size_type;
-#else
-    typedef VSMC_SIZE_TYPE size_type;
-#endif
+    typedef VSMC_CBLAS_INT size_type;
 
     void operator() (const size_type N,
             const double alpha, double *X, const size_type incX) const
     {
-#if VSMC_USE_MKL
+#if VSMC_USE_CBLAS
         ::cblas_dscal(N, alpha, X, incX);
-#else // VSMC_USE_MKL
+#else // VSMC_USE_CBLAS
         if (N == 0)
             return;
 
@@ -44,7 +49,7 @@ class DScal
 
         for (size_type i = 0; i != N; ++i, X += incX)
             *X *= alpha;
-#endif // VSMC_USE_MKL
+#endif // VSMC_USE_CBLAS
     }
 }; // class DScal
 
@@ -54,19 +59,15 @@ class DDot
 {
     public :
 
-#if VSMC_USE_MKL
-    typedef MKL_INT size_type;
-#else
-    typedef VSMC_SIZE_TYPE size_type;
-#endif
+    typedef VSMC_CBLAS_INT size_type;
 
     double operator() (const size_type N,
             const double *X, const size_type incX,
             const double *Y, const size_type incY) const
     {
-#if VSMC_USE_MKL
+#if VSMC_USE_CBLAS
         return ::cblas_ddot(N, X, incX, Y, incY);
-#else // VSMC_USE_MKL
+#else // VSMC_USE_CBLAS
         if (N == 0)
             return 0;
 
@@ -101,7 +102,7 @@ class DDot
             res += (*X) * (*Y);
 
         return res;
-#endif // VSMC_USE_MKL
+#endif // VSMC_USE_CBLAS
     }
 }; // class DDot
 
@@ -111,11 +112,7 @@ class DGemv
 {
     public :
 
-#if VSMC_USE_MKL
-    typedef MKL_INT size_type;
-#else
-    typedef VSMC_SIZE_TYPE size_type;
-#endif
+    typedef VSMC_CBLAS_INT size_type;
 
     void operator() (MatrixOrder order, MatrixTranspose trans,
             const size_type M, const size_type N, const double alpha,
@@ -123,7 +120,7 @@ class DGemv
             const double *X, const size_type incX,
             const double beta, double *Y, const size_type incY) const
     {
-#if VSMC_USE_MKL
+#if VSMC_USE_CBLAS
         ::CBLAS_ORDER cblas_order;
         switch (order) {
             case vsmc::RowMajor :
@@ -155,7 +152,7 @@ class DGemv
 
         ::cblas_dgemv(cblas_order, cblas_trans,
                 M, N, alpha, A, lda, X, incX, beta, Y, incY);
-#else // VSMC_USE_MKL
+#else // VSMC_USE_CBLAS
         if (M == 0 || N == 0)
             return;
 
@@ -208,10 +205,13 @@ class DGemv
         } else {
             VSMC_RUNTIME_ASSERT(false, "INVALID INPUT TO **vsmc::DGemv**");
         }
-#endif // VSMC_USE_MKL
+#endif // VSMC_USE_CBLAS
     }
 }; // class DGemv
 
 } } // namespace vsmc::cxxblas
+
+#undef VSMC_CBLAS_INT
+#undef VSMC_USE_CBLAS
 
 #endif // VSMC_UTILITY_CXXBLAS_HPP
