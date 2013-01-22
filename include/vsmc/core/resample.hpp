@@ -44,12 +44,18 @@ inline void multinomial (SizeType N, SizeType S, RngType &rng,
 template <typename SizeType>
 inline void normalize_replication (SizeType N, SizeType *replication)
 {
-    SizeType sum = std::accumulate(replication, replication + N,
-            static_cast<SizeType>(0));
-    if (sum != N) {
-        SizeType *id_max = std::max_element(replication, replication + N);
-        *id_max += N - sum;
+    SizeType sum = 0;
+    SizeType max_i = 0;
+    SizeType max_v = replication[0];
+    for (SizeType i = 0; i != N; ++i) {
+        SizeType r = replication[i];
+        if (r > max_v) {
+            max_i = i;
+            max_v = r;
+        }
+        sum += r;
     }
+    replication[max_i] += N - sum;
 }
 
 } // namespace vsmc::internal
