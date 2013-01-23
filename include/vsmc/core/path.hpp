@@ -168,6 +168,9 @@ class Path
     /// \sa Monitor::eval()
     void eval (std::size_t iter, const Particle<T> &particle)
     {
+        if (!recording_)
+            return;
+
         VSMC_RUNTIME_ASSERT((bool(eval_)),
                 ("**Path::eval** AN INVALID EVALUATION OBJECT"));
 
