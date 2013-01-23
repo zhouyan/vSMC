@@ -199,11 +199,15 @@ class DGemv
     }
 }; // class DGemv
 
+/// \brief Check if a pointer is aligned to 16 bytes
+/// \ingroup CXXBLAS
 inline bool is_sse_aligned (void *ptr)
 {
     return ((unsigned long) ptr & 15) == 0;
 }
 
+/// \brief Compute the importance sampling integral of univariate variable
+/// \ingroup CXXBLAS
 class ISIntegral1
 {
     public :
@@ -240,6 +244,9 @@ class ISIntegral1
     }
 }; // ISIntegral1
 
+
+/// \brief Compute the importance sampling integral of multivariate variable
+/// \ingroup CXXBLAS
 class ISIntegralD
 {
     public :
