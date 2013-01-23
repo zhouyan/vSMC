@@ -24,29 +24,56 @@ class Monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
     /// \param method The method of the monitor evaluation.
-    /// - _ImportanceSampling_ The evalution object return the integrands whose
-    /// weighted average (the importance sampling estimate) will be calculated
-    /// later by the Monitor object
+    ///
+    /// The evaluation object has the signature
+    /// \code
+    /// void eval (std::size_t iter, std::size_t dim, const Particle<T> &particle, double *result)
+    /// \endcode
+    /// where the first three arguments are passed in by the Monitor at the
+    /// end of each iteration. The evaluation occurs after the possible MCMC
+    /// moves. The output parameter `result` shall contain the results of the
+    /// evaluation, whose meaning depend on the Monitor's constructor
+    /// parameter `method`, which can have two possible values
+    ///
+    /// - _ImportanceSampling_ The array `result` is of length
+    /// `particle.size() * dim`, and it represents a row major matrix of
+    /// dimension `particle.size()` by `dim`, say \f$R\f$. Let \f$W\f$ be
+    /// the vector of the normalized weights. The Monitor will be respoinsible
+    /// to compute the importance sampling estimate \f$r = R^TW\f$ and record
+    /// it. For example, say the purpose of the monitor is to record the
+    /// importance sampling estimates of \f$E[h(X)]\f$ where
+    /// \f$h(X) = (h_1(X),\dots,h_d(X))\f$. Then `result` shall contain the
+    /// evaluation of \f$h(X_i)\f$ for each \f$i\f$ from `0` to
+    /// `particle.size() - 1` in the order
+    /// \f$(h_1(X_0), \dots, h_d(X_0), h_1(X_1), \dots, h_d(X_1), \dots)\f$.
+    ///
     /// - _Simple_ The evalution object returnt the `dim` length record
     /// directly.
+    ///
+    /// After each evaluation, the iteration number `iter` and the imporatance
+    /// sampling estimates (`method == ImportanceSampling`) or `result`
+    /// (`method == `Simple`) are recorded and can be retrived by `index()`
+    /// and `record()`.
     explicit Monitor (std::size_t dim, const eval_type &eval,
             MonitorMethod method = ImportanceSampling) :
-        dim_(dim), eval_(eval), method_(method), var_name_(dim_) {}
+        dim_(dim), eval_(eval), method_(method), recording_(true),
+        var_name_(dim_) {}
 
     Monitor (const Monitor<T> &other) :
         dim_(other.dim_), eval_(other.eval_), method_(other.method_),
-        var_name_(other.var_name_),
+        recording_(other.recording_), var_name_(other.var_name_),
         index_(other.index_), record_(other.record_) {}
 
     Monitor<T> &operator= (const Monitor<T> &other)
     {
         if (&other != this) {
-            dim_      = other.dim_;
-            eval_     = other.eval_;
-            method_   = other.method_;
-            var_name_ = other.var_name_;
-            index_    = other.index_;
-            record_   = other.record_;
+            dim_       = other.dim_;
+            eval_      = other.eval_;
+            method_    = other.method_;
+            recording_ = other.recording_;
+            var_name_  = other.var_name_;
+            index_     = other.index_;
+            record_    = other.record_;
         }
 
         return *this;
@@ -60,9 +87,11 @@ class Monitor
 
     /// \brief The number of iterations has been recorded
     ///
-    /// \note This is not necessarily the same as Sampler<T>::iter_size. For
+    /// \details
+    /// This is not necessarily the same as Sampler<T>::iter_size. For
     /// example, a monitor can be added only after a certain time point of the
-    /// sampler's iterations.
+    /// sampler's iterations. Also the monitor can be turned off for a period
+    /// during the iterations.
     std::size_t iter_size () const
     {
         return index_.size();
@@ -78,7 +107,7 @@ class Monitor
     std::string &var_name (std::size_t id)
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
-                "**vsmc::Monitor::var_name** output of range id");
+                "**vsmc::Monitor::var_name** INVALID ID");
 
         return var_name_[id];
     }
@@ -87,7 +116,7 @@ class Monitor
     const std::string &var_name (std::size_t id) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
-                "**vsmc::Monitor::var_name** output of range id");
+                "**vsmc::Monitor::var_name** INVLID ID");
 
         return var_name_[id];
     }
@@ -108,16 +137,15 @@ class Monitor
     /// iteration
     ///
     /// \details
-    /// For example, if a monitor is only added to the sampler at the sampler's
-    /// iteration `siter`. Then index(0) will be `siter` and so on. If the
-    /// monitor is added before the sampler's initialization and continued to
-    /// be evaluated during the iterations, then iter(iter) shall just be
-    /// `iter`.
+    /// For example, if a monitor is only added to the sampler at the
+    /// sampler's iteration `siter`. Then `index(0)` will be `siter` and so
+    /// on. If the monitor is added before the sampler's initialization and
+    /// continued to be evaluated during the iterations without calling
+    /// `turnoff()`, then iter(iter) shall just be `iter`.
     std::size_t index (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
-                ("CALL **Monitor::index** WITH AN INVALID "
-                 "ITERATION NUMBER"));
+                ("**Monitor::index** INVALID ITERATION NUMBER"));
 
         return index_[iter];
     }
@@ -126,15 +154,13 @@ class Monitor
     /// variable
     ///
     /// \details
-    /// For a `Dim` dimension monitor, `id` shall be 0 to `Dim` - 1
+    /// For a `dim` dimension monitor, `id` shall be 0 to `dim` - 1
     double record (std::size_t id) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
-                ("CALL **Monitor::record** WITH AN INVALID "
-                 "ID NUMBER"));
+                ("**Monitor::record** INVALID ID"));
         VSMC_RUNTIME_ASSERT((iter_size() > 0),
-                ("CALL **Monitor::record** WITH AN INVALID "
-                 "ITERATION NUMBER"));
+                ("**Monitor::record** INVALID ITERATION"));
 
         return record_[(iter_size() - 1) * dim_ + id];
     }
@@ -143,15 +169,13 @@ class Monitor
     /// the monitor iteration
     ///
     /// \details
-    /// For a `Dim` dimension monitor, `id` shall be 0 to `Dim` - 1
+    /// For a `dim` dimension monitor, `id` shall be 0 to `dim` - 1
     double record (std::size_t id, std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
-                ("CALL **Monitor::record** WITH AN INVALID "
-                 "ID NUMBER"));
-        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
-                ("CALL **Monitor::record** WITH AN INVALID "
-                 "ITERATION NUMBER"));
+                ("**Monitor::record** INVALID ID"));
+        VSMC_RUNTIME_ASSERT((iter_size() > 0),
+                ("**Monitor::record** INVALID ITERATION"));
 
         return record_[iter * dim_ + id];
     }
@@ -195,7 +219,7 @@ class Monitor
     /// \param order Either ColMajor or RowMajor
     /// \param first The output iterator
     ///
-    /// \note For example, say `first` is of type `double *`, then if `order ==
+    /// For example, say `first` is of type `double *`, then if `order ==
     /// ColMajor`, then, `first[j * iter_size() + i] == record(i, j)`.
     /// Otherwise, if `order == RowMajor`, then `first[i * dim() + j] ==
     /// record(i, j)`. That is, the output is an `iter_size()` by `dim()`
@@ -226,12 +250,21 @@ class Monitor
     }
 
     /// \brief Perform the evaluation for a given iteration and a Particle<T>
-    /// object
+    /// object.
+    ///
+    /// \details
+    /// This functin is called by a `Sampler` at the end of each
+    /// iteration. It does nothing if `recording()` returns `false`. Otherwise
+    /// it use the user defined evaluation object to compute results. When a
+    /// Monitor is constructed, `recording()` always returns `true`. It can be
+    /// turned off by `turnoff()` and turned on later by `turnon()`.
     void eval (std::size_t iter, const Particle<T> &particle)
     {
+        if (!recording_)
+            return;
+
         VSMC_RUNTIME_ASSERT((bool(eval_)),
-                ("CALL **Monitor::eval** WITH AN INVALID "
-                 "EVALUATION FUNCTOR"));
+                ("**Monitor::eval** INVALID EVALUATION OBJECT"));
 
         result_.resize(dim_);
         switch (method_) {
@@ -264,11 +297,30 @@ class Monitor
         record_.clear();
     }
 
+    /// \brief Whether the montior is actively recording restuls
+    bool recording () const
+    {
+        return recording_;
+    }
+
+    /// \brief Turn on the recording
+    void turnon ()
+    {
+        recording_ = true;
+    }
+
+    /// \brief Turn off the recording
+    void turnoff ()
+    {
+        recording_ = false;
+    }
+
     private :
 
     std::size_t dim_;
     eval_type eval_;
     MonitorMethod method_;
+    bool recording_;
     std::vector<std::string> var_name_;
     std::vector<std::size_t> index_;
     std::vector<double> record_;
