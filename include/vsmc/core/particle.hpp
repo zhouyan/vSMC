@@ -611,9 +611,9 @@ class Particle
     /// \brief Set resampling method by a scheme name from a collection
     ///
     /// \details
-    /// An object of type Resample<ResampleType<EnumType, S>, size_type,
-    /// resample_rng_type> will constructed as the resampling method. This
-    /// can be a user defined partial specializing of Resample clas template
+    /// An object of type Resample<ResampleType<EnumType, S> > wil constructed
+    /// as the resampling method. This can be a user defined partial
+    /// specializing of Resample clas template
     ///
     /// For example, resample_scheme<ResampleScheme, Stratified>() is
     /// equivalent to resample_scheme(Stratified)
@@ -623,12 +623,12 @@ class Particle
         resample_scheme<ResampleType<EnumType, S> >();
     }
 
-    /// \brief Set resampling method by the type of resampling object
+    /// \brief Set resampling method by the specialization of Resample object
     ///
     /// \details
-    /// An object of type Resample<ResType, size_type, resample_rng_type>,
-    /// will constructed as the resampling method. This can be a user defined
-    /// partial specializing of Resample class template
+    /// An object of type Resample<ResType>, will constructed as the
+    /// resampling method. This can be a user defined partial specializing of
+    /// Resample class template
     template <typename ResType>
     void resample_scheme ()
     {
