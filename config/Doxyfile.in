@@ -1207,7 +1207,7 @@ USE_MATHJAX            = YES
 # SVG. The default value is HTML-CSS, which is slower, but has the best
 # compatibility.
 
-MATHJAX_FORMAT         = NativeMML
+MATHJAX_FORMAT         = SVG
 
 # When MathJax is enabled you need to specify the location relative to the
 # HTML output directory using the MATHJAX_RELPATH option. The destination

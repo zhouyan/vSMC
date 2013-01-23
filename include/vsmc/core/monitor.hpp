@@ -19,17 +19,17 @@ class Monitor
         eval_type;
     typedef typename traits::DGemvTypeTrait<T>::type dgemv_type;
 
-    /// \brief Construct a monitor with an evaluation object
+    /// \brief Construct a Monitor with an evaluation object
     ///
-    /// \param dim The dimension of the monitor, i.e., the number of variables
+    /// \param dim The dimension of the Monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
-    /// \param method The method of the monitor evaluation.
+    /// \param method The method of the Monitor evaluation.
     ///
     /// The evaluation object has the signature
     /// \code
     /// void eval (std::size_t iter, std::size_t dim, const Particle<T> &particle, double *result)
     /// \endcode
-    /// where the first three arguments are passed in by the Monitor at the
+    /// where the first three arguments are passed in by the Sampler at the
     /// end of each iteration. The evaluation occurs after the possible MCMC
     /// moves. The output parameter `result` shall contain the results of the
     /// evaluation, whose meaning depend on the Monitor's constructor
@@ -40,7 +40,7 @@ class Monitor
     /// dimension `particle.size()` by `dim`, say \f$R\f$. Let \f$W\f$ be
     /// the vector of the normalized weights. The Monitor will be respoinsible
     /// to compute the importance sampling estimate \f$r = R^TW\f$ and record
-    /// it. For example, say the purpose of the monitor is to record the
+    /// it. For example, say the purpose of the Monitor is to record the
     /// importance sampling estimates of \f$E[h(X)]\f$ where
     /// \f$h(X) = (h_1(X),\dots,h_d(X))\f$. Then `result` shall contain the
     /// evaluation of \f$h(X_i)\f$ for each \f$i\f$ from `0` to
@@ -79,7 +79,7 @@ class Monitor
         return *this;
     }
 
-    /// \brief The dimension of the monitor
+    /// \brief The dimension of the Monitor
     std::size_t dim () const
     {
         return dim_;
@@ -89,8 +89,8 @@ class Monitor
     ///
     /// \details
     /// This is not necessarily the same as Sampler<T>::iter_size. For
-    /// example, a monitor can be added only after a certain time point of the
-    /// sampler's iterations. Also the monitor can be turned off for a period
+    /// example, a Monitor can be added only after a certain time point of the
+    /// sampler's iterations. Also the Monitor can be turned off for a period
     /// during the iterations.
     std::size_t iter_size () const
     {
@@ -103,7 +103,7 @@ class Monitor
         return bool(eval_);
     }
 
-    /// \brief Read and write access to the variable names of the monitor
+    /// \brief Read and write access to the variable names of the Monitor
     std::string &var_name (std::size_t id)
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
@@ -112,7 +112,7 @@ class Monitor
         return var_name_[id];
     }
 
-    /// \brief Read only access to the variable names of the monitor
+    /// \brief Read only access to the variable names of the Monitor
     const std::string &var_name (std::size_t id) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
@@ -133,13 +133,13 @@ class Monitor
             var_name_.push_back(std::string());
     }
 
-    /// \brief Get the iteration index of the sampler of a given monitor
+    /// \brief Get the iteration index of the sampler of a given Monitor
     /// iteration
     ///
     /// \details
-    /// For example, if a monitor is only added to the sampler at the
+    /// For example, if a Monitor is only added to the sampler at the
     /// sampler's iteration `siter`. Then `index(0)` will be `siter` and so
-    /// on. If the monitor is added before the sampler's initialization and
+    /// on. If the Monitor is added before the sampler's initialization and
     /// continued to be evaluated during the iterations without calling
     /// `turnoff()`, then iter(iter) shall just be `iter`.
     std::size_t index (std::size_t iter) const
@@ -154,7 +154,7 @@ class Monitor
     /// variable
     ///
     /// \details
-    /// For a `dim` dimension monitor, `id` shall be 0 to `dim` - 1
+    /// For a `dim` dimension Monitor, `id` shall be 0 to `dim` - 1
     double record (std::size_t id) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
@@ -166,10 +166,10 @@ class Monitor
     }
 
     /// \brief Get the Monte Carlo integration record of a given variable and
-    /// the monitor iteration
+    /// the Monitor iteration
     ///
     /// \details
-    /// For a `dim` dimension monitor, `id` shall be 0 to `dim` - 1
+    /// For a `dim` dimension Monitor, `id` shall be 0 to `dim` - 1
     double record (std::size_t id, std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
@@ -297,7 +297,7 @@ class Monitor
         record_.clear();
     }
 
-    /// \brief Whether the montior is actively recording restuls
+    /// \brief Whether the Montior is actively recording restuls
     bool recording () const
     {
         return recording_;
@@ -327,7 +327,6 @@ class Monitor
     std::vector<double> result_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-
     dgemv_type dgemv_;
 }; // class Monitor
 

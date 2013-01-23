@@ -6,7 +6,7 @@
 
 namespace vsmc {
 
-/// \brief Monitor for path sampling
+/// \brief Monitor for Path sampling
 /// \ingroup Core
 template <typename T>
 class Path
@@ -18,10 +18,37 @@ class Path
     typedef cxx11::function<double (
             std::size_t, const Particle<T> &, double *)> eval_type;
 
-    explicit Path (const eval_type &eval) : eval_(eval) {}
+    /// \brief Construct a Path with an evaluation object
+    ///
+    /// \param eval The evaluation object of type Path::eval_type
+    ///
+    /// A Path object is very similar to a Monitor object. It is a special case
+    /// for Path sampling Monitor. The dimension of the Monitor is always one.
+    /// In addition, the evaluation object returns the width of the Path
+    /// sampling.
+    ///
+    /// The evaluation object has the signature
+    /// \code
+    /// double eval (std::size_t iter, const Particle<T> &particle, double *integrand)
+    /// \endcode
+    /// where the first two arguments are passed in by the Sampler at the end
+    /// of each iteration. The evaluation occurs after the possible MCMC moves.
+    /// The output parameter `integrand` shall contains the results of the
+    /// Path sampling integrands. The return value shall be the Path sampling
+    /// width.
+    ///
+    /// For example, say the Path sampling is computed through integral of
+    /// \f$\lambda = \int_0^1 E[g_\alpha(X)]\,\mathrm{d}\alpha\f$. The integral
+    /// is approximated with numerical integration at point
+    /// \f$\alpha_0 = 0, \alpha_1, \dots, \alpha_T = 1\f$, then at iteration
+    /// \f$t\f$, the output parameter `integrand` contains
+    /// \f$(g_{\alpha_t}(X_0),\dots)\f$ and the return value is
+    /// \f$\alpha_t - \alpha_{t-1}\f$.
+    explicit Path (const eval_type &eval) : eval_(eval), recording_(true) {}
 
     Path (const Path<T> &other) :
-        eval_(other.eval_), index_(other.index_), integrand_(other.integrand_),
+        eval_(other.eval_), recording_(other.recording_),
+        index_(other.index_), integrand_(other.integrand_),
         width_(other.width_), grid_(other.grid_)
     {}
 
@@ -29,6 +56,7 @@ class Path
     {
         if (&other != this) {
             eval_      = other.eval_;
+            recording_ = other.recording_;
             index_     = other.index_;
             integrand_ = other.integrand_;
             width_     = other.width_;
@@ -40,9 +68,9 @@ class Path
 
     /// \brief The number of iterations has been recorded
     ///
-    /// \note This is not necessarily the same as Sampler<T>::iter_size. For
-    /// example, a path sampling monitor can be set only after a certain time
-    /// point of the sampler's iterations.
+    /// This is not necessarily the same as Sampler<T>::iter_size. For example,
+    /// a Path sampling monitor can be set only after a certain time point of
+    /// the sampler's iterations.
     std::size_t iter_size () const
     {
         return index_.size();
@@ -58,8 +86,8 @@ class Path
     /// iteration
     ///
     /// \details
-    /// For example, if a path sampling monitor is only set at the sampler's
-    /// iteration `siter`. Then index(0) will be `siter` and so on. If the path
+    /// For example, if a Path sampling monitor is only set at the sampler's
+    /// iteration `siter`. Then index(0) will be `siter` and so on. If the Path
     /// sampling monitor is set before the sampler's initialization and
     /// continued to be evaluated during the iterations, then iter(iter) shall
     /// just be `iter`.
@@ -72,7 +100,7 @@ class Path
         return index_[iter];
     }
 
-    /// \brief Get the path sampling integrand of a given path iteration
+    /// \brief Get the Path sampling integrand of a given Path iteration
     double integrand (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -82,7 +110,7 @@ class Path
         return integrand_[iter];
     }
 
-    /// \brief Get the path sampling width of a given path iteration
+    /// \brief Get the Path sampling width of a given Path iteration
     double width (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -92,7 +120,7 @@ class Path
         return width_[iter];
     }
 
-    /// \brief Get the path sampling grid value of a given path iteration
+    /// \brief Get the Path sampling grid value of a given Path iteration
     ///
     /// \details
     /// This shall be sum of width's from zero up to the given iteration
@@ -178,15 +206,34 @@ class Path
         grid_.clear();
     }
 
+    /// \brief Whether the Path is actively recording restuls
+    bool recording () const
+    {
+        return recording_;
+    }
+
+    /// \brief Turn on the recording
+    void turnon ()
+    {
+        recording_ = true;
+    }
+
+    /// \brief Turn off the recording
+    void turnoff ()
+    {
+        recording_ = false;
+    }
+
     private :
 
-    std::vector<double> buffer_;
-    std::vector<double> weight_;
     eval_type eval_;
+    bool recording_;
     std::vector<std::size_t> index_;
     std::vector<double> integrand_;
     std::vector<double> width_;
     std::vector<double> grid_;
+    std::vector<double> weight_;
+    std::vector<double> buffer_;
     ddot_type ddot_;
 }; // class PathSampling
 
