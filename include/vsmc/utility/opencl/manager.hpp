@@ -126,15 +126,15 @@ class LocalSize
 /// \brief OpenCL Manager
 /// \ingroup OpenCL
 template <typename ID>
-class CLManager
+class Manager
 {
     public :
 
     typedef std::size_t size_type;
 
-    static CLManager<ID> &instance ()
+    static Manager<ID> &instance ()
     {
-        static CLManager<ID> manager;
+        static Manager<ID> manager;
 
         return manager;
     }
@@ -198,7 +198,7 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
         VSMC_RUNTIME_ASSERT((num),
-                "CALL vsmc::CLManager::crate_buffer WITH ZERO SIZE");
+                "CALL vsmc::Manager::crate_buffer WITH ZERO SIZE");
 
         if (!num)
             return cl::Buffer();
@@ -335,7 +335,7 @@ class CLManager
     mutable void *read_buffer_pool_;
     mutable void *write_buffer_pool_;
 
-    CLManager () :
+    Manager () :
         setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR)
     {
@@ -345,10 +345,10 @@ class CLManager
         setup_cl_manager(dev);
     }
 
-    CLManager (const CLManager<ID> &);
-    CLManager<ID> &operator= (const CLManager<ID> &);
+    Manager (const Manager<ID> &);
+    Manager<ID> &operator= (const Manager<ID> &);
 
-    ~CLManager ()
+    ~Manager ()
     {
         std::free(read_buffer_pool_);
         std::free(write_buffer_pool_);
@@ -454,7 +454,7 @@ class CLManager
     {
         return local_size ? cl::NDRange(local_size) : cl::NullRange;
     }
-}; // clss CLManager
+}; // clss Manager
 
 } } // namespace vsmc::opencl
 

@@ -68,7 +68,7 @@ struct NVIDIAGPU;
 
 class LocalSize;
 
-template <typename> class CLManager;
+template <typename> class Manager;
 
 } // namespace vsmc::opencl
 

@@ -31,14 +31,14 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 
 /// \brief Particle::value_type subtype
 /// \ingroup CL
-template <std::size_t Dim, typename T, typename CLManagerID>
+template <std::size_t Dim, typename T, typename ManagerID>
 class StateCL
 {
     public :
 
     typedef cl_ulong size_type;
     typedef T state_type;
-    typedef opencl::CLManager<CLManagerID> cl_manager_type;
+    typedef opencl::Manager<ManagerID> cl_manager_type;
 
     explicit StateCL (size_type N) :
         dim_(Dim == Dynamic ? 1 : Dim), size_(N),
@@ -50,7 +50,7 @@ class StateCL
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
     }
 
-    StateCL (const StateCL<Dim, T, CLManagerID> &other) :
+    StateCL (const StateCL<Dim, T, ManagerID> &other) :
         dim_(other.dim_), size_(other.size_), cl_manager_(other.cl_manager_),
         program_(other.program_), kernel_copy_(other.kernel_copy_),
         build_(other.build_), build_id_(0),
@@ -62,8 +62,8 @@ class StateCL
                 other.state_buffer_, dim_ * size_, state_buffer_);
     }
 
-    StateCL<Dim, T, CLManagerID> &operator= (
-            const StateCL<Dim, T, CLManagerID> &other)
+    StateCL<Dim, T, ManagerID> &operator= (
+            const StateCL<Dim, T, ManagerID> &other)
     {
         if (this != &other) {
             dim_         = other.dim_;

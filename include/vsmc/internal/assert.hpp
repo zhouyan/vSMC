@@ -122,8 +122,8 @@ class StaticAssert<true>
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func)                           \
     VSMC_RUNTIME_ASSERT((setup()),                                           \
-            ("**vsmc::CLManager::"#func"** can only be called after true "   \
-             "**vsmc::CLManager::setup**"));
+            ("**vsmc::Manager::"#func"** can only be called after true "   \
+             "**vsmc::Manager::setup**"));
 
 #define VSMC_RUNTIME_ASSERT_MKL_STAT_EVAL_EDIT_TASK(status)                  \
     VSMC_RUNTIME_ASSERT((status == VSL_STATUS_OK),                           \
