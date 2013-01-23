@@ -120,10 +120,8 @@ namespace vsmc { namespace traits {                                          \
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ISIntegral1Type, is_integral1_type,
-        cxxblas::ISIntegral1)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ISIntegralDType, is_integrald_type,
-        cxxblas::ISIntegralD)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Integral1Type, integral1_type, Integral1)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(IntegralDType, integrald_type, IntegralD)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type)
 

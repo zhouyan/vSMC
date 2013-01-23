@@ -2,7 +2,6 @@
 #define VSMC_CORE_WEIGHT_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cxxblas.hpp>
 
 #if VSMC_USE_MKL
 #include <mkl_vml.h>

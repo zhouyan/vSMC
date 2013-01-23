@@ -99,10 +99,6 @@
 /// \defgroup Utility Utility
 /// \brief Utilities
 
-/// \defgroup CXXBLAS C++ BLAS wrapper
-/// \ingroup Utility
-/// \brief C++ thin wrapper around the C BLAS API
-
 /// \defgroup Dispatch Apple GCD
 /// \ingroup Utility
 /// \brief Apple GCD dispatch queue utilities

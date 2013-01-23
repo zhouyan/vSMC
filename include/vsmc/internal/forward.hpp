@@ -21,15 +21,8 @@ class NullType;
 
 // Utilities
 class Seed;
-
-namespace cxxblas {
-
-class DDot;
-class DGemv;
-class ISIntegral1;
-class ISIntegralD;
-
-} // namespace vsmc::cxxblas
+class Integral1;
+class IntegralD;
 
 namespace gcd {
 
