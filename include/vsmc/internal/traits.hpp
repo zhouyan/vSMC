@@ -120,12 +120,10 @@ namespace vsmc { namespace traits {                                          \
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DDotType, ddot_type, cxxblas::DDot)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(DGemvType, dgemv_type, cxxblas::DGemv)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ISUnivariateType, is_univariate_type,
-        cxxblas::ISUnivariate<T>)
+        cxxblas::ISUnivariate)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ISMultivariateType, is_multivariate_type,
-        cxxblas::ISMultivariate<T>)
+        cxxblas::ISMultivariate)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type)
 

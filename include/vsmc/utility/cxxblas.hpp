@@ -183,12 +183,11 @@ class DGemv
     }
 }; // class DGemv
 
-template <typename T>
 class ISUnivariate
 {
     public :
 
-    typedef VSMC_CBLAS_INT size_type;
+    typedef DDot::size_type size_type;
 
     /// \brief Compute the importance sampling integral
     ///
@@ -198,17 +197,15 @@ class ISUnivariate
     /// \return The importance sampling estiamte
     double operator() (size_type N, const double *hX, const double *W) const
     {
-        typename traits::DDotTypeTrait<T>::type op;
-        return op(N, hX, 1, W, 1);
+        return DDot()(N, hX, 1, W, 1);
     }
 }; // ISUnivariate
 
-template <typename T>
 class ISMultivariate
 {
     public :
 
-    typedef VSMC_CBLAS_INT size_type;
+    typedef DGemv::size_type size_type;
 
     /// \brief Compute the importance sampling integral
     ///
@@ -221,8 +218,7 @@ class ISMultivariate
     void operator() (size_type N, size_type dim,
             const double *hX, const double *W, double *Eh) const
     {
-        typename traits::DGemvTypeTrait<T>::type op;
-        op(RowMajor, Trans, N, dim, 1, hX, dim, W, 1, 0, Eh, 1);
+        DGemv()(RowMajor, Trans, N, dim, 1, hX, dim, W, 1, 0, Eh, 1);
     }
 }; // class ISMultivariate
 

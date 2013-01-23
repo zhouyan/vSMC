@@ -26,8 +26,8 @@ namespace cxxblas {
 
 class DDot;
 class DGemv;
-template <typename> class ISUnivariate;
-template <typename> class ISMultivariate;
+class ISUnivariate;
+class ISMultivariate;
 
 } // namespace vsmc::cxxblas
 
