@@ -68,9 +68,7 @@ class Path
 
     /// \brief The number of iterations has been recorded
     ///
-    /// This is not necessarily the same as Sampler<T>::iter_size. For example,
-    /// a Path sampling monitor can be set only after a certain time point of
-    /// the sampler's iterations.
+    /// \sa Monitor::iter_size()
     std::size_t iter_size () const
     {
         return index_.size();
@@ -85,12 +83,7 @@ class Path
     /// \brief Get the iteration index of the sampler of a given monitor
     /// iteration
     ///
-    /// \details
-    /// For example, if a Path sampling monitor is only set at the sampler's
-    /// iteration `siter`. Then index(0) will be `siter` and so on. If the Path
-    /// sampling monitor is set before the sampler's initialization and
-    /// continued to be evaluated during the iterations, then iter(iter) shall
-    /// just be `iter`.
+    /// \sa Monitor::index()
     std::size_t index (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -123,7 +116,8 @@ class Path
     /// \brief Get the Path sampling grid value of a given Path iteration
     ///
     /// \details
-    /// This shall be sum of width's from zero up to the given iteration
+    /// This is sum of width's from zero up to the given iteration, in other
+    /// words, \f$\alpha_t\f$
     double grid (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
@@ -134,6 +128,8 @@ class Path
     }
 
     /// \brief Read the index history through an output iterator
+    ///
+    /// \sa Monitor::read_index()
     template <typename OutputIter>
     OutputIter read_index (OutputIter first) const
     {
@@ -168,11 +164,12 @@ class Path
     }
 
     /// Perform the evaluation for a given iteration and a Particle<T> object
+    ///
+    /// \sa Monitor::eval()
     void eval (std::size_t iter, const Particle<T> &particle)
     {
         VSMC_RUNTIME_ASSERT((bool(eval_)),
-                ("CALL **Path::eval** WITH AN INVALID "
-                 "EVALUATION FUNCTOR"));
+                ("**Path::eval** AN INVALID EVALUATION OBJECT"));
 
         buffer_.resize(particle.size());
         weight_.resize(particle.size());
