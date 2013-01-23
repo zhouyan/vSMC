@@ -27,37 +27,6 @@
 
 namespace vsmc { namespace cxxblas {
 
-/// \brief C++ wrapper of cblas_dscal
-class DScal
-{
-    public :
-
-    typedef VSMC_CBLAS_INT size_type;
-
-    void operator() (const size_type N,
-            const double alpha, double *X, const size_type incX) const
-    {
-#if VSMC_USE_CBLAS
-        ::cblas_dscal(N, alpha, X, incX);
-#else // VSMC_USE_CBLAS
-        if (N == 0)
-            return;
-
-        VSMC_RUNTIME_ASSERT((incX > 0),
-                "NON-POSITIVE STRIDE OF X IN **vsmc::DDot**");
-
-        if (incX == 1) {
-            for (size_type i = 0; i != N; ++i, ++X)
-                *X *= alpha;
-            return;
-        }
-
-        for (size_type i = 0; i != N; ++i, X += incX)
-            *X *= alpha;
-#endif // VSMC_USE_CBLAS
-    }
-}; // class DScal
-
 /// \brief C++ wrapper of cblas_ddot
 /// \ingroup CXXBLAS
 class DDot
@@ -213,6 +182,49 @@ class DGemv
 #endif // VSMC_USE_CBLAS
     }
 }; // class DGemv
+
+template <typename T>
+class ISUnivariate
+{
+    public :
+
+    typedef VSMC_CBLAS_INT size_type;
+
+    /// \brief Compute the importance sampling integral
+    ///
+    /// \param N Number of particles
+    /// \param hX A `N` vector \f$(h(X_i))\f$
+    /// \param W Normalized weights
+    /// \return The importance sampling estiamte
+    double operator() (size_type N, const double *hX, const double *W) const
+    {
+        typename traits::DDotTypeTrait<T>::type op;
+        return op(N, hX, 1, W, 1);
+    }
+}; // ISUnivariate
+
+template <typename T>
+class ISMultivariate
+{
+    public :
+
+    typedef VSMC_CBLAS_INT size_type;
+
+    /// \brief Compute the importance sampling integral
+    ///
+    /// \param N Number of particles
+    /// \param dim Number of variables
+    /// \param hX A `N` by `dim` row major matrix, each row `i` contains
+    /// \f$h(X_i) = (h_1(X_i), h_2(X_i), \dots, h_d(X_i))\f$
+    /// \param W Normalized weights
+    /// \param Eh The importance sampling estiamtes of \f$E[h(X)]\f$
+    void operator() (size_type N, size_type dim,
+            const double *hX, const double *W, double *Eh) const
+    {
+        typename traits::DGemvTypeTrait<T>::type op;
+        op(RowMajor, Trans, N, dim, 1, hX, dim, W, 1, 0, Eh, 1);
+    }
+}; // class ISMultivariate
 
 } } // namespace vsmc::cxxblas
 

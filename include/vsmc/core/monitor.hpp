@@ -17,7 +17,10 @@ class Monitor
     typedef cxx11::function<
         void (std::size_t, std::size_t, const Particle<T> &, double *)>
         eval_type;
-    typedef typename traits::DGemvTypeTrait<T>::type dgemv_type;
+    typedef typename traits::ISUnivariateTypeTrait<T>::type
+        is_univariate_type;
+    typedef typename traits::ISMultivariateTypeTrait<T>::type
+        is_multivariate_type;
 
     /// \brief Construct a Monitor with an evaluation object
     ///
@@ -267,22 +270,26 @@ class Monitor
                 ("**Monitor::eval** INVALID EVALUATION OBJECT"));
 
         result_.resize(dim_);
-        switch (method_) {
-            case ImportanceSampling :
-                weight_.resize(particle.size());
-                buffer_.resize(particle.size() * dim_);
-                eval_(iter, dim_, particle, &buffer_[0]);
-                particle.read_weight(&weight_[0]);
-                dgemv_(RowMajor, Trans, static_cast<
-                        typename traits::SizeTypeTrait<dgemv_type>::type>(
-                            particle.size()), static_cast<
-                        typename traits::SizeTypeTrait<dgemv_type>::type>(
-                            dim_), 1, &buffer_[0], dim_, &weight_[0], 1, 0,
-                        &result_[0], 1);
-                break;
-            case Simple :
-                eval_(iter, dim_, particle, &result_[0]);
-                break;
+        if (method_ ==  ImportanceSampling) {
+            weight_.resize(particle.size());
+            buffer_.resize(particle.size() * dim_);
+            eval_(iter, dim_, particle, &buffer_[0]);
+            particle.read_weight(&weight_[0]);
+            if (dim_ == 1) {
+                result_[0] = is_uni_eval_(static_cast<typename
+                        traits::SizeTypeTrait<is_univariate_type>::type>(
+                            particle.size()), &buffer_[0], &weight_[0]);
+            } else {
+                is_mul_eval_(static_cast<typename
+                        traits::SizeTypeTrait<is_multivariate_type>::type>(
+                            particle.size()), static_cast<typename
+                        traits::SizeTypeTrait<is_multivariate_type>::type>(
+                            dim_), &buffer_[0], &weight_[0], &result_[0]);
+            }
+        } else if (method_ == Simple) {
+            eval_(iter, dim_, particle, &result_[0]);
+        } else {
+            VSMC_RUNTIME_ASSERT(false, "**vsmc::Monitor** INVALID METHOD");
         }
 
         index_.push_back(iter);
@@ -327,7 +334,8 @@ class Monitor
     std::vector<double> result_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    dgemv_type dgemv_;
+    is_univariate_type is_uni_eval_;
+    is_multivariate_type is_mul_eval_;
 }; // class Monitor
 
 } // namespace vsmc

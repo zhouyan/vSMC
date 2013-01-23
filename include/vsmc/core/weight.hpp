@@ -18,8 +18,6 @@ class WeightSet
     public :
 
     typedef typename traits::SizeTypeTrait<T>::type size_type;
-    typedef typename traits::DDotTypeTrait<T>::type ddot_type;
-    typedef typename traits::DScalTypeTrait<T>::type dscal_type;
 
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
@@ -268,8 +266,6 @@ class WeightSet
     double ess_;
     std::vector<double> weight_;
     std::vector<double> log_weight_;
-    ddot_type ddot_;
-    dscal_type dscal_;
 
     void log_weight2weight ()
     {
@@ -301,15 +297,16 @@ class WeightSet
 
     void normalize_weight ()
     {
-        double alpha = 0;
+        double coeff = 0;
         for (size_type i = 0; i != size_; ++i)
-            alpha += weight_[i];
-        dscal_(static_cast<
-                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
-                1 / alpha, &weight_[0], 1);
-        ess_ = 1 / ddot_(static_cast<
-                typename traits::SizeTypeTrait<ddot_type>::type>(size_),
-                &weight_[0], 1, &weight_[0], 1);
+            coeff += weight_[i];
+        coeff = 1 / coeff;
+        for (size_type i = 0; i != size_; ++i)
+            weight_[i] *= coeff;
+        ess_ = 0;
+        for (size_type i = 0; i != size_; ++i)
+            ess_ += weight_[i] * weight_[i];
+        ess_ = 1 / ess_;
     }
 
     void normalize_log_weight ()

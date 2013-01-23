@@ -25,8 +25,9 @@ class Seed;
 namespace cxxblas {
 
 class DDot;
-class DScal;
 class DGemv;
+template <typename> class ISUnivariate;
+template <typename> class ISMultivariate;
 
 } // namespace vsmc::cxxblas
 
