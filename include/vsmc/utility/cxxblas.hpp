@@ -9,17 +9,20 @@
 
 #if VSMC_USE_MKL // MKL
 #include <mkl_cblas.h>
-#define VSMC_CBLAS_INT MKL_INT
 #define VSMC_USE_CBLAS 1
+#define VSMC_CBLAS_INT MKL_INT
 #elif VSMC_USE_VECLIB // vecLib
 #include <vecLib/cblas.h>
-#define VSMC_CBLAS_INT int
 #define VSMC_USE_CBLAS 1
+#define VSMC_CBLAS_INT int
 #elif VSMC_USE_GENERIC_CBLAS // Generic CBlas
 #define VSMC_USE_CBLAS 1
+#ifndef VSMC_CBALS_INT
+#define VSMC_CBALS_INT int
+#endif
 #else // No known CBlas
-#define VSMC_CBLAS_INT VSMC_SIZE_TYPE
 #define VSMC_USE_CBLAS 0
+#define VSMC_CBLAS_INT VSMC_SIZE_TYPE
 #endif
 
 namespace vsmc { namespace cxxblas {
