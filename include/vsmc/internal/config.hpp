@@ -88,6 +88,14 @@
 #define VSMC_USE_GENERIC_CBLAS 0
 #endif
 
+#ifndef VSMC_USE_ARMADILLO
+#define VSMC_USE_ARMADILLO 0
+#endif
+
+#ifndef VSMC_USE_EIGEN
+#define VSMC_USE_EIGEN 0
+#endif
+
 #ifndef VSMC_RESTRICTED_ADAPTER
 #define VSMC_RESTRICTED_ADAPTER 1
 #endif

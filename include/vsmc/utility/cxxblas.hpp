@@ -7,22 +7,38 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
+#undef VSMC_USE_CBLAS
+#undef VSMC_USE_CXXBLAS
+#undef VSMC_CXXBLAS_INT
+
 #if VSMC_USE_MKL // MKL
 #include <mkl_cblas.h>
 #define VSMC_USE_CBLAS 1
-#define VSMC_CBLAS_INT MKL_INT
+#define VSMC_USE_CXXBLAS 1
+#define VSMC_CXXBLAS_INT MKL_INT
 #elif VSMC_USE_VECLIB // vecLib
 #include <vecLib/cblas.h>
 #define VSMC_USE_CBLAS 1
-#define VSMC_CBLAS_INT int
+#define VSMC_USE_CXXBLAS 1
+#define VSMC_CXXBLAS_INT int
 #elif VSMC_USE_GENERIC_CBLAS // Generic CBlas
 #define VSMC_USE_CBLAS 1
-#ifndef VSMC_CBALS_INT
-#define VSMC_CBALS_INT int
-#endif
+#define VSMC_USE_CXXBLAS 1
+#define VSMC_CXXBLAS_INT int
+#elif VSMC_USE_ARMADILLO // Armadillo
+#include <armadillo>
+#define VSMC_USE_CBLAS 0
+#define VSMC_USE_CXXBLAS 0
+#define VSMC_CXXBLAS_INT arma::blas_int
+#elif VSMC_USE_EIGEN // Eigen
+#include <Eigen/Dense>
+#define VSMC_USE_CBLAS 0
+#define VSMC_USE_CXXBLAS 0
+#define VSMC_CXXBLAS_INT EIGEN_DEFAULT_DENSE_INDEX_TYPE
 #else // No known CBlas
 #define VSMC_USE_CBLAS 0
-#define VSMC_CBLAS_INT VSMC_SIZE_TYPE
+#define VSMC_USE_CXXBLAS 1
+#define VSMC_CXXBLAS_INT VSMC_SIZE_TYPE
 #endif
 
 namespace vsmc { namespace cxxblas {
@@ -33,7 +49,7 @@ class DDot
 {
     public :
 
-    typedef VSMC_CBLAS_INT size_type;
+    typedef VSMC_CXXBLAS_INT size_type;
 
     double operator() (const size_type N,
             const double *X, const size_type incX,
@@ -86,7 +102,7 @@ class DGemv
 {
     public :
 
-    typedef VSMC_CBLAS_INT size_type;
+    typedef VSMC_CXXBLAS_INT size_type;
 
     void operator() (MatrixOrder order, MatrixTranspose trans,
             const size_type M, const size_type N, const double alpha,
@@ -183,11 +199,16 @@ class DGemv
     }
 }; // class DGemv
 
+inline bool is_sse_aligned (void *ptr)
+{
+    return ((unsigned long) ptr & 15) == 0;
+}
+
 class ISIntegral1
 {
     public :
 
-    typedef DDot::size_type size_type;
+    typedef VSMC_CXXBLAS_INT size_type;
 
     /// \brief Compute the importance sampling integral
     ///
@@ -197,7 +218,25 @@ class ISIntegral1
     /// \return The importance sampling estiamte
     double operator() (size_type N, const double *hX, const double *W) const
     {
+        if (N == 0)
+            return 0;
+#if VSMC_USE_CXXBLAS
         return DDot()(N, hX, 1, W, 1);
+#elif VSMC_USE_ARMADILLO
+        return arma::dot(arma::vec(hX, N), arma::vec(W, N));
+#elif VSMC_USE_EIGEN
+        if (is_sse_aligned((void *) hX) && is_sse_aligned((void *) W)) {
+            Eigen::Map<const Eigen::VectorXd, Eigen::Aligned> hXEigen(hX, N);
+            Eigen::Map<const Eigen::VectorXd, Eigen::Aligned> WEigen(W, N);
+            return hXEigen.dot(WEigen);
+        } else {
+            Eigen::Map<const Eigen::VectorXd> hXEigen(hX, N);
+            Eigen::Map<const Eigen::VectorXd> WEigen(W, N);
+            return hXEigen.dot(WEigen);
+        }
+#else
+#error No implementation of ISIntegral1
+#endif
     }
 }; // ISIntegral1
 
@@ -205,7 +244,7 @@ class ISIntegralD
 {
     public :
 
-    typedef DGemv::size_type size_type;
+    typedef VSMC_CXXBLAS_INT size_type;
 
     /// \brief Compute the importance sampling integral
     ///
@@ -218,13 +257,36 @@ class ISIntegralD
     void operator() (size_type N, size_type dim,
             const double *hX, const double *W, double *Eh) const
     {
+        if (N == 0)
+            return;
+#if VSMC_USE_CXXBLAS
         DGemv()(RowMajor, Trans, N, dim, 1, hX, dim, W, 1, 0, Eh, 1);
+#elif VSMC_USE_ARMADILLO
+        arma::vec res(Eh, dim, false);
+        res = arma::mat(hX, dim, N) * arma::vec(W, N);
+#elif VSMC_USE_EIGEN
+        if (is_sse_aligned((void *) hX) && is_sse_aligned((void *) W) &&
+                is_sse_aligned((void *) Eh)) {
+            Eigen::Map<const Eigen::Matrix<
+                double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>,
+                Eigen::Aligned> hXEigen(hX, dim, N);
+            Eigen::Map<const Eigen::VectorXd, Eigen::Aligned> WEigen(W, N);
+            Eigen::Map<Eigen::VectorXd, Eigen::Aligned> res(Eh, dim);
+            res = hXEigen * WEigen;
+        } else {
+            Eigen::Map<const Eigen::Matrix<
+                double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> >
+                hXEigen(hX, dim, N);
+            Eigen::Map<const Eigen::VectorXd> WEigen(W, N);
+            Eigen::Map<Eigen::VectorXd> res(Eh, dim);
+            res = hXEigen * WEigen;
+        }
+#else
+#error No implementation of ISIntegralD
+#endif
     }
 }; // class ISIntegralD
 
 } } // namespace vsmc::cxxblas
-
-#undef VSMC_CBLAS_INT
-#undef VSMC_USE_CBLAS
 
 #endif // VSMC_UTILITY_CXXBLAS_HPP
