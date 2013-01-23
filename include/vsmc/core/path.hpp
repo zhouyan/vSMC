@@ -14,7 +14,7 @@ class Path
     public :
 
     typedef T value_type;
-    typedef typename traits::ISUnivariateTypeTrait<T>::type is_univariate_type;
+    typedef typename traits::ISIntegral1TypeTrait<T>::type is_integral1_type;
     typedef cxx11::function<double (
             std::size_t, const Particle<T> &, double *)> eval_type;
 
@@ -182,8 +182,8 @@ class Path
         width_.push_back(eval_(iter, particle, &buffer_[0]));
         grid_.push_back(grid_.size() ?
                 grid_.back() + width_.back() : width_.back());
-        integrand_.push_back(is_eval_(static_cast<typename
-                    traits::SizeTypeTrait<is_univariate_type>::type>(
+        integrand_.push_back(is_integral1_(static_cast<typename
+                    traits::SizeTypeTrait<is_integral1_type>::type>(
                         weight_.size()), &weight_[0], &buffer_[0]));
     }
 
@@ -234,7 +234,7 @@ class Path
     std::vector<double> grid_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    is_univariate_type is_eval_;
+    is_integral1_type is_integral1_;
 }; // class PathSampling
 
 } // namespace vsmc

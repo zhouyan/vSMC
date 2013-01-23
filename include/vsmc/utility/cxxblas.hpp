@@ -183,7 +183,7 @@ class DGemv
     }
 }; // class DGemv
 
-class ISUnivariate
+class ISIntegral1
 {
     public :
 
@@ -199,9 +199,9 @@ class ISUnivariate
     {
         return DDot()(N, hX, 1, W, 1);
     }
-}; // ISUnivariate
+}; // ISIntegral1
 
-class ISMultivariate
+class ISIntegralD
 {
     public :
 
@@ -220,7 +220,7 @@ class ISMultivariate
     {
         DGemv()(RowMajor, Trans, N, dim, 1, hX, dim, W, 1, 0, Eh, 1);
     }
-}; // class ISMultivariate
+}; // class ISIntegralD
 
 } } // namespace vsmc::cxxblas
 

@@ -17,10 +17,8 @@ class Monitor
     typedef cxx11::function<
         void (std::size_t, std::size_t, const Particle<T> &, double *)>
         eval_type;
-    typedef typename traits::ISUnivariateTypeTrait<T>::type
-        is_univariate_type;
-    typedef typename traits::ISMultivariateTypeTrait<T>::type
-        is_multivariate_type;
+    typedef typename traits::ISIntegral1TypeTrait<T>::type is_integral1_type;
+    typedef typename traits::ISIntegralDTypeTrait<T>::type is_integrald_type;
 
     /// \brief Construct a Monitor with an evaluation object
     ///
@@ -276,14 +274,14 @@ class Monitor
             eval_(iter, dim_, particle, &buffer_[0]);
             particle.read_weight(&weight_[0]);
             if (dim_ == 1) {
-                result_[0] = is_uni_eval_(static_cast<typename
-                        traits::SizeTypeTrait<is_univariate_type>::type>(
+                result_[0] = is_integral1_(static_cast<typename
+                        traits::SizeTypeTrait<is_integral1_type>::type>(
                             particle.size()), &buffer_[0], &weight_[0]);
             } else {
-                is_mul_eval_(static_cast<typename
-                        traits::SizeTypeTrait<is_multivariate_type>::type>(
+                is_integrald_(static_cast<typename
+                        traits::SizeTypeTrait<is_integrald_type>::type>(
                             particle.size()), static_cast<typename
-                        traits::SizeTypeTrait<is_multivariate_type>::type>(
+                        traits::SizeTypeTrait<is_integrald_type>::type>(
                             dim_), &buffer_[0], &weight_[0], &result_[0]);
             }
         } else if (method_ == Simple) {
@@ -334,8 +332,8 @@ class Monitor
     std::vector<double> result_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    is_univariate_type is_uni_eval_;
-    is_multivariate_type is_mul_eval_;
+    is_integral1_type is_integral1_;
+    is_integrald_type is_integrald_;
 }; // class Monitor
 
 } // namespace vsmc
