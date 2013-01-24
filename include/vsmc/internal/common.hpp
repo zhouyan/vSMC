@@ -7,24 +7,18 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include <ctime>
 
-#include <algorithm>
-#include <limits>
-#include <numeric>
-
-#include <iterator>
-#include <map>
-#include <string>
-#include <vector>
-
-#include <iostream>
 #include <fstream>
-#include <sstream>
 #include <iomanip>
-
+#include <iostream>
+#include <iterator>
+#include <limits>
+#include <map>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/cxx11/random.hpp>

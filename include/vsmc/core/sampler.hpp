@@ -125,7 +125,10 @@ class Sampler
     template <typename OutputIter>
     OutputIter read_ess_history (OutputIter first) const
     {
-        return std::copy(ess_history_.begin(), ess_history_.end(), first);
+        for (std::size_t i = 0; i != ess_history_.size(); ++i, ++first)
+            *first = ess_history_[i];
+
+        return first;
     }
 
     /// \brief Get resampling indicator of a given iteration
@@ -138,8 +141,10 @@ class Sampler
     template <typename OutputIter>
     OutputIter read_resampled_history (OutputIter first) const
     {
-        return std::copy(resampled_history_.begin(), resampled_history_.end(),
-                first);
+        for (std::size_t i = 0; i != resampled_history_.size(); ++i, ++first)
+            *first = resampled_history_[i];
+
+        return first;
     }
 
     /// \brief Get the number of moves (bosth move and mcmc) of a given
@@ -468,8 +473,8 @@ class Sampler
         std::vector<double> acc;
         std::size_t accd = 0;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            accd = std::max VSMC_MACRO_NO_EXPANSION (
-                    accd, accept_history_[iter].size());
+            if (accd < accept_history_[iter].size())
+                accd = accept_history_[iter].size();
         }
         bool print_accept = accd > 0 && iter_size() > 0;
 
@@ -478,7 +483,8 @@ class Sampler
         std::vector<std::size_t> path_mask;
         if (print_path) {
             path_mask.resize(iter_size(),
-                    std::numeric_limits<std::size_t>::max());
+                    std::numeric_limits<std::size_t>::max
+                    VSMC_MACRO_NO_EXPANSION ());
             for (std::size_t d = 0; d != path_.iter_size(); ++d)
                 path_mask[path_.index(d)] = d;
         }
@@ -489,8 +495,9 @@ class Sampler
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             mond += m->second.dim();
-            mi = std::max VSMC_MACRO_NO_EXPANSION (
-                    mi, m->second.iter_size());
+            if (mi < m->second.iter_size())
+                mi = m->second.iter_size();
+
         }
         print_monitor = print_monitor && mond > 0 && mi > 0 && iter_size() > 0;
         std::vector<std::vector<std::size_t> > monitor_mask;
@@ -500,7 +507,8 @@ class Sampler
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
                 monitor_mask[mm].resize(iter_size(),
-                        std::numeric_limits<std::size_t>::max());
+                        std::numeric_limits<std::size_t>::max
+                        VSMC_MACRO_NO_EXPANSION ());
                 for (std::size_t d = 0; d != m->second.iter_size(); ++d)
                     monitor_mask[mm][m->second.index(d)] = d;
                 ++mm;
@@ -570,7 +578,8 @@ class Sampler
 
             if (print_path) {
                 std::size_t pr = path_mask[iter];
-                if (pr < std::numeric_limits<std::size_t>::max()) {
+                if (pr < std::numeric_limits<std::size_t>::max
+                        VSMC_MACRO_NO_EXPANSION ()) {
                     os << sepchar << path_.integrand(pr);
                     os << sepchar << path_.width(pr);
                     os << sepchar << path_.grid(pr);
@@ -586,7 +595,8 @@ class Sampler
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
                     std::size_t mr = monitor_mask[mm][iter];
-                    if (mr < std::numeric_limits<std::size_t>::max()) {
+                    if (mr < std::numeric_limits<std::size_t>::max
+                            VSMC_MACRO_NO_EXPANSION ()) {
                         for (std::size_t d = 0; d != m->second.dim(); ++d)
                             os << sepchar << m->second.record(d, mr);
                     } else {

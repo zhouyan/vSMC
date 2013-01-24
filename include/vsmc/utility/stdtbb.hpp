@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <functional>
-#include <numeric>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -150,9 +149,11 @@ class ThreadInfo
 
     std::size_t thread_num_;
 
-    ThreadInfo () : thread_num_(std::max VSMC_MACRO_NO_EXPANSION (
-                static_cast<std::size_t>(1),
-                static_cast<std::size_t>(std::thread::hardware_concurrency())))
+    ThreadInfo () : thread_num_(
+            static_cast<std::size_t>(1) >
+            static_cast<std::size_t>(std::thread::hardware_concurrency()) ?
+            static_cast<std::size_t>(1) :
+            static_cast<std::size_t>(std::thread::hardware_concurrency()))
     {
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -243,7 +244,11 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     // stop parallelization
 #endif
 
-    return std::accumulate(result.begin(), result.end(), init);
+    T acc(init);
+    for (std::size_t i = 0; i != result.size(); ++i)
+        acc += result[i];
+
+    return acc;
 }
 
 /// \brief Parallel accumulate using C++11 thread
@@ -282,7 +287,11 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     // stop parallelization
 #endif
 
-    return std::accumulate(result.begin(), result.end(), init, bin_op);
+    T acc(init);
+    for (std::size_t i = 0; i != result.size(); ++i)
+        acc = bin_op(acc, result[i]);
+
+    return acc;
 }
 
 } } // namespace vsmc::thread

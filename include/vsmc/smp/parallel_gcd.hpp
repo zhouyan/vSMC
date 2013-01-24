@@ -43,8 +43,11 @@ class InitializeGCD : public InitializeBase<T, Derived>
                 (void *) &wp, work_);
         this->post_processor(particle);
 
-        return std::accumulate(accept_.begin(), accept_.end(),
-                static_cast<std::size_t>(0));
+        std::size_t acc = 0;
+        for (size_type i = 0; i != particle.size(); ++i)
+            acc += accept_[i];
+
+        return acc;
     }
 
     protected :
@@ -96,8 +99,11 @@ class MoveGCD : public MoveBase<T, Derived>
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
 
-        return std::accumulate(accept_.begin(), accept_.end(),
-                static_cast<std::size_t>(0));
+        std::size_t acc = 0;
+        for (size_type i = 0; i != particle.size(); ++i)
+            acc += accept_[i];
+
+        return acc;
     }
 
     protected :

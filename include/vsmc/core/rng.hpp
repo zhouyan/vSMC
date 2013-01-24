@@ -38,7 +38,8 @@ class Seed
 
     result_type get ()
     {
-        if (seed_  >= std::numeric_limits<result_type>::max() - 1)
+        if (seed_  >= std::numeric_limits<result_type>::max
+                VSMC_MACRO_NO_EXPANSION () - 1)
             seed_ = 0;
 
         return ++seed_;
@@ -51,7 +52,8 @@ class Seed
 
     void skip (result_type steps)
     {
-        if (seed_ >= std::numeric_limits<result_type>::max() - steps)
+        if (seed_ >= std::numeric_limits<result_type>::max
+                VSMC_MACRO_NO_EXPANSION () - steps)
             seed_ = steps;
         else
             seed_ += steps;

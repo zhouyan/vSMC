@@ -185,7 +185,10 @@ class Monitor
     template <typename OutputIter>
     OutputIter read_index (OutputIter first) const
     {
-        return std::copy(index_.begin(), index_.end(), first);
+        for (std::size_t i = 0; i != index_.size(); ++i, ++first)
+            *first = index_[i];
+
+        return first;
     }
 
     /// \brief Read the record history for a given variable through an output
@@ -237,7 +240,8 @@ class Monitor
                 first = read_record(d, first);
 
         if (order == RowMajor)
-            first = std::copy(record_.begin(), record_.end(), first);
+            for (std::size_t i = 0; i != record_.size(); ++i, ++first)
+                *first = record_[i];
 
         return first;
     }

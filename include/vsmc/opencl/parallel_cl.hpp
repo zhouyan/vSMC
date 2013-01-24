@@ -299,8 +299,11 @@ class InitializeCL : public opencl::LocalSize
         particle.value().manager().template read_buffer<cl_ulong>(
                 accept_buffer_, particle.size(), &accept_host_[0]);
 
-        return std::accumulate(accept_host_.begin(), accept_host_.end(),
-                static_cast<cl_ulong>(0));
+        cl_ulong acc = 0;
+        for (size_type i = 0; i != particle.size(); ++i)
+            acc += accept_host_[i];
+
+        return acc;
     }
 
     protected :
@@ -393,8 +396,11 @@ class MoveCL : public opencl::LocalSize
         particle.value().manager().template read_buffer<cl_ulong>(
                 accept_buffer_, particle.size(), &accept_host_[0]);
 
-        return std::accumulate(accept_host_.begin(), accept_host_.end(),
-                static_cast<cl_ulong>(0));
+        cl_ulong acc = 0;
+        for (size_type i = 0; i != particle.size(); ++i)
+            acc += accept_host_[i];
+
+        return acc;
     }
 
     protected :

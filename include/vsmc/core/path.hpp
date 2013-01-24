@@ -133,28 +133,40 @@ class Path
     template <typename OutputIter>
     OutputIter read_index (OutputIter first) const
     {
-        return std::copy(index_.begin(), index_.end(), first);
+        for (std::size_t i = 0; i != index_.size(); ++i, ++first)
+            *first = index_[i];
+
+        return first;
     }
 
     /// \brief Read the integrand history through an output iterator
     template <typename OutputIter>
     OutputIter read_integrand (OutputIter first) const
     {
-        return std::copy(integrand_.begin(), integrand_.end(), first);
+        for (std::size_t i = 0; i != integrand_.size(); ++i, ++first)
+            *first = integrand_[i];
+
+        return first;
     }
 
     /// \brief Read the width history through an output iterator
     template <typename OutputIter>
     OutputIter read_width (OutputIter first) const
     {
-        return std::copy(width_.begin(), width_.end(), first);
+        for (std::size_t i = 0; i != width_.size(); ++i, ++first)
+            *first = width_[i];
+
+        return first;
     }
 
     /// \brief Read the grid history through an output iterator
     template <typename OutputIter>
     OutputIter read_grid (OutputIter first) const
     {
-        return std::copy(grid_.begin(), grid_.end(), first);
+        for (std::size_t i = 0; i != grid_.size(); ++i, ++first)
+            *first = grid_[i];
+
+        return first;
     }
 
     /// \brief Set a new evaluation object of type eval_type

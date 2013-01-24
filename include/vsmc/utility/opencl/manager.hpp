@@ -3,7 +3,7 @@
 
 #define __CL_ENABLE_EXCEPTIONS
 
-#include <algorithm>
+#include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <vector>
@@ -233,7 +233,10 @@ class Manager
         command_queue_.enqueueReadBuffer(buf, CL_TRUE, 0,
                 sizeof(CLType) * num, (void *) temp);
 
-        return std::copy(temp, temp + num, first);
+        for (std::size_t i = 0; i != num; ++i, ++first)
+            *first = temp[i];
+
+        return first;
     }
 
     template <typename CLType>

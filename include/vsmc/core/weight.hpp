@@ -42,7 +42,10 @@ class WeightSet
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
     {
-        return std::copy(weight_.begin(), weight_.end(), first);
+        for (size_type i = 0; i != size_; ++i, ++first)
+            *first = weight_[i];
+
+        return first;
     }
 
     /// \brief Read normalized weights through a random access iterator with
@@ -74,7 +77,10 @@ class WeightSet
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
     {
-        return std::copy(log_weight_.begin(), log_weight_.end(), first);
+        for (size_type i = 0; i != size_; ++i, ++first)
+            *first = log_weight_[i];
+
+        return first;
     }
 
     /// \brief Read unnormalized logarithm weights through a random access
@@ -119,8 +125,11 @@ class WeightSet
     void set_equal_weight ()
     {
         ess_ = static_cast<double>(size_);
-        std::fill(weight_.begin(), weight_.end(), 1.0 / size_);
-        std::fill(log_weight_.begin(), log_weight_.end(), 0);
+        double ew = 1 / static_cast<double>(size_);
+        for (size_type i = 0; i != size_; ++i) {
+            weight_[i] = ew;
+            log_weight_[i] = 0;
+        }
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by

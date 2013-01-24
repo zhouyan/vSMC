@@ -108,8 +108,9 @@ class Resample<ResampleType<ResampleScheme, Residual> >
         integral_.resize(N);
         for (SizeType i = 0; i != N; ++i)
             residual_[i] = modf(N * weight[i], &integral_[i]);
-        double dsize = std::accumulate(residual_.begin(), residual_.end(),
-                static_cast<double>(0));
+        double dsize = 0;
+        for (SizeType i = 0; i != N; ++i)
+            dsize += residual_[i];
         SizeType size = static_cast<SizeType>(dsize);
         for (SizeType i = 0; i != N; ++i)
             residual_[i] /= dsize;
@@ -209,9 +210,9 @@ class Resample<ResampleType<ResampleScheme, ResidualStratified> >
             replication[i] = 0;
             residual_[i] = modf(N * weight[i], &integral_[i]);
         }
-
-        double dsize = std::accumulate(residual_.begin(), residual_.end(),
-                static_cast<double>(0));
+        double dsize = 0;
+        for (SizeType i = 0; i != N; ++i)
+            dsize += residual_[i];
         SizeType size = static_cast<SizeType>(dsize);
         for (SizeType i = 0; i != N; ++i)
             residual_[i] /= dsize;
@@ -260,9 +261,9 @@ class Resample<ResampleType<ResampleScheme, ResidualSystematic> >
             replication[i] = 0;
             residual_[i] = modf(N * weight[i], &integral_[i]);
         }
-
-        double dsize = std::accumulate(residual_.begin(), residual_.end(),
-                static_cast<double>(0));
+        double dsize = 0;
+        for (SizeType i = 0; i != N; ++i)
+            dsize += residual_[i];
         SizeType size = static_cast<SizeType>(dsize);
         for (SizeType i = 0; i != N; ++i)
             residual_[i] /= dsize;

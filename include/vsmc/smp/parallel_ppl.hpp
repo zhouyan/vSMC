@@ -78,8 +78,11 @@ class InitializePPL : public InitializeBase<T, Derived>
                 work_(this, &particle, &accept_[0]));
         this->post_processor(particle);
 
-        return std::accumulate(accept_.begin(), accept_.end(),
-                static_cast<std::size_t>(0));
+        std::size_t acc = 0;
+        for (size_type i = 0; i != particle.size(); ++i)
+            acc += accept_[i];
+
+        return acc;
     }
 
     protected :
@@ -135,8 +138,11 @@ class MovePPL : public MoveBase<T, Derived>
                     work_(this, iter, &particle, &accept_[0]));
         this->post_processor(iter, particle);
 
-        return std::accumulate(accept_.begin(), accept_.end(),
-                static_cast<std::size_t>(0));
+        std::size_t acc = 0;
+        for (size_type i = 0; i != particle.size(); ++i)
+            acc += accept_[i];
+
+        return acc;
     }
 
     protected :

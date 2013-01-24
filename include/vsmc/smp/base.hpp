@@ -118,7 +118,8 @@ class StateBase : public StateBaseDim<Dim>
                 first = read_state(d, first);
 
         if (order == RowMajor)
-            first = std::copy(state_.begin(), state_.end(), first);
+            for (std::size_t i = 0; i != state_.size(); ++i, ++first)
+                *first = state_[i];
 
         return first;
     }
@@ -142,7 +143,8 @@ class StateBase : public StateBaseDim<Dim>
     void copy_particle (size_type from, size_type to)
     {
         if (from != to)
-            std::copy(state(from), state(from) + this->dim(), state(to));
+            for (std::size_t d = 0; d != this->dim(); ++d)
+                state(to, d) = state(from, d);
     }
 
     private :
