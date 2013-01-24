@@ -75,7 +75,13 @@ class StaticAssert<true>
         USE_InitializeAdapter_WITHOUT_AN_INITIAILIZE_IMPLEMENTATION,
         USE_MoveAdapter_WITHOUT_A_MOVE_IMPLEMENTATION,
         USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION,
-        USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION
+        USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION,
+
+        NO_IMPLEMENTATION_OF_initialize_state_FOUND,
+        NO_IMPLEMENTATION_OF_move_state_FOUND,
+        NO_IMPLEMENTATION_OF_monitor_state_FOUND,
+        NO_IMPLEMENTATION_OF_path_state_FOUND,
+        NO_IMPLEMENTATION_OF_path_width_FOUND
     };
 }; // class StaticAssert
 
@@ -93,6 +99,9 @@ class StaticAssert<true>
 #define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                      \
     VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfStateCL<derived>::value),      \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
+
+#define VSMC_STATIC_ASSERT_NO_IMPL(member)                   \
+    VSMC_STATIC_ASSERT(false, NO_IMPLEMENTATION_OF_##member##_FOUND)
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func)                             \
     VSMC_RUNTIME_ASSERT((build()),                                           \

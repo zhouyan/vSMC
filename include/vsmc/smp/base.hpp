@@ -243,7 +243,8 @@ class InitializeBase
     }
 
     std::size_t initialize_state_dispatch (SingleParticle<T>,
-            std::size_t (InitializeBase::*) (SingleParticle<T>)) {return 0;}
+            std::size_t (InitializeBase::*) (SingleParticle<T>))
+    { VSMC_STATIC_ASSERT_NO_IMPL(initialize_state); return 0;}
 
     void initialize_param_dispatch (Particle<T> &, void *,
             void (InitializeBase::*) (Particle<T> &, void *)) {}
@@ -267,7 +268,7 @@ class InitializeBase<T, VBase>
     InitializeBase<T, VBase> &operator=
         (const InitializeBase<T, VBase> &) {return *this;}
     virtual ~InitializeBase () {}
-    virtual std::size_t initialize_state (SingleParticle<T>) {return 0;}
+    virtual std::size_t initialize_state (SingleParticle<T>) = 0;
     virtual void initialize_param (Particle<T> &, void *) {}
     virtual void pre_processor (Particle<T> &) {}
     virtual void post_processor (Particle<T> &) {}
@@ -347,7 +348,7 @@ class MoveBase
 
     std::size_t move_state_dispatch (std::size_t, SingleParticle<T>,
             std::size_t (MoveBase::*) (std::size_t, SingleParticle<T>))
-    {return 0;}
+    { VSMC_STATIC_ASSERT_NO_IMPL(move_state); return 0;}
 
     void pre_processor_dispatch (std::size_t, Particle<T> &,
             void (MoveBase::*) (std::size_t, Particle<T> &)) {}
@@ -368,7 +369,7 @@ class MoveBase<T, VBase>
     MoveBase<T, VBase> &operator=
         (const MoveBase<T, VBase> &) {return *this;}
     virtual ~MoveBase () {}
-    virtual std::size_t move_state (std::size_t, SingleParticle<T>) {return 0;}
+    virtual std::size_t move_state (std::size_t, SingleParticle<T>) = 0;
     virtual void pre_processor (std::size_t, Particle<T> &) {}
     virtual void post_processor (std::size_t, Particle<T> &) {}
 }; // class MoveBase<T, VBase>
@@ -455,7 +456,8 @@ class MonitorEvalBase
     void monitor_state_dispatch (std::size_t, std::size_t dim,
             ConstSingleParticle<T>, double *res,
             void (MonitorEvalBase::*)
-            (std::size_t, std::size_t, ConstSingleParticle<T>, double *)) {}
+            (std::size_t, std::size_t, ConstSingleParticle<T>, double *))
+    { VSMC_STATIC_ASSERT_NO_IMPL(monitor_state); }
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (MonitorEvalBase::*) (std::size_t, const Particle<T> &)) {}
@@ -477,7 +479,7 @@ class MonitorEvalBase<T, VBase>
         (const MonitorEvalBase<T, VBase> &) {return *this;}
     virtual ~MonitorEvalBase () {}
     virtual void monitor_state (std::size_t, std::size_t,
-            ConstSingleParticle<T>, double *) {}
+            ConstSingleParticle<T>, double *) = 0;
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 }; // class MonitorEvalBase<T, VBase>
@@ -577,11 +579,11 @@ class PathEvalBase
 
     double path_state_dispatch (std::size_t, ConstSingleParticle<T>,
             double (PathEvalBase::*) (std::size_t, ConstSingleParticle<T>))
-    {return 0;}
+    { VSMC_STATIC_ASSERT_NO_IMPL(path_state); return 0; }
 
     double path_width_dispatch (std::size_t, const Particle<T> &,
             double (PathEvalBase::*) (std::size_t, const Particle<T> &))
-    {return 0;}
+    { VSMC_STATIC_ASSERT_NO_IMPL(path_width); return 0; }
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (PathEvalBase::*) (std::size_t, const Particle<T> &)) {}
@@ -602,8 +604,8 @@ class PathEvalBase<T, VBase>
     PathEvalBase<T, VBase> &operator=
         (const PathEvalBase<T, VBase> &) {return *this;}
     virtual ~PathEvalBase () {}
-    virtual double path_state (std::size_t, ConstSingleParticle<T>) {return 0;}
-    virtual double path_width (std::size_t, const Particle<T> &) {return 0;}
+    virtual double path_state (std::size_t, ConstSingleParticle<T>) = 0;
+    virtual double path_width (std::size_t, const Particle<T> &) = 0;
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 }; // class PathEval<T, VBase>
