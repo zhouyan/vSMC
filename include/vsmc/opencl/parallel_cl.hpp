@@ -38,27 +38,27 @@ class StateCL
 
     typedef cl_ulong size_type;
     typedef T state_type;
-    typedef opencl::Manager<ManagerID> cl_manager_type;
+    typedef opencl::Manager<ManagerID> manager_type;
 
     explicit StateCL (size_type N) :
         dim_(Dim == Dynamic ? 1 : Dim), size_(N),
-        cl_manager_(cl_manager_type::instance()), build_(false), build_id_(0),
-        state_buffer_(cl_manager_.template create_buffer<state_type>(
+        manager_(manager_type::instance()), build_(false), build_id_(0),
+        state_buffer_(manager_.template create_buffer<state_type>(
                 dim_ * size_)),
-        copy_from_buffer_(cl_manager_.template create_buffer<size_type>(size_))
+        copy_from_buffer_(manager_.template create_buffer<size_type>(size_))
     {
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
     }
 
     StateCL (const StateCL<Dim, T, ManagerID> &other) :
-        dim_(other.dim_), size_(other.size_), cl_manager_(other.cl_manager_),
+        dim_(other.dim_), size_(other.size_), manager_(other.manager_),
         program_(other.program_), kernel_copy_(other.kernel_copy_),
         build_(other.build_), build_id_(0),
-        state_buffer_(cl_manager_.template create_buffer<state_type>(
+        state_buffer_(manager_.template create_buffer<state_type>(
                 dim_ * size_)),
-        copy_from_buffer_(cl_manager_.template create_buffer<size_type>(size_))
+        copy_from_buffer_(manager_.template create_buffer<size_type>(size_))
     {
-        cl_manager_.template copy_buffer<state_type>(
+        manager_.template copy_buffer<state_type>(
                 other.state_buffer_, dim_ * size_, state_buffer_);
     }
 
@@ -74,10 +74,10 @@ class StateCL
             build_id_    = 0;
 
             state_buffer_ =
-                cl_manager_.template create_buffer<state_type>(dim_ * size_);
+                manager_.template create_buffer<state_type>(dim_ * size_);
             copy_from_buffer_ =
-                cl_manager_.template create_buffer<size_type>(size_);
-            cl_manager_.template copy_buffer<state_type>(
+                manager_.template create_buffer<size_type>(size_);
+            manager_.template copy_buffer<state_type>(
                     other.state_buffer_, dim_ * size_, state_buffer_);
         }
 
@@ -95,7 +95,7 @@ class StateCL
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
 
         state_buffer_ =
-            cl_manager_.template create_buffer<state_type>(dim * size_);
+            manager_.template create_buffer<state_type>(dim * size_);
         dim_ = dim;
     }
 
@@ -104,9 +104,9 @@ class StateCL
         return size_;
     }
 
-    cl_manager_type &cl_manager () const
+    manager_type &manager () const
     {
-        return cl_manager_;
+        return manager_;
     }
 
     const cl::Buffer &state_buffer () const
@@ -146,19 +146,19 @@ class StateCL
                 static_cast<VSMC_SEED_TYPE::result_type>(size_));
 
         try {
-            program_ = cl_manager_.create_program(ss.str());
-            program_.build(cl_manager_.device_vec(), flags.c_str());
+            program_ = manager_.create_program(ss.str());
+            program_.build(manager_.device_vec(), flags.c_str());
             program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
-            program_.getBuildInfo(cl_manager_.device(),
+            program_.getBuildInfo(manager_.device(),
                     CL_PROGRAM_BUILD_OPTIONS, &build_options_);
-            program_.getBuildInfo(cl_manager_.device(), CL_PROGRAM_BUILD_LOG,
+            program_.getBuildInfo(manager_.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             build_ = true;
         } catch (cl::Error &err) {
             program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
-            program_.getBuildInfo(cl_manager_.device(),
+            program_.getBuildInfo(manager_.device(),
                     CL_PROGRAM_BUILD_OPTIONS, &build_options_);
-            program_.getBuildInfo(cl_manager_.device(), CL_PROGRAM_BUILD_LOG,
+            program_.getBuildInfo(manager_.device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             std::stringstream log_ss;
             log_ss << "====================================================\n";
@@ -222,11 +222,11 @@ class StateCL
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(copy);
         VSMC_RUNTIME_ASSERT((N == size_), "**StateCL::copy** SIZE MISMATCH");
 
-        cl_manager_.template write_buffer<size_type>(
+        manager_.template write_buffer<size_type>(
                 copy_from_buffer_, size_, copy_from);
         kernel_copy_.setArg(0, state_buffer_);
         kernel_copy_.setArg(1, copy_from_buffer_);
-        cl_manager_.run_kernel(kernel_copy_, size_, 0);
+        manager_.run_kernel(kernel_copy_, size_, 0);
     }
 
     template <typename OutputStream>
@@ -234,7 +234,7 @@ class StateCL
             char sepchar = ' ', char eolchar = '\n') const
     {
         state_host_.resize(dim_ * size_);
-        cl_manager_.template read_buffer<state_type>(
+        manager_.template read_buffer<state_type>(
                 state_buffer_, dim_ * size_, &state_host_[0]);
         for (size_type i = 0; i != size_; ++i) {
             os << iter << sepchar;
@@ -252,7 +252,7 @@ class StateCL
     std::size_t dim_;
     size_type size_;
 
-    cl_manager_type &cl_manager_;
+    manager_type &manager_;
 
     cl::Program program_;
     cl::Kernel kernel_copy_;
@@ -285,18 +285,18 @@ class InitializeCL : public opencl::LocalSize
 
         if (accept_host_.size() != particle.size()) {
             accept_host_.resize(particle.size());
-            accept_buffer_ = particle.value().cl_manager().template
+            accept_buffer_ = particle.value().manager().template
                 create_buffer<cl_ulong>(particle.size());
         }
 
         set_kernel(particle);
         initialize_param(particle, param);
         pre_processor(particle);
-        particle.value().cl_manager().run_kernel(
+        particle.value().manager().run_kernel(
                 kernel_, particle.size(), local_size());
         post_processor(particle);
 
-        particle.value().cl_manager().template read_buffer<cl_ulong>(
+        particle.value().manager().template read_buffer<cl_ulong>(
                 accept_buffer_, particle.size(), &accept_host_[0]);
 
         return std::accumulate(accept_host_.begin(), accept_host_.end(),
@@ -380,17 +380,17 @@ class MoveCL : public opencl::LocalSize
 
         if (accept_host_.size() != particle.size()) {
             accept_host_.resize(particle.size());
-            accept_buffer_ = particle.value().cl_manager().template
+            accept_buffer_ = particle.value().manager().template
                 create_buffer<cl_ulong>(particle.size());
         }
 
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().cl_manager().run_kernel(
+        particle.value().manager().run_kernel(
                 kernel_, particle.size(), local_size());
         post_processor(iter, particle);
 
-        particle.value().cl_manager().template read_buffer<cl_ulong>(
+        particle.value().manager().template read_buffer<cl_ulong>(
                 accept_buffer_, particle.size(), &accept_host_[0]);
 
         return std::accumulate(accept_host_.begin(), accept_host_.end(),
@@ -474,7 +474,7 @@ class MonitorEvalCL : public opencl::LocalSize
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, MonitorEvalCL);
 
         if (buffer_size_ != particle.size()) {
-            buffer_ = particle.value().cl_manager().template
+            buffer_ = particle.value().manager().template
                 create_buffer<typename T::state_type>(
                         particle.value().size() * dim);
             buffer_size_ = particle.size();
@@ -482,9 +482,9 @@ class MonitorEvalCL : public opencl::LocalSize
 
         set_kernel(iter, dim, particle);
         pre_processor(iter, particle);
-        particle.value().cl_manager().run_kernel(
+        particle.value().manager().run_kernel(
                 kernel_, particle.size(), local_size());
-        particle.value().cl_manager().template
+        particle.value().manager().template
             read_buffer<typename T::state_type>(
                     buffer_, particle.value().size() * dim, res);
         post_processor(iter, particle);
@@ -572,16 +572,16 @@ class PathEvalCL : public opencl::LocalSize
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, PathEvalCL);
 
         if (buffer_size_ != particle.size()) {
-            buffer_ = particle.value().cl_manager().template
+            buffer_ = particle.value().manager().template
                 create_buffer<typename T::state_type>(particle.value().size());
             buffer_size_ = particle.size();
         }
 
         set_kernel(iter, particle);
         pre_processor(iter, particle);
-        particle.value().cl_manager().run_kernel(
+        particle.value().manager().run_kernel(
                 kernel_, particle.size(), local_size());
-        particle.value().cl_manager().template
+        particle.value().manager().template
             read_buffer<typename T::state_type>(
                     buffer_, particle.value().size(), res);
         post_processor(iter, particle);
