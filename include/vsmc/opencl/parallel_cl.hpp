@@ -138,7 +138,7 @@ class StateCL
         internal::set_cl_state_type<T>(ss);
         ss << "typedef ulong size_type;\n";
         ss << "#define Size " << size_ << "UL\n";
-        ss << "#define Dim  " << dim_  << "U\n";
+        ss << "#define Dim  " << dim_  << "UL\n";
         ss << "#define Seed " << VSMC_SEED_TYPE::instance().get() << "UL\n";
         ss << "#include <vsmc/opencl/device_cl.h>\n";
         ss << source << '\n';
