@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <vsmc/internal/config.hpp>
+#include <vsmc/internal/forward.hpp>
 
 // Runtime assertion
 #if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
@@ -32,8 +33,6 @@
 // Static assertion
 #if VSMC_HAS_CXX11_STATIC_ASSERT
 #define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, #msg)
-#elif defined(BOOST_STATIC_ASSERT) // VSMC_HAS_CXX11_STATIC_ASSERT
-#define VSMC_STATIC_ASSERT(cond, msg) BOOST_STATIC_ASSERT_MSG(cond, #msg)
 #else // VSMC_HAS_CXX11_STATIC_ASSERT
 #ifdef _MSC_VER
 #define VSMC_STATIC_ASSERT(cond, msg) \
@@ -94,8 +93,9 @@ class StaticAssert<true>
     VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfStateCL<derived>::value),      \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
-#define VSMC_STATIC_ASSERT_NO_IMPL(member)                   \
-    VSMC_STATIC_ASSERT(false, NO_IMPLEMENTATION_OF_##member##_FOUND)
+#define VSMC_STATIC_ASSERT_NO_IMPL(member)                                   \
+    VSMC_STATIC_ASSERT((cxx11::is_same<T, NullType>::value),                 \
+            NO_IMPLEMENTATION_OF_##member##_FOUND)
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func)                             \
     VSMC_RUNTIME_ASSERT((build()),                                           \
