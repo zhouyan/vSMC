@@ -31,7 +31,7 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 
 /// \brief Particle::value_type subtype
 /// \ingroup CL
-template <cl_ulong Dim, typename T, typename ManagerID>
+template <std::size_t Dim, typename T, typename ManagerID>
 class StateCL
 {
     public :
@@ -84,12 +84,12 @@ class StateCL
         return *this;
     }
 
-    cl_ulong dim () const
+    std::size_t dim () const
     {
         return dim_;
     }
 
-    void resize_dim (cl_ulong dim)
+    void resize_dim (std::size_t dim)
     {
         VSMC_STATIC_ASSERT((Dim == Dynamic),
                 USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
@@ -231,7 +231,7 @@ class StateCL
 
     private :
 
-    cl_ulong dim_;
+    std::size_t dim_;
     size_type size_;
 
     cl_manager_type &cl_manager_;
