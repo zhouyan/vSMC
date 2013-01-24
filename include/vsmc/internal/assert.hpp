@@ -75,13 +75,7 @@ class StaticAssert<true>
         USE_InitializeAdapter_WITHOUT_AN_INITIAILIZE_IMPLEMENTATION,
         USE_MoveAdapter_WITHOUT_A_MOVE_IMPLEMENTATION,
         USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION,
-        USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION,
-
-        NO_IMPLEMENTATION_OF_initialize_state_FOUND,
-        NO_IMPLEMENTATION_OF_move_state_FOUND,
-        NO_IMPLEMENTATION_OF_monitor_state_FOUND,
-        NO_IMPLEMENTATION_OF_path_state_FOUND,
-        NO_IMPLEMENTATION_OF_path_width_FOUND
+        USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION
     };
 }; // class StaticAssert
 
