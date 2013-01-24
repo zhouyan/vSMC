@@ -229,6 +229,24 @@ class StateCL
         cl_manager_.run_kernel(kernel_copy_, size_, 0);
     }
 
+    template <typename OutputStream>
+    OutputStream &print (OutputStream &os, std::size_t iter = 0,
+            char sepchar = ' ', char eolchar = '\n') const
+    {
+        state_host_.resize(dim_ * size_);
+        cl_manager_.template read_buffer<state_type>(
+                state_buffer_, dim_ * size_, &state_host_[0]);
+        for (size_type i = 0; i != size_; ++i) {
+            os << iter << sepchar;
+            for (std::size_t d = 0; d != this->dim() - 1; ++d)
+                os << state_host_[i * dim_ + d] << sepchar;
+            os << state_host_[i * dim_ + dim_ - 1] << eolchar;
+        }
+
+        return os;
+
+    }
+
     private :
 
     std::size_t dim_;
@@ -247,6 +265,8 @@ class StateCL
 
     cl::Buffer state_buffer_;
     cl::Buffer copy_from_buffer_;
+
+    mutable std::vector<state_type> state_host_;
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype
