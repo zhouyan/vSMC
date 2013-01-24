@@ -130,8 +130,6 @@ class Manager
 {
     public :
 
-    typedef std::size_t size_type;
-
     static Manager<ID> &instance ()
     {
         static Manager<ID> manager;
@@ -194,7 +192,7 @@ class Manager
     }
 
     template<typename CLType>
-    cl::Buffer create_buffer (size_type num) const
+    cl::Buffer create_buffer (std::size_t num) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
         VSMC_RUNTIME_ASSERT((num),
@@ -213,7 +211,7 @@ class Manager
 
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
 
-        size_type num = static_cast<size_type>(distance(first, last));
+        std::size_t num = static_cast<std::size_t>(distance(first, last));
 
         if (!num)
             return cl::Buffer();
@@ -225,7 +223,7 @@ class Manager
     }
 
     template <typename CLType, typename OutputIter>
-    OutputIter read_buffer (const cl::Buffer &buf, size_type num,
+    OutputIter read_buffer (const cl::Buffer &buf, std::size_t num,
             OutputIter first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
@@ -239,7 +237,7 @@ class Manager
     }
 
     template <typename CLType>
-    CLType *read_buffer (const cl::Buffer &buf, size_type num,
+    CLType *read_buffer (const cl::Buffer &buf, std::size_t num,
             CLType *first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
@@ -252,13 +250,13 @@ class Manager
     }
 
     template <typename CLType, typename InputIter>
-    InputIter write_buffer (const cl::Buffer &buf, size_type num,
+    InputIter write_buffer (const cl::Buffer &buf, std::size_t num,
             InputIter first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
         CLType *temp = write_buffer_pool<CLType>(num);
-        for (size_type i = 0; i != num; ++i, ++first)
+        for (std::size_t i = 0; i != num; ++i, ++first)
             temp[i] = *first;
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, 0,
@@ -268,7 +266,7 @@ class Manager
     }
 
     template <typename CLType>
-    const CLType *write_buffer (const cl::Buffer &buf, size_type num,
+    const CLType *write_buffer (const cl::Buffer &buf, std::size_t num,
             const CLType *first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
@@ -281,7 +279,7 @@ class Manager
     }
 
     template <typename CLType>
-    CLType *write_buffer (const cl::Buffer &buf, size_type num,
+    CLType *write_buffer (const cl::Buffer &buf, std::size_t num,
             CLType *first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
@@ -294,7 +292,7 @@ class Manager
     }
 
     template <typename CLType>
-    void copy_buffer (const cl::Buffer &src, size_type num,
+    void copy_buffer (const cl::Buffer &src, std::size_t num,
             const cl::Buffer &dst) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
@@ -310,7 +308,7 @@ class Manager
     }
 
     void run_kernel (const cl::Kernel &kern,
-            size_type global_size, size_type local_size) const
+            std::size_t global_size, std::size_t local_size) const
     {
         command_queue_.finish();
         command_queue_.enqueueNDRangeKernel(kern, cl::NullRange,
@@ -330,8 +328,8 @@ class Manager
 
     bool setup_;
 
-    mutable size_type read_buffer_pool_bytes_;
-    mutable size_type write_buffer_pool_bytes_;
+    mutable std::size_t read_buffer_pool_bytes_;
+    mutable std::size_t write_buffer_pool_bytes_;
     mutable void *read_buffer_pool_;
     mutable void *write_buffer_pool_;
 
@@ -362,8 +360,7 @@ class Manager
             platform_vec_.clear();
         }
 
-        for (std::vector<cl::Platform>::size_type p = 0;
-                p != platform_vec_.size(); ++p) {
+        for (std::size_t p = 0; p != platform_vec_.size(); ++p) {
             try {
                 platform_ = platform_vec_[p];
                 std::string pname;
@@ -381,8 +378,7 @@ class Manager
                 device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
 
                 bool device_found = false;
-                for (std::vector<cl::Device>::size_type d = 0;
-                        d != device_vec_.size(); ++d) {
+                for (std::size_t d = 0; d != device_vec_.size(); ++d) {
                     std::string dname;
                     device_vec_[d].getInfo(CL_DEVICE_NAME, &dname);
                     if (traits::CheckOpenCLDeviceTrait<ID>::check(dname)) {
@@ -412,9 +408,9 @@ class Manager
     }
 
     template <typename CLType>
-    CLType *read_buffer_pool (size_type num) const
+    CLType *read_buffer_pool (std::size_t num) const
     {
-        size_type new_bytes = num * sizeof(CLType);
+        std::size_t new_bytes = num * sizeof(CLType);
         if (new_bytes > read_buffer_pool_bytes_) {
             std::free(read_buffer_pool_);
             read_buffer_pool_ = std::malloc(new_bytes);
@@ -427,9 +423,9 @@ class Manager
     }
 
     template <typename CLType>
-    CLType *write_buffer_pool (size_type num) const
+    CLType *write_buffer_pool (std::size_t num) const
     {
-        size_type new_bytes = num * sizeof(CLType);
+        std::size_t new_bytes = num * sizeof(CLType);
         if (new_bytes > write_buffer_pool_bytes_) {
             std::free(write_buffer_pool_);
             write_buffer_pool_ = std::malloc(new_bytes);
@@ -442,7 +438,7 @@ class Manager
     }
 
     cl::NDRange get_global_nd_range (
-            size_type global_size, size_type local_size) const
+            std::size_t global_size, std::size_t local_size) const
     {
         return (local_size && global_size % local_size) ?
             cl::NDRange((global_size / local_size + 1) * local_size):
@@ -450,7 +446,7 @@ class Manager
     }
 
     cl::NDRange get_local_nd_range (
-            size_type global_size, size_type local_size) const
+            std::size_t global_size, std::size_t local_size) const
     {
         return local_size ? cl::NDRange(local_size) : cl::NullRange;
     }
