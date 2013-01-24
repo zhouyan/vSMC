@@ -303,37 +303,6 @@ class InitializeCL : public opencl::LocalSize
                 static_cast<cl_ulong>(0));
     }
 
-    virtual void initialize_param (Particle<T> &, void *) {}
-    virtual void initialize_state (std::string &) = 0;
-    virtual void pre_processor (Particle<T> &) {}
-    virtual void post_processor (Particle<T> &) {}
-
-    cl::Kernel &kernel ()
-    {
-        return kernel_;
-    }
-
-    const cl::Kernel &kernel () const
-    {
-        return kernel_;
-    }
-
-    void set_kernel (const Particle<T> &particle)
-    {
-        std::string kname;
-        initialize_state(kname);
-
-        if (build_id_ != particle.value().build_id()
-                || kernel_name_ != kname) {
-            build_id_ = particle.value().build_id();
-            kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_);
-        }
-
-        kernel_.setArg(0, particle.value().state_buffer());
-        kernel_.setArg(1, accept_buffer_);
-    }
-
     protected :
 
     InitializeCL () : build_id_(-1) {}
@@ -354,6 +323,37 @@ class InitializeCL : public opencl::LocalSize
     }
 
     virtual ~InitializeCL () {}
+
+    const cl::Kernel &kernel () const
+    {
+        return kernel_;
+    }
+
+    cl::Kernel &kernel ()
+    {
+        return kernel_;
+    }
+
+    void set_kernel (const Particle<T> &particle)
+    {
+        std::string kname;
+        initialize_state(kname);
+
+        if (build_id_ != particle.value().build_id()
+                || kernel_name_ != kname) {
+            build_id_ = particle.value().build_id();
+            kernel_name_ = kname;
+            kernel_ = particle.value().create_kernel(kernel_name_);
+        }
+
+        kernel_.setArg(0, particle.value().state_buffer());
+        kernel_.setArg(1, accept_buffer_);
+    }
+
+    virtual void initialize_param (Particle<T> &, void *) {}
+    virtual void initialize_state (std::string &) = 0;
+    virtual void pre_processor (Particle<T> &) {}
+    virtual void post_processor (Particle<T> &) {}
 
     private :
 
@@ -397,16 +397,33 @@ class MoveCL : public opencl::LocalSize
                 static_cast<cl_ulong>(0));
     }
 
-    virtual void move_state (std::size_t, std::string &) = 0;
-    virtual void pre_processor (std::size_t, Particle<T> &) {}
-    virtual void post_processor (std::size_t, Particle<T> &) {}
+    protected :
 
-    cl::Kernel &kernel ()
+    MoveCL () : build_id_(-1) {}
+
+    MoveCL (const MoveCL<T> &other) :
+        build_id_(other.build_id_),
+        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
+
+    MoveCL<T> &operator= (const MoveCL<T> &other)
+    {
+        if (this != &other) {
+            build_id_ = other.build_id_;
+            kernel_ = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+        }
+
+        return *this;
+    }
+
+    virtual ~MoveCL () {}
+
+    const cl::Kernel &kernel () const
     {
         return kernel_;
     }
 
-    const cl::Kernel &kernel () const
+    cl::Kernel &kernel ()
     {
         return kernel_;
     }
@@ -428,26 +445,9 @@ class MoveCL : public opencl::LocalSize
         kernel_.setArg(2, accept_buffer_);
     }
 
-    protected :
-
-    MoveCL () : build_id_(-1) {}
-
-    MoveCL (const MoveCL<T> &other) :
-        build_id_(other.build_id_),
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
-
-    MoveCL<T> &operator= (const MoveCL<T> &other)
-    {
-        if (this != &other) {
-            build_id_ = other.build_id_;
-            kernel_ = other.kernel_;
-            kernel_name_ = other.kernel_name_;
-        }
-
-        return *this;
-    }
-
-    virtual ~MoveCL () {}
+    virtual void move_state (std::size_t, std::string &) = 0;
+    virtual void pre_processor (std::size_t, Particle<T> &) {}
+    virtual void post_processor (std::size_t, Particle<T> &) {}
 
     private :
 
@@ -490,39 +490,6 @@ class MonitorEvalCL : public opencl::LocalSize
         post_processor(iter, particle);
     }
 
-    virtual void monitor_state (std::size_t, std::string &) = 0;
-    virtual void pre_processor (std::size_t, const Particle<T> &) {}
-    virtual void post_processor (std::size_t, const Particle<T> &) {}
-
-    cl::Kernel kernel ()
-    {
-        return kernel_;
-    }
-
-    const cl::Kernel kernel () const
-    {
-        return kernel_;
-    }
-
-    void set_kernel (std::size_t iter, std::size_t dim,
-            const Particle<T> &particle)
-    {
-        std::string kname;
-        monitor_state(iter, kname);
-
-        if (build_id_ != particle.value().build_id()
-                || kernel_name_ != kname) {
-            build_id_ = particle.value().build_id();
-            kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_);
-        }
-
-        kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
-        kernel_.setArg<cl_ulong>(1, static_cast<cl_ulong>(dim));
-        kernel_.setArg(2, particle.value().state_buffer());
-        kernel_.setArg(3, buffer_);
-    }
-
     protected :
 
     MonitorEvalCL () : build_id_(-1), buffer_size_(0) {}
@@ -546,6 +513,39 @@ class MonitorEvalCL : public opencl::LocalSize
     }
 
     virtual ~MonitorEvalCL () {}
+
+    const cl::Kernel &kernel () const
+    {
+        return kernel_;
+    }
+
+    cl::Kernel &kernel ()
+    {
+        return kernel_;
+    }
+
+    void set_kernel (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle)
+    {
+        std::string kname;
+        monitor_state(iter, kname);
+
+        if (build_id_ != particle.value().build_id()
+                || kernel_name_ != kname) {
+            build_id_ = particle.value().build_id();
+            kernel_name_ = kname;
+            kernel_ = particle.value().create_kernel(kernel_name_);
+        }
+
+        kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
+        kernel_.setArg<cl_ulong>(1, static_cast<cl_ulong>(dim));
+        kernel_.setArg(2, particle.value().state_buffer());
+        kernel_.setArg(3, buffer_);
+    }
+
+    virtual void monitor_state (std::size_t, std::string &) = 0;
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
 
     private :
 
@@ -589,38 +589,6 @@ class PathEvalCL : public opencl::LocalSize
         return this->path_width(iter, particle);
     }
 
-    virtual void path_state (std::size_t, std::string &) = 0;
-    virtual double path_width (std::size_t, const Particle<T> &) = 0;
-    virtual void pre_processor (std::size_t, const Particle<T> &) {}
-    virtual void post_processor (std::size_t, const Particle<T> &) {}
-
-    cl::Kernel kernel ()
-    {
-        return kernel_;
-    }
-
-    const cl::Kernel kernel () const
-    {
-        return kernel_;
-    }
-
-    void set_kernel (std::size_t iter, const Particle<T> &particle)
-    {
-        std::string kname;
-        path_state(iter, kname);
-
-        if (build_id_ != particle.value().build_id()
-                || kernel_name_ != kname) {
-            build_id_ = particle.value().build_id();
-            kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_);
-        }
-
-        kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
-        kernel_.setArg(1, particle.value().state_buffer());
-        kernel_.setArg(2, buffer_);
-    }
-
     protected :
 
     PathEvalCL () : build_id_(-1), buffer_size_(0) {}
@@ -644,6 +612,38 @@ class PathEvalCL : public opencl::LocalSize
     }
 
     virtual ~PathEvalCL () {}
+
+    const cl::Kernel &kernel () const
+    {
+        return kernel_;
+    }
+
+    cl::Kernel &kernel ()
+    {
+        return kernel_;
+    }
+
+    void set_kernel (std::size_t iter, const Particle<T> &particle)
+    {
+        std::string kname;
+        path_state(iter, kname);
+
+        if (build_id_ != particle.value().build_id()
+                || kernel_name_ != kname) {
+            build_id_ = particle.value().build_id();
+            kernel_name_ = kname;
+            kernel_ = particle.value().create_kernel(kernel_name_);
+        }
+
+        kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
+        kernel_.setArg(1, particle.value().state_buffer());
+        kernel_.setArg(2, buffer_);
+    }
+
+    virtual void path_state (std::size_t, std::string &) = 0;
+    virtual double path_width (std::size_t, const Particle<T> &) = 0;
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
 
     private :
 
