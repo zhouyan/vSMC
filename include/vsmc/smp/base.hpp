@@ -501,9 +501,9 @@ class PathEvalBase
         return path_state_dispatch(iter, csp, &Derived::path_state);
     }
 
-    double path_width (std::size_t iter, const Particle<T> &particle)
+    double path_grid (std::size_t iter, const Particle<T> &particle)
     {
-        return path_width_dispatch(iter, particle, &Derived::path_width);
+        return path_grid_dispatch(iter, particle, &Derived::path_grid);
     }
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
@@ -527,11 +527,11 @@ class PathEvalBase
     }
 
     template <typename D>
-    double path_width_dispatch (std::size_t iter, const Particle<T> &particle,
+    double path_grid_dispatch (std::size_t iter, const Particle<T> &particle,
             double (D::*) (std::size_t, const Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_DERIVED_BASE(PathEvalBase);
-        return static_cast<Derived *>(this)->path_width(iter, particle);
+        return static_cast<Derived *>(this)->path_grid(iter, particle);
     }
 
     template <typename D>
@@ -557,10 +557,10 @@ class PathEvalBase
         return Derived::path_state(iter, csp);
     }
 
-    double path_width_dispatch (std::size_t iter, const Particle<T> &particle,
+    double path_grid_dispatch (std::size_t iter, const Particle<T> &particle,
             double (*) (std::size_t, const Particle<T> &))
     {
-        return Derived::path_width(iter, particle);
+        return Derived::path_grid(iter, particle);
     }
 
     void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
@@ -580,9 +580,9 @@ class PathEvalBase
             double (PathEvalBase::*) (std::size_t, ConstSingleParticle<T>))
     { VSMC_STATIC_ASSERT_NO_IMPL(path_state); return 0; }
 
-    double path_width_dispatch (std::size_t, const Particle<T> &,
+    double path_grid_dispatch (std::size_t, const Particle<T> &,
             double (PathEvalBase::*) (std::size_t, const Particle<T> &))
-    { VSMC_STATIC_ASSERT_NO_IMPL(path_width); return 0; }
+    { VSMC_STATIC_ASSERT_NO_IMPL(path_grid); return 0; }
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (PathEvalBase::*) (std::size_t, const Particle<T> &)) {}
@@ -604,7 +604,7 @@ class PathEvalBase<T, VBase>
         (const PathEvalBase<T, VBase> &) {return *this;}
     virtual ~PathEvalBase () {}
     virtual double path_state (std::size_t, ConstSingleParticle<T>) = 0;
-    virtual double path_width (std::size_t, const Particle<T> &) = 0;
+    virtual double path_grid (std::size_t, const Particle<T> &) = 0;
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 }; // class PathEval<T, VBase>

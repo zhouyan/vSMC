@@ -187,17 +187,17 @@ class PathEvalAdapter :
     typedef cxx11::function<double (std::size_t, ConstSingleParticle<T>)>
         path_state_type;
     typedef cxx11::function<double (std::size_t, const Particle<T> &)>
-        path_width_type;
+        path_grid_type;
     typedef cxx11::function<void (std::size_t, const Particle<T> &)>
         pre_processor_type;
     typedef cxx11::function<void (std::size_t, const Particle<T> &)>
         post_processor_type;
 
     PathEvalAdapter (const path_state_type &path_state,
-            const path_width_type &path_width,
+            const path_grid_type &path_grid,
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
-        path_state_(path_state), path_width_(path_width),
+        path_state_(path_state), path_grid_(path_grid),
         pre_processor_(pre), post_processor_(post)
     {
         VSMC_STATIC_ASSERT_ADAPTER_IMPL(PathEval, PATH_EVAL);
@@ -208,9 +208,9 @@ class PathEvalAdapter :
         return path_state_(iter, part);
     }
 
-    double path_width (std::size_t iter, const Particle<T> &particle)
+    double path_grid (std::size_t iter, const Particle<T> &particle)
     {
-        return path_width_(iter, particle);
+        return path_grid_(iter, particle);
     }
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
@@ -228,7 +228,7 @@ class PathEvalAdapter :
     private :
 
     const path_state_type path_state_;
-    const path_width_type path_width_;
+    const path_grid_type path_grid_;
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
 }; // class PathEvalAdapter

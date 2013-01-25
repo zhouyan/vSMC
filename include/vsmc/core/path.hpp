@@ -182,9 +182,17 @@ class Path
         particle.read_weight(&weight_[0]);
 
         index_.push_back(iter);
-        width_.push_back(eval_(iter, particle, &buffer_[0]));
-        grid_.push_back(grid_.size() ?
-                grid_.back() + width_.back() : width_.back());
+        grid_.push_back(eval_(iter, particle, &buffer_[0]));
+        switch (grid_.size()) {
+            case 0 :
+                break;
+            case 1 :
+                width_.push_back(0);
+                break;
+            default :
+                width_.push_back(grid_.back() - grid_[grid_.size() - 2]);
+                break;
+        }
         integrand_.push_back(integral1_(static_cast<typename
                     traits::SizeTypeTrait<integral1_type>::type>(
                         weight_.size()), &weight_[0], &buffer_[0]));

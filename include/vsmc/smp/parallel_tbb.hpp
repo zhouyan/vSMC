@@ -281,7 +281,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 
-        return this->path_width(iter, particle);
+        return this->path_grid(iter, particle);
     }
 
     protected :

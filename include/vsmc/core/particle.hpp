@@ -350,13 +350,10 @@ class Particle
 
     typedef typename traits::SizeTypeTrait<T>::type size_type;
     typedef T value_type;
-    typedef typename traits::WeightSetTypeTrait<T>::type
-        weight_set_type;
-    typedef typename traits::RngSetTypeTrait<T>::type
-        rng_set_type;
+    typedef typename traits::WeightSetTypeTrait<T>::type weight_set_type;
+    typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
     typedef typename rng_set_type::rng_type rng_type;
-    typedef typename traits::ResampleRngTypeTrait<T>::type
-        resample_rng_type;
+    typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
     typedef cxx11::function<
         void (size_type, resample_rng_type &, double *, size_type *)>
         resample_op_type;

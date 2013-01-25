@@ -591,7 +591,7 @@ class PathEvalCL : public opencl::LocalSize
                     buffer_, particle.value().size(), res);
         post_processor(iter, particle);
 
-        return this->path_width(iter, particle);
+        return this->path_grid(iter, particle);
     }
 
     protected :
@@ -646,7 +646,7 @@ class PathEvalCL : public opencl::LocalSize
     }
 
     virtual void path_state (std::size_t, std::string &) = 0;
-    virtual double path_width (std::size_t, const Particle<T> &) = 0;
+    virtual double path_grid (std::size_t, const Particle<T> &) = 0;
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
