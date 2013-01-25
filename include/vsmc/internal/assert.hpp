@@ -10,6 +10,7 @@
 #include <vsmc/cxx11/type_traits.hpp>
 
 // Runtime assertion
+
 #if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
 {                                                                             \
@@ -32,6 +33,7 @@
 #endif // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 
 // Static assertion
+
 #if VSMC_HAS_CXX11_STATIC_ASSERT
 #define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, #msg)
 #else // VSMC_HAS_CXX11_STATIC_ASSERT
@@ -81,34 +83,7 @@ class StaticAssert<true>
 
 } // namespace vsmc
 
-// Static assert
-
-#define VSMC_STATIC_ASSERT_ADAPTER_IMPL(name, NAME)                           \
-    VSMC_STATIC_ASSERT(vsmc::traits::Is##name##Impl<Impl>::value,             \
-            USE_##name##Adapter_WITHOUT_AN_##NAME##_IMPLEMENTATION)           \
-
-#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(name)                           \
-    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
-            USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_State##name##_OBJECT)
-
-#define VSMC_STATIC_ASSERT_NO_IMPL(member)                                    \
-    VSMC_STATIC_ASSERT((cxx11::is_same<T, NullType>::value),                  \
-            NO_IMPLEMENTATION_OF_##member##_FOUND)
-
-#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                       \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfStateCL<derived>::value),       \
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
-
-#define VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(type)                          \
-    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value                 \
-                || cxx11::is_same<type, cl_double>::value),                   \
-            USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
-
-#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user)                    \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value),   \
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
-
-// Runtime assert
+// Runtime assertion macros
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func)                            \
     VSMC_RUNTIME_ASSERT((setup()),                                            \
@@ -179,5 +154,32 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
 #define VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(name)                    \
     VSMC_RUNTIME_ASSERT((N == this->size()),                                  \
             ("**State"#name"::copy** SIZE MISMATCH"))
+
+// Static assertion macros
+
+#define VSMC_STATIC_ASSERT_ADAPTER_IMPL(name, NAME)                           \
+    VSMC_STATIC_ASSERT(vsmc::traits::Is##name##Impl<Impl>::value,             \
+            USE_##name##Adapter_WITHOUT_AN_##NAME##_IMPLEMENTATION)           \
+
+#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(name)                           \
+    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
+            USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_State##name##_OBJECT)
+
+#define VSMC_STATIC_ASSERT_NO_IMPL(member)                                    \
+    VSMC_STATIC_ASSERT((cxx11::is_same<T, NullType>::value),                  \
+            NO_IMPLEMENTATION_OF_##member##_FOUND)
+
+#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                       \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfStateCL<derived>::value),       \
+            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
+
+#define VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(type)                          \
+    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value                 \
+                || cxx11::is_same<type, cl_double>::value),                   \
+            USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
+
+#define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user)                    \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value),   \
+            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
 
 #endif // VSMC_INTERNAL_ASSERT_HPP
