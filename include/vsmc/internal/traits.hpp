@@ -94,19 +94,11 @@ struct HasStatic##OuterMF :                                                   \
                                                                               \
 } } // namespace vsmc::traits
 
-#if VSMC_RESTRICTED_ADAPTER
 #define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName)                             \
 namespace vsmc { namespace traits {                                           \
     template <template <typename, typename> class>                            \
     struct Is##BaseName##Impl : public cxx11::false_type {};                  \
 } } //namespace vsmc::traits
-#else // VSMC_RESTRICTED_ADAPTER
-#define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName)                             \
-namespace vsmc { namespace traits {                                           \
-    template <template <typename, typename> class>                            \
-    struct Is##BaseName##Impl : public cxx11::true_type {};                   \
-} } //namespace vsmc::traits
-#endif // VSMC_RESTRICTED_ADAPTER
 
 #define VSMC_DEFINE_SMP_IS_IMPL_TRUE(Name)                                    \
 namespace vsmc { namespace traits {                                           \
