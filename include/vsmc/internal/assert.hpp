@@ -1,13 +1,9 @@
 #ifndef VSMC_INTERNAL_ASSERT_HPP
 #define VSMC_INTERNAL_ASSERT_HPP
 
-#include <cassert>
-#include <cstdio>
-#include <stdexcept>
-
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/forward.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
+
+#include <stdexcept>
 
 // Runtime assertion
 

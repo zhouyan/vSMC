@@ -1,6 +1,10 @@
 #ifndef VSMC_INTERNAL_FORWARD_HPP
 #define VSMC_INTERNAL_FORWARD_HPP
 
+#include <vsmc/internal/config.hpp>
+
+#include <cstddef>
+
 /// \cond HIDDEN_SYMBOLS
 
 #define VSMC_DEFINE_SMP_FORWARD(Name) \

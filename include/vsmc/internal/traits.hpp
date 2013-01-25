@@ -1,6 +1,8 @@
 #ifndef VSMC_INTERNAL_TRAITS_HPP
 #define VSMC_INTERNAL_TRAITS_HPP
 
+#include <string>
+
 #include <vsmc/cxx11/type_traits.hpp>
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/forward.hpp>
