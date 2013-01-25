@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 
-#ifdef NDEBUG
+#ifdef VSMC_NDEBUG
 #define VSMC_SMP_BASE_DESTRUCTOR_PREFIX
 #else
 #define VSMC_SMP_BASE_DESTRUCTOR_PREFIX virtual

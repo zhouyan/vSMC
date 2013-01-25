@@ -74,7 +74,7 @@ class StaticAssert<true>
         USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
 
-        USE_InitializeAdapter_WITHOUT_AN_INITIAILIZE_IMPLEMENTATION,
+        USE_InitializeAdapter_WITHOUT_A_INITIAILIZE_IMPLEMENTATION,
         USE_MoveAdapter_WITHOUT_A_MOVE_IMPLEMENTATION,
         USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION,
         USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION
@@ -159,7 +159,7 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
 
 #define VSMC_STATIC_ASSERT_ADAPTER_IMPL(name, NAME)                           \
     VSMC_STATIC_ASSERT(vsmc::traits::Is##name##Impl<Impl>::value,             \
-            USE_##name##Adapter_WITHOUT_AN_##NAME##_IMPLEMENTATION)           \
+            USE_##name##Adapter_WITHOUT_A_##NAME##_IMPLEMENTATION)           \
 
 #define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(name)                           \
     VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
