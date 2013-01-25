@@ -3,6 +3,8 @@
 
 #include <vsmc/internal/config.hpp>
 
+#include <cassert>
+#include <cstdio>
 #include <stdexcept>
 
 // Runtime assertion
