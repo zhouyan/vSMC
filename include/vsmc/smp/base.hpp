@@ -49,7 +49,7 @@ class StateBase : public StateBaseDim<Dim>
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT((N == size_), "**StateBase::copy** SIZE MISMATCH");
+        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(Base);
 
         for (size_type to = 0; to != size_; ++to)
             this->copy_particle(copy_from[to], to);
@@ -57,8 +57,7 @@ class StateBase : public StateBaseDim<Dim>
 
     void resize_dim (std::size_t dim)
     {
-        VSMC_STATIC_ASSERT((Dim == Dynamic),
-                USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT);
+        VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Base);
 
         StateBaseDim<Dim>::resize_dim(dim);
         state_.resize(dim * size_);
@@ -109,9 +108,7 @@ class StateBase : public StateBaseDim<Dim>
     template <typename OutputIter>
     OutputIter read_state_matrix (MatrixOrder order, OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT((order == ColMajor || order == RowMajor),
-                "CALL **StateBase::read_state_matrix** with and INVALID "
-                "MatrixOrder");
+        VSMC_RUNTIME_ASSERT_MATRIX_ORDER(order, StateBase::read_state_matrix);
 
         if (order == ColMajor)
             for (std::size_t d = 0; d != this->dim(); ++d)

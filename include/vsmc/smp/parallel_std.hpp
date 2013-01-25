@@ -23,8 +23,7 @@ class StateSTD : public StateBase<Dim, T>
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT((N == this->size()),
-                "**StateSTD::copy** SIZE MISMATCH");
+        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(STD);
 
         thread::parallel_for(
                 thread::BlockedRange<size_type>(0, this->size()),

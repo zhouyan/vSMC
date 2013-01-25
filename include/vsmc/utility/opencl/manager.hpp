@@ -195,8 +195,6 @@ class Manager
     cl::Buffer create_buffer (std::size_t num) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
-        VSMC_RUNTIME_ASSERT((num),
-                "CALL vsmc::Manager::crate_buffer WITH ZERO SIZE");
 
         if (!num)
             return cl::Buffer();

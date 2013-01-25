@@ -33,8 +33,7 @@ class InitializeAdapter :
         initialize_state_(init_state), initialize_param_(init_param),
         pre_processor_(pre), post_processor_(post)
     {
-        VSMC_STATIC_ASSERT(traits::IsInitializeImpl<Impl>::value,
-                USE_InitializeAdapter_WITHOUT_AN_INITIAILIZE_IMPLEMENTATION);
+        VSMC_STATIC_ASSERT_ADAPTER_IMPL(Initialize, INITIALIZE);
     }
 
     std::size_t initialize_state (SingleParticle<T> part)
@@ -92,8 +91,7 @@ class MoveAdapter :
             const post_processor_type &post = post_processor_type()) :
         move_state_(move_state), pre_processor_(pre), post_processor_(post)
     {
-        VSMC_STATIC_ASSERT(traits::IsMoveImpl<Impl>::value,
-                USE_MoveAdapter_WITHOUT_A_MOVE_IMPLEMENTATION);
+        VSMC_STATIC_ASSERT_ADAPTER_IMPL(Move, MOVE);
     }
 
     std::size_t move_state (std::size_t iter, SingleParticle<T> part)
@@ -146,8 +144,7 @@ class MonitorEvalAdapter :
         monitor_state_(monitor_state),
         pre_processor_(pre), post_processor_(post)
     {
-        VSMC_STATIC_ASSERT(traits::IsMonitorEvalImpl<Impl>::value,
-                USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION);
+        VSMC_STATIC_ASSERT_ADAPTER_IMPL(MonitorEval, MONITOR_EVAL);
     }
 
     void monitor_state (std::size_t iter, std::size_t dim,
@@ -203,8 +200,7 @@ class PathEvalAdapter :
         path_state_(path_state), path_width_(path_width),
         pre_processor_(pre), post_processor_(post)
     {
-        VSMC_STATIC_ASSERT(traits::IsPathEvalImpl<Impl>::value,
-                USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION);
+        VSMC_STATIC_ASSERT_ADAPTER_IMPL(PathEval, PATH_EVAL);
     }
 
     double path_state (std::size_t iter, ConstSingleParticle<T> part)

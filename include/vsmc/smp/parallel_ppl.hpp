@@ -29,8 +29,7 @@ class StatePPL : public StateBase<Dim, T>
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT((N == this->size()),
-                "**StatePPL::copy** SIZE MISMATCH");
+        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(PPL);
 
         ppl::parallel_for(static_cast<size_type>(0), N,
                 copy_work_<IntType>(this, copy_from));

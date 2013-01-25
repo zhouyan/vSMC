@@ -40,8 +40,7 @@ class StateOMP : public StateBase<Dim, T>
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),
-                "**StateOMP::copy** SIZE MISMATCH");
+        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(OMP);
 
 #pragma omp parallel for default(none) shared(copy_from)
         for (size_type to = 0; to < static_cast<size_type>(this->size()); ++to)

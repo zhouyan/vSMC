@@ -57,12 +57,11 @@ class Monitor
     /// and `record()`.
     explicit Monitor (std::size_t dim, const eval_type &eval,
             MonitorMethod method = ImportanceSampling) :
-        dim_(dim), eval_(eval), method_(method), recording_(true),
-        var_name_(dim_) {}
+        dim_(dim), eval_(eval), method_(method), recording_(true) {}
 
     Monitor (const Monitor<T> &other) :
         dim_(other.dim_), eval_(other.eval_), method_(other.method_),
-        recording_(other.recording_), var_name_(other.var_name_),
+        recording_(other.recording_), 
         index_(other.index_), record_(other.record_) {}
 
     Monitor<T> &operator= (const Monitor<T> &other)
@@ -72,7 +71,6 @@ class Monitor
             eval_      = other.eval_;
             method_    = other.method_;
             recording_ = other.recording_;
-            var_name_  = other.var_name_;
             index_     = other.index_;
             record_    = other.record_;
         }
@@ -104,36 +102,6 @@ class Monitor
         return bool(eval_);
     }
 
-    /// \brief Read and write access to the variable names of the Monitor
-    std::string &var_name (std::size_t id)
-    {
-        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
-                "**vsmc::Monitor::var_name** INVALID ID");
-
-        return var_name_[id];
-    }
-
-    /// \brief Read only access to the variable names of the Monitor
-    const std::string &var_name (std::size_t id) const
-    {
-        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim_),
-                "**vsmc::Monitor::var_name** INVLID ID");
-
-        return var_name_[id];
-    }
-
-    /// \brief Set all variable names
-    template <typename InputIter>
-    void var_name (InputIter first, InputIter last)
-    {
-        var_name_.clear();
-        for (std::size_t i = 0; i != dim_ && first != last; ++i, ++first)
-            var_name_.push_back(*first);
-        std::size_t diff = dim_ - var_name_.size();
-        for (std::size_t i = 0; i != diff; ++i)
-            var_name_.push_back(std::string());
-    }
-
     /// \brief Get the iteration index of the sampler of a given Monitor
     /// iteration
     ///
@@ -145,8 +113,7 @@ class Monitor
     /// `turnoff()`, then iter(iter) shall just be `iter`.
     std::size_t index (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
-                ("**Monitor::index** INVALID ITERATION NUMBER"));
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Monitor::index);
 
         return index_[iter];
     }
@@ -158,12 +125,11 @@ class Monitor
     /// For a `dim` dimension Monitor, `id` shall be 0 to `dim` - 1
     double record (std::size_t id) const
     {
-        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
-                ("**Monitor::record** INVALID ID"));
-        VSMC_RUNTIME_ASSERT((iter_size() > 0),
-                ("**Monitor::record** INVALID ITERATION"));
+        std::size_t iter = iter_size() ? iter_size() - 1 : iter_size();
+        VSMC_RUNTIME_ASSERT_ID_NUMBER(Monitor::record);
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Monitor::record);
 
-        return record_[(iter_size() - 1) * dim_ + id];
+        return record_[iter * dim_ + id];
     }
 
     /// \brief Get the Monte Carlo integration record of a given variable and
@@ -173,10 +139,8 @@ class Monitor
     /// For a `dim` dimension Monitor, `id` shall be 0 to `dim` - 1
     double record (std::size_t id, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT((id >= 0 && id < dim()),
-                ("**Monitor::record** INVALID ID"));
-        VSMC_RUNTIME_ASSERT((iter_size() > 0),
-                ("**Monitor::record** INVALID ITERATION"));
+        VSMC_RUNTIME_ASSERT_ID_NUMBER(Monitor::record);
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Monitor::record);
 
         return record_[iter * dim_ + id];
     }
@@ -231,9 +195,7 @@ class Monitor
     template <typename OutputIter>
     OutputIter read_record_matrix (MatrixOrder order, OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT((order == ColMajor || order == RowMajor),
-                "CALL **Monitor::read_record_matrix** with and INVALID "
-                "MatrixOrder");
+        VSMC_RUNTIME_ASSERT_MATRIX_ORDER(order, Monitor::read_record_matrix);
 
         if (order == ColMajor)
             for (std::size_t d = 0; d != dim_; ++d)
@@ -268,11 +230,12 @@ class Monitor
         if (!recording_)
             return;
 
-        VSMC_RUNTIME_ASSERT((bool(eval_)),
-                ("**Monitor::eval** INVALID EVALUATION OBJECT"));
+        VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Monitor::eval, EVALUATION);
 
         result_.resize(dim_);
-        if (method_ ==  ImportanceSampling) {
+        if (method_ ==  Simple) {
+            eval_(iter, dim_, particle, &result_[0]);
+        } else {
             weight_.resize(particle.size());
             buffer_.resize(particle.size() * dim_);
             eval_(iter, dim_, particle, &buffer_[0]);
@@ -288,10 +251,6 @@ class Monitor
                         traits::SizeTypeTrait<integrald_type>::type>(
                             dim_), &buffer_[0], &weight_[0], &result_[0]);
             }
-        } else if (method_ == Simple) {
-            eval_(iter, dim_, particle, &result_[0]);
-        } else {
-            VSMC_RUNTIME_ASSERT(false, "**vsmc::Monitor** INVALID METHOD");
         }
 
         index_.push_back(iter);
@@ -330,7 +289,6 @@ class Monitor
     eval_type eval_;
     MonitorMethod method_;
     bool recording_;
-    std::vector<std::string> var_name_;
     std::vector<std::size_t> index_;
     std::vector<double> record_;
     std::vector<double> result_;

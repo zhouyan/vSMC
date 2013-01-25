@@ -29,7 +29,7 @@ class BlockedRange
 
     BlockedRange (size_type begin, size_type end) : begin_(begin), end_(end)
     {
-        VSMC_RUNTIME_ASSERT((begin < end), "INVALID RANG **BlockedRange**");
+        VSMC_RUNTIME_ASSERT_RANGE(begin, end, BlockedRange);
     }
 
     size_type begin () const
@@ -139,8 +139,6 @@ class ThreadInfo
             B += next;
             N -= next;
         }
-        VSMC_RUNTIME_ASSERT((range_vec.back().end() == range.end()),
-                "INVALID PARTITION **ThreadInfo::partition**");
 
         return range_vec;
     }

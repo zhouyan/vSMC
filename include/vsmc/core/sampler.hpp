@@ -179,6 +179,8 @@ class Sampler
     /// \brief Set the initialization object of type init_type
     Sampler<T> &init (const init_type &new_init)
     {
+        VSMC_RUNTIME_ASSERT_FUNCTOR(new_init, Sampler::init, Initialize);
+
         init_ = new_init;
 
         return *this;
@@ -207,8 +209,8 @@ class Sampler
     /// \brief Add a new move
     Sampler<T> &move (const move_type &new_move, bool append)
     {
-        VSMC_RUNTIME_ASSERT((bool(new_move)),
-                "CALL **Sampler::move** WITH AN INVALID MOVE FUNCTOR");
+        VSMC_RUNTIME_ASSERT_FUNCTOR(new_move, Sampler::move, MOVE);
+
         if (!append)
             move_queue_.clear();
         move_queue_.push_back(new_move);
@@ -223,8 +225,7 @@ class Sampler
         if (!append)
             move_queue_.clear();
         while (first != last) {
-            VSMC_RUNTIME_ASSERT((bool(*first)),
-                    "CALL **Sampler::move** WITH AN INVALID MOVE FUNCTOR");
+            VSMC_RUNTIME_ASSERT_FUNCTOR(*first, Sampler::move, MOVE);
             move_queue_.push_back(*first);
             ++first;
         }
@@ -255,8 +256,8 @@ class Sampler
     /// \brief Add a new mcmc
     Sampler<T> &mcmc (const mcmc_type &new_mcmc, bool append)
     {
-        VSMC_RUNTIME_ASSERT((bool(new_mcmc)),
-                "CALL **Sampler::mcmc** WITH AN INVALID MCMC FUNCTOR");
+        VSMC_RUNTIME_ASSERT_FUNCTOR(new_mcmc, Sampler::mcmc, MCMC);
+
         if (!append)
             mcmc_queue_.clear();
         mcmc_queue_.push_back(new_mcmc);
@@ -271,8 +272,7 @@ class Sampler
         if (!append)
             mcmc_queue_.clear();
         while (first != last) {
-            VSMC_RUNTIME_ASSERT((bool(*first)),
-                    "CALL **Sampler::mcmc** WITH AN INVALID MCMC FUNCTOR");
+            VSMC_RUNTIME_ASSERT_FUNCTOR(*first, Sampler::mcmc, MCMC);
             mcmc_queue_.push_back(*first);
             ++first;
         }
@@ -291,6 +291,8 @@ class Sampler
     /// evaluation objects are untouched.
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
+        VSMC_RUNTIME_ASSERT_FUNCTOR(init_, Sampler::initialize, Initialize);
+
         ess_history_.clear();
         resampled_history_.clear();
         accept_history_.clear();
@@ -300,9 +302,6 @@ class Sampler
             m->second.clear();
 
         iter_num_ = 0;
-        VSMC_RUNTIME_ASSERT((bool(init_)),
-                "CALL **Sampler::initialize** WITH AN INVALID "
-                "INITIALIZE FUNCTOR");
         accept_history_.push_back(std::vector<std::size_t>(1,
                     init_(particle_, param)));
         do_resampling();
@@ -376,8 +375,8 @@ class Sampler
     Monitor<T> &monitor (const std::string &name)
     {
         typename monitor_map_type::iterator iter = monitor_.find(name);
-        VSMC_RUNTIME_ASSERT((iter != monitor_.end()),
-                "CALL **Sampler::monitor** WITH AN INVALID MONITOR NAME");
+
+        VSMC_RUNTIME_ASSERT_MONITOR_NAME(iter, monitor_, Sampler::monitor);
 
         return iter->second;
     }
@@ -386,8 +385,8 @@ class Sampler
     const Monitor<T> &monitor (const std::string &name) const
     {
         typename monitor_map_type::const_iterator citer = monitor_.find(name);
-        VSMC_RUNTIME_ASSERT((citer != monitor_.end()),
-                "CALL **Sampler::monitor** WITH AN INVALID MONITOR NAME");
+
+        VSMC_RUNTIME_ASSERT_MONITOR_NAME(citer, monitor_, Sampler::monitor);
 
         return citer->second;
     }
@@ -537,23 +536,11 @@ class Sampler
             if (print_monitor) {
                 for (typename monitor_map_type::const_iterator
                         m = monitor_.begin(); m != monitor_.end(); ++m) {
-                    if (m->second.dim() == 1) {
-                        if (m->second.var_name(0).empty()) {
-                            os << sepchar << m->first;
-                        } else {
-                            os << sepchar << m->first << '.'
-                                << m->second.var_name(0);
-                        }
-                    } else {
-                        for (std::size_t d = 0; d != m->second.dim(); ++d) {
-                            if (m->second.var_name(d).empty()) {
-                                os << sepchar << m->first << '.' << d + 1;
-                            } else {
-                                os << sepchar << m->first << '.'
-                                    << m->second.var_name(d);
-                            }
-                        }
-                    }
+                    if (m->second.dim() == 1)
+                        os << sepchar << m->first;
+                    else
+                        for (std::size_t d = 0; d != m->second.dim(); ++d)
+                            os << sepchar << m->first << '.' << d + 1;
                 }
             }
             if (iter_size() > 0)
@@ -681,12 +668,12 @@ class Sampler
             for (int i = 0; i != 78; ++i)
                 std::fprintf(stderr, "=");
             std::fprintf(stderr, "\n");
-            std::fprintf(stderr, "%6zu", iter_num_);
+            std::fprintf(stderr, "%6u", static_cast<unsigned>(iter_num_));
             return;
         }
 
         if (!(iter_num_ % 50))
-            std::fprintf(stderr, "%6zu", iter_num_);
+            std::fprintf(stderr, "%6u", static_cast<unsigned>(iter_num_));
         else
             std::fprintf(stderr, ".");
 

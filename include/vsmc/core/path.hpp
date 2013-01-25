@@ -86,9 +86,7 @@ class Path
     /// \sa Monitor::index()
     std::size_t index (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
-                ("CALL **Path::index** WITH AN INVALID "
-                 "ITERATION NUMBER"));
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::index);
 
         return index_[iter];
     }
@@ -96,9 +94,7 @@ class Path
     /// \brief Get the Path sampling integrand of a given Path iteration
     double integrand (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
-                ("CALL **Path::integrand** WITH AN INVALID "
-                 "ITERATION NUMBER"));
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::integrand);
 
         return integrand_[iter];
     }
@@ -106,9 +102,7 @@ class Path
     /// \brief Get the Path sampling width of a given Path iteration
     double width (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
-                ("CALL **Path::width** WITH AN INVALID "
-                 "ITERATION NUMBER"));
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::width);
 
         return width_[iter];
     }
@@ -120,9 +114,7 @@ class Path
     /// words, \f$\alpha_t\f$
     double grid (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT((iter >= 0 && iter < iter_size()),
-                ("CALL **Path::grid** WITH AN INVALID "
-                 "ITERATION NUMBER"));
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::grid);
 
         return grid_[iter];
     }
@@ -183,8 +175,7 @@ class Path
         if (!recording_)
             return;
 
-        VSMC_RUNTIME_ASSERT((bool(eval_)),
-                ("**Path::eval** AN INVALID EVALUATION OBJECT"));
+        VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Path::eval, EVALUATION);
 
         buffer_.resize(particle.size());
         weight_.resize(particle.size());

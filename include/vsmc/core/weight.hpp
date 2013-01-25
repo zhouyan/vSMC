@@ -63,11 +63,8 @@ class WeightSet
     double *read_weight (double *first) const
     {
         const double *const wptr = &weight_[0];
-        VSMC_RUNTIME_ASSERT(
-                (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_)),
-                "The destination of **WeightSet::read_weight** is "
-                "overlapping with the source.\n"
-                "How did you get this address?");
+        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_OUT(
+                first - wptr, size_, WeightSet::read_weight);
         std::memcpy(first, wptr, sizeof(double) * size_);
 
         return first + size_;
@@ -98,11 +95,8 @@ class WeightSet
     double *read_log_weight (double *first) const
     {
         const double *const lwptr = &log_weight_[0];
-        VSMC_RUNTIME_ASSERT(
-                (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_)),
-                "The destination of **WeightSet::read_weight** is "
-                "overlapping with the source.\n"
-                "How did you get this address?");
+        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_OUT(
+                first - lwptr, size_, WeightSet::read_log_weight);
         std::memcpy(first, lwptr, sizeof(double) * size_);
 
         return first + size_;
@@ -159,11 +153,8 @@ class WeightSet
     void set_weight (const double *first)
     {
         double *const wptr = &weight_[0];
-        VSMC_RUNTIME_ASSERT(
-                (std::abs(first - wptr) > static_cast<std::ptrdiff_t>(size_)),
-                "The source of **WeightSet::set_weight** is "
-                "overlapping with the destination.\n"
-                "How did you get this address?");
+        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+                first - wptr, size_, WeightSet::set_weight);
         std::memcpy(wptr, first, sizeof(double) * size_);
         weight2log_weight();
     }
@@ -219,11 +210,8 @@ class WeightSet
     void set_log_weight (const double *first)
     {
         double *const lwptr = &log_weight_[0];
-        VSMC_RUNTIME_ASSERT(
-                (std::abs(first - lwptr) > static_cast<std::ptrdiff_t>(size_)),
-                "The source of **WeightSet::set_log_weight** is "
-                "overlapping with the destination.\n"
-                "How did you get this address?");
+        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+                first - lwptr, size_, WeightSet::set_log_weight);
         std::memcpy(lwptr, first, sizeof(double) * size_);
         log_weight2weight();
     }

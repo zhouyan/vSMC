@@ -91,8 +91,7 @@ class StateCL
 
     void resize_dim (std::size_t dim)
     {
-        VSMC_STATIC_ASSERT((Dim == Dynamic),
-                USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT);
+        VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(CL);
 
         state_buffer_ =
             manager_.template create_buffer<state_type>(dim * size_);
@@ -220,7 +219,7 @@ class StateCL
     void copy (size_type N, const IntType *copy_from)
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(copy);
-        VSMC_RUNTIME_ASSERT((N == size_), "**StateCL::copy** SIZE MISMATCH");
+        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(CL);
 
         manager_.template write_buffer<size_type>(
                 copy_from_buffer_, size_, copy_from);

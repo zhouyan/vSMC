@@ -157,9 +157,7 @@ std::ptrdiff_t operator- (
         const ParticleIterator<T, SPType1> &iter1,
         const ParticleIterator<T, SPType2> &iter2)
 {
-    VSMC_RUNTIME_ASSERT((iter1->particle_ptr() == iter2->particle_ptr()),
-            "**ParticleIterator** BELONG TO TWO DIFFERENT PARTICLE COLLECTION"
-            "CAN NOT BE SUBSTRACTED");
+    VSMC_RUNTIME_ASSERT_PARTICLE_ITERATOR_BINARY_OP;
 
     return iter1->id() - iter2->id();
 }
