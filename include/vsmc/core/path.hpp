@@ -335,7 +335,7 @@ class PathGeometry : public Path<T>
             path_(path), weight_history_(weight_history),
             integrand_history_(integrand_history) {}
 
-        double operator() (double alpha) const
+        double operator() (double alpha)
         {
             using std::exp;
 
@@ -390,7 +390,7 @@ class PathGeometry : public Path<T>
         const PathGeometry<T> &path_;
         const std::vector<std::vector<double> > &weight_history_;
         const std::vector<std::vector<double> > &integrand_history_;
-        mutable std::vector<double> weight_;
+        std::vector<double> weight_;
         typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
     }; // class f_alpha_
 }; // class PathGeometry
