@@ -162,6 +162,9 @@ class NumericBase
 
     double operator() (size_type N, const double *grid) const
     {
+        if (N < 2)
+            return 0;
+
         double integral = 0;
         for (size_type i = 1; i != N; ++i)
             integral += static_cast<const Derived *>(this)->

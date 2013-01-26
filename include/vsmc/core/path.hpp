@@ -23,8 +23,8 @@ class Path
     ///
     /// A Path object is very similar to a Monitor object. It is a special case
     /// for Path sampling Monitor. The dimension of the Monitor is always one.
-    /// In addition, the evaluation object returns the width of the Path
-    /// sampling.
+    /// In addition, the evaluation object returns the integration grid of the
+    /// Path sampling.
     ///
     /// The evaluation object has the signature
     /// \code
@@ -34,21 +34,19 @@ class Path
     /// of each iteration. The evaluation occurs after the possible MCMC moves.
     /// The output parameter `integrand` shall contains the results of the
     /// Path sampling integrands. The return value shall be the Path sampling
-    /// width.
+    /// integration grid.
     ///
     /// For example, say the Path sampling is computed through integration of
     /// \f$\lambda = \int_0^1 E[g_\alpha(X)]\,\mathrm{d}\alpha\f$. The integral
     /// is approximated with numerical integration at point
     /// \f$\alpha_0 = 0, \alpha_1, \dots, \alpha_T = 1\f$, then at iteration
     /// \f$t\f$, the output parameter `integrand` contains
-    /// \f$(g_{\alpha_t}(X_0),\dots)\f$ and the return value is
-    /// \f$\alpha_t - \alpha_{t-1}\f$.
+    /// \f$(g_{\alpha_t}(X_0),\dots)\f$ and the return value is \f$\alpha_t\f$.
     explicit Path (const eval_type &eval) : eval_(eval), recording_(true) {}
 
     Path (const Path<T> &other) :
         eval_(other.eval_), recording_(other.recording_),
-        index_(other.index_), integrand_(other.integrand_),
-        width_(other.width_), grid_(other.grid_)
+        index_(other.index_), integrand_(other.integrand_), grid_(other.grid_)
     {}
 
     Path<T> &operator= (const Path<T> &other)
@@ -58,7 +56,6 @@ class Path
             recording_ = other.recording_;
             index_     = other.index_;
             integrand_ = other.integrand_;
-            width_     = other.width_;
             grid_      = other.grid_;
         }
 
@@ -98,19 +95,7 @@ class Path
         return integrand_[iter];
     }
 
-    /// \brief Get the Path sampling width of a given Path iteration
-    double width (std::size_t iter) const
-    {
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::width);
-
-        return width_[iter];
-    }
-
     /// \brief Get the Path sampling grid value of a given Path iteration
-    ///
-    /// \details
-    /// This is sum of width's from zero up to the given iteration, in other
-    /// words, \f$\alpha_t\f$
     double grid (std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::grid);
@@ -136,16 +121,6 @@ class Path
     {
         for (std::size_t i = 0; i != integrand_.size(); ++i, ++first)
             *first = integrand_[i];
-
-        return first;
-    }
-
-    /// \brief Read the width history through an output iterator
-    template <typename OutputIter>
-    OutputIter read_width (OutputIter first) const
-    {
-        for (std::size_t i = 0; i != width_.size(); ++i, ++first)
-            *first = width_[i];
 
         return first;
     }
@@ -182,16 +157,6 @@ class Path
 
         index_.push_back(iter);
         grid_.push_back(eval_(iter, particle, &buffer_[0]));
-        switch (grid_.size()) {
-            case 0 :
-                break;
-            case 1 :
-                width_.push_back(0);
-                break;
-            default :
-                width_.push_back(grid_.back() - grid_[grid_.size() - 2]);
-                break;
-        }
         integrand_.push_back(is_int_1_(static_cast<typename
                     traits::SizeTypeTrait<
                     typename traits::ImportanceSampling1TypeTrait<T>::type
@@ -201,11 +166,15 @@ class Path
     /// \brief Get the logarithm nomralizing constants ratio estimates
     double zconst () const
     {
-        double sum = 0;
-        for (std::size_t i = 1; i != iter_size(); ++i)
-            sum += 0.5 * width_[i] * (integrand_[i-1] + integrand_[i]);
+        if (iter_size() < 2)
+            return 0;
 
-        return sum;
+        double integral = 0;
+        for (std::size_t i = 1; i != iter_size(); ++i)
+            integral += 0.5 * (grid_[i] - grid_[i - 1]) *
+                (integrand_[i] + integrand_[i - 1]);
+
+        return integral;
     }
 
     /// \brief Clear all records of the index and integrations
@@ -213,7 +182,6 @@ class Path
     {
         index_.clear();
         integrand_.clear();
-        width_.clear();
         grid_.clear();
     }
 
@@ -241,7 +209,6 @@ class Path
     bool recording_;
     std::vector<std::size_t> index_;
     std::vector<double> integrand_;
-    std::vector<double> width_;
     std::vector<double> grid_;
     std::vector<double> weight_;
     std::vector<double> buffer_;

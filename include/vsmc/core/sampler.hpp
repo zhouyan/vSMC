@@ -530,7 +530,6 @@ class Sampler
             }
             if (print_path) {
                 os << sepchar << "Path.Integrand";
-                os << sepchar << "Path.Width";
                 os << sepchar << "Path.Grid";
             }
             if (print_monitor) {
@@ -568,10 +567,8 @@ class Sampler
                 if (pr < std::numeric_limits<std::size_t>::max
                         VSMC_MACRO_NO_EXPANSION ()) {
                     os << sepchar << path_.integrand(pr);
-                    os << sepchar << path_.width(pr);
                     os << sepchar << path_.grid(pr);
                 } else {
-                    os << sepchar << nachar;
                     os << sepchar << nachar;
                     os << sepchar << nachar;
                 }
