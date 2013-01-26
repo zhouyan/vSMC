@@ -160,7 +160,7 @@ class Sampler
         return first;
     }
 
-    /// \brief Get the number of moves (bosth move and mcmc) of a given
+    /// \brief Get the number of moves (both move and mcmc) of a given
     /// iteration
     std::size_t move_num (std::size_t iter) const
     {
