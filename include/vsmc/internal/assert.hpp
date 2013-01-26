@@ -77,7 +77,7 @@ class StaticAssert<true>
         USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION,
         USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION,
 
-        USE_NumericNewtonCotes_WITH_A_DEGREE_LARGERT_THAN_4
+        USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_4
     };
 }; // class StaticAssert
 
