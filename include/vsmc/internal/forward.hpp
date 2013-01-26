@@ -25,9 +25,15 @@ class NullType;
 
 // Utilities
 class Seed;
-class Integrate1;
-class IntegrateD;
-template <unsigned> class IntegrateNewtonCotes;
+
+namespace integrate {
+
+class ImportanceSampling1;
+class ImportanceSamplingD;
+template <typename> class NumericBase;
+template <unsigned> class NumericNewtonCotes;
+
+} // namespace integrate
 
 namespace gcd {
 

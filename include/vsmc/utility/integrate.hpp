@@ -40,20 +40,20 @@
 #define VSMC_INTEGRATE_INT VSMC_SIZE_TYPE
 #endif
 
-namespace vsmc {
-
-namespace internal {
+namespace vsmc { namespace internal {
 
 inline bool is_sse_aligned (void *ptr)
 {
     return ((unsigned long) ptr & 15) == 0;
 }
 
-} // namespace vsmc::internal
+} } // namespace vsmc::internal
+
+namespace vsmc { namespace integrate {
 
 /// \brief Compute the importance sampling integration of univariate variable
 /// \ingroup Integrate
-class Integrate1
+class ImportanceSampling1
 {
     public :
 
@@ -91,11 +91,11 @@ class Integrate1
         return res;
 #endif
     }
-}; // Integrate1
+}; // ImportanceSampling1
 
 /// \brief Compute the importance sampling integration of multivariate variable
 /// \ingroup Integrate
-class IntegrateD
+class ImportanceSamplingD
 {
     public :
 
@@ -148,12 +148,12 @@ class IntegrateD
         }
 #endif
     }
-}; // class IntegrateD
+}; // class ImportanceSamplingD
 
-/// \brief Interface class of numerical integration
+/// \brief Numerical integration base class
 /// \ingroup Integrate
 template <typename Derived>
-class IntegrateNumeric
+class NumericBase
 {
     public :
 
@@ -177,7 +177,7 @@ class IntegrateNumeric
         for (size_type i = 0; i != N; ++i, ++grid)
             grid_[i] = *grid;
 
-        return integrate(N, &grid_[0]);
+        return operator()(N, &grid_[0]);
     }
 
     template <typename InputIter>
@@ -187,29 +187,28 @@ class IntegrateNumeric
         for (InputIter iter = grid_begin; iter != grid_end; ++iter)
             grid_.push_back(*iter);
 
-        return integrate(static_cast<size_type>(grid_.size()), &grid_[0]);
+        return operator()(static_cast<size_type>(grid_.size()), &grid_[0]);
     }
 
     private :
 
     mutable std::vector<double> grid_;
-}; // class IntegrateNumeric
+}; // class NumericBase
 
 /// \brief Compute numerical integration using the Newton-Cotes formulae
 /// \ingroup Integrate
 template <unsigned Degree>
-class IntegrateNewtonCotes :
-    public IntegrateNumeric<IntegrateNewtonCotes<Degree> >
+class NumericNewtonCotes : public NumericBase<NumericNewtonCotes<Degree> >
 {
     public :
 
-    typedef IntegrateNumeric<IntegrateNewtonCotes<Degree> > base_type;
+    typedef NumericBase<NumericNewtonCotes<Degree> > base_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::eval_type eval_type;
 
-    IntegrateNewtonCotes (const eval_type &eval) : eval_(eval)
+    NumericNewtonCotes (const eval_type &eval) : eval_(eval)
     {
-        VSMC_STATIC_ASSERT_INTEGRATE_NEWTON_COTES_DEGREE(Degree);
+        VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(Degree);
     }
 
     double integrate_segment (double a, double b) const
@@ -261,24 +260,24 @@ class IntegrateNewtonCotes :
                 7 * eval_(a) + 32 * eval_(x1) + 12 * eval_(x2) +
                 32 * eval_(x3) + 7 * eval_(b));
     }
-}; // class IntegrateNewtonCotes
+}; // class NumericNewtonCotes
 
 /// \brief Compute numerical integration using Trapezoid rule
 /// \ingroup Integrate
-typedef IntegrateNewtonCotes<1> IntegrateTrapezoid;
+typedef NumericNewtonCotes<1> NumericTrapezoid;
 
 /// \brief Compute numerical integration using Simpson rule
 /// \ingroup Integrate
-typedef IntegrateNewtonCotes<2> IntegrateSimpson;
+typedef NumericNewtonCotes<2> NumericSimpson;
 
 /// \brief Compute numerical integration using Simpson 3/8 rule
 /// \ingroup Integrate
-typedef IntegrateNewtonCotes<3> IntegrateSimpson3_8;
+typedef NumericNewtonCotes<3> NumericSimpson3_8;
 
 /// \brief Compute numerical integration using Boole rule
 /// \ingroup Integrate
-typedef IntegrateNewtonCotes<4> IntegrateBoole;
+typedef NumericNewtonCotes<4> NumericBoole;
 
-} // namespace vsmc
+} } // namespace vsmc::integrate
 
 #endif // VSMC_CORE_INTEGRATE_HPP

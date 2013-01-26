@@ -14,7 +14,6 @@ class Path
     public :
 
     typedef T value_type;
-    typedef typename traits::Integrate1TypeTrait<T>::type integrate1_type;
     typedef cxx11::function<double (
             std::size_t, const Particle<T> &, double *)> eval_type;
 
@@ -193,9 +192,10 @@ class Path
                 width_.push_back(grid_.back() - grid_[grid_.size() - 2]);
                 break;
         }
-        integrand_.push_back(integrate1_(static_cast<typename
-                    traits::SizeTypeTrait<integrate1_type>::type>(
-                        weight_.size()), &buffer_[0], &weight_[0]));
+        integrand_.push_back(is_int_1_(static_cast<typename
+                    traits::SizeTypeTrait<
+                    typename traits::ImportanceSampling1TypeTrait<T>::type
+                    >::type>(weight_.size()), &buffer_[0], &weight_[0]));
     }
 
     /// \brief Get the logarithm nomralizing constants ratio estimates
@@ -245,7 +245,7 @@ class Path
     std::vector<double> grid_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    integrate1_type integrate1_;
+    typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
 }; // class PathSampling
 
 } // namespace vsmc

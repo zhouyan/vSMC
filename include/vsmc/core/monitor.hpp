@@ -17,8 +17,6 @@ class Monitor
     typedef cxx11::function<
         void (std::size_t, std::size_t, const Particle<T> &, double *)>
         eval_type;
-    typedef typename traits::Integrate1TypeTrait<T>::type integrate1_type;
-    typedef typename traits::IntegrateDTypeTrait<T>::type integrated_type;
 
     /// \brief Construct a Monitor with an evaluation object
     ///
@@ -241,15 +239,18 @@ class Monitor
             eval_(iter, dim_, particle, &buffer_[0]);
             particle.read_weight(&weight_[0]);
             if (dim_ == 1) {
-                result_[0] = integrate1_(static_cast<typename
-                        traits::SizeTypeTrait<integrate1_type>::type>(
-                            particle.size()), &buffer_[0], &weight_[0]);
+                result_[0] = is_int_1_(static_cast<typename
+                        traits::SizeTypeTrait<
+                        typename traits::ImportanceSampling1TypeTrait<T>::type
+                        >::type>(particle.size()), &buffer_[0], &weight_[0]);
             } else {
-                integrated_(static_cast<typename
-                        traits::SizeTypeTrait<integrated_type>::type>(
-                            particle.size()), static_cast<typename
-                        traits::SizeTypeTrait<integrated_type>::type>(
-                            dim_), &buffer_[0], &weight_[0], &result_[0]);
+                is_int_d_(static_cast<typename
+                        traits::SizeTypeTrait<
+                        typename traits::ImportanceSamplingDTypeTrait<T>::type
+                        >::type>(particle.size()), static_cast<typename
+                        traits::SizeTypeTrait<
+                        typename traits::ImportanceSamplingDTypeTrait<T>::type
+                        >::type>(dim_), &buffer_[0], &weight_[0], &result_[0]);
             }
         }
 
@@ -294,8 +295,8 @@ class Monitor
     std::vector<double> result_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    integrate1_type integrate1_;
-    integrated_type integrated_;
+    typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
+    typename traits::ImportanceSamplingDTypeTrait<T>::type is_int_d_;
 }; // class Monitor
 
 } // namespace vsmc
