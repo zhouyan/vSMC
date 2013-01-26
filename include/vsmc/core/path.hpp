@@ -2,7 +2,7 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/integral.hpp>
+#include <vsmc/core/integrate.hpp>
 
 namespace vsmc {
 
@@ -14,7 +14,7 @@ class Path
     public :
 
     typedef T value_type;
-    typedef typename traits::Integral1TypeTrait<T>::type integral1_type;
+    typedef typename traits::Integrate1TypeTrait<T>::type integrate1_type;
     typedef cxx11::function<double (
             std::size_t, const Particle<T> &, double *)> eval_type;
 
@@ -37,7 +37,7 @@ class Path
     /// Path sampling integrands. The return value shall be the Path sampling
     /// width.
     ///
-    /// For example, say the Path sampling is computed through integral of
+    /// For example, say the Path sampling is computed through integration of
     /// \f$\lambda = \int_0^1 E[g_\alpha(X)]\,\mathrm{d}\alpha\f$. The integral
     /// is approximated with numerical integration at point
     /// \f$\alpha_0 = 0, \alpha_1, \dots, \alpha_T = 1\f$, then at iteration
@@ -193,9 +193,9 @@ class Path
                 width_.push_back(grid_.back() - grid_[grid_.size() - 2]);
                 break;
         }
-        integrand_.push_back(integral1_(static_cast<typename
-                    traits::SizeTypeTrait<integral1_type>::type>(
-                        weight_.size()), &weight_[0], &buffer_[0]));
+        integrand_.push_back(integrate1_(static_cast<typename
+                    traits::SizeTypeTrait<integrate1_type>::type>(
+                        weight_.size()), &buffer_[0], &weight_[0]));
     }
 
     /// \brief Get the logarithm nomralizing constants ratio estimates
@@ -245,7 +245,7 @@ class Path
     std::vector<double> grid_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    integral1_type integral1_;
+    integrate1_type integrate1_;
 }; // class PathSampling
 
 } // namespace vsmc

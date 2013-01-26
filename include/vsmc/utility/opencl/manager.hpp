@@ -209,7 +209,8 @@ class Manager
 
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
 
-        std::size_t num = static_cast<std::size_t>(distance(first, last));
+        std::size_t num = static_cast<std::size_t>(
+                std::abs(distance(first, last)));
 
         if (!num)
             return cl::Buffer();

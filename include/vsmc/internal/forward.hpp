@@ -25,8 +25,8 @@ class NullType;
 
 // Utilities
 class Seed;
-class Integral1;
-class IntegralD;
+class Integrate1;
+class IntegrateD;
 
 namespace gcd {
 

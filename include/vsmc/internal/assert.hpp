@@ -75,7 +75,9 @@ class StaticAssert<true>
         USE_InitializeAdapter_WITHOUT_A_INITIAILIZE_IMPLEMENTATION,
         USE_MoveAdapter_WITHOUT_A_MOVE_IMPLEMENTATION,
         USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION,
-        USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION
+        USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION,
+
+        USE_IntegrateNewtonCotes_WITH_A_DEGREE_LARGERT_THAN_4
     };
 }; // class StaticAssert
 
@@ -157,11 +159,15 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
 
 #define VSMC_STATIC_ASSERT_ADAPTER_IMPL(name, NAME)                           \
     VSMC_STATIC_ASSERT(vsmc::traits::Is##name##Impl<Impl>::value,             \
-            USE_##name##Adapter_WITHOUT_A_##NAME##_IMPLEMENTATION)           \
+            USE_##name##Adapter_WITHOUT_A_##NAME##_IMPLEMENTATION)            \
 
 #define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(name)                           \
     VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
             USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_State##name##_OBJECT)
+
+#define VSMC_STATIC_ASSERT_INTEGRATE_NEWTON_COTES_DEGREE(degree)              \
+    VSMC_STATIC_ASSERT((degree <= 4),                                         \
+            USE_IntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_4)
 
 #define VSMC_STATIC_ASSERT_NO_IMPL(member)                                    \
     VSMC_STATIC_ASSERT((cxx11::is_same<T, NullType>::value),                  \
