@@ -173,10 +173,6 @@ class NumericBase
 
         return integral;
     }
-
-    private :
-
-    mutable std::vector<double> grid_;
 }; // class NumericBase
 
 /// \brief Compute numerical integration using the Newton-Cotes formulae

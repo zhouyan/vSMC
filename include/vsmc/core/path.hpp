@@ -207,6 +207,28 @@ class Path
         recording_ = false;
     }
 
+    protected :
+
+    const double *grid_ptr () const
+    {
+        return &grid_[0];
+    }
+
+    const double *integrand_ptr () const
+    {
+        return &integrand_[0];
+    }
+
+    const std::vector<double> &last_eval_weight () const
+    {
+        return weight_;
+    }
+
+    const std::vector<double> &last_eval_buffer () const
+    {
+        return buffer_;
+    }
+
     private :
 
     eval_type eval_;
@@ -222,29 +244,22 @@ class Path
 /// \brief Monitor for path sampling for SMC with geometry path
 /// \ingroup Core
 template <typename T>
-class PathGeometry
+class PathGeometry : public Path<T>
 {
     public :
 
     typedef cxx11::function<double (
             std::size_t, const Particle<T> &, double *)> eval_type;
 
-    PathGeometry (const eval_type &eval) : eval_(eval), recording_(true) {}
+    PathGeometry (const eval_type &eval) : Path<T>(eval) {}
 
     PathGeometry (const PathGeometry<T> &other) :
-        eval_(other.eval_), recording_(other.recording_),
-        index_(other.index_), integrand_(other.integrand_), grid_(other.grid_),
         weight_history_(other.weight_history_),
         integrand_history_(other.integrand_history_) {}
 
     PathGeometry<T> &operator= (const PathGeometry<T> &other)
     {
         if (&other != this) {
-            eval_              = other.eval_;
-            recording_         = other.recording_;
-            index_             = other.index_;
-            integrand_         = other.integrand_;
-            grid_              = other.grid_;
             weight_history_    = other.weight_history_;
             integrand_history_ = other.integrand_history_;
         }
@@ -252,137 +267,58 @@ class PathGeometry
         return *this;
     }
 
-    std::size_t iter_size () const
-    {
-        return index_.size();
-    }
-
-    VSMC_EXPLICIT_OPERATOR operator bool () const
-    {
-        return bool(eval_);
-    }
-
-    std::size_t index (std::size_t iter) const
-    {
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(PathGeometry::index);
-
-        return index_[iter];
-    }
-
-    double integrand (std::size_t iter) const
-    {
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(PathGeometry::integrand);
-
-        return integrand_[iter];
-    }
-
-    double grid (std::size_t iter) const
-    {
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(PathGeometry::grid);
-
-        return grid_[iter];
-    }
-
-    template <typename OutputIter>
-    OutputIter read_index (OutputIter first) const
-    {
-        for (std::size_t i = 0; i != index_.size(); ++i, ++first)
-            *first = index_[i];
-
-        return first;
-    }
-
-    template <typename OutputIter>
-    OutputIter read_integrand (OutputIter first) const
-    {
-        for (std::size_t i = 0; i != integrand_.size(); ++i, ++first)
-            *first = integrand_[i];
-
-        return first;
-    }
-
-    template <typename OutputIter>
-    OutputIter read_grid (OutputIter first) const
-    {
-        for (std::size_t i = 0; i != grid_.size(); ++i, ++first)
-            *first = grid_[i];
-
-        return first;
-    }
-
-    void set_eval (const eval_type &new_eval)
-    {
-        eval_ = new_eval;
-    }
-
     void eval (std::size_t iter, const Particle<T> &particle)
     {
-        if (!recording_)
-            return;
+        Path<T>::eval(iter, particle);
 
-        VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, PathGeometry::eval, EVALUATION);
-
-        buffer_.resize(particle.size());
-        weight_history_.push_back(std::vector<double>(particle.size()));
-        integrand_history_.push_back(std::vector<double>(particle.size()));
-        particle.read_weight(&weight_history_.back()[0]);
-
-        index_.push_back(iter);
-        grid_.push_back(eval_(iter, particle, &integrand_history_.back()[0]));
-        integrand_.push_back(is_int_1_(static_cast<
-                    typename traits::SizeTypeTrait<
-                    typename traits::ImportanceSampling1TypeTrait<T>::type
-                    >::type>(particle.size()), &integrand_history_.back()[0],
-                    &weight_history_.back()[0]));
+        weight_history_.push_back(this->last_eval_weight());
+        integrand_history_.push_back(this->last_eval_buffer());
     }
 
     template <unsigned Degree>
-    double zconst_newton_cotes () const
+    double zconst_newton_cotes (unsigned grid_enlarger = 1) const
     {
+        if (this->iter_size() < 2)
+            return 0;
+
         integrate::NumericNewtonCotes<Degree> numeric_int(
                 f_alpha_(*this, weight_history_, integrand_history_));
 
+        if (grid_enlarger <= 1) {
+            return numeric_int(static_cast<
+                    typename integrate::NumericNewtonCotes<Degree>::size_type>(
+                        this->iter_size()), this->grid_ptr());
+        }
+
+        std::vector<double> super_grid(grid_enlarger * this->iter_size() -
+                grid_enlarger + this->iter_size());
+        std::size_t offset = 0;
+        for (std::size_t i = 0; i != this->iter_size() - 1; ++i) {
+            double a = this->grid(i);
+            double b = this->grid(i + 1);
+            double h = (b - a) / (grid_enlarger + 1);
+            super_grid[offset++] = a;
+            for (unsigned j = 0; j != grid_enlarger; ++j)
+                super_grid[offset++] = a + h * (j + 1);
+        }
+        super_grid.back() = this->grid(this->iter_size() - 1);
+
         return numeric_int(static_cast<
                 typename integrate::NumericNewtonCotes<Degree>::size_type>(
-                    iter_size()), &grid_[0]);
+                    super_grid.size()), &super_grid[0]);
     }
 
     void clear ()
     {
-        index_.clear();
-        integrand_.clear();
-        grid_.clear();
+        Path<T>::clear();
         weight_history_.clear();
         integrand_history_.clear();
     }
 
-    bool recording () const
-    {
-        return recording_;
-    }
-
-    void turnon ()
-    {
-        recording_ = true;
-    }
-
-    void turnoff ()
-    {
-        recording_ = false;
-    }
-
     private :
-
-    eval_type eval_;
-    bool recording_;
-    std::vector<std::size_t> index_;
-    std::vector<double> integrand_;
-    std::vector<double> grid_;
-    std::vector<double> buffer_;
 
     std::vector<std::vector<double> > weight_history_;
     std::vector<std::vector<double> > integrand_history_;
-    typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
 
     class f_alpha_
     {
