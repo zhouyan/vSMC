@@ -27,6 +27,7 @@ class NullType;
 class Seed;
 class Integrate1;
 class IntegrateD;
+template <unsigned> class IntegrateNewtonCotes;
 
 namespace gcd {
 

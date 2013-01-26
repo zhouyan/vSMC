@@ -1,13 +1,6 @@
 #ifndef VSMC_UTILITY_OPENCL_MANAGER_HPP
 #define VSMC_UTILITY_OPENCL_MANAGER_HPP
 
-#define __CL_ENABLE_EXCEPTIONS
-
-#include <cstddef>
-#include <cstdlib>
-#include <string>
-#include <vector>
-
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
@@ -15,6 +8,11 @@
 #include <vsmc/internal/traits.hpp>
 
 #include <vsmc/utility/opencl/cl_wrapper.hpp>
+
+#include <cstddef>
+#include <cstdlib>
+#include <string>
+#include <vector>
 
 namespace vsmc { namespace opencl {
 

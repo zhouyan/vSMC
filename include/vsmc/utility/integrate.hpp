@@ -1,7 +1,16 @@
 #ifndef VSMC_CORE_INTEGRATE_HPP
 #define VSMC_CORE_INTEGRATE_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/forward.hpp>
+
+#include <vsmc/cxx11/functional.hpp>
+#include <vsmc/cxx11/type_traits.hpp>
+
+#include <cstddef>
+#include <vector>
 
 #undef VSMC_USE_CBLAS
 #undef VSMC_INTEGRATE_INT
@@ -35,8 +44,6 @@ namespace vsmc {
 
 namespace internal {
 
-/// \brief Check if a pointer is aligned to 16 bytes
-/// \ingroup Core
 inline bool is_sse_aligned (void *ptr)
 {
     return ((unsigned long) ptr & 15) == 0;
@@ -45,7 +52,7 @@ inline bool is_sse_aligned (void *ptr)
 } // namespace vsmc::internal
 
 /// \brief Compute the importance sampling integration of univariate variable
-/// \ingroup Core
+/// \ingroup Integrate
 class Integrate1
 {
     public :
@@ -87,7 +94,7 @@ class Integrate1
 }; // Integrate1
 
 /// \brief Compute the importance sampling integration of multivariate variable
-/// \ingroup Core
+/// \ingroup Integrate
 class IntegrateD
 {
     public :
@@ -143,6 +150,8 @@ class IntegrateD
     }
 }; // class IntegrateD
 
+/// \brief Interface class of numerical integration
+/// \ingroup Integrate
 template <typename Derived>
 class IntegrateNumeric
 {
@@ -186,6 +195,8 @@ class IntegrateNumeric
     mutable std::vector<double> grid_;
 }; // class IntegrateNumeric
 
+/// \brief Compute numerical integration using the Newton-Cotes formulae
+/// \ingroup Integrate
 template <unsigned Degree>
 class IntegrateNewtonCotes :
     public IntegrateNumeric<IntegrateNewtonCotes<Degree> >
@@ -252,9 +263,20 @@ class IntegrateNewtonCotes :
     }
 }; // class IntegrateNewtonCotes
 
+/// \brief Compute numerical integration using Trapezoid rule
+/// \ingroup Integrate
 typedef IntegrateNewtonCotes<1> IntegrateTrapezoid;
+
+/// \brief Compute numerical integration using Simpson rule
+/// \ingroup Integrate
 typedef IntegrateNewtonCotes<2> IntegrateSimpson;
+
+/// \brief Compute numerical integration using Simpson 3/8 rule
+/// \ingroup Integrate
 typedef IntegrateNewtonCotes<3> IntegrateSimpson3_8;
+
+/// \brief Compute numerical integration using Boole rule
+/// \ingroup Integrate
 typedef IntegrateNewtonCotes<4> IntegrateBoole;
 
 } // namespace vsmc

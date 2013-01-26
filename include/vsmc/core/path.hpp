@@ -2,7 +2,7 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/integrate.hpp>
+#include <vsmc/utility/integrate.hpp>
 
 namespace vsmc {
 

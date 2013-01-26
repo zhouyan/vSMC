@@ -103,6 +103,10 @@
 /// \ingroup Utility
 /// \brief Apple GCD dispatch queue utilities
 
+/// \defgroup Integrate Compute integrations
+/// \ingroup Utility
+/// \brief Importance sampling and numerical integration
+
 /// \defgroup OpenCL OpenCL
 /// \ingroup Utility
 /// \brief OpenCL device management utilities
