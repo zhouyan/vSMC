@@ -155,16 +155,16 @@ class Path
 
         VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Path::eval, EVALUATION);
 
-        buffer_.resize(particle.size());
-        weight_.resize(particle.size());
-        particle.read_weight(&weight_[0]);
+        double *buffer = malloc_eval_integrand(particle.size());
+        double *weight = malloc_weight(particle.size());
+        particle.read_weight(weight);
 
         index_.push_back(iter);
-        grid_.push_back(eval_(iter, particle, &buffer_[0]));
+        grid_.push_back(eval_(iter, particle, buffer));
         integrand_.push_back(is_int_1_(static_cast<
                     typename traits::SizeTypeTrait<
                     typename traits::ImportanceSampling1TypeTrait<T>::type
-                    >::type>(particle.size()), &buffer_[0], &weight_[0]));
+                    >::type>(particle.size()), buffer, weight));
     }
 
     /// \brief Get the logarithm nomralizing constants ratio estimates
@@ -209,24 +209,18 @@ class Path
 
     protected :
 
-    const double *grid_ptr () const
+    virtual double *malloc_weight (std::size_t N)
     {
-        return &grid_[0];
+        weight_.resize(N);
+
+        return &weight_[0];
     }
 
-    const double *integrand_ptr () const
+    virtual double *malloc_eval_integrand (std::size_t N)
     {
-        return &integrand_[0];
-    }
+        buffer_.resize(N);
 
-    const std::vector<double> &last_eval_weight () const
-    {
-        return weight_;
-    }
-
-    const std::vector<double> &last_eval_buffer () const
-    {
-        return buffer_;
+        return &buffer_[0];
     }
 
     private :
@@ -267,14 +261,6 @@ class PathGeometry : public Path<T>
         return *this;
     }
 
-    void eval (std::size_t iter, const Particle<T> &particle)
-    {
-        Path<T>::eval(iter, particle);
-
-        weight_history_.push_back(this->last_eval_weight());
-        integrand_history_.push_back(this->last_eval_buffer());
-    }
-
     template <unsigned Degree>
     double zconst_newton_cotes (unsigned insert_points = 0) const
     {
@@ -285,9 +271,12 @@ class PathGeometry : public Path<T>
                 f_alpha_(*this, weight_history_, integrand_history_));
 
         if (insert_points == 0) {
+            std::vector<double> base_grid(this->iter_size());
+            for (std::size_t i = 0; i != this->iter_size(); ++i)
+                base_grid[i] = this->grid(i);
             return numeric_int(static_cast<
                     typename integrate::NumericNewtonCotes<Degree>::size_type>(
-                        this->iter_size()), this->grid_ptr());
+                        base_grid.size()), &base_grid[0]);
         }
 
         std::vector<double> super_grid(insert_points * this->iter_size() -
@@ -313,6 +302,22 @@ class PathGeometry : public Path<T>
         Path<T>::clear();
         weight_history_.clear();
         integrand_history_.clear();
+    }
+
+    protected :
+
+    double *malloc_weight (std::size_t N)
+    {
+        weight_history_.push_back(std::vector<double>(N));
+
+        return &weight_history_.back()[0];
+    }
+
+    double *malloc_eval_integrand (std::size_t N)
+    {
+        integrand_history_.push_back(std::vector<double>(N));
+
+        return &integrand_history_.back()[0];
     }
 
     private :
