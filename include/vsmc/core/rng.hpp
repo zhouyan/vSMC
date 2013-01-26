@@ -80,7 +80,7 @@ class RngSet
 {
     public :
 
-    typedef VSMC_PRLRNG_TYPE rng_type;
+    typedef VSMC_ENGINE_TYPE rng_type;
     typedef VSMC_SEED_TYPE seed_type;
     typedef std::vector<rng_type>::size_type size_type;
 
