@@ -40,10 +40,6 @@
 #define VSMC_CBRNG_TYPE r123::Threefry4x64
 #endif
 
-#ifndef VSMC_SEQRNG_TYPE
-#define VSMC_SEQRNG_TYPE vsmc::cxx11::mt19937
-#endif
-
 #if VSMC_USE_RANDOM123
 #define VSMC_PRLRNG_TYPE r123::Engine<VSMC_CBRNG_TYPE>
 #else
@@ -62,6 +58,10 @@
 
 #ifndef VSMC_USE_OMP
 #define VSMC_USE_OMP 0
+#endif
+
+#ifndef VSMC_USE_PPL
+#define VSMC_USE_PPL 0
 #endif
 
 #ifndef VSMC_USE_STD

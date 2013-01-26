@@ -74,33 +74,9 @@ class Seed
     ~Seed () {};
 }; // class Seed
 
-/// \brief Sequential RNG set class
-/// \ingroup Core
-class RngSetSeq
-{
-    public :
-
-    typedef VSMC_SEQRNG_TYPE rng_type;
-    typedef VSMC_SEED_TYPE seed_type;
-    typedef VSMC_SIZE_TYPE size_type;
-
-    explicit RngSetSeq (size_type N) :
-        rng_(static_cast<rng_type::result_type>(seed_type::instance().get()))
-    {}
-
-    rng_type &rng (size_type id)
-    {
-        return rng_;
-    }
-
-    private :
-
-    rng_type rng_;
-}; // class RngSetSeq
-
 /// \brief Parallel RNG set class
 /// \ingroup Core
-class RngSetPrl
+class RngSet
 {
     public :
 
@@ -108,7 +84,7 @@ class RngSetPrl
     typedef VSMC_SEED_TYPE seed_type;
     typedef std::vector<rng_type>::size_type size_type;
 
-    explicit RngSetPrl (size_type N)
+    explicit RngSet (size_type N)
     {
         seed_type &seed = seed_type::instance();
         for (size_type i = 0; i != N; ++i)
@@ -124,11 +100,11 @@ class RngSetPrl
     private :
 
     std::vector<rng_type> rng_;
-}; // class RngSetPrl
+}; // class RngSet
 
 } // namespace vsmc
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSetPrl)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSet)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
         cxx11::mt19937)
 

@@ -41,8 +41,8 @@ In particular, the library use the `<functional>`, `<random>` and
 Equivalences can be found in [Boost][Boost]. By default the library will use
 the [Boost][Boost] library as C++11 implementations are not mature at the time
 writing. But if the C++ implementation has them correctly implemented, the
-standard headers can also be used by defining suitable macros (see the [vSMC
-Macros][vSMCMacro]).
+standard headers can also be used by defining suitable macros (see reference
+manual for details).
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 implementations of `<functional>`, `<random>` and `<type_traits>`
@@ -81,4 +81,3 @@ in the `LICENSE` file distributed with the source.
 [libc++]: http://libcxx.llvm.org
 [libdispatch]: http://libdispatch.macosforge.org/
 [vSMCDoc]: http://zhouyan.github.com/vSMC/doc/html/index.html
-[vSMCMacro]: https://github.com/zhouyan/vSMC/wiki/Macros

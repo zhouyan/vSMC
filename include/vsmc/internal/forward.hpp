@@ -72,8 +72,7 @@ template <typename> class Manager;
 
 // Core
 class Seed;
-class RngSetSeq;
-class RngSetPrl;
+class RngSet;
 template <typename ResType> class Resample;
 template <typename> class WeightSet;
 template <typename> class Sampler;

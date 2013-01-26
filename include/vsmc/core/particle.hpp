@@ -342,7 +342,7 @@ class SingleParticle
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
 /// \sa WeightSetBase
-/// \sa RngSetSeq RngSetPrl
+/// \sa RngSet
 template <typename T>
 class Particle
 {
