@@ -276,7 +276,7 @@ class PathGeometry : public Path<T>
     }
 
     template <unsigned Degree>
-    double zconst_newton_cotes (unsigned grid_enlarger = 1) const
+    double zconst_newton_cotes (unsigned insert_points = 0) const
     {
         if (this->iter_size() < 2)
             return 0;
@@ -284,21 +284,21 @@ class PathGeometry : public Path<T>
         integrate::NumericNewtonCotes<Degree> numeric_int(
                 f_alpha_(*this, weight_history_, integrand_history_));
 
-        if (grid_enlarger <= 1) {
+        if (insert_points == 0) {
             return numeric_int(static_cast<
                     typename integrate::NumericNewtonCotes<Degree>::size_type>(
                         this->iter_size()), this->grid_ptr());
         }
 
-        std::vector<double> super_grid(grid_enlarger * this->iter_size() -
-                grid_enlarger + this->iter_size());
+        std::vector<double> super_grid(insert_points * this->iter_size() -
+                insert_points + this->iter_size());
         std::size_t offset = 0;
         for (std::size_t i = 0; i != this->iter_size() - 1; ++i) {
             double a = this->grid(i);
             double b = this->grid(i + 1);
-            double h = (b - a) / (grid_enlarger + 1);
+            double h = (b - a) / (insert_points + 1);
             super_grid[offset++] = a;
-            for (unsigned j = 0; j != grid_enlarger; ++j)
+            for (unsigned j = 0; j != insert_points; ++j)
                 super_grid[offset++] = a + h * (j + 1);
         }
         super_grid.back() = this->grid(this->iter_size() - 1);
