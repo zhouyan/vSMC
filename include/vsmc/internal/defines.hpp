@@ -9,7 +9,6 @@
 namespace vsmc {
 
 enum {Dynamic};
-enum MonitorMethod {ImportanceSampling, Simple};
 enum MatrixOrder {RowMajor = 101, ColMajor = 102};
 
 } // namespace vsmc

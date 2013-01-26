@@ -22,7 +22,6 @@ class Monitor
     ///
     /// \param dim The dimension of the Monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
-    /// \param method The method of the Monitor evaluation.
     ///
     /// The evaluation object has the signature
     /// \code
@@ -31,35 +30,27 @@ class Monitor
     /// where the first three arguments are passed in by the Sampler at the
     /// end of each iteration. The evaluation occurs after the possible MCMC
     /// moves. The output parameter `result` shall contain the results of the
-    /// evaluation, whose meaning depend on the Monitor's constructor
-    /// parameter `method`, which can have two possible values
+    /// evaluation.
     ///
-    /// - _ImportanceSampling_ The array `result` is of length
-    /// `particle.size() * dim`, and it represents a row major matrix of
-    /// dimension `particle.size()` by `dim`, say \f$R\f$. Let \f$W\f$ be
-    /// the vector of the normalized weights. The Monitor will be respoinsible
-    /// to compute the importance sampling estimate \f$r = R^TW\f$ and record
-    /// it. For example, say the purpose of the Monitor is to record the
-    /// importance sampling estimates of \f$E[h(X)]\f$ where
-    /// \f$h(X) = (h_1(X),\dots,h_d(X))\f$. Then `result` shall contain the
-    /// evaluation of \f$h(X_i)\f$ for each \f$i\f$ from `0` to
-    /// `particle.size() - 1` in the order
+    /// The array `result` is of length `particle.size() * dim`, and it
+    /// represents a row major matrix of dimension `particle.size()` by `dim`,
+    /// say \f$R\f$. Let \f$W\f$ be the vector of the normalized weights. The
+    /// Monitor will be respoinsible to compute the importance sampling
+    /// estimate \f$r = R^TW\f$ and record it. For example, say the purpose of
+    /// the Monitor is to record the importance sampling estimates of
+    /// \f$E[h(X)]\f$ where \f$h(X) = (h_1(X),\dots,h_d(X))\f$. Then `result`
+    /// shall contain the evaluation of \f$h(X_i)\f$ for each \f$i\f$ from `0`
+    /// to `particle.size() - 1` in the order
     /// \f$(h_1(X_0), \dots, h_d(X_0), h_1(X_1), \dots, h_d(X_1), \dots)\f$.
     ///
-    /// - _Simple_ The evalution object returnt the `dim` length record
-    /// directly.
-    ///
     /// After each evaluation, the iteration number `iter` and the imporatance
-    /// sampling estimates (`method == ImportanceSampling`) or `result`
-    /// (`method == `Simple`) are recorded and can be retrived by `index()`
-    /// and `record()`.
-    explicit Monitor (std::size_t dim, const eval_type &eval,
-            MonitorMethod method = ImportanceSampling) :
-        dim_(dim), eval_(eval), method_(method), recording_(true) {}
+    /// sampling estimates are recorded and can be retrived by `index()` and
+    /// `record()`.
+    explicit Monitor (std::size_t dim, const eval_type &eval) :
+        dim_(dim), eval_(eval), recording_(true) {}
 
     Monitor (const Monitor<T> &other) :
-        dim_(other.dim_), eval_(other.eval_), method_(other.method_),
-        recording_(other.recording_), 
+        dim_(other.dim_), eval_(other.eval_), recording_(other.recording_), 
         index_(other.index_), record_(other.record_) {}
 
     Monitor<T> &operator= (const Monitor<T> &other)
@@ -67,7 +58,6 @@ class Monitor
         if (&other != this) {
             dim_       = other.dim_;
             eval_      = other.eval_;
-            method_    = other.method_;
             recording_ = other.recording_;
             index_     = other.index_;
             record_    = other.record_;
@@ -207,18 +197,16 @@ class Monitor
     }
 
     /// \brief Set a new evaluation object of type eval_type
-    void set_eval (const eval_type &new_eval,
-            MonitorMethod method = ImportanceSampling)
+    void set_eval (const eval_type &new_eval)
     {
         eval_ = new_eval;
-        method_ = method;
     }
 
     /// \brief Perform the evaluation for a given iteration and a Particle<T>
     /// object.
     ///
     /// \details
-    /// This functin is called by a `Sampler` at the end of each
+    /// This function is called by a `Sampler` at the end of each
     /// iteration. It does nothing if `recording()` returns `false`. Otherwise
     /// it use the user defined evaluation object to compute results. When a
     /// Monitor is constructed, `recording()` always returns `true`. It can be
@@ -231,27 +219,23 @@ class Monitor
         VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Monitor::eval, EVALUATION);
 
         result_.resize(dim_);
-        if (method_ ==  Simple) {
-            eval_(iter, dim_, particle, &result_[0]);
+        weight_.resize(particle.size());
+        buffer_.resize(particle.size() * dim_);
+        eval_(iter, dim_, particle, &buffer_[0]);
+        particle.read_weight(&weight_[0]);
+        if (dim_ == 1) {
+            result_[0] = is_int_1_(static_cast<
+                    typename traits::SizeTypeTrait<
+                    typename traits::ImportanceSampling1TypeTrait<T>::type
+                    >::type>(particle.size()), &buffer_[0], &weight_[0]);
         } else {
-            weight_.resize(particle.size());
-            buffer_.resize(particle.size() * dim_);
-            eval_(iter, dim_, particle, &buffer_[0]);
-            particle.read_weight(&weight_[0]);
-            if (dim_ == 1) {
-                result_[0] = is_int_1_(static_cast<
-                        typename traits::SizeTypeTrait<
-                        typename traits::ImportanceSampling1TypeTrait<T>::type
-                        >::type>(particle.size()), &buffer_[0], &weight_[0]);
-            } else {
-                is_int_d_(static_cast<
-                        typename traits::SizeTypeTrait<
-                        typename traits::ImportanceSamplingDTypeTrait<T>::type
-                        >::type>(particle.size()), static_cast<typename
-                        traits::SizeTypeTrait<
-                        typename traits::ImportanceSamplingDTypeTrait<T>::type
-                        >::type>(dim_), &buffer_[0], &weight_[0], &result_[0]);
-            }
+            is_int_d_(static_cast<
+                    typename traits::SizeTypeTrait<
+                    typename traits::ImportanceSamplingDTypeTrait<T>::type
+                    >::type>(particle.size()), static_cast<typename
+                    traits::SizeTypeTrait<
+                    typename traits::ImportanceSamplingDTypeTrait<T>::type
+                    >::type>(dim_), &buffer_[0], &weight_[0], &result_[0]);
         }
 
         index_.push_back(iter);
@@ -266,7 +250,7 @@ class Monitor
         record_.clear();
     }
 
-    /// \brief Whether the Montior is actively recording restuls
+    /// \brief Whether the Monitor is actively recording results
     bool recording () const
     {
         return recording_;
@@ -288,7 +272,6 @@ class Monitor
 
     std::size_t dim_;
     eval_type eval_;
-    MonitorMethod method_;
     bool recording_;
     std::vector<std::size_t> index_;
     std::vector<double> record_;

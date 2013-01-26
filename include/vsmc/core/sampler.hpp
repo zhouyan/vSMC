@@ -360,13 +360,11 @@ class Sampler
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
-    /// \param method The method of the monitor evaluation
     Sampler<T> &monitor (const std::string &name, std::size_t dim,
-            const typename Monitor<T>::eval_type &eval,
-            MonitorMethod method = ImportanceSampling)
+            const typename Monitor<T>::eval_type &eval)
     {
         monitor_.insert(typename monitor_map_type::value_type(
-                    name, Monitor<T>(dim, eval, method)));
+                    name, Monitor<T>(dim, eval)));
 
         return *this;
     }
