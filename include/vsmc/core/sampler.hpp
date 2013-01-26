@@ -286,8 +286,8 @@ class Sampler
     /// of type init_type
     ///
     /// \note
-    /// All histories (ESS, resampled, accept, monitors and path) are clared
-    /// before callling the initialization object. Monitors and path's
+    /// All histories (ESS, resampled, accept, Monitor and Path) are clared
+    /// before callling the initialization object. Monitors and Path's
     /// evaluation objects are untouched.
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
@@ -316,7 +316,7 @@ class Sampler
     /// \details
     /// Moves performed first. Then ESS/N is compared to the threshold and
     /// possible resampling is performed. Then mcmcs are performed. Then
-    /// monitors and path are computed
+    /// monitors and Path are computed
     Sampler<T> &iterate (std::size_t num = 1)
     {
         std::vector<std::size_t> accept_count;
@@ -432,9 +432,7 @@ class Sampler
         return path_;
     }
 
-    /// \brief Set the path sampling evaluation object
-    ///
-    /// \param eval The evaluation objet of type Path::eval_type
+    /// \brief Set the Path sampling evaluation object
     Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval)
     {
         path_.set_eval(eval);

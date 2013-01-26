@@ -239,13 +239,13 @@ class Monitor
             eval_(iter, dim_, particle, &buffer_[0]);
             particle.read_weight(&weight_[0]);
             if (dim_ == 1) {
-                result_[0] = is_int_1_(static_cast<typename
-                        traits::SizeTypeTrait<
+                result_[0] = is_int_1_(static_cast<
+                        typename traits::SizeTypeTrait<
                         typename traits::ImportanceSampling1TypeTrait<T>::type
                         >::type>(particle.size()), &buffer_[0], &weight_[0]);
             } else {
-                is_int_d_(static_cast<typename
-                        traits::SizeTypeTrait<
+                is_int_d_(static_cast<
+                        typename traits::SizeTypeTrait<
                         typename traits::ImportanceSamplingDTypeTrait<T>::type
                         >::type>(particle.size()), static_cast<typename
                         traits::SizeTypeTrait<

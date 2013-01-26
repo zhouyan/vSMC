@@ -4,6 +4,10 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/integrate.hpp>
 
+#if VSMC_USE_MKL
+#include <mkl_vml.h>
+#endif
+
 namespace vsmc {
 
 /// \brief Monitor for Path sampling
@@ -157,10 +161,10 @@ class Path
 
         index_.push_back(iter);
         grid_.push_back(eval_(iter, particle, &buffer_[0]));
-        integrand_.push_back(is_int_1_(static_cast<typename
-                    traits::SizeTypeTrait<
+        integrand_.push_back(is_int_1_(static_cast<
+                    typename traits::SizeTypeTrait<
                     typename traits::ImportanceSampling1TypeTrait<T>::type
-                    >::type>(weight_.size()), &buffer_[0], &weight_[0]));
+                    >::type>(particle.size()), &buffer_[0], &weight_[0]));
     }
 
     /// \brief Get the logarithm nomralizing constants ratio estimates
@@ -214,6 +218,241 @@ class Path
     std::vector<double> buffer_;
     typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
 }; // class PathSampling
+
+/// \brief Monitor for path sampling for SMC with geometry path
+/// \ingroup Core
+template <typename T>
+class PathGeometry
+{
+    public :
+
+    typedef cxx11::function<double (
+            std::size_t, const Particle<T> &, double *)> eval_type;
+
+    PathGeometry (const eval_type &eval) : eval_(eval), recording_(true) {}
+
+    PathGeometry (const PathGeometry<T> &other) :
+        eval_(other.eval_), recording_(other.recording_),
+        index_(other.index_), integrand_(other.integrand_), grid_(other.grid_),
+        weight_history_(other.weight_history_),
+        integrand_history_(other.integrand_history_) {}
+
+    PathGeometry<T> &operator= (const PathGeometry<T> &other)
+    {
+        if (&other != this) {
+            eval_              = other.eval_;
+            recording_         = other.recording_;
+            index_             = other.index_;
+            integrand_         = other.integrand_;
+            grid_              = other.grid_;
+            weight_history_    = other.weight_history_;
+            integrand_history_ = other.integrand_history_;
+        }
+
+        return *this;
+    }
+
+    std::size_t iter_size () const
+    {
+        return index_.size();
+    }
+
+    VSMC_EXPLICIT_OPERATOR operator bool () const
+    {
+        return bool(eval_);
+    }
+
+    std::size_t index (std::size_t iter) const
+    {
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(PathGeometry::index);
+
+        return index_[iter];
+    }
+
+    double integrand (std::size_t iter) const
+    {
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(PathGeometry::integrand);
+
+        return integrand_[iter];
+    }
+
+    double grid (std::size_t iter) const
+    {
+        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(PathGeometry::grid);
+
+        return grid_[iter];
+    }
+
+    template <typename OutputIter>
+    OutputIter read_index (OutputIter first) const
+    {
+        for (std::size_t i = 0; i != index_.size(); ++i, ++first)
+            *first = index_[i];
+
+        return first;
+    }
+
+    template <typename OutputIter>
+    OutputIter read_integrand (OutputIter first) const
+    {
+        for (std::size_t i = 0; i != integrand_.size(); ++i, ++first)
+            *first = integrand_[i];
+
+        return first;
+    }
+
+    template <typename OutputIter>
+    OutputIter read_grid (OutputIter first) const
+    {
+        for (std::size_t i = 0; i != grid_.size(); ++i, ++first)
+            *first = grid_[i];
+
+        return first;
+    }
+
+    void set_eval (const eval_type &new_eval)
+    {
+        eval_ = new_eval;
+    }
+
+    void eval (std::size_t iter, const Particle<T> &particle)
+    {
+        if (!recording_)
+            return;
+
+        VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, PathGeometry::eval, EVALUATION);
+
+        buffer_.resize(particle.size());
+        weight_history_.push_back(std::vector<double>(particle.size()));
+        integrand_history_.push_back(std::vector<double>(particle.size()));
+        particle.read_weight(&weight_history_.back()[0]);
+
+        index_.push_back(iter);
+        grid_.push_back(eval_(iter, particle, &integrand_history_.back()[0]));
+        integrand_.push_back(is_int_1_(static_cast<
+                    typename traits::SizeTypeTrait<
+                    typename traits::ImportanceSampling1TypeTrait<T>::type
+                    >::type>(particle.size()), &integrand_history_.back()[0],
+                    &weight_history_.back()[0]));
+    }
+
+    template <unsigned Degree>
+    double zconst_newton_cotes () const
+    {
+        integrate::NumericNewtonCotes<Degree> numeric_int(
+                f_alpha_(*this, weight_history_, integrand_history_));
+
+        return numeric_int(static_cast<
+                typename integrate::NumericNewtonCotes<Degree>::size_type>(
+                    iter_size()), &grid_[0]);
+    }
+
+    void clear ()
+    {
+        index_.clear();
+        integrand_.clear();
+        grid_.clear();
+        weight_history_.clear();
+        integrand_history_.clear();
+    }
+
+    bool recording () const
+    {
+        return recording_;
+    }
+
+    void turnon ()
+    {
+        recording_ = true;
+    }
+
+    void turnoff ()
+    {
+        recording_ = false;
+    }
+
+    private :
+
+    eval_type eval_;
+    bool recording_;
+    std::vector<std::size_t> index_;
+    std::vector<double> integrand_;
+    std::vector<double> grid_;
+    std::vector<double> buffer_;
+
+    std::vector<std::vector<double> > weight_history_;
+    std::vector<std::vector<double> > integrand_history_;
+    typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
+
+    class f_alpha_
+    {
+        public :
+
+        f_alpha_(const PathGeometry<T> &path,
+                const std::vector<std::vector<double> > &weight_history,
+                const std::vector<std::vector<double> > &integrand_history) :
+            path_(path), weight_history_(weight_history),
+            integrand_history_(integrand_history) {}
+
+        double operator() (double alpha) const
+        {
+            using std::exp;
+
+            if (path_.iter_size() == 0)
+                return 0;
+
+            std::size_t iter = 0;
+            while (iter != path_.iter_size() && path_.grid(iter) < alpha)
+                ++iter;
+
+            const double tol = alpha > 0 ? 1e-6 * alpha : 1e-10;
+
+            if (iter != path_.iter_size() && path_.grid(iter) - alpha < tol)
+                return path_.integrand(iter);
+
+            if (iter == 0)
+                return 0;
+
+            --iter;
+            if (alpha - path_.grid(iter) < tol)
+                return path_.integrand(iter);
+
+            double alpha_inc = alpha - path_.grid(iter);
+            std::size_t size = weight_history_[iter].size();
+            weight_.resize(size);
+            for (std::size_t i = 0; i != size; ++i)
+                weight_[i] = alpha_inc * integrand_history_[iter][i];
+#if VSMC_USE_MKL
+            ::vdExp(static_cast<MKL_INT>(size), &weight_[0], &weight_[0]);
+#else
+            for (std::size_t i = 0; i != size; ++i)
+                weight_[i] = exp(weight_[i]);
+#endif
+            for (std::size_t i = 0; i != size; ++i)
+                weight_[i] *= weight_history_[iter][i];
+            double coeff = 0;
+            for (std::size_t i = 0; i != size; ++i)
+                coeff += weight_[i];
+            coeff = 1 / coeff;
+            for (std::size_t i = 0; i != size; ++i)
+                weight_[i] *= coeff;
+
+            return (is_int_1_(static_cast<
+                        typename traits::SizeTypeTrait<
+                        typename traits::ImportanceSampling1TypeTrait<T>::type
+                        >::type>(size), &integrand_history_[iter][0],
+                        &weight_[0]));
+        }
+
+        private :
+
+        const PathGeometry<T> &path_;
+        const std::vector<std::vector<double> > &weight_history_;
+        const std::vector<std::vector<double> > &integrand_history_;
+        mutable std::vector<double> weight_;
+        typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
+    }; // class f_alpha_
+}; // class PathGeometry
 
 } // namespace vsmc
 

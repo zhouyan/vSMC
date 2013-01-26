@@ -166,31 +166,12 @@ class NumericBase
             return 0;
 
         double integral = 0;
-        for (size_type i = 1; i != N; ++i)
+        for (size_type i = 1; i != N; ++i) {
             integral += static_cast<const Derived *>(this)->
                 integrate_segment(grid[i - 1], grid[i]);
+        }
 
         return integral;
-    }
-
-    template <typename InputIter>
-    double operator() (size_type N, InputIter grid) const
-    {
-        grid_.resize(N);
-        for (size_type i = 0; i != N; ++i, ++grid)
-            grid_[i] = *grid;
-
-        return operator()(N, &grid_[0]);
-    }
-
-    template <typename InputIter>
-    double operator() (InputIter grid_begin, InputIter grid_end) const
-    {
-        grid_.clear();
-        for (InputIter iter = grid_begin; iter != grid_end; ++iter)
-            grid_.push_back(*iter);
-
-        return operator()(static_cast<size_type>(grid_.size()), &grid_[0]);
     }
 
     private :
@@ -233,7 +214,7 @@ class NumericNewtonCotes : public NumericBase<NumericNewtonCotes<Degree> >
     double integrate_segment_dispatch (double a, double b,
             cxx11::integral_constant<unsigned, 2>) const
     {
-        static const double coeff = 1.0 / 6.0;
+        const double coeff = 1.0 / 6.0;
 
         return coeff * (b - a) * (
                 eval_(a) + 4 * eval_(a + 0.5 * (b - a)) + eval_(b));
@@ -253,7 +234,7 @@ class NumericNewtonCotes : public NumericBase<NumericNewtonCotes<Degree> >
     double integrate_segment_dispatch (double a, double b,
             cxx11::integral_constant<unsigned, 4>) const
     {
-        static const double coeff = 1.0 / 90.0;
+        const double coeff = 1.0 / 90.0;
         double h = 0.25 * (b - a);
         double x1 = a + h;
         double x2 = a + h * 2;
