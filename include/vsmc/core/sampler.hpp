@@ -44,6 +44,19 @@ class Sampler
         return particle_.size();
     }
 
+    /// \brief Reserve space for a specified number of iterations
+    void reserve (std::size_t num)
+    {
+        ess_history_.reserve(num);
+        resampled_history_.reserve(num);
+        accept_history_.reserve(num);
+        for (typename monitor_map_type::iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+            m->second.reserve(num);
+        }
+        path_.reserve(num);
+    }
+
     /// \brief Number of iterations (including initialization)
     std::size_t iter_size () const
     {
@@ -319,6 +332,9 @@ class Sampler
     /// monitors and Path are computed
     Sampler<T> &iterate (std::size_t num = 1)
     {
+        if (num > 1)
+            reserve(iter_num_ + num);
+
         std::vector<std::size_t> accept_count;
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;

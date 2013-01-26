@@ -74,6 +74,14 @@ class Path
         return index_.size();
     }
 
+    /// \brief Reserve space for a specified number of iterations
+    void reserve (std::size_t num)
+    {
+        index_.reserve(num);
+        integrand_.reserve(num);
+        grid_.reserve(num);
+    }
+
     /// \brief Whether the evaluation object is valid
     VSMC_EXPLICIT_OPERATOR operator bool () const
     {

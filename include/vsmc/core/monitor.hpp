@@ -84,6 +84,13 @@ class Monitor
         return index_.size();
     }
 
+    /// \brief Reserve space for a specified number of iterations
+    void reserve (std::size_t num)
+    {
+        index_.reserve(num);
+        record_.reserve(dim_ * num);
+    }
+
     /// \brief Whether the evaluation object is valid
     VSMC_EXPLICIT_OPERATOR operator bool () const
     {
