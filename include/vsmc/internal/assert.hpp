@@ -16,9 +16,9 @@
         throw vsmc::RuntimeAssert(msg);                                       \
     };                                                                        \
 }
-#elif defined(VSMC_NDEBUG) // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#elif defined(NDEBUG) // No Debug
 #define VSMC_RUNTIME_ASSERT(cond, msg)
-#else
+#else // Runtime assertion
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
 {                                                                             \
     if (!(cond)) {                                                            \

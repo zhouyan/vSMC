@@ -6,10 +6,10 @@
 // Avoid MSVC stupid behavior
 #define VSMC_MACRO_NO_EXPANSION
 
-#ifdef VSMC_NDEBUG
-#define VSMC_SMP_BASE_DESTRUCTOR_PREFIX
-#else
+#if !defined(NDEBUG) || VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_SMP_BASE_DESTRUCTOR_PREFIX virtual
+#else
+#define VSMC_SMP_BASE_DESTRUCTOR_PREFIX
 #endif
 
 namespace vsmc {

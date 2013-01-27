@@ -75,6 +75,19 @@ class NumericTBB : public NumericBase<Derived>
         const eval_type eval_;
         double integral_;
     }; // class work_
+
+    class eval_init_
+    {
+        public :
+
+        eval_init_ (const eval_type &eval) : eval_(eval) {}
+
+        eval_type operator() () const { return eval_; }
+
+        private :
+
+        const eval_type &eval_;
+    }; // class eval_init_;
 }; // class NumericBase
 
 } } // namespace vsmc::integrate
