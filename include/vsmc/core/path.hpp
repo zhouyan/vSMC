@@ -347,6 +347,10 @@ class PathGeometry : public Path<T>
             path_(path), weight_history_(weight_history),
             integrand_history_(integrand_history) {}
 
+        f_alpha_ (const f_alpha_ &other) :
+            path_(other.path_), weight_history_(other.weight_history_),
+            integrand_history_(other.integrand_history_) {}
+
         double operator() (double alpha)
         {
             using std::exp;
