@@ -16,6 +16,12 @@
 #define VSMC_SIZE_TYPE std::size_t
 #endif
 
+// Assertion
+
+#ifndef VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#define VSMC_RUNTIME_ASSERT_AS_EXCEPTION 0
+#endif
+
 // OpenCL Device type
 
 #ifndef VSMC_CL_DEFAULT_ID
