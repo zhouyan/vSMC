@@ -8,9 +8,6 @@ namespace vsmc { namespace integrate {
 
 /// \brief Numerical integration with Microsoft Parallel Pattern Library
 /// \ingroup Integrate
-///
-/// \todo May not be thread-safe, dependent on if vsmc::cxx11::function
-/// copy/assignment are thread-safe.
 template <typename Derived>
 class NumericPPL : public NumericBase<Derived>
 {

@@ -14,9 +14,6 @@ namespace vsmc { namespace integrate {
 
 /// \brief Numerical integration with Intel Threading Building Block
 /// \ingroup Integrate
-///
-/// \todo May not be thread-safe, dependent on if vsmc::cxx11::function
-/// copy/assignment are thread-safe.
 template <typename Derived>
 class NumericTBB : public NumericBase<Derived>
 {
@@ -31,9 +28,7 @@ class NumericTBB : public NumericBase<Derived>
         if (N < 2)
             return 0;
 
-        eval_init_ init(eval);
-        tbb::combinable<eval_type> eval_op(init);
-        work_ work(this, grid, &eval_op);
+        work_ work(this, grid, eval);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(1, N), work);
 
         return work.integral();
@@ -46,7 +41,7 @@ class NumericTBB : public NumericBase<Derived>
         public :
 
         work_ (NumericTBB<Derived> *numeric, const double *grid,
-                tbb::combinable<eval_type> *eval) :
+                const eval_type &eval) :
             numeric_(numeric), grid_(grid), eval_(eval), integral_(0) {}
 
         work_ (const work_ &other, tbb::split) :
@@ -58,7 +53,7 @@ class NumericTBB : public NumericBase<Derived>
             double sum = integral_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 sum += numeric_->integrate_segment(
-                        grid_[i - 1], grid_[i], eval_->local());
+                        grid_[i - 1], grid_[i], eval_);
             }
             integral_ = sum;
         }
@@ -77,7 +72,7 @@ class NumericTBB : public NumericBase<Derived>
 
         NumericTBB<Derived> *const numeric_;
         const double *const grid_;
-        tbb::combinable<eval_type> *const eval_;
+        const eval_type eval_;
         double integral_;
     }; // class work_
 
