@@ -10,6 +10,9 @@ namespace vsmc { namespace integrate {
 
 /// \brief Numerical integration with Intel Cilk Plus
 /// \ingroup Integrate
+///
+/// \todo May not be thread-safe, dependent on if std::function/boost::function
+/// copy/assignment are thread-safe.
 template <typename Derived>
 class NumericCILK : public NumericBase<Derived>
 {

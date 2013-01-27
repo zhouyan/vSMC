@@ -14,6 +14,9 @@ namespace vsmc { namespace integrate {
 
 /// \brief Numerical integration with Intel Threading Building Block
 /// \ingroup Integrate
+///
+/// \todo May not be thread-safe, dependent on if std::function/boost::function
+/// copy/assignment are thread-safe.
 template <typename Derived>
 class NumericTBB : public NumericBase<Derived>
 {
