@@ -12,4 +12,8 @@
 #include <vsmc/utility/integrate/numeric_omp.hpp>
 #endif
 
+#if VSMC_USE_TBB
+#include <vsmc/utility/integrate/numeric_tbb.hpp>
+#endif
+
 #endif // VSMC_CORE_INTEGRATE_HPP
