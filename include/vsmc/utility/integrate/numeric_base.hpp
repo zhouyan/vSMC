@@ -14,7 +14,7 @@
 
 namespace vsmc { namespace integrate {
 
-/// \brief Base numerical integration
+/// \brief Numerical integration base class for implementations
 /// \ingroup Integrate
 template <typename Derived>
 class NumericBase

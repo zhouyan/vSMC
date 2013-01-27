@@ -14,7 +14,7 @@
 
 namespace vsmc { namespace integrate {
 
-/// \brief Compute numerical integration using the Newton-Cotes formulae
+/// \brief Numerical integration with the (closed) Newton-Cotes formulae
 /// \ingroup Integrate
 template <unsigned Degree, template <typename> class NumericImpl>
 class NumericNewtonCotes :

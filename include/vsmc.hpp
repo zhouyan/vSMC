@@ -103,7 +103,7 @@
 /// \ingroup Utility
 /// \brief Apple GCD dispatch queue utilities
 
-/// \defgroup Integrate Compute integrations
+/// \defgroup Integrate Integration
 /// \ingroup Utility
 /// \brief Importance sampling and numerical integration
 
