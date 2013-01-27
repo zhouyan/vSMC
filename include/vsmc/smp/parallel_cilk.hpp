@@ -1,7 +1,6 @@
 #ifndef VSMC_SMP_PARALLEL_CILK_HPP
 #define VSMC_SMP_PARALLEL_CILK_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/smp/base.hpp>
 #include <cilk/cilk.h>
 #include <cilk/reducer_opadd.h>

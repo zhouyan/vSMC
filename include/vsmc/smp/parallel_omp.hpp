@@ -1,27 +1,10 @@
 #ifndef VSMC_SMP_PARALLEL_OMP_HPP
 #define VSMC_SMP_PARALLEL_OMP_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/smp/base.hpp>
 #include <omp.h>
 
 namespace vsmc {
-
-namespace traits {
-
-#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
-template <typename T> struct OMPSizeTypeTrait
-{
-    typedef T type;
-};
-#else
-template <typename T> struct OMPSizeTypeTrait
-{
-    typedef typename cxx11::make_signed<T>::type type;
-};
-#endif
-
-} // namespace vsmc::traits
 
 /// \brief Particle::value_type subtype
 /// \ingroup OMP

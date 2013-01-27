@@ -1,7 +1,6 @@
 #ifndef VSMC_SMP_SEQUENTIAL_HPP
 #define VSMC_SMP_SEQUENTIAL_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/smp/base.hpp>
 
 namespace vsmc {

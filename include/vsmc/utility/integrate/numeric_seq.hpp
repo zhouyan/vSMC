@@ -16,17 +16,14 @@ class NumericSEQ : public NumericBase<Derived>
     typedef typename integrate_base_type::size_type size_type;
     typedef typename integrate_base_type::eval_type eval_type;
 
-    double operator() (size_type N, const double *grid,
-            const eval_type &eval) const
+    double operator() (size_type N, const double *grid, const eval_type &eval)
     {
         if (N < 2)
             return 0;
 
         double integral = 0;
-        for (size_type i = 1; i != N; ++i) {
-            integral += static_cast<const Derived *>(this)->
-                integrate_segment(grid[i - 1], grid[i], eval);
-        }
+        for (size_type i = 1; i != N; ++i)
+            integral += this->integrate_segment(grid[i - 1], grid[i], eval);
 
         return integral;
     }

@@ -141,6 +141,18 @@ VSMC_DEFINE_SMP_IS_IMPL_TRUE(TBB)
 
 namespace vsmc { namespace traits {
 
+#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
+template <typename T> struct OMPSizeTypeTrait
+{
+    typedef T type;
+};
+#else
+template <typename T> struct OMPSizeTypeTrait
+{
+    typedef typename cxx11::make_signed<T>::type type;
+};
+#endif
+
 // IsBaseOfState
 
 template <template <std::size_t, typename> class State, typename D>

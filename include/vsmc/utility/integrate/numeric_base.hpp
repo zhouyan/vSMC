@@ -55,6 +55,7 @@ class NumericBase
     }
 
     double integrate_segment_dispatch (double a, double b,
+            const eval_type &eval,
             double (NumericBase::*) (double, double, const eval_type &))
     { VSMC_STATIC_ASSERT_NO_IMPL(integrate_segment); return 0;}
 }; // class NumericBase

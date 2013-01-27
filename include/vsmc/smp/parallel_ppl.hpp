@@ -1,7 +1,6 @@
 #ifndef VSMC_SMP_PARALLEL_PPL_HPP
 #define VSMC_SMP_PARALLEL_PPL_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/smp/base.hpp>
 #include <ppl.h>
 

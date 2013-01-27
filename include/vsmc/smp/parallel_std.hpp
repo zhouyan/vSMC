@@ -1,7 +1,6 @@
 #ifndef VSMC_SMP_PARALLEL_STD_HPP
 #define VSMC_SMP_PARALLEL_STD_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/smp/base.hpp>
 #include <vsmc/utility/stdtbb.hpp>
 
