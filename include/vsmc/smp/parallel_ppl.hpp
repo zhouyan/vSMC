@@ -2,15 +2,9 @@
 #define VSMC_SMP_PARALLEL_PPL_HPP
 
 #include <vsmc/smp/base.hpp>
-#include <ppl.h>
+#include <vsmc/utility/ppl_wrapper.hpp>
 
 namespace vsmc {
-
-#if _MSC_VER >= 1700
-namespace ppl = ::concurrency;
-#else
-namespace ppl = ::Concurrency;
-#endif
 
 /// \brief Particle::value_type subtype
 /// \ingroup PPL
@@ -71,16 +65,12 @@ class InitializePPL : public InitializeBase<T, Derived>
     {
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        accept_.resize(particle.size());
+        ppl::combinable<std::size_t> accept(accept_init_);
         ppl::parallel_for(static_cast<size_type>(0), particle.size(),
-                work_(this, &particle, &accept_[0]));
+                work_(this, &particle, &accept));
         this->post_processor(particle);
 
-        std::size_t acc = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
-            acc += accept_[i];
-
-        return acc;
+        return accept.combine(accept_accu_);
     }
 
     protected :
@@ -93,19 +83,17 @@ class InitializePPL : public InitializeBase<T, Derived>
 
     private :
 
-    std::vector<std::size_t> accept_;
-
     class work_
     {
         public :
 
         work_ (InitializePPL<T, Derived> *init,
-                Particle<T> *particle, std::size_t *accept) :
+                Particle<T> *particle, ppl::combinable<std::size_t> *accept) :
             init_(init), particle_(particle), accept_(accept) {}
 
         void operator() (size_type i) const
         {
-            accept_[i] = init_->initialize_state(
+            accept_->local() += init_->initialize_state(
                     SingleParticle<T>(i, particle_));
         }
 
@@ -113,8 +101,12 @@ class InitializePPL : public InitializeBase<T, Derived>
 
         InitializePPL<T, Derived> *const init_;
         Particle<T> *const particle_;
-        std::size_t *const accept_;
+        ppl::combinable<std::size_t> *const accept_;
     }; // class work_
+
+    static std::size_t accept_init_ () { return 0; }
+    static std::size_t accept_accu_ (std::size_t a, std::size_t b)
+    { return a + b; }
 }; // class InitializePPL
 
 /// \brief Sampler<T>::move_type subtype
@@ -131,16 +123,12 @@ class MovePPL : public MoveBase<T, Derived>
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         this->pre_processor(iter, particle);
-        accept_.resize(particle.size());
+        ppl::combinable<std::size_t> accept(accept_init_);
         ppl::parallel_for(static_cast<size_type>(0), particle.size(),
-                    work_(this, iter, &particle, &accept_[0]));
+                    work_(this, iter, &particle, &accept));
         this->post_processor(iter, particle);
 
-        std::size_t acc = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
-            acc += accept_[i];
-
-        return acc;
+        return accept.combine(accept_accu_);
     }
 
     protected :
@@ -153,19 +141,17 @@ class MovePPL : public MoveBase<T, Derived>
 
     private :
 
-    std::vector<std::size_t> accept_;
-
     class work_
     {
         public :
 
         work_ (MovePPL<T, Derived> *move, std::size_t iter,
-                Particle<T> *particle, std::size_t *accept):
+                Particle<T> *particle, ppl::combinable<std::size_t> *accept):
             move_(move), particle_(particle), accept_(accept), iter_(iter) {}
 
         void operator() (size_type i) const
         {
-            accept_[i] = move_->move_state(iter_,
+            accept_->local() += move_->move_state(iter_,
                     SingleParticle<T>(i, particle_));
         }
 
@@ -173,9 +159,13 @@ class MovePPL : public MoveBase<T, Derived>
 
         MovePPL<T, Derived> *const move_;
         Particle<T> *const particle_;
-        std::size_t *const accept_;
+        ppl::combinable<std::size_t> *const accept_;
         const std::size_t iter_;
     }; // class work_
+
+    static std::size_t accept_init_ () { return 0; }
+    static std::size_t accept_accu_ (std::size_t a, std::size_t b)
+    { return a + b; }
 }; // class MovePPL
 
 /// \brief Monitor<T>::eval_type subtype

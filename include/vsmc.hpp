@@ -27,12 +27,12 @@
 #include <vsmc/smp/parallel_ppl.hpp>
 #endif
 
-#if VSMC_USE_TBB
-#include <vsmc/smp/parallel_tbb.hpp>
-#endif
-
 #if VSMC_USE_STD
 #include <vsmc/smp/parallel_std.hpp>
+#endif
+
+#if VSMC_USE_TBB
+#include <vsmc/smp/parallel_tbb.hpp>
 #endif
 
 #if VSMC_USE_CL

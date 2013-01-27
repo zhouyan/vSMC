@@ -12,12 +12,12 @@
 #include <vsmc/utility/integrate/numeric_cilk.hpp>
 #endif
 
-#if VSMC_USE_OMP
-#include <vsmc/utility/integrate/numeric_omp.hpp>
-#endif
-
 #if VSMC_USE_GCD
 #include <vsmc/utility/integrate/numeric_gcd.hpp>
+#endif
+
+#if VSMC_USE_OMP
+#include <vsmc/utility/integrate/numeric_omp.hpp>
 #endif
 
 #if VSMC_USE_PPL
