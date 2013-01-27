@@ -5,7 +5,7 @@
 
 namespace vsmc { namespace integrate {
 
-/// \brief Numerical integration with sequential implementation
+/// \brief Numerical integration with Microsoft PPL implementation
 /// \ingroup Integrate
 template <typename Derived>
 class NumericPPL : public NumericBase<Derived>

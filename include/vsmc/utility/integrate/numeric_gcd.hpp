@@ -6,7 +6,7 @@
 
 namespace vsmc { namespace integrate {
 
-/// \brief Numerical integration with sequential implementation
+/// \brief Numerical integration with Apple GCD implementation
 /// \ingroup Integrate
 template <typename Derived>
 class NumericGCD : public NumericBase<Derived>

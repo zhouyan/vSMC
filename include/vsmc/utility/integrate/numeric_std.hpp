@@ -6,7 +6,7 @@
 
 namespace vsmc { namespace integrate {
 
-/// \brief Numerical integration with sequential implementation
+/// \brief Numerical integration with C++11 concurrency implementation
 /// \ingroup Integrate
 template <typename Derived>
 class NumericSTD : public NumericBase<Derived>
