@@ -14,7 +14,7 @@
 
 namespace vsmc { namespace integrate {
 
-/// \brief Numerical integration base class for implementations
+/// \brief Numerical integration base dispatch class
 /// \ingroup Integrate
 template <typename Derived>
 class NumericBase
@@ -60,7 +60,7 @@ class NumericBase
     { VSMC_STATIC_ASSERT_NO_IMPL(integrate_segment); return 0;}
 }; // class NumericBase
 
-/// \brief Base numerical integration class with virtual interface
+/// \brief Numerical integration base interface class
 /// \ingroup Integrate
 template <>
 class NumericBase<VBase>
