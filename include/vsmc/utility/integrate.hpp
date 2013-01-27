@@ -16,6 +16,14 @@
 #include <vsmc/utility/integrate/numeric_omp.hpp>
 #endif
 
+#if VSMC_USE_GCD
+#include <vsmc/utility/integrate/numeric_gcd.hpp>
+#endif
+
+#if VSMC_USE_PPL
+#include <vsmc/utility/integrate/numeric_ppl.hpp>
+#endif
+
 #if VSMC_USE_STD
 #include <vsmc/utility/integrate/numeric_std.hpp>
 #endif
