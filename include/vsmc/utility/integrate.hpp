@@ -8,8 +8,16 @@
 
 #include <vsmc/utility/integrate/numeric_seq.hpp>
 
+#if VSMC_USE_CILK
+#include <vsmc/utility/integrate/numeric_cilk.hpp>
+#endif
+
 #if VSMC_USE_OMP
 #include <vsmc/utility/integrate/numeric_omp.hpp>
+#endif
+
+#if VSMC_USE_STD
+#include <vsmc/utility/integrate/numeric_std.hpp>
 #endif
 
 #if VSMC_USE_TBB
