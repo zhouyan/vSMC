@@ -51,10 +51,9 @@
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Single threaded and parallel samplers using SMP implementations
 
-/// \defgroup Base Dispatcher
+/// \defgroup Base Base Dispatcher
 /// \ingroup SMP
-/// \brief Base class templates that dispatch computing tasks based on
-/// implementations
+/// \brief Base class templates that dispatch computing tasks
 
 /// \defgroup Adapter Adapter
 /// \ingroup SMP
@@ -62,46 +61,45 @@
 
 /// \defgroup Implementation Implementation
 /// \ingroup SMP
-/// \brief Implementation class templates that parallelize user defined
-/// computing tasks
+/// \brief Implementation class templates that parallelize user callbacks
 
 /// \defgroup Sequential Sequential
 /// \ingroup Implementation
 /// \brief Single threaded sampler
 ///
-/// \defgroup GCD Apple GCD
+/// \defgroup GCD Apple Grand Central Dispatch
 /// \ingroup Implementation
-/// \brief Parallelized samplers with Apple GCD
+/// \brief Parallelized sampler with Apple Grand Central Dispatch
 
 /// \defgroup CILK Intel Cilk Plus
 /// \ingroup Implementation
-/// \brief Parallelized samplers with Intel Cilk Plus
+/// \brief Parallelized sampler with Intel Cilk Plus
 
 /// \defgroup OMP OpenMP
 /// \ingroup Implementation
-/// \brief Parallelized samplers with OpenMP
+/// \brief Parallelized sampler with OpenMP
 
 /// \defgroup PPL Microsoft Parallel Pattern Library
 /// \ingroup Implementation
-/// \brief Parallelized samplers with Microsoft PPL
+/// \brief Parallelized sampler with Microsoft Parallel Pattern Library
 
-/// \defgroup STD C++11 Concurrency Support
+/// \defgroup STD C++11 Concurrency
 /// \ingroup Implementation
-/// \brief Parallelized samplers with C++11 concurrency support
+/// \brief Parallelized sampler with C++11 concurrency
 
 /// \defgroup TBB Intel Threading Buidling Block
 /// \ingroup Implementation
-/// \brief Parallelized samplers with Intel TBB
+/// \brief Parallelized sampler with Intel Threading Building Block
 
 /// \defgroup CL OpenCL
 /// \brief Parallelized sampler with OpenCL
 
 /// \defgroup Utility Utility
-/// \brief Utilities
+/// \brief Utilities independent of other part of the library
 
-/// \defgroup Dispatch Apple GCD
+/// \defgroup Dispatch Apple Grand Central Dispatch
 /// \ingroup Utility
-/// \brief Apple GCD dispatch queue utilities
+/// \brief Apple Grand Central Dispatch dispatch queue utilities
 
 /// \defgroup Integrate Integration
 /// \ingroup Utility
@@ -113,8 +111,8 @@
 
 /// \defgroup Random Random
 /// \ingroup Utility
-/// \brief Generating distribution random variates using Random123 CBRNG
+/// \brief Generating distribution random variates using Random123
 
-/// \defgroup STDTBB STDTBB
+/// \defgroup STDTBB C++11 Concurrency
 /// \ingroup Utility
-/// \brief C++11 concurrency utilities
+/// \brief C++11 concurrency for implementing simple parallel algorithms

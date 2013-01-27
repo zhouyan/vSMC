@@ -5,7 +5,7 @@
 
 namespace vsmc { namespace integrate {
 
-/// \brief Numerical integration with Microsoft PPL implementation
+/// \brief Numerical integration with Microsoft Parallel Pattern Library
 /// \ingroup Integrate
 template <typename Derived>
 class NumericPPL : public NumericBase<Derived>
@@ -40,7 +40,7 @@ class NumericPPL : public NumericBase<Derived>
     {
         public :
 
-        work_ (NumericSTD<Derived> *numeric, const double *grid,
+        work_ (NumericPPL<Derived> *numeric, const double *grid,
                 const eval_type &eval, double *integral) :
             numeric_(numeric), grid_(grid), eval_(eval), integral_(integral) {}
 
@@ -52,7 +52,7 @@ class NumericPPL : public NumericBase<Derived>
 
         private :
 
-        NumericSTD<Derived> *const numeric_;
+        NumericPPL<Derived> *const numeric_;
         const double *const grid_;
         const eval_type eval_;
         double *const integral_;
