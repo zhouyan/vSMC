@@ -275,8 +275,7 @@ class PathGeometry : public Path<T>
         if (this->iter_size() < 2)
             return 0;
 
-        integrate::NumericNewtonCotes<Degree> numeric_int(
-                f_alpha_(*this, weight_history_, integrand_history_));
+        integrate::NumericNewtonCotes<Degree> numeric_int;
 
         if (insert_points == 0) {
             std::vector<double> base_grid(this->iter_size());
@@ -284,7 +283,8 @@ class PathGeometry : public Path<T>
                 base_grid[i] = this->grid(i);
             return numeric_int(static_cast<
                     typename integrate::NumericNewtonCotes<Degree>::size_type>(
-                        base_grid.size()), &base_grid[0]);
+                        base_grid.size()), &base_grid[0],
+                    f_alpha_(*this, weight_history_, integrand_history_));
         }
 
         std::vector<double> super_grid(insert_points * this->iter_size() -
@@ -302,7 +302,8 @@ class PathGeometry : public Path<T>
 
         return numeric_int(static_cast<
                 typename integrate::NumericNewtonCotes<Degree>::size_type>(
-                    super_grid.size()), &super_grid[0]);
+                    super_grid.size()), &super_grid[0],
+                    f_alpha_(*this, weight_history_, integrand_history_));
     }
 
     void clear ()

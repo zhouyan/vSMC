@@ -160,7 +160,8 @@ class NumericBase
     typedef VSMC_SIZE_TYPE size_type;
     typedef cxx11::function<double (double)> eval_type;
 
-    double operator() (size_type N, const double *grid) const
+    double operator() (size_type N, const double *grid,
+            const eval_type &eval) const
     {
         if (N < 2)
             return 0;
@@ -168,7 +169,7 @@ class NumericBase
         double integral = 0;
         for (size_type i = 1; i != N; ++i) {
             integral += static_cast<const Derived *>(this)->
-                integrate_segment(grid[i - 1], grid[i]);
+                integrate_segment(grid[i - 1], grid[i], eval);
         }
 
         return integral;
@@ -186,37 +187,34 @@ class NumericNewtonCotes : public NumericBase<NumericNewtonCotes<Degree> >
     typedef typename base_type::size_type size_type;
     typedef typename base_type::eval_type eval_type;
 
-    NumericNewtonCotes (const eval_type &eval) : eval_(eval)
+    double integrate_segment (double a, double b, const eval_type &eval) const
     {
         VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(Degree);
-    }
-
-    double integrate_segment (double a, double b) const
-    {
-        return integrate_segment_dispatch(a, b,
+        return integrate_segment_newton_cotes(a, b, eval,
                 cxx11::integral_constant<unsigned, Degree>());
     }
 
     private :
 
-    eval_type eval_;
-
-    double integrate_segment_dispatch (double a, double b,
+    double integrate_segment_newton_cotes (double a, double b,
+            const eval_type &eval,
             cxx11::integral_constant<unsigned, 1>) const
     {
-        return 0.5 * (b - a) * (eval_(a) + eval_(b));
+        return 0.5 * (b - a) * (eval(a) + eval(b));
     }
 
-    double integrate_segment_dispatch (double a, double b,
+    double integrate_segment_newton_cotes (double a, double b,
+            const eval_type &eval,
             cxx11::integral_constant<unsigned, 2>) const
     {
         const double coeff = 1.0 / 6.0;
 
         return coeff * (b - a) * (
-                eval_(a) + 4 * eval_(a + 0.5 * (b - a)) + eval_(b));
+                eval(a) + 4 * eval(a + 0.5 * (b - a)) + eval(b));
     }
 
-    double integrate_segment_dispatch (double a, double b,
+    double integrate_segment_newton_cotes (double a, double b,
+            const eval_type &eval,
             cxx11::integral_constant<unsigned, 3>) const
     {
         double h = (b - a ) / 3;
@@ -224,10 +222,11 @@ class NumericNewtonCotes : public NumericBase<NumericNewtonCotes<Degree> >
         double x2 = b - h;
 
         return 0.125 * (b - a) * (
-                eval_(a) + 3 * eval_(x1) + 3 * eval_(x2) + eval_(b));
+                eval(a) + 3 * eval(x1) + 3 * eval(x2) + eval(b));
     }
 
-    double integrate_segment_dispatch (double a, double b,
+    double integrate_segment_newton_cotes (double a, double b,
+            const eval_type &eval,
             cxx11::integral_constant<unsigned, 4>) const
     {
         const double coeff = 1.0 / 90.0;
@@ -237,8 +236,8 @@ class NumericNewtonCotes : public NumericBase<NumericNewtonCotes<Degree> >
         double x3 = a + h * 3;
 
         return coeff * (b - a) * (
-                7 * eval_(a) + 32 * eval_(x1) + 12 * eval_(x2) +
-                32 * eval_(x3) + 7 * eval_(b));
+                7 * eval(a) + 32 * eval(x1) + 12 * eval(x2) +
+                32 * eval(x3) + 7 * eval(b));
     }
 }; // class NumericNewtonCotes
 
