@@ -6,6 +6,12 @@
 // Avoid MSVC stupid behavior
 #define VSMC_MACRO_NO_EXPANSION
 
+#ifdef VSMC_NDEBUG
+#define VSMC_SMP_BASE_DESTRUCTOR_PREFIX
+#else
+#define VSMC_SMP_BASE_DESTRUCTOR_PREFIX virtual
+#endif
+
 namespace vsmc {
 
 enum {Dynamic};

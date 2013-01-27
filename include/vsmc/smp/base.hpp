@@ -3,12 +3,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#ifdef VSMC_NDEBUG
-#define VSMC_SMP_BASE_DESTRUCTOR_PREFIX
-#else
-#define VSMC_SMP_BASE_DESTRUCTOR_PREFIX virtual
-#endif
-
 namespace vsmc {
 
 template <std::size_t Dim>

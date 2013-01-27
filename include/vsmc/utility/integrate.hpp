@@ -150,42 +150,84 @@ class ImportanceSamplingD
     }
 }; // class ImportanceSamplingD
 
-/// \brief Numerical integration base class
+/// \brief Base numerical integration
 /// \ingroup Integrate
 template <typename Derived>
 class NumericBase
+{
+    protected :
+
+    typedef VSMC_SIZE_TYPE size_type;
+    typedef cxx11::function<double (double)> eval_type;
+
+    NumericBase () {}
+    NumericBase (const NumericBase<Derived> &) {}
+    NumericBase<Derived> &operator=
+        (const NumericBase<Derived> &) {return *this;}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~NumericBase () {}
+
+    double integrate_segment (double a, double b, const eval_type &eval)
+    {
+        return integrate_segment_dispatch(a, b, eval,
+                &Derived::integrate_segment);
+    }
+
+    private :
+
+    template <typename D>
+    double integrate_segment_dispatch (double a, double b,
+            const eval_type &eval,
+            double (D::*) (double, double, const eval_type &))
+    {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(NumericBase);
+        return static_cast<Derived *>(this)->integrate_segment(a, b, eval);
+    }
+
+    double integrate_segment_dispatch (double a, double b,
+            const eval_type &eval,
+            double (*) (double, double, const eval_type &))
+    {
+        return Derived::integrate_segment(a, b, eval);
+    }
+
+    double integrate_segment_dispatch (double a, double b,
+            double (NumericBase::*) (double, double, const eval_type &))
+    { VSMC_STATIC_ASSERT_NO_IMPL(integrate_segment); return 0;}
+}; // class NumericBase
+
+/// \brief Base numerical integration class with virtual interface
+/// \ingroup Integrate
+template <>
+class NumericBase<VBase>
 {
     public :
 
     typedef VSMC_SIZE_TYPE size_type;
     typedef cxx11::function<double (double)> eval_type;
 
-    double operator() (size_type N, const double *grid,
-            const eval_type &eval) const
-    {
-        if (N < 2)
-            return 0;
+    protected :
 
-        double integral = 0;
-        for (size_type i = 1; i != N; ++i) {
-            integral += static_cast<const Derived *>(this)->
-                integrate_segment(grid[i - 1], grid[i], eval);
-        }
+    NumericBase () {}
+    NumericBase (const NumericBase<VBase> &) {}
+    NumericBase<VBase> &operator=
+        (const NumericBase<VBase> &) {return *this;}
+    virtual ~NumericBase () {}
 
-        return integral;
-    }
-}; // class NumericBase
+    virtual double integrate_segment (double, double, const eval_type &) = 0;
+}; // class NumericBase<VBase>
 
 /// \brief Compute numerical integration using the Newton-Cotes formulae
 /// \ingroup Integrate
-template <unsigned Degree>
-class NumericNewtonCotes : public NumericBase<NumericNewtonCotes<Degree> >
+template <unsigned Degree, template <typename> class NumericImpl>
+class NumericNewtonCotes :
+    public NumericImpl<NumericNewtonCotes<Degree, NumericImpl> >
 {
     public :
 
-    typedef NumericBase<NumericNewtonCotes<Degree> > base_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::eval_type eval_type;
+    typedef NumericImpl<NumericNewtonCotes<Degree, NumericImpl> >
+        integrate_impl_type;
+    typedef typename integrate_impl_type::size_type size_type;
+    typedef typename integrate_impl_type::eval_type eval_type;
 
     double integrate_segment (double a, double b, const eval_type &eval) const
     {
@@ -241,21 +283,33 @@ class NumericNewtonCotes : public NumericBase<NumericNewtonCotes<Degree> >
     }
 }; // class NumericNewtonCotes
 
-/// \brief Compute numerical integration using Trapezoid rule
+/// \brief Numerical integration base class
 /// \ingroup Integrate
-typedef NumericNewtonCotes<1> NumericTrapezoid;
+template <typename Derived>
+class NumericSEQ : public NumericBase<Derived>
+{
+    public :
 
-/// \brief Compute numerical integration using Simpson rule
-/// \ingroup Integrate
-typedef NumericNewtonCotes<2> NumericSimpson;
+    typedef NumericBase<Derived> integrate_base_type;
+    typedef typename integrate_base_type::size_type size_type;
+    typedef typename integrate_base_type::eval_type eval_type;
 
-/// \brief Compute numerical integration using Simpson 3/8 rule
-/// \ingroup Integrate
-typedef NumericNewtonCotes<3> NumericSimpson3_8;
+    double operator() (size_type N, const double *grid,
+            const eval_type &eval) const
+    {
+        if (N < 2)
+            return 0;
 
-/// \brief Compute numerical integration using Boole rule
-/// \ingroup Integrate
-typedef NumericNewtonCotes<4> NumericBoole;
+        double integral = 0;
+        for (size_type i = 1; i != N; ++i) {
+            integral += static_cast<const Derived *>(this)->
+                integrate_segment(grid[i - 1], grid[i], eval);
+        }
+
+        return integral;
+    }
+}; // class NumericBase
+
 
 } } // namespace vsmc::integrate
 

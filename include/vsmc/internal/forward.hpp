@@ -31,7 +31,7 @@ namespace integrate {
 class ImportanceSampling1;
 class ImportanceSamplingD;
 template <typename> class NumericBase;
-template <unsigned> class NumericNewtonCotes;
+template <unsigned, template <typename> class> class NumericNewtonCotes;
 
 } // namespace integrate
 
@@ -86,7 +86,7 @@ template <typename> class Sampler;
 template <typename> class Particle;
 template <typename> class Monitor;
 template <typename> class Path;
-template <typename> class PathGeometry;
+template <typename, template <typename> class> class PathGeometry;
 template <typename> class SingleParticle;
 template <typename> class ConstSingleParticle;
 template <typename, template <typename> class> class ParticleIterator;

@@ -245,7 +245,7 @@ class Path
 
 /// \brief Monitor for path sampling for SMC with geometry path
 /// \ingroup Core
-template <typename T>
+template <typename T, template <typename> class NumericImpl>
 class PathGeometry : public Path<T>
 {
     public :
@@ -255,11 +255,12 @@ class PathGeometry : public Path<T>
 
     PathGeometry (const eval_type &eval) : Path<T>(eval) {}
 
-    PathGeometry (const PathGeometry<T> &other) :
+    PathGeometry (const PathGeometry<T, NumericImpl> &other) :
         weight_history_(other.weight_history_),
         integrand_history_(other.integrand_history_) {}
 
-    PathGeometry<T> &operator= (const PathGeometry<T> &other)
+    PathGeometry<T, NumericImpl> &operator= (
+            const PathGeometry<T, NumericImpl> &other)
     {
         if (&other != this) {
             weight_history_    = other.weight_history_;
@@ -275,15 +276,16 @@ class PathGeometry : public Path<T>
         if (this->iter_size() < 2)
             return 0;
 
-        integrate::NumericNewtonCotes<Degree> numeric_int;
+        integrate::NumericNewtonCotes<Degree, NumericImpl> numeric_int;
 
         if (insert_points == 0) {
             std::vector<double> base_grid(this->iter_size());
             for (std::size_t i = 0; i != this->iter_size(); ++i)
                 base_grid[i] = this->grid(i);
             return numeric_int(static_cast<
-                    typename integrate::NumericNewtonCotes<Degree>::size_type>(
-                        base_grid.size()), &base_grid[0],
+                    typename integrate::NumericNewtonCotes<
+                    Degree, NumericImpl>::size_type>(base_grid.size()),
+                    &base_grid[0],
                     f_alpha_(*this, weight_history_, integrand_history_));
         }
 
@@ -301,9 +303,10 @@ class PathGeometry : public Path<T>
         super_grid.back() = this->grid(this->iter_size() - 1);
 
         return numeric_int(static_cast<
-                typename integrate::NumericNewtonCotes<Degree>::size_type>(
-                    super_grid.size()), &super_grid[0],
-                    f_alpha_(*this, weight_history_, integrand_history_));
+                typename integrate::NumericNewtonCotes<
+                Degree, NumericImpl>::size_type>(super_grid.size()),
+                &super_grid[0],
+                f_alpha_(*this, weight_history_, integrand_history_));
     }
 
     void clear ()
@@ -338,7 +341,7 @@ class PathGeometry : public Path<T>
     {
         public :
 
-        f_alpha_(const PathGeometry<T> &path,
+        f_alpha_(const PathGeometry<T, NumericImpl> &path,
                 const std::vector<std::vector<double> > &weight_history,
                 const std::vector<std::vector<double> > &integrand_history) :
             path_(path), weight_history_(weight_history),
@@ -396,7 +399,7 @@ class PathGeometry : public Path<T>
 
         private :
 
-        const PathGeometry<T> &path_;
+        const PathGeometry<T, NumericImpl> &path_;
         const std::vector<std::vector<double> > &weight_history_;
         const std::vector<std::vector<double> > &integrand_history_;
         std::vector<double> weight_;

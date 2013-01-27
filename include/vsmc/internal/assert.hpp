@@ -165,12 +165,12 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
     VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
             USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_State##name##_OBJECT)
 
-#define VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(degree)              \
+#define VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(degree)                \
     VSMC_STATIC_ASSERT((degree <= 4),                                         \
             USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_4)
 
 #define VSMC_STATIC_ASSERT_NO_IMPL(member)                                    \
-    VSMC_STATIC_ASSERT((cxx11::is_same<T, NullType>::value),                  \
+    VSMC_STATIC_ASSERT((cxx11::is_same<Derived, NullType>::value),            \
             NO_IMPLEMENTATION_OF_##member##_FOUND)
 
 #define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                       \
