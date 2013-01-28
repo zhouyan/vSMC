@@ -239,8 +239,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         work_ (MonitorEvalTBB<T, Derived> *monitor,
                 std::size_t iter, std::size_t dim,
                 const Particle<T> *particle, double *res) :
-            monitor_(monitor), particle_(particle), res_(res),
-            iter_(iter), dim_(dim) {}
+            monitor_(monitor), iter_(iter), dim_(dim),
+            particle_(particle), res_(res) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
@@ -253,10 +253,10 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         private :
 
         MonitorEvalTBB<T, Derived> *const monitor_;
-        const Particle<T> *const particle_;
-        double *const res_;
         const std::size_t iter_;
         const std::size_t dim_;
+        const Particle<T> *const particle_;
+        double *const res_;
     }; // class work_
 }; // class MonitorEvalTBB
 
@@ -298,7 +298,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
         work_ (PathEvalTBB<T, Derived> *path, std::size_t iter,
                 const Particle<T> *particle, double *res) :
-            path_(path), particle_(particle), res_(res), iter_(iter) {}
+            path_(path), iter_(iter), particle_(particle), res_(res) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
@@ -311,9 +311,9 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         private :
 
         PathEvalTBB<T, Derived> *const path_;
+        const std::size_t iter_;
         const Particle<T> *const particle_;
         double *const res_;
-        const std::size_t iter_;
     }; // class work_
 }; // PathEvalTBB
 
