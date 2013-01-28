@@ -15,19 +15,19 @@
 namespace vsmc { namespace internal {
 
 template <unsigned Index, typename EvalType>
-struct NumericNewtonCotesEvalGrid
+struct NumericNewtonCotesEval
 {
     static double result (const double *coeff, double a, double h,
             const EvalType &eval)
     {
         return coeff[Index] * eval(a + (Index - 1) * h) +
-            NumericNewtonCotesEvalGrid<Index - 1, EvalType>::
+            NumericNewtonCotesEval<Index - 1, EvalType>::
             result(coeff, a, h, eval);
     }
 };
 
 template <typename EvalType>
-struct NumericNewtonCotesEvalGrid<1, EvalType>
+struct NumericNewtonCotesEval<1, EvalType>
 {
     static double result (const double *coeff, double a, double h,
             const EvalType &eval)
@@ -37,13 +37,13 @@ struct NumericNewtonCotesEvalGrid<1, EvalType>
 };
 
 template <unsigned Degree>
-class NumericNewtonCotesCoefficient
+class NumericNewtonCotesCoeff
 {
     public :
 
-    static NumericNewtonCotesCoefficient<Degree> &instance ()
+    static NumericNewtonCotesCoeff<Degree> &instance ()
     {
-        static NumericNewtonCotesCoefficient<Degree> coeff;
+        static NumericNewtonCotesCoeff<Degree> coeff;
 
         return coeff;
     }
@@ -57,13 +57,13 @@ class NumericNewtonCotesCoefficient
 
     double coeff_[Degree + 2];
 
-    NumericNewtonCotesCoefficient ()
+    NumericNewtonCotesCoeff ()
     { coeff_init(cxx11::integral_constant<unsigned, Degree>()); }
 
-    NumericNewtonCotesCoefficient
-        (const NumericNewtonCotesCoefficient<Degree> &);
-    NumericNewtonCotesCoefficient<Degree> &operator=
-        (const NumericNewtonCotesCoefficient<Degree> &);
+    NumericNewtonCotesCoeff
+        (const NumericNewtonCotesCoeff<Degree> &);
+    NumericNewtonCotesCoeff<Degree> &operator=
+        (const NumericNewtonCotesCoeff<Degree> &);
 
     void coeff_init (cxx11::integral_constant<unsigned, 1>)
     {
@@ -204,10 +204,10 @@ class NumericNewtonCotes :
 
         double h = (b - a) / Degree;
         const double *const coeff = internal::
-            NumericNewtonCotesCoefficient<Degree>::instance().coeff();
+            NumericNewtonCotesCoeff<Degree>::instance().coeff();
 
         return coeff[0] * (b - a) * (
-                internal::NumericNewtonCotesEvalGrid<Degree, eval_type>::
+                internal::NumericNewtonCotesEval<Degree, eval_type>::
                 result(coeff, a, h, eval) + coeff[Degree + 1] * eval(b));
     }
 
