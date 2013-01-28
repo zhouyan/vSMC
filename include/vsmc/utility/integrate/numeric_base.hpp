@@ -60,6 +60,15 @@ class NumericBase
         return static_cast<Derived *>(this)->integrate_segment(a, b, eval);
     }
 
+    template <typename D>
+    double integrate_segment_dispatch (double a, double b,
+            const eval_type &eval,
+            double (D::*) (double, double, const eval_type &) const)
+    {
+        VSMC_RUNTIME_ASSERT_DERIVED_BASE(NumericBase);
+        return static_cast<Derived *>(this)->integrate_segment(a, b, eval);
+    }
+
     double integrate_segment_dispatch (double a, double b,
             const eval_type &eval,
             double (*) (double, double, const eval_type &))

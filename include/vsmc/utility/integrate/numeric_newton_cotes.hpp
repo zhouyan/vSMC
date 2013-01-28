@@ -27,7 +27,7 @@ class NumericNewtonCotes :
     typedef typename integrate_impl_type::size_type size_type;
     typedef typename integrate_impl_type::eval_type eval_type;
 
-    double integrate_segment (double a, double b, const eval_type &eval)
+    double integrate_segment (double a, double b, const eval_type &eval) const
     {
         VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(Degree);
         return integrate_segment_newton_cotes(a, b, eval,
@@ -38,14 +38,14 @@ class NumericNewtonCotes :
 
     double integrate_segment_newton_cotes (double a, double b,
             const eval_type &eval,
-            cxx11::integral_constant<unsigned, 1>)
+            cxx11::integral_constant<unsigned, 1>) const
     {
         return 0.5 * (b - a) * (eval(a) + eval(b));
     }
 
     double integrate_segment_newton_cotes (double a, double b,
             const eval_type &eval,
-            cxx11::integral_constant<unsigned, 2>)
+            cxx11::integral_constant<unsigned, 2>) const
     {
         const double coeff = 1.0 / 6.0;
 
@@ -55,7 +55,7 @@ class NumericNewtonCotes :
 
     double integrate_segment_newton_cotes (double a, double b,
             const eval_type &eval,
-            cxx11::integral_constant<unsigned, 3>)
+            cxx11::integral_constant<unsigned, 3>) const
     {
         double h = (b - a ) / 3;
         double x1 = a + h;
@@ -67,7 +67,7 @@ class NumericNewtonCotes :
 
     double integrate_segment_newton_cotes (double a, double b,
             const eval_type &eval,
-            cxx11::integral_constant<unsigned, 4>)
+            cxx11::integral_constant<unsigned, 4>) const
     {
         const double coeff = 1.0 / 90.0;
         double h = 0.25 * (b - a);
