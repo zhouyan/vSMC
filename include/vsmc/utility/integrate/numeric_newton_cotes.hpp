@@ -12,6 +12,177 @@
 #include <cstddef>
 #include <vector>
 
+namespace vsmc { namespace internal {
+
+template <unsigned Index, typename EvalType>
+struct NumericNewtonCotesEvalGrid
+{
+    static double result (const double *coeff, double a, double h,
+            const EvalType &eval)
+    {
+        return coeff[Index] * eval(a + (Index - 1) * h) +
+            NumericNewtonCotesEvalGrid<Index - 1, EvalType>::
+            result(coeff, a, h, eval);
+    }
+};
+
+template <typename EvalType>
+struct NumericNewtonCotesEvalGrid<1, EvalType>
+{
+    static double result (const double *coeff, double a, double h,
+            const EvalType &eval)
+    {
+        return coeff[1] * eval(a);
+    }
+};
+
+template <unsigned Degree>
+class NumericNewtonCotesCoefficient
+{
+    public :
+
+    static NumericNewtonCotesCoefficient<Degree> &instance ()
+    {
+        static NumericNewtonCotesCoefficient<Degree> coeff;
+
+        return coeff;
+    }
+
+    const double *coeff() const
+    {
+        return coeff_;
+    }
+
+    private :
+
+    double coeff_[Degree + 2];
+
+    NumericNewtonCotesCoefficient ()
+    { coeff_init(cxx11::integral_constant<unsigned, Degree>()); }
+
+    NumericNewtonCotesCoefficient
+        (const NumericNewtonCotesCoefficient<Degree> &);
+    NumericNewtonCotesCoefficient<Degree> &operator=
+        (const NumericNewtonCotesCoefficient<Degree> &);
+
+    void coeff_init (cxx11::integral_constant<unsigned, 1>)
+    {
+        coeff_[0] = 0.5;
+        coeff_[1] = 1;
+        coeff_[2] = 1;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 2>)
+    {
+        coeff_[0] = 1.0 / 6.0;
+        coeff_[1] = 1;
+        coeff_[2] = 4;
+        coeff_[3] = 1;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 3>)
+    {
+        coeff_[0] = 0.125;
+        coeff_[1] = 1;
+        coeff_[2] = 3;
+        coeff_[3] = 3;
+        coeff_[4] = 1;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 4>)
+    {
+        coeff_[0] = 1.0 / 90.0;
+        coeff_[1] = 7;
+        coeff_[2] = 32;
+        coeff_[3] = 12;
+        coeff_[4] = 32;
+        coeff_[5] = 7;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 5>)
+    {
+        coeff_[0] = 1.0 / 288.0;
+        coeff_[1] = 19;
+        coeff_[2] = 75;
+        coeff_[3] = 50;
+        coeff_[4] = 50;
+        coeff_[5] = 75;
+        coeff_[6] = 19;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 6>)
+    {
+        coeff_[0] = 1.0 / 840.0;
+        coeff_[1] = 41;
+        coeff_[2] = 216;
+        coeff_[3] = 27;
+        coeff_[4] = 272;
+        coeff_[5] = 27;
+        coeff_[6] = 216;
+        coeff_[7] = 41;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 7>)
+    {
+        coeff_[0] = 1.0 / 17280.0;
+        coeff_[1] = 751;
+        coeff_[2] = 3577;
+        coeff_[3] = 1323;
+        coeff_[4] = 2989;
+        coeff_[5] = 2989;
+        coeff_[6] = 1323;
+        coeff_[7] = 3577;
+        coeff_[8] = 751;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 8>)
+    {
+        coeff_[0] = 1.0 / 28350.0;
+        coeff_[1] = 989;
+        coeff_[2] = 5888;
+        coeff_[3] = -928;
+        coeff_[4] = 10496;
+        coeff_[5] = -4540;
+        coeff_[6] = 10496;
+        coeff_[7] = -928;
+        coeff_[8] = 5888;
+        coeff_[9] = 989;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 9>)
+    {
+        coeff_[0] = 1.0 / 89600.0;
+        coeff_[1] = 2857;
+        coeff_[2] = 15741;
+        coeff_[3] = 1080;
+        coeff_[4] = 19344;
+        coeff_[5] = 5778;
+        coeff_[6] = 5778;
+        coeff_[7] = 19344;
+        coeff_[8] = 1080;
+        coeff_[9] = 15741;
+        coeff_[10] = 2857;
+    }
+
+    void coeff_init (cxx11::integral_constant<unsigned, 10>)
+    {
+        coeff_[0] = 1.0 / 598752.0;
+        coeff_[1] = 16067;
+        coeff_[2] = 106300;
+        coeff_[3] = -48525;
+        coeff_[4] = 272400;
+        coeff_[5] = -260550;
+        coeff_[6] = 427368;
+        coeff_[7] = -260550;
+        coeff_[8] = 272400;
+        coeff_[9] = -48525;
+        coeff_[10] = 106300;
+        coeff_[11] = 16067;
+    }
+};
+
+} } // namespace vsmc::internal
+
 namespace vsmc { namespace integrate {
 
 /// \brief Numerical integration with the (closed) Newton-Cotes formulae
@@ -30,55 +201,24 @@ class NumericNewtonCotes :
     double integrate_segment (double a, double b, const eval_type &eval) const
     {
         VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(Degree);
-        return integrate_segment_newton_cotes(a, b, eval,
-                cxx11::integral_constant<unsigned, Degree>());
+
+        double h = (b - a) / Degree;
+        const double *const coeff = internal::
+            NumericNewtonCotesCoefficient<Degree>::instance().coeff();
+
+        return coeff[0] * (b - a) * (
+                internal::NumericNewtonCotesEvalGrid<Degree, eval_type>::
+                result(coeff, a, h, eval) + coeff[Degree + 1] * eval(b));
+    }
+
+    static VSMC_CONSTEXPR unsigned max_degree ()
+    {
+        return max_degree_;
     }
 
     private :
 
-    double integrate_segment_newton_cotes (double a, double b,
-            const eval_type &eval,
-            cxx11::integral_constant<unsigned, 1>) const
-    {
-        return 0.5 * (b - a) * (eval(a) + eval(b));
-    }
-
-    double integrate_segment_newton_cotes (double a, double b,
-            const eval_type &eval,
-            cxx11::integral_constant<unsigned, 2>) const
-    {
-        const double coeff = 1.0 / 6.0;
-
-        return coeff * (b - a) * (
-                eval(a) + 4 * eval(a + 0.5 * (b - a)) + eval(b));
-    }
-
-    double integrate_segment_newton_cotes (double a, double b,
-            const eval_type &eval,
-            cxx11::integral_constant<unsigned, 3>) const
-    {
-        double h = (b - a ) / 3;
-        double x1 = a + h;
-        double x2 = b - h;
-
-        return 0.125 * (b - a) * (
-                eval(a) + 3 * eval(x1) + 3 * eval(x2) + eval(b));
-    }
-
-    double integrate_segment_newton_cotes (double a, double b,
-            const eval_type &eval,
-            cxx11::integral_constant<unsigned, 4>) const
-    {
-        const double coeff = 1.0 / 90.0;
-        double h = 0.25 * (b - a);
-        double x1 = a + h;
-        double x2 = a + h * 2;
-        double x3 = a + h * 3;
-
-        return coeff * (b - a) * (
-                7 * eval(a) + 32 * eval(x1) + 12 * eval(x2) +
-                32 * eval(x3) + 7 * eval(b));
-    }
+    static const unsigned max_degree_ = 10;
 }; // class NumericNewtonCotes
 
 } } // namespace vsmc::integrate

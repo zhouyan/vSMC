@@ -77,7 +77,7 @@ class StaticAssert<true>
         USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION,
         USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION,
 
-        USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_4
+        USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree
     };
 }; // class StaticAssert
 
@@ -166,8 +166,8 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
             USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_State##name##_OBJECT)
 
 #define VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(degree)                \
-    VSMC_STATIC_ASSERT((degree <= 4),                                         \
-            USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_4)
+    VSMC_STATIC_ASSERT((degree >= 1 && degree <= max_degree_),                \
+            USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree)
 
 #define VSMC_STATIC_ASSERT_NO_IMPL(member)                                    \
     VSMC_STATIC_ASSERT((cxx11::is_same<Derived, NullType>::value),            \
