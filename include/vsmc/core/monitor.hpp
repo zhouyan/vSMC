@@ -50,7 +50,7 @@ class Monitor
         dim_(dim), eval_(eval), recording_(true) {}
 
     Monitor (const Monitor<T> &other) :
-        dim_(other.dim_), eval_(other.eval_), recording_(other.recording_), 
+        dim_(other.dim_), eval_(other.eval_), recording_(other.recording_),
         index_(other.index_), record_(other.record_) {}
 
     Monitor<T> &operator= (const Monitor<T> &other)
