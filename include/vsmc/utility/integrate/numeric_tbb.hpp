@@ -42,10 +42,12 @@ class NumericTBB : public NumericBase<Derived>
 
         work_ (NumericTBB<Derived> *numeric, const double *grid,
                 const eval_type &eval) :
-            numeric_(numeric), grid_(grid), eval_(eval), integral_(0) {}
+            numeric_(numeric), grid_(grid), eval_(eval), eval_copy_(eval),
+            integral_(0) {}
 
         work_ (const work_ &other, tbb::split) :
-            numeric_(other.numeric_), grid_(other.grid_), eval_(other.eval_),
+            numeric_(other.numeric_), grid_(other.grid_),
+            eval_(other.eval_copy_), eval_copy_(other.eval_copy_),
             integral_(0) {}
 
         void operator() (const tbb::blocked_range<size_type> &range)
@@ -73,21 +75,9 @@ class NumericTBB : public NumericBase<Derived>
         NumericTBB<Derived> *const numeric_;
         const double *const grid_;
         const eval_type eval_;
+        const eval_type eval_copy_;
         double integral_;
     }; // class work_
-
-    class eval_init_
-    {
-        public :
-
-        eval_init_ (const eval_type &eval) : eval_(eval) {}
-
-        eval_type operator() () const { return eval_; }
-
-        private :
-
-        const eval_type &eval_;
-    }; // class eval_init_;
 }; // class NumericBase
 
 } } // namespace vsmc::integrate

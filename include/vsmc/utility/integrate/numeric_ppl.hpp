@@ -71,7 +71,7 @@ class NumericPPL : public NumericBase<Derived>
 
         private :
 
-        const eval_type &eval_;
+        const eval_type eval_;
     }; // class eval_init_;
 }; // class NumericBase
 
