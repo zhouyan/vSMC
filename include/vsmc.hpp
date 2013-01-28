@@ -116,8 +116,3 @@
 /// \defgroup STDTBB C++11 Concurrency
 /// \ingroup Utility
 /// \brief C++11 concurrency for implementing simple parallel algorithms
-
-/// \todo Implement a thread-safe functor to replace std::function or
-/// boost::function. Their current major implementations are thread-safe but it
-/// is not required by the standard. There is no guarantee it is safe to use
-/// them.
