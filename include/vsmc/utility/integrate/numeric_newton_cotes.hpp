@@ -198,17 +198,19 @@ class NumericNewtonCotes :
     typedef typename integrate_impl_type::size_type size_type;
     typedef typename integrate_impl_type::eval_type eval_type;
 
+    NumericNewtonCotes () :
+        coeff_(internal::NumericNewtonCotesCoeff<Degree>::instance().coeff());
+    {}
+
     double integrate_segment (double a, double b, const eval_type &eval) const
     {
         VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(Degree);
 
         double h = (b - a) / Degree;
-        const double *const coeff = internal::
-            NumericNewtonCotesCoeff<Degree>::instance().coeff();
 
-        return coeff[0] * (b - a) * (
+        return coeff_[0] * (b - a) * (
                 internal::NumericNewtonCotesEval<Degree, eval_type>::
-                result(coeff, a, h, eval) + coeff[Degree + 1] * eval(b));
+                result(coeff_, a, h, eval) + coeff_[Degree + 1] * eval(b));
     }
 
     static VSMC_CONSTEXPR unsigned max_degree ()
@@ -219,6 +221,7 @@ class NumericNewtonCotes :
     private :
 
     static const unsigned max_degree_ = 10;
+    const double *coeff_;
 }; // class NumericNewtonCotes
 
 } } // namespace vsmc::integrate
