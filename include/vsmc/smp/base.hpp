@@ -5,6 +5,8 @@
 
 namespace vsmc {
 
+namespace internal {
+
 template <std::size_t Dim>
 class StateBaseDim
 {
@@ -29,10 +31,12 @@ class StateBaseDim<Dynamic>
     std::size_t dim_;
 };
 
+} // namespace vsmc::internal
+
 /// \brief Particle::value_type subtype
 /// \ingroup Base
 template <std::size_t Dim, typename T>
-class StateBase : public StateBaseDim<Dim>
+class StateBase : public internal::StateBaseDim<Dim>
 {
     public :
 
@@ -53,7 +57,7 @@ class StateBase : public StateBaseDim<Dim>
     {
         VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Base);
 
-        StateBaseDim<Dim>::resize_dim(dim);
+        internal::StateBaseDim<Dim>::resize_dim(dim);
         state_.resize(dim * size_);
     }
 
@@ -70,16 +74,6 @@ class StateBase : public StateBaseDim<Dim>
     const state_type &state (size_type id, std::size_t pos) const
     {
         return state_[id * this->dim() + pos];
-    }
-
-    state_type *state (size_type id)
-    {
-        return &state_[id * this->dim()];
-    }
-
-    const state_type *state (size_type id) const
-    {
-        return &state_[id * this->dim()];
     }
 
     template <typename OutputIter>
