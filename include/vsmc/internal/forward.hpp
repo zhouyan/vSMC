@@ -96,10 +96,10 @@ template <typename, template <typename> class> class ParticleIterator;
 // OpenCL
 template <std::size_t, typename, typename ID = VSMC_CL_DEFAULT_ID>
 class StateCL;
-template <typename, typename B = NullType> class InitializeCL;
-template <typename, typename B = NullType> class MoveCL;
-template <typename, typename B = NullType> class MonitorEvalCL;
-template <typename, typename B = NullType> class PathEvalCL;
+template <typename, typename B = CBase> class InitializeCL;
+template <typename, typename B = CBase> class MoveCL;
+template <typename, typename B = CBase> class MonitorEvalCL;
+template <typename, typename B = CBase> class PathEvalCL;
 
 // SMP Base
 template <std::size_t, typename> class StateBase;
