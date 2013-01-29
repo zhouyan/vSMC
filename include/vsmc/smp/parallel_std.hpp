@@ -24,8 +24,7 @@ class StateSTD : public StateBase<Dim, T>
     {
         VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(STD);
 
-        thread::parallel_for(
-                thread::BlockedRange<size_type>(0, this->size()),
+        thread::parallel_for(thread::BlockedRange<size_type>(0, N),
                 copy_work_<IntType>(this, copy_from));
     }
 
@@ -66,10 +65,11 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         std::size_t accept = thread::parallel_accumulate(
-                thread::BlockedRange<size_type>(0, particle.size()),
+                thread::BlockedRange<size_type>(0, N),
                 work_(this, &particle), static_cast<std::size_t>(0));
         this->post_processor(particle);
 
@@ -125,9 +125,10 @@ class MoveSTD : public MoveBase<T, Derived>
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         std::size_t accept = thread::parallel_accumulate(
-                thread::BlockedRange<size_type>(0, particle.size()),
+                thread::BlockedRange<size_type>(0, N),
                 work_(this, iter, &particle), static_cast<std::size_t>(0));
         this->post_processor(iter, particle);
 
@@ -185,9 +186,9 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        thread::parallel_for(
-                thread::BlockedRange<size_type>(0, particle.size()),
+        thread::parallel_for(thread::BlockedRange<size_type>(0, N),
                 work_(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
@@ -246,9 +247,9 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        thread::parallel_for(
-                thread::BlockedRange<size_type>(0, particle.size()),
+        thread::parallel_for(thread::BlockedRange<size_type>(0, N),
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 

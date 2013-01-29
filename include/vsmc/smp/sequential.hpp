@@ -32,10 +32,11 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         std::size_t accept = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
         this->post_processor(particle);
 
@@ -64,9 +65,10 @@ class MoveSEQ : public MoveBase<T, Derived>
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         this->post_processor(iter, particle);
 
@@ -96,8 +98,9 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        for (size_type i = 0; i != particle.size(); ++i) {
+        for (size_type i = 0; i != N; ++i) {
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
@@ -127,8 +130,9 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        for (size_type i = 0; i != particle.size(); ++i) {
+        for (size_type i = 0; i != N; ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }

@@ -49,7 +49,7 @@ class StateBase : public internal::StateBaseDim<Dim>
     {
         VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(Base);
 
-        for (size_type to = 0; to != size_; ++to)
+        for (size_type to = 0; to != N; ++to)
             this->copy_particle(copy_from[to], to);
     }
 

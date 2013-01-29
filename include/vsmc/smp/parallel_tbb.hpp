@@ -30,7 +30,7 @@ class StateTBB : public StateBase<Dim, T>
     {
         VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(TBB);
 
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 copy_work_<IntType>(this, copy_from));
     }
 
@@ -70,11 +70,11 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         work_ work(this, &particle);
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.size()), work);
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), work);
         this->post_processor(particle);
 
         return work.accept();
@@ -142,10 +142,10 @@ class MoveTBB : public MoveBase<T, Derived>
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         work_ work(this, iter, &particle);
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(
-                    0, particle.size()), work);
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), work);
         this->post_processor(iter, particle);
 
         return work.accept();
@@ -216,8 +216,9 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 work_(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
@@ -274,8 +275,9 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, particle.size()),
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 

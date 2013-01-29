@@ -54,35 +54,7 @@
 #endif
 #endif
 
-// Optional features
-
-#ifndef VSMC_USE_CILK
-#define VSMC_USE_CILK 0
-#endif
-
-#ifndef VSMC_USE_GCD
-#define VSMC_USE_GCD 0
-#endif
-
-#ifndef VSMC_USE_OMP
-#define VSMC_USE_OMP 0
-#endif
-
-#ifndef VSMC_USE_PPL
-#define VSMC_USE_PPL 0
-#endif
-
-#ifndef VSMC_USE_STD
-#define VSMC_USE_STD 0
-#endif
-
-#ifndef VSMC_USE_TBB
-#define VSMC_USE_TBB 0
-#endif
-
-#ifndef VSMC_USE_CL
-#define VSMC_USE_CL 0
-#endif
+// Linear algebra
 
 #ifndef VSMC_USE_MKL
 #define VSMC_USE_MKL 0

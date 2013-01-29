@@ -33,17 +33,17 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        accept_.resize(particle.size());
+        accept_.resize(N);
         work_param_ wp = {this, &particle, &accept_[0]};
-        dispatch_apply_f(particle.size(),
-                gcd::DispatchQueue::instance().queue(),
+        dispatch_apply_f(N, gcd::DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(particle);
 
         std::size_t acc = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             acc += accept_[i];
 
         return acc;
@@ -90,16 +90,16 @@ class MoveGCD : public MoveBase<T, Derived>
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        accept_.resize(particle.size());
+        accept_.resize(N);
         work_param_ wp = {this, &particle, &accept_[0], iter};
-        dispatch_apply_f(particle.size(),
-                gcd::DispatchQueue::instance().queue(),
+        dispatch_apply_f(N, gcd::DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
 
         std::size_t acc = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             acc += accept_[i];
 
         return acc;
@@ -148,10 +148,10 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter, dim};
-        dispatch_apply_f(particle.size(),
-                gcd::DispatchQueue::instance().queue(),
+        dispatch_apply_f(N, gcd::DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
     }
@@ -200,10 +200,10 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter};
-        dispatch_apply_f(particle.size(),
-                gcd::DispatchQueue::instance().queue(),
+        dispatch_apply_f(N, gcd::DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
 

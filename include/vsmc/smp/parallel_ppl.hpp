@@ -63,10 +63,11 @@ class InitializePPL : public InitializeBase<T, Derived>
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         ppl::combinable<std::size_t> accept(accept_init_);
-        ppl::parallel_for(static_cast<size_type>(0), particle.size(),
+        ppl::parallel_for(static_cast<size_type>(0), N,
                 work_(this, &particle, &accept));
         this->post_processor(particle);
 
@@ -122,10 +123,11 @@ class MovePPL : public MoveBase<T, Derived>
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         ppl::combinable<std::size_t> accept(accept_init_);
-        ppl::parallel_for(static_cast<size_type>(0), particle.size(),
-                    work_(this, iter, &particle, &accept));
+        ppl::parallel_for(static_cast<size_type>(0), N,
+                work_(this, iter, &particle, &accept));
         this->post_processor(iter, particle);
 
         return accept.combine(accept_accu_);
@@ -182,8 +184,9 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        ppl::parallel_for(static_cast<size_type>(0), particle.size(),
+        ppl::parallel_for(static_cast<size_type>(0), N,
                 work_(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
@@ -238,8 +241,9 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
+        const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        ppl::parallel_for(static_cast<size_type>(0), particle.size(),
+        ppl::parallel_for(static_cast<size_type>(0), N,
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 

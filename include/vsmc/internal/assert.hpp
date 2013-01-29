@@ -152,7 +152,7 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
              "**StateCL::build**"));
 
 #define VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(name)                    \
-    VSMC_RUNTIME_ASSERT((N == this->size()),                                  \
+    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
             ("**State"#name"::copy** SIZE MISMATCH"))
 
 // Static assertion macros
