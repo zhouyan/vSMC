@@ -37,6 +37,7 @@
 
 #if VSMC_USE_CL
 #include <vsmc/opencl/parallel_cl.hpp>
+#include <vsmc/opencl/adapter.hpp>
 #endif
 
 #endif // VSMC_HPP
@@ -48,16 +49,18 @@
 /// \ingroup Core
 /// \brief Various resampling methods
 
+/// \defgroup Adapter Adapter
+/// \brief Adapter class templates for constructing concrete objects
+
+/// \defgroup CL OpenCL
+/// \brief Parallelized sampler with OpenCL
+
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Single threaded and parallel samplers using SMP implementations
 
 /// \defgroup Base Base Dispatcher
 /// \ingroup SMP
 /// \brief Base class templates that dispatch computing tasks
-
-/// \defgroup Adapter Adapter
-/// \ingroup SMP
-/// \brief Adapter class templates for constructing concrete objects
 
 /// \defgroup Implementation Implementation
 /// \ingroup SMP
@@ -90,9 +93,6 @@
 /// \defgroup TBB Intel Threading Buidling Block
 /// \ingroup Implementation
 /// \brief Parallelized sampler with Intel Threading Building Block
-
-/// \defgroup CL OpenCL
-/// \brief Parallelized sampler with OpenCL
 
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library

@@ -270,7 +270,7 @@ class StateCL
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup CL
-template <typename T>
+template <typename T, typename>
 class InitializeCL : public opencl::LocalSize
 {
     public :
@@ -370,7 +370,7 @@ class InitializeCL : public opencl::LocalSize
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup CL
-template <typename T>
+template <typename T, typename>
 class MoveCL : public opencl::LocalSize
 {
     public :
@@ -469,7 +469,7 @@ class MoveCL : public opencl::LocalSize
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup CL
-template <typename T>
+template <typename T, typename>
 class MonitorEvalCL : public opencl::LocalSize
 {
     public :
@@ -569,7 +569,7 @@ class MonitorEvalCL : public opencl::LocalSize
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup CL
-template <typename T>
+template <typename T, typename>
 class PathEvalCL : public opencl::LocalSize
 {
     public :

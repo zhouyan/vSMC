@@ -21,9 +21,9 @@ namespace integrate {                                                         \
 namespace vsmc {
 
 // Placeholders
-class CBase;
-class VBase;
-class NullType;
+struct CBase;
+struct VBase;
+struct NullType;
 
 // Utilities
 class Seed;
@@ -96,10 +96,10 @@ template <typename, template <typename> class> class ParticleIterator;
 // OpenCL
 template <std::size_t, typename, typename ID = VSMC_CL_DEFAULT_ID>
 class StateCL;
-template <typename> class InitializeCL;
-template <typename> class MoveCL;
-template <typename> class MonitorEvalCL;
-template <typename> class PathEvalCL;
+template <typename, typename B = NullType> class InitializeCL;
+template <typename, typename B = NullType> class MoveCL;
+template <typename, typename B = NullType> class MonitorEvalCL;
+template <typename, typename B = NullType> class PathEvalCL;
 
 // SMP Base
 template <std::size_t, typename> class StateBase;
