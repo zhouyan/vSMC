@@ -11,35 +11,6 @@
 #include <vsmc/smp/sequential.hpp>
 #include <vsmc/smp/adapter.hpp>
 
-#if VSMC_USE_CILK
-#include <vsmc/smp/parallel_cilk.hpp>
-#endif
-
-#if VSMC_USE_GCD
-#include <vsmc/smp/parallel_gcd.hpp>
-#endif
-
-#if VSMC_USE_OMP
-#include <vsmc/smp/parallel_omp.hpp>
-#endif
-
-#if VSMC_USE_PPL
-#include <vsmc/smp/parallel_ppl.hpp>
-#endif
-
-#if VSMC_USE_STD
-#include <vsmc/smp/parallel_std.hpp>
-#endif
-
-#if VSMC_USE_TBB
-#include <vsmc/smp/parallel_tbb.hpp>
-#endif
-
-#if VSMC_USE_CL
-#include <vsmc/opencl/parallel_cl.hpp>
-#include <vsmc/opencl/adapter.hpp>
-#endif
-
 #endif // VSMC_HPP
 
 /// \defgroup Core Core

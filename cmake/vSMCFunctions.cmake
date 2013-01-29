@@ -1,43 +1,74 @@
-FUNCTION (ADD_EXAMPLE basename algs)
-    FOREACH (exe ${EXAMPLE_EXECUTABLES})
-        STRING (TOUPPER "-DUSE_${exe}" flags)
+FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
+    STRING (TOUPPER "${smp_name}" SMP)
+    STRING (TOLOWER "${smp_name}" smp)
+    SET (VSMC_BASE_DEFINE "
+#define BASE_STATE   vsmc::State${SMP}
+#define BASE_INIT    vsmc::Initialize${SMP}
+#define BASE_MOVE    vsmc::Move${SMP}
+#define BASE_MONITOR vsmc::MonitorEval${SMP}
+#define BASE_PATH    vsmc::PathEval${SMP}
+#define BASE_NUMERIC vsmc::integrate::Numeric${SMP}
+#include <vsmc/smp/adapter.hpp>
+#include <vsmc/utility/integrate/numeric_${smp}.hpp>
+    ")
 
-        IF (${exe} STREQUAL "tbb")
-            ADD_TBB_RUNTIME(${basename})
-        ENDIF (${exe} STREQUAL "tbb")
+    IF (${smp} STREQUAL "seq")
+        SET (VSMC_BASE_DEFINE "${VSMC_BASE_DEFINE}
+#include <vsmc/smp/sequential.hpp>")
+    ELSE (${smp} STREQUAL "seq")
+        SET (VSMC_BASE_DEFINE "${VSMC_BASE_DEFINE}
+#include <vsmc/smp/parallel_${smp}.hpp>")
+    ENDIF (${smp} STREQUAL "seq")
 
+    SET (VSMC_BASE_DEFINE_HEADER "${header}-${smp}.hpp")
+
+    CONFIGURE_FILE (
+        ${PROJECT_SOURCE_DIR}/${header}.hpp
+        ${PROJECT_SOURCE_DIR}/${header}-${smp}.hpp)
+    CONFIGURE_FILE (
+        ${PROJECT_SOURCE_DIR}/${source}.cpp
+        ${PROJECT_SOURCE_DIR}/${source}-${smp}.cpp)
+
+    SET (GENERATED_SOURCE ${GENERATED_SOURCE}
+        ${PROJECT_SOURCE_DIR}/${header}-${smp}.hpp
+        CACHE INTERNAL "Generated source")
+    SET (GENERATED_SOURCE ${GENERATED_SOURCE}
+        ${PROJECT_SOURCE_DIR}/${source}-${smp}.cpp
+        CACHE INTERNAL "Generated source")
+
+    ADD_EXECUTABLE (${source}-${smp} ${source}-${smp}.cpp)
+
+    IF (${smp} STREQUAL "omp")
+        SET_TARGET_PROPERTIES (${source}-${smp} PROPERTIES COMPILE_FLAGS
+            "${OpenMP_CXX_FLAGS}")
+    ENDIF (${smp} STREQUAL "omp")
+
+    IF (${smp} STREQUAL "std")
+        TARGET_LINK_LIBRARIES (${source}-${smp} ${VSMC_THREAD_LINK_LIBRARIES})
+    ELSEIF (${smp} STREQUAL "gcd")
+        TARGET_LINK_LIBRARIES (${source}-${smp} ${GCD_LINK_LIBRARIES})
+    ELSEIF (${smp} STREQUAL "tbb")
+        TARGET_LINK_LIBRARIES (${source}-${smp} ${TBB_LINK_LIBRARIES})
+    ELSEIF (${smp} STREQUAL "omp")
+        TARGET_LINK_LIBRARIES (${source}-${smp} ${OpenMP_LINK_LIBRARIES})
+    ENDIF (${smp} STREQUAL "std")
+
+    ADD_DEPENDENCIES (${base} ${source}-${smp})
+ENDFUNCTION (ADD_SMP_EXECUTABLE)
+
+FUNCTION (ADD_EXAMPLE base algs)
+    FOREACH (smp ${EXAMPLE_EXECUTABLES})
+        IF (${smp} STREQUAL "tbb")
+            ADD_TBB_RUNTIME(${base})
+        ENDIF (${smp} STREQUAL "tbb")
         FOREACH (alg ${algs})
-            SET (exe_name ${basename}-${alg}-${exe})
-            ADD_EXECUTABLE (${exe_name} ${basename}-${alg}.cpp)
-
-            IF (${exe} STREQUAL "omp")
-                SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
-                    "${flags} ${OpenMP_CXX_FLAGS}")
-            ELSE (${exe} STREQUAL "omp")
-                SET_TARGET_PROPERTIES (${exe_name} PROPERTIES COMPILE_FLAGS
-                    "${flags}")
-            ENDIF (${exe} STREQUAL "omp")
-
-            IF (${exe} STREQUAL "std")
-                TARGET_LINK_LIBRARIES (${exe_name}
-                    ${EXAMPLE_LINK_LIBRARIES} ${VSMC_THREAD_LINK_LIBRARIES})
-            ELSEIF (${exe} STREQUAL "gcd")
-                TARGET_LINK_LIBRARIES (${exe_name}
-                    ${EXAMPLE_LINK_LIBRARIES} ${GCD_LINK_LIBRARIES})
-            ELSEIF (${exe} STREQUAL "tbb")
-                TARGET_LINK_LIBRARIES (${exe_name}
-                    ${EXAMPLE_LINK_LIBRARIES} ${TBB_LINK_LIBRARIES})
-            ELSEIF (${exe} STREQUAL "omp")
-                TARGET_LINK_LIBRARIES (${exe_name}
-                    ${EXAMPLE_LINK_LIBRARIES} ${OpenMP_LINK_LIBRARIES})
-            ELSE (${exe} STREQUAL "std")
-                TARGET_LINK_LIBRARIES (${exe_name} ${EXAMPLE_LINK_LIBRARIES})
-            ENDIF (${exe} STREQUAL "std")
-
-            ADD_DEPENDENCIES (${basename} ${exe_name})
+            ADD_SMP_EXECUTABLE(${base} ${base} ${base}-${alg} ${smp})
+            TARGET_LINK_LIBRARIES (${base}-${alg}-${smp}
+                ${EXAMPLE_LINK_LIBRARIES})
         ENDFOREACH(alg)
-    ENDFOREACH (exe)
+    ENDFOREACH (smp)
 ENDFUNCTION (ADD_EXAMPLE)
+
 
 FUNCTION (COPY_FILE basename filename)
     ADD_CUSTOM_COMMAND (
