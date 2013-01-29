@@ -199,7 +199,7 @@ class NumericNewtonCotes :
     typedef typename integrate_impl_type::eval_type eval_type;
 
     NumericNewtonCotes () :
-        coeff_(internal::NumericNewtonCotesCoeff<Degree>::instance().coeff());
+        coeff_(internal::NumericNewtonCotesCoeff<Degree>::instance().coeff())
     {}
 
     double integrate_segment (double a, double b, const eval_type &eval) const
