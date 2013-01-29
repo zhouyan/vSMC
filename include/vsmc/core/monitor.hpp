@@ -2,7 +2,7 @@
 #define VSMC_CORE_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/integrate.hpp>
+#include <vsmc/utility/integrate/importance_sampling.hpp>
 
 namespace vsmc {
 
