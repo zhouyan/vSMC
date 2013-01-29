@@ -98,6 +98,8 @@ class LocalSize
         local_size_ = new_size;
     }
 
+    protected :
+
     void set_preferred_local_size (
             const cl::Kernel &kern, const cl::Device &dev)
     {

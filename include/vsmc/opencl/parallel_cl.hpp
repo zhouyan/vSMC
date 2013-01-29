@@ -346,6 +346,8 @@ class InitializeCL : public opencl::LocalSize
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
+            set_preferred_local_size(
+                    kernel_, particle.value().manager().device());
         }
 
         kernel_.setArg(0, particle.value().state_buffer());
@@ -443,6 +445,8 @@ class MoveCL : public opencl::LocalSize
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
+            set_preferred_local_size(
+                    kernel_, particle.value().manager().device());
         }
 
         kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
@@ -540,6 +544,8 @@ class MonitorEvalCL : public opencl::LocalSize
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
+            set_preferred_local_size(
+                    kernel_, particle.value().manager().device());
         }
 
         kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
@@ -638,6 +644,8 @@ class PathEvalCL : public opencl::LocalSize
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
+            set_preferred_local_size(
+                    kernel_, particle.value().manager().device());
         }
 
         kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
