@@ -6,7 +6,6 @@
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
-
 #include <vsmc/utility/opencl/cl_wrapper.hpp>
 
 #include <cstddef>
@@ -21,107 +20,6 @@ struct Default
     typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_DEFAULT>
         opencl_device_type;
 };
-
-struct All
-{
-    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_ALL>
-        opencl_device_type;
-};
-
-struct CPU
-{
-    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_CPU>
-        opencl_device_type;
-};
-
-struct GPU
-{
-    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_GPU>
-        opencl_device_type;
-};
-
-struct Accelerator
-{
-    typedef cxx11::integral_constant<cl_device_type,
-        CL_DEVICE_TYPE_ACCELERATOR> opencl_device_type;
-};
-
-struct AMD
-{
-    static bool check_opencl_platform (const std::string &name)
-    {return name.find(std::string("AMD")) != std::string::npos;}
-};
-
-struct Apple
-{
-    static bool check_opencl_platform (const std::string &name)
-    {return name.find(std::string("Apple")) != std::string::npos;}
-};
-
-struct Intel
-{
-    static bool check_opencl_platform (const std::string &name)
-    {return name.find(std::string("Intel")) != std::string::npos;}
-};
-
-struct NVIDIA
-{
-    static bool check_opencl_platform (const std::string &name)
-    {return name.find(std::string("NVIDIA")) != std::string::npos;}
-};
-
-struct AMDCPU : public AMD, public CPU {};
-struct AMDGPU : public AMD, public GPU {};
-
-struct AppleCPU : public Apple, public CPU {};
-struct AppleGPU : public Apple, public GPU {};
-
-struct IntelCPU : public Intel, public CPU {};
-struct IntelGPU : public Intel, public GPU {};
-
-struct NVIDIACPU : public NVIDIA, public CPU {};
-struct NVIDIAGPU : public NVIDIA, public GPU {};
-
-class LocalSize
-{
-    public :
-
-    LocalSize () : local_size_(0) {}
-
-    std::size_t local_size () const
-    {
-        return local_size_;
-    }
-
-    void local_size (std::size_t new_size)
-    {
-        local_size_ = new_size;
-    }
-
-    protected :
-
-    void set_preferred_local_size (
-            const cl::Kernel &kern, const cl::Device &dev)
-    {
-        local_size(get_preferred_local_size(kern, dev));
-    }
-
-    static std::size_t get_preferred_local_size (
-            const cl::Kernel &kern, const cl::Device &dev)
-    {
-        std::size_t max_s;
-        std::size_t mul_s;
-        kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &max_s);
-        kern.getWorkGroupInfo(dev,
-                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
-
-        return (max_s / mul_s) * mul_s;
-    }
-
-    private :
-
-    std::size_t local_size_;
-}; // class LocalSize
 
 /// \brief OpenCL Manager
 /// \ingroup OpenCL

@@ -1,6 +1,10 @@
 #ifndef VSMC_UTILITY_OPENCL_QUERY_HPP
 #define VSMC_UTILITY_OPENCL_QUERY_HPP
 
+#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/forward.hpp>
 #include <vsmc/utility/opencl/cl_wrapper.hpp>
 
 #include <iostream>

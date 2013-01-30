@@ -73,8 +73,8 @@ struct IntelGPU;
 struct NVIDIACPU;
 struct NVIDIAGPU;
 
-class LocalSize;
-
+class Configure;
+class Query;
 template <typename> class Manager;
 
 } // namespace vsmc::opencl

@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/rng.hpp>
+#include <vsmc/utility/opencl/configure.hpp>
 #include <vsmc/utility/opencl/manager.hpp>
 
 namespace vsmc {
@@ -31,14 +32,14 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 
 /// \brief Particle::value_type subtype
 /// \ingroup CL
-template <std::size_t Dim, typename T, typename ManagerID>
+template <std::size_t Dim, typename T, typename ID>
 class StateCL
 {
     public :
 
     typedef cl_ulong size_type;
     typedef T state_type;
-    typedef opencl::Manager<ManagerID> manager_type;
+    typedef opencl::Manager<ID> manager_type;
 
     explicit StateCL (size_type N) :
         dim_(Dim == Dynamic ? 1 : Dim), size_(N),
@@ -50,7 +51,7 @@ class StateCL
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
     }
 
-    StateCL (const StateCL<Dim, T, ManagerID> &other) :
+    StateCL (const StateCL<Dim, T, ID> &other) :
         dim_(other.dim_), size_(other.size_), manager_(other.manager_),
         program_(other.program_), kernel_copy_(other.kernel_copy_),
         build_(other.build_), build_id_(0),
@@ -62,8 +63,7 @@ class StateCL
                 other.state_buffer_, dim_ * size_, state_buffer_);
     }
 
-    StateCL<Dim, T, ManagerID> &operator= (
-            const StateCL<Dim, T, ManagerID> &other)
+    StateCL<Dim, T, ID> &operator= (const StateCL<Dim, T, ID> &other)
     {
         if (this != &other) {
             dim_         = other.dim_;
@@ -271,7 +271,7 @@ class StateCL
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup CL
 template <typename T, typename>
-class InitializeCL : public opencl::LocalSize
+class InitializeCL : public opencl::Configure
 {
     public :
 
@@ -371,7 +371,7 @@ class InitializeCL : public opencl::LocalSize
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup CL
 template <typename T, typename>
-class MoveCL : public opencl::LocalSize
+class MoveCL : public opencl::Configure
 {
     public :
 
@@ -470,7 +470,7 @@ class MoveCL : public opencl::LocalSize
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup CL
 template <typename T, typename>
-class MonitorEvalCL : public opencl::LocalSize
+class MonitorEvalCL : public opencl::Configure
 {
     public :
 
@@ -570,7 +570,7 @@ class MonitorEvalCL : public opencl::LocalSize
 /// \brief Path<T>::eval_type subtype
 /// \ingroup CL
 template <typename T, typename>
-class PathEvalCL : public opencl::LocalSize
+class PathEvalCL : public opencl::Configure
 {
     public :
 
