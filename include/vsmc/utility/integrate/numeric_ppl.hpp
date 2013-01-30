@@ -67,7 +67,7 @@ class NumericPPL : public NumericBase<Derived>
 
         eval_init_ (const eval_type &eval) : eval_(eval) {}
 
-        eval_type operator() () const { return eval_; }
+        eval_type operator() () const {return eval_;}
 
         private :
 

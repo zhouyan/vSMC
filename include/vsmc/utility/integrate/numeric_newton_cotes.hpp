@@ -58,7 +58,7 @@ class NumericNewtonCotesCoeff
     double coeff_[Degree + 2];
 
     NumericNewtonCotesCoeff ()
-    { coeff_init(cxx11::integral_constant<unsigned, Degree>()); }
+    {coeff_init(cxx11::integral_constant<unsigned, Degree>());}
 
     NumericNewtonCotesCoeff
         (const NumericNewtonCotesCoeff<Degree> &);

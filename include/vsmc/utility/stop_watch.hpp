@@ -285,15 +285,15 @@ class StopWatch
     public :
 
     void start () const {}
-    void stop () const {}
+    void stop  () const {}
     void reset () const {}
 
-    double nanoseconds () const { return 0; }
-    double microseconds () const { return 0; }
-    double milliseconds () const { return 0; }
-    double seconds () const { return 0; }
-    double minutes () const { return 0; }
-    double hours () const { return 0; }
+    double nanoseconds  () const {return 0;}
+    double microseconds () const {return 0;}
+    double milliseconds () const {return 0;}
+    double seconds      () const {return 0;}
+    double minutes      () const {return 0;}
+    double hours        () const {return 0;}
 }; // class StopWatch
 
 } // namespace vsmc

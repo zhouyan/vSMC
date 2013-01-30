@@ -191,7 +191,7 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
                     std::forward<WorkType>(work), *r));
     }
     for (std::vector<std::future<void> >::iterator
-            w = wg.begin(); w != wg.end(); ++w) { w->get(); }
+            w = wg.begin(); w != wg.end(); ++w) {w->get();}
 #else
     // start parallelization
     {
@@ -228,7 +228,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
                     std::forward<WorkType>(work), *r, cxx11::ref(result[i])));
     }
     for (std::vector<std::future<void> >::iterator
-            w = wg.begin(); w != wg.end(); ++w) { w->get(); }
+            w = wg.begin(); w != wg.end(); ++w) {w->get();}
 #else
     // start parallelization
     {
@@ -271,7 +271,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
                     std::forward<WorkType>(work), *r, cxx11::ref(result[i])));
     }
     for (std::vector<std::future<void> >::iterator
-            w = wg.begin(); w != wg.end(); ++w) { w->get(); }
+            w = wg.begin(); w != wg.end(); ++w) {w->get();}
 #else
     // start parallelization
     {

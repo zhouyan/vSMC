@@ -105,9 +105,9 @@ class InitializePPL : public InitializeBase<T, Derived>
         ppl::combinable<std::size_t> *const accept_;
     }; // class work_
 
-    static std::size_t accept_init_ () { return 0; }
+    static std::size_t accept_init_ () {return 0;}
     static std::size_t accept_accu_ (std::size_t a, std::size_t b)
-    { return a + b; }
+    {return a + b;}
 }; // class InitializePPL
 
 /// \brief Sampler<T>::move_type subtype
@@ -165,9 +165,9 @@ class MovePPL : public MoveBase<T, Derived>
         const std::size_t iter_;
     }; // class work_
 
-    static std::size_t accept_init_ () { return 0; }
+    static std::size_t accept_init_ () {return 0;}
     static std::size_t accept_accu_ (std::size_t a, std::size_t b)
-    { return a + b; }
+    {return a + b;}
 }; // class MovePPL
 
 /// \brief Monitor<T>::eval_type subtype

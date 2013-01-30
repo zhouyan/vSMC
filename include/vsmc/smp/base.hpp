@@ -271,7 +271,7 @@ class InitializeBase
 
     std::size_t initialize_state_dispatch (SingleParticle<T>,
             std::size_t (InitializeBase::*) (SingleParticle<T>))
-    { VSMC_STATIC_ASSERT_NO_IMPL(initialize_state); return 0;}
+    {VSMC_STATIC_ASSERT_NO_IMPL(initialize_state); return 0;}
 
     void initialize_param_dispatch (Particle<T> &, void *,
             void (InitializeBase::*) (Particle<T> &, void *)) {}
@@ -407,7 +407,7 @@ class MoveBase
 
     std::size_t move_state_dispatch (std::size_t, SingleParticle<T>,
             std::size_t (MoveBase::*) (std::size_t, SingleParticle<T>))
-    { VSMC_STATIC_ASSERT_NO_IMPL(move_state); return 0;}
+    {VSMC_STATIC_ASSERT_NO_IMPL(move_state); return 0;}
 
     void pre_processor_dispatch (std::size_t, Particle<T> &,
             void (MoveBase::*) (std::size_t, Particle<T> &)) {}
@@ -551,7 +551,7 @@ class MonitorEvalBase
             ConstSingleParticle<T>, double *res,
             void (MonitorEvalBase::*)
             (std::size_t, std::size_t, ConstSingleParticle<T>, double *))
-    { VSMC_STATIC_ASSERT_NO_IMPL(monitor_state); }
+    {VSMC_STATIC_ASSERT_NO_IMPL(monitor_state);}
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (MonitorEvalBase::*) (std::size_t, const Particle<T> &)) {}
@@ -714,11 +714,11 @@ class PathEvalBase
 
     double path_state_dispatch (std::size_t, ConstSingleParticle<T>,
             double (PathEvalBase::*) (std::size_t, ConstSingleParticle<T>))
-    { VSMC_STATIC_ASSERT_NO_IMPL(path_state); return 0; }
+    {VSMC_STATIC_ASSERT_NO_IMPL(path_state); return 0;}
 
     double path_grid_dispatch (std::size_t, const Particle<T> &,
             double (PathEvalBase::*) (std::size_t, const Particle<T> &))
-    { VSMC_STATIC_ASSERT_NO_IMPL(path_grid); return 0; }
+    {VSMC_STATIC_ASSERT_NO_IMPL(path_grid); return 0;}
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (PathEvalBase::*) (std::size_t, const Particle<T> &)) {}
