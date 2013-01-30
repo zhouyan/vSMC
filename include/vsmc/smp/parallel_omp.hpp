@@ -49,8 +49,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         std::size_t accept = 0;
-#pragma omp parallel for reduction(+ : accept) default(none) \
-        shared(particle, N)
+#pragma omp parallel for reduction(+ : accept) default(none) shared(particle)
         for (size_type i = 0; i < N; ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
         this->post_processor(particle);
@@ -85,7 +84,7 @@ class MoveOMP : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
 #pragma omp parallel for reduction(+ : accept) default(none) \
-        shared(particle, iter, N)
+        shared(particle, iter)
         for (size_type i = 0; i < N; ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         this->post_processor(iter, particle);
@@ -119,7 +118,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-#pragma omp parallel for default(none) shared(particle, iter, dim, res, N)
+#pragma omp parallel for default(none) shared(particle, iter, dim, res)
         for (size_type i = 0; i < N; ++i)
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
@@ -152,7 +151,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-#pragma omp parallel for default(none) shared(particle, iter, res, N)
+#pragma omp parallel for default(none) shared(particle, iter, res)
         for (size_type i = 0; i < N; ++i)
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
