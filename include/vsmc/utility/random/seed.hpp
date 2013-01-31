@@ -58,7 +58,7 @@ class Seed
 
     Seed (const Seed &);
     Seed &operator= (const Seed &);
-    ~Seed () {};
+    ~Seed () {}
 }; // class Seed
 
 } // namespace vsmc
