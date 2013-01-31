@@ -5,7 +5,7 @@
 
 namespace vsmc { namespace gcd {
 
-/// \brief Apple GCD dispatch queue informations
+/// \brief Dispatch queue used by vSMC
 /// \ingroup Dispatch
 class DispatchQueue
 {
