@@ -3,8 +3,9 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/resample.hpp>
-#include <vsmc/core/rng.hpp>
 #include <vsmc/core/weight.hpp>
+#include <vsmc/utility/random/rng_set.hpp>
+#include <vsmc/utility/random/seed.hpp>
 
 namespace vsmc {
 
@@ -365,7 +366,7 @@ class Particle
     explicit Particle (size_type N) :
         size_(N), value_(N), weight_set_(N), rng_set_(N),
         replication_(N), copy_from_(N), weight_(N), resampled_(false),
-        resample_rng_(vsmc::Seed::instance().get()),
+        resample_rng_(VSMC_SEED_TYPE::instance().get()),
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
         csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {

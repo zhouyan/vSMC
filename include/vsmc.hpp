@@ -82,7 +82,7 @@
 
 /// \defgroup Random Random
 /// \ingroup Utility
-/// \brief Generating distribution random variates using Random123
+/// \brief Random number generating utilities
 
 /// \defgroup STDTBB C++11 Concurrency
 /// \ingroup Utility

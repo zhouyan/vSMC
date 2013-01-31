@@ -2,9 +2,9 @@
 #define VSMC_OPENCL_PARALLEL_CL_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/rng.hpp>
 #include <vsmc/utility/opencl/configure.hpp>
 #include <vsmc/utility/opencl/manager.hpp>
+#include <vsmc/utility/random/seed.hpp>
 
 namespace vsmc {
 
