@@ -243,8 +243,8 @@ class ConstSingleParticle
 
     template <typename UIntType>
     const typename cxx11::enable_if<
-        traits::HasStateType<T>::value && sizeof(UIntType),
-        typename traits::StateTypeTrait<T>::type>::type
+        StateTypeTrait<T>::value && sizeof(UIntType),
+        typename StateTypeTrait<T>::type>::type
     &state (UIntType pos) const
     {
 
@@ -304,8 +304,8 @@ class SingleParticle
 
     template <typename UIntType>
     typename cxx11::enable_if<
-        traits::HasStateType<T>::value && sizeof(UIntType),
-        typename traits::StateTypeTrait<T>::type>::type
+        StateTypeTrait<T>::value && sizeof(UIntType),
+        typename StateTypeTrait<T>::type>::type
     &state (UIntType pos) const
     {
         VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID;
@@ -349,12 +349,12 @@ class Particle
 {
     public :
 
-    typedef typename traits::SizeTypeTrait<T>::type size_type;
+    typedef typename SizeTypeTrait<T>::type size_type;
     typedef T value_type;
-    typedef typename traits::WeightSetTypeTrait<T>::type weight_set_type;
-    typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
+    typedef typename WeightSetTypeTrait<T>::type weight_set_type;
+    typedef typename RngSetTypeTrait<T>::type rng_set_type;
     typedef typename rng_set_type::rng_type rng_type;
-    typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
+    typedef typename ResampleRngTypeTrait<T>::type resample_rng_type;
     typedef cxx11::function<
         void (size_type, resample_rng_type &, double *, size_type *)>
         resample_op_type;

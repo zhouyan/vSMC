@@ -14,7 +14,7 @@ class StateOMP : public StateBase<Dim, T>
     public :
 
     typedef StateBase<Dim, T> state_base_type;
-    typedef typename traits::OMPSizeTypeTrait<
+    typedef typename internal::OMPSizeTypeTrait<
         typename state_base_type::size_type>::type size_type;
     typedef typename state_base_type::state_type state_type;
 
@@ -39,7 +39,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
     public :
 
     typedef InitializeBase<T, Derived> initialize_base_type;
-    typedef typename traits::OMPSizeTypeTrait<
+    typedef typename internal::OMPSizeTypeTrait<
         typename Particle<T>::size_type>::type size_type;
     typedef T value_type;
 
@@ -74,7 +74,7 @@ class MoveOMP : public MoveBase<T, Derived>
     public :
 
     typedef MoveBase<T, Derived> move_base_type;
-    typedef typename traits::OMPSizeTypeTrait<
+    typedef typename internal::OMPSizeTypeTrait<
         typename Particle<T>::size_type>::type size_type;
     typedef T value_type;
 
@@ -109,7 +109,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     public :
 
     typedef MonitorEvalBase<T, Derived> monitor_eval_base_type;
-    typedef typename traits::OMPSizeTypeTrait<
+    typedef typename internal::OMPSizeTypeTrait<
         typename Particle<T>::size_type>::type size_type;
     typedef T value_type;
 
@@ -142,7 +142,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
     public :
 
     typedef PathEvalBase<T, Derived> path_eval_base_type;
-    typedef typename traits::OMPSizeTypeTrait<
+    typedef typename internal::OMPSizeTypeTrait<
         typename Particle<T>::size_type>::type size_type;
     typedef T value_type;
 

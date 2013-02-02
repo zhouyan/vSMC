@@ -237,9 +237,9 @@ class CLManager
         setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR)
     {
-        cl_device_type dev = traits::OpenCLDeviceTypeTrait<ID>::type::value;
-        if (!dev)
-            dev = CLDefault::opencl_device_type::value;
+        cl_device_type dev = OpenCLDeviceTypeTrait<ID>::value ?
+            OpenCLDeviceTypeTrait<ID>::type::value :
+            CLDefault::opencl_device_type::value;
         setup_cl_manager(dev);
     }
 
@@ -265,7 +265,7 @@ class CLManager
                 platform_ = platform_vec_[p];
                 std::string pname;
                 platform_.getInfo(CL_PLATFORM_NAME, &pname);
-                if (!traits::CheckOpenCLPlatformTrait<ID>::check(pname)) {
+                if (!CheckOpenCLPlatformTrait<ID>::check(pname)) {
                     platform_ = cl::Platform();
                     continue;
                 }
@@ -281,7 +281,7 @@ class CLManager
                 for (std::size_t d = 0; d != device_vec_.size(); ++d) {
                     std::string dname;
                     device_vec_[d].getInfo(CL_DEVICE_NAME, &dname);
-                    if (traits::CheckOpenCLDeviceTrait<ID>::check(dname)) {
+                    if (CheckOpenCLDeviceTrait<ID>::check(dname)) {
                         device_ = device_vec_[d];
                         device_found = true;
                         break;

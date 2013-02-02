@@ -170,9 +170,8 @@ class Path
 
         index_.push_back(iter);
         grid_.push_back(eval_(iter, particle, buffer));
-        integrand_.push_back(is_int_1_(static_cast<
-                    typename traits::SizeTypeTrait<
-                    typename traits::ImportanceSampling1TypeTrait<T>::type
+        integrand_.push_back(is_int_1_(static_cast<typename SizeTypeTrait<
+                    typename ImportanceSampling1TypeTrait<T>::type
                     >::type>(particle.size()), buffer, weight));
     }
 
@@ -241,7 +240,7 @@ class Path
     std::vector<double> grid_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
+    typename ImportanceSampling1TypeTrait<T>::type is_int_1_;
 }; // class PathSampling
 
 /// \brief Monitor for path sampling for SMC with geometry path
@@ -393,9 +392,8 @@ class PathGeometry : public Path<T>
             for (std::size_t i = 0; i != size; ++i)
                 weight_[i] *= coeff;
 
-            return (is_int_1_(static_cast<
-                        typename traits::SizeTypeTrait<
-                        typename traits::ImportanceSampling1TypeTrait<T>::type
+            return (is_int_1_(static_cast<typename SizeTypeTrait<
+                        typename ImportanceSampling1TypeTrait<T>::type
                         >::type>(size), &integrand_history_[iter][0],
                         &weight_[0]));
         }
@@ -406,7 +404,7 @@ class PathGeometry : public Path<T>
         const std::vector<std::vector<double> > &weight_history_;
         const std::vector<std::vector<double> > &integrand_history_;
         std::vector<double> weight_;
-        typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
+        typename ImportanceSampling1TypeTrait<T>::type is_int_1_;
     }; // class f_alpha_
 }; // class PathGeometry
 

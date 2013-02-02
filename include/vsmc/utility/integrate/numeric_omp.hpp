@@ -14,7 +14,7 @@ class NumericOMP : public NumericBase<Derived>
     public :
 
     typedef NumericBase<Derived> integrate_base_type;
-    typedef typename traits::OMPSizeTypeTrait<
+    typedef typename internal::OMPSizeTypeTrait<
         typename integrate_base_type::size_type>::type size_type;
     typedef typename integrate_base_type::eval_type eval_type;
 
