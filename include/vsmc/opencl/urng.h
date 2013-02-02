@@ -82,31 +82,31 @@
         return rng->rnd.v[rng->remain];                                      \
     }
 
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG(2, 32)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG(2, 64)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG(4, 32)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG(4, 64)
 
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG_INIT(2, 32)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG_INIT(2, 64)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG_INIT(4, 32)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG_INIT(4, 64)
 
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG_RAND(2, 32)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG_RAND(2, 64)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG_RAND(4, 32)
-/// \ingroup Random
+/// \ingroup OpenCL
 VSMC_DEFINE_CBURNG_RAND(4, 64)
 
 #endif // VSMC_OPENCL_URNG_H

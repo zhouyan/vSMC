@@ -26,7 +26,3 @@
 /// \defgroup Integrate Integration
 /// \ingroup Utility
 /// \brief Numerical integration
-
-/// \defgroup Random Random
-/// \ingroup Utility
-/// \brief Random number generating
