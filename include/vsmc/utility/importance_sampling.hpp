@@ -49,7 +49,7 @@ inline bool is_sse_aligned (void *ptr)
 
 } } // namespace vsmc::internal
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Compute the importance sampling integration of univariate variable
 /// \ingroup Integrate
@@ -150,6 +150,6 @@ class ImportanceSamplingD
     }
 }; // class ImportanceSamplingD
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_INTEGRATE_IMPORTANCE_SAMPLING_HPP

@@ -4,7 +4,7 @@
 #include <vsmc/utility/integrate/numeric_base.hpp>
 #include <vsmc/utility/dispatch.hpp>
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Numerical integration with Apple Grand Central Dispatch
 /// \ingroup Integrate
@@ -28,8 +28,8 @@ class NumericGCD : public NumericBase<Derived>
 
         return integral;
     }
-}; // class NumericBase
+}; // class NumericGCD
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_INTEGRATE_NUMERIC_GCD_HPP

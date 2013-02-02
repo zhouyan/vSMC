@@ -4,7 +4,7 @@
 #include <vsmc/utility/integrate/numeric_base.hpp>
 #include <omp.h>
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Numerical integration with OpenMP
 /// \ingroup Integrate
@@ -32,8 +32,8 @@ class NumericOMP : public NumericBase<Derived>
 
         return integral;
     }
-}; // class NumericBase
+}; // class NumericOMP
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_INTEGRATE_NUMERIC_OMP_HPP

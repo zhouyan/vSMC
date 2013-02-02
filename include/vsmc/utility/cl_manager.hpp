@@ -1,21 +1,21 @@
-#ifndef VSMC_UTILITY_OPENCL_MANAGER_HPP
-#define VSMC_UTILITY_OPENCL_MANAGER_HPP
+#ifndef VSMC_UTILITY_CL_MANAGER_HPP
+#define VSMC_UTILITY_CL_MANAGER_HPP
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
-#include <vsmc/utility/opencl/cl_wrapper.hpp>
+#include <vsmc/utility/cl_wrapper.hpp>
 
 #include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <vector>
 
-namespace vsmc { namespace opencl {
+namespace vsmc {
 
-struct Default
+struct CLDefault
 {
     typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_DEFAULT>
         opencl_device_type;
@@ -24,13 +24,13 @@ struct Default
 /// \brief OpenCL Manager
 /// \ingroup OpenCL
 template <typename ID>
-class Manager
+class CLManager
 {
     public :
 
-    static Manager<ID> &instance ()
+    static CLManager<ID> &instance ()
     {
-        static Manager<ID> manager;
+        static CLManager<ID> manager;
 
         return manager;
     }
@@ -233,20 +233,20 @@ class Manager
     mutable void *read_buffer_pool_;
     mutable void *write_buffer_pool_;
 
-    Manager () :
+    CLManager () :
         setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR)
     {
         cl_device_type dev = traits::OpenCLDeviceTypeTrait<ID>::type::value;
         if (!dev)
-            dev = Default::opencl_device_type::value;
+            dev = CLDefault::opencl_device_type::value;
         setup_cl_manager(dev);
     }
 
-    Manager (const Manager<ID> &);
-    Manager<ID> &operator= (const Manager<ID> &);
+    CLManager (const CLManager<ID> &);
+    CLManager<ID> &operator= (const CLManager<ID> &);
 
-    ~Manager ()
+    ~CLManager ()
     {
         std::free(read_buffer_pool_);
         std::free(write_buffer_pool_);
@@ -350,8 +350,8 @@ class Manager
     {
         return local_size ? cl::NDRange(local_size) : cl::NullRange;
     }
-}; // clss Manager
+}; // clss CLManager
 
-} } // namespace vsmc::opencl
+} // namespace vsmc
 
-#endif // VSMC_UTILITY_OPENCL_MANAGER_HPP
+#endif // VSMC_UTILITY_CL_MANAGER_HPP

@@ -64,10 +64,6 @@
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
-/// \defgroup Dispatch Apple Grand Central Dispatch
-/// \ingroup Utility
-/// \brief Apple Grand Central Dispatch dispatch queue utilities
-
 /// \defgroup Integrate Integration
 /// \ingroup Utility
 /// \brief Importance sampling and numerical integration

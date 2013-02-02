@@ -10,7 +10,7 @@
 #include <vsmc/utility/integrate/numeric_base.hpp>
 #include <tbb/tbb.h>
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Numerical integration with Intel Threading Building Block
 /// \ingroup Integrate
@@ -78,8 +78,8 @@ class NumericTBB : public NumericBase<Derived>
         const eval_type eval_copy_;
         double integral_;
     }; // class work_
-}; // class NumericBase
+}; // class NumericTBB
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_INTEGRATE_NUMERIC_TBB_HPP

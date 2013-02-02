@@ -7,7 +7,7 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
 #define BASE_MOVE    vsmc::Move${SMP}
 #define BASE_MONITOR vsmc::MonitorEval${SMP}
 #define BASE_PATH    vsmc::PathEval${SMP}
-#define BASE_NUMERIC vsmc::integrate::Numeric${SMP}
+#define BASE_NUMERIC vsmc::Numeric${SMP}
 #include <vsmc/smp/adapter.hpp>
 #include <vsmc/utility/integrate/numeric_${smp}.hpp>
     ")

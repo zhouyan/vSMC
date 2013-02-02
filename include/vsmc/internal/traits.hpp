@@ -115,9 +115,9 @@ namespace vsmc { namespace traits {                                           \
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSampling1Type,
-        importance_sampling_1_type, integrate::ImportanceSampling1)
+        importance_sampling_1_type, ImportanceSampling1)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSamplingDType,
-        importance_sampling_d_type, integrate::ImportanceSamplingD)
+        importance_sampling_d_type, ImportanceSamplingD)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type)
 

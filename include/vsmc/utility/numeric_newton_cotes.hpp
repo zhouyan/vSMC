@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
+#ifndef VSMC_UTILITY_NUMERIC_NEWTON_COTES
+#define VSMC_UTILITY_NUMERIC_NEWTON_COTES
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
@@ -12,7 +12,9 @@
 #include <cstddef>
 #include <vector>
 
-namespace vsmc { namespace internal {
+namespace vsmc {
+
+namespace internal {
 
 template <unsigned Index, typename EvalType>
 struct NumericNewtonCotesEval
@@ -181,9 +183,7 @@ class NumericNewtonCotesCoeff
     }
 };
 
-} } // namespace vsmc::internal
-
-namespace vsmc { namespace integrate {
+} // namespace vsmc::internal
 
 /// \brief Numerical integration with the (closed) Newton-Cotes formulae
 /// \ingroup Integrate
@@ -224,6 +224,6 @@ class NumericNewtonCotes :
     const double *coeff_;
 }; // class NumericNewtonCotes
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_NUMERIC_NEWTON_COTES

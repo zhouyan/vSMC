@@ -2,8 +2,8 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/integrate/importance_sampling.hpp>
-#include <vsmc/utility/integrate/numeric_newton_cotes.hpp>
+#include <vsmc/utility/importance_sampling.hpp>
+#include <vsmc/utility/numeric_newton_cotes.hpp>
 
 #if VSMC_USE_MKL
 #include <mkl_vml.h>
@@ -277,14 +277,13 @@ class PathGeometry : public Path<T>
         if (this->iter_size() < 2)
             return 0;
 
-        integrate::NumericNewtonCotes<Degree, NumericImpl> numeric_int;
+        NumericNewtonCotes<Degree, NumericImpl> numeric_int;
 
         if (insert_points == 0) {
             std::vector<double> base_grid(this->iter_size());
             for (std::size_t i = 0; i != this->iter_size(); ++i)
                 base_grid[i] = this->grid(i);
-            return numeric_int(static_cast<
-                    typename integrate::NumericNewtonCotes<
+            return numeric_int(static_cast<typename NumericNewtonCotes<
                     Degree, NumericImpl>::size_type>(base_grid.size()),
                     &base_grid[0],
                     f_alpha_(*this, weight_history_, integrand_history_));
@@ -303,8 +302,7 @@ class PathGeometry : public Path<T>
         }
         super_grid.back() = this->grid(this->iter_size() - 1);
 
-        return numeric_int(static_cast<
-                typename integrate::NumericNewtonCotes<
+        return numeric_int(static_cast<typename NumericNewtonCotes<
                 Degree, NumericImpl>::size_type>(super_grid.size()),
                 &super_grid[0],
                 f_alpha_(*this, weight_history_, integrand_history_));

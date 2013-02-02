@@ -4,7 +4,7 @@
 #include <vsmc/utility/integrate/numeric_base.hpp>
 #include <vsmc/utility/ppl_wrapper.hpp>
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Numerical integration with Microsoft Parallel Pattern Library
 /// \ingroup Integrate
@@ -73,8 +73,8 @@ class NumericPPL : public NumericBase<Derived>
 
         const eval_type eval_;
     }; // class eval_init_;
-}; // class NumericBase
+}; // class NumericPPL
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_INTEGRATE_NUMERIC_PPL_HPP

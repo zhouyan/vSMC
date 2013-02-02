@@ -2,8 +2,8 @@
 #define VSMC_OPENCL_PARALLEL_CL_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/opencl/configure.hpp>
-#include <vsmc/utility/opencl/manager.hpp>
+#include <vsmc/utility/cl_configure.hpp>
+#include <vsmc/utility/cl_manager.hpp>
 #include <vsmc/utility/random/seed.hpp>
 
 namespace vsmc {
@@ -39,7 +39,7 @@ class StateCL
 
     typedef cl_ulong size_type;
     typedef T state_type;
-    typedef opencl::Manager<ID> manager_type;
+    typedef CLManager<ID> manager_type;
 
     explicit StateCL (size_type N) :
         dim_(Dim == Dynamic ? 1 : Dim), size_(N),
@@ -271,7 +271,7 @@ class StateCL
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup CL
 template <typename T, typename>
-class InitializeCL : public opencl::Configure
+class InitializeCL : public CLConfigure
 {
     public :
 
@@ -371,7 +371,7 @@ class InitializeCL : public opencl::Configure
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup CL
 template <typename T, typename>
-class MoveCL : public opencl::Configure
+class MoveCL : public CLConfigure
 {
     public :
 
@@ -470,7 +470,7 @@ class MoveCL : public opencl::Configure
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup CL
 template <typename T, typename>
-class MonitorEvalCL : public opencl::Configure
+class MonitorEvalCL : public CLConfigure
 {
     public :
 
@@ -570,7 +570,7 @@ class MonitorEvalCL : public opencl::Configure
 /// \brief Path<T>::eval_type subtype
 /// \ingroup CL
 template <typename T, typename>
-class PathEvalCL : public opencl::Configure
+class PathEvalCL : public CLConfigure
 {
     public :
 

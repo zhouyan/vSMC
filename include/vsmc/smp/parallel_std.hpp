@@ -24,7 +24,7 @@ class StateSTD : public StateBase<Dim, T>
     {
         VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(STD);
 
-        thread::parallel_for(thread::BlockedRange<size_type>(0, N),
+        parallel_for(BlockedRange<size_type>(0, N),
                 copy_work_<IntType>(this, copy_from));
     }
 
@@ -39,7 +39,7 @@ class StateSTD : public StateBase<Dim, T>
                 const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
-        void operator() (const thread::BlockedRange<size_type> &range) const
+        void operator() (const BlockedRange<size_type> &range) const
         {
             for (size_type to = range.begin(); to != range.end(); ++to)
                 state_->copy_particle(copy_from_[to], to);
@@ -68,8 +68,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        std::size_t accept = thread::parallel_accumulate(
-                thread::BlockedRange<size_type>(0, N),
+        std::size_t accept = parallel_accumulate(BlockedRange<size_type>(0, N),
                 work_(this, &particle), static_cast<std::size_t>(0));
         this->post_processor(particle);
 
@@ -94,7 +93,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
                 Particle<T> *particle) :
             init_(init), particle_(particle) {}
 
-        void operator() (const thread::BlockedRange<size_type> &range,
+        void operator() (const BlockedRange<size_type> &range,
                 std::size_t &accept) const
         {
             std::size_t acc = 0;
@@ -127,8 +126,7 @@ class MoveSTD : public MoveBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        std::size_t accept = thread::parallel_accumulate(
-                thread::BlockedRange<size_type>(0, N),
+        std::size_t accept = parallel_accumulate(BlockedRange<size_type>(0, N),
                 work_(this, iter, &particle), static_cast<std::size_t>(0));
         this->post_processor(iter, particle);
 
@@ -153,7 +151,7 @@ class MoveSTD : public MoveBase<T, Derived>
                 Particle<T> *particle):
             move_(move), iter_(iter), particle_(particle) {}
 
-        void operator() (const thread::BlockedRange<size_type> &range,
+        void operator() (const BlockedRange<size_type> &range,
                 std::size_t &accept) const
         {
             std::size_t acc = 0;
@@ -188,7 +186,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        thread::parallel_for(thread::BlockedRange<size_type>(0, N),
+        parallel_for(BlockedRange<size_type>(0, N),
                 work_(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
@@ -213,7 +211,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
             monitor_(monitor), iter_(iter), dim_(dim), particle_(particle),
             res_(res) {}
 
-        void operator() (const thread::BlockedRange<size_type> &range) const
+        void operator() (const BlockedRange<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 double *const r = res_ + i * dim_;
@@ -249,7 +247,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        thread::parallel_for(thread::BlockedRange<size_type>(0, N),
+        parallel_for(BlockedRange<size_type>(0, N),
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 
@@ -274,7 +272,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
                 const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
-        void operator() (const thread::BlockedRange<size_type> &range) const
+        void operator() (const BlockedRange<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 const Particle<T> *const part = particle_;

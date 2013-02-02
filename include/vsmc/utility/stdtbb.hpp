@@ -17,7 +17,7 @@
 #include <future>
 #endif
 
-namespace vsmc { namespace thread {
+namespace vsmc {
 
 /// \brief Blocked range
 /// \ingroup STDTBB
@@ -177,7 +177,7 @@ class ThreadInfo
 ///
 /// \details
 /// Requirement: WorkType:
-/// void work (const thread::BlockedRange<size_type> &range);
+/// void work (const BlockedRange<size_type> &range);
 template <typename SizeType, typename WorkType>
 void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 {
@@ -211,7 +211,7 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 ///
 /// \details
 /// Requirement: WorkType:
-/// void work (const thread::BlockedRange<size_type> &range, T &res);
+/// void work (const BlockedRange<size_type> &range, T &res);
 template <typename SizeType, typename T, typename WorkType>
 T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         T init)
@@ -254,7 +254,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
 ///
 /// \details
 /// Requirement: WorkType:
-/// void work (const thread::BlockedRange<size_type> &range, T &res);
+/// void work (const BlockedRange<size_type> &range, T &res);
 template <typename SizeType, typename T, typename BinOp, typename WorkType>
 T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
         T init, BinOp bin_op)
@@ -292,6 +292,6 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     return acc;
 }
 
-} } // namespace vsmc::thread
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_STDTBB_HPP

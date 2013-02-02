@@ -25,7 +25,7 @@
 // OpenCL Device type
 
 #ifndef VSMC_CL_DEFAULT_ID
-#define VSMC_CL_DEFAULT_ID vsmc::opencl::Default
+#define VSMC_CL_DEFAULT_ID vsmc::CLDefault
 #endif
 
 // RNG types

@@ -28,56 +28,21 @@ struct NullType;
 // Utilities
 class Seed;
 
-namespace integrate {
-
 class ImportanceSampling1;
 class ImportanceSamplingD;
 template <typename> class NumericBase;
 template <unsigned, template <typename> class> class NumericNewtonCotes;
 
-} // namespace integrate
-
-namespace gcd {
-
 class DispatchQueue;
-
-} // namespace vsmc::gcd
-
-namespace thread {
 
 template <typename> class BlockedRange;
 class ThreadGuard;
 class ThreadInfo;
 
-} // namespace vsmc::thread
-
-namespace opencl {
-
-struct Default;
-struct All;
-struct CPU;
-struct GPU;
-struct Accelerator;
-
-struct AMD;
-struct Apple;
-struct Intel;
-struct NVIDIA;
-
-struct AMDCPU;
-struct AMDGPU;
-struct AppleCPU;
-struct AppleGPU;
-struct IntelCPU;
-struct IntelGPU;
-struct NVIDIACPU;
-struct NVIDIAGPU;
-
-class Configure;
-class Query;
-template <typename> class Manager;
-
-} // namespace vsmc::opencl
+struct CLDefault;
+class CLConfigure;
+class CLQuery;
+template <typename> class CLManager;
 
 // Core
 class Seed;

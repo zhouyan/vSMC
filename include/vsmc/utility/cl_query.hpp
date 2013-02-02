@@ -1,20 +1,20 @@
-#ifndef VSMC_UTILITY_OPENCL_QUERY_HPP
-#define VSMC_UTILITY_OPENCL_QUERY_HPP
+#ifndef VSMC_UTILITY_CL_QUERY_HPP
+#define VSMC_UTILITY_CL_QUERY_HPP
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
-#include <vsmc/utility/opencl/cl_wrapper.hpp>
+#include <vsmc/utility/cl_wrapper.hpp>
 
 #include <iostream>
 #include <iomanip>
 
-namespace vsmc { namespace opencl {
+namespace vsmc {
 
 /// \brief Query information of OpenCL devices
 /// \ingroup OpenCL
-class Query
+class CLQuery
 {
     public :
 
@@ -441,18 +441,18 @@ class Query
                 v != val.end(); ++v)
             os << *v << ' ';
     }
-}; //class Query
+}; //class CLQuery
 
 /// \brief Print information of all platforms and devices
 /// \ingroup OpenCL
 template<typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const vsmc::opencl::Query &query)
+OutputStream &operator<< (OutputStream &os, const CLQuery &query)
 {
     query.print(os);
     return os;
 }
 
-} } // namespace vsmc::opencl
+} // namespace vsmc
 
 namespace cl {
 
@@ -461,7 +461,7 @@ namespace cl {
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Platform &plat)
 {
-    vsmc::opencl::Query::print(os, plat);
+    vsmc::CLQuery::print(os, plat);
     return os;
 }
 
@@ -470,7 +470,7 @@ OutputStream &operator<< (OutputStream &os, const Platform &plat)
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Context &ctx)
 {
-    vsmc::opencl::Query::print(os, ctx);
+    vsmc::CLQuery::print(os, ctx);
     return os;
 }
 
@@ -479,7 +479,7 @@ OutputStream &operator<< (OutputStream &os, const Context &ctx)
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Device &dev)
 {
-    vsmc::opencl::Query::print(os, dev);
+    vsmc::CLQuery::print(os, dev);
     return os;
 }
 
@@ -488,7 +488,7 @@ OutputStream &operator<< (OutputStream &os, const Device &dev)
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Program &prog)
 {
-    vsmc::opencl::Query::print(os, prog);
+    vsmc::CLQuery::print(os, prog);
     return os;
 }
 
@@ -497,10 +497,10 @@ OutputStream &operator<< (OutputStream &os, const Program &prog)
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Kernel &kern)
 {
-    vsmc::opencl::Query::print(os, kern);
+    vsmc::CLQuery::print(os, kern);
     return os;
 }
 
 } // namespace cl
 
-#endif // VSMC_UTILITY_OPENCL_QUERY_HPP
+#endif // VSMC_UTILITY_CL_QUERY_HPP

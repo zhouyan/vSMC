@@ -12,7 +12,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Numerical integration base dispatch class
 /// \ingroup Integrate
@@ -103,6 +103,6 @@ class NumericBase<VBase>
     virtual double integrate_segment (double, double, const eval_type &) = 0;
 }; // class NumericBase<VBase>
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_NUMERIC_BASE_HPP

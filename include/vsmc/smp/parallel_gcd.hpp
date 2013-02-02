@@ -38,7 +38,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
         this->pre_processor(particle);
         accept_.resize(N);
         work_param_ wp = {this, &particle, &accept_[0]};
-        dispatch_apply_f(N, gcd::DispatchQueue::instance().queue(),
+        dispatch_apply_f(N, DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(particle);
 
@@ -94,7 +94,7 @@ class MoveGCD : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         accept_.resize(N);
         work_param_ wp = {this, &particle, &accept_[0], iter};
-        dispatch_apply_f(N, gcd::DispatchQueue::instance().queue(),
+        dispatch_apply_f(N, DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
 
@@ -151,7 +151,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter, dim};
-        dispatch_apply_f(N, gcd::DispatchQueue::instance().queue(),
+        dispatch_apply_f(N, DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
     }
@@ -203,7 +203,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter};
-        dispatch_apply_f(N, gcd::DispatchQueue::instance().queue(),
+        dispatch_apply_f(N, DispatchQueue::instance().queue(),
                 (void *) &wp, work_);
         this->post_processor(iter, particle);
 

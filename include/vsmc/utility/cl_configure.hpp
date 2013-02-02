@@ -1,19 +1,19 @@
-#ifndef VSMC_UTILITY_OPENCL_CONFIGURE_HPP
-#define VSMC_UTILITY_OPENCL_CONFIGURE_HPP
+#ifndef VSMC_UTILITY_CL_CONFIGURE_HPP
+#define VSMC_UTILITY_CL_CONFIGURE_HPP
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
-#include <vsmc/utility/opencl/cl_wrapper.hpp>
+#include <vsmc/utility/cl_wrapper.hpp>
 
-namespace vsmc { namespace opencl {
+namespace vsmc {
 
-class Configure
+class CLConfigure
 {
     public :
 
-    Configure () : local_size_(0) {}
+    CLConfigure () : local_size_(0) {}
 
     std::size_t local_size () const
     {
@@ -48,8 +48,8 @@ class Configure
     private :
 
     std::size_t local_size_;
-}; // class Configure
+}; // class CLConfigure
 
-} } // namespace vsmc::opencl
+} // namespace vsmc
 
-#endif // VSMC_UTILITY_OPENCL_CONFIGURE_HPP
+#endif // VSMC_UTILITY_CL_CONFIGURE_HPP

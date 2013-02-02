@@ -6,7 +6,7 @@
 #include <cilk/holder.h>
 #include <cilk/reducer_opadd.h>
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Numerical integration with Intel Cilk Plus
 /// \ingroup Integrate
@@ -33,8 +33,8 @@ class NumericCILK : public NumericBase<Derived>
 
         return integral.get_value();
     }
-}; // class NumericBase
+}; // class NumericCILK
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_INTEGRATE_NUMERIC_CILK_HPP

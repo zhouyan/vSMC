@@ -4,7 +4,7 @@
 #include <vsmc/utility/integrate/numeric_base.hpp>
 #include <vsmc/utility/stdtbb.hpp>
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Numerical integration with C++11 concurrency
 /// \ingroup Integrate
@@ -22,9 +22,8 @@ class NumericSTD : public NumericBase<Derived>
         if (N < 2)
             return 0;
 
-        return thread::parallel_accumulate(
-                thread::BlockedRange<size_type>(1, N), work_(this, grid, eval),
-                static_cast<double>(0));
+        return parallel_accumulate(BlockedRange<size_type>(1, N),
+                work_(this, grid, eval), static_cast<double>(0));
     }
 
     private :
@@ -37,7 +36,7 @@ class NumericSTD : public NumericBase<Derived>
                 const eval_type &eval) :
             numeric_(numeric), grid_(grid), eval_(eval) {}
 
-        void operator() (const thread::BlockedRange<size_type> &range,
+        void operator() (const BlockedRange<size_type> &range,
                 double &integral) const
         {
             double sum = 0;
@@ -54,8 +53,8 @@ class NumericSTD : public NumericBase<Derived>
         const double *const grid_;
         const eval_type eval_;
     }; // class work_
-}; // class NumericBase
+}; // class NumericSTD
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_INTEGRATE_NUMERIC_STD_HPP

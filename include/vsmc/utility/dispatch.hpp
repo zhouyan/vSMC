@@ -3,10 +3,10 @@
 
 #include <dispatch/dispatch.h>
 
-namespace vsmc { namespace gcd {
+namespace vsmc {
 
 /// \brief Dispatch queue used by vSMC
-/// \ingroup Dispatch
+/// \ingroup Utility
 class DispatchQueue
 {
     public :
@@ -39,6 +39,6 @@ class DispatchQueue
     DispatchQueue &operator= (const DispatchQueue &);
 }; // class DispatchQueue
 
-} } // namespace vsmc::gcd
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_PARALLE_DISPATCH_HPP

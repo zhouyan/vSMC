@@ -3,7 +3,7 @@
 
 #include <vsmc/utility/integrate/numeric_base.hpp>
 
-namespace vsmc { namespace integrate {
+namespace vsmc {
 
 /// \brief Numerical integration with sequential implementation
 /// \ingroup Integrate
@@ -27,8 +27,8 @@ class NumericSEQ : public NumericBase<Derived>
 
         return integral;
     }
-}; // class NumericBase
+}; // class NumericSEQ
 
-} } // namespace vsmc::integrate
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
