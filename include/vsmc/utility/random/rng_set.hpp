@@ -26,7 +26,7 @@
 namespace vsmc {
 
 /// \brief Parallel RNG set class
-/// \ingroup Random
+/// \ingroup Utility
 class RngSet
 {
     public :

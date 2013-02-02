@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/importance_sampling.hpp>
-#include <vsmc/utility/numeric_newton_cotes.hpp>
+#include <vsmc/utility/integrate/numeric_newton_cotes.hpp>
 
 #if VSMC_USE_MKL
 #include <mkl_vml.h>

@@ -20,7 +20,7 @@
 namespace vsmc {
 
 /// \brief Blocked range
-/// \ingroup STDTBB
+/// \ingroup Utility
 template <typename SizeType>
 class BlockedRange
 {
@@ -50,7 +50,7 @@ class BlockedRange
 }; // class BlockedRange
 
 /// \brief C++11 Thread guard
-/// \ingroup STDTBB
+/// \ingroup Utility
 class ThreadGuard
 {
 #if VSMC_HAS_CXX11_DELETED_FUNCTIONS
@@ -93,7 +93,7 @@ class ThreadGuard
 }; // class ThreadGuard
 
 /// \brief C++11 Thread informations
-/// \ingroup STDTBB
+/// \ingroup Utility
 class ThreadInfo
 {
     public :
@@ -173,7 +173,7 @@ class ThreadInfo
 }; // class ThreadInfo
 
 /// \brief Parallel for using C++11 thread
-/// \ingroup STDTBB
+/// \ingroup Utility
 ///
 /// \details
 /// Requirement: WorkType:
@@ -207,7 +207,7 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 }
 
 /// \brief Parallel accumulate using C++11 thread
-/// \ingroup STDTBB
+/// \ingroup Utility
 ///
 /// \details
 /// Requirement: WorkType:
@@ -250,7 +250,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
 }
 
 /// \brief Parallel accumulate using C++11 thread
-/// \ingroup STDTBB
+/// \ingroup Utility
 ///
 /// \details
 /// Requirement: WorkType:

@@ -9,6 +9,8 @@
 
 namespace vsmc {
 
+/// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
+/// \ingroup Utility
 class CLConfigure
 {
     public :

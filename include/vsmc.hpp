@@ -66,16 +66,8 @@
 
 /// \defgroup Integrate Integration
 /// \ingroup Utility
-/// \brief Importance sampling and numerical integration
-
-/// \defgroup OpenCL OpenCL
-/// \ingroup Utility
-/// \brief OpenCL device management utilities
+/// \brief Numerical integration
 
 /// \defgroup Random Random
 /// \ingroup Utility
-/// \brief Random number generating utilities
-
-/// \defgroup STDTBB C++11 Concurrency
-/// \ingroup Utility
-/// \brief C++11 concurrency for implementing simple parallel algorithms
+/// \brief Random number generating

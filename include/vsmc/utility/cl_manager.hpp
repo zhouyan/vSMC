@@ -22,7 +22,7 @@ struct CLDefault
 };
 
 /// \brief OpenCL Manager
-/// \ingroup OpenCL
+/// \ingroup Utility
 template <typename ID>
 class CLManager
 {

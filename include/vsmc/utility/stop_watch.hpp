@@ -8,6 +8,8 @@
 
 namespace vsmc {
 
+/// \brief Stop watch as a wrapper of C++11 clock
+/// \ingroup Utility
 template <typename ClockType>
 class StopWatchClockWrapper
 {
@@ -53,6 +55,8 @@ class StopWatchClockWrapper
 
 namespace vsmc {
 
+/// \brief Stop watch
+/// \ingroup Utility
 class StopWatch :
     public StopWatchClockWrapper<std::chrono::high_resolution_clock>
 {

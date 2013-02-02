@@ -52,7 +52,7 @@ inline bool is_sse_aligned (void *ptr)
 namespace vsmc {
 
 /// \brief Compute the importance sampling integration of univariate variable
-/// \ingroup Integrate
+/// \ingroup Utility
 class ImportanceSampling1
 {
     public :
@@ -94,7 +94,7 @@ class ImportanceSampling1
 }; // ImportanceSampling1
 
 /// \brief Compute the importance sampling integration of multivariate variable
-/// \ingroup Integrate
+/// \ingroup Utility
 class ImportanceSamplingD
 {
     public :

@@ -13,7 +13,7 @@
 namespace vsmc {
 
 /// \brief Query information of OpenCL devices
-/// \ingroup OpenCL
+/// \ingroup Utility
 class CLQuery
 {
     public :
@@ -444,7 +444,7 @@ class CLQuery
 }; //class CLQuery
 
 /// \brief Print information of all platforms and devices
-/// \ingroup OpenCL
+/// \ingroup Utility
 template<typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const CLQuery &query)
 {
@@ -457,7 +457,7 @@ OutputStream &operator<< (OutputStream &os, const CLQuery &query)
 namespace cl {
 
 /// \brief Print information of all devices in a given platform
-/// \ingroup OpenCL
+/// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Platform &plat)
 {
@@ -466,7 +466,7 @@ OutputStream &operator<< (OutputStream &os, const Platform &plat)
 }
 
 /// \brief Print information of all devices in a given context
-/// \ingroup OpenCL
+/// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Context &ctx)
 {
@@ -475,7 +475,7 @@ OutputStream &operator<< (OutputStream &os, const Context &ctx)
 }
 
 /// \brief Print information a given device
-/// \ingroup OpenCL
+/// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Device &dev)
 {
@@ -484,7 +484,7 @@ OutputStream &operator<< (OutputStream &os, const Device &dev)
 }
 
 /// \brief Print information a given program
-/// \ingroup OpenCL
+/// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Program &prog)
 {
@@ -493,7 +493,7 @@ OutputStream &operator<< (OutputStream &os, const Program &prog)
 }
 
 /// \brief Print information a given kernel
-/// \ingroup OpenCL
+/// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Kernel &kern)
 {

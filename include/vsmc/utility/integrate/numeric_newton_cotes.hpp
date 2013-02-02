@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_NUMERIC_NEWTON_COTES
-#define VSMC_UTILITY_NUMERIC_NEWTON_COTES
+#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
+#define VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
@@ -226,4 +226,4 @@ class NumericNewtonCotes :
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_NUMERIC_NEWTON_COTES
+#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
