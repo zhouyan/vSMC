@@ -6,7 +6,7 @@
 
 namespace vsmc {
 
-/// \brief Numerical integration with Microsoft Parallel Pattern Library
+/// \brief Numerical integration using Parallel Pattern Library
 /// \ingroup Integrate
 template <typename Derived>
 class NumericPPL : public NumericBase<Derived>

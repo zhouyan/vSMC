@@ -82,7 +82,7 @@ class NumericBase
     {VSMC_STATIC_ASSERT_NO_IMPL(integrate_segment); return 0;}
 }; // class NumericBase
 
-/// \brief Numerical integration base interface class
+/// \brief Numerical integration base dispatch class
 /// \ingroup Integrate
 template <>
 class NumericBase<VBase>

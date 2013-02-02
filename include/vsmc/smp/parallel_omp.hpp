@@ -6,8 +6,8 @@
 
 namespace vsmc {
 
-/// \brief Particle::value_type subtype
-/// \ingroup OMP
+/// \brief Particle::value_type subtype using OpenMP
+/// \ingroup SMP
 template <std::size_t Dim, typename T>
 class StateOMP : public StateBase<Dim, T>
 {
@@ -31,8 +31,8 @@ class StateOMP : public StateBase<Dim, T>
     }
 }; // class StateOMP
 
-/// \brief Sampler<T>::init_type subtype
-/// \ingroup OMP
+/// \brief Sampler<T>::init_type subtype using OpenMP
+/// \ingroup SMP
 template <typename T, typename Derived>
 class InitializeOMP : public InitializeBase<T, Derived>
 {
@@ -66,8 +66,8 @@ class InitializeOMP : public InitializeBase<T, Derived>
     ~InitializeOMP () {}
 }; // class InitializeOMP
 
-/// \brief Sampler<T>::move_type subtype
-/// \ingroup OMP
+/// \brief Sampler<T>::move_type subtype using OpenMP
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MoveOMP : public MoveBase<T, Derived>
 {
@@ -101,8 +101,8 @@ class MoveOMP : public MoveBase<T, Derived>
     ~MoveOMP () {}
 }; // class MoveOMP
 
-/// \brief Monitor<T>::eval_type subtype
-/// \ingroup OMP
+/// \brief Monitor<T>::eval_type subtype using OpenMP
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
@@ -134,8 +134,8 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     ~MonitorEvalOMP () {}
 }; // class MonitorEvalOMP
 
-/// \brief Path<T>::eval_type subtype
-/// \ingroup OMP
+/// \brief Path<T>::eval_type subtype using OpenMP
+/// \ingroup SMP
 template <typename T, typename Derived>
 class PathEvalOMP : public PathEvalBase<T, Derived>
 {

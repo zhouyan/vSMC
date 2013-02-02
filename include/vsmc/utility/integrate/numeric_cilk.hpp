@@ -8,7 +8,7 @@
 
 namespace vsmc {
 
-/// \brief Numerical integration with Intel Cilk Plus
+/// \brief Numerical integration using Intel Cilk Plus
 /// \ingroup Integrate
 template <typename Derived>
 class NumericCILK : public NumericBase<Derived>

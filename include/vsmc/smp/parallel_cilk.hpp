@@ -7,8 +7,8 @@
 
 namespace vsmc {
 
-/// \brief Particle::value_type subtype
-/// \ingroup CILK
+/// \brief Particle::value_type subtype using Intel Cilk Plus
+/// \ingroup SMP
 template <std::size_t Dim, typename T>
 class StateCILK : public StateBase<Dim, T>
 {
@@ -30,8 +30,8 @@ class StateCILK : public StateBase<Dim, T>
     }
 }; // class StateCILK
 
-/// \brief Sampler<T>::init_type subtype
-/// \ingroup CILK
+/// \brief Sampler<T>::init_type subtype using Intel Cilk Plus
+/// \ingroup SMP
 template <typename T, typename Derived>
 class InitializeCILK : public InitializeBase<T, Derived>
 {
@@ -63,8 +63,8 @@ class InitializeCILK : public InitializeBase<T, Derived>
     ~InitializeCILK () {}
 }; // class InitializeCILK
 
-/// \brief Sampler<T>::move_type subtype
-/// \ingroup CILK
+/// \brief Sampler<T>::move_type subtype using Intel Cilk Plus
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MoveCILK : public MoveBase<T, Derived>
 {
@@ -95,8 +95,8 @@ class MoveCILK : public MoveBase<T, Derived>
     ~MoveCILK () {}
 }; // class MoveCILK
 
-/// \brief Monitor<T>::eval_type subtype
-/// \ingroup CILK
+/// \brief Monitor<T>::eval_type subtype using Intel Cilk Plus
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
 {
@@ -127,8 +127,8 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
     ~MonitorEvalCILK () {}
 }; // class MonitorEvalCILK
 
-/// \brief Path<T>::eval_type subtype
-/// \ingroup CILK
+/// \brief Path<T>::eval_type subtype using Intel Cilk Plus
+/// \ingroup SMP
 template <typename T, typename Derived>
 class PathEvalCILK : public PathEvalBase<T, Derived>
 {

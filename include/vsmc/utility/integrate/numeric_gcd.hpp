@@ -6,7 +6,7 @@
 
 namespace vsmc {
 
-/// \brief Numerical integration with Apple Grand Central Dispatch
+/// \brief Numerical integration using Apple Grand Central Dispatch
 /// \ingroup Integrate
 template <typename Derived>
 class NumericGCD : public NumericBase<Derived>

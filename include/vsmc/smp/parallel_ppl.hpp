@@ -6,8 +6,8 @@
 
 namespace vsmc {
 
-/// \brief Particle::value_type subtype
-/// \ingroup PPL
+/// \brief Particle::value_type subtype using Parallel Pattern Library
+/// \ingroup SMP
 template <std::size_t Dim, typename T>
 class StatePPL : public StateBase<Dim, T>
 {
@@ -50,8 +50,8 @@ class StatePPL : public StateBase<Dim, T>
     }; // class copy_work_
 }; // class StatePPL
 
-/// \brief Sampler<T>::init_type subtype
-/// \ingroup PPL
+/// \brief Sampler<T>::init_type subtype using Parallel Pattern Library
+/// \ingroup SMP
 template <typename T, typename Derived>
 class InitializePPL : public InitializeBase<T, Derived>
 {
@@ -110,8 +110,8 @@ class InitializePPL : public InitializeBase<T, Derived>
     {return a + b;}
 }; // class InitializePPL
 
-/// \brief Sampler<T>::move_type subtype
-/// \ingroup PPL
+/// \brief Sampler<T>::move_type subtype using Parallel Pattern Library
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MovePPL : public MoveBase<T, Derived>
 {
@@ -170,8 +170,8 @@ class MovePPL : public MoveBase<T, Derived>
     {return a + b;}
 }; // class MovePPL
 
-/// \brief Monitor<T>::eval_type subtype
-/// \ingroup PPL
+/// \brief Monitor<T>::eval_type subtype using Parallel Pattern Library
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 {
@@ -227,8 +227,8 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
     }; // class work_
 }; // class MonitorEvalPPL
 
-/// \brief Path<T>::eval_type subtype
-/// \ingroup PPL
+/// \brief Path<T>::eval_type subtype using Parallel Pattern Library
+/// \ingroup SMP
 template <typename T, typename Derived>
 class PathEvalPPL : public PathEvalBase<T, Derived>
 {

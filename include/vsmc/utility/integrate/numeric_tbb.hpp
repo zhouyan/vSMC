@@ -12,7 +12,7 @@
 
 namespace vsmc {
 
-/// \brief Numerical integration with Intel Threading Building Block
+/// \brief Numerical integration using Intel Threading Building Block
 /// \ingroup Integrate
 template <typename Derived>
 class NumericTBB : public NumericBase<Derived>

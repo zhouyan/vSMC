@@ -30,8 +30,8 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 
 } // namespace vsmc::internal
 
-/// \brief Particle::value_type subtype
-/// \ingroup CL
+/// \brief Particle::value_type subtype using OpenCL
+/// \ingroup OpenCL
 template <std::size_t Dim, typename T, typename ID>
 class StateCL
 {
@@ -268,8 +268,8 @@ class StateCL
     mutable std::vector<state_type> state_host_;
 }; // class StateCL
 
-/// \brief Sampler<T>::init_type subtype
-/// \ingroup CL
+/// \brief Sampler<T>::init_type subtype using OpenCL
+/// \ingroup OpenCL
 template <typename T, typename>
 class InitializeCL : public CLConfigure
 {
@@ -368,8 +368,8 @@ class InitializeCL : public CLConfigure
     cl::Buffer accept_buffer_;
 }; // class InitializeCL
 
-/// \brief Sampler<T>::move_type subtype
-/// \ingroup CL
+/// \brief Sampler<T>::move_type subtype using OpenCL
+/// \ingroup OpenCL
 template <typename T, typename>
 class MoveCL : public CLConfigure
 {
@@ -467,8 +467,8 @@ class MoveCL : public CLConfigure
     cl::Buffer accept_buffer_;
 }; // class MoveCL
 
-/// \brief Monitor<T>::eval_type subtype
-/// \ingroup CL
+/// \brief Monitor<T>::eval_type subtype using OpenCL
+/// \ingroup OpenCL
 template <typename T, typename>
 class MonitorEvalCL : public CLConfigure
 {
@@ -567,8 +567,8 @@ class MonitorEvalCL : public CLConfigure
     cl::Buffer buffer_;
 }; // class MonitorEvalCL
 
-/// \brief Path<T>::eval_type subtype
-/// \ingroup CL
+/// \brief Path<T>::eval_type subtype using OpenCL
+/// \ingroup OpenCL
 template <typename T, typename>
 class PathEvalCL : public CLConfigure
 {

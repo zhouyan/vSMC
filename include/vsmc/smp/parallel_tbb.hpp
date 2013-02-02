@@ -12,8 +12,8 @@
 
 namespace vsmc {
 
-/// \brief Particle::value_type subtype
-/// \ingroup TBB
+/// \brief Particle::value_type subtype using Intel Threading Building Blocks
+/// \ingroup SMP
 template <std::size_t Dim, typename T>
 class StateTBB : public StateBase<Dim, T>
 {
@@ -57,8 +57,8 @@ class StateTBB : public StateBase<Dim, T>
     }; // class copy_work_
 }; // class StateTBB
 
-/// \brief Sampler<T>::init_type subtype
-/// \ingroup TBB
+/// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
+/// \ingroup SMP
 template <typename T, typename Derived>
 class InitializeTBB : public InitializeBase<T, Derived>
 {
@@ -129,8 +129,8 @@ class InitializeTBB : public InitializeBase<T, Derived>
     }; // class work_
 }; // class InitializeTBB
 
-/// \brief Sampler<T>::move_type subtype
-/// \ingroup TBB
+/// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MoveTBB : public MoveBase<T, Derived>
 {
@@ -202,8 +202,8 @@ class MoveTBB : public MoveBase<T, Derived>
     }; // class work_
 }; // class MoveTBB
 
-/// \brief Monitor<T>::eval_type subtype
-/// \ingroup TBB
+/// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 {
@@ -261,8 +261,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     }; // class work_
 }; // class MonitorEvalTBB
 
-/// \brief Path<T>::eval_type subtype
-/// \ingroup TBB
+/// \brief Path<T>::eval_type subtype using Intel Threading Building Blocks
+/// \ingroup SMP
 template <typename T, typename Derived>
 class PathEvalTBB : public PathEvalBase<T, Derived>
 {

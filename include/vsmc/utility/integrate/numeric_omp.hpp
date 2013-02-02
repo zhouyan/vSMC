@@ -6,7 +6,7 @@
 
 namespace vsmc {
 
-/// \brief Numerical integration with OpenMP
+/// \brief Numerical integration using OpenMP
 /// \ingroup Integrate
 template <typename Derived>
 class NumericOMP : public NumericBase<Derived>

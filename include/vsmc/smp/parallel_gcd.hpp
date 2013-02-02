@@ -6,8 +6,8 @@
 
 namespace vsmc {
 
-/// \brief Particle::value_type subtype
-/// \ingroup GCD
+/// \brief Particle::value_type subtype usingt Apple Grand Central Dispatch
+/// \ingroup SMP
 template <std::size_t Dim, typename T>
 class StateGCD : public StateBase<Dim, T>
 {
@@ -20,8 +20,8 @@ class StateGCD : public StateBase<Dim, T>
     explicit StateGCD (size_type N) : StateBase<Dim, T>(N) {}
 }; // class StateGCD
 
-/// \brief Sampler<T>::init_type subtype
-/// \ingroup GCD
+/// \brief Sampler<T>::init_type subtype usingt Apple Grand Central Dispatch
+/// \ingroup SMP
 template <typename T, typename Derived>
 class InitializeGCD : public InitializeBase<T, Derived>
 {
@@ -77,8 +77,8 @@ class InitializeGCD : public InitializeBase<T, Derived>
     }
 }; // class InitializeGCD
 
-/// \brief Sampler<T>::move_type subtype
-/// \ingroup GCD
+/// \brief Sampler<T>::move_type subtype usingt Apple Grand Central Dispatch
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MoveGCD : public MoveBase<T, Derived>
 {
@@ -134,8 +134,8 @@ class MoveGCD : public MoveBase<T, Derived>
     }
 }; // class MoveGCD
 
-/// \brief Monitor<T>::eval_type subtype
-/// \ingroup GCD
+/// \brief Monitor<T>::eval_type subtype usingt Apple Grand Central Dispatch
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 {
@@ -186,8 +186,8 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
     }
 }; // class MonitorEvalGCD
 
-/// \brief Path<T>::eval_type subtype
-/// \ingroup GCD
+/// \brief Path<T>::eval_type subtype usingt Apple Grand Central Dispatch
+/// \ingroup SMP
 template <typename T, typename Derived>
 class PathEvalGCD : public PathEvalBase<T, Derived>
 {

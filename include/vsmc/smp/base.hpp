@@ -34,7 +34,7 @@ class StateBaseDim<Dynamic>
 } // namespace vsmc::internal
 
 /// \brief Particle::value_type subtype
-/// \ingroup Base
+/// \ingroup SMP
 template <std::size_t Dim, typename T>
 class StateBase : public internal::StateBaseDim<Dim>
 {
@@ -138,8 +138,8 @@ class StateBase : public internal::StateBaseDim<Dim>
     std::vector<T> state_;
 }; // class StateBase
 
-/// \brief Base Initialize class
-/// \ingroup Base
+/// \brief Initialize base dispatch class
+/// \ingroup SMP
 template <typename T, typename Derived>
 class InitializeBase
 {
@@ -283,8 +283,8 @@ class InitializeBase
             void (InitializeBase::*) (Particle<T> &)) {}
 }; // class InitializeBase
 
-/// \brief Base Initialize class with virtual interface
-/// \ingroup Base
+/// \brief Initilaize base dispatch class
+/// \ingroup SMP
 template <typename T>
 class InitializeBase<T, VBase>
 {
@@ -301,8 +301,8 @@ class InitializeBase<T, VBase>
     virtual void post_processor (Particle<T> &) {}
 }; // class InitializeBase<T, VBase>
 
-/// \brief Base Move class
-/// \ingroup Base
+/// \brief Move base dispatch class
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MoveBase
 {
@@ -416,8 +416,8 @@ class MoveBase
             void (MoveBase::*) (std::size_t, Particle<T> &)) {}
 }; // class MoveBase
 
-/// \brief Base Move class with virtual interface
-/// \ingroup Base
+/// \brief Move base dispatch class
+/// \ingroup SMP
 template <typename T>
 class MoveBase<T, VBase>
 {
@@ -433,8 +433,8 @@ class MoveBase<T, VBase>
     virtual void post_processor (std::size_t, Particle<T> &) {}
 }; // class MoveBase<T, VBase>
 
-/// \brief Base Monitor evaluation class
-/// \ingroup Base
+/// \brief Monitor evalution base dispatch class
+/// \ingroup SMP
 template <typename T, typename Derived>
 class MonitorEvalBase
 {
@@ -560,8 +560,8 @@ class MonitorEvalBase
             void (MonitorEvalBase::*) (std::size_t, const Particle<T> &)) {}
 }; // class MonitorBase
 
-/// \brief Base Monitor evaluation class with virtual interface
-/// \ingroup Base
+/// \brief Monitor evalution base dispatch class
+/// \ingroup SMP
 template <typename T>
 class MonitorEvalBase<T, VBase>
 {
@@ -578,8 +578,8 @@ class MonitorEvalBase<T, VBase>
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 }; // class MonitorEvalBase<T, VBase>
 
-/// \brief Base Path evaluation class
-/// \ingroup Base
+/// \brief Path evalution base dispatch class
+/// \ingroup SMP
 template <typename T, typename Derived>
 class PathEvalBase
 {
@@ -727,8 +727,8 @@ class PathEvalBase
             void (PathEvalBase::*) (std::size_t, const Particle<T> &)) {}
 }; // class PathEvalBase
 
-/// \brief Base Path evaluation class with virtual interface
-/// \ingroup Base
+/// \brief Path evalution base dispatch class
+/// \ingroup SMP
 template <typename T>
 class PathEvalBase<T, VBase>
 {

@@ -5,7 +5,7 @@
 
 namespace vsmc {
 
-/// \brief Numerical integration with sequential implementation
+/// \brief Numerical integration using sequential implementation
 /// \ingroup Integrate
 template <typename Derived>
 class NumericSEQ : public NumericBase<Derived>
