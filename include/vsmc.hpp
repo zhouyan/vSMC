@@ -2,6 +2,9 @@
 #define VSMC_HPP
 
 #include <vsmc/core/sampler.hpp>
+#include <vsmc/smp/adapter.hpp>
+#include <vsmc/smp/backend_seq.hpp>
+#include <vsmc/utility/integrate/numeric_seq.hpp>
 
 #endif // VSMC_HPP
 

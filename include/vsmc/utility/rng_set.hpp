@@ -1,11 +1,11 @@
-#ifndef VSMC_UTILITY_RANDOM_RNG_SET_HPP
-#define VSMC_UTILITY_RANDOM_RNG_SET_HPP
+#ifndef VSMC_UTILITY_RNG_SET_HPP
+#define VSMC_UTILITY_RNG_SET_HPP
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
-#include <vsmc/utility/random/seed.hpp>
+#include <vsmc/utility/seed.hpp>
 
 #if VSMC_USE_RANDOM123
 #ifdef _MSC_VER
@@ -59,4 +59,4 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSet)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
         cxx11::mt19937)
 
-#endif // VSMC_UTILITY_RANDOM_RNG_SET_HPP
+#endif // VSMC_UTILITY_RNG_SET_HPP

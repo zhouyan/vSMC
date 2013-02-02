@@ -4,8 +4,8 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/resample.hpp>
 #include <vsmc/core/weight.hpp>
-#include <vsmc/utility/random/rng_set.hpp>
-#include <vsmc/utility/random/seed.hpp>
+#include <vsmc/utility/rng_set.hpp>
+#include <vsmc/utility/seed.hpp>
 
 namespace vsmc {
 

@@ -4,7 +4,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl_configure.hpp>
 #include <vsmc/utility/cl_manager.hpp>
-#include <vsmc/utility/random/seed.hpp>
+#include <vsmc/utility/seed.hpp>
 
 namespace vsmc {
 
