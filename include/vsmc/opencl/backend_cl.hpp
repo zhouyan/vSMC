@@ -139,7 +139,7 @@ class StateCL
         ss << "#define Size " << size_ << "UL\n";
         ss << "#define Dim  " << dim_  << "UL\n";
         ss << "#define Seed " << VSMC_SEED_TYPE::instance().get() << "UL\n";
-        ss << "#include <vsmc/opencl/device_cl.h>\n";
+        ss << "#include <vsmc/opencl/device.h>\n";
         ss << source << '\n';
         VSMC_SEED_TYPE::instance().skip(
                 static_cast<VSMC_SEED_TYPE::result_type>(size_));

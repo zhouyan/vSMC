@@ -5,6 +5,7 @@
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
+#include <vsmc/internal/traits.hpp>
 #include <vsmc/utility/seed.hpp>
 
 #if VSMC_USE_RANDOM123

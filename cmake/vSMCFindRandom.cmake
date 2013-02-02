@@ -1,7 +1,7 @@
 SET (VSMC_RANDOM_TEST_SOURCE "
 #include <cassert>
 #include <vsmc/cxx11/random.hpp>
-#include <vsmc/core/rng.hpp>
+#include <vsmc/utility/rng_set.hpp>
 
 int main ()
 {

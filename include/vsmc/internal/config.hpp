@@ -1,8 +1,8 @@
 #ifndef VSMC_INTERNAL_CONFIG_HPP
 #define VSMC_INTERNAL_CONFIG_HPP
 
-#include <vsmc/internal/compiler.h>
 #include <vsmc/internal/version.hpp>
+#include <vsmc/internal/compiler.hpp>
 
 // cstdint
 

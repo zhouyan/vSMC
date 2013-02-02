@@ -1,16 +1,14 @@
 #ifndef VSMC_INTERNAL_COMPILER_HPP
 #define VSMC_INTERNAL_COMPILER_HPP
 
-#if defined(__OPENCL_VERSION__)
-#include <vsmc/internal/compiler/opencl.h>
-#elif defined(__INTEL_COMPILER)
-#include <vsmc/internal/compiler/intel.h>
+#if defined(__INTEL_COMPILER)
+#include <vsmc/internal/compiler/intel.hpp>
 #elif defined(__clang__)
-#include <vsmc/internal/compiler/clang.h>
+#include <vsmc/internal/compiler/clang.hpp>
 #elif defined(__GNUC__)
-#include <vsmc/internal/compiler/gcc.h>
+#include <vsmc/internal/compiler/gcc.hpp>
 #elif defined(_MSC_VER)
-#include <vsmc/internal/compiler/msvc.h>
+#include <vsmc/internal/compiler/msvc.hpp>
 #endif
 
 //  C++11 language features
