@@ -1,15 +1,7 @@
 #ifndef VSMC_HPP
 #define VSMC_HPP
 
-#include <vsmc/internal/config.hpp>
-
 #include <vsmc/core/sampler.hpp>
-#include <vsmc/core/particle.hpp>
-#include <vsmc/core/monitor.hpp>
-#include <vsmc/core/path.hpp>
-
-#include <vsmc/smp/sequential.hpp>
-#include <vsmc/smp/adapter.hpp>
 
 #endif // VSMC_HPP
 

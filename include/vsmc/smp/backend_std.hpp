@@ -1,5 +1,5 @@
-#ifndef VSMC_SMP_PARALLEL_STD_HPP
-#define VSMC_SMP_PARALLEL_STD_HPP
+#ifndef VSMC_SMP_BACKEND_STD_HPP
+#define VSMC_SMP_BACKEND_STD_HPP
 
 #include <vsmc/smp/base.hpp>
 #include <vsmc/utility/stdtbb.hpp>
@@ -292,4 +292,4 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_SMP_PARALLEL_STD_HPP
+#endif // VSMC_SMP_BACKEND_STD_HPP

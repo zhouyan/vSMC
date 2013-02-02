@@ -1,5 +1,5 @@
-#ifndef VSMC_OPENCL_PARALLEL_CL_HPP
-#define VSMC_OPENCL_PARALLEL_CL_HPP
+#ifndef VSMC_OPENCL_BACKEND_CL_HPP
+#define VSMC_OPENCL_BACKEND_CL_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl_configure.hpp>
@@ -669,4 +669,4 @@ class PathEvalCL : public CLConfigure
 
 } // namespace vsmc
 
-#endif // VSMC_OPENCL_PARALLEL_CL_HPP
+#endif // VSMC_OPENCL_BACKEND_CL_HPP

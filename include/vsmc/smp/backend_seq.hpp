@@ -1,16 +1,14 @@
-#ifndef VSMC_SMP_PARALLEL_CILK_HPP
-#define VSMC_SMP_PARALLEL_CILK_HPP
+#ifndef VSMC_SMP_BACKEND_SEQ_HPP
+#define VSMC_SMP_BACKEND_SEQ_HPP
 
 #include <vsmc/smp/base.hpp>
-#include <cilk/cilk.h>
-#include <cilk/reducer_opadd.h>
 
 namespace vsmc {
 
-/// \brief Particle::value_type subtype using Intel Cilk Plus
-/// \ingroup SMP
+/// \brief Particle::value_type subtype
+/// \ingroup Sequential
 template <std::size_t Dim, typename T>
-class StateCILK : public StateBase<Dim, T>
+class StateSEQ : public StateBase<Dim, T>
 {
     public :
 
@@ -18,22 +16,13 @@ class StateCILK : public StateBase<Dim, T>
     typedef typename state_base_type::size_type size_type;
     typedef typename state_base_type::state_type state_type;
 
-    explicit StateCILK (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateSEQ (size_type N) : StateBase<Dim, T>(N) {}
+}; // class StateSEQ
 
-    template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
-    {
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(CILK);
-
-        cilk_for (size_type to = 0; to != N; ++to)
-            this->copy_particle(copy_from[to], to);
-    }
-}; // class StateCILK
-
-/// \brief Sampler<T>::init_type subtype using Intel Cilk Plus
-/// \ingroup SMP
+/// \brief Sampler<T>::init_type subtype
+/// \ingroup Sequential
 template <typename T, typename Derived>
-class InitializeCILK : public InitializeBase<T, Derived>
+class InitializeSEQ : public InitializeBase<T, Derived>
 {
     public :
 
@@ -46,27 +35,27 @@ class InitializeCILK : public InitializeBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        cilk::reducer_opadd<std::size_t> accept;
-        cilk_for (size_type i = 0; i != N; ++i)
+        std::size_t accept = 0;
+        for (size_type i = 0; i != N; ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
         this->post_processor(particle);
 
-        return accept.get_value();
+        return accept;
     }
 
     protected :
 
-    InitializeCILK () {}
-    InitializeCILK (const InitializeCILK<T, Derived> &) {}
-    InitializeCILK<T, Derived> &operator=
-        (const InitializeCILK<T, Derived> &) {return *this;}
-    ~InitializeCILK () {}
-}; // class InitializeCILK
+    InitializeSEQ () {}
+    InitializeSEQ (const InitializeSEQ<T, Derived> &) {}
+    InitializeSEQ<T, Derived> &operator=
+        (const InitializeSEQ<T, Derived> &) {return *this;}
+    ~InitializeSEQ () {}
+}; // class InitializeSEQ
 
-/// \brief Sampler<T>::move_type subtype using Intel Cilk Plus
-/// \ingroup SMP
+/// \brief Sampler<T>::move_type subtype
+/// \ingroup Sequential
 template <typename T, typename Derived>
-class MoveCILK : public MoveBase<T, Derived>
+class MoveSEQ : public MoveBase<T, Derived>
 {
     public :
 
@@ -78,27 +67,27 @@ class MoveCILK : public MoveBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        cilk::reducer_opadd<std::size_t> accept;
-        cilk_for (size_type i = 0; i != N; ++i)
+        std::size_t accept = 0;
+        for (size_type i = 0; i != N; ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         this->post_processor(iter, particle);
 
-        return accept.get_value();
+        return accept;
     }
 
     protected :
 
-    MoveCILK () {}
-    MoveCILK (const MoveCILK<T, Derived> &) {}
-    MoveCILK<T, Derived> &operator=
-        (const MoveCILK<T, Derived> &) {return *this;}
-    ~MoveCILK () {}
-}; // class MoveCILK
+    MoveSEQ () {}
+    MoveSEQ (const MoveSEQ<T, Derived> &) {}
+    MoveSEQ<T, Derived> &operator=
+        (const MoveSEQ<T, Derived> &) {return *this;}
+    ~MoveSEQ () {}
+}; // class MoveSEQ
 
-/// \brief Monitor<T>::eval_type subtype using Intel Cilk Plus
-/// \ingroup SMP
+/// \brief Monitor<T>::eval_type subtype
+/// \ingroup Sequential
 template <typename T, typename Derived>
-class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
+class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
     public :
 
@@ -111,7 +100,7 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        cilk_for (size_type i = 0; i != N; ++i) {
+        for (size_type i = 0; i != N; ++i) {
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
@@ -120,17 +109,17 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalCILK () {}
-    MonitorEvalCILK (const MonitorEvalCILK<T, Derived> &) {}
-    MonitorEvalCILK<T, Derived> &operator=
-        (const MonitorEvalCILK<T, Derived> &) {return *this;}
-    ~MonitorEvalCILK () {}
-}; // class MonitorEvalCILK
+    MonitorEvalSEQ () {}
+    MonitorEvalSEQ (const MonitorEvalSEQ<T, Derived> &) {}
+    MonitorEvalSEQ<T, Derived> &operator=
+        (const MonitorEvalSEQ<T, Derived> &) {return *this;}
+    ~MonitorEvalSEQ () {}
+}; // class MonitorEvalSEQ
 
-/// \brief Path<T>::eval_type subtype using Intel Cilk Plus
-/// \ingroup SMP
+/// \brief Path<T>::eval_type subtype
+/// \ingroup Sequential
 template <typename T, typename Derived>
-class PathEvalCILK : public PathEvalBase<T, Derived>
+class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
     public :
 
@@ -143,7 +132,7 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
-        cilk_for (size_type i = 0; i != N; ++i) {
+        for (size_type i = 0; i != N; ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
         }
@@ -154,13 +143,13 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalCILK () {}
-    PathEvalCILK (const PathEvalCILK<T, Derived> &) {}
-    PathEvalCILK<T, Derived> &operator=
-        (const PathEvalCILK<T, Derived> &) {return *this;}
-    ~PathEvalCILK () {}
-}; // class PathEvalCILK
+    PathEvalSEQ () {}
+    PathEvalSEQ (const PathEvalSEQ<T, Derived> &) {}
+    PathEvalSEQ<T, Derived> &operator=
+        (const PathEvalSEQ<T, Derived> &) {return *this;}
+    ~PathEvalSEQ () {}
+}; // class PathEvalSEQ
 
 } // namespace vsmc
 
-#endif // VSMC_SMP_PARALLEL_CILK_HPP
+#endif // VSMC_SMP_BACKEND_SEQ_HPP

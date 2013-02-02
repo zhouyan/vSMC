@@ -1,7 +1,7 @@
 #ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
 #define VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
 
-#include <vsmc/utility/integrate/numeric_base.hpp>
+#include <vsmc/utility/integrate/base.hpp>
 
 namespace vsmc {
 

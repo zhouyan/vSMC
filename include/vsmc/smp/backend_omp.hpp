@@ -1,5 +1,5 @@
-#ifndef VSMC_SMP_PARALLEL_OMP_HPP
-#define VSMC_SMP_PARALLEL_OMP_HPP
+#ifndef VSMC_SMP_BACKEND_OMP_HPP
+#define VSMC_SMP_BACKEND_OMP_HPP
 
 #include <vsmc/smp/base.hpp>
 #include <omp.h>
@@ -171,4 +171,4 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_SMP_PARALLEL_OMP_HPP
+#endif // VSMC_SMP_BACKEND_OMP_HPP

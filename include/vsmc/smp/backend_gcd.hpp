@@ -1,5 +1,5 @@
-#ifndef VSMC_SMP_PARALLEL_GCD_HPP
-#define VSMC_SMP_PARALLEL_GCD_HPP
+#ifndef VSMC_SMP_BACKEND_GCD_HPP
+#define VSMC_SMP_BACKEND_GCD_HPP
 
 #include <vsmc/smp/base.hpp>
 #include <vsmc/utility/dispatch.hpp>
@@ -240,4 +240,4 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
 
 }
 
-#endif // VSMC_SMP_PARALLEL_GCD_HPP
+#endif // VSMC_SMP_BACKEND_GCD_HPP

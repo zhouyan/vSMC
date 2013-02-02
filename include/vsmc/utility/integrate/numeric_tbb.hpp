@@ -7,7 +7,7 @@
 #endif
 #endif // __clang__
 
-#include <vsmc/utility/integrate/numeric_base.hpp>
+#include <vsmc/utility/integrate/base.hpp>
 #include <tbb/tbb.h>
 
 namespace vsmc {

@@ -9,16 +9,9 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
 #define BASE_PATH    vsmc::PathEval${SMP}
 #define BASE_NUMERIC vsmc::Numeric${SMP}
 #include <vsmc/smp/adapter.hpp>
+#include <vsmc/smp/backend_${smp}.hpp>
 #include <vsmc/utility/integrate/numeric_${smp}.hpp>
     ")
-
-    IF (${smp} STREQUAL "seq")
-        SET (VSMC_BASE_DEFINE "${VSMC_BASE_DEFINE}
-#include <vsmc/smp/sequential.hpp>")
-    ELSE (${smp} STREQUAL "seq")
-        SET (VSMC_BASE_DEFINE "${VSMC_BASE_DEFINE}
-#include <vsmc/smp/parallel_${smp}.hpp>")
-    ENDIF (${smp} STREQUAL "seq")
 
     SET (VSMC_BASE_DEFINE_HEADER "${header}-${smp}.hpp")
 

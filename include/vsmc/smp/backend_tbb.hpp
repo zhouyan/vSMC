@@ -1,5 +1,5 @@
-#ifndef VSMC_SMP_PARALLEL_TBB_HPP
-#define VSMC_SMP_PARALLEL_TBB_HPP
+#ifndef VSMC_SMP_IMPL_TBB_HPP
+#define VSMC_SMP_IMPL_TBB_HPP
 
 #if defined(__clang__) && !defined(_LIBCPP_VERSION) && (__GLIBCXX__ < 20100429)
 #ifndef TBB_USE_CAPTURED_EXCEPTION
@@ -321,4 +321,4 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_SMP_PARALLEL_TBB_HPP
+#endif // VSMC_SMP_IMPL_TBB_HPP

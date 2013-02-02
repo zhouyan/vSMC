@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_BASE_HPP
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_BASE_HPP
+#ifndef VSMC_UTILITY_INTEGRATE_BASE_HPP
+#define VSMC_UTILITY_INTEGRATE_BASE_HPP
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/assert.hpp>
@@ -105,4 +105,4 @@ class NumericBase<VBase>
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_BASE_HPP
+#endif // VSMC_UTILITY_INTEGRATE_BASE_HPP
