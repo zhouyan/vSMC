@@ -60,23 +60,12 @@ inline void normalize_replication (SizeType N, SizeType *replication)
 
 } // namespace vsmc::internal
 
-/// \brief Resample scheme
-/// \ingroup Resampling
-enum ResampleScheme {
-    Multinomial,         ///< Multinomial resampling
-    Residual,            ///< Reisudal resampling
-    Stratified,          ///< Startified resampling
-    Systematic,          ///< Systematic resampling
-    ResidualStratified , ///< Stratified resampling on the residuals
-    ResidualSystematic   ///< Systematic resampling on the residuals
-}; // enum ResamleScheme
-
 /// \brief Int-to-Type struct template for identifying a resampling scheme
-/// \ingroup Resampling
+/// \ingroup Core
 template <typename EnumType, EnumType S> struct ResampleType {};
 
 /// \brief Multinomial resampling
-/// \ingroup Resampling
+/// \ingroup Core
 template <>
 class Resample<ResampleType<ResampleScheme, Multinomial> >
 {
@@ -92,7 +81,7 @@ class Resample<ResampleType<ResampleScheme, Multinomial> >
 }; // Mulitnomial resampling
 
 /// \brief Residual resampling
-/// \ingroup Resampling
+/// \ingroup Core
 template <>
 class Resample<ResampleType<ResampleScheme, Residual> >
 {
@@ -127,7 +116,7 @@ class Resample<ResampleType<ResampleScheme, Residual> >
 }; // Residual resampling
 
 /// \brief Stratified resampling
-/// \ingroup Resampling
+/// \ingroup Core
 template <>
 class Resample<ResampleType<ResampleScheme, Stratified> >
 {
@@ -160,7 +149,7 @@ class Resample<ResampleType<ResampleScheme, Stratified> >
 }; // Stratified resampling
 
 /// \brief Systematic resampling
-/// \ingroup Resampling
+/// \ingroup Core
 template <>
 class Resample<ResampleType<ResampleScheme, Systematic> >
 {
@@ -192,7 +181,7 @@ class Resample<ResampleType<ResampleScheme, Systematic> >
 }; // Systematic resampling
 
 /// \brief Residual stratified resampling
-/// \ingroup Resampling
+/// \ingroup Core
 template <>
 class Resample<ResampleType<ResampleScheme, ResidualStratified> >
 {
@@ -243,7 +232,7 @@ class Resample<ResampleType<ResampleScheme, ResidualStratified> >
 }; // Residual stratified resampling
 
 /// \brief Residual systematic resampling
-/// \ingroup Resampling
+/// \ingroup Core
 template <>
 class Resample<ResampleType<ResampleScheme, ResidualSystematic> >
 {

@@ -16,10 +16,6 @@
 /// \defgroup Core Core
 /// \brief Constructing samplers with operations on the whole particle set
 
-/// \defgroup Resampling Resampling
-/// \ingroup Core
-/// \brief Various resampling methods
-
 /// \defgroup Adapter Adapter
 /// \brief Adapter class templates for constructing concrete objects
 

@@ -16,6 +16,13 @@ namespace vsmc {
 
 enum {Dynamic};
 enum MatrixOrder {RowMajor = 101, ColMajor = 102};
+enum ResampleScheme {
+    Multinomial,
+    Residual,
+    Stratified,
+    Systematic,
+    ResidualStratified,
+    ResidualSystematic};
 
 } // namespace vsmc
 
