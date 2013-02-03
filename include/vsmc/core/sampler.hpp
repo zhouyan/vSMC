@@ -522,7 +522,7 @@ class Sampler
 
         // Print header
         if (print_header) {
-            std::vector<std::string> header(get_print_header(
+            std::vector<std::string> header(summary_header(
                         print_accept, print_path, print_monitor));
             os << header[0];
             for (std::size_t i = 1; i != header.size(); ++i)
@@ -533,7 +533,7 @@ class Sampler
 
         // Print data
         std::pair<std::vector<double>, std::vector<bool> > data(
-                get_print_data(print_accept, print_path, print_monitor));
+                summary_data(print_accept, print_path, print_monitor));
         std::size_t data_dim = data.first.size() / iter_size();
         std::size_t data_offset = 0;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
@@ -613,7 +613,7 @@ class Sampler
         std::cout.flush();
     }
 
-    std::vector<std::string> get_print_header (
+    std::vector<std::string> summary_header (
             bool print_accept, bool print_path, bool print_monitor) const
     {
         std::size_t header_length = 4;
@@ -662,7 +662,7 @@ class Sampler
         return header;
     }
 
-    std::pair<std::vector<double>, std::vector<bool> > get_print_data (
+    std::pair<std::vector<double>, std::vector<bool> > summary_data (
             bool print_accept, bool print_path, bool print_monitor) const
     {
         std::size_t dim = 1;
