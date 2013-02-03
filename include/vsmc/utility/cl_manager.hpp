@@ -70,13 +70,15 @@ class CLManager
         return setup_;
     }
 
-    void setup (cl_device_type dev)
+    bool setup (cl_device_type dev)
     {
         setup_ = false;
         setup_cl_manager(dev);
+
+        return setup_;
     }
 
-    void setup (const cl::Platform &plat, const cl::Context &ctx,
+    bool setup (const cl::Platform &plat, const cl::Context &ctx,
             const cl::Device &dev, const cl::CommandQueue &cmd)
     {
         setup_ = false;
@@ -87,6 +89,8 @@ class CLManager
         device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
         command_queue_ = cmd;
         setup_ = true;
+
+        return setup_;
     }
 
     template<typename CLType>
