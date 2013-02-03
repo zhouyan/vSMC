@@ -1,12 +1,6 @@
 #ifndef VSMC_OPENCL_DEVICE_H
 #define VSMC_OPENCL_DEVICE_H
 
-#if defined(cl_khr_fp64)
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#elif defined(cl_amd_fp64)
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
-#endif
-
 #if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
 #define VSMC_STATIC_INLINE static inline
 #else

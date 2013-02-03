@@ -32,6 +32,10 @@ void set_cl_state_type<cl_double>(std::stringstream &ss)
 
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
+///
+/// \details
+/// Currently the template parameter `T` is limited to `cl_float` or
+/// `cl_double`.
 template <std::size_t Dim, typename T, typename ID>
 class StateCL
 {
@@ -103,21 +107,69 @@ class StateCL
         return size_;
     }
 
+    /// \brief The instance of the CLManager signleton associated with this
+    /// value collcection
     manager_type &manager () const
     {
         return manager_;
     }
 
+    /// \brief The OpenCL buffer that stores the state values
     const cl::Buffer &state_buffer () const
     {
         return state_buffer_;
     }
 
+    /// \brief The OpenCL program associated with this value collection
     const cl::Program &program () const
     {
         return program_;
     }
 
+    /// \brief Build the OpenCL program from source
+    ///
+    /// \param source The source of the program
+    /// \param flags The OpenCL compiler flags, e.g., `-I`
+    ///
+    /// \details
+    /// Note that a few macros and headers are included before the user
+    /// supplied `source`. Say the template parameter `T` of this class is set
+    /// to `cl_double`, `Dim` set to `4`, and there are 1000 particles, then
+    /// the complete source, which acutally get compiled looks like the
+    /// following
+    /// \code
+    /// #if defined(cl_khr_fp64)
+    /// #pragma OPENCL EXTENSION cl_khr_fp64 : enable
+    /// #elif defined(cl_amd_fp64)
+    /// #pragma OPENCL EXTENSION cl_amd_fp64 : enable
+    /// #endif
+    ///
+    /// typedef float state_type;
+    /// #define VSMC_STATE_TYPE_IS_FLOAT  1
+    /// #define VSMC_STATE_TYPE_IS_DOUBLE 0
+    ///
+    /// typedef ulong size_type;
+    /// #define Size 1000UL;
+    /// #define Dim 4UL;
+    /// #define Seed 101UL;
+    /// // The actual number if VSMC_SEED_TYPE::instance().get()
+    ///
+    /// #include <vsmc/opencl/device.h>
+    ///
+    /// // ... User source
+    /// \endcode
+    /// In summary, macros (and thus C compile time constant) for the number of
+    /// particles, the dimension of the states, a seed are defined. A typedef
+    /// `size_type` and `state_type` are defined. The double precision
+    /// extension are enabled if avaialble. And two macros
+    /// `VSMC_STATE_TYPE_IS_FLOAT` and `VSMC_STATE_TYPE_IS_DOUBLE` are provided
+    /// for conditional compile when the precison matters.
+    ///
+    /// After build, `VSMC_SEED_TYPE::instance().skip(N)` is called with `N`
+    /// being the nubmer of particles.
+    ///
+    /// \note
+    /// This function may throw if the build attempt fails.
     void build (const std::string &source,
             const std::string &flags = std::string())
     {
@@ -125,9 +177,6 @@ class StateCL
 
         std::stringstream ss;
 
-        ss << "#ifndef VSMC_USE_RANDOM123\n";
-        ss << "#define VSMC_USE_RANDOM123 " << VSMC_USE_RANDOM123 << '\n';
-        ss << "#endif\n";
         ss << "#if defined(cl_khr_fp64)\n";
         ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
         ss << "#elif defined(cl_amd_fp64)\n";
@@ -183,31 +232,42 @@ class StateCL
         kernel_copy_ = create_kernel("copy");
     }
 
+    /// \brief Whether the last attempted building success
     bool build () const
     {
         return build_;
     }
 
+    /// \brief The build id of the last attempted of building
+    ///
+    /// \details
+    /// This function returns a non-decreasing sequence of integers
     int build_id () const
     {
         return build_id_;
     }
 
+    /// \brief The source of the program of the last attempted building
     std::string build_source () const
     {
         return build_source_;
     }
 
+    /// \brief The build options of the program of the last attempted building
     std::string build_options () const
     {
         return build_options_;
     }
 
+    /// \brief The log of the program of the last attempted building
     std::string build_log () const
     {
         return build_log_;
     }
 
+    /// \brief Create kernel with the current program
+    ///
+    /// \note If build() does not return `true`, then calling this is an error
     cl::Kernel create_kernel (const std::string &name) const
     {
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel);
@@ -270,6 +330,31 @@ class StateCL
 
 /// \brief Sampler<T>::init_type subtype using OpenCL
 /// \ingroup OpenCL
+///
+/// \details
+/// Kernel requirement (`initialize_state`)
+/// \code
+/// __kernel
+/// void kern (__global state_type *state, __global ulong *accept);
+/// \endcode
+/// \li Kernels can have additonal arguments and set by the user in
+/// `pre_processor`.
+/// \li `state` has size `N * Dim` where `accept` has size `N`.
+/// \li The declaration does not have to much this, but the first arguments
+/// will be set by InitializeCL::opeartor(). For example
+/// \code
+/// type struct {
+///     state_type v1;
+///     state_type v2;
+///     // ...
+///     state_type vDim;
+/// } param;
+/// __kernel
+/// void kern (__global param *state, __global ulong *accept);
+/// \endcode
+/// is also acceptable, but now `state` has to be treat as a length `N` array.
+/// In summary, on the host side, it is a `cl::Buffer` object being passed to
+/// the kernel, which is not much unlike `void *` pointer.
 template <typename T, typename>
 class InitializeCL : public CLConfigure
 {
@@ -370,6 +455,13 @@ class InitializeCL : public CLConfigure
 
 /// \brief Sampler<T>::move_type subtype using OpenCL
 /// \ingroup OpenCL
+///
+/// \details
+/// Kernel requirement (`move_state`)
+/// \code
+/// __kernel
+/// void kern (ulong iter, __global state_type *state, __global ulong *accept);
+/// \endcode
 template <typename T, typename>
 class MoveCL : public CLConfigure
 {
@@ -469,6 +561,14 @@ class MoveCL : public CLConfigure
 
 /// \brief Monitor<T>::eval_type subtype using OpenCL
 /// \ingroup OpenCL
+///
+/// \details
+/// Kernel requirement (`monitor_state`)
+/// \code
+/// __kernel
+/// void kern (ulong iter, ulong dim, __global state_type *state,
+///            __global state_type *res);
+/// \endcode
 template <typename T, typename>
 class MonitorEvalCL : public CLConfigure
 {
@@ -569,6 +669,14 @@ class MonitorEvalCL : public CLConfigure
 
 /// \brief Path<T>::eval_type subtype using OpenCL
 /// \ingroup OpenCL
+///
+/// \details
+/// Kernel requirement (`path_state`)
+/// \code
+/// __kernel
+/// void kern (ulong iter, __global state_type *state,
+///            __global state_type *res);
+/// \endcode
 template <typename T, typename>
 class PathEvalCL : public CLConfigure
 {
