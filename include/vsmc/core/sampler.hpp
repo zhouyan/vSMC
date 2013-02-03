@@ -338,14 +338,14 @@ class Sampler
     Sampler<T> &iterate (std::size_t num = 1)
     {
         if (num > 1)
-            reserve(iter_num_ + num);
+            reserve(iter_size() + num);
 
         if (accept_history_.size() < move_queue_.size() + mcmc_queue_.size()) {
             std::size_t diff = move_queue_.size() + mcmc_queue_.size() -
                 accept_history_.size();
             for (std::size_t i = 0; i != diff; ++i) {
                 accept_history_.push_back(
-                        std::vector<std::size_t>(iter_num_, 0));
+                        std::vector<std::size_t>(iter_size(), 0));
             }
         }
 
@@ -473,6 +473,14 @@ class Sampler
         return path_.zconst();
     }
 
+    /// \brief Set if the sampler shall print dots at each iteration
+    Sampler<T> &show_progress (bool show)
+    {
+        show_ = show;
+
+        return *this;
+    }
+
     /// \brief Print the history of the Sampler
     ///
     /// \param os The ostream to which the contents are printed
@@ -495,45 +503,22 @@ class Sampler
             char sepchar = ',', char nachar = '\0') const
     {
         // Accept count
-        std::size_t accd = accept_history_.size();
-        bool print_accept = accd > 0 && iter_num_ > 0;
+        bool print_accept = accept_history_.size() > 0 && iter_size() > 0;
 
         // Path sampling
-        print_path = print_path && path_.iter_size() > 0 && iter_num_ > 0;
-        std::vector<std::size_t> path_mask;
-        if (print_path) {
-            path_mask.resize(iter_num_,
-                    std::numeric_limits<std::size_t>::max
-                    VSMC_MACRO_NO_EXPANSION ());
-            for (std::size_t d = 0; d != path_.iter_size(); ++d)
-                path_mask[path_.index(d)] = d;
-        }
+        print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
 
         // Monitors
         std::size_t mond = 0;
-        std::size_t mi = 0;
-        for (typename monitor_map_type::const_iterator
-                m = monitor_.begin(); m != monitor_.end(); ++m) {
-            mond += m->second.dim();
-            if (mi < m->second.iter_size())
-                mi = m->second.iter_size();
-
-        }
-        print_monitor = print_monitor && mond > 0 && mi > 0 && iter_num_ > 0;
-        std::vector<std::vector<std::size_t> > monitor_mask;
+        std::size_t miter = 0;
         if (print_monitor) {
-            monitor_mask.resize(monitor_.size());
-            std::size_t mm = 0;
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
-                monitor_mask[mm].resize(iter_num_,
-                        std::numeric_limits<std::size_t>::max
-                        VSMC_MACRO_NO_EXPANSION ());
-                for (std::size_t d = 0; d != m->second.iter_size(); ++d)
-                    monitor_mask[mm][m->second.index(d)] = d;
-                ++mm;
+                mond += m->second.dim();
+                miter += m->second.iter_size();
             }
         }
+        print_monitor = mond > 0 && miter > 0 && iter_size() > 0;
 
         // Print header
         if (print_header) {
@@ -542,76 +527,30 @@ class Sampler
             os << header[0];
             for (std::size_t i = 1; i != header.size(); ++i)
                 os << sepchar << header[i];
-            if (iter_num_ > 0)
+            if (iter_size() > 0)
                 os << '\n';
         }
 
         // Print data
-        for (std::size_t iter = 0; iter != iter_num_; ++iter) {
+        std::pair<std::vector<double>, std::vector<bool> > data(
+                get_print_data(print_accept, print_path, print_monitor));
+        std::size_t data_dim = data.first.size() / iter_size();
+        std::size_t data_offset = 0;
+        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             os << sampler_id;
             os << sepchar << iter;
-            os << sepchar << ess_history_[iter] / size();
             os << sepchar << resampled_history_[iter];
-
-            if (print_accept) {
-                for (std::size_t c = 0; c != accd; ++c)
-                    os << sepchar << accept_history_[c][iter] /
-                        static_cast<double>(size());
-            }
-
-            if (print_path) {
-                std::size_t pr = path_mask[iter];
-                if (pr < std::numeric_limits<std::size_t>::max
-                        VSMC_MACRO_NO_EXPANSION ()) {
-                    os << sepchar << path_.integrand(pr);
-                    os << sepchar << path_.grid(pr);
-                } else {
+            for (std::size_t i = 0; i != data_dim; ++i) {
+                if (data.second[data_offset])
+                    os << sepchar << data.first[data_offset];
+                else
                     os << sepchar << nachar;
-                    os << sepchar << nachar;
-                }
+                ++data_offset;
             }
-
-            if (print_monitor) {
-                std::size_t mm = 0;
-                for (typename monitor_map_type::const_iterator
-                        m = monitor_.begin(); m != monitor_.end(); ++m) {
-                    std::size_t mr = monitor_mask[mm][iter];
-                    if (mr < std::numeric_limits<std::size_t>::max
-                            VSMC_MACRO_NO_EXPANSION ()) {
-                        for (std::size_t d = 0; d != m->second.dim(); ++d)
-                            os << sepchar << m->second.record(d, mr);
-                    } else {
-                        for (std::size_t d = 0; d != m->second.dim(); ++d)
-                            os << sepchar << nachar;
-                    }
-                    ++mm;
-                }
-            }
-
             os << '\n';
         }
 
         return os;
-    }
-
-    template<typename OutputStream>
-    Sampler<T> &print (OutputStream &os = std::cout,
-            bool print_header = true,
-            bool print_path = true, bool print_monitor = true,
-            int sampler_id = 0, char sepchar = ',', char nachar = '\0')
-    {
-        print(os, print_header, print_path, print_monitor, sampler_id,
-                sepchar, nachar);
-
-        return *this;
-    }
-
-    /// \brief Set if the sampler shall print dots at each iteration
-    Sampler<T> &show_progress (bool show)
-    {
-        show_ = show;
-
-        return *this;
     }
 
     private :
@@ -693,8 +632,8 @@ class Sampler
 
         header.push_back(std::string("Sampler.ID"));
         header.push_back(std::string("Iter.Num"));
-        header.push_back(std::string("ESS"));
         header.push_back(std::string("Resampled"));
+        header.push_back(std::string("ESS"));
         if (print_accept) {
             char name[32];
             unsigned accd = static_cast<unsigned>(accept_history_.size());
@@ -721,6 +660,76 @@ class Sampler
         }
 
         return header;
+    }
+
+    std::pair<std::vector<double>, std::vector<bool> > get_print_data (
+            bool print_accept, bool print_path, bool print_monitor) const
+    {
+        std::size_t dim = 1;
+        if (print_accept)
+            dim += accept_history_.size();
+        if (print_path)
+            dim += 2;
+        if (print_monitor) {
+            for (typename monitor_map_type::const_iterator
+                    m = monitor_.begin(); m != monitor_.end(); ++m) {
+                dim += m->second.dim();
+            }
+        }
+
+        std::vector<double> data;
+        std::vector<bool> mask;
+        data.reserve(dim * iter_size());
+        mask.reserve(dim * iter_size());
+
+        std::size_t piter = 0;
+        std::vector<std::size_t> miter(monitor_.size(), 0);
+        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+            mask.push_back(true);
+            data.push_back(ess_history_[iter] / size());
+            if (print_accept) {
+                for (std::size_t i = 0; i != accept_history_.size(); ++i) {
+                    data.push_back(accept_history_[i][iter] /
+                            static_cast<double>(size()));
+                    mask.push_back(true);
+                }
+            }
+            if (print_path) {
+                if (piter == path_.iter_size() ||iter != path_.index(piter)) {
+                    data.push_back(0);
+                    data.push_back(0);
+                    mask.push_back(false);
+                    mask.push_back(false);
+                } else {
+                    data.push_back(path_.integrand(piter));
+                    data.push_back(path_.grid(piter));
+                    mask.push_back(true);
+                    mask.push_back(true);
+                    ++piter;
+                }
+            }
+            if (print_monitor) {
+                std::size_t mm = 0;
+                for (typename monitor_map_type::const_iterator
+                        m = monitor_.begin(); m != monitor_.end(); ++m, ++mm) {
+                    if (miter[mm] == m->second.iter_size()
+                            || iter != m->second.index(miter[mm])) {
+                        for (std::size_t i = 0; i != m->second.dim(); ++i) {
+                            data.push_back(0);
+                            mask.push_back(false);
+                        }
+                    } else {
+                        for (std::size_t i = 0; i != m->second.dim(); ++i) {
+                            data.push_back(m->second.record(i, miter[mm]));
+                            mask.push_back(true);
+                            ++miter[mm];
+                        }
+                    }
+                }
+            }
+        }
+
+        return std::make_pair(data, mask);
     }
 }; // class Sampler
 
