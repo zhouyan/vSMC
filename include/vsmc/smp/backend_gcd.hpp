@@ -70,8 +70,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     static void work_ (void *wp, std::size_t i)
     {
-        const work_param_ *const wptr =
-            reinterpret_cast<const work_param_ *>(wp);
+        const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
         wptr->accept[i] = wptr->dispatcher->initialize_state(
                 SingleParticle<T>(static_cast<size_type>(i), wptr->particle));
     }
@@ -127,8 +126,7 @@ class MoveGCD : public MoveBase<T, Derived>
 
     static void work_ (void *wp, std::size_t i)
     {
-        const work_param_ *const wptr =
-            reinterpret_cast<const work_param_ *>(wp);
+        const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
         wptr->accept[i] = wptr->dispatcher->move_state(wptr->iter,
                 SingleParticle<T>(static_cast<size_type>(i), wptr->particle));
     }
@@ -177,8 +175,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 
     static void work_ (void *wp, std::size_t i)
     {
-        const work_param_ *const wptr =
-            reinterpret_cast<const work_param_ *>(wp);
+        const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
         wptr->dispatcher->monitor_state(wptr->iter, wptr->dim,
                 ConstSingleParticle<T>(
                     static_cast<size_type>(i), wptr->particle),
@@ -230,8 +227,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
 
     static void work_ (void *wp, std::size_t i)
     {
-        const work_param_ *const wptr =
-            reinterpret_cast<const work_param_ *>(wp);
+        const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
         wptr->res[i] = wptr->dispatcher->path_state(wptr->iter,
                 ConstSingleParticle<T>(
                     static_cast<size_type>(i), wptr->particle));

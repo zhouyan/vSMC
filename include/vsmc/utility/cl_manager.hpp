@@ -417,7 +417,7 @@ class CLManager
             read_buffer_pool_bytes_ = new_bytes;
         }
 
-        return reinterpret_cast<CLType *>(read_buffer_pool_);
+        return static_cast<CLType *>(read_buffer_pool_);
     }
 
     template <typename CLType>
@@ -432,7 +432,7 @@ class CLManager
             write_buffer_pool_bytes_ = new_bytes;
         }
 
-        return reinterpret_cast<CLType *>(write_buffer_pool_);
+        return static_cast<CLType *>(write_buffer_pool_);
     }
 
     cl::NDRange get_global_nd_range (
