@@ -1587,6 +1587,7 @@ PREDEFINED            +=VSMC_HAS_CXX11LIB_CHRONO=1
 PREDEFINED            +=VSMC_HAS_CXX11LIB_FUNCTIONAL=1
 PREDEFINED            +=VSMC_HAS_CXX11LIB_RANDOM=1
 PREDEFINED            +=VSMC_HAS_CXX11LIB_TYPE_TRAITS=1
+PREDEFINED            +=R123_USE_U01_DOUBLE=1
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.
