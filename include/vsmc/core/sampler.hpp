@@ -51,12 +51,15 @@ class Sampler
     {
         ess_history_.reserve(num);
         resampled_history_.reserve(num);
-        accept_history_.reserve(num);
+        for (std::size_t i = 0; i != accept_history_.size(); ++i)
+            accept_history_[i].reserve(num);
+        if (bool(path_))
+            path_.reserve(num);
         for (typename monitor_map_type::iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
-            m->second.reserve(num);
+            if (bool(m->second))
+                m->second.reserve(num);
         }
-        path_.reserve(num);
     }
 
     /// \brief Number of iterations (including initialization)
@@ -176,7 +179,7 @@ class Sampler
     /// performed (either a move or a mcmc) has `id` 0 and so on.
     std::size_t accept_history (std::size_t id, std::size_t iter) const
     {
-        return accept_history_[iter][id];
+        return accept_history_[id][iter];
     }
 
     /// \brief Read and write access to the Particle<T> object
@@ -337,25 +340,32 @@ class Sampler
         if (num > 1)
             reserve(iter_num_ + num);
 
-        std::vector<std::size_t> accept_count;
+        if (accept_history_.size() < move_queue_.size() + mcmc_queue_.size()) {
+            std::size_t diff = move_queue_.size() + mcmc_queue_.size() -
+                accept_history_.size();
+            for (std::size_t i = 0; i != diff; ++i) {
+                accept_history_.push_back(
+                        std::vector<std::size_t>(iter_num_, 0));
+            }
+        }
+
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
             std::size_t ia = 0;
-            accept_count.resize(move_queue_.size() + mcmc_queue_.size());
-
             for (typename std::vector<move_type>::iterator
                     m = move_queue_.begin(); m != move_queue_.end(); ++m) {
-                accept_count[ia] = (*m)(iter_num_, particle_);
+                accept_history_[ia].push_back((*m)(iter_num_, particle_));
                 ++ia;
             }
             do_resampling();
             for (typename std::vector<mcmc_type>::iterator
                     m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
-                accept_count[ia] = (*m)(iter_num_, particle_);
+                accept_history_[ia].push_back((*m)(iter_num_, particle_));
                 ++ia;
             }
+            for (; ia != accept_history_.size(); ++ia)
+                accept_history_[ia].push_back(0);
             do_monitoring();
-            accept_history_.push_back(accept_count);
             print_progress();
         }
 
@@ -479,23 +489,20 @@ class Sampler
     template<typename OutputStream>
     OutputStream &print (OutputStream &os = std::cout,
             bool print_header = true,
-            bool print_path = true, bool print_monitor = true,
-            int sampler_id = 0, char sepchar = ',', char nachar = '\0') const
+            bool print_path = true,
+            bool print_monitor = true,
+            std::size_t sampler_id = 0,
+            char sepchar = ',', char nachar = '\0') const
     {
         // Accept count
-        std::vector<double> acc;
-        std::size_t accd = 0;
-        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            if (accd < accept_history_[iter].size())
-                accd = accept_history_[iter].size();
-        }
-        bool print_accept = accd > 0 && iter_size() > 0;
+        std::size_t accd = accept_history_.size();
+        bool print_accept = accd > 0 && iter_num_ > 0;
 
         // Path sampling
-        print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
+        print_path = print_path && path_.iter_size() > 0 && iter_num_ > 0;
         std::vector<std::size_t> path_mask;
         if (print_path) {
-            path_mask.resize(iter_size(),
+            path_mask.resize(iter_num_,
                     std::numeric_limits<std::size_t>::max
                     VSMC_MACRO_NO_EXPANSION ());
             for (std::size_t d = 0; d != path_.iter_size(); ++d)
@@ -512,14 +519,14 @@ class Sampler
                 mi = m->second.iter_size();
 
         }
-        print_monitor = print_monitor && mond > 0 && mi > 0 && iter_size() > 0;
+        print_monitor = print_monitor && mond > 0 && mi > 0 && iter_num_ > 0;
         std::vector<std::vector<std::size_t> > monitor_mask;
         if (print_monitor) {
             monitor_mask.resize(monitor_.size());
             std::size_t mm = 0;
             for (typename monitor_map_type::const_iterator
                     m = monitor_.begin(); m != monitor_.end(); ++m) {
-                monitor_mask[mm].resize(iter_size(),
+                monitor_mask[mm].resize(iter_num_,
                         std::numeric_limits<std::size_t>::max
                         VSMC_MACRO_NO_EXPANSION ());
                 for (std::size_t d = 0; d != m->second.iter_size(); ++d)
@@ -530,50 +537,26 @@ class Sampler
 
         // Print header
         if (print_header) {
-            os << "Sampler.ID";
-            os << sepchar << "Iter";
-            os << sepchar << "ESS";
-            os << sepchar << "ResSam";
-            if (print_accept) {
-                if (accd == 1) {
-                    os << sepchar << "Accept";
-                } else {
-                    for (std::size_t d = 0; d != accd; ++d)
-                        os << sepchar << "Accept." << d + 1;
-                }
-            }
-            if (print_path) {
-                os << sepchar << "Path.Integrand";
-                os << sepchar << "Path.Grid";
-            }
-            if (print_monitor) {
-                for (typename monitor_map_type::const_iterator
-                        m = monitor_.begin(); m != monitor_.end(); ++m) {
-                    if (m->second.dim() == 1)
-                        os << sepchar << m->first;
-                    else
-                        for (std::size_t d = 0; d != m->second.dim(); ++d)
-                            os << sepchar << m->first << '.' << d + 1;
-                }
-            }
-            if (iter_size() > 0)
+            std::vector<std::string> header(get_print_header(
+                        print_accept, print_path, print_monitor));
+            os << header[0];
+            for (std::size_t i = 1; i != header.size(); ++i)
+                os << sepchar << header[i];
+            if (iter_num_ > 0)
                 os << '\n';
         }
 
         // Print data
-        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+        for (std::size_t iter = 0; iter != iter_num_; ++iter) {
             os << sampler_id;
             os << sepchar << iter;
             os << sepchar << ess_history_[iter] / size();
             os << sepchar << resampled_history_[iter];
 
             if (print_accept) {
-                for (std::size_t c = 0; c != accept_history_[iter].size(); ++c)
-                    os << sepchar <<
-                        accept_history_[iter][c] / static_cast<double>(size());
-                std::size_t diff = accd - accept_history_[iter].size();
-                for (std::size_t c = 0; c != diff; ++c)
-                    os << sepchar << 0;
+                for (std::size_t c = 0; c != accd; ++c)
+                    os << sepchar << accept_history_[c][iter] /
+                        static_cast<double>(size());
             }
 
             if (print_path) {
@@ -689,6 +672,55 @@ class Sampler
             std::fprintf(stderr, ".");
 
         std::cout.flush();
+    }
+
+    std::vector<std::string> get_print_header (
+            bool print_accept, bool print_path, bool print_monitor) const
+    {
+        std::size_t header_length = 4;
+        if (print_accept)
+            header_length += accept_history_.size();
+        if (print_path)
+            header_length += 2;
+        if (print_monitor) {
+            for (typename monitor_map_type::const_iterator
+                    m = monitor_.begin(); m != monitor_.end(); ++m) {
+                header_length += m->second.dim();
+            }
+        }
+        std::vector<std::string> header;
+        header.reserve(header_length);
+
+        header.push_back(std::string("Sampler.ID"));
+        header.push_back(std::string("Iter.Num"));
+        header.push_back(std::string("ESS"));
+        header.push_back(std::string("Resampled"));
+        if (print_accept) {
+            char name[32];
+            unsigned accd = static_cast<unsigned>(accept_history_.size());
+            for (unsigned i = 0; i != accd; ++i) {
+                std::sprintf(name, "Accept.%u", i);
+                header.push_back(std::string(name));
+            }
+        }
+        if (print_path) {
+            header.push_back(std::string("Path.Integrand"));
+            header.push_back(std::string("Path.Grid"));
+        }
+        if (print_monitor) {
+            for (typename monitor_map_type::const_iterator
+                    m = monitor_.begin(); m != monitor_.end(); ++m) {
+                char *name = new char[m->first.size() + 15];
+                unsigned mond = static_cast<unsigned>(m->second.dim());
+                for (unsigned i = 0; i != mond; ++i) {
+                    std::sprintf(name, "%s.%u", m->first.c_str(), i);
+                    header.push_back(std::string(name));
+                }
+                delete [] name;
+            }
+        }
+
+        return header;
     }
 }; // class Sampler
 
