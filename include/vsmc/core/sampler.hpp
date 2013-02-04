@@ -481,75 +481,102 @@ class Sampler
         return *this;
     }
 
-    /// \brief Summary of the Sampler
-    ///
-    /// \param order If the summary data shall be arranged as row major or
-    /// column major matrix.
-    /// \param header The vector of variable names, ESS, Path.Integrand, etc
-    /// \param data The summary data corresponding to header in a matrix with
-    /// row or column major order
-    /// \param summary_accept Summary data include accept rates if \b true
-    /// \param summary_path Summary data include path sampling if \b true
-    /// \param summary_monitor Summary data include monitors if \b true
-    std::size_t summary (MatrixOrder order,
-            std::vector<std::string> &header, std::vector<double> &data,
-            bool summary_accept = true,
-            bool summary_path = true,
-            bool summary_monitor = true) const
+    /// \brief The size of Sampler summary header
+    std::size_t summary_header_size () const
     {
-        std::size_t mond = 0;
-        std::size_t miter = 0;
+        if (iter_size() == 0)
+            return 0;
+
+        std::size_t header_size = 1; // ESS
+        header_size += accept_history_.size();
+        if (path_.iter_size() > 0)
+            header_size +=  2;
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
-            mond += m->second.dim();
-            miter += m->second.iter_size();
+            if (m->second.iter_size() > 0)
+                header_size += m->second.dim();
         }
-        summary_accept = summary_accept
-            && accept_history_.size() > 0 && iter_size() > 0;
-        summary_path = summary_path
-            && path_.iter_size() > 0 && iter_size() > 0;
-        summary_monitor = summary_monitor
-            && mond > 0 && miter > 0 && iter_size() > 0;
 
-        header = summary_header(summary_accept, summary_path, summary_monitor);
-        data = summary_data(order,
-                summary_accept, summary_path, summary_monitor);
+        return header_size;
+    }
 
-        return header.size();
+    /// \brief Sampler summary header
+    template <typename OutputIter>
+    OutputIter summary_header (OutputIter first) const
+    {
+        if (summary_header_size() == 0)
+            return first;
+
+        *first++ = std::string("ESS");
+
+        char acc_name[32];
+        unsigned accd = static_cast<unsigned>(accept_history_.size());
+        for (unsigned i = 0; i != accd; ++i) {
+            std::sprintf(acc_name, "Accept.%u", i + 1);
+            *first++ = std::string(acc_name);
+        }
+
+        if (path_.iter_size() > 0) {
+            *first++ = std::string("Path.Integrand");
+            *first++ = std::string("Path.Grid");
+        }
+
+        for (typename monitor_map_type::const_iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+            if (m->second.iter_size() > 0) {
+                char *mon_name = new char[m->first.size() + 15];
+                unsigned mond = static_cast<unsigned>(m->second.dim());
+                for (unsigned i = 0; i != mond; ++i) {
+                    std::sprintf(mon_name, "%s.%u", m->first.c_str(), i + 1);
+                    *first++ = std::string(mon_name);
+                }
+                delete [] mon_name;
+            }
+        }
+
+        return first;
+    }
+
+    /// \brief The size of Sampler summary data
+    std::size_t summary_data_size () const
+    {
+        return summary_header_size() * iter_size();
+    }
+
+    /// \brief Sampler summary data
+    ///
+    /// \param order The order of the data, row or column major
+    /// \param first The beginning of the output
+    template <typename OutputIter>
+    OutputIter summary_data (MatrixOrder order, OutputIter first) const
+    {
+        if (summary_data_size() == 0)
+            return first;
+
+        VSMC_RUNTIME_ASSERT_MATRIX_ORDER(order, Sampler::summary_data);
+
+        if (order == RowMajor)
+            first = summary_data_row(first);
+
+        if (order == ColMajor)
+            first = summary_data_col(first);
+
+        return first;
     }
 
     /// \brief Print the history of the Sampler
     ///
     /// \param os The ostream to which the contents are printed
     /// \param sampler_id The ID of the sampler
-    /// \param print_accept Print accept rates if \b true
-    /// \param print_path Print path sampling if \b true
-    /// \param print_monitor Print monitors if \b true
     template<typename OutputStream>
     OutputStream &print (OutputStream &os = std::cout,
-            std::size_t sampler_id = 0,
-            bool print_accept = true,
-            bool print_path = true,
-            bool print_monitor = true) const
+            std::size_t sampler_id = 0) const
     {
-        std::size_t mond = 0;
-        std::size_t miter = 0;
-        for (typename monitor_map_type::const_iterator
-                m = monitor_.begin(); m != monitor_.end(); ++m) {
-            mond += m->second.dim();
-            miter += m->second.iter_size();
-        }
-        print_accept = print_accept
-            && accept_history_.size() > 0 && iter_size() > 0;
-        print_path = print_path
-            && path_.iter_size() > 0 && iter_size() > 0;
-        print_monitor = print_monitor
-            && mond > 0 && miter > 0 && iter_size() > 0;
-
-        std::vector<std::string> header(summary_header(
-                    print_accept, print_path, print_monitor));
-        std::vector<double> data(summary_data(
-                    RowMajor, print_accept, print_path, print_monitor));
+        std::size_t var_num = summary_header_size();
+        std::vector<std::string> header(var_num);
+        std::vector<double> data(var_num * iter_size());
+        summary_header(header.begin());
+        summary_data(RowMajor, data.begin());
 
         os << "Sampler.ID Iteration Resampled";
         for (std::size_t i = 0; i != header.size(); ++i)
@@ -562,7 +589,7 @@ class Sampler
             os << sampler_id;
             os << ' ' << iter;
             os << ' ' << resampled_history_[iter];
-            for (std::size_t i = 0; i != header.size(); ++i)
+            for (std::size_t i = 0; i != var_num; ++i)
                 os << ' ' << data[data_offset++];
             os << '\n';
         }
@@ -630,182 +657,102 @@ class Sampler
         std::cout.flush();
     }
 
-    std::vector<std::string> summary_header (
-            bool summary_accept, bool summary_path, bool summary_monitor) const
+    template <typename OutputIter>
+    OutputIter summary_data_row (OutputIter first) const
     {
-        std::size_t header_length = 1;
-        if (summary_accept)
-            header_length += accept_history_.size();
-        if (summary_path)
-            header_length += 2;
-        if (summary_monitor) {
-            for (typename monitor_map_type::const_iterator
-                    m = monitor_.begin(); m != monitor_.end(); ++m) {
-                header_length += m->second.dim();
-            }
-        }
-
-        std::vector<std::string> header;
-        header.reserve(header_length);
-        header.push_back(std::string("ESS"));
-        if (summary_accept) {
-            char name[32];
-            unsigned accd = static_cast<unsigned>(accept_history_.size());
-            for (unsigned i = 0; i != accd; ++i) {
-                std::sprintf(name, "Accept.%u", i);
-                header.push_back(std::string(name));
-            }
-        }
-        if (summary_path) {
-            header.push_back(std::string("Path.Integrand"));
-            header.push_back(std::string("Path.Grid"));
-        }
-        if (summary_monitor) {
-            for (typename monitor_map_type::const_iterator
-                    m = monitor_.begin(); m != monitor_.end(); ++m) {
-                char *name = new char[m->first.size() + 15];
-                unsigned mond = static_cast<unsigned>(m->second.dim());
-                for (unsigned i = 0; i != mond; ++i) {
-                    std::sprintf(name, "%s.%u", m->first.c_str(), i);
-                    header.push_back(std::string(name));
-                }
-                delete [] name;
-            }
-        }
-
-        return header;
-    }
-
-    std::vector<double> summary_data (MatrixOrder order,
-            bool summary_accept, bool summary_path, bool summary_monitor) const
-    {
-        VSMC_RUNTIME_ASSERT_MATRIX_ORDER(order, Sampler::summary_data);
-
-        std::size_t dim = 1;
-        if (summary_accept)
-            dim += accept_history_.size();
-        if (summary_path)
-            dim += 2;
-        if (summary_monitor) {
-            for (typename monitor_map_type::const_iterator
-                    m = monitor_.begin(); m != monitor_.end(); ++m) {
-                dim += m->second.dim();
-            }
-        }
-
-        std::vector<double> data;
-        data.reserve(dim * iter_size());
-
-        if (order == RowMajor) {
-            summary_data_row(data,
-                    summary_accept, summary_path, summary_monitor);
-        }
-
-        if (order == ColMajor) {
-            summary_data_col(data,
-                    summary_accept, summary_path, summary_monitor);
-        }
-
-        return data;
-    }
-
-    void summary_data_row (std::vector<double> &data,
-            bool summary_accept, bool summary_path, bool summary_monitor) const
-    {
-        data.clear();
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
         std::size_t piter = 0;
         std::vector<std::size_t> miter(monitor_.size(), 0);
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            data.push_back(ess_history_[iter] / size());
-            if (summary_accept) {
-                for (std::size_t i = 0; i != accept_history_.size(); ++i) {
-                    data.push_back(accept_history_[i][iter] /
-                            static_cast<double>(size()));
-                }
+            *first++ = ess_history_[iter] / size();
+            for (std::size_t i = 0; i != accept_history_.size(); ++i) {
+                *first++ = accept_history_[i][iter] /
+                        static_cast<double>(size());
             }
-            if (summary_path) {
+            if (path_.iter_size() > 0) {
                 if (piter == path_.iter_size() ||iter != path_.index(piter)) {
-                    data.push_back(missing_data);
-                    data.push_back(missing_data);
+                    *first++ = missing_data;
+                    *first++ = missing_data;
                 } else {
-                    data.push_back(path_.integrand(piter));
-                    data.push_back(path_.grid(piter));
+                    *first++ = path_.integrand(piter);
+                    *first++ = path_.grid(piter);
                     ++piter;
                 }
             }
-            if (summary_monitor) {
-                std::size_t mm = 0;
-                for (typename monitor_map_type::const_iterator
-                        m = monitor_.begin(); m != monitor_.end(); ++m, ++mm) {
+            std::size_t mm = 0;
+            for (typename monitor_map_type::const_iterator
+                    m = monitor_.begin(); m != monitor_.end(); ++m, ++mm) {
+                if (m->second.iter_size() > 0) {
                     if (miter[mm] == m->second.iter_size()
                             || iter != m->second.index(miter[mm])) {
                         for (std::size_t i = 0; i != m->second.dim(); ++i)
-                            data.push_back(missing_data);
+                            *first++ = missing_data;
                     } else {
                         for (std::size_t i = 0; i != m->second.dim(); ++i)
-                            data.push_back(m->second.record(i, miter[mm]));
+                            *first++ = m->second.record(i, miter[mm]);
                         ++miter[mm];
                     }
                 }
             }
         }
+
+        return first;
     }
 
-    void summary_data_col (std::vector<double> &data,
-            bool summary_accept, bool summary_path, bool summary_monitor) const
+    template <typename OutputIter>
+    OutputIter summary_data_col (OutputIter first) const
     {
-        data.clear();
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
-        for (std::size_t iter = 0; iter != iter_size(); ++iter)
-            data.push_back(ess_history_[iter] / size());
-        if (summary_accept) {
-            for (std::size_t i = 0; i != accept_history_.size(); ++i) {
-                for (std::size_t iter = 0; iter != iter_size(); ++iter)
-                    data.push_back(accept_history_[i][iter] /
-                            static_cast<double>(size()));
-            }
+        for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first)
+            *first = ess_history_[iter] / size();
+        for (std::size_t i = 0; i != accept_history_.size(); ++i) {
+            for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first)
+                *first = accept_history_[i][iter] /
+                    static_cast<double>(size());
         }
-        if (summary_path) {
+        if (path_.iter_size() > 0) {
             std::size_t piter;
             piter = 0;
-            for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+            for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first) {
                 if (piter == path_.iter_size() ||iter != path_.index(piter)) {
-                    data.push_back(missing_data);
+                    *first = missing_data;
                 } else {
-                    data.push_back(path_.integrand(piter));
+                    *first = path_.integrand(piter);
                     ++piter;
                 }
             }
             piter = 0;
-            for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+            for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first) {
                 if (piter == path_.iter_size() ||iter != path_.index(piter)) {
-                    data.push_back(missing_data);
+                    *first = missing_data;
                 } else {
-                    data.push_back(path_.grid(piter));
+                    *first = path_.grid(piter);
                     ++piter;
                 }
             }
         }
-        if (summary_monitor) {
-            for (typename monitor_map_type::const_iterator
-                    m = monitor_.begin(); m != monitor_.end(); ++m) {
+        for (typename monitor_map_type::const_iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+            if (m->second.iter_size() > 0) {
                 for (std::size_t i = 0; i != m->second.dim(); ++i) {
                     std::size_t miter = 0;
-                    for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+                    for (std::size_t iter = 0; iter != iter_size();
+                            ++iter, ++first) {
                         if (miter == m->second.iter_size()
                                 || iter != m->second.index(miter)) {
-                            data.push_back(missing_data);
+                            *first = missing_data;
                         } else {
-                            data.push_back(m->second.record(i, miter));
+                            *first = m->second.record(i, miter);
                             ++miter;
                         }
                     }
                 }
             }
         }
+
+        return first;
     }
 }; // class Sampler
 
