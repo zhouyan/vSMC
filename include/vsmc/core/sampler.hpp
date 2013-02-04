@@ -497,6 +497,20 @@ class Sampler
             bool summary_path = true,
             bool summary_monitor = true) const
     {
+        std::size_t mond = 0;
+        std::size_t miter = 0;
+        for (typename monitor_map_type::const_iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+            mond += m->second.dim();
+            miter += m->second.iter_size();
+        }
+        summary_accept = summary_accept
+            && accept_history_.size() > 0 && iter_size() > 0;
+        summary_path = summary_path
+            && path_.iter_size() > 0 && iter_size() > 0;
+        summary_monitor = summary_monitor
+            && mond > 0 && miter > 0 && iter_size() > 0;
+
         header = summary_header(summary_accept, summary_path, summary_monitor);
         data = summary_data(order,
                 summary_accept, summary_path, summary_monitor);
@@ -511,10 +525,6 @@ class Sampler
     /// \param print_accept Print accept rates if \b true
     /// \param print_path Print path sampling if \b true
     /// \param print_monitor Print monitors if \b true
-    ///
-    /// \note \c print_path and \c print_monitor are only used to hint the
-    /// print process. If there is no record at all, then they won't be printed
-    /// even set to \b true instead of being printed all as NA's.
     template<typename OutputStream>
     OutputStream &print (OutputStream &os = std::cout,
             std::size_t sampler_id = 0,
@@ -529,7 +539,6 @@ class Sampler
             mond += m->second.dim();
             miter += m->second.iter_size();
         }
-
         print_accept = print_accept
             && accept_history_.size() > 0 && iter_size() > 0;
         print_path = print_path
