@@ -2,6 +2,7 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
     STRING (TOUPPER "${smp_name}" SMP)
     STRING (TOLOWER "${smp_name}" smp)
     SET (VSMC_BASE_DEFINE "
+#define VSMC_BACKEND_${SMP} 1
 #define BASE_STATE   vsmc::State${SMP}
 #define BASE_INIT    vsmc::Initialize${SMP}
 #define BASE_MOVE    vsmc::Move${SMP}

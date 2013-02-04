@@ -507,18 +507,22 @@ class Sampler
         if (summary_header_size() == 0)
             return first;
 
-        *first++ = std::string("ESS");
+        *first = std::string("ESS");
+        ++first;
 
         char acc_name[32];
         unsigned accd = static_cast<unsigned>(accept_history_.size());
         for (unsigned i = 0; i != accd; ++i) {
             std::sprintf(acc_name, "Accept.%u", i + 1);
-            *first++ = std::string(acc_name);
+            *first = std::string(acc_name);
+            ++first;
         }
 
         if (path_.iter_size() > 0) {
-            *first++ = std::string("Path.Integrand");
-            *first++ = std::string("Path.Grid");
+            *first = std::string("Path.Integrand");
+            ++first;
+            *first = std::string("Path.Grid");
+            ++first;
         }
 
         for (typename monitor_map_type::const_iterator
@@ -526,9 +530,9 @@ class Sampler
             if (m->second.iter_size() > 0) {
                 char *mon_name = new char[m->first.size() + 15];
                 unsigned mond = static_cast<unsigned>(m->second.dim());
-                for (unsigned i = 0; i != mond; ++i) {
+                for (unsigned i = 0; i != mond; ++i, ++first) {
                     std::sprintf(mon_name, "%s.%u", m->first.c_str(), i + 1);
-                    *first++ = std::string(mon_name);
+                    *first = std::string(mon_name);
                 }
                 delete [] mon_name;
             }
@@ -665,18 +669,24 @@ class Sampler
         std::size_t piter = 0;
         std::vector<std::size_t> miter(monitor_.size(), 0);
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            *first++ = ess_history_[iter] / size();
+            *first = ess_history_[iter] / size();
+            ++first;
             for (std::size_t i = 0; i != accept_history_.size(); ++i) {
-                *first++ = accept_history_[i][iter] /
-                        static_cast<double>(size());
+                *first = accept_history_[i][iter] /
+                    static_cast<double>(size());
+                ++first;
             }
             if (path_.iter_size() > 0) {
                 if (piter == path_.iter_size() ||iter != path_.index(piter)) {
-                    *first++ = missing_data;
-                    *first++ = missing_data;
+                    *first = missing_data;
+                    ++first;
+                    *first = missing_data;
+                    ++first;
                 } else {
-                    *first++ = path_.integrand(piter);
-                    *first++ = path_.grid(piter);
+                    *first = path_.integrand(piter);
+                    ++first;
+                    *first = path_.grid(piter);
+                    ++first;
                     ++piter;
                 }
             }
@@ -686,11 +696,13 @@ class Sampler
                 if (m->second.iter_size() > 0) {
                     if (miter[mm] == m->second.iter_size()
                             || iter != m->second.index(miter[mm])) {
-                        for (std::size_t i = 0; i != m->second.dim(); ++i)
-                            *first++ = missing_data;
+                        for (std::size_t i = 0; i != m->second.dim();
+                                ++i, ++first)
+                            *first = missing_data;
                     } else {
-                        for (std::size_t i = 0; i != m->second.dim(); ++i)
-                            *first++ = m->second.record(i, miter[mm]);
+                        for (std::size_t i = 0; i != m->second.dim();
+                                ++i, ++first)
+                            *first = m->second.record(i, miter[mm]);
                         ++miter[mm];
                     }
                 }

@@ -110,9 +110,12 @@ class ThreadInfo
         return thread_num_;
     }
 
-    void thread_num (std::size_t num)
+    std::size_t thread_num (std::size_t num)
     {
+        std::size_t old_num = thread_num_;
         thread_num_ = num;
+
+        return old_num;
     }
 
     template <typename SizeType>
