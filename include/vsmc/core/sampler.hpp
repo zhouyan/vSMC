@@ -481,9 +481,18 @@ class Sampler
         return *this;
     }
 
+    /// \brief Summary of the Sampler
+    ///
+    /// \param order If the summary data shall be arranged as row major or
+    /// column major matrix.
+    /// \param header The vector of variable names, ESS, Path.Integrand, etc
+    /// \param data The summary data corresponding to header in a matrix with
+    /// row or column major order
+    /// \param summary_accept Summary data include accept rates if \b true
+    /// \param summary_path Summary data include path sampling if \b true
+    /// \param summary_monitor Summary data include monitors if \b true
     std::size_t summary (MatrixOrder order,
-            std::vector<std::string> &header,
-            std::pair<std::vector<double>, std::vector<bool> > &data,
+            std::vector<std::string> &header, std::vector<double> &data,
             bool summary_accept = true,
             bool summary_path = true,
             bool summary_monitor = true) const
@@ -498,71 +507,54 @@ class Sampler
     /// \brief Print the history of the Sampler
     ///
     /// \param os The ostream to which the contents are printed
-    /// \param print_header Print header if \b true
+    /// \param sampler_id The ID of the sampler
+    /// \param print_accept Print accept rates if \b true
     /// \param print_path Print path sampling if \b true
     /// \param print_monitor Print monitors if \b true
-    /// \param sampler_id The ID of the sampler
-    /// \param sepchar The character used to seperate fields
-    /// \param nachar The character used to represent missing values
     ///
     /// \note \c print_path and \c print_monitor are only used to hint the
     /// print process. If there is no record at all, then they won't be printed
     /// even set to \b true instead of being printed all as NA's.
     template<typename OutputStream>
     OutputStream &print (OutputStream &os = std::cout,
-            bool print_header = true,
-            bool print_path = true,
-            bool print_monitor = true,
             std::size_t sampler_id = 0,
-            char sepchar = ',', char nachar = '\0') const
+            bool print_accept = true,
+            bool print_path = true,
+            bool print_monitor = true) const
     {
-        // Accept count
-        bool print_accept = accept_history_.size() > 0 && iter_size() > 0;
-
-        // Path sampling
-        print_path = print_path && path_.iter_size() > 0 && iter_size() > 0;
-
-        // Monitors
         std::size_t mond = 0;
         std::size_t miter = 0;
-        if (print_monitor) {
-            for (typename monitor_map_type::const_iterator
-                    m = monitor_.begin(); m != monitor_.end(); ++m) {
-                mond += m->second.dim();
-                miter += m->second.iter_size();
-            }
-        }
-        print_monitor = mond > 0 && miter > 0 && iter_size() > 0;
-
-        // Print header
-        if (print_header) {
-            std::vector<std::string> header(summary_header(
-                        print_accept, print_path, print_monitor));
-            os << "Sampler.ID";
-            os << sepchar << "Iteration";
-            os << sepchar << "Resampled";
-            for (std::size_t i = 0; i != header.size(); ++i)
-                os << sepchar << header[i];
-            if (iter_size() > 0)
-                os << '\n';
+        for (typename monitor_map_type::const_iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+            mond += m->second.dim();
+            miter += m->second.iter_size();
         }
 
-        // Print data
-        std::pair<std::vector<double>, std::vector<bool> > data(summary_data(
+        print_accept = print_accept
+            && accept_history_.size() > 0 && iter_size() > 0;
+        print_path = print_path
+            && path_.iter_size() > 0 && iter_size() > 0;
+        print_monitor = print_monitor
+            && mond > 0 && miter > 0 && iter_size() > 0;
+
+        std::vector<std::string> header(summary_header(
+                    print_accept, print_path, print_monitor));
+        std::vector<double> data(summary_data(
                     RowMajor, print_accept, print_path, print_monitor));
-        std::size_t data_dim = data.first.size() / iter_size();
+
+        os << "Sampler.ID Iteration Resampled";
+        for (std::size_t i = 0; i != header.size(); ++i)
+            os << ' ' << header[i];
+        if (iter_size() > 0)
+            os << '\n';
+
         std::size_t data_offset = 0;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             os << sampler_id;
-            os << sepchar << iter;
-            os << sepchar << resampled_history_[iter];
-            for (std::size_t i = 0; i != data_dim; ++i) {
-                if (data.second[data_offset])
-                    os << sepchar << data.first[data_offset];
-                else
-                    os << sepchar << nachar;
-                ++data_offset;
-            }
+            os << ' ' << iter;
+            os << ' ' << resampled_history_[iter];
+            for (std::size_t i = 0; i != header.size(); ++i)
+                os << ' ' << data[data_offset++];
             os << '\n';
         }
 
@@ -675,8 +667,7 @@ class Sampler
         return header;
     }
 
-    std::pair<std::vector<double>, std::vector<bool> > summary_data (
-            MatrixOrder order,
+    std::vector<double> summary_data (MatrixOrder order,
             bool summary_accept, bool summary_path, bool summary_monitor) const
     {
         VSMC_RUNTIME_ASSERT_MATRIX_ORDER(order, Sampler::summary_data);
@@ -694,52 +685,44 @@ class Sampler
         }
 
         std::vector<double> data;
-        std::vector<bool> mask;
         data.reserve(dim * iter_size());
-        mask.reserve(dim * iter_size());
 
         if (order == RowMajor) {
-            summary_data_row(data, mask,
+            summary_data_row(data,
                     summary_accept, summary_path, summary_monitor);
         }
 
         if (order == ColMajor) {
-            summary_data_col(data, mask,
+            summary_data_col(data,
                     summary_accept, summary_path, summary_monitor);
         }
 
-        return std::make_pair(data, mask);
+        return data;
     }
 
-    void summary_data_row (std::vector<double> &data, std::vector<bool> &mask,
+    void summary_data_row (std::vector<double> &data,
             bool summary_accept, bool summary_path, bool summary_monitor) const
     {
         data.clear();
-        mask.clear();
+        double missing_data = std::numeric_limits<double>::quiet_NaN();
 
         std::size_t piter = 0;
         std::vector<std::size_t> miter(monitor_.size(), 0);
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             data.push_back(ess_history_[iter] / size());
-            mask.push_back(true);
             if (summary_accept) {
                 for (std::size_t i = 0; i != accept_history_.size(); ++i) {
                     data.push_back(accept_history_[i][iter] /
                             static_cast<double>(size()));
-                    mask.push_back(true);
                 }
             }
             if (summary_path) {
                 if (piter == path_.iter_size() ||iter != path_.index(piter)) {
-                    data.push_back(0);
-                    data.push_back(0);
-                    mask.push_back(false);
-                    mask.push_back(false);
+                    data.push_back(missing_data);
+                    data.push_back(missing_data);
                 } else {
                     data.push_back(path_.integrand(piter));
                     data.push_back(path_.grid(piter));
-                    mask.push_back(true);
-                    mask.push_back(true);
                     ++piter;
                 }
             }
@@ -749,15 +732,11 @@ class Sampler
                         m = monitor_.begin(); m != monitor_.end(); ++m, ++mm) {
                     if (miter[mm] == m->second.iter_size()
                             || iter != m->second.index(miter[mm])) {
-                        for (std::size_t i = 0; i != m->second.dim(); ++i) {
-                            data.push_back(0);
-                            mask.push_back(false);
-                        }
+                        for (std::size_t i = 0; i != m->second.dim(); ++i)
+                            data.push_back(missing_data);
                     } else {
-                        for (std::size_t i = 0; i != m->second.dim(); ++i) {
+                        for (std::size_t i = 0; i != m->second.dim(); ++i)
                             data.push_back(m->second.record(i, miter[mm]));
-                            mask.push_back(true);
-                        }
                         ++miter[mm];
                     }
                 }
@@ -765,23 +744,19 @@ class Sampler
         }
     }
 
-    void summary_data_col (std::vector<double> &data, std::vector<bool> &mask,
+    void summary_data_col (std::vector<double> &data,
             bool summary_accept, bool summary_path, bool summary_monitor) const
     {
         data.clear();
-        mask.clear();
+        double missing_data = std::numeric_limits<double>::quiet_NaN();
 
-        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+        for (std::size_t iter = 0; iter != iter_size(); ++iter)
             data.push_back(ess_history_[iter] / size());
-            mask.push_back(true);
-        }
         if (summary_accept) {
             for (std::size_t i = 0; i != accept_history_.size(); ++i) {
-                for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+                for (std::size_t iter = 0; iter != iter_size(); ++iter)
                     data.push_back(accept_history_[i][iter] /
                             static_cast<double>(size()));
-                    mask.push_back(true);
-                }
             }
         }
         if (summary_path) {
@@ -789,22 +764,18 @@ class Sampler
             piter = 0;
             for (std::size_t iter = 0; iter != iter_size(); ++iter) {
                 if (piter == path_.iter_size() ||iter != path_.index(piter)) {
-                    data.push_back(0);
-                    mask.push_back(false);
+                    data.push_back(missing_data);
                 } else {
                     data.push_back(path_.integrand(piter));
-                    mask.push_back(true);
                     ++piter;
                 }
             }
             piter = 0;
             for (std::size_t iter = 0; iter != iter_size(); ++iter) {
                 if (piter == path_.iter_size() ||iter != path_.index(piter)) {
-                    data.push_back(0);
-                    mask.push_back(false);
+                    data.push_back(missing_data);
                 } else {
                     data.push_back(path_.grid(piter));
-                    mask.push_back(true);
                     ++piter;
                 }
             }
@@ -817,11 +788,9 @@ class Sampler
                     for (std::size_t iter = 0; iter != iter_size(); ++iter) {
                         if (miter == m->second.iter_size()
                                 || iter != m->second.index(miter)) {
-                            data.push_back(0);
-                            mask.push_back(false);
+                            data.push_back(missing_data);
                         } else {
                             data.push_back(m->second.record(i, miter));
-                            mask.push_back(true);
                             ++miter;
                         }
                     }
@@ -836,7 +805,7 @@ class Sampler
 template<typename OutputStream, typename T>
 OutputStream &operator<< (OutputStream &os, const Sampler<T> &sampler)
 {
-    return sampler.print(os, true);
+    return sampler.print(os);
 }
 
 } // namespace vsmc
