@@ -29,6 +29,7 @@ class Sampler
         threshold_(threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()), show_(false)
     {
+	backup_.saved = false;
         resample_scheme(scheme);
     }
 
@@ -37,6 +38,7 @@ class Sampler
             double threshold = 0.5) :
         threshold_(threshold), particle_(N), iter_num_(0)
     {
+	backup_.saved = false;
         resample_scheme(res_op);
     }
 
@@ -198,6 +200,7 @@ class Sampler
     Sampler<T> &init (const init_type &new_init)
     {
         VSMC_RUNTIME_ASSERT_FUNCTOR(new_init, Sampler::init, Initialize);
+	backup_.saved = false;
 
         init_ = new_init;
 
@@ -207,6 +210,7 @@ class Sampler
     /// \brief Clear the move queue
     Sampler<T> &move_queue_clear ()
     {
+	backup_.saved = false;
         move_queue_.clear();
 
         return *this;
@@ -228,6 +232,7 @@ class Sampler
     Sampler<T> &move (const move_type &new_move, bool append)
     {
         VSMC_RUNTIME_ASSERT_FUNCTOR(new_move, Sampler::move, MOVE);
+	backup_.saved = false;
 
         if (!append)
             move_queue_.clear();
@@ -240,6 +245,7 @@ class Sampler
     template <typename InputIter>
     Sampler<T> &move (InputIter first, InputIter last, bool append)
     {
+	backup_.saved = false;
         if (!append)
             move_queue_.clear();
         while (first != last) {
@@ -254,6 +260,7 @@ class Sampler
     /// \brief Clear the mcmc queue
     Sampler<T> &mcmc_queue_clear ()
     {
+	backup_.saved = false;
         mcmc_queue_.clear();
 
         return *this;
@@ -275,6 +282,7 @@ class Sampler
     Sampler<T> &mcmc (const mcmc_type &new_mcmc, bool append)
     {
         VSMC_RUNTIME_ASSERT_FUNCTOR(new_mcmc, Sampler::mcmc, MCMC);
+	backup_.saved = false;
 
         if (!append)
             mcmc_queue_.clear();
@@ -287,6 +295,7 @@ class Sampler
     template <typename InputIter>
     Sampler<T> &mcmc (InputIter first, InputIter last, bool append)
     {
+	backup_.saved = false;
         if (!append)
             mcmc_queue_.clear();
         while (first != last) {
@@ -310,6 +319,7 @@ class Sampler
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
         VSMC_RUNTIME_ASSERT_FUNCTOR(init_, Sampler::initialize, Initialize);
+	backup_.saved = false;
 
         ess_history_.clear();
         resampled_history_.clear();
@@ -370,6 +380,71 @@ class Sampler
         }
 
         return *this;
+    }
+
+    /// \brief Try iteration
+    ///
+    /// \details
+    /// This method is similar to iterate() except that it will try (its best)
+    /// to save sampler state (particles, records etc.) before each iteration.
+    /// If an exception is throw during the one of the iteration, then it will
+    /// try its best to restore the sampler to the state before that iteraiton
+    /// and then throw the original exception. Both the save and restore
+    /// action can throw themselves.  If a save action throw, a
+    /// vsmc::FailedSaveSampler exception is throw.  If a restore action
+    /// throw, a vsmc::FailedRestoreSampler exception is throw. Both exception
+    /// will be initialized with the attempted iteraiton number.
+    Sampler<T> &try_iterate (std::size_t num = 1)
+    {
+	for (std::size_t i = 0; i != num; ++i) {
+	    std::size_t attempted_iter_num = iter_num_ + 1;
+	    try {
+		save();
+	    } catch (...) {
+		throw vsmc::FailedSaveSampler(attempted_iter_num);
+	    }
+
+	    try {
+		iterate();
+	    } catch (...) {
+		std::fprintf(stderr, "Failed to iterate sampler");
+		try {
+		    restore();
+		} catch (...) {
+		    throw vsmc::FailedRestoreSampler(attempted_iter_num);
+		}
+		throw;
+	    }
+	}
+
+	return *this;
+    }
+
+    /// \brief Read and write access to the Path sampling monitor
+    Path<T> &path ()
+    {
+        return path_;
+    }
+
+    /// \brief Read only access to the Path sampling monitor
+    const Path<T> &path () const
+    {
+        return path_;
+    }
+
+    /// \brief Set the Path sampling evaluation object
+    Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval)
+    {
+        path_.set_eval(eval);
+
+        return *this;
+    }
+
+    /// \brief Path sampling estimate of the logarithm of normalizing constants
+    /// ratio
+    double path_sampling () const
+    {
+        return path_.zconst();
     }
 
     /// \brief Add a monitor
@@ -444,33 +519,6 @@ class Sampler
         monitor_.clear();
 
         return *this;
-    }
-
-    /// \brief Read and write access to the Path sampling monitor
-    Path<T> &path ()
-    {
-        return path_;
-    }
-
-    /// \brief Read only access to the Path sampling monitor
-    const Path<T> &path () const
-    {
-        return path_;
-    }
-
-    /// \brief Set the Path sampling evaluation object
-    Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval)
-    {
-        path_.set_eval(eval);
-
-        return *this;
-    }
-
-    /// \brief Path sampling estimate of the logarithm of normalizing constants
-    /// ratio
-    double path_sampling () const
-    {
-        return path_.zconst();
     }
 
     /// \brief Set if the sampler shall print dots at each iteration
@@ -601,6 +649,66 @@ class Sampler
         return os;
     }
 
+    /// \brief Is there a state saved
+    bool is_saved () const
+    {
+	if (!backup_.saved)
+	    return false;
+
+	if (!particle_.is_saved())
+	    return false;
+
+	if (!path_.is_saved())
+	    return false;
+
+        for (typename monitor_map_type::const_iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m) {
+	    if (!m->second.is_saved())
+		return false;
+	}
+
+	return true;
+    }
+
+    /// \brief Save the state of the monitor
+    void save ()
+    {
+	particle_.save();
+	path_.save();
+        for (typename monitor_map_type::iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m)
+	{m->second.save();}
+	backup_.threshold = threshold_;
+	backup_.iter_size = iter_size();
+	backup_.iter_num = iter_num_;
+        backup_.saved = true;
+    }
+
+    /// \brief Try to restore to previous saved state
+    bool restore ()
+    {
+        if (!is_saved())
+            return false;
+
+	particle_.restore();
+	path_.restore();
+        for (typename monitor_map_type::iterator
+		m = monitor_.begin(); m != monitor_.end(); ++m)
+	{m->second.restore();}
+	threshold_ = backup_.threshold;
+	iter_num_ = backup_.iter_num;
+
+        while (ess_history_.size() > backup_.iter_size)
+            ess_history_.pop_back();
+        while (resampled_history_.size() > backup_.iter_size)
+            resampled_history_.pop_back();
+	for (std::size_t i = 0; i != accept_history_.size(); ++i)
+	    while (accept_history_[i].size() > backup_.iter_size)
+		accept_history_[i].pop_back();
+
+        return true;
+    }
+
     private :
 
     init_type init_;
@@ -615,8 +723,15 @@ class Sampler
     std::vector<bool> resampled_history_;
     std::vector<std::vector<std::size_t> > accept_history_;
 
-    monitor_map_type monitor_;
     Path<T> path_;
+    monitor_map_type monitor_;
+
+    struct {
+	double threshold;
+	std::size_t iter_size;
+	std::size_t iter_num;
+	bool saved;
+    } backup_;
 
     bool show_;
 

@@ -55,6 +55,34 @@ class RuntimeAssert : public std::runtime_error
     RuntimeAssert (const char *msg) : std::runtime_error(msg) {}
 }; // class RuntimeAssert
 
+class FailedSaveSampler : public std::runtime_error
+{
+    public :
+
+    FailedSaveSampler (std::size_t iter_num) :
+        std::runtime_error("Failed to save sampler"), iter_num_(iter_num) {}
+
+    std::size_t iter_num () const {return iter_num_;}
+
+    private :
+
+    std::size_t iter_num_;
+}; // class FailedSaveSampler
+
+class FailedRestoreSampler : public std::runtime_error
+{
+    public :
+
+    FailedRestoreSampler (std::size_t iter_num) :
+        std::runtime_error("Failed to restore sampler"), iter_num_(iter_num) {}
+
+    std::size_t iter_num () const {return iter_num_;}
+
+    private :
+
+    std::size_t iter_num_;
+}; // class FailedRestoreSampler
+
 template <bool> class StaticAssert {};
 
 template <>

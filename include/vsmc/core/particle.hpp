@@ -370,6 +370,7 @@ class Particle
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
         csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {
+        backup_init();
         weight_set_.set_equal_weight();
 	sp_[0] = SingleParticle<T>(
 		std::numeric_limits<size_type>::max
@@ -626,6 +627,51 @@ class Particle
         resample_op_ = Resample<ResType>();
     }
 
+    /// \brief Is there a state saved
+    bool is_saved () const
+    {
+        return backup_.saved;
+    }
+
+    /// \brief Save the state of the monitor
+    void save ()
+    {
+        if (backup_.size != size_) {
+            backup_.size = size_;
+            delete backup_.value_ptr;
+            delete backup_.weight_set_ptr;
+            delete backup_.rng_set_ptr;
+            backup_.value_ptr = new value_type(value_);
+            backup_.weight_set_ptr = new weight_set_type(weight_set_);
+            backup_.rng_set_ptr = new rng_set_type(rng_set_);
+        } else {
+            *(backup_.value_ptr) = value_;
+            *(backup_.weight_set_ptr) = weight_set_;
+            *(backup_.rng_set_ptr) = rng_set_;
+        }
+
+        backup_.resample_op = resample_op_;
+        backup_.resample_rng = resample_rng_;
+        backup_.resampled = resampled_;
+        backup_.saved = true;
+    }
+
+    /// \brief Try to restore to previous saved state
+    bool restore ()
+    {
+        if (!is_saved())
+            return false;
+
+         value_        = *(backup_.value_ptr);
+         weight_set_   = *(backup_.weight_set_ptr);
+         rng_set_      = *(backup_.rng_set_ptr);
+         resample_op_  = backup_.resample_op;
+         resample_rng_ = backup_.resample_rng;
+         resampled_    = backup_.resampled;
+
+         return true;
+    }
+
     private :
 
     size_type size_;
@@ -641,6 +687,27 @@ class Particle
     resample_rng_type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
+
+    struct {
+        size_type size;
+        value_type *value_ptr;
+        weight_set_type *weight_set_ptr;
+        rng_set_type *rng_set_ptr;
+        resample_op_type resample_op;
+        resample_rng_type resample_rng;
+        bool resampled;
+        bool saved;
+    } backup_;
+
+    void backup_init ()
+    {
+        backup_.saved = false;
+        backup_.size = 0;
+        backup_.value_ptr = VSMC_NULLPTR;
+        backup_.weight_set_ptr = VSMC_NULLPTR;
+        backup_.rng_set_ptr = VSMC_NULLPTR;
+        backup_.resampled = false;
+    }
 
     void replication2copy_from (size_type N)
     {
