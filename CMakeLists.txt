@@ -10,7 +10,7 @@ PROJECT (vSMC C CXX)
 # Version information
 SET (VERSION_MAJOR 0)
 SET (VERSION_MINOR 9)
-SET (VERSION_PATCH 3)
+SET (VERSION_PATCH 4)
 
 # User configurations
 IF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
