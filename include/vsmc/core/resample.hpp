@@ -22,19 +22,18 @@ inline void multinomial (SizeType N, SizeType S, RngType &rng,
 
         for (SizeType i = 0; i != N; ++i) {
             if (acc_s < S && weight[i] > 0) {
-                typedef typename cxx11::make_signed<SizeType>::type s_t;
-                s_t s = S - acc_s;
                 double p = weight[i] / (sum_w - acc_w);
                 if (p < 0) {
-                    p = 0;
                     assert(p > -1e-6);
+                    p = 0;
                 }
                 if (p > 1) {
-                    p = 1;
                     assert(p - 1 < 1e-6);
+                    p = 1;
                 }
-                cxx11::binomial_distribution<s_t> binom(s, p);
-                replication[i] = binom(rng);
+		long s = static_cast<long>(S - acc_s);
+                cxx11::binomial_distribution<long> binom(s, p);
+                replication[i] = static_cast<SizeType>(binom(rng));
             }
             acc_w += weight[i];
             acc_s += replication[i];

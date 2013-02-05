@@ -3,37 +3,28 @@
 
 #include <vsmc/internal/config.hpp>
 
-#if VSMC_HAS_CXX11LIB_TYPE_TRAITS
-#include <type_traits>
 namespace vsmc { namespace cxx11 {
-using std::integral_constant;
-using std::true_type;
-using std::false_type;
-using std::is_base_of;
-using std::is_pointer;
-using std::is_same;
-using std::is_signed;
-using std::make_signed;
-using std::remove_cv;
-using std::remove_pointer;
-using std::enable_if;
-} }
-#else // VSMC_HAS_CXX11LIB_TYPE_TRAITS
-#include <boost/type_traits.hpp>
-namespace vsmc { namespace cxx11 {
-using boost::integral_constant;
-using boost::true_type;
-using boost::false_type;
-using boost::is_base_of;
-using boost::is_pointer;
-using boost::is_same;
-using boost::is_signed;
-using boost::make_signed;
-using boost::remove_cv;
-using boost::remove_pointer;
+
+// integral constant
+template <typename T, T v>
+struct integral_constant
+{
+    static const T value = v;
+    typedef T value_type;
+    typedef integral_constant<T, v> type;
+    VSMC_CONSTEXPR operator value_type () const {return value;}
+};
+typedef integral_constant<bool, true> true_type;
+typedef integral_constant<bool, false> false_type;
+
+// is_same
+template <typename T, typename U> struct is_same : public false_type {};
+template <typename T> struct is_same<T, T> : public true_type {};
+
+// enable if
 template<bool, class T = void> struct enable_if {};
 template<class T> struct enable_if<true, T> {typedef T type;};
-} }
-#endif // VSMC_HAS_CXX11LIB_TYPE_TRAITS
+
+} } // namespace vsmc::cxx11
 
 #endif // VSMC_CXX11_TYPE_TRATIS_HPP

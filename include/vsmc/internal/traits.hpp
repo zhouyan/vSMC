@@ -154,7 +154,7 @@ template <typename T> struct OMPSizeTypeTrait
 #else
 template <typename T> struct OMPSizeTypeTrait
 {
-    typedef typename cxx11::make_signed<T>::type type;
+    typedef typename std::ptrdiff_t type;
 };
 #endif
 
@@ -164,15 +164,14 @@ struct IsBaseOfStateImpl
     private :
 
     struct char2 {char c1; char c2;};
-    typedef typename cxx11::remove_cv<D>::type derived_type;
 
     template <std::size_t Dim, typename T>
-    static char test (State<Dim, T> *);
+    static char test (const State<Dim, T> *);
     static char2 test (...);
 
     public :
 
-   enum {value = sizeof(test(static_cast<derived_type *>(0))) == sizeof(char)};
+   enum {value = sizeof(test(static_cast<const D *>(0))) == sizeof(char)};
 };
 
 template <template <std::size_t, typename> class State, typename D>
@@ -186,15 +185,14 @@ struct IsBaseOfStateCLImpl
     private :
 
     struct char2 {char c1; char c2;};
-    typedef typename cxx11::remove_cv<D>::type derived_type;
 
     template <std::size_t Dim, typename T, typename ID>
-    static char test (StateCL<Dim, T, ID> *);
+    static char test (const StateCL<Dim, T, ID> *);
     static char2 test (...);
 
     public :
 
-   enum {value = sizeof(test(static_cast<derived_type *>(0))) == sizeof(char)};
+   enum {value = sizeof(test(static_cast<const D *>(0))) == sizeof(char)};
 };
 
 template <typename D>
