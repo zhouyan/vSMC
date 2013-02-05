@@ -80,7 +80,12 @@ SET (VSMC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 # Boost
 SET (Boost_NO_BOOST_CMAKE ON)
 SET (Boost_ADDITIONAL_VERSIONS
-    "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0", "1.52", "1.52.0")
+    "1.49" "1.49.0"
+    "1.50" "1.50.0"
+    "1.51" "1.51.0"
+    "1.52" "1.52.0"
+    "1.53" "1.53.0"
+    "1.54" "1.54.0")
 IF (NOT Boost_FOUND)
     INCLUDE (FindBoost)
 ENDIF (NOT Boost_FOUND)
