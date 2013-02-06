@@ -31,7 +31,7 @@ inline void multinomial (SizeType N, SizeType S, RngType &rng,
                     assert(p - 1 < 1e-6);
                     p = 1;
                 }
-		long s = static_cast<long>(S - acc_s);
+                long s = static_cast<long>(S - acc_s);
                 cxx11::binomial_distribution<long> binom(s, p);
                 replication[i] = static_cast<SizeType>(binom(rng));
             }

@@ -11,8 +11,7 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
 #define BASE_NUMERIC vsmc::Numeric${SMP}
 #include <vsmc/smp/adapter.hpp>
 #include <vsmc/smp/backend_${smp}.hpp>
-#include <vsmc/utility/integrate/numeric_${smp}.hpp>
-    ")
+#include <vsmc/utility/integrate/numeric_${smp}.hpp>")
 
     SET (VSMC_BASE_DEFINE_HEADER "${header}-${smp}.hpp")
 
