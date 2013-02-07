@@ -51,8 +51,6 @@ class RuntimeAssert : public std::runtime_error
     public :
 
     RuntimeAssert (const std::string &msg) : std::runtime_error(msg) {}
-
-    RuntimeAssert (const char *msg) : std::runtime_error(msg) {}
 }; // class RuntimeAssert
 
 template <bool> class StaticAssert {};
