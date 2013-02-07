@@ -47,21 +47,20 @@ class Monitor
     /// sampling estimates are recorded and can be retrived by `index()` and
     /// `record()`.
     explicit Monitor (std::size_t dim, const eval_type &eval) :
-        dim_(dim), eval_(eval), recording_(true) {save();}
+        dim_(dim), eval_(eval), recording_(true) {}
 
     Monitor (const Monitor<T> &other) :
         dim_(other.dim_), eval_(other.eval_), recording_(other.recording_),
-        index_(other.index_), record_(other.record_) {save();}
+        index_(other.index_), record_(other.record_) {}
 
     Monitor<T> &operator= (const Monitor<T> &other)
     {
         if (&other != this) {
-            dim_        = other.dim_;
-            eval_       = other.eval_;
-            recording_  = other.recording_;
-            index_      = other.index_;
-            record_     = other.record_;
-            save();
+            dim_       = other.dim_;
+            eval_      = other.eval_;
+            recording_ = other.recording_;
+            index_     = other.index_;
+            record_    = other.record_;
         }
 
         return *this;
@@ -207,7 +206,6 @@ class Monitor
     /// \brief Set a new evaluation object of type eval_type
     void set_eval (const eval_type &new_eval)
     {
-        backup_.saved = false;
         eval_ = new_eval;
     }
 
@@ -253,7 +251,6 @@ class Monitor
     /// \brief Clear all records of the index and integrations
     void clear ()
     {
-        backup_.saved = false;
         index_.clear();
         record_.clear();
     }
@@ -276,35 +273,6 @@ class Monitor
         recording_ = false;
     }
 
-    /// \brief Is there a state saved
-    bool is_saved () const
-    {
-        return backup_.saved;
-    }
-
-    /// \brief Save the state of the monitor
-    void save ()
-    {
-        backup_.iter_size = iter_size();
-        backup_.recording = recording_;
-        backup_.saved = true;
-    }
-
-    /// \brief Try to restore to previous saved state
-    bool restore ()
-    {
-        if (!is_saved())
-            return false;
-
-        while (index_.size() > backup_.iter_size)
-            index_.pop_back();
-        while (record_.size() > backup_.iter_size * dim_)
-            record_.pop_back();
-        recording_ = backup_.recording;
-
-        return true;
-    }
-
     private :
 
     std::size_t dim_;
@@ -317,12 +285,6 @@ class Monitor
     std::vector<double> buffer_;
     typename ImportanceSampling1TypeTrait<T>::type is_int_1_;
     typename ImportanceSamplingDTypeTrait<T>::type is_int_d_;
-
-    struct {
-        std::size_t iter_size;
-        bool recording;
-        bool saved;
-    } backup_;
 }; // class Monitor
 
 } // namespace vsmc

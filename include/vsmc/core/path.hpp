@@ -47,23 +47,21 @@ class Path
     /// \f$\alpha_0 = 0, \alpha_1, \dots, \alpha_T = 1\f$, then at iteration
     /// \f$t\f$, the output parameter `integrand` contains
     /// \f$(g_{\alpha_t}(X_0),\dots)\f$ and the return value is \f$\alpha_t\f$.
-    explicit Path (const eval_type &eval) : eval_(eval), recording_(true)
-    {save();}
+    explicit Path (const eval_type &eval) : eval_(eval), recording_(true) {}
 
     Path (const Path<T> &other) :
         eval_(other.eval_), recording_(other.recording_),
         index_(other.index_), integrand_(other.integrand_), grid_(other.grid_)
-    {save();}
+    {}
 
     Path<T> &operator= (const Path<T> &other)
     {
         if (&other != this) {
-            eval_         = other.eval_;
-            recording_    = other.recording_;
-            index_        = other.index_;
-            integrand_    = other.integrand_;
-            grid_         = other.grid_;
-            save();
+            eval_       = other.eval_;
+            recording_  = other.recording_;
+            index_      = other.index_;
+            integrand_  = other.integrand_;
+            grid_       = other.grid_;
         }
 
         return *this;
@@ -153,7 +151,6 @@ class Path
     /// \brief Set a new evaluation object of type eval_type
     void set_eval (const eval_type &new_eval)
     {
-        backup_.saved = false;
         eval_ = new_eval;
     }
 
@@ -195,7 +192,6 @@ class Path
     /// \brief Clear all records of the index and integrations
     void clear ()
     {
-        backup_.saved = false;
         index_.clear();
         integrand_.clear();
         grid_.clear();
@@ -217,37 +213,6 @@ class Path
     void turnoff ()
     {
         recording_ = false;
-    }
-
-    /// \brief Is there a state saved
-    bool is_saved () const
-    {
-        return backup_.saved;
-    }
-
-    /// \brief Save the state of the monitor
-    void save ()
-    {
-        backup_.iter_size = iter_size();
-        backup_.recording = recording_;
-        backup_.saved = true;
-    }
-
-    /// \brief Try to restore to previous saved state
-    bool restore ()
-    {
-        if (!is_saved())
-            return false;
-
-        while (index_.size() > backup_.iter_size)
-            index_.pop_back();
-        while (integrand_.size() > backup_.iter_size)
-            integrand_.pop_back();
-        while (grid_.size() > backup_.iter_size)
-            grid_.pop_back();
-        recording_ = backup_.recording;
-
-        return true;
     }
 
     protected :
@@ -276,12 +241,6 @@ class Path
     std::vector<double> weight_;
     std::vector<double> buffer_;
     typename ImportanceSampling1TypeTrait<T>::type is_int_1_;
-
-    struct {
-        std::size_t iter_size;
-        bool recording;
-        bool saved;
-    } backup_;
 }; // class PathSampling
 
 /// \brief Monitor for path sampling for SMC with geometry path

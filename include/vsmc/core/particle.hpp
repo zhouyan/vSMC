@@ -365,12 +365,11 @@ class Particle
 
     explicit Particle (size_type N) :
         size_(N), value_(N), weight_set_(N), rng_set_(N),
-        replication_(N), copy_from_(N), weight_(N), resampled_(false),
+        replication_(N), copy_from_(N), weight_(N),
         resample_rng_(VSMC_SEED_TYPE::instance().get()),
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
         csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {
-        backup_init();
         weight_set_.set_equal_weight();
         sp_[0] = SingleParticle<T>(
                 std::numeric_limits<size_type>::max
@@ -531,9 +530,10 @@ class Particle
     /// \return true if resampling was performed
     bool resample (double threshold)
     {
-        resampled_ = weight_set_.ess() < threshold * size_;
+        bool resampled = weight_set_.ess() < threshold * size_;
         size_type N = weight_set_.resample_size();
-        if (resampled_ && N > 0) {
+        resampled = resampled && N > 0;
+        if (resampled) {
             weight_.resize(N);
             replication_.resize(N);
             weight_set_.read_resample_weight(&weight_[0]);
@@ -544,13 +544,7 @@ class Particle
             weight_set_.set_equal_weight();
         }
 
-        return resampled_;
-    }
-
-    /// \brief Whether last attempt of resample is actually performed
-    bool resampled () const
-    {
-        return resampled_;
+        return resampled;
     }
 
     /// \brief Set resampling method by a resample_op_type object
@@ -627,51 +621,6 @@ class Particle
         resample_op_ = Resample<ResType>();
     }
 
-    /// \brief Is there a state saved
-    bool is_saved () const
-    {
-        return backup_.saved;
-    }
-
-    /// \brief Save the state of the monitor
-    void save ()
-    {
-        if (backup_.size != size_) {
-            backup_.size = size_;
-            delete backup_.value_ptr;
-            delete backup_.weight_set_ptr;
-            delete backup_.rng_set_ptr;
-            backup_.value_ptr = new value_type(value_);
-            backup_.weight_set_ptr = new weight_set_type(weight_set_);
-            backup_.rng_set_ptr = new rng_set_type(rng_set_);
-        } else {
-            *(backup_.value_ptr) = value_;
-            *(backup_.weight_set_ptr) = weight_set_;
-            *(backup_.rng_set_ptr) = rng_set_;
-        }
-
-        backup_.resample_op = resample_op_;
-        backup_.resample_rng = resample_rng_;
-        backup_.resampled = resampled_;
-        backup_.saved = true;
-    }
-
-    /// \brief Try to restore to previous saved state
-    bool restore ()
-    {
-        if (!is_saved())
-            return false;
-
-         value_        = *(backup_.value_ptr);
-         weight_set_   = *(backup_.weight_set_ptr);
-         rng_set_      = *(backup_.rng_set_ptr);
-         resample_op_  = backup_.resample_op;
-         resample_rng_ = backup_.resample_rng;
-         resampled_    = backup_.resampled;
-
-         return true;
-    }
-
     private :
 
     size_type size_;
@@ -682,32 +631,10 @@ class Particle
     std::vector<size_type> replication_;
     std::vector<size_type> copy_from_;
     std::vector<double> weight_;
-    bool resampled_;
     resample_op_type resample_op_;
     resample_rng_type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
-
-    struct {
-        size_type size;
-        value_type *value_ptr;
-        weight_set_type *weight_set_ptr;
-        rng_set_type *rng_set_ptr;
-        resample_op_type resample_op;
-        resample_rng_type resample_rng;
-        bool resampled;
-        bool saved;
-    } backup_;
-
-    void backup_init ()
-    {
-        backup_.saved = false;
-        backup_.size = 0;
-        backup_.value_ptr = VSMC_NULLPTR;
-        backup_.weight_set_ptr = VSMC_NULLPTR;
-        backup_.rng_set_ptr = VSMC_NULLPTR;
-        backup_.resampled = false;
-    }
 
     void replication2copy_from (size_type N)
     {
