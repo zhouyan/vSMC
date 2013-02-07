@@ -45,8 +45,6 @@ class Backup
 
     void save (const T *src)
     {
-        VSMC_RUNTIME_ASSERT_DERIVED_BASE(Backup);
-
         if (!backup_)
             backup_ = new T(*src);
         else
