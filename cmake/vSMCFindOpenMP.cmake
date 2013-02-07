@@ -78,8 +78,8 @@ class Evaluator : public Base<Derived>
         for (int i = 0; i != N; ++i)
             src[i] = i;
 
-#pragma omp parallel for default(none) shared(N, dim, src, res)
-        for (int i = 0; i < src.size(); ++i)
+#pragma omp parallel for default(shared)
+        for (int i = 0; i < N; ++i)
             this->eval(dim, Element(i, &src), res + i * dim);
     }
 };
