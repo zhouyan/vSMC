@@ -13,9 +13,7 @@ class StatePPL : public StateBase<Dim, T>
 {
     public :
 
-    typedef StateBase<Dim, T> state_base_type;
-    typedef typename state_base_type::size_type size_type;
-    typedef typename state_base_type::state_type state_type;
+    typedef typename StateBase<Dim, T>::size_type size_type;
 
     explicit StatePPL (size_type N) : StateBase<Dim, T>(N) {}
 
@@ -34,6 +32,8 @@ class StatePPL : public StateBase<Dim, T>
     class copy_work_
     {
         public :
+
+        typedef typename Particle<T>::size_type size_type;
 
         copy_work_ (StatePPL<Dim, T> *state, const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
@@ -57,12 +57,10 @@ class InitializePPL : public InitializeBase<T, Derived>
 {
     public :
 
-    typedef InitializeBase<T, Derived> initialize_base_type;
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
+        typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -87,6 +85,8 @@ class InitializePPL : public InitializeBase<T, Derived>
     class work_
     {
         public :
+
+        typedef typename Particle<T>::size_type size_type;
 
         work_ (InitializePPL<T, Derived> *init,
                 Particle<T> *particle, ppl::combinable<std::size_t> *accept) :
@@ -117,12 +117,10 @@ class MovePPL : public MoveBase<T, Derived>
 {
     public :
 
-    typedef MoveBase<T, Derived> move_base_type;
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
+        typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         ppl::combinable<std::size_t> accept(accept_init_);
@@ -146,6 +144,8 @@ class MovePPL : public MoveBase<T, Derived>
     class work_
     {
         public :
+
+        typedef typename Particle<T>::size_type size_type;
 
         work_ (MovePPL<T, Derived> *move, std::size_t iter,
                 Particle<T> *particle, ppl::combinable<std::size_t> *accept):
@@ -177,13 +177,11 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 {
     public :
 
-    typedef MonitorEvalBase<T, Derived> monitor_eval_base_type;
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
 
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
+        typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         ppl::parallel_for(static_cast<size_type>(0), N,
@@ -204,6 +202,8 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
     class work_
     {
         public :
+
+        typedef typename Particle<T>::size_type size_type;
 
         work_ (MonitorEvalPPL<T, Derived> *monitor,
                 std::size_t iter, std::size_t dim,
@@ -234,13 +234,11 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
 {
     public :
 
-    typedef PathEvalBase<T, Derived> path_eval_base_type;
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
 
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
+        typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         ppl::parallel_for(static_cast<size_type>(0), N,
@@ -263,6 +261,8 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
     class work_
     {
         public :
+
+        typedef typename Particle<T>::size_type size_type;
 
         work_ (PathEvalPPL<T, Derived> *path, std::size_t iter,
                 const Particle<T> *particle, double *res) :

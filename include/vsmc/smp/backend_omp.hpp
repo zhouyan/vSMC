@@ -13,16 +13,14 @@ class StateOMP : public StateBase<Dim, T>
 {
     public :
 
-    typedef StateBase<Dim, T> state_base_type;
     typedef typename internal::OMPSizeTypeTrait<
-        typename state_base_type::size_type>::type size_type;
-    typedef typename state_base_type::state_type state_type;
+        typename StateBase<Dim, T>::size_type>::type size_type;
 
     explicit StateOMP (size_type N) : StateBase<Dim, T>(N) {}
 
     size_type size () const
     {
-        return static_cast<size_type>(state_base_type::size());
+        return static_cast<size_type>(StateBase<Dim, T>::size());
     }
 
     template <typename IntType>
@@ -43,13 +41,10 @@ class InitializeOMP : public InitializeBase<T, Derived>
 {
     public :
 
-    typedef InitializeBase<T, Derived> initialize_base_type;
-    typedef typename internal::OMPSizeTypeTrait<
-        typename Particle<T>::size_type>::type size_type;
-    typedef T value_type;
-
     std::size_t operator() (Particle<T> &particle, void *param)
     {
+        typedef typename internal::OMPSizeTypeTrait<
+            typename Particle<T>::size_type>::type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -78,13 +73,10 @@ class MoveOMP : public MoveBase<T, Derived>
 {
     public :
 
-    typedef MoveBase<T, Derived> move_base_type;
-    typedef typename internal::OMPSizeTypeTrait<
-        typename Particle<T>::size_type>::type size_type;
-    typedef T value_type;
-
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
+        typedef typename internal::OMPSizeTypeTrait<
+            typename Particle<T>::size_type>::type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
@@ -112,14 +104,11 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
     public :
 
-    typedef MonitorEvalBase<T, Derived> monitor_eval_base_type;
-    typedef typename internal::OMPSizeTypeTrait<
-        typename Particle<T>::size_type>::type size_type;
-    typedef T value_type;
-
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
+        typedef typename internal::OMPSizeTypeTrait<
+            typename Particle<T>::size_type>::type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
@@ -145,14 +134,11 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 {
     public :
 
-    typedef PathEvalBase<T, Derived> path_eval_base_type;
-    typedef typename internal::OMPSizeTypeTrait<
-        typename Particle<T>::size_type>::type size_type;
-    typedef T value_type;
-
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
+        typedef typename internal::OMPSizeTypeTrait<
+            typename Particle<T>::size_type>::type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)

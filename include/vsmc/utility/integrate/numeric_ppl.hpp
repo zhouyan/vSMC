@@ -13,9 +13,8 @@ class NumericPPL : public NumericBase<Derived>
 {
     public :
 
-    typedef NumericBase<Derived> integrate_base_type;
-    typedef typename integrate_base_type::size_type size_type;
-    typedef typename integrate_base_type::eval_type eval_type;
+    typedef typename NumericBase<Derived>::size_type size_type;
+    typedef typename NumericBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
@@ -42,6 +41,8 @@ class NumericPPL : public NumericBase<Derived>
     class work_
     {
         public :
+
+        typedef typename NumericBase<Derived>::size_type size_type;
 
         work_ (NumericPPL<Derived> *numeric, const double *grid,
                 ppl::combinable<eval_type> *eval, double *integral) :

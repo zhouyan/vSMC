@@ -193,10 +193,10 @@ class NumericNewtonCotes :
 {
     public :
 
-    typedef NumericImpl<NumericNewtonCotes<Degree, NumericImpl> >
-        integrate_impl_type;
-    typedef typename integrate_impl_type::size_type size_type;
-    typedef typename integrate_impl_type::eval_type eval_type;
+    typedef typename NumericImpl<NumericNewtonCotes<Degree, NumericImpl> >::
+        size_type size_type;
+    typedef typename NumericImpl<NumericNewtonCotes<Degree, NumericImpl> >::
+        eval_type eval_type;
 
     NumericNewtonCotes () :
         coeff_(internal::NumericNewtonCotesCoeff<Degree>::instance().coeff())

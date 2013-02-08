@@ -13,10 +13,9 @@ class NumericOMP : public NumericBase<Derived>
 {
     public :
 
-    typedef NumericBase<Derived> integrate_base_type;
     typedef typename internal::OMPSizeTypeTrait<
-        typename integrate_base_type::size_type>::type size_type;
-    typedef typename integrate_base_type::eval_type eval_type;
+        typename NumericBase<Derived>::size_type>::type size_type;
+    typedef typename NumericBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
