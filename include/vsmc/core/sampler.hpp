@@ -551,7 +551,7 @@ class Sampler
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             if (m->second.iter_size() > 0) {
-                char *mon_name = new char[m->first.size() + 15];
+                char *mon_name = new char[m->first.size() + 32];
                 unsigned mond = static_cast<unsigned>(m->second.dim());
                 for (unsigned i = 0; i != mond; ++i, ++first) {
 #ifdef _MSC_VER
