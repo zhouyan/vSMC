@@ -5,17 +5,25 @@
 #include <vsmc/internal/compiler/intel.hpp>
 #elif defined(__clang__)
 #include <vsmc/internal/compiler/clang.hpp>
+#elif defined(__OPEN64__)
+#include <vsmc/internal/compiler/open64.hpp>
+#elif defined(__SUNPRO_CC)
+#include <vsmc/internal/compiler/sunpro.hpp>
 #elif defined(__GNUC__)
 #include <vsmc/internal/compiler/gcc.hpp>
 #elif defined(_MSC_VER)
 #include <vsmc/internal/compiler/msvc.hpp>
 #endif
 
-//  C++11 language features
-
 #ifndef VSMC_STATIC_INLINE
 #define VSMC_STATIC_INLINE static inline
 #endif
+
+#ifndef VSMC_OPENMP_COMPILER_GOOD
+#define VSMC_OPENMP_COMPILER_GOOD 0
+#endif
+
+//  C++11 language features
 
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
 #define VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE 0

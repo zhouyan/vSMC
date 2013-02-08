@@ -7,6 +7,10 @@
 #define VSMC_STATIC_INLINE static inline
 #endif
 
+#ifndef VSMC_OPENMP_COMPILER_GOOD
+#define VSMC_OPENMP_COMPILER_GOOD 1
+#endif
+
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 
 // C++11 language features

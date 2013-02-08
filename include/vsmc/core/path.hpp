@@ -282,6 +282,7 @@ class PathGeometry : public Path<T>
             std::vector<double> base_grid(this->iter_size());
             for (std::size_t i = 0; i != this->iter_size(); ++i)
                 base_grid[i] = this->grid(i);
+
             return numeric_int(static_cast<typename NumericNewtonCotes<
                     Degree, NumericImpl>::size_type>(base_grid.size()),
                     &base_grid[0],

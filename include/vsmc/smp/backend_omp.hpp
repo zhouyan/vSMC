@@ -30,7 +30,9 @@ class StateOMP : public StateBase<Dim, T>
     {
         VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(OMP);
 
+#if VSMC_OPENMP_COMPILER_GOOD
 #pragma omp parallel for default(shared)
+#endif
         for (size_type to = 0; to < N; ++to)
             this->copy_particle(copy_from[to], to);
     }
@@ -54,7 +56,9 @@ class InitializeOMP : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         std::size_t accept = 0;
+#if VSMC_OPENMP_COMPILER_GOOD
 #pragma omp parallel for reduction(+ : accept) default(shared)
+#endif
         for (size_type i = 0; i < N; ++i)
             accept += this->initialize_state(SingleParticle<T>(i, &particle));
         this->post_processor(particle);
@@ -88,7 +92,9 @@ class MoveOMP : public MoveBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
+#if VSMC_OPENMP_COMPILER_GOOD
 #pragma omp parallel for reduction(+ : accept) default(shared)
+#endif
         for (size_type i = 0; i < N; ++i)
             accept += this->move_state(iter, SingleParticle<T>(i, &particle));
         this->post_processor(iter, particle);
@@ -122,7 +128,9 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
+#if VSMC_OPENMP_COMPILER_GOOD
 #pragma omp parallel for default(shared)
+#endif
         for (size_type i = 0; i < N; ++i)
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
@@ -155,7 +163,9 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
     {
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
+#if VSMC_OPENMP_COMPILER_GOOD
 #pragma omp parallel for default(shared)
+#endif
         for (size_type i = 0; i < N; ++i)
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));

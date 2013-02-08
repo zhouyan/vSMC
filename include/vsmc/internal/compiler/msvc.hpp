@@ -7,6 +7,10 @@
 #define VSMC_STATIC_INLINE static __inline
 #endif
 
+#ifndef VSMC_OPENMP_COMPILER_GOOD
+#define VSMC_OPENMP_COMPILER_GOOD 1
+#endif
+
 // C++11 language features
 
 #if _MSC_VER >= VSMC_MSVC_NONEXIST
