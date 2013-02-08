@@ -1,10 +1,6 @@
 #ifndef VSMC_INTERNAL_COMPILER_CLANG_HPP
 #define VSMC_INTERNAL_COMPILER_CLANG_HPP
 
-#ifndef VSMC_STATIC_INLINE
-#define VSMC_STATIC_INLINE static inline
-#endif
-
 #if __cplusplus >= 201103L
 
 #if __has_feature(cxx_access_control_sfinae)

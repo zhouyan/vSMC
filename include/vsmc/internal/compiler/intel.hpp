@@ -3,10 +3,6 @@
 
 #define VSMC_INTEL_NONEXIST 1000000UL
 
-#ifndef VSMC_STATIC_INLINE
-#define VSMC_STATIC_INLINE static inline
-#endif
-
 #ifndef VSMC_OPENMP_COMPILER_GOOD
 #define VSMC_OPENMP_COMPILER_GOOD 1
 #endif

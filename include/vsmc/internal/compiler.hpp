@@ -15,10 +15,6 @@
 #include <vsmc/internal/compiler/msvc.hpp>
 #endif
 
-#ifndef VSMC_STATIC_INLINE
-#define VSMC_STATIC_INLINE static inline
-#endif
-
 #ifndef VSMC_OPENMP_COMPILER_GOOD
 #define VSMC_OPENMP_COMPILER_GOOD 0
 #endif
