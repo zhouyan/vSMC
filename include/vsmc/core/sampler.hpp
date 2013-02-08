@@ -529,7 +529,14 @@ class Sampler
         char acc_name[32];
         unsigned accd = static_cast<unsigned>(accept_history_.size());
         for (unsigned i = 0; i != accd; ++i) {
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4996)
+#endif
             std::sprintf(acc_name, "Accept.%u", i + 1);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
             *first = std::string(acc_name);
             ++first;
         }
@@ -547,7 +554,14 @@ class Sampler
                 char *mon_name = new char[m->first.size() + 15];
                 unsigned mond = static_cast<unsigned>(m->second.dim());
                 for (unsigned i = 0; i != mond; ++i, ++first) {
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4996)
+#endif
                     std::sprintf(mon_name, "%s.%u", m->first.c_str(), i + 1);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
                     *first = std::string(mon_name);
                 }
                 delete [] mon_name;
