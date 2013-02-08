@@ -1,8 +1,7 @@
 #ifndef VSMC_INTERNAL_COMPILER_SUNPRO_HPP
 #define VSMC_INTERNAL_COMPILER_SUNPRO_HPP
 
-#ifndef VSMC_OPENMP_COMPILER_GOOD
-#define VSMC_OPENMP_COMPILER_GOOD 0
-#endif
+#pragma error_messages(off, nonewline)
+#pragma error_messages(off, anonnotype)
 
 #endif // VSMC_INTERNAL_COMPILER_SUNPRO_HPP

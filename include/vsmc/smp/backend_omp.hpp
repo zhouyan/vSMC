@@ -2,7 +2,7 @@
 #define VSMC_SMP_BACKEND_OMP_HPP
 
 #include <vsmc/smp/base.hpp>
-#include <vsmc/utility/omp_wrapper.hpp>
+#include <omp.h>
 
 namespace vsmc {
 
