@@ -6,10 +6,10 @@
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 
-/// \brief Backup and restore objects
-/// \ingroup Uitlity
 namespace vsmc {
 
+/// \brief Backup and restore objects
+/// \ingroup Uitlity
 template <typename T>
 class Backup
 {
