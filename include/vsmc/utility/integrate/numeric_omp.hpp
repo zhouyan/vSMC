@@ -2,7 +2,7 @@
 #define VSMC_UTILITY_INTEGRATE_NUMERIC_OMP_HPP
 
 #include <vsmc/utility/integrate/base.hpp>
-#include <omp.h>
+#include <vsmc/utility/omp_wrapper.hpp>
 
 namespace vsmc {
 
@@ -25,10 +25,8 @@ class NumericOMP : public NumericBase<Derived>
 
         double integral = 0;
         eval_type eval_op(eval);
-#if VSMC_OPENMP_COMPILER_GOOD
-#pragma omp parallel for reduction(+ : integral) default(none) \
-        firstprivate (eval_op) shared(N, grid)
-#endif
+#pragma omp parallel for reduction(+ : integral) default(shared) \
+        firstprivate (eval_op)
         for (size_type i = 1; i < N; ++i)
             integral += this->integrate_segment(grid[i - 1], grid[i], eval_op);
 

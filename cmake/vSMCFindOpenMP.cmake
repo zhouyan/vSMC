@@ -1,6 +1,7 @@
 SET (VSMC_OPENMP_TEST_SOURCE "
 #include <vector>
 #include <cassert>
+#include <vsmc/utility/omp_wrapper.hpp>
 
 class Element
 {
