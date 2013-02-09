@@ -1,11 +1,11 @@
 #ifndef VSMC_INTERNAL_TRAITS_HPP
 #define VSMC_INTERNAL_TRAITS_HPP
 
-#include <string>
-
-#include <vsmc/cxx11/type_traits.hpp>
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/forward.hpp>
+#include <vsmc/cxx11/type_traits.hpp>
+
+#include <string>
 
 // Type dispatcher
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)    \

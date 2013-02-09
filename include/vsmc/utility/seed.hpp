@@ -1,10 +1,7 @@
 #ifndef VSMC_UTILITY_SEED_HPP
 #define VSMC_UTILITY_SEED_HPP
 
-#include <vsmc/internal/config.hpp>
-#include <vsmc/internal/assert.hpp>
-#include <vsmc/internal/defines.hpp>
-#include <vsmc/internal/forward.hpp>
+#include <vsmc/internal/common.hpp>
 
 namespace vsmc {
 

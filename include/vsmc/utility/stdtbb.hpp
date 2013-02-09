@@ -1,17 +1,9 @@
 #ifndef VSMC_UTILITY_STDTBB_HPP
 #define VSMC_UTILITY_STDTBB_HPP
 
-#include <vsmc/internal/config.hpp>
-#include <vsmc/internal/assert.hpp>
-#include <vsmc/internal/defines.hpp>
-#include <vsmc/internal/forward.hpp>
+#include <vsmc/internal/common.hpp>
 
-#include <vsmc/cxx11/functional.hpp>
-
-#include <cstdlib>
 #include <thread>
-#include <utility>
-#include <vector>
 
 #if VSMC_HAS_CXX11LIB_FUTURE
 #include <future>

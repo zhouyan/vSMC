@@ -1,11 +1,7 @@
 #ifndef VSMC_UTILITY_RNG_SET_HPP
 #define VSMC_UTILITY_RNG_SET_HPP
 
-#include <vsmc/internal/config.hpp>
-#include <vsmc/internal/assert.hpp>
-#include <vsmc/internal/defines.hpp>
-#include <vsmc/internal/forward.hpp>
-#include <vsmc/internal/traits.hpp>
+#include <vsmc/internal/common.hpp>
 #include <vsmc/utility/seed.hpp>
 
 #if VSMC_USE_RANDOM123
