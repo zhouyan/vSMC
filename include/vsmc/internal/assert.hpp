@@ -156,7 +156,7 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
 // Static assertion macros
 
 #define VSMC_STATIC_ASSERT_ADAPTER_IMPL(name, NAME)                           \
-    VSMC_STATIC_ASSERT(vsmc::internal::Is##name##Impl<Impl>::value,           \
+    VSMC_STATIC_ASSERT(vsmc::traits::Is##name##Impl<Impl>::value,             \
             USE_##name##Adapter_WITHOUT_A_##NAME##_IMPLEMENTATION)            \
 
 #define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(name)                           \
@@ -168,20 +168,20 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
             USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree)
 
 #define VSMC_STATIC_ASSERT_NO_IMPL(member)                                    \
-    VSMC_STATIC_ASSERT((cxx11::is_same<Derived, NullType>::value),            \
+    VSMC_STATIC_ASSERT((vsmc::traits::is_same<Derived, NullType>::value),     \
             NO_IMPLEMENTATION_OF_##member##_FOUND)
 
 #define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                       \
-    VSMC_STATIC_ASSERT((vsmc::internal::IsBaseOfStateCL<derived>::value),     \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfStateCL<derived>::value),       \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
 #define VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(type)                          \
-    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value                 \
-                || cxx11::is_same<type, cl_double>::value),                   \
+    VSMC_STATIC_ASSERT((traits::is_same<type, cl_float>::value                \
+                || vsmc::traits::is_same<type, cl_double>::value),            \
             USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
 #define VSMC_STATIC_ASSERT_STATE_TYPE(base, derived, user)                    \
-    VSMC_STATIC_ASSERT((vsmc::inernal::IsBaseOfState<base, derived>::value),  \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsBaseOfState<base, derived>::value),   \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_##base)
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

@@ -231,15 +231,15 @@ class Monitor
         eval_(iter, dim_, particle, &buffer_[0]);
         particle.read_weight(&weight_[0]);
         if (dim_ == 1) {
-            result_[0] = is_int_1_(static_cast<typename SizeTypeTrait<
-                    typename ImportanceSampling1TypeTrait<T>::type
+            result_[0] = is_int_1_(static_cast<typename traits::SizeTypeTrait<
+                    typename traits::ImportanceSampling1TypeTrait<T>::type
                     >::type>(particle.size()), &buffer_[0], &weight_[0]);
         } else {
-            is_int_d_(static_cast<typename SizeTypeTrait<
-                    typename ImportanceSamplingDTypeTrait<T>::type
+            is_int_d_(static_cast<typename traits::SizeTypeTrait<
+                    typename traits::ImportanceSamplingDTypeTrait<T>::type
                     >::type>(particle.size()),
-                    static_cast<typename SizeTypeTrait<
-                    typename ImportanceSamplingDTypeTrait<T>::type
+                    static_cast<typename traits::SizeTypeTrait<
+                    typename traits::ImportanceSamplingDTypeTrait<T>::type
                     >::type>(dim_), &buffer_[0], &weight_[0], &result_[0]);
         }
 
@@ -283,8 +283,8 @@ class Monitor
     std::vector<double> result_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    typename ImportanceSampling1TypeTrait<T>::type is_int_1_;
-    typename ImportanceSamplingDTypeTrait<T>::type is_int_d_;
+    typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
+    typename traits::ImportanceSamplingDTypeTrait<T>::type is_int_d_;
 }; // class Monitor
 
 } // namespace vsmc

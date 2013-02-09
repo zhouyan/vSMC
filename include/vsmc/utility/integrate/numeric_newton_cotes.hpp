@@ -51,21 +51,21 @@ class NumericNewtonCotesCoeff
     double coeff_[Degree + 2];
 
     NumericNewtonCotesCoeff ()
-    {coeff_init(cxx11::integral_constant<unsigned, Degree>());}
+    {coeff_init(traits::integral_constant<unsigned, Degree>());}
 
     NumericNewtonCotesCoeff
         (const NumericNewtonCotesCoeff<Degree> &);
     NumericNewtonCotesCoeff<Degree> &operator=
         (const NumericNewtonCotesCoeff<Degree> &);
 
-    void coeff_init (cxx11::integral_constant<unsigned, 1>)
+    void coeff_init (traits::integral_constant<unsigned, 1>)
     {
         coeff_[0] = 0.5;
         coeff_[1] = 1;
         coeff_[2] = 1;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 2>)
+    void coeff_init (traits::integral_constant<unsigned, 2>)
     {
         coeff_[0] = 1.0 / 6.0;
         coeff_[1] = 1;
@@ -73,7 +73,7 @@ class NumericNewtonCotesCoeff
         coeff_[3] = 1;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 3>)
+    void coeff_init (traits::integral_constant<unsigned, 3>)
     {
         coeff_[0] = 0.125;
         coeff_[1] = 1;
@@ -82,7 +82,7 @@ class NumericNewtonCotesCoeff
         coeff_[4] = 1;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 4>)
+    void coeff_init (traits::integral_constant<unsigned, 4>)
     {
         coeff_[0] = 1.0 / 90.0;
         coeff_[1] = 7;
@@ -92,7 +92,7 @@ class NumericNewtonCotesCoeff
         coeff_[5] = 7;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 5>)
+    void coeff_init (traits::integral_constant<unsigned, 5>)
     {
         coeff_[0] = 1.0 / 288.0;
         coeff_[1] = 19;
@@ -103,7 +103,7 @@ class NumericNewtonCotesCoeff
         coeff_[6] = 19;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 6>)
+    void coeff_init (traits::integral_constant<unsigned, 6>)
     {
         coeff_[0] = 1.0 / 840.0;
         coeff_[1] = 41;
@@ -115,7 +115,7 @@ class NumericNewtonCotesCoeff
         coeff_[7] = 41;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 7>)
+    void coeff_init (traits::integral_constant<unsigned, 7>)
     {
         coeff_[0] = 1.0 / 17280.0;
         coeff_[1] = 751;
@@ -128,7 +128,7 @@ class NumericNewtonCotesCoeff
         coeff_[8] = 751;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 8>)
+    void coeff_init (traits::integral_constant<unsigned, 8>)
     {
         coeff_[0] = 1.0 / 28350.0;
         coeff_[1] = 989;
@@ -142,7 +142,7 @@ class NumericNewtonCotesCoeff
         coeff_[9] = 989;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 9>)
+    void coeff_init (traits::integral_constant<unsigned, 9>)
     {
         coeff_[0] = 1.0 / 89600.0;
         coeff_[1] = 2857;
@@ -157,7 +157,7 @@ class NumericNewtonCotesCoeff
         coeff_[10] = 2857;
     }
 
-    void coeff_init (cxx11::integral_constant<unsigned, 10>)
+    void coeff_init (traits::integral_constant<unsigned, 10>)
     {
         coeff_[0] = 1.0 / 598752.0;
         coeff_[1] = 16067;

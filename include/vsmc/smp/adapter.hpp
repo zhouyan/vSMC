@@ -10,11 +10,11 @@ namespace vsmc {
 template <typename T, template <typename, typename> class Impl,
          typename BaseType>
 class InitializeAdapter :
-    public internal::AdapImplTrait<T, Impl, InitializeAdapter, BaseType>::type
+    public traits::AdapImplTrait<T, Impl, InitializeAdapter, BaseType>::type
 {
     public :
 
-    typedef typename internal::AdapImplTrait<
+    typedef typename traits::AdapImplTrait<
         T, Impl, vsmc::InitializeAdapter, BaseType>::type
         initialize_impl_type;
     typedef cxx11::function<std::size_t (SingleParticle<T>)>
@@ -72,11 +72,11 @@ class InitializeAdapter :
 template <typename T, template <typename, typename> class Impl,
          typename BaseType>
 class MoveAdapter :
-    public internal::AdapImplTrait<T, Impl, MoveAdapter, BaseType>::type
+    public traits::AdapImplTrait<T, Impl, MoveAdapter, BaseType>::type
 {
     public :
 
-    typedef typename internal::AdapImplTrait<
+    typedef typename traits::AdapImplTrait<
         T, Impl, vsmc::MoveAdapter, BaseType>::type
         move_impl_type;
     typedef cxx11::function<std::size_t (std::size_t, SingleParticle<T>)>
@@ -123,11 +123,11 @@ class MoveAdapter :
 template <typename T, template <typename, typename> class Impl,
          typename BaseType>
 class MonitorEvalAdapter :
-    public internal::AdapImplTrait<T, Impl, MonitorEvalAdapter, BaseType>::type
+    public traits::AdapImplTrait<T, Impl, MonitorEvalAdapter, BaseType>::type
 {
     public :
 
-    typedef typename internal::AdapImplTrait<
+    typedef typename traits::AdapImplTrait<
         T, Impl, vsmc::MonitorEvalAdapter, BaseType>::type
         monitor_eval_impl_type;
     typedef cxx11::function<
@@ -177,11 +177,11 @@ class MonitorEvalAdapter :
 template <typename T, template <typename, typename> class Impl,
          typename BaseType>
 class PathEvalAdapter :
-    public internal::AdapImplTrait<T, Impl, PathEvalAdapter, BaseType>::type
+    public traits::AdapImplTrait<T, Impl, PathEvalAdapter, BaseType>::type
 {
     public :
 
-    typedef typename internal::AdapImplTrait<
+    typedef typename traits::AdapImplTrait<
         T, Impl, vsmc::PathEvalAdapter, BaseType>::type
         path_eval_impl_type;
     typedef cxx11::function<double (std::size_t, ConstSingleParticle<T>)>

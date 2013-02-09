@@ -13,7 +13,7 @@ class StateOMP : public StateBase<Dim, T>
 {
     public :
 
-    typedef typename internal::OMPSizeTypeTrait<
+    typedef typename traits::OMPSizeTypeTrait<
         typename StateBase<Dim, T>::size_type>::type size_type;
 
     explicit StateOMP (size_type N) : StateBase<Dim, T>(N) {}
@@ -43,7 +43,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
-        typedef typename internal::OMPSizeTypeTrait<
+        typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->initialize_param(particle, param);
@@ -75,7 +75,7 @@ class MoveOMP : public MoveBase<T, Derived>
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
-        typedef typename internal::OMPSizeTypeTrait<
+        typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
@@ -107,7 +107,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
-        typedef typename internal::OMPSizeTypeTrait<
+        typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);
@@ -137,7 +137,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
-        typedef typename internal::OMPSizeTypeTrait<
+        typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
         const size_type N = static_cast<size_type>(particle.value().size());
         this->pre_processor(iter, particle);

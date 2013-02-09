@@ -13,7 +13,7 @@ class NumericOMP : public NumericBase<Derived>
 {
     public :
 
-    typedef typename internal::OMPSizeTypeTrait<
+    typedef typename traits::OMPSizeTypeTrait<
         typename NumericBase<Derived>::size_type>::type size_type;
     typedef typename NumericBase<Derived>::eval_type eval_type;
 
