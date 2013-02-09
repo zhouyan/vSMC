@@ -14,9 +14,8 @@ namespace vsmc {                                                              \
     template <typename, typename D = VBase> class Move##Name;                 \
     template <typename, typename D = VBase> class MonitorEval##Name;          \
     template <typename, typename D = VBase> class PathEval##Name;             \
-namespace integrate {                                                         \
     template <typename> class Numeric##Name;                                  \
-} }
+}
 
 namespace vsmc {
 

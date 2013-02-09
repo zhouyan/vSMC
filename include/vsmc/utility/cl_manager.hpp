@@ -1,17 +1,8 @@
 #ifndef VSMC_UTILITY_CL_MANAGER_HPP
 #define VSMC_UTILITY_CL_MANAGER_HPP
 
-#include <vsmc/internal/config.hpp>
-#include <vsmc/internal/assert.hpp>
-#include <vsmc/internal/defines.hpp>
-#include <vsmc/internal/forward.hpp>
-#include <vsmc/internal/traits.hpp>
+#include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl_wrapper.hpp>
-
-#include <cstddef>
-#include <cstdlib>
-#include <string>
-#include <vector>
 
 namespace vsmc {
 

@@ -1,16 +1,7 @@
 #ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
 #define VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
 
-#include <vsmc/internal/config.hpp>
-#include <vsmc/internal/assert.hpp>
-#include <vsmc/internal/defines.hpp>
-#include <vsmc/internal/forward.hpp>
-
-#include <vsmc/cxx11/functional.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
-
-#include <cstddef>
-#include <vector>
+#include <vsmc/internal/common.hpp>
 
 namespace vsmc {
 
