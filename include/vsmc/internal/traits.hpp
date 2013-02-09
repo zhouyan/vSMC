@@ -3,15 +3,12 @@
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/forward.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
 
 #include <string>
 
 // Type dispatcher
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)    \
-namespace vsmc {                                                              \
-                                                                              \
-namespace internal {                                                          \
+namespace vsmc { namespace traits {                                           \
                                                                               \
 template <typename T>                                                         \
 struct Has##OuterType##Impl                                                   \
@@ -29,8 +26,7 @@ struct Has##OuterType##Impl                                                   \
                                                                               \
 template <typename T>                                                         \
 struct Has##OuterType :                                                       \
-    public cxx11::integral_constant <bool, Has##OuterType##Impl<T>::value>    \
-{};                                                                           \
+    public integral_constant <bool, Has##OuterType##Impl<T>::value> {};       \
                                                                               \
 template <typename T, bool> struct OuterType##Dispatch                        \
 {typedef DefaultType type;};                                                  \
@@ -38,18 +34,16 @@ template <typename T, bool> struct OuterType##Dispatch                        \
 template <typename T> struct OuterType##Dispatch<T, true>                     \
 {typedef typename T::InnerType type;};                                        \
                                                                               \
-}                                                                             \
-                                                                              \
 template <typename T> struct OuterType##Trait                                 \
 {                                                                             \
-    enum {value = internal::Has##OuterType<T>::value};                        \
-    typedef typename internal::OuterType##Dispatch<T, value>::type type;      \
+    enum {value = traits::Has##OuterType<T>::value};                          \
+    typedef typename traits::OuterType##Dispatch<T, value>::type type;        \
 };                                                                            \
                                                                               \
-} // namespace vsmc
+} } // namespace vsmc::traits
 
 #define VSMC_DEFINE_MF_CHECKER(OuterMF, InnerMF, RT, Args)                    \
-namespace vsmc { namespace internal {                                         \
+namespace vsmc { namespace traits {                                           \
                                                                               \
 template <typename T>                                                         \
 struct Has##OuterMF##Impl                                                     \
@@ -67,14 +61,13 @@ struct Has##OuterMF##Impl                                                     \
 };                                                                            \
                                                                               \
 template <typename T>                                                         \
-struct Has##OuterMF : public cxx11::integral_constant<                        \
-        bool, internal::Has##OuterMF##Impl<T>::value>                         \
-{};                                                                           \
+struct Has##OuterMF :                                                         \
+    public integral_constant<bool, Has##OuterMF##Impl<T>::value> {};          \
                                                                               \
-} } // namespace vsmc::internal
+} } // namespace vsmc::traits
 
 #define VSMC_DEFINE_STATIC_MF_CHECKER(OuterMF, InnerMF, RT, Args)             \
-namespace vsmc { namespace internal {                                         \
+namespace vsmc { namespace traits {                                           \
                                                                               \
 template <typename T>                                                         \
 struct HasStatic##OuterMF##Impl                                               \
@@ -92,28 +85,54 @@ struct HasStatic##OuterMF##Impl                                               \
 };                                                                            \
                                                                               \
 template <typename T>                                                         \
-struct HasStatic##OuterMF : public cxx11::integral_constant<                  \
-        bool, internal::HasStatic##OuterMF##Impl<T>::value> {};               \
+struct HasStatic##OuterMF :                                                   \
+    public integral_constant<bool, HasStatic##OuterMF##Impl<T>::value> {};    \
                                                                               \
-} } // namespace vsmc::internal
+} } // namespace vsmc::traits
 
 #define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName)                             \
-namespace vsmc { namespace internal {                                         \
-    template <template <typename, typename> class>                            \
-    struct Is##BaseName##Impl : public cxx11::false_type {};                  \
-} } //namespace vsmc::internal
+namespace vsmc { namespace traits {                                           \
+                                                                              \
+template <template <typename, typename> class>                                \
+struct Is##BaseName##Impl : public false_type {};                             \
+                                                                              \
+} } //namespace vsmc::traits
 
 #define VSMC_DEFINE_SMP_IS_IMPL_TRUE(Name)                                    \
-namespace vsmc { namespace internal {                                         \
-    template <>                                                               \
-    struct IsInitializeImpl<Initialize##Name> : public cxx11::true_type {};   \
-    template <>                                                               \
-    struct IsMoveImpl<Move##Name> : public cxx11::true_type {};               \
-    template <>                                                               \
-    struct IsMonitorEvalImpl<MonitorEval##Name> : public cxx11::true_type {}; \
-    template <>                                                               \
-    struct IsPathEvalImpl<PathEval##Name> : public cxx11::true_type {};       \
-} } //namespace vsmc::internal
+namespace vsmc { namespace traits {                                           \
+                                                                              \
+template <>                                                                   \
+struct IsInitializeImpl<Initialize##Name> : public true_type {};              \
+template <>                                                                   \
+struct IsMoveImpl<Move##Name> : public true_type {};                          \
+template <>                                                                   \
+struct IsMonitorEvalImpl<MonitorEval##Name> : public true_type {};            \
+template <>                                                                   \
+struct IsPathEvalImpl<PathEval##Name> : public true_type {};                  \
+                                                                              \
+} } //namespace vsmc::traits
+
+namespace vsmc { namespace traits {
+
+template <typename T, T v>
+struct integral_constant
+{
+    static const T value = v;
+    typedef T value_type;
+    typedef integral_constant<T, v> type;
+    VSMC_CONSTEXPR operator value_type () const {return value;}
+};
+
+typedef integral_constant<bool, true> true_type;
+typedef integral_constant<bool, false> false_type;
+
+template <typename T, typename U> struct is_same : public false_type {};
+template <typename T> struct is_same<T, T> : public true_type {};
+
+template<bool, class T = void> struct enable_if {};
+template<class T> struct enable_if<true, T> {typedef T type;};
+
+} } // namespace vsmc::traits
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
@@ -122,7 +141,7 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSampling1Type,
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSamplingDType,
         importance_sampling_d_type, ImportanceSamplingD)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
-        cxx11::false_type)
+        false_type)
 
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
         bool, (const std::string &))
@@ -142,20 +161,13 @@ VSMC_DEFINE_SMP_IS_IMPL_TRUE(PPL)
 VSMC_DEFINE_SMP_IS_IMPL_TRUE(STD)
 VSMC_DEFINE_SMP_IS_IMPL_TRUE(TBB)
 
-namespace vsmc {
-
-namespace internal {
+namespace vsmc { namespace traits {
 
 #if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
-template <typename T> struct OMPSizeTypeTrait
-{
-    typedef T type;
-};
+template <typename T> struct OMPSizeTypeTrait {typedef T type;};
 #else
 template <typename T> struct OMPSizeTypeTrait
-{
-    typedef typename std::ptrdiff_t type;
-};
+{typedef typename std::ptrdiff_t type;};
 #endif
 
 template <template <std::size_t, typename> class State, typename D>
@@ -176,8 +188,7 @@ struct IsBaseOfStateImpl
 
 template <template <std::size_t, typename> class State, typename D>
 struct IsBaseOfState :
-    public cxx11::integral_constant<bool, IsBaseOfStateImpl<State, D>::value>
-{};
+    public integral_constant<bool, IsBaseOfStateImpl<State, D>::value> {};
 
 template <typename D>
 struct IsBaseOfStateCLImpl
@@ -197,10 +208,7 @@ struct IsBaseOfStateCLImpl
 
 template <typename D>
 struct IsBaseOfStateCL :
-    public cxx11::integral_constant<bool, IsBaseOfStateCLImpl<D>::value>
-{};
-
-// AdaptImplTrait
+    public integral_constant<bool, IsBaseOfStateCLImpl<D>::value> {};
 
 /// \cond HIDDEN_SYMBOLS
 template <typename, template <typename, typename> class, template <typename,
@@ -210,25 +218,18 @@ struct AdapImplTrait;
 
 template <typename T, template <typename, typename> class Impl,
          template <typename, template <typename, typename> class, typename>
-             class Adapter>
-struct AdapImplTrait<T, Impl, Adapter, VBase>
-{
-    typedef Impl<T, VBase> type;
-};
+         class Adapter>
+struct AdapImplTrait<T, Impl, Adapter, VBase> {typedef Impl<T, VBase> type;};
 
 template <typename T, template <typename, typename> class Impl,
          template <typename, template <typename, typename> class, typename>
          class Adapter>
 struct AdapImplTrait<T, Impl, Adapter, CBase>
-{
-    typedef Impl<T, Adapter<T, Impl, CBase> > type;
-};
+{typedef Impl<T, Adapter<T, Impl, CBase> > type;};
 
 template <typename ID, bool>
 struct CheckOpenCLPlatformDispatch
-{
-    static bool check (const std::string &name) {return true;}
-};
+{static bool check (const std::string &name) {return true;}};
 
 template <typename ID>
 struct CheckOpenCLPlatformDispatch<ID, true>
@@ -239,9 +240,7 @@ struct CheckOpenCLPlatformDispatch<ID, true>
 
 template <typename ID, bool>
 struct CheckOpenCLDeviceDispatch
-{
-    static bool check (const std::string &name) {return true;}
-};
+{static bool check (const std::string &name) {return true;}};
 
 template <typename ID>
 struct CheckOpenCLDeviceDispatch<ID, true>
@@ -250,18 +249,16 @@ struct CheckOpenCLDeviceDispatch<ID, true>
     {return ID::check_opencl_device(name);}
 };
 
-} // namespace vsmc::internal
-
 template <typename ID>
 struct CheckOpenCLPlatformTrait :
-    public internal::CheckOpenCLPlatformDispatch<
-    ID, internal::HasStaticCheckOpenCLPlatform<ID>::value> {};
+    public CheckOpenCLPlatformDispatch<
+    ID, HasStaticCheckOpenCLPlatform<ID>::value> {};
 
 template <typename ID>
 struct CheckOpenCLDeviceTrait :
-    public internal::CheckOpenCLDeviceDispatch<
-    ID, internal::HasStaticCheckOpenCLDevice<ID>::value> {};
+    public CheckOpenCLDeviceDispatch<
+    ID, HasStaticCheckOpenCLDevice<ID>::value> {};
 
-} // namespace vsmc::internal
+} } // namespace vsmc::traits
 
 #endif // VSMC_INTERNAL_TRAITS_HPP

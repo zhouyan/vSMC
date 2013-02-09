@@ -9,7 +9,6 @@
 
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/cxx11/random.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
 
 #include <cassert>
 #include <cmath>
