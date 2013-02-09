@@ -46,24 +46,23 @@ class StateCL
     typedef CLManager<ID> manager_type;
 
     explicit StateCL (size_type N) :
-        dim_(Dim == Dynamic ? 1 : Dim), size_(N),
-        manager_(manager_type::instance()), build_(false), build_id_(0),
-        state_buffer_(manager_.template create_buffer<state_type>(
+        dim_(Dim == Dynamic ? 1 : Dim), size_(N), build_(false), build_id_(0),
+        state_buffer_(manager().template create_buffer<state_type>(
                 dim_ * size_)),
-        copy_from_buffer_(manager_.template create_buffer<size_type>(size_))
+        copy_from_buffer_(manager().template create_buffer<size_type>(size_))
     {
         VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
     }
 
     StateCL (const StateCL<Dim, T, ID> &other) :
-        dim_(other.dim_), size_(other.size_), manager_(other.manager_),
+        dim_(other.dim_), size_(other.size_),
         program_(other.program_), kernel_copy_(other.kernel_copy_),
         build_(other.build_), build_id_(0),
-        state_buffer_(manager_.template create_buffer<state_type>(
+        state_buffer_(manager().template create_buffer<state_type>(
                 dim_ * size_)),
-        copy_from_buffer_(manager_.template create_buffer<size_type>(size_))
+        copy_from_buffer_(manager().template create_buffer<size_type>(size_))
     {
-        manager_.template copy_buffer<state_type>(
+        manager().template copy_buffer<state_type>(
                 other.state_buffer_, dim_ * size_, state_buffer_);
     }
 
@@ -78,10 +77,10 @@ class StateCL
             build_id_    = 0;
 
             state_buffer_ =
-                manager_.template create_buffer<state_type>(dim_ * size_);
+                manager().template create_buffer<state_type>(dim_ * size_);
             copy_from_buffer_ =
-                manager_.template create_buffer<size_type>(size_);
-            manager_.template copy_buffer<state_type>(
+                manager().template create_buffer<size_type>(size_);
+            manager().template copy_buffer<state_type>(
                     other.state_buffer_, dim_ * size_, state_buffer_);
         }
 
@@ -98,7 +97,7 @@ class StateCL
         VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(CL);
 
         state_buffer_ =
-            manager_.template create_buffer<state_type>(dim * size_);
+            manager().template create_buffer<state_type>(dim * size_);
         dim_ = dim;
     }
 
@@ -109,9 +108,9 @@ class StateCL
 
     /// \brief The instance of the CLManager signleton associated with this
     /// value collcection
-    manager_type &manager () const
+    static manager_type &manager ()
     {
-        return manager_;
+        return manager_type::instance();
     }
 
     /// \brief The OpenCL buffer that stores the state values
@@ -194,19 +193,19 @@ class StateCL
                 static_cast<VSMC_SEED_TYPE::result_type>(size_));
 
         try {
-            program_ = manager_.create_program(ss.str());
-            program_.build(manager_.device_vec(), flags.c_str());
+            program_ = manager().create_program(ss.str());
+            program_.build(manager().device_vec(), flags.c_str());
             program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
-            program_.getBuildInfo(manager_.device(),
+            program_.getBuildInfo(manager().device(),
                     CL_PROGRAM_BUILD_OPTIONS, &build_options_);
-            program_.getBuildInfo(manager_.device(), CL_PROGRAM_BUILD_LOG,
+            program_.getBuildInfo(manager().device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             build_ = true;
         } catch (cl::Error &err) {
             program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
-            program_.getBuildInfo(manager_.device(),
+            program_.getBuildInfo(manager().device(),
                     CL_PROGRAM_BUILD_OPTIONS, &build_options_);
-            program_.getBuildInfo(manager_.device(), CL_PROGRAM_BUILD_LOG,
+            program_.getBuildInfo(manager().device(), CL_PROGRAM_BUILD_LOG,
                     &build_log_);
             std::stringstream log_ss;
             log_ss << "====================================================\n";
@@ -281,11 +280,11 @@ class StateCL
         VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(copy);
         VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(CL);
 
-        manager_.template write_buffer<size_type>(
+        manager().template write_buffer<size_type>(
                 copy_from_buffer_, size_, copy_from);
         kernel_copy_.setArg(0, state_buffer_);
         kernel_copy_.setArg(1, copy_from_buffer_);
-        manager_.run_kernel(kernel_copy_, size_, 0);
+        manager().run_kernel(kernel_copy_, size_, 0);
     }
 
     template <typename OutputStream>
@@ -293,7 +292,7 @@ class StateCL
             char sepchar = ' ', char eolchar = '\n') const
     {
         state_host_.resize(dim_ * size_);
-        manager_.template read_buffer<state_type>(
+        manager().template read_buffer<state_type>(
                 state_buffer_, dim_ * size_, &state_host_[0]);
         for (size_type i = 0; i != size_; ++i) {
             os << iter << sepchar;
@@ -310,8 +309,6 @@ class StateCL
 
     std::size_t dim_;
     size_type size_;
-
-    manager_type &manager_;
 
     cl::Program program_;
     cl::Kernel kernel_copy_;
