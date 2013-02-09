@@ -44,8 +44,8 @@ implementation has them correctly implemented, the standard headers can also be
 used by defining suitable macros (see reference manual for details).
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
-not all C++11 implementations of `<functional>`, `<random>` and `<type_traits>`
-work properly even they are present.
+not all C++11 implementations of `<functional>` and `<random>` work properly
+even they are present.
 
 The library can optionally use the [Random123][Random123] library for
 parallelized random number generator, and the default behavior is assuming this
