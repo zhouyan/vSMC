@@ -36,13 +36,12 @@ The documentation can also be found [here][vSMCDoc].
 This library has no dependences other than C++ standard libraries (C++11). Any
 C++11 language features are optional.
 
-In particular, the library use the `<functional>`, `<random>` and
-`<type_traits>` headers, which are parts of the  C++11 standard libraries.
-Equivalences can be found in [Boost][Boost]. By default the library will use
-the [Boost][Boost] library as C++11 implementations are not mature at the time
-writing. But if the C++ implementation has them correctly implemented, the
-standard headers can also be used by defining suitable macros (see reference
-manual for details).
+In particular, the library use the `<functional>` and `<random>` headers, which
+are parts of the C++11 standard libraries. Equivalences can be found in
+[Boost][Boost]. By default the library will use the [Boost][Boost] library as
+C++11 implementations are not mature at the time writing. But if the C++
+implementation has them correctly implemented, the standard headers can also be
+used by defining suitable macros (see reference manual for details).
 
 Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 implementations of `<functional>`, `<random>` and `<type_traits>`
@@ -58,7 +57,7 @@ implementation, this means no third-party dependency is required to write a
 parallel SMC sampler. Other third-party parallelization include, [Intel Cilk
 Plus][Intel Cilk Plus], [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple
 Grand Central Dispatch][Apple GCD] is also supported on Mac OS X and on Linux
-via [libdispatch][libdispatch].  [Microsoft Parallel Patterns Library][MS PPL]
+via [libdispatch][libdispatch]. [Microsoft Parallel Patterns Library][MS PPL]
 is supported on Windows when compiled with MSVC 2010 or later. In addition,
 this library also support using [OpenCL][OpenCL] for GPGPU computing, though
 the interface is different than others.
