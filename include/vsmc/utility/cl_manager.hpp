@@ -2,6 +2,7 @@
 #define VSMC_UTILITY_CL_MANAGER_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/utility/cl_wrapper.hpp>
 
 namespace vsmc {
 
