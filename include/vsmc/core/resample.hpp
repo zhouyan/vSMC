@@ -61,7 +61,8 @@ inline void normalize_replication (SizeType N, SizeType *replication)
 
 /// \brief Int-to-Type struct template for identifying a resampling scheme
 /// \ingroup Core
-template <typename EnumType, EnumType S> struct ResampleType {};
+template <typename EnumType, EnumType S> struct ResampleType :
+    public traits::integral_constant<EnumType, S> {};
 
 /// \brief Multinomial resampling
 /// \ingroup Core

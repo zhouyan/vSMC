@@ -23,6 +23,8 @@ namespace vsmc {
 struct CBase;
 struct VBase;
 struct NullType;
+struct ScalarRng;
+struct VectorRng;
 
 // Utilities
 class Seed;
@@ -45,7 +47,7 @@ template <typename> class CLManager;
 
 // Core
 class Seed;
-class RngSet;
+template <typename, typename> class RngSet;
 template <typename ResType> class Resample;
 template <typename> class WeightSet;
 template <typename> class Sampler;

@@ -40,14 +40,6 @@
 #define VSMC_CBRNG_TYPE r123::Threefry4x64
 #endif
 
-#ifndef VSMC_ENGINE_TYPE
-#if VSMC_USE_RANDOM123
-#define VSMC_ENGINE_TYPE r123::Engine<VSMC_CBRNG_TYPE>
-#else
-#define VSMC_ENGINE_TYPE vsmc::cxx11::mt19937
-#endif
-#endif
-
 // Linear algebra
 
 #ifndef VSMC_USE_MKL
