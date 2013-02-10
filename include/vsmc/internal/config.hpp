@@ -10,12 +10,6 @@
 #define __STDC_CONSTANT_MACROS
 #endif
 
-// size_type
-
-#ifndef VSMC_SIZE_TYPE
-#define VSMC_SIZE_TYPE std::size_t
-#endif
-
 // Assertion
 
 #ifndef VSMC_RUNTIME_ASSERT_AS_EXCEPTION

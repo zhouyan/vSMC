@@ -134,7 +134,9 @@ template<class T> struct enable_if<true, T> {typedef T type;};
 
 } } // namespace vsmc::traits
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, VSMC_SIZE_TYPE)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SignedSizeType, size_type, std::ptrdiff_t)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(UnSignedSizeType, size_type, std::size_t)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSampling1Type,
         importance_sampling_1_type, ImportanceSampling1)

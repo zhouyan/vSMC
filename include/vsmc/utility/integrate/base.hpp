@@ -12,7 +12,7 @@ class NumericBase
 {
     protected :
 
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef std::size_t size_type;
     typedef cxx11::function<double (double)> eval_type;
 
     NumericBase () {}
@@ -80,7 +80,7 @@ class NumericBase<VBase>
 {
     public :
 
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef std::size_t size_type;
     typedef cxx11::function<double (double)> eval_type;
 
     protected :

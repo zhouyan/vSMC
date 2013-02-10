@@ -28,7 +28,7 @@
 #include <Eigen/Dense>
 #define VSMC_INTEGRATE_INT EIGEN_DEFAULT_DENSE_INDEX_TYPE
 #else // No known CBlas
-#define VSMC_INTEGRATE_INT VSMC_SIZE_TYPE
+#define VSMC_INTEGRATE_INT std::size_t
 #endif
 
 namespace vsmc { namespace internal {

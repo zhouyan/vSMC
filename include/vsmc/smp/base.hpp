@@ -40,7 +40,7 @@ class StateBase : public internal::StateBaseDim<Dim>
 {
     public :
 
-    typedef VSMC_SIZE_TYPE size_type;
+    typedef std::size_t size_type;
     typedef T state_type;
     explicit StateBase (size_type N) : size_(N), state_(N * Dim) {}
 
