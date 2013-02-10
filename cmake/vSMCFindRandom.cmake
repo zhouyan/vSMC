@@ -6,7 +6,7 @@ SET (VSMC_RANDOM_TEST_SOURCE "
 int main ()
 {
     const int N = 1000;
-    vsmc::RngSet eng(N);
+    vsmc::traits::RngSetTypeTrait<vsmc::NullType>::type eng(N);
 
     vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
     for (int i = 0; i != N; ++i) {
