@@ -66,6 +66,6 @@ class Backup
     bool is_saved_;
 };
 
-}; // 
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_BACKUP_HPP

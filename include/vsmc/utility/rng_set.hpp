@@ -72,19 +72,18 @@ class RngSet<RngType, VectorRng>
 
 } // namespace vsmc
 
-
 #if VSMC_USE_RANDOM123
-#define VSMC_INTERNAL_MACRO_DEFAULT_RNG_SET \
+#define VSMC_INTERNAL_MACRO_DEFAULT_RNG_SET_TYPE \
     RngSet<r123::Engine<r123::Threefry4x64>, VectorRng>
 #else
-#define VSMC_INTERNAL_MACRO_DEFAULT_RNG_SET \
+#define VSMC_INTERNAL_MACRO_DEFAULT_RNG_SET_TYPE \
     RngSet<vsmc::cxx11::mt19937, VectorRng>
 #endif
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
-        VSMC_INTERNAL_MACRO_DEFAULT_RNG_SET)
+        VSMC_INTERNAL_MACRO_DEFAULT_RNG_SET_TYPE)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
-        cxx11::mt19937)
+        vsmc::cxx11::mt19937)
 
 #undef VSMC_INTERNAL_MACRO_DEFAULT_RNG_SET
 
