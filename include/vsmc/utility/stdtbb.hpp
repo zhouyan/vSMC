@@ -110,13 +110,15 @@ class ThreadInfo
         return old_num;
     }
 
-    template <typename SizeType>
-    std::vector<BlockedRange<SizeType> > partition (
-            const BlockedRange<SizeType> &range) const
+    template <typename Range>
+    std::vector<Range> partition (const Range &range) const
     {
-        SizeType N = range.end() - range.begin();
-        SizeType tn = static_cast<SizeType>(thread_num());
-        SizeType block_size =  0;
+        VSMC_RUNTIME_ASSERT_RANGE(range.begin(), range.end(),
+                ThreadInfo::partition);
+        typedef typename traits::SizeTypeTrait<Range>::type size_type;
+        size_type N = range.end() - range.begin();
+        size_type tn = static_cast<size_type>(thread_num());
+        size_type block_size =  0;
 
         if (N < tn)
             block_size = 1;
@@ -125,12 +127,12 @@ class ThreadInfo
         else
             block_size = N / tn;
 
-        std::vector<BlockedRange<SizeType> > range_vec;
+        std::vector<Range> range_vec;
         range_vec.reserve(thread_num());
-        SizeType B = range.begin();
+        size_type B = range.begin();
         while (N > 0) {
-            SizeType next = N < block_size ? N : block_size;
-            range_vec.push_back(BlockedRange<SizeType>(B, B + next));
+            size_type next = N < block_size ? N : block_size;
+            range_vec.push_back(Range(B, B + next));
             B += next;
             N -= next;
         }
@@ -172,15 +174,14 @@ class ThreadInfo
 ///
 /// \details
 /// Requirement: WorkType:
-/// void work (const BlockedRange<size_type> &range);
-template <typename SizeType, typename WorkType>
-void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
+/// void work (const Range &range);
+template <typename Range, typename WorkType>
+void parallel_for (const Range &range, WorkType &&work)
 {
-    std::vector<BlockedRange<SizeType> > range_vec(
-            ThreadInfo::instance().partition(range));
+    std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
-    for (typename std::vector<BlockedRange<SizeType> >::iterator
+    for (typename std::vector<Range>::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r) {
         wg.push_back(std::async(std::launch::async,
                     std::forward<WorkType>(work), *r));
@@ -191,7 +192,7 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
-        for (typename std::vector<BlockedRange<SizeType> >::iterator
+        for (typename std::vector<Range>::iterator
                 r = range_vec.begin(); r != range_vec.end(); ++r) {
             tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
                             *r)));
@@ -206,18 +207,16 @@ void parallel_for (const BlockedRange<SizeType> &range, WorkType &&work)
 ///
 /// \details
 /// Requirement: WorkType:
-/// void work (const BlockedRange<size_type> &range, T &res);
-template <typename SizeType, typename T, typename WorkType>
-T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
-        T init)
+/// void work (const Range &range, T &res);
+template <typename Range, typename T, typename WorkType>
+T parallel_accumulate (const Range &range, WorkType &&work, T init)
 {
-    std::vector<BlockedRange<SizeType> > range_vec(
-            ThreadInfo::instance().partition(range));
+    std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
     std::size_t i = 0;
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
-    for (typename std::vector<BlockedRange<SizeType> >::iterator
+    for (typename std::vector<Range>::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r, ++i) {
         wg.push_back(std::async(std::launch::async,
                     std::forward<WorkType>(work), *r, std::ref(result[i])));
@@ -228,7 +227,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
-        for (typename std::vector<BlockedRange<SizeType> >::iterator
+        for (typename std::vector<Range>::iterator
                 r = range_vec.begin(); r != range_vec.end(); ++r, ++i) {
             tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
                             *r, std::ref(result[i]))));
@@ -249,18 +248,16 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
 ///
 /// \details
 /// Requirement: WorkType:
-/// void work (const BlockedRange<size_type> &range, T &res);
-template <typename SizeType, typename T, typename BinOp, typename WorkType>
-T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
-        T init, BinOp bin_op)
+/// void work (const Range &range, T &res);
+template <typename Range, typename T, typename Bin, typename WorkType>
+T parallel_accumulate (const Range &range, WorkType &&work, T init, Bin bin_op)
 {
-    std::vector<BlockedRange<SizeType> > range_vec(
-            ThreadInfo::instance().partition(range));
+    std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
     std::size_t i =0;
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
-    for (typename std::vector<BlockedRange<SizeType> >::iterator
+    for (typename std::vector<Range>::iterator
             r = range_vec.begin(); r != range_vec.end(); ++r, ++i) {
         wg.push_back(std::async(std::launch::async,
                     std::forward<WorkType>(work), *r, std::ref(result[i])));
@@ -271,7 +268,7 @@ T parallel_accumulate (const BlockedRange<SizeType> &range, WorkType &&work,
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
-        for (typename std::vector<BlockedRange<SizeType> >::iterator
+        for (typename std::vector<Range>::iterator
                 r = range_vec.begin(); r != range_vec.end(); ++r, ++i) {
             tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
                             *r, std::ref(result[i]))));
