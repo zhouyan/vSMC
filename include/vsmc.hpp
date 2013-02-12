@@ -20,6 +20,9 @@
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Single threaded and parallel samplers using SMP implementations
 
+/// \defgroup Traits Traits
+/// \brief Trait classes
+
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 

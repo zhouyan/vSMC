@@ -7,7 +7,37 @@
 
 #include <string>
 
-// Type dispatcher
+/// \brief Define a type dispatch trait
+/// \ingroup Traits
+///
+/// \details
+/// This macro define a class template
+/// \code
+/// template <typename T> struct OuterTrait;
+/// \endcode
+/// with the following members
+/// \li Member enumurator `OuterTrait::value`: true if `T::Inner` exits and is
+/// a type
+/// \li Member type `OuterTrait::type`:
+/// same as `T::Inner` if `value == true`, otherwise `Default`. Three low
+/// level implementation class templates are also defined
+/// \code
+/// template <typename T> struct HasOuterImpl;
+/// template <typename T> struct HasOuter;
+/// template <typename T, bool> struct OuterDispatch;
+/// \endcode
+/// **Example**
+/// \code
+/// VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t);
+///
+/// struct Empty {};
+/// struct Stack {typedef int size_type;};
+///
+/// vsmc::traits::SizeTypeTrait<Empty>::value; // false
+/// vsmc::traits::SizeTypeTrait<Empty>::type;  // std::size_t
+/// vsmc::traits::SizeTypeTrait<Stack>::value; // true
+/// vsmc::traits::SizeTypeTrait<Stack>::type;  // Stack::size_type
+/// \endcode
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)                \
 namespace vsmc { namespace traits {                                           \
                                                                               \
@@ -43,6 +73,38 @@ template <typename T> struct Outer##Trait                                     \
                                                                               \
 } } // namespace vsmc::traits
 
+/// \brief Define a class template dispatch trait
+/// \ingroup Traits
+///
+/// \details
+/// This macro define a class template
+/// \code
+/// template <typename T, typename V> struct OuterTrait;
+/// \endcode
+/// with the following members
+/// \li Member enumurator `OuterTrait::value`: true if `T::Inner` exits and is
+/// a class tempalte that can take `V` as its template parameter. The clas
+/// template can have multiple template parameters, but the 
+/// \li Member type `OuterTrait::type`:
+/// same as `T::Inner<T>` if `value == true`, otherwise `Default<V>`. Three low
+/// level implementation class templates are also defined
+/// \code
+/// template <typename T, typename V> struct HasOuterImpl;
+/// template <typename T, typename V> struct HasOuter;
+/// template <typename T, typename V, bool> struct OuterDispatch;
+/// \endcode
+/// **Example**
+/// \code
+/// VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(VecType, vec_type, std::vector);
+///
+/// struct Empty {};
+/// struct Stack { template <typename T> struct vec_type {/*...*/}; };
+///
+/// vsmc::traits::VecTypeTrait<Empty, int>::value; // false
+/// vsmc::traits::VecTypeTrait<Empty, int>::type;  // std::vector<int>
+/// vsmc::traits::VecTypeTrait<Stack, int>::value; // true
+/// vsmc::traits::VecTypeTrait<Stack, int>::type;  // Stack::vec_type<int>
+/// \endcode
 #define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)       \
 namespace vsmc { namespace traits {                                           \
                                                                               \
