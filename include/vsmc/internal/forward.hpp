@@ -28,6 +28,7 @@ struct VectorRng;
 
 // Utilities
 class Seed;
+template <typename, typename> class RngSet;
 
 class ImportanceSampling1;
 class ImportanceSamplingD;
@@ -46,8 +47,6 @@ class CLQuery;
 template <typename> class CLManager;
 
 // Core
-class Seed;
-template <typename, typename> class RngSet;
 template <typename ResType> class Resample;
 template <typename> class WeightSet;
 template <typename> class Sampler;
