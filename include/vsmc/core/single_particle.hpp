@@ -303,6 +303,24 @@ class ConstSingleParticleBase
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
+///
+/// \details
+/// This is the basic SingleParticle available for any type of Particle. To
+/// extend it for type `T`. One can either specialize
+/// traits::SingleParticle<T,T> or define a class template named
+/// `single_particle_type` within `T` with the following minimum requirement.
+/// \code
+/// template <typename S> // S: StateType, such as StateBase<Dim, T>
+/// struct single_particle_type
+/// {
+///     typedef IntType size_type;
+///     single_particle_type (size_type id, Particle<S> *particle_ptr);
+///     size_type id () const;
+///     const Particle<S> *particle_ptr () const;
+/// };
+/// \endcode
+/// Usually you can safely derive `single_particle_type<S>` from
+/// SingleParticleBase<S> and add methods specific to `S`.
 template <typename T>
 class SingleParticle :
     public traits::SingleParticleTypeTrait<T, T>::type
