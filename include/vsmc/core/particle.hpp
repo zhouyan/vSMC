@@ -528,7 +528,7 @@ class Particle
     /// performed
     ///
     /// \return true if resampling was performed
-    bool resample (double threshold)
+    bool resample (const resample_op_type &op, double threshold)
     {
         bool resampled = weight_set_.ess() < threshold * size_;
         size_type N = weight_set_.resample_size();
@@ -537,7 +537,7 @@ class Particle
             weight_.resize(N);
             replication_.resize(N);
             weight_set_.read_resample_weight(&weight_[0]);
-            resample_op_(size_, resample_rng_,
+            op(size_, resample_rng_,
                     &weight_[0], &replication_[0]);
             replication2copy_from(N);
             value_.copy(N, &copy_from_[0]);
@@ -545,53 +545,6 @@ class Particle
         }
 
         return resampled;
-    }
-
-    /// \brief Set resampling method by a resample_op_type object
-    void resample_scheme (const resample_op_type &res_op)
-    {
-        resample_op_ = res_op;
-    }
-
-    /// \brief Set resampling method by a built-in scheme name
-    ///
-    /// \param scheme A ResampleScheme scheme name
-    ///
-    /// \return  true if scheme is valid and the resampling scheme is actually
-    /// changed, false otherwise
-    bool resample_scheme (ResampleScheme scheme)
-    {
-        switch (scheme) {
-            case Multinomial :
-                resample_op_ = Resample<
-                    ResampleType<ResampleScheme, Multinomial> >();
-                break;
-            case Residual :
-                resample_op_ = Resample<
-                    ResampleType<ResampleScheme, Residual> >();
-                break;
-            case Stratified :
-                resample_op_ = Resample<
-                    ResampleType<ResampleScheme, Stratified> >();
-                break;
-            case Systematic :
-                resample_op_ = Resample<
-                    ResampleType<ResampleScheme, Systematic> >();
-                break;
-            case ResidualStratified :
-                resample_op_ = Resample<
-                    ResampleType<ResampleScheme, ResidualStratified> >();
-                break;
-            case ResidualSystematic :
-                resample_op_ = Resample<
-                    ResampleType<ResampleScheme, ResidualSystematic> >();
-                break;
-            default :
-                return false;
-                break;
-        }
-
-        return true;
     }
 
     private :

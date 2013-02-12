@@ -26,15 +26,16 @@ class Sampler
     typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
     explicit Sampler (size_type N,
-            ResampleScheme scheme = Stratified, double threshold = 0.5) :
-        threshold_(threshold), particle_(N), iter_num_(0),
+            ResampleScheme scheme = Stratified,
+            double resample_threshold = 0.5) :
+        resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()), show_(false)
     {resample_scheme(scheme);}
 
     explicit Sampler (size_type N,
             const typename Particle<T>::resample_op_type &res_op,
-            double threshold = 0.5) :
-        threshold_(threshold), particle_(N), iter_num_(0)
+            double resample_threshold = 0.5) :
+        resample_threshold_(resample_threshold), particle_(N), iter_num_(0)
     {resample_scheme(res_op);}
 
     /// \brief Number of particles
@@ -69,7 +70,7 @@ class Sampler
     Sampler<T> &resample_scheme (
             const typename Particle<T>::resample_op_type &res_op)
     {
-        particle_.resample_scheme(res_op);
+        resample_op_ = res_op;
 
         return *this;
     }
@@ -78,7 +79,34 @@ class Sampler
     /// name
     Sampler<T> &resample_scheme (ResampleScheme scheme)
     {
-        particle_.resample_scheme(scheme);
+        switch (scheme) {
+            case Multinomial :
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, Multinomial> >();
+                break;
+            case Residual :
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, Residual> >();
+                break;
+            case Stratified :
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, Stratified> >();
+                break;
+            case Systematic :
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, Systematic> >();
+                break;
+            case ResidualStratified :
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, ResidualStratified> >();
+                break;
+            case ResidualSystematic :
+                resample_op_ = Resample<
+                    ResampleType<ResampleScheme, ResidualSystematic> >();
+                break;
+            default :
+                break;
+        }
 
         return *this;
     }
@@ -86,13 +114,13 @@ class Sampler
     /// \brief Get resampling threshold
     double resample_threshold () const
     {
-        return threshold_;
+        return resample_threshold_;
     }
 
     /// \brief Set resampling threshold
     Sampler<T> &resample_threshold (double threshold)
     {
-        threshold_ = threshold;
+        resample_threshold_ = threshold;
 
         return *this;
     }
@@ -604,7 +632,8 @@ class Sampler
     std::vector<move_type> move_queue_;
     std::vector<mcmc_type> mcmc_queue_;
 
-    double threshold_;
+    typename Particle<T>::resample_op_type resample_op_;
+    double resample_threshold_;
 
     Particle<T> particle_;
     std::size_t iter_num_;
@@ -619,7 +648,7 @@ class Sampler
 
     void do_resampling ()
     {
-        bool resampled = particle_.resample(threshold_);
+        bool resampled = particle_.resample(resample_op_, resample_threshold_);
         ess_history_.push_back(particle_.ess());
         resampled_history_.push_back(resampled);
     }
