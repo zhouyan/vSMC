@@ -59,15 +59,10 @@ inline void normalize_replication (SizeType N, SizeType *replication)
 
 } // namespace vsmc::internal
 
-/// \brief Int-to-Type struct template for identifying a resampling scheme
-/// \ingroup Core
-template <typename EnumType, EnumType S> struct ResampleType :
-    public traits::integral_constant<EnumType, S> {};
-
 /// \brief Multinomial resampling
 /// \ingroup Core
 template <>
-class Resample<ResampleType<ResampleScheme, Multinomial> >
+class Resample<traits::integral_constant<ResampleScheme, Multinomial> >
 {
     public :
 
@@ -83,7 +78,7 @@ class Resample<ResampleType<ResampleScheme, Multinomial> >
 /// \brief Residual resampling
 /// \ingroup Core
 template <>
-class Resample<ResampleType<ResampleScheme, Residual> >
+class Resample<traits::integral_constant<ResampleScheme, Residual> >
 {
     public :
 
@@ -118,7 +113,7 @@ class Resample<ResampleType<ResampleScheme, Residual> >
 /// \brief Stratified resampling
 /// \ingroup Core
 template <>
-class Resample<ResampleType<ResampleScheme, Stratified> >
+class Resample<traits::integral_constant<ResampleScheme, Stratified> >
 {
     public :
 
@@ -151,7 +146,7 @@ class Resample<ResampleType<ResampleScheme, Stratified> >
 /// \brief Systematic resampling
 /// \ingroup Core
 template <>
-class Resample<ResampleType<ResampleScheme, Systematic> >
+class Resample<traits::integral_constant<ResampleScheme, Systematic> >
 {
     public :
 
@@ -183,7 +178,7 @@ class Resample<ResampleType<ResampleScheme, Systematic> >
 /// \brief Residual stratified resampling
 /// \ingroup Core
 template <>
-class Resample<ResampleType<ResampleScheme, ResidualStratified> >
+class Resample<traits::integral_constant<ResampleScheme, ResidualStratified> >
 {
     public :
 
@@ -234,7 +229,7 @@ class Resample<ResampleType<ResampleScheme, ResidualStratified> >
 /// \brief Residual systematic resampling
 /// \ingroup Core
 template <>
-class Resample<ResampleType<ResampleScheme, ResidualSystematic> >
+class Resample<traits::integral_constant<ResampleScheme, ResidualSystematic> >
 {
     public :
 
