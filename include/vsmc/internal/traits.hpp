@@ -2,21 +2,22 @@
 #define VSMC_INTERNAL_TRAITS_HPP
 
 #include <vsmc/internal/config.hpp>
+#include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 
 #include <string>
 
 // Type dispatcher
-#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OuterType, InnerType, DefaultType)    \
+#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)                \
 namespace vsmc { namespace traits {                                           \
                                                                               \
 template <typename T>                                                         \
-struct Has##OuterType##Impl                                                   \
+struct Has##Outer##Impl                                                       \
 {                                                                             \
     private :                                                                 \
                                                                               \
     struct char2 {char c1; char c2;};                                         \
-    template <typename U> static char test (typename U::InnerType *);         \
+    template <typename U> static char test (typename U::Inner *);             \
     template <typename U> static char2 test (...);                            \
                                                                               \
     public :                                                                  \
@@ -25,34 +26,69 @@ struct Has##OuterType##Impl                                                   \
 };                                                                            \
                                                                               \
 template <typename T>                                                         \
-struct Has##OuterType :                                                       \
-    public integral_constant <bool, Has##OuterType##Impl<T>::value> {};       \
+struct Has##Outer :                                                           \
+    public integral_constant<bool, Has##Outer##Impl<T>::value> {};            \
                                                                               \
-template <typename T, bool> struct OuterType##Dispatch                        \
-{typedef DefaultType type;};                                                  \
+template <typename T, bool> struct Outer##Dispatch                            \
+{typedef Default type;};                                                      \
                                                                               \
-template <typename T> struct OuterType##Dispatch<T, true>                     \
-{typedef typename T::InnerType type;};                                        \
+template <typename T> struct Outer##Dispatch<T, true>                         \
+{typedef typename T::Inner type;};                                            \
                                                                               \
-template <typename T> struct OuterType##Trait                                 \
+template <typename T> struct Outer##Trait                                     \
 {                                                                             \
-    enum {value = traits::Has##OuterType<T>::value};                          \
-    typedef typename traits::OuterType##Dispatch<T, value>::type type;        \
+    enum {value = Has##Outer<T>::value};                                      \
+    typedef typename Outer##Dispatch<T, value>::type type;                    \
 };                                                                            \
                                                                               \
 } } // namespace vsmc::traits
 
-#define VSMC_DEFINE_MF_CHECKER(OuterMF, InnerMF, RT, Args)                    \
+#define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)       \
+namespace vsmc { namespace traits {                                           \
+                                                                              \
+template <typename T, typename V>                                             \
+struct Has##Outer##Impl                                                       \
+{                                                                             \
+    private :                                                                 \
+                                                                              \
+    struct char2 {char c1; char c2;};                                         \
+    template <typename U> static char test (typename U::template Inner<V> *); \
+    template <typename U> static char2 test (...);                            \
+                                                                              \
+    public :                                                                  \
+                                                                              \
+    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};             \
+};                                                                            \
+                                                                              \
+template <typename T, typename V>                                             \
+struct Has##Outer :                                                           \
+    public integral_constant<bool, Has##Outer##Impl<T, V>::value> {};         \
+                                                                              \
+template <typename T, typename V, bool> struct Outer##Dispatch                \
+{typedef Default<V> type;};                                                   \
+                                                                              \
+template <typename T, typename V> struct Outer##Dispatch<T, V, true>          \
+{typedef typename T::template Inner<V> type;};                                \
+                                                                              \
+template <typename T, typename V> struct Outer##Trait                         \
+{                                                                             \
+    enum {value = Has##Outer<T, V>::value};                                   \
+    typedef typename Outer##Dispatch<T, V, value>::type type;                 \
+};                                                                            \
+                                                                              \
+} } // namespace vsmc::traits
+
+#define VSMC_DEFINE_MF_CHECKER(Outer, Inner, RT, Args)                        \
 namespace vsmc { namespace traits {                                           \
                                                                               \
 template <typename T>                                                         \
-struct Has##OuterMF##Impl                                                     \
+struct Has##Outer##Impl                                                       \
 {                                                                             \
     private :                                                                 \
                                                                               \
     struct char2 {char c1; char c2;};                                         \
     template <typename U, RT (U::*) Args> struct sfinae_;                     \
-    template <typename U> static char test (sfinae_<U, &U::InnerMF> *);       \
+    template <typename U> static char test (sfinae_<U, &U::Inner> *);         \
     template <typename U> static char2 test(...);                             \
                                                                               \
     public :                                                                  \
@@ -61,22 +97,22 @@ struct Has##OuterMF##Impl                                                     \
 };                                                                            \
                                                                               \
 template <typename T>                                                         \
-struct Has##OuterMF :                                                         \
-    public integral_constant<bool, Has##OuterMF##Impl<T>::value> {};          \
+struct Has##Outer :                                                           \
+    public integral_constant<bool, Has##Outer##Impl<T>::value> {};            \
                                                                               \
 } } // namespace vsmc::traits
 
-#define VSMC_DEFINE_STATIC_MF_CHECKER(OuterMF, InnerMF, RT, Args)             \
+#define VSMC_DEFINE_STATIC_MF_CHECKER(Outer, Inner, RT, Args)                 \
 namespace vsmc { namespace traits {                                           \
                                                                               \
 template <typename T>                                                         \
-struct HasStatic##OuterMF##Impl                                               \
+struct HasStatic##Outer##Impl                                                 \
 {                                                                             \
     private :                                                                 \
                                                                               \
     struct char2 {char c1; char c2;};                                         \
     template <typename U, RT (*) Args> struct sfinae_;                        \
-    template <typename U> static char test (sfinae_<U, &U::InnerMF> *);       \
+    template <typename U> static char test (sfinae_<U, &U::Inner> *);         \
     template <typename U> static char2 test(...);                             \
                                                                               \
     public :                                                                  \
@@ -85,8 +121,8 @@ struct HasStatic##OuterMF##Impl                                               \
 };                                                                            \
                                                                               \
 template <typename T>                                                         \
-struct HasStatic##OuterMF :                                                   \
-    public integral_constant<bool, HasStatic##OuterMF##Impl<T>::value> {};    \
+struct HasStatic##Outer :                                                     \
+    public integral_constant<bool, HasStatic##Outer##Impl<T>::value> {};      \
                                                                               \
 } } // namespace vsmc::traits
 
