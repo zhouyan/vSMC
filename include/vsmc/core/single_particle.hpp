@@ -321,6 +321,7 @@ class ConstSingleParticleBase
 /// \endcode
 /// Usually you can safely derive `single_particle_type<S>` from
 /// SingleParticleBase<S> and add methods specific to `S`.
+/// \sa StateBase::single_particle_type
 template <typename T>
 class SingleParticle :
     public traits::SingleParticleTypeTrait<T, T>::type
