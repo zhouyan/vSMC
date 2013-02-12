@@ -17,6 +17,7 @@ class Sampler
     public :
 
     typedef typename Particle<T>::size_type size_type;
+    typedef typename Particle<T>::resample_op_type resample_op_type;
     typedef T value_type;
     typedef cxx11::function<std::size_t (Particle<T> &, void *)> init_type;
     typedef cxx11::function<std::size_t (std::size_t, Particle<T> &)>
@@ -33,7 +34,7 @@ class Sampler
     {resample_scheme(scheme);}
 
     explicit Sampler (size_type N,
-            const typename Particle<T>::resample_op_type &res_op,
+            const resample_op_type &res_op,
             double resample_threshold = 0.5) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0)
     {resample_scheme(res_op);}
@@ -66,9 +67,8 @@ class Sampler
         return ess_history_.size();
     }
 
-    /// \brief Set resampling method by a Particle<T>::resample_op_type object
-    Sampler<T> &resample_scheme (
-            const typename Particle<T>::resample_op_type &res_op)
+    /// \brief Set resampling method by a resample_op_type object
+    Sampler<T> &resample_scheme (const resample_op_type &res_op)
     {
         resample_op_ = res_op;
 
@@ -632,7 +632,7 @@ class Sampler
     std::vector<move_type> move_queue_;
     std::vector<mcmc_type> mcmc_queue_;
 
-    typename Particle<T>::resample_op_type resample_op_;
+    resample_op_type resample_op_;
     double resample_threshold_;
 
     Particle<T> particle_;
