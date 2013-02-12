@@ -165,9 +165,6 @@ typedef integral_constant<bool, false> false_type;
 template <typename T, typename U> struct is_same : public false_type {};
 template <typename T> struct is_same<T, T> : public true_type {};
 
-template<bool, class T = void> struct enable_if {};
-template<class T> struct enable_if<true, T> {typedef T type;};
-
 } } // namespace vsmc::traits
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
@@ -180,6 +177,11 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSamplingDType,
         importance_sampling_d_type, ImportanceSamplingD)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         false_type)
+
+VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleType,
+        single_particle_type, SingleParticleBase)
+VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleType,
+        const_single_particle_type, ConstSingleParticleBase)
 
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
         bool, (const std::string &))

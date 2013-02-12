@@ -2,6 +2,7 @@
 #define VSMC_SMP_BASE_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/core/single_particle.hpp>
 
 namespace vsmc {
 
@@ -15,6 +16,36 @@ class StateBase : public traits::StateBaseDimTrait<Dim>
     typedef std::size_t size_type;
     typedef T state_type;
     explicit StateBase (size_type N) : size_(N), state_(N * Dim) {}
+
+    template <typename S>
+    struct single_particle_type : public SingleParticleBase<S>
+    {
+        single_particle_type (
+                typename SingleParticleBase<S>::size_type id,
+                typename SingleParticleBase<S>::particle_ptr_type ptr) :
+            SingleParticleBase<S>(id, ptr) {}
+
+        state_type &state (std::size_t pos) const
+        {return this->mutable_particle_ptr()->value().state( this->id(), pos);}
+
+        std::size_t dim () const
+        {return this->particle_ptr()->value().dim();}
+    };
+
+    template <typename S>
+    struct const_single_particle_type : public ConstSingleParticleBase<S>
+    {
+        const_single_particle_type (
+                typename ConstSingleParticleBase<S>::size_type id,
+                typename ConstSingleParticleBase<S>::particle_ptr_type ptr) :
+            ConstSingleParticleBase<S>(id, ptr) {}
+
+        const state_type &state (std::size_t pos) const
+        {return this->particle_ptr()->value().state(this->id(), pos);}
+
+        std::size_t dim () const
+        {return this->particle_ptr()->value().dim();}
+    };
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)

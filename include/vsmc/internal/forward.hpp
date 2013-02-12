@@ -55,8 +55,10 @@ template <typename> class Monitor;
 template <typename> class Path;
 template <typename, template <typename> class> class PathGeometry;
 template <typename, template <typename> class> class ParticleIterator;
-template <typename> class ConstSingleParticle;
 template <typename> class SingleParticle;
+template <typename> class SingleParticleBase;
+template <typename> class ConstSingleParticle;
+template <typename> class ConstSingleParticleBase;
 
 // OpenCL
 template <std::size_t, typename, typename ID = VSMC_CL_DEFAULT_ID>

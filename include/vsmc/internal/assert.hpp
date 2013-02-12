@@ -88,14 +88,6 @@ class StaticAssert<true>
             ("**vsmc::Manager::"#func"** CAN ONLY BE CALLED AFTER TRUE "      \
              "**vsmc::Manager::setup**"));
 
-#define VSMC_RUNTIME_ASSERT_CONST_SINGLE_PARTICLE_VALID                       \
-    VSMC_RUNTIME_ASSERT(particle_ptr_,                                        \
-            ("A **ConstSingleParticle** object "                              \
-             "is contructed with 0 **Particle** pointer"));                   \
-VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
-        ("A **ConstSignleParticle** object "                                  \
-         "is contructed with an out of range id"));
-
 #define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename)                            \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                      \
             ("DERIVED FROM " #basename                                        \
@@ -135,14 +127,6 @@ VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
 
 #define VSMC_RUNTIME_ASSERT_RANGE(begin, end, func)                           \
     VSMC_RUNTIME_ASSERT((begin < end), ("**"#func"** INVALID RANGE"))
-
-#define VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_VALID                             \
-    VSMC_RUNTIME_ASSERT(particle_ptr_,                                        \
-            ("A **SingleParticle** OBJECT "                                   \
-             "IS CONTRUCTED WITH 0 **Particle** POINTER"));                   \
-VSMC_RUNTIME_ASSERT((id_ >= 0 && id_ <= particle_ptr_->size()),               \
-        ("A **SignleParticle** OBJECT "                                       \
-         "IS CONTRUCTED WITH AN OUT OF RANGE ID"));
 
 #define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func)                              \
     VSMC_RUNTIME_ASSERT((build()),                                            \
