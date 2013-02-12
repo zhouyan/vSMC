@@ -194,6 +194,7 @@ class Particle
 
     /// \brief Performing resampling if ESS/N < threshold
     ///
+    /// \param op The resampling operation funcitor
     /// \param threshold The threshold of ESS/N below which resampling will be
     /// performed
     ///
