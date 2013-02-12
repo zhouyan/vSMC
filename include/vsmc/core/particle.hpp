@@ -357,7 +357,7 @@ class Particle
     typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
     typedef cxx11::function<
         void (size_type, resample_rng_type &, double *, size_type *)>
-        resample_op_type;
+        resample_type;
     typedef ParticleIterator<T, SingleParticle> iterator;
     typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
@@ -528,7 +528,7 @@ class Particle
     /// performed
     ///
     /// \return true if resampling was performed
-    bool resample (const resample_op_type &op, double threshold)
+    bool resample (const resample_type &op, double threshold)
     {
         bool resampled = weight_set_.ess() < threshold * size_;
         size_type N = weight_set_.resample_size();
@@ -557,7 +557,6 @@ class Particle
     std::vector<size_type> replication_;
     std::vector<size_type> copy_from_;
     std::vector<double> weight_;
-    resample_op_type resample_op_;
     resample_rng_type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
