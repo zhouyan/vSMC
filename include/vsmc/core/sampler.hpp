@@ -83,39 +83,6 @@ class Sampler
         return *this;
     }
 
-    /// \brief Set resampling method by a scheme name from a collection
-    ///
-    /// \details
-    /// An object of type Resample<ResampleType<EnumType, S>, size_type,
-    /// Particle<T>::resample_rng_set_type> will constructed as the resampling
-    /// method. This can be a user defined partial specializing of Resample
-    /// class template
-    ///
-    /// For example, resample_scheme<ResampleScheme, Stratified>() is
-    /// equivalent to resample_scheme(Stratified)
-    template <typename EnumType, EnumType S>
-    Sampler<T> &resample_scheme ()
-    {
-        particle_.template resample_scheme<EnumType, S>();
-
-        return *this;
-    }
-
-    /// \brief Set resampling method by the type of resampling object
-    ///
-    /// \details
-    /// An object of type Resample<ResType, size_type,
-    /// Particle<T>::rng_set_type>, will constructed as the resampling method.
-    /// This can be a user defined partial specializing of Resample class
-    /// template
-    template <typename ResType>
-    Sampler<T> &resample_scheme ()
-    {
-        particle_.template resample_scheme<ResType>();
-
-        return *this;
-    }
-
     /// \brief Get resampling threshold
     double resample_threshold () const
     {
