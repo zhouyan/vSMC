@@ -307,8 +307,9 @@ class ConstSingleParticleBase
 /// \details
 /// This is the basic SingleParticle available for any type of Particle. To
 /// extend it for type `T`. One can either specialize
-/// traits::SingleParticle<T,T> or define a class template named
-/// `single_particle_type` within `T` with the following minimum requirement.
+/// vsmc::traits::SingleParticleTypeTrait<T,T> or define a class template
+/// named `single_particle_type` within `T` with the following minimum
+/// requirement.
 /// \code
 /// template <typename S> // S: StateType, such as StateBase<Dim, T>
 /// struct single_particle_type
