@@ -172,28 +172,32 @@ template <typename T> struct OMPSizeTypeTrait
 {typedef typename std::ptrdiff_t type;};
 #endif
 
-template <template <std::size_t, typename> class State, typename D>
-struct IsBaseOfStateImpl
+template <std::size_t Dim>
+class StateBaseDimTrait
 {
-    private :
-
-    struct char2 {char c1; char c2;};
-
-    template <std::size_t Dim, typename T>
-    static char test (const State<Dim, T> *);
-    static char2 test (...);
-
     public :
 
-   enum {value = sizeof(test(static_cast<const D *>(0))) == sizeof(char)};
+    static VSMC_CONSTEXPR std::size_t dim () {return Dim;}
 };
 
-template <template <std::size_t, typename> class State, typename D>
-struct IsBaseOfState :
-    public integral_constant<bool, IsBaseOfStateImpl<State, D>::value> {};
+template <>
+class StateBaseDimTrait<Dynamic>
+{
+    public :
+
+    StateBaseDimTrait () : dim_(Dynamic) {}
+
+    std::size_t dim () const {return dim_;}
+
+    void resize_dim (std::size_t dim) {dim_ = dim;}
+
+    private :
+
+    std::size_t dim_;
+};
 
 template <typename D>
-struct IsBaseOfStateCLImpl
+struct IsDerivedFromStateCLImpl
 {
     private :
 
@@ -209,8 +213,8 @@ struct IsBaseOfStateCLImpl
 };
 
 template <typename D>
-struct IsBaseOfStateCL :
-    public integral_constant<bool, IsBaseOfStateCLImpl<D>::value> {};
+struct IsDerivedFromStateCL :
+    public integral_constant<bool, IsDerivedFromStateCLImpl<D>::value> {};
 
 /// \cond HIDDEN_SYMBOLS
 template <typename, template <typename, typename> class, template <typename,

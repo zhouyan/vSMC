@@ -5,38 +5,10 @@
 
 namespace vsmc {
 
-namespace internal {
-
-template <std::size_t Dim>
-class StateBaseDim
-{
-    public :
-
-    static VSMC_CONSTEXPR std::size_t dim () {return Dim;}
-};
-
-template <>
-class StateBaseDim<Dynamic>
-{
-    public :
-
-    StateBaseDim () : dim_(Dynamic) {}
-
-    std::size_t dim () const {return dim_;}
-
-    void resize_dim (std::size_t dim) {dim_ = dim;}
-
-    private :
-
-    std::size_t dim_;
-};
-
-} // namespace vsmc::internal
-
 /// \brief Particle::value_type subtype
 /// \ingroup SMP
 template <std::size_t Dim, typename T>
-class StateBase : public internal::StateBaseDim<Dim>
+class StateBase : public traits::StateBaseDimTrait<Dim>
 {
     public :
 
@@ -57,7 +29,7 @@ class StateBase : public internal::StateBaseDim<Dim>
     {
         VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Base);
 
-        internal::StateBaseDim<Dim>::resize_dim(dim);
+        traits::StateBaseDimTrait<Dim>::resize_dim(dim);
         state_.resize(dim * size_);
     }
 
