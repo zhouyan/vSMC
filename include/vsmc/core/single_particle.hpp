@@ -301,6 +301,8 @@ class ConstSingleParticleBase
     particle_ptr_type particle_ptr_;
 }; // class ConstSingleParticle
 
+/// \brief A thin wrapper over a complete Particle
+/// \ingroup Core
 template <typename T>
 class SingleParticle :
     public traits::SingleParticleTypeTrait<T, T>::type
@@ -316,6 +318,8 @@ class SingleParticle :
         base_sp_type(id, particle_ptr) {}
 };
 
+/// \brief A const variant to SingleParticle
+/// \ingroup Core
 template <typename T>
 class ConstSingleParticle :
     public traits::ConstSingleParticleTypeTrait<T, T>::type
