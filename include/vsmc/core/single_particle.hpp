@@ -311,7 +311,7 @@ class ConstSingleParticleBase
 /// named `single_particle_type` within `T` with the following minimum
 /// requirement.
 /// \code
-/// template <typename S> // S: StateType, such as StateBase<Dim, T>
+/// template <typename S> // S: StateType, such as StateMatrix<Dim, T>
 /// struct single_particle_type
 /// {
 ///     typedef IntType size_type;
@@ -322,7 +322,6 @@ class ConstSingleParticleBase
 /// \endcode
 /// Usually you can safely derive `single_particle_type<S>` from
 /// SingleParticleBase<S> and add methods specific to `S`.
-/// \sa StateBase::single_particle_type
 template <typename T>
 class SingleParticle :
     public traits::SingleParticleTypeTrait<T, T>::type

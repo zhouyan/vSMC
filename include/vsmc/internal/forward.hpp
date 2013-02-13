@@ -2,6 +2,7 @@
 #define VSMC_INTERNAL_FORWARD_HPP
 
 #include <vsmc/internal/config.hpp>
+#include <vsmc/internal/defines.hpp>
 
 #include <cstddef>
 
@@ -9,7 +10,7 @@
 
 #define VSMC_DEFINE_SMP_FORWARD(Name)                                         \
 namespace vsmc {                                                              \
-    template <std::size_t, typename> class State##Name;                       \
+    template <typename> class State##Name;                                    \
     template <typename, typename D = VBase> class Initialize##Name;           \
     template <typename, typename D = VBase> class Move##Name;                 \
     template <typename, typename D = VBase> class MonitorEval##Name;          \
@@ -68,8 +69,11 @@ template <typename, typename B = CBase> class MoveCL;
 template <typename, typename B = CBase> class MonitorEvalCL;
 template <typename, typename B = CBase> class PathEvalCL;
 
+// SMP State
+template <std::size_t, typename, MatrixOrder> class StateMatrixBase;
+template <std::size_t, typename, MatrixOrder O = RowMajor> class StateMatrix;
+
 // SMP Base
-template <std::size_t, typename> class StateBase;
 template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
 template <typename, typename> class MonitorEvalBase;

@@ -8,14 +8,14 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype usingt Apple Grand Central Dispatch
 /// \ingroup SMP
-template <std::size_t Dim, typename T>
-class StateGCD : public StateBase<Dim, T>
+template <typename BaseState>
+class StateGCD : public BaseState
 {
     public :
 
-    typedef typename StateBase<Dim, T>::size_type size_type;
+    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StateGCD (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateGCD (size_type N) : BaseState(N) {}
 }; // class StateGCD
 
 /// \brief Sampler<T>::init_type subtype usingt Apple Grand Central Dispatch

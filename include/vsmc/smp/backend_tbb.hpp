@@ -14,14 +14,14 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype using Intel Threading Building Blocks
 /// \ingroup SMP
-template <std::size_t Dim, typename T>
-class StateTBB : public StateBase<Dim, T>
+template <typename BaseState>
+class StateTBB : public BaseState
 {
     public :
 
-    typedef typename StateBase<Dim, T>::size_type size_type;
+    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StateTBB (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateTBB (size_type N) : BaseState(N) {}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
@@ -39,7 +39,7 @@ class StateTBB : public StateBase<Dim, T>
     {
         public :
 
-        copy_work_ (StateTBB<Dim, T> *state, const IntType *copy_from) :
+        copy_work_ (StateTBB<BaseState> *state, const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
@@ -50,7 +50,7 @@ class StateTBB : public StateBase<Dim, T>
 
         private :
 
-        StateTBB<Dim, T> *const state_;
+        StateTBB<BaseState> *const state_;
         const IntType *const copy_from_;
     }; // class copy_work_
 }; // class StateTBB

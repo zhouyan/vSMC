@@ -9,14 +9,14 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype using Intel Cilk Plus
 /// \ingroup SMP
-template <std::size_t Dim, typename T>
-class StateCILK : public StateBase<Dim, T>
+template <typename BaseState>
+class StateCILK : public BaseState
 {
     public :
 
-    typedef typename StateBase<Dim, T>::size_type size_type;
+    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StateCILK (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateCILK (size_type N) : BaseState(N) {}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)

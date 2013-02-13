@@ -85,7 +85,7 @@ template <typename T> struct Outer##Trait                                     \
 /// with the following members
 /// - Member enumurator `OuterTrait::value`: true if `T::Inner` exits and is a
 /// class tempalte that can take `V` as its template parameter. The clas
-/// template can have multiple template parameters, but the 
+/// template can have multiple template parameters, but the
 /// - Member type `OuterTrait::type`: same as `T::Inner<T>` if `value ==
 /// true`, otherwise `Default<V>`.
 /// - Three low level implementation class templates are also defined
@@ -275,7 +275,7 @@ template <typename T> struct OMPSizeTypeTrait
 #endif
 
 template <std::size_t Dim>
-class StateBaseDimTrait
+class DimTrait
 {
     public :
 
@@ -283,11 +283,11 @@ class StateBaseDimTrait
 };
 
 template <>
-class StateBaseDimTrait<Dynamic>
+class DimTrait<Dynamic>
 {
     public :
 
-    StateBaseDimTrait () : dim_(Dynamic) {}
+    DimTrait () : dim_(Dynamic) {}
 
     std::size_t dim () const {return dim_;}
 

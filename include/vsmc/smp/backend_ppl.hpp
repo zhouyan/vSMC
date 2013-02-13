@@ -8,14 +8,14 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype using Parallel Pattern Library
 /// \ingroup SMP
-template <std::size_t Dim, typename T>
-class StatePPL : public StateBase<Dim, T>
+template <typename BaseState>
+class StatePPL : public BaseState
 {
     public :
 
-    typedef typename StateBase<Dim, T>::size_type size_type;
+    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StatePPL (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StatePPL (size_type N) : BaseState(N) {}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
@@ -35,7 +35,7 @@ class StatePPL : public StateBase<Dim, T>
 
         typedef typename Particle<T>::size_type size_type;
 
-        copy_work_ (StatePPL<Dim, T> *state, const IntType *copy_from) :
+        copy_work_ (StatePPL<BaseState> *state, const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
         void operator() (size_type to) const
@@ -45,7 +45,7 @@ class StatePPL : public StateBase<Dim, T>
 
         private :
 
-        StatePPL<Dim, T> *const state_;
+        StatePPL<BaseState> *const state_;
         const IntType *const copy_from_;
     }; // class copy_work_
 }; // class StatePPL

@@ -8,14 +8,14 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype using C++11 concurrency
 /// \ingroup SMP
-template <std::size_t Dim, typename T>
-class StateSTD : public StateBase<Dim, T>
+template <typename BaseState>
+class StateSTD : public BaseState
 {
     public :
 
-    typedef typename StateBase<Dim, T>::size_type size_type;
+    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StateSTD (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateSTD (size_type N) : BaseState(N) {}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
@@ -33,8 +33,7 @@ class StateSTD : public StateBase<Dim, T>
     {
         public :
 
-        copy_work_ (StateSTD<Dim, T> *state,
-                const IntType *copy_from) :
+        copy_work_ (StateSTD<BaseState> *state, const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
         void operator() (const BlockedRange<size_type> &range) const
@@ -45,7 +44,7 @@ class StateSTD : public StateBase<Dim, T>
 
         private :
 
-        StateSTD<Dim, T> *const state_;
+        StateSTD<BaseState> *const state_;
         const IntType *const copy_from_;
     }; // class copy_work_
 }; // class StateSTD

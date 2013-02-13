@@ -7,14 +7,14 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup Sequential
-template <std::size_t Dim, typename T>
-class StateSEQ : public StateBase<Dim, T>
+template <typename BaseState>
+class StateSEQ : public BaseState
 {
     public :
 
-    typedef typename StateBase<Dim, T>::size_type size_type;
+    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StateSEQ (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateSEQ (size_type N) : BaseState(N) {}
 }; // class StateSEQ
 
 /// \brief Sampler<T>::init_type subtype

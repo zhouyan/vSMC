@@ -8,19 +8,19 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype using OpenMP
 /// \ingroup SMP
-template <std::size_t Dim, typename T>
-class StateOMP : public StateBase<Dim, T>
+template <typename BaseState>
+class StateOMP : public BaseState
 {
     public :
 
     typedef typename traits::OMPSizeTypeTrait<
-        typename StateBase<Dim, T>::size_type>::type size_type;
+        typename traits::SizeTypeTrait<BaseState>::type>::type size_type;
 
-    explicit StateOMP (size_type N) : StateBase<Dim, T>(N) {}
+    explicit StateOMP (size_type N) : BaseState(N) {}
 
     size_type size () const
     {
-        return static_cast<size_type>(StateBase<Dim, T>::size());
+        return static_cast<size_type>(BaseState::size());
     }
 
     template <typename IntType>

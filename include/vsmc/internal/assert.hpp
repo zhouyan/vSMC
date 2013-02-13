@@ -61,10 +61,9 @@ class StaticAssert<true>
     public :
 
     enum {
-        USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateBase_OBJECT,
+        USE_METHOD_resize_dim_WITH_A_FIXED_DIM_State_OBJECT,
 
         USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double,
-        USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateCL_OBJECT,
         USE_InitializeCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_MoveCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
@@ -143,9 +142,9 @@ class StaticAssert<true>
     VSMC_STATIC_ASSERT(vsmc::traits::Is##name##Impl<Impl>::value,             \
             USE_##name##Adapter_WITHOUT_A_##NAME##_IMPLEMENTATION)            \
 
-#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(name)                           \
+#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE                                 \
     VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
-            USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_State##name##_OBJECT)
+            USE_METHOD_resize_dim_WITH_A_FIXED_DIM_State_OBJECT)
 
 #define VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(degree)                \
     VSMC_STATIC_ASSERT((degree >= 1 && degree <= max_degree_),                \
