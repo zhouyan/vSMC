@@ -17,16 +17,24 @@
 #include <cstdio>
 #include <cstring>
 
+#include <limits>
+#include <stdexcept>
+#include <utility>
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <iterator>
-#include <limits>
-#include <map>
 #include <sstream>
-#include <stdexcept>
+
+#include <iterator>
+
+#include <deque>
+#include <list>
+#include <map>
+#include <queue>
+#include <set>
+#include <stack>
 #include <string>
-#include <utility>
 #include <vector>
 
 #endif // VSMC_INTERNAL_COMMON_HPP

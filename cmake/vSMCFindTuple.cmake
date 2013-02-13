@@ -1,8 +1,5 @@
-SET (VSMC_TUPLE_TEST_SOURCE "
-#include <vsmc/internal/compiler.hpp>
-#include <tuple>
-#include <cassert>
-int main () {assert(VSMC_HAS_CXX11_VARIADIC_TEMPLATES);}")
+FILE (READ ${PROJECT_SOURCE_DIR}/test/utility/utility_tuple_manip.cpp
+    VSMC_TUPLE_TEST_SOURCE)
 
 IF (NOT VSMC_TUPLE_FOUND)
     UNSET (VSMC_TUPLE_FOUND CACHE)

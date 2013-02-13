@@ -5,7 +5,7 @@
 #include <vsmc/core/single_particle.hpp>
 
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES && VSMC_HAS_CXX11LIB_TUPLE
-#include <tuple>
+#include <vsmc/utility/tuple_manip.hpp>
 #endif
 
 namespace vsmc {
@@ -187,36 +187,15 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES && VSMC_HAS_CXX11LIB_TUPLE
 
-namespace internal {
-
-template <typename, typename> struct TupleCat;
-
-template <typename FirstType, typename... Types>
-struct TupleCat<FirstType, std::tuple<Types...> >
-{typedef std::tuple<FirstType, Types...> type;};
-
-template <typename FirstType, typename... Types>
-struct StateTupleVectorType
-{
-    typedef typename TupleCat<std::vector<FirstType>,
-            typename StateTupleVectorType<Types...>::type>::type type;
-};
-
-template <typename FirstType>
-struct StateTupleVectorType<FirstType>
-{typedef std::tuple<std::vector<FirstType> > type;};
-
-} // namespace vsmc::internal
-
 /// \brief Base type of StateTuple
 /// \ingroup SMP
-template <MatrixOrder Order, typename FirstType, typename... Types>
+template <MatrixOrder Order, typename T, typename... Types>
 class StateTupleBase
 {
     public :
 
     typedef std::size_t size_type;
-    typedef std::tuple<FirstType, Types...> state_tuple_type;
+    typedef std::tuple<T, Types...> state_tuple_type;
 
     template <std::size_t Pos> struct state_type
     {typedef typename std::tuple_element<Pos, state_tuple_type>::type type;};
@@ -273,8 +252,8 @@ class StateTupleBase
     template <std::size_t Pos, typename OutputIter>
     OutputIter read_state (OutputIter first) const
     {
-        const StateTuple<Order, FirstType, Types...> *sptr =
-            static_cast<const StateTuple<Order, FirstType, Types...> *>(this);
+        const StateTuple<Order, T, Types...> *sptr =
+            static_cast<const StateTuple<Order, T, Types...> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
                 *first = sptr->template state<Pos>(i);
 
@@ -313,8 +292,8 @@ class StateTupleBase
     template <std::size_t Pos>
     void copy_particle (size_type from, size_type to, pos_tag_<Pos>)
     {
-        StateTuple<Order, FirstType, Types...> *sptr =
-            static_cast<StateTuple<Order, FirstType, Types...> *>(this);
+        StateTuple<Order, T, Types...> *sptr =
+            static_cast<StateTuple<Order, T, Types...> *>(this);
         sptr->template state<Pos>(to) = sptr->template state<Pos>(from);
         copy_particle (from, to, pos_tag_<Pos + 1>());
     }
@@ -325,8 +304,8 @@ class StateTupleBase
     void print_particle (OutputStream &os, size_type id,
             char sepchar, char eolchar, pos_tag_<Pos>) const
     {
-        const StateTuple<Order, FirstType, Types...> *sptr =
-            static_cast<const StateTuple<Order, FirstType, Types...> *>(this);
+        const StateTuple<Order, T, Types...> *sptr =
+            static_cast<const StateTuple<Order, T, Types...> *>(this);
         os << sptr->template state<Pos>(id) << sepchar;
         print_particle(os, id, sepchar, eolchar, pos_tag_<Pos + 1>());
     }
@@ -335,21 +314,21 @@ class StateTupleBase
     void print_particle (OutputStream &os, size_type id,
             char sepchar, char eolchar, pos_tag_<dim_ - 1>) const
     {
-        const StateTuple<Order, FirstType, Types...> *sptr =
-            static_cast<const StateTuple<Order, FirstType, Types...> *>(this);
+        const StateTuple<Order, T, Types...> *sptr =
+            static_cast<const StateTuple<Order, T, Types...> *>(this);
         os << sptr->template state<dim_ - 1>(id) << eolchar;
     }
 }; // class StateTupleBase
 
 /// \brief Particle::value_type subtype
 /// \ingroup SMP
-template <typename FirstType, typename... Types>
-class StateTuple<RowMajor, FirstType, Types...> :
-    public StateTupleBase<RowMajor, FirstType, Types...>
+template <typename T, typename... Types>
+class StateTuple<RowMajor, T, Types...> :
+    public StateTupleBase<RowMajor, T, Types...>
 {
     public :
 
-    typedef StateTupleBase<RowMajor, FirstType, Types...>
+    typedef StateTupleBase<RowMajor, T, Types...>
         state_tuple_base_type;
     typedef typename state_tuple_base_type::size_type size_type;
 
@@ -365,18 +344,18 @@ class StateTuple<RowMajor, FirstType, Types...> :
 
     private :
 
-    std::vector<std::tuple<FirstType, Types...> > state_;
+    std::vector<std::tuple<T, Types...> > state_;
 }; // StateTuple
 
 /// \brief Particle::value_type subtype
 /// \ingroup SMP
-template <typename FirstType, typename... Types>
-class StateTuple<ColMajor, FirstType, Types...> :
-    public StateTupleBase<ColMajor, FirstType, Types...>
+template <typename T, typename... Types>
+class StateTuple<ColMajor, T, Types...> :
+    public StateTupleBase<ColMajor, T, Types...>
 {
     public :
 
-    typedef StateTupleBase<ColMajor, FirstType, Types...>
+    typedef StateTupleBase<ColMajor, T, Types...>
         state_tuple_base_type;
     typedef typename state_tuple_base_type::size_type size_type;
 
@@ -393,9 +372,7 @@ class StateTuple<ColMajor, FirstType, Types...> :
 
     private :
 
-    typename internal::StateTupleVectorType<FirstType, Types...>::type
-        state_;
-
+    typename tuple::TupleApplyVector<std::tuple<T, Types...> >::type state_;
     template <std::size_t Pos> struct pos_tag_ {};
 
     template <std::size_t Pos>
