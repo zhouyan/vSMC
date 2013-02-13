@@ -199,7 +199,7 @@
 #endif
 #endif
 
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 7
 #ifndef VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 #define VSMC_HAS_CXX11_VARIADIC_TEMPLATES 1
 #endif

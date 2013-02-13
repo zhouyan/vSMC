@@ -72,6 +72,10 @@ template <typename, typename B = CBase> class PathEvalCL;
 // SMP State
 template <std::size_t, typename, MatrixOrder> class StateMatrixBase;
 template <std::size_t, typename, MatrixOrder O = RowMajor> class StateMatrix;
+#if VSMC_HAS_CXX11_VARIADIC_TEMPLATES && VSMC_HAS_CXX11LIB_TUPLE
+template <MatrixOrder, typename, typename...> class StateTupleBase;
+template <MatrixOrder, typename, typename...> class StateTuple;
+#endif
 
 // SMP Base
 template <typename, typename> class InitializeBase;

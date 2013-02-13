@@ -63,7 +63,6 @@ FUNCTION (ADD_EXAMPLE base algs)
     ENDFOREACH (smp)
 ENDFUNCTION (ADD_EXAMPLE)
 
-
 FUNCTION (COPY_FILE basename filename)
     ADD_CUSTOM_COMMAND (
         OUTPUT  ${PROJECT_BINARY_DIR}/${filename}
