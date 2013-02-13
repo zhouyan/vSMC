@@ -33,8 +33,6 @@ class StatePPL : public BaseState
     {
         public :
 
-        typedef typename Particle<T>::size_type size_type;
-
         copy_work_ (StatePPL<BaseState> *state, const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
