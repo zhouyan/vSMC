@@ -47,6 +47,16 @@ class CLConfigure;
 class CLQuery;
 template <typename> class CLManager;
 
+// Adapter
+template <typename, template <typename, typename> class, typename B = CBase>
+         class InitializeAdapter;
+template <typename, template <typename, typename> class, typename B = CBase>
+         class MoveAdapter;
+template <typename, template <typename, typename> class, typename B = CBase>
+         class MonitorEvalAdapter;
+template <typename, template <typename, typename> class, typename B = CBase>
+         class PathEvalAdapter;
+
 // Core
 template <typename ResType> class Resample;
 template <typename> class WeightSet;
@@ -82,16 +92,6 @@ template <typename, typename> class InitializeBase;
 template <typename, typename> class MoveBase;
 template <typename, typename> class MonitorEvalBase;
 template <typename, typename> class PathEvalBase;
-
-// SMP Adapter
-template <typename, template <typename, typename> class, typename B = CBase>
-         class InitializeAdapter;
-template <typename, template <typename, typename> class, typename B = CBase>
-         class MoveAdapter;
-template <typename, template <typename, typename> class, typename B = CBase>
-         class MonitorEvalAdapter;
-template <typename, template <typename, typename> class, typename B = CBase>
-         class PathEvalAdapter;
 
 } // namesapce vsmc
 

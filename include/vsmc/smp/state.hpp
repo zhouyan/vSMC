@@ -10,7 +10,7 @@
 
 namespace vsmc {
 
-/// \brief Particle::value_type subtype
+/// \brief Base type of StateTuple
 /// \ingroup SMP
 template <MatrixOrder Order, std::size_t Dim, typename T>
 class StateMatrixBase : public traits::DimTrait<Dim>
@@ -19,8 +19,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     typedef std::size_t size_type;
     typedef T state_type;
-
-    explicit StateMatrixBase (size_type N) : size_(N), state_(N * Dim) {}
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S>
@@ -128,6 +126,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     protected :
 
+    explicit StateMatrixBase (size_type N) : size_(N), state_(N * Dim) {}
+
     void copy_particle (size_type from, size_type to)
     {
         StateMatrix<Order, Dim, T> *sptr =
@@ -208,6 +208,8 @@ struct StateTupleVectorType<FirstType>
 
 } // namespace vsmc::internal
 
+/// \brief Base type of StateTuple
+/// \ingroup SMP
 template <MatrixOrder Order, typename FirstType, typename... Types>
 class StateTupleBase
 {
@@ -215,8 +217,6 @@ class StateTupleBase
 
     typedef std::size_t size_type;
     typedef std::tuple<FirstType, Types...> state_tuple_type;
-
-    explicit StateTupleBase (size_type N) : size_(N) {}
 
     template <std::size_t Pos> struct state_type
     {typedef typename std::tuple_element<Pos, state_tuple_type>::type type;};
@@ -295,6 +295,8 @@ class StateTupleBase
 
     protected :
 
+    explicit StateTupleBase (size_type N) : size_(N) {}
+
     void copy_particle (size_type from, size_type to)
     {
         if (from != to)
@@ -339,6 +341,8 @@ class StateTupleBase
     }
 }; // class StateTupleBase
 
+/// \brief Particle::value_type subtype
+/// \ingroup SMP
 template <typename FirstType, typename... Types>
 class StateTuple<RowMajor, FirstType, Types...> :
     public StateTupleBase<RowMajor, FirstType, Types...>
@@ -364,6 +368,8 @@ class StateTuple<RowMajor, FirstType, Types...> :
     std::vector<std::tuple<FirstType, Types...> > state_;
 }; // StateTuple
 
+/// \brief Particle::value_type subtype
+/// \ingroup SMP
 template <typename FirstType, typename... Types>
 class StateTuple<ColMajor, FirstType, Types...> :
     public StateTupleBase<ColMajor, FirstType, Types...>
