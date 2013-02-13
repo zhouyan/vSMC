@@ -334,11 +334,11 @@ class StateCL
 /// __kernel
 /// void kern (__global state_type *state, __global ulong *accept);
 /// \endcode
-/// \li Kernels can have additonal arguments and set by the user in
+/// - Kernels can have additonal arguments and set by the user in
 /// `pre_processor`.
-/// \li `state` has size `N * Dim` where `accept` has size `N`.
-/// \li The declaration does not have to much this, but the first arguments
-/// will be set by InitializeCL::opeartor(). For example
+/// - `state` has size `N * Dim` where `accept` has size `N`.
+/// - The declaration does not have to much this, but the first arguments will
+/// be set by InitializeCL::opeartor(). For example
 /// \code
 /// type struct {
 ///     state_type v1;
