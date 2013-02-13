@@ -207,7 +207,8 @@ struct TupleApply<C, std::tuple<> >
 /// \endcode
 /// where `T` is a `std::tuple` type, say `std::tuple<T1, T2>`. The struct has
 /// memeber type
-/// - `type`: std::tuple<Inner<T1>, Inner<T2>, ...>
+/// - `type`: std::tuple<Inner<T1>, Inner<T2>  >
+///
 /// Note that the class template `Inner` can have more than one template
 /// parameter. However, all but the first must have default arguments
 ///
@@ -233,8 +234,8 @@ struct TupleApply<C, std::tuple<> >
 /// Ideally the more general case, where the class template has more than one
 /// template parameter can be handled by `TupleApply` through variadic
 /// template. However currently compiler support for variadic template is not
-/// very robust. The general `TupleApply` at the time of writing only works
-/// with GCC 4.7 and Clang 3.2
+/// very robust. The general `TupleApply` (not defined in this vSMC) at the
+/// time of writing only works with GCC 4.7 and Clang 3.2
 ///
 /// `TupleApply` for all C++03 containers but std::map are defined
 #define VSMC_DEFINE_TUPLE_APPLY(Outer, Inner)                                 \
