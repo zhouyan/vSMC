@@ -12,7 +12,7 @@ namespace vsmc {
 
 /// \brief Particle::value_type subtype
 /// \ingroup SMP
-template <std::size_t Dim, typename T, MatrixOrder Order>
+template <MatrixOrder Order, std::size_t Dim, typename T>
 class StateMatrixBase : public traits::DimTrait<Dim>
 {
     public :
@@ -72,8 +72,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     template <typename OutputIter>
     OutputIter read_state (std::size_t pos, OutputIter first) const
     {
-        const StateMatrix<Dim, T, Order> *sptr =
-            static_cast<const StateMatrix<Dim, T, Order> *>(this);
+        const StateMatrix<Order, Dim, T> *sptr =
+            static_cast<const StateMatrix<Order, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
                 *first = sptr->state(i, pos);
 
@@ -93,12 +93,12 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         VSMC_RUNTIME_ASSERT_MATRIX_ORDER(
                 order, StateMatrix::read_state_matrix);
 
-        const StateMatrix<Dim, T, Order> *sptr =
-            static_cast<const StateMatrix<Dim, T, Order> *>(this);
         if (order == Order) {
             for (std::size_t i = 0; i != state_.size(); ++i, ++first)
                 *first = state_[i];
         } else {
+            const StateMatrix<Order, Dim, T> *sptr =
+                static_cast<const StateMatrix<Order, Dim, T> *>(this);
             for (size_type i = 0; i != size_; ++i) {
                 for (std::size_t d = 0; d != this->dim(); ++d) {
                     *first = sptr->state(i, d);
@@ -114,8 +114,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     OutputStream &print (OutputStream &os, std::size_t iter = 0,
             char sepchar = ' ', char eolchar = '\n') const
     {
-        const StateMatrix<Dim, T, Order> *sptr =
-            static_cast<const StateMatrix<Dim, T, Order> *>(this);
+        const StateMatrix<Order, Dim, T> *sptr =
+            static_cast<const StateMatrix<Order, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i) {
             os << iter << sepchar;
             for (std::size_t d = 0; d != this->dim() - 1; ++d)
@@ -130,8 +130,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     void copy_particle (size_type from, size_type to)
     {
-        StateMatrix<Dim, T, Order> *sptr =
-            static_cast<StateMatrix<Dim, T, Order> *>(this);
+        StateMatrix<Order, Dim, T> *sptr =
+            static_cast<StateMatrix<Order, Dim, T> *>(this);
         if (from != to)
             for (std::size_t d = 0; d != this->dim(); ++d)
                 sptr->state(to, d) = sptr->state(from, d);
@@ -150,11 +150,11 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 /// \brief Particle::value_type subtype
 /// \ingroup SMP
 template <std::size_t Dim, typename T>
-class StateMatrix<Dim, T, RowMajor> : public StateMatrixBase<Dim, T, RowMajor>
+class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 {
     public :
 
-    typedef StateMatrixBase<Dim, T, RowMajor> state_matrix_base_type;
+    typedef StateMatrixBase<RowMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
@@ -169,11 +169,11 @@ class StateMatrix<Dim, T, RowMajor> : public StateMatrixBase<Dim, T, RowMajor>
 /// \brief Particle::value_type subtype
 /// \ingroup SMP
 template <std::size_t Dim, typename T>
-class StateMatrix<Dim, T, ColMajor> : public StateMatrixBase<Dim, T, ColMajor>
+class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 {
     public :
 
-    typedef StateMatrixBase<Dim, T, ColMajor> state_matrix_base_type;
+    typedef StateMatrixBase<ColMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
