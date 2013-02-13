@@ -54,7 +54,7 @@ template <typename> struct TuplePopBack;
 template <typename, std::size_t> struct TuplePopFrontN;
 template <typename, std::size_t> struct TuplePopBackN;
 template <typename, typename> struct TupleMerge;
-template <template <typename> class, typename> struct TupleApply;
+template <typename, template <typename> class>  struct TupleApply;
 
 namespace tuple {
 

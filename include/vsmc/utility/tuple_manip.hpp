@@ -9,7 +9,7 @@ namespace vsmc {
 /// \brief Push a type to the front of a std::tuple type
 /// \ingroup Utility
 template <typename T, typename... Types>
-struct TuplePushFront<T, std::tuple<Types...> >
+struct TuplePushFront<std::tuple<Types...>, T>
 {
     typedef std::tuple<T, Types...> type;
 };
@@ -17,7 +17,7 @@ struct TuplePushFront<T, std::tuple<Types...> >
 /// \brief Push a type to the back of a std::tuple type
 /// \ingroup Utility
 template <typename T, typename... Types>
-struct TuplePushBack<T, std::tuple<Types...> >
+struct TuplePushBack<std::tuple<Types...>, T>
 {
     typedef std::tuple<Types..., T> type;
 };
@@ -49,7 +49,7 @@ struct TuplePopBack<std::tuple<T, Types...> >
 
     public :
 
-    typedef typename TuplePushFront<T, tail_type>::type type;
+    typedef typename TuplePushFront<tail_type, T>::type type;
 };
 
 /// \brief Remove a type from the back of a std::tuple type
@@ -141,8 +141,8 @@ struct TupleMerge
 {
     private :
 
-    typedef typename TuplePushBack<
-        typename std::tuple_element<0, T2>::type, T1>::type head_type;
+    typedef typename TuplePushBack<T1,
+        typename std::tuple_element<0, T2>::type>::type head_type;
     typedef typename TuplePopFront<T2>::type tail_type;
 
     public :
@@ -181,16 +181,17 @@ struct TupleMerge<std::tuple<>, std::tuple<> >
 /// Give a `std::tuple<T1, T2, ...>` and a class template `C`, the member type
 /// is `std::tuple<C<T1>, C<T2>, ...>`.
 template <template <typename> class C, typename T, typename... Types>
-struct TupleApply<C, std::tuple<T, Types...> >
+struct TupleApply<std::tuple<T, Types...>, C>
 {
-    typedef typename TuplePushFront<C<T>,
-            typename TupleApply<C, std::tuple<Types...> >::type>::type type;
+    typedef typename TuplePushFront<
+        typename TupleApply<std::tuple<Types...>, C>::type, C<T>
+        >::type type;
 };
 
 /// \brief Generate a new std::tuple types by apply a class template
 /// \ingroup Utility
 template <template <typename> class C>
-struct TupleApply<C, std::tuple<> >
+struct TupleApply<std::tuple<>, C>
 {
     typedef std::tuple<> type;
 };
@@ -244,8 +245,9 @@ namespace vsmc { namespace tuple {                                            \
 template <typename T, typename... Types>                                      \
 struct TupleApply##Outer<std::tuple<T, Types...> >                            \
 {                                                                             \
-    typedef typename TuplePushFront<Inner<T>, typename TupleApply##Outer<     \
-        std::tuple<Types...> >::type>::type type;                             \
+    typedef typename TuplePushFront<                                          \
+        typename TupleApply##Outer<std::tuple<Types...> >::type, Inner<T>     \
+        >::type type;                                                         \
 };                                                                            \
                                                                               \
 template <>                                                                   \
