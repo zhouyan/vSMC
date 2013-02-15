@@ -7,6 +7,11 @@
 
 namespace vsmc {
 
+/// \brief Position of parameter in the state vector
+/// \ingroup SMP
+template <std::size_t Pos>
+struct Position : public traits::integral_constant<std::size_t, Pos> {};
+
 /// \brief Base type of StateTuple
 /// \ingroup SMP
 template <MatrixOrder Order, typename T, typename... Types>
@@ -31,10 +36,10 @@ class StateTupleBase
         static VSMC_CONSTEXPR std::size_t dim () {return S::dim();}
 
         template <std::size_t Pos>
-        typename state_type<Pos>::type &state () const
+        typename state_type<Pos>::type &state (Position<Pos>) const
         {
-            return this->mutable_particle_ptr()->value().template
-                state<Pos>(this->id());
+            return this->mutable_particle_ptr()->value().
+                state(this->id(), Position<Pos>());
         }
     };
 
@@ -49,10 +54,10 @@ class StateTupleBase
         static VSMC_CONSTEXPR std::size_t dim () {return S::dim();}
 
         template <std::size_t Pos>
-        const typename state_type<Pos>::type &state () const
+        const typename state_type<Pos>::type &state (Position<Pos>) const
         {
-            return this->particle_ptr()->value().template
-                state<Pos>(this->id());
+            return this->particle_ptr()->value().
+                state(this->id(), Position<Pos>());
         }
     };
 
@@ -70,12 +75,12 @@ class StateTupleBase
     }
 
     template <std::size_t Pos, typename OutputIter>
-    OutputIter read_state (OutputIter first) const
+    OutputIter read_state (Position<Pos>, OutputIter first) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
-                *first = sptr->template state<Pos>(i);
+                *first = sptr->state(i, Position<Pos>());
 
         return first;
     }
@@ -86,7 +91,7 @@ class StateTupleBase
     {
         for (size_type i = 0; i != size_; ++i) {
             os << iter << sepchar;
-            print_particle(os, i, sepchar, eolchar, pos_tag_<0>());
+            print_particle(os, i, sepchar, eolchar, Position<0>());
         }
 
         return os;
@@ -99,7 +104,7 @@ class StateTupleBase
     void copy_particle (size_type from, size_type to)
     {
         if (from != to)
-            copy_particle(from, to, pos_tag_<0>());
+            copy_particle(from, to, Position<0>());
     }
 
     private :
@@ -107,36 +112,34 @@ class StateTupleBase
     size_type size_;
     static const std::size_t dim_ = sizeof...(Types) + 1;
 
-    template <std::size_t Pos> struct pos_tag_ {};
-
     template <std::size_t Pos>
-    void copy_particle (size_type from, size_type to, pos_tag_<Pos>)
+    void copy_particle (size_type from, size_type to, Position<Pos>)
     {
         StateTuple<Order, T, Types...> *sptr =
             static_cast<StateTuple<Order, T, Types...> *>(this);
-        sptr->template state<Pos>(to) = sptr->template state<Pos>(from);
-        copy_particle (from, to, pos_tag_<Pos + 1>());
+        sptr->state(to, Position<Pos>()) = sptr->state(from, Position<Pos>());
+        copy_particle (from, to, Position<Pos + 1>());
     }
 
-    void copy_particle (size_type from, size_type to, pos_tag_<dim_>) {}
+    void copy_particle (size_type from, size_type to, Position<dim_>) {}
 
     template <typename OutputStream, std::size_t Pos>
     void print_particle (OutputStream &os, size_type id,
-            char sepchar, char eolchar, pos_tag_<Pos>) const
+            char sepchar, char eolchar, Position<Pos>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
-        os << sptr->template state<Pos>(id) << sepchar;
-        print_particle(os, id, sepchar, eolchar, pos_tag_<Pos + 1>());
+        os << sptr->state(id, Position<Pos>()) << sepchar;
+        print_particle(os, id, sepchar, eolchar, Position<Pos + 1>());
     }
 
     template <typename OutputStream>
     void print_particle (OutputStream &os, size_type id,
-            char sepchar, char eolchar, pos_tag_<dim_ - 1>) const
+            char sepchar, char eolchar, Position<dim_ - 1>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
-        os << sptr->template state<dim_ - 1>(id) << eolchar;
+        os << sptr->state(id, Position<dim_ - 1>()) << eolchar;
     }
 }; // class StateTupleBase
 
@@ -156,11 +159,13 @@ class StateTuple<RowMajor, T, Types...> :
 
     template <std::size_t Pos>
     typename state_tuple_base_type::template state_type<Pos>::type
-    &state (size_type id) {return std::get<Pos>(state_[id]);}
+    &state (size_type id, Position<Pos>)
+    {return std::get<Pos>(state_[id]);}
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type
-    &state (size_type id) const {return std::get<Pos>(state_[id]);}
+    &state (size_type id, Position<Pos>) const
+    {return std::get<Pos>(state_[id]);}
 
     private :
 
@@ -180,29 +185,30 @@ class StateTuple<ColMajor, T, Types...> :
     typedef typename state_tuple_base_type::size_type size_type;
 
     explicit StateTuple (size_type N) : state_tuple_base_type(N)
-    {init_state(N, pos_tag_<0>());}
+    {init_state(N, Position<0>());}
 
     template <std::size_t Pos>
     typename state_tuple_base_type::template state_type<Pos>::type
-    &state (size_type id) {return std::get<Pos>(state_)[id];}
+    &state (size_type id, Position<Pos>)
+    {return std::get<Pos>(state_)[id];}
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type
-    &state (size_type id) const {return std::get<Pos>(state_)[id];}
+    &state (size_type id, Position<Pos>) const
+    {return std::get<Pos>(state_)[id];}
 
     private :
 
     typename tuple::TupleApplyVector<std::tuple<T, Types...> >::type state_;
-    template <std::size_t Pos> struct pos_tag_ {};
 
     template <std::size_t Pos>
-    void init_state (size_type N, pos_tag_<Pos>)
+    void init_state (size_type N, Position<Pos>)
     {
         std::get<Pos>(state_).resize(N);
-        init_state(N, pos_tag_<Pos + 1>());
+        init_state(N, Position<Pos + 1>());
     }
 
-    void init_state (size_type N, pos_tag_<sizeof...(Types)>)
+    void init_state (size_type N, Position<sizeof...(Types)>)
     {
         std::get<sizeof...(Types)>(state_).resize(N);
     }

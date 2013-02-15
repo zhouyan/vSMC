@@ -249,7 +249,7 @@ struct TupleApply<std::tuple<>, C>
 /// For class template `Inner` which has only one template parameter the macro
 /// definition is not needed. One can simply use `vsmc::TupleApply`
 /// \code
-/// template <typename T> class Vector; 
+/// template <typename T> class Vector;
 /// typedef vsmc::TupleApply<Vector, std::tuple<char, short, int> >::type t1;
 /// typedef std::tuple<Vector<char>, Vector<short>, Vector<int> >::type t2;
 /// vsmc::traits::is_same<t1, t2>::value; // true
