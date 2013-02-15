@@ -174,6 +174,28 @@ struct TupleMerge<std::tuple<>, std::tuple<> >
     typedef std::tuple<> type;
 };
 
+/// \brief Concatenate multiple std::tuple types
+/// \ingroup Utility
+template <typename T1, typename T2, typename... Types>
+struct TupleCat<T1, T2, Types...>
+{
+    private :
+
+    typedef typename TupleMerge<T1, T2>::type head_type;
+
+    public :
+
+    typedef typename TupleCat<head_type, Types...>::type type;
+};
+
+/// \brief Concatenate multiple std::tuple types
+/// \ingroup Utility
+template <typename... Types>
+struct TupleCat<std::tuple<Types...> >
+{
+    typedef std::tuple<Types...> type;
+};
+
 /// \brief Generate a new std::tuple types by apply a class template
 /// \ingroup Utility
 ///
