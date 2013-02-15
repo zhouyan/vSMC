@@ -1,20 +1,6 @@
 FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
     STRING (TOUPPER "${smp_name}" SMP)
     STRING (TOLOWER "${smp_name}" smp)
-    SET (VSMC_BASE_DEFINE "
-#define VSMC_BACKEND_${SMP} 1
-#define BASE_STATE   vsmc::State${SMP}
-#define BASE_INIT    vsmc::Initialize${SMP}
-#define BASE_MOVE    vsmc::Move${SMP}
-#define BASE_MONITOR vsmc::MonitorEval${SMP}
-#define BASE_PATH    vsmc::PathEval${SMP}
-#define BASE_NUMERIC vsmc::Numeric${SMP}
-#include <vsmc/smp/adapter.hpp>
-#include <vsmc/smp/state.hpp>
-#include <vsmc/smp/backend_${smp}.hpp>
-#include <vsmc/utility/integrate/numeric_${smp}.hpp>")
-
-    SET (VSMC_BASE_DEFINE_HEADER "${header}-${smp}.hpp")
 
     CONFIGURE_FILE (
         ${PROJECT_SOURCE_DIR}/${header}.hpp
