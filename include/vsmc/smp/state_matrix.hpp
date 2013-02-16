@@ -54,6 +54,10 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     size_type size () const {return size_;}
 
+    T *data () {return &state_[0];}
+
+    const T *data () const {return &state_[0];}
+
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
@@ -160,6 +164,12 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     const T &state (size_type id, std::size_t pos) const
     {return this->state_matrix()[id * this->dim() + pos];}
+
+    T *row_ptr (size_type id)
+    {return this->data() + id * this->dim();}
+
+    const T *row_ptr (size_type id) const
+    {return this->data() + id * this->dim();}
 }; // class StateMatrix
 
 /// \brief Particle::value_type subtype
@@ -179,6 +189,12 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     const T &state (size_type id, std::size_t pos) const
     {return this->state_matrix()[pos * this->size() + id];}
+
+    T *col_ptr (std::size_t pos)
+    {return this->data() + pos * this->size();}
+
+    const T *col_ptr (std::size_t pos) const
+    {return this->data() + pos * this->size();}
 }; // class StateMatrix
 
 } // namespace vsmc
