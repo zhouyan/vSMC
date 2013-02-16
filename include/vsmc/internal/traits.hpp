@@ -291,6 +291,8 @@ class DimTrait<Dynamic>
 
     std::size_t dim () const {return dim_;}
 
+    protected :
+
     void resize_dim (std::size_t dim) {dim_ = dim;}
 
     private :

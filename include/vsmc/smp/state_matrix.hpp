@@ -19,10 +19,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S>
     {
-        single_particle_type (
-                typename SingleParticleBase<S>::size_type id,
-                typename SingleParticleBase<S>::particle_ptr_type ptr) :
-            SingleParticleBase<S>(id, ptr) {}
+        single_particle_type (typename Particle<S>::size_type id,
+                Particle<S> *particle_ptr) :
+            SingleParticleBase<S>(id, particle_ptr) {}
 
         std::size_t dim () const {return this->particle_ptr()->value().dim();}
 
@@ -33,10 +32,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     template <typename S>
     struct const_single_particle_type : public ConstSingleParticleBase<S>
     {
-        const_single_particle_type (
-                typename ConstSingleParticleBase<S>::size_type id,
-                typename ConstSingleParticleBase<S>::particle_ptr_type ptr) :
-            ConstSingleParticleBase<S>(id, ptr) {}
+        const_single_particle_type (typename Particle<S>::size_type id,
+                const Particle<S> *particle_ptr) :
+            ConstSingleParticleBase<S>(id, particle_ptr) {}
 
         std::size_t dim () const {return this->particle_ptr()->value().dim();}
 

@@ -202,12 +202,8 @@ class SingleParticleBase
 {
     public :
 
-    typedef Particle<T> particle_type;
-    typedef particle_type * particle_ptr_type;
-    typedef typename particle_type::size_type size_type;
-    typedef typename particle_type::rng_type rng_type;
-
-    SingleParticleBase (size_type id, particle_ptr_type particle_ptr) :
+    SingleParticleBase (typename Particle<T>::size_type id,
+            Particle<T> *particle_ptr) :
         id_(id), particle_ptr_(particle_ptr) {}
 
     SingleParticleBase (const SingleParticle<T> &other) :
@@ -221,37 +217,23 @@ class SingleParticleBase
         return *this;
     }
 
-    size_type id () const
-    {
-        return id_;
-    }
+    typename Particle<T>::size_type id () const {return id_;}
 
-    const particle_type &particle () const
-    {
-        return *particle_ptr_;
-    }
+    const Particle<T> &particle () const {return *particle_ptr_;}
 
-    const Particle<T> *particle_ptr () const
-    {
-        return particle_ptr_;
-    }
+    const Particle<T> *particle_ptr () const {return particle_ptr_;}
 
-    rng_type &rng () const
-    {
-        return particle_ptr_->rng(id_);
-    }
+    typename Particle<T>::rng_type &rng () const
+    {return particle_ptr_->rng(id_);}
 
     protected :
 
-    Particle<T> *mutable_particle_ptr () const
-    {
-        return particle_ptr_;
-    }
+    Particle<T> *mutable_particle_ptr () const {return particle_ptr_;}
 
     private :
 
-    size_type id_;
-    particle_ptr_type particle_ptr_;
+    typename Particle<T>::size_type id_;
+    Particle<T> *particle_ptr_;
 }; // class SingleParticle
 
 /// \brief A const variant to SingleParticle
@@ -261,11 +243,8 @@ class ConstSingleParticleBase
 {
     public :
 
-    typedef Particle<T> particle_type;
-    typedef const particle_type * particle_ptr_type;
-    typedef typename particle_type::size_type size_type;
-
-    ConstSingleParticleBase (size_type id, particle_ptr_type particle_ptr) :
+    ConstSingleParticleBase (typename Particle<T>::size_type id,
+            const Particle<T> *particle_ptr) :
         id_(id), particle_ptr_(particle_ptr) {}
 
     ConstSingleParticleBase (const ConstSingleParticle<T> &other) :
@@ -280,25 +259,16 @@ class ConstSingleParticleBase
         return *this;
     }
 
-    size_type id () const
-    {
-        return id_;
-    }
+    typename Particle<T>::size_type id () const {return id_;}
 
-    const particle_type &particle () const
-    {
-        return *particle_ptr_;
-    }
+    const Particle<T> &particle () const {return *particle_ptr_;}
 
-    const Particle<T> *particle_ptr () const
-    {
-        return particle_ptr_;
-    }
+    const Particle<T> *particle_ptr () const {return particle_ptr_;}
 
     private :
 
-    size_type id_;
-    particle_ptr_type particle_ptr_;
+    typename Particle<T>::size_type id_;
+    const Particle<T> *particle_ptr_;
 }; // class ConstSingleParticle
 
 /// \brief A thin wrapper over a complete Particle
@@ -326,15 +296,12 @@ template <typename T>
 class SingleParticle :
     public traits::SingleParticleTypeTrait<T, T>::type
 {
+    typedef typename traits::SingleParticleTypeTrait<T, T>::type base;
+
     public :
 
-    typedef typename traits::SingleParticleTypeTrait<T, T>::type
-        base_sp_type;
-
-    SingleParticle (
-            typename base_sp_type::size_type id,
-            typename base_sp_type::particle_ptr_type particle_ptr) :
-        base_sp_type(id, particle_ptr) {}
+    SingleParticle (typename Particle<T>::size_type id,
+            Particle<T> *particle_ptr) : base(id, particle_ptr) {}
 };
 
 /// \brief A const variant to SingleParticle
@@ -343,22 +310,19 @@ template <typename T>
 class ConstSingleParticle :
     public traits::ConstSingleParticleTypeTrait<T, T>::type
 {
+    typedef typename traits::ConstSingleParticleTypeTrait<T, T>::type base;
+
     public :
 
-    typedef typename traits::ConstSingleParticleTypeTrait<T, T>::type
-        base_csp_type;
-
-    ConstSingleParticle (
-            typename base_csp_type::size_type id,
-            typename base_csp_type::particle_ptr_type particle_ptr) :
-        base_csp_type(id, particle_ptr) {}
+    ConstSingleParticle (typename Particle<T>::size_type id,
+            const Particle<T> *particle_ptr) : base(id, particle_ptr) {}
 
     ConstSingleParticle (const SingleParticle<T> &other) :
-        base_csp_type(other.id(), other.particle_ptr()) {}
+        base(other.id(), other.particle_ptr()) {}
 
     ConstSingleParticle &operator= (const SingleParticle<T> &other)
     {
-        base_csp_type::operator=(base(other.id(), other.particle_ptr()));
+        base::operator=(base(other.id(), other.particle_ptr()));
 
         return *this;
     }
