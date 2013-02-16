@@ -42,51 +42,9 @@ inline bool is_sse_aligned (void *ptr)
 
 namespace vsmc {
 
-/// \brief Compute the importance sampling integration of univariate variable
-/// \ingroup Utility
-class ImportanceSampling1
-{
-    public :
-
-    typedef VSMC_INTEGRATE_INT size_type;
-
-    /// \brief Compute the importance sampling integration
-    ///
-    /// \param N Number of particles
-    /// \param hX A `N` vector \f$(h(X_i))\f$
-    /// \param W Normalized weights
-    /// \return The importance sampling estiamte
-    double operator() (size_type N, const double *hX, const double *W) const
-    {
-        if (N == 0)
-            return 0;
-#if VSMC_USE_CBLAS
-        return cblas_ddot(N, hX, 1, W, 1);
-#elif VSMC_USE_ARMADILLO
-        return arma::dot(arma::vec(hX, N), arma::vec(W, N));
-#elif VSMC_USE_EIGEN
-        if (internal::is_sse_aligned((void *) hX) &&
-                internal::is_sse_aligned((void *) W)) {
-            Eigen::Map<const Eigen::VectorXd, Eigen::Aligned> hXEigen(hX, N);
-            Eigen::Map<const Eigen::VectorXd, Eigen::Aligned> WEigen(W, N);
-            return hXEigen.dot(WEigen);
-        } else {
-            Eigen::Map<const Eigen::VectorXd> hXEigen(hX, N);
-            Eigen::Map<const Eigen::VectorXd> WEigen(W, N);
-            return hXEigen.dot(WEigen);
-        }
-#else
-        double res = 0;
-        for (size_type i = 0; i != N; ++i)
-            res += hX[i] * W[i];
-        return res;
-#endif
-    }
-}; // ImportanceSampling1
-
 /// \brief Compute the importance sampling integration of multivariate variable
 /// \ingroup Utility
-class ImportanceSamplingD
+class ImportanceSampling
 {
     public :
 
@@ -139,7 +97,7 @@ class ImportanceSamplingD
         }
 #endif
     }
-}; // class ImportanceSamplingD
+}; // class ImportanceSampling
 
 } // namespace vsmc
 

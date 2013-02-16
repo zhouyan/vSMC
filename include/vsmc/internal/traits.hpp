@@ -233,13 +233,8 @@ template <typename T> struct is_same<T, T> : public true_type {};
 } } // namespace vsmc::traits
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SignedSizeType, size_type, std::ptrdiff_t)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(UnSignedSizeType, size_type, std::size_t)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(StateType, state_type, void)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSampling1Type,
-        importance_sampling_1_type, ImportanceSampling1)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSamplingDType,
-        importance_sampling_d_type, ImportanceSamplingD)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ImportanceSamplingType,
+        importance_sampling_type, ImportanceSampling)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         false_type)
 

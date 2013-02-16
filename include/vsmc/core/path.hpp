@@ -2,7 +2,6 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/importance_sampling.hpp>
 #include <vsmc/utility/integrate/numeric_newton_cotes.hpp>
 
 #if VSMC_USE_MKL
@@ -164,16 +163,18 @@ class Path
 
         VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Path::eval, EVALUATION);
 
-        double *buffer = malloc_eval_integrand(particle.size());
-        double *weight = malloc_weight(particle.size());
+        const std::size_t N = static_cast<std::size_t>(particle.size());
+        double *buffer = malloc_eval_integrand(N);
+        double *weight = malloc_weight(N);
         particle.read_weight(weight);
 
         index_.push_back(iter);
         grid_.push_back(eval_(iter, particle, buffer));
-        integrand_.push_back(
-                is_int_1_(static_cast<typename traits::SizeTypeTrait<
-                    typename traits::ImportanceSampling1TypeTrait<T>::type
-                    >::type>(particle.size()), buffer, weight));
+
+        double res = 0;
+        for (std::size_t i = 0; i != N; ++i)
+            res += buffer[i] * weight[i];
+        integrand_.push_back(res);
     }
 
     /// \brief Get the logarithm nomralizing constants ratio estimates
@@ -241,7 +242,6 @@ class Path
     std::vector<double> grid_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
 }; // class PathSampling
 
 /// \brief Monitor for path sampling for SMC with geometry path
@@ -394,10 +394,12 @@ class PathGeometry : public Path<T>
             for (std::size_t i = 0; i != size; ++i)
                 weight_[i] *= coeff;
 
-            return (is_int_1_(static_cast<typename traits::SizeTypeTrait<
-                        typename traits::ImportanceSampling1TypeTrait<T>::type
-                        >::type>(size), &integrand_history_[iter][0],
-                        &weight_[0]));
+            double res = 0;
+            const double *buffer = &integrand_history_[iter][0]; 
+            for (std::size_t i = 0; i != size; ++i)
+                res += buffer[i] * weight_[i];
+
+            return res;
         }
 
         private :
@@ -406,7 +408,6 @@ class PathGeometry : public Path<T>
         const std::vector<std::vector<double> > &weight_history_;
         const std::vector<std::vector<double> > &integrand_history_;
         std::vector<double> weight_;
-        typename traits::ImportanceSampling1TypeTrait<T>::type is_int_1_;
     }; // class f_alpha_
 }; // class PathGeometry
 
