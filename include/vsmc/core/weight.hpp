@@ -21,22 +21,15 @@ class WeightSet
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
-    size_type resample_size () const
-    {
-        return size_;
-    }
+    size_type resample_size () const {return size_;}
 
     template <typename OutputIter>
     OutputIter read_resample_weight (OutputIter first) const
-    {
-        return read_weight(first);
-    }
+    {return read_weight(first);}
 
     template <typename RandomIter>
     RandomIter read_resample_weight (RandomIter first, int stride) const
-    {
-        return read_weight(first, stride);
-    }
+    {return read_weight(first, stride);}
 
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
@@ -103,16 +96,10 @@ class WeightSet
     }
 
     /// \brief Get the normalized weight of the id'th particle
-    double weight (size_type id) const
-    {
-        return weight_[id];
-    }
+    double weight (size_type id) const {return weight_[id];}
 
     /// \brief Get the unnormalized logarithm weight of the id'th particle
-    double log_weight (size_type id) const
-    {
-        return log_weight_[id];
-    }
+    double log_weight (size_type id) const {return log_weight_[id];}
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS
     /// such that each particle has a equal weight
@@ -241,10 +228,7 @@ class WeightSet
 
     /// \brief Get the ESS of the particle collection based on the current
     /// weights
-    double ess () const
-    {
-        return ess_;
-    }
+    double ess () const {return ess_;}
 
     private :
 

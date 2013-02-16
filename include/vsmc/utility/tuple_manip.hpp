@@ -10,33 +10,25 @@ namespace vsmc {
 /// \ingroup Utility
 template <typename T, typename... Types>
 struct TuplePushFront<std::tuple<Types...>, T>
-{
-    typedef std::tuple<T, Types...> type;
-};
+{typedef std::tuple<T, Types...> type;};
 
 /// \brief Push a type to the back of a std::tuple type
 /// \ingroup Utility
 template <typename T, typename... Types>
 struct TuplePushBack<std::tuple<Types...>, T>
-{
-    typedef std::tuple<Types..., T> type;
-};
+{typedef std::tuple<Types..., T> type;};
 
 /// \brief Remove a type from the front of a std::tuple type
 /// \ingroup Utility
 template <typename T, typename... Types>
 struct TuplePopFront<std::tuple<T, Types...> >
-{
-    typedef std::tuple<Types...> type;
-};
+{typedef std::tuple<Types...> type;};
 
 /// \brief Remove a type from the front of a std::tuple type
 /// \ingroup Utility
 template <>
 struct TuplePopFront<std::tuple<> >
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 /// \brief Remove a type from the back of a std::tuple type
 /// \ingroup Utility
@@ -56,49 +48,37 @@ struct TuplePopBack<std::tuple<T, Types...> >
 /// \ingroup Utility
 template <typename T>
 struct TuplePopBack<std::tuple<T> >
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 /// \brief Remove a type from the back of a std::tuple type
 /// \ingroup Utility
 template <>
 struct TuplePopBack<std::tuple<> >
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Utility
 template <std::size_t N, typename T, typename... Types>
 struct TuplePopFrontN<std::tuple<T, Types...>, N>
-{
-    typedef typename TuplePopFrontN<std::tuple<Types...>, N - 1>::type type;
-};
+{typedef typename TuplePopFrontN<std::tuple<Types...>, N - 1>::type type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Utility
 template <typename T, typename... Types>
 struct TuplePopFrontN<std::tuple<T, Types...>, 0>
-{
-    typedef std::tuple<T, Types...> type;
-};
+{typedef std::tuple<T, Types...> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Utility
 template <std::size_t N>
 struct TuplePopFrontN<std::tuple<>, N>
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Utility
 template <>
 struct TuplePopFrontN<std::tuple<>, 0>
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Utility
@@ -114,25 +94,19 @@ struct TuplePopBackN<std::tuple<T, Types...>, N>
 /// \ingroup Utility
 template <typename T, typename... Types>
 struct TuplePopBackN<std::tuple<T, Types...>, 0>
-{
-    typedef std::tuple<T, Types...> type;
-};
+{typedef std::tuple<T, Types...> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Utility
 template <std::size_t N>
 struct TuplePopBackN<std::tuple<>, N>
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Utility
 template <>
 struct TuplePopBackN<std::tuple<>, 0>
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 /// \brief Merge two std::tuple types
 /// \ingroup Utility
@@ -154,25 +128,19 @@ struct TupleMerge
 /// \ingroup Utility
 template <typename T, typename... Types>
 struct TupleMerge<std::tuple<>, std::tuple<T, Types...> >
-{
-    typedef std::tuple<T, Types...> type;
-};
+{typedef std::tuple<T, Types...> type;};
 
 /// \brief Merge two std::tuple types
 /// \ingroup Utility
 template <typename T, typename... Types>
 struct TupleMerge<std::tuple<T, Types...>, std::tuple<> >
-{
-    typedef std::tuple<T, Types...> type;
-};
+{typedef std::tuple<T, Types...> type;};
 
 /// \brief Merge two std::tuple types
 /// \ingroup Utility
 template <>
 struct TupleMerge<std::tuple<>, std::tuple<> >
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 /// \brief Concatenate multiple std::tuple types
 /// \ingroup Utility
@@ -192,9 +160,7 @@ struct TupleCat<T1, T2, Types...>
 /// \ingroup Utility
 template <typename... Types>
 struct TupleCat<std::tuple<Types...> >
-{
-    typedef std::tuple<Types...> type;
-};
+{typedef std::tuple<Types...> type;};
 
 /// \brief Generate a new std::tuple types by apply a class template
 /// \ingroup Utility
@@ -214,9 +180,7 @@ struct TupleApply<std::tuple<T, Types...>, C>
 /// \ingroup Utility
 template <template <typename> class C>
 struct TupleApply<std::tuple<>, C>
-{
-    typedef std::tuple<> type;
-};
+{typedef std::tuple<> type;};
 
 }; // namespace vsmc
 
@@ -274,9 +238,7 @@ struct TupleApply##Outer<std::tuple<T, Types...> >                            \
                                                                               \
 template <>                                                                   \
 struct TupleApply##Outer<std::tuple<> >                                       \
-{                                                                             \
-    typedef std::tuple<> type;                                                \
-};                                                                            \
+{typedef std::tuple<> type;};                                                 \
                                                                               \
 } } // namespace vsmc::tuple
 

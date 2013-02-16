@@ -40,10 +40,7 @@ class Sampler
     {resample_scheme(res_op);}
 
     /// \brief Number of particles
-    size_type size () const
-    {
-        return particle_.size();
-    }
+    size_type size () const {return particle_.size();}
 
     /// \brief Reserve space for a specified number of iterations
     void reserve (std::size_t num)
@@ -62,18 +59,11 @@ class Sampler
     }
 
     /// \brief Number of iterations (including initialization)
-    std::size_t iter_size () const
-    {
-        return ess_history_.size();
-    }
+    std::size_t iter_size () const {return ess_history_.size();}
 
     /// \brief Set resampling method by a resample_type object
     Sampler<T> &resample_scheme (const resample_type &res_op)
-    {
-        resample_op_ = res_op;
-
-        return *this;
-    }
+    {resample_op_ = res_op; return *this;}
 
     /// \brief Set resampling method by a built-in ResampleScheme scheme
     /// name
@@ -112,24 +102,14 @@ class Sampler
     }
 
     /// \brief Get resampling threshold
-    double resample_threshold () const
-    {
-        return resample_threshold_;
-    }
+    double resample_threshold () const {return resample_threshold_;}
 
     /// \brief Set resampling threshold
     Sampler<T> &resample_threshold (double threshold)
-    {
-        resample_threshold_ = threshold;
-
-        return *this;
-    }
+    {resample_threshold_ = threshold; return *this;}
 
     /// \brief Get ESS of a given iteration, initialization count as iter 0
-    double ess_history (std::size_t iter) const
-    {
-        return ess_history_[iter];
-    }
+    double ess_history (std::size_t iter) const {return ess_history_[iter];}
 
     /// \brief Read ESS history through an output iterator
     template <typename OutputIter>
@@ -143,9 +123,7 @@ class Sampler
 
     /// \brief Get resampling indicator of a given iteration
     bool resampled_history (std::size_t iter) const
-    {
-        return resampled_history_[iter];
-    }
+    {return resampled_history_[iter];}
 
     /// \brief Read resampling indicator history through an output iterator
     template <typename OutputIter>
@@ -160,9 +138,7 @@ class Sampler
     /// \brief Get the number of moves (both move and mcmc) of a given
     /// iteration
     std::size_t move_num (std::size_t iter) const
-    {
-        return accept_history_[iter].size();
-    }
+    {return accept_history_[iter].size();}
 
     /// \brief Get the accept count of a given move id and the iteration
     ///
@@ -170,21 +146,13 @@ class Sampler
     /// The total number of move can be get through move_num(). The first move
     /// performed (either a move or a mcmc) has `id` 0 and so on.
     std::size_t accept_history (std::size_t id, std::size_t iter) const
-    {
-        return accept_history_[id][iter];
-    }
+    {return accept_history_[id][iter];}
 
     /// \brief Read and write access to the Particle<T> object
-    Particle<T> &particle ()
-    {
-        return particle_;
-    }
+    Particle<T> &particle () {return particle_;}
 
     /// \brief Read only access to the Particle<T> object
-    const Particle<T> &particle () const
-    {
-        return particle_;
-    }
+    const Particle<T> &particle () const {return particle_;}
 
     /// \brief Set the initialization object of type init_type
     Sampler<T> &init (const init_type &new_init)
@@ -197,24 +165,13 @@ class Sampler
     }
 
     /// \brief Clear the move queue
-    Sampler<T> &move_queue_clear ()
-    {
-        move_queue_.clear();
-
-        return *this;
-    }
+    Sampler<T> &move_queue_clear () {move_queue_.clear(); return *this;}
 
     /// \brief Check if move queue is empty
-    bool move_queue_empty () const
-    {
-        return move_queue_.empty();
-    }
+    bool move_queue_empty () const {return move_queue_.empty();}
 
     /// \brief Check the size of the move queue
-    std::size_t move_queue_size () const
-    {
-        return move_queue_.size();
-    }
+    std::size_t move_queue_size () const {return move_queue_.size();}
 
     /// \brief Add a new move
     Sampler<T> &move (const move_type &new_move, bool append)
@@ -244,24 +201,13 @@ class Sampler
     }
 
     /// \brief Clear the mcmc queue
-    Sampler<T> &mcmc_queue_clear ()
-    {
-        mcmc_queue_.clear();
-
-        return *this;
-    }
+    Sampler<T> &mcmc_queue_clear () {mcmc_queue_.clear(); return *this;}
 
     /// \brief Check if mcmc queue is empty
-    bool mcmc_queue_empty () const
-    {
-        return mcmc_queue_.empty();
-    }
+    bool mcmc_queue_empty () const {return mcmc_queue_.empty();}
 
     /// \brief Check the size of the mcmc queue
-    std::size_t mcmc_queue_size () const
-    {
-        return mcmc_queue_.size();
-    }
+    std::size_t mcmc_queue_size () const {return mcmc_queue_.size();}
 
     /// \brief Add a new mcmc
     Sampler<T> &mcmc (const mcmc_type &new_mcmc, bool append)
@@ -384,42 +330,25 @@ class Sampler
     }
 
     /// \brief Read and write access to the Path sampling monitor
-    Path<T> &path ()
-    {
-        return path_;
-    }
+    Path<T> &path () {return path_;}
 
     /// \brief Read only access to the Path sampling monitor
-    const Path<T> &path () const
-    {
-        return path_;
-    }
+    const Path<T> &path () const {return path_;}
 
     /// \brief Set the Path sampling evaluation object
     Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval)
-    {
-        path_.set_eval(eval);
-
-        return *this;
-    }
+    {path_.set_eval(eval); return *this;}
 
     /// \brief Path sampling estimate of the logarithm of normalizing constants
     /// ratio
-    double path_sampling () const
-    {
-        return path_.zconst();
-    }
+    double path_sampling () const {return path_.zconst();}
 
     /// \brief Add a monitor
     ///
     /// \param name The name of the monitor
     /// \param mon The new monitor to be added
     Sampler<T> &monitor (const std::string &name, const Monitor<T> &mon)
-    {
-        monitor_.insert(std::make_pair(name, mon));
-
-        return *this;
-    }
+    {monitor_.insert(std::make_pair(name, mon)); return *this;}
 
     /// \brief Add a monitor with an evaluation object
     ///
@@ -457,17 +386,11 @@ class Sampler
 
     /// \brief Read and write access to all monitors to the monitor_map_type
     /// object
-    monitor_map_type &monitor ()
-    {
-        return monitor_;
-    }
+    monitor_map_type &monitor () {return monitor_;}
 
     /// \brief Read only access to all monitors to the the monitor_map_type
     /// object
-    const monitor_map_type &monitor () const
-    {
-        return monitor_;
-    }
+    const monitor_map_type &monitor () const {return monitor_;}
 
     /// \brief Erase a named monitor
     bool clear_monitor (const std::string &name)
@@ -477,20 +400,10 @@ class Sampler
     }
 
     /// \brief Erase all monitors
-    Sampler<T> &clear_monitor ()
-    {
-        monitor_.clear();
-
-        return *this;
-    }
+    Sampler<T> &clear_monitor () {monitor_.clear(); return *this;}
 
     /// \brief Set if the sampler shall print dots at each iteration
-    Sampler<T> &show_progress (bool show)
-    {
-        show_ = show;
-
-        return *this;
-    }
+    Sampler<T> &show_progress (bool show) {show_ = show; return *this;}
 
     /// \brief The size of Sampler summary header
     std::size_t summary_header_size () const
@@ -568,9 +481,7 @@ class Sampler
 
     /// \brief The size of Sampler summary data
     std::size_t summary_data_size () const
-    {
-        return summary_header_size() * iter_size();
-    }
+    {return summary_header_size() * iter_size();}
 
     /// \brief Sampler summary data
     ///
@@ -798,9 +709,7 @@ class Sampler
 /// \ingroup Core
 template<typename OutputStream, typename T>
 OutputStream &operator<< (OutputStream &os, const Sampler<T> &sampler)
-{
-    return sampler.print(os);
-}
+{return sampler.print(os);}
 
 } // namespace vsmc
 

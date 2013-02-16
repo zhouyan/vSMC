@@ -67,10 +67,7 @@ class Monitor
     }
 
     /// \brief The dimension of the Monitor
-    std::size_t dim () const
-    {
-        return dim_;
-    }
+    std::size_t dim () const {return dim_;}
 
     /// \brief The number of iterations has been recorded
     ///
@@ -79,10 +76,7 @@ class Monitor
     /// example, a Monitor can be added only after a certain time point of the
     /// sampler's iterations. Also the Monitor can be turned off for a period
     /// during the iterations.
-    std::size_t iter_size () const
-    {
-        return index_.size();
-    }
+    std::size_t iter_size () const {return index_.size();}
 
     /// \brief Reserve space for a specified number of iterations
     void reserve (std::size_t num)
@@ -92,10 +86,7 @@ class Monitor
     }
 
     /// \brief Whether the evaluation object is valid
-    VSMC_EXPLICIT_OPERATOR operator bool () const
-    {
-        return bool(eval_);
-    }
+    VSMC_EXPLICIT_OPERATOR operator bool () const {return bool(eval_);}
 
     /// \brief Get the iteration index of the sampler of a given Monitor
     /// iteration
@@ -204,10 +195,7 @@ class Monitor
     }
 
     /// \brief Set a new evaluation object of type eval_type
-    void set_eval (const eval_type &new_eval)
-    {
-        eval_ = new_eval;
-    }
+    void set_eval (const eval_type &new_eval) {eval_ = new_eval;}
 
     /// \brief Perform the evaluation for a given iteration and a Particle<T>
     /// object.
@@ -255,22 +243,13 @@ class Monitor
     }
 
     /// \brief Whether the Monitor is actively recording results
-    bool recording () const
-    {
-        return recording_;
-    }
+    bool recording () const {return recording_;}
 
     /// \brief Turn on the recording
-    void turnon ()
-    {
-        recording_ = true;
-    }
+    void turnon () {recording_ = true;}
 
     /// \brief Turn off the recording
-    void turnoff ()
-    {
-        recording_ = false;
-    }
+    void turnoff () {recording_ = false;}
 
     private :
 

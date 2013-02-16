@@ -18,10 +18,7 @@ class Backup
 
     Backup (const Backup<T> &other) :
         backup_(VSMC_NULLPTR), is_saved_(other.is_saved_)
-    {
-        if (is_saved_)
-            backup_ = new T(*(other.backup_));
-    }
+    {if (is_saved_) backup_ = new T(*(other.backup_));}
 
     Backup<T> &operator= (const Backup<T> &other)
     {

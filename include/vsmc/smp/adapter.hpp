@@ -32,32 +32,19 @@ class InitializeAdapter :
             const post_processor_type &post = post_processor_type()) :
         initialize_state_(init_state), initialize_param_(init_param),
         pre_processor_(pre), post_processor_(post)
-    {
-        VSMC_STATIC_ASSERT_ADAPTER_IMPL(Initialize, INITIALIZE);
-    }
+    {VSMC_STATIC_ASSERT_ADAPTER_IMPL(Initialize, INITIALIZE);}
 
     std::size_t initialize_state (SingleParticle<T> part)
-    {
-        return initialize_state_(part);
-    }
+    {return initialize_state_(part);}
 
     void initialize_param (Particle<T> &particle, void *param)
-    {
-        if (bool(initialize_param_))
-            initialize_param_(particle, param);
-    }
+    {if (bool(initialize_param_)) initialize_param_(particle, param);}
 
     void pre_processor (Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(particle);
-    }
+    {if (bool(pre_processor_)) pre_processor_(particle);}
 
     void post_processor (Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(particle);
-    }
+    {if (bool(post_processor_)) post_processor_(particle);}
 
     private :
 
@@ -90,26 +77,16 @@ class MoveAdapter :
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
         move_state_(move_state), pre_processor_(pre), post_processor_(post)
-    {
-        VSMC_STATIC_ASSERT_ADAPTER_IMPL(Move, MOVE);
-    }
+    {VSMC_STATIC_ASSERT_ADAPTER_IMPL(Move, MOVE);}
 
     std::size_t move_state (std::size_t iter, SingleParticle<T> part)
-    {
-        return move_state_(iter, part);
-    }
+    {return move_state_(iter, part);}
 
     void pre_processor (std::size_t iter, Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(iter, particle);
-    }
+    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(iter, particle);
-    }
+    {if (bool(post_processor_)) post_processor_(iter, particle);}
 
     private :
 
@@ -143,27 +120,17 @@ class MonitorEvalAdapter :
             const post_processor_type &post = post_processor_type()) :
         monitor_state_(monitor_state),
         pre_processor_(pre), post_processor_(post)
-    {
-        VSMC_STATIC_ASSERT_ADAPTER_IMPL(MonitorEval, MONITOR_EVAL);
-    }
+    {VSMC_STATIC_ASSERT_ADAPTER_IMPL(MonitorEval, MONITOR_EVAL);}
 
     void monitor_state (std::size_t iter, std::size_t dim,
             ConstSingleParticle<T> part, double *res)
-    {
-        monitor_state_(iter, dim, part, res);
-    }
+    {monitor_state_(iter, dim, part, res);}
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(iter, particle);
-    }
+    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(iter, particle);
-    }
+    {if (bool(post_processor_)) post_processor_(iter, particle);}
 
     private :
 
@@ -199,31 +166,19 @@ class PathEvalAdapter :
             const post_processor_type &post = post_processor_type()) :
         path_state_(path_state), path_grid_(path_grid),
         pre_processor_(pre), post_processor_(post)
-    {
-        VSMC_STATIC_ASSERT_ADAPTER_IMPL(PathEval, PATH_EVAL);
-    }
+    {VSMC_STATIC_ASSERT_ADAPTER_IMPL(PathEval, PATH_EVAL);}
 
     double path_state (std::size_t iter, ConstSingleParticle<T> part)
-    {
-        return path_state_(iter, part);
-    }
+    {return path_state_(iter, part);}
 
     double path_grid (std::size_t iter, const Particle<T> &particle)
-    {
-        return path_grid_(iter, particle);
-    }
+    {return path_grid_(iter, particle);}
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(iter, particle);
-    }
+    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(iter, particle);
-    }
+    {if (bool(post_processor_)) post_processor_(iter, particle);}
 
     private :
 

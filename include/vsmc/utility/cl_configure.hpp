@@ -14,23 +14,15 @@ class CLConfigure
 
     CLConfigure () : local_size_(0) {}
 
-    std::size_t local_size () const
-    {
-        return local_size_;
-    }
+    std::size_t local_size () const {return local_size_;}
 
-    void local_size (std::size_t new_size)
-    {
-        local_size_ = new_size;
-    }
+    void local_size (std::size_t new_size) {local_size_ = new_size;}
 
     protected :
 
     void set_preferred_local_size (
             const cl::Kernel &kern, const cl::Device &dev)
-    {
-        local_size(get_preferred_local_size(kern, dev));
-    }
+    {local_size(get_preferred_local_size(kern, dev));}
 
     static std::size_t get_preferred_local_size (
             const cl::Kernel &kern, const cl::Device &dev)

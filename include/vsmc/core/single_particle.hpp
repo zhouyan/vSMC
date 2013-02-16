@@ -12,11 +12,12 @@ class ParticleIterator :
     public std::iterator<std::random_access_iterator_tag, SPType<T>,
     std::ptrdiff_t, const SPType<T> *, const SPType<T> &>
 {
-    public :
-
     typedef std::iterator<std::random_access_iterator_tag, SPType<T>,
         std::ptrdiff_t, const SPType<T> *, const SPType<T> &>
         base_iterator_type;
+
+    public :
+
     typedef typename base_iterator_type::value_type      value_type;
     typedef typename base_iterator_type::difference_type difference_type;
     typedef typename base_iterator_type::pointer         pointer;
@@ -35,85 +36,35 @@ class ParticleIterator :
 
     ParticleIterator<T, SPType> &operator= (
             const ParticleIterator<T, SPType> &other)
-    {
-        ptr_ = other.ptr_;
-
-        return *this;
-    }
+    {ptr_ = other.ptr_; return *this;}
 
     template <template <typename> class OtherSPType>
     ParticleIterator<T, SPType> &operator= (
             const ParticleIterator<T, OtherSPType> &other)
-    {
-        /// \internal
-        /// If SPType is SingleParticle, OtherSPType is ConstSingleParticle,
-        /// The following shall results in a compile time error.
-        /// If SPType is ConstSingleParticle, OtherSPType is SingleParticle,
-        /// The following shall be fine.
-        /// The copy constructor is similar.
-        /// It is still a little too tricky here.
-        ptr_ = &other->particle().sp(other->id());
+    {ptr_ = &other->particle().sp(other->id()); return *this;}
 
-        return *this;
-    }
+    reference operator* () const {return *ptr_;}
 
-    reference operator* () const
-    {
-        return *ptr_;
-    }
+    pointer operator-> () const {return ptr_;}
 
-    pointer operator-> () const
-    {
-        return ptr_;
-    }
+    value_type operator[] (difference_type diff) const {return *(ptr_ + diff);}
 
-    value_type operator[] (difference_type diff) const
-    {
-        return *(ptr_ + diff);
-    }
-
-    ParticleIterator<T, SPType> &operator++ ()
-    {
-        ++ptr_;
-
-        return *this;
-    }
+    ParticleIterator<T, SPType> &operator++ () {++ptr_; return *this;}
 
     ParticleIterator<T, SPType> operator++ (int)
-    {
-        ParticleIterator<T, SPType> iter(*this);
+    {ParticleIterator<T, SPType> iter(*this); return ++iter;}
 
-        return ++iter;
-    }
-
-    ParticleIterator<T, SPType> &operator-- ()
-    {
-        --ptr_;
-
-        return *this;
-    }
+    ParticleIterator<T, SPType> &operator-- () {--ptr_; return *this;}
 
     ParticleIterator<T, SPType> operator-- (int)
-    {
-        ParticleIterator<T, SPType> iter(*this);
-
-        return --iter;
-    }
+    {ParticleIterator<T, SPType> iter(*this); return --iter;}
 
     ParticleIterator<T, SPType> &operator+= (difference_type diff)
-    {
-        ptr_ += diff;
-
-        return *this;
-    }
+    {ptr_ += diff; return *this;}
 
 
     ParticleIterator<T, SPType> &operator-= (difference_type diff)
-    {
-        ptr_ -= diff;
-
-        return *this;
-    }
+    {ptr_ -= diff; return *this;}
 
     private :
 
@@ -177,10 +128,7 @@ ParticleIterator<T, SPType> operator+ (
 template <typename T, template <typename> class SPType>
 ParticleIterator<T, SPType> operator+ (
         typename ParticleIterator<T, SPType>::difference_type diff,
-        const ParticleIterator<T, SPType> &iter)
-{
-    return iter + diff;
-}
+        const ParticleIterator<T, SPType> &iter) {return iter + diff;}
 
 /// \brief Particle iterator operator-
 /// \ingroup Core
@@ -321,11 +269,7 @@ class ConstSingleParticle :
         base(other.id(), other.particle_ptr()) {}
 
     ConstSingleParticle &operator= (const SingleParticle<T> &other)
-    {
-        base::operator=(base(other.id(), other.particle_ptr()));
-
-        return *this;
-    }
+    {base::operator=(base(other.id(), other.particle_ptr())); return *this;}
 };
 
 } // namespace vsmc

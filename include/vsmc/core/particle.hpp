@@ -54,143 +54,73 @@ class Particle
     }
 
     /// \brief Number of particles
-    size_type size () const
-    {
-        return size_;
-    }
+    size_type size () const {return size_;}
 
-    const SingleParticle<T> &sp (size_type id)
-    {
-        return sp_[id + 1];
-    }
+    const SingleParticle<T> &sp (size_type i) {return sp_[i + 1];}
 
-    const ConstSingleParticle<T> &sp (size_type id) const
-    {
-        return csp_[id + 1];
-    }
+    const ConstSingleParticle<T> &sp (size_type i) const {return csp_[i + 1];}
 
-    iterator begin()
-    {
-        return iterator(&sp(0));
-    }
+    iterator begin() {return iterator(&sp(0));}
 
-    iterator end()
-    {
-        return iterator(&sp(size_));
-    }
+    iterator end() {return iterator(&sp(size_));}
 
-    const_iterator begin() const
-    {
-        return cosnt_iterator(&sp(0));
-    }
+    const_iterator begin() const {return cosnt_iterator(&sp(0));}
 
-    const_iterator end() const
-    {
-        return const_iterator(&sp(size_));
-    }
+    const_iterator end() const {return const_iterator(&sp(size_));}
 
-    const_iterator cbegin() const
-    {
-        return const_iterator(&sp(0));
-    }
+    const_iterator cbegin() const {return const_iterator(&sp(0));}
 
-    const_iterator cend() const
-    {
-        return const_iterator(&sp(size_));
-    }
+    const_iterator cend() const {return const_iterator(&sp(size_));}
 
-    reverse_iterator rbegin()
-    {
-        return reverse_iterator(end());
-    }
+    reverse_iterator rbegin() {return reverse_iterator(end());}
 
-    reverse_iterator rend()
-    {
-        return reverse_iterator(begin());
-    }
+    reverse_iterator rend() {return reverse_iterator(begin());}
 
     const_reverse_iterator rbegin() const
-    {
-        return const_reverse_iterator(end());
-    }
+    {return const_reverse_iterator(end());}
 
     const_reverse_iterator rend() const
-    {
-        return const_reverse_iterator(begin());
-    }
+    {return const_reverse_iterator(begin());}
 
     const_reverse_iterator crbegin() const
-    {
-        return const_reverse_iterator(cend());
-    }
+    {return const_reverse_iterator(cend());}
 
     const_reverse_iterator crend() const
-    {
-        return const_reverse_iterator(cbegin());
-    }
+    {return const_reverse_iterator(cbegin());}
 
     /// \brief Read and write access to the value collection object
-    value_type &value ()
-    {
-        return value_;
-    }
+    value_type &value () {return value_;}
 
     /// \brief Read only access to the value collection object
-    const value_type &value () const
-    {
-        return value_;
-    }
+    const value_type &value () const {return value_;}
 
     /// \brief Read and write access to the weight collection object
-    weight_set_type &weight_set ()
-    {
-        return weight_set_;
-    }
+    weight_set_type &weight_set () {return weight_set_;}
 
     /// \brief Read only access to the weight collection object
-    const weight_set_type &weight_set () const
-    {
-        return weight_set_;
-    }
+    const weight_set_type &weight_set () const {return weight_set_;}
 
     /// \brief Read and write access to the RNG collection object
-    rng_set_type &rng_set ()
-    {
-        return rng_set_;
-    }
+    rng_set_type &rng_set () {return rng_set_;}
 
     /// \brief Read only access to the RNG collection object
-    const rng_set_type &rng_set () const
-    {
-        return rng_set_;
-    }
+    const rng_set_type &rng_set () const {return rng_set_;}
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS
     /// such that each particle has a equal weight
-    void set_equal_weight ()
-    {
-        weight_set_.set_equal_weight();
-    }
+    void set_equal_weight () {weight_set_.set_equal_weight();}
 
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
-    {
-        return weight_set_.read_weight(first);
-    }
+    {return weight_set_.read_weight(first);}
 
     /// \brief Get the ESS of the particle collection based on the current
     /// weights
-    double ess () const
-    {
-        return weight_set_.ess();
-    }
+    double ess () const {return weight_set_.ess();}
 
     /// \brief Get an RNG stream for a given particle
-    rng_type &rng (size_type id)
-    {
-        return rng_set_.rng(id);
-    }
+    rng_type &rng (size_type id) {return rng_set_.rng(id);}
 
     /// \brief Performing resampling if ESS/N < threshold
     ///

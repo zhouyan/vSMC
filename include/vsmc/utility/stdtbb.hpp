@@ -21,19 +21,11 @@ class BlockedRange
     typedef SizeType size_type;
 
     BlockedRange (size_type begin, size_type end) : begin_(begin), end_(end)
-    {
-        VSMC_RUNTIME_ASSERT_RANGE(begin, end, BlockedRange);
-    }
+    {VSMC_RUNTIME_ASSERT_RANGE(begin, end, BlockedRange);}
 
-    size_type begin () const
-    {
-        return begin_;
-    }
+    size_type begin () const {return begin_;}
 
-    size_type end () const
-    {
-        return end_;
-    }
+    size_type end () const {return end_;}
 
     private :
 
@@ -65,19 +57,11 @@ class ThreadGuard
         thread_(std::move(other.thread_)) {}
 
     ThreadGuard &operator= (ThreadGuard &&other) VSMC_NOEXCEPT
-    {
-        thread_ = std::move(other.thread_);
-
-        return *this;
-    }
+    {thread_ = std::move(other.thread_); return *this;}
 
     ThreadGuard (std::thread &&thr) VSMC_NOEXCEPT : thread_(std::move(thr)) {}
 
-    ~ThreadGuard () VSMC_NOEXCEPT
-    {
-        if (thread_.joinable())
-            thread_.join();
-    }
+    ~ThreadGuard () VSMC_NOEXCEPT {if (thread_.joinable()) thread_.join();}
 
     private :
 
@@ -97,10 +81,7 @@ class ThreadInfo
         return info;
     }
 
-    std::size_t thread_num () const
-    {
-        return thread_num_;
-    }
+    std::size_t thread_num () const {return thread_num_;}
 
     std::size_t thread_num (std::size_t num)
     {

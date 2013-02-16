@@ -19,24 +19,16 @@ class InitializeBase
     VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~InitializeBase () {}
 
     std::size_t initialize_state (SingleParticle<T> sp)
-    {
-        return initialize_state_dispatch(sp, &Derived::initialize_state);
-    }
+    {return initialize_state_dispatch(sp, &Derived::initialize_state);}
 
     void initialize_param (Particle<T> &particle, void *param)
-    {
-        initialize_param_dispatch(particle, param, &Derived::initialize_param);
-    }
+    {initialize_param_dispatch(particle, param, &Derived::initialize_param);}
 
     void pre_processor (Particle<T> &particle)
-    {
-        pre_processor_dispatch(particle, &Derived::pre_processor);
-    }
+    {pre_processor_dispatch(particle, &Derived::pre_processor);}
 
     void post_processor (Particle<T> &particle)
-    {
-        post_processor_dispatch(particle, &Derived::post_processor);
-    }
+    {post_processor_dispatch(particle, &Derived::post_processor);}
 
     private :
 
@@ -112,27 +104,19 @@ class InitializeBase
 
     std::size_t initialize_state_dispatch (SingleParticle<T> sp,
             std::size_t (*) (SingleParticle<T>))
-    {
-        return Derived::initialize_state(sp);
-    }
+    {return Derived::initialize_state(sp);}
 
     void initialize_param_dispatch (Particle<T> &particle, void *param,
             void (*) (Particle<T> &, void *))
-    {
-        Derived::initialize_param(particle, param);
-    }
+    {Derived::initialize_param(particle, param);}
 
     void pre_processor_dispatch (Particle<T> &particle,
             void (*) (Particle<T> &))
-    {
-        Derived::pre_processor(particle);
-    }
+    {Derived::pre_processor(particle);}
 
     void post_processor_dispatch (Particle<T> &particle,
             void (*) (Particle<T> &))
-    {
-        Derived::post_processor(particle);
-    }
+    {Derived::post_processor(particle);}
 
     // base
 
@@ -182,19 +166,13 @@ class MoveBase
     VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MoveBase () {}
 
     std::size_t move_state (std::size_t iter, SingleParticle<T> sp)
-    {
-        return move_state_dispatch(iter, sp, &Derived::move_state);
-    }
+    {return move_state_dispatch(iter, sp, &Derived::move_state);}
 
     void pre_processor (std::size_t iter, Particle<T> &particle)
-    {
-        pre_processor_dispatch(iter, particle, &Derived::pre_processor);
-    }
+    {pre_processor_dispatch(iter, particle, &Derived::pre_processor);}
 
     void post_processor (std::size_t iter, Particle<T> &particle)
-    {
-        post_processor_dispatch(iter, particle, &Derived::post_processor);
-    }
+    {post_processor_dispatch(iter, particle, &Derived::post_processor);}
 
     private :
 
@@ -254,21 +232,15 @@ class MoveBase
 
     std::size_t move_state_dispatch (std::size_t iter, SingleParticle<T> sp,
             std::size_t (*) (std::size_t, SingleParticle<T>))
-    {
-        return Derived::move_state(iter, sp);
-    }
+    {return Derived::move_state(iter, sp);}
 
     void pre_processor_dispatch (std::size_t iter, Particle<T> &particle,
             void (*) (std::size_t, Particle<T> &))
-    {
-        Derived::pre_processor(iter, particle);
-    }
+    {Derived::pre_processor(iter, particle);}
 
     void post_processor_dispatch (std::size_t iter, Particle<T> &particle,
             void (*) (std::size_t, Particle<T> &))
-    {
-        Derived::post_processor(iter, particle);
-    }
+    {Derived::post_processor(iter, particle);}
 
     // base
 
@@ -315,19 +287,13 @@ class MonitorEvalBase
 
     void monitor_state (std::size_t iter, std::size_t dim,
             ConstSingleParticle<T> csp, double *res)
-    {
-        monitor_state_dispatch(iter, dim, csp, res, &Derived::monitor_state);
-    }
+    {monitor_state_dispatch(iter, dim, csp, res, &Derived::monitor_state);}
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        pre_processor_dispatch(iter, particle, &Derived::pre_processor);
-    }
+    {pre_processor_dispatch(iter, particle, &Derived::pre_processor);}
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        post_processor_dispatch(iter, particle, &Derived::post_processor);
-    }
+    {post_processor_dispatch(iter, particle, &Derived::post_processor);}
 
     private :
 
@@ -395,22 +361,16 @@ class MonitorEvalBase
             ConstSingleParticle<T> csp, double *res,
             void (*) (std::size_t, std::size_t, ConstSingleParticle<T>,
                 double *))
-    {
-        Derived::monitor_state(iter, dim, csp, res);
-    }
+    {Derived::monitor_state(iter, dim, csp, res);}
 
     void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
             void (*) (std::size_t, const Particle<T> &))
-    {
-        Derived::pre_processor(iter, particle);
-    }
+    {Derived::pre_processor(iter, particle);}
 
     void post_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (*) (std::size_t, const Particle<T> &))
-    {
-        Derived::post_processor(iter, particle);
-    }
+    {Derived::post_processor(iter, particle);}
 
     // base
 
@@ -459,24 +419,16 @@ class PathEvalBase
     VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~PathEvalBase () {}
 
     double path_state (std::size_t iter, ConstSingleParticle<T> csp)
-    {
-        return path_state_dispatch(iter, csp, &Derived::path_state);
-    }
+    {return path_state_dispatch(iter, csp, &Derived::path_state);}
 
     double path_grid (std::size_t iter, const Particle<T> &particle)
-    {
-        return path_grid_dispatch(iter, particle, &Derived::path_grid);
-    }
+    {return path_grid_dispatch(iter, particle, &Derived::path_grid);}
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        pre_processor_dispatch(iter, particle, &Derived::pre_processor);
-    }
+    {pre_processor_dispatch(iter, particle, &Derived::pre_processor);}
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        post_processor_dispatch(iter, particle, &Derived::post_processor);
-    }
+    {post_processor_dispatch(iter, particle, &Derived::post_processor);}
 
     private :
 
@@ -554,28 +506,20 @@ class PathEvalBase
 
     double path_state_dispatch (std::size_t iter, ConstSingleParticle<T> csp,
             double (*) (std::size_t, ConstSingleParticle<T>))
-    {
-        return Derived::path_state(iter, csp);
-    }
+    {return Derived::path_state(iter, csp);}
 
     double path_grid_dispatch (std::size_t iter, const Particle<T> &particle,
             double (*) (std::size_t, const Particle<T> &))
-    {
-        return Derived::path_grid(iter, particle);
-    }
+    {return Derived::path_grid(iter, particle);}
 
     void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
             void (*) (std::size_t, const Particle<T> &))
-    {
-        Derived::pre_processor(iter, particle);
-    }
+    {Derived::pre_processor(iter, particle);}
 
     void post_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (*) (std::size_t, const Particle<T> &))
-    {
-        Derived::post_processor(iter, particle);
-    }
+    {Derived::post_processor(iter, particle);}
 
     // base
 

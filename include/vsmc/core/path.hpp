@@ -69,10 +69,7 @@ class Path
     /// \brief The number of iterations has been recorded
     ///
     /// \sa Monitor::iter_size()
-    std::size_t iter_size () const
-    {
-        return index_.size();
-    }
+    std::size_t iter_size () const {return index_.size();}
 
     /// \brief Reserve space for a specified number of iterations
     void reserve (std::size_t num)
@@ -83,10 +80,7 @@ class Path
     }
 
     /// \brief Whether the evaluation object is valid
-    VSMC_EXPLICIT_OPERATOR operator bool () const
-    {
-        return bool(eval_);
-    }
+    VSMC_EXPLICIT_OPERATOR operator bool () const {return bool(eval_);}
 
     /// \brief Get the iteration index of the sampler of a given monitor
     /// iteration
@@ -148,10 +142,7 @@ class Path
     }
 
     /// \brief Set a new evaluation object of type eval_type
-    void set_eval (const eval_type &new_eval)
-    {
-        eval_ = new_eval;
-    }
+    void set_eval (const eval_type &new_eval) {eval_ = new_eval;}
 
     /// Perform the evaluation for a given iteration and a Particle<T> object
     ///
@@ -200,22 +191,13 @@ class Path
     }
 
     /// \brief Whether the Path is actively recording restuls
-    bool recording () const
-    {
-        return recording_;
-    }
+    bool recording () const {return recording_;}
 
     /// \brief Turn on the recording
-    void turnon ()
-    {
-        recording_ = true;
-    }
+    void turnon () {recording_ = true;}
 
     /// \brief Turn off the recording
-    void turnoff ()
-    {
-        recording_ = false;
-    }
+    void turnoff () {recording_ = false;}
 
     protected :
 

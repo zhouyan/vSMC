@@ -16,10 +16,7 @@ class StopWatchClockWrapper
 
     StopWatchClockWrapper () : elapsed_(0) {}
 
-    void start () const
-    {
-        start_time_ = clock_type::now();
-    }
+    void start () const {start_time_ = clock_type::now();}
 
     void stop () const
     {
@@ -27,15 +24,9 @@ class StopWatchClockWrapper
         elapsed_ += stop_time - start_time_;
     }
 
-    void reset () const
-    {
-        elapsed_ = typename clock_type::duration(0);
-    }
+    void reset () const {elapsed_ = typename clock_type::duration(0);}
 
-    typename clock_type::duration elapsed () const
-    {
-        return elapsed_;
-    }
+    typename clock_type::duration elapsed () const {return elapsed_;}
 
     private :
 
@@ -109,15 +100,9 @@ class StopWatch
 {
     public :
 
-    StopWatch ()
-    {
-        reset();
-    }
+    StopWatch () {reset();}
 
-    void start () const
-    {
-        start_time_ = mach_absolute_time();
-    }
+    void start () const {start_time_ = mach_absolute_time();}
 
     void stop () const
     {
@@ -198,15 +183,9 @@ class StopWatch
 {
     public :
 
-    StopWatch ()
-    {
-        reset();
-    }
+    StopWatch () {reset();}
 
-    void start () const
-    {
-        clock_gettime(CLOCK_REALTIME, &start_time_);
-    }
+    void start () const {clock_gettime(CLOCK_REALTIME, &start_time_);}
 
     void stop () const
     {

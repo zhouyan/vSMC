@@ -77,47 +77,27 @@ class CLManager
     }
 
     /// \brief The platform currently being used
-    const cl::Platform &platform () const
-    {
-        return platform_;
-    }
+    const cl::Platform &platform () const {return platform_;}
 
     /// \brief The vector of all platforms that the manager found
     const std::vector<cl::Platform> &platform_vec () const
-    {
-        return platform_vec_;
-    }
+    {return platform_vec_;}
 
     /// \brief The context currently being used
-    const cl::Context &context () const
-    {
-        return context_;
-    }
+    const cl::Context &context () const {return context_;}
 
     /// \brief The device currently being used
-    const cl::Device &device () const
-    {
-        return device_;
-    }
+    const cl::Device &device () const {return device_;}
 
     /// \brief The vector of all device that the manager found in the platform
-    const std::vector<cl::Device> &device_vec () const
-    {
-        return device_vec_;
-    }
+    const std::vector<cl::Device> &device_vec () const {return device_vec_;}
 
     /// \brief The command queue currently being used
-    const cl::CommandQueue &command_queue () const
-    {
-        return command_queue_;
-    }
+    const cl::CommandQueue &command_queue () const {return command_queue_;}
 
     /// \brief Whether the platform, context, device and command queue has been
     /// setup correctly
-    bool setup () const
-    {
-        return setup_;
-    }
+    bool setup () const {return setup_;}
 
     /// \brief Try to setup the platform, context, device and command queue
     /// using the given device type
@@ -278,9 +258,7 @@ class CLManager
 
     /// \brief Create a program given the source within the current context
     cl::Program create_program (const std::string &source) const
-    {
-        return cl::Program(context_, source);
-    }
+    {return cl::Program(context_, source);}
 
     /// \brief Run a given kernel with one dimensional global size and local
     /// size on the current command queue
@@ -436,9 +414,7 @@ class CLManager
 
     cl::NDRange get_local_nd_range (
             std::size_t global_size, std::size_t local_size) const
-    {
-        return local_size ? cl::NDRange(local_size) : cl::NullRange;
-    }
+    {return local_size ? cl::NDRange(local_size) : cl::NullRange;}
 }; // clss CLManager
 
 } // namespace vsmc

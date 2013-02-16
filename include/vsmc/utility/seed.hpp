@@ -29,10 +29,7 @@ class Seed
         return ++seed_;
     }
 
-    void set (result_type seed)
-    {
-        seed_ = seed;
-    }
+    void set (result_type seed) {seed_ = seed;}
 
     void skip (result_type steps)
     {
@@ -47,11 +44,7 @@ class Seed
 
     result_type seed_;
 
-    Seed () : seed_(VSMC_RNG_SEED)
-    {
-        if (!seed_)
-            seed_ = std::rand();
-    }
+    Seed () : seed_(VSMC_RNG_SEED) {if (!seed_) seed_ = std::rand();}
 
     Seed (const Seed &);
     Seed &operator= (const Seed &);

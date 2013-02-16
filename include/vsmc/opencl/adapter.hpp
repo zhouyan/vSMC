@@ -28,27 +28,16 @@ class InitializeAdapter<T, InitializeCL, B> : public InitializeCL<T, B>
         pre_processor_(pre), post_processor_(post) {}
 
     void initialize_state (std::string &kernel_name)
-    {
-        kernel_name = initialize_state_;
-    }
+    {kernel_name = initialize_state_;}
 
     void initialize_param (Particle<T> &particle, void *param)
-    {
-        if (bool(initialize_param_))
-            initialize_param_(particle, param);
-    }
+    {if (bool(initialize_param_)) initialize_param_(particle, param);}
 
     void pre_processor (Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(particle);
-    }
+    {if (bool(pre_processor_)) pre_processor_(particle);}
 
     void post_processor (Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(particle);
-    }
+    {if (bool(post_processor_)) post_processor_(particle);}
 
     private :
 
@@ -77,21 +66,13 @@ class MoveAdapter<T, MoveCL, B> : public MoveCL<T, B>
         move_state_(move_state), pre_processor_(pre), post_processor_(post) {}
 
     void move_state (std::size_t iter, std::string &kernel_name)
-    {
-        kernel_name = move_state_;
-    }
+    {kernel_name = move_state_;}
 
     void pre_processor (std::size_t iter, Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(iter, particle);
-    }
+    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(iter, particle);
-    }
+    {if (bool(post_processor_)) post_processor_(iter, particle);}
 
     private :
 
@@ -120,21 +101,13 @@ class MonitorEvalAdapter<T, MonitorEvalCL, B> : public MonitorEvalCL<T, B>
         pre_processor_(pre), post_processor_(post) {}
 
     void monitor_state (std::size_t, std::string &kernel_name)
-    {
-        kernel_name = monitor_state_;
-    }
+    {kernel_name = monitor_state_;}
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(iter, particle);
-    }
+    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(iter, particle);
-    }
+    {if (bool(post_processor_)) post_processor_(iter, particle);}
 
     private :
 
@@ -166,26 +139,16 @@ class PathEvalAdapter<T, PathEvalCL, B> : public PathEvalCL<T, B>
         pre_processor_(pre), post_processor_(post) {}
 
     void path_state (std::size_t, std::string &kernel_name)
-    {
-        kernel_name = path_state_;
-    }
+    {kernel_name = path_state_;}
 
     double path_grid (std::size_t iter, const Particle<T> &particle)
-    {
-        return path_grid_(iter, particle);
-    }
+    {return path_grid_(iter, particle);}
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        if (bool(pre_processor_))
-            pre_processor_(iter, particle);
-    }
+    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
-    {
-        if (bool(post_processor_))
-            post_processor_(iter, particle);
-    }
+    {if (bool(post_processor_)) post_processor_(iter, particle);}
 
     private :
 

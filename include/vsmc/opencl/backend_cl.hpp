@@ -50,9 +50,7 @@ class StateCL
         state_buffer_(manager().template create_buffer<state_type>(
                 dim_ * size_)),
         copy_from_buffer_(manager().template create_buffer<size_type>(size_))
-    {
-        VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);
-    }
+    {VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);}
 
     StateCL (const StateCL<Dim, T, ID> &other) :
         dim_(other.dim_), size_(other.size_),
@@ -87,10 +85,7 @@ class StateCL
         return *this;
     }
 
-    std::size_t dim () const
-    {
-        return dim_;
-    }
+    std::size_t dim () const {return dim_;}
 
     void resize_dim (std::size_t dim)
     {
@@ -101,29 +96,17 @@ class StateCL
         dim_ = dim;
     }
 
-    size_type size () const
-    {
-        return size_;
-    }
+    size_type size () const {return size_;}
 
     /// \brief The instance of the CLManager signleton associated with this
     /// value collcection
-    static manager_type &manager ()
-    {
-        return manager_type::instance();
-    }
+    static manager_type &manager () {return manager_type::instance();}
 
     /// \brief The OpenCL buffer that stores the state values
-    const cl::Buffer &state_buffer () const
-    {
-        return state_buffer_;
-    }
+    const cl::Buffer &state_buffer () const {return state_buffer_;}
 
     /// \brief The OpenCL program associated with this value collection
-    const cl::Program &program () const
-    {
-        return program_;
-    }
+    const cl::Program &program () const {return program_;}
 
     /// \brief Build the OpenCL program from source
     ///
@@ -232,37 +215,22 @@ class StateCL
     }
 
     /// \brief Whether the last attempted building success
-    bool build () const
-    {
-        return build_;
-    }
+    bool build () const {return build_;}
 
     /// \brief The build id of the last attempted of building
     ///
     /// \details
     /// This function returns a non-decreasing sequence of integers
-    int build_id () const
-    {
-        return build_id_;
-    }
+    int build_id () const {return build_id_;}
 
     /// \brief The source of the program of the last attempted building
-    std::string build_source () const
-    {
-        return build_source_;
-    }
+    std::string build_source () const {return build_source_;}
 
     /// \brief The build options of the program of the last attempted building
-    std::string build_options () const
-    {
-        return build_options_;
-    }
+    std::string build_options () const {return build_options_;}
 
     /// \brief The log of the program of the last attempted building
-    std::string build_log () const
-    {
-        return build_log_;
-    }
+    std::string build_log () const {return build_log_;}
 
     /// \brief Create kernel with the current program
     ///

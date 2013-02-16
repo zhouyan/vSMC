@@ -418,15 +418,10 @@ class CLQuery
 
     template <typename OutputStream>
     static void print_name (OutputStream &os, const std::string &name)
-    {
-        os << std::setw(40) << std::left << name << ' ';
-    }
+    {os << std::setw(40) << std::left << name << ' ';}
 
     template <typename OutputStream, typename T>
-    static void print_val (OutputStream &os, const T &val)
-    {
-        os << val;
-    }
+    static void print_val (OutputStream &os, const T &val) {os << val;}
 
     template<typename OutputStream, typename T>
     static void print_val (OutputStream &os, const std::vector<T> &val)
@@ -441,10 +436,7 @@ class CLQuery
 /// \ingroup Utility
 template<typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const CLQuery &query)
-{
-    query.print(os);
-    return os;
-}
+{query.print(os); return os;}
 
 } // namespace vsmc
 
@@ -454,46 +446,31 @@ namespace cl {
 /// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Platform &plat)
-{
-    vsmc::CLQuery::print(os, plat);
-    return os;
-}
+{vsmc::CLQuery::print(os, plat); return os;}
 
 /// \brief Print information of all devices in a given context
 /// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Context &ctx)
-{
-    vsmc::CLQuery::print(os, ctx);
-    return os;
-}
+{vsmc::CLQuery::print(os, ctx); return os;}
 
 /// \brief Print information a given device
 /// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Device &dev)
-{
-    vsmc::CLQuery::print(os, dev);
-    return os;
-}
+{vsmc::CLQuery::print(os, dev); return os;}
 
 /// \brief Print information a given program
 /// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Program &prog)
-{
-    vsmc::CLQuery::print(os, prog);
-    return os;
-}
+{vsmc::CLQuery::print(os, prog); return os;}
 
 /// \brief Print information a given kernel
 /// \ingroup Utility
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Kernel &kern)
-{
-    vsmc::CLQuery::print(os, kern);
-    return os;
-}
+{vsmc::CLQuery::print(os, kern); return os;}
 
 } // namespace cl
 
