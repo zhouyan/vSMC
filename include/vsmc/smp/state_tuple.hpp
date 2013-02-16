@@ -30,7 +30,7 @@ class StateTupleBase
     {
         single_particle_type (typename Particle<S>::size_type id,
                 Particle<S> *particle_ptr) :
-            SingleParticleBase<S>(id, patricle_ptr) {}
+            SingleParticleBase<S>(id, particle_ptr) {}
 
         static VSMC_CONSTEXPR std::size_t dim () {return S::dim();}
 
