@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_IMPORTANCE_SAMPLING_HPP
-#define VSMC_UTILITY_INTEGRATE_IMPORTANCE_SAMPLING_HPP
+#ifndef VSMC_UTILITY_IMPORTANCE_SAMPLING_HPP
+#define VSMC_UTILITY_IMPORTANCE_SAMPLING_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -31,20 +31,11 @@
 #define VSMC_INTEGRATE_INT std::size_t
 #endif
 
-namespace vsmc { namespace internal {
-
-inline bool is_sse_aligned (void *ptr)
-{
-    return ((unsigned long) ptr & 15) == 0;
-}
-
-} } // namespace vsmc::internal
-
 namespace vsmc {
 
 /// \brief Compute the importance sampling integration of multivariate variable
 /// \ingroup Utility
-class ImportanceSampling
+class ISIntegrate
 {
     public :
 
@@ -70,9 +61,8 @@ class ImportanceSampling
         arma::vec res(Eh, dim, false);
         res = arma::mat(hX, dim, N) * arma::vec(W, N);
 #elif VSMC_USE_EIGEN
-        if (internal::is_sse_aligned((void *) hX) &&
-                internal::is_sse_aligned((void *) W) &&
-                internal::is_sse_aligned((void *) Eh)) {
+        if (is_align((void *) hX) && is_align((void *) W) &&
+                is_align((void *) Eh)) {
             Eigen::Map<const Eigen::Matrix<
                 double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>,
                 Eigen::Aligned> hXEigen(hX, dim, N);
@@ -97,8 +87,12 @@ class ImportanceSampling
         }
 #endif
     }
-}; // class ImportanceSampling
+
+    private :
+
+    static bool is_align (void *ptr) {return ((unsigned long) ptr & 15) == 0;}
+}; // class ISIntegrate
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_IMPORTANCE_SAMPLING_HPP
+#endif // VSMC_UTILITY_IMPORTANCE_SAMPLING_HPP

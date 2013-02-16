@@ -236,12 +236,10 @@ class Monitor
                 res += buffer_[i] * weight_[i];
             result_[0] = res;
         } else {
-            is_int_(static_cast<typename traits::SizeTypeTrait<
-                    typename traits::ImportanceSamplingTypeTrait<T>::type
-                    >::type>(particle.size()),
-                    static_cast<typename traits::SizeTypeTrait<
-                    typename traits::ImportanceSamplingTypeTrait<T>::type
-                    >::type>(dim_), &buffer_[0], &weight_[0], &result_[0]);
+            ISIntegrate is_inte;
+            is_inte(static_cast<ISIntegrate::size_type>(particle.size()),
+                    static_cast<ISIntegrate::size_type>(dim_),
+                    &buffer_[0], &weight_[0], &result_[0]);
         }
 
         index_.push_back(iter);
@@ -284,7 +282,6 @@ class Monitor
     std::vector<double> result_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
-    typename traits::ImportanceSamplingTypeTrait<T>::type is_int_;
 }; // class Monitor
 
 } // namespace vsmc

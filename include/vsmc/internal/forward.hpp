@@ -31,7 +31,7 @@ struct VectorRng;
 class Seed;
 template <typename, typename> class RngSet;
 
-class ImportanceSampling;
+class ISIntegrate;
 template <typename> class NumericBase;
 template <unsigned, template <typename> class> class NumericNewtonCotes;
 
