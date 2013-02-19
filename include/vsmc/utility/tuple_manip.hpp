@@ -4,6 +4,36 @@
 #include <vsmc/internal/common.hpp>
 #include <tuple>
 
+/// \cond HIDDEN_SYMBOLS
+
+namespace vsmc {
+
+template <typename, typename> struct TuplePushFront;
+template <typename, typename> struct TuplePushBack;
+template <typename> struct TuplePopFront;
+template <typename> struct TuplePopBack;
+template <typename, std::size_t> struct TuplePopFrontN;
+template <typename, std::size_t> struct TuplePopBackN;
+template <typename, typename> struct TupleMerge;
+template <typename...> struct TupleCat;
+template <typename, template <typename> class>  struct TupleApply;
+
+namespace tuple {
+
+template <typename> struct TupleApplyDeque;
+template <typename> struct TupleApplyList;
+template <typename> struct TupleApplyPriorityQueue;
+template <typename> struct TupleApplyQueue;
+template <typename> struct TupleApplySet;
+template <typename> struct TupleApplyStack;
+template <typename> struct TupleApplyVector;
+
+} // namespace vsmc::tuple
+
+} // namespace vsmc
+
+/// \endcond HIDDEN_SYMBOLS
+
 namespace vsmc {
 
 /// \brief Push a type to the front of a std::tuple type

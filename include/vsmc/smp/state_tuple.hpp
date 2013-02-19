@@ -40,6 +40,13 @@ class StateTupleBase
             return this->mutable_particle_ptr()->value().
                 state(this->id(), Position<Pos>());
         }
+
+        template <std::size_t Pos>
+        typename state_type<Pos>::type &state () const
+        {
+            return this->mutable_particle_ptr()->value().template
+                state<Pos>(this->id());
+        }
     };
 
     template <typename S>
@@ -56,6 +63,13 @@ class StateTupleBase
         {
             return this->particle_ptr()->value().
                 state(this->id(), Position<Pos>());
+        }
+
+        template <std::size_t Pos>
+        const typename state_type<Pos>::type &state () const
+        {
+            return this->particle_ptr()->value().template
+                state<Pos>(this->id());
         }
     };
 
@@ -165,6 +179,16 @@ class StateTuple<RowMajor, T, Types...> :
     &state (size_type id, Position<Pos>) const
     {return std::get<Pos>(state_[id]);}
 
+    template <std::size_t Pos>
+    typename state_tuple_base_type::template state_type<Pos>::type
+    &state (size_type id)
+    {return state(id, Position<Pos>());}
+
+    template <std::size_t Pos>
+    const typename state_tuple_base_type::template state_type<Pos>::type
+    &state (size_type id) const
+    {return state(id, Position<Pos>());}
+
     private :
 
     std::vector<std::tuple<T, Types...> > state_;
@@ -195,6 +219,16 @@ class StateTuple<ColMajor, T, Types...> :
     &state (size_type id, Position<Pos>) const
     {return std::get<Pos>(state_)[id];}
 
+    template <std::size_t Pos>
+    typename state_tuple_base_type::template state_type<Pos>::type
+    &state (size_type id)
+    {return state(id, Position<Pos>());}
+
+    template <std::size_t Pos>
+    const typename state_tuple_base_type::template state_type<Pos>::type
+    &state (size_type id) const
+    {return state(id, Position<Pos>());}
+
     private :
 
     typename tuple::TupleApplyVector<std::tuple<T, Types...> >::type state_;
@@ -207,9 +241,7 @@ class StateTuple<ColMajor, T, Types...> :
     }
 
     void init_state (size_type N, Position<sizeof...(Types)>)
-    {
-        std::get<sizeof...(Types)>(state_).resize(N);
-    }
+    {std::get<sizeof...(Types)>(state_).resize(N);}
 }; // class StateTuple
 
 } // namespace vsmc

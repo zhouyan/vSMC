@@ -46,30 +46,6 @@ class CLConfigure;
 class CLQuery;
 template <typename> class CLManager;
 
-#if VSMC_HAS_CXX11_VARIADIC_TEMPLATES && VSMC_HAS_CXX11LIB_TUPLE
-template <typename, typename> struct TuplePushFront;
-template <typename, typename> struct TuplePushBack;
-template <typename> struct TuplePopFront;
-template <typename> struct TuplePopBack;
-template <typename, std::size_t> struct TuplePopFrontN;
-template <typename, std::size_t> struct TuplePopBackN;
-template <typename, typename> struct TupleMerge;
-template <typename...> struct TupleCat;
-template <typename, template <typename> class>  struct TupleApply;
-#endif // VSMC_HAS_CXX11_VARIADIC_TEMPLATES && VSMC_HAS_CXX11LIB_TUPLE
-
-namespace tuple {
-
-template <typename> struct TupleApplyDeque;
-template <typename> struct TupleApplyList;
-template <typename> struct TupleApplyPriorityQueue;
-template <typename> struct TupleApplyQueue;
-template <typename> struct TupleApplySet;
-template <typename> struct TupleApplyStack;
-template <typename> struct TupleApplyVector;
-
-} // namespace vsmc::tuple
-
 // Adapter
 template <typename, template <typename, typename> class, typename B = CBase>
          class InitializeAdapter;
