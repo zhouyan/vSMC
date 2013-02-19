@@ -41,10 +41,7 @@ class NumericNewtonCotesCoeff
         return coeff;
     }
 
-    const double *coeff() const
-    {
-        return coeff_;
-    }
+    const double *coeff() const {return coeff_;}
 
     private :
 
@@ -204,10 +201,7 @@ class NumericNewtonCotes :
                 result(coeff_, a, h, eval) + coeff_[Degree + 1] * eval(b));
     }
 
-    static VSMC_CONSTEXPR unsigned max_degree ()
-    {
-        return max_degree_;
-    }
+    static VSMC_CONSTEXPR unsigned max_degree () {return max_degree_;}
 
     private :
 
