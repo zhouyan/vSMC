@@ -70,10 +70,11 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     void state_unpack (size_type id, const state_pack_type &pack)
     {
-        VSMC_RUNTIME_ASSERT_STATE_PACK_SIZE(pack.size(), this->dim());
+        VSMC_RUNTIME_ASSERT_STATE_UNPACK_SIZE(
+                pack.size(), this->dim(), Matrix);
 
-        const StateMatrix<Order, Dim, T> *sptr =
-            static_cast<const StateMatrix<Order, Dim, T> *>(this);
+        StateMatrix<Order, Dim, T> *sptr =
+            static_cast<StateMatrix<Order, Dim, T> *>(this);
         for (std::size_t d = 0; d != this->dim(); ++d)
             sptr->state(id, d) = pack[d];
     }
@@ -81,7 +82,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(Base);
+        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(Matrix);
 
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);

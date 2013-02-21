@@ -21,6 +21,8 @@ class WeightSet
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
+    size_type size () const {return size_;}
+
     size_type resample_size () const {return size_;}
 
     template <typename OutputIter>
@@ -106,7 +108,7 @@ class WeightSet
     void set_equal_weight ()
     {
         ess_ = static_cast<double>(size_);
-        double ew = 1 / static_cast<double>(size_);
+        double ew = 1 / ess_;
         for (size_type i = 0; i != size_; ++i) {
             weight_[i] = ew;
             log_weight_[i] = 0;
@@ -230,6 +232,16 @@ class WeightSet
     /// weights
     double ess () const {return ess_;}
 
+    protected :
+
+    std::vector<double> &weight_vec () {return weight_;}
+
+    const std::vector<double> &weight_vec () const {return weight_;}
+
+    std::vector<double> &log_weight_vec () {return log_weight_;}
+
+    const std::vector<double> &log_weight_vec () const {return log_weight_;}
+
     private :
 
     size_type size_;
@@ -241,7 +253,12 @@ class WeightSet
     {
         using std::exp;
 
-        normalize_log_weight();
+        double max_weight = log_weight_[0];
+        for (size_type i = 0; i != size_; ++i)
+            if (log_weight_[i] > max_weight)
+                max_weight = log_weight_[i];
+        for (size_type i = 0; i != size_; ++i)
+            log_weight_[i] -= max_weight;
 #if VSMC_USE_MKL
         ::vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
 #else
@@ -262,10 +279,9 @@ class WeightSet
         for (size_type i = 0; i != size_; ++i)
             log_weight_[i] = log(weight_[i]);
 #endif
-        normalize_log_weight();
     }
 
-    void normalize_weight ()
+    virtual void normalize_weight ()
     {
         double coeff = 0;
         for (size_type i = 0; i != size_; ++i)
@@ -277,16 +293,6 @@ class WeightSet
         for (size_type i = 0; i != size_; ++i)
             ess_ += weight_[i] * weight_[i];
         ess_ = 1 / ess_;
-    }
-
-    void normalize_log_weight ()
-    {
-        double max_weight = log_weight_[0];
-        for (size_type i = 0; i != size_; ++i)
-            if (log_weight_[i] > max_weight)
-                max_weight = log_weight_[i];
-        for (size_type i = 0; i != size_; ++i)
-            log_weight_[i] -= max_weight;
     }
 }; // class WeightSet
 

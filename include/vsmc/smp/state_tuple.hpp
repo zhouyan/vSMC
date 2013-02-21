@@ -91,7 +91,7 @@ class StateTupleBase
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(Base);
+        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(Tuple);
 
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);
@@ -152,8 +152,8 @@ class StateTupleBase
     void unpack_particle (size_type id, const state_pack_type &pack,
             Position<Pos>)
     {
-        const StateTuple<Order, T, Types...> *sptr =
-            static_cast<const StateTuple<Order, T, Types...> *>(this);
+        StateTuple<Order, T, Types...> *sptr =
+            static_cast<StateTuple<Order, T, Types...> *>(this);
         sptr->state(id, Position<Pos>()) = std::get<Pos>(pack);
         unpack_particle(id, pack, Position<Pos + 1>());
     }

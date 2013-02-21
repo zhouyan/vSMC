@@ -127,15 +127,13 @@ class Particle
     /// \return true if resampling was performed
     bool resample (const resample_type &op, double threshold)
     {
-        bool resampled = weight_set_.ess() < threshold * size_;
         size_type N = weight_set_.resample_size();
-        resampled = resampled && N > 0;
+        bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
             weight_.resize(N);
             replication_.resize(N);
             weight_set_.read_resample_weight(&weight_[0]);
-            op(size_, resample_rng_,
-                    &weight_[0], &replication_[0]);
+            op(N, resample_rng_, &weight_[0], &replication_[0]);
             replication2copy_from(N);
             value_.copy(N, &copy_from_[0]);
             weight_set_.set_equal_weight();
