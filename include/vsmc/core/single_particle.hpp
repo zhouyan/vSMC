@@ -7,6 +7,28 @@ namespace vsmc {
 
 /// \brief Particle iterator
 /// \ingroup Core
+///
+/// \details
+/// A particle iterator is a random access iterator. However it has some
+/// special properties.
+/// - ParticleIterator::poiner is a pointer to a constant SingleParticle or
+/// ConstSingleParticle object
+/// - ParticleIterator::reference is a reference to a constant SingleParticle
+/// or ConstSingleParticle object
+/// These means that when calling SingleParticle or ConstSingleParticle member
+/// functions through an iterator, only const member functions are possible.
+/// However, this is not really a restriction, since SingleParticle and
+/// ConstSingleParticle are supposed to be used to access Particle object. They
+/// may provide write access to the Particle object. However, themselves cannot
+/// be changed. That is, the following will be ill-formed,
+/// \code
+/// auto iter = particle.begin();
+/// *iter = SingleParticle(0, 0);
+/// \endcode
+/// This is the supposed behavior, since change the SingleParticle object
+/// pointed by the iterator is meaningless and logically wrong. The
+/// constantness of the iterators are related to the constantness of the
+/// Particle object.
 template <typename T, template <typename> class SPType>
 class ParticleIterator :
     public std::iterator<std::random_access_iterator_tag, SPType<T>,
@@ -61,7 +83,6 @@ class ParticleIterator :
 
     ParticleIterator<T, SPType> &operator+= (difference_type diff)
     {ptr_ += diff; return *this;}
-
 
     ParticleIterator<T, SPType> &operator-= (difference_type diff)
     {ptr_ -= diff; return *this;}

@@ -12,8 +12,6 @@ namespace vsmc {
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
-/// \sa WeightSetBase
-/// \sa RngSet
 template <typename T>
 class Particle
 {
@@ -41,11 +39,9 @@ class Particle
         csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {
         weight_set_.set_equal_weight();
-        sp_[0] = SingleParticle<T>(
-                std::numeric_limits<size_type>::max
+        sp_[0] = SingleParticle<T>(std::numeric_limits<size_type>::max
                 VSMC_MACRO_NO_EXPANSION (), this);
-        csp_[0] = ConstSingleParticle<T>(
-                std::numeric_limits<size_type>::max
+        csp_[0] = ConstSingleParticle<T>(std::numeric_limits<size_type>::max
                 VSMC_MACRO_NO_EXPANSION (), this);
         for (size_type i = 1; i != size_ + 2; ++i) {
             sp_[i] = SingleParticle<T>(i - 1, this);
