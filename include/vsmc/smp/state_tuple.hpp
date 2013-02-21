@@ -20,10 +20,10 @@ class StateTupleBase
     public :
 
     typedef std::size_t size_type;
-    typedef std::tuple<T, Types...> state_tuple_type;
+    typedef std::tuple<T, Types...> state_pack_type;
 
     template <std::size_t Pos> struct state_type
-    {typedef typename std::tuple_element<Pos, state_tuple_type>::type type;};
+    {typedef typename std::tuple_element<Pos, state_pack_type>::type type;};
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S>
@@ -77,6 +77,17 @@ class StateTupleBase
 
     static VSMC_CONSTEXPR std::size_t dim () {return dim_;}
 
+    state_pack_type state_pack (size_type id) const
+    {
+        state_pack_type pack;
+        pack_particle(id, pack, Position<0>());
+
+        return pack;
+    }
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {unpack_particle(pack, id, Position<0>());}
+
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
@@ -125,12 +136,38 @@ class StateTupleBase
     static const std::size_t dim_ = sizeof...(Types) + 1;
 
     template <std::size_t Pos>
+    void pack_particle (size_type id, state_pack_type &pack,
+            Position<Pos>) const
+    {
+        const StateTuple<Order, T, Types...> *sptr =
+            static_cast<const StateTuple<Order, T, Types...> *>(this);
+        std::get<Pos>(pack) = sptr->state(id, Position<Pos>());
+        pack_particle(id, pack, Position<Pos + 1>());
+    }
+
+    void pack_particle (size_type id, state_pack_type &pack,
+            Position<dim_>) const {}
+
+    template <std::size_t Pos>
+    void unpack_particle (size_type id, const state_pack_type &pack,
+            Position<Pos>)
+    {
+        const StateTuple<Order, T, Types...> *sptr =
+            static_cast<const StateTuple<Order, T, Types...> *>(this);
+        sptr->state(id, Position<Pos>()) = std::get<Pos>(pack);
+        unpack_particle(id, pack, Position<Pos + 1>());
+    }
+
+    void unpack_particle (size_type id, const state_pack_type &pack,
+            Position<dim_>) {}
+
+    template <std::size_t Pos>
     void copy_particle (size_type from, size_type to, Position<Pos>)
     {
         StateTuple<Order, T, Types...> *sptr =
             static_cast<StateTuple<Order, T, Types...> *>(this);
         sptr->state(to, Position<Pos>()) = sptr->state(from, Position<Pos>());
-        copy_particle (from, to, Position<Pos + 1>());
+        copy_particle(from, to, Position<Pos + 1>());
     }
 
     void copy_particle (size_type from, size_type to, Position<dim_>) {}

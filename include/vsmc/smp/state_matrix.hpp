@@ -14,6 +14,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     public :
 
     typedef std::size_t size_type;
+    typedef std::vector<T> state_pack_type;
     typedef T state_type;
 
     template <typename S>
@@ -55,6 +56,27 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     T *data () {return &state_[0];}
 
     const T *data () const {return &state_[0];}
+
+    state_pack_type state_pack (size_type id) const
+    {
+        const StateMatrix<Order, Dim, T> *sptr =
+            static_cast<const StateMatrix<Order, Dim, T> *>(this);
+        state_pack_type pack(this->dim());
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            pack[d] = sptr->state(id, d);
+
+        return pack;
+    }
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {
+        VSMC_RUNTIME_ASSERT_STATE_PACK_SIZE(pack.size(), this->dim());
+
+        const StateMatrix<Order, Dim, T> *sptr =
+            static_cast<const StateMatrix<Order, Dim, T> *>(this);
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            sptr->state(id, d) = pack[d];
+    }
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)

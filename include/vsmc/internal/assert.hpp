@@ -136,6 +136,10 @@ class StaticAssert<true>
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
             ("**State"#name"::copy** SIZE MISMATCH"))
 
+#define VSMC_RUNTIME_ASSERT_STATE_UNPACK_SIZE(pack_size, dim, name)           \
+    VSMC_RUNTIME_ASSERT((pack_size >= dim),                                   \
+            ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
+
 // Static assertion macros
 
 #define VSMC_STATIC_ASSERT_ADAPTER_IMPL(name, NAME)                           \
