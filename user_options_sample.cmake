@@ -11,6 +11,7 @@ SET (BOOST_ROOT "C:/Program Files/Boost" CACHE PATH "Boost ROOT")
 SET (Boost_NO_SYSTEM_PATHS OFF CACHE BOOL "Do not use system Boost search")
 # Use Boost static libraries (vSMC itself does not use Boost runtime)
 SET (Boost_USE_STATIC_LIBS ON CACHE BOOL "Boost use static libraries")
+SET (Boost_USE_STATIC_RUNTIME ON CACHE BOOL "Boost use static runtime")
 
 # For additional Boost related variables see the CMake official FindBoost.cmake
 
