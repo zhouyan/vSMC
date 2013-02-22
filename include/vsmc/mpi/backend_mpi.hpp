@@ -139,7 +139,7 @@ class WeightSetMPI : public WeightSet<BaseState>
 ///
 /// \details
 /// The tag `boost::mpi::environment::max_tag()` is reserved by vSMC for copy
-/// particles
+/// particles.
 template <typename BaseState, typename ID>
 class StateMPI : public BaseState
 {
@@ -151,7 +151,8 @@ class StateMPI : public BaseState
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate),
-        offset_(N * static_cast<size_type>(world_.rank())) {}
+        offset_(N * static_cast<size_type>(world_.rank())),
+        copy_tag_(boost::mpi::environment::max_tag()) {}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
@@ -172,7 +173,6 @@ class StateMPI : public BaseState
         copy_reqs_.clear();
         size_type copy_end = 0;
         for (size_type to = 0; to != N; ++to) {
-            int tag = local_id(to);
             size_type from = copy_from_[to];
             if (is_local(to) && is_local(from)) {
                 size_type lto = local_id(to);
@@ -180,11 +180,11 @@ class StateMPI : public BaseState
                 this->copy_particle(lfrom, lto);
             } else if (is_local(to)) {
                 copy_to_[copy_end] = local_id(to);
-                copy_reqs_.push_back(world_.irecv(rank(from), tag,
+                copy_reqs_.push_back(world_.irecv(rank(from), copy_tag_,
                             copy_pack_[copy_end]));
                 ++copy_end;
             } else if (is_local(from)) {
-                copy_reqs_.push_back(world_.isend(rank(to), tag,
+                copy_reqs_.push_back(world_.isend(rank(to), copy_tag_,
                             this->state_pack(local_id(from))));
             }
         }
@@ -216,6 +216,7 @@ class StateMPI : public BaseState
 
     boost::mpi::communicator world_;
     size_type offset_;
+    int copy_tag_;
     std::vector<size_type> copy_to_;
     std::vector<size_type> copy_from_;
     std::vector<boost::mpi::request> copy_reqs_;
