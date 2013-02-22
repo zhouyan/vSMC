@@ -136,10 +136,6 @@ class WeightSetMPI : public WeightSet<BaseState>
 
 /// \brief Particle::value_type subtype using MPI
 /// \ingroup MPI
-///
-/// \details
-/// The tag `boost::mpi::environment::max_tag()` is reserved by vSMC for copy
-/// particles.
 template <typename BaseState, typename ID>
 class StateMPI : public BaseState
 {
@@ -154,6 +150,11 @@ class StateMPI : public BaseState
         offset_(N * static_cast<size_type>(world_.rank())),
         copy_tag_(boost::mpi::environment::max_tag()) {}
 
+    /// \brief Copy particles
+    ///
+    /// \details
+    /// The tag `boost::mpi::environment::max_tag()` is reserved by vSMC for
+    /// copy particles.
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
@@ -195,8 +196,7 @@ class StateMPI : public BaseState
         world_.barrier();
     }
 
-    boost::mpi::communicator &world () {return world_;}
-
+    /// \brief A duplicated MPI communicator for this object
     const boost::mpi::communicator &world () const {return world_;}
 
     protected :
