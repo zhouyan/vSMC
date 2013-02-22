@@ -3,10 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight.hpp>
-
-#include <boost/mpi/collectives.hpp>
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/environment.hpp>
+#include <boost/mpi.hpp>
 
 namespace vsmc {
 
@@ -121,8 +118,7 @@ class StateMPI : public BaseState
     typedef WeightSetMPI<BaseState> weight_set_type;
 
     explicit StateMPI (size_type N) :
-        BaseState(N), offset_(N * static_cast<size_type>(world_.rank())),
-        copy_particle_tag_(boost::mpi::environment::max_tag()) {}
+        BaseState(N), offset_(N * static_cast<size_type>(world_.rank())) {}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
@@ -138,25 +134,30 @@ class StateMPI : public BaseState
         }
         boost::mpi::broadcast(world_, copy_from_, 0);
 
+        copy_to_.resize(this->size());
+        copy_pack_.resize(this->size());
+        copy_reqs_.clear();
+        size_type copy_end = 0;
         for (size_type to = 0; to != N; ++to) {
+            int tag = local_id(to);
             size_type from = copy_from_[to];
             if (is_local(to) && is_local(from)) {
                 size_type lto = local_id(to);
                 size_type lfrom = local_id(from);
                 this->copy_particle(lfrom, lto);
             } else if (is_local(to)) {
-                size_type lto = local_id(to);
-                typename BaseState::state_pack_type pack(
-                        this->state_pack(lto));
-                world_.recv(rank(from), copy_particle_tag_, pack);
-                this->state_unpack(lto, pack);
+                copy_to_[copy_end] = local_id(to);
+                copy_reqs_.push_back(world_.irecv(rank(from), tag,
+                            copy_pack_[copy_end]));
+                ++copy_end;
             } else if (is_local(from)) {
-                size_type lfrom = local_id(from);
-                typename BaseState::state_pack_type pack(
-                        this->state_pack(lfrom));
-                world_.send(rank(to), copy_particle_tag_, pack);
+                copy_reqs_.push_back(world_.isend(rank(to), tag,
+                            this->state_pack(local_id(from))));
             }
         }
+        boost::mpi::wait_all(copy_reqs_.begin(), copy_reqs_.end());
+        for (size_type i = 0; i != copy_end; ++i)
+            this->state_unpack(copy_to_[i], copy_pack_[i]);
 
         world_.barrier();
     }
@@ -169,24 +170,23 @@ class StateMPI : public BaseState
 
     size_type offset () const {return offset_;}
 
+    int rank (size_type global_id) const
+    {return static_cast<int>(global_id / this->size());}
+
     bool is_local (size_type global_id) const
     {return global_id >= offset_ && global_id < this->size() + offset_;}
 
     size_type local_id (size_type global_id) const
-    {return global_id - offset_;}
-
-    size_type global_id (size_type local_id) const
-    {return local_id + offset_;}
-
-    int rank (size_type global_id) const
-    {return static_cast<int>(global_id / this->size());}
+    {return global_id - this->size() * rank(global_id);}
 
     private :
 
     boost::mpi::communicator world_;
     size_type offset_;
-    int copy_particle_tag_;
+    std::vector<size_type> copy_to_;
     std::vector<size_type> copy_from_;
+    std::vector<boost::mpi::request> copy_reqs_;
+    std::vector<typename BaseState::state_pack_type> copy_pack_;
 }; // class StateMPI
 
 } // namespace vsmc
