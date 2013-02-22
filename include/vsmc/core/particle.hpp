@@ -34,7 +34,7 @@ class Particle
     explicit Particle (size_type N) :
         size_(N), value_(N), weight_set_(N), rng_set_(N),
         replication_(N), copy_from_(N), weight_(N),
-        resample_rng_(VSMC_SEED_TYPE::instance().get()),
+        resample_rng_(Seed::instance().get()),
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
         csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {

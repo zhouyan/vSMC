@@ -16,24 +16,11 @@
 #define VSMC_RUNTIME_ASSERT_AS_EXCEPTION 0
 #endif
 
-// OpenCL Device type
-
-#ifndef VSMC_CL_DEFAULT_ID
-#define VSMC_CL_DEFAULT_ID vsmc::CLDefault
-#endif
 
 // RNG types
 
 #ifndef VSMC_USE_RANDOM123
 #define VSMC_USE_RANDOM123 1
-#endif
-
-#ifndef VSMC_SEED_TYPE
-#define VSMC_SEED_TYPE vsmc::Seed
-#endif
-
-#ifndef VSMC_RNG_SEED
-#define VSMC_RNG_SEED 0
 #endif
 
 #ifndef VSMC_CBRNG_TYPE

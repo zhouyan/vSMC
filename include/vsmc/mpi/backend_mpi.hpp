@@ -7,9 +7,39 @@
 
 namespace vsmc {
 
+/// \brief MPI Communicator
+/// \ingroup MPI
+///
+/// \details
+/// Use specialization of the singleton to configure different StateMPI
+template <typename ID>
+class MPICommunicator
+{
+    public :
+
+    static MPICommunicator<ID> &instance ()
+    {
+        static MPICommunicator<ID> comm;
+
+        return comm;
+    }
+
+    const MPI_Comm &get () const {return comm_;}
+
+    void set (const MPI_Comm &comm) {comm_ = comm;}
+
+    private :
+
+    MPI_Comm comm_;
+
+    MPICommunicator () : comm_(MPI_COMM_WORLD) {};
+    MPICommunicator (const MPICommunicator<ID> &other);
+    MPICommunicator<ID> &operator= (const MPICommunicator<ID> &other);
+}; // class MPICommunicator
+
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
-template <typename BaseState>
+template <typename BaseState, typename ID>
 class WeightSetMPI : public WeightSet<BaseState>
 {
     public :
@@ -17,8 +47,10 @@ class WeightSetMPI : public WeightSet<BaseState>
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
     explicit WeightSetMPI (size_type N) :
-        WeightSet<BaseState>(N), ess_(static_cast<double>(N) * world_.size())
-    {}
+        WeightSet<BaseState>(N),
+        world_(MPICommunicator<ID>::instance().get(),
+                boost::mpi::comm_duplicate),
+        ess_(static_cast<double>(N) * world_.size()) {}
 
     size_type resample_size () const {return this->size() * world_.size();}
 
@@ -109,16 +141,19 @@ class WeightSetMPI : public WeightSet<BaseState>
 /// \details
 /// The tag `boost::mpi::environment::max_tag()` is reserved by vSMC for copy
 /// particles
-template <typename BaseState>
+template <typename BaseState, typename ID>
 class StateMPI : public BaseState
 {
     public :
 
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
-    typedef WeightSetMPI<BaseState> weight_set_type;
+    typedef WeightSetMPI<BaseState, ID> weight_set_type;
 
     explicit StateMPI (size_type N) :
-        BaseState(N), offset_(N * static_cast<size_type>(world_.rank())) {}
+        BaseState(N),
+        world_(MPICommunicator<ID>::instance().get(),
+                boost::mpi::comm_duplicate),
+        offset_(N * static_cast<size_type>(world_.rank())) {}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)

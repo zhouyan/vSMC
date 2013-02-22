@@ -44,11 +44,9 @@ class Seed
 
     result_type seed_;
 
-    Seed () : seed_(VSMC_RNG_SEED) {if (!seed_) seed_ = std::rand();}
-
+    Seed () : seed_(0) {}
     Seed (const Seed &);
     Seed &operator= (const Seed &);
-    ~Seed () {}
 }; // class Seed
 
 } // namespace vsmc

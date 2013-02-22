@@ -71,12 +71,17 @@ template <typename> class ConstSingleParticle;
 template <typename> class ConstSingleParticleBase;
 
 // OpenCL
-template <std::size_t, typename, typename ID = VSMC_CL_DEFAULT_ID>
-class StateCL;
+template <std::size_t, typename, typename ID = CLDefault> class StateCL;
 template <typename, typename B = CBase> class InitializeCL;
 template <typename, typename B = CBase> class MoveCL;
 template <typename, typename B = CBase> class MonitorEvalCL;
 template <typename, typename B = CBase> class PathEvalCL;
+
+// MPI
+struct MPIDefault;
+template <typename> class MPICommunicator;
+template <typename, typename> class WeightSetMPI;
+template <typename, typename ID = MPIDefault> class StateMPI;
 
 // SMP State
 template <MatrixOrder, std::size_t, typename> class StateMatrixBase;

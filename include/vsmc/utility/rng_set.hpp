@@ -30,11 +30,10 @@ class RngSet<RngType, ScalarRng>
     public :
 
     typedef RngType rng_type;
-    typedef VSMC_SEED_TYPE seed_type;
     typedef std::size_t size_type;
 
     explicit RngSet (size_type) : rng_(static_cast<
-            typename rng_type::result_type>(seed_type::instance().get())) {}
+            typename rng_type::result_type>(Seed::instance().get())) {}
 
     rng_type &rng (size_type id) {return rng_;}
 
@@ -51,12 +50,11 @@ class RngSet<RngType, VectorRng>
     public :
 
     typedef RngType rng_type;
-    typedef VSMC_SEED_TYPE seed_type;
     typedef typename std::vector<rng_type>::size_type size_type;
 
     explicit RngSet (size_type N)
     {
-        seed_type &seed = seed_type::instance();
+        Seed &seed = Seed::instance();
         for (size_type i = 0; i != N; ++i) {
             rng_.push_back(rng_type(static_cast<
                         typename rng_type::result_type>(seed.get())));

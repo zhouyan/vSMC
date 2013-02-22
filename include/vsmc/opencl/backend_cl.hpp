@@ -134,7 +134,7 @@ class StateCL
     /// #define Size 1000UL;
     /// #define Dim 4UL;
     /// #define Seed 101UL;
-    /// // The actual number if VSMC_SEED_TYPE::instance().get()
+    /// // The actual number if vsmc::Seed::instance().get()
     ///
     /// #include <vsmc/opencl/device.h>
     ///
@@ -147,7 +147,7 @@ class StateCL
     /// `VSMC_STATE_TYPE_IS_FLOAT` and `VSMC_STATE_TYPE_IS_DOUBLE` are provided
     /// for conditional compile when the precison matters.
     ///
-    /// After build, `VSMC_SEED_TYPE::instance().skip(N)` is called with `N`
+    /// After build, `vsmc::Seed::instance().skip(N)` is called with `N`
     /// being the nubmer of particles.
     ///
     /// \note
@@ -169,11 +169,10 @@ class StateCL
         ss << "typedef ulong size_type;\n";
         ss << "#define Size " << size_ << "UL\n";
         ss << "#define Dim  " << dim_  << "UL\n";
-        ss << "#define Seed " << VSMC_SEED_TYPE::instance().get() << "UL\n";
+        ss << "#define Seed " << Seed::instance().get() << "UL\n";
         ss << "#include <vsmc/opencl/device.h>\n";
         ss << source << '\n';
-        VSMC_SEED_TYPE::instance().skip(
-                static_cast<VSMC_SEED_TYPE::result_type>(size_));
+        Seed::instance().skip(static_cast<Seed::result_type>(size_));
 
         try {
             program_ = manager().create_program(ss.str());
