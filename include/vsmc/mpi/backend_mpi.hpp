@@ -47,8 +47,7 @@ class WeightSetMPI : public WeightSet<BaseState>
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
     explicit WeightSetMPI (size_type N) :
-        WeightSet<BaseState>(N),
-        world_(MPICommunicator<ID>::instance().get(),
+        WeightSet<BaseState>(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate),
         ess_(static_cast<double>(N) * world_.size()) {}
 
@@ -150,8 +149,7 @@ class StateMPI : public BaseState
     typedef WeightSetMPI<BaseState, ID> weight_set_type;
 
     explicit StateMPI (size_type N) :
-        BaseState(N),
-        world_(MPICommunicator<ID>::instance().get(),
+        BaseState(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate),
         offset_(N * static_cast<size_type>(world_.rank())) {}
 
