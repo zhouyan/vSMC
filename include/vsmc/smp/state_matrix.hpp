@@ -1,7 +1,7 @@
 #ifndef VSMC_SMP_STATE_MATRIX_HPP
 #define VSMC_SMP_STATE_MATRIX_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/smp/base.hpp>
 #include <vsmc/core/single_particle.hpp>
 
 namespace vsmc {
@@ -28,6 +28,14 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
         state_type &state (std::size_t pos) const
         {return this->mutable_particle_ptr()->value().state(this->id(), pos);}
+
+        template <std::size_t Pos>
+        state_type &state (Position<Pos>) const
+        {return this->state(Pos);}
+
+        template <std::size_t Pos>
+        state_type &state () const
+        {return this->state(Pos);}
     };
 
     template <typename S>
@@ -41,6 +49,14 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
         const state_type &state (std::size_t pos) const
         {return this->particle_ptr()->value().state(this->id(), pos);}
+
+        template <std::size_t Pos>
+        const state_type &state (Position<Pos>) const
+        {return this->state(Pos);}
+
+        template <std::size_t Pos>
+        const state_type &state () const
+        {return this->state(Pos);}
     };
 
     void resize_dim (std::size_t dim)
@@ -186,6 +202,22 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     const T &state (size_type id, std::size_t pos) const
     {return this->state_matrix()[id * this->dim() + pos];}
 
+    template <std::size_t Pos> 
+    T &state (size_type id, Position<Pos>)
+    {return state(id, Pos);}
+
+    template <std::size_t Pos> 
+    const T &state (size_type id, Position<Pos>) const
+    {return state(id, Pos);}
+
+    template <std::size_t Pos> 
+    T &state (size_type id)
+    {return state(id, Pos);}
+
+    template <std::size_t Pos> 
+    const T &state (size_type id) const
+    {return state(id, Pos);}
+
     T *row_ptr (size_type id)
     {return this->data() + id * this->dim();}
 
@@ -210,6 +242,22 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     const T &state (size_type id, std::size_t pos) const
     {return this->state_matrix()[pos * this->size() + id];}
+
+    template <std::size_t Pos>
+    T &state (size_type id, Position<Pos>)
+    {return state(id, Pos);}
+
+    template <std::size_t Pos>
+    const T &state (size_type id, Position<Pos>) const
+    {return state(id, Pos);}
+
+    template <std::size_t Pos>
+    T &state (size_type id)
+    {return state(id, Pos);}
+
+    template <std::size_t Pos>
+    const T &state (size_type id) const
+    {return state(id, Pos);}
 
     T *col_ptr (std::size_t pos)
     {return this->data() + pos * this->size();}

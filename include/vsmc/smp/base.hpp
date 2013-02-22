@@ -5,6 +5,11 @@
 
 namespace vsmc {
 
+/// \brief Position of parameter in the state vector
+/// \ingroup SMP
+template <std::size_t Pos>
+struct Position : public traits::integral_constant<std::size_t, Pos> {};
+
 /// \brief Initialize base dispatch class
 /// \ingroup SMP
 template <typename T, typename Derived>

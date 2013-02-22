@@ -1,16 +1,11 @@
 #ifndef VSMC_SMP_STATE_TUPLE_HPP
 #define VSMC_SMP_STATE_TUPLE_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/smp/base.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/utility/tuple_manip.hpp>
 
 namespace vsmc {
-
-/// \brief Position of parameter in the state vector
-/// \ingroup SMP
-template <std::size_t Pos>
-struct Position : public traits::integral_constant<std::size_t, Pos> {};
 
 /// \brief Base type of StateTuple
 /// \ingroup SMP
@@ -43,10 +38,7 @@ class StateTupleBase
 
         template <std::size_t Pos>
         typename state_type<Pos>::type &state () const
-        {
-            return this->mutable_particle_ptr()->value().template
-                state<Pos>(this->id());
-        }
+        {return this->state(Position<Pos>());}
     };
 
     template <typename S>
@@ -67,10 +59,7 @@ class StateTupleBase
 
         template <std::size_t Pos>
         const typename state_type<Pos>::type &state () const
-        {
-            return this->particle_ptr()->value().template
-                state<Pos>(this->id());
-        }
+        {return this->state(Position<Pos>());}
     };
 
     size_type size () const {return size_;}
