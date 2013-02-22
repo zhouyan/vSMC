@@ -23,10 +23,6 @@
 #define VSMC_USE_RANDOM123 1
 #endif
 
-#ifndef VSMC_CBRNG_TYPE
-#define VSMC_CBRNG_TYPE r123::Threefry4x64
-#endif
-
 // Linear algebra
 
 #ifndef VSMC_USE_MKL
