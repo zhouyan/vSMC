@@ -15,10 +15,13 @@
 /// \brief Adapter class templates for constructing concrete objects
 
 /// \defgroup OpenCL OpenCL
-/// \brief Parallelized sampler with OpenCL
+/// \brief Parallel sampler using OpenCL
 
 /// \defgroup SMP Symmetric Multiprocessing
-/// \brief Single threaded and parallel samplers using SMP implementations
+/// \brief Parallel samplers using multi-threading on SMP architecture
+
+/// \defgroup MPI Message Passing Interface
+/// \brief Parallel samplers using MPI
 
 /// \defgroup Traits Traits
 /// \brief Trait classes
