@@ -15,10 +15,62 @@ class StateTupleBase
     public :
 
     typedef std::size_t size_type;
-    typedef std::tuple<T, Types...> state_pack_type;
+    typedef std::tuple<T, Types...> state_tuple_type;
 
     template <std::size_t Pos> struct state_type
-    {typedef typename std::tuple_element<Pos, state_pack_type>::type type;};
+    {typedef typename std::tuple_element<Pos, state_tuple_type>::type type;};
+
+    class state_pack_type
+    {
+        public :
+
+        state_pack_type () {}
+
+        state_pack_type (const state_tuple_type &data) : data_(data) {}
+
+        operator state_tuple_type () {return data_;}
+
+        template <std::size_t Pos>
+        typename state_type<Pos>::type &get ()
+        {return std::get<Pos>(data_);}
+
+        template <std::size_t Pos>
+        const typename state_type<Pos>::type &get () const
+        {return std::get<Pos>(data_);}
+
+        template <typename Archive>
+        void serialize (Archive &ar, const unsigned int)
+        {serialize(ar, Position<0>());}
+
+        template <typename Archive>
+        void serialize (Archive &ar, const unsigned int) const
+        {serialize(ar, Position<0>());}
+
+        private :
+
+        state_tuple_type data_;
+        static const std::size_t dim_ = sizeof...(Types) + 1;
+
+        template <typename Archive, std::size_t Pos>
+        void serialize (Archive &ar, Position<Pos>)
+        {
+            ar & std::get<Pos>(data_);
+            serialize(ar, Position<Pos + 1>());
+        }
+
+        template <typename Archive>
+        void serialize (Archive &ar, Position<dim_>) {}
+
+        template <typename Archive, std::size_t Pos>
+        void serialize (Archive &ar, Position<Pos>) const
+        {
+            ar & std::get<Pos>(data_);
+            serialize(ar, Position<Pos + 1>());
+        }
+
+        template <typename Archive>
+        void serialize (Archive &ar, Position<dim_>) const {}
+    };
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S>
@@ -75,7 +127,7 @@ class StateTupleBase
     }
 
     void state_unpack (size_type id, const state_pack_type &pack)
-    {unpack_particle(pack, id, Position<0>());}
+    {unpack_particle(id, pack, Position<0>());}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
@@ -130,7 +182,7 @@ class StateTupleBase
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
-        std::get<Pos>(pack) = sptr->state(id, Position<Pos>());
+        pack.template get<Pos>() = sptr->state(id, Position<Pos>());
         pack_particle(id, pack, Position<Pos + 1>());
     }
 
@@ -143,7 +195,7 @@ class StateTupleBase
     {
         StateTuple<Order, T, Types...> *sptr =
             static_cast<StateTuple<Order, T, Types...> *>(this);
-        sptr->state(id, Position<Pos>()) = std::get<Pos>(pack);
+        sptr->state(id, Position<Pos>()) = pack.template get<Pos>();
         unpack_particle(id, pack, Position<Pos + 1>());
     }
 
