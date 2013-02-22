@@ -10,6 +10,8 @@
 
 namespace vsmc {
 
+/// \brief Particle::weight_set_type subtype using MPI
+/// \ingroup MPI
 template <typename BaseState>
 class WeightSetMPI : public WeightSet<BaseState>
 {
@@ -76,7 +78,6 @@ class WeightSetMPI : public WeightSet<BaseState>
     boost::mpi::communicator world_;
     double ess_;
     mutable std::vector<std::vector<double> > weight_gather_;
-    static const int weight_coeff_tag_ = 0;
 
     void normalize_weight ()
     {
@@ -105,6 +106,12 @@ class WeightSetMPI : public WeightSet<BaseState>
     }
 }; // class WeightSetMPI
 
+/// \brief Particle::value_type subtype using MPI
+/// \ingroup MPI
+///
+/// \details
+/// The tag `boost::mpi::environment::max_tag()` is reserved by vSMC for copy
+/// particles
 template <typename BaseState>
 class StateMPI : public BaseState
 {
@@ -113,7 +120,9 @@ class StateMPI : public BaseState
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
     typedef WeightSetMPI<BaseState> weight_set_type;
 
-    explicit StateMPI (size_type N) : BaseState(N) {}
+    explicit StateMPI (size_type N) :
+        BaseState(N), offset_(N * static_cast<size_type>(world_.rank())),
+        copy_particle_tag_(boost::mpi::environment::max_tag()) {}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
@@ -158,17 +167,16 @@ class StateMPI : public BaseState
 
     protected :
 
-    size_type offset () const
-    {return this->size() * static_cast<size_type>(world_.rank());}
+    size_type offset () const {return offset_;}
 
     bool is_local (size_type global_id) const
-    {return global_id >= offset() && global_id < this->size() + offset();}
+    {return global_id >= offset_ && global_id < this->size() + offset_;}
 
     size_type local_id (size_type global_id) const
-    {return global_id - offset();}
+    {return global_id - offset_;}
 
     size_type global_id (size_type local_id) const
-    {return local_id + offset();}
+    {return local_id + offset_;}
 
     int rank (size_type global_id) const
     {return static_cast<int>(global_id / this->size());}
@@ -176,8 +184,9 @@ class StateMPI : public BaseState
     private :
 
     boost::mpi::communicator world_;
+    size_type offset_;
+    int copy_particle_tag_;
     std::vector<size_type> copy_from_;
-    static const int copy_particle_tag_ = 1;
 }; // class StateMPI
 
 } // namespace vsmc
