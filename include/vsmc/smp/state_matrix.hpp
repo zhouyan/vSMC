@@ -202,19 +202,19 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     const T &state (size_type id, std::size_t pos) const
     {return this->state_matrix()[id * this->dim() + pos];}
 
-    template <std::size_t Pos> 
+    template <std::size_t Pos>
     T &state (size_type id, Position<Pos>)
     {return state(id, Pos);}
 
-    template <std::size_t Pos> 
+    template <std::size_t Pos>
     const T &state (size_type id, Position<Pos>) const
     {return state(id, Pos);}
 
-    template <std::size_t Pos> 
+    template <std::size_t Pos>
     T &state (size_type id)
     {return state(id, Pos);}
 
-    template <std::size_t Pos> 
+    template <std::size_t Pos>
     const T &state (size_type id) const
     {return state(id, Pos);}
 

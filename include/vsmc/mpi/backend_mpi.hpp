@@ -48,7 +48,7 @@ class WeightSetMPI : public WeightSet<BaseState>
 
     explicit WeightSetMPI (size_type N) :
         WeightSet<BaseState>(N), world_(MPICommunicator<ID>::instance().get(),
-                boost::mpi::comm_duplicate),
+                boost::mpi::comm_duplicate), internal_barrier_(true),
         ess_(static_cast<double>(N) * world_.size()) {}
 
     size_type resample_size () const {return this->size() * world_.size();}
@@ -56,14 +56,12 @@ class WeightSetMPI : public WeightSet<BaseState>
     template <typename OutputIter>
     OutputIter read_resample_weight (OutputIter first) const
     {
-        world_.barrier();
-
+        barrier();
         boost::mpi::all_gather(world_, this->weight_vec(), weight_gather_);
         for (int r = 0; r != world_.size(); ++r)
             for (size_type i = 0; i != this->size(); ++i, ++first)
                 *first = weight_gather_[r][i];
-
-        world_.barrier();
+        barrier();
 
         return first;
     }
@@ -71,22 +69,19 @@ class WeightSetMPI : public WeightSet<BaseState>
     template <typename RandomIter>
     RandomIter read_resample_weight (RandomIter first, int stride) const
     {
-        world_.barrier();
-
+        barrier();
         boost::mpi::all_gather(world_, this->weight_vec(), weight_gather_);
         for (int r = 0; r != world_.size(); ++r)
             for (size_type i = 0; i != this->size(); ++i, first += stride)
                 *first = weight_gather_[r][i];
-
-        world_.barrier();
+        barrier();
 
         return first;
     }
 
     void set_equal_weight ()
     {
-        world_.barrier();
-
+        barrier();
         ess_ = static_cast<double>(this->size()) * world_.size();
         double ew = 1 / ess_;
         std::vector<double> &weight = this->weight_vec();
@@ -95,21 +90,28 @@ class WeightSetMPI : public WeightSet<BaseState>
             weight[i] = ew;
             log_weight[i] = 0;
         }
-
-        world_.barrier();
+        barrier();
     }
 
     double ess () const {return ess_;}
 
+    /// \brief A duplicated MPI communicator for this weight set object
+    const boost::mpi::communicator &world () const {return world_;}
+
+    void barrier () const {if (internal_barrier_) world_.barrier();}
+
+    void internal_barrier (bool use) {internal_barrier_ = use;}
+
     private :
 
     boost::mpi::communicator world_;
+    bool internal_barrier_;
     double ess_;
     mutable std::vector<std::vector<double> > weight_gather_;
 
     void normalize_weight ()
     {
-        world_.barrier();
+        barrier();
 
         std::vector<double> &weight = this->weight_vec();
 
@@ -130,7 +132,7 @@ class WeightSetMPI : public WeightSet<BaseState>
         gess = 1 / gess;
         ess_ = gess;
 
-        world_.barrier();
+        barrier();
     }
 }; // class WeightSetMPI
 
@@ -146,7 +148,7 @@ class StateMPI : public BaseState
 
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),
-                boost::mpi::comm_duplicate),
+                boost::mpi::comm_duplicate), internal_barrier_(true),
         offset_(N * static_cast<size_type>(world_.rank())),
         copy_tag_(boost::mpi::environment::max_tag()) {}
 
@@ -206,7 +208,7 @@ class StateMPI : public BaseState
     {
         VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH_MPI;
 
-        world_.barrier();
+        barrier();
 
         copy_from_.resize(N);
         if (world_.rank() == 0) {
@@ -216,14 +218,18 @@ class StateMPI : public BaseState
         boost::mpi::broadcast(world_, copy_from_, 0);
 
         copy_this_node(N, &copy_from_[0], copy_recv_, copy_send_);
-        world_.barrier();
+        barrier();
 
         copy_inter_node(copy_recv_, copy_send_);
-        world_.barrier();
+        barrier();
     }
 
-    /// \brief A duplicated MPI communicator for this object
+    /// \brief A duplicated MPI communicator for this state value object
     const boost::mpi::communicator &world () const {return world_;}
+
+    void barrier () const {if (internal_barrier_) world_.barrier();}
+
+    void internal_barrier (bool use) {internal_barrier_ = use;}
 
     /// \brief The number of particles on all nodes
     size_type global_size () const
@@ -249,7 +255,7 @@ class StateMPI : public BaseState
 
     /// \brief Transfer a local particle id *on this node* into a global
     /// particle id
-    size_type global_id (size_type lcoal_id) const {return local_id + offset_;}
+    size_type global_id (size_type local_id) const {return local_id + offset_;}
 
     protected :
 
@@ -335,6 +341,7 @@ class StateMPI : public BaseState
     private :
 
     boost::mpi::communicator world_;
+    bool internal_barrier_;
     size_type offset_;
     int copy_tag_;
     std::vector<size_type> copy_from_;

@@ -1,12 +1,6 @@
 #ifndef VSMC_SMP_IMPL_TBB_HPP
 #define VSMC_SMP_IMPL_TBB_HPP
 
-#if defined(__clang__) && !defined(_LIBCPP_VERSION) && (__GLIBCXX__ < 20100429)
-#ifndef TBB_USE_CAPTURED_EXCEPTION
-#define TBB_USE_CAPTURED_EXCEPTION 1
-#endif
-#endif // __clang__
-
 #include <vsmc/smp/base.hpp>
 #include <tbb/tbb.h>
 

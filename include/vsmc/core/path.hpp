@@ -377,7 +377,7 @@ class PathGeometry : public Path<T>
                 weight_[i] *= coeff;
 
             double res = 0;
-            const double *buffer = &integrand_history_[iter][0]; 
+            const double *buffer = &integrand_history_[iter][0];
             for (std::size_t i = 0; i != size; ++i)
                 res += buffer[i] * weight_[i];
 

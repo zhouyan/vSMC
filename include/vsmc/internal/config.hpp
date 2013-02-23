@@ -10,12 +10,27 @@
 #define __STDC_CONSTANT_MACROS
 #endif
 
+// TBB exception
+
+#include <cstddef>
+#if defined(__clang__)
+#if defined(_LIBCPP_VERSION)  && !defined(__APPLE__)
+#ifndef TBB_USE_CAPTURED_EXCEPTION
+#define TBB_USE_CAPTURED_EXCEPTION 1
+#endif
+#endif // libc++
+#if defined(__GLIBCXX__) && (__GLIBCXX__ < 20100429)
+#ifndef TBB_USE_CAPTURED_EXCEPTION
+#define TBB_USE_CAPTURED_EXCEPTION 1
+#endif
+#endif // libstdc++
+#endif // __clang__
+
 // Assertion
 
 #ifndef VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT_AS_EXCEPTION 0
 #endif
-
 
 // RNG types
 
