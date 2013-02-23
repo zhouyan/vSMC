@@ -152,9 +152,55 @@ class StateMPI : public BaseState
 
     /// \brief Copy particles
     ///
+    /// \param N The number of particles on all nodes
+    /// \param copy_from A vector of length `N`, for each particle with global
+    /// id `to`, `copy_from[to]` is the global id of the particle it shall
+    /// copy.
+    ///
     /// \details
-    /// The tag `boost::mpi::environment::max_tag()` is reserved by vSMC for
-    /// copy particles.
+    /// The `BaseState` type is required to have the following members
+    /// - `state_pack_type`: A type that used to pack state values. It shall be
+    /// serializable. That is, a `state_pack_type` object is acceptable by
+    /// `boost::mpi::communicator::send` etc. Both
+    /// `StateMatrix::state_pack_type` and `StateTuple::state_pack_type`
+    /// satisfy this requirement if their template type parameter types are
+    /// serializable. For user defined types, see document of Boost.Serialize
+    /// of how to serialize a class object.
+    /// - `state_pack`
+    /// \code
+    /// state_pack_type state_pack (size_type id) const;
+    /// \endcode
+    /// Given a local particle id on this node, pack the state values into a
+    /// `state_pack_type` object.
+    /// - `state_unpack`
+    /// \code
+    /// void state_unpack (size_type id, const state_pack_type &pack);
+    /// \endcode
+    /// Given a local particle id and a `state_pack_type` object, unpack it
+    /// into the given position on this node.
+    ///
+    /// In vSMC, the resampling algorithms generate the number of replications
+    /// of each particle. Particles with replication zero need to copy other
+    /// particles. The vector of the number of replications is transfered to
+    /// `copy_from` by `Particle::resample`, and it is generated in such a way
+    /// that each particle will copy from somewhere close to itself. Therefore,
+    /// transferring between nodes is minimized.
+    ///
+    /// This default implementation perform three stages of copy.
+    /// - Stage one: Generate a local duplicate of `copy_from` on node `0` and
+    /// broadcast it to all nodes.
+    /// - Stage two: Perform local copy, copy those particles where the
+    /// destination and source are both on this node. This is performed in
+    /// parallel on each node.
+    /// - Stage three: copy particles that need message passing between nodes.
+    ///
+    /// A derived class can override this `copy` method. For the following
+    /// possible reasons,
+    /// - Stage one is not needed or too expansive
+    /// - Stage three is too expansive. The default implementation assumes
+    /// `this->state_pack(id)` is not too expansive, and inter-node copy is
+    /// rare anyway. If this is not the case, then it can be a performance
+    /// bottle neck.
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
@@ -169,11 +215,77 @@ class StateMPI : public BaseState
         }
         boost::mpi::broadcast(world_, copy_from_, 0);
 
-        copy_recv_.clear();
-        copy_send_.clear();
+        copy_this_node(N, &copy_from_[0], copy_recv_, copy_send_);
+        world_.barrier();
+
+        copy_inter_node(copy_recv_, copy_send_);
+        world_.barrier();
+    }
+
+    /// \brief A duplicated MPI communicator for this object
+    const boost::mpi::communicator &world () const {return world_;}
+
+    /// \brief The number of particles on all nodes
+    size_type global_size () const
+    {return this->size() * static_cast<size_type>(world_.size());}
+
+    /// \brief The number of particles on nodes with ranks less than the rank
+    /// of this node.
+    size_type offset () const {return offset_;}
+
+    /// \brief Given a global particle id return the rank of the node it
+    /// belongs
+    int rank (size_type global_id) const
+    {return static_cast<int>(global_id / this->size());}
+
+    /// \brief Given a global particle id check if it is on this `node`
+    bool is_local (size_type global_id) const
+    {return global_id >= offset_ && global_id < this->size() + offset_;}
+
+    /// \brief Transfer a global particle id into a local particle id
+    size_type local_id (size_type global_id) const
+    {return global_id - this->size() * rank(global_id);}
+
+    protected :
+
+    /// \brief The MPI recv/send tag used by `copy_inter_node`
+    int copy_tag () const {return copy_tag_;}
+
+    /// \brief Perform local copy
+    ///
+    /// \param N The number of particles on all nodes
+    /// \param copy_from_first The first iterator of the copy_from vector
+    /// \param copy_recv All particles that shall be received at this node
+    /// \param copy_send All particles that shall be send from this node
+    ///
+    /// \details
+    /// `copy_from_first` can be a one-pass input iterator used to access a
+    /// vector of size `N`, say `copy_from`.
+    /// For each `to` in the range `0` to `N - 1`
+    /// - If both `to` and `from = copy_from[to]` are particles on this node,
+    /// invoke `copy_particle` to copy the parties. Otherwise,
+    /// - If `to` is a particle on this node, insert a pair into `copy_recv`,
+    /// whose values are the rank of the node from which this node shall
+    /// receive the particle and the particle id *on this node* where the
+    /// particle received shall be unpacked. Otherwise,
+    /// - If `from = copy_from[to]` is a particle on this node, insert a pair
+    /// into `copy_send`, whose values are the rank of the node to which this
+    /// node shall send the particle  and the particle id *on this node* where
+    /// the particle sent shall be packed. Otherwise do nothing.
+    ///
+    /// \note
+    /// It is important the the vector access through `copy_from_first` is the
+    /// same for all nodes. Otherwise the behavior is undefined.
+    template <typename InputIter>
+    void copy_this_node (size_type N, InputIter copy_from_first,
+            std::vector<std::pair<int, size_type> > &copy_recv,
+            std::vector<std::pair<int, size_type> > &copy_send)
+    {
+        copy_recv.clear();
+        copy_send.clear();
         int rank_this = world_.rank();
-        for (size_type to = 0; to != N; ++to) {
-            size_type from = copy_from_[to];
+        for (size_type to = 0; to != N; ++to, ++copy_from_first) {
+            size_type from = *copy_from_first;
             int rank_recv = rank(to);
             int rank_send = rank(from);
             size_type id_recv = local_id(to);
@@ -181,48 +293,39 @@ class StateMPI : public BaseState
             if (rank_this == rank_recv && rank_this == rank_send) {
                 this->copy_particle(id_send, id_recv);
             } else if (rank_this == rank_recv) {
-                copy_recv_.push_back(std::make_pair(rank_send, id_recv));
+                copy_recv.push_back(std::make_pair(rank_send, id_recv));
             } else if (rank_this == rank_send) {
-                copy_send_.push_back(std::make_pair(rank_recv, id_send));
+                copy_send.push_back(std::make_pair(rank_recv, id_send));
             }
         }
+    }
 
+    /// \brief Perform global copy
+    ///
+    /// \param copy_recv The output vector `copy_recv` from `copy_this_node`
+    /// \param copy_send The output vector `copy_send` from `copy_this_node`
+    void copy_inter_node (
+            const std::vector<std::pair<int, size_type> > &copy_recv,
+            const std::vector<std::pair<int, size_type> > &copy_send)
+    {
+        int rank_this = world_.rank();
         for (int r = 0; r != world_.size(); ++r) {
             if (rank_this == r) {
-                for (std::size_t i = 0; i != copy_recv_.size(); ++i) {
+                for (std::size_t i = 0; i != copy_recv.size(); ++i) {
                     typename BaseState::state_pack_type pack;
                     world_.recv(copy_recv_[i].first, copy_tag_, pack);
-                    this->state_unpack(copy_recv_[i].second, pack);
+                    this->state_unpack(copy_recv[i].second, pack);
                 }
             } else {
-                for (std::size_t i = 0; i != copy_send_.size(); ++i) {
+                for (std::size_t i = 0; i != copy_send.size(); ++i) {
                     if (copy_send_[i].first == r) {
                         world_.send(copy_send_[i].first, copy_tag_,
-                                this->state_pack(copy_send_[i].second));
+                                this->state_pack(copy_send[i].second));
                     }
                 }
             }
-            world_.barrier();
         }
-
-        world_.barrier();
     }
-
-    /// \brief A duplicated MPI communicator for this object
-    const boost::mpi::communicator &world () const {return world_;}
-
-    protected :
-
-    size_type offset () const {return offset_;}
-
-    int rank (size_type global_id) const
-    {return static_cast<int>(global_id / this->size());}
-
-    bool is_local (size_type global_id) const
-    {return global_id >= offset_ && global_id < this->size() + offset_;}
-
-    size_type local_id (size_type global_id) const
-    {return global_id - this->size() * rank(global_id);}
 
     private :
 
