@@ -304,7 +304,7 @@ class StateMPI : public BaseState
     /// vector of size `N`, say `copy_from`.
     /// For each `to` in the range `0` to `N - 1`
     /// - If both `to` and `from = copy_from[to]` are particles on this node,
-    /// invoke `copy_particle` to copy the parties. Otherwise,
+    /// use `BaseState::copy` to copy the parties. Otherwise,
     /// - If `to` is a particle on this node, insert a pair into `copy_recv`,
     /// whose values are the rank of the node from which this node shall
     /// receive the particle and the particle id *on this node* where the
@@ -322,9 +322,21 @@ class StateMPI : public BaseState
             std::vector<std::pair<int, size_type> > &copy_recv,
             std::vector<std::pair<int, size_type> > &copy_send)
     {
+        using std::advance;
+
+        int rank_this = world_.rank();
+
+        copy_from_this_.resize(this->size());
+        InputIter first = copy_from_first;
+        advance(first, offset_);
+        for (size_type to = 0; to != this->size(); ++to, ++first) {
+            copy_from_this_[to] =
+                rank_this == rank(*first) ? local_id(*first) : to;
+        }
+        BaseState::copy(this->size(), &copy_from_this_[0]);
+
         copy_recv.clear();
         copy_send.clear();
-        int rank_this = world_.rank();
         for (size_type to = 0; to != N; ++to, ++copy_from_first) {
             size_type from = *copy_from_first;
             int rank_recv = rank(to);
@@ -332,7 +344,7 @@ class StateMPI : public BaseState
             size_type id_recv = local_id(to);
             size_type id_send = local_id(from);
             if (rank_this == rank_recv && rank_this == rank_send) {
-                this->copy_particle(id_send, id_recv);
+                continue;
             } else if (rank_this == rank_recv) {
                 copy_recv.push_back(std::make_pair(rank_send, id_recv));
             } else if (rank_this == rank_send) {
@@ -375,6 +387,7 @@ class StateMPI : public BaseState
     size_type offset_;
     int copy_tag_;
     std::vector<size_type> copy_from_;
+    std::vector<size_type> copy_from_this_;
     std::vector<std::pair<int, size_type> > copy_recv_;
     std::vector<std::pair<int, size_type> > copy_send_;
 }; // class StateMPI
