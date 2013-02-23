@@ -169,29 +169,41 @@ class StateMPI : public BaseState
         }
         boost::mpi::broadcast(world_, copy_from_, 0);
 
-        copy_to_.resize(this->size());
-        copy_pack_.resize(this->size());
-        copy_reqs_.clear();
-        size_type copy_end = 0;
+        copy_recv_.clear();
+        copy_send_.clear();
+        int rank_this = world_.rank();
         for (size_type to = 0; to != N; ++to) {
             size_type from = copy_from_[to];
-            if (is_local(to) && is_local(from)) {
-                size_type lto = local_id(to);
-                size_type lfrom = local_id(from);
-                this->copy_particle(lfrom, lto);
-            } else if (is_local(to)) {
-                copy_to_[copy_end] = local_id(to);
-                copy_reqs_.push_back(world_.irecv(rank(from), copy_tag_,
-                            copy_pack_[copy_end]));
-                ++copy_end;
-            } else if (is_local(from)) {
-                copy_reqs_.push_back(world_.isend(rank(to), copy_tag_,
-                            this->state_pack(local_id(from))));
+            int rank_recv = rank(to);
+            int rank_send = rank(from);
+            size_type id_recv = local_id(to);
+            size_type id_send = local_id(from);
+            if (rank_this == rank_recv && rank_this == rank_send) {
+                this->copy_particle(id_send, id_recv);
+            } else if (rank_this == rank_recv) {
+                copy_recv_.push_back(std::make_pair(rank_send, id_recv));
+            } else if (rank_this == rank_send) {
+                copy_send_.push_back(std::make_pair(rank_recv, id_send));
             }
         }
-        boost::mpi::wait_all(copy_reqs_.begin(), copy_reqs_.end());
-        for (size_type i = 0; i != copy_end; ++i)
-            this->state_unpack(copy_to_[i], copy_pack_[i]);
+
+        for (int r = 0; r != world_.size(); ++r) {
+            if (rank_this == r) {
+                for (std::size_t i = 0; i != copy_recv_.size(); ++i) {
+                    typename BaseState::state_pack_type pack;
+                    world_.recv(copy_recv_[i].first, copy_tag_, pack);
+                    this->state_unpack(copy_recv_[i].second, pack);
+                }
+            } else {
+                for (std::size_t i = 0; i != copy_send_.size(); ++i) {
+                    if (copy_send_[i].first == r) {
+                        world_.send(copy_send_[i].first, copy_tag_,
+                                this->state_pack(copy_send_[i].second));
+                    }
+                }
+            }
+            world_.barrier();
+        }
 
         world_.barrier();
     }
@@ -217,10 +229,9 @@ class StateMPI : public BaseState
     boost::mpi::communicator world_;
     size_type offset_;
     int copy_tag_;
-    std::vector<size_type> copy_to_;
     std::vector<size_type> copy_from_;
-    std::vector<boost::mpi::request> copy_reqs_;
-    std::vector<typename BaseState::state_pack_type> copy_pack_;
+    std::vector<std::pair<int, size_type> > copy_recv_;
+    std::vector<std::pair<int, size_type> > copy_send_;
 }; // class StateMPI
 
 } // namespace vsmc
