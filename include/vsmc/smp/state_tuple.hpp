@@ -39,11 +39,11 @@ class StateTupleBase
         {return std::get<Pos>(data_);}
 
         template <typename Archive>
-        void serialize (Archive &ar, const unsigned int)
+        void serialize (Archive &ar, const unsigned)
         {serialize(ar, Position<0>());}
 
         template <typename Archive>
-        void serialize (Archive &ar, const unsigned int) const
+        void serialize (Archive &ar, const unsigned) const
         {serialize(ar, Position<0>());}
 
         private :

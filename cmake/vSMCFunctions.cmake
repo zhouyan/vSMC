@@ -58,6 +58,11 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
         TARGET_LINK_LIBRARIES (${source}-${smp} ${TBB_LINK_LIBRARIES})
     ENDIF (${smp} STREQUAL "gcd")
 
+    IF (${source} MATCHES "-mpi")
+        TARGET_LINK_LIBRARIES (${source}-${smp}
+            ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
+    ENDIF (${source} MATCHES "-mpi")
+
     ADD_DEPENDENCIES (${base} ${source}-${smp})
 ENDFUNCTION (ADD_SMP_EXECUTABLE)
 
