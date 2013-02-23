@@ -243,8 +243,13 @@ class StateMPI : public BaseState
     {return global_id >= offset_ && global_id < this->size() + offset_;}
 
     /// \brief Transfer a global particle id into a local particle id
+    /// (possibly not on this node, use `rank` to get the rank of its node)
     size_type local_id (size_type global_id) const
     {return global_id - this->size() * rank(global_id);}
+
+    /// \brief Transfer a local particle id *on this node* into a global
+    /// particle id
+    size_type global_id (size_type lcoal_id) const {return local_id + offset_;}
 
     protected :
 
