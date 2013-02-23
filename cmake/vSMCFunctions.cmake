@@ -2,6 +2,34 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
     STRING (TOUPPER "${smp_name}" SMP)
     STRING (TOLOWER "${smp_name}" smp)
 
+    IF (${smp} STREQUAL "cilk")
+        SET (HALF_NUM_THREADS
+            "int tnum = __cilkrts_get_nworkers();")
+        SET (HALF_NUM_THREADS ${HALF_NUM_THREADS}
+            "tnum = tnum > 1 ? tnum / 2 : tnum;")
+        SET (HALF_NUM_THREADS ${HALF_NUM_THREADS}
+            "std::stringstream tnum_ss; tnum_ss << tnum;")
+        SET (HALF_NUM_THREADS ${HALF_NUM_THREADS}
+            "__cilkrts_set_param(\"nworkers\", tnum_ss.str().c_str());")
+    ELSEIF (${smp} STREQUAL "omp")
+        SET (HALF_NUM_THREADS
+            "int tnum = omp_get_max_threads();")
+        SET (HALF_NUM_THREADS ${HALF_NUM_THREADS}
+            "omp_set_num_threads(tnum > 1 ? tnum / 2 : tnum);")
+    ELSEIF (${smp} STREQUAL "std")
+        SET (HALF_NUM_THREADS
+            "vsmc::ThreadInfo &tinfo = vsmc::ThreadInfo::instance();")
+        SET (HALF_NUM_THREADS ${HALF_NUM_THREADS}
+            "std::size_t tnum = tinfo.thread_num();")
+        SET (HALF_NUM_THREADS ${HALF_NUM_THREADS}
+            "tinfo.thread_num(tnum > 1 ? tnum / 2 : tnum);")
+    ELSEIF (${smp} STREQUAL "tbb")
+        SET (HALF_NUM_THREADS
+            "int tnum = tbb::task_scheduler_init::default_num_threads();")
+        SET (HALF_NUM_THREADS ${HALF_NUM_THREADS}
+            "tbb::task_scheduler_init init(tnum > 1 ? tnum / 2 : tnum);")
+    ENDIF (${smp} STREQUAL "cilk")
+
     CONFIGURE_FILE (
         ${PROJECT_SOURCE_DIR}/${header}.hpp
         ${PROJECT_SOURCE_DIR}/${header}-${smp}.hpp)
@@ -18,20 +46,17 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
 
     ADD_EXECUTABLE (${source}-${smp} ${source}-${smp}.cpp)
 
-    IF (${smp} STREQUAL "omp")
+    IF (${smp} STREQUAL "gcd")
+        TARGET_LINK_LIBRARIES (${source}-${smp} ${GCD_LINK_LIBRARIES})
+    ELSEIF (${smp} STREQUAL "omp")
         SET_TARGET_PROPERTIES (${source}-${smp} PROPERTIES COMPILE_FLAGS
             "${OpenMP_CXX_FLAGS}")
-    ENDIF (${smp} STREQUAL "omp")
-
-    IF (${smp} STREQUAL "std")
+        TARGET_LINK_LIBRARIES (${source}-${smp} ${OpenMP_LINK_LIBRARIES})
+    ELSEIF (${smp} STREQUAL "std")
         TARGET_LINK_LIBRARIES (${source}-${smp} ${VSMC_THREAD_LINK_LIBRARIES})
-    ELSEIF (${smp} STREQUAL "gcd")
-        TARGET_LINK_LIBRARIES (${source}-${smp} ${GCD_LINK_LIBRARIES})
     ELSEIF (${smp} STREQUAL "tbb")
         TARGET_LINK_LIBRARIES (${source}-${smp} ${TBB_LINK_LIBRARIES})
-    ELSEIF (${smp} STREQUAL "omp")
-        TARGET_LINK_LIBRARIES (${source}-${smp} ${OpenMP_LINK_LIBRARIES})
-    ENDIF (${smp} STREQUAL "std")
+    ENDIF (${smp} STREQUAL "gcd")
 
     ADD_DEPENDENCIES (${base} ${source}-${smp})
 ENDFUNCTION (ADD_SMP_EXECUTABLE)

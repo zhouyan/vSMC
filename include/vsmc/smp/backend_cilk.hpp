@@ -3,6 +3,7 @@
 
 #include <vsmc/smp/base.hpp>
 #include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 #include <cilk/reducer_opadd.h>
 
 namespace vsmc {

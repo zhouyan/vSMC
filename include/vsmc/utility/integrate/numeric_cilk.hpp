@@ -3,6 +3,7 @@
 
 #include <vsmc/utility/integrate/base.hpp>
 #include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 #include <cilk/holder.h>
 #include <cilk/reducer_opadd.h>
 
