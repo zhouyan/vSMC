@@ -34,6 +34,7 @@ class MPIEnvironment
         vsmc::Seed::instance().modulo(
                 static_cast<vsmc::Seed::result_type>(world.size()),
                 static_cast<vsmc::Seed::result_type>(world.rank()));
+        world.barrier();
     }
 }; // class MPIEnvironment
 
@@ -79,18 +80,27 @@ class WeightSetMPI : public WeightSet<BaseState>
     explicit WeightSetMPI (size_type N) :
         WeightSet<BaseState>(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate), internal_barrier_(true),
-        ess_(static_cast<double>(N) * world_.size()) {}
+        resample_size_(0), ess_(0)
+    {
+        boost::mpi::all_reduce(
+                world_, N, resample_size_, std::plus<size_type>());
+        ess_ = static_cast<double>(resample_size_);
+        barrier();
+    }
 
-    size_type resample_size () const {return this->size() * world_.size();}
+    size_type resample_size () const {return resample_size_;}
 
     template <typename OutputIter>
     OutputIter read_resample_weight (OutputIter first) const
     {
         barrier();
-        boost::mpi::all_gather(world_, this->weight_vec(), weight_gather_);
-        for (int r = 0; r != world_.size(); ++r)
-            for (size_type i = 0; i != this->size(); ++i, ++first)
-                *first = weight_gather_[r][i];
+        weight_all_.clear();
+        boost::mpi::all_gather(world_, this->weight_vec(), weight_all_);
+        for (int r = 0; r != world_.size(); ++r) {
+            size_type N = weight_all_[r].size();
+            for (size_type i = 0; i != N; ++i, ++first)
+                *first = weight_all_[r][i];
+        }
         barrier();
 
         return first;
@@ -100,10 +110,13 @@ class WeightSetMPI : public WeightSet<BaseState>
     RandomIter read_resample_weight (RandomIter first, int stride) const
     {
         barrier();
-        boost::mpi::all_gather(world_, this->weight_vec(), weight_gather_);
-        for (int r = 0; r != world_.size(); ++r)
-            for (size_type i = 0; i != this->size(); ++i, first += stride)
-                *first = weight_gather_[r][i];
+        weight_all_.clear();
+        boost::mpi::all_gather(world_, this->weight_vec(), weight_all_);
+        for (int r = 0; r != world_.size(); ++r) {
+            size_type N = weight_all_[r].size();
+            for (size_type i = 0; i != N; ++i, first += stride)
+                *first = weight_all_[r][i];
+        }
         barrier();
 
         return first;
@@ -112,7 +125,7 @@ class WeightSetMPI : public WeightSet<BaseState>
     void set_equal_weight ()
     {
         barrier();
-        ess_ = static_cast<double>(this->size()) * world_.size();
+        ess_ = static_cast<double>(resample_size_);
         double ew = 1 / ess_;
         std::vector<double> &weight = this->weight_vec();
         std::vector<double> &log_weight = this->log_weight_vec();
@@ -136,8 +149,9 @@ class WeightSetMPI : public WeightSet<BaseState>
 
     boost::mpi::communicator world_;
     bool internal_barrier_;
+    size_type resample_size_;
     double ess_;
-    mutable std::vector<std::vector<double> > weight_gather_;
+    mutable std::vector<std::vector<double> > weight_all_;
 
     void normalize_weight ()
     {
@@ -179,8 +193,21 @@ class StateMPI : public BaseState
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate), internal_barrier_(true),
-        offset_(N * static_cast<size_type>(world_.rank())),
-        copy_tag_(boost::mpi::environment::max_tag()) {}
+        offset_(0), global_size_(0), size_equal_(true),
+        copy_tag_(boost::mpi::environment::max_tag())
+    {
+        boost::mpi::all_gather(world_, N, size_all_);
+        for (int i = 0; i != world_.rank(); ++i) {
+            offset_ += size_all_[i];
+            global_size_ += size_all_[i];
+            size_equal_ = size_equal_ && N == size_all_[i];
+        }
+        for (int i = world_.rank(); i != world_.size(); ++i) {
+            global_size_ += size_all_[i];
+            size_equal_ = size_equal_ && N == size_all_[i];
+        }
+        barrier();
+    }
 
     /// \brief Copy particles
     ///
@@ -262,8 +289,7 @@ class StateMPI : public BaseState
     void internal_barrier (bool use) {internal_barrier_ = use;}
 
     /// \brief The number of particles on all nodes
-    size_type global_size () const
-    {return this->size() * static_cast<size_type>(world_.size());}
+    size_type global_size () const {return global_size_;}
 
     /// \brief The number of particles on nodes with ranks less than the rank
     /// of this node.
@@ -272,7 +298,19 @@ class StateMPI : public BaseState
     /// \brief Given a global particle id return the rank of the node it
     /// belongs
     int rank (size_type global_id) const
-    {return static_cast<int>(global_id / this->size());}
+    {
+        if (size_equal_)
+            return global_id / this->size();
+
+        std::size_t r = 0;
+        size_type g = size_all_[0];
+        while (g <= global_id) {
+            ++r;
+            g += size_all_[r];
+        }
+
+        return static_cast<int>(r);
+    }
 
     /// \brief Given a global particle id check if it is on this `node`
     bool is_local (size_type global_id) const
@@ -281,7 +319,20 @@ class StateMPI : public BaseState
     /// \brief Transfer a global particle id into a local particle id
     /// (possibly not on this node, use `rank` to get the rank of its node)
     size_type local_id (size_type global_id) const
-    {return global_id - this->size() * rank(global_id);}
+    {
+        if (size_equal_)
+            return global_id - this->size() * rank(global_id);
+
+        std::size_t r = 0;
+        size_type g = size_all_[0];
+        while (g <= global_id) {
+            ++r;
+            g += size_all_[r];
+        }
+        g -= size_all_[r];
+
+        return global_id - g;
+    }
 
     /// \brief Transfer a local particle id *on this node* into a global
     /// particle id
@@ -330,8 +381,9 @@ class StateMPI : public BaseState
         InputIter first = copy_from_first;
         advance(first, offset_);
         for (size_type to = 0; to != this->size(); ++to, ++first) {
+            size_type from = *first;
             copy_from_this_[to] =
-                rank_this == rank(*first) ? local_id(*first) : to;
+                rank_this == rank(from) ? local_id(from) : to;
         }
         BaseState::copy(this->size(), &copy_from_this_[0]);
 
@@ -385,6 +437,9 @@ class StateMPI : public BaseState
     boost::mpi::communicator world_;
     bool internal_barrier_;
     size_type offset_;
+    size_type global_size_;
+    bool size_equal_;
+    std::vector<size_type> size_all_;
     int copy_tag_;
     std::vector<size_type> copy_from_;
     std::vector<size_type> copy_from_this_;

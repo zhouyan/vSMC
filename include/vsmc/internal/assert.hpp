@@ -137,8 +137,7 @@ class StaticAssert<true>
             ("**State"#name"::copy** SIZE MISMATCH"))
 
 #define VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH_MPI                      \
-    VSMC_RUNTIME_ASSERT(                                                      \
-            (N == static_cast<size_type>(this->size() * world_.size())),      \
+    VSMC_RUNTIME_ASSERT((N == global_size_),                                  \
             ("**StateMPI::copy** SIZE MISMATCH"))
 
 #define VSMC_RUNTIME_ASSERT_STATE_UNPACK_SIZE(pack_size, dim, name)           \
