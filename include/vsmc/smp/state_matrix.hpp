@@ -115,11 +115,11 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         return first;
     }
 
-    template <typename OutputIter>
-    void read_state_matrix (OutputIter *first) const
+    template <typename OutputIterIter>
+    void read_state_matrix (OutputIterIter first) const
     {
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            read_state(d, first[d]);
+        for (std::size_t d = 0; d != this->dim(); ++d, ++first)
+            read_state(d, *first);
     }
 
     template <typename OutputIter>
