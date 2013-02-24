@@ -60,7 +60,8 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
 
     IF (${source} MATCHES "-mpi")
         TARGET_LINK_LIBRARIES (${source}-${smp}
-            ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
+            ${Boost_MPI_LIBRARY} ${Boost_SERIALIZATION_LIBRARY}
+            ${MPI_CXX_LIBRARIES})
     ENDIF (${source} MATCHES "-mpi")
 
     ADD_DEPENDENCIES (${base} ${source}-${smp})
