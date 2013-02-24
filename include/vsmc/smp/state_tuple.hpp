@@ -149,6 +149,10 @@ class StateTupleBase
         return first;
     }
 
+    template <std::size_t Pos, typename OutputIter>
+    OutputIter read_state (OutputIter first) const
+    {return read_state(Position<Pos>(), first);}
+
     template <typename OutputStream>
     OutputStream &print (OutputStream &os, std::size_t iter = 0,
             char sepchar = ' ', char eolchar = '\n') const

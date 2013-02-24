@@ -119,6 +119,10 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     OutputIter read_state (Position<Pos>, OutputIter first) const
     {return read_state(Pos, first);}
 
+    template <std::size_t Pos, typename OutputIter>
+    OutputIter read_state (OutputIter first) const
+    {return read_state(Pos, first);}
+
     template <typename OutputIterIter>
     void read_state_matrix (OutputIterIter first) const
     {
@@ -138,10 +142,19 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         } else {
             const StateMatrix<Order, Dim, T> *sptr =
                 static_cast<const StateMatrix<Order, Dim, T> *>(this);
-            for (size_type i = 0; i != size_; ++i) {
+            if (order == RowMajor) {
+                for (size_type i = 0; i != size_; ++i) {
+                    for (std::size_t d = 0; d != this->dim(); ++d) {
+                        *first = sptr->state(i, d);
+                        ++first;
+                    }
+                }
+            } else if (order == ColMajor) {
                 for (std::size_t d = 0; d != this->dim(); ++d) {
-                    *first = sptr->state(i, d);
-                    ++first;
+                    for (size_type i = 0; i != size_; ++i) {
+                        *first = sptr->state(i, d);
+                        ++first;
+                    }
                 }
             }
         }
