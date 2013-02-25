@@ -159,7 +159,7 @@ class StaticAssert<true>
             USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree)
 
 #define VSMC_STATIC_ASSERT_NO_IMPL(member)                                    \
-    VSMC_STATIC_ASSERT((vsmc::traits::is_same<Derived, NullType>::value),     \
+    VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<Derived, NullType>::value),      \
             NO_IMPLEMENTATION_OF_##member##_FOUND)
 
 #define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                       \
@@ -167,8 +167,8 @@ class StaticAssert<true>
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
 #define VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(type)                          \
-    VSMC_STATIC_ASSERT((traits::is_same<type, cl_float>::value                \
-                || vsmc::traits::is_same<type, cl_double>::value),            \
+    VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<type, cl_float>::value           \
+                || vsmc::cxx11::is_same<type, cl_double>::value),             \
             USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

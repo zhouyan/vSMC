@@ -71,27 +71,27 @@ class Sampler
     {
         switch (scheme) {
             case Multinomial :
-                resample_op_ = Resample<traits::integral_constant<
+                resample_op_ = Resample<cxx11::integral_constant<
                     ResampleScheme, Multinomial> >();
                 break;
             case Residual :
-                resample_op_ = Resample<traits::integral_constant<
+                resample_op_ = Resample<cxx11::integral_constant<
                     ResampleScheme, Residual> >();
                 break;
             case Stratified :
-                resample_op_ = Resample<traits::integral_constant<
+                resample_op_ = Resample<cxx11::integral_constant<
                     ResampleScheme, Stratified> >();
                 break;
             case Systematic :
-                resample_op_ = Resample<traits::integral_constant<
+                resample_op_ = Resample<cxx11::integral_constant<
                     ResampleScheme, Systematic> >();
                 break;
             case ResidualStratified :
-                resample_op_ = Resample<traits::integral_constant<
+                resample_op_ = Resample<cxx11::integral_constant<
                     ResampleScheme, ResidualStratified> >();
                 break;
             case ResidualSystematic :
-                resample_op_ = Resample<traits::integral_constant<
+                resample_op_ = Resample<cxx11::integral_constant<
                     ResampleScheme, ResidualSystematic> >();
                 break;
             default :

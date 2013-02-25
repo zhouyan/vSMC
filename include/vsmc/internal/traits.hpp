@@ -4,6 +4,7 @@
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
+#include <vsmc/cxx11/type_traits.hpp>
 
 #include <string>
 
@@ -58,7 +59,7 @@ struct Has##Outer##Impl                                                       \
                                                                               \
 template <typename T>                                                         \
 struct Has##Outer :                                                           \
-    public integral_constant<bool, Has##Outer##Impl<T>::value> {};            \
+    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};     \
                                                                               \
 template <typename T, bool> struct Outer##Dispatch                            \
 {typedef Default type;};                                                      \
@@ -127,7 +128,7 @@ struct Has##Outer##Impl                                                       \
                                                                               \
 template <typename T, typename V>                                             \
 struct Has##Outer :                                                           \
-    public integral_constant<bool, Has##Outer##Impl<T, V>::value> {};         \
+    public cxx11::integral_constant<bool, Has##Outer##Impl<T, V>::value> {};  \
                                                                               \
 template <typename T, typename V, bool> struct Outer##Dispatch                \
 {typedef Default<V> type;};                                                   \
@@ -163,7 +164,7 @@ struct Has##Outer##Impl                                                       \
                                                                               \
 template <typename T>                                                         \
 struct Has##Outer :                                                           \
-    public integral_constant<bool, Has##Outer##Impl<T>::value> {};            \
+    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};     \
                                                                               \
 } } // namespace vsmc::traits
 
@@ -187,7 +188,7 @@ struct HasStatic##Outer##Impl                                                 \
                                                                               \
 template <typename T>                                                         \
 struct HasStatic##Outer :                                                     \
-    public integral_constant<bool, HasStatic##Outer##Impl<T>::value> {};      \
+    public cxx11::integral_constant<bool, HasStatic##Outer##Impl<T>::value>{};\
                                                                               \
 } } // namespace vsmc::traits
 
@@ -195,7 +196,7 @@ struct HasStatic##Outer :                                                     \
 namespace vsmc { namespace traits {                                           \
                                                                               \
 template <template <typename, typename> class>                                \
-struct Is##BaseName##Impl : public false_type {};                             \
+struct Is##BaseName##Impl : public cxx11::false_type {};                      \
                                                                               \
 } } //namespace vsmc::traits
 
@@ -203,38 +204,19 @@ struct Is##BaseName##Impl : public false_type {};                             \
 namespace vsmc { namespace traits {                                           \
                                                                               \
 template <>                                                                   \
-struct IsInitializeImpl<Initialize##Name> : public true_type {};              \
+struct IsInitializeImpl<Initialize##Name> : public cxx11::true_type {};       \
 template <>                                                                   \
-struct IsMoveImpl<Move##Name> : public true_type {};                          \
+struct IsMoveImpl<Move##Name> : public cxx11::true_type {};                   \
 template <>                                                                   \
-struct IsMonitorEvalImpl<MonitorEval##Name> : public true_type {};            \
+struct IsMonitorEvalImpl<MonitorEval##Name> : public cxx11::true_type {};     \
 template <>                                                                   \
-struct IsPathEvalImpl<PathEval##Name> : public true_type {};                  \
+struct IsPathEvalImpl<PathEval##Name> : public cxx11::true_type {};           \
                                                                               \
 } } //namespace vsmc::traits
 
-namespace vsmc { namespace traits {
-
-template <typename T, T v>
-struct integral_constant
-{
-    static const T value = v;
-    typedef T value_type;
-    typedef integral_constant<T, v> type;
-    VSMC_CONSTEXPR operator value_type () const {return value;}
-};
-
-typedef integral_constant<bool, true> true_type;
-typedef integral_constant<bool, false> false_type;
-
-template <typename T, typename U> struct is_same : public false_type {};
-template <typename T> struct is_same<T, T> : public true_type {};
-
-} } // namespace vsmc::traits
-
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
-        false_type)
+        cxx11::false_type)
 
 VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleType,
         single_particle_type, SingleParticleBase)
@@ -312,7 +294,7 @@ struct IsDerivedFromStateCLImpl
 
 template <typename D>
 struct IsDerivedFromStateCL :
-    public integral_constant<bool, IsDerivedFromStateCLImpl<D>::value> {};
+    public cxx11::integral_constant<bool,IsDerivedFromStateCLImpl<D>::value>{};
 
 /// \cond HIDDEN_SYMBOLS
 template <typename, template <typename, typename> class, template <typename,

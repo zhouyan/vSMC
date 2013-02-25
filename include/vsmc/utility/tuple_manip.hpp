@@ -237,7 +237,7 @@ struct TupleApply<std::tuple<>, C>
 ///     std::tuple<char, short, int> >::type t1;
 /// typedef std::tuple<
 ///     std::vector<char>, std::vector<short>, std::vector<int> >::type t2;
-/// vsmc::traits::is_same<t1, t2>::value; // true
+/// vsmc::cxx11::is_same<t1, t2>::value; // true
 /// \endcode
 ///
 /// For class template `Inner` which has only one template parameter the macro
@@ -246,7 +246,7 @@ struct TupleApply<std::tuple<>, C>
 /// template <typename T> class Vector;
 /// typedef vsmc::TupleApply<Vector, std::tuple<char, short, int> >::type t1;
 /// typedef std::tuple<Vector<char>, Vector<short>, Vector<int> >::type t2;
-/// vsmc::traits::is_same<t1, t2>::value; // true
+/// vsmc::cxx11::is_same<t1, t2>::value; // true
 /// \endcode
 /// Ideally the more general case, where the class template has more than one
 /// template parameter can be handled by `TupleApply` through variadic

@@ -8,7 +8,7 @@ namespace vsmc {
 
 struct CLDefault
 {
-    typedef traits::integral_constant<cl_device_type, CL_DEVICE_TYPE_DEFAULT>
+    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_DEFAULT>
         opencl_device_type;
 };
 

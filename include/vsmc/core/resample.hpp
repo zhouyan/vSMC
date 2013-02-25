@@ -56,7 +56,7 @@ inline void normalize_replication (SizeType N, SizeType *replication)
 /// \brief Multinomial resampling
 /// \ingroup Core
 template <>
-class Resample<traits::integral_constant<ResampleScheme, Multinomial> >
+class Resample<cxx11::integral_constant<ResampleScheme, Multinomial> >
 {
     public :
 
@@ -72,7 +72,7 @@ class Resample<traits::integral_constant<ResampleScheme, Multinomial> >
 /// \brief Residual resampling
 /// \ingroup Core
 template <>
-class Resample<traits::integral_constant<ResampleScheme, Residual> >
+class Resample<cxx11::integral_constant<ResampleScheme, Residual> >
 {
     public :
 
@@ -107,7 +107,7 @@ class Resample<traits::integral_constant<ResampleScheme, Residual> >
 /// \brief Stratified resampling
 /// \ingroup Core
 template <>
-class Resample<traits::integral_constant<ResampleScheme, Stratified> >
+class Resample<cxx11::integral_constant<ResampleScheme, Stratified> >
 {
     public :
 
@@ -140,7 +140,7 @@ class Resample<traits::integral_constant<ResampleScheme, Stratified> >
 /// \brief Systematic resampling
 /// \ingroup Core
 template <>
-class Resample<traits::integral_constant<ResampleScheme, Systematic> >
+class Resample<cxx11::integral_constant<ResampleScheme, Systematic> >
 {
     public :
 
@@ -172,7 +172,7 @@ class Resample<traits::integral_constant<ResampleScheme, Systematic> >
 /// \brief Residual stratified resampling
 /// \ingroup Core
 template <>
-class Resample<traits::integral_constant<ResampleScheme, ResidualStratified> >
+class Resample<cxx11::integral_constant<ResampleScheme, ResidualStratified> >
 {
     public :
 
@@ -223,7 +223,7 @@ class Resample<traits::integral_constant<ResampleScheme, ResidualStratified> >
 /// \brief Residual systematic resampling
 /// \ingroup Core
 template <>
-class Resample<traits::integral_constant<ResampleScheme, ResidualSystematic> >
+class Resample<cxx11::integral_constant<ResampleScheme, ResidualSystematic> >
 {
     public :
 
