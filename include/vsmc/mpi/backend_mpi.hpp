@@ -153,6 +153,25 @@ class WeightSetMPI : public WeightSet<BaseState>
     double ess_;
     mutable std::vector<std::vector<double> > weight_all_;
 
+    void normalize_log_weight ()
+    {
+        barrier();
+
+        std::vector<double> &log_weight = this->log_weight_vec();
+
+        double lmax_weight = log_weight_[0];
+        for (size_type i = 0; i != this->size(); ++i)
+            if (log_weight[i] > lmax_weight)
+                lmax_weight = log_weight[i];
+        double gmax_weight = 0;
+        boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
+                boost::mpi::maximum<double>());
+        for (size_type i = 0; i != this->size(); ++i)
+            log_weight_[i] -= gmax_weight;
+
+        barrier();
+    }
+
     void normalize_weight ()
     {
         barrier();

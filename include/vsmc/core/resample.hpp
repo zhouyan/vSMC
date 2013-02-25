@@ -11,33 +11,27 @@ template <typename SizeType, typename RngType>
 inline void multinomial (SizeType N, SizeType S, RngType &rng,
         const double *weight, SizeType *replication)
 {
-        double sum_w = 0;
-        double acc_w = 0;
-        SizeType acc_s = 0;
+    double sum_w = 0;
+    double acc_w = 0;
+    SizeType acc_s = 0;
 
-        for (SizeType i = 0; i != N; ++i) {
-            replication[i] = 0;
-            sum_w += weight[i];
-        }
+    for (SizeType i = 0; i != N; ++i) {
+        replication[i] = 0;
+        sum_w += weight[i];
+    }
 
-        for (SizeType i = 0; i != N; ++i) {
-            if (acc_s < S && weight[i] > 0) {
-                double p = weight[i] / (sum_w - acc_w);
-                if (p < 0) {
-                    assert(p > -1e-6);
-                    p = 0;
-                }
-                if (p > 1) {
-                    assert(p - 1 < 1e-6);
-                    p = 1;
-                }
-                long s = static_cast<long>(S - acc_s);
-                cxx11::binomial_distribution<long> binom(s, p);
-                replication[i] = static_cast<SizeType>(binom(rng));
-            }
-            acc_w += weight[i];
-            acc_s += replication[i];
+    for (SizeType i = 0; i != N; ++i) {
+        if (acc_s < S && weight[i] > 0) {
+            double p = weight[i] / (sum_w - acc_w);
+            p = p < 0 ? 0 : p;
+            p = p > 1 ? 1 : p;
+            long s = static_cast<long>(S - acc_s);
+            cxx11::binomial_distribution<long> binom(s, p);
+            replication[i] = static_cast<SizeType>(binom(rng));
         }
+        acc_w += weight[i];
+        acc_s += replication[i];
+    }
 }
 
 template <typename SizeType>

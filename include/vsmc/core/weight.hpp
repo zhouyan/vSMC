@@ -253,12 +253,7 @@ class WeightSet
     {
         using std::exp;
 
-        double max_weight = log_weight_[0];
-        for (size_type i = 0; i != size_; ++i)
-            if (log_weight_[i] > max_weight)
-                max_weight = log_weight_[i];
-        for (size_type i = 0; i != size_; ++i)
-            log_weight_[i] -= max_weight;
+        normalize_log_weight();
 #if VSMC_USE_MKL
         ::vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
 #else
@@ -279,6 +274,17 @@ class WeightSet
         for (size_type i = 0; i != size_; ++i)
             log_weight_[i] = log(weight_[i]);
 #endif
+        normalize_log_weight();
+    }
+
+    virtual void normalize_log_weight ()
+    {
+        double max_weight = log_weight_[0];
+        for (size_type i = 0; i != size_; ++i)
+            if (log_weight_[i] > max_weight)
+                max_weight = log_weight_[i];
+        for (size_type i = 0; i != size_; ++i)
+            log_weight_[i] -= max_weight;
     }
 
     virtual void normalize_weight ()
