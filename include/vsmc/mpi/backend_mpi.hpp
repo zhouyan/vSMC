@@ -159,7 +159,7 @@ class WeightSetMPI : public WeightSet<BaseState>
 
         std::vector<double> &log_weight = this->log_weight_vec();
 
-        double lmax_weight = log_weight_[0];
+        double lmax_weight = log_weight[0];
         for (size_type i = 0; i != this->size(); ++i)
             if (log_weight[i] > lmax_weight)
                 lmax_weight = log_weight[i];
@@ -167,7 +167,7 @@ class WeightSetMPI : public WeightSet<BaseState>
         boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
                 boost::mpi::maximum<double>());
         for (size_type i = 0; i != this->size(); ++i)
-            log_weight_[i] -= gmax_weight;
+            log_weight[i] -= gmax_weight;
 
         barrier();
     }
