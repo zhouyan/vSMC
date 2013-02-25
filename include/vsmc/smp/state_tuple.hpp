@@ -26,6 +26,29 @@ class StateTupleBase
 
         state_pack_type () {}
 
+        state_pack_type (const state_pack_type &other) : data_(other.data_) {}
+
+        state_pack_type &operator= (const state_pack_type &other)
+        {
+            if (this != &other)
+                data_ = other.data_;
+
+            return *this;
+        }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        state_pack_type (state_pack_type &&other) :
+            data_(cxx11::move(other.data_)) {}
+
+        state_pack_type &operator= (state_pack_type &&other)
+        {
+            if (this != &other)
+                data_ = cxx11::move(other.data_);
+
+            return *this;
+        }
+#endif
+
         state_pack_type (const state_tuple_type &data) : data_(data) {}
 
         operator state_tuple_type () {return data_;}
