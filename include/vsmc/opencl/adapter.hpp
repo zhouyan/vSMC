@@ -7,12 +7,13 @@ namespace vsmc {
 
 /// \brief Initialize class adapter specialization for OpenCL
 /// \ingroup Adapter
-template <typename T, typename B>
-class InitializeAdapter<T, InitializeCL, B> : public InitializeCL<T, B>
+template <typename T, typename BaseType>
+class InitializeAdapter<T, InitializeCL, BaseType> :
+    public InitializeCL<T, BaseType>
 {
     public :
 
-    typedef InitializeCL<T, B> initialize_impl_type;
+    typedef InitializeCL<T, BaseType> initialize_impl_type;
     typedef cxx11::function<void (Particle<T> &, void *)>
         initialize_param_type;
     typedef cxx11::function<void (Particle<T> &)>
@@ -49,12 +50,12 @@ class InitializeAdapter<T, InitializeCL, B> : public InitializeCL<T, B>
 
 /// \brief Move class adapter specialization for OpenCL
 /// \ingroup Adapter
-template <typename T, typename B>
-class MoveAdapter<T, MoveCL, B> : public MoveCL<T, B>
+template <typename T, typename BaseType>
+class MoveAdapter<T, MoveCL, BaseType> : public MoveCL<T, BaseType>
 {
     public :
 
-    typedef MoveCL<T, B> move_impl_type;
+    typedef MoveCL<T, BaseType> move_impl_type;
     typedef cxx11::function<void (std::size_t, Particle<T> &)>
         pre_processor_type;
     typedef cxx11::function<void (std::size_t, Particle<T> &)>
@@ -83,12 +84,13 @@ class MoveAdapter<T, MoveCL, B> : public MoveCL<T, B>
 
 /// \brief Monitor evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
-template <typename T, typename B>
-class MonitorEvalAdapter<T, MonitorEvalCL, B> : public MonitorEvalCL<T, B>
+template <typename T, typename BaseType>
+class MonitorEvalAdapter<T, MonitorEvalCL, BaseType> :
+    public MonitorEvalCL<T, BaseType>
 {
     public :
 
-    typedef MonitorEvalCL<T, B> monitor_eval_impl_type;
+    typedef MonitorEvalCL<T, BaseType> monitor_eval_impl_type;
     typedef cxx11::function<void (std::size_t, const Particle<T> &)>
         pre_processor_type;
     typedef cxx11::function<void (std::size_t, const Particle<T> &)>
@@ -118,12 +120,13 @@ class MonitorEvalAdapter<T, MonitorEvalCL, B> : public MonitorEvalCL<T, B>
 
 /// \brief Path evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
-template <typename T, typename B>
-class PathEvalAdapter<T, PathEvalCL, B> : public PathEvalCL<T, B>
+template <typename T, typename BaseType>
+class PathEvalAdapter<T, PathEvalCL, BaseType> :
+    public PathEvalCL<T, BaseType>
 {
     public :
 
-    typedef PathEvalCL<T, B> path_eval_impl_type;
+    typedef PathEvalCL<T, BaseType> path_eval_impl_type;
     typedef cxx11::function<double (std::size_t, const Particle<T> &)>
         path_grid_type;
     typedef cxx11::function<void (std::size_t, const Particle<T> &)>
