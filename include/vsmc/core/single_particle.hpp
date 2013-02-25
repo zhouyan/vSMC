@@ -175,17 +175,6 @@ class SingleParticleBase
             Particle<T> *particle_ptr) :
         id_(id), particle_ptr_(particle_ptr) {}
 
-    SingleParticleBase (const SingleParticle<T> &other) :
-        id_(other.id_), particle_ptr_(other.particle_ptr_) {}
-
-    SingleParticleBase &operator= (const SingleParticle<T> &other)
-    {
-        id_ = other.id_;
-        particle_ptr_ = other.particle_ptr_;
-
-        return *this;
-    }
-
     typename Particle<T>::size_type id () const {return id_;}
 
     const Particle<T> &particle () const {return *particle_ptr_;}
@@ -215,18 +204,6 @@ class ConstSingleParticleBase
     ConstSingleParticleBase (typename Particle<T>::size_type id,
             const Particle<T> *particle_ptr) :
         id_(id), particle_ptr_(particle_ptr) {}
-
-    ConstSingleParticleBase (const ConstSingleParticle<T> &other) :
-        id_(other.id_), particle_ptr_(other.particle_ptr_) {}
-
-    ConstSingleParticleBase &operator= (
-            const ConstSingleParticleBase<T> &other)
-    {
-        id_ = other.id_;
-        particle_ptr_ = other.particle_ptr_;
-
-        return *this;
-    }
 
     typename Particle<T>::size_type id () const {return id_;}
 
@@ -271,6 +248,11 @@ class SingleParticle :
 
     SingleParticle (typename Particle<T>::size_type id,
             Particle<T> *particle_ptr) : base(id, particle_ptr) {}
+
+    SingleParticle (const SingleParticle<T> &other) : base(other) {}
+
+    SingleParticle &operator= (const SingleParticle<T> &other)
+    {base::operator=(other); return *this;}
 };
 
 /// \brief A const variant to SingleParticle
@@ -286,11 +268,19 @@ class ConstSingleParticle :
     ConstSingleParticle (typename Particle<T>::size_type id,
             const Particle<T> *particle_ptr) : base(id, particle_ptr) {}
 
+    ConstSingleParticle (const ConstSingleParticle<T> &other) : base(other) {}
+
     ConstSingleParticle (const SingleParticle<T> &other) :
         base(other.id(), other.particle_ptr()) {}
 
+    ConstSingleParticle &operator= (const ConstSingleParticle<T> &other)
+    {base::operator=(other); return *this;}
+
     ConstSingleParticle &operator= (const SingleParticle<T> &other)
-    {base::operator=(base(other.id(), other.particle_ptr())); return *this;}
+    {
+        base::operator=(base(other.id(), other.particle_ptr()));
+        return *this;
+    }
 };
 
 } // namespace vsmc
