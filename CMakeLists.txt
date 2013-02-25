@@ -7,11 +7,6 @@ ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 
 PROJECT (vSMC C CXX)
 
-# Version information
-SET (VERSION_MAJOR 0)
-SET (VERSION_MINOR 9)
-SET (VERSION_PATCH 4)
-
 # User configurations
 IF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
     INCLUDE (${PROJECT_SOURCE_DIR}/user_options.cmake)
@@ -21,9 +16,6 @@ ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
 FILE (READ ${PROJECT_SOURCE_DIR}/README.md README)
 SET (DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
 SET (DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
-CONFIGURE_FILE (
-    ${PROJECT_SOURCE_DIR}/config/version.hpp.in
-    ${PROJECT_SOURCE_DIR}/include/vsmc/internal/version.hpp)
 CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/config/Doxyfile.in
     ${PROJECT_BINARY_DIR}/Doxyfile)
