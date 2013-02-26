@@ -12,17 +12,17 @@
 #define VSMC_SMP_BASE_DESTRUCTOR_PREFIX
 #endif
 
-#define VSMC_DEFINE_SMP_IMPL_PROTECTED(ImplName, BaseName)                    \
-BaseName##ImplName () {}                                                      \
-BaseName##ImplName () (const BaseName##ImplName<T, Derived> &other) :         \
-    BaseName##Base<T, Derived>(other) {}                                      \
-BaseName##ImplName<T, Derived> &operator=                                     \
-    (const BaseName##ImplName<T, Derived> &other)                             \
+#define VSMC_DEFINE_SMP_IMPL_PROTECTED(Impl, Name)                            \
+Name##Impl () {}                                                              \
+Name##Impl (const Name##Impl<T, Derived> &other) :                            \
+	Name##Base<T, Derived>(other) {}                                      \
+Name##Impl<T, Derived> &operator=                                             \
+	(const Name##Impl<T, Derived> &other)                                 \
 {                                                                             \
-    if (this != other) BaseName##Base<T, Derived>::operator=(other);          \
+    if (this != other) Name##Base<T, Derived>::operator=(other);              \
     return *this;                                                             \
 }                                                                             \
-~Classname () {}
+~Name##Impl () {}
 
 namespace vsmc {
 

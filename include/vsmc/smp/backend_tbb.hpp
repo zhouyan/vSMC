@@ -72,11 +72,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeTBB () {}
-    InitializeTBB (const InitializeTBB<T, Derived> &) {}
-    InitializeTBB<T, Derived> &operator=
-        (const InitializeTBB<T, Derived> &) {return *this;}
-    ~InitializeTBB () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(TBB, Initialize)
 
     private :
 
@@ -143,11 +139,7 @@ class MoveTBB : public MoveBase<T, Derived>
 
     protected :
 
-    MoveTBB () {}
-    MoveTBB (const MoveTBB<T, Derived> &) {}
-    MoveTBB<T, Derived> &operator=
-        (const MoveTBB<T, Derived> &) {return *this;}
-    ~MoveTBB () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(TBB, Move)
 
     private :
 
@@ -215,11 +207,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalTBB () {}
-    MonitorEvalTBB (const MonitorEvalTBB<T, Derived> &) {}
-    MonitorEvalTBB<T, Derived> &operator=
-        (const MonitorEvalTBB<T, Derived> &) {return *this;}
-    ~MonitorEvalTBB () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(TBB, MonitorEval)
 
     private :
 
@@ -276,11 +264,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalTBB () {}
-    PathEvalTBB (const PathEvalTBB<T, Derived> &) {}
-    PathEvalTBB<T, Derived> &operator=
-        (const PathEvalTBB<T, Derived> &) {return *this;}
-    ~PathEvalTBB () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(TBB, PathEval)
 
     private :
 

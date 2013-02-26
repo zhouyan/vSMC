@@ -41,11 +41,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeSEQ () {}
-    InitializeSEQ (const InitializeSEQ<T, Derived> &) {}
-    InitializeSEQ<T, Derived> &operator=
-        (const InitializeSEQ<T, Derived> &) {return *this;}
-    ~InitializeSEQ () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(SEQ, Initialize)
 }; // class InitializeSEQ
 
 /// \brief Sampler<T>::move_type subtype
@@ -71,11 +67,7 @@ class MoveSEQ : public MoveBase<T, Derived>
 
     protected :
 
-    MoveSEQ () {}
-    MoveSEQ (const MoveSEQ<T, Derived> &) {}
-    MoveSEQ<T, Derived> &operator=
-        (const MoveSEQ<T, Derived> &) {return *this;}
-    ~MoveSEQ () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(SEQ, Move)
 }; // class MoveSEQ
 
 /// \brief Monitor<T>::eval_type subtype
@@ -101,11 +93,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalSEQ () {}
-    MonitorEvalSEQ (const MonitorEvalSEQ<T, Derived> &) {}
-    MonitorEvalSEQ<T, Derived> &operator=
-        (const MonitorEvalSEQ<T, Derived> &) {return *this;}
-    ~MonitorEvalSEQ () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(SEQ, MonitorEval)
 }; // class MonitorEvalSEQ
 
 /// \brief Path<T>::eval_type subtype
@@ -133,11 +121,7 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalSEQ () {}
-    PathEvalSEQ (const PathEvalSEQ<T, Derived> &) {}
-    PathEvalSEQ<T, Derived> &operator=
-        (const PathEvalSEQ<T, Derived> &) {return *this;}
-    ~PathEvalSEQ () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(SEQ, PathEval)
 }; // class PathEvalSEQ
 
 } // namespace vsmc

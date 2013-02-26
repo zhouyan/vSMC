@@ -52,11 +52,7 @@ class InitializeCILK : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeCILK () {}
-    InitializeCILK (const InitializeCILK<T, Derived> &) {}
-    InitializeCILK<T, Derived> &operator=
-        (const InitializeCILK<T, Derived> &) {return *this;}
-    ~InitializeCILK () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(CILK, Initialize)
 }; // class InitializeCILK
 
 /// \brief Sampler<T>::move_type subtype using Intel Cilk Plus
@@ -82,11 +78,7 @@ class MoveCILK : public MoveBase<T, Derived>
 
     protected :
 
-    MoveCILK () {}
-    MoveCILK (const MoveCILK<T, Derived> &) {}
-    MoveCILK<T, Derived> &operator=
-        (const MoveCILK<T, Derived> &) {return *this;}
-    ~MoveCILK () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(CILK, Move)
 }; // class MoveCILK
 
 /// \brief Monitor<T>::eval_type subtype using Intel Cilk Plus
@@ -112,11 +104,7 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalCILK () {}
-    MonitorEvalCILK (const MonitorEvalCILK<T, Derived> &) {}
-    MonitorEvalCILK<T, Derived> &operator=
-        (const MonitorEvalCILK<T, Derived> &) {return *this;}
-    ~MonitorEvalCILK () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(CILK, MonitorEval)
 }; // class MonitorEvalCILK
 
 /// \brief Path<T>::eval_type subtype using Intel Cilk Plus
@@ -143,11 +131,7 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalCILK () {}
-    PathEvalCILK (const PathEvalCILK<T, Derived> &) {}
-    PathEvalCILK<T, Derived> &operator=
-        (const PathEvalCILK<T, Derived> &) {return *this;}
-    ~PathEvalCILK () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(CILK, PathEval)
 }; // class PathEvalCILK
 
 } // namespace vsmc

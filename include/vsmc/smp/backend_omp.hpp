@@ -59,11 +59,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeOMP () {}
-    InitializeOMP (const InitializeOMP<T, Derived> &) {}
-    InitializeOMP<T, Derived> &operator=
-        (const InitializeOMP<T, Derived> &) {return *this;}
-    ~InitializeOMP () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(OMP, Initialize)
 }; // class InitializeOMP
 
 /// \brief Sampler<T>::move_type subtype using OpenMP
@@ -90,11 +86,7 @@ class MoveOMP : public MoveBase<T, Derived>
 
     protected :
 
-    MoveOMP () {}
-    MoveOMP (const MoveOMP<T, Derived> &) {}
-    MoveOMP<T, Derived> &operator=
-        (const MoveOMP<T, Derived> &) {return *this;}
-    ~MoveOMP () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(OMP, Move)
 }; // class MoveOMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
@@ -120,11 +112,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalOMP () {}
-    MonitorEvalOMP (const MonitorEvalOMP<T, Derived> &) {}
-    MonitorEvalOMP<T, Derived> &operator=
-        (const MonitorEvalOMP<T, Derived> &) {return *this;}
-    ~MonitorEvalOMP () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(OMP, MonitorEval)
 }; // class MonitorEvalOMP
 
 /// \brief Path<T>::eval_type subtype using OpenMP
@@ -152,11 +140,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalOMP () {}
-    PathEvalOMP (const PathEvalOMP<T, Derived> &) {}
-    PathEvalOMP<T, Derived> &operator=
-        (const PathEvalOMP<T, Derived> &) {return *this;}
-    ~PathEvalOMP () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(OMP, PathEval)
 }; // class PathEvalOMP
 
 } // namespace vsmc

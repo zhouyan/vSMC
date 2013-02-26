@@ -72,11 +72,7 @@ class InitializePPL : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializePPL () {}
-    InitializePPL (const InitializePPL<T, Derived> &) {}
-    InitializePPL<T, Derived> &operator=
-        (const InitializePPL<T, Derived> &) {return *this;}
-    ~InitializePPL () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(PPL, Initialize)
 
     private :
 
@@ -131,11 +127,7 @@ class MovePPL : public MoveBase<T, Derived>
 
     protected :
 
-    MovePPL () {}
-    MovePPL (const MovePPL<T, Derived> &) {}
-    MovePPL<T, Derived> &operator=
-        (const MovePPL<T, Derived> &) {return *this;}
-    ~MovePPL () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(PPL, Move)
 
     private :
 
@@ -189,11 +181,7 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalPPL () {}
-    MonitorEvalPPL (const MonitorEvalPPL<T, Derived> &) {}
-    MonitorEvalPPL<T, Derived> &operator=
-        (const MonitorEvalPPL<T, Derived> &) {return *this;}
-    ~MonitorEvalPPL () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(PPL, MonitorEval)
 
     private :
 
@@ -248,11 +236,7 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalPPL () {}
-    PathEvalPPL (const PathEvalPPL<T, Derived> &) {}
-    PathEvalPPL<T, Derived> &operator=
-        (const PathEvalPPL<T, Derived> &) {return *this;}
-    ~PathEvalPPL () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(PPL, PathEval)
 
     private :
 

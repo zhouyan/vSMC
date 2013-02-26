@@ -239,13 +239,14 @@ class PathGeometry : public Path<T>
     PathGeometry (const eval_type &eval) : Path<T>(eval) {}
 
     PathGeometry (const PathGeometry<T, NumericImpl> &other) :
-        weight_history_(other.weight_history_),
+        Path<T>(other), weight_history_(other.weight_history_),
         integrand_history_(other.integrand_history_) {}
 
     PathGeometry<T, NumericImpl> &operator= (
             const PathGeometry<T, NumericImpl> &other)
     {
         if (&other != this) {
+            Path<T>::operator=(other);
             weight_history_    = other.weight_history_;
             integrand_history_ = other.integrand_history_;
         }

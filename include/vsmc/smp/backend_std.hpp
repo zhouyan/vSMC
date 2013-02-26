@@ -72,11 +72,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeSTD () {}
-    InitializeSTD (const InitializeSTD<T, Derived> &) {}
-    InitializeSTD<T, Derived> &operator=
-        (const InitializeSTD<T, Derived> &) {return *this;}
-    ~InitializeSTD () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(STD, Initialize)
 
     private :
 
@@ -130,11 +126,7 @@ class MoveSTD : public MoveBase<T, Derived>
 
     protected :
 
-    MoveSTD () {}
-    MoveSTD (const MoveSTD<T, Derived> &) {}
-    MoveSTD<T, Derived> &operator=
-        (const MoveSTD<T, Derived> &) {return *this;}
-    ~MoveSTD () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(STD, Move)
 
     private :
 
@@ -188,11 +180,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalSTD () {}
-    MonitorEvalSTD (const MonitorEvalSTD<T, Derived> &) {}
-    MonitorEvalSTD<T, Derived> &operator=
-        (const MonitorEvalSTD<T, Derived> &) {return *this;}
-    ~MonitorEvalSTD () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(STD, MonitorEval)
 
     private :
 
@@ -251,11 +239,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalSTD () {}
-    PathEvalSTD (const PathEvalSTD<T, Derived> &) {}
-    PathEvalSTD<T, Derived> &operator=
-        (const PathEvalSTD<T, Derived> &) {return *this;}
-    ~PathEvalSTD () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(STD, PathEval)
 
     private :
 

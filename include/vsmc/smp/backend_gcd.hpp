@@ -47,11 +47,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     protected :
 
-    InitializeGCD () {}
-    InitializeGCD (const InitializeGCD<T, Derived> &) {}
-    InitializeGCD<T, Derived> &operator=
-        (const InitializeGCD<T, Derived> &) {return *this;}
-    ~InitializeGCD () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(GCD, Initialize)
 
     private :
 
@@ -101,11 +97,7 @@ class MoveGCD : public MoveBase<T, Derived>
 
     protected :
 
-    MoveGCD () {}
-    MoveGCD (const MoveGCD<T, Derived> &) {}
-    MoveGCD<T, Derived> &operator=
-        (const MoveGCD<T, Derived> &) {return *this;}
-    ~MoveGCD () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(GCD, Move)
 
     private :
 
@@ -150,11 +142,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    MonitorEvalGCD () {}
-    MonitorEvalGCD (const MonitorEvalGCD<T, Derived> &) {}
-    MonitorEvalGCD<T, Derived> &operator=
-        (const MonitorEvalGCD<T, Derived> &) {return *this;}
-    ~MonitorEvalGCD () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(GCD, MonitorEval)
 
     private :
 
@@ -202,11 +190,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
 
     protected :
 
-    PathEvalGCD () {}
-    PathEvalGCD (const PathEvalGCD<T, Derived> &) {}
-    PathEvalGCD<T, Derived> &operator=
-        (const PathEvalGCD<T, Derived> &) {return *this;}
-    ~PathEvalGCD () {}
+    VSMC_DEFINE_SMP_IMPL_PROTECTED(GCD, PathEval)
 
     private :
 
