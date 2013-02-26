@@ -296,23 +296,6 @@ template <typename D>
 struct IsDerivedFromStateCL :
     public cxx11::integral_constant<bool,IsDerivedFromStateCLImpl<D>::value>{};
 
-/// \cond HIDDEN_SYMBOLS
-template <typename, template <typename, typename> class, template <typename,
-         template <typename, typename> class, typename> class, typename>
-struct AdapImplTrait;
-/// \endcond HIDDEN_SYMBOLS
-
-template <typename T, template <typename, typename> class Impl,
-         template <typename, template <typename, typename> class, typename>
-         class Adapter>
-struct AdapImplTrait<T, Impl, Adapter, VBase> {typedef Impl<T, VBase> type;};
-
-template <typename T, template <typename, typename> class Impl,
-         template <typename, template <typename, typename> class, typename>
-         class Adapter>
-struct AdapImplTrait<T, Impl, Adapter, CBase>
-{typedef Impl<T, Adapter<T, Impl, CBase> > type;};
-
 template <typename ID, bool>
 struct CheckOpenCLPlatformDispatch
 {static bool check (const std::string &name) {return true;}};

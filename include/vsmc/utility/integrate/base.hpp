@@ -74,7 +74,7 @@ class NumericBase
 /// \brief Numerical integration base dispatch class
 /// \ingroup Integrate
 template <>
-class NumericBase<VBase>
+class NumericBase<Virtual>
 {
     public :
 
@@ -84,13 +84,13 @@ class NumericBase<VBase>
     protected :
 
     NumericBase () {}
-    NumericBase (const NumericBase<VBase> &) {}
-    NumericBase<VBase> &operator=
-        (const NumericBase<VBase> &) {return *this;}
+    NumericBase (const NumericBase<Virtual> &) {}
+    NumericBase<Virtual> &operator=
+        (const NumericBase<Virtual> &) {return *this;}
     virtual ~NumericBase () {}
 
     virtual double integrate_segment (double, double, const eval_type &) = 0;
-}; // class NumericBase<VBase>
+}; // class NumericBase<Virtual>
 
 } // namespace vsmc
 

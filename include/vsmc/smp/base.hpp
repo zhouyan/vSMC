@@ -141,20 +141,20 @@ class InitializeBase
 /// \brief Initilaize base dispatch class
 /// \ingroup SMP
 template <typename T>
-class InitializeBase<T, VBase>
+class InitializeBase<T, Virtual>
 {
     protected :
 
     InitializeBase () {}
-    InitializeBase (const InitializeBase<T, VBase> &) {}
-    InitializeBase<T, VBase> &operator=
-        (const InitializeBase<T, VBase> &) {return *this;}
+    InitializeBase (const InitializeBase<T, Virtual> &) {}
+    InitializeBase<T, Virtual> &operator=
+        (const InitializeBase<T, Virtual> &) {return *this;}
     virtual ~InitializeBase () {}
     virtual std::size_t initialize_state (SingleParticle<T>) = 0;
     virtual void initialize_param (Particle<T> &, void *) {}
     virtual void pre_processor (Particle<T> &) {}
     virtual void post_processor (Particle<T> &) {}
-}; // class InitializeBase<T, VBase>
+}; // class InitializeBase<T, Virtual>
 
 /// \brief Move base dispatch class
 /// \ingroup SMP
@@ -262,19 +262,19 @@ class MoveBase
 /// \brief Move base dispatch class
 /// \ingroup SMP
 template <typename T>
-class MoveBase<T, VBase>
+class MoveBase<T, Virtual>
 {
     protected :
 
     MoveBase () {}
-    MoveBase (const MoveBase<T, VBase> &) {}
-    MoveBase<T, VBase> &operator=
-        (const MoveBase<T, VBase> &) {return *this;}
+    MoveBase (const MoveBase<T, Virtual> &) {}
+    MoveBase<T, Virtual> &operator=
+        (const MoveBase<T, Virtual> &) {return *this;}
     virtual ~MoveBase () {}
     virtual std::size_t move_state (std::size_t, SingleParticle<T>) = 0;
     virtual void pre_processor (std::size_t, Particle<T> &) {}
     virtual void post_processor (std::size_t, Particle<T> &) {}
-}; // class MoveBase<T, VBase>
+}; // class MoveBase<T, Virtual>
 
 /// \brief Monitor evalution base dispatch class
 /// \ingroup SMP
@@ -394,20 +394,20 @@ class MonitorEvalBase
 /// \brief Monitor evalution base dispatch class
 /// \ingroup SMP
 template <typename T>
-class MonitorEvalBase<T, VBase>
+class MonitorEvalBase<T, Virtual>
 {
     protected :
 
     MonitorEvalBase () {}
-    MonitorEvalBase (const MonitorEvalBase<T, VBase> &) {}
-    MonitorEvalBase<T, VBase> &operator=
-        (const MonitorEvalBase<T, VBase> &) {return *this;}
+    MonitorEvalBase (const MonitorEvalBase<T, Virtual> &) {}
+    MonitorEvalBase<T, Virtual> &operator=
+        (const MonitorEvalBase<T, Virtual> &) {return *this;}
     virtual ~MonitorEvalBase () {}
     virtual void monitor_state (std::size_t, std::size_t,
             ConstSingleParticle<T>, double *) = 0;
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
-}; // class MonitorEvalBase<T, VBase>
+}; // class MonitorEvalBase<T, Virtual>
 
 /// \brief Path evalution base dispatch class
 /// \ingroup SMP
@@ -545,20 +545,20 @@ class PathEvalBase
 /// \brief Path evalution base dispatch class
 /// \ingroup SMP
 template <typename T>
-class PathEvalBase<T, VBase>
+class PathEvalBase<T, Virtual>
 {
     protected :
 
     PathEvalBase () {}
-    PathEvalBase (const PathEvalBase<T, VBase> &) {}
-    PathEvalBase<T, VBase> &operator=
-        (const PathEvalBase<T, VBase> &) {return *this;}
+    PathEvalBase (const PathEvalBase<T, Virtual> &) {}
+    PathEvalBase<T, Virtual> &operator=
+        (const PathEvalBase<T, Virtual> &) {return *this;}
     virtual ~PathEvalBase () {}
     virtual double path_state (std::size_t, ConstSingleParticle<T>) = 0;
     virtual double path_grid (std::size_t, const Particle<T> &) = 0;
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
-}; // class PathEval<T, VBase>
+}; // class PathEval<T, Virtual>
 
 } // namespace vsmc
 

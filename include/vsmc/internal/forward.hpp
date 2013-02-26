@@ -11,18 +11,18 @@
 #define VSMC_DEFINE_SMP_FORWARD(Name)                                         \
 namespace vsmc {                                                              \
     template <typename> class State##Name;                                    \
-    template <typename, typename D = VBase> class Initialize##Name;           \
-    template <typename, typename D = VBase> class Move##Name;                 \
-    template <typename, typename D = VBase> class MonitorEval##Name;          \
-    template <typename, typename D = VBase> class PathEval##Name;             \
+    template <typename, typename D = Virtual> class Initialize##Name;         \
+    template <typename, typename D = Virtual> class Move##Name;               \
+    template <typename, typename D = Virtual> class MonitorEval##Name;        \
+    template <typename, typename D = Virtual> class PathEval##Name;           \
     template <typename> class Numeric##Name;                                  \
 }
 
 namespace vsmc {
 
 // Placeholders
-struct CBase;
-struct VBase;
+struct Functor;
+struct Virtual;
 struct NullType;
 struct ScalarRng;
 struct VectorRng;
@@ -47,13 +47,13 @@ class CLQuery;
 template <typename> class CLManager;
 
 // Adapter
-template <typename, template <typename, typename> class, typename B = CBase>
+template <typename, template <typename, typename> class, typename F = Functor>
          class InitializeAdapter;
-template <typename, template <typename, typename> class, typename B = CBase>
+template <typename, template <typename, typename> class, typename F = Functor>
          class MoveAdapter;
-template <typename, template <typename, typename> class, typename B = CBase>
+template <typename, template <typename, typename> class, typename F = Functor>
          class MonitorEvalAdapter;
-template <typename, template <typename, typename> class, typename B = CBase>
+template <typename, template <typename, typename> class, typename F = Functor>
          class PathEvalAdapter;
 
 // Core
@@ -72,10 +72,10 @@ template <typename> class ConstSingleParticleBase;
 
 // OpenCL
 template <std::size_t, typename, typename ID = CLDefault> class StateCL;
-template <typename, typename B = CBase> class InitializeCL;
-template <typename, typename B = CBase> class MoveCL;
-template <typename, typename B = CBase> class MonitorEvalCL;
-template <typename, typename B = CBase> class PathEvalCL;
+template <typename, typename B = Functor> class InitializeCL;
+template <typename, typename B = Functor> class MoveCL;
+template <typename, typename B = Functor> class MonitorEvalCL;
+template <typename, typename B = Functor> class PathEvalCL;
 
 // MPI
 struct MPIDefault;

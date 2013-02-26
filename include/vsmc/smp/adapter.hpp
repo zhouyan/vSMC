@@ -5,18 +5,34 @@
 
 namespace vsmc {
 
+template <typename T, template <typename, typename> class Impl, typename F>
+class InitializeAdapter
+{
+}; // InitializeAdapter
+
+template <typename T, template <typename, typename> class Impl, typename F>
+class MoveAdapter
+{
+}; // MoveAdapter
+
+template <typename T, template <typename, typename> class Impl, typename F>
+class MonitorEvalAdapter
+{
+}; // MonitorEvalAdapter
+
+template <typename T, template <typename, typename> class Impl, typename F>
+class PathEvalAdapter
+{
+}; // PathEvalAdapter
+
 /// \brief Initialize class adapter
 /// \ingroup Adapter
-template <typename T, template <typename, typename> class Impl,
-         typename BaseType>
-class InitializeAdapter :
-    public traits::AdapImplTrait<T, Impl, InitializeAdapter, BaseType>::type
+template <typename T, template <typename, typename> class Impl>
+class InitializeAdapter<T, Impl, Functor> :
+    public Impl<T, InitializeAdapter<T, Impl, Functor> >
 {
     public :
 
-    typedef typename traits::AdapImplTrait<
-        T, Impl, vsmc::InitializeAdapter, BaseType>::type
-        initialize_impl_type;
     typedef cxx11::function<std::size_t (SingleParticle<T>)>
         initialize_state_type;
     typedef cxx11::function<void (Particle<T> &, void *)>
@@ -56,16 +72,12 @@ class InitializeAdapter :
 
 /// \brief Move class adapter
 /// \ingroup Adapter
-template <typename T, template <typename, typename> class Impl,
-         typename BaseType>
-class MoveAdapter :
-    public traits::AdapImplTrait<T, Impl, MoveAdapter, BaseType>::type
+template <typename T, template <typename, typename> class Impl>
+class MoveAdapter<T, Impl, Functor> :
+    public Impl<T, MoveAdapter<T, Impl, Functor> >
 {
     public :
 
-    typedef typename traits::AdapImplTrait<
-        T, Impl, vsmc::MoveAdapter, BaseType>::type
-        move_impl_type;
     typedef cxx11::function<std::size_t (std::size_t, SingleParticle<T>)>
         move_state_type;
     typedef cxx11::function<void (std::size_t, Particle<T> &)>
@@ -97,16 +109,12 @@ class MoveAdapter :
 
 /// \brief Monitor evaluation class adapter
 /// \ingroup Adapter
-template <typename T, template <typename, typename> class Impl,
-         typename BaseType>
-class MonitorEvalAdapter :
-    public traits::AdapImplTrait<T, Impl, MonitorEvalAdapter, BaseType>::type
+template <typename T, template <typename, typename> class Impl>
+class MonitorEvalAdapter<T, Impl, Functor> :
+    public Impl<T, MonitorEvalAdapter<T, Impl, Functor> >
 {
     public :
 
-    typedef typename traits::AdapImplTrait<
-        T, Impl, vsmc::MonitorEvalAdapter, BaseType>::type
-        monitor_eval_impl_type;
     typedef cxx11::function<
         void (std::size_t, std::size_t, ConstSingleParticle<T>, double *)>
         monitor_state_type;
@@ -141,16 +149,12 @@ class MonitorEvalAdapter :
 
 /// \brief Path evaluation class adapter
 /// \ingroup Adapter
-template <typename T, template <typename, typename> class Impl,
-         typename BaseType>
-class PathEvalAdapter :
-    public traits::AdapImplTrait<T, Impl, PathEvalAdapter, BaseType>::type
+template <typename T, template <typename, typename> class Impl>
+class PathEvalAdapter<T, Impl, Functor> :
+    public Impl<T, PathEvalAdapter<T, Impl, Functor> >
 {
     public :
 
-    typedef typename traits::AdapImplTrait<
-        T, Impl, vsmc::PathEvalAdapter, BaseType>::type
-        path_eval_impl_type;
     typedef cxx11::function<double (std::size_t, ConstSingleParticle<T>)>
         path_state_type;
     typedef cxx11::function<double (std::size_t, const Particle<T> &)>
