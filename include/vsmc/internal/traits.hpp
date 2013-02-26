@@ -155,7 +155,7 @@ struct Has##Outer##Impl                                                       \
     struct char2 {char c1; char c2;};                                         \
     template <typename U, RT (U::*) Args> struct sfinae_;                     \
     template <typename U> static char test (sfinae_<U, &U::Inner> *);         \
-    template <typename U> static char2 test(...);                             \
+    template <typename U> static char2 test (...);                            \
                                                                               \
     public :                                                                  \
                                                                               \
@@ -179,7 +179,7 @@ struct HasStatic##Outer##Impl                                                 \
     struct char2 {char c1; char c2;};                                         \
     template <typename U, RT (*) Args> struct sfinae_;                        \
     template <typename U> static char test (sfinae_<U, &U::Inner> *);         \
-    template <typename U> static char2 test(...);                             \
+    template <typename U> static char2 test (...);                            \
                                                                               \
     public :                                                                  \
                                                                               \
@@ -191,6 +191,42 @@ struct HasStatic##Outer :                                                     \
     public cxx11::integral_constant<bool, HasStatic##Outer##Impl<T>::value>{};\
                                                                               \
 } } // namespace vsmc::traits
+
+#define VSMC_DEFINE_SMP_MF_CHECKER(name, RT, Args)                            \
+template <typename U>                                                         \
+struct has_##name##_non_static_                                               \
+{                                                                             \
+    private :                                                                 \
+                                                                              \
+    struct char2 {char c1; char c2;};                                         \
+    template <typename V, RT (V::*) Args> struct sfinae_;                     \
+    template <typename V> static char test (sfinae_<V, &V::name> *);          \
+    template <typename V> static char2 test (...);                            \
+                                                                              \
+    public :                                                                  \
+                                                                              \
+    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};             \
+};                                                                            \
+                                                                              \
+template <typename U>                                                         \
+struct has_##name##_static_                                                   \
+{                                                                             \
+    private :                                                                 \
+                                                                              \
+    struct char2 {char c1; char c2;};                                         \
+    template <typename V, RT (*) Args> struct sfinae_;                        \
+    template <typename V> static char test (sfinae_<V, &V::name> *);          \
+    template <typename V> static char2 test (...);                            \
+                                                                              \
+    public :                                                                  \
+                                                                              \
+    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};             \
+};                                                                            \
+                                                                              \
+template <typename U>                                                         \
+struct has_##name##_ : public cxx11::integral_constant<bool,                  \
+    has_##name##_non_static_<U>::value ||                                     \
+    has_##name##_static_<U>::value> {};
 
 #define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName)                             \
 namespace vsmc { namespace traits {                                           \
