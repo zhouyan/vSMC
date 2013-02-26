@@ -22,6 +22,7 @@ namespace vsmc {
 
 // Placeholders
 struct Functor;
+struct InternalObject;
 struct Virtual;
 struct NullType;
 struct ScalarRng;
@@ -47,14 +48,19 @@ class CLQuery;
 template <typename> class CLManager;
 
 // Adapter
+template <typename, typename, typename> class InitializeAdapterBase;
+template <typename, typename, typename> class MoveAdapterBase;
+template <typename, typename, typename> class MonitorEvalAdapterBase;
+template <typename, typename, typename> class PathEvalAdapterBase;
+
 template <typename, template <typename, typename> class, typename F = Functor>
-         class InitializeAdapter;
+class InitializeAdapter;
 template <typename, template <typename, typename> class, typename F = Functor>
-         class MoveAdapter;
+class MoveAdapter;
 template <typename, template <typename, typename> class, typename F = Functor>
-         class MonitorEvalAdapter;
+class MonitorEvalAdapter;
 template <typename, template <typename, typename> class, typename F = Functor>
-         class PathEvalAdapter;
+class PathEvalAdapter;
 
 // Core
 template <typename ResType> class Resample;

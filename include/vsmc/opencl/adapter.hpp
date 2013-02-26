@@ -2,163 +2,187 @@
 #define VSMC_OPENCL_ADAPTER_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/adapter/base.hpp>
 
 namespace vsmc {
 
 /// \brief Initialize class adapter specialization for OpenCL
 /// \ingroup Adapter
-template <typename T, typename BaseType>
-class InitializeAdapter<T, InitializeCL, BaseType> :
-    public InitializeCL<T, BaseType>
+template <typename T, typename F>
+class InitializeAdapter<T, InitializeCL, F> :
+    public InitializeAdapterBase<T, F, InitializeCL<T> >
 {
+    typedef InitializeAdapterBase<T, F, InitializeCL<T> > base;
+
     public :
 
-    typedef InitializeCL<T, BaseType> initialize_impl_type;
-    typedef cxx11::function<void (Particle<T> &, void *)>
-        initialize_param_type;
-    typedef cxx11::function<void (Particle<T> &)>
-        pre_processor_type;
-    typedef cxx11::function<void (Particle<T> &)>
-        post_processor_type;
+    InitializeAdapter () {}
+
+    InitializeAdapter (const F &f) : base(f) {}
+
+    void initialize_state (std::string &kernel_name)
+    {return this->adapter_f().initialize_state(kernel_name);}
+}; // InitializeAdapter
+
+/// \brief Move class adapter specialization for OpenCL
+/// \ingroup Adapter
+template <typename T, typename F>
+class MoveAdapter<T, MoveCL, F> : public MoveAdapterBase<T, F, MoveCL<T> >
+{
+    typedef MoveAdapterBase<T, F, MoveCL<T> > base;
+
+    public :
+
+    MoveAdapter () {}
+
+    MoveAdapter (const F &f) : base(f) {}
+
+    void move_state (std::size_t iter, std::string &kernel_name)
+    {return this->adapter_f().move_state(iter, kernel_name);}
+}; // MoveAdapter
+
+/// \brief Monitor evaluation class adapter specialization for OpenCL
+/// \ingroup Adapter
+template <typename T, typename F>
+class MonitorEvalAdapter<T, MonitorEvalCL, F> :
+    public MonitorEvalAdapterBase<T, F, MonitorEvalCL<T> >
+{
+    typedef MonitorEvalAdapterBase<T, F, MonitorEvalCL<T> > base;
+
+    public :
+
+    MonitorEvalAdapter () {}
+
+    MonitorEvalAdapter (const F &f) : base(f) {}
+
+    void move_state (std::size_t iter, std::string &kernel_name)
+    {this->adapter_f().monitor_state(iter, kernel_name);}
+}; // MonitorEvalAdapter
+
+/// \brief Path evaluation class adapter specialization for OpenCL
+/// \ingroup Adapter
+template <typename T, typename F>
+class PathEvalAdapter<T, PathEvalCL, F> :
+    public PathEvalAdapterBase<T, F, PathEvalCL<T> >
+{
+    typedef PathEvalAdapterBase<T, F, PathEvalCL<T> > base;
+
+    public :
+
+    PathEvalAdapter () {}
+
+    PathEvalAdapter (const F &f) : base(f) {}
+
+    void path_state (std::size_t iter, std::string &kernel_name)
+    {return this->adapter_f().path_state(iter, kernel_name);}
+}; // PathEvalAdapter
+
+/// \brief Initialize class adapter specialization for OpenCL
+/// \ingroup Adapter
+template <typename T>
+class InitializeAdapter<T, InitializeCL, Functor> :
+    public InitializeAdapterBase<T, Functor, InitializeCL<T> >
+{
+    typedef InitializeAdapterBase<T, Functor, InitializeCL<T> > base;
+
+    public :
+
+    typedef typename base::initialize_param_type initialize_param_type;
+    typedef typename base::pre_processor_type pre_processor_type;
+    typedef typename base::post_processor_type post_processor_type;
 
     InitializeAdapter (const std::string &init_state,
             const initialize_param_type &init_param = initialize_param_type(),
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
-        initialize_state_(init_state), initialize_param_(init_param),
-        pre_processor_(pre), post_processor_(post) {}
+        base(init_param, pre, post), initialize_state_(init_state) {}
 
     void initialize_state (std::string &kernel_name)
     {kernel_name = initialize_state_;}
 
-    void initialize_param (Particle<T> &particle, void *param)
-    {if (bool(initialize_param_)) initialize_param_(particle, param);}
-
-    void pre_processor (Particle<T> &particle)
-    {if (bool(pre_processor_)) pre_processor_(particle);}
-
-    void post_processor (Particle<T> &particle)
-    {if (bool(post_processor_)) post_processor_(particle);}
-
     private :
 
     const std::string initialize_state_;
-    const initialize_param_type initialize_param_;
-    const pre_processor_type pre_processor_;
-    const post_processor_type post_processor_;
 }; // class InitializeAdapter
 
 /// \brief Move class adapter specialization for OpenCL
 /// \ingroup Adapter
-template <typename T, typename BaseType>
-class MoveAdapter<T, MoveCL, BaseType> : public MoveCL<T, BaseType>
+template <typename T>
+class MoveAdapter<T, MoveCL, Functor> :
+    public MoveAdapterBase<T, Functor, MoveCL<T> >
 {
+    typedef MoveAdapterBase<T, Functor, MoveCL<T> > base;
+
     public :
 
-    typedef MoveCL<T, BaseType> move_impl_type;
-    typedef cxx11::function<void (std::size_t, Particle<T> &)>
-        pre_processor_type;
-    typedef cxx11::function<void (std::size_t, Particle<T> &)>
-        post_processor_type;
+    typedef typename base::pre_processor_type pre_processor_type;
+    typedef typename base::post_processor_type post_processor_type;
 
     MoveAdapter (const std::string &move_state,
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
-        move_state_(move_state), pre_processor_(pre), post_processor_(post) {}
+        base(pre, post), move_state_(move_state) {}
 
     void move_state (std::size_t iter, std::string &kernel_name)
     {kernel_name = move_state_;}
 
-    void pre_processor (std::size_t iter, Particle<T> &particle)
-    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
-
-    void post_processor (std::size_t iter, Particle<T> &particle)
-    {if (bool(post_processor_)) post_processor_(iter, particle);}
-
     private :
 
     const std::string move_state_;
-    const pre_processor_type pre_processor_;
-    const post_processor_type post_processor_;
 }; // class MoveAdapter
 
 /// \brief Monitor evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
-template <typename T, typename BaseType>
-class MonitorEvalAdapter<T, MonitorEvalCL, BaseType> :
-    public MonitorEvalCL<T, BaseType>
+template <typename T>
+class MonitorEvalAdapter<T, MonitorEvalCL, Functor> :
+    public MonitorEvalAdapterBase<T, Functor, MonitorEvalCL<T> >
 {
+    typedef MonitorEvalAdapterBase<T, Functor, MonitorEvalCL<T> > base;
+
     public :
 
-    typedef MonitorEvalCL<T, BaseType> monitor_eval_impl_type;
-    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
-        pre_processor_type;
-    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
-        post_processor_type;
+    typedef typename base::pre_processor_type pre_processor_type;
+    typedef typename base::post_processor_type post_processor_type;
 
     MonitorEvalAdapter (const std::string &monitor_state,
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
-        monitor_state_(monitor_state),
-        pre_processor_(pre), post_processor_(post) {}
+        base(pre, post), monitor_state_(monitor_state) {}
 
     void monitor_state (std::size_t, std::string &kernel_name)
     {kernel_name = monitor_state_;}
 
-    void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
-
-    void post_processor (std::size_t iter, const Particle<T> &particle)
-    {if (bool(post_processor_)) post_processor_(iter, particle);}
-
     private :
 
     const std::string monitor_state_;
-    const pre_processor_type pre_processor_;
-    const post_processor_type post_processor_;
 }; // class MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
-template <typename T, typename BaseType>
-class PathEvalAdapter<T, PathEvalCL, BaseType> :
-    public PathEvalCL<T, BaseType>
+template <typename T>
+class PathEvalAdapter<T, PathEvalCL, Functor> :
+    public PathEvalAdapterBase<T, Functor, PathEvalCL<T> >
 {
+    typedef PathEvalAdapterBase<T, Functor, PathEvalCL<T> > base;
+
     public :
 
-    typedef PathEvalCL<T, BaseType> path_eval_impl_type;
-    typedef cxx11::function<double (std::size_t, const Particle<T> &)>
-        path_grid_type;
-    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
-        pre_processor_type;
-    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
-        post_processor_type;
+    typedef typename base::path_grid_type path_grid_type;
+    typedef typename base::pre_processor_type pre_processor_type;
+    typedef typename base::post_processor_type post_processor_type;
 
     PathEvalAdapter (const std::string &path_state,
             const path_grid_type &path_grid,
             const pre_processor_type &pre = pre_processor_type(),
             const post_processor_type &post = post_processor_type()) :
-        path_state_(path_state), path_grid_(path_grid),
-        pre_processor_(pre), post_processor_(post) {}
+        base(path_grid, pre, post), path_state_(path_state) {}
 
     void path_state (std::size_t, std::string &kernel_name)
     {kernel_name = path_state_;}
 
-    double path_grid (std::size_t iter, const Particle<T> &particle)
-    {return path_grid_(iter, particle);}
-
-    void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
-
-    void post_processor (std::size_t iter, const Particle<T> &particle)
-    {if (bool(post_processor_)) post_processor_(iter, particle);}
-
     private :
 
     const std::string path_state_;
-    const path_grid_type path_grid_;
-    const pre_processor_type pre_processor_;
-    const post_processor_type post_processor_;
 }; // class PathEvalAdapter
 
 } // namespace vsmc

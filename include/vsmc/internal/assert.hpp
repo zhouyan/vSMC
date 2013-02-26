@@ -69,11 +69,6 @@ class StaticAssert<true>
         USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
 
-        USE_InitializeAdapter_WITHOUT_A_INITIAILIZE_IMPLEMENTATION,
-        USE_MoveAdapter_WITHOUT_A_MOVE_IMPLEMENTATION,
-        USE_MonitorEvalAdapter_WITHOUT_A_MONITOR_EVAL_IMPLEMENTATION,
-        USE_PathEvalAdapter_WITHOUT_A_PATH_EVAL_IMPLEMENTATION,
-
         USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree
     };
 }; // class StaticAssert
@@ -145,10 +140,6 @@ class StaticAssert<true>
             ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
 // Static assertion macros
-
-#define VSMC_STATIC_ASSERT_ADAPTER_IMPL(name, NAME)                           \
-    VSMC_STATIC_ASSERT(vsmc::traits::Is##name##Impl<Impl>::value,             \
-            USE_##name##Adapter_WITHOUT_A_##NAME##_IMPLEMENTATION)            \
 
 #define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE                                 \
     VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \

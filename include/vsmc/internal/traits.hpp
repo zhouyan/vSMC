@@ -228,28 +228,6 @@ struct has_##name##_ : public cxx11::integral_constant<bool,                  \
     has_##name##_non_static_<U>::value ||                                     \
     has_##name##_static_<U>::value> {};
 
-#define VSMC_DEFINE_SMP_IS_IMPL_GENERIC(BaseName)                             \
-namespace vsmc { namespace traits {                                           \
-                                                                              \
-template <template <typename, typename> class>                                \
-struct Is##BaseName##Impl : public cxx11::false_type {};                      \
-                                                                              \
-} } //namespace vsmc::traits
-
-#define VSMC_DEFINE_SMP_IS_IMPL_TRUE(Name)                                    \
-namespace vsmc { namespace traits {                                           \
-                                                                              \
-template <>                                                                   \
-struct IsInitializeImpl<Initialize##Name> : public cxx11::true_type {};       \
-template <>                                                                   \
-struct IsMoveImpl<Move##Name> : public cxx11::true_type {};                   \
-template <>                                                                   \
-struct IsMonitorEvalImpl<MonitorEval##Name> : public cxx11::true_type {};     \
-template <>                                                                   \
-struct IsPathEvalImpl<PathEval##Name> : public cxx11::true_type {};           \
-                                                                              \
-} } //namespace vsmc::traits
-
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type)
@@ -263,19 +241,6 @@ VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
         bool, (const std::string &))
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDevice, check_opencl_device,
         bool, (const std::string &))
-
-VSMC_DEFINE_SMP_IS_IMPL_GENERIC(Initialize)
-VSMC_DEFINE_SMP_IS_IMPL_GENERIC(Move)
-VSMC_DEFINE_SMP_IS_IMPL_GENERIC(MonitorEval)
-VSMC_DEFINE_SMP_IS_IMPL_GENERIC(PathEval)
-
-VSMC_DEFINE_SMP_IS_IMPL_TRUE(SEQ)
-VSMC_DEFINE_SMP_IS_IMPL_TRUE(CILK)
-VSMC_DEFINE_SMP_IS_IMPL_TRUE(GCD)
-VSMC_DEFINE_SMP_IS_IMPL_TRUE(OMP)
-VSMC_DEFINE_SMP_IS_IMPL_TRUE(PPL)
-VSMC_DEFINE_SMP_IS_IMPL_TRUE(STD)
-VSMC_DEFINE_SMP_IS_IMPL_TRUE(TBB)
 
 namespace vsmc { namespace traits {
 
