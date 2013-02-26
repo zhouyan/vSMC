@@ -10,64 +10,62 @@ namespace vsmc {
 
 namespace internal {
 
-template <typename> void set_cl_state_type (std::stringstream &);
+template <typename> void set_cl_fp_type (std::stringstream &);
 
 template<>
-void set_cl_state_type<cl_float>(std::stringstream &ss)
+void set_cl_fp_type<cl_float>(std::stringstream &ss)
 {
-    ss << "typedef float state_type;\n";
-    ss << "#define VSMC_STATE_TYPE_IS_FLOAT  1\n";
-    ss << "#define VSMC_STATE_TYPE_IS_DOUBLE 0\n";
+    ss << "typedef float fp_type;\n";
+    ss << "#define VSMC_FP_TYPE_IS_FLOAT  1\n";
+    ss << "#define VSMC_FP_TYPE_IS_DOUBLE 0\n";
 }
 
 template<>
-void set_cl_state_type<cl_double>(std::stringstream &ss)
+void set_cl_fp_type<cl_double>(std::stringstream &ss)
 {
-    ss << "typedef double state_type;\n";
-    ss << "#define VSMC_STATE_TYPE_IS_FLOAT  0\n";
-    ss << "#define VSMC_STATE_TYPE_IS_DOUBLE 1\n";
+    ss << "typedef double fp_type;\n";
+    ss << "#define VSMC_FP_TYPE_IS_FLOAT  0\n";
+    ss << "#define VSMC_FP_TYPE_IS_DOUBLE 1\n";
 }
 
 } // namespace vsmc::internal
 
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
-///
-/// \details
-/// Currently the template parameter `T` is limited to `cl_float` or
-/// `cl_double`.
-template <std::size_t Dim, typename T, typename ID>
+template <std::size_t StateSize, typename FPType, typename ID>
 class StateCL
 {
     public :
 
     typedef cl_ulong size_type;
-    typedef T state_type;
+    typedef FPType fp_type;
     typedef CLManager<ID> manager_type;
 
     explicit StateCL (size_type N) :
-        dim_(Dim == Dynamic ? 1 : Dim), size_(N), build_(false), build_id_(0),
-        state_buffer_(manager().template create_buffer<state_type>(
-                dim_ * size_)),
+        state_size_(StateSize == Dynamic ? 1 : StateSize),
+        size_(N), build_(false), build_id_(0),
+        state_buffer_(manager().template create_buffer<char>(
+                state_size_ * size_)),
         copy_from_buffer_(manager().template create_buffer<size_type>(size_))
-    {VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(T);}
+        {}
 
-    StateCL (const StateCL<Dim, T, ID> &other) :
-        dim_(other.dim_), size_(other.size_),
+    StateCL (const StateCL<StateSize, FPType, ID> &other) :
+        state_size_(other.state_size_), size_(other.size_),
         program_(other.program_), kernel_copy_(other.kernel_copy_),
         build_(other.build_), build_id_(0),
-        state_buffer_(manager().template create_buffer<state_type>(
-                dim_ * size_)),
+        state_buffer_(manager().template create_buffer<char>(
+                state_size_ * size_)),
         copy_from_buffer_(manager().template create_buffer<size_type>(size_))
     {
-        manager().template copy_buffer<state_type>(
-                other.state_buffer_, dim_ * size_, state_buffer_);
+        manager().template copy_buffer<char>(
+                other.state_buffer_, state_size_ * size_, state_buffer_);
     }
 
-    StateCL<Dim, T, ID> &operator= (const StateCL<Dim, T, ID> &other)
+    StateCL<StateSize, FPType, ID> &operator=
+        (const StateCL<StateSize, FPType, ID> &other)
     {
         if (this != &other) {
-            dim_         = other.dim_;
+            state_size_  = other.state_size_;
             size_        = other.size_;
             program_     = other.program_;
             kernel_copy_ = other.kernel_copy_;
@@ -75,25 +73,26 @@ class StateCL
             build_id_    = 0;
 
             state_buffer_ =
-                manager().template create_buffer<state_type>(dim_ * size_);
+                manager().template create_buffer<char>(state_size_ * size_);
             copy_from_buffer_ =
                 manager().template create_buffer<size_type>(size_);
-            manager().template copy_buffer<state_type>(
-                    other.state_buffer_, dim_ * size_, state_buffer_);
+            manager().template copy_buffer<char>(
+                    other.state_buffer_, state_size_ * size_, state_buffer_);
         }
 
         return *this;
     }
 
-    std::size_t dim () const {return dim_;}
+    std::size_t state_size () const {return state_size_;}
 
-    void resize_dim (std::size_t dim)
+    void resize_state (std::size_t state_size)
     {
+        static const std::size_t Dim = StateSize;
         VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE;
 
         state_buffer_ =
-            manager().template create_buffer<state_type>(dim * size_);
-        dim_ = dim;
+            manager().template create_buffer<char>(state_size * size_);
+        state_size_ = state_size;
     }
 
     size_type size () const {return size_;}
@@ -115,10 +114,10 @@ class StateCL
     ///
     /// \details
     /// Note that a few macros and headers are included before the user
-    /// supplied `source`. Say the template parameter `T` of this class is set
-    /// to `cl_double`, `Dim` set to `4`, and there are 1000 particles, then
-    /// the complete source, which acutally get compiled looks like the
-    /// following
+    /// supplied `source`. Say the template parameter `StateSize ==4`,
+    /// `FPType` of this class is set to `cl_double`, and there are 1000
+    /// particles, then the complete source, which acutally get compiled looks
+    /// like the following
     /// \code
     /// #if defined(cl_khr_fp64)
     /// #pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -126,13 +125,13 @@ class StateCL
     /// #pragma OPENCL EXTENSION cl_amd_fp64 : enable
     /// #endif
     ///
-    /// typedef float state_type;
-    /// #define VSMC_STATE_TYPE_IS_FLOAT  1
-    /// #define VSMC_STATE_TYPE_IS_DOUBLE 0
+    /// typedef float fp_type;
+    /// #define VSMC_FP_TYPE_TYPE_IS_FLOAT  1
+    /// #define VSMC_FP_TYPE_TYPE_IS_DOUBLE 0
     ///
     /// typedef ulong size_type;
     /// #define Size 1000UL;
-    /// #define Dim 4UL;
+    /// #define StateSize 4UL;
     /// #define Seed 101UL;
     /// // The actual number if vsmc::Seed::instance().get()
     ///
@@ -140,12 +139,12 @@ class StateCL
     ///
     /// // ... User source
     /// \endcode
-    /// In summary, macros (and thus C compile time constant) for the number of
-    /// particles, the dimension of the states, a seed are defined. A typedef
-    /// `size_type` and `state_type` are defined. The double precision
+    /// In summary, macros (and thus C compile time constant) for the number
+    /// of particles, the dimension of the states, a seed are defined. A
+    /// typedef `size_type` and `fp_type` are defined. The double precision
     /// extension are enabled if avaialble. And two macros
-    /// `VSMC_STATE_TYPE_IS_FLOAT` and `VSMC_STATE_TYPE_IS_DOUBLE` are provided
-    /// for conditional compile when the precison matters.
+    /// `VSMC_FP_TYPE_IS_FLOAT` and `VSMC_FP_TYPE_IS_DOUBLE` are provided for
+    /// conditional compile when the precison matters.
     ///
     /// After build, `vsmc::Seed::instance().skip(N)` is called with `N`
     /// being the nubmer of particles.
@@ -165,10 +164,10 @@ class StateCL
         ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
         ss << "#endif\n";
 
-        internal::set_cl_state_type<T>(ss);
+        internal::set_cl_fp_type<fp_type>(ss);
         ss << "typedef ulong size_type;\n";
         ss << "#define Size " << size_ << "UL\n";
-        ss << "#define Dim  " << dim_  << "UL\n";
+        ss << "#define StateSize " << state_size_ << "UL\n";
         ss << "#define Seed " << Seed::instance().get() << "UL\n";
         ss << "#include <vsmc/opencl/device.h>\n";
         ss << source << '\n';
@@ -254,27 +253,9 @@ class StateCL
         manager().run_kernel(kernel_copy_, size_, 0);
     }
 
-    template <typename OutputStream>
-    OutputStream &print (OutputStream &os, std::size_t iter = 0,
-            char sepchar = ' ', char eolchar = '\n') const
-    {
-        state_host_.resize(dim_ * size_);
-        manager().template read_buffer<state_type>(
-                state_buffer_, dim_ * size_, &state_host_[0]);
-        for (size_type i = 0; i != size_; ++i) {
-            os << iter << sepchar;
-            for (std::size_t d = 0; d != this->dim() - 1; ++d)
-                os << state_host_[i * dim_ + d] << sepchar;
-            os << state_host_[i * dim_ + dim_ - 1] << eolchar;
-        }
-
-        return os;
-
-    }
-
     private :
 
-    std::size_t dim_;
+    std::size_t state_size_;
     size_type size_;
 
     cl::Program program_;
@@ -288,8 +269,6 @@ class StateCL
 
     cl::Buffer state_buffer_;
     cl::Buffer copy_from_buffer_;
-
-    mutable std::vector<state_type> state_host_;
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype using OpenCL
@@ -303,7 +282,7 @@ class StateCL
 /// \endcode
 /// - Kernels can have additonal arguments and set by the user in
 /// `pre_processor`.
-/// - `state` has size `N * Dim` where `accept` has size `N`.
+/// - `state` has size `N * StateSize` where `accept` has size `N`.
 /// - The declaration does not have to much this, but the first arguments will
 /// be set by InitializeCL::opeartor(). For example
 /// \code
@@ -311,7 +290,7 @@ class StateCL
 ///     state_type v1;
 ///     state_type v2;
 ///     // ...
-///     state_type vDim;
+///     state_type vDim; // vDim = StateSize / state_type
 /// } param;
 /// __kernel
 /// void kern (__global param *state, __global ulong *accept);
@@ -359,12 +338,13 @@ class InitializeCL : public CLConfigure
     InitializeCL () : build_id_(-1) {}
 
     InitializeCL (const InitializeCL<T> &other) :
-        build_id_(other.build_id_),
+        CLConfigure(other), build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
 
     InitializeCL<T> &operator= (const InitializeCL<T> &other)
     {
         if (this != &other) {
+            CLConfigure::operator=(other);
             build_id_ = other.build_id_;
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
@@ -465,12 +445,13 @@ class MoveCL : public CLConfigure
     MoveCL () : build_id_(-1) {}
 
     MoveCL (const MoveCL<T> &other) :
-        build_id_(other.build_id_),
+        CLConfigure(other), build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
 
     MoveCL<T> &operator= (const MoveCL<T> &other)
     {
         if (this != &other) {
+            CLConfigure::operator=(other);
             build_id_ = other.build_id_;
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
@@ -531,7 +512,7 @@ class MoveCL : public CLConfigure
 /// \code
 /// __kernel
 /// void kern (ulong iter, ulong dim, __global state_type *state,
-///            __global state_type *res);
+///            __global fp_type *res);
 /// \endcode
 template <typename T, typename>
 class MonitorEvalCL : public CLConfigure
@@ -548,7 +529,7 @@ class MonitorEvalCL : public CLConfigure
 
         if (buffer_size_ != particle.size()) {
             buffer_ = particle.value().manager().template
-                create_buffer<typename T::state_type>(
+                create_buffer<typename T::fp_type>(
                         particle.value().size() * dim);
             buffer_size_ = particle.size();
         }
@@ -558,7 +539,7 @@ class MonitorEvalCL : public CLConfigure
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), local_size());
         particle.value().manager().template
-            read_buffer<typename T::state_type>(
+            read_buffer<typename T::fp_type>(
                     buffer_, particle.value().size() * dim, res);
         post_processor(iter, particle);
     }
@@ -568,13 +549,14 @@ class MonitorEvalCL : public CLConfigure
     MonitorEvalCL () : build_id_(-1), buffer_size_(0) {}
 
     MonitorEvalCL (const MonitorEvalCL<T> &other) :
-        build_id_(other.build_id_),
+        CLConfigure(other), build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
         buffer_size_(other.buffer_size_), buffer_(other.buffer_) {}
 
     MonitorEvalCL<T> &operator= (const MonitorEvalCL<T> &other)
     {
         if (this != &other) {
+            CLConfigure::operator=(other);
             build_id_ = other.build_id_;
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;
@@ -656,7 +638,7 @@ class PathEvalCL : public CLConfigure
 
         if (buffer_size_ != particle.size()) {
             buffer_ = particle.value().manager().template
-                create_buffer<typename T::state_type>(particle.value().size());
+                create_buffer<typename T::fp_type>(particle.value().size());
             buffer_size_ = particle.size();
         }
 
@@ -665,7 +647,7 @@ class PathEvalCL : public CLConfigure
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), local_size());
         particle.value().manager().template
-            read_buffer<typename T::state_type>(
+            read_buffer<typename T::fp_type>(
                     buffer_, particle.value().size(), res);
         post_processor(iter, particle);
 
@@ -677,13 +659,14 @@ class PathEvalCL : public CLConfigure
     PathEvalCL () : build_id_(-1), buffer_size_(0) {}
 
     PathEvalCL (const PathEvalCL<T> &other) :
-        build_id_(other.build_id_),
+        CLConfigure(other), build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
         buffer_size_(other.buffer_size_), buffer_(other.buffer_) {}
 
     PathEvalCL<T> &operator= (const PathEvalCL<T> &other)
     {
         if (this != &other) {
+            CLConfigure::operator=(other);
             build_id_ = other.build_id_;
             kernel_ = other.kernel_;
             kernel_name_ = other.kernel_name_;

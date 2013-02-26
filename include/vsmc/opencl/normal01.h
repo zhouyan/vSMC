@@ -3,7 +3,7 @@
 
 #include <vsmc/opencl/urng.h>
 
-#if VSMC_STATE_TYPE_IS_FLOAT
+#if VSMC_FP_TYPE_IS_FLOAT
 #define NORMAL01_2x32      normal01_2x32_24
 #define NORMAL01_2x32_INIT normal01_2x32_24_init
 #define NORMAL01_2x32_RAND normal01_2x32_24_rand
@@ -11,9 +11,9 @@
 #define NORMAL01_4x32      normal01_4x32_24
 #define NORMAL01_4x32_INIT normal01_4x32_24_init
 #define NORMAL01_4x32_RAND normal01_4x32_24_rand
-#endif // VSMC_STATE_TYPE_IS_FLOAT
+#endif // VSMC_FP_TYPE_IS_FLOAT
 
-#if VSMC_STATE_TYPE_IS_DOUBLE
+#if VSMC_FP_TYPE_IS_DOUBLE
 #define NORMAL01_2x32      normal01_2x32_53
 #define NORMAL01_2x32_INIT normal01_2x32_53_init
 #define NORMAL01_2x32_RAND normal01_2x32_53_rand
@@ -29,7 +29,7 @@
 #define NORMAL01_4x64      normal01_4x64_53
 #define NORMAL01_4x64_INIT normal01_4x64_53_init
 #define NORMAL01_4x64_RAND normal01_4x64_53_rand
-#endif // VSMC_STATE_TYPE_IS_DOUBLE
+#endif // VSMC_FP_TYPE_IS_DOUBLE
 
 #define M_2PI_24 6.2831853071795865F
 #define M_2PI_53 6.2831853071795865

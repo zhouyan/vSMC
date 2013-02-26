@@ -8,16 +8,17 @@
 #endif
 
 __kernel
-void copy (__global state_type *state, __global size_type *copy_from)
+void copy (__global char *state, __global size_type *copy_from)
 {
     size_type to = get_global_id(0);
 
     if (to >= Size)
         return;
 
-    __global state_type *state_from = state + copy_from[to] * Dim;
-    __global state_type *state_to   = state + to * Dim;
-    for (uint i = 0; i != Dim; ++i)
+    size_type from = copy_from[to];
+    __global char *state_to = state + StateSize * to;
+    __global char *state_from = state + StateSize * from;
+    for (size_type i = 0; i != StateSize; ++i)
         state_to[i] = state_from[i];
 }
 
