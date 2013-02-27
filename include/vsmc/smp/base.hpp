@@ -14,13 +14,7 @@ template <std::size_t Pos> struct Position {};
 template <typename T, typename Derived>
 class InitializeBase
 {
-    protected :
-
-    InitializeBase () {}
-    InitializeBase (const InitializeBase<T, Derived> &) {}
-    InitializeBase<T, Derived> &operator=
-        (const InitializeBase<T, Derived> &) {return *this;}
-    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~InitializeBase () {}
+    public :
 
     std::size_t initialize_state (SingleParticle<T> sp)
     {return initialize_state_dispatch(sp, &Derived::initialize_state);}
@@ -33,6 +27,14 @@ class InitializeBase
 
     void post_processor (Particle<T> &particle)
     {post_processor_dispatch(particle, &Derived::post_processor);}
+
+    protected :
+
+    InitializeBase () {}
+    InitializeBase (const InitializeBase<T, Derived> &) {}
+    InitializeBase<T, Derived> &operator=
+        (const InitializeBase<T, Derived> &) {return *this;}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~InitializeBase () {}
 
     private :
 
@@ -143,6 +145,13 @@ class InitializeBase
 template <typename T>
 class InitializeBase<T, Virtual>
 {
+    public :
+
+    virtual std::size_t initialize_state (SingleParticle<T>) = 0;
+    virtual void initialize_param (Particle<T> &, void *) {}
+    virtual void pre_processor (Particle<T> &) {}
+    virtual void post_processor (Particle<T> &) {}
+
     protected :
 
     InitializeBase () {}
@@ -150,10 +159,6 @@ class InitializeBase<T, Virtual>
     InitializeBase<T, Virtual> &operator=
         (const InitializeBase<T, Virtual> &) {return *this;}
     virtual ~InitializeBase () {}
-    virtual std::size_t initialize_state (SingleParticle<T>) = 0;
-    virtual void initialize_param (Particle<T> &, void *) {}
-    virtual void pre_processor (Particle<T> &) {}
-    virtual void post_processor (Particle<T> &) {}
 }; // class InitializeBase<T, Virtual>
 
 /// \brief Move base dispatch class
@@ -161,13 +166,7 @@ class InitializeBase<T, Virtual>
 template <typename T, typename Derived>
 class MoveBase
 {
-    protected :
-
-    MoveBase () {}
-    MoveBase (const MoveBase<T, Derived> &) {}
-    MoveBase<T, Derived> &operator=
-        (const MoveBase<T, Derived> &) {return *this;}
-    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MoveBase () {}
+    public :
 
     std::size_t move_state (std::size_t iter, SingleParticle<T> sp)
     {return move_state_dispatch(iter, sp, &Derived::move_state);}
@@ -177,6 +176,14 @@ class MoveBase
 
     void post_processor (std::size_t iter, Particle<T> &particle)
     {post_processor_dispatch(iter, particle, &Derived::post_processor);}
+
+    protected :
+
+    MoveBase () {}
+    MoveBase (const MoveBase<T, Derived> &) {}
+    MoveBase<T, Derived> &operator=
+        (const MoveBase<T, Derived> &) {return *this;}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MoveBase () {}
 
     private :
 
@@ -264,6 +271,12 @@ class MoveBase
 template <typename T>
 class MoveBase<T, Virtual>
 {
+    public :
+
+    virtual std::size_t move_state (std::size_t, SingleParticle<T>) = 0;
+    virtual void pre_processor (std::size_t, Particle<T> &) {}
+    virtual void post_processor (std::size_t, Particle<T> &) {}
+
     protected :
 
     MoveBase () {}
@@ -271,9 +284,6 @@ class MoveBase<T, Virtual>
     MoveBase<T, Virtual> &operator=
         (const MoveBase<T, Virtual> &) {return *this;}
     virtual ~MoveBase () {}
-    virtual std::size_t move_state (std::size_t, SingleParticle<T>) = 0;
-    virtual void pre_processor (std::size_t, Particle<T> &) {}
-    virtual void post_processor (std::size_t, Particle<T> &) {}
 }; // class MoveBase<T, Virtual>
 
 /// \brief Monitor evalution base dispatch class
@@ -281,13 +291,7 @@ class MoveBase<T, Virtual>
 template <typename T, typename Derived>
 class MonitorEvalBase
 {
-    protected :
-
-    MonitorEvalBase () {}
-    MonitorEvalBase (const MonitorEvalBase<T, Derived> &) {}
-    MonitorEvalBase<T, Derived> &operator=
-        (const MonitorEvalBase<T, Derived> &) {return *this;}
-    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MonitorEvalBase () {}
+    public :
 
     void monitor_state (std::size_t iter, std::size_t dim,
             ConstSingleParticle<T> csp, double *res)
@@ -298,6 +302,14 @@ class MonitorEvalBase
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
     {post_processor_dispatch(iter, particle, &Derived::post_processor);}
+
+    protected :
+
+    MonitorEvalBase () {}
+    MonitorEvalBase (const MonitorEvalBase<T, Derived> &) {}
+    MonitorEvalBase<T, Derived> &operator=
+        (const MonitorEvalBase<T, Derived> &) {return *this;}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~MonitorEvalBase () {}
 
     private :
 
@@ -396,6 +408,13 @@ class MonitorEvalBase
 template <typename T>
 class MonitorEvalBase<T, Virtual>
 {
+    public :
+
+    virtual void monitor_state (std::size_t, std::size_t,
+            ConstSingleParticle<T>, double *) = 0;
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
+
     protected :
 
     MonitorEvalBase () {}
@@ -403,10 +422,6 @@ class MonitorEvalBase<T, Virtual>
     MonitorEvalBase<T, Virtual> &operator=
         (const MonitorEvalBase<T, Virtual> &) {return *this;}
     virtual ~MonitorEvalBase () {}
-    virtual void monitor_state (std::size_t, std::size_t,
-            ConstSingleParticle<T>, double *) = 0;
-    virtual void pre_processor (std::size_t, const Particle<T> &) {}
-    virtual void post_processor (std::size_t, const Particle<T> &) {}
 }; // class MonitorEvalBase<T, Virtual>
 
 /// \brief Path evalution base dispatch class
@@ -414,13 +429,7 @@ class MonitorEvalBase<T, Virtual>
 template <typename T, typename Derived>
 class PathEvalBase
 {
-    protected :
-
-    PathEvalBase () {}
-    PathEvalBase (const PathEvalBase<T, Derived> &) {}
-    PathEvalBase<T, Derived> &operator=
-        (const PathEvalBase<T, Derived> &) {return *this;}
-    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~PathEvalBase () {}
+    public :
 
     double path_state (std::size_t iter, ConstSingleParticle<T> csp)
     {return path_state_dispatch(iter, csp, &Derived::path_state);}
@@ -433,6 +442,14 @@ class PathEvalBase
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
     {post_processor_dispatch(iter, particle, &Derived::post_processor);}
+
+    protected :
+
+    PathEvalBase () {}
+    PathEvalBase (const PathEvalBase<T, Derived> &) {}
+    PathEvalBase<T, Derived> &operator=
+        (const PathEvalBase<T, Derived> &) {return *this;}
+    VSMC_SMP_BASE_DESTRUCTOR_PREFIX ~PathEvalBase () {}
 
     private :
 
@@ -547,6 +564,13 @@ class PathEvalBase
 template <typename T>
 class PathEvalBase<T, Virtual>
 {
+    public :
+
+    virtual double path_state (std::size_t, ConstSingleParticle<T>) = 0;
+    virtual double path_grid (std::size_t, const Particle<T> &) = 0;
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
+
     protected :
 
     PathEvalBase () {}
@@ -554,10 +578,6 @@ class PathEvalBase<T, Virtual>
     PathEvalBase<T, Virtual> &operator=
         (const PathEvalBase<T, Virtual> &) {return *this;}
     virtual ~PathEvalBase () {}
-    virtual double path_state (std::size_t, ConstSingleParticle<T>) = 0;
-    virtual double path_grid (std::size_t, const Particle<T> &) = 0;
-    virtual void pre_processor (std::size_t, const Particle<T> &) {}
-    virtual void post_processor (std::size_t, const Particle<T> &) {}
 }; // class PathEval<T, Virtual>
 
 } // namespace vsmc

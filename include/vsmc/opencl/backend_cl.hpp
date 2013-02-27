@@ -333,6 +333,11 @@ class InitializeCL : public CLConfigure
         return acc;
     }
 
+    virtual void initialize_param (Particle<T> &, void *) {}
+    virtual void initialize_state (std::string &) = 0;
+    virtual void pre_processor (Particle<T> &) {}
+    virtual void post_processor (Particle<T> &) {}
+
     protected :
 
     InitializeCL () : build_id_(-1) {}
@@ -382,11 +387,6 @@ class InitializeCL : public CLConfigure
         kernel_.setArg(0, particle.value().state_buffer());
         kernel_.setArg(1, accept_buffer_);
     }
-
-    virtual void initialize_param (Particle<T> &, void *) {}
-    virtual void initialize_state (std::string &) = 0;
-    virtual void pre_processor (Particle<T> &) {}
-    virtual void post_processor (Particle<T> &) {}
 
     private :
 
@@ -440,6 +440,10 @@ class MoveCL : public CLConfigure
         return acc;
     }
 
+    virtual void move_state (std::size_t, std::string &) = 0;
+    virtual void pre_processor (std::size_t, Particle<T> &) {}
+    virtual void post_processor (std::size_t, Particle<T> &) {}
+
     protected :
 
     MoveCL () : build_id_(-1) {}
@@ -491,10 +495,6 @@ class MoveCL : public CLConfigure
         kernel_.setArg(2, accept_buffer_);
     }
 
-    virtual void move_state (std::size_t, std::string &) = 0;
-    virtual void pre_processor (std::size_t, Particle<T> &) {}
-    virtual void post_processor (std::size_t, Particle<T> &) {}
-
     private :
 
     int build_id_;
@@ -543,6 +543,10 @@ class MonitorEvalCL : public CLConfigure
                     buffer_, particle.value().size() * dim, res);
         post_processor(iter, particle);
     }
+
+    virtual void monitor_state (std::size_t, std::string &) = 0;
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
 
     protected :
 
@@ -600,10 +604,6 @@ class MonitorEvalCL : public CLConfigure
         kernel_.setArg(3, buffer_);
     }
 
-    virtual void monitor_state (std::size_t, std::string &) = 0;
-    virtual void pre_processor (std::size_t, const Particle<T> &) {}
-    virtual void post_processor (std::size_t, const Particle<T> &) {}
-
     private :
 
     int build_id_;
@@ -653,6 +653,11 @@ class PathEvalCL : public CLConfigure
 
         return this->path_grid(iter, particle);
     }
+
+    virtual void path_state (std::size_t, std::string &) = 0;
+    virtual double path_grid (std::size_t, const Particle<T> &) = 0;
+    virtual void pre_processor (std::size_t, const Particle<T> &) {}
+    virtual void post_processor (std::size_t, const Particle<T> &) {}
 
     protected :
 
@@ -707,11 +712,6 @@ class PathEvalCL : public CLConfigure
         kernel_.setArg(1, particle.value().state_buffer());
         kernel_.setArg(2, buffer_);
     }
-
-    virtual void path_state (std::size_t, std::string &) = 0;
-    virtual double path_grid (std::size_t, const Particle<T> &) = 0;
-    virtual void pre_processor (std::size_t, const Particle<T> &) {}
-    virtual void post_processor (std::size_t, const Particle<T> &) {}
 
     private :
 
