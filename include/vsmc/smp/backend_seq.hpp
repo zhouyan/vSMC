@@ -41,7 +41,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(SEQ, Initialize)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(SEQ, Initialize)
 }; // class InitializeSEQ
 
 /// \brief Sampler<T>::move_type subtype
@@ -67,7 +67,7 @@ class MoveSEQ : public MoveBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(SEQ, Move)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(SEQ, Move)
 }; // class MoveSEQ
 
 /// \brief Monitor<T>::eval_type subtype
@@ -93,7 +93,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(SEQ, MonitorEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(SEQ, MonitorEval)
 }; // class MonitorEvalSEQ
 
 /// \brief Path<T>::eval_type subtype
@@ -121,7 +121,7 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(SEQ, PathEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(SEQ, PathEval)
 }; // class PathEvalSEQ
 
 } // namespace vsmc

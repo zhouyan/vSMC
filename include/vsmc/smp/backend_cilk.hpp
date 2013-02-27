@@ -52,7 +52,7 @@ class InitializeCILK : public InitializeBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(CILK, Initialize)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(CILK, Initialize)
 }; // class InitializeCILK
 
 /// \brief Sampler<T>::move_type subtype using Intel Cilk Plus
@@ -78,7 +78,7 @@ class MoveCILK : public MoveBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(CILK, Move)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(CILK, Move)
 }; // class MoveCILK
 
 /// \brief Monitor<T>::eval_type subtype using Intel Cilk Plus
@@ -104,7 +104,7 @@ class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(CILK, MonitorEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(CILK, MonitorEval)
 }; // class MonitorEvalCILK
 
 /// \brief Path<T>::eval_type subtype using Intel Cilk Plus
@@ -131,7 +131,7 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(CILK, PathEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(CILK, PathEval)
 }; // class PathEvalCILK
 
 } // namespace vsmc

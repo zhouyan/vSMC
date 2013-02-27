@@ -72,7 +72,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(STD, Initialize)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(STD, Initialize)
 
     private :
 
@@ -126,7 +126,7 @@ class MoveSTD : public MoveBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(STD, Move)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(STD, Move)
 
     private :
 
@@ -180,7 +180,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(STD, MonitorEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(STD, MonitorEval)
 
     private :
 
@@ -239,7 +239,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(STD, PathEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(STD, PathEval)
 
     private :
 

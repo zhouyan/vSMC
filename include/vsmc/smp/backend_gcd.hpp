@@ -47,7 +47,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(GCD, Initialize)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(GCD, Initialize)
 
     private :
 
@@ -97,7 +97,7 @@ class MoveGCD : public MoveBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(GCD, Move)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(GCD, Move)
 
     private :
 
@@ -142,7 +142,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(GCD, MonitorEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(GCD, MonitorEval)
 
     private :
 
@@ -190,7 +190,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(GCD, PathEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(GCD, PathEval)
 
     private :
 

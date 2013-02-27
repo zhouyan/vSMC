@@ -59,7 +59,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(OMP, Initialize)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(OMP, Initialize)
 }; // class InitializeOMP
 
 /// \brief Sampler<T>::move_type subtype using OpenMP
@@ -86,7 +86,7 @@ class MoveOMP : public MoveBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(OMP, Move)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(OMP, Move)
 }; // class MoveOMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
@@ -112,7 +112,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(OMP, MonitorEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(OMP, MonitorEval)
 }; // class MonitorEvalOMP
 
 /// \brief Path<T>::eval_type subtype using OpenMP
@@ -140,7 +140,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 
     protected :
 
-    VSMC_DEFINE_SMP_IMPL_PROTECTED(OMP, PathEval)
+    VSMC_DEFINE_SMP_IMPL_COPY_BASE(OMP, PathEval)
 }; // class PathEvalOMP
 
 } // namespace vsmc

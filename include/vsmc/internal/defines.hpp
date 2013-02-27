@@ -12,18 +12,6 @@
 #define VSMC_SMP_BASE_DESTRUCTOR_PREFIX
 #endif
 
-#define VSMC_DEFINE_SMP_IMPL_PROTECTED(Impl, Name)                            \
-Name##Impl () {}                                                              \
-Name##Impl (const Name##Impl<T, Derived> &other) :                            \
-        Name##Base<T, Derived>(other) {}                                      \
-Name##Impl<T, Derived> &operator=                                             \
-        (const Name##Impl<T, Derived> &other)                                 \
-{                                                                             \
-    if (this != &other) Name##Base<T, Derived>::operator=(other);             \
-    return *this;                                                             \
-}                                                                             \
-~Name##Impl () {}
-
 namespace vsmc {
 
 enum {Dynamic};

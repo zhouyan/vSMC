@@ -3,6 +3,18 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_DEFINE_SMP_IMPL_COPY_BASE(Impl, Name)                            \
+Name##Impl () {}                                                              \
+Name##Impl (const Name##Impl<T, Derived> &other) :                            \
+        Name##Base<T, Derived>(other) {}                                      \
+Name##Impl<T, Derived> &operator=                                             \
+        (const Name##Impl<T, Derived> &other)                                 \
+{                                                                             \
+    if (this != &other) Name##Base<T, Derived>::operator=(other);             \
+    return *this;                                                             \
+}                                                                             \
+~Name##Impl () {}
+
 namespace vsmc {
 
 /// \brief Position of parameter in the state vector
