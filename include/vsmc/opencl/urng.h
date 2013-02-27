@@ -13,6 +13,9 @@
 #endif
 #endif
 
+#include <Random123/threefry.h>
+#include <Random123/u01.h>
+
 #ifndef CBRNG2x32
 #define CBRNG2x32 threefry2x32
 #endif
@@ -47,10 +50,6 @@
 #define U01_CLOSED_OPEN_64   u01_closed_closed_64_53
 #define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53
 #endif // VSMC_FP_TYPE_IS_DOUBLE
-
-#include <Random123/philox.h>
-#include <Random123/threefry.h>
-#include <Random123/u01.h>
 
 #define VSMC_DEFINE_CBURNG(N, W) \
     typedef struct {                                                         \
