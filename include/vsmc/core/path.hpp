@@ -236,11 +236,14 @@ class PathGeometry : public Path<T>
     typedef cxx11::function<double (
             std::size_t, const Particle<T> &, double *)> eval_type;
 
-    PathGeometry (const eval_type &eval) : Path<T>(eval) {}
+    PathGeometry (const eval_type &eval,
+            double abs_err = 1e-6, double rel_err = 1e-6) :
+        Path<T>(eval), abs_err_(abs_err), rel_err_(rel_err) {}
 
     PathGeometry (const PathGeometry<T, NumericImpl> &other) :
         Path<T>(other), weight_history_(other.weight_history_),
-        integrand_history_(other.integrand_history_) {}
+        integrand_history_(other.integrand_history_),
+        abs_err_(other.abs_err_), rel_err_(other.rel_err_) {}
 
     PathGeometry<T, NumericImpl> &operator= (
             const PathGeometry<T, NumericImpl> &other)
@@ -249,6 +252,8 @@ class PathGeometry : public Path<T>
             Path<T>::operator=(other);
             weight_history_    = other.weight_history_;
             integrand_history_ = other.integrand_history_;
+            abs_err_           = other.abs_err_;
+            rel_err_           = other.rel_err_;
         }
 
         return *this;
@@ -270,7 +275,8 @@ class PathGeometry : public Path<T>
             return numeric_int(static_cast<typename NumericNewtonCotes<
                     Degree, NumericImpl>::size_type>(base_grid.size()),
                     &base_grid[0],
-                    f_alpha_(*this, weight_history_, integrand_history_));
+                    f_alpha_(*this, weight_history_, integrand_history_,
+                        abs_err_, rel_err_));
         }
 
         std::vector<double> super_grid(insert_points * this->iter_size() -
@@ -289,7 +295,8 @@ class PathGeometry : public Path<T>
         return numeric_int(static_cast<typename NumericNewtonCotes<
                 Degree, NumericImpl>::size_type>(super_grid.size()),
                 &super_grid[0],
-                f_alpha_(*this, weight_history_, integrand_history_));
+                f_alpha_(*this, weight_history_, integrand_history_,
+                    abs_err_, rel_err_));
     }
 
     void clear ()
@@ -319,6 +326,8 @@ class PathGeometry : public Path<T>
 
     std::vector<std::vector<double> > weight_history_;
     std::vector<std::vector<double> > integrand_history_;
+    double abs_err_;
+    double rel_err_;
 
     class f_alpha_
     {
@@ -326,13 +335,16 @@ class PathGeometry : public Path<T>
 
         f_alpha_(const PathGeometry<T, NumericImpl> &path,
                 const std::vector<std::vector<double> > &weight_history,
-                const std::vector<std::vector<double> > &integrand_history) :
+                const std::vector<std::vector<double> > &integrand_history,
+                double abs_err, double rel_err) :
             path_(path), weight_history_(weight_history),
-            integrand_history_(integrand_history) {}
+            integrand_history_(integrand_history),
+            abs_err_(abs_err), rel_err_(rel_err) {}
 
         f_alpha_ (const f_alpha_ &other) :
             path_(other.path_), weight_history_(other.weight_history_),
-            integrand_history_(other.integrand_history_) {}
+            integrand_history_(other.integrand_history_),
+            abs_err_(other.abs_err_), rel_err_(other.rel_err_) {}
 
         double operator() (double alpha)
         {
@@ -345,7 +357,9 @@ class PathGeometry : public Path<T>
             while (iter != path_.iter_size() && path_.grid(iter) < alpha)
                 ++iter;
 
-            const double tol = alpha > 0 ? 1e-6 * alpha : 1e-10;
+            double tol = alpha * rel_err_;
+            tol = tol < abs_err_ ? tol : abs_err_;
+            tol = tol > 0 ? tol : abs_err_;
 
             if (iter != path_.iter_size() && path_.grid(iter) - alpha < tol)
                 return path_.integrand(iter);
@@ -391,6 +405,8 @@ class PathGeometry : public Path<T>
         const std::vector<std::vector<double> > &weight_history_;
         const std::vector<std::vector<double> > &integrand_history_;
         std::vector<double> weight_;
+        double abs_err_;
+        double rel_err_;
     }; // class f_alpha_
 }; // class PathGeometry
 
