@@ -31,11 +31,11 @@ void set_cl_fp_type<cl_double>(std::stringstream &ss)
 
 /// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
 /// \ingroup OpenCL
-class CLConfigure
+class ConfigureCL
 {
     public :
 
-    CLConfigure () : local_size_(0) {}
+    ConfigureCL () : local_size_(0) {}
 
     std::size_t local_size () const {return local_size_;}
 
@@ -61,7 +61,7 @@ class CLConfigure
     private :
 
     std::size_t local_size_;
-}; // class CLConfigure
+}; // class ConfigureCL
 
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
@@ -273,9 +273,9 @@ class StateCL
                 size_, configure_copy_.local_size());
     }
 
-    CLConfigure &configure_copy () {return configure_copy_;}
+    ConfigureCL &configure_copy () {return configure_copy_;}
 
-    const CLConfigure &configure_copy () const {return configure_copy_;}
+    const ConfigureCL &configure_copy () const {return configure_copy_;}
 
     private :
 
@@ -284,7 +284,7 @@ class StateCL
 
     cl::Program program_;
     cl::Kernel kernel_copy_;
-    CLConfigure configure_copy_;
+    ConfigureCL configure_copy_;
 
     bool build_;
     int build_id_;
@@ -386,9 +386,9 @@ class InitializeCL
 
     virtual ~InitializeCL () {}
 
-    CLConfigure &configure () {return configure_;}
+    ConfigureCL &configure () {return configure_;}
 
-    const CLConfigure &configure () const {return configure_;}
+    const ConfigureCL &configure () const {return configure_;}
 
     cl::Kernel &kernel () {return kernel_;}
 
@@ -414,7 +414,7 @@ class InitializeCL
 
     private :
 
-    CLConfigure configure_;
+    ConfigureCL configure_;
     int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
@@ -492,9 +492,9 @@ class MoveCL
 
     virtual ~MoveCL () {}
 
-    CLConfigure &configure () {return configure_;}
+    ConfigureCL &configure () {return configure_;}
 
-    const CLConfigure &configure () const {return configure_;}
+    const ConfigureCL &configure () const {return configure_;}
 
     cl::Kernel &kernel () {return kernel_;}
 
@@ -521,7 +521,7 @@ class MoveCL
 
     private :
 
-    CLConfigure configure_;
+    ConfigureCL configure_;
     int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
@@ -596,9 +596,9 @@ class MonitorEvalCL
 
     virtual ~MonitorEvalCL () {}
 
-    CLConfigure &configure () {return configure_;}
+    ConfigureCL &configure () {return configure_;}
 
-    const CLConfigure &configure () const {return configure_;}
+    const ConfigureCL &configure () const {return configure_;}
 
     cl::Kernel &kernel () {return kernel_;}
 
@@ -627,7 +627,7 @@ class MonitorEvalCL
 
     private :
 
-    CLConfigure configure_;
+    ConfigureCL configure_;
     int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
@@ -705,9 +705,9 @@ class PathEvalCL
 
     virtual ~PathEvalCL () {}
 
-    CLConfigure &configure () {return configure_;}
+    ConfigureCL &configure () {return configure_;}
 
-    const CLConfigure &configure () const {return configure_;}
+    const ConfigureCL &configure () const {return configure_;}
 
     cl::Kernel &kernel () {return kernel_;}
 
@@ -734,7 +734,7 @@ class PathEvalCL
 
     private :
 
-    CLConfigure configure_;
+    ConfigureCL configure_;
     int build_id_;
     cl::Kernel kernel_;
     std::string kernel_name_;
