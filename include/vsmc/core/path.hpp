@@ -275,7 +275,8 @@ class PathGeometry : public Path<T>
             return numeric_int(static_cast<typename NumericNewtonCotes<
                     Degree, NumericImpl>::size_type>(base_grid.size()),
                     &base_grid[0],
-                    f_alpha_(*this, weight_history_, integrand_history_,
+                    f_alpha_(weight_size_, *this,
+                        weight_history_, integrand_history_,
                         abs_err_, rel_err_));
         }
 
@@ -295,8 +296,8 @@ class PathGeometry : public Path<T>
         return numeric_int(static_cast<typename NumericNewtonCotes<
                 Degree, NumericImpl>::size_type>(super_grid.size()),
                 &super_grid[0],
-                f_alpha_(*this, weight_history_, integrand_history_,
-                    abs_err_, rel_err_));
+                f_alpha_(weight_size_, *this,
+                    weight_history_, integrand_history_, abs_err_, rel_err_));
     }
 
     void clear ()
@@ -310,6 +311,7 @@ class PathGeometry : public Path<T>
 
     double *malloc_weight (std::size_t N)
     {
+        weight_size_ = static_cast<weight_size_type>(N);
         weight_history_.push_back(std::vector<double>(N));
 
         return &weight_history_.back()[0];
@@ -324,26 +326,31 @@ class PathGeometry : public Path<T>
 
     private :
 
+    typedef typename traits::SizeTypeTrait<
+        typename traits::WeightSetTypeTrait<T>::type>::type weight_size_type;
+
     std::vector<std::vector<double> > weight_history_;
     std::vector<std::vector<double> > integrand_history_;
     double abs_err_;
     double rel_err_;
+    weight_size_type weight_size_;
 
     class f_alpha_
     {
         public :
 
-        f_alpha_(const PathGeometry<T, NumericImpl> &path,
+        f_alpha_(weight_size_type N, const PathGeometry<T, NumericImpl> &path,
                 const std::vector<std::vector<double> > &weight_history,
                 const std::vector<std::vector<double> > &integrand_history,
                 double abs_err, double rel_err) :
             path_(path), weight_history_(weight_history),
-            integrand_history_(integrand_history),
+            integrand_history_(integrand_history), weight_set_(N), weight_(N),
             abs_err_(abs_err), rel_err_(rel_err) {}
 
         f_alpha_ (const f_alpha_ &other) :
             path_(other.path_), weight_history_(other.weight_history_),
             integrand_history_(other.integrand_history_),
+            weight_set_(other.weight_set_), weight_(other.weight_),
             abs_err_(other.abs_err_), rel_err_(other.rel_err_) {}
 
         double operator() (double alpha)
@@ -372,8 +379,8 @@ class PathGeometry : public Path<T>
                 return path_.integrand(iter);
 
             double alpha_inc = alpha - path_.grid(iter);
-            std::size_t size = weight_history_[iter].size();
-            weight_.resize(size);
+            std::size_t size = weight_.size();
+
             for (std::size_t i = 0; i != size; ++i)
                 weight_[i] = alpha_inc * integrand_history_[iter][i];
 #if VSMC_USE_MKL
@@ -383,13 +390,9 @@ class PathGeometry : public Path<T>
                 weight_[i] = exp(weight_[i]);
 #endif
             for (std::size_t i = 0; i != size; ++i)
-                weight_[i] *= weight_history_[iter][i];
-            double coeff = 0;
-            for (std::size_t i = 0; i != size; ++i)
-                coeff += weight_[i];
-            coeff = 1 / coeff;
-            for (std::size_t i = 0; i != size; ++i)
-                weight_[i] *= coeff;
+                weight_[i] = weight_history_[iter][i] * weight_[i];
+            weight_set_.set_weight(&weight_[0]);
+            weight_set_.read_weight(&weight_[0]);
 
             double res = 0;
             const double *buffer = &integrand_history_[iter][0];
@@ -404,6 +407,7 @@ class PathGeometry : public Path<T>
         const PathGeometry<T, NumericImpl> &path_;
         const std::vector<std::vector<double> > &weight_history_;
         const std::vector<std::vector<double> > &integrand_history_;
+        typename traits::WeightSetTypeTrait<T>::type weight_set_;
         std::vector<double> weight_;
         double abs_err_;
         double rel_err_;
