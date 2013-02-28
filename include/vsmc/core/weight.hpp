@@ -304,6 +304,4 @@ class WeightSet
 
 } // namespace vsmc
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet<T>);
-
 #endif // VSMC_CORE_WEIGHT_HPP
