@@ -158,11 +158,14 @@ class Particle
         size_type N = weight_set_.resample_size();
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
-            weight_.resize(N);
+            copy_from_.resize(N);
             replication_.resize(N);
-            weight_set_.read_resample_weight(&weight_[0]);
-            op(N, resample_rng_, &weight_[0], &replication_[0]);
-            replication2copy_from(N);
+            weight_.resize(N);
+            double *end = weight_set_.read_resample_weight(&weight_[0]);
+            if (end == &weight_[0] + N) {
+                op(N, resample_rng_, &weight_[0], &replication_[0]);
+                replication2copy_from(N);
+            }
             value_.copy(N, &copy_from_[0]);
             weight_set_.set_equal_weight();
         }
@@ -186,8 +189,6 @@ class Particle
 
     void replication2copy_from (size_type N)
     {
-        copy_from_.resize(N);
-
         size_type from = 0;
         size_type time = 0;
         for (size_type to = 0; to != N; ++to) {

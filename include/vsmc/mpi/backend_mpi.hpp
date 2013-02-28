@@ -94,12 +94,15 @@ class WeightSetMPI : public WeightSet<BaseState>
     OutputIter read_resample_weight (OutputIter first) const
     {
         barrier();
-        weight_all_.clear();
-        boost::mpi::all_gather(world_, this->weight_vec(), weight_all_);
-        for (int r = 0; r != world_.size(); ++r) {
-            size_type N = weight_all_[r].size();
-            for (size_type i = 0; i != N; ++i, ++first)
-                *first = weight_all_[r][i];
+        if (world_.rank() == 0) {
+            boost::mpi::gather(world_, this->weight_vec(), weight_all_, 0);
+            for (int r = 0; r != world_.size(); ++r) {
+                size_type N = weight_all_[r].size();
+                for (size_type i = 0; i != N; ++i, ++first)
+                    *first = weight_all_[r][i];
+            }
+        } else {
+            boost::mpi::gather(world_, this->weight_vec(), 0);
         }
         barrier();
 
@@ -110,12 +113,15 @@ class WeightSetMPI : public WeightSet<BaseState>
     RandomIter read_resample_weight (RandomIter first, int stride) const
     {
         barrier();
-        weight_all_.clear();
-        boost::mpi::all_gather(world_, this->weight_vec(), weight_all_);
-        for (int r = 0; r != world_.size(); ++r) {
-            size_type N = weight_all_[r].size();
-            for (size_type i = 0; i != N; ++i, first += stride)
-                *first = weight_all_[r][i];
+        if (world_.rank() == 0) {
+            boost::mpi::gather(world_, this->weight_vec(), weight_all_, 0);
+            for (int r = 0; r != world_.size(); ++r) {
+                size_type N = weight_all_[r].size();
+                for (size_type i = 0; i != N; ++i, first += stride)
+                    *first = weight_all_[r][i];
+            }
+        } else {
+            boost::mpi::gather(world_, this->weight_vec(), 0);
         }
         barrier();
 
@@ -285,7 +291,6 @@ class StateMPI : public BaseState
         VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH_MPI;
 
         barrier();
-
         copy_from_.resize(N);
         if (world_.rank() == 0) {
             for (size_type i = 0; i != N; ++i)
