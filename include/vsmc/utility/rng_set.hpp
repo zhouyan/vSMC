@@ -4,6 +4,19 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/seed.hpp>
 
+#if VSMC_USE_RANDOM123
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4521)
+#endif // _MSC_VER
+#define R123_USE_U01_DOUBLE 1
+#include <Random123/threefry.h>
+#include <Random123/conventional/Engine.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // _MSC_VER
+#endif // VSMC_USE_RANDOM123
+
 namespace vsmc {
 
 /// \brief Scalar RNG set
@@ -53,5 +66,16 @@ class RngSet<RngType, VectorRng>
 }; // class RngSet
 
 } // namespace vsmc
+
+#if VSMC_USE_RANDOM123
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    RngSet<r123::Engine<r123::Threefry4x64>, VectorRng>
+#else
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    RngSet<vsmc::cxx11::mt19937, VectorRng>
+#endif
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
+        VSMC_DEFAULT_RNG_SET_TYPE)
 
 #endif // VSMC_UTILITY_RNG_SET_HPP
