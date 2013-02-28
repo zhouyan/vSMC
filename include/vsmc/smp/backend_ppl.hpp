@@ -59,7 +59,7 @@ class InitializePPL : public InitializeBase<T, Derived>
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         ppl::combinable<std::size_t> accept(accept_init_);
@@ -115,7 +115,7 @@ class MovePPL : public MoveBase<T, Derived>
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         ppl::combinable<std::size_t> accept(accept_init_);
         ppl::parallel_for(static_cast<size_type>(0), N,
@@ -172,7 +172,7 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
             const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         ppl::parallel_for(static_cast<size_type>(0), N,
                 work_(this, iter, dim, &particle, res));
@@ -225,7 +225,7 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
             double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         ppl::parallel_for(static_cast<size_type>(0), N,
                 work_(this, iter, &particle, res));

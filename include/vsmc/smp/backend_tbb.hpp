@@ -60,7 +60,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         work_ work(this, &particle);
@@ -128,7 +128,7 @@ class MoveTBB : public MoveBase<T, Derived>
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_ work(this, iter, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), work);
@@ -198,7 +198,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
             const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 work_(this, iter, dim, &particle, res));
@@ -253,7 +253,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
             double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 work_(this, iter, &particle, res));
