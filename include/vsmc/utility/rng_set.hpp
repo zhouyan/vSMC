@@ -17,6 +17,17 @@
 #endif // _MSC_VER
 #endif // VSMC_USE_RANDOM123
 
+#if VSMC_USE_RANDOM123
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    RngSet<r123::Engine<r123::Threefry4x64>, VectorRng>
+#else
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    RngSet<vsmc::cxx11::mt19937, VectorRng>
+#endif
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
+        VSMC_DEFAULT_RNG_SET_TYPE)
+
 namespace vsmc {
 
 /// \brief Scalar RNG set
@@ -66,16 +77,5 @@ class RngSet<RngType, VectorRng>
 }; // class RngSet
 
 } // namespace vsmc
-
-#if VSMC_USE_RANDOM123
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    RngSet<r123::Engine<r123::Threefry4x64>, VectorRng>
-#else
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    RngSet<vsmc::cxx11::mt19937, VectorRng>
-#endif
-
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
-        VSMC_DEFAULT_RNG_SET_TYPE)
 
 #endif // VSMC_UTILITY_RNG_SET_HPP
