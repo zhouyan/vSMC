@@ -8,9 +8,6 @@
 #include <vsmc/utility/rng_set.hpp>
 #include <vsmc/utility/seed.hpp>
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
-        vsmc::cxx11::mt19937)
-
 namespace vsmc {
 
 /// \brief Particle class representing the whole particle set
