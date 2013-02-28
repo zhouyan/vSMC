@@ -113,6 +113,16 @@ template <typename T> struct remove_pointer<T *const volatile>
 template <typename T> struct add_pointer
 {typedef typename remove_reference<T>::type * type;};
 
+// is_floating_point
+namespace is_floating_point_impl {
+template <typename T> struct helper :              public false_type {};
+template <>           struct helper<float> :       public true_type {};
+template <>           struct helper<double> :      public true_type {};
+template <>           struct helper<long double> : public true_type {};
+}
+template <typename T> struct is_floating_point :
+    public is_floating_point_impl::helper<typename remove_cv<T>::type> {};
+
 } } // namespace vsmc::cxx11
 
 #endif // VSMC_INTERNAL_CXX11_TYPE_TRAITS_HPP
