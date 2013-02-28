@@ -60,7 +60,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         std::size_t accept = parallel_accumulate(BlockedRange<size_type>(0, N),
@@ -115,7 +115,7 @@ class MoveSTD : public MoveBase<T, Derived>
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         std::size_t accept = parallel_accumulate(BlockedRange<size_type>(0, N),
                 work_(this, iter, &particle), static_cast<std::size_t>(0));
@@ -171,7 +171,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
             const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         parallel_for(BlockedRange<size_type>(0, N),
                 work_(this, iter, dim, &particle, res));
@@ -228,7 +228,7 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
             double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         parallel_for(BlockedRange<size_type>(0, N),
                 work_(this, iter, &particle, res));

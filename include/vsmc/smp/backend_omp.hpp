@@ -18,10 +18,7 @@ class StateOMP : public BaseState
 
     explicit StateOMP (size_type N) : BaseState(N) {}
 
-    size_type size () const
-    {
-        return static_cast<size_type>(BaseState::size());
-    }
+    size_type size () const {return static_cast<size_type>(BaseState::size());}
 
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
@@ -45,7 +42,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         std::size_t accept = 0;
@@ -73,7 +70,7 @@ class MoveOMP : public MoveBase<T, Derived>
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
 #pragma omp parallel for reduction(+ : accept) default(shared)
@@ -101,7 +98,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i)
@@ -127,7 +124,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i)

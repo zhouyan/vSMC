@@ -8,7 +8,7 @@
 #endif
 
 __kernel
-void copy (__global char *state, __global size_type *copy_from)
+void copy (__global copy_state_struct *state, __global size_type *copy_from)
 {
     size_type to = get_global_id(0);
 
@@ -16,10 +16,7 @@ void copy (__global char *state, __global size_type *copy_from)
         return;
 
     size_type from = copy_from[to];
-    __global char *state_to = state + StateSize * to;
-    __global char *state_from = state + StateSize * from;
-    for (size_type i = 0; i != StateSize; ++i)
-        state_to[i] = state_from[i];
+    state[to] = state[from];
 }
 
 #endif // VSMC_OPENCL_DEVICE_H

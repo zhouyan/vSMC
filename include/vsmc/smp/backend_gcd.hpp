@@ -29,7 +29,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         accept_.resize(N);
@@ -80,7 +80,7 @@ class MoveGCD : public MoveBase<T, Derived>
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         accept_.resize(N);
         work_param_ wp = {this, &particle, &accept_[0], iter};
@@ -132,7 +132,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
             const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter, dim};
         dispatch_apply_f(N, DispatchQueue::instance().queue(),
@@ -178,7 +178,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
             double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.value().size());
+        const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter};
         dispatch_apply_f(N, DispatchQueue::instance().queue(),
