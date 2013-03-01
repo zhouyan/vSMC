@@ -123,7 +123,7 @@ class WeightSet
     {
         for (size_type i = 0; i != size_; ++i, ++first)
             weight_[i] = *first;
-        weight2log_weight();
+        post_set_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -134,7 +134,7 @@ class WeightSet
     {
         for (size_type i = 0; i != size_; ++i, first += stride)
             weight_[i] = *first;
-        weight2log_weight();
+        post_set_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -145,8 +145,11 @@ class WeightSet
         VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
                 first - wptr, size_, WeightSet::set_weight);
         std::memcpy(wptr, first, sizeof(double) * size_);
-        weight2log_weight();
+        post_set_weight();
     }
+
+    void set_weight (double *first)
+    {set_weight(static_cast<const double *>(first));}
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// multiply the normalized weight with (possible unnormalized) incremental
@@ -156,7 +159,7 @@ class WeightSet
     {
         for (size_type i = 0; i != size_; ++i, ++first)
             weight_[i] *= *first;
-        weight2log_weight();
+        post_set_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -168,7 +171,7 @@ class WeightSet
     {
         for (size_type i = 0; i != size_; ++i, first += stride)
             weight_[i] *= *first;
-        weight2log_weight();
+        post_set_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -179,7 +182,7 @@ class WeightSet
     {
         for (size_type i = 0; i != size_; ++i, ++first)
             log_weight_[i] = *first;
-        log_weight2weight();
+        post_set_log_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -190,7 +193,7 @@ class WeightSet
     {
         for (size_type i = 0; i != size_; ++i, first += stride)
             log_weight_[i] = *first;
-        log_weight2weight();
+        post_set_log_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -202,8 +205,11 @@ class WeightSet
         VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
                 first - lwptr, size_, WeightSet::set_log_weight);
         std::memcpy(lwptr, first, sizeof(double) * size_);
-        log_weight2weight();
+        post_set_log_weight();
     }
+
+    void set_log_weight (double *first)
+    {set_log_weight(static_cast<const double *>(first));}
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// adding to the unnormalized logarithm weights with (possible
@@ -213,7 +219,7 @@ class WeightSet
     {
         for (size_type i = 0; i != size_; ++i, ++first)
             log_weight_[i] += *first;
-        log_weight2weight();
+        post_set_log_weight();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -225,7 +231,7 @@ class WeightSet
     {
         for (size_type i = 0; i != size_; ++i, first += stride)
             log_weight_[i] += *first;
-        log_weight2weight();
+        post_set_log_weight();
     }
 
     /// \brief Get the ESS of the particle collection based on the current
@@ -242,39 +248,24 @@ class WeightSet
 
     const std::vector<double> &log_weight_vec () const {return log_weight_;}
 
-    private :
-
-    size_type size_;
-    double ess_;
-    std::vector<double> weight_;
-    std::vector<double> log_weight_;
-
-    void log_weight2weight ()
+    virtual void log_weight2weight ()
     {
-        using std::exp;
-
-        normalize_log_weight();
 #if VSMC_USE_MKL
         ::vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
 #else
         for (size_type i = 0; i != size_; ++i)
             weight_[i] = exp(log_weight_[i]);
 #endif
-        normalize_weight();
     }
 
-    void weight2log_weight ()
+    virtual void weight2log_weight ()
     {
-        using std::log;
-
-        normalize_weight();
 #if VSMC_USE_MKL
         ::vdLn(static_cast<MKL_INT>(size_), &weight_[0], &log_weight_[0]);
 #else
         for (size_type i = 0; i != size_; ++i)
             log_weight_[i] = log(weight_[i]);
 #endif
-        normalize_log_weight();
     }
 
     virtual void normalize_log_weight ()
@@ -299,6 +290,31 @@ class WeightSet
         for (size_type i = 0; i != size_; ++i)
             ess_ += weight_[i] * weight_[i];
         ess_ = 1 / ess_;
+    }
+
+    private :
+
+    size_type size_;
+    double ess_;
+    std::vector<double> weight_;
+    std::vector<double> log_weight_;
+
+    void post_set_log_weight ()
+    {
+        using std::exp;
+
+        normalize_log_weight();
+        log_weight2weight();
+        normalize_weight();
+    }
+
+    void post_set_weight ()
+    {
+        using std::log;
+
+        normalize_weight();
+        weight2log_weight();
+        normalize_log_weight();
     }
 }; // class WeightSet
 

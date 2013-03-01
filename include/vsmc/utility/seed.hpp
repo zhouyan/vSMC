@@ -25,7 +25,7 @@ class Seed
     void set (result_type seed)
     {seed_ = seed < seed_max_ ? seed : seed - seed_max_;}
 
-    /// \brief Subsequent seed \f$S\f$ will all belong to equalivant class 
+    /// \brief Subsequent seed \f$S\f$ will all belong to equalivant class
     /// \f$S\ \mathrm{mod}\ \mathtt{div} \equiv \mathtt{rem}\f$
     void modulo (result_type div, result_type rem)
     {

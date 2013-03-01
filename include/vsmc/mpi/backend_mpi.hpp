@@ -71,14 +71,16 @@ class MPICommunicator
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
 template <typename BaseState, typename ID>
-class WeightSetMPI : public WeightSet<BaseState>
+class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
 {
+    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
+
     public :
 
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
     explicit WeightSetMPI (size_type N) :
-        WeightSet<BaseState>(N), world_(MPICommunicator<ID>::instance().get(),
+        base(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate), internal_barrier_(true),
         resample_size_(0), ess_(0)
     {
