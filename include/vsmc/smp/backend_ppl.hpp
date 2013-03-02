@@ -6,6 +6,78 @@
 
 namespace vsmc {
 
+/// \brief Particle::weight_set_type subtype using Parallel Pattern Library
+/// \ingroup SMP
+template <typename BaseState>
+class WeightSetPPL : public traits::WeightSetTypeTrait<BaseState>::type
+{
+    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
+
+    public :
+
+    typedef typename traits::SizeTypeTrait<base>::type size_type;
+
+    explicit WeightSetPPL (size_type N) : base(N) {}
+
+    private :
+
+    void log_weight2weight ()
+    {
+        const size_type N = static_cast<size_type>(this->size());
+        ppl::parallel_for(static_cast<size_type>(0), N,
+                log_weight2weight_(
+                    this->weight_ptr(), this->log_weight_ptr()));
+    }
+
+    void weight2log_weight ()
+    {
+        const size_type N = static_cast<size_type>(this->size());
+        ppl::parallel_for(static_cast<size_type>(0), N,
+                weight2log_weight_(
+                    this->weight_ptr(), this->log_weight_ptr()));
+    }
+
+    class log_weight2weight_
+    {
+        public :
+
+        log_weight2weight_ (double *weight, const double *log_weight) :
+            weight_(weight), log_weight_(log_weight) {}
+
+        void operator() (size_type i) const
+        {
+            using std::exp;
+
+            weight_[i] = exp(log_weight_[i]);
+        }
+
+        private :
+
+        double *const weight_;
+        const double *const log_weight_;
+    }; // class log_weight2weight_
+
+    class weight2log_weight_
+    {
+        public :
+
+        weight2log_weight_ (const double *weight, double *log_weight) :
+            weight_(weight), log_weight_(log_weight) {}
+
+        void operator() (size_type i) const
+        {
+            using std::log;
+
+            log_weight_[i] = log(weight_[i]);
+        }
+
+        private :
+
+        const double *const weight_;
+        double *const log_weight_;
+    }; // class weight2log_weight_
+}; // class WeightSetPPL
+
 /// \brief Particle::value_type subtype using Parallel Pattern Library
 /// \ingroup SMP
 template <typename BaseState>
@@ -37,9 +109,7 @@ class StatePPL : public BaseState
             state_(state), copy_from_(copy_from) {}
 
         void operator() (size_type to) const
-        {
-            state_->copy_particle(copy_from_[to], to);
-        }
+        {state_->copy_particle(copy_from_[to], to);}
 
         private :
 

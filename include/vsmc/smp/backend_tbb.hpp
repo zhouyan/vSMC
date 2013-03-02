@@ -3,6 +3,7 @@
 
 #include <vsmc/smp/base.hpp>
 #include <vsmc/utility/tbb_op.hpp>
+#include <tbb/tbb.h>
 
 namespace vsmc {
 
@@ -24,24 +25,26 @@ class WeightSetTBB : public traits::WeightSetTypeTrait<BaseState>::type
 
     void log_weight2weight ()
     {
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+        const size_type N = static_cast<size_type>(this->size());
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 tbb_op::exp<double>(
                     this->log_weight_ptr(), this->weight_ptr()));
     }
 
     void weight2log_weight ()
     {
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+        const size_type N = static_cast<size_type>(this->size());
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 tbb_op::log<double>(
                     this->weight_ptr(), this->log_weight_ptr()));
     }
 
     void normalize_log_weight ()
     {
+        const size_type N = static_cast<size_type>(this->size());
         tbb_op::maximum<double> max_weight(this->log_weight_ptr());
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, this->size()),
-                max_weight);
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), max_weight);
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 tbb_op::minus<double>(
                     this->log_weight_ptr(), this->log_weight_ptr(),
                     max_weight.result()));
@@ -49,10 +52,10 @@ class WeightSetTBB : public traits::WeightSetTypeTrait<BaseState>::type
 
     void normalize_weight ()
     {
+        const size_type N = static_cast<size_type>(this->size());
         tbb_op::summation<double> coeff(this->weight_ptr());
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, this->size()),
-                coeff);
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), coeff);
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 tbb_op::multiplies<double>(
                     this->weight_ptr(), this->weight_ptr(),
                     1 / coeff.result()));

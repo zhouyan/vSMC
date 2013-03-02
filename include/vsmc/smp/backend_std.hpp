@@ -3,8 +3,39 @@
 
 #include <vsmc/smp/base.hpp>
 #include <vsmc/utility/stdtbb.hpp>
+#include <vsmc/utility/tbb_op.hpp>
 
 namespace vsmc {
+
+/// \brief Particle::weight_set_type subtype using C++11 concurrency
+/// \ingroup SMP
+template <typename BaseState>
+class WeightSetSTD : public traits::WeightSetTypeTrait<BaseState>::type
+{
+    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
+
+    public :
+
+    typedef typename traits::SizeTypeTrait<base>::type size_type;
+
+    explicit WeightSetSTD (size_type N) : base(N) {}
+
+    private :
+
+    void log_weight2weight ()
+    {
+        const size_type N = static_cast<size_type>(this->size());
+        parallel_for(BlockedRange<size_type>(0, N), tbb_op::exp<double>(
+                    this->log_weight_ptr(), this->weight_ptr()));
+    }
+
+    void weight2log_weight ()
+    {
+        const size_type N = static_cast<size_type>(this->size());
+        parallel_for(BlockedRange<size_type>(0, N), tbb_op::log<double>(
+                    this->weight_ptr(), this->log_weight_ptr()));
+    }
+}; // class WeightSetSTD
 
 /// \brief Particle::value_type subtype using C++11 concurrency
 /// \ingroup SMP

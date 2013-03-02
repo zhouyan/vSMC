@@ -8,6 +8,44 @@
 
 namespace vsmc {
 
+/// \brief Particle::weight_set_type subtype using Intel Cilk Plus
+/// \ingroup SMP
+template <typename BaseState>
+class WeightSetCILK : public traits::WeightSetTypeTrait<BaseState>::type
+{
+    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
+
+    public :
+
+    typedef typename traits::SizeTypeTrait<base>::type size_type;
+
+    explicit WeightSetCILK (size_type N) : base(N) {}
+
+    private :
+
+    void log_weight2weight ()
+    {
+        using std::exp;
+
+        const size_type N = static_cast<size_type>(this->size());
+        double *weight = this->weight_ptr();
+        const double *log_weight = this->log_weight_ptr();
+        cilk_for (size_type i = 0; i != N; ++i)
+            weight[i] = exp(log_weight[i]);
+    }
+
+    void weight2log_weight ()
+    {
+        using std::log;
+
+        const size_type N = static_cast<size_type>(this->size());
+        const double *weight = this->weight_ptr();
+        double *log_weight = this->log_weight_ptr();
+        cilk_for (size_type i = 0; i != N; ++i)
+            log_weight[i] = log(weight[i]);
+    }
+}; // class WeightSetCILK
+
 /// \brief Particle::value_type subtype using Intel Cilk Plus
 /// \ingroup SMP
 template <typename BaseState>

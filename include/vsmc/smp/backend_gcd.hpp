@@ -6,6 +6,64 @@
 
 namespace vsmc {
 
+/// \brief Particle::weight_set_type subtype using Apple Grand Central Dispatch
+/// \ingroup SMP
+template <typename BaseState>
+class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
+{
+    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
+
+    public :
+
+    typedef typename traits::SizeTypeTrait<base>::type size_type;
+
+    explicit WeightSetGCD (size_type N) : base(N) {}
+
+    private :
+
+    void log_weight2weight ()
+    {
+        using std::exp;
+
+        const size_type N = static_cast<size_type>(this->size());
+        work_param_ wp = {this->weight_ptr(), this->log_weight_ptr()};
+        dispatch_apply_f(N, DispatchQueue::instance().queue(),
+                (void *) &wp, log_weight2weight_);
+    }
+
+    void weight2log_weight ()
+    {
+        using std::log;
+
+        const size_type N = static_cast<size_type>(this->size());
+        work_param_ wp = {this->weight_ptr(), this->log_weight_ptr()};
+        dispatch_apply_f(N, DispatchQueue::instance().queue(),
+                (void *) &wp, weight2log_weight_);
+    }
+
+    struct work_param_
+    {
+        double *const weight;
+        double *const log_weight;
+    };
+
+    static void log_weight2weight_ (void *wp, std::size_t i)
+    {
+        using std::exp;
+
+        const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
+        wptr->weight[i] = exp(wptr->log_weight[i]);
+    }
+
+    static void weight2log_weight_ (void *wp, std::size_t i)
+    {
+        using std::log;
+
+        const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
+        wptr->log_weight[i] = log(wptr->weight[i]);
+    }
+}; // class WeightSetGCD
+
 /// \brief Particle::value_type subtype usingt Apple Grand Central Dispatch
 /// \ingroup SMP
 template <typename BaseState>

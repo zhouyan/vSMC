@@ -133,14 +133,18 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
     void set_equal_weight ()
     {
         barrier();
-        this->set_ess(static_cast<double>(resample_size_));
-        double ew = 1 / this->ess();
+
+        const size_type N = static_cast<size_type>(this->size());
         std::vector<double> &weight = this->weight_vec();
         std::vector<double> &log_weight = this->log_weight_vec();
-        for (size_type i = 0; i != this->size(); ++i) {
+
+        this->set_ess(static_cast<double>(resample_size_));
+        double ew = 1 / this->ess();
+        for (size_type i = 0; i != N; ++i) {
             weight[i] = ew;
             log_weight[i] = 0;
         }
+
         barrier();
     }
 
@@ -162,16 +166,17 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
     {
         barrier();
 
+        const size_type N = static_cast<size_type>(this->size());
         std::vector<double> &log_weight = this->log_weight_vec();
 
         double lmax_weight = log_weight[0];
-        for (size_type i = 0; i != this->size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             if (log_weight[i] > lmax_weight)
                 lmax_weight = log_weight[i];
         double gmax_weight = 0;
         boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
                 boost::mpi::maximum<double>());
-        for (size_type i = 0; i != this->size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             log_weight[i] -= gmax_weight;
 
         barrier();
@@ -181,19 +186,20 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
     {
         barrier();
 
+        const size_type N = static_cast<size_type>(this->size());
         std::vector<double> &weight = this->weight_vec();
 
         double lcoeff = 0;
-        for (size_type i = 0; i != this->size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             lcoeff += weight[i];
         double gcoeff = 0;
         boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
         gcoeff = 1 / gcoeff;
-        for (size_type i = 0; i != this->size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             weight[i] *= gcoeff;
 
         double less = 0;
-        for (size_type i = 0; i != this->size(); ++i)
+        for (size_type i = 0; i != N; ++i)
             less += weight[i] * weight[i];
         double gess = 0;
         boost::mpi::all_reduce(world_, less, gess, std::plus<double>());

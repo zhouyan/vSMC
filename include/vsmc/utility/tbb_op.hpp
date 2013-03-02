@@ -2,7 +2,6 @@
 #define VSMC_UTILITY_TBB_OP_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <tbb/tbb.h>
 
 #define VSMC_DEFINE_TBB_OP_FOR_UNARY_OBJECT(name, uni)                        \
 namespace vsmc { namespace tbb_op {                                           \
@@ -13,8 +12,8 @@ class name                                                                    \
                                                                               \
     name (const T *data, T *result) : data_(data), result_(result) {}         \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range) const         \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range) const                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
@@ -40,8 +39,8 @@ class name                                                                    \
     name (const T *data, T *result, const T &val) :                           \
         data_(data), result_(result), val_(val) {}                            \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range) const         \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range) const                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
@@ -67,8 +66,8 @@ class name                                                                    \
                                                                               \
     name (const T *data, T *result) : data_(data), result_(result) {}         \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range) const         \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range) const                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
@@ -93,8 +92,8 @@ class name                                                                    \
     name (const T *data, T *result, const T &val) :                           \
         data_(data), result_(result), val_(val) {}                            \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range) const         \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range) const                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
@@ -119,8 +118,8 @@ class name                                                                    \
                                                                               \
     name (const T *data, T *result) : data_(data), result_(result) {}         \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range) const         \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range) const                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
@@ -145,8 +144,8 @@ class name                                                                    \
     name (const T *data, T *result, const T &val) :                           \
         data_(data), result_(result), val_(val) {}                            \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range) const         \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range) const                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
@@ -171,11 +170,12 @@ class name                                                                    \
                                                                               \
     name (const T *data) : data_(data), result_(identity) {}                  \
                                                                               \
-    name (const name<T> &other, tbb::split) :                                 \
+    template <typename Split>                                                 \
+    name (const name<T> &other, Split) :                                      \
         data_(other.data_), result_(identity) {}                              \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range)               \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range)                            \
     {                                                                         \
         const T *const data = data_;                                          \
         T result = result_;                                                   \
@@ -209,11 +209,12 @@ class name                                                                    \
                                                                               \
     name (const T *data) : data_(data), result_(identity) {}                  \
                                                                               \
-    name (const name<T> &other, tbb::split) :                                 \
+    template <typename Split>                                                 \
+    name (const name<T> &other, Split) :                                      \
         data_(other.data_), result_(identity) {}                              \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range)               \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range)                            \
     {                                                                         \
         const T *const data = data_;                                          \
         T result = result_;                                                   \
@@ -242,11 +243,12 @@ class name                                                                    \
                                                                               \
     name (const T *data) : data_(data), result_(identity) {}                  \
                                                                               \
-    name (const name<T> &other, tbb::split) :                                 \
+    template <typename Split>                                                 \
+    name (const name<T> &other, Split) :                                      \
         data_(other.data_), result_(identity) {}                              \
                                                                               \
-    template <typename SizeType>                                              \
-    void operator() (const tbb::blocked_range<SizeType> &range)               \
+    template <typename SizeType, template <typename> class Range>             \
+    void operator() (const Range<SizeType> &range)                            \
     {                                                                         \
         const T *const data = data_;                                          \
         T result = result_;                                                   \
@@ -267,23 +269,6 @@ class name                                                                    \
 } }
 
 namespace vsmc { namespace tbb_op {
-
-using std::abs;
-using std::exp;
-using std::log;
-using std::log10;
-using std::sqrt;
-using std::sin;
-using std::cos;
-using std::tan;
-using std::asin;
-using std::acos;
-using std::atan;
-using std::sinh;
-using std::cosh;
-using std::tanh;
-using std::ceil;
-using std::floor;
 
 template <typename T> inline const T &max_fn (const T &a, const T &b)
 {return std::max VSMC_MACRO_NO_EXPANSION (a, b);}
@@ -317,11 +302,12 @@ class square_sum
     square_sum (const T *data) :
         data_(data), result_(zero_trait<T>::value()) {}
 
-    square_sum (const square_sum<T> &other, tbb::split) :
+    template <typename Split>
+    square_sum (const square_sum<T> &other, Split) :
         data_(other.data_), result_(zero_trait<T>::value()) {}
 
-    template <typename SizeType>
-    void operator() (const tbb::blocked_range<SizeType> &range)
+    template <typename SizeType, template <typename> class Range>
+    void operator() (const Range<SizeType> &range)
     {
         const T *const data = data_;
         T result = result_;
@@ -350,27 +336,27 @@ VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(multiplies, *)
 VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(divides,    /)
 VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(modulus,    %)
 
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(abs,   abs)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(exp,   exp)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(log,   log)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(log10, log10)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sqrt,  sqrt)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sin,   sin)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(cos,   cos)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(tan,   tan)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(asin,  asin)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(acos,  acos)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(atan,  atan)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sinh,  sinh)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(cosh,  cosh)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(tanh,  tanh)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(ceil,  ceil)
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(floor, floor)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(abs,   std::abs)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(exp,   std::exp)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(log,   std::log)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(log10, std::log10)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sqrt,  std::sqrt)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sin,   std::sin)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(cos,   std::cos)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(tan,   std::tan)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(asin,  std::asin)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(acos,  std::acos)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(atan,  std::atan)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sinh,  std::sinh)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(cosh,  std::cosh)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(tanh,  std::tanh)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(ceil,  std::ceil)
+VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(floor, std::floor)
 
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(maximum, max_fn,
-        positive_infinity_trait<T>::value())
-VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(minimum, min_fn,
         negative_infinity_trait<T>::value())
+VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(minimum, min_fn,
+        positive_infinity_trait<T>::value())
 
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(summation, +, zero_trait<T>::value())
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(product,   *, one_trait<T>::value())
