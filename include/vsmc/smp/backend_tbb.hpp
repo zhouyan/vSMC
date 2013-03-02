@@ -10,13 +10,15 @@ namespace vsmc {
 /// Blocks
 /// \ingroup SMP
 template <typename BaseState>
-class WeightSetTBB : public WeightSet<BaseState>
+class WeightSetTBB : public traits::WeightSetTypeTrait<BaseState>::type
 {
+    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
+
     public :
 
-    typedef typename WeightSet<BaseState>::size_type size_type;
+    typedef typename traits::SizeTypeTrait<base>::type size_type;
 
-    explicit WeightSetTBB (size_type N) : WeightSet<BaseState>(N) {}
+    explicit WeightSetTBB (size_type N) : base(N) {}
 
     private :
 
