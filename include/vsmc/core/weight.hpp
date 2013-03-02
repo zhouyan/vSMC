@@ -11,12 +11,11 @@ namespace vsmc {
 
 /// \brief Weight set class
 /// \ingroup Core
-template <typename T>
 class WeightSet
 {
     public :
 
-    typedef typename traits::SizeTypeTrait<T>::type size_type;
+    typedef std::size_t size_type;
 
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}

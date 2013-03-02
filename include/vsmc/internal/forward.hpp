@@ -63,8 +63,8 @@ template <typename, template <typename, typename> class, typename F = Functor>
 class PathEvalAdapter;
 
 // Core
+class WeightSet;
 template <typename ResType> class Resample;
-template <typename> class WeightSet;
 template <typename> class Sampler;
 template <typename> class Particle;
 template <typename> class Monitor;

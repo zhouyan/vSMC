@@ -77,7 +77,7 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
 
     public :
 
-    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
+    typedef typename traits::SizeTypeTrait<base>::type size_type;
 
     explicit WeightSetMPI (size_type N) :
         base(N), world_(MPICommunicator<ID>::instance().get(),

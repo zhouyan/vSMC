@@ -32,7 +32,11 @@ class Particle
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     explicit Particle (size_type N) :
-        size_(N), value_(N), weight_set_(N), rng_set_(N),
+        size_(N), value_(N),
+        weight_set_(static_cast<typename
+                traits::SizeTypeTrait<weight_set_type>::type>(N)),
+        rng_set_(static_cast<typename
+                traits::SizeTypeTrait<rng_set_type>::type>(N)),
         replication_(N), copy_from_(N), weight_(N),
         resample_rng_(Seed::instance().get()),
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
@@ -127,7 +131,7 @@ class Particle
     /// \return true if resampling was performed
     bool resample (const resample_type &op, double threshold)
     {
-        size_type N = weight_set_.resample_size();
+        size_type N = static_cast<size_type>(weight_set_.resample_size());
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
             copy_from_.resize(N);
