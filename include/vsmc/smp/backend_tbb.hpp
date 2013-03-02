@@ -2,9 +2,64 @@
 #define VSMC_SMP_IMPL_TBB_HPP
 
 #include <vsmc/smp/base.hpp>
-#include <tbb/tbb.h>
+#include <vsmc/utility/tbb_op.hpp>
 
 namespace vsmc {
+
+/// \brief Particle::weight_set_type subtype using Intel Threading Building
+/// Blocks
+/// \ingroup SMP
+template <typename BaseState>
+class WeightSetTBB : public WeightSet<BaseState>
+{
+    public :
+
+    typedef typename WeightSet<BaseState>::size_type size_type;
+
+    explicit WeightSetTBB (size_type N) : WeightSet<BaseState>(N) {}
+
+    private :
+
+    void log_weight2weight ()
+    {
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+                tbb_op::exp<double>(
+                    this->log_weight_ptr(), this->weight_ptr()));
+    }
+
+    void weight2log_weight ()
+    {
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+                tbb_op::log<double>(
+                    this->weight_ptr(), this->log_weight_ptr()));
+    }
+
+    void normalize_log_weight ()
+    {
+        tbb_op::maximum<double> max_weight(this->log_weight_ptr());
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, this->size()),
+                max_weight);
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+                tbb_op::minus<double>(
+                    this->log_weight_ptr(), this->log_weight_ptr(),
+                    max_weight.result()));
+    }
+
+    void normalize_weight ()
+    {
+        tbb_op::summation<double> coeff(this->weight_ptr());
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, this->size()),
+                coeff);
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, this->size()),
+                tbb_op::multiplies<double>(
+                    this->weight_ptr(), this->weight_ptr(),
+                    1 / coeff.result()));
+        tbb_op::square_sum<double> ess(this->weight_ptr());
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, this->size()),
+                ess);
+        this->set_ess(1 / ess.result());
+    }
+}; // class WeightSetTBB
 
 /// \brief Particle::value_type subtype using Intel Threading Building Blocks
 /// \ingroup SMP
@@ -99,15 +154,9 @@ class InitializeTBB : public InitializeBase<T, Derived>
             accept_ = acc;
         }
 
-        void join (const work_ &other)
-        {
-            accept_ += other.accept_;
-        }
+        void join (const work_ &other) {accept_ += other.accept_;}
 
-        std::size_t accept () const
-        {
-            return accept_;
-        }
+        std::size_t accept () const {return accept_;}
 
         private :
 

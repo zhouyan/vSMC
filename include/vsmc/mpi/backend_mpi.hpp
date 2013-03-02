@@ -82,11 +82,11 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
     explicit WeightSetMPI (size_type N) :
         base(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate), internal_barrier_(true),
-        resample_size_(0), ess_(0)
+        resample_size_(0)
     {
         boost::mpi::all_reduce(
                 world_, N, resample_size_, std::plus<size_type>());
-        ess_ = static_cast<double>(resample_size_);
+        this->set_ess(static_cast<double>(resample_size_));
         barrier();
     }
 
@@ -133,8 +133,8 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
     void set_equal_weight ()
     {
         barrier();
-        ess_ = static_cast<double>(resample_size_);
-        double ew = 1 / ess_;
+        this->set_ess(static_cast<double>(resample_size_));
+        double ew = 1 / this->ess();
         std::vector<double> &weight = this->weight_vec();
         std::vector<double> &log_weight = this->log_weight_vec();
         for (size_type i = 0; i != this->size(); ++i) {
@@ -143,8 +143,6 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
         }
         barrier();
     }
-
-    double ess () const {return ess_;}
 
     /// \brief A duplicated MPI communicator for this weight set object
     const boost::mpi::communicator &world () const {return world_;}
@@ -158,7 +156,6 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
     boost::mpi::communicator world_;
     bool internal_barrier_;
     size_type resample_size_;
-    double ess_;
     mutable std::vector<std::vector<double> > weight_all_;
 
     void normalize_log_weight ()
@@ -201,7 +198,7 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
         double gess = 0;
         boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
         gess = 1 / gess;
-        ess_ = gess;
+        this->set_ess(gess);
 
         barrier();
     }

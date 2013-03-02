@@ -23,6 +23,10 @@ class WeightSet
 
     size_type size () const {return size_;}
 
+    /// \brief Get the ESS of the particle collection based on the current
+    /// weights
+    double ess () const {return ess_;}
+
     size_type resample_size () const {return size_;}
 
     template <typename OutputIter>
@@ -234,11 +238,17 @@ class WeightSet
         post_set_log_weight();
     }
 
-    /// \brief Get the ESS of the particle collection based on the current
-    /// weights
-    double ess () const {return ess_;}
-
     protected :
+
+    void set_ess (double e) {ess_ = e;}
+
+    double *weight_ptr () {return &weight_[0];}
+
+    const double *weight_ptr () const {return &weight_[0];}
+
+    double *log_weight_ptr () {return &log_weight_[0];}
+
+    const double *log_weight_ptr () const {return &log_weight_[0];}
 
     std::vector<double> &weight_vec () {return weight_;}
 
