@@ -219,7 +219,7 @@
 #endif
 #endif
 
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 7
 #ifndef VSMC_HAS_CXX11LIB_FUTURE
 #define VSMC_HAS_CXX11LIB_FUTURE 1
 #endif
@@ -228,12 +228,6 @@
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
 #ifndef VSMC_HAS_CXX11LIB_RANDOM
 #define VSMC_HAS_CXX11LIB_RANDOM 1
-#endif
-#endif
-
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
-#ifndef VSMC_HAS_CXX11LIB_THREAD
-#define VSMC_HAS_CXX11LIB_THREAD 1
 #endif
 #endif
 

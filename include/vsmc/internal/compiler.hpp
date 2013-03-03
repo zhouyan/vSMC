@@ -15,10 +15,6 @@
 #include <vsmc/internal/compiler/msvc.hpp>
 #endif
 
-#ifndef VSMC_OPENMP_COMPILER_GOOD
-#define VSMC_OPENMP_COMPILER_GOOD 0
-#endif
-
 //  C++11 language features
 
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
@@ -169,10 +165,6 @@
 
 #ifndef VSMC_HAS_CXX11LIB_RANDOM
 #define VSMC_HAS_CXX11LIB_RANDOM 0
-#endif
-
-#ifndef VSMC_HAS_CXX11LIB_THREAD
-#define VSMC_HAS_CXX11LIB_THREAD 0
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

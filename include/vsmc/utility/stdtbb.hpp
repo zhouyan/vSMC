@@ -188,7 +188,7 @@ void parallel_for (const Range &range, WorkType &&work)
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
-    for (std::size_t i = 0; i != range_vec.size(); ++i)
+    for (std::size_t i = 0; i != range_vec.size(); ++i) {
         wg.push_back(std::async(std::launch::async,
                     std::forward<WorkType>(work), range_vec[i]));
     }
@@ -257,7 +257,7 @@ T parallel_accumulate (const Range &range, WorkType &&work, T init)
     std::vector<T> result(range_vec.size());
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
-    for (std::size_t i = 0; i != rang_vec.size(); ++i) {
+    for (std::size_t i = 0; i != range_vec.size(); ++i) {
         wg.push_back(std::async(std::launch::async,
                     std::forward<WorkType>(work), range_vec[i],
                     std::ref(result[i])));
