@@ -35,6 +35,30 @@ class WeightSetSTD : public traits::WeightSetTypeTrait<BaseState>::type
         parallel_for(BlockedRange<size_type>(0, N), tbb_op::log<double>(
                     this->weight_ptr(), this->log_weight_ptr()));
     }
+
+    void normalize_log_weight ()
+    {
+        const size_type N = static_cast<size_type>(this->size());
+        tbb_op::maximum<double> max_weight(this->log_weight_ptr());
+        parallel_reduce(BlockedRange<size_type>(0, N), max_weight);
+        parallel_for(BlockedRange<size_type>(0, N), tbb_op::minus<double>(
+                    this->log_weight_ptr(), this->log_weight_ptr(),
+                    max_weight.result()));
+    }
+
+    void normalize_weight ()
+    {
+        const size_type N = static_cast<size_type>(this->size());
+        tbb_op::summation<double> coeff(this->weight_ptr());
+        parallel_reduce(BlockedRange<size_type>(0, N), coeff);
+        parallel_for(BlockedRange<size_type>(0, N),
+                tbb_op::multiplies<double>(
+                    this->weight_ptr(), this->weight_ptr(),
+                    1 / coeff.result()));
+        tbb_op::square_sum<double> ess(this->weight_ptr());
+        parallel_reduce(BlockedRange<size_type>(0, this->size()), ess);
+        this->set_ess(1 / ess.result());
+    }
 }; // class WeightSetSTD
 
 /// \brief Particle::value_type subtype using C++11 concurrency
