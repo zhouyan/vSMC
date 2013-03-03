@@ -19,7 +19,7 @@ class WeightSetPPL : public traits::WeightSetTypeTrait<BaseState>::type
 
     explicit WeightSetPPL (size_type N) : base(N) {}
 
-    private :
+    protected :
 
     void log_weight2weight ()
     {
@@ -36,6 +36,8 @@ class WeightSetPPL : public traits::WeightSetTypeTrait<BaseState>::type
                 weight2log_weight_(
                     this->weight_ptr(), this->log_weight_ptr()));
     }
+
+    private :
 
     class log_weight2weight_
     {

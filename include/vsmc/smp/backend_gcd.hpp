@@ -19,7 +19,7 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 
     explicit WeightSetGCD (size_type N) : base(N) {}
 
-    private :
+    protected :
 
     void log_weight2weight ()
     {
@@ -40,6 +40,8 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
         dispatch_apply_f(N, DispatchQueue::instance().queue(),
                 (void *) &wp, weight2log_weight_);
     }
+
+    private :
 
     struct work_param_
     {

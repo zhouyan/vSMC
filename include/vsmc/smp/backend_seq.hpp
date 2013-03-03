@@ -18,7 +18,7 @@ class WeightSetSEQ : public traits::WeightSetTypeTrait<BaseState>::type
 
     explicit WeightSetSEQ (size_type N) : base(N) {}
 
-    private :
+    protected :
 
     void log_weight2weight ()
     {
