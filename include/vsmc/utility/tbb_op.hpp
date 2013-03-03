@@ -12,13 +12,14 @@ class name                                                                    \
                                                                               \
     name (const T *data, T *result) : data_(data), result_(result) {}         \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range) const                      \
+    template <typename  Range>                                                \
+    void operator() (const Range &range) const                                \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
         uni op;                                                               \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result[i] = op(data[i]);                                          \
     }                                                                         \
                                                                               \
@@ -39,13 +40,14 @@ class name                                                                    \
     name (const T *data, T *result, const T &val) :                           \
         data_(data), result_(result), val_(val) {}                            \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range) const                      \
+    template <typename Range>                                                 \
+    void operator() (const Range &range) const                                \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
         bin op;                                                               \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result[i] = op(data[i], val_);                                    \
     }                                                                         \
                                                                               \
@@ -66,12 +68,13 @@ class name                                                                    \
                                                                               \
     name (const T *data, T *result) : data_(data), result_(result) {}         \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range) const                      \
+    template <typename  Range>                                                \
+    void operator() (const Range &range) const                                \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result[i] = uni(data[i]);                                         \
     }                                                                         \
                                                                               \
@@ -92,12 +95,13 @@ class name                                                                    \
     name (const T *data, T *result, const T &val) :                           \
         data_(data), result_(result), val_(val) {}                            \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range) const                      \
+    template <typename Range>                                                 \
+    void operator() (const Range &range) const                                \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result[i] = bin(data[i], val_);                                   \
     }                                                                         \
                                                                               \
@@ -118,12 +122,13 @@ class name                                                                    \
                                                                               \
     name (const T *data, T *result) : data_(data), result_(result) {}         \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range) const                      \
+    template <typename Range>                                                 \
+    void operator() (const Range &range) const                                \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result[i] = uni data[i];                                          \
     }                                                                         \
                                                                               \
@@ -144,12 +149,13 @@ class name                                                                    \
     name (const T *data, T *result, const T &val) :                           \
         data_(data), result_(result), val_(val) {}                            \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range) const                      \
+    template <typename Range>                                                 \
+    void operator() (const Range &range) const                                \
     {                                                                         \
         const T *const data = data_;                                          \
         T *const result = result_;                                            \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result[i] = data[i] bin val_;                                     \
     }                                                                         \
                                                                               \
@@ -174,13 +180,14 @@ class name                                                                    \
     name (const name<T> &other, Split) :                                      \
         data_(other.data_), result_(identity) {}                              \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range)                            \
+    template <typename Range>                                                 \
+    void operator() (const Range &range)                                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T result = result_;                                                   \
         bin op;                                                               \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result = op(result, data[i]);                                     \
         result_ = result;                                                     \
     }                                                                         \
@@ -213,12 +220,13 @@ class name                                                                    \
     name (const name<T> &other, Split) :                                      \
         data_(other.data_), result_(identity) {}                              \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range)                            \
+    template <typename Range>                                                 \
+    void operator() (const Range &range)                                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T result = result_;                                                   \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result = bin(result, data[i]);                                    \
         result_ = result;                                                     \
     }                                                                         \
@@ -247,12 +255,13 @@ class name                                                                    \
     name (const name<T> &other, Split) :                                      \
         data_(other.data_), result_(identity) {}                              \
                                                                               \
-    template <typename SizeType, template <typename> class Range>             \
-    void operator() (const Range<SizeType> &range)                            \
+    template <typename Range>                                                 \
+    void operator() (const Range &range)                                      \
     {                                                                         \
         const T *const data = data_;                                          \
         T result = result_;                                                   \
-        for (SizeType i = range.begin(); i != range.end(); ++i)               \
+        for (typename Range::const_iterator i = range.begin();                \
+                i != range.end(); ++i)                                        \
             result = result bin data[i];                                      \
         result_ = result;                                                     \
     }                                                                         \
@@ -268,7 +277,25 @@ class name                                                                    \
 };                                                                            \
 } }
 
-namespace vsmc { namespace tbb_op {
+namespace vsmc {
+
+/// \brief Intel TBB and vSMC STDTBB functors
+/// \ingroup Utility
+///
+/// \details
+/// Range concept: All functors defined in this namespace require the range
+/// satisfies
+/// \code
+/// struct Range
+/// {
+///     typdef IntType const_iterator;
+///     const_iterator begin() const;
+///     const iterator end() const;
+/// };
+/// \endcode
+/// Both `tbb::blocked_range<IntType>` and `vsmc::BlockedRange<IntType>`
+/// satisfies these requirement.
+namespace tbb_op {
 
 template <typename T> inline const T &max_fn (const T &a, const T &b)
 {return std::max VSMC_MACRO_NO_EXPANSION (a, b);}
@@ -306,12 +333,13 @@ class square_sum
     square_sum (const square_sum<T> &other, Split) :
         data_(other.data_), result_(zero_trait<T>::value()) {}
 
-    template <typename SizeType, template <typename> class Range>
-    void operator() (const Range<SizeType> &range)
+    template <typename Range>
+    void operator() (const Range &range)
     {
         const T *const data = data_;
         T result = result_;
-        for (SizeType i = range.begin(); i != range.end(); ++i)
+        for (typename Range::const_iterator i = range.begin();
+                i != range.end(); ++i)
             result = result + data[i] * data[i];
         result_ = result;
     }
