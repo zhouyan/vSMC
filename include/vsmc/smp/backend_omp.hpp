@@ -20,7 +20,7 @@ class WeightSetOMP : public traits::WeightSetTypeTrait<BaseState>::type
 
     explicit WeightSetOMP (size_type N) : base(N) {}
 
-    private :
+    protected :
 
     void log_weight2weight ()
     {
