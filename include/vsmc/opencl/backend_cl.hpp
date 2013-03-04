@@ -128,8 +128,8 @@ class StateCL
 
     void resize_state (std::size_t state_size)
     {
-        static const std::size_t Dim = StateSize;
-        VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE;
+        VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(StateSize);
+        VSMC_RUNTIME_ASSERT_DIM(state_size);
 
         state_buffer_ =
             manager().template create_buffer<char>(state_size * size_);

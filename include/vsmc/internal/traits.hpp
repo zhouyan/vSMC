@@ -265,7 +265,7 @@ class DimTrait<Dynamic>
 {
     public :
 
-    DimTrait () : dim_(Dynamic) {}
+    DimTrait () : dim_(1) {}
 
     std::size_t dim () const {return dim_;}
 

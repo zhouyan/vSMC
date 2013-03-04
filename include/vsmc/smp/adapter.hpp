@@ -23,7 +23,7 @@ class InitializeAdapter :
     InitializeAdapter (const F &f) : base(f) {}
 
     std::size_t initialize_state (SingleParticle<T> part)
-    {return this->adapter_f().initialize_state(part);}
+    {return this->implementation().initialize_state(part);}
 }; // InitializeAdapter
 
 /// \brief Move class adapter
@@ -43,7 +43,7 @@ class MoveAdapter :
     MoveAdapter (const F &f) : base(f) {}
 
     std::size_t move_state (std::size_t iter, SingleParticle<T> part)
-    {return this->adapter_f().move_state(iter, part);}
+    {return this->implementation().move_state(iter, part);}
 }; // MoveAdapter
 
 /// \brief Monitor evaluation class adapter
@@ -64,7 +64,7 @@ class MonitorEvalAdapter :
 
     void monitor_state (std::size_t iter, std::size_t dim,
             ConstSingleParticle<T> part, double *res)
-    {this->adapter_f().monitor_state(iter, dim, part, res);}
+    {this->implementation().monitor_state(iter, dim, part, res);}
 }; // MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter
@@ -84,7 +84,7 @@ class PathEvalAdapter :
     PathEvalAdapter (const F &f) : base(f) {}
 
     double path_state (std::size_t iter, ConstSingleParticle<T> part)
-    {return this->adapter_f().path_state(iter, part);}
+    {return this->implementation().path_state(iter, part);}
 }; // PathEvalAdapter
 
 /// \brief Initialize class adapter

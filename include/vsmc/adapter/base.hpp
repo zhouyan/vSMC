@@ -34,11 +34,9 @@ class InitializeAdapterBase : public BaseType
                 typename has_post_processor_<F>::type());
     }
 
-    protected :
+    F &implementation () {return f_;}
 
-    F &adapter_f () {return f_;}
-
-    const F &adapter_f () const {return f_;}
+    const F &implementation () const {return f_;}
 
     private :
 
@@ -92,11 +90,9 @@ class MoveAdapterBase : public BaseType
                 typename has_post_processor_<F>::type());
     }
 
-    protected :
+    F &implementation () {return f_;}
 
-    F &adapter_f () {return f_;}
-
-    const F &adapter_f () const {return f_;}
+    const F &implementation () const {return f_;}
 
     private :
 
@@ -144,11 +140,9 @@ class MonitorEvalAdapterBase : public BaseType
                 typename has_post_processor_<F>::type());
     }
 
-    protected :
+    F &implementation () {return f_;}
 
-    F &adapter_f () {return f_;}
-
-    const F &adapter_f () const {return f_;}
+    const F &implementation () const {return f_;}
 
     private :
 
@@ -199,11 +193,9 @@ class PathEvalAdapterBase : public BaseType
                 typename has_post_processor_<F>::type());
     }
 
-    protected :
+    F &implementation () {return f_;}
 
-    F &adapter_f () {return f_;}
-
-    const F &adapter_f () const {return f_;}
+    const F &implementation () const {return f_;}
 
     private :
 

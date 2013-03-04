@@ -87,6 +87,9 @@ class StaticAssert<true>
             ("DERIVED FROM " #basename                                        \
              " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
 
+#define VSMC_RUNTIME_ASSERT_DIM(dim)                                          \
+    VSMC_RUNTIME_ASSERT((dim >= 1), ("DIMENSION IS LESS THAN 1"))
+
 #define VSMC_RUNTIME_ASSERT_FUNCTOR(func, name, caller)                       \
     VSMC_RUNTIME_ASSERT(bool(func), "**"#caller"** INVALID "#name" OBJECT")   \
 
@@ -141,7 +144,7 @@ class StaticAssert<true>
 
 // Static assertion macros
 
-#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE                                 \
+#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim)                            \
     VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
             USE_METHOD_resize_dim_WITH_A_FIXED_DIM_State_OBJECT)
 

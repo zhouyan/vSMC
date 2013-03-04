@@ -61,7 +61,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     void resize_dim (std::size_t dim)
     {
-        VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE;
+        VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim);
+        VSMC_RUNTIME_ASSERT_DIM(dim);
 
         traits::DimTrait<Dim>::resize_dim(dim);
         state_.resize(dim * size_);

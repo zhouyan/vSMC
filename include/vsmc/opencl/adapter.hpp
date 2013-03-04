@@ -21,7 +21,7 @@ class InitializeAdapter<T, InitializeCL, F> :
     InitializeAdapter (const F &f) : base(f) {}
 
     void initialize_state (std::string &kernel_name)
-    {return this->adapter_f().initialize_state(kernel_name);}
+    {return this->implementation().initialize_state(kernel_name);}
 }; // InitializeAdapter
 
 /// \brief Move class adapter specialization for OpenCL
@@ -38,7 +38,7 @@ class MoveAdapter<T, MoveCL, F> : public MoveAdapterBase<T, F, MoveCL<T> >
     MoveAdapter (const F &f) : base(f) {}
 
     void move_state (std::size_t iter, std::string &kernel_name)
-    {return this->adapter_f().move_state(iter, kernel_name);}
+    {return this->implementation().move_state(iter, kernel_name);}
 }; // MoveAdapter
 
 /// \brief Monitor evaluation class adapter specialization for OpenCL
@@ -56,7 +56,7 @@ class MonitorEvalAdapter<T, MonitorEvalCL, F> :
     MonitorEvalAdapter (const F &f) : base(f) {}
 
     void move_state (std::size_t iter, std::string &kernel_name)
-    {this->adapter_f().monitor_state(iter, kernel_name);}
+    {this->implementation().monitor_state(iter, kernel_name);}
 }; // MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter specialization for OpenCL
@@ -74,7 +74,7 @@ class PathEvalAdapter<T, PathEvalCL, F> :
     PathEvalAdapter (const F &f) : base(f) {}
 
     void path_state (std::size_t iter, std::string &kernel_name)
-    {return this->adapter_f().path_state(iter, kernel_name);}
+    {return this->implementation().path_state(iter, kernel_name);}
 }; // PathEvalAdapter
 
 /// \brief Initialize class adapter specialization for OpenCL
