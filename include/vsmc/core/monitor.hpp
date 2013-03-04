@@ -156,15 +156,12 @@ class Monitor
     /// \brief Read the record history of all variables through an array of
     /// output iterators
     ///
-    /// \param first A pointer to an array of output iterators
-    ///
-    /// \details
-    /// The record of variable `id` will be read through `first[id]`
-    template <typename OutputIter>
-    void read_record_matrix (OutputIter *first) const
+    /// \param first An iterator of container of output iterators
+    template <typename OutputIterIter>
+    void read_record_matrix (OutputIterIter first) const
     {
-        for (std::size_t d = 0; d != dim_; ++d)
-            read_record(d, first[d]);
+        for (std::size_t d = 0; d != dim_; ++d, ++first)
+            read_record(d, *first);
     }
 
     /// \brief Read the record history of all variables through an output
