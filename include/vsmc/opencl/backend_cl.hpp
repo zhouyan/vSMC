@@ -187,13 +187,13 @@ class StateCL
 
         std::stringstream ss;
 
-        internal::set_cl_fp_type<fp_type>(ss);
-
         ss << "#if defined(cl_khr_fp64)\n";
         ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
         ss << "#elif defined(cl_amd_fp64)\n";
         ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
         ss << "#endif\n";
+
+        internal::set_cl_fp_type<fp_type>(ss);
 
         ss << "typedef ulong size_type;\n";
         ss << "#define Size " << size_ << "UL\n";
