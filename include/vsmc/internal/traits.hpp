@@ -233,9 +233,9 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet);
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType, opencl_device_type,
         cxx11::false_type)
 
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleType,
+VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleBaseType,
         single_particle_type, SingleParticleBase)
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleType,
+VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
         const_single_particle_type, ConstSingleParticleBase)
 
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
@@ -329,6 +329,12 @@ template <typename ID>
 struct CheckOpenCLDeviceTrait :
     public CheckOpenCLDeviceDispatch<
     ID, HasStaticCheckOpenCLDevice<ID>::value> {};
+
+template <typename T> struct SingleParticleTypeTrait :
+    public SingleParticleBaseTypeTrait<T, T> {};
+
+template <typename T> struct ConstSingleParticleTypeTrait :
+    public ConstSingleParticleBaseTypeTrait<T, T> {};
 
 } } // namespace vsmc::traits
 
