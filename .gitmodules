@@ -1,0 +1,3 @@
+[submodule "vSMCExample"]
+	path = vSMCExample
+	url = git@github.com:zhouyan/vSMCExample.git
