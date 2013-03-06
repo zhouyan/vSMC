@@ -96,7 +96,7 @@ class ParticleIterator :
 /// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
-bool operator== (
+inline bool operator== (
         const ParticleIterator<T, SPType1> &iter1,
         const ParticleIterator<T, SPType2> &iter2)
 {
@@ -109,7 +109,7 @@ bool operator== (
 /// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
-bool operator!= (
+inline bool operator!= (
         const ParticleIterator<T, SPType1> &iter1,
         const ParticleIterator<T, SPType2> &iter2)
 {
@@ -122,7 +122,7 @@ bool operator!= (
 /// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
-std::ptrdiff_t operator- (
+inline std::ptrdiff_t operator- (
         const ParticleIterator<T, SPType1> &iter1,
         const ParticleIterator<T, SPType2> &iter2)
 {
@@ -134,7 +134,7 @@ std::ptrdiff_t operator- (
 /// \brief Particle iterator operator+
 /// \ingroup Core
 template <typename T, template <typename> class SPType>
-ParticleIterator<T, SPType> operator+ (
+inline ParticleIterator<T, SPType> operator+ (
         const ParticleIterator<T, SPType> &iter,
         typename ParticleIterator<T, SPType>::difference_type diff)
 {
@@ -147,14 +147,14 @@ ParticleIterator<T, SPType> operator+ (
 /// \brief Particle iterator operator+
 /// \ingroup Core
 template <typename T, template <typename> class SPType>
-ParticleIterator<T, SPType> operator+ (
+inline ParticleIterator<T, SPType> operator+ (
         typename ParticleIterator<T, SPType>::difference_type diff,
         const ParticleIterator<T, SPType> &iter) {return iter + diff;}
 
 /// \brief Particle iterator operator-
 /// \ingroup Core
 template <typename T, template <typename> class SPType>
-ParticleIterator<T, SPType> operator- (
+inline ParticleIterator<T, SPType> operator- (
         const ParticleIterator<T, SPType> &iter,
         typename ParticleIterator<T, SPType>::difference_type diff)
 {

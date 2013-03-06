@@ -708,7 +708,7 @@ class Sampler
 /// \brief Print the Sampler
 /// \ingroup Core
 template<typename OutputStream, typename T>
-OutputStream &operator<< (OutputStream &os, const Sampler<T> &sampler)
+inline OutputStream &operator<< (OutputStream &os, const Sampler<T> &sampler)
 {return sampler.print(os);}
 
 } // namespace vsmc

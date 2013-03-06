@@ -12,7 +12,7 @@ namespace internal {
 template <typename> void set_cl_fp_type (std::stringstream &);
 
 template<>
-void set_cl_fp_type<cl_float>(std::stringstream &ss)
+inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
 {
     ss << "typedef float fp_type;\n";
     ss << "#define VSMC_FP_TYPE_IS_FLOAT  1\n";
@@ -20,7 +20,7 @@ void set_cl_fp_type<cl_float>(std::stringstream &ss)
 }
 
 template<>
-void set_cl_fp_type<cl_double>(std::stringstream &ss)
+inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
 {
     ss << "typedef double fp_type;\n";
     ss << "#define VSMC_FP_TYPE_IS_FLOAT  0\n";

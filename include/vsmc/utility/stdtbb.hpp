@@ -183,7 +183,7 @@ class ThreadInfo
 /// work(range);
 /// \endcode
 template <typename Range, typename WorkType>
-void parallel_for (const Range &range, WorkType &&work)
+inline void parallel_for (const Range &range, WorkType &&work)
 {
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
 #if VSMC_HAS_CXX11LIB_FUTURE
@@ -217,7 +217,7 @@ void parallel_for (const Range &range, WorkType &&work)
 /// Work.join(other_work);
 /// \endcode
 template <typename Range, typename WorkType>
-void parallel_reduce (const Range &range, WorkType &work)
+inline void parallel_reduce (const Range &range, WorkType &work)
 {
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
     std::vector<WorkType> work_vec(range_vec.size(), work);
@@ -251,7 +251,7 @@ void parallel_reduce (const Range &range, WorkType &work)
 /// work(range, res); // res: T reference type
 /// \endcode
 template <typename Range, typename T, typename WorkType>
-T parallel_accumulate (const Range &range, WorkType &&work, T init)
+inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
 {
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
@@ -291,7 +291,8 @@ T parallel_accumulate (const Range &range, WorkType &&work, T init)
 /// work(range, res); // res: T reference type
 /// \endcode
 template <typename Range, typename T, typename Bin, typename WorkType>
-T parallel_accumulate (const Range &range, WorkType &&work, T init, Bin bin_op)
+inline T parallel_accumulate (const Range &range, WorkType &&work,
+        T init, Bin bin_op)
 {
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());

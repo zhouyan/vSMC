@@ -435,7 +435,7 @@ class CLQuery
 /// \brief Print information of all platforms and devices
 /// \ingroup Utility
 template<typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const CLQuery &query)
+inline OutputStream &operator<< (OutputStream &os, const CLQuery &query)
 {query.print(os); return os;}
 
 } // namespace vsmc
@@ -445,13 +445,13 @@ namespace cl {
 /// \brief Print information of all devices in a given platform
 /// \ingroup Utility
 template <typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const Platform &plat)
+inline OutputStream &operator<< (OutputStream &os, const Platform &plat)
 {vsmc::CLQuery::print(os, plat); return os;}
 
 /// \brief Print information of all devices in a given context
 /// \ingroup Utility
 template <typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const Context &ctx)
+inline OutputStream &operator<< (OutputStream &os, const Context &ctx)
 {vsmc::CLQuery::print(os, ctx); return os;}
 
 /// \brief Print information a given device
@@ -463,13 +463,13 @@ OutputStream &operator<< (OutputStream &os, const Device &dev)
 /// \brief Print information a given program
 /// \ingroup Utility
 template <typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const Program &prog)
+inline OutputStream &operator<< (OutputStream &os, const Program &prog)
 {vsmc::CLQuery::print(os, prog); return os;}
 
 /// \brief Print information a given kernel
 /// \ingroup Utility
 template <typename OutputStream>
-OutputStream &operator<< (OutputStream &os, const Kernel &kern)
+inline OutputStream &operator<< (OutputStream &os, const Kernel &kern)
 {vsmc::CLQuery::print(os, kern); return os;}
 
 } // namespace cl
