@@ -64,11 +64,9 @@ class beta_distribution
 
     void param (const param_type &par) {param_ = par;}
 
-    static VSMC_CONSTEXPR RealType min VSMC_MACRO_NO_EXPANSION () const
-    {return 0;}
+    static VSMC_CONSTEXPR RealType min VSMC_MACRO_NO_EXPANSION () {return 0;}
 
-    static VSMC_CONSTEXPR RealType max VSMC_MACRO_NO_EXPANSION () const
-    {return 1;}
+    static VSMC_CONSTEXPR RealType max VSMC_MACRO_NO_EXPANSION () {return 1;}
 
     private :
 
@@ -79,27 +77,27 @@ class beta_distribution
 
 template <typename RealType>
 inline bool operator== (
-        const typename beta_distribution<RealType>::param_type &par1,
-        const typename beta_distribution<RealType>::param_type &par2)
-{return par1.shape1() == par2.shape1() && par1.shape2() == par2.shape2();}
+        const typename beta_distribution<RealType>::param_type &p1,
+        const typename beta_distribution<RealType>::param_type &p2)
+{return p1.shape1() == p2.shape1() && p1.shape2() == p2.shape2();}
 
 template <typename RealType>
 inline bool operator!= (
-        const typename beta_distribution<RealType>::param_type &par1,
-        const typename beta_distribution<RealType>::param_type &par2)
-{return !(par1 == par2);}
+        const typename beta_distribution<RealType>::param_type &p1,
+        const typename beta_distribution<RealType>::param_type &p2)
+{return !(p1 == p2);}
 
 template <typename RealType>
 inline bool operator== (
-        const beta_distribution<RealType> &dist1,
-        const beta_distribution<RealType> &dist2)
-{return dist1.shape1() == dist2.shape1() && dist1.shape2() == dist2.shape2();}
+        const beta_distribution<RealType> &d1,
+        const beta_distribution<RealType> &d2)
+{return d1.shape1() == d2.shape1() && d1.shape2() == d2.shape2();}
 
 template <typename RealType>
 inline bool operator!= (
-        const beta_distribution<RealType> &dist1,
-        const beta_distribution<RealType> &dist2)
-{return !(dist1 == dist2);}
+        const beta_distribution<RealType> &d1,
+        const beta_distribution<RealType> &d2)
+{return !(d1 == d2);}
 
 template <typename CharT, typename Traits, typename RealType>
 inline std::basic_ostream<CharT, Traits> &operator<< (
