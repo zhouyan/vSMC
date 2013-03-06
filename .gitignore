@@ -3,7 +3,6 @@ build*
 doc/main.md
 example/pet/pet_conv.data
 example/pet/pet_real.data
-include/cl.hpp
 user_options.cmake
 
 *-cilk.cpp
