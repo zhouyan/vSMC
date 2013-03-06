@@ -5,6 +5,8 @@
 
 namespace vsmc { namespace cxx11 {
 
+/// \brief Laplace distribution
+/// \ingroup Random
 template <typename RealType = double>
 class laplace_distribution
 {
@@ -78,30 +80,40 @@ class laplace_distribution
     uniform_real_distribution<RealType> runif_;
 }; // class laplace_distribution
 
+/// \brief Laplace distribution comparison
+/// \ingroup Random
 template <typename RealType>
 inline bool operator== (
         const typename laplace_distribution<RealType>::param_type &p1,
         const typename laplace_distribution<RealType>::param_type &p2)
 {return p1.location() == p2.location() && p1.scale() == p2.scale();}
 
+/// \brief Laplace distribution comparison
+/// \ingroup Random
 template <typename RealType>
 inline bool operator!= (
         const typename laplace_distribution<RealType>::param_type &p1,
         const typename laplace_distribution<RealType>::param_type &p2)
 {return !(p1 == p2);}
 
+/// \brief Laplace distribution comparison
+/// \ingroup Random
 template <typename RealType>
 inline bool operator== (
         const laplace_distribution<RealType> &d1,
         const laplace_distribution<RealType> &d2)
 {return d1.location() == d2.location() && d1.scale() == d2.scale();}
 
+/// \brief Laplace distribution comparison
+/// \ingroup Random
 template <typename RealType>
 inline bool operator!= (
         const laplace_distribution<RealType> &d1,
         const laplace_distribution<RealType> &d2)
 {return !(d1 == d2);}
 
+/// \brief Laplace distribution output
+/// \ingroup Random
 template <typename CharT, typename Traits, typename RealType>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os,
@@ -119,10 +131,12 @@ inline std::basic_ostream<CharT, Traits> &operator<< (
     return os;
 }
 
+/// \brief Laplace distribution input
+/// \ingroup Random
 template <typename CharT, typename Traits, typename RealType>
-inline std::basic_istream<CharT, Traits> &operator<< (
+inline std::basic_istream<CharT, Traits> &operator>> (
         std::basic_istream<CharT, Traits> &is,
-        const laplace_distribution<RealType> &dist)
+        laplace_distribution<RealType> &dist)
 {
     internal::SaveIOFlags<CharT, Traits> flags(is);
     is.flags(std::ios_base::dec | std::ios_base::skipws);

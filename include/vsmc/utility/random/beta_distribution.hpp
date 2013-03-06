@@ -5,6 +5,8 @@
 
 namespace vsmc { namespace cxx11 {
 
+/// \brief Beta distribution
+/// \ingroup Random
 template <typename RealType = double>
 class beta_distribution
 {
@@ -75,30 +77,40 @@ class beta_distribution
     gamma_distribution<RealType> rgamma2_;
 }; // class beta_distribution
 
+/// \brief Beta distribution comparison
+/// \ingroup Random
 template <typename RealType>
 inline bool operator== (
         const typename beta_distribution<RealType>::param_type &p1,
         const typename beta_distribution<RealType>::param_type &p2)
 {return p1.shape1() == p2.shape1() && p1.shape2() == p2.shape2();}
 
+/// \brief Beta distribution comparison
+/// \ingroup Random
 template <typename RealType>
 inline bool operator!= (
         const typename beta_distribution<RealType>::param_type &p1,
         const typename beta_distribution<RealType>::param_type &p2)
 {return !(p1 == p2);}
 
+/// \brief Beta distribution comparison
+/// \ingroup Random
 template <typename RealType>
 inline bool operator== (
         const beta_distribution<RealType> &d1,
         const beta_distribution<RealType> &d2)
 {return d1.shape1() == d2.shape1() && d1.shape2() == d2.shape2();}
 
+/// \brief Beta distribution comparison
+/// \ingroup Random
 template <typename RealType>
 inline bool operator!= (
         const beta_distribution<RealType> &d1,
         const beta_distribution<RealType> &d2)
 {return !(d1 == d2);}
 
+/// \brief Beta distribution output
+/// \ingroup Random
 template <typename CharT, typename Traits, typename RealType>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os,
@@ -116,10 +128,12 @@ inline std::basic_ostream<CharT, Traits> &operator<< (
     return os;
 }
 
+/// \brief Beta distribution input
+/// \ingroup Random
 template <typename CharT, typename Traits, typename RealType>
-inline std::basic_istream<CharT, Traits> &operator<< (
+inline std::basic_istream<CharT, Traits> &operator>> (
         std::basic_istream<CharT, Traits> &is,
-        const beta_distribution<RealType> &dist)
+        beta_distribution<RealType> &dist)
 {
     internal::SaveIOFlags<CharT, Traits> flags(is);
     is.flags(std::ios_base::dec | std::ios_base::skipws);
