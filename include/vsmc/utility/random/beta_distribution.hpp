@@ -29,6 +29,7 @@ class beta_distribution
         }
 
         RealType shape1 () const {return shape1_;}
+
         RealType shape2 () const {return shape2_;}
 
         private :
@@ -39,16 +40,16 @@ class beta_distribution
 
     beta_distribution (RealType shape1 = 1, RealType shape2 = 1) :
         param_(param_type(shape1, shape2)),
-        gamma1_(shape1, 1), gamma2_(shape2, 1) {}
+        rgamma1_(shape1, 1), rgamma2_(shape2, 1) {}
 
     beta_distribution (const param_type &par) :
-        param_(par), gamma1_(param_.shape1()), gamma2_(param_.shape2()) {}
+        param_(par), rgamma1_(param_.shape1()), rgamma2_(param_.shape2()) {}
 
     template <typename Eng>
     RealType operator() (Eng &eng)
     {
-        RealType x = gamma1_(eng);
-        RealType y = gamma2_(eng);
+        RealType x = rgamma1_(eng);
+        RealType y = rgamma2_(eng);
 
         return x / (x + y);
     }
@@ -63,15 +64,17 @@ class beta_distribution
 
     void param (const param_type &par) {param_ = par;}
 
-    RealType min VSMC_MACRO_NO_EXPANSION () const {return 0;}
+    static VSMC_CONSTEXPR RealType min VSMC_MACRO_NO_EXPANSION () const
+    {return 0;}
 
-    RealType max VSMC_MACRO_NO_EXPANSION () const {return 1;}
+    static VSMC_CONSTEXPR RealType max VSMC_MACRO_NO_EXPANSION () const
+    {return 1;}
 
     private :
 
     param_type param_;
-    gamma_distribution<RealType> gamma1_;
-    gamma_distribution<RealType> gamma2_;
+    gamma_distribution<RealType> rgamma1_;
+    gamma_distribution<RealType> rgamma2_;
 }; // class beta_distribution
 
 template <typename RealType>
@@ -122,11 +125,11 @@ inline std::basic_istream<CharT, Traits> &operator<< (
 {
     internal::SaveIOFlags<CharT, Traits> flags(is);
     is.flags(std::ios_base::dec | std::ios_base::skipws);
-    RealType s1;
-    RealType s2;
-    is >> s1 >> s2;
+    RealType p1;
+    RealType p2;
+    is >> p1 >> p2;
     if (!is.fail())
-        dist.param(typename beta_distribution<RealType>::param_type(s1, s2));
+        dist.param(typename beta_distribution<RealType>::param_type(p1, p2));
 
     return is;
 }
