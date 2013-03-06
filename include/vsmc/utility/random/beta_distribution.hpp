@@ -146,6 +146,6 @@ inline std::basic_istream<CharT, Traits> &operator>> (
     return is;
 }
 
-} } // namespace beta_distribution
+} } // namespace vsmc::cxx11
 
 #endif // VSMC_UTILITY_RANDOM_BETA_DISTRIBUTION_HPP
