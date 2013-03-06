@@ -12,6 +12,13 @@ IF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
     INCLUDE (${PROJECT_SOURCE_DIR}/user_options.cmake)
 ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
 
+# Options
+OPTION (VSMC_ENABLE_TEST            "Enable building tests"    ON)
+OPTION (VSMC_ENABLE_EXAMPLE         "Enable building examples" ON)
+OPTION (VSMC_ENABLE_CXX11LIB_FUTURE "Enable C++11 <future>"    OFF)
+OPTION (VSMC_ENABLE_MPI             "Enable MPI"               OFF)
+OPTION (VSMC_ENABLE_MPI_TEST        "Enable MPI tests"         OFF)
+
 # Configuration files
 FILE (READ ${PROJECT_SOURCE_DIR}/README.md README)
 SET (DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
@@ -23,25 +30,17 @@ CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/doc/main.md.in
     ${PROJECT_SOURCE_DIR}/doc/main.md)
 
-# Options
-OPTION (VSMC_DISABLE_BUILD   "Disable building all")
-OPTION (VSMC_DISABLE_TEST    "Disable building tests")
-OPTION (VSMC_DISABLE_EXAMPLE "Disable building examples")
-OPTION (VSMC_TRY_FUTURE      "Try C++11 <future>")
-
 IF (NOT VSMC_INSTALL_INC_DIR)
     SET (VSMC_INSTALL_INC_DIR include)
 ENDIF (NOT VSMC_INSTALL_INC_DIR)
 
 # Installation
-
 INSTALL (FILES include/vsmc.hpp DESTINATION ${VSMC_INSTALL_INC_DIR})
 INSTALL (FILES include/vsmc_rcpp.hpp DESTINATION ${VSMC_INSTALL_INC_DIR})
 INSTALL (DIRECTORY include/vsmc/ DESTINATION ${VSMC_INSTALL_INC_DIR}/vsmc
     PATTERN ".DS_Store" EXCLUDE PATTERN "*.swp" EXCLUDE)
 
 # Documentations
-
 INCLUDE (FindDoxygen)
 FILE (GLOB_RECURSE DOC_SOURCE_FILES      ${PROJECT_SOURCE_DIR}/doc/*.*)
 FILE (GLOB_RECURSE DOC_INCLUDE_FILES_C   ${PROJECT_SOURCE_DIR}/include/*.h)
@@ -137,7 +136,6 @@ ENDIF (VSMC_STDTBB_FOUND)
 INCLUDE (vSMCFindTuple)
 
 # Third-patry features
-
 SET (VSMC_USE_SEQ TRUE)
 
 IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
@@ -192,9 +190,9 @@ IF (VSMC_OPENCL_FOUND)
     SET (VSMC_CL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 ENDIF (VSMC_OPENCL_FOUND)
 
-IF (VSMC_BUILD_MPI)
+IF (VSMC_ENABLE_MPI)
     INCLUDE (vSMCFindMPI)
-ENDIF (VSMC_BUILD_MPI)
+ENDIF (VSMC_ENABLE_MPI)
 IF (VSMC_MPI_FOUND)
     INCLUDE_DIRECTORIES (SYSTEM ${MPI_CXX_INCLUDE_PATH})
 ENDIF (VSMC_MPI_FOUND)
@@ -233,7 +231,6 @@ IF (MSVC)
 ENDIF (MSVC)
 
 # SMP backends
-
 MESSAGE (STATUS "Build with Sequential")
 SET (SMP_EXECUTABLES seq)
 
