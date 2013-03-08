@@ -5,7 +5,7 @@
 #define VSMC_GNUC_NONEXIST 1000000UL
 
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
-#if defined(__GNUC__) && defined (__GNUNC_MINOR__)
+#if defined(__GNUC__) && defined(__GNUC_MINOR__)
 
 // C++11 language features
 
@@ -233,7 +233,7 @@
 #endif
 #endif
 
-#endif // defined(__GNUC__) && defined (__GNUNC_MINOR__)
+#endif // defined(__GNUC__) && defined(__GNUC_MINOR__)
 #endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 
 #endif // VSMC_INTERNAL_COMPILER_INTEL_HPP
