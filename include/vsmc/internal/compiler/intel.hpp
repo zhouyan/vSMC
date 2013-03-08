@@ -4,6 +4,8 @@
 #define VSMC_INTEL_NONEXIST 1000000UL
 
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
+#if defined(__GNUC__) && defined (__GNUNC_MINOR__)
+#if __GNUC__ >= 4 && __GNUC__MINOR__ >= 6
 
 #if __INTEL_COMPILER >= VSMC_INTEL_NONEXIST
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
@@ -203,6 +205,8 @@
 #endif
 #endif
 
+#endif // __GNUC__ >= 4 && __GNUC__MINOR__ >= 6
+#endif // defined(__GNUC__) && defined (__GNUNC_MINOR__)
 #endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 
 #endif // VSMC_INTERNAL_COMPILER_INTEL_HPP

@@ -1,6 +1,8 @@
 #ifndef VSMC_INTERNAL_CXX11_TYPE_TRAITS_HPP
 #define VSMC_INTERNAL_CXX11_TYPE_TRAITS_HPP
 
+#include <vsmc/internal/config.hpp>
+
 namespace vsmc { namespace cxx11 {
 
 // integral_constant
