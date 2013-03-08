@@ -4,7 +4,21 @@
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/smp/adapter.hpp>
 #include <vsmc/smp/backend_seq.hpp>
+// #include <vsmc/smp/backend_cilk.hpp>
+// #include <vsmc/smp/backend_gcd.hpp>
+// #include <vsmc/smp/backend_omp.hpp>
+// #include <vsmc/smp/backend_ppl.hpp>
+// #include <vsmc/smp/backend_std.hpp>
+// #include <vsmc/smp/backend_tbb.hpp>
+// #include <vsmc/mpi/backend_mpi.hpp>
+// #include <vsmc/opencl/backend_cl.hpp>
 #include <vsmc/utility/integrate/numeric_seq.hpp>
+// #include <vsmc/utility/integrate/numeric_cilk.hpp>
+// #include <vsmc/utility/integrate/numeric_gcd.hpp>
+// #include <vsmc/utility/integrate/numeric_omp.hpp>
+// #include <vsmc/utility/integrate/numeric_ppl.hpp>
+// #include <vsmc/utility/integrate/numeric_std.hpp>
+// #include <vsmc/utility/integrate/numeric_tbb.hpp>
 
 #endif // VSMC_HPP
 
