@@ -1,4 +1,4 @@
-FILE (READ ${PROJECT_SOURCE_DIR}/test/utility/utility_stdtbb.cpp
+FILE (READ ${PROJECT_SOURCE_DIR}/test/utility/src/utility_stdtbb.cpp
     VSMC_STDTBB_TEST_SOURCE)
 
 IF (NOT VSMC_STDTBB_FOUND)

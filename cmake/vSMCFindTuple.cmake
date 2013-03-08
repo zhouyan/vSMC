@@ -1,4 +1,4 @@
-FILE (READ ${PROJECT_SOURCE_DIR}/test/utility/utility_tuple_manip.cpp
+FILE (READ ${PROJECT_SOURCE_DIR}/test/utility/src/utility_tuple_manip.cpp
     VSMC_TUPLE_TEST_SOURCE)
 
 IF (NOT VSMC_TUPLE_FOUND)

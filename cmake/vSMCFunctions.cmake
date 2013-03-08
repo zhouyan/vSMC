@@ -31,20 +31,14 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
     ENDIF (${smp} STREQUAL "cilk")
 
     CONFIGURE_FILE (
-        ${PROJECT_SOURCE_DIR}/${header}.hpp
-        ${PROJECT_SOURCE_DIR}/${header}-${smp}.hpp)
+        ${PROJECT_SOURCE_DIR}/include/${header}.hpp
+        ${PROJECT_BINARY_DIR}/include/${header}-${smp}.hpp)
     CONFIGURE_FILE (
-        ${PROJECT_SOURCE_DIR}/${source}.cpp
-        ${PROJECT_SOURCE_DIR}/${source}-${smp}.cpp)
+        ${PROJECT_SOURCE_DIR}/src/${source}.cpp
+        ${PROJECT_BINARY_DIR}/src/${source}-${smp}.cpp)
 
-    SET (GENERATED_SOURCE ${GENERATED_SOURCE}
-        ${PROJECT_SOURCE_DIR}/${header}-${smp}.hpp
-        CACHE INTERNAL "Generated source")
-    SET (GENERATED_SOURCE ${GENERATED_SOURCE}
-        ${PROJECT_SOURCE_DIR}/${source}-${smp}.cpp
-        CACHE INTERNAL "Generated source")
-
-    ADD_EXECUTABLE (${source}-${smp} ${source}-${smp}.cpp)
+    ADD_EXECUTABLE (${source}-${smp}
+        ${PROJECT_BINARY_DIR}/src/${source}-${smp}.cpp)
 
     IF (${smp} STREQUAL "gcd")
         TARGET_LINK_LIBRARIES (${source}-${smp} ${GCD_LINK_LIBRARIES})
