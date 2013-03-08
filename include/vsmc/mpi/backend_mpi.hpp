@@ -446,15 +446,15 @@ class StateMPI : public BaseState
         for (int r = 0; r != world_.size(); ++r) {
             if (rank_this == r) {
                 for (std::size_t i = 0; i != copy_recv.size(); ++i) {
-                    typename BaseState::state_pack_type pack;
-                    world_.recv(copy_recv_[i].first, copy_tag_, pack);
-                    this->state_unpack(copy_recv[i].second, pack);
+                    world_.recv(copy_recv_[i].first, copy_tag_, pack_recv_);
+                    this->state_unpack(copy_recv[i].second, pack_recv_);
                 }
             } else {
                 for (std::size_t i = 0; i != copy_send.size(); ++i) {
                     if (copy_send_[i].first == r) {
-                        world_.send(copy_send_[i].first, copy_tag_,
-                                this->state_pack(copy_send[i].second));
+                        pack_send_ = this->state_pack(copy_send[i].second);
+                        world_.send(copy_send_[i].first,
+                                copy_tag_, pack_send_);
                     }
                 }
             }
@@ -474,6 +474,8 @@ class StateMPI : public BaseState
     std::vector<size_type> copy_from_this_;
     std::vector<std::pair<int, size_type> > copy_recv_;
     std::vector<std::pair<int, size_type> > copy_send_;
+    typename BaseState::state_pack_type pack_recv_;
+    typename BaseState::state_pack_type pack_send_;
 }; // class StateMPI
 
 } // namespace vsmc
