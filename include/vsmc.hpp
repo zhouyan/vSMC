@@ -46,7 +46,3 @@
 /// \defgroup Integrate Integration
 /// \ingroup Utility
 /// \brief Numerical integration
-///
-/// \defgroup Random Random distributions
-/// \ingroup Utility
-/// \brief C++11 style random distributions
