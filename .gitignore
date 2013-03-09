@@ -1,4 +1,5 @@
 .R*
 build*
 doc/main.md
+include/cl.hpp
 user_options.cmake
