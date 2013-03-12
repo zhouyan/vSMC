@@ -64,7 +64,7 @@ class Backup
         return true;
     }
 
-    bool restore (T &dst) const {restore(&dst);}
+    bool restore (T &dst) const {return restore(&dst);}
 
     private :
 
