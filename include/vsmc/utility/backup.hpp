@@ -75,7 +75,7 @@ class Backup
 /// \brief Backup and restore objects in scope
 /// \ingroup Uitlity
 template <typename T>
-BackupLocker
+class BackupLocker
 {
     public :
 

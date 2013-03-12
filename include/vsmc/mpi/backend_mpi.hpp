@@ -155,12 +155,7 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
 
     void internal_barrier (bool use) {internal_barrier_ = use;}
 
-    private :
-
-    boost::mpi::communicator world_;
-    bool internal_barrier_;
-    size_type resample_size_;
-    mutable std::vector<std::vector<double> > weight_all_;
+    protected :
 
     void normalize_log_weight ()
     {
@@ -208,6 +203,57 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
 
         barrier();
     }
+
+    double compute_ess (const double *first, bool use_log) const
+    {
+        using std::exp;
+
+        barrier();
+
+        const size_type N = static_cast<size_type>(this->size());
+        const std::vector<double> &weight = this->weight_vec();
+
+        work_space_.resize(N);
+        double *const wptr = &work_space_[0];
+        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+                first - wptr, N, WeightSetMPI::ess);
+        std::memcpy(wptr, first, sizeof(double) * N);
+
+        if (use_log) {
+            for (size_type i = 0; i != N; ++i)
+                wptr[i] = exp(wptr[i]);
+        }
+
+        double lcoeff = 0;
+        for (size_type i = 0; i != N; ++i) {
+            wptr[i] *= weight[i];
+            lcoeff += wptr[i];
+        }
+        double gcoeff = 0;
+        boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
+        gcoeff = 1 / gcoeff;
+        for (size_type i = 0; i != N; ++i)
+            wptr[i] *= gcoeff;
+
+        double less = 0;
+        for (size_type i = 0; i != N; ++i)
+            less += wptr[i] * wptr[i];
+        double gess = 0;
+        boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
+        gess = 1 / gess;
+
+        barrier();
+
+        return gess;
+    }
+
+    private :
+
+    boost::mpi::communicator world_;
+    bool internal_barrier_;
+    size_type resample_size_;
+    mutable std::vector<double> work_space_;
+    mutable std::vector<std::vector<double> > weight_all_;
 }; // class WeightSetMPI
 
 /// \brief Particle::value_type subtype using MPI

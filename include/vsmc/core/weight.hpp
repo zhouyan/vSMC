@@ -22,16 +22,64 @@ class WeightSet
 
     size_type size () const {return size_;}
 
-    /// \brief Get the ESS of the particle collection based on the current
-    /// weights
+    /// \brief ESS of the particle collection based on the current weights
     double ess () const {return ess_;}
 
+    /// \brief Compute ESS given (log) incremental weights
+    template <typename InputIter>
+    double ess (InputIter first, bool use_log) const
+    {
+        work_space_.resize(size_);
+        for (size_type i = 0; i != size_; ++i, ++first)
+            work_space_[i] = *first;
+
+        return compute_ess(&work_space_[0], use_log);
+    }
+
+    /// \brief Compute ESS given (log) incremental weights
+    template <typename RandomIter>
+    double ess (RandomIter first, int stride, bool use_log) const
+    {
+        work_space_.resize(size_);
+        for (size_type i = 0; i != size_; ++i, first += stride)
+            work_space_[i] = *first;
+
+        return compute_ess(&work_space_[0], use_log);
+    }
+
+    /// \brief Compute CESS given (log) incremental weights
+    template <typename InputIter>
+    double cess (InputIter first, bool use_log) const
+    {
+        work_space_.resize(size_);
+        for (size_type i = 0; i != size_; ++i, ++first)
+            work_space_[i] = *first;
+
+        return compute_cess(&work_space_[0], use_log);
+    }
+
+    /// \brief Compute CESS given (log) incremental weights
+    template <typename RandomIter>
+    double cess (RandomIter first, int stride, bool use_log) const
+    {
+        work_space_.resize(size_);
+        for (size_type i = 0; i != size_; ++i, first += stride)
+            work_space_[i] = *first;
+
+        return compute_cess(&work_space_[0], use_log);
+    }
+
+    /// \brief Size of the weight set for the purpose of resampling
     size_type resample_size () const {return size_;}
 
+    /// \brief Read normalized weights through an output iterator for the
+    /// purpose of resampling
     template <typename OutputIter>
     OutputIter read_resample_weight (OutputIter first) const
     {return read_weight(first);}
 
+    /// \brief Read normalized weights through a random access iterator for
+    /// the purpose of resampling
     template <typename RandomIter>
     RandomIter read_resample_weight (RandomIter first, int stride) const
     {return read_weight(first, stride);}
@@ -259,6 +307,8 @@ class WeightSet
 
     virtual void log_weight2weight ()
     {
+        using std::log;
+
 #if VSMC_USE_MKL
         ::vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
 #else
@@ -269,6 +319,8 @@ class WeightSet
 
     virtual void weight2log_weight ()
     {
+        using std::log;
+
 #if VSMC_USE_MKL
         ::vdLn(static_cast<MKL_INT>(size_), &weight_[0], &log_weight_[0]);
 #else
@@ -301,17 +353,91 @@ class WeightSet
         ess_ = 1 / ess_;
     }
 
+    virtual double compute_ess (const double *first, bool use_log) const
+    {
+        using std::exp;
+
+        double *wptr = VSMC_NULLPTR;
+        if (first == &work_space_[0]) {
+            wptr = &work_space_[0];
+        } else {
+            work_space_.resize(size_);
+            wptr = &work_space_[0];
+            VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+                    first - wptr, size_, WeightSet::ess);
+            std::memcpy(wptr, first, sizeof(double) * size_);
+        }
+
+        if (use_log) {
+#if VSMC_USE_MKL
+            ::vdExp(static_cast<MKL_INT>(size_), wptr, wptr);
+#else
+            for (size_type i = 0; i != size_; ++i)
+                wptr[i] = exp(wptr[i]);
+#endif
+        }
+
+        for (size_type i = 0; i != size_; ++i)
+            wptr[i] *= weight_[i];
+        double coeff = 0;
+        for (size_type i = 0; i != size_; ++i)
+            coeff += wptr[i];
+        coeff = 1 / coeff;
+        for (size_type i = 0; i != size_; ++i)
+            wptr[i] *= coeff;
+
+        double res = 0;
+        for (size_type i = 0; i != size_; ++i)
+            res += wptr[i] * wptr[i];
+        res = 1 / res;
+
+        return res;
+    }
+
+    virtual double compute_cess (const double *first, bool use_log) const
+    {
+        using std::exp;
+
+        double *wptr = VSMC_NULLPTR;
+        if (first == &work_space_[0]) {
+            wptr = &work_space_[0];
+        } else {
+            work_space_.resize(size_);
+            wptr = &work_space_[0];
+            VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+                    first - wptr, size_, WeightSet::cess);
+            std::memcpy(wptr, first, sizeof(double) * size_);
+        }
+
+        if (use_log) {
+#if VSMC_USE_MKL
+            ::vdExp(static_cast<MKL_INT>(size_), wptr, wptr);
+#else
+            for (size_type i = 0; i != size_; ++i)
+                wptr[i] = exp(wptr[i]);
+#endif
+        }
+
+        double above = 0;
+        double below = 0;
+        for (size_type i = 0; i != size_; ++i) {
+            above += weight_[i] * wptr[i];
+            below += weight_[i] * wptr[i] * wptr[i];
+        }
+
+        return above * above / below;
+    }
+
     private :
 
     size_type size_;
     double ess_;
     std::vector<double> weight_;
     std::vector<double> log_weight_;
+    mutable std::vector<double> work_space_;
 
     void post_set_log_weight ()
     {
-        using std::exp;
-
         normalize_log_weight();
         log_weight2weight();
         normalize_weight();
@@ -319,8 +445,6 @@ class WeightSet
 
     void post_set_weight ()
     {
-        using std::log;
-
         normalize_weight();
         weight2log_weight();
         normalize_log_weight();
