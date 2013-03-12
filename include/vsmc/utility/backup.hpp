@@ -16,9 +16,14 @@ class Backup
 
     Backup (const T *src) : backup_(new T(*src)), is_saved_(true) {}
 
+    Backup (const T &src) : backup_(new T(src)), is_saved_(true) {}
+
     Backup (const Backup<T> &other) :
         backup_(VSMC_NULLPTR), is_saved_(other.is_saved_)
-    {if (is_saved_) backup_ = new T(*(other.backup_));}
+    {
+        if (is_saved_)
+            backup_ = new T(*(other.backup_));
+    }
 
     Backup<T> &operator= (const Backup<T> &other)
     {
@@ -47,6 +52,8 @@ class Backup
         is_saved_ = true;
     }
 
+    void save (const T &src) {save(&src);}
+
     bool restore (T *dst) const
     {
         if (!is_saved_)
@@ -57,11 +64,30 @@ class Backup
         return true;
     }
 
+    bool restore (T &dst) const {restore(&dst);}
+
     private :
 
     T *backup_;
     bool is_saved_;
 };
+
+/// \brief Backup and restore objects in scope
+/// \ingroup Uitlity
+template <typename T>
+BackupLocker
+{
+    public :
+
+    BackupLocker (T &src) : src_(src), backup_(src) {}
+    BackupLocker (T *src) : src_(*src), backup_(src) {}
+    ~BackupLocker () {src_ = backup_;}
+
+    private :
+
+    T &src_;
+    T backup_;
+}; // class BackupStatic
 
 } // namespace vsmc
 
