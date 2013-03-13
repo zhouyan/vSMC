@@ -253,6 +253,46 @@ class WeightSetMPI : public WeightSet
         return gess;
     }
 
+    double compute_cess (const double *first, bool use_log) const
+    {
+        using std::exp;
+
+        barrier();
+
+        const size_type N = static_cast<size_type>(this->size());
+        const double *const weight = this->weight_ptr();
+
+        work_space_.resize(N);
+        double *const wptr = &work_space_[0];
+        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+                first - wptr, N, WeightSetMPI::ess);
+        std::memcpy(wptr, first, sizeof(double) * N);
+
+        if (use_log) {
+#if VSMC_USE_MKL
+            ::vdExp(static_cast<MKL_INT>(N), wptr, wptr);
+#else
+            for (size_type i = 0; i != N; ++i)
+                wptr[i] = exp(wptr[i]);
+#endif
+        }
+
+        double labove = 0;
+        double lbelow = 0;
+        for (size_type i = 0; i != N; ++i) {
+            labove += weight[i] * wptr[i];
+            lbelow += weight[i] * wptr[i] * wptr[i];
+        }
+        double gabove = 0;
+        double gbelow = 0;
+        boost::mpi::all_reduce(world_, labove, gabove, std::plus<double>());
+        boost::mpi::all_reduce(world_, lbelow, gbelow, std::plus<double>());
+
+        barrier();
+
+        return gabove * gabove / gbelow;
+    }
+
     private :
 
     boost::mpi::communicator world_;
