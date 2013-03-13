@@ -6,6 +6,10 @@
 #include <vsmc/utility/seed.hpp>
 #include <boost/mpi.hpp>
 
+#if VSMC_USE_MKL
+#include <mkl_vml.h>
+#endif
+
 namespace vsmc {
 
 /// \brief MPI Environment
@@ -220,8 +224,12 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
         std::memcpy(wptr, first, sizeof(double) * N);
 
         if (use_log) {
+#if VSMC_USE_MKL
+            ::vdExp(static_cast<MKL_INT>(N), wptr, wptr);
+#else
             for (size_type i = 0; i != N; ++i)
                 wptr[i] = exp(wptr[i]);
+#endif
         }
 
         double lcoeff = 0;
