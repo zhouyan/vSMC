@@ -74,17 +74,15 @@ class MPICommunicator
 
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
-template <typename BaseState, typename ID>
-class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
+template <typename ID>
+class WeightSetMPI : public WeightSet
 {
-    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
-
     public :
 
-    typedef typename traits::SizeTypeTrait<base>::type size_type;
+    typedef WeightSet::size_type size_type;
 
     explicit WeightSetMPI (size_type N) :
-        base(N), world_(MPICommunicator<ID>::instance().get(),
+        WeightSet(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate), internal_barrier_(true),
         resample_size_(0)
     {
@@ -139,8 +137,8 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        std::vector<double> &weight = this->weight_vec();
-        std::vector<double> &log_weight = this->log_weight_vec();
+        double *const weight = this->weight_ptr();
+        double *const log_weight = this->log_weight_ptr();
 
         this->set_ess(static_cast<double>(resample_size_));
         double ew = 1 / this->ess();
@@ -166,7 +164,7 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        std::vector<double> &log_weight = this->log_weight_vec();
+        double *const log_weight = this->log_weight_ptr();
 
         double lmax_weight = log_weight[0];
         for (size_type i = 0; i != N; ++i)
@@ -186,7 +184,7 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        std::vector<double> &weight = this->weight_vec();
+        double *const weight = this->weight_ptr();
 
         double lcoeff = 0;
         for (size_type i = 0; i != N; ++i)
@@ -215,7 +213,7 @@ class WeightSetMPI : public traits::WeightSetTypeTrait<BaseState>::type
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        const std::vector<double> &weight = this->weight_vec();
+        const double *const weight = this->weight_ptr();
 
         work_space_.resize(N);
         double *const wptr = &work_space_[0];
@@ -272,7 +270,7 @@ class StateMPI : public BaseState
     public :
 
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
-    typedef WeightSetMPI<BaseState, ID> weight_set_type;
+    typedef WeightSetMPI<ID> weight_set_type;
 
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),

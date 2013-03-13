@@ -86,7 +86,7 @@ template <typename, typename B = Functor> class PathEvalCL;
 // MPI
 struct MPIDefault;
 template <typename> class MPICommunicator;
-template <typename, typename> class WeightSetMPI;
+template <typename> class WeightSetMPI;
 template <typename, typename ID = MPIDefault> class StateMPI;
 
 // SMP State
