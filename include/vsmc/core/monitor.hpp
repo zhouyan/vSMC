@@ -210,26 +210,27 @@ class Monitor
 
         VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Monitor::eval, EVALUATION);
 
-        result_.resize(dim_);
-        weight_.resize(particle.size());
-        buffer_.resize(particle.size() * dim_);
-        eval_(iter, dim_, particle, &buffer_[0]);
-        particle.read_weight(&weight_[0]);
+        const std::size_t N = static_cast<std::size_t>(particle.size());
+        double *const result = malloc_result(dim_);
+        double *const buffer = malloc_eval_integrand(N * dim_);
+        double *const weight = malloc_weight(N);
+        particle.read_weight(weight);
+
+        eval_(iter, dim_, particle, buffer);
         if (dim_ == 1) {
             double res = 0;
-            for (std::size_t i = 0; i != weight_.size(); ++i)
-                res += buffer_[i] * weight_[i];
-            result_[0] = res;
+            for (std::size_t i = 0; i != N; ++i)
+                res += buffer[i] * weight[i];
+            result[0] = res;
         } else {
-            ISIntegrate is_inte;
-            is_inte(static_cast<ISIntegrate::size_type>(particle.size()),
+            is_integrate_(static_cast<ISIntegrate::size_type>(N),
                     static_cast<ISIntegrate::size_type>(dim_),
-                    &buffer_[0], &weight_[0], &result_[0]);
+                    buffer, weight, result);
         }
 
         index_.push_back(iter);
         for (std::size_t d = 0; d != dim_; ++d)
-            record_.push_back(result_[d]);
+            record_.push_back(result[d]);
     }
 
     /// \brief Clear all records of the index and integrations
@@ -248,6 +249,29 @@ class Monitor
     /// \brief Turn off the recording
     void turnoff () {recording_ = false;}
 
+    protected :
+
+    virtual double *malloc_result (std::size_t N)
+    {
+        result_.resize(N);
+
+        return &result_[0];
+    }
+
+    virtual double *malloc_weight (std::size_t N)
+    {
+        weight_.resize(N);
+
+        return &weight_[0];
+    }
+
+    virtual double *malloc_eval_integrand (std::size_t N)
+    {
+        buffer_.resize(N);
+
+        return &buffer_[0];
+    }
+
     private :
 
     std::size_t dim_;
@@ -258,6 +282,7 @@ class Monitor
     std::vector<double> result_;
     std::vector<double> weight_;
     std::vector<double> buffer_;
+    ISIntegrate is_integrate_;
 }; // class Monitor
 
 } // namespace vsmc

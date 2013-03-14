@@ -155,8 +155,8 @@ class Path
         VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Path::eval, EVALUATION);
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
-        double *buffer = malloc_eval_integrand(N);
-        double *weight = malloc_weight(N);
+        double *const buffer = malloc_eval_integrand(N);
+        double *const weight = malloc_weight(N);
         particle.read_weight(weight);
 
         index_.push_back(iter);

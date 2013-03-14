@@ -87,17 +87,19 @@ class Resample<cxx11::integral_constant<ResampleScheme, Residual> >
 
         residual_.resize(N);
         integral_.resize(N);
+        double *const rptr = &residual_[0];
+        double *const iptr = &integral_[0];
         for (SizeType i = 0; i != N; ++i)
-            residual_[i] = modf(N * weight[i], &integral_[i]);
+            rptr[i] = modf(N * weight[i], iptr + i);
         double dsize = 0;
         for (SizeType i = 0; i != N; ++i)
-            dsize += residual_[i];
+            dsize += rptr[i];
         SizeType size = static_cast<SizeType>(dsize);
         for (SizeType i = 0; i != N; ++i)
-            residual_[i] /= dsize;
-        internal::multinomial(N, size, rng, &residual_[0], replication);
+            rptr[i] /= dsize;
+        internal::multinomial(N, size, rng, rptr, replication);
         for (SizeType i = 0; i != N; ++i)
-            replication[i] += static_cast<SizeType>(integral_[i]);
+            replication[i] += static_cast<SizeType>(iptr[i]);
         internal::normalize_replication(N, replication);
     }
 
@@ -187,21 +189,23 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualStratified> >
 
         residual_.resize(N);
         integral_.resize(N);
+        double *const rptr = &residual_[0];
+        double *const iptr = &integral_[0];
         for (SizeType i = 0; i != N; ++i) {
             replication[i] = 0;
-            residual_[i] = modf(N * weight[i], &integral_[i]);
+            rptr[i] = modf(N * weight[i], iptr + i);
         }
         double dsize = 0;
         for (SizeType i = 0; i != N; ++i)
-            dsize += residual_[i];
+            dsize += rptr[i];
         SizeType size = static_cast<SizeType>(dsize);
         for (SizeType i = 0; i != N; ++i)
-            residual_[i] /= dsize;
+            rptr[i] /= dsize;
         SizeType j = 0;
         SizeType k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng);
-        double cw = residual_[0];
+        double cw = rptr[0];
         while (j != size) {
             while (j < cw * size - u && j != size) {
                 ++replication[k];
@@ -210,10 +214,10 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualStratified> >
             }
             if (k == N - 1)
                 break;
-            cw += residual_[++k];
+            cw += rptr[++k];
         }
         for (SizeType i = 0; i != N; ++i)
-            replication[i] += static_cast<SizeType>(integral_[i]);
+            replication[i] += static_cast<SizeType>(iptr[i]);
         internal::normalize_replication(N, replication);
     }
 
@@ -238,21 +242,23 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualSystematic> >
 
         residual_.resize(N);
         integral_.resize(N);
+        double *const rptr = &residual_[0];
+        double *const iptr = &integral_[0];
         for (SizeType i = 0; i != N; ++i) {
             replication[i] = 0;
-            residual_[i] = modf(N * weight[i], &integral_[i]);
+            rptr[i] = modf(N * weight[i], iptr + i);
         }
         double dsize = 0;
         for (SizeType i = 0; i != N; ++i)
-            dsize += residual_[i];
+            dsize += rptr[i];
         SizeType size = static_cast<SizeType>(dsize);
         for (SizeType i = 0; i != N; ++i)
-            residual_[i] /= dsize;
+            rptr[i] /= dsize;
         SizeType j = 0;
         SizeType k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng);
-        double cw = residual_[0];
+        double cw = rptr[0];
         while (j != size) {
             while (j < cw * size - u && j != size) {
                 ++replication[k];
@@ -260,10 +266,10 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualSystematic> >
             }
             if (k == N - 1)
                 break;
-            cw += residual_[++k];
+            cw += rptr[++k];
         }
         for (SizeType i = 0; i != N; ++i)
-            replication[i] += static_cast<SizeType>(integral_[i]);
+            replication[i] += static_cast<SizeType>(iptr[i]);
         internal::normalize_replication(N, replication);
     }
 

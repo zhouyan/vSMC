@@ -29,44 +29,44 @@ class WeightSet
     template <typename InputIter>
     double ess (InputIter first, bool use_log) const
     {
-        work_space_.resize(size_);
+        buffer_.resize(size_);
         for (size_type i = 0; i != size_; ++i, ++first)
-            work_space_[i] = *first;
+            buffer_[i] = *first;
 
-        return compute_ess(&work_space_[0], use_log);
+        return compute_ess(&buffer_[0], use_log);
     }
 
     /// \brief Compute ESS given (log) incremental weights
     template <typename RandomIter>
     double ess (RandomIter first, int stride, bool use_log) const
     {
-        work_space_.resize(size_);
+        buffer_.resize(size_);
         for (size_type i = 0; i != size_; ++i, first += stride)
-            work_space_[i] = *first;
+            buffer_[i] = *first;
 
-        return compute_ess(&work_space_[0], use_log);
+        return compute_ess(&buffer_[0], use_log);
     }
 
     /// \brief Compute CESS given (log) incremental weights
     template <typename InputIter>
     double cess (InputIter first, bool use_log) const
     {
-        work_space_.resize(size_);
+        buffer_.resize(size_);
         for (size_type i = 0; i != size_; ++i, ++first)
-            work_space_[i] = *first;
+            buffer_[i] = *first;
 
-        return compute_cess(&work_space_[0], use_log);
+        return compute_cess(&buffer_[0], use_log);
     }
 
     /// \brief Compute CESS given (log) incremental weights
     template <typename RandomIter>
     double cess (RandomIter first, int stride, bool use_log) const
     {
-        work_space_.resize(size_);
+        buffer_.resize(size_);
         for (size_type i = 0; i != size_; ++i, first += stride)
-            work_space_[i] = *first;
+            buffer_[i] = *first;
 
-        return compute_cess(&work_space_[0], use_log);
+        return compute_cess(&buffer_[0], use_log);
     }
 
     /// \brief Size of the weight set for the purpose of resampling
@@ -307,13 +307,15 @@ class WeightSet
 
     virtual void log_weight2weight ()
     {
-        using std::log;
+        using std::exp;
 
+        double *const wptr = weight_ptr();
+        const double *const lptr = log_weight_ptr();
 #if VSMC_USE_MKL
-        ::vdExp(static_cast<MKL_INT>(size_), &log_weight_[0], &weight_[0]);
+        ::vdExp(static_cast<MKL_INT>(size_), lptr, wptr);
 #else
         for (size_type i = 0; i != size_; ++i)
-            weight_[i] = exp(log_weight_[i]);
+            wptr[i] = exp(lptr[i]);
 #endif
     }
 
@@ -321,35 +323,39 @@ class WeightSet
     {
         using std::log;
 
+        const double *const wptr = weight_ptr();
+        double *const lptr = log_weight_ptr();
 #if VSMC_USE_MKL
-        ::vdLn(static_cast<MKL_INT>(size_), &weight_[0], &log_weight_[0]);
+        ::vdLn(static_cast<MKL_INT>(size_), wptr, lptr);
 #else
         for (size_type i = 0; i != size_; ++i)
-            log_weight_[i] = log(weight_[i]);
+            lptr[i] = log(wptr[i]);
 #endif
     }
 
     virtual void normalize_log_weight ()
     {
-        double max_weight = log_weight_[0];
+        double *const lptr = log_weight_ptr();
+        double max_weight = lptr[0];
         for (size_type i = 0; i != size_; ++i)
-            if (log_weight_[i] > max_weight)
-                max_weight = log_weight_[i];
+            if (lptr[i] > max_weight)
+                max_weight = lptr[i];
         for (size_type i = 0; i != size_; ++i)
-            log_weight_[i] -= max_weight;
+            lptr[i] -= max_weight;
     }
 
     virtual void normalize_weight ()
     {
+        double *const wptr = weight_ptr();
         double coeff = 0;
         for (size_type i = 0; i != size_; ++i)
-            coeff += weight_[i];
+            coeff += wptr[i];
         coeff = 1 / coeff;
         for (size_type i = 0; i != size_; ++i)
-            weight_[i] *= coeff;
+            wptr[i] *= coeff;
         ess_ = 0;
         for (size_type i = 0; i != size_; ++i)
-            ess_ += weight_[i] * weight_[i];
+            ess_ += wptr[i] * wptr[i];
         ess_ = 1 / ess_;
     }
 
@@ -357,38 +363,37 @@ class WeightSet
     {
         using std::exp;
 
-        double *wptr = VSMC_NULLPTR;
-        if (first == &work_space_[0]) {
-            wptr = &work_space_[0];
-        } else {
-            work_space_.resize(size_);
-            wptr = &work_space_[0];
+        if (first != &buffer_[0]) {
+            buffer_.resize(size_);
+            double *const ptr = &buffer_[0];
             VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
-                    first - wptr, size_, WeightSet::ess);
-            std::memcpy(wptr, first, sizeof(double) * size_);
+                    first - ptr, size_, WeightSet::ess);
+            std::memcpy(ptr, first, sizeof(double) * size_);
         }
+        double *const bptr = &buffer_[0];
+        const double *const wptr = weight_ptr();
 
         if (use_log) {
 #if VSMC_USE_MKL
-            ::vdExp(static_cast<MKL_INT>(size_), wptr, wptr);
+            ::vdExp(static_cast<MKL_INT>(size_), bptr, bptr);
 #else
             for (size_type i = 0; i != size_; ++i)
-                wptr[i] = exp(wptr[i]);
+                bptr[i] = exp(bptr[i]);
 #endif
         }
 
         for (size_type i = 0; i != size_; ++i)
-            wptr[i] *= weight_[i];
+            bptr[i] *= wptr[i];
         double coeff = 0;
         for (size_type i = 0; i != size_; ++i)
-            coeff += wptr[i];
+            coeff += bptr[i];
         coeff = 1 / coeff;
         for (size_type i = 0; i != size_; ++i)
-            wptr[i] *= coeff;
+            bptr[i] *= coeff;
 
         double res = 0;
         for (size_type i = 0; i != size_; ++i)
-            res += wptr[i] * wptr[i];
+            res += bptr[i] * bptr[i];
         res = 1 / res;
 
         return res;
@@ -398,31 +403,30 @@ class WeightSet
     {
         using std::exp;
 
-        double *wptr = VSMC_NULLPTR;
-        if (first == &work_space_[0]) {
-            wptr = &work_space_[0];
-        } else {
-            work_space_.resize(size_);
-            wptr = &work_space_[0];
+        if (first != &buffer_[0]) {
+            buffer_.resize(size_);
+            double *const ptr = &buffer_[0];
             VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
-                    first - wptr, size_, WeightSet::cess);
-            std::memcpy(wptr, first, sizeof(double) * size_);
+                    first - ptr, size_, WeightSet::cess);
+            std::memcpy(ptr, first, sizeof(double) * size_);
         }
+        double *const bptr = &buffer_[0];
+        const double *const wptr = weight_ptr();
 
         if (use_log) {
 #if VSMC_USE_MKL
-            ::vdExp(static_cast<MKL_INT>(size_), wptr, wptr);
+            ::vdExp(static_cast<MKL_INT>(size_), bptr, bptr);
 #else
             for (size_type i = 0; i != size_; ++i)
-                wptr[i] = exp(wptr[i]);
+                bptr[i] = exp(bptr[i]);
 #endif
         }
 
         double above = 0;
         double below = 0;
         for (size_type i = 0; i != size_; ++i) {
-            above += weight_[i] * wptr[i];
-            below += weight_[i] * wptr[i] * wptr[i];
+            above += wptr[i] * bptr[i];
+            below += wptr[i] * bptr[i] * bptr[i];
         }
 
         return above * above / below;
@@ -434,7 +438,7 @@ class WeightSet
     double ess_;
     std::vector<double> weight_;
     std::vector<double> log_weight_;
-    mutable std::vector<double> work_space_;
+    mutable std::vector<double> buffer_;
 
     void post_set_log_weight ()
     {
