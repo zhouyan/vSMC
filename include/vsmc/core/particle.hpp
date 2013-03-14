@@ -60,32 +60,32 @@ class Particle
 
     const ConstSingleParticle<T> &sp (size_type i) const {return csp_[i + 1];}
 
-    iterator begin() {return iterator(&sp(0));}
+    iterator begin () {return iterator(&sp(0));}
 
-    iterator end() {return iterator(&sp(size_));}
+    iterator end () {return iterator(&sp(size_));}
 
-    const_iterator begin() const {return cosnt_iterator(&sp(0));}
+    const_iterator begin () const {return cosnt_iterator(&sp(0));}
 
-    const_iterator end() const {return const_iterator(&sp(size_));}
+    const_iterator end () const {return const_iterator(&sp(size_));}
 
-    const_iterator cbegin() const {return const_iterator(&sp(0));}
+    const_iterator cbegin () const {return const_iterator(&sp(0));}
 
-    const_iterator cend() const {return const_iterator(&sp(size_));}
+    const_iterator cend () const {return const_iterator(&sp(size_));}
 
-    reverse_iterator rbegin() {return reverse_iterator(end());}
+    reverse_iterator rbegin () {return reverse_iterator(end());}
 
-    reverse_iterator rend() {return reverse_iterator(begin());}
+    reverse_iterator rend () {return reverse_iterator(begin());}
 
-    const_reverse_iterator rbegin() const
+    const_reverse_iterator rbegin () const
     {return const_reverse_iterator(end());}
 
-    const_reverse_iterator rend() const
+    const_reverse_iterator rend () const
     {return const_reverse_iterator(begin());}
 
-    const_reverse_iterator crbegin() const
+    const_reverse_iterator crbegin () const
     {return const_reverse_iterator(cend());}
 
-    const_reverse_iterator crend() const
+    const_reverse_iterator crend () const
     {return const_reverse_iterator(cbegin());}
 
     /// \brief Read and write access to the value collection object

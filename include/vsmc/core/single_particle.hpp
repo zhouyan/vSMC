@@ -40,10 +40,10 @@ class ParticleIterator :
 
     public :
 
-    typedef typename base_iterator_type::value_type      value_type;
+    typedef typename base_iterator_type::value_type value_type;
     typedef typename base_iterator_type::difference_type difference_type;
-    typedef typename base_iterator_type::pointer         pointer;
-    typedef typename base_iterator_type::reference       reference;
+    typedef typename base_iterator_type::pointer pointer;
+    typedef typename base_iterator_type::reference reference;
 
     ParticleIterator () : ptr_(VSMC_NULLPTR) {}
 
@@ -92,7 +92,7 @@ class ParticleIterator :
     pointer ptr_;
 }; // class ParticleIterator
 
-/// \brief Particle iterator operator==
+/// \brief ParticleIterator operator==
 /// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
@@ -105,7 +105,7 @@ inline bool operator== (
         (iter1->particle_ptr() == iter2->particle_ptr());
 }
 
-/// \brief Particle iterator operator!=
+/// \brief ParticleIterator operator!=
 /// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
@@ -118,7 +118,7 @@ inline bool operator!= (
         (iter1->particle_ptr() != iter2->particle_ptr());
 }
 
-/// \brief Particle iterator operator-
+/// \brief ParticleIterator operator-
 /// \ingroup Core
 template <typename T,
          template <typename> class SPType1, template <typename> class SPType2>
@@ -131,7 +131,7 @@ inline std::ptrdiff_t operator- (
     return iter1->id() - iter2->id();
 }
 
-/// \brief Particle iterator operator+
+/// \brief ParticleIterator operator+
 /// \ingroup Core
 template <typename T, template <typename> class SPType>
 inline ParticleIterator<T, SPType> operator+ (
@@ -144,14 +144,14 @@ inline ParticleIterator<T, SPType> operator+ (
     return new_iter;
 }
 
-/// \brief Particle iterator operator+
+/// \brief ParticleIterator operator+
 /// \ingroup Core
 template <typename T, template <typename> class SPType>
 inline ParticleIterator<T, SPType> operator+ (
         typename ParticleIterator<T, SPType>::difference_type diff,
         const ParticleIterator<T, SPType> &iter) {return iter + diff;}
 
-/// \brief Particle iterator operator-
+/// \brief ParticleIterator operator-
 /// \ingroup Core
 template <typename T, template <typename> class SPType>
 inline ParticleIterator<T, SPType> operator- (

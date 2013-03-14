@@ -138,6 +138,11 @@ class StaticAssert<true>
     VSMC_RUNTIME_ASSERT((N == global_size_),                                  \
             ("**StateMPI::copy** SIZE MISMATCH"))
 
+#define VSMC_RUNTIME_ASSERT_STATE_MATRIX_RC_ITERATOR_BINARY_OP                \
+    VSMC_RUNTIME_ASSERT((iter1->inc() == iter2->inc()),                       \
+            ("BINARY OPERATION ON TWO **StateMatrixRCIteraotr** WITH"         \
+            "TWO DIFFERNT INCREMENT"))
+
 #define VSMC_RUNTIME_ASSERT_STATE_UNPACK_SIZE(pack_size, dim, name)           \
     VSMC_RUNTIME_ASSERT((pack_size >= dim),                                   \
             ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
