@@ -17,8 +17,10 @@ class MPIEnvironment
 {
     public :
 
+#ifdef BOOST_MPI_HAS_NOARG_INITIALIZATION
     explicit MPIEnvironment (bool abort_on_exception = true) :
         env_(abort_on_exception) {init_seed();}
+#endif
 
     MPIEnvironment(int &argc, char **&argv, bool abort_on_exception = true) :
         env_(argc, argv, abort_on_exception) {init_seed();}
