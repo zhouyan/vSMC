@@ -3,152 +3,9 @@
 
 #include <vsmc/smp/base.hpp>
 #include <vsmc/core/single_particle.hpp>
+#include <vsmc/utility/iterator.hpp>
 
 namespace vsmc {
-
-/// \brief StateMatrix row/col iterator
-/// \ingroup SMP
-template <typename RandomIter>
-class StateMatrixRCIterator :
-    public std::iterator<
-    typename std::iterator_traits<RandomIter>::iterator_category,
-    typename std::iterator_traits<RandomIter>::value_type,
-    typename std::iterator_traits<RandomIter>::difference_type,
-    typename std::iterator_traits<RandomIter>::pointer,
-    typename std::iterator_traits<RandomIter>::reference>
-{
-    public :
-
-    typedef typename std::iterator_traits<RandomIter>::value_type
-        value_type;
-    typedef typename std::iterator_traits<RandomIter>::difference_type
-        difference_type;
-    typedef typename std::iterator_traits<RandomIter>::pointer
-        pointer;
-    typedef typename std::iterator_traits<RandomIter>::reference
-        reference;
-
-    StateMatrixRCIterator (RandomIter iter, std::size_t inc) :
-        iter_(iter), inc_(inc) {}
-
-    template <typename OtherRandomIter>
-    StateMatrixRCIterator (
-            const StateMatrixRCIterator<OtherRandomIter> &other) :
-        iter_(other.iterator()), inc_(other.increment()) {}
-
-    template <typename OtherRandomIter>
-    StateMatrixRCIterator<RandomIter> &operator= (
-            const StateMatrixRCIterator<OtherRandomIter> &other)
-    {
-        iter_ = other.iterator();
-        inc_ = other.increment();
-
-        return *this;
-    }
-
-    RandomIter iterator () const {return iter_;}
-
-    std::size_t increment () const {return inc_;}
-
-    reference operator* () const {return *iter_;}
-
-    pointer operator-> () const {return iter_;}
-
-    value_type operator[] (difference_type diff) const
-    {return *(iter_ + diff * inc_);}
-
-    StateMatrixRCIterator<RandomIter> &operator++ ()
-    {iter_ += inc_ ; return *this;}
-
-    StateMatrixRCIterator<RandomIter> operator++ (int)
-    {StateMatrixRCIterator<RandomIter> iter(*this); return ++iter;}
-
-    StateMatrixRCIterator<RandomIter> &operator-- ()
-    {iter_ -= inc_; return *this;}
-
-    StateMatrixRCIterator<RandomIter> operator-- (int)
-    {StateMatrixRCIterator<RandomIter> iter(*this); return --iter;}
-
-    StateMatrixRCIterator<RandomIter> &operator+= (difference_type diff)
-    {iter_ += diff * inc_; return *this;}
-
-    StateMatrixRCIterator<RandomIter> &operator-= (difference_type diff)
-    {iter_ -= diff * inc_; return *this;}
-
-    private :
-
-    RandomIter iter_;
-    std::size_t inc_;
-}; // class StateMatrixRCIterator
-
-/// \brief StateMatrixRCIterator operator==
-/// \ingroup SMP
-template <typename RandomIter1, typename RandomIter2>
-inline bool operator== (
-        const StateMatrixRCIterator<RandomIter1> &iter1,
-        const StateMatrixRCIterator<RandomIter2> &iter2)
-{
-    return
-        (iter1.iterator() == iter2.iterator()) &&
-        (iter1.increment() == iter2.increment());
-}
-
-/// \brief StateMarixRCIterator operator!=
-/// \ingroup SMP
-template <typename RandomIter1, typename RandomIter2>
-inline bool operator!= (
-        const StateMatrixRCIterator<RandomIter1> &iter1,
-        const StateMatrixRCIterator<RandomIter2> &iter2)
-{
-    return
-        (iter1.iterator() != iter2.iterator()) ||
-        (iter1.increment() != iter2.increment());
-}
-
-/// \brief StateMarixRCIterator operator-
-/// \ingroup SMP
-template <typename RandomIter1, typename RandomIter2>
-inline std::ptrdiff_t operator- (
-        const StateMatrixRCIterator<RandomIter1> &iter1,
-        const StateMatrixRCIterator<RandomIter2> &iter2)
-{
-    VSMC_RUNTIME_ASSERT_STATE_MATRIX_RC_ITERATOR_BINARY_OP;
-
-    return (iter1.iterator() - iter2.iterator()) / iter1.increment();
-}
-
-/// \brief StateMarixRCIterator operator+
-/// \ingroup SMP
-template <typename RandomIter>
-inline StateMatrixRCIterator<RandomIter> operator+ (
-        const StateMatrixRCIterator<RandomIter> &iter,
-        typename StateMatrixRCIterator<RandomIter>::difference_type diff)
-{
-    StateMatrixRCIterator<RandomIter> new_iter(iter);
-    new_iter += diff;
-
-    return new_iter;
-}
-
-/// \brief StateMarixRCIterator operator+
-/// \ingroup SMP
-template <typename RandomIter>
-inline StateMatrixRCIterator<RandomIter> operator+ (
-        typename StateMatrixRCIterator<RandomIter>::difference_type diff,
-        const StateMatrixRCIterator<RandomIter> &iter) {return iter + diff;}
-
-/// \brief StateMarixRCIterator operator-
-/// \ingroup SMP
-template <typename RandomIter>
-inline StateMatrixRCIterator<RandomIter> operator- (
-        const StateMatrixRCIterator<RandomIter> &iter,
-        typename StateMatrixRCIterator<RandomIter>::difference_type diff)
-{
-    StateMatrixRCIterator<RandomIter> new_iter(iter);
-    new_iter -= diff;
-
-    return new_iter;
-}
 
 /// \brief Base type of StateTuple
 /// \ingroup SMP
@@ -392,9 +249,9 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         row_reverse_iterator;
     typedef typename std::vector<T>::const_reverse_iterator
         row_const_reverse_iterator;
-    typedef StateMatrixRCIterator<typename std::vector<T>::iterator>
+    typedef StepRandomIterator<typename std::vector<T>::iterator>
         col_iterator;
-    typedef StateMatrixRCIterator<typename std::vector<T>::const_iterator>
+    typedef StepRandomIterator<typename std::vector<T>::const_iterator>
         col_const_iterator;
     typedef std::reverse_iterator<col_iterator>
         col_reverse_iterator;
@@ -519,9 +376,9 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     typedef StateMatrixBase<ColMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
-    typedef StateMatrixRCIterator<typename std::vector<T>::iterator>
+    typedef StepRandomIterator<typename std::vector<T>::iterator>
         row_iterator;
-    typedef StateMatrixRCIterator<typename std::vector<T>::const_iterator>
+    typedef StepRandomIterator<typename std::vector<T>::const_iterator>
         row_const_iterator;
     typedef std::reverse_iterator<row_iterator>
         row_reverse_iterator;
