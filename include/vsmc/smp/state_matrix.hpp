@@ -82,7 +82,7 @@ class StateMatrixRCIterator :
 }; // class StateMatrixRCIterator
 
 /// \brief StateMatrixRCIterator operator==
-/// \ingroup Core
+/// \ingroup SMP
 template <typename RandomIter1, typename RandomIter2>
 inline bool operator== (
         const StateMatrixRCIterator<RandomIter1> &iter1,
@@ -94,7 +94,7 @@ inline bool operator== (
 }
 
 /// \brief StateMarixRCIterator operator!=
-/// \ingroup Core
+/// \ingroup SMP
 template <typename RandomIter1, typename RandomIter2>
 inline bool operator!= (
         const StateMatrixRCIterator<RandomIter1> &iter1,
@@ -106,7 +106,7 @@ inline bool operator!= (
 }
 
 /// \brief StateMarixRCIterator operator-
-/// \ingroup Core
+/// \ingroup SMP
 template <typename RandomIter1, typename RandomIter2>
 inline std::ptrdiff_t operator- (
         const StateMatrixRCIterator<RandomIter1> &iter1,
@@ -118,7 +118,7 @@ inline std::ptrdiff_t operator- (
 }
 
 /// \brief StateMarixRCIterator operator+
-/// \ingroup Core
+/// \ingroup SMP
 template <typename RandomIter>
 inline StateMatrixRCIterator<RandomIter> operator+ (
         const StateMatrixRCIterator<RandomIter> &iter,
@@ -131,14 +131,14 @@ inline StateMatrixRCIterator<RandomIter> operator+ (
 }
 
 /// \brief StateMarixRCIterator operator+
-/// \ingroup Core
+/// \ingroup SMP
 template <typename RandomIter>
 inline StateMatrixRCIterator<RandomIter> operator+ (
         typename StateMatrixRCIterator<RandomIter>::difference_type diff,
         const StateMatrixRCIterator<RandomIter> &iter) {return iter + diff;}
 
 /// \brief StateMarixRCIterator operator-
-/// \ingroup Core
+/// \ingroup SMP
 template <typename RandomIter>
 inline StateMatrixRCIterator<RandomIter> operator- (
         const StateMatrixRCIterator<RandomIter> &iter,
