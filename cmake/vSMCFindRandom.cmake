@@ -10,13 +10,13 @@ int main ()
 
     vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
     for (int i = 0; i != N; ++i) {
-        int u = runif(eng.rng(i));
+        double u = runif(eng.rng(i));
         assert(u >= 0 && u <= 100);
     }
 
-    vsmc::cxx11::uniform_int_distribution<> ruint(1, 100);
+    vsmc::cxx11::uniform_int_distribution<std::size_t> ruint(1, 100);
     for (int i = 0; i != N; ++i) {
-        int u = ruint(eng.rng(i));
+        std::size_t u = ruint(eng.rng(i));
         assert(u >= 1 && u <= 100);
     }
 
