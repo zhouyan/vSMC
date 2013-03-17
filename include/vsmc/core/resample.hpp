@@ -64,7 +64,7 @@ class ResampleCopyFromReplication
 
     template <typename IntType1, typename IntType2>
     void operator() (std::size_t N,
-            const IntType1 *replication, IntType2 *copy_from)
+            const IntType1 *replication, IntType2 *copy_from) const
     {
         std::size_t from = 0;
         std::size_t time = 0;
@@ -86,6 +86,15 @@ class ResampleCopyFromReplication
         }
     }
 }; // class ResampleCopyFromReplication
+
+class ResamplePostCopy
+{
+    public :
+
+    template <typename WeightSetType>
+    void operator() (WeightSetType &weight_set) const
+    {weight_set.set_equal_weight();}
+}; // class ResamplePostCopy
 
 /// \brief Multinomial resampling
 /// \ingroup Core

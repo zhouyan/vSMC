@@ -22,9 +22,9 @@ class Particle
     typedef typename traits::WeightSetTypeTrait<T>::type weight_set_type;
     typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
     typedef typename rng_set_type::rng_type rng_type;
-    typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
     typedef cxx11::function<
-        void (size_type, resample_rng_type &, double *, size_type *)>
+        void (size_type, typename traits::ResampleRngTypeTrait<T>::type &,
+                double *, size_type *)>
         resample_type;
     typedef ParticleIterator<T, SingleParticle> iterator;
     typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
@@ -37,7 +37,7 @@ class Particle
                 traits::SizeTypeTrait<weight_set_type>::type>(N)),
         rng_set_(static_cast<typename
                 traits::SizeTypeTrait<rng_set_type>::type>(N)),
-        replication_(N), copy_from_(N), weight_(N),
+        resample_replication_(N), resample_copy_from_(N), resample_weight_(N),
         resample_rng_(Seed::instance().get()),
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
         csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
@@ -129,22 +129,69 @@ class Particle
     /// performed
     ///
     /// \return true if resampling was performed
+    ///
+    /// \details
+    /// The out of box behavior are suitable for most applications. However,
+    /// the user can also gain full control over the internal of this
+    /// function by changing the `weight_set_type` and other type traits for
+    /// specific value collection type. The sequence of operations of this
+    /// function is listed as in the following pseudo-code
+    /// 1. Determine if resampling is required
+    ///     * Set `N = weight_set.resample_size()`
+    ///     * Set `resampled = weight_set.ess() < threshold * N`
+    ///     * If `!resampled`, GO TO Step 8. Otherwise, GO TO Step 2
+    /// 2. Determine if resampling algorithms shall be performed. This is only
+    /// useful for MPI implementations. the boolean value `resampled` ensures
+    /// that collective actions like `copy` will be called by all nodes.
+    /// However, the resampling replication numbers can be computed by one
+    /// node instead of by all. Therefore, the program can actually collect and
+    /// read the resampling weights on one node, and do nothing on other nodes.
+    /// This difference shall be reflected by the returning iterator of
+    /// `read_resample_weight`
+    ///     * (Allocate `double *weight` for size `N`)
+    ///     * Set `double *end = weight_set.read_resample_weight(weight)`
+    ///     * If `end != weight + N`, GO TO step 5. Otherwise, GO TO Step 3
+    /// 3. Performing resampling, produce replication number of each particle
+    ///     * (Allocate `size_type *replication` for size `N`)
+    ///     * (Create RNG engine `resample_rng` according to
+    ///     traits::ResampleRngTypeTrait)
+    ///     * Call `op(N, resample_rng, weight, replication)`
+    /// 4. Transform replication numbers into parent particle indices
+    ///     * (Allocat `size_type *copy_from` for size `N`)
+    ///     * (Create functor `r2c` according to
+    ///     traits::ResampleCopyFromReplicationTypeTrait)
+    ///     * Call `r2c(N, replication, copy_from)`
+    /// 5. Set `const size_type *cptr` according to results of Step 2.
+    ///     * If Step 3 and 4 are skipped according to Step 2, then set
+    ///     `cptr = 0`. Otherwise,
+    ///     * Set `cptr = copy_from`
+    /// 6. Performing copying of particles
+    ///     * Call `value.copy(N, cptr)`
+    /// 7. Performing post resampling weight manipulation
+    ///     * (Create functor `post` according to
+    ///     traits::ResamplePostCopyTypeTrait)
+    ///     * `post(weight_set)`
+    /// 8. `return resampled`
     bool resample (const resample_type &op, double threshold)
     {
         size_type N = static_cast<size_type>(weight_set_.resample_size());
         bool resampled = weight_set_.ess() < threshold * N;
+        const size_type *cptr = VSMC_NULLPTR;
         if (resampled) {
-            copy_from_.resize(N);
-            replication_.resize(N);
-            weight_.resize(N);
-            double *end = weight_set_.read_resample_weight(&weight_[0]);
-            if (end == &weight_[0] + N) {
-                op(N, resample_rng_, &weight_[0], &replication_[0]);
-                resample_copy_from_replication_(
-                        N, &replication_[0], &copy_from_[0]);
+            resample_copy_from_.resize(N);
+            resample_replication_.resize(N);
+            resample_weight_.resize(N);
+            double *end = weight_set_.read_resample_weight(
+                    &resample_weight_[0]);
+            if (end == &resample_weight_[0] + N) {
+                op(N, resample_rng_,
+                        &resample_weight_[0], &resample_replication_[0]);
+                resample_copy_from_replication_(N,
+                        &resample_replication_[0], &resample_copy_from_[0]);
+                cptr = &resample_copy_from_[0];
             }
-            value_.copy(N, &copy_from_[0]);
-            weight_set_.set_equal_weight();
+            value_.copy(N, cptr);
+            resample_post_copy_(weight_set_);
         }
 
         return resampled;
@@ -157,12 +204,13 @@ class Particle
     weight_set_type weight_set_;
     rng_set_type rng_set_;
 
+    std::vector<size_type> resample_replication_;
+    std::vector<size_type> resample_copy_from_;
+    std::vector<double> resample_weight_;
     typename traits::ResampleCopyFromReplicationTypeTrait<T>::type
         resample_copy_from_replication_;
-    std::vector<size_type> replication_;
-    std::vector<size_type> copy_from_;
-    std::vector<double> weight_;
-    resample_rng_type resample_rng_;
+    typename traits::ResamplePostCopyTypeTrait<T>::type resample_post_copy_;
+    typename traits::ResampleRngTypeTrait<T>::type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
 }; // class Particle
