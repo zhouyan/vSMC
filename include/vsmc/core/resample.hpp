@@ -56,6 +56,37 @@ inline void normalize_replication (SizeType N, SizeType *replication)
 
 } // namespace vsmc::internal
 
+/// \brief Transform replication numbers to parent particle locations
+/// \ingroup Core
+class ResampleCopyFromReplication
+{
+    public :
+
+    template <typename IntType1, typename IntType2>
+    void operator() (std::size_t N,
+            const IntType1 *replication, IntType2 *copy_from)
+    {
+        std::size_t from = 0;
+        std::size_t time = 0;
+        for (std::size_t to = 0; to != N; ++to) {
+            if (replication[to]) {
+                copy_from[to] = to;
+            } else {
+                // replication[to] has zero child, copy from elsewhere
+                if (replication[from] - time <= 1) {
+                    // only 1 child left on replication[from]
+                    time = 0;
+                    do // move from to some position with at least 2 children
+                        ++from;
+                    while (replication[from] < 2);
+                }
+                copy_from[to] = from;
+                ++time;
+            }
+        }
+    }
+}; // class ResampleCopyFromReplication
+
 /// \brief Multinomial resampling
 /// \ingroup Core
 template <>

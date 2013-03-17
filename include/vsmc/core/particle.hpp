@@ -140,7 +140,8 @@ class Particle
             double *end = weight_set_.read_resample_weight(&weight_[0]);
             if (end == &weight_[0] + N) {
                 op(N, resample_rng_, &weight_[0], &replication_[0]);
-                replication2copy_from(N);
+                resample_copy_from_replication_(
+                        N, &replication_[0], &copy_from_[0]);
             }
             value_.copy(N, &copy_from_[0]);
             weight_set_.set_equal_weight();
@@ -156,34 +157,14 @@ class Particle
     weight_set_type weight_set_;
     rng_set_type rng_set_;
 
+    typename traits::ResampleCopyFromReplicationTypeTrait<T>::type
+        resample_copy_from_replication_;
     std::vector<size_type> replication_;
     std::vector<size_type> copy_from_;
     std::vector<double> weight_;
     resample_rng_type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
-
-    void replication2copy_from (size_type N)
-    {
-        size_type from = 0;
-        size_type time = 0;
-        for (size_type to = 0; to != N; ++to) {
-            if (replication_[to]) {
-                copy_from_[to] = to;
-            } else {
-                // replication_[to] has zero child, copy from elsewhere
-                if (replication_[from] - time <= 1) {
-                    // only 1 child left on replication_[from]
-                    time = 0;
-                    do // move from to some position with at least 2 children
-                        ++from;
-                    while (replication_[from] < 2);
-                }
-                copy_from_[to] = from;
-                ++time;
-            }
-        }
-    }
 }; // class Particle
 
 } // namespace vsmc

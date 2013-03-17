@@ -64,6 +64,7 @@ class PathEvalAdapter;
 
 // Core
 class WeightSet;
+class ResampleCopyFromReplication;
 template <typename ResType> class Resample;
 template <typename> class Sampler;
 template <typename> class Particle;
