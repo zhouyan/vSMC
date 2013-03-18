@@ -9,14 +9,12 @@
 /// \cond HIDDEN_SYMBOLS
 
 #define VSMC_DEFINE_SMP_FORWARD(Name)                                         \
-namespace vsmc {                                                              \
-    template <typename> class State##Name;                                    \
-    template <typename, typename D = Virtual> class Initialize##Name;         \
-    template <typename, typename D = Virtual> class Move##Name;               \
-    template <typename, typename D = Virtual> class MonitorEval##Name;        \
-    template <typename, typename D = Virtual> class PathEval##Name;           \
-    template <typename> class Numeric##Name;                                  \
-}
+template <typename> class State##Name;                                        \
+template <typename, typename D = Virtual> class Initialize##Name;             \
+template <typename, typename D = Virtual> class Move##Name;                   \
+template <typename, typename D = Virtual> class MonitorEval##Name;            \
+template <typename, typename D = Virtual> class PathEval##Name;               \
+template <typename> class Numeric##Name;
 
 namespace vsmc {
 
@@ -106,8 +104,6 @@ template <typename, typename> class MoveBase;
 template <typename, typename> class MonitorEvalBase;
 template <typename, typename> class PathEvalBase;
 
-} // namesapce vsmc
-
 // SMP Implementations
 VSMC_DEFINE_SMP_FORWARD(SEQ)
 VSMC_DEFINE_SMP_FORWARD(CILK)
@@ -116,6 +112,8 @@ VSMC_DEFINE_SMP_FORWARD(OMP)
 VSMC_DEFINE_SMP_FORWARD(PPL)
 VSMC_DEFINE_SMP_FORWARD(STD)
 VSMC_DEFINE_SMP_FORWARD(TBB)
+
+} // namesapce vsmc
 
 /// \endcond HIDDEN_SYMBOLS
 

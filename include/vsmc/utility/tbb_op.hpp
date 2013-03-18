@@ -4,7 +4,6 @@
 #include <vsmc/internal/common.hpp>
 
 #define VSMC_DEFINE_TBB_OP_FOR_UNARY_OBJECT(name, uni)                        \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -27,11 +26,9 @@ class name                                                                    \
                                                                               \
     const T *const data_;                                                     \
     T *const result_;                                                         \
-};                                                                            \
-} }
+};
 
 #define VSMC_DEFINE_TBB_OP_FOR_BINARY_OBJECT(name, bin)                       \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -56,11 +53,9 @@ class name                                                                    \
     const T *const data_;                                                     \
     T *const result_;                                                         \
     const T val_;                                                             \
-};                                                                            \
-} }
+};
 
 #define VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(name, uni)                      \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -82,11 +77,9 @@ class name                                                                    \
                                                                               \
     const T *const data_;                                                     \
     T *const result_;                                                         \
-};                                                                            \
-} }
+};
 
 #define VSMC_DEFINE_TBB_OP_FOR_BINARY_FUNCTION(name, bin)                     \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -110,11 +103,9 @@ class name                                                                    \
     const T *const data_;                                                     \
     T *const result_;                                                         \
     const T val_;                                                             \
-};                                                                            \
-} }
+};
 
 #define VSMC_DEFINE_TBB_OP_FOR_UNARY_OPERATOR(name, uni)                      \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -136,11 +127,9 @@ class name                                                                    \
                                                                               \
     const T *const data_;                                                     \
     T *const result_;                                                         \
-};                                                                            \
-} }
+};
 
 #define VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(name, bin)                     \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -164,11 +153,9 @@ class name                                                                    \
     const T *const data_;                                                     \
     T *const result_;                                                         \
     const T val_;                                                             \
-};                                                                            \
-} }
+};
 
 #define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OBJECT(name, bin, identity)          \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -204,11 +191,9 @@ class name                                                                    \
                                                                               \
     const T *const data_;                                                     \
     T result_;                                                                \
-};                                                                            \
-} }
+};
 
 #define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(name, bin, identity)        \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -239,11 +224,9 @@ class name                                                                    \
                                                                               \
     const T *const data_;                                                     \
     T result_;                                                                \
-};                                                                            \
-} }
+};
 
 #define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(name, bin, identity)        \
-namespace vsmc { namespace tbb_op {                                           \
 template <typename T>                                                         \
 class name                                                                    \
 {                                                                             \
@@ -274,8 +257,7 @@ class name                                                                    \
                                                                               \
     const T *const data_;                                                     \
     T result_;                                                                \
-};                                                                            \
-} }
+};
 
 namespace vsmc {
 
@@ -354,8 +336,6 @@ class square_sum
     T result_;
 }; // class square_sum
 
-} } // namespace vsmc::tbb_op
-
 VSMC_DEFINE_TBB_OP_FOR_UNARY_OPERATOR(negate, -)
 
 VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(plus,       +)
@@ -388,5 +368,7 @@ VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(minimum, min_fn,
 
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(summation, +, zero_trait<T>::value())
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(product,   *, one_trait<T>::value())
+
+} } // namespace vsmc::tbb_op
 
 #endif // VSMC_UTILITY_TBB_OP_HPP

@@ -249,7 +249,7 @@ template <typename> struct TupleApply##Outer;                                 \
 template <typename T, typename... Types>                                      \
 struct TupleApply##Outer<std::tuple<T, Types...> >                            \
 {                                                                             \
-    typedef typename TuplePushFront<                                          \
+    typedef typename vsmc::TuplePushFront<                                    \
         typename TupleApply##Outer<std::tuple<Types...> >::type, Inner<T>     \
         >::type type;                                                         \
 };                                                                            \

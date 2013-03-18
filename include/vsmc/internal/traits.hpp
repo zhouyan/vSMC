@@ -41,8 +41,6 @@
 /// vsmc::traits::SizeTypeTrait<Stack>::type;  // Stack::size_type
 /// \endcode
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)                \
-namespace vsmc { namespace traits {                                           \
-                                                                              \
 template <typename T>                                                         \
 struct Has##Outer##Impl                                                       \
 {                                                                             \
@@ -71,9 +69,7 @@ template <typename T> struct Outer##Trait                                     \
 {                                                                             \
     enum {value = Has##Outer<T>::value};                                      \
     typedef typename Outer##Dispatch<T, value>::type type;                    \
-};                                                                            \
-                                                                              \
-} } // namespace vsmc::traits
+};
 
 /// \brief Define a class template dispatch trait
 /// \ingroup Traits
@@ -110,8 +106,6 @@ template <typename T> struct Outer##Trait                                     \
 /// vsmc::traits::VecTypeTrait<Stack, int>::type;  // Stack::vec_type<int>
 /// \endcode
 #define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)       \
-namespace vsmc { namespace traits {                                           \
-                                                                              \
 template <typename T, typename V>                                             \
 struct Has##Outer##Impl                                                       \
 {                                                                             \
@@ -140,13 +134,9 @@ template <typename T, typename V> struct Outer##Trait                         \
 {                                                                             \
     enum {value = Has##Outer<T, V>::value};                                   \
     typedef typename Outer##Dispatch<T, V, value>::type type;                 \
-};                                                                            \
-                                                                              \
-} } // namespace vsmc::traits
+};
 
 #define VSMC_DEFINE_MF_CHECKER(Outer, Inner, RT, Args)                        \
-namespace vsmc { namespace traits {                                           \
-                                                                              \
 template <typename T>                                                         \
 struct Has##Outer##Impl                                                       \
 {                                                                             \
@@ -164,13 +154,9 @@ struct Has##Outer##Impl                                                       \
                                                                               \
 template <typename T>                                                         \
 struct Has##Outer :                                                           \
-    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};     \
-                                                                              \
-} } // namespace vsmc::traits
+    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};
 
 #define VSMC_DEFINE_STATIC_MF_CHECKER(Outer, Inner, RT, Args)                 \
-namespace vsmc { namespace traits {                                           \
-                                                                              \
 template <typename T>                                                         \
 struct HasStatic##Outer##Impl                                                 \
 {                                                                             \
@@ -188,9 +174,7 @@ struct HasStatic##Outer##Impl                                                 \
                                                                               \
 template <typename T>                                                         \
 struct HasStatic##Outer :                                                     \
-    public cxx11::integral_constant<bool, HasStatic##Outer##Impl<T>::value>{};\
-                                                                              \
-} } // namespace vsmc::traits
+    public cxx11::integral_constant<bool, HasStatic##Outer##Impl<T>::value>{};
 
 #define VSMC_DEFINE_SMP_MF_CHECKER(name, RT, Args)                            \
 template <typename U>                                                         \
@@ -228,6 +212,8 @@ struct has_##name##_ : public cxx11::integral_constant<bool,                  \
     has_##name##_non_static_<U>::value ||                                     \
     has_##name##_static_<U>::value> {};
 
+namespace vsmc { namespace traits {
+
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleCopyFromReplicationType,
@@ -246,8 +232,6 @@ VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
         bool, (const std::string &))
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDevice, check_opencl_device,
         bool, (const std::string &))
-
-namespace vsmc { namespace traits {
 
 #if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 template <typename T> struct OMPSizeTypeTrait {typedef T type;};

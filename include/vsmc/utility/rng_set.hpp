@@ -25,10 +25,14 @@
     RngSet<vsmc::cxx11::mt19937, VectorRng>
 #endif
 
+namespace vsmc {
+
+namespace traits {
+
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
         VSMC_DEFAULT_RNG_SET_TYPE)
 
-namespace vsmc {
+} // namepsace vsmc::traits
 
 /// \brief Scalar RNG set
 /// \ingroup Utility
