@@ -30,10 +30,11 @@ class WeightSet
     double ess (InputIter first, bool use_log) const
     {
         buffer_.resize(size_);
+        double *const bptr = &buffer_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
-            buffer_[i] = *first;
+            bptr[i] = *first;
 
-        return compute_ess(&buffer_[0], use_log);
+        return compute_ess(bptr, use_log);
     }
 
     /// \brief Compute ESS given (log) incremental weights
@@ -41,10 +42,11 @@ class WeightSet
     double ess (RandomIter first, int stride, bool use_log) const
     {
         buffer_.resize(size_);
+        double *const bptr = &buffer_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
-            buffer_[i] = *first;
+            bptr[i] = *first;
 
-        return compute_ess(&buffer_[0], use_log);
+        return compute_ess(bptr, use_log);
     }
 
     /// \brief Compute CESS given (log) incremental weights
@@ -52,10 +54,11 @@ class WeightSet
     double cess (InputIter first, bool use_log) const
     {
         buffer_.resize(size_);
+        double *const bptr = &buffer_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
-            buffer_[i] = *first;
+            bptr[i] = *first;
 
-        return compute_cess(&buffer_[0], use_log);
+        return compute_cess(bptr, use_log);
     }
 
     /// \brief Compute CESS given (log) incremental weights
@@ -63,10 +66,11 @@ class WeightSet
     double cess (RandomIter first, int stride, bool use_log) const
     {
         buffer_.resize(size_);
+        double *const bptr = &buffer_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
-            buffer_[i] = *first;
+            bptr[i] = *first;
 
-        return compute_cess(&buffer_[0], use_log);
+        return compute_cess(bptr, use_log);
     }
 
     /// \brief Size of the weight set for the purpose of resampling
@@ -88,8 +92,9 @@ class WeightSet
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
     {
+        const double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
-            *first = weight_[i];
+            *first = wptr[i];
 
         return first;
     }
@@ -99,8 +104,9 @@ class WeightSet
     template <typename RandomIter>
     RandomIter read_weight (RandomIter first, int stride) const
     {
+        const double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
-            *first = weight_[i];
+            *first = wptr[i];
 
         return first;
     }
@@ -120,8 +126,9 @@ class WeightSet
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
     {
+        const double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
-            *first = log_weight_[i];
+            *first = lwptr[i];
 
         return first;
     }
@@ -131,8 +138,9 @@ class WeightSet
     template <typename RandomIter>
     RandomIter read_log_weight (RandomIter first, int stride) const
     {
+        const double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
-            *first = log_weight_[i];
+            *first = lwptr[i];
 
         return first;
     }
@@ -160,9 +168,11 @@ class WeightSet
     {
         ess_ = static_cast<double>(size_);
         double ew = 1 / ess_;
+        double *const wptr = &weight_[0];
+        double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i) {
-            weight_[i] = ew;
-            log_weight_[i] = 0;
+            wptr[i] = ew;
+            lwptr[i] = 0;
         }
     }
 
@@ -172,8 +182,9 @@ class WeightSet
     template <typename InputIter>
     void set_weight (InputIter first)
     {
+        double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
-            weight_[i] = *first;
+            wptr[i] = *first;
         post_set_weight();
     }
 
@@ -183,8 +194,9 @@ class WeightSet
     template <typename RandomIter>
     void set_weight (RandomIter first, int stride)
     {
+        double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
-            weight_[i] = *first;
+            wptr[i] = *first;
         post_set_weight();
     }
 
@@ -208,8 +220,9 @@ class WeightSet
     template <typename InputIter>
     void mul_weight (InputIter first)
     {
+        double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
-            weight_[i] *= *first;
+            wptr[i] *= *first;
         post_set_weight();
     }
 
@@ -220,8 +233,9 @@ class WeightSet
     template <typename RandomIter>
     void mul_weight (RandomIter first, int stride)
     {
+        double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
-            weight_[i] *= *first;
+            wptr[i] *= *first;
         post_set_weight();
     }
 
@@ -231,8 +245,9 @@ class WeightSet
     template <typename InputIter>
     void set_log_weight (InputIter first)
     {
+        double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
-            log_weight_[i] = *first;
+            lwptr[i] = *first;
         post_set_log_weight();
     }
 
@@ -242,8 +257,9 @@ class WeightSet
     template <typename RandomIter>
     void set_log_weight (RandomIter first, int stride)
     {
+        double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
-            log_weight_[i] = *first;
+            lwptr[i] = *first;
         post_set_log_weight();
     }
 
@@ -268,8 +284,9 @@ class WeightSet
     template <typename InputIter>
     void add_log_weight (InputIter first)
     {
+        double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
-            log_weight_[i] += *first;
+            lwptr[i] += *first;
         post_set_log_weight();
     }
 
@@ -280,8 +297,9 @@ class WeightSet
     template <typename RandomIter>
     void add_log_weight (RandomIter first, int stride)
     {
+        double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
-            log_weight_[i] += *first;
+            lwptr[i] += *first;
         post_set_log_weight();
     }
 

@@ -135,8 +135,10 @@ class Monitor
     template <typename OutputIter>
     OutputIter read_index (OutputIter first) const
     {
-        for (std::size_t i = 0; i != index_.size(); ++i, ++first)
-            *first = index_[i];
+        const std::size_t N = index_.size();
+        const std::size_t *const iptr = &index_[0];
+        for (std::size_t i = 0; i != N; ++i, ++first)
+            *first = iptr[i];
 
         return first;
     }
@@ -146,8 +148,9 @@ class Monitor
     template <typename OutputIter>
     OutputIter read_record (std::size_t id, OutputIter first) const
     {
+        const std::size_t N = iter_size();
         const double *riter = &record_[id];
-        for (std::size_t i = 0; i != iter_size(); ++i, ++first, riter += dim_)
+        for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
             *first = *riter;
 
         return first;
@@ -184,9 +187,12 @@ class Monitor
             for (std::size_t d = 0; d != dim_; ++d)
                 first = read_record(d, first);
 
-        if (order == RowMajor)
-            for (std::size_t i = 0; i != record_.size(); ++i, ++first)
-                *first = record_[i];
+        if (order == RowMajor) {
+            const std::size_t N = record_.size();
+            const double *const rptr = &record_[0];
+            for (std::size_t i = 0; i != N; ++i, ++first)
+                *first = rptr[i];
+        }
 
         return first;
     }

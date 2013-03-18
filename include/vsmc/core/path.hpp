@@ -115,8 +115,10 @@ class Path
     template <typename OutputIter>
     OutputIter read_index (OutputIter first) const
     {
-        for (std::size_t i = 0; i != index_.size(); ++i, ++first)
-            *first = index_[i];
+        const std::size_t N = index_.size();
+        const std::size_t *const iptr = &index_[0];
+        for (std::size_t i = 0; i != N; ++i, ++first)
+            *first = iptr[i];
 
         return first;
     }
@@ -125,8 +127,10 @@ class Path
     template <typename OutputIter>
     OutputIter read_integrand (OutputIter first) const
     {
-        for (std::size_t i = 0; i != integrand_.size(); ++i, ++first)
-            *first = integrand_[i];
+        const std::size_t N = integrand_.size();
+        const double *const iptr = &integrand_[0];
+        for (std::size_t i = 0; i != N; ++i, ++first)
+            *first = iptr[i];
 
         return first;
     }
@@ -135,8 +139,10 @@ class Path
     template <typename OutputIter>
     OutputIter read_grid (OutputIter first) const
     {
-        for (std::size_t i = 0; i != grid_.size(); ++i, ++first)
-            *first = grid_[i];
+        const std::size_t N = grid_.size();
+        const double *const gptr = &grid_[0];
+        for (std::size_t i = 0; i != N; ++i, ++first)
+            *first = gptr[i];
 
         return first;
     }
@@ -174,10 +180,13 @@ class Path
         if (iter_size() < 2)
             return 0;
 
+        const std::size_t N = iter_size();
+        const double *const gptr = &grid_[0];
+        const double *const iptr = &integrand_[0];
         double integral = 0;
-        for (std::size_t i = 1; i != iter_size(); ++i)
-            integral += 0.5 * (grid_[i] - grid_[i - 1]) *
-                (integrand_[i] + integrand_[i - 1]);
+        for (std::size_t i = 1; i != N; ++i)
+            integral += (gptr[i] - gptr[i - 1]) * (iptr[i] + iptr[i - 1]);
+        integral *= 0.5;
 
         return integral;
     }
