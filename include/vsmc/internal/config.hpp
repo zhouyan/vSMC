@@ -77,4 +77,10 @@
 #define VSMC_NULLPTR 0
 #endif
 
+// Use native time libraries if !VSMC_HAS_CXX11LIB_CHRONO
+
+#ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
+#define VSMC_HAS_NATIVE_TIME_LIBRARY
+#endif
+
 #endif // VSMC_INTERNAL_CONFIG_HPP
