@@ -89,7 +89,9 @@ class StopWatch :
 
 } // namespace vsmc
 
-#elif defined(__APPLE__) || defined(__MACOSX)
+#elif VSMC_HAS_NATIVE_TIME_LIBRARY
+
+#if defined(__APPLE__) || defined(__MACOSX)
 #define VSMC_STOP_WATCH_DEFINED
 
 #include <mach/mach_time.h>
@@ -253,6 +255,8 @@ class StopWatch
 } // namespace vsmc
 
 #endif // _POSIX_C_SOURCE
+
+#endif // VSMC_HAS_NATIVE_TIME_LIBRARY
 
 #endif // VSMC_HAS_CXX11LIB_CHRONO
 
