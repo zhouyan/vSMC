@@ -18,18 +18,6 @@ template <typename, typename> struct TupleMerge;
 template <typename...> struct TupleCat;
 template <typename, template <typename> class>  struct TupleApply;
 
-namespace tuple {
-
-template <typename> struct TupleApplyDeque;
-template <typename> struct TupleApplyList;
-template <typename> struct TupleApplyPriorityQueue;
-template <typename> struct TupleApplyQueue;
-template <typename> struct TupleApplySet;
-template <typename> struct TupleApplyStack;
-template <typename> struct TupleApplyVector;
-
-} // namespace vsmc::tuple
-
 } // namespace vsmc
 
 /// \endcond HIDDEN_SYMBOLS
@@ -256,7 +244,7 @@ struct TupleApply<std::tuple<>, C>
 ///
 /// `TupleApply` for all C++03 containers but std::map are defined
 #define VSMC_DEFINE_TUPLE_APPLY(Outer, Inner)                                 \
-namespace vsmc { namespace tuple {                                            \
+template <typename> struct TupleApply##Outer;                                 \
                                                                               \
 template <typename T, typename... Types>                                      \
 struct TupleApply##Outer<std::tuple<T, Types...> >                            \
@@ -266,18 +254,7 @@ struct TupleApply##Outer<std::tuple<T, Types...> >                            \
         >::type type;                                                         \
 };                                                                            \
                                                                               \
-template <>                                                                   \
-struct TupleApply##Outer<std::tuple<> >                                       \
-{typedef std::tuple<> type;};                                                 \
-                                                                              \
-} } // namespace vsmc::tuple
-
-VSMC_DEFINE_TUPLE_APPLY(Deque,         std::deque)
-VSMC_DEFINE_TUPLE_APPLY(List,          std::list)
-VSMC_DEFINE_TUPLE_APPLY(PriorityQueue, std::priority_queue)
-VSMC_DEFINE_TUPLE_APPLY(Queue,         std::queue)
-VSMC_DEFINE_TUPLE_APPLY(Set,           std::set)
-VSMC_DEFINE_TUPLE_APPLY(Stack,         std::stack)
-VSMC_DEFINE_TUPLE_APPLY(Vector,        std::vector)
+template <> struct TupleApply##Outer<std::tuple<> >                           \
+{typedef std::tuple<> type;};
 
 #endif // VSMC_UTILITY_TUPLE_MANIP_HPP

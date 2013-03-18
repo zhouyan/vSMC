@@ -7,6 +7,12 @@
 
 namespace vsmc {
 
+namespace state_tuple_impl {
+
+VSMC_DEFINE_TUPLE_APPLY(Vector, std::vector)
+
+} // namespace vsmc::state_tuple_impl
+
 /// \brief Base type of StateTuple
 /// \ingroup SMP
 template <MatrixOrder Order, typename T, typename... Types>
@@ -336,7 +342,7 @@ class StateTuple<ColMajor, T, Types...> :
 
     private :
 
-    typename tuple::TupleApplyVector<std::tuple<T, Types...> >::type state_;
+    typename state_tuple_impl::TupleApplyVector<std::tuple<T, Types...> >::type state_;
 
     template <std::size_t Pos>
     void init_state (size_type N, Position<Pos>)

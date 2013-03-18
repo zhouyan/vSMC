@@ -29,13 +29,7 @@
 #include <sstream>
 
 #include <iterator>
-
-#include <deque>
-#include <list>
 #include <map>
-#include <queue>
-#include <set>
-#include <stack>
 #include <string>
 #include <vector>
 
