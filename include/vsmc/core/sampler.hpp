@@ -61,6 +61,15 @@ class Sampler
     /// \brief Number of iterations (including initialization)
     std::size_t iter_size () const {return ess_history_.size();}
 
+    /// \brief Force resample
+    Sampler<T> &resample ()
+    {
+        particle_.resample(resample_op_,
+                std::numeric_limits<double>::max VSMC_MACRO_NO_EXPANSION ());
+
+        return *this;
+    }
+
     /// \brief Set resampling method by a resample_type object
     Sampler<T> &resample_scheme (const resample_type &res_op)
     {resample_op_ = res_op; return *this;}
