@@ -7,6 +7,7 @@
 #include <vsmc/core/weight.hpp>
 #include <vsmc/utility/rng_set.hpp>
 #include <vsmc/utility/seed.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 
 namespace vsmc {
 
@@ -176,26 +177,72 @@ class Particle
     {
         size_type N = static_cast<size_type>(weight_set_.resample_size());
         bool resampled = weight_set_.ess() < threshold * N;
-        const size_type *cptr = VSMC_NULLPTR;
         if (resampled) {
             resample_copy_from_.resize(N);
             resample_replication_.resize(N);
             resample_weight_.resize(N);
-            double *end = weight_set_.read_resample_weight(
-                    &resample_weight_[0]);
+            const size_type *cptr = VSMC_NULLPTR;
+            double *end = VSMC_NULLPTR;
+            {
+                ScopedStopWatch start(resample_read_weight_watch_);
+                end = weight_set_.read_resample_weight(&resample_weight_[0]);
+            }
             if (end == &resample_weight_[0] + N) {
-                op(N, resample_rng_,
-                        &resample_weight_[0], &resample_replication_[0]);
-                resample_copy_from_replication_(N,
-                        &resample_replication_[0], &resample_copy_from_[0]);
+                {
+                    ScopedStopWatch start(resample_get_replication_watch_);
+                    op(N, resample_rng_,
+                            &resample_weight_[0], &resample_replication_[0]);
+                }
+                {
+                    ScopedStopWatch start(resample_get_copy_from_watch_);
+                    resample_copy_from_replication_(N,
+                            &resample_replication_[0],
+                            &resample_copy_from_[0]);
+                }
                 cptr = &resample_copy_from_[0];
             }
-            value_.copy(N, cptr);
-            resample_post_copy_(weight_set_);
+            {
+                ScopedStopWatch start(resample_copy_watch_);
+                value_.copy(N, cptr);
+            }
+            {
+                ScopedStopWatch start(resample_post_copy_watch_);
+                resample_post_copy_(weight_set_);
+            }
         }
 
         return resampled;
     }
+
+    StopWatch &resample_read_weight_watch ()
+    {return resample_read_weight_watch_;}
+
+    const StopWatch &resample_read_weight_watch () const
+    {return resample_read_weight_watch_;}
+
+    StopWatch &resample_get_replication_watch ()
+    {return resample_get_replication_watch_;}
+
+    const StopWatch &resample_get_replication_watch () const
+    {return resample_get_replication_watch_;}
+
+    StopWatch &resample_get_copy_from_watch ()
+    {return resample_get_copy_from_watch_;}
+
+    const StopWatch &resample_get_copy_from_watch () const
+    {return resample_get_copy_from_watch_;}
+
+    StopWatch &resample_copy_watch ()
+    {return resample_copy_watch_;}
+
+    const StopWatch &resample_copy_watch () const
+    {return resample_copy_watch_;}
+
+    StopWatch &resample_post_copy_watch ()
+    {return resample_post_copy_watch_;}
+
+    const StopWatch &resample_post_copy_watch () const
+    {return resample_post_copy_watch_;}
 
     private :
 
@@ -213,6 +260,12 @@ class Particle
     typename traits::ResampleRngTypeTrait<T>::type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
+
+    StopWatch resample_read_weight_watch_;
+    StopWatch resample_get_replication_watch_;
+    StopWatch resample_get_copy_from_watch_;
+    StopWatch resample_copy_watch_;
+    StopWatch resample_post_copy_watch_;
 }; // class Particle
 
 } // namespace vsmc

@@ -259,8 +259,8 @@ class Sampler
     {
         VSMC_RUNTIME_ASSERT_FUNCTOR(init_, Sampler::initialize, Initialize);
         do_init(param);
-        do_resampling();
-        do_monitoring();
+        do_resample();
+        do_monitor();
         print_progress();
 
         return *this;
@@ -290,11 +290,11 @@ class Sampler
             ++iter_num_;
             std::size_t ia = 0;
             ia = do_move(ia);
-            do_resampling();
+            do_resample();
             ia = do_mcmc(ia);
             for (; ia != accept_history_.size(); ++ia)
                 accept_history_[ia].push_back(0);
-            do_monitoring();
+            do_monitor();
             print_progress();
         }
 
@@ -401,8 +401,8 @@ class Sampler
         watch_init_.reset();
         watch_move_.reset();
         watch_mcmc_.reset();
-        watch_resampling_.reset();
-        watch_monitoring_.reset();
+        watch_resample_.reset();
+        watch_monitor_.reset();
     }
 
     StopWatch &watch_init () {return watch_init_;}
@@ -417,13 +417,13 @@ class Sampler
 
     const StopWatch &watch_mcmc () const {return watch_mcmc_;}
 
-    StopWatch &watch_resampling () {return watch_resampling_;}
+    StopWatch &watch_resample () {return watch_resample_;}
 
-    const StopWatch &watch_resampling () const {return watch_resampling_;}
+    const StopWatch &watch_resample () const {return watch_resample_;}
 
-    StopWatch &watch_monitoring () {return watch_monitoring_;}
+    StopWatch &watch_monitor () {return watch_monitor_;}
 
-    const StopWatch &watch_monitoring () const {return watch_monitoring_;}
+    const StopWatch &watch_monitor () const {return watch_monitor_;}
 
     /// \brief The size of Sampler summary header
     std::size_t summary_header_size () const
@@ -579,8 +579,8 @@ class Sampler
     StopWatch watch_init_;
     StopWatch watch_move_;
     StopWatch watch_mcmc_;
-    StopWatch watch_resampling_;
-    StopWatch watch_monitoring_;
+    StopWatch watch_resample_;
+    StopWatch watch_monitor_;
 
     void do_init (void *param)
     {
@@ -622,17 +622,17 @@ class Sampler
         return ia;
     }
 
-    void do_resampling ()
+    void do_resample ()
     {
-        ScopedStopWatch start(watch_resampling_);
+        ScopedStopWatch start(watch_resample_);
         bool resampled = particle_.resample(resample_op_, resample_threshold_);
         ess_history_.push_back(particle_.ess());
         resampled_history_.push_back(resampled);
     }
 
-    void do_monitoring ()
+    void do_monitor ()
     {
-        ScopedStopWatch start(watch_monitoring_);
+        ScopedStopWatch start(watch_monitor_);
         if (bool(path_))
             path_.eval(iter_num_, particle_);
 
