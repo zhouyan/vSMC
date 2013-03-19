@@ -303,6 +303,16 @@ class WeightSet
         post_set_log_weight();
     }
 
+    /// \brief Draw a sample according to the weights
+    template <typename URNG>
+    size_type draw (URNG &eng) const
+    {
+        cxx11::discrete_distribution<size_type>
+            rsample(weight_.begin(), weight_.end());
+
+        return rsample(eng);
+    }
+
     protected :
 
     void set_ess (double e) {ess_ = e;}
