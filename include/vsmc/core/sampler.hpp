@@ -6,6 +6,7 @@
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>
 #include <vsmc/utility/backup.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 
 namespace vsmc {
 
@@ -257,18 +258,7 @@ class Sampler
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
         VSMC_RUNTIME_ASSERT_FUNCTOR(init_, Sampler::initialize, Initialize);
-
-        ess_history_.clear();
-        resampled_history_.clear();
-        accept_history_.clear();
-        path_.clear();
-        for (typename monitor_map_type::iterator
-                m = monitor_.begin(); m != monitor_.end(); ++m)
-            m->second.clear();
-
-        iter_num_ = 0;
-        accept_history_.push_back(std::vector<std::size_t>(1,
-                    init_(particle_, param)));
+        do_init(param);
         do_resampling();
         do_monitoring();
         print_progress();
@@ -299,17 +289,9 @@ class Sampler
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
             std::size_t ia = 0;
-            for (typename std::vector<move_type>::iterator
-                    m = move_queue_.begin(); m != move_queue_.end(); ++m) {
-                accept_history_[ia].push_back((*m)(iter_num_, particle_));
-                ++ia;
-            }
+            ia = do_move(ia);
             do_resampling();
-            for (typename std::vector<mcmc_type>::iterator
-                    m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
-                accept_history_[ia].push_back((*m)(iter_num_, particle_));
-                ++ia;
-            }
+            ia = do_mcmc(ia);
             for (; ia != accept_history_.size(); ++ia)
                 accept_history_[ia].push_back(0);
             do_monitoring();
@@ -413,6 +395,35 @@ class Sampler
 
     /// \brief Set if the sampler shall print dots at each iteration
     Sampler<T> &show_progress (bool show) {show_ = show; return *this;}
+
+    void reset_watch ()
+    {
+        watch_init_.reset();
+        watch_move_.reset();
+        watch_mcmc_.reset();
+        watch_resampling_.reset();
+        watch_monitoring_.reset();
+    }
+
+    StopWatch &watch_init () {return watch_init_;}
+
+    const StopWatch &watch_init () const {return watch_init_;}
+
+    StopWatch &watch_move () {return watch_move_;}
+
+    const StopWatch &watch_move () const {return watch_move_;}
+
+    StopWatch &watch_mcmc () {return watch_mcmc_;}
+
+    const StopWatch &watch_mcmc () const {return watch_mcmc_;}
+
+    StopWatch &watch_resampling () {return watch_resampling_;}
+
+    const StopWatch &watch_resampling () const {return watch_resampling_;}
+
+    StopWatch &watch_monitoring () {return watch_monitoring_;}
+
+    const StopWatch &watch_monitoring () const {return watch_monitoring_;}
 
     /// \brief The size of Sampler summary header
     std::size_t summary_header_size () const
@@ -565,9 +576,55 @@ class Sampler
     monitor_map_type monitor_;
 
     bool show_;
+    StopWatch watch_init_;
+    StopWatch watch_move_;
+    StopWatch watch_mcmc_;
+    StopWatch watch_resampling_;
+    StopWatch watch_monitoring_;
+
+    void do_init (void *param)
+    {
+        ScopedStopWatch start(watch_init_);
+        ess_history_.clear();
+        resampled_history_.clear();
+        accept_history_.clear();
+        path_.clear();
+        for (typename monitor_map_type::iterator
+                m = monitor_.begin(); m != monitor_.end(); ++m)
+            m->second.clear();
+
+        iter_num_ = 0;
+        accept_history_.push_back(std::vector<std::size_t>(1,
+                    init_(particle_, param)));
+    }
+
+    std::size_t do_move (std::size_t ia)
+    {
+        ScopedStopWatch start(watch_move_);
+        for (typename std::vector<move_type>::iterator
+                m = move_queue_.begin(); m != move_queue_.end(); ++m) {
+            accept_history_[ia].push_back((*m)(iter_num_, particle_));
+            ++ia;
+        }
+
+        return ia;
+    }
+
+    std::size_t do_mcmc (std::size_t ia)
+    {
+        ScopedStopWatch start(watch_mcmc_);
+        for (typename std::vector<mcmc_type>::iterator
+                m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
+            accept_history_[ia].push_back((*m)(iter_num_, particle_));
+            ++ia;
+        }
+
+        return ia;
+    }
 
     void do_resampling ()
     {
+        ScopedStopWatch start(watch_resampling_);
         bool resampled = particle_.resample(resample_op_, resample_threshold_);
         ess_history_.push_back(particle_.ess());
         resampled_history_.push_back(resampled);
@@ -575,6 +632,7 @@ class Sampler
 
     void do_monitoring ()
     {
+        ScopedStopWatch start(watch_monitoring_);
         if (bool(path_))
             path_.eval(iter_num_, particle_);
 

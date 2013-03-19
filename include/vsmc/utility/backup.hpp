@@ -75,13 +75,13 @@ class Backup
 /// \brief Backup and restore objects in scope
 /// \ingroup Uitlity
 template <typename T>
-class BackupLocker
+class ScopedBackup
 {
     public :
 
-    BackupLocker (T &src) : src_(src), backup_(src) {}
-    BackupLocker (T *src) : src_(*src), backup_(src) {}
-    ~BackupLocker () {src_ = backup_;}
+    ScopedBackup (T &src) : src_(src), backup_(src) {}
+    ScopedBackup (T *src) : src_(*src), backup_(src) {}
+    ~ScopedBackup () {src_ = backup_;}
 
     private :
 

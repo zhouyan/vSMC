@@ -280,9 +280,28 @@ class StopWatch
     double hours        () const {return 0;}
 }; // class StopWatch
 
+
 } // namespace vsmc
 
 #endif // VSMC_STOP_WATCH_DEFINED
+
+namespace vsmc {
+
+/// \brief Start and stop a StopWatch in scope
+/// \ingroup Utility
+class ScopedStopWatch
+{
+    public :
+
+    ScopedStopWatch (StopWatch &watch) : watch_(watch) {watch_.start();}
+    ~ScopedStopWatch () {watch_.stop();}
+
+    private :
+
+    StopWatch &watch_;
+}; // class ScopedStopWatch
+
+} // namespace vsmc
 
 #ifdef VSMC_STOP_WATCH_DEFINED
 #undef VSMC_STOP_WATCH_DEFINED
