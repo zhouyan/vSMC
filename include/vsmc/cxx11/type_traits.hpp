@@ -5,6 +5,11 @@
 
 namespace vsmc { namespace cxx11 {
 
+/// \defgroup CPP11Traits C++11 style Type Traits
+/// \brief C++11 style type traits
+/// \ingroup Traits
+/// @{
+
 // integral_constant
 template <typename T, T v>
 struct integral_constant
@@ -124,6 +129,8 @@ template <>           struct helper<long double> : public true_type {};
 }
 template <typename T> struct is_floating_point :
     public is_floating_point_impl::helper<typename remove_cv<T>::type> {};
+
+/// @}
 
 } } // namespace vsmc::cxx11
 
