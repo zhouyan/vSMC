@@ -59,7 +59,9 @@ template <typename T>                                                         \
 struct Has##Outer :                                                           \
     public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};     \
                                                                               \
-template <typename T, bool> struct Outer##Dispatch                            \
+template <typename T, bool> struct Outer##Dispatch;                           \
+                                                                              \
+template <typename T> struct Outer##Dispatch<T, false>                        \
 {typedef Default type;};                                                      \
                                                                               \
 template <typename T> struct Outer##Dispatch<T, true>                         \
@@ -124,7 +126,9 @@ template <typename T, typename V>                                             \
 struct Has##Outer :                                                           \
     public cxx11::integral_constant<bool, Has##Outer##Impl<T, V>::value> {};  \
                                                                               \
-template <typename T, typename V, bool> struct Outer##Dispatch                \
+template <typename T, typename V, bool> struct Outer##Dispatch;               \
+                                                                              \
+template <typename T, typename V> struct Outer##Dispatch<T, V, false>         \
 {typedef Default<V> type;};                                                   \
                                                                               \
 template <typename T, typename V> struct Outer##Dispatch<T, V, true>          \
