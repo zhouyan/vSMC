@@ -31,12 +31,14 @@ class Sampler
             ResampleScheme scheme = Stratified,
             double resample_threshold = 0.5) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
-        path_(typename Path<T>::eval_type()) {resample_scheme(scheme);}
+        path_(typename Path<T>::eval_type()), start_watch_(false)
+    {resample_scheme(scheme);}
 
     explicit Sampler (size_type N,
             const resample_type &res_op,
             double resample_threshold = 0.5) :
-        resample_threshold_(resample_threshold), particle_(N), iter_num_(0)
+        resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
+        path_(typename Path<T>::eval_type()), start_watch_(false)
     {resample_scheme(res_op);}
 
     /// \brief Number of particles
@@ -390,6 +392,10 @@ class Sampler
     /// \brief Erase all monitors
     Sampler<T> &clear_monitor () {monitor_.clear(); return *this;}
 
+    void start_watch () {start_watch_ = true;}
+
+    void stop_watch () {start_watch_ = false;}
+
     void reset_watch ()
     {
         watch_init_.reset();
@@ -569,6 +575,7 @@ class Sampler
     Path<T> path_;
     monitor_map_type monitor_;
 
+    bool start_watch_;
     StopWatch watch_init_;
     StopWatch watch_move_;
     StopWatch watch_mcmc_;
@@ -577,7 +584,7 @@ class Sampler
 
     void do_init (void *param)
     {
-        ScopedStopWatch start(watch_init_);
+        ScopedStopWatch<StopWatch> start(watch_init_, start_watch_);
         ess_history_.clear();
         resampled_history_.clear();
         accept_history_.clear();
@@ -593,7 +600,7 @@ class Sampler
 
     std::size_t do_move (std::size_t ia)
     {
-        ScopedStopWatch start(watch_move_);
+        ScopedStopWatch<StopWatch> start(watch_move_, start_watch_);
         for (typename std::vector<move_type>::iterator
                 m = move_queue_.begin(); m != move_queue_.end(); ++m) {
             accept_history_[ia].push_back((*m)(iter_num_, particle_));
@@ -605,7 +612,7 @@ class Sampler
 
     std::size_t do_mcmc (std::size_t ia)
     {
-        ScopedStopWatch start(watch_mcmc_);
+        ScopedStopWatch<StopWatch> start(watch_mcmc_, start_watch_);
         for (typename std::vector<mcmc_type>::iterator
                 m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
             accept_history_[ia].push_back((*m)(iter_num_, particle_));
@@ -617,7 +624,7 @@ class Sampler
 
     void do_resample ()
     {
-        ScopedStopWatch start(watch_resample_);
+        ScopedStopWatch<StopWatch> start(watch_resample_, start_watch_);
         bool resampled = particle_.resample(resample_op_, resample_threshold_);
         ess_history_.push_back(particle_.ess());
         resampled_history_.push_back(resampled);
@@ -625,7 +632,7 @@ class Sampler
 
     void do_monitor ()
     {
-        ScopedStopWatch start(watch_monitor_);
+        ScopedStopWatch<StopWatch> start(watch_monitor_, start_watch_);
         if (bool(path_))
             path_.eval(iter_num_, particle_);
 

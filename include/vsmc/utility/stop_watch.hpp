@@ -7,7 +7,7 @@ namespace vsmc {
 
 /// \brief A dummy StopWatch that does nothing
 /// \ingroup Utility
-class StopWatchNull
+class DummyStopWatch
 {
     public :
 
@@ -51,6 +51,26 @@ class StopWatchClockWrapper
     mutable typename clock_type::duration elapsed_;
     mutable typename clock_type::time_point start_time_;
 }; // class StopWatchClockWrapper
+
+/// \brief Start and stop a StopWatch in scope
+/// \ingroup Utility
+template <typename WatchType>
+class ScopedStopWatch
+{
+    public :
+
+    typedef WatchType watch_type;
+
+    ScopedStopWatch (watch_type &watch, bool start = true) :
+        start_(start), watch_(watch) {if (start_) watch_.start();}
+
+    ~ScopedStopWatch () {if (start_) watch_.stop();}
+
+    private :
+
+    const bool start_;
+    watch_type &watch_;
+}; // class ScopedStopWatch
 
 } // namespace vsmc
 
@@ -279,34 +299,10 @@ class StopWatch
 #endif // VSMC_HAS_CXX11LIB_CHRONO
 
 #ifndef VSMC_STOP_WATCH_DEFINED
-
 namespace vsmc {
-
-typedef StopWatchNull StopWatch;
-
+typedef DummyStopWatch StopWatch;
 } // namespace vsmc
-
-#endif // VSMC_STOP_WATCH_DEFINED
-
-namespace vsmc {
-
-/// \brief Start and stop a StopWatch in scope
-/// \ingroup Utility
-class ScopedStopWatch
-{
-    public :
-
-    ScopedStopWatch (StopWatch &watch) : watch_(watch) {watch_.start();}
-    ~ScopedStopWatch () {watch_.stop();}
-
-    private :
-
-    StopWatch &watch_;
-}; // class ScopedStopWatch
-
-} // namespace vsmc
-
-#ifdef VSMC_STOP_WATCH_DEFINED
+#else
 #undef VSMC_STOP_WATCH_DEFINED
 #endif
 
