@@ -33,6 +33,9 @@
 /// \defgroup Core Core
 /// \brief Constructing samplers with operations on the whole particle set
 
+/// \defgroup Resample Resampling algorithms
+/// \brief Resampling algorithm functor classes
+
 /// \defgroup Adapter Adapter
 /// \brief Adapter class templates for constructing concrete objects
 

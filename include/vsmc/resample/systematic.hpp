@@ -13,7 +13,7 @@ typedef cxx11::integral_constant<ResampleScheme, Systematic>
 } // namespace vsmc::internal
 
 /// \brief Systematic resampling
-/// \ingroup Core
+/// \ingroup Resample
 template <>
 class Resample<internal::ResampleSystematic>
 {

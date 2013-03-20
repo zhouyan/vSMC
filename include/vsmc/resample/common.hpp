@@ -61,7 +61,7 @@ inline void normalize_replication (std::size_t N, IntType *replication)
 } // namespace vsmc::internal
 
 /// \brief Transform replication numbers to parent particle locations
-/// \ingroup Core
+/// \ingroup Resample
 ///
 /// \details This one shall be used in place of the default if resampling
 /// algorithms output parent locations directly instead of replication number
@@ -74,7 +74,7 @@ class ResampleCopyFromReplicationNoAaction
 }; // class ResampleCopyFromReplicationNoAaction
 
 /// \brief Transform replication numbers to parent particle locations
-/// \ingroup Core
+/// \ingroup Resample
 class ResampleCopyFromReplication
 {
     public :

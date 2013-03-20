@@ -13,7 +13,7 @@ typedef cxx11::integral_constant<ResampleScheme, ResidualStratified>
 } // namespace vsmc::internal
 
 /// \brief Residual stratified resampling
-/// \ingroup Core
+/// \ingroup Resample
 template <>
 class Resample<internal::ResampleResidualStratified>
 {

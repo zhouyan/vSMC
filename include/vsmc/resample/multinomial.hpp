@@ -13,7 +13,7 @@ typedef cxx11::integral_constant<ResampleScheme, Multinomial>
 } // namespace vsmc::internal
 
 /// \brief Multinomial resampling
-/// \ingroup Core
+/// \ingroup Resample
 template <>
 class Resample<internal::ResampleMultinomial>
 {
