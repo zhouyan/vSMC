@@ -14,41 +14,40 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
 
 namespace internal {
 
-template <typename SizeType, typename RngType>
-inline void multinomial (SizeType N, SizeType S, RngType &rng,
-        const double *weight, SizeType *replication)
+template <typename IntType, typename RngType>
+inline void multinomial (std::size_t N, std::size_t S, RngType &rng,
+        const double *weight, IntType *res)
 {
     double sum_w = 0;
-    double acc_w = 0;
-    SizeType acc_s = 0;
-
-    for (SizeType i = 0; i != N; ++i) {
-        replication[i] = 0;
+    for (std::size_t i = 0; i != N; ++i) {
+        res[i] = 0;
         sum_w += weight[i];
     }
 
-    for (SizeType i = 0; i != N; ++i) {
+    double acc_w = 0;
+    IntType acc_s = 0;
+    for (std::size_t i = 0; i != N; ++i) {
         if (acc_s < S && weight[i] > 0) {
             double p = weight[i] / (sum_w - acc_w);
             p = p < 0 ? 0 : p;
             p = p > 1 ? 1 : p;
             long s = static_cast<long>(S - acc_s);
             cxx11::binomial_distribution<long> binom(s, p);
-            replication[i] = static_cast<SizeType>(binom(rng));
+            res[i] = static_cast<IntType>(binom(rng));
         }
         acc_w += weight[i];
-        acc_s += replication[i];
+        acc_s += res[i];
     }
 }
 
-template <typename SizeType>
-inline void normalize_replication (SizeType N, SizeType *replication)
+template <typename IntType>
+inline void normalize_replication (std::size_t N, IntType *replication)
 {
-    SizeType sum = 0;
-    SizeType max_i = 0;
-    SizeType max_v = replication[0];
-    for (SizeType i = 0; i != N; ++i) {
-        SizeType r = replication[i];
+    IntType sum = 0;
+    std::size_t max_i = 0;
+    IntType max_v = replication[0];
+    for (std::size_t i = 0; i != N; ++i) {
+        const IntType r = replication[i];
         if (r > max_v) {
             max_i = i;
             max_v = r;
@@ -120,9 +119,9 @@ class Resample<cxx11::integral_constant<ResampleScheme, Multinomial> >
 {
     public :
 
-    template <typename SizeType, typename RngType>
-    void operator() (SizeType N, RngType &rng, const double *weight,
-            SizeType *replication)
+    template <typename IntType, typename RngType>
+    void operator() (std::size_t N, RngType &rng, const double *weight,
+            IntType *replication)
     {
         internal::multinomial(N, N, rng, weight, replication);
         internal::normalize_replication(N, replication);
@@ -136,9 +135,9 @@ class Resample<cxx11::integral_constant<ResampleScheme, Residual> >
 {
     public :
 
-    template <typename SizeType, typename RngType>
-    void operator() (SizeType N, RngType &rng, const double *weight,
-            SizeType *replication)
+    template <typename IntType, typename RngType>
+    void operator() (std::size_t N, RngType &rng, const double *weight,
+            IntType *replication)
     {
         using std::modf;
 
@@ -146,17 +145,17 @@ class Resample<cxx11::integral_constant<ResampleScheme, Residual> >
         integral_.resize(N);
         double *const rptr = &residual_[0];
         double *const iptr = &integral_[0];
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             rptr[i] = modf(N * weight[i], iptr + i);
         double dsize = 0;
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             dsize += rptr[i];
-        SizeType size = static_cast<SizeType>(dsize);
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             rptr[i] /= dsize;
+        std::size_t size = static_cast<std::size_t>(dsize);
         internal::multinomial(N, size, rng, rptr, replication);
-        for (SizeType i = 0; i != N; ++i)
-            replication[i] += static_cast<SizeType>(iptr[i]);
+        for (std::size_t i = 0; i != N; ++i)
+            replication[i] += static_cast<IntType>(iptr[i]);
         internal::normalize_replication(N, replication);
     }
 
@@ -173,15 +172,15 @@ class Resample<cxx11::integral_constant<ResampleScheme, Stratified> >
 {
     public :
 
-    template <typename SizeType, typename RngType>
-    void operator() (SizeType N, RngType &rng, const double *weight,
-            SizeType *replication)
+    template <typename IntType, typename RngType>
+    void operator() (std::size_t N, RngType &rng, const double *weight,
+            IntType *replication)
     {
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             replication[i] = 0;
 
-        SizeType j = 0;
-        SizeType k = 0;
+        std::size_t j = 0;
+        std::size_t k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng);
         double cw = weight[0];
@@ -206,15 +205,15 @@ class Resample<cxx11::integral_constant<ResampleScheme, Systematic> >
 {
     public :
 
-    template <typename SizeType, typename RngType>
-    void operator() (SizeType N, RngType &rng, const double *weight,
-            SizeType *replication)
+    template <typename IntType, typename RngType>
+    void operator() (std::size_t N, RngType &rng, const double *weight,
+            IntType *replication)
     {
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             replication[i] = 0;
 
-        SizeType j = 0;
-        SizeType k = 0;
+        std::size_t j = 0;
+        std::size_t k = 0;
         cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng);
         double cw = weight[0];
@@ -238,9 +237,9 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualStratified> >
 {
     public :
 
-    template <typename SizeType, typename RngType>
-    void operator() (SizeType N, RngType &rng, const double *weight,
-            SizeType *replication)
+    template <typename IntType, typename RngType>
+    void operator() (std::size_t N, RngType &rng, const double *weight,
+            IntType *replication)
     {
         using std::modf;
 
@@ -248,18 +247,18 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualStratified> >
         integral_.resize(N);
         double *const rptr = &residual_[0];
         double *const iptr = &integral_[0];
-        for (SizeType i = 0; i != N; ++i) {
+        for (std::size_t i = 0; i != N; ++i) {
             replication[i] = 0;
             rptr[i] = modf(N * weight[i], iptr + i);
         }
         double dsize = 0;
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             dsize += rptr[i];
-        SizeType size = static_cast<SizeType>(dsize);
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             rptr[i] /= dsize;
-        SizeType j = 0;
-        SizeType k = 0;
+        std::size_t j = 0;
+        std::size_t k = 0;
+        std::size_t size = static_cast<std::size_t>(dsize);
         cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng);
         double cw = rptr[0];
@@ -273,8 +272,8 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualStratified> >
                 break;
             cw += rptr[++k];
         }
-        for (SizeType i = 0; i != N; ++i)
-            replication[i] += static_cast<SizeType>(iptr[i]);
+        for (std::size_t i = 0; i != N; ++i)
+            replication[i] += static_cast<IntType>(iptr[i]);
         internal::normalize_replication(N, replication);
     }
 
@@ -291,9 +290,9 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualSystematic> >
 {
     public :
 
-    template <typename SizeType, typename RngType>
-    void operator() (SizeType N, RngType &rng, const double *weight,
-            SizeType *replication)
+    template <typename IntType, typename RngType>
+    void operator() (std::size_t N, RngType &rng, const double *weight,
+            IntType *replication)
     {
         using std::modf;
 
@@ -301,18 +300,18 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualSystematic> >
         integral_.resize(N);
         double *const rptr = &residual_[0];
         double *const iptr = &integral_[0];
-        for (SizeType i = 0; i != N; ++i) {
+        for (std::size_t i = 0; i != N; ++i) {
             replication[i] = 0;
             rptr[i] = modf(N * weight[i], iptr + i);
         }
         double dsize = 0;
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             dsize += rptr[i];
-        SizeType size = static_cast<SizeType>(dsize);
-        for (SizeType i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             rptr[i] /= dsize;
-        SizeType j = 0;
-        SizeType k = 0;
+        std::size_t j = 0;
+        std::size_t k = 0;
+        std::size_t size = static_cast<std::size_t>(dsize);
         cxx11::uniform_real_distribution<double> unif(0,1);
         double u = unif(rng);
         double cw = rptr[0];
@@ -325,8 +324,8 @@ class Resample<cxx11::integral_constant<ResampleScheme, ResidualSystematic> >
                 break;
             cw += rptr[++k];
         }
-        for (SizeType i = 0; i != N; ++i)
-            replication[i] += static_cast<SizeType>(iptr[i]);
+        for (std::size_t i = 0; i != N; ++i)
+            replication[i] += static_cast<IntType>(iptr[i]);
         internal::normalize_replication(N, replication);
     }
 
