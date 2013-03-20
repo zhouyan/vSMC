@@ -22,6 +22,14 @@
 
 #endif // VSMC_HPP
 
+/// \defgroup Config Configuration
+/// \brief Configuration macros and default values if undefined
+
+/// \defgroup Compiler Compiler configration
+/// \brief Compiler related configuration macros. Default value varies with
+/// different compilers
+/// \ingroup Config
+
 /// \defgroup Core Core
 /// \brief Constructing samplers with operations on the whole particle set
 
