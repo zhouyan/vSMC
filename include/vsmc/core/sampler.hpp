@@ -658,11 +658,9 @@ class Sampler
         }
 
         if (!(iter_num_ % 50))
-            std::fprintf(stderr, "%6u", static_cast<unsigned>(iter_num_));
+            std::fprintf(stderr, "\n%6u", static_cast<unsigned>(iter_num_));
         else
             std::fprintf(stderr, ".");
-
-        std::cout.flush();
     }
 
     template <typename OutputIter>
