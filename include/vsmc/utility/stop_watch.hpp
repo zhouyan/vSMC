@@ -300,7 +300,7 @@ class StopWatch
 
 #ifndef VSMC_STOP_WATCH_DEFINED
 namespace vsmc {
-typedef DummyStopWatch StopWatch;
+typedef VSMC_STOP_WATCH_TYPE StopWatch;
 } // namespace vsmc
 #else
 #undef VSMC_STOP_WATCH_DEFINED

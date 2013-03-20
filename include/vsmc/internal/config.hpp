@@ -83,4 +83,8 @@
 #define VSMC_HAS_NATIVE_TIME_LIBRARY 1
 #endif
 
+#ifndef VSMC_STOP_WATCH_TYPE
+#define VSMC_STOP_WATCH_TYPE DummyStopWatch
+#endif
+
 #endif // VSMC_INTERNAL_CONFIG_HPP
