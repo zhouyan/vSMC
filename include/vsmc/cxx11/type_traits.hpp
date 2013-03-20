@@ -2,6 +2,7 @@
 #define VSMC_INTERNAL_CXX11_TYPE_TRAITS_HPP
 
 #include <vsmc/internal/config.hpp>
+#include <cstddef>
 
 namespace vsmc { namespace cxx11 {
 

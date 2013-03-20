@@ -2,9 +2,9 @@
 #define VSMC_CORE_PARTICLE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/resample.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/weight.hpp>
+#include <vsmc/resample/basic.hpp>
 #include <vsmc/utility/rng_set.hpp>
 #include <vsmc/utility/seed.hpp>
 #include <vsmc/utility/stop_watch.hpp>
