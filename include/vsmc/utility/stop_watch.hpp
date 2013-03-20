@@ -5,7 +5,25 @@
 
 namespace vsmc {
 
-/// \brief Stop watch as a wrapper of C++11 clock
+/// \brief A dummy StopWatch that does nothing
+/// \ingroup Utility
+class StopWatchNull
+{
+    public :
+
+    void start () const {}
+    void stop  () const {}
+    void reset () const {}
+
+    double nanoseconds  () const {return 0;}
+    double microseconds () const {return 0;}
+    double milliseconds () const {return 0;}
+    double seconds      () const {return 0;}
+    double minutes      () const {return 0;}
+    double hours        () const {return 0;}
+}; // class StopWatch
+
+/// \brief StopWatch as a wrapper of C++11 clock
 /// \ingroup Utility
 template <typename ClockType>
 class StopWatchClockWrapper
@@ -264,22 +282,7 @@ class StopWatch
 
 namespace vsmc {
 
-class StopWatch
-{
-    public :
-
-    void start () const {}
-    void stop  () const {}
-    void reset () const {}
-
-    double nanoseconds  () const {return 0;}
-    double microseconds () const {return 0;}
-    double milliseconds () const {return 0;}
-    double seconds      () const {return 0;}
-    double minutes      () const {return 0;}
-    double hours        () const {return 0;}
-}; // class StopWatch
-
+typedef StopWatchNull StopWatch;
 
 } // namespace vsmc
 

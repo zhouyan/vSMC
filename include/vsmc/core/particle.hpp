@@ -214,6 +214,15 @@ class Particle
         return resampled;
     }
 
+    void reset_watch ()
+    {
+        resample_read_weight_watch_.reset();
+        resample_get_replication_watch_.reset();
+        resample_get_copy_from_watch_.reset();
+        resample_copy_watch_.reset();
+        resample_post_copy_watch_.reset();
+    }
+
     StopWatch &resample_read_weight_watch ()
     {return resample_read_weight_watch_;}
 

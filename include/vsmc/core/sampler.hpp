@@ -31,8 +31,7 @@ class Sampler
             ResampleScheme scheme = Stratified,
             double resample_threshold = 0.5) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
-        path_(typename Path<T>::eval_type()), show_(false)
-    {resample_scheme(scheme);}
+        path_(typename Path<T>::eval_type()) {resample_scheme(scheme);}
 
     explicit Sampler (size_type N,
             const resample_type &res_op,
@@ -261,7 +260,6 @@ class Sampler
         do_init(param);
         do_resample();
         do_monitor();
-        print_progress();
 
         return *this;
     }
@@ -295,7 +293,6 @@ class Sampler
             for (; ia != accept_history_.size(); ++ia)
                 accept_history_[ia].push_back(0);
             do_monitor();
-            print_progress();
         }
 
         return *this;
@@ -392,9 +389,6 @@ class Sampler
 
     /// \brief Erase all monitors
     Sampler<T> &clear_monitor () {monitor_.clear(); return *this;}
-
-    /// \brief Set if the sampler shall print dots at each iteration
-    Sampler<T> &show_progress (bool show) {show_ = show; return *this;}
 
     void reset_watch ()
     {
@@ -575,7 +569,6 @@ class Sampler
     Path<T> path_;
     monitor_map_type monitor_;
 
-    bool show_;
     StopWatch watch_init_;
     StopWatch watch_move_;
     StopWatch watch_mcmc_;
@@ -641,26 +634,6 @@ class Sampler
             if (bool(m->second))
                 m->second.eval(iter_num_, particle_);
         }
-    }
-
-    void print_progress () const
-    {
-        if (!show_)
-            return;
-
-        if (iter_num_ == 0) {
-            std::fprintf(stderr, "\n");
-            for (int i = 0; i != 78; ++i)
-                std::fprintf(stderr, "=");
-            std::fprintf(stderr, "\n");
-            std::fprintf(stderr, "%6u", static_cast<unsigned>(iter_num_));
-            return;
-        }
-
-        if (!(iter_num_ % 50))
-            std::fprintf(stderr, "\n%6u", static_cast<unsigned>(iter_num_));
-        else
-            std::fprintf(stderr, ".");
     }
 
     template <typename OutputIter>
