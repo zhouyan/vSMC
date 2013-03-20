@@ -35,10 +35,10 @@
 /// struct Empty {};
 /// struct Stack {typedef int size_type;};
 ///
-/// vsmc::traits::SizeTypeTrait<Empty>::value; // false
-/// vsmc::traits::SizeTypeTrait<Empty>::type;  // std::size_t
-/// vsmc::traits::SizeTypeTrait<Stack>::value; // true
-/// vsmc::traits::SizeTypeTrait<Stack>::type;  // Stack::size_type
+/// SizeTypeTrait<Empty>::value; // false
+/// SizeTypeTrait<Empty>::type;  // std::size_t
+/// SizeTypeTrait<Stack>::value; // true
+/// SizeTypeTrait<Stack>::type;  // Stack::size_type
 /// \endcode
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)                \
 template <typename T>                                                         \
@@ -100,10 +100,10 @@ template <typename T> struct Outer##Trait                                     \
 /// struct Empty {};
 /// struct Stack { template <typename T> struct vec_type {/*...*/}; };
 ///
-/// vsmc::traits::VecTypeTrait<Empty, int>::value; // false
-/// vsmc::traits::VecTypeTrait<Empty, int>::type;  // std::vector<int>
-/// vsmc::traits::VecTypeTrait<Stack, int>::value; // true
-/// vsmc::traits::VecTypeTrait<Stack, int>::type;  // Stack::vec_type<int>
+/// VecTypeTrait<Empty, int>::value; // false
+/// VecTypeTrait<Empty, int>::type;  // std::vector<int>
+/// VecTypeTrait<Stack, int>::value; // true
+/// VecTypeTrait<Stack, int>::type;  // Stack::vec_type<int>
 /// \endcode
 #define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)       \
 template <typename T, typename V>                                             \
@@ -136,6 +136,33 @@ template <typename T, typename V> struct Outer##Trait                         \
     typedef typename Outer##Dispatch<T, V, value>::type type;                 \
 };
 
+/// \brief Define member function checker
+/// \ingroup Traits
+///
+/// \details This macro define a class template
+/// \code
+/// template <typename T> struct HasOuter
+/// \endcode
+/// which is derived from `vsmc::cxx11::true_type` if a non-static member
+/// function of the form
+/// \code
+/// RT Inner Args
+/// \endcode
+/// exists. Otherwise it is derived from `vsmc::cxx11::false_type`. The
+/// function arguments `Args` need to be enclosed by parenthesis.
+///
+/// **Example**
+/// \code
+/// VSMC_DEFINE_MF_CHECKER(State, state, double, (std::size_t))
+///
+/// struct Empty {};
+/// struct Value {double state (std::size_t i) {return /* something */;}};
+///
+/// HasState<Empty>::value; // false
+/// HasState<Empty>::type;  // false_type
+/// HasState<Value>::value; // true
+/// HasState<Value>::type;  // true_type
+/// \endcode
 #define VSMC_DEFINE_MF_CHECKER(Outer, Inner, RT, Args)                        \
 template <typename T>                                                         \
 struct Has##Outer##Impl                                                       \
@@ -156,6 +183,33 @@ template <typename T>                                                         \
 struct Has##Outer :                                                           \
     public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};
 
+/// \brief Define static member function checker
+/// \ingroup Traits
+///
+/// \details This macro define a class template
+/// \code
+/// template <typename T> struct HasStaticOuter
+/// \endcode
+/// which is derived from `vsmc::cxx11::true_type` if a static member function
+/// of the form
+/// \code
+/// RT Inner Args
+/// \endcode
+/// exists. Otherwise it is derived from `vsmc::cxx11::false_type`. The
+/// function arguments `Args` need to be enclosed by parenthesis.
+///
+/// **Example**
+/// \code
+/// VSMC_DEFINE_STATIC_MF_CHECKER(Dim, dim, int, (int))
+///
+/// struct Empty {};
+/// struct Value {static int dim (int) {return /* something */;}};
+///
+/// HasStaticDim<Empty>::value; // false
+/// HasStaticDim<Empty>::type;  // false_type
+/// HasStaticDim<Value>::value; // true
+/// HasStaticDim<Value>::type;  // true_type
+/// \endcode
 #define VSMC_DEFINE_STATIC_MF_CHECKER(Outer, Inner, RT, Args)                 \
 template <typename T>                                                         \
 struct HasStatic##Outer##Impl                                                 \
