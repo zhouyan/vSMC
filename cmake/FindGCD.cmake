@@ -5,7 +5,7 @@
 # GCD_FOUND          - TRUE if Apple GCD is found and work correctly.
 #                      But it is untested by real GCD programs
 # GCD_INCLUDE_DIR    - The directory containing GCD headers
-# GCD_LINK_LIBRARIES - TBB libraries that shall be linked to
+# GCD_LINK_LIBRARIES - GCD libraries that shall be linked to
 #
 # The following variables affect the behavior of this module
 #
@@ -15,15 +15,11 @@
 IF (NOT DEFINED GCD_FOUND)
     IF (NOT DEFINED GCD_LINK_LIBRARIES)
         IF (APPLE)
-            SET (GCD_LINK_LIBRARIES_RELEASE)
-            SET (GCD_LINK_LIBRARIES_DEBUG)
             MESSAGE (STATUS "GCD link libraries not need (Mac OS X)")
         ELSE (APPLE)
             FIND_LIBRARY (GCD_LINK_LIBRARIES dispatch
                 PATHS ${GCD_LIB_PATH} ENV LIBRARY_PATH)
             IF (GCD_LINK_LIBRARIES)
-                SET (GCD_LINK_LIBRARIES_RELEASE ${GCD_LINK_LIBRARIES})
-                SET (GCD_LINK_LIBRARIES_DEBUG ${GCD_LINK_LIBRARIES})
                 MESSAGE (STATUS "Found GCD libraries: ${GCD_LINK_LIBRARIES}")
             ELSE (GCD_LINK_LIBRARIES)
                 MESSAGE (STATUS "NOT Found GCD libraries")
