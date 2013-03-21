@@ -142,16 +142,7 @@ class Sampler
         return first;
     }
 
-    /// \brief Get the number of moves (both move and mcmc) of a given
-    /// iteration
-    std::size_t move_num (std::size_t iter) const
-    {return accept_history_[iter].size();}
-
     /// \brief Get the accept count of a given move id and the iteration
-    ///
-    /// \details
-    /// The total number of move can be get through move_num(). The first move
-    /// performed (either a move or a mcmc) has `id` 0 and so on.
     std::size_t accept_history (std::size_t id, std::size_t iter) const
     {return accept_history_[id][iter];}
 
