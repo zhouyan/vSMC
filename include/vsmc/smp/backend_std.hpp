@@ -37,6 +37,23 @@ class WeightSetSTD : public traits::WeightSetTypeTrait<BaseState>::type
     }
 }; // class WeightSetSTD
 
+/// \brief Calculating normalizing constant ratio using C++11 concurrency
+/// \ingroup SMP
+class NormalizingConstantSTD : public NormalizingConstant
+{
+    public :
+
+    NormalizingConstantSTD (std::size_t N) : NormalizingConstant(N) {}
+
+    protected:
+
+    void vd_exp (std::size_t N, double *inc_weight) const
+    {
+        parallel_for(BlockedRange<std::size_t>(0, N), tbb_op::exp<double>(
+                    inc_weight, inc_weight));
+    }
+}; // class NormalizingConstantSTD
+
 /// \brief Particle::value_type subtype using C++11 concurrency
 /// \ingroup SMP
 template <typename BaseState>

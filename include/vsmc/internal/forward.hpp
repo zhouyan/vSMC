@@ -10,6 +10,8 @@
 
 #define VSMC_DEFINE_SMP_FORWARD(Name)                                         \
 template <typename> class State##Name;                                        \
+template <typename> class WeightSet##Name;                                    \
+class NormalizingConstant##Name;                                              \
 template <typename, typename D = Virtual> class Initialize##Name;             \
 template <typename, typename D = Virtual> class Move##Name;                   \
 template <typename, typename D = Virtual> class MonitorEval##Name;            \
@@ -86,8 +88,9 @@ template <typename, typename B = Functor> class PathEvalCL;
 // MPI
 struct MPIDefault;
 template <typename> class MPICommunicator;
-template <typename> class WeightSetMPI;
 template <typename, typename ID = MPIDefault> class StateMPI;
+template <typename> class WeightSetMPI;
+class NormalizingConstant;
 
 // SMP State
 template <MatrixOrder, std::size_t, typename> class StateMatrixBase;

@@ -318,7 +318,7 @@ class Sampler
 
     /// \brief Path sampling estimate of the logarithm of normalizing constants
     /// ratio
-    double path_sampling () const {return path_.zconst();}
+    double path_sampling () const {return path_.log_zconst();}
 
     /// \brief Add a monitor
     ///

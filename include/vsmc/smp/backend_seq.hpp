@@ -43,6 +43,25 @@ class WeightSetSEQ : public traits::WeightSetTypeTrait<BaseState>::type
     }
 }; // class WeightSetSEQ
 
+/// \brief Calculating normalizing constant ratio
+/// \ingroup SMP
+class NormalizingConstantSEQ : public NormalizingConstant
+{
+    public :
+
+    NormalizingConstantSEQ (std::size_t N) : NormalizingConstant(N) {}
+
+    protected:
+
+    void vd_exp (std::size_t N, double *inc_weight) const
+    {
+        using std::exp;
+
+        for (std::size_t i = 0; i != N; ++i)
+            inc_weight[i] = exp(inc_weight[i]);
+    }
+}; // class NormalizingConstantSEQ
+
 /// \brief Particle::value_type subtype
 /// \ingroup Sequential
 template <typename BaseState>

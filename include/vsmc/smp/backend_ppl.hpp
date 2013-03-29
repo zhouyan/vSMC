@@ -80,6 +80,41 @@ class WeightSetPPL : public traits::WeightSetTypeTrait<BaseState>::type
     }; // class weight2log_weight_
 }; // class WeightSetPPL
 
+/// \brief Calculating normalizing constant ratio using Microsoft Parallel
+/// Pattern Library
+/// \ingroup SMP
+class NormalizingConstantPPL : public NormalizingConstant
+{
+    public :
+
+    NormalizingConstantPPL (std::size_t N) : NormalizingConstant(N) {}
+
+    protected:
+
+    void vd_exp (std::size_t N, double *inc_weight) const
+    {ppl::parallel_for(static_cast<std::size_t>(0), N, vd_exp_(inc_weight));}
+
+    private :
+
+    class vd_exp_
+    {
+        public :
+
+        vd_exp_ (double *inc_weight) : inc_weight_(inc_weight) {}
+
+        void operator() (std::size_t i) const
+        {
+            using std::exp;
+
+            inc_weight_[i] = exp(inc_weight_[i]);
+        }
+
+        private :
+
+        double *const inc_weight_;
+    }; // class vd_exp_
+}; // class NormalizingConstantPPL
+
 /// \brief Particle::value_type subtype using Parallel Pattern Library
 /// \ingroup SMP
 template <typename BaseState>

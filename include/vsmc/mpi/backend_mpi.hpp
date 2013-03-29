@@ -4,6 +4,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/mpi/manager.hpp>
 #include <vsmc/mpi/weight.hpp>
+#include <vsmc/mpi/normalizing_constant.hpp>
 
 namespace vsmc {
 
@@ -16,6 +17,7 @@ class StateMPI : public BaseState
 
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
     typedef WeightSetMPI<ID> weight_set_type;
+    typedef ID id_type;
 
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),

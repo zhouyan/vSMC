@@ -49,7 +49,7 @@ class Path
     explicit Path (const eval_type &eval) : eval_(eval), recording_(true) {}
 
     Path (const Path<T> &other) :
-        eval_(other.eval_), recording_(other.recording_),
+        eval_(other.eval_), recording_(other.recording_), log_zconst_(0),
         index_(other.index_), integrand_(other.integrand_), grid_(other.grid_)
     {}
 
@@ -172,28 +172,24 @@ class Path
         for (std::size_t i = 0; i != N; ++i)
             res += buffer[i] * weight[i];
         integrand_.push_back(res);
+
+        if (iter_size() > 1) {
+            std::size_t i = iter_size() - 1;
+            log_zconst_ += 0.5 * (grid_[i] - grid_[i - 1]) *
+                (integrand_[i] + integrand_[i - 1]);
+        }
     }
+
+    /// \brief Get the nomralizing constants ratio estimates
+    double zconst () const {return std::exp(log_zconst_);}
 
     /// \brief Get the logarithm nomralizing constants ratio estimates
-    double zconst () const
-    {
-        if (iter_size() < 2)
-            return 0;
-
-        const std::size_t N = iter_size();
-        const double *const gptr = &grid_[0];
-        const double *const iptr = &integrand_[0];
-        double integral = 0;
-        for (std::size_t i = 1; i != N; ++i)
-            integral += (gptr[i] - gptr[i - 1]) * (iptr[i] + iptr[i - 1]);
-        integral *= 0.5;
-
-        return integral;
-    }
+    double log_zconst () const {return log_zconst_;}
 
     /// \brief Clear all records of the index and integrations
     void clear ()
     {
+        log_zconst_ = 0;
         index_.clear();
         integrand_.clear();
         grid_.clear();
@@ -228,6 +224,7 @@ class Path
 
     eval_type eval_;
     bool recording_;
+    double log_zconst_;
     std::vector<std::size_t> index_;
     std::vector<double> integrand_;
     std::vector<double> grid_;
@@ -269,7 +266,7 @@ class PathGeometry : public Path<T>
     }
 
     template <unsigned Degree>
-    double zconst_newton_cotes (unsigned insert_points = 0) const
+    double log_zconst_newton_cotes (unsigned insert_points = 0) const
     {
         if (this->iter_size() < 2)
             return 0;

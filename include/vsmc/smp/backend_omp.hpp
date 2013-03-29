@@ -47,6 +47,29 @@ class WeightSetOMP : public traits::WeightSetTypeTrait<BaseState>::type
     }
 }; // class WeightSetOMP
 
+/// \brief Calculating normalizing constant ratio using OpenMP
+/// \ingroup SMP
+class NormalizingConstantOMP : public NormalizingConstant
+{
+    typedef typename traits::OMPSizeTypeTrait<std::size_t>::type size_type;
+
+    public :
+
+    NormalizingConstantOMP (std::size_t N) : NormalizingConstant(N) {}
+
+    protected:
+
+    void vd_exp (std::size_t N, double *inc_weight) const
+    {
+        using std::exp;
+
+        size_type NN = static_cast<size_type>(N);
+#pragma omp parallel for default(shared)
+        for (size_type i = 0; i < N; ++i)
+            inc_weight[i] = exp(inc_weight[i]);
+    }
+}; // class NormalizingConstantOMP
+
 /// \brief Particle::value_type subtype using OpenMP
 /// \ingroup SMP
 template <typename BaseState>

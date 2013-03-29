@@ -2,6 +2,8 @@
 #define VSMC_SMP_BASE_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/core/weight.hpp>
+#include <vsmc/core/normalizing_constant.hpp>
 
 #define VSMC_DEFINE_SMP_IMPL_COPY_BASE(Impl, Name)                            \
 Name##Impl () {}                                                              \

@@ -66,6 +66,34 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
     }
 }; // class WeightSetGCD
 
+/// \brief Calculating normalizing constant ratio using Apple Grand Central
+/// Dispatch
+/// \ingroup SMP
+class NormalizingConstantGCD : public NormalizingConstant
+{
+    public :
+
+    NormalizingConstantGCD (std::size_t N) : NormalizingConstant(N) {}
+
+    protected:
+
+    void vd_exp (std::size_t N, double *inc_weight) const
+    {
+        dispatch_apply_f(N, DispatchQueue::instance().queue(),
+                (void *) inc_weight, vd_exp_);
+    }
+
+    private :
+
+    static void vd_exp_ (void *wp, std::size_t i)
+    {
+        using std::exp;
+
+        double *const iptr = static_cast<double *>(wp);
+        iptr[i] = exp(iptr[i]);
+    }
+}; // class NormalizingConstantGCD
+
 /// \brief Particle::value_type subtype usingt Apple Grand Central Dispatch
 /// \ingroup SMP
 template <typename BaseState>

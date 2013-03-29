@@ -66,6 +66,24 @@ class WeightSetTBB : public traits::WeightSetTypeTrait<BaseState>::type
     }
 }; // class WeightSetTBB
 
+/// \brief Calculating normalizing constant ratio using Intel Threading
+/// Building Blocks
+/// \ingroup SMP
+class NormalizingConstantTBB : public NormalizingConstant
+{
+    public :
+
+    NormalizingConstantTBB (std::size_t N) : NormalizingConstant(N) {}
+
+    protected:
+
+    void vd_exp (std::size_t N, double *inc_weight) const
+    {
+        tbb::parallel_for(tbb::blocked_range<std::size_t>(0, N),
+                tbb_op::exp<double>(inc_weight, inc_weight));
+    }
+}; // class NormalizingConstantTBB
+
 /// \brief Particle::value_type subtype using Intel Threading Building Blocks
 /// \ingroup SMP
 template <typename BaseState>

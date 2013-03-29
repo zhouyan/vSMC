@@ -46,6 +46,24 @@ class WeightSetCILK : public traits::WeightSetTypeTrait<BaseState>::type
     }
 }; // class WeightSetCILK
 
+/// \brief Calculating normalizing constant ratio using Intel Cilk Plus
+/// \ingroup SMP
+class NormalizingConstantCILK : public NormalizingConstant
+{
+    public :
+
+    NormalizingConstantCILK (std::size_t N) : NormalizingConstant(N) {}
+
+    protected:
+
+    void vd_exp (std::size_t N, double *inc_weight) const
+    {
+        using std::exp;
+        cilk_for (std::size_t i = 0; i != N; ++i)
+            inc_weight[i] = exp(inc_weight[i]);
+    }
+}; // class NormalizingConstantCILK
+
 /// \brief Particle::value_type subtype using Intel Cilk Plus
 /// \ingroup SMP
 template <typename BaseState>
