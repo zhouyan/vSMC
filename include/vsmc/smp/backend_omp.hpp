@@ -51,7 +51,7 @@ class WeightSetOMP : public traits::WeightSetTypeTrait<BaseState>::type
 /// \ingroup SMP
 class NormalizingConstantOMP : public NormalizingConstant
 {
-    typedef typename traits::OMPSizeTypeTrait<std::size_t>::type size_type;
+    typedef traits::OMPSizeTypeTrait<std::size_t>::type size_type;
 
     public :
 
@@ -65,7 +65,7 @@ class NormalizingConstantOMP : public NormalizingConstant
 
         size_type NN = static_cast<size_type>(N);
 #pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i)
+        for (size_type i = 0; i < NN; ++i)
             inc_weight[i] = exp(inc_weight[i]);
     }
 }; // class NormalizingConstantOMP

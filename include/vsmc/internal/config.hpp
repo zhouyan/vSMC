@@ -7,11 +7,11 @@
 #define __STDC_CONSTANT_MACROS
 #endif
 
-#if defined(__clang__)
-#ifndef TBB_USE_CAPTURED_EXCEPTION
-#define TBB_USE_CAPTURED_EXCEPTION 1
-#endif
-#endif
+// #if defined(__clang__)
+// #ifndef TBB_USE_CAPTURED_EXCEPTION
+// #define TBB_USE_CAPTURED_EXCEPTION 1
+// #endif
+// #endif
 
 #if  VSMC_HAS_CXX11_CONSTEXPR
 #define VSMC_CONSTEXPR constexpr
