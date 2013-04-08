@@ -55,7 +55,7 @@ inline void normalize_replication (std::size_t N, IntType *replication)
         }
         sum += r;
     }
-    replication[max_i] += N - sum;
+    replication[max_i] += static_cast<IntType>(N - sum);
 }
 
 } // namespace vsmc::internal
@@ -87,7 +87,7 @@ class ResampleCopyFromReplication
         std::size_t time = 0;
         for (std::size_t to = 0; to != N; ++to) {
             if (replication[to]) {
-                copy_from[to] = to;
+                copy_from[to] = static_cast<IntType2>(to);
             } else {
                 // replication[to] has zero child, copy from elsewhere
                 if (replication[from] - time <= 1) {
@@ -97,7 +97,7 @@ class ResampleCopyFromReplication
                         ++from;
                     while (replication[from] < 2);
                 }
-                copy_from[to] = from;
+                copy_from[to] = static_cast<IntType2>(from);
                 ++time;
             }
         }

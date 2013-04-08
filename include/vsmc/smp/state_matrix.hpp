@@ -71,7 +71,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         VSMC_RUNTIME_ASSERT_DIM(dim);
 
         traits::DimTrait<Dim>::resize_dim(dim);
-        state_.resize(dim * size_);
+        state_.resize(StateMatrix<Order, Dim, T>::storage_size(size_, dim));
     }
 
     size_type size () const {return size_;}
@@ -82,27 +82,31 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     iterator begin() {return state_.begin();}
 
-    iterator end () {return state_.end();}
+    iterator end () {return state_.begin() + this->dim() * size_;}
 
     const_iterator begin () const {return state_.begin();}
 
-    const_iterator end () const {return state_.end();}
+    const_iterator end () const {return state_.begin() + this->dim() * size_;}
 
     const_iterator cbegin () const {return state_.begin();}
 
-    const_iterator cend () const {return state_.end();}
+    const_iterator cend () const {return state_.begin() + this->dim() * size_;}
 
-    reverse_iterator rbegin () {return state_.rbegin();}
+    reverse_iterator rbegin () {return reverse_iterator(end());}
 
-    reverse_iterator rend () {return state_.rend();}
+    reverse_iterator rend () {return reverse_iterator(begin());}
 
-    const_reverse_iterator rbegin () const {return state_.rbegin();}
+    const_reverse_iterator rbegin () const
+    {return const_reverse_iterator(end());}
 
-    const_reverse_iterator rend () const {return state_.rend();}
+    const_reverse_iterator rend () const
+    {return const_reverse_iterator(begin());}
 
-    const_reverse_iterator crbegin () const {return state_.rbegin();}
+    const_reverse_iterator crbegin () const
+    {return const_reverse_iterator(cend());}
 
-    const_reverse_iterator crend () const {return state_.rend();}
+    const_reverse_iterator crend () const
+    {return const_reverse_iterator(cbegin());}
 
     state_pack_type state_pack (size_type id) const
     {
@@ -168,7 +172,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
                 order, StateMatrix::read_state_matrix);
 
         if (order == Order) {
-            for (std::size_t i = 0; i != state_.size(); ++i, ++first)
+            for (std::size_t i = 0; i != this->dim() * size_; ++i, ++first)
                 *first = state_[i];
         } else {
             const StateMatrix<Order, Dim, T> *sptr =
@@ -211,7 +215,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     protected :
 
-    explicit StateMatrixBase (size_type N) : size_(N), state_(N * Dim) {}
+    explicit StateMatrixBase (size_type N) :
+        size_(N), state_(StateMatrix<Order, Dim, T>::storage_size(size_, Dim))
+    {}
 
     void copy_particle (size_type from, size_type to)
     {
@@ -259,6 +265,9 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         col_const_reverse_iterator;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
+
+    static std::size_t storage_size (std::size_t N, std::size_t dim)
+    {return (N + 1) * dim;}
 
     T &state (size_type id, std::size_t pos)
     {return this->state_matrix()[id * this->dim() + pos];}
@@ -394,6 +403,9 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         col_const_reverse_iterator;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
+
+    static std::size_t storage_size (std::size_t N, std::size_t dim)
+    {return N * (dim + 1);}
 
     T &state (size_type id, std::size_t pos)
     {return this->state_matrix()[pos * this->size() + id];}

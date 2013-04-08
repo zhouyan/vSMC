@@ -2,6 +2,7 @@ SET (VSMC_RANDOM_TEST_SOURCE "
 #include <cassert>
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/utility/rng_set.hpp>
+#include <vector>
 
 int main ()
 {
@@ -47,6 +48,16 @@ int main ()
     vsmc::cxx11::normal_distribution<> rnorm(0, 1);
     for (int i = 0; i != N; ++i) {
         double n = rnorm(eng.rng(i));
+    }
+
+    std::vector<double> w(3);
+    w[0] = 0.2;
+    w[1] = 0.3;
+    w[2] = 0.4;
+    vsmc::cxx11::discrete_distribution<> rdist(w.begin(), w.end());
+    for (int i = 0; i != N; ++i) {
+        int d = rdist(eng.rng(i));
+        assert(d >= 0 && d < 3);
     }
 
     return 0;
