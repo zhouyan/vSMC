@@ -41,10 +41,3 @@ SET (OpenCL_LIB_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.0/lib/x64"
     CACHE PATH "OpenCL lib path")
 
 ##############################################################################
-
-# vSMC options
-
-SET (VSMC_DISABLE_BUILD   OFF CACHE BOOL "Disable building all")
-SET (VSMC_DISABLE_TEST    OFF CACHE BOOL "Disable building tests")
-SET (VSMC_DISABLE_EXAMPLE OFF CACHE BOOL "Disable building examples")
-SET (VSMC_TRY_FUTURE      OFF CACHE BOOL "Try C++11 <future>")
