@@ -1,9 +1,6 @@
-SET (VSMC_OPENCL_TEST_SOURCE "
-#include <vsmc/utility/cl_query.hpp>
+FILE (READ ${PROJECT_SOURCE_DIR}/cmake/vSMCFindOpenCL.cpp
+    VSMC_OPENCL_TEST_SOURCE)
 
-int main ()
-{std::cout << vsmc::CLQuery() << std::endl;}
-")
 INCLUDE (FindOpenCL)
 IF (OPENCL_FOUND AND NOT DEFINED VSMC_OPENCL_FOUND)
     INCLUDE (CheckCXXSourceRuns)
