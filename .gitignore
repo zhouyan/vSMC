@@ -1,5 +1,6 @@
 .R*
 build*
+cmake/test
 doc/main.md
 include/cl.hpp
 user_options.cmake
