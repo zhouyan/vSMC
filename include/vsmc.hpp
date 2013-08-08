@@ -57,3 +57,6 @@
 /// \defgroup Integrate Integration
 /// \ingroup Utility
 /// \brief Numerical integration
+
+/// \defgroup MRW Metropolis Random Walk
+/// \brief Metropolis Random Walk kernels
