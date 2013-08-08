@@ -1,5 +1,5 @@
-#ifndef VSMC_ADAPTER_BASE_HPP
-#define VSMC_ADAPTER_BASE_HPP
+#ifndef VSMC_CORE_ADAPTER_HPP
+#define VSMC_CORE_ADAPTER_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -223,7 +223,7 @@ class PathEvalAdapterBase : public BaseType
 /// \brief Initialize class adapter base
 /// \ingroup Adapter
 template <typename T, typename BaseType>
-class InitializeAdapterBase<T, Functor, BaseType> : public BaseType
+class InitializeAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public :
 
@@ -260,7 +260,7 @@ class InitializeAdapterBase<T, Functor, BaseType> : public BaseType
 /// \brief Move class adapter base
 /// \ingroup Adapter
 template <typename T, typename BaseType>
-class MoveAdapterBase<T, Functor, BaseType> : public BaseType
+class MoveAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public :
 
@@ -289,7 +289,7 @@ class MoveAdapterBase<T, Functor, BaseType> : public BaseType
 /// \brief Monitor evaluation base
 /// \ingroup Adapter
 template <typename T, typename BaseType>
-class MonitorEvalAdapterBase<T, Functor, BaseType> : public BaseType
+class MonitorEvalAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public :
 
@@ -318,7 +318,7 @@ class MonitorEvalAdapterBase<T, Functor, BaseType> : public BaseType
 /// \brief Path evaluation class base
 /// \ingroup Adapter
 template <typename T, typename BaseType>
-class PathEvalAdapterBase<T, Functor, BaseType> : public BaseType
+class PathEvalAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public :
 
@@ -353,4 +353,4 @@ class PathEvalAdapterBase<T, Functor, BaseType> : public BaseType
 
 } // namespace vsmc
 
-#endif // VSMC_ADAPTER_BASE_HPP
+#endif // VSMC_CORE_ADAPTER_HPP

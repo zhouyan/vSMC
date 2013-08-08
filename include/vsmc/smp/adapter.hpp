@@ -2,7 +2,7 @@
 #define VSMC_SMP_ADAPTER_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/adapter/base.hpp>
+#include <vsmc/core/adapter.hpp>
 
 namespace vsmc {
 
@@ -90,12 +90,12 @@ class PathEvalAdapter :
 /// \brief Initialize class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl>
-class InitializeAdapter<T, Impl, Functor> :
-    public InitializeAdapterBase<T, Functor,
-    Impl<T, InitializeAdapter<T, Impl, Functor> > >
+class InitializeAdapter<T, Impl, NullType> :
+    public InitializeAdapterBase<T, NullType,
+    Impl<T, InitializeAdapter<T, Impl, NullType> > >
 {
-    typedef InitializeAdapterBase<T, Functor,
-    Impl<T, InitializeAdapter<T, Impl, Functor> > > base;
+    typedef InitializeAdapterBase<T, NullType,
+    Impl<T, InitializeAdapter<T, Impl, NullType> > > base;
 
     public :
 
@@ -122,12 +122,12 @@ class InitializeAdapter<T, Impl, Functor> :
 /// \brief Move class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl>
-class MoveAdapter<T, Impl, Functor> :
-    public MoveAdapterBase<T, Functor,
-    Impl<T, MoveAdapter<T, Impl, Functor> > >
+class MoveAdapter<T, Impl, NullType> :
+    public MoveAdapterBase<T, NullType,
+    Impl<T, MoveAdapter<T, Impl, NullType> > >
 {
-    typedef MoveAdapterBase<T, Functor,
-    Impl<T, MoveAdapter<T, Impl, Functor> > > base;
+    typedef MoveAdapterBase<T, NullType,
+    Impl<T, MoveAdapter<T, Impl, NullType> > > base;
 
     public :
 
@@ -152,12 +152,12 @@ class MoveAdapter<T, Impl, Functor> :
 /// \brief Monitor evaluation class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl>
-class MonitorEvalAdapter<T, Impl, Functor> :
-    public MonitorEvalAdapterBase<T, Functor,
-    Impl<T, MonitorEvalAdapter<T, Impl, Functor> > >
+class MonitorEvalAdapter<T, Impl, NullType> :
+    public MonitorEvalAdapterBase<T, NullType,
+    Impl<T, MonitorEvalAdapter<T, Impl, NullType> > >
 {
-    typedef MonitorEvalAdapterBase<T, Functor,
-    Impl<T, MonitorEvalAdapter<T, Impl, Functor> > > base;
+    typedef MonitorEvalAdapterBase<T, NullType,
+    Impl<T, MonitorEvalAdapter<T, Impl, NullType> > > base;
 
     public :
 
@@ -184,12 +184,12 @@ class MonitorEvalAdapter<T, Impl, Functor> :
 /// \brief Path evaluation class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl>
-class PathEvalAdapter<T, Impl, Functor> :
-    public PathEvalAdapterBase<T, Functor,
-    Impl<T, PathEvalAdapter<T, Impl, Functor> > >
+class PathEvalAdapter<T, Impl, NullType> :
+    public PathEvalAdapterBase<T, NullType,
+    Impl<T, PathEvalAdapter<T, Impl, NullType> > >
 {
-    typedef PathEvalAdapterBase<T, Functor,
-    Impl<T, PathEvalAdapter<T, Impl, Functor> > > base;
+    typedef PathEvalAdapterBase<T, NullType,
+    Impl<T, PathEvalAdapter<T, Impl, NullType> > > base;
 
     public :
 

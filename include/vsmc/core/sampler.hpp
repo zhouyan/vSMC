@@ -581,6 +581,7 @@ class Sampler
             m->second.clear();
 
         iter_num_ = 0;
+        particle_.set_equal_weight();
         accept_history_.push_back(std::vector<std::size_t>(1,
                     init_(particle_, param)));
     }

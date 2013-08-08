@@ -21,8 +21,6 @@ template <typename> class Numeric##Name;
 namespace vsmc {
 
 // Placeholders
-struct Functor;
-struct InternalObject;
 struct Virtual;
 struct NullType;
 struct ScalarRng;
@@ -53,13 +51,13 @@ template <typename, typename, typename> class MoveAdapterBase;
 template <typename, typename, typename> class MonitorEvalAdapterBase;
 template <typename, typename, typename> class PathEvalAdapterBase;
 
-template <typename, template <typename, typename> class, typename F = Functor>
+template <typename, template <typename, typename> class, typename F = NullType>
 class InitializeAdapter;
-template <typename, template <typename, typename> class, typename F = Functor>
+template <typename, template <typename, typename> class, typename F = NullType>
 class MoveAdapter;
-template <typename, template <typename, typename> class, typename F = Functor>
+template <typename, template <typename, typename> class, typename F = NullType>
 class MonitorEvalAdapter;
-template <typename, template <typename, typename> class, typename F = Functor>
+template <typename, template <typename, typename> class, typename F = NullType>
 class PathEvalAdapter;
 
 // Core
@@ -80,10 +78,10 @@ template <typename> class ConstSingleParticleBase;
 
 // OpenCL
 template <std::size_t, typename, typename ID = CLDefault> class StateCL;
-template <typename, typename B = Functor> class InitializeCL;
-template <typename, typename B = Functor> class MoveCL;
-template <typename, typename B = Functor> class MonitorEvalCL;
-template <typename, typename B = Functor> class PathEvalCL;
+template <typename, typename B = NullType> class InitializeCL;
+template <typename, typename B = NullType> class MoveCL;
+template <typename, typename B = NullType> class MonitorEvalCL;
+template <typename, typename B = NullType> class PathEvalCL;
 
 // MPI
 struct MPIDefault;

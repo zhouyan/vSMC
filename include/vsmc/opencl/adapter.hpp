@@ -2,7 +2,7 @@
 #define VSMC_OPENCL_ADAPTER_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/adapter/base.hpp>
+#include <vsmc/core/adapter.hpp>
 
 namespace vsmc {
 
@@ -80,10 +80,10 @@ class PathEvalAdapter<T, PathEvalCL, F> :
 /// \brief Initialize class adapter specialization for OpenCL
 /// \ingroup Adapter
 template <typename T>
-class InitializeAdapter<T, InitializeCL, Functor> :
-    public InitializeAdapterBase<T, Functor, InitializeCL<T> >
+class InitializeAdapter<T, InitializeCL, NullType> :
+    public InitializeAdapterBase<T, NullType, InitializeCL<T> >
 {
-    typedef InitializeAdapterBase<T, Functor, InitializeCL<T> > base;
+    typedef InitializeAdapterBase<T, NullType, InitializeCL<T> > base;
 
     public :
 
@@ -108,10 +108,10 @@ class InitializeAdapter<T, InitializeCL, Functor> :
 /// \brief Move class adapter specialization for OpenCL
 /// \ingroup Adapter
 template <typename T>
-class MoveAdapter<T, MoveCL, Functor> :
-    public MoveAdapterBase<T, Functor, MoveCL<T> >
+class MoveAdapter<T, MoveCL, NullType> :
+    public MoveAdapterBase<T, NullType, MoveCL<T> >
 {
-    typedef MoveAdapterBase<T, Functor, MoveCL<T> > base;
+    typedef MoveAdapterBase<T, NullType, MoveCL<T> > base;
 
     public :
 
@@ -134,10 +134,10 @@ class MoveAdapter<T, MoveCL, Functor> :
 /// \brief Monitor evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
 template <typename T>
-class MonitorEvalAdapter<T, MonitorEvalCL, Functor> :
-    public MonitorEvalAdapterBase<T, Functor, MonitorEvalCL<T> >
+class MonitorEvalAdapter<T, MonitorEvalCL, NullType> :
+    public MonitorEvalAdapterBase<T, NullType, MonitorEvalCL<T> >
 {
-    typedef MonitorEvalAdapterBase<T, Functor, MonitorEvalCL<T> > base;
+    typedef MonitorEvalAdapterBase<T, NullType, MonitorEvalCL<T> > base;
 
     public :
 
@@ -160,10 +160,10 @@ class MonitorEvalAdapter<T, MonitorEvalCL, Functor> :
 /// \brief Path evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
 template <typename T>
-class PathEvalAdapter<T, PathEvalCL, Functor> :
-    public PathEvalAdapterBase<T, Functor, PathEvalCL<T> >
+class PathEvalAdapter<T, PathEvalCL, NullType> :
+    public PathEvalAdapterBase<T, NullType, PathEvalCL<T> >
 {
-    typedef PathEvalAdapterBase<T, Functor, PathEvalCL<T> > base;
+    typedef PathEvalAdapterBase<T, NullType, PathEvalCL<T> > base;
 
     public :
 
