@@ -177,7 +177,6 @@ class Particle
     bool resample (const resample_type &op, double threshold)
     {
         size_type N = static_cast<size_type>(weight_set_.resample_size());
-        if (threshold <= 0) return false;
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
             resample_copy_from_.resize(N);
