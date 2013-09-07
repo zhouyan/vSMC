@@ -2,19 +2,19 @@
 #define VSMC_OPENCL_URNG_H
 
 #if defined(cl_khr_fp64) || defined(cl_amd_fp64)
-#define R123_USE_U01_DOUBLE 1
+#define VSMC_USE_U01_DOUBLE 1
 #else
-#define R123_USE_U01_DOUBLE 0
+#define VSMC_USE_U01_DOUBLE 0
 #endif
 
 #if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
-#ifndef R123_STATIC_INLINE
-#define R123_STATIC_INLINE static inline
+#ifndef VSMC_STATIC_INLINE
+#define VSMC_STATIC_INLINE static inline
 #endif
 #endif
 
 #include <Random123/threefry.h>
-#include <Random123/u01.h>
+#include <vsmc/opencl/u01.h>
 
 #ifndef CBRNG2x32
 #define CBRNG2x32 threefry2x32
