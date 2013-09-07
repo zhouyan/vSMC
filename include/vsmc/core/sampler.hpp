@@ -519,9 +519,12 @@ class Sampler
     OutputStream &print (OutputStream &os = std::cout,
             std::size_t sampler_id = 0) const
     {
+        std::vector<std::string> header;
+        std::vector<double> data;
         std::size_t var_num = summary_header_size();
-        std::vector<std::string> header(var_num);
-        std::vector<double> data(var_num * iter_size());
+        std::size_t dat_num = var_num * iter_size();
+        header.resize(var_num);
+        data.resize(dat_num);
         summary_header(header.begin());
         summary_data(RowMajor, data.begin());
 
