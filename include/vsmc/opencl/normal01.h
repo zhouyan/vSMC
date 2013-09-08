@@ -78,7 +78,7 @@ VSMC_DEFINE_NORMAL01_RAND(2, 32, 24, float)
 /// \ingroup OpenCL
 VSMC_DEFINE_NORMAL01_RAND(4, 32, 24, float)
 
-#if R123_USE_U01_DOUBLE
+#if VSMC_FP_TYPE_IS_DOUBLE
 /// \ingroup OpenCL
 VSMC_DEFINE_NORMAL01(2, 32, 53, double)
 /// \ingroup OpenCL
@@ -108,6 +108,6 @@ VSMC_DEFINE_NORMAL01_INIT(4, 64, 53, double)
 VSMC_DEFINE_NORMAL01_RAND(2, 64, 53, double)
 /// \ingroup OpenCL
 VSMC_DEFINE_NORMAL01_RAND(4, 64, 53, double)
-#endif
+#endif // R123_USE_U01_DOUBLE
 
 #endif // VSMC_OPENCL_NORMAL01_H

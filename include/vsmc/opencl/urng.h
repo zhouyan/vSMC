@@ -1,16 +1,18 @@
 #ifndef VSMC_OPENCL_URNG_H
 #define VSMC_OPENCL_URNG_H
 
-#if defined(cl_khr_fp64) || defined(cl_amd_fp64)
-#define VSMC_USE_U01_DOUBLE 1
-#else
-#define VSMC_USE_U01_DOUBLE 0
-#endif
-
 #if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
 #ifndef VSMC_STATIC_INLINE
 #define VSMC_STATIC_INLINE static inline
 #endif
+#endif
+
+#if VSMC_FP_TYPE_IS_FLOAT
+#define VSMC_USE_U01_DOUBLE 0
+#endif
+
+#if VSMC_FP_TYPE_IS_DOUBLE
+#define VSMC_USE_U01_DOUBLE 1
 #endif
 
 #include <Random123/threefry.h>

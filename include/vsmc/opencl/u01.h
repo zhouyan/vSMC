@@ -36,7 +36,7 @@ VSMC_STATIC_INLINE float u01_open_open_32_24 (uint32_t i)
 VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)
 {
     /* N.B.  we ignore the high bit, so output is not monotonic */
-    return ((i&VSMC_64BIT(0x7ffffffffffffe00)) + (i&0x200))*VSMC_0x1p_63; /* 0x1.p-63; */
+    return ((i&R123_64BIT(0x7ffffffffffffe00)) + (i&0x200))*VSMC_0x1p_63; /* 0x1.p-63; */
 }
 
 VSMC_STATIC_INLINE double u01_closed_open_64_53 (uint64_t i)
@@ -63,7 +63,7 @@ VSMC_STATIC_INLINE double u01_closed_closed_32_53 (uint32_t i)
      * j   =  0 1 2 3 4 ....        2^32
      * by converting to double *before* doing the add, we don't wrap the high
      * bit.
-     * /
+     */
     return (((double)(i&1)) + i)*VSMC_0x1p_32; /* 0x1.p-32; */
 }
 
