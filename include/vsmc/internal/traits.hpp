@@ -294,6 +294,8 @@ VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
         bool, (const std::string &))
 VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDevice, check_opencl_device,
         bool, (const std::string &))
+VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDeviceVendor,
+        check_opencl_device_vendor, bool, (const std::string &))
 
 #if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 template <typename T> struct OMPSizeTypeTrait {typedef T type;};
@@ -370,6 +372,17 @@ struct CheckOpenCLDeviceDispatch<ID, true>
     {return ID::check_opencl_device(name);}
 };
 
+template <typename ID, bool>
+struct CheckOpenCLDeviceVendorDispatch
+{static bool check (const std::string &name) {return true;}};
+
+template <typename ID>
+struct CheckOpenCLDeviceVendorDispatch<ID, true>
+{
+    static bool check (const std::string &name)
+    {return ID::check_opencl_device_vendor(name);}
+};
+
 template <typename ID>
 struct CheckOpenCLPlatformTrait :
     public CheckOpenCLPlatformDispatch<
@@ -379,6 +392,11 @@ template <typename ID>
 struct CheckOpenCLDeviceTrait :
     public CheckOpenCLDeviceDispatch<
     ID, HasStaticCheckOpenCLDevice<ID>::value> {};
+
+template <typename ID>
+struct CheckOpenCLDeviceVendorTrait :
+    public CheckOpenCLDeviceVendorDispatch<
+    ID, HasStaticCheckOpenCLDeviceVendor<ID>::value> {};
 
 template <typename T> struct SingleParticleTypeTrait :
     public SingleParticleBaseTypeTrait<T, T> {};

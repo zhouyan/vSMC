@@ -346,9 +346,18 @@ class CLManager
 
                 bool device_found = false;
                 for (std::size_t d = 0; d != device_vec_.size(); ++d) {
-                    std::string dname;
-                    device_vec_[d].getInfo(CL_DEVICE_NAME, &dname);
-                    if (traits::CheckOpenCLDeviceTrait<ID>::check(dname)) {
+                    std::string name;
+                    device_vec_[d].getInfo(CL_DEVICE_NAME, &name);
+                    if (traits::CheckOpenCLDeviceTrait<ID>::check(name)) {
+                        device_ = device_vec_[d];
+                        device_found = true;
+                        break;
+                    }
+                }
+                for (std::size_t d = 0; d != device_vec_.size(); ++d) {
+                    std::string name;
+                    device_vec_[d].getInfo(CL_DEVICE_VENDOR, &name);
+                    if (traits::CheckOpenCLDeviceVendorTrait<ID>::check(name)) {
                         device_ = device_vec_[d];
                         device_found = true;
                         break;
