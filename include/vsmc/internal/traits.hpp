@@ -348,7 +348,7 @@ struct IsDerivedFromStateCLImpl
 
 template <typename D>
 struct IsDerivedFromStateCL :
-    public cxx11::integral_constant<bool,IsDerivedFromStateCLImpl<D>::value>{};
+    public cxx11::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
 
 template <typename ID, bool>
 struct CheckOpenCLPlatformDispatch
@@ -398,10 +398,12 @@ struct CheckOpenCLDeviceVendorTrait :
     public CheckOpenCLDeviceVendorDispatch<
     ID, HasStaticCheckOpenCLDeviceVendor<ID>::value> {};
 
-template <typename T> struct SingleParticleTypeTrait :
+template <typename T>
+struct SingleParticleTypeTrait :
     public SingleParticleBaseTypeTrait<T, T> {};
 
-template <typename T> struct ConstSingleParticleTypeTrait :
+template <typename T>
+struct ConstSingleParticleTypeTrait :
     public ConstSingleParticleBaseTypeTrait<T, T> {};
 
 } } // namespace vsmc::traits
