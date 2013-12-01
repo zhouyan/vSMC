@@ -334,7 +334,7 @@ class CLManager
         } catch (cl::Error) {
             platform_vec_.clear();
         }
-        
+
         bool setup_platform = false;
         if (traits::HasStaticCheckOpenCLPlatform<ID>::value) {
             for (std::size_t p = 0; p != platform_vec_.size(); ++p) {
@@ -415,7 +415,8 @@ class CLManager
         }
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_COMMAND_QUEUE;
         
-        setup_ = true;
+        setup_ = setup_platform && setup_context
+            && setup_device && setup_command_queue;
     }
 
     template <typename CLType>
