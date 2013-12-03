@@ -24,7 +24,7 @@ class Particle
     typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
     typedef typename rng_set_type::rng_type rng_type;
     typedef cxx11::function<
-        void (size_type, typename traits::ResampleRngTypeTrait<T>::type &,
+        void (std::size_t, typename traits::ResampleRngTypeTrait<T>::type &,
                 double *, size_type *)>
         resample_type;
     typedef ParticleIterator<T, SingleParticle> iterator;
@@ -193,7 +193,7 @@ class Particle
                 {
                     ScopedStopWatch<StopWatch> start(
                             resample_get_replication_watch_, start_watch_);
-                    op(N, resample_rng_,
+                    op(static_cast<std::size_t>(N), resample_rng_,
                             &resample_weight_[0], &resample_replication_[0]);
                 }
                 {
