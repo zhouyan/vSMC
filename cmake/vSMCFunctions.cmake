@@ -57,6 +57,7 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
     ENDIF (${source} MATCHES "-mpi")
 
     ADD_DEPENDENCIES (${base} ${source}-${smp})
+    ADD_DEPENDENCIES (build${smp} ${source}-${smp})
 ENDFUNCTION (ADD_SMP_EXECUTABLE)
 
 FUNCTION (ADD_EXAMPLE base algs)
