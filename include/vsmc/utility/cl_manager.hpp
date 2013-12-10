@@ -388,6 +388,114 @@ class CLManager
         set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
                 arg8, arg9);
     }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8,
+             typename Arg9, typename Arg10>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
+            const Arg10 &arg10)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8, arg9, arg10);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8,
+             typename Arg9, typename Arg10, typename Arg11>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
+            const Arg10 &arg10, const Arg11 &arg11)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8, arg9, arg10, arg11);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8,
+             typename Arg9, typename Arg10, typename Arg11, typename Arg12>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
+            const Arg10 &arg10, const Arg11 &arg11, const Arg12 &arg12)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8, arg9, arg10, arg11, arg12);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8,
+             typename Arg9, typename Arg10, typename Arg11, typename Arg12,
+             typename Arg13>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
+            const Arg10 &arg10, const Arg11 &arg11, const Arg12 &arg12,
+            const Arg13 &arg13)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8, arg9, arg10, arg11, arg12, arg13);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8,
+             typename Arg9, typename Arg10, typename Arg11, typename Arg12,
+             typename Arg13, typename Arg14>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
+            const Arg10 &arg10, const Arg11 &arg11, const Arg12 &arg12,
+            const Arg13 &arg13, const Arg14 &arg14)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8,
+             typename Arg9, typename Arg10, typename Arg11, typename Arg12,
+             typename Arg13, typename Arg14, typename Arg15>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
+            const Arg10 &arg10, const Arg11 &arg11, const Arg12 &arg12,
+            const Arg13 &arg13, const Arg14 &arg14, const Arg15 &arg15)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8,
+             typename Arg9, typename Arg10, typename Arg11, typename Arg12,
+             typename Arg13, typename Arg14, typename Arg15, typename Arg16>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
+            const Arg10 &arg10, const Arg11 &arg11, const Arg12 &arg12,
+            const Arg13 &arg13, const Arg14 &arg14, const Arg15 &arg15,
+            const Arg16 &arg16)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
+    }
+
 #endif // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
     private :
