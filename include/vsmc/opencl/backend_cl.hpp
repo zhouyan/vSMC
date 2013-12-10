@@ -331,6 +331,13 @@ class InitializeCL
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
+    /// \brief The index offset of additional kernel arguments set by the user
+    ///
+    /// \details
+    /// The first user supplied additional argument shall have index
+    /// `kernel_args_offset`
+    const static std::size_t kernel_args_offset = 2;
+
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, InitializeCL);
@@ -438,6 +445,13 @@ class MoveCL
 
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
+
+    /// \brief The index offset of additional kernel arguments set by the user
+    ///
+    /// \details
+    /// The first user supplied additional argument shall have index
+    /// `kernel_args_offset`
+    const static std::size_t kernel_args_offset = 3;
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
@@ -547,6 +561,13 @@ class MonitorEvalCL
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
 
+    /// \brief The index offset of additional kernel arguments set by the user
+    ///
+    /// \details
+    /// The first user supplied additional argument shall have index
+    /// `kernel_args_offset`
+    const static std::size_t kernel_args_offset = 4;
+
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
@@ -652,6 +673,13 @@ class PathEvalCL
 
     typedef typename Particle<T>::size_type size_type;
     typedef T value_type;
+
+    /// \brief The index offset of additional kernel arguments set by the user
+    ///
+    /// \details
+    /// The first user supplied additional argument shall have index
+    /// `kernel_args_offset`
+    const static std::size_t kernel_args_offset = 3;
 
     double operator() (std::size_t iter, const Particle<T> &particle,
         double *res)

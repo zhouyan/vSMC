@@ -97,7 +97,7 @@ class StaticAssert<true>
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_COMMAND_QUEUE                    \
     VSMC_RUNTIME_ASSERT(setup_command_queue,                                  \
             ("**vsmc::CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
-    
+
 #define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename)                            \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                      \
             ("DERIVED FROM " #basename                                        \

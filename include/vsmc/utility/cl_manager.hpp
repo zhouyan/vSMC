@@ -292,6 +292,104 @@ class CLManager
         command_queue_.finish();
     }
 
+#if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
+    template <typename Arg1, typename... Args>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Args &...args)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, args...);
+    }
+#else // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
+    template <typename Arg1>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1)
+    {
+        kern.setArg(offset, arg1);
+    }
+
+    template <typename Arg1, typename Arg2>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8);
+    }
+
+    template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+             typename Arg5, typename Arg6, typename Arg7, typename Arg8,
+             typename Arg9>
+    void set_kernel_args (cl::Kernel &kern, std::size_t offset,
+            const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
+            const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
+            const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9)
+    {
+        kern.setArg(offset, arg1);
+        set_kernel_args(kern, offset + 1, arg2, arg3, arg4, arg5, arg6, arg7,
+                arg8, arg9);
+    }
+#endif // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
+
     private :
 
     cl::Platform platform_;
@@ -355,7 +453,7 @@ class CLManager
             setup_platform = true;
         }
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_PLATFORM;
-        
+
         bool setup_context = false;
         try {
             cl_context_properties context_properties[] = {
@@ -370,7 +468,7 @@ class CLManager
             device_vec_.clear();
         }
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_CONTEXT;
-        
+
         bool setup_device = false;
         if (traits::HasStaticCheckOpenCLDevice<ID>::value) {
             for (std::size_t d = 0; d != device_vec_.size(); ++d) {
@@ -405,7 +503,7 @@ class CLManager
             setup_device = true;
         }
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_DEVICE;
-        
+
         bool setup_command_queue = false;
         try {
             command_queue_ = cl::CommandQueue(context_, device_, 0);
@@ -414,7 +512,7 @@ class CLManager
             command_queue_ = cl::CommandQueue();
         }
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_COMMAND_QUEUE;
-        
+
         setup_ = setup_platform && setup_context
             && setup_device && setup_command_queue;
     }
@@ -460,6 +558,10 @@ class CLManager
     cl::NDRange get_local_nd_range (
             std::size_t global_size, std::size_t local_size) const
     {return local_size ? cl::NDRange(local_size) : cl::NullRange;}
+
+#if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
+    void set_kernel_args (cl::Kernel &, std::size_t) {}
+#endif // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 }; // clss CLManager
 
 } // namespace vsmc
