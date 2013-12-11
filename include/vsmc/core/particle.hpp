@@ -25,7 +25,7 @@ class Particle
     typedef typename rng_set_type::rng_type rng_type;
     typedef cxx11::function<
         void (std::size_t, typename traits::ResampleRngTypeTrait<T>::type &,
-                double *, size_type *)>
+                const double *, size_type *)>
         resample_type;
     typedef ParticleIterator<T, SingleParticle> iterator;
     typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
