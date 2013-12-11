@@ -13,9 +13,11 @@ IF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
 ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
 
 # Options
-OPTION (VSMC_ENABLE_EXAMPLE         "Enable building examples"   ON)
-OPTION (VSMC_ENABLE_CXX11LIB_FUTURE "Enable C++11 <future>"      OFF)
-OPTION (VSMC_ENABLE_MPI             "Enable MPI"                 OFF)
+OPTION (VSMC_ENABLE_EXAMPLE             "Enable building examples"  ON)
+OPTION (VSMC_ENABLE_CXX11LIB_FUNCTIONAL "Enable C++11 <functional>" ON)
+OPTION (VSMC_ENABLE_CXX11LIB_RANDOM     "Enable C++11 <random>"     ON)
+OPTION (VSMC_ENABLE_CXX11LIB_FUTURE     "Enable C++11 <future>"     OFF)
+OPTION (VSMC_ENABLE_MPI                 "Enable MPI"                OFF)
 
 # Configuration files
 FILE (READ ${PROJECT_SOURCE_DIR}/README.md README)
