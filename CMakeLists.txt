@@ -14,8 +14,11 @@ ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
 
 # Options
 OPTION (VSMC_ENABLE_EXAMPLE             "Enable building examples"  ON)
+OPTION (VSMC_ENABLE_CXX11LIB_CHRONO     "Enable C++11 <chrono>"     ON)
 OPTION (VSMC_ENABLE_CXX11LIB_FUNCTIONAL "Enable C++11 <functional>" ON)
 OPTION (VSMC_ENABLE_CXX11LIB_RANDOM     "Enable C++11 <random>"     ON)
+OPTION (VSMC_ENABLE_CXX11LIB_THREAD     "Enable C++11 <thread>"     ON)
+OPTION (VSMC_ENABLE_CXX11LIB_TUPLE      "Enable C++11 <tuple>"      ON)
 OPTION (VSMC_ENABLE_CXX11LIB_FUTURE     "Enable C++11 <future>"     OFF)
 OPTION (VSMC_ENABLE_MPI                 "Enable MPI"                OFF)
 
