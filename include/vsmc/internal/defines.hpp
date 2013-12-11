@@ -25,7 +25,8 @@ enum ResampleScheme {
     Stratified,
     Systematic,
     ResidualStratified,
-    ResidualSystematic};
+    ResidualSystematic
+};
 
 } // namespace vsmc
 
