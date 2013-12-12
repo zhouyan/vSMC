@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cl_manager.hpp>
+#include <vsmc/utility/cl_manip.hpp>
 #include <vsmc/utility/seed.hpp>
 
 namespace vsmc {
