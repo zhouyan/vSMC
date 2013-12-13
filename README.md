@@ -66,10 +66,10 @@ is available.
 
 # Compiler support
 
-This library make heavy use of some template metaprogramming techniques. It is
-requires a highly standard conforming compiler. Fortunately most commonly used
-compilers, at least in C++98 mode, is able to compile the examples distributed
-with this library.
+This library makes heavy use of some template metaprogramming techniques. It
+requires a standard conforming compiler. Fortunately, most commonly used
+modern compilers, at least in C++98 mode, is able to compile the examples
+distributed with the library.
 
 This library has been regularly tested with recent [Clang][Clang], [GCC][GCC]
 and [Intel C++ Compiler][icpc], in both C++98 and C++11 modes. In particular,
@@ -77,24 +77,23 @@ and [Intel C++ Compiler][icpc], in both C++98 and C++11 modes. In particular,
 support all the C++11 features used by the library very well. [Intel C++
 Compiler][icpc] when used with [GCC][GCC] 4.7's standard library can also
 support all the C++11 features. When it is used with [GCC][GCC] 4.8's standard
-library, which Intel claims full support, though all features are supported,
-some examples fails to compile when complex template metaprogramming are
-involved. The issues are still under investigation. The current workaround is
-that use the [Boost][Boost] Function library instead of the standard library
-`<functional>` (by defining the flag `-DVSMC_HAS_CXX11LIB_FUNCTIONAL=0`) when
-use this compiler configuration in C++11 mode.
+library, though all features are supported, some examples fail to compile when
+complex template constructs are involved. The issues are still under
+investigation. The current workaround is to use the [Boost][Boost] Function
+library instead of the standard library `<functional>` (by defining the flag
+`-DVSMC_HAS_CXX11LIB_FUNCTIONAL=0`) when using this compiler configuration in
+C++11 mode.
 
-[Microsoft Visual C++][MSVC] is also supported. Version 2008 and later is able
-to compile the examples in C++98 mode. Version 2012 and later is able to
-support most of the C++11 features. However, this compiler is tested less
-regularly.
+[Microsoft Visual C++][MSVC] is also supported. Version 2008 and later are able
+to compile the examples in C++98 mode. Version 2012 and later support most of
+the C++11 features. However, this compiler is tested less regularly.
 
-Other compilers such as [Open64][Open64] were previously tested in C++98 modes
-(most of them don't support C++11 at all). Future developments will relies more
+Other compilers such as [Open64][Open64] were previously tested in C++98 mode
+(most of them don't support C++11 at all). Future developments will rely more
 on C++11 features. There are likely to be new (optional) features that are
-C++11 only. Therefore these outdated compilers won't be tested anymore.
-However, for the foreseeable future, all basic features will be supported by a
-C++98 compiler.
+C++11 only. Therefore, these outdated compilers won't be tested anymore.
+However, for the foreseeable future, all basic features should be supported by
+a C++98 compiler.
 
 # License
 
