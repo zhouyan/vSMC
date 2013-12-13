@@ -31,7 +31,20 @@ make docs
 ~~~
 The documentation can also be found [here][vSMCDoc].
 
-# Third-party dependencies and parallelization
+# Parallelization backends
+
+The library support various backends for multi-thread parallelization, unified
+under a uniform interface. One is C++11 concurrency. For a full C++11
+implementation, this means no third-party dependency is required to write a
+parallel SMC sampler. Other third-party parallelization include, [Intel Cilk
+Plus][Intel Cilk Plus], [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple
+Grand Central Dispatch][Apple GCD] is also supported on Mac OS X and on Linux
+via [libdispatch][libdispatch]. [Microsoft Parallel Patterns Library][MS PPL]
+is supported on Windows when compiled with MSVC 2010 or later. In addition,
+this library also support using [OpenCL][OpenCL] for GPGPU computing, though
+the interface is different than others.
+
+# Third-party dependencies
 
 This library has no dependences other than C++ standard libraries (C++11). Any
 C++11 language features are optional.
@@ -51,16 +64,37 @@ The library can optionally use the [Random123][Random123] library for
 parallelized random number generator, and the default behavior is assuming this
 is available.
 
-The library support various back-ends for multi-thread parallelization, unified
-under a uniform interface. One is C++11 concurrency. For a full C++11
-implementation, this means no third-party dependency is required to write a
-parallel SMC sampler. Other third-party parallelization include, [Intel Cilk
-Plus][Intel Cilk Plus], [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple
-Grand Central Dispatch][Apple GCD] is also supported on Mac OS X and on Linux
-via [libdispatch][libdispatch]. [Microsoft Parallel Patterns Library][MS PPL]
-is supported on Windows when compiled with MSVC 2010 or later. In addition,
-this library also support using [OpenCL][OpenCL] for GPGPU computing, though
-the interface is different than others.
+# Compiler support
+
+This library make heavy use of some template metaprogramming techniques. It is
+requires a highly standard conforming compiler. Fortunately most commonly used
+compilers, at least in C++98 mode, is able to compile the examples distributed
+with this library.
+
+This library has been regularly tested with recent [Clang][Clang], [GCC][GCC]
+and [Intel C++ Compiler][icpc], in both C++98 and C++11 modes. In particular,
+[Clang][Clang] 3.3 and later with [libc++][libc++] and [GCC][GCC] 4.7 and later
+support all the C++11 features used by the library very well. [Intel C++
+Compiler][icpc] when used with [GCC][GCC] 4.7's standard library can also
+support all the C++11 features. When it is used with [GCC][GCC] 4.8's standard
+library, which Intel claims full support, though all features are supported,
+some examples fails to compile when complex template metaprogramming are
+involved. The issues are still under investigation. The current workaround is
+that use the [Boost][Boost] Function library instead of the standard library
+`<functional>` (by defining the flag `-DVSMC_HAS_CXX11LIB_FUNCTIONAL=0`) when
+use this compiler configuration in C++11 mode.
+
+[Microsoft Visual C++][MSVC] is also supported. Version 2008 and later is able
+to compile the examples in C++98 mode. Version 2012 and later is able to
+support most of the C++11 features. However, this compiler is tested less
+regularly.
+
+Other compilers such as [Open64][Open64] were previously tested in C++98 modes
+(most of them don't support C++11 at all). Future developments will relies more
+on C++11 features. There are likely to be new (optional) features that are
+C++11 only. Therefore these outdated compilers won't be tested anymore.
+However, for the foreseeable future, all basic features will be supported by a
+C++98 compiler.
 
 # License
 
@@ -70,13 +104,19 @@ in the `LICENSE` file distributed with the source.
 [Apple GCD]: http://en.wikipedia.org/wiki/Grand_Central_Dispatch
 [Boost]: http://www.boost.org/
 [CMake]: http://www.cmake.org/
+[Clang]: http://clang.llvm.org
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
+[GCC]: http://gcc.gnu.org
 [Intel Cilk Plus]: http://en.wikipedia.org/wiki/Intel_Cilk_Plus
 [Intel TBB]: http://threadingbuildingblocks.org/
 [MS PPL]: http://msdn.microsoft.com/en-us/library/dd492418.aspx
+[MSVC]: http://msdn.microsoft.com/en-us/vstudio//default.aspx
 [OpenCL]: http://www.khronos.org/opencl/
 [OpenMP]: http://www.openmp.org/
 [Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
+[icpc]: http://software.intel.com/en-us/intel-compilers
+[libc++]: http://libcxx.llvm.org
 [libc++]: http://libcxx.llvm.org
 [libdispatch]: http://libdispatch.macosforge.org/
 [vSMCDoc]: http://zhouyan.github.com/vSMC/doc/html/index.html
+[Open64]: http://www.open64.net
