@@ -34,7 +34,7 @@
 namespace vsmc {
 
 /// \brief Compute the importance sampling integration of multivariate variable
-/// \ingroup Utility
+/// \ingroup Integrate
 class ISIntegrate
 {
     public :

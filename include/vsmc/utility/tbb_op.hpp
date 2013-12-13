@@ -262,7 +262,7 @@ class name                                                                    \
 namespace vsmc {
 
 /// \brief Intel TBB and vSMC STDTBB functors
-/// \ingroup Utility
+/// \ingroup TBBOp
 ///
 /// \details
 /// Range concept: All functors defined in this namespace require the range

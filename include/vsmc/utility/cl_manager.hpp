@@ -13,7 +13,7 @@ struct CLDefault
 };
 
 /// \brief OpenCL Manager
-/// \ingroup Utility
+/// \ingroup CLUtility
 ///
 /// \details
 /// Each instance of CLManager is an singleton. Different `ID` template

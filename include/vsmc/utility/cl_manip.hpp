@@ -11,7 +11,7 @@ namespace vsmc {
 inline void cl_set_kernel_args (cl::Kernel &, std::size_t) {}
 
 /// \brief Set OpenCL kernel arguments
-/// \ingroup Utility
+/// \ingroup CLUtility
 ///
 /// \details
 /// The first argument `arg1` is set with index `offset` and the next with

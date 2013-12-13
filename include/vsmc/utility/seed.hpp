@@ -6,7 +6,7 @@
 namespace vsmc {
 
 /// \brief Seed generator
-/// \ingroup Utility
+/// \ingroup RNG
 class Seed
 {
     public :

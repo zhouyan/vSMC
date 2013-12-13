@@ -35,7 +35,7 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
 } // namepsace vsmc::traits
 
 /// \brief Scalar RNG set
-/// \ingroup Utility
+/// \ingroup RNG
 template <typename RngType>
 class RngSet<RngType, ScalarRng>
 {
@@ -55,7 +55,7 @@ class RngSet<RngType, ScalarRng>
 }; // class RngSet
 
 /// \brief Vector RNG set
-/// \ingroup Utility
+/// \ingroup RNG
 template <typename RngType>
 class RngSet<RngType, VectorRng>
 {

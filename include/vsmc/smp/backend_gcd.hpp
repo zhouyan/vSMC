@@ -7,7 +7,7 @@
 namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype using Apple Grand Central Dispatch
-/// \ingroup SMP
+/// \ingroup GCD
 template <typename BaseState>
 class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 {
@@ -68,7 +68,7 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 
 /// \brief Calculating normalizing constant ratio using Apple Grand Central
 /// Dispatch
-/// \ingroup SMP
+/// \ingroup GCD
 class NormalizingConstantGCD : public NormalizingConstant
 {
     public :
@@ -95,7 +95,7 @@ class NormalizingConstantGCD : public NormalizingConstant
 }; // class NormalizingConstantGCD
 
 /// \brief Particle::value_type subtype usingt Apple Grand Central Dispatch
-/// \ingroup SMP
+/// \ingroup GCD
 template <typename BaseState>
 class StateGCD : public BaseState
 {
@@ -107,7 +107,7 @@ class StateGCD : public BaseState
 }; // class StateGCD
 
 /// \brief Sampler<T>::init_type subtype usingt Apple Grand Central Dispatch
-/// \ingroup SMP
+/// \ingroup GCD
 template <typename T, typename Derived>
 class InitializeGCD : public InitializeBase<T, Derived>
 {
@@ -158,7 +158,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
 }; // class InitializeGCD
 
 /// \brief Sampler<T>::move_type subtype usingt Apple Grand Central Dispatch
-/// \ingroup SMP
+/// \ingroup GCD
 template <typename T, typename Derived>
 class MoveGCD : public MoveBase<T, Derived>
 {
@@ -209,7 +209,7 @@ class MoveGCD : public MoveBase<T, Derived>
 }; // class MoveGCD
 
 /// \brief Monitor<T>::eval_type subtype usingt Apple Grand Central Dispatch
-/// \ingroup SMP
+/// \ingroup GCD
 template <typename T, typename Derived>
 class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 {
@@ -255,7 +255,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 }; // class MonitorEvalGCD
 
 /// \brief Path<T>::eval_type subtype usingt Apple Grand Central Dispatch
-/// \ingroup SMP
+/// \ingroup GCD
 template <typename T, typename Derived>
 class PathEvalGCD : public PathEvalBase<T, Derived>
 {

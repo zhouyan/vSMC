@@ -6,7 +6,7 @@
 namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype
-/// \ingroup SMP
+/// \ingroup SEQ
 template <typename BaseState>
 class WeightSetSEQ : public traits::WeightSetTypeTrait<BaseState>::type
 {
@@ -44,7 +44,7 @@ class WeightSetSEQ : public traits::WeightSetTypeTrait<BaseState>::type
 }; // class WeightSetSEQ
 
 /// \brief Calculating normalizing constant ratio
-/// \ingroup SMP
+/// \ingroup SEQ
 class NormalizingConstantSEQ : public NormalizingConstant
 {
     public :

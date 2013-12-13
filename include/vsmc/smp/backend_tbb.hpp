@@ -9,7 +9,7 @@ namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype using Intel Threading Building
 /// Blocks
-/// \ingroup SMP
+/// \ingroup TBB
 template <typename BaseState>
 class WeightSetTBB : public traits::WeightSetTypeTrait<BaseState>::type
 {
@@ -68,7 +68,7 @@ class WeightSetTBB : public traits::WeightSetTypeTrait<BaseState>::type
 
 /// \brief Calculating normalizing constant ratio using Intel Threading
 /// Building Blocks
-/// \ingroup SMP
+/// \ingroup TBB
 class NormalizingConstantTBB : public NormalizingConstant
 {
     public :
@@ -85,7 +85,7 @@ class NormalizingConstantTBB : public NormalizingConstant
 }; // class NormalizingConstantTBB
 
 /// \brief Particle::value_type subtype using Intel Threading Building Blocks
-/// \ingroup SMP
+/// \ingroup TBB
 template <typename BaseState>
 class StateTBB : public BaseState
 {
@@ -128,7 +128,7 @@ class StateTBB : public BaseState
 }; // class StateTBB
 
 /// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
-/// \ingroup SMP
+/// \ingroup TBB
 template <typename T, typename Derived>
 class InitializeTBB : public InitializeBase<T, Derived>
 {
@@ -190,7 +190,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
 }; // class InitializeTBB
 
 /// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
-/// \ingroup SMP
+/// \ingroup TBB
 template <typename T, typename Derived>
 class MoveTBB : public MoveBase<T, Derived>
 {
@@ -259,7 +259,7 @@ class MoveTBB : public MoveBase<T, Derived>
 }; // class MoveTBB
 
 /// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
-/// \ingroup SMP
+/// \ingroup TBB
 template <typename T, typename Derived>
 class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 {
@@ -314,7 +314,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 }; // class MonitorEvalTBB
 
 /// \brief Path<T>::eval_type subtype using Intel Threading Building Blocks
-/// \ingroup SMP
+/// \ingroup TBB
 template <typename T, typename Derived>
 class PathEvalTBB : public PathEvalBase<T, Derived>
 {

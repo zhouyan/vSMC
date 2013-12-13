@@ -6,7 +6,7 @@
 namespace vsmc {
 
 /// \brief A dummy StopWatch that does nothing
-/// \ingroup Utility
+/// \ingroup StopWatch
 class DummyStopWatch
 {
     public :
@@ -24,7 +24,7 @@ class DummyStopWatch
 }; // class StopWatch
 
 /// \brief StopWatch as a wrapper of C++11 clock
-/// \ingroup Utility
+/// \ingroup StopWatch
 template <typename ClockType>
 class StopWatchClockWrapper
 {
@@ -53,7 +53,7 @@ class StopWatchClockWrapper
 }; // class StopWatchClockWrapper
 
 /// \brief Start and stop a StopWatch in scope
-/// \ingroup Utility
+/// \ingroup StopWatch
 template <typename WatchType>
 class ScopedStopWatch
 {
@@ -82,7 +82,7 @@ class ScopedStopWatch
 namespace vsmc {
 
 /// \brief Stop watch
-/// \ingroup Utility
+/// \ingroup StopWatch
 class StopWatch :
     public StopWatchClockWrapper<std::chrono::high_resolution_clock>
 {

@@ -7,7 +7,7 @@
 namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype using OpenMP
-/// \ingroup SMP
+/// \ingroup OMP
 template <typename BaseState>
 class WeightSetOMP : public traits::WeightSetTypeTrait<BaseState>::type
 {
@@ -48,7 +48,7 @@ class WeightSetOMP : public traits::WeightSetTypeTrait<BaseState>::type
 }; // class WeightSetOMP
 
 /// \brief Calculating normalizing constant ratio using OpenMP
-/// \ingroup SMP
+/// \ingroup OMP
 class NormalizingConstantOMP : public NormalizingConstant
 {
     typedef traits::OMPSizeTypeTrait<std::size_t>::type size_type;
@@ -71,7 +71,7 @@ class NormalizingConstantOMP : public NormalizingConstant
 }; // class NormalizingConstantOMP
 
 /// \brief Particle::value_type subtype using OpenMP
-/// \ingroup SMP
+/// \ingroup OMP
 template <typename BaseState>
 class StateOMP : public BaseState
 {
@@ -96,7 +96,7 @@ class StateOMP : public BaseState
 }; // class StateOMP
 
 /// \brief Sampler<T>::init_type subtype using OpenMP
-/// \ingroup SMP
+/// \ingroup OMP
 template <typename T, typename Derived>
 class InitializeOMP : public InitializeBase<T, Derived>
 {
@@ -124,7 +124,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
 }; // class InitializeOMP
 
 /// \brief Sampler<T>::move_type subtype using OpenMP
-/// \ingroup SMP
+/// \ingroup OMP
 template <typename T, typename Derived>
 class MoveOMP : public MoveBase<T, Derived>
 {
@@ -151,7 +151,7 @@ class MoveOMP : public MoveBase<T, Derived>
 }; // class MoveOMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
-/// \ingroup SMP
+/// \ingroup OMP
 template <typename T, typename Derived>
 class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
@@ -177,7 +177,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 }; // class MonitorEvalOMP
 
 /// \brief Path<T>::eval_type subtype using OpenMP
-/// \ingroup SMP
+/// \ingroup OMP
 template <typename T, typename Derived>
 class PathEvalOMP : public PathEvalBase<T, Derived>
 {

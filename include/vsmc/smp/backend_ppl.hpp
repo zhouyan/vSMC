@@ -7,7 +7,7 @@
 namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype using Parallel Pattern Library
-/// \ingroup SMP
+/// \ingroup PPL
 template <typename BaseState>
 class WeightSetPPL : public traits::WeightSetTypeTrait<BaseState>::type
 {
@@ -82,7 +82,7 @@ class WeightSetPPL : public traits::WeightSetTypeTrait<BaseState>::type
 
 /// \brief Calculating normalizing constant ratio using Microsoft Parallel
 /// Pattern Library
-/// \ingroup SMP
+/// \ingroup PPL
 class NormalizingConstantPPL : public NormalizingConstant
 {
     public :
@@ -116,7 +116,7 @@ class NormalizingConstantPPL : public NormalizingConstant
 }; // class NormalizingConstantPPL
 
 /// \brief Particle::value_type subtype using Parallel Pattern Library
-/// \ingroup SMP
+/// \ingroup PPL
 template <typename BaseState>
 class StatePPL : public BaseState
 {
@@ -156,7 +156,7 @@ class StatePPL : public BaseState
 }; // class StatePPL
 
 /// \brief Sampler<T>::init_type subtype using Parallel Pattern Library
-/// \ingroup SMP
+/// \ingroup PPL
 template <typename T, typename Derived>
 class InitializePPL : public InitializeBase<T, Derived>
 {
@@ -212,7 +212,7 @@ class InitializePPL : public InitializeBase<T, Derived>
 }; // class InitializePPL
 
 /// \brief Sampler<T>::move_type subtype using Parallel Pattern Library
-/// \ingroup SMP
+/// \ingroup PPL
 template <typename T, typename Derived>
 class MovePPL : public MoveBase<T, Derived>
 {
@@ -268,7 +268,7 @@ class MovePPL : public MoveBase<T, Derived>
 }; // class MovePPL
 
 /// \brief Monitor<T>::eval_type subtype using Parallel Pattern Library
-/// \ingroup SMP
+/// \ingroup PPL
 template <typename T, typename Derived>
 class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 {
@@ -321,7 +321,7 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 }; // class MonitorEvalPPL
 
 /// \brief Path<T>::eval_type subtype using Parallel Pattern Library
-/// \ingroup SMP
+/// \ingroup PPL
 template <typename T, typename Derived>
 class PathEvalPPL : public PathEvalBase<T, Derived>
 {

@@ -5,8 +5,8 @@
 
 namespace vsmc {
 
-/// \brief Backup and restore objects
-/// \ingroup Uitlity
+/// \brief Backup and restore objects manually
+/// \ingroup Backup
 template <typename T>
 class Backup
 {
@@ -73,7 +73,7 @@ class Backup
 };
 
 /// \brief Backup and restore objects in scope
-/// \ingroup Uitlity
+/// \ingroup Backup
 template <typename T>
 class ScopedBackup
 {

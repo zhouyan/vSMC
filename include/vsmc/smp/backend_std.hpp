@@ -8,7 +8,7 @@
 namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype using C++11 concurrency
-/// \ingroup SMP
+/// \ingroup STD
 template <typename BaseState>
 class WeightSetSTD : public traits::WeightSetTypeTrait<BaseState>::type
 {
@@ -38,7 +38,7 @@ class WeightSetSTD : public traits::WeightSetTypeTrait<BaseState>::type
 }; // class WeightSetSTD
 
 /// \brief Calculating normalizing constant ratio using C++11 concurrency
-/// \ingroup SMP
+/// \ingroup STD
 class NormalizingConstantSTD : public NormalizingConstant
 {
     public :
@@ -55,7 +55,7 @@ class NormalizingConstantSTD : public NormalizingConstant
 }; // class NormalizingConstantSTD
 
 /// \brief Particle::value_type subtype using C++11 concurrency
-/// \ingroup SMP
+/// \ingroup STD
 template <typename BaseState>
 class StateSTD : public BaseState
 {
@@ -98,7 +98,7 @@ class StateSTD : public BaseState
 }; // class StateSTD
 
 /// \brief Sampler<T>::init_type subtype using C++11 concurrency
-/// \ingroup SMP
+/// \ingroup STD
 template <typename T, typename Derived>
 class InitializeSTD : public InitializeBase<T, Derived>
 {
@@ -153,7 +153,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
 }; // class InitializeSTD
 
 /// \brief Sampler<T>::move_type subtype using C++11 concurrency
-/// \ingroup SMP
+/// \ingroup STD
 template <typename T, typename Derived>
 class MoveSTD : public MoveBase<T, Derived>
 {
@@ -208,7 +208,7 @@ class MoveSTD : public MoveBase<T, Derived>
 }; // class MoveSTD
 
 /// \brief Monitor<T>::eval_type subtype using C++11 concurrency
-/// \ingroup SMP
+/// \ingroup STD
 template <typename T, typename Derived>
 class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 {
@@ -265,7 +265,7 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 }; // class MonitorEvalSTD
 
 /// \brief Path<T>::eval_type subtype using C++11 concurrency
-/// \ingroup SMP
+/// \ingroup STD
 template <typename T, typename Derived>
 class PathEvalSTD : public PathEvalBase<T, Derived>
 {
