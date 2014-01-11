@@ -23,6 +23,12 @@ inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
 template<>
 inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
 {
+    ss << "#if defined(cl_khr_fp64)\n";
+    ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
+    ss << "#elif defined(cl_amd_fp64)\n";
+    ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
+    ss << "#endif\n";
+
     ss << "typedef double fp_type;\n";
     ss << "#define VSMC_FP_TYPE_IS_FLOAT  0\n";
     ss << "#define VSMC_FP_TYPE_IS_DOUBLE 1\n";
@@ -187,12 +193,6 @@ class StateCL
         ++build_id_;
 
         std::stringstream ss;
-
-        ss << "#if defined(cl_khr_fp64)\n";
-        ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
-        ss << "#elif defined(cl_amd_fp64)\n";
-        ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
-        ss << "#endif\n";
 
         internal::set_cl_fp_type<fp_type>(ss);
 

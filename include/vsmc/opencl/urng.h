@@ -1,9 +1,11 @@
 #ifndef VSMC_OPENCL_URNG_H
 #define VSMC_OPENCL_URNG_H
 
-#if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
 #ifndef VSMC_STATIC_INLINE
+#if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
 #define VSMC_STATIC_INLINE static inline
+#else
+#define VSMC_STATIC_INLINE inline
 #endif
 #endif
 

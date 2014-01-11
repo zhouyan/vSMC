@@ -2,6 +2,7 @@
 #define VSMC_OPENCL_NORMAL01_H
 
 #include <vsmc/opencl/urng.h>
+#include <vsmc/opencl/constants.h>
 
 #if VSMC_FP_TYPE_IS_FLOAT
 #define NORMAL01_2x32      normal01_2x32_24
@@ -30,9 +31,6 @@
 #define NORMAL01_4x64_INIT normal01_4x64_53_init
 #define NORMAL01_4x64_RAND normal01_4x64_53_rand
 #endif // VSMC_FP_TYPE_IS_DOUBLE
-
-#define M_2PI_24 6.2831853071795865F
-#define M_2PI_53 6.2831853071795865
 
 #define VSMC_DEFINE_NORMAL01(N, W, F, FT) \
     typedef struct {                                                         \

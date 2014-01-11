@@ -56,6 +56,8 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
         TARGET_LINK_LIBRARIES (${source}-${smp} ${VSMC_MPI_LINK_LIBRARIES})
     ENDIF (${source} MATCHES "-mpi")
 
+    TARGET_LINK_LIBRARIES (${source}-${smp} ${EXAMPLE_LINK_LIBRARIES})
+
     ADD_DEPENDENCIES (${base} ${source}-${smp})
     ADD_DEPENDENCIES (build${smp} ${source}-${smp})
 ENDFUNCTION (ADD_SMP_EXECUTABLE)
@@ -67,8 +69,6 @@ FUNCTION (ADD_EXAMPLE base algs)
         ENDIF (${smp} STREQUAL "tbb")
         FOREACH (alg ${algs})
             ADD_SMP_EXECUTABLE (${base} ${base} ${base}-${alg} ${smp})
-            TARGET_LINK_LIBRARIES (${base}-${alg}-${smp}
-                ${EXAMPLE_LINK_LIBRARIES})
         ENDFOREACH (alg)
     ENDFOREACH (smp)
 ENDFUNCTION (ADD_EXAMPLE)
