@@ -4,7 +4,20 @@
 #include <Random123/threefry.h>
 #include <Random123/philox.h>
 #include <vsmc/opencl/defines.h>
-#include <vsmc/opencl/u01.h>
+
+#ifndef VSMC_STATIC_INLINE
+#if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
+#define VSMC_STATIC_INLINE static inline
+#elif defined(__STDC__)
+#define VSMC_STATIC_INLINE static inline
+#else
+#define VSMC_STATIC_INLINE inline
+#endif
+#endif
+
+#ifdef __STDC__
+#define VSMC_FP_TYPE_IS_DOUBLE 1
+#endif
 
 #ifndef CBRNG2x32
 #define CBRNG2x32 threefry2x32
@@ -71,31 +84,31 @@
         return rng->rnd.v[rng->remain];                                      \
     }
 
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG(2, 32)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG(2, 64)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG(4, 32)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG(4, 64)
 
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG_INIT(2, 32)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG_INIT(2, 64)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG_INIT(4, 32)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG_INIT(4, 64)
 
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG_RAND(2, 32)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG_RAND(2, 64)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG_RAND(4, 32)
-/// \ingroup OpenCL
+/// \ingroup OpenCLRNG
 VSMC_DEFINE_CBURNG_RAND(4, 64)
 
 #endif // VSMC_OPENCL_URNG_H
