@@ -1,0 +1,255 @@
+#ifndef VSMC_OPENCL_GAMMAK1_H
+#define VSMC_OPENCL_GAMMAK1_H
+
+//  REFERENCES
+//
+//    [1] Shape parameter a >= 1.  Algorithm GD in:
+//
+//        Ahrens, J.H. and Dieter, U. (1982). Generating gamma variates by a
+//        modified rejection technique. Comm. ACM, 25, 47-54.
+//
+//
+//    [2] Shape parameter 0 < a < 1. Algorithm GS in:
+//
+//        Ahrens, J.H. and Dieter, U. (1974). Computer methods for sampling
+//        from gamma, beta, poisson and binomial distributions. Computing, 12,
+//        223-246.
+
+#include <vsmc/opencl/urng.h>
+#include <vsmc/opencl/normal01.h>
+#include <vsmc/opencl/constants.h>
+
+#if VSMC_FP_TYPE_IS_FLOAT
+#define GAMMAK1_2x32      gammak1_2x32_24
+#define GAMMAK1_2x32_INIT gammak1_2x32_24_init
+#define GAMMAK1_2x32_RAND gammak1_2x32_24_rand
+
+#define GAMMAK1_4x32      gammak1_4x32_24
+#define GAMMAK1_4x32_INIT gammak1_4x32_24_init
+#define GAMMAK1_4x32_RAND gammak1_4x32_24_rand
+#endif // VSMC_FP_TYPE_IS_FLOAT
+
+#if VSMC_FP_TYPE_IS_DOUBLE
+#define GAMMAK1_2x32      gammak1_2x32_53
+#define GAMMAK1_2x32_INIT gammak1_2x32_53_init
+#define GAMMAK1_2x32_RAND gammak1_2x32_53_rand
+
+#define GAMMAK1_2x64      gammak1_2x64_53
+#define GAMMAK1_2x64_INIT gammak1_2x64_53_init
+#define GAMMAK1_2x64_RAND gammak1_2x64_53_rand
+
+#define GAMMAK1_4x32      gammak1_4x32_53
+#define GAMMAK1_4x32_INIT gammak1_4x32_53_init
+#define GAMMAK1_4x32_RAND gammak1_4x32_53_rand
+
+#define GAMMAK1_4x64      gammak1_4x64_53
+#define GAMMAK1_4x64_INIT gammak1_4x64_53_init
+#define GAMMAK1_4x64_RAND gammak1_4x64_53_rand
+#endif // VSMC_FP_TYPE_IS_DOUBLE
+
+#define VSMC_DEFINE_GAMMAK1(N, W, F, FT) \
+    typedef struct {                                                         \
+        FT c_shape;                                                          \
+        FT c_s2, c_s, c_d, c_b, c_si, c_c, c_q0;                             \
+        FT c_a[7];                                                           \
+        normal01_##N##x##W##_##F rnorm;                                      \
+    } gammak1_##N##x##W##_##F;
+
+#define VSMC_DEFINE_GAMMAK1_INIT(N, W, F, FT) \
+    VSMC_STATIC_INLINE void gammak1_##N##x##W##_##F##_init (                 \
+            gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W *rng, FT shape) \
+    {                                                                        \
+        rgamma->c_shape = shape;                                             \
+                                                                             \
+        if (shape <= 1)                                                      \
+            return;                                                          \
+                                                                             \
+        rgamma->c_a[0] = 0.3333333;                                          \
+        rgamma->c_a[1] = -0.250003;                                          \
+        rgamma->c_a[2] = 0.2000062;                                          \
+        rgamma->c_a[3] = -0.1662921;                                         \
+        rgamma->c_a[4] = 0.1423657;                                          \
+        rgamma->c_a[5] = -0.1367177;                                         \
+        rgamma->c_a[6] = 0.1233795;                                          \
+                                                                             \
+        normal01_##N##x##W##_##F##_init(&(rgamma->rnorm), rng);              \
+                                                                             \
+        FT c_sqrt32 = 5.6568542494923802;                                    \
+        rgamma->c_s2 = shape - 0.5f;                                         \
+        rgamma->c_s = sqrt(rgamma->c_s2);                                    \
+        rgamma->c_d = c_sqrt32 - rgamma->c_s * 12;                           \
+                                                                             \
+        FT r = 1 / shape;                                                    \
+        FT q1 = 0.04166669;                                                  \
+        FT q2 = 0.02083148;                                                  \
+        FT q3 = 0.00801191;                                                  \
+        FT q4 = 0.00144121;                                                  \
+        FT q5 = -7.388e-5;                                                   \
+        FT q6 = 2.4511e-4;                                                   \
+        FT q7 = 2.424e-4;                                                    \
+        rgamma->c_q0 = ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r +\
+                    q2) * r + q1) * r;                                       \
+        if (shape <= 3.686f) {                                               \
+            rgamma->c_b = 0.463f + rgamma->c_s + 0.178f * rgamma->c_s2;      \
+            rgamma->c_si = 1.235f;                                           \
+            rgamma->c_c = 0.195f / rgamma->c_s - 0.079f + 0.16f * rgamma->c_s;\
+        } else if (shape <= 13.022f) {                                       \
+            rgamma->c_b = 1.654f + 0.0076f * rgamma->c_s2;                   \
+            rgamma->c_si = 1.68f / rgamma->c_s + 0.275f;                     \
+            rgamma->c_c = 0.062f / rgamma->c_s + 0.024f;                     \
+        } else {                                                             \
+            rgamma->c_b = 1.77f;                                             \
+            rgamma->c_si = 0.75f;                                            \
+            rgamma->c_c = 0.1515f / rgamma->c_s;                             \
+        }                                                                    \
+    }
+
+#define VSMC_DEFINE_GAMMAK1_RAND(N, W, F, FT) \
+    VSMC_STATIC_INLINE FT gammak1_##N##x##W##_##F##_rand (                   \
+            gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W *rng)           \
+    {                                                                        \
+        if (rgamma->c_shape < 0)                                             \
+            return -1;                                                       \
+                                                                             \
+        if (rgamma->c_shape == 0)                                            \
+            return 0;                                                        \
+                                                                             \
+        if (rgamma->c_shape == 1) {                                          \
+            FT u = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));   \
+            return -log(u);                                                  \
+        }                                                                    \
+                                                                             \
+        if (rgamma->c_shape < 1) {                                           \
+            const FT a = rgamma->c_shape;                                    \
+            const FT c_exp_m1 = 0.3678794411714423;                          \
+            FT b = 1 + c_exp_m1 * a;                                         \
+            while (true) {                                                   \
+                FT u = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));\
+                FT v = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));\
+                FT p = b * u;                                                \
+                FT e = -log(v);                                              \
+                if (p >= 1) {                                                \
+                    FT x = -log((b - p) / a);                                \
+                    if (e >= (1 - a) * log(x))                               \
+                        return x * x;                                        \
+                } else {                                                     \
+                    FT x = exp(log(p) / a);                                  \
+                    if (e >= x)                                              \
+                        return x * x;                                        \
+                }                                                            \
+            }                                                                \
+        }                                                                    \
+                                                                             \
+        const FT c_s2 = rgamma->c_s2;                                        \
+        const FT c_s = rgamma->c_s;                                          \
+        const FT c_d = rgamma->c_d;                                          \
+        const FT c_b = rgamma->c_b;                                          \
+        const FT c_si = rgamma->c_si;                                        \
+        const FT c_c = rgamma->c_c;                                          \
+        const FT c_q0 = rgamma->c_q0;                                        \
+        const FT *const c_a = rgamma->c_a;                                   \
+                                                                             \
+        FT t = normal01_##N##x##W##_##F##_rand(&(rgamma->rnorm), rng);       \
+        FT x = c_s + t * 0.5f;                                               \
+        if (t >= 0)                                                          \
+            return x * x;                                                    \
+                                                                             \
+        FT u = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));       \
+        if (c_d * u <= t * t * t)                                            \
+            return x * x;                                                    \
+                                                                             \
+        if (x > 0) {                                                         \
+            FT v = t / (c_s + c_s);                                          \
+            FT q;                                                            \
+            if (fabs(v) <= 0.25f) {                                          \
+                q = c_q0 + 0.5f * t * t *                                    \
+                    ((((((c_a[6] * v + c_a[5]) * v + c_a[4]) * v + c_a[3]) * \
+                       v + c_a[2]) * v + c_a[1]) * v + c_a[0]) * v;          \
+            } else {                                                         \
+                q = c_q0 - c_s * t + 0.25f * t * t +                         \
+                    (c_s2 + c_s2) * log(1 + v);                              \
+            }                                                                \
+                                                                             \
+            if (log(1 - u) <= q)                                             \
+                return x * x;                                                \
+        }                                                                    \
+                                                                             \
+        while (true) {                                                       \
+            FT e = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));   \
+            FT u = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));   \
+            e = -log(e);                                                     \
+            u = u + u - 1;                                                   \
+            FT t = u < 0 ?  c_b - c_si * e : c_b + c_si * e;                 \
+                                                                             \
+            const FT c_tau = -0.71874483771719;                              \
+            if (t <= c_tau)                                                  \
+                continue;                                                    \
+                                                                             \
+            FT v = t / (c_s + c_s);                                          \
+            FT q;                                                            \
+            if (fabs(v) <= 0.25f) {                                          \
+                q = c_q0 + 0.5f * t * t *                                    \
+                    ((((((c_a[6] * v + c_a[5]) * v + c_a[4]) * v + c_a[3]) * \
+                       v + c_a[2]) * v + c_a[1]) * v + c_a[0]) * v;          \
+            } else {                                                         \
+                q = c_q0 - c_s * t + 0.25f * t * t +                         \
+                    (c_s2 + c_s2) * log(1 + v);                              \
+            }                                                                \
+            if (q <= 0)                                                      \
+                continue;                                                    \
+            if (c_c * fabs(u) > expm1(q) * exp(e - 0.5f * t * t))            \
+                continue;                                                    \
+                                                                             \
+            FT x = c_s + 0.5f * t;                                           \
+            return x * x;                                                    \
+        }                                                                    \
+    }
+
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1(2, 32, 24, float)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1(4, 32, 24, float)
+
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_INIT(2, 32, 24, float)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_INIT(4, 32, 24, float)
+
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_RAND(2, 32, 24, float)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_RAND(4, 32, 24, float)
+
+#if VSMC_FP_TYPE_IS_DOUBLE
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1(2, 32, 53, double)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1(4, 32, 53, double)
+
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_INIT(2, 32, 53, double)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_INIT(4, 32, 53, double)
+
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_RAND(2, 32, 53, double)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_RAND(4, 32, 53, double)
+
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1(2, 64, 53, double)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1(4, 64, 53, double)
+
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_INIT(2, 64, 53, double)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_INIT(4, 64, 53, double)
+
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_RAND(2, 64, 53, double)
+/// \ingroup OpenCL
+VSMC_DEFINE_GAMMAK1_RAND(4, 64, 53, double)
+#endif // R123_USE_U01_DOUBLE
+
+#endif // VSMC_OPENCL_GAMMAK1_H
