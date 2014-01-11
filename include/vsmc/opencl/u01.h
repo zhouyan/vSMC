@@ -31,7 +31,7 @@ VSMC_STATIC_INLINE float u01_open_open_32_24 (uint32_t i)
     return (0.5f+(i>>9))*VSMC_0x1p_23f; /* 0x1.p-23f; */
 }
 
-#if VSMC_USE_U01_DOUBLE
+#if VSMC_FP_TYPE_IS_DOUBLE
 /* narrowing conversions:  uint64_t to double */
 VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)
 {
@@ -82,7 +82,6 @@ VSMC_STATIC_INLINE double u01_open_open_32_53 (uint32_t i)
     return (0.5+i)*VSMC_0x1p_32; /* 0x1.p-32; */
 }
 
-#endif // VSMC_USE_U01_DOUBLE
-
+#endif // VSMC_FP_TYPE_IS_DOUBLE
 
 #endif // VSMC_OPENCL_U01_H
