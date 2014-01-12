@@ -2,9 +2,9 @@
 ///
 /// ## The problem
 ///
-/// The [Random123][Random123] library is ideal for generating random numbers on
-/// OpenCL device. It is easy to use, for example, say inside a kernel, to generate
-/// four standard normal random variates,
+/// The [Random123][Random123] library is ideal for generating random numbers
+/// on OpenCL device. It is easy to use, for example, say inside a kernel, to
+/// generate four standard normal random variates,
 /// ~~~{.c}
 /// #include <Random123/threefry64.h>
 /// #include <vsmc/opencl/u01.h>
@@ -23,13 +23,13 @@
 /// z[2] = sqrt(-2 * log(u[2])) * cos(2 * M_PI_F * u[3]);
 /// z[3] = sqrt(-2 * log(u[2])) * sin(2 * M_PI_F * u[3]);
 /// ~~~
-/// As seen above, for every call to `threefry4x32` we can generate four standard
-/// normal random variates. It is fine if we just happen to need four random
-/// numbers. But this is rarely the case. Then we need some tricky code to keep
-/// track of when to call `threefry4x32` again etc., or call it every time we need
-/// a random number and waste a lot of time and generated numbers.
+/// As seen above, for every call to `threefry4x32` we can generate four
+/// standard normal random variates. It is fine if we just happen to need four
+/// random numbers. But this is rarely the case. Then we need some tricky code
+/// to keep track of when to call `threefry4x32` again etc., or call it every
+/// time we need a random number and waste a lot of time and generated numbers.
 ///
-/// vSMC's OpenCL module provide some facilities to partially solve this problem.
+/// vSMC's RNG module provide some facilities to partially solve this problem.
 ///
 /// [Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
 ///
@@ -45,8 +45,8 @@
 /// cburng2x64
 /// cburng4x64
 /// ~~~
-/// The default engines use `threefry4x32` etc. To use the Philox engine, define
-/// macros `CBRNG4x32` etc., before including vSMC headers. For example,
+/// The default engines use `threefry4x32` etc. To use the Philox engine,
+/// define macros `CBRNG4x32` etc., before including vSMC headers. For example,
 /// ~~~{.c}
 /// #define CBRNG4x32 philox4x32
 /// ~~~
@@ -59,8 +59,8 @@
 /// cburng4x32_init(&rng);
 /// uint32_t res = cburng4x32_rand(&rng);
 /// ~~~
-/// The function `cburng4x32_rand` will be responsible for increasing the counters.
-/// The keys and counters can also be set manually. For example,
+/// The function `cburng4x32_rand` will be responsible for increasing the
+/// counters.  The keys and counters can also be set manually. For example,
 /// ~~~{.c}
 /// rng.key.v[0] = get_global_id(0);
 /// rng.ctr.v[0] = 0;
@@ -80,34 +80,35 @@
 /// }
 /// ~~~
 /// Since OpenCL does not support static local variables, this is the most
-/// convenient way to ensure that the RNG used in each kernel call does not overlap
-/// their counters.
+/// convenient way to ensure that the RNG used in each kernel call does not
+/// overlap their counters.
 ///
 /// ## Distributions
 ///
 /// ### Overview
 ///
-/// For each distribution, a set of types and functions are defined. Each of them
-/// use either 32- or 64-bits RNG and generate `float` or `double` precision
-/// results. For example,
+/// For each distribution, a set of types and functions are defined. Each of
+/// them use either 32- or 64-bits RNG and generate `float` or `double`
+/// precision results. For example,
 /// ~~~{.c}
 /// float u01_open_closed_32_24 (uint32_t);
 /// ~~~
-/// generate `float` precision uniform random variates on `(0, 1]` using 32-bits
-/// integers. Another example,
+/// generate `float` precision uniform random variates on `(0, 1]` using
+/// 32-bits integers. Another example,
 /// ~~~{.c}
 /// normal01_4x32_24
 /// ~~~
 /// is the type used to construct objects that can be used to generate `float`
 /// precision standard Normal random variates using `cburng4x32` engines.
 ///
-/// Not all OpenCL devices have `double` precision support. Therefore by default,
-/// only 32-bits and `float` versions of these types and functions are defined. To
-/// enable 64-bits and `double` versions, define the macro `VSMC_FP_TYPE_IS_DOUBLE`
-/// with a non-zero value.
+/// Not all OpenCL devices have `double` precision support. Therefore by
+/// default, only 32-bits and `float` versions of these types and functions are
+/// defined. To enable 64-bits and `double` versions, define the macro
+/// `VSMC_FP_TYPE_IS_DOUBLE` with a non-zero value.
 ///
-/// In a single program, usually only `float` or `double` precision is used. Macros
-/// are defined according to the value of `VSMC_FP_TYPE_IS_DOUBLE`. For example,
+/// In a single program, usually only `float` or `double` precision is used.
+/// Macros are defined according to the value of `VSMC_FP_TYPE_IS_DOUBLE`. For
+/// example,
 /// ~~~{.c}
 /// NORMAL01_4x32
 /// ~~~
@@ -123,13 +124,13 @@
 /// - `<FT>`: float or double
 /// - `<F>`: 24 if `<FT>` is float, 53 if `<FT>` is double
 ///
-/// See
+/// \sa
 ///
-/// \subpage u01 Uniform real distribution
+/// \subpage u01
 ///
-/// \subpage normal01 Normal distribution
+/// \subpage normal01
 ///
-/// \subpage gammak1 Gamma distribution
+/// \subpage gammak1
 
 #ifndef VSMC_RNG_URNG_H
 #define VSMC_RNG_URNG_H

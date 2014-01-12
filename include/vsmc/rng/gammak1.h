@@ -4,11 +4,11 @@
 /// - Distribution: Gamma with scale 1, shape k,
 ///  \f$ f(x) = \frac{1}{\Gamma(k)}x^{k-1}e^{-x} \f$
 /// - Method:
-///   - k >= 1: Ahrens, J.H. and Dieter, U. (1982). Generating gamma variates by a
-///     modified rejection technique. Comm. ACM, 25, 47-54.
-///   - k < 1: Ahrens, J.H. and Dieter, U. (1974). Computer methods for sampling
-///     from gamma, beta, poisson and binomial distributions. Computing, 12,
-///     223-246.
+///   - k >= 1: Ahrens, J.H. and Dieter, U. (1982). Generating gamma variates
+///   by a modified rejection technique. Comm. ACM, 25, 47-54.
+///   - k < 1: Ahrens, J.H. and Dieter, U. (1974). Computer methods for
+///   sampling from gamma, beta, poisson and binomial distributions. Computing,
+///   12, 223-246.
 ///
 /// ### Types and functions
 ///

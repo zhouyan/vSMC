@@ -1,7 +1,8 @@
 /// \page normal01 Normal distribution
 ///
 /// - Header: `<vsmc/rng/normal01.h>`
-/// - Distribution: Standard Normal \f$ f(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2} \f$
+/// - Distribution: Standard Normal
+/// \f$ f(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2} \f$
 /// - Method: Box-Muller
 ///
 /// ### Types and functions

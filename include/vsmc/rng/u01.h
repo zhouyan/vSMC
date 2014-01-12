@@ -1,8 +1,8 @@
 /// \page u01 Uniform real distribution
 ///
 /// - Header: `<vsmc/rng/urng.h>`
-/// - Distribution: Uniform distribution on `[0, 1]` and its (semi-) open/closed
-///   variants
+/// - Distribution: Uniform distribution on `[0, 1]` and its (semi-)
+/// open/closed variants
 ///
 /// ### Functions
 ///
