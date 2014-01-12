@@ -17,4 +17,17 @@
 #endif
 #endif
 
+#ifndef VSMC_FP_TYPE_IS_FLOAT
+#define VSMC_FP_TYPE_IS_FLOAT 0
+#endif
+
+#ifndef VSMC_FP_TYPE_IS_DOUBLE
+#define VSMC_FP_TYPE_IS_DOUBLE 0
+#endif
+
+#if !(VSMC_FP_TYPE_IS_FLOAT || VSMC_FP_TYPE_IS_DOUBLE)
+#undef VSMC_FP_TYPE_IS_FLOAT
+#define VSMC_FP_TYPE_IS_FLOAT 1
+#endif
+
 #endif // VSMC_OPENCL_DEFINES_H
