@@ -42,10 +42,6 @@
 /// \defgroup OpenCL OpenCL
 /// \brief Parallel sampler using OpenCL
 
-/// \defgroup OpenCLRNG OpenCL random number generating
-/// \ingroup OpenCL
-/// \brief Generating random numbers on OpenCL devices
-
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
 

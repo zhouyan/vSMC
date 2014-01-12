@@ -1,6 +1,6 @@
 /// \page gammak1 Gamma distribution
 ///
-/// - Header: `<vsmc/opencl/gammak1.h>`
+/// - Header: `<vsmc/rng/gammak1.h>`
 /// - Distribution: Gamma with scale 1, shape k,
 ///  \f$ f(x) = \frac{1}{\Gamma(k)}x^{k-1}e^{-x} \f$
 /// - Method:
@@ -30,7 +30,7 @@
 ///
 /// ~~~{.c}
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
-/// #include <vsmc/opencl/gammak1.h>
+/// #include <vsmc/rng/gammak1.h>
 ///
 /// cburng4x32 rng;
 /// cburng4x32_init(&rng);
@@ -45,12 +45,12 @@
 /// double r = GAMMAK1_4x32_RAND(&rgamma, &rng);
 /// ~~~
 
-#ifndef VSMC_OPENCL_GAMMAK1_H
-#define VSMC_OPENCL_GAMMAK1_H
+#ifndef VSMC_RNG_GAMMAK1_H
+#define VSMC_RNG_GAMMAK1_H
 
-#include <vsmc/opencl/urng.h>
-#include <vsmc/opencl/normal01.h>
-#include <vsmc/opencl/u01.h>
+#include <vsmc/rng/urng.h>
+#include <vsmc/rng/normal01.h>
+#include <vsmc/rng/u01.h>
 
 #if VSMC_FP_TYPE_IS_FLOAT
 #define GAMMAK1_2x32      gammak1_2x32_24
@@ -238,51 +238,51 @@
         }                                                                    \
     }
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1(2, 32, 24, float)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1(4, 32, 24, float)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_INIT(2, 32, 24, float)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_INIT(4, 32, 24, float)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_RAND(2, 32, 24, float)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_RAND(4, 32, 24, float)
 
 #if VSMC_FP_TYPE_IS_DOUBLE
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1(2, 32, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1(4, 32, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_INIT(2, 32, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_INIT(4, 32, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_RAND(2, 32, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_RAND(4, 32, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1(2, 64, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1(4, 64, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_INIT(2, 64, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_INIT(4, 64, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_RAND(2, 64, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_GAMMAK1_RAND(4, 64, 53, double)
-#endif // R123_USE_U01_DOUBLE
+#endif // VSMC_USE_U01_DOUBLE
 
-#endif // VSMC_OPENCL_GAMMAK1_H
+#endif // VSMC_RNG_GAMMAK1_H

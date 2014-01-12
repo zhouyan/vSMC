@@ -1,6 +1,6 @@
 /// \page normal01 Normal distribution
 ///
-/// - Header: `<vsmc/opencl/normal01.h>`
+/// - Header: `<vsmc/rng/normal01.h>`
 /// - Distribution: Standard Normal \f$ f(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2} \f$
 /// - Method: Box-Muller
 ///
@@ -24,7 +24,7 @@
 ///
 /// ~~~{.c}
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
-/// #include <vsmc/opencl/normal01.h>
+/// #include <vsmc/rng/normal01.h>
 ///
 /// cburng4x32 rng;
 /// cburng4x32_init(&rng);
@@ -39,11 +39,11 @@
 /// double r = NORMAL01_4x32_RAND(&rnorm, &rng);
 /// ~~~
 
-#ifndef VSMC_OPENCL_NORMAL01_H
-#define VSMC_OPENCL_NORMAL01_H
+#ifndef VSMC_RNG_NORMAL01_H
+#define VSMC_RNG_NORMAL01_H
 
-#include <vsmc/opencl/urng.h>
-#include <vsmc/opencl/u01.h>
+#include <vsmc/rng/urng.h>
+#include <vsmc/rng/u01.h>
 
 #if VSMC_FP_TYPE_IS_FLOAT
 #define NORMAL01_2x32      normal01_2x32_24
@@ -105,51 +105,51 @@
         }                                                                    \
     }
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01(2, 32, 24, float)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01(4, 32, 24, float)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_INIT(2, 32, 24, float)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_INIT(4, 32, 24, float)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_RAND(2, 32, 24, float)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_RAND(4, 32, 24, float)
 
 #if VSMC_FP_TYPE_IS_DOUBLE
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01(2, 32, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01(4, 32, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_INIT(2, 32, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_INIT(4, 32, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_RAND(2, 32, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_RAND(4, 32, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01(2, 64, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01(4, 64, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_INIT(2, 64, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_INIT(4, 64, 53, double)
 
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_RAND(2, 64, 53, double)
-/// \ingroup OpenCLRNG
+/// \ingroup RNG
 VSMC_DEFINE_NORMAL01_RAND(4, 64, 53, double)
-#endif // R123_USE_U01_DOUBLE
+#endif // VSMC_USE_U01_DOUBLE
 
-#endif // VSMC_OPENCL_NORMAL01_H
+#endif // VSMC_RNG_NORMAL01_H
