@@ -6,6 +6,38 @@
 
 namespace vsmc {
 
+/// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
+/// \ingroup CLUtility
+class ConfigureCL
+{
+    public :
+
+    ConfigureCL () : local_size_(0) {}
+
+    std::size_t local_size () const {return local_size_;}
+
+    void local_size (std::size_t new_size) {local_size_ = new_size;}
+
+    void local_size (const cl::Kernel &kern, const cl::Device &dev)
+    {local_size(preferred_local_size(kern, dev));}
+
+    static std::size_t preferred_local_size (
+            const cl::Kernel &kern, const cl::Device &dev)
+    {
+        std::size_t max_s;
+        std::size_t mul_s;
+        kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &max_s);
+        kern.getWorkGroupInfo(dev,
+                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
+
+        return (max_s / mul_s) * mul_s;
+    }
+
+    private :
+
+    std::size_t local_size_;
+}; // class ConfigureCL
+
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
 inline void cl_set_kernel_args (cl::Kernel &, std::size_t) {}

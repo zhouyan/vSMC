@@ -36,40 +36,6 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
 
 } // namespace vsmc::internal
 
-/// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
-/// \ingroup OpenCL
-class ConfigureCL
-{
-    public :
-
-    ConfigureCL () : local_size_(0) {}
-
-    std::size_t local_size () const {return local_size_;}
-
-    void local_size (std::size_t new_size) {local_size_ = new_size;}
-
-    void local_size (const cl::Kernel &kern, const cl::Device &dev)
-    {local_size(preferred_local_size(kern, dev));}
-
-    protected :
-
-    static std::size_t preferred_local_size (
-            const cl::Kernel &kern, const cl::Device &dev)
-    {
-        std::size_t max_s;
-        std::size_t mul_s;
-        kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &max_s);
-        kern.getWorkGroupInfo(dev,
-                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
-
-        return (max_s / mul_s) * mul_s;
-    }
-
-    private :
-
-    std::size_t local_size_;
-}; // class ConfigureCL
-
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
 template <std::size_t StateSize, typename FPType, typename ID>
