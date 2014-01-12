@@ -15,10 +15,6 @@
 #endif
 #endif
 
-#ifdef __STDC__
-#define VSMC_FP_TYPE_IS_DOUBLE 1
-#endif
-
 #ifndef CBRNG2x32
 #define CBRNG2x32 threefry2x32
 #endif

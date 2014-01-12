@@ -11,8 +11,10 @@
 #endif
 #endif
 
-#ifdef __STDC__
-#define VSMC_FP_TYPE_IS_DOUBLE 1
+#if defined(VSMC_FP_TYPE_IS_FLOAT) && defined(VSMC_FP_TYPE_IS_DOUBLE)
+#if VSMC_FP_TYPE_IS_FLOAT && VSMC_FP_TYPE_IS_DOUBLE
+#error VSMC_FP_TYPE_IS_FLOAT and VSMC_FP_TYPE_IS_DOUBLE cannot both be non-zero
+#endif
 #endif
 
 #endif // VSMC_OPENCL_DEFINES_H

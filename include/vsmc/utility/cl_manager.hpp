@@ -351,8 +351,24 @@ class CLManager
                 }
             }
         } else if (platform_vec_.size() != 0) {
-            platform_ = platform_vec_[0];
-            setup_platform = true;
+            for (std::size_t p = 0; p != platform_vec_.size(); ++p) {
+                try {
+                    platform_ = platform_vec_[p];
+                    cl_context_properties context_properties[] = {
+                        CL_CONTEXT_PLATFORM,
+                        (cl_context_properties)(platform_)(), 0
+                    };
+                    context_ = cl::Context(dev, context_properties);
+                    device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
+                    if (device_vec_.size() != 0) {
+                        setup_platform = true;
+                        break;
+                    }
+                } catch (cl::Error) {
+                    context_ = cl::Context();
+                    device_vec_.clear();
+                }
+            }
         }
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_PLATFORM;
 
