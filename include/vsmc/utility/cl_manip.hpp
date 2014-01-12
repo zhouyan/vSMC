@@ -33,6 +33,13 @@ class ConfigureCL
         return (max_s / mul_s) * mul_s;
     }
 
+    static std::size_t preferred_global_size (
+            std::size_t N, std::size_t local_size)
+    {
+        return (local_size && N % local_size) ?
+            (N / local_size + 1) * local_size : N;
+    }
+
     private :
 
     std::size_t local_size_;
