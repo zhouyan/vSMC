@@ -24,7 +24,7 @@
 /// 
 /// ~~~{.c}
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
-/// #include <vsmc/opencl/urng.h>
+/// #include <vsmc/opencl/u01.h>
 /// 
 /// cburng4x32 rng;
 /// cburng4x32_init(&rng);
@@ -37,6 +37,25 @@
 #define VSMC_OPENCL_U01_H
 
 #include <vsmc/opencl/urng.h>
+
+#if VSMC_FP_TYPE_IS_FLOAT
+#define U01_OPEN_OPEN_32     u01_open_open_32_24
+#define U01_OPEN_CLOSED_32   u01_open_closed_32_24
+#define U01_CLOSED_OPEN_32   u01_closed_closed_32_24
+#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_24
+#endif // VSMC_FP_TYPE_IS_FLOAT
+
+#if VSMC_FP_TYPE_IS_DOUBLE
+#define U01_OPEN_OPEN_32     u01_open_open_32_53
+#define U01_OPEN_CLOSED_32   u01_open_closed_32_53
+#define U01_CLOSED_OPEN_32   u01_closed_closed_32_53
+#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_53
+
+#define U01_OPEN_OPEN_64     u01_open_open_64_53
+#define U01_OPEN_CLOSED_64   u01_open_closed_64_53
+#define U01_CLOSED_OPEN_64   u01_closed_closed_64_53
+#define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53
+#endif // VSMC_FP_TYPE_IS_DOUBLE
 
 #define VSMC_0x1p_31f (1.f/(1024.f*1024.f*1024.f*2.f))
 #define VSMC_0x1p_24f (128.f*VSMC_0x1p_31f)

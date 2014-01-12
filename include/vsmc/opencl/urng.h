@@ -35,25 +35,6 @@
 #define CBRNG4x64 threefry4x64
 #endif
 
-#if VSMC_FP_TYPE_IS_FLOAT
-#define U01_OPEN_OPEN_32     u01_open_open_32_24
-#define U01_OPEN_CLOSED_32   u01_open_closed_32_24
-#define U01_CLOSED_OPEN_32   u01_closed_closed_32_24
-#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_24
-#endif // VSMC_FP_TYPE_IS_FLOAT
-
-#if VSMC_FP_TYPE_IS_DOUBLE
-#define U01_OPEN_OPEN_32     u01_open_open_32_53
-#define U01_OPEN_CLOSED_32   u01_open_closed_32_53
-#define U01_CLOSED_OPEN_32   u01_closed_closed_32_53
-#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_53
-
-#define U01_OPEN_OPEN_64     u01_open_open_64_53
-#define U01_OPEN_CLOSED_64   u01_open_closed_64_53
-#define U01_CLOSED_OPEN_64   u01_closed_closed_64_53
-#define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53
-#endif // VSMC_FP_TYPE_IS_DOUBLE
-
 #define VSMC_DEFINE_CBURNG(N, W) \
     typedef struct {                                                         \
         struct r123array##N##x##W key;                                       \
