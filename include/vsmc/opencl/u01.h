@@ -1,35 +1,35 @@
 /// \page u01 Uniform real distribution
-/// 
+///
 /// - Header: `<vsmc/opencl/urng.h>`
 /// - Distribution: Uniform distribution on `[0, 1]` and its (semi-) open/closed
 ///   variants
-/// 
+///
 /// ### Functions
-/// 
+///
 /// ~~~{.c}
 /// <FT> u01_<bound>_<bound>_<W>_<F> (uint<W>_t);
 /// ~~~
 /// where `<bound>` is either `open` or `closed`.
-/// 
+///
 /// For example, to generate uniform random variates on `(0, 1]`,
-/// 
+///
 /// ### Macros
-/// 
+///
 /// ~~~{.c}
 /// U01_<BOUND>_<BOUND>_<W>
 /// ~~~
 /// where `<BOUND>` is either `OPEN` or `CLOSED`.
-/// 
+///
 /// ### Examples
-/// 
+///
 /// ~~~{.c}
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
 /// #include <vsmc/opencl/u01.h>
-/// 
+///
 /// cburng4x32 rng;
 /// cburng4x32_init(&rng);
 /// double u_53 = u01_open_closed_32_53(cburng4x32_rand(&rng));
-/// 
+///
 /// double u = U01_OPEN_CLOSED_32(cburng4x32_rand(&rng));
 /// ~~~
 
@@ -92,6 +92,7 @@ VSMC_STATIC_INLINE float u01_open_open_32_24 (uint32_t i)
 }
 
 #if VSMC_FP_TYPE_IS_DOUBLE
+
 /* narrowing conversions:  uint64_t to double */
 /// \ingroup OpenCLRNG
 VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)

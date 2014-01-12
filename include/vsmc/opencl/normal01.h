@@ -1,39 +1,39 @@
 /// \page normal01 Normal distribution
-/// 
+///
 /// - Header: `<vsmc/opencl/normal01.h>`
 /// - Distribution: Standard Normal \f$ f(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2} \f$
 /// - Method: Box-Muller
-/// 
+///
 /// ### Types and functions
-/// 
+///
 /// ~~~{.c}
 /// normal01_<N>x<W>_<F>;
 /// void normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *, cburng<N>x<W> *, <FT> shape);
 /// <FT> normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *, cburng<N>x<W> *);
 /// ~~~
-/// 
+///
 /// ### Macros
-/// 
+///
 /// ~~~{.c}
 /// NORMAL01_<N>x<W>
 /// NORMAL01_<N>x<W>_INIT
 /// NORMAL01_<N>x<W>_RAND
 /// ~~~
-/// 
+///
 /// ### Examples
-/// 
+///
 /// ~~~{.c}
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
 /// #include <vsmc/opencl/normal01.h>
-/// 
+///
 /// cburng4x32 rng;
 /// cburng4x32_init(&rng);
-/// 
+///
 /// double shape = 2;
 /// normal01_4x32_53 rnorm_53;
 /// normal01_4x32_53_init(&rnorm_53, &rng, shape);
 /// double r_53 = normal01_4x32_53_rand(&rnorm_53, &rng);
-/// 
+///
 /// NORMAL01_4x32 rnorm;
 /// NORMAL01_4x32_INIT(&rnorm, &rng, shape);
 /// double r = NORMAL01_4x32_RAND(&rnorm, &rng);

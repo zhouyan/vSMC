@@ -1,45 +1,45 @@
 /// \page gammak1 Gamma distribution
-/// 
+///
 /// - Header: `<vsmc/opencl/gammak1.h>`
 /// - Distribution: Gamma with scale 1, shape k,
 ///  \f$ f(x) = \frac{1}{\Gamma(k)}x^{k-1}e^{-x} \f$
-/// - Method: 
+/// - Method:
 ///   - k >= 1: Ahrens, J.H. and Dieter, U. (1982). Generating gamma variates by a
 ///     modified rejection technique. Comm. ACM, 25, 47-54.
 ///   - k < 1: Ahrens, J.H. and Dieter, U. (1974). Computer methods for sampling
 ///     from gamma, beta, poisson and binomial distributions. Computing, 12,
 ///     223-246.
-/// 
+///
 /// ### Types and functions
-/// 
+///
 /// ~~~{.c}
 /// gammak1_<N>x<W>_<F>;
 /// void gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W> *, <FT> shape);
 /// <FT> gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W> *);
 /// ~~~
-/// 
+///
 /// ### Macros
-/// 
+///
 /// ~~~{.c}
 /// GAMMAK1_<N>x<W>
 /// GAMMAK1_<N>x<W>_INIT
 /// GAMMAK1_<N>x<W>_RAND
 /// ~~~
-/// 
+///
 /// ### Examples
-/// 
+///
 /// ~~~{.c}
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
 /// #include <vsmc/opencl/gammak1.h>
-/// 
+///
 /// cburng4x32 rng;
 /// cburng4x32_init(&rng);
-/// 
+///
 /// double shape = 2;
 /// gammak1_4x32_53 rgamma_53;
 /// gammak1_4x32_53_init(&rgamma_53, &rng, shape);
 /// double r_53 = gammak1_4x32_53_rand(&rgamma_53, &rng);
-/// 
+///
 /// GAMMAK1_4x32 rgamma;
 /// GAMMAK1_4x32_INIT(&rgamma, &rng, shape);
 /// double r = GAMMAK1_4x32_RAND(&rgamma, &rng);

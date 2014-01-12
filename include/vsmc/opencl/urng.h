@@ -1,9 +1,9 @@
 #ifndef VSMC_OPENCL_URNG_H
 #define VSMC_OPENCL_URNG_H
 
+#include <vsmc/opencl/defines.h>
 #include <Random123/threefry.h>
 #include <Random123/philox.h>
-#include <vsmc/opencl/defines.h>
 
 #ifndef VSMC_STATIC_INLINE
 #if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
@@ -13,10 +13,6 @@
 #else
 #define VSMC_STATIC_INLINE inline
 #endif
-#endif
-
-#ifdef __STDC__
-#define VSMC_FP_TYPE_IS_DOUBLE 1
 #endif
 
 #ifndef CBRNG2x32
