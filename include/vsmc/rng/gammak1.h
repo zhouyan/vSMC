@@ -98,10 +98,11 @@
         normal01_##N##x##W##_##F##_init(&(rgamma->rnorm), rng);              \
                                                                              \
         FT c_sqrt32 = 5.6568542494923802;                                    \
-        rgamma->c_s2 = shape - 0.5f;                                         \
-        rgamma->c_s = sqrt(rgamma->c_s2);                                    \
-        rgamma->c_d = c_sqrt32 - rgamma->c_s * 12;                           \
+        FT c_s2 = shape - 0.5f;                                              \
+        FT c_s = sqrt(c_s2);                                                 \
+        FT c_d = c_sqrt32 - c_s * 12;                                        \
                                                                              \
+        FT c_b, c_si, c_c;                                                   \
         FT r = 1 / shape;                                                    \
         FT q1 = 0.04166669;                                                  \
         FT q2 = 0.02083148;                                                  \
@@ -110,21 +111,29 @@
         FT q5 = -7.388e-5;                                                   \
         FT q6 = 2.4511e-4;                                                   \
         FT q7 = 2.424e-4;                                                    \
-        rgamma->c_q0 = ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r +\
+        FT c_q0 = ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r +     \
                     q2) * r + q1) * r;                                       \
         if (shape <= 3.686f) {                                               \
-            rgamma->c_b = 0.463f + rgamma->c_s + 0.178f * rgamma->c_s2;      \
-            rgamma->c_si = 1.235f;                                           \
-            rgamma->c_c = 0.195f / rgamma->c_s - 0.079f + 0.16f * rgamma->c_s;\
+            c_b = 0.463f + c_s + 0.178f * c_s2;                              \
+            c_si = 1.235f;                                                   \
+            c_c = 0.195f / c_s - 0.079f + 0.16f * c_s;                       \
         } else if (shape <= 13.022f) {                                       \
-            rgamma->c_b = 1.654f + 0.0076f * rgamma->c_s2;                   \
-            rgamma->c_si = 1.68f / rgamma->c_s + 0.275f;                     \
-            rgamma->c_c = 0.062f / rgamma->c_s + 0.024f;                     \
+            c_b = 1.654f + 0.0076f * c_s2;                                   \
+            c_si = 1.68f / c_s + 0.275f;                                     \
+            c_c = 0.062f / c_s + 0.024f;                                     \
         } else {                                                             \
-            rgamma->c_b = 1.77f;                                             \
-            rgamma->c_si = 0.75f;                                            \
-            rgamma->c_c = 0.1515f / rgamma->c_s;                             \
+            c_b = 1.77f;                                                     \
+            c_si = 0.75f;                                                    \
+            c_c = 0.1515f / c_s;                                             \
         }                                                                    \
+                                                                             \
+        rgamma->c_s2    = c_s2;                                              \
+        rgamma->c_s     = c_s;                                               \
+        rgamma->c_d     = c_d;                                               \
+        rgamma->c_b     = c_b;                                               \
+        rgamma->c_si    = c_si;                                              \
+        rgamma->c_c     = c_c;                                               \
+        rgamma->c_q0    = c_q0;                                              \
     }
 
 #define VSMC_DEFINE_GAMMAK1_RAND(N, W, F, FT) \
