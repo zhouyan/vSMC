@@ -78,7 +78,6 @@
     typedef struct {                                                         \
         FT u1;                                                               \
         FT u2;                                                               \
-        FT c_2pi;                                                            \
         unsigned char saved;                                                 \
     } normal01_##N##x##W##_##F;
 
@@ -88,7 +87,6 @@
     {                                                                        \
         rnorm->u1 = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));  \
         rnorm->u2 = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));  \
-        rnorm->c_2pi = 6.2831853071795865;                                   \
         rnorm->saved = 1;                                                    \
     }
 
@@ -96,7 +94,7 @@
     VSMC_STATIC_INLINE FT normal01_##N##x##W##_##F##_rand (                  \
             normal01_##N##x##W##_##F *rnorm, cburng##N##x##W *rng)           \
     {                                                                        \
-        const FT c_2pi = rnorm->c_2pi;                                       \
+        const FT c_2pi = 6.2831853071795865;                                 \
         if (rnorm->saved) {                                                  \
             rnorm->saved = 0;                                                \
             return sqrt(-2 * log(rnorm->u1)) * cos(c_2pi * rnorm->u2);       \
