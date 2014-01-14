@@ -45,6 +45,32 @@ class ConfigureCL
     std::size_t local_size_;
 }; // class ConfigureCL
 
+/// \brief Print build log
+/// \ingroup CLUtility
+template <typename ID>
+inline void cl_print_build_log (cl::Program &program)
+{
+    CLManager<ID> &manager = CLManager<ID>::instance();
+
+    cl_build_status status = CL_BUILD_SUCCESS;
+    std::string line(78, '=');
+    std::string log;
+    std::string dname;
+
+    for (std::vector<cl::Device>::const_iterator
+            diter = manager.device_vec().begin();
+            diter != manager.device_vec().end(); ++diter) {
+        program.getBuildInfo(*diter, CL_PROGRAM_BUILD_STATUS, &status);
+        if (status != CL_BUILD_SUCCESS) {
+            program.getBuildInfo(manager.device(), CL_PROGRAM_BUILD_LOG, &log);
+            diter->getInfo((cl_device_info) CL_DEVICE_NAME, &dname);
+            std::cout << line << std::endl;
+            std::cout << "Build failed for : " << dname << std::endl;
+            std::cout << line << log << line << std::endl;
+        }
+    }
+}
+
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
 inline void cl_set_kernel_args (cl::Kernel &, std::size_t) {}

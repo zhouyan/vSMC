@@ -60,7 +60,7 @@ class StateCL
         program_(other.program_), kernel_copy_(other.kernel_copy_),
         configure_copy_(other.configure_copy_), build_(other.build_),
         build_id_(other.build_id_), build_source_(other.build_source_),
-        build_options_(other.build_options_), build_log_(other.build_log_),
+        build_options_(other.build_options_),
         state_buffer_(manager().template create_buffer<char>(
                 state_size_ * size_)),
         copy_from_buffer_(manager().template create_buffer<size_type>(size_))
@@ -82,7 +82,6 @@ class StateCL
             build_id_       = other.build_id_;
             build_source_   = other.build_source_;
             build_options_  = other.build_options_;
-            build_log_      = other.build_log_;
 
             state_buffer_ =
                 manager().template create_buffer<char>(state_size_ * size_);
@@ -182,15 +181,9 @@ class StateCL
             program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
             program_.getBuildInfo(manager().device(),
                     CL_PROGRAM_BUILD_OPTIONS, &build_options_);
-            program_.getBuildInfo(manager().device(), CL_PROGRAM_BUILD_LOG,
-                    &build_log_);
             build_ = true;
         } catch (...) {
-            program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
-            program_.getBuildInfo(manager().device(),
-                    CL_PROGRAM_BUILD_OPTIONS, &build_options_);
-            program_.getBuildInfo(manager().device(),
-                    CL_PROGRAM_BUILD_LOG, &build_log_);
+            cl_print_build_log<ID>(program_);
             throw;
         }
 
@@ -212,9 +205,6 @@ class StateCL
 
     /// \brief The build options of the program of the last attempted building
     const char *build_options () const {return build_options_.c_str();}
-
-    /// \brief The log of the program of the last attempted building
-    const char *build_log () const {return build_log_.c_str();}
 
     /// \brief Create kernel with the current program
     ///
@@ -257,7 +247,6 @@ class StateCL
     int build_id_;
     std::string build_source_;
     std::string build_options_;
-    std::string build_log_;
 
     cl::Buffer state_buffer_;
     cl::Buffer copy_from_buffer_;
