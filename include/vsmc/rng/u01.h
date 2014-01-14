@@ -106,7 +106,7 @@ VSMC_STATIC_INLINE double u01_closed_open_64_53 (uint64_t i)
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_open_closed_64_53 (uint64_t i)
 {
-    return (1 + (i>>11)) * VSMC_0x1p_53;
+    return (1.0 + (i>>11)) * VSMC_0x1p_53;
 }
 
 /// \ingroup RNG
