@@ -173,6 +173,7 @@
     {                                                                        \
         struct r123array##N##x##W ukey = {{0}};                              \
         rng->ctr = rng->rnd = ukey;                                          \
+        ukey.v[0] = seed;                                                    \
         rng->key = CBRNG##N##x##W##KEYINIT(ukey);                            \
         rng->remain = 0;                                                     \
     }
