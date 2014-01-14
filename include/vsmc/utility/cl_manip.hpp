@@ -54,6 +54,7 @@ inline void cl_print_build_log (cl::Program &program)
 
     cl_build_status status = CL_BUILD_SUCCESS;
     std::string line(78, '=');
+    line += "\n";
     std::string log;
     std::string dname;
 
@@ -64,9 +65,8 @@ inline void cl_print_build_log (cl::Program &program)
         if (status != CL_BUILD_SUCCESS) {
             program.getBuildInfo(manager.device(), CL_PROGRAM_BUILD_LOG, &log);
             diter->getInfo((cl_device_info) CL_DEVICE_NAME, &dname);
-            std::cout << line << std::endl;
-            std::cout << "Build failed for : " << dname << std::endl;
-            std::cout << line << log << line << std::endl;
+            std::cout << line << "Build failed for : " << dname << std::endl;
+            std::cout << line << log << std::endl << line << std::endl;
         }
     }
 }

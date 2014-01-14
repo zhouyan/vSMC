@@ -351,6 +351,8 @@ class CLManager
                 }
             }
         } else if (platform_vec_.size() != 0) {
+            std::vector<cl::Device> dev_pool;
+            std::vector<cl::Device> dev_select;
             for (std::size_t p = 0; p != platform_vec_.size(); ++p) {
                 try {
                     platform_ = platform_vec_[p];
@@ -359,8 +361,9 @@ class CLManager
                         (cl_context_properties)(platform_)(), 0
                     };
                     context_ = cl::Context(dev, context_properties);
-                    device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
-                    if (device_vec_.size() != 0) {
+                    dev_pool = context_.getInfo<CL_CONTEXT_DEVICES>();
+                    device_filter(dev_pool, dev_select);
+                    if (dev_select.size() != 0) {
                         setup_platform = true;
                         break;
                     }
@@ -373,53 +376,29 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_PLATFORM;
 
         bool setup_context = false;
+        bool setup_device = false;
         try {
+            std::vector<cl::Device> dev_pool;
+            std::vector<cl::Device> dev_select;
             cl_context_properties context_properties[] = {
                 CL_CONTEXT_PLATFORM,
                 (cl_context_properties)(platform_)(), 0
             };
             context_ = cl::Context(dev, context_properties);
-            device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
-            setup_context = true;
+            dev_pool = context_.getInfo<CL_CONTEXT_DEVICES>();
+            device_filter(dev_pool, dev_select);
+            if (dev_select.size() != 0) {
+                context_ = cl::Context(dev_select, context_properties);
+                setup_context = true;
+                device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
+                device_ = device_vec_[0];
+                setup_device = true;
+            }
         } catch (cl::Error) {
             context_ = cl::Context();
             device_vec_.clear();
         }
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_CONTEXT;
-
-        bool setup_device = false;
-        if (traits::HasStaticCheckOpenCLDevice<ID>::value) {
-            for (std::size_t d = 0; d != device_vec_.size(); ++d) {
-                std::string name;
-                try {
-                    device_vec_[d].getInfo(CL_DEVICE_NAME, &name);
-                    if (traits::CheckOpenCLDeviceTrait<ID>::check(name)) {
-                        device_ = device_vec_[d];
-                        setup_device = true;
-                        break;
-                    }
-                } catch (cl::Error) {
-                    device_ = cl::Device();
-                }
-            }
-        } else if (traits::HasStaticCheckOpenCLDeviceVendor<ID>::value) {
-            for (std::size_t d = 0; d != device_vec_.size(); ++d) {
-                std::string name;
-                try {
-                    device_vec_[d].getInfo(CL_DEVICE_VENDOR, &name);
-                    if (traits::CheckOpenCLDeviceVendorTrait<ID>::check(name)) {
-                        device_ = device_vec_[d];
-                        setup_device = true;
-                        break;
-                    }
-                } catch (cl::Error) {
-                    device_ = cl::Device();
-                }
-            }
-        } else if (device_vec_.size() != 0) {
-            device_ = device_vec_[0];
-            setup_device = true;
-        }
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_DEVICE;
 
         bool setup_command_queue = false;
@@ -433,6 +412,30 @@ class CLManager
 
         setup_ = setup_platform && setup_context
             && setup_device && setup_command_queue;
+    }
+
+    void device_filter (const std::vector<cl::Device> &dev_pool,
+            std::vector<cl::Device> &dev_select)
+    {
+        dev_select.clear();
+
+        if (traits::HasStaticCheckOpenCLDevice<ID>::value) {
+            for (std::size_t d = 0; d != dev_pool.size(); ++d) {
+                std::string name;
+                dev_pool[d].getInfo(CL_DEVICE_NAME, &name);
+                if (traits::CheckOpenCLDeviceTrait<ID>::check(name))
+                    dev_select.push_back(dev_pool[d]);
+            }
+        } else if (traits::HasStaticCheckOpenCLDeviceVendor<ID>::value) {
+            for (std::size_t d = 0; d != dev_pool.size(); ++d) {
+                std::string name;
+                dev_pool[d].getInfo(CL_DEVICE_VENDOR, &name);
+                if (traits::CheckOpenCLDeviceVendorTrait<ID>::check(name))
+                    dev_select.push_back(dev_pool[d]);
+            }
+        } else {
+            dev_select = dev_pool;
+        }
     }
 
     template <typename CLType>
