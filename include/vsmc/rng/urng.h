@@ -46,9 +46,11 @@
 /// cburng4x64
 /// ~~~
 /// The default engines use `threefry4x32` etc. To use the Philox engine,
-/// define macros `CBRNG4x32` etc., before including vSMC headers. For example,
+/// define macros `CBRNG4x32` *and* `CBRNG4x32KEYINIT` etc., before including
+/// vSMC headers. For example,
 /// ~~~{.c}
 /// #define CBRNG4x32 philox4x32
+/// #define CBRNG4x32KEYINIT philox4x32keyinit
 /// ~~~
 ///
 /// Each RNG engine is used as the following,
@@ -72,8 +74,7 @@
 /// __kernel void ker (__global struct r123array4x32 *counter)
 /// {
 ///     cburng4x32 rng;
-///     cburng4x32_init(&rng);
-///     rng.key.v[0] = get_global_id(0);
+///     cburng4x32_init(&rng, get_global_id(0));
 ///     rng.ctr = counter[get_global_id(0)];
 ///     // use engine rng
 ///     counter[i] = rng.ctr;
@@ -137,22 +138,25 @@
 
 #include <vsmc/rng/defines.h>
 #include <Random123/threefry.h>
-#include <Random123/philox.h>
 
 #ifndef CBRNG2x32
 #define CBRNG2x32 threefry2x32
-#endif
-
-#ifndef CBRNG2x64
-#define CBRNG2x64 threefry2x64
+#define CBRNG2x32KEYINIT threefry2x32keyinit
 #endif
 
 #ifndef CBRNG4x32
 #define CBRNG4x32 threefry4x32
+#define CBRNG4x32KEYINIT threefry4x32keyinit
+#endif
+
+#ifndef CBRNG2x64
+#define CBRNG2x64 threefry2x64
+#define CBRNG2x64KEYINIT threefry2x64keyinit
 #endif
 
 #ifndef CBRNG4x64
 #define CBRNG4x64 threefry4x64
+#define CBRNG4x64KEYINIT threefry4x64keyinit
 #endif
 
 #define VSMC_DEFINE_CBURNG(N, W) \
@@ -164,10 +168,12 @@
     } cburng##N##x##W;
 
 #define VSMC_DEFINE_CBURNG_INIT(N, W) \
-    VSMC_STATIC_INLINE void cburng##N##x##W##_init(cburng##N##x##W *rng)     \
+    VSMC_STATIC_INLINE void cburng##N##x##W##_init(                          \
+            cburng##N##x##W *rng, uint##W##_t seed)                          \
     {                                                                        \
-        struct r123array##N##x##W v = {{0}};                                 \
-        rng->key = rng->ctr = rng->rnd = v;                                  \
+        struct r123array##N##x##W ukey = {{0}};                              \
+        rng->ctr = rng->rnd = ukey;                                          \
+        rng->key = CBRNG##N##x##W##KEYINIT(ukey);                            \
         rng->remain = 0;                                                     \
     }
 
@@ -188,27 +194,27 @@
 /// \ingroup RNG
 VSMC_DEFINE_CBURNG(2, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG(2, 64)
-/// \ingroup RNG
 VSMC_DEFINE_CBURNG(4, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG(2, 64)
 /// \ingroup RNG
 VSMC_DEFINE_CBURNG(4, 64)
 
 /// \ingroup RNG
 VSMC_DEFINE_CBURNG_INIT(2, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_INIT(2, 64)
-/// \ingroup RNG
 VSMC_DEFINE_CBURNG_INIT(4, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_INIT(2, 64)
 /// \ingroup RNG
 VSMC_DEFINE_CBURNG_INIT(4, 64)
 
 /// \ingroup RNG
 VSMC_DEFINE_CBURNG_RAND(2, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_RAND(2, 64)
-/// \ingroup RNG
 VSMC_DEFINE_CBURNG_RAND(4, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RAND(2, 64)
 /// \ingroup RNG
 VSMC_DEFINE_CBURNG_RAND(4, 64)
 
