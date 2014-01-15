@@ -91,11 +91,18 @@
             gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W *rng, FT shape) \
     {                                                                        \
         rgamma->c_shape = shape;                                             \
-                                                                             \
-        if (shape <= 1)                                                      \
-            return;                                                          \
-                                                                             \
         normal01_##N##x##W##_##F##_init(&(rgamma->rnorm), rng);              \
+                                                                             \
+        if (shape <= 1) {                                                    \
+            rgamma->c_s2 = 0;                                                \
+            rgamma->c_s = 0;                                                 \
+            rgamma->c_d = 0;                                                 \
+            rgamma->c_b = 0;                                                 \
+            rgamma->c_si = 0;                                                \
+            rgamma->c_c = 0;                                                 \
+            rgamma->c_q0 = 0;                                                \
+            return;                                                          \
+        }                                                                    \
                                                                              \
         FT c_sqrt32 = 5.6568542494923802;                                    \
         FT c_s2 = shape - 0.5f;                                              \
