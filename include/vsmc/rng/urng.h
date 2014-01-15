@@ -118,7 +118,8 @@
 /// `double` if `VSMC_FP_TYPE_IS_DOUBLE` is defined and non-zero or `float`
 /// otherwise.
 ///
-/// In the documentation of each distribution, the following notations are used,
+/// In the documentation of each distribution, the following notations are
+/// used,
 ///
 /// - `<N>`: 2 or 4, the rounds of counter-based RNG algorithm
 /// - `<W>`: 32 or 64, the bits of integer RNG

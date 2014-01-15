@@ -80,7 +80,7 @@ VSMC_STATIC_INLINE float u01_closed_open_32_24 (uint32_t i)
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_open_closed_32_24 (uint32_t i)
 {
-    return (1 + (i>>8)) * VSMC_0x1p_24f;
+    return (1.0f + (i>>8)) * VSMC_0x1p_24f;
 }
 
 /// \ingroup RNG
