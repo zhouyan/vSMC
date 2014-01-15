@@ -166,7 +166,7 @@
         struct r123array##N##x##W key;                                       \
         struct r123array##N##x##W ctr;                                       \
         struct r123array##N##x##W rnd;                                       \
-        unsigned char remain;                                                \
+        unsigned char rem;                                                   \
     } cburng##N##x##W;
 
 #define VSMC_DEFINE_CBURNG_INIT(N, W) \
@@ -174,25 +174,39 @@
             cburng##N##x##W *rng, uint##W##_t seed)                          \
     {                                                                        \
         struct r123array##N##x##W ukey = {{}};                               \
-        struct r123array##N##x##W rctr = {{}};                               \
+        rng->ctr = ukey;                                                     \
+        rng->rnd = ukey;                                                     \
         ukey.v[0] = seed;                                                    \
         rng->key = CBRNG##N##x##W##KEYINIT(ukey);                            \
-        rng->ctr = rng->rnd = rctr;                                          \
-        rng->remain = 0;                                                     \
+        rng->rem = 0;                                                        \
     }
 
 #define VSMC_DEFINE_CBURNG_RAND(N, W) \
     VSMC_STATIC_INLINE uint##W##_t cburng##N##x##W##_rand(                   \
             cburng##N##x##W *rng)                                            \
     {                                                                        \
-        if (rng->remain == 0) {                                              \
-            rng->ctr.v[0]++;                                                 \
-            rng->rnd = CBRNG##N##x##W(rng->ctr, rng->key);                   \
-            rng->remain = N;                                                 \
-        }                                                                    \
-        rng->remain--;                                                       \
+        unsigned char rem = rng->rem;                                        \
+        struct r123array##N##x##W rnd = rng->rnd;                            \
                                                                              \
-        return rng->rnd.v[rng->remain];                                      \
+        if (rem > 0) {                                                       \
+            --rem;                                                           \
+            rng->rem = rem;                                                  \
+            return rnd.v[rem];                                               \
+        }                                                                    \
+                                                                             \
+        struct r123array##N##x##W ctr = rng->ctr;                            \
+        struct r123array##N##x##W key = rng->key;                            \
+                                                                             \
+        rem = N - 1;                                                         \
+        ctr.v[0]++;                                                          \
+        rnd = CBRNG##N##x##W(ctr, key);                                      \
+                                                                             \
+        rng->rem = rem;                                                      \
+        rng->rnd = rnd;                                                      \
+        rng->ctr = ctr;                                                      \
+        rng->key = key;                                                      \
+                                                                             \
+        return rnd.v[rem];                                                   \
     }
 
 /// \ingroup RNG
