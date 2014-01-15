@@ -10,6 +10,12 @@ struct CLDefault
 {
     typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_DEFAULT>
         opencl_device_type;
+
+    static bool check_opencl_platform (const std::string &) {return true;}
+
+    static bool check_opencl_device (const std::string &) {return true;}
+
+    static bool check_opencl_device_vendor (const std::string &) {return true;}
 };
 
 /// \brief OpenCL Manager
@@ -87,10 +93,6 @@ class CLManager
     /// \brief The platform currently being used
     const cl::Platform &platform () const {return platform_;}
 
-    /// \brief The vector of all platforms that the manager found
-    const std::vector<cl::Platform> &platform_vec () const
-    {return platform_vec_;}
-
     /// \brief The context currently being used
     const cl::Context &context () const {return context_;}
 
@@ -127,7 +129,6 @@ class CLManager
     {
         setup_ = false;
         platform_ = plat;
-        cl::Platform::get(&platform_vec_);
         context_ = ctx;
         device_ = dev;
         device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
@@ -295,7 +296,6 @@ class CLManager
     private :
 
     cl::Platform platform_;
-    std::vector<cl::Platform> platform_vec_;
     cl::Context context_;
     cl::Device device_;
     std::vector<cl::Device> device_vec_;
@@ -327,52 +327,9 @@ class CLManager
         std::free(write_buffer_pool_);
     }
 
-    void setup_cl_manager (cl_device_type dev)
+    void setup_cl_manager (cl_device_type dev_type)
     {
-        try {
-            cl::Platform::get(&platform_vec_);
-        } catch (cl::Error) {
-            platform_vec_.clear();
-        }
-
-        bool setup_platform = false;
-        if (traits::HasStaticCheckOpenCLPlatform<ID>::value) {
-            for (std::size_t p = 0; p != platform_vec_.size(); ++p) {
-                std::string name;
-                try {
-                    platform_vec_[p].getInfo(CL_PLATFORM_NAME, &name);
-                    if (traits::CheckOpenCLPlatformTrait<ID>::check(name)) {
-                        platform_ = platform_vec_[p];
-                        setup_platform = true;
-                        break;
-                    }
-                } catch (cl::Error) {
-                    platform_ = cl::Platform();
-                }
-            }
-        } else if (platform_vec_.size() != 0) {
-            std::vector<cl::Device> dev_pool;
-            std::vector<cl::Device> dev_select;
-            for (std::size_t p = 0; p != platform_vec_.size(); ++p) {
-                try {
-                    platform_ = platform_vec_[p];
-                    cl_context_properties context_properties[] = {
-                        CL_CONTEXT_PLATFORM,
-                        (cl_context_properties)(platform_)(), 0
-                    };
-                    context_ = cl::Context(dev, context_properties);
-                    dev_pool = context_.getInfo<CL_CONTEXT_DEVICES>();
-                    device_filter(dev_pool, dev_select);
-                    if (dev_select.size() != 0) {
-                        setup_platform = true;
-                        break;
-                    }
-                } catch (cl::Error) {
-                    context_ = cl::Context();
-                    device_vec_.clear();
-                }
-            }
-        }
+        bool setup_platform = platform_filter(dev_type);
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_PLATFORM;
 
         bool setup_context = false;
@@ -380,24 +337,20 @@ class CLManager
         try {
             std::vector<cl::Device> dev_pool;
             std::vector<cl::Device> dev_select;
-            cl_context_properties context_properties[] = {
-                CL_CONTEXT_PLATFORM,
-                (cl_context_properties)(platform_)(), 0
-            };
-            context_ = cl::Context(dev, context_properties);
-            dev_pool = context_.getInfo<CL_CONTEXT_DEVICES>();
+            platform_.getDevices(dev_type, &dev_pool);
             device_filter(dev_pool, dev_select);
             if (dev_select.size() != 0) {
+                cl_context_properties context_properties[] = {
+                    CL_CONTEXT_PLATFORM,
+                    (cl_context_properties)(platform_)(), 0
+                };
                 context_ = cl::Context(dev_select, context_properties);
                 setup_context = true;
                 device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
                 device_ = device_vec_[0];
                 setup_device = true;
             }
-        } catch (cl::Error) {
-            context_ = cl::Context();
-            device_vec_.clear();
-        }
+        } catch (cl::Error) {}
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_CONTEXT;
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_DEVICE;
 
@@ -405,13 +358,51 @@ class CLManager
         try {
             command_queue_ = cl::CommandQueue(context_, device_, 0);
             setup_command_queue = true;
-        } catch (cl::Error) {
-            command_queue_ = cl::CommandQueue();
-        }
+        } catch (cl::Error) {}
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_COMMAND_QUEUE;
 
         setup_ = setup_platform && setup_context
             && setup_device && setup_command_queue;
+    }
+
+    bool platform_filter (cl_device_type dev_type)
+    {
+        std::vector<cl::Platform> platform_vec;
+        try {
+            cl::Platform::get(&platform_vec);
+        } catch (cl::Error) {
+            platform_vec.clear();
+        }
+        if (platform_vec.size() == 0)
+            return false;
+
+        if (traits::HasStaticCheckOpenCLPlatform<ID>::value) {
+            try {
+                for (std::size_t p = 0; p != platform_vec.size(); ++p) {
+                    std::string name;
+                    platform_vec[p].getInfo(CL_PLATFORM_NAME, &name);
+                    if (traits::CheckOpenCLPlatformTrait<ID>::check(name)) {
+                        platform_ = platform_vec[p];
+                        return true;
+                    }
+                }
+            } catch (cl::Error) {}
+        }
+
+        try {
+            for (std::size_t p = 0; p != platform_vec.size(); ++p) {
+                std::vector<cl::Device> dev_pool;
+                std::vector<cl::Device> dev_select;
+                platform_vec[p].getDevices(dev_type, &dev_pool);
+                device_filter(dev_pool, dev_select);
+                if (dev_select.size() != 0) {
+                    platform_ = platform_vec[p];
+                    return true;
+                }
+            }
+        } catch (cl::Error) {}
+
+        return false;
     }
 
     void device_filter (const std::vector<cl::Device> &dev_pool,
