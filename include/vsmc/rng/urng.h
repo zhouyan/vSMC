@@ -139,6 +139,7 @@
 
 #include <vsmc/rng/defines.h>
 #include <Random123/threefry.h>
+#include <Random123/philox.h>
 
 #ifndef CBRNG2x32
 #define CBRNG2x32 threefry2x32
@@ -184,7 +185,7 @@
     VSMC_STATIC_INLINE uint##W##_t cburng##N##x##W##_rand(                   \
             cburng##N##x##W *rng)                                            \
     {                                                                        \
-        if (!rng->remain) {                                                  \
+        if (rng->remain == 0) {                                              \
             rng->ctr.v[0]++;                                                 \
             rng->rnd = CBRNG##N##x##W(rng->ctr, rng->key);                   \
             rng->remain = N;                                                 \
