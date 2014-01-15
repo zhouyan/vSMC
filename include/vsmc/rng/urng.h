@@ -172,10 +172,11 @@
     VSMC_STATIC_INLINE void cburng##N##x##W##_init(                          \
             cburng##N##x##W *rng, uint##W##_t seed)                          \
     {                                                                        \
-        struct r123array##N##x##W ukey = {{0}};                              \
-        rng->ctr = rng->rnd = ukey;                                          \
+        struct r123array##N##x##W ukey = {{}};                               \
+        struct r123array##N##x##W rctr = {{}};                               \
         ukey.v[0] = seed;                                                    \
         rng->key = CBRNG##N##x##W##KEYINIT(ukey);                            \
+        rng->ctr = rng->rnd = rctr;                                          \
         rng->remain = 0;                                                     \
     }
 
