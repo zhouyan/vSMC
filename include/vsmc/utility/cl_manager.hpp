@@ -408,24 +408,37 @@ class CLManager
     void device_filter (const std::vector<cl::Device> &dev_pool,
             std::vector<cl::Device> &dev_select)
     {
-        dev_select.clear();
+        std::vector<bool> dev_select_idx(dev_pool.size(), true);
+
+        if (traits::HasStaticCheckOpenCLDeviceVendor<ID>::value) {
+            for (std::size_t d = 0; d != dev_pool.size(); ++d) {
+                try {
+                    std::string str;
+                    dev_pool[d].getInfo(CL_DEVICE_VENDOR, &str);
+                    if (!traits::CheckOpenCLDeviceVendorTrait<ID>::check(str))
+                        dev_select_idx[d] = false;
+                } catch (cl::Error) {
+                    dev_select_idx[d] = false;
+                }
+            }
+        }
 
         if (traits::HasStaticCheckOpenCLDevice<ID>::value) {
             for (std::size_t d = 0; d != dev_pool.size(); ++d) {
-                std::string name;
-                dev_pool[d].getInfo(CL_DEVICE_NAME, &name);
-                if (traits::CheckOpenCLDeviceTrait<ID>::check(name))
-                    dev_select.push_back(dev_pool[d]);
+                try {
+                    std::string str;
+                    dev_pool[d].getInfo(CL_DEVICE_NAME, &str);
+                    if (!traits::CheckOpenCLDeviceTrait<ID>::check(str))
+                        dev_select_idx[d] = false;
+                } catch (cl::Error) {
+                    dev_select_idx[d] = false;
+                }
             }
-        } else if (traits::HasStaticCheckOpenCLDeviceVendor<ID>::value) {
-            for (std::size_t d = 0; d != dev_pool.size(); ++d) {
-                std::string name;
-                dev_pool[d].getInfo(CL_DEVICE_VENDOR, &name);
-                if (traits::CheckOpenCLDeviceVendorTrait<ID>::check(name))
-                    dev_select.push_back(dev_pool[d]);
-            }
-        } else {
-            dev_select = dev_pool;
+        }
+
+        for (std::size_t d = 0; d != dev_pool.size(); ++d) {
+            if (dev_select_idx[d])
+                try {dev_select.push_back(dev_pool[d]);} catch (cl::Error) {}
         }
     }
 
