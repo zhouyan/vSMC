@@ -4,21 +4,7 @@
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/smp/adapter.hpp>
 #include <vsmc/smp/backend_seq.hpp>
-// #include <vsmc/smp/backend_cilk.hpp>
-// #include <vsmc/smp/backend_gcd.hpp>
-// #include <vsmc/smp/backend_omp.hpp>
-// #include <vsmc/smp/backend_ppl.hpp>
-// #include <vsmc/smp/backend_std.hpp>
-// #include <vsmc/smp/backend_tbb.hpp>
-// #include <vsmc/mpi/backend_mpi.hpp>
-// #include <vsmc/opencl/backend_cl.hpp>
-#include <vsmc/utility/integrate/numeric_seq.hpp>
-// #include <vsmc/utility/integrate/numeric_cilk.hpp>
-// #include <vsmc/utility/integrate/numeric_gcd.hpp>
-// #include <vsmc/utility/integrate/numeric_omp.hpp>
-// #include <vsmc/utility/integrate/numeric_ppl.hpp>
-// #include <vsmc/utility/integrate/numeric_std.hpp>
-// #include <vsmc/utility/integrate/numeric_tbb.hpp>
+#include <vsmc/integrate/numeric_seq.hpp>
 
 #endif // VSMC_HPP
 
@@ -79,16 +65,15 @@
 /// \defgroup Traits Traits
 /// \brief Trait classes
 
+/// \defgroup Integrate Integration
+/// \brief Numerical integration
+
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
 /// \defgroup Backup Object Backup
 /// \ingroup Utility
 /// \brief Backup and restore objects
-
-/// \defgroup Integrate Integration
-/// \ingroup Utility
-/// \brief Numerical integration
 
 /// \defgroup RNG RNG
 /// \brief Utilities for managing independent RNG engines

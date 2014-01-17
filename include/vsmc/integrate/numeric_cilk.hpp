@@ -1,7 +1,7 @@
 #ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_CILK_HPP
 #define VSMC_UTILITY_INTEGRATE_NUMERIC_CILK_HPP
 
-#include <vsmc/utility/integrate/base.hpp>
+#include <vsmc/integrate/base.hpp>
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
 #include <cilk/holder.h>

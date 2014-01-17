@@ -2,7 +2,7 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/integrate/numeric_newton_cotes.hpp>
+#include <vsmc/integrate/numeric_newton_cotes.hpp>
 
 #if VSMC_USE_MKL
 #include <mkl_vml.h>

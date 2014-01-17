@@ -1,8 +1,8 @@
 #ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_PPL_HPP
 #define VSMC_UTILITY_INTEGRATE_NUMERIC_PPL_HPP
 
-#include <vsmc/utility/integrate/base.hpp>
-#include <vsmc/utility/ppl_wrapper.hpp>
+#include <vsmc/integrate/base.hpp>
+#include <vsmc/smp/internal/ppl_wrapper.hpp>
 
 namespace vsmc {
 

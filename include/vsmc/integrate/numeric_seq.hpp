@@ -1,15 +1,14 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_GCD_HPP
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_GCD_HPP
+#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
+#define VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
 
-#include <vsmc/utility/integrate/base.hpp>
-#include <vsmc/utility/dispatch.hpp>
+#include <vsmc/integrate/base.hpp>
 
 namespace vsmc {
 
-/// \brief Numerical integration using Apple Grand Central Dispatch
+/// \brief Numerical integration using sequential implementation
 /// \ingroup Integrate
 template <typename Derived>
-class NumericGCD : public NumericBase<Derived>
+class NumericSEQ : public NumericBase<Derived>
 {
     public :
 
@@ -27,8 +26,8 @@ class NumericGCD : public NumericBase<Derived>
 
         return integral;
     }
-}; // class NumericGCD
+}; // class NumericSEQ
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_GCD_HPP
+#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
