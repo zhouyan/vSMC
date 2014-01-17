@@ -2,12 +2,12 @@
 #define VSMC_UTILITY_CL_MANIP_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cl_wrapper.hpp>
+#include <vsmc/opencl/cl_wrapper.hpp>
 
 namespace vsmc {
 
 /// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 class ConfigureCL
 {
     public :
@@ -46,7 +46,7 @@ class ConfigureCL
 }; // class ConfigureCL
 
 /// \brief Print build log
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 template <typename ID>
 inline void cl_print_build_log (cl::Program &program)
 {
@@ -76,7 +76,7 @@ inline void cl_print_build_log (cl::Program &program)
 inline void cl_set_kernel_args (cl::Kernel &, std::size_t) {}
 
 /// \brief Set OpenCL kernel arguments
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 ///
 /// \details
 /// The first argument `arg1` is set with index `offset` and the next with

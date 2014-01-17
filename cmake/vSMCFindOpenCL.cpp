@@ -1,4 +1,4 @@
-#include <vsmc/utility/cl_query.hpp>
+#include <vsmc/opencl/cl_query.hpp>
 
 int main ()
 {

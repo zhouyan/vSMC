@@ -2,8 +2,8 @@
 #define VSMC_OPENCL_BACKEND_CL_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cl_manager.hpp>
-#include <vsmc/utility/cl_manip.hpp>
+#include <vsmc/opencl/cl_manager.hpp>
+#include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/rng/seed.hpp>
 
 namespace vsmc {

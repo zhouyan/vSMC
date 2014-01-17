@@ -2,7 +2,7 @@
 #define VSMC_UTILITY_CL_MANAGER_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cl_wrapper.hpp>
+#include <vsmc/opencl/cl_wrapper.hpp>
 
 namespace vsmc {
 
@@ -19,7 +19,7 @@ struct CLDefault
 };
 
 /// \brief OpenCL Manager
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 ///
 /// \details
 /// Each instance of CLManager is an singleton. Different `ID` template

@@ -2,12 +2,12 @@
 #define VSMC_UTILITY_CL_QUERY_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/cl_wrapper.hpp>
+#include <vsmc/opencl/cl_wrapper.hpp>
 
 namespace vsmc {
 
 /// \brief Query information of OpenCL devices
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 class CLQuery
 {
     public :
@@ -433,7 +433,7 @@ class CLQuery
 }; //class CLQuery
 
 /// \brief Print information of all platforms and devices
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 template<typename OutputStream>
 inline OutputStream &operator<< (OutputStream &os, const CLQuery &query)
 {query.print(os); return os;}
@@ -443,31 +443,31 @@ inline OutputStream &operator<< (OutputStream &os, const CLQuery &query)
 namespace cl {
 
 /// \brief Print information of all devices in a given platform
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 template <typename OutputStream>
 inline OutputStream &operator<< (OutputStream &os, const Platform &plat)
 {vsmc::CLQuery::print(os, plat); return os;}
 
 /// \brief Print information of all devices in a given context
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 template <typename OutputStream>
 inline OutputStream &operator<< (OutputStream &os, const Context &ctx)
 {vsmc::CLQuery::print(os, ctx); return os;}
 
 /// \brief Print information a given device
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 template <typename OutputStream>
 OutputStream &operator<< (OutputStream &os, const Device &dev)
 {vsmc::CLQuery::print(os, dev); return os;}
 
 /// \brief Print information a given program
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 template <typename OutputStream>
 inline OutputStream &operator<< (OutputStream &os, const Program &prog)
 {vsmc::CLQuery::print(os, prog); return os;}
 
 /// \brief Print information a given kernel
-/// \ingroup CLUtility
+/// \ingroup OpenCL
 template <typename OutputStream>
 inline OutputStream &operator<< (OutputStream &os, const Kernel &kern)
 {vsmc::CLQuery::print(os, kern); return os;}
