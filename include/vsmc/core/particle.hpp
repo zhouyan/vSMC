@@ -5,8 +5,8 @@
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/weight.hpp>
 #include <vsmc/resample/basic.hpp>
-#include <vsmc/utility/rng_set.hpp>
-#include <vsmc/utility/seed.hpp>
+#include <vsmc/rng/rng_set.hpp>
+#include <vsmc/rng/seed.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
 namespace vsmc {

@@ -2,7 +2,7 @@
 #define VSMC_MPI_MANAGER_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/seed.hpp>
+#include <vsmc/rng/seed.hpp>
 #include <boost/mpi.hpp>
 
 namespace vsmc {

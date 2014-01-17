@@ -2,7 +2,7 @@
 #define VSMC_UTILITY_RNG_SET_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/seed.hpp>
+#include <vsmc/rng/seed.hpp>
 
 #if VSMC_USE_RANDOM123
 #ifdef _MSC_VER
