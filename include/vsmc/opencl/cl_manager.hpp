@@ -274,7 +274,7 @@ class CLManager
     ///
     /// \details
     /// OpenCL requires that `global_size` is a multiple of `local_size`. This
-    /// function will round `global_size` if it is not already a multiple of
+    /// function will round `N` if it is not already a multiple of
     /// `local_size`. In the kernel it is important to check that
     /// `get_global_id(0)` is not out of range.
     ///
@@ -284,12 +284,12 @@ class CLManager
     /// `run_kernel(kern, N, K)`. But within the kernel, you need to check
     /// `get_global_id(0) < N`
     void run_kernel (const cl::Kernel &kern,
-            std::size_t global_size, std::size_t local_size) const
+            std::size_t N, std::size_t local_size) const
     {
         command_queue_.finish();
         command_queue_.enqueueNDRangeKernel(kern, cl::NullRange,
-                get_global_nd_range(global_size, local_size),
-                get_local_nd_range(global_size, local_size));
+                get_global_nd_range(N, local_size),
+                get_local_nd_range(N, local_size));
         command_queue_.finish();
     }
 
@@ -473,16 +473,17 @@ class CLManager
     }
 
     cl::NDRange get_global_nd_range (
-            std::size_t global_size, std::size_t local_size) const
+            std::size_t N, std::size_t local_size) const
     {
-        return (local_size && global_size % local_size) ?
-            cl::NDRange((global_size / local_size + 1) * local_size):
-            cl::NDRange(global_size);
+        return (local_size && N % local_size) ?
+            cl::NDRange((N / local_size + 1) * local_size): cl::NDRange(N);
     }
 
     cl::NDRange get_local_nd_range (
-            std::size_t global_size, std::size_t local_size) const
-    {return local_size ? cl::NDRange(local_size) : cl::NullRange;}
+            std::size_t N, std::size_t local_size) const
+    {
+        return local_size ? cl::NDRange(local_size) : cl::NullRange;
+    }
 }; // clss CLManager
 
 } // namespace vsmc

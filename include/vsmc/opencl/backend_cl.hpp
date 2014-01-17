@@ -36,6 +36,30 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
 
 } // namespace vsmc::internal
 
+/// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
+/// \ingroup OpenCL
+class ConfigureCL
+{
+    public :
+
+    ConfigureCL () : local_size_(0) {}
+
+    std::size_t local_size () const {return local_size_;}
+
+    void local_size (std::size_t new_size) {local_size_ = new_size;}
+
+    void local_size (std::size_t N,
+            const cl::Kernel &kern, const cl::Device &dev)
+    {
+        std::size_t global_size;
+        cl_preferred_work_size(N, kern, dev, global_size, local_size_);
+    };
+
+    private :
+
+    std::size_t local_size_;
+}; // class ConfigureCL
+
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
 template <std::size_t StateSize, typename FPType, typename ID>
@@ -188,7 +212,7 @@ class StateCL
         }
 
         kernel_copy_ = create_kernel("copy");
-        configure_copy_.local_size(kernel_copy_, manager().device());
+        configure_copy_.local_size(size_, kernel_copy_, manager().device());
     }
 
     /// \brief Whether the last attempted building success
@@ -226,8 +250,8 @@ class StateCL
                 copy_from_buffer_, size_, copy_from);
         kernel_copy_.setArg(0, state_buffer_);
         kernel_copy_.setArg(1, copy_from_buffer_);
-        manager().run_kernel(kernel_copy_,
-                size_, configure_copy_.local_size());
+        manager().run_kernel(
+                kernel_copy_, size_, configure_copy_.local_size());
     }
 
     ConfigureCL &configure_copy () {return configure_copy_;}
@@ -367,7 +391,7 @@ class InitializeCL
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            configure_.local_size(
+            configure_.local_size(particle.size(),
                     kernel_, particle.value().manager().device());
         }
 
@@ -480,7 +504,7 @@ class MoveCL
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            configure_.local_size(
+            configure_.local_size(particle.size(),
                     kernel_, particle.value().manager().device());
         }
 
@@ -592,7 +616,7 @@ class MonitorEvalCL
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            configure_.local_size(
+            configure_.local_size(particle.size(),
                     kernel_, particle.value().manager().device());
         }
 
@@ -707,7 +731,7 @@ class PathEvalCL
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
-            configure_.local_size(
+            configure_.local_size(particle.size(),
                     kernel_, particle.value().manager().device());
         }
 
