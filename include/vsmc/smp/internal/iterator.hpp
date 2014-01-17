@@ -5,8 +5,6 @@
 
 namespace vsmc {
 
-/// \brief Non-uniform random iterator adapter
-/// \ingroup Iterator
 template <typename RandomIter>
 class StepRandomIterator :
     public std::iterator<
@@ -80,8 +78,6 @@ class StepRandomIterator :
     std::size_t inc_;
 }; // class StepRandomIterator
 
-/// \brief StepRandomIterator operator==
-/// \ingroup Iterator
 template <typename RandomIter1, typename RandomIter2>
 inline bool operator== (
         const StepRandomIterator<RandomIter1> &iter1,
@@ -92,8 +88,6 @@ inline bool operator== (
         (iter1.increment() == iter2.increment());
 }
 
-/// \brief StepRandomIterator operator!=
-/// \ingroup Iterator
 template <typename RandomIter1, typename RandomIter2>
 inline bool operator!= (
         const StepRandomIterator<RandomIter1> &iter1,
@@ -104,8 +98,6 @@ inline bool operator!= (
         (iter1.increment() != iter2.increment());
 }
 
-/// \brief StepRandomIterator operator-
-/// \ingroup Iterator
 template <typename RandomIter1, typename RandomIter2>
 inline std::ptrdiff_t operator- (
         const StepRandomIterator<RandomIter1> &iter1,
@@ -116,8 +108,6 @@ inline std::ptrdiff_t operator- (
     return (iter1.iterator() - iter2.iterator()) / iter1.increment();
 }
 
-/// \brief StateMarixRCIterator operator+
-/// \ingroup Iterator
 template <typename RandomIter>
 inline StepRandomIterator<RandomIter> operator+ (
         const StepRandomIterator<RandomIter> &iter,
@@ -129,15 +119,11 @@ inline StepRandomIterator<RandomIter> operator+ (
     return new_iter;
 }
 
-/// \brief StateMarixRCIterator operator+
-/// \ingroup Iterator
 template <typename RandomIter>
 inline StepRandomIterator<RandomIter> operator+ (
         typename StepRandomIterator<RandomIter>::difference_type diff,
         const StepRandomIterator<RandomIter> &iter) {return iter + diff;}
 
-/// \brief StateMarixRCIterator operator-
-/// \ingroup Iterator
 template <typename RandomIter>
 inline StepRandomIterator<RandomIter> operator- (
         const StepRandomIterator<RandomIter> &iter,

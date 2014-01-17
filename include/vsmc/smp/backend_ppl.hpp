@@ -2,7 +2,7 @@
 #define VSMC_SMP_BACKEND_PPL_HPP
 
 #include <vsmc/smp/base.hpp>
-#include <vsmc/utility/ppl_wrapper.hpp>
+#include <vsmc/smp/internal/ppl_wrapper.hpp>
 
 namespace vsmc {
 

@@ -86,24 +86,11 @@
 /// \ingroup Utility
 /// \brief Backup and restore objects
 
-/// \defgroup CLUtility OpenCL Utilities
-/// \ingroup Utility
-/// \brief Utilities for managing OpenCL objects
-
-/// \defgroup Dispatch Apple GCD Utilities
-/// \ingroup Utility
-/// \brief Utilities for managing Apple GCD queues
-
 /// \defgroup Integrate Integration
 /// \ingroup Utility
 /// \brief Numerical integration
 
-/// \defgroup Iterator Iterator
-/// \ingroup Utility
-/// \brief Non-standard iterators
-
 /// \defgroup RNG RNG
-/// \ingroup Utility
 /// \brief Utilities for managing independent RNG engines
 
 /// \defgroup STDTBB STDTBB

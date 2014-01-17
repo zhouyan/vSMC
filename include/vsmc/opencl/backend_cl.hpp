@@ -146,7 +146,7 @@ class StateCL
     /// #define Seed 101UL;
     /// // The actual seed is vsmc::Seed::instance().get()
     ///
-    /// #include <vsmc/opencl/device.h>
+    /// #include <vsmc/opencl/internal/device.h>
     ///
     /// // ... User source, passed by the source argument
     /// \endcode
@@ -171,7 +171,7 @@ class StateCL
             ss << "char c" << i << ";\n";
         ss << "} copy_state_struct;\n";
 
-        ss << "#include <vsmc/opencl/device.h>\n";
+        ss << "#include <vsmc/opencl/internal/device.h>\n";
         ss << source << '\n';
         Seed::instance().skip(static_cast<Seed::result_type>(size_));
 

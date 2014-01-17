@@ -2,7 +2,7 @@
 #define VSMC_UTILITY_CL_MANIP_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/opencl/cl_wrapper.hpp>
+#include <vsmc/opencl/internal/cl_wrapper.hpp>
 
 namespace vsmc {
 

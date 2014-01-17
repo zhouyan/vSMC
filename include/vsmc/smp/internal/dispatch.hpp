@@ -5,8 +5,6 @@
 
 namespace vsmc {
 
-/// \brief Dispatch queue used by vSMC
-/// \ingroup Dispatch
 class DispatchQueue
 {
     public :

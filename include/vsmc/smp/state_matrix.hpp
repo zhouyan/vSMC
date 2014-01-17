@@ -3,7 +3,7 @@
 
 #include <vsmc/smp/base.hpp>
 #include <vsmc/core/single_particle.hpp>
-#include <vsmc/utility/iterator.hpp>
+#include <vsmc/smp/internal/iterator.hpp>
 
 namespace vsmc {
 
