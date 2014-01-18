@@ -79,7 +79,8 @@ SET (Boost_ADDITIONAL_VERSIONS
     "1.51" "1.51.0"
     "1.52" "1.52.0"
     "1.53" "1.53.0"
-    "1.54" "1.54.0")
+    "1.54" "1.54.0"
+    "1.55" "1.55.0")
 IF (NOT Boost_FOUND)
     INCLUDE (FindBoost)
 ENDIF (NOT Boost_FOUND)
