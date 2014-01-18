@@ -246,6 +246,7 @@ inline void parallel_reduce (const Range &range, WorkType &work)
 /// \ingroup STDTBB
 ///
 /// \details
+/// Requirement: WorkType
 /// \code
 /// WorkType work;
 /// work(range, res); // res: T reference type
@@ -286,6 +287,7 @@ inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
 /// \ingroup STDTBB
 ///
 /// \details
+/// Requirement: WorkType
 /// \code
 /// WorkType work;
 /// work(range, res); // res: T reference type
