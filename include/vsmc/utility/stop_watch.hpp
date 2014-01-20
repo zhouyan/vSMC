@@ -134,7 +134,9 @@ class StopWatch :
 
     StopWatch () {}
 
-    StopWatch (const base_watch_type &base_watch) {}
+    StopWatch (const StopWatch &other) : base_watch_type(other) {}
+
+    StopWatch (const base_watch_type &other) : base_watch_type(other) {}
 
     double nanoseconds () const
     {
