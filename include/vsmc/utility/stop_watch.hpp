@@ -11,9 +11,10 @@ class DummyStopWatch
 {
     public :
 
-    void start () const {}
-    void stop  () const {}
-    void reset () const {}
+    bool running () const {return running_;}
+    void start () const {running_ = true;}
+    void stop  () const {running_ = false;}
+    void reset () const {running_ = false;}
 
     double nanoseconds  () const {return 0;}
     double microseconds () const {return 0;}
@@ -21,6 +22,10 @@ class DummyStopWatch
     double seconds      () const {return 0;}
     double minutes      () const {return 0;}
     double hours        () const {return 0;}
+
+    private :
+
+    mutable bool running_;
 }; // class StopWatch
 
 /// \brief StopWatch as a wrapper of C++11 clock
@@ -32,24 +37,60 @@ class StopWatchClockWrapper
 
     typedef ClockType clock_type;
 
-    StopWatchClockWrapper () : elapsed_(0) {}
+    StopWatchClockWrapper () : elapsed_(0), running_(false) {}
 
-    void start () const {start_time_ = clock_type::now();}
+    bool running () const {return running_;}
+
+    void start () const
+    {
+        running_ = true;
+        start_time_ = clock_type::now();
+    }
 
     void stop () const
     {
         typename clock_type::time_point stop_time = clock_type::now();
         elapsed_ += stop_time - start_time_;
+        running_ = false;
     }
 
-    void reset () const {elapsed_ = typename clock_type::duration(0);}
+    void reset () const
+    {
+        elapsed_ = typename clock_type::duration(0);
+        running_ = false;
+    }
 
     typename clock_type::duration elapsed () const {return elapsed_;}
+
+    StopWatchClockWrapper<ClockType> &operator+= (
+            const StopWatchClockWrapper<ClockType> &other)
+    {
+        bool stopped = !(running_ || other.running());
+        VSMC_RUNTIME_ASSERT_ADDING_RUNNING_WATCH(stopped);
+
+        elapsed_ += other.elapsed_;
+
+        return *this;
+    }
+
+    StopWatchClockWrapper<ClockType> operator+ (
+            const StopWatchClockWrapper<ClockType> &other) const
+    {
+        bool stopped = !(running_ || other.running());
+        VSMC_RUNTIME_ASSERT_ADDING_RUNNING_WATCH(stopped);
+
+        StopWatchClockWrapper<ClockType> watch(*this);
+        watch += other;
+
+        return watch;
+    }
+
 
     private :
 
     mutable typename clock_type::duration elapsed_;
     mutable typename clock_type::time_point start_time_;
+    mutable bool running_;
 }; // class StopWatchClockWrapper
 
 /// \brief Start and stop a StopWatch in scope
@@ -87,6 +128,13 @@ class StopWatch :
     public StopWatchClockWrapper<std::chrono::high_resolution_clock>
 {
     public :
+
+    typedef StopWatchClockWrapper<std::chrono::high_resolution_clock>
+        base_watch_type;
+
+    StopWatch () {}
+
+    StopWatch (const base_watch_type &base_watch) {}
 
     double nanoseconds () const
     {
@@ -140,9 +188,15 @@ class StopWatch
 {
     public :
 
-    StopWatch () {reset();}
+    StopWatch () : running_(false) {reset();}
 
-    void start () const {start_time_ = mach_absolute_time();}
+    bool running () const {return running_;}
+
+    void start () const
+    {
+        running_ = true;
+        start_time_ = mach_absolute_time();
+    }
 
     void stop () const
     {
@@ -153,6 +207,7 @@ class StopWatch
         uint64_t sec = elapsed_nano / ratio_;
         elapsed_sec_ += sec;
         elapsed_nsec_ += elapsed_nano - sec * ratio_;
+        running_ = false;
     }
 
     void reset () const
@@ -160,6 +215,7 @@ class StopWatch
         elapsed_sec_ = 0;
         elapsed_nsec_ = 0;
         mach_timebase_info(&timebase_);
+        running_ = false;
     }
 
     double nanoseconds () const
@@ -198,12 +254,35 @@ class StopWatch
             static_cast<double>(elapsed_nsec_) / 1e9 / 3600.0;
     }
 
+    StopWatch &operator+= (const StopWatch &other)
+    {
+        bool stopped = !(running_ || other.running());
+        VSMC_RUNTIME_ASSERT_ADDING_RUNNING_WATCH(stopped);
+
+        elapsed_sec_  += other.elapsed_sec_;
+        elapsed_nsec_ += other.elapsed_nsec_;
+
+        return *this;
+    }
+
+    StopWatch operator+ (const StopWatch &other) const
+    {
+        bool stopped = !(running_ || other.running());
+        VSMC_RUNTIME_ASSERT_ADDING_RUNNING_WATCH(stopped);
+
+        StopWatch watch(*this);
+        watch += other;
+
+        return watch;
+    }
+
     private :
 
     mutable uint64_t elapsed_sec_;
     mutable uint64_t elapsed_nsec_;
     mutable uint64_t start_time_;
     mutable mach_timebase_info_data_t timebase_;
+    mutable bool running_;
     static const uint64_t ratio_ = 1000000000L; // 9 zero
 }; // class StopWatch
 
@@ -223,9 +302,15 @@ class StopWatch
 {
     public :
 
-    StopWatch () {reset();}
+    StopWatch () : running_(false) {reset();}
 
-    void start () const {clock_gettime(CLOCK_REALTIME, &start_time_);}
+    bool running () const {return running_;}
+
+    void start () const
+    {
+        running_ = true;
+        clock_gettime(CLOCK_REALTIME, &start_time_);
+    }
 
     void stop () const
     {
@@ -239,12 +324,14 @@ class StopWatch
         long inc_sec = elapsed_.tv_nsec / ratio_;
         elapsed_.tv_sec += static_cast<time_t>(inc_sec);
         elapsed_.tv_nsec -= inc_sec * ratio_;
+        running_ = false;
     }
 
     void reset () const
     {
         elapsed_.tv_sec = 0;
         elapsed_.tv_nsec = 0;
+        running_ = false;
     }
 
     double nanoseconds () const
@@ -283,10 +370,33 @@ class StopWatch
             static_cast<double>(elapsed_.tv_nsec) / 1e9 / 3600.0;
     }
 
+    StopWatch &operator+= (const StopWatch &other)
+    {
+        bool stopped = !(running_ || other.running());
+        VSMC_RUNTIME_ASSERT_ADDING_RUNNING_WATCH(running);
+
+        elapsed_.tv_sec  += other.elapsed_.tv_sec;
+        elapsed_.tv_nsec += other.elapsed_.tv_nsec;
+
+        return *this;
+    }
+
+    StopWatch operator+ (const StopWatch &other) const
+    {
+        bool stopped = !(running_ || other.running());
+        VSMC_RUNTIME_ASSERT_ADDING_RUNNING_WATCH(stopped);
+
+        StopWatch watch(*this);
+        watch += other;
+
+        return watch;
+    }
+
     private :
 
     mutable timespec elapsed_;
     mutable timespec start_time_;
+    mutable bool running_;
     static const long ratio_ = 1000000000L; // 9 zero
 }; // class StopWatch
 

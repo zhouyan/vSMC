@@ -163,6 +163,10 @@ class StaticAssert<true>
     VSMC_RUNTIME_ASSERT((pack_size >= dim),                                   \
             ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
+#define VSMC_RUNTIME_ASSERT_ADDING_RUNNING_WATCH(running)                     \
+    VSMC_RUNTIME_ASSERT((stopped),                                            \
+            ("CANNOT ADD TWO RUNNING **StopWatch**"))
+
 // Static assertion macros
 
 #define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim)                            \
