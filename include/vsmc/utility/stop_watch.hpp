@@ -23,10 +23,13 @@ class DummyStopWatch
     double minutes      () const {return 0;}
     double hours        () const {return 0;}
 
+    DummyStopWatch &operator+= (const DummyStopWatch &other) {return *this;}
+    DummyStopWatch operator+ (const DummyStopWatch &other) const {return *this;}
+
     private :
 
     mutable bool running_;
-}; // class StopWatch
+}; // class DummyStopWatch
 
 /// \brief StopWatch as a wrapper of C++11 clock
 /// \ingroup StopWatch
