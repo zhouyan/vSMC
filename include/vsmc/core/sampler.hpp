@@ -8,6 +8,10 @@
 #include <vsmc/utility/backup.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
+#if VSMC_USE_HDF5
+#include <vsmc/utility/hdf5_helper.hpp>
+#endif
+
 namespace vsmc {
 
 /// \brief SMC Sampler
@@ -546,6 +550,30 @@ class Sampler
 
         return os;
     }
+
+#if VSMC_USE_HDF5
+    void hdf5_save (const std::string &file_name,
+            const std::string &sampler_name = std::string("Sampler")) const
+    {
+        std::vector<std::string> header;
+        std::vector<double> data;
+        std::size_t var_num = summary_header_size();
+        std::size_t dat_num = var_num * iter_size();
+        header.resize(var_num);
+        data.resize(dat_num);
+        summary_header(header.begin());
+        summary_data(ColMajor, data.begin());
+
+        std::vector<const double *> data_ptr(var_num);
+        for (std::size_t i = 0; i != var_num; ++i)
+            data_ptr[i] = &data[i * iter_size()];
+
+        hdf5_write_data_frame<double>(iter_size(), var_num,
+                sampler_name, file_name, data_ptr.begin(), header.begin());
+        hdf5_append_data_frame<int>(iter_size(), sampler_name, file_name,
+                resampled_history_.begin(), "Resampled");
+    }
+#endif // VSMC_USE_HDF5
 
     private :
 

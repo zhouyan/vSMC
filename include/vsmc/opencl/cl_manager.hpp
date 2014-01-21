@@ -190,7 +190,7 @@ class CLManager
     }
 
     /// \brief Read an OpenCL buffer of a given type and number of elements
-    /// into an pointer
+    /// into a pointer
     template <typename CLType>
     CLType *read_buffer (const cl::Buffer &buf, std::size_t num,
             CLType *first) const
@@ -204,8 +204,8 @@ class CLManager
         return first + num;
     }
 
-    /// \brief Read an OpenCL buffer of a given type and number of elements
-    /// into an pointer
+    /// \brief Write an OpenCL buffer of a given type and number of elements
+    /// from an iterator
     template <typename CLType, typename InputIter>
     InputIter write_buffer (const cl::Buffer &buf, std::size_t num,
             InputIter first) const
@@ -223,7 +223,7 @@ class CLManager
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
-    /// from an iterator
+    /// from a pointer
     template <typename CLType>
     const CLType *write_buffer (const cl::Buffer &buf, std::size_t num,
             const CLType *first) const
@@ -238,7 +238,7 @@ class CLManager
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
-    /// from an pointer
+    /// from a pointer
     template <typename CLType>
     CLType *write_buffer (const cl::Buffer &buf, std::size_t num,
             CLType *first) const

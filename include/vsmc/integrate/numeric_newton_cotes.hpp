@@ -175,15 +175,14 @@ class NumericNewtonCotesCoeff
 
 /// \brief Numerical integration with the (closed) Newton-Cotes formulae
 /// \ingroup Integrate
-template <unsigned Degree, template <typename> class NumericImpl>
-class NumericNewtonCotes :
-    public NumericImpl<NumericNewtonCotes<Degree, NumericImpl> >
+template <unsigned Degree, template <typename> class Impl>
+class NumericNewtonCotes : public Impl<NumericNewtonCotes<Degree, Impl> >
 {
     public :
 
-    typedef typename NumericImpl<NumericNewtonCotes<Degree, NumericImpl> >::
+    typedef typename Impl<NumericNewtonCotes<Degree, Impl> >::
         size_type size_type;
-    typedef typename NumericImpl<NumericNewtonCotes<Degree, NumericImpl> >::
+    typedef typename Impl<NumericNewtonCotes<Degree, Impl> >::
         eval_type eval_type;
 
     NumericNewtonCotes () :
