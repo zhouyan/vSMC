@@ -81,6 +81,12 @@
 #define VSMC_USE_EIGEN 0
 #endif
 
+/// \brief Use HDF5 for saving data
+/// \ingroup Config
+#ifndef VSMC_USE_HDF5
+#define VSMC_USE_HDF5 0
+#endif
+
 /// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` is zero
 /// \ingroup Config
 #ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
