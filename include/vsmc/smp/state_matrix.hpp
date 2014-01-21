@@ -5,6 +5,10 @@
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/smp/internal/iterator.hpp>
 
+#if VSMC_USE_HDF5
+#include <vsmc/utility/hdf5_helper.hpp>
+#endif
+
 namespace vsmc {
 
 /// \brief Base type of StateTuple
@@ -212,6 +216,15 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
         return os;
     }
+
+#if VSMC_USE_HDF5
+    void hdf5_save (const std::string &file_name,
+            const std::string &data_name, bool append = false) const
+    {
+        hdf5_write_matrix<Order>(size_, this->dim(), data_name, file_name,
+                data(), append);
+    }
+#endif // VSMC_USE_HDF5
 
     protected :
 
