@@ -9,7 +9,7 @@
 #include <vsmc/utility/stop_watch.hpp>
 
 #if VSMC_USE_HDF5
-#include <vsmc/utility/hdf5_helper.hpp>
+#include <vsmc/utility/hdf5_save.hpp>
 #endif
 
 namespace vsmc {
@@ -568,9 +568,9 @@ class Sampler
         for (std::size_t i = 0; i != var_num; ++i)
             data_ptr[i] = &data[i * iter_size()];
 
-        hdf5_write_data_frame<double>(iter_size(), var_num,
+        hdf5_save_data_frame<double>(iter_size(), var_num,
                 file_name, sampler_name, data_ptr.begin(), header.begin());
-        hdf5_append_data_frame<int>(iter_size(), file_name, sampler_name,
+        hdf5_insert_data_frame<int>(iter_size(), file_name, sampler_name,
                 resampled_history_.begin(), "Resampled");
     }
 #endif // VSMC_USE_HDF5

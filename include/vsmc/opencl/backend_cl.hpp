@@ -7,7 +7,7 @@
 #include <vsmc/rng/seed.hpp>
 
 #if VSMC_USE_HDF5
-#include <vsmc/utility/hdf5_helper.hpp>
+#include <vsmc/utility/hdf5_save.hpp>
 #endif
 
 namespace vsmc {
@@ -271,7 +271,7 @@ class StateCL
         std::size_t N = state_size_ * size_ / sizeof(StateType);
         std::vector<StateType> data(N);
         manager().template read_buffer<StateType>(state_buffer_, N, &data[0]);
-        hdf5_write_matrix<Order>(size_, ncol, file_name, data_name,
+        hdf5_save_matrix<Order>(size_, ncol, file_name, data_name,
                 &data[0], append);
     }
 #endif // VSMC_USE_HDF5

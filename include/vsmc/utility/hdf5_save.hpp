@@ -118,7 +118,7 @@ inline const T *hdf5_data_ptr (std::size_t N, InputIter first, T *tmp)
 } // namespace vsmc::internal
 
 template <MatrixOrder Order, typename T>
-inline const T *hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
+inline const T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         const T *first, bool append = false)
 {
@@ -151,19 +151,19 @@ inline const T *hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
 }
 
 template <MatrixOrder Order, typename T>
-inline T *hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
+inline T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         T *first, bool append = false)
 {
     const T *cfirst = first;
-    hdf5_write_matrix<Order>(
+    hdf5_save_matrix<Order>(
             nrow, ncol, data_name, file_name, cfirst, append);
 
     return first + nrow * ncol;
 }
 
 template <MatrixOrder Order, typename T, typename InputIter>
-inline InputIter hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
+inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIter first, bool append = false)
 {
@@ -171,14 +171,14 @@ inline InputIter hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
     std::vector<T> data(N);
     for (std::size_t i = 0; i != N; ++i, ++first)
         data[i] = *first;
-    hdf5_write_matrix<Order>(
+    hdf5_save_matrix<Order>(
             nrow, ncol, data_name, file_name, &data[0], append);
 
     return first;
 }
 
 template <typename T, typename InputIterIter>
-inline void hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
+inline void hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIterIter first, bool append = false)
 {
@@ -186,12 +186,12 @@ inline void hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
     T *dst = &data[0];
     for (std::size_t c = 0; c != ncol; ++c, ++first)
         dst = internal::hdf5_copy_data(nrow, &dst, *first);
-    hdf5_write_matrix<ColMajor>(
+    hdf5_save_matrix<ColMajor>(
             nrow, ncol, data_name, file_name, &data[0], append);
 }
 
 template <typename T, typename InputIterIter, typename SInputIter>
-inline void hdf5_write_data_frame (std::size_t nrow, std::size_t ncol,
+inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIterIter first, SInputIter sfirst, bool append = false)
 {
@@ -231,7 +231,7 @@ inline void hdf5_write_data_frame (std::size_t nrow, std::size_t ncol,
 }
 
 template <typename T, typename InputIter>
-inline void hdf5_append_data_frame (std::size_t N,
+inline void hdf5_insert_data_frame (std::size_t N,
         const std::string &file_name, const std::string &data_name,
         InputIter first, const std::string &vname)
 {

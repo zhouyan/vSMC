@@ -6,7 +6,7 @@
 #include <vsmc/smp/internal/iterator.hpp>
 
 #if VSMC_USE_HDF5
-#include <vsmc/utility/hdf5_helper.hpp>
+#include <vsmc/utility/hdf5_save.hpp>
 #endif
 
 namespace vsmc {
@@ -221,7 +221,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     void hdf5_save (const std::string &file_name,
             const std::string &data_name, bool append = false) const
     {
-        hdf5_write_matrix<Order>(size_, this->dim(), file_name, data_name,
+        hdf5_save_matrix<Order>(size_, this->dim(), file_name, data_name,
                 data(), append);
     }
 #endif // VSMC_USE_HDF5
