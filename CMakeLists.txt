@@ -90,7 +90,7 @@ IF (Boost_FOUND)
         ${Boost_INCLUDE_DIRS})
 ENDIF (Boost_FOUND)
 
-# C++11 libs flags
+# C++11 <functional>
 INCLUDE (vSMCFindFunctional)
 IF (VSMC_FUNCTIONAL_STD_FOUND)
     ADD_DEFINITIONS (-DVSMC_HAS_CXX11LIB_FUNCTIONAL=1)
@@ -102,6 +102,7 @@ ELSE (VSMC_FUNCTIONAL_STD_FOUND)
         -DVSMC_HAS_CXX11LIB_FUNCTIONAL=0)
 ENDIF (VSMC_FUNCTIONAL_STD_FOUND)
 
+# C++11 <random>
 INCLUDE (vSMCFindRandom)
 IF (VSMC_RANDOM_STD_FOUND)
     ADD_DEFINITIONS (-DVSMC_HAS_CXX11LIB_RANDOM=1)
@@ -119,7 +120,62 @@ ELSE (VSMC_RANDOM123_FOUND)
     ADD_DEFINITIONS (-DVSMC_USE_RANDOM123=0)
 ENDIF (VSMC_RANDOM123_FOUND)
 
+# Continuous only if both <functional> and <random> work
 IF (VSMC_FUNCTIONAL_FOUND AND VSMC_RANDOM_FOUND)
+
+    ##########################################################################
+    # Check features
+    ##########################################################################
+
+    # Intel Cilk Plus
+    IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+        INCLUDE (FindCilk)
+    ENDIF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+
+    # Intel TBB
+    INCLUDE (FindTBB)
+    IF (TBB_FOUND)
+        INCLUDE_DIRECTORIES (SYSTEM ${TBB_INCLUDE_DIR})
+        ADD_DEFINITIONS (${TBB_DEFINITIONS})
+    ENDIF (TBB_FOUND)
+
+    # OpenMP
+    IF (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+        INCLUDE (vSMCFindOpenMP)
+    ENDIF (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+
+    # Apple GCD
+    INCLUDE (vSMCFindGCD)
+    IF (VSMC_GCD_FOUND)
+        INCLUDE_DIRECTORIES (SYSTEM ${GCD_INCLUDE_DIR})
+    ENDIF (VSMC_GCD_FOUND)
+
+    # Microsoft PPL
+    IF (NOT DEFINED VSMC_PPL_FOUND)
+        IF (MSVC_VERSION GREATER 1599)
+            MESSAGE (STATUS "Found Microsoft PPL support")
+            SET (VSMC_PPL_FOUND TRUE CACHE BOOL "Found PPL")
+        ELSE (MSVC_VERSION GREATER 1599)
+            SET (VSMC_PPL_FOUND FALSE CACHE BOOL "NOT Found PPL")
+        ENDIF (MSVC_VERSION GREATER 1599)
+    ENDIF (NOT DEFINED VSMC_PPL_FOUND)
+
+    # OpenCL
+    INCLUDE (vSMCFindOpenCL)
+    IF (VSMC_OPENCL_FOUND)
+        INCLUDE_DIRECTORIES (SYSTEM ${OpenCL_INCLUDE_DIR})
+        SET (VSMC_CL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+    ENDIF (VSMC_OPENCL_FOUND)
+
+    # MPI
+    IF (VSMC_ENABLE_MPI)
+        INCLUDE (vSMCFindMPI)
+    ENDIF (VSMC_ENABLE_MPI)
+    IF (VSMC_MPI_FOUND)
+        INCLUDE_DIRECTORIES (SYSTEM ${MPI_CXX_INCLUDE_PATH})
+    ENDIF (VSMC_MPI_FOUND)
+
+    # C++11 <thread> and <future>
     INCLUDE (vSMCFindSTDTBB)
     IF (VSMC_STDTBB_FOUND)
         SET (VSMC_USE_STD TRUE)
@@ -132,67 +188,39 @@ IF (VSMC_FUNCTIONAL_FOUND AND VSMC_RANDOM_FOUND)
         SET (VSMC_USE_STD FALSE)
     ENDIF (VSMC_STDTBB_FOUND)
 
+    # C++11 <tuple>
     INCLUDE (vSMCFindTuple)
 
-    # Third-patry features
-    IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
-        INCLUDE (FindCilk)
-    ENDIF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
-
-    INCLUDE (vSMCFindGCD)
-    IF (VSMC_GCD_FOUND)
-        INCLUDE_DIRECTORIES (SYSTEM ${GCD_INCLUDE_DIR})
-    ENDIF (VSMC_GCD_FOUND)
-
-    IF (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-        INCLUDE (vSMCFindOpenMP)
-    ENDIF (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-
-    IF (NOT DEFINED VSMC_PPL_FOUND)
-        IF (MSVC_VERSION GREATER 1599)
-            MESSAGE (STATUS "Found Microsoft PPL support")
-            SET (VSMC_PPL_FOUND TRUE CACHE BOOL "Found PPL")
-        ELSE (MSVC_VERSION GREATER 1599)
-            SET (VSMC_PPL_FOUND FALSE CACHE BOOL "NOT Found PPL")
-        ENDIF (MSVC_VERSION GREATER 1599)
-    ENDIF (NOT DEFINED VSMC_PPL_FOUND)
-
-    INCLUDE (FindTBB)
-    IF (TBB_FOUND)
-        INCLUDE_DIRECTORIES (SYSTEM ${TBB_INCLUDE_DIR})
-        ADD_DEFINITIONS (${TBB_DEFINITIONS})
-    ENDIF (TBB_FOUND)
-
-    INCLUDE (vSMCFindOpenCL)
-    IF (VSMC_OPENCL_FOUND)
-        INCLUDE_DIRECTORIES (SYSTEM ${OpenCL_INCLUDE_DIR})
-        SET (VSMC_CL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
-    ENDIF (VSMC_OPENCL_FOUND)
-
-    IF (VSMC_ENABLE_MPI)
-        INCLUDE (vSMCFindMPI)
-    ENDIF (VSMC_ENABLE_MPI)
-    IF (VSMC_MPI_FOUND)
-        INCLUDE_DIRECTORIES (SYSTEM ${MPI_CXX_INCLUDE_PATH})
-    ENDIF (VSMC_MPI_FOUND)
-
-    # Timing
+    # C++11 <chrono>
     INCLUDE (vSMCFindChrono)
     IF (VSMC_CHRONO_FOUND)
         ADD_DEFINITIONS (-DVSMC_HAS_CXX11LIB_CHRONO=1)
     ELSE (VSMC_CHRONO_FOUND)
         ADD_DEFINITIONS (-DVSMC_HAS_CXX11LIB_CHRONO=0)
+        ADD_DEFINITIONS (-DVSMC_HAS_NATIVE_TIME_LIBRARY=0)
     ENDIF (VSMC_CHRONO_FOUND)
 
+    # Linux librt
     IF (UNIX AND NOT APPLE)
         UNSET (LINUX_LIBRT CACHE)
         FIND_LIBRARY (LINUX_LIBRT rt)
-        IF (NOT LINUX_LIBRT)
-            ADD_DEFINITIONS (-DVSMC_HAS_NATIVE_TIME_LIBRARY=0)
-        ENDIF (NOT LINUX_LIBRT)
+        IF (LINUX_LIBRT)
+            SET (EXAMPLE_LINK_LIBRARIES ${EXAMPLE_LINK_LIBRARIES}
+                ${LINUX_LIBRT})
+        ENDIF (LINUX_LIBRT)
     ENDIF (UNIX AND NOT APPLE)
 
-    # Special math functions
+    # HDF5
+    INCLUDE (FindHDF5)
+    IF (HDF5_FOUND)
+        ADD_DEFINITIONS (${HDF5_DEFINITIONS})
+        ADD_DEFINITIONS (-DVSMC_USE_HDF5=1)
+        INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIRS})
+        SET (EXAMPLE_LINK_LIBRARIES ${EXAMPLE_LINK_LIBRARIES}
+            ${HDF5_C_LIBRARIES})
+    ENDIF (HDF5_FOUND)
+
+    # lgamma
     INCLUDE (FindCXXMathLgamma)
     IF (CXX_MATH_LGAMMA_C99_FOUND)
         ADD_DEFINITIONS (-DVSMC_USE_C99_LGAMMA=1)
@@ -214,84 +242,81 @@ IF (VSMC_FUNCTIONAL_FOUND AND VSMC_RANDOM_FOUND)
         ADD_DEFINITIONS (-U__OBJC2__)
     ENDIF (APPLE)
 
-    # Disable MSVC iterator warning. Callers are responsible for checking bounds!
+    # Disable MSVC iterator warning
     IF (MSVC)
         ADD_DEFINITIONS (-D_SCL_SECURE_NO_WARNINGS)
     ENDIF (MSVC)
 
-    # HDF5 support
-    INCLUDE (FindHDF5)
-    IF (HDF5_FOUND)
-        MESSAGE (STATUS "Enable HDF5 support")
-        ADD_DEFINITIONS (${HDF5_DEFINITIONS})
-        ADD_DEFINITIONS (-DVSMC_USE_HDF5)
-        INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIRS})
-    ENDIF (HDF5_FOUND)
+    ##########################################################################
+    # Enable features
+    ##########################################################################
 
-    # SMP backends
-    MESSAGE (STATUS "Enable Sequential")
+    MESSAGE (STATUS "Enable backend Sequential")
     SET (SMP_EXECUTABLES seq)
     ADD_CUSTOM_TARGET (buildseq)
 
+    IF (CILK_FOUND)
+        MESSAGE (STATUS "Enable backend Intel Cilk Plus")
+        SET (SMP_EXECUTABLES ${SMP_EXECUTABLES} cilk)
+        ADD_CUSTOM_TARGET (buildcilk)
+    ENDIF (CILK_FOUND)
+
     IF (TBB_FOUND)
-        MESSAGE (STATUS "Enable Intel Threading Building Blocks")
+        MESSAGE (STATUS "Enable backend Intel Threading Building Blocks")
         SET (SMP_EXECUTABLES ${SMP_EXECUTABLES} tbb)
         ADD_CUSTOM_TARGET (buildtbb)
     ENDIF (TBB_FOUND)
 
     IF (VSMC_OPENMP_FOUND)
-        MESSAGE (STATUS "Enable OpenMP")
+        MESSAGE (STATUS "Enable backend OpenMP")
         SET (SMP_EXECUTABLES ${SMP_EXECUTABLES} omp)
         ADD_CUSTOM_TARGET (buildomp)
     ENDIF (VSMC_OPENMP_FOUND)
 
-    IF (CILK_FOUND)
-        MESSAGE (STATUS "Enable Intel Cilk Plus")
-        SET (SMP_EXECUTABLES ${SMP_EXECUTABLES} cilk)
-        ADD_CUSTOM_TARGET (buildcilk)
-    ENDIF (CILK_FOUND)
-
     IF (VSMC_GCD_FOUND)
-        MESSAGE (STATUS "Enable Apple Grand Central Dispatch")
+        MESSAGE (STATUS "Enable backend Apple Grand Central Dispatch")
         SET (SMP_EXECUTABLES ${SMP_EXECUTABLES} gcd)
         ADD_CUSTOM_TARGET (buildgcd)
     ENDIF (VSMC_GCD_FOUND)
 
     IF (VSMC_PPL_FOUND)
-        MESSAGE (STATUS "Enable Microsoft Parallel Pattern Library")
+        MESSAGE (STATUS "Enable backend Microsoft Parallel Pattern Library")
         SET (SMP_EXECUTABLES ${SMP_EXECUTABLES} ppl)
         ADD_CUSTOM_TARGET (buildppl)
     ENDIF (VSMC_PPL_FOUND)
 
+    IF (VSMC_OPENCL_FOUND)
+        MESSAGE (STATUS "Enable backend OpenCL")
+    ENDIF (VSMC_OPENCL_FOUND)
+
+    IF (VSMC_MPI_FOUND)
+        MESSAGE (STATUS "Enable backend MPI")
+    ENDIF (VSMC_MPI_FOUND)
+
     IF (VSMC_STDTBB_FOUND)
-        MESSAGE (STATUS "Enable C++11 concurrency")
+        MESSAGE (STATUS "Enable backend C++11 concurrency")
         SET (SMP_EXECUTABLES ${SMP_EXECUTABLES} std)
         ADD_CUSTOM_TARGET (buildstd)
     ENDIF (VSMC_STDTBB_FOUND)
 
-    IF (VSMC_OPENCL_FOUND)
-        MESSAGE (STATUS "Enable OpenCL")
-    ENDIF (VSMC_OPENCL_FOUND)
-
-    IF (VSMC_MPI_FOUND)
-        MESSAGE (STATUS "Enable MPI")
-    ENDIF (VSMC_MPI_FOUND)
-
     IF (VSMC_FUTURE_FOUND)
-        MESSAGE (STATUS "Enable C++11 <future>")
+        MESSAGE (STATUS "Enable support C++11 <future>")
     ELSEIF (VSMC_THREAD_FOUND)
-        MESSAGE (STATUS "Enable C++11 <thread>")
+        MESSAGE (STATUS "Enable support C++11 <thread>")
     ENDIF (VSMC_FUTURE_FOUND)
 
     IF (VSMC_TUPLE_FOUND)
-        MESSAGE (STATUS "Enable C++11 <tuple>")
+        MESSAGE (STATUS "Enable support C++11 <tuple>")
     ENDIF (VSMC_TUPLE_FOUND)
 
     IF (VSMC_CHRONO_FOUND)
-        MESSAGE (STATUS "Enable C++11 <chrono>")
+        MESSAGE (STATUS "Enable support C++11 <chrono>")
     ENDIF (VSMC_CHRONO_FOUND)
 
-    MESSAGE (STATUS "Build example")
+    IF (HDF5_FOUND)
+        MESSAGE (STATUS "Enable support HDF5")
+    ENDIF (HDF5_FOUND)
+
     ADD_CUSTOM_TARGET (buildexample)
     ADD_SUBDIRECTORY (vSMCExample EXCLUDE_FROM_ALL)
 ENDIF (VSMC_FUNCTIONAL_FOUND AND VSMC_RANDOM_FOUND)
