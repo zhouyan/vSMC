@@ -221,7 +221,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     void hdf5_save (const std::string &file_name,
             const std::string &data_name, bool append = false) const
     {
-        hdf5_write_matrix<Order>(size_, this->dim(), data_name, file_name,
+        hdf5_write_matrix<Order>(size_, this->dim(), file_name, data_name,
                 data(), append);
     }
 #endif // VSMC_USE_HDF5

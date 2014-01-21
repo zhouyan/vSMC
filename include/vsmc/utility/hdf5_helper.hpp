@@ -119,7 +119,7 @@ inline const T *hdf5_data_ptr (std::size_t N, InputIter first, T *tmp)
 
 template <MatrixOrder Order, typename T>
 inline const T *hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
-        const std::string &data_name, const std::string &file_name,
+        const std::string &file_name, const std::string &data_name,
         const T *first, bool append = false)
 {
     if (nrow == 0 || ncol == 0)
@@ -152,7 +152,7 @@ inline const T *hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
 
 template <MatrixOrder Order, typename T>
 inline T *hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
-        const std::string &data_name, const std::string &file_name,
+        const std::string &file_name, const std::string &data_name,
         T *first, bool append = false)
 {
     const T *cfirst = first;
@@ -164,7 +164,7 @@ inline T *hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
 
 template <MatrixOrder Order, typename T, typename InputIter>
 inline InputIter hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
-        const std::string &data_name, const std::string &file_name,
+        const std::string &file_name, const std::string &data_name,
         InputIter first, bool append = false)
 {
     std::size_t N = nrow * ncol;
@@ -179,7 +179,7 @@ inline InputIter hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
 
 template <typename T, typename InputIterIter>
 inline void hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
-        const std::string &data_name, const std::string &file_name,
+        const std::string &file_name, const std::string &data_name,
         InputIterIter first, bool append = false)
 {
     std::vector<T> data(nrow * ncol);
@@ -192,7 +192,7 @@ inline void hdf5_write_matrix (std::size_t nrow, std::size_t ncol,
 
 template <typename T, typename InputIterIter, typename SInputIter>
 inline void hdf5_write_data_frame (std::size_t nrow, std::size_t ncol,
-        const std::string &data_name, const std::string &file_name,
+        const std::string &file_name, const std::string &data_name,
         InputIterIter first, SInputIter sfirst, bool append = false)
 {
     std::string group_name("/" + data_name);
@@ -232,7 +232,7 @@ inline void hdf5_write_data_frame (std::size_t nrow, std::size_t ncol,
 
 template <typename T, typename InputIter>
 inline void hdf5_append_data_frame (std::size_t N,
-        const std::string &data_name, const std::string &file_name,
+        const std::string &file_name, const std::string &data_name,
         InputIter first, const std::string &vname)
 {
     if (N == 0)

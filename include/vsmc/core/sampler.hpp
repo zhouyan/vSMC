@@ -569,8 +569,8 @@ class Sampler
             data_ptr[i] = &data[i * iter_size()];
 
         hdf5_write_data_frame<double>(iter_size(), var_num,
-                sampler_name, file_name, data_ptr.begin(), header.begin());
-        hdf5_append_data_frame<int>(iter_size(), sampler_name, file_name,
+                file_name, sampler_name, data_ptr.begin(), header.begin());
+        hdf5_append_data_frame<int>(iter_size(), file_name, sampler_name,
                 resampled_history_.begin(), "Resampled");
     }
 #endif // VSMC_USE_HDF5
