@@ -157,7 +157,7 @@ inline T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
 {
     const T *cfirst = first;
     hdf5_save_matrix<Order>(
-            nrow, ncol, data_name, file_name, cfirst, append);
+            nrow, ncol, file_name, data_name, cfirst, append);
 
     return first + nrow * ncol;
 }
@@ -172,7 +172,7 @@ inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
     for (std::size_t i = 0; i != N; ++i, ++first)
         data[i] = *first;
     hdf5_save_matrix<Order>(
-            nrow, ncol, data_name, file_name, &data[0], append);
+            nrow, ncol, file_name, data_name, &data[0], append);
 
     return first;
 }
@@ -187,7 +187,7 @@ inline void hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
     for (std::size_t c = 0; c != ncol; ++c, ++first)
         dst = internal::hdf5_copy_data(nrow, &dst, *first);
     hdf5_save_matrix<ColMajor>(
-            nrow, ncol, data_name, file_name, &data[0], append);
+            nrow, ncol, file_name, data_name, &data[0], append);
 }
 
 template <typename T, typename InputIterIter, typename SInputIter>
