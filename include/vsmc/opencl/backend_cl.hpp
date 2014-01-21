@@ -6,6 +6,10 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/rng/seed.hpp>
 
+#if VSMC_USE_HDF5
+#include <vsmc/utility/hdf5_helper.hpp>
+#endif
+
 namespace vsmc {
 
 namespace internal {
@@ -257,6 +261,20 @@ class StateCL
     ConfigureCL &configure_copy () {return configure_copy_;}
 
     const ConfigureCL &configure_copy () const {return configure_copy_;}
+
+#if VSMC_USE_HDF5
+    template <typename StateType, MatrixOrder Order>
+    void hdf5_save (const std::string &file_name,
+            const std::string &data_name, bool append = false) const
+    {
+        std::size_t ncol = state_size_ / sizeof(StateType);
+        std::size_t N = state_size_ * size_ / sizeof(StateType);
+        std::vector<StateType> data(N);
+        manager().template read_buffer<StateType>(state_buffer_, N, &data[0]);
+        hdf5_write_matrix<Order>(size_, ncol, data_name, file_name,
+                &data[0], append);
+    }
+#endif // VSMC_USE_HDF5
 
     private :
 
