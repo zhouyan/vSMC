@@ -122,6 +122,8 @@ inline const T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         const T *first, bool append = false)
 {
+    using internal::hdf5_datatype;
+
     if (nrow == 0 || ncol == 0)
         return first;
 
@@ -137,7 +139,7 @@ inline const T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
                 H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     }
     hid_t dataspace = H5Screate_simple(2, dim, NULL);
-    hid_t datatype = internal::hdf5_datatype<T>();
+    hid_t datatype = hdf5_datatype<T>();
     hid_t dataset = H5Dcreate(datafile, dataset_name.c_str(),
             datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, first);
@@ -195,6 +197,8 @@ inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIterIter first, SInputIter sfirst, bool append = false)
 {
+    using internal::hdf5_datatype;
+
     std::string group_name("/" + data_name);
     hsize_t dim[1] = {nrow};
 
@@ -210,7 +214,7 @@ inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
 
     if (nrow != 0 && ncol != 0) {
         hid_t dataspace = H5Screate_simple(1, dim, NULL);
-        hid_t datatype = internal::hdf5_datatype<T>();
+        hid_t datatype = hdf5_datatype<T>();
         T *data_tmp = new T[nrow];
         for (std::size_t j = 0; j != ncol; ++j, ++first, ++sfirst) {
             const T *data = internal::hdf5_data_ptr(nrow, *first, data_tmp);
@@ -235,6 +239,8 @@ inline void hdf5_insert_data_frame (std::size_t N,
         const std::string &file_name, const std::string &data_name,
         InputIter first, const std::string &vname)
 {
+    using internal::hdf5_datatype;
+
     if (N == 0)
         return;
 
@@ -244,7 +250,7 @@ inline void hdf5_insert_data_frame (std::size_t N,
 
     hid_t datafile = H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
     hid_t dataspace = H5Screate_simple(1, dim, NULL);
-    hid_t datatype = internal::hdf5_datatype<T>();
+    hid_t datatype = hdf5_datatype<T>();
     const T *data = internal::hdf5_data_ptr(N, first, data_tmp);
     hid_t dataset = H5Dcreate(datafile, dataset_name.c_str(),
             datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
