@@ -94,5 +94,9 @@
 /// \ingroup Utility
 /// \brief Classes for manipulating C++11 tuple
 
+/// \defgroup HDF5Save HDF5 Save
+/// \ingroup Utility
+/// \brief Functions for saving objects in HDF5 format
+
 /// \defgroup MRW Metropolis Random Walk
 /// \brief Metropolis Random Walk kernels

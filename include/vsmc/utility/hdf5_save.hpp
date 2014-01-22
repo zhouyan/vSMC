@@ -117,6 +117,19 @@ inline const T *hdf5_data_ptr (std::size_t N, InputIter first, T *tmp)
 
 } // namespace vsmc::internal
 
+/// \brief Save a matrix in the HDF5 format from a pointer
+/// \ingroup HDF5Save
+///
+/// \details
+/// \tparam Order Storage order (RowMajor or ColMajor)
+/// \tparam T Tyep of the data
+/// \param nrow Number of rows
+/// \param ncol Number of columns
+/// \param file_name Name of the HDF5 file
+/// \param data_name Name of the matrix data
+/// \param first A pointer to an array of length nrow * ncol 
+/// \param append If true the data is appended into an existing file, otherwise
+/// save in a new file
 template <MatrixOrder Order, typename T>
 inline const T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
@@ -152,6 +165,8 @@ inline const T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
     return first + nrow * ncol;
 }
 
+/// \brief Save a matrix in the HDF5 format from a pointer
+/// \ingroup HDF5Save
 template <MatrixOrder Order, typename T>
 inline T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
@@ -164,6 +179,8 @@ inline T *hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
     return first + nrow * ncol;
 }
 
+/// \brief Save a matrix in the HDF5 format from an iterator
+/// \ingroup HDF5Save
 template <MatrixOrder Order, typename T, typename InputIter>
 inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
@@ -179,19 +196,68 @@ inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
     return first;
 }
 
-template <typename T, typename InputIterIter>
+/// \brief Save a matrix in the HDF5 format from an iterator to iterators
+/// \ingroup HDF5Save
+///
+/// \details
+/// \tparam Order Storage order (RowMajor or ColMajor)
+/// \tparam T Tyep of the data
+/// \tparam InputIterIter The input iterator type, which points to input
+/// iterators
+/// \param nrow Number of rows
+/// \param ncol Number of columns
+/// \param file_name Name of the HDF5 file
+/// \param data_name Name of the matrix data
+/// \param first An iterator points to a sequence of iterations of length ncol
+/// (RowMajor) or nrow (ColMajor). That is, if the Order is RowMajor, then each
+/// dereference of the iterator is itself an iterator that points to the
+/// beginning of a row of the matrix. If the Order is ColMajor, then it points
+/// the beginning of a column of the matrix.
+/// \param append If true the data is appended into an existing file, otherwise
+/// save in a new file
+template <MatrixOrder Order, typename T, typename InputIterIter>
 inline void hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIterIter first, bool append = false)
 {
     std::vector<T> data(nrow * ncol);
     T *dst = &data[0];
-    for (std::size_t c = 0; c != ncol; ++c, ++first)
-        dst = internal::hdf5_copy_data(nrow, &dst, *first);
-    hdf5_save_matrix<ColMajor>(
+    if (Order == RowMajor) {
+        for (std::size_t r = 0; r != nrow; ++r, ++first)
+            dst = internal::hdf5_copy_data(ncol, &dst, *first);
+    }
+    if (Order == ColMajor) {
+        for (std::size_t c = 0; c != ncol; ++c, ++first)
+            dst = internal::hdf5_copy_data(nrow, &dst, *first);
+    }
+    hdf5_save_matrix<Order>(
             nrow, ncol, file_name, data_name, &data[0], append);
 }
 
+/// \brief Save a data frame in the HDF5 format from an iterator to iterators
+/// \ingroup HDF5Save
+///
+/// \details
+/// A data frame is similar to that in R. It is much like a matrix except that
+/// each column will be stored seperatedly as an variable and given a name.
+///
+/// \tparam Order Storage order (RowMajor or ColMajor)
+/// \tparam T Tyep of the data
+/// \tparam InputIterIter The input iterator type, which points to input
+/// iterators
+/// \tparam SInputIter The input iterator type of names
+/// \param nrow Number of rows
+/// \param ncol Number of columns
+/// \param file_name Name of the HDF5 file
+/// \param data_name Name of the data frame
+/// \param first An iterator points to a sequence of iterations of length ncol.
+/// Each derefence of the iterator is iteself an iterator that points to the
+/// beginning of a column of the data frame.
+/// \param sfirst An iterator points to the beginning of a sequence of strings
+/// that store the names of each column. The dereference need to be convertible
+/// to std::string
+/// \param append If true the data is appended into an existing file, otherwise
+/// save in a new file
 template <typename T, typename InputIterIter, typename SInputIter>
 inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
@@ -234,6 +300,16 @@ inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
     H5Fclose(datafile);
 }
 
+/// \brief Insert a variable into an existing data frame saved in HDF5 format
+/// \ingroup HDF5Save
+///
+/// \details
+/// \param N The length of the variable vector. It may be different from that
+/// of the existing data frame.
+/// \param file_name Name of the HDF5 file
+/// \param data_name Name of the data frame
+/// \param first An iterator points to the beginning of the variable vector
+/// \param vname Name of the new variable
 template <typename T, typename InputIter>
 inline void hdf5_insert_data_frame (std::size_t N,
         const std::string &file_name, const std::string &data_name,
@@ -263,6 +339,8 @@ inline void hdf5_insert_data_frame (std::size_t N,
     delete [] data_tmp;
 }
 
+/// \brief Save a Sampler in the HDF5 format
+/// \ingroup HDF5Save
 template <typename T>
 inline void hdf5_save (const Sampler<T> &sampler,
         const std::string &file_name, const std::string &data_name,
@@ -286,6 +364,8 @@ inline void hdf5_save (const Sampler<T> &sampler,
             resampled.begin(), "Resampled");
 }
 
+/// \brief Save a StateMatrix in the HDF5 format
+/// \ingroup HDF5Save
 template <MatrixOrder Order, std::size_t Dim, typename T>
 inline void hdf5_save (const StateMatrix<Order, Dim, T> &state,
         const std::string &file_name, const std::string &data_name,
@@ -367,6 +447,8 @@ inline void hdf5_save_state_tuple(
 
 } // namespace vsmc::internal
 
+/// \brief Save a StateTuple in the HDF5 format
+/// \ingroup HDF5Save
 template <MatrixOrder Order, typename T, typename... Types>
 inline void hdf5_save (const StateTuple<Order, T, Types...> &state,
         const std::string &file_name, const std::string &data_name,
@@ -381,6 +463,8 @@ inline void hdf5_save (const StateTuple<Order, T, Types...> &state,
 
 #endif // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
+/// \brief Save a StateCL in the HDF5 format
+/// \ingroup HDF5Save
 template <MatrixOrder Order, typename T,
          std::size_t StateSize, typename FPType, typename ID>
 inline void hdf5_save (const StateCL<StateSize, FPType, ID> &state,
