@@ -3,6 +3,11 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_RUNTIME_ASSERT_CORE_SINGLE_PARTICLE_ITERATOR_BINARY_OP \
+    VSMC_RUNTIME_ASSERT((iter1->particle_ptr() == iter2->particle_ptr()),    \
+            ("BINARY OPERATION ON TWO **ParticleIterator** BELONGING TO "    \
+            "TWO DIFFERNT **Particle** OBJECT"))
+
 namespace vsmc {
 
 /// \brief Particle iterator
@@ -126,7 +131,7 @@ inline std::ptrdiff_t operator- (
         const ParticleIterator<T, SPType1> &iter1,
         const ParticleIterator<T, SPType2> &iter2)
 {
-    VSMC_RUNTIME_ASSERT_PARTICLE_ITERATOR_BINARY_OP;
+    VSMC_RUNTIME_ASSERT_CORE_SINGLE_PARTICLE_ITERATOR_BINARY_OP;
 
     return iter1->id() - iter2->id();
 }

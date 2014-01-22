@@ -6,6 +6,10 @@
 #include <vsmc/mpi/weight.hpp>
 #include <vsmc/mpi/normalizing_constant.hpp>
 
+#define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH \
+    VSMC_RUNTIME_ASSERT((N == global_size_),                                 \
+            ("**StateMPI::copy** SIZE MISMATCH"))
+
 namespace vsmc {
 
 /// \brief Particle::value_type subtype using MPI
@@ -92,7 +96,7 @@ class StateMPI : public BaseState
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH_MPI;
+        VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH;
 
         barrier();
         copy_from_.resize(N);

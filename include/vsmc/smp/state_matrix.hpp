@@ -5,6 +5,14 @@
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/smp/internal/iterator.hpp>
 
+#define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_DIM_SIZE(dim) \
+    VSMC_RUNTIME_ASSERT((dim >= 1),                                          \
+            ("**StateMatrix** DIMENSION IS LESS THAN 1"))
+
+#define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_UNPACK_SIZE(psize, dim, name) \
+    VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
+            ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
+
 namespace vsmc {
 
 /// \brief Base type of StateTuple
@@ -68,7 +76,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     void resize_dim (std::size_t dim)
     {
         VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim);
-        VSMC_RUNTIME_ASSERT_DIM(dim);
+        VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_DIM_SIZE(dim);
 
         traits::DimTrait<Dim>::resize_dim(dim);
         state_.resize(StateMatrix<Order, Dim, T>::storage_size(size_, dim));
@@ -121,7 +129,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     void state_unpack (size_type id, const state_pack_type &pack)
     {
-        VSMC_RUNTIME_ASSERT_STATE_UNPACK_SIZE(
+        VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_UNPACK_SIZE(
                 pack.size(), this->dim(), Matrix);
 
         StateMatrix<Order, Dim, T> *sptr =
@@ -133,7 +141,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(Matrix);
+        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(Matrix);
 
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);
@@ -165,26 +173,23 @@ class StateMatrixBase : public traits::DimTrait<Dim>
             read_state(d, *first);
     }
 
-    template <typename OutputIter>
-    OutputIter read_state_matrix (MatrixOrder order, OutputIter first) const
+    template <MatrixOrder ROrder, typename OutputIter>
+    OutputIter read_state_matrix (OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT_MATRIX_ORDER(
-                order, StateMatrix::read_state_matrix);
-
-        if (order == Order) {
+        if (ROrder == Order) {
             for (std::size_t i = 0; i != this->dim() * size_; ++i, ++first)
                 *first = state_[i];
         } else {
             const StateMatrix<Order, Dim, T> *sptr =
                 static_cast<const StateMatrix<Order, Dim, T> *>(this);
-            if (order == RowMajor) {
+            if (ROrder == RowMajor) {
                 for (size_type i = 0; i != size_; ++i) {
                     for (std::size_t d = 0; d != this->dim(); ++d) {
                         *first = sptr->state(i, d);
                         ++first;
                     }
                 }
-            } else if (order == ColMajor) {
+            } else if (ROrder == ColMajor) {
                 for (std::size_t d = 0; d != this->dim(); ++d) {
                     for (size_type i = 0; i != size_; ++i) {
                         *first = sptr->state(i, d);

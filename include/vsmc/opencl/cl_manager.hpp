@@ -4,6 +4,27 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 
+#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
+    VSMC_RUNTIME_ASSERT((setup()),                                           \
+            ("**vsmc::CLManager::"#func"** CAN ONLY BE CALLED AFTER TRUE "   \
+             "**vsmc::CLManager::setup**"));
+
+#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_PLATFORM \
+    VSMC_RUNTIME_ASSERT(setup_platform,                                      \
+            ("**vsmc::CLManager::setup** FAILED TO SETUP A PLATFORM"));
+
+#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_CONTEXT \
+    VSMC_RUNTIME_ASSERT(setup_context,                                       \
+            ("**vsmc::CLManager::setup** FAILED TO SETUP A CONTEXT"));
+
+#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_DEVICE \
+    VSMC_RUNTIME_ASSERT(setup_device,                                        \
+            ("**vsmc::CLManager::setup** FAILED TO SETUP A DEVICE"));
+
+#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_COMMAND_QUEUE \
+    VSMC_RUNTIME_ASSERT(setup_command_queue,                                 \
+            ("**vsmc::CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
+
 namespace vsmc {
 
 struct CLDefault

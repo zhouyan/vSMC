@@ -161,7 +161,7 @@ class StateTupleBase
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(Tuple);
+        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(Tuple);
 
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);

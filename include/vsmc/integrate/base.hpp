@@ -3,6 +3,11 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_RUNTIME_ASSERT_INTEGRATE_BASE_DERIVED \
+    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                     \
+            ("DERIVED FROM  NumericBase                                      \
+             " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
+
 namespace vsmc {
 
 /// \brief Numerical integration base dispatch class
@@ -47,7 +52,7 @@ class NumericBase
             const eval_type &eval,
             double (D::*) (double, double, const eval_type &))
     {
-        VSMC_RUNTIME_ASSERT_DERIVED_BASE(NumericBase);
+        VSMC_RUNTIME_ASSERT_INTEGRATE_BASE_DERIVED;
         return static_cast<Derived *>(this)->integrate_segment(a, b, eval);
     }
 
@@ -56,7 +61,7 @@ class NumericBase
             const eval_type &eval,
             double (D::*) (double, double, const eval_type &) const)
     {
-        VSMC_RUNTIME_ASSERT_DERIVED_BASE(NumericBase);
+        VSMC_RUNTIME_ASSERT_INTEGRATE_BASE_DERIVED;
         return static_cast<Derived *>(this)->integrate_segment(a, b, eval);
     }
 

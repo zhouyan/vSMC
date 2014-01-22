@@ -352,7 +352,7 @@ inline void hdf5_save (const Sampler<T> &sampler,
     std::vector<double> data(nrow * ncol);
     std::vector<int> resampled(nrow);
     sampler.summary_header(header.begin());
-    sampler.summary_data(ColMajor, data.begin());
+    sampler.template summary_data<ColMajor>(data.begin());
     sampler.read_resampled_history(resampled.begin());
     std::vector<const double *> data_ptr(ncol);
     for (std::size_t j = 0; j != ncol; ++j)

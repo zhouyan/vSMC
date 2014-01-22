@@ -4,6 +4,18 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/integrate/importance_sampling.hpp>
 
+#define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func) \
+    VSMC_RUNTIME_ASSERT((id >= 0 && id < this->dim()),                       \
+            ("**Monitor::"#func"** INVALID ID NUMBER ARGUMENT"))
+
+#define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(func) \
+    VSMC_RUNTIME_ASSERT((iter >= 0 && iter < this->iter_size()),             \
+            ("**Monitor::"#func"** INVALID ITERATION NUMBER ARGUMENT"))
+
+#define VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(func, caller, name) \
+    VSMC_RUNTIME_ASSERT(bool(func),                                          \
+            ("**Monitor::"#caller"** INVALID "#name" OBJECT"))               \
+
 namespace vsmc {
 
 /// \brief Monitor for Monte Carlo integration
@@ -99,7 +111,7 @@ class Monitor
     /// `turnoff()`, then iter(iter) shall just be `iter`.
     std::size_t index (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Monitor::index);
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(index);
 
         return index_[iter];
     }
@@ -112,8 +124,8 @@ class Monitor
     double record (std::size_t id) const
     {
         std::size_t iter = iter_size() ? iter_size() - 1 : iter_size();
-        VSMC_RUNTIME_ASSERT_ID_NUMBER(Monitor::record);
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Monitor::record);
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(record);
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(record);
 
         return record_[iter * dim_ + id];
     }
@@ -125,8 +137,8 @@ class Monitor
     /// For a `dim` dimension Monitor, `id` shall be 0 to `dim` - 1
     double record (std::size_t id, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_ID_NUMBER(Monitor::record);
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Monitor::record);
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(record);
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(record);
 
         return record_[iter * dim_ + id];
     }
@@ -178,16 +190,14 @@ class Monitor
     /// Otherwise, if `order == RowMajor`, then `first[i * dim() + j] ==
     /// record(i, j)`. That is, the output is an `iter_size()` by `dim()`
     /// matrix, with the usual meaning of column or row major order.
-    template <typename OutputIter>
-    OutputIter read_record_matrix (MatrixOrder order, OutputIter first) const
+    template <MatrixOrder Order, typename OutputIter>
+    OutputIter read_record_matrix (OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT_MATRIX_ORDER(order, Monitor::read_record_matrix);
-
-        if (order == ColMajor)
+        if (Order == ColMajor)
             for (std::size_t d = 0; d != dim_; ++d)
                 first = read_record(d, first);
 
-        if (order == RowMajor) {
+        if (Order == RowMajor) {
             const std::size_t N = record_.size();
             const double *const rptr = &record_[0];
             for (std::size_t i = 0; i != N; ++i, ++first)
@@ -214,7 +224,7 @@ class Monitor
         if (!recording_)
             return;
 
-        VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Monitor::eval, EVALUATION);
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(eval_, eval, EVALUATION);
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
         double *const result = malloc_result(dim_);

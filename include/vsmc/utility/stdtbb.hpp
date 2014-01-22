@@ -9,6 +9,9 @@
 #include <future>
 #endif
 
+#define VSMC_RUNTIME_ASSERT_UTILITY_STDTBB_RANGE(begin, end, func) \
+    VSMC_RUNTIME_ASSERT((begin < end), ("**"#func"** INVALID RANGE"))
+
 namespace vsmc {
 
 /// \brief Blocked range
@@ -25,7 +28,7 @@ class BlockedRange
 
     BlockedRange (T begin, T end, size_type grainsize = 1) :
         begin_(begin), end_(end), grainsize_(grainsize)
-    {VSMC_RUNTIME_ASSERT_RANGE(begin, end, BlockedRange);}
+    {VSMC_RUNTIME_ASSERT_UTILITY_STDTBB_RANGE(begin, end, BlockedRange);}
 
     template <typename Split>
     BlockedRange (BlockedRange<T> &other, Split) :

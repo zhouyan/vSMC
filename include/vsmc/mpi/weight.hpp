@@ -77,7 +77,7 @@ class WeightSetMPI : public WeightSet
             for (int r = 0; r != world_.size(); ++r) {
                 const size_type N = weight_all_[r].size();
                 const double *const wptr = &weight_all_[r][0];
-                VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_OUT(
+                VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_OUT(
                         first - wptr, N, WeightSetMPI::read_resample_weight);
                 std::memcpy(first, wptr, sizeof(double) * N);
                 first += N;
@@ -173,7 +173,7 @@ class WeightSetMPI : public WeightSet
 
         buffer_.resize(N);
         double *const bptr = &buffer_[0];
-        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(
                 first - bptr, N, WeightSetMPI::ess);
         std::memcpy(bptr, first, sizeof(double) * N);
 
@@ -220,7 +220,7 @@ class WeightSetMPI : public WeightSet
 
         buffer_.resize(N);
         double *const bptr = &buffer_[0];
-        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(
                 first - bptr, N, WeightSetMPI::ess);
         std::memcpy(bptr, first, sizeof(double) * N);
 

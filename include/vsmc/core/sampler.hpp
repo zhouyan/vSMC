@@ -8,6 +8,14 @@
 #include <vsmc/utility/backup.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
+#define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func) \
+    VSMC_RUNTIME_ASSERT((iter != map.end()),                                 \
+            ("**Sampler::"#func"** INVALID MONITOR NAME"))
+
+#define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(func, caller, name) \
+    VSMC_RUNTIME_ASSERT(bool(func),                                          \
+            ("**Sampler::"#caller"** INVALID "#name" OBJECT"))               \
+
 namespace vsmc {
 
 /// \brief SMC Sampler
@@ -155,7 +163,7 @@ class Sampler
     /// \brief Set the initialization object of type init_type
     Sampler<T> &init (const init_type &new_init)
     {
-        VSMC_RUNTIME_ASSERT_FUNCTOR(new_init, Sampler::init, Initialize);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init, INITIALIZE);
 
         init_ = new_init;
 
@@ -174,7 +182,7 @@ class Sampler
     /// \brief Add a new move
     Sampler<T> &move (const move_type &new_move, bool append)
     {
-        VSMC_RUNTIME_ASSERT_FUNCTOR(new_move, Sampler::move, MOVE);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_move, move, MOVE);
 
         if (!append)
             move_queue_.clear();
@@ -190,7 +198,7 @@ class Sampler
         if (!append)
             move_queue_.clear();
         while (first != last) {
-            VSMC_RUNTIME_ASSERT_FUNCTOR(*first, Sampler::move, MOVE);
+            VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(*first, move, MOVE);
             move_queue_.push_back(*first);
             ++first;
         }
@@ -210,7 +218,7 @@ class Sampler
     /// \brief Add a new mcmc
     Sampler<T> &mcmc (const mcmc_type &new_mcmc, bool append)
     {
-        VSMC_RUNTIME_ASSERT_FUNCTOR(new_mcmc, Sampler::mcmc, MCMC);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_mcmc, mcmc, MCMC);
 
         if (!append)
             mcmc_queue_.clear();
@@ -226,7 +234,7 @@ class Sampler
         if (!append)
             mcmc_queue_.clear();
         while (first != last) {
-            VSMC_RUNTIME_ASSERT_FUNCTOR(*first, Sampler::mcmc, MCMC);
+            VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(*first, mcmc, MCMC);
             mcmc_queue_.push_back(*first);
             ++first;
         }
@@ -245,7 +253,9 @@ class Sampler
     /// evaluation objects are untouched.
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
-        VSMC_RUNTIME_ASSERT_FUNCTOR(init_, Sampler::initialize, Initialize);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
+                init_, initialize, INITIALIZE);
+
         do_init(param);
         do_resample();
         do_monitor();
@@ -346,7 +356,8 @@ class Sampler
     {
         typename monitor_map_type::iterator iter = monitor_.find(name);
 
-        VSMC_RUNTIME_ASSERT_MONITOR_NAME(iter, monitor_, Sampler::monitor);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(
+                iter, monitor_, monitor);
 
         return iter->second;
     }
@@ -356,7 +367,8 @@ class Sampler
     {
         typename monitor_map_type::const_iterator citer = monitor_.find(name);
 
-        VSMC_RUNTIME_ASSERT_MONITOR_NAME(citer, monitor_, Sampler::monitor);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(
+                citer, monitor_, monitor);
 
         return citer->second;
     }
@@ -494,18 +506,16 @@ class Sampler
     ///
     /// \param order The order of the data, row or column major
     /// \param first The beginning of the output
-    template <typename OutputIter>
-    OutputIter summary_data (MatrixOrder order, OutputIter first) const
+    template <MatrixOrder Order, typename OutputIter>
+    OutputIter summary_data (OutputIter first) const
     {
         if (summary_data_size() == 0)
             return first;
 
-        VSMC_RUNTIME_ASSERT_MATRIX_ORDER(order, Sampler::summary_data);
-
-        if (order == RowMajor)
+        if (Order == RowMajor)
             first = summary_data_row(first);
 
-        if (order == ColMajor)
+        if (Order == ColMajor)
             first = summary_data_col(first);
 
         return first;
@@ -524,7 +534,7 @@ class Sampler
         std::vector<std::string> header(var_num);
         std::vector<double> data(dat_num);
         summary_header(header.begin());
-        summary_data(RowMajor, data.begin());
+        summary_data<RowMajor>(data.begin());
 
         os << "Sampler.ID Iteration Resampled";
         for (std::size_t i = 0; i != header.size(); ++i)

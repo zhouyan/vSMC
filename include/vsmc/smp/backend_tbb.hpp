@@ -98,7 +98,7 @@ class StateTBB : public BaseState
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(TBB);
+        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(TBB);
 
         tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
                 copy_work_<IntType>(this, copy_from));

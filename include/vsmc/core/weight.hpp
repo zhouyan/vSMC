@@ -7,6 +7,14 @@
 #include <mkl_vml.h>
 #endif
 
+#define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(diff, size, func) \
+    VSMC_RUNTIME_ASSERT((std::abs(diff) > static_cast<std::ptrdiff_t>(size)),\
+            ("THE DESTINATION OF **"#func"** OVERLAPPING WITH THE SOURCE"))
+
+#define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_OUT(diff, size, func) \
+    VSMC_RUNTIME_ASSERT((std::abs(diff) > static_cast<std::ptrdiff_t>(size)),\
+            ("THE SOURCE OF **"#func"** OVERLAPPING WITH THE DESTINATION"))
+
 namespace vsmc {
 
 /// \brief Weight set class
@@ -115,7 +123,7 @@ class WeightSet
     double *read_weight (double *first) const
     {
         const double *const wptr = &weight_[0];
-        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_OUT(
+        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_OUT(
                 first - wptr, size_, WeightSet::read_weight);
         std::memcpy(first, wptr, sizeof(double) * size_);
 
@@ -149,7 +157,7 @@ class WeightSet
     double *read_log_weight (double *first) const
     {
         const double *const lwptr = &log_weight_[0];
-        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_OUT(
+        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_OUT(
                 first - lwptr, size_, WeightSet::read_log_weight);
         std::memcpy(first, lwptr, sizeof(double) * size_);
 
@@ -205,7 +213,7 @@ class WeightSet
     void set_weight (const double *first)
     {
         double *const wptr = &weight_[0];
-        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(
                 first - wptr, size_, WeightSet::set_weight);
         std::memcpy(wptr, first, sizeof(double) * size_);
         post_set_weight();
@@ -269,7 +277,7 @@ class WeightSet
     void set_log_weight (const double *first)
     {
         double *const lwptr = &log_weight_[0];
-        VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(
                 first - lwptr, size_, WeightSet::set_log_weight);
         std::memcpy(lwptr, first, sizeof(double) * size_);
         post_set_log_weight();
@@ -394,7 +402,7 @@ class WeightSet
         if (first != &buffer_[0]) {
             buffer_.resize(size_);
             double *const ptr = &buffer_[0];
-            VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+            VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(
                     first - ptr, size_, WeightSet::ess);
             std::memcpy(ptr, first, sizeof(double) * size_);
         }
@@ -434,7 +442,7 @@ class WeightSet
         if (first != &buffer_[0]) {
             buffer_.resize(size_);
             double *const ptr = &buffer_[0];
-            VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(
+            VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(
                     first - ptr, size_, WeightSet::cess);
             std::memcpy(ptr, first, sizeof(double) * size_);
         }

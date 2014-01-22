@@ -6,6 +6,18 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/rng/seed.hpp>
 
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func) \
+    VSMC_RUNTIME_ASSERT((build()),                                           \
+            ("**StateCL::"#func"** CAN ONLY BE CALLED AFTER true "           \
+             "**StateCL::build**"));
+
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_STATE_SIZE(state_size) \
+    VSMC_RUNTIME_ASSERT((state_size >= 1), ("STATE SIZE IS LESS THAN 1"))
+
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH \
+    VSMC_RUNTIME_ASSERT((N == size_), ("**StateCL::copy** SIZE MISMATCH"))
+
+
 namespace vsmc {
 
 namespace internal {
@@ -124,8 +136,8 @@ class StateCL
 
     void resize_state (std::size_t state_size)
     {
-        VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(StateSize);
-        VSMC_RUNTIME_ASSERT_DIM(state_size);
+        VSMC_STATIC_ASSERT_DYNAMIC_STATE_SIZE_RESIZE(StateSize);
+        VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_STATE_SIZE(state_size);
 
         state_buffer_ =
             manager().template create_buffer<char>(state_size * size_);
@@ -236,7 +248,7 @@ class StateCL
     /// \note If build() does not return `true`, then calling this is an error
     cl::Kernel create_kernel (const std::string &name) const
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(create_kernel);
+        VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(create_kernel);
 
         return cl::Kernel(program_, name.c_str());
     }
@@ -244,8 +256,8 @@ class StateCL
     template<typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(copy);
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(CL);
+        VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(copy);
+        VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH;
 
         manager().template write_buffer<size_type>(
                 copy_from_buffer_, size_, copy_from);

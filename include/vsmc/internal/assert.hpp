@@ -61,13 +61,14 @@ class StaticAssert<true>
     public :
 
     enum {
-        USE_METHOD_resize_dim_WITH_A_FIXED_DIM_State_OBJECT,
+        USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT,
+        USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT,
 
-        USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double,
         USE_InitializeCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
-        USE_MoveCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
+        USE_MoveCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
+        USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double,
 
         USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree
     };
@@ -75,103 +76,15 @@ class StaticAssert<true>
 
 } // namespace vsmc
 
-// Runtime assertion macros
-
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func)                            \
-    VSMC_RUNTIME_ASSERT((setup()),                                            \
-            ("**vsmc::CLManager::"#func"** CAN ONLY BE CALLED AFTER TRUE "    \
-             "**vsmc::CLManager::setup**"));
-
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_PLATFORM                         \
-    VSMC_RUNTIME_ASSERT(setup_platform,                                       \
-            ("**vsmc::CLManager::setup** FAILED TO SETUP A PLATFORM"));
-
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_CONTEXT                          \
-    VSMC_RUNTIME_ASSERT(setup_context,                                        \
-            ("**vsmc::CLManager::setup** FAILED TO SETUP A CONTEXT"));
-
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_DEVICE                           \
-    VSMC_RUNTIME_ASSERT(setup_device,                                         \
-            ("**vsmc::CLManager::setup** FAILED TO SETUP A DEVICE"));
-
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_COMMAND_QUEUE                    \
-    VSMC_RUNTIME_ASSERT(setup_command_queue,                                  \
-            ("**vsmc::CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
-
-#define VSMC_RUNTIME_ASSERT_DERIVED_BASE(basename)                            \
-    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                      \
-            ("DERIVED FROM " #basename                                        \
-             " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
-
-#define VSMC_RUNTIME_ASSERT_DIM(dim)                                          \
-    VSMC_RUNTIME_ASSERT((dim >= 1), ("DIMENSION IS LESS THAN 1"))
-
-#define VSMC_RUNTIME_ASSERT_FUNCTOR(func, name, caller)                       \
-    VSMC_RUNTIME_ASSERT(bool(func), "**"#caller"** INVALID "#name" OBJECT")   \
-
-#define VSMC_RUNTIME_ASSERT_ID_NUMBER(func)                                   \
-    VSMC_RUNTIME_ASSERT((id >= 0 && id < this->dim()),                        \
-            ("**"#func"** INVALID ITERATION NUMBER ARGUMENT"))
-
-#define VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_IN(diff, size, func)               \
-    VSMC_RUNTIME_ASSERT((std::abs(diff) > static_cast<std::ptrdiff_t>(size)), \
-            ("THE DESTINATION OF **"#func"** OVERLAPPING WITH THE SOURCE"))
-
-#define VSMC_RUNTIME_ASSERT_INVALID_MEMCPY_OUT(diff, size, func)              \
-    VSMC_RUNTIME_ASSERT((std::abs(diff) > static_cast<std::ptrdiff_t>(size)), \
-            ("THE SOURCE OF **"#func"** OVERLAPPING WITH THE DESTINATION"))
-
-#define VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(func)                            \
-    VSMC_RUNTIME_ASSERT((iter >= 0 && iter < this->iter_size()),              \
-            ("**"#func"** INVALID ITERATION NUMBER ARGUMENT"))
-
-#define VSMC_RUNTIME_ASSERT_MATRIX_ORDER(order, func)                         \
-    VSMC_RUNTIME_ASSERT((order == vsmc::RowMajor || order == vsmc::ColMajor), \
-            ("**"#func"** INVALID MATRIX ORDER"))
-
-#define VSMC_RUNTIME_ASSERT_MONITOR_NAME(iter, map, func)                     \
-    VSMC_RUNTIME_ASSERT((iter != map.end()),                                  \
-            ("**"#func"** INVALID MONITOR NAME"))
-
-#define VSMC_RUNTIME_ASSERT_PARTICLE_ITERATOR_BINARY_OP                       \
-    VSMC_RUNTIME_ASSERT((iter1->particle_ptr() == iter2->particle_ptr()),     \
-            ("BINARY OPERATION ON TWO **ParticleIterator** BELONGING TO "     \
-            "TWO DIFFERNT **Particle** OBJECT"))
-
-#define VSMC_RUNTIME_ASSERT_RANGE(begin, end, func)                           \
-    VSMC_RUNTIME_ASSERT((begin < end), ("**"#func"** INVALID RANGE"))
-
-#define VSMC_RUNTIME_ASSERT_STATE_CL_BUILD(func)                              \
-    VSMC_RUNTIME_ASSERT((build()),                                            \
-            ("**StateCL::"#func"** CAN ONLY BE CALLED AFTER true "            \
-             "**StateCL::build**"));
-
-#define VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(name)                    \
-    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
-            ("**State"#name"::copy** SIZE MISMATCH"))
-
-#define VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH_MPI                      \
-    VSMC_RUNTIME_ASSERT((N == global_size_),                                  \
-            ("**StateMPI::copy** SIZE MISMATCH"))
-
-#define VSMC_RUNTIME_ASSERT_STATE_MATRIX_RC_ITERATOR_BINARY_OP                \
-    VSMC_RUNTIME_ASSERT((iter1->inc() == iter2->inc()),                       \
-            ("BINARY OPERATION ON TWO **StateMatrixRCIteraotr** WITH"         \
-            "TWO DIFFERNT INCREMENT"))
-
-#define VSMC_RUNTIME_ASSERT_STATE_UNPACK_SIZE(pack_size, dim, name)           \
-    VSMC_RUNTIME_ASSERT((pack_size >= dim),                                   \
-            ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
-
-#define VSMC_RUNTIME_ASSERT_ADDING_RUNNING_WATCH(running)                     \
-    VSMC_RUNTIME_ASSERT((stopped),                                            \
-            ("CANNOT ADD TWO RUNNING **StopWatch**"))
-
 // Static assertion macros
 
 #define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim)                            \
     VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
-            USE_METHOD_resize_dim_WITH_A_FIXED_DIM_State_OBJECT)
+            USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
+
+#define VSMC_STATIC_ASSERT_DYNAMIC_STATE_SIZE_RESIZE(Dim)                     \
+    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
+            USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT)
 
 #define VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(degree)                \
     VSMC_STATIC_ASSERT((degree >= 1 && degree <= max_degree_),                \
@@ -188,6 +101,6 @@ class StaticAssert<true>
 #define VSMC_STATIC_ASSERT_STATE_CL_FP_TYPE(type)                             \
     VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<type, cl_float>::value           \
                 || vsmc::cxx11::is_same<type, cl_double>::value),             \
-            USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
+            USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

@@ -87,7 +87,7 @@ class StateOMP : public BaseState
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_STATE_COPY_SIZE_MISMATCH(OMP);
+        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(OMP);
 
 #pragma omp parallel for default(shared)
         for (size_type to = 0; to < N; ++to)

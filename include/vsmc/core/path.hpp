@@ -8,6 +8,14 @@
 #include <mkl_vml.h>
 #endif
 
+#define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func) \
+    VSMC_RUNTIME_ASSERT((iter >= 0 && iter < this->iter_size()),             \
+            ("**Path::"#func"** INVALID ITERATION NUMBER ARGUMENT"))
+
+#define VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(func, caller, name) \
+    VSMC_RUNTIME_ASSERT(bool(func),                                          \
+            ("**Path::"#caller"** INVALID "#name" OBJECT"))                  \
+
 namespace vsmc {
 
 /// \brief Monitor for Path sampling
@@ -88,7 +96,7 @@ class Path
     /// \sa Monitor::index()
     std::size_t index (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::index);
+        VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(index);
 
         return index_[iter];
     }
@@ -96,7 +104,7 @@ class Path
     /// \brief Get the Path sampling integrand of a given Path iteration
     double integrand (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::integrand);
+        VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(integrand);
 
         return integrand_[iter];
     }
@@ -104,7 +112,7 @@ class Path
     /// \brief Get the Path sampling grid value of a given Path iteration
     double grid (std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_ITERATION_NUMBER(Path::grid);
+        VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(grid);
 
         return grid_[iter];
     }
@@ -158,7 +166,7 @@ class Path
         if (!recording_)
             return;
 
-        VSMC_RUNTIME_ASSERT_FUNCTOR(eval_, Path::eval, EVALUATION);
+        VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(eval_, eval, EVALUATION);
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
         double *const buffer = malloc_eval_integrand(N);
