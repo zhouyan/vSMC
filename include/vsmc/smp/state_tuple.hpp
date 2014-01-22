@@ -5,10 +5,6 @@
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/utility/tuple_manip.hpp>
 
-#if VSMC_USE_HDF5
-#include <vsmc/utility/hdf5_save.hpp>
-#endif
-
 namespace vsmc {
 
 namespace internal {
@@ -304,52 +300,10 @@ class StateTuple<RowMajor, T, Types...> :
     &state (size_type id) const
     {return state(id, Position<Pos>());}
 
-#if VSMC_USE_HDF5
-    void hdf5_save (const std::string &file_name,
-            const std::string &data_name, bool append = false) const
-    {
-        hdf5_save_data_frame<int>(0, 0, file_name, data_name,
-                (int **) VSMC_NULLPTR, (std::string *) VSMC_NULLPTR, append);
-        hdf5_save_state(file_name, data_name, Position<0>());
-    }
-#endif // VSMC_USE_HDF5
-
     private :
 
     static const std::size_t dim_ = sizeof...(Types) + 1;
     std::vector<std::tuple<T, Types...> > state_;
-
-#if VSMC_USE_HDF5
-    template <std::size_t Pos>
-    void hdf5_save_state (const std::string &file_name,
-            const std::string &data_name, Position<Pos>) const
-    {
-        typedef typename state_tuple_base_type::template
-            state_type<Pos>::type dtype;
-        std::vector<dtype> data_vec(this->size());
-        this->read_state(Position<Pos>(), data_vec.begin());
-        const dtype *data = &data_vec[0];
-        std::stringstream ss;
-        ss << "V" << Pos;
-        hdf5_insert_data_frame<dtype>(
-                this->size(), file_name, data_name, data, ss.str());
-        hdf5_save_state(file_name, data_name, Position<Pos + 1>());
-    }
-
-    void hdf5_save_state (const std::string &file_name,
-            const std::string &data_name, Position<dim_ - 1>) const
-    {
-        typedef typename state_tuple_base_type::template
-            state_type<dim_ - 1>::type dtype;
-        std::vector<dtype> data_vec(this->size());
-        this->read_state(Position<dim_ - 1>(), data_vec.begin());
-        const dtype *data = &data_vec[0];
-        std::stringstream ss;
-        ss << "V" << dim_ - 1;
-        hdf5_insert_data_frame<dtype>(
-                this->size(), file_name, data_name, data, ss.str());
-    }
-#endif // VSMC_USE_HDF5
 }; // StateTuple
 
 /// \brief Particle::value_type subtype
@@ -387,15 +341,13 @@ class StateTuple<ColMajor, T, Types...> :
     &state (size_type id) const
     {return state(id, Position<Pos>());}
 
-#if VSMC_USE_HDF5
-    void hdf5_save (const std::string &file_name,
-            const std::string &data_name, bool append = false) const
-    {
-        hdf5_save_data_frame<int>(0, 0, file_name, data_name,
-                (int **) VSMC_NULLPTR, (std::string *) VSMC_NULLPTR, append);
-        hdf5_save_state(file_name, data_name, Position<0>());
-    }
-#endif // VSMC_USE_HDF5
+    template <std::size_t Pos>
+    const typename state_tuple_base_type::template state_type<Pos>::type
+    *data (Position<Pos>) const {return &std::get<Pos>(state_)[0];} 
+
+    template <std::size_t Pos>
+    const typename state_tuple_base_type::template state_type<Pos>::type
+    *data () const {return &std::get<Pos>(state_)[0];} 
 
     private :
 
@@ -411,34 +363,6 @@ class StateTuple<ColMajor, T, Types...> :
 
     void init_state (size_type N, Position<sizeof...(Types)>)
     {std::get<sizeof...(Types)>(state_).resize(N);}
-
-#if VSMC_USE_HDF5
-    template <std::size_t Pos>
-    void hdf5_save_state (const std::string &file_name,
-            const std::string &data_name, Position<Pos>) const
-    {
-        typedef typename state_tuple_base_type::template
-            state_type<Pos>::type dtype;
-        const dtype *data = &std::get<Pos>(state_)[0];
-        std::stringstream ss;
-        ss << "V" << Pos;
-        hdf5_insert_data_frame<dtype>(
-                this->size(), file_name, data_name, data, ss.str());
-        hdf5_save_state(file_name, data_name, Position<Pos + 1>());
-    }
-
-    void hdf5_save_state (const std::string &file_name,
-            const std::string &data_name, Position<dim_ - 1>) const
-    {
-        typedef typename state_tuple_base_type::template
-            state_type<dim_ - 1>::type dtype;
-        const dtype *data = &std::get<dim_ - 1>(state_)[0];
-        std::stringstream ss;
-        ss << "V" << dim_ - 1;
-        hdf5_insert_data_frame<dtype>(
-                this->size(), file_name, data_name, data, ss.str());
-    }
-#endif // VSMC_USE_HDF5
 }; // class StateTuple
 
 } // namespace vsmc

@@ -6,10 +6,6 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/rng/seed.hpp>
 
-#if VSMC_USE_HDF5
-#include <vsmc/utility/hdf5_save.hpp>
-#endif
-
 namespace vsmc {
 
 namespace internal {
@@ -183,10 +179,11 @@ class StateCL
     void build (const std::string &source,
             const std::string &flags = std::string())
     {
+        VSMC_STATIC_ASSERT_STATE_CL_FP_TYPE(fp_type);
+
         ++build_id_;
 
         std::stringstream ss;
-
         internal::set_cl_fp_type<fp_type>(ss);
 
         ss << "typedef ulong size_type;\n";
@@ -261,20 +258,6 @@ class StateCL
     ConfigureCL &configure_copy () {return configure_copy_;}
 
     const ConfigureCL &configure_copy () const {return configure_copy_;}
-
-#if VSMC_USE_HDF5
-    template <typename StateType, MatrixOrder Order>
-    void hdf5_save (const std::string &file_name,
-            const std::string &data_name, bool append = false) const
-    {
-        std::size_t ncol = state_size_ / sizeof(StateType);
-        std::size_t N = state_size_ * size_ / sizeof(StateType);
-        std::vector<StateType> data(N);
-        manager().template read_buffer<StateType>(state_buffer_, N, &data[0]);
-        hdf5_save_matrix<Order>(size_, ncol, file_name, data_name,
-                &data[0], append);
-    }
-#endif // VSMC_USE_HDF5
 
     private :
 

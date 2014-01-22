@@ -8,10 +8,6 @@
 #include <vsmc/utility/backup.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#if VSMC_USE_HDF5
-#include <vsmc/utility/hdf5_save.hpp>
-#endif
-
 namespace vsmc {
 
 /// \brief SMC Sampler
@@ -523,12 +519,10 @@ class Sampler
     OutputStream &print (OutputStream &os = std::cout,
             std::size_t sampler_id = 0) const
     {
-        std::vector<std::string> header;
-        std::vector<double> data;
         std::size_t var_num = summary_header_size();
         std::size_t dat_num = var_num * iter_size();
-        header.resize(var_num);
-        data.resize(dat_num);
+        std::vector<std::string> header(var_num);
+        std::vector<double> data(dat_num);
         summary_header(header.begin());
         summary_data(RowMajor, data.begin());
 
@@ -550,30 +544,6 @@ class Sampler
 
         return os;
     }
-
-#if VSMC_USE_HDF5
-    void hdf5_save (const std::string &file_name,
-            const std::string &sampler_name = std::string("Sampler")) const
-    {
-        std::vector<std::string> header;
-        std::vector<double> data;
-        std::size_t var_num = summary_header_size();
-        std::size_t dat_num = var_num * iter_size();
-        header.resize(var_num);
-        data.resize(dat_num);
-        summary_header(header.begin());
-        summary_data(ColMajor, data.begin());
-
-        std::vector<const double *> data_ptr(var_num);
-        for (std::size_t i = 0; i != var_num; ++i)
-            data_ptr[i] = &data[i * iter_size()];
-
-        hdf5_save_data_frame<double>(iter_size(), var_num,
-                file_name, sampler_name, data_ptr.begin(), header.begin());
-        hdf5_insert_data_frame<int>(iter_size(), file_name, sampler_name,
-                resampled_history_.begin(), "Resampled");
-    }
-#endif // VSMC_USE_HDF5
 
     private :
 

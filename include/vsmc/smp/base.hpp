@@ -19,10 +19,6 @@ Name##Impl<T, Derived> &operator=                                             \
 
 namespace vsmc {
 
-/// \brief Position of parameter in the state vector
-/// \ingroup SMP
-template <std::size_t Pos> struct Position {};
-
 /// \brief Initialize base dispatch class
 /// \ingroup SMP
 template <typename T, typename Derived>

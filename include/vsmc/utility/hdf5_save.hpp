@@ -263,6 +263,139 @@ inline void hdf5_insert_data_frame (std::size_t N,
     delete [] data_tmp;
 }
 
+template <typename T>
+inline void hdf5_save (const Sampler<T> &sampler,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    std::size_t nrow = sampler.iter_size();
+    std::size_t ncol = sampler.summary_header_size();
+    std::vector<std::string> header(ncol);
+    std::vector<double> data(nrow * ncol);
+    std::vector<int> resampled(nrow);
+    sampler.summary_header(header.begin());
+    sampler.summary_data(ColMajor, data.begin());
+    sampler.read_resampled_history(resampled.begin());
+    std::vector<const double *> data_ptr(ncol);
+    for (std::size_t j = 0; j != ncol; ++j)
+        data_ptr[j] = &data[j * nrow];
+
+    hdf5_save_data_frame<double>(nrow, ncol, file_name, data_name,
+            data_ptr.begin(), header.begin(), append);
+    hdf5_insert_data_frame<int>(ncol, file_name, data_name,
+            resampled.begin(), "Resampled");
+}
+
+template <MatrixOrder Order, std::size_t Dim, typename T>
+inline void hdf5_save (const StateMatrix<Order, Dim, T> &state,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    hdf5_save_matrix<Order>(state.size(), state.dim(), file_name, data_name,
+            state.data(), append);
+}
+
+#if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
+
+namespace internal {
+
+template <typename T, typename... Types>
+inline void hdf5_save_state_tuple(
+    const StateTuple<RowMajor, T, Types...> &state,
+    const std::string &file_name, const std::string &data_name, Position<0>)
+{
+    typedef StateTuple<RowMajor, T, Types...> state_type;
+    typedef typename state_type::state_tuple_base_type::template
+        state_type<0>::type dtype;
+    std::string vname("V0");
+    std::vector<dtype> data_vec(state.size());
+    state.read_state(Position<0>(), data_vec.begin());
+    const dtype *data = &data_vec[0];
+    hdf5_insert_data_frame<dtype>(state.size(), file_name, data_name,
+            data, vname);
+}
+
+template <typename T, typename... Types, std::size_t Pos>
+inline void hdf5_save_state_tuple(
+    const StateTuple<RowMajor, T, Types...> &state,
+    const std::string &file_name, const std::string &data_name, Position<Pos>)
+{
+    typedef StateTuple<RowMajor, T, Types...> state_type;
+    typedef typename state_type::state_tuple_base_type::template
+        state_type<Pos>::type dtype;
+    std::stringstream ss;
+    ss << 'V' << Pos;
+    std::string vname(ss.str());
+    std::vector<dtype> data_vec(state.size());
+    state.read_state(Position<Pos>(), data_vec.begin());
+    const dtype *data = &data_vec[0];
+    hdf5_insert_data_frame<dtype>(state.size(), file_name, data_name,
+            data, vname);
+    hdf5_save_state_tuple(state, file_name, data_name, Position<Pos - 1>());
+}
+
+template <typename T, typename... Types>
+inline void hdf5_save_state_tuple(
+    const StateTuple<ColMajor, T, Types...> &state,
+    const std::string &file_name, const std::string &data_name, Position<0>)
+{
+    typedef StateTuple<RowMajor, T, Types...> state_type;
+    typedef typename state_type::state_tuple_base_type::template
+        state_type<0>::type dtype;
+    std::string vname("V0");
+    const dtype *data = state.data(Position<0>());
+    hdf5_insert_data_frame<dtype>(state.size(), file_name, data_name,
+            data, vname);
+}
+
+template <typename T, typename... Types, std::size_t Pos>
+inline void hdf5_save_state_tuple(
+    const StateTuple<ColMajor, T, Types...> &state,
+    const std::string &file_name, const std::string &data_name, Position<Pos>)
+{
+    typedef StateTuple<RowMajor, T, Types...> state_type;
+    typedef typename state_type::state_tuple_base_type::template
+        state_type<Pos>::type dtype;
+    std::stringstream ss;
+    ss << 'V' << Pos;
+    std::string vname(ss.str());
+    const dtype *data = state.data(Position<Pos>());
+    hdf5_insert_data_frame<dtype>(state.size(), file_name, data_name,
+            data, vname);
+    hdf5_save_state_tuple(state, file_name, data_name, Position<Pos - 1>());
+}
+
+} // namespace vsmc::internal
+
+template <MatrixOrder Order, typename T, typename... Types>
+inline void hdf5_save (const StateTuple<Order, T, Types...> &state,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    static const std::size_t dim = sizeof...(Types) + 1;
+    hdf5_save_data_frame<int>(0, 0, file_name, data_name,
+            (int **) VSMC_NULLPTR, (std::string *) VSMC_NULLPTR, append);
+    internal::hdf5_save_state_tuple(state, file_name, data_name,
+            Position<dim - 1>());
+}
+
+#endif // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
+
+template <MatrixOrder Order, typename T,
+         std::size_t StateSize, typename FPType, typename ID>
+inline void hdf5_save (const StateCL<StateSize, FPType, ID> &state,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    std::size_t nrow = state.size();
+    std::size_t ncol = state.state_size() / sizeof(T);
+    std::size_t N = nrow * ncol;
+    std::vector<T> data(N);
+    state.manager().template read_buffer<T>(state.state_buffer(), N, &data[0]);
+    hdf5_save_matrix<Order>(nrow, ncol, file_name, data_name,
+            &data[0], append);
+}
+
 } // namespace vsmc
 
 #endif // VSMC_UTILITY_HDF5_HELPER_HPP

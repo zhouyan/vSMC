@@ -185,7 +185,7 @@ class StaticAssert<true>
     VSMC_STATIC_ASSERT((vsmc::traits::IsDerivedFromStateCL<derived>::value),  \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
-#define VSMC_STATIC_ASSERT_STATE_CL_VALUE_TYPE(type)                          \
+#define VSMC_STATIC_ASSERT_STATE_CL_FP_TYPE(type)                             \
     VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<type, cl_float>::value           \
                 || vsmc::cxx11::is_same<type, cl_double>::value),             \
             USE_StateCL_WITH_A_STATE_TYPE_OTHER_THAN_cl_float_AND_cl_double)
