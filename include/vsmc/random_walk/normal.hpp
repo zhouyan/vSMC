@@ -1,17 +1,17 @@
-#ifndef VSMC_MRW_NORMAL_HPP
-#define VSMC_MRW_NORMAL_HPP
+#ifndef VSMC_RANDOM_WALK_NORMAL_HPP
+#define VSMC_RANDOM_WALK_NORMAL_HPP
 
-#include <vsmc/mrw/base.hpp>
+#include <vsmc/random_walk/base.hpp>
 
 namespace vsmc {
 
 /// \brief Metropolis random walk with a Normal kernel
-/// \ingroup MRW
-class NormalRW : public BaseRW
+/// \ingroup RandomWalk
+class NormalRandomWalk : public BaseRandomWalk
 {
     public :
 
-    NormalRW () : rnorm_(0, 1) {}
+    NormalRandomWalk () : rnorm_(0, 1) {}
 
     template <typename URNG, typename Func>
     bool operator() (double &val, double sd, URNG &eng, const Func &func)
@@ -52,8 +52,8 @@ class NormalRW : public BaseRW
 
     cxx11::normal_distribution<double> rnorm_;
     std::vector<double> new_val_vec_;
-}; // class NormalRW
+}; // class NormalRandomWalk
 
 } // namespace vsmc
 
-#endif // VSMC_MRW_NORMAL_HPP
+#endif // VSMC_RANDOM_WALK_NORMAL_HPP

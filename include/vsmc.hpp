@@ -16,14 +16,29 @@
 /// different compilers
 /// \ingroup Config
 
+/// \defgroup Traits Traits
+/// \brief Trait classes
+
 /// \defgroup Core Core
 /// \brief Constructing samplers with operations on the whole particle set
 
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
 
+/// \defgroup RNG RNG
+/// \brief Utilities for managing independent RNG engines
+
 /// \defgroup Adapter Adapter
 /// \brief Adapter class templates for constructing concrete objects
+
+/// \defgroup Integrate Integration
+/// \brief Numerical integration
+
+/// \defgroup RandomWalk Metropolis Random Walk
+/// \brief Metropolis Random Walk kernels
+
+/// \defgroup MPI Message Passing Interface
+/// \brief Parallel samplers using MPI
 
 /// \defgroup OpenCL OpenCL
 /// \brief Parallel sampler using OpenCL
@@ -59,15 +74,6 @@
 /// \ingroup SMP
 /// \brief Parallel samplers using Intel TBB
 
-/// \defgroup MPI Message Passing Interface
-/// \brief Parallel samplers using MPI
-
-/// \defgroup Traits Traits
-/// \brief Trait classes
-
-/// \defgroup Integrate Integration
-/// \brief Numerical integration
-
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
@@ -75,8 +81,9 @@
 /// \ingroup Utility
 /// \brief Backup and restore objects
 
-/// \defgroup RNG RNG
-/// \brief Utilities for managing independent RNG engines
+/// \defgroup HDF5Save HDF5 Save
+/// \ingroup Utility
+/// \brief Functions for saving objects in HDF5 format
 
 /// \defgroup STDTBB STDTBB
 /// \ingroup Utility
@@ -93,10 +100,3 @@
 /// \defgroup Tuple Tuple Manipulation
 /// \ingroup Utility
 /// \brief Classes for manipulating C++11 tuple
-
-/// \defgroup HDF5Save HDF5 Save
-/// \ingroup Utility
-/// \brief Functions for saving objects in HDF5 format
-
-/// \defgroup MRW Metropolis Random Walk
-/// \brief Metropolis Random Walk kernels

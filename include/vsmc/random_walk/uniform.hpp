@@ -1,13 +1,13 @@
-#ifndef VSMC_MRW_UNIFORM_HPP
-#define VSMC_MRW_UNIFORM_HPP
+#ifndef VSMC_RANDOM_WALK_UNIFORM_HPP
+#define VSMC_RANDOM_WALK_UNIFORM_HPP
 
-#include <vsmc/mrw/base.hpp>
+#include <vsmc/random_walk/base.hpp>
 
 namespace vsmc {
 
 /// \brief Metropolis random walk with a uniform kernel
-/// \ingroup MRW
-class UniformRW : public BaseRW
+/// \ingroup RandomWalk
+class UniformRandomWalk : public BaseRandomWalk
 {
     public :
 
@@ -49,8 +49,8 @@ class UniformRW : public BaseRW
     private :
 
     std::vector<double> new_val_vec_;
-}; // class UniformRW
+}; // class UniformRandomWalk
 
 } // namespace vsmc
 
-#endif // VSMC_MRW_UNIFORM_HPP
+#endif // VSMC_RANDOM_WALK_UNIFORM_HPP
