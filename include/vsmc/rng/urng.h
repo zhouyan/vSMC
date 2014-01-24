@@ -38,12 +38,16 @@
 /// ~~~{.c}
 /// <vsmc/opencl/urng.h>
 /// ~~~
-/// The counter-based RNGs are wrapped in the above header. Four are defined,
+/// The counter-based RNGs are wrapped in the above header. Eight are defined,
 /// ~~~{.c}
-/// cburng2x32
-/// cburng4x32
-/// cburng2x64
-/// cburng4x64
+/// threefry2x32_rng_t
+/// threefry4x32_rng_t
+/// threefry2x64_rng_t
+/// threefry4x64_rng_t
+/// philox2x32_rng_t
+/// philox4x32_rng_t
+/// philox2x64_rng_t
+/// philox4x64_rng_t
 /// ~~~
 /// The default engines use `threefry4x32` etc. To use the Philox engine,
 /// define macros `CBRNG4x32` *and* `CBRNG4x32KEYINIT` etc., before including
@@ -57,11 +61,11 @@
 /// ~~~{.c}
 /// #include <vsmc/opencl/urng.h>
 ///
-/// cburng4x32 rng;
-/// cburng4x32_init(&rng);
-/// uint32_t res = cburng4x32_rand(&rng);
+/// threefry4x32_rng_t rng;
+/// threefry4x32_init(&rng);
+/// uint32_t res = threefry4x32_rand(&rng);
 /// ~~~
-/// The function `cburng4x32_rand` will be responsible for increasing the
+/// The function `threefry4x32_rand` will be responsible for increasing the
 /// counters.  The keys and counters can also be set manually. For example,
 /// ~~~{.c}
 /// rng.key.v[0] = get_global_id(0);
@@ -71,10 +75,10 @@
 /// One may keep the states of counters between OpenCL kernel calls as in the
 /// following example,
 /// ~~~{.c}
-/// __kernel void ker (__global struct r123array4x32 *counter)
+/// __kernel void ker (__global struct threefry4x32_ctr_t *counter)
 /// {
-///     cburng4x32 rng;
-///     cburng4x32_init(&rng, get_global_id(0));
+///     threefry4x32_rng_t rng;
+///     threefry4x32_init(&rng, get_global_id(0));
 ///     rng.ctr = counter[get_global_id(0)];
 ///     // use engine rng
 ///     counter[i] = rng.ctr;
@@ -100,7 +104,7 @@
 /// normal01_4x32_24
 /// ~~~
 /// is the type used to construct objects that can be used to generate `float`
-/// precision standard Normal random variates using `cburng4x32` engines.
+/// precision standard Normal random variates using `threefry4x32` engines.
 ///
 /// Not all OpenCL devices have `double` precision support. Therefore by
 /// default, only 32-bits and `float` versions of these types and functions are
@@ -114,8 +118,8 @@
 /// NORMAL01_4x32
 /// ~~~
 /// is the type used to construct objects that can be used to generate standard
-/// Normal random variates using `cburng4x32` engines. The generated results is
-/// `double` if `VSMC_FP_TYPE_IS_DOUBLE` is defined and non-zero or `float`
+/// Normal random variates using `threefry4x32` engines. The generated results
+/// is `double` if `VSMC_FP_TYPE_IS_DOUBLE` is defined and non-zero or `float`
 /// otherwise.
 ///
 /// In the documentation of each distribution, the following notations are
@@ -141,52 +145,33 @@
 #include <Random123/threefry.h>
 #include <Random123/philox.h>
 
-#ifndef CBRNG2x32
-#define CBRNG2x32 threefry2x32
-#define CBRNG2x32KEYINIT threefry2x32keyinit
-#endif
-
-#ifndef CBRNG4x32
-#define CBRNG4x32 threefry4x32
-#define CBRNG4x32KEYINIT threefry4x32keyinit
-#endif
-
-#ifndef CBRNG2x64
-#define CBRNG2x64 threefry2x64
-#define CBRNG2x64KEYINIT threefry2x64keyinit
-#endif
-
-#ifndef CBRNG4x64
-#define CBRNG4x64 threefry4x64
-#define CBRNG4x64KEYINIT threefry4x64keyinit
-#endif
-
-#define VSMC_DEFINE_CBURNG(N, W) \
+#define VSMC_DEFINE_CBURNG_RNG_T(RNG, N, W) \
     typedef struct {                                                         \
-        struct r123array##N##x##W key;                                       \
-        struct r123array##N##x##W ctr;                                       \
-        struct r123array##N##x##W rnd;                                       \
+        RNG##N##x##W##_key_t key;                                            \
+        RNG##N##x##W##_ctr_t ctr;                                            \
+        RNG##N##x##W##_ctr_t rnd;                                            \
         unsigned char rem;                                                   \
-    } cburng##N##x##W;
+    } RNG##N##x##W##_rng_t;
 
-#define VSMC_DEFINE_CBURNG_INIT(N, W) \
-    VSMC_STATIC_INLINE void cburng##N##x##W##_init(                          \
-            cburng##N##x##W *rng, uint##W##_t seed)                          \
+#define VSMC_DEFINE_CBURNG_INIT(RNG, N, W) \
+    VSMC_STATIC_INLINE void RNG##N##x##W##_init(                             \
+            RNG##N##x##W##_rng_t *rng, uint##W##_t seed)                     \
     {                                                                        \
-        struct r123array##N##x##W ukey = {{}};                               \
-        rng->ctr = ukey;                                                     \
-        rng->rnd = ukey;                                                     \
+        RNG##N##x##W##_ctr_t init_ctr = {{}};                                \
+        RNG##N##x##W##_ukey_t ukey = {{}};                                   \
+        rng->ctr = init_ctr;                                                 \
+        rng->rnd = init_ctr;                                                 \
         ukey.v[0] = seed;                                                    \
-        rng->key = CBRNG##N##x##W##KEYINIT(ukey);                            \
+        rng->key = RNG##N##x##W##keyinit(ukey);                              \
         rng->rem = 0;                                                        \
     }
 
-#define VSMC_DEFINE_CBURNG_RAND(N, W) \
-    VSMC_STATIC_INLINE uint##W##_t cburng##N##x##W##_rand(                   \
-            cburng##N##x##W *rng)                                            \
+#define VSMC_DEFINE_CBURNG_RAND(RNG, N, W) \
+    VSMC_STATIC_INLINE uint##W##_t RNG##N##x##W##_rand(                      \
+            RNG##N##x##W##_rng_t *rng)                                       \
     {                                                                        \
         unsigned char rem = rng->rem;                                        \
-        struct r123array##N##x##W rnd = rng->rnd;                            \
+        RNG##N##x##W##_ctr_t rnd = rng->rnd;                                 \
                                                                              \
         if (rem > 0) {                                                       \
             --rem;                                                           \
@@ -194,12 +179,12 @@
             return rnd.v[rem];                                               \
         }                                                                    \
                                                                              \
-        struct r123array##N##x##W ctr = rng->ctr;                            \
-        struct r123array##N##x##W key = rng->key;                            \
+        RNG##N##x##W##_ctr_t ctr = rng->ctr;                                 \
+        RNG##N##x##W##_key_t key = rng->key;                                 \
                                                                              \
         rem = N - 1;                                                         \
         ctr.v[0]++;                                                          \
-        rnd = CBRNG##N##x##W(ctr, key);                                      \
+        rnd = RNG##N##x##W(ctr, key);                                        \
                                                                              \
         rng->rem = rem;                                                      \
         rng->rnd = rnd;                                                      \
@@ -210,30 +195,85 @@
     }
 
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG(2, 32)
+VSMC_DEFINE_CBURNG_RNG_T(threefry, 2, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG(4, 32)
+VSMC_DEFINE_CBURNG_RNG_T(threefry, 4, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG(2, 64)
+VSMC_DEFINE_CBURNG_RNG_T(threefry, 2, 64)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG(4, 64)
+VSMC_DEFINE_CBURNG_RNG_T(threefry, 4, 64)
 
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_INIT(2, 32)
+VSMC_DEFINE_CBURNG_INIT(threefry, 2, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_INIT(4, 32)
+VSMC_DEFINE_CBURNG_INIT(threefry, 4, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_INIT(2, 64)
+VSMC_DEFINE_CBURNG_INIT(threefry, 2, 64)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_INIT(4, 64)
+VSMC_DEFINE_CBURNG_INIT(threefry, 4, 64)
 
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_RAND(2, 32)
+VSMC_DEFINE_CBURNG_RAND(threefry, 2, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_RAND(4, 32)
+VSMC_DEFINE_CBURNG_RAND(threefry, 4, 32)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_RAND(2, 64)
+VSMC_DEFINE_CBURNG_RAND(threefry, 2, 64)
 /// \ingroup RNG
-VSMC_DEFINE_CBURNG_RAND(4, 64)
+VSMC_DEFINE_CBURNG_RAND(threefry, 4, 64)
+
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RNG_T(philox, 2, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RNG_T(philox, 4, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RNG_T(philox, 2, 64)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RNG_T(philox, 4, 64)
+
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_INIT(philox, 2, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_INIT(philox, 4, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_INIT(philox, 2, 64)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_INIT(philox, 4, 64)
+
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RAND(philox, 2, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RAND(philox, 4, 32)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RAND(philox, 2, 64)
+/// \ingroup RNG
+VSMC_DEFINE_CBURNG_RAND(philox, 4, 64)
+
+#if VSMC_USE_THREEFRY_CBURNG
+typedef threefry2x32_rng_t cburng2x32_rng_t;
+typedef threefry4x32_rng_t cburng4x32_rng_t;
+typedef threefry2x64_rng_t cburng2x64_rng_t;
+typedef threefry4x64_rng_t cburng4x64_rng_t;
+#define cburng2x32_init  threefry2x32_init
+#define cburng4x32_init  threefry4x32_init
+#define cburng2x64_init  threefry2x64_init
+#define cburng4x64_init  threefry4x64_init
+#define cburng2x32_rand  threefry2x32_rand
+#define cburng4x32_rand  threefry4x32_rand
+#define cburng2x64_rand  threefry2x64_rand
+#define cburng4x64_rand  threefry4x64_rand
+#else
+typedef philox2x32_rng_t cburng2x32_rng_t;
+typedef philox4x32_rng_t cburng4x32_rng_t;
+typedef philox2x64_rng_t cburng2x64_rng_t;
+typedef philox4x64_rng_t cburng4x64_rng_t;
+#define cburng2x32_init  philox2x32_init
+#define cburng4x32_init  philox4x32_init
+#define cburng2x64_init  philox2x64_init
+#define cburng4x64_init  philox4x64_init
+#define cburng2x32_rand  philox2x32_rand
+#define cburng4x32_rand  philox4x32_rand
+#define cburng2x64_rand  philox2x64_rand
+#define cburng4x64_rand  philox4x64_rand
+#endif
 
 #endif // VSMC_RNG_URNG_H

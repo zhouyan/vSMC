@@ -14,8 +14,8 @@
 ///
 /// ~~~{.c}
 /// gammak1_<N>x<W>_<F>;
-/// void gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W> *, <FT> shape);
-/// <FT> gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W> *);
+/// void gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W>_rng_t *, <FT> shape);
+/// <FT> gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W>_rng_t *);
 /// ~~~
 ///
 /// ### Macros
@@ -32,7 +32,7 @@
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
 /// #include <vsmc/rng/gammak1.h>
 ///
-/// cburng4x32 rng;
+/// cburng4x32_rng_t rng;
 /// cburng4x32_init(&rng);
 ///
 /// double shape = 2;
@@ -88,7 +88,8 @@
 
 #define VSMC_DEFINE_GAMMAK1_INIT(N, W, F, FT) \
     VSMC_STATIC_INLINE void gammak1_##N##x##W##_##F##_init (                 \
-            gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W *rng, FT shape) \
+            gammak1_##N##x##W##_##F *rgamma,                                 \
+            cburng##N##x##W##_rng_t *rng, FT shape)                          \
     {                                                                        \
         rgamma->c_shape = shape;                                             \
         normal01_##N##x##W##_##F##_init(&(rgamma->rnorm), rng);              \
@@ -145,7 +146,7 @@
 
 #define VSMC_DEFINE_GAMMAK1_RAND(N, W, F, FT) \
     VSMC_STATIC_INLINE FT gammak1_##N##x##W##_##F##_rand (                   \
-            gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W *rng)           \
+            gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W##_rng_t *rng)   \
     {                                                                        \
         const FT c_shape = rgamma->c_shape;                                  \
         const FT c_s2    = rgamma->c_s2;                                     \

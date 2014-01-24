@@ -26,7 +26,7 @@
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
 /// #include <vsmc/rng/u01.h>
 ///
-/// cburng4x32 rng;
+/// cburng4x32_rng_t rng;
 /// cburng4x32_init(&rng);
 /// double u_53 = u01_open_closed_32_53(cburng4x32_rand(&rng));
 ///

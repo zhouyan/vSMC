@@ -9,8 +9,8 @@
 ///
 /// ~~~{.c}
 /// normal01_<N>x<W>_<F>;
-/// void normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *, cburng<N>x<W> *, <FT> shape);
-/// <FT> normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *, cburng<N>x<W> *);
+/// void normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *, cburng<N>x<W>_rng_t *, <FT> shape);
+/// <FT> normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *, cburng<N>x<W>_rng_t *);
 /// ~~~
 ///
 /// ### Macros
@@ -27,7 +27,7 @@
 /// #define VSMC_FP_TYPE_IS_DOUBLE 1
 /// #include <vsmc/rng/normal01.h>
 ///
-/// cburng4x32 rng;
+/// cburng4x32_rng_t rng;
 /// cburng4x32_init(&rng);
 ///
 /// double shape = 2;
@@ -83,7 +83,7 @@
 
 #define VSMC_DEFINE_NORMAL01_INIT(N, W, F, FT) \
     VSMC_STATIC_INLINE void normal01_##N##x##W##_##F##_init (                \
-            normal01_##N##x##W##_##F *rnorm, cburng##N##x##W *rng)           \
+            normal01_##N##x##W##_##F *rnorm, cburng##N##x##W##_rng_t *rng)   \
     {                                                                        \
         rnorm->u1 = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));  \
         rnorm->u2 = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));  \
@@ -92,7 +92,7 @@
 
 #define VSMC_DEFINE_NORMAL01_RAND(N, W, F, FT) \
     VSMC_STATIC_INLINE FT normal01_##N##x##W##_##F##_rand (                  \
-            normal01_##N##x##W##_##F *rnorm, cburng##N##x##W *rng)           \
+            normal01_##N##x##W##_##F *rnorm, cburng##N##x##W##_rng_t *rng)   \
     {                                                                        \
         const FT c_2pi = 6.2831853071795865;                                 \
         if (rnorm->saved) {                                                  \
