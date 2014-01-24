@@ -3,10 +3,24 @@
 #include <vsmc/rng/rng_set.hpp>
 #include <vector>
 
+#if defined(VSMC_RANDOM123_AES_FOUND)
+#include <Random123/aes.h>
+#endif
+
+#if defined(VSMC_RANDOM123_ARS_FOUND)
+#include <Random123/ars.h>
+#endif
+
 int main ()
 {
     const int N = 1000;
+#if defined(VSMC_RANDOM123_AES_FOUND)
+    vsmc::RngSet<r123::Engine<r123::AESNI4x32>, vsmc::VectorRng> eng(N);
+#elif defined(VSMC_RANDOM123_ARS_FOUND)
+    vsmc::RngSet<r123::Engine<r123::ARS4x32_R<7> >, vsmc::VectorRng> eng(N);
+#else
     vsmc::traits::RngSetTypeTrait<vsmc::NullType>::type eng(N);
+#endif
 
     vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
     for (int i = 0; i != N; ++i) {

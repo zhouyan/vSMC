@@ -9,8 +9,8 @@
 #pragma warning(push)
 #pragma warning(disable:4521)
 #endif // _MSC_VER
-#define R123_USE_U01_DOUBLE 1
 #include <Random123/threefry.h>
+#include <Random123/philox.h>
 #include <Random123/conventional/Engine.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -19,7 +19,7 @@
 
 #if VSMC_USE_RANDOM123
 #define VSMC_DEFAULT_RNG_SET_TYPE \
-    RngSet<r123::Engine<r123::Threefry4x64>, VectorRng>
+    RngSet<r123::Engine<r123::Philox2x64>, VectorRng>
 #else
 #define VSMC_DEFAULT_RNG_SET_TYPE \
     RngSet<vsmc::cxx11::mt19937, VectorRng>
