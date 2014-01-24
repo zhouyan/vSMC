@@ -504,7 +504,6 @@ class Sampler
 
     /// \brief Sampler summary data
     ///
-    /// \param order The order of the data, row or column major
     /// \param first The beginning of the output
     template <MatrixOrder Order, typename OutputIter>
     OutputIter summary_data (OutputIter first) const

@@ -182,7 +182,6 @@ class Monitor
     /// \brief Read the record history of all variables through an output
     /// iterator
     ///
-    /// \param order Either ColMajor or RowMajor
     /// \param first The output iterator
     ///
     /// For example, say `first` is of type `double *`, then if `order ==
