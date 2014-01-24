@@ -64,7 +64,6 @@ ENDIF (NOT VSMC_ENABLE_EXAMPLE)
 
 # Module path and vSMC cmake functions
 SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
-INCLUDE (vSMCFunctions)
 
 # Required Includes
 SET (VSMC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
