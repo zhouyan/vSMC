@@ -233,9 +233,21 @@
 #endif
 #endif
 
+#if VSMC_GNUC_VERSION >= 40700
+#ifndef VSMC_HAS_CXX11LIB_MUTEX
+#define VSMC_HAS_CXX11LIB_MUTEX 1
+#endif
+#endif
+
 #if VSMC_GNUC_VERSION >= 40500
 #ifndef VSMC_HAS_CXX11LIB_RANDOM
 #define VSMC_HAS_CXX11LIB_RANDOM 1
+#endif
+#endif
+
+#if VSMC_GNUC_VERSION >= 40700
+#ifndef VSMC_HAS_CXX11LIB_THREAD
+#define VSMC_HAS_CXX11LIB_THREAD 1
 #endif
 #endif
 

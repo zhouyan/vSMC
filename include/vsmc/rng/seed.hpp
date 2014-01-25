@@ -55,9 +55,8 @@ class Seed
     result_type div_;
     result_type rem_;
 
-    Seed () :
-        seed_(0), seed_max_(std::numeric_limits<result_type>::max
-                VSMC_MACRO_NO_EXPANSION ()), div_(1), rem_(0) {}
+    Seed () : seed_(0), seed_max_(std::numeric_limits<result_type>::max
+            VSMC_MACRO_NO_EXPANSION ()), div_(1), rem_(0) {}
 
     Seed (const Seed &);
     Seed &operator= (const Seed &);

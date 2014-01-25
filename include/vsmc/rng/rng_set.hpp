@@ -20,10 +20,8 @@
 #if VSMC_USE_RANDOM123
 #define VSMC_DEFAULT_RNG_SET_TYPE \
     RngSet<r123::Engine<r123::Philox2x64>, VectorRng>
-#elif VSMC_HAS_CXX11_THREAD_LOCAL
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    RngSet<vsmc::cxx11::mt19937, ThreadLocalRng>
 #else
+#warning No Random123 found, RNG streams may not be independent
 #define VSMC_DEFAULT_RNG_SET_TYPE \
     RngSet<vsmc::cxx11::mt19937, VectorRng>
 #endif
@@ -87,37 +85,6 @@ class RngSet<RngType, VectorRng>
 
     std::vector<rng_type> rng_;
 }; // class RngSet
-
-#if VSMC_HAS_CXX11_THREAD_LOCAL
-
-/// \brief Thread local RNG set
-/// \ingroup RNG
-template <typename RngType>
-class RngSet<RngType, ThreadLocalRng>
-{
-    public :
-
-    typedef RngType rng_type;
-    typedef std::size_t size_type;
-
-    explicit RngSet (size_type N = 1) : size_(N) {}
-
-    size_type size () const {return size_;}
-
-    rng_type &rng (size_type id = 0)
-    {
-        thread_local rng_type rng_local(static_cast<
-                typename rng_type::result_type>(Seed::instance().get()));
-
-        return rng_local;
-    }
-
-    private :
-
-    size_type size_;
-}; // class RngSet
-
-#endif // VSMC_HAS_CXX11_THREAD_LOCAL
 
 } // namespace vsmc
 

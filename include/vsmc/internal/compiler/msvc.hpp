@@ -229,9 +229,21 @@
 #endif
 #endif
 
+#if _MSC_VER >= 1700
+#ifndef VSMC_HAS_CXX11LIB_MUTEX
+#define VSMC_HAS_CXX11LIB_MUTEX 1
+#endif
+#endif
+
 #if _MSC_VER >= 1600
 #ifndef VSMC_HAS_CXX11LIB_RANDOM
 #define VSMC_HAS_CXX11LIB_RANDOM 1
+#endif
+#endif
+
+#if _MSC_VER >= 1700
+#ifndef VSMC_HAS_CXX11LIB_THREAD
+#define VSMC_HAS_CXX11LIB_THREAD 1
 #endif
 #endif
 

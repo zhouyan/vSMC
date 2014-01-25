@@ -241,10 +241,20 @@
 #define VSMC_HAS_CXX11LIB_FUTURE 0
 #endif
 
+/// \brief C++11 `<mutex>`
+#ifndef VSMC_HAS_CXX11LIB_MUTEX
+#define VSMC_HAS_CXX11LIB_MUTEX 0
+#endif
+
 /// \brief C++11 `<random>`
 /// \ingroup Compiler
 #ifndef VSMC_HAS_CXX11LIB_RANDOM
 #define VSMC_HAS_CXX11LIB_RANDOM 0
+#endif
+
+/// \brief C++11 `<thread>`
+#ifndef VSMC_HAS_CXX11LIB_THREAD
+#define VSMC_HAS_CXX11LIB_THREAD 0
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

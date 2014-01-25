@@ -25,7 +25,6 @@ struct Virtual;
 struct NullType;
 struct ScalarRng;
 struct VectorRng;
-struct ThreadLocalRng;
 
 // Utilities
 class Seed;
