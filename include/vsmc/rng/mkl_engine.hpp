@@ -208,7 +208,7 @@ struct EngSkipForce
     }
 
     void skip_buffer_size (std::size_t size) {skip_buffer_size_ = size;}
-    std::size_t skip_buffer_size () const {skip_buffer_size_;}
+    std::size_t skip_buffer_size () const {return skip_buffer_size_;}
 
     private :
 
