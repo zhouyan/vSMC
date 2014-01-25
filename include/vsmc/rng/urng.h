@@ -150,7 +150,7 @@
         RNG##N##x##W##_key_t key;                                            \
         RNG##N##x##W##_ctr_t ctr;                                            \
         RNG##N##x##W##_ctr_t rnd;                                            \
-        unsigned char rem;                                                   \
+        unsigned char remain;                                                \
     } RNG##N##x##W##_rng_t;
 
 #define VSMC_DEFINE_CBURNG_INIT(RNG, N, W) \
@@ -163,35 +163,35 @@
         rng->rnd = init_ctr;                                                 \
         ukey.v[0] = seed;                                                    \
         rng->key = RNG##N##x##W##keyinit(ukey);                              \
-        rng->rem = 0;                                                        \
+        rng->remain = 0;                                                     \
     }
 
 #define VSMC_DEFINE_CBURNG_RAND(RNG, N, W) \
     VSMC_STATIC_INLINE uint##W##_t RNG##N##x##W##_rand(                      \
             RNG##N##x##W##_rng_t *rng)                                       \
     {                                                                        \
-        unsigned char rem = rng->rem;                                        \
+        unsigned char remain = rng->remain;                                  \
         RNG##N##x##W##_ctr_t rnd = rng->rnd;                                 \
                                                                              \
-        if (rem > 0) {                                                       \
-            --rem;                                                           \
-            rng->rem = rem;                                                  \
-            return rnd.v[rem];                                               \
+        if (remain > 0) {                                                    \
+            --remain;                                                        \
+            rng->remain = remain;                                            \
+            return rnd.v[remain];                                            \
         }                                                                    \
                                                                              \
         RNG##N##x##W##_ctr_t ctr = rng->ctr;                                 \
         RNG##N##x##W##_key_t key = rng->key;                                 \
                                                                              \
-        rem = N - 1;                                                         \
+        remain = N - 1;                                                      \
         ctr.v[0]++;                                                          \
         rnd = RNG##N##x##W(ctr, key);                                        \
                                                                              \
-        rng->rem = rem;                                                      \
+        rng->remain = remain;                                                \
         rng->rnd = rnd;                                                      \
         rng->ctr = ctr;                                                      \
         rng->key = key;                                                      \
                                                                              \
-        return rnd.v[rem];                                                   \
+        return rnd.v[remain];                                                \
     }
 
 /// \ingroup RNG
