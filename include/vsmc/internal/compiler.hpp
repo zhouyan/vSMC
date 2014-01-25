@@ -185,6 +185,12 @@
 #define VSMC_HAS_CXX11_STRONG_ENUMS 0
 #endif
 
+/// \brief C++11 thread_local
+/// \ingroup Compiler
+#ifndef VSMC_HAS_CXX11_THREAD_LOCAL
+#define VSMC_HAS_CXX11_THREAD_LOCAL 0
+#endif
+
 /// \brief C++11 trailing return type function declaration
 /// \ingroup Compiler
 #ifndef VSMC_HAS_CXX11_TRAILING_RETURN

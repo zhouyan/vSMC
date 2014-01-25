@@ -173,6 +173,12 @@
 #endif
 #endif
 
+#if __has_feature(cxx_thread_local)
+#ifndef VSMC_HAS_CXX11_THREAD_LOCAL
+#define VSMC_HAS_CXX11_THREAD_LOCAL 1
+#endif
+#endif
+
 #if __has_feature(cxx_trailing_return)
 #ifndef VSMC_HAS_CXX11_TRAILING_RETURN
 #define VSMC_HAS_CXX11_TRAILING_RETURN 1
