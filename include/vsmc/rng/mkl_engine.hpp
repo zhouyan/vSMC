@@ -152,7 +152,7 @@ inline void rng_error_check (int status, const char *func, const char *vslf)
 } // error_check
 #else
 template <MKL_INT BRNG>
-void static rng_error_check (int, const char *, const char *) {}
+inline void rng_error_check (int, const char *, const char *) {}
 #endif
 
 /// \brief MKL RNG C++11 engine skip ahead using `vslSkipAheadStream`
@@ -166,6 +166,9 @@ struct EngSkipVSL
         rng_error_check<BRNG>(
                 status, "EngSkipVSL::skip", "vslSkipAheadStream");
     }
+
+    void skip_buffer_size (std::size_t) {}
+    std::size_t skip_buffer_size () const {return 0;}
 }; // struct EngSkipVSL
 
 /// \brief MKL RNG C++11 engine skip ahead by generating random numbers
@@ -173,18 +176,45 @@ struct EngSkipVSL
 template <MKL_INT BRNG>
 struct EngSkipForce
 {
+    EngSkipForce () : skip_buffer_size_(1000) {}
+
     void skip (VSLStreamStatePtr stream, std::size_t nskip)
     {
-        ruint_.resize(nskip);
-        int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
-                stream, nskip, &ruint_[0]);
-        rng_error_check<BRNG>(
-                status, "EngSkipForce::skip", "viRngUniformBits32");
+        if (nskip == 0)
+            return;
+
+        if (nskip < skip_buffer_size()) {
+            ruint_.resize(nskip);
+            int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
+                    stream, nskip, &ruint_[0]);
+            rng_error_check<BRNG>(
+                    status, "EngSkipForce::skip", "viRngUniformBits32");
+        } else {
+            ruint_fixed_.resize(skip_buffer_size_);
+            std::size_t repeat = nskip / skip_buffer_size_;
+            std::size_t remain = nskip - repeat * skip_buffer_size_;
+            int status = VSL_ERROR_OK;
+            for (std::size_t r = 1; r != repeat + 1; ++r) {
+                status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
+                        stream, r * skip_buffer_size_, &ruint_[0]);
+                rng_error_check<BRNG>(
+                        status, "EngSkipForce::skip", "viRngUniformBits32");
+            }
+            status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
+                    stream, remain, &ruint_[0]);
+            rng_error_check<BRNG>(
+                    status, "EngSkipForce::skip", "viRngUniformBits32");
+        }
     }
+
+    void skip_buffer_size (std::size_t size) {skip_buffer_size_ = size;}
+    std::size_t skip_buffer_size () const {skip_buffer_size_;}
 
     private :
 
+    std::size_t skip_buffer_size_;
     std::vector<unsigned int> ruint_;
+    std::vector<unsigned int> ruint_fixed_;
 }; // strut EngSkipForce
 
 /// \brief MKL RNG index offest (constant zero)
@@ -316,11 +346,14 @@ template <MKL_INT BRNG,
 
     VSLStreamStatePtr stream () const {return stream_;}
 
-    static VSMC_CONSTEXPR result_type min VSMC_MACRO_NO_EXPANSION () {return _Min;}
-    static VSMC_CONSTEXPR result_type max VSMC_MACRO_NO_EXPANSION () {return _Max;}
-
     static const result_type _Min = 0;
     static const result_type _Max = ~((result_type)0);
+
+    static VSMC_CONSTEXPR result_type min VSMC_MACRO_NO_EXPANSION ()
+    {return _Min;}
+
+    static VSMC_CONSTEXPR result_type max VSMC_MACRO_NO_EXPANSION ()
+    {return _Max;}
 
     private :
 
