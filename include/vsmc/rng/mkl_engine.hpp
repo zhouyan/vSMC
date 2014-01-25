@@ -4,195 +4,176 @@
 #include <vsmc/internal/common.hpp>
 #include <mkl_vsl.h>
 
-#define VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status) \
-    {                                                                        \
-        if (status != VSL_ERROR_OK) {                                        \
-            std::string msg("Using MKL BRNG: ");                             \
-            switch (BRNG) {                                                  \
-                case VSL_BRNG_MCG31 :                                        \
-                    msg += "VSL_BRNG_MCG31";                                 \
-                    break;                                                   \
-                case VSL_BRNG_MCG59 :                                        \
-                    msg += "VSL_BRNG_MCG59";                                 \
-                    break;                                                   \
-                case VSL_BRNG_MRG32K3A :                                     \
-                    msg += "VSL_BRNG_MRG32K3A";                              \
-                    break;                                                   \
-                case VSL_BRNG_R250 :                                         \
-                    msg += "VSL_BRNG_R250";                                  \
-                    break;                                                   \
-                case VSL_BRNG_MT19937 :                                      \
-                    msg += "VSL_BRNG_MT19937";                               \
-                    break;                                                   \
-                case VSL_BRNG_SFMT19937 :                                    \
-                    msg += "VSL_BRNG_SFMT19937";                             \
-                    break;                                                   \
-                case VSL_BRNG_MT2203 :                                       \
-                    msg += "VSL_BRNG_MT2203";                                \
-                    break;                                                   \
-                case VSL_BRNG_WH :                                           \
-                    msg += "VSL_BRNG_WH";                                    \
-                    break;                                                   \
-                case VSL_BRNG_NONDETERM :                                    \
-                    msg += "VSL_BRNG_NONDETERM";                             \
-                    break;                                                   \
-            }                                                                \
-            msg += "\n";                                                     \
-            std::fprintf(stderr, "%s", msg.c_str());                         \
-        }                                                                    \
-                                                                             \
-        switch (status) {                                                    \
-            case VSL_ERROR_OK :                                              \
-                break;                                                       \
-            case VSL_ERROR_BADARGS :                                         \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_ERROR_BADARGS");                                \
-                break;                                                       \
-            case VSL_ERROR_CPU_NOT_SUPPORTED :                               \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_ERROR_CPU_NOT_SUPPORTED");                      \
-                break;                                                       \
-            case VSL_ERROR_FEATURE_NOT_IMPLEMENTED :                         \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_ERROR_FEATURE_NOT_IMPLEMENTED");                \
-                break;                                                       \
-            case VSL_ERROR_MEM_FAILURE :                                     \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_ERROR_MEM_FAILURE");                            \
-                break;                                                       \
-            case VSL_ERROR_NULL_PTR :                                        \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_ERROR_NULL_PTR");                               \
-                break;                                                       \
-            case VSL_ERROR_UNKNOWN :                                         \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_ERROR_UNKNOWN");                                \
-                break;                                                       \
-            case VSL_RNG_ERROR_BAD_FILE_FORMAT :                             \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BAD_FILE_FORMAT");                    \
-                break;                                                       \
-            case VSL_RNG_ERROR_BAD_MEM_FORMAT :                              \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BAD_MEM_FORMAT");                     \
-                break;                                                       \
-            case VSL_RNG_ERROR_BAD_NBITS :                                   \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BAD_NBITS");                          \
-                break;                                                       \
-            case VSL_RNG_ERROR_BAD_NSEEDS :                                  \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BAD_NSEEDS");                         \
-                break;                                                       \
-            case VSL_RNG_ERROR_BAD_STREAM :                                  \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BAD_STREAM");                         \
-                break;                                                       \
-            case VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE :                       \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE");              \
-                break;                                                       \
-            case VSL_RNG_ERROR_BAD_UPDATE :                                  \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BAD_UPDATE");                         \
-                break;                                                       \
-            case VSL_RNG_ERROR_BAD_WORD_SIZE :                               \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BAD_WORD_SIZE");                      \
-                break;                                                       \
-            case VSL_RNG_ERROR_BRNG_NOT_SUPPORTED :                          \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BRNG_NOT_SUPPORTED");                 \
-                break;                                                       \
-            case VSL_RNG_ERROR_BRNG_TABLE_FULL :                             \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BRNG_TABLE_FULL");                    \
-                break;                                                       \
-            case VSL_RNG_ERROR_BRNGS_INCOMPATIBLE :                          \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_BRNGS_INCOMPATIBLE");                 \
-                break;                                                       \
-            case VSL_RNG_ERROR_FILE_CLOSE :                                  \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_FILE_CLOSE");                         \
-                break;                                                       \
-            case VSL_RNG_ERROR_FILE_OPEN :                                   \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_FILE_OPEN");                          \
-                break;                                                       \
-            case VSL_RNG_ERROR_FILE_READ :                                   \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_FILE_READ");                          \
-                break;                                                       \
-            case VSL_RNG_ERROR_FILE_WRITE :                                  \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_FILE_WRITE");                         \
-                break;                                                       \
-            case VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM :                     \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM");            \
-                break;                                                       \
-            case VSL_RNG_ERROR_INVALID_BRNG_INDEX :                          \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_INVALID_BRNG_INDEX");                 \
-                break;                                                       \
-            case VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED :                        \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED");               \
-                break;                                                       \
-            case VSL_RNG_ERROR_NO_NUMBERS :                                  \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_NO_NUMBERS");                         \
-                break;                                                       \
-            case VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED :                         \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED");                \
-                break;                                                       \
-            case VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED :                       \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED");              \
-                break;                                                       \
-            case VSL_RNG_ERROR_UNSUPPORTED_FILE_VER :                        \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_UNSUPPORTED_FILE_VER");               \
-                break;                                                       \
-            case VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED :                     \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED");            \
-                break;                                                       \
-            case VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED :                 \
-                VSMC_RUNTIME_ASSERT(false,                                   \
-                        "VSL_RNG_ERROR_NONDETERM_ NRETRIES_EXCEEDED");       \
-                break;                                                       \
-            default :                                                        \
-                break;                                                       \
-        }                                                                    \
-    } // VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS
-
 namespace vsmc { namespace mkl {
+
+#ifndef NDEBUG
+template <MKL_INT BRNG>
+inline void rng_error_check (int status, const char *func, const char *vslf)
+{
+    if (status == VSL_ERROR_OK)
+        return;
+
+    std::string msg("**vsmc::mkl::");
+    msg += func;
+    msg += " failure";
+    msg += "; MKL function: ";
+    msg += vslf;
+
+    msg += "; BRNG: ";
+    switch (BRNG) {
+        case VSL_BRNG_MCG31 :
+            msg += "VSL_BRNG_MCG31";
+            break;
+        case VSL_BRNG_MCG59 :
+            msg += "VSL_BRNG_MCG59";
+            break;
+        case VSL_BRNG_MRG32K3A :
+            msg += "VSL_BRNG_MRG32K3A";
+            break;
+        case VSL_BRNG_R250 :
+            msg += "VSL_BRNG_R250";
+            break;
+        case VSL_BRNG_MT19937 :
+            msg += "VSL_BRNG_MT19937";
+            break;
+        case VSL_BRNG_SFMT19937 :
+            msg += "VSL_BRNG_SFMT19937";
+            break;
+        case VSL_BRNG_MT2203 :
+            msg += "VSL_BRNG_MT2203";
+            break;
+        case VSL_BRNG_WH :
+            msg += "VSL_BRNG_WH";
+            break;
+        case VSL_BRNG_NONDETERM :
+            msg += "VSL_BRNG_NONDETERM";
+            break;
+    } // switch (BRNG)
+
+    msg += "; Error code: ";
+    switch (status) {
+        case VSL_ERROR_BADARGS :
+            msg += "VSL_ERROR_BADARGS";
+            break;
+        case VSL_ERROR_CPU_NOT_SUPPORTED :
+            msg += "VSL_ERROR_CPU_NOT_SUPPORTED";
+            break;
+        case VSL_ERROR_FEATURE_NOT_IMPLEMENTED :
+            msg += "VSL_ERROR_FEATURE_NOT_IMPLEMENTED";
+            break;
+        case VSL_ERROR_MEM_FAILURE :
+            msg += "VSL_ERROR_MEM_FAILURE";
+            break;
+        case VSL_ERROR_NULL_PTR :
+            msg += "VSL_ERROR_NULL_PTR";
+            break;
+        case VSL_ERROR_UNKNOWN :
+            msg += "VSL_ERROR_UNKNOWN";
+            break;
+        case VSL_RNG_ERROR_BAD_FILE_FORMAT :
+            msg += "VSL_RNG_ERROR_BAD_FILE_FORMAT";
+            break;
+        case VSL_RNG_ERROR_BAD_MEM_FORMAT :
+            msg += "VSL_RNG_ERROR_BAD_MEM_FORMAT";
+            break;
+        case VSL_RNG_ERROR_BAD_NBITS :
+            msg += "VSL_RNG_ERROR_BAD_NBITS";
+            break;
+        case VSL_RNG_ERROR_BAD_NSEEDS :
+            msg += "VSL_RNG_ERROR_BAD_NSEEDS";
+            break;
+        case VSL_RNG_ERROR_BAD_STREAM :
+            msg += "VSL_RNG_ERROR_BAD_STREAM";
+            break;
+        case VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE :
+            msg += "VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE";
+            break;
+        case VSL_RNG_ERROR_BAD_UPDATE :
+            msg += "VSL_RNG_ERROR_BAD_UPDATE";
+            break;
+        case VSL_RNG_ERROR_BAD_WORD_SIZE :
+            msg += "VSL_RNG_ERROR_BAD_WORD_SIZE";
+            break;
+        case VSL_RNG_ERROR_BRNG_NOT_SUPPORTED :
+            msg += "VSL_RNG_ERROR_BRNG_NOT_SUPPORTED";
+            break;
+        case VSL_RNG_ERROR_BRNG_TABLE_FULL :
+            msg += "VSL_RNG_ERROR_BRNG_TABLE_FULL";
+            break;
+        case VSL_RNG_ERROR_BRNGS_INCOMPATIBLE :
+            msg += "VSL_RNG_ERROR_BRNGS_INCOMPATIBLE";
+            break;
+        case VSL_RNG_ERROR_FILE_CLOSE :
+            msg += "VSL_RNG_ERROR_FILE_CLOSE";
+            break;
+        case VSL_RNG_ERROR_FILE_OPEN :
+            msg += "VSL_RNG_ERROR_FILE_OPEN";
+            break;
+        case VSL_RNG_ERROR_FILE_READ :
+            msg += "VSL_RNG_ERROR_FILE_READ";
+            break;
+        case VSL_RNG_ERROR_FILE_WRITE :
+            msg += "VSL_RNG_ERROR_FILE_WRITE";
+            break;
+        case VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM :
+            msg += "VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM";
+            break;
+        case VSL_RNG_ERROR_INVALID_BRNG_INDEX :
+            msg += "VSL_RNG_ERROR_INVALID_BRNG_INDEX";
+            break;
+        case VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED :
+            msg += "VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED";
+            break;
+        case VSL_RNG_ERROR_NO_NUMBERS :
+            msg += "VSL_RNG_ERROR_NO_NUMBERS";
+            break;
+        case VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED :
+            msg += "VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED";
+            break;
+        case VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED :
+            msg += "VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED";
+            break;
+        case VSL_RNG_ERROR_UNSUPPORTED_FILE_VER :
+            msg += "VSL_RNG_ERROR_UNSUPPORTED_FILE_VER";
+            break;
+        case VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED :
+            msg += "VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED";
+            break;
+        case VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED :
+            msg += "VSL_RNG_ERROR_NONDETERM_ NRETRIES_EXCEEDED";
+            break;
+        default :
+            break;
+    } // switch (status)
+
+    VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
+} // error_check
+#else
+template <MKL_INT BRNG>
+void static rng_error_check (int, const char *, const char *) {}
+#endif
 
 template <MKL_INT BRNG>
 struct EngSkipVSL
 {
-    static int skip (VSLStreamStatePtr stream, std::size_t nskip)
+    static void skip (VSLStreamStatePtr stream, std::size_t nskip)
     {
-        VSLBRngProperties prop;
-        vslGetBrngProperties(BRNG, &prop);
-        std::size_t skip_mul = prop.WordSize / sizeof(uint32_t);
-        if (skip_mul < 1) skip_mul = 1;
-
-        return vslSkipAheadStream(stream, nskip / skip_mul);
+        int status = vslSkipAheadStream(stream, nskip);
+        rng_error_check<BRNG>(
+                status, "EngSkipVSL::skip", "vslSkipAheadStream");
     }
 }; // struct EngSkipVSL
 
+template <MKL_INT BRNG>
 struct EngSkipForce
 {
-    int skip (VSLStreamStatePtr stream, std::size_t nskip)
+    void skip (VSLStreamStatePtr stream, std::size_t nskip)
     {
         ruint_.resize(nskip);
-
-        return viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
+        int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                 stream, nskip, &ruint_[0]);
+        rng_error_check<BRNG>(
+                status, "EngSkipForce::skip", "viRngUniformBits32");
     }
 
     private :
@@ -200,12 +181,14 @@ struct EngSkipForce
     std::vector<uint32_t> ruint_;
 }; // strut EngSkipForce
 
+template <MKL_INT BRNG>
 struct EngOffsetZero
 {
     static void set_offset (MKL_INT) {}
     static VSMC_CONSTEXPR MKL_INT offset () {return 0;}
 }; // struct EngOffsetZero
 
+template <MKL_INT BRNG>
 struct EngOffsetDynamic
 {
     EngOffsetDynamic () : offset_(0) {}
@@ -218,9 +201,11 @@ struct EngOffsetDynamic
     MKL_INT offset_;
 }; // struct EngOffsetDynamic
 
-template <MKL_INT BRNG, typename EngOffset, typename EngSkip,
+template <MKL_INT BRNG,
+         template <MKL_INT> class EngOffset,
+         template <MKL_INT> class EngSkip,
          std::size_t Buffer = 1000, MKL_UINT Seed = 101>
-class Engine : public EngOffset, public EngSkip
+         class Engine : public EngOffset<BRNG>, public EngSkip<BRNG>
 {
     public :
 
@@ -229,23 +214,23 @@ class Engine : public EngOffset, public EngSkip
     explicit Engine (MKL_UINT seed = Seed) : ruint_(Buffer), remain_(0)
     {
         int status = vslNewStream(&stream_, BRNG + this->offset(), seed);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        rng_error_check<BRNG>(status, "Engine::Engine", "vslNewStream");
     }
 
     template <typename SeedSeq>
-    explicit Engine (SeedSeq &seq) : ruint_(Buffer), remain_(0)
+        explicit Engine (SeedSeq &seq) : ruint_(Buffer), remain_(0)
     {
         MKL_UINT seed = 0;
         seq.generate(&seed, &seed + 1);
         int status = vslNewStream(&stream_, BRNG + this->offset(), seed);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        rng_error_check<BRNG>(status, "Engine::Engine", "vslNewStream");
     }
 
     Engine (const Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> &other) :
         ruint_(other.ruint_), remain_(other.remain_)
     {
         int status = vslCopyStream(&stream_, other.stream_);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        rng_error_check<BRNG>(status, "Engine::Engine", "vslCopyStream");
     }
 
     Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> &operator= (
@@ -254,7 +239,8 @@ class Engine : public EngOffset, public EngSkip
         ruint_ = other.ruint_;
         remain_ = other.remain_;
         int status = vslCopyStreamState(stream_, other.stream_);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        rng_error_check<BRNG>(
+                status, "Engine::operator=", "vslCopyStreamState");
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
@@ -274,24 +260,24 @@ class Engine : public EngOffset, public EngSkip
 
     void seed (MKL_UINT s = Seed)
     {
-        int status = VSL_STATUS_OK;
+        int status = VSL_ERROR_OK;
         VSLStreamStatePtr new_stream;
         status = vslNewStream(&new_stream, BRNG + this->offset(), s);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        rng_error_check<BRNG>(status, "Engine::seed", "vslNewStream");
         status = vslCopyStreamState(stream_, new_stream);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        rng_error_check<BRNG>(status, "Engine::seed", "vslCopyStreamState");
         status = vslDeleteStream(&new_stream);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        rng_error_check<BRNG>(status, "Engine::seed", "vslDeleteStream");
         remain_ = 0;
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq)
-    {
-        MKL_UINT s = 0;
-        seq.generate(&s, &s + 1);
-        seed(s);
-    }
+        void seed (SeedSeq &seq)
+        {
+            MKL_UINT s = 0;
+            seq.generate(&s, &s + 1);
+            seed(s);
+        }
 
     result_type operator() ()
     {
@@ -303,7 +289,8 @@ class Engine : public EngOffset, public EngSkip
 
         int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                 stream_, Buffer, ruint_ptr);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        rng_error_check<BRNG>(
+                status, "Engine::operator()", "viRngUniformBits32");
         remain_ = Buffer - 1;
 
         return ruint_ptr[remain_];
@@ -311,8 +298,7 @@ class Engine : public EngOffset, public EngSkip
 
     void discard (std::size_t nskip)
     {
-        int status = this->skip(stream_, nskip);
-        VSMC_RUNTIME_ASSERT_RNG_MKL_ENGINE_VSL_STATUS(status);
+        this->skip(stream_, nskip);
         remain_ = 0;
     }
 
@@ -331,12 +317,12 @@ class Engine : public EngOffset, public EngSkip
     VSLStreamStatePtr stream_;
 }; // class Engine
 
-typedef Engine<VSL_BRNG_MCG59,    EngOffsetZero, EngSkipVSL<VSL_BRNG_MCG59> > MCG59;
-typedef Engine<VSL_BRNG_MRG32K3A, EngOffsetZero, EngSkipVSL<VSL_BRNG_MRG32K3A> > MRG32K3A;
-typedef Engine<VSL_BRNG_MT19937,   EngOffsetZero, EngSkipForce> MT19937;
-typedef Engine<VSL_BRNG_SFMT19937, EngOffsetZero, EngSkipForce> SFMT19937;
-typedef Engine<VSL_BRNG_MT2203, EngOffsetDynamic, EngSkipForce> MT2203;
-typedef Engine<VSL_BRNG_NONDETERM, EngOffsetZero, EngSkipForce> NONDETERM;
+typedef Engine<VSL_BRNG_MCG59,     EngOffsetZero,    EngSkipVSL>   MCG59;
+typedef Engine<VSL_BRNG_MRG32K3A,  EngOffsetZero,    EngSkipVSL>   MRG32K3A;
+typedef Engine<VSL_BRNG_MT19937,   EngOffsetZero,    EngSkipForce> MT19937;
+typedef Engine<VSL_BRNG_SFMT19937, EngOffsetZero,    EngSkipForce> SFMT19937;
+typedef Engine<VSL_BRNG_MT2203,    EngOffsetDynamic, EngSkipForce> MT2203;
+typedef Engine<VSL_BRNG_NONDETERM, EngOffsetZero,    EngSkipForce> NONDETERM;
 
 } } // namespace vsmc::mkl
 
