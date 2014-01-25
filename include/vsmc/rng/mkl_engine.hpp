@@ -7,6 +7,8 @@
 namespace vsmc { namespace mkl {
 
 #ifndef NDEBUG
+/// \brief Check MKL RNG error status
+/// \ingroup RNG
 template <MKL_INT BRNG>
 inline void rng_error_check (int status, const char *func, const char *vslf)
 {
@@ -153,6 +155,8 @@ template <MKL_INT BRNG>
 void static rng_error_check (int, const char *, const char *) {}
 #endif
 
+/// \brief MKL RNG C++11 engine skip ahead using `vslSkipAheadStream`
+/// \ingroup RNG
 template <MKL_INT BRNG>
 struct EngSkipVSL
 {
@@ -164,6 +168,8 @@ struct EngSkipVSL
     }
 }; // struct EngSkipVSL
 
+/// \brief MKL RNG C++11 engine skip ahead by generating random numbers
+/// \ingroup RNG
 template <MKL_INT BRNG>
 struct EngSkipForce
 {
@@ -178,9 +184,11 @@ struct EngSkipForce
 
     private :
 
-    std::vector<uint32_t> ruint_;
+    std::vector<unsigned int> ruint_;
 }; // strut EngSkipForce
 
+/// \brief MKL RNG index offest (constant zero)
+/// \ingroup RNG
 template <MKL_INT BRNG>
 struct EngOffsetZero
 {
@@ -188,6 +196,8 @@ struct EngOffsetZero
     static VSMC_CONSTEXPR MKL_INT offset () {return 0;}
 }; // struct EngOffsetZero
 
+/// \brief MKL RNG index offest (set dynamically)
+/// \ingroup RNG
 template <MKL_INT BRNG>
 struct EngOffsetDynamic
 {
@@ -201,6 +211,8 @@ struct EngOffsetDynamic
     MKL_INT offset_;
 }; // struct EngOffsetDynamic
 
+/// \brief MKL RNG C++11 engine
+/// \ingroup RNG
 template <MKL_INT BRNG,
          template <MKL_INT> class EngOffset,
          template <MKL_INT> class EngSkip,
@@ -209,7 +221,7 @@ template <MKL_INT BRNG,
 {
     public :
 
-    typedef uint32_t result_type;
+    typedef unsigned int result_type;
 
     explicit Engine (MKL_UINT seed = Seed) : ruint_(Buffer), remain_(0)
     {
@@ -317,12 +329,30 @@ template <MKL_INT BRNG,
     VSLStreamStatePtr stream_;
 }; // class Engine
 
-typedef Engine<VSL_BRNG_MCG59,     EngOffsetZero,    EngSkipVSL>   MCG59;
-typedef Engine<VSL_BRNG_MRG32K3A,  EngOffsetZero,    EngSkipVSL>   MRG32K3A;
-typedef Engine<VSL_BRNG_MT19937,   EngOffsetZero,    EngSkipForce> MT19937;
-typedef Engine<VSL_BRNG_SFMT19937, EngOffsetZero,    EngSkipForce> SFMT19937;
-typedef Engine<VSL_BRNG_MT2203,    EngOffsetDynamic, EngSkipForce> MT2203;
-typedef Engine<VSL_BRNG_NONDETERM, EngOffsetZero,    EngSkipForce> NONDETERM;
+/// \brief A 59-bit multiplicative congruential generator
+/// \ingroup RNG
+typedef Engine<VSL_BRNG_MCG59, EngOffsetZero, EngSkipVSL> MCG59;
+
+/// \brief A combined multiple recursive generator with two components of order
+/// 3
+/// \ingroup RNG
+typedef Engine<VSL_BRNG_MRG32K3A, EngOffsetZero, EngSkipVSL> MRG32K3A;
+
+/// \brief A Mersenne-Twister pseudoranom number genertor
+/// \ingroup RNG
+typedef Engine<VSL_BRNG_MT19937, EngOffsetZero, EngSkipForce> MT19937;
+
+/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
+/// \ingroup RNG
+typedef Engine<VSL_BRNG_SFMT19937, EngOffsetZero, EngSkipForce> SFMT19937;
+
+/// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
+/// \ingroup RNG
+typedef Engine<VSL_BRNG_MT2203, EngOffsetDynamic, EngSkipForce> MT2203;
+
+/// \brief A non-determinstic random number generator
+/// \ingroup RNG
+typedef Engine<VSL_BRNG_NONDETERM, EngOffsetZero, EngSkipForce> NONDETERM;
 
 } } // namespace vsmc::mkl
 
