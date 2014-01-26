@@ -23,7 +23,7 @@
 #else
 #warning No Random123 found, RNG streams may not be independent
 #define VSMC_DEFAULT_RNG_SET_TYPE \
-    RngSet<vsmc::cxx11::mt19937, VectorRng>
+    RngSet<vsmc::cxx11::mt19937_64, VectorRng>
 #endif
 
 namespace vsmc {

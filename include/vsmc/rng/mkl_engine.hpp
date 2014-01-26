@@ -165,11 +165,12 @@ template <MKL_INT, typename> struct EngRandomBits;
 template <MKL_INT BRNG>
 struct EngRandomBits<BRNG, unsigned>
 {
-    static void generate (VSLStreamStatePtr str,
-            std::size_t n, unsigned *r)
+    typedef unsigned result_type;
+
+    static void generate (VSLStreamStatePtr str, MKL_INT n, result_type *r)
     {
         int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
-                str, static_cast<MKL_INT>(n), r);
+                str, n, r);
         rng_error_check<BRNG>(
                 status, "EngRandomBits::generate", "viRngUniformBits32");
     }
@@ -178,13 +179,14 @@ struct EngRandomBits<BRNG, unsigned>
 /// \brief MKL RNG C++11 engine generating random bits (64-bits)
 /// \ingroup RNG
 template <MKL_INT BRNG>
-struct EngRandomBits<BRNG, unsigned long long>
+struct EngRandomBits<BRNG, unsigned MKL_INT64>
 {
-    static void generate (VSLStreamStatePtr str,
-            std::size_t n, unsigned long long *r)
+    typedef unsigned MKL_INT64 result_type;
+
+    static void generate (VSLStreamStatePtr str, MKL_INT n, result_type *r)
     {
         int status = viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
-                str, static_cast<MKL_INT>(n), r);
+                str, n, r);
         rng_error_check<BRNG>(
                 status, "EngRandomBits::generate", "viRngUniformBits64");
     }
@@ -195,15 +197,17 @@ struct EngRandomBits<BRNG, unsigned long long>
 template <MKL_INT BRNG>
 struct EngSkipVSL
 {
-    static void skip (VSLStreamStatePtr stream, std::size_t nskip)
+    typedef long long skip_size_type;
+
+    static void skip (VSLStreamStatePtr stream, skip_size_type nskip)
     {
         int status = vslSkipAheadStream(stream, nskip);
         rng_error_check<BRNG>(
                 status, "EngSkipVSL::skip", "vslSkipAheadStream");
     }
 
-    static void skip_buffer_size (std::size_t) {}
-    static VSMC_CONSTEXPR std::size_t skip_buffer_size () {return 0;}
+    static void skip_buffer_size (skip_size_type) {}
+    static VSMC_CONSTEXPR skip_size_type skip_buffer_size () {return 0;}
 }; // struct EngSkipVSL
 
 /// \brief MKL RNG C++11 engine skip ahead by generating random numbers
@@ -211,9 +215,11 @@ struct EngSkipVSL
 template <MKL_INT BRNG, typename RT>
 struct EngSkipForce
 {
+    typedef MKL_INT skip_size_type;
+
     EngSkipForce () : buffer_size_(1000) {}
 
-    void skip (VSLStreamStatePtr stream, std::size_t nskip)
+    void skip (VSLStreamStatePtr stream, skip_size_type nskip)
     {
         if (nskip == 0)
             return;
@@ -225,22 +231,22 @@ struct EngSkipForce
         } else {
             if (ruint_.size() < buffer_size_)
                 ruint_.resize(buffer_size_);
-            std::size_t repeat = nskip / buffer_size_;
-            std::size_t remain = nskip - repeat * buffer_size_;
-            for (std::size_t r = 1; r != repeat + 1; ++r) {
-                std::size_t n = r * buffer_size_;
+            skip_size_type repeat = nskip / buffer_size_;
+            skip_size_type remain = nskip - repeat * buffer_size_;
+            for (skip_size_type r = 1; r != repeat + 1; ++r) {
+                skip_size_type n = r * buffer_size_;
                 EngRandomBits<BRNG, RT>::generate(stream, n, &ruint_[0]);
             }
             EngRandomBits<BRNG, RT>::generate(stream, remain, &ruint_[0]);
         }
     }
 
-    void buffer_size (MKL_INT size) {buffer_size_ = size;}
-    MKL_INT buffer_size () const {return buffer_size_;}
+    void buffer_size (skip_size_type size) {buffer_size_ = size;}
+    skip_size_type buffer_size () const {return buffer_size_;}
 
     private :
 
-    MKL_INT buffer_size_;
+    skip_size_type buffer_size_;
     std::vector<RT> ruint_;
 }; // strut EngSkipForce
 
@@ -365,14 +371,15 @@ class Engine : public EngSkip, public EngOffset
             return ruint_ptr[remain_];
         }
 
-        EngRandomBits<BRNG, RT>::generate(stream_, ruint_.size(), ruint_ptr);
-        remain_ = ruint_.size() - 1;
+        EngRandomBits<BRNG, RT>::generate(stream_, Buffer, ruint_ptr);
+        remain_ = Buffer - 1;
         return ruint_ptr[remain_];
     }
 
     void discard (std::size_t nskip)
     {
-        this->skip(stream_, nskip);
+        this->skip(stream_,
+                static_cast<typename EngSkip::skip_size_type>(nskip));
         remain_ = 0;
     }
 
@@ -407,8 +414,8 @@ typedef Engine<VSL_BRNG_MT19937, unsigned,
 
 /// \brief A Mersenne-Twister pseudoranom number genertor (64-bit)
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MT19937, unsigned long long,
-        EngSkipForce<VSL_BRNG_MT19937, unsigned long long>, EngOffsetZero>
+typedef Engine<VSL_BRNG_MT19937, unsigned MKL_INT64,
+        EngSkipForce<VSL_BRNG_MT19937, unsigned MKL_INT64>, EngOffsetZero>
         MT19937_64;
 
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
@@ -420,8 +427,8 @@ typedef Engine<VSL_BRNG_SFMT19937, unsigned,
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
 /// (64-bit)
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_SFMT19937, unsigned long long,
-        EngSkipForce<VSL_BRNG_SFMT19937, unsigned long long>, EngOffsetZero>
+typedef Engine<VSL_BRNG_SFMT19937, unsigned MKL_INT64,
+        EngSkipForce<VSL_BRNG_SFMT19937, unsigned MKL_INT64>, EngOffsetZero>
         SFMT19937_64;
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
@@ -432,8 +439,8 @@ typedef Engine<VSL_BRNG_MT2203, unsigned,
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor (64-bit)
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MT2203, unsigned long long,
-        EngSkipForce<VSL_BRNG_MT2203, unsigned long long>, EngOffsetDynamic<6024> >
+typedef Engine<VSL_BRNG_MT2203, unsigned MKL_INT64,
+        EngSkipForce<VSL_BRNG_MT2203, unsigned MKL_INT64>, EngOffsetDynamic<6024> >
         MT2203_64;
 
 /// \brief A non-determinstic random number generator
@@ -444,8 +451,8 @@ typedef Engine<VSL_BRNG_NONDETERM, unsigned,
 
 /// \brief A non-determinstic random number generator (64-bit)
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_NONDETERM, unsigned long long,
-        EngSkipForce<VSL_BRNG_NONDETERM, unsigned long long>, EngOffsetZero>
+typedef Engine<VSL_BRNG_NONDETERM, unsigned MKL_INT64,
+        EngSkipForce<VSL_BRNG_NONDETERM, unsigned MKL_INT64>, EngOffsetZero>
         NONDETERM_64;
 
 } // namespace vsmc::mkl
