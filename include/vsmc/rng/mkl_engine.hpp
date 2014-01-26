@@ -27,11 +27,34 @@ namespace mkl {
 
 /// \cond HIDDEN_SYMBOLS
 
+struct ThreadLocalRng;
 template <MKL_INT> class Stream;
 template <typename, typename> class Distribution;
-template <typename, MKL_INT B = VSMC_RNG_MKL_BUFFER_SIZE> class UniformBits;
 template <MKL_INT, typename, MKL_UINT S = VSMC_RNG_MKL_SEED> class Engine;
-struct ThreadLocalRng;
+
+template <typename> class UniformBits;
+
+template <MKL_INT> class UniformInteger;
+template <MKL_INT> class Bernoulli;
+template <MKL_INT> class Geometric;
+template <MKL_INT> class Binomial;
+template <MKL_INT> class HyperGeometric;
+template <MKL_INT> class Poisson;
+template <MKL_INT> class PoissonV;
+template <MKL_INT> class NegBinomial;
+
+template <typename, MKL_INT> class UniformReal;
+template <typename, MKL_INT> class Gaussian;
+template <typename, MKL_INT> class GaussianMV;
+template <typename, MKL_INT> class Exponential;
+template <typename, MKL_INT> class Laplace;
+template <typename, MKL_INT> class WeiBull;
+template <typename, MKL_INT> class Cauchy;
+template <typename, MKL_INT> class Rayleigh;
+template <typename, MKL_INT> class LogNormal;
+template <typename, MKL_INT> class Gumbel;
+template <typename, MKL_INT> class Gamma;
+template <typename, MKL_INT> class Beta;
 
 /// \endcond HIDDEN_SYMBOLS
 
@@ -189,13 +212,17 @@ struct SkipAheadVSL
         rng_error_check<BRNG>(
                 status, "SkipAheadVSL::skip", "vslSkipAheadStream");
     }
+
+    static void buffer_size (MKL_INT) {}
+    static MKL_INT buffer_size () {return 0;}
 }; // struct SkipAheadVSL
 
 template <typename ResultType>
 struct SkipAheadForce
 {
     typedef MKL_INT size_type;
-    static const MKL_INT buffer_size = VSMC_RNG_MKL_BUFFER_SIZE;
+
+    SkipAheadForce () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
 
     template <MKL_INT BRNG>
     void operator() (const Stream<BRNG> &stream, size_type nskip)
@@ -203,25 +230,29 @@ struct SkipAheadForce
         if (nskip == 0)
             return;
 
-        if (nskip < buffer_size) {
+        if (nskip < buffer_size_) {
             if (ruint_.size() < nskip)
                 ruint_.resize(nskip);
             runif_(stream, nskip, &ruint_[0]);
         } else {
-            if (ruint_.size() < buffer_size)
-                ruint_.resize(buffer_size);
-            size_type repeat = nskip / buffer_size;
-            size_type remain = nskip - repeat * buffer_size;
+            if (ruint_.size() < buffer_size_)
+                ruint_.resize(buffer_size_);
+            size_type repeat = nskip / buffer_size_;
+            size_type remain = nskip - repeat * buffer_size_;
             for (size_type r = 1; r != repeat + 1; ++r) {
-                size_type n = r * buffer_size;
+                size_type n = r * buffer_size_;
                 runif_(stream, n, &ruint_[0]);
             }
             runif_(stream, remain, &ruint_[0]);
         }
     }
 
+    void buffer_size (MKL_INT size) {buffer_size_ = size;}
+    MKL_INT buffer_size () {return buffer_size_;}
+
     private :
 
+    MKL_INT buffer_size_ = VSMC_RNG_MKL_BUFFER_SIZE;
     std::vector<ResultType> ruint_;
     UniformBits<ResultType> runif_;
 }; // strut SkipAheadForce
@@ -370,18 +401,18 @@ class Distribution
 
     typedef ResultType result_type;
 
-    Distribution () : remain_(0) {}
+    Distribution () : remain_(0), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
 
     template <MKL_INT BRNG>
     result_type operator() (const Stream<BRNG> &stream)
     {
-        result_.resize(Derived::buffer_size);
+        result_.resize(buffer_size_);
         result_type *const rptr = &result_[0];
         if (remain_ > 0) {
             --remain_;
         } else {
-            Derived::generate(stream, Derived::buffer_size, rptr);
-            remain_ = Derived::buffer_size - 1;
+            Derived::generate(stream, buffer_size_, rptr);
+            remain_ = buffer_size_ - 1;
         }
 
         return rptr[remain_];
@@ -392,23 +423,25 @@ class Distribution
     {Derived::generate(stream, n, r);}
 
     void reset () {remain_ = 0;}
+    void buffer_size (MKL_INT size) {buffer_size_ = size;}
+    MKL_INT buffer_size () const {return buffer_size_;}
 
     private :
 
     MKL_INT remain_;
+    MKL_INT buffer_size_;
     std::vector<result_type> result_;
 }; // class Distribution
 
 /// \brief MKL RNG C++11 engine generating random bits (32-bits)
 /// \ingroup RNG
-template <MKL_INT BufSize>
-class UniformBits<unsigned, BufSize> :
-    public Distribution<unsigned, UniformBits<unsigned, BufSize> >
+template <>
+class UniformBits<unsigned> :
+    public Distribution<unsigned, UniformBits<unsigned> >
 {
     public :
 
     typedef unsigned result_type;
-    static const MKL_INT buffer_size = BufSize;
 
     template <MKL_INT BRNG>
     static void generate (const Stream<BRNG> &stream, MKL_INT n,
@@ -423,10 +456,9 @@ class UniformBits<unsigned, BufSize> :
 
 /// \brief MKL RNG C++11 engine generating random bits (64-bits)
 /// \ingroup RNG
-template <MKL_INT BufSize>
-class UniformBits<unsigned MKL_INT64, BufSize> :
-    public Distribution<unsigned MKL_INT64,
-        UniformBits<unsigned MKL_INT64, BufSize> >
+template <>
+class UniformBits<unsigned MKL_INT64> :
+    public Distribution<unsigned MKL_INT64, UniformBits<unsigned MKL_INT64> >
 {
     public :
 
@@ -455,6 +487,7 @@ class Engine
     typedef Stream<BRNG> stream_type;
     typedef typename traits::SkipAheadTrait<BRNG, ResultType>::type
         skip_ahead_type;
+    typedef UniformBits<result_type> runif_type;
 
     explicit Engine (MKL_UINT seed = Seed) : stream_(seed) {}
 
@@ -494,6 +527,12 @@ class Engine
 
     stream_type &stream () {return stream_;}
     const stream_type &stream () const {return stream_;}
+
+    skip_ahead_type &skip_ahead () {return skip_ahead_;}
+    const skip_ahead_type &skip_ahead () const {return skip_ahead_;}
+
+    runif_type &runif () {return runif_;}
+    const runif_type &runif () const {return runif_;}
 
     private :
 
