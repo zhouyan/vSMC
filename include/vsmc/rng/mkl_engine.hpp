@@ -4,7 +4,18 @@
 #include <vsmc/internal/common.hpp>
 #include <mkl_vsl.h>
 
-namespace vsmc { namespace mkl {
+#if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
+#include <vsmc/rng/rng_set.hpp>
+
+#define VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_RNG_SET_MT2203_OFFSET(offset) \
+    VSMC_RUNTIME_ASSERT((offset < 6024),                                     \
+            ("**vsmc::RngSet<vsmc::mkl::MT2203, vsmc::VectorRng> "           \
+             "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
+#endif
+
+namespace vsmc {
+
+namespace mkl {
 
 #ifndef NDEBUG
 /// \brief Check MKL RNG error status
@@ -222,7 +233,7 @@ struct EngSkipForce
 template <MKL_INT BRNG>
 struct EngOffsetZero
 {
-    static void set_offset (MKL_INT) {}
+    static void offset (MKL_INT) {}
     static VSMC_CONSTEXPR MKL_INT offset () {return 0;}
 }; // struct EngOffsetZero
 
@@ -233,7 +244,7 @@ struct EngOffsetDynamic
 {
     EngOffsetDynamic () : offset_(0) {}
 
-    void set_offset (MKL_INT n) {offset_ = n;}
+    void offset (MKL_INT n) {offset_ = n;}
     MKL_INT offset () const {return offset_;}
 
     private :
@@ -387,6 +398,63 @@ typedef Engine<VSL_BRNG_MT2203, EngOffsetDynamic, EngSkipForce> MT2203;
 /// \ingroup RNG
 typedef Engine<VSL_BRNG_NONDETERM, EngOffsetZero, EngSkipForce> NONDETERM;
 
-} } // namespace vsmc::mkl
+} // namespace vsmc::mkl
+
+#if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
+
+template <>
+class RngSet<mkl::MT2203, VectorRng>
+{
+    public :
+
+    typedef mkl::MT2203 rng_type;
+    typedef std::size_t size_type;
+
+    explicit RngSet (size_type N = 1) : size_(N)
+    {
+        std::lock_guard lock(mtx_);
+        offset_ = 0;
+    };
+
+    size_type size () const {return size_;}
+
+    rng_type &rng (size_type id = 0)
+    {
+        static thread_local bool flag = 0;
+        if (!flag)
+            init_rng(flag);
+
+        return rng_;
+    }
+
+    void offset (unsigned int n)
+    {
+        std::lock_guard lock(mtx_);
+        offset_ = n;
+    }
+
+    unsigned int offset () const {return offset_;}
+
+    private :
+
+    std::size_t size_;
+    static std::mutex mtx_;
+    static unsigned int offset_;
+    static thread_local mkl::MT2203 rng_;
+
+    void init_rng (bool &flag)
+    {
+        std::lock_guard lock(mtx_);
+        ++offset_;
+        VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_RNG_SET_MT2203_OFFSET(offset_);
+        rng_.offset(static_cast<MKL_INT>(offset_));
+        rng_.seed(static_cast<MKL_UINT>(Seed::instance().get()));
+        flag = true;
+    }
+}; // class RngSet
+
+#endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
+
+} // namespace vsmc
 
 #endif // VSMC_RNG_MKL_ENGINE_HPP
