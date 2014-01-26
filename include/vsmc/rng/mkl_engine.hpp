@@ -6,6 +6,7 @@
 
 #if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 #include <vsmc/rng/rng_set.hpp>
+#include <mutex>
 #endif
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset) \
