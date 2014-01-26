@@ -25,9 +25,6 @@
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
 
-/// \defgroup RNG Random number generating
-/// \brief Utilities for managing independent RNG engines
-
 /// \defgroup Adapter Adapter
 /// \brief Adapter class templates for constructing concrete objects
 
@@ -73,6 +70,17 @@
 /// \defgroup TBB Intel Threading Building Blocks
 /// \ingroup SMP
 /// \brief Parallel samplers using Intel TBB
+
+/// \defgroup RNG Random number generating
+/// \brief Utilities for managing RNG engines
+
+/// \defgroup R123RNG Random123 RNG
+/// \ingroup RNG
+/// \brief Random number generating using Random123 RNG
+
+/// \defgroup MKLRNG MKL RNG
+/// \ingroup RNG
+/// \brief Random number generating using MKL RNG
 
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library

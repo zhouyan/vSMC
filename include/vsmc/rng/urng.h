@@ -194,85 +194,108 @@
         return rnd.v[remain];                                                \
     }
 
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RNG_T(threefry, 2, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RNG_T(threefry, 4, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RNG_T(threefry, 2, 64)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RNG_T(threefry, 4, 64)
 
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_INIT(threefry, 2, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_INIT(threefry, 4, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_INIT(threefry, 2, 64)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_INIT(threefry, 4, 64)
 
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RAND(threefry, 2, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RAND(threefry, 4, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RAND(threefry, 2, 64)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RAND(threefry, 4, 64)
 
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RNG_T(philox, 2, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RNG_T(philox, 4, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RNG_T(philox, 2, 64)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RNG_T(philox, 4, 64)
 
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_INIT(philox, 2, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_INIT(philox, 4, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_INIT(philox, 2, 64)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_INIT(philox, 4, 64)
 
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RAND(philox, 2, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RAND(philox, 4, 32)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RAND(philox, 2, 64)
-/// \ingroup RNG
+/// \ingroup R123RNG
 VSMC_DEFINE_CBURNG_RAND(philox, 4, 64)
 
 #if VSMC_USE_THREEFRY_CBURNG
+/// \ingroup R123RNG
 typedef threefry2x32_rng_t cburng2x32_rng_t;
+/// \ingroup R123RNG
 typedef threefry4x32_rng_t cburng4x32_rng_t;
+/// \ingroup R123RNG
 typedef threefry2x64_rng_t cburng2x64_rng_t;
+/// \ingroup R123RNG
 typedef threefry4x64_rng_t cburng4x64_rng_t;
+/// \ingroup R123RNG
 #define cburng2x32_init  threefry2x32_init
+/// \ingroup R123RNG
 #define cburng4x32_init  threefry4x32_init
+/// \ingroup R123RNG
 #define cburng2x64_init  threefry2x64_init
+/// \ingroup R123RNG
 #define cburng4x64_init  threefry4x64_init
+/// \ingroup R123RNG
 #define cburng2x32_rand  threefry2x32_rand
+/// \ingroup R123RNG
 #define cburng4x32_rand  threefry4x32_rand
+/// \ingroup R123RNG
 #define cburng2x64_rand  threefry2x64_rand
+/// \ingroup R123RNG
 #define cburng4x64_rand  threefry4x64_rand
 #else
 typedef philox2x32_rng_t cburng2x32_rng_t;
+/// \ingroup R123RNG
 typedef philox4x32_rng_t cburng4x32_rng_t;
+/// \ingroup R123RNG
 typedef philox2x64_rng_t cburng2x64_rng_t;
+/// \ingroup R123RNG
 typedef philox4x64_rng_t cburng4x64_rng_t;
+/// \ingroup R123RNG
 #define cburng2x32_init  philox2x32_init
+/// \ingroup R123RNG
 #define cburng4x32_init  philox4x32_init
+/// \ingroup R123RNG
 #define cburng2x64_init  philox2x64_init
+/// \ingroup R123RNG
 #define cburng4x64_init  philox4x64_init
+/// \ingroup R123RNG
 #define cburng2x32_rand  philox2x32_rand
+/// \ingroup R123RNG
 #define cburng4x32_rand  philox4x32_rand
+/// \ingroup R123RNG
 #define cburng2x64_rand  philox2x64_rand
+/// \ingroup R123RNG
 #define cburng4x64_rand  philox4x64_rand
 #endif
 
