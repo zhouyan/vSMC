@@ -261,7 +261,7 @@ struct SkipAheadForce
 
     private :
 
-    MKL_INT buffer_size_ = VSMC_RNG_MKL_BUFFER_SIZE;
+    MKL_INT buffer_size_;
     std::vector<ResultType> ruint_;
     UniformBits<ResultType> runif_;
 }; // strut SkipAheadForce
