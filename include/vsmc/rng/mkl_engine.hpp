@@ -158,12 +158,12 @@ template <MKL_INT BRNG>
 inline void rng_error_check (int, const char *, const char *) {}
 #endif
 
-template <MKL_INT, typename> struct EngRandomBits;
+template <MKL_INT, typename> struct EngUniformBits;
 
 /// \brief MKL RNG C++11 engine generating random bits (32-bits)
 /// \ingroup RNG
 template <MKL_INT BRNG>
-struct EngRandomBits<BRNG, unsigned>
+struct EngUniformBits<BRNG, unsigned>
 {
     typedef unsigned result_type;
 
@@ -172,14 +172,14 @@ struct EngRandomBits<BRNG, unsigned>
         int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                 str, n, r);
         rng_error_check<BRNG>(
-                status, "EngRandomBits::generate", "viRngUniformBits32");
+                status, "EngUniformBits::generate", "viRngUniformBits32");
     }
-}; // struct EngRandomBits
+}; // struct EngUniformBits
 
 /// \brief MKL RNG C++11 engine generating random bits (64-bits)
 /// \ingroup RNG
 template <MKL_INT BRNG>
-struct EngRandomBits<BRNG, unsigned MKL_INT64>
+struct EngUniformBits<BRNG, unsigned MKL_INT64>
 {
     typedef unsigned MKL_INT64 result_type;
 
@@ -188,9 +188,9 @@ struct EngRandomBits<BRNG, unsigned MKL_INT64>
         int status = viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
                 str, n, r);
         rng_error_check<BRNG>(
-                status, "EngRandomBits::generate", "viRngUniformBits64");
+                status, "EngUniformBits::generate", "viRngUniformBits64");
     }
-}; // struct EngRandomBits
+}; // struct EngUniformBits
 
 /// \brief MKL RNG C++11 engine skip ahead using `vslSkipAheadStream`
 /// \ingroup RNG
@@ -227,7 +227,7 @@ struct EngSkipForce
         if (nskip < buffer_size()) {
             if (ruint_.size() < nskip)
                 ruint_.resize(nskip);
-            EngRandomBits<BRNG, RT>::generate(stream, nskip, &ruint_[0]);
+            EngUniformBits<BRNG, RT>::generate(stream, nskip, &ruint_[0]);
         } else {
             if (ruint_.size() < buffer_size_)
                 ruint_.resize(buffer_size_);
@@ -235,9 +235,9 @@ struct EngSkipForce
             skip_size_type remain = nskip - repeat * buffer_size_;
             for (skip_size_type r = 1; r != repeat + 1; ++r) {
                 skip_size_type n = r * buffer_size_;
-                EngRandomBits<BRNG, RT>::generate(stream, n, &ruint_[0]);
+                EngUniformBits<BRNG, RT>::generate(stream, n, &ruint_[0]);
             }
-            EngRandomBits<BRNG, RT>::generate(stream, remain, &ruint_[0]);
+            EngUniformBits<BRNG, RT>::generate(stream, remain, &ruint_[0]);
         }
     }
 
@@ -371,7 +371,7 @@ class Engine : public EngSkip, public EngOffset
             return ruint_ptr[remain_];
         }
 
-        EngRandomBits<BRNG, RT>::generate(stream_, Buffer, ruint_ptr);
+        EngUniformBits<BRNG, RT>::generate(stream_, Buffer, ruint_ptr);
         remain_ = Buffer - 1;
         return ruint_ptr[remain_];
     }
