@@ -385,6 +385,8 @@ typedef Engine<VSL_BRNG_NONDETERM, EngOffsetZero, EngSkipForce> NONDETERM;
 
 #if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 
+/// \brief Vector RNG set using MKL MT2203 engine with thread-local storage
+/// \ingroup RNG
 template <>
 class RngSet<mkl::MT2203, VectorRng>
 {

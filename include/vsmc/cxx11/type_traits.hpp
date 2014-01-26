@@ -6,7 +6,7 @@
 
 namespace vsmc { namespace cxx11 {
 
-/// \defgroup CPP11Traits C++11 style Type Traits
+/// \defgroup CPP11Traits C++11 style type traits
 /// \brief C++11 style type traits
 /// \ingroup Traits
 /// @{

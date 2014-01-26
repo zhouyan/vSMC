@@ -25,7 +25,7 @@
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
 
-/// \defgroup RNG RNG
+/// \defgroup RNG Random number generating
 /// \brief Utilities for managing independent RNG engines
 
 /// \defgroup Adapter Adapter
@@ -34,7 +34,7 @@
 /// \defgroup Integrate Integration
 /// \brief Numerical integration
 
-/// \defgroup RandomWalk Metropolis Random Walk
+/// \defgroup RandomWalk Metropolis random walk
 /// \brief Metropolis Random Walk kernels
 
 /// \defgroup MPI Message Passing Interface
@@ -66,7 +66,7 @@
 /// \ingroup SMP
 /// \brief Sequential samplers
 
-/// \defgroup STD STDTBB
+/// \defgroup STD C++11 concurrency
 /// \ingroup SMP
 /// \brief Parallel samplers using C++11 concurrency
 
@@ -77,11 +77,11 @@
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
-/// \defgroup Backup Object Backup
+/// \defgroup Backup Object backup
 /// \ingroup Utility
 /// \brief Backup and restore objects
 
-/// \defgroup HDF5Save HDF5 Save
+/// \defgroup HDF5Save HDF5 objects saving
 /// \ingroup Utility
 /// \brief Functions for saving objects in HDF5 format
 
@@ -89,7 +89,7 @@
 /// \ingroup Utility
 /// \brief Parallel constructs using C++11 concurrency
 
-/// \defgroup StopWatch Stop Watch
+/// \defgroup StopWatch Stop watch
 /// \ingroup Utility
 /// \brief Utilities for measuring the time of procedures
 
@@ -97,6 +97,6 @@
 /// \ingroup Utility
 /// \brief Operators for Intel TBB and STDTBB
 
-/// \defgroup Tuple Tuple Manipulation
+/// \defgroup Tuple Tuple manipulation
 /// \ingroup Utility
 /// \brief Classes for manipulating C++11 tuple
