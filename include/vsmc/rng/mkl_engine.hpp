@@ -336,7 +336,7 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 {
     public :
 
-    explicit Stream (MKL_UINT seed)
+    explicit Stream (MKL_UINT seed = VSMC_RNG_MKL_SEED)
     {
         int status = ::vslNewStream(&stream_, BRNG + this->offset(), seed);
         rng_error_check<BRNG>(status, "Stream::Stream", "vslNewStream");
@@ -733,8 +733,9 @@ class Hypergeometric : public Distribution<MKL_INT, Hypergeometric<Method> >
 
     typedef MKL_INT result_type;
 
-    Hypergeometric (result_type l, result_type s, result_type m) :
-        l_(l), s_(s), m_(m) {}
+    Hypergeometric (result_type population, result_type sample,
+            result_type mask) :
+        l_(population), s_(sample), m_(mask) {}
 
     template <MKL_INT BRNG>
     void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
