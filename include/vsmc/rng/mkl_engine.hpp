@@ -6,12 +6,12 @@
 
 #if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 #include <vsmc/rng/rng_set.hpp>
+#endif
 
-#define VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_RNG_SET_MT2203_OFFSET(offset) \
-    VSMC_RUNTIME_ASSERT((offset < 6024),                                     \
+#define VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_OFFSET(offset) \
+    VSMC_RUNTIME_ASSERT((offset < max VSMC_MACRO_NO_EXPANSION ()),           \
             ("**vsmc::RngSet<vsmc::mkl::MT2203, vsmc::VectorRng> "           \
              "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
-#endif
 
 namespace vsmc {
 
@@ -48,6 +48,9 @@ inline void rng_error_check (int status, const char *func, const char *vslf)
             break;
         case VSL_BRNG_NONDETERM :
             msg += "VSL_BRNG_NONDETERM";
+            break;
+        default :
+            msg += "UNKNOWN";
             break;
     } // switch (BRNG)
 
@@ -144,6 +147,7 @@ inline void rng_error_check (int status, const char *func, const char *vslf)
             msg += "VSL_RNG_ERROR_NONDETERM_ NRETRIES_EXCEEDED";
             break;
         default :
+            msg += "UNKNOWN";
             break;
     } // switch (status)
 
@@ -156,13 +160,12 @@ inline void rng_error_check (int, const char *, const char *) {}
 
 /// \brief MKL RNG C++11 engine skip ahead using `vslSkipAheadStream`
 /// \ingroup RNG
-template <MKL_INT BRNG>
 struct EngSkipVSL
 {
     static void skip (VSLStreamStatePtr stream, std::size_t nskip)
     {
         int status = vslSkipAheadStream(stream, nskip);
-        rng_error_check<BRNG>(
+        rng_error_check<-1>(
                 status, "EngSkipVSL::skip", "vslSkipAheadStream");
     }
 
@@ -172,7 +175,6 @@ struct EngSkipVSL
 
 /// \brief MKL RNG C++11 engine skip ahead by generating random numbers
 /// \ingroup RNG
-template <MKL_INT BRNG>
 struct EngSkipForce
 {
     EngSkipForce () : skip_buffer_size_(1000) {}
@@ -186,7 +188,7 @@ struct EngSkipForce
             ruint_.resize(nskip);
             int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                     stream, nskip, &ruint_[0]);
-            rng_error_check<BRNG>(
+            rng_error_check<-1>(
                     status, "EngSkipForce::skip", "viRngUniformBits32");
         } else {
             ruint_fixed_.resize(skip_buffer_size_);
@@ -196,12 +198,12 @@ struct EngSkipForce
             for (std::size_t r = 1; r != repeat + 1; ++r) {
                 status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                         stream, r * skip_buffer_size_, &ruint_[0]);
-                rng_error_check<BRNG>(
+                rng_error_check<-1>(
                         status, "EngSkipForce::skip", "viRngUniformBits32");
             }
             status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                     stream, remain, &ruint_[0]);
-            rng_error_check<BRNG>(
+            rng_error_check<-1>(
                     status, "EngSkipForce::skip", "viRngUniformBits32");
         }
     }
@@ -218,21 +220,31 @@ struct EngSkipForce
 
 /// \brief MKL RNG index offest (constant zero)
 /// \ingroup RNG
-template <MKL_INT BRNG>
 struct EngOffsetZero
 {
+    static VSMC_CONSTEXPR MKL_INT min VSMC_MACRO_NO_EXPANSION () {return 0;}
+    static VSMC_CONSTEXPR MKL_INT max VSMC_MACRO_NO_EXPANSION () {return 0;}
     static void offset (MKL_INT) {}
     static VSMC_CONSTEXPR MKL_INT offset () {return 0;}
 }; // struct EngOffsetZero
 
 /// \brief MKL RNG index offest (set dynamically)
 /// \ingroup RNG
-template <MKL_INT BRNG>
+template <MKL_INT MaxOffset>
 struct EngOffsetDynamic
 {
     EngOffsetDynamic () : offset_(0) {}
 
-    void offset (MKL_INT n) {offset_ = n;}
+    static VSMC_CONSTEXPR MKL_INT min VSMC_MACRO_NO_EXPANSION () {return 0;}
+    static VSMC_CONSTEXPR MKL_INT max VSMC_MACRO_NO_EXPANSION ()
+    {return MaxOffset;}
+
+    void offset (MKL_INT n)
+    {
+        VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_OFFSET(n);
+        offset_ = n;
+    }
+
     MKL_INT offset () const {return offset_;}
 
     private :
@@ -242,11 +254,9 @@ struct EngOffsetDynamic
 
 /// \brief MKL RNG C++11 engine
 /// \ingroup RNG
-template <MKL_INT BRNG,
-         template <MKL_INT> class EngOffset,
-         template <MKL_INT> class EngSkip,
+template <MKL_INT BRNG, typename EngSkip, typename EngOffset,
          std::size_t Buffer = 1000, MKL_UINT Seed = 101>
-         class Engine : public EngOffset<BRNG>, public EngSkip<BRNG>
+         class Engine : public EngSkip, public EngOffset
 {
     public :
 
@@ -267,15 +277,15 @@ template <MKL_INT BRNG,
         rng_error_check<BRNG>(status, "Engine::Engine", "vslNewStream");
     }
 
-    Engine (const Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> &other) :
+    Engine (const Engine<BRNG, EngSkip, EngOffset, Buffer, Seed> &other) :
         ruint_(other.ruint_), remain_(other.remain_)
     {
         int status = vslCopyStream(&stream_, other.stream_);
         rng_error_check<BRNG>(status, "Engine::Engine", "vslCopyStream");
     }
 
-    Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> &operator= (
-            const Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> &other)
+    Engine<BRNG, EngSkip, EngOffset, Buffer, Seed> &operator= (
+            const Engine<BRNG, EngSkip, EngOffset, Buffer, Seed> &other)
     {
         ruint_ = other.ruint_;
         remain_ = other.remain_;
@@ -285,11 +295,11 @@ template <MKL_INT BRNG,
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Engine (Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> &&other) :
+    Engine (Engine<BRNG, EngSkip, EngOffset, Buffer, Seed> &&other) :
         ruint_(other.ruint_), remain_(other.remain_), stream_(other.stream_) {}
 
-    Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> &operator= (
-            Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> &&other)
+    Engine<BRNG, EngSkip, EngOffset, Buffer, Seed> &operator= (
+            Engine<BRNG, EngSkip, EngOffset, Buffer, Seed> &&other)
     {
         ruint_ = other.ruint_;
         remain_ = other.remain_;;
@@ -363,36 +373,44 @@ template <MKL_INT BRNG,
 
 /// \brief A 59-bit multiplicative congruential generator
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MCG59, EngOffsetZero, EngSkipVSL> MCG59;
+typedef Engine<VSL_BRNG_MCG59, EngSkipVSL, EngOffsetZero> MCG59;
 
 /// \brief A Mersenne-Twister pseudoranom number genertor
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MT19937, EngOffsetZero, EngSkipForce> MT19937;
+typedef Engine<VSL_BRNG_MT19937, EngSkipForce, EngOffsetZero> MT19937;
 
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_SFMT19937, EngOffsetZero, EngSkipForce> SFMT19937;
+typedef Engine<VSL_BRNG_SFMT19937, EngSkipForce, EngOffsetZero> SFMT19937;
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MT2203, EngOffsetDynamic, EngSkipForce> MT2203;
+typedef Engine<VSL_BRNG_MT2203, EngSkipForce, EngOffsetDynamic<6024> > MT2203;
 
 /// \brief A non-determinstic random number generator
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_NONDETERM, EngOffsetZero, EngSkipForce> NONDETERM;
+typedef Engine<VSL_BRNG_NONDETERM, EngSkipForce, EngOffsetZero> NONDETERM;
 
 } // namespace vsmc::mkl
 
 #if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 
-/// \brief Vector RNG set using MKL MT2203 engine with thread-local storage
+namespace mkl {
+
+struct ThreadLocalRng;
+
+} // namespace vsmc::mkl
+
+/// \brief Vector RNG set using MKL BRNG with thread-local storage
 /// \ingroup RNG
-template <>
-class RngSet<mkl::MT2203, VectorRng>
+template <MKL_INT BRNG, typename EngSkip, typename EngOffset,
+         std::size_t Buffer, MKL_UINT Seed>
+class RngSet<mkl::Engine<BRNG, EngSkip, EngOffset, Buffer, Seed>,
+      mkl::ThreadLocalRng>
 {
     public :
 
-    typedef mkl::MT2203 rng_type;
+    typedef mkl::Engine<BRNG, EngOffset, EngSkip, Buffer, Seed> rng_type;
     typedef std::size_t size_type;
 
     explicit RngSet (size_type N = 1) : size_(N) {}
@@ -401,7 +419,7 @@ class RngSet<mkl::MT2203, VectorRng>
 
     rng_type &rng (size_type id = 0)
     {
-        static thread_local mkl::MT2203 tl_rng;
+        static thread_local rng_type tl_rng;
         static thread_local bool tl_flag = 0;
         if (!tl_flag)
             init_rng(tl_rng, tl_flag);
@@ -417,8 +435,7 @@ class RngSet<mkl::MT2203, VectorRng>
     void init_rng (rng_type &tl_rng, bool &tl_flag)
     {
         std::lock_guard<std::mutex> lock(mtx_);
-        unsigned offset = SeedGenerator<mkl::MT2203>::instance().get();
-        VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_RNG_SET_MT2203_OFFSET(offset);
+        unsigned offset = SeedGenerator<rng_type>::instance().get();
         tl_rng.offset(static_cast<MKL_INT>(offset));
         tl_rng.seed(static_cast<MKL_UINT>(Seed::instance().get()));
         tl_flag = true;
