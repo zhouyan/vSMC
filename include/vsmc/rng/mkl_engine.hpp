@@ -8,9 +8,9 @@
 #include <vsmc/rng/rng_set.hpp>
 #endif
 
-#define VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_OFFSET(offset) \
+#define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset) \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MACRO_NO_EXPANSION ()),           \
-            ("**vsmc::RngSet<vsmc::mkl::MT2203, vsmc::VectorRng> "           \
+            ("**vsmc::mkl::OffsetDynamic**"                                  \
              "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
 
 #ifndef VSMC_RNG_MKL_BUFFER_SIZE
@@ -24,6 +24,16 @@
 namespace vsmc {
 
 namespace mkl {
+
+/// \cond HIDDEN_SYMBOLS
+
+template <MKL_INT> class Stream;
+template <typename, typename> class Distribution;
+template <typename, MKL_INT B = VSMC_RNG_MKL_BUFFER_SIZE> class UniformBits;
+template <MKL_INT, typename, MKL_UINT S = VSMC_RNG_MKL_SEED> class Engine;
+struct ThreadLocalRng;
+
+/// \endcond HIDDEN_SYMBOLS
 
 #ifndef NDEBUG
 /// \brief Check MKL RNG error status
@@ -166,91 +176,56 @@ template <MKL_INT BRNG>
 inline void rng_error_check (int, const char *, const char *) {}
 #endif
 
-template <MKL_INT, typename> struct UniformBits;
+namespace traits {
 
-/// \brief MKL RNG C++11 engine generating random bits (32-bits)
-/// \ingroup RNG
-template <MKL_INT BRNG>
-struct UniformBits<BRNG, unsigned>
-{
-    typedef unsigned result_type;
-
-    static void generate (VSLStreamStatePtr str, MKL_INT n, result_type *r)
-    {
-        int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
-                str, n, r);
-        rng_error_check<BRNG>(
-                status, "UniformBits::generate", "viRngUniformBits32");
-    }
-}; // struct UniformBits
-
-/// \brief MKL RNG C++11 engine generating random bits (64-bits)
-/// \ingroup RNG
-template <MKL_INT BRNG>
-struct UniformBits<BRNG, unsigned MKL_INT64>
-{
-    typedef unsigned MKL_INT64 result_type;
-
-    static void generate (VSLStreamStatePtr str, MKL_INT n, result_type *r)
-    {
-        int status = viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
-                str, n, r);
-        rng_error_check<BRNG>(
-                status, "UniformBits::generate", "viRngUniformBits64");
-    }
-}; // struct UniformBits
-
-/// \brief MKL RNG C++11 engine skip ahead using `vslSkipAheadStream`
-/// \ingroup RNG
-template <MKL_INT BRNG>
 struct SkipAheadVSL
 {
     typedef long long size_type;
 
-    void operator() (VSLStreamStatePtr stream, size_type nskip)
+    template <MKL_INT BRNG>
+    void operator() (const Stream<BRNG> &stream, size_type nskip)
     {
-        int status = vslSkipAheadStream(stream, nskip);
+        int status = vslSkipAheadStream(stream.ptr(), nskip);
         rng_error_check<BRNG>(
                 status, "SkipAheadVSL::skip", "vslSkipAheadStream");
     }
 }; // struct SkipAheadVSL
 
-/// \brief MKL RNG C++11 engine skip ahead by generating random numbers
-/// \ingroup RNG
-template <MKL_INT BRNG, typename RT, MKL_INT BufSize = VSMC_RNG_MKL_BUFFER_SIZE>
+template <typename ResultType>
 struct SkipAheadForce
 {
     typedef MKL_INT size_type;
+    static const MKL_INT buffer_size = VSMC_RNG_MKL_BUFFER_SIZE;
 
-    void operator() (VSLStreamStatePtr stream, size_type nskip)
+    template <MKL_INT BRNG>
+    void operator() (const Stream<BRNG> &stream, size_type nskip)
     {
         if (nskip == 0)
             return;
 
-        if (nskip < BufSize) {
+        if (nskip < buffer_size) {
             if (ruint_.size() < nskip)
                 ruint_.resize(nskip);
-            UniformBits<BRNG, RT>::generate(stream, nskip, &ruint_[0]);
+            runif_(stream, nskip, &ruint_[0]);
         } else {
-            if (ruint_.size() < BufSize)
-                ruint_.resize(BufSize);
-            size_type repeat = nskip / BufSize;
-            size_type remain = nskip - repeat * BufSize;
+            if (ruint_.size() < buffer_size)
+                ruint_.resize(buffer_size);
+            size_type repeat = nskip / buffer_size;
+            size_type remain = nskip - repeat * buffer_size;
             for (size_type r = 1; r != repeat + 1; ++r) {
-                size_type n = r * BufSize;
-                UniformBits<BRNG, RT>::generate(stream, n, &ruint_[0]);
+                size_type n = r * buffer_size;
+                runif_(stream, n, &ruint_[0]);
             }
-            UniformBits<BRNG, RT>::generate(stream, remain, &ruint_[0]);
+            runif_(stream, remain, &ruint_[0]);
         }
     }
 
     private :
 
-    std::vector<RT> ruint_;
+    std::vector<ResultType> ruint_;
+    UniformBits<ResultType> runif_;
 }; // strut SkipAheadForce
 
-/// \brief MKL RNG index offest (constant zero)
-/// \ingroup RNG
 struct OffsetZero
 {
     static VSMC_CONSTEXPR MKL_INT min VSMC_MACRO_NO_EXPANSION () {return 0;}
@@ -259,8 +234,6 @@ struct OffsetZero
     static VSMC_CONSTEXPR MKL_INT offset () {return 0;}
 }; // struct OffsetZero
 
-/// \brief MKL RNG index offest (set dynamically)
-/// \ingroup RNG
 template <MKL_INT MaxOffset>
 struct OffsetDynamic
 {
@@ -272,7 +245,7 @@ struct OffsetDynamic
 
     void offset (MKL_INT n)
     {
-        VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_OFFSET(n);
+        VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(n);
         offset_ = n;
     }
 
@@ -283,14 +256,48 @@ struct OffsetDynamic
     MKL_INT offset_;
 }; // struct OffsetDynamic
 
+template <MKL_INT BRNG, typename ResultType>
+struct SkipAheadTrait
+{typedef SkipAheadForce<ResultType> type;};
+
+template <typename ResultType>
+struct SkipAheadTrait<VSL_BRNG_MCG31, ResultType>
+{typedef SkipAheadVSL type;};
+
+template <typename ResultType>
+struct SkipAheadTrait<VSL_BRNG_MCG59, ResultType>
+{typedef SkipAheadVSL type;};
+
+template <typename ResultType>
+struct SkipAheadTrait<VSL_BRNG_MRG32K3A, ResultType>
+{typedef SkipAheadVSL type;};
+
+template <typename ResultType>
+struct SkipAheadTrait<VSL_BRNG_SOBOL, ResultType>
+{typedef SkipAheadVSL type;};
+
+template <typename ResultType>
+struct SkipAheadTrait<VSL_BRNG_NIEDERR, ResultType>
+{typedef SkipAheadVSL type;};
+
+template <MKL_INT> struct OffsetTrait {typedef OffsetZero type;};
+
+template <>
+struct OffsetTrait<VSL_BRNG_MT2203> {typedef OffsetDynamic<6024> type;};
+
+template <>
+struct OffsetTrait<VSL_BRNG_WH> {typedef OffsetDynamic<273> type;};
+
+} // namespace vsmc::mkl::traits
+
 /// \brief MKL RNG C++11 engine stream
 /// \ingroup RNG
-template <MKL_INT BRNG, typename Offset, MKL_UINT Seed>
-class Stream : public Offset
+template <MKL_INT BRNG>
+class Stream : public traits::OffsetTrait<BRNG>::type
 {
     public :
 
-    explicit Stream (MKL_UINT seed = Seed)
+    explicit Stream (MKL_UINT seed)
     {
         int status = vslNewStream(&stream_, BRNG + this->offset(), seed);
         rng_error_check<BRNG>(status, "Stream::Stream", "vslNewStream");
@@ -305,14 +312,13 @@ class Stream : public Offset
         rng_error_check<BRNG>(status, "Stream::Stream", "vslNewStream");
     }
 
-    Stream (const Stream<BRNG, Offset, Seed> &other)
+    Stream (const Stream<BRNG> &other)
     {
         int status = vslCopyStream(&stream_, other.stream_);
         rng_error_check<BRNG>(status, "Stream::Stream", "vslCopyStream");
     }
 
-    Stream<BRNG, Offset, Seed> &operator= (
-            const Stream<BRNG, Offset, Seed> &other)
+    Stream<BRNG> &operator= (const Stream<BRNG> &other)
     {
         int status = vslCopyStreamState(stream_, other.stream_);
         rng_error_check<BRNG>(
@@ -320,17 +326,15 @@ class Stream : public Offset
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Stream (Stream<BRNG, Offset, Seed> &&other) :
-        stream_(other.stream_) {}
+    Stream (Stream<BRNG> &&other) : stream_(other.stream_) {}
 
-    Stream<BRNG, Offset, Seed> &operator= (
-            Stream<BRNG, Offset, Seed> &&other)
+    Stream<BRNG> &operator= (Stream<BRNG> &&other)
     {stream_ = other.stream_;}
 #endif
 
     ~Stream () {vslDeleteStream(&stream_);}
 
-    void seed (MKL_UINT s = Seed)
+    void seed (MKL_UINT s)
     {
         int status = VSL_ERROR_OK;
         VSLStreamStatePtr new_stream;
@@ -350,64 +354,133 @@ class Stream : public Offset
         seed(s);
     }
 
-    VSLStreamStatePtr ptr () {return stream_;}
+    VSLStreamStatePtr ptr () const {return stream_;}
 
     private :
 
     VSLStreamStatePtr stream_;
 }; // class Stream
 
+/// \brief Base class of MKL distributions
+/// \ingroup RNG
+template <typename ResultType, typename Derived>
+class Distribution
+{
+    public :
+
+    typedef ResultType result_type;
+
+    Distribution () : remain_(0) {}
+
+    template <MKL_INT BRNG>
+    result_type operator() (const Stream<BRNG> &stream)
+    {
+        result_.resize(Derived::buffer_size);
+        result_type *const rptr = &result_[0];
+        if (remain_ > 0) {
+            --remain_;
+        } else {
+            Derived::generate(stream, Derived::buffer_size, rptr);
+            remain_ = Derived::buffer_size - 1;
+        }
+
+        return rptr[remain_];
+    }
+
+    template <MKL_INT BRNG>
+    void operator() (const Stream<BRNG> &stream, MKL_INT n, result_type *r)
+    {Derived::generate(stream, n, r);}
+
+    void reset () {remain_ = 0;}
+
+    private :
+
+    MKL_INT remain_;
+    std::vector<result_type> result_;
+}; // class Distribution
+
+/// \brief MKL RNG C++11 engine generating random bits (32-bits)
+/// \ingroup RNG
+template <MKL_INT BufSize>
+class UniformBits<unsigned, BufSize> :
+    public Distribution<unsigned, UniformBits<unsigned, BufSize> >
+{
+    public :
+
+    typedef unsigned result_type;
+    static const MKL_INT buffer_size = BufSize;
+
+    template <MKL_INT BRNG>
+    static void generate (const Stream<BRNG> &stream, MKL_INT n,
+            result_type *r)
+    {
+        int status = viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
+                stream.ptr(), n, r);
+        rng_error_check<BRNG>(
+                status, "UniformBits::generate", "viRngUniformBits32");
+    }
+}; // class UniformBits
+
+/// \brief MKL RNG C++11 engine generating random bits (64-bits)
+/// \ingroup RNG
+template <MKL_INT BufSize>
+class UniformBits<unsigned MKL_INT64, BufSize> :
+    public Distribution<unsigned MKL_INT64,
+        UniformBits<unsigned MKL_INT64, BufSize> >
+{
+    public :
+
+    typedef unsigned MKL_INT64 result_type;
+    static const MKL_INT buffer_size = VSMC_RNG_MKL_BUFFER_SIZE;
+
+    template <MKL_INT BRNG>
+    static void generate (const Stream<BRNG> &stream,
+            MKL_INT n, result_type *r)
+    {
+        int status = viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
+                stream.ptr(), n, r);
+        rng_error_check<BRNG>(
+                status, "UniformBits::generate", "viRngUniformBits64");
+    }
+}; // class UniformBits
+
 /// \brief MKL RNG C++11 engine
 /// \ingroup RNG
-template <MKL_INT BRNG, typename Offset, typename SkipAhead, typename RT,
-         std::size_t BufSize = VSMC_RNG_MKL_BUFFER_SIZE,
-         MKL_UINT Seed = VSMC_RNG_MKL_SEED>
+template <MKL_INT BRNG, typename ResultType, MKL_UINT Seed>
 class Engine
 {
     public :
 
-    typedef RT result_type;
-    typedef Stream<BRNG, Offset, Seed> stream_type;
-    typedef SkipAhead skip_ahead_type;
+    typedef ResultType result_type;
+    typedef Stream<BRNG> stream_type;
+    typedef typename traits::SkipAheadTrait<BRNG, ResultType>::type
+        skip_ahead_type;
 
-    explicit Engine (MKL_UINT seed = Seed) :
-        stream_(seed), ruint_(BufSize), remain_(0) {}
+    explicit Engine (MKL_UINT seed = Seed) : stream_(seed) {}
 
     template <typename SeedSeq>
-    explicit Engine (SeedSeq &seq) :
-        stream_(seq), ruint_(BufSize), remain_(0) {}
+    explicit Engine (SeedSeq &seq) : stream_(seq) {}
 
     void seed (MKL_UINT s = Seed)
     {
         stream_.seed(s);
-        remain_ = 0;
+        runif_.reset();
     }
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq)
     {
         stream_.seed(seq);
-        remain_ = 0;
+        runif_.reset();
     }
 
-    result_type operator() ()
-    {
-        result_type *ruint_ptr = &ruint_[0];
-        if (remain_ > 0) {
-            --remain_;
-            return ruint_ptr[remain_];
-        }
-
-        UniformBits<BRNG, RT>::generate(stream_.ptr(), BufSize, ruint_ptr);
-        remain_ = BufSize - 1;
-        return ruint_ptr[remain_];
-    }
+    result_type operator() () {return runif_(stream_);}
 
     void discard (std::size_t nskip)
     {
-        skip_ahead_(stream_.ptr(),
-                static_cast<typename SkipAhead::size_type>(nskip));
-        remain_ = 0;
+        skip_ahead_(stream_,
+                static_cast<typename skip_ahead_type::size_type>(nskip));
+        runif_.reset();
     }
 
     static const result_type _Min = 0;
@@ -419,84 +492,65 @@ class Engine
     static VSMC_CONSTEXPR result_type max VSMC_MACRO_NO_EXPANSION ()
     {return _Max;}
 
+    stream_type &stream () {return stream_;}
+    const stream_type &stream () const {return stream_;}
+
     private :
 
     stream_type stream_;
     skip_ahead_type skip_ahead_;
-    std::vector<result_type> ruint_;
-    std::size_t remain_;
+    UniformBits<result_type> runif_;
 }; // class Engine
 
 /// \brief A 59-bit multiplicative congruential generator
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MCG59, OffsetZero,
-        SkipAheadVSL<VSL_BRNG_MCG59>, unsigned> MCG59;
+typedef Engine<VSL_BRNG_MCG59, unsigned> MCG59;
 
 /// \brief A Mersenne-Twister pseudoranom number genertor
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MT19937, OffsetZero,
-        SkipAheadForce<VSL_BRNG_MT19937, unsigned>, unsigned> MT19937;
+typedef Engine<VSL_BRNG_MT19937, unsigned> MT19937;
 
 /// \brief A Mersenne-Twister pseudoranom number genertor (64-bit)
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MT19937, OffsetZero,
-        SkipAheadForce<VSL_BRNG_MT19937, unsigned MKL_INT64>,
-        unsigned MKL_INT64> MT19937_64;
+typedef Engine<VSL_BRNG_MT19937, unsigned MKL_INT64> MT19937_64;
 
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_SFMT19937, OffsetZero,
-        SkipAheadForce<VSL_BRNG_SFMT19937, unsigned>, unsigned> SFMT19937;
+typedef Engine<VSL_BRNG_SFMT19937, unsigned> SFMT19937;
 
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
 /// (64-bit)
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_SFMT19937, OffsetZero,
-        SkipAheadForce<VSL_BRNG_SFMT19937, unsigned MKL_INT64>,
-        unsigned MKL_INT64> SFMT19937_64;
+typedef Engine<VSL_BRNG_SFMT19937, unsigned MKL_INT64> SFMT19937_64;
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MT2203, OffsetDynamic<6024>,
-        SkipAheadForce<VSL_BRNG_MT2203, unsigned>, unsigned> MT2203;
+typedef Engine<VSL_BRNG_MT2203, unsigned> MT2203;
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor (64-bit)
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_MT2203, OffsetDynamic<6024>,
-        SkipAheadForce<VSL_BRNG_MT2203, unsigned MKL_INT64>,
-        unsigned MKL_INT64>MT2203_64;
+typedef Engine<VSL_BRNG_MT2203, unsigned MKL_INT64>MT2203_64;
 
 /// \brief A non-determinstic random number generator
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_NONDETERM, OffsetZero,
-        SkipAheadForce<VSL_BRNG_NONDETERM, unsigned>, unsigned> NONDETERM;
+typedef Engine<VSL_BRNG_NONDETERM, unsigned> NONDETERM;
 
 /// \brief A non-determinstic random number generator (64-bit)
 /// \ingroup RNG
-typedef Engine<VSL_BRNG_NONDETERM, OffsetZero,
-        SkipAheadForce<VSL_BRNG_NONDETERM, unsigned MKL_INT64>,
-        unsigned MKL_INT64> NONDETERM_64;
+typedef Engine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> NONDETERM_64;
 
 } // namespace vsmc::mkl
 
 #if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 
-namespace mkl {
-
-struct ThreadLocalRng;
-
-} // namespace vsmc::mkl
-
 /// \brief Vector RNG set using MKL BRNG with thread-local storage
 /// \ingroup RNG
-template <MKL_INT BRNG, typename RT, typename SkipAhead, typename Offset,
-         std::size_t BufSize, MKL_UINT Seed>
-class RngSet<mkl::Engine<BRNG, RT, SkipAhead, Offset, BufSize, Seed>,
-      mkl::ThreadLocalRng>
+template <MKL_INT BRNG, typename ResultType, MKL_UINT Seed>
+class RngSet<mkl::Engine<BRNG, ResultType, Seed>, mkl::ThreadLocalRng>
 {
     public :
 
-    typedef mkl::Engine<BRNG, RT, Offset, SkipAhead, BufSize, Seed> rng_type;
+    typedef mkl::Engine<BRNG, ResultType, Seed> rng_type;
     typedef std::size_t size_type;
 
     explicit RngSet (size_type N = 1) : size_(N) {}
@@ -522,7 +576,7 @@ class RngSet<mkl::Engine<BRNG, RT, SkipAhead, Offset, BufSize, Seed>,
     {
         std::lock_guard<std::mutex> lock(mtx_);
         unsigned offset = SeedGenerator<rng_type>::instance().get();
-        tl_rng.offset(static_cast<MKL_INT>(offset));
+        tl_rng.stream().offset(static_cast<MKL_INT>(offset));
         tl_rng.seed(static_cast<MKL_UINT>(Seed::instance().get()));
         tl_flag = true;
     }
