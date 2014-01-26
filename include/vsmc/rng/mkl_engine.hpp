@@ -10,7 +10,7 @@
 #define VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_RNG_SET_MT2203_OFFSET(offset) \
     VSMC_RUNTIME_ASSERT((offset < 6024),                                     \
             ("**vsmc::RngSet<vsmc::mkl::MT2203, vsmc::VectorRng> "           \
-             "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
+             "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
 #endif
 
 namespace vsmc {
@@ -34,17 +34,8 @@ inline void rng_error_check (int status, const char *func, const char *vslf)
 
     msg += "; BRNG: ";
     switch (BRNG) {
-        case VSL_BRNG_MCG31 :
-            msg += "VSL_BRNG_MCG31";
-            break;
         case VSL_BRNG_MCG59 :
             msg += "VSL_BRNG_MCG59";
-            break;
-        case VSL_BRNG_MRG32K3A :
-            msg += "VSL_BRNG_MRG32K3A";
-            break;
-        case VSL_BRNG_R250 :
-            msg += "VSL_BRNG_R250";
             break;
         case VSL_BRNG_MT19937 :
             msg += "VSL_BRNG_MT19937";
@@ -54,9 +45,6 @@ inline void rng_error_check (int status, const char *func, const char *vslf)
             break;
         case VSL_BRNG_MT2203 :
             msg += "VSL_BRNG_MT2203";
-            break;
-        case VSL_BRNG_WH :
-            msg += "VSL_BRNG_WH";
             break;
         case VSL_BRNG_NONDETERM :
             msg += "VSL_BRNG_NONDETERM";
@@ -224,8 +212,8 @@ struct EngSkipForce
     private :
 
     std::size_t skip_buffer_size_;
-    std::vector<unsigned int> ruint_;
-    std::vector<unsigned int> ruint_fixed_;
+    std::vector<unsigned> ruint_;
+    std::vector<unsigned> ruint_fixed_;
 }; // strut EngSkipForce
 
 /// \brief MKL RNG index offest (constant zero)
@@ -262,7 +250,7 @@ template <MKL_INT BRNG,
 {
     public :
 
-    typedef unsigned int result_type;
+    typedef unsigned result_type;
 
     explicit Engine (MKL_UINT seed = Seed) : ruint_(Buffer), remain_(0)
     {
@@ -377,11 +365,6 @@ template <MKL_INT BRNG,
 /// \ingroup RNG
 typedef Engine<VSL_BRNG_MCG59, EngOffsetZero, EngSkipVSL> MCG59;
 
-/// \brief A combined multiple recursive generator with two components of order
-/// 3
-/// \ingroup RNG
-typedef Engine<VSL_BRNG_MRG32K3A, EngOffsetZero, EngSkipVSL> MRG32K3A;
-
 /// \brief A Mersenne-Twister pseudoranom number genertor
 /// \ingroup RNG
 typedef Engine<VSL_BRNG_MT19937, EngOffsetZero, EngSkipForce> MT19937;
@@ -410,46 +393,33 @@ class RngSet<mkl::MT2203, VectorRng>
     typedef mkl::MT2203 rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet (size_type N = 1) : size_(N)
-    {
-        std::lock_guard lock(mtx_);
-        offset_ = 0;
-    };
+    explicit RngSet (size_type N = 1) : size_(N) {}
 
     size_type size () const {return size_;}
 
     rng_type &rng (size_type id = 0)
     {
-        static thread_local bool flag = 0;
-        if (!flag)
-            init_rng(flag);
+        static thread_local mkl::MT2203 tl_rng;
+        static thread_local bool tl_flag = 0;
+        if (!tl_flag)
+            init_rng(tl_rng, tl_flag);
 
-        return rng_;
+        return tl_rng;
     }
-
-    void offset (unsigned int n)
-    {
-        std::lock_guard lock(mtx_);
-        offset_ = n;
-    }
-
-    unsigned int offset () const {return offset_;}
 
     private :
 
     std::size_t size_;
-    static std::mutex mtx_;
-    static unsigned int offset_;
-    static thread_local mkl::MT2203 rng_;
+    std::mutex mtx_;
 
-    void init_rng (bool &flag)
+    void init_rng (rng_type &tl_rng, bool &tl_flag)
     {
-        std::lock_guard lock(mtx_);
-        ++offset_;
-        VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_RNG_SET_MT2203_OFFSET(offset_);
-        rng_.offset(static_cast<MKL_INT>(offset_));
-        rng_.seed(static_cast<MKL_UINT>(Seed::instance().get()));
-        flag = true;
+        std::lock_guard<std::mutex> lock(mtx_);
+        unsigned offset = SeedGenerator<mkl::MT2203>::instance().get();
+        VSMC_RUNTIME_ASSEET_RNG_MKL_ENGINE_RNG_SET_MT2203_OFFSET(offset);
+        tl_rng.offset(static_cast<MKL_INT>(offset));
+        tl_rng.seed(static_cast<MKL_UINT>(Seed::instance().get()));
+        tl_flag = true;
     }
 }; // class RngSet
 

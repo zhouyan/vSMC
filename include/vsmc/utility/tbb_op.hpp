@@ -3,260 +3,260 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_DEFINE_TBB_OP_FOR_UNARY_OBJECT(name, uni)                        \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data, T *result) : data_(data), result_(result) {}         \
-                                                                              \
-    template <typename  Range>                                                \
-    void operator() (const Range &range) const                                \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T *const result = result_;                                            \
-        uni op;                                                               \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result[i] = op(data[i]);                                          \
-    }                                                                         \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T *const result_;                                                         \
+#define VSMC_DEFINE_TBB_OP_FOR_UNARY_OBJECT(name, uni) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data, T *result) : data_(data), result_(result) {}        \
+                                                                             \
+    template <typename  Range>                                               \
+    void operator() (const Range &range) const                               \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T *const result = result_;                                           \
+        uni op;                                                              \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result[i] = op(data[i]);                                         \
+    }                                                                        \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T *const result_;                                                        \
 };
 
-#define VSMC_DEFINE_TBB_OP_FOR_BINARY_OBJECT(name, bin)                       \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data, T *result, const T &val) :                           \
-        data_(data), result_(result), val_(val) {}                            \
-                                                                              \
-    template <typename Range>                                                 \
-    void operator() (const Range &range) const                                \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T *const result = result_;                                            \
-        bin op;                                                               \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result[i] = op(data[i], val_);                                    \
-    }                                                                         \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T *const result_;                                                         \
-    const T val_;                                                             \
+#define VSMC_DEFINE_TBB_OP_FOR_BINARY_OBJECT(name, bin) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data, T *result, const T &val) :                          \
+        data_(data), result_(result), val_(val) {}                           \
+                                                                             \
+    template <typename Range>                                                \
+    void operator() (const Range &range) const                               \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T *const result = result_;                                           \
+        bin op;                                                              \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result[i] = op(data[i], val_);                                   \
+    }                                                                        \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T *const result_;                                                        \
+    const T val_;                                                            \
 };
 
-#define VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(name, uni)                      \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data, T *result) : data_(data), result_(result) {}         \
-                                                                              \
-    template <typename  Range>                                                \
-    void operator() (const Range &range) const                                \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T *const result = result_;                                            \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result[i] = uni(data[i]);                                         \
-    }                                                                         \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T *const result_;                                                         \
+#define VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(name, uni) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data, T *result) : data_(data), result_(result) {}        \
+                                                                             \
+    template <typename  Range>                                               \
+    void operator() (const Range &range) const                               \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T *const result = result_;                                           \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result[i] = uni(data[i]);                                        \
+    }                                                                        \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T *const result_;                                                        \
 };
 
-#define VSMC_DEFINE_TBB_OP_FOR_BINARY_FUNCTION(name, bin)                     \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data, T *result, const T &val) :                           \
-        data_(data), result_(result), val_(val) {}                            \
-                                                                              \
-    template <typename Range>                                                 \
-    void operator() (const Range &range) const                                \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T *const result = result_;                                            \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result[i] = bin(data[i], val_);                                   \
-    }                                                                         \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T *const result_;                                                         \
-    const T val_;                                                             \
+#define VSMC_DEFINE_TBB_OP_FOR_BINARY_FUNCTION(name, bin) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data, T *result, const T &val) :                          \
+        data_(data), result_(result), val_(val) {}                           \
+                                                                             \
+    template <typename Range>                                                \
+    void operator() (const Range &range) const                               \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T *const result = result_;                                           \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result[i] = bin(data[i], val_);                                  \
+    }                                                                        \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T *const result_;                                                        \
+    const T val_;                                                            \
 };
 
-#define VSMC_DEFINE_TBB_OP_FOR_UNARY_OPERATOR(name, uni)                      \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data, T *result) : data_(data), result_(result) {}         \
-                                                                              \
-    template <typename Range>                                                 \
-    void operator() (const Range &range) const                                \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T *const result = result_;                                            \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result[i] = uni data[i];                                          \
-    }                                                                         \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T *const result_;                                                         \
+#define VSMC_DEFINE_TBB_OP_FOR_UNARY_OPERATOR(name, uni) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data, T *result) : data_(data), result_(result) {}        \
+                                                                             \
+    template <typename Range>                                                \
+    void operator() (const Range &range) const                               \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T *const result = result_;                                           \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result[i] = uni data[i];                                         \
+    }                                                                        \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T *const result_;                                                        \
 };
 
-#define VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(name, bin)                     \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data, T *result, const T &val) :                           \
-        data_(data), result_(result), val_(val) {}                            \
-                                                                              \
-    template <typename Range>                                                 \
-    void operator() (const Range &range) const                                \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T *const result = result_;                                            \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result[i] = data[i] bin val_;                                     \
-    }                                                                         \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T *const result_;                                                         \
-    const T val_;                                                             \
+#define VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(name, bin) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data, T *result, const T &val) :                          \
+        data_(data), result_(result), val_(val) {}                           \
+                                                                             \
+    template <typename Range>                                                \
+    void operator() (const Range &range) const                               \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T *const result = result_;                                           \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result[i] = data[i] bin val_;                                    \
+    }                                                                        \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T *const result_;                                                        \
+    const T val_;                                                            \
 };
 
-#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OBJECT(name, bin, identity)          \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data) : data_(data), result_(identity) {}                  \
-                                                                              \
-    template <typename Split>                                                 \
-    name (const name<T> &other, Split) :                                      \
-        data_(other.data_), result_(identity) {}                              \
-                                                                              \
-    template <typename Range>                                                 \
-    void operator() (const Range &range)                                      \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T result = result_;                                                   \
-        bin op;                                                               \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result = op(result, data[i]);                                     \
-        result_ = result;                                                     \
-    }                                                                         \
-                                                                              \
-    void join (const name<T> &other)                                          \
-    {                                                                         \
-        bin op;                                                               \
-        result_ = op(result_, other.result_);                                 \
-    }                                                                         \
-                                                                              \
-    T result () const {return result_;}                                       \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T result_;                                                                \
+#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OBJECT(name, bin, identity) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data) : data_(data), result_(identity) {}                 \
+                                                                             \
+    template <typename Split>                                                \
+    name (const name<T> &other, Split) :                                     \
+        data_(other.data_), result_(identity) {}                             \
+                                                                             \
+    template <typename Range>                                                \
+    void operator() (const Range &range)                                     \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T result = result_;                                                  \
+        bin op;                                                              \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result = op(result, data[i]);                                    \
+        result_ = result;                                                    \
+    }                                                                        \
+                                                                             \
+    void join (const name<T> &other)                                         \
+    {                                                                        \
+        bin op;                                                              \
+        result_ = op(result_, other.result_);                                \
+    }                                                                        \
+                                                                             \
+    T result () const {return result_;}                                      \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T result_;                                                               \
 };
 
-#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(name, bin, identity)        \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data) : data_(data), result_(identity) {}                  \
-                                                                              \
-    template <typename Split>                                                 \
-    name (const name<T> &other, Split) :                                      \
-        data_(other.data_), result_(identity) {}                              \
-                                                                              \
-    template <typename Range>                                                 \
-    void operator() (const Range &range)                                      \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T result = result_;                                                   \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result = bin(result, data[i]);                                    \
-        result_ = result;                                                     \
-    }                                                                         \
-                                                                              \
-    void join (const name<T> &other) {result_ = bin(result_, other.result_);} \
-                                                                              \
-    T result () const {return result_;}                                       \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T result_;                                                                \
+#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(name, bin, identity) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data) : data_(data), result_(identity) {}                 \
+                                                                             \
+    template <typename Split>                                                \
+    name (const name<T> &other, Split) :                                     \
+        data_(other.data_), result_(identity) {}                             \
+                                                                             \
+    template <typename Range>                                                \
+    void operator() (const Range &range)                                     \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T result = result_;                                                  \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result = bin(result, data[i]);                                   \
+        result_ = result;                                                    \
+    }                                                                        \
+                                                                             \
+    void join (const name<T> &other) {result_ = bin(result_, other.result_);}\
+                                                                             \
+    T result () const {return result_;}                                      \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T result_;                                                               \
 };
 
-#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(name, bin, identity)        \
-template <typename T>                                                         \
-class name                                                                    \
-{                                                                             \
-    public :                                                                  \
-                                                                              \
-    name (const T *data) : data_(data), result_(identity) {}                  \
-                                                                              \
-    template <typename Split>                                                 \
-    name (const name<T> &other, Split) :                                      \
-        data_(other.data_), result_(identity) {}                              \
-                                                                              \
-    template <typename Range>                                                 \
-    void operator() (const Range &range)                                      \
-    {                                                                         \
-        const T *const data = data_;                                          \
-        T result = result_;                                                   \
-        for (typename Range::const_iterator i = range.begin();                \
-                i != range.end(); ++i)                                        \
-            result = result bin data[i];                                      \
-        result_ = result;                                                     \
-    }                                                                         \
-                                                                              \
-    void join (const name<T> &other) {result_ = result_ bin other.result_;}   \
-                                                                              \
-    T result () const {return result_;}                                       \
-                                                                              \
-    private :                                                                 \
-                                                                              \
-    const T *const data_;                                                     \
-    T result_;                                                                \
+#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(name, bin, identity) \
+template <typename T>                                                        \
+class name                                                                   \
+{                                                                            \
+    public :                                                                 \
+                                                                             \
+    name (const T *data) : data_(data), result_(identity) {}                 \
+                                                                             \
+    template <typename Split>                                                \
+    name (const name<T> &other, Split) :                                     \
+        data_(other.data_), result_(identity) {}                             \
+                                                                             \
+    template <typename Range>                                                \
+    void operator() (const Range &range)                                     \
+    {                                                                        \
+        const T *const data = data_;                                         \
+        T result = result_;                                                  \
+        for (typename Range::const_iterator i = range.begin();               \
+                i != range.end(); ++i)                                       \
+            result = result bin data[i];                                     \
+        result_ = result;                                                    \
+    }                                                                        \
+                                                                             \
+    void join (const name<T> &other) {result_ = result_ bin other.result_;}  \
+                                                                             \
+    T result () const {return result_;}                                      \
+                                                                             \
+    private :                                                                \
+                                                                             \
+    const T *const data_;                                                    \
+    T result_;                                                               \
 };
 
 namespace vsmc {

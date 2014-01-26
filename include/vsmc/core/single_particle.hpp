@@ -255,7 +255,7 @@ class SingleParticle :
 
     SingleParticle (const SingleParticle<T> &other) : base(other) {}
 
-    SingleParticle &operator= (const SingleParticle<T> &other)
+    SingleParticle<T> &operator= (const SingleParticle<T> &other)
     {base::operator=(other); return *this;}
 };
 
@@ -277,10 +277,10 @@ class ConstSingleParticle :
     ConstSingleParticle (const SingleParticle<T> &other) :
         base(other.id(), other.particle_ptr()) {}
 
-    ConstSingleParticle &operator= (const ConstSingleParticle<T> &other)
+    ConstSingleParticle<T> &operator= (const ConstSingleParticle<T> &other)
     {base::operator=(other); return *this;}
 
-    ConstSingleParticle &operator= (const SingleParticle<T> &other)
+    ConstSingleParticle<T> &operator= (const SingleParticle<T> &other)
     {
         base::operator=(base(other.id(), other.particle_ptr()));
         return *this;
