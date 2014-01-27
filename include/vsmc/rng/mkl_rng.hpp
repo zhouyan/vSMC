@@ -534,12 +534,12 @@ typedef Engine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> NONDETERM_64;
 
 /// \brief Vector RNG set using MKL BRNG with thread-local storage
 /// \ingroup MKLRNG
-template <MKL_INT BRNG, typename ResultType, MKL_UINT Seed>
-class RngSet<mkl::Engine<BRNG, ResultType, Seed>, mkl::ThreadLocalRng>
+template <MKL_INT BRNG, typename ResultType>
+class RngSet<mkl::Engine<BRNG, ResultType>, mkl::ThreadLocalRng>
 {
     public :
 
-    typedef mkl::Engine<BRNG, ResultType, Seed> rng_type;
+    typedef mkl::Engine<BRNG, ResultType> rng_type;
     typedef std::size_t size_type;
 
     explicit RngSet (size_type N = 1) : size_(N) {}
