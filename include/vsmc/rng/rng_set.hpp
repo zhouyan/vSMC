@@ -42,6 +42,9 @@ namespace traits {
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
         VSMC_DEFAULT_RNG_SET_TYPE)
 
+template <typename Rng>
+struct RngOffset {static void shift (Rng &rng) {}};
+
 } // namepsace vsmc::traits
 
 /// \brief Scalar RNG set
@@ -129,6 +132,7 @@ class RngSet<RngType, ThreadLocalRng>
     void init_rng (rng_type &tl_rng, bool &tl_flag)
     {
         std::lock_guard<std::mutex> lock(mtx_);
+        traits::RngOffset<rng_type>::shift(tl_rng);
         tl_rng.seed(Seed::instance().get());
         tl_flag = true;
     }
