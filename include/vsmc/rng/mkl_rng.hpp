@@ -1,7 +1,6 @@
 #ifndef VSMC_RNG_MKL_RNG_HPP
 #define VSMC_RNG_MKL_RNG_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <mkl_vsl.h>
 

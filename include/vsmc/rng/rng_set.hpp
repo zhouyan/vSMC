@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_RNG_SET_HPP
-#define VSMC_UTILITY_RNG_SET_HPP
+#ifndef VSMC_RNG_RNG_SET_HPP
+#define VSMC_RNG_RNG_SET_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
@@ -116,26 +116,27 @@ class RngSet<RngType, ThreadLocalRng>
 
     rng_type &rng (size_type id = 0)
     {
-        static thread_local rng_type tl_rng;
-        static thread_local bool tl_flag = 0;
-        if (!tl_flag)
-            init_rng(tl_rng, tl_flag);
+        static thread_local rng_type rng;
+        static thread_local bool flag = false;
+        init_rng(rng, flag);
 
-        return tl_rng;
+        return rng;
     }
 
     private :
 
     std::size_t size_;
-    std::mutex mtx_;
     traits::RngShift<rng_type> shift_;
+    std::mutex mtx_;
 
-    void init_rng (rng_type &tl_rng, bool &tl_flag)
+    void init_rng (rng_type &rng, bool &flag)
     {
+        if (flag) return;
+
         std::lock_guard<std::mutex> lock(mtx_);
-        tl_rng.seed(Seed::instance().get());
-        shift_(tl_rng);
-        tl_flag = true;
+        rng.seed(Seed::instance().get());
+        shift_(rng);
+        flag = true;
     }
 }; // class RngSet<RngType, ThreadLocalRng>
 
@@ -143,4 +144,4 @@ class RngSet<RngType, ThreadLocalRng>
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_RNG_SET_HPP
+#endif // VSMC_RNG_RNG_SET_HPP
