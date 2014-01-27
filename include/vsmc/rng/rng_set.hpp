@@ -43,7 +43,7 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
         VSMC_DEFAULT_RNG_SET_TYPE)
 
 template <typename Rng>
-struct RngOffset {static void shift (Rng &rng) {}};
+struct RngShift {void operator() (Rng &rng) const {}};
 
 } // namepsace vsmc::traits
 
@@ -68,7 +68,7 @@ class RngSet<RngType, ScalarRng>
 
     std::size_t size_;
     rng_type rng_;
-}; // class RngSet
+}; // class RngSet<RngType, ScalarRng>
 
 /// \brief Vector RNG set
 /// \ingroup RNG
@@ -96,7 +96,7 @@ class RngSet<RngType, VectorRng>
     private :
 
     std::vector<rng_type> rng_;
-}; // class RngSet
+}; // class RngSet<RngType, VectorRng>
 
 #if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 
@@ -128,15 +128,16 @@ class RngSet<RngType, ThreadLocalRng>
 
     std::size_t size_;
     std::mutex mtx_;
+    traits::RngShift<rng_type> shift_;
 
     void init_rng (rng_type &tl_rng, bool &tl_flag)
     {
         std::lock_guard<std::mutex> lock(mtx_);
-        traits::RngOffset<rng_type>::shift(tl_rng);
         tl_rng.seed(Seed::instance().get());
+        shift_(tl_rng);
         tl_flag = true;
     }
-}; // class RngSet
+}; // class RngSet<RngType, ThreadLocalRng>
 
 #endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 

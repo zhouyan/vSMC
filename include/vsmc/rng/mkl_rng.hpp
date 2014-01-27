@@ -292,18 +292,17 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 {
     public :
 
-    explicit Stream (MKL_UINT seed = traits::SeedTrait<BRNG>::value)
+    explicit Stream (MKL_UINT s = traits::SeedTrait<BRNG>::value) : seed_(s)
     {
-        int status = ::vslNewStream(&stream_, BRNG + this->offset(), seed);
+        int status = ::vslNewStream(&stream_, BRNG + this->offset(), s);
         rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
     template <typename SeedSeq>
     explicit Stream (SeedSeq &seq)
     {
-        MKL_UINT seed = 0;
-        seq.generate(&seed, &seed + 1);
-        int status = ::vslNewStream(&stream_, BRNG + this->offset(), seed);
+        seq.generate(&seed_, &seed_ + 1);
+        int status = ::vslNewStream(&stream_, BRNG + this->offset(), seed_);
         rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
@@ -331,12 +330,16 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 
     void seed (MKL_UINT s)
     {
+        seed_ = s;
         int status = VSL_ERROR_OK;
         VSLStreamStatePtr new_stream;
+
         status = ::vslNewStream(&new_stream, BRNG + this->offset(), s);
         rng_error_check(BRNG, status, "Stream::seed", "vslNewStream");
+
         status = ::vslCopyStreamState(stream_, new_stream);
         rng_error_check(BRNG, status, "Stream::seed", "vslCopyStreamState");
+
         status = ::vslDeleteStream(&new_stream);
         rng_error_check(BRNG, status, "Stream::seed", "vslDeleteStream");
     }
@@ -344,15 +347,22 @@ class Stream : public traits::OffsetTrait<BRNG>::type
     template <typename SeedSeq>
     void seed (SeedSeq &seq)
     {
-        MKL_UINT s = 0;
-        seq.generate(&s, &s + 1);
-        seed(s);
+        seq.generate(&seed_, &seed_ + 1);
+        seed(seed_);
     }
 
     VSLStreamStatePtr ptr () const {return stream_;}
 
+    void shift ()
+    {
+        unsigned offset = SeedGenerator<Stream<BRNG> >::instance().get();
+        this->offset(static_cast<MKL_INT>(offset));
+        seed(seed_);
+    }
+
     private :
 
+    MKL_UINT seed_;
     VSLStreamStatePtr stream_;
 }; // class Stream
 
@@ -1067,14 +1077,10 @@ class Beta : public Distribution<FPType, Beta<FPType, Method> >
 namespace traits {
 
 template <MKL_INT BRNG, typename ResultType>
-struct RngOffset<mkl::Engine<BRNG, ResultType> >
+struct RngShift<mkl::Engine<BRNG, ResultType> >
 {
-    static void shift (mkl::Engine<BRNG, ResultType> &rng)
-    {
-        unsigned offset =
-            SeedGenerator<mkl::Engine<BRNG, ResultType> >::instance().get();
-        rng.stream().offset(static_cast<MKL_INT>(offset));
-    }
+    void operator() (mkl::Engine<BRNG, ResultType> &rng) const
+    {rng.stream().shift();}
 };
 
 } // namespace vsmc::traits
