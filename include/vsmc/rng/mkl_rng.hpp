@@ -305,13 +305,15 @@ class Stream : public traits::OffsetTrait<BRNG>::type
         rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
-    Stream (const Stream<BRNG> &other)
+    Stream (const Stream<BRNG> &other) :
+        traits::OffsetTrait<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
         rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
     }
 
-    Stream (Stream<BRNG> &other)
+    Stream (Stream<BRNG> &other) :
+        traits::OffsetTrait<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
         rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
@@ -319,16 +321,21 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 
     Stream<BRNG> &operator= (const Stream<BRNG> &other)
     {
+        traits::OffsetTrait<BRNG>::type::operator=(other);
         int status = ::vslCopyStreamState(str_ptr_, other.str_ptr_);
         rng_error_check(BRNG, status,
                 "Stream::operator=", "vslCopyStreamState");
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Stream (Stream<BRNG> &&other) : str_ptr_(other.str_ptr_) {}
+    Stream (Stream<BRNG> &&other) :
+        traits::OffsetTrait<BRNG>::type(other), str_ptr_(other.str_ptr_) {}
 
     Stream<BRNG> &operator= (Stream<BRNG> &&other)
-    {str_ptr_ = other.str_ptr_;}
+    {
+        traits::OffsetTrait<BRNG>::type::operator=(other);
+        str_ptr_ = other.str_ptr_;
+    }
 #endif
 
     ~Stream () {::vslDeleteStream(&str_ptr_);}
@@ -432,7 +439,6 @@ class Distribution
     std::string vsl_name_prefix (unsigned MKL_INT64) {return "vi";}
     std::string vsl_name_prefix (float)              {return "vs";}
     std::string vsl_name_prefix (double)             {return "vd";}
-
 }; // class Distribution
 
 /// \brief MKL RNG C++11 engine
