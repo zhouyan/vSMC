@@ -209,6 +209,36 @@
 #endif
 #endif
 
+// C++11 library features
+
+#if _LIBCPP_VERSION >= 1101
+
+#ifndef VSMC_HAS_CXX11LIB_CHRONO
+#define VSMC_HAS_CXX11LIB_CHRONO 1
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_HAS_CXX11LIB_FUNCTIONAL 1
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_FUTURE
+#define VSMC_HAS_CXX11LIB_FUTURE 1
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_MUTEX
+#define VSMC_HAS_CXX11LIB_MUTEX 1
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_RANDOM
+#define VSMC_HAS_CXX11LIB_RANDOM 1
+#endif
+
+#ifndef VSMC_HAS_CXX11LIB_THREAD
+#define VSMC_HAS_CXX11LIB_THREAD 1
+#endif
+
+#endif // _LIBCPP_VERSION
+
 #endif // __cplusplus >= 201103L
 
 #endif // VSMC_INTERNAL_COMPILER_CLANG_HPP
