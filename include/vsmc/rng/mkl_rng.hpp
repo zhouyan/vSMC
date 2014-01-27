@@ -2,12 +2,8 @@
 #define VSMC_RNG_MKL_RNG_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <mkl_vsl.h>
-
-#if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 #include <vsmc/rng/rng_set.hpp>
-#include <mutex>
-#endif
+#include <mkl_vsl.h>
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset) \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MACRO_NO_EXPANSION ()),           \
@@ -24,7 +20,6 @@ namespace mkl {
 
 /// \cond HIDDEN_SYMBOLS
 
-struct ThreadLocalRng;
 template <MKL_INT> class Stream;
 template <typename, typename> class Distribution;
 template <MKL_INT, typename> class Engine;
@@ -527,53 +522,6 @@ typedef Engine<VSL_BRNG_NONDETERM, unsigned> NONDETERM;
 /// \brief A non-determinstic random number generator (64-bit)
 /// \ingroup MKLRNG
 typedef Engine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> NONDETERM_64;
-
-} // namespace vsmc::mkl
-
-#if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
-
-/// \brief Vector RNG set using MKL BRNG with thread-local storage
-/// \ingroup MKLRNG
-template <MKL_INT BRNG, typename ResultType>
-class RngSet<mkl::Engine<BRNG, ResultType>, mkl::ThreadLocalRng>
-{
-    public :
-
-    typedef mkl::Engine<BRNG, ResultType> rng_type;
-    typedef std::size_t size_type;
-
-    explicit RngSet (size_type N = 1) : size_(N) {}
-
-    size_type size () const {return size_;}
-
-    rng_type &rng (size_type id = 0)
-    {
-        static thread_local rng_type tl_rng;
-        static thread_local bool tl_flag = 0;
-        if (!tl_flag)
-            init_rng(tl_rng, tl_flag);
-
-        return tl_rng;
-    }
-
-    private :
-
-    std::size_t size_;
-    std::mutex mtx_;
-
-    void init_rng (rng_type &tl_rng, bool &tl_flag)
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        unsigned offset = SeedGenerator<rng_type>::instance().get();
-        tl_rng.stream().offset(static_cast<MKL_INT>(offset));
-        tl_rng.seed(static_cast<MKL_UINT>(Seed::instance().get()));
-        tl_flag = true;
-    }
-}; // class RngSet
-
-#endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
-
-namespace mkl {
 
 /// \brief MKL uniform bits (32-bits)
 /// \ingroup MKLRNG
@@ -1115,6 +1063,49 @@ class Beta : public Distribution<FPType, Beta<FPType, Method> >
 }; // class Beta
 
 } // namespace vsmc::mkl
+
+#if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
+
+/// \brief Thread local RNG set partial specialization for MKL Engines
+/// \ingroup MKLRNG
+template <MKL_INT BRNG, typename ResultType>
+class RngSet<mkl::Engine<BRNG, ResultType>, ThreadLocalRng>
+{
+    public :
+
+    typedef mkl::Engine<BRNG, ResultType> rng_type;
+    typedef std::size_t size_type;
+
+    explicit RngSet (size_type N = 1) : size_(N) {}
+
+    size_type size () const {return size_;}
+
+    rng_type &rng (size_type id = 0)
+    {
+        static thread_local rng_type tl_rng;
+        static thread_local bool tl_flag = 0;
+        if (!tl_flag)
+            init_rng(tl_rng, tl_flag);
+
+        return tl_rng;
+    }
+
+    private :
+
+    std::size_t size_;
+    std::mutex mtx_;
+
+    void init_rng (rng_type &tl_rng, bool &tl_flag)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        unsigned offset = SeedGenerator<rng_type>::instance().get();
+        tl_rng.stream().offset(static_cast<MKL_INT>(offset));
+        tl_rng.seed(Seed::instance().get());
+        tl_flag = true;
+    }
+}; // class RngSet
+
+#endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 
 } // namespace vsmc
 

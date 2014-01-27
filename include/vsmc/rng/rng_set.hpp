@@ -17,13 +17,22 @@
 #endif // _MSC_VER
 #endif // VSMC_USE_RANDOM123
 
+#if VSMC_HAS_CXX11LIB_MUTEX
+#include <mutex>
+#endif
+
 #if VSMC_USE_RANDOM123
 #define VSMC_DEFAULT_RNG_SET_TYPE \
-    RngSet<r123::Engine<r123::Philox2x64>, VectorRng>
-#else
-#warning No Random123 found, RNG streams may not be independent
+    vsmc::RngSet<r123::Engine<r123::Philox2x64>, vsmc::VectorRng>
+#elif VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX && VSMC_USE_MKL
 #define VSMC_DEFAULT_RNG_SET_TYPE \
-    RngSet<vsmc::cxx11::mt19937_64, VectorRng>
+    vsmc::RngSet<vsmc::mkl::MT2203_64, vsmc::ThreadLocalRng>
+#elif VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    vsmc::RngSet<vsmc::cxx11::mt19937_64, vsmc::ThreadLocalRng>
+#else
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    vsmc::RngSet<vsmc::cxx11::mt19937_64, vsmc::VectorRng>
 #endif
 
 namespace vsmc {
@@ -85,6 +94,47 @@ class RngSet<RngType, VectorRng>
 
     std::vector<rng_type> rng_;
 }; // class RngSet
+
+#if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
+
+/// \brief Thread local RNG set
+/// \ingroup RNG
+template <typename RngType>
+class RngSet<RngType, ThreadLocalRng>
+{
+    public :
+
+    typedef RngType rng_type;
+    typedef std::size_t size_type;
+
+    explicit RngSet (size_type N = 1) : size_(N) {}
+
+    size_type size () const {return size_;}
+
+    rng_type &rng (size_type id = 0)
+    {
+        static thread_local rng_type tl_rng;
+        static thread_local bool tl_flag = 0;
+        if (!tl_flag)
+            init_rng(tl_rng, tl_flag);
+
+        return tl_rng;
+    }
+
+    private :
+
+    std::size_t size_;
+    std::mutex mtx_;
+
+    void init_rng (rng_type &tl_rng, bool &tl_flag)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        tl_rng.seed(Seed::instance().get());
+        tl_flag = true;
+    }
+}; // class RngSet
+
+#endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 
 } // namespace vsmc
 
