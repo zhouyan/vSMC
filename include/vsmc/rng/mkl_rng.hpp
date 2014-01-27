@@ -1,5 +1,5 @@
-#ifndef VSMC_RNG_MKL_ENGINE_HPP
-#define VSMC_RNG_MKL_ENGINE_HPP
+#ifndef VSMC_RNG_MKL_RNG_HPP
+#define VSMC_RNG_MKL_RNG_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <mkl_vsl.h>
@@ -1157,4 +1157,4 @@ class Beta : public Distribution<FPType, Beta<FPType, Method> >
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_MKL_ENGINE_HPP
+#endif // VSMC_RNG_MKL_RNG_HPP
