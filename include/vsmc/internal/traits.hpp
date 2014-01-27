@@ -40,37 +40,37 @@
 /// SizeTypeTrait<Stack>::value; // true
 /// SizeTypeTrait<Stack>::type;  // Stack::size_type
 /// \endcode
-#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)                \
-template <typename T>                                                         \
-struct Has##Outer##Impl                                                       \
-{                                                                             \
-    private :                                                                 \
-                                                                              \
-    struct char2 {char c1; char c2;};                                         \
-    template <typename U> static char test (typename U::Inner *);             \
-    template <typename U> static char2 test (...);                            \
-                                                                              \
-    public :                                                                  \
-                                                                              \
-    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};             \
-};                                                                            \
-                                                                              \
-template <typename T>                                                         \
-struct Has##Outer :                                                           \
-    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};     \
-                                                                              \
-template <typename T, bool> struct Outer##Dispatch;                           \
-                                                                              \
-template <typename T> struct Outer##Dispatch<T, false>                        \
-{typedef Default type;};                                                      \
-                                                                              \
-template <typename T> struct Outer##Dispatch<T, true>                         \
-{typedef typename T::Inner type;};                                            \
-                                                                              \
-template <typename T> struct Outer##Trait                                     \
-{                                                                             \
-    enum {value = Has##Outer<T>::value};                                      \
-    typedef typename Outer##Dispatch<T, value>::type type;                    \
+#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)               \
+template <typename T>                                                        \
+struct Has##Outer##Impl                                                      \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename U> static char test (typename U::Inner *);            \
+    template <typename U> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename T>                                                        \
+struct Has##Outer :                                                          \
+    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};    \
+                                                                             \
+template <typename T, bool> struct Outer##Dispatch;                          \
+                                                                             \
+template <typename T> struct Outer##Dispatch<T, false>                       \
+{typedef Default type;};                                                     \
+                                                                             \
+template <typename T> struct Outer##Dispatch<T, true>                        \
+{typedef typename T::Inner type;};                                           \
+                                                                             \
+template <typename T> struct Outer##Trait                                    \
+{                                                                            \
+    enum {value = Has##Outer<T>::value};                                     \
+    typedef typename Outer##Dispatch<T, value>::type type;                   \
 };
 
 /// \brief Define a class template dispatch trait
@@ -107,37 +107,37 @@ template <typename T> struct Outer##Trait                                     \
 /// VecTypeTrait<Stack, int>::value; // true
 /// VecTypeTrait<Stack, int>::type;  // Stack::vec_type<int>
 /// \endcode
-#define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)       \
-template <typename T, typename V>                                             \
-struct Has##Outer##Impl                                                       \
-{                                                                             \
-    private :                                                                 \
-                                                                              \
-    struct char2 {char c1; char c2;};                                         \
-    template <typename U> static char test (typename U::template Inner<V> *); \
-    template <typename U> static char2 test (...);                            \
-                                                                              \
-    public :                                                                  \
-                                                                              \
-    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};             \
-};                                                                            \
-                                                                              \
-template <typename T, typename V>                                             \
-struct Has##Outer :                                                           \
-    public cxx11::integral_constant<bool, Has##Outer##Impl<T, V>::value> {};  \
-                                                                              \
-template <typename T, typename V, bool> struct Outer##Dispatch;               \
-                                                                              \
-template <typename T, typename V> struct Outer##Dispatch<T, V, false>         \
-{typedef Default<V> type;};                                                   \
-                                                                              \
-template <typename T, typename V> struct Outer##Dispatch<T, V, true>          \
-{typedef typename T::template Inner<V> type;};                                \
-                                                                              \
-template <typename T, typename V> struct Outer##Trait                         \
-{                                                                             \
-    enum {value = Has##Outer<T, V>::value};                                   \
-    typedef typename Outer##Dispatch<T, V, value>::type type;                 \
+#define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)      \
+template <typename T, typename V>                                            \
+struct Has##Outer##Impl                                                      \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename U> static char test (typename U::template Inner<V> *);\
+    template <typename U> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename T, typename V>                                            \
+struct Has##Outer :                                                          \
+    public cxx11::integral_constant<bool, Has##Outer##Impl<T, V>::value> {}; \
+                                                                             \
+template <typename T, typename V, bool> struct Outer##Dispatch;              \
+                                                                             \
+template <typename T, typename V> struct Outer##Dispatch<T, V, false>        \
+{typedef Default<V> type;};                                                  \
+                                                                             \
+template <typename T, typename V> struct Outer##Dispatch<T, V, true>         \
+{typedef typename T::template Inner<V> type;};                               \
+                                                                             \
+template <typename T, typename V> struct Outer##Trait                        \
+{                                                                            \
+    enum {value = Has##Outer<T, V>::value};                                  \
+    typedef typename Outer##Dispatch<T, V, value>::type type;                \
 };
 
 /// \brief Define member function checker
@@ -167,24 +167,24 @@ template <typename T, typename V> struct Outer##Trait                         \
 /// HasState<Value>::value; // true
 /// HasState<Value>::type;  // true_type
 /// \endcode
-#define VSMC_DEFINE_MF_CHECKER(Outer, Inner, RT, Args)                        \
-template <typename T>                                                         \
-struct Has##Outer##Impl                                                       \
-{                                                                             \
-    private :                                                                 \
-                                                                              \
-    struct char2 {char c1; char c2;};                                         \
-    template <typename U, RT (U::*) Args> struct sfinae_;                     \
-    template <typename U> static char test (sfinae_<U, &U::Inner> *);         \
-    template <typename U> static char2 test (...);                            \
-                                                                              \
-    public :                                                                  \
-                                                                              \
-    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};             \
-};                                                                            \
-                                                                              \
-template <typename T>                                                         \
-struct Has##Outer :                                                           \
+#define VSMC_DEFINE_MF_CHECKER(Outer, Inner, RT, Args)                       \
+template <typename T>                                                        \
+struct Has##Outer##Impl                                                      \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename U, RT (U::*) Args> struct sfinae_;                    \
+    template <typename U> static char test (sfinae_<U, &U::Inner> *);        \
+    template <typename U> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename T>                                                        \
+struct Has##Outer :                                                          \
     public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};
 
 /// \brief Define static member function checker
@@ -214,60 +214,60 @@ struct Has##Outer :                                                           \
 /// HasStaticDim<Value>::value; // true
 /// HasStaticDim<Value>::type;  // true_type
 /// \endcode
-#define VSMC_DEFINE_STATIC_MF_CHECKER(Outer, Inner, RT, Args)                 \
-template <typename T>                                                         \
-struct HasStatic##Outer##Impl                                                 \
-{                                                                             \
-    private :                                                                 \
-                                                                              \
-    struct char2 {char c1; char c2;};                                         \
-    template <typename U, RT (*) Args> struct sfinae_;                        \
-    template <typename U> static char test (sfinae_<U, &U::Inner> *);         \
-    template <typename U> static char2 test (...);                            \
-                                                                              \
-    public :                                                                  \
-                                                                              \
-    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};             \
-};                                                                            \
-                                                                              \
-template <typename T>                                                         \
-struct HasStatic##Outer :                                                     \
+#define VSMC_DEFINE_STATIC_MF_CHECKER(Outer, Inner, RT, Args)                \
+template <typename T>                                                        \
+struct HasStatic##Outer##Impl                                                \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename U, RT (*) Args> struct sfinae_;                       \
+    template <typename U> static char test (sfinae_<U, &U::Inner> *);        \
+    template <typename U> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename T>                                                        \
+struct HasStatic##Outer :                                                    \
     public cxx11::integral_constant<bool, HasStatic##Outer##Impl<T>::value>{};
 
-#define VSMC_DEFINE_SMP_MF_CHECKER(name, RT, Args)                            \
-template <typename U>                                                         \
-struct has_##name##_non_static_                                               \
-{                                                                             \
-    private :                                                                 \
-                                                                              \
-    struct char2 {char c1; char c2;};                                         \
-    template <typename V, RT (V::*) Args> struct sfinae_;                     \
-    template <typename V> static char test (sfinae_<V, &V::name> *);          \
-    template <typename V> static char2 test (...);                            \
-                                                                              \
-    public :                                                                  \
-                                                                              \
-    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};             \
-};                                                                            \
-                                                                              \
-template <typename U>                                                         \
-struct has_##name##_static_                                                   \
-{                                                                             \
-    private :                                                                 \
-                                                                              \
-    struct char2 {char c1; char c2;};                                         \
-    template <typename V, RT (*) Args> struct sfinae_;                        \
-    template <typename V> static char test (sfinae_<V, &V::name> *);          \
-    template <typename V> static char2 test (...);                            \
-                                                                              \
-    public :                                                                  \
-                                                                              \
-    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};             \
-};                                                                            \
-                                                                              \
-template <typename U>                                                         \
-struct has_##name##_ : public cxx11::integral_constant<bool,                  \
-    has_##name##_non_static_<U>::value ||                                     \
+#define VSMC_DEFINE_SMP_MF_CHECKER(name, RT, Args)                           \
+template <typename U>                                                        \
+struct has_##name##_non_static_                                              \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename V, RT (V::*) Args> struct sfinae_;                    \
+    template <typename V> static char test (sfinae_<V, &V::name> *);         \
+    template <typename V> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename U>                                                        \
+struct has_##name##_static_                                                  \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename V, RT (*) Args> struct sfinae_;                       \
+    template <typename V> static char test (sfinae_<V, &V::name> *);         \
+    template <typename V> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename U>                                                        \
+struct has_##name##_ : public cxx11::integral_constant<bool,                 \
+    has_##name##_non_static_<U>::value ||                                    \
     has_##name##_static_<U>::value> {};
 
 namespace vsmc {
@@ -406,6 +406,8 @@ template <typename T>
 struct ConstSingleParticleTypeTrait :
     public ConstSingleParticleBaseTypeTrait<T, T> {};
 
-} } // namespace vsmc::traits
+} // namespace vsmc::traits
+
+} // namespace vsmc
 
 #endif // VSMC_INTERNAL_TRAITS_HPP

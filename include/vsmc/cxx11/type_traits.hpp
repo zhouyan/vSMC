@@ -4,7 +4,9 @@
 #include <vsmc/internal/config.hpp>
 #include <cstddef>
 
-namespace vsmc { namespace cxx11 {
+namespace vsmc {
+
+namespace cxx11 {
 
 /// \defgroup CPP11Traits C++11 style type traits
 /// \brief C++11 style type traits
@@ -133,6 +135,8 @@ template <typename T> struct is_floating_point :
 
 /// @}
 
-} } // namespace vsmc::cxx11
+} // namespace vsmc::cxx11
+
+} // namespace vsmc
 
 #endif // VSMC_INTERNAL_CXX11_TYPE_TRAITS_HPP

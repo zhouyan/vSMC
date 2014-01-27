@@ -369,6 +369,8 @@ VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(minimum, min_fn,
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(summation, +, zero_trait<T>::value())
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(product,   *, one_trait<T>::value())
 
-} } // namespace vsmc::tbb_op
+} // namespace vsmc::tbb_op
+
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_TBB_OP_HPP
