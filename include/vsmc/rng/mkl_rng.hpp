@@ -469,7 +469,7 @@ class Engine
     Engine<BRNG, ResultType> &operator= (const Engine<BRNG, ResultType> &other)
     {
         stream_ = other.stream_;
-        skip_head_ = other.skip_ahead_;
+        skip_ahead_ = other.skip_ahead_;
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
