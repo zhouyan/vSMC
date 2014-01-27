@@ -293,7 +293,7 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 
     explicit Stream (MKL_UINT s = traits::SeedTrait<BRNG>::value) : seed_(s)
     {
-        int status = ::vslNewStream(&str_ptr_, BRNG + this->offset(), s);
+        int status = ::vslNewStream(&str_ptr_, BRNG + this->offset(), seed_);
         rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
@@ -305,15 +305,13 @@ class Stream : public traits::OffsetTrait<BRNG>::type
         rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
-    Stream (const Stream<BRNG> &other) :
-        traits::OffsetTrait<BRNG>::type(other)
+    Stream (const Stream<BRNG> &other) : traits::OffsetTrait<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
         rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
     }
 
-    Stream (Stream<BRNG> &other) :
-        traits::OffsetTrait<BRNG>::type(other)
+    Stream (Stream<BRNG> &other) : traits::OffsetTrait<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
         rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
@@ -329,11 +327,13 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     Stream (Stream<BRNG> &&other) :
-        traits::OffsetTrait<BRNG>::type(other), str_ptr_(other.str_ptr_) {}
+        traits::OffsetTrait<BRNG>::type(std::move(other)),
+        seed_(other.seed_), str_ptr_(other.str_ptr_) {}
 
     Stream<BRNG> &operator= (Stream<BRNG> &&other)
     {
-        traits::OffsetTrait<BRNG>::type::operator=(other);
+        traits::OffsetTrait<BRNG>::type::operator=(std::move(other));
+        seed_ = other.seed_;
         str_ptr_ = other.str_ptr_;
     }
 #endif
@@ -460,18 +460,28 @@ class Engine
     template <typename SeedSeq>
     explicit Engine (SeedSeq &seq) : stream_(seq) {}
 
-    Engine (const Engine<BRNG, ResultType> &other) : stream_(other.stream_) {}
+    Engine (const Engine<BRNG, ResultType> &other) :
+        stream_(other.stream_), skip_ahead_(other.skip_ahead_) {}
 
-    Engine (Engine<BRNG, ResultType> &other) : stream_(other.stream_) {}
+    Engine (Engine<BRNG, ResultType> &other) :
+        stream_(other.stream_), skip_ahead_(other.skip_ahead_) {}
 
     Engine<BRNG, ResultType> &operator= (const Engine<BRNG, ResultType> &other)
-    {stream_ = other.stream_;}
+    {
+        stream_ = other.stream_;
+        skip_head_ = other.skip_ahead_;
+    }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Engine (Engine<BRNG, ResultType> &&other) : stream_(other.stream_) {}
+    Engine (Engine<BRNG, ResultType> &&other) :
+        stream_(std::move(other.stream_)),
+        skip_ahead_(std::move(other.skip_ahead_)) {}
 
     Engine<BRNG, ResultType> &operator= (Engine<BRNG, ResultType> &&other)
-    {stream_ = other.stream_;}
+    {
+        stream_ = std::move(other.stream_);
+        skip_ahead_ = std::move(other.skip_ahead_);
+    }
 #endif
 
     void seed (MKL_UINT s)
@@ -518,7 +528,7 @@ class Engine
 
     stream_type stream_;
     skip_ahead_type skip_ahead_;
-    UniformBits<result_type> runif_;
+    runif_type runif_;
 }; // class Engine
 
 /// \brief A 59-bit multiplicative congruential generator

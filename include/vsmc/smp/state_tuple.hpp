@@ -44,12 +44,12 @@ class StateTupleBase
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
         state_pack_type (state_pack_type &&other) :
-            data_(cxx11::move(other.data_)) {}
+            data_(std::move(other.data_)) {}
 
         state_pack_type &operator= (state_pack_type &&other)
         {
             if (this != &other)
-                data_ = cxx11::move(other.data_);
+                data_ = std::move(other.data_);
 
             return *this;
         }

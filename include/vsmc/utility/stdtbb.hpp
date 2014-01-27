@@ -191,6 +191,7 @@ inline void parallel_for (const Range &range, WorkType &&work)
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
+    wg.reserve(range_vec.size());
     for (std::size_t i = 0; i != range_vec.size(); ++i) {
         wg.push_back(std::async(std::launch::async,
                     std::forward<WorkType>(work), range_vec[i]));
@@ -200,6 +201,7 @@ inline void parallel_for (const Range &range, WorkType &&work)
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
+        tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
             tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
                             range_vec[i])));
@@ -226,6 +228,7 @@ inline void parallel_reduce (const Range &range, WorkType &work)
     std::vector<WorkType> work_vec(range_vec.size(), work);
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
+    wg.reserve(range_vec.size());
     for (std::size_t i = 0; i != range_vec.size(); ++i) {
         wg.push_back(std::async(std::launch::async,
                     std::ref(work_vec[i]), range_vec[i]));
@@ -235,6 +238,7 @@ inline void parallel_reduce (const Range &range, WorkType &work)
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
+        tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
             tg.push_back(ThreadGuard(std::thread(std::ref(work_vec[i]),
                             range_vec[i])));
@@ -261,6 +265,7 @@ inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
     std::vector<T> result(range_vec.size());
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
+    wg.reserve(range_vec.size());
     for (std::size_t i = 0; i != range_vec.size(); ++i) {
         wg.push_back(std::async(std::launch::async,
                     std::forward<WorkType>(work), range_vec[i],
@@ -271,6 +276,7 @@ inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
+        tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
             tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
                             range_vec[i], std::ref(result[i]))));
@@ -303,6 +309,7 @@ inline T parallel_accumulate (const Range &range, WorkType &&work,
     std::vector<T> result(range_vec.size());
 #if VSMC_HAS_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
+    wg.reserve(range_vec.size());
     for (std::size_t i = 0; i != range_vec.size(); ++i) {
         wg.push_back(std::async(std::launch::async,
                     std::forward<WorkType>(work), range_vec[i],
@@ -313,6 +320,7 @@ inline T parallel_accumulate (const Range &range, WorkType &&work,
     // start parallelization
     {
         std::vector<ThreadGuard> tg;
+        tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
             tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
                             range_vec[i], std::ref(result[i]))));

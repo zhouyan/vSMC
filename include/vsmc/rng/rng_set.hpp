@@ -57,8 +57,7 @@ class RngSet<RngType, ScalarRng>
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet (size_type N = 1) : size_(N), rng_(static_cast<
-            typename rng_type::result_type>(Seed::instance().get())) {}
+    explicit RngSet (size_type N) : size_(N), rng_(Seed::instance().get()) {}
 
     size_type size () const {return size_;}
 
@@ -80,13 +79,11 @@ class RngSet<RngType, VectorRng>
     typedef RngType rng_type;
     typedef typename std::vector<rng_type>::size_type size_type;
 
-    explicit RngSet (size_type N = 1)
+    explicit RngSet (size_type N)
     {
-        Seed &seed = Seed::instance();
-        for (size_type i = 0; i != N; ++i) {
-            rng_.push_back(rng_type(static_cast<
-                        typename rng_type::result_type>(seed.get())));
-        }
+        rng_.reserve(N);
+        for (size_type i = 0; i != N; ++i)
+            rng_.push_back(rng_type(Seed::instance().get()));
     }
 
     size_type size () const {return rng_.size();}
@@ -110,7 +107,7 @@ class RngSet<RngType, ThreadLocalRng>
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet (size_type N = 1) : size_(N) {}
+    explicit RngSet (size_type N) : size_(N) {}
 
     size_type size () const {return size_;}
 

@@ -16,7 +16,7 @@ class RngSetTBB
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSetTBB (size_type N = 1) : size_(N) {init_rng();}
+    explicit RngSetTBB (size_type N) : size_(N) {init_rng();}
 
     size_type size () const {return size_;}
 
