@@ -293,7 +293,7 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 
     explicit Stream (MKL_UINT s = traits::SeedTrait<BRNG>::value) : seed_(s)
     {
-        int status = ::vslNewStream(&stream_, BRNG + this->offset(), s);
+        int status = ::vslNewStream(&str_ptr_, BRNG + this->offset(), s);
         rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
@@ -301,45 +301,51 @@ class Stream : public traits::OffsetTrait<BRNG>::type
     explicit Stream (SeedSeq &seq)
     {
         seq.generate(&seed_, &seed_ + 1);
-        int status = ::vslNewStream(&stream_, BRNG + this->offset(), seed_);
+        int status = ::vslNewStream(&str_ptr_, BRNG + this->offset(), seed_);
         rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
     Stream (const Stream<BRNG> &other)
     {
-        int status = ::vslCopyStream(&stream_, other.stream_);
+        int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
+        rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
+    }
+
+    Stream (Stream<BRNG> &other)
+    {
+        int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
         rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
     }
 
     Stream<BRNG> &operator= (const Stream<BRNG> &other)
     {
-        int status = ::vslCopyStreamState(stream_, other.stream_);
+        int status = ::vslCopyStreamState(str_ptr_, other.str_ptr_);
         rng_error_check(BRNG, status,
                 "Stream::operator=", "vslCopyStreamState");
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Stream (Stream<BRNG> &&other) : stream_(other.stream_) {}
+    Stream (Stream<BRNG> &&other) : str_ptr_(other.str_ptr_) {}
 
     Stream<BRNG> &operator= (Stream<BRNG> &&other)
-    {stream_ = other.stream_;}
+    {str_ptr_ = other.str_ptr_;}
 #endif
 
-    ~Stream () {::vslDeleteStream(&stream_);}
+    ~Stream () {::vslDeleteStream(&str_ptr_);}
 
     void seed (MKL_UINT s)
     {
         seed_ = s;
         int status = VSL_ERROR_OK;
-        VSLStreamStatePtr new_stream;
+        VSLStreamStatePtr new_str_ptr;
 
-        status = ::vslNewStream(&new_stream, BRNG + this->offset(), s);
+        status = ::vslNewStream(&new_str_ptr, BRNG + this->offset(), s);
         rng_error_check(BRNG, status, "Stream::seed", "vslNewStream");
 
-        status = ::vslCopyStreamState(stream_, new_stream);
+        status = ::vslCopyStreamState(str_ptr_, new_str_ptr);
         rng_error_check(BRNG, status, "Stream::seed", "vslCopyStreamState");
 
-        status = ::vslDeleteStream(&new_stream);
+        status = ::vslDeleteStream(&new_str_ptr);
         rng_error_check(BRNG, status, "Stream::seed", "vslDeleteStream");
     }
 
@@ -350,7 +356,7 @@ class Stream : public traits::OffsetTrait<BRNG>::type
         seed(seed_);
     }
 
-    VSLStreamStatePtr ptr () const {return stream_;}
+    VSLStreamStatePtr ptr () const {return str_ptr_;}
 
     void shift ()
     {
@@ -362,7 +368,7 @@ class Stream : public traits::OffsetTrait<BRNG>::type
     private :
 
     MKL_UINT seed_;
-    VSLStreamStatePtr stream_;
+    VSLStreamStatePtr str_ptr_;
 }; // class Stream
 
 /// \brief Base class of MKL distributions
@@ -442,11 +448,25 @@ class Engine
         skip_ahead_type;
     typedef UniformBits<result_type> runif_type;
 
-    explicit Engine (MKL_UINT seed = traits::SeedTrait<BRNG>::value) :
-        stream_(seed) {}
+    explicit Engine (MKL_UINT s = traits::SeedTrait<BRNG>::value) :
+        stream_(s) {}
 
     template <typename SeedSeq>
     explicit Engine (SeedSeq &seq) : stream_(seq) {}
+
+    Engine (const Engine<BRNG, ResultType> &other) : stream_(other.stream_) {}
+
+    Engine (Engine<BRNG, ResultType> &other) : stream_(other.stream_) {}
+
+    Engine<BRNG, ResultType> &operator= (const Engine<BRNG, ResultType> &other)
+    {stream_ = other.stream_;}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    Engine (Engine<BRNG, ResultType> &&other) : stream_(other.stream_) {}
+
+    Engine<BRNG, ResultType> &operator= (Engine<BRNG, ResultType> &&other)
+    {stream_ = other.stream_;}
+#endif
 
     void seed (MKL_UINT s)
     {
