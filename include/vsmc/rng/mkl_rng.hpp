@@ -18,10 +18,6 @@
 #define VSMC_RNG_MKL_BUFFER_SIZE 1000
 #endif
 
-#ifndef VSMC_RNG_MKL_SEED
-#define VSMC_RNG_MKL_SEED 861014
-#endif
-
 namespace vsmc {
 
 namespace mkl {
@@ -31,7 +27,7 @@ namespace mkl {
 struct ThreadLocalRng;
 template <MKL_INT> class Stream;
 template <typename, typename> class Distribution;
-template <MKL_INT, typename, MKL_UINT S = VSMC_RNG_MKL_SEED> class Engine;
+template <MKL_INT, typename> class Engine;
 
 template <typename> class UniformBits;
 
@@ -67,11 +63,81 @@ template <typename F = double,
 
 /// \endcond HIDDEN_SYMBOLS
 
+#define VSMC_DEFINE_VSL_BRNG_CASE(BRNG) \
+    case BRNG : return #BRNG ;
+
+/// \brief Transfer MKL BRNG index to string
+/// \ingroup MKLRNG
+inline std::string rng_brng_str (MKL_INT BRNG)
+{
+    switch (BRNG) {
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_MCG31)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_MCG59)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_MRG32K3A)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_R250)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_MT19937)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_SFMT19937)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_MT2203)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_WH)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_SOBOL)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_NIEDERR)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_IABSTRACT)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_DABSTRACT)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_SABSTRACT)
+        VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_NONDETERM)
+        default : return "Unknown";
+    }
+}
+
+#define VSMC_DEFINE_VSL_ERROR_CASE(STATUS) \
+    case STATUS : return #STATUS ;
+
+/// \brief Transfer MKL VSL error code to string
+/// \ingroup MKLRNG
+inline std::string rng_error_str (int status)
+{
+    switch (status) {
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_ERROR_OK)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_ERROR_BADARGS)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_ERROR_CPU_NOT_SUPPORTED)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_ERROR_FEATURE_NOT_IMPLEMENTED)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_ERROR_MEM_FAILURE)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_ERROR_NULL_PTR)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_ERROR_UNKNOWN)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BAD_FILE_FORMAT)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BAD_MEM_FORMAT)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BAD_NBITS)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BAD_NSEEDS)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BAD_STREAM)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BAD_UPDATE)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BAD_WORD_SIZE)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BRNG_NOT_SUPPORTED)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BRNG_TABLE_FULL)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_BRNGS_INCOMPATIBLE)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_FILE_CLOSE)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_FILE_OPEN)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_FILE_READ)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_FILE_WRITE)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_INVALID_BRNG_INDEX)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_NO_NUMBERS)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_UNSUPPORTED_FILE_VER)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED)
+        VSMC_DEFINE_VSL_ERROR_CASE(VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED)
+        default :
+            return "UNKNOWN";
+    }
+}
+
 #ifndef NDEBUG
 /// \brief Check MKL RNG error status
 /// \ingroup MKLRNG
-template <MKL_INT BRNG>
-inline void rng_error_check (int status, const char *func, const char *vslf)
+inline void rng_error_check (MKL_INT BRNG, int status,
+        const char *func, const char *vslf)
 {
     if (status == VSL_ERROR_OK)
         return;
@@ -83,132 +149,26 @@ inline void rng_error_check (int status, const char *func, const char *vslf)
     msg += vslf;
 
     msg += "; BRNG: ";
-    switch (BRNG) {
-        case VSL_BRNG_MCG59 :
-            msg += "VSL_BRNG_MCG59";
-            break;
-        case VSL_BRNG_MT19937 :
-            msg += "VSL_BRNG_MT19937";
-            break;
-        case VSL_BRNG_SFMT19937 :
-            msg += "VSL_BRNG_SFMT19937";
-            break;
-        case VSL_BRNG_MT2203 :
-            msg += "VSL_BRNG_MT2203";
-            break;
-        case VSL_BRNG_NONDETERM :
-            msg += "VSL_BRNG_NONDETERM";
-            break;
-        default :
-            msg += "UNKNOWN";
-            break;
-    } // switch (BRNG)
-
+    msg += rng_brng_str(BRNG);
     msg += "; Error code: ";
-    switch (status) {
-        case VSL_ERROR_BADARGS :
-            msg += "VSL_ERROR_BADARGS";
-            break;
-        case VSL_ERROR_CPU_NOT_SUPPORTED :
-            msg += "VSL_ERROR_CPU_NOT_SUPPORTED";
-            break;
-        case VSL_ERROR_FEATURE_NOT_IMPLEMENTED :
-            msg += "VSL_ERROR_FEATURE_NOT_IMPLEMENTED";
-            break;
-        case VSL_ERROR_MEM_FAILURE :
-            msg += "VSL_ERROR_MEM_FAILURE";
-            break;
-        case VSL_ERROR_NULL_PTR :
-            msg += "VSL_ERROR_NULL_PTR";
-            break;
-        case VSL_ERROR_UNKNOWN :
-            msg += "VSL_ERROR_UNKNOWN";
-            break;
-        case VSL_RNG_ERROR_BAD_FILE_FORMAT :
-            msg += "VSL_RNG_ERROR_BAD_FILE_FORMAT";
-            break;
-        case VSL_RNG_ERROR_BAD_MEM_FORMAT :
-            msg += "VSL_RNG_ERROR_BAD_MEM_FORMAT";
-            break;
-        case VSL_RNG_ERROR_BAD_NBITS :
-            msg += "VSL_RNG_ERROR_BAD_NBITS";
-            break;
-        case VSL_RNG_ERROR_BAD_NSEEDS :
-            msg += "VSL_RNG_ERROR_BAD_NSEEDS";
-            break;
-        case VSL_RNG_ERROR_BAD_STREAM :
-            msg += "VSL_RNG_ERROR_BAD_STREAM";
-            break;
-        case VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE :
-            msg += "VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE";
-            break;
-        case VSL_RNG_ERROR_BAD_UPDATE :
-            msg += "VSL_RNG_ERROR_BAD_UPDATE";
-            break;
-        case VSL_RNG_ERROR_BAD_WORD_SIZE :
-            msg += "VSL_RNG_ERROR_BAD_WORD_SIZE";
-            break;
-        case VSL_RNG_ERROR_BRNG_NOT_SUPPORTED :
-            msg += "VSL_RNG_ERROR_BRNG_NOT_SUPPORTED";
-            break;
-        case VSL_RNG_ERROR_BRNG_TABLE_FULL :
-            msg += "VSL_RNG_ERROR_BRNG_TABLE_FULL";
-            break;
-        case VSL_RNG_ERROR_BRNGS_INCOMPATIBLE :
-            msg += "VSL_RNG_ERROR_BRNGS_INCOMPATIBLE";
-            break;
-        case VSL_RNG_ERROR_FILE_CLOSE :
-            msg += "VSL_RNG_ERROR_FILE_CLOSE";
-            break;
-        case VSL_RNG_ERROR_FILE_OPEN :
-            msg += "VSL_RNG_ERROR_FILE_OPEN";
-            break;
-        case VSL_RNG_ERROR_FILE_READ :
-            msg += "VSL_RNG_ERROR_FILE_READ";
-            break;
-        case VSL_RNG_ERROR_FILE_WRITE :
-            msg += "VSL_RNG_ERROR_FILE_WRITE";
-            break;
-        case VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM :
-            msg += "VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM";
-            break;
-        case VSL_RNG_ERROR_INVALID_BRNG_INDEX :
-            msg += "VSL_RNG_ERROR_INVALID_BRNG_INDEX";
-            break;
-        case VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED :
-            msg += "VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED";
-            break;
-        case VSL_RNG_ERROR_NO_NUMBERS :
-            msg += "VSL_RNG_ERROR_NO_NUMBERS";
-            break;
-        case VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED :
-            msg += "VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED";
-            break;
-        case VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED :
-            msg += "VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED";
-            break;
-        case VSL_RNG_ERROR_UNSUPPORTED_FILE_VER :
-            msg += "VSL_RNG_ERROR_UNSUPPORTED_FILE_VER";
-            break;
-        case VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED :
-            msg += "VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED";
-            break;
-        case VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED :
-            msg += "VSL_RNG_ERROR_NONDETERM_ NRETRIES_EXCEEDED";
-            break;
-        default :
-            msg += "UNKNOWN";
-            break;
-    } // switch (status)
+    msg += rng_error_str(status);
 
     VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
 } // error_check
 #else
-template <MKL_INT BRNG>
-inline void rng_error_check (int, const char *, const char *) {}
+inline void rng_error_check (MKL_INT int, const char *, const char *) {}
 #endif
 
 namespace traits {
+
+template<MKL_INT> struct SeedTrait
+{static const MKL_UINT value = 101;};
+
+template <> struct SeedTrait<VSL_BRNG_SOBOL>
+{static const MKL_UINT value = 10;};
+
+template <> struct SeedTrait<VSL_BRNG_NIEDERR>
+{static const MKL_UINT value = 10;};
 
 struct SkipAheadVSL
 {
@@ -218,7 +178,7 @@ struct SkipAheadVSL
     void operator() (const Stream<BRNG> &stream, size_type nskip)
     {
         int status = ::vslSkipAheadStream(stream.ptr(), nskip);
-        rng_error_check<BRNG>(status,
+        rng_error_check(BRNG, status,
                 "SkipAheadVSL::skip", "vslSkipAheadStream");
     }
 
@@ -337,10 +297,10 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 {
     public :
 
-    explicit Stream (MKL_UINT seed = VSMC_RNG_MKL_SEED)
+    explicit Stream (MKL_UINT seed = traits::SeedTrait<BRNG>::value)
     {
         int status = ::vslNewStream(&stream_, BRNG + this->offset(), seed);
-        rng_error_check<BRNG>(status, "Stream::Stream", "vslNewStream");
+        rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
     template <typename SeedSeq>
@@ -349,19 +309,19 @@ class Stream : public traits::OffsetTrait<BRNG>::type
         MKL_UINT seed = 0;
         seq.generate(&seed, &seed + 1);
         int status = ::vslNewStream(&stream_, BRNG + this->offset(), seed);
-        rng_error_check<BRNG>(status, "Stream::Stream", "vslNewStream");
+        rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
     }
 
     Stream (const Stream<BRNG> &other)
     {
         int status = ::vslCopyStream(&stream_, other.stream_);
-        rng_error_check<BRNG>(status, "Stream::Stream", "vslCopyStream");
+        rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
     }
 
     Stream<BRNG> &operator= (const Stream<BRNG> &other)
     {
         int status = ::vslCopyStreamState(stream_, other.stream_);
-        rng_error_check<BRNG>(status,
+        rng_error_check(BRNG, status,
                 "Stream::operator=", "vslCopyStreamState");
     }
 
@@ -379,11 +339,11 @@ class Stream : public traits::OffsetTrait<BRNG>::type
         int status = VSL_ERROR_OK;
         VSLStreamStatePtr new_stream;
         status = ::vslNewStream(&new_stream, BRNG + this->offset(), s);
-        rng_error_check<BRNG>(status, "Stream::seed", "vslNewStream");
+        rng_error_check(BRNG, status, "Stream::seed", "vslNewStream");
         status = ::vslCopyStreamState(stream_, new_stream);
-        rng_error_check<BRNG>(status, "Stream::seed", "vslCopyStreamState");
+        rng_error_check(BRNG, status, "Stream::seed", "vslCopyStreamState");
         status = ::vslDeleteStream(&new_stream);
-        rng_error_check<BRNG>(status, "Stream::seed", "vslDeleteStream");
+        rng_error_check(BRNG, status, "Stream::seed", "vslDeleteStream");
     }
 
     template <typename SeedSeq>
@@ -448,7 +408,7 @@ class Distribution
         std::string vsl_name(vsl_name_prefix(static_cast<result_type>(0)));
         vsl_name += "Rng";
         vsl_name += name;
-        rng_error_check<BRNG>(status, dist_name.c_str(), vsl_name.c_str());
+        rng_error_check(BRNG, status, dist_name.c_str(), vsl_name.c_str());
     }
 
     private :
@@ -467,7 +427,7 @@ class Distribution
 
 /// \brief MKL RNG C++11 engine
 /// \ingroup MKLRNG
-template <MKL_INT BRNG, typename ResultType, MKL_UINT Seed>
+template <MKL_INT BRNG, typename ResultType>
 class Engine
 {
     public :
@@ -478,12 +438,13 @@ class Engine
         skip_ahead_type;
     typedef UniformBits<result_type> runif_type;
 
-    explicit Engine (MKL_UINT seed = Seed) : stream_(seed) {}
+    explicit Engine (MKL_UINT seed = traits::SeedTrait<BRNG>::value) :
+        stream_(seed) {}
 
     template <typename SeedSeq>
     explicit Engine (SeedSeq &seq) : stream_(seq) {}
 
-    void seed (MKL_UINT s = Seed)
+    void seed (MKL_UINT s)
     {
         stream_.seed(s);
         runif_.reset();
@@ -629,7 +590,7 @@ class UniformBits<unsigned> :
     {
         int status = ::viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                 str.ptr(), n, r);
-        rng_error_check<BRNG>(status,
+        rng_error_check(BRNG, status,
                 "UniformBits::generate", "viRngUniformBits32");
     }
 }; // class UniformBits
@@ -649,7 +610,7 @@ class UniformBits<unsigned MKL_INT64> :
     {
         int status = ::viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
                 str.ptr(), n, r);
-        rng_error_check<BRNG>(status,
+        rng_error_check(BRNG, status,
                 "UniformBits::generate", "viRngUniformBits64");
     }
 }; // class UniformBits
