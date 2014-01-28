@@ -113,11 +113,17 @@ class RngSet<RngType, ThreadLocalRng>
 
     rng_type &rng (size_type id = 0)
     {
-        static thread_local rng_type rng;
-        static thread_local bool flag = false;
-        init_rng(rng, flag);
+        static thread_local std::pair<rng_type, bool> rng_flag =
+            std::make_pair(rng_type(), false);
 
-        return rng;
+        if (rng_flag.second) return rng_flag.first;
+
+        std::lock_guard<std::mutex> lock(mtx_);
+        rng_flag.first.seed(Seed::instance().get());
+        shift_(rng_flag.first);
+        rng_flag.second = true;
+
+        return rng_flag.first;
     }
 
     private :
@@ -125,16 +131,6 @@ class RngSet<RngType, ThreadLocalRng>
     std::size_t size_;
     traits::RngShift<rng_type> shift_;
     std::mutex mtx_;
-
-    void init_rng (rng_type &rng, bool &flag)
-    {
-        if (flag) return;
-
-        std::lock_guard<std::mutex> lock(mtx_);
-        rng.seed(Seed::instance().get());
-        shift_(rng);
-        flag = true;
-    }
 }; // class RngSet<RngType, ThreadLocalRng>
 
 #endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
