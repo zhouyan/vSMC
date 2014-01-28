@@ -181,7 +181,7 @@ class StateMPI : public BaseState
     /// \brief Perform local copy
     ///
     /// \param N The number of particles on all nodes
-    /// \param copy_from_first The first iterator of the copy_from vector
+    /// \param copy_from_first The beginning of the copy_from vector
     /// \param copy_recv All particles that shall be received at this node
     /// \param copy_send All particles that shall be send from this node
     ///
@@ -200,9 +200,8 @@ class StateMPI : public BaseState
     /// node shall send the particle  and the particle id *on this node* where
     /// the particle sent shall be packed. Otherwise do nothing.
     ///
-    /// \note
-    /// It is important the the vector access through `copy_from_first` is the
-    /// same for all nodes. Otherwise the behavior is undefined.
+    /// It is important the the vector accessed through `copy_from_first` is
+    /// the same for all nodes. Otherwise the behavior is undefined.
     template <typename InputIter>
     void copy_this_node (size_type N, InputIter copy_from_first,
             std::vector<std::pair<int, size_type> > &copy_recv,

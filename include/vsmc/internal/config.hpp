@@ -75,8 +75,11 @@
 
 /// \brief Use generic CBLAS for BLAS level 2 and level 3 computations
 /// \ingroup Config
-/// \note User has to include CLBAS header first
-/// \note Use `VSMC_GENERIC_CBLAS_INT` to define the CBLAS integer type
+///
+/// \details
+/// User has to include CLBAS header first
+///
+/// Use `VSMC_GENERIC_CBLAS_INT` to define the CBLAS integer type
 #ifndef VSMC_USE_GENERIC_CBLAS
 #define VSMC_USE_GENERIC_CBLAS 0
 #endif
@@ -89,13 +92,21 @@
 
 /// \brief The fallback StopWatch type
 /// \ingroup Config
-/// \note The class defined by `VSMC_STOP_WATCH_TYPE` need to be defined before
+///
+/// \details
+/// The class defined by `VSMC_STOP_WATCH_TYPE` need to be defined before
 /// including the `<vsmc/utility/stop_watch.hpp>` header. It shall provide the
 /// same interface as DummyStopWatch. This is only used when both
 /// `VSMC_HAS_CXX11LIB_CHRONO` and `VSMC_HAS_NATIVE_TIME_LIBRARY` are zero, in
 /// which case StopWatch is a typedef of this macro.
 #ifndef VSMC_STOP_WATCH_TYPE
 #define VSMC_STOP_WATCH_TYPE DummyStopWatch
+#endif
+
+/// \brief Default type of Seed
+/// \ingroup Config
+#ifndef VSMC_SEED_TYPE
+#define VSMC_SEED_TYPE vsmc::SeedGenerator<NullType>
 #endif
 
 #endif // VSMC_INTERNAL_CONFIG_HPP

@@ -92,7 +92,6 @@ struct CLDefault
 /// then this can help to narrow down the selection further. Note that this
 /// check will only be performed if `check_opencl_device` is not present.
 ///
-/// \note
 /// Before using a CLManager, it is important to check that
 /// `CLManager::instance().setup()` returns `true`. Possible reasons of
 /// returning `false` include no OpenCL device found at all, or no device match

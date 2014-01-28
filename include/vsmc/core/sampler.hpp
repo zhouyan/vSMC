@@ -247,7 +247,6 @@ class Sampler
     /// \param param Additional parameters passed to the initialization object
     /// of type init_type
     ///
-    /// \note
     /// All histories (ESS, resampled, accept, Monitor and Path) are clared
     /// before callling the initialization object. Monitors and Path's
     /// evaluation objects are untouched.

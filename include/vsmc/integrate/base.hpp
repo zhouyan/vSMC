@@ -32,7 +32,7 @@ class NumericBase
     /// \param b The rightmost of the segment
     /// \param eval The functor used for evaluation
     ///
-    /// \note `eval` need a thread-safe copy if the implementation use
+    /// `eval` need a thread-safe copy if the implementation use
     /// parallelization, such as NumericTBB etc, in the sense that when
     /// constructing the new object, vSMC does not need to lock the original.
     /// Both major C++11 implementations and current Boost `function` satisfy

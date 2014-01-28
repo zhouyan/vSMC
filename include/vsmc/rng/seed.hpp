@@ -117,7 +117,7 @@ class SeedGenerator
     SeedGenerator<ID> &operator= (const SeedGenerator<ID> &);
 }; // class SeedGenerator
 
-typedef SeedGenerator<NullType> Seed;
+typedef VSMC_SEED_TYPE Seed;
 
 } // namespace vsmc
 

@@ -245,7 +245,8 @@ class StateCL
 
     /// \brief Create kernel with the current program
     ///
-    /// \note If build() does not return `true`, then calling this is an error
+    /// \details
+    /// If build() does not return `true`, then calling this is an error
     cl::Kernel create_kernel (const std::string &name) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(create_kernel);
