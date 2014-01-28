@@ -22,10 +22,10 @@ class Particle
     typedef T value_type;
     typedef typename traits::WeightSetTypeTrait<T>::type weight_set_type;
     typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
+    typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
     typedef typename rng_set_type::rng_type rng_type;
     typedef cxx11::function<
-        void (std::size_t, typename traits::ResampleRngTypeTrait<T>::type &,
-                const double *, size_type *)>
+        void (std::size_t, resample_rng_type &, const double *, size_type *)>
         resample_type;
     typedef ParticleIterator<T, SingleParticle> iterator;
     typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
@@ -276,7 +276,7 @@ class Particle
     typename traits::ResampleCopyFromReplicationTypeTrait<T>::type
         resample_copy_from_replication_;
     typename traits::ResamplePostCopyTypeTrait<T>::type resample_post_copy_;
-    typename traits::ResampleRngTypeTrait<T>::type resample_rng_;
+    resample_rng_type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
 
