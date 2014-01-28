@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_STD_HPP
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_STD_HPP
+#ifndef VSMC_INTEGRATE_NUMERIC_STD_HPP
+#define VSMC_INTEGRATE_NUMERIC_STD_HPP
 
 #include <vsmc/integrate/base.hpp>
 #include <vsmc/utility/stdtbb.hpp>
@@ -58,4 +58,4 @@ class NumericSTD : public NumericBase<Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_STD_HPP
+#endif // VSMC_INTEGRATE_NUMERIC_STD_HPP

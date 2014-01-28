@@ -1,5 +1,5 @@
-#ifndef VSMC_INTERNAL_CXX11_TYPE_TRAITS_HPP
-#define VSMC_INTERNAL_CXX11_TYPE_TRAITS_HPP
+#ifndef VSMC_CXX11_TYPE_TRAITS_HPP
+#define VSMC_CXX11_TYPE_TRAITS_HPP
 
 #include <vsmc/internal/config.hpp>
 #include <cstddef>
@@ -139,4 +139,4 @@ template <typename T> struct is_floating_point :
 
 } // namespace vsmc
 
-#endif // VSMC_INTERNAL_CXX11_TYPE_TRAITS_HPP
+#endif // VSMC_CXX11_TYPE_TRAITS_HPP

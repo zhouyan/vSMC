@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_OMP_HPP
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_OMP_HPP
+#ifndef VSMC_INTEGRATE_NUMERIC_OMP_HPP
+#define VSMC_INTEGRATE_NUMERIC_OMP_HPP
 
 #include <vsmc/integrate/base.hpp>
 #include <omp.h>
@@ -37,4 +37,4 @@ class NumericOMP : public NumericBase<Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_OMP_HPP
+#endif // VSMC_INTEGRATE_NUMERIC_OMP_HPP

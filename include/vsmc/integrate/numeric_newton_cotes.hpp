@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
+#ifndef VSMC_INTEGRATE_NUMERIC_NEWTON_COTES_HPP
+#define VSMC_INTEGRATE_NUMERIC_NEWTON_COTES_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -210,4 +210,4 @@ class NumericNewtonCotes : public Impl<NumericNewtonCotes<Degree, Impl> >
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_NEWTON_COTES
+#endif // VSMC_INTEGRATE_NUMERIC_NEWTON_COTES_HPP

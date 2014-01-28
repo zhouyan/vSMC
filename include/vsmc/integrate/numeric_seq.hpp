@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
+#ifndef VSMC_INTEGRATE_NUMERIC_SEQ_HPP
+#define VSMC_INTEGRATE_NUMERIC_SEQ_HPP
 
 #include <vsmc/integrate/base.hpp>
 
@@ -30,4 +30,4 @@ class NumericSEQ : public NumericBase<Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_SEQ_HPP
+#endif // VSMC_INTEGRATE_NUMERIC_SEQ_HPP

@@ -1,5 +1,5 @@
-#ifndef VSMC_SMP_IMPL_TBB_HPP
-#define VSMC_SMP_IMPL_TBB_HPP
+#ifndef VSMC_SMP_BACKEND_TBB_HPP
+#define VSMC_SMP_BACKEND_TBB_HPP
 
 #include <vsmc/smp/base.hpp>
 #include <vsmc/utility/tbb_op.hpp>
@@ -369,4 +369,4 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_SMP_IMPL_TBB_HPP
+#endif // VSMC_SMP_BACKEND_TBB_HPP

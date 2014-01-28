@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_PARALLE_DISPATCH_HPP
-#define VSMC_UTILITY_PARALLE_DISPATCH_HPP
+#ifndef VSMC_SMP_INTERNAL_DISPATCH_HPP
+#define VSMC_SMP_INTERNAL_DISPATCH_HPP
 
 #include <dispatch/dispatch.h>
 
@@ -39,4 +39,4 @@ class DispatchQueue
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_PARALLE_DISPATCH_HPP
+#endif // VSMC_SMP_INTERNAL_DISPATCH_HPP

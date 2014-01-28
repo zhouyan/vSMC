@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_HDF5_HELPER_HPP
-#define VSMC_UTILITY_HDF5_HELPER_HPP
+#ifndef VSMC_UTILITY_HDF5_SAVE_HPP
+#define VSMC_UTILITY_HDF5_SAVE_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <hdf5.h>
@@ -482,4 +482,4 @@ inline void hdf5_save (const StateCL<StateSize, FPType, ID> &state,
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_HDF5_HELPER_HPP
+#endif // VSMC_UTILITY_HDF5_SAVE_HPP

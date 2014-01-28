@@ -21,20 +21,6 @@
 #include <mutex>
 #endif
 
-#if VSMC_USE_RANDOM123
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    vsmc::RngSet<r123::Engine<r123::Philox2x64>, vsmc::VectorRng>
-#elif VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX && VSMC_USE_MKL
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    vsmc::RngSet<vsmc::mkl::MT2203_64, vsmc::ThreadLocalRng>
-#elif VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    vsmc::RngSet<vsmc::cxx11::mt19937_64, vsmc::ThreadLocalRng>
-#else
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    vsmc::RngSet<vsmc::cxx11::mt19937_64, vsmc::VectorRng>
-#endif
-
 namespace vsmc {
 
 namespace traits {

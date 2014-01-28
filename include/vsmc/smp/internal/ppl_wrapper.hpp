@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_PPL_WRAPPER_HPP
-#define VSMC_UTILITY_PPL_WRAPPER_HPP
+#ifndef VSMC_SMP_INTERNAL_PPL_WRAPPER_HPP
+#define VSMC_SMP_INTERNAL_PPL_WRAPPER_HPP
 
 #include <ppl.h>
 
@@ -11,4 +11,4 @@ namespace ppl = ::Concurrency;
 #endif
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_PPL_WRAPPER_HPP
+#endif // VSMC_SMP_INTERNAL_PPL_WRAPPER_HPP

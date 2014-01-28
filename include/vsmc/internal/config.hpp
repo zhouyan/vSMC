@@ -7,12 +7,6 @@
 #define __STDC_CONSTANT_MACROS
 #endif
 
-// #if defined(__clang__)
-// #ifndef TBB_USE_CAPTURED_EXCEPTION
-// #define TBB_USE_CAPTURED_EXCEPTION 1
-// #endif
-// #endif
-
 #if  VSMC_HAS_CXX11_CONSTEXPR
 #define VSMC_CONSTEXPR constexpr
 #else
@@ -49,6 +43,24 @@
 #define VSMC_USE_RANDOM123 1
 #endif
 
+/// \brief Default RNG type for resampling
+/// \ingroup Config
+#ifndef VSMC_DEFAULT_RESAMPLE_RNG_TYPE
+#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE vsmc::cxx11::mt19937_64
+#endif
+
+/// \brief Default RNG set type
+/// \ingroup Config
+#ifndef VSMC_DEFAULT_RNG_SET_TYPE
+#if VSMC_USE_RANDOM123
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    vsmc::RngSet<r123::Engine<r123::Philox2x64>, vsmc::VectorRng>
+#else
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    vsmc::RngSet<vsmc::cxx11::mt19937, vsmc::VectorRng>
+#endif
+#endif
+
 /// \brief Use Intel MKL for BLAS level 2, level 3 and other computations
 /// \ingroup Config
 #ifndef VSMC_USE_MKL
@@ -69,19 +81,7 @@
 #define VSMC_USE_GENERIC_CBLAS 0
 #endif
 
-/// \brief Use the Armadillo library for BLAS level 2 and level 3 computations
-/// \ingroup Config
-#ifndef VSMC_USE_ARMADILLO
-#define VSMC_USE_ARMADILLO 0
-#endif
-
-/// \brief Use the Eigen library for BLAS level 2 and level 3 computations
-/// \ingroup Config
-#ifndef VSMC_USE_EIGEN
-#define VSMC_USE_EIGEN 0
-#endif
-
-/// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` is zero
+/// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fail
 /// \ingroup Config
 #ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
 #define VSMC_HAS_NATIVE_TIME_LIBRARY 1

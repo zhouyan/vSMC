@@ -8,7 +8,8 @@ namespace vsmc {
 namespace traits {
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
-        vsmc::cxx11::mt19937_64)
+        VSMC_DEFAULT_RESAMPLE_RNG_TYPE)
+
 } // namespace vsmc::traits
 
 namespace internal {

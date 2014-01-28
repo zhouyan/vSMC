@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_CL_MANAGER_HPP
-#define VSMC_UTILITY_CL_MANAGER_HPP
+#ifndef VSMC_OPENCL_CL_MANAGER_HPP
+#define VSMC_OPENCL_CL_MANAGER_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
@@ -509,4 +509,4 @@ class CLManager
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_CL_MANAGER_HPP
+#endif // VSMC_OPENCL_CL_MANAGER_HPP

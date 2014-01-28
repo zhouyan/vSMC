@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_CILK_HPP
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_CILK_HPP
+#ifndef VSMC_INTEGRATE_NUMERIC_CILK_HPP
+#define VSMC_INTEGRATE_NUMERIC_CILK_HPP
 
 #include <vsmc/integrate/base.hpp>
 #include <cilk/cilk.h>
@@ -37,4 +37,4 @@ class NumericCILK : public NumericBase<Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_CILK_HPP
+#endif // VSMC_INTEGRATE_NUMERIC_CILK_HPP

@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_SEED_HPP
-#define VSMC_UTILITY_SEED_HPP
+#ifndef VSMC_RNG_SEED_HPP
+#define VSMC_RNG_SEED_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -68,4 +68,4 @@ typedef SeedGenerator<NullType> Seed;
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_SEED_HPP
+#endif // VSMC_RNG_SEED_HPP

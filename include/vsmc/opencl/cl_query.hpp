@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_CL_QUERY_HPP
-#define VSMC_UTILITY_CL_QUERY_HPP
+#ifndef VSMC_OPENCL_CL_QUERY_HPP
+#define VSMC_OPENCL_CL_QUERY_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
@@ -474,4 +474,4 @@ inline OutputStream &operator<< (OutputStream &os, const Kernel &kern)
 
 } // namespace cl
 
-#endif // VSMC_UTILITY_CL_QUERY_HPP
+#endif // VSMC_OPENCL_CL_QUERY_HPP

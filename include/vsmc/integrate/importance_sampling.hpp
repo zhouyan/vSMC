@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_IMPORTANCE_SAMPLING_HPP
-#define VSMC_UTILITY_IMPORTANCE_SAMPLING_HPP
+#ifndef VSMC_INTEGRATE_IMPORTANCE_SAMPLING_HPP
+#define VSMC_INTEGRATE_IMPORTANCE_SAMPLING_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -21,12 +21,6 @@
 #else
 #define VSMC_INTEGRATE_INT int
 #endif
-#elif VSMC_USE_ARMADILLO // Armadillo
-#include <armadillo>
-#define VSMC_INTEGRATE_INT arma::blas_int
-#elif VSMC_USE_EIGEN // Eigen
-#include <Eigen/Dense>
-#define VSMC_INTEGRATE_INT EIGEN_DEFAULT_DENSE_INDEX_TYPE
 #else // No known CBlas
 #define VSMC_INTEGRATE_INT std::size_t
 #endif
@@ -57,26 +51,6 @@ class ISIntegrate
 #if VSMC_USE_CBLAS
         cblas_dgemv(CblasColMajor, CblasNoTrans,
                 dim, N, 1, hX, dim, W, 1, 0, Eh, 1);
-#elif VSMC_USE_ARMADILLO
-        arma::vec res(Eh, dim, false);
-        res = arma::mat(hX, dim, N) * arma::vec(W, N);
-#elif VSMC_USE_EIGEN
-        if (is_align((void *) hX) && is_align((void *) W) &&
-                is_align((void *) Eh)) {
-            Eigen::Map<const Eigen::Matrix<
-                double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>,
-                Eigen::Aligned> hXEigen(hX, dim, N);
-            Eigen::Map<const Eigen::VectorXd, Eigen::Aligned> WEigen(W, N);
-            Eigen::Map<Eigen::VectorXd, Eigen::Aligned> res(Eh, dim);
-            res = hXEigen * WEigen;
-        } else {
-            Eigen::Map<const Eigen::Matrix<
-                double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> >
-                hXEigen(hX, dim, N);
-            Eigen::Map<const Eigen::VectorXd> WEigen(W, N);
-            Eigen::Map<Eigen::VectorXd> res(Eh, dim);
-            res = hXEigen * WEigen;
-        }
 #else
         for (size_type d = 0; d != dim; ++d)
             Eh[d] = 0;
@@ -95,4 +69,4 @@ class ISIntegrate
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_IMPORTANCE_SAMPLING_HPP
+#endif // VSMC_INTEGRATE_IMPORTANCE_SAMPLING_HPP

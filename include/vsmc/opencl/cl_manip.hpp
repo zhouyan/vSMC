@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_CL_MANIP_HPP
-#define VSMC_UTILITY_CL_MANIP_HPP
+#ifndef VSMC_OPENCL_CL_MANIP_HPP
+#define VSMC_OPENCL_CL_MANIP_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
@@ -330,4 +330,4 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_CL_MANIP_HPP
+#endif // VSMC_OPENCL_CL_MANIP_HPP

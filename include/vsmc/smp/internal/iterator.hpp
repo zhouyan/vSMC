@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_ITERATOR_HPP
-#define VSMC_UTILITY_ITERATOR_HPP
+#ifndef VSMC_SMP_INTERNAL_ITERATOR_HPP
+#define VSMC_SMP_INTERNAL_ITERATOR_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -142,4 +142,4 @@ inline StepRandomIterator<RandomIter> operator- (
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_ITERATOR_HPP
+#endif // VSMC_SMP_INTERNAL_ITERATOR_HPP

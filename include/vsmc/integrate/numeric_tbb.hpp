@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_INTEGRATE_NUMERIC_TBB_HPP
-#define VSMC_UTILITY_INTEGRATE_NUMERIC_TBB_HPP
+#ifndef VSMC_INTEGRATE_NUMERIC_TBB_HPP
+#define VSMC_INTEGRATE_NUMERIC_TBB_HPP
 
 #include <vsmc/integrate/base.hpp>
 #include <tbb/tbb.h>
@@ -77,4 +77,4 @@ class NumericTBB : public NumericBase<Derived>
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_INTEGRATE_NUMERIC_TBB_HPP
+#endif // VSMC_INTEGRATE_NUMERIC_TBB_HPP
