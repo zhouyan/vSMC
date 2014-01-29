@@ -61,6 +61,13 @@
 #endif
 #endif
 
+/// \brief Enable <vsmc/rng/u01.h> etc., double precision when used with vSMC
+#if defined(VSMC_FP_TYPE_IS_FLOAT) && VSMC_FP_TYPE_IS_FLOAT
+#define VSMC_FP_TYPE_IS_DOUBLE 0
+#else
+#define VSMC_FP_TYPE_IS_DOUBLE 1
+#endif
+
 /// \brief Use Intel MKL for BLAS level 2, level 3 and other computations
 /// \ingroup Config
 #ifndef VSMC_USE_MKL

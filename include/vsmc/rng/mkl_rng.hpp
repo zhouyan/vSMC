@@ -617,7 +617,7 @@ class Bernoulli : public Distribution<MKL_INT, Bernoulli<Method> >
 
     typedef MKL_INT result_type;
 
-    Bernoulli (double p = 0.5) : p_(p) {}
+    explicit Bernoulli (double p = 0.5) : p_(p) {}
 
     template <MKL_INT BRNG>
     void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
@@ -640,7 +640,7 @@ class Geometric : public Distribution<MKL_INT, Geometric<Method> >
 
     typedef MKL_INT result_type;
 
-    Geometric (double p = 0.5) : p_(p) {}
+    explicit Geometric (double p = 0.5) : p_(p) {}
 
     template <MKL_INT BRNG>
     void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
@@ -663,7 +663,7 @@ class Binomial : public Distribution<MKL_INT, Binomial<Method> >
 
     typedef MKL_INT result_type;
 
-    Binomial (result_type ntrial = 1, double p = 0.5) :
+    explicit Binomial (result_type ntrial = 1, double p = 0.5) :
         ntrial_(ntrial), p_(p) {}
 
     template <MKL_INT BRNG>
@@ -715,7 +715,7 @@ class Poisson : public Distribution<MKL_INT, Poisson<Method> >
 
     typedef MKL_INT result_type;
 
-    Poisson (double lambda = 1) : lambda_(lambda) {}
+    explicit Poisson (double lambda = 1) : lambda_(lambda) {}
 
     template <MKL_INT BRNG>
     void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
@@ -738,7 +738,7 @@ class NegBinomial : public Distribution<MKL_INT, NegBinomial<Method> >
 
     typedef MKL_INT result_type;
 
-    NegBinomial (double ntrial = 1, double p = 0.5) :
+    explicit NegBinomial (double ntrial = 1, double p = 0.5) :
         ntrial_(ntrial), p_(p) {}
 
     template <MKL_INT BRNG>
@@ -763,7 +763,7 @@ class Uniform : public Distribution<ResultType, Uniform<ResultType, Method> >
 
     typedef ResultType result_type;
 
-    Uniform (result_type a = 0, result_type b = 1) : a_(a), b_(b) {}
+    explicit Uniform (result_type a = 0, result_type b = 1) : a_(a), b_(b) {}
 
     template <MKL_INT BRNG>
     void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
@@ -796,7 +796,7 @@ class Gaussian : public Distribution<FPType, Gaussian<FPType, Method> >
 
     typedef FPType result_type;
 
-    Gaussian (result_type mean = 0, result_type sd = 1) :
+    explicit Gaussian (result_type mean = 0, result_type sd = 1) :
         mean_(mean), sd_(sd) {}
 
     template <MKL_INT BRNG>
@@ -827,7 +827,8 @@ class Exponential : public Distribution<FPType, Exponential<FPType, Method> >
 
     typedef FPType result_type;
 
-    Exponential (result_type displacement = 0, result_type scale = 1) :
+    explicit Exponential (
+            result_type displacement = 0, result_type scale = 1) :
         disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
@@ -858,7 +859,7 @@ class Laplace : public Distribution<FPType, Laplace<FPType, Method> >
 
     typedef FPType result_type;
 
-    Laplace (result_type mean = 0, result_type scale = 1) :
+    explicit Laplace (result_type mean = 0, result_type scale = 1) :
         mean_(mean), scale_(scale) {}
 
     template <MKL_INT BRNG>
@@ -889,7 +890,7 @@ class Weibull : public Distribution<FPType, Weibull<FPType, Method> >
 
     typedef FPType result_type;
 
-    Weibull (result_type shape = 1,
+    explicit Weibull (result_type shape = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape_(shape), disp_(displacement), scale_(scale) {}
 
@@ -922,7 +923,7 @@ class Cauchy : public Distribution<FPType, Cauchy<FPType, Method> >
 
     typedef FPType result_type;
 
-    Cauchy (result_type displacement = 0, result_type scale = 1) :
+    explicit Cauchy (result_type displacement = 0, result_type scale = 1) :
         disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
@@ -953,7 +954,7 @@ class Rayleigh : public Distribution<FPType, Rayleigh<FPType, Method> >
 
     typedef FPType result_type;
 
-    Rayleigh (result_type displacement = 0, result_type scale = 1) :
+    explicit Rayleigh (result_type displacement = 0, result_type scale = 1) :
         disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
@@ -984,7 +985,7 @@ class Lognormal : public Distribution<FPType, Lognormal<FPType, Method> >
 
     typedef FPType result_type;
 
-    Lognormal (result_type mean = 0, result_type sd = 1,
+    explicit Lognormal (result_type mean = 0, result_type sd = 1,
             result_type displacement = 0, result_type scale = 1) :
         mean_(mean), sd_(sd), disp_(displacement), scale_(scale) {}
 
@@ -1018,7 +1019,7 @@ class Gumbel : public Distribution<FPType, Gumbel<FPType, Method> >
 
     typedef FPType result_type;
 
-    Gumbel (result_type displacement = 0, result_type scale = 1) :
+    explicit Gumbel (result_type displacement = 0, result_type scale = 1) :
         disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
@@ -1049,7 +1050,7 @@ class Gamma : public Distribution<FPType, Gamma<FPType, Method> >
 
     typedef FPType result_type;
 
-    Gamma (result_type shape = 1,
+    explicit Gamma (result_type shape = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape_(shape), disp_(displacement), scale_(scale) {}
 
@@ -1082,7 +1083,7 @@ class Beta : public Distribution<FPType, Beta<FPType, Method> >
 
     typedef FPType result_type;
 
-    Beta (result_type shape1 = 1, result_type shape2 = 1,
+    explicit Beta (result_type shape1 = 1, result_type shape2 = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape1_(shape1), shape2_(shape2), disp_(displacement), scale_(scale) {}
 

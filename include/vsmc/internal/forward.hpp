@@ -21,26 +21,34 @@ template <typename> class Numeric##Name;
 namespace vsmc {
 
 // Placeholders
-struct Virtual;
-struct NullType;
-struct ScalarRng;
-struct VectorRng;
-struct ThreadLocalRng;
+struct Virtual {};
+struct NullType {};
+struct ScalarRng {};
+struct VectorRng {};
+struct ThreadLocalRng {};
+struct Open {};
+struct Closed {};
 
-// Utilities
-template <typename> class SeedGenerator;
-template <typename, typename> class RngSet;
-
+// Integrate
 class ISIntegrate;
 template <typename> class NumericBase;
 template <unsigned, template <typename> class> class NumericNewtonCotes;
 
+// Rng
+template <typename> class SeedGenerator;
+template <typename, typename> class RngSet;
+template <typename> class RngSetTBB;
+template <typename, typename, typename> class UniformRealDistribution;
+
+// SMP
 class DispatchQueue;
 
+// STDTBB
 template <typename> class BlockedRange;
 class ThreadGuard;
 class ThreadInfo;
 
+// OpenCL
 struct CLDefault;
 class CLConfigure;
 class CLQuery;
