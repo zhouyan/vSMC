@@ -67,6 +67,39 @@ class UniformRealDistribution
         result_type a () const {return a_;}
         result_type b () const {return b_;}
 
+        friend inline bool operator== (
+                const param_type &param1, const param_type &param2)
+        {return (param1.a() == param2.a()) && (param1.b() == param2.b());}
+
+        friend inline bool operator!= (
+                const param_type param1, const param_type param2) 
+        {return (param1.a() != param2.a()) || (param1.b() != param2.b());}
+
+        template <typename CharT, typename Traits>
+        friend inline std::basic_ostream<CharT, Traits> &operator<< (
+                std::basic_ostream<CharT, Traits> &os, const param_type &param)
+        {
+            os << param.a() << ' ' << param.b();
+
+            return os;
+        }
+
+        template <typename CharT, typename Traits>
+        friend inline std::basic_istream<CharT, Traits> &operator>> (
+                std::basic_istream<CharT, Traits> &is, param_type &param)
+        {
+            result_type a;
+            result_type b;
+            if (is >> a >> std::ws >> b) {
+                if (a <= b)
+                    param = param_type(param_type(a, b));
+                else
+                    is.setstate(std::ios_base::failbit);
+            }
+
+            return is;
+        }
+
         private :
 
         result_type a_;
@@ -156,6 +189,61 @@ class UniformRealDistribution
     static float u01(uint64_t i, Closed, Closed, u64, f53)
     {return ::u01_closed_closed_64_53(i);}
 }; // class UniformRealDistributionBase
+
+/// \brief UniformRealDistribution operator==
+/// \ingroup RNG
+template <typename FPType, typename Left, typename Right>
+inline bool operator== (
+        const UniformRealDistribution<FPType, Left, Right> &runif1,
+        const UniformRealDistribution<FPType, Left, Right> &runif2)
+{
+    return (runif1.a() == runif2.a()) && (runif1.b() == runif2.b());
+}
+
+/// \brief UniformRealDistribution operator!=
+/// \ingroup RNG
+template <typename FPType, typename Left, typename Right>
+inline bool operator!= (
+        const UniformRealDistribution<FPType, Left, Right> &runif1,
+        const UniformRealDistribution<FPType, Left, Right> &runif2)
+{
+    return (runif1.a() != runif2.a()) || (runif1.b() != runif2.b());
+}
+
+/// \brief UniformRealDistribution operator<<
+/// \ingroup RNG
+template <typename CharT, typename Traits,
+         typename FPType, typename Left, typename Right>
+inline std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os,
+        const UniformRealDistribution<FPType, Left, Right> &runif)
+{
+    os << runif.a() << ' ' << runif.b();
+
+    return os;
+}
+
+/// \brief UniformRealDistribution operator>>
+/// \ingroup RNG
+template <typename CharT, typename Traits,
+         typename FPType, typename Left, typename Right>
+inline std::basic_istream<CharT, Traits> &operator>> (
+        std::basic_istream<CharT, Traits> &is,
+        UniformRealDistribution<FPType, Left, Right> &runif)
+{
+    typedef typename UniformRealDistribution<FPType, Left, Right>::param_type
+        param_type;
+    FPType a;
+    FPType b;
+    if (is >> a >> std::ws >> b) {
+        if (a <= b)
+            runif.param(param_type(a, b));
+        else
+            is.setstate(std::ios_base::failbit);
+    }
+
+    return is;
+}
 
 } // namespace vsmc
 
