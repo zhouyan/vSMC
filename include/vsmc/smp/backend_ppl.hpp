@@ -1,7 +1,7 @@
 #ifndef VSMC_SMP_BACKEND_PPL_HPP
 #define VSMC_SMP_BACKEND_PPL_HPP
 
-#include <vsmc/smp/base.hpp>
+#include <vsmc/smp/backend_base.hpp>
 #include <vsmc/smp/internal/ppl_wrapper.hpp>
 
 namespace vsmc {
@@ -129,7 +129,7 @@ class StatePPL : public BaseState
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(PPL);
+        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(PPL);
 
         ppl::parallel_for(static_cast<size_type>(0), N,
                 copy_work_<IntType>(this, copy_from));

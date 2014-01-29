@@ -1,9 +1,12 @@
 #ifndef VSMC_SMP_STATE_MATRIX_HPP
 #define VSMC_SMP_STATE_MATRIX_HPP
 
-#include <vsmc/smp/base.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/smp/internal/iterator.hpp>
+
+#define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_COPY_SIZE_MISMATCH \
+    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
+            ("**StateMatrix::copy** SIZE MISMATCH"))
 
 #define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_DIM_SIZE(dim) \
     VSMC_RUNTIME_ASSERT((dim >= 1),                                          \
@@ -141,7 +144,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(Matrix);
+        VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_COPY_SIZE_MISMATCH;
 
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);

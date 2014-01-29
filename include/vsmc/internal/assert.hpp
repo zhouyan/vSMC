@@ -70,7 +70,7 @@ class StaticAssert<true>
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double,
 
-        USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree
+        USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree
     };
 }; // class StaticAssert
 
@@ -78,29 +78,29 @@ class StaticAssert<true>
 
 // Static assertion macros
 
-#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim)                            \
-    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
+#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim)                           \
+    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                               \
             USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
 
-#define VSMC_STATIC_ASSERT_DYNAMIC_STATE_SIZE_RESIZE(Dim)                     \
-    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                                \
+#define VSMC_STATIC_ASSERT_DYNAMIC_STATE_SIZE_RESIZE(Dim)                    \
+    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                               \
             USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT)
 
-#define VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(degree)                \
-    VSMC_STATIC_ASSERT((degree >= 1 && degree <= max_degree_),                \
-            USE_NumericNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree)
+#define VSMC_STATIC_ASSERT_NINTEGRATE_NEWTON_COTES_DEGREE(degree)            \
+    VSMC_STATIC_ASSERT((degree >= 1 && degree <= max_degree_),               \
+            USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree)
 
-#define VSMC_STATIC_ASSERT_NO_IMPL(member)                                    \
-    VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<Derived, NullType>::value),      \
+#define VSMC_STATIC_ASSERT_NO_IMPL(member)                                   \
+    VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<Derived, NullType>::value),     \
             NO_IMPLEMENTATION_OF_##member##_FOUND)
 
-#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                       \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsDerivedFromStateCL<derived>::value),  \
+#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                      \
+    VSMC_STATIC_ASSERT((vsmc::traits::IsDerivedFromStateCL<derived>::value), \
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
-#define VSMC_STATIC_ASSERT_STATE_CL_FP_TYPE(type)                             \
-    VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<type, cl_float>::value           \
-                || vsmc::cxx11::is_same<type, cl_double>::value),             \
+#define VSMC_STATIC_ASSERT_STATE_CL_FP_TYPE(type)                            \
+    VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<type, cl_float>::value          \
+                || vsmc::cxx11::is_same<type, cl_double>::value),            \
             USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

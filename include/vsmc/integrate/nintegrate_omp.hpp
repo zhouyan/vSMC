@@ -1,7 +1,7 @@
-#ifndef VSMC_INTEGRATE_NUMERIC_OMP_HPP
-#define VSMC_INTEGRATE_NUMERIC_OMP_HPP
+#ifndef VSMC_INTEGRATE_NINTEGRATE_OMP_HPP
+#define VSMC_INTEGRATE_NINTEGRATE_OMP_HPP
 
-#include <vsmc/integrate/base.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
 #include <omp.h>
 
 namespace vsmc {
@@ -9,13 +9,13 @@ namespace vsmc {
 /// \brief Numerical integration using OpenMP
 /// \ingroup Integrate
 template <typename Derived>
-class NumericOMP : public NumericBase<Derived>
+class NIntegrateOMP : public NIntegrateBase<Derived>
 {
     public :
 
     typedef typename traits::OMPSizeTypeTrait<
-        typename NumericBase<Derived>::size_type>::type size_type;
-    typedef typename NumericBase<Derived>::eval_type eval_type;
+        typename NIntegrateBase<Derived>::size_type>::type size_type;
+    typedef typename NIntegrateBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
@@ -33,8 +33,8 @@ class NumericOMP : public NumericBase<Derived>
 
         return integral;
     }
-}; // class NumericOMP
+}; // class NIntegrateOMP
 
 } // namespace vsmc
 
-#endif // VSMC_INTEGRATE_NUMERIC_OMP_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_OMP_HPP

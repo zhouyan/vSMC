@@ -1,5 +1,5 @@
-#ifndef VSMC_INTEGRATE_NUMERIC_NEWTON_COTES_HPP
-#define VSMC_INTEGRATE_NUMERIC_NEWTON_COTES_HPP
+#ifndef VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP
+#define VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -8,19 +8,19 @@ namespace vsmc {
 namespace internal {
 
 template <unsigned Index, typename EvalType>
-struct NumericNewtonCotesEval
+struct NIntegrateNewtonCotesEval
 {
     static double result (const double *coeff, double a, double h,
             const EvalType &eval)
     {
         return coeff[Index] * eval(a + (Index - 1) * h) +
-            NumericNewtonCotesEval<Index - 1, EvalType>::
+            NIntegrateNewtonCotesEval<Index - 1, EvalType>::
             result(coeff, a, h, eval);
     }
 };
 
 template <typename EvalType>
-struct NumericNewtonCotesEval<1, EvalType>
+struct NIntegrateNewtonCotesEval<1, EvalType>
 {
     static double result (const double *coeff, double a, double h,
             const EvalType &eval)
@@ -30,13 +30,13 @@ struct NumericNewtonCotesEval<1, EvalType>
 };
 
 template <unsigned Degree>
-class NumericNewtonCotesCoeff
+class NIntegrateNewtonCotesCoeff
 {
     public :
 
-    static NumericNewtonCotesCoeff<Degree> &instance ()
+    static NIntegrateNewtonCotesCoeff<Degree> &instance ()
     {
-        static NumericNewtonCotesCoeff<Degree> coeff;
+        static NIntegrateNewtonCotesCoeff<Degree> coeff;
 
         return coeff;
     }
@@ -47,13 +47,13 @@ class NumericNewtonCotesCoeff
 
     double coeff_[Degree + 2];
 
-    NumericNewtonCotesCoeff ()
+    NIntegrateNewtonCotesCoeff ()
     {coeff_init(cxx11::integral_constant<unsigned, Degree>());}
 
-    NumericNewtonCotesCoeff
-        (const NumericNewtonCotesCoeff<Degree> &);
-    NumericNewtonCotesCoeff<Degree> &operator=
-        (const NumericNewtonCotesCoeff<Degree> &);
+    NIntegrateNewtonCotesCoeff
+        (const NIntegrateNewtonCotesCoeff<Degree> &);
+    NIntegrateNewtonCotesCoeff<Degree> &operator=
+        (const NIntegrateNewtonCotesCoeff<Degree> &);
 
     void coeff_init (cxx11::integral_constant<unsigned, 1>)
     {
@@ -176,27 +176,27 @@ class NumericNewtonCotesCoeff
 /// \brief Numerical integration with the (closed) Newton-Cotes formulae
 /// \ingroup Integrate
 template <unsigned Degree, template <typename> class Impl>
-class NumericNewtonCotes : public Impl<NumericNewtonCotes<Degree, Impl> >
+class NIntegrateNewtonCotes : public Impl<NIntegrateNewtonCotes<Degree, Impl> >
 {
     public :
 
-    typedef typename Impl<NumericNewtonCotes<Degree, Impl> >::
+    typedef typename Impl<NIntegrateNewtonCotes<Degree, Impl> >::
         size_type size_type;
-    typedef typename Impl<NumericNewtonCotes<Degree, Impl> >::
+    typedef typename Impl<NIntegrateNewtonCotes<Degree, Impl> >::
         eval_type eval_type;
 
-    NumericNewtonCotes () :
-        coeff_(internal::NumericNewtonCotesCoeff<Degree>::instance().coeff())
+    NIntegrateNewtonCotes () : coeff_(
+            internal::NIntegrateNewtonCotesCoeff<Degree>::instance().coeff())
     {}
 
     double integrate_segment (double a, double b, const eval_type &eval) const
     {
-        VSMC_STATIC_ASSERT_NUMERIC_NEWTON_COTES_DEGREE(Degree);
+        VSMC_STATIC_ASSERT_NINTEGRATE_NEWTON_COTES_DEGREE(Degree);
 
         double h = (b - a) / Degree;
 
         return coeff_[0] * (b - a) * (
-                internal::NumericNewtonCotesEval<Degree, eval_type>::
+                internal::NIntegrateNewtonCotesEval<Degree, eval_type>::
                 result(coeff_, a, h, eval) + coeff_[Degree + 1] * eval(b));
     }
 
@@ -206,8 +206,8 @@ class NumericNewtonCotes : public Impl<NumericNewtonCotes<Degree, Impl> >
 
     static const unsigned max_degree_ = 10;
     const double *coeff_;
-}; // class NumericNewtonCotes
+}; // class NIntegrateNewtonCotes
 
 } // namespace vsmc
 
-#endif // VSMC_INTEGRATE_NUMERIC_NEWTON_COTES_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP

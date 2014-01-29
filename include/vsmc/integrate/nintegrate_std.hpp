@@ -1,7 +1,7 @@
-#ifndef VSMC_INTEGRATE_NUMERIC_STD_HPP
-#define VSMC_INTEGRATE_NUMERIC_STD_HPP
+#ifndef VSMC_INTEGRATE_NINTEGRATE_STD_HPP
+#define VSMC_INTEGRATE_NINTEGRATE_STD_HPP
 
-#include <vsmc/integrate/base.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
 #include <vsmc/utility/stdtbb.hpp>
 
 namespace vsmc {
@@ -9,12 +9,12 @@ namespace vsmc {
 /// \brief Numerical integration using C++11 concurrency
 /// \ingroup Integrate
 template <typename Derived>
-class NumericSTD : public NumericBase<Derived>
+class NIntegrateSTD : public NIntegrateBase<Derived>
 {
     public :
 
-    typedef typename NumericBase<Derived>::size_type size_type;
-    typedef typename NumericBase<Derived>::eval_type eval_type;
+    typedef typename NIntegrateBase<Derived>::size_type size_type;
+    typedef typename NIntegrateBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
@@ -31,18 +31,18 @@ class NumericSTD : public NumericBase<Derived>
     {
         public :
 
-        typedef typename NumericBase<Derived>::size_type size_type;
+        typedef typename NIntegrateBase<Derived>::size_type size_type;
 
-        work_ (NumericSTD<Derived> *numeric, const double *grid,
+        work_ (NIntegrateSTD<Derived> *nintegrate, const double *grid,
                 const eval_type &eval) :
-            numeric_(numeric), grid_(grid), eval_(eval) {}
+            nintegrate_(nintegrate), grid_(grid), eval_(eval) {}
 
         void operator() (const BlockedRange<size_type> &range,
                 double &integral) const
         {
             double sum = 0;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                sum += numeric_->integrate_segment(
+                sum += nintegrate_->integrate_segment(
                         grid_[i - 1], grid_[i], eval_);
             }
             integral = sum;
@@ -50,12 +50,12 @@ class NumericSTD : public NumericBase<Derived>
 
         private :
 
-        NumericSTD<Derived> *const numeric_;
+        NIntegrateSTD<Derived> *const nintegrate_;
         const double *const grid_;
         const eval_type eval_;
     }; // class work_
-}; // class NumericSTD
+}; // class NIntegrateSTD
 
 } // namespace vsmc
 
-#endif // VSMC_INTEGRATE_NUMERIC_STD_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_STD_HPP

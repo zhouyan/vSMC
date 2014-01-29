@@ -1,9 +1,12 @@
 #ifndef VSMC_SMP_STATE_TUPLE_HPP
 #define VSMC_SMP_STATE_TUPLE_HPP
 
-#include <vsmc/smp/base.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/utility/tuple_manip.hpp>
+
+#define VSMC_RUNTIME_ASSERT_SMP_STATE_TUPLE_COPY_SIZE_MISMATCH \
+    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
+            ("**StateTuple::copy** SIZE MISMATCH"))
 
 namespace vsmc {
 
@@ -161,7 +164,7 @@ class StateTupleBase
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(Tuple);
+        VSMC_RUNTIME_ASSERT_SMP_STATE_TUPLE_COPY_SIZE_MISMATCH;
 
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);

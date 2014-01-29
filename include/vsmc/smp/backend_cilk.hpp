@@ -1,7 +1,7 @@
 #ifndef VSMC_SMP_BACKEND_CILK_HPP
 #define VSMC_SMP_BACKEND_CILK_HPP
 
-#include <vsmc/smp/base.hpp>
+#include <vsmc/smp/backend_base.hpp>
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
 #include <cilk/reducer_opadd.h>
@@ -78,7 +78,7 @@ class StateCILK : public BaseState
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(CILK);
+        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(CILK);
 
         cilk_for (size_type to = 0; to != N; ++to)
             this->copy_particle(copy_from[to], to);

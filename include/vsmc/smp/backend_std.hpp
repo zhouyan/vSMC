@@ -1,7 +1,7 @@
 #ifndef VSMC_SMP_BACKEND_STD_HPP
 #define VSMC_SMP_BACKEND_STD_HPP
 
-#include <vsmc/smp/base.hpp>
+#include <vsmc/smp/backend_base.hpp>
 #include <vsmc/utility/stdtbb.hpp>
 #include <vsmc/utility/tbb_op.hpp>
 
@@ -68,7 +68,7 @@ class StateSTD : public BaseState
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_BASE_COPY_SIZE_MISMATCH(STD);
+        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(STD);
 
         parallel_for(BlockedRange<size_type>(0, N),
                 copy_work_<IntType>(this, copy_from));

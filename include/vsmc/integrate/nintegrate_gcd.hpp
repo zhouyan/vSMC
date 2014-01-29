@@ -1,7 +1,7 @@
-#ifndef VSMC_INTEGRATE_NUMERIC_GCD_HPP
-#define VSMC_INTEGRATE_NUMERIC_GCD_HPP
+#ifndef VSMC_INTEGRATE_NINTEGRATE_GCD_HPP
+#define VSMC_INTEGRATE_NINTEGRATE_GCD_HPP
 
-#include <vsmc/integrate/base.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
 #include <vsmc/smp/internal/dispatch.hpp>
 
 namespace vsmc {
@@ -9,12 +9,12 @@ namespace vsmc {
 /// \brief Numerical integration using Apple Grand Central Dispatch
 /// \ingroup Integrate
 template <typename Derived>
-class NumericGCD : public NumericBase<Derived>
+class NIntegrateGCD : public NIntegrateBase<Derived>
 {
     public :
 
-    typedef typename NumericBase<Derived>::size_type size_type;
-    typedef typename NumericBase<Derived>::eval_type eval_type;
+    typedef typename NIntegrateBase<Derived>::size_type size_type;
+    typedef typename NIntegrateBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
@@ -27,8 +27,8 @@ class NumericGCD : public NumericBase<Derived>
 
         return integral;
     }
-}; // class NumericGCD
+}; // class NIntegrateGCD
 
 } // namespace vsmc
 
-#endif // VSMC_INTEGRATE_NUMERIC_GCD_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_GCD_HPP

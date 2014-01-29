@@ -1,7 +1,7 @@
-#ifndef VSMC_INTEGRATE_NUMERIC_TBB_HPP
-#define VSMC_INTEGRATE_NUMERIC_TBB_HPP
+#ifndef VSMC_INTEGRATE_NINTEGRATE_TBB_HPP
+#define VSMC_INTEGRATE_NINTEGRATE_TBB_HPP
 
-#include <vsmc/integrate/base.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
 #include <tbb/tbb.h>
 
 namespace vsmc {
@@ -9,12 +9,12 @@ namespace vsmc {
 /// \brief Numerical integration using Intel Threading Building Block
 /// \ingroup Integrate
 template <typename Derived>
-class NumericTBB : public NumericBase<Derived>
+class NIntegrateTBB : public NIntegrateBase<Derived>
 {
     public :
 
-    typedef typename NumericBase<Derived>::size_type size_type;
-    typedef typename NumericBase<Derived>::eval_type eval_type;
+    typedef typename NIntegrateBase<Derived>::size_type size_type;
+    typedef typename NIntegrateBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
@@ -33,15 +33,15 @@ class NumericTBB : public NumericBase<Derived>
     {
         public :
 
-        typedef typename NumericBase<Derived>::size_type size_type;
+        typedef typename NIntegrateBase<Derived>::size_type size_type;
 
-        work_ (NumericTBB<Derived> *numeric, const double *grid,
+        work_ (NIntegrateTBB<Derived> *nintegrate, const double *grid,
                 const eval_type &eval) :
-            numeric_(numeric), grid_(grid), eval_(eval), eval_copy_(eval),
-            integral_(0) {}
+            nintegrate_(nintegrate), grid_(grid),
+            eval_(eval), eval_copy_(eval), integral_(0) {}
 
         work_ (const work_ &other, tbb::split) :
-            numeric_(other.numeric_), grid_(other.grid_),
+            nintegrate_(other.nintegrate_), grid_(other.grid_),
             eval_(other.eval_copy_), eval_copy_(other.eval_copy_),
             integral_(0) {}
 
@@ -49,7 +49,7 @@ class NumericTBB : public NumericBase<Derived>
         {
             double sum = integral_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                sum += numeric_->integrate_segment(
+                sum += nintegrate_->integrate_segment(
                         grid_[i - 1], grid_[i], eval_);
             }
             integral_ = sum;
@@ -67,14 +67,14 @@ class NumericTBB : public NumericBase<Derived>
 
         private :
 
-        NumericTBB<Derived> *const numeric_;
+        NIntegrateTBB<Derived> *const nintegrate_;
         const double *const grid_;
         const eval_type eval_;
         const eval_type eval_copy_;
         double integral_;
     }; // class work_
-}; // class NumericTBB
+}; // class NIntegrateTBB
 
 } // namespace vsmc
 
-#endif // VSMC_INTEGRATE_NUMERIC_TBB_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_TBB_HPP

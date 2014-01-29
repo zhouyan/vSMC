@@ -1,7 +1,7 @@
-#ifndef VSMC_INTEGRATE_NUMERIC_PPL_HPP
-#define VSMC_INTEGRATE_NUMERIC_PPL_HPP
+#ifndef VSMC_INTEGRATE_NINTEGRATE_PPL_HPP
+#define VSMC_INTEGRATE_NINTEGRATE_PPL_HPP
 
-#include <vsmc/integrate/base.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
 #include <vsmc/smp/internal/ppl_wrapper.hpp>
 
 namespace vsmc {
@@ -9,12 +9,12 @@ namespace vsmc {
 /// \brief Numerical integration using Parallel Pattern Library
 /// \ingroup Integrate
 template <typename Derived>
-class NumericPPL : public NumericBase<Derived>
+class NIntegratePPL : public NIntegrateBase<Derived>
 {
     public :
 
-    typedef typename NumericBase<Derived>::size_type size_type;
-    typedef typename NumericBase<Derived>::eval_type eval_type;
+    typedef typename NIntegrateBase<Derived>::size_type size_type;
+    typedef typename NIntegrateBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
@@ -42,21 +42,22 @@ class NumericPPL : public NumericBase<Derived>
     {
         public :
 
-        typedef typename NumericBase<Derived>::size_type size_type;
+        typedef typename NIntegrateBase<Derived>::size_type size_type;
 
-        work_ (NumericPPL<Derived> *numeric, const double *grid,
+        work_ (NIntegratePPL<Derived> *nintegrate, const double *grid,
                 ppl::combinable<eval_type> *eval, double *integral) :
-            numeric_(numeric), grid_(grid), eval_(eval), integral_(integral) {}
+            nintegrate_(nintegrate), grid_(grid), eval_(eval),
+            integral_(integral) {}
 
         void operator() (size_type i) const
         {
-            integral_[i - 1] = numeric_->integrate_segment(
+            integral_[i - 1] = nintegrate_->integrate_segment(
                     grid_[i - 1], grid_[i], eval_->local());
         }
 
         private :
 
-        NumericPPL<Derived> *const numeric_;
+        NIntegratePPL<Derived> *const nintegrate_;
         const double *const grid_;
         ppl::combinable<eval_type> *const eval_;
         double *const integral_;
@@ -74,8 +75,8 @@ class NumericPPL : public NumericBase<Derived>
 
         const eval_type eval_;
     }; // class eval_init_;
-}; // class NumericPPL
+}; // class NIntegratePPL
 
 } // namespace vsmc
 
-#endif // VSMC_INTEGRATE_NUMERIC_PPL_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_PPL_HPP

@@ -4,7 +4,7 @@
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/smp/adapter.hpp>
 #include <vsmc/smp/backend_seq.hpp>
-#include <vsmc/integrate/numeric_seq.hpp>
+#include <vsmc/integrate/nintegrate_seq.hpp>
 
 #endif // VSMC_HPP
 
@@ -30,9 +30,6 @@
 
 /// \defgroup Integrate Integration
 /// \brief Numerical integration
-
-/// \defgroup RandomWalk Metropolis random walk
-/// \brief Metropolis Random Walk kernels
 
 /// \defgroup MPI Message Passing Interface
 /// \brief Parallel samplers using MPI

@@ -16,7 +16,7 @@ template <typename, typename D = Virtual> class Initialize##Name;            \
 template <typename, typename D = Virtual> class Move##Name;                  \
 template <typename, typename D = Virtual> class MonitorEval##Name;           \
 template <typename, typename D = Virtual> class PathEval##Name;              \
-template <typename> class Numeric##Name;
+template <typename> class NIntegrate##Name;
 
 namespace vsmc {
 
@@ -31,8 +31,8 @@ struct Closed {};
 
 // Integrate
 class ISIntegrate;
-template <typename> class NumericBase;
-template <unsigned, template <typename> class> class NumericNewtonCotes;
+template <typename> class NIntegrateBase;
+template <unsigned, template <typename> class> class NIntegrateNewtonCotes;
 
 // Rng
 template <typename> class SeedGenerator;

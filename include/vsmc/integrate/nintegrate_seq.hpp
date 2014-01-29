@@ -1,19 +1,19 @@
-#ifndef VSMC_INTEGRATE_NUMERIC_SEQ_HPP
-#define VSMC_INTEGRATE_NUMERIC_SEQ_HPP
+#ifndef VSMC_INTEGRATE_NINTEGRATE_SEQ_HPP
+#define VSMC_INTEGRATE_NINTEGRATE_SEQ_HPP
 
-#include <vsmc/integrate/base.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
 
 namespace vsmc {
 
 /// \brief Numerical integration using sequential implementation
 /// \ingroup Integrate
 template <typename Derived>
-class NumericSEQ : public NumericBase<Derived>
+class NIntegrateSEQ : public NIntegrateBase<Derived>
 {
     public :
 
-    typedef typename NumericBase<Derived>::size_type size_type;
-    typedef typename NumericBase<Derived>::eval_type eval_type;
+    typedef typename NIntegrateBase<Derived>::size_type size_type;
+    typedef typename NIntegrateBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
@@ -26,8 +26,8 @@ class NumericSEQ : public NumericBase<Derived>
 
         return integral;
     }
-}; // class NumericSEQ
+}; // class NIntegrateSEQ
 
 } // namespace vsmc
 
-#endif // VSMC_INTEGRATE_NUMERIC_SEQ_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_SEQ_HPP

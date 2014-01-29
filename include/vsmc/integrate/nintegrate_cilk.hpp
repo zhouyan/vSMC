@@ -1,7 +1,7 @@
-#ifndef VSMC_INTEGRATE_NUMERIC_CILK_HPP
-#define VSMC_INTEGRATE_NUMERIC_CILK_HPP
+#ifndef VSMC_INTEGRATE_NINTEGRATE_CILK_HPP
+#define VSMC_INTEGRATE_NINTEGRATE_CILK_HPP
 
-#include <vsmc/integrate/base.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
 #include <cilk/holder.h>
@@ -12,12 +12,12 @@ namespace vsmc {
 /// \brief Numerical integration using Intel Cilk Plus
 /// \ingroup Integrate
 template <typename Derived>
-class NumericCILK : public NumericBase<Derived>
+class NIntegrateCILK : public NIntegrateBase<Derived>
 {
     public :
 
-    typedef typename NumericBase<Derived>::size_type size_type;
-    typedef typename NumericBase<Derived>::eval_type eval_type;
+    typedef typename NIntegrateBase<Derived>::size_type size_type;
+    typedef typename NIntegrateBase<Derived>::eval_type eval_type;
 
     double operator() (size_type N, const double *grid, const eval_type &eval)
     {
@@ -33,8 +33,8 @@ class NumericCILK : public NumericBase<Derived>
 
         return integral.get_value();
     }
-}; // class NumericCILK
+}; // class NIntegrateCILK
 
 } // namespace vsmc
 
-#endif // VSMC_INTEGRATE_NUMERIC_CILK_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_CILK_HPP
