@@ -164,7 +164,7 @@
             return 0;                                                        \
                                                                              \
         if (c_shape == 1) {                                                  \
-            FT u = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));   \
+            FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));     \
             return -log(u);                                                  \
         }                                                                    \
                                                                              \
@@ -172,8 +172,8 @@
             const FT c_exp_m1 = 0.3678794411714423;                          \
             FT b = 1 + c_exp_m1 * c_shape;                                   \
             while (true) {                                                   \
-                FT u = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));\
-                FT v = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));\
+                FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng)); \
+                FT v = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng)); \
                 FT p = b * u;                                                \
                 FT e = -log(v);                                              \
                 if (p >= 1) {                                                \
@@ -193,7 +193,7 @@
         if (t >= 0)                                                          \
             return x * x;                                                    \
                                                                              \
-        FT u = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));       \
+        FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));         \
         if (c_d * u <= t * t * t)                                            \
             return x * x;                                                    \
                                                                              \
@@ -222,8 +222,8 @@
         }                                                                    \
                                                                              \
         while (true) {                                                       \
-            FT e = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));   \
-            FT u = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));   \
+            FT e = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));     \
+            FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));     \
             e = -log(e);                                                     \
             u = u + u - 1;                                                   \
             FT t = u < 0 ?  c_b - c_si * e : c_b + c_si * e;                 \
