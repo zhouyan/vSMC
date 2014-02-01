@@ -127,7 +127,7 @@ inline const T *hdf5_data_ptr (std::size_t N, InputIter first, T *tmp)
 /// \param ncol Number of columns
 /// \param file_name Name of the HDF5 file
 /// \param data_name Name of the matrix data
-/// \param first A pointer to an array of length nrow * ncol 
+/// \param first A pointer to an array of length nrow * ncol
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
 template <MatrixOrder Order, typename T>

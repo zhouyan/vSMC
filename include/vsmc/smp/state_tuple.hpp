@@ -346,11 +346,11 @@ class StateTuple<ColMajor, T, Types...> :
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type
-    *data (Position<Pos>) const {return &std::get<Pos>(state_)[0];} 
+    *data (Position<Pos>) const {return &std::get<Pos>(state_)[0];}
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type
-    *data () const {return &std::get<Pos>(state_)[0];} 
+    *data () const {return &std::get<Pos>(state_)[0];}
 
     private :
 

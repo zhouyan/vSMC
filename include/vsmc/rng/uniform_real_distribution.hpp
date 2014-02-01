@@ -72,7 +72,7 @@ class UniformRealDistribution
         {return (param1.a() == param2.a()) && (param1.b() == param2.b());}
 
         friend inline bool operator!= (
-                const param_type param1, const param_type param2) 
+                const param_type param1, const param_type param2)
         {return (param1.a() != param2.a()) || (param1.b() != param2.b());}
 
         template <typename CharT, typename Traits>
