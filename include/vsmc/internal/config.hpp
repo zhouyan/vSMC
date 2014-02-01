@@ -31,6 +31,12 @@
 #define VSMC_NULLPTR 0
 #endif
 
+/// \brief C++11 long long interge type
+/// \ingroup Config
+#ifndef VSMC_HAS_LONG_LONG
+#define VSMC_HAS_LONG_LONG 0
+#endif
+
 /// \brief Turn vSMC runtime assertions into exceptions
 /// \ingroup Config
 #ifndef VSMC_RUNTIME_ASSERT_AS_EXCEPTION

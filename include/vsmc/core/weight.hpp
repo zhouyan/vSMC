@@ -8,11 +8,11 @@
 #endif
 
 #define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(diff, size, func) \
-    VSMC_RUNTIME_ASSERT((std::abs(diff) > static_cast<std::ptrdiff_t>(size)),\
+    VSMC_RUNTIME_ASSERT((std::abs(diff) >= static_cast<std::ptrdiff_t>(size)),\
             ("THE DESTINATION OF **"#func"** OVERLAPPING WITH THE SOURCE"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_OUT(diff, size, func) \
-    VSMC_RUNTIME_ASSERT((std::abs(diff) > static_cast<std::ptrdiff_t>(size)),\
+    VSMC_RUNTIME_ASSERT((std::abs(diff) >= static_cast<std::ptrdiff_t>(size)),\
             ("THE SOURCE OF **"#func"** OVERLAPPING WITH THE DESTINATION"))
 
 namespace vsmc {
