@@ -237,6 +237,10 @@
 #define VSMC_HAS_CXX11LIB_THREAD 1
 #endif
 
+#ifndef VSMC_HAS_CXX11LIB_TUPLE
+#define VSMC_HAS_CXX11LIB_TUPLE 1
+#endif
+
 #endif // _LIBCPP_VERSION
 
 #endif // __cplusplus >= 201103L

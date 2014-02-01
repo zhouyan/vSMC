@@ -10,12 +10,6 @@
 
 namespace vsmc {
 
-namespace internal {
-
-VSMC_DEFINE_TUPLE_APPLY(Vector, std::vector)
-
-} // namespace vsmc::internal
-
 /// \brief Base type of StateTuple
 /// \ingroup SMP
 template <MatrixOrder Order, typename T, typename... Types>
@@ -25,6 +19,12 @@ class StateTupleBase
 
     typedef std::size_t size_type;
     typedef std::tuple<T, Types...> state_tuple_type;
+
+    typedef typename TuplePointer<state_tuple_type>::type
+        state_tuple_ptr_type;
+
+    typedef typename TupleConstPointer<state_tuple_type>::type
+        state_tuple_cptr_type;
 
     template <std::size_t Pos> struct state_type
     {typedef typename std::tuple_element<Pos, state_tuple_type>::type type;};
@@ -303,6 +303,9 @@ class StateTuple<RowMajor, T, Types...> :
     &state (size_type id) const
     {return state(id, Position<Pos>());}
 
+    const typename state_tuple_base_type::state_tuple_type *data () const
+    {return &state_[0];}
+
     private :
 
     static const std::size_t dim_ = sizeof...(Types) + 1;
@@ -352,10 +355,18 @@ class StateTuple<ColMajor, T, Types...> :
     const typename state_tuple_base_type::template state_type<Pos>::type
     *data () const {return &std::get<Pos>(state_)[0];}
 
+    typename state_tuple_base_type::state_tuple_cptr_type data () const
+    {
+        typename state_tuple_base_type::state_tuple_cptr_type dptr;
+        insert_data(dptr, Position<0>());
+
+        return dptr;
+    }
+
     private :
 
     static const std::size_t dim_ = sizeof...(Types) + 1;
-    typename internal::TupleApplyVector<std::tuple<T, Types...> >::type state_;
+    typename TupleApplyVector<std::tuple<T, Types...> >::type state_;
 
     template <std::size_t Pos>
     void init_state (size_type N, Position<Pos>)
@@ -366,6 +377,20 @@ class StateTuple<ColMajor, T, Types...> :
 
     void init_state (size_type N, Position<sizeof...(Types)>)
     {std::get<sizeof...(Types)>(state_).resize(N);}
+
+    template <std::size_t Pos>
+    void insert_data (
+            typename state_tuple_base_type::state_tuple_cptr_type &dptr,
+            Position<Pos>) const
+    {
+        std::get<Pos>(dptr) = data<Pos>();
+        insert_data(dptr, Position<Pos + 1>());
+    }
+
+    void insert_data (
+            typename state_tuple_base_type::state_tuple_cptr_type &dptr,
+            Position<sizeof...(Types)>) const
+    {std::get<sizeof...(Types)>(dptr) = data<sizeof...(Types)>();}
 }; // class StateTuple
 
 } // namespace vsmc

@@ -16,6 +16,8 @@ template <typename, std::size_t> struct TuplePopFrontN;
 template <typename, std::size_t> struct TuplePopBackN;
 template <typename, typename> struct TupleMerge;
 template <typename...> struct TupleCat;
+template <typename...> struct TuplePointer;
+template <typename...> struct TupleConstPointer;
 template <typename, template <typename> class>  struct TupleApply;
 
 } // namespace vsmc
@@ -180,7 +182,39 @@ template <typename... Types>
 struct TupleCat<std::tuple<Types...> >
 {typedef std::tuple<Types...> type;};
 
-/// \brief Generate a new std::tuple types by apply a class template
+/// \brief Generate a new std::tuple type whose element types is the pointer
+/// type of the original
+template <typename T, typename... Types>
+struct TuplePointer<std::tuple<T, Types...> >
+{
+    typedef typename TuplePushFront<
+        typename TuplePointer<std::tuple<Types...> >::type,
+                 T *>::type type;
+};
+
+/// \brief Generate a new std::tuple type whose element types is the pointer
+/// type of the original
+template <>
+struct TuplePointer<std::tuple<> >
+{typedef std::tuple<> type;};
+
+/// \brief Generate a new std::tuple type whose element types is the constant
+/// pointer type of the original
+template <typename T, typename... Types>
+struct TupleConstPointer<std::tuple<T, Types...> >
+{
+    typedef typename TuplePushFront<
+        typename TupleConstPointer<std::tuple<Types...> >::type,
+                 const T *>::type type;
+};
+
+/// \brief Generate a new std::tuple type whose element types is the constant
+/// pointer type of the original
+template <>
+struct TupleConstPointer<std::tuple<> >
+{typedef std::tuple<> type;};
+
+/// \brief Generate a new std::tuple type by apply a class template
 /// \ingroup Tuple
 ///
 /// \details
@@ -194,7 +228,7 @@ struct TupleApply<std::tuple<T, Types...>, C>
         >::type type;
 };
 
-/// \brief Generate a new std::tuple types by apply a class template
+/// \brief Generate a new std::tuple type by apply a class template
 /// \ingroup Tuple
 template <template <typename> class C>
 struct TupleApply<std::tuple<>, C>
@@ -256,5 +290,9 @@ struct TupleApply##Outer<std::tuple<T, Types...> >                            \
                                                                               \
 template <> struct TupleApply##Outer<std::tuple<> >                           \
 {typedef std::tuple<> type;};
+
+namespace vsmc {
+VSMC_DEFINE_TUPLE_APPLY(Vector, std::vector)
+}
 
 #endif // VSMC_UTILITY_TUPLE_MANIP_HPP

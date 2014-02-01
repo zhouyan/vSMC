@@ -251,6 +251,12 @@
 #endif
 #endif
 
+#if VSMC_GNUC_VERSION >= 40700
+#ifndef VSMC_HAS_CXX11LIB_TUPLE
+#define VSMC_HAS_CXX11LIB_TUPLE 1
+#endif
+#endif
+
 #endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 
 #endif // VSMC_INTERNAL_COMPILER_GCC_HPP

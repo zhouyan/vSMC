@@ -256,6 +256,12 @@
 #endif
 #endif
 
+#if __INTEL_COMPILER >= 1400 && VSMC_GNUC_VERSION >= 40700
+#ifndef VSMC_HAS_CXX11LIB_TUPLE
+#define VSMC_HAS_CXX11LIB_TUPLE 1
+#endif
+#endif
+
 #endif // defined(__GNUC__) && defined(__GNUC_MINOR__)
 #endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 

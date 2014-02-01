@@ -257,4 +257,9 @@
 #define VSMC_HAS_CXX11LIB_THREAD 0
 #endif
 
+/// \brief C++11 `<tuple>`
+#ifndef VSMC_HAS_CXX11LIB_TUPLE
+#define VSMC_HAS_CXX11LIB_TUPLE 1
+#endif
+
 #endif // VSMC_INTERNAL_COMPILER_HPP

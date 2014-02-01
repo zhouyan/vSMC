@@ -4,6 +4,10 @@
 #include <vsmc/internal/common.hpp>
 #include <hdf5.h>
 
+#if VSMC_HAS_CXX11LIB_TUPLE
+#include <vsmc/utility/tuple_manip.hpp>
+#endif
+
 namespace vsmc {
 
 namespace internal {
@@ -31,6 +35,8 @@ template <typename T>
 class HDF5DataPtr
 {
     public :
+
+    HDF5DataPtr () : ptr_(VSMC_NULLPTR) {}
 
     template <typename InputIter>
     InputIter set (std::size_t n, InputIter first)
@@ -155,7 +161,7 @@ inline hid_t hdf5_datatype<long double> ()
 ///
 /// \details
 /// \tparam Order Storage order (RowMajor or ColMajor)
-/// \tparam T Tyep of the data
+/// \tparam T Type of the data
 /// \param nrow Number of rows
 /// \param ncol Number of columns
 /// \param file_name Name of the HDF5 file
@@ -208,7 +214,7 @@ inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
 /// A data frame is similar to that in R. It is much like a matrix except that
 /// each column will be stored seperatedly as an variable and given a name.
 ///
-/// \tparam T Tyep of the data
+/// \tparam T Type of the data
 /// \tparam InputIterIter The input iterator type, which points to input
 /// iterators
 /// \tparam SInputIter The input iterator type of names
@@ -301,6 +307,129 @@ inline void hdf5_insert_data_frame (std::size_t N,
     H5Fclose(datafile);
 }
 
+#if VSMC_HAS_CXX11LIB_TUPLE
+
+namespace internal {
+
+template <typename TupleVectorType>
+inline void hdf5_tuple_vector_reserve (std::size_t n, TupleVectorType &vec,
+        Position<0>)
+{std::get<0>(vec).reserve(n);}
+
+template <typename TupleVectorType, std::size_t Pos>
+inline void hdf5_tuple_vector_reserve (std::size_t n, TupleVectorType &vec,
+        Position<Pos>)
+{
+    std::get<Pos>(vec).reserve(n);
+    hdf5_tuple_vector_reserve(n, vec, Position<Pos - 1>());
+}
+
+template <typename TupleVectorType, typename InputIter>
+inline void hdf5_tuple_vector_copy (std::size_t n, TupleVectorType &vec,
+        InputIter first, Position<0>)
+{
+    typedef typename std::iterator_traits<InputIter>::value_type tuple_type;
+    typedef typename std::tuple_element<0, tuple_type>::type value_type;
+    value_type *dst = &std::get<0>(vec)[0];
+    for (std::size_t i = 0; i != n; ++i, ++first, ++dst)
+        *dst = std::get<0>(*first);
+}
+
+template <typename TupleVectorType, typename InputIter, std::size_t Pos>
+inline void hdf5_tuple_vector_copy (std::size_t n, TupleVectorType &vec,
+        InputIter first, Position<Pos>)
+{
+    typedef typename std::iterator_traits<InputIter>::value_type tuple_type;
+    typedef typename std::tuple_element<Pos, tuple_type>::type value_type;
+    value_type *dst = &std::get<Pos>(vec)[0];
+    InputIter ffirst = first;
+    for (std::size_t i = 0; i != n; ++i, ++first, ++dst)
+        *dst = std::get<Pos>(*first);
+    hdf5_tuple_vector_copy(n, vec, ffirst, Position<Pos - 1>());
+}
+
+template <typename TupleVectorType, typename TuplePtrType>
+inline void hdf5_tuple_vector_ptr(
+        const TupleVectorType &vec, TuplePtrType &ptr, Position<0>)
+{std::get<0>(ptr) = &std::get<0>(vec)[0];}
+
+template <typename TupleVectorType, typename TuplePtrType, std::size_t Pos>
+inline void hdf5_tuple_vector_ptr(
+        const TupleVectorType &vec, TuplePtrType &ptr, Position<Pos>)
+{
+    std::get<Pos>(ptr) = &std::get<Pos>(vec)[0];
+    hdf5_tuple_vector_ptr(vec, ptr, Position<Pos - 1>());
+}
+
+template <typename InputIter, typename... InputIters>
+inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
+        const std::string &file_name, const std::string &data_name,
+        const std::tuple<InputIter, InputIters...> &first,
+        const std::string *sptr, Position<0>)
+{
+    typedef typename std::tuple_element<
+        0, std::tuple<InputIter, InputIters...> >::type iter_type;
+    typedef typename std::iterator_traits<iter_type>::value_type dtype;
+    internal::HDF5DataPtr<dtype> data_ptr;
+    data_ptr.set(nrow, std::get<0>(first));
+    const dtype *data = data_ptr.get();
+    hdf5_insert_data_frame<dtype>(nrow, file_name, data_name, data, *sptr);
+}
+
+template <typename InputIter, typename... InputIters, std::size_t Pos>
+inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
+        const std::string &file_name, const std::string &data_name,
+        const std::tuple<InputIter, InputIters...> &first,
+        const std::string *sptr, Position<Pos>)
+{
+    typedef typename std::tuple_element<
+        Pos, std::tuple<InputIter, InputIters...> >::type iter_type;
+    typedef typename std::iterator_traits<iter_type>::value_type dtype;
+    internal::HDF5DataPtr<dtype> data_ptr;
+    data_ptr.set(nrow, std::get<Pos>(first));
+    const dtype *data = data_ptr.get();
+    hdf5_insert_data_frame<dtype>(nrow, file_name, data_name, data, *sptr);
+    hdf5_insert_data_frame_tuple(nrow, file_name, data_name, first, --sptr,
+            Position<Pos - 1>());
+}
+
+} // namespace vsmc::internal
+
+/// \brief Save a data frame in the HDF5 format from tuple of iterators
+/// \ingroup HDF5Save
+///
+/// \details
+/// A data frame is similar to that in R. It is much like a matrix except that
+/// each column will be stored seperatedly as an variable and given a name.
+///
+/// \param nrow Number of rows
+/// \param file_name Name of the HDF5 file
+/// \param data_name Name of the data frame
+/// \param first A `std::tuple` type object whose element types are iterators.
+/// Each element is the beginning of a column of the data frame.
+/// \param sfirst An iterator points to the beginning of a sequence of strings
+/// that store the names of each column. The dereference need to be convertible
+/// to std::string
+/// \param append If true the data is appended into an existing file, otherwise
+/// save in a new file
+template <typename SInputIter, typename InputIter, typename... InputIters>
+inline void hdf5_save_data_frame (std::size_t nrow,
+        const std::string &file_name, const std::string &data_name,
+        const std::tuple<InputIter, InputIters...> &first,
+        SInputIter sfirst, bool append = false)
+{
+    static const std::size_t dim = sizeof...(InputIters) + 1;
+    internal::HDF5DataPtr<std::string> vnames;
+    vnames.set(dim, sfirst);
+    const std::string *sptr = vnames.get() + dim;
+    hdf5_save_data_frame<int>(0, 0, file_name, data_name,
+            (int **) VSMC_NULLPTR, (std::string *) VSMC_NULLPTR, append);
+    internal::hdf5_insert_data_frame_tuple(nrow, file_name, data_name, first,
+            --sptr, Position<dim - 1>());
+}
+
+#endif // VSMC_HAS_CXX11LIB_TUPLE
+
 /// \brief Save a Sampler in the HDF5 format
 /// \ingroup HDF5Save
 template <typename T>
@@ -337,93 +466,57 @@ inline void hdf5_save (const StateMatrix<Order, Dim, T> &state,
             state.data(), append);
 }
 
-#if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
-
-namespace internal {
-
-template <typename T, typename... Types>
-inline void hdf5_save_state_tuple(
-    const StateTuple<RowMajor, T, Types...> &state,
-    const std::string &file_name, const std::string &data_name, Position<0>)
-{
-    typedef StateTuple<RowMajor, T, Types...> state_type;
-    typedef typename state_type::state_tuple_base_type::template
-        state_type<0>::type dtype;
-    std::string vname("V0");
-    std::vector<dtype> data_vec(state.size());
-    state.read_state(Position<0>(), data_vec.begin());
-    const dtype *data = &data_vec[0];
-    hdf5_insert_data_frame<dtype>(state.size(), file_name, data_name,
-            data, vname);
-}
-
-template <typename T, typename... Types, std::size_t Pos>
-inline void hdf5_save_state_tuple(
-    const StateTuple<RowMajor, T, Types...> &state,
-    const std::string &file_name, const std::string &data_name, Position<Pos>)
-{
-    typedef StateTuple<RowMajor, T, Types...> state_type;
-    typedef typename state_type::state_tuple_base_type::template
-        state_type<Pos>::type dtype;
-    std::stringstream ss;
-    ss << 'V' << Pos;
-    std::string vname(ss.str());
-    std::vector<dtype> data_vec(state.size());
-    state.read_state(Position<Pos>(), data_vec.begin());
-    const dtype *data = &data_vec[0];
-    hdf5_insert_data_frame<dtype>(state.size(), file_name, data_name,
-            data, vname);
-    hdf5_save_state_tuple(state, file_name, data_name, Position<Pos - 1>());
-}
-
-template <typename T, typename... Types>
-inline void hdf5_save_state_tuple(
-    const StateTuple<ColMajor, T, Types...> &state,
-    const std::string &file_name, const std::string &data_name, Position<0>)
-{
-    typedef StateTuple<RowMajor, T, Types...> state_type;
-    typedef typename state_type::state_tuple_base_type::template
-        state_type<0>::type dtype;
-    std::string vname("V0");
-    const dtype *data = state.data(Position<0>());
-    hdf5_insert_data_frame<dtype>(state.size(), file_name, data_name,
-            data, vname);
-}
-
-template <typename T, typename... Types, std::size_t Pos>
-inline void hdf5_save_state_tuple(
-    const StateTuple<ColMajor, T, Types...> &state,
-    const std::string &file_name, const std::string &data_name, Position<Pos>)
-{
-    typedef StateTuple<RowMajor, T, Types...> state_type;
-    typedef typename state_type::state_tuple_base_type::template
-        state_type<Pos>::type dtype;
-    std::stringstream ss;
-    ss << 'V' << Pos;
-    std::string vname(ss.str());
-    const dtype *data = state.data(Position<Pos>());
-    hdf5_insert_data_frame<dtype>(state.size(), file_name, data_name,
-            data, vname);
-    hdf5_save_state_tuple(state, file_name, data_name, Position<Pos - 1>());
-}
-
-} // namespace vsmc::internal
+#if VSMC_HAS_CXX11LIB_TUPLE
 
 /// \brief Save a StateTuple in the HDF5 format
 /// \ingroup HDF5Save
-template <MatrixOrder Order, typename T, typename... Types>
-inline void hdf5_save (const StateTuple<Order, T, Types...> &state,
+template <typename T, typename... Types>
+inline void hdf5_save (const StateTuple<RowMajor, T, Types...> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
 {
     static const std::size_t dim = sizeof...(Types) + 1;
-    hdf5_save_data_frame<int>(0, 0, file_name, data_name,
-            (int **) VSMC_NULLPTR, (std::string *) VSMC_NULLPTR, append);
-    internal::hdf5_save_state_tuple(state, file_name, data_name,
+    std::vector<std::string> vnames;
+    vnames.reserve(dim);
+    for (std::size_t i = 0; i != dim; ++i) {
+        std::stringstream ss;
+        ss << 'V' << i;
+        vnames.push_back(ss.str());
+    }
+
+    typename TupleApplyVector<std::tuple<T, Types...> >::type data_vec;
+    internal::hdf5_tuple_vector_reserve(state.size(), data_vec,
             Position<dim - 1>());
+    internal::hdf5_tuple_vector_copy(state.size(), data_vec, state.data(),
+            Position<dim - 1>());
+
+    typename TupleConstPointer<std::tuple<T, Types...> >::type data_ptr;
+    internal::hdf5_tuple_vector_ptr(data_vec, data_ptr, Position<dim - 1>());
+
+    hdf5_save_data_frame(state.size(), file_name, data_name, data_ptr,
+            &vnames[0], append);
 }
 
-#endif // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
+/// \brief Save a StateTuple in the HDF5 format
+/// \ingroup HDF5Save
+template <typename T, typename... Types>
+inline void hdf5_save (const StateTuple<ColMajor, T, Types...> &state,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    static const std::size_t dim = sizeof...(Types) + 1;
+    std::vector<std::string> vnames;
+    vnames.reserve(dim);
+    for (std::size_t i = 0; i != dim; ++i) {
+        std::stringstream ss;
+        ss << 'V' << i;
+        vnames.push_back(ss.str());
+    }
+    hdf5_save_data_frame(state.size(), file_name, data_name,
+            state.data(), &vnames[0], append);
+}
+
+#endif // VSMC_HAS_CXX11LIB_TUPLE
 
 /// \brief Save a StateCL in the HDF5 format
 /// \ingroup HDF5Save
