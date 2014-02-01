@@ -48,16 +48,6 @@ class HDF5DataPtr
 
     const T *set (std::size_t n, const T *ptr) {ptr_ = ptr; return ptr + n;}
 
-    template <typename Alloc>
-    typename std::vector<T, Alloc>::iterator set (std::size_t n,
-            typename std::vector<T, Alloc>::iterator first)
-    {ptr_ = &(*first); return first + n;}
-
-    template <typename Alloc>
-    typename std::vector<T, Alloc>::const_iterator set (std::size_t n,
-            typename std::vector<T, Alloc>::const_iterator first)
-    {ptr_ = &(*first); return first + n;}
-
     const T *get () const {return ptr_;}
 
     private :
