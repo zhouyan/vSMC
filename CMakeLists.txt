@@ -23,15 +23,15 @@ OPTION (VSMC_ENABLE_CXX11LIB_FUTURE     "Enable C++11 <future>"     OFF)
 OPTION (VSMC_ENABLE_MPI                 "Enable MPI"                OFF)
 
 # Configuration files
-FILE (READ ${PROJECT_SOURCE_DIR}/README.markdown README)
+FILE (READ ${PROJECT_SOURCE_DIR}/README.md README)
 SET (DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
 SET (DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
 CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/Doxyfile.in
     ${PROJECT_BINARY_DIR}/Doxyfile)
 CONFIGURE_FILE (
-    ${PROJECT_SOURCE_DIR}/doc/main.markdown.in
-    ${PROJECT_SOURCE_DIR}/doc/main.markdown)
+    ${PROJECT_SOURCE_DIR}/doc/main.md.in
+    ${PROJECT_SOURCE_DIR}/doc/main.md)
 
 IF (NOT VSMC_INSTALL_INC_DIR)
     SET (VSMC_INSTALL_INC_DIR include)

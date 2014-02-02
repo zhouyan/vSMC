@@ -1,6 +1,3 @@
-.R*
 build*
-cmake/test
-doc/main.markdown
-include/cl.hpp
+doc/main.md
 user_options.cmake
