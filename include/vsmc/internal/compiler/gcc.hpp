@@ -3,7 +3,7 @@
 
 #define VSMC_GNUC_NONEXIST 1000000UL
 #define VSMC_GNUC_VERSION \
-    __GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__
+    (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 

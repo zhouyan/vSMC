@@ -1,6 +1,8 @@
 #ifndef VSMC_INTERNAL_COMPILER_HPP
 #define VSMC_INTERNAL_COMPILER_HPP
 
+#include <cstddef>
+
 #if defined(__INTEL_COMPILER)
 #include <vsmc/internal/compiler/intel.hpp>
 #elif defined(__clang__)

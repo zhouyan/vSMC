@@ -211,7 +211,7 @@
 
 // C++11 library features
 
-#if _LIBCPP_VERSION >= 1101
+#if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION >= 1101
 
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_HAS_CXX11LIB_CHRONO 1
@@ -245,7 +245,7 @@
 #define VSMC_HAS_CXX11LIB_TUPLE 1
 #endif
 
-#endif // _LIBCPP_VERSION
+#endif // defined(_LIBCPP_VERSION) && _LIBCPP_VERSION >= 1101
 
 #endif // __cplusplus >= 201103L
 

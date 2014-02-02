@@ -7,8 +7,7 @@
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 #if defined(__GNUC__) && defined(__GNUC_MINOR__)
 
-#define VSMC_GNUC_VERSION \
-    __GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__
+#define VSMC_GNUC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)
 
 // C++11 language features
 
@@ -156,7 +155,7 @@
 #endif
 #endif
 
-#if __INTEL_COMPILER >= 1400 && VSMC_GNUC_VERSION >= 40801
+#if __INTEL_COMPILER >= 1400 && VSMC_GNUC_VERSION >= 40800
 #ifndef VSMC_HAS_CXX11_REFERENCE_QUALIFIED_FUNCTIONS
 #define VSMC_HAS_CXX11_REFERENCE_QUALIFIED_FUNCTIONS 1
 #endif
