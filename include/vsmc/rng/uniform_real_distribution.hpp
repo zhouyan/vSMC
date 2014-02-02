@@ -38,17 +38,6 @@ struct IntegerRangeTypeTrait<0, ~((uint64_t)0)> {typedef uint64_t type;};
 /// - It allows the interval to be either open or closed on both sides.
 /// - It requires that the uniform random number generator to produce integers
 ///   on the full range of either `uint32_t` or `uint64_t`.
-///
-/// Also note that the results of RNG engine's `min` and `max` member functions
-/// has to be compile time constants and can thus be used as template
-/// argumments. Because the range of the `result_type` of many RNG engines
-/// (e.g., `std::mt19937`) is not necessary the same as the between of `min`
-/// and `max`. If UniformRealDistribution::operator() cannot determine the
-/// proper type that holds the range between `min` and `max` at compile time,
-/// then it has to resolve to (much) slower runtime decisions. Though
-/// considering that cost of generating random integers is likely to be much
-/// higher than the cost of runtime decision of the range, it might be just
-/// easier to use functions defined in `<vsmc/rng/u01.h>`.
 template <typename FPType, typename Left, typename Right>
 class UniformRealDistribution
 {
