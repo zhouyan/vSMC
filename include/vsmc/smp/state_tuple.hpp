@@ -1,8 +1,8 @@
 #ifndef VSMC_SMP_STATE_TUPLE_HPP
 #define VSMC_SMP_STATE_TUPLE_HPP
 
+#include <tuple>
 #include <vsmc/core/single_particle.hpp>
-#include <vsmc/utility/tuple_manip.hpp>
 
 #define VSMC_RUNTIME_ASSERT_SMP_STATE_TUPLE_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \

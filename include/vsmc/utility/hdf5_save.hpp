@@ -5,7 +5,7 @@
 #include <hdf5.h>
 
 #if VSMC_HAS_CXX11LIB_TUPLE
-#include <vsmc/utility/tuple_manip.hpp>
+#include <tuple>
 #endif
 
 namespace vsmc {
