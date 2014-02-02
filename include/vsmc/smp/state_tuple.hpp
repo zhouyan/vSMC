@@ -19,12 +19,8 @@ class StateTupleBase
 
     typedef std::size_t size_type;
     typedef std::tuple<T, Types...> state_tuple_type;
-
-    typedef typename TuplePointer<state_tuple_type>::type
-        state_tuple_ptr_type;
-
-    typedef typename TupleConstPointer<state_tuple_type>::type
-        state_tuple_cptr_type;
+    typedef std::tuple<T *, Types *...> state_tuple_ptr_type;
+    typedef std::tuple<const T *, const Types *...> state_tuple_cptr_type;
 
     template <std::size_t Pos> struct state_type
     {typedef typename std::tuple_element<Pos, state_tuple_type>::type type;};
@@ -366,7 +362,7 @@ class StateTuple<ColMajor, T, Types...> :
     private :
 
     static const std::size_t dim_ = sizeof...(Types) + 1;
-    typename TupleApplyVector<std::tuple<T, Types...> >::type state_;
+    std::tuple<std::vector<T>, std::vector<Types>...> state_;
 
     template <std::size_t Pos>
     void init_state (size_type N, Position<Pos>)

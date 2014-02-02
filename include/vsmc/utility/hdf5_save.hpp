@@ -484,13 +484,13 @@ inline void hdf5_save (const StateTuple<RowMajor, T, Types...> &state,
         vnames.push_back(ss.str());
     }
 
-    typename TupleApplyVector<std::tuple<T, Types...> >::type data_vec;
+    std::tuple<std::vector<T>, std::vector<Types>...> data_vec;
     internal::hdf5_tuple_vector_reserve(state.size(), data_vec,
             Position<dim - 1>());
     internal::hdf5_tuple_vector_copy(state.size(), data_vec, state.data(),
             Position<dim - 1>());
 
-    typename TupleConstPointer<std::tuple<T, Types...> >::type data_ptr;
+    typename std::tuple<const T *, const Types *...> data_ptr;
     internal::hdf5_tuple_vector_ptr(data_vec, data_ptr, Position<dim - 1>());
 
     hdf5_save_data_frame(state.size(), file_name, data_name, data_ptr,
