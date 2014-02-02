@@ -5,8 +5,8 @@
 
 #define VSMC_RUNTIME_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                     \
-            ("DERIVED FROM  NIntegrateBase                                   \
-             " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
+            ("DERIVED FROM  NIntegrateBase "                                 \
+             "WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
 
 namespace vsmc {
 

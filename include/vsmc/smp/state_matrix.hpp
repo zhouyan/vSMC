@@ -2,7 +2,7 @@
 #define VSMC_SMP_STATE_MATRIX_HPP
 
 #include <vsmc/core/single_particle.hpp>
-#include <vsmc/smp/internal/iterator.hpp>
+#include <vsmc/smp/iterator.hpp>
 
 #define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \

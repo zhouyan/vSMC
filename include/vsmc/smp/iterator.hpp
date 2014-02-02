@@ -1,11 +1,11 @@
-#ifndef VSMC_SMP_INTERNAL_ITERATOR_HPP
-#define VSMC_SMP_INTERNAL_ITERATOR_HPP
+#ifndef VSMC_SMP_ITERATOR_HPP
+#define VSMC_SMP_ITERATOR_HPP
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_SMP_INTERNAL_ITERATOR_BINARY_OP \
+#define VSMC_RUNTIME_ASSERT_SMP_ITERATOR_BINARY_OP \
     VSMC_RUNTIME_ASSERT((iter1->inc() == iter2->inc()),                      \
-            ("BINARY OPERATION ON TWO **StateMatrixRCIteraotr** WITH"        \
+            ("BINARY OPERATION ON TWO **StateMatrixRCIteraotr** WITH "       \
             "TWO DIFFERNT INCREMENT"))
 
 namespace vsmc {
@@ -108,7 +108,7 @@ inline std::ptrdiff_t operator- (
         const StepRandomIterator<RandomIter1> &iter1,
         const StepRandomIterator<RandomIter2> &iter2)
 {
-    VSMC_RUNTIME_ASSERT_SMP_INTERNAL_ITERATOR_BINARY_OP;
+    VSMC_RUNTIME_ASSERT_SMP_ITERATOR_BINARY_OP;
 
     return (iter1.iterator() - iter2.iterator()) / iter1.increment();
 }
@@ -142,4 +142,4 @@ inline StepRandomIterator<RandomIter> operator- (
 
 } // namespace vsmc
 
-#endif // VSMC_SMP_INTERNAL_ITERATOR_HPP
+#endif // VSMC_SMP_ITERATOR_HPP

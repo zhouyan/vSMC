@@ -6,7 +6,7 @@
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset) \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MACRO_NO_EXPANSION ()),           \
-            ("**vsmc::mkl::OffsetDynamic**"                                  \
+            ("**vsmc::mkl::OffsetDynamic** "                                 \
              "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
 
 #ifndef VSMC_RNG_MKL_BUFFER_SIZE

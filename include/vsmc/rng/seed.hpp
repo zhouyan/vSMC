@@ -5,12 +5,12 @@
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem) \
     VSMC_RUNTIME_ASSERT((div > rem),                                         \
-            ("**vsmc::SeedGenerator::modulo**"                               \
+            ("**vsmc::SeedGenerator::modulo** "                              \
              "REMAINDER IS NOT SMALLER THAN THE DIVISOR"))
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(seed_max) \
     VSMC_RUNTIME_ASSERT((seed_max > 1),                                      \
-            ("**vsmc::SeedGenerator::modulo**"                               \
+            ("**vsmc::SeedGenerator::modulo** "                              \
              "THE MAXIMUM OF THE INTERNAL SEED IS NO LARGER THAN 1"))
 
 namespace vsmc {

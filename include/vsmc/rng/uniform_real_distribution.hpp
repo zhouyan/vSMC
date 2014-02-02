@@ -4,6 +4,17 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/u01.h>
 
+#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min) \
+    VSMC_RUNTIME_ASSERT((eng_min == 0),                                      \
+            ("**vsmc::UniformRealDistribution::operator()** "                \
+             "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN ZERO"))
+
+#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX \
+    VSMC_RUNTIME_ASSERT(false,                                               \
+            ("**vsmc::UniformRealDistribution::operator()** "                \
+             "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN "       \
+             "THE MAXIMUM OF uint32_t OR uint64_t"))
+
 namespace vsmc {
 
 namespace traits {
@@ -130,17 +141,39 @@ class UniformRealDistribution
     template <typename Eng>
     result_type operator() (Eng &eng) const
     {
-        typedef typename Eng::result_type eng_result_type;
-        typedef typename traits::IntegerRangeTypeTrait<
-            Eng::min VSMC_MACRO_NO_EXPANSION (),
-            Eng::max VSMC_MACRO_NO_EXPANSION ()>::type eng_uint;
-        typedef cxx11::integral_constant<std::size_t, sizeof(eng_uint)>
-            u_bits;
         typedef cxx11::integral_constant<std::size_t, sizeof(result_type)>
             fp_bits;
 
-        result_type u = u01(static_cast<eng_uint>(eng()), Left(), Right(),
+#if VSMC_HAS_CONSTEXPR_ENGINE_MINMAX
+        typedef typename traits::IntegerRangeTypeTrait<
+            Eng::min VSMC_MACRO_NO_EXPANSION (),
+            Eng::max VSMC_MACRO_NO_EXPANSION ()>::type eng_uint_t;
+        typedef cxx11::integral_constant<std::size_t, sizeof(eng_uint_t)>
+            u_bits;
+
+        result_type u = u01(static_cast<eng_uint_t>(eng()), Left(), Right(),
                 u_bits(), fp_bits());
+#else // VSMC_HAS_CONSTEXPR_ENGINE_MINMAX
+        static const uint64_t eng_min = static_cast<uint64_t>(
+                Eng::min VSMC_MACRO_NO_EXPANSION ());
+        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min);
+
+        result_type u = 0;
+        static const uint64_t eng_max = static_cast<uint64_t>(
+                Eng::max VSMC_MACRO_NO_EXPANSION ());
+        switch (eng_max) {
+            case uint32_t_max_ :
+                u = u01(static_cast<uint32_t>(eng()), Left(), Right(),
+                        u32(), fp_bits());
+                break;
+            case uint64_t_max_ :
+                u = u01(static_cast<uint64_t>(eng()), Left(), Right(),
+                        u64(), fp_bits());
+                break;
+            default :
+                VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX;
+        }
+#endif // VSMC_HAS_CONSTEXPR_ENGINE_MINMAX
 
         return u * (b_ - a_) + a_;
     }
@@ -150,8 +183,10 @@ class UniformRealDistribution
     result_type a_;
     result_type b_;
 
-    static const uint32_t uint32_t_max_ = ~((uint32_t)0);
+#if !VSMC_HAS_CONSTEXPR_ENGINE_MINMAX
+    static const uint64_t uint32_t_max_ = ~((uint32_t)0);
     static const uint64_t uint64_t_max_ = ~((uint64_t)0);
+#endif
 
     static float u01(uint32_t i, Open, Open, u32, f24)
     {return ::u01_open_open_32_24(i);}
@@ -165,28 +200,40 @@ class UniformRealDistribution
     static float u01(uint32_t i, Closed, Closed, u32, f24)
     {return ::u01_closed_closed_32_24(i);}
 
-    static float u01(uint32_t i, Open, Open, u32, f53)
+    static double u01(uint32_t i, Open, Open, u32, f53)
     {return ::u01_open_open_32_53(i);}
 
-    static float u01(uint32_t i, Open, Closed, u32, f53)
+    static double u01(uint32_t i, Open, Closed, u32, f53)
     {return ::u01_open_closed_32_53(i);}
 
-    static float u01(uint32_t i, Closed, Open, u32, f53)
+    static double u01(uint32_t i, Closed, Open, u32, f53)
     {return ::u01_closed_open_32_53(i);}
 
-    static float u01(uint32_t i, Closed, Closed, u32, f53)
+    static double u01(uint32_t i, Closed, Closed, u32, f53)
     {return ::u01_closed_closed_32_53(i);}
 
-    static float u01(uint64_t i, Open, Open, u64, f53)
+    static float u01(uint64_t i, Open, Open, u64, f24)
     {return ::u01_open_open_64_53(i);}
 
-    static float u01(uint64_t i, Open, Closed, u64, f53)
+    static float u01(uint64_t i, Open, Closed, u64, f24)
     {return ::u01_open_closed_64_53(i);}
 
-    static float u01(uint64_t i, Closed, Open, u64, f53)
+    static float u01(uint64_t i, Closed, Open, u64, f24)
     {return ::u01_closed_open_64_53(i);}
 
-    static float u01(uint64_t i, Closed, Closed, u64, f53)
+    static float u01(uint64_t i, Closed, Closed, u64, f24)
+    {return ::u01_closed_closed_64_53(i);}
+
+    static double u01(uint64_t i, Open, Open, u64, f53)
+    {return ::u01_open_open_64_53(i);}
+
+    static double u01(uint64_t i, Open, Closed, u64, f53)
+    {return ::u01_open_closed_64_53(i);}
+
+    static double u01(uint64_t i, Closed, Open, u64, f53)
+    {return ::u01_closed_open_64_53(i);}
+
+    static double u01(uint64_t i, Closed, Closed, u64, f53)
     {return ::u01_closed_closed_64_53(i);}
 }; // class UniformRealDistributionBase
 

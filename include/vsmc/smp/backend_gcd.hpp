@@ -2,7 +2,7 @@
 #define VSMC_SMP_BACKEND_GCD_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-#include <vsmc/smp/internal/dispatch.hpp>
+#include <vsmc/smp/internal/gcd_wrapper.hpp>
 
 namespace vsmc {
 
