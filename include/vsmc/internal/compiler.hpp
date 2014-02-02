@@ -252,6 +252,12 @@
 #define VSMC_HAS_CXX11LIB_RANDOM 0
 #endif
 
+/// \brief C++11 `<random>` RNG support constexpr min/max
+/// \ingroup Compiler
+#ifndef VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
+#define VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX 0
+#endif
+
 /// \brief C++11 `<thread>`
 #ifndef VSMC_HAS_CXX11LIB_THREAD
 #define VSMC_HAS_CXX11LIB_THREAD 0
