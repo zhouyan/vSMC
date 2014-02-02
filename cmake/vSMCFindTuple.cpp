@@ -1,12 +1,26 @@
 #include <vsmc/utility/tuple_manip.hpp>
-#include <vsmc/internal/traits.hpp>
 
-#include <cassert>
+template <typename VecType, typename TpType>
+inline void assign_vec (VecType &vec, const TpType &tp, vsmc::Position<0>)
+{
+    std::get<0>(vec).push_back(std::get<0>(tp));
+}
 
-namespace temp_ns {
+template <typename VecType, typename TpType, std::size_t Pos>
+inline void assign_vec (VecType &vec, const TpType &tp, vsmc::Position<Pos>)
+{
+    std::get<Pos>(vec).push_back(std::get<Pos>(tp));
+    assign_vec(vec, tp, vsmc::Position<Pos - 1>());
+}
 
-VSMC_DEFINE_TUPLE_APPLY(Vector, std::vector)
+template <typename... Types>
+inline std::tuple<std::vector<Types>...> create_vec (
+        const std::tuple<Types...> &tp)
+{
+    std::tuple<std::vector<Types>...> vec;
+    assign_vec(vec, tp, vsmc::Position<sizeof...(Types) - 1>());
 
+    return vec;
 }
 
 int main ()
@@ -141,12 +155,21 @@ int main ()
     }
 
     {
-        typedef temp_ns::TupleApplyVector<full>::type tc;
-        assert((is_same<tc, std::tuple<
-                    std::vector<char>,
-                    std::vector<short>,
-                    std::vector<int>,
-                    std::vector<long> > >::value));
+        full tp;
+        std::get<0>(tp) = 0;
+        std::get<1>(tp) = 1;
+        std::get<2>(tp) = 2;
+        std::get<3>(tp) = 3;
+        std::tuple<
+            std::vector<char>,
+            std::vector<short>,
+            std::vector<int>,
+            std::vector<long>
+                > vec = create_vec(tp);
+        assert((std::get<0>(tp) == std::get<0>(vec)[0]));
+        assert((std::get<1>(tp) == std::get<1>(vec)[0]));
+        assert((std::get<2>(tp) == std::get<2>(vec)[0]));
+        assert((std::get<3>(tp) == std::get<3>(vec)[0]));
     }
 
     return 0;
