@@ -202,16 +202,16 @@ class UniformRealDistribution
     {return ::u01_closed_closed_32_53(i);}
 
     static float u01(uint64_t i, Open, Open, u64, f24)
-    {return ::u01_open_open_64_53(i);}
+    {return static_cast<float>(::u01_open_open_64_53(i));}
 
     static float u01(uint64_t i, Open, Closed, u64, f24)
-    {return ::u01_open_closed_64_53(i);}
+    {return static_cast<float>(::u01_open_closed_64_53(i));}
 
     static float u01(uint64_t i, Closed, Open, u64, f24)
-    {return ::u01_closed_open_64_53(i);}
+    {return static_cast<float>(::u01_closed_open_64_53(i));}
 
     static float u01(uint64_t i, Closed, Closed, u64, f24)
-    {return ::u01_closed_closed_64_53(i);}
+    {return static_cast<float>(::u01_closed_closed_64_53(i));}
 
     static double u01(uint64_t i, Open, Open, u64, f53)
     {return ::u01_open_open_64_53(i);}
@@ -269,6 +269,7 @@ inline std::basic_istream<CharT, Traits> &operator>> (
 {
     typedef typename UniformRealDistribution<FPType, Left, Right>::param_type
         param_type;
+
     FPType a;
     FPType b;
     if (is >> a >> std::ws >> b) {
