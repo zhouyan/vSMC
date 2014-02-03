@@ -11,12 +11,14 @@
 #else
   #ifdef __cplusplus
     #define VSMC_STATIC_INLINE inline
+    #include <cmath>
   #else
     #if defined(__STDC_VERSION__) && __STDC_VERSION__ > 199901L
       #define VSMC_STATIC_INLINE static inline
     #else
       #error Define VSMC_STATIC_INLINE first
     #endif
+    #include <math.h>
   #endif
 #endif
 #endif // VSMC_STATIC_INLINE
