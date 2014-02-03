@@ -19,12 +19,12 @@ class DummyStopWatch
     void stop  () const {running_ = false;}
     void reset () const {running_ = false;}
 
-    double nanoseconds  () const {return 0;}
-    double microseconds () const {return 0;}
-    double milliseconds () const {return 0;}
-    double seconds      () const {return 0;}
-    double minutes      () const {return 0;}
-    double hours        () const {return 0;}
+    double nanoseconds  () const {return 1;}
+    double microseconds () const {return 1e-3;}
+    double milliseconds () const {return 1e-6;}
+    double seconds      () const {return 1e-9;}
+    double minutes      () const {return 1e-9 / 60;}
+    double hours        () const {return 1e-9 / 3600;}
 
     DummyStopWatch &operator+= (const DummyStopWatch &other) {return *this;}
     DummyStopWatch operator+ (const DummyStopWatch &other) const {return *this;}
