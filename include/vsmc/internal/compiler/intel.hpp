@@ -224,13 +224,19 @@
 #endif
 #endif
 
+#if __INTEL_COMPILER >= VSMC_INTEL_NONEXIST
+#ifndef VSMC_HAS_CXX11LIB_CMATH
+#define VSMC_HAS_CXX11LIB_CMATH 1
+#endif
+#endif
+
 #if __INTEL_COMPILER >= 1400 && VSMC_GNUC_VERSION >= 40700
 #ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_HAS_CXX11LIB_FUNCTIONAL 1
 #endif
 #endif
 
-#if __INTEL_COMPILER >= 1400 && VSMC_GNUC_VERSION >= 40700
+#if __INTEL_COMPILER >= VSMC_INTEL_NONEXIST
 #ifndef VSMC_HAS_CXX11LIB_FUTURE
 #define VSMC_HAS_CXX11LIB_FUTURE 0
 #endif
@@ -269,5 +275,11 @@
 #endif // defined(__GNUC__) && defined(__GNUC_MINOR__)
 
 #endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
+
+// C99 library features
+
+#ifndef VSMC_HAS_C99LIB_MATH
+#define VSMC_HAS_C99LIB_MATH 1
+#endif
 
 #endif // VSMC_INTERNAL_COMPILER_INTEL_HPP

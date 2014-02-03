@@ -217,6 +217,12 @@
 #endif
 #endif
 
+#if _MSC_VER >= 1800
+#ifndef VSMC_HAS_CXX11LIB_CMATH
+#define VSMC_HAS_CXX11LIB_CMATH 1
+#endif
+#endif
+
 #if _MSC_VER >= 1700
 #ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_HAS_CXX11LIB_FUNCTIONAL 1
@@ -256,6 +262,14 @@
 #if _MSC_VER >= 1800
 #ifndef VSMC_HAS_CXX11LIB_TUPLE
 #define VSMC_HAS_CXX11LIB_TUPLE 1
+#endif
+#endif
+
+// C99 library features
+
+#if _MSC_VER >= 1800
+#ifndef VSMC_HAS_C99LIB_MATH
+#define VSMC_HAS_C99LIB_MATH 1
 #endif
 #endif
 

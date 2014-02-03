@@ -222,6 +222,12 @@
 #endif
 
 #if VSMC_GNUC_VERSION >= 40700
+#ifndef VSMC_HAS_CXX11LIB_CMATH
+#define VSMC_HAS_CXX11LIB_CMATH 1
+#endif
+#endif
+
+#if VSMC_GNUC_VERSION >= 40700
 #ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_HAS_CXX11LIB_FUNCTIONAL 1
 #endif
@@ -264,5 +270,11 @@
 #endif
 
 #endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
+
+// C99 library features
+
+#ifndef VSMC_HAS_C99LIB_MATH
+#define VSMC_HAS_C99LIB_MATH 1
+#endif
 
 #endif // VSMC_INTERNAL_COMPILER_GCC_HPP

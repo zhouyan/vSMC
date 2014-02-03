@@ -231,6 +231,12 @@
 #define VSMC_HAS_CXX11LIB_CHRONO 0
 #endif
 
+/// \brief C++11 `<cmath>` (special functions)
+/// \ingroup Compiler
+#ifndef VSMC_HAS_CXX11LIB_CMATH
+#define VSMC_HAS_CXX11LIB_CMATH 0
+#endif
+
 /// \brief C++11 `<functional>` (std::function)
 /// \ingroup Compiler
 #ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
@@ -261,13 +267,23 @@
 #endif
 
 /// \brief C++11 `<thread>`
+/// \ingroup Compiler
 #ifndef VSMC_HAS_CXX11LIB_THREAD
 #define VSMC_HAS_CXX11LIB_THREAD 0
 #endif
 
 /// \brief C++11 `<tuple>`
+/// \ingroup Compiler
 #ifndef VSMC_HAS_CXX11LIB_TUPLE
 #define VSMC_HAS_CXX11LIB_TUPLE 0
+#endif
+
+// C99 library features
+
+/// \brief C99 `<math.h>` (special functions)
+/// \ingroup Compiler
+#ifndef VSMC_HAS_C99LIB_MATH
+#define VSMC_HAS_C99LIB_MATH 0
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

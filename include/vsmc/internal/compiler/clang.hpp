@@ -222,6 +222,12 @@
 #endif
 
 #if _LIBCPP_VERSION >= 1101
+#ifndef VSMC_HAS_CXX11LIB_CMATH
+#define VSMC_HAS_CXX11LIB_CMATH 1
+#endif
+#endif
+
+#if _LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_HAS_CXX11LIB_FUNCTIONAL 1
 #endif
@@ -266,5 +272,11 @@
 #endif // defined(_LIBCPP_VERSION)
 
 #endif // __cplusplus >= 201103L
+
+// C99 library features
+
+#ifndef VSMC_HAS_C99LIB_MATH
+#define VSMC_HAS_C99LIB_MATH 1
+#endif
 
 #endif // VSMC_INTERNAL_COMPILER_CLANG_HPP
