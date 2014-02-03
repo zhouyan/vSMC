@@ -109,7 +109,7 @@ inline void cl_print_build_log (cl::Program &program)
 
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
-inline void cl_set_kernel_args (cl::Kernel &, std::size_t) {}
+inline void cl_set_kernel_args (cl::Kernel &, cl_uint) {}
 
 /// \brief Set OpenCL kernel arguments
 /// \ingroup OpenCL
@@ -120,7 +120,7 @@ inline void cl_set_kernel_args (cl::Kernel &, std::size_t) {}
 /// variadic template, there can be arbitrary number of arguments.
 /// Otherwise this function supports up to 16 arguments.
 template <typename Arg1, typename... Args>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Args &...args)
 {
     kern.setArg(offset, arg1);
@@ -130,14 +130,14 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 #else // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
 template <typename Arg1>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1)
 {
     kern.setArg(offset, arg1);
 }
 
 template <typename Arg1, typename Arg2>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2)
 {
     kern.setArg(offset, arg1);
@@ -145,7 +145,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 }
 
 template <typename Arg1, typename Arg2, typename Arg3>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
             const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3)
 {
     kern.setArg(offset, arg1);
@@ -153,7 +153,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 }
 
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4)
 {
@@ -163,7 +163,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
     typename Arg5>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5)
 {
@@ -173,7 +173,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
     typename Arg5, typename Arg6>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6)
 {
@@ -183,7 +183,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
     typename Arg5, typename Arg6, typename Arg7>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7)
@@ -195,7 +195,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
     typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8)
@@ -208,7 +208,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5, typename Arg6, typename Arg7, typename Arg8,
     typename Arg9>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9)
@@ -221,7 +221,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5, typename Arg6, typename Arg7, typename Arg8,
     typename Arg9, typename Arg10>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
@@ -235,7 +235,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5, typename Arg6, typename Arg7, typename Arg8,
     typename Arg9, typename Arg10, typename Arg11>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
@@ -249,7 +249,7 @@ inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
 template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5, typename Arg6, typename Arg7, typename Arg8,
     typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
@@ -264,7 +264,7 @@ template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5, typename Arg6, typename Arg7, typename Arg8,
          typename Arg9, typename Arg10, typename Arg11, typename Arg12,
     typename Arg13>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
@@ -280,7 +280,7 @@ template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5, typename Arg6, typename Arg7, typename Arg8,
          typename Arg9, typename Arg10, typename Arg11, typename Arg12,
     typename Arg13, typename Arg14>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
@@ -296,7 +296,7 @@ template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5, typename Arg6, typename Arg7, typename Arg8,
          typename Arg9, typename Arg10, typename Arg11, typename Arg12,
     typename Arg13, typename Arg14, typename Arg15>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
@@ -312,7 +312,7 @@ template <typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5, typename Arg6, typename Arg7, typename Arg8,
          typename Arg9, typename Arg10, typename Arg11, typename Arg12,
     typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline void cl_set_kernel_args (cl::Kernel &kern, std::size_t offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3,
         const Arg4 &arg4, const Arg5 &arg5, const Arg6 &arg6,
         const Arg7 &arg7, const Arg8 &arg8, const Arg9 &arg9,
