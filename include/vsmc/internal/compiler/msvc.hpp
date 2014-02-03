@@ -235,7 +235,7 @@
 #endif
 #endif
 
-#if _MSC_VER >= VSMC_MSVC_NONEXIST
+#if _MSC_VER >= 1700
 #ifndef VSMC_HAS_CXX11LIB_RANDOM
 #define VSMC_HAS_CXX11LIB_RANDOM 1
 #endif
