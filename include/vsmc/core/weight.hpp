@@ -315,10 +315,17 @@ class WeightSet
     template <typename URNG>
     size_type draw (URNG &eng) const
     {
-        cxx11::discrete_distribution<size_type>
-            rsample(weight_.begin(), weight_.end());
+        cxx11::uniform_real_distribution<double> runif(0, 1);
+        double u = runif(eng);
+        size_type i = 0;
+        const double *w = &weight_[0];
+        double sum = w[0];
+        while (sum < u) {
+            ++i;
+            sum += w[i];
+        }
 
-        return rsample(eng);
+        return i;
     }
 
     protected :
