@@ -40,7 +40,7 @@
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
 
-/// \defgroup Cilk Intel Cilk Plus
+/// \defgroup CILK Intel Cilk Plus
 /// \ingroup SMP
 /// \brief Parallel samplers using Intel Cilk Plus
 
