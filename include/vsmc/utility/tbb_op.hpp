@@ -286,22 +286,16 @@ template <typename T> inline const T &min_fn (const T &a, const T &b)
 {return std::min VSMC_MACRO_NO_EXPANSION (a, b);}
 
 template <typename T> struct positive_infinity_trait
-{
-    static VSMC_CONSTEXPR T value ()
-    {return std::numeric_limits<T>::infinity();}
-};
+{static T value () {return std::numeric_limits<T>::infinity();}};
 
 template <typename T> struct negative_infinity_trait
-{
-    static VSMC_CONSTEXPR T value ()
-    {return -std::numeric_limits<T>::infinity();}
-};
+{static T value () {return -std::numeric_limits<T>::infinity();}};
 
 template <typename T> struct zero_trait
-{static VSMC_CONSTEXPR T value () {return static_cast<T>(0);}};
+{static T value () {return static_cast<T>(0);}};
 
 template <typename T> struct one_trait
-{static VSMC_CONSTEXPR T value () {return static_cast<T>(1);}};
+{static T value () {return static_cast<T>(1);}};
 
 template <typename T>
 class square_sum
