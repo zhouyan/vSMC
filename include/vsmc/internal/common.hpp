@@ -11,6 +11,8 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
+#include <vsmc/math/constants.hpp>
+
 #include <cassert>
 #include <cmath>
 #include <cstddef>

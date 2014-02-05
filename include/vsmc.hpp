@@ -68,6 +68,13 @@
 /// \ingroup SMP
 /// \brief Parallel samplers using Intel TBB
 
+/// \defgroup Math Mathematics
+/// \brief Mathematical utilities
+
+/// \defgroup Constants Constants
+/// \ingroup Math
+/// \brief Mathematical constants
+
 /// \defgroup RNG Random number generating
 /// \brief Utilities for managing RNG engines
 
