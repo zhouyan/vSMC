@@ -21,11 +21,11 @@ template <typename> class NIntegrate##Name;
 namespace vsmc {
 
 // Placeholders
-struct Virtual {};
-struct NullType {};
-struct ScalarRng {};
-struct VectorRng {};
-struct ThreadLocalRng {};
+struct Virtual;
+struct NullType;
+struct ScalarRng;
+struct VectorRng;
+struct ThreadLocalRng;
 struct Open {};
 struct Closed {};
 
@@ -47,12 +47,6 @@ class DispatchQueue;
 template <typename> class BlockedRange;
 class ThreadGuard;
 class ThreadInfo;
-
-// OpenCL
-struct CLDefault;
-class CLConfigure;
-class CLQuery;
-template <typename> class CLManager;
 
 // Adapter
 template <typename, typename, typename> class InitializeAdapterBase;
@@ -86,6 +80,11 @@ template <typename> class ConstSingleParticle;
 template <typename> class ConstSingleParticleBase;
 
 // OpenCL
+struct CLDefault;
+class CLConfigure;
+class CLQuery;
+template <typename> class CLSetup;
+template <typename> class CLManager;
 template <std::size_t, typename, typename ID = CLDefault> class StateCL;
 template <typename, typename B = NullType> class InitializeCL;
 template <typename, typename B = NullType> class MoveCL;

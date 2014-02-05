@@ -140,100 +140,6 @@ template <typename T, typename V> struct Outer##Trait                        \
     typedef typename Outer##Dispatch<T, V, value>::type type;                \
 };
 
-/// \brief Define member function checker
-/// \ingroup Traits
-///
-/// \details This macro define a class template
-/// \code
-/// template <typename T> struct HasOuter
-/// \endcode
-/// which is derived from `vsmc::cxx11::true_type` if a non-static member
-/// function of the form
-/// \code
-/// RT Inner Args
-/// \endcode
-/// exists. Otherwise it is derived from `vsmc::cxx11::false_type`. The
-/// function arguments `Args` need to be enclosed by parenthesis.
-///
-/// **Example**
-/// \code
-/// VSMC_DEFINE_MF_CHECKER(State, state, double, (std::size_t))
-///
-/// struct Empty {};
-/// struct Value {double state (std::size_t i) {return /* something */;}};
-///
-/// HasState<Empty>::value; // false
-/// HasState<Empty>::type;  // false_type
-/// HasState<Value>::value; // true
-/// HasState<Value>::type;  // true_type
-/// \endcode
-#define VSMC_DEFINE_MF_CHECKER(Outer, Inner, RT, Args)                       \
-template <typename T>                                                        \
-struct Has##Outer##Impl                                                      \
-{                                                                            \
-    private :                                                                \
-                                                                             \
-    struct char2 {char c1; char c2;};                                        \
-    template <typename U, RT (U::*) Args> struct sfinae_;                    \
-    template <typename U> static char test (sfinae_<U, &U::Inner> *);        \
-    template <typename U> static char2 test (...);                           \
-                                                                             \
-    public :                                                                 \
-                                                                             \
-    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
-};                                                                           \
-                                                                             \
-template <typename T>                                                        \
-struct Has##Outer :                                                          \
-    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};
-
-/// \brief Define static member function checker
-/// \ingroup Traits
-///
-/// \details This macro define a class template
-/// \code
-/// template <typename T> struct HasStaticOuter
-/// \endcode
-/// which is derived from `vsmc::cxx11::true_type` if a static member function
-/// of the form
-/// \code
-/// RT Inner Args
-/// \endcode
-/// exists. Otherwise it is derived from `vsmc::cxx11::false_type`. The
-/// function arguments `Args` need to be enclosed by parenthesis.
-///
-/// **Example**
-/// \code
-/// VSMC_DEFINE_STATIC_MF_CHECKER(Dim, dim, int, (int))
-///
-/// struct Empty {};
-/// struct Value {static int dim (int) {return /* something */;}};
-///
-/// HasStaticDim<Empty>::value; // false
-/// HasStaticDim<Empty>::type;  // false_type
-/// HasStaticDim<Value>::value; // true
-/// HasStaticDim<Value>::type;  // true_type
-/// \endcode
-#define VSMC_DEFINE_STATIC_MF_CHECKER(Outer, Inner, RT, Args)                \
-template <typename T>                                                        \
-struct HasStatic##Outer##Impl                                                \
-{                                                                            \
-    private :                                                                \
-                                                                             \
-    struct char2 {char c1; char c2;};                                        \
-    template <typename U, RT (*) Args> struct sfinae_;                       \
-    template <typename U> static char test (sfinae_<U, &U::Inner> *);        \
-    template <typename U> static char2 test (...);                           \
-                                                                             \
-    public :                                                                 \
-                                                                             \
-    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
-};                                                                           \
-                                                                             \
-template <typename T>                                                        \
-struct HasStatic##Outer :                                                    \
-    public cxx11::integral_constant<bool, HasStatic##Outer##Impl<T>::value>{};
-
 #define VSMC_DEFINE_SMP_MF_CHECKER(name, RT, Args)                           \
 template <typename U>                                                        \
 struct has_##name##_non_static_                                              \
@@ -282,20 +188,11 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleCopyFromReplicationType,
         resample_copy_from_replication_type, ResampleCopyFromReplication)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResamplePostCopyType,
         resample_post_copy_type, ResamplePostCopy)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(OpenCLDeviceType,
-        opencl_device_type, cxx11::false_type)
 
 VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleBaseType,
         single_particle_type, SingleParticleBase)
 VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
         const_single_particle_type, ConstSingleParticleBase)
-
-VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLPlatform, check_opencl_platform,
-        bool, (const std::string &))
-VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDevice, check_opencl_device,
-        bool, (const std::string &))
-VSMC_DEFINE_STATIC_MF_CHECKER(CheckOpenCLDeviceVendor,
-        check_opencl_device_vendor, bool, (const std::string &))
 
 #if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 template <typename T> struct OMPSizeTypeTrait {typedef T type;};
@@ -349,54 +246,6 @@ struct IsDerivedFromStateCLImpl
 template <typename D>
 struct IsDerivedFromStateCL :
     public cxx11::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
-
-template <typename ID, bool>
-struct CheckOpenCLPlatformDispatch
-{static bool check (const std::string &name) {return true;}};
-
-template <typename ID>
-struct CheckOpenCLPlatformDispatch<ID, true>
-{
-    static bool check (const std::string &name)
-    {return ID::check_opencl_platform(name);}
-};
-
-template <typename ID, bool>
-struct CheckOpenCLDeviceDispatch
-{static bool check (const std::string &name) {return true;}};
-
-template <typename ID>
-struct CheckOpenCLDeviceDispatch<ID, true>
-{
-    static bool check (const std::string &name)
-    {return ID::check_opencl_device(name);}
-};
-
-template <typename ID, bool>
-struct CheckOpenCLDeviceVendorDispatch
-{static bool check (const std::string &name) {return true;}};
-
-template <typename ID>
-struct CheckOpenCLDeviceVendorDispatch<ID, true>
-{
-    static bool check (const std::string &name)
-    {return ID::check_opencl_device_vendor(name);}
-};
-
-template <typename ID>
-struct CheckOpenCLPlatformTrait :
-    public CheckOpenCLPlatformDispatch<
-    ID, HasStaticCheckOpenCLPlatform<ID>::value> {};
-
-template <typename ID>
-struct CheckOpenCLDeviceTrait :
-    public CheckOpenCLDeviceDispatch<
-    ID, HasStaticCheckOpenCLDevice<ID>::value> {};
-
-template <typename ID>
-struct CheckOpenCLDeviceVendorTrait :
-    public CheckOpenCLDeviceVendorDispatch<
-    ID, HasStaticCheckOpenCLDeviceVendor<ID>::value> {};
 
 template <typename T>
 struct SingleParticleTypeTrait :

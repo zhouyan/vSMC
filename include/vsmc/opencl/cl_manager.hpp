@@ -27,16 +27,88 @@
 
 namespace vsmc {
 
-struct CLDefault
+/// \brief Configure the default behavior of CLManager
+/// \ingroup OpenCL
+template <typename ID>
+class CLSetup
 {
-    typedef cxx11::integral_constant<cl_device_type, CL_DEVICE_TYPE_DEFAULT>
-        opencl_device_type;
+    public :
 
-    static bool check_opencl_platform (const std::string &) {return true;}
+    static CLSetup<ID> &instance ()
+    {
+        static CLSetup<ID> config;
 
-    static bool check_opencl_device (const std::string &) {return true;}
+        return config;
+    }
 
-    static bool check_opencl_device_vendor (const std::string &) {return true;}
+    /// \brief Default string value of the device, vendor, platform names
+    const std::string &default_name () const {return default_;}
+
+    /// \brief Set the device type using a string value
+    ///
+    /// \details
+    /// \param name One of "GPU", "CPU", "Accelerator". Other values are
+    /// treated as setting the default device type
+    /// \return false if the default value is using, otherwise true
+    void device_type (const std::string &name)
+    {
+        if (name == std::string("CPU"))
+            device_type(CL_DEVICE_TYPE_CPU);
+        else if (name == std::string("GPU"))
+            device_type(CL_DEVICE_TYPE_GPU);
+        else if (name == std::string("Accelerator"))
+            device_type(CL_DEVICE_TYPE_ACCELERATOR);
+        else
+            device_type(CL_DEVICE_TYPE_DEFAULT);
+    }
+
+    void device_type   (cl_device_type type)     {device_type_   = type;}
+    void device        (const std::string &name) {device_        = name;}
+    void device_vendor (const std::string &name) {device_vendor_ = name;}
+    void platform      (const std::string &name) {platform_      = name;}
+
+    cl_device_type device_type       () const {return device_type_;}
+    const std::string &device        () const {return device_;}
+    const std::string &device_vendor () const {return device_vendor_;}
+    const std::string &platform      () const {return platform_;}
+
+    bool default_device_type () const
+    {return device_type_ == CL_DEVICE_TYPE_DEFAULT;}
+
+    bool default_device        () const {return default_ == device_;}
+    bool default_device_vendor () const {return default_ == device_vendor_;}
+    bool default_platform      () const {return default_ == platform_;}
+
+    bool check_device (const std::string &name) const
+    {return check_name(name, device_);}
+
+    bool check_device_vendor (const std::string &name) const
+    {return check_name(name, device_vendor_);}
+
+    bool check_platform (const std::string &name) const
+    {return check_name(name, platform_);}
+
+    private :
+
+    cl_device_type device_type_;
+    std::string default_;
+    std::string device_;
+    std::string device_vendor_;
+    std::string platform_;
+
+    CLSetup () :
+        device_type_(CL_DEVICE_TYPE_DEFAULT), default_("vSMCOpenCLDefault"),
+        device_(default_), device_vendor_(default_), platform_(default_) {}
+
+    CLSetup (const CLSetup<ID> &);
+    CLSetup<ID> &operator= (const CLSetup<ID> &);
+
+    bool check_name (const std::string &name, const std::string &stored) const
+    {
+        if (stored == default_)
+            return true;
+        return name.find(stored) != std::string::npos;
+    }
 };
 
 /// \brief OpenCL Manager
@@ -315,6 +387,7 @@ class CLManager
 
     private :
 
+
     cl::Platform platform_;
     cl::Context context_;
     cl::Device device_;
@@ -322,6 +395,7 @@ class CLManager
     cl::CommandQueue command_queue_;
 
     bool setup_;
+    CLSetup<ID> &setup_default_;
 
     mutable std::size_t read_buffer_pool_bytes_;
     mutable std::size_t write_buffer_pool_bytes_;
@@ -329,14 +403,10 @@ class CLManager
     mutable void *write_buffer_pool_;
 
     CLManager () :
-        setup_(false), read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
+        setup_(false), setup_default_(CLSetup<ID>::instance()),
+        read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
         read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR)
-    {
-        cl_device_type dev = traits::OpenCLDeviceTypeTrait<ID>::value ?
-            traits::OpenCLDeviceTypeTrait<ID>::type::value :
-            CLDefault::opencl_device_type::value;
-        setup_cl_manager(dev);
-    }
+    {setup_cl_manager(setup_default_.device_type());}
 
     CLManager (const CLManager<ID> &);
     CLManager<ID> &operator= (const CLManager<ID> &);
@@ -396,21 +466,23 @@ class CLManager
         if (platform_vec.size() == 0)
             return false;
 
-        if (traits::HasStaticCheckOpenCLPlatform<ID>::value) {
-            try {
-                for (std::size_t p = 0; p != platform_vec.size(); ++p) {
+        // If not using default platform
+        if (!setup_default_.default_platform()) {
+            for (std::size_t p = 0; p != platform_vec.size(); ++p) {
+                try {
                     std::string name;
                     platform_vec[p].getInfo(CL_PLATFORM_NAME, &name);
-                    if (traits::CheckOpenCLPlatformTrait<ID>::check(name)) {
+                    if (setup_default_.check_platform(name)) {
                         platform_ = platform_vec[p];
                         return true;
                     }
-                }
-            } catch (cl::Error) {}
+                } catch (cl::Error) {}
+            }
         }
 
-        try {
-            for (std::size_t p = 0; p != platform_vec.size(); ++p) {
+        // Using default platform: finding the first that has the device type
+        for (std::size_t p = 0; p != platform_vec.size(); ++p) {
+            try {
                 std::vector<cl::Device> dev_pool;
                 std::vector<cl::Device> dev_select;
                 platform_vec[p].getDevices(dev_type, &dev_pool);
@@ -419,8 +491,8 @@ class CLManager
                     platform_ = platform_vec[p];
                     return true;
                 }
-            }
-        } catch (cl::Error) {}
+            } catch (cl::Error) {}
+        }
 
         return false;
     }
@@ -430,12 +502,13 @@ class CLManager
     {
         std::vector<bool> dev_select_idx(dev_pool.size(), true);
 
-        if (traits::HasStaticCheckOpenCLDeviceVendor<ID>::value) {
+        // Not using the default device vendor
+        if (!setup_default_.default_device_vendor()) {
             for (std::size_t d = 0; d != dev_pool.size(); ++d) {
                 try {
                     std::string str;
                     dev_pool[d].getInfo(CL_DEVICE_VENDOR, &str);
-                    if (!traits::CheckOpenCLDeviceVendorTrait<ID>::check(str))
+                    if (!setup_default_.check_device_vendor(str))
                         dev_select_idx[d] = false;
                 } catch (cl::Error) {
                     dev_select_idx[d] = false;
@@ -443,12 +516,13 @@ class CLManager
             }
         }
 
-        if (traits::HasStaticCheckOpenCLDevice<ID>::value) {
+        // Not using the default device
+        if (!setup_default_.default_device()) {
             for (std::size_t d = 0; d != dev_pool.size(); ++d) {
                 try {
                     std::string str;
                     dev_pool[d].getInfo(CL_DEVICE_NAME, &str);
-                    if (!traits::CheckOpenCLDeviceTrait<ID>::check(str))
+                    if (!setup_default_.check_device(str))
                         dev_select_idx[d] = false;
                 } catch (cl::Error) {
                     dev_select_idx[d] = false;
@@ -457,8 +531,11 @@ class CLManager
         }
 
         for (std::size_t d = 0; d != dev_pool.size(); ++d) {
-            if (dev_select_idx[d])
-                try {dev_select.push_back(dev_pool[d]);} catch (cl::Error) {}
+            if (dev_select_idx[d]) {
+                try {
+                    dev_select.push_back(dev_pool[d]);
+                } catch (cl::Error) {}
+            }
         }
     }
 
