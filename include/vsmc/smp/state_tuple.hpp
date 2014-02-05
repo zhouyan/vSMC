@@ -77,7 +77,7 @@ class StateTupleBase
         private :
 
         state_tuple_type data_;
-        static const std::size_t dim_ = sizeof...(Types) + 1;
+        static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
 
         template <typename Archive, std::size_t Pos>
         void serialize (Archive &ar, Position<Pos>)
@@ -206,7 +206,7 @@ class StateTupleBase
     private :
 
     size_type size_;
-    static const std::size_t dim_ = sizeof...(Types) + 1;
+    static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
 
     template <std::size_t Pos>
     void pack_particle (size_type id, state_pack_type &pack,
@@ -304,7 +304,7 @@ class StateTuple<RowMajor, T, Types...> :
 
     private :
 
-    static const std::size_t dim_ = sizeof...(Types) + 1;
+    static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
     std::vector<std::tuple<T, Types...> > state_;
 }; // StateTuple
 
@@ -361,7 +361,7 @@ class StateTuple<ColMajor, T, Types...> :
 
     private :
 
-    static const std::size_t dim_ = sizeof...(Types) + 1;
+    static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
     std::tuple<std::vector<T>, std::vector<Types>...> state_;
 
     template <std::size_t Pos>

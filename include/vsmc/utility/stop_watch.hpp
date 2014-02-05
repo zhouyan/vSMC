@@ -291,7 +291,7 @@ class StopWatch
     mutable uint64_t start_time_;
     mutable mach_timebase_info_data_t timebase_;
     mutable bool running_;
-    static const uint64_t ratio_ = 1000000000L; // 9 zero
+    static VSMC_CONSTEXPR const uint64_t ratio_ = 1000000000L; // 9 zero
 }; // class StopWatch
 
 } // namespace vsmc
@@ -405,7 +405,7 @@ class StopWatch
     mutable timespec elapsed_;
     mutable timespec start_time_;
     mutable bool running_;
-    static const long ratio_ = 1000000000L; // 9 zero
+    static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
 }; // class StopWatch
 
 } // namespace vsmc

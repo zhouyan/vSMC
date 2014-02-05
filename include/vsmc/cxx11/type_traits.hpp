@@ -17,7 +17,7 @@ namespace cxx11 {
 template <typename T, T v>
 struct integral_constant
 {
-    static const T value = v;
+    static VSMC_CONSTEXPR const T value = v;
     typedef T value_type;
     typedef integral_constant<T, v> type;
     VSMC_CONSTEXPR operator value_type () const {return value;}

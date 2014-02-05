@@ -156,13 +156,13 @@ inline void rng_error_check (MKL_INT int, const char *, const char *) {}
 namespace traits {
 
 template<MKL_INT> struct SeedTrait
-{static const MKL_UINT value = 101;};
+{static VSMC_CONSTEXPR const MKL_UINT value = 101;};
 
 template <> struct SeedTrait<VSL_BRNG_SOBOL>
-{static const MKL_UINT value = 10;};
+{static VSMC_CONSTEXPR const MKL_UINT value = 10;};
 
 template <> struct SeedTrait<VSL_BRNG_NIEDERR>
-{static const MKL_UINT value = 10;};
+{static VSMC_CONSTEXPR const MKL_UINT value = 10;};
 
 struct SkipAheadVSL
 {
@@ -506,8 +506,8 @@ class Engine
         runif_.reset();
     }
 
-    static const result_type _Min = 0;
-    static const result_type _Max = ~((result_type)0);
+    static VSMC_CONSTEXPR const result_type _Min = 0;
+    static VSMC_CONSTEXPR const result_type _Max = ~((result_type)0);
 
     static VSMC_CONSTEXPR result_type min VSMC_MACRO_NO_EXPANSION ()
     {return _Min;}

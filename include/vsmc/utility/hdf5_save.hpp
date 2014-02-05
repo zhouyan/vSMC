@@ -418,7 +418,7 @@ inline void hdf5_save_data_frame (std::size_t nrow,
         const std::tuple<InputIter, InputIters...> &first,
         SInputIter sfirst, bool append = false)
 {
-    static const std::size_t dim = sizeof...(InputIters) + 1;
+    static VSMC_CONSTEXPR const std::size_t dim = sizeof...(InputIters) + 1;
     internal::HDF5DataPtr<std::string> vnames;
     vnames.set(dim, sfirst);
     const std::string *sptr = vnames.get() + dim;
@@ -475,7 +475,7 @@ inline void hdf5_save (const StateTuple<RowMajor, T, Types...> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
 {
-    static const std::size_t dim = sizeof...(Types) + 1;
+    static VSMC_CONSTEXPR const std::size_t dim = sizeof...(Types) + 1;
     std::vector<std::string> vnames;
     vnames.reserve(dim);
     for (std::size_t i = 0; i != dim; ++i) {
@@ -504,7 +504,7 @@ inline void hdf5_save (const StateTuple<ColMajor, T, Types...> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
 {
-    static const std::size_t dim = sizeof...(Types) + 1;
+    static VSMC_CONSTEXPR const std::size_t dim = sizeof...(Types) + 1;
     std::vector<std::string> vnames;
     vnames.reserve(dim);
     for (std::size_t i = 0; i != dim; ++i) {

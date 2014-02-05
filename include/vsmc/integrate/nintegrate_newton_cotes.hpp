@@ -204,7 +204,7 @@ class NIntegrateNewtonCotes : public Impl<NIntegrateNewtonCotes<Degree, Impl> >
 
     private :
 
-    static const unsigned max_degree_ = 10;
+    static VSMC_CONSTEXPR const unsigned max_degree_ = 10;
     const double *coeff_;
 }; // class NIntegrateNewtonCotes
 

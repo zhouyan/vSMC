@@ -143,12 +143,12 @@ class UniformRealDistribution
         result_type u = u01(static_cast<eng_uint_t>(eng()), Left(), Right(),
                 u_bits(), fp_bits());
 #else // VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
-        static const uint64_t eng_min = static_cast<uint64_t>(
+        static VSMC_CONSTEXPR const uint64_t eng_min = static_cast<uint64_t>(
                 eng.min VSMC_MACRO_NO_EXPANSION ());
         VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min);
 
         result_type u = 0;
-        static const uint64_t eng_max = static_cast<uint64_t>(
+        static VSMC_CONSTEXPR const uint64_t eng_max = static_cast<uint64_t>(
                 eng.max VSMC_MACRO_NO_EXPANSION ());
         switch (eng_max) {
             case uint32_t_max_ :
@@ -173,8 +173,8 @@ class UniformRealDistribution
     result_type b_;
 
 #if !VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
-    static const uint64_t uint32_t_max_ = ~((uint32_t)0);
-    static const uint64_t uint64_t_max_ = ~((uint64_t)0);
+    static VSMC_CONSTEXPR const uint64_t uint32_t_max_ = ~((uint32_t)0);
+    static VSMC_CONSTEXPR const uint64_t uint64_t_max_ = ~((uint64_t)0);
 #endif
 
     static float u01(uint32_t i, Open, Open, u32, f24)
