@@ -498,6 +498,10 @@ class WeightSet
     }
 }; // class WeightSet
 
+namespace traits {
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet)
+} // namespace vsmc::traits
+
 } // namespace vsmc
 
 #endif // VSMC_CORE_WEIGHT_HPP

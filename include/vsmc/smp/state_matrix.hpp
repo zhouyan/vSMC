@@ -18,6 +18,8 @@
 
 namespace vsmc {
 
+template <MatrixOrder, std::size_t, typename> class StateMatrix;
+
 /// \brief Base type of StateTuple
 /// \ingroup SMP
 template <MatrixOrder Order, std::size_t Dim, typename T>

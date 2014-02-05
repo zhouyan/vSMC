@@ -7,6 +7,8 @@
 
 namespace vsmc {
 
+VSMC_DEFINE_SMP_FORWARD(TBB)
+
 /// \brief Particle::weight_set_type subtype using Intel Threading Building
 /// Blocks
 /// \ingroup TBB

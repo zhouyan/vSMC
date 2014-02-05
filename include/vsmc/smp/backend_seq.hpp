@@ -5,6 +5,8 @@
 
 namespace vsmc {
 
+VSMC_DEFINE_SMP_FORWARD(SEQ)
+
 /// \brief Particle::weight_set_type subtype
 /// \ingroup SEQ
 template <typename BaseState>

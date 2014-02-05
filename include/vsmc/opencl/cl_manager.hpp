@@ -27,6 +27,10 @@
 
 namespace vsmc {
 
+/// \brief Default CLManager ID
+/// \ingroup OpenCL
+struct CLDefault;
+
 /// \brief Configure the default behavior of CLManager
 /// \ingroup OpenCL
 template <typename ID>

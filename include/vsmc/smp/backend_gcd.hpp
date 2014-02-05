@@ -6,6 +6,8 @@
 
 namespace vsmc {
 
+VSMC_DEFINE_SMP_FORWARD(GCD)
+
 /// \brief Particle::weight_set_type subtype using Apple Grand Central Dispatch
 /// \ingroup GCD
 template <typename BaseState>

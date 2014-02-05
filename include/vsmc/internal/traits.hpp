@@ -183,16 +183,6 @@ namespace vsmc {
 namespace traits {
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleCopyFromReplicationType,
-        resample_copy_from_replication_type, ResampleCopyFromReplication)
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResamplePostCopyType,
-        resample_post_copy_type, ResamplePostCopy)
-
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleBaseType,
-        single_particle_type, SingleParticleBase)
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
-        const_single_particle_type, ConstSingleParticleBase)
 
 #if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 template <typename T> struct OMPSizeTypeTrait {typedef T type;};
@@ -226,34 +216,6 @@ class DimTrait<Dynamic>
 
     std::size_t dim_;
 };
-
-template <typename D>
-struct IsDerivedFromStateCLImpl
-{
-    private :
-
-    struct char2 {char c1; char c2;};
-
-    template <std::size_t Dim, typename T, typename ID>
-    static char test (const StateCL<Dim, T, ID> *);
-    static char2 test (...);
-
-    public :
-
-   enum {value = sizeof(test(static_cast<const D *>(0))) == sizeof(char)};
-};
-
-template <typename D>
-struct IsDerivedFromStateCL :
-    public cxx11::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
-
-template <typename T>
-struct SingleParticleTypeTrait :
-    public SingleParticleBaseTypeTrait<T, T> {};
-
-template <typename T>
-struct ConstSingleParticleTypeTrait :
-    public ConstSingleParticleBaseTypeTrait<T, T> {};
 
 } // namespace vsmc::traits
 

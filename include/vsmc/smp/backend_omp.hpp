@@ -6,6 +6,8 @@
 
 namespace vsmc {
 
+VSMC_DEFINE_SMP_FORWARD(OMP)
+
 /// \brief Particle::weight_set_type subtype using OpenMP
 /// \ingroup OMP
 template <typename BaseState>

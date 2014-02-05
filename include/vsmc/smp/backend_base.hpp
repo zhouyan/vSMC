@@ -4,6 +4,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight.hpp>
 #include <vsmc/core/normalizing_constant.hpp>
+#include <vsmc/core/single_particle.hpp>
 
 #define VSMC_DEFINE_SMP_IMPL_COPY_BASE(Impl, Name) \
 Name##Impl () {}                                                             \

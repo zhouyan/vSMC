@@ -5,13 +5,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
-        VSMC_DEFAULT_RESAMPLE_RNG_TYPE)
-
-} // namespace vsmc::traits
-
 namespace internal {
 
 // N: Number of weights
@@ -60,6 +53,10 @@ inline void normalize_replication (std::size_t N, IntType *replication)
 }
 
 } // namespace vsmc::internal
+
+/// \brief Resample forward decleration
+/// \ingroup Resample
+template <typename> class Resample;
 
 /// \brief Transform replication numbers to parent particle locations
 /// \ingroup Resample
@@ -113,6 +110,17 @@ class ResamplePostCopy
     void operator() (WeightSetType &weight_set) const
     {weight_set.set_equal_weight();}
 }; // class ResamplePostCopy
+
+namespace traits {
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
+        VSMC_DEFAULT_RESAMPLE_RNG_TYPE)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleCopyFromReplicationType,
+        resample_copy_from_replication_type, ResampleCopyFromReplication)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResamplePostCopyType,
+        resample_post_copy_type, ResamplePostCopy)
+
+} // namespace vsmc::traits
 
 } // namespace vsmc
 

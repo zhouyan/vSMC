@@ -29,6 +29,14 @@ struct IntegerRangeTypeTrait<0, ~((uint64_t)0)> {typedef uint64_t type;};
 
 } // namespace vsmc::traits
 
+/// \brief Parameter type for open interval
+/// \ingroup RNG
+struct Open {};
+
+/// \brief Parameter type for closed interval
+/// \ingroup RNG
+struct Closed {};
+
 /// \brief Uniform real distribution with variants open/closed variants
 /// \ingroup RNG
 ///

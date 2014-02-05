@@ -48,6 +48,35 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
 
 } // namespace vsmc::internal
 
+namespace traits {
+
+template <typename D>
+struct IsDerivedFromStateCLImpl
+{
+    private :
+
+    struct char2 {char c1; char c2;};
+
+    template <std::size_t Dim, typename T, typename ID>
+    static char test (const StateCL<Dim, T, ID> *);
+    static char2 test (...);
+
+    public :
+
+   enum {value = sizeof(test(static_cast<const D *>(0))) == sizeof(char)};
+};
+
+template <typename D>
+struct IsDerivedFromStateCL :
+    public cxx11::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
+
+} // namespace vsmc::traits
+
+template <typename, typename B = NullType> class InitializeCL;
+template <typename, typename B = NullType> class MoveCL;
+template <typename, typename B = NullType> class MonitorEvalCL;
+template <typename, typename B = NullType> class PathEvalCL;
+
 /// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
 /// \ingroup OpenCL
 class ConfigureCL

@@ -8,6 +8,8 @@
 
 namespace vsmc {
 
+VSMC_DEFINE_SMP_FORWARD(CILK)
+
 /// \brief Particle::weight_set_type subtype using Intel Cilk Plus
 /// \ingroup CILK
 template <typename BaseState>

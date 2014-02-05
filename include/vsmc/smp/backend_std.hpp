@@ -7,6 +7,8 @@
 
 namespace vsmc {
 
+VSMC_DEFINE_SMP_FORWARD(STD)
+
 /// \brief Particle::weight_set_type subtype using C++11 concurrency
 /// \ingroup STD
 template <typename BaseState>

@@ -6,6 +6,8 @@
 
 namespace vsmc {
 
+VSMC_DEFINE_SMP_FORWARD(PPL)
+
 /// \brief Particle::weight_set_type subtype using Parallel Pattern Library
 /// \ingroup PPL
 template <typename BaseState>

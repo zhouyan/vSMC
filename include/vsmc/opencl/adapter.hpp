@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/adapter.hpp>
+#include <vsmc/opencl/backend_cl.hpp>
 
 namespace vsmc {
 

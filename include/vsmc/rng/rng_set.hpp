@@ -25,13 +25,14 @@ namespace vsmc {
 
 namespace traits {
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
-        VSMC_DEFAULT_RNG_SET_TYPE)
-
 template <typename Rng>
 struct RngShift {void operator() (Rng &rng) const {}};
 
 } // namepsace vsmc::traits
+
+struct ScalarRng;
+struct VectorRng;
+template <typename, typename> class RngSet;
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
@@ -83,6 +84,8 @@ class RngSet<RngType, VectorRng>
 
 #if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 
+struct ThreadLocalRng;
+
 /// \brief Thread local RNG set
 /// \ingroup RNG
 template <typename RngType>
@@ -120,6 +123,11 @@ class RngSet<RngType, ThreadLocalRng>
 }; // class RngSet<RngType, ThreadLocalRng>
 
 #endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
+
+namespace traits {
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
+        VSMC_DEFAULT_RNG_SET_TYPE)
+} // namespace vsmc::traits
 
 } // namespace vsmc
 
