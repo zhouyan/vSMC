@@ -162,14 +162,14 @@ class vsmc::CLManager&lt; ID &gt;</h3>
 <div class="line"><span class="stringliteral">setup.device_name(&quot;</span>Iris<span class="stringliteral">&quot;);</span></div>
 <div class="line"><span class="stringliteral">CLManager&lt;CLDefault&gt; &amp;manager = CLManager&lt;CLDefault&gt;::instance();</span></div>
 </div><!-- fragment --><p> If compiled on a recent MacBook Pro (late 2013 model), then the Iris Pro GPU from Intel will be used. Note that in this case, actually specify </p>
-<div class="fragment"><div class="line">setup.device_type(<span class="stringliteral">&quot;GPU);</span></div>
-<div class="line"><span class="stringliteral">setup.device_name(&quot;</span>Iris<span class="stringliteral">&quot;)</span></div>
+<div class="fragment"><div class="line">setup.device_type(<span class="stringliteral">&quot;GPU&quot;</span>);</div>
+<div class="line">setup.device_name(<span class="stringliteral">&quot;Iris&quot;</span>)</div>
 </div><!-- fragment --><p> or </p>
-<div class="fragment"><div class="line">setup.device_type(<span class="stringliteral">&quot;GPU);</span></div>
-<div class="line"><span class="stringliteral">setup.device_vedor(&quot;</span>Intel<span class="stringliteral">&quot;)</span></div>
+<div class="fragment"><div class="line">setup.device_type(<span class="stringliteral">&quot;GPU&quot;</span>);</div>
+<div class="line">setup.device_vedor(<span class="stringliteral">&quot;Intel&quot;</span>)</div>
 </div><!-- fragment --><p> is enough. However, if one specify </p>
-<div class="fragment"><div class="line">setup.device_type(<span class="stringliteral">&quot;CPU);</span></div>
-<div class="line"><span class="stringliteral">setup.device_vedor(&quot;</span>NVIDIA<span class="stringliteral">&quot;)</span></div>
+<div class="fragment"><div class="line">setup.device_type(<span class="stringliteral">&quot;CPU&quot;</span>);</div>
+<div class="line">setup.device_vedor(<span class="stringliteral">&quot;NVIDIA&quot;</span>)</div>
 </div><!-- fragment --><p> Then the setup will fail, since there is no device with the specified combinations. Also note that, specification such as </p>
 <div class="fragment"><div class="line">setup.device_vendor(<span class="stringliteral">&quot;NVIDIA&quot;</span>)</div>
 </div><!-- fragment --><p> may not be enough to lead to successful setup. The default device type <code>CL_DEVICE_TYPE_DEFAULT</code> may not be GPU. To be safe, if one need to use <a class="el" href="classvsmc_1_1_c_l_setup.html" title="Configure the default behavior of CLManager. ">CLSetup</a>, at least specify the device type. It can be set through values of type <code>cl_device_type</code> or a string with values "GPU", "CPU", "Accelerator". Other string values are silently ignored and the default is used.</p>
