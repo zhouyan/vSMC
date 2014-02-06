@@ -2,6 +2,7 @@
 #define VSMC_CXX11_FUNCTIONAL_HPP
 
 #include <vsmc/internal/config.hpp>
+#include <vsmc/internal/defines.hpp>
 
 #if VSMC_HAS_CXX11LIB_FUNCTIONAL
 
