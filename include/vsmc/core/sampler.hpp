@@ -37,14 +37,14 @@ class Sampler
 
     explicit Sampler (size_type N,
             ResampleScheme scheme = Stratified,
-            double resample_threshold = 0.5) :
+            double resample_threshold = 0) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()), start_watch_(false)
     {resample_scheme(scheme);}
 
     explicit Sampler (size_type N,
             const resample_type &res_op,
-            double resample_threshold = 0.5) :
+            double resample_threshold = 0) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()), start_watch_(false)
     {resample_scheme(res_op);}
