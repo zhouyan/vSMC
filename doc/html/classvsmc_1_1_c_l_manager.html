@@ -166,9 +166,9 @@ class vsmc::CLManager&lt; ID &gt;</h3>
 </div><!-- fragment --><p> Similar to <code>check_opencl_platform</code> but for a given device name. If there are multiple OpenCL device for a given platform, then this can help to narrow down the selection further.</p>
 <div class="fragment"><div class="line"><span class="keyword">static</span> <span class="keywordtype">bool</span> ID::check_opencl_device_vendor (<span class="keyword">const</span> std::string &amp;name);</div>
 </div><!-- fragment --><p> Similar to <code>check_opencl_device</code> but only check the vendor of the device. If there are multiple OpenCL device for a given platform with a given type, then this can help to narrow down the selection further. Note that this check will only be performed if <code>check_opencl_device</code> is not present.</p>
-<p>Before using a <a class="el" href="classvsmc_1_1_c_l_manager.html" title="OpenCL Manager. ">CLManager</a>, it is important to check that <code><a class="el" href="classvsmc_1_1_c_l_manager.html#aad6358182bda186ffa3afaac9698d5c4" title="Get an instance of the manager singleton. ">CLManager::instance()</a>.<a class="el" href="classvsmc_1_1_c_l_manager.html#a5eda05068df8772d61fee36d89e02ad4" title="Whether the platform, context, device and command queue has been setup correctly. ...">setup()</a></code> returns <code>true</code>. Possible reasons of returning <code>false</code> include no OpenCL device found at all, or no device match the desired device type, or platform or device name is found. In this case, the user need to setup the <a class="el" href="classvsmc_1_1_c_l_manager.html" title="OpenCL Manager. ">CLManager</a> manually. </p>
+<p>Before using a <a class="el" href="classvsmc_1_1_c_l_manager.html" title="OpenCL Manager. ">CLManager</a>, it is important to check that <a class="el" href="classvsmc_1_1_c_l_manager.html#aad6358182bda186ffa3afaac9698d5c4" title="Get an instance of the manager singleton. ">CLManager::instance</a> returns <code>true</code>. Possible reasons of returning <code>false</code> include no OpenCL device found at all, or no device match the desired device type, or platform or device name is found. In this case, the user need to setup the <a class="el" href="classvsmc_1_1_c_l_manager.html" title="OpenCL Manager. ">CLManager</a> manually. If debug is enabled (no <code>-DNDEBUG</code>), then such situations will either cause termination of the program or raise an exception (if <code>VSMC_RUNTIME_ASSERT_AS_EXCEPTION</code> is non-zero). </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00176">176</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00178">178</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a595b2125f2181b56e6a34d18082ec9e4"></a>
 <div class="memitem">
@@ -195,7 +195,7 @@ template&lt;typename ID&gt; </div>
 
 <p>The command queue currently being used. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00201">201</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00203">203</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -224,7 +224,7 @@ template&lt;typename ID&gt; </div>
 
 <p>The context currently being used. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00192">192</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00194">194</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -272,7 +272,7 @@ template&lt;typename CLType &gt; </div>
 
 <p>Copy an OpenCL buffer into another of a given type and number of elements. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00377">377</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00379">379</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -304,7 +304,7 @@ template&lt;typename CLType &gt; </div>
 
 <p>Create an OpenCL buffer of a given type and number of elements. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00262">262</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00264">264</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -346,7 +346,7 @@ template&lt;typename CLType , typename InputIter &gt; </div>
 
 <p>Create an OpenCL buffer of a given type from a range of elements. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00274">274</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00276">276</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -376,7 +376,7 @@ template&lt;typename ID&gt; </div>
 
 <p>Create a program given the source within the current context. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00388">388</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00390">390</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -405,7 +405,7 @@ template&lt;typename ID&gt; </div>
 
 <p>The device currently being used. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00195">195</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00197">197</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -434,7 +434,7 @@ template&lt;typename ID&gt; </div>
 
 <p>The vector of all device that the manager found in the platform. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00198">198</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00200">200</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -463,7 +463,7 @@ template&lt;typename ID&gt; </div>
 
 <p>Get an instance of the manager singleton. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00181">181</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00183">183</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -492,7 +492,7 @@ template&lt;typename ID&gt; </div>
 
 <p>The platform currently being used. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00189">189</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00191">191</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -534,7 +534,7 @@ template&lt;typename CharT , typename Traits &gt; </div>
 
 <p>Print build log. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00238">238</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00240">240</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -582,7 +582,7 @@ template&lt;typename CLType , typename OutputIter &gt; </div>
 
 <p>Read an OpenCL buffer of a given type and number of elements into an iterator. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00295">295</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00297">297</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -630,7 +630,7 @@ template&lt;typename CLType &gt; </div>
 
 <p>Read an OpenCL buffer of a given type and number of elements into a pointer. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00314">314</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00316">316</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -678,7 +678,7 @@ template&lt;typename ID&gt; </div>
 <p>OpenCL requires that <code>global_size</code> is a multiple of <code>local_size</code>. This function will round <code>N</code> if it is not already a multiple of <code>local_size</code>. In the kernel it is important to check that <code>get_global_id(0)</code> is not out of range.</p>
 <p>For example, say we have kernel that should be applied to <code>N</code> elements. But the most efficient local size <code>K</code> does not divide <code>N</code>. Instead of calculate the correct global size yourself, you can simple call <code>run_kernel(kern, N, K)</code>. But within the kernel, you need to check <code>get_global_id(0) &lt; N</code> </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00405">405</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00407">407</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -707,7 +707,7 @@ template&lt;typename ID&gt; </div>
 
 <p>Whether the platform, context, device and command queue has been setup correctly. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00205">205</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00207">207</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -737,7 +737,7 @@ template&lt;typename ID&gt; </div>
 
 <p>Try to setup the platform, context, device and command queue using the given device type. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00209">209</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00211">211</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -790,7 +790,7 @@ template&lt;typename ID&gt; </div>
 <p>Set the platform, context, device and command queue manually. </p>
 <p>After this member function call <a class="el" href="classvsmc_1_1_c_l_manager.html#a5eda05068df8772d61fee36d89e02ad4" title="Whether the platform, context, device and command queue has been setup correctly. ...">setup()</a> will return <code>true</code> in future calls </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00222">222</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00224">224</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -838,7 +838,7 @@ template&lt;typename CLType , typename InputIter &gt; </div>
 
 <p>Write an OpenCL buffer of a given type and number of elements from an iterator. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00329">329</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00331">331</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -886,7 +886,7 @@ template&lt;typename CLType &gt; </div>
 
 <p>Write an OpenCL buffer of a given type and number of elements from a pointer. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00347">347</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00349">349</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>
@@ -934,7 +934,7 @@ template&lt;typename CLType &gt; </div>
 
 <p>Write an OpenCL buffer of a given type and number of elements from a pointer. </p>
 
-<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00362">362</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
+<p>Definition at line <a class="el" href="cl__manager_8hpp_source.html#l00364">364</a> of file <a class="el" href="cl__manager_8hpp_source.html">cl_manager.hpp</a>.</p>
 
 </div>
 </div>

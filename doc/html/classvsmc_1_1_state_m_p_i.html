@@ -242,7 +242,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00122">122</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00121">121</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -290,9 +290,8 @@ template&lt;typename IntType &gt; </div>
   </table>
   </dd>
 </dl>
-<p>The <code><a class="el" href="class_base_state.html">BaseState</a></code> type is required to have the following members</p>
+<p>The <code><a class="el" href="class_base_state.html">BaseState</a></code> type is required to have the following members - <code>state_pack_type</code>: A type that used to pack state values. It shall be serializable. That is, a <code>state_pack_type</code> object is acceptable by <code>boost::mpi::communicator::send</code> etc. Both StateMatrix::state_pack_type and StateTuple::state_pack_type satisfy this requirement if their template type parameter types are serializable. For user defined types, see document of Boost.Serialize of how to serialize a class object.</p>
 <ul>
-<li><code>state_pack_type</code>: A type that used to pack state values. It shall be serializable. That is, a <code>state_pack_type</code> object is acceptable by <code>boost::mpi::communicator::send</code> etc. Both <code>StateMatrix::state_pack_type</code> and <code>StateTuple::state_pack_type</code> satisfy this requirement if their template type parameter types are serializable. For user defined types, see document of Boost.Serialize of how to serialize a class object.</li>
 <li><code>state_pack</code> <div class="fragment"><div class="line">state_pack_type state_pack (size_type <span class="keywordtype">id</span>) <span class="keyword">const</span>;</div>
 </div><!-- fragment --> Given a local particle id on this node, pack the state values into a <code>state_pack_type</code> object.</li>
 <li><code>state_unpack</code> <div class="fragment"><div class="line"><span class="keywordtype">void</span> state_unpack (size_type <span class="keywordtype">id</span>, <span class="keyword">const</span> state_pack_type &amp;pack);</div>
@@ -311,7 +310,7 @@ template&lt;typename IntType &gt; </div>
 <li>Stage three is too expansive. The default implementation assumes <code>this-&gt;state_pack(id)</code> is not too expansive, and inter-node copy is rare anyway. If this is not the case, then it can be a performance bottle neck. </li>
 </ul>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00097">97</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00096">96</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -358,7 +357,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00246">246</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00245">245</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -387,7 +386,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>History of number of particles send from this node during copy. </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00117">117</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00116">116</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -416,7 +415,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>The MPI recv/send tag used by <code>copy_inter_node</code> </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00179">179</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00178">178</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -486,7 +485,7 @@ template&lt;typename InputIter &gt; </div>
 </ul>
 <p>It is important the the vector accessed through <code>copy_from_first</code> is the same for all nodes. Otherwise the behavior is undefined. </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00206">206</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00205">205</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -516,7 +515,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>Transfer a local particle id <em>on this node</em> into a global particle id. </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00174">174</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00173">173</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -545,7 +544,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>The number of particles on all nodes. </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00127">127</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00126">126</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -573,7 +572,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00124">124</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00123">123</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -603,7 +602,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>Given a global particle id check if it is on this <code>node</code> </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00151">151</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00150">150</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -633,7 +632,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>Transfer a global particle id into a local particle id (possibly not on this node, use <code>rank</code> to get the rank of its node) </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00156">156</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00155">155</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -662,7 +661,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>The number of particles on nodes with ranks less than the rank of this node. </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00131">131</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00130">130</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -692,7 +691,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>Given a global particle id return the rank of the node it belongs. </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00135">135</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00134">134</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
@@ -721,7 +720,7 @@ template&lt;typename BaseState , typename ID &gt; </div>
 
 <p>A duplicated MPI communicator for this state value object. </p>
 
-<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00120">120</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
+<p>Definition at line <a class="el" href="backend__mpi_8hpp_source.html#l00119">119</a> of file <a class="el" href="backend__mpi_8hpp_source.html">backend_mpi.hpp</a>.</p>
 
 </div>
 </div>
