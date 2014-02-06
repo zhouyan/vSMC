@@ -213,7 +213,7 @@ class Monitor
     /// object.
     ///
     /// \details
-    /// This function is called by a `Sampler` at the end of each
+    /// This function is called by a Sampler at the end of each
     /// iteration. It does nothing if `recording()` returns `false`. Otherwise
     /// it use the user defined evaluation object to compute results. When a
     /// Monitor is constructed, `recording()` always returns `true`. It can be

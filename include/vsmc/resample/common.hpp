@@ -124,7 +124,7 @@ class ResamplePostCopy
 
 namespace traits {
 
-/// \brief `Particle::resample_rng_type` trait
+/// \brief Particle::resample_rng_type trait
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
         VSMC_DEFAULT_RESAMPLE_RNG_TYPE)

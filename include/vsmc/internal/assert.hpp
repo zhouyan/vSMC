@@ -9,24 +9,33 @@
 
 // Runtime assertion
 
+#define VSMC_RUNTIME_WARNING(cond, msg)                                      \
+{                                                                            \
+    if (!(cond)) {                                                           \
+        std::fprintf(stderr,                                                 \
+                "vSMC runtime warning; File: %s; Line: %d\n%s\n",            \
+                __FILE__, __LINE__, msg);                                    \
+    };                                                                       \
+}
+
 #if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
-#define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
-{                                                                             \
-    if (!(cond)) {                                                            \
-        throw vsmc::RuntimeAssert(msg);                                       \
-    };                                                                        \
+#define VSMC_RUNTIME_ASSERT(cond, msg)                                       \
+{                                                                            \
+    if (!(cond)) {                                                           \
+        throw vsmc::RuntimeAssert(msg);                                      \
+    };                                                                       \
 }
 #elif defined(NDEBUG) // No Debug
 #define VSMC_RUNTIME_ASSERT(cond, msg)
 #else // Runtime assertion
-#define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
-{                                                                             \
-    if (!(cond)) {                                                            \
-        std::fprintf(stderr,                                                  \
-                "vSMC runtime assertion failed; File: %s; Line: %d\n%s\n",    \
-                __FILE__, __LINE__, msg);                                     \
-    };                                                                        \
-    assert(cond);                                                             \
+#define VSMC_RUNTIME_ASSERT(cond, msg)                                       \
+{                                                                            \
+    if (!(cond)) {                                                           \
+        std::fprintf(stderr,                                                 \
+                "vSMC runtime assertion failed; File: %s; Line: %d\n%s\n",   \
+                __FILE__, __LINE__, msg);                                    \
+    };                                                                       \
+    assert(cond);                                                            \
 }
 #endif // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 

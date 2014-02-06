@@ -130,7 +130,7 @@ class ProgramOption : public ProgramOptionBase
     bool has_default_;
 };
 
-/// \brief A map of `ProgramOption`
+/// \brief A map of ProgramOption
 /// \ingroup Option
 ///
 /// \details

@@ -119,7 +119,7 @@ class RngSet<RngType, ThreadLocalRng>
 
 namespace traits {
 
-/// \brief `Particle::rng_set_type` trait
+/// \brief Particle::rng_set_type trait
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
         VSMC_DEFAULT_RNG_SET_TYPE)
 

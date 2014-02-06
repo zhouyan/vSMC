@@ -50,14 +50,13 @@ class StateMPI : public BaseState
     /// copy.
     ///
     /// \details
-    /// The `BaseState` type is required to have the following members
-    /// - `state_pack_type`: A type that used to pack state values. It shall be
+    /// The `BaseState` type is required to have the following members -
+    /// `state_pack_type`: A type that used to pack state values. It shall be
     /// serializable. That is, a `state_pack_type` object is acceptable by
-    /// `boost::mpi::communicator::send` etc. Both
-    /// `StateMatrix::state_pack_type` and `StateTuple::state_pack_type`
-    /// satisfy this requirement if their template type parameter types are
-    /// serializable. For user defined types, see document of Boost.Serialize
-    /// of how to serialize a class object.
+    /// `boost::mpi::communicator::send` etc. Both StateMatrix::state_pack_type
+    /// and StateTuple::state_pack_type satisfy this requirement if their
+    /// template type parameter types are serializable. For user defined types,
+    /// see document of Boost.Serialize of how to serialize a class object.
     /// - `state_pack`
     /// \code
     /// state_pack_type state_pack (size_type id) const;
@@ -74,7 +73,7 @@ class StateMPI : public BaseState
     /// In vSMC, the resampling algorithms generate the number of replications
     /// of each particle. Particles with replication zero need to copy other
     /// particles. The vector of the number of replications is transfered to
-    /// `copy_from` by `Particle::resample`, and it is generated in such a way
+    /// `copy_from` by Particle::resample, and it is generated in such a way
     /// that each particle will copy from somewhere close to itself. Therefore,
     /// transferring between nodes is minimized.
     ///
