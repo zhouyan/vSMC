@@ -448,8 +448,11 @@ class CLManager
 
     void setup_cl_manager (cl_device_type dev_type)
     {
+        setup_ = false;
+
         bool setup_platform = platform_filter(dev_type);
         VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_PLATFORM;
+        if (!setup_platform) return;
 
         bool setup_context = false;
         bool setup_device = false;
@@ -472,6 +475,8 @@ class CLManager
         } catch (cl::Error) {}
         VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT;
         VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE;
+        if (!setup_context) return;
+        if (!setup_device) return;
 
         bool setup_command_queue = false;
         try {
@@ -479,9 +484,9 @@ class CLManager
             setup_command_queue = true;
         } catch (cl::Error) {}
         VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE;
+        if (!setup_command_queue) return;
 
-        setup_ = setup_platform && setup_context
-            && setup_device && setup_command_queue;
+        setup_ = true;
     }
 
     bool platform_filter (cl_device_type dev_type)
