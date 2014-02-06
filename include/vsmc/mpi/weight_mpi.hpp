@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight.hpp>
-#include <vsmc/mpi/manager.hpp>
+#include <vsmc/mpi/mpi_manager.hpp>
 
 #if VSMC_USE_MKL
 #include <mkl_vml.h>

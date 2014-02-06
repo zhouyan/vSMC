@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/normalizing_constant.hpp>
-#include <vsmc/mpi/manager.hpp>
+#include <vsmc/mpi/mpi_manager.hpp>
 
 namespace vsmc {
 
