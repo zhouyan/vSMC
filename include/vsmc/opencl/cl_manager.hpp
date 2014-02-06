@@ -9,20 +9,20 @@
             ("**vsmc::CLManager::"#func"** CAN ONLY BE CALLED AFTER TRUE "   \
              "**vsmc::CLManager::setup**"));
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_PLATFORM \
-    VSMC_RUNTIME_ASSERT(setup_platform,                                      \
+#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_PLATFORM \
+    VSMC_RUNTIME_WARNING(setup_platform,                                     \
             ("**vsmc::CLManager::setup** FAILED TO SETUP A PLATFORM"));
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_CONTEXT \
-    VSMC_RUNTIME_ASSERT(setup_context,                                       \
+#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT \
+    VSMC_RUNTIME_WARNING(setup_context,                                      \
             ("**vsmc::CLManager::setup** FAILED TO SETUP A CONTEXT"));
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_DEVICE \
-    VSMC_RUNTIME_ASSERT(setup_device,                                        \
+#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE \
+    VSMC_RUNTIME_WARNING(setup_device,                                       \
             ("**vsmc::CLManager::setup** FAILED TO SETUP A DEVICE"));
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_COMMAND_QUEUE \
-    VSMC_RUNTIME_ASSERT(setup_command_queue,                                 \
+#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE \
+    VSMC_RUNTIME_WARNING(setup_command_queue,                                \
             ("**vsmc::CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
 
 namespace vsmc {
@@ -125,53 +125,55 @@ class CLSetup
 ///
 /// The `ID` template parameter, apart from ensuring that different IDs create
 /// distinct singletons, it can also provide additional information about which
-/// device CLManager shall choose by default. Therefore it can optionally be a
-/// policy class.
+/// device CLManager shall choose by default through the singleton CLSetup with
+/// the same `ID` template argument.
 ///
-/// At initialization, the constructor of the singleton check if the following
-/// member type, data and member functions exit,
-///
+/// It is important to configure the platform and device to be used through
+/// CLSetup before calling CLManager::instance for the first time. If nothing
+/// is done by the user, the default behavior is to use
+/// `CL_DEVICE_TYPE_DEFAULT` type device, and set the platform to be the first
+/// one that contain such as device, and the device to the first one that is of
+/// such a type. The user can change the platform name, device vendor name,
+/// device name, and device type through CLSetup. In case of names, only
+/// partial match is requried. For example,
 /// \code
-/// cl_device_type ID::opencl_device_type::value;
+/// CLSetup<CLDefault> &setup = CLSetup<CLDefault>::instance();
+/// setup.platform("Apple");
+/// setup.device_vendor("Intel");
+/// setup.device_type("GPU);
+/// setup.device_name("Iris");
+/// CLManager<CLDefault> &manager = CLManager<CLDefault>::instance();
 /// \endcode
-/// The device type. The cl_device_type integer that determine which type of
-/// device to use Normally this shall be enough to narrow the choice of device
-/// of CLManager If missing, `CL_DEVICE_TYPE_DEFAULT` is used.
-///
+/// If compiled on a recent MacBook Pro (late 2013 model), then the Iris Pro
+/// GPU from Intel will be used. Note that in this case, actually specify
 /// \code
-/// static bool ID::check_opencl_platform (const std::string &name);
+/// setup.device_type("GPU);
+/// setup.device_name("Iris")
 /// \endcode
-/// The name of the platform. If there are multiple OpenCL platforms
-/// available, CLManager check each of the platform's name against this
-/// function until one returns `true`. For example, say there are both the
-/// Intel and AMD platform available for CPU through OpenCL ICD. One can write
-/// the following in this policy class
+/// or 
 /// \code
-/// static bool check_opencl_platform (const std::string &name)
-/// {return name.find(std::string("Intel")) != std::string::npos;}
+/// setup.device_type("GPU);
+/// setup.device_vedor("Intel")
 /// \endcode
-/// Then, only the Intel platform will be used even the AMD one is found first.
-///
+/// is enough. However, if one specify
 /// \code
-/// static bool ID::check_opencl_device (const std::string &name);
+/// setup.device_type("CPU);
+/// setup.device_vedor("NVIDIA")
 /// \endcode
-/// Similar to `check_opencl_platform` but for a given device name. If there
-/// are multiple OpenCL device for a given platform, then this can help to
-/// narrow down the selection further.
-///
+/// Then the setup will fail, since there is no device with the specified
+/// combinations. Also note that, specification such as
 /// \code
-/// static bool ID::check_opencl_device_vendor (const std::string &name);
+/// setup.device_vendor("NVIDIA")
 /// \endcode
-/// Similar to `check_opencl_device` but only check the vendor of the device. If
-/// there are multiple OpenCL device for a given platform with a given type,
-/// then this can help to narrow down the selection further. Note that this
-/// check will only be performed if `check_opencl_device` is not present.
+/// may not be enough to lead to successful setup. The default device type
+/// `CL_DEVICE_TYPE_DEFAULT` may not be GPU. To be safe, if one need to use
+/// CLSetup, at least specify the device type. It can be set through values of
+/// type `cl_device_type` or a string with values "GPU", "CPU", "Accelerator".
+/// Other string values are silently ignored and the default is used.
 ///
-/// Before using a CLManager, it is important to check that
-/// `CLManager::instance().setup()` returns `true`. Possible reasons of
-/// returning `false` include no OpenCL device found at all, or no device match
-/// the desired device type, or platform or device name is found. In this case,
-/// the user need to setup the CLManager manually.
+///
+/// Before using a CLManager, it is important to check that CLManager::setup
+/// returns `true`.
 template <typename ID>
 class CLManager
 {
@@ -447,7 +449,7 @@ class CLManager
     void setup_cl_manager (cl_device_type dev_type)
     {
         bool setup_platform = platform_filter(dev_type);
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_PLATFORM;
+        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_PLATFORM;
 
         bool setup_context = false;
         bool setup_device = false;
@@ -468,15 +470,15 @@ class CLManager
                 setup_device = true;
             }
         } catch (cl::Error) {}
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_CONTEXT;
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_DEVICE;
+        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT;
+        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE;
 
         bool setup_command_queue = false;
         try {
             command_queue_ = cl::CommandQueue(context_, device_, 0);
             setup_command_queue = true;
         } catch (cl::Error) {}
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP_COMMAND_QUEUE;
+        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE;
 
         setup_ = setup_platform && setup_context
             && setup_device && setup_command_queue;

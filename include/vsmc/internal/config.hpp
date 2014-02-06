@@ -19,6 +19,12 @@
 #define VSMC_RUNTIME_ASSERT_AS_EXCEPTION 0
 #endif
 
+/// \brief Turn vSMC runtime warning into exceptions
+/// \ingroup Config
+#ifndef VSMC_RUNTIME_WARNING_AS_EXCEPTION
+#define VSMC_RUNTIME_WARNING_AS_EXCEPTION 0
+#endif
+
 /// \brief Use Random123 for random number generating
 /// \ingroup Config
 #ifndef VSMC_USE_RANDOM123
