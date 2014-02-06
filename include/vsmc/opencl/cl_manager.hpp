@@ -234,6 +234,30 @@ class CLManager
         return setup_;
     }
 
+    /// \brief Print build log
+    template <typename CharT, typename Traits>
+    void print_build_log (cl::Program &program,
+            std::basic_ostream<CharT, Traits> &os = std::cout)
+    {
+        cl_build_status status = CL_BUILD_SUCCESS;
+        std::string line(78, '=');
+        line += "\n";
+        std::string log;
+        std::string dname;
+
+        for (std::vector<cl::Device>::const_iterator
+                diter = device_vec_.begin();
+                diter != device_vec_.end(); ++diter) {
+            program.getBuildInfo(*diter, CL_PROGRAM_BUILD_STATUS, &status);
+            if (status != CL_BUILD_SUCCESS) {
+                program.getBuildInfo(device_, CL_PROGRAM_BUILD_LOG, &log);
+                diter->getInfo((cl_device_info) CL_DEVICE_NAME, &dname);
+                os << line << "Build failed for : " << dname << std::endl;
+                os << line << log << std::endl << line << std::endl;
+            }
+        }
+    }
+
     /// \brief Create an OpenCL buffer of a given type and number of elements
     template<typename CLType>
     cl::Buffer create_buffer (std::size_t num) const

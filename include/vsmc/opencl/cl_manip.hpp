@@ -81,32 +81,6 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
     return pref_diff;
 }
 
-/// \brief Print build log
-/// \ingroup OpenCL
-template <typename ID>
-inline void cl_print_build_log (cl::Program &program)
-{
-    CLManager<ID> &manager = CLManager<ID>::instance();
-
-    cl_build_status status = CL_BUILD_SUCCESS;
-    std::string line(78, '=');
-    line += "\n";
-    std::string log;
-    std::string dname;
-
-    for (std::vector<cl::Device>::const_iterator
-            diter = manager.device_vec().begin();
-            diter != manager.device_vec().end(); ++diter) {
-        program.getBuildInfo(*diter, CL_PROGRAM_BUILD_STATUS, &status);
-        if (status != CL_BUILD_SUCCESS) {
-            program.getBuildInfo(manager.device(), CL_PROGRAM_BUILD_LOG, &log);
-            diter->getInfo((cl_device_info) CL_DEVICE_NAME, &dname);
-            std::cout << line << "Build failed for : " << dname << std::endl;
-            std::cout << line << log << std::endl << line << std::endl;
-        }
-    }
-}
-
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
 inline void cl_set_kernel_args (cl::Kernel &, cl_uint) {}
