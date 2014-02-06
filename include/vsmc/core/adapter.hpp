@@ -5,25 +5,14 @@
 
 namespace vsmc {
 
-/// Initialize adapter forward decleration
-/// \ingroup Adapter
-template <typename, template <typename, typename> class, typename F = NullType>
-class InitializeAdapter;
-
-/// Move adapter forward decleration
-/// \ingroup Adapter
-template <typename, template <typename, typename> class, typename F = NullType>
-class MoveAdapter;
-
-/// MonitorEval adapter forward decleration
-/// \ingroup Adapter
-template <typename, template <typename, typename> class, typename F = NullType>
-class MonitorEvalAdapter;
-
-/// PathEval adapter forward decleration
-/// \ingroup Adapter
-template <typename, template <typename, typename> class, typename F = NullType>
-class PathEvalAdapter;
+template <typename T, template <typename, typename> class Impl,
+         typename Func = NullType> class InitializeAdapter;
+template <typename T, template <typename, typename> class Impl,
+         typename Func = NullType> class MoveAdapter;
+template <typename T, template <typename, typename> class Impl,
+         typename Func = NullType> class MonitorEvalAdapter;
+template <typename T, template <typename, typename> class Impl,
+         typename Func = NullType> class PathEvalAdapter;
 
 /// \brief Initialize class adapter base
 /// \ingroup Adapter

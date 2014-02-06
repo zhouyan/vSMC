@@ -11,9 +11,7 @@ namespace vsmc {
 /// \ingroup MPI
 struct MPIDefault;
 
-/// \cond HIDDENT_SYMBOLS
 template <typename, typename ID = MPIDefault> class StateMPI;
-/// \endcond HIDDENT_SYMBOLS
 
 /// \brief MPI Environment
 /// \ingroup MPI

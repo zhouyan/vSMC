@@ -17,45 +17,45 @@ namespace vsmc {
 
 namespace mkl {
 
-/// \cond HIDDEN_SYMBOLS
+template <MKL_INT BRNG>                          class Stream;
+template <typename ResultType, typename Derived> class Distribution;
+template <MKL_INT BRNG, typename ResultType>     class Engine;
+template <typename ResultType>                   class UniformBits;
 
-template <MKL_INT> class Stream;
-template <typename, typename> class Distribution;
-template <MKL_INT, typename> class Engine;
-
-template <typename> class UniformBits;
-
-template <MKL_INT M = VSL_RNG_METHOD_BERNOULLI_ICDF>      class Bernoulli;
-template <MKL_INT M = VSL_RNG_METHOD_GEOMETRIC_ICDF>      class Geometric;
-template <MKL_INT M = VSL_RNG_METHOD_BINOMIAL_BTPE>       class Binomial;
-template <MKL_INT M = VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE> class Hypergeometric;
-template <MKL_INT M = VSL_RNG_METHOD_POISSON_PTPE>        class Poisson;
-template <MKL_INT M = VSL_RNG_METHOD_NEGBINOMIAL_NBAR>    class NegBinomial;
-
-template <typename, MKL_INT M = VSL_RNG_METHOD_UNIFORM_STD>  class Uniform;
-
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>   class Gaussian;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_EXPONENTIAL_ICDF>      class Exponential;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_LAPLACE_ICDF>          class Laplace;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_WEIBULL_ICDF>          class Weibull;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_CAUCHY_ICDF>           class Cauchy;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_RAYLEIGH_ICDF>         class Rayleigh;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2>  class Lognormal;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_GUMBEL_ICDF>           class Gumbel;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_GAMMA_GNORM>           class Gamma;
-template <typename F = double,
-         MKL_INT M = VSL_RNG_METHOD_BETA_CJA>              class Beta;
-
-/// \endcond HIDDEN_SYMBOLS
+template <MKL_INT Method =
+    VSL_RNG_METHOD_BERNOULLI_ICDF>       class Bernoulli;
+template <MKL_INT Method =
+    VSL_RNG_METHOD_GEOMETRIC_ICDF>       class Geometric;
+template <MKL_INT Method =
+    VSL_RNG_METHOD_BINOMIAL_BTPE>        class Binomial;
+template <MKL_INT Method =
+    VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE>  class Hypergeometric;
+template <MKL_INT Method =
+    VSL_RNG_METHOD_POISSON_PTPE>         class Poisson;
+template <MKL_INT Method =
+    VSL_RNG_METHOD_NEGBINOMIAL_NBAR>     class NegBinomial;
+template <typename ResultType, MKL_INT Method =
+    VSL_RNG_METHOD_UNIFORM_STD>          class Uniform;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>  class Gaussian;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_EXPONENTIAL_ICDF>     class Exponential;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_LAPLACE_ICDF>         class Laplace;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_WEIBULL_ICDF>         class Weibull;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_CAUCHY_ICDF>          class Cauchy;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_RAYLEIGH_ICDF>        class Rayleigh;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2> class Lognormal;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_GUMBEL_ICDF>          class Gumbel;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_GAMMA_GNORM>          class Gamma;
+template <typename FPType = double, MKL_INT Method =
+    VSL_RNG_METHOD_BETA_CJA>             class Beta;
 
 #define VSMC_DEFINE_VSL_BRNG_CASE(BRNG) \
     case BRNG : return #BRNG ;
@@ -626,7 +626,7 @@ class Bernoulli : public Distribution<MKL_INT, Bernoulli<Method> >
         this->template generate_error_check<BRNG>(status, "Bernoulli");
     }
 
-    public :
+    private :
 
     double p_;
 }; // class Bernoulli
@@ -649,7 +649,7 @@ class Geometric : public Distribution<MKL_INT, Geometric<Method> >
         this->template generate_error_check<BRNG>(status, "Geometric");
     }
 
-    public :
+    private :
 
     double p_;
 }; // class Geometric
@@ -673,7 +673,7 @@ class Binomial : public Distribution<MKL_INT, Binomial<Method> >
         this->template generate_error_check<BRNG>(status, "Binomial");
     }
 
-    public :
+    private :
 
     result_type ntrial_;
     double p_;
@@ -699,7 +699,7 @@ class Hypergeometric : public Distribution<MKL_INT, Hypergeometric<Method> >
         this->template generate_error_check<BRNG>(status, "Hypergeometric");
     }
 
-    public :
+    private :
 
     result_type l_;
     result_type s_;
@@ -724,7 +724,7 @@ class Poisson : public Distribution<MKL_INT, Poisson<Method> >
         this->template generate_error_check<BRNG>(status, "Poisson");
     }
 
-    public :
+    private :
 
     double lambda_;
 }; // class Poisson
@@ -748,7 +748,7 @@ class NegBinomial : public Distribution<MKL_INT, NegBinomial<Method> >
         this->template generate_error_check<BRNG>(status, "NegBinomial");
     }
 
-    public :
+    private :
 
     double ntrial_;
     double p_;

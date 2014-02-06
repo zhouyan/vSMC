@@ -6,17 +6,11 @@
 
 #include <cstddef>
 
-/// \cond HIDDEN_SYMBOLS
-
 #define VSMC_DEFINE_SMP_FORWARD(Name) \
-template <typename> class State##Name;                                       \
-template <typename> class WeightSet##Name;                                   \
-class NormalizingConstant##Name;                                             \
-template <typename, typename D = Virtual> class Initialize##Name;            \
-template <typename, typename D = Virtual> class Move##Name;                  \
-template <typename, typename D = Virtual> class MonitorEval##Name;           \
-template <typename, typename D = Virtual> class PathEval##Name;              \
-template <typename> class NIntegrate##Name;
+template <typename T, typename Derived = Virtual> class Initialize##Name;    \
+template <typename T, typename Derived = Virtual> class Move##Name;          \
+template <typename T, typename Derived = Virtual> class MonitorEval##Name;   \
+template <typename T, typename Derived = Virtual> class PathEval##Name;
 
 namespace vsmc {
 
@@ -28,28 +22,27 @@ struct NullType;
 template <std::size_t> struct Position {};
 
 // Core classes
-template <typename> class Sampler;
-template <typename> class Particle;
-template <typename> class Monitor;
-template <typename> class Path;
-template <typename> class SingleParticle;
-template <typename> class ConstSingleParticle;
-template <typename> class SingleParticleBase;
-template <typename> class ConstSingleParticleBase;
+template <typename T> class Sampler;
+template <typename T> class Particle;
+template <typename T> class Monitor;
+template <typename T> class Path;
+template <typename T> class SingleParticle;
+template <typename T> class ConstSingleParticle;
+template <typename T> class SingleParticleBase;
+template <typename T> class ConstSingleParticleBase;
 class WeightSet;
 
 // SMP states
-template <MatrixOrder, std::size_t, typename> class StateMatrix;
+template <MatrixOrder Order, std::size_t Dim, typename T> class StateMatrix;
 #if VSMC_HAS_CXX11LIB_TUPLE
-template <MatrixOrder, typename, typename...> class StateTuple;
+template <MatrixOrder Order, typename T, typename... Types> class StateTuple;
 #endif
 
 // OpenCL state
 struct CLDefault;
-template <std::size_t, typename, typename ID = CLDefault> class StateCL;
+template <std::size_t StateSize, typename FPType, typename ID = CLDefault>
+class StateCL;
 
 } // namesapce vsmc
-
-/// \endcond HIDDEN_SYMBOLS
 
 #endif // VSMC_INTERNAL_FORWARD_HPP

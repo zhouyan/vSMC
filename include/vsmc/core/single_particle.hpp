@@ -232,8 +232,9 @@ namespace traits {
 /// \details
 /// This is the basic SingleParticle available for any type of Particle. To
 /// extend it for type `T`. One can either specialize
-/// vsmc::traits::SingleParticleTypeTrait<T> or define a class template named
-/// `single_particle_type` within `T` with the following minimum requirement.
+/// vsmc::traits::SingleParticleBaseTypeTrait<T> or define a class template
+/// named `single_particle_type` within `T` with the following minimum
+/// requirement.
 /// \code
 /// template <typename S> // S: StateType, such as StateMatrix<Dim, T>
 /// struct single_particle_type
@@ -248,9 +249,9 @@ namespace traits {
 /// SingleParticleBase<S> and add methods specific to `S`.
 template <typename T>
 class SingleParticle :
-    public traits::SingleParticleTypeTrait<T>::type
+    public traits::SingleParticleBaseTypeTrait<T>::type
 {
-    typedef typename traits::SingleParticleTypeTrait<T>::type base;
+    typedef typename traits::SingleParticleBaseTypeTrait<T>::type base;
 
     public :
 
@@ -267,9 +268,9 @@ class SingleParticle :
 /// \ingroup Core
 template <typename T>
 class ConstSingleParticle :
-    public traits::ConstSingleParticleTypeTrait<T>::type
+    public traits::ConstSingleParticleBaseTypeTrait<T>::type
 {
-    typedef typename traits::ConstSingleParticleTypeTrait<T>::type base;
+    typedef typename traits::ConstSingleParticleBaseTypeTrait<T>::type base;
 
     public :
 

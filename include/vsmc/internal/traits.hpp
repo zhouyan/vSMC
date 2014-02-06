@@ -7,39 +7,9 @@
 
 #include <string>
 
-/// \brief Define a type dispatch trait
-/// \ingroup Traits
-///
-/// \details
-/// This macro define a class template
-/// \code
-/// template <typename T> struct OuterTrait;
-/// \endcode
-/// with the following members
-/// - Member enumurator `OuterTrait::value`: true if `T::Inner` exits and is a
-/// type
-/// - Member type `OuterTrait::type`: same as `T::Inner` if `value == true`,
-/// otherwise `Default`.
-/// - Three low level implementation class templates are also defined
-/// \code
-/// template <typename T> struct HasOuterImpl;
-/// template <typename T> struct HasOuter;
-/// template <typename T, bool> struct OuterDispatch;
-/// \endcode
-///
-/// **Example**
-/// \code
-/// VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t);
-///
-/// struct Empty {};
-/// struct Stack {typedef int size_type;};
-///
-/// SizeTypeTrait<Empty>::value; // false
-/// SizeTypeTrait<Empty>::type;  // std::size_t
-/// SizeTypeTrait<Stack>::value; // true
-/// SizeTypeTrait<Stack>::type;  // Stack::size_type
-/// \endcode
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)               \
+template <typename T> struct Outer##Trait;                                   \
+                                                                             \
 template <typename T>                                                        \
 struct Has##Outer##Impl                                                      \
 {                                                                            \
@@ -72,48 +42,16 @@ template <typename T> struct Outer##Trait                                    \
     typedef typename Outer##Dispatch<T, value>::type type;                   \
 };
 
-/// \brief Define a class template dispatch trait
-/// \ingroup Traits
-///
-/// \details
-/// This macro define a class template
-/// \code
-/// template <typename T, typename V> struct OuterTrait;
-/// \endcode
-/// with the following members
-/// - Member enumurator `OuterTrait::value`: true if `T::Inner` exits and is a
-/// class tempalte that can take `V` as its template parameter. The clas
-/// template can have multiple template parameters, however all but the first
-/// need to have default arguments.
-/// - Member type `OuterTrait::type`: same as `T::Inner<T>` if
-/// `value == true`, otherwise `Default<V>`.
-/// - Three low level implementation class templates are also defined
-/// \code
-/// template <typename T, typename V> struct HasOuterImpl;
-/// template <typename T, typename V> struct HasOuter;
-/// template <typename T, typename V, bool> struct OuterDispatch;
-/// \endcode
-///
-/// **Example**
-/// \code
-/// VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(VecType, vec_type, std::vector);
-///
-/// struct Empty {};
-/// struct Stack { template <typename T> struct vec_type {/*...*/}; };
-///
-/// VecTypeTrait<Empty, int>::value; // false
-/// VecTypeTrait<Empty, int>::type;  // std::vector<int>
-/// VecTypeTrait<Stack, int>::value; // true
-/// VecTypeTrait<Stack, int>::type;  // Stack::vec_type<int>
-/// \endcode
 #define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)      \
-template <typename T, typename V>                                            \
+template <typename T> struct Outer##Trait;                                   \
+                                                                             \
+template <typename T>                                                        \
 struct Has##Outer##Impl                                                      \
 {                                                                            \
     private :                                                                \
                                                                              \
     struct char2 {char c1; char c2;};                                        \
-    template <typename U> static char test (typename U::template Inner<V> *);\
+    template <typename U> static char test (typename U::template Inner<T> *);\
     template <typename U> static char2 test (...);                           \
                                                                              \
     public :                                                                 \
@@ -121,22 +59,22 @@ struct Has##Outer##Impl                                                      \
     enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
 };                                                                           \
                                                                              \
-template <typename T, typename V>                                            \
+template <typename T>                                                        \
 struct Has##Outer :                                                          \
-    public cxx11::integral_constant<bool, Has##Outer##Impl<T, V>::value> {}; \
+    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};    \
                                                                              \
-template <typename T, typename V, bool> struct Outer##Dispatch;              \
+template <typename T,  bool> struct Outer##Dispatch;                         \
                                                                              \
-template <typename T, typename V> struct Outer##Dispatch<T, V, false>        \
-{typedef Default<V> type;};                                                  \
+template <typename T> struct Outer##Dispatch<T, false>                       \
+{typedef Default<T> type;};                                                  \
                                                                              \
-template <typename T, typename V> struct Outer##Dispatch<T, V, true>         \
-{typedef typename T::template Inner<V> type;};                               \
+template <typename T> struct Outer##Dispatch<T, true>                        \
+{typedef typename T::template Inner<T> type;};                               \
                                                                              \
-template <typename T, typename V> struct Outer##Trait                        \
+template <typename T> struct Outer##Trait                                    \
 {                                                                            \
-    enum {value = Has##Outer<T, V>::value};                                  \
-    typedef typename Outer##Dispatch<T, V, value>::type type;                \
+    enum {value = Has##Outer<T>::value};                                     \
+    typedef typename Outer##Dispatch<T, value>::type type;                   \
 };
 
 #define VSMC_DEFINE_SMP_MF_CHECKER(name, RT, Args)                           \
@@ -177,25 +115,25 @@ struct has_##name##_ : public cxx11::integral_constant<bool,                 \
 
 namespace vsmc {
 
-/// \brief Type traits
-/// \ingroup Traits
 namespace traits {
 
+/// \brief `Particle::size_type` etc., traits
+/// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
+
+/// \brief `Particle::weight_set_type` trait
+/// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet)
 
+/// \brief `SingleParticle` base class trait
+/// \ingroup Traits
 VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleBaseType,
         single_particle_type, SingleParticleBase)
+
+/// \brief `ConstSingleParticle` base class trait
+/// \ingroup Traits
 VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
         const_single_particle_type, ConstSingleParticleBase)
-
-template <typename T>
-struct SingleParticleTypeTrait :
-    public SingleParticleBaseTypeTrait<T, T> {};
-
-template <typename T>
-struct ConstSingleParticleTypeTrait :
-    public ConstSingleParticleBaseTypeTrait<T, T> {};
 
 #if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 template <typename T> struct OMPSizeTypeTrait {typedef T type;};
@@ -204,6 +142,8 @@ template <typename T> struct OMPSizeTypeTrait
 {typedef typename std::ptrdiff_t type;};
 #endif
 
+/// \brief Dimension trait for `StateMatrix` and `StateCL`
+/// \ingroup Traits
 template <std::size_t Dim>
 class DimTrait
 {

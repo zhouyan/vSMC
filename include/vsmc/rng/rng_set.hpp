@@ -25,7 +25,7 @@ namespace vsmc {
 
 struct ScalarRng;
 struct VectorRng;
-template <typename, typename> class RngSet;
+template <typename RngType, typename Storage> class RngSet;
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
@@ -118,8 +118,11 @@ class RngSet<RngType, ThreadLocalRng>
 #endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 
 namespace traits {
+
+/// \brief `Particle::rng_set_type` trait
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
         VSMC_DEFAULT_RNG_SET_TYPE)
+
 } // namespace vsmc::traits
 
 } // namespace vsmc

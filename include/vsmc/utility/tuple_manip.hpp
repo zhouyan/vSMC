@@ -4,8 +4,6 @@
 #include <vsmc/internal/common.hpp>
 #include <tuple>
 
-/// \cond HIDDEN_SYMBOLS
-
 namespace vsmc {
 
 template <typename, typename> struct TuplePushFront;
@@ -18,8 +16,6 @@ template <typename, typename> struct TupleMerge;
 template <typename...> struct TupleCat;
 
 } // namespace vsmc
-
-/// \endcond HIDDEN_SYMBOLS
 
 namespace vsmc {
 
