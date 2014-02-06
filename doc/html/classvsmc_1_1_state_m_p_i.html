@@ -298,7 +298,7 @@ template&lt;typename IntType &gt; </div>
 <li><code>state_unpack</code> <div class="fragment"><div class="line"><span class="keywordtype">void</span> state_unpack (size_type <span class="keywordtype">id</span>, <span class="keyword">const</span> state_pack_type &amp;pack);</div>
 </div><!-- fragment --> Given a local particle id and a <code>state_pack_type</code> object, unpack it into the given position on this node.</li>
 </ul>
-<p>In vSMC, the resampling algorithms generate the number of replications of each particle. Particles with replication zero need to copy other particles. The vector of the number of replications is transfered to <code>copy_from</code> by <code><a class="el" href="classvsmc_1_1_particle.html#a4dca9c6399a521708ace92b876524f13" title="Performing resampling if ESS/N &lt; threshold. ">Particle::resample</a></code>, and it is generated in such a way that each particle will copy from somewhere close to itself. Therefore, transferring between nodes is minimized.</p>
+<p>In vSMC, the resampling algorithms generate the number of replications of each particle. Particles with replication zero need to copy other particles. The vector of the number of replications is transfered to <code>copy_from</code> by <a class="el" href="classvsmc_1_1_particle.html#a4dca9c6399a521708ace92b876524f13" title="Performing resampling if ESS/N &lt; threshold. ">Particle::resample</a>, and it is generated in such a way that each particle will copy from somewhere close to itself. Therefore, transferring between nodes is minimized.</p>
 <p>This default implementation perform three stages of copy.</p>
 <ul>
 <li>Stage one: Generate a local duplicate of <code>copy_from</code> on node <code>0</code> and broadcast it to all nodes.</li>
