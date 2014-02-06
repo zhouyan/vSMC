@@ -278,8 +278,8 @@ inline std::basic_istream<CharT, Traits> &operator>> (
     typedef typename UniformRealDistribution<FPType, Left, Right>::param_type
         param_type;
 
-    FPType a;
-    FPType b;
+    FPType a = 0;
+    FPType b = 0;
     if (is >> a >> std::ws >> b) {
         if (a <= b)
             runif.param(param_type(a, b));
