@@ -1,5 +1,5 @@
-#ifndef VSMC_MPI_WEIGHT_HPP
-#define VSMC_MPI_WEIGHT_HPP
+#ifndef VSMC_MPI_WEIGHT_MPI_HPP
+#define VSMC_MPI_WEIGHT_MPI_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight.hpp>
@@ -268,4 +268,4 @@ class WeightSetMPI : public WeightSet
 
 } // namespace vsmc
 
-#endif // VSMC_MPI_WEIGHT_HPP
+#endif // VSMC_MPI_WEIGHT_MPI_HPP

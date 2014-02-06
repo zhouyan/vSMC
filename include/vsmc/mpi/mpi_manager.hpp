@@ -1,5 +1,5 @@
-#ifndef VSMC_MPI_MANAGER_HPP
-#define VSMC_MPI_MANAGER_HPP
+#ifndef VSMC_MPI_MPI_MANAGER_HPP
+#define VSMC_MPI_MPI_MANAGER_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
@@ -77,4 +77,4 @@ class MPICommunicator
 
 } // namespace vsmc
 
-#endif // VSMC_MPI_MANAGER_HPP
+#endif // VSMC_MPI_MPI_MANAGER_HPP

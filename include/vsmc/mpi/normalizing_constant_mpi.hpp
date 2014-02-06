@@ -1,5 +1,5 @@
-#ifndef VSMC_MPI_NORMALIZING_CONSTANT_HPP
-#define VSMC_MPI_NORMALIZING_CONSTANT_HPP
+#ifndef VSMC_MPI_NORMALIZING_CONSTANT_MPI_HPP
+#define VSMC_MPI_NORMALIZING_CONSTANT_MPI_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/normalizing_constant.hpp>
@@ -45,4 +45,4 @@ class NormalizingConstantMPI : public NormalizingConstant
 
 } // namespace vsmc
 
-#endif // VSMC_MPI_NORMALIZING_CONSTANT_HPP
+#endif // VSMC_MPI_NORMALIZING_CONSTANT_MPI_HPP
