@@ -50,7 +50,6 @@ class CLSetup
 
     /// \brief Set the device type using a string value
     ///
-    /// \details
     /// \param name One of "GPU", "CPU", "Accelerator". Other values are
     /// treated as setting the default device type
     /// \return false if the default value is using, otherwise true

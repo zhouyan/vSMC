@@ -100,6 +100,10 @@
 /// \ingroup Utility
 /// \brief Functions for saving objects in HDF5 format
 
+/// \defgroup Option Program options
+/// \ingroup Utility
+/// \brief Process program command line options
+
 /// \defgroup STDTBB STDTBB
 /// \ingroup Utility
 /// \brief Parallel constructs using C++11 concurrency
