@@ -1,7 +1,7 @@
 #ifndef VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP
 #define VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
 
 namespace vsmc {
 
@@ -175,29 +175,29 @@ class NIntegrateNewtonCotesCoeff
 
 /// \brief Numerical integration with the (closed) Newton-Cotes formulae
 /// \ingroup Integrate
-template <unsigned Degree, template <typename> class Impl>
-class NIntegrateNewtonCotes : public Impl<NIntegrateNewtonCotes<Degree, Impl> >
+template <unsigned Degree>
+class NIntegrateNewtonCotes :
+    public NIntegrateBase<NIntegrateNewtonCotes<Degree> >
 {
     public :
 
-    typedef typename Impl<NIntegrateNewtonCotes<Degree, Impl> >::
+    typedef typename NIntegrateBase<NIntegrateNewtonCotes<Degree> >::
         size_type size_type;
-    typedef typename Impl<NIntegrateNewtonCotes<Degree, Impl> >::
+    typedef typename NIntegrateBase<NIntegrateNewtonCotes<Degree> >::
         eval_type eval_type;
 
-    NIntegrateNewtonCotes () : coeff_(
-            internal::NIntegrateNewtonCotesCoeff<Degree>::instance().coeff())
-    {}
-
-    double integrate_segment (double a, double b, const eval_type &eval) const
+    static double integrate_segment (double a, double b, const eval_type &eval)
     {
         VSMC_STATIC_ASSERT_NINTEGRATE_NEWTON_COTES_DEGREE(Degree);
 
+        const double *const coeff =
+            internal::NIntegrateNewtonCotesCoeff<Degree>::instance().coeff();
+
         double h = (b - a) / Degree;
 
-        return coeff_[0] * (b - a) * (
+        return coeff[0] * (b - a) * (
                 internal::NIntegrateNewtonCotesEval<Degree, eval_type>::
-                result(coeff_, a, h, eval) + coeff_[Degree + 1] * eval(b));
+                result(coeff, a, h, eval) + coeff[Degree + 1] * eval(b));
     }
 
     static VSMC_CONSTEXPR unsigned max_degree () {return max_degree_;}
@@ -205,7 +205,6 @@ class NIntegrateNewtonCotes : public Impl<NIntegrateNewtonCotes<Degree, Impl> >
     private :
 
     static VSMC_CONSTEXPR const unsigned max_degree_ = 10;
-    const double *coeff_;
 }; // class NIntegrateNewtonCotes
 
 } // namespace vsmc

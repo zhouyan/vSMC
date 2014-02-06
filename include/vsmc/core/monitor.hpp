@@ -2,7 +2,7 @@
 #define VSMC_CORE_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/integrate/importance_sampling.hpp>
+#include <vsmc/integrate/is_integrate.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func) \
     VSMC_RUNTIME_ASSERT((id >= 0 && id < this->dim()),                       \
