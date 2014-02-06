@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Vsmc by zhouyan</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Vsmc</h1>
+        <p>Vectorized Sequential Monte Carlo</p>
+
+        <p class="view"><a href="https://github.com/zhouyan/vSMC">View the Project on GitHub <small>zhouyan/vSMC</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/zhouyan/vSMC/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/zhouyan/vSMC/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/zhouyan/vSMC">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="introduction" class="anchor" href="#introduction"><span class="octicon octicon-link"></span></a>Introduction</h1>
+
+<p>vSMC library provide a framework for implementing SMC algorithms. It provides a
+core module which perform resampling, etc., operations common to all SMC
+algorithms and applications. In addition, it provides the bases for
+implementing parallelized samplers. The SMC algorithms are highly
+parallelizable, but there are many frameworks for doing this. This library
+tries to hide the different parallelization mechanism behind a unified
+interface, and thus increases code reuse.</p>
+
+<h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>This is a header only template C++ library. To install the library just move
+the contents of the <code>include</code> directory into a proper place, e.g.,
+<code>/usr/local/include</code> in Unix-alike systems. Alternatively, one can use
+<a href="http://www.cmake.org/">CMake</a> (2.8 or later required),</p>
+
+<div class="highlight highlight-sh"><pre><span class="nb">cd</span> /path_to_vSMC_source
+mkdir build
+<span class="nb">cd </span>build
+cmake ..
+make install
+</pre></div>
+
+<p>One may need <code>su</code> or <code>sudo</code> permissions to perform the last installation step.</p>
+
+<h1>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h1>
+
+<p>To make the documentations one need <a href="http://www.stack.nl/%7Edimitri/doxygen/manual.html">Doxygen</a> 1.8.3 or later.</p>
+
+<div class="highlight highlight-sh"><pre>make docs
+</pre></div>
+
+<p>The documentation can also be found <a href="http://zhouyan.github.com/vSMC/doc/html/index.html">here</a>.</p>
+
+<h1>
+<a name="parallelization-backends" class="anchor" href="#parallelization-backends"><span class="octicon octicon-link"></span></a>Parallelization backends</h1>
+
+<p>The library support various backends for multi-thread parallelization, unified
+under a uniform interface. One is C++11 concurrency. For a full C++11
+implementation, this means no third-party dependency is required to write a
+parallel SMC sampler. Other third-party parallelization include, <a href="http://en.wikipedia.org/wiki/Intel_Cilk_Plus">Intel Cilk
+Plus</a>, <a href="http://threadingbuildingblocks.org/">Intel TBB</a> and <a href="http://www.openmp.org/">OpenMP</a>. <a href="http://en.wikipedia.org/wiki/Grand_Central_Dispatch">Apple
+Grand Central Dispatch</a> is also supported on Mac OS X and on Linux
+via <a href="http://libdispatch.macosforge.org/">libdispatch</a>. <a href="http://msdn.microsoft.com/en-us/library/dd492418.aspx">Microsoft Parallel Patterns Library</a>
+is supported on Windows when compiled with MSVC 2010 or later. In addition,
+this library also support using <a href="http://www.khronos.org/opencl/">OpenCL</a> for GPGPU computing, though
+the interface is different than others.</p>
+
+<h1>
+<a name="third-party-dependencies" class="anchor" href="#third-party-dependencies"><span class="octicon octicon-link"></span></a>Third-party dependencies</h1>
+
+<p>This library has no dependences other than C++ standard libraries (C++11). Any
+C++11 language features are optional.</p>
+
+<p>In particular, the library use the <code>&lt;functional&gt;</code> and <code>&lt;random&gt;</code> headers, which
+are parts of the C++11 standard libraries. Equivalences can be found in
+<a href="http://www.boost.org/">Boost</a>. By default the library will use the <a href="http://www.boost.org/">Boost</a> library as
+C++11 implementations are not mature at the time writing. But if the C++
+implementation has them correctly implemented, the standard headers can also be
+used by defining suitable macros (see reference manual for details).</p>
+
+<p>Note that this library is only tested with <a href="http://www.boost.org/">Boost</a> 1.49 or later. Also
+not all C++11 implementations of <code>&lt;functional&gt;</code> and <code>&lt;random&gt;</code> work properly
+even they are present.</p>
+
+<p>The library can optionally use the <a href="http://www.thesalmons.org/john/random123/releases/latest/docs/index.html">Random123</a> library for
+parallelized random number generator, and the default behavior is assuming this
+is available.</p>
+
+<h1>
+<a name="compiler-support" class="anchor" href="#compiler-support"><span class="octicon octicon-link"></span></a>Compiler support</h1>
+
+<p>This library makes heavy use of some template metaprogramming techniques. It
+requires a standard conforming compiler. Fortunately, most commonly used
+modern compilers, at least in C++98 mode, is able to compile the examples
+distributed with the library.</p>
+
+<p>This library has been regularly tested with recent <a href="http://clang.llvm.org">Clang</a>, <a href="http://gcc.gnu.org">GCC</a>
+and <a href="http://software.intel.com/en-us/intel-compilers">Intel C++ Compiler</a>, in both C++98 and C++11 modes. In particular,
+<a href="http://clang.llvm.org">Clang</a> 3.3 and later with <a href="http://libcxx.llvm.org">libc++</a> and <a href="http://gcc.gnu.org">GCC</a> 4.7 and later
+support all the C++11 features used by the library very well. <a href="http://software.intel.com/en-us/intel-compilers">Intel C++
+Compiler</a> when used with <a href="http://gcc.gnu.org">GCC</a> 4.7's standard library can also
+support all the C++11 features. When it is used with <a href="http://gcc.gnu.org">GCC</a> 4.8's standard
+library, though all features are supported, some examples fail to compile when
+complex template constructs are involved. The issues are still under
+investigation. The current workaround is to use the <a href="http://www.boost.org/">Boost</a> Function
+library instead of the standard library <code>&lt;functional&gt;</code> (by defining the flag
+<code>-DVSMC_HAS_CXX11LIB_FUNCTIONAL=0</code>) when using this compiler configuration in
+C++11 mode.</p>
+
+<p><a href="http://msdn.microsoft.com/en-us/vstudio//default.aspx">Microsoft Visual C++</a> is also supported. Version 2008 and later are able
+to compile the examples in C++98 mode. Version 2012 and later support most of
+the C++11 features. However, this compiler is tested less regularly.</p>
+
+<p>Other compilers such as <a href="http://www.open64.net">Open64</a> were previously tested in C++98 mode
+(most of them don't support C++11 at all). Future developments will rely more
+on C++11 features. There are likely to be new (optional) features that are
+C++11 only. Therefore, these outdated compilers won't be tested anymore.
+However, for the foreseeable future, all basic features should be supported by
+a C++98 compiler.</p>
+
+<h1>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h1>
+
+<p>The vSMC library is distributed with a 2-clause BSD license which can be found
+in the <code>LICENSE</code> file distributed with the source.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/zhouyan">zhouyan</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
