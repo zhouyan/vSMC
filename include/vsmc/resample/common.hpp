@@ -54,6 +54,17 @@ inline void normalize_replication (std::size_t N, IntType *replication)
 
 } // namespace vsmc::internal
 
+/// \brief Resampling schemes
+/// \ingroup Resample
+enum ResampleScheme {
+    Multinomial,
+    Residual,
+    Stratified,
+    Systematic,
+    ResidualStratified,
+    ResidualSystematic
+};
+
 /// \brief Resample forward decleration
 /// \ingroup Resample
 template <typename> class Resample;

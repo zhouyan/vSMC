@@ -16,6 +16,9 @@
 /// different compilers
 /// \ingroup Config
 
+/// \defgroup Definitions Constants definitions
+/// \brief Enumerators and macro definitions
+
 /// \defgroup Traits Traits
 /// \brief Trait classes
 
