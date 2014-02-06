@@ -31,14 +31,6 @@ class NIntegrateBase
     /// \param a The leftmost of the segment
     /// \param b The rightmost of the segment
     /// \param eval The functor used for evaluation
-    ///
-    /// `eval` need a thread-safe copy if the implementation use
-    /// parallelization, such as NIntegrateTBB etc, in the sense that when
-    /// constructing the new object, vSMC does not need to lock the original.
-    /// Both major C++11 implementations and current Boost `function` satisfy
-    /// this requirement, though the actual functor wrapped by
-    /// `vsmc::cxx11::function` may not be. It is the user's responsibility to
-    /// ensure this.
     double integrate_segment (double a, double b, const eval_type &eval)
     {
         return integrate_segment_dispatch(a, b, eval,
