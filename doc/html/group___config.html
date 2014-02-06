@@ -80,6 +80,9 @@ Macros</h2></td></tr>
 <tr class="memitem:ga400c13a1407dd1ebe07768b669aa3c0f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___config.html#ga400c13a1407dd1ebe07768b669aa3c0f">VSMC_RUNTIME_ASSERT_AS_EXCEPTION</a>&#160;&#160;&#160;0</td></tr>
 <tr class="memdesc:ga400c13a1407dd1ebe07768b669aa3c0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn vSMC runtime assertions into exceptions.  <a href="#ga400c13a1407dd1ebe07768b669aa3c0f">More...</a><br/></td></tr>
 <tr class="separator:ga400c13a1407dd1ebe07768b669aa3c0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae786b46b3574fdd42bc3925ca7dee2bc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___config.html#gae786b46b3574fdd42bc3925ca7dee2bc">VSMC_RUNTIME_WARNING_AS_EXCEPTION</a>&#160;&#160;&#160;0</td></tr>
+<tr class="memdesc:gae786b46b3574fdd42bc3925ca7dee2bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn vSMC runtime warning into exceptions.  <a href="#gae786b46b3574fdd42bc3925ca7dee2bc">More...</a><br/></td></tr>
+<tr class="separator:gae786b46b3574fdd42bc3925ca7dee2bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadfc3cf6cfc0c9ea680ca6446e60cee90"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___config.html#gadfc3cf6cfc0c9ea680ca6446e60cee90">VSMC_SEED_TYPE</a>&#160;&#160;&#160;<a class="el" href="classvsmc_1_1_seed_generator.html">vsmc::SeedGenerator</a>&lt;<a class="el" href="class_null_type.html">NullType</a>&gt;</td></tr>
 <tr class="memdesc:gadfc3cf6cfc0c9ea680ca6446e60cee90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default type of Seed.  <a href="#gadfc3cf6cfc0c9ea680ca6446e60cee90">More...</a><br/></td></tr>
 <tr class="separator:gadfc3cf6cfc0c9ea680ca6446e60cee90"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -114,7 +117,7 @@ Macros</h2></td></tr>
 
 <p>Default RNG type for resampling. </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00031">31</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00037">37</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
@@ -130,7 +133,7 @@ Macros</h2></td></tr>
 
 <p>Default RNG set type. </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00038">38</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00044">44</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
@@ -162,7 +165,7 @@ Macros</h2></td></tr>
 
 <p>Use native timing library if <code>VSMC_HAS_CXX11LIB_CHRONO</code> test fail. </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00079">79</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00085">85</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
@@ -182,6 +185,22 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="gae786b46b3574fdd42bc3925ca7dee2bc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VSMC_RUNTIME_WARNING_AS_EXCEPTION&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Turn vSMC runtime warning into exceptions. </p>
+
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00025">25</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="gadfc3cf6cfc0c9ea680ca6446e60cee90"></a>
 <div class="memitem">
 <div class="memproto">
@@ -194,7 +213,7 @@ Macros</h2></td></tr>
 
 <p>Default type of Seed. </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00098">98</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00104">104</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
@@ -211,7 +230,7 @@ Macros</h2></td></tr>
 <p>The fallback StopWatch type. </p>
 <p>The class defined by <code>VSMC_STOP_WATCH_TYPE</code> need to be defined before including the <code>&lt;<a class="el" href="stop__watch_8hpp.html">vsmc/utility/stop_watch.hpp</a>&gt;</code> header. It shall provide the same interface as DummyStopWatch. This is only used when both <code>VSMC_HAS_CXX11LIB_CHRONO</code> and <code>VSMC_HAS_NATIVE_TIME_LIBRARY</code> are zero, in which case StopWatch is a typedef of this macro. </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00092">92</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00098">98</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
@@ -229,7 +248,7 @@ Macros</h2></td></tr>
 <p>User has to include CLBAS header first</p>
 <p>Use <code>VSMC_GENERIC_CBLAS_INT</code> to define the CBLAS integer type </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00073">73</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00079">79</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
@@ -245,7 +264,7 @@ Macros</h2></td></tr>
 
 <p>Use Intel MKL for BLAS level 2, level 3 and other computations. </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00056">56</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00062">62</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
@@ -261,7 +280,7 @@ Macros</h2></td></tr>
 
 <p>Use Random123 for random number generating. </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00025">25</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00031">31</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
@@ -277,7 +296,7 @@ Macros</h2></td></tr>
 
 <p>Use Apple vecLib for BLAS level 2 and level 3 computations. </p>
 
-<p>Definition at line <a class="el" href="config_8hpp_source.html#l00062">62</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
+<p>Definition at line <a class="el" href="config_8hpp_source.html#l00068">68</a> of file <a class="el" href="config_8hpp_source.html">config.hpp</a>.</p>
 
 </div>
 </div>
