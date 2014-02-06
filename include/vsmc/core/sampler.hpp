@@ -6,7 +6,6 @@
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>
 #include <vsmc/utility/backup.hpp>
-#include <vsmc/utility/stop_watch.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func) \
     VSMC_RUNTIME_ASSERT((iter != map.end()),                                 \
@@ -39,15 +38,13 @@ class Sampler
             ResampleScheme scheme = Stratified,
             double resample_threshold = 0) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
-        path_(typename Path<T>::eval_type()), start_watch_(false)
-    {resample_scheme(scheme);}
+        path_(typename Path<T>::eval_type()) {resample_scheme(scheme);}
 
     explicit Sampler (size_type N,
             const resample_type &res_op,
             double resample_threshold = 0) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
-        path_(typename Path<T>::eval_type()), start_watch_(false)
-    {resample_scheme(res_op);}
+        path_(typename Path<T>::eval_type()) {resample_scheme(res_op);}
 
     /// \brief Number of particles
     size_type size () const {return particle_.size();}
@@ -390,39 +387,6 @@ class Sampler
     /// \brief Erase all monitors
     Sampler<T> &clear_monitor () {monitor_.clear(); return *this;}
 
-    void start_watch () {start_watch_ = true;}
-
-    void stop_watch () {start_watch_ = false;}
-
-    void reset_watch ()
-    {
-        watch_init_.reset();
-        watch_move_.reset();
-        watch_mcmc_.reset();
-        watch_resample_.reset();
-        watch_monitor_.reset();
-    }
-
-    StopWatch &watch_init () {return watch_init_;}
-
-    const StopWatch &watch_init () const {return watch_init_;}
-
-    StopWatch &watch_move () {return watch_move_;}
-
-    const StopWatch &watch_move () const {return watch_move_;}
-
-    StopWatch &watch_mcmc () {return watch_mcmc_;}
-
-    const StopWatch &watch_mcmc () const {return watch_mcmc_;}
-
-    StopWatch &watch_resample () {return watch_resample_;}
-
-    const StopWatch &watch_resample () const {return watch_resample_;}
-
-    StopWatch &watch_monitor () {return watch_monitor_;}
-
-    const StopWatch &watch_monitor () const {return watch_monitor_;}
-
     /// \brief The size of Sampler summary header
     std::size_t summary_header_size () const
     {
@@ -571,16 +535,8 @@ class Sampler
     Path<T> path_;
     monitor_map_type monitor_;
 
-    bool start_watch_;
-    StopWatch watch_init_;
-    StopWatch watch_move_;
-    StopWatch watch_mcmc_;
-    StopWatch watch_resample_;
-    StopWatch watch_monitor_;
-
     void do_init (void *param)
     {
-        ScopedStopWatch<StopWatch> start(watch_init_, start_watch_);
         ess_history_.clear();
         resampled_history_.clear();
         accept_history_.clear();
@@ -597,7 +553,6 @@ class Sampler
 
     std::size_t do_move (std::size_t ia)
     {
-        ScopedStopWatch<StopWatch> start(watch_move_, start_watch_);
         for (typename std::vector<move_type>::iterator
                 m = move_queue_.begin(); m != move_queue_.end(); ++m) {
             accept_history_[ia].push_back((*m)(iter_num_, particle_));
@@ -609,7 +564,6 @@ class Sampler
 
     std::size_t do_mcmc (std::size_t ia)
     {
-        ScopedStopWatch<StopWatch> start(watch_mcmc_, start_watch_);
         for (typename std::vector<mcmc_type>::iterator
                 m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
             accept_history_[ia].push_back((*m)(iter_num_, particle_));
@@ -621,7 +575,6 @@ class Sampler
 
     void do_resample ()
     {
-        ScopedStopWatch<StopWatch> start(watch_resample_, start_watch_);
         bool resampled = particle_.resample(resample_op_, resample_threshold_);
         ess_history_.push_back(particle_.ess());
         resampled_history_.push_back(resampled);
@@ -629,7 +582,6 @@ class Sampler
 
     void do_monitor ()
     {
-        ScopedStopWatch<StopWatch> start(watch_monitor_, start_watch_);
         if (bool(path_))
             path_.eval(iter_num_, particle_);
 

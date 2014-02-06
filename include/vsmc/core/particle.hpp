@@ -7,7 +7,6 @@
 #include <vsmc/resample/basic.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
-#include <vsmc/utility/stop_watch.hpp>
 
 namespace vsmc {
 
@@ -41,8 +40,7 @@ class Particle
         resample_replication_(N), resample_copy_from_(N), resample_weight_(N),
         resample_rng_(Seed::instance().get()),
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
-        csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR)),
-        start_watch_(false)
+        csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {
         weight_set_.set_equal_weight();
         sp_[0] = SingleParticle<T>(std::numeric_limits<size_type>::max
@@ -184,84 +182,20 @@ class Particle
             resample_weight_.resize(N);
             const size_type *cptr = VSMC_NULLPTR;
             double *end = VSMC_NULLPTR;
-            {
-                ScopedStopWatch<StopWatch> start(
-                        resample_read_weight_watch_, start_watch_);
-                end = weight_set_.read_resample_weight(&resample_weight_[0]);
-            }
+            end = weight_set_.read_resample_weight(&resample_weight_[0]);
             if (end == &resample_weight_[0] + N) {
-                {
-                    ScopedStopWatch<StopWatch> start(
-                            resample_get_replication_watch_, start_watch_);
-                    op(static_cast<std::size_t>(N), resample_rng_,
-                            &resample_weight_[0], &resample_replication_[0]);
-                }
-                {
-                    ScopedStopWatch<StopWatch> start(
-                            resample_get_copy_from_watch_, start_watch_);
-                    resample_copy_from_replication_(N,
-                            &resample_replication_[0],
-                            &resample_copy_from_[0]);
-                }
+                op(static_cast<std::size_t>(N), resample_rng_,
+                        &resample_weight_[0], &resample_replication_[0]);
+                resample_copy_from_replication_(N,
+                        &resample_replication_[0], &resample_copy_from_[0]);
                 cptr = &resample_copy_from_[0];
-            }
-            {
-                ScopedStopWatch<StopWatch> start(
-                        resample_copy_watch_, start_watch_);
                 value_.copy(N, cptr);
-            }
-            {
-                ScopedStopWatch<StopWatch> start(
-                        resample_post_copy_watch_, start_watch_);
                 resample_post_copy_(weight_set_);
             }
         }
 
         return resampled;
     }
-
-    void start_watch () {start_watch_ = true;}
-
-    void stop_watch () {start_watch_ = false;}
-
-    void reset_watch ()
-    {
-        resample_read_weight_watch_.reset();
-        resample_get_replication_watch_.reset();
-        resample_get_copy_from_watch_.reset();
-        resample_copy_watch_.reset();
-        resample_post_copy_watch_.reset();
-    }
-
-    StopWatch &resample_read_weight_watch ()
-    {return resample_read_weight_watch_;}
-
-    const StopWatch &resample_read_weight_watch () const
-    {return resample_read_weight_watch_;}
-
-    StopWatch &resample_get_replication_watch ()
-    {return resample_get_replication_watch_;}
-
-    const StopWatch &resample_get_replication_watch () const
-    {return resample_get_replication_watch_;}
-
-    StopWatch &resample_get_copy_from_watch ()
-    {return resample_get_copy_from_watch_;}
-
-    const StopWatch &resample_get_copy_from_watch () const
-    {return resample_get_copy_from_watch_;}
-
-    StopWatch &resample_copy_watch ()
-    {return resample_copy_watch_;}
-
-    const StopWatch &resample_copy_watch () const
-    {return resample_copy_watch_;}
-
-    StopWatch &resample_post_copy_watch ()
-    {return resample_post_copy_watch_;}
-
-    const StopWatch &resample_post_copy_watch () const
-    {return resample_post_copy_watch_;}
 
     private :
 
@@ -279,13 +213,6 @@ class Particle
     resample_rng_type resample_rng_;
     std::vector<SingleParticle<T> > sp_;
     std::vector<ConstSingleParticle<T> > csp_;
-
-    bool start_watch_;
-    StopWatch resample_read_weight_watch_;
-    StopWatch resample_get_replication_watch_;
-    StopWatch resample_get_copy_from_watch_;
-    StopWatch resample_copy_watch_;
-    StopWatch resample_post_copy_watch_;
 }; // class Particle
 
 } // namespace vsmc
