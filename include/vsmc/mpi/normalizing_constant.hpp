@@ -8,7 +8,7 @@
 namespace vsmc {
 
 /// \brief Calculating normalizing constant ratio using MPI
-/// \ingroup SMP
+/// \ingroup MPI
 template <typename ID>
 class NormalizingConstantMPI : public NormalizingConstant
 {
