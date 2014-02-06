@@ -115,7 +115,6 @@ in the `LICENSE` file distributed with the source.
 [Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [libc++]: http://libcxx.llvm.org
-[libc++]: http://libcxx.llvm.org
 [libdispatch]: http://libdispatch.macosforge.org/
-[vSMCDoc]: http://zhouyan.github.io/vSMC/doc/html/index.html
+[vSMCDoc]: http://zhouyan.github.com/vSMC/doc/html/index.html
 [Open64]: http://www.open64.net
