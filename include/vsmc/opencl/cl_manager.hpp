@@ -147,17 +147,17 @@ class CLSetup
 /// If compiled on a recent MacBook Pro (late 2013 model), then the Iris Pro
 /// GPU from Intel will be used. Note that in this case, actually specify
 /// \code
-/// setup.device_type("GPU);
+/// setup.device_type("GPU");
 /// setup.device_name("Iris")
 /// \endcode
 /// or 
 /// \code
-/// setup.device_type("GPU);
+/// setup.device_type("GPU");
 /// setup.device_vedor("Intel")
 /// \endcode
 /// is enough. However, if one specify
 /// \code
-/// setup.device_type("CPU);
+/// setup.device_type("CPU");
 /// setup.device_vedor("NVIDIA")
 /// \endcode
 /// Then the setup will fail, since there is no device with the specified
