@@ -23,13 +23,6 @@
 
 namespace vsmc {
 
-namespace traits {
-
-template <typename Rng>
-struct RngShift {void operator() (Rng &rng) const {}};
-
-} // namepsace vsmc::traits
-
 struct ScalarRng;
 struct VectorRng;
 template <typename, typename> class RngSet;

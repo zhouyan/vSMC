@@ -249,7 +249,7 @@ class StateCL
                     CL_PROGRAM_BUILD_OPTIONS, &build_options_);
             build_ = true;
         } catch (...) {
-            cl_print_build_log<ID>(program_);
+            manager().print_build_log(program_, std::cout);
             throw;
         }
 

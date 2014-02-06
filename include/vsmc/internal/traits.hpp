@@ -2,7 +2,6 @@
 #define VSMC_INTERNAL_TRAITS_HPP
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
@@ -183,6 +182,20 @@ namespace vsmc {
 namespace traits {
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet)
+
+VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleBaseType,
+        single_particle_type, SingleParticleBase)
+VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
+        const_single_particle_type, ConstSingleParticleBase)
+
+template <typename T>
+struct SingleParticleTypeTrait :
+    public SingleParticleBaseTypeTrait<T, T> {};
+
+template <typename T>
+struct ConstSingleParticleTypeTrait :
+    public ConstSingleParticleBaseTypeTrait<T, T> {};
 
 #if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 template <typename T> struct OMPSizeTypeTrait {typedef T type;};
@@ -216,6 +229,9 @@ class DimTrait<Dynamic>
 
     std::size_t dim_;
 };
+
+template <typename Rng>
+struct RngShift {void operator() (Rng &rng) const {}};
 
 } // namespace vsmc::traits
 

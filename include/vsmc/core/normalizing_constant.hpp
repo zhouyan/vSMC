@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+#if VSMC_USE_MKL
+#include <mkl_vml.h>
+#endif
+
 namespace vsmc {
 
 /// \brief Calcualting normalizing constant ratio

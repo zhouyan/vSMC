@@ -224,19 +224,6 @@ class ConstSingleParticleBase
 
 namespace traits {
 
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleBaseType,
-        single_particle_type, SingleParticleBase)
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
-        const_single_particle_type, ConstSingleParticleBase)
-
-template <typename T>
-struct SingleParticleTypeTrait :
-    public SingleParticleBaseTypeTrait<T, T> {};
-
-template <typename T>
-struct ConstSingleParticleTypeTrait :
-    public ConstSingleParticleBaseTypeTrait<T, T> {};
-
 } // namespace vsmc::traits
 
 /// \brief A thin wrapper over a complete Particle

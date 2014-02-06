@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_MKL_RNG_HPP
 #define VSMC_RNG_MKL_RNG_HPP
 
-#include <vsmc/rng/rng_set.hpp>
+#include <vsmc/rng/seed.hpp>
 #include <mkl_vsl.h>
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset) \

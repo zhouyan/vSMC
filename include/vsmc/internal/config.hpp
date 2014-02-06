@@ -1,35 +1,11 @@
 #ifndef VSMC_INTERNAL_CONFIG_HPP
 #define VSMC_INTERNAL_CONFIG_HPP
 
-#include <vsmc/internal/compiler.hpp>
-
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
 #endif
 
-#if  VSMC_HAS_CXX11_CONSTEXPR
-#define VSMC_CONSTEXPR constexpr
-#else
-#define VSMC_CONSTEXPR
-#endif
-
-#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
-#define VSMC_EXPLICIT_OPERATOR explicit
-#else
-#define VSMC_EXPLICIT_OPERATOR
-#endif
-
-#if VSMC_HAS_CXX11_NOEXCEPT
-#define VSMC_NOEXCEPT noexcept
-#else
-#define VSMC_NOEXCEPT
-#endif
-
-#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
-#define VSMC_NULLPTR nullptr
-#else
-#define VSMC_NULLPTR 0
-#endif
+#include <vsmc/internal/compiler.hpp>
 
 /// \brief C++11 long long interge type
 /// \ingroup Config

@@ -2,7 +2,6 @@
 #define VSMC_INTERNAL_DEFINES_HPP
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
 
 // Avoid MSVC stupid behavior
 #define VSMC_MACRO_NO_EXPANSION
@@ -11,6 +10,30 @@
 #define VSMC_CRTP_DESTRUCTOR_PREFIX virtual
 #else
 #define VSMC_CRTP_DESTRUCTOR_PREFIX
+#endif
+
+#if  VSMC_HAS_CXX11_CONSTEXPR
+#define VSMC_CONSTEXPR constexpr
+#else
+#define VSMC_CONSTEXPR
+#endif
+
+#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
+#define VSMC_EXPLICIT_OPERATOR explicit
+#else
+#define VSMC_EXPLICIT_OPERATOR
+#endif
+
+#if VSMC_HAS_CXX11_NOEXCEPT
+#define VSMC_NOEXCEPT noexcept
+#else
+#define VSMC_NOEXCEPT
+#endif
+
+#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
+#define VSMC_NULLPTR nullptr
+#else
+#define VSMC_NULLPTR 0
 #endif
 
 namespace vsmc {

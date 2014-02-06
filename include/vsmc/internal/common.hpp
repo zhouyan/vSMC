@@ -2,9 +2,9 @@
 #define VSMC_INTERNAL_COMMON_HPP
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/forward.hpp>
-#include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
 #include <vsmc/cxx11/functional.hpp>

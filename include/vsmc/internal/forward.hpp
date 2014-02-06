@@ -32,6 +32,11 @@ template <typename> class Sampler;
 template <typename> class Particle;
 template <typename> class Monitor;
 template <typename> class Path;
+template <typename> class SingleParticle;
+template <typename> class ConstSingleParticle;
+template <typename> class SingleParticleBase;
+template <typename> class ConstSingleParticleBase;
+class WeightSet;
 
 // SMP states
 template <MatrixOrder, std::size_t, typename> class StateMatrix;
