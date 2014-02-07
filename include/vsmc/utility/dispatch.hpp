@@ -49,6 +49,7 @@ class DispatchObject
 
     DispatchObject &operator= (const DispatchObject &other)
     {
+        dispatch_release(object_);
         object_ = other.object_;
         dispatch_retain(object_);
 
