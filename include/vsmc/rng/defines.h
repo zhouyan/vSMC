@@ -3,12 +3,19 @@
 
 #ifndef VSMC_STATIC_INLINE
 #ifdef __OPENCL_VERSION__
+  #ifndef UINT64_C
+  #define UINT64_C(x) ((ulong)(x##UL))
+  #endif
   #if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
     #define VSMC_STATIC_INLINE static inline
   #else
     #define VSMC_STATIC_INLINE inline
   #endif
 #else
+  #include <stdint.h>
+  #ifndef UINT64_C
+    #error You must define __STC_CONSTANT_MACROS before #include<stdint.h>
+  #endif
   #ifdef __cplusplus
     #define VSMC_STATIC_INLINE inline
     #include <cmath>

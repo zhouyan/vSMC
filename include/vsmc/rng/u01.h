@@ -36,7 +36,7 @@
 #ifndef VSMC_RNG_U01_H
 #define VSMC_RNG_U01_H
 
-#include <vsmc/rng/urng.h>
+#include <vsmc/rng/defines.h>
 
 #if VSMC_FP_TYPE_IS_FLOAT
 #define U01_OPEN_OPEN_32     u01_open_open_32_24
@@ -94,7 +94,7 @@ VSMC_STATIC_INLINE float u01_open_open_32_24 (uint32_t i)
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)
 {
-    return ((i&R123_64BIT(0x7ffffffffffffe00)) + (i&0x200)) * VSMC_0x1p_63;
+    return ((i&UINT64_C(0x7ffffffffffffe00)) + (i&0x200)) * VSMC_0x1p_63;
 }
 
 /// \ingroup RNG
