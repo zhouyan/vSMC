@@ -29,7 +29,7 @@ class DispatchObject
     ///
     /// \details
     /// The original object will be retained by this object
-    DispatchObject (DispatchType object) : object_(object)
+    explicit DispatchObject (DispatchType object) : object_(object)
     {dispatch_retain(object);}
 
     DispatchObject (const DispatchObject &other) : object_(other.object_)
@@ -77,6 +77,10 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     {dispatch_queue_set_specific(this->get(), key, context, destructor);}
 
     /// \brief Set this queue as the target queue for the object
+    ///
+    /// \details
+    /// Note that set this queue as the target of an dispatch object will
+    /// retain the queue.
     template <typename DispatchType>
     void set_as_target (const DispatchObject<DispatchType> &object) const
     {dispatch_set_target_queue(object.get(), this->get());}
@@ -179,6 +183,63 @@ class DispatchQueue<Private> : public DispatchQueueBase
 
     ~DispatchQueue () {dispatch_release(this->get());}
 }; // class DispatchQueue
+
+/// \brief A Dispatch group
+/// \ingroup Dispatch
+class DispatchGroup : public DispatchObject<dispatch_group_t>
+{
+    public :
+
+    DispatchGroup () :
+        DispatchObject<dispatch_group_t>(dispatch_group_create()) {}
+
+    ~DispatchGroup () {dispatch_release(this->get());}
+
+    void enter () {dispatch_group_enter(this->get());}
+
+    void leave () {dispatch_group_leave(this->get());}
+
+    long wait (dispatch_time_t timeout)
+    {return dispatch_group_wait(this->get(), timeout);}
+
+    template <DispatchQueueType Type>
+    void async_f (const DispatchQueue<Type> &queue, void *context,
+            dispatch_function_t work) const
+    {dispatch_group_async_f(this->get(), queue.get(), context, work);}
+
+    void async_f (dispatch_queue_t queue, void *context,
+            dispatch_function_t work) const
+    {dispatch_group_async_f(this->get(), queue, context, work);}
+
+    template <DispatchQueueType Type>
+    void notify_f (const DispatchQueue<Type> &queue, void *context,
+            dispatch_function_t work) const
+    {dispatch_group_notify_f(this->get(), queue.get(), context, work);}
+
+    void notify_f (dispatch_queue_t queue, void *context,
+            dispatch_function_t work) const
+    {dispatch_group_notify_f(this->get(), queue, context, work);}
+
+#ifdef __BLOCKS__
+    template <DispatchQueueType Type>
+    void async (const DispatchQueue<Type> &queue,
+            dispatch_block_t block) const
+    {dispatch_group_async(this->get(), queue.get(), block);}
+
+    void async (dispatch_queue_t queue,
+            dispatch_block_t block) const
+    {dispatch_group_async(this->get(), queue, block);}
+
+    template <DispatchQueueType Type>
+    void notify (const DispatchQueue<Type> &queue,
+            dispatch_block_t block) const
+    {dispatch_group_notify(this->get(), queue.get(), block);}
+
+    void notify (dispatch_queue_t queue,
+            dispatch_block_t block) const
+    {dispatch_group_notify(this->get(), queue, block);}
+#endif // __BLOCKS__
+}; // class DispatchGroup
 
 } // namespace vsmc
 
