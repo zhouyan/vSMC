@@ -47,7 +47,7 @@
 /// \ingroup SMP
 /// \brief Parallel samplers using Intel Cilk Plus
 
-/// \defgroup GCD Apple Grand Central Dispatch
+/// \defgroup GCD Grand Central Dispatch
 /// \ingroup SMP
 /// \brief Parallel samplers using Apple GCD
 
@@ -55,7 +55,7 @@
 /// \ingroup SMP
 /// \brief Parallel samplers using OpenMP
 
-/// \defgroup PPL Microsoft Parallel Pattern Library
+/// \defgroup PPL Parallel Pattern Library
 /// \ingroup SMP
 /// \brief Parallel samplers using Microsoft PPL
 
@@ -95,6 +95,10 @@
 /// \defgroup Backup Object backup
 /// \ingroup Utility
 /// \brief Backup and restore objects
+
+/// \defgroup Dispatch Grand Central Dispatch
+/// \ingroup Utility
+/// \brief C++ wrapper of Apple GCD
 
 /// \defgroup HDF5Save HDF5 objects saving
 /// \ingroup Utility

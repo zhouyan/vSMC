@@ -2,7 +2,7 @@
 #define VSMC_SMP_BACKEND_GCD_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-#include <vsmc/smp/internal/gcd_wrapper.hpp>
+#include <vsmc/utility/dispatch.hpp>
 
 namespace vsmc {
 
@@ -29,8 +29,7 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 
         const size_type N = static_cast<size_type>(this->size());
         work_param_ wp = {this->weight_ptr(), this->log_weight_ptr()};
-        dispatch_apply_f(N, DispatchQueue::instance().queue(),
-                (void *) &wp, log_weight2weight_);
+        queue_.apply_f(N, (void *) &wp, log_weight2weight_);
     }
 
     void weight2log_weight ()
@@ -39,11 +38,12 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 
         const size_type N = static_cast<size_type>(this->size());
         work_param_ wp = {this->weight_ptr(), this->log_weight_ptr()};
-        dispatch_apply_f(N, DispatchQueue::instance().queue(),
-                (void *) &wp, weight2log_weight_);
+        queue_.apply_f(N, (void *) &wp, weight2log_weight_);
     }
 
     private :
+
+    DispatchQueue<Global> queue_;
 
     struct work_param_
     {
@@ -80,12 +80,11 @@ class NormalizingConstantGCD : public NormalizingConstant
     protected:
 
     void vd_exp (std::size_t N, double *inc_weight) const
-    {
-        dispatch_apply_f(N, DispatchQueue::instance().queue(),
-                (void *) inc_weight, vd_exp_);
-    }
+    {queue_.apply_f(N, (void *) inc_weight, vd_exp_);}
 
     private :
+
+    DispatchQueue<Global> queue_;
 
     static void vd_exp_ (void *wp, std::size_t i)
     {
@@ -115,7 +114,6 @@ class InitializeGCD : public InitializeBase<T, Derived>
 {
     public :
 
-
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
@@ -124,8 +122,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
         this->pre_processor(particle);
         accept_.resize(N);
         work_param_ wp = {this, &particle, &accept_[0]};
-        dispatch_apply_f(N, DispatchQueue::instance().queue(),
-                (void *) &wp, work_);
+        queue_.apply_f(N, (void *) &wp, work_);
         this->post_processor(particle);
 
         std::size_t acc = 0;
@@ -141,6 +138,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     private :
 
+    DispatchQueue<Global> queue_;
     std::vector<std::size_t> accept_;
 
     struct work_param_
@@ -174,8 +172,7 @@ class MoveGCD : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         accept_.resize(N);
         work_param_ wp = {this, &particle, &accept_[0], iter};
-        dispatch_apply_f(N, DispatchQueue::instance().queue(),
-                (void *) &wp, work_);
+        queue_.apply_f(N, (void *) &wp, work_);
         this->post_processor(iter, particle);
 
         std::size_t acc = 0;
@@ -191,6 +188,7 @@ class MoveGCD : public MoveBase<T, Derived>
 
     private :
 
+    DispatchQueue<Global> queue_;
     std::vector<std::size_t> accept_;
 
     struct work_param_
@@ -225,8 +223,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter, dim};
-        dispatch_apply_f(N, DispatchQueue::instance().queue(),
-                (void *) &wp, work_);
+        queue_.apply_f(N, (void *) &wp, work_);
         this->post_processor(iter, particle);
     }
 
@@ -235,6 +232,8 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
     VSMC_DEFINE_SMP_IMPL_COPY_BASE(GCD, MonitorEval)
 
     private :
+
+    DispatchQueue<Global> queue_;
 
     struct work_param_
     {
@@ -271,8 +270,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_param_ wp = {this, &particle, res, iter};
-        dispatch_apply_f(N, DispatchQueue::instance().queue(),
-                (void *) &wp, work_);
+        queue_.apply_f(N, (void *) &wp, work_);
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);
@@ -283,6 +281,8 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
     VSMC_DEFINE_SMP_IMPL_COPY_BASE(GCD, PathEval)
 
     private :
+
+    DispatchQueue<Global> queue_;
 
     struct work_param_
     {
