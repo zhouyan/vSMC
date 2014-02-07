@@ -21,12 +21,28 @@ namespace vsmc {
 /// \brief Types of DispatchQueue
 /// \ingroup Dispatch
 enum DispatchQueueType {
-    Main,    ///< The queue obtained through `dispatch_get_main_queue`
-    Global,  ///< The queue obtained through `dispatch_get_gloal_queue`
-    Private  ///< The queue created by `dispatch_queue_create`
+    DispatchMain,    ///< The queue obtained through `dispatch_get_main_queue`
+    DispatchGlobal,  ///< The queue obtained through `dispatch_get_gloal_queue`
+    DispatchPrivate  ///< The queue created by `dispatch_queue_create`
+};
+
+/// \brief Types of DispatchSource
+/// \ingroup Dispatch
+enum DispatchSourceType {
+    DispatchDataAdd,   ///< DISPATCH_SOURCE_TYPE_DATA_ADD,
+    DispatchDataOr,    ///< DISPATCH_SOURCE_TYPE_DATA_OR,
+    DispatchMachRecv,  ///< DISPATCH_SOURCE_TYPE_MACH_RECV,
+    DispatchMachSend,  ///< DISPATCH_SOURCE_TYPE_MACH_SEND,
+    DispatchProc,      ///< DISPATCH_SOURCE_TYPE_PROC,
+    DispatchRead,      ///< DISPATCH_SOURCE_TYPE_READ,
+    DispatchSignal,    ///< DISPATCH_SOURCE_TYPE_SIGNAL,
+    DispatchTimer,     ///< DISPATCH_SOURCE_TYPE_TIMER,
+    DispatchVnode,     ///< DISPATCH_SOURCE_TYPE_VNODE,
+    DispatchWrite      ///< DISPATCH_SOURCE_TYPE_WRITE
 };
 
 template <DispatchQueueType> class DispatchQueue;
+template <DispatchSourceType> class DispatchSource;
 
 /// \brief Base class of Dispatch objects
 /// \ingroup Dispatch
@@ -178,7 +194,7 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
 /// \brief The main dispatch queue (`dipatch_get_main_queue`)
 /// \ingroup Dispatch
 template <>
-class DispatchQueue<Main> : public DispatchQueueBase
+class DispatchQueue<DispatchMain> : public DispatchQueueBase
 {
     public :
 
@@ -188,7 +204,7 @@ class DispatchQueue<Main> : public DispatchQueueBase
 /// \brief The global (concurrent) dispatch queue (`dispatch_get_gloal_queue`)
 /// \ingroup Dispatch
 template <>
-class DispatchQueue<Global> : public DispatchQueueBase
+class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 {
     public :
 
@@ -205,7 +221,7 @@ class DispatchQueue<Global> : public DispatchQueueBase
 /// \brief A private dispatch queue (`dispatch_queue_create`)
 /// \ingroup Dispatch
 template <>
-class DispatchQueue<Private> : public DispatchQueueBase
+class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
 {
     public :
 
@@ -274,7 +290,7 @@ class DispatchGroup : public DispatchObject<dispatch_group_t>
 
 /// \brief Base class of DispatchSource
 /// \ingroup Dispatch
-template <dispatch_source_type_t Type>
+template <DispatchSourceType Type>
 class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 {
     public :
@@ -327,9 +343,13 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 #endif // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
 #endif // __BLOCKS__
 
+    protected :
+
     DispatchSourceBase (uintptr_t handle, unsigned long mask,
-            dispatch_queue_t queue) : DispatchObject<dispatch_source_t>(
-                dispatch_source_create(Type, handle, mask, queue)) {}
+            dispatch_queue_t queue) :
+        DispatchObject<dispatch_source_t>(
+                dispatch_source_create(source_type(cxx11::integral_constant<
+                        DispatchSourceType, Type>()), handle, mask, queue)) {}
 
     DispatchSourceBase (const DispatchSourceBase &other) :
         DispatchObject<dispatch_source_t>(other) {}
@@ -338,96 +358,130 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     {DispatchObject<dispatch_source_t>::operator=(other); return *this;}
 
     ~DispatchSourceBase () {dispatch_release(this->get());}
+
+    private :
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchDataAdd>)
+    {return DISPATCH_SOURCE_TYPE_DATA_ADD;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchDataOr>)
+    {return DISPATCH_SOURCE_TYPE_DATA_OR;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchMachRecv>)
+    {return DISPATCH_SOURCE_TYPE_MACH_RECV;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchMachSend>)
+    {return DISPATCH_SOURCE_TYPE_MACH_SEND;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchProc>)
+    {return DISPATCH_SOURCE_TYPE_PROC;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchRead>)
+    {return DISPATCH_SOURCE_TYPE_READ;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchSignal>)
+    {return DISPATCH_SOURCE_TYPE_SIGNAL;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchTimer>)
+    {return DISPATCH_SOURCE_TYPE_TIMER;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchVnode>)
+    {return DISPATCH_SOURCE_TYPE_VNODE;}
+
+    static dispatch_source_type_t source_type (
+            cxx11::integral_constant<DispatchSourceType, DispatchWrite>)
+    {return DISPATCH_SOURCE_TYPE_WRITE;}
 }; // class DispatchSourceBase
 
 /// \brief A dispatch source
-template <dispatch_source_type_t Type>
+template <DispatchSourceType Type>
 class DispatchSource : public DispatchSourceBase<Type>
 {
     public :
 
     template <DispatchQueueType QType>
     DispatchSource (uintptr_t handle, unsigned long mask,
-            const DispatchQueue<QType> &queue) : DispatchSourceBase<Type>(
-                handle, mask, queue.get()) {}
+            const DispatchQueue<QType> &queue) :
+        DispatchSourceBase<Type>(handle, mask, queue.get()) {}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
-            dispatch_queue_t queue) : DispatchSourceBase<Type>(
-                handle, mask, queue) {}
+            dispatch_queue_t queue) :
+        DispatchSourceBase<Type>(handle, mask, queue) {}
 }; // class DispatchSource
 
 template <>
-class DispatchSource<DISPATCH_SOURCE_TYPE_DATA_ADD> :
-    public DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_ADD>
+class DispatchSource<DispatchDataAdd> :
+    public DispatchSourceBase<DispatchDataAdd>
 {
     public :
 
     template <DispatchQueueType QType>
     DispatchSource (uintptr_t handle, unsigned long mask,
             const DispatchQueue<QType> &queue) :
-        DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_ADD>(
-                handle, mask, queue.get()) {}
+        DispatchSourceBase<DispatchDataAdd>(handle, mask, queue.get()) {}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
             dispatch_queue_t queue) :
-        DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_ADD>(
-                handle, mask, queue) {}
+        DispatchSourceBase<DispatchDataAdd>(handle, mask, queue) {}
 
     void merge_data (unsigned long value) const
     {dispatch_source_merge_data(this->get(), value);}
 }; // class DispatchSource
 
 template <>
-class DispatchSource<DISPATCH_SOURCE_TYPE_DATA_OR> :
-    public DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_OR>
+class DispatchSource<DispatchDataOr> :
+    public DispatchSourceBase<DispatchDataOr>
 {
     public :
 
     template <DispatchQueueType QType>
     DispatchSource (uintptr_t handle, unsigned long mask,
             const DispatchQueue<QType> &queue) :
-        DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_OR>(
-                handle, mask, queue.get()) {}
+        DispatchSourceBase<DispatchDataOr>(handle, mask, queue.get()) {}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
             dispatch_queue_t queue) :
-        DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_OR>(
-                handle, mask, queue) {}
+        DispatchSourceBase<DispatchDataOr>(handle, mask, queue) {}
 
     void merge_data (unsigned long value) const
     {dispatch_source_merge_data(this->get(), value);}
 }; // class DispatchSource
 
 template <>
-class DispatchSource<DISPATCH_SOURCE_TYPE_TIMER> :
-    public DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>
+class DispatchSource<DispatchTimer> :
+    public DispatchSourceBase<DispatchTimer>
 {
     public :
 
     template <DispatchQueueType QType>
     DispatchSource (uintptr_t handle, unsigned long mask,
             const DispatchQueue<QType> &queue) :
-        DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>(
-                handle, mask, queue.get()) {}
+        DispatchSourceBase<DispatchTimer>(handle, mask, queue.get()) {}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
             dispatch_queue_t queue) :
-        DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>(
-                handle, mask, queue) {}
+        DispatchSourceBase<DispatchTimer>(handle, mask, queue) {}
 
     template <DispatchQueueType QType>
     DispatchSource (uintptr_t handle, unsigned long mask,
             const DispatchQueue<QType> &queue,
             dispatch_time_t start, uint64_t interval, uint64_t leeway) :
-        DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>(
-                handle, mask, queue.get())
+        DispatchSourceBase<DispatchTimer>(handle, mask, queue.get())
     {set_timer(start, interval, leeway);}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
             dispatch_queue_t queue,
             dispatch_time_t start, uint64_t interval, uint64_t leeway) :
-        DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>(
-                handle, mask, queue)
+        DispatchSourceBase<DispatchTimer>(handle, mask, queue)
     {set_timer(start, interval, leeway);}
 
     void set_timer (dispatch_time_t start, uint64_t interval, uint64_t leeway)

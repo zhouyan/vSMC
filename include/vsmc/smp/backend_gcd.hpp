@@ -43,7 +43,7 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 
     private :
 
-    DispatchQueue<Global> queue_;
+    DispatchQueue<DispatchGlobal> queue_;
 
     struct work_param_
     {
@@ -84,7 +84,7 @@ class NormalizingConstantGCD : public NormalizingConstant
 
     private :
 
-    DispatchQueue<Global> queue_;
+    DispatchQueue<DispatchGlobal> queue_;
 
     static void vd_exp_ (void *wp, std::size_t i)
     {
@@ -138,7 +138,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     private :
 
-    DispatchQueue<Global> queue_;
+    DispatchQueue<DispatchGlobal> queue_;
     std::vector<std::size_t> accept_;
 
     struct work_param_
@@ -188,7 +188,7 @@ class MoveGCD : public MoveBase<T, Derived>
 
     private :
 
-    DispatchQueue<Global> queue_;
+    DispatchQueue<DispatchGlobal> queue_;
     std::vector<std::size_t> accept_;
 
     struct work_param_
@@ -233,7 +233,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 
     private :
 
-    DispatchQueue<Global> queue_;
+    DispatchQueue<DispatchGlobal> queue_;
 
     struct work_param_
     {
@@ -282,7 +282,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
 
     private :
 
-    DispatchQueue<Global> queue_;
+    DispatchQueue<DispatchGlobal> queue_;
 
     struct work_param_
     {
