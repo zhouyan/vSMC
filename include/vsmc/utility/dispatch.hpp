@@ -76,7 +76,7 @@ class DispatchObject
 
     void *get_context () const {return dispatch_get_context(object_);}
 
-    void set_context (void *ctx) {dispatch_set_context(object_, ctx);}
+    void set_context (void *context) {dispatch_set_context(object_, context);}
 
     void set_finalizer_f (dispatch_function_t finalizer)
     {dispatch_set_finalizer_t(object_, finalizer);}
