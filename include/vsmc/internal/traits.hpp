@@ -10,6 +10,7 @@
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)               \
 template <typename T> struct Outer##Trait;                                   \
                                                                              \
+namespace internal {                                                         \
 template <typename T>                                                        \
 struct Has##Outer##Impl                                                      \
 {                                                                            \
@@ -35,16 +36,18 @@ template <typename T> struct Outer##Dispatch<T, false>                       \
                                                                              \
 template <typename T> struct Outer##Dispatch<T, true>                        \
 {typedef typename T::Inner type;};                                           \
+}                                                                            \
                                                                              \
 template <typename T> struct Outer##Trait                                    \
 {                                                                            \
-    enum {value = Has##Outer<T>::value};                                     \
-    typedef typename Outer##Dispatch<T, value>::type type;                   \
+    enum {value = internal::Has##Outer<T>::value};                           \
+    typedef typename internal::Outer##Dispatch<T, value>::type type;         \
 };
 
 #define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)      \
 template <typename T> struct Outer##Trait;                                   \
                                                                              \
+namespace internal {                                                         \
 template <typename T>                                                        \
 struct Has##Outer##Impl                                                      \
 {                                                                            \
@@ -70,11 +73,12 @@ template <typename T> struct Outer##Dispatch<T, false>                       \
                                                                              \
 template <typename T> struct Outer##Dispatch<T, true>                        \
 {typedef typename T::template Inner<T> type;};                               \
+}                                                                            \
                                                                              \
 template <typename T> struct Outer##Trait                                    \
 {                                                                            \
-    enum {value = Has##Outer<T>::value};                                     \
-    typedef typename Outer##Dispatch<T, value>::type type;                   \
+    enum {value = internal::Has##Outer<T>::value};                           \
+    typedef typename internal::Outer##Dispatch<T, value>::type type;         \
 };
 
 #define VSMC_DEFINE_SMP_MF_CHECKER(name, RT, Args)                           \

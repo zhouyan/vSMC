@@ -104,12 +104,12 @@ inline typename remove_reference<T>::type &&move (T &&t) VSMC_NOEXCEPT
 #endif
 
 // is_pointer
-namespace is_pointer_impl {
-template <typename T> struct helper :      public false_type {};
-template <typename T> struct helper<T *> : public true_type {};
-}
+namespace internal {
+template <typename T> struct is_pointer_impl :      public false_type {};
+template <typename T> struct is_pointer_impl<T *> : public true_type {};
+} // namespace vsmc::internal
 template <typename T> struct is_pointer :
-    public is_pointer_impl::helper<typename remove_cv<T>::type> {};
+    public internal::is_pointer_impl<typename remove_cv<T>::type> {};
 
 // remove_pointer
 template <typename T> struct remove_pointer              {typedef T type;};
@@ -124,14 +124,17 @@ template <typename T> struct add_pointer
 {typedef typename remove_reference<T>::type * type;};
 
 // is_floating_point
-namespace is_floating_point_impl {
-template <typename T> struct helper :              public false_type {};
-template <>           struct helper<float> :       public true_type {};
-template <>           struct helper<double> :      public true_type {};
-template <>           struct helper<long double> : public true_type {};
-}
+namespace internal {
+template <typename T> struct is_floating_point_impl : public false_type {};
+template <> struct is_floating_point_impl<float> :
+    public true_type {};
+template <> struct is_floating_point_impl<double> :
+    public true_type {};
+template <> struct is_floating_point_impl<long double> :
+    public true_type {};
+} // namespace vsmc::internal
 template <typename T> struct is_floating_point :
-    public is_floating_point_impl::helper<typename remove_cv<T>::type> {};
+    public internal::is_floating_point_impl<typename remove_cv<T>::type> {};
 
 /// @}
 
