@@ -82,12 +82,14 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     const char *get_label () const
     {return dispatch_queue_get_label(this->get());}
 
+#ifdef MAC_OS_X_VERSION_10_7
     void *get_specific (const void *key) const
     {return dispatch_queue_get_specific(this->get(), key);}
 
     void set_specific (const void *key, void *context,
             dispatch_function_t destructor)
     {dispatch_queue_set_specific(this->get(), key, context, destructor);}
+#endif // MAC_OS_X_VERSION_10_7
 
     /// \brief Set this queue as the target queue for the object
     ///
@@ -112,11 +114,13 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     void sync_f (void *context, dispatch_function_t work) const
     {dispatch_sync_f(this->get(), context, work);}
 
+#ifdef MAC_OS_X_VERSION_10_7
     void barrier_async_f (void *context, dispatch_function_t work) const
     {dispatch_barrier_async_f(this->get(), context, work);}
 
     void barrier_sync_f (void *context, dispatch_function_t work) const
     {dispatch_barrier_sync_f(this->get(), context, work);}
+#endif // MAC_OS_X_VERSION_10_7
 
 #ifdef __BLOCKS__
     void after (dispatch_time_t when, dispatch_block_t block) const
@@ -131,6 +135,7 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     void sync (dispatch_block_t block) const
     {dispatch_sync(this->get(), block);}
 
+#ifdef MAC_OS_X_VERSION_10_7
     void barrier_async (dispatch_block_t block) const
     {dispatch_barrier_async(this->get(), block);}
 
@@ -144,6 +149,7 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     void write (dispatch_fd_t fd, dispatch_data_t data,
             void (^handler) (dispatch_data_t, int)) const
     {dispatch_write(fd, data, this->get(), handler);}
+#endif // MAC_OS_X_VERSION_10_7
 #endif // __BLOCKS__
 
     protected :
@@ -278,11 +284,13 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     void set_event_handler_f (dispatch_function_t event_handler)
     {dispatch_source_set_event_handler_f(this->get(), event_handler);}
 
+#ifdef MAC_OS_X_VERSION_10_7
     void set_registration_handler_f (dispatch_function_t registration_handler)
     {
         dispatch_source_set_registration_handler_f(
                 this->get(), registration_handler);
     }
+#endif // MAC_OS_X_VERSION_10_7
 
 #ifdef __BLOCKS__
     void set_cancel_handler (dispatch_block_t cancel_handler)
@@ -291,11 +299,13 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     void set_event_handler (dispatch_block_t event_handler)
     {dispatch_source_set_event_handler(this->get(), event_handler);}
 
+#ifdef MAC_OS_X_VERSION_10_7
     void set_registration_handler (dispatch_block_t registration_handler)
     {
         dispatch_source_set_registration_handler(
                 this->get(), registration_handler);
     }
+#endif // MAC_OS_X_VERSION_10_7
 #endif // __BLOCKS__
 
     DispatchSourceBase (uintptr_t handle, unsigned long mask,
