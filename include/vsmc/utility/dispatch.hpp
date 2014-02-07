@@ -10,7 +10,7 @@
   #else
     #define VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7 0
   #endif
-#if defined(MAC_OS_X_VERSION_10_7)
+#elif defined(MAC_OS_X_VERSION_10_7)
   #define VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7 1
 #else
   #define VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7 0
