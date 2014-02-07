@@ -58,7 +58,7 @@ class DispatchObject
     ~DispatchObject () {dispatch_release(object_);}
 
     /// \brief Return the underlying Dispatch object
-    const DispatchType get () const {return object_;}
+    DispatchType get () const {return object_;}
 
     /// \brief If the object is non-NULL
     bool empty () const
@@ -103,14 +103,12 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     {dispatch_queue_set_specific(this->get(), key, context, destructor);}
 #endif // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
 
-    /// \brief Set this queue as the target queue for the object
-    ///
-    /// \details
-    /// Note that set this queue as the target of an dispatch object will
-    /// retain the queue.
     template <typename DispatchType>
-    void set_as_target (const DispatchObject<DispatchType> &object) const
+    void set_target_queue (const DispatchObject<DispatchType> &object) const
     {dispatch_set_target_queue(object.get(), this->get());}
+
+    void set_target_queue (dispatch_object_t object) const
+    {dispatch_set_target_queue(object, this->get());}
 
     void after_f (dispatch_time_t when, void *context,
             dispatch_function_t f) const
@@ -289,11 +287,14 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     long test_cancel () const
     {return dispatch_source_test_cancel(this->get());}
 
-    unsigned long get_data () const {dispatch_source_get_data(this->get());}
+    unsigned long get_data () const
+    {return dispatch_source_get_data(this->get());}
 
-    uintptr_t get_handle () const {dispatch_source_get_handle(this->get());}
+    uintptr_t get_handle () const
+    {return dispatch_source_get_handle(this->get());}
 
-    unsigned long get_mask () const {dispatch_source_get_mask(this->get());}
+    unsigned long get_mask () const
+    {return dispatch_source_get_mask(this->get());}
 
     void set_cancel_handler_f (dispatch_function_t cancel_handler)
     {dispatch_source_set_cancel_handler_f(this->get(), cancel_handler);}
