@@ -391,6 +391,7 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 }; // class DispatchSourceBase
 
 /// \brief A dispatch source
+/// \ingroup Dispatch
 template <DispatchSourceType Type>
 class DispatchSource : public DispatchSourceBase<Type>
 {
@@ -406,6 +407,8 @@ class DispatchSource : public DispatchSourceBase<Type>
         DispatchSourceBase<Type>(handle, mask, queue) {}
 }; // class DispatchSource
 
+/// \brief Data (ADD) dispatch source
+/// \ingroup Dispatch
 template <>
 class DispatchSource<DispatchDataAdd> :
     public DispatchSourceBase<DispatchDataAdd>
@@ -425,6 +428,8 @@ class DispatchSource<DispatchDataAdd> :
     {dispatch_source_merge_data(this->get(), value);}
 }; // class DispatchSource
 
+/// \brief Data (OR) dispatch source
+/// \ingroup Dispatch
 template <>
 class DispatchSource<DispatchDataOr> :
     public DispatchSourceBase<DispatchDataOr>
@@ -444,6 +449,8 @@ class DispatchSource<DispatchDataOr> :
     {dispatch_source_merge_data(this->get(), value);}
 }; // class DispatchSource
 
+/// \brief Timer dispatch source
+/// \ingroup Dispatch
 template <>
 class DispatchSource<DispatchTimer> :
     public DispatchSourceBase<DispatchTimer>
