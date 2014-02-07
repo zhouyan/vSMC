@@ -57,12 +57,12 @@ inline void normalize_replication (std::size_t N, IntType *replication)
 /// \brief Resampling schemes
 /// \ingroup Resample
 enum ResampleScheme {
-    Multinomial,
-    Residual,
-    Stratified,
-    Systematic,
-    ResidualStratified,
-    ResidualSystematic
+    Multinomial,        ///< Multinomial resampling
+    Residual,           ///< Residual resampling
+    Stratified,         ///< Stratified resampling
+    Systematic,         ///< Systematic resampling
+    ResidualStratified, ///< Stratified resampling on residuals
+    ResidualSystematic  ///< Systematic resampling on residuals
 };
 
 /// \brief Resample forward decleration
