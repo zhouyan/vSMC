@@ -3,8 +3,9 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING(running) \
-    VSMC_RUNTIME_ASSERT((stopped), ("CANNOT ADD TWO RUNNING **StopWatch**"))
+#define VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING \
+    VSMC_RUNTIME_ASSERT((!(running_ || other.running_)),                     \
+            ("CANNOT ADD TWO RUNNING **StopWatch**"))
 
 namespace vsmc {
 
@@ -74,8 +75,7 @@ class StopWatchClockWrapper
     StopWatchClockWrapper<ClockType> &operator+= (
             const StopWatchClockWrapper<ClockType> &other)
     {
-        bool stopped = !(running_ || other.running());
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING(stopped);
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
 
         elapsed_ += other.elapsed_;
 
@@ -85,8 +85,7 @@ class StopWatchClockWrapper
     StopWatchClockWrapper<ClockType> operator+ (
             const StopWatchClockWrapper<ClockType> &other) const
     {
-        bool stopped = !(running_ || other.running());
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING(stopped);
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
 
         StopWatchClockWrapper<ClockType> watch(*this);
         watch += other;
@@ -268,8 +267,7 @@ class StopWatch
 
     StopWatch &operator+= (const StopWatch &other)
     {
-        bool stopped = !(running_ || other.running());
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING(stopped);
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
 
         elapsed_sec_  += other.elapsed_sec_;
         elapsed_nsec_ += other.elapsed_nsec_;
@@ -279,8 +277,7 @@ class StopWatch
 
     StopWatch operator+ (const StopWatch &other) const
     {
-        bool stopped = !(running_ || other.running());
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING(stopped);
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
 
         StopWatch watch(*this);
         watch += other;
@@ -384,8 +381,7 @@ class StopWatch
 
     StopWatch &operator+= (const StopWatch &other)
     {
-        bool stopped = !(running_ || other.running());
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING(running);
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
 
         elapsed_.tv_sec  += other.elapsed_.tv_sec;
         elapsed_.tv_nsec += other.elapsed_.tv_nsec;
@@ -395,8 +391,7 @@ class StopWatch
 
     StopWatch operator+ (const StopWatch &other) const
     {
-        bool stopped = !(running_ || other.running());
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING(stopped);
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
 
         StopWatch watch(*this);
         watch += other;
