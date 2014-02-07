@@ -17,6 +17,27 @@
 #include <vsmc/internal/compiler/msvc.hpp>
 #endif
 
+#if defined(__APPLE__) || defined(__MACOSX)
+#include <Availability.h>
+#endif
+
+#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(__MAC_10_0)
+#define VSMC_MAC_10_0 __MAC_10_0
+#define VSMC_MAC_10_1 __MAC_10_1
+#define VSMC_MAC_10_2 __MAC_10_2
+#define VSMC_MAC_10_3 __MAC_10_3
+#define VSMC_MAC_10_4 __MAC_10_4
+#define VSMC_MAC_10_5 __MAC_10_5
+#define VSMC_MAC_10_6 __MAC_10_6
+#define VSMC_MAC_10_7 __MAC_10_7
+#define VSMC_MAC_10_8 __MAC_10_8
+#define VSMC_MAC_10_9 __MAC_10_9
+#define VSMC_MAC_VERSION __MAC_OS_X_VERSION_MIN_REQUIRED
+#define VSMC_MAC_VERSION_MIN_REQUIRED(ver) VSMC_MAC_VERSION >= ver
+#else
+#define VSMC_MAC_VERSION_MIN_REQUIRED(ver) 0
+#endif
+
 //  C++11 language features
 
 /// \brief C++11 SFINAE includes access control

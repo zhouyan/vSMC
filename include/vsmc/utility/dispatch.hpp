@@ -4,18 +4,6 @@
 #include <vsmc/internal/common.hpp>
 #include <dispatch/dispatch.h>
 
-#if defined(MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_X_VERSION_10_7)
-  #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
-    #define VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7 1
-  #else
-    #define VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7 0
-  #endif
-#elif defined(MAC_OS_X_VERSION_10_7)
-  #define VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7 1
-#else
-  #define VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7 0
-#endif
-
 namespace vsmc {
 
 /// \brief Types of DispatchQueue
@@ -111,14 +99,14 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     const char *get_label () const
     {return dispatch_queue_get_label(this->get());}
 
-#if VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
     void *get_specific (const void *key) const
     {return dispatch_queue_get_specific(this->get(), key);}
 
     void set_specific (const void *key, void *context,
             dispatch_function_t destructor)
     {dispatch_queue_set_specific(this->get(), key, context, destructor);}
-#endif // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 
     template <typename DispatchType>
     void set_target_queue (const DispatchObject<DispatchType> &object) const
@@ -141,13 +129,13 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     void sync_f (void *context, dispatch_function_t work) const
     {dispatch_sync_f(this->get(), context, work);}
 
-#if VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
     void barrier_async_f (void *context, dispatch_function_t work) const
     {dispatch_barrier_async_f(this->get(), context, work);}
 
     void barrier_sync_f (void *context, dispatch_function_t work) const
     {dispatch_barrier_sync_f(this->get(), context, work);}
-#endif // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 
 #ifdef __BLOCKS__
     void after (dispatch_time_t when, dispatch_block_t block) const
@@ -162,7 +150,7 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     void sync (dispatch_block_t block) const
     {dispatch_sync(this->get(), block);}
 
-#if VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
     void barrier_async (dispatch_block_t block) const
     {dispatch_barrier_async(this->get(), block);}
 
@@ -176,7 +164,7 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     void write (dispatch_fd_t fd, dispatch_data_t data,
             void (^handler) (dispatch_data_t, int)) const
     {dispatch_write(fd, data, this->get(), handler);}
-#endif // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 #endif // __BLOCKS__
 
     protected :
@@ -208,14 +196,14 @@ class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 {
     public :
 
-#if VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
     DispatchQueue (dispatch_queue_priority_t priority =
             DISPATCH_QUEUE_PRIORITY_DEFAULT, unsigned long flags = 0) :
         DispatchQueueBase(dispatch_get_global_queue(priority, flags)) {}
-#else // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#else // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
     DispatchQueue (long priority = 0, unsigned long flags = 0) :
         DispatchQueueBase(dispatch_get_global_queue(priority, flags)) {}
-#endif // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 }; // class DispatchQueue
 
 /// \brief A private dispatch queue (`dispatch_queue_create`)
@@ -319,13 +307,13 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     void set_event_handler_f (dispatch_function_t event_handler)
     {dispatch_source_set_event_handler_f(this->get(), event_handler);}
 
-#if VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
     void set_registration_handler_f (dispatch_function_t registration_handler)
     {
         dispatch_source_set_registration_handler_f(
                 this->get(), registration_handler);
     }
-#endif // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 
 #ifdef __BLOCKS__
     void set_cancel_handler (dispatch_block_t cancel_handler)
@@ -334,13 +322,13 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     void set_event_handler (dispatch_block_t event_handler)
     {dispatch_source_set_event_handler(this->get(), event_handler);}
 
-#if VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
     void set_registration_handler (dispatch_block_t registration_handler)
     {
         dispatch_source_set_registration_handler(
                 this->get(), registration_handler);
     }
-#endif // VSMC_DISPATCH_HAS_MAC_OS_X_VERSION_10_7
+#endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 #endif // __BLOCKS__
 
     protected :
