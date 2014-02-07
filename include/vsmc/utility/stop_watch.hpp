@@ -215,7 +215,7 @@ class StopWatch
             timebase_.numer / timebase_.denom;
         uint64_t inc_sec = elapsed_nsec / ratio_;
         uint64_t inc_nsec = elapsed_nsec % ratio_;
-        elapsed_sec_ += sec;
+        elapsed_sec_ += inc_sec;
         elapsed_nsec_ += inc_nsec;
         running_ = false;
     }
