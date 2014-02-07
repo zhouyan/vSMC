@@ -48,6 +48,15 @@ class DispatchObject
     /// \brief Return the underlying Dispatch object
     const DispatchType get () const {return object_;}
 
+    /// \brief If the object is non-NULL
+    bool empty () const
+    {
+        if (object_)
+            return false;
+        else
+            return true;
+    }
+
     void *get_context () const {return dispatch_get_context(object_);}
 
     void set_context (void *ctx) {dispatch_set_context(object_, ctx);}
@@ -287,7 +296,7 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
         dispatch_source_set_registration_handler(
                 this->get(), registration_handler);
     }
-#endif
+#endif // __BLOCKS__
 
     DispatchSourceBase (uintptr_t handle, unsigned long mask,
             dispatch_queue_t queue) : DispatchObject<dispatch_source_t>(
