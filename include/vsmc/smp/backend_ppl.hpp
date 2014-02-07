@@ -2,11 +2,17 @@
 #define VSMC_SMP_BACKEND_PPL_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-#include <vsmc/smp/internal/ppl_wrapper.hpp>
+#include <ppl.h>
 
 namespace vsmc {
 
 VSMC_DEFINE_SMP_FORWARD(PPL)
+
+#if _MSC_VER >= 1700
+namespace ppl = ::concurrency;
+#else
+namespace ppl = ::Concurrency;
+#endif
 
 /// \brief Particle::weight_set_type subtype using Parallel Pattern Library
 /// \ingroup PPL
