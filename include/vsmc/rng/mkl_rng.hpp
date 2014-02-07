@@ -150,7 +150,7 @@ inline void rng_error_check (MKL_INT BRNG, int status,
     VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
 } // error_check
 #else
-inline void rng_error_check (MKL_INT int, const char *, const char *) {}
+inline void rng_error_check (MKL_INT, int, const char *, const char *) {}
 #endif
 
 namespace traits {

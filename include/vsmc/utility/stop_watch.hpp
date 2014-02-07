@@ -43,7 +43,7 @@ class StopWatchClockWrapper
 
     typedef ClockType clock_type;
 
-    StopWatchClockWrapper () : elapsed_(0), running_(false) {}
+    StopWatchClockWrapper () : elapsed_(0), running_(false) {reset();}
 
     bool running () const {return running_;}
 
@@ -62,6 +62,7 @@ class StopWatchClockWrapper
 
     void reset () const
     {
+        start();
         elapsed_ = typename clock_type::duration(0);
         running_ = false;
     }
@@ -90,7 +91,6 @@ class StopWatchClockWrapper
 
         return watch;
     }
-
 
     private :
 
@@ -210,16 +210,18 @@ class StopWatch
     {
         uint64_t stop_time = mach_absolute_time();
         uint64_t elapsed_abs = stop_time - start_time_;
-        uint64_t elapsed_nano = elapsed_abs *
+        uint64_t elapsed_nsec = elapsed_abs *
             timebase_.numer / timebase_.denom;
-        uint64_t sec = elapsed_nano / ratio_;
+        uint64_t inc_sec = elapsed_nsec / ratio_;
+        uint64_t inc_nsec = elapsed_nsec % ratio_;
         elapsed_sec_ += sec;
-        elapsed_nsec_ += elapsed_nano - sec * ratio_;
+        elapsed_nsec_ += inc_nsec;
         running_ = false;
     }
 
     void reset () const
     {
+        start();
         elapsed_sec_ = 0;
         elapsed_nsec_ = 0;
         mach_timebase_info(&timebase_);
@@ -235,31 +237,31 @@ class StopWatch
     double microseconds () const
     {
         return static_cast<double>(elapsed_sec_) * 1e6 +
-            static_cast<double>(elapsed_nsec_) / 1e3;
+            static_cast<double>(elapsed_nsec_) * 1e-3;
     }
 
     double milliseconds () const
     {
         return static_cast<double>(elapsed_sec_) * 1e3 +
-            static_cast<double>(elapsed_nsec_) / 1e6;
+            static_cast<double>(elapsed_nsec_) * 1e-6;
     }
 
     double seconds () const
     {
         return static_cast<double>(elapsed_sec_) +
-            static_cast<double>(elapsed_nsec_) / 1e9;
+            static_cast<double>(elapsed_nsec_) * 1e-9;
     }
 
     double minutes () const
     {
         return static_cast<double>(elapsed_sec_) / 60.0 +
-            static_cast<double>(elapsed_nsec_) / 1e9 / 60.0;
+            static_cast<double>(elapsed_nsec_) * 1e-9 / 60.0;
     }
 
     double hours () const
     {
         return static_cast<double>(elapsed_sec_) / 3600.0 +
-            static_cast<double>(elapsed_nsec_) / 1e9 / 3600.0;
+            static_cast<double>(elapsed_nsec_) * 1e-9 / 3600.0;
     }
 
     StopWatch &operator+= (const StopWatch &other)
@@ -327,16 +329,16 @@ class StopWatch
         time_t sec = stop_time.tv_sec - start_time_.tv_sec;
         long nsec = stop_time.tv_nsec - start_time_.tv_nsec;
 
-        elapsed_.tv_sec += sec;
-        elapsed_.tv_nsec += nsec;
-        long inc_sec = elapsed_.tv_nsec / ratio_;
-        elapsed_.tv_sec += static_cast<time_t>(inc_sec);
-        elapsed_.tv_nsec -= inc_sec * ratio_;
+        time_t inc_sec = sec + nsec / ratio_;
+        long inc_nsec = nsec % ratio_;
+        elapsed_.tv_sec += inc_sec;
+        elapsed_.tv_nsec += inc_nsec;
         running_ = false;
     }
 
     void reset () const
     {
+        start();
         elapsed_.tv_sec = 0;
         elapsed_.tv_nsec = 0;
         running_ = false;
@@ -351,31 +353,31 @@ class StopWatch
     double microseconds () const
     {
         return static_cast<double>(elapsed_.tv_sec) * 1e6 +
-            static_cast<double>(elapsed_.tv_nsec) / 1e3;
+            static_cast<double>(elapsed_.tv_nsec) * 1e-3;
     }
 
     double milliseconds () const
     {
         return static_cast<double>(elapsed_.tv_sec) * 1e3 +
-            static_cast<double>(elapsed_.tv_nsec) / 1e6;
+            static_cast<double>(elapsed_.tv_nsec) * 1e-6;
     }
 
     double seconds () const
     {
         return static_cast<double>(elapsed_.tv_sec) +
-            static_cast<double>(elapsed_.tv_nsec) / 1e9;
+            static_cast<double>(elapsed_.tv_nsec) * 1e-9;
     }
 
     double minutes () const
     {
         return static_cast<double>(elapsed_.tv_sec) / 60.0 +
-            static_cast<double>(elapsed_.tv_nsec) / 1e9 / 60.0;
+            static_cast<double>(elapsed_.tv_nsec) * 1e-9 / 60.0;
     }
 
     double hours () const
     {
         return static_cast<double>(elapsed_.tv_sec) / 3600.0 +
-            static_cast<double>(elapsed_.tv_nsec) / 1e9 / 3600.0;
+            static_cast<double>(elapsed_.tv_nsec) * 1e-9 / 3600.0;
     }
 
     StopWatch &operator+= (const StopWatch &other)
