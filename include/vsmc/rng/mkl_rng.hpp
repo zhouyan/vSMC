@@ -6,7 +6,7 @@
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset) \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MACRO_NO_EXPANSION ()),           \
-            ("**vsmc::mkl::OffsetDynamic** "                                 \
+            ("**vsmc::MKLOffsetDynamic** "                                   \
              "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
 
 #ifndef VSMC_RNG_MKL_BUFFER_SIZE
@@ -15,54 +15,53 @@
 
 namespace vsmc {
 
-namespace mkl {
+template <MKL_INT BRNG>                          class MKLStream;
+template <typename ResultType, typename Derived> class MKLDistribution;
+template <MKL_INT BRNG, typename ResultType>     class MKLEngine;
 
-template <MKL_INT BRNG>                          class Stream;
-template <typename ResultType, typename Derived> class Distribution;
-template <MKL_INT BRNG, typename ResultType>     class Engine;
-template <typename ResultType>                   class UniformBits;
+template <typename ResultType> class MKLUniformBitsDistribution;
 
 template <MKL_INT Method =
-    VSL_RNG_METHOD_BERNOULLI_ICDF>       class Bernoulli;
+    VSL_RNG_METHOD_BERNOULLI_ICDF>       class MKLBernoulliDistribution;
 template <MKL_INT Method =
-    VSL_RNG_METHOD_GEOMETRIC_ICDF>       class Geometric;
+    VSL_RNG_METHOD_GEOMETRIC_ICDF>       class MKLGeometricDistribution;
 template <MKL_INT Method =
-    VSL_RNG_METHOD_BINOMIAL_BTPE>        class Binomial;
+    VSL_RNG_METHOD_BINOMIAL_BTPE>        class MKLBinomialDistribution;
 template <MKL_INT Method =
-    VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE>  class Hypergeometric;
+    VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE>  class MKLHypergeometricDistribution;
 template <MKL_INT Method =
-    VSL_RNG_METHOD_POISSON_PTPE>         class Poisson;
+    VSL_RNG_METHOD_POISSON_PTPE>         class MKLPoissonDistribution;
 template <MKL_INT Method =
-    VSL_RNG_METHOD_NEGBINOMIAL_NBAR>     class NegBinomial;
+    VSL_RNG_METHOD_NEGBINOMIAL_NBAR>     class MKLNegBinomialDistribution;
 template <typename ResultType, MKL_INT Method =
-    VSL_RNG_METHOD_UNIFORM_STD>          class Uniform;
+    VSL_RNG_METHOD_UNIFORM_STD>          class MKLUniformDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>  class Gaussian;
+    VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>  class MKLGaussianDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_EXPONENTIAL_ICDF>     class Exponential;
+    VSL_RNG_METHOD_EXPONENTIAL_ICDF>     class MKLExponentialDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_LAPLACE_ICDF>         class Laplace;
+    VSL_RNG_METHOD_LAPLACE_ICDF>         class MKLLaplaceDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_WEIBULL_ICDF>         class Weibull;
+    VSL_RNG_METHOD_WEIBULL_ICDF>         class MKLWeibullDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_CAUCHY_ICDF>          class Cauchy;
+    VSL_RNG_METHOD_CAUCHY_ICDF>          class MKLCauchyDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_RAYLEIGH_ICDF>        class Rayleigh;
+    VSL_RNG_METHOD_RAYLEIGH_ICDF>        class MKLRayleighDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2> class Lognormal;
+    VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2> class MKLLognormalDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_GUMBEL_ICDF>          class Gumbel;
+    VSL_RNG_METHOD_GUMBEL_ICDF>          class MKLGumbelDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_GAMMA_GNORM>          class Gamma;
+    VSL_RNG_METHOD_GAMMA_GNORM>          class MKLGammaDistribution;
 template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_BETA_CJA>             class Beta;
+    VSL_RNG_METHOD_BETA_CJA>             class MKLBetaDistribution;
 
 #define VSMC_DEFINE_VSL_BRNG_CASE(BRNG) \
     case BRNG : return #BRNG ;
 
 /// \brief Transfer MKL BRNG index to string
 /// \ingroup MKLRNG
-inline std::string rng_brng_str (MKL_INT BRNG)
+inline std::string mkl_rng_brng_str (MKL_INT BRNG)
 {
     switch (BRNG) {
         VSMC_DEFINE_VSL_BRNG_CASE(VSL_BRNG_MCG31)
@@ -86,9 +85,9 @@ inline std::string rng_brng_str (MKL_INT BRNG)
 #define VSMC_DEFINE_VSL_ERROR_CASE(STATUS) \
     case STATUS : return #STATUS ;
 
-/// \brief Transfer MKL VSL error code to string
+/// \brief Transfer MKL error code to string
 /// \ingroup MKLRNG
-inline std::string rng_error_str (int status)
+inline std::string mkl_rng_error_str (int status)
 {
     switch (status) {
         VSMC_DEFINE_VSL_ERROR_CASE(VSL_ERROR_OK)
@@ -130,50 +129,50 @@ inline std::string rng_error_str (int status)
 #ifndef NDEBUG
 /// \brief Check MKL RNG error status
 /// \ingroup MKLRNG
-inline void rng_error_check (MKL_INT BRNG, int status,
+inline void mkl_rng_error_check (MKL_INT BRNG, int status,
         const char *func, const char *vslf)
 {
     if (status == VSL_ERROR_OK)
         return;
 
-    std::string msg("**vsmc::mkl::");
+    std::string msg("**vsmc::");
     msg += func;
     msg += " failure";
     msg += "; MKL function: ";
     msg += vslf;
 
     msg += "; BRNG: ";
-    msg += rng_brng_str(BRNG);
+    msg += mkl_rng_brng_str(BRNG);
     msg += "; Error code: ";
-    msg += rng_error_str(status);
+    msg += mkl_rng_error_str(status);
 
     VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
 } // error_check
 #else
-inline void rng_error_check (MKL_INT, int, const char *, const char *) {}
+inline void mkl_rng_error_check (MKL_INT, int, const char *, const char *) {}
 #endif
 
 namespace traits {
 
-template<MKL_INT> struct SeedTrait
+template<MKL_INT> struct MKLSeedTrait
 {static VSMC_CONSTEXPR const MKL_UINT value = 101;};
 
-template <> struct SeedTrait<VSL_BRNG_SOBOL>
+template <> struct MKLSeedTrait<VSL_BRNG_SOBOL>
 {static VSMC_CONSTEXPR const MKL_UINT value = 10;};
 
-template <> struct SeedTrait<VSL_BRNG_NIEDERR>
+template <> struct MKLSeedTrait<VSL_BRNG_NIEDERR>
 {static VSMC_CONSTEXPR const MKL_UINT value = 10;};
 
-struct SkipAheadVSL
+struct MKLSkipAheadVSL
 {
     typedef long long size_type;
 
     template <MKL_INT BRNG>
-    void operator() (const Stream<BRNG> &stream, size_type nskip)
+    void operator() (const MKLStream<BRNG> &stream, size_type nskip)
     {
         int status = ::vslSkipAheadStream(stream.ptr(), nskip);
-        rng_error_check(BRNG, status,
-                "SkipAheadVSL::skip", "vslSkipAheadStream");
+        mkl_rng_error_check(BRNG, status,
+                "MKLSkipAheadVSL::skip", "vslSkipAheadStream");
     }
 
     static void buffer_size (MKL_INT) {}
@@ -181,14 +180,14 @@ struct SkipAheadVSL
 }; // struct SkipAheadVSL
 
 template <typename ResultType>
-struct SkipAheadForce
+struct MKLSkipAheadForce
 {
     typedef MKL_INT size_type;
 
-    SkipAheadForce () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
+    MKLSkipAheadForce () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
 
     template <MKL_INT BRNG>
-    void operator() (const Stream<BRNG> &stream, size_type nskip)
+    void operator() (const MKLStream<BRNG> &stream, size_type nskip)
     {
         if (nskip == 0)
             return;
@@ -217,10 +216,10 @@ struct SkipAheadForce
 
     MKL_INT buffer_size_;
     std::vector<ResultType> ruint_;
-    UniformBits<ResultType> runif_;
+    MKLUniformBitsDistribution<ResultType> runif_;
 }; // strut SkipAheadForce
 
-struct OffsetZero
+struct MKLOffsetZero
 {
     static VSMC_CONSTEXPR MKL_INT min VSMC_MACRO_NO_EXPANSION () {return 0;}
     static VSMC_CONSTEXPR MKL_INT max VSMC_MACRO_NO_EXPANSION () {return 0;}
@@ -229,9 +228,9 @@ struct OffsetZero
 }; // struct OffsetZero
 
 template <MKL_INT MaxOffset>
-struct OffsetDynamic
+struct MKLOffsetDynamic
 {
-    OffsetDynamic () : offset_(0) {}
+    MKLOffsetDynamic () : offset_(0) {}
 
     static VSMC_CONSTEXPR MKL_INT min VSMC_MACRO_NO_EXPANSION () {return 0;}
     static VSMC_CONSTEXPR MKL_INT max VSMC_MACRO_NO_EXPANSION ()
@@ -251,94 +250,101 @@ struct OffsetDynamic
 }; // struct OffsetDynamic
 
 template <MKL_INT BRNG, typename ResultType>
-struct SkipAheadTrait
-{typedef SkipAheadForce<ResultType> type;};
+struct MKLSkipAheadTrait
+{typedef MKLSkipAheadForce<ResultType> type;};
 
 template <typename ResultType>
-struct SkipAheadTrait<VSL_BRNG_MCG31, ResultType>
-{typedef SkipAheadVSL type;};
+struct MKLSkipAheadTrait<VSL_BRNG_MCG31, ResultType>
+{typedef MKLSkipAheadVSL type;};
 
 template <typename ResultType>
-struct SkipAheadTrait<VSL_BRNG_MCG59, ResultType>
-{typedef SkipAheadVSL type;};
+struct MKLSkipAheadTrait<VSL_BRNG_MCG59, ResultType>
+{typedef MKLSkipAheadVSL type;};
 
 template <typename ResultType>
-struct SkipAheadTrait<VSL_BRNG_MRG32K3A, ResultType>
-{typedef SkipAheadVSL type;};
+struct MKLSkipAheadTrait<VSL_BRNG_MRG32K3A, ResultType>
+{typedef MKLSkipAheadVSL type;};
 
 template <typename ResultType>
-struct SkipAheadTrait<VSL_BRNG_SOBOL, ResultType>
-{typedef SkipAheadVSL type;};
+struct MKLSkipAheadTrait<VSL_BRNG_SOBOL, ResultType>
+{typedef MKLSkipAheadVSL type;};
 
 template <typename ResultType>
-struct SkipAheadTrait<VSL_BRNG_NIEDERR, ResultType>
-{typedef SkipAheadVSL type;};
+struct MKLSkipAheadTrait<VSL_BRNG_NIEDERR, ResultType>
+{typedef MKLSkipAheadVSL type;};
 
-template <MKL_INT> struct OffsetTrait {typedef OffsetZero type;};
+template <MKL_INT> struct MKLOffsetTrait {typedef MKLOffsetZero type;};
 
 template <>
-struct OffsetTrait<VSL_BRNG_MT2203> {typedef OffsetDynamic<6024> type;};
+struct MKLOffsetTrait<VSL_BRNG_MT2203> {typedef MKLOffsetDynamic<6024> type;};
 
 template <>
-struct OffsetTrait<VSL_BRNG_WH> {typedef OffsetDynamic<273> type;};
+struct MKLOffsetTrait<VSL_BRNG_WH> {typedef MKLOffsetDynamic<273> type;};
 
-} // namespace vsmc::mkl::traits
+} // namespace vsmc::traits
 
 /// \brief MKL RNG C++11 engine stream
 /// \ingroup MKLRNG
 template <MKL_INT BRNG>
-class Stream : public traits::OffsetTrait<BRNG>::type
+class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
 {
     public :
 
-    explicit Stream (MKL_UINT s = traits::SeedTrait<BRNG>::value) : seed_(s)
+    explicit MKLStream (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value) :
+        seed_(s)
     {
         int status = ::vslNewStream(&str_ptr_, BRNG + this->offset(), seed_);
-        rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
+        mkl_rng_error_check(BRNG, status,
+                "MKLStream::Stream", "vslNewStream");
     }
 
     template <typename SeedSeq>
-    explicit Stream (SeedSeq &seq)
+    explicit MKLStream (SeedSeq &seq)
     {
         seq.generate(&seed_, &seed_ + 1);
         int status = ::vslNewStream(&str_ptr_, BRNG + this->offset(), seed_);
-        rng_error_check(BRNG, status, "Stream::Stream", "vslNewStream");
+        mkl_rng_error_check(BRNG, status,
+                "MKLStream::Stream", "vslNewStream");
     }
 
-    Stream (const Stream<BRNG> &other) : traits::OffsetTrait<BRNG>::type(other)
+    MKLStream (const MKLStream<BRNG> &other) :
+        traits::MKLOffsetTrait<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
-        rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
+        mkl_rng_error_check(BRNG, status,
+                "MKLStream::Stream", "vslCopyStream");
     }
 
-    Stream (Stream<BRNG> &other) : traits::OffsetTrait<BRNG>::type(other)
+    MKLStream (MKLStream<BRNG> &other) :
+        traits::MKLOffsetTrait<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
-        rng_error_check(BRNG, status, "Stream::Stream", "vslCopyStream");
+        mkl_rng_error_check(BRNG, status,
+                "MKLStream::Stream", "vslCopyStream");
     }
 
-    Stream<BRNG> &operator= (const Stream<BRNG> &other)
+    MKLStream<BRNG> &operator= (const MKLStream<BRNG> &other)
     {
-        traits::OffsetTrait<BRNG>::type::operator=(other);
+        traits::MKLOffsetTrait<BRNG>::type::operator=(other);
         int status = ::vslCopyStreamState(str_ptr_, other.str_ptr_);
-        rng_error_check(BRNG, status,
-                "Stream::operator=", "vslCopyStreamState");
+        mkl_rng_error_check(BRNG, status,
+                "MKLStream::operator=", "vslCopyStreamState");
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Stream (Stream<BRNG> &&other) :
-        traits::OffsetTrait<BRNG>::type(std::move(other)),
+    MKLStream (MKLStream<BRNG> &&other) :
+        traits::MKLOffsetTrait<BRNG>::type(std::move(other)),
         seed_(other.seed_), str_ptr_(other.str_ptr_) {}
 
-    Stream<BRNG> &operator= (Stream<BRNG> &&other)
+    MKLStream<BRNG> &operator= (MKLStream<BRNG> &&other)
     {
-        traits::OffsetTrait<BRNG>::type::operator=(std::move(other));
+        traits::MKLOffsetTrait<BRNG>::type::operator=(std::move(other));
         seed_ = other.seed_;
         str_ptr_ = other.str_ptr_;
     }
 #endif
 
-    ~Stream () {::vslDeleteStream(&str_ptr_);}
+    ~MKLStream () {::vslDeleteStream(&str_ptr_);}
 
     void seed (MKL_UINT s)
     {
@@ -347,13 +353,16 @@ class Stream : public traits::OffsetTrait<BRNG>::type
         VSLStreamStatePtr new_str_ptr;
 
         status = ::vslNewStream(&new_str_ptr, BRNG + this->offset(), s);
-        rng_error_check(BRNG, status, "Stream::seed", "vslNewStream");
+        mkl_rng_error_check(BRNG, status,
+                "MKLStream::seed", "vslNewStream");
 
         status = ::vslCopyStreamState(str_ptr_, new_str_ptr);
-        rng_error_check(BRNG, status, "Stream::seed", "vslCopyStreamState");
+        mkl_rng_error_check(BRNG, status,
+                "MKLStream::seed", "vslCopyStreamState");
 
         status = ::vslDeleteStream(&new_str_ptr);
-        rng_error_check(BRNG, status, "Stream::seed", "vslDeleteStream");
+        mkl_rng_error_check(BRNG, status,
+                "MKLStream::seed", "vslDeleteStream");
     }
 
     template <typename SeedSeq>
@@ -367,7 +376,7 @@ class Stream : public traits::OffsetTrait<BRNG>::type
 
     void shift ()
     {
-        unsigned offset = SeedGenerator<Stream<BRNG> >::instance().get();
+        unsigned offset = SeedGenerator<MKLStream<BRNG> >::instance().get();
         this->offset(static_cast<MKL_INT>(offset));
         seed(seed_);
     }
@@ -378,19 +387,19 @@ class Stream : public traits::OffsetTrait<BRNG>::type
     VSLStreamStatePtr str_ptr_;
 }; // class Stream
 
-/// \brief Base class of MKL distributions
+/// \brief Base class of MKL distribution
 /// \ingroup MKLRNG
 template <typename ResultType, typename Derived>
-class Distribution
+class MKLDistribution
 {
     public :
 
     typedef ResultType result_type;
 
-    Distribution () : remain_(0), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
+    MKLDistribution () : remain_(0), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
 
     template <MKL_INT BRNG>
-    result_type operator() (const Stream<BRNG> &stream)
+    result_type operator() (const MKLStream<BRNG> &stream)
     {
         result_.resize(buffer_size_);
         result_type *const rptr = &result_[0];
@@ -405,7 +414,7 @@ class Distribution
     }
 
     template <MKL_INT BRNG>
-    void operator() (const Stream<BRNG> &stream, MKL_INT n, result_type *r)
+    void operator() (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {static_cast<Derived *>(this)->generate(stream, n, r);}
 
     void reset () {remain_ = 0;}
@@ -421,11 +430,11 @@ class Distribution
             return;
 
         std::string dist_name(name);
-        dist_name += "::generate";
+        dist_name = "MKL" + dist_name + "Distribution::generate";
         std::string vsl_name(vsl_name_prefix(static_cast<result_type>(0)));
         vsl_name += "Rng";
         vsl_name += name;
-        rng_error_check(BRNG, status, dist_name.c_str(), vsl_name.c_str());
+        mkl_rng_error_check(BRNG, status, dist_name.c_str(), vsl_name.c_str());
     }
 
     private :
@@ -444,40 +453,42 @@ class Distribution
 /// \brief MKL RNG C++11 engine
 /// \ingroup MKLRNG
 template <MKL_INT BRNG, typename ResultType>
-class Engine
+class MKLEngine
 {
     public :
 
     typedef ResultType result_type;
-    typedef Stream<BRNG> stream_type;
-    typedef typename traits::SkipAheadTrait<BRNG, ResultType>::type
+    typedef MKLStream<BRNG> stream_type;
+    typedef typename traits::MKLSkipAheadTrait<BRNG, ResultType>::type
         skip_ahead_type;
-    typedef UniformBits<result_type> runif_type;
+    typedef MKLUniformBitsDistribution<result_type> runif_type;
 
-    explicit Engine (MKL_UINT s = traits::SeedTrait<BRNG>::value) :
+    explicit MKLEngine (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value) :
         stream_(s) {}
 
     template <typename SeedSeq>
-    explicit Engine (SeedSeq &seq) : stream_(seq) {}
+    explicit MKLEngine (SeedSeq &seq) : stream_(seq) {}
 
-    Engine (const Engine<BRNG, ResultType> &other) :
+    MKLEngine (const MKLEngine<BRNG, ResultType> &other) :
         stream_(other.stream_), skip_ahead_(other.skip_ahead_) {}
 
-    Engine (Engine<BRNG, ResultType> &other) :
+    MKLEngine (MKLEngine<BRNG, ResultType> &other) :
         stream_(other.stream_), skip_ahead_(other.skip_ahead_) {}
 
-    Engine<BRNG, ResultType> &operator= (const Engine<BRNG, ResultType> &other)
+    MKLEngine<BRNG, ResultType> &operator= (
+            const MKLEngine<BRNG, ResultType> &other)
     {
         stream_ = other.stream_;
         skip_ahead_ = other.skip_ahead_;
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Engine (Engine<BRNG, ResultType> &&other) :
+    MKLEngine (MKLEngine<BRNG, ResultType> &&other) :
         stream_(std::move(other.stream_)),
         skip_ahead_(std::move(other.skip_ahead_)) {}
 
-    Engine<BRNG, ResultType> &operator= (Engine<BRNG, ResultType> &&other)
+    MKLEngine<BRNG, ResultType> &operator= (
+            MKLEngine<BRNG, ResultType> &&other)
     {
         stream_ = std::move(other.stream_);
         skip_ahead_ = std::move(other.skip_ahead_);
@@ -533,94 +544,96 @@ class Engine
 
 /// \brief A 59-bit multiplicative congruential generator
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_MCG59, unsigned> MCG59;
+typedef MKLEngine<VSL_BRNG_MCG59, unsigned> MKL_MCG59;
 
 /// \brief A Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_MT19937, unsigned> MT19937;
+typedef MKLEngine<VSL_BRNG_MT19937, unsigned> MKL_MT19937;
 
 /// \brief A Mersenne-Twister pseudoranom number genertor (64-bit)
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_MT19937, unsigned MKL_INT64> MT19937_64;
+typedef MKLEngine<VSL_BRNG_MT19937, unsigned MKL_INT64> MKL_MT19937_64;
 
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_SFMT19937, unsigned> SFMT19937;
+typedef MKLEngine<VSL_BRNG_SFMT19937, unsigned> MKL_SFMT19937;
 
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
 /// (64-bit)
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_SFMT19937, unsigned MKL_INT64> SFMT19937_64;
+typedef MKLEngine<VSL_BRNG_SFMT19937, unsigned MKL_INT64> MKL_SFMT19937_64;
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_MT2203, unsigned> MT2203;
+typedef MKLEngine<VSL_BRNG_MT2203, unsigned> MKL_MT2203;
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor (64-bit)
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_MT2203, unsigned MKL_INT64>MT2203_64;
+typedef MKLEngine<VSL_BRNG_MT2203, unsigned MKL_INT64>MKL_MT2203_64;
 
 /// \brief A non-determinstic random number generator
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_NONDETERM, unsigned> NONDETERM;
+typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned> MKL_NONDETERM;
 
 /// \brief A non-determinstic random number generator (64-bit)
 /// \ingroup MKLRNG
-typedef Engine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> NONDETERM_64;
+typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> MKL_NONDETERM_64;
 
 /// \brief MKL uniform bits (32-bits)
 /// \ingroup MKLRNG
 template <>
-class UniformBits<unsigned> :
-    public Distribution<unsigned, UniformBits<unsigned> >
+class MKLUniformBitsDistribution<unsigned> :
+    public MKLDistribution<unsigned, MKLUniformBitsDistribution<unsigned> >
 {
     public :
 
     typedef unsigned result_type;
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = ::viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                 str.ptr(), n, r);
-        rng_error_check(BRNG, status,
-                "UniformBits::generate", "viRngUniformBits32");
+        mkl_rng_error_check(BRNG, status,
+                "MKLUniformBitsDistribution::generate", "viRngUniformBits32");
     }
 }; // class UniformBits
 
 /// \brief MKL uniform bits (64-bits)
 /// \ingroup MKLRNG
 template <>
-class UniformBits<unsigned MKL_INT64> :
-    public Distribution<unsigned MKL_INT64, UniformBits<unsigned MKL_INT64> >
+class MKLUniformBitsDistribution<unsigned MKL_INT64> :
+    public MKLDistribution<unsigned MKL_INT64,
+    MKLUniformBitsDistribution<unsigned MKL_INT64> >
 {
     public :
 
     typedef unsigned MKL_INT64 result_type;
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = ::viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
                 str.ptr(), n, r);
-        rng_error_check(BRNG, status,
-                "UniformBits::generate", "viRngUniformBits64");
+        mkl_rng_error_check(BRNG, status,
+                "MKLUniformBitsDistribution::generate", "viRngUniformBits64");
     }
 }; // class UniformBits
 
 /// \brief MKL Bernoulli distribution
 /// \ingroup MKLRNG
 template <MKL_INT Method>
-class Bernoulli : public Distribution<MKL_INT, Bernoulli<Method> >
+class MKLBernoulliDistribution :
+    public MKLDistribution<MKL_INT, MKLBernoulliDistribution<Method> >
 {
     public :
 
     typedef MKL_INT result_type;
 
-    explicit Bernoulli (double p = 0.5) : p_(p) {}
+    explicit MKLBernoulliDistribution (double p = 0.5) : p_(p) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = ::viRngBernoulli(Method, str.ptr(), n, r, p_);
         this->template generate_error_check<BRNG>(status, "Bernoulli");
@@ -634,16 +647,17 @@ class Bernoulli : public Distribution<MKL_INT, Bernoulli<Method> >
 /// \brief MKL Geometric distribution
 /// \ingroup MKLRNG
 template <MKL_INT Method>
-class Geometric : public Distribution<MKL_INT, Geometric<Method> >
+class MKLGeometricDistribution :
+    public MKLDistribution<MKL_INT, MKLGeometricDistribution<Method> >
 {
     public :
 
     typedef MKL_INT result_type;
 
-    explicit Geometric (double p = 0.5) : p_(p) {}
+    explicit MKLGeometricDistribution (double p = 0.5) : p_(p) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = ::viRngGeometric(Method, str.ptr(), n, r, p_);
         this->template generate_error_check<BRNG>(status, "Geometric");
@@ -657,17 +671,18 @@ class Geometric : public Distribution<MKL_INT, Geometric<Method> >
 /// \brief MKL Binomial distribution
 /// \ingroup MKLRNG
 template <MKL_INT Method>
-class Binomial : public Distribution<MKL_INT, Binomial<Method> >
+class MKLBinomialDistribution :
+    public MKLDistribution<MKL_INT, MKLBinomialDistribution<Method> >
 {
     public :
 
     typedef MKL_INT result_type;
 
-    explicit Binomial (result_type ntrial = 1, double p = 0.5) :
+    explicit MKLBinomialDistribution (result_type ntrial = 1, double p = 0.5) :
         ntrial_(ntrial), p_(p) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = ::viRngBinomial(Method, str.ptr(), n, r, ntrial_, p_);
         this->template generate_error_check<BRNG>(status, "Binomial");
@@ -682,20 +697,22 @@ class Binomial : public Distribution<MKL_INT, Binomial<Method> >
 /// \brief MKL Hypergeometric distribution
 /// \ingroup MKLRNG
 template <MKL_INT Method>
-class Hypergeometric : public Distribution<MKL_INT, Hypergeometric<Method> >
+class MKLHypergeometricDistribution :
+    public MKLDistribution<MKL_INT, MKLHypergeometricDistribution<Method> >
 {
     public :
 
     typedef MKL_INT result_type;
 
-    Hypergeometric (result_type population, result_type sample,
+    MKLHypergeometricDistribution (result_type population, result_type sample,
             result_type mask) :
         l_(population), s_(sample), m_(mask) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
-        int status = ::viRngHypergeometric(Method, str.ptr(), n, r, l_, s_, m_);
+        int status = ::viRngHypergeometric(Method, str.ptr(),
+                n, r, l_, s_, m_);
         this->template generate_error_check<BRNG>(status, "Hypergeometric");
     }
 
@@ -709,16 +726,17 @@ class Hypergeometric : public Distribution<MKL_INT, Hypergeometric<Method> >
 /// \brief MKL Poisson distribution
 /// \ingroup MKLRNG
 template <MKL_INT Method>
-class Poisson : public Distribution<MKL_INT, Poisson<Method> >
+class MKLPoissonDistribution :
+    public MKLDistribution<MKL_INT, MKLPoissonDistribution<Method> >
 {
     public :
 
     typedef MKL_INT result_type;
 
-    explicit Poisson (double lambda = 1) : lambda_(lambda) {}
+    explicit MKLPoissonDistribution (double lambda = 1) : lambda_(lambda) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = ::viRngPoisson(Method, str.ptr(), n, r, lambda_);
         this->template generate_error_check<BRNG>(status, "Poisson");
@@ -732,17 +750,18 @@ class Poisson : public Distribution<MKL_INT, Poisson<Method> >
 /// \brief MKL NegBinomial distribution
 /// \ingroup MKLRNG
 template <MKL_INT Method>
-class NegBinomial : public Distribution<MKL_INT, NegBinomial<Method> >
+class MKLNegBinomialDistribution :
+    public MKLDistribution<MKL_INT, MKLNegBinomialDistribution<Method> >
 {
     public :
 
     typedef MKL_INT result_type;
 
-    explicit NegBinomial (double ntrial = 1, double p = 0.5) :
+    explicit MKLNegBinomialDistribution (double ntrial = 1, double p = 0.5) :
         ntrial_(ntrial), p_(p) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = ::viRngNegBinomial(Method, str.ptr(), n, r, ntrial_, p_);
         this->template generate_error_check<BRNG>(status, "NegBinomial");
@@ -754,19 +773,22 @@ class NegBinomial : public Distribution<MKL_INT, NegBinomial<Method> >
     double p_;
 }; // class NegBinomial
 
-/// \brief MKL Uniform distributions
+/// \brief MKL Uniform distribution
 /// \ingroup MKLRNG
 template <typename ResultType, MKL_INT Method>
-class Uniform : public Distribution<ResultType, Uniform<ResultType, Method> >
+class MKLUniformDistribution :
+    public MKLDistribution<ResultType,
+    MKLUniformDistribution<ResultType, Method> >
 {
     public :
 
     typedef ResultType result_type;
 
-    explicit Uniform (result_type a = 0, result_type b = 1) : a_(a), b_(b) {}
+    explicit MKLUniformDistribution (result_type a = 0, result_type b = 1) :
+        a_(a), b_(b) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Uniform");
@@ -787,20 +809,21 @@ class Uniform : public Distribution<ResultType, Uniform<ResultType, Method> >
     {return ::vdRngUniform(Method, ptr, n, r, a_, b_);}
 }; // class Uniform
 
-/// \brief MKL Gaussian distributions
+/// \brief MKL Gaussian distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Gaussian : public Distribution<FPType, Gaussian<FPType, Method> >
+class MKLGaussianDistribution :
+    public MKLDistribution<FPType, MKLGaussianDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Gaussian (result_type mean = 0, result_type sd = 1) :
-        mean_(mean), sd_(sd) {}
+    explicit MKLGaussianDistribution (result_type mean = 0,
+            result_type sd = 1) : mean_(mean), sd_(sd) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Gaussian");
@@ -818,21 +841,21 @@ class Gaussian : public Distribution<FPType, Gaussian<FPType, Method> >
     {return ::vdRngGaussian(Method, ptr, n, r, mean_, sd_);}
 }; // class Gaussian
 
-/// \brief MKL Exponential distributions
+/// \brief MKL Exponential distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Exponential : public Distribution<FPType, Exponential<FPType, Method> >
+class MKLExponentialDistribution :
+    public MKLDistribution<FPType, MKLExponentialDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Exponential (
-            result_type displacement = 0, result_type scale = 1) :
-        disp_(displacement), scale_(scale) {}
+    explicit MKLExponentialDistribution (result_type displacement = 0,
+            result_type scale = 1) : disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Exponential");
@@ -850,20 +873,21 @@ class Exponential : public Distribution<FPType, Exponential<FPType, Method> >
     {return ::vdRngExponential(Method, ptr, n, r, disp_, scale_);}
 }; // class Exponential
 
-/// \brief MKL Laplace distributions
+/// \brief MKL Laplace distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Laplace : public Distribution<FPType, Laplace<FPType, Method> >
+class MKLLaplaceDistribution :
+    public MKLDistribution<FPType, MKLLaplaceDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Laplace (result_type mean = 0, result_type scale = 1) :
-        mean_(mean), scale_(scale) {}
+    explicit MKLLaplaceDistribution (result_type mean = 0,
+            result_type scale = 1) : mean_(mean), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Laplace");
@@ -881,21 +905,22 @@ class Laplace : public Distribution<FPType, Laplace<FPType, Method> >
     {return ::vdRngLaplace(Method, ptr, n, r, mean_, scale_);}
 }; // class Laplace
 
-/// \brief MKL Weibull distributions
+/// \brief MKL Weibull distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Weibull : public Distribution<FPType, Weibull<FPType, Method> >
+class MKLWeibullDistribution :
+    public MKLDistribution<FPType, MKLWeibullDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Weibull (result_type shape = 1,
+    explicit MKLWeibullDistribution (result_type shape = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape_(shape), disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Weibull");
@@ -914,20 +939,21 @@ class Weibull : public Distribution<FPType, Weibull<FPType, Method> >
     {return ::vdRngWeibull(Method, ptr, n, r, shape_, disp_, scale_);}
 }; // class Weibull
 
-/// \brief MKL Cauchy distributions
+/// \brief MKL Cauchy distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Cauchy : public Distribution<FPType, Cauchy<FPType, Method> >
+class MKLCauchyDistribution :
+    public MKLDistribution<FPType, MKLCauchyDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Cauchy (result_type displacement = 0, result_type scale = 1) :
-        disp_(displacement), scale_(scale) {}
+    explicit MKLCauchyDistribution (result_type displacement = 0,
+            result_type scale = 1) : disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Cauchy");
@@ -945,20 +971,21 @@ class Cauchy : public Distribution<FPType, Cauchy<FPType, Method> >
     {return ::vdRngCauchy(Method, ptr, n, r, disp_, scale_);}
 }; // class Cauchy
 
-/// \brief MKL Rayleigh distributions
+/// \brief MKL Rayleigh distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Rayleigh : public Distribution<FPType, Rayleigh<FPType, Method> >
+class MKLRayleighDistribution :
+    public MKLDistribution<FPType, MKLRayleighDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Rayleigh (result_type displacement = 0, result_type scale = 1) :
-        disp_(displacement), scale_(scale) {}
+    explicit MKLRayleighDistribution (result_type displacement = 0,
+            result_type scale = 1) : disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Rayleigh");
@@ -976,21 +1003,23 @@ class Rayleigh : public Distribution<FPType, Rayleigh<FPType, Method> >
     {return ::vdRngRayleigh(Method, ptr, n, r, disp_, scale_);}
 }; // class Rayleigh
 
-/// \brief MKL Lognormal distributions
+/// \brief MKL Lognormal distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Lognormal : public Distribution<FPType, Lognormal<FPType, Method> >
+class MKLLognormalDistribution :
+    public MKLDistribution<FPType, MKLLognormalDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Lognormal (result_type mean = 0, result_type sd = 1,
+    explicit MKLLognormalDistribution (
+            result_type mean = 0, result_type sd = 1,
             result_type displacement = 0, result_type scale = 1) :
         mean_(mean), sd_(sd), disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Lognormal");
@@ -1010,20 +1039,21 @@ class Lognormal : public Distribution<FPType, Lognormal<FPType, Method> >
     {return ::vdRngLognormal(Method, ptr, n, r, mean_, sd_, disp_, scale_);}
 }; // class Lognormal
 
-/// \brief MKL Gumbel distributions
+/// \brief MKL Gumbel distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Gumbel : public Distribution<FPType, Gumbel<FPType, Method> >
+class MKLGumbelDistribution :
+    public MKLDistribution<FPType, MKLGumbelDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Gumbel (result_type displacement = 0, result_type scale = 1) :
-        disp_(displacement), scale_(scale) {}
+    explicit MKLGumbelDistribution (result_type displacement = 0,
+            result_type scale = 1) : disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Gumbel");
@@ -1041,21 +1071,22 @@ class Gumbel : public Distribution<FPType, Gumbel<FPType, Method> >
     {return ::vdRngGumbel(Method, ptr, n, r, disp_, scale_);}
 }; // class Gumbel
 
-/// \brief MKL Gamma distributions
+/// \brief MKL Gamma distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Gamma : public Distribution<FPType, Gamma<FPType, Method> >
+class MKLGammaDistribution :
+    public MKLDistribution<FPType, MKLGammaDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Gamma (result_type shape = 1,
+    explicit MKLGammaDistribution (result_type shape = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape_(shape), disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Gamma");
@@ -1074,21 +1105,23 @@ class Gamma : public Distribution<FPType, Gamma<FPType, Method> >
     {return ::vdRngGamma(Method, ptr, n, r, shape_, disp_, scale_);}
 }; // class Gamma
 
-/// \brief MKL Beta distributions
+/// \brief MKL Beta distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
-class Beta : public Distribution<FPType, Beta<FPType, Method> >
+class MKLBetaDistribution :
+    public MKLDistribution<FPType, MKLBetaDistribution<FPType, Method> >
 {
     public :
 
     typedef FPType result_type;
 
-    explicit Beta (result_type shape1 = 1, result_type shape2 = 1,
+    explicit MKLBetaDistribution (
+            result_type shape1 = 1, result_type shape2 = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape1_(shape1), shape2_(shape2), disp_(displacement), scale_(scale) {}
 
     template <MKL_INT BRNG>
-    void generate (const Stream<BRNG> &str, MKL_INT n, result_type *r)
+    void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
     {
         int status = generate(str.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Beta");
@@ -1108,14 +1141,12 @@ class Beta : public Distribution<FPType, Beta<FPType, Method> >
     {return ::vdRngBeta(Method, ptr, n, r, shape1_, shape2_, disp_, scale_);}
 }; // class Beta
 
-} // namespace vsmc::mkl
-
 namespace traits {
 
 template <MKL_INT BRNG, typename ResultType>
-struct RngShift<mkl::Engine<BRNG, ResultType> >
+struct RngShift<MKLEngine<BRNG, ResultType> >
 {
-    void operator() (mkl::Engine<BRNG, ResultType> &rng) const
+    void operator() (MKLEngine<BRNG, ResultType> &rng) const
     {rng.stream().shift();}
 };
 
