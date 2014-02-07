@@ -91,11 +91,11 @@
 /// \details
 /// The class defined by `VSMC_STOP_WATCH_TYPE` need to be defined before
 /// including the `<vsmc/utility/stop_watch.hpp>` header. It shall provide the
-/// same interface as DummyStopWatch. This is only used when both
+/// same interface as internal::DummyStopWatch. This is only used when both
 /// `VSMC_HAS_CXX11LIB_CHRONO` and `VSMC_HAS_NATIVE_TIME_LIBRARY` are zero, in
 /// which case StopWatch is a typedef of this macro.
 #ifndef VSMC_STOP_WATCH_TYPE
-#define VSMC_STOP_WATCH_TYPE DummyStopWatch
+#define VSMC_STOP_WATCH_TYPE internal::DummyStopWatch
 #endif
 
 /// \brief Default type of Seed

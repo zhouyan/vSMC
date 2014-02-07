@@ -8,8 +8,8 @@
 
 namespace vsmc {
 
-/// \brief A dummy StopWatch that does nothing
-/// \ingroup StopWatch
+namespace internal {
+
 class DummyStopWatch
 {
     public :
@@ -33,6 +33,8 @@ class DummyStopWatch
 
     mutable bool running_;
 }; // class DummyStopWatch
+
+} // namespace vsmc::internal
 
 /// \brief StopWatch as a wrapper of C++11 clock
 /// \ingroup StopWatch
