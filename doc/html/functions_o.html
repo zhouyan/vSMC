@@ -81,7 +81,6 @@
       <li><a href="functions_n.html#index_n"><span>n</span></a></li>
       <li class="current"><a href="functions_o.html#index_o"><span>o</span></a></li>
       <li><a href="functions_p.html#index_p"><span>p</span></a></li>
-      <li><a href="functions_q.html#index_q"><span>q</span></a></li>
       <li><a href="functions_r.html#index_r"><span>r</span></a></li>
       <li><a href="functions_s.html#index_s"><span>s</span></a></li>
       <li><a href="functions_t.html#index_t"><span>t</span></a></li>
@@ -98,12 +97,9 @@
 
 <h3><a class="anchor" id="index_o"></a>- o -</h3><ul>
 <li>offset()
-: <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_offset_dynamic.html#a4a9c2b6e1fcf8266120d12da378939ef">vsmc::mkl::traits::OffsetDynamic&lt; MaxOffset &gt;</a>
-, <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_offset_zero.html#a3c622653ca4526123824a43ff6f07175">vsmc::mkl::traits::OffsetZero</a>
-, <a class="el" href="classvsmc_1_1_state_m_p_i.html#a4f20730484f17c38054fd94edf28d2c2">vsmc::StateMPI&lt; BaseState, ID &gt;</a>
-</li>
-<li>OffsetDynamic()
-: <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_offset_dynamic.html#a48374ae764f061b66b6083f822b0a80c">vsmc::mkl::traits::OffsetDynamic&lt; MaxOffset &gt;</a>
+: <a class="el" href="classvsmc_1_1_state_m_p_i.html#a4f20730484f17c38054fd94edf28d2c2">vsmc::StateMPI&lt; BaseState, ID &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_offset_dynamic.html#a853c12b7ef2fa10a2ff206db64648bf8">vsmc::traits::MKLOffsetDynamic&lt; MaxOffset &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_offset_zero.html#a192115559d58a74f275e16bc823b6e4b">vsmc::traits::MKLOffsetZero</a>
 </li>
 <li>operator bool()
 : <a class="el" href="classvsmc_1_1_monitor.html#a9a1d8ec09cbfa72ac0751fb137898c42">vsmc::Monitor&lt; T &gt;</a>
@@ -128,10 +124,8 @@
 , <a class="el" href="classvsmc_1_1_initialize_s_t_d.html#a6f59a0a3b6ddfaa728403babaf76767f">vsmc::InitializeSTD&lt; T, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_initialize_t_b_b.html#ac6ee23359b57b8debf2c534d6e4863a4">vsmc::InitializeTBB&lt; T, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_i_s_integrate.html#a7d8e3f5a7051e03222e473aaac114f99">vsmc::ISIntegrate</a>
-, <a class="el" href="classvsmc_1_1mkl_1_1_distribution.html#acbdbaa107a9c6e0302753f78306e4555">vsmc::mkl::Distribution&lt; ResultType, Derived &gt;</a>
-, <a class="el" href="classvsmc_1_1mkl_1_1_engine.html#aa551730109479b43b117b260a3d98785">vsmc::mkl::Engine&lt; BRNG, ResultType &gt;</a>
-, <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_skip_ahead_force.html#a52e7a8132672b7dc78a98d33305c83c6">vsmc::mkl::traits::SkipAheadForce&lt; ResultType &gt;</a>
-, <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_skip_ahead_v_s_l.html#ac5ee055d61f04147b947c10dc100d32b">vsmc::mkl::traits::SkipAheadVSL</a>
+, <a class="el" href="classvsmc_1_1_m_k_l_distribution.html#a707740fbc21dc74e28b465993f031512">vsmc::MKLDistribution&lt; ResultType, Derived &gt;</a>
+, <a class="el" href="classvsmc_1_1_m_k_l_engine.html#ab302f4804a31a37ef58686f5f39d6102">vsmc::MKLEngine&lt; BRNG, ResultType &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_c_i_l_k.html#a4b65963f023eb8005c5ecfad8cc50a5f">vsmc::MonitorEvalCILK&lt; T, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_c_l.html#a9ce50042b04ea59e69e7ba27068db6ca">vsmc::MonitorEvalCL&lt; typename, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_g_c_d.html#aff20a569498a770f90e7f5426288b69f">vsmc::MonitorEvalGCD&lt; T, Derived &gt;</a>
@@ -193,8 +187,10 @@
 , <a class="el" href="classvsmc_1_1tbb__op_1_1summation.html#a626fbfc8f84fc989a0c12049ea0cc716">vsmc::tbb_op::summation&lt; T &gt;</a>
 , <a class="el" href="classvsmc_1_1tbb__op_1_1tan.html#af89e9465f8929a385d66a3f84e09bfbd">vsmc::tbb_op::tan&lt; T &gt;</a>
 , <a class="el" href="classvsmc_1_1tbb__op_1_1tanh.html#ab203b337439b805fb112b9a81eef5964">vsmc::tbb_op::tanh&lt; T &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_skip_ahead_force.html#a6e70f18ec2818d1a796b189ef7726ea8">vsmc::traits::MKLSkipAheadForce&lt; ResultType &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_skip_ahead_v_s_l.html#af36366caa29ac2e809c900a8a41fb50f">vsmc::traits::MKLSkipAheadVSL</a>
 , <a class="el" href="structvsmc_1_1traits_1_1_rng_shift.html#a4b7a96e345bee5fd7f2a4818e7c60209">vsmc::traits::RngShift&lt; Rng &gt;</a>
-, <a class="el" href="structvsmc_1_1traits_1_1_rng_shift_3_01mkl_1_1_engine_3_01_b_r_n_g_00_01_result_type_01_4_01_4.html#a3108104b90e7c3f4dfe278a065ca2922">vsmc::traits::RngShift&lt; mkl::Engine&lt; BRNG, ResultType &gt; &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_rng_shift_3_01_m_k_l_engine_3_01_b_r_n_g_00_01_result_type_01_4_01_4.html#a4836411cd0f608ecf62da6b8d10c9517">vsmc::traits::RngShift&lt; MKLEngine&lt; BRNG, ResultType &gt; &gt;</a>
 , <a class="el" href="classvsmc_1_1_uniform_real_distribution.html#a4f8231be924afa360155f6571ebde64a">vsmc::UniformRealDistribution&lt; FPType, Left, Right &gt;</a>
 </li>
 <li>operator*()
@@ -202,21 +198,21 @@
 , <a class="el" href="classvsmc_1_1_step_random_iterator.html#adb86781538daadf9a2dcf184e73d47db">vsmc::StepRandomIterator&lt; RandomIter &gt;</a>
 </li>
 <li>operator+()
-: <a class="el" href="classvsmc_1_1_dummy_stop_watch.html#a171f4eb6bf98b8d27721fd4a6b2c567c">vsmc::DummyStopWatch</a>
+: <a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html#af56daea10b3889b8b9b0703e2cd06560">vsmc::internal::DummyStopWatch</a>
 , <a class="el" href="classvsmc_1_1_stop_watch_clock_wrapper.html#a79bb7dc440a40004e2a5a535fec76712">vsmc::StopWatchClockWrapper&lt; ClockType &gt;</a>
 </li>
 <li>operator++()
-: <a class="el" href="classvsmc_1_1_particle_iterator.html#ae0a7d5045bbd2ae7e98b3877e0e87707">vsmc::ParticleIterator&lt; T, SPType &gt;</a>
-, <a class="el" href="classvsmc_1_1_step_random_iterator.html#aa340db0fc805ef74d1bcdf263ada2684">vsmc::StepRandomIterator&lt; RandomIter &gt;</a>
+: <a class="el" href="classvsmc_1_1_particle_iterator.html#a403a7b80b9306d3d29b3551ef9de8db0">vsmc::ParticleIterator&lt; T, SPType &gt;</a>
+, <a class="el" href="classvsmc_1_1_step_random_iterator.html#aefbf3f8bddcd2b5785b9617988ed94bf">vsmc::StepRandomIterator&lt; RandomIter &gt;</a>
 </li>
 <li>operator+=()
-: <a class="el" href="classvsmc_1_1_dummy_stop_watch.html#abe068d94458e5fcef5e2b4a329e3ee33">vsmc::DummyStopWatch</a>
+: <a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html#a615bfa6317361da25293203a7797c2bd">vsmc::internal::DummyStopWatch</a>
 , <a class="el" href="classvsmc_1_1_particle_iterator.html#ac852eafb00205c095ba509a000d3c3f9">vsmc::ParticleIterator&lt; T, SPType &gt;</a>
 , <a class="el" href="classvsmc_1_1_step_random_iterator.html#a801c451413ae3d67d59a72accaf0136d">vsmc::StepRandomIterator&lt; RandomIter &gt;</a>
 , <a class="el" href="classvsmc_1_1_stop_watch_clock_wrapper.html#a74eb8c09e817fed90d308500d77a8280">vsmc::StopWatchClockWrapper&lt; ClockType &gt;</a>
 </li>
 <li>operator--()
-: <a class="el" href="classvsmc_1_1_particle_iterator.html#afe6b0c1494498cde398509f33aeb0417">vsmc::ParticleIterator&lt; T, SPType &gt;</a>
+: <a class="el" href="classvsmc_1_1_particle_iterator.html#aa5e0f604c1400734a7b676bcec0e3906">vsmc::ParticleIterator&lt; T, SPType &gt;</a>
 , <a class="el" href="classvsmc_1_1_step_random_iterator.html#acd2b1adc266c204c371e4210a783a06f">vsmc::StepRandomIterator&lt; RandomIter &gt;</a>
 </li>
 <li>operator-=()
@@ -233,6 +229,9 @@
 <li>operator=()
 : <a class="el" href="classvsmc_1_1_backup.html#a0eb1b73c188294740f34231a4c397e54">vsmc::Backup&lt; T &gt;</a>
 , <a class="el" href="classvsmc_1_1_const_single_particle.html#af656caa32b333e4f3623e145005e22e3">vsmc::ConstSingleParticle&lt; T &gt;</a>
+, <a class="el" href="classvsmc_1_1_dispatch_object.html#aaad53894c3a14d987760db62357cd237">vsmc::DispatchObject&lt; DispatchType &gt;</a>
+, <a class="el" href="classvsmc_1_1_dispatch_queue_base.html#a50a85028da31803a49e86b64045352a5">vsmc::DispatchQueueBase</a>
+, <a class="el" href="classvsmc_1_1_dispatch_source_base.html#a05e948aaa951ea6bfdc7ad09909d34a1">vsmc::DispatchSourceBase&lt; Type &gt;</a>
 , <a class="el" href="classvsmc_1_1_initialize_base.html#a6fbe45d846d69e1d9d127bc2e3885f2b">vsmc::InitializeBase&lt; T, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_initialize_base_3_01_t_00_01_virtual_01_4.html#aabeabf47d4b62d603595a55f171ab36b">vsmc::InitializeBase&lt; T, Virtual &gt;</a>
 , <a class="el" href="classvsmc_1_1_initialize_c_i_l_k.html#a2ca982887e845dbda89ad0960616f3cc">vsmc::InitializeCILK&lt; T, Derived &gt;</a>
@@ -243,8 +242,8 @@
 , <a class="el" href="classvsmc_1_1_initialize_s_e_q.html#aaaa8b6ab4f9f412ddfa96086f2ca230c">vsmc::InitializeSEQ&lt; T, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_initialize_s_t_d.html#a954b84a1cfa6063185de607ea7855a06">vsmc::InitializeSTD&lt; T, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_initialize_t_b_b.html#aa047b83e600c90420416349bdb23c11d">vsmc::InitializeTBB&lt; T, Derived &gt;</a>
-, <a class="el" href="classvsmc_1_1mkl_1_1_engine.html#abf3b56d736ae56a05a88129cc04309a0">vsmc::mkl::Engine&lt; BRNG, ResultType &gt;</a>
-, <a class="el" href="classvsmc_1_1mkl_1_1_stream.html#a759fe13d0acd122a06dd527283831dd6">vsmc::mkl::Stream&lt; BRNG &gt;</a>
+, <a class="el" href="classvsmc_1_1_m_k_l_engine.html#a51246cbf21de628969016ba60b6e2abb">vsmc::MKLEngine&lt; BRNG, ResultType &gt;</a>
+, <a class="el" href="classvsmc_1_1_m_k_l_stream.html#a25d0e13363e7d93019f48bb78b9ab5ad">vsmc::MKLStream&lt; BRNG &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor.html#a6908d99237e2f178285b52479833fb57">vsmc::Monitor&lt; T &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_base.html#a2c44a6b0f0a84916780ac595467f7fab">vsmc::MonitorEvalBase&lt; T, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_base_3_01_t_00_01_virtual_01_4.html#afb3c094969486088de5d9758befd1cc5">vsmc::MonitorEvalBase&lt; T, Virtual &gt;</a>

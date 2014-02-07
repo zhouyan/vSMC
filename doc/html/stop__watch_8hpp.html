@@ -71,8 +71,7 @@
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvsmc_1_1_dummy_stop_watch.html">vsmc::DummyStopWatch</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dummy <a class="el" href="classvsmc_1_1_stop_watch.html" title="Stop watch. ">StopWatch</a> that does nothing.  <a href="classvsmc_1_1_dummy_stop_watch.html#details">More...</a><br/></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html">vsmc::internal::DummyStopWatch</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvsmc_1_1_scoped_stop_watch.html">vsmc::ScopedStopWatch&lt; WatchType &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start and stop a <a class="el" href="classvsmc_1_1_stop_watch.html" title="Stop watch. ">StopWatch</a> in scope.  <a href="classvsmc_1_1_scoped_stop_watch.html#details">More...</a><br/></td></tr>
@@ -88,29 +87,30 @@ Classes</h2></td></tr>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacevsmc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevsmc.html">vsmc</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacevsmc_1_1internal"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevsmc_1_1internal.html">vsmc::internal</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a42200ce78b44a978e6c969187b56ed35"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stop__watch_8hpp.html#a42200ce78b44a978e6c969187b56ed35">VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING</a>(running)&#160;&#160;&#160;<a class="el" href="assert_8hpp.html#aeb451e52f485b9c7fd0b3c3754e11f9d">VSMC_RUNTIME_ASSERT</a>((stopped), (&quot;CANNOT ADD TWO RUNNING **StopWatch**&quot;))</td></tr>
-<tr class="separator:a42200ce78b44a978e6c969187b56ed35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc63d61dc5da7033978982643d337bc7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stop__watch_8hpp.html#afc63d61dc5da7033978982643d337bc7">VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING</a></td></tr>
+<tr class="separator:afc63d61dc5da7033978982643d337bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8309494de509fbb54564b49944ac1762"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stop__watch_8hpp.html#a8309494de509fbb54564b49944ac1762">VSMC_STOP_WATCH_DEFINED</a></td></tr>
 <tr class="separator:a8309494de509fbb54564b49944ac1762"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
-<a class="anchor" id="a42200ce78b44a978e6c969187b56ed35"></a>
+<a class="anchor" id="afc63d61dc5da7033978982643d337bc7"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">#define VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING</td>
-          <td>(</td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname">running</td><td>)</td>
-          <td>&#160;&#160;&#160;<a class="el" href="assert_8hpp.html#aeb451e52f485b9c7fd0b3c3754e11f9d">VSMC_RUNTIME_ASSERT</a>((stopped), (&quot;CANNOT ADD TWO RUNNING **StopWatch**&quot;))</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="assert_8hpp.html#aeb451e52f485b9c7fd0b3c3754e11f9d">VSMC_RUNTIME_ASSERT</a>((!(running_ || other.running_)),                     \</div>
+<div class="line">            (<span class="stringliteral">&quot;CANNOT ADD TWO RUNNING **StopWatch**&quot;</span>))</div>
+<div class="ttc" id="assert_8hpp_html_aeb451e52f485b9c7fd0b3c3754e11f9d"><div class="ttname"><a href="assert_8hpp.html#aeb451e52f485b9c7fd0b3c3754e11f9d">VSMC_RUNTIME_ASSERT</a></div><div class="ttdeci">#define VSMC_RUNTIME_ASSERT(cond, msg)</div><div class="ttdef"><b>Definition:</b> <a href="assert_8hpp_source.html#l00022">assert.hpp:22</a></div></div>
+</div><!-- fragment -->
 <p>Definition at line <a class="el" href="stop__watch_8hpp_source.html#l00006">6</a> of file <a class="el" href="stop__watch_8hpp_source.html">stop_watch.hpp</a>.</p>
 
 </div>
@@ -125,7 +125,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="stop__watch_8hpp_source.html#l00125">125</a> of file <a class="el" href="stop__watch_8hpp_source.html">stop_watch.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stop__watch_8hpp_source.html#l00126">126</a> of file <a class="el" href="stop__watch_8hpp_source.html">stop_watch.hpp</a>.</p>
 
 </div>
 </div>

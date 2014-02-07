@@ -80,7 +80,6 @@
       <li><a href="functions_func_n.html#index_n"><span>n</span></a></li>
       <li><a href="functions_func_o.html#index_o"><span>o</span></a></li>
       <li><a href="functions_func_p.html#index_p"><span>p</span></a></li>
-      <li><a href="functions_func_q.html#index_q"><span>q</span></a></li>
       <li><a href="functions_func_r.html#index_r"><span>r</span></a></li>
       <li class="current"><a href="functions_func_s.html#index_s"><span>s</span></a></li>
       <li><a href="functions_func_t.html#index_t"><span>t</span></a></li>
@@ -109,12 +108,12 @@
 : <a class="el" href="classvsmc_1_1_scoped_stop_watch.html#a4fa70f93cc03ab972bf1aa115e361c59">vsmc::ScopedStopWatch&lt; WatchType &gt;</a>
 </li>
 <li>seconds()
-: <a class="el" href="classvsmc_1_1_dummy_stop_watch.html#ad906ea199e9f246efdfc0668ef981bc8">vsmc::DummyStopWatch</a>
+: <a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html#a8a31379558ff32d0cd92c14245252bf6">vsmc::internal::DummyStopWatch</a>
 , <a class="el" href="classvsmc_1_1_stop_watch.html#af85baf8e3a17030cc0f6e40c92818f3c">vsmc::StopWatch</a>
 </li>
 <li>seed()
-: <a class="el" href="classvsmc_1_1mkl_1_1_engine.html#a7523579f7d104d28fef60846cf4bdf98">vsmc::mkl::Engine&lt; BRNG, ResultType &gt;</a>
-, <a class="el" href="classvsmc_1_1mkl_1_1_stream.html#a4273df416cc32e80c71f2b39befb18eb">vsmc::mkl::Stream&lt; BRNG &gt;</a>
+: <a class="el" href="classvsmc_1_1_m_k_l_engine.html#ab26d98f5a6e3a7c9f67eec903e2a5a0c">vsmc::MKLEngine&lt; BRNG, ResultType &gt;</a>
+, <a class="el" href="classvsmc_1_1_m_k_l_stream.html#a4d6820a587793770a3e11c2dfc25e164">vsmc::MKLStream&lt; BRNG &gt;</a>
 , <a class="el" href="classvsmc_1_1_seed_generator.html#ae06c7a6f7b42d2f76674fb86584d4341">vsmc::SeedGenerator&lt; ID &gt;</a>
 </li>
 <li>seed_max()
@@ -128,6 +127,12 @@
 , <a class="el" href="classvsmc_1_1_m_p_i_communicator.html#a1a5a9d8977a0e6d81b7cb33284b89ae6">vsmc::MPICommunicator&lt; ID &gt;</a>
 , <a class="el" href="classvsmc_1_1_seed_generator.html#acc03ae18ec897385e1cd79c47d325c55">vsmc::SeedGenerator&lt; ID &gt;</a>
 </li>
+<li>set_cancel_handler_f()
+: <a class="el" href="classvsmc_1_1_dispatch_source_base.html#ad6c91b5f573aa2a8fa1209c1d35a2481">vsmc::DispatchSourceBase&lt; Type &gt;</a>
+</li>
+<li>set_context()
+: <a class="el" href="classvsmc_1_1_dispatch_object.html#a1dec5eea92fc3b263df3cbfc14944c1a">vsmc::DispatchObject&lt; DispatchType &gt;</a>
+</li>
 <li>set_equal_weight()
 : <a class="el" href="classvsmc_1_1_particle.html#a889f0820f0f74d31da4b1a9f81e7dacd">vsmc::Particle&lt; T &gt;</a>
 , <a class="el" href="classvsmc_1_1_weight_set.html#a10dcdff320ee0f455e8bfb689531f6d4">vsmc::WeightSet</a>
@@ -140,6 +145,12 @@
 : <a class="el" href="classvsmc_1_1_monitor.html#a51600675e13027bb6c5617f7003b6eaa">vsmc::Monitor&lt; T &gt;</a>
 , <a class="el" href="classvsmc_1_1_path.html#ad7d8030e5fbebf1aa74cb28f770ba422">vsmc::Path&lt; T &gt;</a>
 </li>
+<li>set_event_handler_f()
+: <a class="el" href="classvsmc_1_1_dispatch_source_base.html#a445e8ab89bd2fd2f4660413b1cb4f13f">vsmc::DispatchSourceBase&lt; Type &gt;</a>
+</li>
+<li>set_finalizer_f()
+: <a class="el" href="classvsmc_1_1_dispatch_object.html#aac38292e78d36c15f298728bd9d718d7">vsmc::DispatchObject&lt; DispatchType &gt;</a>
+</li>
 <li>set_kernel()
 : <a class="el" href="classvsmc_1_1_initialize_c_l.html#a20d8cf803551c9dfd4c3d265e628ca19">vsmc::InitializeCL&lt; typename, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_c_l.html#ab004b40af9ab91c809d895f5b615f16e">vsmc::MonitorEvalCL&lt; typename, Derived &gt;</a>
@@ -149,6 +160,18 @@
 <li>set_log_weight()
 : <a class="el" href="classvsmc_1_1_weight_set.html#a565bc048f443a01f27bdd428da0e233e">vsmc::WeightSet</a>
 </li>
+<li>set_registration_handler_f()
+: <a class="el" href="classvsmc_1_1_dispatch_source_base.html#a113fa5b53d35d4490c4e887acf4c81e9">vsmc::DispatchSourceBase&lt; Type &gt;</a>
+</li>
+<li>set_specific()
+: <a class="el" href="classvsmc_1_1_dispatch_queue_base.html#a8702f5d888dcdb9218428c46f252bf57">vsmc::DispatchQueueBase</a>
+</li>
+<li>set_target_queue()
+: <a class="el" href="classvsmc_1_1_dispatch_queue_base.html#a4d2b073630dffe9210d9014788752f77">vsmc::DispatchQueueBase</a>
+</li>
+<li>set_timer()
+: <a class="el" href="classvsmc_1_1_dispatch_source_3_01_dispatch_timer_01_4.html#a29b65064517fafb0173f46f98e8203c6">vsmc::DispatchSource&lt; DispatchTimer &gt;</a>
+</li>
 <li>set_weight()
 : <a class="el" href="classvsmc_1_1_weight_set.html#a710f49d99df43e5b2176ea49f4c53266">vsmc::WeightSet</a>
 </li>
@@ -156,7 +179,7 @@
 : <a class="el" href="classvsmc_1_1_c_l_manager.html#a5eda05068df8772d61fee36d89e02ad4">vsmc::CLManager&lt; ID &gt;</a>
 </li>
 <li>shift()
-: <a class="el" href="classvsmc_1_1mkl_1_1_stream.html#af6dd17c207dc88e41dfbe0cd8a7d8083">vsmc::mkl::Stream&lt; BRNG &gt;</a>
+: <a class="el" href="classvsmc_1_1_m_k_l_stream.html#afe232a49fc5aa4c20ed6d9f97531d148">vsmc::MKLStream&lt; BRNG &gt;</a>
 </li>
 <li>sin()
 : <a class="el" href="classvsmc_1_1tbb__op_1_1sin.html#a551650cc7bfb33a0b5158ae8e6f152af">vsmc::tbb_op::sin&lt; T &gt;</a>
@@ -188,13 +211,10 @@
 , <a class="el" href="classvsmc_1_1_weight_set.html#ac8cdec00d6aced2a4d129da15b746bed">vsmc::WeightSet</a>
 </li>
 <li>skip()
-: <a class="el" href="classvsmc_1_1_seed_generator.html#ac1709e3463fc826f1e6acd96106b66ff">vsmc::SeedGenerator&lt; ID &gt;</a>
+: <a class="el" href="classvsmc_1_1_seed_generator.html#a95ebf095fe8042e383148cb8e6ccecab">vsmc::SeedGenerator&lt; ID &gt;</a>
 </li>
 <li>skip_ahead()
-: <a class="el" href="classvsmc_1_1mkl_1_1_engine.html#ab8555aaaa43fdaba95789e8112a9c857">vsmc::mkl::Engine&lt; BRNG, ResultType &gt;</a>
-</li>
-<li>SkipAheadForce()
-: <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_skip_ahead_force.html#ad615444077864d922c10d40983e8e540">vsmc::mkl::traits::SkipAheadForce&lt; ResultType &gt;</a>
+: <a class="el" href="classvsmc_1_1_m_k_l_engine.html#ac62559a19fbc188af8de6a9f4923886e">vsmc::MKLEngine&lt; BRNG, ResultType &gt;</a>
 </li>
 <li>sp()
 : <a class="el" href="classvsmc_1_1_particle.html#a59fcce2d949c767544eed68c209f09b6">vsmc::Particle&lt; T &gt;</a>
@@ -206,15 +226,15 @@
 : <a class="el" href="classvsmc_1_1tbb__op_1_1square__sum.html#ab56208fa6b45cf90de64101478ba2216">vsmc::tbb_op::square_sum&lt; T &gt;</a>
 </li>
 <li>start()
-: <a class="el" href="classvsmc_1_1_dummy_stop_watch.html#a5940a44d8b6a3dcbb1cb85223ab7e94e">vsmc::DummyStopWatch</a>
+: <a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html#aa8b086ad1fa389daae359bd394f94601">vsmc::internal::DummyStopWatch</a>
 , <a class="el" href="classvsmc_1_1_stop_watch_clock_wrapper.html#a88c6ca0ca9b172485c4206f8b5dee061">vsmc::StopWatchClockWrapper&lt; ClockType &gt;</a>
 </li>
 <li>state()
-: <a class="el" href="classvsmc_1_1_state_matrix_3_01_col_major_00_01_dim_00_01_t_01_4.html#ad5c18211e06b31dd94d971757dac3cca">vsmc::StateMatrix&lt; ColMajor, Dim, T &gt;</a>
-, <a class="el" href="classvsmc_1_1_state_matrix_3_01_row_major_00_01_dim_00_01_t_01_4.html#ac0170914f87e1edac1729c774ae039c3">vsmc::StateMatrix&lt; RowMajor, Dim, T &gt;</a>
+: <a class="el" href="classvsmc_1_1_state_matrix_3_01_col_major_00_01_dim_00_01_t_01_4.html#af9fd509511fb840b74987137c93e54c4">vsmc::StateMatrix&lt; ColMajor, Dim, T &gt;</a>
+, <a class="el" href="classvsmc_1_1_state_matrix_3_01_row_major_00_01_dim_00_01_t_01_4.html#a57edaca838dae6c41b119ebdf2fc4813">vsmc::StateMatrix&lt; RowMajor, Dim, T &gt;</a>
 , <a class="el" href="structvsmc_1_1_state_matrix_base_1_1const__single__particle__type.html#a712769ecb335c714157957fe5cb48d01">vsmc::StateMatrixBase&lt; Order, Dim, T &gt;::const_single_particle_type&lt; S &gt;</a>
-, <a class="el" href="structvsmc_1_1_state_matrix_base_1_1single__particle__type.html#a272d528cb44e3ebafda8bb2c083376e4">vsmc::StateMatrixBase&lt; Order, Dim, T &gt;::single_particle_type&lt; S &gt;</a>
-, <a class="el" href="classvsmc_1_1_state_tuple_3_01_col_major_00_01_t_00_01_types_8_8_8_4.html#a30af376bb1032a94231d6f8f9ec9d00c">vsmc::StateTuple&lt; ColMajor, T, Types...&gt;</a>
+, <a class="el" href="structvsmc_1_1_state_matrix_base_1_1single__particle__type.html#acd687a67186c9c5e0c13198fc0a5ffe7">vsmc::StateMatrixBase&lt; Order, Dim, T &gt;::single_particle_type&lt; S &gt;</a>
+, <a class="el" href="classvsmc_1_1_state_tuple_3_01_col_major_00_01_t_00_01_types_8_8_8_4.html#a5a3a57fded13b7c928e7b9646b836bf5">vsmc::StateTuple&lt; ColMajor, T, Types...&gt;</a>
 , <a class="el" href="classvsmc_1_1_state_tuple_3_01_row_major_00_01_t_00_01_types_8_8_8_4.html#ace2483533ed78a6d3a4b6b324c2bf2f5">vsmc::StateTuple&lt; RowMajor, T, Types...&gt;</a>
 , <a class="el" href="structvsmc_1_1_state_tuple_base_1_1const__single__particle__type.html#aa9f2fd8524a21ee995c3e70cfcdebe09">vsmc::StateTupleBase&lt; Order, T, Types &gt;::const_single_particle_type&lt; S &gt;</a>
 , <a class="el" href="structvsmc_1_1_state_tuple_base_1_1single__particle__type.html#a9b3a55b9be42515cc0e6e03e3ec570fe">vsmc::StateTupleBase&lt; Order, T, Types &gt;::single_particle_type&lt; S &gt;</a>
@@ -230,7 +250,7 @@
 , <a class="el" href="classvsmc_1_1_state_tuple_base.html#acfa6a5e7a59e3bed51f708c9f0dfdf04">vsmc::StateTupleBase&lt; Order, T, Types &gt;</a>
 </li>
 <li>state_pack_type()
-: <a class="el" href="classvsmc_1_1_state_tuple_base_1_1state__pack__type.html#a368a3709aeb4afdeb639afa0af4bf92d">vsmc::StateTupleBase&lt; Order, T, Types &gt;::state_pack_type</a>
+: <a class="el" href="classvsmc_1_1_state_tuple_base_1_1state__pack__type.html#a617c80a1b155bd6809dd269406ba7805">vsmc::StateTupleBase&lt; Order, T, Types &gt;::state_pack_type</a>
 </li>
 <li>state_size()
 : <a class="el" href="classvsmc_1_1_state_c_l.html#a84b7983e35fc0e4a30e64001d7082375">vsmc::StateCL&lt; StateSize, FPType, ID &gt;</a>
@@ -243,7 +263,7 @@
 : <a class="el" href="classvsmc_1_1_state_c_i_l_k.html#ac40211cd5f34155f162ca2f44aa4544a">vsmc::StateCILK&lt; BaseState &gt;</a>
 </li>
 <li>StateCL()
-: <a class="el" href="classvsmc_1_1_state_c_l.html#a5d8399b019d062ce4474b224c811542c">vsmc::StateCL&lt; StateSize, FPType, ID &gt;</a>
+: <a class="el" href="classvsmc_1_1_state_c_l.html#a9953895b8952f0960305476a8c0a7a5e">vsmc::StateCL&lt; StateSize, FPType, ID &gt;</a>
 </li>
 <li>StateGCD()
 : <a class="el" href="classvsmc_1_1_state_g_c_d.html#a64cb1e91dd1581658b82eee22136d209">vsmc::StateGCD&lt; BaseState &gt;</a>
@@ -284,11 +304,11 @@
 : <a class="el" href="classvsmc_1_1_step_random_iterator.html#a29b0221f9852b7d8801ea334b6c0f8ed">vsmc::StepRandomIterator&lt; RandomIter &gt;</a>
 </li>
 <li>stop()
-: <a class="el" href="classvsmc_1_1_dummy_stop_watch.html#acf66489006c3597b27a8622e0f737779">vsmc::DummyStopWatch</a>
+: <a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html#a3b5f079d791abfe13c5ce8f3e311ae66">vsmc::internal::DummyStopWatch</a>
 , <a class="el" href="classvsmc_1_1_stop_watch_clock_wrapper.html#a99db9cd91b770167b6d243ae74e4181e">vsmc::StopWatchClockWrapper&lt; ClockType &gt;</a>
 </li>
 <li>StopWatch()
-: <a class="el" href="classvsmc_1_1_stop_watch.html#ad825bddd2b3a20e4f6c75a003a9fee12">vsmc::StopWatch</a>
+: <a class="el" href="classvsmc_1_1_stop_watch.html#ae702ec034c88869aeafbe549d04bd519">vsmc::StopWatch</a>
 </li>
 <li>StopWatchClockWrapper()
 : <a class="el" href="classvsmc_1_1_stop_watch_clock_wrapper.html#a8c09465a8a58ab677b97bd6fdb4ea458">vsmc::StopWatchClockWrapper&lt; ClockType &gt;</a>
@@ -298,10 +318,7 @@
 , <a class="el" href="classvsmc_1_1_state_matrix_3_01_row_major_00_01_dim_00_01_t_01_4.html#ac1555f301567d5c75af76fc687176e3e">vsmc::StateMatrix&lt; RowMajor, Dim, T &gt;</a>
 </li>
 <li>stream()
-: <a class="el" href="classvsmc_1_1mkl_1_1_engine.html#ac447dc02a31599648db439ce5ae3f91c">vsmc::mkl::Engine&lt; BRNG, ResultType &gt;</a>
-</li>
-<li>Stream()
-: <a class="el" href="classvsmc_1_1mkl_1_1_stream.html#ab75e056aa607479299bf0017d596ba4a">vsmc::mkl::Stream&lt; BRNG &gt;</a>
+: <a class="el" href="classvsmc_1_1_m_k_l_engine.html#adf31533651c1e9b934f059a2dd33ef0e">vsmc::MKLEngine&lt; BRNG, ResultType &gt;</a>
 </li>
 <li>summary_data()
 : <a class="el" href="classvsmc_1_1_sampler.html#ae66b4964b5d01434cec3796122942d70">vsmc::Sampler&lt; T &gt;</a>
@@ -316,7 +333,14 @@
 : <a class="el" href="classvsmc_1_1_sampler.html#a63647b3130e7a7afa7c2d8356fdd4e63">vsmc::Sampler&lt; T &gt;</a>
 </li>
 <li>summation()
-: <a class="el" href="classvsmc_1_1tbb__op_1_1summation.html#ac0743e33d9c11c54113aab7cf287e641">vsmc::tbb_op::summation&lt; T &gt;</a>
+: <a class="el" href="classvsmc_1_1tbb__op_1_1summation.html#adf2d9c42c7ad6db07ef0dd12bd0e273b">vsmc::tbb_op::summation&lt; T &gt;</a>
+</li>
+<li>suspend()
+: <a class="el" href="classvsmc_1_1_dispatch_queue_base.html#afb2761d612ed1e80c151ce1b447fb1c8">vsmc::DispatchQueueBase</a>
+, <a class="el" href="classvsmc_1_1_dispatch_source_base.html#a255677bee589204f4878c5791427ed4f">vsmc::DispatchSourceBase&lt; Type &gt;</a>
+</li>
+<li>sync_f()
+: <a class="el" href="classvsmc_1_1_dispatch_queue_base.html#a2ed509c61f173929ab0275f574b795e4">vsmc::DispatchQueueBase</a>
 </li>
 </ul>
 </div><!-- contents -->

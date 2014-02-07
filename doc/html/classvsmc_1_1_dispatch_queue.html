@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>vSMC: vsmc::DispatchQueue Class Reference</title>
+<title>vSMC: vsmc::DispatchQueue&lt; DispatchQueueType &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -58,110 +58,19 @@
 </div>
 </div><!-- top -->
 <div class="header">
-  <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
-<a href="classvsmc_1_1_dispatch_queue-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">vsmc::DispatchQueue Class Reference</div>  </div>
+<div class="title">vsmc::DispatchQueue&lt; DispatchQueueType &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="gcd__wrapper_8hpp_source.html">vsmc/smp/internal/gcd_wrapper.hpp</a>&gt;</code></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:a010a5a865ca518d016491429645be490"><td class="memItemLeft" align="right" valign="top">dispatch_queue_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvsmc_1_1_dispatch_queue.html#a010a5a865ca518d016491429645be490">queue</a> () const </td></tr>
-<tr class="separator:a010a5a865ca518d016491429645be490"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27ea72f73b893ef913e701d95849ecce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvsmc_1_1_dispatch_queue.html#a27ea72f73b893ef913e701d95849ecce">queue</a> (dispatch_queue_t new_queue)</td></tr>
-<tr class="separator:a27ea72f73b893ef913e701d95849ecce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ab35fd16d852af99cdbb49181be43230d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classvsmc_1_1_dispatch_queue.html">DispatchQueue</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvsmc_1_1_dispatch_queue.html#ab35fd16d852af99cdbb49181be43230d">instance</a> ()</td></tr>
-<tr class="separator:ab35fd16d852af99cdbb49181be43230d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
+<p><code>#include &lt;<a class="el" href="dispatch_8hpp_source.html">vsmc/utility/dispatch.hpp</a>&gt;</code></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="gcd__wrapper_8hpp_source.html#l00008">8</a> of file <a class="el" href="gcd__wrapper_8hpp_source.html">gcd_wrapper.hpp</a>.</p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="ab35fd16d852af99cdbb49181be43230d"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static <a class="el" href="classvsmc_1_1_dispatch_queue.html">DispatchQueue</a>&amp; vsmc::DispatchQueue::instance </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
+<div class="textblock"><h3>template&lt;DispatchQueueType&gt;<br/>
+class vsmc::DispatchQueue&lt; DispatchQueueType &gt;</h3>
 
-<p>Definition at line <a class="el" href="gcd__wrapper_8hpp_source.html#l00012">12</a> of file <a class="el" href="gcd__wrapper_8hpp_source.html">gcd_wrapper.hpp</a>.</p>
 
-</div>
-</div>
-<a class="anchor" id="a010a5a865ca518d016491429645be490"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">dispatch_queue_t vsmc::DispatchQueue::queue </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="gcd__wrapper_8hpp_source.html#l00019">19</a> of file <a class="el" href="gcd__wrapper_8hpp_source.html">gcd_wrapper.hpp</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a27ea72f73b893ef913e701d95849ecce"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void vsmc::DispatchQueue::queue </td>
-          <td>(</td>
-          <td class="paramtype">dispatch_queue_t&#160;</td>
-          <td class="paramname"><em>new_queue</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="gcd__wrapper_8hpp_source.html#l00024">24</a> of file <a class="el" href="gcd__wrapper_8hpp_source.html">gcd_wrapper.hpp</a>.</p>
-
-</div>
-</div>
-</div><!-- contents -->
+<p>Definition at line <a class="el" href="dispatch_8hpp_source.html#l00032">32</a> of file <a class="el" href="dispatch_8hpp_source.html">dispatch.hpp</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

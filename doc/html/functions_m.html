@@ -81,7 +81,6 @@
       <li><a href="functions_n.html#index_n"><span>n</span></a></li>
       <li><a href="functions_o.html#index_o"><span>o</span></a></li>
       <li><a href="functions_p.html#index_p"><span>p</span></a></li>
-      <li><a href="functions_q.html#index_q"><span>q</span></a></li>
       <li><a href="functions_r.html#index_r"><span>r</span></a></li>
       <li><a href="functions_s.html#index_s"><span>s</span></a></li>
       <li><a href="functions_t.html#index_t"><span>t</span></a></li>
@@ -117,9 +116,9 @@
 : <a class="el" href="classvsmc_1_1_state_c_l.html#a43448cd36bf0ba003562762b26c5e29a">vsmc::StateCL&lt; StateSize, FPType, ID &gt;</a>
 </li>
 <li>max()
-: <a class="el" href="classvsmc_1_1mkl_1_1_engine.html#a3872a148e0f0b0523c4b61eb4406a148">vsmc::mkl::Engine&lt; BRNG, ResultType &gt;</a>
-, <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_offset_dynamic.html#a735d4134ade1baf27b17c18aef9012a2">vsmc::mkl::traits::OffsetDynamic&lt; MaxOffset &gt;</a>
-, <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_offset_zero.html#a9b2c0aa744eefab6ed67240348123bff">vsmc::mkl::traits::OffsetZero</a>
+: <a class="el" href="classvsmc_1_1_m_k_l_engine.html#aed51be8afa74915443e687a445017460">vsmc::MKLEngine&lt; BRNG, ResultType &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_offset_dynamic.html#a89db13a86d20e928e0b79953a48ec7d8">vsmc::traits::MKLOffsetDynamic&lt; MaxOffset &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_offset_zero.html#a6468c1016d4db84257a4909dfa38b367">vsmc::traits::MKLOffsetZero</a>
 , <a class="el" href="classvsmc_1_1_uniform_real_distribution.html#a9a901e55a332242ac191d5f213e1c2a7">vsmc::UniformRealDistribution&lt; FPType, Left, Right &gt;</a>
 </li>
 <li>max_degree()
@@ -143,29 +142,99 @@
 <li>mcmc_type
 : <a class="el" href="classvsmc_1_1_sampler.html#ae071e5d8f491d84bbed46cc88e011c90">vsmc::Sampler&lt; T &gt;</a>
 </li>
+<li>merge_data()
+: <a class="el" href="classvsmc_1_1_dispatch_source_3_01_dispatch_data_add_01_4.html#a023f0bbd89c6610b28de5df438ff509b">vsmc::DispatchSource&lt; DispatchDataAdd &gt;</a>
+, <a class="el" href="classvsmc_1_1_dispatch_source_3_01_dispatch_data_or_01_4.html#a668e450f653153d296e4bcc041d31989">vsmc::DispatchSource&lt; DispatchDataOr &gt;</a>
+</li>
 <li>microseconds()
-: <a class="el" href="classvsmc_1_1_dummy_stop_watch.html#adb57ff189b176073d11e6aae3fe012c7">vsmc::DummyStopWatch</a>
+: <a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html#a5243033cd8de74f70ef8a820514cf6f2">vsmc::internal::DummyStopWatch</a>
 , <a class="el" href="classvsmc_1_1_stop_watch.html#a37a24e75d0c77b036016ab2e4a830f6a">vsmc::StopWatch</a>
 </li>
 <li>milliseconds()
-: <a class="el" href="classvsmc_1_1_dummy_stop_watch.html#a685e89e1cad78c43902161ae08a56917">vsmc::DummyStopWatch</a>
+: <a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html#a2d49633c69e37d2055200400807ab504">vsmc::internal::DummyStopWatch</a>
 , <a class="el" href="classvsmc_1_1_stop_watch.html#a0aff63b58ac0bd126c728b95aaeae217">vsmc::StopWatch</a>
 </li>
 <li>min()
-: <a class="el" href="classvsmc_1_1mkl_1_1_engine.html#a7fed09c7eaa1dc42fbb3c13c1cb1c3d8">vsmc::mkl::Engine&lt; BRNG, ResultType &gt;</a>
-, <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_offset_dynamic.html#af783f3410fa331bb79e3e18b56e8024a">vsmc::mkl::traits::OffsetDynamic&lt; MaxOffset &gt;</a>
-, <a class="el" href="structvsmc_1_1mkl_1_1traits_1_1_offset_zero.html#a18edd8ec282c2ce59c5d42116a2f9d8c">vsmc::mkl::traits::OffsetZero</a>
+: <a class="el" href="classvsmc_1_1_m_k_l_engine.html#a9e63703813be51b3fb9883306221249a">vsmc::MKLEngine&lt; BRNG, ResultType &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_offset_dynamic.html#ab8171b299a05e2852756137e5a2d8930">vsmc::traits::MKLOffsetDynamic&lt; MaxOffset &gt;</a>
+, <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_offset_zero.html#abacd428340eb22666ca1502d1bcda55b">vsmc::traits::MKLOffsetZero</a>
 , <a class="el" href="classvsmc_1_1_uniform_real_distribution.html#ab8a46ae28ee626bc167e04a7cfe21264">vsmc::UniformRealDistribution&lt; FPType, Left, Right &gt;</a>
 </li>
 <li>minimum()
-: <a class="el" href="classvsmc_1_1tbb__op_1_1minimum.html#afa32eb22054c77b7eab4a421cd85e018">vsmc::tbb_op::minimum&lt; T &gt;</a>
+: <a class="el" href="classvsmc_1_1tbb__op_1_1minimum.html#a333e9000ad17d8d828eacf24d3263650">vsmc::tbb_op::minimum&lt; T &gt;</a>
 </li>
 <li>minus()
 : <a class="el" href="classvsmc_1_1tbb__op_1_1minus.html#ae9548b3d0597ecb60aba1500b1bbdcd2">vsmc::tbb_op::minus&lt; T &gt;</a>
 </li>
 <li>minutes()
-: <a class="el" href="classvsmc_1_1_dummy_stop_watch.html#ac9376a11f55a61c39a0eeeab7b4da2c7">vsmc::DummyStopWatch</a>
+: <a class="el" href="classvsmc_1_1internal_1_1_dummy_stop_watch.html#ad756c54154e12c2b2ccc4034842f1a2c">vsmc::internal::DummyStopWatch</a>
 , <a class="el" href="classvsmc_1_1_stop_watch.html#a70d8b62b8bed5517601fb85058de8ab1">vsmc::StopWatch</a>
+</li>
+<li>MKLBernoulliDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_bernoulli_distribution.html#ac3535b6d25018c029dd78f443a8d80b7">vsmc::MKLBernoulliDistribution&lt; Method &gt;</a>
+</li>
+<li>MKLBetaDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_beta_distribution.html#a7e8e6b81b61567c24e2752f2057cc389">vsmc::MKLBetaDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLBinomialDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_binomial_distribution.html#a69202cfb318c157013ffd9c08b57410c">vsmc::MKLBinomialDistribution&lt; Method &gt;</a>
+</li>
+<li>MKLCauchyDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_cauchy_distribution.html#acaa1ce62d931a158b4682fb10641abc0">vsmc::MKLCauchyDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_distribution.html#a5f9ae639ebcb5f2772e8eba411d6ddae">vsmc::MKLDistribution&lt; ResultType, Derived &gt;</a>
+</li>
+<li>MKLEngine()
+: <a class="el" href="classvsmc_1_1_m_k_l_engine.html#aee3c44f604237737e6c349c00742c9e2">vsmc::MKLEngine&lt; BRNG, ResultType &gt;</a>
+</li>
+<li>MKLExponentialDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_exponential_distribution.html#a2b887226563fa212840a602d4b221f97">vsmc::MKLExponentialDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLGammaDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_gamma_distribution.html#a2d53f2d236356b3cdfb162a0cbdd0ef1">vsmc::MKLGammaDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLGaussianDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_gaussian_distribution.html#a4938ae4811a085b461cd260ad5c6a7c6">vsmc::MKLGaussianDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLGeometricDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_geometric_distribution.html#ab1d929ce8193cadef71f0f43ba1a478c">vsmc::MKLGeometricDistribution&lt; Method &gt;</a>
+</li>
+<li>MKLGumbelDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_gumbel_distribution.html#ab66e96b9f9de4ccc876fd290a9d5ca2e">vsmc::MKLGumbelDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLHypergeometricDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_hypergeometric_distribution.html#acfacb1055869faf82ac5ae3855f55fe0">vsmc::MKLHypergeometricDistribution&lt; Method &gt;</a>
+</li>
+<li>MKLLaplaceDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_laplace_distribution.html#a43d70efb420d133be6cfa696e04fa236">vsmc::MKLLaplaceDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLLognormalDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_lognormal_distribution.html#a19d242948127bb346b29f38022b806af">vsmc::MKLLognormalDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLNegBinomialDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_neg_binomial_distribution.html#a5859e3e1f7a30a9de755eedfa14671b3">vsmc::MKLNegBinomialDistribution&lt; Method &gt;</a>
+</li>
+<li>MKLOffsetDynamic()
+: <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_offset_dynamic.html#aa08557e052bb46e46d5e53895b7a507f">vsmc::traits::MKLOffsetDynamic&lt; MaxOffset &gt;</a>
+</li>
+<li>MKLPoissonDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_poisson_distribution.html#a5f96ad0a55319cfc836baffc085d6cb2">vsmc::MKLPoissonDistribution&lt; Method &gt;</a>
+</li>
+<li>MKLRayleighDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_rayleigh_distribution.html#a67cd9ec4a35696724bf57f470a38f42a">vsmc::MKLRayleighDistribution&lt; FPType, Method &gt;</a>
+</li>
+<li>MKLSkipAheadForce()
+: <a class="el" href="structvsmc_1_1traits_1_1_m_k_l_skip_ahead_force.html#a67a21dd7457b0fc28dcb613e0a0b39ea">vsmc::traits::MKLSkipAheadForce&lt; ResultType &gt;</a>
+</li>
+<li>MKLStream()
+: <a class="el" href="classvsmc_1_1_m_k_l_stream.html#ad14bb1a068580e037855daf2762bfd62">vsmc::MKLStream&lt; BRNG &gt;</a>
+</li>
+<li>MKLUniformDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_uniform_distribution.html#abe0681ca1c641d13a05ef9804f0c1948">vsmc::MKLUniformDistribution&lt; ResultType, Method &gt;</a>
+</li>
+<li>MKLWeibullDistribution()
+: <a class="el" href="classvsmc_1_1_m_k_l_weibull_distribution.html#a5d5cb4f87aa7f02cff010ae9eb6d8e95">vsmc::MKLWeibullDistribution&lt; FPType, Method &gt;</a>
 </li>
 <li>modulo()
 : <a class="el" href="classvsmc_1_1_seed_generator.html#a4b196433ea28af58d8d23e84c088e9ce">vsmc::SeedGenerator&lt; ID &gt;</a>
@@ -196,7 +265,7 @@
 <li>MonitorEvalAdapter()
 : <a class="el" href="classvsmc_1_1_monitor_eval_adapter.html#a8cecd3a048dc93b8f9e16e57093cd07b">vsmc::MonitorEvalAdapter&lt; T, Impl, Func &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_adapter_3_01_t_00_01_impl_00_01_null_type_01_4.html#af4d264c4a69865fef5b6676ef76b7db1">vsmc::MonitorEvalAdapter&lt; T, Impl, NullType &gt;</a>
-, <a class="el" href="classvsmc_1_1_monitor_eval_adapter_3_01_t_00_01_monitor_eval_c_l_00_01_f_01_4.html#a3fbb67ea1c4bd845da8e9c60dfe23179">vsmc::MonitorEvalAdapter&lt; T, MonitorEvalCL, F &gt;</a>
+, <a class="el" href="classvsmc_1_1_monitor_eval_adapter_3_01_t_00_01_monitor_eval_c_l_00_01_f_01_4.html#a8caaeec41b04b03fd46bb46a9d035e8a">vsmc::MonitorEvalAdapter&lt; T, MonitorEvalCL, F &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_adapter_3_01_t_00_01_monitor_eval_c_l_00_01_null_type_01_4.html#a1e72856ffbcfc17ff297c17fafc19446">vsmc::MonitorEvalAdapter&lt; T, MonitorEvalCL, NullType &gt;</a>
 </li>
 <li>MonitorEvalAdapterBase()
@@ -204,7 +273,7 @@
 , <a class="el" href="classvsmc_1_1_monitor_eval_adapter_base_3_01_t_00_01_null_type_00_01_base_type_01_4.html#abfca8de46b6281bcb2a14297ea14a482">vsmc::MonitorEvalAdapterBase&lt; T, NullType, BaseType &gt;</a>
 </li>
 <li>MonitorEvalBase()
-: <a class="el" href="classvsmc_1_1_monitor_eval_base.html#ab48ce14dec214e5bb55b7c009e3737bd">vsmc::MonitorEvalBase&lt; T, Derived &gt;</a>
+: <a class="el" href="classvsmc_1_1_monitor_eval_base.html#a1eb617b4f5e0ecef89b49917e5cf07fb">vsmc::MonitorEvalBase&lt; T, Derived &gt;</a>
 , <a class="el" href="classvsmc_1_1_monitor_eval_base_3_01_t_00_01_virtual_01_4.html#a3eb9f908afe46133f043cd33d4f8f902">vsmc::MonitorEvalBase&lt; T, Virtual &gt;</a>
 </li>
 <li>MonitorEvalCILK()
@@ -229,10 +298,10 @@
 : <a class="el" href="classvsmc_1_1_monitor_eval_s_t_d.html#a300aad94e794d6a34545ab79db0023eb">vsmc::MonitorEvalSTD&lt; T, Derived &gt;</a>
 </li>
 <li>MonitorEvalTBB()
-: <a class="el" href="classvsmc_1_1_monitor_eval_t_b_b.html#a6d6b94994eecf3321a37cdbec7b39697">vsmc::MonitorEvalTBB&lt; T, Derived &gt;</a>
+: <a class="el" href="classvsmc_1_1_monitor_eval_t_b_b.html#af83c11df3bc9df836774fb7573557ffa">vsmc::MonitorEvalTBB&lt; T, Derived &gt;</a>
 </li>
 <li>move()
-: <a class="el" href="classvsmc_1_1_sampler.html#ab0c41cc61304e8350bd4cec5368a4b35">vsmc::Sampler&lt; T &gt;</a>
+: <a class="el" href="classvsmc_1_1_sampler.html#a2e95efbdc311e19de690260d642fb8de">vsmc::Sampler&lt; T &gt;</a>
 </li>
 <li>move_queue_clear()
 : <a class="el" href="classvsmc_1_1_sampler.html#a9040032e2387623dbb5b58bebd96e87a">vsmc::Sampler&lt; T &gt;</a>
@@ -260,7 +329,7 @@
 : <a class="el" href="classvsmc_1_1_sampler.html#a068cfc8f7d2b1fdc467a96a9c2a255e1">vsmc::Sampler&lt; T &gt;</a>
 </li>
 <li>MoveAdapter()
-: <a class="el" href="classvsmc_1_1_move_adapter.html#a524e04948487fb5740af3c2779dcf161">vsmc::MoveAdapter&lt; T, Impl, Func &gt;</a>
+: <a class="el" href="classvsmc_1_1_move_adapter.html#a008dd17378e86a25ec355d22c223396c">vsmc::MoveAdapter&lt; T, Impl, Func &gt;</a>
 , <a class="el" href="classvsmc_1_1_move_adapter_3_01_t_00_01_impl_00_01_null_type_01_4.html#a8eef4e8ce986ebb7f146c3f2cd8720a4">vsmc::MoveAdapter&lt; T, Impl, NullType &gt;</a>
 , <a class="el" href="classvsmc_1_1_move_adapter_3_01_t_00_01_move_c_l_00_01_f_01_4.html#a0288b6397384ca17e6353459b972dd8e">vsmc::MoveAdapter&lt; T, MoveCL, F &gt;</a>
 , <a class="el" href="classvsmc_1_1_move_adapter_3_01_t_00_01_move_c_l_00_01_null_type_01_4.html#a447e276a4e55d7df78aed447a0093733">vsmc::MoveAdapter&lt; T, MoveCL, NullType &gt;</a>
@@ -277,22 +346,22 @@
 : <a class="el" href="classvsmc_1_1_move_c_i_l_k.html#a44c228de1217dea0098caeca862a3a55">vsmc::MoveCILK&lt; T, Derived &gt;</a>
 </li>
 <li>MoveCL()
-: <a class="el" href="classvsmc_1_1_move_c_l.html#a835543563c163f38cfcf14383cd9579a">vsmc::MoveCL&lt; typename, Derived &gt;</a>
+: <a class="el" href="classvsmc_1_1_move_c_l.html#aeb55dcdfa80323ec842e63302c179506">vsmc::MoveCL&lt; typename, Derived &gt;</a>
 </li>
 <li>MoveGCD()
 : <a class="el" href="classvsmc_1_1_move_g_c_d.html#ab971b3f8d32e1262ba6775b2c7bd8ab9">vsmc::MoveGCD&lt; T, Derived &gt;</a>
 </li>
 <li>MoveOMP()
-: <a class="el" href="classvsmc_1_1_move_o_m_p.html#ad86ea81755c3805dbe381422c0b27a6f">vsmc::MoveOMP&lt; T, Derived &gt;</a>
+: <a class="el" href="classvsmc_1_1_move_o_m_p.html#a74bae9991af06ad87363de312fbb6de3">vsmc::MoveOMP&lt; T, Derived &gt;</a>
 </li>
 <li>MovePPL()
-: <a class="el" href="classvsmc_1_1_move_p_p_l.html#adf3d551efa132c446fb2d0ff2a73b6f5">vsmc::MovePPL&lt; T, Derived &gt;</a>
+: <a class="el" href="classvsmc_1_1_move_p_p_l.html#a567e5d18916ef5e0ac0259dc3242f39b">vsmc::MovePPL&lt; T, Derived &gt;</a>
 </li>
 <li>MoveSEQ()
 : <a class="el" href="classvsmc_1_1_move_s_e_q.html#abeda76318f2637f4ac2eb56328d26706">vsmc::MoveSEQ&lt; T, Derived &gt;</a>
 </li>
 <li>MoveSTD()
-: <a class="el" href="classvsmc_1_1_move_s_t_d.html#a76921c6d13b7f2f4deacca66fae523b3">vsmc::MoveSTD&lt; T, Derived &gt;</a>
+: <a class="el" href="classvsmc_1_1_move_s_t_d.html#a260b917e52f802e4403010a63e54ea6d">vsmc::MoveSTD&lt; T, Derived &gt;</a>
 </li>
 <li>MoveTBB()
 : <a class="el" href="classvsmc_1_1_move_t_b_b.html#aa0096e1cc2d2d01789500d6d48ac455c">vsmc::MoveTBB&lt; T, Derived &gt;</a>
@@ -301,7 +370,7 @@
 : <a class="el" href="classvsmc_1_1_m_p_i_environment.html#a46ff49a2e5cced363ccf74571a85ce4e">vsmc::MPIEnvironment</a>
 </li>
 <li>mul_weight()
-: <a class="el" href="classvsmc_1_1_normalizing_constant.html#a7173903772b01ad6230070118ca52f83">vsmc::NormalizingConstant</a>
+: <a class="el" href="classvsmc_1_1_normalizing_constant.html#a02a7b161067fa3930dfa480786880f36">vsmc::NormalizingConstant</a>
 , <a class="el" href="classvsmc_1_1_weight_set.html#acfa71ca88b87615dd56384044c382ce2">vsmc::WeightSet</a>
 </li>
 <li>multiplies()
