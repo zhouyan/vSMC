@@ -16,7 +16,7 @@ enum DispatchQueueType {
 
 template <DispatchQueueType> class DispatchQueue;
 
-/// \brief Base class of all Dispatch objects
+/// \brief Base class of Dispatch objects
 /// \ingroup Dispatch
 ///
 /// \details All Dispatch objects are reference counting shared objects
@@ -66,6 +66,10 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
 {
     public :
 
+    void resume () {dispatch_resume(this->get());}
+
+    void suspend () {dispatch_suspend(this->get());}
+
     const char *get_label () const
     {return dispatch_queue_get_label(this->get());}
 
@@ -84,10 +88,6 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     template <typename DispatchType>
     void set_as_target (const DispatchObject<DispatchType> &object) const
     {dispatch_set_target_queue(object.get(), this->get());}
-
-    void resume () {dispatch_resume(this->get());}
-
-    void suspend () {dispatch_suspend(this->get());}
 
     void after_f (dispatch_time_t when, void *context,
             dispatch_function_t f) const
@@ -240,6 +240,161 @@ class DispatchGroup : public DispatchObject<dispatch_group_t>
     {dispatch_group_notify(this->get(), queue, block);}
 #endif // __BLOCKS__
 }; // class DispatchGroup
+
+/// \brief Base class of DispatchSource
+/// \ingroup Dispatch
+template <dispatch_source_type_t Type>
+class DispatchSourceBase : public DispatchObject<dispatch_source_t>
+{
+    public :
+
+    void resume () {dispatch_resume(this->get());}
+
+    void suspend () {dispatch_suspend(this->get());}
+
+    void cancel () {dispatch_source_cancel(this->get());}
+
+    long test_cancel () const
+    {return dispatch_source_test_cancel(this->get());}
+
+    unsigned long get_data () const {dispatch_source_get_data(this->get());}
+
+    uintptr_t get_handle () const {dispatch_source_get_handle(this->get());}
+
+    unsigned long get_mask () const {dispatch_source_get_mask(this->get());}
+
+    void set_cancel_handler_f (dispatch_function_t cancel_handler)
+    {dispatch_source_set_cancel_handler_f(this->get(), cancel_handler);}
+
+    void set_event_handler_f (dispatch_function_t event_handler)
+    {dispatch_source_set_event_handler_f(this->get(), event_handler);}
+
+    void set_registration_handler_f (dispatch_function_t registration_handler)
+    {
+        dispatch_source_set_registration_handler_f(
+                this->get(), registration_handler);
+    }
+
+#ifdef __BLOCKS__
+    void set_cancel_handler (dispatch_block_t cancel_handler)
+    {dispatch_source_set_cancel_handler(this->get(), cancel_handler);}
+
+    void set_event_handler (dispatch_block_t event_handler)
+    {dispatch_source_set_event_handler(this->get(), event_handler);}
+
+    void set_registration_handler (dispatch_block_t registration_handler)
+    {
+        dispatch_source_set_registration_handler(
+                this->get(), registration_handler);
+    }
+#endif
+
+    DispatchSourceBase (uintptr_t handle, unsigned long mask,
+            dispatch_queue_t queue) : DispatchObject<dispatch_source_t>(
+                dispatch_source_create(Type, handle, mask, queue)) {}
+
+    DispatchSourceBase (const DispatchSourceBase &other) :
+        DispatchObject<dispatch_source_t>(other) {}
+
+    DispatchSourceBase &operator= (const DispatchSourceBase &other)
+    {DispatchObject<dispatch_source_t>::operator=(other); return *this;}
+
+    ~DispatchSourceBase () {dispatch_release(this->get());}
+}; // class DispatchSourceBase
+
+/// \brief A dispatch source
+template <dispatch_source_type_t Type>
+class DispatchSource : public DispatchSourceBase<Type>
+{
+    public :
+
+    template <DispatchQueueType QType>
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            const DispatchQueue<QType> &queue) : DispatchSourceBase<Type>(
+                handle, mask, queue.get()) {}
+
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            dispatch_queue_t queue) : DispatchSourceBase<Type>(
+                handle, mask, queue) {}
+}; // class DispatchSource
+
+template <>
+class DispatchSource<DISPATCH_SOURCE_TYPE_DATA_ADD> :
+    public DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_ADD>
+{
+    public :
+
+    template <DispatchQueueType QType>
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            const DispatchQueue<QType> &queue) :
+        DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_ADD>(
+                handle, mask, queue.get()) {}
+
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            dispatch_queue_t queue) :
+        DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_ADD>(
+                handle, mask, queue) {}
+
+    void merge_data (unsigned long value) const
+    {dispatch_source_merge_data(this->get(), value);}
+}; // class DispatchSource
+
+template <>
+class DispatchSource<DISPATCH_SOURCE_TYPE_DATA_OR> :
+    public DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_OR>
+{
+    public :
+
+    template <DispatchQueueType QType>
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            const DispatchQueue<QType> &queue) :
+        DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_OR>(
+                handle, mask, queue.get()) {}
+
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            dispatch_queue_t queue) :
+        DispatchSourceBase<DISPATCH_SOURCE_TYPE_DATA_OR>(
+                handle, mask, queue) {}
+
+    void merge_data (unsigned long value) const
+    {dispatch_source_merge_data(this->get(), value);}
+}; // class DispatchSource
+
+template <>
+class DispatchSource<DISPATCH_SOURCE_TYPE_TIMER> :
+    public DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>
+{
+    public :
+
+    template <DispatchQueueType QType>
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            const DispatchQueue<QType> &queue) :
+        DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>(
+                handle, mask, queue.get()) {}
+
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            dispatch_queue_t queue) :
+        DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>(
+                handle, mask, queue) {}
+
+    template <DispatchQueueType QType>
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            const DispatchQueue<QType> &queue,
+            dispatch_time_t start, uint64_t interval, uint64_t leeway) :
+        DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>(
+                handle, mask, queue.get())
+    {set_timer(start, interval, leeway);}
+
+    DispatchSource (uintptr_t handle, unsigned long mask,
+            dispatch_queue_t queue,
+            dispatch_time_t start, uint64_t interval, uint64_t leeway) :
+        DispatchSourceBase<DISPATCH_SOURCE_TYPE_TIMER>(
+                handle, mask, queue)
+    {set_timer(start, interval, leeway);}
+
+    void set_timer (dispatch_time_t start, uint64_t interval, uint64_t leeway)
+    {dispatch_source_set_timer(this->get(), start, interval, leeway);}
+}; // class DispatchSource
 
 } // namespace vsmc
 
