@@ -181,9 +181,14 @@ class DispatchQueue<Global> : public DispatchQueueBase
 {
     public :
 
+#ifdef MAC_OS_X_VERSION_10_7
     DispatchQueue (dispatch_queue_priority_t priority =
             DISPATCH_QUEUE_PRIORITY_DEFAULT, unsigned long flags = 0) :
         DispatchQueueBase(dispatch_get_global_queue(priority, flags)) {}
+#else // MAC_OS_X_VERSION_10_7
+    DispatchQueue (long priority = 0, unsigned long flags = 0) :
+        DispatchQueueBase(dispatch_get_global_queue(priority, flags)) {}
+#endif // MAC_OS_X_VERSION_10_7
 }; // class DispatchQueue
 
 /// \brief A private dispatch queue (`dispatch_queue_create`)
