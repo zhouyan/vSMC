@@ -56,11 +56,11 @@ class Sampler
         resampled_history_.reserve(num);
         for (std::size_t i = 0; i != accept_history_.size(); ++i)
             accept_history_[i].reserve(num);
-        if (bool(path_))
+        if (!path_.empty())
             path_.reserve(num);
         for (typename monitor_map_type::iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
-            if (bool(m->second))
+            if (!m->second.empty())
                 m->second.reserve(num);
         }
     }
@@ -582,12 +582,12 @@ class Sampler
 
     void do_monitor ()
     {
-        if (bool(path_))
+        if (!path_.empty())
             path_.eval(iter_num_, particle_);
 
         for (typename monitor_map_type::iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
-            if (bool(m->second))
+            if (!m->second.empty())
                 m->second.eval(iter_num_, particle_);
         }
     }

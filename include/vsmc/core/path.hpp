@@ -88,7 +88,7 @@ class Path
     }
 
     /// \brief Whether the evaluation object is valid
-    VSMC_EXPLICIT_OPERATOR operator bool () const {return bool(eval_);}
+    bool empty () const {return !bool(eval_);}
 
     /// \brief Get the iteration index of the sampler of a given monitor
     /// iteration
