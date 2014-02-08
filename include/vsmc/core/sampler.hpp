@@ -68,6 +68,14 @@ class Sampler
     /// \brief Number of iterations (including initialization)
     std::size_t iter_size () const {return ess_history_.size();}
 
+    /// \brief Current iteration number (initialization count as zero)
+    ///
+    /// \details
+    /// The `iter_size() - iter_num()` is always 1. `iter_size` emphasize that it
+    /// returns the total number of iterations. `iter_num` is more like an
+    /// index of the sampler.
+    std::size_t iter_num () const {return iter_num_;}
+
     /// \brief Force resample
     Sampler<T> &resample ()
     {
