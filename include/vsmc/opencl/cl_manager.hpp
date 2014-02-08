@@ -150,7 +150,7 @@ class CLSetup
 /// setup.device_type("GPU");
 /// setup.device_name("Iris")
 /// \endcode
-/// or 
+/// or
 /// \code
 /// setup.device_type("GPU");
 /// setup.device_vedor("Intel")
