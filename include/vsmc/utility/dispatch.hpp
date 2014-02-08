@@ -202,15 +202,6 @@ class DispatchObject
     /// \brief Return the underlying Dispatch object
     DispatchType get () const {return object_;}
 
-    /// \brief If the object is non-NULL
-    bool empty () const
-    {
-        if (object_)
-            return false;
-        else
-            return true;
-    }
-
     void *get_context () const
     {return dispatch_get_context(object_);}
 
@@ -637,19 +628,6 @@ class DispatchSource<DispatchTimer> :
     DispatchSource (uintptr_t handle, unsigned long mask,
             dispatch_queue_t queue) :
         DispatchSourceBase<DispatchTimer>(handle, mask, queue) {}
-
-    template <DispatchQueueType QType>
-    DispatchSource (uintptr_t handle, unsigned long mask,
-            const DispatchQueue<QType> &queue,
-            dispatch_time_t start, uint64_t interval, uint64_t leeway) :
-        DispatchSourceBase<DispatchTimer>(handle, mask, queue.get())
-    {if (!this->empty()) set_timer(start, interval, leeway);}
-
-    DispatchSource (uintptr_t handle, unsigned long mask,
-            dispatch_queue_t queue,
-            dispatch_time_t start, uint64_t interval, uint64_t leeway) :
-        DispatchSourceBase<DispatchTimer>(handle, mask, queue)
-    {if (!this->empty()) set_timer(start, interval, leeway);}
 
     void set_timer (dispatch_time_t start,
             uint64_t interval, uint64_t leeway) const
