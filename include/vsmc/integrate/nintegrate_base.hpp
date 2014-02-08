@@ -22,8 +22,8 @@ class NIntegrateBase
 
     NIntegrateBase () {}
     NIntegrateBase (const NIntegrateBase<Derived> &) {}
-    NIntegrateBase<Derived> &operator=
-        (const NIntegrateBase<Derived> &) {return *this;}
+    NIntegrateBase<Derived> &operator= (const NIntegrateBase<Derived> &)
+    {return *this;}
     VSMC_CRTP_DESTRUCTOR_PREFIX ~NIntegrateBase () {}
 
     /// \brief Integrate a segment on the grid
@@ -94,8 +94,8 @@ class NIntegrateBase<Virtual>
 
     NIntegrateBase () {}
     NIntegrateBase (const NIntegrateBase<Virtual> &) {}
-    NIntegrateBase<Virtual> &operator=
-        (const NIntegrateBase<Virtual> &) {return *this;}
+    NIntegrateBase<Virtual> &operator= (const NIntegrateBase<Virtual> &)
+    {return *this;}
     virtual ~NIntegrateBase () {}
 
     virtual double integrate_segment (double, double, const eval_type &) = 0;

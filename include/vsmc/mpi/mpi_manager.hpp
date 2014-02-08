@@ -71,8 +71,8 @@ class MPICommunicator
     MPI_Comm comm_;
 
     MPICommunicator () : comm_(MPI_COMM_WORLD) {};
-    MPICommunicator (const MPICommunicator<ID> &other);
-    MPICommunicator<ID> &operator= (const MPICommunicator<ID> &other);
+    MPICommunicator (const MPICommunicator<ID> &);
+    MPICommunicator<ID> &operator= (const MPICommunicator<ID> &);
 }; // class MPICommunicator
 
 } // namespace vsmc
