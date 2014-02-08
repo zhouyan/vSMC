@@ -5,17 +5,30 @@
 #include <vsmc/core/weight.hpp>
 #include <vsmc/core/normalizing_constant.hpp>
 
-#define VSMC_DEFINE_SMP_IMPL_COPY_BASE(Impl, Name) \
+#define VSMC_DEFINE_SMP_IMPL_COPY(Impl, Name) \
 Name##Impl () {}                                                             \
 Name##Impl (const Name##Impl<T, Derived> &other) :                           \
         Name##Base<T, Derived>(other) {}                                     \
-Name##Impl<T, Derived> &operator=                                            \
-        (const Name##Impl<T, Derived> &other)                                \
+Name##Impl<T, Derived> &operator= (const Name##Impl<T, Derived> &other)      \
 {                                                                            \
-    if (this != &other) Name##Base<T, Derived>::operator=(other);            \
+    Name##Base<T, Derived>::operator=(other);                                \
     return *this;                                                            \
 }                                                                            \
 ~Name##Impl () {}
+
+#define VSMC_DEFINE_SMP_BASE_COPY(Name) \
+Name##Base () {}                                                             \
+Name##Base (const Name##Base<T, Derived> &) {}                               \
+Name##Base<T, Derived> &operator= (const Name##Base<T, Derived> &)           \
+{return *this;}                                                              \
+VSMC_CRTP_DESTRUCTOR_PREFIX ~Name##Base () {}
+
+#define VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Name) \
+Name##Base () {}                                                             \
+Name##Base (const Name##Base<T, Virtual> &) {}                               \
+Name##Base<T, Virtual> &operator= (const Name##Base<T, Virtual> &)           \
+{return *this;}                                                              \
+virtual ~Name##Base () {}
 
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                     \
@@ -49,11 +62,7 @@ class InitializeBase
 
     protected :
 
-    InitializeBase () {}
-    InitializeBase (const InitializeBase<T, Derived> &) {}
-    InitializeBase<T, Derived> &operator=
-        (const InitializeBase<T, Derived> &) {return *this;}
-    VSMC_CRTP_DESTRUCTOR_PREFIX ~InitializeBase () {}
+    VSMC_DEFINE_SMP_BASE_COPY(Initialize)
 
     private :
 
@@ -173,11 +182,7 @@ class InitializeBase<T, Virtual>
 
     protected :
 
-    InitializeBase () {}
-    InitializeBase (const InitializeBase<T, Virtual> &) {}
-    InitializeBase<T, Virtual> &operator=
-        (const InitializeBase<T, Virtual> &) {return *this;}
-    virtual ~InitializeBase () {}
+    VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Initialize)
 }; // class InitializeBase<T, Virtual>
 
 /// \brief Move base dispatch class
@@ -198,11 +203,7 @@ class MoveBase
 
     protected :
 
-    MoveBase () {}
-    MoveBase (const MoveBase<T, Derived> &) {}
-    MoveBase<T, Derived> &operator=
-        (const MoveBase<T, Derived> &) {return *this;}
-    VSMC_CRTP_DESTRUCTOR_PREFIX ~MoveBase () {}
+    VSMC_DEFINE_SMP_BASE_COPY(Move)
 
     private :
 
@@ -298,11 +299,7 @@ class MoveBase<T, Virtual>
 
     protected :
 
-    MoveBase () {}
-    MoveBase (const MoveBase<T, Virtual> &) {}
-    MoveBase<T, Virtual> &operator=
-        (const MoveBase<T, Virtual> &) {return *this;}
-    virtual ~MoveBase () {}
+    VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Move)
 }; // class MoveBase<T, Virtual>
 
 /// \brief Monitor evalution base dispatch class
@@ -324,11 +321,7 @@ class MonitorEvalBase
 
     protected :
 
-    MonitorEvalBase () {}
-    MonitorEvalBase (const MonitorEvalBase<T, Derived> &) {}
-    MonitorEvalBase<T, Derived> &operator=
-        (const MonitorEvalBase<T, Derived> &) {return *this;}
-    VSMC_CRTP_DESTRUCTOR_PREFIX ~MonitorEvalBase () {}
+    VSMC_DEFINE_SMP_BASE_COPY(MonitorEval)
 
     private :
 
@@ -436,11 +429,7 @@ class MonitorEvalBase<T, Virtual>
 
     protected :
 
-    MonitorEvalBase () {}
-    MonitorEvalBase (const MonitorEvalBase<T, Virtual> &) {}
-    MonitorEvalBase<T, Virtual> &operator=
-        (const MonitorEvalBase<T, Virtual> &) {return *this;}
-    virtual ~MonitorEvalBase () {}
+    VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(MonitorEval)
 }; // class MonitorEvalBase<T, Virtual>
 
 /// \brief Path evalution base dispatch class
@@ -464,11 +453,7 @@ class PathEvalBase
 
     protected :
 
-    PathEvalBase () {}
-    PathEvalBase (const PathEvalBase<T, Derived> &) {}
-    PathEvalBase<T, Derived> &operator=
-        (const PathEvalBase<T, Derived> &) {return *this;}
-    VSMC_CRTP_DESTRUCTOR_PREFIX ~PathEvalBase () {}
+    VSMC_DEFINE_SMP_BASE_COPY(PathEval)
 
     private :
 
@@ -592,11 +577,7 @@ class PathEvalBase<T, Virtual>
 
     protected :
 
-    PathEvalBase () {}
-    PathEvalBase (const PathEvalBase<T, Virtual> &) {}
-    PathEvalBase<T, Virtual> &operator=
-        (const PathEvalBase<T, Virtual> &) {return *this;}
-    virtual ~PathEvalBase () {}
+    VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(PathEval)
 }; // class PathEval<T, Virtual>
 
 } // namespace vsmc
