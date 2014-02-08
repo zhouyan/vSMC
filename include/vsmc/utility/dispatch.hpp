@@ -669,6 +669,10 @@ class DispatchProgress
 {
     public :
 
+    /// \brief Construct a DispatchProgress with total amount of work
+    ///
+    /// \param total Total amount of work represented by an integer, for
+    /// example file size or SMC algorithm total number of iterations
     DispatchProgress (uint64_t total) :
         total_(total), queue_("DispatchProgress"), timer_(0, 0, queue_) {}
 
@@ -696,6 +700,10 @@ class DispatchProgress
         watch_.stop();
     }
 
+    /// \brief Returnt the current progress
+    ///
+    /// \return The amount of work already down represented by an integer in
+    /// the range zero to total, where total is passed into the constructor
     virtual uint64_t current () const = 0;
 
     private :
