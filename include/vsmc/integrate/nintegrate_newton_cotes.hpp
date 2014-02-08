@@ -50,10 +50,11 @@ class NIntegrateNewtonCotesCoeff
     NIntegrateNewtonCotesCoeff ()
     {coeff_init(cxx11::integral_constant<unsigned, Degree>());}
 
-    NIntegrateNewtonCotesCoeff
-        (const NIntegrateNewtonCotesCoeff<Degree> &);
-    NIntegrateNewtonCotesCoeff<Degree> &operator=
-        (const NIntegrateNewtonCotesCoeff<Degree> &);
+    NIntegrateNewtonCotesCoeff (
+            const NIntegrateNewtonCotesCoeff<Degree> &);
+
+    NIntegrateNewtonCotesCoeff<Degree> &operator= (
+            const NIntegrateNewtonCotesCoeff<Degree> &);
 
     void coeff_init (cxx11::integral_constant<unsigned, 1>)
     {

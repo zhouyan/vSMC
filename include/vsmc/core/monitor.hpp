@@ -68,12 +68,14 @@ class Monitor
 
     Monitor<T> &operator= (const Monitor<T> &other)
     {
-        dim_          = other.dim_;
-        eval_         = other.eval_;
-        recording_    = other.recording_;
-        index_        = other.index_;
-        record_       = other.record_;
-        is_integrate_ = other.is_integrate_;
+        if (this != &other) {
+            dim_          = other.dim_;
+            eval_         = other.eval_;
+            recording_    = other.recording_;
+            index_        = other.index_;
+            record_       = other.record_;
+            is_integrate_ = other.is_integrate_;
+        }
 
         return *this;
     }
@@ -88,12 +90,14 @@ class Monitor
 
     Monitor<T> &operator= (Monitor<T> &&other)
     {
-        dim_          = other.dim_;
-        eval_         = cxx11::move(other.eval_);
-        recording_    = other.recording_;
-        index_        = cxx11::move(other.index_);
-        record_       = cxx11::move(other.record_);
-        is_integrate_ = cxx11::move(other.is_integrate_);
+        if (this != &other) {
+            dim_          = other.dim_;
+            eval_         = cxx11::move(other.eval_);
+            recording_    = other.recording_;
+            index_        = cxx11::move(other.index_);
+            record_       = cxx11::move(other.record_);
+            is_integrate_ = cxx11::move(other.is_integrate_);
+        }
 
         return *this;
     }

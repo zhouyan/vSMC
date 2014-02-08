@@ -64,12 +64,14 @@ class Path
 
     Path<T> &operator= (const Path<T> &other)
     {
-        eval_       = other.eval_;
-        recording_  = other.recording_;
-        log_zconst_ = other.log_zconst_;
-        index_      = other.index_;
-        integrand_  = other.integrand_;
-        grid_       = other.grid_;
+        if (this != &other) {
+            eval_       = other.eval_;
+            recording_  = other.recording_;
+            log_zconst_ = other.log_zconst_;
+            index_      = other.index_;
+            integrand_  = other.integrand_;
+            grid_       = other.grid_;
+        }
 
         return *this;
     }
@@ -84,12 +86,14 @@ class Path
 
     Path<T> &operator= (Path<T> &&other)
     {
-        eval_       = cxx11::move(other.eval_);
-        recording_  = other.recording_;
-        log_zconst_ = other.log_zconst_;
-        index_      = cxx11::move(other.index_);
-        integrand_  = cxx11::move(other.integrand_);
-        grid_       = cxx11::move(other.grid_);
+        if (this != &other) {
+            eval_       = cxx11::move(other.eval_);
+            recording_  = other.recording_;
+            log_zconst_ = other.log_zconst_;
+            index_      = cxx11::move(other.index_);
+            integrand_  = cxx11::move(other.integrand_);
+            grid_       = cxx11::move(other.grid_);
+        }
 
         return *this;
     }
@@ -282,11 +286,13 @@ class PathGeometry : public Path<T>
 
     PathGeometry<T> &operator= (const PathGeometry<T> &other)
     {
-        Path<T>::operator=(other);
-        weight_history_    = other.weight_history_;
-        integrand_history_ = other.integrand_history_;
-        abs_err_           = other.abs_err_;
-        rel_err_           = other.rel_err_;
+        if (this != &other) {
+            Path<T>::operator=(other);
+            weight_history_    = other.weight_history_;
+            integrand_history_ = other.integrand_history_;
+            abs_err_           = other.abs_err_;
+            rel_err_           = other.rel_err_;
+        }
 
         return *this;
     }
@@ -300,11 +306,13 @@ class PathGeometry : public Path<T>
 
     PathGeometry<T> &operator= (PathGeometry<T> &&other)
     {
-        Path<T>::operator=(cxx11::move(other));
-        weight_history_    = cxx11::move(other.weight_history_);
-        integrand_history_ = cxx11::move(other.integrand_history_);
-        abs_err_           = other.abs_err_;
-        rel_err_           = other.rel_err_;
+        if (this != &other) {
+            Path<T>::operator=(cxx11::move(other));
+            weight_history_    = cxx11::move(other.weight_history_);
+            integrand_history_ = cxx11::move(other.integrand_history_);
+            abs_err_           = other.abs_err_;
+            rel_err_           = other.rel_err_;
+        }
 
         return *this;
     }
