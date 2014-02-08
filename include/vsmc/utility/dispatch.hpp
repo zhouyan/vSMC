@@ -53,9 +53,11 @@ class DispatchObject
 
     DispatchObject &operator= (const DispatchObject &other)
     {
-        dispatch_release(object_);
-        object_ = other.object_;
-        dispatch_retain(object_);
+        if (this != &other) {
+            dispatch_release(object_);
+            object_ = other.object_;
+            dispatch_retain(object_);
+        }
 
         return *this;
     }
@@ -471,13 +473,13 @@ class DispatchSource<DispatchTimer> :
             const DispatchQueue<QType> &queue,
             dispatch_time_t start, uint64_t interval, uint64_t leeway) :
         DispatchSourceBase<DispatchTimer>(handle, mask, queue.get())
-    {set_timer(start, interval, leeway);}
+    {if (!this->empty()) set_timer(start, interval, leeway);}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
             dispatch_queue_t queue,
             dispatch_time_t start, uint64_t interval, uint64_t leeway) :
         DispatchSourceBase<DispatchTimer>(handle, mask, queue)
-    {set_timer(start, interval, leeway);}
+    {if (!this->empty()) set_timer(start, interval, leeway);}
 
     void set_timer (dispatch_time_t start, uint64_t interval, uint64_t leeway)
     {dispatch_source_set_timer(this->get(), start, interval, leeway);}
