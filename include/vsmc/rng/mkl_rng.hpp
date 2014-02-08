@@ -186,6 +186,20 @@ struct MKLSkipAheadForce
 
     MKLSkipAheadForce () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
 
+    MKLSkipAheadForce (const MKLSkipAheadForce &other) :
+        buffer_size_(other.buffer_size_) {}
+
+    MKLSkipAheadForce &operator= (const MKLSkipAheadForce &other)
+    {buffer_size_ = other.buffer_size_;}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    MKLSkipAheadForce (MKLSkipAheadForce &&other) :
+        buffer_size_(other.buffer_size_) {}
+
+    MKLSkipAheadForce &operator= (MKLSkipAheadForce &&other)
+    {buffer_size_ = other.buffer_size_;}
+#endif
+
     template <MKL_INT BRNG>
     void operator() (const MKLStream<BRNG> &stream, size_type nskip)
     {
@@ -325,22 +339,30 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
 
     MKLStream<BRNG> &operator= (const MKLStream<BRNG> &other)
     {
-        traits::MKLOffsetTrait<BRNG>::type::operator=(other);
-        int status = ::vslCopyStreamState(str_ptr_, other.str_ptr_);
-        mkl_rng_error_check(BRNG, status,
-                "MKLStream::operator=", "vslCopyStreamState");
+        if (this != &other) {
+            traits::MKLOffsetTrait<BRNG>::type::operator=(other);
+            int status = ::vslCopyStreamState(str_ptr_, other.str_ptr_);
+            mkl_rng_error_check(BRNG, status,
+                    "MKLStream::operator=", "vslCopyStreamState");
+        }
+
+        return *this;
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     MKLStream (MKLStream<BRNG> &&other) :
-        traits::MKLOffsetTrait<BRNG>::type(std::move(other)),
+        traits::MKLOffsetTrait<BRNG>::type(cxx11::move(other)),
         seed_(other.seed_), str_ptr_(other.str_ptr_) {}
 
     MKLStream<BRNG> &operator= (MKLStream<BRNG> &&other)
     {
-        traits::MKLOffsetTrait<BRNG>::type::operator=(std::move(other));
-        seed_ = other.seed_;
-        str_ptr_ = other.str_ptr_;
+        if (this != other) {
+            traits::MKLOffsetTrait<BRNG>::type::operator=(cxx11::move(other));
+            seed_ = other.seed_;
+            str_ptr_ = other.str_ptr_;
+        }
+
+        return *this;
     }
 #endif
 
@@ -397,6 +419,38 @@ class MKLDistribution
     typedef ResultType result_type;
 
     MKLDistribution () : remain_(0), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
+
+    MKLDistribution (const MKLDistribution &other) :
+        remain_(other.remain_), buffer_size_(other.buffer_size_),
+        result_(other.result_) {}
+
+    MKLDistribution &operator= (const MKLDistribution &other)
+    {
+        if (this != &other) {
+            remain_ = other.remain_;
+            buffer_size_ = other.buffer_size_;
+            result_ = other.result_;
+        }
+
+        return *this;
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    MKLDistribution (MKLDistribution &&other) :
+        remain_(other.remain_), buffer_size_(other.buffer_size_),
+        result_(cxx11::move(other.result_)) {}
+
+    MKLDistribution &operator= (MKLDistribution &&other)
+    {
+        if (this != &other) {
+            remain_ = other.remain_;
+            buffer_size_ = other.buffer_size_;
+            result_ = cxx11::move(other.result_);
+        }
+
+        return *this;
+    }
+#endif
 
     template <MKL_INT BRNG>
     result_type operator() (const MKLStream<BRNG> &stream)
@@ -478,20 +532,28 @@ class MKLEngine
     MKLEngine<BRNG, ResultType> &operator= (
             const MKLEngine<BRNG, ResultType> &other)
     {
-        stream_ = other.stream_;
-        skip_ahead_ = other.skip_ahead_;
+        if (this != &other) {
+            stream_ = other.stream_;
+            skip_ahead_ = other.skip_ahead_;
+        }
+
+        return *this;
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     MKLEngine (MKLEngine<BRNG, ResultType> &&other) :
-        stream_(std::move(other.stream_)),
-        skip_ahead_(std::move(other.skip_ahead_)) {}
+        stream_(static_cast<MKLStream<BRNG> &&>(other.stream_)),
+        skip_ahead_(static_cast<skip_ahead_type &&>(other.skip_ahead_)) {}
 
     MKLEngine<BRNG, ResultType> &operator= (
             MKLEngine<BRNG, ResultType> &&other)
     {
-        stream_ = std::move(other.stream_);
-        skip_ahead_ = std::move(other.skip_ahead_);
+        if (this != &other) {
+            stream_ = cxx11::move(other.stream_);
+            skip_ahead_ = cxx11::move(other.skip_ahead_);
+        }
+
+        return *this;
     }
 #endif
 
