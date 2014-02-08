@@ -32,6 +32,62 @@ enum DispatchSourceType {
 template <DispatchQueueType> class DispatchQueue;
 template <DispatchSourceType> class DispatchSource;
 
+/// \brief Wrap a function object into a `dispatch_function_t` type pointer
+/// \ingroup Dispatch
+template <typename T>
+class DispatchFunction
+{
+    public :
+
+    DispatchFunction (const T &work) : work_(work) {}
+
+    DispatchFunction (const DispatchFunction<T> &other) :
+        work_(other.work_) {}
+
+    DispatchFunction<T> &operator= (const DispatchFunction<T> &other)
+    {
+        if (this != &other)
+            work_ = other.work_;
+
+        return *this;
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    DispatchFunction (T &&work) VSMC_NOEXCEPT : work_(cxx11::move(work)) {}
+
+    DispatchFunction (DispatchFunction<T> &&other) VSMC_NOEXCEPT :
+        work_(cxx11::move(other.work_)) {}
+
+    DispatchFunction<T> &operator= (DispatchFunction<T> &&other) VSMC_NOEXCEPT
+    {
+        if (this != &other)
+            work_ = cxx11::move(other.work_);
+
+        return *this;
+    }
+#endif
+
+    void *context () const {return (void *) &work_;}
+
+    dispatch_function_t function () const {return function_;}
+
+    private :
+
+    T work_;
+
+    static void function_ (void *work) {(*static_cast<T *>(work))();}
+}; // class DispatchFunction
+
+template <typename T>
+DispatchFunction<T> dispatch_make_function (T &work)
+{return DispatchFunction<T>(work);}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+template <typename T>
+DispatchFunction<T> dispatch_make_function (T &&work) VSMC_NOEXCEPT
+{return DispatchFunction<T>(cxx11::move(work));}
+#endif
+
 /// \brief Base class of Dispatch objects
 /// \ingroup Dispatch
 ///
@@ -54,7 +110,6 @@ class DispatchObject
     DispatchObject &operator= (const DispatchObject &other)
     {
         if (this != &other) {
-            dispatch_release(object_);
             object_ = other.object_;
             dispatch_retain(object_);
         }
@@ -76,12 +131,18 @@ class DispatchObject
             return true;
     }
 
-    void *get_context () const {return dispatch_get_context(object_);}
+    void *get_context () const
+    {return dispatch_get_context(object_);}
 
-    void set_context (void *context) {dispatch_set_context(object_, context);}
+    void set_context (void *context) const
+    {dispatch_set_context(object_, context);}
 
-    void set_finalizer_f (dispatch_function_t finalizer)
+    void set_finalizer_f (dispatch_function_t finalizer) const
     {dispatch_set_finalizer_t(object_, finalizer);}
+
+    protected :
+
+    void set (DispatchType object) {object_ = object;}
 
     private :
 
@@ -94,9 +155,9 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
 {
     public :
 
-    void resume () {dispatch_resume(this->get());}
+    void resume () const {dispatch_resume(this->get());}
 
-    void suspend () {dispatch_suspend(this->get());}
+    void suspend () const {dispatch_suspend(this->get());}
 
     const char *get_label () const
     {return dispatch_queue_get_label(this->get());}
@@ -106,7 +167,7 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
     {return dispatch_queue_get_specific(this->get(), key);}
 
     void set_specific (const void *key, void *context,
-            dispatch_function_t destructor)
+            dispatch_function_t destructor) const
     {dispatch_queue_set_specific(this->get(), key, context, destructor);}
 #endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 
@@ -218,6 +279,20 @@ class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
     DispatchQueue (const char *name, dispatch_queue_attr_t attr = NULL) :
         DispatchQueueBase(dispatch_queue_create(name, attr)) {}
 
+    DispatchQueue (const DispatchQueue<DispatchPrivate> &other) :
+        DispatchQueueBase(other) {dispatch_retain(this->get());}
+
+    DispatchQueue<DispatchPrivate> &operator= (
+            const DispatchQueue<DispatchPrivate> &other)
+    {
+        if (this != &other) {
+            DispatchQueueBase::operator=(other); return *this;
+            dispatch_retain(this->get());
+        }
+
+        return *this;
+    }
+
     ~DispatchQueue () {dispatch_release(this->get());}
 }; // class DispatchQueue
 
@@ -230,13 +305,26 @@ class DispatchGroup : public DispatchObject<dispatch_group_t>
     DispatchGroup () :
         DispatchObject<dispatch_group_t>(dispatch_group_create()) {}
 
+    DispatchGroup (const DispatchGroup &other) :
+        DispatchObject<dispatch_group_t>(other) {dispatch_retain(this->get());}
+
+    DispatchGroup &operator= (const DispatchGroup &other)
+    {
+        if (this != &other) {
+            DispatchObject<dispatch_group_t>::operator=(other);
+            dispatch_retain(this->get());
+        }
+
+        return *this;
+    }
+
     ~DispatchGroup () {dispatch_release(this->get());}
 
-    void enter () {dispatch_group_enter(this->get());}
+    void enter () const {dispatch_group_enter(this->get());}
 
-    void leave () {dispatch_group_leave(this->get());}
+    void leave () const {dispatch_group_leave(this->get());}
 
-    long wait (dispatch_time_t timeout)
+    long wait (dispatch_time_t timeout) const
     {return dispatch_group_wait(this->get(), timeout);}
 
     template <DispatchQueueType Type>
@@ -285,11 +373,11 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 {
     public :
 
-    void resume () {dispatch_resume(this->get());}
+    void resume () const {dispatch_resume(this->get());}
 
-    void suspend () {dispatch_suspend(this->get());}
+    void suspend () const {dispatch_suspend(this->get());}
 
-    void cancel () {dispatch_source_cancel(this->get());}
+    void cancel () const {dispatch_source_cancel(this->get());}
 
     long test_cancel () const
     {return dispatch_source_test_cancel(this->get());}
@@ -303,14 +391,15 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     unsigned long get_mask () const
     {return dispatch_source_get_mask(this->get());}
 
-    void set_cancel_handler_f (dispatch_function_t cancel_handler)
+    void set_cancel_handler_f (dispatch_function_t cancel_handler) const
     {dispatch_source_set_cancel_handler_f(this->get(), cancel_handler);}
 
-    void set_event_handler_f (dispatch_function_t event_handler)
+    void set_event_handler_f (dispatch_function_t event_handler) const
     {dispatch_source_set_event_handler_f(this->get(), event_handler);}
 
 #if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
-    void set_registration_handler_f (dispatch_function_t registration_handler)
+    void set_registration_handler_f (dispatch_function_t
+            registration_handler) const
     {
         dispatch_source_set_registration_handler_f(
                 this->get(), registration_handler);
@@ -318,14 +407,15 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 #endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 
 #ifdef __BLOCKS__
-    void set_cancel_handler (dispatch_block_t cancel_handler)
+    void set_cancel_handler (dispatch_block_t cancel_handler) const
     {dispatch_source_set_cancel_handler(this->get(), cancel_handler);}
 
-    void set_event_handler (dispatch_block_t event_handler)
+    void set_event_handler (dispatch_block_t event_handler) const
     {dispatch_source_set_event_handler(this->get(), event_handler);}
 
 #if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
-    void set_registration_handler (dispatch_block_t registration_handler)
+    void set_registration_handler (dispatch_block_t
+            registration_handler) const
     {
         dispatch_source_set_registration_handler(
                 this->get(), registration_handler);
@@ -481,7 +571,8 @@ class DispatchSource<DispatchTimer> :
         DispatchSourceBase<DispatchTimer>(handle, mask, queue)
     {if (!this->empty()) set_timer(start, interval, leeway);}
 
-    void set_timer (dispatch_time_t start, uint64_t interval, uint64_t leeway)
+    void set_timer (dispatch_time_t start,
+            uint64_t interval, uint64_t leeway) const
     {dispatch_source_set_timer(this->get(), start, interval, leeway);}
 }; // class DispatchSource
 
