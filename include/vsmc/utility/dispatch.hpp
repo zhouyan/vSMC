@@ -2,6 +2,7 @@
 #define VSMC_UTILITY_DISPATCH_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 #include <dispatch/dispatch.h>
 
 namespace vsmc {
@@ -290,14 +291,6 @@ class DispatchQueueBase : public DispatchObject<dispatch_queue_t>
 
     void barrier_sync (dispatch_block_t block) const
     {dispatch_barrier_sync(this->get(), block);}
-
-    void read (dispatch_fd_t fd, std::size_t length,
-            void (^handler) (dispatch_data_t, int)) const
-    {dispatch_read(fd, length, this->get(), handler);}
-
-    void write (dispatch_fd_t fd, dispatch_data_t data,
-            void (^handler) (dispatch_data_t, int)) const
-    {dispatch_write(fd, data, this->get(), handler);}
 #endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 #endif // __BLOCKS__
 
@@ -450,8 +443,7 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 
     void cancel () const {dispatch_source_cancel(this->get());}
 
-    long test_cancel () const
-    {return dispatch_source_test_cancel(this->get());}
+    long testcancel () const {return dispatch_source_testcancel(this->get());}
 
     unsigned long get_data () const
     {return dispatch_source_get_data(this->get());}
@@ -503,12 +495,20 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
                         DispatchSourceType, Type>()), handle, mask, queue)) {}
 
     DispatchSourceBase (const DispatchSourceBase &other) :
-        DispatchObject<dispatch_source_t>(other) {}
+        DispatchObject<dispatch_source_t>(other)
+    {dispatch_retain(this->get());}
 
     DispatchSourceBase &operator= (const DispatchSourceBase &other)
-    {DispatchObject<dispatch_source_t>::operator=(other); return *this;}
+    {
+        if (this != &other) {
+            DispatchObject<dispatch_source_t>::operator=(other);
+            dispatch_retain(this->get());
+        }
 
-    ~DispatchSourceBase () {dispatch_release(this->get());}
+        return *this;
+    }
+
+    ~DispatchSourceBase () {if (!testcancel()) dispatch_release(this->get());}
 
     private :
 
@@ -633,6 +633,159 @@ class DispatchSource<DispatchTimer> :
             uint64_t interval, uint64_t leeway) const
     {dispatch_source_set_timer(this->get(), start, interval, leeway);}
 }; // class DispatchSource
+
+/// \brief Display a progress bar while algorithm proceed
+/// \ingroup Dispatch
+///
+/// \details
+/// Example:
+/// \code
+/// class myProgress : public vsmc::DispatchProgress
+/// {
+///     public :
+///
+///     myProgress (vsmc::Sampler<T> &sampler, std::size_t IterNum) :
+///         vsmc::DispatchProgress(IterNum), sampler_(sampler) {}
+///
+///     // implement the following pure virtual base class function. You may
+///     // want to lock `sampler_` in case `iter_num` is read while it is
+///     // being updated
+///     uint64_t get_current () const {return sampler_.iter_num();}
+///
+///     private :
+///
+///     const vsmc::Sampler<T> &sampler_;
+/// };
+///
+/// vsmc::Sampler<T> sampler(N);
+/// // configure the sampler
+/// myProgress progress(sampler, IterNum);
+/// progress.start();
+/// sampler.initialize();
+/// sampler.iterate(IterNum);
+/// progress.stop();
+/// \endcode
+class DispatchProgress
+{
+    public :
+
+    DispatchProgress (uint64_t total) :
+        total_(total), queue_("DispatchProgress"), timer_(0, 0, queue_) {}
+
+    ~DispatchProgress () {timer_.cancel();}
+
+    void start ()
+    {
+        timer_.set_context((void *) this);
+        timer_.set_event_handler_f(print_start);
+        timer_.set_timer(DISPATCH_TIME_NOW, NSEC_PER_SEC, NSEC_PER_SEC);
+
+        watch_.reset();
+        watch_.start();
+        timer_.resume();
+    }
+
+    void stop ()
+    {
+        timer_.suspend();
+        queue_.sync_f((void *) this, print_stop);
+        watch_.stop();
+    }
+
+    virtual uint64_t current () const = 0;
+
+    private :
+
+    uint64_t total_;
+    DispatchQueue<DispatchPrivate> queue_;
+    DispatchSource<DispatchTimer> timer_;
+    StopWatch watch_;
+
+    static void print_progress (void *context)
+    {
+        const DispatchProgress *timer_ptr =
+            static_cast<const DispatchProgress *>(context);
+
+        uint64_t totl = timer_ptr->total_;
+        uint64_t iter = timer_ptr->current();
+        iter = (iter <= totl) ? iter : totl;
+        int num_equal = 60 * iter / totl;
+        int percent = 100 * iter / totl;
+
+        timer_ptr->watch_.stop();
+        timer_ptr->watch_.start();
+        StopWatch elapsed = timer_ptr->watch_;
+        uint64_t elapsed_second = static_cast<uint64_t>(elapsed.seconds());
+        uint64_t display_second = elapsed_second % 60;
+        uint64_t elapsed_minute = (elapsed_second - display_second) / 60;
+        uint64_t display_minute = elapsed_minute % 60;
+        uint64_t display_hour   = (elapsed_minute - display_minute) / 60;
+
+        std::cout << " [" << std::string(num_equal, '=');
+        if (num_equal < 60)
+            std::cout << '-' << std::string((59 - num_equal), ' ');
+        std::cout << "][";
+
+        if (percent < 100) std::cout << ' ';
+        if (percent < 10) std::cout << ' ';
+        std::cout << percent << "%] ";
+
+        if (display_hour > 0)
+            std::cout << display_hour << ':';
+
+        if (display_minute >= 10)
+            std::cout << display_minute << ':';
+        else
+            std::cout << '0' << display_minute << ':';
+
+        if (display_second >= 10)
+            std::cout << display_second;
+        else
+            std::cout << '0' << display_second;
+    }
+
+    static void print_start (void *context)
+    {
+        print_progress(context);
+        std::cout << '\r' << std::flush;
+    }
+
+    static void print_stop (void *context)
+    {
+        print_progress(context);
+        std::cout << std::endl;
+    }
+}; // class DispatchProgress
+
+/// \brief A DispatchProgress that monitors a vSMC Sampler
+/// \ingroup Dispatch
+///
+/// \details
+/// Example:
+/// \code
+/// vsmc::Sampler<T> sampler(N);
+/// // configure the sampler
+/// vsmc::DispatchProgressSampler<T> progress(sampler, IterNum);
+/// progress.start();
+/// sampler.initialize();
+/// sampler.iterate(IterNum);
+/// progress.stop();
+/// \endcode
+template <typename T>
+class DispatchProgressSampler : public DispatchProgress
+{
+    public :
+
+    DispatchProgressSampler (const Sampler<T> &sampler, std::size_t iter_num) :
+        DispatchProgress(iter_num), sampler_(sampler) {}
+
+    uint64_t current () const
+    {return static_cast<uint64_t>(sampler_.iter_num());}
+
+    private :
+
+    const Sampler<T> &sampler_;
+};
 
 } // namespace vsmc
 
