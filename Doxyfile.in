@@ -1657,6 +1657,7 @@ PREDEFINED +=__MAC_10_6=1060
 PREDEFINED +=__MAC_10_7=1070
 PREDEFINED +=__MAC_10_8=1080
 PREDEFINED +=__MAC_10_9=1090
+PREDEFINED +=__BLOCKS__
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.
