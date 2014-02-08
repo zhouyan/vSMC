@@ -18,15 +18,15 @@ enum DispatchQueueType {
 /// \brief Types of DispatchSource
 /// \ingroup Dispatch
 enum DispatchSourceType {
-    DispatchDataAdd,   ///< DISPATCH_SOURCE_TYPE_DATA_ADD,
-    DispatchDataOr,    ///< DISPATCH_SOURCE_TYPE_DATA_OR,
-    DispatchMachRecv,  ///< DISPATCH_SOURCE_TYPE_MACH_RECV,
-    DispatchMachSend,  ///< DISPATCH_SOURCE_TYPE_MACH_SEND,
-    DispatchProc,      ///< DISPATCH_SOURCE_TYPE_PROC,
-    DispatchRead,      ///< DISPATCH_SOURCE_TYPE_READ,
-    DispatchSignal,    ///< DISPATCH_SOURCE_TYPE_SIGNAL,
-    DispatchTimer,     ///< DISPATCH_SOURCE_TYPE_TIMER,
-    DispatchVnode,     ///< DISPATCH_SOURCE_TYPE_VNODE,
+    DispatchDataAdd,   ///< DISPATCH_SOURCE_TYPE_DATA_ADD
+    DispatchDataOr,    ///< DISPATCH_SOURCE_TYPE_DATA_OR
+    DispatchMachRecv,  ///< DISPATCH_SOURCE_TYPE_MACH_RECV
+    DispatchMachSend,  ///< DISPATCH_SOURCE_TYPE_MACH_SEND
+    DispatchProc,      ///< DISPATCH_SOURCE_TYPE_PROC
+    DispatchRead,      ///< DISPATCH_SOURCE_TYPE_READ
+    DispatchSignal,    ///< DISPATCH_SOURCE_TYPE_SIGNAL
+    DispatchTimer,     ///< DISPATCH_SOURCE_TYPE_TIMER
+    DispatchVnode,     ///< DISPATCH_SOURCE_TYPE_VNODE
     DispatchWrite      ///< DISPATCH_SOURCE_TYPE_WRITE
 };
 
@@ -650,7 +650,7 @@ class DispatchSource<DispatchTimer> :
 ///     // implement the following pure virtual base class function. You may
 ///     // want to lock `sampler_` in case `iter_num` is read while it is
 ///     // being updated
-///     uint64_t get_current () const {return sampler_.iter_num();}
+///     uint64_t current () const {return sampler_.iter_num();}
 ///
 ///     private :
 ///
@@ -678,6 +678,7 @@ class DispatchProgress
 
     ~DispatchProgress () {timer_.cancel();}
 
+    /// \brief Start to print the progress
     void start ()
     {
         num_equal_ = 1000000;
@@ -693,6 +694,7 @@ class DispatchProgress
         timer_.resume();
     }
 
+    /// \brief Stop to print the progress
     void stop ()
     {
         timer_.suspend();
