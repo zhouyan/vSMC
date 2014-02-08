@@ -558,7 +558,7 @@ class MKLEngine
     }
 #endif
 
-    bool empty () const {stream_.empty();}
+    bool empty () const {return stream_.empty();}
 
     void seed (MKL_UINT s)
     {
