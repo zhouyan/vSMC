@@ -676,9 +676,13 @@ class DispatchProgress
 
     void start ()
     {
+        num_equal_ = 1000000;
+        elapsed_second_ = 1000000;
+
         timer_.set_context((void *) this);
         timer_.set_event_handler_f(print_start);
-        timer_.set_timer(DISPATCH_TIME_NOW, NSEC_PER_SEC, NSEC_PER_SEC);
+        timer_.set_timer(DISPATCH_TIME_NOW,
+                NSEC_PER_SEC / 10, NSEC_PER_SEC / 10);
 
         watch_.reset();
         watch_.start();
@@ -700,48 +704,89 @@ class DispatchProgress
     DispatchQueue<DispatchPrivate> queue_;
     DispatchSource<DispatchTimer> timer_;
     StopWatch watch_;
+    mutable std::size_t num_equal_;
+    mutable uint64_t elapsed_second_;
+    mutable char display_progress_[128];
+    mutable char display_time_[128];
 
     static void print_progress (void *context)
     {
         const DispatchProgress *timer_ptr =
             static_cast<const DispatchProgress *>(context);
 
-        uint64_t totl = timer_ptr->total_;
         uint64_t iter = timer_ptr->current();
+        uint64_t totl = timer_ptr->total_;
         iter = (iter <= totl) ? iter : totl;
-        int num_equal = 60 * iter / totl;
-        int percent = 100 * iter / totl;
+        std::size_t num_equal = static_cast<std::size_t>(60 * iter / totl);
 
         timer_ptr->watch_.stop();
         timer_ptr->watch_.start();
         StopWatch elapsed = timer_ptr->watch_;
         uint64_t elapsed_second = static_cast<uint64_t>(elapsed.seconds());
-        uint64_t display_second = elapsed_second % 60;
-        uint64_t elapsed_minute = (elapsed_second - display_second) / 60;
-        uint64_t display_minute = elapsed_minute % 60;
-        uint64_t display_hour   = (elapsed_minute - display_minute) / 60;
 
-        std::cout << " [" << std::string(num_equal, '=');
-        if (num_equal < 60)
-            std::cout << '-' << std::string((59 - num_equal), ' ');
-        std::cout << "][";
+        if (timer_ptr->num_equal_ != num_equal) {
+            timer_ptr->num_equal_ = num_equal;
+            int percent = static_cast<int>(100 * iter / totl);
+            std::size_t num_space = 60 - num_equal;
+            std::size_t num_dash = 0;
+            if (num_space > 0) {
+                --num_space;
+                num_dash = 1;
+            }
+            char p1 = static_cast<char>((percent / 100) % 10);
+            char p2 = static_cast<char>((percent / 10) % 10);
+            char p3 = static_cast<char>(percent % 10);
 
-        if (percent < 100) std::cout << ' ';
-        if (percent < 10) std::cout << ' ';
-        std::cout << percent << "%] ";
+            char *cstr = timer_ptr->display_progress_;
+            std::size_t offset = 0;
+            cstr[offset++] = ' ';
+            cstr[offset++] = '[';
+            for (std::size_t i = 0; i != num_equal; ++i)
+                cstr[offset++] = '=';
+            for (std::size_t i = 0; i != num_dash; ++i)
+                cstr[offset++] = '-';
+            for (std::size_t i = 0; i != num_space; ++i)
+                cstr[offset++] = ' ';
+            cstr[offset++] = ']';
+            cstr[offset++] = '[';
+            cstr[offset++] = (percent >= 100) ? ('0' + p1) : ' ';
+            cstr[offset++] = (percent >=  10) ? ('0' + p2) : ' ';
+            cstr[offset++] = (percent >=   1) ? ('0' + p3) : '0';
+            cstr[offset++] = '%';
+            cstr[offset++] = ']';
+            cstr[offset++] = ' ';
+            cstr[offset++] = '\0';
+        }
 
-        if (display_hour > 0)
-            std::cout << display_hour << ':';
+        if (timer_ptr->elapsed_second_ != elapsed_second) {
+            timer_ptr->elapsed_second_ = elapsed_second;
+            uint64_t display_second = elapsed_second % 60;
+            uint64_t display_minute = (elapsed_second / 60) % 60;
+            uint64_t display_hour   = elapsed_second / 3600;
 
-        if (display_minute >= 10)
-            std::cout << display_minute << ':';
-        else
-            std::cout << '0' << display_minute << ':';
+            char *cstr = timer_ptr->display_time_;
+            std::size_t offset = 0;
+            char htmp[100];
+            std::size_t hnum = 0;
+            if (display_hour > 0) {
+                while (display_hour) {
+                    htmp[hnum++] = '0' + static_cast<char>(display_hour % 10);
+                    display_hour /= 10;
+                }
+                for (std::size_t i = hnum; i != 0; --i)
+                    cstr[offset++] = htmp[hnum - 1];
+                cstr[offset++] = ':';
+            }
+            cstr[offset++] = '0' + static_cast<char>(display_minute / 10);
+            cstr[offset++] = '0' + static_cast<char>(display_minute % 10);
+            cstr[offset++] = ':';
+            cstr[offset++] = '0' + static_cast<char>(display_second / 10);
+            cstr[offset++] = '0' + static_cast<char>(display_second % 10);
+            cstr[offset++] = '\0';
+        }
 
-        if (display_second >= 10)
-            std::cout << display_second;
-        else
-            std::cout << '0' << display_second;
+        std::cout << const_cast<const char *>(timer_ptr->display_progress_);
+        std::cout << const_cast<const char *>(timer_ptr->display_time_);
     }
 
     static void print_start (void *context)
