@@ -32,12 +32,14 @@ enum DispatchSourceType {
 template <DispatchQueueType> class DispatchQueue;
 template <DispatchSourceType> class DispatchSource;
 
-/// \brief Wrap a function object into a `dispatch_function_t` type pointer
+/// \brief Wrap a callable object into a `dispatch_function_t` type pointer
 /// \ingroup Dispatch
 template <typename T>
 class DispatchFunction
 {
     public :
+
+    typedef dispatch_function_t function_type;
 
     DispatchFunction (const T &work) : work_(work) {}
 
@@ -69,7 +71,7 @@ class DispatchFunction
 
     void *context () const {return (void *) &work_;}
 
-    dispatch_function_t function () const {return function_;}
+    function_type function () const {return function_;}
 
     private :
 
@@ -78,14 +80,92 @@ class DispatchFunction
     static void function_ (void *work) {(*static_cast<T *>(work))();}
 }; // class DispatchFunction
 
+/// \brief Wrap a callable object into a `void (*) (void *, std::size_t)` type
+/// pointer
+/// \ingroup Dispatch
+template <typename T>
+class DispatchFunctionApply
+{
+    public :
+
+    typedef void (*function_type) (void *, std::size_t);
+
+    DispatchFunctionApply (const T &work) : work_(work) {}
+
+    DispatchFunctionApply (const DispatchFunctionApply<T> &other) :
+        work_(other.work_) {}
+
+    DispatchFunctionApply<T> &operator= (const DispatchFunctionApply<T> &other)
+    {
+        if (this != &other)
+            work_ = other.work_;
+
+        return *this;
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    DispatchFunctionApply (T &&work) VSMC_NOEXCEPT :
+        work_(cxx11::move(work)) {}
+
+    DispatchFunctionApply (DispatchFunctionApply<T> &&other) VSMC_NOEXCEPT :
+        work_(cxx11::move(other.work_)) {}
+
+    DispatchFunctionApply<T> &operator= (
+            DispatchFunctionApply<T> &&other) VSMC_NOEXCEPT
+    {
+        if (this != &other)
+            work_ = cxx11::move(other.work_);
+
+        return *this;
+    }
+#endif
+
+    void *context () const {return (void *) &work_;}
+
+    function_type function () const {return function_;}
+
+    private :
+
+    T work_;
+
+    static void function_ (void *work, std::size_t i)
+    {(*static_cast<T *>(work))(i);}
+}; // class DispatchFunctionApply
+
+/// \brief Make a DispatchFunction object from an arbitrary callable object
+/// \ingroup Dispatch
+///
+/// \param work A callable object with signature `void f(void)`
 template <typename T>
 DispatchFunction<T> dispatch_make_function (T &work)
 {return DispatchFunction<T>(work);}
 
+/// \brief Make a DispatchFunctionApply object from an arbitrary callable
+/// object
+/// \ingroup Dispatch
+///
+/// \param work A callable object with signature `void f(std::size_t)`
+template <typename T>
+DispatchFunctionApply<T> dispatch_make_function_apply (T &work)
+{return DispatchFunctionApply<T>(work);}
+
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
+/// \brief Make a DispatchFunction object from an arbitrary callable object
+/// \ingroup Dispatch
+///
+/// \param work A callable object with signature `void f(void)`
 template <typename T>
 DispatchFunction<T> dispatch_make_function (T &&work) VSMC_NOEXCEPT
 {return DispatchFunction<T>(cxx11::move(work));}
+
+/// \brief Make a DispatchFunctionApply object from an arbitrary callable
+/// object
+/// \ingroup Dispatch
+///
+/// \param work A callable object with signature `void f(std::size_t)`
+template <typename T>
+DispatchFunctionApply<T> dispatch_make_function_apply (T &&work) VSMC_NOEXCEPT
+{return DispatchFunctionApply<T>(cxx11::move(work));}
 #endif
 
 /// \brief Base class of Dispatch objects
