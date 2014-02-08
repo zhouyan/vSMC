@@ -162,12 +162,14 @@ class StateCL
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     StateCL (StateCL<StateSize, FPType, ID> &&other) :
         state_size_(other.state_size_), size_(other.size_),
-        program_(other.program_), kernel_copy_(other.kernel_copy_),
-        configure_copy_(other.configure_copy_), build_(other.build_),
-        build_id_(other.build_id_), build_source_(other.build_source_),
-        build_options_(other.build_options_),
-        state_buffer_(other.state_buffer_),
-        copy_from_buffer_(other.copy_from_buffer_) {}
+        program_(cxx11::move(other.program_)),
+        kernel_copy_(cxx11::move(other.kernel_copy_)),
+        configure_copy_(cxx11::move(other.configure_copy_)),
+        build_(other.build_), build_id_(other.build_id_),
+        build_source_(cxx11::move(other.build_source_)),
+        build_options_(cxx11::move(other.build_options_)),
+        state_buffer_(cxx11::move(other.state_buffer_)),
+        copy_from_buffer_(cxx11::move(other.copy_from_buffer_)) {}
 
     StateCL<StateSize, FPType, ID> &operator= (
             StateCL<StateSize, FPType, ID> &&other)
@@ -175,15 +177,15 @@ class StateCL
         if (this != &other) {
             state_size_       = other.state_size_;
             size_             = other.size_;
-            program_          = other.program_;
-            kernel_copy_      = other.kernel_copy_;
-            configure_copy_   = other.configure_copy_;
+            program_          = cxx11::move(other.program_);
+            kernel_copy_      = cxx11::move(other.kernel_copy_);
+            configure_copy_   = cxx11::move(other.configure_copy_);
             build_            = other.build_;
             build_id_         = other.build_id_;
-            build_source_     = other.build_source_;
-            build_options_    = other.build_options_;
-            state_buffer_     = other.state_buffer_;
-            copy_from_buffer_ = other.copy_from_buffer_;
+            build_source_     = cxx11::move(other.build_source_);
+            build_options_    = cxx11::move(other.build_options_);
+            state_buffer_     = cxx11::move(other.state_buffer_);
+            copy_from_buffer_ = cxx11::move(other.copy_from_buffer_);
         }
 
         return *this;
