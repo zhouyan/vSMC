@@ -54,25 +54,46 @@ class Path
     /// \f$\alpha_0 = 0, \alpha_1, \dots, \alpha_T = 1\f$, then at iteration
     /// \f$t\f$, the output parameter `integrand` contains
     /// \f$(g_{\alpha_t}(X_0),\dots)\f$ and the return value is \f$\alpha_t\f$.
-    explicit Path (const eval_type &eval) : eval_(eval), recording_(true) {}
+    explicit Path (const eval_type &eval) :
+        eval_(eval), recording_(true), log_zconst_(0) {}
 
     Path (const Path<T> &other) :
-        eval_(other.eval_), recording_(other.recording_), log_zconst_(0),
-        index_(other.index_), integrand_(other.integrand_), grid_(other.grid_)
-    {}
+        eval_(other.eval_), recording_(other.recording_),
+        log_zconst_(other.log_zconst_), index_(other.index_),
+        integrand_(other.integrand_), grid_(other.grid_) {}
 
     Path<T> &operator= (const Path<T> &other)
     {
-        if (&other != this) {
-            eval_       = other.eval_;
-            recording_  = other.recording_;
-            index_      = other.index_;
-            integrand_  = other.integrand_;
-            grid_       = other.grid_;
-        }
+        eval_       = other.eval_;
+        recording_  = other.recording_;
+        log_zconst_ = other.log_zconst_;
+        index_      = other.index_;
+        integrand_  = other.integrand_;
+        grid_       = other.grid_;
 
         return *this;
     }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    Path (Path<T> &&other) :
+        eval_(cxx11::move(other.eval_)),
+        recording_(other.recording_), log_zconst_(other.log_zconst_),
+        index_(cxx11::move(other.index_)),
+        integrand_(cxx11::move(other.integrand_)),
+        grid_(cxx11::move(other.grid_)) {}
+
+    Path<T> &operator= (Path<T> &&other)
+    {
+        eval_       = cxx11::move(other.eval_);
+        recording_  = other.recording_;
+        log_zconst_ = other.log_zconst_;
+        index_      = cxx11::move(other.index_);
+        integrand_  = cxx11::move(other.integrand_);
+        grid_       = cxx11::move(other.grid_);
+
+        return *this;
+    }
+#endif
 
     /// \brief The number of iterations has been recorded
     ///
@@ -261,16 +282,33 @@ class PathGeometry : public Path<T>
 
     PathGeometry<T> &operator= (const PathGeometry<T> &other)
     {
-        if (&other != this) {
-            Path<T>::operator=(other);
-            weight_history_    = other.weight_history_;
-            integrand_history_ = other.integrand_history_;
-            abs_err_           = other.abs_err_;
-            rel_err_           = other.rel_err_;
-        }
+        Path<T>::operator=(other);
+        weight_history_    = other.weight_history_;
+        integrand_history_ = other.integrand_history_;
+        abs_err_           = other.abs_err_;
+        rel_err_           = other.rel_err_;
 
         return *this;
     }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    PathGeometry (PathGeometry<T> &&other) :
+        Path<T>(cxx11::move(other)),
+        weight_history_(cxx11::move(other.weight_history_)),
+        integrand_history_(cxx11::move(other.integrand_history_)),
+        abs_err_(other.abs_err_), rel_err_(other.rel_err_) {}
+
+    PathGeometry<T> &operator= (PathGeometry<T> &&other)
+    {
+        Path<T>::operator=(cxx11::move(other));
+        weight_history_    = cxx11::move(other.weight_history_);
+        integrand_history_ = cxx11::move(other.integrand_history_);
+        abs_err_           = other.abs_err_;
+        rel_err_           = other.rel_err_;
+
+        return *this;
+    }
+#endif
 
     template <unsigned Degree>
     double log_zconst_newton_cotes (unsigned insert_points = 0) const
