@@ -192,14 +192,6 @@ struct MKLSkipAheadForce
     MKLSkipAheadForce &operator= (const MKLSkipAheadForce &other)
     {buffer_size_ = other.buffer_size_;}
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    MKLSkipAheadForce (MKLSkipAheadForce &&other) :
-        buffer_size_(other.buffer_size_) {}
-
-    MKLSkipAheadForce &operator= (MKLSkipAheadForce &&other)
-    {buffer_size_ = other.buffer_size_;}
-#endif
-
     template <MKL_INT BRNG>
     void operator() (const MKLStream<BRNG> &stream, size_type nskip)
     {
@@ -352,7 +344,7 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     MKLStream (MKLStream<BRNG> &&other) :
         traits::MKLOffsetTrait<BRNG>::type(cxx11::move(other)),
-        seed_(other.seed_), str_ptr_(other.str_ptr_) {}
+        seed_(other.seed_), str_ptr_(other.str_ptr_) {other.str_ptr_ = NULL;}
 
     MKLStream<BRNG> &operator= (MKLStream<BRNG> &&other)
     {
@@ -360,13 +352,22 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
             traits::MKLOffsetTrait<BRNG>::type::operator=(cxx11::move(other));
             seed_ = other.seed_;
             str_ptr_ = other.str_ptr_;
+            other.str_ptr_ = NULL;
         }
 
         return *this;
     }
 #endif
 
-    ~MKLStream () {::vslDeleteStream(&str_ptr_);}
+    ~MKLStream () {if (!empty()) ::vslDeleteStream(&str_ptr_);}
+
+    bool empty () const
+    {
+        if (str_ptr_)
+            return false;
+        else
+            return true;
+    }
 
     void seed (MKL_UINT s)
     {
@@ -556,6 +557,8 @@ class MKLEngine
         return *this;
     }
 #endif
+
+    bool empty () const {stream_.empty();}
 
     void seed (MKL_UINT s)
     {
