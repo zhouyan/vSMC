@@ -96,6 +96,20 @@ class DispatchFunction
 /// \brief Make a DispatchFunction object from an arbitrary callable object
 /// \ingroup Dispatch
 ///
+/// \details
+/// This is a helper function. Often as will C++, it is difficult to know the
+/// exact type of `work` (say, a lambda expression), which is requried in class
+/// template object delerations. With this function, one may write,
+/// \code
+/// vsmc::DispatchQueue<vsmc::DispatchGlobal> queue;
+/// vsmc::DispatchGroup group;
+/// auto work = vsmc::dispatch_funciton_new([] { /* do work */ })
+/// group.async(queue, work->context(), work->function());
+/// // some where perhaps far away
+/// group.wait(DISPATCH_TIME_FOREVER); // wait for work be done
+/// delete work;
+/// \endcode
+///
 /// \param work A callable object with signature `void f(void)`
 template <typename T>
 DispatchFunction<
