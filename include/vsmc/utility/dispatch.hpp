@@ -671,7 +671,11 @@ class DispatchProgress
     /// \brief Construct a DispatchProgress with total amount of work
     DispatchProgress () :
         total_(0), queue_("DispatchProgress"), timer_(0, 0, queue_),
-        iter_(0), num_equal_(0), elapsed_second_(0) {}
+        num_equal_(0), percent_(0), elapsed_second_(0), iter_(0) {}
+
+    DispatchProgress (const DispatchQueue<DispatchPrivate> &queue) :
+        total_(0), queue_(queue), timer_(0, 0, queue_),
+        num_equal_(0), percent_(0), elapsed_second_(0), iter_(0) {}
 
     ~DispatchProgress () {timer_.cancel();}
 
@@ -682,9 +686,11 @@ class DispatchProgress
     void start (uint64_t total)
     {
         total_ = total;
-        iter_ = total_;
+
         num_equal_ = 1000000;
+        percent_ = 100;
         elapsed_second_ = 1000000;
+        iter_ = total_;
 
         timer_.set_context((void *) this);
         timer_.set_event_handler_f(print_start);
@@ -717,12 +723,14 @@ class DispatchProgress
     DispatchSource<DispatchTimer> timer_;
     StopWatch watch_;
 
-    mutable uint64_t iter_;
-    mutable std::size_t num_equal_;
+    mutable unsigned num_equal_;
+    mutable unsigned percent_;
     mutable uint64_t elapsed_second_;
-    mutable char display_iter_[32];
+    mutable uint64_t iter_;
     mutable char display_progress_[128];
+    mutable char display_percent_[32];
     mutable char display_time_[16];
+    mutable char display_iter_[32];
 
     template <typename UIntType>
     static void uint_to_char (UIntType num, char *cstr, std::size_t &offset)
@@ -741,9 +749,9 @@ class DispatchProgress
     }
 
     template <typename UIntType>
-    static std::size_t uint_digit (UIntType num)
+    static unsigned uint_digit (UIntType num)
     {
-        std::size_t digit = 0;
+        unsigned digit = 0;
         UIntType base = 1;
         while (num >= base) {
             ++digit;
@@ -760,34 +768,15 @@ class DispatchProgress
 
         uint64_t total = timer_ptr->total_;
         uint64_t iter = timer_ptr->current();
-        iter = (iter <= total) ? iter : total;
-        std::size_t num_equal = static_cast<std::size_t>(60 * iter / total);
-
         const StopWatch &elapsed = timer_ptr->watch_;
         elapsed.stop();
         elapsed.start();
-        uint64_t elapsed_second = static_cast<uint64_t>(elapsed.seconds());
 
-        if (timer_ptr->iter_ != iter) {
-            timer_ptr->iter_ = iter;
-            char *cstr = timer_ptr->display_iter_;
-            std::size_t offset = 0;
-            std::size_t diff = uint_digit(total) - uint_digit(iter);
-            cstr[offset++] = '[';
-            for (std::size_t i = 0; i != diff; ++i)
-                cstr[offset++] = ' ';
-            uint_to_char(iter, cstr, offset);
-            cstr[offset++] = '/';
-            uint_to_char(total, cstr, offset);
-            cstr[offset++] = ']';
-            cstr[offset++] = '\0';
-        }
-
+        unsigned num_equal = static_cast<unsigned>(60 * iter / total);
         if (timer_ptr->num_equal_ != num_equal) {
             timer_ptr->num_equal_ = num_equal;
-            int percent = static_cast<int>(100 * iter / total);
-            std::size_t num_space = 60 - num_equal;
-            std::size_t num_dash = 0;
+            unsigned num_space = 60 - num_equal;
+            unsigned num_dash = 0;
             if (num_space > 0) {
                 --num_space;
                 num_dash = 1;
@@ -796,15 +785,24 @@ class DispatchProgress
             char *cstr = timer_ptr->display_progress_;
             std::size_t offset = 0;
             cstr[offset++] = '[';
-            for (std::size_t i = 0; i != num_equal; ++i)
+            for (unsigned i = 0; i != num_equal; ++i)
                 cstr[offset++] = '=';
             if (num_dash != 0)
                 cstr[offset++] = '-';
-            for (std::size_t i = 0; i != num_space; ++i)
+            for (unsigned i = 0; i != num_space; ++i)
                 cstr[offset++] = ' ';
             cstr[offset++] = ']';
+            cstr[offset++] = '\0';
+        }
+
+        unsigned percent = static_cast<unsigned>(100 * iter / total);
+        if (timer_ptr->percent_ != percent) {
+            timer_ptr->percent_ = percent;
+
+            char *cstr = timer_ptr->display_percent_;
+            std::size_t offset = 0;
             cstr[offset++] = '[';
-            for (std::size_t i = 0; i != 3 - uint_digit(percent); ++i)
+            for (unsigned i = 0; i != 3 - uint_digit(percent); ++i)
                 cstr[offset++] = ' ';
             uint_to_char(percent, cstr, offset);
             cstr[offset++] = '%';
@@ -812,6 +810,7 @@ class DispatchProgress
             cstr[offset++] = '\0';
         }
 
+        uint64_t elapsed_second = static_cast<uint64_t>(elapsed.seconds());
         if (timer_ptr->elapsed_second_ != elapsed_second) {
             timer_ptr->elapsed_second_ = elapsed_second;
             uint64_t display_second = elapsed_second % 60;
@@ -833,10 +832,28 @@ class DispatchProgress
             cstr[offset++] = '\0';
         }
 
+        iter = (iter <= total) ? iter : total;
+        if (timer_ptr->iter_ != iter) {
+            timer_ptr->iter_ = iter;
+            int diff = uint_digit(total) - uint_digit(iter);
+            char *cstr = timer_ptr->display_iter_;
+
+            std::size_t offset = 0;
+            cstr[offset++] = '[';
+            for (int i = 0; i < diff; ++i)
+                cstr[offset++] = ' ';
+            uint_to_char(iter, cstr, offset);
+            cstr[offset++] = '/';
+            uint_to_char(total, cstr, offset);
+            cstr[offset++] = ']';
+            cstr[offset++] = '\0';
+        }
+
         std::cout << ' ';
-        std::cout << const_cast<const char *>(timer_ptr->display_iter_);
         std::cout << const_cast<const char *>(timer_ptr->display_progress_);
+        std::cout << const_cast<const char *>(timer_ptr->display_percent_);
         std::cout << const_cast<const char *>(timer_ptr->display_time_);
+        std::cout << const_cast<const char *>(timer_ptr->display_iter_);
     }
 
     static void print_start (void *context)
@@ -872,6 +889,10 @@ class DispatchProgressSampler : public DispatchProgress
     public :
 
     DispatchProgressSampler (const Sampler<T> &sampler) : sampler_(sampler) {}
+
+    DispatchProgressSampler (const Sampler<T> &sampler,
+            const DispatchQueue<DispatchPrivate> &queue) :
+        DispatchProgress(queue), sampler_(sampler) {}
 
     uint64_t current () const
     {return static_cast<uint64_t>(sampler_.iter_num());}
