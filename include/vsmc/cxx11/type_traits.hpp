@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/assert.hpp>
 
 namespace vsmc {
 
@@ -100,6 +101,17 @@ inline typename remove_reference<T>::type &&move (T &&t) VSMC_NOEXCEPT
 {
     typedef typename remove_reference<T>::type U;
     return static_cast<U &&>(t);
+}
+
+template <typename T>
+inline T &&forward (typename remove_reference<T>::type &t) VSMC_NOEXCEPT
+{return static_cast<T &&>(t);}
+
+template <typename T>
+inline T &&forward (typename remove_reference<T>::type &&t) VSMC_NOEXCEPT
+{
+    VSMC_STATIC_ASSERT_FORWARD_RVALUE;
+    return static_cast<T&&>(t);
 }
 #endif
 

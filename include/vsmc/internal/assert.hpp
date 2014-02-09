@@ -97,7 +97,9 @@ class StaticAssert<true>
         USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
         USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double,
 
-        USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree
+        USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree,
+
+        ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE
     };
 }; // class StaticAssert
 
@@ -129,5 +131,9 @@ class StaticAssert<true>
     VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<type, cl_float>::value          \
                 || vsmc::cxx11::is_same<type, cl_double>::value),            \
             USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
+
+#define VSMC_STATIC_ASSERT_FORWARD_RVALUE \
+    VSMC_STATIC_ASSERT((!vsmc::cxx11::is_lvalue_reference<T>::value),        \
+            ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE)
 
 #endif // VSMC_INTERNAL_ASSERT_HPP
