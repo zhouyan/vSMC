@@ -41,7 +41,9 @@ class RngSet<RngType, ScalarRng>
 
     size_type size () const {return size_;}
 
-    rng_type &rng (size_type id = 0) {return rng_;}
+    rng_type &rng (size_type) {return rng_;}
+
+    rng_type &operator[] (size_type) {return rng_;}
 
     private :
 
@@ -68,7 +70,9 @@ class RngSet<RngType, VectorRng>
 
     size_type size () const {return rng_.size();}
 
-    rng_type &rng (size_type id = 0) {return rng_[id];}
+    rng_type &rng (size_type id) {return rng_[id];}
+
+    rng_type &operator[] (size_type id) {return rng_[id];}
 
     private :
 
@@ -93,7 +97,7 @@ class RngSet<RngType, ThreadLocalRng>
 
     size_type size () const {return size_;}
 
-    rng_type &rng (size_type id = 0)
+    rng_type &rng (size_type)
     {
         static thread_local std::pair<rng_type, bool> rng_flag =
             std::make_pair(rng_type(), false);
@@ -107,6 +111,8 @@ class RngSet<RngType, ThreadLocalRng>
 
         return rng_flag.first;
     }
+
+    rng_type &operator[] (size_type id) {return rng(id);}
 
     private :
 

@@ -53,7 +53,7 @@ class CLSetup
     /// \param name One of "GPU", "CPU", "Accelerator". Other values are
     /// treated as setting the default device type
     /// \return false if the default value is using, otherwise true
-    void device_type (const std::string &name)
+    bool device_type (const std::string &name)
     {
         if (name == std::string("CPU"))
             device_type(CL_DEVICE_TYPE_CPU);
@@ -61,8 +61,12 @@ class CLSetup
             device_type(CL_DEVICE_TYPE_GPU);
         else if (name == std::string("Accelerator"))
             device_type(CL_DEVICE_TYPE_ACCELERATOR);
-        else
+        else {
             device_type(CL_DEVICE_TYPE_DEFAULT);
+            return false;
+        }
+
+        return true;
     }
 
     void device_type   (cl_device_type type)     {device_type_   = type;}
@@ -410,7 +414,7 @@ class CLManager
         command_queue_.finish();
         command_queue_.enqueueNDRangeKernel(kern, cl::NullRange,
                 get_global_nd_range(N, local_size),
-                get_local_nd_range(N, local_size));
+                get_local_nd_range(local_size));
         command_queue_.finish();
     }
 
@@ -610,8 +614,7 @@ class CLManager
             cl::NDRange((N / local_size + 1) * local_size): cl::NDRange(N);
     }
 
-    cl::NDRange get_local_nd_range (
-            std::size_t N, std::size_t local_size) const
+    cl::NDRange get_local_nd_range (std::size_t local_size) const
     {
         return local_size ? cl::NDRange(local_size) : cl::NullRange;
     }

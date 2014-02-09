@@ -340,7 +340,8 @@ class MonitorEvalBase
     }
 
     template <typename D>
-    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+    void pre_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
@@ -369,7 +370,8 @@ class MonitorEvalBase
     }
 
     template <typename D>
-    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+    void pre_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &) const)
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
@@ -393,7 +395,8 @@ class MonitorEvalBase
                 double *))
     {Derived::monitor_state(iter, dim, csp, res);}
 
-    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+    void pre_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
             void (*) (std::size_t, const Particle<T> &))
     {Derived::pre_processor(iter, particle);}
 
@@ -404,8 +407,8 @@ class MonitorEvalBase
 
     // base
 
-    void monitor_state_dispatch (std::size_t, std::size_t dim,
-            ConstSingleParticle<T>, double *res,
+    void monitor_state_dispatch (std::size_t, std::size_t ,
+            ConstSingleParticle<T>, double *,
             void (MonitorEvalBase::*)
             (std::size_t, std::size_t, ConstSingleParticle<T>, double *))
     {VSMC_STATIC_ASSERT_NO_IMPL(monitor_state);}
@@ -478,7 +481,8 @@ class PathEvalBase
     }
 
     template <typename D>
-    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+    void pre_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &))
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
@@ -513,7 +517,8 @@ class PathEvalBase
     }
 
     template <typename D>
-    void pre_processor_dispatch (std::size_t iter, const Particle<T> &particle,
+    void pre_processor_dispatch (std::size_t iter,
+            const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &) const)
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);

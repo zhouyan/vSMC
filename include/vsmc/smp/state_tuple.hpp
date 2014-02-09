@@ -77,7 +77,7 @@ class StateTupleBase
         }
 
         template <typename Archive>
-        void serialize (Archive &ar, Position<dim_>) {}
+        void serialize (Archive &, Position<dim_>) {}
 
         template <typename Archive, std::size_t Pos>
         void serialize (Archive &ar, Position<Pos>) const
@@ -87,7 +87,7 @@ class StateTupleBase
         }
 
         template <typename Archive>
-        void serialize (Archive &ar, Position<dim_>) const {}
+        void serialize (Archive &, Position<dim_>) const {}
     };
 
     template <typename S>
@@ -208,7 +208,7 @@ class StateTupleBase
         pack_particle(id, pack, Position<Pos + 1>());
     }
 
-    void pack_particle (size_type id, state_pack_type &pack,
+    void pack_particle (size_type, state_pack_type &,
             Position<dim_>) const {}
 
     template <std::size_t Pos>
@@ -221,7 +221,7 @@ class StateTupleBase
         unpack_particle(id, pack, Position<Pos + 1>());
     }
 
-    void unpack_particle (size_type id, const state_pack_type &pack,
+    void unpack_particle (size_type, const state_pack_type &,
             Position<dim_>) {}
 
     template <std::size_t Pos>
@@ -233,7 +233,7 @@ class StateTupleBase
         copy_particle(from, to, Position<Pos + 1>());
     }
 
-    void copy_particle (size_type from, size_type to, Position<dim_>) {}
+    void copy_particle (size_type, size_type, Position<dim_>) {}
 
     template <typename OutputStream, std::size_t Pos>
     void print_particle (OutputStream &os, size_type id,
@@ -246,8 +246,8 @@ class StateTupleBase
     }
 
     template <typename OutputStream>
-    void print_particle (OutputStream &os, size_type id,
-            char sepchar, char eolchar, Position<dim_ - 1>) const
+    void print_particle (OutputStream &os, size_type id, char, char eolchar,
+            Position<dim_ - 1>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);

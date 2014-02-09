@@ -66,9 +66,8 @@ class ProgramOption : public ProgramOptionBase
     template <typename V>
     ProgramOption (const char *name, const char *desc, T *ptr, const V &val) :
         name_(std::string("--") + name),
-        desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR), default_(val),
-        has_default_(true)
-    {*ptr = val;}
+        desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
+        default_(static_cast<T>(val)), has_default_(true) {*ptr = default_;}
 
     /// \brief Construct an option that can store multiple values with a
     /// default value
@@ -76,11 +75,11 @@ class ProgramOption : public ProgramOptionBase
     ProgramOption (const char *name, const char *desc, std::vector<T> *ptr,
             const V &val) :
         name_(std::string("--") + name),
-        desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr), default_(val),
-        has_default_(true)
+        desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
+        default_(static_cast<T>(val)), has_default_(true)
     {
         vec_ptr_->clear();
-        vec_ptr_->push_back(val);
+        vec_ptr_->push_back(default_);
     }
 
     /// \brief Compare an option name and set value if it is the same as the

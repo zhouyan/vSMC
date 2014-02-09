@@ -95,6 +95,8 @@ class Path
     }
 #endif
 
+    virtual ~Path () {}
+
     /// \brief The number of iterations has been recorded
     ///
     /// \sa Monitor::iter_size()

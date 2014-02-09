@@ -14,6 +14,8 @@ class NormalizingConstant
     NormalizingConstant (std::size_t N) :
         size_(N), log_zconst_(0), weight_(N), inc_weight_(N) {}
 
+    virtual ~NormalizingConstant () {}
+
     double zconst () const {return std::exp(log_zconst_);}
 
     double log_zconst () const {return log_zconst_;}

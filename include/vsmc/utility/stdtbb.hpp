@@ -167,9 +167,8 @@ class ThreadInfo
 #pragma warning(pop)
 #endif
         if (num_str) {
-            std::size_t num = std::atoi(num_str);
-            if (num)
-                thread_num_ = num;
+            int num = std::atoi(num_str);
+            thread_num_ = num > 0 ? static_cast<std::size_t>(num) : 1;
         }
     }
 

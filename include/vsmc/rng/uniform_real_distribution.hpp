@@ -77,11 +77,17 @@ class UniformRealDistribution
 
         friend inline bool operator== (
                 const param_type &param1, const param_type &param2)
-        {return (param1.a() == param2.a()) && (param1.b() == param2.b());}
+        {
+            if (param1.a() < param2.a() || param1.a() > param2.a())
+                return false;
+            if (param1.b() < param2.b() || param1.b() > param2.b())
+                return false;
+            return true;
+        }
 
         friend inline bool operator!= (
                 const param_type param1, const param_type param2)
-        {return (param1.a() != param2.a()) || (param1.b() != param2.b());}
+        {return !(param1 == param2);}
 
         template <typename CharT, typename Traits>
         friend inline std::basic_ostream<CharT, Traits> &operator<< (
@@ -241,7 +247,11 @@ inline bool operator== (
         const UniformRealDistribution<FPType, Left, Right> &runif1,
         const UniformRealDistribution<FPType, Left, Right> &runif2)
 {
-    return (runif1.a() == runif2.a()) && (runif1.b() == runif2.b());
+    if (runif1.a() < runif2.a() ||runif1.a() > runif1.a())
+        return false;
+    if (runif1.b() < runif2.b() ||runif1.b() > runif1.b())
+        return false;
+    return true;
 }
 
 /// \brief UniformRealDistribution operator!=
@@ -250,9 +260,7 @@ template <typename FPType, typename Left, typename Right>
 inline bool operator!= (
         const UniformRealDistribution<FPType, Left, Right> &runif1,
         const UniformRealDistribution<FPType, Left, Right> &runif2)
-{
-    return (runif1.a() != runif2.a()) || (runif1.b() != runif2.b());
-}
+{return !(runif1 == runif2);}
 
 /// \brief UniformRealDistribution operator<<
 /// \ingroup RNG

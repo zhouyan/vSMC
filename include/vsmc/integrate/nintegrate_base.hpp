@@ -74,8 +74,7 @@ class NIntegrateBase
             double (*) (double, double, const eval_type &))
     {return Derived::integrate_segment(a, b, eval);}
 
-    double integrate_segment_dispatch (double a, double b,
-            const eval_type &eval,
+    double integrate_segment_dispatch (double, double, const eval_type &,
             double (NIntegrateBase::*) (double, double, const eval_type &))
     {VSMC_STATIC_ASSERT_NO_IMPL(integrate_segment); return 0;}
 }; // class NIntegrateBase

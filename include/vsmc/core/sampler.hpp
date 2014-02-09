@@ -114,8 +114,6 @@ class Sampler
                 resample_op_ = Resample<
                     internal::ResampleResidualSystematic>();
                 break;
-            default :
-                break;
         }
 
         return *this;

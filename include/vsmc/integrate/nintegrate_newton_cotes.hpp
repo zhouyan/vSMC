@@ -22,7 +22,7 @@ struct NIntegrateNewtonCotesEval
 template <typename EvalType>
 struct NIntegrateNewtonCotesEval<1, EvalType>
 {
-    static double result (const double *coeff, double a, double h,
+    static double result (const double *coeff, double a, double,
             const EvalType &eval)
     {
         return coeff[1] * eval(a);

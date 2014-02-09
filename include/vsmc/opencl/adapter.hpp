@@ -124,7 +124,7 @@ class MoveAdapter<T, MoveCL, NullType> :
             const post_processor_type &post = post_processor_type()) :
         base(pre, post), move_state_(move_state) {}
 
-    void move_state (std::size_t iter, std::string &kernel_name)
+    void move_state (std::size_t, std::string &kernel_name)
     {kernel_name = move_state_;}
 
     private :

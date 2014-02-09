@@ -28,15 +28,15 @@ class CLQuery
     {
         print_equal(os);
 
-        print_info_val<std::string>(os, plat,
+        print_info_val<std::string, cl_platform_info>(os, plat,
                 CL_PLATFORM_NAME, "CL_PLATFORM_NAME");
-        print_info_val<std::string>(os, plat,
+        print_info_val<std::string, cl_platform_info>(os, plat,
                 CL_PLATFORM_VENDOR, "CL_PLATFORM_VENDOR");
-        print_info_val<std::string>(os, plat,
+        print_info_val<std::string, cl_platform_info>(os, plat,
                 CL_PLATFORM_VERSION, "CL_PLATFORM_VERSION");
-        print_info_val<std::string>(os, plat,
+        print_info_val<std::string, cl_platform_info>(os, plat,
                 CL_PLATFORM_PROFILE, "CL_PLATFORM_PROFILE");
-        print_info_val<std::string>(os, plat,
+        print_info_val<std::string, cl_platform_info>(os, plat,
                 CL_PLATFORM_EXTENSIONS, "CL_PLATFORM_EXTENSIONS");
 
         std::vector<cl::Device> device;
@@ -52,119 +52,119 @@ class CLQuery
     {
         print_dash(os);
 
-        print_info_val<std::string>(os, dev,
+        print_info_val<std::string, cl_device_info>(os, dev,
                 CL_DEVICE_NAME, "CL_DEVICE_NAME");
         print_dev_type(os, dev);
-        print_info_val<std::string>(os, dev,
+        print_info_val<std::string, cl_device_info>(os, dev,
                 CL_DEVICE_VENDOR, "CL_DEVICE_VENDOR");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_VENDOR_ID, "CL_DEVICE_VENDOR_ID");
-        print_info_val<std::string>(os, dev,
+        print_info_val<std::string, cl_device_info>(os, dev,
                 CL_DRIVER_VERSION, "CL_DRIVER_VERSION");
-        print_info_val<std::string>(os, dev,
+        print_info_val<std::string, cl_device_info>(os, dev,
                 CL_DEVICE_PROFILE, "CL_DEVICE_PROFILE");
-        print_info_val<std::string>(os, dev,
+        print_info_val<std::string, cl_device_info>(os, dev,
                 CL_DEVICE_VERSION, "CL_DEVICE_VERSION");
-        print_info_val<std::string>(os, dev,
+        print_info_val<std::string, cl_device_info>(os, dev,
                 CL_DEVICE_OPENCL_C_VERSION, "CL_DEVICE_OPENCL_C_VERSION");
-        print_info_val<std::string>(os, dev,
+        print_info_val<std::string, cl_device_info>(os, dev,
                 CL_DEVICE_EXTENSIONS, "CL_DEVICE_EXTENSIONS");
         os << '\n';
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_MAX_COMPUTE_UNITS,
                 "CL_DEVICE_MAX_COMPUTE_UNITS");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
                 "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS");
-        print_info_val<std::vector<std::size_t> >(os, dev,
+        print_info_val<std::vector<std::size_t> , cl_device_info>(os, dev,
                 CL_DEVICE_MAX_WORK_ITEM_SIZES,
                 "CL_DEVICE_MAX_WORK_ITEM_SIZES");
-        print_info_val<std::size_t>(os, dev,
+        print_info_val<std::size_t, cl_device_info>(os, dev,
                 CL_DEVICE_MAX_WORK_GROUP_SIZE,
                 "CL_DEVICE_MAX_WORK_GROUP_SIZE");
         os << '\n';
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_MAX_CLOCK_FREQUENCY,
                 "CL_DEVICE_MAX_CLOCK_FREQUENCY", "MHz");
-        print_info_val<std::size_t>(os, dev,
+        print_info_val<std::size_t, cl_device_info>(os, dev,
                 CL_DEVICE_MAX_PARAMETER_SIZE,
                 "CL_DEVICE_MAX_PARAMETER_SIZE", "byte");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_ADDRESS_BITS,
                 "CL_DEVICE_ADDRESS_BITS", "bit");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_MEM_BASE_ADDR_ALIGN,
                 "CL_DEVICE_MEM_BASE_ADDR_ALIGN", "bit");
-        print_info_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong, cl_device_info>(os, dev,
                 CL_DEVICE_MAX_MEM_ALLOC_SIZE,
                 "CL_DEVICE_MAX_MEM_ALLOC_SIZE", "byte");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
                 "CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE", "byte");
-        print_info_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong, cl_device_info>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
                 "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE", "byte");
-        print_info_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong, cl_device_info>(os, dev,
                 CL_DEVICE_GLOBAL_MEM_SIZE,
                 "CL_DEVICE_GLOBAL_MEM_SIZE", "byte");
-        print_info_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong, cl_device_info>(os, dev,
                 CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
                 "CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE", "byte");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_MAX_CONSTANT_ARGS,
                 "CL_DEVICE_MAX_CONSTANT_ARGS");
-        print_info_val<cl_ulong>(os, dev,
+        print_info_val<cl_ulong, cl_device_info>(os, dev,
                 CL_DEVICE_LOCAL_MEM_SIZE,
                 "CL_DEVICE_LOCAL_MEM_SIZE", "byte");
-        print_info_val<cl_bool>(os, dev,
+        print_info_val<cl_bool, cl_device_info>(os, dev,
                 CL_DEVICE_ERROR_CORRECTION_SUPPORT,
                 "CL_DEVICE_ERROR_CORRECTION_SUPPORT");
-        print_info_val<std::size_t>(os, dev,
+        print_info_val<std::size_t, cl_device_info>(os, dev,
                 CL_DEVICE_PROFILING_TIMER_RESOLUTION,
                 "CL_DEVICE_PROFILING_TIMER_RESOLUTION", "ns");
         os << '\n';
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
                 "CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF");
         os << '\n';
 #if VSMC_OPENCL_VERSION >= 110
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_INT,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_INT");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE");
-        print_info_val<cl_uint>(os, dev,
+        print_info_val<cl_uint, cl_device_info>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF");
 #endif // VSMC_OPENCL_VERSION >= 110
@@ -175,7 +175,7 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const cl::Context &ctx)
     {
         std::vector<cl::Device> device;
-        ctx.getInfo(CL_CONTEXT_DEVICES, &device);
+        ctx.getInfo(static_cast<cl_context_info>(CL_CONTEXT_DEVICES), &device);
         for (std::vector<cl::Device>::const_iterator d = device.begin();
                 d != device.end(); ++d)
             print(os, *d);
@@ -185,9 +185,9 @@ class CLQuery
     static void print (
             std::basic_ostream<CharT, Traits> &os, const cl::Program &prog)
     {
-        print_info_val<cl_uint>(os, prog,
+        print_info_val<cl_uint, cl_program_info>(os, prog,
                 CL_PROGRAM_NUM_DEVICES, "CL_PROGRAM_NUM_DEVICES");
-        print_info_val<std::size_t>(os, prog,
+        print_info_val<std::size_t, cl_program_info>(os, prog,
                 CL_PROGRAM_BINARY_SIZES, "CL_PROGRAM_BINARY_SIZES", "byte");
     }
 
@@ -196,18 +196,18 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const cl::Kernel &kern)
     {
         cl::Context ctx;
-        kern.getInfo(CL_KERNEL_CONTEXT, &ctx);
+        kern.getInfo(static_cast<cl_kernel_info>(CL_KERNEL_CONTEXT), &ctx);
         std::vector<cl::Device> device;
-        ctx.getInfo(CL_CONTEXT_DEVICES, &device);
+        ctx.getInfo(static_cast<cl_kernel_info>(CL_CONTEXT_DEVICES), &device);
         for (std::vector<cl::Device>::const_iterator d = device.begin();
                 d != device.end(); ++d) {
-            print_info_val<std::string>(os, *d,
+            print_info_val<std::string, cl_device_info>(os, *d,
                     CL_DEVICE_NAME,
                     "CL_DEVICE_NAME");
-            print_info_val<std::string>(os, kern,
+            print_info_val<std::string, cl_kernel_info>(os, kern,
                     CL_KERNEL_FUNCTION_NAME,
                     "CL_KERNEL_FUNCTION_NAME");
-            print_info_val<cl_uint>(os, kern,
+            print_info_val<cl_uint, cl_kernel_info>(os, kern,
                     CL_KERNEL_NUM_ARGS,
                     "CL_KERNEL_NUM_ARGS");
             print_kernwginfo_val<std::size_t>(os, kern, *d,
@@ -229,19 +229,11 @@ class CLQuery
 
     template<typename CharT, typename Traits>
     static void print_equal (std::basic_ostream<CharT, Traits> &os)
-    {
-        for (int l = 0; l != 80; ++l)
-            os << '=';
-        os << '\n';
-    }
+    {os << std::string(80, '=') << '\n';}
 
     template<typename CharT, typename Traits>
     static void print_dash (std::basic_ostream<CharT, Traits> &os)
-    {
-        for (int l = 0; l != 80; ++l)
-            os << '-';
-        os << '\n';
-    }
+    {os << std::string(80, '-') << '\n';}
 
     template<typename CharT, typename Traits>
     static void print_dev_type (
@@ -249,7 +241,7 @@ class CLQuery
     {
         cl_device_type type;
         std::string info;
-        dev.getInfo(CL_DEVICE_TYPE, &type);
+        dev.getInfo(static_cast<cl_device_info>(CL_DEVICE_TYPE), &type);
 
         append_bit_field<cl_device_type>(CL_DEVICE_TYPE_CPU,
                 type, "CL_DEVICE_TYPE_CPU", info);
@@ -278,14 +270,14 @@ class CLQuery
         }
     }
 
-    template<typename T, typename CharT, typename Traits,
+    template<typename T, typename CLInfoType, typename CharT, typename Traits,
         typename CLObj, typename InfoType>
     static void print_info_val (std::basic_ostream<CharT, Traits> &os,
             const CLObj &obj, InfoType info,
             const std::string &name, const std::string &unit = "")
     {
         T val;
-        obj.getInfo(info, &val);
+        obj.getInfo(static_cast<CLInfoType>(info), &val);
         print_name(os, name);
         print_val(os, val);
         os << ' ' << unit << '\n';
@@ -298,7 +290,8 @@ class CLQuery
             const std::string &name, const std::string &unit = "")
     {
         T val;
-        kern.getWorkGroupInfo(dev, info, &val);
+        kern.getWorkGroupInfo(dev,
+                static_cast<cl_kernel_work_group_info>(info), &val);
         print_name(os, name);
         print_val(os, val);
         os << ' ' << unit << '\n';
@@ -355,14 +348,6 @@ class CLQuery
         os << std::setw(41) << ' ' << val_vec.back();
     }
 
-    template <typename CharT, typename Traits>
-    static void print_val (std::basic_ostream<CharT, Traits> &os,
-            std::string &val)
-    {
-        const std::string &v = val;
-        print_val(os, v);
-    }
-
     template<typename CharT, typename Traits, typename T>
     static void print_val (std::basic_ostream<CharT, Traits> &os,
             const std::vector<T> &val)
@@ -370,14 +355,6 @@ class CLQuery
         for (typename std::vector<T>::const_iterator v = val.begin();
                 v != val.end(); ++v)
             os << *v << ' ';
-    }
-
-    template<typename CharT, typename Traits, typename T>
-    static void print_val (std::basic_ostream<CharT, Traits> &os,
-            std::vector<T> &val)
-    {
-        const std::vector<T> &v = val;
-        print_val(os, v);
     }
 }; //class CLQuery
 

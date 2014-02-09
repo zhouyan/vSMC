@@ -27,8 +27,8 @@ class DummyStopWatch
     double minutes      () const {return 1e-9 / 60;}
     double hours        () const {return 1e-9 / 3600;}
 
-    DummyStopWatch &operator+= (const DummyStopWatch &other) {return *this;}
-    DummyStopWatch operator+ (const DummyStopWatch &other) const {return *this;}
+    DummyStopWatch &operator+= (const DummyStopWatch &) {return *this;}
+    DummyStopWatch operator+ (const DummyStopWatch &) const {return *this;}
 
     private :
 

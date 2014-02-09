@@ -159,7 +159,6 @@ inline hid_t hdf5_datatype<long double> ()
 /// \brief Save a matrix in the HDF5 format from an input iterator
 /// \ingroup HDF5Save
 ///
-/// \details
 /// \tparam Order Storage order (RowMajor or ColMajor)
 /// \tparam T Type of the data
 /// \param nrow Number of rows
@@ -273,7 +272,6 @@ inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
 /// \brief Insert a variable into an existing data frame saved in HDF5 format
 /// \ingroup HDF5Save
 ///
-/// \details
 /// \param N The length of the variable vector. It may be different from that
 /// of the existing data frame.
 /// \param file_name Name of the HDF5 file

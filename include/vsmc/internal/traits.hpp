@@ -175,7 +175,7 @@ class DimTrait<Dynamic>
 };
 
 template <typename Rng>
-struct RngShift {void operator() (Rng &rng) const {}};
+struct RngShift {void operator() (Rng &) const {}};
 
 } // namespace vsmc::traits
 

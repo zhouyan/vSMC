@@ -71,6 +71,7 @@ class RuntimeAssert : public std::runtime_error
     public :
 
     RuntimeAssert (const std::string &msg) : std::runtime_error(msg) {}
+    RuntimeAssert (const char *msg) : std::runtime_error(msg) {}
 }; // class RuntimeAssert
 
 class RuntimeWarning : public std::runtime_error
@@ -78,6 +79,7 @@ class RuntimeWarning : public std::runtime_error
     public :
 
     RuntimeWarning (const std::string &msg) : std::runtime_error(msg) {}
+    RuntimeWarning (const char *msg) : std::runtime_error(msg) {}
 }; // class RuntimeWarning
 
 template <bool> class StaticAssert {};

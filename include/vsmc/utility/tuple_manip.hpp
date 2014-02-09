@@ -175,6 +175,6 @@ template <typename... Types>
 struct TupleCat<std::tuple<Types...> >
 {typedef std::tuple<Types...> type;};
 
-}; // namespace vsmc
+} // namespace vsmc
 
 #endif // VSMC_UTILITY_TUPLE_MANIP_HPP

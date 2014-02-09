@@ -24,6 +24,8 @@ class WeightSet
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
+    virtual ~WeightSet () {}
+
     size_type size () const {return size_;}
 
     /// \brief ESS of the particle collection based on the current weights

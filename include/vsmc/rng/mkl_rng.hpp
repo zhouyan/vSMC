@@ -456,7 +456,7 @@ class MKLDistribution
     template <MKL_INT BRNG>
     result_type operator() (const MKLStream<BRNG> &stream)
     {
-        result_.resize(buffer_size_);
+        result_.resize(static_cast<std::size_t>(buffer_size_));
         result_type *const rptr = &result_[0];
         if (remain_ > 0) {
             --remain_;

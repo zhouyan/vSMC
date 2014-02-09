@@ -69,7 +69,7 @@ class InitializeAdapterBase : public BaseType
     {f_.post_processor(particle);}
 
     void initialize_param_dispatch
-        (Particle<T> &, void *param, cxx11::false_type) {}
+        (Particle<T> &, void *, cxx11::false_type) {}
     void pre_processor_dispatch
         (Particle<T> &, cxx11::false_type) {}
     void post_processor_dispatch

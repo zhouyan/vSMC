@@ -94,7 +94,7 @@ class ConfigureCL
     {
         std::size_t global_size;
         cl_preferred_work_size(N, kern, dev, global_size, local_size_);
-    };
+    }
 
     private :
 

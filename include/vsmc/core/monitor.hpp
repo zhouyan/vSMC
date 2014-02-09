@@ -103,6 +103,8 @@ class Monitor
     }
 #endif
 
+    virtual ~Monitor () {}
+
     /// \brief The dimension of the Monitor
     std::size_t dim () const {return dim_;}
 

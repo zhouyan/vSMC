@@ -79,7 +79,7 @@ class ResampleCopyFromReplicationNoAaction
     public :
 
     template <typename IntType1, typename IntType2>
-    void operator() (std::size_t N, const IntType1 *, IntType2 *) const {}
+    void operator() (std::size_t, const IntType1 *, IntType2 *) const {}
 }; // class ResampleCopyFromReplicationNoAaction
 
 /// \brief Transform replication numbers to parent particle locations

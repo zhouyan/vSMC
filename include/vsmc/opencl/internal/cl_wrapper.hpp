@@ -5,8 +5,8 @@
 #define __CL_ENABLE_EXCEPTIONS
 #endif
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-#if __GNUC__ >= 4 && __GNUC_MINIOR__ >= 6
+#if defined(__GNUC__) && defined(__GNC_MINOR__) && !defined(__INTEL_COMPILER)
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -14,8 +14,8 @@
 
 #include <cl.hpp>
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-#if __GNUC__ >= 4 && __GNUC_MINIOR__ >= 6
+#if defined(__GNUC__) && defined(__GNC_MINOR__) && !defined(__INTEL_COMPILER)
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
 #pragma GCC diagnostic pop
 #endif
 #endif

@@ -312,7 +312,7 @@ class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
             const DispatchQueue<DispatchPrivate> &other)
     {
         if (this != &other) {
-            DispatchQueueBase::operator=(other); return *this;
+            DispatchQueueBase::operator=(other);
             dispatch_retain(this->get());
         }
 
@@ -639,7 +639,7 @@ class DispatchProgress
         total_(0), queue_(queue), timer_(0, 0, queue_),
         num_equal_(0), percent_(0), elapsed_second_(0), iter_(0) {}
 
-    ~DispatchProgress () {timer_.cancel();}
+    virtual ~DispatchProgress () {timer_.cancel();}
 
     /// \brief Start to print the progress
     ///
@@ -797,12 +797,12 @@ class DispatchProgress
         iter = (iter <= total) ? iter : total;
         if (timer_ptr->iter_ != iter) {
             timer_ptr->iter_ = iter;
-            int diff = uint_digit(total) - uint_digit(iter);
+            unsigned diff = uint_digit(total) - uint_digit(iter);
             char *cstr = timer_ptr->display_iter_;
 
             std::size_t offset = 0;
             cstr[offset++] = '[';
-            for (int i = 0; i < diff; ++i)
+            for (unsigned i = 0; i < diff; ++i)
                 cstr[offset++] = ' ';
             uint_to_char(iter, cstr, offset);
             cstr[offset++] = '/';
