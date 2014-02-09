@@ -139,11 +139,10 @@ class InitializeSTD : public InitializeBase<T, Derived>
         void operator() (const BlockedRange<size_type> &range,
                 std::size_t &accept) const
         {
+            Particle<T> *const part = particle_;
             std::size_t acc = 0;
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                Particle<T> *const part = particle_;
+            for (size_type i = range.begin(); i != range.end(); ++i)
                 acc += init_->initialize_state(SingleParticle<T>(i, part));
-            }
             accept = acc;
         }
 
@@ -193,11 +192,11 @@ class MoveSTD : public MoveBase<T, Derived>
         void operator() (const BlockedRange<size_type> &range,
                 std::size_t &accept) const
         {
+            Particle<T> *const part = particle_;
+            const std::size_t iter = iter_;
             std::size_t acc = 0;
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                Particle<T> *const part = particle_;
-                acc += move_->move_state(iter_, SingleParticle<T>(i, part));
-            }
+            for (size_type i = range.begin(); i != range.end(); ++i)
+                acc += move_->move_state(iter, SingleParticle<T>(i, part));
             accept = acc;
         }
 
@@ -248,10 +247,13 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 
         void operator() (const BlockedRange<size_type> &range) const
         {
+            const Particle<T> *const part = particle_;
+            const std::size_t iter = iter_;
+            const std::size_t dim = dim_;
+            double *const res = res_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                double *const r = res_ + i * dim_;
-                const Particle<T> *const part = particle_;
-                monitor_->monitor_state(iter_, dim_,
+                double *const r = res + i * dim;
+                monitor_->monitor_state(iter, dim,
                         ConstSingleParticle<T>(i, part), r);
             }
         }
@@ -305,9 +307,11 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
 
         void operator() (const BlockedRange<size_type> &range) const
         {
+            const Particle<T> *const part = particle_;
+            const std::size_t iter = iter_;
+            double *const res = res_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                const Particle<T> *const part = particle_;
-                res_[i] = path_->path_state(iter_,
+                res[i] = path_->path_state(iter,
                         ConstSingleParticle<T>(i, part));
             }
         }

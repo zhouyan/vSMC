@@ -171,11 +171,10 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
         void operator() (const tbb::blocked_range<size_type> &range)
         {
+            Particle<T> *const part = particle_;
             std::size_t acc = accept_;
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                acc += init_->initialize_state(
-                        SingleParticle<T>(i, particle_));
-            }
+            for (size_type i = range.begin(); i != range.end(); ++i)
+                acc += init_->initialize_state(SingleParticle<T>(i, part));
             accept_ = acc;
         }
 
@@ -233,23 +232,17 @@ class MoveTBB : public MoveBase<T, Derived>
 
         void operator() (const tbb::blocked_range<size_type> &range)
         {
+            Particle<T> *const part = particle_;
+            const std::size_t iter = iter_;
             std::size_t acc = accept_;
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                acc += move_->move_state(iter_,
-                        SingleParticle<T>(i, particle_));
-            }
+            for (size_type i = range.begin(); i != range.end(); ++i)
+                acc += move_->move_state(iter, SingleParticle<T>(i, part));
             accept_ = acc;
         }
 
-        void join (const work_ &other)
-        {
-            accept_ += other.accept_;
-        }
+        void join (const work_ &other) {accept_ += other.accept_;}
 
-        std::size_t accept () const
-        {
-            return accept_;
-        }
+        std::size_t accept () const {return accept_;}
 
         private :
 
@@ -299,9 +292,14 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
+            const Particle<T> *const part = particle_;
+            const std::size_t iter = iter_;
+            const std::size_t dim = dim_;
+            double *const res = res_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                monitor_->monitor_state(iter_, dim_,
-                        ConstSingleParticle<T>(i, particle_), res_ + i * dim_);
+                double *const r = res + i * dim;
+                monitor_->monitor_state(iter, dim,
+                        ConstSingleParticle<T>(i, part), r);
             }
         }
 
@@ -354,9 +352,12 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
         void operator() (const tbb::blocked_range<size_type> &range) const
         {
+            const Particle<T> *const part = particle_;
+            const std::size_t iter = iter_;
+            double *const res = res_;
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                res_[i] = path_->path_state(iter_,
-                        ConstSingleParticle<T>(i, particle_));
+                res[i] = path_->path_state(iter,
+                        ConstSingleParticle<T>(i, part));
             }
         }
 
