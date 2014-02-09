@@ -104,7 +104,7 @@ class DispatchFunction
 /// vsmc::DispatchQueue<vsmc::DispatchGlobal> queue;
 /// vsmc::DispatchGroup group;
 /// auto work = vsmc::dispatch_funciton_new([] { /* do work */ })
-/// group.async(queue, work->context(), work->function());
+/// group.async_f(queue, work->context(), work->function());
 /// // some where perhaps far away
 /// group.wait(DISPATCH_TIME_FOREVER); // wait for work be done
 /// delete work;
