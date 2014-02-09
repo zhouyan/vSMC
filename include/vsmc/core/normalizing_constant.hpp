@@ -3,10 +3,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#if VSMC_USE_MKL
-#include <mkl_vml.h>
-#endif
-
 namespace vsmc {
 
 /// \brief Calcualting normalizing constant ratio
@@ -78,12 +74,8 @@ class NormalizingConstant
     {
         using std::exp;
 
-#if VSMC_USE_MKL
-        ::vdExp(static_cast<MKL_INT>(N), inc_weight, inc_weight);
-#else
         for (std::size_t i = 0; i != N; ++i)
             inc_weight[i] = exp(inc_weight[i]);
-#endif
     }
 
     virtual double inc_zconst (std::size_t N,

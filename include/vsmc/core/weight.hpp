@@ -3,10 +3,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#if VSMC_USE_MKL
-#include <mkl_vml.h>
-#endif
-
 #define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_IN(diff, size, func) \
     VSMC_RUNTIME_ASSERT((std::abs(diff) >= static_cast<std::ptrdiff_t>(size)),\
             ("THE DESTINATION OF **"#func"** OVERLAPPING WITH THE SOURCE"))
@@ -354,12 +350,8 @@ class WeightSet
 
         double *const wptr = weight_ptr();
         const double *const lptr = log_weight_ptr();
-#if VSMC_USE_MKL
-        ::vdExp(static_cast<MKL_INT>(size_), lptr, wptr);
-#else
         for (size_type i = 0; i != size_; ++i)
             wptr[i] = exp(lptr[i]);
-#endif
     }
 
     virtual void weight2log_weight ()
@@ -368,12 +360,8 @@ class WeightSet
 
         const double *const wptr = weight_ptr();
         double *const lptr = log_weight_ptr();
-#if VSMC_USE_MKL
-        ::vdLn(static_cast<MKL_INT>(size_), wptr, lptr);
-#else
         for (size_type i = 0; i != size_; ++i)
             lptr[i] = log(wptr[i]);
-#endif
     }
 
     virtual void normalize_log_weight ()
@@ -417,12 +405,8 @@ class WeightSet
         const double *const wptr = weight_ptr();
 
         if (use_log) {
-#if VSMC_USE_MKL
-            ::vdExp(static_cast<MKL_INT>(size_), bptr, bptr);
-#else
             for (size_type i = 0; i != size_; ++i)
                 bptr[i] = exp(bptr[i]);
-#endif
         }
 
         for (size_type i = 0; i != size_; ++i)
@@ -457,12 +441,8 @@ class WeightSet
         const double *const wptr = weight_ptr();
 
         if (use_log) {
-#if VSMC_USE_MKL
-            ::vdExp(static_cast<MKL_INT>(size_), bptr, bptr);
-#else
             for (size_type i = 0; i != size_; ++i)
                 bptr[i] = exp(bptr[i]);
-#endif
         }
 
         double above = 0;

@@ -56,29 +56,6 @@
 #define VSMC_FP_TYPE_IS_DOUBLE 1
 #endif
 
-/// \brief Use Intel MKL for BLAS level 2, level 3 and other computations
-/// \ingroup Config
-#ifndef VSMC_USE_MKL
-#define VSMC_USE_MKL 0
-#endif
-
-/// \brief Use Apple vecLib for BLAS level 2 and level 3 computations
-/// \ingroup Config
-#ifndef VSMC_USE_VECLIB
-#define VSMC_USE_VECLIB 0
-#endif
-
-/// \brief Use generic CBLAS for BLAS level 2 and level 3 computations
-/// \ingroup Config
-///
-/// \details
-/// User has to include CLBAS header first
-///
-/// Use `VSMC_GENERIC_CBLAS_INT` to define the CBLAS integer type
-#ifndef VSMC_USE_GENERIC_CBLAS
-#define VSMC_USE_GENERIC_CBLAS 0
-#endif
-
 /// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fail
 /// \ingroup Config
 #ifndef VSMC_HAS_NATIVE_TIME_LIBRARY

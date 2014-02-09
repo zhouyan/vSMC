@@ -3,28 +3,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#undef VSMC_USE_CBLAS
-#undef VSMC_INTEGRATE_INT
-
-#if VSMC_USE_MKL // MKL
-#include <mkl_cblas.h>
-#define VSMC_USE_CBLAS 1
-#define VSMC_INTEGRATE_INT MKL_INT
-#elif VSMC_USE_VECLIB // vecLib
-#include <vecLib/cblas.h>
-#define VSMC_USE_CBLAS 1
-#define VSMC_INTEGRATE_INT int
-#elif VSMC_USE_GENERIC_CBLAS // Generic CBlas
-#define VSMC_USE_CBLAS 1
-#ifdef VSMC_GENERIC_CBLAS_INT
-#define VSMC_INTEGRATE_INT VSMC_GENERIC_CBLAS_INT
-#else
-#define VSMC_INTEGRATE_INT int
-#endif
-#else // No known CBlas
-#define VSMC_INTEGRATE_INT std::size_t
-#endif
-
 namespace vsmc {
 
 /// \brief Compute the importance sampling integration of multivariate variable
@@ -33,7 +11,7 @@ class ISIntegrate
 {
     public :
 
-    typedef VSMC_INTEGRATE_INT size_type;
+    typedef std::size_t size_type;
 
     /// \brief Compute the importance sampling integration
     ///
@@ -46,12 +24,8 @@ class ISIntegrate
     void operator() (size_type N, size_type dim,
             const double *hX, const double *W, double *Eh) const
     {
-        if (N == 0)
+        if (N == 0 || dim == 0)
             return;
-#if VSMC_USE_CBLAS
-        cblas_dgemv(CblasColMajor, CblasNoTrans,
-                dim, N, 1, hX, dim, W, 1, 0, Eh, 1);
-#else
         for (size_type d = 0; d != dim; ++d)
             Eh[d] = 0;
         for (size_type i = 0; i != N; ++i) {
@@ -59,7 +33,6 @@ class ISIntegrate
             for (size_type d = 0; d != dim; ++d)
                 Eh[d] += w * hX[i * dim + d];
         }
-#endif
     }
 
     private :

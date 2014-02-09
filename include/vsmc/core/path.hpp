@@ -4,10 +4,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/integrate/nintegrate_newton_cotes.hpp>
 
-#if VSMC_USE_MKL
-#include <mkl_vml.h>
-#endif
-
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func) \
     VSMC_RUNTIME_ASSERT((iter >= 0 && iter < this->iter_size()),             \
             ("**Path::"#func"** INVALID ITERATION NUMBER ARGUMENT"))
@@ -441,12 +437,8 @@ class PathGeometry : public Path<T>
 
             for (std::size_t i = 0; i != size; ++i)
                 weight_[i] = alpha_inc * integrand_history_[iter][i];
-#if VSMC_USE_MKL
-            ::vdExp(static_cast<MKL_INT>(size), &weight_[0], &weight_[0]);
-#else
             for (std::size_t i = 0; i != size; ++i)
                 weight_[i] = exp(weight_[i]);
-#endif
             for (std::size_t i = 0; i != size; ++i)
                 weight_[i] = weight_history_[iter][i] * weight_[i];
             weight_set_.set_weight(&weight_[0]);

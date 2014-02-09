@@ -5,10 +5,6 @@
 #include <vsmc/core/weight.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
 
-#if VSMC_USE_MKL
-#include <mkl_vml.h>
-#endif
-
 namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype using MPI
@@ -178,12 +174,8 @@ class WeightSetMPI : public WeightSet
         std::memcpy(bptr, first, sizeof(double) * N);
 
         if (use_log) {
-#if VSMC_USE_MKL
-            ::vdExp(static_cast<MKL_INT>(N), bptr, bptr);
-#else
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = exp(bptr[i]);
-#endif
         }
 
         double lcoeff = 0;
@@ -225,12 +217,8 @@ class WeightSetMPI : public WeightSet
         std::memcpy(bptr, first, sizeof(double) * N);
 
         if (use_log) {
-#if VSMC_USE_MKL
-            ::vdExp(static_cast<MKL_INT>(N), bptr, bptr);
-#else
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = exp(bptr[i]);
-#endif
         }
 
         double labove = 0;
