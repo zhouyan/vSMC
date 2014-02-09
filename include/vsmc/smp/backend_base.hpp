@@ -5,17 +5,6 @@
 #include <vsmc/core/weight.hpp>
 #include <vsmc/core/normalizing_constant.hpp>
 
-#define VSMC_DEFINE_SMP_IMPL_COPY(Impl, Name) \
-Name##Impl () {}                                                             \
-Name##Impl (const Name##Impl<T, Derived> &other) :                           \
-        Name##Base<T, Derived>(other) {}                                     \
-Name##Impl<T, Derived> &operator= (const Name##Impl<T, Derived> &other)      \
-{                                                                            \
-    Name##Base<T, Derived>::operator=(other);                                \
-    return *this;                                                            \
-}                                                                            \
-~Name##Impl () {}
-
 #define VSMC_DEFINE_SMP_BASE_COPY(Name) \
 Name##Base () {}                                                             \
 Name##Base (const Name##Base<T, Derived> &) {}                               \
@@ -29,6 +18,19 @@ Name##Base (const Name##Base<T, Virtual> &) {}                               \
 Name##Base<T, Virtual> &operator= (const Name##Base<T, Virtual> &)           \
 {return *this;}                                                              \
 virtual ~Name##Base () {}
+
+#define VSMC_DEFINE_SMP_IMPL_COPY(Impl, Name) \
+Name##Impl () {}                                                             \
+Name##Impl (const Name##Impl<T, Derived> &other) :                           \
+        Name##Base<T, Derived>(other) {}                                     \
+Name##Impl<T, Derived> &operator= (const Name##Impl<T, Derived> &other)      \
+{                                                                            \
+    if (this != &other)                                                      \
+        Name##Base<T, Derived>::operator=(other);                            \
+                                                                             \
+    return *this;                                                            \
+}                                                                            \
+~Name##Impl () {}
 
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                     \

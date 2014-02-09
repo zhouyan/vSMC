@@ -437,10 +437,12 @@ class InitializeCL
 
     InitializeCL<T> &operator= (const InitializeCL<T> &other)
     {
-        configure_   = other.configure_;
-        build_id_    = other.build_id_;
-        kernel_      = other.kernel_;
-        kernel_name_ = other.kernel_name_;
+        if (this != &other) {
+            configure_   = other.configure_;
+            build_id_    = other.build_id_;
+            kernel_      = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+        }
 
         return *this;
     }
@@ -548,10 +550,12 @@ class MoveCL
 
     MoveCL<T> &operator= (const MoveCL<T> &other)
     {
-        configure_   = other.configure_;
-        build_id_    = other.build_id_;
-        kernel_      = other.kernel_;
-        kernel_name_ = other.kernel_name_;
+        if (this != &other) {
+            configure_   = other.configure_;
+            build_id_    = other.build_id_;
+            kernel_      = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+        }
 
         return *this;
     }
@@ -657,10 +661,12 @@ class MonitorEvalCL
 
     MonitorEvalCL<T> &operator= (const MonitorEvalCL<T> &other)
     {
-        configure_   = other.configure_;
-        build_id_    = other.build_id_;
-        kernel_      = other.kernel_;
-        kernel_name_ = other.kernel_name_;
+        if (this != &other) {
+            configure_   = other.configure_;
+            build_id_    = other.build_id_;
+            kernel_      = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+        }
 
         return *this;
     }
@@ -771,10 +777,12 @@ class PathEvalCL
 
     PathEvalCL<T> &operator= (const PathEvalCL<T> &other)
     {
-        configure_   = other.configure_;
-        build_id_    = other.build_id_;
-        kernel_      = other.kernel_;
-        kernel_name_ = other.kernel_name_;
+        if (this != &other) {
+            configure_   = other.configure_;
+            build_id_    = other.build_id_;
+            kernel_      = other.kernel_;
+            kernel_name_ = other.kernel_name_;
+        }
 
         return *this;
     }
