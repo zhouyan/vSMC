@@ -118,7 +118,11 @@ VSMC_STATIC_INLINE double u01_open_open_64_53 (uint64_t i)
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_closed_32_53 (uint32_t i)
 {
+#ifdef __cplusplus
+    return (static_cast<double>(i&1) + i) * VSMC_0x1p_32;
+#else
     return (((double)(i&1)) + i) * VSMC_0x1p_32;
+#endif
 }
 
 /// \ingroup RNG

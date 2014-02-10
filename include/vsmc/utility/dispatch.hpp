@@ -77,7 +77,7 @@ class DispatchFunction
     }
 #endif
 
-    void *context () {return (void *) this;}
+    void *context () {return static_cast<void *>(this);}
 
     dispatch_function_t function () const {return function_;}
 
@@ -139,23 +139,42 @@ class DispatchObject
     ///
     /// \details
     /// The original object will be retained by this object
-    explicit DispatchObject (DispatchType object) : object_(object)
-    {dispatch_retain(object);}
-
-    DispatchObject (const DispatchObject &other) : object_(other.object_)
-    {dispatch_retain(object_);}
-
-    DispatchObject &operator= (const DispatchObject &other)
+    explicit DispatchObject (const DispatchType &object) : object_(object)
     {
-        if (this != &other) {
-            object_ = other.object_;
+        if (object_ != NULL)
+            dispatch_retain(object);
+    }
+
+    DispatchObject (const DispatchObject<DispatchType> &other) :
+        object_(other.object_)
+    {
+        if (object_ != NULL)
             dispatch_retain(object_);
-        }
+    }
+
+    DispatchObject<DispatchType> &operator= (
+            const DispatchObject<DispatchType> &other)
+    {
+        if (this == &other)
+            return *this;
+
+        if (object_ == other.object_)
+            return *this;
+
+        if (object_ != NULL)
+            dispatch_release(object_);
+        object_ = other.object_;
+        if (object_ != NULL)
+            dispatch_retain(object_);
 
         return *this;
     }
 
-    ~DispatchObject () {dispatch_release(object_);}
+    ~DispatchObject ()
+    {
+        if (object_ != NULL)
+            dispatch_release(object_);
+    }
 
     /// \brief Return the underlying Dispatch object
     DispatchType get () const {return object_;}
@@ -306,20 +325,29 @@ class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
         DispatchQueueBase(dispatch_queue_create(name, attr)) {}
 
     DispatchQueue (const DispatchQueue<DispatchPrivate> &other) :
-        DispatchQueueBase(other) {dispatch_retain(this->get());}
+        DispatchQueueBase(other)
+    {
+        if (this->get() != NULL)
+            dispatch_retain(this->get());
+    }
 
     DispatchQueue<DispatchPrivate> &operator= (
             const DispatchQueue<DispatchPrivate> &other)
     {
         if (this != &other) {
             DispatchQueueBase::operator=(other);
-            dispatch_retain(this->get());
+            if (this->get() != NULL)
+                dispatch_retain(this->get());
         }
 
         return *this;
     }
 
-    ~DispatchQueue () {dispatch_release(this->get());}
+    ~DispatchQueue ()
+    {
+        if (this->get() != NULL)
+            dispatch_release(this->get());
+    }
 }; // class DispatchQueue
 
 /// \brief A Dispatch group
@@ -332,19 +360,28 @@ class DispatchGroup : public DispatchObject<dispatch_group_t>
         DispatchObject<dispatch_group_t>(dispatch_group_create()) {}
 
     DispatchGroup (const DispatchGroup &other) :
-        DispatchObject<dispatch_group_t>(other) {dispatch_retain(this->get());}
+        DispatchObject<dispatch_group_t>(other)
+    {
+        if (this->get() != NULL)
+            dispatch_retain(this->get());
+    }
 
     DispatchGroup &operator= (const DispatchGroup &other)
     {
         if (this != &other) {
             DispatchObject<dispatch_group_t>::operator=(other);
-            dispatch_retain(this->get());
+            if (this->get() != NULL)
+                dispatch_retain(this->get());
         }
 
         return *this;
     }
 
-    ~DispatchGroup () {dispatch_release(this->get());}
+    ~DispatchGroup ()
+    {
+        if (this->get() != NULL)
+            dispatch_release(this->get());
+    }
 
     void enter () const {dispatch_group_enter(this->get());}
 
@@ -458,19 +495,29 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 
     DispatchSourceBase (const DispatchSourceBase &other) :
         DispatchObject<dispatch_source_t>(other)
-    {dispatch_retain(this->get());}
+    {
+        if (this->get() != NULL)
+            dispatch_retain(this->get());
+    }
 
     DispatchSourceBase &operator= (const DispatchSourceBase &other)
     {
         if (this != &other) {
             DispatchObject<dispatch_source_t>::operator=(other);
-            dispatch_retain(this->get());
+            if (this->get() != NULL)
+                dispatch_retain(this->get());
         }
 
         return *this;
     }
 
-    ~DispatchSourceBase () {if (!testcancel()) dispatch_release(this->get());}
+    ~DispatchSourceBase ()
+    {
+        if (testcancel())
+            this->set(NULL);
+        else if (this->get() != NULL)
+            dispatch_release(this->get());
+    }
 
     private :
 
@@ -654,7 +701,7 @@ class DispatchProgress
         elapsed_second_ = 1000000;
         iter_ = total_;
 
-        timer_.set_context((void *) this);
+        timer_.set_context(static_cast<void *>(this));
         timer_.set_event_handler_f(print_start);
         timer_.set_timer(DISPATCH_TIME_NOW,
                 NSEC_PER_SEC / 10, NSEC_PER_SEC / 10);
@@ -668,7 +715,7 @@ class DispatchProgress
     void stop ()
     {
         timer_.suspend();
-        queue_.sync_f((void *) this, print_stop);
+        queue_.sync_f(static_cast<void *>(this), print_stop);
         watch_.stop();
     }
 

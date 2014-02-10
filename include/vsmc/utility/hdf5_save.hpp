@@ -421,7 +421,8 @@ inline void hdf5_save_data_frame (std::size_t nrow,
     vnames.set(dim, sfirst);
     const std::string *sptr = vnames.get() + dim;
     hdf5_save_data_frame<int>(0, 0, file_name, data_name,
-            (int **) VSMC_NULLPTR, (std::string *) VSMC_NULLPTR, append);
+            static_cast<int **>(VSMC_NULLPTR),
+            static_cast<std::string *>(VSMC_NULLPTR), append);
     internal::hdf5_insert_data_frame_tuple(nrow, file_name, data_name, first,
             --sptr, Position<dim - 1>());
 }

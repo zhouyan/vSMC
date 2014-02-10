@@ -30,12 +30,14 @@ class StateMPI : public BaseState
         copy_tag_(boost::mpi::environment::max_tag())
     {
         boost::mpi::all_gather(world_, N, size_all_);
-        for (int i = 0; i != world_.rank(); ++i) {
+        const std::size_t R = static_cast<std::size_t>(world_.rank());
+        const std::size_t S = static_cast<std::size_t>(world_.size());
+        for (std::size_t i = 0; i != R; ++i) {
             offset_ += size_all_[i];
             global_size_ += size_all_[i];
             size_equal_ = size_equal_ && N == size_all_[i];
         }
-        for (int i = world_.rank(); i != world_.size(); ++i) {
+        for (std::size_t i = R; i != S; ++i) {
             global_size_ += size_all_[i];
             size_equal_ = size_equal_ && N == size_all_[i];
         }
@@ -134,7 +136,7 @@ class StateMPI : public BaseState
     int rank (size_type global_id) const
     {
         if (size_equal_)
-            return global_id / this->size();
+            return static_cast<int>(global_id / this->size());
 
         std::size_t r = 0;
         size_type g = size_all_[0];
@@ -154,8 +156,10 @@ class StateMPI : public BaseState
     /// (possibly not on this node, use `rank` to get the rank of its node)
     size_type local_id (size_type global_id) const
     {
-        if (size_equal_)
-            return global_id - this->size() * rank(global_id);
+        if (size_equal_) {
+            return global_id -
+                this->size() * static_cast<size_type>(rank(global_id));
+        }
 
         std::size_t r = 0;
         size_type g = size_all_[0];
@@ -212,7 +216,8 @@ class StateMPI : public BaseState
 
         copy_from_this_.resize(this->size());
         InputIter first = copy_from_first;
-        advance(first, offset_);
+        advance(first, static_cast<typename std::iterator_traits<InputIter>::
+                difference_type>(offset_));
         for (size_type to = 0; to != this->size(); ++to, ++first) {
             size_type from = *first;
             copy_from_this_[to] =

@@ -29,7 +29,7 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 
         const size_type N = static_cast<size_type>(this->size());
         work_param_ wp(this->weight_ptr(), this->log_weight_ptr());
-        queue_.apply_f(N, (void *) &wp, log_weight2weight_);
+        queue_.apply_f(N, static_cast<void *>(&wp), log_weight2weight_);
     }
 
     void weight2log_weight ()
@@ -38,7 +38,7 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 
         const size_type N = static_cast<size_type>(this->size());
         work_param_ wp(this->weight_ptr(), this->log_weight_ptr());
-        queue_.apply_f(N, (void *) &wp, weight2log_weight_);
+        queue_.apply_f(N, static_cast<void *>(&wp), weight2log_weight_);
     }
 
     private :
@@ -83,7 +83,7 @@ class NormalizingConstantGCD : public NormalizingConstant
     protected:
 
     void vd_exp (std::size_t N, double *inc_weight) const
-    {queue_.apply_f(N, (void *) inc_weight, vd_exp_);}
+    {queue_.apply_f(N, static_cast<void *>(inc_weight), vd_exp_);}
 
     private :
 
@@ -125,7 +125,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
         this->pre_processor(particle);
         accept_.resize(N);
         work_param_ wp(this, &particle, &accept_[0]);
-        queue_.apply_f(N, (void *) &wp, work_);
+        queue_.apply_f(N, static_cast<void *>(&wp), work_);
         this->post_processor(particle);
 
         std::size_t acc = 0;
@@ -179,7 +179,7 @@ class MoveGCD : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         accept_.resize(N);
         work_param_ wp(this, &particle, &accept_[0], iter);
-        queue_.apply_f(N, (void *) &wp, work_);
+        queue_.apply_f(N, static_cast<void *>(&wp), work_);
         this->post_processor(iter, particle);
 
         std::size_t acc = 0;
@@ -234,7 +234,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_param_ wp(this, &particle, res, iter, dim);
-        queue_.apply_f(N, (void *) &wp, work_);
+        queue_.apply_f(N, static_cast<void *>(&wp), work_);
         this->post_processor(iter, particle);
     }
 
@@ -285,7 +285,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_param_ wp(this, &particle, res, iter);
-        queue_.apply_f(N, (void *) &wp, work_);
+        queue_.apply_f(N, static_cast<void *>(&wp), work_);
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);

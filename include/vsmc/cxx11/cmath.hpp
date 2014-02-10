@@ -19,12 +19,6 @@ using std::erf;
 using std::erfc;
 using std::lgamma;
 using std::tgamma;
-using std::fpclassify;
-using std::isfinite;
-using std::isinf;
-using std::isnan;
-using std::isnormal;
-using std::signbit;
 } }
 #elif VSMC_HAS_C99LIB_MATH
 #include <math.h>
@@ -35,13 +29,6 @@ inline double      (name) (double      x) {return ::name(x);}                \
 inline long double (name) (long double x) {return ::name##l(x);}             \
 template <typename T> inline double (name) (T x)                             \
 {return ::name(static_cast<double>(x));}
-
-#define VSMC_DEFINE_C99_MATH_FPCLASSIFY(RT, name) \
-inline RT (name) (float       x) {return name(x);}                           \
-inline RT (name) (double      x) {return name(x);}                           \
-inline RT (name) (long double x) {return name(x);}                           \
-template <typename T> inline RT (name) (T x)                                 \
-{return name(static_cast<double>(x));}
 
 namespace vsmc { namespace cxx11 {
 inline float       (hypot) (float       x, float       y) {return ::hypotf(x, y);}
@@ -67,12 +54,6 @@ VSMC_DEFINE_C99_MATH_SPECIAL(erf)
 VSMC_DEFINE_C99_MATH_SPECIAL(erfc)
 VSMC_DEFINE_C99_MATH_SPECIAL(lgamma)
 VSMC_DEFINE_C99_MATH_SPECIAL(tgamma)
-VSMC_DEFINE_C99_MATH_FPCLASSIFY(int, fpclassify)
-VSMC_DEFINE_C99_MATH_FPCLASSIFY(bool, isfinite)
-VSMC_DEFINE_C99_MATH_FPCLASSIFY(bool, isinf)
-VSMC_DEFINE_C99_MATH_FPCLASSIFY(bool, isnan)
-VSMC_DEFINE_C99_MATH_FPCLASSIFY(bool, isnormal)
-VSMC_DEFINE_C99_MATH_FPCLASSIFY(bool, signbit)
 } }
 #else // VSMC_HAS_CXX11LIB_CMATH
 #include <boost/math/special_functions/expm1.hpp>
@@ -84,8 +65,6 @@ VSMC_DEFINE_C99_MATH_FPCLASSIFY(bool, signbit)
 #include <boost/math/special_functions/atanh.hpp>
 #include <boost/math/special_functions/erf.hpp>
 #include <boost/math/special_functions/gamma.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <boost/math/special_functions/sign.hpp>
 
 namespace vsmc {namespace cxx11 {
 
@@ -118,12 +97,6 @@ using boost::math::erf;
 using boost::math::erfc;
 using boost::math::lgamma;
 using boost::math::tgamma;
-using boost::math::fpclassify;
-using boost::math::isfinite;
-using boost::math::isinf;
-using boost::math::isnan;
-using boost::math::isnormal;
-using boost::math::signbit;
 } }
 #endif // VSMC_HAS_CXX11LIB_CMATH
 

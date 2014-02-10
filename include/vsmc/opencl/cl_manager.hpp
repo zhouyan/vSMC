@@ -256,7 +256,8 @@ class CLManager
             program.getBuildInfo(*diter, CL_PROGRAM_BUILD_STATUS, &status);
             if (status != CL_BUILD_SUCCESS) {
                 program.getBuildInfo(device_, CL_PROGRAM_BUILD_LOG, &log);
-                diter->getInfo((cl_device_info) CL_DEVICE_NAME, &dname);
+                diter->getInfo(static_cast<cl_device_info>(CL_DEVICE_NAME),
+                        &dname);
                 os << line << "Build failed for : " << dname << std::endl;
                 os << line << log << std::endl << line << std::endl;
             }
@@ -306,7 +307,7 @@ class CLManager
         CLType *temp = read_buffer_pool<CLType>(num);
         command_queue_.finish();
         command_queue_.enqueueReadBuffer(buf, CL_TRUE, 0,
-                sizeof(CLType) * num, (void *) temp);
+                sizeof(CLType) * num, static_cast<void *>(temp));
 
         for (std::size_t i = 0; i != num; ++i, ++first)
             *first = temp[i];
@@ -324,7 +325,7 @@ class CLManager
 
         command_queue_.finish();
         command_queue_.enqueueReadBuffer(buf, CL_TRUE, 0,
-                sizeof(CLType) * num, (void *) first);
+                sizeof(CLType) * num, static_cast<void *>(first));
 
         return first + num;
     }
@@ -342,7 +343,7 @@ class CLManager
             temp[i] = *first;
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, 0,
-                sizeof(CLType) * num, (void *) temp);
+                sizeof(CLType) * num, static_cast<void *>(temp));
 
         return first;
     }
@@ -357,7 +358,8 @@ class CLManager
 
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, 0,
-                sizeof(CLType) * num, (void *) first);
+                sizeof(CLType) * num,
+                static_cast<void *>(const_cast<CLType *>(first)));
 
         return first + num;
     }
@@ -372,7 +374,7 @@ class CLManager
 
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, 0,
-                sizeof(CLType) * num, (void *) first);
+                sizeof(CLType) * num, static_cast<void *>(first));
 
         return first + num;
     }
@@ -467,8 +469,8 @@ class CLManager
             device_filter(dev_pool, dev_select);
             if (dev_select.size() != 0) {
                 cl_context_properties context_properties[] = {
-                    CL_CONTEXT_PLATFORM,
-                    (cl_context_properties)(platform_)(), 0
+                    static_cast<cl_context_properties>(CL_CONTEXT_PLATFORM),
+                    reinterpret_cast<cl_context_properties>(platform_()), 0
                 };
                 context_ = cl::Context(dev_select, context_properties);
                 setup_context = true;
