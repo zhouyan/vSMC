@@ -112,7 +112,7 @@ class DispatchFunction
 ///
 /// \param work A callable object with signature `void f(void)`
 template <typename T>
-DispatchFunction<
+inline DispatchFunction<
 typename cxx11::remove_cv<typename cxx11::remove_reference<T>::type>::type>
 *dispatch_function_new (T &&work) VSMC_NOEXCEPT
 {
@@ -122,7 +122,7 @@ typename cxx11::remove_cv<typename cxx11::remove_reference<T>::type>::type>
 }
 #else
 template <typename T>
-DispatchFunction<T> *dispatch_function_new (const T &work)
+inline DispatchFunction<T> *dispatch_function_new (const T &work)
 {return new DispatchFunction<T>(work);}
 #endif
 

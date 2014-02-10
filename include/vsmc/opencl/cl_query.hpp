@@ -386,7 +386,7 @@ inline std::basic_ostream<CharT, Traits> &operator<< (
 /// \brief Print information a given device
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
-std::basic_ostream<CharT, Traits> &operator<< (
+inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Device &dev)
 {vsmc::CLQuery::print(os, dev); return os;}
 

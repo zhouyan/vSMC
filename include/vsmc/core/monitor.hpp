@@ -5,11 +5,11 @@
 #include <vsmc/integrate/is_integrate.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func) \
-    VSMC_RUNTIME_ASSERT((id >= 0 && id < this->dim()),                       \
+    VSMC_RUNTIME_ASSERT((id < this->dim()),                                  \
             ("**Monitor::"#func"** INVALID ID NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(func) \
-    VSMC_RUNTIME_ASSERT((iter >= 0 && iter < this->iter_size()),             \
+    VSMC_RUNTIME_ASSERT((iter < this->iter_size()),                          \
             ("**Monitor::"#func"** INVALID ITERATION NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(func, caller, name) \

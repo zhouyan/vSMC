@@ -28,7 +28,7 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
         using std::exp;
 
         const size_type N = static_cast<size_type>(this->size());
-        work_param_ wp = {this->weight_ptr(), this->log_weight_ptr()};
+        work_param_ wp(this->weight_ptr(), this->log_weight_ptr());
         queue_.apply_f(N, (void *) &wp, log_weight2weight_);
     }
 
@@ -37,7 +37,7 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
         using std::log;
 
         const size_type N = static_cast<size_type>(this->size());
-        work_param_ wp = {this->weight_ptr(), this->log_weight_ptr()};
+        work_param_ wp(this->weight_ptr(), this->log_weight_ptr());
         queue_.apply_f(N, (void *) &wp, weight2log_weight_);
     }
 
@@ -47,6 +47,9 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
 
     struct work_param_
     {
+        work_param_ (double *wptr, double *lwptr) :
+            weight(wptr), log_weight(lwptr) {}
+
         double *const weight;
         double *const log_weight;
     };
@@ -121,7 +124,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         accept_.resize(N);
-        work_param_ wp = {this, &particle, &accept_[0]};
+        work_param_ wp(this, &particle, &accept_[0]);
         queue_.apply_f(N, (void *) &wp, work_);
         this->post_processor(particle);
 
@@ -143,6 +146,10 @@ class InitializeGCD : public InitializeBase<T, Derived>
 
     struct work_param_
     {
+        work_param_ (InitializeGCD<T, Derived> *dptr, Particle<T> *pptr,
+                std::size_t *aptr) :
+            dispatcher(dptr), particle(pptr), accept(aptr) {}
+
         InitializeGCD<T, Derived> *const dispatcher;
         Particle<T> *const particle;
         std::size_t *const accept;
@@ -171,7 +178,7 @@ class MoveGCD : public MoveBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         accept_.resize(N);
-        work_param_ wp = {this, &particle, &accept_[0], iter};
+        work_param_ wp(this, &particle, &accept_[0], iter);
         queue_.apply_f(N, (void *) &wp, work_);
         this->post_processor(iter, particle);
 
@@ -193,6 +200,10 @@ class MoveGCD : public MoveBase<T, Derived>
 
     struct work_param_
     {
+        work_param_ (MoveGCD<T, Derived> *dptr, Particle<T> *pptr,
+                std::size_t *aptr, std::size_t i) :
+            dispatcher(dptr), particle(pptr), accept(aptr), iter(i) {}
+
         MoveGCD<T, Derived> *const dispatcher;
         Particle<T> *const particle;
         std::size_t *const accept;
@@ -222,7 +233,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        work_param_ wp = {this, &particle, res, iter, dim};
+        work_param_ wp(this, &particle, res, iter, dim);
         queue_.apply_f(N, (void *) &wp, work_);
         this->post_processor(iter, particle);
     }
@@ -237,6 +248,10 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 
     struct work_param_
     {
+        work_param_ (MonitorEvalGCD<T, Derived> *dptr, const Particle<T> *pptr,
+                double *rptr, std::size_t i, std::size_t d) :
+            dispatcher(dptr), particle(pptr), res(rptr), iter(i), dim(d) {}
+
         MonitorEvalGCD<T, Derived> *const dispatcher;
         const Particle<T> *const particle;
         double *const res;
@@ -269,7 +284,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        work_param_ wp = {this, &particle, res, iter};
+        work_param_ wp(this, &particle, res, iter);
         queue_.apply_f(N, (void *) &wp, work_);
         this->post_processor(iter, particle);
 
@@ -286,6 +301,10 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
 
     struct work_param_
     {
+        work_param_ (PathEvalGCD<T, Derived> *dptr, const Particle<T> *pptr,
+                double *rptr, std::size_t i) :
+            dispatcher(dptr), particle(pptr), res(rptr), iter(i) {}
+
         PathEvalGCD<T, Derived> *const dispatcher;
         const Particle<T> *const particle;
         double *const res;

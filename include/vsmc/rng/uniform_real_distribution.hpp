@@ -4,8 +4,8 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/u01.h>
 
-#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min) \
-    VSMC_RUNTIME_ASSERT((eng_min == 0),                                      \
+#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN \
+    VSMC_RUNTIME_ASSERT(false,                                               \
             ("**vsmc::UniformRealDistribution::operator()** "                \
              "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN ZERO"))
 
@@ -159,11 +159,16 @@ class UniformRealDistribution
 #else // VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
         static VSMC_CONSTEXPR const uint64_t eng_min = static_cast<uint64_t>(
                 eng.min VSMC_MACRO_NO_EXPANSION ());
-        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min);
+        if (eng_min != 0) {
+            VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN;
+            return 0;
+        }
 
-        result_type u = 0;
         static VSMC_CONSTEXPR const uint64_t eng_max = static_cast<uint64_t>(
                 eng.max VSMC_MACRO_NO_EXPANSION ());
+        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX;
+
+        result_type u = 0;
         switch (eng_max) {
             case uint32_t_max_ :
                 u = u01(static_cast<uint32_t>(eng()), Left(), Right(),
@@ -174,7 +179,7 @@ class UniformRealDistribution
                         u64(), fp_bits());
                 break;
             default :
-                VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX;
+                return 0;
         }
 #endif // VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
 

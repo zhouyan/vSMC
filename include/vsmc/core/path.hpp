@@ -5,7 +5,7 @@
 #include <vsmc/integrate/nintegrate_newton_cotes.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func) \
-    VSMC_RUNTIME_ASSERT((iter >= 0 && iter < this->iter_size()),             \
+    VSMC_RUNTIME_ASSERT((iter < this->iter_size()),                          \
             ("**Path::"#func"** INVALID ITERATION NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(func, caller, name) \

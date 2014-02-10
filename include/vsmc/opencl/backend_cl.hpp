@@ -327,7 +327,7 @@ class StateCL
         kernel_copy_.setArg(0, state_buffer_);
         kernel_copy_.setArg(1, copy_from_buffer_);
         manager().run_kernel(
-                kernel_copy_, size_, configure_copy_.local_size());
+                kernel_copy_, N, configure_copy_.local_size());
     }
 
     ConfigureCL &configure_copy () {return configure_copy_;}
@@ -392,7 +392,7 @@ class InitializeCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    const static std::size_t kernel_args_offset = 2;
+    static const std::size_t kernel_args_offset = 2;
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
@@ -507,7 +507,7 @@ class MoveCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    const static std::size_t kernel_args_offset = 3;
+    static const std::size_t kernel_args_offset = 3;
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
@@ -622,7 +622,7 @@ class MonitorEvalCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    const static std::size_t kernel_args_offset = 4;
+    static const std::size_t kernel_args_offset = 4;
 
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
@@ -735,7 +735,7 @@ class PathEvalCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    const static std::size_t kernel_args_offset = 3;
+    static const std::size_t kernel_args_offset = 3;
 
     double operator() (std::size_t iter, const Particle<T> &particle,
         double *res)
