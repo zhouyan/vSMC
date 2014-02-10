@@ -61,11 +61,10 @@ class RngSet<RngType, VectorRng>
     typedef RngType rng_type;
     typedef typename std::vector<rng_type>::size_type size_type;
 
-    explicit RngSet (size_type N)
+    explicit RngSet (size_type N) : rng_(N)
     {
-        rng_.reserve(N);
         for (size_type i = 0; i != N; ++i)
-            rng_.push_back(rng_type(Seed::instance().get()));
+            rng_[i].seed(Seed::instance().get());
     }
 
     size_type size () const {return rng_.size();}
