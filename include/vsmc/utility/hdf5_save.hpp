@@ -450,7 +450,7 @@ inline void hdf5_save (const Sampler<T> &sampler,
 
     hdf5_save_data_frame<double>(nrow, ncol, file_name, data_name,
             data_ptr.begin(), header.begin(), append);
-    hdf5_insert_data_frame<int>(ncol, file_name, data_name,
+    hdf5_insert_data_frame<int>(nrow, file_name, data_name,
             resampled.begin(), "Resampled");
 }
 
