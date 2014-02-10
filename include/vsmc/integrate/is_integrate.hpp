@@ -34,10 +34,6 @@ class ISIntegrate
                 Eh[d] += w * hX[i * dim + d];
         }
     }
-
-    private :
-
-    static bool is_align (void *ptr) {return ((unsigned long) ptr & 15) == 0;}
 }; // class ISIntegrate
 
 } // namespace vsmc

@@ -24,6 +24,39 @@ class WeightSet
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
+    WeightSet (const WeightSet &other) :
+        size_(other.size_), ess_(other.ess_),
+        weight_(other.weight_), log_weight_(other.log_weight_) {}
+
+    WeightSet &operator= (const WeightSet &other) {
+        if (this != &other) {
+            size_       = other.size_;
+            ess_        = other.ess_;
+            weight_     = other.weight_;
+            log_weight_ = other.log_weight_;
+        }
+
+        return *this;
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    WeightSet (WeightSet &&other) :
+        size_(other.size_), ess_(other.ess_),
+        weight_(cxx11::move(other.weight_)),
+        log_weight_(cxx11::move(other.log_weight_)) {}
+
+    WeightSet &operator= (WeightSet &&other) {
+        if (this != &other) {
+            size_       = other.size_;
+            ess_        = other.ess_;
+            weight_     = cxx11::move(other.weight_);
+            log_weight_ = cxx11::move(other.log_weight_);
+        }
+
+        return *this;
+    }
+#endif
+
     virtual ~WeightSet () {}
 
     size_type size () const {return size_;}

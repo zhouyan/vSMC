@@ -145,6 +145,22 @@ class StopWatch :
 
     StopWatch (const base_watch_type &other) : base_watch_type(other) {}
 
+    StopWatch &operator= (const StopWatch &other)
+    {
+        if (this != &other)
+            base_watch_type::operator=(other);
+
+        return *this;
+    }
+
+    StopWatch &operator= (const base_watch_type &other)
+    {
+        if (this != &other)
+            base_watch_type::operator=(other);
+
+        return *this;
+    }
+
     double nanoseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<

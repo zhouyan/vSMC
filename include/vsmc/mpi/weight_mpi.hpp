@@ -70,8 +70,10 @@ class WeightSetMPI : public WeightSet
         barrier();
         gather_resample_weight();
         if (world_.rank() == 0) {
-            for (int r = 0; r != world_.size(); ++r) {
-                const size_type N = weight_all_[r].size();
+            const std::size_t S = static_cast<std::size_t>(world_.size());
+            for (std::size_t r = 0; r != S; ++r) {
+                const std::size_t N =
+                    static_cast<std::size_t>(weight_all_[r].size());
                 const double *const wptr = &weight_all_[r][0];
                 VSMC_RUNTIME_ASSERT_CORE_WEIGHT_INVALID_MEMCPY_OUT(
                         first - wptr, N, WeightSetMPI::read_resample_weight);

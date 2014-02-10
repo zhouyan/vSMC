@@ -22,10 +22,12 @@ namespace traits {
 template<uint64_t, uint64_t> struct IntegerRangeTypeTrait;
 
 template<>
-struct IntegerRangeTypeTrait<0, ~((uint32_t)0)> {typedef uint32_t type;};
+struct IntegerRangeTypeTrait<0, ~(static_cast<uint32_t>(0))>
+{typedef uint32_t type;};
 
 template<>
-struct IntegerRangeTypeTrait<0, ~((uint64_t)0)> {typedef uint64_t type;};
+struct IntegerRangeTypeTrait<0, ~(static_cast<uint64_t>(0))>
+{typedef uint64_t type;};
 
 } // namespace vsmc::traits
 
@@ -192,8 +194,10 @@ class UniformRealDistribution
     result_type b_;
 
 #if !VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
-    static VSMC_CONSTEXPR const uint64_t uint32_t_max_ = ~((uint32_t)0);
-    static VSMC_CONSTEXPR const uint64_t uint64_t_max_ = ~((uint64_t)0);
+    static VSMC_CONSTEXPR const uint64_t uint32_t_max_ =
+        ~(static_cast<uint32_t>(0));
+    static VSMC_CONSTEXPR const uint64_t uint64_t_max_ =
+        ~(static_cast<uint64_t>(0));
 #endif
 
     static float u01(uint32_t i, Open, Open, u32, f24)
