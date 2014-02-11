@@ -2,7 +2,7 @@
 #define VSMC_SMP_BACKEND_BASE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/weight.hpp>
+#include <vsmc/core/weight_set.hpp>
 #include <vsmc/core/normalizing_constant.hpp>
 
 #define VSMC_DEFINE_SMP_BASE_COPY(Name) \
