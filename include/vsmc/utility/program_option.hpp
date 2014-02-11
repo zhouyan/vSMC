@@ -211,6 +211,15 @@ class ProgramOptionMap
         return *this;
     }
 
+    ProgramOptionMap &remove (const char *name)
+    {
+        delete option_ptr_[name];
+        option_ptr_.erase(name);
+        option_processed_.erase(name);
+
+        return *this;
+    }
+
     /// \brief Process the options
     ///
     /// \details
