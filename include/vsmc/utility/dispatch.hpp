@@ -679,11 +679,13 @@ class DispatchProgress
 
     /// \brief Construct a DispatchProgress with total amount of work
     DispatchProgress () :
-        total_(0), queue_("DispatchProgress"), timer_(0, 0, queue_),
+        total_(0), offset_(0),
+        queue_("DispatchProgress"), timer_(0, 0, queue_),
         num_equal_(0), percent_(0), elapsed_second_(0), iter_(0) {}
 
     DispatchProgress (const DispatchQueue<DispatchPrivate> &queue) :
-        total_(0), queue_(queue), timer_(0, 0, queue_),
+        total_(0), offset_(0),
+        queue_(queue), timer_(0, 0, queue_),
         num_equal_(0), percent_(0), elapsed_second_(0), iter_(0) {}
 
     virtual ~DispatchProgress () {timer_.cancel();}
@@ -725,9 +727,17 @@ class DispatchProgress
     /// the range zero to total, where total is passed into the constructor
     virtual uint64_t current () const = 0;
 
+    /// \brief The offset that should be reduced from the value returned by
+    /// `current`
+    uint64_t offset () const {return offset_;}
+
+    /// \brief Set the offset
+    void offset (uint64_t n) {offset_ = n;}
+
     private :
 
     uint64_t total_;
+    uint64_t offset_;
     DispatchQueue<DispatchPrivate> queue_;
     DispatchSource<DispatchTimer> timer_;
     StopWatch watch_;
@@ -775,13 +785,17 @@ class DispatchProgress
         const DispatchProgress *timer_ptr =
             static_cast<const DispatchProgress *>(context);
 
-        uint64_t total = timer_ptr->total_;
         uint64_t iter = timer_ptr->current();
+        uint64_t iter_total = timer_ptr->total_;
+        uint64_t iter_offset = timer_ptr->offset_;
+        iter = iter >= iter_offset ? iter - iter_offset : 0;
+        iter = iter <= iter_total ? iter : iter_total;
+
         const StopWatch &elapsed = timer_ptr->watch_;
         elapsed.stop();
         elapsed.start();
 
-        unsigned num_equal = static_cast<unsigned>(60 * iter / total);
+        unsigned num_equal = static_cast<unsigned>(60 * iter / iter_total);
         if (timer_ptr->num_equal_ != num_equal) {
             timer_ptr->num_equal_ = num_equal;
             unsigned num_space = 60 - num_equal;
@@ -804,7 +818,7 @@ class DispatchProgress
             cstr[offset++] = '\0';
         }
 
-        unsigned percent = static_cast<unsigned>(100 * iter / total);
+        unsigned percent = static_cast<unsigned>(100 * iter / iter_total);
         if (timer_ptr->percent_ != percent) {
             timer_ptr->percent_ = percent;
 
@@ -841,10 +855,9 @@ class DispatchProgress
             cstr[offset++] = '\0';
         }
 
-        iter = (iter <= total) ? iter : total;
         if (timer_ptr->iter_ != iter) {
             timer_ptr->iter_ = iter;
-            unsigned diff = uint_digit(total) - uint_digit(iter);
+            unsigned diff = uint_digit(iter_total) - uint_digit(iter);
             char *cstr = timer_ptr->display_iter_;
 
             std::size_t offset = 0;
@@ -853,7 +866,7 @@ class DispatchProgress
                 cstr[offset++] = ' ';
             uint_to_char(iter, cstr, offset);
             cstr[offset++] = '/';
-            uint_to_char(total, cstr, offset);
+            uint_to_char(iter_total, cstr, offset);
             cstr[offset++] = ']';
             cstr[offset++] = '\0';
         }
