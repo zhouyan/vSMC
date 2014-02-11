@@ -3,20 +3,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#ifndef NDEBUG
-#define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_DUPLICATE(set, name) \
-{                                                                            \
-    if (set.count(name) == 1) {                                              \
-        std::string msg("**vsmc::ProgramOptionMap::add** Option \"");        \
-        msg += name;                                                         \
-        msg += "\" ALREADY EXISTS";                                          \
-        VSMC_RUNTIME_ASSERT(false, msg.c_str());                             \
-    }                                                                        \
-}
-#else
-#define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_DUPLICATE(set, name)
-#endif
-
 namespace vsmc {
 
 /// \brief Program opiton base class
@@ -180,16 +166,19 @@ class ProgramOption : public ProgramOptionBase
 /// will be appended to the destination vector instead of override the defualt
 /// value.
 ///
-/// If add an option with a name that already exists, then it is a runtime
-/// error.
+/// If add an option with a name that already exists, then it overrides the
+/// previous one
 class ProgramOptionMap
 {
     public :
 
     ~ProgramOptionMap ()
     {
-        for (std::size_t i = 0; i != options_.size(); ++i)
-            delete options_[i];
+        for (std::map<std::string, ProgramOptionBase *>::iterator
+                iter = option_ptr_.begin();
+                iter != option_ptr_.end(); ++iter) {
+            delete iter->second;
+        }
     }
 
     /// \brief Add an option
@@ -201,9 +190,10 @@ class ProgramOptionMap
     template <typename T, typename Dest>
     ProgramOptionMap &add (const char *name, const char *desc, Dest *ptr)
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_DUPLICATE(option_names_, name);
-        option_names_.insert(name);
-        options_.push_back(new ProgramOption<T>(name, desc, ptr));
+        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, optr);
+        const std::string oname(std::string("--") + name);
+        option_ptr_.insert(std::make_pair(oname, ptr));
+        option_processed_.insert(std::make_pair(oname, 0));
 
         return *this;
     }
@@ -213,46 +203,53 @@ class ProgramOptionMap
     ProgramOptionMap &add (const char *name, const char *desc, Dest *ptr,
             const V &val)
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_DUPLICATE(option_names_, name);
-        option_names_.insert(name);
-        options_.push_back(new ProgramOption<T>(name, desc, ptr, val));
+        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, ptr, val);
+        const std::string oname(std::string("--") + name);
+        option_ptr_.insert(std::make_pair(oname, optr));
+        option_processed_.insert(std::make_pair(oname, 0));
 
         return *this;
     }
 
     /// \brief Process the options
     ///
+    /// \details
+    /// If the option "--help" is given at the commad line, then this function
+    /// does not process any other options. It merely process the options
+    /// --help by printing the help information.
+    ///
     /// \param argc The first argument of the `main` function
     /// \param argv The second argument of the `main` function
     ///
     /// \return `true` If the option `--help` has been specified on the command
     /// line. Otherwise `false`.
-    bool process (int argc, const char *const *argv)
+    bool process (int argc, const char **argv)
     {
-        processed_.clear();
         for (int ac = 1; ac != argc; ++ac) {
             if (!std::strcmp(argv[ac], "--help")) {
-                for (std::size_t i = 0; i != options_.size(); ++i)
-                    options_[i]->print_help();
+                for (std::map<std::string, ProgramOptionBase *>::iterator
+                        iter = option_ptr_.begin();
+                        iter != option_ptr_.end(); ++iter) {
+                    iter->second->print_help();
+                }
                 return true;
             }
         }
 
-        int ac = 1;
-        while (ac < argc) {
-            bool set = false;
-            for (std::size_t i = 0; i != options_.size(); ++i) {
-                set = options_[i]->compare_set(argv[ac], argv[ac + 1]);
-                if (set) processed_.push_back(argv[ac]);
+        for (std::map<std::string, ProgramOptionBase *>::iterator
+                iter = option_ptr_.begin();
+                iter != option_ptr_.end(); ++iter) {
+            for (int ac = 1; ac != argc; ++ac) {
+                bool set = iter->second->compare_set(argv[ac], argv[ac + 1]);
+                if (set) ++option_processed_[iter->first];
             }
-            ac += set ? 2 : 1;
         }
 
         return false;
     }
 
     /// \brief Process the options
-    bool process (int argc, char *const *argv)
+    bool process (int argc, char **argv)
     {
         const char **cargv = new const char *[argc];
         for (int i = 0; i != argc; ++i)
@@ -264,23 +261,12 @@ class ProgramOptionMap
     /// \brief Count the number of occurence of an option on the command line
     /// given its name
     std::size_t count (const char *name) const
-    {
-        std::string oname("--");
-        oname += name;
-        std::vector<std::string>::const_iterator iter = processed_.begin();
-        std::size_t c = 0;
-        for (; iter != processed_.end(); ++iter)
-            if (*iter == oname)
-                ++c;
-
-        return c;
-    }
+    {return option_processed_.find(std::string("--") + name)->second;}
 
     private :
 
-    std::set<std::string> option_names_;
-    std::vector<ProgramOptionBase *> options_;
-    std::vector<std::string> processed_;
+    std::map<std::string, ProgramOptionBase *> option_ptr_;
+    std::map<std::string, std::size_t> option_processed_;
 };
 
 } // namespace vsmc
