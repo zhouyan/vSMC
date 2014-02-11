@@ -809,6 +809,7 @@ class DispatchProgress
             timer_ptr->num_equal_ = num_equal + 1;
             timer_ptr->percent_ = percent + 1;
             timer_ptr->elapsed_second_ = elapsed_second + 1;
+            timer_ptr->iter_ = iter + 1;
         }
 
         if (timer_ptr->num_equal_ != num_equal) {
