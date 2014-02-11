@@ -191,7 +191,7 @@ class ProgramOptionMap
     ProgramOptionMap &add (const char *name, const char *desc, Dest *ptr)
     {
         const std::string oname(std::string("--") + name);
-        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, optr);
+        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, ptr);
         if (option_ptr_.count(oname) != 0)
             delete option_ptr_[oname];
         option_ptr_[oname] = optr;
