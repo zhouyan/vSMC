@@ -698,10 +698,10 @@ class DispatchProgress
     {
         total_ = total;
 
-        num_equal_ = 1000000;
-        percent_ = 100;
+        num_equal_ = num_equal_max_ + 1;
+        percent_ = percent_max_ + 1;
         elapsed_second_ = 1000000;
-        iter_ = total_;
+        iter_ = total_ + 1;
 
         timer_.set_context(static_cast<void *>(this));
         timer_.set_event_handler_f(print_start);
@@ -751,11 +751,16 @@ class DispatchProgress
     mutable char display_time_[16];
     mutable char display_iter_[32];
 
+    static VSMC_CONSTEXPR const uint64_t num_equal_max_ = 60;
+    static VSMC_CONSTEXPR const uint64_t percent_max_ = 100;
+
     template <typename UIntType>
     static void uint_to_char (UIntType num, char *cstr, std::size_t &offset)
     {
-        if (num == 0)
+        if (num == 0) {
+            cstr[offset++] = '0';
             return;
+        }
 
         char utmp[16];
         std::size_t unum = 0;
@@ -789,16 +794,17 @@ class DispatchProgress
         uint64_t iter_total = timer_ptr->total_;
         uint64_t iter_offset = timer_ptr->offset_;
         iter = iter >= iter_offset ? iter - iter_offset : 0;
-        iter = iter <= iter_total ? iter : iter_total;
+        uint64_t display_iter = iter <= iter_total ? iter : iter_total;
 
         const StopWatch &elapsed = timer_ptr->watch_;
         elapsed.stop();
         elapsed.start();
 
-        unsigned num_equal = static_cast<unsigned>(60 * iter / iter_total);
+        unsigned num_equal = iter_total == 0 ? num_equal_max_ :
+            static_cast<unsigned>(num_equal_max_ * display_iter / iter_total);
         if (timer_ptr->num_equal_ != num_equal) {
             timer_ptr->num_equal_ = num_equal;
-            unsigned num_space = 60 - num_equal;
+            unsigned num_space = num_equal_max_ - num_equal;
             unsigned num_dash = 0;
             if (num_space > 0) {
                 --num_space;
@@ -818,7 +824,8 @@ class DispatchProgress
             cstr[offset++] = '\0';
         }
 
-        unsigned percent = static_cast<unsigned>(100 * iter / iter_total);
+        unsigned percent = iter_total == 0 ? percent_max_ :
+            static_cast<unsigned>(percent_max_ * display_iter / iter_total);
         if (timer_ptr->percent_ != percent) {
             timer_ptr->percent_ = percent;
 
@@ -843,9 +850,10 @@ class DispatchProgress
             char *cstr = timer_ptr->display_time_;
             std::size_t offset = 0;
             cstr[offset++] = '[';
-            uint_to_char(display_hour, cstr, offset);
-            if (display_hour > 0)
+            if (display_hour > 0) {
+                uint_to_char(display_hour, cstr, offset);
                 cstr[offset++] = ':';
+            }
             cstr[offset++] = '0' + static_cast<char>(display_minute / 10);
             cstr[offset++] = '0' + static_cast<char>(display_minute % 10);
             cstr[offset++] = ':';
