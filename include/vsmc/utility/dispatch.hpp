@@ -816,10 +816,10 @@ class DispatchProgress
             unsigned num_space = num_equal_max_ - num_equal;
             unsigned num_dash = 0;
             while (num_space > num_dash) {
-                if (num_dash < num_dash_max_) {
-                    --num_space;
-                    ++num_dash;
-                }
+		if (num_dash == num_dash_max_)
+		    break;
+		--num_space;
+		++num_dash;
             }
 
             char *cstr = timer_ptr->display_progress_;
