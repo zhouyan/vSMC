@@ -190,10 +190,12 @@ class ProgramOptionMap
     template <typename T, typename Dest>
     ProgramOptionMap &add (const char *name, const char *desc, Dest *ptr)
     {
-        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, optr);
         const std::string oname(std::string("--") + name);
-        option_ptr_.insert(std::make_pair(oname, ptr));
-        option_processed_.insert(std::make_pair(oname, 0));
+        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, optr);
+        if (option_ptr_.count(oname) != 0)
+            delete option_ptr_[oname];
+        option_ptr_[oname] = optr;
+        option_processed_[oname] = 0;
 
         return *this;
     }
@@ -203,19 +205,24 @@ class ProgramOptionMap
     ProgramOptionMap &add (const char *name, const char *desc, Dest *ptr,
             const V &val)
     {
-        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, ptr, val);
         const std::string oname(std::string("--") + name);
-        option_ptr_.insert(std::make_pair(oname, optr));
-        option_processed_.insert(std::make_pair(oname, 0));
+        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, ptr, val);
+        if (option_ptr_.count(oname) != 0)
+            delete option_ptr_[oname];
+        option_ptr_[oname] = optr;
+        option_processed_[oname] = 0;
 
         return *this;
     }
 
     ProgramOptionMap &remove (const char *name)
     {
-        delete option_ptr_[name];
-        option_ptr_.erase(name);
-        option_processed_.erase(name);
+        const std::string oname(std::string("--") + name);
+        if (option_ptr_.count(oname) != 0) {
+            delete option_ptr_[oname];
+            option_ptr_.erase(oname);
+            option_processed_.erase(oname);
+        }
 
         return *this;
     }
