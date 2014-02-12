@@ -817,10 +817,10 @@ class DispatchProgress
             unsigned num_space = num_equal_max_ - num_equal;
             unsigned num_dash = 0;
             while (num_space > num_dash) {
-		if (num_dash == num_dash_max_)
-		    break;
-		--num_space;
-		++num_dash;
+                if (num_dash == num_dash_max_)
+                    break;
+                --num_space;
+                ++num_dash;
             }
 
             char *cstr = timer_ptr->display_progress_;
@@ -838,7 +838,7 @@ class DispatchProgress
 
         if (timer_ptr->percent_ != percent) {
             timer_ptr->percent_ = percent;
-            const unsigned num_space = 3 - uint_digit(percent); 
+            const unsigned num_space = 3 - uint_digit(percent);
 
             char *cstr = timer_ptr->display_percent_;
             std::size_t offset = 0;
