@@ -106,7 +106,7 @@ in the `LICENSE` file distributed with the source.
 [Clang]: http://clang.llvm.org
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
 [GCC]: http://gcc.gnu.org
-[Intel Cilk Plus]: http://en.wikipedia.org/wiki/Intel_Cilk_Plus
+[Intel Cilk Plus]: https://www.cilkplus.org
 [Intel TBB]: http://threadingbuildingblocks.org/
 [MS PPL]: http://msdn.microsoft.com/en-us/library/dd492418.aspx
 [MSVC]: http://msdn.microsoft.com/en-us/vstudio//default.aspx
