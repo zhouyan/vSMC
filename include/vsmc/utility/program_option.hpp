@@ -11,8 +11,9 @@ class ProgramOptionBase
 {
     public :
 
-    virtual bool compare_set (const char *, const char *) = 0;
+    virtual bool set (const std::string &) = 0;
     virtual void print_help () const = 0;
+    virtual ProgramOptionBase *clone () const = 0;
     virtual ~ProgramOptionBase () {}
 };
 
@@ -28,65 +29,51 @@ class ProgramOption : public ProgramOptionBase
 
     /// \brief Construct an option that can store a single value
     ///
-    /// \param name Name of the option, on command name it shall be specified
-    /// by --name
+    /// \param oname Name of the option in the format `--name`
     /// \param desc A descritpion stream of the option
     /// \param ptr The destination that store the option value
-    ProgramOption (const char *name, const char *desc, T *ptr) :
-        name_(std::string("--") + name),
-        desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR), has_default_(false) {}
+    ProgramOption (const std::string &oname, const std::string &desc, T *ptr) :
+        oname_(oname), desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
+        has_default_(false) {}
 
     /// \brief Construct an option that can store multiple values
     ///
-    /// \param name Name of the option, on command name it shall be specified
-    /// by --name. The option can be specified multiple times on the command
-    /// line. Each value will be stored within the vector
+    /// \param oname Name of the option in the format `--name`. The option can
+    /// be specified multiple times on the command line. Each value will be
+    /// stored within the vector
     /// \param desc A descritpion stream of the option
     /// \param ptr The destination that store the option value
-    ProgramOption (const char *name, const char *desc, std::vector<T> *ptr) :
-        name_(std::string("--") + name),
-        desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr), has_default_(false) {}
+    ProgramOption (const std::string &oname, const std::string &desc,
+            std::vector<T> *ptr) :
+        oname_(oname), desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
+        has_default_(false) {}
 
     /// \brief Construct an option that can store a single value with a default
     /// value
     template <typename V>
-    ProgramOption (const char *name, const char *desc, T *ptr, const V &val) :
-        name_(std::string("--") + name),
-        desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
+    ProgramOption (const std::string &oname, const std::string &desc,
+            T *ptr, const V &val) :
+        oname_(oname), desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
         default_(static_cast<T>(val)), has_default_(true) {*ptr = default_;}
 
     /// \brief Construct an option that can store multiple values with a
     /// default value
     template <typename V>
-    ProgramOption (const char *name, const char *desc, std::vector<T> *ptr,
-            const V &val) :
-        name_(std::string("--") + name),
-        desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
+    ProgramOption (const std::string &oname, const std::string &desc,
+            std::vector<T> *ptr, const V &val) :
+        oname_(oname), desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
         default_(static_cast<T>(val)), has_default_(true)
-    {
-        vec_ptr_->clear();
-        vec_ptr_->push_back(default_);
-    }
+    {vec_ptr_->push_back(default_);}
 
-    /// \brief Compare an option name and set value if it is the same as the
-    /// name of this option
-    ///
-    /// \param name Name of the specified opiton to be checked against this
-    /// option
-    /// \param sval A string contains the value, will be converted to this
-    /// option's type
-    bool compare_set (const char *name, const char *sval)
+    bool set (const std::string &sval)
     {
-        if (std::strcmp(name_.c_str(), name))
-            return false;
-
         std::stringstream ss;
         ss << sval;
         T tval;
         ss >> tval;
         if (ss.fail()) {
             std::fprintf(stderr, "Invalid value for option %s: %s\n",
-                    name_.c_str(), sval);
+                    oname_.c_str(), sval.c_str());
             return false;
         }
 
@@ -99,15 +86,22 @@ class ProgramOption : public ProgramOptionBase
     /// \brief Print help information
     void print_help () const
     {
-        std::cout << "  " << std::setw(20) << std::left << name_ << desc_;
+        std::cout << "  " << std::setw(20) << std::left << oname_ << desc_;
         if (has_default_)
             std::cout << " (default: " << default_ << ")";
         std::cout << std::endl;
     }
 
+    ProgramOptionBase *clone () const
+    {
+        ProgramOptionBase *ptr = new ProgramOption<T>(*this);
+
+        return ptr;
+    }
+
     private :
 
-    std::string name_;
+    std::string oname_;
     std::string desc_;
     T *const ptr_;
     std::vector<T> *const vec_ptr_;
@@ -132,10 +126,8 @@ class ProgramOption : public ProgramOptionBase
 ///     Map.add<double>("option2", "option description string 2", &Value2);
 ///     Map.add<double>("option3", "option description string 3", &Value3);
 ///     Map.add<double>("option4", "option description string 4", &Value4, 401);
-///     if (Map.process(argc, argv)) {
-///         Map.print_help();
+///     if (Map.process(argc, argv)) // Help info was printed
 ///         return 0;
-///     }
 ///
 ///     std::cout << Value1 << std::endl;
 ///     std::cout << Value2 << std::endl;
@@ -172,12 +164,50 @@ class ProgramOptionMap
 {
     public :
 
+    ProgramOptionMap () {}
+
+    ProgramOptionMap (const ProgramOptionMap &other) :
+        option_ptr_(other.option_ptr_), option_cnt_(other.option_cnt_)
+    {
+        for (std::map<std::string, ProgramOptionBase *>::iterator
+                iter = option_ptr_.begin();
+                iter != option_ptr_.end(); ++iter) {
+            if (iter->second)
+                iter->second = iter->second->clone();
+        }
+    }
+
+    ProgramOptionMap &operator= (const ProgramOptionMap &other)
+    {
+        if (this != &other) {
+            for (std::map<std::string, ProgramOptionBase *>::iterator
+                    iter = option_ptr_.begin();
+                    iter != option_ptr_.end(); ++iter) {
+                if (iter->second)
+                    delete iter->second;
+            }
+
+            option_ptr_ = other.option_ptr_;
+            option_cnt_ = other.option_cnt_;
+
+            for (std::map<std::string, ProgramOptionBase *>::iterator
+                    iter = option_ptr_.begin();
+                    iter != option_ptr_.end(); ++iter) {
+                if (iter->second)
+                    iter->second = iter->second->clone();
+            }
+        }
+
+        return *this;
+    }
+
     ~ProgramOptionMap ()
     {
         for (std::map<std::string, ProgramOptionBase *>::iterator
                 iter = option_ptr_.begin();
                 iter != option_ptr_.end(); ++iter) {
-            delete iter->second;
+            if (iter->second)
+                delete iter->second;
         }
     }
 
@@ -188,40 +218,44 @@ class ProgramOptionMap
     /// \param desc A descritpion stream of the option
     /// \param ptr The destination that store the option value
     template <typename T, typename Dest>
-    ProgramOptionMap &add (const char *name, const char *desc, Dest *ptr)
+    ProgramOptionMap &add (const std::string &name, const std::string &desc,
+            Dest *ptr)
     {
-        const std::string oname(std::string("--") + name);
-        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, ptr);
+        const std::string oname("--" + name);
+        ProgramOptionBase *optr = new ProgramOption<T>(oname, desc, ptr);
         if (option_ptr_.count(oname) != 0)
-            delete option_ptr_[oname];
+            if (option_ptr_[oname])
+                delete option_ptr_[oname];
         option_ptr_[oname] = optr;
-        option_processed_[oname] = 0;
+        option_cnt_[oname] = 0;
 
         return *this;
     }
 
     /// \brief Add an option with a default value
     template <typename T, typename Dest, typename V>
-    ProgramOptionMap &add (const char *name, const char *desc, Dest *ptr,
-            const V &val)
+    ProgramOptionMap &add (const std::string &name, const std::string &desc,
+            Dest *ptr, const V &val)
     {
-        const std::string oname(std::string("--") + name);
-        ProgramOptionBase *optr = new ProgramOption<T>(name, desc, ptr, val);
+        const std::string oname("--" + name);
+        ProgramOptionBase *optr = new ProgramOption<T>(oname, desc, ptr, val);
         if (option_ptr_.count(oname) != 0)
-            delete option_ptr_[oname];
+            if (option_ptr_[oname])
+                delete option_ptr_[oname];
         option_ptr_[oname] = optr;
-        option_processed_[oname] = 0;
+        option_cnt_[oname] = 0;
 
         return *this;
     }
 
-    ProgramOptionMap &remove (const char *name)
+    ProgramOptionMap &remove (const std::string &name)
     {
-        const std::string oname(std::string("--") + name);
+        const std::string oname("--" + name);
         if (option_ptr_.count(oname) != 0) {
-            delete option_ptr_[oname];
+            if (option_ptr_[oname])
+                delete option_ptr_[oname];
             option_ptr_.erase(oname);
-            option_processed_.erase(oname);
+            option_cnt_.erase(oname);
         }
 
         return *this;
@@ -252,13 +286,9 @@ class ProgramOptionMap
             }
         }
 
-        for (std::map<std::string, ProgramOptionBase *>::iterator
-                iter = option_ptr_.begin();
-                iter != option_ptr_.end(); ++iter) {
-            for (int ac = 1; ac != argc; ++ac) {
-                bool set = iter->second->compare_set(argv[ac], argv[ac + 1]);
-                if (set) ++option_processed_[iter->first];
-            }
+        for (int ac = 1; ac < argc - 1; ++ac) {
+            if (process_pair(argv[ac], argv[ac + 1]))
+                ++ac;
         }
 
         return false;
@@ -276,13 +306,28 @@ class ProgramOptionMap
 
     /// \brief Count the number of occurence of an option on the command line
     /// given its name
-    std::size_t count (const char *name) const
-    {return option_processed_.find(std::string("--") + name)->second;}
+    std::size_t count (const std::string &name) const
+    {return option_cnt_.find("--" + name)->second;}
 
     private :
 
     std::map<std::string, ProgramOptionBase *> option_ptr_;
-    std::map<std::string, std::size_t> option_processed_;
+    std::map<std::string, std::size_t> option_cnt_;
+
+    bool process_pair (const std::string &oname, const std::string &sval)
+    {
+        std::map<std::string, ProgramOptionBase *>::iterator iter =
+            option_ptr_.find(oname);
+
+        if (iter == option_ptr_.end())
+            return false;
+
+        if (!iter->second->set(sval))
+            return false;
+
+        ++option_cnt_[oname];
+        return true;
+    }
 };
 
 } // namespace vsmc
