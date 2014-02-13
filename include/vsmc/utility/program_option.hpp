@@ -11,6 +11,10 @@ class ProgramOptionBase
 {
     public :
 
+    ProgramOptionBase () {}
+    ProgramOptionBase (const ProgramOptionBase &) {}
+    ProgramOptionBase &operator= (const ProgramOptionBase &) {return *this;}
+
     virtual bool set (const std::string &) = 0;
     virtual void print_help () const = 0;
     virtual ProgramOptionBase *clone () const = 0;
