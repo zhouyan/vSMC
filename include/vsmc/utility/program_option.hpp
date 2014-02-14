@@ -15,8 +15,9 @@ class ProgramOptionBase
     ProgramOptionBase (const ProgramOptionBase &) {}
     ProgramOptionBase &operator= (const ProgramOptionBase &) {return *this;}
 
-    virtual bool set (std::stringstream &ss, const std::string &) = 0;
-    virtual void print_help () const = 0;
+    virtual bool set (std::stringstream &,
+            const std::string &, const std::string &) = 0;
+    virtual void print_help (const std::string &) const = 0;
     virtual ProgramOptionBase *clone () const = 0;
     virtual ~ProgramOptionBase () {}
 }; // class ProgramOptionBase
@@ -30,29 +31,28 @@ class ProgramOption : public ProgramOptionBase
 
     typedef T value_type;
 
-    ProgramOption (const std::string &oname, const std::string &desc, T *ptr) :
-        oname_(oname), desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
+    ProgramOption (const std::string &desc, T *ptr) :
+        desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
         default_(T()), has_default_(false) {}
 
-    ProgramOption (const std::string &oname, const std::string &desc,
-            std::vector<T> *ptr) :
-        oname_(oname), desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
+    ProgramOption (const std::string &desc, std::vector<T> *ptr) :
+        desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
         default_(T()), has_default_(false) {}
 
     template <typename V>
-    ProgramOption (const std::string &oname, const std::string &desc,
-            T *ptr, const V &val) :
-        oname_(oname), desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
+    ProgramOption (const std::string &desc, T *ptr, const V &val) :
+        desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
         default_(static_cast<T>(val)), has_default_(true) {*ptr = default_;}
 
     template <typename V>
-    ProgramOption (const std::string &oname, const std::string &desc,
-            std::vector<T> *ptr, const V &val) :
-        oname_(oname), desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
+    ProgramOption (const std::string &desc, std::vector<T> *ptr,
+            const V &val) :
+        desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
         default_(static_cast<T>(val)), has_default_(true)
     {vec_ptr_->push_back(default_);}
 
-    bool set (std::stringstream &ss, const std::string &sval)
+    bool set (std::stringstream &ss,
+            const std::string &oname, const std::string &sval)
     {
         ss.clear();
         ss.str(std::string());
@@ -60,7 +60,7 @@ class ProgramOption : public ProgramOptionBase
         ss << sval;
         if (ss.fail()) {
             std::fprintf(stderr, "Failed to read input of option '%s': %s\n",
-                    oname_.c_str(), sval.c_str());
+                    oname.c_str(), sval.c_str());
             ss.clear();
             return false;
         }
@@ -69,7 +69,7 @@ class ProgramOption : public ProgramOptionBase
         ss >> tval;
         if (ss.fail()) {
             std::fprintf(stderr, "Failed to set value of option '%s': %s\n",
-                    oname_.c_str(), sval.c_str());
+                    oname.c_str(), sval.c_str());
             ss.clear();
             return false;
         }
@@ -80,9 +80,9 @@ class ProgramOption : public ProgramOptionBase
         return true;
     }
 
-    void print_help () const
+    void print_help (const std::string &oname) const
     {
-        std::cout << "  " << std::setw(20) << std::left << oname_ << desc_;
+        std::cout << "  " << std::setw(20) << std::left << oname << desc_;
         if (has_default_)
             std::cout << " (default: " << default_ << ")";
         std::cout << std::endl;
@@ -97,7 +97,6 @@ class ProgramOption : public ProgramOptionBase
 
     private :
 
-    std::string oname_;
     std::string desc_;
     T *const ptr_;
     std::vector<T> *const vec_ptr_;
@@ -216,7 +215,7 @@ class ProgramOptionMap
             Dest *ptr)
     {
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOption<T>(oname, desc, ptr);
+        ProgramOptionBase *optr = new ProgramOption<T>(desc, ptr);
         add_option(oname, optr);
 
         return *this;
@@ -228,7 +227,7 @@ class ProgramOptionMap
             Dest *ptr, const V &val)
     {
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOption<T>(oname, desc, ptr, val);
+        ProgramOptionBase *optr = new ProgramOption<T>(desc, ptr, val);
         add_option(oname, optr);
 
         return *this;
@@ -264,7 +263,7 @@ class ProgramOptionMap
             if (!std::strcmp(argv[ac], "--help")) {
                 for (option_map_type::iterator iter = option_map_.begin();
                         iter != option_map_.end(); ++iter) {
-                    iter->second.first->print_help();
+                    iter->second.first->print_help(iter->first);
                 }
                 return true;
             }
@@ -323,7 +322,7 @@ class ProgramOptionMap
         if (iter == option_map_.end())
             return false;
 
-        if (!iter->second.first->set(ss_, sval))
+        if (!iter->second.first->set(ss_, iter->first, sval))
             return false;
 
         ++iter->second.second;
