@@ -15,7 +15,7 @@ class ProgramOptionBase
     ProgramOptionBase (const ProgramOptionBase &) {}
     ProgramOptionBase &operator= (const ProgramOptionBase &) {return *this;}
 
-    virtual bool set (const std::string &) = 0;
+    virtual bool set (std::stringstream &ss, const std::string &) = 0;
     virtual void print_help () const = 0;
     virtual ProgramOptionBase *clone () const = 0;
     virtual ~ProgramOptionBase () {}
@@ -28,40 +28,23 @@ class ProgramOption : public ProgramOptionBase
 {
     public :
 
-    /// \brief Value type of this option
     typedef T value_type;
 
-    /// \brief Construct an option that can store a single value
-    ///
-    /// \param oname Name of the option in the format `--name`
-    /// \param desc A descritpion stream of the option
-    /// \param ptr The destination that store the option value
     ProgramOption (const std::string &oname, const std::string &desc, T *ptr) :
         oname_(oname), desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
-        has_default_(false) {}
+        default_(T()), has_default_(false) {}
 
-    /// \brief Construct an option that can store multiple values
-    ///
-    /// \param oname Name of the option in the format `--name`. The option can
-    /// be specified multiple times on the command line. Each value will be
-    /// stored within the vector
-    /// \param desc A descritpion stream of the option
-    /// \param ptr The destination that store the option value
     ProgramOption (const std::string &oname, const std::string &desc,
             std::vector<T> *ptr) :
         oname_(oname), desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
-        has_default_(false) {}
+        default_(T()), has_default_(false) {}
 
-    /// \brief Construct an option that can store a single value with a default
-    /// value
     template <typename V>
     ProgramOption (const std::string &oname, const std::string &desc,
             T *ptr, const V &val) :
         oname_(oname), desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
         default_(static_cast<T>(val)), has_default_(true) {*ptr = default_;}
 
-    /// \brief Construct an option that can store multiple values with a
-    /// default value
     template <typename V>
     ProgramOption (const std::string &oname, const std::string &desc,
             std::vector<T> *ptr, const V &val) :
@@ -69,15 +52,25 @@ class ProgramOption : public ProgramOptionBase
         default_(static_cast<T>(val)), has_default_(true)
     {vec_ptr_->push_back(default_);}
 
-    bool set (const std::string &sval)
+    bool set (std::stringstream &ss, const std::string &sval)
     {
-        std::stringstream ss;
+        ss.clear();
+        ss.str(std::string());
+
         ss << sval;
+        if (ss.fail()) {
+            std::fprintf(stderr, "Failed to read input of option '%s': %s\n",
+                    oname_.c_str(), sval.c_str());
+            ss.clear();
+            return false;
+        }
+
         T tval;
         ss >> tval;
         if (ss.fail()) {
-            std::fprintf(stderr, "Invalid value for option %s: %s\n",
+            std::fprintf(stderr, "Failed to set value of option '%s': %s\n",
                     oname_.c_str(), sval.c_str());
+            ss.clear();
             return false;
         }
 
@@ -87,7 +80,6 @@ class ProgramOption : public ProgramOptionBase
         return true;
     }
 
-    /// \brief Print help information
     void print_help () const
     {
         std::cout << "  " << std::setw(20) << std::left << oname_ << desc_;
@@ -310,6 +302,7 @@ class ProgramOptionMap
     private :
 
     option_map_type option_map_;
+    std::stringstream ss_;
 
     void add_option (const std::string &oname, ProgramOptionBase *optr)
     {
@@ -330,7 +323,7 @@ class ProgramOptionMap
         if (iter == option_map_.end())
             return false;
 
-        if (!iter->second.first->set(sval))
+        if (!iter->second.first->set(ss_, sval))
             return false;
 
         ++iter->second.second;
