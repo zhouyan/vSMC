@@ -56,6 +56,31 @@ class ProgramOptionBase
 
 /// \brief Opiton with a default value
 /// \ingroup Option
+///
+/// \details
+/// Basic example
+/// ~~~{.cpp}
+/// #include <vsmc/utility/program_option.hpp>
+///
+/// int main (int argc, char **argv)
+/// {
+///     double Value;
+///     ProgramOptionMap Map;
+///     Map.add("option_name", "option description", &Value);
+///     if (Map.process(argc, argv)) // Help info was printed
+///         return 0;
+///
+///     std::cout << Value << std::endl;
+/// }
+/// ~~~
+/// And if on the command line,
+/// ~~~{.sh}
+/// ./prog --option_name 0.5
+/// ~~~
+/// will produce the output
+/// ~~~{.txt}
+/// 0.5
+/// ~~~
 template <typename T>
 class ProgramOptionDefault : public ProgramOptionBase
 {
@@ -176,55 +201,6 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
 
 /// \brief A map of ProgramOption
 /// \ingroup Option
-///
-/// \details
-/// Basic example:
-/// \code
-/// int main (int argc, char **argv)
-/// {
-///     double Value1;
-///     double Value2;
-///     std::vector<double> Value3;
-///     std::vector<double> Value4;
-///     ProgramOptionMap Map;
-///     Map.add<double>("option1", "option description string 1", &Value1);
-///     Map.add<double>("option2", "option description string 2", &Value2);
-///     Map.add<double>("option3", "option description string 3", &Value3);
-///     Map.add<double>("option4", "option description string 4", &Value4, 401);
-///     if (Map.process(argc, argv)) // Help info was printed
-///         return 0;
-///
-///     std::cout << Value1 << std::endl;
-///     std::cout << Value2 << std::endl;
-///     for (std::size_t i = 0; i != Value3.size(); ++i)
-///         std::cout << Value3[i] << std::endl;
-///     for (std::size_t i = 0; i != Value4.size(); ++i)
-///         std::cout << Value4[i] << std::endl;
-/// }
-/// \endcode
-/// And if on the command line,
-/// \code
-/// ./prog --option1 101 --option2 201 --option2 202 --option3 301 --option3 202 --option4 402
-/// \end
-/// will produce the output
-/// \code
-/// 101
-/// 202
-/// 301
-/// 302
-/// 401
-/// 402
-/// \endcode
-/// An option may be specified multiple times on the command line. If the
-/// option's value type is a specialization of std::vector, then all values
-/// will be stored. Otherwise only the last one will be stored. A default value
-/// may be specified for an option. If an option's value type is a
-/// specializaiton of std::vector, then values specified on the command line
-/// will be appended to the destination vector instead of override the defualt
-/// value.
-///
-/// If add an option with a name that already exists, then it overrides the
-/// previous one
 class ProgramOptionMap
 {
     public :
