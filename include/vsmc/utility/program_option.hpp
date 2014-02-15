@@ -469,12 +469,6 @@ class ProgramOptionMap
 
         return true;
     }
-
-    void process_value (std::string &str)
-    {
-        if (str.back() == ',')
-            str.erase(--str.end());
-    }
 }; // class ProgramOptionMap
 
 } // namespace vsmc
