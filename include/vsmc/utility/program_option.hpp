@@ -20,44 +20,18 @@ class ProgramOptionBase
     ProgramOptionBase (const ProgramOptionBase &) {}
     ProgramOptionBase &operator= (const ProgramOptionBase &) {return *this;}
 
-    virtual bool set (std::stringstream &,
-            const std::string &, const std::string &) = 0;
+    virtual bool set (std::stringstream &, const std::string &,
+            const std::string &) = 0;
     virtual bool set_default () = 0;
     virtual void print_help (const std::string &) const = 0;
     virtual ProgramOptionBase *clone () const = 0;
     virtual ~ProgramOptionBase () {}
-}; // class ProgramOptionBase
 
-/// \brief Class that store an option and its default value
-/// \ingroup Option
-template <typename T>
-class ProgramOption : public ProgramOptionBase
-{
-    public :
+    protected :
 
-    typedef T value_type;
-
-    ProgramOption (const std::string &desc, T *ptr) :
-        desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
-        default_(T()), has_default_(false) {}
-
-    ProgramOption (const std::string &desc, std::vector<T> *ptr) :
-        desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
-        default_(T()), has_default_(false) {}
-
-    template <typename V>
-    ProgramOption (const std::string &desc, T *ptr, const V &val) :
-        desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
-        default_(static_cast<T>(val)), has_default_(true) {}
-
-    template <typename V>
-    ProgramOption (const std::string &desc, std::vector<T> *ptr,
-            const V &val) :
-        desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
-        default_(static_cast<T>(val)), has_default_(true) {}
-
-    bool set (std::stringstream &ss,
-            const std::string &oname, const std::string &sval)
+    template <typename T>
+    bool set_value (std::stringstream &ss, const std::string &oname,
+            const std::string &sval, T *dest)
     {
         ss.clear();
         ss.str(sval);
@@ -70,22 +44,29 @@ class ProgramOption : public ProgramOptionBase
             ss.clear();
             return false;
         }
-
-        if (ptr_) *ptr_ = tval;
-        if (vec_ptr_) vec_ptr_->push_back(tval);
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        *dest = cxx11::move(tval);
+#else
+        *dest = tval;
+#endif
 
         return true;
     }
+}; // class ProgramOptionBase
 
-    bool set_default ()
-    {
-        if (has_default_) {
-            if (ptr_) *ptr_ = default_;
-            if (vec_ptr_) vec_ptr_->push_back(default_);
-        }
+/// \brief Opiton with a default value
+/// \ingroup Option
+template <typename T>
+class ProgramOptionDefault : public ProgramOptionBase
+{
+    public :
 
-        return has_default_;
-    }
+    ProgramOptionDefault (const std::string &desc) :
+        desc_(desc), default_(T()), has_default_(false) {}
+
+    template <typename V>
+    ProgramOptionDefault (const std::string &desc, const V &val) :
+        desc_(desc), default_(static_cast<T>(val)), has_default_(true) {}
 
     void print_help (const std::string &oname) const
     {
@@ -95,21 +76,103 @@ class ProgramOption : public ProgramOptionBase
         std::cout << std::endl;
     }
 
+    protected :
+
+    bool set_value_default (T *dest)
+    {
+        if (has_default_)
+            *dest = default_;
+
+        return has_default_;
+    }
+
+    private :
+
+    std::string desc_;
+    T default_;
+    bool has_default_;
+}; // ProgramOptionDefault
+
+/// \brief Option with a single value
+/// \ingroup Option
+template <typename T>
+class ProgramOptionScalar : public ProgramOptionDefault<T>
+{
+    public :
+
+    ProgramOptionScalar (const std::string &desc, T *ptr) :
+        ProgramOptionDefault<T>(desc), ptr_(ptr) {}
+
+    template <typename V>
+    ProgramOptionScalar (const std::string &desc, T *ptr, const V &val) :
+        ProgramOptionDefault<T>(desc, val), ptr_(ptr) {}
+
+    bool set (std::stringstream &ss, const std::string &oname,
+            const std::string &sval)
+    {return this->set_value(ss, oname, sval, ptr_);}
+
+    bool set_default () {return this->set_value_default(ptr_);}
+
     ProgramOptionBase *clone () const
     {
-        ProgramOptionBase *ptr = new ProgramOption<T>(*this);
+        ProgramOptionBase *ptr = new ProgramOptionScalar<T>(*this);
 
         return ptr;
     }
 
     private :
 
-    std::string desc_;
     T *const ptr_;
-    std::vector<T> *const vec_ptr_;
-    T default_;
-    bool has_default_;
-}; // class ProgramOption
+}; // class ProgramOptionScalar
+
+/// \brief Option with multiple values
+/// \ingroup Option
+template <typename T>
+class ProgramOptionVector : public ProgramOptionDefault<T>
+{
+    public :
+
+    ProgramOptionVector (const std::string &desc, std::vector<T> *ptr) :
+        ProgramOptionDefault<T>(desc), val_(T()), ptr_(ptr) {}
+
+    template <typename V>
+    ProgramOptionVector (const std::string &desc, std::vector<T> *ptr,
+            const V &val) :
+        ProgramOptionDefault<T>(desc, val), val_(T()), ptr_(ptr) {}
+
+    bool set (std::stringstream &ss, const std::string &oname,
+            const std::string &sval)
+    {
+        bool success = this->set_value(ss, oname, sval, &val_);
+
+        if (success)
+            ptr_->push_back(val_);
+
+        return success;
+    }
+
+    bool set_default ()
+    {
+        bool success = this->set_value_default(&val_);
+
+        if (success)
+            ptr_->push_back(val_);
+
+        return success;
+    }
+
+    ProgramOptionBase *clone () const
+    {
+        ProgramOptionBase *ptr = new ProgramOptionVector<T>(*this);
+
+        return ptr;
+    }
+
+    private :
+
+    T val_;
+    std::vector<T> *const ptr_;
+}; // class ProgramOptionVector
 
 /// \brief A map of ProgramOption
 /// \ingroup Option
@@ -211,32 +274,58 @@ class ProgramOptionMap
         }
     }
 
-    /// \brief Add an option
+    /// \brief Add an option with a single value
     ///
     /// \param name Name of the option, on command name it shall be specified
     /// by --name
     /// \param desc A descritpion stream of the option
     /// \param ptr The destination that store the option value
-    template <typename T, typename Dest>
+    template <typename T>
     ProgramOptionMap &add (const std::string &name, const std::string &desc,
-            Dest *ptr)
+            T *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOption<T>(desc, ptr);
+        ProgramOptionBase *optr = new ProgramOptionScalar<T>(desc, ptr);
         add_option(oname, optr);
 
         return *this;
     }
 
-    /// \brief Add an option with a default value
-    template <typename T, typename Dest, typename V>
+    /// \brief Add an option with a single value, with a default value
+    template <typename T, typename V>
     ProgramOptionMap &add (const std::string &name, const std::string &desc,
-            Dest *ptr, const V &val)
+            T *ptr, const V &val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOption<T>(desc, ptr, val);
+        ProgramOptionBase *optr = new ProgramOptionScalar<T>(desc, ptr, val);
+        add_option(oname, optr);
+
+        return *this;
+    }
+
+    /// \brief Add an opiton with multiple value
+    template <typename T>
+    ProgramOptionMap &add (const std::string &name, const std::string &desc,
+            std::vector<T> *ptr)
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
+        const std::string oname("--" + name);
+        ProgramOptionBase *optr = new ProgramOptionVector<T>(desc, ptr);
+        add_option(oname, optr);
+
+        return *this;
+    }
+
+    /// \brief Add an opiton with multiple value, with a default value
+    template <typename T, typename V>
+    ProgramOptionMap &add (const std::string &name, const std::string &desc,
+            std::vector<T> *ptr, const V &val)
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
+        const std::string oname("--" + name);
+        ProgramOptionBase *optr = new ProgramOptionVector<T>(desc, ptr, val);
         add_option(oname, optr);
 
         return *this;
