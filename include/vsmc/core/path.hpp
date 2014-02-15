@@ -35,9 +35,9 @@ class Path
     /// Path sampling.
     ///
     /// The evaluation object has the signature
-    /// \code
+    /// ~~~{.cpp}
     /// double eval (std::size_t iter, const Particle<T> &particle, double *integrand)
-    /// \endcode
+    /// ~~~
     /// where the first two arguments are passed in by the Sampler at the end
     /// of each iteration. The evaluation occurs after the possible MCMC moves.
     /// The output parameter `integrand` shall contains the results of the

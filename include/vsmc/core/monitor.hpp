@@ -36,9 +36,9 @@ class Monitor
     /// \param eval The evaluation object of type Monitor::eval_type
     ///
     /// The evaluation object has the signature
-    /// \code
+    /// ~~~{.cpp}
     /// void eval (std::size_t iter, std::size_t dim, const Particle<T> &particle, double *result)
-    /// \endcode
+    /// ~~~
     /// where the first three arguments are passed in by the Sampler at the
     /// end of each iteration. The evaluation occurs after the possible MCMC
     /// moves. The output parameter `result` shall contain the results of the

@@ -26,10 +26,10 @@ namespace vsmc {
 /// ConstSingleParticle are supposed to be used to access Particle object. They
 /// may provide write access to the Particle object. However, themselves cannot
 /// be changed. That is, the following will be ill-formed,
-/// \code
+/// ~~~{.cpp}
 /// auto iter = particle.begin();
 /// *iter = SingleParticle(0, 0);
-/// \endcode
+/// ~~~
 /// This is the supposed behavior, since change the SingleParticle object
 /// pointed by the iterator is meaningless and logically wrong. The
 /// constantness of the iterators are related to the constantness of the
@@ -235,7 +235,7 @@ namespace traits {
 /// vsmc::traits::SingleParticleBaseTypeTrait<T> or define a class template
 /// named `single_particle_type` within `T` with the following minimum
 /// requirement.
-/// \code
+/// ~~~{.cpp}
 /// template <typename S> // S: StateType, such as StateMatrix<Dim, T>
 /// struct single_particle_type
 /// {
@@ -244,7 +244,7 @@ namespace traits {
 ///     size_type id () const;
 ///     const Particle<S> *particle_ptr () const;
 /// };
-/// \endcode
+/// ~~~
 /// Usually you can safely derive `single_particle_type<S>` from
 /// SingleParticleBase<S> and add methods specific to `S`.
 template <typename T>

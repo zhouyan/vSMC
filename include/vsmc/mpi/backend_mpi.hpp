@@ -60,15 +60,15 @@ class StateMPI : public BaseState
     /// template type parameter types are serializable. For user defined types,
     /// see document of Boost.Serialize of how to serialize a class object.
     /// - `state_pack`
-    /// \code
+    /// ~~~{.cpp}
     /// state_pack_type state_pack (size_type id) const;
-    /// \endcode
+    /// ~~~
     /// Given a local particle id on this node, pack the state values into a
     /// `state_pack_type` object.
     /// - `state_unpack`
-    /// \code
+    /// ~~~{.cpp}
     /// void state_unpack (size_type id, const state_pack_type &pack);
-    /// \endcode
+    /// ~~~
     /// Given a local particle id and a `state_pack_type` object, unpack it
     /// into the given position on this node.
     ///

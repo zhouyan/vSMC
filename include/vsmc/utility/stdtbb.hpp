@@ -181,10 +181,10 @@ class ThreadInfo
 ///
 /// \details
 /// Requirement: WorkType:
-/// \code
+/// ~~~{.cpp}
 /// WorkType work;
 /// work(range);
-/// \endcode
+/// ~~~
 template <typename Range, typename WorkType>
 inline void parallel_for (const Range &range, WorkType &&work)
 {
@@ -216,11 +216,11 @@ inline void parallel_for (const Range &range, WorkType &&work)
 ///
 /// \details
 /// Requirement: WorkType
-/// \code
+/// ~~~{.cpp}
 /// WorkType work;
 /// work(range);
 /// Work.join(other_work);
-/// \endcode
+/// ~~~
 template <typename Range, typename WorkType>
 inline void parallel_reduce (const Range &range, WorkType &work)
 {
@@ -254,10 +254,10 @@ inline void parallel_reduce (const Range &range, WorkType &work)
 ///
 /// \details
 /// Requirement: WorkType
-/// \code
+/// ~~~{.cpp}
 /// WorkType work;
 /// work(range, res); // res: T reference type
-/// \endcode
+/// ~~~
 template <typename Range, typename T, typename WorkType>
 inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
 {
@@ -297,10 +297,10 @@ inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
 ///
 /// \details
 /// Requirement: WorkType
-/// \code
+/// ~~~{.cpp}
 /// WorkType work;
 /// work(range, res); // res: T reference type
-/// \endcode
+/// ~~~
 template <typename Range, typename T, typename Bin, typename WorkType>
 inline T parallel_accumulate (const Range &range, WorkType &&work,
         T init, Bin bin_op)

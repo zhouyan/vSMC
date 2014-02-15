@@ -227,7 +227,7 @@ class StateCL
     /// `FPType` of this class is set to `cl_double`, and there are `1000`
     /// particles, then the complete source, which acutally get compiled looks
     /// like the following
-    /// \code
+    /// ~~~{.cpp}
     /// typedef float fp_type;
     /// #define VSMC_FP_TYPE_TYPE_IS_FLOAT  1
     /// #define VSMC_FP_TYPE_TYPE_IS_DOUBLE 0
@@ -247,7 +247,7 @@ class StateCL
     /// #include <vsmc/opencl/internal/device.h>
     ///
     /// // ... User source, passed by the source argument
-    /// \endcode
+    /// ~~~
     /// After build, `vsmc::Seed::instance().skip(N)` is called with `N`
     /// being the nubmer of particles.
     void build (const std::string &source,
@@ -357,16 +357,16 @@ class StateCL
 ///
 /// \details
 /// Kernel requirement (`initialize_state`)
-/// \code
+/// ~~~{.cpp}
 /// __kernel
 /// void kern (__global state_type *state, __global ulong *accept);
-/// \endcode
+/// ~~~
 /// - Kernels can have additonal arguments and set by the user in
 /// `pre_processor`.
 /// - `state` has size `N * StateSize` where `accept` has size `N`.
 /// - The declaration does not have to much this, but the first arguments will
 /// be set by InitializeCL::opeartor(). For example
-/// \code
+/// ~~~{.cpp}
 /// type struct {
 ///     state_type v1;
 ///     state_type v2;
@@ -375,7 +375,7 @@ class StateCL
 /// } param;
 /// __kernel
 /// void kern (__global param *state, __global ulong *accept);
-/// \endcode
+/// ~~~
 /// is also acceptable, but now `state` has to be treat as a length `N` array.
 /// In summary, on the host side, it is a `cl::Buffer` object being passed to
 /// the kernel, which is not much unlike `void *` pointer.
@@ -490,10 +490,10 @@ class InitializeCL
 ///
 /// \details
 /// Kernel requirement (`move_state`)
-/// \code
+/// ~~~{.cpp}
 /// __kernel
 /// void kern (ulong iter, __global state_type *state, __global ulong *accept);
-/// \endcode
+/// ~~~
 template <typename T, typename>
 class MoveCL
 {
@@ -604,11 +604,11 @@ class MoveCL
 ///
 /// \details
 /// Kernel requirement (`monitor_state`)
-/// \code
+/// ~~~{.cpp}
 /// __kernel
 /// void kern (ulong iter, ulong dim, __global state_type *state,
 ///            __global fp_type *res);
-/// \endcode
+/// ~~~
 template <typename T, typename>
 class MonitorEvalCL
 {
@@ -717,11 +717,11 @@ class MonitorEvalCL
 ///
 /// \details
 /// Kernel requirement (`path_state`)
-/// \code
+/// ~~~{.cpp}
 /// __kernel
 /// void kern (ulong iter, __global state_type *state,
 ///            __global state_type *res);
-/// \endcode
+/// ~~~
 template <typename T, typename>
 class PathEvalCL
 {

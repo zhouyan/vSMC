@@ -140,35 +140,35 @@ class CLSetup
 /// such a type. The user can change the platform name, device vendor name,
 /// device name, and device type through CLSetup. In case of names, only
 /// partial match is requried. For example,
-/// \code
+/// ~~~{.cpp}
 /// CLSetup<CLDefault> &setup = CLSetup<CLDefault>::instance();
 /// setup.platform("Apple");
 /// setup.device_vendor("Intel");
 /// setup.device_type("GPU);
 /// setup.device_name("Iris");
 /// CLManager<CLDefault> &manager = CLManager<CLDefault>::instance();
-/// \endcode
+/// ~~~
 /// If compiled on a recent MacBook Pro (late 2013 model), then the Iris Pro
 /// GPU from Intel will be used. Note that in this case, actually specify
-/// \code
+/// ~~~{.cpp}
 /// setup.device_type("GPU");
 /// setup.device_name("Iris")
-/// \endcode
+/// ~~~
 /// or
-/// \code
+/// ~~~{.cpp}
 /// setup.device_type("GPU");
 /// setup.device_vedor("Intel")
-/// \endcode
+/// ~~~
 /// is enough. However, if one specify
-/// \code
+/// ~~~{.cpp}
 /// setup.device_type("CPU");
 /// setup.device_vedor("NVIDIA")
-/// \endcode
+/// ~~~
 /// Then the setup will fail, since there is no device with the specified
 /// combinations. Also note that, specification such as
-/// \code
+/// ~~~{.cpp}
 /// setup.device_vendor("NVIDIA")
-/// \endcode
+/// ~~~
 /// may not be enough to lead to successful setup. The default device type
 /// `CL_DEVICE_TYPE_DEFAULT` may not be GPU. To be safe, if one need to use
 /// CLSetup, at least specify the device type. It can be set through values of

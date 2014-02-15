@@ -100,7 +100,7 @@ class DispatchFunction
 /// This is a helper function. Often as will C++, it is difficult to know the
 /// exact type of `work` (say, a lambda expression), which is requried in class
 /// template object delerations. With this function, one may write,
-/// \code
+/// ~~~{.cpp}
 /// vsmc::DispatchQueue<vsmc::DispatchGlobal> queue;
 /// vsmc::DispatchGroup group;
 /// auto work = vsmc::dispatch_funciton_new([] { /* do work */ });
@@ -108,7 +108,7 @@ class DispatchFunction
 /// // somewhere perhaps far away
 /// group.wait(DISPATCH_TIME_FOREVER); // wait for work to be done
 /// delete work;
-/// \endcode
+/// ~~~
 ///
 /// \param work A callable object with signature `void f(void)`
 template <typename T>
@@ -648,7 +648,7 @@ class DispatchSource<DispatchTimer> :
 ///
 /// \details
 /// Example:
-/// \code
+/// ~~~{.cpp}
 /// class myProgress : public vsmc::DispatchProgress
 /// {
 ///     public :
@@ -672,7 +672,7 @@ class DispatchSource<DispatchTimer> :
 /// sampler.initialize();
 /// sampler.iterate(IterNum);
 /// progress.stop();
-/// \endcode
+/// ~~~
 class DispatchProgress
 {
     public :
@@ -914,7 +914,7 @@ class DispatchProgress
 ///
 /// \details
 /// Example:
-/// \code
+/// ~~~{.cpp}
 /// vsmc::Sampler<T> sampler(N);
 /// // configure the sampler
 /// vsmc::DispatchProgressSampler<T> progress(sampler);
@@ -922,7 +922,7 @@ class DispatchProgress
 /// sampler.initialize();
 /// sampler.iterate(IterNum);
 /// progress.stop();
-/// \endcode
+/// ~~~
 template <typename T>
 class DispatchProgressSampler : public DispatchProgress
 {

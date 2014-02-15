@@ -267,14 +267,14 @@ namespace vsmc {
 /// \details
 /// Range concept: All functors defined in this namespace require the range
 /// satisfies
-/// \code
+/// ~~~{.cpp}
 /// struct Range
 /// {
 ///     typdef IntType const_iterator;
 ///     const_iterator begin() const;
 ///     const iterator end() const;
 /// };
-/// \endcode
+/// ~~~
 /// Both `tbb::blocked_range<IntType>` and `vsmc::BlockedRange<IntType>`
 /// satisfies these requirement.
 namespace tbb_op {
