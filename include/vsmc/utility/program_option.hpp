@@ -23,7 +23,6 @@ class ProgramOptionBase
     virtual bool set (std::stringstream &,
             const std::string &, const std::string &) = 0;
     virtual bool set_default () = 0;
-    virtual const std::string &value_string () const = 0;
     virtual void print_help (const std::string &) const = 0;
     virtual ProgramOptionBase *clone () const = 0;
     virtual ~ProgramOptionBase () {}
@@ -60,23 +59,20 @@ class ProgramOption : public ProgramOptionBase
     bool set (std::stringstream &ss,
             const std::string &oname, const std::string &sval)
     {
-        if (bool(ptr_) || bool(vec_ptr_)) {
+        ss.clear();
+        ss.str(sval);
+        T tval;
+        ss >> tval;
+        if (ss.fail()) {
+            std::fprintf(stderr,
+                    "Failed to set value of option '%s': %s\n",
+                    oname.c_str(), sval.c_str());
             ss.clear();
-            ss.str(sval);
-            T tval;
-            ss >> tval;
-            if (ss.fail()) {
-                std::fprintf(stderr,
-                        "Failed to set value of option '%s': %s\n",
-                        oname.c_str(), sval.c_str());
-                ss.clear();
-                return false;
-            }
-
-            if (ptr_) *ptr_ = tval;
-            if (vec_ptr_) vec_ptr_->push_back(tval);
+            return false;
         }
-        sval_ = sval;
+
+        if (ptr_) *ptr_ = tval;
+        if (vec_ptr_) vec_ptr_->push_back(tval);
 
         return true;
     }
@@ -90,8 +86,6 @@ class ProgramOption : public ProgramOptionBase
 
         return has_default_;
     }
-
-    const std::string &value_string () const {return sval_;}
 
     void print_help (const std::string &oname) const
     {
@@ -111,7 +105,6 @@ class ProgramOption : public ProgramOptionBase
     private :
 
     std::string desc_;
-    std::string sval_;
     T *const ptr_;
     std::vector<T> *const vec_ptr_;
     T default_;
@@ -319,45 +312,6 @@ class ProgramOptionMap
             return iter->second.second;
         else
             return 0;
-    }
-
-    /// \brief Convert the string of the option value into object
-    ///
-    /// \param name Name of the option
-    /// \param ptr The destination to set the value of the option
-    ///
-    /// \return True if the option is found and conversion is successful
-    template <typename T>
-    bool get (const std::string &name, T *ptr) const
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, value);
-
-        std::string oname("--" + name);
-        option_map_type::const_iterator iter = option_map_.find(oname);
-        const std::string &sval = iter->second.first->value_string();
-
-        if (iter == option_map_.end())
-            return false;
-
-        if (sval.empty()) {
-            std::fprintf(stderr,
-                    "Failed to get value of option '%s': %s (not set yet)\n",
-                    oname.c_str(), sval.c_str());
-            return false;
-        }
-
-        ss_.clear();
-        ss_.str(sval);
-        ss_ >> *ptr;
-        if (ss_.fail()) {
-            std::fprintf(stderr,
-                    "Failed to get value of option '%s': %s\n",
-                    oname.c_str(), sval.c_str());
-            ss_.clear();
-            return false;
-        }
-
-        return true;
     }
 
     private :
