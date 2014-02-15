@@ -51,8 +51,8 @@ class NormalizingConstantSTD : public NormalizingConstant
 
     void vd_exp (std::size_t N, double *inc_weight) const
     {
-        parallel_for(BlockedRange<std::size_t>(0, N), tbb_op::exp<double>(
-                    inc_weight, inc_weight));
+        parallel_for(BlockedRange<std::size_t>(0, N),
+                tbb_op::exp<double>(inc_weight, inc_weight));
     }
 }; // class NormalizingConstantSTD
 

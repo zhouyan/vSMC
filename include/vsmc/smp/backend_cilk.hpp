@@ -30,8 +30,8 @@ class WeightSetCILK : public traits::WeightSetTypeTrait<BaseState>::type
         using std::exp;
 
         const size_type N = static_cast<size_type>(this->size());
-        double *weight = this->weight_ptr();
-        const double *log_weight = this->log_weight_ptr();
+        double *const weight = this->weight_ptr();
+        const double *const log_weight = this->log_weight_ptr();
         cilk_for (size_type i = 0; i != N; ++i)
             weight[i] = exp(log_weight[i]);
     }
@@ -41,8 +41,8 @@ class WeightSetCILK : public traits::WeightSetTypeTrait<BaseState>::type
         using std::log;
 
         const size_type N = static_cast<size_type>(this->size());
-        const double *weight = this->weight_ptr();
-        double *log_weight = this->log_weight_ptr();
+        const double *const weight = this->weight_ptr();
+        double *const log_weight = this->log_weight_ptr();
         cilk_for (size_type i = 0; i != N; ++i)
             log_weight[i] = log(weight[i]);
     }
@@ -61,6 +61,7 @@ class NormalizingConstantCILK : public NormalizingConstant
     void vd_exp (std::size_t N, double *inc_weight) const
     {
         using std::exp;
+
         cilk_for (std::size_t i = 0; i != N; ++i)
             inc_weight[i] = exp(inc_weight[i]);
     }
