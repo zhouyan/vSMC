@@ -22,6 +22,7 @@ class ProgramOptionBase
 
     virtual bool set (std::stringstream &,
             const std::string &, const std::string &) = 0;
+    virtual bool set_default () = 0;
     virtual const std::string &value_string () const = 0;
     virtual void print_help (const std::string &) const = 0;
     virtual ProgramOptionBase *clone () const = 0;
@@ -48,14 +49,13 @@ class ProgramOption : public ProgramOptionBase
     template <typename V>
     ProgramOption (const std::string &desc, T *ptr, const V &val) :
         desc_(desc), ptr_(ptr), vec_ptr_(VSMC_NULLPTR),
-        default_(static_cast<T>(val)), has_default_(true) {*ptr = default_;}
+        default_(static_cast<T>(val)), has_default_(true) {}
 
     template <typename V>
     ProgramOption (const std::string &desc, std::vector<T> *ptr,
             const V &val) :
         desc_(desc), ptr_(VSMC_NULLPTR), vec_ptr_(ptr),
-        default_(static_cast<T>(val)), has_default_(true)
-    {vec_ptr_->push_back(default_);}
+        default_(static_cast<T>(val)), has_default_(true) {}
 
     bool set (std::stringstream &ss,
             const std::string &oname, const std::string &sval)
@@ -79,6 +79,16 @@ class ProgramOption : public ProgramOptionBase
         sval_ = sval;
 
         return true;
+    }
+
+    bool set_default ()
+    {
+        if (has_default_) {
+            if (ptr_) *ptr_ = default_;
+            if (vec_ptr_) vec_ptr_->push_back(default_);
+        }
+
+        return has_default_;
     }
 
     const std::string &value_string () const {return sval_;}
@@ -278,6 +288,13 @@ class ProgramOptionMap
         for (int ac = 1; ac < argc - 1; ++ac) {
             if (process_option(argv[ac], argv[ac + 1]))
                 ++ac;
+        }
+
+        for (option_map_type::iterator iter = option_map_.begin();
+                iter != option_map_.end(); ++iter) {
+            if (iter->second.second == 0)
+                if (iter->second.first->set_default())
+                    iter->second.second = 1;
         }
 
         return false;
