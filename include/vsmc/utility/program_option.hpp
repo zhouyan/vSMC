@@ -346,9 +346,8 @@ class ProgramOptionMap
     /// \brief Process the options
     ///
     /// \details
-    /// If the option "--help" is given at the commad line, then this function
-    /// does not process any other options. It merely process the options
-    /// --help by printing the help information.
+    /// If the option "--help" is given at the commad line, help information
+    /// are printed.
     ///
     /// \param argc The first argument of the `main` function
     /// \param argv The second argument of the `main` function
@@ -357,39 +356,23 @@ class ProgramOptionMap
     /// line. Otherwise `false`.
     bool process (int argc, const char **argv)
     {
-        for (int ac = 1; ac != argc; ++ac) {
-            if (!std::strcmp(argv[ac], "--help")) {
-                for (option_map_type::iterator iter = option_map_.begin();
-                        iter != option_map_.end(); ++iter) {
-                    iter->second.first->print_help(iter->first);
-                }
-                return true;
-            }
-        }
+        std::vector<std::string> arg_vector;
+        arg_vector.reserve(static_cast<std::size_t>(argc));
+        for (int i = 0; i != argc; ++i)
+            arg_vector.push_back(argv[i]);
 
-        for (int ac = 1; ac < argc - 1; ++ac) {
-            if (process_option(argv[ac], argv[ac + 1]))
-                ++ac;
-        }
-
-        for (option_map_type::iterator iter = option_map_.begin();
-                iter != option_map_.end(); ++iter) {
-            if (iter->second.second == 0)
-                if (iter->second.first->set_default())
-                    iter->second.second = 1;
-        }
-
-        return false;
+        return process_option(arg_vector);
     }
 
     /// \brief Process the options
     bool process (int argc, char **argv)
     {
-        const char **cargv = new const char *[argc];
+        std::vector<std::string> arg_vector;
+        arg_vector.reserve(static_cast<std::size_t>(argc));
         for (int i = 0; i != argc; ++i)
-            cargv[i] = argv[i];
+            arg_vector.push_back(argv[i]);
 
-        return process(argc, cargv);
+        return process_option(arg_vector);
     }
 
     /// \brief Count the number of occurence of an option on the command line
@@ -420,18 +403,101 @@ class ProgramOptionMap
         }
     }
 
-    bool process_option (const std::string &oname, const std::string &sval)
+    bool process_option (std::vector<std::string> &arg_vector)
     {
-        option_map_type::iterator iter = option_map_.find(oname);
+        bool help = false;
+        const std::string oname_help("--help");
+        const std::vector<std::string> empty_value;
+        std::vector<std::pair<std::string, std::vector<std::string> > >
+            option_vector;
 
-        if (iter == option_map_.end())
+        std::vector<std::string>::iterator aiter = arg_vector.begin();
+        while (!is_option(*aiter) && aiter != arg_vector.end())
+            ++aiter;
+        while (aiter != arg_vector.end()) {
+            if (*aiter == oname_help) {
+                help = true;
+                while (!is_option(*aiter) && aiter != arg_vector.end())
+                    ++aiter;
+            }
+            option_vector.push_back(std::make_pair(*aiter, empty_value));
+            std::vector<std::string> &value = option_vector.back().second;
+            ++aiter;
+            while (!is_option(*aiter) && aiter != arg_vector.end()) {
+                value.push_back(*aiter);
+                ++aiter;
+            }
+        }
+
+        if (help) {
+            for (option_map_type::iterator iter = option_map_.begin();
+                    iter != option_map_.end(); ++iter) {
+                iter->second.first->print_help(iter->first);
+            }
+        }
+
+        for (std::vector<std::pair<std::string, std::vector<std::string> > >::
+                iterator iter = option_vector.begin();
+                iter != option_vector.end(); ++iter) {
+            option_map_type::iterator miter = option_map_.find(iter->first);
+            if (miter == option_map_.end())
+                continue;
+            bool proc = false;
+            const std::size_t vsize = iter->second.size();
+            for (std::size_t i = 0; i != vsize; ++i)
+                proc = process_option(miter, iter->second[i]) || proc;
+            if (proc)
+                ++miter->second.second;
+        }
+
+        for (option_map_type::iterator iter = option_map_.begin();
+                iter != option_map_.end(); ++iter) {
+            if (iter->second.second == 0)
+                if (iter->second.first->set_default())
+                    iter->second.second = 1;
+        }
+
+        return help;
+    }
+
+    bool process_option (option_map_type::iterator iter, std::string &sval)
+    {
+        std::size_t e = sval.size();
+        std::size_t n = 0;
+        while (e != 0 && (sval[e] == ' ' || sval[e] == ',')) {
+            ++n;
+            --e;
+        }
+        if (n != 0)
+            sval.erase(++e, n);
+
+        if (sval.empty())
             return false;
 
         if (!iter->second.first->set(ss_, iter->first, sval))
             return false;
 
-        ++iter->second.second;
         return true;
+    }
+
+    bool is_option (const std::string &str)
+    {
+        if (str.size() < 3)
+            return false;
+
+        if (str[0] != '-')
+            return false;
+
+        if (str[1] != '-')
+            return false;
+
+        return true;
+    }
+
+    void process_value (std::string &str)
+    {
+        if (str.back() == ',')
+            str.erase(--str.end());
     }
 }; // class ProgramOptionMap
 
