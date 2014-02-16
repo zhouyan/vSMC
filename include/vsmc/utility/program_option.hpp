@@ -300,8 +300,7 @@ class ProgramOptionMap
     ProgramOptionMap ()
     {
         help_ptr_ = new ProgramOptionHelp;
-        option_map_["--help"] =
-            std::make_pair(help_ptr_, static_cast<std::size_t>(0));
+        option_map_["--help"] = std::make_pair(help_ptr_, 0);
     }
 
     ProgramOptionMap (const ProgramOptionMap &other) :
@@ -421,28 +420,23 @@ class ProgramOptionMap
     ///
     /// \param argc The first argument of the `main` function
     /// \param argv The second argument of the `main` function
-    ///
-    /// \return `true` If the option `--help` has been specified on the command
-    /// line. Otherwise `false`.
-    bool process (int argc, const char **argv)
+    void process (int argc, const char **argv)
     {
         std::vector<std::string> arg_vector;
         arg_vector.reserve(static_cast<std::size_t>(argc));
         for (int i = 0; i != argc; ++i)
             arg_vector.push_back(argv[i]);
-
-        return process_option(arg_vector);
+        process_arg(arg_vector);
     }
 
     /// \brief Process the options
-    bool process (int argc, char **argv)
+    void process (int argc, char **argv)
     {
         std::vector<std::string> arg_vector;
         arg_vector.reserve(static_cast<std::size_t>(argc));
         for (int i = 0; i != argc; ++i)
             arg_vector.push_back(argv[i]);
-
-        return process_option(arg_vector);
+        process_arg(arg_vector);
     }
 
     /// \brief Count the number of occurence of an option on the command line
@@ -464,17 +458,16 @@ class ProgramOptionMap
 
     void add_option (const std::string &oname, ProgramOptionBase *optr)
     {
-        std::pair<option_map_type::iterator, bool> set =
-            option_map_.insert(std::make_pair(oname,
-                        std::make_pair(optr, static_cast<std::size_t>(0))));
-        if (!set.second) {
-            if (set.first->second.first)
-                delete set.first->second.first;
-            set.first->second.first = optr;
+        std::pair<option_map_type::iterator, bool> insert =
+            option_map_.insert(std::make_pair(oname, std::make_pair(optr, 0)));
+        if (!insert.second) {
+            if (insert.first->second.first)
+                delete insert.first->second.first;
+            insert.first->second.first = optr;
         }
     }
 
-    bool process_option (std::vector<std::string> &arg_vector)
+    void process_arg (std::vector<std::string> &arg_vector)
     {
         const std::vector<std::string> empty_value;
         std::vector<std::pair<std::string, std::vector<std::string> > >
@@ -492,7 +485,7 @@ class ProgramOptionMap
             }
         }
 
-        std::string sval_true("1");
+        const std::string sval_true("1");
         for (std::vector<std::pair<std::string, std::vector<std::string> > >::
                 iterator iter = option_vector.begin();
                 iter != option_vector.end(); ++iter) {
@@ -508,8 +501,10 @@ class ProgramOptionMap
             } else if (vsize == 0) {
                 program_option_error(miter->first, "No value specified");
             } else {
-                for (std::size_t i = 0; i != vsize; ++i)
+                for (std::size_t i = 0; i != vsize; ++i) {
+                    process_value(iter->second[i]);
                     proc = process_option(miter, iter->second[i]) || proc;
+                }
             }
             if (proc)
                 ++miter->second.second;
@@ -528,11 +523,9 @@ class ProgramOptionMap
                 iter->second.first->print_help(iter->first);
             }
         }
-
-        return help_ptr_->help();
     }
 
-    bool process_option (option_map_type::iterator iter, std::string &sval)
+    void process_value (std::string &sval)
     {
         std::size_t e = sval.size();
         std::size_t n = 0;
@@ -542,16 +535,17 @@ class ProgramOptionMap
         }
         if (n != 0)
             sval.erase(e, n);
+    }
 
+    bool process_option (option_map_type::iterator iter,
+            const std::string &sval)
+    {
         if (sval.empty()) {
             program_option_error(iter->first, "No value specified");
             return false;
         }
 
-        if (!iter->second.first->set(ss_, iter->first, sval))
-            return false;
-
-        return true;
+        return iter->second.first->set(ss_, iter->first, sval);
     }
 
     bool is_option (const std::string &str)
