@@ -5,7 +5,7 @@
 #include <mkl_vsl.h>
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset) \
-    VSMC_RUNTIME_ASSERT((offset < max VSMC_MACRO_NO_EXPANSION ()),           \
+    VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE ()),                          \
             ("**vsmc::MKLOffsetDynamic** "                                   \
              "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
 
@@ -227,8 +227,8 @@ struct MKLSkipAheadForce
 
 struct MKLOffsetZero
 {
-    static VSMC_CONSTEXPR MKL_INT min VSMC_MACRO_NO_EXPANSION () {return 0;}
-    static VSMC_CONSTEXPR MKL_INT max VSMC_MACRO_NO_EXPANSION () {return 0;}
+    static VSMC_CONSTEXPR MKL_INT min VSMC_MNE () {return 0;}
+    static VSMC_CONSTEXPR MKL_INT max VSMC_MNE () {return 0;}
     static void offset (MKL_INT) {}
     static VSMC_CONSTEXPR MKL_INT offset () {return 0;}
 }; // struct OffsetZero
@@ -238,9 +238,8 @@ struct MKLOffsetDynamic
 {
     MKLOffsetDynamic () : offset_(0) {}
 
-    static VSMC_CONSTEXPR MKL_INT min VSMC_MACRO_NO_EXPANSION () {return 0;}
-    static VSMC_CONSTEXPR MKL_INT max VSMC_MACRO_NO_EXPANSION ()
-    {return MaxOffset;}
+    static VSMC_CONSTEXPR MKL_INT min VSMC_MNE () {return 0;}
+    static VSMC_CONSTEXPR MKL_INT max VSMC_MNE () {return MaxOffset;}
 
     void offset (MKL_INT n)
     {
@@ -586,11 +585,8 @@ class MKLEngine
     static VSMC_CONSTEXPR const result_type _Max =
         ~(static_cast<result_type>(0));
 
-    static VSMC_CONSTEXPR result_type min VSMC_MACRO_NO_EXPANSION ()
-    {return _Min;}
-
-    static VSMC_CONSTEXPR result_type max VSMC_MACRO_NO_EXPANSION ()
-    {return _Max;}
+    static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
+    static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     stream_type &stream () {return stream_;}
     const stream_type &stream () const {return stream_;}

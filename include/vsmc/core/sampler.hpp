@@ -80,7 +80,7 @@ class Sampler
     Sampler<T> &resample ()
     {
         particle_.resample(resample_op_,
-                std::numeric_limits<double>::max VSMC_MACRO_NO_EXPANSION ());
+                std::numeric_limits<double>::max VSMC_MNE ());
 
         return *this;
     }

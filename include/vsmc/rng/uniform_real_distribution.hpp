@@ -140,8 +140,8 @@ class UniformRealDistribution
 
     result_type a () const {return a_;}
     result_type b () const {return b_;}
-    result_type min VSMC_MACRO_NO_EXPANSION () const {return a_;}
-    result_type max VSMC_MACRO_NO_EXPANSION () const {return b_;}
+    result_type min VSMC_MNE () const {return a_;}
+    result_type max VSMC_MNE () const {return b_;}
 
     template <typename Eng>
     result_type operator() (Eng &eng) const
@@ -151,8 +151,7 @@ class UniformRealDistribution
 
 #if VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
         typedef typename traits::IntegerRangeTypeTrait<
-            Eng::min VSMC_MACRO_NO_EXPANSION (),
-            Eng::max VSMC_MACRO_NO_EXPANSION ()>::type eng_uint_t;
+            Eng::min VSMC_MNE (), Eng::max VSMC_MNE ()>::type eng_uint_t;
         typedef cxx11::integral_constant<std::size_t, sizeof(eng_uint_t)>
             u_bits;
 
@@ -160,14 +159,14 @@ class UniformRealDistribution
                 u_bits(), fp_bits());
 #else // VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
         static VSMC_CONSTEXPR const uint64_t eng_min = static_cast<uint64_t>(
-                eng.min VSMC_MACRO_NO_EXPANSION ());
+                eng.min VSMC_MNE ());
         if (eng_min != 0) {
             VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN;
             return 0;
         }
 
         static VSMC_CONSTEXPR const uint64_t eng_max = static_cast<uint64_t>(
-                eng.max VSMC_MACRO_NO_EXPANSION ());
+                eng.max VSMC_MNE ());
         VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX;
 
         result_type u = 0;

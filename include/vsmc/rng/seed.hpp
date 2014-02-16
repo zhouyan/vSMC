@@ -81,8 +81,7 @@ class SeedGenerator
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_ = std::numeric_limits<result_type>::max
-            VSMC_MACRO_NO_EXPANSION ();
+        seed_max_ = std::numeric_limits<result_type>::max VSMC_MNE ();
         seed_max_ -= seed_max_ % divisor_;
         seed_max_ /= divisor_;
 
@@ -110,8 +109,8 @@ class SeedGenerator
     result_type remainder_;
 
     SeedGenerator () :
-        seed_(0), seed_max_(std::numeric_limits<result_type>::max
-                VSMC_MACRO_NO_EXPANSION ()), divisor_(1), remainder_(0) {}
+        seed_(0), seed_max_(std::numeric_limits<result_type>::max VSMC_MNE ()),
+        divisor_(1), remainder_(0) {}
 
     SeedGenerator (const SeedGenerator<ID> &);
     SeedGenerator<ID> &operator= (const SeedGenerator<ID> &);

@@ -280,10 +280,10 @@ namespace vsmc {
 namespace tbb_op {
 
 template <typename T> inline const T &max_fn (const T &a, const T &b)
-{return std::max VSMC_MACRO_NO_EXPANSION (a, b);}
+{return std::max VSMC_MNE (a, b);}
 
 template <typename T> inline const T &min_fn (const T &a, const T &b)
-{return std::min VSMC_MACRO_NO_EXPANSION (a, b);}
+{return std::min VSMC_MNE (a, b);}
 
 template <typename T> struct positive_infinity_trait
 {static T value () {return std::numeric_limits<T>::infinity();}};
