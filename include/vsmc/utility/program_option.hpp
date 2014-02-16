@@ -10,6 +10,15 @@
 
 namespace vsmc {
 
+/// \brief Program option error messages
+/// \ingroup Option
+inline void program_option_error (const std::string &oname,
+        const std::string &msg)
+{
+    std::fprintf(stderr, "vSMC Program option error: option: %s: %s",
+            oname.c_str(), msg.c_str());
+}
+
 /// \brief Program option base class
 /// \ingroup Option
 class ProgramOptionBase
@@ -38,9 +47,7 @@ class ProgramOptionBase
         T tval;
         ss >> tval;
         if (ss.fail()) {
-            std::fprintf(stderr,
-                    "Failed to set value of option '%s': %s\n",
-                    oname.c_str(), sval.c_str());
+            program_option_error(oname, "Failed to set value: " + sval);
             ss.clear();
             return false;
         }
@@ -139,11 +146,7 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
     bool set_default () {return this->set_value_default(ptr_);}
 
     ProgramOptionBase *clone () const
-    {
-        ProgramOptionBase *ptr = new ProgramOptionScalar<T>(*this);
-
-        return ptr;
-    }
+    {return new ProgramOptionScalar<T>(*this);}
 
     private :
 
@@ -187,11 +190,7 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
     }
 
     ProgramOptionBase *clone () const
-    {
-        ProgramOptionBase *ptr = new ProgramOptionVector<T>(*this);
-
-        return ptr;
-    }
+    {return new ProgramOptionVector<T>(*this);}
 
     private :
 
@@ -416,14 +415,18 @@ class ProgramOptionMap
                 iterator iter = option_vector.begin();
                 iter != option_vector.end(); ++iter) {
             option_map_type::iterator miter = option_map_.find(iter->first);
-            if (miter == option_map_.end())
+            if (miter == option_map_.end()) {
+                program_option_error(iter->first, "Unknown option ignored");
                 continue;
+            }
             bool proc = false;
             const std::size_t vsize = iter->second.size();
             for (std::size_t i = 0; i != vsize; ++i)
                 proc = process_option(miter, iter->second[i]) || proc;
             if (proc)
                 ++miter->second.second;
+            else
+                program_option_error(iter->first, "Failed to set value");
         }
 
         for (option_map_type::iterator iter = option_map_.begin();
