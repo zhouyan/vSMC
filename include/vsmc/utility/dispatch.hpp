@@ -316,8 +316,9 @@ class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
 {
     public :
 
-    DispatchQueue (const char *name, dispatch_queue_attr_t attr = NULL) :
-        DispatchQueueBase(dispatch_queue_create(name, attr)) {}
+    DispatchQueue (const char *label = NULL,
+            dispatch_queue_attr_t attr = NULL) :
+        DispatchQueueBase(dispatch_queue_create(label, attr)) {}
 
     DispatchQueue (const DispatchQueue<DispatchPrivate> &other) :
         DispatchQueueBase(other)
@@ -481,80 +482,48 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 #endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 #endif // __BLOCKS__
 
+    private :
+
+    template <DispatchSourceType> struct source_type {};
+
     protected :
 
     DispatchSourceBase (uintptr_t handle, unsigned long mask,
             dispatch_queue_t queue) :
-        DispatchObject<dispatch_source_t>(
-                dispatch_source_create(source_type(cxx11::integral_constant<
-                        DispatchSourceType, Type>()), handle, mask, queue)) {}
-
-    DispatchSourceBase (const DispatchSourceBase &other) :
-        DispatchObject<dispatch_source_t>(other)
-    {
-        if (this->object() != NULL)
-            dispatch_retain(this->object());
-    }
-
-    DispatchSourceBase &operator= (const DispatchSourceBase &other)
-    {
-        if (this != &other) {
-            DispatchObject<dispatch_source_t>::operator=(other);
-            if (this->object() != NULL)
-                dispatch_retain(this->object());
-        }
-
-        return *this;
-    }
-
-    ~DispatchSourceBase ()
-    {
-        if (testcancel())
-            this->object(NULL);
-        else if (this->object() != NULL)
-            dispatch_release(this->object());
-    }
+        DispatchObject<dispatch_source_t>(dispatch_source_create(
+                    source_type_t(source_type<Type>()),
+                    handle, mask, queue)) {}
 
     private :
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchDataAdd>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchDataAdd>)
     {return DISPATCH_SOURCE_TYPE_DATA_ADD;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchDataOr>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchDataOr>)
     {return DISPATCH_SOURCE_TYPE_DATA_OR;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchMachRecv>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchMachRecv>)
     {return DISPATCH_SOURCE_TYPE_MACH_RECV;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchMachSend>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchMachSend>)
     {return DISPATCH_SOURCE_TYPE_MACH_SEND;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchProc>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchProc>)
     {return DISPATCH_SOURCE_TYPE_PROC;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchRead>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchRead>)
     {return DISPATCH_SOURCE_TYPE_READ;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchSignal>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchSignal>)
     {return DISPATCH_SOURCE_TYPE_SIGNAL;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchTimer>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchTimer>)
     {return DISPATCH_SOURCE_TYPE_TIMER;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchVnode>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchVnode>)
     {return DISPATCH_SOURCE_TYPE_VNODE;}
 
-    static dispatch_source_type_t source_type (
-            cxx11::integral_constant<DispatchSourceType, DispatchWrite>)
+    static dispatch_source_type_t source_type_t (source_type<DispatchWrite>)
     {return DISPATCH_SOURCE_TYPE_WRITE;}
 }; // class DispatchSourceBase
 
@@ -641,50 +610,20 @@ class DispatchSource<DispatchTimer> :
 
 /// \brief Display a progress bar while algorithm proceed
 /// \ingroup Dispatch
-///
-/// \details
-/// Example:
-/// ~~~{.cpp}
-/// class myProgress : public vsmc::DispatchProgress
-/// {
-///     public :
-///
-///     myProgress (vsmc::Sampler<T> &sampler) : sampler_(sampler) {}
-///
-///     // implement the following pure virtual base class function. You may
-///     // want to lock `sampler_` in case `iter_num` is read while it is
-///     // being updated
-///     uint64_t current () const {return sampler_.iter_num();}
-///
-///     private :
-///
-///     const vsmc::Sampler<T> &sampler_;
-/// };
-///
-/// vsmc::Sampler<T> sampler(N);
-/// // configure the sampler
-/// myProgress progress(sampler);
-/// progress.start(IterNum);
-/// sampler.initialize();
-/// sampler.iterate(IterNum);
-/// progress.stop();
-/// ~~~
 class DispatchProgress
 {
     public :
 
     /// \brief Construct a DispatchProgress with total amount of work
     DispatchProgress () :
-        total_(0), offset_(0),
-        queue_("DispatchProgress"), timer_(0, 0, queue_), print_first_(true),
-        num_equal_(0), percent_(0), elapsed_second_(0), iter_(0) {}
+        queue_("vsmc::DispatchProgress::queue_"), timer_(0, 0, queue_),
+        total_(0), iter_(0), print_first_(true),
+        num_equal_(0), percent_(0), elapsed_second_(0), last_iter_(0) {}
 
-    DispatchProgress (const DispatchQueue<DispatchPrivate> &queue) :
-        total_(0), offset_(0),
+    explicit DispatchProgress (const DispatchQueue<DispatchPrivate> &queue) :
         queue_(queue), timer_(0, 0, queue_),
-        num_equal_(0), percent_(0), elapsed_second_(0), iter_(0) {}
-
-    virtual ~DispatchProgress () {timer_.cancel();}
+        total_(0), iter_(0), print_first_(true),
+        num_equal_(0), percent_(0), elapsed_second_(0), last_iter_(0) {}
 
     /// \brief Start to print the progress
     ///
@@ -693,10 +632,11 @@ class DispatchProgress
     void start (uint64_t total)
     {
         total_ = total;
+        iter_ = 0;
         print_first_ = true;
 
         timer_.set_context(static_cast<void *>(this));
-        timer_.set_event_handler_f(print_start);
+        timer_.set_event_handler_f(print_start_);
         timer_.set_timer(DISPATCH_TIME_NOW,
                 NSEC_PER_SEC / 10, NSEC_PER_SEC / 10);
 
@@ -709,40 +649,32 @@ class DispatchProgress
     void stop ()
     {
         timer_.suspend();
-        queue_.sync_f(static_cast<void *>(this), print_stop);
+        queue_.sync_f(static_cast<void *>(this), print_stop_);
         watch_.stop();
     }
 
     /// \brief Returnt the current progress
-    ///
-    /// \return The amount of work already down represented by an integer in
-    /// the range zero to total, where total is passed into the constructor
-    virtual uint64_t current () const = 0;
-
-    /// \brief The offset that should be reduced from the value returned by
-    /// `current`
-    uint64_t offset () const {return offset_;}
-
-    /// \brief Set the offset
-    void offset (uint64_t n) {offset_ = n;}
+    void increment () {queue_.async_f(static_cast<void *>(this), increment_);}
 
     private :
 
-    uint64_t total_;
-    uint64_t offset_;
     DispatchQueue<DispatchPrivate> queue_;
     DispatchSource<DispatchTimer> timer_;
     StopWatch watch_;
 
-    mutable bool print_first_;
-    mutable unsigned num_equal_;
-    mutable unsigned percent_;
-    mutable uint64_t elapsed_second_;
-    mutable uint64_t iter_;
-    mutable char display_progress_[128];
-    mutable char display_percent_[32];
-    mutable char display_time_[16];
-    mutable char display_iter_[32];
+    uint64_t total_;
+    uint64_t iter_;
+    bool print_first_;
+
+    unsigned num_equal_;
+    unsigned percent_;
+    uint64_t elapsed_second_;
+    uint64_t last_iter_;
+
+    char display_progress_[128];
+    char display_percent_[32];
+    char display_time_[16];
+    char display_iter_[32];
 
     static VSMC_CONSTEXPR const unsigned num_equal_max_ = 60;
     static VSMC_CONSTEXPR const unsigned num_dash_max_ = 1;
@@ -781,31 +713,28 @@ class DispatchProgress
 
     static void print_progress (void *context)
     {
-        const DispatchProgress *timer_ptr =
-            static_cast<const DispatchProgress *>(context);
+        DispatchProgress *timer_ptr = static_cast<DispatchProgress *>(context);
 
-        uint64_t iter = timer_ptr->current();
-        uint64_t iter_total = timer_ptr->total_;
-        uint64_t iter_offset = timer_ptr->offset_;
-        iter = iter > iter_offset ? iter - iter_offset : 0;
+        uint64_t iter = timer_ptr->iter_;
+        uint64_t total = timer_ptr->total_;
 
         const StopWatch &elapsed = timer_ptr->watch_;
         elapsed.stop();
         elapsed.start();
         uint64_t elapsed_second = static_cast<uint64_t>(elapsed.seconds());
 
-        uint64_t display_iter = iter <= iter_total ? iter : iter_total;
-        unsigned num_equal = iter_total == 0 ? num_equal_max_ :
-            static_cast<unsigned>(num_equal_max_ * display_iter / iter_total);
-        unsigned percent = iter_total == 0 ? percent_max_ :
-            static_cast<unsigned>(percent_max_ * display_iter / iter_total);
+        uint64_t display_iter = iter <= total ? iter : total;
+        unsigned num_equal = total == 0 ? num_equal_max_ :
+            static_cast<unsigned>(num_equal_max_ * display_iter / total);
+        unsigned percent = total == 0 ? percent_max_ :
+            static_cast<unsigned>(percent_max_ * display_iter / total);
 
         if (timer_ptr->print_first_) {
             timer_ptr->print_first_ = false;
             timer_ptr->num_equal_ = num_equal + 1;
             timer_ptr->percent_ = percent + 1;
             timer_ptr->elapsed_second_ = elapsed_second + 1;
-            timer_ptr->iter_ = iter + 1;
+            timer_ptr->last_iter_ = iter + 1;
         }
 
         if (timer_ptr->num_equal_ != num_equal) {
@@ -869,9 +798,9 @@ class DispatchProgress
             cstr[offset++] = '\0';
         }
 
-        if (timer_ptr->iter_ != iter) {
-            timer_ptr->iter_ = iter;
-            unsigned num_space = uint_digit(iter_total) - uint_digit(iter);
+        if (timer_ptr->last_iter_ != iter) {
+            timer_ptr->last_iter_ = iter;
+            unsigned num_space = uint_digit(total) - uint_digit(iter);
             char *cstr = timer_ptr->display_iter_;
 
             std::size_t offset = 0;
@@ -880,7 +809,7 @@ class DispatchProgress
                 cstr[offset++] = ' ';
             uint_to_char(iter, cstr, offset);
             cstr[offset++] = '/';
-            uint_to_char(iter_total, cstr, offset);
+            uint_to_char(total, cstr, offset);
             cstr[offset++] = ']';
             cstr[offset++] = '\0';
         }
@@ -892,51 +821,24 @@ class DispatchProgress
         std::cout << const_cast<const char *>(timer_ptr->display_iter_);
     }
 
-    static void print_start (void *context)
+    static void increment_ (void *context)
+    {
+        DispatchProgress *timer_ptr = static_cast<DispatchProgress *>(context);
+        ++timer_ptr->iter_;
+    }
+
+    static void print_start_ (void *context)
     {
         print_progress(context);
         std::cout << '\r' << std::flush;
     }
 
-    static void print_stop (void *context)
+    static void print_stop_ (void *context)
     {
         print_progress(context);
         std::cout << std::endl;
     }
 }; // class DispatchProgress
-
-/// \brief A DispatchProgress that monitors a vSMC Sampler
-/// \ingroup Dispatch
-///
-/// \details
-/// Example:
-/// ~~~{.cpp}
-/// vsmc::Sampler<T> sampler(N);
-/// // configure the sampler
-/// vsmc::DispatchProgressSampler<T> progress(sampler);
-/// progress.start(IterNum);
-/// sampler.initialize();
-/// sampler.iterate(IterNum);
-/// progress.stop();
-/// ~~~
-template <typename T>
-class DispatchProgressSampler : public DispatchProgress
-{
-    public :
-
-    DispatchProgressSampler (const Sampler<T> &sampler) : sampler_(sampler) {}
-
-    DispatchProgressSampler (const Sampler<T> &sampler,
-            const DispatchQueue<DispatchPrivate> &queue) :
-        DispatchProgress(queue), sampler_(sampler) {}
-
-    uint64_t current () const
-    {return static_cast<uint64_t>(sampler_.iter_num());}
-
-    private :
-
-    const Sampler<T> &sampler_;
-};
 
 } // namespace vsmc
 
