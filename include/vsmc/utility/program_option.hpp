@@ -197,13 +197,14 @@ inline void program_option_error (const std::string &oname,
 
 /// \brief Program option base class
 /// \ingroup Option
-class ProgramOptionBase
+class ProgramOption
 {
     public :
 
-    ProgramOptionBase () {}
-    ProgramOptionBase (const ProgramOptionBase &) {}
-    ProgramOptionBase &operator= (const ProgramOptionBase &) {return *this;}
+    ProgramOption () {}
+    ProgramOption (const ProgramOption &) {}
+    ProgramOption &operator= (const ProgramOption &) {return *this;}
+    virtual ~ProgramOption () {}
 
     virtual bool is_bool () const = 0;
     virtual bool is_vector () const = 0;
@@ -211,8 +212,7 @@ class ProgramOptionBase
             const std::string &) = 0;
     virtual bool set_default () = 0;
     virtual void print_help (const std::string &) const = 0;
-    virtual ProgramOptionBase *clone () const = 0;
-    virtual ~ProgramOptionBase () {}
+    virtual ProgramOption *clone () const = 0;
 
     protected :
 
@@ -293,11 +293,11 @@ class ProgramOptionBase
 
         return true;
     }
-}; // class ProgramOptionBase
+}; // class ProgramOption
 
 /// \brief Option --help
 /// \ingroup Option
-class ProgramOptionHelp : public ProgramOptionBase
+class ProgramOptionHelp : public ProgramOption
 {
     public :
 
@@ -319,7 +319,7 @@ class ProgramOptionHelp : public ProgramOptionBase
         std::cout << "Print help information" << std::endl;
     }
 
-    ProgramOptionBase *clone () const {return new ProgramOptionHelp;}
+    ProgramOption *clone () const {return new ProgramOptionHelp;}
 
     bool help () const {return help_;}
 
@@ -331,7 +331,7 @@ class ProgramOptionHelp : public ProgramOptionBase
 /// \brief Option with a default value
 /// \ingroup Option
 template <typename T>
-class ProgramOptionDefault : public ProgramOptionBase
+class ProgramOptionDefault : public ProgramOption
 {
     public :
 
@@ -391,7 +391,7 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 
     bool set_default () {return this->set_value_default(ptr_);}
 
-    ProgramOptionBase *clone () const
+    ProgramOption *clone () const
     {return new ProgramOptionScalar<T>(*this);}
 
     private :
@@ -437,7 +437,7 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
         return success;
     }
 
-    ProgramOptionBase *clone () const
+    ProgramOption *clone () const
     {return new ProgramOptionVector<T, Cont>(*this);}
 
     private :
@@ -452,7 +452,7 @@ class ProgramOptionMap
 {
     public :
 
-    typedef std::map<std::string, std::pair<ProgramOptionBase *, std::size_t> >
+    typedef std::map<std::string, std::pair<ProgramOption *, std::size_t> >
         option_map_type;
 
     ProgramOptionMap ()
@@ -513,7 +513,7 @@ class ProgramOptionMap
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOptionScalar<T>(desc, ptr);
+        ProgramOption *optr = new ProgramOptionScalar<T>(desc, ptr);
         add_option(oname, optr);
 
         return *this;
@@ -526,7 +526,7 @@ class ProgramOptionMap
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOptionScalar<T>(desc, ptr, val);
+        ProgramOption *optr = new ProgramOptionScalar<T>(desc, ptr, val);
         add_option(oname, optr);
 
         return *this;
@@ -539,7 +539,7 @@ class ProgramOptionMap
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr =
+        ProgramOption *optr =
             new ProgramOptionVector<T, std::vector<T> >(desc, ptr);
         add_option(oname, optr);
 
@@ -553,7 +553,7 @@ class ProgramOptionMap
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr =
+        ProgramOption *optr =
             new ProgramOptionVector<T, std::vector<T> >(desc, ptr, val);
         add_option(oname, optr);
 
@@ -569,8 +569,7 @@ class ProgramOptionMap
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr =
-            new ProgramOptionVector<T, Cont>(desc, ptr);
+        ProgramOption *optr = new ProgramOptionVector<T, Cont>(desc, ptr);
         add_option(oname, optr);
 
         return *this;
@@ -586,7 +585,7 @@ class ProgramOptionMap
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOptionVector<T, Cont>(desc, ptr, val);
+        ProgramOption *optr = new ProgramOptionVector<T, Cont>(desc, ptr, val);
         add_option(oname, optr);
 
         return *this;
@@ -651,13 +650,33 @@ class ProgramOptionMap
             return 0;
     }
 
+    /// \brief Get the underlying option object
+    const ProgramOption *option (const std::string &name) const
+    {
+        option_map_type::const_iterator iter = option_map_.find("--" + name);
+        if (iter != option_map_.end())
+            return iter->second.first;
+        else
+            return VSMC_NULLPTR;
+    }
+
+    /// \brief Get the underlying option object
+    ProgramOption *option (const std::string &name)
+    {
+        option_map_type::const_iterator iter = option_map_.find("--" + name);
+        if (iter != option_map_.end())
+            return iter->second.first;
+        else
+            return VSMC_NULLPTR;
+    }
+
     private :
 
     ProgramOptionHelp *help_ptr_;
     option_map_type option_map_;
     mutable std::stringstream ss_;
 
-    void add_option (const std::string &oname, ProgramOptionBase *optr)
+    void add_option (const std::string &oname, ProgramOption *optr)
     {
         std::pair<option_map_type::iterator, bool> insert =
             option_map_.insert(std::make_pair(oname, std::make_pair(optr, 0)));
