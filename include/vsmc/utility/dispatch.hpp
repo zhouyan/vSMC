@@ -165,17 +165,7 @@ class DispatchObject
     /// \brief Return the underlying Dispatch object
     DispatchType object () const {return object_;}
 
-    void *get_context () const
-    {return dispatch_get_context(object_);}
-
-    void set_context (void *context) const
-    {dispatch_set_context(object_, context);}
-
-    void set_finalizer_f (dispatch_function_t finalizer) const
-    {dispatch_set_finalizer_t(object_, finalizer);}
-
-    protected :
-
+    /// \brief Set the underlying Dispatch object and retain it
     void object (DispatchType obj)
     {
         if (object_ == obj)
@@ -187,6 +177,15 @@ class DispatchObject
         if (object_ != NULL)
             dispatch_retain(object_);
     }
+
+    void *get_context () const
+    {return dispatch_get_context(object_);}
+
+    void set_context (void *context) const
+    {dispatch_set_context(object_, context);}
+
+    void set_finalizer_f (dispatch_function_t finalizer) const
+    {dispatch_set_finalizer_t(object_, finalizer);}
 
     private :
 
