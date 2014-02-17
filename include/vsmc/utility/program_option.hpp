@@ -295,7 +295,7 @@ class ProgramOption
     }
 }; // class ProgramOption
 
-/// \brief Option --help
+/// \brief Option `--help`
 /// \ingroup Option
 class ProgramOptionHelp : public ProgramOption
 {
@@ -504,7 +504,7 @@ class ProgramOptionMap
     /// \brief Add an option with a single value
     ///
     /// \param name Name of the option, on command name it shall be specified
-    /// by --name
+    /// by `--name`
     /// \param desc A descritpion stream of the option
     /// \param ptr The destination that store the option value
     template <typename T>
@@ -606,7 +606,7 @@ class ProgramOptionMap
     /// \brief Process the options
     ///
     /// \details
-    /// If the option "--help" is given at the commad line, help information
+    /// If the option `--help` is given at the commad line, help information
     /// are printed.
     ///
     /// \param argc The first argument of the `main` function
