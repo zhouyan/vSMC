@@ -1,3 +1,179 @@
+/// \page po Program option
+///
+/// ## Introduction
+///
+/// Basic example
+/// ~~~{.cpp}
+/// #include <vsmc/utility/program_option.hpp>
+///
+/// int main (int argc, char **argv)
+/// {
+///     double Value;
+///     ProgramOptionMap Map;
+///     Map.add("option_name", "option description", &Value);
+///     Map.process(argc, argv)
+///     if (Map.count("help")) // Option --help are specified
+///         return 0;
+///
+///     std::cout << Value << std::endl;
+/// }
+/// ~~~
+/// And if on the command line,
+/// ~~~{.sh}
+/// ./prog --option_name 0.5
+/// ~~~
+/// This program will produce the output
+/// ~~~{.txt}
+/// 0.5
+/// ~~~
+/// In the source, options are added using `ProgramOptionMap::add`. The first
+/// argument is the option name, say `option_name`. The second is a description
+/// of the option. And the third is an pointer points to the destination of the
+/// value. On the command line the option is specified with `--option_name`
+/// followed by values.
+///
+/// ## Add options
+///
+/// The general form of the member function `ProgramOptionMap::add` is
+/// ~~~{.cpp}
+/// template <typename T, typename Dest, typename V>
+/// ProgramOptionMap &add (const std::string &name, const std::string &desc, Dest *dest, const V &val);
+/// ~~~
+/// where `T` is the value type of the option. If the fourth (optional)
+/// argument is present, it is taken to be the default value of the option. The
+/// second template argument, `Dest` is the type of the destination pointer.
+///
+/// If `T` is the same as `Dest`, then the option is a scalar option that can
+/// store a single value. Otherwise, `Dest` is taken to be a container type,
+/// e.g., `std::vector<T>`, and the option can store multiple values. The
+/// behavior differs when multiple values are specified in the command line.
+/// Therefore, if `Dest` is a container type and is intended to be used as
+/// such, the first template argument needs to be specified explicity. The only
+/// exception is when `Dest` is `std::vector<T>`, in which case no template
+/// argument needs to be specified. The value type `T` needs to support input
+/// stream `operator>>`. The container type needs to support `push_back(T &)`,
+/// in other words, it needs to be a sequential container.
+///
+/// To summary, the template argument deduction is shown in the following
+/// example,
+/// ~~~{.cpp}
+/// double sOpt;
+/// std::vector<double> vOpt;
+/// std::list<double> lOpt;
+/// vsmc::ProgramOptionMap Map;
+///
+/// Map.add("sName", "desc", &sOpt);        // OK, single value option. T: double, Dest: double
+/// Map.add("vName", "desc", &vOpt);        // OK, multi-value option.  T: double, Dest: std::vector<double>
+/// Map.add<double>("name", "desc", &lOpt); // OK, multi-value option.  T: double, Dest: std::list<double>
+/// Map.add("lName", "desc", &lOpt);        // Error! T: std::list<double>, Dest: std::list<double>, no operator>>
+/// ~~~
+///
+/// ## Process option
+///
+/// Options can be processed by calling `Map.process(argc, argv)`, where `argc`
+/// and `argv` are the typical arguments of the `main` function.
+///
+/// After processing, one can use `ProgramOptionMap::count` to obtain the
+/// number of a certain option being specified on the command line. For
+/// example,
+/// ~~~{.cpp}
+/// Map.count("name");
+/// ~~~
+///
+/// ## Specify options on the command line
+///
+/// On the command line, each option can be specified multiple times. After
+/// each option name, zero or more values can be specified. Multiple values
+/// shall be seperated by white spaces. Optionally comma can be added after
+/// each value. For example,
+/// ~~~{.sh}
+/// ./prog --sName val               # OK
+/// ./prog --sName val1 --sName val2 # OK
+/// ./prog --sName val1 val2         # OK
+/// ./prog --sName val1, val2        # OK
+/// ./prog --sName val1,val2         # Error, white space required after comma
+/// ~~~
+///
+/// Note that any values specified before the first option are ignored. Any
+/// unknown options are also ignored. For example,
+/// ~~~{.sh}
+/// ./prog val1 val2 --sName val --nName val3 # "val1 val2" and "--nName val3" ignored
+/// ~~~
+///
+/// ### Specify an option multiple times,
+///
+/// If the option is a single value option, it is as if only the last one is
+/// used. If the option is a multi-value option, then each of them are
+/// processed. Continue the example,
+/// ~~~{.sh}
+/// ./prog --sName val               # sOpt => val
+/// ./prog --sName val1 --sName val2 # sOpt => val2
+/// ./prog --vName val1 --vName val2 # vOpt => {val1, val2}
+/// ~~~
+///
+/// ### Specify multiple values
+///
+/// After each option, multiple value can be specified. For each value, first
+/// trailing white spaces and comma are stripped. Then, if it is a single value
+/// option, values are joint into a single string, separated by a single white
+/// space, and processed as a single value. If it is a multi-value option, then
+/// each value are processed separately, as if they are specified multiple
+/// times. For example,
+/// ~~~{.sh}
+/// ./prog --sName val1, val2 # Equivalent to ./prog --sName "val1 val2"
+/// ./prog --vName val1, val2 # Equivalent to ./prog --vName val1 --vName val2
+/// ~~~
+/// A more useful example is as the following,
+/// ~~~{.cpp}
+/// vsmc::cxx11::uniform_real_distribution<double> runif;
+/// Map.add("runif", "desc", &runif);
+/// ~~~
+/// ~~~{.sh}
+/// ./prog --runif -1, 1        # OK. Uniform distribution on (-1, 1]
+/// ./prog --runif -1 --runif 1 # Error! uniform_real_distribution operator>> requires two values
+/// ~~~
+///
+/// If for a multi-value option, each value needs to contain multiple sub
+/// values, proper shell quoting is required. For example
+/// ~~~{.cpp}
+/// std::vector<vsmc::cxx11::uniform_real_distribution<double> > vrunif;
+/// Map.add("vrunif", "desc", &vrunif);
+/// ~~~
+/// ~~~{.sh}
+/// ./prog --vrunif -1, 1           # Error! Equivalent to ./prog --vrunif -1 --vrunif 1
+/// ./prog --vrunif "-1 1"          # OK.
+/// ./prog --vrunif "-1 1", "-2 2"  # OK. vrunif now has two uniform distributions.
+/// ~~~
+///
+/// ## Boolean options
+///
+/// If the value type of an option is `bool`, then it is treated specially. If
+/// no values are specified, it is treated as `true`. For example,
+/// ~~~{.cpp}
+/// bool Flag;
+/// Map.add("flag", "desc", &Flag);
+/// ~~~
+/// ~~~{.sh}
+/// ./prog --flag # Flag => true
+/// ~~~
+/// If values are specified, then the following are treated as true: non-zero
+/// decimal integer values, e.g., `1`, `23`. `y`, `Y`, `yes`, `Yes`, `YES`,
+/// `t`, `T`, `True`, `TRUE`. The following are treated as false: zero, e.g.,
+/// `0`, `00`, `n`, `N`, `no`, `No`, `NO`, `f`, `F`, `false`, `False`, `FALSE`.
+/// In other words, for values formed entirely of digits, it is treated as an
+/// integer and tested as in C/C++; if it is a string, then the common `yes`
+/// and `no` and their short forms, lower/upper case variants are treated as
+/// `true` and `false`, respectively. And common boolean literal in programming
+/// languages (not only `true` and `false` as in C++) are accepted.
+///
+/// ## Special option `--help`
+///
+/// Each option has a description string. If on the command line, the `--help`
+/// option is specified, then help informations will be printed. User does not
+/// need to add this option. However, the user can add this option manually to
+/// suppress the default printing of help informations. The default `--help` is
+/// a boolean option.
+
 #ifndef VSMC_UTILITY_PROGRAM_OPTION_HPP
 #define VSMC_UTILITY_PROGRAM_OPTION_HPP
 
@@ -152,7 +328,7 @@ class ProgramOptionHelp : public ProgramOptionBase
     bool help_;
 }; // ProgramOptionHelp
 
-/// \brief Opiton with a default value
+/// \brief Option with a default value
 /// \ingroup Option
 template <typename T>
 class ProgramOptionDefault : public ProgramOptionBase
@@ -225,16 +401,16 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 
 /// \brief Option with multiple values
 /// \ingroup Option
-template <typename T>
+template <typename T, typename Cont>
 class ProgramOptionVector : public ProgramOptionDefault<T>
 {
     public :
 
-    ProgramOptionVector (const std::string &desc, std::vector<T> *ptr) :
+    ProgramOptionVector (const std::string &desc, Cont *ptr) :
         ProgramOptionDefault<T>(desc), val_(T()), ptr_(ptr) {}
 
     template <typename V>
-    ProgramOptionVector (const std::string &desc, std::vector<T> *ptr,
+    ProgramOptionVector (const std::string &desc, Cont *ptr,
             const V &val) :
         ProgramOptionDefault<T>(desc, val), val_(T()), ptr_(ptr) {}
 
@@ -262,41 +438,16 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
     }
 
     ProgramOptionBase *clone () const
-    {return new ProgramOptionVector<T>(*this);}
+    {return new ProgramOptionVector<T, Cont>(*this);}
 
     private :
 
     T val_;
-    std::vector<T> *const ptr_;
+    Cont *const ptr_;
 }; // class ProgramOptionVector
 
 /// \brief A map of ProgramOption
 /// \ingroup Option
-///
-/// \details
-/// Basic example
-/// ~~~{.cpp}
-/// #include <vsmc/utility/program_option.hpp>
-///
-/// int main (int argc, char **argv)
-/// {
-///     double Value;
-///     ProgramOptionMap Map;
-///     Map.add("option_name", "option description", &Value);
-///     if (Map.process(argc, argv)) // Help info was printed
-///         return 0;
-///
-///     std::cout << Value << std::endl;
-/// }
-/// ~~~
-/// And if on the command line,
-/// ~~~{.sh}
-/// ./prog --option_name 0.5
-/// ~~~
-/// will produce the output
-/// ~~~{.txt}
-/// 0.5
-/// ~~~
 class ProgramOptionMap
 {
     public :
@@ -381,27 +532,61 @@ class ProgramOptionMap
         return *this;
     }
 
-    /// \brief Add an opiton with multiple value
+    /// \brief Add an option with multiple value
     template <typename T>
     ProgramOptionMap &add (const std::string &name, const std::string &desc,
             std::vector<T> *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOptionVector<T>(desc, ptr);
+        ProgramOptionBase *optr =
+            new ProgramOptionVector<T, std::vector<T> >(desc, ptr);
         add_option(oname, optr);
 
         return *this;
     }
 
-    /// \brief Add an opiton with multiple value, with a default value
+    /// \brief Add an option with multiple value, with a default value
     template <typename T, typename V>
     ProgramOptionMap &add (const std::string &name, const std::string &desc,
             std::vector<T> *ptr, const V &val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOptionBase *optr = new ProgramOptionVector<T>(desc, ptr, val);
+        ProgramOptionBase *optr =
+            new ProgramOptionVector<T, std::vector<T> >(desc, ptr, val);
+        add_option(oname, optr);
+
+        return *this;
+    }
+
+    /// \brief Add an option with multiple value with a container other than
+    /// `std::vector`
+    template <typename T, typename Cont>
+    typename cxx11::enable_if<!cxx11::is_same<T, Cont>::value,
+             ProgramOptionMap &>::type
+    add (const std::string &name, const std::string &desc, Cont *ptr)
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
+        const std::string oname("--" + name);
+        ProgramOptionBase *optr =
+            new ProgramOptionVector<T, Cont>(desc, ptr);
+        add_option(oname, optr);
+
+        return *this;
+    }
+
+    /// \brief Add an option with multiple value, with a default value, with a
+    /// container other than `std::vector`.
+    template <typename T, typename Cont, typename V>
+    typename cxx11::enable_if<!cxx11::is_same<T, Cont>::value,
+             ProgramOptionMap &>::type
+    add (const std::string &name, const std::string &desc, Cont *ptr,
+            const V &val)
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
+        const std::string oname("--" + name);
+        ProgramOptionBase *optr = new ProgramOptionVector<T, Cont>(desc, ptr, val);
         add_option(oname, optr);
 
         return *this;
@@ -444,6 +629,15 @@ class ProgramOptionMap
         for (int i = 0; i != argc; ++i)
             arg_vector.push_back(argv[i]);
         process_arg(arg_vector);
+    }
+
+    /// \brief Print help information for each option
+    void print_help () const
+    {
+        for (option_map_type::const_iterator iter = option_map_.begin();
+                iter != option_map_.end(); ++iter) {
+            iter->second.first->print_help(iter->first);
+        }
     }
 
     /// \brief Count the number of occurence of an option on the command line
@@ -533,12 +727,8 @@ class ProgramOptionMap
                     iter->second.second = 1;
         }
 
-        if (help_ptr_->help()) {
-            for (option_map_type::iterator iter = option_map_.begin();
-                    iter != option_map_.end(); ++iter) {
-                iter->second.first->print_help(iter->first);
-            }
-        }
+        if (help_ptr_->help())
+            print_help();
     }
 
     void process_value (std::string &sval)
