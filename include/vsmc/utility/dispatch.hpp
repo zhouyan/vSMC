@@ -427,6 +427,16 @@ class DispatchGroup : public DispatchObject<dispatch_group_t>
 
 /// \brief Base class of DispatchSource
 /// \ingroup Dispatch
+///
+/// \bug A DispachSource object is manually retained when created. It is
+/// supposed to be retained by `dispatch_source_create` according to the
+/// documents. But this seems not to be the case in the current implementation
+/// (Mac OS X 10.9). The worst case is that a source object is retained one
+/// more time than it is released. A simple test example is,
+/// ~~~{.cpp}
+/// dispatch_source_t source = dispatch_source_create( /* arguments */ );
+/// dispatch_release(source); // generate error
+/// ~~~
 template <DispatchSourceType Type>
 class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 {
@@ -492,7 +502,35 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
             dispatch_queue_t queue) :
         DispatchObject<dispatch_source_t>(dispatch_source_create(
                     source_type_t(source_type<Type>()),
-                    handle, mask, queue)) {}
+                    handle, mask, queue))
+    {
+        if (this->object() != NULL)
+            dispatch_retain(this->object());
+    }
+
+    DispatchSourceBase (const DispatchSourceBase &other) :
+        DispatchObject<dispatch_source_t>(other)
+    {
+        if (this->object() != NULL)
+            dispatch_retain(this->object());
+    }
+
+    DispatchSourceBase &operator= (const DispatchSourceBase &other)
+    {
+        if (this != &other) {
+            DispatchObject<dispatch_source_t>::operator=(other);
+            if (this->object() != NULL)
+                dispatch_retain(this->object());
+        }
+
+        return *this;
+    }
+
+    ~DispatchSourceBase ()
+    {
+        if (this->object() != NULL)
+            dispatch_release(this->object());
+    }
 
     private :
 
