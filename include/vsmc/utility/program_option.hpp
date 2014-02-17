@@ -209,7 +209,7 @@ class ProgramOption
     virtual bool is_bool () const = 0;
     virtual bool is_vector () const = 0;
     virtual bool set (std::stringstream &, const std::string &,
-            const std::string &) = 0;
+            const std::string &, bool) = 0;
     virtual bool set_default () = 0;
     virtual void print_help (const std::string &) const = 0;
     virtual ProgramOption *clone () const = 0;
@@ -217,7 +217,7 @@ class ProgramOption
     protected :
 
     bool set_value (std::stringstream &, const std::string &oname,
-            const std::string &sval, bool *dest)
+            const std::string &sval, bool *dest, bool silent)
     {
         const char *const sptr = sval.c_str();
         const std::size_t size = sval.size();
@@ -268,20 +268,22 @@ class ProgramOption
             return true;
         }
 
-        program_option_error(oname, "Failed to set boolean value: " + sval);
+        if (!silent)
+            program_option_error(oname, "Failed to set value: " + sval);
         return false;
     }
 
     template <typename T>
     bool set_value (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, T *dest)
+            const std::string &sval, T *dest, bool silent)
     {
         ss.clear();
         ss.str(sval);
         T tval;
         ss >> tval;
         if (ss.fail()) {
-            program_option_error(oname, "Failed to set value: " + sval);
+            if (!silent)
+                program_option_error(oname, "Failed to set value: " + sval);
             ss.clear();
             return false;
         }
@@ -308,8 +310,8 @@ class ProgramOptionHelp : public ProgramOption
     bool is_vector () const {return false;}
 
     bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval)
-    {return set_value(ss, oname, sval, &help_);}
+            const std::string &sval, bool silent)
+    {return set_value(ss, oname, sval, &help_, silent);}
 
     bool set_default () {return false;}
 
@@ -386,8 +388,8 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
     bool is_vector () const {return false;}
 
     bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval)
-    {return this->set_value(ss, oname, sval, ptr_);}
+            const std::string &sval, bool silent)
+    {return this->set_value(ss, oname, sval, ptr_, silent);}
 
     bool set_default () {return this->set_value_default(ptr_);}
 
@@ -417,9 +419,9 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
     bool is_vector () const {return true;}
 
     bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval)
+            const std::string &sval, bool silent)
     {
-        bool success = this->set_value(ss, oname, sval, &val_);
+        bool success = this->set_value(ss, oname, sval, &val_, silent);
 
         if (success)
             ptr_->push_back(val_);
@@ -455,14 +457,12 @@ class ProgramOptionMap
     typedef std::map<std::string, std::pair<ProgramOption *, std::size_t> >
         option_map_type;
 
-    ProgramOptionMap ()
-    {
-        help_ptr_ = new ProgramOptionHelp;
-        option_map_["--help"] = std::make_pair(help_ptr_, 0);
-    }
+    explicit ProgramOptionMap (bool silent = false) :
+        silent_(silent), help_ptr_(new ProgramOptionHelp)
+    {option_map_["--help"] = std::make_pair(help_ptr_, 0);}
 
     ProgramOptionMap (const ProgramOptionMap &other) :
-        option_map_(other.option_map_)
+        silent_(other.silent_), option_map_(other.option_map_)
     {
         for (option_map_type::iterator iter = option_map_.begin();
                 iter != option_map_.end(); ++iter) {
@@ -491,6 +491,29 @@ class ProgramOptionMap
 
         return *this;
     }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    ProgramOptionMap (ProgramOptionMap &&other) :
+        silent_(other.silent_), help_ptr_(other.help_ptr_),
+        option_map_(cxx11::move(other.option_map_))
+    {
+        other.help_ptr_ = VSMC_NULLPTR;
+        other.option_map_.clear();
+    }
+
+    ProgramOptionMap &operator= (ProgramOptionMap &&other)
+    {
+        if (this != &other) {
+            silent_ = other.silent_;
+            help_ptr_ = other.help_ptr_;
+            option_map_ = cxx11::move(other.option_map_);
+            other.help_ptr_ = VSMC_NULLPTR;
+            other.option_map_.clear();
+        }
+
+        return *this;
+    }
+#endif
 
     ~ProgramOptionMap ()
     {
@@ -678,8 +701,13 @@ class ProgramOptionMap
             return VSMC_NULLPTR;
     }
 
+    /// \brief Set the silent flag, if true, no error messages will be printed
+    /// for unknown optins etc.,
+    void silent (bool flag) {return silent_ = flag;}
+
     private :
 
+    bool silent_;
     ProgramOptionHelp *help_ptr_;
     option_map_type option_map_;
     mutable std::stringstream ss_;
@@ -720,7 +748,8 @@ class ProgramOptionMap
                 iter != option_vector.end(); ++iter) {
             option_map_type::iterator miter = option_map_.find(iter->first);
             if (miter == option_map_.end()) {
-                program_option_error(iter->first, "Unknown option ignored");
+                if (!silent_)
+                    program_option_error(iter->first, "Unknown option");
                 continue;
             }
 
@@ -729,7 +758,8 @@ class ProgramOptionMap
             if (vsize == 0 && miter->second.first->is_bool()) {
                 proc = process_option(miter, sval_true);
             } else if (vsize == 0) {
-                program_option_error(miter->first, "No value specified");
+                if (!silent_)
+                    program_option_error(miter->first, "No value specified");
             } else if (!miter->second.first->is_vector()) {
                 option_value.clear();
                 for (std::size_t i = 0; i != vsize - 1; ++i)
@@ -769,11 +799,12 @@ class ProgramOptionMap
             const std::string &sval)
     {
         if (sval.empty()) {
-            program_option_error(iter->first, "No value specified");
+            if (!silent_)
+                program_option_error(iter->first, "No value specified");
             return false;
         }
 
-        return iter->second.first->set(ss_, iter->first, sval);
+        return iter->second.first->set(ss_, iter->first, sval, silent_);
     }
 
     bool is_option (const std::string &str) const
