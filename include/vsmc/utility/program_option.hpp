@@ -703,7 +703,7 @@ class ProgramOptionMap
 
     /// \brief Set the silent flag, if true, no error messages will be printed
     /// for unknown optins etc.,
-    void silent (bool flag) {return silent_ = flag;}
+    void silent (bool flag) {silent_ = flag;}
 
     private :
 
