@@ -307,15 +307,15 @@ class ProgramOptionHelp : public ProgramOption
 
     bool is_vector () const {return false;}
 
-    bool set (std::stringstream &ss, const std::string &,
+    bool set (std::stringstream &ss, const std::string &oname,
             const std::string &sval)
-    {return set_value(ss, "--help", sval, &help_);}
+    {return set_value(ss, oname, sval, &help_);}
 
     bool set_default () {return false;}
 
-    void print_help (const std::string &) const
+    void print_help (const std::string &oname) const
     {
-        std::cout << "  " << std::setw(20) << std::left << "--help";
+        std::cout << "  " << std::setw(20) << std::left << oname;
         std::cout << "Print help information" << std::endl;
     }
 
