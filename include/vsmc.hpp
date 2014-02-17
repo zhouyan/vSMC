@@ -104,7 +104,7 @@
 /// \ingroup Utility
 /// \brief Functions for saving objects in HDF5 format
 
-/// \defgroup Option Program options
+/// \defgroup Option Program option
 /// \ingroup Utility
 /// \brief Process program command line options
 
