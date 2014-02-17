@@ -30,6 +30,7 @@ class ProgramOptionBase
     ProgramOptionBase &operator= (const ProgramOptionBase &) {return *this;}
 
     virtual bool is_bool () const = 0;
+    virtual bool is_vector () const = 0;
     virtual bool set (std::stringstream &, const std::string &,
             const std::string &) = 0;
     virtual bool set_default () = 0;
@@ -128,6 +129,8 @@ class ProgramOptionHelp : public ProgramOptionBase
 
     bool is_bool () const {return true;}
 
+    bool is_vector () const {return false;}
+
     bool set (std::stringstream &ss, const std::string &,
             const std::string &sval)
     {return set_value(ss, "--help", sval, &help_);}
@@ -204,6 +207,8 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
     ProgramOptionScalar (const std::string &desc, T *ptr, const V &val) :
         ProgramOptionDefault<T>(desc, val), ptr_(ptr) {}
 
+    bool is_vector () const {return false;}
+
     bool set (std::stringstream &ss, const std::string &oname,
             const std::string &sval)
     {return this->set_value(ss, oname, sval, ptr_);}
@@ -232,6 +237,8 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
     ProgramOptionVector (const std::string &desc, std::vector<T> *ptr,
             const V &val) :
         ProgramOptionDefault<T>(desc, val), val_(T()), ptr_(ptr) {}
+
+    bool is_vector () const {return true;}
 
     bool set (std::stringstream &ss, const std::string &oname,
             const std::string &sval)
@@ -486,6 +493,7 @@ class ProgramOptionMap
         }
 
         const std::string sval_true("1");
+        std::string vsval;
         for (std::vector<std::pair<std::string, std::vector<std::string> > >::
                 iterator iter = option_vector.begin();
                 iter != option_vector.end(); ++iter) {
@@ -494,12 +502,20 @@ class ProgramOptionMap
                 program_option_error(iter->first, "Unknown option ignored");
                 continue;
             }
+
             bool proc = false;
             const std::size_t vsize = iter->second.size();
             if (vsize == 0 && miter->second.first->is_bool()) {
-                proc = process_option(miter, sval_true) || proc;
+                proc = process_option(miter, sval_true);
             } else if (vsize == 0) {
                 program_option_error(miter->first, "No value specified");
+            } else if (!miter->second.first->is_vector()) {
+                vsval.clear();
+                for (std::size_t i = 0; i != vsize; ++i) {
+                    process_value(iter->second[i]);
+                    vsval += iter->second[i] + ' ';
+                }
+                proc = process_option(miter, vsval);
             } else {
                 for (std::size_t i = 0; i != vsize; ++i) {
                     process_value(iter->second[i]);
