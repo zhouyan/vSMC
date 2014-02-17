@@ -613,21 +613,29 @@ class ProgramOptionMap
     /// \param argv The second argument of the `main` function
     void process (int argc, const char **argv)
     {
+        std::string arg;
         std::vector<std::string> arg_vector;
         arg_vector.reserve(static_cast<std::size_t>(argc));
-        for (int i = 0; i != argc; ++i)
-            arg_vector.push_back(argv[i]);
-        process_arg(arg_vector);
+        for (int i = 0; i != argc; ++i) {
+            arg = process_arg(argv[i]);
+            if (!arg.empty())
+                arg_vector.push_back(arg);
+        }
+        process_arg_vector(arg_vector);
     }
 
     /// \brief Process the options
     void process (int argc, char **argv)
     {
+        std::string arg;
         std::vector<std::string> arg_vector;
         arg_vector.reserve(static_cast<std::size_t>(argc));
-        for (int i = 0; i != argc; ++i)
-            arg_vector.push_back(argv[i]);
-        process_arg(arg_vector);
+        for (int i = 0; i != argc; ++i) {
+            arg = process_arg(argv[i]);
+            if (!arg.empty())
+                arg_vector.push_back(arg);
+        }
+        process_arg_vector(arg_vector);
     }
 
     /// \brief Print help information for each option
@@ -687,26 +695,26 @@ class ProgramOptionMap
         }
     }
 
-    void process_arg (std::vector<std::string> &arg_vector)
+    void process_arg_vector (std::vector<std::string> &arg_vector)
     {
-        const std::vector<std::string> empty_value;
+        std::string option_value;
+        const std::vector<std::string> option_value_vec;
         std::vector<std::pair<std::string, std::vector<std::string> > >
             option_vector;
         std::vector<std::string>::iterator aiter = arg_vector.begin();
         while (aiter != arg_vector.end() && !is_option(*aiter))
             ++aiter;
         while (aiter != arg_vector.end()) {
-            option_vector.push_back(std::make_pair(*aiter, empty_value));
+            option_vector.push_back(std::make_pair(*aiter, option_value_vec));
             std::vector<std::string> &value = option_vector.back().second;
             ++aiter;
             while (aiter != arg_vector.end() &&!is_option(*aiter)) {
-                value.push_back(*aiter);
+                    value.push_back(*aiter);
                 ++aiter;
             }
         }
 
         const std::string sval_true("1");
-        std::string vsval;
         for (std::vector<std::pair<std::string, std::vector<std::string> > >::
                 iterator iter = option_vector.begin();
                 iter != option_vector.end(); ++iter) {
@@ -723,17 +731,14 @@ class ProgramOptionMap
             } else if (vsize == 0) {
                 program_option_error(miter->first, "No value specified");
             } else if (!miter->second.first->is_vector()) {
-                vsval.clear();
-                for (std::size_t i = 0; i != vsize; ++i) {
-                    process_value(iter->second[i]);
-                    vsval += iter->second[i] + ' ';
-                }
-                proc = process_option(miter, vsval);
+                option_value.clear();
+                for (std::size_t i = 0; i != vsize - 1; ++i)
+                    option_value += iter->second[i] + ' ';
+                option_value += iter->second[vsize - 1];
+                proc = process_option(miter, option_value);
             } else {
-                for (std::size_t i = 0; i != vsize; ++i) {
-                    process_value(iter->second[i]);
+                for (std::size_t i = 0; i != vsize; ++i)
                     proc = process_option(miter, iter->second[i]) || proc;
-                }
             }
             if (proc)
                 ++miter->second.second;
@@ -750,16 +755,14 @@ class ProgramOptionMap
             print_help();
     }
 
-    void process_value (std::string &sval)
+    std::string process_arg (const char *arg) const
     {
-        std::size_t e = sval.size();
-        std::size_t n = 0;
-        while (e != 0 && (sval[e - 1] == ' ' || sval[e - 1] == ',')) {
-            ++n;
+        std::size_t s = std::strlen(arg);
+        std::size_t e = s;
+        while (e != 0 && (arg[e - 1] == ' ' || arg[e - 1] == ','))
             --e;
-        }
-        if (n != 0)
-            sval.erase(e, n);
+
+        return std::string(arg, arg + e);
     }
 
     bool process_option (option_map_type::iterator iter,
@@ -773,7 +776,7 @@ class ProgramOptionMap
         return iter->second.first->set(ss_, iter->first, sval);
     }
 
-    bool is_option (const std::string &str)
+    bool is_option (const std::string &str) const
     {
         if (str.size() < 3)
             return false;
