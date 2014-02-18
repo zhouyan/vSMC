@@ -180,7 +180,7 @@
 #include <vsmc/internal/common.hpp>
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func) \
-    VSMC_RUNTIME_ASSERT((bool(ptr)),                                         \
+    VSMC_RUNTIME_ASSERT((ptr != VSMC_NULLPTR),                               \
             ("**vsmc::ProgramOptionMap::"#func                               \
              "** ATTEMPT TO SET OPTION WITH A NULL POINTER"))
 
@@ -225,8 +225,9 @@ class ProgramOption
         bool is_numb = true;
         bool is_zero = true;
         for (std::size_t i = 0; i != size; ++i) {
-            is_numb = is_numb && std::isdigit(sptr[i]);
-            is_zero = is_zero && (sptr[i] == '0');
+            char c = sptr[i];
+            is_numb = is_numb && c >= '0' && c <= '9';
+            is_zero = is_zero && (c == '0');
         }
         if (is_zero) {
             *dest = false;
