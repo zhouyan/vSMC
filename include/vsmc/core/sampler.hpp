@@ -299,25 +299,6 @@ class Sampler
         return *this;
     }
 
-    /// \brief Try iteration
-    ///
-    /// \details
-    /// This method is similar to iterate() except that it will try (its best)
-    /// to save the sampler itself and restore itself if an exception condition
-    /// raised during the iterations.
-    Sampler<T> &try_iterate (std::size_t num = 1)
-    {
-        Backup<Sampler<T> > backup(this);
-        try {
-            iterate(num);
-        } catch (...) {
-            backup.restore(this);
-            throw;
-        }
-
-        return *this;
-    }
-
     /// \brief Read and write access to the Path sampling monitor
     Path<T> &path () {return path_;}
 
