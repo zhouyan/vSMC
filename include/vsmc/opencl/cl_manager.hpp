@@ -6,24 +6,24 @@
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
     VSMC_RUNTIME_ASSERT((setup()),                                           \
-            ("**vsmc::CLManager::"#func"** CAN ONLY BE CALLED AFTER TRUE "   \
-             "**vsmc::CLManager::setup**"));
+            ("**CLManager::"#func"** CAN ONLY BE CALLED AFTER TRUE "         \
+             "**CLManager::setup**"));
 
 #define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_PLATFORM \
     VSMC_RUNTIME_WARNING(setup_platform,                                     \
-            ("**vsmc::CLManager::setup** FAILED TO SETUP A PLATFORM"));
+            ("**CLManager::setup** FAILED TO SETUP A PLATFORM"));
 
 #define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT \
     VSMC_RUNTIME_WARNING(setup_context,                                      \
-            ("**vsmc::CLManager::setup** FAILED TO SETUP A CONTEXT"));
+            ("**CLManager::setup** FAILED TO SETUP A CONTEXT"));
 
 #define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE \
     VSMC_RUNTIME_WARNING(setup_device,                                       \
-            ("**vsmc::CLManager::setup** FAILED TO SETUP A DEVICE"));
+            ("**CLManager::setup** FAILED TO SETUP A DEVICE"));
 
 #define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE \
     VSMC_RUNTIME_WARNING(setup_command_queue,                                \
-            ("**vsmc::CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
+            ("**CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
 
 namespace vsmc {
 

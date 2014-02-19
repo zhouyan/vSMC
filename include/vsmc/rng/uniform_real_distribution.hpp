@@ -6,12 +6,12 @@
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN \
     VSMC_RUNTIME_ASSERT(false,                                               \
-            ("**vsmc::UniformRealDistribution::operator()** "                \
+            ("**UniformRealDistribution::operator()** "                      \
              "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN ZERO"))
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX \
     VSMC_RUNTIME_ASSERT(false,                                               \
-            ("**vsmc::UniformRealDistribution::operator()** "                \
+            ("**UniformRealDistribution::operator()** "                      \
              "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN "       \
              "THE MAXIMUM OF uint32_t OR uint64_t"))
 
