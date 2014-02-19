@@ -14,8 +14,7 @@ class WeightSetOMP : public WeightSet
 {
     public :
 
-    typedef typename traits::OMPSizeTypeTrait<WeightSet::size_type>::type
-        size_type;
+    typedef traits::OMPSizeTypeTrait<WeightSet::size_type>::type size_type;
 
     explicit WeightSetOMP (size_type N) : WeightSet(N) {}
 
