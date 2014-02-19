@@ -180,18 +180,18 @@ class Particle
             resample_copy_from_.resize(N);
             resample_replication_.resize(N);
             resample_weight_.resize(N);
+            double *end = weight_set_.read_resample_weight(
+                    &resample_weight_[0]);
             const size_type *cptr = VSMC_NULLPTR;
-            double *end = VSMC_NULLPTR;
-            end = weight_set_.read_resample_weight(&resample_weight_[0]);
             if (end == &resample_weight_[0] + N) {
                 op(static_cast<std::size_t>(N), resample_rng_,
                         &resample_weight_[0], &resample_replication_[0]);
                 resample_copy_from_replication_(N,
                         &resample_replication_[0], &resample_copy_from_[0]);
                 cptr = &resample_copy_from_[0];
-                value_.copy(N, cptr);
-                resample_post_copy_(weight_set_);
             }
+            value_.copy(N, cptr);
+            resample_post_copy_(weight_set_);
         }
 
         return resampled;

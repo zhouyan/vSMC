@@ -32,11 +32,11 @@ class WeightSetMPI : public WeightSetBase
 
     explicit WeightSetMPI (size_type N) :
         WeightSetBase(N), world_(MPICommunicator<ID>::instance().get(),
-                boost::mpi::comm_duplicate), internal_barrier_(true),
-        resample_size_(0)
+                boost::mpi::comm_duplicate),
+        internal_barrier_(true), resample_size_(0)
     {
-        boost::mpi::all_reduce(
-                world_, N, resample_size_, std::plus<size_type>());
+        boost::mpi::all_reduce(world_, N, resample_size_,
+                std::plus<size_type>());
         this->set_ess(static_cast<double>(resample_size_));
         barrier();
     }
@@ -73,7 +73,7 @@ class WeightSetMPI : public WeightSetBase
         double *const log_weight = this->log_weight_ptr();
 
         this->set_ess(static_cast<double>(resample_size_));
-        double ew = 1 / this->ess();
+        const double ew = 1 / this->ess();
         for (size_type i = 0; i != N; ++i) {
             weight[i] = ew;
             log_weight[i] = 0;
@@ -244,7 +244,8 @@ class NormalizingConstantMPI : public NormalizingConstantBase
     NormalizingConstantMPI (std::size_t N) :
         NormalizingConstantBase(N),
         world_(MPICommunicator<ID>::instance().get(),
-                boost::mpi::comm_duplicate), internal_barrier_(true) {}
+                boost::mpi::comm_duplicate),
+        internal_barrier_(true) {}
 
     const boost::mpi::communicator &world () const {return world_;}
 
@@ -285,7 +286,8 @@ class StateMPI : public BaseState
 
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),
-                boost::mpi::comm_duplicate), internal_barrier_(true),
+                boost::mpi::comm_duplicate),
+        internal_barrier_(true),
         offset_(0), global_size_(0), size_equal_(true),
         copy_tag_(boost::mpi::environment::max_tag())
     {
@@ -361,9 +363,11 @@ class StateMPI : public BaseState
 
         barrier();
         copy_from_.resize(N);
+        IntType *const cptr = &copy_from_[0];
         if (world_.rank() == 0) {
-            for (size_type i = 0; i != N; ++i)
-                copy_from_[i] = copy_from[i];
+            VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(
+                    cptr - copy_from, N, StateMPI::copy);
+            std::memcpy(cptr, copy_from, sizeof(IntType) * N);
         }
         boost::mpi::broadcast(world_, copy_from_, 0);
 
