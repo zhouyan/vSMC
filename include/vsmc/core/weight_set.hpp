@@ -113,11 +113,11 @@ class WeightSet
     }
 
     /// \brief Size of the weight set for the purpose of resampling
-    size_type resample_size () const {return size_;}
+    virtual size_type resample_size () const {return size_;}
 
     /// \brief Read normalized weights through an output iterator for the
     /// purpose of resampling
-    double *read_resample_weight (double *first) const
+    virtual double *read_resample_weight (double *first) const
     {return read_weight(first);}
 
     /// \brief Read normalized weights through an output iterator
