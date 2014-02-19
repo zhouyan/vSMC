@@ -12,38 +12,17 @@ VSMC_DEFINE_SMP_FORWARD(CILK)
 
 /// \brief Particle::weight_set_type subtype using Intel Cilk Plus
 /// \ingroup CILK
-template <typename BaseState>
-class WeightSetCILK : public traits::WeightSetTypeTrait<BaseState>::type
+class WeightSetCILK : public WeightSet
 {
-    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
-
     public :
 
-    typedef typename traits::SizeTypeTrait<base>::type size_type;
-
-    explicit WeightSetCILK (size_type N) : base(N) {}
+    explicit WeightSetCILK (size_type N) : WeightSet(N) {}
 
     protected :
 
-    void log_weight2weight ()
-    {
-        using std::exp;
+    void log_weight2weight () {vd_exp(size(), log_weight_ptr(), weight_ptr());}
 
-        const size_type N = static_cast<size_type>(this->size());
-        double *const weight = this->weight_ptr();
-        const double *const log_weight = this->log_weight_ptr();
-        vd_exp(N, log_weight, weight);
-    }
-
-    void weight2log_weight ()
-    {
-        using std::log;
-
-        const size_type N = static_cast<size_type>(this->size());
-        const double *const weight = this->weight_ptr();
-        double *const log_weight = this->log_weight_ptr();
-        vd_log(N, weight, log_weight);
-    }
+    void weight2log_weight () {vd_log(size(), weight_ptr(), log_weight_ptr());}
 
     private :
 

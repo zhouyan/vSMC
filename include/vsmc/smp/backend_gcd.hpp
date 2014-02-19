@@ -10,16 +10,11 @@ VSMC_DEFINE_SMP_FORWARD(GCD)
 
 /// \brief Particle::weight_set_type subtype using Apple Grand Central Dispatch
 /// \ingroup GCD
-template <typename BaseState>
-class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
+class WeightSetGCD : public WeightSet
 {
-    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
-
     public :
 
-    typedef typename traits::SizeTypeTrait<base>::type size_type;
-
-    explicit WeightSetGCD (size_type N) : base(N) {}
+    explicit WeightSetGCD (size_type N) : WeightSet(N) {}
 
     protected :
 
@@ -27,8 +22,8 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
     {
         using std::exp;
 
-        const size_type N = static_cast<size_type>(this->size());
-        work_param_ wp(this->weight_ptr(), this->log_weight_ptr());
+        const std::size_t N = static_cast<std::size_t>(size());
+        work_param_ wp(weight_ptr(), log_weight_ptr());
         queue_.apply_f(N, static_cast<void *>(&wp), log_weight2weight_);
     }
 
@@ -36,8 +31,8 @@ class WeightSetGCD : public traits::WeightSetTypeTrait<BaseState>::type
     {
         using std::log;
 
-        const size_type N = static_cast<size_type>(this->size());
-        work_param_ wp(this->weight_ptr(), this->log_weight_ptr());
+        const std::size_t N = static_cast<std::size_t>(size());
+        work_param_ wp(weight_ptr(), log_weight_ptr());
         queue_.apply_f(N, static_cast<void *>(&wp), weight2log_weight_);
     }
 

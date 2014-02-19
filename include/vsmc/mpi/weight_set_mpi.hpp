@@ -9,15 +9,15 @@ namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
-template <typename ID>
-class WeightSetMPI : public WeightSet
+template <typename WeightSetBase, typename ID>
+class WeightSetMPI : public WeightSetBase
 {
     public :
 
-    typedef WeightSet::size_type size_type;
+    typedef typename WeightSetBase::size_type size_type;
 
     explicit WeightSetMPI (size_type N) :
-        WeightSet(N), world_(MPICommunicator<ID>::instance().get(),
+        WeightSetBase(N), world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate), internal_barrier_(true),
         resample_size_(0)
     {
@@ -28,42 +28,6 @@ class WeightSetMPI : public WeightSet
     }
 
     size_type resample_size () const {return resample_size_;}
-
-    template <typename OutputIter>
-    OutputIter read_resample_weight (OutputIter first) const
-    {
-        barrier();
-        gather_resample_weight();
-        if (world_.rank() == 0) {
-            for (int r = 0; r != world_.size(); ++r) {
-                const size_type N = weight_all_[r].size();
-                const double *const wptr = &weight_all_[r][0];
-                for (size_type i = 0; i != N; ++i, ++first)
-                    *first = wptr[i];
-            }
-        }
-        barrier();
-
-        return first;
-    }
-
-    template <typename RandomIter>
-    RandomIter read_resample_weight (RandomIter first, int stride) const
-    {
-        barrier();
-        gather_resample_weight();
-        if (world_.rank() == 0) {
-            for (int r = 0; r != world_.size(); ++r) {
-                const size_type N = weight_all_[r].size();
-                const double *const wptr = &weight_all_[r][0];
-                for (size_type i = 0; i != N; ++i, first += stride)
-                    *first = wptr[i];
-            }
-        }
-        barrier();
-
-        return first;
-    }
 
     double *read_resample_weight (double *first) const
     {

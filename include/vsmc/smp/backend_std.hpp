@@ -11,31 +11,24 @@ VSMC_DEFINE_SMP_FORWARD(STD)
 
 /// \brief Particle::weight_set_type subtype using C++11 concurrency
 /// \ingroup STD
-template <typename BaseState>
-class WeightSetSTD : public traits::WeightSetTypeTrait<BaseState>::type
+class WeightSetSTD : public WeightSet
 {
-    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
-
     public :
 
-    typedef typename traits::SizeTypeTrait<base>::type size_type;
-
-    explicit WeightSetSTD (size_type N) : base(N) {}
+    explicit WeightSetSTD (size_type N) : WeightSet(N) {}
 
     protected :
 
     void log_weight2weight ()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        parallel_for(BlockedRange<size_type>(0, N), tbb_op::exp<double>(
-                    this->log_weight_ptr(), this->weight_ptr()));
+        parallel_for(BlockedRange<size_type>(0, size()), tbb_op::exp<double>(
+                    log_weight_ptr(), weight_ptr()));
     }
 
     void weight2log_weight ()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        parallel_for(BlockedRange<size_type>(0, N), tbb_op::log<double>(
-                    this->weight_ptr(), this->log_weight_ptr()));
+        parallel_for(BlockedRange<size_type>(0, size()), tbb_op::log<double>(
+                    weight_ptr(), log_weight_ptr()));
     }
 }; // class WeightSetSTD
 

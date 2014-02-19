@@ -31,6 +31,7 @@ template <typename T> class ConstSingleParticle;
 template <typename T> class SingleParticleBase;
 template <typename T> class ConstSingleParticleBase;
 class WeightSet;
+class NormalizingConstant;
 
 // SMP states
 template <MatrixOrder Order, std::size_t Dim, typename T> class StateMatrix;

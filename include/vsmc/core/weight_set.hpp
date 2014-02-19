@@ -117,15 +117,8 @@ class WeightSet
 
     /// \brief Read normalized weights through an output iterator for the
     /// purpose of resampling
-    template <typename OutputIter>
-    OutputIter read_resample_weight (OutputIter first) const
+    double *read_resample_weight (double *first) const
     {return read_weight(first);}
-
-    /// \brief Read normalized weights through a random access iterator for
-    /// the purpose of resampling
-    template <typename RandomIter>
-    RandomIter read_resample_weight (RandomIter first, int stride) const
-    {return read_weight(first, stride);}
 
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>

@@ -16,33 +16,24 @@ namespace ppl = ::Concurrency;
 
 /// \brief Particle::weight_set_type subtype using Parallel Pattern Library
 /// \ingroup PPL
-template <typename BaseState>
-class WeightSetPPL : public traits::WeightSetTypeTrait<BaseState>::type
+class WeightSetPPL : public WeightSet
 {
-    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
-
     public :
 
-    typedef typename traits::SizeTypeTrait<base>::type size_type;
-
-    explicit WeightSetPPL (size_type N) : base(N) {}
+    explicit WeightSetPPL (size_type N) : WeightSet(N) {}
 
     protected :
 
     void log_weight2weight ()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        ppl::parallel_for(static_cast<size_type>(0), N,
-                log_weight2weight_(
-                    this->weight_ptr(), this->log_weight_ptr()));
+        ppl::parallel_for(static_cast<size_type>(0), size(),
+                log_weight2weight_(weight_ptr(), log_weight_ptr()));
     }
 
     void weight2log_weight ()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        ppl::parallel_for(static_cast<size_type>(0), N,
-                weight2log_weight_(
-                    this->weight_ptr(), this->log_weight_ptr()));
+        ppl::parallel_for(static_cast<size_type>(0), size(),
+                weight2log_weight_(weight_ptr(), log_weight_ptr()));
     }
 
     private :

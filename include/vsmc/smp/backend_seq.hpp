@@ -9,16 +9,11 @@ VSMC_DEFINE_SMP_FORWARD(SEQ)
 
 /// \brief Particle::weight_set_type subtype
 /// \ingroup SEQ
-template <typename BaseState>
-class WeightSetSEQ : public traits::WeightSetTypeTrait<BaseState>::type
+class WeightSetSEQ : public WeightSet
 {
-    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
-
     public :
 
-    typedef typename traits::SizeTypeTrait<base>::type size_type;
-
-    explicit WeightSetSEQ (size_type N) : base(N) {}
+    explicit WeightSetSEQ (size_type N) : WeightSet(N) {}
 
     protected :
 
@@ -26,9 +21,9 @@ class WeightSetSEQ : public traits::WeightSetTypeTrait<BaseState>::type
     {
         using std::exp;
 
-        const size_type N = static_cast<size_type>(this->size());
-        double *const weight = this->weight_ptr();
-        const double *const log_weight = this->log_weight_ptr();
+        const size_type N = size();
+        double *const weight = weight_ptr();
+        const double *const log_weight = log_weight_ptr();
         for (size_type i = 0; i != N; ++i)
             weight[i] = exp(log_weight[i]);
     }
@@ -37,9 +32,9 @@ class WeightSetSEQ : public traits::WeightSetTypeTrait<BaseState>::type
     {
         using std::log;
 
-        const size_type N = static_cast<size_type>(this->size());
-        const double *const weight = this->weight_ptr();
-        double *const log_weight = this->log_weight_ptr();
+        const size_type N = size();
+        const double *const weight = weight_ptr();
+        double *const log_weight = log_weight_ptr();
         for (size_type i = 0; i != N; ++i)
             log_weight[i] = log(weight[i]);
     }

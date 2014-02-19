@@ -9,13 +9,14 @@ namespace vsmc {
 
 /// \brief Calculating normalizing constant ratio using MPI
 /// \ingroup MPI
-template <typename ID>
-class NormalizingConstantMPI : public NormalizingConstant
+template <typename NormalizingConstantBase, typename ID>
+class NormalizingConstantMPI : public NormalizingConstantBase
 {
     public :
 
     NormalizingConstantMPI (std::size_t N) :
-        NormalizingConstant(N), world_(MPICommunicator<ID>::instance().get(),
+        NormalizingConstantBase(N),
+        world_(MPICommunicator<ID>::instance().get(),
                 boost::mpi::comm_duplicate), internal_barrier_(true) {}
 
     const boost::mpi::communicator &world () const {return world_;}
@@ -29,7 +30,8 @@ class NormalizingConstantMPI : public NormalizingConstant
     double inc_zconst (std::size_t N,
             const double *weight, const double *inc_weight) const
     {
-        double linc = NormalizingConstant::inc_zconst(N, weight, inc_weight);
+        double linc = NormalizingConstantBase::inc_zconst(
+                N, weight, inc_weight);
         double ginc = 0;
         boost::mpi::all_reduce(world_, linc, ginc, std::plus<double>());
         barrier();

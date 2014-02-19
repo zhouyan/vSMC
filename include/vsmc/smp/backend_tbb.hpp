@@ -12,59 +12,46 @@ VSMC_DEFINE_SMP_FORWARD(TBB)
 /// \brief Particle::weight_set_type subtype using Intel Threading Building
 /// Blocks
 /// \ingroup TBB
-template <typename BaseState>
-class WeightSetTBB : public traits::WeightSetTypeTrait<BaseState>::type
+class WeightSetTBB : public WeightSet
 {
-    typedef typename traits::WeightSetTypeTrait<BaseState>::type base;
-
     public :
 
-    typedef typename traits::SizeTypeTrait<base>::type size_type;
-
-    explicit WeightSetTBB (size_type N) : base(N) {}
+    explicit WeightSetTBB (size_type N) : WeightSet(N) {}
 
     protected :
 
     void log_weight2weight ()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
-                tbb_op::exp<double>(
-                    this->log_weight_ptr(), this->weight_ptr()));
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size()),
+                tbb_op::exp<double>(log_weight_ptr(), weight_ptr()));
     }
 
     void weight2log_weight ()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
-                tbb_op::log<double>(
-                    this->weight_ptr(), this->log_weight_ptr()));
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size()),
+                tbb_op::log<double>(weight_ptr(), log_weight_ptr()));
     }
 
     void normalize_log_weight ()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        tbb_op::maximum<double> max_weight(this->log_weight_ptr());
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), max_weight);
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
-                tbb_op::minus<double>(
-                    this->log_weight_ptr(), this->log_weight_ptr(),
+        tbb_op::maximum<double> max_weight(log_weight_ptr());
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, size()),
+                max_weight);
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size()),
+                tbb_op::minus<double>(log_weight_ptr(), log_weight_ptr(),
                     max_weight.result()));
     }
 
     void normalize_weight ()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        tbb_op::summation<double> coeff(this->weight_ptr());
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), coeff);
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
-                tbb_op::multiplies<double>(
-                    this->weight_ptr(), this->weight_ptr(),
+        tbb_op::summation<double> coeff(weight_ptr());
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, size()), coeff);
+        tbb::parallel_for(tbb::blocked_range<size_type>(0, size()),
+                tbb_op::multiplies<double>(weight_ptr(), weight_ptr(),
                     1 / coeff.result()));
-        tbb_op::square_sum<double> ess(this->weight_ptr());
-        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, this->size()),
-                ess);
-        this->set_ess(1 / ess.result());
+        tbb_op::square_sum<double> ess(weight_ptr());
+        tbb::parallel_reduce(tbb::blocked_range<size_type>(0, size()), ess);
+        set_ess(1 / ess.result());
     }
 }; // class WeightSetTBB
 

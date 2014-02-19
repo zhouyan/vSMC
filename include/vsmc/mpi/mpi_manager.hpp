@@ -12,6 +12,10 @@ namespace vsmc {
 struct MPIDefault;
 
 template <typename, typename ID = MPIDefault> class StateMPI;
+template <typename NCBase = WeightSet, typename ID = MPIDefault>
+class WeightSetMPI;
+template <typename NCBase = NormalizingConstant, typename ID = MPIDefault>
+class NormalizingConstantMPI;
 
 /// \brief MPI Environment
 /// \ingroup MPI
