@@ -12,7 +12,7 @@
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX \
     VSMC_RUNTIME_ASSERT(false,                                               \
             ("**UniformRealDistribution::operator()** "                      \
-             "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN "       \
+             "ENGINE MEMBER FUNCTION max() RETURN A VALUE OTHER THAN "       \
              "THE MAXIMUM OF uint32_t OR uint64_t"))
 
 namespace vsmc {
@@ -167,7 +167,10 @@ class UniformRealDistribution
 
         static VSMC_CONSTEXPR const uint64_t eng_max = static_cast<uint64_t>(
                 eng.max VSMC_MNE ());
-        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX;
+        if (eng_max != uint32_t_max_ && eng_max != uint64_t_max_) {
+            VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX;
+            return 0;
+        }
 
         result_type u = 0;
         switch (eng_max) {
