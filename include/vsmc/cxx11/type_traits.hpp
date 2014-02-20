@@ -12,6 +12,9 @@ namespace cxx11 {
 /// \defgroup CPP11Traits C++11 style type traits
 /// \brief C++11 style type traits
 /// \ingroup Traits
+///
+/// \details Most of C++11/14 type traits are defined, except those require
+/// compiler sepcific funtionalities
 /// @{
 
 //////////////////////////////////////////////////////////////////////////////
@@ -132,6 +135,15 @@ template <typename> struct common_type;
 template <typename> struct underlying_type;
 template <typename> struct result_of;
 
+// Utilities
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+template <typename T>
+typename add_rvalue_reference<T>::type declval() VSMC_NOEXCEPT;
+#else
+template <typename T>
+typename add_lvalue_reference<T>::type declval() VSMC_NOEXCEPT;
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 // Helper classes
 //////////////////////////////////////////////////////////////////////////////
@@ -148,134 +160,6 @@ struct integral_constant
 };
 typedef integral_constant<bool, true> true_type;
 typedef integral_constant<bool, false> false_type;
-
-//////////////////////////////////////////////////////////////////////////////
-// Constant-volatily specifiers
-//////////////////////////////////////////////////////////////////////////////
-
-// is_const
-template <typename T> struct is_const :          public false_type {};
-template <typename T> struct is_const<const T> : public true_type {};
-
-// is_volatile
-template <typename T> struct is_volatile :             public false_type {};
-template <typename T> struct is_volatile<volatile T> : public true_type {};
-
-// remove_cv
-template <typename T> struct remove_const          {typedef T type;};
-template <typename T> struct remove_const<const T> {typedef T type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using remove_const_t = typename remove_const<T>::type;
-#endif
-
-template <typename T> struct remove_volatile             {typedef T type;};
-template <typename T> struct remove_volatile<volatile T> {typedef T type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using remove_volatile_t =
-typename remove_volatile<T>::type;
-#endif
-
-template <typename T> struct remove_cv
-{typedef typename remove_volatile<typename remove_const<T>::type>::type type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using remove_cv_t = typename remove_cv<T>::type;
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-// Refrences
-//////////////////////////////////////////////////////////////////////////////
-
-// is_lvalue_reference
-template <typename T> struct is_lvalue_reference :      public false_type {};
-template <typename T> struct is_lvalue_reference<T &> : public true_type {};
-
-// is_rvalue_reference
-template <typename T> struct is_rvalue_reference :       public false_type {};
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-template <typename T> struct is_rvalue_reference<T &&> : public true_type {};
-#endif
-
-// is_reference
-template <typename T> struct is_reference       : public false_type {};
-template <typename T> struct is_reference<T &>  : public true_type {};
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-template <typename T> struct is_reference<T &&> : public true_type {};
-#endif
-
-// remove_reference
-template <typename T> struct remove_reference       {typedef T type;};
-template <typename T> struct remove_reference<T &>  {typedef T type;};
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-template <typename T> struct remove_reference<T &&> {typedef T type;};
-#endif
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using remove_reference_t =
-typename remove_reference<T>::type;
-#endif
-
-// add_lvalue_reference
-template <typename T> struct add_lvalue_reference      {typedef T &  type;};
-template <typename T> struct add_lvalue_reference<T &> {typedef T &  type;};
-template <> struct add_lvalue_reference<void>
-{typedef void type;};
-template <> struct add_lvalue_reference<const void>
-{typedef const void type;};
-template <> struct add_lvalue_reference<volatile void>
-{typedef volatile void type;};
-template <> struct add_lvalue_reference<const volatile void>
-{typedef const volatile void type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using add_lvalue_reference_t =
-typename add_lvalue_reference<T>::type;
-#endif
-
-// add_rvalue_reference
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-template <typename T> struct add_rvalue_reference  {typedef T &&  type;};
-template <> struct add_rvalue_reference<void>
-{typedef void type;};
-template <> struct add_rvalue_reference<const void>
-{typedef const void type;};
-template <> struct add_rvalue_reference<volatile void>
-{typedef volatile void type;};
-template <> struct add_rvalue_reference<const volatile void>
-{typedef const volatile void type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using add_rvalue_reference_t =
-typename add_rvalue_reference<T>::type;
-#endif
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-// Pointers
-//////////////////////////////////////////////////////////////////////////////
-
-// is_pointer
-namespace internal {
-template <typename T> struct is_pointer_impl :      public false_type {};
-template <typename T> struct is_pointer_impl<T *> : public true_type {};
-} // namespace vsmc::internal
-template <typename T> struct is_pointer :
-    public internal::is_pointer_impl<typename remove_cv<T>::type> {};
-
-// remove_pointer
-template <typename T> struct remove_pointer              {typedef T type;};
-template <typename T> struct remove_pointer<T *>         {typedef T type;};
-template <typename T> struct remove_pointer<T *const>    {typedef T type;};
-template <typename T> struct remove_pointer<T *volatile> {typedef T type;};
-template <typename T> struct remove_pointer<T *const volatile>
-{typedef T type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using remove_pointer_t =
-typename remove_pointer<T>::type;
-#endif
-
-// add_pointer
-template <typename T> struct add_pointer
-{typedef typename remove_reference<T>::type * type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using add_pointer_t = typename add_pointer<T>::type;
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Primary type categories
@@ -340,25 +224,14 @@ template <typename T> struct is_array<T []> : public true_type  {};
 template <typename T, std::size_t N>
 struct is_array<T [N]> : public true_type {};
 
-// remove_extent
-template <typename T> struct remove_extent       {typedef T type;};
-template <typename T> struct remove_extent<T []> {typedef T type;};
-template <typename T, std::size_t N> struct remove_extent<T [N]>
-{typedef T type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using remove_extent_t = typename remove_extent<T>::type;
-#endif
-
-// remove_all_extents
-template <typename T> struct remove_all_extents {typedef T type;};
-template <typename T> struct remove_all_extents<T []>
-{typedef typename remove_all_extents<T>::type type;};
-template <typename T, std::size_t N> struct remove_all_extents<T [N]>
-{typedef typename remove_all_extents<T>::type type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using remove_all_extents_t =
-typename remove_all_extents<T>::type;
-#endif
+// is_enum
+template <typename T> struct is_enum :
+    public integral_constant<bool,
+    !is_void<T>::value           && !is_integral<T>::value       &&
+    !is_floating_point<T>::value && !is_pointer<T>::value        &&
+    !is_reference<T>::value      && !is_member_pointer<T>::value &&
+    !is_union<T>::value          && !is_class<T>::value          &&
+    !is_function<T>::value> {};
 
 // is_union
 namespace internal {
@@ -396,18 +269,28 @@ template <typename T> struct is_function_impl<T, true> : public false_type {};
 template <typename T> struct is_function :
     public internal::is_function_impl<T> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// Member pointer
-//////////////////////////////////////////////////////////////////////////////
-
-// is_member_pointer
+// is_pointer
 namespace internal {
-template <typename> struct is_member_pointer_impl : public false_type {};
-template <typename T, typename U> struct is_member_pointer_impl<T U::*> :
-    public true_type {};
+template <typename T> struct is_pointer_impl :      public false_type {};
+template <typename T> struct is_pointer_impl<T *> : public true_type {};
 } // namespace vsmc::internal
-template <typename T> struct is_member_pointer :
-    public internal::is_member_pointer_impl<typename remove_cv<T>::type> {};
+template <typename T> struct is_pointer :
+    public internal::is_pointer_impl<typename remove_cv<T>::type> {};
+
+// is_lvalue_reference
+template <typename T> struct is_lvalue_reference :      public false_type {};
+template <typename T> struct is_lvalue_reference<T &> : public true_type {};
+
+// is_rvalue_reference
+template <typename T> struct is_rvalue_reference :       public false_type {};
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+template <typename T> struct is_rvalue_reference<T &&> : public true_type {};
+#endif
+
+// is_member_object_pointer
+template <typename T> struct is_member_object_pointer :
+    public integral_constant<bool,
+    is_member_pointer<T>::value && !is_member_function_pointer<T>::value> {};
 
 // is_member_function_pointer
 namespace internal {
@@ -420,32 +303,18 @@ template <typename T> struct is_member_function_pointer :
     public internal::is_member_function_pointer_impl<
     typename remove_cv<T>::type> {};
 
-// is_member_object_pointer
-template <typename T> struct is_member_object_pointer :
-    public integral_constant<bool,
-    is_member_pointer<T>::value && !is_member_function_pointer<T>::value> {};
-
 //////////////////////////////////////////////////////////////////////////////
 // Composite type categories
 //////////////////////////////////////////////////////////////////////////////
-
-// is_enum
-template <typename T> struct is_enum :
-    public integral_constant<bool,
-    !is_void<T>::value           && !is_integral<T>::value       &&
-    !is_floating_point<T>::value && !is_pointer<T>::value        &&
-    !is_reference<T>::value      && !is_member_pointer<T>::value &&
-    !is_union<T>::value          && !is_class<T>::value          &&
-    !is_function<T>::value> {};
-
-// is_arithmetic
-template <typename T> struct is_arithmetic : public integral_constant<bool,
-    is_integral<T>::value || is_floating_point<T>::value> {};
 
 // is_fundamental
 template <typename T> struct is_fundamental : public integral_constant<bool,
     is_void<T>::value || is_null_pointer<T>::value || is_arithmetic<T>::value>
 {};
+
+// is_arithmetic
+template <typename T> struct is_arithmetic : public integral_constant<bool,
+    is_integral<T>::value || is_floating_point<T>::value> {};
 
 // is_scalar
 template <typename T> struct is_scalar :
@@ -464,48 +333,33 @@ template <typename T> struct is_object :
 template <typename T> struct is_compound : public integral_constant<bool,
     !is_fundamental<T>::value> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// Add cv
-//////////////////////////////////////////////////////////////////////////////
+// is_reference
+template <typename T> struct is_reference       : public false_type {};
+template <typename T> struct is_reference<T &>  : public true_type {};
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+template <typename T> struct is_reference<T &&> : public true_type {};
+#endif
 
-// add_const
+// is_member_pointer
 namespace internal {
-template <typename T, bool =
-    is_reference<T>::value || is_function<T>::value || is_const<T>::value>
-struct add_const_impl {typedef T type;};
-template <typename T>
-struct add_const_impl<T, false> {typedef const T type;};
+template <typename> struct is_member_pointer_impl : public false_type {};
+template <typename T, typename U> struct is_member_pointer_impl<T U::*> :
+    public true_type {};
 } // namespace vsmc::internal
-template <typename T> struct add_const
-{typedef typename internal::add_const_impl<T>::type type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using add_const_t = typename add_const<T>::type;
-#endif
-
-// add_volatile
-namespace internal {
-template <typename T, bool =
-    is_reference<T>::value || is_function<T>::value || is_volatile<T>::value>
-struct add_volatile_impl {typedef T type;};
-template <typename T>
-struct add_volatile_impl<T, false> {typedef volatile T type;};
-} // namespace vsmc::internal
-template <typename T> struct add_volatile
-{typedef typename internal::add_volatile_impl<T>::type type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using add_volatile_t = typename add_volatile<T>::type;
-#endif
-
-// add_cv
-template <typename T> struct add_cv
-{typedef typename add_volatile<typename add_const<T>::type>::type type;};
-#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
-template <typename T> using add_cv_t = typename add_cv<T>::type;
-#endif
+template <typename T> struct is_member_pointer :
+    public internal::is_member_pointer_impl<typename remove_cv<T>::type> {};
 
 //////////////////////////////////////////////////////////////////////////////
 // Type properties
 //////////////////////////////////////////////////////////////////////////////
+
+// is_const
+template <typename T> struct is_const :          public false_type {};
+template <typename T> struct is_const<const T> : public true_type {};
+
+// is_volatile
+template <typename T> struct is_volatile :             public false_type {};
+template <typename T> struct is_volatile<volatile T> : public true_type {};
 
 // is_trivial
 // is_trivially_copyable
@@ -513,42 +367,47 @@ template <typename T> using add_cv_t = typename add_cv<T>::type;
 // is_pod
 // is_literal_type
 // is_empty
-// is_polymorphic
+// is_polymporhic
 // is_abstract
 // is_signed
 // is_unsigned
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-template <typename T>
-inline typename remove_reference<T>::type &&move (T &&t) VSMC_NOEXCEPT
-{
-    typedef typename remove_reference<T>::type U;
-    return static_cast<U &&>(t);
-}
+//////////////////////////////////////////////////////////////////////////////
+// Supported operations
+//////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-inline T &&forward (typename remove_reference<T>::type &t) VSMC_NOEXCEPT
-{return static_cast<T &&>(t);}
+// is_constructible
+// is_trivally_constructible
+// is_nothrow_constructible
+// is_default_constructible
+// is_trivally_default_constructible
+// is_nothrow_default_constructible
+// is_copy_constructible
+// is_trivally_copy_constructible
+// is_nothrow_copy_constructible
+// is_move_constructible
+// is_trivally_move_constructible
+// is_nothrow_move_constructible
+// is_assignable
+// is_trivally_assignable
+// is_nothrow_assignable
+// is_copy_assignable
+// is_trivally_copy_assignable
+// is_nothrow_copy_assignable
+// is_move_assignable
+// is_trivally_move_assignable
+// is_nothrow_move_assignable
+// is_destructible
+// is_trivally_destructible
+// is_nothrow_destructible
+// has_virtual_destructor
 
-template <typename T>
-inline T &&forward (typename remove_reference<T>::type &&t) VSMC_NOEXCEPT
-{
-    VSMC_STATIC_ASSERT_FORWARD_RVALUE;
-    return static_cast<T&&>(t);
-}
-#endif
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-template <typename T>
-typename add_rvalue_reference<T>::type declval() VSMC_NOEXCEPT;
-#else
-template <typename T>
-typename add_lvalue_reference<T>::type declval() VSMC_NOEXCEPT;
-#endif
-
-// enable_if
-template <bool, typename = void> struct enable_if {};
-template <typename T>            struct enable_if<true, T> {typedef T type;};
+//////////////////////////////////////////////////////////////////////////////
+// Property queries
+//////////////////////////////////////////////////////////////////////////////
+// alignment_of
+// rank
+// extend
 
 //////////////////////////////////////////////////////////////////////////////
 // Type relations
@@ -705,6 +564,206 @@ struct is_convertible_impl<T1, T2, 3, 3> : public true_type {};
 } // namespace vsmc::internal
 template <typename T1, typename T2> struct is_convertible :
     public internal::is_convertible_impl<T1, T2> {};
+
+//////////////////////////////////////////////////////////////////////////////
+// Const-volatility specifiers
+//////////////////////////////////////////////////////////////////////////////
+
+// remove_const
+template <typename T> struct remove_const          {typedef T type;};
+template <typename T> struct remove_const<const T> {typedef T type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using remove_const_t = typename remove_const<T>::type;
+#endif
+
+// remove_volatile
+template <typename T> struct remove_volatile             {typedef T type;};
+template <typename T> struct remove_volatile<volatile T> {typedef T type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using remove_volatile_t =
+typename remove_volatile<T>::type;
+#endif
+
+// remove_cv
+template <typename T> struct remove_cv
+{typedef typename remove_volatile<typename remove_const<T>::type>::type type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using remove_cv_t = typename remove_cv<T>::type;
+#endif
+
+// add_const
+namespace internal {
+template <typename T, bool =
+    is_reference<T>::value || is_function<T>::value || is_const<T>::value>
+struct add_const_impl {typedef T type;};
+template <typename T>
+struct add_const_impl<T, false> {typedef const T type;};
+} // namespace vsmc::internal
+template <typename T> struct add_const
+{typedef typename internal::add_const_impl<T>::type type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using add_const_t = typename add_const<T>::type;
+#endif
+
+// add_volatile
+namespace internal {
+template <typename T, bool =
+    is_reference<T>::value || is_function<T>::value || is_volatile<T>::value>
+struct add_volatile_impl {typedef T type;};
+template <typename T>
+struct add_volatile_impl<T, false> {typedef volatile T type;};
+} // namespace vsmc::internal
+template <typename T> struct add_volatile
+{typedef typename internal::add_volatile_impl<T>::type type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using add_volatile_t = typename add_volatile<T>::type;
+#endif
+
+// add_cv
+template <typename T> struct add_cv
+{typedef typename add_volatile<typename add_const<T>::type>::type type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using add_cv_t = typename add_cv<T>::type;
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+// References
+//////////////////////////////////////////////////////////////////////////////
+
+// remove_reference
+template <typename T> struct remove_reference       {typedef T type;};
+template <typename T> struct remove_reference<T &>  {typedef T type;};
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+template <typename T> struct remove_reference<T &&> {typedef T type;};
+#endif
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using remove_reference_t =
+typename remove_reference<T>::type;
+#endif
+
+// add_lvalue_reference
+template <typename T> struct add_lvalue_reference      {typedef T &  type;};
+template <typename T> struct add_lvalue_reference<T &> {typedef T &  type;};
+template <> struct add_lvalue_reference<void>
+{typedef void type;};
+template <> struct add_lvalue_reference<const void>
+{typedef const void type;};
+template <> struct add_lvalue_reference<volatile void>
+{typedef volatile void type;};
+template <> struct add_lvalue_reference<const volatile void>
+{typedef const volatile void type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using add_lvalue_reference_t =
+typename add_lvalue_reference<T>::type;
+#endif
+
+// add_rvalue_reference
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+template <typename T> struct add_rvalue_reference  {typedef T &&  type;};
+template <> struct add_rvalue_reference<void>
+{typedef void type;};
+template <> struct add_rvalue_reference<const void>
+{typedef const void type;};
+template <> struct add_rvalue_reference<volatile void>
+{typedef volatile void type;};
+template <> struct add_rvalue_reference<const volatile void>
+{typedef const volatile void type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using add_rvalue_reference_t =
+typename add_rvalue_reference<T>::type;
+#endif
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+// Pointers
+//////////////////////////////////////////////////////////////////////////////
+
+// remove_pointer
+template <typename T> struct remove_pointer              {typedef T type;};
+template <typename T> struct remove_pointer<T *>         {typedef T type;};
+template <typename T> struct remove_pointer<T *const>    {typedef T type;};
+template <typename T> struct remove_pointer<T *volatile> {typedef T type;};
+template <typename T> struct remove_pointer<T *const volatile>
+{typedef T type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using remove_pointer_t =
+typename remove_pointer<T>::type;
+#endif
+
+// add_pointer
+template <typename T> struct add_pointer
+{typedef typename remove_reference<T>::type * type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using add_pointer_t = typename add_pointer<T>::type;
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+// Arrays
+//////////////////////////////////////////////////////////////////////////////
+
+// remove_extent
+template <typename T> struct remove_extent       {typedef T type;};
+template <typename T> struct remove_extent<T []> {typedef T type;};
+template <typename T, std::size_t N> struct remove_extent<T [N]>
+{typedef T type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using remove_extent_t = typename remove_extent<T>::type;
+#endif
+
+// remove_all_extents
+template <typename T> struct remove_all_extents {typedef T type;};
+template <typename T> struct remove_all_extents<T []>
+{typedef typename remove_all_extents<T>::type type;};
+template <typename T, std::size_t N> struct remove_all_extents<T [N]>
+{typedef typename remove_all_extents<T>::type type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using remove_all_extents_t =
+typename remove_all_extents<T>::type;
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+// Miscellaneous transformations
+//////////////////////////////////////////////////////////////////////////////
+
+// aligned_storage
+// aligned_union
+// decay
+
+// enable_if
+template <bool, typename = void> struct enable_if {};
+template <typename T>            struct enable_if<true, T> {typedef T type;};
+
+// conditional
+// common_type
+// underlying_type
+// result_of
+
+//////////////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////////////
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+template <typename T>
+inline typename remove_reference<T>::type &&move (T &&t) VSMC_NOEXCEPT;
+
+template <typename T>
+inline typename remove_reference<T>::type &&move (T &&t) VSMC_NOEXCEPT
+{
+    typedef typename remove_reference<T>::type U;
+    return static_cast<U &&>(t);
+}
+
+template <typename T>
+inline T &&forward (typename remove_reference<T>::type &t) VSMC_NOEXCEPT
+{return static_cast<T &&>(t);}
+
+template <typename T>
+inline T &&forward (typename remove_reference<T>::type &&t) VSMC_NOEXCEPT
+{
+    VSMC_STATIC_ASSERT_FORWARD_RVALUE;
+    return static_cast<T&&>(t);
+}
+#endif
 
 /// @}
 
