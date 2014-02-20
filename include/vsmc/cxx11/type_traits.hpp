@@ -93,7 +93,7 @@ template <typename> struct has_virtual_destructor;
 // Property queries
 template <typename> struct alignment_of;
 template <typename> struct rank;
-template <typename> struct extent;
+template <typename, unsigned> struct extent;
 
 // Type relations
 template <typename, typename> struct is_same;
@@ -130,7 +130,7 @@ template <typename> struct aligned_storage;
 template <typename> struct aligned_union;
 template <typename> struct decay;
 template <bool, typename> struct enable_if;
-template <typename> struct conditional;
+template <bool, typename, typename> struct conditional;
 template <typename> struct common_type;
 template <typename> struct underlying_type;
 template <typename> struct result_of;
@@ -160,6 +160,11 @@ struct integral_constant
 };
 typedef integral_constant<bool, true> true_type;
 typedef integral_constant<bool, false> false_type;
+
+namespace internal {
+typedef char tp_test_true;
+struct tp_test_false {char a[2];};
+} // namespace vsmc::internal
 
 //////////////////////////////////////////////////////////////////////////////
 // Primary type categories
@@ -242,28 +247,26 @@ template <typename T> struct is_union :
 
 // is_class
 namespace internal {
-typedef char is_class_true;
-struct is_class_false {char a; char b;};
-template <typename T> inline is_class_true  is_class_test (int T::*);
-template <typename T> inline is_class_false is_class_test (...);
+template <typename T> inline tp_test_true  is_class_test (int T::*);
+template <typename>   inline tp_test_false is_class_test (...);
 } // namespace vsmc::internal
-template <typename T> struct is_class : public integral_constant<bool,
-    sizeof(internal::is_class_test<T>(0)) == sizeof(internal::is_class_true)
-                                        && !is_union<T>::value> {};
+template <typename T> struct is_class :
+    public integral_constant<bool,
+    sizeof(internal::is_class_test<T>(0)) == sizeof(internal::tp_test_true) &&
+    !is_union<T>::value> {};
 
 // is_function
 namespace internal {
-typedef char is_function_true;
-struct is_function_false {char a; char b;};
-template <typename T> inline is_function_true  is_function_test (T *);
-template <typename T> inline is_function_false is_function_test (...);
+template <typename T> inline tp_test_true  is_function_test (T *);
+template <typename>   inline tp_test_false is_function_test (...);
 template <typename T> inline T &is_function_test_src ();
 template <typename T, bool =
     is_class<T>::value     || is_union<T>::value  || is_void<T>::value ||
     is_reference<T>::value || is_null_pointer<T>::value>
-struct is_function_impl : public integral_constant<bool,
+struct is_function_impl :
+    public integral_constant<bool,
     sizeof(is_function_test<T>(is_function_test_src<T>())) ==
-                          sizeof(is_function_true)> {};
+    sizeof(tp_test_true)> {};
 template <typename T> struct is_function_impl<T, true> : public false_type {};
 } // namespace vsmc::internal
 template <typename T> struct is_function :
@@ -365,12 +368,77 @@ template <typename T> struct is_volatile<volatile T> : public true_type {};
 // is_trivially_copyable
 // is_standard_layout
 // is_pod
+
 // is_literal_type
+template <typename T> struct is_literal_type :
+    public integral_constant<bool,
+    is_scalar<typename remove_all_extents<T>::type>::value ||
+    is_reference<typename remove_all_extents<T>::type>::value> {};
+
 // is_empty
-// is_polymporhic
+namespace internal {
+template <typename T> struct is_empty_derived    : public T {double x;};
+template <typename T> struct is_empty_standalone            {double x;};
+} // namespace vsmc::internal
+template <typename T> struct is_empty :
+    public integral_constant<bool,
+    sizeof(internal::is_empty_derived<T>) ==
+    sizeof(internal::is_empty_standalone<T>)> {};
+
+// is_polymorphic
+namespace internal {
+template <typename T> inline tp_test_true is_polymorphic_test (
+        typename enable_if<sizeof(static_cast<T *>(const_cast<void *>(
+                    dynamic_cast<const volatile void *>(
+                        declval<T *>())))) != 0, int>::type);
+template <typename> inline tp_test_false is_polymorphic_test (...);
+} // namespace vsmc::internal
+template <typename T> struct is_polymorphic :
+    public integral_constant<bool,
+    sizeof(internal::is_polymorphic_test<T>(0)) ==
+    sizeof(internal::tp_test_true)> {};
+
 // is_abstract
+namespace internal {
+template <typename T> inline tp_test_false is_abstract_test (T (*) [1]);
+template <typename>   inline tp_test_true  is_abstract_test (...);
+template <typename T, bool = is_class<T>::value>
+struct is_abstract_impl : public integral_constant<bool,
+    sizeof(is_abstract_test<T>(0)) == sizeof(tp_test_true)> {};
+template <typename T> struct is_abstract_impl<T, false> : public false_type {};
+} // namespace vsmc::internal
+template <typename T> struct is_abstract :
+    public internal::is_abstract_impl<T> {};
+
 // is_signed
+namespace internal {
+template <typename T, bool = is_integral<T>::value>
+struct is_signed_num_impl : public integral_constant<bool,
+    static_cast<T>(-1) < static_cast<T>(0)> {};
+template <typename T>
+struct is_signed_num_impl<T, false> : public true_type {};
+
+template <typename T, bool = is_arithmetic<T>::value>
+struct is_signed_impl : public is_signed_num_impl<T> {};
+template <typename T>
+struct is_signed_impl<T, false> : public false_type {};
+} // namespace vsmc::internal
+template <typename T>
+struct is_signed : public internal::is_signed_impl<T> {};
+
 // is_unsigned
+namespace internal {
+template <typename T, bool = is_integral<T>::value>
+struct is_unsigned_num_impl : public integral_constant<bool,
+    static_cast<T>(0) < static_cast<T>(-1)> {};
+template <typename T>
+struct is_unsigned_num_impl<T, false> : public false_type {};
+template <typename T, bool = is_arithmetic<T>::value>
+struct is_unsigned_impl : public is_unsigned_num_impl<T> {};
+template <typename T> struct is_unsigned_impl<T, false> : public false_type {};
+} // namespace vsmc::internal
+template <typename T>
+struct is_unsigned : public internal::is_unsigned_impl<T> {};
 
 //////////////////////////////////////////////////////////////////////////////
 // Supported operations
@@ -405,9 +473,28 @@ template <typename T> struct is_volatile<volatile T> : public true_type {};
 //////////////////////////////////////////////////////////////////////////////
 // Property queries
 //////////////////////////////////////////////////////////////////////////////
+
 // alignment_of
+
 // rank
-// extend
+template <typename> struct rank :
+    public integral_constant<std::size_t, 0> {};
+template <typename T> struct rank<T []> :
+    public integral_constant<std::size_t, rank<T>::value + 1> {};
+template <typename T, std::size_t N> struct rank<T [N]> :
+    public integral_constant<std::size_t, rank<T>::value + 1> {};
+
+// extent
+template <typename, unsigned = 0> struct extent :
+    public integral_constant<std::size_t, 0> {};
+template <typename T> struct extent<T [], 0> :
+    public integral_constant<std::size_t, 0> {};
+template <typename T, unsigned I> struct extent<T [], I> :
+    public integral_constant<std::size_t, extent<T, I - 1>::value> {};
+template <typename T, std::size_t N> struct extent<T [N], 0> :
+    public integral_constant<std::size_t, N> {};
+template <typename T, std::size_t N, unsigned I> struct extent<T [N], I> :
+    public integral_constant<std::size_t, extent<T, I - 1>::value> {};
 
 //////////////////////////////////////////////////////////////////////////////
 // Type relations
@@ -427,29 +514,26 @@ template <typename T> struct is_base_of_src
     template <typename U> operator const is_base_of_dest<U> &();
 };
 
-template <std::size_t> struct is_base_of_true {typedef char type;};
-struct is_base_of_false {char a; char b;};
+template <std::size_t> struct is_base_of_fail {typedef char type;};
 // if convertible to base, then ambiguous
 // otherwise this is the overloading match
 template <typename B, typename D>
-inline typename is_base_of_true<sizeof(
+inline typename is_base_of_fail<sizeof(
         is_base_of_dest<B>(declval<is_base_of_src<D> >())
         )>::type is_base_of_test (int);
 template <typename B, typename D>
 
-inline is_base_of_false is_base_of_test (...);
+inline tp_test_true is_base_of_test (...);
 } // namespace vsmc::internal
 template <typename B, typename D> struct is_base_of :
     public integral_constant<bool, is_class<B>::value &&
     sizeof(internal::is_base_of_test<B, D>(0)) ==
-    sizeof(internal::is_base_of_false)> {};
+    sizeof(internal::tp_test_true)> {};
 
 // is_convertible
 namespace internal {
-typedef char is_convertible_true;
-struct is_convertible_false {char a; char b;};
-template <typename T> is_convertible_true  is_convertible_test (T);
-template <typename>   is_convertible_false is_convertible_test (...);
+template <typename T> tp_test_true  is_convertible_test (T);
+template <typename>   tp_test_false is_convertible_test (...);
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
 template <typename T> T && is_convertible_test_src ();
 #else
@@ -476,10 +560,10 @@ struct is_convertible_impl :
     public integral_constant<bool,
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     sizeof(is_convertible_test<T2>(is_convertible_test_src<T1>())) ==
-    sizeof(is_convertible_true)
+    sizeof(tp_test_true)
 #else
     sizeof(is_convertible_test<T2>(is_convertible_test_src<T1>())) ==
-    sizeof(is_convertible_true) && !(!is_function<T1>::value &&
+    sizeof(tp_test_true) && !(!is_function<T1>::value &&
             !is_reference<T1>::value && is_reference<T2>::value &&
             (!is_const<typename remove_reference<T2>::type>::value ||
              is_volatile<typename remove_reference<T2>::type>::value) &&
@@ -489,18 +573,19 @@ struct is_convertible_impl :
 #endif
     > {};
 template <typename T1, typename T2>
-struct is_convertible_impl<T1, T2, 1, 0> : false_type {};
+struct is_convertible_impl<T1, T2, 1, 0> : public false_type {};
 template <typename T1>
-struct is_convertible_impl<T1, const T1 &, 1, 0> : true_type {};
+struct is_convertible_impl<T1, const T1 &, 1, 0> : public true_type {};
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
 template <typename T1>
-struct is_convertible_impl<T1, T1 &&, 1, 0> : true_type {};
+struct is_convertible_impl<T1, T1 &&, 1, 0> : public true_type {};
 template <typename T1>
-struct is_convertible_impl<T1, const T1 &&, 1, 0> : true_type {};
+struct is_convertible_impl<T1, const T1 &&, 1, 0> : public true_type {};
 template <typename T1>
-struct is_convertible_impl<T1, volatile T1 &&, 1, 0> : true_type {};
+struct is_convertible_impl<T1, volatile T1 &&, 1, 0> : public true_type {};
 template <typename T1>
-struct is_convertible_impl<T1, const volatile T1 &&, 1, 0> : true_type {};
+struct is_convertible_impl<T1, const volatile T1 &&, 1, 0> :
+    public true_type {};
 #endif
 
 template <typename T1, typename T2>
@@ -581,7 +666,7 @@ template <typename T> struct remove_volatile             {typedef T type;};
 template <typename T> struct remove_volatile<volatile T> {typedef T type;};
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using remove_volatile_t =
-typename remove_volatile<T>::type;
+    typename remove_volatile<T>::type;
 #endif
 
 // remove_cv
@@ -638,7 +723,7 @@ template <typename T> struct remove_reference<T &&> {typedef T type;};
 #endif
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using remove_reference_t =
-typename remove_reference<T>::type;
+    typename remove_reference<T>::type;
 #endif
 
 // add_lvalue_reference
@@ -654,7 +739,7 @@ template <> struct add_lvalue_reference<const volatile void>
 {typedef const volatile void type;};
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using add_lvalue_reference_t =
-typename add_lvalue_reference<T>::type;
+    typename add_lvalue_reference<T>::type;
 #endif
 
 // add_rvalue_reference
@@ -670,7 +755,7 @@ template <> struct add_rvalue_reference<const volatile void>
 {typedef const volatile void type;};
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using add_rvalue_reference_t =
-typename add_rvalue_reference<T>::type;
+    typename add_rvalue_reference<T>::type;
 #endif
 #endif
 
@@ -687,7 +772,7 @@ template <typename T> struct remove_pointer<T *const volatile>
 {typedef T type;};
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using remove_pointer_t =
-typename remove_pointer<T>::type;
+    typename remove_pointer<T>::type;
 #endif
 
 // add_pointer
@@ -696,6 +781,109 @@ template <typename T> struct add_pointer
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using add_pointer_t = typename add_pointer<T>::type;
 #endif
+
+//////////////////////////////////////////////////////////////////////////////
+// Sign modifiers
+//////////////////////////////////////////////////////////////////////////////
+
+namespace internal {
+template <typename T, typename U,
+         bool = is_const<typename remove_reference<T>::type>::value,
+         bool = is_volatile<typename remove_reference<T>::type>::value>
+struct apply_cv;
+template <typename T, typename U> struct apply_cv<T, U, true, true>
+{typedef const volatile U type;};
+template <typename T, typename U> struct apply_cv<T, U, true, false>
+{typedef const U type;};
+template <typename T, typename U> struct apply_cv<T, U, false, true>
+{typedef volatile U type;};
+template <typename T, typename U> struct apply_cv<T, U, false, false>
+{typedef U type;};
+template <typename T, typename U> struct apply_cv<T &, U, true, true>
+{typedef const volatile U & type;};
+template <typename T, typename U> struct apply_cv<T &, U, true, false>
+{typedef const U & type;};
+template <typename T, typename U> struct apply_cv<T &, U, false, true>
+{typedef volatile U & type;};
+template <typename T, typename U> struct apply_cv<T &, U, false, false>
+{typedef U & type;};
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+template <typename T, typename U> struct apply_cv<T &&, U, true, true>
+{typedef const volatile U && type;};
+template <typename T, typename U> struct apply_cv<T &&, U, true, false>
+{typedef const U && type;};
+template <typename T, typename U> struct apply_cv<T &&, U, false, true>
+{typedef volatile U && type;};
+template <typename T, typename U> struct apply_cv<T &&, U, false, false>
+{typedef U && type;};
+#endif
+} // namespace vsmc::internal
+
+// make_signed
+namespace internal {
+template <typename T, bool = is_integral<T>::value || is_enum<T>::value>
+struct make_signed_impl {};
+template <> struct make_signed_impl<signed short, true>
+{typedef signed short type;};
+template <> struct make_signed_impl<signed int, true>
+{typedef signed int type;};
+template <> struct make_signed_impl<signed long, true>
+{typedef signed long type;};
+#if VSMC_HAS_CXX11_LONG_LONG
+template <> struct make_signed_impl<signed long long, true>
+{typedef signed long long type;};
+#endif
+template <> struct make_signed_impl<unsigned short, true>
+{typedef signed short type;};
+template <> struct make_signed_impl<unsigned int, true>
+{typedef signed int type;};
+template <> struct make_signed_impl<unsigned long, true>
+{typedef signed long type;};
+#if VSMC_HAS_CXX11_LONG_LONG
+template <> struct make_signed_impl<unsigned long long, true>
+{typedef signed long long type;};
+#endif
+} // namespace vsmc::internal
+template <typename T>
+struct make_signed
+{
+    typedef typename internal::apply_cv<T,
+            typename internal::make_signed_impl<typename remove_cv<
+                typename remove_reference<T>::type>::type>::type>::type type;
+};
+
+// make_unsigned
+namespace internal {
+template <typename T, bool = is_integral<T>::value || is_enum<T>::value>
+struct make_unsigned_impl {};
+template <> struct make_unsigned_impl<signed short, true>
+{typedef unsigned short type;};
+template <> struct make_unsigned_impl<signed int, true>
+{typedef unsigned int type;};
+template <> struct make_unsigned_impl<signed long, true>
+{typedef unsigned long type;};
+#if VSMC_HAS_CXX11_LONG_LONG
+template <> struct make_unsigned_impl<signed long long, true>
+{typedef unsigned long long type;};
+#endif
+template <> struct make_unsigned_impl<unsigned short, true>
+{typedef unsigned short type;};
+template <> struct make_unsigned_impl<unsigned int, true>
+{typedef unsigned int type;};
+template <> struct make_unsigned_impl<unsigned long, true>
+{typedef unsigned long type;};
+#if VSMC_HAS_CXX11_LONG_LONG
+template <> struct make_unsigned_impl<unsigned long long, true>
+{typedef unsigned long long type;};
+#endif
+} // namespace vsmc::internal
+template <typename T>
+struct make_unsigned
+{
+    typedef typename internal::apply_cv<T,
+            typename internal::make_unsigned_impl<typename remove_cv<
+                typename remove_reference<T>::type>::type>::type>::type type;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // Arrays
@@ -718,7 +906,7 @@ template <typename T, std::size_t N> struct remove_all_extents<T [N]>
 {typedef typename remove_all_extents<T>::type type;};
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using remove_all_extents_t =
-typename remove_all_extents<T>::type;
+    typename remove_all_extents<T>::type;
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -727,13 +915,45 @@ typename remove_all_extents<T>::type;
 
 // aligned_storage
 // aligned_union
+
 // decay
+template <typename T>
+struct decay
+{
+    private :
+
+    typedef typename remove_reference<T>::type U;
+
+    public :
+
+    typedef
+        typename conditional<
+            is_array<U>::value, typename remove_extent<U>::type *,
+        typename conditional<
+            is_function<U>::value, typename add_pointer<U>::type,
+        typename remove_cv<U>::type>::type>::type type;
+};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using decay_t = typename decay<T>::type;
+#endif
 
 // enable_if
 template <bool, typename = void> struct enable_if {};
-template <typename T>            struct enable_if<true, T> {typedef T type;};
+template <typename T> struct enable_if<true, T> {typedef T type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <bool B, typename T = void> using enable_if_t =
+    typename enable_if<B, T>::type;
+#endif
 
 // conditional
+template <bool, typename, typename F> struct conditional {typedef F type;};
+template <typename T, typename F> struct conditional<true, T, F>
+{typedef T type;};
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <bool B, typename T, typename F> using conditional_t =
+    typename conditional<B, T, F>::type;
+#endif
+
 // common_type
 // underlying_type
 // result_of
