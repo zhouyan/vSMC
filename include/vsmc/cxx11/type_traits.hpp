@@ -851,6 +851,9 @@ struct make_signed
             typename internal::make_signed_impl<typename remove_cv<
                 typename remove_reference<T>::type>::type>::type>::type type;
 };
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using make_signed_t = typename make_signed<T>::type;
+#endif
 
 // make_unsigned
 namespace internal {
@@ -884,6 +887,9 @@ struct make_unsigned
             typename internal::make_unsigned_impl<typename remove_cv<
                 typename remove_reference<T>::type>::type>::type>::type type;
 };
+#if VSMC_HAS_CXX11_ALIAS_TEMPLATES
+template <typename T> using make_unsigned_t = typename make_unsigned<T>::type;
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Arrays
