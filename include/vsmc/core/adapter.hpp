@@ -5,14 +5,14 @@
 
 namespace vsmc {
 
-template <typename T, template <typename, typename> class Impl,
-         typename Func = NullType> class InitializeAdapter;
-template <typename T, template <typename, typename> class Impl,
-         typename Func = NullType> class MoveAdapter;
-template <typename T, template <typename, typename> class Impl,
-         typename Func = NullType> class MonitorEvalAdapter;
-template <typename T, template <typename, typename> class Impl,
-         typename Func = NullType> class PathEvalAdapter;
+template <typename T, template <typename, typename> class,
+         typename = NullType> class InitializeAdapter;
+template <typename T, template <typename, typename> class,
+         typename = NullType> class MoveAdapter;
+template <typename T, template <typename, typename> class,
+         typename = NullType> class MonitorEvalAdapter;
+template <typename T, template <typename, typename> class,
+         typename = NullType> class PathEvalAdapter;
 
 /// \brief Initialize class adapter base
 /// \ingroup Adapter

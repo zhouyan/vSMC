@@ -72,10 +72,10 @@ struct IsDerivedFromStateCL :
 
 } // namespace vsmc::traits
 
-template <typename, typename Derived = NullType> class InitializeCL;
-template <typename, typename Derived = NullType> class MoveCL;
-template <typename, typename Derived = NullType> class MonitorEvalCL;
-template <typename, typename Derived = NullType> class PathEvalCL;
+template <typename, typename = NullType> class InitializeCL;
+template <typename, typename = NullType> class MoveCL;
+template <typename, typename = NullType> class MonitorEvalCL;
+template <typename, typename = NullType> class PathEvalCL;
 
 /// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
 /// \ingroup OpenCL

@@ -25,7 +25,7 @@ namespace vsmc {
 
 struct ScalarRng;
 struct VectorRng;
-template <typename RngType, typename Storage> class RngSet;
+template <typename, typename> class RngSet;
 
 /// \brief Scalar RNG set
 /// \ingroup RNG

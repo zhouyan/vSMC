@@ -15,46 +15,45 @@
 
 namespace vsmc {
 
-template <MKL_INT BRNG>                          class MKLStream;
-template <typename ResultType, typename Derived> class MKLDistribution;
-template <MKL_INT BRNG, typename ResultType>     class MKLEngine;
+template <MKL_INT>            class MKLStream;
+template <typename, typename> class MKLDistribution;
+template <MKL_INT, typename>  class MKLEngine;
+template <typename>           class MKLUniformBitsDistribution;
 
-template <typename ResultType> class MKLUniformBitsDistribution;
-
-template <MKL_INT Method =
-    VSL_RNG_METHOD_BERNOULLI_ICDF>       class MKLBernoulliDistribution;
-template <MKL_INT Method =
-    VSL_RNG_METHOD_GEOMETRIC_ICDF>       class MKLGeometricDistribution;
-template <MKL_INT Method =
-    VSL_RNG_METHOD_BINOMIAL_BTPE>        class MKLBinomialDistribution;
-template <MKL_INT Method =
-    VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE>  class MKLHypergeometricDistribution;
-template <MKL_INT Method =
-    VSL_RNG_METHOD_POISSON_PTPE>         class MKLPoissonDistribution;
-template <MKL_INT Method =
-    VSL_RNG_METHOD_NEGBINOMIAL_NBAR>     class MKLNegBinomialDistribution;
-template <typename ResultType, MKL_INT Method =
-    VSL_RNG_METHOD_UNIFORM_STD>          class MKLUniformDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>  class MKLGaussianDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_EXPONENTIAL_ICDF>     class MKLExponentialDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_LAPLACE_ICDF>         class MKLLaplaceDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_WEIBULL_ICDF>         class MKLWeibullDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_CAUCHY_ICDF>          class MKLCauchyDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_RAYLEIGH_ICDF>        class MKLRayleighDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2> class MKLLognormalDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_GUMBEL_ICDF>          class MKLGumbelDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_GAMMA_GNORM>          class MKLGammaDistribution;
-template <typename FPType = double, MKL_INT Method =
-    VSL_RNG_METHOD_BETA_CJA>             class MKLBetaDistribution;
+template <MKL_INT = VSL_RNG_METHOD_BERNOULLI_ICDF>
+class MKLBernoulliDistribution;
+template <MKL_INT = VSL_RNG_METHOD_GEOMETRIC_ICDF>
+class MKLGeometricDistribution;
+template <MKL_INT = VSL_RNG_METHOD_BINOMIAL_BTPE>
+class MKLBinomialDistribution;
+template <MKL_INT = VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE>
+class MKLHypergeometricDistribution;
+template <MKL_INT = VSL_RNG_METHOD_POISSON_PTPE>
+class MKLPoissonDistribution;
+template <MKL_INT = VSL_RNG_METHOD_NEGBINOMIAL_NBAR>
+class MKLNegBinomialDistribution;
+template <typename, MKL_INT = VSL_RNG_METHOD_UNIFORM_STD>
+class MKLUniformDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>
+class MKLGaussianDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_EXPONENTIAL_ICDF>
+class MKLExponentialDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_LAPLACE_ICDF>
+class MKLLaplaceDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_WEIBULL_ICDF>
+class MKLWeibullDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_CAUCHY_ICDF>
+class MKLCauchyDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_RAYLEIGH_ICDF>
+class MKLRayleighDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2>
+class MKLLognormalDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_GUMBEL_ICDF>
+class MKLGumbelDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_GAMMA_GNORM>
+class MKLGammaDistribution;
+template <typename = double, MKL_INT = VSL_RNG_METHOD_BETA_CJA>
+class MKLBetaDistribution;
 
 #define VSMC_DEFINE_VSL_BRNG_CASE(BRNG) \
     case BRNG : return #BRNG ;

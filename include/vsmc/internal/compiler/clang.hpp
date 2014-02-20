@@ -5,6 +5,10 @@
 
 // C++11 language features
 
+#ifndef VSMC_HAS_CXX11_LONG_LONG
+#define VSMC_HAS_CXX11_LONG_LONG 1
+#endif
+
 #if __has_feature(cxx_access_control_sfinae)
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
 #define VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE 1

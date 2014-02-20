@@ -40,6 +40,12 @@
 
 //  C++11 language features
 
+/// \brief C++11 long long
+/// \ingroup Compiler
+#ifndef VSMC_HAS_CXX11_LONG_LONG
+#define VSMC_HAS_CXX11_LONG_LONG 0
+#endif
+
 /// \brief C++11 SFINAE includes access control
 /// \ingroup Compiler
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE

@@ -15,10 +15,9 @@ namespace vsmc {
 /// \ingroup MPI
 struct MPIDefault;
 
-template <typename, typename ID = MPIDefault> class StateMPI;
-template <typename WSBase = WeightSet, typename ID = MPIDefault>
-class WeightSetMPI;
-template <typename NCBase = NormalizingConstant, typename ID = MPIDefault>
+template <typename, typename = MPIDefault> class StateMPI;
+template <typename = WeightSet, typename = MPIDefault> class WeightSetMPI;
+template <typename = NormalizingConstant, typename = MPIDefault>
 class NormalizingConstantMPI;
 
 /// \brief Particle::weight_set_type subtype using MPI
