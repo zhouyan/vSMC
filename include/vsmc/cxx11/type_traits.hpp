@@ -9,12 +9,60 @@ namespace vsmc {
 
 namespace cxx11 {
 
-/// \defgroup CPP11Traits C++11 style type traits
+/// \defgroup CXX11Traits C++11 style type traits
 /// \brief C++11 style type traits
 /// \ingroup Traits
 ///
-/// \details Most of C++11/14 type traits are defined, except those require
-/// compiler sepcific funtionalities
+/// \details
+/// Most of C++11/14 type traits are defined, except those require compiler
+/// sepcific funtionalities.
+///
+/// \bug vsmc::cxx11::is_union is not correctly implemented. This type traits
+/// need compiler support to be implemented. The current behavior is that
+/// `is_union<T>` derives from vsmc::cxx11::false_type for any `T`.  In
+/// addition, `is_class<T>` derives vsmc::cxx11::true_type if the template
+/// parameter type is a union, while it should derive from
+/// vsmc::cxx11::false_type
+///
+/// \todo The following traits are declared but not implemented yet
+/// ~~~{.cpp}
+/// template <typename> struct is_trivial;
+/// template <typename> struct is_trivially_copyable;
+/// template <typename> struct is_standard_layout;
+/// template <typename> struct is_pod;
+/// template <typename> struct is_literal_type;
+/// template <typename> struct is_constructible;
+/// template <typename> struct is_trivially_constructible;
+/// template <typename> struct is_nothrow_constructible;
+/// template <typename> struct is_default_constructible;
+/// template <typename> struct is_trivially_default_constructible;
+/// template <typename> struct is_nothrow_default_constructible;
+/// template <typename> struct is_copy_constructible;
+/// template <typename> struct is_trivially_copy_constructible;
+/// template <typename> struct is_nothrow_copy_constructible;
+/// template <typename> struct is_move_constructible;
+/// template <typename> struct is_trivially_move_constructible;
+/// template <typename> struct is_nothrow_move_constructible;
+/// template <typename> struct is_assignable;
+/// template <typename> struct is_trivially_assignable;
+/// template <typename> struct is_nothrow_assignable;
+/// template <typename> struct is_copy_assignable;
+/// template <typename> struct is_trivially_copy_assignable;
+/// template <typename> struct is_nothrow_copy_assignable;
+/// template <typename> struct is_move_assignable;
+/// template <typename> struct is_trivially_move_assignable;
+/// template <typename> struct is_nothrow_move_assignable;
+/// template <typename> struct is_destructible;
+/// template <typename> struct is_trivially_destructible;
+/// template <typename> struct is_nothrow_destructible;
+/// template <typename> struct has_virtual_destructor;
+/// template <typename> struct alignment_of;
+/// template <typename> struct aligned_storage;
+/// template <typename> struct aligned_union;
+/// template <typename> struct common_type;
+/// template <typename> struct underlying_type;
+/// template <typename> struct result_of;
+/// ~~~
 /// @{
 
 //////////////////////////////////////////////////////////////////////////////
@@ -53,7 +101,7 @@ template <typename> struct is_member_pointer;
 template <typename> struct is_const;
 template <typename> struct is_volatile;
 template <typename> struct is_trivial;
-template <typename> struct is_trivally_copyable;
+template <typename> struct is_trivially_copyable;
 template <typename> struct is_standard_layout;
 template <typename> struct is_pod;
 template <typename> struct is_literal_type;
@@ -65,28 +113,28 @@ template <typename> struct is_unsigned;
 
 // Supported operations
 template <typename> struct is_constructible;
-template <typename> struct is_trivally_constructible;
+template <typename> struct is_trivially_constructible;
 template <typename> struct is_nothrow_constructible;
 template <typename> struct is_default_constructible;
-template <typename> struct is_trivally_default_constructible;
+template <typename> struct is_trivially_default_constructible;
 template <typename> struct is_nothrow_default_constructible;
 template <typename> struct is_copy_constructible;
-template <typename> struct is_trivally_copy_constructible;
+template <typename> struct is_trivially_copy_constructible;
 template <typename> struct is_nothrow_copy_constructible;
 template <typename> struct is_move_constructible;
-template <typename> struct is_trivally_move_constructible;
+template <typename> struct is_trivially_move_constructible;
 template <typename> struct is_nothrow_move_constructible;
 template <typename> struct is_assignable;
-template <typename> struct is_trivally_assignable;
+template <typename> struct is_trivially_assignable;
 template <typename> struct is_nothrow_assignable;
 template <typename> struct is_copy_assignable;
-template <typename> struct is_trivally_copy_assignable;
+template <typename> struct is_trivially_copy_assignable;
 template <typename> struct is_nothrow_copy_assignable;
 template <typename> struct is_move_assignable;
-template <typename> struct is_trivally_move_assignable;
+template <typename> struct is_trivially_move_assignable;
 template <typename> struct is_nothrow_move_assignable;
 template <typename> struct is_destructible;
-template <typename> struct is_trivally_destructible;
+template <typename> struct is_trivially_destructible;
 template <typename> struct is_nothrow_destructible;
 template <typename> struct has_virtual_destructor;
 
@@ -144,21 +192,22 @@ template <typename T>
 typename add_lvalue_reference<T>::type declval() VSMC_NOEXCEPT;
 #endif
 
-//////////////////////////////////////////////////////////////////////////////
-// Helper classes
-//////////////////////////////////////////////////////////////////////////////
+/// \defgroup CXX11TraitsHelper Helper classes
+/// \brief Helper classes
+/// \ingroup CXX11Traits
+/// @{
 
 // integral_constant
 template <typename T, T v>
 struct integral_constant
 {
-    static VSMC_CONSTEXPR const T value = v;
     typedef T value_type;
     typedef integral_constant<T, v> type;
+    static VSMC_CONSTEXPR const T value = v;
     VSMC_CONSTEXPR operator value_type () const {return value;}
     VSMC_CONSTEXPR value_type operator() () const {return value;}
 };
-typedef integral_constant<bool, true> true_type;
+typedef integral_constant<bool, true>  true_type;
 typedef integral_constant<bool, false> false_type;
 
 namespace internal {
@@ -166,9 +215,12 @@ typedef char tp_test_true;
 struct tp_test_false {char a[2];};
 } // namespace vsmc::internal
 
-//////////////////////////////////////////////////////////////////////////////
-// Primary type categories
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsPrimary Primary type categories
+/// \brief Primary type categories
+/// \ingroup CXX11Traits
+/// @{
 
 // is_void
 namespace internal {
@@ -191,18 +243,18 @@ template <typename T> struct is_null_pointer :
 // is_integral
 namespace internal {
 template <typename> struct is_integral_impl : public false_type {};
-template <> struct is_integral_impl<char>           : public true_type {};
-template <> struct is_integral_impl<signed char>    : public true_type {};
-template <> struct is_integral_impl<unsigned char>  : public true_type {};
-template <> struct is_integral_impl<wchar_t>        : public true_type {};
-template <> struct is_integral_impl<short>          : public true_type {};
+template <> struct is_integral_impl<char          > : public true_type {};
+template <> struct is_integral_impl<signed char   > : public true_type {};
+template <> struct is_integral_impl<unsigned char > : public true_type {};
+template <> struct is_integral_impl<wchar_t       > : public true_type {};
+template <> struct is_integral_impl<short         > : public true_type {};
 template <> struct is_integral_impl<unsigned short> : public true_type {};
-template <> struct is_integral_impl<int>            : public true_type {};
-template <> struct is_integral_impl<unsigned>       : public true_type {};
-template <> struct is_integral_impl<long>           : public true_type {};
-template <> struct is_integral_impl<unsigned long>  : public true_type {};
+template <> struct is_integral_impl<int           > : public true_type {};
+template <> struct is_integral_impl<unsigned      > : public true_type {};
+template <> struct is_integral_impl<long          > : public true_type {};
+template <> struct is_integral_impl<unsigned long > : public true_type {};
 #if VSMC_HAS_CXX11_LONG_LONG
-template <> struct is_integral_impl<long long>          : public true_type {};
+template <> struct is_integral_impl<long long         > : public true_type {};
 template <> struct is_integral_impl<unsigned long long> : public true_type {};
 #endif
 #if VSMC_HAS_CXX11_UNICODE_LITERALS
@@ -216,18 +268,18 @@ template <typename T> struct is_integral :
 // is_floating_point
 namespace internal {
 template <typename> struct is_floating_point_impl : public false_type {};
-template <> struct is_floating_point_impl<float>       : public true_type  {};
-template <> struct is_floating_point_impl<double>      : public true_type  {};
+template <> struct is_floating_point_impl<float      > : public true_type  {};
+template <> struct is_floating_point_impl<double     > : public true_type  {};
 template <> struct is_floating_point_impl<long double> : public true_type  {};
 } // namespace vsmc::internal
 template <typename T> struct is_floating_point :
     public internal::is_floating_point_impl<typename remove_cv<T>::type> {};
 
 // is_array
-template <typename>   struct is_array       : public false_type {};
-template <typename T> struct is_array<T []> : public true_type  {};
-template <typename T, std::size_t N>
-struct is_array<T [N]> : public true_type {};
+template <typename> struct is_array : public false_type {};
+template <typename T> struct is_array<T []> : public true_type {};
+template <typename T, std::size_t N> struct is_array<T [N]> :
+    public true_type {};
 
 // is_enum
 template <typename T> struct is_enum :
@@ -247,8 +299,8 @@ template <typename T> struct is_union :
 
 // is_class
 namespace internal {
-template <typename T> inline tp_test_true  is_class_test (int T::*);
-template <typename>   inline tp_test_false is_class_test (...);
+template <typename T> tp_test_true  is_class_test (int T::*);
+template <typename>   tp_test_false is_class_test (...);
 } // namespace vsmc::internal
 template <typename T> struct is_class :
     public integral_constant<bool,
@@ -257,9 +309,9 @@ template <typename T> struct is_class :
 
 // is_function
 namespace internal {
-template <typename T> inline tp_test_true  is_function_test (T *);
-template <typename>   inline tp_test_false is_function_test (...);
-template <typename T> inline T &is_function_test_src ();
+template <typename T> tp_test_true  is_function_test (T *);
+template <typename>   tp_test_false is_function_test (...);
+template <typename T> T &is_function_test_src ();
 template <typename T, bool =
     is_class<T>::value     || is_union<T>::value  || is_void<T>::value ||
     is_reference<T>::value || is_null_pointer<T>::value>
@@ -274,20 +326,20 @@ template <typename T> struct is_function :
 
 // is_pointer
 namespace internal {
-template <typename T> struct is_pointer_impl :      public false_type {};
-template <typename T> struct is_pointer_impl<T *> : public true_type {};
+template <typename>   struct is_pointer_impl :      public false_type {};
+template <typename T> struct is_pointer_impl<T *> : public true_type  {};
 } // namespace vsmc::internal
 template <typename T> struct is_pointer :
     public internal::is_pointer_impl<typename remove_cv<T>::type> {};
 
 // is_lvalue_reference
-template <typename T> struct is_lvalue_reference :      public false_type {};
-template <typename T> struct is_lvalue_reference<T &> : public true_type {};
+template <typename>   struct is_lvalue_reference      : public false_type {};
+template <typename T> struct is_lvalue_reference<T &> : public true_type  {};
 
 // is_rvalue_reference
-template <typename T> struct is_rvalue_reference :       public false_type {};
+template <typename>   struct is_rvalue_reference       : public false_type {};
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-template <typename T> struct is_rvalue_reference<T &&> : public true_type {};
+template <typename T> struct is_rvalue_reference<T &&> : public true_type  {};
 #endif
 
 // is_member_object_pointer
@@ -298,7 +350,7 @@ template <typename T> struct is_member_object_pointer :
 // is_member_function_pointer
 namespace internal {
 template <typename>
-struct is_member_function_pointer_impl : public false_type {};
+struct is_member_function_pointer_impl         : public false_type     {};
 template <typename T, typename U>
 struct is_member_function_pointer_impl<T U::*> : public is_function<T> {};
 } // namespace vsmc::internal
@@ -306,17 +358,22 @@ template <typename T> struct is_member_function_pointer :
     public internal::is_member_function_pointer_impl<
     typename remove_cv<T>::type> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// Composite type categories
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsComposite Composite type categories
+/// \brief Composite type categories
+/// \ingroup CXX11Traits
+/// @{
 
 // is_fundamental
-template <typename T> struct is_fundamental : public integral_constant<bool,
-    is_void<T>::value || is_null_pointer<T>::value || is_arithmetic<T>::value>
-{};
+template <typename T> struct is_fundamental :
+    public integral_constant<bool,
+    is_void<T>::value || is_null_pointer<T>::value ||
+    is_arithmetic<T>::value> {};
 
 // is_arithmetic
-template <typename T> struct is_arithmetic : public integral_constant<bool,
+template <typename T> struct is_arithmetic :
+    public integral_constant<bool,
     is_integral<T>::value || is_floating_point<T>::value> {};
 
 // is_scalar
@@ -333,8 +390,8 @@ template <typename T> struct is_object :
     is_union<T>::value  || is_class<T>::value> {};
 
 // is_compound
-template <typename T> struct is_compound : public integral_constant<bool,
-    !is_fundamental<T>::value> {};
+template <typename T> struct is_compound :
+    public integral_constant<bool, !is_fundamental<T>::value> {};
 
 // is_reference
 template <typename T> struct is_reference       : public false_type {};
@@ -345,24 +402,28 @@ template <typename T> struct is_reference<T &&> : public true_type {};
 
 // is_member_pointer
 namespace internal {
-template <typename> struct is_member_pointer_impl : public false_type {};
-template <typename T, typename U> struct is_member_pointer_impl<T U::*> :
-    public true_type {};
+template <typename>
+struct is_member_pointer_impl         : public false_type {};
+template <typename T, typename U>
+struct is_member_pointer_impl<T U::*> : public true_type  {};
 } // namespace vsmc::internal
 template <typename T> struct is_member_pointer :
     public internal::is_member_pointer_impl<typename remove_cv<T>::type> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// Type properties
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsProperties Type properties
+/// \brief Type properties
+/// \ingroup CXX11Traits
+/// @{
 
 // is_const
-template <typename T> struct is_const :          public false_type {};
-template <typename T> struct is_const<const T> : public true_type {};
+template <typename>   struct is_const          : public false_type {};
+template <typename T> struct is_const<const T> : public true_type  {};
 
 // is_volatile
-template <typename T> struct is_volatile :             public false_type {};
-template <typename T> struct is_volatile<volatile T> : public true_type {};
+template <typename>   struct is_volatile             : public false_type {};
+template <typename T> struct is_volatile<volatile T> : public true_type  {};
 
 // is_trivial
 // is_trivially_copyable
@@ -377,8 +438,10 @@ template <typename T> struct is_literal_type :
 
 // is_empty
 namespace internal {
-template <typename T> struct is_empty_derived    : public T {double x;};
-template <typename T> struct is_empty_standalone            {double x;};
+template <typename is_empty_base>
+struct is_empty_derived : public is_empty_base {double x;};
+template <typename>
+struct is_empty_standalone {double x;};
 } // namespace vsmc::internal
 template <typename T> struct is_empty :
     public integral_constant<bool,
@@ -387,11 +450,11 @@ template <typename T> struct is_empty :
 
 // is_polymorphic
 namespace internal {
-template <typename T> inline tp_test_true is_polymorphic_test (
+template <typename T> tp_test_true is_polymorphic_test (
         typename enable_if<sizeof(static_cast<T *>(const_cast<void *>(
-                    dynamic_cast<const volatile void *>(
-                        declval<T *>())))) != 0, int>::type);
-template <typename> inline tp_test_false is_polymorphic_test (...);
+                    dynamic_cast<const volatile void *>(declval<T *>())
+                    ))) != 0, int>::type);
+template <typename> tp_test_false is_polymorphic_test (...);
 } // namespace vsmc::internal
 template <typename T> struct is_polymorphic :
     public integral_constant<bool,
@@ -400,10 +463,10 @@ template <typename T> struct is_polymorphic :
 
 // is_abstract
 namespace internal {
-template <typename T> inline tp_test_false is_abstract_test (T (*) [1]);
-template <typename>   inline tp_test_true  is_abstract_test (...);
-template <typename T, bool = is_class<T>::value>
-struct is_abstract_impl : public integral_constant<bool,
+template <typename T> tp_test_false is_abstract_test (T (*) [1]);
+template <typename>   tp_test_true  is_abstract_test (...);
+template <typename T, bool = is_class<T>::value> struct is_abstract_impl :
+    public integral_constant<bool,
     sizeof(is_abstract_test<T>(0)) == sizeof(tp_test_true)> {};
 template <typename T> struct is_abstract_impl<T, false> : public false_type {};
 } // namespace vsmc::internal
@@ -413,66 +476,70 @@ template <typename T> struct is_abstract :
 // is_signed
 namespace internal {
 template <typename T, bool = is_integral<T>::value>
-struct is_signed_num_impl : public integral_constant<bool,
-    static_cast<T>(-1) < static_cast<T>(0)> {};
+struct is_signed_num_impl :
+    public integral_constant<bool, static_cast<T>(-1) < static_cast<T>(0)> {};
 template <typename T>
 struct is_signed_num_impl<T, false> : public true_type {};
-
-template <typename T, bool = is_arithmetic<T>::value>
-struct is_signed_impl : public is_signed_num_impl<T> {};
-template <typename T>
-struct is_signed_impl<T, false> : public false_type {};
+template <typename T, bool = is_arithmetic<T>::value> struct is_signed_impl :
+    public is_signed_num_impl<T> {};
+template <typename T> struct is_signed_impl<T, false> : public false_type {};
 } // namespace vsmc::internal
-template <typename T>
-struct is_signed : public internal::is_signed_impl<T> {};
+template <typename T> struct is_signed :
+    public internal::is_signed_impl<T> {};
 
 // is_unsigned
 namespace internal {
 template <typename T, bool = is_integral<T>::value>
-struct is_unsigned_num_impl : public integral_constant<bool,
-    static_cast<T>(0) < static_cast<T>(-1)> {};
+struct is_unsigned_num_impl :
+    public integral_constant<bool, static_cast<T>(0) < static_cast<T>(-1)> {};
 template <typename T>
 struct is_unsigned_num_impl<T, false> : public false_type {};
-template <typename T, bool = is_arithmetic<T>::value>
-struct is_unsigned_impl : public is_unsigned_num_impl<T> {};
+template <typename T, bool = is_arithmetic<T>::value> struct is_unsigned_impl :
+    public is_unsigned_num_impl<T> {};
 template <typename T> struct is_unsigned_impl<T, false> : public false_type {};
 } // namespace vsmc::internal
-template <typename T>
-struct is_unsigned : public internal::is_unsigned_impl<T> {};
+template <typename T> struct is_unsigned :
+    public internal::is_unsigned_impl<T> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// Supported operations
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsSupport Supported operations
+/// \brief Supported operations
+/// \ingroup CXX11Traits
+/// @{
 
 // is_constructible
-// is_trivally_constructible
+// is_trivially_constructible
 // is_nothrow_constructible
 // is_default_constructible
-// is_trivally_default_constructible
+// is_trivially_default_constructible
 // is_nothrow_default_constructible
 // is_copy_constructible
-// is_trivally_copy_constructible
+// is_trivially_copy_constructible
 // is_nothrow_copy_constructible
 // is_move_constructible
-// is_trivally_move_constructible
+// is_trivially_move_constructible
 // is_nothrow_move_constructible
 // is_assignable
-// is_trivally_assignable
+// is_trivially_assignable
 // is_nothrow_assignable
 // is_copy_assignable
-// is_trivally_copy_assignable
+// is_trivially_copy_assignable
 // is_nothrow_copy_assignable
 // is_move_assignable
-// is_trivally_move_assignable
+// is_trivially_move_assignable
 // is_nothrow_move_assignable
 // is_destructible
-// is_trivally_destructible
+// is_trivially_destructible
 // is_nothrow_destructible
 // has_virtual_destructor
 
-//////////////////////////////////////////////////////////////////////////////
-// Property queries
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsQueries Property queries
+/// \brief Property queries
+/// \ingroup CXX11Traits
+/// @{
 
 // alignment_of
 
@@ -496,34 +563,34 @@ template <typename T, std::size_t N> struct extent<T [N], 0> :
 template <typename T, std::size_t N, unsigned I> struct extent<T [N], I> :
     public integral_constant<std::size_t, extent<T, I - 1>::value> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// Type relations
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsRelations Type relations
+/// \brief Type relations
+/// \ingroup CXX11Traits
+/// @{
 
 // is_same
-template <typename T, typename U> struct is_same :       public false_type {};
-template <typename T>             struct is_same<T, T> : public true_type {};
+template <typename, typename> struct is_same       : public false_type {};
+template <typename T>         struct is_same<T, T> : public true_type  {};
 
 // is_base_of
 namespace internal {
-template <typename T> struct is_base_of_dest
-{is_base_of_dest (const volatile T &);};
-template <typename T> struct is_base_of_src
+template <typename T>
+struct is_base_of_dest {is_base_of_dest (const volatile T &);};
+template <typename T>
+struct is_base_of_src
 {
     operator const volatile T &();
     template <typename U> operator const is_base_of_dest<U> &();
 };
 
 template <std::size_t> struct is_base_of_fail {typedef char type;};
-// if convertible to base, then ambiguous
-// otherwise this is the overloading match
 template <typename B, typename D>
-inline typename is_base_of_fail<sizeof(
+typename is_base_of_fail<sizeof(
         is_base_of_dest<B>(declval<is_base_of_src<D> >())
         )>::type is_base_of_test (int);
-template <typename B, typename D>
-
-inline tp_test_true is_base_of_test (...);
+template <typename B, typename D> tp_test_true is_base_of_test (...);
 } // namespace vsmc::internal
 template <typename B, typename D> struct is_base_of :
     public integral_constant<bool, is_class<B>::value &&
@@ -650,9 +717,12 @@ struct is_convertible_impl<T1, T2, 3, 3> : public true_type {};
 template <typename T1, typename T2> struct is_convertible :
     public internal::is_convertible_impl<T1, T2> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// Const-volatility specifiers
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsCV Const-volatility specifiers
+/// \brief Const-volatility specifiers
+/// \ingroup CXX11Traits
+/// @{
 
 // remove_const
 template <typename T> struct remove_const          {typedef T type;};
@@ -711,9 +781,12 @@ template <typename T> struct add_cv
 template <typename T> using add_cv_t = typename add_cv<T>::type;
 #endif
 
-//////////////////////////////////////////////////////////////////////////////
-// References
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsRef References
+/// \brief References
+/// \ingroup CXX11Traits
+/// @{
 
 // remove_reference
 template <typename T> struct remove_reference       {typedef T type;};
@@ -759,9 +832,12 @@ template <typename T> using add_rvalue_reference_t =
 #endif
 #endif
 
-//////////////////////////////////////////////////////////////////////////////
-// Pointers
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsPtr Pointers
+/// \brief Pointers
+/// \ingroup CXX11Traits
+/// @{
 
 // remove_pointer
 template <typename T> struct remove_pointer              {typedef T type;};
@@ -782,9 +858,12 @@ template <typename T> struct add_pointer
 template <typename T> using add_pointer_t = typename add_pointer<T>::type;
 #endif
 
-//////////////////////////////////////////////////////////////////////////////
-// Sign modifiers
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsSign Sign modifiers
+/// \brief Sign modifiers
+/// \ingroup CXX11Traits
+/// @{
 
 namespace internal {
 template <typename T, typename U,
@@ -891,15 +970,20 @@ struct make_unsigned
 template <typename T> using make_unsigned_t = typename make_unsigned<T>::type;
 #endif
 
-//////////////////////////////////////////////////////////////////////////////
-// Arrays
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsArray Arrays
+/// \brief Arrays
+/// \ingroup CXX11Traits
+/// @{
 
 // remove_extent
-template <typename T> struct remove_extent       {typedef T type;};
-template <typename T> struct remove_extent<T []> {typedef T type;};
-template <typename T, std::size_t N> struct remove_extent<T [N]>
-{typedef T type;};
+template <typename T>
+struct remove_extent {typedef T type;};
+template <typename T>
+struct remove_extent<T []> {typedef T type;};
+template <typename T, std::size_t N>
+struct remove_extent<T [N]> {typedef T type;};
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using remove_extent_t = typename remove_extent<T>::type;
 #endif
@@ -915,9 +999,12 @@ template <typename T> using remove_all_extents_t =
     typename remove_all_extents<T>::type;
 #endif
 
-//////////////////////////////////////////////////////////////////////////////
-// Miscellaneous transformations
-//////////////////////////////////////////////////////////////////////////////
+/// @}
+
+/// \defgroup CXX11TraitsMisc Miscellaneous transformations
+/// \brief Miscellaneous transformations
+/// \ingroup CXX11Traits
+/// @{
 
 // aligned_storage
 // aligned_union
@@ -964,9 +1051,16 @@ template <bool B, typename T, typename F> using conditional_t =
 // underlying_type
 // result_of
 
+/// @}
+
 //////////////////////////////////////////////////////////////////////////////
 // Utilities
 //////////////////////////////////////////////////////////////////////////////
+
+/// \defgroup CXX11TraitsUtility Utilities
+/// \brief Utility Utilities
+/// \ingroup CXX11Traits
+/// @{
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
 template <typename T>
@@ -990,6 +1084,8 @@ inline T &&forward (typename remove_reference<T>::type &&t) VSMC_NOEXCEPT
     return static_cast<T&&>(t);
 }
 #endif
+
+/// @}
 
 /// @}
 
