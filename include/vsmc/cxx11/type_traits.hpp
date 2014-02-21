@@ -1058,7 +1058,7 @@ template <bool B, typename T, typename F> using conditional_t =
 //////////////////////////////////////////////////////////////////////////////
 
 /// \defgroup CXX11TraitsUtility Utilities
-/// \brief Utility Utilities
+/// \brief Utilities
 /// \ingroup CXX11Traits
 /// @{
 
