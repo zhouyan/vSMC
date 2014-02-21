@@ -1,13 +1,3 @@
-#ifndef VSMC_HPP
-#define VSMC_HPP
-
-#include <vsmc/core/sampler.hpp>
-#include <vsmc/smp/adapter.hpp>
-#include <vsmc/smp/backend_seq.hpp>
-#include <vsmc/integrate/nintegrate_seq.hpp>
-
-#endif // VSMC_HPP
-
 /// \defgroup Config Configuration
 /// \brief Configuration macros and default values if undefined
 
@@ -123,3 +113,76 @@
 /// \defgroup Tuple Tuple manipulation
 /// \ingroup Utility
 /// \brief Classes for manipulating C++11 tuple
+
+#ifndef VSMC_HPP
+#define VSMC_HPP
+
+#include <vsmc/core/adapter.hpp>
+#include <vsmc/core/monitor.hpp>
+#include <vsmc/core/normalizing_constant.hpp>
+#include <vsmc/core/particle.hpp>
+#include <vsmc/core/path.hpp>
+#include <vsmc/core/sampler.hpp>
+#include <vsmc/core/single_particle.hpp>
+#include <vsmc/core/weight_set.hpp>
+
+#include <vsmc/cxx11/cmath.hpp>
+#include <vsmc/cxx11/functional.hpp>
+#include <vsmc/cxx11/random.hpp>
+#include <vsmc/cxx11/type_traits.hpp>
+
+#include <vsmc/integrate/is_integrate.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
+#include <vsmc/integrate/nintegrate_newton_cotes.hpp>
+
+#include <vsmc/math/constants.hpp>
+
+// #include <vsmc/mpi/backend_mpi.hpp>
+// #include <vsmc/mpi/mpi_manager.hpp>
+
+// #include <vsmc/opencl/adapter.hpp>
+// #include <vsmc/opencl/backend_cl.hpp>
+// #include <vsmc/opencl/cl_manager.hpp>
+// #include <vsmc/opencl/cl_manip.hpp>
+// #include <vsmc/opencl/cl_query.hpp>
+
+#include <vsmc/resample/basic.hpp>
+#include <vsmc/resample/multinomial.hpp>
+#include <vsmc/resample/residual.hpp>
+#include <vsmc/resample/residual_stratified.hpp>
+#include <vsmc/resample/residual_systematic.hpp>
+#include <vsmc/resample/stratified.hpp>
+#include <vsmc/resample/systematic.hpp>
+
+#include <vsmc/rng/gammak1.h>
+// #include <vsmc/rng/mkl_rng.hpp>
+#include <vsmc/rng/normal01.h>
+#include <vsmc/rng/rng_set.hpp>
+#include <vsmc/rng/seed.hpp>
+#include <vsmc/rng/u01.h>
+#include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/rng/urng.h>
+
+#include <vsmc/smp/adapter.hpp>
+#include <vsmc/smp/backend_base.hpp>
+// #include <vsmc/smp/backend_cilk.hpp>
+// #include <vsmc/smp/backend_gcd.hpp>
+// #include <vsmc/smp/backend_omp.hpp>
+// #include <vsmc/smp/backend_ppl.hpp>
+#include <vsmc/smp/backend_seq.hpp>
+// #include <vsmc/smp/backend_std.hpp>
+// #include <vsmc/smp/backend_tbb.hpp>
+#include <vsmc/smp/iterator.hpp>
+#include <vsmc/smp/state_matrix.hpp>
+// #include <vsmc/smp/state_tuple.hpp>
+
+#include <vsmc/utility/backup.hpp>
+// #include <vsmc/utility/dispatch.hpp>
+// #include <vsmc/utility/hdf5_save.hpp>
+#include <vsmc/utility/program_option.hpp>
+// #include <vsmc/utility/stdtbb.hpp>
+#include <vsmc/utility/stop_watch.hpp>
+#include <vsmc/utility/tbb_op.hpp>
+// #include <vsmc/utility/tuple_manip.hpp>
+
+#endif // VSMC_HPP
