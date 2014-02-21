@@ -48,7 +48,7 @@
                 __FILE__, __LINE__, msg);                                    \
     };                                                                       \
 }
-#endif
+#endif // VSMC_RUNTIME_WARNING_AS_EXCEPTION
 
 // Static assertion
 
