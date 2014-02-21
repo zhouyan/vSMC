@@ -585,7 +585,7 @@ struct is_base_of_src
     template <typename U> operator const is_base_of_dest<U> &();
 };
 
-template <std::size_t> struct is_base_of_fail {typedef char type;};
+template <std::size_t> struct is_base_of_fail {typedef tp_test_false type;};
 template <typename B, typename D>
 typename is_base_of_fail<sizeof(
         is_base_of_dest<B>(declval<is_base_of_src<D> >())
