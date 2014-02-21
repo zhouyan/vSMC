@@ -101,7 +101,10 @@ class StaticAssert<true>
 
         USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree,
 
-        ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE
+        ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE,
+
+        USE_CRTP_SMP_BASE_CLASS_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE,
+        USE_CRTP_NIntegrateBase_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE
     };
 }; // class StaticAssert
 
@@ -137,5 +140,16 @@ class StaticAssert<true>
 #define VSMC_STATIC_ASSERT_FORWARD_RVALUE \
     VSMC_STATIC_ASSERT((!vsmc::cxx11::is_lvalue_reference<T>::value),        \
             ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE)
+
+#define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(base) \
+    VSMC_STATIC_ASSERT(                                                      \
+            (vsmc::cxx11::is_base_of<base<T, Derived>, Derived>::value),     \
+            USE_CRTP_SMP_BASE_CLASS_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE)
+
+#define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED \
+    VSMC_STATIC_ASSERT(                                                      \
+            (vsmc::cxx11::is_base_of<NIntegrateBase<Derived>, Derived>::value),\
+            USE_CRTP_NIntegrateBase_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE)
+
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

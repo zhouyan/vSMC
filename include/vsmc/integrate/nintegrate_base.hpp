@@ -56,6 +56,7 @@ class NIntegrateBase
             const eval_type &eval,
             double (D::*) (double, double, const eval_type &))
     {
+        VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED;
         VSMC_RUNTIME_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED;
         return static_cast<Derived *>(this)->integrate_segment(a, b, eval);
     }
@@ -65,6 +66,7 @@ class NIntegrateBase
             const eval_type &eval,
             double (D::*) (double, double, const eval_type &) const)
     {
+        VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED;
         VSMC_RUNTIME_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED;
         return static_cast<Derived *>(this)->integrate_segment(a, b, eval);
     }
