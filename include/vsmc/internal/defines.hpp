@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/config.hpp>
 
-// Avoid MSVC stupid behavior: MNE=Macro No Expansion
+/// \brief Avoid MSVC stupid behavior: MNE = Macro No Expansion
 #define VSMC_MNE
 
 /// \brief CRTP style base classes (virtual) destructor
