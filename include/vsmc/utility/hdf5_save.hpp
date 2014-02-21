@@ -192,7 +192,7 @@ inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
         datafile = H5Fcreate(file_name.c_str(),
                 H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     }
-    hid_t dataspace = H5Screate_simple(2, dim, NULL);
+    hid_t dataspace = H5Screate_simple(2, dim, VSMC_NULLPTR);
     hid_t datatype = hdf5_datatype<T>();
     hid_t dataset = H5Dcreate(datafile, dataset_name.c_str(),
             datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -248,7 +248,7 @@ inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     if (nrow != 0 && ncol != 0) {
-        hid_t dataspace = H5Screate_simple(1, dim, NULL);
+        hid_t dataspace = H5Screate_simple(1, dim, VSMC_NULLPTR);
         hid_t datatype = hdf5_datatype<T>();
         internal::HDF5DataPtr<T> data_ptr;
         for (std::size_t j = 0; j != ncol; ++j, ++first, ++sfirst) {
@@ -290,7 +290,7 @@ inline void hdf5_insert_data_frame (std::size_t N,
     hsize_t dim[1] = {N};
 
     hid_t datafile = H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-    hid_t dataspace = H5Screate_simple(1, dim, NULL);
+    hid_t dataspace = H5Screate_simple(1, dim, VSMC_NULLPTR);
     hid_t datatype = hdf5_datatype<T>();
     internal::HDF5DataPtr<T> data_ptr;
     data_ptr.set(N, first);

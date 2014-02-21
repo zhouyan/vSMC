@@ -342,7 +342,8 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     MKLStream (MKLStream<BRNG> &&other) :
         traits::MKLOffsetTrait<BRNG>::type(cxx11::move(other)),
-        seed_(other.seed_), str_ptr_(other.str_ptr_) {other.str_ptr_ = NULL;}
+        seed_(other.seed_), str_ptr_(other.str_ptr_)
+    {other.str_ptr_ = VSMC_NULLPTR;}
 
     MKLStream<BRNG> &operator= (MKLStream<BRNG> &&other)
     {
@@ -350,7 +351,7 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
             traits::MKLOffsetTrait<BRNG>::type::operator=(cxx11::move(other));
             seed_ = other.seed_;
             str_ptr_ = other.str_ptr_;
-            other.str_ptr_ = NULL;
+            other.str_ptr_ = VSMC_NULLPTR;
         }
 
         return *this;

@@ -127,14 +127,14 @@ class DispatchObject
     /// The original object will be retained by this object
     explicit DispatchObject (const DispatchType &object) : object_(object)
     {
-        if (object_ != NULL)
+        if (object_ != VSMC_NULLPTR)
             dispatch_retain(object);
     }
 
     DispatchObject (const DispatchObject<DispatchType> &other) :
         object_(other.object_)
     {
-        if (object_ != NULL)
+        if (object_ != VSMC_NULLPTR)
             dispatch_retain(object_);
     }
 
@@ -147,10 +147,10 @@ class DispatchObject
         if (object_ == other.object_)
             return *this;
 
-        if (object_ != NULL)
+        if (object_ != VSMC_NULLPTR)
             dispatch_release(object_);
         object_ = other.object_;
-        if (object_ != NULL)
+        if (object_ != VSMC_NULLPTR)
             dispatch_retain(object_);
 
         return *this;
@@ -158,7 +158,7 @@ class DispatchObject
 
     ~DispatchObject ()
     {
-        if (object_ != NULL)
+        if (object_ != VSMC_NULLPTR)
             dispatch_release(object_);
     }
 
@@ -171,10 +171,10 @@ class DispatchObject
         if (object_ == obj)
             return;
 
-        if (object_ != NULL)
+        if (object_ != VSMC_NULLPTR)
             dispatch_release(object_);
         object_ = obj;
-        if (object_ != NULL)
+        if (object_ != VSMC_NULLPTR)
             dispatch_retain(object_);
     }
 
@@ -316,14 +316,14 @@ class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
 {
     public :
 
-    DispatchQueue (const char *label = NULL,
-            dispatch_queue_attr_t attr = NULL) :
+    DispatchQueue (const char *label = VSMC_NULLPTR,
+            dispatch_queue_attr_t attr = VSMC_NULLPTR) :
         DispatchQueueBase(dispatch_queue_create(label, attr)) {}
 
     DispatchQueue (const DispatchQueue<DispatchPrivate> &other) :
         DispatchQueueBase(other)
     {
-        if (this->object() != NULL)
+        if (this->object() != VSMC_NULLPTR)
             dispatch_retain(this->object());
     }
 
@@ -332,7 +332,7 @@ class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
     {
         if (this != &other) {
             DispatchQueueBase::operator=(other);
-            if (this->object() != NULL)
+            if (this->object() != VSMC_NULLPTR)
                 dispatch_retain(this->object());
         }
 
@@ -341,7 +341,7 @@ class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
 
     ~DispatchQueue ()
     {
-        if (this->object() != NULL)
+        if (this->object() != VSMC_NULLPTR)
             dispatch_release(this->object());
     }
 }; // class DispatchQueue
@@ -358,7 +358,7 @@ class DispatchGroup : public DispatchObject<dispatch_group_t>
     DispatchGroup (const DispatchGroup &other) :
         DispatchObject<dispatch_group_t>(other)
     {
-        if (this->object() != NULL)
+        if (this->object() != VSMC_NULLPTR)
             dispatch_retain(this->object());
     }
 
@@ -366,7 +366,7 @@ class DispatchGroup : public DispatchObject<dispatch_group_t>
     {
         if (this != &other) {
             DispatchObject<dispatch_group_t>::operator=(other);
-            if (this->object() != NULL)
+            if (this->object() != VSMC_NULLPTR)
                 dispatch_retain(this->object());
         }
 
@@ -375,7 +375,7 @@ class DispatchGroup : public DispatchObject<dispatch_group_t>
 
     ~DispatchGroup ()
     {
-        if (this->object() != NULL)
+        if (this->object() != VSMC_NULLPTR)
             dispatch_release(this->object());
     }
 
@@ -504,14 +504,14 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
                     source_type_t(source_type<Type>()),
                     handle, mask, queue))
     {
-        if (this->object() != NULL)
+        if (this->object() != VSMC_NULLPTR)
             dispatch_retain(this->object());
     }
 
     DispatchSourceBase (const DispatchSourceBase &other) :
         DispatchObject<dispatch_source_t>(other)
     {
-        if (this->object() != NULL)
+        if (this->object() != VSMC_NULLPTR)
             dispatch_retain(this->object());
     }
 
@@ -519,7 +519,7 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     {
         if (this != &other) {
             DispatchObject<dispatch_source_t>::operator=(other);
-            if (this->object() != NULL)
+            if (this->object() != VSMC_NULLPTR)
                 dispatch_retain(this->object());
         }
 
@@ -528,7 +528,7 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 
     ~DispatchSourceBase ()
     {
-        if (this->object() != NULL)
+        if (this->object() != VSMC_NULLPTR)
             dispatch_release(this->object());
     }
 
