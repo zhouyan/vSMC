@@ -475,15 +475,17 @@ class ProgramOptionMap
 
     public :
 
-    explicit ProgramOptionMap (bool silent = false) :
-        silent_(silent), help_ptr_(new ProgramOptionHelp)
+    explicit ProgramOptionMap (bool silent = false, bool auto_help = true) :
+        silent_(silent), auto_help_(auto_help),
+        help_ptr_(new ProgramOptionHelp)
     {
         option_map_["--help"] = std::make_pair(help_ptr_, 0);
         option_list_.push_back(std::make_pair("--help", help_ptr_));
     }
 
     ProgramOptionMap (const ProgramOptionMap &other) :
-        silent_(other.silent_), option_map_(other.option_map_)
+        silent_(other.silent_), auto_help_(other.auto_help_),
+        option_map_(other.option_map_), option_list_(other.option_list_)
     {
         for (option_map_type::iterator iter = option_map_.begin();
                 iter != option_map_.end(); ++iter) {
@@ -495,6 +497,8 @@ class ProgramOptionMap
     ProgramOptionMap &operator= (const ProgramOptionMap &other)
     {
         if (this != &other) {
+            silent_ = other.silent_;
+            auto_help_ = other.auto_help_;
             for (option_map_type::iterator iter = option_map_.begin();
                     iter != option_map_.end(); ++iter) {
                 if (iter->second.first)
@@ -502,6 +506,7 @@ class ProgramOptionMap
             }
 
             option_map_ = other.option_map_;
+            option_list_ = other.option_list_;
 
             for (option_map_type::iterator iter = option_map_.begin();
                     iter != option_map_.end(); ++iter) {
@@ -515,11 +520,14 @@ class ProgramOptionMap
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     ProgramOptionMap (ProgramOptionMap &&other) :
-        silent_(other.silent_), help_ptr_(other.help_ptr_),
-        option_map_(cxx11::move(other.option_map_))
+        silent_(other.silent_), auto_help_(other.auto_help_),
+        help_ptr_(other.help_ptr_),
+        option_map_(cxx11::move(other.option_map_)),
+        option_list_(cxx11::move(other.option_list_))
     {
         other.help_ptr_ = VSMC_NULLPTR;
         other.option_map_.clear();
+        other.option_list_.clear();
     }
 
     ProgramOptionMap &operator= (ProgramOptionMap &&other)
@@ -528,8 +536,10 @@ class ProgramOptionMap
             silent_ = other.silent_;
             help_ptr_ = other.help_ptr_;
             option_map_ = cxx11::move(other.option_map_);
+            option_list_ = cxx11::move(other.option_list_);
             other.help_ptr_ = VSMC_NULLPTR;
             other.option_map_.clear();
+            other.option_list_.clear();
         }
 
         return *this;
@@ -726,12 +736,17 @@ class ProgramOptionMap
     }
 
     /// \brief Set the silent flag, if true, no error messages will be printed
-    /// for unknown optins etc.,
+    /// for unknown options etc.,
     void silent (bool flag) {silent_ = flag;}
+
+    /// \brief Set the auto_help flag, if true, help information is printed
+    /// automatically when the `--help` option is processed
+    void auto_help (bool flag) {auto_help_ = flag;}
 
     private :
 
     bool silent_;
+    bool auto_help_;
     ProgramOptionHelp *help_ptr_;
     option_map_type option_map_;
     option_list_type option_list_;
@@ -821,7 +836,7 @@ class ProgramOptionMap
                     iter->second.second = 1;
         }
 
-        if (help_ptr_->help())
+        if (auto_help_ && help_ptr_->help())
             print_help();
     }
 
