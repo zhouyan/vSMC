@@ -318,8 +318,10 @@ class ProgramOptionHelp : public ProgramOption
 
     void print_help (const std::string &oname) const
     {
-        std::cout << "  " << std::setw(20) << std::left << oname;
-        std::cout << "Print help information" << std::endl;
+        std::cout << ' ' << std::setw(20) << std::left << oname;
+        std::cout << ' ' << std::setw(40) << "Print help information";
+        std::cout << ' ' << "(default: false)";
+        std::cout << std::endl;
     }
 
     ProgramOption *clone () const {return new ProgramOptionHelp;}
@@ -349,9 +351,9 @@ class ProgramOptionDefault : public ProgramOption
 
     void print_help (const std::string &oname) const
     {
-        std::cout << "  " << std::setw(20) << std::left << oname << desc_;
-        if (has_default_)
-            std::cout << " (default: " << default_ << ")";
+        std::cout << ' ' << std::setw(20) << std::left << oname;
+        std::cout << ' ' << std::setw(40) << desc_;
+        print_default(default_);
         std::cout << std::endl;
     }
 
@@ -370,6 +372,19 @@ class ProgramOptionDefault : public ProgramOption
     std::string desc_;
     T default_;
     bool has_default_;
+
+    template <typename U>
+    void print_default (const U &val) const
+    {
+        if (has_default_)
+            std::cout << " (default: " << val;
+    }
+
+    void print_default (bool val) const
+    {
+        if (has_default_)
+            std::cout << " (default: " << (val ? "true" : "false") << ')';
+    }
 }; // ProgramOptionDefault
 
 /// \brief Option with a single value
@@ -453,14 +468,19 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
 /// \ingroup Option
 class ProgramOptionMap
 {
-    public :
-
     typedef std::map<std::string, std::pair<ProgramOption *, std::size_t> >
         option_map_type;
+    typedef std::list<std::pair<std::string, const ProgramOption *> >
+        option_list_type;
+
+    public :
 
     explicit ProgramOptionMap (bool silent = false) :
         silent_(silent), help_ptr_(new ProgramOptionHelp)
-    {option_map_["--help"] = std::make_pair(help_ptr_, 0);}
+    {
+        option_map_["--help"] = std::make_pair(help_ptr_, 0);
+        option_list_.push_back(std::make_pair("--help", help_ptr_));
+    }
 
     ProgramOptionMap (const ProgramOptionMap &other) :
         silent_(other.silent_), option_map_(other.option_map_)
@@ -617,11 +637,14 @@ class ProgramOptionMap
 
     ProgramOptionMap &remove (const std::string &name)
     {
-        option_map_type::iterator iter = option_map_.find("--" + name);
+        const std::string oname("--" + name);
+        option_map_type::iterator iter = option_map_.find(oname);
         if (iter != option_map_.end()) {
             if (iter->second.first)
                 delete iter->second.first;
             option_map_.erase(iter);
+            option_list_type::iterator liter = option_list_find(oname);
+            option_list_.erase(liter);
         }
 
         return *this;
@@ -665,9 +688,9 @@ class ProgramOptionMap
     /// \brief Print help information for each option
     void print_help () const
     {
-        for (option_map_type::const_iterator iter = option_map_.begin();
-                iter != option_map_.end(); ++iter) {
-            iter->second.first->print_help(iter->first);
+        for (option_list_type::const_iterator liter = option_list_.begin();
+                liter != option_list_.end(); ++liter) {
+            liter->second->print_help(liter->first);
         }
     }
 
@@ -711,16 +734,32 @@ class ProgramOptionMap
     bool silent_;
     ProgramOptionHelp *help_ptr_;
     option_map_type option_map_;
+    option_list_type option_list_;
     mutable std::stringstream ss_;
+
+    option_list_type::iterator option_list_find (const std::string &oname)
+    {
+        option_list_type::iterator liter = option_list_.begin();
+        for (; liter != option_list_.end(); ++liter) {
+            if (liter->first == oname)
+                break;
+        }
+
+        return liter;
+    }
 
     void add_option (const std::string &oname, ProgramOption *optr)
     {
         std::pair<option_map_type::iterator, bool> insert =
             option_map_.insert(std::make_pair(oname, std::make_pair(optr, 0)));
-        if (!insert.second) {
+        if (insert.second) {
+            option_list_.push_back(std::make_pair(oname, optr));
+        } else {
             if (insert.first->second.first)
                 delete insert.first->second.first;
             insert.first->second.first = optr;
+            option_list_type::iterator liter = option_list_find(oname);
+            liter->second = optr;
         }
     }
 
