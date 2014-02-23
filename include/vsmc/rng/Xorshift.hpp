@@ -146,12 +146,14 @@ class XorshiftEngine
             std::basic_istream<CharT, Traits> &is,
             XorshiftEngine<ResultType, R, A, B, C> &eng)
     {
-        result_type s;
+        result_type state[R];
         for (std::size_t i = 0; i != R; ++i) {
-            if (is >> std::ws >> s)
-                eng.state_[i] = s;
-            else
+            if(!(is >> std::ws >> state[i]))
                 break;
+        }
+        if (is) {
+            for (std::size_t i = 0; i != R; ++i)
+                eng.state_[i] = state[i];
         }
 
         return is;
@@ -160,7 +162,7 @@ class XorshiftEngine
     private :
 
     result_type state_[R];
-}; // class Xorshift
+}; // class XorshiftEngine
 
 /// \brief Xorshift RNG engine generating \f$2^32 - 1\f$ 32-bits integers
 /// \ingroup RNG
