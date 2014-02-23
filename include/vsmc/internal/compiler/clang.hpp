@@ -1,13 +1,13 @@
 #ifndef VSMC_INTERNAL_COMPILER_CLANG_HPP
 #define VSMC_INTERNAL_COMPILER_CLANG_HPP
 
-#if __cplusplus >= 201103L
-
-// C++11 language features
-
 #ifndef VSMC_HAS_CXX11_LONG_LONG
 #define VSMC_HAS_CXX11_LONG_LONG 1
 #endif
+
+#if __cplusplus >= 201103L
+
+// C++11 language features
 
 #if __has_feature(cxx_access_control_sfinae)
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE

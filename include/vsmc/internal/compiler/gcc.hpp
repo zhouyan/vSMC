@@ -5,15 +5,15 @@
 #define VSMC_GNUC_VERSION \
     (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
-#if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
-
-// C++11 language features
-
 #if VSMC_GNUC_VERSION >= 40300
 #ifndef VSMC_HAS_CXX11_LONG_LONG
 #define VSMC_HAS_CXX11_LONG_LONG 1
 #endif
 #endif
+
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
+
+// C++11 language features
 
 #if VSMC_GNUC_VERSION >= 40800
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE

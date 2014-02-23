@@ -3,13 +3,13 @@
 
 #define VSMC_MSVC_NONEXIST 1000000UL
 
-// C++11 language features
-
 #if _MSC_VER >= 1600
 #ifndef VSMC_HAS_CXX11_LONG_LONG
 #define VSMC_HAS_CXX11_LONG_LONG 1
 #endif
 #endif
+
+// C++11 language features
 
 #if _MSC_VER >= VSMC_MSVC_NONEXIST
 #ifndef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
