@@ -685,15 +685,52 @@ class DispatchProgress
     }
 
     /// \brief Stop to print the progress
-    void stop ()
+    ///
+    /// \param finished If true, then it is assumed that all work has been
+    /// finished, and at the end the progress will be shown as `100%` and
+    /// `total/total`, where total is the first parameter of `start`.
+    /// Otherwise, whatever progress has been made will be shown. For example,
+    /// consider that there are a large number of iterations, say `N`, which is
+    /// not a multiple of `1000`, but because each iteration progress very
+    /// fast, it will be very inefficient to call `increment` every time the
+    /// algorithm moves to the next iteration. Instead, one may call it every
+    /// `1000` iterations with `increment(1000)`. At the end, the
+    /// DispatchProgress object will only know that there is a multiple of
+    /// `1000` iterations. One may either call
+    /// `increment(N - (N / 1000) * 1000); stop();` or simply `stop(true)`.
+    void stop (bool finished = false)
     {
         timer_.suspend();
+        if (finished && iter_ < total_)
+            increment(total_ - iter_);
         queue_.sync_f(static_cast<void *>(this), print_stop_);
         watch_.stop();
     }
 
+    private :
+
+    struct step_context
+    {
+        step_context (uint64_t s, DispatchProgress *p) : step(s), timer(p) {}
+
+        uint64_t step;
+        DispatchProgress *timer;
+    };
+
+    public :
+
     /// \brief Returnt the current progress
-    void increment () {queue_.async_f(static_cast<void *>(this), increment_);}
+    void increment (uint64_t step = 1)
+    {
+        if (step == 0) {
+            return;
+        } else if (step == 1) {
+            queue_.async_f(static_cast<void *>(this), increment_);
+        } else {
+            step_context *context = new step_context(step, this);
+            queue_.async_f(static_cast<void *>(context), increment_step_);
+        }
+    }
 
     private :
 
@@ -876,6 +913,13 @@ class DispatchProgress
     {
         DispatchProgress *timer_ptr = static_cast<DispatchProgress *>(context);
         ++timer_ptr->iter_;
+    }
+
+    static void increment_step_ (void *context)
+    {
+        step_context *inc = static_cast<step_context *>(context);
+        inc->timer->iter_ += inc->step;
+        delete inc;
     }
 
     static void print_start_ (void *context)
