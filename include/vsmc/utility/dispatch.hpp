@@ -656,12 +656,16 @@ class DispatchProgress
     DispatchProgress () :
         queue_("vsmc::DispatchProgress::queue_"), timer_(0, 0, queue_),
         total_(0), iter_(0), print_first_(true),
-        num_equal_(0), percent_(0), elapsed_second_(0), last_iter_(0) {}
+        num_equal_(0), percent_(0), elapsed_second_(0), last_iter_(0),
+        display_progress_(), display_percent_(), display_time_(),
+        display_iter_() {}
 
     explicit DispatchProgress (const DispatchQueue<DispatchPrivate> &queue) :
         queue_(queue), timer_(0, 0, queue_),
         total_(0), iter_(0), print_first_(true),
-        num_equal_(0), percent_(0), elapsed_second_(0), last_iter_(0) {}
+        num_equal_(0), percent_(0), elapsed_second_(0), last_iter_(0),
+        display_progress_(), display_percent_(), display_time_(),
+        display_iter_() {}
 
     /// \brief Start to print the progress
     ///

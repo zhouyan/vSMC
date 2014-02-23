@@ -37,7 +37,7 @@ inline void xorshift (ResultType *state, Position<R>)
     state[R - 1] = (state[R - 1]^(state[R - 1]>>C))^t;
 }
 
-}; // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief Xorshift RNG engine
 /// \ingroup RNG
@@ -49,7 +49,7 @@ class XorshiftEngine
 
     typedef ResultType result_type;
 
-    explicit XorshiftEngine (result_type s = 123456)
+    explicit XorshiftEngine (result_type s = 123456) : state_()
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType);
@@ -58,7 +58,7 @@ class XorshiftEngine
     }
 
     template <typename SeedSeq>
-    explicit XorshiftEngine (SeedSeq &seq)
+    explicit XorshiftEngine (SeedSeq &seq) : state_()
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType);
@@ -66,7 +66,8 @@ class XorshiftEngine
         seed(seq);
     }
 
-    XorshiftEngine (const XorshiftEngine<ResultType, R, A, B, C> &other)
+    XorshiftEngine (const XorshiftEngine<ResultType, R, A, B, C> &other) :
+        state_()
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType);
@@ -75,7 +76,7 @@ class XorshiftEngine
             state_[i] = other.state_[i];
     }
 
-    XorshiftEngine (XorshiftEngine<ResultType, R, A, B, C> &other)
+    XorshiftEngine (XorshiftEngine<ResultType, R, A, B, C> &other) : state_()
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType);
