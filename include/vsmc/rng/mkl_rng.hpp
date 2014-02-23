@@ -4,7 +4,13 @@
 #include <vsmc/rng/seed.hpp>
 #include <mkl_vsl.h>
 
-#define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset) \
+#define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
+    VSMC_STATIC_ASSERT(                                                      \
+            (::vsmc::cxx11::is_same<FPType, float>::value ||                 \
+             ::vsmc::cxx11::is_same<FPType, double>::value),                 \
+            USE_MKL##Dist##Distribution_##WITH_A_RESULT_TYPE_OTHER_THAN_float_OR_double)
+
+#define VSMC_RUNTIME_ASSERT_RNG_MKL_RNG_OFFSET(offset) \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE ()),                          \
             ("**MKLOffsetDynamic** "                                         \
              "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
@@ -242,7 +248,7 @@ struct MKLOffsetDynamic
 
     void offset (MKL_INT n)
     {
-        VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(n);
+        VSMC_RUNTIME_ASSERT_RNG_MKL_RNG_OFFSET(n);
         offset_ = n;
     }
 
@@ -882,7 +888,8 @@ class MKLGaussianDistribution :
     typedef FPType result_type;
 
     explicit MKLGaussianDistribution (result_type mean = 0,
-            result_type sd = 1) : mean_(mean), sd_(sd) {}
+            result_type sd = 1) : mean_(mean), sd_(sd)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gaussian);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -914,7 +921,8 @@ class MKLExponentialDistribution :
     typedef FPType result_type;
 
     explicit MKLExponentialDistribution (result_type displacement = 0,
-            result_type scale = 1) : disp_(displacement), scale_(scale) {}
+            result_type scale = 1) : disp_(displacement), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Exponential);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -946,7 +954,8 @@ class MKLLaplaceDistribution :
     typedef FPType result_type;
 
     explicit MKLLaplaceDistribution (result_type mean = 0,
-            result_type scale = 1) : mean_(mean), scale_(scale) {}
+            result_type scale = 1) : mean_(mean), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Laplace);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -979,7 +988,8 @@ class MKLWeibullDistribution :
 
     explicit MKLWeibullDistribution (result_type shape = 1,
             result_type displacement = 0, result_type scale = 1) :
-        shape_(shape), disp_(displacement), scale_(scale) {}
+        shape_(shape), disp_(displacement), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Weibull);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -1012,7 +1022,8 @@ class MKLCauchyDistribution :
     typedef FPType result_type;
 
     explicit MKLCauchyDistribution (result_type displacement = 0,
-            result_type scale = 1) : disp_(displacement), scale_(scale) {}
+            result_type scale = 1) : disp_(displacement), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Cauchy);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -1044,7 +1055,8 @@ class MKLRayleighDistribution :
     typedef FPType result_type;
 
     explicit MKLRayleighDistribution (result_type displacement = 0,
-            result_type scale = 1) : disp_(displacement), scale_(scale) {}
+            result_type scale = 1) : disp_(displacement), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Rayleigh);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -1078,7 +1090,8 @@ class MKLLognormalDistribution :
     explicit MKLLognormalDistribution (
             result_type mean = 0, result_type sd = 1,
             result_type displacement = 0, result_type scale = 1) :
-        mean_(mean), sd_(sd), disp_(displacement), scale_(scale) {}
+        mean_(mean), sd_(sd), disp_(displacement), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Lognormal);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -1112,7 +1125,8 @@ class MKLGumbelDistribution :
     typedef FPType result_type;
 
     explicit MKLGumbelDistribution (result_type displacement = 0,
-            result_type scale = 1) : disp_(displacement), scale_(scale) {}
+            result_type scale = 1) : disp_(displacement), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gumbel);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -1145,7 +1159,8 @@ class MKLGammaDistribution :
 
     explicit MKLGammaDistribution (result_type shape = 1,
             result_type displacement = 0, result_type scale = 1) :
-        shape_(shape), disp_(displacement), scale_(scale) {}
+        shape_(shape), disp_(displacement), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gamma);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
@@ -1180,7 +1195,8 @@ class MKLBetaDistribution :
     explicit MKLBetaDistribution (
             result_type shape1 = 1, result_type shape2 = 1,
             result_type displacement = 0, result_type scale = 1) :
-        shape1_(shape1), shape2_(shape2), disp_(displacement), scale_(scale) {}
+        shape1_(shape1), shape2_(shape2), disp_(displacement), scale_(scale)
+    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Beta);}
 
     template <MKL_INT BRNG>
     void generate (const MKLStream<BRNG> &str, MKL_INT n, result_type *r)
