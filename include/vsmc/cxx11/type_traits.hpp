@@ -2,8 +2,8 @@
 #define VSMC_CXX11_TYPE_TRAITS_HPP
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/defines.hpp>
 
 namespace vsmc {
 
