@@ -18,19 +18,6 @@ namespace vsmc {
 
 namespace internal {
 
-template <typename ResultType>
-inline void xorshift_assign (ResultType *state, Position<2>)
-{
-    state[0] = state[1];
-}
-
-template <typename ResultType, std::size_t R>
-inline void xorshift_assign (ResultType *state, Position<R>)
-{
-    state[0] = state[1];
-    xorshift_assign(state + 1, Position<R - 1>());
-}
-
 template <typename ResultType, ResultType A, ResultType B, ResultType C>
 inline void xorshift (ResultType *state, Position<1>)
 {
@@ -46,7 +33,7 @@ inline void xorshift (ResultType *state, Position<R>)
     ResultType t = state[0];
     t ^= t<<A;
     t ^= t>>B;
-    xorshift_assign(state, Position<R>());
+    rng_array_shift(state, Position<R>());
     state[R - 1] = (state[R - 1]^(state[R - 1]>>C))^t;
 }
 
