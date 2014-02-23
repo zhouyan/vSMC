@@ -135,7 +135,7 @@ class XorshiftEngine
             const XorshiftEngine<ResultType, R, A, B, C> &eng)
     {
         for (std::size_t i = 0; i != R - 1; ++i)
-            os << eng.state_ << ' ';
+            os << eng.state_[i] << ' ';
         os << eng.state_[R - 1];
 
         return os;
