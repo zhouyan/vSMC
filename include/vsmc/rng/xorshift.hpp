@@ -6,6 +6,14 @@
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R) \
     VSMC_STATIC_ASSERT((R != 0), USE_XorshiftEngine_WITH_ZERO_INTERNAL_STATE)
 
+#define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType) \
+    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<ResultType>::value),      \
+            USE_XorshiftEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
+
+#define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType) \
+    VSMC_STATIC_ASSERT((sizeof(ResultType) >= sizeof(uint32_t)),             \
+            USE_XorshiftEngine_WITH_A_ResultType_SMALLER_THAN_32_BITS)
+
 namespace vsmc {
 
 namespace internal {
@@ -57,6 +65,8 @@ class XorshiftEngine
     explicit XorshiftEngine (result_type s = 123456)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType);
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType);
         seed(s);
     }
 
@@ -64,12 +74,16 @@ class XorshiftEngine
     explicit XorshiftEngine (SeedSeq &seq)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType);
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType);
         seed(seq);
     }
 
     XorshiftEngine (const XorshiftEngine<ResultType, R, A, B, C> &other)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType);
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType);
         for (std::size_t i = 0; i != R; ++i)
             state_[i] = other.state_[i];
     }
@@ -77,6 +91,8 @@ class XorshiftEngine
     XorshiftEngine (XorshiftEngine<ResultType, R, A, B, C> &other)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType);
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType);
         for (std::size_t i = 0; i != R; ++i)
             state_[i] = other.state_[i];
     }
