@@ -711,8 +711,8 @@ class DispatchProgress
 
     char display_progress_[128];
     char display_percent_[32];
-    char display_time_[16];
-    char display_iter_[32];
+    char display_time_[32];
+    char display_iter_[64];
 
     static VSMC_CONSTEXPR const unsigned num_equal_max_ = 60;
     static VSMC_CONSTEXPR const unsigned num_dash_max_ = 1;
@@ -726,7 +726,7 @@ class DispatchProgress
             return;
         }
 
-        char utmp[16];
+        char utmp[32];
         std::size_t unum = 0;
         while (num) {
             utmp[unum++] = '0' + static_cast<char>(num % 10);
@@ -739,11 +739,13 @@ class DispatchProgress
     template <typename UIntType>
     static unsigned uint_digit (UIntType num)
     {
-        unsigned digit = 1;
-        UIntType base = 10;
-        while (num >= base) {
+        if (num == 0)
+            return 1;
+
+        unsigned digit = 0;
+        while (num != 0) {
             ++digit;
-            base *= 10;
+            num /= 10;
         }
 
         return digit;
@@ -763,9 +765,15 @@ class DispatchProgress
 
         uint64_t display_iter = iter <= total ? iter : total;
         unsigned num_equal = total == 0 ? num_equal_max_ :
-            static_cast<unsigned>(num_equal_max_ * display_iter / total);
+            static_cast<unsigned>(static_cast<double>(num_equal_max_) * (
+                        static_cast<double>(display_iter) /
+                        static_cast<double>(total)));
+        num_equal = num_equal <= num_equal_max_ ? num_equal : num_equal_max_;
         unsigned percent = total == 0 ? percent_max_ :
-            static_cast<unsigned>(percent_max_ * display_iter / total);
+            static_cast<unsigned>(static_cast<double>(percent_max_) * (
+                        static_cast<double>(display_iter) /
+                        static_cast<double>(total)));
+        percent = percent <= percent_max_ ? percent : percent_max_;
 
         if (timer_ptr->print_first_) {
             timer_ptr->print_first_ = false;
@@ -838,7 +846,9 @@ class DispatchProgress
 
         if (timer_ptr->last_iter_ != iter) {
             timer_ptr->last_iter_ = iter;
-            unsigned num_space = uint_digit(total) - uint_digit(iter);
+            unsigned dtotal = uint_digit(total);
+            unsigned diter = uint_digit(iter);
+            unsigned num_space = dtotal > diter ? dtotal - diter : 0;
             char *cstr = timer_ptr->display_iter_;
 
             std::size_t offset = 0;
