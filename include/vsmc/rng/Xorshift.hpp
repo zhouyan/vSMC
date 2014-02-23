@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_XORSHIFT_HPP
 #define VSMC_RNG_XORSHIFT_HPP
 
-#include <vsmc/rng/seed.hpp>
+#include <vsmc/internal/common.hpp>
 #include <stdint.h>
 
 namespace vsmc {
@@ -14,11 +14,11 @@ void xorshift_assign (ResultType *state, Position<2>)
     state[0] = state[1];
 }
 
-template <typename ResultType, std::size_t Pos>
-void xorshift_assign (ResultType *state, Position<Pos>)
+template <typename ResultType, std::size_t R>
+void xorshift_assign (ResultType *state, Position<R>)
 {
     state[0] = state[1];
-    xorshift_assign(state + 1, Position<Pos - 1>());
+    xorshift_assign(state + 1, Position<R - 1>());
 }
 
 template <typename ResultType, ResultType A, ResultType B, ResultType C>
@@ -30,21 +30,21 @@ inline void xorshift (ResultType *state, Position<1>)
 }
 
 template <typename ResultType, ResultType A, ResultType B, ResultType C,
-    std::size_t Pos>
-inline void xorshift (ResultType *state, Position<Pos>)
+    std::size_t R>
+inline void xorshift (ResultType *state, Position<R>)
 {
     ResultType t = state[0];
     t ^= t<<A;
     t ^= t>>B;
-    xorshift_assign(state, Position<Pos>());
-    state[Pos - 1] = (state[Pos - 1]^(state[Pos - 1]>>C))^t;
+    xorshift_assign(state, Position<R>());
+    state[R - 1] = (state[R - 1]^(state[R - 1]>>C))^t;
 }
 
 }; // namespace vsmc::internal
 
 /// \brief Xorshift RNG engine
 /// \ingroup RNG
-template <typename ResultType, std::size_t Round,
+template <typename ResultType, std::size_t R,
          ResultType A, ResultType B, ResultType C>
 class XorshiftEngine
 {
@@ -52,36 +52,28 @@ class XorshiftEngine
 
     typedef ResultType result_type;
 
-    explicit XorshiftEngine (result_type s = 123456)
-    {
-        result_type seed = s;
-        for (std::size_t i = 0; i != Round; ++i) {
-            internal::xorshift<ResultType, A, B, C>(&seed, Position<1>());
-            state_[0] = s;
-        }
-    }
+    explicit XorshiftEngine (result_type s = 123456) {seed(s);}
 
     template <typename SeedSeq>
-    explicit XorshiftEngine (SeedSeq &seq)
-    {seq.generate(state_, state_ + Round);}
+    explicit XorshiftEngine (SeedSeq &seq) {seed(seq);}
 
-    XorshiftEngine (const XorshiftEngine<ResultType, Round, A, B, C> &other)
+    XorshiftEngine (const XorshiftEngine<ResultType, R, A, B, C> &other)
     {
-        for (std::size_t i = 0; i != Round; ++i)
+        for (std::size_t i = 0; i != R; ++i)
             state_[i] = other.state_[i];
     }
 
-    XorshiftEngine (XorshiftEngine<ResultType, Round, A, B, C> &other)
+    XorshiftEngine (XorshiftEngine<ResultType, R, A, B, C> &other)
     {
-        for (std::size_t i = 0; i != Round; ++i)
+        for (std::size_t i = 0; i != R; ++i)
             state_[i] = other.state_[i];
     }
 
-    XorshiftEngine<ResultType, Round, A, B, C> &operator= (
-            const XorshiftEngine<ResultType, Round, A, B, C> &other)
+    XorshiftEngine<ResultType, R, A, B, C> &operator= (
+            const XorshiftEngine<ResultType, R, A, B, C> &other)
     {
         if (this != &other) {
-            for (std::size_t i = 0; i != Round; ++i)
+            for (std::size_t i = 0; i != R; ++i)
                 state_[i] = other.state_[i];
         }
 
@@ -91,20 +83,20 @@ class XorshiftEngine
     void seed (result_type s)
     {
         result_type seed = s;
-        for (std::size_t i = 0; i != Round; ++i) {
+        for (std::size_t i = 0; i != R; ++i) {
             internal::xorshift<ResultType, A, B, C>(&seed, Position<1>());
             state_[0] = s;
         }
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq) {seq.generate(state_, state_ + Round);}
+    void seed (SeedSeq &seq) {seq.generate(state_, state_ + R);}
 
     result_type operator() ()
     {
-        internal::xorshift<ResultType, A, B, C>(state_, Position<Round>());
+        internal::xorshift<ResultType, A, B, C>(state_, Position<R>());
 
-        return state_[Round - 1];
+        return state_[R - 1];
     }
 
     void discard (std::size_t nskip)
@@ -121,10 +113,10 @@ class XorshiftEngine
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     friend inline bool operator== (
-            const XorshiftEngine<ResultType, Round, A, B, C> &eng1,
-            const XorshiftEngine<ResultType, Round, A, B, C> &eng2)
+            const XorshiftEngine<ResultType, R, A, B, C> &eng1,
+            const XorshiftEngine<ResultType, R, A, B, C> &eng2)
     {
-        for (std::size_t i = 0; i != Round; ++i) {
+        for (std::size_t i = 0; i != R; ++i) {
             if (eng1.state_[i] != eng2.state_[i])
                 return false;
         }
@@ -133,18 +125,18 @@ class XorshiftEngine
     }
 
     friend inline bool operator!= (
-            const XorshiftEngine<ResultType, Round, A, B, C> &eng1,
-            const XorshiftEngine<ResultType, Round, A, B, C> &eng2)
+            const XorshiftEngine<ResultType, R, A, B, C> &eng1,
+            const XorshiftEngine<ResultType, R, A, B, C> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const XorshiftEngine<ResultType, Round, A, B, C> &eng)
+            const XorshiftEngine<ResultType, R, A, B, C> &eng)
     {
-        for (std::size_t i = 0; i != Round - 1; ++i)
+        for (std::size_t i = 0; i != R - 1; ++i)
             os << eng.state_ << ' ';
-        os << eng.state_[Round - 1];
+        os << eng.state_[R - 1];
 
         return os;
     }
@@ -152,10 +144,10 @@ class XorshiftEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            XorshiftEngine<ResultType, Round, A, B, C> &eng)
+            XorshiftEngine<ResultType, R, A, B, C> &eng)
     {
         result_type s;
-        for (std::size_t i = 0; i != Round; ++i) {
+        for (std::size_t i = 0; i != R; ++i) {
             if (is >> std::ws >> s)
                 eng.state_[i] = s;
             else
@@ -167,7 +159,7 @@ class XorshiftEngine
 
     private :
 
-    result_type state_[Round];
+    result_type state_[R];
 }; // class Xorshift
 
 /// \brief Xorshift RNG engine generating \f$2^32 - 1\f$ 32-bits integers
