@@ -9,13 +9,13 @@ namespace vsmc {
 namespace internal {
 
 template <typename ResultType>
-void xorshift_assign (ResultType *state, Position<2>)
+inline void xorshift_assign (ResultType *state, Position<2>)
 {
     state[0] = state[1];
 }
 
 template <typename ResultType, std::size_t R>
-void xorshift_assign (ResultType *state, Position<R>)
+inline void xorshift_assign (ResultType *state, Position<R>)
 {
     state[0] = state[1];
     xorshift_assign(state + 1, Position<R - 1>());
