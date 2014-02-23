@@ -3,6 +3,15 @@
 
 #include <vsmc/rng/common.hpp>
 
+#define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(ResultType) \
+    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<ResultType>::value),      \
+            USE_XorCombineEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
+
+#define VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2) \
+    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_same<                              \
+                typename Eng1::resultType, typename Eng2::resultType>::value),\
+            USE_XorCombineEngine_WITH_TWO_RNG_ENGINES_WITH_DIFFERENT_RESULT_TYPE)
+
 namespace vsmc {
 
 /// \brief Combine two RNG engines using XOR
@@ -18,16 +27,32 @@ class XorCombineEngine
     typedef Eng1 engine_type1;
     typedef Eng2 engine_type2;
 
-    explicit XorCombineEngine (result_type s = 123456) : eng1_(s), eng2_(s) {}
+    explicit XorCombineEngine (result_type s = 123456) : eng1_(s), eng2_(s)
+    {
+        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
+        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
+    }
 
     template <typename SeedSeq>
-    explicit XorCombineEngine (SeedSeq &seq) : eng1_(seq), eng2_(seq) {}
+    explicit XorCombineEngine (SeedSeq &seq) : eng1_(seq), eng2_(seq)
+    {
+        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
+        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
+    }
 
     XorCombineEngine (const XorCombineEngine<Eng1, Eng2> &other) :
-        eng1_(other.eng1_), eng2_(other.eng2_) {}
+        eng1_(other.eng1_), eng2_(other.eng2_)
+    {
+        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
+        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
+    }
 
     XorCombineEngine (XorCombineEngine<Eng1, Eng2> &other) :
-        eng1_(other.eng1_), eng2_(other.eng2_) {}
+        eng1_(other.eng1_), eng2_(other.eng2_)
+    {
+        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
+        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
+    }
 
     XorCombineEngine<Eng1, Eng2> &operator= (
             const XorCombineEngine<Eng1, Eng2> &other)
@@ -42,7 +67,11 @@ class XorCombineEngine
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     XorCombineEngine (XorCombineEngine<Eng1, Eng2> &&other) :
-        eng1_(cxx11::move(other.eng1_)), eng2_(cxx11::move(other.eng2_)) {}
+        eng1_(cxx11::move(other.eng1_)), eng2_(cxx11::move(other.eng2_))
+    {
+        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
+        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
+    }
 
     XorCombineEngine<Eng1, Eng2> &operator= (
             XorCombineEngine<Eng1, Eng2> &&other)
@@ -74,18 +103,18 @@ class XorCombineEngine
     engine_type2 &eng2 () {return eng2_;}
 
     static VSMC_CONSTEXPR result_type min VSMC_MNE ()
-    {return Eng1::min VSMC_MNE ();}
+    {
+        return Eng1::min VSMC_MNE () < Eng2::min VSMC_MNE () ?
+            Eng1::min VSMC_MNE : Eng2::min VSMC_MNE ();
+    }
 
     static VSMC_CONSTEXPR result_type max VSMC_MNE ()
-    {return Eng1::max VSMC_MNE ();}
-
-    result_type operator() ()
     {
-        typename Eng1::result_type val1 = (eng1_())<<S1;
-        typename Eng2::result_type val2 = (eng2_())<<S2;
-
-        return val1^(static_cast<result_type>(val2));
+        return Eng1::max VSMC_MNE () > Eng2::max VSMC_MNE () ?
+            Eng1::max VSMC_MNE : Eng2::max VSMC_MNE ();
     }
+
+    result_type operator() () {return (eng1_()<<S1)^(eng2_()<<S2);}
 
     void discard (std::size_t nskip)
     {
