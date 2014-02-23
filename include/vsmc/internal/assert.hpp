@@ -13,7 +13,7 @@
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                       \
 {                                                                            \
     if (!(cond)) {                                                           \
-        throw vsmc::RuntimeAssert(msg);                                      \
+        throw ::vsmc::RuntimeAssert(msg);                                    \
     };                                                                       \
 }
 #elif defined(NDEBUG) // No Debug
@@ -34,7 +34,7 @@
 #define VSMC_RUNTIME_WARNING(cond, msg)                                      \
 {                                                                            \
     if (!(cond)) {                                                           \
-        throw vsmc::RuntimeWarning(msg);                                     \
+        throw ::vsmc::RuntimeWarning(msg);                                   \
     };                                                                       \
 }
 #elif defined(NDEBUG) // No Debug
@@ -55,13 +55,12 @@
 #if VSMC_HAS_CXX11_STATIC_ASSERT
 #define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, #msg)
 #else // VSMC_HAS_CXX11_STATIC_ASSERT
-#ifdef _MSC_VER
 #define VSMC_STATIC_ASSERT(cond, msg) \
-    {vsmc::StaticAssert<bool(cond)>::msg;}
-#else // _MSC_VER
-#define VSMC_STATIC_ASSERT(cond, msg) \
-    if (vsmc::StaticAssert<bool(cond)>::msg) {};
-#endif // _MSC_VER
+{                                                                            \
+    struct VSMC_STATIC_ASSERT_FAILURE_##msg {};                              \
+    ::vsmc::StaticAssert<bool(cond)>::test(                                  \
+                VSMC_STATIC_ASSERT_FAILURE_##msg());                         \
+}
 #endif // VSMC_HAS_CXX11_STATIC_ASSERT
 
 namespace vsmc {
@@ -82,74 +81,11 @@ class RuntimeWarning : public std::runtime_error
     RuntimeWarning (const char *msg) : std::runtime_error(msg) {}
 }; // class RuntimeWarning
 
-template <bool> class StaticAssert {};
+template <bool> struct StaticAssert {static void test (int) {}};
 
 template <>
-class StaticAssert<true>
-{
-    public :
-
-    enum {
-        USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT,
-        USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT,
-
-        USE_InitializeCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
-        USE_MonitorEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
-        USE_MoveCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
-        USE_PathEvalCL_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL,
-        USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double,
-
-        USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree,
-
-        ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE,
-
-        USE_CRTP_SMP_BASE_CLASS_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE,
-        USE_CRTP_NIntegrateBase_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE
-    };
-}; // class StaticAssert
+struct StaticAssert<true> {static void test (...) {}};
 
 } // namespace vsmc
-
-// Static assertion macros
-
-#define VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim)                           \
-    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                               \
-            USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
-
-#define VSMC_STATIC_ASSERT_DYNAMIC_STATE_SIZE_RESIZE(Dim)                    \
-    VSMC_STATIC_ASSERT((Dim == vsmc::Dynamic),                               \
-            USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT)
-
-#define VSMC_STATIC_ASSERT_NINTEGRATE_NEWTON_COTES_DEGREE(degree)            \
-    VSMC_STATIC_ASSERT((degree >= 1 && degree <= max_degree_),               \
-            USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree)
-
-#define VSMC_STATIC_ASSERT_NO_IMPL(member)                                   \
-    VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<Derived, NullType>::value),     \
-            NO_IMPLEMENTATION_OF_##member##_FOUND)
-
-#define VSMC_STATIC_ASSERT_STATE_CL_TYPE(derived, user)                      \
-    VSMC_STATIC_ASSERT((vsmc::traits::IsDerivedFromStateCL<derived>::value), \
-            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
-
-#define VSMC_STATIC_ASSERT_STATE_CL_FP_TYPE(type)                            \
-    VSMC_STATIC_ASSERT((vsmc::cxx11::is_same<type, cl_float>::value          \
-                || vsmc::cxx11::is_same<type, cl_double>::value),            \
-            USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
-
-#define VSMC_STATIC_ASSERT_FORWARD_RVALUE \
-    VSMC_STATIC_ASSERT((!vsmc::cxx11::is_lvalue_reference<T>::value),        \
-            ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE)
-
-#define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(base) \
-    VSMC_STATIC_ASSERT(                                                      \
-            (vsmc::cxx11::is_base_of<base<T, Derived>, Derived>::value),     \
-            USE_CRTP_SMP_BASE_CLASS_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE)
-
-#define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED \
-    VSMC_STATIC_ASSERT(                                                      \
-            (vsmc::cxx11::is_base_of<NIntegrateBase<Derived>, Derived>::value),\
-            USE_CRTP_NIntegrateBase_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE)
-
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

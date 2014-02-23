@@ -374,35 +374,35 @@ namespace cl {
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Platform &plat)
-{vsmc::CLQuery::print(os, plat); return os;}
+{::vsmc::CLQuery::print(os, plat); return os;}
 
 /// \brief Print information of all devices in a given context
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Context &ctx)
-{vsmc::CLQuery::print(os, ctx); return os;}
+{::vsmc::CLQuery::print(os, ctx); return os;}
 
 /// \brief Print information a given device
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Device &dev)
-{vsmc::CLQuery::print(os, dev); return os;}
+{::vsmc::CLQuery::print(os, dev); return os;}
 
 /// \brief Print information a given program
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Program &prog)
-{vsmc::CLQuery::print(os, prog); return os;}
+{::vsmc::CLQuery::print(os, prog); return os;}
 
 /// \brief Print information a given kernel
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Kernel &kern)
-{vsmc::CLQuery::print(os, kern); return os;}
+{::vsmc::CLQuery::print(os, kern); return os;}
 
 } // namespace cl
 

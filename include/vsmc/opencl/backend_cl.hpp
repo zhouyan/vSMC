@@ -6,6 +6,19 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/rng/seed.hpp>
 
+#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim) \
+    VSMC_STATIC_ASSERT((Dim == ::vsmc::Dynamic),                             \
+            USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT)
+
+#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(derived, user) \
+    VSMC_STATIC_ASSERT((::vsmc::traits::IsDerivedFromStateCL<derived>::value),\
+            USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
+
+#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type) \
+    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_same<type, cl_float>::value        \
+                || ::vsmc::cxx11::is_same<type, cl_double>::value),          \
+            USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
+
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func) \
     VSMC_RUNTIME_ASSERT((build()),                                           \
             ("**StateCL::"#func"** CAN ONLY BE CALLED AFTER true "           \
@@ -198,7 +211,8 @@ class StateCL
 
     void resize_state (std::size_t state_size)
     {
-        VSMC_STATIC_ASSERT_DYNAMIC_STATE_SIZE_RESIZE(StateSize);
+        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(
+                StateSize);
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_STATE_SIZE(state_size);
 
         state_buffer_ =
@@ -253,7 +267,7 @@ class StateCL
     void build (const std::string &source,
             const std::string &flags = std::string())
     {
-        VSMC_STATIC_ASSERT_STATE_CL_FP_TYPE(fp_type);
+        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(fp_type);
 
         ++build_id_;
 
@@ -396,7 +410,7 @@ class InitializeCL
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, InitializeCL);
+        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, InitializeCL);
 
         std::size_t bsize = particle.size();
         if (accept_host_.size() != bsize) {
@@ -511,7 +525,7 @@ class MoveCL
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, MoveCL);
+        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, MoveCL);
 
         std::size_t bsize = static_cast<std::size_t>(particle.size());
         if (accept_host_.size() != bsize) {
@@ -627,7 +641,7 @@ class MonitorEvalCL
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, MonitorEvalCL);
+        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, MonitorEvalCL);
 
         std::size_t bsize = static_cast<std::size_t>(particle.size()) * dim;
         if (buffer_size_ != bsize) {
@@ -740,7 +754,7 @@ class PathEvalCL
     double operator() (std::size_t iter, const Particle<T> &particle,
         double *res)
     {
-        VSMC_STATIC_ASSERT_STATE_CL_TYPE(T, PathEvalCL);
+        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, PathEvalCL);
 
         std::size_t bsize = static_cast<std::size_t>(particle.size());
         if (buffer_size_ != bsize) {

@@ -3,6 +3,10 @@
 
 #include <vsmc/integrate/nintegrate_base.hpp>
 
+#define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_NEWTON_COTES_DEGREE(degree) \
+    VSMC_STATIC_ASSERT((degree >= 1 && degree <= max_degree_),               \
+            USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree)
+
 namespace vsmc {
 
 namespace internal {
@@ -189,7 +193,7 @@ class NIntegrateNewtonCotes :
 
     static double integrate_segment (double a, double b, const eval_type &eval)
     {
-        VSMC_STATIC_ASSERT_NINTEGRATE_NEWTON_COTES_DEGREE(Degree);
+        VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_NEWTON_COTES_DEGREE(Degree);
 
         const double *const coeff =
             internal::NIntegrateNewtonCotesCoeff<Degree>::instance().coeff();

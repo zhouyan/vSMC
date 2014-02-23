@@ -4,6 +4,10 @@
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/smp/iterator.hpp>
 
+#define VSMC_STATIC_ASSERT_SMP_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
+    VSMC_STATIC_ASSERT((Dim == ::vsmc::Dynamic),                             \
+            USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
+
 #define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
             ("**StateMatrix::copy** SIZE MISMATCH"))
@@ -78,7 +82,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     void resize_dim (std::size_t dim)
     {
-        VSMC_STATIC_ASSERT_DYNAMIC_DIM_RESIZE(Dim);
+        VSMC_STATIC_ASSERT_SMP_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim);
         VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_DIM_SIZE(dim);
 
         traits::DimTrait<Dim>::resize_dim(dim);

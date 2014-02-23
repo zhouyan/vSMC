@@ -34,7 +34,7 @@
 /// \brief Default RNG type for resampling
 /// \ingroup Config
 #ifndef VSMC_DEFAULT_RESAMPLE_RNG_TYPE
-#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE vsmc::cxx11::mt19937
+#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE ::vsmc::cxx11::mt19937
 #endif
 
 /// \brief Default RNG set type
@@ -42,10 +42,10 @@
 #ifndef VSMC_DEFAULT_RNG_SET_TYPE
 #if VSMC_USE_RANDOM123
 #define VSMC_DEFAULT_RNG_SET_TYPE \
-    vsmc::RngSet<r123::Engine<r123::Philox2x64>, vsmc::VectorRng>
+    ::vsmc::RngSet<r123::Engine<r123::Philox2x64>, ::vsmc::VectorRng>
 #else
 #define VSMC_DEFAULT_RNG_SET_TYPE \
-    vsmc::RngSet<vsmc::cxx11::mt19937, vsmc::VectorRng>
+    ::vsmc::RngSet<::vsmc::cxx11::mt19937, ::vsmc::VectorRng>
 #endif
 #endif
 
@@ -78,7 +78,7 @@
 /// \brief Default type of Seed
 /// \ingroup Config
 #ifndef VSMC_SEED_TYPE
-#define VSMC_SEED_TYPE vsmc::SeedGenerator<NullType>
+#define VSMC_SEED_TYPE ::vsmc::SeedGenerator<NullType>
 #endif
 
 /// \brief Use MPI

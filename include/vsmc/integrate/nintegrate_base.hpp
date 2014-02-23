@@ -3,6 +3,15 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED \
+    VSMC_STATIC_ASSERT(                                                      \
+            (::vsmc::cxx11::is_base_of<NIntegrateBase<Derived>, Derived>::value),\
+            USE_CRTP_NIntegrateBase_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE)
+
+#define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_NO_IMPL(member) \
+    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_same<Derived, NullType>::value),   \
+            DERIVED_FROM_NIntegrateBase_WITHOUT_IMPLEMENTATION_OF_##member##_IN_THE_Derived_TEMPLATE_PARAMETER)
+
 #define VSMC_RUNTIME_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this)),                     \
             ("DERIVED FROM  NIntegrateBase "                                 \
@@ -78,7 +87,11 @@ class NIntegrateBase
 
     double integrate_segment_dispatch (double, double, const eval_type &,
             double (NIntegrateBase::*) (double, double, const eval_type &))
-    {VSMC_STATIC_ASSERT_NO_IMPL(integrate_segment); return 0;}
+    {
+        VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_NO_IMPL(
+                integrate_segment);
+        return 0;
+    }
 }; // class NIntegrateBase
 
 /// \brief Numerical integration base dispatch class

@@ -32,9 +32,9 @@ class MPIEnvironment
     void init_seed () const
     {
         boost::mpi::communicator world;
-        vsmc::Seed::instance().modulo(
-                static_cast<vsmc::Seed::result_type>(world.size()),
-                static_cast<vsmc::Seed::result_type>(world.rank()));
+        Seed::instance().modulo(
+                static_cast<Seed::result_type>(world.size()),
+                static_cast<Seed::result_type>(world.rank()));
         world.barrier();
     }
 }; // class MPIEnvironment

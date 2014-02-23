@@ -5,6 +5,10 @@
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
 
+#define VSMC_STATIC_ASSERT_CXX11_TYPE_TRATIS_FORWARD_RVALUE \
+    VSMC_STATIC_ASSERT((!::vsmc::cxx11::is_lvalue_reference<T>::value),      \
+            ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE)
+
 namespace vsmc {
 
 namespace cxx11 {
@@ -1080,7 +1084,7 @@ inline T &&forward (typename remove_reference<T>::type &t) VSMC_NOEXCEPT
 template <typename T>
 inline T &&forward (typename remove_reference<T>::type &&t) VSMC_NOEXCEPT
 {
-    VSMC_STATIC_ASSERT_FORWARD_RVALUE;
+    VSMC_STATIC_ASSERT_CXX11_TYPE_TRATIS_FORWARD_RVALUE;
     return static_cast<T&&>(t);
 }
 #endif

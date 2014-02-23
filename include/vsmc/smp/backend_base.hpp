@@ -32,6 +32,15 @@ Name##Impl<T, Derived> &operator= (const Name##Impl<T, Derived> &other)      \
 }                                                                            \
 ~Name##Impl () {}
 
+#define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \
+    VSMC_STATIC_ASSERT(                                                      \
+            (::vsmc::cxx11::is_base_of<basename<T, Derived>, Derived>::value),\
+            DERIVED_FROM_##basename##_WITH_INCORRECT_Derived_TEMPLATE_PARAMETER)
+
+#define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(basename, member)        \
+    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_same<Derived, NullType>::value),   \
+            DERIVED_FROM_##basename##_WITHOUT_IMPLEMENTATION_OF_##member##_IN_THE_Derived_TEMPLATE_PARAMETER)
+
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != VSMC_NULLPTR),     \
             ("DERIVED FROM " #basename                                       \
@@ -166,7 +175,11 @@ class InitializeBase
 
     std::size_t initialize_state_dispatch (SingleParticle<T>,
             std::size_t (InitializeBase::*) (SingleParticle<T>))
-    {VSMC_STATIC_ASSERT_NO_IMPL(initialize_state); return 0;}
+    {
+        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(
+                InitializeBase, initialize_state);
+        return 0;
+    }
 
     void initialize_param_dispatch (Particle<T> &, void *,
             void (InitializeBase::*) (Particle<T> &, void *)) {}
@@ -293,7 +306,10 @@ class MoveBase
 
     std::size_t move_state_dispatch (std::size_t, SingleParticle<T>,
             std::size_t (MoveBase::*) (std::size_t, SingleParticle<T>))
-    {VSMC_STATIC_ASSERT_NO_IMPL(move_state); return 0;}
+    {
+        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(MoveBase, move_state);
+        return 0;
+    }
 
     void pre_processor_dispatch (std::size_t, Particle<T> &,
             void (MoveBase::*) (std::size_t, Particle<T> &)) {}
@@ -431,7 +447,10 @@ class MonitorEvalBase
             ConstSingleParticle<T>, double *,
             void (MonitorEvalBase::*)
             (std::size_t, std::size_t, ConstSingleParticle<T>, double *))
-    {VSMC_STATIC_ASSERT_NO_IMPL(monitor_state);}
+    {
+        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(
+                MonitorEvalBase, monitor_state);
+    }
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (MonitorEvalBase::*) (std::size_t, const Particle<T> &)) {}
@@ -585,11 +604,17 @@ class PathEvalBase
 
     double path_state_dispatch (std::size_t, ConstSingleParticle<T>,
             double (PathEvalBase::*) (std::size_t, ConstSingleParticle<T>))
-    {VSMC_STATIC_ASSERT_NO_IMPL(path_state); return 0;}
+    {
+        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(PathEvalBase, path_state);
+        return 0;
+    }
 
     double path_grid_dispatch (std::size_t, const Particle<T> &,
             double (PathEvalBase::*) (std::size_t, const Particle<T> &))
-    {VSMC_STATIC_ASSERT_NO_IMPL(path_grid); return 0;}
+    {
+        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(PathEvalBase, path_grid);
+        return 0;
+    }
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (PathEvalBase::*) (std::size_t, const Particle<T> &)) {}

@@ -3,6 +3,9 @@
 
 #include <vsmc/rng/common.hpp>
 
+#define VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R) \
+    VSMC_STATIC_ASSERT((R != 0), USE_XorshiftEngine_WITH_ZERO_INTERNAL_STATE)
+
 namespace vsmc {
 
 namespace internal {
@@ -51,19 +54,29 @@ class XorshiftEngine
 
     typedef ResultType result_type;
 
-    explicit XorshiftEngine (result_type s = 123456) {seed(s);}
+    explicit XorshiftEngine (result_type s = 123456)
+    {
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
+        seed(s);
+    }
 
     template <typename SeedSeq>
-    explicit XorshiftEngine (SeedSeq &seq) {seed(seq);}
+    explicit XorshiftEngine (SeedSeq &seq)
+    {
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
+        seed(seq);
+    }
 
     XorshiftEngine (const XorshiftEngine<ResultType, R, A, B, C> &other)
     {
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
         for (std::size_t i = 0; i != R; ++i)
             state_[i] = other.state_[i];
     }
 
     XorshiftEngine (XorshiftEngine<ResultType, R, A, B, C> &other)
     {
+        VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R);
         for (std::size_t i = 0; i != R; ++i)
             state_[i] = other.state_[i];
     }
