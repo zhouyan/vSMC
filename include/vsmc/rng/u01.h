@@ -67,53 +67,37 @@
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_closed_closed_32_24 (uint32_t i)
-{
-    return ((i&0x7fffffc0) + (i&0x40)) * VSMC_0x1p_31f;
-}
+{return ((i&0x7fffffc0) + (i&0x40)) * VSMC_0x1p_31f;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_closed_open_32_24 (uint32_t i)
-{
-    return (i>>8) * VSMC_0x1p_24f;
-}
+{return (i>>8) * VSMC_0x1p_24f;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_open_closed_32_24 (uint32_t i)
-{
-    return (1.0f + (i>>8)) * VSMC_0x1p_24f;
-}
+{return (1.0f + (i>>8)) * VSMC_0x1p_24f;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_open_open_32_24 (uint32_t i)
-{
-    return (0.5f + (i>>9)) * VSMC_0x1p_23f;
-}
+{return (0.5f + (i>>9)) * VSMC_0x1p_23f;}
 
 #if VSMC_FP_TYPE_IS_DOUBLE
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)
-{
-    return ((i&UINT64_C(0x7ffffffffffffe00)) + (i&0x200)) * VSMC_0x1p_63;
-}
+{return ((i&UINT64_C(0x7ffffffffffffe00)) + (i&0x200)) * VSMC_0x1p_63;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_open_64_53 (uint64_t i)
-{
-    return (i>>11) * VSMC_0x1p_53;
-}
+{return (i>>11) * VSMC_0x1p_53;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_open_closed_64_53 (uint64_t i)
-{
-    return (1.0 + (i>>11)) * VSMC_0x1p_53;
-}
+{return (1.0 + (i>>11)) * VSMC_0x1p_53;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_open_open_64_53 (uint64_t i)
-{
-    return (0.5 + (i>>12)) * VSMC_0x1p_52;
-}
+{return (0.5 + (i>>12)) * VSMC_0x1p_52;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_closed_32_53 (uint32_t i)
@@ -127,21 +111,15 @@ VSMC_STATIC_INLINE double u01_closed_closed_32_53 (uint32_t i)
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_open_32_53 (uint32_t i)
-{
-    return i * VSMC_0x1p_32;
-}
+{return i * VSMC_0x1p_32;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_open_closed_32_53 (uint32_t i)
-{
-    return (1.0 + i) * VSMC_0x1p_32;
-}
+{return (1.0 + i) * VSMC_0x1p_32;}
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_open_open_32_53 (uint32_t i)
-{
-    return (0.5 + i) * VSMC_0x1p_32;
-}
+{return (0.5 + i) * VSMC_0x1p_32;}
 
 #endif // VSMC_FP_TYPE_IS_DOUBLE
 
