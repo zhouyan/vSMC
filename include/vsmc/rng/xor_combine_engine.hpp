@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_COMBINE_HPP
 #define VSMC_RNG_COMBINE_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/rng/common.hpp>
 
 namespace vsmc {
 

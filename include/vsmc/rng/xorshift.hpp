@@ -1,8 +1,7 @@
 #ifndef VSMC_RNG_XORSHIFT_HPP
 #define VSMC_RNG_XORSHIFT_HPP
 
-#include <vsmc/internal/common.hpp>
-#include <stdint.h>
+#include <vsmc/rng/common.hpp>
 
 namespace vsmc {
 
