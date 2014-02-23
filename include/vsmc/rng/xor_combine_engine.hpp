@@ -21,7 +21,7 @@ class XorCombineEngine
     explicit XorCombineEngine (result_type s = 123456) : eng1_(s), eng2_(s) {}
 
     template <typename SeedSeq>
-    explicit XorCombineEngine (SeedSeq &seq) {seed(seq);}
+    explicit XorCombineEngine (SeedSeq &seq) : eng1_(seq), eng2_(seq) {}
 
     XorCombineEngine (const XorCombineEngine<Eng1, Eng2> &other) :
         eng1_(other.eng1_), eng2_(other.eng2_) {}
@@ -80,7 +80,12 @@ class XorCombineEngine
     {return Eng1::max VSMC_MNE ();}
 
     result_type operator() ()
-    {return (this->eng1()()<<S1)^(this->eng2()()<<S2);}
+    {
+        typename Eng1::result_type val1 = (eng1_())<<S1;
+        typename Eng2::result_type val2 = (eng2_())<<S2;
+
+        return val1^(static_cast<result_type>(val2));
+    }
 
     void discard (std::size_t nskip)
     {
