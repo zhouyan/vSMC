@@ -667,7 +667,9 @@ class DispatchProgress
     ///
     /// \param total Total amount of work represented by an integer, for
     /// example file size or SMC algorithm total number of iterations
-    void start (uint64_t total)
+    void start (uint64_t total,
+            uint64_t interval = NSEC_PER_SEC / 10,
+            uint64_t leeway = NSEC_PER_SEC / 10)
     {
         total_ = total;
         iter_ = 0;
@@ -675,8 +677,7 @@ class DispatchProgress
 
         timer_.set_context(static_cast<void *>(this));
         timer_.set_event_handler_f(print_start_);
-        timer_.set_timer(DISPATCH_TIME_NOW,
-                NSEC_PER_SEC / 10, NSEC_PER_SEC / 10);
+        timer_.set_timer(DISPATCH_TIME_NOW, interval, leeway);
 
         watch_.reset();
         watch_.start();
@@ -765,14 +766,16 @@ class DispatchProgress
 
         uint64_t display_iter = iter <= total ? iter : total;
         unsigned num_equal = total == 0 ? num_equal_max_ :
-            static_cast<unsigned>(static_cast<double>(num_equal_max_) * (
-                        static_cast<double>(display_iter) /
-                        static_cast<double>(total)));
+            static_cast<unsigned>(
+                    static_cast<double>(num_equal_max_) * 
+                    static_cast<double>(display_iter) /
+                    static_cast<double>(total));
         num_equal = num_equal <= num_equal_max_ ? num_equal : num_equal_max_;
         unsigned percent = total == 0 ? percent_max_ :
-            static_cast<unsigned>(static_cast<double>(percent_max_) * (
-                        static_cast<double>(display_iter) /
-                        static_cast<double>(total)));
+            static_cast<unsigned>(
+                    static_cast<double>(percent_max_) *
+                    static_cast<double>(display_iter) /
+                    static_cast<double>(total));
         percent = percent <= percent_max_ ? percent : percent_max_;
 
         if (timer_ptr->print_first_) {
