@@ -88,6 +88,18 @@ struct XorshiftEngineTrait
 
 namespace internal {
 
+template <typename ResultType, ResultType K, bool =
+    (K <= traits::XorshiftEngineTrait<ResultType>::max_loop_unroll)>
+struct XorshiftIter {static VSMC_CONSTEXPR const std::size_t value = 0;};
+
+template <typename ResultType, ResultType K>
+struct XorshiftIter<ResultType, K, false>
+{
+    XorshiftIter () : value(0) {}
+
+    std::size_t value;
+};
+
 template <bool, typename ResultType, ResultType A>
 struct XorshiftLeft
 {static ResultType get (ResultType x) {return x;}};
@@ -181,14 +193,14 @@ class XorshiftEngine
 
     typedef ResultType result_type;
 
-    explicit XorshiftEngine (result_type s = 123456) : iter_(0)
+    explicit XorshiftEngine (result_type s = 123456)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
         seed(s);
     }
 
     template <typename SeedSeq>
-    explicit XorshiftEngine (SeedSeq &seq) : iter_(0)
+    explicit XorshiftEngine (SeedSeq &seq)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
         seed(seq);
@@ -253,7 +265,7 @@ class XorshiftEngine
     result_type operator() ()
     {
         return internal::xorshift<ResultType, A, B, C, D, R, S>(
-                state_, Position<K>(), iter_);
+                state_, Position<K>(), iter_.value);
     }
 
     void discard (std::size_t nskip)
@@ -318,7 +330,7 @@ class XorshiftEngine
 
     private :
 
-    std::size_t iter_;
+    internal::XorshiftIter<result_type, K> iter_;
     internal::RngStorage<result_type, K, (sizeof(ResultType) * K <=
             traits::XorshiftEngineTrait<ResultType>::max_stack_alloc)> state_;
 }; // class XorshiftEngine
@@ -383,8 +395,11 @@ typedef XorshiftEngine<uint64_t, 32, 35, 27, 26, 37, 32, 1> Xorshift32x64;
 /// \ingroup RNG
 typedef XorshiftEngine<uint64_t, 64, 33, 26, 27, 29, 64, 53> Xorshift64x64;
 
-/// \brief THe default Xorshift engine
-typedef Xorshift16x64 Xorshift;
+/// \brief THe default 32-bits Xorshift engine
+typedef Xorshift128x32 Xorshift;
+
+/// \brief THe default 64-bits Xorshift engine
+typedef Xorshift64x64  Xorshift_64;
 
 } // namespace vsmc
 
