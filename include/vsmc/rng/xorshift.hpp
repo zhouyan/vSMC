@@ -67,7 +67,7 @@ struct xorshift_right<true, ResultType, A>
 {static ResultType get (ResultType x) {return x^(x>>A);}};
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S,
-         bool  = (K <= 8)>
+         bool  = (K <= 4)>
 struct xorshift_index
 {
     static VSMC_CONSTEXPR std::size_t r (std::size_t) {return K - R;}
@@ -94,7 +94,7 @@ struct xorshift_index<ResultType, K, R, S, false>
 };
 
 template <typename ResultType, std::size_t K,
-         bool B = (sizeof(ResultType) * K <= 128)>
+         bool B = (sizeof(ResultType) * K <= 512)>
 class xorshift_storage
 {
     public :
@@ -448,7 +448,7 @@ typedef XorshiftEngine<uint64_t, 32, 35, 27, 26, 37, 32, 1> Xorshift32x64;
 typedef XorshiftEngine<uint64_t, 64, 33, 26, 27, 29, 64, 53> Xorshift64x64;
 
 /// \brief THe default Xorshift engine
-typedef Xorshift8x64 Xorshift;
+typedef Xorshift16x64 Xorshift;
 
 } // namespace vsmc
 
