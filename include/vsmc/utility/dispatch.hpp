@@ -908,11 +908,11 @@ class DispatchProgress
             cstr[offset++] = '\0';
         }
 
-        std::cout << ' ';
-        std::cout << const_cast<const char *>(timer_ptr->display_progress_);
-        std::cout << const_cast<const char *>(timer_ptr->display_percent_);
-        std::cout << const_cast<const char *>(timer_ptr->display_time_);
-        std::cout << const_cast<const char *>(timer_ptr->display_iter_);
+        std::fprintf(stderr, " ");
+        std::fprintf(stderr, "%s", timer_ptr->display_progress_);
+        std::fprintf(stderr, "%s", timer_ptr->display_percent_);
+        std::fprintf(stderr, "%s", timer_ptr->display_time_);
+        std::fprintf(stderr, "%s", timer_ptr->display_iter_);
     }
 
     static void increment_ (void *context)
@@ -931,13 +931,15 @@ class DispatchProgress
     static void print_start_ (void *context)
     {
         print_progress(context);
-        std::cout << '\r' << std::flush;
+        std::fprintf(stderr, "\r");
+        std::fflush(stderr);
     }
 
     static void print_stop_ (void *context)
     {
         print_progress(context);
-        std::cout << std::endl;
+        std::fprintf(stderr, "\n");
+        std::fflush(stderr);
     }
 }; // class DispatchProgress
 
