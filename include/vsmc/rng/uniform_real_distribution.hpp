@@ -13,7 +13,7 @@
             ((static_cast<uint64_t>(engmax) ==                               \
               static_cast<uint64_t>(~(static_cast<uint32_t>(0)))) ||         \
              (static_cast<uint64_t>(engmax) ==                               \
-              (~(static_cast<uint32_t>(0))))),                               \
+              (~(static_cast<uint64_t>(0))))),                               \
             USE_UniformRealDistribution_WITH_A_RNG_ENGINE_HAVING_MAX_THAT_DOES_NOT_COVER_THE_FULL_RANGE)
 
 
