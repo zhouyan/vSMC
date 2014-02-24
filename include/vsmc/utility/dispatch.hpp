@@ -671,6 +671,8 @@ class DispatchProgress
     ///
     /// \param total Total amount of work represented by an integer, for
     /// example file size or SMC algorithm total number of iterations
+    /// \param interval The interval in nanoseconds of timer
+    /// \param leeway The leeway in nanoseconds of timer
     void start (uint64_t total,
             uint64_t interval = NSEC_PER_SEC / 10,
             uint64_t leeway = NSEC_PER_SEC / 10)
