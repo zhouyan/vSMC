@@ -52,19 +52,46 @@ namespace internal {
 
 template <bool, typename ResultType, ResultType A>
 struct xorshift_left
-{static ResultType op (ResultType x) {return x;}};
+{static ResultType get (ResultType x) {return x;}};
 
 template <typename ResultType, ResultType A>
 struct xorshift_left<true, ResultType, A>
-{static ResultType op (ResultType x) {return x^(x<<A);}};
+{static ResultType get (ResultType x) {return x^(x<<A);}};
 
 template <bool, typename ResultType, ResultType A>
 struct xorshift_right
-{static ResultType op (ResultType x) {return x;}};
+{static ResultType get (ResultType x) {return x;}};
 
 template <typename ResultType, ResultType A>
 struct xorshift_right<true, ResultType, A>
-{static ResultType op (ResultType x) {return x^(x>>A);}};
+{static ResultType get (ResultType x) {return x^(x>>A);}};
+
+template <typename ResultType, std::size_t K, std::size_t R, std::size_t S,
+         bool  = (K <= 8)>
+struct xorshift_index
+{
+    static VSMC_CONSTEXPR std::size_t r (std::size_t) {return K - R;}
+
+    static VSMC_CONSTEXPR std::size_t s (std::size_t) {return K - S;}
+
+    static VSMC_CONSTEXPR std::size_t k (std::size_t) {return K - 1;}
+
+    static void shift (ResultType *state, Position<K>, std::size_t &)
+    {rng_array_shift(state, Position<K>());}
+};
+
+template <typename ResultType, std::size_t K, std::size_t R, std::size_t S>
+struct xorshift_index<ResultType, K, R, S, false>
+{
+    static std::size_t r (std::size_t iter) {return (K - R + iter) % K;}
+
+    static std::size_t s (std::size_t iter) {return (K - S + iter) % K;}
+
+    static std::size_t k (std::size_t iter) {return (K - 1 + iter) % K;}
+
+    static void shift (ResultType *, Position<K>, std::size_t &iter)
+    {iter = (iter + 1) % K;}
+};
 
 template <typename ResultType, std::size_t K,
          bool B = (sizeof(ResultType) * K <= 128)>
@@ -168,25 +195,28 @@ class xorshift_storage<ResultType, K, false>
 
 template <typename ResultType, ResultType A, ResultType B, ResultType C,
          ResultType, std::size_t, std::size_t>
-inline void xorshift (ResultType *state, Position<1>)
+inline ResultType xorshift (ResultType *state, Position<1>, std::size_t &)
 {
     *state ^= (*state)<<A;
     *state ^= (*state)>>B;
     *state ^= (*state)<<C;
+
+    return *state;
 }
 
 template <typename ResultType, ResultType A, ResultType B, ResultType C,
     ResultType D, std::size_t R, std::size_t S, std::size_t K>
-inline void xorshift (ResultType *state, Position<K>)
+inline ResultType xorshift (ResultType *state, Position<K>, std::size_t &iter)
 {
-    ResultType xr = state[K - R];
-    ResultType xs = state[K - S];
-    xr = xorshift_left <A != 0, ResultType, A>::op(xr);
-    xr = xorshift_right<B != 0, ResultType, B>::op(xr);
-    xs = xorshift_left <C != 0, ResultType, C>::op(xs);
-    xs = xorshift_right<D != 0, ResultType, D>::op(xs);
-    rng_array_shift(state, Position<K>());
-    state[K - 1] = xs^xr;
+    ResultType xr = state[xorshift_index<ResultType, K, R, S>::r(iter)];
+    ResultType xs = state[xorshift_index<ResultType, K, R, S>::s(iter)];
+    xr = xorshift_left <A != 0, ResultType, A>::get(xr);
+    xr = xorshift_right<B != 0, ResultType, B>::get(xr);
+    xs = xorshift_left <C != 0, ResultType, C>::get(xs);
+    xs = xorshift_right<D != 0, ResultType, D>::get(xs);
+    xorshift_index<ResultType, K, R, S>::shift(state, Position<K>(), iter);
+
+    return state[xorshift_index<ResultType, K, R, S>::k(iter)] = xs^xr;
 }
 
 } // namespace vsmc::internal
@@ -216,14 +246,14 @@ class XorshiftEngine
 
     typedef ResultType result_type;
 
-    explicit XorshiftEngine (result_type s = 123456)
+    explicit XorshiftEngine (result_type s = 123456) : iter_(0)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
         seed(s);
     }
 
     template <typename SeedSeq>
-    explicit XorshiftEngine (SeedSeq &seq)
+    explicit XorshiftEngine (SeedSeq &seq) : iter_(0)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
         seed(seq);
@@ -231,19 +261,21 @@ class XorshiftEngine
 
     XorshiftEngine (
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &other) :
-        state_(other.state_)
+        iter_(other.iter_), state_(other.state_)
     {VSMC_STATIC_ASSERT_RNG_XORSHIFT;}
 
     XorshiftEngine (
             XorshiftEngine<ResultType, K, A, B, C, D, R, S> &other) :
-        state_(other.state_)
+        iter_(other.iter_), state_(other.state_)
     {VSMC_STATIC_ASSERT_RNG_XORSHIFT;}
 
     XorshiftEngine<ResultType, K, A, B, C, D, R, S> &operator= (
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &other)
     {
-        if (this != &other)
+        if (this != &other) {
+            iter_ = other.iter_;
             state_ = other.state_;
+        }
 
         return *this;
     }
@@ -251,14 +283,16 @@ class XorshiftEngine
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     XorshiftEngine (
             XorshiftEngine<ResultType, K, A, B, C, D, R, S> &&other) :
-        state_(cxx11::move(other.state_))
+        iter_(other.iter_), state_(cxx11::move(other.state_))
     {VSMC_STATIC_ASSERT_RNG_XORSHIFT;}
 
     XorshiftEngine<ResultType, K, A, B, C, D, R, S> &operator= (
             XorshiftEngine<ResultType, K, A, B, C, D, R, S> &&other)
     {
-        if (this != &other)
+        if (this != &other) {
+            iter_ = other.iter_;
             state_ = cxx11::move(other.state_);
+        }
 
         return *this;
     }
@@ -270,9 +304,10 @@ class XorshiftEngine
             static_cast<result_type>(std::numeric_limits<uint32_t>::
                     max VSMC_MNE ());
         uint32_t seed = static_cast<uint32_t>(s % u32max);
+        std::size_t iter = 0;
         for (std::size_t i = 0; i != K; ++i) {
             internal::xorshift<uint32_t, 13, 17, 5, 0, 0, 0>(
-                    &seed, Position<1>());
+                    &seed, Position<1>(), iter);
             state_[0] = s;
         }
     }
@@ -282,10 +317,8 @@ class XorshiftEngine
 
     result_type operator() ()
     {
-        internal::xorshift<ResultType, A, B, C, D, R, S>(
-                state_, Position<K>());
-
-        return state_[K - 1];
+        return internal::xorshift<ResultType, A, B, C, D, R, S>(
+                state_, Position<K>(), iter_);
     }
 
     void discard (std::size_t nskip)
@@ -350,6 +383,7 @@ class XorshiftEngine
 
     private :
 
+    std::size_t iter_;
     internal::xorshift_storage<result_type, K> state_;
 }; // class XorshiftEngine
 
@@ -414,7 +448,7 @@ typedef XorshiftEngine<uint64_t, 32, 35, 27, 26, 37, 32, 1> Xorshift32x64;
 typedef XorshiftEngine<uint64_t, 64, 33, 26, 27, 29, 64, 53> Xorshift64x64;
 
 /// \brief THe default Xorshift engine
-typedef Xorshift4x32 Xorshift;
+typedef Xorshift8x64 Xorshift;
 
 } // namespace vsmc
 
