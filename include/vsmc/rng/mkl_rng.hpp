@@ -159,6 +159,8 @@ inline void mkl_rng_error_check (MKL_INT, int, const char *, const char *) {}
 
 namespace traits {
 
+/// \brief Default Seed for MKL RNG
+/// \ingroup Traits
 template<MKL_INT> struct MKLSeedTrait
 {static VSMC_CONSTEXPR const MKL_UINT value = 101;};
 
@@ -168,6 +170,8 @@ template <> struct MKLSeedTrait<VSL_BRNG_SOBOL>
 template <> struct MKLSeedTrait<VSL_BRNG_NIEDERR>
 {static VSMC_CONSTEXPR const MKL_UINT value = 10;};
 
+/// \brief Skip ahead algorithm for MKL RNG using VSL function
+/// \ingroup Traits
 struct MKLSkipAheadVSL
 {
     typedef long long size_type;
@@ -184,6 +188,8 @@ struct MKLSkipAheadVSL
     static MKL_INT buffer_size () {return 0;}
 }; // struct SkipAheadVSL
 
+/// \brief Skip ahead algorithm for MKL RNG using brute-force
+/// \ingroup Traits
 template <typename ResultType>
 struct MKLSkipAheadForce
 {
@@ -230,6 +236,36 @@ struct MKLSkipAheadForce
     MKLUniformBitsDistribution<ResultType> runif_;
 }; // strut SkipAheadForce
 
+/// \brief Skip ahead algorithm for MKL RNG
+/// \ingroup Traits
+template <MKL_INT BRNG, typename ResultType>
+struct MKLSkipAheadTrait
+{typedef MKLSkipAheadForce<ResultType> type;};
+
+template <typename ResultType>
+struct MKLSkipAheadTrait<VSL_BRNG_MCG31, ResultType>
+{typedef MKLSkipAheadVSL type;};
+
+template <typename ResultType>
+struct MKLSkipAheadTrait<VSL_BRNG_MCG59, ResultType>
+{typedef MKLSkipAheadVSL type;};
+
+template <typename ResultType>
+struct MKLSkipAheadTrait<VSL_BRNG_MRG32K3A, ResultType>
+{typedef MKLSkipAheadVSL type;};
+
+template <typename ResultType>
+struct MKLSkipAheadTrait<VSL_BRNG_SOBOL, ResultType>
+{typedef MKLSkipAheadVSL type;};
+
+template <typename ResultType>
+struct MKLSkipAheadTrait<VSL_BRNG_NIEDERR, ResultType>
+{typedef MKLSkipAheadVSL type;};
+
+} // namespace vsmc::traits
+
+namespace internal {
+
 struct MKLOffsetZero
 {
     static VSMC_CONSTEXPR MKL_INT min VSMC_MNE () {return 0;}
@@ -259,44 +295,19 @@ struct MKLOffsetDynamic
     MKL_INT offset_;
 }; // struct OffsetDynamic
 
-template <MKL_INT BRNG, typename ResultType>
-struct MKLSkipAheadTrait
-{typedef MKLSkipAheadForce<ResultType> type;};
-
-template <typename ResultType>
-struct MKLSkipAheadTrait<VSL_BRNG_MCG31, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <typename ResultType>
-struct MKLSkipAheadTrait<VSL_BRNG_MCG59, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <typename ResultType>
-struct MKLSkipAheadTrait<VSL_BRNG_MRG32K3A, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <typename ResultType>
-struct MKLSkipAheadTrait<VSL_BRNG_SOBOL, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <typename ResultType>
-struct MKLSkipAheadTrait<VSL_BRNG_NIEDERR, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <MKL_INT> struct MKLOffsetTrait {typedef MKLOffsetZero type;};
+template <MKL_INT> struct MKLOffset {typedef MKLOffsetZero type;};
 
 template <>
-struct MKLOffsetTrait<VSL_BRNG_MT2203> {typedef MKLOffsetDynamic<6024> type;};
+struct MKLOffset<VSL_BRNG_MT2203> {typedef MKLOffsetDynamic<6024> type;};
 
 template <>
-struct MKLOffsetTrait<VSL_BRNG_WH> {typedef MKLOffsetDynamic<273> type;};
-
-} // namespace vsmc::traits
+struct MKLOffset<VSL_BRNG_WH> {typedef MKLOffsetDynamic<273> type;};
+} // namespace vsmc::internal
 
 /// \brief MKL RNG C++11 engine stream
 /// \ingroup MKLRNG
 template <MKL_INT BRNG>
-class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
+class MKLStream : public internal::MKLOffset<BRNG>::type
 {
     public :
 
@@ -318,7 +329,7 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
     }
 
     MKLStream (const MKLStream<BRNG> &other) :
-        traits::MKLOffsetTrait<BRNG>::type(other)
+        internal::MKLOffset<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
         mkl_rng_error_check(BRNG, status,
@@ -326,7 +337,7 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
     }
 
     MKLStream (MKLStream<BRNG> &other) :
-        traits::MKLOffsetTrait<BRNG>::type(other)
+        internal::MKLOffset<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
         mkl_rng_error_check(BRNG, status,
@@ -336,7 +347,7 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
     MKLStream<BRNG> &operator= (const MKLStream<BRNG> &other)
     {
         if (this != &other) {
-            traits::MKLOffsetTrait<BRNG>::type::operator=(other);
+            internal::MKLOffset<BRNG>::type::operator=(other);
             int status = ::vslCopyStreamState(str_ptr_, other.str_ptr_);
             mkl_rng_error_check(BRNG, status,
                     "MKLStream::operator=", "vslCopyStreamState");
@@ -347,14 +358,14 @@ class MKLStream : public traits::MKLOffsetTrait<BRNG>::type
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     MKLStream (MKLStream<BRNG> &&other) :
-        traits::MKLOffsetTrait<BRNG>::type(cxx11::move(other)),
+        internal::MKLOffset<BRNG>::type(cxx11::move(other)),
         seed_(other.seed_), str_ptr_(other.str_ptr_)
     {other.str_ptr_ = VSMC_NULLPTR;}
 
     MKLStream<BRNG> &operator= (MKLStream<BRNG> &&other)
     {
         if (this != other) {
-            traits::MKLOffsetTrait<BRNG>::type::operator=(cxx11::move(other));
+            internal::MKLOffset<BRNG>::type::operator=(cxx11::move(other));
             seed_ = other.seed_;
             str_ptr_ = other.str_ptr_;
             other.str_ptr_ = VSMC_NULLPTR;

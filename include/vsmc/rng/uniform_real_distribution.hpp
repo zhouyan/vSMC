@@ -4,6 +4,19 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/u01.h>
 
+#define VSMC_STATIC_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(engmin) \
+    VSMC_STATIC_ASSERT((engmin == 0),                                        \
+            USE_UniformRealDistribution_WITH_A_RNG_ENGINE_HAVING_NONZERO_MIN)
+
+#define VSMC_STATIC_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(engmax) \
+    VSMC_STATIC_ASSERT(                                                      \
+            ((static_cast<uint64_t>(engmax) ==                               \
+              static_cast<uint64_t>(~(static_cast<uint32_t>(0)))) ||         \
+             (static_cast<uint64_t>(engmax) ==                               \
+              (~(static_cast<uint32_t>(0))))),                               \
+            USE_UniformRealDistribution_WITH_A_RNG_ENGINE_HAVING_MAX_THAT_DOES_NOT_COVER_THE_FULL_RANGE)
+
+
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN \
     VSMC_RUNTIME_ASSERT(false,                                               \
             ("**UniformRealDistribution::operator()** "                      \
@@ -17,19 +30,19 @@
 
 namespace vsmc {
 
-namespace traits {
+namespace internal {
 
-template<uint64_t, uint64_t> struct IntegerRangeTypeTrait;
+template<uint64_t, uint64_t> struct FullRangeIntgerType;
 
 template<>
-struct IntegerRangeTypeTrait<0, ~(static_cast<uint32_t>(0))>
+struct FullRangeIntgerType<0, ~(static_cast<uint32_t>(0))>
 {typedef uint32_t type;};
 
 template<>
-struct IntegerRangeTypeTrait<0, ~(static_cast<uint64_t>(0))>
+struct FullRangeIntgerType<0, ~(static_cast<uint64_t>(0))>
 {typedef uint64_t type;};
 
-} // namespace vsmc::traits
+} // namespace vsmc::interal
 
 /// \brief Parameter type for open interval
 /// \ingroup RNG
@@ -150,7 +163,11 @@ class UniformRealDistribution
             fp_bits;
 
 #if VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
-        typedef typename traits::IntegerRangeTypeTrait<
+        VSMC_STATIC_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(
+                (Eng::min VSMC_MNE ()));
+        VSMC_STATIC_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(
+                (Eng::max VSMC_MNE ()));
+        typedef typename internal::FullRangeIntgerType<
             Eng::min VSMC_MNE (), Eng::max VSMC_MNE ()>::type eng_uint_t;
         typedef cxx11::integral_constant<std::size_t, sizeof(eng_uint_t)>
             u_bits;

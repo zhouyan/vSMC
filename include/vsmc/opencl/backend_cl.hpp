@@ -11,7 +11,7 @@
             USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT)
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(derived, user) \
-    VSMC_STATIC_ASSERT((::vsmc::traits::IsDerivedFromStateCL<derived>::value),\
+    VSMC_STATIC_ASSERT((::vsmc::internal::IsDerivedFromStateCL<derived>::value),\
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type) \
@@ -59,10 +59,6 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
     ss << "#define VSMC_FP_TYPE_IS_DOUBLE 1\n";
 }
 
-} // namespace vsmc::internal
-
-namespace traits {
-
 template <typename D>
 struct IsDerivedFromStateCLImpl
 {
@@ -83,7 +79,7 @@ template <typename D>
 struct IsDerivedFromStateCL :
     public cxx11::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
 
-} // namespace vsmc::traits
+} // namespace vsmc::internal
 
 template <typename, typename = NullType> class InitializeCL;
 template <typename, typename = NullType> class MoveCL;

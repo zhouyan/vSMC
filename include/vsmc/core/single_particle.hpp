@@ -222,10 +222,6 @@ class ConstSingleParticleBase
     const Particle<T> *particle_ptr_;
 }; // class ConstSingleParticleBase
 
-namespace traits {
-
-} // namespace vsmc::traits
-
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
 ///
