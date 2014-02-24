@@ -23,7 +23,7 @@ inline void xorshift (ResultType *state, Position<1>)
 {
     *state ^= (*state)<<A;
     *state ^= (*state)>>B;
-    *state ^= (*state)>>C;
+    *state ^= (*state)<<C;
 }
 
 template <typename ResultType, ResultType A, ResultType B, ResultType C,
