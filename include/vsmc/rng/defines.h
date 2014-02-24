@@ -49,4 +49,8 @@
 #define VSMC_FP_TYPE_IS_FLOAT 1
 #endif
 
+#ifndef VSMC_USE_THREEFRY_CBURNG
+#define VSMC_USE_THREEFRY_CBURNG 0
+#endif
+
 #endif // VSMC_OPENCL_DEFINES_H
