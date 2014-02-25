@@ -24,8 +24,8 @@ class XorCombineEngine
     public :
 
     typedef typename Eng1::result_type result_type;
-    typedef Eng1 engine_type1;
-    typedef Eng2 engine_type2;
+    typedef Eng1 engine1_type;
+    typedef Eng2 engine2_type;
 
     explicit XorCombineEngine (result_type s = 123456) : eng1_(s), eng2_(s)
     {
@@ -98,9 +98,9 @@ class XorCombineEngine
         eng2_.seed(seq);
     }
 
-    engine_type1 &eng1 () {return eng1_;}
+    engine1_type &eng1 () {return eng1_;}
 
-    engine_type2 &eng2 () {return eng2_;}
+    engine2_type &eng2 () {return eng2_;}
 
     static VSMC_CONSTEXPR result_type min VSMC_MNE ()
     {
@@ -147,11 +147,16 @@ class XorCombineEngine
             std::basic_istream<CharT, Traits> &is,
             XorCombineEngine<Eng1, Eng2> &eng)
     {
-        engine_type1 eng1;
-        engine_type2 eng2;
-        if (is >> eng1 >> std::ws >> eng2) {
-            eng.eng1_ = eng1;
-            eng.eng2_ = eng2;
+        engine1_type eng1_tmp;
+        engine2_type eng2_tmp;
+        if (is >> eng1_tmp >> std::ws >> eng2_tmp) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            eng.eng1_ = cxx11::move(eng1_tmp);
+            eng.eng2_ = cxx11::move(eng2_tmp);
+#else
+            eng.eng1_ = eng1_tmp;
+            eng.eng2_ = eng2_tmp;
+#endif
         }
 
         return is;
@@ -159,8 +164,8 @@ class XorCombineEngine
 
     private :
 
-    engine_type1 eng1_;
-    engine_type2 eng2_;
+    engine1_type eng1_;
+    engine2_type eng2_;
 }; // class XorCombineEngine
 
 } // namespace vsmc

@@ -344,6 +344,128 @@ template <typename Eng,
          typename Eng::result_type DInit = 6615241>
 class XorwowEngine
 {
+    public :
+
+    typedef typename Eng::result_type result_type;
+    typedef Eng engine_type;
+
+    explicit XorwowEngine (result_type s = 123456) : eng_(s), weyl_(DInit) {}
+
+    template <typename SeedSeq>
+    explicit XorwowEngine (SeedSeq &seq) : eng_(seq), weyl_(DInit) {}
+
+    XorwowEngine (const XorwowEngine<Eng, D, DInit> &other) :
+        eng_(other.eng_), weyl_(other.weyl_) {}
+
+    XorwowEngine (XorwowEngine<Eng, D, DInit> &other) :
+        eng_(other.eng_), weyl_(other.weyl_) {}
+
+    XorwowEngine<Eng, D, DInit> &operator= (
+            const XorwowEngine<Eng, D, DInit> &other)
+    {
+        if (this != &other) {
+            eng_ = other.eng_;
+            weyl_ = other.weyl_;
+        }
+
+        return *this;
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    XorwowEngine (XorwowEngine<Eng, D, DInit> &&other) :
+        eng_(cxx11::move(other.eng_)), weyl_(other.weyl_) {}
+
+    XorwowEngine<Eng, D, DInit> &operator= (
+            XorwowEngine<Eng, D, DInit> &&other)
+    {
+        if (this != &other) {
+            eng_ = cxx11::move(other.eng_);
+            weyl_ = other.weyl_;
+        }
+
+        return *this;
+    }
+#endif
+
+    void seed (result_type s)
+    {
+        eng_.seed(s);
+        weyl_ = DInit;
+    }
+
+    template <typename SeedSeq>
+    void seed (SeedSeq &seq)
+    {
+        eng_.seed(seq);
+        weyl_ = DInit;
+    }
+
+    result_type operator() ()
+    {
+        weyl_ += D;
+
+        return eng_() + weyl_;
+    }
+
+    void discard (std::size_t nskip)
+    {
+        eng_.discard(nskip);
+        weyl_ += D * nskip;
+    }
+
+    static VSMC_CONSTEXPR const result_type _Min = 0;
+    static VSMC_CONSTEXPR const result_type _Max =
+        ~(static_cast<result_type>(0));
+
+    static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
+    static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
+
+    friend inline bool operator== (
+            const XorwowEngine<Eng, D, DInit> &eng1,
+            const XorwowEngine<Eng, D, DInit> &eng2)
+    {
+        return eng1.eng_ == eng2.eng_ && eng1.weyl_ == eng2.weyl_;
+    }
+
+    friend inline bool operator!= (
+            const XorwowEngine<Eng, D, DInit> &eng1,
+            const XorwowEngine<Eng, D, DInit> &eng2)
+    {return !(eng1 == eng2);}
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os,
+            const XorwowEngine<Eng, D, DInit> &eng)
+    {
+        os << eng.eng_ << ' ' << eng.weyl_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_istream<CharT, Traits> &operator>> (
+            std::basic_istream<CharT, Traits> &is,
+            XorwowEngine<Eng, D, DInit> &eng)
+    {
+        engine_type eng_tmp;
+        result_type weyl_tmp;
+        if (is >> eng_tmp >> std::ws >> weyl_tmp) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            eng.eng_ = cxx11::move(eng_tmp);
+#else
+            eng.eng_ = eng_tmp;
+#endif
+            eng.weyl_ = weyl_tmp;
+        }
+
+        return is;
+    }
+
+
+    private :
+
+    Eng eng_;
+    result_type weyl_;
 }; // class XorwowEngine
 
 /// \brief Xorshift RNG engine generating \f$2^32 - 1\f$ 32-bits integers
