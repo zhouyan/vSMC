@@ -468,71 +468,137 @@ class XorwowEngine
     result_type weyl_;
 }; // class XorwowEngine
 
-/// \brief Xorshift RNG engine generating \f$2^32 - 1\f$ 32-bits integers
+/// \brief Xorshift RNG engine generating \f$2^32-1\f$ 32-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint32_t, 1, 13, 17, 5, 0, 0, 0> Xorshift1x32;
 
-/// \brief Xorshift RNG engine generating \f$2^64 - 1\f$ 64-bits integers
+/// \brief Xorshift RNG engine generating \f$2^64-1\f$ 64-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint64_t, 1, 13, 7, 17, 0, 0, 0> Xorshift1x64;
 
-/// \brief Xorshift RNG engine generating \f$2^64 - 1\f$ 32-bits integers
+/// \brief Xorshift RNG engine generating \f$2^64-1\f$ 32-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint32_t, 2, 17, 14, 12, 19, 2, 1> Xorshift2x32;
 
-/// \brief Xorshift RNG engine generating \f$2^128 - 1\f$ 32-bits integers
+/// \brief Xorshift RNG engine generating \f$2^128-1\f$ 32-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint32_t, 4, 15, 14, 12, 17, 4, 3> Xorshift4x32;
 
-/// \brief Xorshift RNG engine generating \f$2^256 - 1\f$ 32-bits integers
+/// \brief Xorshift RNG engine generating \f$2^256-1\f$ 32-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint32_t, 8, 18, 13, 14, 15, 8, 3> Xorshift8x32;
 
-/// \brief Xorshift RNG engine generating \f$2^512 - 1\f$ 32-bits integers
+/// \brief Xorshift RNG engine generating \f$2^512-1\f$ 32-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint32_t, 16, 17, 15, 13, 14, 16, 1> Xorshift16x32;
 
-/// \brief Xorshift RNG engine generating \f$2^1024 - 1\f$ 32-bits integers
+/// \brief Xorshift RNG engine generating \f$2^1024-1\f$ 32-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint32_t, 32, 19, 11, 13, 16, 32, 15> Xorshift32x32;
 
-/// \brief Xorshift RNG engine generating \f$2^2048 - 1\f$ 32-bits integers
+/// \brief Xorshift RNG engine generating \f$2^2048-1\f$ 32-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint32_t, 64, 19, 12, 14, 15, 64, 59> Xorshift64x32;
 
-/// \brief Xorshift RNG engine generating \f$2^4096 - 1\f$ 32-bits integers
+/// \brief Xorshift RNG engine generating \f$2^4096-1\f$ 32-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint32_t, 128, 17, 12, 13, 15, 128, 95> Xorshift128x32;
 
-/// \brief Xorshift RNG engine generating \f$2^128 - 1\f$ 64-bits integers
+/// \brief Xorshift RNG engine generating \f$2^128-1\f$ 64-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint64_t, 2, 33, 31, 28, 29, 2, 1> Xorshift2x64;
 
-/// \brief Xorshift RNG engine generating \f$2^256 - 1\f$ 64-bits integers
+/// \brief Xorshift RNG engine generating \f$2^256-1\f$ 64-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint64_t, 4, 37, 27, 29, 33, 4, 3> Xorshift4x64;
 
-/// \brief Xorshift RNG engine generating \f$2^512 - 1\f$ 64-bits integers
+/// \brief Xorshift RNG engine generating \f$2^512-1\f$ 64-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint64_t, 8, 37, 26, 29, 34, 8, 1> Xorshift8x64;
 
-/// \brief Xorshift RNG engine generating \f$2^1024 - 1\f$ 64-bits integers
+/// \brief Xorshift RNG engine generating \f$2^1024-1\f$ 64-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint64_t, 16, 34, 29, 25, 31, 16, 7> Xorshift16x64;
 
-/// \brief Xorshift RNG engine generating \f$2^2048 - 1\f$ 64-bits integers
+/// \brief Xorshift RNG engine generating \f$2^2048-1\f$ 64-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint64_t, 32, 35, 27, 26, 37, 32, 1> Xorshift32x64;
 
-/// \brief Xorshift RNG engine generating \f$2^4096 - 1\f$ 64-bits integers
+/// \brief Xorshift RNG engine generating \f$2^4096-1\f$ 64-bits integers
 /// \ingroup RNG
 typedef XorshiftEngine<uint64_t, 64, 33, 26, 27, 29, 64, 53> Xorshift64x64;
 
-/// \brief THe default 32-bits Xorshift engine
+/// \brief THe default 32-bits Xorshift RNG engine
 typedef Xorshift128x32 Xorshift;
 
-/// \brief THe default 64-bits Xorshift engine
+/// \brief THe default 64-bits Xorshift RNG engine
 typedef Xorshift64x64  Xorshift_64;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^32-1\f$ 32-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift1x32> Xorwow1x32;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^64-1\f$ 64-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift1x64> Xorwow1x64;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^64-1\f$ 32-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift2x32> Xorwow2x32;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^128-1\f$ 32-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift4x32> Xorwow4x32;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^256-1\f$ 32-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift8x32> Xorwow8x32;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^512-1\f$ 32-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift16x32> Xorwow16x32;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^1024-1\f$ 32-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift32x32> Xorwow32x32;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^2048-1\f$ 32-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift64x32> Xorwow64x32;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^4096-1\f$ 32-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift128x32> Xorwow128x32;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^128-1\f$ 64-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift2x64> Xorwow2x64;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^256-1\f$ 64-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift4x64> Xorwow4x64;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^512-1\f$ 64-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift8x64> Xorwow8x64;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^1024-1\f$ 64-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift16x64> Xorwow16x64;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^2048-1\f$ 64-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift32x64> Xorwow32x64;
+
+/// \brief Xorwow RNG engine based on Xorshfit \f$2^4096-1\f$ 64-bits integers
+/// \ingroup RNG
+typedef XorwowEngine<Xorshift64x64> Xorwow64x64;
+
+/// \brief THe default 32-bits Xorwow RNG engine
+typedef Xorwow128x32 Xorwow;
+
+/// \brief THe default 64-bits Xorwow RNG engine
+typedef Xorwow64x64  Xorwow_64;
 
 } // namespace vsmc
 
