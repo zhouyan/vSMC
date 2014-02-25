@@ -257,10 +257,15 @@ class XorshiftEngine
                     &seed, Position<1>(), iter);
             state_[0] = s;
         }
+        discard(4 * K);
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq) {seq.generate(state_.data(), state_.data() + K);}
+    void seed (SeedSeq &seq)
+    {
+        seq.generate(state_.data(), state_.data() + K);
+        discard(4 * K);
+    }
 
     result_type operator() ()
     {
@@ -334,6 +339,13 @@ class XorshiftEngine
     internal::RngStorage<result_type, K, (sizeof(ResultType) * K <=
             traits::XorshiftEngineTrait<ResultType>::max_stack_alloc)> state_;
 }; // class XorshiftEngine
+
+template <typename Eng,
+         typename Eng::result_type D = 362437>
+         typename Eng::result_type DInit = 362437>
+class XorwowEngine
+{
+}; // class XorwowEngine
 
 /// \brief Xorshift RNG engine generating \f$2^32 - 1\f$ 32-bits integers
 /// \ingroup RNG

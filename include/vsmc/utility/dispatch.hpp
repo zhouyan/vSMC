@@ -810,7 +810,7 @@ class DispatchProgress
         uint64_t display_iter = iter <= total ? iter : total;
         unsigned num_equal = total == 0 ? num_equal_max_ :
             static_cast<unsigned>(
-                    static_cast<double>(num_equal_max_) * 
+                    static_cast<double>(num_equal_max_) *
                     static_cast<double>(display_iter) /
                     static_cast<double>(total));
         num_equal = num_equal <= num_equal_max_ ? num_equal : num_equal_max_;
