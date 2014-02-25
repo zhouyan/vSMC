@@ -116,5 +116,5 @@ in the `LICENSE` file distributed with the source.
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [libc++]: http://libcxx.llvm.org
 [libdispatch]: http://libdispatch.macosforge.org/
-[vSMCDoc]: http://zhouyan.github.io/vSMC/doc/html/
+[vSMCDoc]: http://zhouyan.github.io/vSMCDoc/doc/html/
 [Open64]: http://www.open64.net
