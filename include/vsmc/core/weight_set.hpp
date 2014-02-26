@@ -212,50 +212,62 @@ class WeightSet
     /// changing the (possible unnormalized) weights directly through an input
     /// iterator
     template <typename InputIter>
-    void set_weight (InputIter first)
+    InputIter set_weight (InputIter first)
     {
         double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
             wptr[i] = *first;
         post_set_weight();
+
+        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// changing the (possible unnormalized) weights directly through a random
     /// access iterator with (possible non-uniform) stride
     template <typename RandomIter>
-    void set_weight (RandomIter first, int stride)
+    RandomIter set_weight (RandomIter first, int stride)
     {
         double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             wptr[i] = *first;
         post_set_weight();
+
+        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// changing the (possible unnormalized) weights directly through a pointer
-    void set_weight (const double *first)
+    const double *set_weight (const double *first)
     {
         double *const wptr = &weight_[0];
         VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(
                 first - wptr, size_, WeightSet::set_weight);
         std::memcpy(wptr, first, sizeof(double) * size_);
         post_set_weight();
+
+        return first + size_;
     }
 
-    void set_weight (double *first)
-    {set_weight(static_cast<const double *>(first));}
+    double *set_weight (double *first)
+    {
+        set_weight(static_cast<const double *>(first));
+
+        return first + size_;
+    }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// multiply the normalized weight with (possible unnormalized) incremental
     /// weights through an input iterator
     template <typename InputIter>
-    void mul_weight (InputIter first)
+    InputIter mul_weight (InputIter first)
     {
         double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
             wptr[i] *= *first;
         post_set_weight();
+
+        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -263,63 +275,77 @@ class WeightSet
     /// weights through a random access iterator with (possible non-uniform)
     /// stride
     template <typename RandomIter>
-    void mul_weight (RandomIter first, int stride)
+    RandomIter mul_weight (RandomIter first, int stride)
     {
         double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             wptr[i] *= *first;
         post_set_weight();
+
+        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// changing the (possible unnormalized) logarithm weights directly through
     /// an input iterator
     template <typename InputIter>
-    void set_log_weight (InputIter first)
+    InputIter set_log_weight (InputIter first)
     {
         double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
             lwptr[i] = *first;
         post_set_log_weight();
+
+        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// changing the (possible unnormalized) logarithm weights directly through
     /// a random access iterator with (possible non-uniform) stride
     template <typename RandomIter>
-    void set_log_weight (RandomIter first, int stride)
+    RandomIter set_log_weight (RandomIter first, int stride)
     {
         double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             lwptr[i] = *first;
         post_set_log_weight();
+
+        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// changing the (possible unnormalized) logarithm weights directly through
     /// a pointer
-    void set_log_weight (const double *first)
+    const double *set_log_weight (const double *first)
     {
         double *const lwptr = &log_weight_[0];
         VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(
                 first - lwptr, size_, WeightSet::set_log_weight);
         std::memcpy(lwptr, first, sizeof(double) * size_);
         post_set_log_weight();
+
+        return first + size_;
     }
 
-    void set_log_weight (double *first)
-    {set_log_weight(static_cast<const double *>(first));}
+    double *set_log_weight (double *first)
+    {
+        set_log_weight(static_cast<const double *>(first));
+
+        return first + size_;
+    }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// adding to the unnormalized logarithm weights with (possible
     /// unormalized) logarithm incremental weights through an input iterator
     template <typename InputIter>
-    void add_log_weight (InputIter first)
+    InputIter add_log_weight (InputIter first)
     {
         double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
             lwptr[i] += *first;
         post_set_log_weight();
+
+        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -327,12 +353,14 @@ class WeightSet
     /// unormalized) logarithm incremental weights through a ranodm access
     /// iterator with (possible non-uniform) stride
     template <typename RandomIter>
-    void add_log_weight (RandomIter first, int stride)
+    RandomIter add_log_weight (RandomIter first, int stride)
     {
         double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             lwptr[i] += *first;
         post_set_log_weight();
+
+        return first;
     }
 
     /// \brief Draw a sample according to the weights
@@ -505,6 +533,89 @@ class WeightSet
         normalize_log_weight();
     }
 }; // class WeightSet
+
+/// \brief An empty weight set class
+/// \ingroup Core
+///
+/// \details
+/// This class provides all the interfaces of WeightSet, while they do nothing
+/// at all and the class cost no memory usage. This is primarily to be used in
+/// algorithms where weights are irrelevant. Any attempt of using member
+/// functions of this class will not result in compile time or runtime errors,
+/// but the results might not be what one will be expecting.
+class WeightSetEmpty
+{
+    public :
+
+    typedef std::size_t size_type;
+
+    explicit WeightSetEmpty (size_type) {}
+
+    size_type size () const {return 0;}
+
+    double ess () const {return 0;}
+
+    template <typename InputIter>
+    double ess (InputIter, bool) const {return 0;}
+
+    template <typename RandomIter>
+    double ess (RandomIter, int, bool) const {return 0;}
+
+    template <typename InputIter>
+    double cess (InputIter, bool) const {return 0;}
+
+    template <typename RandomIter>
+    double cess (RandomIter, int, bool) const {return 0;}
+
+    size_type resample_size () const {return 0;}
+
+    double *read_resample_weight (double *) const {return VSMC_NULLPTR;}
+
+    template <typename OutputIter>
+    OutputIter read_weight (OutputIter first) const {return first;}
+
+    template <typename RandomIter>
+    RandomIter read_weight (RandomIter first, int) const {return first;}
+
+    template <typename OutputIter>
+    OutputIter read_log_weight (OutputIter first) const {return first;}
+
+    template <typename RandomIter>
+    RandomIter read_log_weight (RandomIter first, int) const {return first;}
+
+    double weight (size_type) const {return 0;}
+
+    double log_weight (size_type) const {return 0;}
+
+    void set_equal_weight () {}
+
+    template <typename InputIter>
+    void set_weight (InputIter) {}
+
+    template <typename RandomIter>
+    void set_weight (RandomIter, int) {}
+
+    template <typename InputIter>
+    void mul_weight (InputIter) {}
+
+    template <typename RandomIter>
+    void mul_weight (RandomIter, int) {}
+
+    template <typename InputIter>
+    void set_log_weight (InputIter) {}
+
+    template <typename RandomIter>
+    void set_log_weight (RandomIter, int) {}
+
+    template <typename InputIter>
+    void add_log_weight (InputIter) {}
+
+    template <typename RandomIter>
+    void add_log_weight (RandomIter, int) {}
+
+    template <typename URNG>
+    size_type draw (URNG &) const {return 0;}
+}; // class WeightSetEmtpy
 
 } // namespace vsmc
 
