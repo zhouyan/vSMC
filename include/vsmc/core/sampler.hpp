@@ -34,15 +34,18 @@ class Sampler
         mcmc_type;
     typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
-    explicit Sampler (size_type N,
-            ResampleScheme scheme = Stratified,
-            double resample_threshold = resample_threshold_never()) :
+    explicit Sampler (size_type N) :
+        resample_threshold_(resample_threshold_never()),
+        particle_(N), iter_num_(0),
+        path_(typename Path<T>::eval_type()) {resample_scheme(Stratified);}
+
+    Sampler (size_type N, ResampleScheme scheme,
+            double resample_threshold = 0.5) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()) {resample_scheme(scheme);}
 
-    explicit Sampler (size_type N,
-            const resample_type &res_op,
-            double resample_threshold = resample_threshold_never()) :
+    Sampler (size_type N, const resample_type &res_op,
+            double resample_threshold = 0.5) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()) {resample_scheme(res_op);}
 
