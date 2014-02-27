@@ -7,10 +7,30 @@
 
 #include <vsmc/internal/compiler.hpp>
 
-/// \brief C++11 long long interge type
+/// \brief Disable vSMC static assertions (fatal error)
 /// \ingroup Config
-#ifndef VSMC_HAS_LONG_LONG
-#define VSMC_HAS_LONG_LONG 0
+#ifndef VSMC_NO_STATIC_ASSERT
+#define VSMC_NO_STATIC_ASSERT 0
+#endif
+
+/// \brief Disable vSMC runtime assertions (fatal error)
+/// \ingroup Config
+#ifndef VSMC_NO_RUNTIME_ASSERT
+#ifndef NDEBUG
+#define VSMC_NO_RUNTIME_ASSERT 0
+#else
+#define VSMC_NO_RUNTIME_ASSERT 1
+#endif
+#endif
+
+/// \brief Disable vSMC runtime warnings (nonfatal error)
+/// \ingroup Config
+#ifndef VSMC_NO_RUNTIME_WARNING
+#ifndef NDEBUG
+#define VSMC_NO_RUNTIME_WARNING 0
+#else
+#define VSMC_NO_RUNTIME_WARNING 1
+#endif
 #endif
 
 /// \brief Turn vSMC runtime assertions into exceptions

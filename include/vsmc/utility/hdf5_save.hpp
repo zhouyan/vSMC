@@ -122,7 +122,7 @@ template <>
 inline hid_t hdf5_datatype<unsigned long> ()
 {return H5Tcopy(H5T_NATIVE_ULONG);}
 
-#if VSMC_HAS_LONG_LONG
+#if VSMC_HAS_CXX11_LONG_LONG
 
 /// \brief HDF5 data type specialization for long long
 /// \ingroup HDFSave
@@ -136,7 +136,7 @@ template <>
 inline hid_t hdf5_datatype<unsigned long long> ()
 {return H5Tcopy(H5T_NATIVE_ULLONG);}
 
-#endif // VSMC_HAS_LONG_LONG
+#endif // VSMC_HAS_CXX11_LONG_LONG
 
 /// \brief HDF5 data type specialization for float
 /// \ingroup HDFSave
