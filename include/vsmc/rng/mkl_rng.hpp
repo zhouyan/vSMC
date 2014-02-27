@@ -599,8 +599,8 @@ class MKLEngine
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max =
-        ~(static_cast<result_type>(0));
+    static VSMC_CONSTEXPR const result_type _Max = static_cast<result_type>(
+            ~(static_cast<result_type>(0)));
 
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}

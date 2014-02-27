@@ -11,11 +11,11 @@
 #define VSMC_STATIC_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(engmax) \
     VSMC_STATIC_ASSERT(                                                      \
             ((static_cast<uint64_t>(engmax) ==                               \
-              static_cast<uint64_t>(~(static_cast<uint32_t>(0)))) ||         \
+              static_cast<uint64_t>(                                         \
+                  static_cast<uint32_t>(~(static_cast<uint32_t>(0))))) ||    \
              (static_cast<uint64_t>(engmax) ==                               \
-              (~(static_cast<uint64_t>(0))))),                               \
+              static_cast<uint64_t>(~(static_cast<uint64_t>(0))))),          \
             USE_UniformRealDistribution_WITH_A_RNG_ENGINE_HAVING_MAX_THAT_DOES_NOT_COVER_THE_FULL_RANGE)
-
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN \
     VSMC_RUNTIME_ASSERT(false,                                               \
@@ -35,11 +35,13 @@ namespace internal {
 template<uint64_t, uint64_t> struct FullRangeIntgerType;
 
 template<>
-struct FullRangeIntgerType<0, ~(static_cast<uint32_t>(0))>
+struct FullRangeIntgerType<0,
+    static_cast<uint64_t>(static_cast<uint32_t>(~(static_cast<uint32_t>(0))))>
 {typedef uint32_t type;};
 
 template<>
-struct FullRangeIntgerType<0, ~(static_cast<uint64_t>(0))>
+struct FullRangeIntgerType<0,
+    static_cast<uint64_t>(~(static_cast<uint64_t>(0)))>
 {typedef uint64_t type;};
 
 } // namespace vsmc::interal
@@ -213,10 +215,10 @@ class UniformRealDistribution
     result_type b_;
 
 #if !VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
-    static VSMC_CONSTEXPR const uint64_t uint32_t_max_ =
-        ~(static_cast<uint32_t>(0));
-    static VSMC_CONSTEXPR const uint64_t uint64_t_max_ =
-        ~(static_cast<uint64_t>(0));
+    static VSMC_CONSTEXPR const uint64_t uint32_t_max_ = static_cast<uint64_t>(
+            static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
+    static VSMC_CONSTEXPR const uint64_t uint64_t_max_ = static_cast<uint64_t>(
+            ~(static_cast<uint64_t>(0)));
 #endif
 
     static float u01(uint32_t i, Open, Open, u32, f24)

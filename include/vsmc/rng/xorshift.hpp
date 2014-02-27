@@ -88,19 +88,19 @@ struct XorshiftEngineTrait
 
 namespace internal {
 
-template <bool, typename ResultType, ResultType A>
+template <bool, typename ResultType, unsigned>
 struct XorshiftLeft
 {static ResultType get (ResultType x) {return x;}};
 
-template <typename ResultType, ResultType A>
+template <typename ResultType, unsigned A>
 struct XorshiftLeft<true, ResultType, A>
 {static ResultType get (ResultType x) {return x^(x<<A);}};
 
-template <bool, typename ResultType, ResultType A>
+template <bool, typename ResultType, unsigned>
 struct XorshiftRight
 {static ResultType get (ResultType x) {return x;}};
 
-template <typename ResultType, ResultType A>
+template <typename ResultType, unsigned A>
 struct XorshiftRight<true, ResultType, A>
 {static ResultType get (ResultType x) {return x^(x>>A);}};
 
@@ -137,8 +137,8 @@ struct XorshiftIndex<ResultType, K, R, S, false>
     std::size_t iter_;
 };
 
-template <typename ResultType, ResultType A, ResultType B, ResultType C,
-         ResultType, std::size_t, std::size_t, typename IndexType>
+template <typename ResultType, unsigned A, unsigned B, unsigned C, unsigned,
+    std::size_t, std::size_t, typename IndexType>
 inline ResultType xorshift (ResultType *state, IndexType &, Position<1>)
 {
     *state ^= (*state)<<A;
@@ -148,9 +148,8 @@ inline ResultType xorshift (ResultType *state, IndexType &, Position<1>)
     return *state;
 }
 
-template <typename ResultType, ResultType A, ResultType B, ResultType C,
-    ResultType D, std::size_t R, std::size_t S, typename IndexType,
-    std::size_t K>
+template <typename ResultType, unsigned A, unsigned B, unsigned C, unsigned D,
+    std::size_t R, std::size_t S, typename IndexType, std::size_t K>
 inline ResultType xorshift (ResultType *state, IndexType &index, Position<K>)
 {
     ResultType xr = state[index.r()];
@@ -183,8 +182,8 @@ inline ResultType xorshift (ResultType *state, IndexType &index, Position<K>)
 /// \tparam R Index of first xorshift (unused if `K = 1`)
 /// \tparam S Index of second xorshift (unused if `K = 1`)
 template <typename ResultType, std::size_t K,
-         ResultType A, ResultType B, ResultType C,
-         ResultType D, std::size_t R, std::size_t S>
+         unsigned A, unsigned B, unsigned C, unsigned D,
+         std::size_t R, std::size_t S>
 class XorshiftEngine
 {
     public :
@@ -279,8 +278,8 @@ class XorshiftEngine
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max =
-        ~(static_cast<result_type>(0));
+    static VSMC_CONSTEXPR const result_type _Max = static_cast<result_type>(
+            ~(static_cast<result_type>(0)));
 
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
@@ -414,8 +413,8 @@ class XorwowEngine
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max =
-        ~(static_cast<result_type>(0));
+    static VSMC_CONSTEXPR const result_type _Max = static_cast<result_type>(
+            ~(static_cast<result_type>(0)));
 
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
