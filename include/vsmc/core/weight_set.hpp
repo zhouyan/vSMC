@@ -553,19 +553,19 @@ class WeightSetEmpty
 
     size_type size () const {return 0;}
 
-    double ess () const {return 0;}
+    double ess () const {return max_ess();}
 
     template <typename InputIter>
-    double ess (InputIter, bool) const {return 0;}
+    double ess (InputIter, bool) const {return max_ess();}
 
     template <typename RandomIter>
-    double ess (RandomIter, int, bool) const {return 0;}
+    double ess (RandomIter, int, bool) const {return max_ess();}
 
     template <typename InputIter>
-    double cess (InputIter, bool) const {return 0;}
+    double cess (InputIter, bool) const {return max_ess();}
 
     template <typename RandomIter>
-    double cess (RandomIter, int, bool) const {return 0;}
+    double cess (RandomIter, int, bool) const {return max_ess();}
 
     size_type resample_size () const {return 0;}
 
@@ -583,7 +583,7 @@ class WeightSetEmpty
     template <typename RandomIter>
     RandomIter read_log_weight (RandomIter first, int) const {return first;}
 
-    double weight (size_type) const {return 0;}
+    double weight (size_type) const {return 1;}
 
     double log_weight (size_type) const {return 0;}
 
@@ -615,6 +615,10 @@ class WeightSetEmpty
 
     template <typename URNG>
     size_type draw (URNG &) const {return 0;}
+
+    private :
+
+    static double max_ess () {return std::numeric_limits<double>::max();}
 }; // class WeightSetEmtpy
 
 } // namespace vsmc

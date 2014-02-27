@@ -36,13 +36,13 @@ class Sampler
 
     explicit Sampler (size_type N,
             ResampleScheme scheme = Stratified,
-            double resample_threshold = 0) :
+            double resample_threshold = resample_threshold_never()) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()) {resample_scheme(scheme);}
 
     explicit Sampler (size_type N,
             const resample_type &res_op,
-            double resample_threshold = 0) :
+            double resample_threshold = resample_threshold_never()) :
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()) {resample_scheme(res_op);}
 
@@ -125,6 +125,16 @@ class Sampler
     /// \brief Set resampling threshold
     Sampler<T> &resample_threshold (double threshold)
     {resample_threshold_ = threshold; return *this;}
+
+    /// \brief Special value of resampling threshold that indicate no
+    /// resampling will be ever performed
+    static double resample_threshold_never ()
+    {return -std::numeric_limits<double>::infinity();}
+
+    /// \brief Special value of resampling threshold that indicate no
+    /// resampling will always be performed
+    static double resample_threshold_always ()
+    {return std::numeric_limits<double>::infinity();}
 
     /// \brief Get ESS of a given iteration, initialization count as iter 0
     double ess_history (std::size_t iter) const {return ess_history_[iter];}
