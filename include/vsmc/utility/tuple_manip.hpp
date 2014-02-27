@@ -40,8 +40,7 @@ struct TuplePopFront<std::tuple<T, Types...> >
 /// \brief Remove a type from the front of a std::tuple type
 /// \ingroup Tuple
 template <>
-struct TuplePopFront<std::tuple<> >
-{typedef std::tuple<> type;};
+struct TuplePopFront<std::tuple<> > {typedef std::tuple<> type;};
 
 /// \brief Remove a type from the back of a std::tuple type
 /// \ingroup Tuple
@@ -66,8 +65,7 @@ struct TuplePopBack<std::tuple<T> >
 /// \brief Remove a type from the back of a std::tuple type
 /// \ingroup Tuple
 template <>
-struct TuplePopBack<std::tuple<> >
-{typedef std::tuple<> type;};
+struct TuplePopBack<std::tuple<> > {typedef std::tuple<> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Tuple
@@ -84,14 +82,12 @@ struct TuplePopFrontN<std::tuple<T, Types...>, 0>
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Tuple
 template <std::size_t N>
-struct TuplePopFrontN<std::tuple<>, N>
-{typedef std::tuple<> type;};
+struct TuplePopFrontN<std::tuple<>, N> {typedef std::tuple<> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Tuple
 template <>
-struct TuplePopFrontN<std::tuple<>, 0>
-{typedef std::tuple<> type;};
+struct TuplePopFrontN<std::tuple<>, 0> {typedef std::tuple<> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Tuple
@@ -112,14 +108,12 @@ struct TuplePopBackN<std::tuple<T, Types...>, 0>
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Tuple
 template <std::size_t N>
-struct TuplePopBackN<std::tuple<>, N>
-{typedef std::tuple<> type;};
+struct TuplePopBackN<std::tuple<>, N> {typedef std::tuple<> type;};
 
 /// \brief Remove N types from the front of a std::tuple type
 /// \ingroup Tuple
 template <>
-struct TuplePopBackN<std::tuple<>, 0>
-{typedef std::tuple<> type;};
+struct TuplePopBackN<std::tuple<>, 0> {typedef std::tuple<> type;};
 
 /// \brief Merge two std::tuple types
 /// \ingroup Tuple
@@ -152,8 +146,7 @@ struct TupleMerge<std::tuple<T, Types...>, std::tuple<> >
 /// \brief Merge two std::tuple types
 /// \ingroup Tuple
 template <>
-struct TupleMerge<std::tuple<>, std::tuple<> >
-{typedef std::tuple<> type;};
+struct TupleMerge<std::tuple<>, std::tuple<> > {typedef std::tuple<> type;};
 
 /// \brief Concatenate multiple std::tuple types
 /// \ingroup Tuple
@@ -172,8 +165,31 @@ struct TupleCat<T1, T2, Types...>
 /// \brief Concatenate multiple std::tuple types
 /// \ingroup Tuple
 template <typename... Types>
-struct TupleCat<std::tuple<Types...> >
-{typedef std::tuple<Types...> type;};
+struct TupleCat<std::tuple<Types...> > {typedef std::tuple<Types...> type;};
+
+template <typename, template <typename> class> struct TupleSearch;
+
+/// \brief Search a std::tuple type and generate a new std::tuple type that
+/// contains types that satisfy the condition
+/// \ingroup Tuple
+template <typename T, typename... Types, template <typename> class Cond>
+struct TupleSearch<std::tuple<T, Types...>, Cond>
+{
+    private :
+
+    typedef typename TupleSearch<std::tuple<Types...>, Cond>::type tail_type;
+
+    public :
+
+    typedef typename cxx11::conditional<Cond<T>::value,
+            typename TuplePushFront<tail_type, T>::type, tail_type>::type type;
+};
+
+/// \brief Search a std::tuple type and generate a new std::tuple type that
+/// contains types that satisfy the condition
+/// \ingroup Tuple
+template <template <typename> class Cond>
+struct TupleSearch<std::tuple<>, Cond> {typedef std::tuple<> type;};
 
 } // namespace vsmc
 
