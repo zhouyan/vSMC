@@ -4,6 +4,10 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
 
+#if VSMC_HAS_CXX11LIB_MUTEX
+#include <mutex>
+#endif
+
 #if VSMC_USE_RANDOM123
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -16,10 +20,6 @@
 #pragma warning(pop)
 #endif // _MSC_VER
 #endif // VSMC_USE_RANDOM123
-
-#if VSMC_HAS_CXX11LIB_MUTEX
-#include <mutex>
-#endif
 
 namespace vsmc {
 

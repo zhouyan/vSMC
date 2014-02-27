@@ -9,6 +9,11 @@
 #include <iostream>
 #include <stdint.h>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4351)
+#endif
+
 namespace vsmc {
 
 namespace internal {
@@ -128,5 +133,9 @@ class RngStorage<ResultType, K, false>
 } // namespace vsmc::internal
 
 } // namespace vsmc
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // VSMC_RNG_COMMON_HPP

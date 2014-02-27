@@ -3,6 +3,11 @@
 
 #include <vsmc/rng/common.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4521)
+#endif
+
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R) \
     VSMC_STATIC_ASSERT((K != 0), USE_XorshiftEngine_WITH_ORDER_EUQAL_TO_ZERO)
 
@@ -600,5 +605,9 @@ typedef Xorwow128x32 Xorwow;
 typedef Xorwow64x64  Xorwow_64;
 
 } // namespace vsmc
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // VSMC_RNG_XORSHIFT_HPP

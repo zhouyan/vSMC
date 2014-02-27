@@ -4,6 +4,11 @@
 #include <vsmc/rng/seed.hpp>
 #include <mkl_vsl.h>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4521)
+#endif
+
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \
             (::vsmc::cxx11::is_same<FPType, float>::value ||                 \
@@ -1242,5 +1247,9 @@ struct RngShift<MKLEngine<BRNG, ResultType> >
 } // namespace vsmc::traits
 
 } // namespace vsmc
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // VSMC_RNG_MKL_RNG_HPP
