@@ -167,17 +167,17 @@ struct TupleCat<T1, T2, Types...>
 template <typename... Types>
 struct TupleCat<std::tuple<Types...> > {typedef std::tuple<Types...> type;};
 
-template <typename, template <typename> class> struct TupleSearch;
+template <typename, template <typename> class> struct TupleFind;
 
 /// \brief Search a std::tuple type and generate a new std::tuple type that
 /// contains types that satisfy the condition
 /// \ingroup Tuple
 template <typename T, typename... Types, template <typename> class Cond>
-struct TupleSearch<std::tuple<T, Types...>, Cond>
+struct TupleFind<std::tuple<T, Types...>, Cond>
 {
     private :
 
-    typedef typename TupleSearch<std::tuple<Types...>, Cond>::type tail_type;
+    typedef typename TupleFind<std::tuple<Types...>, Cond>::type tail_type;
 
     public :
 
@@ -189,7 +189,7 @@ struct TupleSearch<std::tuple<T, Types...>, Cond>
 /// contains types that satisfy the condition
 /// \ingroup Tuple
 template <template <typename> class Cond>
-struct TupleSearch<std::tuple<>, Cond> {typedef std::tuple<> type;};
+struct TupleFind<std::tuple<>, Cond> {typedef std::tuple<> type;};
 
 } // namespace vsmc
 
