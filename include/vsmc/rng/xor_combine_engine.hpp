@@ -3,6 +3,11 @@
 
 #include <vsmc/rng/common.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4521)
+#endif
+
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(ResultType) \
     VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<ResultType>::value),      \
             USE_XorCombineEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
@@ -40,22 +45,22 @@ class XorCombineEngine
         VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
     }
 
-    XorCombineEngine (const XorCombineEngine<Eng1, Eng2> &other) :
+    XorCombineEngine (const XorCombineEngine<Eng1, Eng2, S1, S2> &other) :
         eng1_(other.eng1_), eng2_(other.eng2_)
     {
         VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
         VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
     }
 
-    XorCombineEngine (XorCombineEngine<Eng1, Eng2> &other) :
+    XorCombineEngine (XorCombineEngine<Eng1, Eng2, S1, S2> &other) :
         eng1_(other.eng1_), eng2_(other.eng2_)
     {
         VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
         VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
     }
 
-    XorCombineEngine<Eng1, Eng2> &operator= (
-            const XorCombineEngine<Eng1, Eng2> &other)
+    XorCombineEngine<Eng1, Eng2, S1, S2> &operator= (
+            const XorCombineEngine<Eng1, Eng2, S1, S2> &other)
     {
         if (this != &other) {
             eng1_ = other.eng1_;
@@ -66,15 +71,15 @@ class XorCombineEngine
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    XorCombineEngine (XorCombineEngine<Eng1, Eng2> &&other) :
+    XorCombineEngine (XorCombineEngine<Eng1, Eng2, S1, S2> &&other) :
         eng1_(cxx11::move(other.eng1_)), eng2_(cxx11::move(other.eng2_))
     {
         VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
         VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
     }
 
-    XorCombineEngine<Eng1, Eng2> &operator= (
-            XorCombineEngine<Eng1, Eng2> &&other)
+    XorCombineEngine<Eng1, Eng2, S1, S2> &operator= (
+            XorCombineEngine<Eng1, Eng2, S1, S2> &&other)
     {
         if (this != &other) {
             eng1_ = cxx11::move(other.eng1_);
@@ -123,19 +128,19 @@ class XorCombineEngine
     }
 
     friend inline bool operator== (
-            const XorCombineEngine<Eng1, Eng2> &eng1,
-            const XorCombineEngine<Eng1, Eng2> &eng2)
+            const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
+            const XorCombineEngine<Eng1, Eng2, S1, S2> &eng2)
     {return (eng1.eng1_ == eng2.eng1_ && eng1.eng2_ == eng2.eng2_);}
 
     friend inline bool operator!= (
-            const XorCombineEngine<Eng1, Eng2> &eng1,
-            const XorCombineEngine<Eng1, Eng2> &eng2)
+            const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
+            const XorCombineEngine<Eng1, Eng2, S1, S2> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const XorCombineEngine<Eng1, Eng2> &eng)
+            const XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
     {
         os << eng.eng1_ << ' ' << eng.eng2_;
 
@@ -145,7 +150,7 @@ class XorCombineEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            XorCombineEngine<Eng1, Eng2> &eng)
+            XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
     {
         engine1_type eng1_tmp;
         engine2_type eng2_tmp;
@@ -169,5 +174,9 @@ class XorCombineEngine
 }; // class XorCombineEngine
 
 } // namespace vsmc
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // VSMC_RNG_COMBINE_HPP
