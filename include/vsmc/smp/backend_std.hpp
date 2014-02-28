@@ -9,46 +9,6 @@ namespace vsmc {
 
 VSMC_DEFINE_SMP_FORWARD(STD)
 
-/// \brief Particle::weight_set_type subtype using C++11 concurrency
-/// \ingroup STD
-class WeightSetSTD : public WeightSet
-{
-    public :
-
-    explicit WeightSetSTD (size_type N) : WeightSet(N) {}
-
-    protected :
-
-    void log_weight2weight ()
-    {
-        parallel_for(BlockedRange<size_type>(0, size()), tbb_op::exp<double>(
-                    log_weight_ptr(), weight_ptr()));
-    }
-
-    void weight2log_weight ()
-    {
-        parallel_for(BlockedRange<size_type>(0, size()), tbb_op::log<double>(
-                    weight_ptr(), log_weight_ptr()));
-    }
-}; // class WeightSetSTD
-
-/// \brief Calculating normalizing constant ratio using C++11 concurrency
-/// \ingroup STD
-class NormalizingConstantSTD : public NormalizingConstant
-{
-    public :
-
-    NormalizingConstantSTD (std::size_t N) : NormalizingConstant(N) {}
-
-    protected:
-
-    void vd_exp (std::size_t N, double *inc_weight) const
-    {
-        parallel_for(BlockedRange<std::size_t>(0, N),
-                tbb_op::exp<double>(inc_weight, inc_weight));
-    }
-}; // class NormalizingConstantSTD
-
 /// \brief Particle::value_type subtype using C++11 concurrency
 /// \ingroup STD
 template <typename BaseState>

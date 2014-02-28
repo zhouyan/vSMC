@@ -8,66 +8,6 @@ namespace vsmc {
 
 VSMC_DEFINE_SMP_FORWARD(OMP)
 
-/// \brief Particle::weight_set_type subtype using OpenMP
-/// \ingroup OMP
-class WeightSetOMP : public WeightSet
-{
-    public :
-
-    typedef traits::OMPSizeTypeTrait<WeightSet::size_type>::type size_type;
-
-    explicit WeightSetOMP (size_type N) : WeightSet(N) {}
-
-    protected :
-
-    void log_weight2weight ()
-    {
-        using std::exp;
-
-        const size_type N = static_cast<size_type>(size());
-        double *weight = weight_ptr();
-        const double *log_weight = log_weight_ptr();
-#pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i)
-            weight[i] = exp(log_weight[i]);
-    }
-
-    void weight2log_weight ()
-    {
-        using std::log;
-
-        const size_type N = static_cast<size_type>(size());
-        const double *weight = weight_ptr();
-        double *log_weight = log_weight_ptr();
-#pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i)
-            log_weight[i] = log(weight[i]);
-    }
-}; // class WeightSetOMP
-
-/// \brief Calculating normalizing constant ratio using OpenMP
-/// \ingroup OMP
-class NormalizingConstantOMP : public NormalizingConstant
-{
-    typedef traits::OMPSizeTypeTrait<std::size_t>::type size_type;
-
-    public :
-
-    NormalizingConstantOMP (std::size_t N) : NormalizingConstant(N) {}
-
-    protected:
-
-    void vd_exp (std::size_t N, double *inc_weight) const
-    {
-        using std::exp;
-
-        size_type NN = static_cast<size_type>(N);
-#pragma omp parallel for default(shared)
-        for (size_type i = 0; i < NN; ++i)
-            inc_weight[i] = exp(inc_weight[i]);
-    }
-}; // class NormalizingConstantOMP
-
 /// \brief Particle::value_type subtype using OpenMP
 /// \ingroup OMP
 template <typename BaseState>

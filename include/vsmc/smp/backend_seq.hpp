@@ -7,58 +7,6 @@ namespace vsmc {
 
 VSMC_DEFINE_SMP_FORWARD(SEQ)
 
-/// \brief Particle::weight_set_type subtype
-/// \ingroup SEQ
-class WeightSetSEQ : public WeightSet
-{
-    public :
-
-    explicit WeightSetSEQ (size_type N) : WeightSet(N) {}
-
-    protected :
-
-    void log_weight2weight ()
-    {
-        using std::exp;
-
-        const size_type N = size();
-        double *const weight = weight_ptr();
-        const double *const log_weight = log_weight_ptr();
-        for (size_type i = 0; i != N; ++i)
-            weight[i] = exp(log_weight[i]);
-    }
-
-    void weight2log_weight ()
-    {
-        using std::log;
-
-        const size_type N = size();
-        const double *const weight = weight_ptr();
-        double *const log_weight = log_weight_ptr();
-        for (size_type i = 0; i != N; ++i)
-            log_weight[i] = log(weight[i]);
-    }
-}; // class WeightSetSEQ
-
-/// \brief Calculating normalizing constant ratio
-/// \ingroup SEQ
-class NormalizingConstantSEQ : public NormalizingConstant
-{
-    public :
-
-    NormalizingConstantSEQ (std::size_t N) : NormalizingConstant(N) {}
-
-    protected:
-
-    void vd_exp (std::size_t N, double *inc_weight) const
-    {
-        using std::exp;
-
-        for (std::size_t i = 0; i != N; ++i)
-            inc_weight[i] = exp(inc_weight[i]);
-    }
-}; // class NormalizingConstantSEQ
-
 /// \brief Particle::value_type subtype
 /// \ingroup Sequential
 template <typename BaseState>

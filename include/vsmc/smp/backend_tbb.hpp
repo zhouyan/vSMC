@@ -9,48 +9,6 @@ namespace vsmc {
 
 VSMC_DEFINE_SMP_FORWARD(TBB)
 
-/// \brief Particle::weight_set_type subtype using Intel Threading Building
-/// Blocks
-/// \ingroup TBB
-class WeightSetTBB : public WeightSet
-{
-    public :
-
-    explicit WeightSetTBB (size_type N) : WeightSet(N) {}
-
-    protected :
-
-    void log_weight2weight ()
-    {
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, size()),
-                tbb_op::exp<double>(log_weight_ptr(), weight_ptr()));
-    }
-
-    void weight2log_weight ()
-    {
-        tbb::parallel_for(tbb::blocked_range<size_type>(0, size()),
-                tbb_op::log<double>(weight_ptr(), log_weight_ptr()));
-    }
-}; // class WeightSetTBB
-
-/// \brief Calculating normalizing constant ratio using Intel Threading
-/// Building Blocks
-/// \ingroup TBB
-class NormalizingConstantTBB : public NormalizingConstant
-{
-    public :
-
-    NormalizingConstantTBB (std::size_t N) : NormalizingConstant(N) {}
-
-    protected:
-
-    void vd_exp (std::size_t N, double *inc_weight) const
-    {
-        tbb::parallel_for(tbb::blocked_range<std::size_t>(0, N),
-                tbb_op::exp<double>(inc_weight, inc_weight));
-    }
-}; // class NormalizingConstantTBB
-
 /// \brief Particle::value_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename BaseState>
