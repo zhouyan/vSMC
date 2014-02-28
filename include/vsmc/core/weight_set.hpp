@@ -618,7 +618,8 @@ class WeightSetEmpty
 
     private :
 
-    static double max_ess () {return std::numeric_limits<double>::max();}
+    static double max_ess ()
+    {return std::numeric_limits<double>::max VSMC_MNE();}
 }; // class WeightSetEmtpy
 
 } // namespace vsmc
