@@ -507,9 +507,9 @@ class Sampler
     ///
     /// \param os The ostream to which the contents are printed
     /// \param sampler_id The ID of the sampler
-    template<typename OutputStream>
-    OutputStream &print (OutputStream &os = std::cout,
-            std::size_t sampler_id = 0) const
+    template<typename CharT, typename Traits>
+    void print (std::size_t sampler_id,
+            std::basic_ostream<CharT, Traits> &os) const
     {
         std::size_t var_num = summary_header_size();
         std::size_t dat_num = var_num * iter_size();
@@ -533,9 +533,10 @@ class Sampler
                 os << ' ' << data[data_offset++];
             os << '\n';
         }
-
-        return os;
     }
+
+    void print (std::size_t sampler_id = 0) const
+    {print(sampler_id, std::cout);}
 
     private :
 
@@ -721,9 +722,10 @@ class Sampler
 
 /// \brief Print the Sampler
 /// \ingroup Core
-template<typename OutputStream, typename T>
-inline OutputStream &operator<< (OutputStream &os, const Sampler<T> &sampler)
-{return sampler.print(os);}
+template<typename T, typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
+{sampler.print(0, os); return os;}
 
 } // namespace vsmc
 

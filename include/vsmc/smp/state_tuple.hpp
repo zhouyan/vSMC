@@ -171,8 +171,9 @@ class StateTupleBase
     OutputIter read_state (OutputIter first) const
     {return read_state(Position<Pos>(), first);}
 
-    template <typename OutputStream>
-    OutputStream &print (OutputStream &os, std::size_t iter = 0,
+    template <typename CharT, typename Traits>
+    std::basic_ostream<CharT, Traits> &print (
+            std::basic_ostream<CharT, Traits> &os, std::size_t iter = 0,
             char sepchar = ' ', char eolchar = '\n') const
     {
         for (size_type i = 0; i != size_; ++i) {
@@ -235,8 +236,8 @@ class StateTupleBase
 
     void copy_particle (size_type, size_type, Position<dim_>) {}
 
-    template <typename OutputStream, std::size_t Pos>
-    void print_particle (OutputStream &os, size_type id,
+    template <std::size_t Pos, typename CharT, typename Traits>
+    void print_particle (std::basic_ostream<CharT, Traits> &os, size_type id,
             char sepchar, char eolchar, Position<Pos>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
@@ -245,9 +246,9 @@ class StateTupleBase
         print_particle(os, id, sepchar, eolchar, Position<Pos + 1>());
     }
 
-    template <typename OutputStream>
-    void print_particle (OutputStream &os, size_type id, char, char eolchar,
-            Position<dim_ - 1>) const
+    template <typename CharT, typename Traits>
+    void print_particle (std::basic_ostream<CharT, Traits> &os, size_type id,
+            char, char eolchar, Position<dim_ - 1>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);

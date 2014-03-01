@@ -209,8 +209,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         return first;
     }
 
-    template <typename OutputStream>
-    OutputStream &print (OutputStream &os, std::size_t iter = 0,
+    template <typename CharT, typename Traits>
+    std::basic_ostream<CharT, Traits> &print (
+            std::basic_ostream<CharT, Traits> &os, std::size_t iter = 0,
             char sepchar = ' ', char eolchar = '\n') const
     {
         const StateMatrix<Order, Dim, T> *sptr =

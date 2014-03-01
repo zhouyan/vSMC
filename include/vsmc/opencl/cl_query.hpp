@@ -270,10 +270,10 @@ class CLQuery
         }
     }
 
-    template<typename T, typename CLInfoType, typename CharT, typename Traits,
-        typename CLObj, typename InfoType>
+    template<typename T, typename CLInfoType,
+        typename ObjType, typename InfoType, typename CharT, typename Traits>
     static void print_info_val (std::basic_ostream<CharT, Traits> &os,
-            const CLObj &obj, InfoType info,
+            const ObjType &obj, InfoType info,
             const std::string &name, const std::string &unit = "")
     {
         T val;
@@ -302,7 +302,7 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const std::string &name)
     {os << std::setw(40) << std::left << name << ' ';}
 
-    template <typename CharT, typename Traits, typename T>
+    template <typename T, typename CharT, typename Traits>
     static void print_val (std::basic_ostream<CharT, Traits> &os, const T &val)
     {os << val;}
 
@@ -348,7 +348,7 @@ class CLQuery
         os << std::setw(41) << ' ' << val_vec.back();
     }
 
-    template<typename CharT, typename Traits, typename T>
+    template<typename T, typename CharT, typename Traits>
     static void print_val (std::basic_ostream<CharT, Traits> &os,
             const std::vector<T> &val)
     {

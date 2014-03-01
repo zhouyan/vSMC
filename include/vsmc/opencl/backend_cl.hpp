@@ -260,8 +260,9 @@ class StateCL
     /// ~~~
     /// After build, `vsmc::Seed::instance().skip(N)` is called with `N`
     /// being the nubmer of particles.
-    void build (const std::string &source,
-            const std::string &flags = std::string())
+    template <typename CharT, typename Traits>
+    void build (const std::string &source, const std::string &flags,
+            std::basic_ostream<CharT, Traits> &os)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(fp_type);
 
@@ -292,13 +293,17 @@ class StateCL
                     CL_PROGRAM_BUILD_OPTIONS, &build_options_);
             build_ = true;
         } catch (...) {
-            manager().print_build_log(program_, std::cout);
+            manager().print_build_log(program_, os);
             throw;
         }
 
         kernel_copy_ = create_kernel("copy");
         configure_copy_.local_size(size_, kernel_copy_, manager().device());
     }
+
+    void build (const std::string &source,
+            const std::string &flags = std::string())
+    {build(source, flags, std::cout);}
 
     /// \brief Whether the last attempted building success
     bool build () const {return build_;}
