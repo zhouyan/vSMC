@@ -115,7 +115,7 @@
 
 /// \defgroup Tuple Tuple manipulation
 /// \ingroup Utility
-/// \brief Classes for manipulating C++11 tuple
+/// \brief Classes for manipulating and using C++11 tuple like type lists
 
 #ifndef VSMC_HPP
 #define VSMC_HPP
