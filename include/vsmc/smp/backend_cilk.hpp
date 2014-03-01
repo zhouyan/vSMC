@@ -10,58 +10,6 @@ namespace vsmc {
 
 VSMC_DEFINE_SMP_FORWARD(CILK)
 
-/// \brief Particle::weight_set_type subtype using Intel Cilk Plus
-/// \ingroup CILK
-class WeightSetCILK : public WeightSet
-{
-    public :
-
-    explicit WeightSetCILK (size_type N) : WeightSet(N) {}
-
-    protected :
-
-    void log_weight2weight () {vd_exp(size(), log_weight_ptr(), weight_ptr());}
-
-    void weight2log_weight () {vd_log(size(), weight_ptr(), log_weight_ptr());}
-
-    private :
-
-    void vd_exp (size_type N, const double *x, double *y)
-    {
-        using std::exp;
-
-        cilk_for (size_type i = 0; i != N; ++i)
-            y[i] = exp(x[i]);
-    }
-
-    void vd_log (size_type N, const double *x, double *y)
-    {
-        using std::log;
-
-        cilk_for (size_type i = 0; i != N; ++i)
-            y[i] = log(x[i]);
-    }
-}; // class WeightSetCILK
-
-/// \brief Calculating normalizing constant ratio using Intel Cilk Plus
-/// \ingroup CILK
-class NormalizingConstantCILK : public NormalizingConstant
-{
-    public :
-
-    NormalizingConstantCILK (std::size_t N) : NormalizingConstant(N) {}
-
-    protected:
-
-    void vd_exp (std::size_t N, double *inc_weight) const
-    {
-        using std::exp;
-
-        cilk_for (std::size_t i = 0; i != N; ++i)
-            inc_weight[i] = exp(inc_weight[i]);
-    }
-}; // class NormalizingConstantCILK
-
 /// \brief Particle::value_type subtype using Intel Cilk Plus
 /// \ingroup CILK
 template <typename BaseState>
