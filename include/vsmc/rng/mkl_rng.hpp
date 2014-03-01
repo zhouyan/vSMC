@@ -136,7 +136,11 @@ inline std::string mkl_rng_error_str (int status)
     }
 }
 
-#ifndef NDEBUG
+#if VSMC_NO_RUNTIME_ASSERT
+/// \brief Check MKL RNG error status
+/// \ingroup MKLRNG
+inline void mkl_rng_error_check (MKL_INT, int, const char *, const char *) {}
+#else
 /// \brief Check MKL RNG error status
 /// \ingroup MKLRNG
 inline void mkl_rng_error_check (MKL_INT BRNG, int status,
@@ -158,8 +162,6 @@ inline void mkl_rng_error_check (MKL_INT BRNG, int status,
 
     VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
 } // error_check
-#else
-inline void mkl_rng_error_check (MKL_INT, int, const char *, const char *) {}
 #endif
 
 namespace traits {

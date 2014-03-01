@@ -186,14 +186,21 @@
 
 namespace vsmc {
 
+#if VSMC_NO_RUNTIME_WARNING
+/// \brief Program option error messages
+/// \ingroup Option
+inline void program_option_error (const std::string &,
+        const std::string &) {}
+#else
 /// \brief Program option error messages
 /// \ingroup Option
 inline void program_option_error (const std::string &oname,
         const std::string &msg)
 {
-    std::fprintf(stderr, "vSMC Program option error: option %s: %s\n",
-            oname.c_str(), msg.c_str());
+    const std::string warning = "Program option: " + oname + " : " + msg;
+    VSMC_RUNTIME_WARNING(false, warning.c_str());
 }
+#endif
 
 /// \brief Program option base class
 /// \ingroup Option

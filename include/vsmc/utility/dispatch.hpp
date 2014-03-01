@@ -932,14 +932,12 @@ class DispatchProgress
     {
         print_progress(context);
         std::fprintf(stderr, "\r");
-        std::fflush(stderr);
     }
 
     static void print_stop_ (void *context)
     {
         print_progress(context);
         std::fprintf(stderr, "\n");
-        std::fflush(stderr);
     }
 }; // class DispatchProgress
 
