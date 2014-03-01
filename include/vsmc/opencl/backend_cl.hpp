@@ -230,6 +230,7 @@ class StateCL
     ///
     /// \param source The source of the program
     /// \param flags The OpenCL compiler flags, e.g., `-I`
+    /// \param os The output stream to write the output
     ///
     /// \details
     /// Note that a few macros and headers are included before the user

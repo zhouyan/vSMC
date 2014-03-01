@@ -505,8 +505,8 @@ class Sampler
 
     /// \brief Print the history of the Sampler
     ///
-    /// \param os The ostream to which the contents are printed
     /// \param sampler_id The ID of the sampler
+    /// \param os The ostream to which the contents are printed
     template<typename CharT, typename Traits>
     void print (std::size_t sampler_id,
             std::basic_ostream<CharT, Traits> &os) const
