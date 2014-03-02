@@ -22,10 +22,10 @@ FILE (READ ${PROJECT_SOURCE_DIR}/README.md README)
 SET (DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
 SET (DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
 CONFIGURE_FILE (
-    ${PROJECT_SOURCE_DIR}/Doxyfile.in
+    ${PROJECT_SOURCE_DIR}/config/Doxyfile.in
     ${PROJECT_BINARY_DIR}/Doxyfile)
 CONFIGURE_FILE (
-    ${PROJECT_SOURCE_DIR}/doc/main.md.in
+    ${PROJECT_SOURCE_DIR}/config/main.md.in
     ${PROJECT_SOURCE_DIR}/doc/main.md)
 
 # Generate headers
