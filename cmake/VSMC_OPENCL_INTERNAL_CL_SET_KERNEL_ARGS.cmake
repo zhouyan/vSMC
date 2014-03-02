@@ -34,6 +34,7 @@ WHILE (ARG_MAX LESS VSMC_OPENCL_CL_SET_KERNEL_ARGS_MAX)
     MATH (EXPR ARG_MAX "${ARG_MAX} + 1")
 ENDWHILE (ARG_MAX LESS VSMC_OPENCL_CL_SET_KERNEL_ARGS_MAX)
 
-FILE (WRITE
-    ${PROJECT_SOURCE_DIR}/include/vsmc/opencl/internal/cl_set_kernel_args.hpp
-    ${FUNC})
+SET (VSMC_OPENCL_CL_SET_KERNEL_ARGS ${FUNC})
+CONFIGURE_FILE (
+    ${PROJECT_SOURCE_DIR}/config/vsmc_opencl_internal_cl_set_kernel_args.hpp
+    ${PROJECT_SOURCE_DIR}/include/vsmc/opencl/internal/cl_set_kernel_args.hpp)

@@ -486,3 +486,4 @@ inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
     kern.setArg(offset + 15, arg15);
 }
 
+
