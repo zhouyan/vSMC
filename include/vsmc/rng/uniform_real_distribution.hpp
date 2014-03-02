@@ -4,13 +4,13 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/u01.h>
 
-#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN \
-    VSMC_RUNTIME_ASSERT(false,                                               \
+#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min) \
+    VSMC_RUNTIME_ASSERT((eng_min == 0),                                      \
             ("**UniformRealDistribution::operator()** "                      \
              "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN ZERO"))
 
-#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX \
-    VSMC_RUNTIME_ASSERT(false,                                               \
+#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(eng_max) \
+    VSMC_RUNTIME_ASSERT((eng_max == uint32_t_max_ || eng_max == uint64_t_max_),\
             ("**UniformRealDistribution::operator()** "                      \
              "ENGINE MEMBER FUNCTION max() RETURN A VALUE OTHER THAN "       \
              "THE MAXIMUM OF uint32_t OR uint64_t"))
@@ -145,6 +145,12 @@ class UniformRealDistribution
     result_type min VSMC_MNE () const {return a_;}
     result_type max VSMC_MNE () const {return b_;}
 
+    /// \brief Generate uniform random variates
+    ///
+    /// \tparam Eng Requirement:
+    /// - `Eng::min() == 0` and
+    /// - `Eng::max() == std::numeric_limits<uint32_t>::max()` or
+    /// - `Eng::max() == std::numeric_limits<uint64_t>::max()`
     template <typename Eng>
     result_type operator() (Eng &eng) const
     {
@@ -160,19 +166,12 @@ class UniformRealDistribution
         result_type u = u01(static_cast<eng_uint_t>(eng()), Left(), Right(),
                 u_bits(), fp_bits());
 #else // VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
-        static VSMC_CONSTEXPR const uint64_t eng_min = static_cast<uint64_t>(
-                eng.min VSMC_MNE ());
-        if (eng_min != 0) {
-            VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN;
-            return 0;
-        }
-
-        static VSMC_CONSTEXPR const uint64_t eng_max = static_cast<uint64_t>(
+        static const uint64_t eng_max = static_cast<uint64_t>(
                 eng.max VSMC_MNE ());
-        if (eng_max != uint32_t_max_ && eng_max != uint64_t_max_) {
-            VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX;
-            return 0;
-        }
+
+        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(
+                (eng.min VSMC_MNE ()));
+        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(eng_max);
 
         result_type u = 0;
         switch (eng_max) {
