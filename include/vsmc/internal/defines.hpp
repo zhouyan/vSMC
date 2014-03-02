@@ -10,12 +10,12 @@
 /// \ingroup Definitions
 ///
 /// \details
-/// This macro is defined to `virtual` if compiled in debug mode, otherwise
-/// (`-DNDEBUG`) it is empty.
-#if !defined(NDEBUG) || VSMC_RUNTIME_ASSERT_AS_EXCEPTION
-#define VSMC_CRTP_DESTRUCTOR_PREFIX virtual
-#else
+/// This macro is defined to `virtual` if compiled in when
+/// `VSMC_NO_RUNTIME_ASSERT` is disabled; otherwise it is empty.
+#if VSMC_NO_RUNTIME_ASSERT
 #define VSMC_CRTP_DESTRUCTOR_PREFIX
+#else
+#define VSMC_CRTP_DESTRUCTOR_PREFIX virtual
 #endif
 
 /// \brief constexpr
