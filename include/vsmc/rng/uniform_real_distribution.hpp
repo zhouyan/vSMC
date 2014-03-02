@@ -148,9 +148,12 @@ class UniformRealDistribution
     /// \brief Generate uniform random variates
     ///
     /// \tparam Eng Requirement:
-    /// - `Eng::min() == 0` and
-    /// - `Eng::max() == std::numeric_limits<uint32_t>::max()` or
-    /// - `Eng::max() == std::numeric_limits<uint64_t>::max()`
+    /// ~~~{.cpp}
+    /// Eng::min() == 0 && (
+    /// Eng::max() == std::numeric_limits<uint32_t>::max() ||
+    /// Eng::max() == std::numeric_limits<uint64_t>::max()
+    /// )
+    /// ~~~
     template <typename Eng>
     result_type operator() (Eng &eng) const
     {
