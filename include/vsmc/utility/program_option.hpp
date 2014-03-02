@@ -186,22 +186,18 @@
 
 namespace vsmc {
 
-#if VSMC_NO_RUNTIME_WARNING
-/// \brief Program option error messages
+/// \brief Program option warning messages
 /// \ingroup Option
-inline void program_option_error (const std::string &,
-        const std::string &, std::ostream &) {}
-#else
-/// \brief Program option error messages
-/// \ingroup Option
-inline void program_option_error (const std::string &oname,
-        const std::string &msg, std::ostream &os)
+inline void program_option_warning (const std::string &oname,
+        const std::string &msg, bool silent, std::ostream &os)
 {
-    os << "vSMC Program Option Error\n";
+    if (silent)
+        return;
+
+    os << "vSMC Program Option Warning\n";
     os << "Option: " << oname << '\n';
-    os << "Error : " << msg << std::endl;
+    os << "Message : " << msg << std::endl;
 }
-#endif
 
 /// \brief Program option base class
 /// \ingroup Option
@@ -277,8 +273,8 @@ class ProgramOption
             return true;
         }
 
-        if (!silent)
-            program_option_error(oname, "Failed to set value: " + sval, os);
+        program_option_warning(oname, "Failed to set value: " + sval,
+                silent, os);
         return false;
     }
 
@@ -291,10 +287,8 @@ class ProgramOption
         T tval;
         ss >> tval;
         if (ss.fail()) {
-            if (!silent) {
-                program_option_error(oname,
-                        "Failed to set value: " + sval, os);
-            }
+            program_option_warning(oname, "Failed to set value: " + sval,
+                    silent, os);
             ss.clear();
             return false;
         }
@@ -679,7 +673,8 @@ class ProgramOptionMap
     /// \param argc The first argument of the `main` function
     /// \param argv The second argument of the `main` function
     /// \param os The output stream used to print help information if
-    /// `auto_help` is set to true
+    /// `auto_help` is set to true, and the warning messages if any error
+    /// occurs when processing the options.
     void process (int argc, const char **argv, std::ostream &os = std::cout)
     {
         std::string arg;
@@ -716,8 +711,7 @@ class ProgramOptionMap
         }
     }
 
-    /// \brief Count the number of occurence of an option on the command line
-    /// given its name
+    /// \brief Count the number of successful processing of an option
     std::size_t count (const std::string &name) const
     {
         option_map_type::const_iterator iter = option_map_.find("--" + name);
@@ -747,8 +741,8 @@ class ProgramOptionMap
             return VSMC_NULLPTR;
     }
 
-    /// \brief Set the silent flag, if true, no error messages will be printed
-    /// for unknown options etc.,
+    /// \brief Set the silent flag, if true, no warning messages will be
+    /// printed for unknown options etc.,
     void silent (bool flag) {silent_ = flag;}
 
     /// \brief Set the auto_help flag, if true, help information is printed
@@ -816,8 +810,8 @@ class ProgramOptionMap
                 iter != option_vector.end(); ++iter) {
             option_map_type::iterator miter = option_map_.find(iter->first);
             if (miter == option_map_.end()) {
-                if (!silent_)
-                    program_option_error(iter->first, "Unknown option", os);
+                program_option_warning(iter->first, "Unknown option",
+                        silent_, os);
                 continue;
             }
 
@@ -826,8 +820,8 @@ class ProgramOptionMap
             if (vsize == 0 && miter->second.first->is_bool()) {
                 proc = process_option(miter, sval_true, os);
             } else if (vsize == 0) {
-                if (!silent_)
-                    program_option_error(miter->first, "Value not found", os);
+                program_option_warning(miter->first, "Value not found",
+                        silent_, os);
             } else if (!miter->second.first->is_vector()) {
                 option_value.clear();
                 for (std::size_t i = 0; i != vsize - 1; ++i)
@@ -867,8 +861,7 @@ class ProgramOptionMap
             const std::string &sval, std::ostream &os)
     {
         if (sval.empty()) {
-            if (!silent_)
-                program_option_error(iter->first, "No value found", os);
+            program_option_warning(iter->first, "No value found", silent_, os);
             return false;
         }
 
