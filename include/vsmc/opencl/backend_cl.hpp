@@ -408,7 +408,7 @@ class InitializeCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static const std::size_t kernel_args_offset = 2;
+    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 2;}
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
@@ -523,7 +523,7 @@ class MoveCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static const std::size_t kernel_args_offset = 3;
+    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 3;}
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
@@ -638,7 +638,7 @@ class MonitorEvalCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static const std::size_t kernel_args_offset = 4;
+    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 4;}
 
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
@@ -751,7 +751,7 @@ class PathEvalCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static const std::size_t kernel_args_offset = 3;
+    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 3;}
 
     double operator() (std::size_t iter, const Particle<T> &particle,
         double *res)
