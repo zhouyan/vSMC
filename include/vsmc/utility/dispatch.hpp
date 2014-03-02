@@ -653,19 +653,20 @@ class DispatchProgress
     public :
 
     /// \brief Construct a DispatchProgress with total amount of work
-    DispatchProgress () :
+    DispatchProgress (std::ostream &os = std::cout) :
         queue_("vsmc::DispatchProgress::queue_"), timer_(0, 0, queue_),
         total_(0), iter_(0), print_first_(true),
         num_equal_(0), percent_(0), elapsed_second_(0), last_iter_(0),
         display_progress_(), display_percent_(), display_time_(),
-        display_iter_() {}
+        display_iter_(), os_(os) {}
 
-    explicit DispatchProgress (const DispatchQueue<DispatchPrivate> &queue) :
+    explicit DispatchProgress (const DispatchQueue<DispatchPrivate> &queue,
+            std::ostream &os = std::cout) :
         queue_(queue), timer_(0, 0, queue_),
         total_(0), iter_(0), print_first_(true),
         num_equal_(0), percent_(0), elapsed_second_(0), last_iter_(0),
         display_progress_(), display_percent_(), display_time_(),
-        display_iter_() {}
+        display_iter_(), os_(os) {}
 
     /// \brief Start to print the progress
     ///
@@ -758,6 +759,8 @@ class DispatchProgress
     char display_time_[32];
     char display_iter_[64];
 
+    std::ostream &os_;
+
     static VSMC_CONSTEXPR const unsigned num_equal_max_ = 60;
     static VSMC_CONSTEXPR const unsigned num_dash_max_ = 1;
     static VSMC_CONSTEXPR const unsigned percent_max_ = 100;
@@ -842,6 +845,7 @@ class DispatchProgress
 
             char *cstr = timer_ptr->display_progress_;
             std::size_t offset = 0;
+            cstr[offset++] = ' ';
             cstr[offset++] = '[';
             for (unsigned i = 0; i != num_equal; ++i)
                 cstr[offset++] = '=';
@@ -908,11 +912,10 @@ class DispatchProgress
             cstr[offset++] = '\0';
         }
 
-        std::fprintf(stderr, " ");
-        std::fprintf(stderr, "%s", timer_ptr->display_progress_);
-        std::fprintf(stderr, "%s", timer_ptr->display_percent_);
-        std::fprintf(stderr, "%s", timer_ptr->display_time_);
-        std::fprintf(stderr, "%s", timer_ptr->display_iter_);
+        timer_ptr->os_ << timer_ptr->display_progress_;
+        timer_ptr->os_ << timer_ptr->display_percent_;
+        timer_ptr->os_ << timer_ptr->display_time_;
+        timer_ptr->os_ << timer_ptr->display_iter_;
     }
 
     static void increment_ (void *context)
@@ -931,13 +934,13 @@ class DispatchProgress
     static void print_start_ (void *context)
     {
         print_progress(context);
-        std::fprintf(stderr, "\r");
+        static_cast<DispatchProgress *>(context)->os_ << '\r';
     }
 
     static void print_stop_ (void *context)
     {
         print_progress(context);
-        std::fprintf(stderr, "\n");
+        static_cast<DispatchProgress *>(context)->os_ << '\n';
     }
 }; // class DispatchProgress
 

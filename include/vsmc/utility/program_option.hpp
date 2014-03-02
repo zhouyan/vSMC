@@ -190,15 +190,16 @@ namespace vsmc {
 /// \brief Program option error messages
 /// \ingroup Option
 inline void program_option_error (const std::string &,
-        const std::string &) {}
+        const std::string &, std::ostream &) {}
 #else
 /// \brief Program option error messages
 /// \ingroup Option
 inline void program_option_error (const std::string &oname,
-        const std::string &msg)
+        const std::string &msg, std::ostream &os)
 {
-    const std::string warning = "Program option: " + oname + " : " + msg;
-    VSMC_RUNTIME_WARNING(false, warning.c_str());
+    os << "vSMC Program Option Error\n";
+    os << "Option: " << oname << '\n';
+    os << "Error : " << msg << std::endl;
 }
 #endif
 
@@ -216,15 +217,15 @@ class ProgramOption
     virtual bool is_bool () const = 0;
     virtual bool is_vector () const = 0;
     virtual bool set (std::stringstream &, const std::string &,
-            const std::string &, bool) = 0;
+            const std::string &, bool, std::ostream &) = 0;
     virtual bool set_default () = 0;
-    virtual void print_help (const std::string &) const = 0;
+    virtual void print_help (const std::string &, std::ostream &) const = 0;
     virtual ProgramOption *clone () const = 0;
 
     protected :
 
     bool set_value (std::stringstream &, const std::string &oname,
-            const std::string &sval, bool *dest, bool silent)
+            const std::string &sval, bool *dest, bool silent, std::ostream &os)
     {
         const char *const sptr = sval.c_str();
         const std::size_t size = sval.size();
@@ -277,21 +278,23 @@ class ProgramOption
         }
 
         if (!silent)
-            program_option_error(oname, "Failed to set value: " + sval);
+            program_option_error(oname, "Failed to set value: " + sval, os);
         return false;
     }
 
     template <typename T>
     bool set_value (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, T *dest, bool silent)
+            const std::string &sval, T *dest, bool silent, std::ostream &os)
     {
         ss.clear();
         ss.str(sval);
         T tval;
         ss >> tval;
         if (ss.fail()) {
-            if (!silent)
-                program_option_error(oname, "Failed to set value: " + sval);
+            if (!silent) {
+                program_option_error(oname,
+                        "Failed to set value: " + sval, os);
+            }
             ss.clear();
             return false;
         }
@@ -318,17 +321,17 @@ class ProgramOptionHelp : public ProgramOption
     bool is_vector () const {return false;}
 
     bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, bool silent)
-    {return set_value(ss, oname, sval, &help_, silent);}
+            const std::string &sval, bool silent, std::ostream &os)
+    {return set_value(ss, oname, sval, &help_, silent, os);}
 
     bool set_default () {return false;}
 
-    void print_help (const std::string &oname) const
+    void print_help (const std::string &oname, std::ostream &os) const
     {
-        std::cout << ' ' << std::setw(20) << std::left << oname;
-        std::cout << ' ' << std::setw(40) << "Print help information";
-        std::cout << ' ' << "(default: false)";
-        std::cout << std::endl;
+        os << ' ' << std::setw(20) << std::left << oname;
+        os << ' ' << std::setw(40) << "Print help information";
+        os << ' ' << "(default: false)";
+        os << std::endl;
     }
 
     ProgramOption *clone () const {return new ProgramOptionHelp;}
@@ -356,12 +359,12 @@ class ProgramOptionDefault : public ProgramOption
 
     bool is_bool () const {return cxx11::is_same<T, bool>::value;}
 
-    void print_help (const std::string &oname) const
+    void print_help (const std::string &oname, std::ostream &os) const
     {
-        std::cout << ' ' << std::setw(20) << std::left << oname;
-        std::cout << ' ' << std::setw(40) << desc_;
-        print_default(default_);
-        std::cout << std::endl;
+        os << ' ' << std::setw(20) << std::left << oname;
+        os << ' ' << std::setw(40) << desc_;
+        print_default(default_, os);
+        os << std::endl;
     }
 
     protected :
@@ -381,16 +384,16 @@ class ProgramOptionDefault : public ProgramOption
     bool has_default_;
 
     template <typename U>
-    void print_default (const U &val) const
+    void print_default (const U &val, std::ostream &os) const
     {
         if (has_default_)
-            std::cout << " (default: " << val;
+            os << " (default: " << val;
     }
 
-    void print_default (bool val) const
+    void print_default (bool val, std::ostream &os) const
     {
         if (has_default_)
-            std::cout << " (default: " << (val ? "true" : "false") << ')';
+            os << " (default: " << (val ? "true" : "false") << ')';
     }
 }; // ProgramOptionDefault
 
@@ -411,8 +414,8 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
     bool is_vector () const {return false;}
 
     bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, bool silent)
-    {return this->set_value(ss, oname, sval, ptr_, silent);}
+            const std::string &sval, bool silent, std::ostream &os)
+    {return this->set_value(ss, oname, sval, ptr_, silent, os);}
 
     bool set_default () {return this->set_value_default(ptr_);}
 
@@ -442,9 +445,9 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
     bool is_vector () const {return true;}
 
     bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, bool silent)
+            const std::string &sval, bool silent, std::ostream &os)
     {
-        bool success = this->set_value(ss, oname, sval, &val_, silent);
+        bool success = this->set_value(ss, oname, sval, &val_, silent, os);
 
         if (success)
             ptr_->push_back(val_);
@@ -675,7 +678,9 @@ class ProgramOptionMap
     ///
     /// \param argc The first argument of the `main` function
     /// \param argv The second argument of the `main` function
-    void process (int argc, const char **argv)
+    /// \param os The output stream used to print help information if
+    /// `auto_help` is set to true
+    void process (int argc, const char **argv, std::ostream &os = std::cout)
     {
         std::string arg;
         std::vector<std::string> arg_vector;
@@ -685,11 +690,11 @@ class ProgramOptionMap
             if (!arg.empty())
                 arg_vector.push_back(arg);
         }
-        process_arg_vector(arg_vector);
+        process_arg_vector(arg_vector, os);
     }
 
     /// \brief Process the options
-    void process (int argc, char **argv)
+    void process (int argc, char **argv, std::ostream &os = std::cout)
     {
         std::string arg;
         std::vector<std::string> arg_vector;
@@ -699,15 +704,15 @@ class ProgramOptionMap
             if (!arg.empty())
                 arg_vector.push_back(arg);
         }
-        process_arg_vector(arg_vector);
+        process_arg_vector(arg_vector, os);
     }
 
     /// \brief Print help information for each option
-    void print_help () const
+    void print_help (std::ostream &os = std::cout) const
     {
         for (option_list_type::const_iterator liter = option_list_.begin();
                 liter != option_list_.end(); ++liter) {
-            liter->second->print_help(liter->first);
+            liter->second->print_help(liter->first, os);
         }
     }
 
@@ -785,7 +790,8 @@ class ProgramOptionMap
         }
     }
 
-    void process_arg_vector (std::vector<std::string> &arg_vector)
+    void process_arg_vector (std::vector<std::string> &arg_vector,
+            std::ostream &os)
     {
         std::string option_value;
         const std::vector<std::string> option_value_vec;
@@ -811,26 +817,26 @@ class ProgramOptionMap
             option_map_type::iterator miter = option_map_.find(iter->first);
             if (miter == option_map_.end()) {
                 if (!silent_)
-                    program_option_error(iter->first, "Unknown option");
+                    program_option_error(iter->first, "Unknown option", os);
                 continue;
             }
 
             bool proc = false;
             const std::size_t vsize = iter->second.size();
             if (vsize == 0 && miter->second.first->is_bool()) {
-                proc = process_option(miter, sval_true);
+                proc = process_option(miter, sval_true, os);
             } else if (vsize == 0) {
                 if (!silent_)
-                    program_option_error(miter->first, "No value specified");
+                    program_option_error(miter->first, "Value not found", os);
             } else if (!miter->second.first->is_vector()) {
                 option_value.clear();
                 for (std::size_t i = 0; i != vsize - 1; ++i)
                     option_value += iter->second[i] + ' ';
                 option_value += iter->second[vsize - 1];
-                proc = process_option(miter, option_value);
+                proc = process_option(miter, option_value, os);
             } else {
                 for (std::size_t i = 0; i != vsize; ++i)
-                    proc = process_option(miter, iter->second[i]) || proc;
+                    proc = process_option(miter, iter->second[i], os) || proc;
             }
             if (proc)
                 ++miter->second.second;
@@ -844,7 +850,7 @@ class ProgramOptionMap
         }
 
         if (auto_help_ && help_ptr_->help())
-            print_help();
+            print_help(os);
     }
 
     std::string process_arg (const char *arg) const
@@ -858,15 +864,15 @@ class ProgramOptionMap
     }
 
     bool process_option (option_map_type::iterator iter,
-            const std::string &sval)
+            const std::string &sval, std::ostream &os)
     {
         if (sval.empty()) {
             if (!silent_)
-                program_option_error(iter->first, "No value specified");
+                program_option_error(iter->first, "No value found", os);
             return false;
         }
 
-        return iter->second.first->set(ss_, iter->first, sval, silent_);
+        return iter->second.first->set(ss_, iter->first, sval, silent_, os);
     }
 
     bool is_option (const std::string &str) const
