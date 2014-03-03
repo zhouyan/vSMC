@@ -2,7 +2,6 @@
 #define VSMC_SMP_BACKEND_TBB_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-#include <vsmc/utility/tbb_op.hpp>
 #include <tbb/tbb.h>
 
 namespace vsmc {

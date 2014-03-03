@@ -290,32 +290,38 @@ template <typename T> struct negative_infinity_trait
 /// \brief Positive infinity of a given floating points type
 /// \ingroup TBBOp
 template <> struct positive_infinity_trait<float>
-{static T value () {return std::numeric_limits<float>::infinity();}};
+{static float value () {return std::numeric_limits<float>::infinity();}};
 
 /// \brief Negative infinity of a given floating points type
 /// \ingroup TBBOp
 template <> struct negative_infinity_trait<float>
-{static T value () {return -std::numeric_limits<float>::infinity();}};
+{static float value () {return -std::numeric_limits<float>::infinity();}};
 
 /// \brief Positive infinity of a given floating points type
 /// \ingroup TBBOp
 template <> struct positive_infinity_trait<double>
-{static T value () {return std::numeric_limits<double>::infinity();}};
+{static double value () {return std::numeric_limits<double>::infinity();}};
 
 /// \brief Negative infinity of a given floating points type
 /// \ingroup TBBOp
 template <> struct negative_infinity_trait<double>
-{static T value () {return -std::numeric_limits<double>::infinity();}};
+{static double value () {return -std::numeric_limits<double>::infinity();}};
 
 /// \brief Positive infinity of a given floating points type
 /// \ingroup TBBOp
 template <> struct positive_infinity_trait<long double>
-{static T value () {return std::numeric_limits<long double>::infinity();}};
+{
+    static long double value ()
+    {return std::numeric_limits<long double>::infinity();}
+};
 
 /// \brief Negative infinity of a given floating points type
 /// \ingroup TBBOp
 template <> struct negative_infinity_trait<long double>
-{static T value () {return -std::numeric_limits<long double>::infinity();}};
+{
+    static long double value ()
+    {return -std::numeric_limits<long double>::infinity();}
+};
 
 /// \brief Zero of a given type
 /// \ingroup TBBOp

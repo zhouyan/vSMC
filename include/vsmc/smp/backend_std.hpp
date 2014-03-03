@@ -3,7 +3,6 @@
 
 #include <vsmc/smp/backend_base.hpp>
 #include <vsmc/utility/stdtbb.hpp>
-#include <vsmc/utility/tbb_op.hpp>
 
 namespace vsmc {
 
