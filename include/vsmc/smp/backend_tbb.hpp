@@ -25,17 +25,17 @@ class StateTBB : public BaseState
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(TBB);
 
         tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
-                copy_work_<IntType>(this, copy_from));
+                copy_work<IntType>(this, copy_from));
     }
 
-    private :
+    protected :
 
     template <typename IntType>
-    class copy_work_
+    class copy_work
     {
         public :
 
-        copy_work_ (StateTBB<BaseState> *state, const IntType *copy_from) :
+        copy_work (StateTBB<BaseState> *state, const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
@@ -48,7 +48,7 @@ class StateTBB : public BaseState
 
         StateTBB<BaseState> *const state_;
         const IntType *const copy_from_;
-    }; // class copy_work_
+    }; // class copy_work
 }; // class StateTBB
 
 /// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
@@ -58,14 +58,13 @@ class InitializeTBB : public InitializeBase<T, Derived>
 {
     public :
 
-
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        work_ work(this, &particle);
+        initialize_work work(this, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), work);
         this->post_processor(particle);
 
@@ -76,19 +75,17 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
     VSMC_DEFINE_SMP_IMPL_COPY(TBB, Initialize)
 
-    private :
-
-    class work_
+    class initialize_work
     {
         public :
 
         typedef typename Particle<T>::size_type size_type;
 
-        work_ (InitializeTBB<T, Derived> *init,
+        initialize_work (InitializeTBB<T, Derived> *init,
                 Particle<T> *particle) :
             init_(init), particle_(particle), accept_(0) {}
 
-        work_ (const work_ &other, tbb::split) :
+        initialize_work (const initialize_work &other, tbb::split) :
             init_(other.init_), particle_(other.particle_), accept_(0) {}
 
         void operator() (const tbb::blocked_range<size_type> &range)
@@ -100,7 +97,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
             accept_ = acc;
         }
 
-        void join (const work_ &other) {accept_ += other.accept_;}
+        void join (const initialize_work &other) {accept_ += other.accept_;}
 
         std::size_t accept () const {return accept_;}
 
@@ -109,7 +106,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
         InitializeTBB<T, Derived> *const init_;
         Particle<T> *const particle_;
         std::size_t accept_;
-    }; // class work_
+    }; // class initialize_work
 }; // class InitializeTBB
 
 /// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
@@ -119,13 +116,12 @@ class MoveTBB : public MoveBase<T, Derived>
 {
     public :
 
-
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        work_ work(this, iter, &particle);
+        move_work work(this, iter, &particle);
         tbb::parallel_reduce(tbb::blocked_range<size_type>(0, N), work);
         this->post_processor(iter, particle);
 
@@ -136,19 +132,17 @@ class MoveTBB : public MoveBase<T, Derived>
 
     VSMC_DEFINE_SMP_IMPL_COPY(TBB, Move)
 
-    private :
-
-    class work_
+    class move_work
     {
         public :
 
         typedef typename Particle<T>::size_type size_type;
 
-        work_ (MoveTBB<T, Derived> *move, std::size_t iter,
+        move_work (MoveTBB<T, Derived> *move, std::size_t iter,
                 Particle<T> *particle):
             move_(move), iter_(iter), particle_(particle), accept_(0) {}
 
-        work_ (const work_ &other, tbb::split) :
+        move_work (const move_work &other, tbb::split) :
             move_(other.move_), iter_(other.iter_),
             particle_(other.particle_), accept_(0) {}
 
@@ -162,7 +156,7 @@ class MoveTBB : public MoveBase<T, Derived>
             accept_ = acc;
         }
 
-        void join (const work_ &other) {accept_ += other.accept_;}
+        void join (const move_work &other) {accept_ += other.accept_;}
 
         std::size_t accept () const {return accept_;}
 
@@ -172,7 +166,7 @@ class MoveTBB : public MoveBase<T, Derived>
         const std::size_t iter_;
         Particle<T> *const particle_;
         std::size_t accept_;
-    }; // class work_
+    }; // class move_work
 }; // class MoveTBB
 
 /// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
@@ -182,7 +176,6 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 {
     public :
 
-
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
@@ -190,7 +183,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
-                work_(this, iter, dim, &particle, res));
+                monitor_eval_work(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
 
@@ -198,15 +191,13 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
     VSMC_DEFINE_SMP_IMPL_COPY(TBB, MonitorEval)
 
-    private :
-
-    class work_
+    class monitor_eval_work
     {
         public :
 
         typedef typename Particle<T>::size_type size_type;
 
-        work_ (MonitorEvalTBB<T, Derived> *monitor,
+        monitor_eval_work (MonitorEvalTBB<T, Derived> *monitor,
                 std::size_t iter, std::size_t dim,
                 const Particle<T> *particle, double *res) :
             monitor_(monitor), iter_(iter), dim_(dim),
@@ -232,7 +223,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         const std::size_t dim_;
         const Particle<T> *const particle_;
         double *const res_;
-    }; // class work_
+    }; // class monitor_eval_work
 }; // class MonitorEvalTBB
 
 /// \brief Path<T>::eval_type subtype using Intel Threading Building Blocks
@@ -242,7 +233,6 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 {
     public :
 
-
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
     {
@@ -250,7 +240,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         tbb::parallel_for(tbb::blocked_range<size_type>(0, N),
-                work_(this, iter, &particle, res));
+                path_eval_work(this, iter, &particle, res));
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);
@@ -260,15 +250,13 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
     VSMC_DEFINE_SMP_IMPL_COPY(TBB, PathEval)
 
-    private :
-
-    class work_
+    class path_eval_work
     {
         public :
 
         typedef typename Particle<T>::size_type size_type;
 
-        work_ (PathEvalTBB<T, Derived> *path, std::size_t iter,
+        path_eval_work (PathEvalTBB<T, Derived> *path, std::size_t iter,
                 const Particle<T> *particle, double *res) :
             path_(path), iter_(iter), particle_(particle), res_(res) {}
 
@@ -289,7 +277,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         const std::size_t iter_;
         const Particle<T> *const particle_;
         double *const res_;
-    }; // class work_
+    }; // class path_eval_work
 }; // PathEvalTBB
 
 } // namespace vsmc
