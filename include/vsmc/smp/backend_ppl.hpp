@@ -61,7 +61,6 @@ class InitializePPL : public InitializeBase<T, Derived>
 {
     public :
 
-
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
@@ -116,7 +115,6 @@ template <typename T, typename Derived>
 class MovePPL : public MoveBase<T, Derived>
 {
     public :
-
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
@@ -173,7 +171,6 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 {
     public :
 
-
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
@@ -225,7 +222,6 @@ template <typename T, typename Derived>
 class PathEvalPPL : public PathEvalBase<T, Derived>
 {
     public :
-
 
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)

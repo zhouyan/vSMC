@@ -435,9 +435,7 @@ class XorwowEngine
     friend inline bool operator== (
             const XorwowEngine<Eng, D, DInit> &eng1,
             const XorwowEngine<Eng, D, DInit> &eng2)
-    {
-        return eng1.eng_ == eng2.eng_ && eng1.weyl_ == eng2.weyl_;
-    }
+    {return eng1.eng_ == eng2.eng_ && eng1.weyl_ == eng2.weyl_;}
 
     friend inline bool operator!= (
             const XorwowEngine<Eng, D, DInit> &eng1,
@@ -472,7 +470,6 @@ class XorwowEngine
 
         return is;
     }
-
 
     private :
 

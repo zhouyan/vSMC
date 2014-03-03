@@ -116,7 +116,7 @@ class CLSetup
             return true;
         return name.find(stored) != std::string::npos;
     }
-};
+}; // class CLSetup
 
 /// \brief OpenCL Manager
 /// \ingroup OpenCL
@@ -174,7 +174,6 @@ class CLSetup
 /// CLSetup, at least specify the device type. It can be set through values of
 /// type `cl_device_type` or a string with values "GPU", "CPU", "Accelerator".
 /// Other string values are silently ignored and the default is used.
-///
 ///
 /// Before using a CLManager, it is important to check that CLManager::setup
 /// returns `true`.
@@ -422,7 +421,6 @@ class CLManager
 
     private :
 
-
     cl::Platform platform_;
     cl::Context context_;
     cl::Device device_;
@@ -617,9 +615,7 @@ class CLManager
     }
 
     cl::NDRange get_local_nd_range (std::size_t local_size) const
-    {
-        return local_size ? cl::NDRange(local_size) : cl::NullRange;
-    }
+    {return local_size ? cl::NDRange(local_size) : cl::NullRange;}
 }; // clss CLManager
 
 } // namespace vsmc

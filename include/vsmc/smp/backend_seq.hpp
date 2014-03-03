@@ -26,7 +26,6 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 {
     public :
 
-
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
@@ -53,7 +52,6 @@ class MoveSEQ : public MoveBase<T, Derived>
 {
     public :
 
-
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
@@ -79,7 +77,6 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
     public :
 
-
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
@@ -104,7 +101,6 @@ template <typename T, typename Derived>
 class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
     public :
-
 
     double operator() (std::size_t iter, const Particle<T> &particle,
             double *res)
