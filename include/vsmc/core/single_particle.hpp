@@ -49,10 +49,11 @@ class ParticleIterator :
     typedef typename base_iterator_type::difference_type difference_type;
     typedef typename base_iterator_type::pointer pointer;
     typedef typename base_iterator_type::reference reference;
+    typedef std::random_access_iterator_tag iterator_category;
 
     ParticleIterator () : ptr_(VSMC_NULLPTR) {}
 
-    ParticleIterator (pointer ptr) : ptr_(ptr) {}
+    explicit ParticleIterator (pointer ptr) : ptr_(ptr) {}
 
     ParticleIterator (const ParticleIterator<T, SPType> &other) :
         ptr_(other.ptr_) {}
@@ -78,12 +79,12 @@ class ParticleIterator :
 
     ParticleIterator<T, SPType> &operator++ () {++ptr_; return *this;}
 
-    ParticleIterator<T, SPType> operator++ (int)
+    ParticleIterator<T, SPType> operator++ (int) const
     {ParticleIterator<T, SPType> iter(*this); return ++iter;}
 
     ParticleIterator<T, SPType> &operator-- () {--ptr_; return *this;}
 
-    ParticleIterator<T, SPType> operator-- (int)
+    ParticleIterator<T, SPType> operator-- (int) const
     {ParticleIterator<T, SPType> iter(*this); return --iter;}
 
     ParticleIterator<T, SPType> &operator+= (difference_type diff)

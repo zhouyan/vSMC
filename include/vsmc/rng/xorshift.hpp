@@ -2,6 +2,7 @@
 #define VSMC_RNG_XORSHIFT_HPP
 
 #include <vsmc/rng/common.hpp>
+#include <vsmc/utility/static_vector.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -67,7 +68,7 @@ struct XorshiftEngineTrait
     /// order of the engine. For states smaller than or equal to this value, it
     /// will be allocated on the stack using an array. Otherwise it will be
     /// allocated on the heap.
-    static VSMC_CONSTEXPR const std::size_t max_stack_alloc = 1024;
+    static VSMC_CONSTEXPR const std::size_t max_static_size = 1024;
 
     /// \brief Maximum number of states (e.g., 4 in Xorshift4x64) that an
     /// unrolled loop will be used
@@ -263,14 +264,14 @@ class XorshiftEngine
     void seed (SeedSeq &seq)
     {
         index_.reset();
-        seq.generate(state_.data(), state_.data() + K);
+        seq.generate(state_.begin(), state_.end());
         discard(4 * K);
     }
 
     result_type operator() ()
     {
         return internal::xorshift<ResultType, A, B, C, D, R, S>(
-                state_, index_, Position<K>());
+                state_.data(), index_, Position<K>());
     }
 
     void discard (std::size_t nskip)
@@ -336,8 +337,8 @@ class XorshiftEngine
     private :
 
     internal::XorshiftIndex<ResultType, K, R, S> index_;
-    internal::RngStorage<result_type, K, (sizeof(ResultType) * K <=
-            traits::XorshiftEngineTrait<ResultType>::max_stack_alloc)> state_;
+    StaticVector<result_type, K, traits::XorshiftEngineTrait<ResultType> >
+        state_;
 
     static VSMC_CONSTEXPR const result_type uint32_t_max_ =
         static_cast<result_type>(static_cast<uint32_t>(

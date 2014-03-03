@@ -101,6 +101,10 @@
 /// \ingroup Utility
 /// \brief Process program command line options
 
+/// \defgroup StaticVector Static vector
+/// \ingroup Utility
+/// \brief Container with static size but possible dynamic memory allocation
+
 /// \defgroup STDTBB STDTBB
 /// \ingroup Utility
 /// \brief Parallel constructs using C++11 concurrency
