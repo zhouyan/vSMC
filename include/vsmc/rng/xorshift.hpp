@@ -121,7 +121,8 @@ struct XorshiftIndex
     static VSMC_CONSTEXPR std::size_t s () {return K - S;}
     static VSMC_CONSTEXPR std::size_t k () {return K - 1;}
 
-    static void shift (ResultType *state) {rng_array_left_shift<K, 1>(state);}
+    static void shift (ResultType *state)
+    {rng_array_left_shift<K, 1, false>(state);}
 };
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S>

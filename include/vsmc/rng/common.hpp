@@ -35,13 +35,13 @@ inline void rng_array_left_zero (ResultType *state, cxx11::true_type)
             cxx11::integral_constant<bool, (I + 1 < N)>());
 }
 
-template <std::size_t N, std::size_t A, typename ResultType>
+template <std::size_t N, std::size_t A, bool fillzero, typename ResultType>
 inline void rng_array_left_shift (ResultType *state)
 {
     rng_array_left_assign<N, A, 0>(state,
             cxx11::integral_constant<bool, (A > 0 && A < N)>());
     rng_array_left_zero<N, N - A>(state,
-            cxx11::integral_constant<bool, (A > 0 && A <= N)>());
+            cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
 }
 
 template <std::size_t, std::size_t, std::size_t, typename ResultType>
@@ -66,13 +66,13 @@ inline void rng_array_right_zero (ResultType *state, cxx11::true_type)
             cxx11::integral_constant<bool, (I > 0)>());
 }
 
-template <std::size_t N, std::size_t A, typename ResultType>
+template <std::size_t N, std::size_t A, bool fillzero, typename ResultType>
 inline void rng_array_right_shift (ResultType *state)
 {
     rng_array_right_assign<N, A, N - 1>(state,
             cxx11::integral_constant<bool, (A > 0 && A < N)>());
     rng_array_right_zero<N, A - 1>(state,
-            cxx11::integral_constant<bool, (A > 0 && A <= N)>());
+            cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
 }
 
 } // namespace vsmc::internal
