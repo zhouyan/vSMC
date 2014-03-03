@@ -9,34 +9,74 @@
 #include <iostream>
 #include <stdint.h>
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4351)
-#endif
-
 namespace vsmc {
 
 namespace internal {
 
-template <typename ResultType>
-inline void rng_array_shift (ResultType *state, Position<2>)
+template <std::size_t, std::size_t, std::size_t, typename ResultType>
+inline void rng_array_left_assign (ResultType *, cxx11::false_type) {}
+
+template <std::size_t N, std::size_t A, std::size_t I, typename ResultType>
+inline void rng_array_left_assign (ResultType *state, cxx11::true_type)
 {
-    state[0] = state[1];
+    state[I] = state[I + A];
+    rng_array_left_assign<N, A, I + 1>(state,
+            cxx11::integral_constant<bool, (A + I < N)>());
 }
 
-template <typename ResultType, std::size_t K>
-inline void rng_array_shift (ResultType *state, Position<K>)
+template <std::size_t, std::size_t, typename ResultType>
+inline void rng_array_left_zero (ResultType *, cxx11::false_type) {}
+
+template <std::size_t N, std::size_t I, typename ResultType>
+inline void rng_array_left_zero (ResultType *state, cxx11::true_type)
 {
-    state[0] = state[1];
-    rng_array_shift(state + 1, Position<K - 1>());
+    state[I] = 0;
+    rng_array_left_zero<N, I + 1>(state,
+            cxx11::integral_constant<bool, (I < N)>());
+}
+
+template <std::size_t N, std::size_t A, typename ResultType>
+inline void rng_array_left_shift (ResultType *state)
+{
+    rng_array_left_assign<N, A, 0>(state,
+            cxx11::integral_constant<bool, (A > 0 && A < N)>());
+    rng_array_left_zero<N, N - A>(state,
+            cxx11::integral_constant<bool, (A > 0 && A <= N)>());
+}
+
+template <std::size_t, std::size_t, std::size_t, typename ResultType>
+inline void rng_array_right_assign (ResultType *, cxx11::false_type) {}
+
+template <std::size_t N, std::size_t A, std::size_t I, typename ResultType>
+inline void rng_array_right_assign (ResultType *state, cxx11::true_type)
+{
+    state[I] = state[I - A];
+    rng_array_right_assign<N, A, I - 1>(state,
+            cxx11::integral_constant<bool, (A < I)>());
+}
+
+template <std::size_t, std::size_t, typename ResultType>
+inline void rng_array_right_zero (ResultType *, cxx11::false_type) {}
+
+template <std::size_t N, std::size_t I, typename ResultType>
+inline void rng_array_right_zero (ResultType *state, cxx11::true_type)
+{
+    state[I] = 0;
+    rng_array_right_zero<N, I - 1>(state,
+            cxx11::integral_constant<bool, (I > 0)>());
+}
+
+template <std::size_t N, std::size_t A, typename ResultType>
+inline void rng_array_right_shift (ResultType *state)
+{
+    rng_array_right_assign<N, A, N - 1>(state,
+            cxx11::integral_constant<bool, (A > 0 && A < N)>());
+    rng_array_right_zero<N, A - 1>(state,
+            cxx11::integral_constant<bool, (A > 0 && A <= N)>());
 }
 
 } // namespace vsmc::internal
 
 } // namespace vsmc
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif // VSMC_RNG_COMMON_HPP

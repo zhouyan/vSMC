@@ -9,7 +9,7 @@
 #pragma warning(disable:4521)
 #endif
 
-#define VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(R) \
+#define VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(K) \
     VSMC_STATIC_ASSERT((K != 0), USE_XorshiftEngine_WITH_ORDER_EUQAL_TO_ZERO)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType) \
@@ -122,7 +122,7 @@ struct XorshiftIndex
     static VSMC_CONSTEXPR std::size_t k () {return K - 1;}
 
     static void shift (ResultType *state, Position<K>)
-    {rng_array_shift(state, Position<K>());}
+    {rng_array_left_shift<K, 1>(state);}
 };
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S>

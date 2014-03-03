@@ -3,6 +3,11 @@
 
 #include <vsmc/internal/common.hpp>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4351)
+#endif
+
 #define VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N) \
     VSMC_RUNTIME_ASSERT((i < N),                                             \
             ("**StaticVector** USED WITH AN INDEX OUT OF RANGE"))
@@ -459,5 +464,9 @@ inline bool operator>= (
 {return !(sv1 < sv2);}
 
 } // namespace vsmc
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // VSMC_UTILITY_STATIC_VECTOR_HPP

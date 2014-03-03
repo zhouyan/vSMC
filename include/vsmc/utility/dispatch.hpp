@@ -5,6 +5,11 @@
 #include <vsmc/utility/stop_watch.hpp>
 #include <dispatch/dispatch.h>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4351)
+#endif
+
 namespace vsmc {
 
 /// \brief Types of DispatchQueue
@@ -945,5 +950,9 @@ class DispatchProgress
 }; // class DispatchProgress
 
 } // namespace vsmc
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // VSMC_UTILITY_DISPATCH_HPP
