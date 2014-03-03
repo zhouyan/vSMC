@@ -96,19 +96,19 @@ namespace internal {
 
 template <bool, typename ResultType, unsigned>
 struct XorshiftLeft
-{static ResultType get (ResultType x) {return x;}};
+{static ResultType shift (ResultType x) {return x;}};
 
 template <typename ResultType, unsigned A>
 struct XorshiftLeft<true, ResultType, A>
-{static ResultType get (ResultType x) {return x^(x<<A);}};
+{static ResultType shift (ResultType x) {return x^(x<<A);}};
 
 template <bool, typename ResultType, unsigned>
 struct XorshiftRight
-{static ResultType get (ResultType x) {return x;}};
+{static ResultType shift (ResultType x) {return x;}};
 
 template <typename ResultType, unsigned A>
 struct XorshiftRight<true, ResultType, A>
-{static ResultType get (ResultType x) {return x^(x>>A);}};
+{static ResultType shift (ResultType x) {return x^(x>>A);}};
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S,
          bool  =
@@ -121,8 +121,7 @@ struct XorshiftIndex
     static VSMC_CONSTEXPR std::size_t s () {return K - S;}
     static VSMC_CONSTEXPR std::size_t k () {return K - 1;}
 
-    static void shift (ResultType *state, Position<K>)
-    {rng_array_left_shift<K, 1>(state);}
+    static void shift (ResultType *state) {rng_array_left_shift<K, 1>(state);}
 };
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S>
@@ -136,16 +135,17 @@ struct XorshiftIndex<ResultType, K, R, S, false>
     std::size_t s () {return (K - S + iter_) % K;}
     std::size_t k () {return (K - 1 + iter_) % K;}
 
-    void shift (ResultType *, Position<K>) {iter_ = (iter_ + 1) % K;}
+    void shift (ResultType *) {iter_ = (iter_ + 1) % K;}
 
     private :
 
     std::size_t iter_;
 };
 
-template <typename ResultType, unsigned A, unsigned B, unsigned C, unsigned,
-    std::size_t, std::size_t, typename IndexType>
-inline ResultType xorshift (ResultType *state, IndexType &, Position<1>)
+template <unsigned A, unsigned B, unsigned C, unsigned,
+    typename ResultType, std::size_t R, std::size_t S>
+inline ResultType xorshift (ResultType *state,
+        XorshiftIndex<ResultType, 1, R, S> &)
 {
     *state ^= (*state)<<A;
     *state ^= (*state)>>B;
@@ -154,17 +154,18 @@ inline ResultType xorshift (ResultType *state, IndexType &, Position<1>)
     return *state;
 }
 
-template <typename ResultType, unsigned A, unsigned B, unsigned C, unsigned D,
-    std::size_t R, std::size_t S, typename IndexType, std::size_t K>
-inline ResultType xorshift (ResultType *state, IndexType &index, Position<K>)
+template <unsigned A, unsigned B, unsigned C, unsigned D,
+    typename ResultType, std::size_t K, std::size_t R, std::size_t S>
+inline ResultType xorshift (ResultType *state,
+        XorshiftIndex<ResultType, K, R, S> &index)
 {
     ResultType xr = state[index.r()];
     ResultType xs = state[index.s()];
-    xr = XorshiftLeft <A != 0, ResultType, A>::get(xr);
-    xr = XorshiftRight<B != 0, ResultType, B>::get(xr);
-    xs = XorshiftLeft <C != 0, ResultType, C>::get(xs);
-    xs = XorshiftRight<D != 0, ResultType, D>::get(xs);
-    index.shift(state, Position<K>());
+    xr = XorshiftLeft <A != 0, ResultType, A>::shift(xr);
+    xr = XorshiftRight<B != 0, ResultType, B>::shift(xr);
+    xs = XorshiftLeft <C != 0, ResultType, C>::shift(xs);
+    xs = XorshiftRight<D != 0, ResultType, D>::shift(xs);
+    index.shift(state);
 
     return state[index.k()] = xs^xr;
 }
@@ -251,10 +252,10 @@ class XorshiftEngine
     void seed (result_type s)
     {
         uint32_t seed = static_cast<uint32_t>(s % uint32_t_max_);
+        internal::XorshiftIndex<uint32_t, 1, 0, 0> index;
         index_.reset();
         for (std::size_t i = 0; i != K; ++i) {
-            internal::xorshift<uint32_t, 13, 17, 5, 0, 0, 0>(
-                    &seed, index_, Position<1>());
+            internal::xorshift<13, 17, 5, 0>(&seed, index);
             state_[0] = seed;
         }
         discard(4 * K);
@@ -269,10 +270,7 @@ class XorshiftEngine
     }
 
     result_type operator() ()
-    {
-        return internal::xorshift<ResultType, A, B, C, D, R, S>(
-                state_.data(), index_, Position<K>());
-    }
+    {return internal::xorshift<A, B, C, D>(state_.data(), index_);}
 
     void discard (std::size_t nskip)
     {
