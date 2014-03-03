@@ -259,7 +259,7 @@ class XorshiftEngine
         index_.reset();
         for (std::size_t i = 0; i != K; ++i) {
             internal::xorshift<13, 17, 5, 0>(&seed, index);
-            state_[0] = seed;
+            state_[i] = seed;
         }
         discard(4 * K);
     }
