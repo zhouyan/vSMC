@@ -22,6 +22,26 @@ class StaticVectorStorage<T, N, true>
 {
     protected :
 
+    StaticVectorStorage () : data_() {}
+
+    StaticVectorStorage (const StaticVectorStorage<T, N, true> &other) :
+        data_()
+    {
+        for (std::size_t i = 0; i != N; ++i)
+            data_[i] = other.data_[i];
+    }
+
+    StaticVectorStorage<T, N, true> &operator= (
+            const StaticVectorStorage<T, N, true> &other)
+    {
+        if (this != &other) {
+            for (std::size_t i = 0; i != N; ++i)
+                data_[i] = other.data_[i];
+        }
+
+        return *this;
+    }
+
     T *ptr () {return data_;}
 
     const T *ptr () const {return data_;}
@@ -44,10 +64,10 @@ class StaticVectorStorage<T, N, false>
 {
     protected :
 
-    StaticVectorStorage () : data_(new T[N]) {}
+    StaticVectorStorage () : data_(new T[N]()) {}
 
     StaticVectorStorage (const StaticVectorStorage<T, N, false> &other) :
-        data_(new T[N])
+        data_(new T[N]())
     {
         for (std::size_t i = 0; i != N; ++i)
             data_[i] = other.data_[i];
