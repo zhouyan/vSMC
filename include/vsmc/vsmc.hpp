@@ -74,13 +74,17 @@
 /// \defgroup RNG Random number generating
 /// \brief Utilities for managing RNG engines
 
-/// \defgroup R123RNG Random123 RNG
+/// \defgroup R123RNG Random123
 /// \ingroup RNG
 /// \brief Random number generating using Random123 RNG
 
-/// \defgroup MKLRNG MKL RNG
+/// \defgroup MKLRNG MKL
 /// \ingroup RNG
 /// \brief Random number generating using MKL RNG
+
+/// \defgroup Xorshift Xorshift
+/// \ingroup RNG
+/// \brief Random number generating using Xorshift algorithm
 
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library

@@ -189,12 +189,12 @@ class StaticVectorIterator :
     pointer ptr_;
 }; // class StaticVectorIterator
 
-/// \brief A container class with static size but possible dynamic memory
+/// \brief Container class with static size but possible dynamic memory
 /// allocation
 /// \ingroup StaticVector
 ///
 /// \details
-/// Array and C++11 `std::array` are efficient for when the size is known at
+/// Array and C++11 `std::array` are efficient when the size is known at
 /// compile time. However, whent the size is large, the benefits can be
 /// negligible. And in the worst case, it can even cause stack overflow or
 /// degenerate the performance. There are other undesired effects of
@@ -209,10 +209,30 @@ class StaticVectorIterator :
 /// the size is large, it uses dynamic memory allocation and it still behaves
 /// much like a `std::array` except one does not need to worry that very large
 /// stack allocation will happen.
+///
+/// The interface is almost identical to that of `std::array` with a few
+/// differences.
+/// - There is no `max_size()` member function
+/// - The `size()` and `empty()` member functions are `static` and can be used
+/// as constant expression if `constexpr` is supported
+/// - There are additional `at<Pos>()` and `at(Position<Pos>())` member
+/// functions, which perform static assertions of the index instead of runtime
+/// assertion. They can also be used to write loop unrolling functions for the
+/// container. They are preferred way to access elements. They are (slightly)
+/// more efficient than `operator[]` and also safer.
+/// - The non-member function `get` and `swap` are defined in the namespace
+/// `vsmc`. Use the swap idiom,
+/// ~~~{.cpp}
+/// using std::swap;
+/// swap(obj1, obj2);
+/// ~~~
+/// instead of calling `std::swap(obj1, obj2)`. See "Effective C++".
+/// - The helper classes `std::tuple_size` and `std::tuple_element` are not
+/// defined for StaticVector
 template <typename T, std::size_t N,
          typename Traits = traits::StaticVectorTrait<T> >
 class StaticVector : public internal::StaticVectorStorage<T, N,
-    sizeof(T) * N <= Traits::max_static_size>
+    (sizeof(T) * N <= Traits::max_static_size)>
 {
     public :
 
@@ -328,12 +348,31 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     void swap (StaticVector<T, N, Traits> &other) {this->swap_data(other);}
 }; // class StaticVector
 
+/// \brief StaticVector ADL of swap
 template <typename T, std::size_t N, typename Traits>
 inline void swap (
         StaticVector<T, N, Traits> &sv1,
         StaticVector<T, N, Traits> &sv2)
 {sv1.swap(sv2);}
 
+/// \brief StaticVector ADL of get
+template <std::size_t I, typename T, std::size_t N, typename Traits>
+inline T &get (StaticVector<T, N, Traits> &sv)
+{return sv.template at<I>();}
+
+/// \brief StaticVector ADL of get
+template <std::size_t I, typename T, std::size_t N, typename Traits>
+inline const T &get (const StaticVector<T, N, Traits> &sv)
+{return sv.template at<I>();}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+/// \brief StaticVector ADL of get
+template <std::size_t I, typename T, std::size_t N, typename Traits>
+inline T &&get (StaticVector<T, N, Traits> &&sv)
+{return cxx11::move(sv.template at<I>());}
+#endif
+
+/// \brief StaticVector operator==
 template <typename T, std::size_t N, typename Traits>
 inline bool operator== (
         StaticVector<T, N, Traits> &sv1,
@@ -346,12 +385,14 @@ inline bool operator== (
     return true;
 }
 
+/// \brief StaticVector operator!=
 template <typename T, std::size_t N, typename Traits>
 inline bool operator!= (
         StaticVector<T, N, Traits> &sv1,
         StaticVector<T, N, Traits> &sv2)
 {return !(sv1 == sv2);}
 
+/// \brief StaticVector operator<
 template <typename T, std::size_t N, typename Traits>
 inline bool operator< (
         StaticVector<T, N, Traits> &sv1,
@@ -367,6 +408,7 @@ inline bool operator< (
     return false;
 }
 
+/// \brief StaticVector operator<=
 template <typename T, std::size_t N, typename Traits>
 inline bool operator<= (
         StaticVector<T, N, Traits> &sv1,
@@ -382,12 +424,14 @@ inline bool operator<= (
     return true;
 }
 
+/// \brief StaticVector operator>
 template <typename T, std::size_t N, typename Traits>
 inline bool operator> (
         StaticVector<T, N, Traits> &sv1,
         StaticVector<T, N, Traits> &sv2)
 {return !(sv1 <= sv2);}
 
+/// \brief StaticVector operator>=
 template <typename T, std::size_t N, typename Traits>
 inline bool operator>= (
         StaticVector<T, N, Traits> &sv1,
