@@ -249,10 +249,7 @@ class XorshiftEngine
 
     void seed (result_type s)
     {
-        static VSMC_CONSTEXPR const result_type u32max =
-            static_cast<result_type>(std::numeric_limits<uint32_t>::
-                    max VSMC_MNE ());
-        uint32_t seed = static_cast<uint32_t>(s % u32max);
+        uint32_t seed = static_cast<uint32_t>(s % uint32_t_max_);
         index_.reset();
         for (std::size_t i = 0; i != K; ++i) {
             internal::xorshift<uint32_t, 13, 17, 5, 0, 0, 0>(
@@ -341,8 +338,17 @@ class XorshiftEngine
     internal::XorshiftIndex<ResultType, K, R, S> index_;
     internal::RngStorage<result_type, K, (sizeof(ResultType) * K <=
             traits::XorshiftEngineTrait<ResultType>::max_stack_alloc)> state_;
+
+    static VSMC_CONSTEXPR const result_type uint32_t_max_ =
+        static_cast<result_type>(static_cast<uint32_t>(
+                    ~(static_cast<uint32_t>(0))));
 }; // class XorshiftEngine
 
+/// \brief Xorwow RNG engine
+/// \ingroup RNG
+///
+/// \details
+/// Use Marsaglia's Xorwow algorithm with an Xorshift engine.
 template <typename Eng,
          typename Eng::result_type D = 362437,
          typename Eng::result_type DInit = 6615241>

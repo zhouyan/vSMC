@@ -24,11 +24,11 @@ inline void rng_array_shift (ResultType *state, Position<2>)
     state[0] = state[1];
 }
 
-template <typename ResultType, std::size_t R>
-inline void rng_array_shift (ResultType *state, Position<R>)
+template <typename ResultType, std::size_t K>
+inline void rng_array_shift (ResultType *state, Position<K>)
 {
     state[0] = state[1];
-    rng_array_shift(state + 1, Position<R - 1>());
+    rng_array_shift(state + 1, Position<K - 1>());
 }
 
 template <typename ResultType, std::size_t K, bool B>
