@@ -160,11 +160,13 @@ inline ResultType xorshift (ResultType *state,
         XorshiftIndex<ResultType, K, R, S> &index)
 {
     ResultType xr = state[index.r()];
-    ResultType xs = state[index.s()];
     xr = XorshiftLeft <A != 0, ResultType, A>::shift(xr);
     xr = XorshiftRight<B != 0, ResultType, B>::shift(xr);
+
+    ResultType xs = state[index.s()];
     xs = XorshiftLeft <C != 0, ResultType, C>::shift(xs);
     xs = XorshiftRight<D != 0, ResultType, D>::shift(xs);
+
     index.shift(state);
 
     return state[index.k()] = xs^xr;

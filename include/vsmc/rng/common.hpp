@@ -21,7 +21,7 @@ inline void rng_array_left_assign (ResultType *state, cxx11::true_type)
 {
     state[I] = state[I + A];
     rng_array_left_assign<N, A, I + 1>(state,
-            cxx11::integral_constant<bool, (A + I < N)>());
+            cxx11::integral_constant<bool, (I + A + 1 < N)>());
 }
 
 template <std::size_t, std::size_t, typename ResultType>
@@ -32,7 +32,7 @@ inline void rng_array_left_zero (ResultType *state, cxx11::true_type)
 {
     state[I] = 0;
     rng_array_left_zero<N, I + 1>(state,
-            cxx11::integral_constant<bool, (I < N)>());
+            cxx11::integral_constant<bool, (I + 1 < N)>());
 }
 
 template <std::size_t N, std::size_t A, typename ResultType>
