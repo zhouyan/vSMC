@@ -261,22 +261,6 @@ class name                                                                   \
 
 namespace vsmc {
 
-/// \brief Intel TBB and vSMC STDTBB functors
-/// \ingroup TBBOp
-///
-/// \details
-/// Range concept: All functors defined in this namespace require the range
-/// satisfies
-/// ~~~{.cpp}
-/// struct Range
-/// {
-///     typdef IntType const_iterator;
-///     const_iterator begin() const;
-///     const iterator end() const;
-/// };
-/// ~~~
-/// Both `tbb::blocked_range<IntType>` and `vsmc::BlockedRange<IntType>`
-/// satisfies these requirement.
 namespace tbb_op {
 
 template <typename T> inline const T &max_fn (const T &a, const T &b)
@@ -285,18 +269,66 @@ template <typename T> inline const T &max_fn (const T &a, const T &b)
 template <typename T> inline const T &min_fn (const T &a, const T &b)
 {return std::min VSMC_MNE (a, b);}
 
+/// \brief Positive infinity of a given floating points type (or maximum for
+/// non-floating points type).
+/// \ingroup TBBOp
+///
+/// \details
+/// Specialize this trait to use with tbb_op::minimum
 template <typename T> struct positive_infinity_trait
-{static T value () {return std::numeric_limits<T>::infinity();}};
+{static T value () {return std::numeric_limits<T>::max VSMC_MNE();}};
 
+/// \brief Negative infinity of a given floating points type (or minimum for
+/// non-floating points type)
+/// \ingroup TBBOp
+///
+/// \details
+/// Specialize this trait to use with tbb_op::maximum
 template <typename T> struct negative_infinity_trait
-{static T value () {return -std::numeric_limits<T>::infinity();}};
+{static T value () {return std::numeric_limits<T>::min VSMC_MNE();}};
 
+/// \brief Positive infinity of a given floating points type
+/// \ingroup TBBOp
+template <> struct positive_infinity_trait<float>
+{static T value () {return std::numeric_limits<float>::infinity();}};
+
+/// \brief Negative infinity of a given floating points type
+/// \ingroup TBBOp
+template <> struct negative_infinity_trait<float>
+{static T value () {return -std::numeric_limits<float>::infinity();}};
+
+/// \brief Positive infinity of a given floating points type
+/// \ingroup TBBOp
+template <> struct positive_infinity_trait<double>
+{static T value () {return std::numeric_limits<double>::infinity();}};
+
+/// \brief Negative infinity of a given floating points type
+/// \ingroup TBBOp
+template <> struct negative_infinity_trait<double>
+{static T value () {return -std::numeric_limits<double>::infinity();}};
+
+/// \brief Positive infinity of a given floating points type
+/// \ingroup TBBOp
+template <> struct positive_infinity_trait<long double>
+{static T value () {return std::numeric_limits<long double>::infinity();}};
+
+/// \brief Negative infinity of a given floating points type
+/// \ingroup TBBOp
+template <> struct negative_infinity_trait<long double>
+{static T value () {return -std::numeric_limits<long double>::infinity();}};
+
+/// \brief Zero of a given type
+/// \ingroup TBBOp
 template <typename T> struct zero_trait
 {static T value () {return static_cast<T>(0);}};
 
+/// \brief One of a given type
+/// \ingroup TBBOp
 template <typename T> struct one_trait
 {static T value () {return static_cast<T>(1);}};
 
+/// \brief Summation of squares
+/// \ingroup TBBOp
 template <typename T>
 class square_sum
 {
@@ -330,37 +362,110 @@ class square_sum
     T result_;
 }; // class square_sum
 
+/// \brief Negation
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_OPERATOR(negate, -)
 
+/// \brief Plus
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(plus,       +)
+
+/// \brief Minus
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(minus,      -)
+
+/// \brief Multiple
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(multiplies, *)
+
+/// \brief Division
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(divides,    /)
+
+/// \brief Modulo
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(modulus,    %)
 
+/// \brief Absolute value
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(abs,   std::abs)
+
+/// \brief Exponential
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(exp,   std::exp)
+
+/// \brief Logarithm
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(log,   std::log)
+
+/// \brief Logarithm of 10
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(log10, std::log10)
+
+/// \brief Square root
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sqrt,  std::sqrt)
+
+/// \brief Sine
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sin,   std::sin)
+
+/// \brief Cosine
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(cos,   std::cos)
+
+/// \brief Tangent
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(tan,   std::tan)
+
+/// \brief arc sine
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(asin,  std::asin)
+
+/// \brief arc cosine
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(acos,  std::acos)
+
+/// \brief arc tangent
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(atan,  std::atan)
+
+/// \brief Hyperbolic sine
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sinh,  std::sinh)
+
+/// \brief Hyperbolic cosine
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(cosh,  std::cosh)
+
+/// \brief Hyperbolic tangent
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(tanh,  std::tanh)
+
+/// \brief Ceil
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(ceil,  std::ceil)
+
+/// \brief Floor
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(floor, std::floor)
 
+/// \brief Maximum
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(maximum, max_fn,
         negative_infinity_trait<T>::value())
+
+/// \brief Minimum
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(minimum, min_fn,
         positive_infinity_trait<T>::value())
 
+/// \brief Summation
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(summation, +, zero_trait<T>::value())
+
+/// \brief Product
+/// \ingroup TBBOp
 VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(product,   *, one_trait<T>::value())
 
 } // namespace vsmc::tbb_op
