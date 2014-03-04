@@ -61,7 +61,8 @@ class StateTBB : public BaseState
     {
         public :
 
-        parallel_copy_work (StateTBB<BaseState> *state, const IntType *copy_from) :
+        parallel_copy_work (StateTBB<BaseState> *state,
+                const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
         void operator() (const tbb::blocked_range<size_type> &range) const
@@ -79,9 +80,7 @@ class StateTBB : public BaseState
     template <typename IntType>
     void parallel_copy_run (const IntType *copy_from,
             const tbb::blocked_range<size_type> &range)
-    {
-        tbb::parallel_for(range, parallel_copy_work<IntType>(this, copy_from));
-    }
+    {tbb::parallel_for(range, parallel_copy_work<IntType>(this, copy_from));}
 
     template <typename IntType>
     void parallel_copy_run (const IntType *copy_from,
