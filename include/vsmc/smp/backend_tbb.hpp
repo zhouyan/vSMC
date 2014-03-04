@@ -111,7 +111,7 @@ class StateTBB : public BaseState
 
 #if __TBB_TASK_GROUP_CONTEXT
     template <typename IntType>
-    void parallel_copy (const IntType *copy_from,
+    void parallel_copy_run (const IntType *copy_from,
             const tbb::blocked_range<size_type> &range,
             const tbb::auto_partitioner &partitioner,
             tbb::task_group_context &context)
