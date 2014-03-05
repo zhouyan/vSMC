@@ -4,11 +4,6 @@
 #include <vsmc/rng/seed.hpp>
 #include <mkl_vsl.h>
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4521)
-#endif
-
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \
             (::vsmc::cxx11::is_same<FPType, float>::value ||                 \
@@ -27,8 +22,8 @@
 namespace vsmc {
 
 template <MKL_INT>            class MKLStream;
-template <typename, typename> class MKLDistribution;
 template <MKL_INT, typename>  class MKLEngine;
+template <typename, typename> class MKLDistribution;
 template <typename>           class MKLUniformBitsDistribution;
 
 template <MKL_INT = VSL_RNG_METHOD_BERNOULLI_ICDF>
@@ -327,7 +322,9 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     template <typename SeedSeq>
-    explicit MKLStream (SeedSeq &seq)
+    explicit MKLStream (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, MKL_UINT>::value>::type * =
+            VSMC_NULLPTR)
     {
         seq.generate(&seed_, &seed_ + 1);
         int status = ::vslNewStream(&str_ptr_, BRNG + this->offset(), seed_);
@@ -336,14 +333,6 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     MKLStream (const MKLStream<BRNG> &other) :
-        internal::MKLOffset<BRNG>::type(other)
-    {
-        int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
-        mkl_rng_error_check(BRNG, status,
-                "MKLStream::Stream", "vslCopyStream");
-    }
-
-    MKLStream (MKLStream<BRNG> &other) :
         internal::MKLOffset<BRNG>::type(other)
     {
         int status = ::vslCopyStream(&str_ptr_, other.str_ptr_);
@@ -412,7 +401,9 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq)
+    void seed (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, MKL_UINT>::value>::type * =
+            VSMC_NULLPTR)
     {
         seq.generate(&seed_, &seed_ + 1);
         seed(seed_);
@@ -545,12 +536,11 @@ class MKLEngine
         stream_(s) {}
 
     template <typename SeedSeq>
-    explicit MKLEngine (SeedSeq &seq) : stream_(seq) {}
+    explicit MKLEngine (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, MKL_UINT>::value>::type * =
+            VSMC_NULLPTR) : stream_(seq) {}
 
     MKLEngine (const MKLEngine<BRNG, ResultType> &other) :
-        stream_(other.stream_), skip_ahead_(other.skip_ahead_) {}
-
-    MKLEngine (MKLEngine<BRNG, ResultType> &other) :
         stream_(other.stream_), skip_ahead_(other.skip_ahead_) {}
 
     MKLEngine<BRNG, ResultType> &operator= (
@@ -590,7 +580,9 @@ class MKLEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq)
+    void seed (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, MKL_UINT>::value>::type * =
+            VSMC_NULLPTR)
     {
         stream_.seed(seq);
         runif_.reset();
@@ -1237,21 +1229,6 @@ class MKLBetaDistribution :
     {return ::vdRngBeta(Method, ptr, n, r, shape1_, shape2_, disp_, scale_);}
 }; // class Beta
 
-namespace traits {
-
-template <MKL_INT BRNG, typename ResultType>
-struct RngShift<MKLEngine<BRNG, ResultType> >
-{
-    void operator() (MKLEngine<BRNG, ResultType> &rng) const
-    {rng.stream().shift();}
-};
-
-} // namespace vsmc::traits
-
 } // namespace vsmc
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif // VSMC_RNG_MKL_RNG_HPP

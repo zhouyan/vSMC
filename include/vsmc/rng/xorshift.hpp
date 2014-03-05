@@ -4,11 +4,6 @@
 #include <vsmc/rng/common.hpp>
 #include <vsmc/utility/static_vector.hpp>
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4521)
-#endif
-
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(K) \
     VSMC_STATIC_ASSERT((K != 0), USE_XorshiftEngine_WITH_ORDER_EUQAL_TO_ZERO)
 
@@ -207,7 +202,9 @@ class XorshiftEngine
     }
 
     template <typename SeedSeq>
-    explicit XorshiftEngine (SeedSeq &seq)
+    explicit XorshiftEngine (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            VSMC_NULLPTR)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
         seed(seq);
@@ -215,11 +212,6 @@ class XorshiftEngine
 
     XorshiftEngine (
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &other) :
-        index_(other.index_), state_(other.state_)
-    {VSMC_STATIC_ASSERT_RNG_XORSHIFT;}
-
-    XorshiftEngine (
-            XorshiftEngine<ResultType, K, A, B, C, D, R, S> &other) :
         index_(other.index_), state_(other.state_)
     {VSMC_STATIC_ASSERT_RNG_XORSHIFT;}
 
@@ -265,7 +257,9 @@ class XorshiftEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq)
+    void seed (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            VSMC_NULLPTR)
     {
         index_.reset();
         seq.generate(state_.begin(), state_.end());
@@ -364,12 +358,11 @@ class XorwowEngine
     explicit XorwowEngine (result_type s = 123456) : eng_(s), weyl_(DInit) {}
 
     template <typename SeedSeq>
-    explicit XorwowEngine (SeedSeq &seq) : eng_(seq), weyl_(DInit) {}
+    explicit XorwowEngine (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
+            VSMC_NULLPTR) : eng_(seq), weyl_(DInit) {}
 
     XorwowEngine (const XorwowEngine<Eng, D, DInit> &other) :
-        eng_(other.eng_), weyl_(other.weyl_) {}
-
-    XorwowEngine (XorwowEngine<Eng, D, DInit> &other) :
         eng_(other.eng_), weyl_(other.weyl_) {}
 
     XorwowEngine<Eng, D, DInit> &operator= (
@@ -406,7 +399,9 @@ class XorwowEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq)
+    void seed (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
+            VSMC_NULLPTR)
     {
         eng_.seed(seq);
         weyl_ = DInit;
@@ -614,9 +609,5 @@ typedef Xorwow128x32 Xorwow;
 typedef Xorwow64x64  Xorwow_64;
 
 } // namespace vsmc
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif // VSMC_RNG_XORSHIFT_HPP

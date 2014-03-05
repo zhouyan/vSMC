@@ -75,6 +75,13 @@ inline void rng_array_right_shift (ResultType *state)
             cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
 }
 
+template <typename SeedSeq, typename ResultType>
+struct is_seed_sequence :
+    public cxx11::integral_constant<bool,
+    !cxx11::is_convertible<SeedSeq, ResultType>::value &&
+    !cxx11::is_same<
+    typename cxx11::remove_cv<SeedSeq>::type, ResultType>::value> {};
+
 } // namespace vsmc::internal
 
 } // namespace vsmc

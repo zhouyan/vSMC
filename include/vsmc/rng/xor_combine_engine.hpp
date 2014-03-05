@@ -3,11 +3,6 @@
 
 #include <vsmc/rng/common.hpp>
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4521)
-#endif
-
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(ResultType) \
     VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<ResultType>::value),      \
             USE_XorCombineEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
@@ -39,20 +34,15 @@ class XorCombineEngine
     }
 
     template <typename SeedSeq>
-    explicit XorCombineEngine (SeedSeq &seq) : eng1_(seq), eng2_(seq)
+    explicit XorCombineEngine (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
+            VSMC_NULLPTR) : eng1_(seq), eng2_(seq)
     {
         VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
         VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
     }
 
     XorCombineEngine (const XorCombineEngine<Eng1, Eng2, S1, S2> &other) :
-        eng1_(other.eng1_), eng2_(other.eng2_)
-    {
-        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
-        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
-    }
-
-    XorCombineEngine (XorCombineEngine<Eng1, Eng2, S1, S2> &other) :
         eng1_(other.eng1_), eng2_(other.eng2_)
     {
         VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
@@ -97,7 +87,9 @@ class XorCombineEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq)
+    void seed (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
+            VSMC_NULLPTR)
     {
         eng1_.seed(seq);
         eng2_.seed(seq);
@@ -174,9 +166,5 @@ class XorCombineEngine
 }; // class XorCombineEngine
 
 } // namespace vsmc
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif // VSMC_RNG_COMBINE_HPP
