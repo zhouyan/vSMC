@@ -72,47 +72,6 @@ class RngSet<RngType, Vector>
     std::vector<rng_type> rng_;
 }; // class RngSet
 
-#if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
-
-/// \brief Thread local RNG set
-/// \ingroup RNG
-template <typename RngType>
-class RngSet<RngType, ThreadLocal>
-{
-    public :
-
-    typedef RngType rng_type;
-    typedef std::size_t size_type;
-
-    explicit RngSet (size_type N) : size_(N) {}
-
-    size_type size () const {return size_;}
-
-    rng_type &operator[] (size_type)
-    {
-        static thread_local std::pair<rng_type, bool> rng_flag(
-                rng_type(), false);
-
-        if (rng_flag.second)
-            return rng_flag.first;
-
-        std::lock_guard<std::mutex> lock(mtx_);
-        rng_flag.first.seed(Seed::instance().get());
-        shift_(rng_flag.first);
-        rng_flag.second = true;
-
-        return rng_flag.first;
-    }
-
-    private :
-
-    std::size_t size_;
-    traits::RngShift<rng_type> shift_;
-    std::mutex mtx_;
-}; // class RngSet
-
-#endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
-
 namespace traits {
 
 /// \brief Particle::rng_set_type trait
