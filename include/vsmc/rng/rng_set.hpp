@@ -23,14 +23,12 @@
 
 namespace vsmc {
 
-struct ScalarRng;
-struct VectorRng;
 template <typename, typename> class RngSet;
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
 template <typename RngType>
-class RngSet<RngType, ScalarRng>
+class RngSet<RngType, Scalar>
 {
     public :
 
@@ -41,20 +39,18 @@ class RngSet<RngType, ScalarRng>
 
     size_type size () const {return size_;}
 
-    rng_type &rng (size_type) {return rng_;}
-
     rng_type &operator[] (size_type) {return rng_;}
 
     private :
 
     std::size_t size_;
     rng_type rng_;
-}; // class RngSet<RngType, ScalarRng>
+}; // class RngSet
 
 /// \brief Vector RNG set
 /// \ingroup RNG
 template <typename RngType>
-class RngSet<RngType, VectorRng>
+class RngSet<RngType, Vector>
 {
     public :
 
@@ -69,23 +65,19 @@ class RngSet<RngType, VectorRng>
 
     size_type size () const {return rng_.size();}
 
-    rng_type &rng (size_type id) {return rng_[id];}
-
     rng_type &operator[] (size_type id) {return rng_[id];}
 
     private :
 
     std::vector<rng_type> rng_;
-}; // class RngSet<RngType, VectorRng>
+}; // class RngSet
 
 #if VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
-
-struct ThreadLocalRng;
 
 /// \brief Thread local RNG set
 /// \ingroup RNG
 template <typename RngType>
-class RngSet<RngType, ThreadLocalRng>
+class RngSet<RngType, ThreadLocal>
 {
     public :
 
@@ -96,12 +88,13 @@ class RngSet<RngType, ThreadLocalRng>
 
     size_type size () const {return size_;}
 
-    rng_type &rng (size_type)
+    rng_type &operator[] (size_type)
     {
-        static thread_local std::pair<rng_type, bool> rng_flag =
-            std::make_pair(rng_type(), false);
+        static thread_local std::pair<rng_type, bool> rng_flag(
+                rng_type(), false);
 
-        if (rng_flag.second) return rng_flag.first;
+        if (rng_flag.second)
+            return rng_flag.first;
 
         std::lock_guard<std::mutex> lock(mtx_);
         rng_flag.first.seed(Seed::instance().get());
@@ -111,14 +104,12 @@ class RngSet<RngType, ThreadLocalRng>
         return rng_flag.first;
     }
 
-    rng_type &operator[] (size_type id) {return rng(id);}
-
     private :
 
     std::size_t size_;
     traits::RngShift<rng_type> shift_;
     std::mutex mtx_;
-}; // class RngSet<RngType, ThreadLocalRng>
+}; // class RngSet
 
 #endif // VSMC_HAS_CXX11_THREAD_LOCAL && VSMC_HAS_CXX11LIB_MUTEX
 

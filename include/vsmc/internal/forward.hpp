@@ -17,6 +17,9 @@ namespace vsmc {
 // Template default arguments
 struct Virtual;
 struct NullType;
+struct Scalar;
+struct Vector;
+struct ThreadLocal;
 
 // std::tuple function recursion
 template <std::size_t> struct Position {};

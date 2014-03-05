@@ -120,7 +120,7 @@ class Particle
     double ess () const {return weight_set_.ess();}
 
     /// \brief Get an RNG stream for a given particle
-    rng_type &rng (size_type id) {return rng_set_.rng(id);}
+    rng_type &rng (size_type id) {return rng_set_[id];}
 
     /// \brief Performing resampling if ESS/N < threshold
     ///
