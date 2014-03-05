@@ -146,7 +146,7 @@ template <typename T> struct OMPSizeTypeTrait
 {typedef typename std::ptrdiff_t type;};
 #endif
 
-/// \brief Dimension trait for StateMatrix and StateCL
+/// \brief Dimension trait for StateMatrix and StateCL (fixed dimension)
 /// \ingroup Traits
 template <std::size_t Dim>
 class DimTrait
@@ -156,6 +156,8 @@ class DimTrait
     static VSMC_CONSTEXPR std::size_t dim () {return Dim;}
 };
 
+/// \brief Dimension trait for StateMatrix and StateCL (dynamic dimension)
+/// \ingroup Traits
 template <>
 class DimTrait<Dynamic>
 {
