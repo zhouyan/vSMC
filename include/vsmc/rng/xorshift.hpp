@@ -245,9 +245,9 @@ class XorshiftEngine
 
     void seed (result_type s)
     {
+        index_.reset();
         uint32_t seed = static_cast<uint32_t>(s % uint32_t_max_);
         internal::XorshiftIndex<uint32_t, 1, 0, 0> index;
-        index_.reset();
         for (std::size_t i = 0; i != K; ++i) {
             internal::xorshift<13, 17, 5, 0>(&seed, index);
             state_[i] = seed;
@@ -331,7 +331,7 @@ class XorshiftEngine
     private :
 
     internal::XorshiftIndex<ResultType, K, R, S> index_;
-    StaticVector<result_type, K, traits::XorshiftEngineTrait<ResultType> >
+    StaticVector<ResultType, K, traits::XorshiftEngineTrait<ResultType> >
         state_;
 
     static VSMC_CONSTEXPR const result_type uint32_t_max_ =
