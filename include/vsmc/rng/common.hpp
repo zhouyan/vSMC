@@ -6,6 +6,7 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
+#include <vsmc/utility/static_vector.hpp>
 #include <iostream>
 #include <stdint.h>
 

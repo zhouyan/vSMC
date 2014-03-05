@@ -2,7 +2,6 @@
 #define VSMC_RNG_XORSHIFT_HPP
 
 #include <vsmc/rng/common.hpp>
-#include <vsmc/utility/static_vector.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(K) \
     VSMC_STATIC_ASSERT((K != 0), USE_XorshiftEngine_WITH_ORDER_EUQAL_TO_ZERO)
