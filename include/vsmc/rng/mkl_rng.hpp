@@ -161,16 +161,18 @@ inline void mkl_rng_error_check (MKL_INT BRNG, int status,
 
 namespace traits {
 
-/// \brief Default Seed for MKL RNG
+/// \brief Default seed for MKL RNG
 /// \ingroup Traits
-template<MKL_INT> struct MKLSeedTrait
-{static VSMC_CONSTEXPR const MKL_UINT value = 101;};
+template<MKL_INT> struct MKLSeedTrait :
+    public cxx11::integral_constant<MKL_UINT, 101> {};
 
-template <> struct MKLSeedTrait<VSL_BRNG_SOBOL>
-{static VSMC_CONSTEXPR const MKL_UINT value = 10;};
+/// \brief Default seed for MKL Sobol quasi-RNG
+template <> struct MKLSeedTrait<VSL_BRNG_SOBOL> :
+    public cxx11::integral_constant<MKL_UINT, 10> {};
 
-template <> struct MKLSeedTrait<VSL_BRNG_NIEDERR>
-{static VSMC_CONSTEXPR const MKL_UINT value = 10;};
+/// \brief Default seed for MKL Niederr quasi-RNG
+template <> struct MKLSeedTrait<VSL_BRNG_NIEDERR> :
+    public cxx11::integral_constant<MKL_UINT, 10> {};
 
 /// \brief Skip ahead algorithm for MKL RNG using VSL function
 /// \ingroup Traits

@@ -20,7 +20,7 @@
             USE_XorshiftEngine_WITH_INDEX_##I##_EQUAL_TO_ZERO)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_INDEX_ORDER(R, S, K) \
-    VSMC_STATIC_ASSERT((R > S || K == 1),                                  \
+    VSMC_STATIC_ASSERT((R > S || K == 1),                                    \
             USE_XorshiftEngine_WITH_INDEX_##R##_NOT_LARGER_THAN_##S)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_SHIFT_BITS(A) \
