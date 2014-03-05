@@ -174,9 +174,6 @@ class DimTrait<Dynamic>
     std::size_t dim_;
 };
 
-template <typename Rng>
-struct RngShift {void operator() (Rng &) const {}};
-
 } // namespace vsmc::traits
 
 } // namespace vsmc
