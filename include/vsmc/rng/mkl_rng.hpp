@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_MKL_RNG_HPP
 #define VSMC_RNG_MKL_RNG_HPP
 
-#include <vsmc/rng/seed.hpp>
+#include <vsmc/rng/common.hpp>
 #include <mkl_vsl.h>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
@@ -22,8 +22,8 @@
 namespace vsmc {
 
 template <MKL_INT>            class MKLStream;
-template <MKL_INT, typename>  class MKLEngine;
 template <typename, typename> class MKLDistribution;
+template <MKL_INT, typename>  class MKLEngine;
 template <typename>           class MKLUniformBitsDistribution;
 
 template <MKL_INT = VSL_RNG_METHOD_BERNOULLI_ICDF>
@@ -313,9 +313,10 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 {
     public :
 
-    explicit MKLStream (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value) :
-        seed_(s)
+    explicit MKLStream (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
+            MKL_INT offset = 0) : seed_(s)
     {
+        this->offset(offset);
         int status = ::vslNewStream(&str_ptr_, BRNG + this->offset(), seed_);
         mkl_rng_error_check(BRNG, status,
                 "MKLStream::Stream", "vslNewStream");
@@ -410,13 +411,6 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     VSLStreamStatePtr ptr () const {return str_ptr_;}
-
-    void shift ()
-    {
-        unsigned offset = SeedGenerator<MKLStream<BRNG> >::instance().get();
-        this->offset(static_cast<MKL_INT>(offset));
-        seed(seed_);
-    }
 
     private :
 
@@ -532,8 +526,8 @@ class MKLEngine
         skip_ahead_type;
     typedef MKLUniformBitsDistribution<result_type> runif_type;
 
-    explicit MKLEngine (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value) :
-        stream_(s) {}
+    explicit MKLEngine (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
+            MKL_INT offset = 0) : stream_(s, offset) {}
 
     template <typename SeedSeq>
     explicit MKLEngine (SeedSeq &seq, typename cxx11::enable_if<
