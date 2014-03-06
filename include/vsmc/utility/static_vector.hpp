@@ -8,13 +8,16 @@
 #pragma warning(disable:4351)
 #endif
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N) \
-    VSMC_RUNTIME_ASSERT((i < N),                                             \
-            ("**StaticVector** USED WITH AN INDEX OUT OF RANGE"))
+#define VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N) \
+    VSMC_STATIC_ASSERT((N > 0), USE_StaticVector_WITH_SIZE_ZERO)
 
 #define VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N) \
     VSMC_STATIC_ASSERT((Pos < N),                                            \
             USE_StaticVector_WITH_AN_INDEX_OUT_OF_RANGE)
+
+#define VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N) \
+    VSMC_RUNTIME_ASSERT((i < N),                                             \
+            ("**StaticVector** USED WITH AN INDEX OUT OF RANGE"))
 
 namespace vsmc {
 
@@ -27,11 +30,13 @@ class StaticVectorStorage<T, N, true>
 {
     protected :
 
-    StaticVectorStorage () : data_() {}
+    StaticVectorStorage () : data_()
+    {VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);}
 
     StaticVectorStorage (const StaticVectorStorage<T, N, true> &other) :
         data_()
     {
+        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);
         for (std::size_t i = 0; i != N; ++i)
             data_[i] = other.data_[i];
     }
@@ -69,11 +74,13 @@ class StaticVectorStorage<T, N, false>
 {
     protected :
 
-    StaticVectorStorage () : data_(new T[N]()) {}
+    StaticVectorStorage () : data_(new T[N]())
+    {VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);}
 
     StaticVectorStorage (const StaticVectorStorage<T, N, false> &other) :
         data_(new T[N]())
     {
+        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);
         for (std::size_t i = 0; i != N; ++i)
             data_[i] = other.data_[i];
     }
@@ -91,7 +98,11 @@ class StaticVectorStorage<T, N, false>
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     StaticVectorStorage (StaticVectorStorage<T, N, false> &&other) :
-        data_(other.data_) {other.data_ = VSMC_NULLPTR;}
+        data_(other.data_)
+    {
+        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);
+        other.data_ = VSMC_NULLPTR;
+    }
 
     StaticVectorStorage<T, N, false> &operator= (
             StaticVectorStorage<T, N, false> &&other)
@@ -374,6 +385,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
 }; // class StaticVector
 
 /// \brief StaticVector ADL of swap
+/// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline void swap (
         StaticVector<T, N, Traits> &sv1,
@@ -381,23 +393,27 @@ inline void swap (
 {sv1.swap(sv2);}
 
 /// \brief StaticVector ADL of get
+/// \ingroup StaticVector
 template <std::size_t I, typename T, std::size_t N, typename Traits>
 inline T &get (StaticVector<T, N, Traits> &sv)
 {return sv.template at<I>();}
 
 /// \brief StaticVector ADL of get
+/// \ingroup StaticVector
 template <std::size_t I, typename T, std::size_t N, typename Traits>
 inline const T &get (const StaticVector<T, N, Traits> &sv)
 {return sv.template at<I>();}
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
 /// \brief StaticVector ADL of get
+/// \ingroup StaticVector
 template <std::size_t I, typename T, std::size_t N, typename Traits>
 inline T &&get (StaticVector<T, N, Traits> &&sv)
 {return cxx11::move(sv.template at<I>());}
 #endif
 
 /// \brief StaticVector operator==
+/// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator== (
         StaticVector<T, N, Traits> &sv1,
@@ -411,6 +427,7 @@ inline bool operator== (
 }
 
 /// \brief StaticVector operator!=
+/// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator!= (
         StaticVector<T, N, Traits> &sv1,
@@ -418,6 +435,7 @@ inline bool operator!= (
 {return !(sv1 == sv2);}
 
 /// \brief StaticVector operator<
+/// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator< (
         StaticVector<T, N, Traits> &sv1,
@@ -434,6 +452,7 @@ inline bool operator< (
 }
 
 /// \brief StaticVector operator<=
+/// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator<= (
         StaticVector<T, N, Traits> &sv1,
@@ -450,6 +469,7 @@ inline bool operator<= (
 }
 
 /// \brief StaticVector operator>
+/// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator> (
         StaticVector<T, N, Traits> &sv1,
@@ -457,11 +477,49 @@ inline bool operator> (
 {return !(sv1 <= sv2);}
 
 /// \brief StaticVector operator>=
+/// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator>= (
         StaticVector<T, N, Traits> &sv1,
         StaticVector<T, N, Traits> &sv2)
 {return !(sv1 < sv2);}
+
+/// \brief StaticVector operator<<
+/// \ingroup StaticVector
+template <typename T, std::size_t N, typename Traits,
+         typename CharT, typename CharTraits>
+inline std::basic_ostream<CharT, CharTraits> &operator<< (
+        std::basic_ostream<CharT, CharTraits> &os,
+        const StaticVector<T, N, Traits> &sv)
+{
+    for (std::size_t i = 0; i < N - 1; ++i)
+        os << sv[i] << ' ';
+    os << sv[N - 1];
+
+    return os;
+}
+
+/// \brief StaticVector operator<<
+/// \ingroup StaticVector
+template <typename T, std::size_t N, typename Traits,
+         typename CharT, typename CharTraits>
+inline std::basic_istream<CharT, CharTraits> &operator>> (
+        std::basic_istream<CharT, CharTraits> &is,
+        const StaticVector<T, N, Traits> &sv)
+{
+    StaticVector<T, N, Traits> tmp;
+    for (std::size_t i = 0; i != N; ++i) {
+        if(!(is >> std::ws >> tmp[i]))
+            break;
+    }
+    if (is) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        sv = cxx11::move(tmp);
+#else
+        sv = tmp;
+#endif
+    }
+}
 
 } // namespace vsmc
 

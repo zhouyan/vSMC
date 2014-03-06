@@ -7,6 +7,7 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 #include <vsmc/utility/static_vector.hpp>
+#include <iomanip>
 #include <iostream>
 #include <stdint.h>
 
@@ -75,6 +76,22 @@ inline void rng_array_right_shift (ResultType *state)
     rng_array_right_zero<N, A - 1>(state,
             cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
 }
+
+template <typename ResultType, unsigned N> struct RngRotate;
+
+template <unsigned N>
+struct RngRotate<uint32_t, N>
+{
+    static uint32_t rotate (uint32_t x)
+    {return (x << (N & 31)) | (x >> ((32 - N) & 31));}
+};
+
+template <unsigned N>
+struct RngRotate<uint64_t, N>
+{
+    static uint64_t rotate (uint64_t x)
+    {return (x << (N & 63)) | (x >> ((64 - N) & 63));}
+};
 
 template <typename SeedSeq, typename ResultType>
 struct is_seed_sequence :

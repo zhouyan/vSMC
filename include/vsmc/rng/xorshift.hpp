@@ -284,14 +284,7 @@ class XorshiftEngine
     friend inline bool operator== (
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng1,
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng2)
-    {
-        for (std::size_t i = 0; i != K; ++i) {
-            if (eng1.state_[i] != eng2.state_[i])
-                return false;
-        }
-
-        return true;
-    }
+    {return eng1.state_ == eng2.state_;}
 
     friend inline bool operator!= (
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng1,
@@ -302,27 +295,22 @@ class XorshiftEngine
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
-    {
-        for (std::size_t i = 0; i != K - 1; ++i)
-            os << eng.state_[i] << ' ';
-        os << eng.state_[K - 1];
-
-        return os;
-    }
+    {os << eng.state_; return os;}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
             XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
     {
-        result_type state[K];
-        for (std::size_t i = 0; i != K; ++i) {
-            if(!(is >> std::ws >> state[i]))
-                break;
-        }
+        StaticVector<ResultType, K, traits::XorshiftEngineTrait<ResultType> >
+            tmp;
+        is >> tmp;
         if (is) {
-            for (std::size_t i = 0; i != K; ++i)
-                eng.state_[i] = state[i];
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            eng.state_ = cxx11::move(tmp);
+#else
+            eng.state_ = tmp;
+#endif
         }
 
         return is;
@@ -407,11 +395,7 @@ class XorwowEngine
     }
 
     result_type operator() ()
-    {
-        weyl_ += D;
-
-        return eng_() + weyl_;
-    }
+    {return eng_() + (weyl_ += D);}
 
     void discard (std::size_t nskip)
     {
@@ -440,11 +424,7 @@ class XorwowEngine
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const XorwowEngine<Eng, D, DInit> &eng)
-    {
-        os << eng.eng_ << ' ' << eng.weyl_;
-
-        return os;
-    }
+    {return (os << eng.eng_ << ' ' << eng.weyl_);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
