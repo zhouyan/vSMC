@@ -175,6 +175,27 @@ struct PhiloxRound<ResultType, 4, N, true>
 
 } // namespace vsmc::internal
 
+/// \brief Philox RNG engine reimplemented
+/// \ingroup R123RNG
+///
+/// \details
+/// This is a reimplementation of the algorithm Philox as described in
+/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
+/// [Random123][r123lib]. Currently it is much slower than the original. The
+/// original implementation use some platform dependent assembly or intrinsics
+/// to optimize the performance. This implementation use standard C++. So it is
+/// more portable. But whenever possible, the original should be used.
+///
+/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
+/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
+///
+/// The implementation is almost identical to the original. Compared to
+/// `r123:Engine<Philox2x32>` etc., when using the default constructor of the
+/// one with a single seed, the output shall be exactly the same for the first
+/// \f$2^n\f$ iterations, where \f$n\f$ is the number of bits (32 or 64).
+/// Further iterations may produce different results, as vSMC increment the
+/// counter slightly differently, but it still cover the same range and has the
+/// same period as the original.
 template <typename ResultType, std::size_t K, std::size_t R = 10>
 class PhiloxEngine
 {
