@@ -166,7 +166,7 @@ void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
     const unsigned whalf = 32;
     const uint64_t lomask = (static_cast<uint64_t>(1) << whalf) - 1;
 
-    lo = a * b;
+    lo = static_cast<uint64_t>(a * b);
 
     uint64_t ahi = a >> whalf;
     uint64_t alo = a & lomask;
