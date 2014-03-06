@@ -149,25 +149,34 @@ struct PhiloxBumpk<ResultType, 4, N, true>
     }
 };
 
-template <std::size_t K, std::size_t N, typename ResultType>
-void philox_hilo (ResultType b, ResultType &hi, ResultType &lo)
+template <std::size_t K, std::size_t N>
+void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
 {
-    const ResultType a =
-        traits::PhiloxRoundConstantTrait<ResultType, K, N>::value;
-    const unsigned whalf = RngUIntBits<ResultType>::value / 2;
-    const ResultType lomask = (static_cast<ResultType>(1) << whalf) - 1;
+    uint64_t prod = static_cast<uint64_t>(b) * static_cast<uint64_t>(
+            traits::PhiloxRoundConstantTrait<uint32_t, K, N>::value);
+    hi = prod >> 32;
+    lo = static_cast<uint32_t>(prod);
+}
+
+template <std::size_t K, std::size_t N>
+void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+{
+    const uint64_t a =
+        traits::PhiloxRoundConstantTrait<uint64_t, K, N>::value;
+    const unsigned whalf = 32;
+    const uint64_t lomask = (static_cast<uint64_t>(1) << whalf) - 1;
 
     lo = a * b;
 
-    ResultType ahi = a >> whalf;
-    ResultType alo = a & lomask;
-    ResultType bhi = b >> whalf;
-    ResultType blo = b & lomask;
+    uint64_t ahi = a >> whalf;
+    uint64_t alo = a & lomask;
+    uint64_t bhi = b >> whalf;
+    uint64_t blo = b & lomask;
 
-    ResultType ahbl = ahi * blo;
-    ResultType albh = alo * bhi;
+    uint64_t ahbl = ahi * blo;
+    uint64_t albh = alo * bhi;
 
-    ResultType ahbl_albh = ((ahbl & lomask) + (albh & lomask));
+    uint64_t ahbl_albh = ((ahbl & lomask) + (albh & lomask));
 
     hi = ahi * bhi + (ahbl >> whalf) + (albh >> whalf);
     hi += ahbl_albh >> whalf;
@@ -216,13 +225,20 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// \details
 /// This is a reimplementation of the algorithm Philox as described in
 /// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
-/// [Random123][r123lib]. Currently it is much slower than the original. The
-/// original implementation use some platform dependent assembly or intrinsics
-/// to optimize the performance. This implementation use standard C++. So it is
-/// more portable. But whenever possible, the original should be used.
+/// [Random123][r123lib].
 ///
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
+///
+/// Depending on the compiler, the 32-bits version might be slightly faster
+/// than the original implementation. I have observed a speedup at most of
+/// two-folds when using Clang on a Haswell CPU. In some cases it is slightly
+/// slower (but more close than the faster case).
+///
+/// Currently the 64-bits version is much slower than the original. The
+/// original implementation use some platform dependent assembly or intrinsics
+/// to optimize the performance. This implementation use standard C++. So it is
+/// more portable. But whenever possible, the original should be used.
 ///
 /// The implementation is almost identical to the original. Compared to
 /// `r123:Engine<Philox2x32>` etc., when using the default constructor of the
