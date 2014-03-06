@@ -510,8 +510,17 @@ class ThreefryEngine
 /// \brief Threefry RNG engine re-implemented
 /// \ingroup R123RNG
 typedef ThreefryEngine<uint32_t, 2> Threefry2x32;
+
+/// \brief Threefry RNG engine re-implemented
+/// \ingroup R123RNG
 typedef ThreefryEngine<uint32_t, 4> Threefry4x32;
+
+/// \brief Threefry RNG engine re-implemented
+/// \ingroup R123RNG
 typedef ThreefryEngine<uint64_t, 2> Threefry2x64;
+
+/// \brief Threefry RNG engine re-implemented
+/// \ingroup R123RNG
 typedef ThreefryEngine<uint64_t, 4> Threefry4x64;
 
 } // namespace vsmc

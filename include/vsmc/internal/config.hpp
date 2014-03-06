@@ -62,10 +62,10 @@
 #ifndef VSMC_DEFAULT_RNG_SET_TYPE
 #if VSMC_USE_RANDOM123
 #define VSMC_DEFAULT_RNG_SET_TYPE \
-    ::vsmc::RngSet<::r123::Engine<r123::Philox2x64>, ::vsmc::Vector>
+    ::vsmc::RngSet< ::r123::Engine<r123::Philox2x64>, ::vsmc::Vector>
 #else
 #define VSMC_DEFAULT_RNG_SET_TYPE \
-    ::vsmc::RngSet<::vsmc::Threefry2x64, ::vsmc::Vector>
+    ::vsmc::RngSet< ::vsmc::Threefry2x64, ::vsmc::Vector>
 #endif
 #endif
 
