@@ -225,13 +225,15 @@ struct ThreefryInsert<ResultType, 4, N, true>
 /// \details
 /// This is a reimplementation of the algorithm Threefry as described in
 /// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
-/// [Random123][r123lib]. Depending on the compiler, it might be slightly
-/// faster than the original implementation. I have observed a speedup at most
-/// of two-folds when using Clang on a Haswell CPU. In some cases it is
-/// slightly slower (but more close than the faster case).
+/// [Random123][r123lib].
 ///
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
+///
+/// Depending on the compiler, it might be slightly faster than the original
+/// implementation. I have observed a speedup at most of two-folds when using
+/// Clang on a Haswell CPU. In some cases it is slightly slower (but more close
+/// than the faster case).
 ///
 /// The implementation is almost identical to the original. Compared to
 /// `r123:Engine<Threefry2x32>` etc., when using the default constructor of the
