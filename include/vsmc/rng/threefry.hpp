@@ -3,6 +3,17 @@
 
 #include <vsmc/rng/common.hpp>
 
+#if VSMC_USE_RANDOM123
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4521)
+#endif // _MSC_VER
+#include <Random123/threefry.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // _MSC_VER
+#endif // VSMC_USE_RANDOM123
+
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_same<ResultType, uint32_t>::value ||                  \
@@ -35,6 +46,26 @@ namespace vsmc {
 
 namespace internal {
 
+#if VSMC_USE_RANDOM123
+template <typename, std::size_t, std::size_t> struct ThreefryR123Trait;
+
+template <std::size_t R>
+struct ThreefryR123Trait<uint32_t, 2, R>
+{typedef r123::Threefry2x32_R<R> type;};
+
+template <std::size_t R>
+struct ThreefryR123Trait<uint32_t, 4, R>
+{typedef r123::Threefry4x32_R<R> type;};
+
+template <std::size_t R>
+struct ThreefryR123Trait<uint64_t, 2, R>
+{typedef r123::Threefry2x64_R<R> type;};
+
+template <std::size_t R>
+struct ThreefryR123Trait<uint64_t, 4, R>
+{typedef r123::Threefry4x64_R<R> type;};
+#endif
+
 template <typename, std::size_t> struct ThreefryIncrement;
 
 template <typename ResultType>
@@ -45,6 +76,7 @@ struct ThreefryIncrement<ResultType, 2>
         if (ctr[0] < max_) {++ctr[0]; return;}
         if (ctr[1] < max_) {++ctr[0]; return;}
         ctr[0] = 0;
+        ctr[1] = 0;
     }
 
     private :
@@ -63,6 +95,9 @@ struct ThreefryIncrement<ResultType, 4>
         if (ctr[2] < max_) {++ctr[0]; return;}
         if (ctr[3] < max_) {++ctr[0]; return;}
         ctr[0] = 0;
+        ctr[1] = 0;
+        ctr[2] = 0;
+        ctr[3] = 0;
     }
 
     private :
@@ -71,12 +106,12 @@ struct ThreefryIncrement<ResultType, 4>
             ~(static_cast<ResultType>(0)));
 };
 
-template <typename> struct ThreefryParity;
+template <typename> struct ThreefryKS;
 
-template <> struct ThreefryParity<uint32_t> :
+template <> struct ThreefryKS<uint32_t> :
     public cxx11::integral_constant<uint32_t, 0x1BD11BDA> {};
 
-template <> struct ThreefryParity<uint64_t> :
+template <> struct ThreefryKS<uint64_t> :
     public cxx11::integral_constant<uint64_t,
            (static_cast<uint64_t>(0xA9FC1A22) +
             (static_cast<uint64_t>(0x1BD11BDA) << 32))> {};
@@ -251,6 +286,8 @@ class ThreefryEngine
     public :
 
     typedef ResultType result_type;
+    typedef StaticVector<ResultType, K> key_type;
+    typedef StaticVector<ResultType, K> ctr_type;
 
     explicit ThreefryEngine (result_type s = 0) : remain_(0)
     {
@@ -329,6 +366,35 @@ class ThreefryEngine
         init_ks();
     }
 
+    const key_type &key () const {return key_;}
+
+    const ctr_type &ctr () const {return ctr_;}
+
+    void key (const key_type &k)
+    {
+        key_ = k;
+        init_ks();
+    }
+
+    void ctr (const ctr_type &c) {ctr_ = c;}
+
+#if VSMC_USE_RANDOM123
+    void key (const typename internal::ThreefryR123Trait<
+            ResultType, K, R>::type::key_type &k)
+    {
+        for (std::size_t i = 0; i != K; ++i)
+            key_[i] = k.v[i];
+        init_ks();
+    }
+
+    void ctr (const typename internal::ThreefryR123Trait<
+            ResultType, K, R>::type::ctr_type &c)
+    {
+        for (std::size_t i = 0; i != K; ++i)
+            ctr_[i] = c.v[i];
+    }
+#endif
+
     result_type operator() ()
     {
         if (remain_ > 0)
@@ -406,14 +472,14 @@ class ThreefryEngine
     private :
 
     std::size_t remain_;
-    StaticVector<ResultType, K> key_;
-    StaticVector<ResultType, K> ctr_;
-    StaticVector<ResultType, K> res_;
+    key_type key_;
+    ctr_type ctr_;
+    ctr_type res_;
     StaticVector<ResultType, K + 1> ks_;
 
     void init_ks ()
     {
-        ks_[K] = internal::ThreefryParity<ResultType>::value;
+        ks_[K] = internal::ThreefryKS<ResultType>::value;
         for (std::size_t i = 0; i != K; ++i) {
             ks_[i] = key_[i];
             ks_[K] ^= key_[i];
