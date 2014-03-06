@@ -306,7 +306,7 @@ class ThreefryEngine
 
     ThreefryEngine (const ThreefryEngine<ResultType, K, R> &other) :
         remain_(other.remain_),
-        key_(other.key_), ctr_(other.ctr_), res_(other.res_)
+        key_(other.key_), ctr_(other.ctr_), res_(other.res_), ks_(other.ks_)
     {VSMC_STATIC_ASSERT_RNG_THREEFRY;}
 
     ThreefryEngine<ResultType, K, R> &operator= (
@@ -317,6 +317,7 @@ class ThreefryEngine
             key_ = other.key_;
             ctr_ = other.ctr_;
             res_ = other.res_;
+            ks_ = other.ks_;
         }
 
         return *this;
@@ -337,6 +338,7 @@ class ThreefryEngine
             key_ = cxx11::move(other.key_);
             ctr_ = cxx11::move(other.ctr_);
             res_ = cxx11::move(other.res_);
+            ks_ = cxx11::move(other.ks_);
         }
 
         return *this;
@@ -372,16 +374,22 @@ class ThreefryEngine
 
     void key (const key_type &k)
     {
+        remain_ = 0;
         key_ = k;
         init_ks();
     }
 
-    void ctr (const ctr_type &c) {ctr_ = c;}
+    void ctr (const ctr_type &c)
+    {
+        remain_ = 0;
+        ctr_ = c;
+    }
 
 #if VSMC_USE_RANDOM123
     void key (const typename internal::ThreefryR123Trait<
             ResultType, K, R>::type::key_type &k)
     {
+        remain_ = 0;
         for (std::size_t i = 0; i != K; ++i)
             key_[i] = k.v[i];
         init_ks();
@@ -390,6 +398,7 @@ class ThreefryEngine
     void ctr (const typename internal::ThreefryR123Trait<
             ResultType, K, R>::type::ctr_type &c)
     {
+        remain_ = 0;
         for (std::size_t i = 0; i != K; ++i)
             ctr_[i] = c.v[i];
     }
