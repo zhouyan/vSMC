@@ -38,8 +38,8 @@
         VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_2(K, R);                       \
         VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_4(K, R);
 
-#define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, R, val) \
-    template <> struct ThreefryRotateConstant < T, K, N, R > :               \
+#define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val) \
+    template <> struct ThreefryRotateConstant < T, K, N, I > :               \
         public cxx11::integral_constant< unsigned, val > {};
 
 namespace vsmc {
@@ -65,46 +65,6 @@ template <std::size_t R>
 struct ThreefryR123Trait<uint64_t, 4, R>
 {typedef r123::Threefry4x64_R<R> type;};
 #endif
-
-template <typename, std::size_t> struct ThreefryIncrement;
-
-template <typename ResultType>
-struct ThreefryIncrement<ResultType, 2>
-{
-    static void increment (ResultType *ctr)
-    {
-        if (ctr[0] < max_) {++ctr[0]; return;}
-        if (ctr[1] < max_) {++ctr[0]; return;}
-        ctr[0] = 0;
-        ctr[1] = 0;
-    }
-
-    private :
-
-    static VSMC_CONSTEXPR const ResultType max_ = static_cast<ResultType>(
-            ~(static_cast<ResultType>(0)));
-};
-
-template <typename ResultType>
-struct ThreefryIncrement<ResultType, 4>
-{
-    static void increment (ResultType *ctr)
-    {
-        if (ctr[0] < max_) {++ctr[0]; return;}
-        if (ctr[1] < max_) {++ctr[0]; return;}
-        if (ctr[2] < max_) {++ctr[0]; return;}
-        if (ctr[3] < max_) {++ctr[0]; return;}
-        ctr[0] = 0;
-        ctr[1] = 0;
-        ctr[2] = 0;
-        ctr[3] = 0;
-    }
-
-    private :
-
-    static VSMC_CONSTEXPR const ResultType max_ = static_cast<ResultType>(
-            ~(static_cast<ResultType>(0)));
-};
 
 template <typename> struct ThreefryKS;
 
@@ -173,7 +133,7 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 5, 1, 12)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 6, 1, 22)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 7, 1, 32)
 
-template <typename ResultType, std::size_t, std::size_t N, bool = (N != 0)>
+template <typename ResultType, std::size_t, std::size_t N, bool = (N > 0)>
 struct ThreefryRotate {static void rotate (ResultType *) {}};
 
 template <typename ResultType, std::size_t N>
@@ -409,7 +369,7 @@ class ThreefryEngine
         if (remain_ > 0)
             return res_[--remain_];
 
-        internal::ThreefryIncrement<ResultType, K>::increment(ctr_.data());
+        internal::RngCounterIncrement<ResultType, K>::increment(ctr_.data());
         res_ = ctr_;
         generate<0>(res_.data(), ks_.data(), cxx11::true_type());
         remain_ = K - 1;

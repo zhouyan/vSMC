@@ -3,19 +3,21 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
-#include <vsmc/rng/threefry.hpp>
 
 #if VSMC_USE_RANDOM123
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:4521)
 #endif // _MSC_VER
-#include <Random123/threefry.h>
 #include <Random123/philox.h>
+#include <Random123/threefry.h>
 #include <Random123/conventional/Engine.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // _MSC_VER
+#else //  VSMC_USE_RANDOM123
+#include <vsmc/rng/philox.hpp>
+#include <vsmc/rng/threefry.hpp>
 #endif // VSMC_USE_RANDOM123
 
 namespace vsmc {

@@ -11,6 +11,10 @@
 #include <iostream>
 #include <stdint.h>
 
+#ifndef UINT64_C
+#define DEFINE MACRO __STDC_CONSTANT_MACROS BEFORE INCLUDING <stdint.h>
+#endif
+
 namespace vsmc {
 
 namespace internal {
@@ -77,6 +81,14 @@ inline void rng_array_right_shift (ResultType *state)
             cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
 }
 
+template <typename> struct RngUIntBits;
+
+template <> struct RngUIntBits<uint32_t> :
+    public cxx11::integral_constant<std::size_t, 32> {};
+
+template <> struct RngUIntBits<uint64_t> :
+    public cxx11::integral_constant<std::size_t, 64> {};
+
 template <typename ResultType, unsigned N> struct RngRotate;
 
 template <unsigned N>
@@ -91,6 +103,38 @@ struct RngRotate<uint64_t, N>
 {
     static uint64_t rotate (uint64_t x)
     {return (x << (N & 63)) | (x >> ((64 - N) & 63));}
+};
+
+template <typename, std::size_t> struct RngCounterIncrement;
+
+template <typename ResultType, std::size_t K>
+struct RngCounterIncrement
+{
+    static void increment (ResultType *ctr)
+    {increment<0>(ctr, cxx11::true_type());}
+
+    private :
+
+    static VSMC_CONSTEXPR const ResultType max_ = static_cast<ResultType>(
+            ~(static_cast<ResultType>(0)));
+
+    template <std::size_t>
+    static void increment (ResultType *ctr, cxx11::false_type)
+    {
+        for (std::size_t i = 0; i != K; ++i)
+            ctr[i] = 0;
+    }
+
+    template <std::size_t N>
+    static void increment (ResultType *ctr, cxx11::true_type)
+    {
+        if (ctr[N] < max_) {
+            ++ctr[N];
+            return;
+        }
+
+        increment<N + 1>(ctr, cxx11::integral_constant<bool, N < K>());
+    }
 };
 
 template <typename SeedSeq, typename ResultType>
