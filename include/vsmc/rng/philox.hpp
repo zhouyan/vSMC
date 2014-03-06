@@ -95,6 +95,40 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t, 4, 0,
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t, 4, 1,
         UINT64_C(0xCA5A826395121157))
 
+} // namespace vsmc::internal
+
+namespace traits {
+
+/// \brief Traits of Philox RNG engine constants for bumping the key (Weyl
+/// sequence)
+/// \ingroup Traits
+///
+/// \details
+/// The first template argument is either `uint32_t` or `uint64_t`. The second
+/// is either 0 or 1. Specializing the class templates
+/// `PhiloxBumpkConstantTrait<uint64_t, 0>` etc., are equivalent to define
+/// macros `PHILOX_W64_0` etc., in the original implementation.
+template <typename ResultType, std::size_t N>
+struct PhiloxBumpkConstantTrait :
+    public ::vsmc::internal::PhiloxBumpkConstant<ResultType, N> {};
+
+/// \brief Traits of Philox RNG engine constants for rounding
+/// \ingroup Traits
+///
+/// \details
+/// The first template argument is either `uint32_t` or `uint64_t`. The second
+/// is the size of the RNG, either 2 or 4. The third is either 0 or 1.
+/// Specializing the class templates `PhiloxRoundConstantTrait<uint64_t, 4, 0>`
+/// etc., are equivalent to define macros `PHILOX_M4x64_0` etc., in the
+/// original implementation.
+template <typename ResultType, std::size_t K, std::size_t N>
+struct PhiloxRoundConstantTrait :
+    public ::vsmc::internal::PhiloxRoundConstant<ResultType, K, N> {};
+
+} // namespace vsmc::traits
+
+namespace internal {
+
 template <typename ResultType, std::size_t, std::size_t N, bool = (N > 1)>
 struct PhiloxBumpk {static void bumpk (ResultType *) {}};
 
@@ -102,7 +136,7 @@ template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 2, N, true>
 {
     static void bumpk (ResultType *ks)
-    {ks[0] += PhiloxBumpkConstant<ResultType, 0>::value;}
+    {ks[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;}
 };
 
 template <typename ResultType, std::size_t N>
@@ -110,15 +144,16 @@ struct PhiloxBumpk<ResultType, 4, N, true>
 {
     static void bumpk (ResultType *ks)
     {
-        ks[0] += PhiloxBumpkConstant<ResultType, 0>::value;
-        ks[1] += PhiloxBumpkConstant<ResultType, 1>::value;
+        ks[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
+        ks[1] += traits::PhiloxBumpkConstantTrait<ResultType, 1>::value;
     }
 };
 
 template <std::size_t K, std::size_t N, typename ResultType>
 void philox_hilo (ResultType b, ResultType &hi, ResultType &lo)
 {
-    const ResultType a = PhiloxRoundConstant<ResultType, K, N>::value;
+    const ResultType a =
+        traits::PhiloxRoundConstantTrait<ResultType, K, N>::value;
     const unsigned whalf = RngUIntBits<ResultType>::value / 2;
     const ResultType lomask = (static_cast<ResultType>(1) << whalf) - 1;
 
