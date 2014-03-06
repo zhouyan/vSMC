@@ -81,14 +81,6 @@ inline void rng_array_right_shift (ResultType *state)
             cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
 }
 
-template <typename> struct RngUIntBits;
-
-template <> struct RngUIntBits<uint32_t> :
-    public cxx11::integral_constant<std::size_t, 32> {};
-
-template <> struct RngUIntBits<uint64_t> :
-    public cxx11::integral_constant<std::size_t, 64> {};
-
 template <typename ResultType, unsigned N> struct RngRotate;
 
 template <unsigned N>
