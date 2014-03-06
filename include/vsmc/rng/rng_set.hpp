@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
+#include <vsmc/rng/threefry.hpp>
 
 #if VSMC_USE_RANDOM123
 #ifdef _MSC_VER
