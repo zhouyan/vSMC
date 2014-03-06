@@ -8,12 +8,17 @@
 #pragma warning(disable:4351)
 #endif
 
-#define VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N) \
-    VSMC_STATIC_ASSERT((N > 0), USE_StaticVector_WITH_SIZE_ZERO)
-
 #define VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N) \
     VSMC_STATIC_ASSERT((Pos < N),                                            \
             USE_StaticVector_WITH_AN_INDEX_OUT_OF_RANGE)
+
+#define VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_BEGIN(Begin, N) \
+    VSMC_STATIC_ASSERT((Begin < N),                                          \
+            USE_StaticVector_SLICE_WITH_FIRST_INDEX_TOO_LARGE)
+
+#define VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_END(End, N) \
+    VSMC_STATIC_ASSERT((End < N),                                            \
+            USE_StaticVector_WITH_SLICE_WITH_SECOND_INDEX_TOO_LARGE)
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N) \
     VSMC_RUNTIME_ASSERT((i < N),                                             \
@@ -30,13 +35,11 @@ class StaticVectorStorage<T, N, true>
 {
     protected :
 
-    StaticVectorStorage () : data_()
-    {VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);}
+    StaticVectorStorage () : data_() {}
 
     StaticVectorStorage (const StaticVectorStorage<T, N, true> &other) :
         data_()
     {
-        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);
         for (std::size_t i = 0; i != N; ++i)
             data_[i] = other.data_[i];
     }
@@ -74,13 +77,11 @@ class StaticVectorStorage<T, N, false>
 {
     protected :
 
-    StaticVectorStorage () : data_(new T[N]())
-    {VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);}
+    StaticVectorStorage () : data_(new T[N]()) {}
 
     StaticVectorStorage (const StaticVectorStorage<T, N, false> &other) :
         data_(new T[N]())
     {
-        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);
         for (std::size_t i = 0; i != N; ++i)
             data_[i] = other.data_[i];
     }
@@ -98,11 +99,7 @@ class StaticVectorStorage<T, N, false>
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     StaticVectorStorage (StaticVectorStorage<T, N, false> &&other) :
-        data_(other.data_)
-    {
-        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SIZE(N);
-        other.data_ = VSMC_NULLPTR;
-    }
+        data_(other.data_) {other.data_ = VSMC_NULLPTR;}
 
     StaticVectorStorage<T, N, false> &operator= (
             StaticVectorStorage<T, N, false> &&other)
@@ -382,6 +379,71 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     }
 
     void swap (StaticVector<T, N, Traits> &other) {this->swap_data(other);}
+
+    /// \brief Get a new vector with a different size
+    template <std::size_t Size>
+    StaticVector<T, Size, Traits> resize () const
+    {return resize<Size>(cxx11::integral_constant<bool, Size == N>());}
+
+    /// \brief Get a slice of the vector, [Begin, End)
+    template <std::size_t Begin, std::size_t End>
+    StaticVector<T, End - Begin, Traits> slice () const
+    {
+        return slice<Begin, End>(
+                cxx11::integral_constant<bool, Begin == 0 && End == N>());
+    }
+
+    /// \brief Expand the vector, starting with Begin and size N
+    template <std::size_t Begin, std::size_t Size>
+    StaticVector<T, Size, Traits> expand () const
+    {return expand<Begin, Size>(cxx11::integral_constant<bool, Begin == 0>());}
+
+    private :
+
+    template <std::size_t Size>
+    StaticVector<T, Size, Traits> resize (cxx11::true_type) const
+    {return *this;}
+
+    template <std::size_t Size>
+    StaticVector<T, Size, Traits> resize (cxx11::false_type) const
+    {
+        StaticVector<T, Size, Traits> res;
+        for (std::size_t i = 0, j = 0; i != N && j != Size; ++i, ++j)
+            res[j] = operator[](i);
+
+        return res;
+    }
+
+    template <std::size_t Begin, std::size_t End>
+    StaticVector<T, End - Begin, Traits> slice (cxx11::true_type) const
+    {return *this;}
+
+    template <std::size_t Begin, std::size_t End>
+    StaticVector<T, End - Begin, Traits> slice (cxx11::false_type) const
+    {
+        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_BEGIN(Begin, N);
+        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_END(End, N);
+        StaticVector<T, End - Begin, Traits> res;
+        for (std::size_t i = Begin, j = 0; i != End; ++i, ++j)
+            res[j] = operator[](i);
+
+        return res;
+    }
+
+    template <std::size_t Begin, std::size_t Size>
+    StaticVector<T, Size, Traits> expand (cxx11::true_type) const
+    {return resize<Size>();}
+
+    template <std::size_t Begin, std::size_t Size>
+    StaticVector<T, Size, Traits> expand (cxx11::false_type) const
+    {
+        VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_BEGIN(Begin, N);
+        StaticVector<T, Size, Traits> res;
+        for (std::size_t i = Begin, j = 0; i != N && j != Size; ++i, ++j)
+            res[j] = operator[](i);
+
+        return res;
+    }
 }; // class StaticVector
 
 /// \brief StaticVector ADL of swap

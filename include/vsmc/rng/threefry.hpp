@@ -488,11 +488,10 @@ class ThreefryEngine
 
     void init_ks ()
     {
+        ks_ = key_.template resize<K + 1>();
         ks_[K] = internal::ThreefryKS<ResultType>::value;
-        for (std::size_t i = 0; i != K; ++i) {
-            ks_[i] = key_[i];
-            ks_[K] ^= key_[i];
-        }
+        for (std::size_t i = 0; i != K; ++i)
+            ks_[K] ^= ks_[i];
     }
 
     template <std::size_t N>
