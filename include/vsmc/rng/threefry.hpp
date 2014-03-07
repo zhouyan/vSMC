@@ -266,7 +266,6 @@ class ThreefryEngine
     void seed (result_type s)
     {
         ctr_.fill(0);
-        res_.fill(0);
         key_.fill(0);
         key_[0] = s;
         init_par();
@@ -279,7 +278,6 @@ class ThreefryEngine
             VSMC_NULLPTR)
     {
         ctr_.fill(0);
-        res_.fill(0);
         key_.fill(0);
         seq.generate(key_.begin(), key_.end());
         init_par();

@@ -275,7 +275,6 @@ class PhiloxEngine
     void seed (result_type s)
     {
         ctr_.fill(0);
-        res_.fill(0);
         key_.fill(0);
         key_[0] = s;
         remain_ = 0;
@@ -287,7 +286,6 @@ class PhiloxEngine
             VSMC_NULLPTR)
     {
         ctr_.fill(0);
-        res_.fill(0);
         key_.fill(0);
         seq.generate(key_.begin(), key_.end());
         remain_ = 0;
