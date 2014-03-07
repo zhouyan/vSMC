@@ -255,8 +255,8 @@ class PhiloxEngine
     public :
 
     typedef ResultType result_type;
-    typedef StaticVector<ResultType, K / 2> key_type;
     typedef StaticVector<ResultType, K> ctr_type;
+    typedef StaticVector<ResultType, K / 2> key_type;
 
     explicit PhiloxEngine (result_type s = 0) : remain_(0)
     {
@@ -361,9 +361,7 @@ class PhiloxEngine
     {
         return
             eng1.ctr_ == eng2.ctr_ &&
-            eng1.res_ == eng2.res_ &&
             eng1.key_ == eng2.key_ &&
-            eng1.par_ == eng2.par_ &&
             eng1.remain_ == eng2.remain_;
     }
 

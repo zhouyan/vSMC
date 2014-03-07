@@ -261,8 +261,7 @@ class ThreefryEngine
 
     ThreefryEngine (const ThreefryEngine<ResultType, K, R> &other) :
         key_(other.key_), ctr_(other.ctr_), res_(other.res_), par_(other.par_),
-        remain_(other.remain_)
-    {VSMC_STATIC_ASSERT_RNG_THREEFRY;}
+        remain_(other.remain_) {VSMC_STATIC_ASSERT_RNG_THREEFRY;}
 
     ThreefryEngine<ResultType, K, R> &operator= (
             const ThreefryEngine<ResultType, K, R> &other)
@@ -350,9 +349,7 @@ class ThreefryEngine
     {
         return
             eng1.ctr_ == eng2.ctr_ &&
-            eng1.res_ == eng2.res_ &&
             eng1.key_ == eng2.key_ &&
-            eng1.par_ == eng2.par_ &&
             eng1.remain_ == eng2.remain_;
     }
 
