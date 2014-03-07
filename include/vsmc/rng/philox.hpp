@@ -20,14 +20,10 @@
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND_0(R) \
     VSMC_STATIC_ASSERT((R > 0), USE_PhiloxEngine_WITH_ZERO_ROUND)
 
-#define VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND(R) \
-    VSMC_STATIC_ASSERT((R <= 16), USE_PhiloxEngine_WITH_ROUNDS_LARGER_THAN_16)
-
 #define VSMC_STATIC_ASSERT_RNG_PHILOX \
         VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);               \
         VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K);                               \
-        VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND_0(R);                            \
-        VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND(R);
+        VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND_0(R);
 
 #define VSMC_DEFINE_RNG_PHILOX_BUMPK_CONSTANT(T, I, val) \
     template <> struct PhiloxBumpkConstant < T, I > :                        \
@@ -160,11 +156,11 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 
 #else // VSMC_HAS_INT128
 
-template <std::size_t K, std::size_t N>
-void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+template <std::size_t K, std::size_t I>
+inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
     const uint64_t a =
-        traits::PhiloxRoundConstantTrait<uint64_t, K, N>::value;
+        traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value;
     const unsigned whalf = 32;
     const uint64_t lomask = (static_cast<uint64_t>(1) << whalf) - 1;
 
@@ -274,24 +270,6 @@ class PhiloxEngine
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(seq);
-    }
-
-    PhiloxEngine (const PhiloxEngine<ResultType, K, R> &other) :
-        ctr_(other.ctr_), res_(other.res_), key_(other.key_), par_(other.par_),
-        remain_(other.remain_) {VSMC_STATIC_ASSERT_RNG_PHILOX;}
-
-    PhiloxEngine<ResultType, K, R> &operator= (
-            const PhiloxEngine<ResultType, K, R> &other)
-    {
-        if (this != &other) {
-            ctr_ = other.ctr_;
-            res_ = other.res_;
-            key_ = other.key_;
-            par_ = other.par_;
-            remain_ = other.remain_;
-        }
-
-        return *this;
     }
 
     void seed (result_type s)

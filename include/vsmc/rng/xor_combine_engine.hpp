@@ -7,10 +7,14 @@
     VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<ResultType>::value),      \
             USE_XorCombineEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
 
-#define VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2) \
+#define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_SAME_TYPE(Eng1, Eng2) \
     VSMC_STATIC_ASSERT((::vsmc::cxx11::is_same<                              \
                 typename Eng1::resultType, typename Eng2::resultType>::value),\
             USE_XorCombineEngine_WITH_TWO_RNG_ENGINES_WITH_DIFFERENT_RESULT_TYPE)
+
+#define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE \
+        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(ResultType);             \
+        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
 
 namespace vsmc {
 
@@ -28,57 +32,13 @@ class XorCombineEngine
     typedef Eng2 engine2_type;
 
     explicit XorCombineEngine (result_type s = 123456) : eng1_(s), eng2_(s)
-    {
-        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
-        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
-    }
+    {VSMC_STATIC_ASSERT_RNG_XOR_COMBINE;}
 
     template <typename SeedSeq>
     explicit XorCombineEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR) : eng1_(seq), eng2_(seq)
-    {
-        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
-        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
-    }
-
-    XorCombineEngine (const XorCombineEngine<Eng1, Eng2, S1, S2> &other) :
-        eng1_(other.eng1_), eng2_(other.eng2_)
-    {
-        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
-        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
-    }
-
-    XorCombineEngine<Eng1, Eng2, S1, S2> &operator= (
-            const XorCombineEngine<Eng1, Eng2, S1, S2> &other)
-    {
-        if (this != &other) {
-            eng1_ = other.eng1_;
-            eng2_ = other.eng2_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    XorCombineEngine (XorCombineEngine<Eng1, Eng2, S1, S2> &&other) :
-        eng1_(cxx11::move(other.eng1_)), eng2_(cxx11::move(other.eng2_))
-    {
-        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);
-        VSMC_STATIC_ASSERT_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
-    }
-
-    XorCombineEngine<Eng1, Eng2, S1, S2> &operator= (
-            XorCombineEngine<Eng1, Eng2, S1, S2> &&other)
-    {
-        if (this != &other) {
-            eng1_ = cxx11::move(other.eng1_);
-            eng2_ = cxx11::move(other.eng2_);
-        }
-
-        return *this;
-    }
-#endif
+    {VSMC_STATIC_ASSERT_RNG_XOR_COMBINE;}
 
     void seed (result_type s)
     {

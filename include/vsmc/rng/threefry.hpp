@@ -263,24 +263,6 @@ class ThreefryEngine
         seed(seq);
     }
 
-    ThreefryEngine (const ThreefryEngine<ResultType, K, R> &other) :
-        key_(other.key_), ctr_(other.ctr_), res_(other.res_), par_(other.par_),
-        remain_(other.remain_) {VSMC_STATIC_ASSERT_RNG_THREEFRY;}
-
-    ThreefryEngine<ResultType, K, R> &operator= (
-            const ThreefryEngine<ResultType, K, R> &other)
-    {
-        if (this != &other) {
-            ctr_ = other.ctr_;
-            res_ = other.res_;
-            key_ = other.key_;
-            par_ = other.par_;
-            remain_ = other.remain_;
-        }
-
-        return *this;
-    }
-
     void seed (result_type s)
     {
         ctr_.fill(0);

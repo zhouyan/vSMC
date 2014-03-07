@@ -209,40 +209,6 @@ class XorshiftEngine
         seed(seq);
     }
 
-    XorshiftEngine (
-            const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &other) :
-        index_(other.index_), state_(other.state_)
-    {VSMC_STATIC_ASSERT_RNG_XORSHIFT;}
-
-    XorshiftEngine<ResultType, K, A, B, C, D, R, S> &operator= (
-            const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &other)
-    {
-        if (this != &other) {
-            index_ = other.index_;
-            state_ = other.state_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    XorshiftEngine (
-            XorshiftEngine<ResultType, K, A, B, C, D, R, S> &&other) :
-        index_(cxx11::move(other.index_)), state_(cxx11::move(other.state_))
-    {VSMC_STATIC_ASSERT_RNG_XORSHIFT;}
-
-    XorshiftEngine<ResultType, K, A, B, C, D, R, S> &operator= (
-            XorshiftEngine<ResultType, K, A, B, C, D, R, S> &&other)
-    {
-        if (this != &other) {
-            index_ = cxx11::move(other.index_);
-            state_ = cxx11::move(other.state_);
-        }
-
-        return *this;
-    }
-#endif
-
     void seed (result_type s)
     {
         index_.reset();
@@ -348,36 +314,6 @@ class XorwowEngine
     explicit XorwowEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR) : eng_(seq), weyl_(DInit) {}
-
-    XorwowEngine (const XorwowEngine<Eng, D, DInit> &other) :
-        eng_(other.eng_), weyl_(other.weyl_) {}
-
-    XorwowEngine<Eng, D, DInit> &operator= (
-            const XorwowEngine<Eng, D, DInit> &other)
-    {
-        if (this != &other) {
-            eng_ = other.eng_;
-            weyl_ = other.weyl_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    XorwowEngine (XorwowEngine<Eng, D, DInit> &&other) :
-        eng_(cxx11::move(other.eng_)), weyl_(other.weyl_) {}
-
-    XorwowEngine<Eng, D, DInit> &operator= (
-            XorwowEngine<Eng, D, DInit> &&other)
-    {
-        if (this != &other) {
-            eng_ = cxx11::move(other.eng_);
-            weyl_ = other.weyl_;
-        }
-
-        return *this;
-    }
-#endif
 
     void seed (result_type s)
     {
