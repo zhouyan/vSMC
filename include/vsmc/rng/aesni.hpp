@@ -7,9 +7,8 @@
 #define VSMC_STATIC_ASSERT_RNG_AESNI_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_same<ResultType, uint32_t>::value ||                  \
-             cxx11::is_same<ResultType, uint64_t>::value ||                  \
-             cxx11::is_same<ResultType, __m128i>::value),                    \
-            USE_AESNIEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t_OR_m128i)
+             cxx11::is_same<ResultType, uint64_t>::value),                   \
+            USE_AESNIEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_AESNI \
     VSMC_STATIC_ASSERT_RNG_AESNI_RESULT_TYPE(ResultType);
@@ -94,11 +93,10 @@ class AESNIEngine
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
+        seq.generate(ctr_.begin(), ctr_.end());
+        pack(result_type());
         ctr_.fill(0);
-        seq.generate(res_.begin(), res_.end());
-        __m128i k = _mm_setzero_si128();
-        _mm_storeu_si128(&k, *(reinterpret_cast<__m128i *>(res_.data())));
-        init_key(k);
+        init_key(pac_);
         remain_ = 0;
     }
 
@@ -134,8 +132,21 @@ class AESNIEngine
 
     void discard (std::size_t nskip)
     {
-        for (std::size_t i = 0; i != nskip; ++i)
-            operator()();
+        if (nskip == 0)
+            return;
+
+        --nskip;
+        internal::RngCounter<ResultType, K_>::increment(ctr_.data(), nskip);
+        remain_ = 0;
+        operator()();
+        nskip = nskip % K_;
+        if (remain_ >= nskip) {
+            remain_ -= nskip;
+            return;
+        }
+
+        nskip -= remain_;
+        remain_ = K_ - nskip;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -156,10 +167,32 @@ class AESNIEngine
     __m128i tmp2_;
     std::size_t remain_;
 
+    __m128i expand_seed (uint32_t s)
+    {return _mm_set_epi32(0, 0, 0, static_cast<int32_t>(s));}
+
+    __m128i expand_seed (uint64_t s)
+    {return _mm_set_epi64x(0, static_cast<int64_t>(s));}
+
     void pack ()
     {
-        _mm_storeu_si128(&pac_, *(reinterpret_cast<__m128i *>(ctr_.data())));
+        pack(result_type());
         pac_ = _mm_xor_si128(pac_, key_[0]);
+    }
+
+    void pack (uint32_t)
+    {
+        _mm_set_epi32(
+                static_cast<int32_t>(ctr_.template at<3>()),
+                static_cast<int32_t>(ctr_.template at<2>()),
+                static_cast<int32_t>(ctr_.template at<1>()),
+                static_cast<int32_t>(ctr_.template at<0>()));
+    }
+
+    void pack(uint64_t)
+    {
+        _mm_set_epi64x(
+                static_cast<int64_t>(ctr_.template at<1>()),
+                static_cast<int64_t>(ctr_.template at<0>()));
     }
 
     void unpack ()
@@ -181,12 +214,6 @@ class AESNIEngine
         tmp0_ = k;
         init_key<0>(cxx11::true_type());
     }
-
-    __m128i expand_seed (uint32_t s)
-    {return _mm_set1_epi32(static_cast<int32_t>(s));}
-
-    __m128i expand_seed (uint64_t s)
-    {return _mm_set1_epi64x(static_cast<int64_t>(s));}
 
     template <std::size_t>
     void init_key (cxx11::false_type) {key_[R_] = tmp0_;}

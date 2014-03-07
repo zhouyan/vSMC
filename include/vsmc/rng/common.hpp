@@ -119,6 +119,18 @@ struct RngCounter
     static void increment (ResultType *ctr)
     {increment<0>(ctr, cxx11::true_type());}
 
+    static void increment (ResultType *ctr, std::size_t nskip)
+    {
+        uint64_t nskip_64 = static_cast<uint64_t>(nskip);
+        uint64_t max_64 = static_cast<uint64_t>(max_);
+        while (nskip_64 > max_64) {
+            increment<0>(ctr, max_, cxx11::true_type());
+            nskip_64 -= max_64;
+        }
+        increment<0>(ctr, static_cast<ResultType>(nskip_64),
+                cxx11::true_type());
+    }
+
     private :
 
     static VSMC_CONSTEXPR const ResultType max_ = static_cast<ResultType>(
@@ -140,6 +152,32 @@ struct RngCounter
         }
 
         increment<N + 1>(ctr, cxx11::integral_constant<bool, N < K>());
+    }
+
+    template <std::size_t>
+    static void increment (ResultType *ctr, ResultType nskip,
+            cxx11::false_type)
+    {
+        if (nskip == 0)
+            return;
+
+        for (std::size_t i = 0; i != K; ++i)
+            ctr[i] = 0;
+        --nskip;
+        ctr[0] = nskip;
+    }
+
+    template <std::size_t N>
+    static void increment (ResultType *ctr, ResultType nskip,
+            cxx11::true_type)
+    {
+        if (nskip <= max_ - ctr[N]) {
+            ctr[N] += nskip;
+            return;
+        }
+        ctr[N] = max_;
+        increment<N + 1>(ctr, nskip - (max_ - ctr[N]),
+                cxx11::integral_constant<bool, N < K>());
     }
 };
 

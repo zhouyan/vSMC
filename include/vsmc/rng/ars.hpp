@@ -7,9 +7,8 @@
 #define VSMC_STATIC_ASSERT_RNG_ARS_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_same<ResultType, uint32_t>::value ||                  \
-             cxx11::is_same<ResultType, uint64_t>::value ||                  \
-             cxx11::is_same<ResultType, __m128i>::value),                    \
-            USE_ARSEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t_OR_m128i)
+             cxx11::is_same<ResultType, uint64_t>::value),                   \
+            USE_ARSEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_ARS_ROUND_0(R) \
     VSMC_STATIC_ASSERT((R > 0), USE_ARSEngine_WITH_ZERO_ROUND)
@@ -48,7 +47,10 @@ class ARSEngine
     typedef __m128i key_type;
 
     explicit ARSEngine (result_type s = 0) :
-        par_(_mm_setzero_si128()), weyl_(par_), pac_(par_), remain_(0) 
+        par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
+                    static_cast<int64_t>(UINT64_C(0xBB67AE8584CAA73B)),
+                    static_cast<int64_t>(UINT64_C(0x9E3779B97F4A7C15)))),
+        pac_(par_), remain_(0) 
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
         seed(s);
@@ -58,7 +60,10 @@ class ARSEngine
     explicit ARSEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR) :
-        par_(_mm_setzero_si128()), weyl_(par_), pac_(par_), remain_(0) 
+        par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
+                    static_cast<int64_t>(UINT64_C(0xBB67AE8584CAA73B)),
+                    static_cast<int64_t>(UINT64_C(0x9E3779B97F4A7C15)))),
+        pac_(par_), remain_(0) 
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
         seed(seq);
@@ -76,9 +81,10 @@ class ARSEngine
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
+        seq.generate(ctr_.begin(), ctr_.end());
+        pack(result_type());
         ctr_.fill(0);
-        seq.generate(res_.begin(), res_.end());
-        _mm_storeu_si128(&key_, *(reinterpret_cast<__m128i *>(res_.data())));
+        key_ = pac_;
         remain_ = 0;
     }
 
@@ -114,8 +120,21 @@ class ARSEngine
 
     void discard (std::size_t nskip)
     {
-        for (std::size_t i = 0; i != nskip; ++i)
-            operator()();
+        if (nskip == 0)
+            return;
+
+        --nskip;
+        internal::RngCounter<ResultType, K_>::increment(ctr_.data(), nskip);
+        remain_ = 0;
+        operator()();
+        nskip = nskip % K_;
+        if (remain_ >= nskip) {
+            remain_ -= nskip;
+            return;
+        }
+
+        nskip -= remain_;
+        remain_ = K_ - nskip;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -135,14 +154,33 @@ class ARSEngine
     __m128i pac_;
     std::size_t remain_;
 
+    __m128i expand_seed (uint32_t s)
+    {return _mm_set_epi32(0, 0, 0, static_cast<int32_t>(s));}
+
+    __m128i expand_seed (uint64_t s)
+    {return _mm_set_epi64x(0, static_cast<int64_t>(s));}
+
     void pack ()
     {
         par_ = key_;
-        weyl_ = _mm_set_epi64x(
-                static_cast<int64_t>(UINT64_C(0xBB67AE8584CAA73B)),
-                static_cast<int64_t>(UINT64_C(0x9E3779B97F4A7C15)));
-        _mm_storeu_si128(&pac_, *(reinterpret_cast<__m128i *>(ctr_.data())));
+        pack(result_type());
         pac_ = _mm_xor_si128(pac_, par_);
+    }
+
+    void pack (uint32_t)
+    {
+        _mm_set_epi32(
+                static_cast<int32_t>(ctr_.template at<3>()),
+                static_cast<int32_t>(ctr_.template at<2>()),
+                static_cast<int32_t>(ctr_.template at<1>()),
+                static_cast<int32_t>(ctr_.template at<0>()));
+    }
+
+    void pack(uint64_t)
+    {
+        _mm_set_epi64x(
+                static_cast<int64_t>(ctr_.template at<1>()),
+                static_cast<int64_t>(ctr_.template at<0>()));
     }
 
     void unpack ()
@@ -160,14 +198,8 @@ class ARSEngine
     {
         par_ = _mm_add_epi64(par_, weyl_);
         pac_ = _mm_aesenc_si128(pac_, par_);
-        generate<N + 1>(cxx11::integral_constant<bool, N < R>());
+        generate<N + 1>(cxx11::integral_constant<bool, N  + 1 < R>());
     }
-
-    __m128i expand_seed (uint32_t s)
-    {return _mm_set1_epi32(static_cast<int32_t>(s));}
-
-    __m128i expand_seed (uint64_t s)
-    {return _mm_set1_epi64x(static_cast<int64_t>(s));}
 }; // class ARSEngine
 
 /// \brief ARS RNG engine returning 32-bits integers

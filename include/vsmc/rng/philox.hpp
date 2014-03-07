@@ -323,8 +323,21 @@ class PhiloxEngine
 
     void discard (std::size_t nskip)
     {
-        for (std::size_t i = 0; i != nskip; ++i)
-            operator()();
+        if (nskip == 0)
+            return;
+
+        --nskip;
+        internal::RngCounter<ResultType, K>::increment(ctr_.data(), nskip);
+        remain_ = 0;
+        operator()();
+        nskip = nskip % K;
+        if (remain_ >= nskip) {
+            remain_ -= nskip;
+            return;
+        }
+
+        nskip -= remain_;
+        remain_ = K - nskip;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
