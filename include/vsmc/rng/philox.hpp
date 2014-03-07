@@ -101,20 +101,20 @@ struct PhiloxRoundConstantTrait :
 
 namespace internal {
 
-template <typename ResultType, std::size_t, std::size_t N, bool = (N > 1)>
-struct PhiloxBumpk {static void bumpk (ResultType *) {}};
+template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 1)>
+struct PhiloxBumpk {static void bumpk (StaticVector<ResultType, K / 2> &) {}};
 
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 2, N, true>
 {
-    static void bumpk (ResultType *par)
+    static void bumpk (StaticVector<ResultType, 1> &par)
     {par[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;}
 };
 
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 4, N, true>
 {
-    static void bumpk (ResultType *par)
+    static void bumpk (StaticVector<ResultType, 2> &par)
     {
         par[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
         par[1] += traits::PhiloxBumpkConstantTrait<ResultType, 1>::value;
@@ -183,13 +183,18 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 
 #endif // VSMC_HAS_INT128
 
-template <typename ResultType, std::size_t, std::size_t N, bool = (N > 0)>
-struct PhiloxRound {static void round (ResultType *, const ResultType *) {}};
+template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
+struct PhiloxRound
+{
+    static void round (StaticVector<ResultType, K> &,
+            const StaticVector<ResultType, K / 2> &) {}
+};
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true>
 {
-    static void round (ResultType *state, const ResultType *par)
+    static void round (StaticVector<ResultType, 2> &state,
+            const StaticVector<ResultType, 1> &par)
     {
         ResultType hi = 0;
         ResultType lo = 0;
@@ -202,7 +207,8 @@ struct PhiloxRound<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true>
 {
-    static void round (ResultType *state, const ResultType *par)
+    static void round (StaticVector<ResultType, 4> &state,
+            const StaticVector<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
         ResultType hi1 = 0;
@@ -318,7 +324,7 @@ class PhiloxEngine
         internal::RngCounter<ResultType, K>::increment(ctr_.data());
         par_ = key_;
         res_ = ctr_;
-        generate<0>(res_.data(), par_.data(), cxx11::true_type());
+        generate<0>(cxx11::true_type());
         remain_ = K - 1;
 
         return res_[K - 1];
@@ -404,14 +410,14 @@ class PhiloxEngine
     std::size_t remain_;
 
     template <std::size_t>
-    void generate (result_type *, result_type *, cxx11::false_type) {}
+    void generate (cxx11::false_type) {}
 
     template <std::size_t N>
-    void generate (result_type *state, result_type *par, cxx11::true_type)
+    void generate (cxx11::true_type)
     {
-        internal::PhiloxBumpk<ResultType, K, N>::bumpk(par);
-        internal::PhiloxRound<ResultType, K, N>::round(state, par);
-        generate<N + 1>(state, par, cxx11::integral_constant<bool, N < R>());
+        internal::PhiloxBumpk<ResultType, K, N>::bumpk(par_);
+        internal::PhiloxRound<ResultType, K, N>::round(res_, par_);
+        generate<N + 1>(cxx11::integral_constant<bool, N < R>());
     }
 }; // class PhiloxEngine
 
