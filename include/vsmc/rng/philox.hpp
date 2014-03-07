@@ -230,10 +230,9 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
-/// Depending on the compiler, the 32-bits version might be slightly faster
-/// than the original implementation. I have observed a speedup at most of
-/// two-folds when using Clang on a Haswell CPU. In some cases it is slightly
-/// slower (but more close than the faster case).
+/// Depending on the compilers, processors and RNG configurations, it might be
+/// slightly faster or slower than the original implementation. At most
+/// two-folds performace difference (both faster and slower) were observed.
 ///
 /// Currently the 64-bits version is much slower than the original, except when
 /// using recent Clang, GCC, Intel C++ or MSVC on x86-64 computers. The

@@ -227,10 +227,9 @@ struct ThreefryInsert<ResultType, 4, N, true>
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
-/// Depending on the compiler, it might be slightly faster than the original
-/// implementation. I have observed a speedup at most of two-folds when using
-/// Clang on a Haswell CPU. In some cases it is slightly slower (but more close
-/// than the faster case).
+/// Depending on the compilers, processors and RNG configurations, it might be
+/// slightly faster or slower than the original implementation. At most
+/// two-folds performace difference (both faster and slower) were observed.
 ///
 /// The implementation is almost identical to the original. Compared to
 /// `r123:Engine<r123::Threefry4x32>` etc., when using the default constructor
