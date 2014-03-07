@@ -145,7 +145,7 @@ class ARSEngine
         unpack();
         remain_ = K_ - 1;
 
-        return res_[K_ - 1];
+        return res_.template at<K_ - 1>();
     }
 
     void discard (std::size_t nskip)
@@ -186,32 +186,24 @@ class ARSEngine
 
     void pack ()
     {
-        pack(result_type());
+        pac_ = pack(ctr_);
         pac_ = _mm_xor_si128(pac_, par_);
     }
 
-    void pack (uint32_t)
+    __m128i pack (const StaticVector<uint32_t, 4> &c)
     {
-        par_ = _mm_set_epi32(
-                static_cast<int32_t>(key_.template at<3>()),
-                static_cast<int32_t>(key_.template at<2>()),
-                static_cast<int32_t>(key_.template at<1>()),
-                static_cast<int32_t>(key_.template at<0>()));
-        pac_ = _mm_set_epi32(
-                static_cast<int32_t>(ctr_.template at<3>()),
-                static_cast<int32_t>(ctr_.template at<2>()),
-                static_cast<int32_t>(ctr_.template at<1>()),
-                static_cast<int32_t>(ctr_.template at<0>()));
+        return _mm_set_epi32(
+                static_cast<int32_t>(c.at<3>()),
+                static_cast<int32_t>(c.at<2>()),
+                static_cast<int32_t>(c.at<1>()),
+                static_cast<int32_t>(c.at<0>()));
     }
 
-    void pack(uint64_t)
+    __m128i pack (const StaticVector<uint64_t, 2> &c)
     {
-        par_ = _mm_set_epi64x(
-                static_cast<int64_t>(key_.template at<1>()),
-                static_cast<int64_t>(key_.template at<0>()));
-        pac_ = _mm_set_epi64x(
-                static_cast<int64_t>(ctr_.template at<1>()),
-                static_cast<int64_t>(ctr_.template at<0>()));
+        return _mm_set_epi64x(
+                static_cast<int64_t>(c.at<1>()),
+                static_cast<int64_t>(c.at<0>()));
     }
 
     void unpack ()

@@ -124,7 +124,7 @@ class AESNIEngine
 
     void ukey (const ukey_type &uk)
     {
-        __m128i k = ukey128(uk);
+        __m128i k = pack(uk);
         init_key(k);
         remain_ = 0;
     }
@@ -140,7 +140,7 @@ class AESNIEngine
         unpack();
         remain_ = K_ - 1;
 
-        return res_[K_ - 1];
+        return res_.template at<K_ - 1>();
     }
 
     void discard (std::size_t nskip)
@@ -180,42 +180,26 @@ class AESNIEngine
     __m128i tmp2_;
     std::size_t remain_;
 
-    __m128i ukey128 (const StaticVector<uint32_t, 4> &uk)
-    {
-        return _mm_set_epi32(
-                static_cast<int32_t>(uk.at<3>()),
-                static_cast<int32_t>(uk.at<2>()),
-                static_cast<int32_t>(uk.at<1>()),
-                static_cast<int32_t>(uk.at<0>()));
-    }
-
-    __m128i ukey128 (const StaticVector<uint64_t, 2> &uk)
-    {
-        return _mm_set_epi64x(
-                static_cast<int64_t>(uk.at<1>()),
-                static_cast<int64_t>(uk.at<0>()));
-    }
-
     void pack ()
     {
-        pack(result_type());
-        pac_ = _mm_xor_si128(pac_, key_[0]);
+        pac_ = pack(ctr_);
+        pac_ = _mm_xor_si128(pac_, key_.template at<0>());
     }
 
-    void pack (uint32_t)
+    __m128i pack (const StaticVector<uint32_t, 4> &c)
     {
-        pac_ = _mm_set_epi32(
-                static_cast<int32_t>(ctr_.template at<3>()),
-                static_cast<int32_t>(ctr_.template at<2>()),
-                static_cast<int32_t>(ctr_.template at<1>()),
-                static_cast<int32_t>(ctr_.template at<0>()));
+        return _mm_set_epi32(
+                static_cast<int32_t>(c.at<3>()),
+                static_cast<int32_t>(c.at<2>()),
+                static_cast<int32_t>(c.at<1>()),
+                static_cast<int32_t>(c.at<0>()));
     }
 
-    void pack(uint64_t)
+    __m128i pack (const StaticVector<uint64_t, 2> &c)
     {
-        pac_ = _mm_set_epi64x(
-                static_cast<int64_t>(ctr_.template at<1>()),
-                static_cast<int64_t>(ctr_.template at<0>()));
+        return _mm_set_epi64x(
+                static_cast<int64_t>(c.at<1>()),
+                static_cast<int64_t>(c.at<0>()));
     }
 
     void unpack ()
@@ -223,12 +207,12 @@ class AESNIEngine
 
     template <std::size_t>
     void generate (cxx11::false_type)
-    {pac_ = _mm_aesenclast_si128(pac_, key_[R_]);}
+    {pac_ = _mm_aesenclast_si128(pac_, key_.template at<R_>());}
 
     template <std::size_t N>
     void generate (cxx11::true_type)
     {
-        pac_ = _mm_aesenc_si128(pac_, key_[N + 1]);
+        pac_ = _mm_aesenc_si128(pac_, key_.template at<N + 1>());
         generate<N + 1>(cxx11::integral_constant<bool, N + 2 < R_>());
     }
 
@@ -239,12 +223,12 @@ class AESNIEngine
     }
 
     template <std::size_t>
-    void init_key (cxx11::false_type) {key_[R_] = tmp0_;}
+    void init_key (cxx11::false_type) {key_.template at<R_>() = tmp0_;}
 
     template <std::size_t N>
     void init_key (cxx11::true_type)
     {
-        key_[N] = tmp0_;
+        key_.template at<N>() = tmp0_;
         tmp1_ = _mm_aeskeygenassist_si128(tmp0_,
                 internal::AESNIRoundConstant<N>::value);
         init_key_assit();
