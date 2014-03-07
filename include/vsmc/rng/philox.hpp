@@ -319,16 +319,15 @@ class PhiloxEngine
 
     result_type operator() ()
     {
-        if (remain_ > 0)
-            return res_[--remain_];
+        if (remain_ == 0) {
+            internal::RngCounter<ResultType, K>::increment(ctr_);
+            res_ = ctr_;
+            par_ = key_;
+            generate<0>(cxx11::true_type());
+            remain_ = K;
+        }
 
-        internal::RngCounter<ResultType, K>::increment(ctr_.data());
-        par_ = key_;
-        res_ = ctr_;
-        generate<0>(cxx11::true_type());
-        remain_ = K - 1;
-
-        return res_[K - 1];
+        return res_[--remain_];
     }
 
     void discard (std::size_t nskip)
@@ -337,7 +336,7 @@ class PhiloxEngine
             return;
 
         --nskip;
-        internal::RngCounter<ResultType, K>::increment(ctr_.data(), nskip);
+        internal::RngCounter<ResultType, K>::increment(ctr_, nskip);
         remain_ = 0;
         operator()();
         nskip = nskip % K;

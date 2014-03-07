@@ -116,10 +116,12 @@ inline void rng_array_right_shift (ResultType *state)
 template <typename ResultType, std::size_t K>
 struct RngCounter
 {
-    static void increment (ResultType *ctr)
+    typedef StaticVector<ResultType, K> ctr_type;
+
+    static void increment (ctr_type &ctr)
     {increment<0>(ctr, cxx11::true_type());}
 
-    static void increment (ResultType *ctr, std::size_t nskip)
+    static void increment (ctr_type &ctr, std::size_t nskip)
     {
         uint64_t nskip_64 = static_cast<uint64_t>(nskip);
         uint64_t max_64 = static_cast<uint64_t>(max_);
@@ -137,14 +139,14 @@ struct RngCounter
             ~(static_cast<ResultType>(0)));
 
     template <std::size_t>
-    static void increment (ResultType *ctr, cxx11::false_type)
+    static void increment (ctr_type &ctr, cxx11::false_type)
     {
         for (std::size_t i = 0; i != K; ++i)
             ctr[i] = 0;
     }
 
     template <std::size_t N>
-    static void increment (ResultType *ctr, cxx11::true_type)
+    static void increment (ctr_type &ctr, cxx11::true_type)
     {
         if (ctr[N] < max_) {
             ++ctr[N];
@@ -155,7 +157,7 @@ struct RngCounter
     }
 
     template <std::size_t>
-    static void increment (ResultType *ctr, ResultType nskip,
+    static void increment (ctr_type &ctr, ResultType nskip,
             cxx11::false_type)
     {
         if (nskip == 0)
@@ -168,7 +170,7 @@ struct RngCounter
     }
 
     template <std::size_t N>
-    static void increment (ResultType *ctr, ResultType nskip,
+    static void increment (ctr_type &ctr, ResultType nskip,
             cxx11::true_type)
     {
         if (nskip <= max_ - ctr[N]) {
