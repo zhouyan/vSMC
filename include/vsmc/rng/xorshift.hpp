@@ -295,7 +295,7 @@ class XorshiftEngine
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
-    {os << eng.state_; return os;}
+    {if (os) os << eng.state_; return os;}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
@@ -304,7 +304,7 @@ class XorshiftEngine
     {
         StaticVector<ResultType, K, traits::XorshiftEngineTrait<ResultType> >
             tmp;
-        is >> tmp;
+        if (is) is >> std::ws >> tmp;
         if (is) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
             eng.state_ = cxx11::move(tmp);
@@ -433,7 +433,9 @@ class XorwowEngine
     {
         engine_type eng_tmp;
         result_type weyl_tmp;
-        if (is >> eng_tmp >> std::ws >> weyl_tmp) {
+        if (is) >> std::ws >> eng_tmp;
+        if (is) >> std::ws >> weyl_tmp;
+        if (is) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
             eng.eng_ = cxx11::move(eng_tmp);
 #else

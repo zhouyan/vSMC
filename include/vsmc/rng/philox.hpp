@@ -392,11 +392,11 @@ class PhiloxEngine
             PhiloxEngine<ResultType, K, R> &eng)
     {
         PhiloxEngine eng_tmp;
-        if (is) is >> eng_tmp.ctr_;
-        if (is) is >> eng_tmp.res_;
-        if (is) is >> eng_tmp.key_;
-        if (is) is >> eng_tmp.par_;
-        if (is) is >> eng_tmp.remain_;
+        if (is) is >> std::ws >> eng_tmp.ctr_;
+        if (is) is >> std::ws >> eng_tmp.res_;
+        if (is) is >> std::ws >> eng_tmp.key_;
+        if (is) is >> std::ws >> eng_tmp.par_;
+        if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
 
         return is;

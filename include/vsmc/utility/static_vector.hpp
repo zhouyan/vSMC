@@ -554,9 +554,12 @@ inline std::basic_ostream<CharT, CharTraits> &operator<< (
         std::basic_ostream<CharT, CharTraits> &os,
         const StaticVector<T, N, Traits> &sv)
 {
+    if (!os)
+        return os;
+
     for (std::size_t i = 0; i < N - 1; ++i)
-        os << sv[i] << ' ';
-    os << sv[N - 1];
+        if (os) os << sv[i] << ' ';
+    if (os) os << sv[N - 1];
 
     return os;
 }
@@ -569,10 +572,13 @@ inline std::basic_istream<CharT, CharTraits> &operator>> (
         std::basic_istream<CharT, CharTraits> &is,
         const StaticVector<T, N, Traits> &sv)
 {
+    if (!is)
+        return is;
+
     StaticVector<T, N, Traits> tmp;
     for (std::size_t i = 0; i != N; ++i) {
-        if(!(is >> std::ws >> tmp[i]))
-            break;
+        if (!is) return is;
+        is >> std::ws >> tmp[i];
     }
     if (is) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES

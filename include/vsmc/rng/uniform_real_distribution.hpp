@@ -97,7 +97,8 @@ class UniformRealDistribution
         friend inline std::basic_ostream<CharT, Traits> &operator<< (
                 std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
-            os << param.a() << ' ' << param.b();
+            if (os) os << param.a() << ' ';
+            if (os) os << param.b();
 
             return os;
         }
@@ -108,7 +109,9 @@ class UniformRealDistribution
         {
             result_type a;
             result_type b;
-            if (is >> a >> std::ws >> b) {
+            if (is) is >> std::ws >> a;
+            if (is) is >> std::ws >> b;
+            if (is) {
                 if (a <= b)
                     param = param_type(param_type(a, b));
                 else
