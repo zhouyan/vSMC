@@ -17,13 +17,9 @@
     VSMC_STATIC_ASSERT((K == 2 || K == 4),                                   \
             USE_PhiloxEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
 
-#define VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND_0(R) \
-    VSMC_STATIC_ASSERT((R > 0), USE_PhiloxEngine_WITH_ZERO_ROUND)
-
 #define VSMC_STATIC_ASSERT_RNG_PHILOX \
         VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);               \
-        VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K);                               \
-        VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND_0(R);
+        VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K);
 
 #define VSMC_DEFINE_RNG_PHILOX_BUMPK_CONSTANT(T, I, val) \
     template <> struct PhiloxBumpkConstant < T, I > :                        \
@@ -246,7 +242,12 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// to optimize the performance. This implementation use standard C99 when used
 /// on other platforms.
 ///
-/// The implementation is almost identical to the original. Compared to
+/// This implementation is slightly more flexible in the sense that it does not
+/// limit the number of rounds. However, larger number of rounds can have
+/// undesired effects. To say the least, currently all loops are unrolled,
+/// which can slow down significantly when the number of rounds is large.
+///
+/// This implementation is almost identical to the original. Compared to
 /// `r123:Engine<r123::Philox4x32>` etc., when using the default constructor or
 /// the one with a single seed, the output shall be exactly the same for the
 /// first \f$2^n\f$ iterations, where \f$n\f$ is the number of bits (32 or 64).

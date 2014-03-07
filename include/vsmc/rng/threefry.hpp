@@ -13,23 +13,9 @@
     VSMC_STATIC_ASSERT((K == 2 || K == 4),                                   \
             USE_ThreefryEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
 
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_0(R) \
-    VSMC_STATIC_ASSERT((R > 0), USE_ThreefryEngine_WITH_ZERO_ROUND)
-
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_2(K, R) \
-    VSMC_STATIC_ASSERT((R <= 32 || K == 4),                                  \
-            USE_ThreefryEngine_WITH_SIZE_2_AND_ROUNDS_LARGER_THAN_32)
-
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_4(K, R) \
-    VSMC_STATIC_ASSERT((R <= 72),                                            \
-            USE_ThreefryEngine_WITH_SIZE_4_AND_ROUNDS_LARGER_THAN_72)
-
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY \
         VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType);             \
-        VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K);                             \
-        VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_0(R);                          \
-        VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_2(K, R);                       \
-        VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_4(K, R);
+        VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K);
 
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val) \
     template <> struct ThreefryRotateConstant < T, K, N, I > :               \
@@ -237,7 +223,12 @@ struct ThreefryInsert<ResultType, 4, N, true>
 /// slightly faster or slower than the original implementation. At most
 /// two-folds performace difference (both faster and slower) were observed.
 ///
-/// The implementation is almost identical to the original. Compared to
+/// This implementation is slightly more flexible in the sense that it does not
+/// limit the number of rounds. However, larger number of rounds can have
+/// undesired effects. To say the least, currently all loops are unrolled,
+/// which can slow down significantly when the number of rounds is large.
+///
+/// This implementation is almost identical to the original. Compared to
 /// `r123:Engine<r123::Threefry4x32>` etc., when using the default constructor
 /// or the one with a single seed, the output shall be exactly the same for the
 /// first \f$2^n\f$ iterations, where \f$n\f$ is the number of bits (32 or 64).
