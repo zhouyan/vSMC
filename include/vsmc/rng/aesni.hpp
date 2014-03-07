@@ -44,10 +44,13 @@ VSMC_DEFINE_RNG_AESNI_ROUND_CONSTANT(9, 0x36)
 /// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib].
 ///
-/// The implementation is slightly more flexible in the sense that the rounds
-/// does not have to be 10. Otherwise it is almost identical. However, unlike
-/// the reimplementation ThreefryEngine and PhiloxEngine, this engine won't
-/// give exactly the same output as `AESNI4x32_R` etc.
+/// The implementation is almost identical to the original. Compared to
+/// `r123:Engine<r123::AESNI4x32>`, when using the default constructor or the
+/// one with a single seed, the output shall be exactly the same for the first
+/// \f$2^32\f$ iterations. Further iterations may produce different results, as
+/// vSMC increment the counter slightly differently, but it still cover the
+/// same range and has the same period as the original. In addition, this
+/// engine allows output of 64-bits integers.
 template <typename ResultType>
 class AESNIEngine
 {
@@ -60,6 +63,7 @@ class AESNIEngine
     typedef ResultType result_type;
     typedef StaticVector<ResultType, K_> ctr_type;
     typedef StaticVector<__m128i, R_ + 1> key_type;
+    typedef StaticVector<ResultType, K_> ukey_type;
 
     explicit AESNIEngine (result_type s = 0) :
         pac_(_mm_setzero_si128()),
@@ -83,8 +87,10 @@ class AESNIEngine
     void seed (result_type s)
     {
         ctr_.fill(0);
-        __m128i k = expand_seed(s);
-        init_key(k);
+        ukey_type uk;
+        uk.fill(0);
+        uk.template at<0>() = s;
+        ukey(uk);
         remain_ = 0;
     }
 
@@ -93,26 +99,33 @@ class AESNIEngine
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
-        seq.generate(ctr_.begin(), ctr_.end());
-        pack(result_type());
         ctr_.fill(0);
-        init_key(pac_);
+        ukey_type uk;
+        seq.generate(uk.begin(), uk.end());
+        ukey(uk);
         remain_ = 0;
     }
-
-    const key_type &key () const {return key_;}
 
     const ctr_type &ctr () const {return ctr_;}
 
-    void key (__m128i k)
-    {
-        init_key(k);
-        remain_ = 0;
-    }
+    const key_type &key () const {return key_;}
 
     void ctr (const ctr_type &c)
     {
         ctr_ = c;
+        remain_ = 0;
+    }
+
+    void key (const key_type &k)
+    {
+        key_ = k;
+        remain_ = 0;
+    }
+
+    void ukey (const ukey_type &uk)
+    {
+        __m128i k = ukey128(uk);
+        init_key(k);
         remain_ = 0;
     }
 
@@ -167,11 +180,21 @@ class AESNIEngine
     __m128i tmp2_;
     std::size_t remain_;
 
-    __m128i expand_seed (uint32_t s)
-    {return _mm_set_epi32(0, 0, 0, static_cast<int32_t>(s));}
+    __m128i ukey128 (const StaticVector<uint32_t, 4> &uk)
+    {
+        return _mm_set_epi32(
+                static_cast<int32_t>(uk.at<3>()),
+                static_cast<int32_t>(uk.at<2>()),
+                static_cast<int32_t>(uk.at<1>()),
+                static_cast<int32_t>(uk.at<0>()));
+    }
 
-    __m128i expand_seed (uint64_t s)
-    {return _mm_set_epi64x(0, static_cast<int64_t>(s));}
+    __m128i ukey128 (const StaticVector<uint64_t, 2> &uk)
+    {
+        return _mm_set_epi64x(
+                static_cast<int64_t>(uk.at<1>()),
+                static_cast<int64_t>(uk.at<0>()));
+    }
 
     void pack ()
     {
@@ -181,7 +204,7 @@ class AESNIEngine
 
     void pack (uint32_t)
     {
-        _mm_set_epi32(
+        pac_ = _mm_set_epi32(
                 static_cast<int32_t>(ctr_.template at<3>()),
                 static_cast<int32_t>(ctr_.template at<2>()),
                 static_cast<int32_t>(ctr_.template at<1>()),
@@ -190,7 +213,7 @@ class AESNIEngine
 
     void pack(uint64_t)
     {
-        _mm_set_epi64x(
+        pac_ = _mm_set_epi64x(
                 static_cast<int64_t>(ctr_.template at<1>()),
                 static_cast<int64_t>(ctr_.template at<0>()));
     }
@@ -206,7 +229,7 @@ class AESNIEngine
     void generate (cxx11::true_type)
     {
         pac_ = _mm_aesenc_si128(pac_, key_[N + 1]);
-        generate<N + 1>(cxx11::integral_constant<bool, N + 1 < R_>());
+        generate<N + 1>(cxx11::integral_constant<bool, N + 2 < R_>());
     }
 
     void init_key(__m128i k)
