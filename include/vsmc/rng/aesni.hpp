@@ -40,8 +40,8 @@ class AESNIEngine
     public :
 
     typedef ResultType result_type;
-    typedef StaticVector<__m128i, R + 1> key_type;
     typedef StaticVector<ResultType, K_> ctr_type;
+    typedef StaticVector<__m128i, R + 1> key_type;
 
     explicit AESNIEngine (result_type s = 0) :
         pac_(_mm_setzero_si128()),
@@ -65,8 +65,7 @@ class AESNIEngine
     void seed (result_type s)
     {
         ctr_.fill(0);
-        res_.fill(0);
-        __m128i k = _mm_set1_epi64x(static_cast<int64_t>(s));
+        __m128i k = expand_seed(s);
         init_key(k);
         remain_ = 0;
     }
@@ -77,11 +76,9 @@ class AESNIEngine
             VSMC_NULLPTR)
     {
         ctr_.fill(0);
-        res_.fill(0);
-        ctr_type s;
-        seq.generate(s.begin(), s.end());
+        seq.generate(res_.begin(), res_.end());
         __m128i k = _mm_setzero_si128();
-        _mm_storeu_si128(&k, *(reinterpret_cast<__m128i *>(s.data())));
+        _mm_storeu_si128(&k, *(reinterpret_cast<__m128i *>(res_.data())));
         init_key(k);
         remain_ = 0;
     }
@@ -181,6 +178,12 @@ class AESNIEngine
         init_key<0>(cxx11::true_type());
     }
 
+    __m128i expand_seed (uint32_t s)
+    {return _mm_set1_epi32(static_cast<int32_t>(s));}
+
+    __m128i expand_seed (uint64_t s)
+    {return _mm_set1_epi64x(static_cast<int64_t>(s));}
+
     template <std::size_t>
     void init_key (cxx11::false_type) {key_[R] = tmp0_;}
 
@@ -189,11 +192,11 @@ class AESNIEngine
     {
         key_[N] = tmp0_;
         tmp1_ = _mm_aeskeygenassist_si128(tmp0_, 1<<N);
-        assist_key();
+        init_key_assit();
         init_key<N + 1>(cxx11::integral_constant<bool, N < R>());
     }
 
-    void assist_key ()
+    void init_key_assit ()
     {
         tmp1_ = _mm_shuffle_epi32 (tmp1_ ,0xFF);
         tmp2_ = _mm_slli_si128    (tmp0_, 0x4);
