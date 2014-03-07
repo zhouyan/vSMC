@@ -409,8 +409,7 @@ class PhiloxEngine
     key_type par_;
     std::size_t remain_;
 
-    template <std::size_t>
-    void generate (cxx11::false_type) {}
+    template <std::size_t> void generate (cxx11::false_type) {}
 
     template <std::size_t N>
     void generate (cxx11::true_type)

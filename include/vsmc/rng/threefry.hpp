@@ -130,13 +130,13 @@ struct ThreefryRotateImpl<uint64_t, N>
     static VSMC_CONSTEXPR const unsigned right_ = (64 - N) & 63;
 };
 
-template <typename ResultType, std::size_t, std::size_t N, bool = (N > 0)>
-struct ThreefryRotate {static void rotate (ResultType *) {}};
+template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
+struct ThreefryRotate {static void rotate (StaticVector<ResultType, K> &) {}};
 
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 2, N, true>
 {
-    static void rotate (ResultType *state)
+    static void rotate (StaticVector<ResultType, 2> &state)
     {
         state[0] += state[1];
         state[1] = ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
@@ -152,7 +152,7 @@ struct ThreefryRotate<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 4, N, true>
 {
-    static void rotate (ResultType *state)
+    static void rotate (StaticVector<ResultType, 4> &state)
     {
         state[0] += state[i0_];
         state[i0_] = ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
@@ -172,14 +172,19 @@ struct ThreefryRotate<ResultType, 4, N, true>
     static VSMC_CONSTEXPR const unsigned r_ = (N - 1) % 8;
 };
 
-template <typename ResultType, std::size_t, std::size_t N, bool = (N % 4 == 0)>
+template <typename ResultType, std::size_t K, std::size_t N,
+         bool = (N % 4 == 0)>
 struct ThreefryInsert
-{static void insert (ResultType *, const ResultType *) {}};
+{
+    static void insert (StaticVector<ResultType, K> &,
+            const StaticVector<ResultType, K + 1> &) {}
+};
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsert<ResultType, 2, N, true>
 {
-    static void insert (ResultType *state, const ResultType *par)
+    static void insert (StaticVector<ResultType, 2> &state,
+            const StaticVector<ResultType, 3> &par)
     {
         state[0] += par[i0_];
         state[1] += par[i1_];
@@ -196,7 +201,8 @@ struct ThreefryInsert<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct ThreefryInsert<ResultType, 4, N, true>
 {
-    static void insert (ResultType *state, const ResultType *par)
+    static void insert (StaticVector<ResultType, 4> &state,
+            const StaticVector<ResultType, 5> &par)
     {
         state[0] += par[i0_];
         state[1] += par[i1_];
@@ -307,7 +313,7 @@ class ThreefryEngine
 
         internal::RngCounter<ResultType, K>::increment(ctr_.data());
         res_ = ctr_;
-        generate<0>(res_.data(), par_.data(), cxx11::true_type());
+        generate<0>(cxx11::true_type());
         remain_ = K - 1;
 
         return res_[K - 1];
@@ -400,15 +406,14 @@ class ThreefryEngine
             par_[K] ^= par_[i];
     }
 
-    template <std::size_t>
-    void generate (result_type *, result_type *, cxx11::false_type) {}
+    template <std::size_t> void generate (cxx11::false_type) {}
 
     template <std::size_t N>
-    void generate (result_type *state, result_type *par, cxx11::true_type)
+    void generate (cxx11::true_type)
     {
-        internal::ThreefryRotate<ResultType, K, N>::rotate(state);
-        internal::ThreefryInsert<ResultType, K, N>::insert(state, par);
-        generate<N + 1>(state, par, cxx11::integral_constant<bool, N < R>());
+        internal::ThreefryRotate<ResultType, K, N>::rotate(res_);
+        internal::ThreefryInsert<ResultType, K, N>::insert(res_, par_);
+        generate<N + 1>(cxx11::integral_constant<bool, N < R>());
     }
 }; // class ThreefryEngine
 
