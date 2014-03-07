@@ -55,15 +55,6 @@ namespace traits {
 template <typename ResultType>
 struct XorshiftEngineTrait
 {
-    /// \brief Maximum size in bytes that can be allocated on stack
-    ///
-    /// \details
-    /// The size of the states is `K * sizeof(ResultType)` where `K` is the
-    /// order of the engine. For states smaller than or equal to this value, it
-    /// will be allocated on the stack using an array. Otherwise it will be
-    /// allocated on the heap.
-    static VSMC_CONSTEXPR const std::size_t max_static_size = 1024;
-
     /// \brief Maximum number of states (e.g., 4 in Xorshift4x64) that an
     /// unrolled loop will be used
     ///
@@ -115,7 +106,7 @@ struct XorshiftIndex
     static VSMC_CONSTEXPR std::size_t s () {return K - S;}
     static VSMC_CONSTEXPR std::size_t k () {return K - 1;}
 
-    static void shift (ResultType *state)
+    static void shift (StaticVector<ResultType, K> &state)
     {rng_array_left_shift<K, 1, false>(state);}
 };
 
@@ -130,7 +121,8 @@ struct XorshiftIndex<ResultType, K, R, S, false>
     std::size_t s () {return (K - S + iter_) % K;}
     std::size_t k () {return (K - 1 + iter_) % K;}
 
-    void shift (ResultType *) {iter_ = (iter_ + 1) % K;}
+    void shift (StaticVector<ResultType, K> &)
+    {iter_ = (iter_ + 1) % K;}
 
     private :
 
@@ -139,19 +131,19 @@ struct XorshiftIndex<ResultType, K, R, S, false>
 
 template <unsigned A, unsigned B, unsigned C, unsigned,
     typename ResultType, std::size_t R, std::size_t S>
-inline ResultType xorshift (ResultType *state,
+inline ResultType xorshift (StaticVector<ResultType, 1> &state,
         XorshiftIndex<ResultType, 1, R, S> &)
 {
-    *state ^= (*state)<<A;
-    *state ^= (*state)>>B;
-    *state ^= (*state)<<C;
+    state.front() ^= (state.front())<<A;
+    state.front() ^= (state.front())>>B;
+    state.front() ^= (state.front())<<C;
 
-    return *state;
+    return state.front();
 }
 
 template <unsigned A, unsigned B, unsigned C, unsigned D,
     typename ResultType, std::size_t K, std::size_t R, std::size_t S>
-inline ResultType xorshift (ResultType *state,
+inline ResultType xorshift (StaticVector<ResultType, K> &state,
         XorshiftIndex<ResultType, K, R, S> &index)
 {
     ResultType xr = state[index.r()];
@@ -212,12 +204,11 @@ class XorshiftEngine
     void seed (result_type s)
     {
         index_.reset();
-        uint32_t seed = static_cast<uint32_t>(s % uint32_t_max_);
+        StaticVector<uint32_t, 1> seed;
+        seed.front() = static_cast<uint32_t>(s % uint32_t_max_);
         internal::XorshiftIndex<uint32_t, 1, 0, 0> index;
-        for (std::size_t i = 0; i != K; ++i) {
-            internal::xorshift<13, 17, 5, 0>(&seed, index);
-            state_[i] = seed;
-        }
+        for (std::size_t i = 0; i != K; ++i)
+            state_[i] = internal::xorshift<13, 17, 5, 0>(seed, index);
         discard(4 * K);
     }
 
@@ -232,7 +223,7 @@ class XorshiftEngine
     }
 
     result_type operator() ()
-    {return internal::xorshift<A, B, C, D>(state_.data(), index_);}
+    {return internal::xorshift<A, B, C, D>(state_, index_);}
 
     void discard (std::size_t nskip)
     {
@@ -268,8 +259,7 @@ class XorshiftEngine
             std::basic_istream<CharT, Traits> &is,
             XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
     {
-        StaticVector<ResultType, K, traits::XorshiftEngineTrait<ResultType> >
-            tmp;
+        StaticVector<ResultType, K> tmp;
         if (is) is >> std::ws >> tmp;
         if (is) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
@@ -285,8 +275,7 @@ class XorshiftEngine
     private :
 
     internal::XorshiftIndex<ResultType, K, R, S> index_;
-    StaticVector<ResultType, K, traits::XorshiftEngineTrait<ResultType> >
-        state_;
+    StaticVector<ResultType, K> state_;
 
     static VSMC_CONSTEXPR const result_type uint32_t_max_ =
         static_cast<result_type>(static_cast<uint32_t>(

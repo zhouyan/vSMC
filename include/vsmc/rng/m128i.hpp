@@ -12,15 +12,15 @@ namespace vsmc {
 
 namespace internal {
 
-template <typename T, std::size_t N>
-inline void pack (const StaticVector<T, N> &c, __m128i &m)
+template <typename T, std::size_t N, typename Traits>
+inline void pack (const StaticVector<T, N, Traits> &c, __m128i &m)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(T, N);
     _mm_storeu_si128(&m, *(reinterpret_cast<const __m128i *>(c.data())));
 }
 
-template <typename T, std::size_t N>
-inline void unpack (const __m128i &m, StaticVector<T, N> &c)
+template <typename T, std::size_t N, typename Traits>
+inline void unpack (const __m128i &m, StaticVector<T, N, Traits> &c)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(T, N);
     _mm_storeu_si128(reinterpret_cast<__m128i *>(c.data()), m);

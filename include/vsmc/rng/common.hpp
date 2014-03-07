@@ -51,77 +51,91 @@ namespace vsmc {
 
 namespace internal {
 
-template <std::size_t, std::size_t, std::size_t, typename ResultType>
-inline void rng_array_left_assign (ResultType *, cxx11::false_type) {}
+template <std::size_t K, std::size_t, std::size_t,
+         typename T, typename Traits>
+inline void rng_array_left_assign (StaticVector<T, K, Traits> &,
+        cxx11::false_type) {}
 
-template <std::size_t N, std::size_t A, std::size_t I, typename ResultType>
-inline void rng_array_left_assign (ResultType *state, cxx11::true_type)
+template <std::size_t K, std::size_t A, std::size_t I,
+         typename T, typename Traits>
+inline void rng_array_left_assign (StaticVector<T, K, Traits> &state,
+        cxx11::true_type)
 {
     state[I] = state[I + A];
-    rng_array_left_assign<N, A, I + 1>(state,
-            cxx11::integral_constant<bool, (I + A + 1 < N)>());
+    rng_array_left_assign<K, A, I + 1>(state,
+            cxx11::integral_constant<bool, (I + A + 1 < K)>());
 }
 
-template <std::size_t, std::size_t, typename ResultType>
-inline void rng_array_left_zero (ResultType *, cxx11::false_type) {}
+template <std::size_t K, std::size_t, typename T, typename Traits>
+inline void rng_array_left_zero (StaticVector<T, K, Traits> &,
+        cxx11::false_type) {}
 
-template <std::size_t N, std::size_t I, typename ResultType>
-inline void rng_array_left_zero (ResultType *state, cxx11::true_type)
+template <std::size_t K, std::size_t I, typename T, typename Traits>
+inline void rng_array_left_zero (StaticVector<T, K, Traits> &state,
+        cxx11::true_type)
 {
     state[I] = 0;
-    rng_array_left_zero<N, I + 1>(state,
-            cxx11::integral_constant<bool, (I + 1 < N)>());
+    rng_array_left_zero<K, I + 1>(state,
+            cxx11::integral_constant<bool, (I + 1 < K)>());
 }
 
-template <std::size_t N, std::size_t A, bool fillzero, typename ResultType>
-inline void rng_array_left_shift (ResultType *state)
+template <std::size_t K, std::size_t A, bool fillzero,
+        typename T, typename Traits>
+inline void rng_array_left_shift (StaticVector<T, K, Traits> &state)
 {
-    rng_array_left_assign<N, A, 0>(state,
-            cxx11::integral_constant<bool, (A > 0 && A < N)>());
-    rng_array_left_zero<N, N - A>(state,
-            cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
+    rng_array_left_assign<K, A, 0>(state,
+            cxx11::integral_constant<bool, (A > 0 && A < K)>());
+    rng_array_left_zero<K, K - A>(state,
+            cxx11::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
 }
 
-template <std::size_t, std::size_t, std::size_t, typename ResultType>
-inline void rng_array_right_assign (ResultType *, cxx11::false_type) {}
+template <std::size_t K, std::size_t, std::size_t,
+         typename T, typename Traits>
+inline void rng_array_right_assign (StaticVector<T, K, Traits> &,
+        cxx11::false_type) {}
 
-template <std::size_t N, std::size_t A, std::size_t I, typename ResultType>
-inline void rng_array_right_assign (ResultType *state, cxx11::true_type)
+template <std::size_t K, std::size_t A, std::size_t I,
+        typename T, typename Traits>
+inline void rng_array_right_assign (StaticVector<T, K, Traits> &state,
+        cxx11::true_type)
 {
     state[I] = state[I - A];
-    rng_array_right_assign<N, A, I - 1>(state,
+    rng_array_right_assign<K, A, I - 1>(state,
             cxx11::integral_constant<bool, (A < I)>());
 }
 
-template <std::size_t, std::size_t, typename ResultType>
-inline void rng_array_right_zero (ResultType *, cxx11::false_type) {}
+template <std::size_t K, std::size_t, typename T, typename Traits>
+inline void rng_array_right_zero (StaticVector<T, K, Traits> &,
+        cxx11::false_type) {}
 
-template <std::size_t N, std::size_t I, typename ResultType>
-inline void rng_array_right_zero (ResultType *state, cxx11::true_type)
+template <std::size_t K, std::size_t I, typename T, typename Traits>
+inline void rng_array_right_zero (StaticVector<T, K, Traits> &state,
+        cxx11::true_type)
 {
     state[I] = 0;
-    rng_array_right_zero<N, I - 1>(state,
+    rng_array_right_zero<K, I - 1>(state,
             cxx11::integral_constant<bool, (I > 0)>());
 }
 
-template <std::size_t N, std::size_t A, bool fillzero, typename ResultType>
-inline void rng_array_right_shift (ResultType *state)
+template <std::size_t K, std::size_t A, bool fillzero,
+        typename T, typename Traits>
+inline void rng_array_right_shift (StaticVector<T, K, Traits> &state)
 {
-    rng_array_right_assign<N, A, N - 1>(state,
-            cxx11::integral_constant<bool, (A > 0 && A < N)>());
-    rng_array_right_zero<N, A - 1>(state,
-            cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
+    rng_array_right_assign<K, A, K - 1>(state,
+            cxx11::integral_constant<bool, (A > 0 && A < K)>());
+    rng_array_right_zero<K, A - 1>(state,
+            cxx11::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
 }
 
-template <typename ResultType, std::size_t K>
+template <typename T, std::size_t K>
 struct RngCounter
 {
-    typedef StaticVector<ResultType, K> ctr_type;
-
-    static void increment (ctr_type &ctr)
+    template <typename Traits>
+    static void increment (StaticVector<T, K, Traits> &ctr)
     {increment<0>(ctr, cxx11::true_type());}
 
-    static void increment (ctr_type &ctr, std::size_t nskip)
+    template <typename Traits>
+    static void increment (StaticVector<T, K, Traits> &ctr, std::size_t nskip)
     {
         uint64_t nskip_64 = static_cast<uint64_t>(nskip);
         uint64_t max_64 = static_cast<uint64_t>(max_);
@@ -129,24 +143,24 @@ struct RngCounter
             increment<0>(ctr, max_, cxx11::true_type());
             nskip_64 -= max_64;
         }
-        increment<0>(ctr, static_cast<ResultType>(nskip_64),
+        increment<0>(ctr, static_cast<T>(nskip_64),
                 cxx11::true_type());
     }
 
     private :
 
-    static VSMC_CONSTEXPR const ResultType max_ = static_cast<ResultType>(
-            ~(static_cast<ResultType>(0)));
+    static VSMC_CONSTEXPR const T max_ = static_cast<T>(
+            ~(static_cast<T>(0)));
 
-    template <std::size_t>
-    static void increment (ctr_type &ctr, cxx11::false_type)
+    template <std::size_t, typename Traits>
+    static void increment (StaticVector<T, K, Traits> &ctr, cxx11::false_type)
     {
         for (std::size_t i = 0; i != K; ++i)
             ctr[i] = 0;
     }
 
-    template <std::size_t N>
-    static void increment (ctr_type &ctr, cxx11::true_type)
+    template <std::size_t N, typename Traits>
+    static void increment (StaticVector<T, K, Traits> &ctr, cxx11::true_type)
     {
         if (ctr[N] < max_) {
             ++ctr[N];
@@ -156,8 +170,8 @@ struct RngCounter
         increment<N + 1>(ctr, cxx11::integral_constant<bool, N < K>());
     }
 
-    template <std::size_t>
-    static void increment (ctr_type &ctr, ResultType nskip,
+    template <std::size_t, typename Traits>
+    static void increment (StaticVector<T, K, Traits> &ctr, T nskip,
             cxx11::false_type)
     {
         if (nskip == 0)
@@ -169,8 +183,8 @@ struct RngCounter
         ctr[0] = nskip;
     }
 
-    template <std::size_t N>
-    static void increment (ctr_type &ctr, ResultType nskip,
+    template <std::size_t N, typename Traits>
+    static void increment (StaticVector<T, K, Traits> &ctr, T nskip,
             cxx11::true_type)
     {
         if (nskip <= max_ - ctr[N]) {
@@ -183,12 +197,11 @@ struct RngCounter
     }
 };
 
-template <typename SeedSeq, typename ResultType>
+template <typename SeedSeq, typename T>
 struct is_seed_sequence :
     public cxx11::integral_constant<bool,
-    !cxx11::is_convertible<SeedSeq, ResultType>::value &&
-    !cxx11::is_same<
-    typename cxx11::remove_cv<SeedSeq>::type, ResultType>::value> {};
+    !cxx11::is_convertible<SeedSeq, T>::value &&
+    !cxx11::is_same<typename cxx11::remove_cv<SeedSeq>::type, T>::value> {};
 
 } // namespace vsmc::internal
 
