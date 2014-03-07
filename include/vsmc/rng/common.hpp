@@ -113,8 +113,6 @@ inline void rng_array_right_shift (ResultType *state)
             cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
 }
 
-template <typename, std::size_t> struct RngCounter;
-
 template <typename ResultType, std::size_t K>
 struct RngCounter
 {
