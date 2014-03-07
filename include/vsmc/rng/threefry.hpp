@@ -133,6 +133,30 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 5, 1, 12)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 6, 1, 22)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 7, 1, 32)
 
+template <typename ResultType, unsigned N> struct ThreefryRotateImpl;
+
+template <unsigned N>
+struct ThreefryRotateImpl<uint32_t, N>
+{
+    static uint32_t rotate (uint32_t x) {return (x << left_ | x >> right_);}
+
+    private :
+
+    static VSMC_CONSTEXPR const unsigned left_ = N & 31;
+    static VSMC_CONSTEXPR const unsigned right_ = (32 - N) & 31;
+};
+
+template <unsigned N>
+struct ThreefryRotateImpl<uint64_t, N>
+{
+    static uint64_t rotate (uint64_t x) {return (x << left_ | x >> right_);}
+
+    private :
+
+    static VSMC_CONSTEXPR const unsigned left_ = N & 63;
+    static VSMC_CONSTEXPR const unsigned right_ = (64 - N) & 63;
+};
+
 template <typename ResultType, std::size_t, std::size_t N, bool = (N > 0)>
 struct ThreefryRotate {static void rotate (ResultType *) {}};
 
@@ -142,7 +166,7 @@ struct ThreefryRotate<ResultType, 2, N, true>
     static void rotate (ResultType *state)
     {
         state[0] += state[1];
-        state[1] = RngRotate<ResultType, ThreefryRotateConstant<
+        state[1] = ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
             ResultType, 2, r_, 0>::value>::rotate(state[1]);
         state[1] ^= state[0];
     }
@@ -158,12 +182,12 @@ struct ThreefryRotate<ResultType, 4, N, true>
     static void rotate (ResultType *state)
     {
         state[0] += state[i0_];
-        state[i0_] = RngRotate<ResultType, ThreefryRotateConstant<
+        state[i0_] = ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
             ResultType, 4, r_, 0>::value>::rotate(state[i0_]);
         state[i0_] ^= state[0];
 
         state[2] += state[i2_];
-        state[i2_] = RngRotate<ResultType, ThreefryRotateConstant<
+        state[i2_] = ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
             ResultType, 4, r_, 1>::value>::rotate(state[i2_]);
         state[i2_] ^= state[2];
     }
@@ -371,7 +395,7 @@ class ThreefryEngine
         if (remain_ > 0)
             return res_[--remain_];
 
-        internal::RngCounterIncrement<ResultType, K>::increment(ctr_.data());
+        internal::RngCounter<ResultType, K>::increment(ctr_.data());
         res_ = ctr_;
         generate<0>(res_.data(), ks_.data(), cxx11::true_type());
         remain_ = K - 1;

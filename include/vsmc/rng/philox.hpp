@@ -3,6 +3,10 @@
 
 #include <vsmc/rng/common.hpp>
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 #if VSMC_USE_RANDOM123
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -150,13 +154,39 @@ struct PhiloxBumpk<ResultType, 4, N, true>
 };
 
 template <std::size_t K, std::size_t N>
-void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
+inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
 {
-    uint64_t prod = static_cast<uint64_t>(b) * static_cast<uint64_t>(
-            traits::PhiloxRoundConstantTrait<uint32_t, K, N>::value);
+    uint64_t prod =
+        static_cast<uint64_t>(b) *
+        static_cast<uint64_t>(
+                traits::PhiloxRoundConstantTrait<uint32_t, K, N>::value);
     hi = prod >> 32;
     lo = static_cast<uint32_t>(prod);
 }
+
+#if VSMC_HAS_INT128
+
+template <std::size_t K, std::size_t N>
+inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+{
+    VSMC_UINT128 prod =
+        static_cast<VSMC_UINT128>(b) *
+        static_cast<VSMC_UINT128>(
+                traits::PhiloxRoundConstantTrait<uint64_t, K, N>::value);
+    hi = prod >> 64;
+    lo = static_cast<uint64_t>(prod);
+}
+
+#elif defined(_MSC_VER) // VSMC_HAS_INT128
+
+template <std::size_t K, std::size_t N>
+inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+{
+    lo = _umul128(traits::PhiloxRoundConstantTrait<uint64_t, K, N>::value, b,
+            &hi);
+}
+
+#else // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t N>
 void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
@@ -182,6 +212,8 @@ void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
     hi += ahbl_albh >> whalf;
     hi += ((lo >> whalf) < (ahbl_albh & lomask));
 }
+
+#endif // VSMC_HAS_INT128
 
 template <typename ResultType, std::size_t, std::size_t N, bool = (N > 0)>
 struct PhiloxRound {static void round (ResultType *, const ResultType *) {}};
@@ -235,10 +267,11 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// two-folds when using Clang on a Haswell CPU. In some cases it is slightly
 /// slower (but more close than the faster case).
 ///
-/// Currently the 64-bits version is much slower than the original. The
+/// Currently the 64-bits version is much slower than the original, except when
+/// using recent Clang, GCC, Intel C++ or MSVC on x86-64 computers. The
 /// original implementation use some platform dependent assembly or intrinsics
-/// to optimize the performance. This implementation use standard C++. So it is
-/// more portable. But whenever possible, the original should be used.
+/// to optimize the performance. This implementation use standard C99 when used
+/// on other platforms.
 ///
 /// The implementation is almost identical to the original. Compared to
 /// `r123:Engine<Philox2x32>` etc., when using the default constructor of the
@@ -372,7 +405,7 @@ class PhiloxEngine
         if (remain_ > 0)
             return res_[--remain_];
 
-        internal::RngCounterIncrement<ResultType, K>::increment(ctr_.data());
+        internal::RngCounter<ResultType, K>::increment(ctr_.data());
         ks_ = key_;
         res_ = ctr_;
         generate<0>(res_.data(), ks_.data(), cxx11::true_type());

@@ -15,6 +15,38 @@
 #define DEFINE MACRO __STDC_CONSTANT_MACROS BEFORE INCLUDING <stdint.h>
 #endif
 
+#ifndef VSMC_HAS_INT128
+#undef VSMC_INT128
+#undef VSMC_UINT128
+#if defined(__INTEL_COMPILER)
+#define VSMC_HAS_INT128 1
+#define VSMC_INT128  __int128_t
+#define VSMC_UINT128 __uint128_t
+#elif defined(__clang__)
+#define VSMC_HAS_INT128 1
+#define VSMC_INT128  __int128_t
+#define VSMC_UINT128 __uint128_t
+#elif defined(__OPEN64__)
+#define VSMC_HAS_INT128 0
+#elif defined(__SUNPRO_CC)
+#define VSMC_HAS_INT128 0
+#elif defined(__GNUC__)
+#ifdef __x86_64__
+#define VSMC_HAS_INT128 1
+#define VSMC_INT128  __int128_t
+#define VSMC_UINT128 __uint128_t
+#else
+#define VSMC_HAS_INT128 0
+#endif
+#elif defined(_MSC_VER)
+#define VSMC_HAS_INT128 0
+#endif
+#endif
+
+#ifndef VSMC_HAS_INT128
+#define VSMC_HAS_INT128 0
+#endif
+
 namespace vsmc {
 
 namespace internal {
@@ -81,26 +113,10 @@ inline void rng_array_right_shift (ResultType *state)
             cxx11::integral_constant<bool, (fillzero && A > 0 && A <= N)>());
 }
 
-template <typename ResultType, unsigned N> struct RngRotate;
-
-template <unsigned N>
-struct RngRotate<uint32_t, N>
-{
-    static uint32_t rotate (uint32_t x)
-    {return (x << (N & 31)) | (x >> ((32 - N) & 31));}
-};
-
-template <unsigned N>
-struct RngRotate<uint64_t, N>
-{
-    static uint64_t rotate (uint64_t x)
-    {return (x << (N & 63)) | (x >> ((64 - N) & 63));}
-};
-
-template <typename, std::size_t> struct RngCounterIncrement;
+template <typename, std::size_t> struct RngCounter;
 
 template <typename ResultType, std::size_t K>
-struct RngCounterIncrement
+struct RngCounter
 {
     static void increment (ResultType *ctr)
     {increment<0>(ctr, cxx11::true_type());}
