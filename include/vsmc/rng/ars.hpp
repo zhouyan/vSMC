@@ -134,6 +134,17 @@ class ARSEngine
         remain_ = 0;
     }
 
+    /// \brief Same as operator() but return the __m128i type
+    __m128i generate ()
+    {
+        internal::RngCounter<ResultType, K_>::increment(ctr_.data());
+        pack();
+        generate<0>(cxx11::integral_constant<bool, 1 < R>());
+        remain_ = 0;
+
+        return pac_;
+    }
+
     result_type operator() ()
     {
         if (remain_ > 0)
