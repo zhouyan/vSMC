@@ -233,9 +233,9 @@ struct ThreefryInsert<ResultType, 4, N, true>
 /// than the faster case).
 ///
 /// The implementation is almost identical to the original. Compared to
-/// `r123:Engine<Threefry2x32>` etc., when using the default constructor of the
-/// one with a single seed, the output shall be exactly the same for the first
-/// \f$2^n\f$ iterations, where \f$n\f$ is the number of bits (32 or 64).
+/// `r123:Engine<r123::Threefry4x32>` etc., when using the default constructor
+/// or the one with a single seed, the output shall be exactly the same for the
+/// first \f$2^n\f$ iterations, where \f$n\f$ is the number of bits (32 or 64).
 /// Further iterations may produce different results, as vSMC increment the
 /// counter slightly differently, but it still cover the same range and has the
 /// same period as the original.
@@ -284,20 +284,20 @@ class ThreefryEngine
         remain_ = 0;
     }
 
+    const ctr_type &ctr () const {return ctr_;}
+
     const key_type &key () const {return key_;}
 
-    const ctr_type &ctr () const {return ctr_;}
+    void ctr (const ctr_type &c)
+    {
+        ctr_ = c;
+        remain_ = 0;
+    }
 
     void key (const key_type &k)
     {
         key_ = k;
         init_par();
-        remain_ = 0;
-    }
-
-    void ctr (const ctr_type &c)
-    {
-        ctr_ = c;
         remain_ = 0;
     }
 
