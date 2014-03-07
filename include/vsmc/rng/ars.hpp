@@ -14,8 +14,12 @@
 #define VSMC_STATIC_ASSERT_RNG_ARS_ROUND_0(R) \
     VSMC_STATIC_ASSERT((R > 0), USE_ARSEngine_WITH_ZERO_ROUND)
 
+#define VSMC_STATIC_ASSERT_RNG_ARS_ROUND(R) \
+    VSMC_STATIC_ASSERT((R <= 10), USE_ARSEngine_WITH_ROUNDS_LARGER_THAN_10)
+
 #define VSMC_STATIC_ASSERT_RNG_ARS \
-    VSMC_STATIC_ASSERT_RNG_ARS_ROUND_0(R);
+    VSMC_STATIC_ASSERT_RNG_ARS_ROUND_0(R);                                   \
+    VSMC_STATIC_ASSERT_RNG_ARS_ROUND(R);
 
 namespace vsmc {
 
@@ -120,21 +124,6 @@ class ARSEngine
 
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
-
-    friend inline bool operator== (
-            const ARSEngine<ResultType, R> &eng1,
-            const ARSEngine<ResultType, R> &eng2)
-    {
-        return
-            eng1.ctr_ == eng2.ctr_ &&
-            eng1.key_ == eng2.key_ &&
-            eng1.remain_ == eng2.remain_ ;
-    }
-
-    friend inline bool operator!= (
-            const ARSEngine<ResultType, R> &eng1,
-            const ARSEngine<ResultType, R> &eng2)
-    {return !(eng1 == eng2);}
 
     private :
 

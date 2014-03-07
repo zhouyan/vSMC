@@ -145,21 +145,6 @@ class AESNIEngine
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
-    friend inline bool operator== (
-            const AESNIEngine<ResultType> &eng1,
-            const AESNIEngine<ResultType> &eng2)
-    {
-        return
-            eng1.ctr_ == eng2.ctr_ &&
-            eng1.key_ == eng2.key_ &&
-            eng1.remain_ == eng2.remain_ ;
-    }
-
-    friend inline bool operator!= (
-            const AESNIEngine<ResultType> &eng1,
-            const AESNIEngine<ResultType> &eng2)
-    {return !(eng1 == eng2);}
-
     private :
 
     ctr_type ctr_;
