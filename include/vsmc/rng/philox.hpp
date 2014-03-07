@@ -7,17 +7,6 @@
 #include <intrin.h>
 #endif
 
-#if VSMC_USE_RANDOM123
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4521)
-#endif // _MSC_VER
-#include <Random123/philox.h>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-#endif // VSMC_USE_RANDOM123
-
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_same<ResultType, uint32_t>::value ||                  \
@@ -48,26 +37,6 @@
 namespace vsmc {
 
 namespace internal {
-
-#if VSMC_USE_RANDOM123
-template <typename, std::size_t, std::size_t> struct PhiloxR123Trait;
-
-template <std::size_t R>
-struct PhiloxR123Trait<uint32_t, 2, R>
-{typedef r123::Philox2x32_R<R> type;};
-
-template <std::size_t R>
-struct PhiloxR123Trait<uint32_t, 4, R>
-{typedef r123::Philox4x32_R<R> type;};
-
-template <std::size_t R>
-struct PhiloxR123Trait<uint64_t, 2, R>
-{typedef r123::Philox2x64_R<R> type;};
-
-template <std::size_t R>
-struct PhiloxR123Trait<uint64_t, 4, R>
-{typedef r123::Philox4x64_R<R> type;};
-#endif
 
 template <typename, std::size_t> struct PhiloxBumpkConstant;
 
@@ -139,17 +108,17 @@ struct PhiloxBumpk {static void bumpk (ResultType *) {}};
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 2, N, true>
 {
-    static void bumpk (ResultType *ks)
-    {ks[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;}
+    static void bumpk (ResultType *par)
+    {par[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;}
 };
 
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 4, N, true>
 {
-    static void bumpk (ResultType *ks)
+    static void bumpk (ResultType *par)
     {
-        ks[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
-        ks[1] += traits::PhiloxBumpkConstantTrait<ResultType, 1>::value;
+        par[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
+        par[1] += traits::PhiloxBumpkConstantTrait<ResultType, 1>::value;
     }
 };
 
@@ -221,12 +190,12 @@ struct PhiloxRound {static void round (ResultType *, const ResultType *) {}};
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true>
 {
-    static void round (ResultType *state, const ResultType *ks)
+    static void round (ResultType *state, const ResultType *par)
     {
         ResultType hi = 0;
         ResultType lo = 0;
         philox_hilo<2, 0>(state[0], hi, lo);
-        state[0] = hi^ks[0]^state[1];
+        state[0] = hi^par[0]^state[1];
         state[1] = lo;
     }
 };
@@ -234,7 +203,7 @@ struct PhiloxRound<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true>
 {
-    static void round (ResultType *state, const ResultType *ks)
+    static void round (ResultType *state, const ResultType *par)
     {
         ResultType hi0 = 0;
         ResultType hi1 = 0;
@@ -242,9 +211,9 @@ struct PhiloxRound<ResultType, 4, N, true>
         ResultType lo1 = 0;
         philox_hilo<4, 0>(state[0], hi0, lo0);
         philox_hilo<4, 1>(state[2], hi1, lo1);
-        state[0] = hi1^state[1]^ks[0];
+        state[0] = hi1^state[1]^par[0];
         state[1] = lo1;
-        state[2] = hi0^state[3]^ks[1];
+        state[2] = hi0^state[3]^par[1];
         state[3] = lo0;
     }
 };
@@ -305,53 +274,30 @@ class PhiloxEngine
     }
 
     PhiloxEngine (const PhiloxEngine<ResultType, K, R> &other) :
-        remain_(other.remain_),
-        key_(other.key_), ctr_(other.ctr_), res_(other.res_), ks_(other.ks_)
-    {VSMC_STATIC_ASSERT_RNG_PHILOX;}
+        ctr_(other.ctr_), res_(other.res_), key_(other.key_), par_(other.par_),
+        remain_(other.remain_) {VSMC_STATIC_ASSERT_RNG_PHILOX;}
 
     PhiloxEngine<ResultType, K, R> &operator= (
             const PhiloxEngine<ResultType, K, R> &other)
     {
         if (this != &other) {
-            remain_ = other.remain_;
-            key_ = other.key_;
             ctr_ = other.ctr_;
             res_ = other.res_;
-            ks_ = other.ks_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    PhiloxEngine (PhiloxEngine<ResultType, K, R> &&other) :
-        remain_(other.remain_),
-        key_(cxx11::move(other.key_)), ctr_(cxx11::move(other.ctr_)),
-        res_(cxx11::move(other.res_))
-    {VSMC_STATIC_ASSERT_RNG_PHILOX;}
-
-    PhiloxEngine<ResultType, K, R> &operator= (
-            PhiloxEngine<ResultType, K, R> &&other)
-    {
-        if (this != &other) {
+            key_ = other.key_;
+            par_ = other.par_;
             remain_ = other.remain_;
-            key_ = cxx11::move(other.key_);
-            ctr_ = cxx11::move(other.ctr_);
-            res_ = cxx11::move(other.res_);
-            ks_ = cxx11::move(other.ks_);
         }
 
         return *this;
     }
-#endif
 
     void seed (result_type s)
     {
-        remain_ = 0;
-        key_.fill(0);
         ctr_.fill(0);
         res_.fill(0);
+        key_.fill(0);
         key_[0] = s;
+        remain_ = 0;
     }
 
     template <typename SeedSeq>
@@ -359,11 +305,11 @@ class PhiloxEngine
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
-        remain_ = 0;
-        key_.fill(0);
         ctr_.fill(0);
         res_.fill(0);
+        key_.fill(0);
         seq.generate(key_.begin(), key_.end());
+        remain_ = 0;
     }
 
     const key_type &key () const {return key_;}
@@ -372,33 +318,15 @@ class PhiloxEngine
 
     void key (const key_type &k)
     {
-        remain_ = 0;
         key_ = k;
+        remain_ = 0;
     }
 
     void ctr (const ctr_type &c)
     {
-        remain_ = 0;
         ctr_ = c;
-    }
-
-#if VSMC_USE_RANDOM123
-    void key (const typename internal::PhiloxR123Trait<
-            ResultType, K, R>::type::key_type &k)
-    {
         remain_ = 0;
-        for (std::size_t i = 0; i != K / 2; ++i)
-            key_[i] = k.v[i];
     }
-
-    void ctr (const typename internal::PhiloxR123Trait<
-            ResultType, K, R>::type::ctr_type &c)
-    {
-        remain_ = 0;
-        for (std::size_t i = 0; i != K; ++i)
-            ctr_[i] = c.v[i];
-    }
-#endif
 
     result_type operator() ()
     {
@@ -406,9 +334,9 @@ class PhiloxEngine
             return res_[--remain_];
 
         internal::RngCounter<ResultType, K>::increment(ctr_.data());
-        ks_ = key_;
+        par_ = key_;
         res_ = ctr_;
-        generate<0>(res_.data(), ks_.data(), cxx11::true_type());
+        generate<0>(res_.data(), par_.data(), cxx11::true_type());
         remain_ = K - 1;
 
         return res_[K - 1];
@@ -431,10 +359,12 @@ class PhiloxEngine
             const PhiloxEngine<ResultType, K, R> &eng1,
             const PhiloxEngine<ResultType, K, R> &eng2)
     {
-        return eng1.remain_ == eng2.remain_ &&
-            eng1.key_ == eng2.key_ &&
+        return
             eng1.ctr_ == eng2.ctr_ &&
-            eng1.res_ == eng2.res_;
+            eng1.res_ == eng2.res_ &&
+            eng1.key_ == eng2.key_ &&
+            eng1.par_ == eng2.par_ &&
+            eng1.remain_ == eng2.remain_;
     }
 
     friend inline bool operator!= (
@@ -447,8 +377,11 @@ class PhiloxEngine
             std::basic_ostream<CharT, Traits> &os,
             const PhiloxEngine<ResultType, K, R> &eng)
     {
-        os << eng.remain_ << ' ';
-        os << eng.key_ << ' ' << eng.ctr_ << ' ' << eng.res_ << ' ' << eng.ks_;
+        if (os) os << eng.ctr_ << ' ';
+        if (os) os << eng.res_ << ' ';
+        if (os) os << eng.key_ << ' ';
+        if (os) os << eng.par_ << ' ';
+        if (os) os << eng.remain_;
 
         return os;
     }
@@ -459,39 +392,33 @@ class PhiloxEngine
             PhiloxEngine<ResultType, K, R> &eng)
     {
         PhiloxEngine eng_tmp;
-        if (is) is >> eng_tmp.remain_;
-        if (is) is >> eng_tmp.key_;
         if (is) is >> eng_tmp.ctr_;
         if (is) is >> eng_tmp.res_;
-        if (is) is >> eng_tmp.ks_;
-        if (is) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            eng = cxx11::move(eng_tmp);
-#else
-            eng = eng_tmp;
-#endif
-        }
+        if (is) is >> eng_tmp.key_;
+        if (is) is >> eng_tmp.par_;
+        if (is) is >> eng_tmp.remain_;
+        if (is) eng = eng_tmp;
 
         return is;
     }
 
     private :
 
-    std::size_t remain_;
-    key_type key_;
     ctr_type ctr_;
     ctr_type res_;
-    key_type ks_;
+    key_type key_;
+    key_type par_;
+    std::size_t remain_;
 
     template <std::size_t N>
     void generate (result_type *, result_type *, cxx11::false_type) {}
 
     template <std::size_t N>
-    void generate (result_type *state, result_type *ks, cxx11::true_type)
+    void generate (result_type *state, result_type *par, cxx11::true_type)
     {
-        internal::PhiloxBumpk<ResultType, K, N>::bumpk(ks);
-        internal::PhiloxRound<ResultType, K, N>::round(state, ks);
-        generate<N + 1>(state, ks, cxx11::integral_constant<bool, N < R>());
+        internal::PhiloxBumpk<ResultType, K, N>::bumpk(par);
+        internal::PhiloxRound<ResultType, K, N>::round(state, par);
+        generate<N + 1>(state, par, cxx11::integral_constant<bool, N < R>());
     }
 }; // class PhiloxEngine
 

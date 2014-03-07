@@ -3,17 +3,6 @@
 
 #include <vsmc/rng/common.hpp>
 
-#if VSMC_USE_RANDOM123
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4521)
-#endif // _MSC_VER
-#include <Random123/threefry.h>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif // _MSC_VER
-#endif // VSMC_USE_RANDOM123
-
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_same<ResultType, uint32_t>::value ||                  \
@@ -46,32 +35,12 @@ namespace vsmc {
 
 namespace internal {
 
-#if VSMC_USE_RANDOM123
-template <typename, std::size_t, std::size_t> struct ThreefryR123Trait;
+template <typename> struct ThreefryPar;
 
-template <std::size_t R>
-struct ThreefryR123Trait<uint32_t, 2, R>
-{typedef r123::Threefry2x32_R<R> type;};
-
-template <std::size_t R>
-struct ThreefryR123Trait<uint32_t, 4, R>
-{typedef r123::Threefry4x32_R<R> type;};
-
-template <std::size_t R>
-struct ThreefryR123Trait<uint64_t, 2, R>
-{typedef r123::Threefry2x64_R<R> type;};
-
-template <std::size_t R>
-struct ThreefryR123Trait<uint64_t, 4, R>
-{typedef r123::Threefry4x64_R<R> type;};
-#endif
-
-template <typename> struct ThreefryKS;
-
-template <> struct ThreefryKS<uint32_t> :
+template <> struct ThreefryPar<uint32_t> :
     public cxx11::integral_constant<uint32_t, 0x1BD11BDA> {};
 
-template <> struct ThreefryKS<uint64_t> :
+template <> struct ThreefryPar<uint64_t> :
     public cxx11::integral_constant<uint64_t,
            (static_cast<uint64_t>(0xA9FC1A22) +
             (static_cast<uint64_t>(0x1BD11BDA) << 32))> {};
@@ -206,10 +175,10 @@ struct ThreefryInsert
 template <typename ResultType, std::size_t N>
 struct ThreefryInsert<ResultType, 2, N, true>
 {
-    static void insert (ResultType *state, const ResultType *ks)
+    static void insert (ResultType *state, const ResultType *par)
     {
-        state[0] += ks[i0_];
-        state[1] += ks[i1_];
+        state[0] += par[i0_];
+        state[1] += par[i1_];
         state[1] += inc_;
     }
 
@@ -223,12 +192,12 @@ struct ThreefryInsert<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct ThreefryInsert<ResultType, 4, N, true>
 {
-    static void insert (ResultType *state, const ResultType *ks)
+    static void insert (ResultType *state, const ResultType *par)
     {
-        state[0] += ks[i0_];
-        state[1] += ks[i1_];
-        state[2] += ks[i2_];
-        state[3] += ks[i3_];
+        state[0] += par[i0_];
+        state[1] += par[i1_];
+        state[2] += par[i2_];
+        state[3] += par[i3_];
         state[3] += inc_;
     }
 
@@ -272,8 +241,8 @@ class ThreefryEngine
     public :
 
     typedef ResultType result_type;
-    typedef StaticVector<ResultType, K> key_type;
     typedef StaticVector<ResultType, K> ctr_type;
+    typedef StaticVector<ResultType, K> key_type;
 
     explicit ThreefryEngine (result_type s = 0) : remain_(0)
     {
@@ -291,54 +260,32 @@ class ThreefryEngine
     }
 
     ThreefryEngine (const ThreefryEngine<ResultType, K, R> &other) :
-        remain_(other.remain_),
-        key_(other.key_), ctr_(other.ctr_), res_(other.res_), ks_(other.ks_)
+        key_(other.key_), ctr_(other.ctr_), res_(other.res_), par_(other.par_),
+        remain_(other.remain_)
     {VSMC_STATIC_ASSERT_RNG_THREEFRY;}
 
     ThreefryEngine<ResultType, K, R> &operator= (
             const ThreefryEngine<ResultType, K, R> &other)
     {
         if (this != &other) {
-            remain_ = other.remain_;
-            key_ = other.key_;
             ctr_ = other.ctr_;
             res_ = other.res_;
-            ks_ = other.ks_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    ThreefryEngine (ThreefryEngine<ResultType, K, R> &&other) :
-        remain_(other.remain_),
-        key_(cxx11::move(other.key_)), ctr_(cxx11::move(other.ctr_)),
-        res_(cxx11::move(other.res_))
-    {VSMC_STATIC_ASSERT_RNG_THREEFRY;}
-
-    ThreefryEngine<ResultType, K, R> &operator= (
-            ThreefryEngine<ResultType, K, R> &&other)
-    {
-        if (this != &other) {
+            key_ = other.key_;
+            par_ = other.par_;
             remain_ = other.remain_;
-            key_ = cxx11::move(other.key_);
-            ctr_ = cxx11::move(other.ctr_);
-            res_ = cxx11::move(other.res_);
-            ks_ = cxx11::move(other.ks_);
         }
 
         return *this;
     }
-#endif
 
     void seed (result_type s)
     {
-        remain_ = 0;
-        key_.fill(0);
         ctr_.fill(0);
         res_.fill(0);
+        key_.fill(0);
         key_[0] = s;
-        init_ks();
+        init_par();
+        remain_ = 0;
     }
 
     template <typename SeedSeq>
@@ -346,12 +293,12 @@ class ThreefryEngine
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
-        remain_ = 0;
-        key_.fill(0);
         ctr_.fill(0);
         res_.fill(0);
+        key_.fill(0);
         seq.generate(key_.begin(), key_.end());
-        init_ks();
+        init_par();
+        remain_ = 0;
     }
 
     const key_type &key () const {return key_;}
@@ -360,35 +307,16 @@ class ThreefryEngine
 
     void key (const key_type &k)
     {
-        remain_ = 0;
         key_ = k;
-        init_ks();
+        init_par();
+        remain_ = 0;
     }
 
     void ctr (const ctr_type &c)
     {
-        remain_ = 0;
         ctr_ = c;
-    }
-
-#if VSMC_USE_RANDOM123
-    void key (const typename internal::ThreefryR123Trait<
-            ResultType, K, R>::type::key_type &k)
-    {
         remain_ = 0;
-        for (std::size_t i = 0; i != K; ++i)
-            key_[i] = k.v[i];
-        init_ks();
     }
-
-    void ctr (const typename internal::ThreefryR123Trait<
-            ResultType, K, R>::type::ctr_type &c)
-    {
-        remain_ = 0;
-        for (std::size_t i = 0; i != K; ++i)
-            ctr_[i] = c.v[i];
-    }
-#endif
 
     result_type operator() ()
     {
@@ -397,7 +325,7 @@ class ThreefryEngine
 
         internal::RngCounter<ResultType, K>::increment(ctr_.data());
         res_ = ctr_;
-        generate<0>(res_.data(), ks_.data(), cxx11::true_type());
+        generate<0>(res_.data(), par_.data(), cxx11::true_type());
         remain_ = K - 1;
 
         return res_[K - 1];
@@ -420,10 +348,12 @@ class ThreefryEngine
             const ThreefryEngine<ResultType, K, R> &eng1,
             const ThreefryEngine<ResultType, K, R> &eng2)
     {
-        return eng1.remain_ == eng2.remain_ &&
-            eng1.key_ == eng2.key_ &&
+        return
             eng1.ctr_ == eng2.ctr_ &&
-            eng1.res_ == eng2.res_;
+            eng1.res_ == eng2.res_ &&
+            eng1.key_ == eng2.key_ &&
+            eng1.par_ == eng2.par_ &&
+            eng1.remain_ == eng2.remain_;
     }
 
     friend inline bool operator!= (
@@ -436,8 +366,11 @@ class ThreefryEngine
             std::basic_ostream<CharT, Traits> &os,
             const ThreefryEngine<ResultType, K, R> &eng)
     {
-        os << eng.remain_ << ' ';
-        os << eng.key_ << ' ' << eng.ctr_ << ' ' << eng.res_ << ' ' << eng.ks_;
+        if (os) os << eng.ctr_ << ' ';
+        if (os) os << eng.res_ << ' ';
+        if (os) os << eng.key_ << ' ';
+        if (os) os << eng.par_ << ' ';
+        if (os) os << eng.remain_;
 
         return os;
     }
@@ -448,47 +381,41 @@ class ThreefryEngine
             ThreefryEngine<ResultType, K, R> &eng)
     {
         ThreefryEngine eng_tmp;
-        if (is) is >> eng_tmp.remain_;
-        if (is) is >> eng_tmp.key_;
-        if (is) is >> eng_tmp.ctr_;
-        if (is) is >> eng_tmp.res_;
-        if (is) is >> eng_tmp.ks_;
-        if (is) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            eng = cxx11::move(eng_tmp);
-#else
-            eng = eng_tmp;
-#endif
-        }
+        if (is) is >> std::ws >> eng_tmp.ctr_;
+        if (is) is >> std::ws >> eng_tmp.res_;
+        if (is) is >> std::ws >> eng_tmp.key_;
+        if (is) is >> std::ws >> eng_tmp.par_;
+        if (is) is >> std::ws >> eng_tmp.remain_;
+        if (is) eng = eng_tmp;
 
         return is;
     }
 
     private :
 
-    std::size_t remain_;
-    key_type key_;
     ctr_type ctr_;
     ctr_type res_;
-    StaticVector<ResultType, K + 1> ks_;
+    key_type key_;
+    StaticVector<ResultType, K + 1> par_;
+    std::size_t remain_;
 
-    void init_ks ()
+    void init_par ()
     {
-        ks_ = key_.template resize<K + 1>();
-        ks_[K] = internal::ThreefryKS<ResultType>::value;
+        par_ = key_.template resize<K + 1>();
+        par_[K] = internal::ThreefryPar<ResultType>::value;
         for (std::size_t i = 0; i != K; ++i)
-            ks_[K] ^= ks_[i];
+            par_[K] ^= par_[i];
     }
 
     template <std::size_t N>
     void generate (result_type *, result_type *, cxx11::false_type) {}
 
     template <std::size_t N>
-    void generate (result_type *state, result_type *ks, cxx11::true_type)
+    void generate (result_type *state, result_type *par, cxx11::true_type)
     {
         internal::ThreefryRotate<ResultType, K, N>::rotate(state);
-        internal::ThreefryInsert<ResultType, K, N>::insert(state, ks);
-        generate<N + 1>(state, ks, cxx11::integral_constant<bool, N < R>());
+        internal::ThreefryInsert<ResultType, K, N>::insert(state, par);
+        generate<N + 1>(state, par, cxx11::integral_constant<bool, N < R>());
     }
 }; // class ThreefryEngine
 
