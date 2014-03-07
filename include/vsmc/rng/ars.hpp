@@ -30,10 +30,13 @@ namespace vsmc {
 /// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib].
 ///
-/// The implementation is slightly more flexible in the sense that the rounds
-/// does not have to be 10. Otherwise it is almost identical. However, unlike
-/// the reimplementation ThreefryEngine and PhiloxEngine, this engine won't
-/// give exactly the same output as `ARS4x32_R` etc.
+/// The implementation is almost identical to the original. Compared to
+/// `r123:Engine<r123::ARS4x32_R<10> >` etc., when using the default
+/// constructor or the one with a single seed, the output shall be exactly the
+/// same for the first \f$2^32\f$ iterations. Further iterations may produce
+/// different results, as vSMC increment the counter slightly differently, but
+/// it still cover the same range and has the same period as the original. In
+/// addition, this engine allows output of 64-bits integers.
 template <typename ResultType, std::size_t R = 10>
 class ARSEngine
 {
@@ -44,7 +47,7 @@ class ARSEngine
 
     typedef ResultType result_type;
     typedef StaticVector<ResultType, K_> ctr_type;
-    typedef __m128i key_type;
+    typedef StaticVector<ResultType, K_> key_type;
 
     explicit ARSEngine (result_type s = 0) :
         par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
@@ -72,7 +75,8 @@ class ARSEngine
     void seed (result_type s)
     {
         ctr_.fill(0);
-        key_ = expand_seed(s);
+        key_.fill(0);
+        key_[0] = s;
         remain_ = 0;
     }
 
@@ -81,26 +85,24 @@ class ARSEngine
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
-        seq.generate(ctr_.begin(), ctr_.end());
-        pack(result_type());
         ctr_.fill(0);
-        key_ = pac_;
+        seq.generate(key_.begin(), key_.end());
         remain_ = 0;
     }
-
-    const key_type &key () const {return key_;}
 
     const ctr_type &ctr () const {return ctr_;}
 
-    void key (key_type k)
-    {
-        key_ = k;
-        remain_ = 0;
-    }
+    const key_type &key () const {return key_;}
 
     void ctr (const ctr_type &c)
     {
         ctr_ = c;
+        remain_ = 0;
+    }
+
+    void key (key_type k)
+    {
+        key_ = k;
         remain_ = 0;
     }
 
@@ -111,7 +113,7 @@ class ARSEngine
 
         internal::RngCounter<ResultType, K_>::increment(ctr_.data());
         pack();
-        generate<0>(cxx11::true_type());
+        generate<0>(cxx11::integral_constant<bool, 1 < R>());
         unpack();
         remain_ = K_ - 1;
 
@@ -154,22 +156,20 @@ class ARSEngine
     __m128i pac_;
     std::size_t remain_;
 
-    __m128i expand_seed (uint32_t s)
-    {return _mm_set_epi32(0, 0, 0, static_cast<int32_t>(s));}
-
-    __m128i expand_seed (uint64_t s)
-    {return _mm_set_epi64x(0, static_cast<int64_t>(s));}
-
     void pack ()
     {
-        par_ = key_;
         pack(result_type());
         pac_ = _mm_xor_si128(pac_, par_);
     }
 
     void pack (uint32_t)
     {
-        _mm_set_epi32(
+        par_ = _mm_set_epi32(
+                static_cast<int32_t>(key_.template at<3>()),
+                static_cast<int32_t>(key_.template at<2>()),
+                static_cast<int32_t>(key_.template at<1>()),
+                static_cast<int32_t>(key_.template at<0>()));
+        pac_ = _mm_set_epi32(
                 static_cast<int32_t>(ctr_.template at<3>()),
                 static_cast<int32_t>(ctr_.template at<2>()),
                 static_cast<int32_t>(ctr_.template at<1>()),
@@ -178,7 +178,10 @@ class ARSEngine
 
     void pack(uint64_t)
     {
-        _mm_set_epi64x(
+        par_ = _mm_set_epi64x(
+                static_cast<int64_t>(key_.template at<1>()),
+                static_cast<int64_t>(key_.template at<0>()));
+        pac_ = _mm_set_epi64x(
                 static_cast<int64_t>(ctr_.template at<1>()),
                 static_cast<int64_t>(ctr_.template at<0>()));
     }
@@ -198,7 +201,7 @@ class ARSEngine
     {
         par_ = _mm_add_epi64(par_, weyl_);
         pac_ = _mm_aesenc_si128(pac_, par_);
-        generate<N + 1>(cxx11::integral_constant<bool, N  + 1 < R>());
+        generate<N + 1>(cxx11::integral_constant<bool, N  + 2 < R>());
     }
 }; // class ARSEngine
 
