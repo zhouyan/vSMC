@@ -13,17 +13,21 @@
     VSMC_STATIC_ASSERT((K == 2 || K == 4),                                   \
             USE_ThreefryEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
 
+#define VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_0(R) \
+    VSMC_STATIC_ASSERT((R > 0), USE_ThreefryEngine_WITH_ZERO_ROUND)
+
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_2(K, R) \
-    VSMC_STATIC_ASSERT((R <= 32 || K == 4),                                 \
+    VSMC_STATIC_ASSERT((R <= 32 || K == 4),                                  \
             USE_ThreefryEngine_WITH_SIZE_2_AND_ROUNDS_LARGER_THAN_32)
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_4(K, R) \
-    VSMC_STATIC_ASSERT((R <= 72),                                           \
+    VSMC_STATIC_ASSERT((R <= 72),                                            \
             USE_ThreefryEngine_WITH_SIZE_4_AND_ROUNDS_LARGER_THAN_72)
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY \
         VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType);             \
         VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K);                             \
+        VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_0(R);                          \
         VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_2(K, R);                       \
         VSMC_STATIC_ASSERT_RNG_THREEFRY_ROUND_4(K, R);
 
@@ -404,7 +408,7 @@ class ThreefryEngine
             par_[K] ^= par_[i];
     }
 
-    template <std::size_t N>
+    template <std::size_t>
     void generate (result_type *, result_type *, cxx11::false_type) {}
 
     template <std::size_t N>

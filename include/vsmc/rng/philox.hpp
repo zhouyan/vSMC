@@ -17,13 +17,16 @@
     VSMC_STATIC_ASSERT((K == 2 || K == 4),                                   \
             USE_PhiloxEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
 
+#define VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND_0(R) \
+    VSMC_STATIC_ASSERT((R > 0), USE_PhiloxEngine_WITH_ZERO_ROUND)
+
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND(R) \
-    VSMC_STATIC_ASSERT((R <= 16),                                            \
-            USE_PhiloxEngine_WITH_ROUNDS_LARGER_THAN_16)
+    VSMC_STATIC_ASSERT((R <= 16), USE_PhiloxEngine_WITH_ROUNDS_LARGER_THAN_16)
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX \
-        VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);             \
-        VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K);                             \
+        VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);               \
+        VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K);                               \
+        VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND_0(R);                            \
         VSMC_STATIC_ASSERT_RNG_PHILOX_ROUND(R);
 
 #define VSMC_DEFINE_RNG_PHILOX_BUMPK_CONSTANT(T, I, val) \
@@ -408,7 +411,7 @@ class PhiloxEngine
     key_type par_;
     std::size_t remain_;
 
-    template <std::size_t N>
+    template <std::size_t>
     void generate (result_type *, result_type *, cxx11::false_type) {}
 
     template <std::size_t N>
