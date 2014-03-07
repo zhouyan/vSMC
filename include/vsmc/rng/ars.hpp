@@ -1,8 +1,7 @@
 #ifndef VSMC_RNG_ARS_HPP
 #define VSMC_RNG_ARS_HPP
 
-#include <vsmc/rng/common.hpp>
-#include <wmmintrin.h>
+#include <vsmc/rng/m128i.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_ARS_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
@@ -147,16 +146,13 @@ class ARSEngine
 
     result_type operator() ()
     {
-        if (remain_ > 0)
-            return res_[--remain_];
+        if (remain_ == 0) {
+            generate();
+            internal::unpack(pac_, res_);
+            remain_ = K_;
+        }
 
-        internal::RngCounter<ResultType, K_>::increment(ctr_.data());
-        pack();
-        generate<0>(cxx11::integral_constant<bool, 1 < R>());
-        unpack();
-        remain_ = K_ - 1;
-
-        return res_.template at<K_ - 1>();
+        return res_[--remain_];
     }
 
     void discard (std::size_t nskip)
@@ -197,28 +193,10 @@ class ARSEngine
 
     void pack ()
     {
-        pac_ = pack(ctr_);
+        internal::pack(ctr_, pac_);
+        internal::pack(key_, par_);
         pac_ = _mm_xor_si128(pac_, par_);
     }
-
-    __m128i pack (const StaticVector<uint32_t, 4> &c)
-    {
-        return _mm_set_epi32(
-                static_cast<int32_t>(c.at<3>()),
-                static_cast<int32_t>(c.at<2>()),
-                static_cast<int32_t>(c.at<1>()),
-                static_cast<int32_t>(c.at<0>()));
-    }
-
-    __m128i pack (const StaticVector<uint64_t, 2> &c)
-    {
-        return _mm_set_epi64x(
-                static_cast<int64_t>(c.at<1>()),
-                static_cast<int64_t>(c.at<0>()));
-    }
-
-    void unpack ()
-    {_mm_storeu_si128(reinterpret_cast<__m128i *>(res_.data()), pac_);}
 
     template <std::size_t>
     void generate (cxx11::false_type)

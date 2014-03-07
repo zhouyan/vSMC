@@ -33,6 +33,12 @@ template <typename, std::size_t, bool> class StaticVectorStorage;
 template <typename T, std::size_t N>
 class StaticVectorStorage<T, N, true>
 {
+    public :
+
+    T &operator[] (std::size_t i) {return data_[i];}
+
+    const T &operator[] (std::size_t i) const {return data_[i];}
+
     protected :
 
     StaticVectorStorage () : data_() {}
@@ -75,6 +81,12 @@ class StaticVectorStorage<T, N, true>
 template <typename T, std::size_t N>
 class StaticVectorStorage<T, N, false>
 {
+    public :
+
+    T &operator[] (std::size_t i) {return data_[i];}
+
+    const T &operator[] (std::size_t i) const {return data_[i];}
+
     protected :
 
     StaticVectorStorage () : data_(new T[N]()) {}
@@ -314,54 +326,50 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     reference at (size_type i)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N);
-        return this->ptr()[i];
+        return this->operator[](i);
     }
 
     const_reference at (size_type i) const
     {
         VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N);
-        return this->ptr()[i];
+        return this->operator[](i);
     }
 
     template <size_type Pos>
     reference at ()
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->ptr()[Pos];
+        return this->operator[](Pos);
     }
 
     template <size_type Pos>
     const_reference at () const
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->ptr()[Pos];
+        return this->operator[](Pos);
     }
 
     template <size_type Pos>
     reference at (Position<Pos>)
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->ptr()[Pos];
+        return this->operator[](Pos);
     }
 
     template <size_type Pos>
     const_reference at (Position<Pos>) const
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->ptr()[Pos];
+        return this->operator[](Pos);
     }
 
-    reference operator[] (size_type i) {return this->ptr()[i];}
+    reference front () {return this->operator[](0);}
 
-    const_reference operator[] (size_type i) const {return this->ptr()[i];}
+    const_reference front () const {return this->operator[](0);}
 
-    reference front () {return this->ptr()[0];}
+    reference back () {return this->operator[](N - 1);}
 
-    const_reference front () const {return this->ptr()[0];}
-
-    reference back () {return this->ptr()[N - 1];}
-
-    const_reference back () const {return this->ptr()[N - 1];}
+    const_reference back () const {return this->operator[](N - 1);}
 
     pointer data () {return this->ptr();}
 
@@ -373,9 +381,8 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
 
     void fill (const T &value)
     {
-        T *ptr = data();
         for (size_type i = 0; i != N; ++i)
-            ptr[i] = value;
+            this->operator[](i) = value;
     }
 
     void swap (StaticVector<T, N, Traits> &other) {this->swap_data(other);}
@@ -409,7 +416,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     {
         StaticVector<T, Size, Traits> res;
         for (std::size_t i = 0, j = 0; i != N && j != Size; ++i, ++j)
-            res[j] = operator[](i);
+            res[j] = this->operator[](i);
 
         return res;
     }
@@ -425,7 +432,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_END(End, N);
         StaticVector<T, End - Begin, Traits> res;
         for (std::size_t i = Begin, j = 0; i != End; ++i, ++j)
-            res[j] = operator[](i);
+            res[j] = this->operator[](i);
 
         return res;
     }
@@ -440,7 +447,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_BEGIN(Begin, N);
         StaticVector<T, Size, Traits> res;
         for (std::size_t i = Begin, j = 0; i != N && j != Size; ++i, ++j)
-            res[j] = operator[](i);
+            res[j] = this->operator[](i);
 
         return res;
     }
