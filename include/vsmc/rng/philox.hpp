@@ -71,7 +71,7 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t, 4, 1,
 
 namespace traits {
 
-/// \brief Traits of Philox RNG engine constants for bumping the key (Weyl
+/// \brief Traits of PhiloxEngine constants for bumping the key (Weyl
 /// sequence)
 /// \ingroup Traits
 ///
@@ -84,7 +84,7 @@ template <typename ResultType, std::size_t N>
 struct PhiloxBumpkConstantTrait :
     public ::vsmc::internal::PhiloxBumpkConstant<ResultType, N> {};
 
-/// \brief Traits of Philox RNG engine constants for rounding
+/// \brief Traits of PhiloxEngine constants for rounding
 /// \ingroup Traits
 ///
 /// \details
@@ -248,6 +248,10 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// Further iterations may produce different results, as vSMC increment the
 /// counter slightly differently, but it still cover the same range and has the
 /// same period as the original.
+///
+/// The constants of bumping the key (Weyl constants) and those used in each
+/// rounds can be set through traits, `vsmc::traits::PhiloxBumpkConstantTrait`
+/// and `vsmc::traits::PhiloxRoundConstantTrait`.
 template <typename ResultType, std::size_t K, std::size_t R = 10>
 class PhiloxEngine
 {

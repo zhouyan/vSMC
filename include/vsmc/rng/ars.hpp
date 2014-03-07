@@ -22,6 +22,31 @@
 
 namespace vsmc {
 
+namespace internal {
+
+template <std::size_t> struct ARSConstant;
+
+template <> struct ARSConstant<0> :
+    public cxx11::integral_constant<uint64_t, UINT64_C(0xBB67AE8584CAA73B)> {};
+
+template <> struct ARSConstant<1> :
+    public cxx11::integral_constant<uint64_t, UINT64_C(0x9E3779B97F4A7C15)> {};
+
+} // namespace vsmc::internal
+
+namespace traits {
+
+/// \brief Traits of ARSEngine constants (Weyl sequence)
+/// \ingroup Traits
+///
+/// \details
+/// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bits or
+/// the Weyl constant.
+template <std::size_t N> struct ARSConstantTrait :
+    public ::vsmc::internal::ARSConstant<N> {};
+
+} // namespace vsmc::traits
+
 /// \brief ARS RNG engine reimplemented
 /// \ingroup R123RNG
 ///
@@ -35,8 +60,11 @@ namespace vsmc {
 /// constructor or the one with a single seed, the output shall be exactly the
 /// same for the first \f$2^32\f$ iterations. Further iterations may produce
 /// different results, as vSMC increment the counter slightly differently, but
-/// it still cover the same range and has the same period as the original. In
-/// addition, this engine allows output of 64-bits integers.
+/// it still cover the same range and has the same period as the original.
+///
+/// This implementation is slightly more flexible than the original. First it
+/// allows using 64-bits integers as output. Second It allows setting the Weyl
+/// constants through trait `vsmc::traits::ARSConstantTrait`.
 template <typename ResultType, std::size_t R = 10>
 class ARSEngine
 {
@@ -51,8 +79,8 @@ class ARSEngine
 
     explicit ARSEngine (result_type s = 0) :
         par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
-                    static_cast<int64_t>(UINT64_C(0xBB67AE8584CAA73B)),
-                    static_cast<int64_t>(UINT64_C(0x9E3779B97F4A7C15)))),
+                    static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
+                    static_cast<int64_t>(traits::ARSConstantTrait<1>::value))),
         pac_(par_), remain_(0) 
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
@@ -64,8 +92,8 @@ class ARSEngine
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR) :
         par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
-                    static_cast<int64_t>(UINT64_C(0xBB67AE8584CAA73B)),
-                    static_cast<int64_t>(UINT64_C(0x9E3779B97F4A7C15)))),
+                    static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
+                    static_cast<int64_t>(traits::ARSConstantTrait<1>::value))),
         pac_(par_), remain_(0) 
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
