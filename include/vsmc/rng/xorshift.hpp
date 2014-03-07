@@ -432,9 +432,9 @@ class XorwowEngine
             XorwowEngine<Eng, D, DInit> &eng)
     {
         engine_type eng_tmp;
-        result_type weyl_tmp;
-        if (is) >> std::ws >> eng_tmp;
-        if (is) >> std::ws >> weyl_tmp;
+        result_type weyl_tmp = 0;
+        if (is) is >> std::ws >> eng_tmp;
+        if (is) is >> std::ws >> weyl_tmp;
         if (is) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
             eng.eng_ = cxx11::move(eng_tmp);

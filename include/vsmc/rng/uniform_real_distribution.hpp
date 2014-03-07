@@ -107,8 +107,8 @@ class UniformRealDistribution
         friend inline std::basic_istream<CharT, Traits> &operator>> (
                 std::basic_istream<CharT, Traits> &is, param_type &param)
         {
-            result_type a;
-            result_type b;
+            result_type a = 0;
+            result_type b = 0;
             if (is) is >> std::ws >> a;
             if (is) is >> std::ws >> b;
             if (is) {
