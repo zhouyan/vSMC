@@ -4,6 +4,21 @@
 #include <vsmc/rng/generator_wrapper.hpp>
 #include <gsl/gsl_rng.h>
 
+#define VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(Name, pointer) \
+    template <> struct GSLRngTypePointer< GSL_RNG_TYPE_##Name >              \
+    {static const gsl_rng_type *get () {return gsl_rng_##pointer ;}};
+
+#define VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(Name, Min, Max) \
+    template <> struct GSLRngMinMaxTrait< GSL_RNG_TYPE_##Name >              \
+    {                                                                        \
+        static VSMC_CONSTEXPR const uint32_t _Min =                          \
+        static_cast<uint32_t>(Min##UL);                                      \
+        static VSMC_CONSTEXPR const uint32_t _Max =                          \
+        static_cast<uint32_t>(Max##UL);                                      \
+        static VSMC_CONSTEXPR uint32_t min VSMC_MNE () {return _Min;}        \
+        static VSMC_CONSTEXPR uint32_t max VSMC_MNE () {return _Max;}        \
+    };
+
 namespace vsmc {
 
 /// \brief GSL RNG algorithms
@@ -28,44 +43,35 @@ namespace internal {
 
 template <GSLRngType> struct GSLRngTypePointer;
 
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_MT19937>
-{static const gsl_rng_type *get () {return gsl_rng_mt19937;}};
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(MT19937,   mt19937)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(RANLXS0,   ranlxs0)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(RANLXS1,   ranlxs1)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(RANLXS2,   ranlxs2)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(RANLXD1,   ranlxd1)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(RANLXD2,   ranlxd2)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(RANLUX,    ranlux)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(RANLUX389, ranlux389)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(CMRG,      cmrg)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(MRG,       mrg)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(TAUS,      taus)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(TAUS2,     taus2)
+VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(GFSR4,     gfsr4)
 
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_RANLXS0>
-{static const gsl_rng_type *get () {return gsl_rng_ranlxs0;}};
+template <GSLRngType RngType> struct GSLRngMinMaxTrait;
 
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_RANLXS1>
-{static const gsl_rng_type *get () {return gsl_rng_ranlxs1;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_RANLXS2>
-{static const gsl_rng_type *get () {return gsl_rng_ranlxs2;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_RANLXD1>
-{static const gsl_rng_type *get () {return gsl_rng_ranlxd1;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_RANLXD2>
-{static const gsl_rng_type *get () {return gsl_rng_ranlxd2;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_RANLUX>
-{static const gsl_rng_type *get () {return gsl_rng_ranlux;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_RANLUX389>
-{static const gsl_rng_type *get () {return gsl_rng_ranlux389;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_CMRG>
-{static const gsl_rng_type *get () {return gsl_rng_cmrg;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_MRG>
-{static const gsl_rng_type *get () {return gsl_rng_mrg;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_TAUS>
-{static const gsl_rng_type *get () {return gsl_rng_taus;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_TAUS2>
-{static const gsl_rng_type *get () {return gsl_rng_taus2;}};
-
-template <> struct GSLRngTypePointer<GSL_RNG_TYPE_GFSR4>
-{static const gsl_rng_type *get () {return gsl_rng_gfsr4;}};
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(MT19937,   0, 4294967295)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXS0,   0, 16777215)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXS1,   0, 16777215)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXS2,   0, 16777215)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXD1,   0, 4294967295)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXD2,   0, 4294967295)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLUX,    0, 16777215)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLUX389, 0, 16777215)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(CMRG,      0, 2147483646)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(MRG,       0, 2147483646)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(TAUS,      0, 4294967295)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(TAUS2,     0, 4294967295)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(GFSR4,     0, 4294967295)
 
 template <GSLRngType RngType>
 class GSLRngGenerator
@@ -135,69 +141,30 @@ class GSLRngGenerator
     gsl_rng *rng_;
 };
 
-template <GSLRngType RngType>
-struct GSLRngMinMax
-{
-    uint32_t min VSMC_MNE ()
-    {
-        return static_cast<uint32_t>(static_cast<
-                GeneratorWrapper<unsigned long,
-                GSLRngGenerator<RngType>,
-                GSLRngMinMax<RngType> > >(this)->generator().min VSMC_MNE ());
-    }
-
-    uint32_t max VSMC_MNE ()
-    {
-        return static_cast<uint32_t>(static_cast<
-                GeneratorWrapper<unsigned long,
-                GSLRngGenerator<RngType>,
-                GSLRngMinMax<RngType> > >(this)->generator().max VSMC_MNE ());
-    }
-};
-
-template <GSLRngType RngType> struct GSLRngMinMaxTrait
-{typedef GSLRngMinMax<RngType> type;};
-
-template <> struct GSLRngMinMaxTrait<GSL_RNG_TYPE_MT19937>
-{typedef ::vsmc::traits::GeneratorWrapperMinMaxTrait<uint32_t> type;};
-
-template <> struct GSLRngMinMaxTrait<GSL_RNG_TYPE_RANLXD1>
-{typedef ::vsmc::traits::GeneratorWrapperMinMaxTrait<uint32_t> type;};
-
-template <> struct GSLRngMinMaxTrait<GSL_RNG_TYPE_RANLXD2>
-{typedef ::vsmc::traits::GeneratorWrapperMinMaxTrait<uint32_t> type;};
-
-template <> struct GSLRngMinMaxTrait<GSL_RNG_TYPE_TAUS>
-{typedef ::vsmc::traits::GeneratorWrapperMinMaxTrait<uint32_t> type;};
-
-template <> struct GSLRngMinMaxTrait<GSL_RNG_TYPE_TAUS2>
-{typedef ::vsmc::traits::GeneratorWrapperMinMaxTrait<uint32_t> type;};
-
-template <> struct GSLRngMinMaxTrait<GSL_RNG_TYPE_GFSR4>
-{typedef ::vsmc::traits::GeneratorWrapperMinMaxTrait<uint32_t> type;};
-
 } // namespace vsmc::internal
 
 /// \brief GSL RNG Engine
 /// \ingroup GSLRNG
 template <GSLRngType RngType>
 class GSLRngEngine :
-    public GeneratorWrapper<uint32_t, internal::GSLRngGenerator<RngType>,
-    typename internal::GSLRngMinMaxTrait<RngType>::type>
+    public GeneratorWrapper<uint32_t,
+    internal::GSLRngGenerator<RngType>,
+    internal::GSLRngMinMaxTrait<RngType> >
 {
-    typedef GeneratorWrapper<uint32_t, internal::GSLRngGenerator<RngType>,
-            typename internal::GSLRngMinMaxTrait<RngType>::type> base_type;
+    typedef GeneratorWrapper<uint32_t,
+    internal::GSLRngGenerator<RngType>,
+    internal::GSLRngMinMaxTrait<RngType> > base;
 
     public :
 
     typedef uint32_t result_type;
 
-    GSLRngEngine (result_type s = 0) : base_type(s) {seed(s);}
+    GSLRngEngine (result_type s = 0) : base(s) {seed(s);}
 
     template <typename SeedSeq>
     explicit GSLRngEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
-            VSMC_NULLPTR) : base_type(seq) {seed(seq);}
+            VSMC_NULLPTR) : base(seq) {seed(seq);}
 
     void seed (result_type s)
     {this->generator().seed(static_cast<unsigned long>(s));}
@@ -217,13 +184,41 @@ class GSLRngEngine :
 /// \ingroup GSLRNG
 typedef GSLRngEngine<GSL_RNG_TYPE_MT19937> GSL_MT19937;
 
-/// \brief A RANLXS with luxury level 1
+/// \brief A RANLUX generator with luxury level 0
+/// \ingroup GSLRNG
+typedef GSLRngEngine<GSL_RNG_TYPE_RANLXS0> GSL_RANLXS0;
+
+/// \brief A RANLUX generator with luxury level 0
+/// \ingroup GSLRNG
+typedef GSLRngEngine<GSL_RNG_TYPE_RANLXS1> GSL_RANLXS1;
+
+/// \brief A RANLUX generator with luxury level 0
+/// \ingroup GSLRNG
+typedef GSLRngEngine<GSL_RNG_TYPE_RANLXS2> GSL_RANLXS2;
+
+/// \brief A RANLXS generator with luxury level 1
 /// \ingroup GSLRNG
 typedef GSLRngEngine<GSL_RNG_TYPE_RANLXD1> GSL_RANLXD1;
 
-/// \brief A RANLXS with luxury level 2
+/// \brief A RANLXS generator with luxury level 2
 /// \ingroup GSLRNG
 typedef GSLRngEngine<GSL_RNG_TYPE_RANLXD2> GSL_RANLXD2;
+
+/// \brief A RANLUX generator
+/// \ingroup GSLRNG
+typedef GSLRngEngine<GSL_RNG_TYPE_RANLUX> GSL_RANLUX;
+
+/// \brief A RANLUX generator with the highest level of randomness
+/// \ingroup GSLRNG
+typedef GSLRngEngine<GSL_RNG_TYPE_RANLUX389> GSL_RANLUX389;
+
+/// \brief A combined multiple recursive generator
+/// \ingroup GSLRNG
+typedef GSLRngEngine<GSL_RNG_TYPE_CMRG> GSL_CMRG;
+
+/// \brief A fifth-order multiple recursive generator
+/// \ingroup GSL
+typedef GSLRngEngine<GSL_RNG_TYPE_MRG> GSL_MRG;
 
 /// \brief A maximally equidistributed combined Tausworthe generator
 /// \ingroup GSLRNG
