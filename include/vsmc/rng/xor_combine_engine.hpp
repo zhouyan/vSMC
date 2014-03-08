@@ -3,9 +3,9 @@
 
 #include <vsmc/rng/common.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(ResultType) \
-    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<ResultType>::value),      \
-            USE_XorCombineEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
+#define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type) \
+    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<result_type>::value),     \
+            USE_XorCombineEngine_WITH_ENGINES_HAVE_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_SAME_TYPE(Eng1, Eng2) \
     VSMC_STATIC_ASSERT((::vsmc::cxx11::is_same<                              \
@@ -13,7 +13,7 @@
             USE_XorCombineEngine_WITH_TWO_RNG_ENGINES_WITH_DIFFERENT_RESULT_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE \
-        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(ResultType);             \
+        VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);             \
         VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_SAME_TYPE(Eng1, Eng2);
 
 namespace vsmc {
