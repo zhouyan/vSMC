@@ -5,61 +5,79 @@
 #include <vsmc/rng/engine_result_wrapper.hpp>
 #include <immintrin.h>
 
+#ifndef VSMC_RD_RAND_NTRIAL_MAX
+#define VSMC_RD_RAND_NTRIAL_MAX 10
+#endif
+
+#define VSMC_RUNTIME_WARNING_RNG_RD_RAND_NTRIAL(ntrial, NTrialMax) \
+    VSMC_RUNTIME_WARNING((ntrial < NTrialMax),                                \
+            ("**RdSeedStep::generate** MAXIMUM NUMBER OF TRIALS EXCEEDED"))
+
 namespace vsmc {
 
-namespace internal {
+/// \brief RdRand generator
+/// \ingroup RDRNG
+template <typename, std::size_t = VSMC_RD_RAND_NTRIAL_MAX> struct RdRandStep;
 
-template <typename> struct RdRandStep;
-
-template <> struct RdRandStep<uint16_t>
+/// \brief RdRand generator with 16-bits output
+/// \ingroup RDRNG
+template <std::size_t NTrialMax> struct RdRandStep<uint16_t, NTrialMax>
 {
     static uint16_t generate ()
     {
-        unsigned short r;
-        while (!(_rdrand16_step(&r)))
-            ;
+        unsigned short r = 0;
+        std::size_t ntrial = 0;
+        while (_rdrand16_step(&r) == 0 && ntrial != NTrialMax)
+            ++ntrial;
+        VSMC_RUNTIME_WARNING_RNG_RD_RAND_NTRIAL(ntrial, NTrialMax);
 
         return static_cast<uint16_t>(r);
     }
 }; // struct RdRandStep
 
-template <> struct RdRandStep<uint32_t>
+/// \brief RdRand generator with 32-bits output
+/// \ingroup RDRNG
+template <std::size_t NTrialMax> struct RdRandStep<uint32_t, NTrialMax>
 {
     static uint32_t generate ()
     {
-        unsigned r;
-        while (!(_rdrand32_step(&r)))
-            ;
+        unsigned r = 0;
+        std::size_t ntrial = 0;
+        while (_rdrand32_step(&r) == 0 && ntrial != NTrialMax)
+            ++ntrial;
+        VSMC_RUNTIME_WARNING_RNG_RD_RAND_NTRIAL(ntrial, NTrialMax);
 
         return static_cast<uint32_t>(r);
     }
 }; // struct RdRandStep
 
-template <> struct RdRandStep<uint64_t>
+/// \brief RdRand generator with 64-bits output
+/// \ingroup RDRNG
+template <std::size_t NTrialMax> struct RdRandStep<uint64_t, NTrialMax>
 {
     static uint64_t generate ()
     {
-        unsigned long long r;
-        while (!(_rdrand64_step(&r)))
-            ;
+        unsigned long long r = 0;
+        std::size_t ntrial = 0;
+        while (_rdrand64_step(&r) == 0 && ntrial != NTrialMax)
+            ++ntrial;
+        VSMC_RUNTIME_WARNING_RNG_RD_RAND_NTRIAL(ntrial, NTrialMax);
 
         return static_cast<uint64_t>(r);
     }
 }; // struct RdRandStep
 
-} // namespace vsmc::internal
-
 /// \brief C++11 Engine that wraps _rdrand16_step
 /// \ingroup RDRNG
-typedef GeneratorWrapper<uint16_t, internal::RdRandStep<uint16_t> > RdRand16;
+typedef GeneratorWrapper<uint16_t, RdRandStep<uint16_t> > RdRand16;
 
 /// \brief C++11 Engine that wraps _rdrand32_step
 /// \ingroup RDRNG
-typedef GeneratorWrapper<uint32_t, internal::RdRandStep<uint32_t> > RdRand32;
+typedef GeneratorWrapper<uint32_t, RdRandStep<uint32_t> > RdRand32;
 
 /// \brief C++11 Engine that wraps _rdrand64_step
 /// \ingroup RDRNG
-typedef GeneratorWrapper<uint64_t, internal::RdRandStep<uint64_t> > RdRand64;
+typedef GeneratorWrapper<uint64_t, RdRandStep<uint64_t> > RdRand64;
 
 /// \brief C++11 Engine that wraps _rdrand32_step but output 16-bits integers
 /// \ingroup RDRNG
