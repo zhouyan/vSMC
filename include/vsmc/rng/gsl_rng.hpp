@@ -4,20 +4,20 @@
 #include <vsmc/rng/generator_wrapper.hpp>
 #include <gsl/gsl_rng.h>
 
-#define VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(Name, pointer) \
-    template <> struct GSLRngTypePointer< GSL_RNG_TYPE_##Name >              \
+#define VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(Generator, pointer) \
+    template <> struct GSLRngTypePointer< GSL_RNG_TYPE_##Generator >         \
     {static const gsl_rng_type *get () {return gsl_rng_##pointer ;}};
 
-#define VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(Name, Min, Max) \
-    template <> struct GSLRngMinMaxTrait< GSL_RNG_TYPE_##Name >              \
-    {                                                                        \
-        static VSMC_CONSTEXPR const uint32_t _Min =                          \
-        static_cast<uint32_t>(Min##UL);                                      \
-        static VSMC_CONSTEXPR const uint32_t _Max =                          \
-        static_cast<uint32_t>(Max##UL);                                      \
-        static VSMC_CONSTEXPR uint32_t min VSMC_MNE () {return _Min;}        \
-        static VSMC_CONSTEXPR uint32_t max VSMC_MNE () {return _Max;}        \
-    };
+#define VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(Generator, Min, Max) \
+template <> struct GSLRngMinMax< GSL_RNG_TYPE_##Generator >                  \
+{                                                                            \
+    static VSMC_CONSTEXPR const uint32_t _Min =                              \
+    static_cast<uint32_t>(Min##UL);                                          \
+    static VSMC_CONSTEXPR const uint32_t _Max =                              \
+    static_cast<uint32_t>(Max##UL);                                          \
+    static VSMC_CONSTEXPR uint32_t min VSMC_MNE () {return _Min;}            \
+    static VSMC_CONSTEXPR uint32_t max VSMC_MNE () {return _Max;}            \
+}; // VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX
 
 namespace vsmc {
 
@@ -57,22 +57,21 @@ VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(TAUS,      taus)
 VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(TAUS2,     taus2)
 VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(GFSR4,     gfsr4)
 
-template <GSLRngType RngType> struct GSLRngMinMaxTrait;
+template <GSLRngType RngType> struct GSLRngMinMax;
 
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(MT19937,   0, 4294967295)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXS0,   0, 16777215)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXS1,   0, 16777215)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXS2,   0, 16777215)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXD1,   0, 4294967295)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLXD2,   0, 4294967295)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLUX,    0, 16777215)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(RANLUX389, 0, 16777215)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(CMRG,      0, 2147483646)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(MRG,       0, 2147483646)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(TAUS,      0, 4294967295)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(TAUS2,     0, 4294967295)
-VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(GFSR4,     0, 4294967295)
-
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(MT19937,   0, 0xFFFFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(RANLXS0,   0, 0x00FFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(RANLXS1,   0, 0x00FFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(RANLXS2,   0, 0x00FFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(RANLXD1,   0, 0xFFFFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(RANLXD2,   0, 0xFFFFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(RANLUX,    0, 0x00FFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(RANLUX389, 0, 0x00FFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(CMRG,      0, 0x7FFFFFFE)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(MRG,       0, 0x7FFFFFFE)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(TAUS,      0, 0xFFFFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(TAUS2,     0, 0xFFFFFFFF)
+VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(GFSR4,     0, 0xFFFFFFFF)
 } // namespace vsmc::internal
 
 /// \brief GSL RNG generator for use with GeneratorWrapper
@@ -137,7 +136,6 @@ class GSLGenerator
     }
 
     unsigned long min VSMC_MNE () const {return gsl_rng_min(rng_);}
-
     unsigned long max VSMC_MNE () const {return gsl_rng_max(rng_);}
 
     private :
@@ -150,10 +148,10 @@ class GSLGenerator
 template <GSLRngType RngType>
 class GSLEngine :
     public GeneratorWrapper<uint32_t, GSLGenerator<RngType>,
-    internal::GSLRngMinMaxTrait<RngType> >
+    internal::GSLRngMinMax<RngType> >
 {
     typedef GeneratorWrapper<uint32_t, GSLGenerator<RngType>,
-    internal::GSLRngMinMaxTrait<RngType> > base;
+    internal::GSLRngMinMax<RngType> > base;
 
     public :
 
