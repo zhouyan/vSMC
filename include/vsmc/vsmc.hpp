@@ -75,6 +75,7 @@
 /// \brief Utilities for managing RNG engines
 
 /// \defgroup GSLRNG GSL
+/// \ingroup RNG
 /// \brief Random number generating using GSL RNG
 
 /// \defgroup MKLRNG MKL
