@@ -19,7 +19,7 @@
 namespace vsmc {
 
 /// \brief Combine two RNG engines using XOR
-/// \ingroup RNG
+/// \ingroup RNGWraper
 template <typename Eng1, typename Eng2,
          typename Eng1::result_type S1 = 0,
          typename Eng2::result_type S2 = 0>
@@ -31,7 +31,7 @@ class XorCombineEngine
     typedef Eng1 engine1_type;
     typedef Eng2 engine2_type;
 
-    explicit XorCombineEngine (result_type s = 123456) : eng1_(s), eng2_(s)
+    explicit XorCombineEngine (result_type s = 1) : eng1_(s), eng2_(s)
     {VSMC_STATIC_ASSERT_RNG_XOR_COMBINE;}
 
     template <typename SeedSeq>

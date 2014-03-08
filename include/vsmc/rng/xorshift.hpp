@@ -186,7 +186,7 @@ class XorshiftEngine
 
     typedef ResultType result_type;
 
-    explicit XorshiftEngine (result_type s = 123456)
+    explicit XorshiftEngine (result_type s = 1)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
         seed(s);
@@ -297,7 +297,7 @@ class XorwowEngine
     typedef typename Eng::result_type result_type;
     typedef Eng engine_type;
 
-    explicit XorwowEngine (result_type s = 123456) : eng_(s), weyl_(DInit) {}
+    explicit XorwowEngine (result_type s = 1) : eng_(s), weyl_(DInit) {}
 
     template <typename SeedSeq>
     explicit XorwowEngine (SeedSeq &seq, typename cxx11::enable_if<
