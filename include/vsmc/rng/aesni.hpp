@@ -183,7 +183,7 @@ class AESNIEngine
         if (eng1.ctr_ != eng2.ctr_)
             return false;
 
-        if (eng1.res_ != eng2.res_) 
+        if (eng1.res_ != eng2.res_)
             return false;
 
         for (std::size_t i = 0; i != key_type::size(); ++i)

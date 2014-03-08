@@ -3,6 +3,7 @@
 
 #include <vsmc/rng/generator_wrapper.hpp>
 #include <vsmc/rng/engine_result_wrapper.hpp>
+#include <immintrin.h>
 
 namespace vsmc {
 
@@ -49,27 +50,27 @@ template <> struct RdSeedStep<uint64_t>
 } // namespace vsmc::internal
 
 /// \brief C++11 Engine that wraps _rdseed16_step
-/// \ingroup RNGWrapper
+/// \ingroup RDRNG
 typedef RdSeedEngine<uint16_t, internal::RdSeedStep<uint16_t> > RdSeed16;
 
 /// \brief C++11 Engine that wraps _rdseed32_step
-/// \ingroup RNGWrapper
+/// \ingroup RDRNG
 typedef RdSeedEngine<uint32_t, internal::RdSeedStep<uint32_t> > RdSeed32;
 
 /// \brief C++11 Engine that wraps _rdseed64_step
-/// \ingroup RNGWrapper
+/// \ingroup RDRNG
 typedef RdSeedEngine<uint64_t, internal::RdSeedStep<uint64_t> > RdSeed64;
 
 /// \brief C++11 Engine that wraps _rdseed32_step but output 16-bits integers
-/// \ingroup RNGWrapper
+/// \ingroup RDRNG
 typedef EngineResultWrapper<uint16_t, RdSeed32> RdSeed32_16;
 
 /// \brief C++11 Engine that wraps _rdseed64_step but output 16-bits integers
-/// \ingroup RNGWrapper
+/// \ingroup RDRNG
 typedef EngineResultWrapper<uint16_t, RdSeed64> RdSeed64_16;
 
 /// \brief C++11 Engine that wraps _rdseed64_step but output 32-bits integers
-/// \ingroup RNGWrapper
+/// \ingroup RDRNG
 typedef EngineResultWrapper<uint32_t, RdSeed64> RdSeed64_32;
 
 } // namespace vsmc

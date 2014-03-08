@@ -74,6 +74,9 @@
 /// \defgroup RNG Random number generating
 /// \brief Utilities for managing RNG engines
 
+/// \defgroup GSLRNG GSL
+/// \brief Random number generating using GSL RNG
+
 /// \defgroup MKLRNG MKL
 /// \ingroup RNG
 /// \brief Random number generating using MKL RNG
@@ -82,13 +85,17 @@
 /// \ingroup RNG
 /// \brief Random number generating using Random123 RNG
 
-/// \defgroup RNGWrapper
-/// \brief C++11 RNG engines that wrap other RNG generators
+/// \defgroup RDRNG RdRand and RdSeed
 /// \ingroup RNG
+/// \defgroup Random number generating using Intel RdRand and RdSeed
+
+/// \defgroup RNGWrapper Wrapper
+/// \ingroup RNG
+/// \brief C++11 RNG engines that wrap other RNG generators
 
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
-/// \brief Random number generating using Xorshift algorithm
+/// \brief Random number generating using the Xorshift algorithm
 
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library

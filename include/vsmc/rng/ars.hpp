@@ -80,7 +80,7 @@ class ARSEngine
         par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
                     static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
                     static_cast<int64_t>(traits::ARSConstantTrait<1>::value))),
-        pac_(par_), remain_(0) 
+        pac_(par_), remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
         seed(s);
@@ -93,7 +93,7 @@ class ARSEngine
         par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
                     static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
                     static_cast<int64_t>(traits::ARSConstantTrait<1>::value))),
-        pac_(par_), remain_(0) 
+        pac_(par_), remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
         seed(seq);
@@ -188,7 +188,7 @@ class ARSEngine
         if (eng1.ctr_ != eng2.ctr_)
             return false;
 
-        if (eng1.res_ != eng2.res_) 
+        if (eng1.res_ != eng2.res_)
             return false;
 
         if (eng1.key_ != eng2.key_)

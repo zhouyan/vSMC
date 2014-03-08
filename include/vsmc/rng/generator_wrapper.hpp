@@ -2,7 +2,6 @@
 #define VSMC_RNG_GENERATOR_WRAPPER_HPP
 
 #include <vsmc/rng/common.hpp>
-#include <immintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT((                                                     \
@@ -15,6 +14,23 @@
     VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER_RESULT_TYPE(ResultType);
 
 namespace vsmc {
+
+namespace traits {
+
+/// \brief Default traits of GeneratorWrapper
+/// \ingroup Traits
+template <typename ResultType, typename = void>
+struct GeneratorWrapperMinMaxTrait
+{
+    static VSMC_CONSTEXPR const ResultType _Min = 0;
+    static VSMC_CONSTEXPR const ResultType _Max = static_cast<ResultType>(
+            ~(static_cast<ResultType>(0)));
+
+    static VSMC_CONSTEXPR ResultType min VSMC_MNE () {return _Min;}
+    static VSMC_CONSTEXPR ResultType max VSMC_MNE () {return _Max;}
+};
+
+} // namespace traits
 
 /// \brief A thin wrapper over any RNG Generator for use with C++11 API
 /// \ingroup RNGWrapper
@@ -35,8 +51,9 @@ namespace vsmc {
 /// the this library (otherwise will have to require more interfaces of
 /// Generator). And all member functions, except `operator()`, does nothing. To
 /// seed and change the engine, use the Generator type object.
-template <typename ResultType, class Generator>
-class GeneratorWrapper
+template <typename ResultType, class Generator, typename Traits = 
+    traits::GeneratorWrapperMinMaxTrait<ResultType, Generator> >
+class GeneratorWrapper : public Traits
 {
     public :
 
@@ -62,13 +79,6 @@ class GeneratorWrapper
 
     void discard (std::size_t) {}
 
-    static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max = static_cast<result_type>(
-            ~(static_cast<result_type>(0)));
-
-    static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
-    static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
-
     Generator &generator () {return generator_;}
 
     const Generator &generator () const {return generator_;}
@@ -81,14 +91,14 @@ class GeneratorWrapper
             const GeneratorWrapper<ResultType, Generator> &,
             const GeneratorWrapper<ResultType, Generator> &) {return true;}
 
-    template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os,
+    template <typename CharT, typename CharTraits>
+    friend inline std::basic_ostream<CharT, CharTraits> &operator<< (
+            std::basic_ostream<CharT, CharTraits> &os,
             const GeneratorWrapper<ResultType, Generator> &) {return os;}
 
-    template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>> (
-            std::basic_istream<CharT, Traits> &is,
+    template <typename CharT, typename CharTraits>
+    friend inline std::basic_istream<CharT, CharTraits> &operator>> (
+            std::basic_istream<CharT, CharTraits> &is,
             GeneratorWrapper<ResultType, Generator> &) {return is;}
 
     private :

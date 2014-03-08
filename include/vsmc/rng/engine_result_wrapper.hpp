@@ -4,15 +4,22 @@
 #include <vsmc/rng/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER_SIZE(K) \
-    VSMC_STATIC_ASSERT((K > 0),                                             \
+    VSMC_STATIC_ASSERT((K > 0),                                              \
             USE_EngineResultWrapper_WITH_A_TOO_LARGE_RESULT_TYPE)
+
+#define VSMC_RUNTIME_ASSERT_RNG_ENGINE_RESULT_WRAPPER_RANGE(Eng, eng) \
+    VSMC_RUNTIME_ASSERT((eng.min VSMC_MNE () == 0 &&                         \
+                eng.max VSMC_MNE () == static_cast<eng_result_type>(         \
+                    ~(static_cast<eng_result_type>(0)))),                    \
+            ("**EngineResultWrapper** USED WITH AN ENGINE "                  \
+             "THAT DOES NOT COVER THE FULL RANGE OF ITS RESULT TYPE"))
 
 #define VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER \
     VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER_SIZE(K_);
 
 namespace vsmc {
 
-/// \brief Wrapper one RNG Engine into another
+/// \brief Wrapper one RNG engine into another
 /// \ingroup RNGWrapper
 ///
 /// \details
@@ -21,11 +28,16 @@ namespace vsmc {
 /// 64-bits random bits, and then `ResultType` can be `uint32_t` and 32-bits
 /// are returned every time the `operator()` is called. And each call down to
 /// the original engine's `operator()` generates two 32-bits integers.
+///
+/// In addition, the output of the original engine need to be uniform on the
+/// full range of its `result_type`.
 template <typename ResultType, typename Eng>
 class EngineResultWrapper
 {
+    typedef typename Eng::result_type eng_result_type;
+
     static VSMC_CONSTEXPR const std::size_t K_ =
-        sizeof(typename Eng::result_type) / sizeof(ResultType);
+        sizeof(eng_result_type) / sizeof(ResultType);
 
     public :
 
@@ -33,13 +45,19 @@ class EngineResultWrapper
     typedef Eng engine_type;
 
     explicit EngineResultWrapper (result_type s = 1) : eng_(s), remain_(0)
-    {VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER;}
+    {
+        VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER;
+        VSMC_RUNTIME_ASSERT_RNG_ENGINE_RESULT_WRAPPER_RANGE(Eng, eng_);
+    }
 
     template <typename SeedSeq>
     explicit EngineResultWrapper (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR) : eng_(seq), remain_(0)
-    {VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER;}
+    {
+        VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER;
+        VSMC_RUNTIME_ASSERT_RNG_ENGINE_RESULT_WRAPPER_RANGE(Eng, eng_);
+    }
 
     void seed (result_type s)
     {
@@ -75,7 +93,7 @@ class EngineResultWrapper
             return;
         }
 
-        nskip_ -= remain_;
+        nskip -= remain_;
         remain_ = 0;
         eng_.discard(nskip / K_);
         nskip -= (nskip / K_) * K_;
