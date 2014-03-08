@@ -73,18 +73,22 @@ VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(TAUS,      0, 4294967295)
 VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(TAUS2,     0, 4294967295)
 VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX_TRAIT(GFSR4,     0, 4294967295)
 
+} // namespace vsmc::internal
+
+/// \brief GSL RNG generator for use with GeneratorWrapper
+/// \ingroup GSLRNG
 template <GSLRngType RngType>
-class GSLRngGenerator
+class GSLGenerator
 {
     public :
 
-    GSLRngGenerator () :
+    GSLGenerator () :
         rng_(gsl_rng_alloc(internal::GSLRngTypePointer<RngType>::get())) {}
 
-    GSLRngGenerator (const GSLRngGenerator<RngType> &other) :
+    GSLGenerator (const GSLGenerator<RngType> &other) :
         rng_(gsl_rng_clone(other.rng_)) {}
 
-    GSLRngGenerator<RngType> &operator= (const GSLRngGenerator<RngType> &other)
+    GSLGenerator<RngType> &operator= (const GSLGenerator<RngType> &other)
     {
         if (this != &other) {
             if (rng_ != VSMC_NULLPTR)
@@ -96,10 +100,10 @@ class GSLRngGenerator
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    GSLRngGenerator (GSLRngGenerator<RngType> &&other) :
+    GSLGenerator (GSLGenerator<RngType> &&other) :
         rng_(other.rng_) {other.rng_ = VSMC_NULLPTR;}
 
-    GSLRngGenerator<RngType> &operator= (GSLRngGenerator<RngType> &&other)
+    GSLGenerator<RngType> &operator= (GSLGenerator<RngType> &&other)
     {
         if (this != &other) {
             if (rng_ != VSMC_NULLPTR)
@@ -112,7 +116,7 @@ class GSLRngGenerator
     }
 #endif
 
-    ~GSLRngGenerator ()
+    ~GSLGenerator ()
     {
         if (rng_ != VSMC_NULLPTR)
             gsl_rng_free(rng_);
@@ -139,30 +143,26 @@ class GSLRngGenerator
     private :
 
     gsl_rng *rng_;
-}; // class GSLRngGenerator
-
-} // namespace vsmc::internal
+}; // class GSLGenerator
 
 /// \brief GSL RNG Engine
 /// \ingroup GSLRNG
 template <GSLRngType RngType>
-class GSLRngEngine :
-    public GeneratorWrapper<uint32_t,
-    internal::GSLRngGenerator<RngType>,
+class GSLEngine :
+    public GeneratorWrapper<uint32_t, GSLGenerator<RngType>,
     internal::GSLRngMinMaxTrait<RngType> >
 {
-    typedef GeneratorWrapper<uint32_t,
-    internal::GSLRngGenerator<RngType>,
+    typedef GeneratorWrapper<uint32_t, GSLGenerator<RngType>,
     internal::GSLRngMinMaxTrait<RngType> > base;
 
     public :
 
     typedef uint32_t result_type;
 
-    GSLRngEngine (result_type s = 0) : base(s) {seed(s);}
+    GSLEngine (result_type s = 0) : base(s) {seed(s);}
 
     template <typename SeedSeq>
-    explicit GSLRngEngine (SeedSeq &seq, typename cxx11::enable_if<
+    explicit GSLEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR) : base(seq) {seed(seq);}
 
@@ -178,60 +178,60 @@ class GSLRngEngine :
         seq.generate(&s, &s + 1);
         this->generator().seed(s);
     }
-}; // class GSLRngEngine
+}; // class GSLEngine
 
 /// \brief A Mersenne-Twister pseudoranom number genertor
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_MT19937> GSL_MT19937;
+typedef GSLEngine<GSL_RNG_TYPE_MT19937> GSL_MT19937;
 
 /// \brief A RANLUX generator with luxury level 0
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_RANLXS0> GSL_RANLXS0;
+typedef GSLEngine<GSL_RNG_TYPE_RANLXS0> GSL_RANLXS0;
 
 /// \brief A RANLUX generator with luxury level 0
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_RANLXS1> GSL_RANLXS1;
+typedef GSLEngine<GSL_RNG_TYPE_RANLXS1> GSL_RANLXS1;
 
 /// \brief A RANLUX generator with luxury level 0
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_RANLXS2> GSL_RANLXS2;
+typedef GSLEngine<GSL_RNG_TYPE_RANLXS2> GSL_RANLXS2;
 
 /// \brief A RANLXS generator with luxury level 1
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_RANLXD1> GSL_RANLXD1;
+typedef GSLEngine<GSL_RNG_TYPE_RANLXD1> GSL_RANLXD1;
 
 /// \brief A RANLXS generator with luxury level 2
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_RANLXD2> GSL_RANLXD2;
+typedef GSLEngine<GSL_RNG_TYPE_RANLXD2> GSL_RANLXD2;
 
 /// \brief A RANLUX generator
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_RANLUX> GSL_RANLUX;
+typedef GSLEngine<GSL_RNG_TYPE_RANLUX> GSL_RANLUX;
 
 /// \brief A RANLUX generator with the highest level of randomness
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_RANLUX389> GSL_RANLUX389;
+typedef GSLEngine<GSL_RNG_TYPE_RANLUX389> GSL_RANLUX389;
 
 /// \brief A combined multiple recursive generator
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_CMRG> GSL_CMRG;
+typedef GSLEngine<GSL_RNG_TYPE_CMRG> GSL_CMRG;
 
 /// \brief A fifth-order multiple recursive generator
 /// \ingroup GSL
-typedef GSLRngEngine<GSL_RNG_TYPE_MRG> GSL_MRG;
+typedef GSLEngine<GSL_RNG_TYPE_MRG> GSL_MRG;
 
 /// \brief A maximally equidistributed combined Tausworthe generator
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_TAUS> GSL_TAUS;
+typedef GSLEngine<GSL_RNG_TYPE_TAUS> GSL_TAUS;
 
 /// \brief A maximally equidistributed combined Tausworthe generator with
 /// improved seeding procedure
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_TAUS2> GSL_TAUS2;
+typedef GSLEngine<GSL_RNG_TYPE_TAUS2> GSL_TAUS2;
 
 /// \brief A a lagged-fibonacci alike generator
 /// \ingroup GSLRNG
-typedef GSLRngEngine<GSL_RNG_TYPE_GFSR4> GSL_GFSR4;
+typedef GSLEngine<GSL_RNG_TYPE_GFSR4> GSL_GFSR4;
 
 } // namespace vsmc
 
