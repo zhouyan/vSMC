@@ -74,13 +74,17 @@
 /// \defgroup RNG Random number generating
 /// \brief Utilities for managing RNG engines
 
+/// \defgroup MKLRNG MKL
+/// \ingroup RNG
+/// \brief Random number generating using MKL RNG
+
 /// \defgroup R123RNG Random123
 /// \ingroup RNG
 /// \brief Random number generating using Random123 RNG
 
-/// \defgroup MKLRNG MKL
+/// \defgroup RNGWrapper
+/// \brief C++11 RNG engines that wrap other RNG generators
 /// \ingroup RNG
-/// \brief Random number generating using MKL RNG
 
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
