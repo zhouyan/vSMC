@@ -183,16 +183,22 @@
 #include <vsmc/resample/stratified.hpp>
 #include <vsmc/resample/systematic.hpp>
 
-#include <vsmc/rng/gammak1.h>
+#include <vsmc/rng/rng_set.hpp>
+#include <vsmc/rng/seed.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/rng/generator_wrapper.hpp>
+#include <vsmc/rng/engine_result_wrapper.hpp>
+#include <vsmc/rng/philox.hpp>
+#include <vsmc/rng/threefry.hpp>
+#include <vsmc/rng/xorshift.hpp>
+#include <vsmc/rng/xor_combine_engine.hpp>
 #if VSMC_USE_MKL
 #include <vsmc/rng/mkl_rng.hpp>
 #endif
-#include <vsmc/rng/normal01.h>
-#include <vsmc/rng/rng_set.hpp>
-#include <vsmc/rng/seed.hpp>
-#include <vsmc/rng/u01.h>
-#include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/rng/urng.h>
+#include <vsmc/rng/gammak1.h>
+#include <vsmc/rng/normal01.h>
+#include <vsmc/rng/u01.h>
 
 #include <vsmc/smp/adapter.hpp>
 #include <vsmc/smp/backend_base.hpp>
