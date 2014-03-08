@@ -37,7 +37,7 @@ enum GSLRngType {
     GSL_RNG_TYPE_TAUS,       ///< gsl_rng_taus
     GSL_RNG_TYPE_TAUS2,      ///< gsl_rng_taus2
     GSL_RNG_TYPE_GFSR4       ///< gsl_rng_gfsr4
-};
+}; // enum GSLRngType
 
 namespace internal {
 
@@ -139,7 +139,7 @@ class GSLRngGenerator
     private :
 
     gsl_rng *rng_;
-};
+}; // class GSLRngGenerator
 
 } // namespace vsmc::internal
 

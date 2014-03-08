@@ -56,14 +56,14 @@ namespace vsmc {
 /// \ingroup Definitions
 enum {
     Dynamic ///< Used to specify a dimension template parameter is dynamic
-};
+}; // enum Dynamic
 
 /// \brief Matrix order
 /// \ingroup Definitions
 enum MatrixOrder {
     RowMajor = 101, ///< Data are stored row by row in memory
     ColMajor = 102  ///< Data are stored column by column in memory
-};
+}; // enum MatrixOrder
 
 } // namespace vsmc
 

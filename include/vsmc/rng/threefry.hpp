@@ -103,7 +103,7 @@ struct ThreefryRotateImpl<uint32_t, N>
 
     static VSMC_CONSTEXPR const unsigned left_ = N & 31;
     static VSMC_CONSTEXPR const unsigned right_ = (32 - N) & 31;
-};
+}; // struct ThreefryRotateImpl
 
 template <unsigned N>
 struct ThreefryRotateImpl<uint64_t, N>
@@ -114,7 +114,7 @@ struct ThreefryRotateImpl<uint64_t, N>
 
     static VSMC_CONSTEXPR const unsigned left_ = N & 63;
     static VSMC_CONSTEXPR const unsigned right_ = (64 - N) & 63;
-};
+}; // struct ThreefryRotateImpl
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct ThreefryRotate {static void rotate (StaticVector<ResultType, K> &) {}};
@@ -134,7 +134,7 @@ struct ThreefryRotate<ResultType, 2, N, true>
     private :
 
     static VSMC_CONSTEXPR const unsigned r_ = (N - 1) % 8;
-};
+}; // struct ThreefryRotate
 
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 4, N, true>
@@ -159,7 +159,7 @@ struct ThreefryRotate<ResultType, 4, N, true>
     static VSMC_CONSTEXPR const std::size_t i0_ = N % 2 ? 1 : 3;
     static VSMC_CONSTEXPR const std::size_t i2_ = N % 2 ? 3 : 1;
     static VSMC_CONSTEXPR const unsigned r_ = (N - 1) % 8;
-};
+}; // struct ThreefryRotate
 
 template <typename ResultType, std::size_t K, std::size_t N,
          bool = (N % 4 == 0)>
@@ -167,7 +167,7 @@ struct ThreefryInsert
 {
     static void insert (StaticVector<ResultType, K> &,
             const StaticVector<ResultType, K + 1> &) {}
-};
+}; // struct ThreefryInsert
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsert<ResultType, 2, N, true>
@@ -185,7 +185,7 @@ struct ThreefryInsert<ResultType, 2, N, true>
     static VSMC_CONSTEXPR const std::size_t inc_ = N / 4;
     static VSMC_CONSTEXPR const std::size_t i0_ = (inc_ + 0) % 3;
     static VSMC_CONSTEXPR const std::size_t i1_ = (inc_ + 1) % 3;
-};
+}; // struct ThreefryInsert
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsert<ResultType, 4, N, true>
@@ -207,7 +207,7 @@ struct ThreefryInsert<ResultType, 4, N, true>
     static VSMC_CONSTEXPR const std::size_t i1_ = (inc_ + 1) % 5;
     static VSMC_CONSTEXPR const std::size_t i2_ = (inc_ + 2) % 5;
     static VSMC_CONSTEXPR const std::size_t i3_ = (inc_ + 3) % 5;
-};
+}; // struct ThreefryInsert
 
 } // namespace vsmc::internal
 

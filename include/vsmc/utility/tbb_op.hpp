@@ -3,7 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_DEFINE_TBB_OP_FOR_UNARY_OBJECT(name, uni) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OBJECT(name, uni) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -26,9 +26,9 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T *const result_;                                                        \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OBJECT
 
-#define VSMC_DEFINE_TBB_OP_FOR_BINARY_OBJECT(name, bin) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OBJECT(name, bin) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -53,9 +53,9 @@ class name                                                                   \
     const T *const data_;                                                    \
     T *const result_;                                                        \
     const T val_;                                                            \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OBJECT
 
-#define VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(name, uni) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(name, uni) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -77,9 +77,9 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T *const result_;                                                        \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION
 
-#define VSMC_DEFINE_TBB_OP_FOR_BINARY_FUNCTION(name, bin) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_FUNCTION(name, bin) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -103,9 +103,9 @@ class name                                                                   \
     const T *const data_;                                                    \
     T *const result_;                                                        \
     const T val_;                                                            \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_FUNCTION
 
-#define VSMC_DEFINE_TBB_OP_FOR_UNARY_OPERATOR(name, uni) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OPERATOR(name, uni) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -127,9 +127,9 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T *const result_;                                                        \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OPERATOR
 
-#define VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(name, bin) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(name, bin) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -153,9 +153,9 @@ class name                                                                   \
     const T *const data_;                                                    \
     T *const result_;                                                        \
     const T val_;                                                            \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR
 
-#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OBJECT(name, bin, identity) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OBJECT(name, bin, identity) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -191,9 +191,9 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T result_;                                                               \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OBJECT
 
-#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(name, bin, identity) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_FUNCTION(name, bin, identity)\
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -224,9 +224,9 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T result_;                                                               \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_FUNCTION
 
-#define VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(name, bin, identity) \
+#define VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OPERATOR(name, bin, identity)\
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -257,7 +257,7 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T result_;                                                               \
-};
+}; // VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OPERATOR
 
 namespace vsmc {
 
@@ -313,7 +313,7 @@ template <> struct positive_infinity_trait<long double>
 {
     static long double value ()
     {return std::numeric_limits<long double>::infinity();}
-};
+}; // struct positive_infinity_trait
 
 /// \brief Negative infinity of a given floating points type
 /// \ingroup TBBOp
@@ -321,7 +321,7 @@ template <> struct negative_infinity_trait<long double>
 {
     static long double value ()
     {return -std::numeric_limits<long double>::infinity();}
-};
+}; // struct negative_infinity_trait
 
 /// \brief Zero of a given type
 /// \ingroup TBBOp
@@ -370,109 +370,111 @@ class square_sum
 
 /// \brief Negation
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_OPERATOR(negate, -)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OPERATOR(negate, -)
 
 /// \brief Plus
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(plus,       +)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(plus, +)
 
 /// \brief Minus
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(minus,      -)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(minus, -)
 
 /// \brief Multiple
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(multiplies, *)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(multiplies, *)
 
 /// \brief Division
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(divides,    /)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(divides, /)
 
 /// \brief Modulo
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_BINARY_OPERATOR(modulus,    %)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(modulus, %)
 
 /// \brief Absolute value
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(abs,   std::abs)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(abs, std::abs)
 
 /// \brief Exponential
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(exp,   std::exp)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(exp, std::exp)
 
 /// \brief Logarithm
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(log,   std::log)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(log, std::log)
 
 /// \brief Logarithm of 10
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(log10, std::log10)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(log10, std::log10)
 
 /// \brief Square root
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sqrt,  std::sqrt)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(sqrt, std::sqrt)
 
 /// \brief Sine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sin,   std::sin)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(sin, std::sin)
 
 /// \brief Cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(cos,   std::cos)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(cos, std::cos)
 
 /// \brief Tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(tan,   std::tan)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(tan, std::tan)
 
 /// \brief arc sine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(asin,  std::asin)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(asin, std::asin)
 
 /// \brief arc cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(acos,  std::acos)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(acos, std::acos)
 
 /// \brief arc tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(atan,  std::atan)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(atan, std::atan)
 
 /// \brief Hyperbolic sine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(sinh,  std::sinh)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(sinh, std::sinh)
 
 /// \brief Hyperbolic cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(cosh,  std::cosh)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(cosh, std::cosh)
 
 /// \brief Hyperbolic tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(tanh,  std::tanh)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(tanh, std::tanh)
 
 /// \brief Ceil
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(ceil,  std::ceil)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(ceil, std::ceil)
 
 /// \brief Floor
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_FOR_UNARY_FUNCTION(floor, std::floor)
+VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(floor, std::floor)
 
 /// \brief Maximum
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(maximum, max_fn,
+VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_FUNCTION(maximum, max_fn,
         negative_infinity_trait<T>::value())
 
 /// \brief Minimum
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_REDUCE_BINARY_FUNCTION(minimum, min_fn,
+VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_FUNCTION(minimum, min_fn,
         positive_infinity_trait<T>::value())
 
 /// \brief Summation
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(summation, +, zero_trait<T>::value())
+VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OPERATOR(summation, +,
+        zero_trait<T>::value())
 
 /// \brief Product
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_OP_REDUCE_BINARY_OPERATOR(product,   *, one_trait<T>::value())
+VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OPERATOR(product, *,
+        one_trait<T>::value())
 
 } // namespace vsmc::tbb_op
 

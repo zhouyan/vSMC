@@ -191,7 +191,7 @@ struct RngCounter
         increment<N + 1>(ctr, nskip - (max_ - ctr[N]),
                 cxx11::integral_constant<bool, N < K>());
     }
-};
+}; // struct RngCounter
 
 template <typename SeedSeq, typename T>
 struct is_seed_sequence :

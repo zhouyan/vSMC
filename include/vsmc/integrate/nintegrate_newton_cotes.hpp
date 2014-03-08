@@ -21,14 +21,14 @@ struct NIntegrateNewtonCotesEval
             NIntegrateNewtonCotesEval<Index - 1, EvalType>::
             result(coeff, a, h, eval);
     }
-};
+}; // struct NIntegrateNewtonCotesEval
 
 template <typename EvalType>
 struct NIntegrateNewtonCotesEval<1, EvalType>
 {
     static double result (const double *coeff, double a, double,
             const EvalType &eval) {return coeff[1] * eval(a);}
-};
+}; // struct NIntegrateNewtonCotesEval
 
 template <unsigned Degree>
 class NIntegrateNewtonCotesCoeff
@@ -171,7 +171,7 @@ class NIntegrateNewtonCotesCoeff
         coeff_[10] = 106300;
         coeff_[11] = 16067;
     }
-};
+}; // NIntegrateNewtonCotesCoeff
 
 } // namespace vsmc::internal
 

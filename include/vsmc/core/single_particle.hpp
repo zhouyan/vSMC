@@ -259,7 +259,7 @@ class SingleParticle :
 
     SingleParticle<T> &operator= (const SingleParticle<T> &other)
     {base::operator=(other); return *this;}
-};
+}; // class SingleParticle
 
 /// \brief A const variant to SingleParticle
 /// \ingroup Core
@@ -287,7 +287,7 @@ class ConstSingleParticle :
         base::operator=(base(other.id(), other.particle_ptr()));
         return *this;
     }
-};
+}; // class ConstSingleParticle
 
 } // namespace vsmc
 

@@ -28,7 +28,7 @@ struct GeneratorWrapperMinMaxTrait
 
     static VSMC_CONSTEXPR ResultType min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR ResultType max VSMC_MNE () {return _Max;}
-};
+}; // struct GeneratorWrapperMinMaxTrait
 
 } // namespace traits
 
@@ -51,7 +51,7 @@ struct GeneratorWrapperMinMaxTrait
 /// the this library (otherwise will have to require more interfaces of
 /// Generator). And all member functions, except `operator()`, does nothing. To
 /// seed and change the engine, use the Generator type object.
-template <typename ResultType, class Generator, typename Traits = 
+template <typename ResultType, class Generator, typename Traits =
     traits::GeneratorWrapperMinMaxTrait<ResultType, Generator> >
 class GeneratorWrapper : public Traits
 {

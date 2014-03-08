@@ -108,7 +108,7 @@ struct XorshiftIndex
 
     static void shift (StaticVector<ResultType, K> &state)
     {rng_array_left_shift<K, 1, false>(state);}
-};
+}; // struct XorshiftIndex
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S>
 struct XorshiftIndex<ResultType, K, R, S, false>
@@ -127,7 +127,7 @@ struct XorshiftIndex<ResultType, K, R, S, false>
     private :
 
     std::size_t iter_;
-};
+}; // struct XorshiftIndex
 
 template <unsigned A, unsigned B, unsigned C, unsigned,
     typename ResultType, std::size_t R, std::size_t S>

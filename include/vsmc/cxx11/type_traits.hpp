@@ -210,7 +210,7 @@ struct integral_constant
     static VSMC_CONSTEXPR const T value = v;
     VSMC_CONSTEXPR operator value_type () const {return value;}
     VSMC_CONSTEXPR value_type operator() () const {return value;}
-};
+}; // struct integral_constant
 typedef integral_constant<bool, true>  true_type;
 typedef integral_constant<bool, false> false_type;
 
@@ -592,7 +592,7 @@ struct is_base_of_src
 {
     operator const volatile T &();
     template <typename U> operator const is_base_of_dest<U> &();
-};
+}; // struct is_base_of_src
 
 template <std::size_t> struct is_base_of_fail {typedef tp_test_false type;};
 template <typename B, typename D>
@@ -938,7 +938,7 @@ struct make_signed
     typedef typename internal::apply_cv<T,
             typename internal::make_signed_impl<typename remove_cv<
                 typename remove_reference<T>::type>::type>::type>::type type;
-};
+}; //struct make_signed
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using make_signed_t = typename make_signed<T>::type;
 #endif
@@ -974,7 +974,7 @@ struct make_unsigned
     typedef typename internal::apply_cv<T,
             typename internal::make_unsigned_impl<typename remove_cv<
                 typename remove_reference<T>::type>::type>::type>::type type;
-};
+}; // struct make_unsigned
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using make_unsigned_t = typename make_unsigned<T>::type;
 #endif
@@ -1034,7 +1034,7 @@ struct decay
         typename conditional<
             is_function<U>::value, typename add_pointer<U>::type,
         typename remove_cv<U>::type>::type>::type type;
-};
+}; // struct decay
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
 template <typename T> using decay_t = typename decay<T>::type;
 #endif

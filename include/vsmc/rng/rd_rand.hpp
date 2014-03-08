@@ -21,7 +21,7 @@ template <> struct RdRandStep<uint16_t>
 
         return static_cast<uint16_t>(r);
     }
-};
+}; // struct RdRandStep
 
 template <> struct RdRandStep<uint32_t>
 {
@@ -33,7 +33,7 @@ template <> struct RdRandStep<uint32_t>
 
         return static_cast<uint32_t>(r);
     }
-};
+}; // struct RdRandStep
 
 template <> struct RdRandStep<uint64_t>
 {
@@ -45,7 +45,7 @@ template <> struct RdRandStep<uint64_t>
 
         return static_cast<uint64_t>(r);
     }
-};
+}; // struct RdRandStep
 
 } // namespace vsmc::internal
 

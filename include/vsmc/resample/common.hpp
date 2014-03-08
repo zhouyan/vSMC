@@ -63,7 +63,7 @@ enum ResampleScheme {
     Systematic,         ///< Systematic resampling
     ResidualStratified, ///< Stratified resampling on residuals
     ResidualSystematic  ///< Systematic resampling on residuals
-};
+}; // enum ResampleScheme
 
 /// \brief Resample forward decleration
 /// \ingroup Resample

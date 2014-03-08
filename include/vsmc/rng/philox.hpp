@@ -108,7 +108,7 @@ struct PhiloxBumpk<ResultType, 2, N, true>
         par[Position<0>()] +=
             traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
     }
-};
+}; // struct PhiloxBumpk
 
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 4, N, true>
@@ -120,7 +120,7 @@ struct PhiloxBumpk<ResultType, 4, N, true>
         par[Position<1>()] +=
             traits::PhiloxBumpkConstantTrait<ResultType, 1>::value;
     }
-};
+}; // struct PhiloxBumpk
 
 template <std::size_t K, std::size_t N>
 inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
@@ -189,7 +189,7 @@ struct PhiloxRound
 {
     static void round (StaticVector<ResultType, K> &,
             const StaticVector<ResultType, K / 2> &) {}
-};
+}; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true>
@@ -203,7 +203,7 @@ struct PhiloxRound<ResultType, 2, N, true>
         state[Position<0>()] = hi^par[Position<0>()]^state[Position<1>()];
         state[Position<1>()] = lo;
     }
-};
+}; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true>
@@ -222,7 +222,7 @@ struct PhiloxRound<ResultType, 4, N, true>
         state[Position<2>()] = hi0^state[Position<3>()]^par[Position<1>()];
         state[Position<3>()] = lo0;
     }
-};
+}; // struct PhiloxRound
 
 } // namespace vsmc::internal
 

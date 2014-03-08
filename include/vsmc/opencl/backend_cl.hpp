@@ -72,7 +72,7 @@ struct IsDerivedFromStateCLImpl
     public :
 
    enum {value = sizeof(test(static_cast<const D *>(0))) == sizeof(char)};
-};
+}; // struct IsDerivedFromStateImpl
 
 template <typename D>
 struct IsDerivedFromStateCL :

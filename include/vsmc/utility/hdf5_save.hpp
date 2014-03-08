@@ -60,7 +60,7 @@ class HDF5DataPtr
 
     const T *ptr_;
     std::vector<T> data_;
-};
+}; // class HDF5DataPtr
 
 } // namespace vsmc::internal
 

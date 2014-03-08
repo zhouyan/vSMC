@@ -49,7 +49,7 @@ struct TuplePopBack<std::tuple<T, Types...> >
     public :
 
     typedef typename TuplePushFront<tail_type, T>::type type;
-};
+}; // struct TuplePopBack
 
 /// \brief Remove a type from the back of a `std::tuple` type
 /// \ingroup Tuple
@@ -87,7 +87,7 @@ struct TuplePopBackN<std::tuple<T, Types...>, N>
     typedef typename TuplePopBackN<
         typename TuplePopBack<std::tuple<T, Types...> >::type,
                  N - 1>::type type;
-};
+}; // struct TuplePopBackN
 
 template <typename T, typename... Types>
 struct TuplePopBackN<std::tuple<T, Types...>, 0>
@@ -115,7 +115,7 @@ struct TupleMerge
     public :
 
     typedef typename TupleMerge<head_type, tail_type>::type type;
-};
+}; // struct TupleMerge
 
 template <typename T, typename... Types>
 struct TupleMerge<std::tuple<>, std::tuple<T, Types...> >
@@ -142,7 +142,7 @@ struct TupleCat<T1, T2, Types...>
     public :
 
     typedef typename TupleCat<head_type, Types...>::type type;
-};
+}; // struct TupleCat
 
 template <typename... Types>
 struct TupleCat<std::tuple<Types...> > {typedef std::tuple<Types...> type;};
@@ -164,7 +164,7 @@ struct TupleFilter<std::tuple<T, Types...>, Cond>
 
     typedef typename cxx11::conditional<Cond<T>::value,
             typename TuplePushFront<tail_type, T>::type, tail_type>::type type;
-};
+}; // struct TupleFilter
 
 template <template <typename> class Cond>
 struct TupleFilter<std::tuple<>, Cond> {typedef std::tuple<> type;};
@@ -185,7 +185,7 @@ struct TupleTransform<std::tuple<T, Types...>, Trans>
 
     typedef typename TuplePushFront<tail_type, typename Trans<T>::type>::type
         type;
-};
+}; // struct TupleTransform
 
 template <template <typename> class Trans>
 struct TupleTransform<std::tuple<>, Trans> {typedef std::tuple<> type;};
@@ -200,7 +200,7 @@ struct TupleCountImpl<std::tuple<T, Types...>, V>
     static VSMC_CONSTEXPR const std::size_t value =
         (cxx11::is_same<T, V>::value ? 0 : 1) +
         TupleCountImpl<std::tuple<Types...>, V>::value;
-};
+}; // struct TupleCountImpl
 
 template <typename V>
 struct TupleCountImpl<std::tuple<>, V>
@@ -224,7 +224,7 @@ struct TupleCountIfImpl<std::tuple<T, Types...>, Cond>
     static VSMC_CONSTEXPR const std::size_t value =
         (Cond<T>::value ? 0 : 1) +
         TupleCountIfImpl<std::tuple<Types...>, Cond>::value;
-};
+}; // struct TupleCountIfImpl
 
 template <template <typename> class Cond>
 struct TupleCountIfImpl<std::tuple<>, Cond>
@@ -249,9 +249,9 @@ struct TupleFindImpl<std::tuple<T, Types...>, V>
     static VSMC_CONSTEXPR const std::size_t value =
         cxx11::is_same<T, V>::value ? 0 :
         TupleFindImpl<std::tuple<Types...>, V>::value + 1;
-};
-template <typename V>
-struct TupleFindImpl<std::tuple<>, V>
+}; // struct TupleFindImpl
+
+template <typename V> struct TupleFindImpl<std::tuple<>, V>
 {static VSMC_CONSTEXPR const std::size_t value = 0;};
 
 } // namespace vsmc::internal
@@ -272,7 +272,7 @@ struct TupleFindIfImpl<std::tuple<T, Types...>, Cond>
 {
     static VSMC_CONSTEXPR const std::size_t value = Cond<T>::value ? 0 :
         TupleFindIfImpl<std::tuple<Types...>, Cond>::value + 1;
-};
+}; // struct TupleFindIfImpl
 
 template <template <typename> class Cond>
 struct TupleFindIfImpl<std::tuple<>, Cond>
@@ -296,7 +296,7 @@ struct TupleErase<std::tuple<T, Types...>, V>
 {
     typedef typename TuplePushFront<
         typename TupleErase<std::tuple<Types...>, V>::type, T>::type type;
-};
+}; // struct TupleErase
 
 template <typename T, typename... Types>
 struct TupleErase<std::tuple<T, Types...>, T>
@@ -314,7 +314,7 @@ struct TupleEraseAll<std::tuple<T, Types...>, V>
 {
     typedef typename TuplePushFront<
         typename TupleEraseAll<std::tuple<Types...>, V>::type, T>::type type;
-};
+}; // struct TupleEraseAll
 
 template <typename T, typename... Types>
 struct TupleEraseAll<std::tuple<T, Types...>, T>
@@ -339,7 +339,7 @@ struct TupleEraseDuplicate<std::tuple<T, Types...> >
     public :
 
     typedef typename TuplePushFront<tail_type, T>::type type;
-};
+}; // struct TupleEraseDuplicate
 
 template <>
 struct TupleEraseDuplicate<std::tuple<> > {typedef std::tuple<> type;};
@@ -366,7 +366,7 @@ struct TupleReplace<std::tuple<T, Types...>, V, U>
 {
     typedef typename TuplePushFront<
         typename TupleReplace<std::tuple<Types...>, V, U>::type, T>::type type;
-};
+}; // struct TupleReplace
 
 template <typename T, typename... Types, typename U>
 struct TupleReplace<std::tuple<T, Types...>, T, U>
@@ -386,7 +386,7 @@ struct TupleReplaceAll<std::tuple<T, Types...>, V, U>
     typedef typename TuplePushFront<
         typename TupleReplaceAll<std::tuple<Types...>, V, U>::type, T>::type
         type;
-};
+}; // struct TupleReplaceAll
 
 template <typename T, typename... Types, typename U>
 struct TupleReplaceAll<std::tuple<T, Types...>, T, U>
@@ -394,7 +394,7 @@ struct TupleReplaceAll<std::tuple<T, Types...>, T, U>
     typedef typename TuplePushFront<
         typename TupleReplaceAll<std::tuple<Types...>, T, U>::type, U>::type
         type;
-};
+}; // struct TupleReplaceAll
 
 template <typename V, typename U>
 struct TupleReplaceAll<std::tuple<>, V, U> {typedef std::tuple<> type;};

@@ -18,7 +18,7 @@ enum DispatchQueueType {
     DispatchMain,    ///< The queue obtained through `dispatch_get_main_queue`
     DispatchGlobal,  ///< The queue obtained through `dispatch_get_gloal_queue`
     DispatchPrivate  ///< The queue created by `dispatch_queue_create`
-};
+}; // enum DispatchQueueType
 
 /// \brief Types of DispatchSource
 /// \ingroup Dispatch
@@ -33,7 +33,7 @@ enum DispatchSourceType {
     DispatchTimer,     ///< DISPATCH_SOURCE_TYPE_TIMER
     DispatchVnode,     ///< DISPATCH_SOURCE_TYPE_VNODE
     DispatchWrite      ///< DISPATCH_SOURCE_TYPE_WRITE
-};
+}; // enum DispatchSourceType
 
 template <DispatchQueueType> class DispatchQueue;
 template <DispatchSourceType> class DispatchSource;

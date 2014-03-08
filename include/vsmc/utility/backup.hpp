@@ -70,7 +70,7 @@ class Backup
 
     T *backup_;
     bool is_saved_;
-};
+}; // class Backup
 
 /// \brief Backup and restore objects in scope
 /// \ingroup Backup
