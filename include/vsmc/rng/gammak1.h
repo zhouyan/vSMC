@@ -80,13 +80,13 @@
 #define GAMMAK1_4x64_RAND gammak1_4x64_53_rand
 #endif // VSMC_FP_TYPE_IS_DOUBLE
 
-#define VSMC_DEFINE_GAMMAK1(N, W, F, FT) \
+#define VSMC_DEFINE_RNG_GAMMAK1(N, W, F, FT) \
     typedef struct {                                                         \
         FT c_shape, c_s2, c_s, c_d, c_b, c_si, c_c, c_q0;                    \
         normal01_##N##x##W##_##F rnorm;                                      \
     } gammak1_##N##x##W##_##F;
 
-#define VSMC_DEFINE_GAMMAK1_INIT(N, W, F, FT) \
+#define VSMC_DEFINE_RNG_GAMMAK1_INIT(N, W, F, FT) \
     VSMC_STATIC_INLINE void gammak1_##N##x##W##_##F##_init (                 \
             gammak1_##N##x##W##_##F *rgamma,                                 \
             cburng##N##x##W##_rng_t *rng, FT shape)                          \
@@ -144,7 +144,7 @@
         rgamma->c_q0    = c_q0;                                              \
     }
 
-#define VSMC_DEFINE_GAMMAK1_RAND(N, W, F, FT) \
+#define VSMC_DEFINE_RNG_GAMMAK1_RAND(N, W, F, FT) \
     VSMC_STATIC_INLINE FT gammak1_##N##x##W##_##F##_rand (                   \
             gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W##_rng_t *rng)   \
     {                                                                        \
@@ -253,50 +253,50 @@
     }
 
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1(2, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1(2, 32, 24, float)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1(4, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1(4, 32, 24, float)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_INIT(2, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 32, 24, float)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_INIT(4, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 32, 24, float)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_RAND(2, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 32, 24, float)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_RAND(4, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 32, 24, float)
 
 #if VSMC_FP_TYPE_IS_DOUBLE
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1(2, 32, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1(2, 32, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1(4, 32, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1(4, 32, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_INIT(2, 32, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 32, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_INIT(4, 32, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 32, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_RAND(2, 32, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 32, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_RAND(4, 32, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 32, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1(2, 64, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1(2, 64, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1(4, 64, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1(4, 64, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_INIT(2, 64, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 64, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_INIT(4, 64, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 64, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_RAND(2, 64, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 64, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_GAMMAK1_RAND(4, 64, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 64, 53, double)
 #endif // VSMC_USE_U01_DOUBLE
 
 #endif // VSMC_RNG_GAMMAK1_H

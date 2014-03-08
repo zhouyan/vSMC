@@ -74,14 +74,14 @@
 #define NORMAL01_4x64_RAND normal01_4x64_53_rand
 #endif // VSMC_FP_TYPE_IS_DOUBLE
 
-#define VSMC_DEFINE_NORMAL01(N, W, F, FT) \
+#define VSMC_DEFINE_RNG_NORMAL01(N, W, F, FT) \
     typedef struct {                                                         \
         FT u1;                                                               \
         FT u2;                                                               \
         unsigned char saved;                                                 \
     } normal01_##N##x##W##_##F;
 
-#define VSMC_DEFINE_NORMAL01_INIT(N, W, F, FT) \
+#define VSMC_DEFINE_RNG_NORMAL01_INIT(N, W, F, FT) \
     VSMC_STATIC_INLINE void normal01_##N##x##W##_##F##_init (                \
             normal01_##N##x##W##_##F *rnorm, cburng##N##x##W##_rng_t *rng)   \
     {                                                                        \
@@ -90,7 +90,7 @@
         rnorm->saved = 1;                                                    \
     }
 
-#define VSMC_DEFINE_NORMAL01_RAND(N, W, F, FT) \
+#define VSMC_DEFINE_RNG_NORMAL01_RAND(N, W, F, FT) \
     VSMC_STATIC_INLINE FT normal01_##N##x##W##_##F##_rand (                  \
             normal01_##N##x##W##_##F *rnorm, cburng##N##x##W##_rng_t *rng)   \
     {                                                                        \
@@ -105,50 +105,50 @@
     }
 
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01(2, 32, 24, float)
+VSMC_DEFINE_RNG_NORMAL01(2, 32, 24, float)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01(4, 32, 24, float)
+VSMC_DEFINE_RNG_NORMAL01(4, 32, 24, float)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_INIT(2, 32, 24, float)
+VSMC_DEFINE_RNG_NORMAL01_INIT(2, 32, 24, float)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_INIT(4, 32, 24, float)
+VSMC_DEFINE_RNG_NORMAL01_INIT(4, 32, 24, float)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_RAND(2, 32, 24, float)
+VSMC_DEFINE_RNG_NORMAL01_RAND(2, 32, 24, float)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_RAND(4, 32, 24, float)
+VSMC_DEFINE_RNG_NORMAL01_RAND(4, 32, 24, float)
 
 #if VSMC_FP_TYPE_IS_DOUBLE
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01(2, 32, 53, double)
+VSMC_DEFINE_RNG_NORMAL01(2, 32, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01(4, 32, 53, double)
+VSMC_DEFINE_RNG_NORMAL01(4, 32, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_INIT(2, 32, 53, double)
+VSMC_DEFINE_RNG_NORMAL01_INIT(2, 32, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_INIT(4, 32, 53, double)
+VSMC_DEFINE_RNG_NORMAL01_INIT(4, 32, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_RAND(2, 32, 53, double)
+VSMC_DEFINE_RNG_NORMAL01_RAND(2, 32, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_RAND(4, 32, 53, double)
+VSMC_DEFINE_RNG_NORMAL01_RAND(4, 32, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01(2, 64, 53, double)
+VSMC_DEFINE_RNG_NORMAL01(2, 64, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01(4, 64, 53, double)
+VSMC_DEFINE_RNG_NORMAL01(4, 64, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_INIT(2, 64, 53, double)
+VSMC_DEFINE_RNG_NORMAL01_INIT(2, 64, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_INIT(4, 64, 53, double)
+VSMC_DEFINE_RNG_NORMAL01_INIT(4, 64, 53, double)
 
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_RAND(2, 64, 53, double)
+VSMC_DEFINE_RNG_NORMAL01_RAND(2, 64, 53, double)
 /// \ingroup R123RNG
-VSMC_DEFINE_NORMAL01_RAND(4, 64, 53, double)
+VSMC_DEFINE_RNG_NORMAL01_RAND(4, 64, 53, double)
 #endif // VSMC_USE_U01_DOUBLE
 
 #endif // VSMC_RNG_NORMAL01_H
