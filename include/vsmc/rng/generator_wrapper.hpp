@@ -28,6 +28,13 @@ namespace vsmc {
 /// is also 64-bits but a typedef of `unsigned long`. It is ok as long the
 /// `static_cast` from the returned value to `uint64_t` does not change, add,
 /// or lose any bits.
+///
+/// For most RNG generators, use only need to write a thin wrapper to use this
+/// class.  Also note that the `operator==` will always return false as this
+/// wrapper assume that the internal states of the RNG cannot be determined by
+/// the this library (otherwise will have to require more interfaces of
+/// Generator). And all member functions, except `operator()`, does nothing. To
+/// seed and change the engine, use the Generator type object.
 template <typename ResultType, class Generator>
 class GeneratorWrapper
 {
@@ -61,6 +68,10 @@ class GeneratorWrapper
 
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
+
+    Generator &generator () {return generator_;}
+
+    const Generator &generator () const {return generator_;}
 
     friend inline bool operator== (
             const GeneratorWrapper<ResultType, Generator> &,
