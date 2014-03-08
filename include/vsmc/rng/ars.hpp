@@ -181,6 +181,61 @@ class ARSEngine
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
+    friend inline bool operator== (
+            const ARSEngine<ResultType> &eng1,
+            const ARSEngine<ResultType> &eng2)
+    {
+        if (eng1.ctr_ != eng2.ctr_)
+            return false;
+
+        if (eng1.res_ != eng2.res_) 
+            return false;
+
+        if (eng1.key_ != eng2.key_)
+            return false;
+
+        return eng1.remain_ == eng2.remain_;
+    }
+
+    friend inline bool operator!= (
+            const ARSEngine<ResultType> &eng1,
+            const ARSEngine<ResultType> &eng2)
+    {return !(eng1 == eng2);}
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os,
+            const ARSEngine<ResultType> &eng)
+    {
+        if (os) os << eng.ctr_ << ' ';
+        if (os) os << eng.res_ << ' ';
+        if (os) os << eng.key_ << ' ';
+        internal::output_m128i(os, eng.par_);  if (os) os << ' ';
+        internal::output_m128i(os, eng.weyl_); if (os) os << ' ';
+        internal::output_m128i(os, eng.pac_);  if (os) os << ' ';
+        if (os) os << eng.remain_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_istream<CharT, Traits> &operator>> (
+            std::basic_istream<CharT, Traits> &is,
+            ARSEngine<ResultType> &eng)
+    {
+        ARSEngine eng_tmp;
+        if (is) is >> std::ws >> eng_tmp.ctr_;
+        if (is) is >> std::ws >> eng_tmp.res_;
+        if (is) is >> std::ws >> eng_tmp.key_;
+        internal::input_m128i(is, eng_tmp.par_);
+        internal::input_m128i(is, eng_tmp.weyl_);
+        internal::input_m128i(is, eng_tmp.pac_);
+        if (is) is >> std::ws >> eng_tmp.remain_;
+        if (is) eng = eng_tmp;
+
+        return is;
+    }
+
     private :
 
     ctr_type ctr_;

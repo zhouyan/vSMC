@@ -176,6 +176,68 @@ class AESNIEngine
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
+    friend inline bool operator== (
+            const AESNIEngine<ResultType> &eng1,
+            const AESNIEngine<ResultType> &eng2)
+    {
+        if (eng1.ctr_ != eng2.ctr_)
+            return false;
+
+        if (eng1.res_ != eng2.res_) 
+            return false;
+
+        for (std::size_t i = 0; i != key_type::size(); ++i)
+            if (!internal::is_equal(eng1.key_[i], eng2.key_[i]))
+                return false;
+
+        return eng1.remain_ == eng2.remain_;
+    }
+
+    friend inline bool operator!= (
+            const AESNIEngine<ResultType> &eng1,
+            const AESNIEngine<ResultType> &eng2)
+    {return !(eng1 == eng2);}
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os,
+            const AESNIEngine<ResultType> &eng)
+    {
+        if (os) os << eng.ctr_ << ' ';
+        if (os) os << eng.res_ << ' ';
+        for (std::size_t i = 0; i != key_type::size(); ++i) {
+            internal::output_m128i(os, eng.key_[i]);
+            if (os) os << ' ';
+        }
+        internal::output_m128i(os, eng.pac_);  if (os) os << ' ';
+        internal::output_m128i(os, eng.tmp0_); if (os) os << ' ';
+        internal::output_m128i(os, eng.tmp1_); if (os) os << ' ';
+        internal::output_m128i(os, eng.tmp2_); if (os) os << ' ';
+        if (os) os << eng.remain_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_istream<CharT, Traits> &operator>> (
+            std::basic_istream<CharT, Traits> &is,
+            AESNIEngine<ResultType> &eng)
+    {
+        AESNIEngine eng_tmp;
+        if (is) is >> std::ws >> eng_tmp.ctr_;
+        if (is) is >> std::ws >> eng_tmp.res_;
+        for (std::size_t i = 0; i != key_type::size(); ++i)
+            internal::input_m128i(is, eng_tmp.key_[i]);
+        internal::input_m128i(is, eng_tmp.pac_);
+        internal::input_m128i(is, eng_tmp.tmp0_);
+        internal::input_m128i(is, eng_tmp.tmp1_);
+        internal::input_m128i(is, eng_tmp.tmp2_);
+        if (is) is >> std::ws >> eng_tmp.remain_;
+        if (is) eng = eng_tmp;
+
+        return is;
+    }
+
     private :
 
     ctr_type ctr_;

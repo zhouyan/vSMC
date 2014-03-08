@@ -341,6 +341,7 @@ class ThreefryEngine
     {
         return
             eng1.ctr_ == eng2.ctr_ &&
+            eng1.res_ == eng2.res_ &&
             eng1.key_ == eng2.key_ &&
             eng1.remain_ == eng2.remain_;
     }

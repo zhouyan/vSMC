@@ -26,6 +26,38 @@ inline void unpack (const __m128i &m, StaticVector<T, N, Traits> &c)
     _mm_storeu_si128(reinterpret_cast<__m128i *>(c.data()), m);
 }
 
+inline bool is_equal (const __m128i &a, const __m128i &b)
+{
+    StaticVector<uint64_t, 2> sa;
+    StaticVector<uint64_t, 2> sb;
+    unpack(a, sa);
+    unpack(b, sb);
+
+    return sa == sb;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &output_m128i (
+        std::basic_ostream<CharT, Traits> &os, const __m128i &a)
+{
+    StaticVector<uint64_t, 2> sa;
+    unpack(a, sa);
+    if (os) os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &input_m128i (
+        std::basic_istream<CharT, Traits> &is, __m128i &a)
+{
+    StaticVector<uint64_t, 2> sa;
+    if (is) is >> sa;
+    if (is) pack(sa, a);
+
+    return is;
+}
+
 } // namespace vsmc::internal
 
 } // namespace vsmc
