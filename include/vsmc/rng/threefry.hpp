@@ -124,10 +124,11 @@ struct ThreefryRotate<ResultType, 2, N, true>
 {
     static void rotate (StaticVector<ResultType, 2> &state)
     {
-        state[0] += state[1];
-        state[1] = ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
-            ResultType, 2, r_, 0>::value>::rotate(state[1]);
-        state[1] ^= state[0];
+        state[Position<0>()] += state[Position<1>()];
+        state[Position<1>()] =
+            ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
+            ResultType, 2, r_, 0>::value>::rotate(state[Position<1>()]);
+        state[Position<1>()] ^= state[Position<0>()];
     }
 
     private :
@@ -140,15 +141,17 @@ struct ThreefryRotate<ResultType, 4, N, true>
 {
     static void rotate (StaticVector<ResultType, 4> &state)
     {
-        state[0] += state[i0_];
-        state[i0_] = ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
-            ResultType, 4, r_, 0>::value>::rotate(state[i0_]);
-        state[i0_] ^= state[0];
+        state[Position<0>()] += state[Position<i0_>()];
+        state[Position<i0_>()] =
+            ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
+            ResultType, 4, r_, 0>::value>::rotate(state[Position<i0_>()]);
+        state[Position<i0_>()] ^= state[Position<0>()];
 
-        state[2] += state[i2_];
-        state[i2_] = ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
-            ResultType, 4, r_, 1>::value>::rotate(state[i2_]);
-        state[i2_] ^= state[2];
+        state[Position<2>()] += state[Position<i2_>()];
+        state[Position<i2_>()] =
+            ThreefryRotateImpl<ResultType, ThreefryRotateConstant<
+            ResultType, 4, r_, 1>::value>::rotate(state[Position<i2_>()]);
+        state[Position<i2_>()] ^= state[Position<2>()];
     }
 
     private :
@@ -172,9 +175,9 @@ struct ThreefryInsert<ResultType, 2, N, true>
     static void insert (StaticVector<ResultType, 2> &state,
             const StaticVector<ResultType, 3> &par)
     {
-        state[0] += par[i0_];
-        state[1] += par[i1_];
-        state[1] += inc_;
+        state[Position<0>()] += par[Position<i0_>()];
+        state[Position<1>()] += par[Position<i1_>()];
+        state[Position<1>()] += inc_;
     }
 
     private :
@@ -190,11 +193,11 @@ struct ThreefryInsert<ResultType, 4, N, true>
     static void insert (StaticVector<ResultType, 4> &state,
             const StaticVector<ResultType, 5> &par)
     {
-        state[0] += par[i0_];
-        state[1] += par[i1_];
-        state[2] += par[i2_];
-        state[3] += par[i3_];
-        state[3] += inc_;
+        state[Position<0>()] += par[Position<i0_>()];
+        state[Position<1>()] += par[Position<i1_>()];
+        state[Position<2>()] += par[Position<i2_>()];
+        state[Position<3>()] += par[Position<i3_>()];
+        state[Position<3>()] += inc_;
     }
 
     private :
@@ -263,7 +266,7 @@ class ThreefryEngine
     {
         ctr_.fill(0);
         key_.fill(0);
-        key_[0] = s;
+        key_.front() = s;
         init_par();
         remain_ = 0;
     }
@@ -392,9 +395,9 @@ class ThreefryEngine
     void init_par ()
     {
         par_ = key_.template resize<K + 1>();
-        par_[K] = internal::ThreefryPar<ResultType>::value;
+        par_.back() = internal::ThreefryPar<ResultType>::value;
         for (std::size_t i = 0; i != K; ++i)
-            par_[K] ^= par_[i];
+            par_.back() ^= par_[i];
     }
 
     template <std::size_t> void generate (cxx11::false_type) {}

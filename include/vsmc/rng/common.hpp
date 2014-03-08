@@ -61,7 +61,7 @@ template <std::size_t K, std::size_t A, std::size_t I,
 inline void rng_array_left_assign (StaticVector<T, K, Traits> &state,
         cxx11::true_type)
 {
-    state[I] = state[I + A];
+    state[Position<I>()] = state[Position<I + A>()];
     rng_array_left_assign<K, A, I + 1>(state,
             cxx11::integral_constant<bool, (I + A + 1 < K)>());
 }
@@ -74,7 +74,7 @@ template <std::size_t K, std::size_t I, typename T, typename Traits>
 inline void rng_array_left_zero (StaticVector<T, K, Traits> &state,
         cxx11::true_type)
 {
-    state[I] = 0;
+    state[Position<I>()] = 0;
     rng_array_left_zero<K, I + 1>(state,
             cxx11::integral_constant<bool, (I + 1 < K)>());
 }
@@ -99,7 +99,7 @@ template <std::size_t K, std::size_t A, std::size_t I,
 inline void rng_array_right_assign (StaticVector<T, K, Traits> &state,
         cxx11::true_type)
 {
-    state[I] = state[I - A];
+    state[Position<I>()] = state[Position<I - A>()];
     rng_array_right_assign<K, A, I - 1>(state,
             cxx11::integral_constant<bool, (A < I)>());
 }
@@ -112,7 +112,7 @@ template <std::size_t K, std::size_t I, typename T, typename Traits>
 inline void rng_array_right_zero (StaticVector<T, K, Traits> &state,
         cxx11::true_type)
 {
-    state[I] = 0;
+    state[Position<I>()] = 0;
     rng_array_right_zero<K, I - 1>(state,
             cxx11::integral_constant<bool, (I > 0)>());
 }
@@ -154,10 +154,7 @@ struct RngCounter
 
     template <std::size_t, typename Traits>
     static void increment (StaticVector<T, K, Traits> &ctr, cxx11::false_type)
-    {
-        for (std::size_t i = 0; i != K; ++i)
-            ctr[i] = 0;
-    }
+    {ctr.fill(0);}
 
     template <std::size_t N, typename Traits>
     static void increment (StaticVector<T, K, Traits> &ctr, cxx11::true_type)
@@ -177,8 +174,7 @@ struct RngCounter
         if (nskip == 0)
             return;
 
-        for (std::size_t i = 0; i != K; ++i)
-            ctr[i] = 0;
+        ctr.fill(0);
         --nskip;
         ctr[0] = nskip;
     }

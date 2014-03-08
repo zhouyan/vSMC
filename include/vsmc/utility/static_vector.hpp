@@ -279,6 +279,9 @@ template <typename T, std::size_t N,
 class StaticVector : public internal::StaticVectorStorage<T, N,
     (sizeof(T) * N <= Traits::max_static_size)>
 {
+    typedef internal::StaticVectorStorage<T, N,
+    (sizeof(T) * N <= Traits::max_static_size)> storage_type;
+
     public :
 
     typedef T value_type;
@@ -326,50 +329,62 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     reference at (size_type i)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N);
-        return this->operator[](i);
+        return storage_type::operator[](i);
     }
 
     const_reference at (size_type i) const
     {
         VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N);
-        return this->operator[](i);
+        return storage_type::operator[](i);
     }
 
     template <size_type Pos>
     reference at ()
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->operator[](Pos);
+        return storage_type::operator[](Pos);
     }
 
     template <size_type Pos>
     const_reference at () const
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->operator[](Pos);
+        return storage_type::operator[](Pos);
     }
 
     template <size_type Pos>
     reference at (Position<Pos>)
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->operator[](Pos);
+        return storage_type::operator[](Pos);
     }
 
     template <size_type Pos>
     const_reference at (Position<Pos>) const
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->operator[](Pos);
+        return storage_type::operator[](Pos);
     }
 
-    reference front () {return this->operator[](0);}
+    reference operator[] (size_type i)
+    {return storage_type::operator[](i);}
 
-    const_reference front () const {return this->operator[](0);}
+    const_reference operator[] (size_type i) const
+    {return storage_type::operator[](i);}
 
-    reference back () {return this->operator[](N - 1);}
+    template <size_type Pos>
+    reference operator[] (Position<Pos>) {return at<Pos>();}
 
-    const_reference back () const {return this->operator[](N - 1);}
+    template <size_type Pos>
+    const_reference operator[] (Position<Pos>) const {return at<Pos>();}
+
+    reference front () {return at<0>();}
+
+    const_reference front () const {return at<0>();}
+
+    reference back () {return at<N - 1>();}
+
+    const_reference back () const {return at<N - 1>();}
 
     pointer data () {return this->ptr();}
 

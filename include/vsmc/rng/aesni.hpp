@@ -156,7 +156,7 @@ class AESNIEngine
             return;
 
         --nskip;
-        internal::RngCounter<ResultType, K_>::increment(ctr_.data(), nskip);
+        internal::RngCounter<ResultType, K_>::increment(ctr_, nskip);
         remain_ = 0;
         operator()();
         nskip = nskip % K_;
@@ -262,7 +262,7 @@ class AESNIEngine
     template <std::size_t N>
     void generate (cxx11::true_type)
     {
-        pac_ = _mm_aesenc_si128(pac_, key_[N + 1]);
+        pac_ = _mm_aesenc_si128(pac_, key_[Position<N + 1>()]);
         generate<N + 1>(cxx11::integral_constant<bool, N + 2 < R_>());
     }
 
@@ -278,7 +278,7 @@ class AESNIEngine
     template <std::size_t N>
     void init_key (cxx11::true_type)
     {
-        key_[N] = tmp0_;
+        key_[Position<N>()] = tmp0_;
         tmp1_ = _mm_aeskeygenassist_si128(tmp0_,
                 internal::AESNIRoundConstant<N>::value);
         init_key_assit();

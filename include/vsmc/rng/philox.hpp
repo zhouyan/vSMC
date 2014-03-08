@@ -104,7 +104,10 @@ template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 2, N, true>
 {
     static void bumpk (StaticVector<ResultType, 1> &par)
-    {par[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;}
+    {
+        par[Position<0>()] +=
+            traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
+    }
 };
 
 template <typename ResultType, std::size_t N>
@@ -112,8 +115,10 @@ struct PhiloxBumpk<ResultType, 4, N, true>
 {
     static void bumpk (StaticVector<ResultType, 2> &par)
     {
-        par[0] += traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
-        par[1] += traits::PhiloxBumpkConstantTrait<ResultType, 1>::value;
+        par[Position<0>()] +=
+            traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
+        par[Position<1>()] +=
+            traits::PhiloxBumpkConstantTrait<ResultType, 1>::value;
     }
 };
 
@@ -194,9 +199,9 @@ struct PhiloxRound<ResultType, 2, N, true>
     {
         ResultType hi = 0;
         ResultType lo = 0;
-        philox_hilo<2, 0>(state[0], hi, lo);
-        state[0] = hi^par[0]^state[1];
-        state[1] = lo;
+        philox_hilo<2, 0>(state[Position<0>()], hi, lo);
+        state[Position<0>()] = hi^par[Position<0>()]^state[Position<1>()];
+        state[Position<1>()] = lo;
     }
 };
 
@@ -210,12 +215,12 @@ struct PhiloxRound<ResultType, 4, N, true>
         ResultType hi1 = 0;
         ResultType lo0 = 0;
         ResultType lo1 = 0;
-        philox_hilo<4, 0>(state[0], hi0, lo0);
-        philox_hilo<4, 1>(state[2], hi1, lo1);
-        state[0] = hi1^state[1]^par[0];
-        state[1] = lo1;
-        state[2] = hi0^state[3]^par[1];
-        state[3] = lo0;
+        philox_hilo<4, 0>(state[Position<0>()], hi0, lo0);
+        philox_hilo<4, 1>(state[Position<2>()], hi1, lo1);
+        state[Position<0>()] = hi1^state[Position<1>()]^par[Position<0>()];
+        state[Position<1>()] = lo1;
+        state[Position<2>()] = hi0^state[Position<3>()]^par[Position<1>()];
+        state[Position<3>()] = lo0;
     }
 };
 
@@ -286,7 +291,7 @@ class PhiloxEngine
     {
         ctr_.fill(0);
         key_.fill(0);
-        key_[0] = s;
+        key_.front() = s;
         remain_ = 0;
     }
 

@@ -103,7 +103,7 @@ class ARSEngine
     {
         ctr_.fill(0);
         key_.fill(0);
-        key_[0] = s;
+        key_.front() = s;
         remain_ = 0;
     }
 
@@ -161,7 +161,7 @@ class ARSEngine
             return;
 
         --nskip;
-        internal::RngCounter<ResultType, K_>::increment(ctr_.data(), nskip);
+        internal::RngCounter<ResultType, K_>::increment(ctr_, nskip);
         remain_ = 0;
         operator()();
         nskip = nskip % K_;
