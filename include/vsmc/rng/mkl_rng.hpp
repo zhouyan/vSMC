@@ -31,6 +31,12 @@ template <MKL_INT>            class MKLStream;
 template <typename, typename> class MKLDistribution;
 template <MKL_INT, typename>  class MKLEngine;
 
+class MKLUniformBits32Distribution;
+class MKLUniformBits64Distribution;
+
+template <typename, MKL_INT = VSL_RNG_METHOD_UNIFORM_STD>
+class MKLUniformDistribution;
+
 template <MKL_INT = VSL_RNG_METHOD_BERNOULLI_ICDF>
 class MKLBernoulliDistribution;
 template <MKL_INT = VSL_RNG_METHOD_GEOMETRIC_ICDF>
@@ -43,8 +49,6 @@ template <MKL_INT = VSL_RNG_METHOD_POISSON_PTPE>
 class MKLPoissonDistribution;
 template <MKL_INT = VSL_RNG_METHOD_NEGBINOMIAL_NBAR>
 class MKLNegBinomialDistribution;
-template <typename, MKL_INT = VSL_RNG_METHOD_UNIFORM_STD>
-class MKLUniformDistribution;
 template <typename = double, MKL_INT = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>
 class MKLGaussianDistribution;
 template <typename = double, MKL_INT = VSL_RNG_METHOD_EXPONENTIAL_ICDF>
@@ -159,6 +163,41 @@ inline void mkl_rng_error_check (MKL_INT BRNG, int status,
 
 namespace traits {
 
+/// \brief MKLEngine uniform bits trait
+/// \ingroup Traits
+///
+/// \details
+/// To use MKLEngine with those MKL BRNG that has not been typedefed by vSMC,
+/// one need to specialize this trait, which has member type `type`, and this
+/// type has member
+/// `operator() (const MKLStream<BRNG> &, MKL_INT, ResultType *)` such that
+/// given the stream object, it is able to generate uniform integers.
+///
+/// This traits also need to have two static constant member data, `min` and
+/// `max`
+template <MKL_INT, typename> struct MKLUniformBitsTrait;
+
+/// \brief Default uniform bits generator for MKLEngine with `unsigned` output
+/// \ingroup Traits
+template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned>
+{
+    typedef MKLUniformBits32Distribution type;
+    static VSMC_CONSTEXPR const unsigned min VSMC_MNE = 0;
+    static VSMC_CONSTEXPR const unsigned max VSMC_MNE =
+        static_cast<unsigned>(~(static_cast<unsigned>(0)));
+}; // struct MKLUniformBitsTrait
+
+/// \brief Default uniform bits generator for MKLEngine with
+/// `unsigned MKL_INT64` output
+/// \ingroup Traits
+template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64>
+{
+    typedef MKLUniformBits64Distribution type;
+    static VSMC_CONSTEXPR const unsigned MKL_INT64 min VSMC_MNE = 0;
+    static VSMC_CONSTEXPR const unsigned MKL_INT64 max VSMC_MNE =
+        static_cast<unsigned MKL_INT64>(~(static_cast<unsigned MKL_INT64>(0)));
+}; // struct MKLUniformBitsTrait
+
 /// \brief Default seed for MKL RNG
 /// \ingroup Traits
 template<MKL_INT> struct MKLSeedTrait :
@@ -172,7 +211,7 @@ template <> struct MKLSeedTrait<VSL_BRNG_SOBOL> :
 template <> struct MKLSeedTrait<VSL_BRNG_NIEDERR> :
     public cxx11::integral_constant<MKL_UINT, 10> {};
 
-} // namespace vsmc::traits
+} // namespace traits
 
 namespace internal {
 
@@ -212,46 +251,6 @@ struct MKLOffset<VSL_BRNG_MT2203> {typedef MKLOffsetDynamic<6024> type;};
 
 template <>
 struct MKLOffset<VSL_BRNG_WH> {typedef MKLOffsetDynamic<273> type;};
-
-class MKLUniformBits32
-{
-    public :
-
-    typedef unsigned result_type;
-
-    template <MKL_INT BRNG>
-    void operator() (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
-                stream.ptr(), n, r);
-        mkl_rng_error_check(BRNG, status,
-                "MKLUniformBitsDistribution::generate", "viRngUniformBits32");
-    }
-}; // class MKLUniformBits32Distribution
-
-class MKLUniformBits64
-{
-    public :
-
-    typedef unsigned MKL_INT64 result_type;
-
-    template <MKL_INT BRNG>
-    void operator() (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
-                stream.ptr(), n, r);
-        mkl_rng_error_check(BRNG, status,
-                "MKLUniformBitsDistribution::generate", "viRngUniformBits64");
-    }
-}; // class MKLUniformBits64Distribution
-
-template <MKL_INT, typename> struct MKLUniformBits;
-
-template <MKL_INT BRNG> struct MKLUniformBits<BRNG, unsigned>
-{typedef MKLUniformBits32 type;};
-
-template <MKL_INT BRNG> struct MKLUniformBits<BRNG, unsigned MKL_INT64>
-{typedef MKLUniformBits64 type;};
 
 struct MKLSkipAheadVSL
 {
@@ -311,7 +310,7 @@ struct MKLSkipAheadForce
     private :
 
     std::vector<ResultType> buffer_;
-    typename internal::MKLUniformBits<BRNG, ResultType>::type uniform_bits_;
+    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     MKL_INT buffer_size_;
 }; // strut SkipAheadForce
 
@@ -568,9 +567,10 @@ class MKLEngine
                 (nskip));
     }
 
-    static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max = static_cast<result_type>(
-            ~(static_cast<result_type>(0)));
+    static VSMC_CONSTEXPR const result_type _Min =
+        traits::MKLUniformBitsTrait<BRNG, ResultType>::min VSMC_MNE;
+    static VSMC_CONSTEXPR const result_type _Max =
+        traits::MKLUniformBitsTrait<BRNG, ResultType>::max VSMC_MNE;
 
     static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
@@ -587,7 +587,7 @@ class MKLEngine
 
     stream_type stream_;
     typename internal::MKLSkipAhead<BRNG, ResultType>::type skip_ahead_;
-    typename internal::MKLUniformBits<BRNG, ResultType>::type uniform_bits_;
+    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     std::vector<result_type> buffer_;
     MKL_INT buffer_size_;
     MKL_INT remain_;
@@ -725,6 +725,78 @@ class MKLDistribution
     std::string vsl_name_prefix (float)              {return "vs";}
     std::string vsl_name_prefix (double)             {return "vd";}
 }; // class MKLDistribution
+
+/// \brief MKL uniform bits distribution (32-bits)
+/// \ingroup MKLRNG
+class MKLUniformBits32Distribution :
+    public MKLDistribution<unsigned, MKLUniformBits32Distribution>
+{
+    public :
+
+    typedef unsigned result_type;
+
+    template <MKL_INT BRNG>
+    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    {
+        int status = ::viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
+                stream.ptr(), n, r);
+        this->template generate_error_check<BRNG>(status, "UniformBits32");
+    }
+}; // class MKLUniformBits32Distribution
+
+/// \brief MKL uniform bits distribution (64-bits)
+/// \ingroup MKLRNG
+class MKLUniformBits64Distribution :
+    public MKLDistribution<unsigned MKL_INT64, MKLUniformBits64Distribution>
+{
+    public :
+
+    typedef unsigned MKL_INT64 result_type;
+
+    template <MKL_INT BRNG>
+    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    {
+        int status = ::viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
+                stream.ptr(), n, r);
+        this->template generate_error_check<BRNG>(status, "UniformBits64");
+    }
+}; // class MKLUniformBits64Distribution
+
+/// \brief MKL Uniform distribution
+/// \ingroup MKLRNG
+template <typename ResultType, MKL_INT Method>
+class MKLUniformDistribution :
+    public MKLDistribution<ResultType,
+    MKLUniformDistribution<ResultType, Method> >
+{
+    public :
+
+    typedef ResultType result_type;
+
+    explicit MKLUniformDistribution (result_type a = 0, result_type b = 1) :
+        a_(a), b_(b) {}
+
+    template <MKL_INT BRNG>
+    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    {
+        int status = generate(stream.ptr(), n, r);
+        this->template generate_error_check<BRNG>(status, "Uniform");
+    }
+
+    private :
+
+    result_type a_;
+    result_type b_;
+
+    int generate (VSLStreamStatePtr ptr, MKL_INT n, MKL_INT *r)
+    {return ::viRngUniform(Method, ptr, n, r, a_, b_);}
+
+    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
+    {return ::vsRngUniform(Method, ptr, n, r, a_, b_);}
+
+    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
+    {return ::vdRngUniform(Method, ptr, n, r, a_, b_);}
+}; // class MKLUniformDistribution
 
 /// \brief MKL Bernoulli distribution
 /// \ingroup MKLRNG
@@ -879,42 +951,6 @@ class MKLNegBinomialDistribution :
     double ntrial_;
     double p_;
 }; // class MKLNegBinomialDistribution
-
-/// \brief MKL Uniform distribution
-/// \ingroup MKLRNG
-template <typename ResultType, MKL_INT Method>
-class MKLUniformDistribution :
-    public MKLDistribution<ResultType,
-    MKLUniformDistribution<ResultType, Method> >
-{
-    public :
-
-    typedef ResultType result_type;
-
-    explicit MKLUniformDistribution (result_type a = 0, result_type b = 1) :
-        a_(a), b_(b) {}
-
-    template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Uniform");
-    }
-
-    private :
-
-    result_type a_;
-    result_type b_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, MKL_INT *r)
-    {return ::viRngUniform(Method, ptr, n, r, a_, b_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngUniform(Method, ptr, n, r, a_, b_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngUniform(Method, ptr, n, r, a_, b_);}
-}; // class MKLUniformDistribution
 
 /// \brief MKL Gaussian distribution
 /// \ingroup MKLRNG
