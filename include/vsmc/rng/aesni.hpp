@@ -20,6 +20,10 @@
     template <> struct AESNIRoundConstant< N > :                             \
         public cxx11::integral_constant<int, val > {};
 
+#ifndef VSMC_RNG_AESNI_BLOCKS
+#define VSMC_RNG_AESNI_BLOCKS 1
+#endif
+
 namespace vsmc {
 
 namespace internal {
@@ -54,7 +58,7 @@ VSMC_DEFINE_RNG_AESNI_ROUND_CONSTANT(9, 0x36)
 /// vSMC increment the counter slightly differently, but it still cover the
 /// same range and has the same period as the original. In addition, this
 /// engine allows output of 64-bits integers.
-template <typename ResultType, std::size_t Blocks = 1>
+template <typename ResultType, std::size_t Blocks = VSMC_RNG_AESNI_BLOCKS>
 class AESNIEngine
 {
     static VSMC_CONSTEXPR const std::size_t R_ = 10;
@@ -180,8 +184,8 @@ class AESNIEngine
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     friend inline bool operator== (
-            const AESNIEngine<ResultType> &eng1,
-            const AESNIEngine<ResultType> &eng2)
+            const AESNIEngine<ResultType, Blocks> &eng1,
+            const AESNIEngine<ResultType, Blocks> &eng2)
     {
         if (eng1.ctr_ != eng2.ctr_)
             return false;
@@ -197,14 +201,14 @@ class AESNIEngine
     }
 
     friend inline bool operator!= (
-            const AESNIEngine<ResultType> &eng1,
-            const AESNIEngine<ResultType> &eng2)
+            const AESNIEngine<ResultType, Blocks> &eng1,
+            const AESNIEngine<ResultType, Blocks> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const AESNIEngine<ResultType> &eng)
+            const AESNIEngine<ResultType, Blocks> &eng)
     {
         if (os) os << eng.ctr_ << ' ';
         if (os) os << eng.res_ << ' ';
@@ -212,7 +216,8 @@ class AESNIEngine
             internal::output_m128i(os, eng.key_[i]);
             if (os) os << ' ';
         }
-        internal::output_m128i(os, eng.pac_);  if (os) os << ' ';
+        for (std::size_t i = 0; i != Blocks; ++i)
+            internal::output_m128i(os, eng.pac_[i]);  if (os) os << ' ';
         internal::output_m128i(os, eng.tmp0_); if (os) os << ' ';
         internal::output_m128i(os, eng.tmp1_); if (os) os << ' ';
         internal::output_m128i(os, eng.tmp2_); if (os) os << ' ';
@@ -224,14 +229,15 @@ class AESNIEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            AESNIEngine<ResultType> &eng)
+            AESNIEngine<ResultType, Blocks> &eng)
     {
         AESNIEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.res_;
         for (std::size_t i = 0; i != key_type::size(); ++i)
             internal::input_m128i(is, eng_tmp.key_[i]);
-        internal::input_m128i(is, eng_tmp.pac_);
+        for (std::size_t i = 0; i != Blocks; ++i)
+            internal::input_m128i(is, eng_tmp.pac_[i]);
         internal::input_m128i(is, eng_tmp.tmp0_);
         internal::input_m128i(is, eng_tmp.tmp1_);
         internal::input_m128i(is, eng_tmp.tmp2_);
@@ -447,6 +453,18 @@ typedef AESNIEngine<uint64_t, 4> AESNI2x64_4;
 /// \brief AESNI RNG engine returning 128-bits integers with 4 block
 /// \ingroup R123RNG
 typedef AESNIEngine<__m128i, 4>  AESNI1x128_4;
+
+/// \brief AESNI RNG engine returning 32-bits integers with 8 block
+/// \ingroup R123RNG
+typedef AESNIEngine<uint32_t, 8> AESNI4x32_8;
+
+/// \brief AESNI RNG engine returning 64-bits integers with 8 block
+/// \ingroup R123RNG
+typedef AESNIEngine<uint64_t, 8> AESNI2x64_8;
+
+/// \brief AESNI RNG engine returning 128-bits integers with 8 block
+/// \ingroup R123RNG
+typedef AESNIEngine<__m128i, 8>  AESNI1x128_8;
 
 } // namespace vsmc
 

@@ -29,6 +29,10 @@
     template <> struct PhiloxRoundConstant < T, K, I > :                     \
         public cxx11::integral_constant< T, val > {};
 
+#ifndef VSMC_RNG_PHILOX_ROUNDS
+#define VSMC_RNG_PHILOX_ROUNDS 10
+#endif
+
 namespace vsmc {
 
 namespace internal {
@@ -263,7 +267,8 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// The constants of bumping the key (Weyl constants) and those used in each
 /// rounds can be set through traits, `vsmc::traits::PhiloxBumpkConstantTrait`
 /// and `vsmc::traits::PhiloxRoundConstantTrait`.
-template <typename ResultType, std::size_t K, std::size_t R = 10>
+template <typename ResultType, std::size_t K,
+         std::size_t R = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxEngine
 {
     public :

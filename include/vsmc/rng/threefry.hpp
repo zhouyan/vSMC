@@ -21,6 +21,10 @@
     template <> struct ThreefryRotateConstant < T, K, N, I > :               \
         public cxx11::integral_constant< unsigned, val > {};
 
+#ifndef VSMC_RNG_THREEFRY_ROUNDS
+#define VSMC_RNG_THREEFRY_ROUNDS 20
+#endif
+
 namespace vsmc {
 
 namespace internal {
@@ -238,7 +242,8 @@ struct ThreefryInsert<ResultType, 4, N, true>
 /// Further iterations may produce different results, as vSMC increment the
 /// counter slightly differently, but it still cover the same range and has the
 /// same period as the original.
-template <typename ResultType, std::size_t K, std::size_t R = 20>
+template <typename ResultType, std::size_t K,
+         std::size_t R = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryEngine
 {
     public :
