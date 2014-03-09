@@ -57,7 +57,7 @@ template <std::size_t NTrialMax> struct RdSeedStep<uint64_t, NTrialMax>
 {
     static uint64_t generate ()
     {
-        unsigned long long r = 0;
+        unsigned VSMC_INT64 r = 0;
         std::size_t ntrial = 0;
         while (_rdseed64_step(&r) == 0 && ntrial <= NTrialMax)
             ++ntrial;

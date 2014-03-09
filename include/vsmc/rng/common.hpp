@@ -15,37 +15,37 @@
 #define DEFINE MACRO __STDC_CONSTANT_MACROS BEFORE INCLUDING <stdint.h>
 #endif
 
+#ifndef VSMC_INT64
+#if defined(__INTEL_COMPILER) || defined(_MSC_VER)
+#define VSMC_INT64  __int64
+#else
+#define VSMC_INT64  long long
+#endif
+#endif // VSMC_INT64
+
+#ifdef __x86_64__
 #ifndef VSMC_HAS_INT128
 #undef VSMC_INT128
-#undef VSMC_UINT128
 #if defined(__INTEL_COMPILER)
 #define VSMC_HAS_INT128 1
-#define VSMC_INT128  __int128_t
-#define VSMC_UINT128 __uint128_t
+#define VSMC_INT128  __int128
 #elif defined(__clang__)
 #define VSMC_HAS_INT128 1
-#define VSMC_INT128  __int128_t
-#define VSMC_UINT128 __uint128_t
+#define VSMC_INT128  __int128
 #elif defined(__OPEN64__)
 #define VSMC_HAS_INT128 0
 #elif defined(__SUNPRO_CC)
 #define VSMC_HAS_INT128 0
 #elif defined(__GNUC__)
-#ifdef __x86_64__
 #define VSMC_HAS_INT128 1
-#define VSMC_INT128  __int128_t
-#define VSMC_UINT128 __uint128_t
+#define VSMC_INT128  __int128
+#elif defined(_MSC_VER)
+#define VSMC_HAS_INT128 0
 #else
 #define VSMC_HAS_INT128 0
 #endif
-#elif defined(_MSC_VER)
-#define VSMC_HAS_INT128 0
-#endif
-#endif
-
-#ifndef VSMC_HAS_INT128
-#define VSMC_HAS_INT128 0
-#endif
+#endif // VSMC_HAS_INT128
+#endif // __x86_64__
 
 namespace vsmc {
 

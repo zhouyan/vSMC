@@ -138,9 +138,9 @@ inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
 template <std::size_t K, std::size_t N>
 inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
-    VSMC_UINT128 prod =
-        static_cast<VSMC_UINT128>(b) *
-        static_cast<VSMC_UINT128>(
+    unsigned VSMC_INT128 prod =
+        static_cast<unsigned VSMC_INT128>(b) *
+        static_cast<unsigned VSMC_INT128>(
                 traits::PhiloxRoundConstantTrait<uint64_t, K, N>::value);
     hi = prod >> 64;
     lo = static_cast<uint64_t>(prod);
