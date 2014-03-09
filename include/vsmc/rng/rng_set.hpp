@@ -59,7 +59,8 @@ class RngSet<RngType, Vector>
     explicit RngSet (size_type N) : rng_(N)
     {
         for (size_type i = 0; i != N; ++i)
-            rng_[i].seed(Seed::instance().get());
+            rng_[i].seed(static_cast<typename rng_type::result_type>(
+                        Seed::instance().get()));
     }
 
     size_type size () const {return rng_.size();}
