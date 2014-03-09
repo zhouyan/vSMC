@@ -9,8 +9,12 @@
              cxx11::is_same<ResultType, uint64_t>::value),                   \
             USE_AESNIEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
+#define VSMC_STATIC_ASSERT_RNG_AESNI_BLOCKS(Blocks) \
+    VSMC_STATIC_ASSERT((Blocks > 0), USE_AESNIEngine_WITH_ZERO_BLOCKS)
+
 #define VSMC_STATIC_ASSERT_RNG_AESNI \
-    VSMC_STATIC_ASSERT_RNG_AESNI_RESULT_TYPE(ResultType);
+    VSMC_STATIC_ASSERT_RNG_AESNI_RESULT_TYPE(ResultType);                    \
+    VSMC_STATIC_ASSERT_RNG_AESNI_BLOCKS(Blocks);
 
 #define VSMC_DEFINE_RNG_AESNI_ROUND_CONSTANT(N, val) \
     template <> struct AESNIRoundConstant< N > :                             \
@@ -50,7 +54,7 @@ VSMC_DEFINE_RNG_AESNI_ROUND_CONSTANT(9, 0x36)
 /// vSMC increment the counter slightly differently, but it still cover the
 /// same range and has the same period as the original. In addition, this
 /// engine allows output of 64-bits integers.
-template <typename ResultType>
+template <typename ResultType, std::size_t Blocks = 1>
 class AESNIEngine
 {
     static VSMC_CONSTEXPR const std::size_t R_ = 10;
@@ -65,8 +69,7 @@ class AESNIEngine
     typedef StaticVector<ResultType, K_> ukey_type;
 
     explicit AESNIEngine (result_type s = 0) :
-        pac_(_mm_setzero_si128()),
-        tmp0_(pac_), tmp1_(pac_), tmp2_(pac_), remain_(0)
+        tmp0_(), tmp1_(), tmp2_(), remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_AESNI;
         seed(s);
@@ -75,9 +78,7 @@ class AESNIEngine
     template <typename SeedSeq>
     explicit AESNIEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) :
-        pac_(_mm_setzero_si128()),
-        tmp0_(pac_), tmp1_(pac_), tmp2_(pac_), remain_(0)
+            VSMC_NULLPTR) : tmp0_(), tmp1_(), tmp2_(), remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_AESNI;
         seed(seq);
@@ -85,7 +86,9 @@ class AESNIEngine
 
     void seed (result_type s)
     {
-        ctr_.fill(0);
+        ctr_type c;
+        c.fill(0);
+        ctr_.fill(c);
         ukey_type uk;
         uk.fill(0);
         uk.front() = s;
@@ -98,7 +101,9 @@ class AESNIEngine
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
-        ctr_.fill(0);
+        ctr_type c;
+        c.fill(0);
+        ctr_.fill(c);
         ukey_type uk;
         seq.generate(uk.begin(), uk.end());
         ukey(uk);
@@ -111,7 +116,7 @@ class AESNIEngine
 
     void ctr (const ctr_type &c)
     {
-        ctr_ = c;
+        ctr_.back() = c;
         remain_ = 0;
     }
 
@@ -123,31 +128,19 @@ class AESNIEngine
 
     void ukey (const ukey_type &uk)
     {
-        internal::pack(uk, pac_);
-        init_key(pac_);
+        internal::pack(uk, pac_.front());
+        init_key(pac_.front());
         remain_ = 0;
-    }
-
-    /// \brief Same as operator() but return the __m128i type
-    __m128i generate ()
-    {
-        internal::RngCounter<ResultType, K_>::increment(ctr_);
-        pack();
-        generate<0>(cxx11::true_type());
-        remain_ = 0;
-
-        return pac_;
     }
 
     result_type operator() ()
     {
-        if (remain_ == 0) {
+        if (remain_ == 0)
             generate();
-            internal::unpack(pac_, res_);
-            remain_ = K_;
-        }
+        --remain_;
 
-        return res_[--remain_];
+        return result<Blocks - 1>(
+                cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
     void discard (std::size_t nskip)
@@ -240,30 +233,129 @@ class AESNIEngine
 
     private :
 
-    ctr_type ctr_;
-    ctr_type res_;
+    StaticVector<ctr_type, Blocks> ctr_;
+    StaticVector<ctr_type, Blocks> res_;
     key_type key_;
-    __m128i pac_;
+    StaticVector<__m128i, Blocks> pac_;
     __m128i tmp0_;
     __m128i tmp1_;
     __m128i tmp2_;
     std::size_t remain_;
 
+    void increment ()
+    {
+        ctr_.front() = ctr_.back();
+        internal::RngCounter<ResultType, K_>::increment(ctr_.front());
+        increment<1>(cxx11::integral_constant<bool, 1 < Blocks>());
+    }
+
+    template <std::size_t> void increment (cxx11::false_type) {}
+
+    template <std::size_t B>
+    void increment (cxx11::true_type)
+    {
+        ctr_[Position<B>()] = ctr_[Position<B - 1>()];
+        internal::RngCounter<ResultType, K_>::increment(ctr_[Position<B>()]);
+        increment<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
     void pack ()
     {
-        internal::pack(ctr_, pac_);
-        pac_ = _mm_xor_si128(pac_, key_.front());
+        internal::pack(ctr_.front(), pac_.front());
+        pack<1>(cxx11::integral_constant<bool, 1 < Blocks>());
+        pac_.front() = _mm_xor_si128(pac_.front(), key_.front());
+        pac_xor<1>(cxx11::integral_constant<bool, 1 < Blocks>());
+    }
+
+    template <std::size_t> void pack (cxx11::false_type) {}
+
+    template <std::size_t B>
+    void pack (cxx11::true_type)
+    {
+        internal::pack(ctr_[Position<B>()], pac_[Position<B>()]);
+        pack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    template <std::size_t> void pac_xor (cxx11::false_type) {}
+
+    template <std::size_t B>
+    void pac_xor (cxx11::true_type)
+    {
+        pac_[Position<B>()] = _mm_xor_si128(pac_[Position<B>()], key_.front());
+        pac_xor<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    template <std::size_t> void unpack (cxx11::false_type) {}
+
+    void unpack ()
+    {
+        internal::unpack(pac_.front(), res_.front());
+        unpack<1>(cxx11::integral_constant<bool, 1 < Blocks>());
+    }
+
+    template <std::size_t B>
+    void unpack (cxx11::true_type)
+    {
+        internal::unpack(pac_[Position<B>()], res_[Position<B>()]);
+        unpack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    void generate ()
+    {
+        increment();
+        pack();
+        generate<0>(cxx11::true_type());
+        unpack();
+        remain_ = K_ * Blocks;
     }
 
     template <std::size_t>
     void generate (cxx11::false_type)
-    {pac_ = _mm_aesenclast_si128(pac_, key_.back());}
+    {
+        pac_.front() = _mm_aesenclast_si128(pac_.front(), key_.back());
+        generate_last<1>(cxx11::integral_constant<bool, 1 < Blocks>());
+    }
+
+    template <std::size_t> void generate_last (cxx11::false_type) {}
+
+    template <std::size_t B>
+    void generate_last (cxx11::true_type)
+    {
+        pac_[Position<B>()] =
+            _mm_aesenclast_si128(pac_[Position<B>()], key_.back());
+        generate_last<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
 
     template <std::size_t N>
     void generate (cxx11::true_type)
     {
-        pac_ = _mm_aesenc_si128(pac_, key_[Position<N + 1>()]);
+        pac_.front() = _mm_aesenc_si128(pac_.front(), key_[Position<N + 1>()]);
+        generate_step<1, N>(cxx11::integral_constant<bool, 1 < Blocks>());
         generate<N + 1>(cxx11::integral_constant<bool, N + 2 < R_>());
+    }
+
+    template <std::size_t, std::size_t>
+    void generate_step (cxx11::false_type) {}
+
+    template <std::size_t B, std::size_t N>
+    void generate_step (cxx11::true_type)
+    {
+        pac_[Position<B>()] =
+            _mm_aesenc_si128(pac_[Position<B>()], key_[Position<N + 1>()]);
+        generate_step<B + 1, N>(
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    template <std::size_t>
+    result_type result (cxx11::false_type)
+    {return res_.front()[remain_];}
+
+    template <std::size_t R>
+    result_type result (cxx11::true_type)
+    {
+        if (remain_ > R * K_)
+            return res_[Position<R>()][remain_ - R * K_];
+        return result<R - 1>(cxx11::integral_constant<bool, 0 < R>());
     }
 
     void init_key(__m128i k)
@@ -298,17 +390,53 @@ class AESNIEngine
     }
 }; // class AESNIEngine
 
-/// \brief AESNI RNG engine returning 32-bits integers
+/// \brief AESNI RNG engine returning 32-bits integers with default blocks
 /// \ingroup R123RNG
 typedef AESNIEngine<uint32_t> AESNI4x32;
 
-/// \brief AESNI RNG engine returning 64-bits integers
+/// \brief AESNI RNG engine returning 64-bits integers with default blocks
 /// \ingroup R123RNG
 typedef AESNIEngine<uint64_t> AESNI2x64;
 
-/// \brief AESNI RNG engine returning 128-bits integers
+/// \brief AESNI RNG engine returning 128-bits integers with default blocks
 /// \ingroup R123RNG
 typedef AESNIEngine<__m128i>  AESNI1x128;
+
+/// \brief AESNI RNG engine returning 32-bits integers with 1 block
+/// \ingroup R123RNG
+typedef AESNIEngine<uint32_t, 1> AESNI4x32_1;
+
+/// \brief AESNI RNG engine returning 64-bits integers with 1 block
+/// \ingroup R123RNG
+typedef AESNIEngine<uint64_t, 1> AESNI2x64_1;
+
+/// \brief AESNI RNG engine returning 128-bits integers with 1 block
+/// \ingroup R123RNG
+typedef AESNIEngine<__m128i, 1>  AESNI1x128_1;
+
+/// \brief AESNI RNG engine returning 32-bits integers with 2 block
+/// \ingroup R123RNG
+typedef AESNIEngine<uint32_t, 2> AESNI4x32_2;
+
+/// \brief AESNI RNG engine returning 64-bits integers with 2 block
+/// \ingroup R123RNG
+typedef AESNIEngine<uint64_t, 2> AESNI2x64_2;
+
+/// \brief AESNI RNG engine returning 128-bits integers with 2 block
+/// \ingroup R123RNG
+typedef AESNIEngine<__m128i, 2>  AESNI1x128_2;
+
+/// \brief AESNI RNG engine returning 32-bits integers with 4 block
+/// \ingroup R123RNG
+typedef AESNIEngine<uint32_t, 4> AESNI4x32_4;
+
+/// \brief AESNI RNG engine returning 64-bits integers with 4 block
+/// \ingroup R123RNG
+typedef AESNIEngine<uint64_t, 4> AESNI2x64_4;
+
+/// \brief AESNI RNG engine returning 128-bits integers with 4 block
+/// \ingroup R123RNG
+typedef AESNIEngine<__m128i, 4>  AESNI1x128_4;
 
 } // namespace vsmc
 
