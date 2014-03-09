@@ -110,13 +110,20 @@ class AESNIEngine
         remain_ = 0;
     }
 
-    const ctr_type &ctr () const {return ctr_;}
+    const StaticVector<ctr_type, Blocks> &ctr () const {return ctr_;}
 
     const key_type &key () const {return key_;}
 
     void ctr (const ctr_type &c)
     {
         ctr_.back() = c;
+        increment();
+        remain_ = 0;
+    }
+
+    void ctr (const StaticVector<ctr_type, Blocks> &c)
+    {
+        ctr_ = c;
         remain_ = 0;
     }
 
@@ -156,7 +163,8 @@ class AESNIEngine
             return;
 
         remain_ = 0;
-        if (nksip < Blocks)
+        increment();
+        if (nskip <= Blocks)
             return;
 
         nskip -= Blocks;
@@ -352,12 +360,12 @@ class AESNIEngine
     result_type result (cxx11::false_type)
     {return res_.front()[remain_];}
 
-    template <std::size_t R>
+    template <std::size_t I>
     result_type result (cxx11::true_type)
     {
-        if (remain_ > R * K_)
-            return res_[Position<R>()][remain_ - R * K_];
-        return result<R - 1>(cxx11::integral_constant<bool, 0 < R>());
+        if (remain_ > I * K_)
+            return res_[Position<I>()][remain_ - I * K_];
+        return result<I - 1>(cxx11::integral_constant<bool, 0 < I>());
     }
 
     void init_key(__m128i k)
