@@ -77,7 +77,11 @@ class GeneratorWrapper : public Traits
     result_type operator() ()
     {return static_cast<result_type>(generator_.generate());}
 
-    void discard (std::size_t) {}
+    void discard (std::size_t nskip)
+    {
+        for (std::size_t i = 0; i != nskip; ++i)
+            operator()();
+    }
 
     Generator &generator () {return generator_;}
 

@@ -143,23 +143,25 @@ class AESNIEngine
                 cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
+    /// \brief Discard results
+    ///
+    /// \details
+    /// The the behavior is slightly different from that in C++11 standard.
+    /// Calling `discard(nskip)` is not equivalent to call `operator()` `nskip`
+    /// times. Instead, it ensures that at least `nskip` results are discarded.
+    /// There may be a few more than `nskip` also discarded.
     void discard (std::size_t nskip)
     {
         if (nskip == 0)
             return;
 
-        --nskip;
-        internal::RngCounter<ResultType, K_>::increment(ctr_, nskip);
         remain_ = 0;
-        operator()();
-        nskip = nskip % K_;
-        if (remain_ >= nskip) {
-            remain_ -= nskip;
+        if (nksip < Blocks)
             return;
-        }
 
-        nskip -= remain_;
-        remain_ = K_ - nskip;
+        nskip -= Blocks;
+        internal::RngCounter<ResultType, K_>::increment(ctr_.front(), nskip);
+        increment();
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;

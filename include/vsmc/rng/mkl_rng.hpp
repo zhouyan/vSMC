@@ -259,6 +259,9 @@ struct MKLSkipAheadVSL
     template <MKL_INT BRNG>
     void operator() (const MKLStream<BRNG> &stream, size_type nskip)
     {
+        if (nskip == 0)
+            return;
+
         int status = ::vslSkipAheadStream(stream.ptr(), nskip);
         mkl_rng_error_check(BRNG, status,
                 "MKLSkipAheadVSL::skip", "vslSkipAheadStream");
@@ -560,6 +563,13 @@ class MKLEngine
         return buffer_[static_cast<std::size_t>(--remain_)];
     }
 
+    /// \brief Discard results
+    ///
+    /// \details
+    /// The the behavior is slightly different from that in C++11 standard.
+    /// Calling `discard(nskip)` is not equivalent to call `operator()` `nskip`
+    /// times. Instead, it ensures that at least `nskip` results are discarded.
+    /// There may be a few more than `nskip` also discarded.
     void discard (std::size_t nskip)
     {
         skip_ahead_(stream_, static_cast<typename
