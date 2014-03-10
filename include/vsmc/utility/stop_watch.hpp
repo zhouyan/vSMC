@@ -475,10 +475,10 @@ typedef VSMC_STOP_WATCH_TYPE StopWatch;
 
 namespace vsmc {
 
+/// \brief StopWatch operator+
+/// \ingroup StopWatch
 inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
 {
-    VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
     StopWatch watch(sw1);
     watch += sw2;
 
