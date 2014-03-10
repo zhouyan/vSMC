@@ -41,26 +41,26 @@ namespace vsmc {
 
 namespace internal {
 
-template <std::size_t> struct ARSConstant;
+template <std::size_t> struct ARSWeylConstantValue;
 
-template <> struct ARSConstant<0> :
+template <> struct ARSWeylConstantValue<0> :
     public cxx11::integral_constant<uint64_t, UINT64_C(0xBB67AE8584CAA73B)> {};
 
-template <> struct ARSConstant<1> :
+template <> struct ARSWeylConstantValue<1> :
     public cxx11::integral_constant<uint64_t, UINT64_C(0x9E3779B97F4A7C15)> {};
 
 } // namespace vsmc::internal
 
 namespace traits {
 
-/// \brief Traits of ARSEngine constants (Weyl sequence)
+/// \brief ARSEngine Weyl sequence constants
 /// \ingroup Traits
 ///
 /// \details
 /// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bits or
 /// the Weyl constant.
-template <std::size_t N> struct ARSConstantTrait :
-    public ::vsmc::internal::ARSConstant<N> {};
+template <std::size_t N> struct ARSWeylConstantTrait :
+    public ::vsmc::internal::ARSWeylConstantValue<N> {};
 
 } // namespace vsmc::traits
 
@@ -77,8 +77,8 @@ class ARSKeySeq
     {
         key_seq.front() = ukey;
         __m128i weyl = _mm_set_epi64x(
-                static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
-                static_cast<int64_t>(traits::ARSConstantTrait<1>::value));
+                static_cast<int64_t>(traits::ARSWeylConstantTrait<0>::value),
+                static_cast<int64_t>(traits::ARSWeylConstantTrait<1>::value));
         generate<1>(weyl, key_seq, cxx11::true_type());
     }
 
@@ -122,7 +122,7 @@ class ARSKeySeq
 /// sequence generation (the last template argument). The default key sequence,
 /// `vsmc::ARSKeySequence<R>` is exacatly the same as that implemented in the
 /// original. The Weyl constants can be changed through
-/// `vsmc::traits::ARSConstantTrait`.
+/// `vsmc::traits::ARSWeylConstantTrait`.
 ///
 /// Using other key sequence can lead to other rng. The `KeySeq` template
 /// parameter only need to has a memeber function of the form,
