@@ -138,13 +138,6 @@ class AESEngine :
     explicit AESEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR) : base(seq) {}
-
-    void seed (ResultType s) {base::seed(s);}
-
-    template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) {base::seed(seq);}
 }; // class AESEngine
 
 /// \brief AES RNG engine returning 32-bits integers with default blocks
