@@ -218,7 +218,10 @@ class ARSEngine
     result_type operator() ()
     {
         if (remain_ == 0) {
-            generate();
+            increment();
+            pack();
+            generate<1>(cxx11::true_type());
+            unpack();
             remain_ = K_ * Blocks;
         }
 
@@ -381,14 +384,6 @@ class ARSEngine
     {
         m128i_unpack<B * K_>(pac_[Position<B>()], res_);
         unpack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    void generate ()
-    {
-        increment();
-        pack();
-        generate<1>(cxx11::true_type());
-        unpack();
     }
 
     template <std::size_t>
