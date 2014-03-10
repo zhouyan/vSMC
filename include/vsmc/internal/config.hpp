@@ -77,6 +77,7 @@
 #endif
 
 /// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fail
+/// (for Linux and Mac OS X only)
 /// \ingroup Config
 #ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
 #define VSMC_HAS_NATIVE_TIME_LIBRARY 1
