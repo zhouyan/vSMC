@@ -222,29 +222,30 @@ class ARSEngine
             unpack();
             remain_ = K_ * Blocks;
         }
+        --remain_;
 
-        return res_[--remain_];
+        return res_[remain_];
     }
 
-    /// \brief Discard results
-    ///
-    /// \details
-    /// The the behavior is slightly different from that in C++11 standard.
-    /// Calling `discard(nskip)` is not equivalent to call `operator()` `nskip`
-    /// times. Instead, it ensures that at least `nskip` results are discarded.
-    /// There may be a few more than `nskip` also discarded.
     void discard (std::size_t nskip)
     {
-        if (nskip == 0)
+        if (nskip <= remain_) {
+            remain_ -= nskip;
             return;
+        }
+
+        nskip -= remain_;
+        if (nskip <= K_ * Blocks) {
+            remain_ = 0;
+            operator()();
+            remain_ = K_ * Blocks - nskip;
+            return;
+        }
 
         remain_ = 0;
-        counter::increment(ctr_);
-        if (nskip <= Blocks)
-            return;
-
-        nskip -= Blocks;
-        counter::increment(ctr_, nskip);
+        counter::increment(ctr_, nskip / (K_ * Blocks));
+        operator()();
+        remain_ = K_ * Blocks - nskip % (K_ * Blocks);
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -317,9 +318,6 @@ class ARSEngine
     }
 
     protected :
-
-    ctr_type &ctr () {return ctr_.back();}
-    key_type &key () {return key_;}
 
     StaticVector<ctr_type, Blocks> &ctr_seq () {return ctr_;}
     const StaticVector<ctr_type, Blocks> &ctr_seq () const {return ctr_;}

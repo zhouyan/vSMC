@@ -186,7 +186,6 @@ class RngCounter
         result<0>(ctr, res, cxx11::integral_constant<bool, 0 < N>());
     }
 
-
     template <std::size_t K, typename Traits>
     static void increment (StaticVector<T, K, Traits> &ctr)
     {increment_ctr<0>(ctr, cxx11::integral_constant<bool, 0 < K>());}
@@ -194,8 +193,22 @@ class RngCounter
     template <std::size_t K, typename Traits>
     static void increment (StaticVector<T, K, Traits> &ctr, std::size_t nskip)
     {
+        if (K == 0)
+            return;
+
+        if (nskip == 0)
+            return;
+
+        if (nskip == 1) {
+            increment(ctr);
+            return;
+        }
+
         uint64_t nskip_64 = static_cast<uint64_t>(nskip);
-        uint64_t max_64 = static_cast<uint64_t>(max_);
+        const uint64_t max_64 = static_cast<uint64_t>(max_);
+        if (nskip_64 / K > max_64)
+            nskip_64 %= (K * max_64);
+
         while (nskip_64 > max_64) {
             increment_ctr<0>(ctr, max_,
                     cxx11::integral_constant<bool, 0 < K>());
@@ -220,7 +233,19 @@ class RngCounter
     static void increment (StaticVector<StaticVector<T, K, Traits>,
             Blocks, BlockTraits> &ctr, std::size_t nskip)
     {
-        // TODO
+        if (K == 0 || Blocks == 0)
+            return;
+
+        if (nskip == 0)
+            return;
+
+        if (nskip == 1) {
+            increment(ctr);
+            return;
+        }
+
+        increment(ctr.back(), (nskip - 1) * Blocks);
+        increment(ctr);
     }
 
     private :
@@ -229,7 +254,7 @@ class RngCounter
              std::size_t Blocks, typename BlockTraits,
              std::size_t N, typename ResultTraits>
     static void result (const StaticVector<StaticVector<T, K, Traits>,
-            Blocks, BlockTraits> &ctr, StaticVector<T, N, ResultTraits> &res,
+            Blocks, BlockTraits> &, StaticVector<T, N, ResultTraits> &,
             cxx11::false_type) {}
 
     template <std::size_t B, std::size_t K, typename Traits,
@@ -271,27 +296,30 @@ class RngCounter
             return;
 
         ctr.fill(0);
-        --nskip;
-        ctr.front() = nskip;
+        ctr.front() = nskip - 1;
     }
 
     template <std::size_t N, std::size_t K, typename Traits>
     static void increment_ctr (StaticVector<T, K, Traits> &ctr, T nskip,
             cxx11::true_type)
     {
-        if (nskip <= max_ - ctr[Position<N>()]) {
+        if (nskip == 0)
+            return;
+
+        const T remain = max_ - ctr[Position<N>()];
+        if (nskip <= remain) {
             ctr[Position<N>()] += nskip;
             return;
         }
         ctr[Position<N>()] = max_;
-        increment_ctr<N + 1>(ctr, nskip - (max_ - ctr[Position<N>()]),
+        increment_ctr<N + 1>(ctr, nskip - remain,
                 cxx11::integral_constant<bool, N + 1 < K>());
     }
 
     template <std::size_t, std::size_t K, typename Traits,
              std::size_t Blocks, typename BlockTraits>
     static void increment_block (StaticVector<StaticVector<T, K, Traits>,
-            Blocks, BlockTraits> &ctr, cxx11::false_type) {}
+            Blocks, BlockTraits> &, cxx11::false_type) {}
 
     template <std::size_t B, std::size_t K, typename Traits,
              std::size_t Blocks, typename BlockTraits>
