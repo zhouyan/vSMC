@@ -45,7 +45,7 @@ struct AESRoundConstantTrait :
 
 } // namespace traits
 
-/// \brief Default AESEngine key sequence generator
+/// \brief AESEngine key sequence generator
 /// \ingroup R123RNG
 template <std::size_t R>
 class AESKeySeq
