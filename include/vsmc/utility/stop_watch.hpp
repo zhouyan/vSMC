@@ -283,7 +283,7 @@ class StopWatch
     mutable uint64_t start_time_;
     mutable mach_timebase_info_data_t timebase_;
     mutable bool running_;
-    static VSMC_CONSTEXPR const uint64_t ratio_ = 1000000000L; // 9 zero
+    static VSMC_CONSTEXPR const uint64_t ratio_ = 1000000000UL; // 9 zero
 }; // class StopWatch
 
 } // namespace vsmc
@@ -401,6 +401,96 @@ class StopWatch
 } // namespace vsmc
 
 #endif // _POSIX_C_SOURCE
+
+#elif defined(WIN32)
+
+#include <windows.h>
+#define VSMC_STOP_WATCH_DEFINED
+
+namespace vsmc {
+
+class StopWatch
+{
+    public :
+
+    StopWatch () :
+        elapsed_(0), start_time_(0), frequency_(0), running_(false)
+    {reset();}
+
+    bool running () const {return running_;}
+
+    void start () const
+    {
+        running_ = true;
+        LARGE_INTEGER time;
+        QueryPerformanceCounter(&time);
+        start_time_ = time.QuadPart;
+    }
+
+    void stop () const
+    {
+        LARGE_INTEGER time;
+        QueryPerformanceCounter(&time);
+        elapsed_ += time.QuadPart - start_time_;
+        running_ = false;
+    }
+
+    void reset () const
+    {
+        start();
+        elapsed_ = 0;
+        LARGE_INTEGER freq;
+        QueryPerformanceFrequency(&freq);
+        frequency_ = static_cast<double>(freq.QuadPart);
+        running_ = false;
+    }
+
+    double nanoseconds () const
+    {return static_cast<double>(elapsed_) / frequency_ * 1e9;}
+
+    double microseconds () const
+    {return static_cast<double>(elapsed_) / frequency_ * 1e6;}
+
+    double milliseconds () const
+    {return static_cast<double>(elapsed_) / frequency_ * 1e3;}
+
+    double seconds () const
+    {return static_cast<double>(elapsed_) / frequency_;}
+
+    double minutes () const
+    {return static_cast<double>(elapsed_) / frequency_ / 60.0;}
+
+    double hours () const
+    {return static_cast<double>(elapsed_) / frequency_ / 3600.0;}
+
+    StopWatch &operator+= (const StopWatch &other)
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
+
+        elapsed_ += other.elapsed_;
+
+        return *this;
+    }
+
+    StopWatch operator+ (const StopWatch &other) const
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
+
+        StopWatch watch(*this);
+        watch += other;
+
+        return watch;
+    }
+
+    private :
+
+    mutable __int64 elapsed_;
+    mutable __int64 start_time_;
+    mutable double frequency_;
+    mutable bool running_;
+}; // class StopWatch
+
+} // namespace vsmc
 
 #endif // VSMC_HAS_NATIVE_TIME_LIBRARY
 
