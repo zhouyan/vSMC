@@ -100,6 +100,9 @@ class AESKeySeq
 /// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib].
 ///
+/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
+/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
+///
 /// The algorithm is almost identical to the original. Compared to
 /// `r123:Engine<r123::AESNI4x32>`, when using the default constructor or the
 /// one with a single seed, the output shall be exactly the same for the first

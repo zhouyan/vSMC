@@ -107,6 +107,9 @@ class ARSKeySeq
 /// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib].
 ///
+/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
+/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
+///
 /// Compared to `r123:Engine<r123::ARS4x32_R<10> >` etc., when using the
 /// default constructor or the one with a single seed, the output shall be
 /// exactly the same for the first \f$2^32\f$ iterations. Further iterations
