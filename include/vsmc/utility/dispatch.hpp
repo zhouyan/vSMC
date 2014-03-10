@@ -731,7 +731,7 @@ class DispatchProgress
 
     public :
 
-    /// \brief Returnt the current progress
+    /// \brief Increase the progress count
     void increment (uint64_t step = 1)
     {
         if (step == 0) {
