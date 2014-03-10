@@ -256,13 +256,12 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// undesired effects. To say the least, currently all loops are unrolled,
 /// which can slow down significantly when the number of rounds is large.
 ///
-/// This implementation is almost identical to the original. Compared to
-/// `r123:Engine<r123::Philox4x32>` etc., when using the default constructor or
-/// the one with a single seed, the output shall be exactly the same for the
-/// first \f$2^n\f$ iterations, where \f$n\f$ is the number of bits (32 or 64).
-/// Further iterations may produce different results, as vSMC increment the
-/// counter slightly differently, but it still cover the same range and has the
-/// same period as the original.
+/// Compared to `r123:Engine<r123::Philox4x32>` etc., when using the default
+/// constructor or the one with a single seed, the output shall be exactly the
+/// same for the first \f$2^n\f$ iterations, where \f$n\f$ is the number of
+/// bits (32 or 64).  Further iterations may produce different results, as vSMC
+/// increment the counter slightly differently, but it still cover the same
+/// range and has the same period as the original.
 ///
 /// The constants of bumping the key (Weyl constants) and those used in each
 /// rounds can be set through traits, `vsmc::traits::PhiloxBumpkConstantTrait`
@@ -285,7 +284,7 @@ class PhiloxEngine
 
     template <typename SeedSeq>
     explicit PhiloxEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
@@ -302,7 +301,7 @@ class PhiloxEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
         ctr_.fill(0);
@@ -387,10 +386,10 @@ class PhiloxEngine
             std::basic_ostream<CharT, Traits> &os,
             const PhiloxEngine<ResultType, K, R> &eng)
     {
-        if (os) os << eng.ctr_ << ' ';
-        if (os) os << eng.res_ << ' ';
-        if (os) os << eng.key_ << ' ';
-        if (os) os << eng.par_ << ' ';
+        if (os) os << eng.ctr_; if (os) os << ' ';
+        if (os) os << eng.res_; if (os) os << ' ';
+        if (os) os << eng.key_; if (os) os << ' ';
+        if (os) os << eng.par_; if (os) os << ' ';
         if (os) os << eng.remain_;
 
         return os;

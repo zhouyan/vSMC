@@ -64,14 +64,14 @@ class GeneratorWrapper : public Traits
 
     template <typename SeedSeq>
     explicit GeneratorWrapper (SeedSeq &, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR) {VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER;}
 
     void seed (result_type) {}
 
     template <typename SeedSeq>
     void seed (SeedSeq &, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR) {}
 
     result_type operator() ()

@@ -194,7 +194,7 @@ struct RngCounter
 }; // struct RngCounter
 
 template <typename SeedSeq, typename T>
-struct is_seed_sequence :
+struct is_seed_seq :
     public cxx11::integral_constant<bool,
     !cxx11::is_convertible<SeedSeq, T>::value &&
     !cxx11::is_same<typename cxx11::remove_cv<SeedSeq>::type, T>::value> {};

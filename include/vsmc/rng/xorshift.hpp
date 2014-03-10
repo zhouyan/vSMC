@@ -194,7 +194,7 @@ class XorshiftEngine
 
     template <typename SeedSeq>
     explicit XorshiftEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
@@ -214,7 +214,7 @@ class XorshiftEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
         index_.reset();
@@ -301,7 +301,7 @@ class XorwowEngine
 
     template <typename SeedSeq>
     explicit XorwowEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR) : eng_(seq), weyl_(DInit) {}
 
     void seed (result_type s)
@@ -312,7 +312,7 @@ class XorwowEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR)
     {
         eng_.seed(seq);

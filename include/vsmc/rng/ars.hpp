@@ -60,6 +60,38 @@ template <std::size_t N> struct ARSConstantTrait :
 
 } // namespace vsmc::traits
 
+/// \brief Default ARSEngine key sequence generator
+/// \ingroup R123RNG
+template <std::size_t R>
+class ARSKeySeq
+{
+    public :
+
+    typedef StaticVector<__m128i, R + 1> key_type;
+
+    static void generate (const __m128i &unique_key, key_type &key)
+    {
+        key.front() = unique_key;
+        __m128i weyl = _mm_set_epi64x(
+                static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
+                static_cast<int64_t>(traits::ARSConstantTrait<1>::value));
+        generate<1>(weyl, key, cxx11::true_type());
+    }
+
+    private :
+
+    template <std::size_t>
+    static void generate (const __m128i &, key_type &, cxx11::false_type) {}
+
+    template <std::size_t N>
+    static void generate (const __m128i &weyl, key_type &key, cxx11::true_type)
+    {
+        key[Position<N>()] = _mm_add_epi64(key[Position<N - 1>()], weyl);
+        generate<N + 1>(weyl, key,
+                cxx11::integral_constant<bool, N < R>());
+    }
+}; // class ARSKeySeq
+
 /// \brief ARS RNG engine reimplemented
 /// \ingroup R123RNG
 ///
@@ -68,19 +100,37 @@ template <std::size_t N> struct ARSConstantTrait :
 /// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib].
 ///
-/// The implementation is almost identical to the original. Compared to
-/// `r123:Engine<r123::ARS4x32_R<10> >` etc., when using the default
-/// constructor or the one with a single seed, the output shall be exactly the
-/// same for the first \f$2^32\f$ iterations. Further iterations may produce
-/// different results, as vSMC increment the counter slightly differently, but
-/// it still cover the same range and has the same period as the original.
+/// Compared to `r123:Engine<r123::ARS4x32_R<10> >` etc., when using the
+/// default constructor or the one with a single seed, the output shall be
+/// exactly the same for the first \f$2^32\f$ iterations. Further iterations
+/// may produce different results, as vSMC increment the counter slightly
+/// differently, but it still cover the same range and has the same period as
+/// the original.
 ///
-/// This implementation is slightly more flexible than the original. First it
-/// allows using 64-bits integers as output. Second It allows setting the Weyl
-/// constants through trait `vsmc::traits::ARSConstantTrait`.
+/// This implementation is more flexible than the original. First, it
+/// allows using 64-bits integers as output. Second, it allows user defined key
+/// sequence generation. The default key sequence, `vsmc::ARSKeySequence<R>` is
+/// exacatly the same as that implemented in the original. The Weyl constants
+/// can be changed through `vsmc::traits::ARSConstantTrait`.
+///
+/// Using other key sequence can lead to other rng. The `KeySeq` template
+/// parameter only need to has a memeber function of the form,
+/// ~~~{.cpp}
+/// void generate (const __m128i &unique_key, ARSEngine::key_type &key)
+/// ~~~
+/// which is similar to that of C++11 `seed_seq`. Given a unique key, a
+/// sequence of keys shall be generated. The default, `ARSKeySeq` use a Weyl
+/// sequence.
+///
+/// Though logically, we might should call the current `key_type` of ARSEngine
+/// `key_seq_type`, and the `ukey_type` as `key_type`. However, the terms used
+/// here is the same that in the original to avoid any confusion.
+///
+/// \sa AESEngine
 template <typename ResultType,
          std::size_t Blocks = VSMC_RNG_ARS_BLOCKS,
-         std::size_t R = VSMC_RNG_ARS_ROUNDS>
+         std::size_t R = VSMC_RNG_ARS_ROUNDS,
+         typename KeySeq = ARSKeySeq<R> >
 class ARSEngine
 {
     static VSMC_CONSTEXPR const std::size_t K_ =
@@ -101,53 +151,12 @@ class ARSEngine
 
     template <typename SeedSeq>
     explicit ARSEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
         seed(seq);
     }
-
-    ARSEngine (const ARSEngine<ResultType, Blocks, R> &other) :
-        ctr_(other.ctr_), res_(other.res_), key_(other.key_), pac_(other.pac_),
-        remain_(other.remain_) {}
-
-    ARSEngine<ResultType, Blocks, R> &operator= (
-            const ARSEngine<ResultType, Blocks, R> &other)
-    {
-        if (this != &other) {
-            ctr_ = other.ctr_;
-            res_ = other.res_;
-            key_ = other.key_;
-            pac_ = other.pac_;
-            remain_ = other.remain_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    ARSEngine (ARSEngine<ResultType, Blocks, R> &&other) :
-        ctr_(cxx11::move(other.ctr_)), res_(cxx11::move(other.res_)),
-        key_(cxx11::move(other.key_)), pac_(cxx11::move(other.pac_)),
-        remain_(other.remain_) {}
-
-    ARSEngine<ResultType, Blocks, R> &operator= (
-            ARSEngine<ResultType, Blocks, R> &&other)
-    {
-        if (this != &other) {
-            ctr_ = cxx11::move(other.ctr_);
-            res_ = cxx11::move(other.res_);
-            key_ = cxx11::move(other.key_);
-            pac_ = cxx11::move(other.pac_);
-            remain_ = other.remain_;
-        }
-
-        return *this;
-    }
-#endif
-
-    virtual ~ARSEngine () {}
 
     void seed (result_type s)
     {
@@ -163,7 +172,7 @@ class ARSEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
         ctr_type c;
@@ -201,7 +210,8 @@ class ARSEngine
     void ukey (const ukey_type &uk)
     {
         m128i_pack<0>(uk, pac_.front());
-        init_key(pac_.front());
+        KeySeq key_seq;
+        key_seq.generate(pac_.front(), key_);
         remain_ = 0;
     }
 
@@ -245,8 +255,8 @@ class ARSEngine
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     friend inline bool operator== (
-            const ARSEngine<ResultType, Blocks, R> &eng1,
-            const ARSEngine<ResultType, Blocks, R> &eng2)
+            const ARSEngine<ResultType, Blocks, R, KeySeq> &eng1,
+            const ARSEngine<ResultType, Blocks, R, KeySeq> &eng2)
     {
         if (eng1.ctr_ != eng2.ctr_)
             return false;
@@ -262,21 +272,25 @@ class ARSEngine
     }
 
     friend inline bool operator!= (
-            const ARSEngine<ResultType, Blocks, R> &eng1,
-            const ARSEngine<ResultType, Blocks, R> &eng2)
+            const ARSEngine<ResultType, Blocks, R, KeySeq> &eng1,
+            const ARSEngine<ResultType, Blocks, R, KeySeq> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const ARSEngine<ResultType, Blocks, R> &eng)
+            const ARSEngine<ResultType, Blocks, R, KeySeq> &eng)
     {
         if (os) os << eng.ctr_ << ' ';
         if (os) os << eng.res_ << ' ';
-        for (std::size_t i = 0; i != key_type::size(); ++i)
-            m128i_output(os, eng.key_[i]); if (os) os << ' ';
-        for (std::size_t i = 0; i != Blocks; ++i)
-            m128i_output(os, eng.pac_[i]);  if (os) os << ' ';
+        for (std::size_t i = 0; i != key_type::size(); ++i) {
+            m128i_output(os, eng.key_[i]);
+            if (os) os << ' ';
+        }
+        for (std::size_t i = 0; i != Blocks; ++i) {
+            m128i_output(os, eng.pac_[i]);
+            if (os) os << ' ';
+        }
         if (os) os << eng.remain_;
 
         return os;
@@ -285,7 +299,7 @@ class ARSEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            ARSEngine<ResultType, Blocks, R> &eng)
+            ARSEngine<ResultType, Blocks, R, KeySeq> &eng)
     {
         ARSEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
@@ -407,25 +421,6 @@ class ARSEngine
         pac_[Position<B>()] = _mm_aesenclast_si128(
                 pac_[Position<B>()], key_.back());
         generate_last<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    virtual void init_key (const __m128i &k)
-    {
-        key_.front() = k;
-        __m128i weyl = _mm_set_epi64x(
-                static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
-                static_cast<int64_t>(traits::ARSConstantTrait<1>::value));
-        init_key_seq<1>(weyl, cxx11::true_type());
-    }
-
-    template <std::size_t>
-    void init_key_seq (const __m128i &, cxx11::false_type) {}
-
-    template <std::size_t N>
-    void init_key_seq (const __m128i &weyl, cxx11::true_type)
-    {
-        key_[Position<N>()] = _mm_add_epi64(key_[Position<N - 1>()], weyl);
-        init_key_seq<N + 1>(weyl, cxx11::integral_constant<bool, N < R>());
     }
 }; // class ARSEngine
 

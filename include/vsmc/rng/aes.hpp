@@ -30,42 +30,22 @@ VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(9, 0x36)
 
 } // namespace vsmc::internal
 
-/// \brief AES RNG engine reimplemented
-/// \ingroup R123RNG
-///
-/// \details
-/// This is a reimplementation of the algorithm AES as described in [Parallel
-/// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
-/// [Random123][r123lib].
-///
-/// The implementation is almost identical to the original. Compared to
-/// `r123:Engine<r123::AESNI4x32>`, when using the default constructor or the
-/// one with a single seed, the output shall be exactly the same for the first
-/// \f$2^32\f$ iterations. Further iterations may produce different results, as
-/// vSMC increment the counter slightly differently, but it still cover the
-/// same range and has the same period as the original. In addition, this
-/// engine allows output of 64-bits integers.
-template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AESEngine : public ARSEngine<ResultType, Blocks, 10>
+/// \brief Default AESEngine key sequence generator
+/// \ingroup
+template <std::size_t R>
+class AESKeySeq
 {
-    typedef ARSEngine<ResultType, Blocks, 10> base;
-
     public :
 
-    explicit AESEngine (ResultType s = 0) :
-        base(s), tmp0_(), tmp1_(), tmp2_() {}
+    typedef StaticVector<__m128i, R + 1> key_type;
 
-    template <typename SeedSeq>
-    explicit AESEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : base(seq), tmp0_(), tmp1_(), tmp2_() {}
+    AESKeySeq () : tmp0_(), tmp1_(), tmp2_() {}
 
-    void seed (ResultType s) {base::seed(s);}
-
-    template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) {base::seed(seq);}
+    void generate (const __m128i &k, key_type &key)
+    {
+        tmp0_ = k;
+        generate<0>(key, cxx11::true_type());
+    }
 
     private :
 
@@ -73,26 +53,20 @@ class AESEngine : public ARSEngine<ResultType, Blocks, 10>
     __m128i tmp1_;
     __m128i tmp2_;
 
-    void init_key (const __m128i &k)
-    {
-        tmp0_ = k;
-        init_key_seq<0>(cxx11::true_type());
-    }
-
     template <std::size_t>
-    void init_key_seq (cxx11::false_type) {this->key().back() = tmp0_;}
+    void generate (key_type &key, cxx11::false_type) {key.back() = tmp0_;}
 
     template <std::size_t N>
-    void init_key_seq (cxx11::true_type)
+    void generate (key_type &key, cxx11::true_type)
     {
-        this->key()[Position<N>()] = tmp0_;
+        key[Position<N>()] = tmp0_;
         tmp1_ = _mm_aeskeygenassist_si128(tmp0_,
                 internal::AESRoundConstant<N>::value);
-        init_key_assit();
-        init_key_seq<N + 1>(cxx11::integral_constant<bool, N < 9>());
+        generate_assit();
+        generate<N + 1>(key, cxx11::integral_constant<bool, N + 1 < R>());
     }
 
-    void init_key_assit ()
+    void generate_assit ()
     {
         tmp1_ = _mm_shuffle_epi32 (tmp1_ ,0xFF);
         tmp2_ = _mm_slli_si128    (tmp0_, 0x04);
@@ -103,6 +77,46 @@ class AESEngine : public ARSEngine<ResultType, Blocks, 10>
         tmp0_ = _mm_xor_si128     (tmp0_, tmp2_);
         tmp0_ = _mm_xor_si128     (tmp0_, tmp1_);
     }
+}; // class AESKeySeq
+
+/// \brief AES RNG engine reimplemented
+/// \ingroup R123RNG
+///
+/// \details
+/// This is a reimplementation of the algorithm AES as described in [Parallel
+/// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
+/// [Random123][r123lib].
+///
+/// The algorithm is almost identical to the original. Compared to
+/// `r123:Engine<r123::AESNI4x32>`, when using the default constructor or the
+/// one with a single seed, the output shall be exactly the same for the first
+/// \f$2^32\f$ iterations. Further iterations may produce different results, as
+/// vSMC increment the counter slightly differently, but it still cover the
+/// same range and has the same period as the original.
+///
+/// The implementation however is much different the original. See the source
+/// for how the ARSEngine is used as the base of AESEngine, and how to
+/// implement similar engines.
+template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
+class AESEngine : public ARSEngine<ResultType, Blocks, 10, AESKeySeq<10> >
+{
+    typedef ARSEngine<ResultType, Blocks, 10, AESKeySeq<10> > base;
+
+    public :
+
+    explicit AESEngine (ResultType s = 0) : base(s) {}
+
+    template <typename SeedSeq>
+    explicit AESEngine (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
+            VSMC_NULLPTR) : base(seq) {}
+
+    void seed (ResultType s) {base::seed(s);}
+
+    template <typename SeedSeq>
+    void seed (SeedSeq &seq, typename cxx11::enable_if<
+            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
+            VSMC_NULLPTR) {base::seed(seq);}
 }; // class AESEngine
 
 /// \brief AES RNG engine returning 32-bits integers with default blocks

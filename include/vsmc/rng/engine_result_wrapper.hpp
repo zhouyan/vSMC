@@ -52,7 +52,7 @@ class EngineResultWrapper
 
     template <typename SeedSeq>
     explicit EngineResultWrapper (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR) : eng_(seq), remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER;
@@ -67,7 +67,7 @@ class EngineResultWrapper
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, result_type>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR)
     {
         eng_.seed(seq);

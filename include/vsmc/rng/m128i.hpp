@@ -48,9 +48,11 @@ template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &m128i_output (
         std::basic_ostream<CharT, Traits> &os, const __m128i &a)
 {
-    StaticVector<uint64_t, 2> sa;
-    m128i_unpack<0>(a, sa);
-    if (os) os << sa;
+    if (os) {
+        StaticVector<uint64_t, 2> sa;
+        m128i_unpack<0>(a, sa);
+        os << sa;
+    }
 
     return os;
 }
@@ -62,9 +64,11 @@ template <typename CharT, typename Traits>
 inline std::basic_istream<CharT, Traits> &m128i_input (
         std::basic_istream<CharT, Traits> &is, __m128i &a)
 {
-    StaticVector<uint64_t, 2> sa;
-    if (is) is >> sa;
-    if (is) m128i_pack<0>(sa, a);
+    if (is) {
+        StaticVector<uint64_t, 2> sa;
+        is >> sa;
+        if (is) m128i_pack<0>(sa, a);
+    }
 
     return is;
 }

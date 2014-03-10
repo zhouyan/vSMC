@@ -368,7 +368,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     template <typename SeedSeq>
     explicit MKLStream (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, MKL_UINT>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * =
             VSMC_NULLPTR) :
         seed_(0), stream_ptr_(VSMC_NULLPTR), property_()
     {
@@ -463,7 +463,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, MKL_UINT>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * =
             VSMC_NULLPTR)
     {
         seq.generate(&seed_, &seed_ + 1);
@@ -498,7 +498,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, MKL_UINT>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * =
             VSMC_NULLPTR) :
         stream_(seq), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), remain_(0) {}
 
@@ -549,7 +549,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_sequence<SeedSeq, MKL_UINT>::value>::type * =
+            !internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * =
             VSMC_NULLPTR) {stream_.seed(seq);}
 
     result_type operator() ()
