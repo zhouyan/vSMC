@@ -37,14 +37,14 @@ class AESKeySeq
 {
     public :
 
-    typedef StaticVector<__m128i, R + 1> key_type;
+    typedef StaticVector<__m128i, R + 1> key_seq_type;
 
     AESKeySeq () : tmp0_(), tmp1_(), tmp2_() {}
 
-    void generate (const __m128i &k, key_type &key)
+    void generate (const __m128i &ukey, key_seq_type &key_seq)
     {
-        tmp0_ = k;
-        generate<0>(key, cxx11::true_type());
+        tmp0_ = ukey;
+        generate<0>(key_seq, cxx11::true_type());
     }
 
     private :
@@ -54,16 +54,17 @@ class AESKeySeq
     __m128i tmp2_;
 
     template <std::size_t>
-    void generate (key_type &key, cxx11::false_type) {key.back() = tmp0_;}
+    void generate (key_seq_type &key_seq, cxx11::false_type)
+    {key_seq.back() = tmp0_;}
 
     template <std::size_t N>
-    void generate (key_type &key, cxx11::true_type)
+    void generate (key_seq_type &key_seq, cxx11::true_type)
     {
-        key[Position<N>()] = tmp0_;
+        key_seq[Position<N>()] = tmp0_;
         tmp1_ = _mm_aeskeygenassist_si128(tmp0_,
                 internal::AESRoundConstant<N>::value);
         generate_assit();
-        generate<N + 1>(key, cxx11::integral_constant<bool, N + 1 < R>());
+        generate<N + 1>(key_seq, cxx11::integral_constant<bool, N + 1 < R>());
     }
 
     void generate_assit ()
