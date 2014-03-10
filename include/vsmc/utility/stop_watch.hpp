@@ -28,7 +28,6 @@ class DummyStopWatch
     double hours        () const {return 1e-9 / 3600;}
 
     DummyStopWatch &operator+= (const DummyStopWatch &) {return *this;}
-    DummyStopWatch operator+ (const DummyStopWatch &) const {return *this;}
 
     private :
 
@@ -266,16 +265,6 @@ class StopWatch
         return *this;
     }
 
-    StopWatch operator+ (const StopWatch &other) const
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        StopWatch watch(*this);
-        watch += other;
-
-        return watch;
-    }
-
     private :
 
     mutable uint64_t elapsed_sec_;
@@ -380,16 +369,6 @@ class StopWatch
         return *this;
     }
 
-    StopWatch operator+ (const StopWatch &other) const
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        StopWatch watch(*this);
-        watch += other;
-
-        return watch;
-    }
-
     private :
 
     mutable timespec elapsed_;
@@ -472,16 +451,6 @@ class StopWatch
         return *this;
     }
 
-    StopWatch operator+ (const StopWatch &other) const
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        StopWatch watch(*this);
-        watch += other;
-
-        return watch;
-    }
-
     private :
 
     mutable __int64 elapsed_;
@@ -503,5 +472,20 @@ typedef VSMC_STOP_WATCH_TYPE StopWatch;
 #else
 #undef VSMC_STOP_WATCH_DEFINED
 #endif
+
+namespace vsmc {
+
+inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
+{
+    VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
+
+    StopWatch watch(sw1);
+    watch += sw2;
+
+    return watch;
+}
+
+} // namespace vsmc
+
 
 #endif // VSMC_UTILITY_STOP_WATCH_HPP
