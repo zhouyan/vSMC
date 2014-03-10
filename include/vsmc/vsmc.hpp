@@ -88,7 +88,7 @@
 
 /// \defgroup RDRNG RdRand and RdSeed
 /// \ingroup RNG
-/// \defgroup Random number generating using Intel RdRand and RdSeed
+/// \brief Random number generating using Intel RdRand and RdSeed
 
 /// \defgroup RNGWrapper Wrapper
 /// \ingroup RNG
