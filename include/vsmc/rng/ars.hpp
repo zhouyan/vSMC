@@ -199,17 +199,19 @@ class ARSEngine
 
     void ukey (const ukey_type &uk)
     {
-        internal::pack(uk, pac_.front());
+        m128i_pack<0>(uk, pac_.front());
         init_key(pac_.front());
         remain_ = 0;
     }
 
     result_type operator() ()
     {
-        if (remain_ == 0)
+        if (remain_ == 0) {
             generate();
+            remain_ = K_ * Blocks;
+        }
 
-        return result();
+        return res_[--remain_];
     }
 
     /// \brief Discard results
@@ -252,7 +254,7 @@ class ARSEngine
             return false;
 
         for (std::size_t i = 0; i != key_type::size(); ++i)
-            if (!internal::is_equal(eng1.key_[i], eng2.key_[i]))
+            if (!m128i_is_equal(eng1.key_[i], eng2.key_[i]))
                 return false;
 
         return eng1.remain_ == eng2.remain_;
@@ -271,9 +273,9 @@ class ARSEngine
         if (os) os << eng.ctr_ << ' ';
         if (os) os << eng.res_ << ' ';
         for (std::size_t i = 0; i != key_type::size(); ++i)
-            internal::output_m128i(os, eng.key_[i]); if (os) os << ' ';
+            m128i_output(os, eng.key_[i]); if (os) os << ' ';
         for (std::size_t i = 0; i != Blocks; ++i)
-            internal::output_m128i(os, eng.pac_[i]);  if (os) os << ' ';
+            m128i_output(os, eng.pac_[i]);  if (os) os << ' ';
         if (os) os << eng.remain_;
 
         return os;
@@ -288,9 +290,9 @@ class ARSEngine
         if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.res_;
         for (std::size_t i = 0; i != Blocks; ++i)
-            internal::input_m128i(is, eng_tmp.pac_[i]);
+            m128i_input(is, eng_tmp.pac_[i]);
         for (std::size_t i = 0; i != Blocks; ++i)
-            internal::input_m128i(is, eng_tmp.pac_[i]);
+            m128i_input(is, eng_tmp.pac_[i]);
         if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
 
@@ -306,7 +308,7 @@ class ARSEngine
     private :
 
     StaticVector<ctr_type, Blocks> ctr_;
-    StaticVector<ctr_type, Blocks> res_;
+    StaticVector<ResultType, K_ * Blocks> res_;
     key_type key_;
     StaticVector<__m128i, Blocks> pac_;
     std::size_t remain_;
@@ -330,7 +332,7 @@ class ARSEngine
 
     void pack ()
     {
-        internal::pack(ctr_.front(), pac_.front());
+        m128i_pack<0>(ctr_.front(), pac_.front());
         pack<1>(cxx11::integral_constant<bool, 1 < Blocks>());
 
         pac_.front() = _mm_xor_si128(pac_.front(), key_.front());
@@ -342,7 +344,7 @@ class ARSEngine
     template <std::size_t B>
     void pack (cxx11::true_type)
     {
-        internal::pack(ctr_[Position<B>()], pac_[Position<B>()]);
+        m128i_pack<0>(ctr_[Position<B>()], pac_[Position<B>()]);
         pack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
@@ -362,7 +364,7 @@ class ARSEngine
     template <std::size_t B>
     void unpack (cxx11::true_type)
     {
-        internal::unpack(pac_[Position<B>()], res_[Position<B>()]);
+        m128i_unpack<B * K_>(pac_[Position<B>()], res_);
         unpack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
@@ -372,21 +374,10 @@ class ARSEngine
         pack();
         generate<1>(cxx11::true_type());
         unpack();
-        remain_ = K_ * Blocks;
     }
 
     template <std::size_t>
     void generate (cxx11::false_type) {generate_last<0>(cxx11::true_type());}
-
-    template <std::size_t> void generate_last (cxx11::false_type) {}
-
-    template <std::size_t B>
-    void generate_last (cxx11::true_type)
-    {
-        pac_[Position<B>()] = _mm_aesenclast_si128(
-                pac_[Position<B>()], key_.back());
-        generate_last<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
 
     template <std::size_t N>
     void generate (cxx11::true_type)
@@ -407,19 +398,14 @@ class ARSEngine
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    result_type result () {return result<Blocks - 1>(cxx11::true_type());}
+    template <std::size_t> void generate_last (cxx11::false_type) {}
 
-    template <std::size_t>
-    result_type result (cxx11::false_type) {return res_.front()[--remain_];}
-
-    template <std::size_t I>
-    result_type result (cxx11::true_type)
+    template <std::size_t B>
+    void generate_last (cxx11::true_type)
     {
-        if (remain_ > I * K_) {
-            --remain_;
-            return res_[Position<I>()][remain_ - I * K_];
-        }
-        return result<I - 1>(cxx11::integral_constant<bool, 1 < I>());
+        pac_[Position<B>()] = _mm_aesenclast_si128(
+                pac_[Position<B>()], key_.back());
+        generate_last<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
     virtual void init_key (const __m128i &k)
