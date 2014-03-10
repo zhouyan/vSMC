@@ -109,8 +109,8 @@ class AESKeySeq
 /// The algorithm is almost identical to the original. Compared to
 /// `r123:Engine<r123::AESNI4x32>`, when using the default constructor or the
 /// one with a single seed, the output shall be exactly the same for the first
-/// \f$2^32\f$ iterations. Further iterations may produce different results, as
-/// vSMC increment the counter slightly differently, but it still cover the
+/// \f$2^{32}\f$ iterations. Further iterations may produce different results,
+/// as vSMC increment the counter slightly differently, but it still cover the
 /// same range and has the same period as the original.
 ///
 /// The implementation however is much different the original. See the source

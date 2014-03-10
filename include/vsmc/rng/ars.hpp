@@ -112,7 +112,7 @@ class ARSKeySeq
 ///
 /// Compared to `r123:Engine<r123::ARS4x32_R<10> >` etc., when using the
 /// default constructor or the one with a single seed, the output shall be
-/// exactly the same for the first \f$2^32\f$ iterations. Further iterations
+/// exactly the same for the first \f$2^{32}\f$ iterations. Further iterations
 /// may produce different results, as vSMC increment the counter slightly
 /// differently, but it still cover the same range and has the same period as
 /// the original.
