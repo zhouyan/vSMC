@@ -152,6 +152,8 @@ class ARSEngine
     static VSMC_CONSTEXPR const std::size_t K_ =
         sizeof(__m128i) / sizeof(ResultType);
 
+    typedef internal::RngCounter<ResultType> counter;
+
     public :
 
     typedef ResultType result_type;
@@ -176,7 +178,7 @@ class ARSEngine
 
     void seed (result_type s)
     {
-        ctr_.back().fill(0);
+        counter::reset(ctr_);
         key_.fill(0);
         key_.front() = s;
         key_seq_init();
@@ -188,19 +190,19 @@ class ARSEngine
             !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
-        ctr_.back().fill(0);
+        counter::reset(ctr_);
         seq.generate(key_.begin(), key_.end());
         key_seq_init();
         remain_ = 0;
     }
 
-    const ctr_type &ctr () const {return ctr_.back();}
+    const ctr_type &ctr () const {return counter::get(ctr_);}
 
     const key_type &key () const {return key_;}
 
     void ctr (const ctr_type &c)
     {
-        ctr_.back() = c;
+        counter::set(ctr_, c);
         remain_ = 0;
     }
 
@@ -214,7 +216,10 @@ class ARSEngine
     result_type operator() ()
     {
         if (remain_ == 0) {
-            generate();
+            counter::increment(ctr_);
+            pack();
+            generate<1>(cxx11::true_type());
+            unpack();
             remain_ = K_ * Blocks;
         }
 
@@ -234,13 +239,12 @@ class ARSEngine
             return;
 
         remain_ = 0;
-        increment();
+        counter::increment(ctr_);
         if (nskip <= Blocks)
             return;
 
         nskip -= Blocks;
-        internal::RngCounter<ResultType, K_>::increment(ctr_.front(), nskip);
-        increment();
+        counter::increment(ctr_, nskip);
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -339,23 +343,6 @@ class ARSEngine
         seq.generate(pac_.front(), key_seq_);
     }
 
-    void increment ()
-    {
-        ctr_.front() = ctr_.back();
-        internal::RngCounter<ResultType, K_>::increment(ctr_.front());
-        increment<1>(cxx11::integral_constant<bool, 1 < Blocks>());
-    }
-
-    template <std::size_t> void increment (cxx11::false_type) {}
-
-    template <std::size_t B>
-    void increment (cxx11::true_type)
-    {
-        ctr_[Position<B>()] = ctr_[Position<B - 1>()];
-        internal::RngCounter<ResultType, K_>::increment(ctr_[Position<B>()]);
-        increment<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
     void pack ()
     {
         m128i_pack<0>(ctr_.front(), pac_.front());
@@ -393,14 +380,6 @@ class ARSEngine
     {
         m128i_unpack<B * K_>(pac_[Position<B>()], res_);
         unpack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    void generate ()
-    {
-        increment();
-        pack();
-        generate<1>(cxx11::true_type());
-        unpack();
     }
 
     template <std::size_t>

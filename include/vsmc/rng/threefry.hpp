@@ -247,6 +247,8 @@ template <typename ResultType, std::size_t K,
          std::size_t R = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryEngine
 {
+    typedef internal::RngCounter<ResultType> counter;
+
     public :
 
     typedef ResultType result_type;
@@ -270,7 +272,7 @@ class ThreefryEngine
 
     void seed (result_type s)
     {
-        ctr_.fill(0);
+        counter::reset(ctr_);
         key_.fill(0);
         key_.front() = s;
         init_par();
@@ -282,20 +284,19 @@ class ThreefryEngine
             !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
-        ctr_.fill(0);
-        key_.fill(0);
+        counter::reset(ctr_);
         seq.generate(key_.begin(), key_.end());
         init_par();
         remain_ = 0;
     }
 
-    const ctr_type &ctr () const {return ctr_;}
+    const ctr_type &ctr () const {return counter::get(ctr_);}
 
     const key_type &key () const {return key_;}
 
     void ctr (const ctr_type &c)
     {
-        ctr_ = c;
+        counter::set(ctr_, c);
         remain_ = 0;
     }
 
@@ -309,7 +310,7 @@ class ThreefryEngine
     result_type operator() ()
     {
         if (remain_ == 0) {
-            internal::RngCounter<ResultType, K>::increment(ctr_);
+            counter::increment(ctr_);
             res_ = ctr_;
             generate<0>(cxx11::true_type());
             remain_ = K;
@@ -324,7 +325,7 @@ class ThreefryEngine
             return;
 
         --nskip;
-        internal::RngCounter<ResultType, K>::increment(ctr_, nskip);
+        counter::increment(ctr_, nskip);
         remain_ = 0;
         operator()();
         nskip = nskip % K;
