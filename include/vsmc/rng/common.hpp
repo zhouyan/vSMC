@@ -159,12 +159,12 @@ struct RngCounter
     template <std::size_t N, typename Traits>
     static void increment (StaticVector<T, K, Traits> &ctr, cxx11::true_type)
     {
-        if (ctr[N] < max_) {
-            ++ctr[N];
+        if (ctr[Position<N>()] < max_) {
+            ++ctr[Position<N>()];
             return;
         }
 
-        increment<N + 1>(ctr, cxx11::integral_constant<bool, N < K>());
+        increment<N + 1>(ctr, cxx11::integral_constant<bool, N + 1 < K>());
     }
 
     template <std::size_t, typename Traits>
@@ -176,20 +176,20 @@ struct RngCounter
 
         ctr.fill(0);
         --nskip;
-        ctr[0] = nskip;
+        ctr.front() = nskip;
     }
 
     template <std::size_t N, typename Traits>
     static void increment (StaticVector<T, K, Traits> &ctr, T nskip,
             cxx11::true_type)
     {
-        if (nskip <= max_ - ctr[N]) {
-            ctr[N] += nskip;
+        if (nskip <= max_ - ctr[Position<N>()]) {
+            ctr[Position<N>()] += nskip;
             return;
         }
-        ctr[N] = max_;
-        increment<N + 1>(ctr, nskip - (max_ - ctr[N]),
-                cxx11::integral_constant<bool, N < K>());
+        ctr[Position<N>()] = max_;
+        increment<N + 1>(ctr, nskip - (max_ - ctr[Position<N>()]),
+                cxx11::integral_constant<bool, N + 1 < K>());
     }
 }; // struct RngCounter
 
