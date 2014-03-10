@@ -2,6 +2,7 @@
 #define VSMC_RNG_ARS_HPP
 
 #include <vsmc/rng/m128i.hpp>
+#include <wmmintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_ARS_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \

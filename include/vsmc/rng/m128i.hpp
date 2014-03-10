@@ -2,7 +2,7 @@
 #define VSMC_RNG_M128I_HPP
 
 #include <vsmc/rng/common.hpp>
-#include <wmmintrin.h>
+#include <emmintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N) \
     VSMC_STATIC_ASSERT(                                                      \
@@ -11,6 +11,8 @@
 
 namespace vsmc {
 
+/// \brief Pack a StaticVector into an __m128i object
+/// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
 inline void m128i_pack (const StaticVector<T, N, Traits> &c, __m128i &m)
 {
@@ -18,6 +20,8 @@ inline void m128i_pack (const StaticVector<T, N, Traits> &c, __m128i &m)
     m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));
 }
 
+/// \brief Unpack an __m128i object into a StaticVector
+/// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
 inline void m128i_unpack (const __m128i &m, StaticVector<T, N, Traits> &c)
 {
@@ -25,6 +29,8 @@ inline void m128i_unpack (const __m128i &m, StaticVector<T, N, Traits> &c)
     _mm_storeu_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);
 }
 
+/// \brief Compare two __m128i objects
+/// \ingroup RNG
 inline bool m128i_is_equal (const __m128i &a, const __m128i &b)
 {
     StaticVector<uint64_t, 2> sa;
@@ -35,6 +41,9 @@ inline bool m128i_is_equal (const __m128i &a, const __m128i &b)
     return sa == sb;
 }
 
+/// \brief Write an __m128i object into an output stream as two 64-bits
+/// unsigned integers
+/// \ingroup RNG
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &m128i_output (
         std::basic_ostream<CharT, Traits> &os, const __m128i &a)
@@ -46,6 +55,9 @@ inline std::basic_ostream<CharT, Traits> &m128i_output (
     return os;
 }
 
+/// \brief Input an __m128i object from an input stream as two 64-bits
+/// unsigned integers written by m128i_output
+/// \ingroup RNG
 template <typename CharT, typename Traits>
 inline std::basic_istream<CharT, Traits> &m128i_input (
         std::basic_istream<CharT, Traits> &is, __m128i &a)
