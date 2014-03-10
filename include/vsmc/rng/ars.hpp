@@ -114,11 +114,12 @@ class ARSKeySeq
 /// differently, but it still cover the same range and has the same period as
 /// the original.
 ///
-/// This implementation is more flexible than the original. First, it
-/// allows using 64-bits integers as output. Second, it allows user defined key
-/// sequence generation. The default key sequence, `vsmc::ARSKeySequence<R>` is
-/// exacatly the same as that implemented in the original. The Weyl constants
-/// can be changed through `vsmc::traits::ARSConstantTrait`.
+/// This implementation is more flexible than the original. First, it allows
+/// using 64-bits integers as output. Second, it allows user defined key
+/// sequence generation (the last template argument). The default key sequence,
+/// `vsmc::ARSKeySequence<R>` is exacatly the same as that implemented in the
+/// original. The Weyl constants can be changed through
+/// `vsmc::traits::ARSConstantTrait`.
 ///
 /// Using other key sequence can lead to other rng. The `KeySeq` template
 /// parameter only need to has a memeber function of the form,
@@ -129,7 +130,16 @@ class ARSKeySeq
 /// sequence of keys shall be generated. The default, `ARSKeySeq` use a Weyl
 /// sequence.
 ///
-/// \sa AESEngine
+/// The second template argument, `Blocks` specify how many blocks shall be
+/// used. The AES-NI instructions have noticeable latency but can be started
+/// every two cycles. But allowing generating multiple blocks at once, and
+/// interleave the instructions, the throughput can be increased at the cost of
+/// space. There are typedefs for blocks 1, 2, 4, 8. The default blocks, as in
+/// `ARS4x32` is defined by the macro `VSMC_RNG_ARS_BLOCKS`
+///
+/// The third template argument, `R` is the rounds of the algorithm. AES
+/// requires 10 rounds when using a 128-bits key. With reduced strength, any
+/// number of round below 10 can be used.
 template <typename ResultType,
          std::size_t Blocks = VSMC_RNG_ARS_BLOCKS,
          std::size_t R = VSMC_RNG_ARS_ROUNDS,

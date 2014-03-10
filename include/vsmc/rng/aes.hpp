@@ -4,7 +4,7 @@
 #include <vsmc/rng/ars.hpp>
 
 #define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val) \
-    template <> struct AESRoundConstant< N > :                             \
+    template <> struct AESRoundConstantValue< N > :                          \
         public cxx11::integral_constant<int, val > {};
 
 /// \brief AESEngine default blocks
@@ -13,11 +13,17 @@
 #define VSMC_RNG_AES_BLOCKS 1
 #endif
 
+/// \brief AESEngine default round constant
+/// \ingroup Config
+#ifndef VSMC_RNG_AES_ROUND_CONSTANT
+#define VSMC_RNG_AES_ROUND_CONSTANT ::vsmc::AESRoundConstant
+#endif
+
 namespace vsmc {
 
 namespace internal {
 
-template <std::size_t N> struct AESRoundConstant;
+template <std::size_t N> struct AESRoundConstantValue;
 
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0, 0x01)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(1, 0x02)
@@ -32,9 +38,14 @@ VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(9, 0x36)
 
 } // namespace vsmc::internal
 
+/// \brief Default AESKeySeq round constants
+/// \ingroup R123RNG
+template <std::size_t N>
+struct AESRoundConstant : public internal::AESRoundConstantValue<N> {};
+
 /// \brief Default AESEngine key sequence generator
-/// \ingroup
-template <std::size_t R>
+/// \ingroup R123RNG
+template <std::size_t R, template <std::size_t> class RoundConstant>
 class AESKeySeq
 {
     public :
@@ -63,8 +74,7 @@ class AESKeySeq
     void generate (key_seq_type &key_seq, cxx11::true_type)
     {
         key_seq[Position<N>()] = tmp0_;
-        tmp1_ = _mm_aeskeygenassist_si128(tmp0_,
-                internal::AESRoundConstant<N>::value);
+        tmp1_ = _mm_aeskeygenassist_si128(tmp0_, RoundConstant<N>::value);
         generate_assit();
         generate<N + 1>(key_seq, cxx11::integral_constant<bool, N + 1 < R>());
     }
@@ -100,10 +110,25 @@ class AESKeySeq
 /// The implementation however is much different the original. See the source
 /// for how the ARSEngine is used as the base of AESEngine, and how to
 /// implement similar engines.
-template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AESEngine : public ARSEngine<ResultType, Blocks, 10, AESKeySeq<10> >
+///
+/// The second template argument specify the number of blocks, see ARSEngine.
+///
+/// The last template argument is the round constants for use with
+/// `_mm_aeskeygenassist_si128`. It need to be class template with a static
+/// constant member data `value` which is the round constant for `N` ranging
+/// from at least 0 to 9.
+///
+/// \sa AESRoundConstant
+/// \sa AESKeySeq.
+template <typename ResultType,
+         std::size_t Blocks = VSMC_RNG_AES_BLOCKS,
+         template <std::size_t> class RoundConstant =
+         VSMC_RNG_AES_ROUND_CONSTANT>
+class AESEngine :
+    public ARSEngine<ResultType, Blocks, 10, AESKeySeq<10, RoundConstant> >
 {
-    typedef ARSEngine<ResultType, Blocks, 10, AESKeySeq<10> > base;
+    typedef ARSEngine<ResultType, Blocks, 10, AESKeySeq<10, RoundConstant> >
+        base;
 
     public :
 
