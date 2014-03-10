@@ -45,18 +45,14 @@ class StaticVectorStorage<T, N, true>
 
     StaticVectorStorage (const StaticVectorStorage<T, N, true> &other) :
         data_()
-    {
-        for (std::size_t i = 0; i != N; ++i)
-            data_[i] = other.data_[i];
-    }
+    {copy(other, cxx11::integral_constant<bool, N <= max_unroll_>());}
 
     StaticVectorStorage<T, N, true> &operator= (
             const StaticVectorStorage<T, N, true> &other)
     {
-        if (this != &other) {
-            for (std::size_t i = 0; i != N; ++i)
-                data_[i] = other.data_[i];
-        }
+        if (this != &other)
+            copy(other, cxx11::integral_constant<bool,
+                    N <= max_unroll_ && cxx11::is_fundamental<T>::value>());
 
         return *this;
     }
@@ -76,6 +72,27 @@ class StaticVectorStorage<T, N, true>
     private :
 
     T data_[N];
+
+    static VSMC_CONSTEXPR const std::size_t max_unroll_ = 16;
+
+    void copy (const StaticVectorStorage<T, N, true> &other, cxx11::false_type)
+    {
+        for (std::size_t i = 0; i != N; ++i)
+            data_[i] = other.data_[i];
+    }
+
+    void copy (const StaticVectorStorage<T, N, true> &other, cxx11::true_type)
+    {copy<0>(other, cxx11::integral_constant<bool, 0 < N>());}
+
+    template <std::size_t>
+    void copy (const StaticVectorStorage<T, N, true> &, cxx11::false_type) {}
+
+    template <std::size_t I>
+    void copy (const StaticVectorStorage<T, N, true> &other, cxx11::true_type)
+    {
+        data_[I] = other.data_[I];
+        copy<I + 1>(other, cxx11::integral_constant<bool, I + 1 < N>());
+    }
 }; // class StaticVectorStorage
 
 template <typename T, std::size_t N>
