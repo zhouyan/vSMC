@@ -135,10 +135,10 @@ class ARSKeySeq
 ///
 /// The second template argument, `Blocks` specify how many blocks shall be
 /// used. The AES-NI instructions have noticeable latency but can be started
-/// every two cycles. But allowing generating multiple blocks at once, and
-/// interleave the instructions, the throughput can be increased at the cost of
-/// space. There are typedefs for blocks 1, 2, 4, 8. The default blocks, as in
-/// `ARS4x32` is defined by the macro `VSMC_RNG_ARS_BLOCKS`
+/// every two cycles. By allowing generating multiple blocks at once, and
+/// interleaving the instructions, the throughput can be increased at the cost
+/// of space. The default blocks, as in `ARS4x32` is defined by the macro
+/// `VSMC_RNG_ARS_BLOCKS`
 ///
 /// The third template argument, `R` is the rounds of the algorithm. AES
 /// requires 10 rounds when using a 128-bits key. With reduced strength, any
@@ -427,66 +427,6 @@ typedef ARSEngine<uint64_t> ARS2x64;
 /// default rounds
 /// \ingroup R123RNG
 typedef ARSEngine<__m128i>  ARS1x128;
-
-/// \brief ARS RNG engine returning 32-bits integers with 1 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<uint32_t, 1> ARS4x32_1;
-
-/// \brief ARS RNG engine returning 64-bits integers with 1 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<uint64_t, 1> ARS2x64_1;
-
-/// \brief ARS RNG engine returning 128-bits integers with 1 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<__m128i, 1>  ARS1x128_1;
-
-/// \brief ARS RNG engine returning 32-bits integers with 2 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<uint32_t, 2> ARS4x32_2;
-
-/// \brief ARS RNG engine returning 64-bits integers with 2 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<uint64_t, 2> ARS2x64_2;
-
-/// \brief ARS RNG engine returning 128-bits integers with 2 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<__m128i, 2>  ARS1x128_2;
-
-/// \brief ARS RNG engine returning 32-bits integers with 4 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<uint32_t, 4> ARS4x32_4;
-
-/// \brief ARS RNG engine returning 64-bits integers with 4 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<uint64_t, 4> ARS2x64_4;
-
-/// \brief ARS RNG engine returning 128-bits integers with 4 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<__m128i, 4>  ARS1x128_4;
-
-/// \brief ARS RNG engine returning 32-bits integers with 8 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<uint32_t, 8> ARS4x32_8;
-
-/// \brief ARS RNG engine returning 64-bits integers with 8 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<uint64_t, 8> ARS2x64_8;
-
-/// \brief ARS RNG engine returning 128-bits integers with 8 block and default
-/// rounds
-/// \ingroup R123RNG
-typedef ARSEngine<__m128i, 8>  ARS1x128_8;
 
 } // namespace vsmc
 

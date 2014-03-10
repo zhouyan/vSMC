@@ -148,54 +148,6 @@ typedef AESEngine<uint64_t> AES2x64;
 /// \ingroup R123RNG
 typedef AESEngine<__m128i>  AES1x128;
 
-/// \brief AES RNG engine returning 32-bits integers with 1 block
-/// \ingroup R123RNG
-typedef AESEngine<uint32_t, 1> AES4x32_1;
-
-/// \brief AES RNG engine returning 64-bits integers with 1 block
-/// \ingroup R123RNG
-typedef AESEngine<uint64_t, 1> AES2x64_1;
-
-/// \brief AES RNG engine returning 128-bits integers with 1 block
-/// \ingroup R123RNG
-typedef AESEngine<__m128i, 1>  AES1x128_1;
-
-/// \brief AES RNG engine returning 32-bits integers with 2 block
-/// \ingroup R123RNG
-typedef AESEngine<uint32_t, 2> AES4x32_2;
-
-/// \brief AES RNG engine returning 64-bits integers with 2 block
-/// \ingroup R123RNG
-typedef AESEngine<uint64_t, 2> AES2x64_2;
-
-/// \brief AES RNG engine returning 128-bits integers with 2 block
-/// \ingroup R123RNG
-typedef AESEngine<__m128i, 2>  AES1x128_2;
-
-/// \brief AES RNG engine returning 32-bits integers with 4 block
-/// \ingroup R123RNG
-typedef AESEngine<uint32_t, 4> AES4x32_4;
-
-/// \brief AES RNG engine returning 64-bits integers with 4 block
-/// \ingroup R123RNG
-typedef AESEngine<uint64_t, 4> AES2x64_4;
-
-/// \brief AES RNG engine returning 128-bits integers with 4 block
-/// \ingroup R123RNG
-typedef AESEngine<__m128i, 4>  AES1x128_4;
-
-/// \brief AES RNG engine returning 32-bits integers with 8 block
-/// \ingroup R123RNG
-typedef AESEngine<uint32_t, 8> AES4x32_8;
-
-/// \brief AES RNG engine returning 64-bits integers with 8 block
-/// \ingroup R123RNG
-typedef AESEngine<uint64_t, 8> AES2x64_8;
-
-/// \brief AES RNG engine returning 128-bits integers with 8 block
-/// \ingroup R123RNG
-typedef AESEngine<__m128i, 8>  AES1x128_8;
-
 } // namespace vsmc
 
 #endif // VSMC_RNG_AES_HPP
