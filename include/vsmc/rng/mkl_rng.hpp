@@ -652,14 +652,14 @@ class MKLDistribution
     MKLDistribution () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), remain_(0) {}
 
     MKLDistribution (const MKLDistribution &other) :
-        buffer_size_(other.buffer_size_),
-        buffer_(other.buffer_), remain_(other.remain_) {}
+        buffer_(other.buffer_), buffer_size_(other.buffer_size_),
+        remain_(other.remain_) {}
 
     MKLDistribution &operator= (const MKLDistribution &other)
     {
         if (this != &other) {
-            buffer_size_ = other.buffer_size_;
             buffer_ = other.buffer_;
+            buffer_size_ = other.buffer_size_;
             remain_ = other.remain_;
         }
 
