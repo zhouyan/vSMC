@@ -43,20 +43,6 @@ class StaticVectorStorage<T, N, true>
 
     StaticVectorStorage () : data_() {}
 
-    StaticVectorStorage (const StaticVectorStorage<T, N, true> &other) :
-        data_()
-    {copy(other, cxx11::integral_constant<bool, N <= max_unroll_>());}
-
-    StaticVectorStorage<T, N, true> &operator= (
-            const StaticVectorStorage<T, N, true> &other)
-    {
-        if (this != &other)
-            copy(other, cxx11::integral_constant<bool,
-                    N <= max_unroll_ && cxx11::is_fundamental<T>::value>());
-
-        return *this;
-    }
-
     T *ptr () {return data_;}
 
     const T *ptr () const {return data_;}
