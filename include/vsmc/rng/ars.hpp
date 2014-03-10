@@ -6,7 +6,8 @@
 #define VSMC_STATIC_ASSERT_RNG_ARS_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_same<ResultType, uint32_t>::value ||                  \
-             cxx11::is_same<ResultType, uint64_t>::value),                   \
+             cxx11::is_same<ResultType, uint64_t>::value) ||                 \
+             cxx11::is_same<ResultType, __m128i>::value)                     \
             USE_ARSEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_ARS_ROUND_0(R) \
@@ -88,13 +89,10 @@ class ARSEngine
 
     typedef ResultType result_type;
     typedef StaticVector<ResultType, K_> ctr_type;
-    typedef StaticVector<ResultType, K_> key_type;
+    typedef StaticVector<__m128i, R + 1> key_type;
+    typedef StaticVector<ResultType, K_> ukey_type;
 
-    explicit ARSEngine (result_type s = 0) :
-        par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
-                    static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
-                    static_cast<int64_t>(traits::ARSConstantTrait<1>::value))),
-        remain_(0)
+    explicit ARSEngine (result_type s = 0) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
         seed(s);
@@ -103,23 +101,62 @@ class ARSEngine
     template <typename SeedSeq>
     explicit ARSEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_sequence<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) :
-        par_(_mm_setzero_si128()), weyl_ (_mm_set_epi64x(
-                    static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
-                    static_cast<int64_t>(traits::ARSConstantTrait<1>::value))),
-        remain_(0)
+            VSMC_NULLPTR) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_ARS;
         seed(seq);
     }
+
+    ARSEngine (const ARSEngine<ResultType, Blocks, R> &other) :
+        ctr_(other.ctr_), res_(other.res_), key_(other.key_), pac_(other.pac_),
+        remain_(other.remain_) {}
+
+    ARSEngine<ResultType, Blocks, R> &operator= (
+            const ARSEngine<ResultType, Blocks, R> &other)
+    {
+        if (this != &other) {
+            ctr_ = other.ctr_;
+            res_ = other.res_;
+            key_ = other.key_;
+            pac_ = other.pac_;
+            remain_ = other.remain_;
+        }
+
+        return *this;
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    ARSEngine (ARSEngine<ResultType, Blocks, R> &&other) :
+        ctr_(cxx11::move(other.ctr_)), res_(cxx11::move(other.res_)),
+        key_(cxx11::move(other.key_)), pac_(cxx11::move(other.pac_)),
+        remain_(other.remain_) {}
+
+    ARSEngine<ResultType, Blocks, R> &operator= (
+            ARSEngine<ResultType, Blocks, R> &&other)
+    {
+        if (this != &other) {
+            ctr_ = cxx11::move(other.ctr_);
+            res_ = cxx11::move(other.res_);
+            key_ = cxx11::move(other.key_);
+            pac_ = cxx11::move(other.pac_);
+            remain_ = other.remain_;
+        }
+
+        return *this;
+    }
+#endif
+
+    virtual ~ARSEngine () {}
 
     void seed (result_type s)
     {
         ctr_type c;
         c.fill(0);
         ctr_.fill(c);
-        key_.fill(0);
-        key_.front() = s;
+        ukey_type uk;
+        uk.fill(0);
+        uk.front() = s;
+        ukey(uk);
         remain_ = 0;
     }
 
@@ -131,7 +168,9 @@ class ARSEngine
         ctr_type c;
         c.fill(0);
         ctr_.fill(c);
-        seq.generate(key_.begin(), key_.end());
+        ukey_type uk;
+        seq.generate(uk.begin(), uk.end());
+        ukey(uk);
         remain_ = 0;
     }
 
@@ -158,14 +197,19 @@ class ARSEngine
         remain_ = 0;
     }
 
+    void ukey (const ukey_type &uk)
+    {
+        internal::pack(uk, pac_.front());
+        init_key(pac_.front());
+        remain_ = 0;
+    }
+
     result_type operator() ()
     {
         if (remain_ == 0)
             generate();
-        --remain_;
 
-        return result<Blocks - 1>(
-                cxx11::integral_constant<bool, 1 < Blocks>());
+        return result();
     }
 
     /// \brief Discard results
@@ -207,8 +251,9 @@ class ARSEngine
         if (eng1.res_ != eng2.res_)
             return false;
 
-        if (eng1.key_ != eng2.key_)
-            return false;
+        for (std::size_t i = 0; i != key_type::size(); ++i)
+            if (!internal::is_equal(eng1.key_[i], eng2.key_[i]))
+                return false;
 
         return eng1.remain_ == eng2.remain_;
     }
@@ -225,9 +270,8 @@ class ARSEngine
     {
         if (os) os << eng.ctr_ << ' ';
         if (os) os << eng.res_ << ' ';
-        if (os) os << eng.key_ << ' ';
-        internal::output_m128i(os, eng.par_);  if (os) os << ' ';
-        internal::output_m128i(os, eng.weyl_); if (os) os << ' ';
+        for (std::size_t i = 0; i != key_type::size(); ++i)
+            internal::output_m128i(os, eng.key_[i]); if (os) os << ' ';
         for (std::size_t i = 0; i != Blocks; ++i)
             internal::output_m128i(os, eng.pac_[i]);  if (os) os << ' ';
         if (os) os << eng.remain_;
@@ -243,9 +287,8 @@ class ARSEngine
         ARSEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.res_;
-        if (is) is >> std::ws >> eng_tmp.key_;
-        internal::input_m128i(is, eng_tmp.par_);
-        internal::input_m128i(is, eng_tmp.weyl_);
+        for (std::size_t i = 0; i != Blocks; ++i)
+            internal::input_m128i(is, eng_tmp.pac_[i]);
         for (std::size_t i = 0; i != Blocks; ++i)
             internal::input_m128i(is, eng_tmp.pac_[i]);
         if (is) is >> std::ws >> eng_tmp.remain_;
@@ -254,13 +297,17 @@ class ARSEngine
         return is;
     }
 
+    protected :
+
+    StaticVector<ctr_type, Blocks> &ctr () {return ctr_;}
+    StaticVector<ctr_type, Blocks> &res () {return res_;}
+    key_type &key () {return key_;}
+
     private :
 
     StaticVector<ctr_type, Blocks> ctr_;
     StaticVector<ctr_type, Blocks> res_;
     key_type key_;
-    __m128i par_;
-    __m128i weyl_;
     StaticVector<__m128i, Blocks> pac_;
     std::size_t remain_;
 
@@ -283,10 +330,10 @@ class ARSEngine
 
     void pack ()
     {
-        internal::pack(key_, par_);
         internal::pack(ctr_.front(), pac_.front());
         pack<1>(cxx11::integral_constant<bool, 1 < Blocks>());
-        pac_.front() = _mm_xor_si128(pac_.front(), par_);
+
+        pac_.front() = _mm_xor_si128(pac_.front(), key_.front());
         pac_xor<1>(cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
@@ -304,17 +351,13 @@ class ARSEngine
     template <std::size_t B>
     void pac_xor (cxx11::true_type)
     {
-        pac_[Position<B>()] = _mm_xor_si128(pac_[Position<B>()], par_);
+        pac_[Position<B>()] = _mm_xor_si128(pac_[Position<B>()], key_.front());
         pac_xor<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t> void unpack (cxx11::false_type) {}
 
-    void unpack ()
-    {
-        internal::unpack(pac_.front(), res_.front());
-        unpack<1>(cxx11::integral_constant<bool, 1 < Blocks>());
-    }
+    void unpack () {unpack<0>(cxx11::true_type());}
 
     template <std::size_t B>
     void unpack (cxx11::true_type)
@@ -327,57 +370,75 @@ class ARSEngine
     {
         increment();
         pack();
-        generate<0>(cxx11::true_type());
+        generate<1>(cxx11::true_type());
         unpack();
         remain_ = K_ * Blocks;
     }
 
     template <std::size_t>
-    void generate (cxx11::false_type)
-    {
-        par_ = _mm_add_epi64(par_, weyl_);
-        pac_.front() = _mm_aesenclast_si128(pac_.front(), par_);
-        generate_last<1>(cxx11::integral_constant<bool, 1 < Blocks>());
-    }
+    void generate (cxx11::false_type) {generate_last<0>(cxx11::true_type());}
 
     template <std::size_t> void generate_last (cxx11::false_type) {}
 
     template <std::size_t B>
     void generate_last (cxx11::true_type)
     {
-        pac_[Position<B>()] = _mm_aesenclast_si128(pac_[Position<B>()], par_);
+        pac_[Position<B>()] = _mm_aesenclast_si128(
+                pac_[Position<B>()], key_.back());
         generate_last<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t N>
     void generate (cxx11::true_type)
     {
-        par_ = _mm_add_epi64(par_, weyl_);
-        pac_.front() = _mm_aesenc_si128(pac_.front(), par_);
-        generate_step<1>(cxx11::integral_constant<bool, 1 < Blocks>());
-        generate<N + 1>(cxx11::integral_constant<bool, N  + 2 < R>());
+        generate_step<0, N>(cxx11::true_type());
+        generate<N + 1>(cxx11::integral_constant<bool, N  + 1 < R>());
     }
 
-    template <std::size_t>
+    template <std::size_t, std::size_t>
     void generate_step (cxx11::false_type) {}
 
-    template <std::size_t B>
+    template <std::size_t B, std::size_t N>
     void generate_step (cxx11::true_type)
     {
-        pac_[Position<B>()] = _mm_aesenc_si128(pac_[Position<B>()], par_);
-        generate_step<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+        pac_[Position<B>()] = _mm_aesenc_si128(
+                pac_[Position<B>()], key_[Position<N>()]);
+        generate_step<B + 1, N>(
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
+    result_type result () {return result<Blocks - 1>(cxx11::true_type());}
+
     template <std::size_t>
-    result_type result (cxx11::false_type)
-    {return res_.front()[remain_];}
+    result_type result (cxx11::false_type) {return res_.front()[--remain_];}
 
     template <std::size_t I>
     result_type result (cxx11::true_type)
     {
-        if (remain_ > I * K_)
+        if (remain_ > I * K_) {
+            --remain_;
             return res_[Position<I>()][remain_ - I * K_];
-        return result<I - 1>(cxx11::integral_constant<bool, 0 < I>());
+        }
+        return result<I - 1>(cxx11::integral_constant<bool, 1 < I>());
+    }
+
+    virtual void init_key (const __m128i &k)
+    {
+        key_.front() = k;
+        __m128i weyl = _mm_set_epi64x(
+                static_cast<int64_t>(traits::ARSConstantTrait<0>::value),
+                static_cast<int64_t>(traits::ARSConstantTrait<1>::value));
+        init_key_seq<1>(weyl, cxx11::true_type());
+    }
+
+    template <std::size_t>
+    void init_key_seq (const __m128i &, cxx11::false_type) {}
+
+    template <std::size_t N>
+    void init_key_seq (const __m128i &weyl, cxx11::true_type)
+    {
+        key_[Position<N>()] = _mm_add_epi64(key_[Position<N - 1>()], weyl);
+        init_key_seq<N + 1>(weyl, cxx11::integral_constant<bool, N < R>());
     }
 }; // class ARSEngine
 
