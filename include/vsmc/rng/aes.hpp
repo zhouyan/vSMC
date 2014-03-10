@@ -7,6 +7,8 @@
     template <> struct AESRoundConstant< N > :                             \
         public cxx11::integral_constant<int, val > {};
 
+/// \brief AESEngine default blocks
+/// \ingroup Config
 #ifndef VSMC_RNG_AES_BLOCKS
 #define VSMC_RNG_AES_BLOCKS 1
 #endif

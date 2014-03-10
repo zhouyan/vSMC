@@ -21,6 +21,8 @@
     template <> struct ThreefryRotateConstant < T, K, N, I > :               \
         public cxx11::integral_constant< unsigned, val > {};
 
+/// \brief ThreefryEngine default rounds
+/// \ingroup Config
 #ifndef VSMC_RNG_THREEFRY_ROUNDS
 #define VSMC_RNG_THREEFRY_ROUNDS 20
 #endif

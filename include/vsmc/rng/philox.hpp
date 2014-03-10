@@ -29,6 +29,8 @@
     template <> struct PhiloxRoundConstant < T, K, I > :                     \
         public cxx11::integral_constant< T, val > {};
 
+/// \brief PhiloxEngine default rounds
+/// \ingroup Config
 #ifndef VSMC_RNG_PHILOX_ROUNDS
 #define VSMC_RNG_PHILOX_ROUNDS 10
 #endif

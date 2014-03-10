@@ -25,10 +25,14 @@
     VSMC_STATIC_ASSERT_RNG_ARS_ROUND(R);                                     \
     VSMC_STATIC_ASSERT_RNG_ARS_BLOCKS(Blocks);
 
+/// \brief ARSEngine default blocks
+/// \ingroup Config
 #ifndef VSMC_RNG_ARS_BLOCKS
 #define VSMC_RNG_ARS_BLOCKS 1
 #endif
 
+/// \brief ARSEngine default rounds
+/// \ingroup Config
 #ifndef VSMC_RNG_ARS_ROUNDS
 #define VSMC_RNG_ARS_ROUNDS 10
 #endif
