@@ -500,8 +500,8 @@ inline T &&get (StaticVector<T, N, Traits> &&sv)
 /// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator== (
-        StaticVector<T, N, Traits> &sv1,
-        StaticVector<T, N, Traits> &sv2)
+        const StaticVector<T, N, Traits> &sv1,
+        const StaticVector<T, N, Traits> &sv2)
 {
     for (std::size_t i = 0; i != N; ++i)
         if (sv1[i] != sv2[i])
@@ -514,16 +514,16 @@ inline bool operator== (
 /// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator!= (
-        StaticVector<T, N, Traits> &sv1,
-        StaticVector<T, N, Traits> &sv2)
+        const StaticVector<T, N, Traits> &sv1,
+        const StaticVector<T, N, Traits> &sv2)
 {return !(sv1 == sv2);}
 
 /// \brief StaticVector operator<
 /// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator< (
-        StaticVector<T, N, Traits> &sv1,
-        StaticVector<T, N, Traits> &sv2)
+        const StaticVector<T, N, Traits> &sv1,
+        const StaticVector<T, N, Traits> &sv2)
 {
     for (std::size_t i = 0; i != N; ++i) {
         if (sv1[i] < sv2[i])
@@ -539,8 +539,8 @@ inline bool operator< (
 /// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator<= (
-        StaticVector<T, N, Traits> &sv1,
-        StaticVector<T, N, Traits> &sv2)
+        const StaticVector<T, N, Traits> &sv1,
+        const StaticVector<T, N, Traits> &sv2)
 {
     for (std::size_t i = 0; i != N; ++i) {
         if (sv1[i] < sv2[i])
@@ -556,16 +556,16 @@ inline bool operator<= (
 /// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator> (
-        StaticVector<T, N, Traits> &sv1,
-        StaticVector<T, N, Traits> &sv2)
+        const StaticVector<T, N, Traits> &sv1,
+        const StaticVector<T, N, Traits> &sv2)
 {return !(sv1 <= sv2);}
 
 /// \brief StaticVector operator>=
 /// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits>
 inline bool operator>= (
-        StaticVector<T, N, Traits> &sv1,
-        StaticVector<T, N, Traits> &sv2)
+        const StaticVector<T, N, Traits> &sv1,
+        const StaticVector<T, N, Traits> &sv2)
 {return !(sv1 < sv2);}
 
 /// \brief StaticVector operator<<
@@ -586,13 +586,13 @@ inline std::basic_ostream<CharT, CharTraits> &operator<< (
     return os;
 }
 
-/// \brief StaticVector operator<<
+/// \brief StaticVector operator>>
 /// \ingroup StaticVector
 template <typename T, std::size_t N, typename Traits,
          typename CharT, typename CharTraits>
 inline std::basic_istream<CharT, CharTraits> &operator>> (
         std::basic_istream<CharT, CharTraits> &is,
-        const StaticVector<T, N, Traits> &sv)
+        StaticVector<T, N, Traits> &sv)
 {
     if (!is)
         return is;
