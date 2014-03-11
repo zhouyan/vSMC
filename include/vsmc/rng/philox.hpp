@@ -299,7 +299,10 @@ class PhiloxEngine
     }
 
     PhiloxEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
-    {counter::set(ctr_, c);}
+    {
+        VSMC_STATIC_ASSERT_RNG_PHILOX;
+        counter::set(ctr_, c);
+    }
 
     void seed (result_type s)
     {

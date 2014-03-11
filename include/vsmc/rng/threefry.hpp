@@ -275,6 +275,7 @@ class ThreefryEngine
 
     ThreefryEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
     {
+        VSMC_STATIC_ASSERT_RNG_THREEFRY;
         counter::set(ctr_, c);
         init_par();
     }
