@@ -36,7 +36,7 @@
 #ifndef VSMC_RNG_U01_H
 #define VSMC_RNG_U01_H
 
-#include <vsmc/rng/defines.h>
+#include <vsmc/rng/internal/defines.h>
 
 #if VSMC_FP_TYPE_IS_FLOAT
 #define U01_OPEN_OPEN_32     u01_open_open_32_24

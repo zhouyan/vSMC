@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_M128I_HPP
 #define VSMC_RNG_M128I_HPP
 
-#include <vsmc/rng/common.hpp>
+#include <vsmc/rng/internal/common.hpp>
 #include <emmintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N) \

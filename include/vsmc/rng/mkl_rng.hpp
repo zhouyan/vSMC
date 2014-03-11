@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_MKL_RNG_HPP
 #define VSMC_RNG_MKL_RNG_HPP
 
-#include <vsmc/rng/common.hpp>
+#include <vsmc/rng/internal/common.hpp>
 #include <mkl_vsl.h>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \

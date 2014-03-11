@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_SEED_HPP
 #define VSMC_RNG_SEED_HPP
 
-#include <vsmc/rng/common.hpp>
+#include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem) \
     VSMC_RUNTIME_ASSERT((div > rem),                                         \

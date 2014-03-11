@@ -1,5 +1,5 @@
-#ifndef VSMC_RNG_COMMON_HPP
-#define VSMC_RNG_COMMON_HPP
+#ifndef VSMC_RNG_INTERNAL_COMMON_HPP
+#define VSMC_RNG_INTERNAL_COMMON_HPP
 
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/defines.hpp>
@@ -343,4 +343,4 @@ struct is_seed_seq :
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_COMMON_HPP
+#endif // VSMC_RNG_INTERNAL_COMMON_HPP

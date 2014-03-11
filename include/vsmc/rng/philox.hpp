@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_PHILOX_HPP
 #define VSMC_RNG_PHILOX_HPP
 
-#include <vsmc/rng/common.hpp>
+#include <vsmc/rng/internal/common.hpp>
 
 #ifdef _MSC_VER
 #include <intrin.h>

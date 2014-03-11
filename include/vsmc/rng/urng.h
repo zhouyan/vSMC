@@ -141,7 +141,7 @@
 #ifndef VSMC_RNG_URNG_H
 #define VSMC_RNG_URNG_H
 
-#include <vsmc/rng/defines.h>
+#include <vsmc/rng/internal/defines.h>
 #include <Random123/threefry.h>
 #include <Random123/philox.h>
 

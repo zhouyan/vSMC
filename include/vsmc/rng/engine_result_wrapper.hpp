@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_ENGINE_RESULT_WRAPPER_HPP
 #define VSMC_RNG_ENGINE_RESULT_WRAPPER_HPP
 
-#include <vsmc/rng/common.hpp>
+#include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_ENGINE_RESULT_WRAPPER_SIZE(K) \
     VSMC_STATIC_ASSERT((K > 0),                                              \

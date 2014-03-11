@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_COMBINE_HPP
 #define VSMC_RNG_COMBINE_HPP
 
-#include <vsmc/rng/common.hpp>
+#include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type) \
     VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<result_type>::value),     \
