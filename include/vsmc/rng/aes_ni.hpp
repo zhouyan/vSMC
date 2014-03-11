@@ -17,8 +17,8 @@ namespace vsmc {
 /// \ingroup AESNIRNG
 ///
 /// \details
-/// Two dervied class AESEngine and ARSEngine behaves exactly the same as AES
-/// and ARS RNG engines as desribed in
+/// Two dervied class AES128Engine and ARSEngine behave exactly the same as
+/// AES and ARS RNG engines as desribed in
 /// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib], when used with `uint32_t` as ResultType. The first
 /// \f$2^{32}\f$ iterations will be exactly the same as
@@ -31,12 +31,14 @@ namespace vsmc {
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
 /// This implementation is more flexible than the original. First, it allows
-/// using 64-bits integers as output. Second, it allows user defined key
+/// using any unsigned integers as output. Second, it allows user defined key
 /// schedule (the second template argument). The two derived classed merely use
 /// two special key schedule to reproduce the original behavior.
 ///
-/// Using other key schedule can lead to other rng. The `KeySeq` template
-/// parameter only need to has a memeber function of the form,
+/// \tparam ResultType The output type of `operator()`
+///
+/// \tparam KeySeq Using other key schedule can lead to other rng. The `KeySeq`
+/// template parameter needs to has a memeber function of the form,
 /// ~~~{.cpp}
 /// void generate (const key_type &key, AESNIEngine::key_seq_type &key_seq)
 /// ~~~
@@ -44,18 +46,17 @@ namespace vsmc {
 /// sequence of round keys shall be generated and filled into `key_seq`. The
 /// `KeySeq` type also needs to have a member type `key_type`
 ///
-/// The third template argument, `R` is the rounds of the algorithm. AES
-/// requires 10 rounds when using a 128-bits key. With reduced strength, any
-/// number of round below 10 can be used.
+/// \tparam Rounds The third template argument is the rounds of the algorithm.
+/// AES requires 10 rounds when using a 128-bits key. With reduced strength,
+/// any number of round below 10 can be used.
 ///
-/// The fourth template argument, `Blocks` specify how many blocks shall be
-/// used. The AES-NI instructions have noticeable latency but can be started
+/// \tparam Blocks The fourth template argument specifies how many blocks shall
+/// be used. The AES-NI instructions have noticeable latency but can be started
 /// every two cycles. By allowing generating multiple blocks at once, and
 /// interleaving the instructions, the throughput can be increased at the cost
-/// of space. The default blocks, as in `ARS4x32` is defined by the macro
-/// `VSMC_RNG_ARS_BLOCKS`
+/// of space.
 template <typename ResultType, typename KeySeq,
-         std::size_t R, std::size_t Blocks>
+         std::size_t Rounds, std::size_t Blocks>
 class AESNIEngine
 {
     static VSMC_CONSTEXPR const std::size_t K_ =
@@ -71,7 +72,7 @@ class AESNIEngine
     typedef StaticVector<ResultType, buffer_size_> buffer_type;
     typedef StaticVector<ResultType, K_> ctr_type;
     typedef typename KeySeq::key_type key_type;
-    typedef StaticVector<__m128i, R + 1> key_seq_type;
+    typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
 
     explicit AESNIEngine (result_type s = 0) : remain_(0)
     {
@@ -140,7 +141,7 @@ class AESNIEngine
     /// initialized.
     static buffer_type generate (const ctr_type &c, const key_type &k)
     {
-        AESNIEngine<ResultType, KeySeq, R, Blocks> eng(c, k);
+        AESNIEngine<ResultType, KeySeq, Rounds, Blocks> eng(c, k);
         eng.generate();
 
         return eng.buffer_;
@@ -155,7 +156,7 @@ class AESNIEngine
     /// be saved.
     buffer_type generate (const ctr_type &c) const
     {
-        AESNIEngine<ResultType, KeySeq, R, Blocks> eng(*this);
+        AESNIEngine<ResultType, KeySeq, Rounds, Blocks> eng(*this);
         eng.ctr(c);
         eng.generate();
 
@@ -203,8 +204,8 @@ class AESNIEngine
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     friend inline bool operator== (
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng1,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng2)
+            const AESNIEngine<ResultType, KeySeq, Rounds, Blocks> &eng1,
+            const AESNIEngine<ResultType, KeySeq, Rounds, Blocks> &eng2)
     {
         if (eng1.ctr_ != eng2.ctr_)
             return false;
@@ -220,14 +221,14 @@ class AESNIEngine
     }
 
     friend inline bool operator!= (
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng1,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng2)
+            const AESNIEngine<ResultType, KeySeq, Rounds, Blocks> &eng1,
+            const AESNIEngine<ResultType, KeySeq, Rounds, Blocks> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng)
+            const AESNIEngine<ResultType, KeySeq, Rounds, Blocks> &eng)
     {
         if (os) os << eng.ctr_ << ' ';
         if (os) os << eng.buffer_ << ' ';
@@ -248,7 +249,7 @@ class AESNIEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            AESNIEngine<ResultType, KeySeq, R, Blocks> &eng)
+            AESNIEngine<ResultType, KeySeq, Rounds, Blocks> &eng)
     {
         AESNIEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
@@ -321,7 +322,7 @@ class AESNIEngine
     void generate ()
     {
         pack();
-        generate<1>(cxx11::integral_constant<bool, 1 < R>());
+        generate<1>(cxx11::integral_constant<bool, 1 < Rounds>());
         unpack();
     }
 
@@ -333,7 +334,7 @@ class AESNIEngine
     void generate (cxx11::true_type)
     {
         generate_step<0, N>(cxx11::integral_constant<bool, 0 < Blocks>());
-        generate<N + 1>(cxx11::integral_constant<bool, N  + 1 < R>());
+        generate<N + 1>(cxx11::integral_constant<bool, N  + 1 < Rounds>());
     }
 
     template <std::size_t, std::size_t>

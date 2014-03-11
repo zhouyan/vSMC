@@ -47,7 +47,7 @@ struct AESRoundConstantTrait :
 } // namespace traits
 
 /// \brief AES128Engine key sequence generator
-/// \ingroup R123RNG
+/// \ingroup AESNIRNG
 class AES128KeySeq
 {
     public :
@@ -132,11 +132,11 @@ class AES128Engine : public AESNIEngine<ResultType, AES128KeySeq, 10, Blocks>
 }; // class AES128Engine
 
 /// \brief AES-128 RNG engine returning 32-bits integers with default blocks
-/// \ingroup R123RNG
+/// \ingroup AESNIRNG
 typedef AES128Engine<uint32_t> AES128_32;
 
 /// \brief AES-128 RNG engine returning 64-bits integers with default blocks
-/// \ingroup R123RNG
+/// \ingroup AESNIRNG
 typedef AES128Engine<uint64_t> AES128_64;
 
 } // namespace vsmc

@@ -43,7 +43,7 @@ template <std::size_t N> struct ARSWeylConstantTrait :
 } // namespace vsmc::traits
 
 /// \brief Default ARSEngine key sequence generator
-/// \ingroup R123RNG
+/// \ingroup AESNIRNG
 class ARSKeySeq
 {
     public :
@@ -116,12 +116,12 @@ class ARSEngine : public AESNIEngine<ResultType, ARSKeySeq, R, Blocks>
 
 /// \brief ARS RNG engine returning 32-bits integers with default blocks and
 /// default rounds
-/// \ingroup R123RNG
+/// \ingroup AESNIRNG
 typedef ARSEngine<uint32_t> ARS_32;
 
 /// \brief ARS RNG engine returning 64-bits integers with default blocks and
 /// default rounds
-/// \ingroup R123RNG
+/// \ingroup AESNIRNG
 typedef ARSEngine<uint64_t> ARS_64;
 
 } // namespace vsmc

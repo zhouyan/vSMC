@@ -244,7 +244,7 @@ struct ThreefryInsert<ResultType, 4, N, true>
 /// increment the counter slightly differently, but it still cover the same
 /// range and has the same period as the original.
 template <typename ResultType, std::size_t K,
-         std::size_t R = VSMC_RNG_THREEFRY_ROUNDS>
+         std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryEngine
 {
     static VSMC_CONSTEXPR const std::size_t buffer_size_ = K;
@@ -325,7 +325,7 @@ class ThreefryEngine
     /// initialized.
     static buffer_type generate (const ctr_type &c, const key_type &k)
     {
-        ThreefryEngine<ResultType, K, R> eng(c, k);
+        ThreefryEngine<ResultType, K, Rounds> eng(c, k);
         eng.generate();
 
         return eng.buffer_;
@@ -340,7 +340,7 @@ class ThreefryEngine
     /// be saved.
     buffer_type generate (const ctr_type &c) const
     {
-        ThreefryEngine<ResultType, K, R> eng(*this);
+        ThreefryEngine<ResultType, K, Rounds> eng(*this);
         eng.ctr(c);
         eng.generate();
 
@@ -388,8 +388,8 @@ class ThreefryEngine
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     friend inline bool operator== (
-            const ThreefryEngine<ResultType, K, R> &eng1,
-            const ThreefryEngine<ResultType, K, R> &eng2)
+            const ThreefryEngine<ResultType, K, Rounds> &eng1,
+            const ThreefryEngine<ResultType, K, Rounds> &eng2)
     {
         return
             eng1.ctr_ == eng2.ctr_ &&
@@ -399,14 +399,14 @@ class ThreefryEngine
     }
 
     friend inline bool operator!= (
-            const ThreefryEngine<ResultType, K, R> &eng1,
-            const ThreefryEngine<ResultType, K, R> &eng2)
+            const ThreefryEngine<ResultType, K, Rounds> &eng1,
+            const ThreefryEngine<ResultType, K, Rounds> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const ThreefryEngine<ResultType, K, R> &eng)
+            const ThreefryEngine<ResultType, K, Rounds> &eng)
     {
         if (os) os << eng.ctr_;    if (os) os << ' ';
         if (os) os << eng.key_;    if (os) os << ' ';
@@ -420,7 +420,7 @@ class ThreefryEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            ThreefryEngine<ResultType, K, R> &eng)
+            ThreefryEngine<ResultType, K, Rounds> &eng)
     {
         ThreefryEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
@@ -462,7 +462,7 @@ class ThreefryEngine
     {
         internal::ThreefryRotate<ResultType, K, N>::rotate(buffer_);
         internal::ThreefryInsert<ResultType, K, N>::insert(buffer_, par_);
-        generate<N + 1>(cxx11::integral_constant<bool, N < R>());
+        generate<N + 1>(cxx11::integral_constant<bool, N < Rounds>());
     }
 }; // class ThreefryEngine
 

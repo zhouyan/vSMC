@@ -269,7 +269,7 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// rounds can be set through traits, `vsmc::traits::PhiloxBumpkConstantTrait`
 /// and `vsmc::traits::PhiloxRoundConstantTrait`.
 template <typename ResultType, std::size_t K,
-         std::size_t R = VSMC_RNG_PHILOX_ROUNDS>
+         std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxEngine
 {
     static VSMC_CONSTEXPR const std::size_t buffer_size_ = K;
@@ -346,7 +346,7 @@ class PhiloxEngine
     /// initialized.
     static buffer_type generate (const ctr_type &c, const key_type &k)
     {
-        PhiloxEngine<ResultType, K, R> eng(c, k);
+        PhiloxEngine<ResultType, K, Rounds> eng(c, k);
         eng.generate();
 
         return eng.buffer_;
@@ -361,7 +361,7 @@ class PhiloxEngine
     /// be saved.
     buffer_type generate (const ctr_type &c) const
     {
-        PhiloxEngine<ResultType, K, R> eng(*this);
+        PhiloxEngine<ResultType, K, Rounds> eng(*this);
         eng.ctr(c);
         eng.generate();
 
@@ -409,8 +409,8 @@ class PhiloxEngine
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     friend inline bool operator== (
-            const PhiloxEngine<ResultType, K, R> &eng1,
-            const PhiloxEngine<ResultType, K, R> &eng2)
+            const PhiloxEngine<ResultType, K, Rounds> &eng1,
+            const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {
         return
             eng1.ctr_ == eng2.ctr_ &&
@@ -420,14 +420,14 @@ class PhiloxEngine
     }
 
     friend inline bool operator!= (
-            const PhiloxEngine<ResultType, K, R> &eng1,
-            const PhiloxEngine<ResultType, K, R> &eng2)
+            const PhiloxEngine<ResultType, K, Rounds> &eng1,
+            const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const PhiloxEngine<ResultType, K, R> &eng)
+            const PhiloxEngine<ResultType, K, Rounds> &eng)
     {
         if (os) os << eng.ctr_;    if (os) os << ' ';
         if (os) os << eng.key_;    if (os) os << ' ';
@@ -441,7 +441,7 @@ class PhiloxEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            PhiloxEngine<ResultType, K, R> &eng)
+            PhiloxEngine<ResultType, K, Rounds> &eng)
     {
         PhiloxEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
@@ -476,7 +476,7 @@ class PhiloxEngine
     {
         internal::PhiloxBumpk<ResultType, K, N>::bumpk(par_);
         internal::PhiloxRound<ResultType, K, N>::round(buffer_, par_);
-        generate<N + 1>(cxx11::integral_constant<bool, N < R>());
+        generate<N + 1>(cxx11::integral_constant<bool, N < Rounds>());
     }
 }; // class PhiloxEngine
 
