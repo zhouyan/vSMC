@@ -16,24 +16,22 @@
 
 namespace vsmc {
 
-/// \brief AES and ARS RNG base engine
-/// \ingroup R123RNG
+/// \brief RNG engine using AES-NI instructions
+/// \ingroup AESNIRNG
 ///
 /// \details
-/// This is a reimplementation of the algorithm AES and ARS as described in
+/// Two dervied class AESEngine and ARSEngine behaves exactly the same as AES
+/// and ARS RNG engines as desribed in
 /// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
-/// [Random123][r123lib].
-///
-/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
-/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
-///
-/// Two dervied class AESEngine and ARSEngine behaviors exactly the same as in
-/// the original implementation, when used with `uint32_t` as ResultType. The
-/// first \f$2^{32}\f$ iterations will be exactly the same as
+/// [Random123][r123lib], when used with `uint32_t` as ResultType. The first
+/// \f$2^{32}\f$ iterations will be exactly the same as
 /// `r123::Engine<r123:AESNI4x32>` and `r123::Engine<r123:ARS4x32_R<10> >`.
 /// (Note, they could be simple template alias in C++11, but to support C++98
 /// we had to derive from it. Since the derived classes contains nothing and
 /// does nothing, there is no performance cost).
+///
+/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
+/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
 /// This implementation is more flexible than the original. First, it allows
 /// using 64-bits integers as output. Second, it allows user defined key

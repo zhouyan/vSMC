@@ -99,7 +99,7 @@ class AESKeySeq
 }; // class AESKeySeq
 
 /// \brief AES RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup AESNIRNG
 ///
 /// \details
 /// This is a reimplementation of the algorithm AES as described in [Parallel

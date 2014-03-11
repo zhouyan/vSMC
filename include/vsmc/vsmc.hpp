@@ -74,6 +74,10 @@
 /// \defgroup RNG Random number generating
 /// \brief Utilities for managing RNG engines
 
+/// \defgroup AESNIRNG AES-NI
+/// \ingroup RNG
+/// \brief Random number generating using AES-NI
+
 /// \defgroup GSLRNG GSL
 /// \ingroup RNG
 /// \brief Random number generating using GSL RNG

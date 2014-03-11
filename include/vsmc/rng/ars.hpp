@@ -77,7 +77,7 @@ class ARSKeySeq
 }; // class ARSKeySeq
 
 /// \brief ARS RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup AESNIRNG
 ///
 /// \details
 /// This is a reimplementation of the algorithm ARS as described in [Parallel
