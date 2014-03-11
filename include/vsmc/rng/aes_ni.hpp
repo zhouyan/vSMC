@@ -57,7 +57,9 @@ namespace vsmc {
 /// requires 10 rounds when using a 128-bits key. With reduced strength, any
 /// number of round below 10 can be used.
 template <typename ResultType, typename KeySeq,
-         std::size_t R, std::size_t Blocks>
+         std::size_t R, std::size_t Blocks, typename KeyType =
+             StaticVector<ResultType, sizeof(__m128i) / sizeof(ResultType)>
+         >
 class AESNIEngine
 {
     static VSMC_CONSTEXPR const std::size_t K_ =

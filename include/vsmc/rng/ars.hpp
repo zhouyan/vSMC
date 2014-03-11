@@ -85,8 +85,8 @@ class ARSKeySeq
 /// \ingroup AESNIRNG
 ///
 /// \details
-/// This is a reimplementation of the algorithm ARS as described in [Parallel
-/// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
+/// This is a reimplementation of the ARS engine as described in
+/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib].
 ///
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
@@ -113,12 +113,12 @@ class ARSEngine : public AESNIEngine<ResultType, ARSKeySeq, R, Blocks>
 /// \brief ARS RNG engine returning 32-bits integers with default blocks and
 /// default rounds
 /// \ingroup R123RNG
-typedef ARSEngine<uint32_t> ARS4x32;
+typedef ARSEngine<uint32_t> ARS_32;
 
 /// \brief ARS RNG engine returning 64-bits integers with default blocks and
 /// default rounds
 /// \ingroup R123RNG
-typedef ARSEngine<uint64_t> ARS2x64;
+typedef ARSEngine<uint64_t> ARS_64;
 
 } // namespace vsmc
 

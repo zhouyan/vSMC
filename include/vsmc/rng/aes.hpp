@@ -46,13 +46,13 @@ struct AESRoundConstantTrait :
 
 } // namespace traits
 
-/// \brief AESEngine key sequence generator
+/// \brief AES128Engine key sequence generator
 /// \ingroup R123RNG
-class AESKeySeq
+class AES128KeySeq
 {
     public :
 
-    AESKeySeq () : tmp0_(), tmp1_(), tmp2_() {}
+    AES128KeySeq () : tmp0_(), tmp1_(), tmp2_() {}
 
     template <typename T, std::size_t K, typename KeyTraits,
              std::size_t Rp1, typename Traits>
@@ -97,42 +97,42 @@ class AESKeySeq
         tmp0_ = _mm_xor_si128     (tmp0_, tmp2_);
         tmp0_ = _mm_xor_si128     (tmp0_, tmp1_);
     }
-}; // class AESKeySeq
+}; // class AES128KeySeq
 
-/// \brief AES RNG engine reimplemented
+/// \brief AES-128 RNG engine reimplemented
 /// \ingroup AESNIRNG
 ///
 /// \details
-/// This is a reimplementation of the algorithm AES as described in [Parallel
-/// Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
+/// This is a reimplementation of the algorithm AESNI engine as described in
+/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib].
 ///
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
-/// \sa AESKeySeq.
+/// \sa AES128KeySeq.
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AESEngine : public AESNIEngine<ResultType, AESKeySeq, 10, Blocks>
+class AES128Engine : public AESNIEngine<ResultType, AES128KeySeq, 10, Blocks>
 {
-    typedef AESNIEngine<ResultType, AESKeySeq, 10, Blocks> base;
+    typedef AESNIEngine<ResultType, AES128KeySeq, 10, Blocks> base;
 
     public :
 
-    explicit AESEngine (ResultType s = 0) : base(s) {}
+    explicit AES128Engine (ResultType s = 0) : base(s) {}
 
     template <typename SeedSeq>
-    explicit AESEngine (SeedSeq &seq, typename cxx11::enable_if<
+    explicit AES128Engine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR) : base(seq) {}
-}; // class AESEngine
+}; // class AES128Engine
 
-/// \brief AES RNG engine returning 32-bits integers with default blocks
+/// \brief AES-128 RNG engine returning 32-bits integers with default blocks
 /// \ingroup R123RNG
-typedef AESEngine<uint32_t> AES4x32;
+typedef AES128Engine<uint32_t> AES128_32;
 
-/// \brief AES RNG engine returning 64-bits integers with default blocks
+/// \brief AES-128 RNG engine returning 64-bits integers with default blocks
 /// \ingroup R123RNG
-typedef AESEngine<uint64_t> AES2x64;
+typedef AES128Engine<uint64_t> AES128_64;
 
 } // namespace vsmc
 
