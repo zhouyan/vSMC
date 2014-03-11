@@ -41,7 +41,7 @@ namespace vsmc {
 /// Using other key schedule can lead to other rng. The `KeySeq` template
 /// parameter only need to has a memeber function of the form,
 /// ~~~{.cpp}
-/// void generate (const __m128i &ukey, ARSEngine::key_seq_type &key_seq)
+/// void generate (const key_type &key, ARSEngine::key_seq_type &key_seq)
 /// ~~~
 /// which is similar to that of C++11 `seed_seq`. Given a unique key, a
 /// sequence of keys shall be generated. The default, `ARSKeySeq` use a Weyl
@@ -242,9 +242,8 @@ class AESNIEngine
 
     void key_seq_init ()
     {
-        m128i_pack<0>(key_, pac_.front());
         KeySeq seq;
-        seq.generate(pac_.front(), key_seq_);
+        seq.generate(key_, key_seq_);
     }
 
     void pack ()

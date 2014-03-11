@@ -54,13 +54,14 @@ class AESKeySeq
 
     AESKeySeq () : tmp0_(), tmp1_(), tmp2_() {}
 
-    template <std::size_t Rp1, typename Traits>
-    void generate (const __m128i &ukey,
+    template <typename T, std::size_t K, typename KeyTraits,
+             std::size_t Rp1, typename Traits>
+    void generate (const StaticVector<T, K, KeyTraits> &key,
             StaticVector<__m128i, Rp1, Traits> &key_seq)
     {
-        tmp0_ = ukey;
+        m128i_pack<0>(key, tmp0_);
         key_seq.front() = tmp0_;
-        generate<1>(key_seq, cxx11::integral_constant<bool, 1 < Rp1>());
+        generate_seq<1>(key_seq, cxx11::integral_constant<bool, 1 < Rp1>());
     }
 
     private :
@@ -70,18 +71,18 @@ class AESKeySeq
     __m128i tmp2_;
 
     template <std::size_t, std::size_t Rp1, typename Traits>
-    void generate (StaticVector<__m128i, Rp1, Traits> &key_seq,
-            cxx11::false_type) {key_seq.back() = tmp0_;}
+    void generate_seq (StaticVector<__m128i, Rp1, Traits> &key_seq,
+            cxx11::false_type) {}
 
     template <std::size_t N, std::size_t Rp1, typename Traits>
-    void generate (StaticVector<__m128i, Rp1, Traits> &key_seq,
+    void generate_seq (StaticVector<__m128i, Rp1, Traits> &key_seq,
             cxx11::true_type)
     {
         tmp1_ = _mm_aeskeygenassist_si128(tmp0_,
                 traits::AESRoundConstantTrait<N>::value);
         generate_assit();
         key_seq[Position<N>()] = tmp0_;
-        generate<N + 1>(key_seq,
+        generate_seq<N + 1>(key_seq,
                 cxx11::integral_constant<bool, N + 1 < Rp1>());
     }
 
