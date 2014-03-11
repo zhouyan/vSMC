@@ -35,6 +35,8 @@ class StaticVectorStorage<T, N, true>
 {
     public :
 
+    static VSMC_CONSTEXPR const bool is_static = true;
+
     T &operator[] (std::size_t i) {return data_[i];}
 
     const T &operator[] (std::size_t i) const {return data_[i];}
@@ -85,6 +87,8 @@ template <typename T, std::size_t N>
 class StaticVectorStorage<T, N, false>
 {
     public :
+
+    static VSMC_CONSTEXPR const bool is_static = false;
 
     T &operator[] (std::size_t i) {return data_[i];}
 
