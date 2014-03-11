@@ -85,7 +85,7 @@ class RngSet<RngType, Vector>
     typedef RngType rng_type;
     typedef typename std::vector<rng_type>::size_type size_type;
 
-    explicit RngSet (size_type N) : rng_(N)
+    explicit RngSet (size_type N) : rng_(N, rng_type())
     {
         for (size_type i = 0; i != N; ++i)
             rng_[i].seed(static_cast<typename rng_type::result_type>(
