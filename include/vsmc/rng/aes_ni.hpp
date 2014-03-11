@@ -120,13 +120,15 @@ class AESNIEngine
 
     const key_type &key () const {return key_;}
 
+    const key_seq_type &key_seq () const {return key_seq_;}
+
     void ctr (const ctr_type &c)
     {
         counter::set(ctr_, c);
         remain_ = 0;
     }
 
-    void key (key_type k)
+    void key (const key_type &k)
     {
         key_ = k;
         key_seq_init();
