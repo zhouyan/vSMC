@@ -458,8 +458,8 @@ class PhiloxEngine
 
     ctr_type ctr_;
     key_type key_;
-    buffer_type buffer_;
     key_type par_;
+    buffer_type buffer_;
     std::size_t remain_;
 
     void generate ()
