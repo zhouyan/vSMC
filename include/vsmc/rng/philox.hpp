@@ -443,7 +443,7 @@ class PhiloxEngine
             std::basic_istream<CharT, Traits> &is,
             PhiloxEngine<ResultType, K, Rounds> &eng)
     {
-        PhiloxEngine eng_tmp;
+        PhiloxEngine<ResultType, K, Rounds> eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.key_;
         if (is) is >> std::ws >> eng_tmp.par_;

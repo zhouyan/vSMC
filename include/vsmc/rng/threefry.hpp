@@ -404,7 +404,7 @@ class ThreefryEngine
             std::basic_istream<CharT, Traits> &is,
             ThreefryEngine<ResultType, K, Rounds> &eng)
     {
-        ThreefryEngine eng_tmp;
+        ThreefryEngine<ResultType, K, Rounds> eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.par_;
         if (is) is >> std::ws >> eng_tmp.buffer_;
