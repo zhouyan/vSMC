@@ -1,7 +1,7 @@
 #ifndef VSMC_RNG_AES_HPP
 #define VSMC_RNG_AES_HPP
 
-#include <vsmc/rng/ars.hpp>
+#include <vsmc/rng/aes_ni.hpp>
 
 #define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val) \
     template <> struct AESRoundConstantValue< N > :                          \
@@ -48,19 +48,19 @@ struct AESRoundConstantTrait :
 
 /// \brief AESEngine key sequence generator
 /// \ingroup R123RNG
-template <std::size_t R>
 class AESKeySeq
 {
     public :
 
-    typedef StaticVector<__m128i, R + 1> key_seq_type;
-
     AESKeySeq () : tmp0_(), tmp1_(), tmp2_() {}
 
-    void generate (const __m128i &ukey, key_seq_type &key_seq)
+    template <std::size_t Rp1, typename Traits>
+    void generate (const __m128i &ukey,
+            StaticVector<__m128i, Rp1, Traits> &key_seq)
     {
         tmp0_ = ukey;
-        generate<0>(key_seq, cxx11::true_type());
+        key_seq.front() = tmp0_;
+        generate<1>(key_seq, cxx11::integral_constant<bool, 1 < Rp1>());
     }
 
     private :
@@ -69,18 +69,20 @@ class AESKeySeq
     __m128i tmp1_;
     __m128i tmp2_;
 
-    template <std::size_t>
-    void generate (key_seq_type &key_seq, cxx11::false_type)
-    {key_seq.back() = tmp0_;}
+    template <std::size_t, std::size_t Rp1, typename Traits>
+    void generate (StaticVector<__m128i, Rp1, Traits> &key_seq,
+            cxx11::false_type) {key_seq.back() = tmp0_;}
 
-    template <std::size_t N>
-    void generate (key_seq_type &key_seq, cxx11::true_type)
+    template <std::size_t N, std::size_t Rp1, typename Traits>
+    void generate (StaticVector<__m128i, Rp1, Traits> &key_seq,
+            cxx11::true_type)
     {
-        key_seq[Position<N>()] = tmp0_;
         tmp1_ = _mm_aeskeygenassist_si128(tmp0_,
-                traits::AESRoundConstantTrait<N + 1>::value);
+                traits::AESRoundConstantTrait<N>::value);
         generate_assit();
-        generate<N + 1>(key_seq, cxx11::integral_constant<bool, N + 1 < R>());
+        key_seq[Position<N>()] = tmp0_;
+        generate<N + 1>(key_seq,
+                cxx11::integral_constant<bool, N + 1 < Rp1>());
     }
 
     void generate_assit ()
@@ -107,25 +109,11 @@ class AESKeySeq
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
-/// The algorithm is almost identical to the original. Compared to
-/// `r123:Engine<r123::AESNI4x32>`, when using the default constructor or the
-/// one with a single seed, the output shall be exactly the same for the first
-/// \f$2^{32}\f$ iterations. Further iterations may produce different results,
-/// as vSMC increment the counter slightly differently, but it still cover the
-/// same range and has the same period as the original.
-///
-/// The implementation however is much different the original. See the source
-/// for how the ARSEngine is used as the base of AESEngine, and how to
-/// implement similar engines.
-///
-/// The second template argument specify the number of blocks
-///
 /// \sa AESKeySeq.
-/// \sa ARSEngine.
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AESEngine : public ARSEngine<ResultType, Blocks, 10, AESKeySeq<10> >
+class AESEngine : public AESNIEngine<ResultType, AESKeySeq, 10, Blocks>
 {
-    typedef ARSEngine<ResultType, Blocks, 10, AESKeySeq<10> > base;
+    typedef AESNIEngine<ResultType, AESKeySeq, 10, Blocks> base;
 
     public :
 
