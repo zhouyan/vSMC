@@ -376,8 +376,8 @@ class ThreefryEngine
     {
         return
             eng1.ctr_ == eng2.ctr_ &&
-            eng1.buffer_ == eng2.buffer_ &&
             eng1.par_ == eng2.par_ &&
+            eng1.buffer_ == eng2.buffer_ &&
             eng1.remain_ == eng2.remain_;
     }
 
@@ -392,8 +392,8 @@ class ThreefryEngine
             const ThreefryEngine<ResultType, K, Rounds> &eng)
     {
         if (os) os << eng.ctr_;    if (os) os << ' ';
-        if (os) os << eng.buffer_; if (os) os << ' ';
         if (os) os << eng.par_;    if (os) os << ' ';
+        if (os) os << eng.buffer_; if (os) os << ' ';
         if (os) os << eng.remain_;
 
         return os;
@@ -406,8 +406,8 @@ class ThreefryEngine
     {
         ThreefryEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
-        if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.par_;
+        if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
 
