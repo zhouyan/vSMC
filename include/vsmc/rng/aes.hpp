@@ -114,16 +114,20 @@ class AES128KeySeq
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
 class AES128Engine : public AESNIEngine<ResultType, AES128KeySeq, 10, Blocks>
 {
-    typedef AESNIEngine<ResultType, AES128KeySeq, 10, Blocks> base;
 
     public :
 
-    explicit AES128Engine (ResultType s = 0) : base(s) {}
+    typedef AESNIEngine<ResultType, AES128KeySeq, 10, Blocks> base_eng_type;
+
+    explicit AES128Engine (ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
     explicit AES128Engine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : base(seq) {}
+            VSMC_NULLPTR) : base_eng_type(seq) {}
+
+    AES128Engine (const typename base_eng_type::ctr_type &c,
+            const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
 }; // class AES128Engine
 
 /// \brief AES-128 RNG engine returning 32-bits integers with default blocks

@@ -98,16 +98,19 @@ template <typename ResultType,
          std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
 class ARSEngine : public AESNIEngine<ResultType, ARSKeySeq, R, Blocks>
 {
-    typedef AESNIEngine<ResultType, ARSKeySeq, R, Blocks> base;
-
     public :
 
-    explicit ARSEngine (ResultType s = 0) : base(s) {}
+    typedef AESNIEngine<ResultType, ARSKeySeq, R, Blocks> base_eng_type;
+
+    explicit ARSEngine (ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
     explicit ARSEngine (SeedSeq &seq, typename cxx11::enable_if<
             !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : base(seq) {}
+            VSMC_NULLPTR) : base_eng_type(seq) {}
+
+    ARSEngine (const typename base_eng_type::ctr_type &c,
+            const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
 }; // class ARSEngine
 
 /// \brief ARS RNG engine returning 32-bits integers with default blocks and

@@ -5,10 +5,8 @@
 #include <wmmintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType) \
-    VSMC_STATIC_ASSERT(                                                      \
-            (cxx11::is_same<ResultType, uint32_t>::value ||                  \
-             cxx11::is_same<ResultType, uint64_t>::value),                   \
-            USE_AESNIEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
+    VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),              \
+            USE_AESNIEngine_WITH_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI \
     VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType);
@@ -72,6 +70,7 @@ class AESNIEngine
     public :
 
     typedef ResultType result_type;
+    typedef StaticVector<ResultType, buffer_size_> buffer_type;
     typedef StaticVector<ResultType, K_> ctr_type;
     typedef StaticVector<ResultType, K_> key_type;
     typedef StaticVector<__m128i, R + 1> key_seq_type;
@@ -89,6 +88,12 @@ class AESNIEngine
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(seq);
+    }
+
+    AESNIEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
+    {
+        counter::set(ctr_, c);
+        key_seq_init();
     }
 
     void seed (result_type s)
@@ -128,13 +133,41 @@ class AESNIEngine
         remain_ = 0;
     }
 
+    /// \brief Generate a buffer of random bits given the counter and key
+    ///
+    /// \details
+    /// This is much slower than calling `operator()` to generate the same
+    /// amount of bits, since each call to this function requires the key to be
+    /// initialized.
+    static buffer_type generate (const ctr_type &c, const key_type &k)
+    {
+        AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> eng(c, k);
+        eng.generate();
+
+        return eng.buffer_;
+    }
+
+    /// \brief Generate a buffer of random bits given the counter and using the
+    /// current key
+    ///
+    /// \details
+    /// This is (hopefully not much) slower than calling `operator()` to
+    /// generate the same amount of bits, since the state of the engine has to
+    /// be saved.
+    buffer_type generate (const ctr_type &c) const
+    {
+        AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> eng(*this);
+        eng.ctr(c);
+        eng.generate();
+
+        return eng.buffer_;
+    }
+
     result_type operator() ()
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
-            pack();
-            generate<1>(cxx11::integral_constant<bool, 1 < R>());
-            unpack();
+            generate();
             remain_ = buffer_size_;
         }
         --remain_;
@@ -171,8 +204,8 @@ class AESNIEngine
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     friend inline bool operator== (
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng1,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng2)
+            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng1,
+            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng2)
     {
         if (eng1.ctr_ != eng2.ctr_)
             return false;
@@ -188,14 +221,14 @@ class AESNIEngine
     }
 
     friend inline bool operator!= (
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng1,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng2)
+            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng1,
+            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng)
+            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng)
     {
         if (os) os << eng.ctr_ << ' ';
         if (os) os << eng.buffer_ << ' ';
@@ -216,7 +249,7 @@ class AESNIEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            AESNIEngine<ResultType, KeySeq, R, Blocks> &eng)
+            AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng)
     {
         AESNIEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
@@ -235,7 +268,7 @@ class AESNIEngine
     private :
 
     StaticVector<ctr_type, Blocks> ctr_;
-    StaticVector<ResultType, buffer_size_> buffer_;
+    buffer_type buffer_;
     key_type key_;
     StaticVector<__m128i, Blocks> pac_;
     key_seq_type key_seq_;
@@ -284,6 +317,13 @@ class AESNIEngine
     {
         m128i_unpack<B * K_>(pac_[Position<B>()], buffer_);
         unpack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    void generate ()
+    {
+        pack();
+        generate<1>(cxx11::integral_constant<bool, 1 < R>());
+        unpack();
     }
 
     template <std::size_t>

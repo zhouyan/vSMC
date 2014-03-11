@@ -279,6 +279,7 @@ class PhiloxEngine
     public :
 
     typedef ResultType result_type;
+    typedef StaticVector<ResultType, buffer_size_> buffer_type;
     typedef StaticVector<ResultType, K> ctr_type;
     typedef StaticVector<ResultType, K / 2> key_type;
 
@@ -296,6 +297,9 @@ class PhiloxEngine
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(seq);
     }
+
+    PhiloxEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
+    {counter::set(ctr_, c);}
 
     void seed (result_type s)
     {
@@ -331,13 +335,41 @@ class PhiloxEngine
         remain_ = 0;
     }
 
+    /// \brief Generate a buffer of random bits given the counter and key
+    ///
+    /// \details
+    /// This is much slower than calling `operator()` to generate the same
+    /// amount of bits, since each call to this function requires the key to be
+    /// initialized.
+    static buffer_type generate (const ctr_type &c, const key_type &k)
+    {
+        PhiloxEngine<ResultType, K, R> eng(c, k);
+        eng.generate();
+
+        return eng.buffer_;
+    }
+
+    /// \brief Generate a buffer of random bits given the counter and using the
+    /// current key
+    ///
+    /// \details
+    /// This is (hopefully not much) slower than calling `operator()` to
+    /// generate the same amount of bits, since the state of the engine has to
+    /// be saved.
+    buffer_type generate (const ctr_type &c) const
+    {
+        PhiloxEngine<ResultType, K, R> eng(*this);
+        eng.ctr(c);
+        eng.generate();
+
+        return eng.buffer_;
+    }
+
     result_type operator() ()
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
-            buffer_ = ctr_;
-            par_ = key_;
-            generate<0>(cxx11::true_type());
+            generate();
             remain_ = buffer_size_;
         }
         --remain_;
@@ -423,9 +455,16 @@ class PhiloxEngine
 
     ctr_type ctr_;
     key_type key_;
-    StaticVector<ResultType, buffer_size_> buffer_;
+    buffer_type buffer_;
     key_type par_;
     std::size_t remain_;
+
+    void generate ()
+    {
+        buffer_ = ctr_;
+        par_ = key_;
+        generate<0>(cxx11::true_type());
+    }
 
     template <std::size_t> void generate (cxx11::false_type) {}
 

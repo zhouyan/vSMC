@@ -254,6 +254,7 @@ class ThreefryEngine
     public :
 
     typedef ResultType result_type;
+    typedef StaticVector<ResultType, buffer_size_> buffer_type;
     typedef StaticVector<ResultType, K> ctr_type;
     typedef StaticVector<ResultType, K> key_type;
 
@@ -270,6 +271,12 @@ class ThreefryEngine
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(seq);
+    }
+
+    ThreefryEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
+    {
+        counter::set(ctr_, c);
+        init_par();
     }
 
     void seed (result_type s)
@@ -309,12 +316,41 @@ class ThreefryEngine
         remain_ = 0;
     }
 
+    /// \brief Generate a buffer of random bits given the counter and key
+    ///
+    /// \details
+    /// This is much slower than calling `operator()` to generate the same
+    /// amount of bits, since each call to this function requires the key to be
+    /// initialized.
+    static buffer_type generate (const ctr_type &c, const key_type &k)
+    {
+        ThreefryEngine<ResultType, K, R> eng(c, k);
+        eng.generate();
+
+        return eng.buffer_;
+    }
+
+    /// \brief Generate a buffer of random bits given the counter and using the
+    /// current key
+    ///
+    /// \details
+    /// This is (hopefully not much) slower than calling `operator()` to
+    /// generate the same amount of bits, since the state of the engine has to
+    /// be saved.
+    buffer_type generate (const ctr_type &c) const
+    {
+        ThreefryEngine<ResultType, K, R> eng(*this);
+        eng.ctr(c);
+        eng.generate();
+
+        return eng.buffer_;
+    }
+
     result_type operator() ()
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
-            buffer_ = ctr_;
-            generate<0>(cxx11::true_type());
+            generate();
             remain_ = buffer_size_;
         }
         --remain_;
@@ -400,9 +436,15 @@ class ThreefryEngine
 
     ctr_type ctr_;
     key_type key_;
-    StaticVector<ResultType, buffer_size_> buffer_;
+    buffer_type buffer_;
     StaticVector<ResultType, K + 1> par_;
     std::size_t remain_;
+
+    void generate ()
+    {
+        buffer_ = ctr_;
+        generate<0>(cxx11::true_type());
+    }
 
     void init_par ()
     {
