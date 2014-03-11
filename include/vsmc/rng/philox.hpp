@@ -480,19 +480,19 @@ class PhiloxEngine
     }
 }; // class PhiloxEngine
 
-/// \brief Philox RNG engine re-implemented
+/// \brief Philox2x32 RNG engine re-implemented
 /// \ingroup R123RNG
 typedef PhiloxEngine<uint32_t, 2> Philox2x32;
 
-/// \brief Philox RNG engine re-implemented
+/// \brief Philox4x32 RNG engine re-implemented
 /// \ingroup R123RNG
 typedef PhiloxEngine<uint32_t, 4> Philox4x32;
 
-/// \brief Philox RNG engine re-implemented
+/// \brief Philox2x64 RNG engine re-implemented
 /// \ingroup R123RNG
 typedef PhiloxEngine<uint64_t, 2> Philox2x64;
 
-/// \brief Philox RNG engine re-implemented
+/// \brief Philox4x64 RNG engine re-implemented
 /// \ingroup R123RNG
 typedef PhiloxEngine<uint64_t, 4> Philox4x64;
 

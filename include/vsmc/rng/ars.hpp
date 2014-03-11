@@ -82,7 +82,7 @@ class ARSKeySeq
     }
 }; // class ARSKeySeq
 
-/// \brief ARS RNG engine reimplemented
+/// \brief ARS RNG engine
 /// \ingroup AESNIRNG
 ///
 /// \details
@@ -93,7 +93,7 @@ class ARSKeySeq
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
-/// \sa ARSKeySeq.
+/// \sa ARSKeySeq
 template <typename ResultType,
          std::size_t R = VSMC_RNG_ARS_ROUNDS,
          std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
@@ -114,12 +114,12 @@ class ARSEngine : public AESNIEngine<ResultType, ARSKeySeq, R, Blocks>
             const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
 }; // class ARSEngine
 
-/// \brief ARS RNG engine returning 32-bits integers with default blocks and
+/// \brief ARS RNG engine with 32-bits integers output, default blocks and
 /// default rounds
 /// \ingroup AESNIRNG
 typedef ARSEngine<uint32_t> ARS_32;
 
-/// \brief ARS RNG engine returning 64-bits integers with default blocks and
+/// \brief ARS RNG engine with 64-bits integers output, default blocks and
 /// default rounds
 /// \ingroup AESNIRNG
 typedef ARSEngine<uint64_t> ARS_64;

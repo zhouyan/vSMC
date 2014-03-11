@@ -466,19 +466,19 @@ class ThreefryEngine
     }
 }; // class ThreefryEngine
 
-/// \brief Threefry RNG engine re-implemented
+/// \brief Threefry2x32 RNG engine reimplemented
 /// \ingroup R123RNG
 typedef ThreefryEngine<uint32_t, 2> Threefry2x32;
 
-/// \brief Threefry RNG engine re-implemented
+/// \brief Threefry4x32 RNG engine reimplemented
 /// \ingroup R123RNG
 typedef ThreefryEngine<uint32_t, 4> Threefry4x32;
 
-/// \brief Threefry RNG engine re-implemented
+/// \brief Threefry2x64 RNG engine reimplemented
 /// \ingroup R123RNG
 typedef ThreefryEngine<uint64_t, 2> Threefry2x64;
 
-/// \brief Threefry RNG engine re-implemented
+/// \brief Threefry4x64 RNG engine reimplemented
 /// \ingroup R123RNG
 typedef ThreefryEngine<uint64_t, 4> Threefry4x64;
 
