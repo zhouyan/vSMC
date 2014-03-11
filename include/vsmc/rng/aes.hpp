@@ -52,11 +52,12 @@ class AES128KeySeq
 {
     public :
 
+    typedef StaticVector<uint64_t, 2> key_type;
+
     AES128KeySeq () : tmp0_(), tmp1_(), tmp2_() {}
 
-    template <typename T, std::size_t K, typename KeyTraits,
-             std::size_t Rp1, typename Traits>
-    void generate (const StaticVector<T, K, KeyTraits> &key,
+    template <std::size_t Rp1, typename Traits>
+    void generate (const key_type &key,
             StaticVector<__m128i, Rp1, Traits> &key_seq)
     {
         m128i_pack<0>(key, tmp0_);

@@ -48,14 +48,15 @@ class ARSKeySeq
 {
     public :
 
+    typedef StaticVector<uint64_t, 2> key_type;
+
     ARSKeySeq () : weyl_(_mm_set_epi64x(
                 static_cast<int64_t>(traits::ARSWeylConstantTrait<0>::value),
                 static_cast<int64_t>(traits::ARSWeylConstantTrait<1>::value)))
     {}
 
-    template <typename T, std::size_t K, typename KeyTraits,
-             std::size_t Rp1, typename Traits>
-    void generate (const StaticVector<T, K, KeyTraits> &key,
+    template <std::size_t Rp1, typename Traits>
+    void generate (const key_type &key,
             StaticVector<__m128i, Rp1, Traits> &key_seq)
     {
         m128i_pack<0>(key, key_seq.front());

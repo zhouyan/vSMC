@@ -38,26 +38,24 @@ namespace vsmc {
 /// Using other key schedule can lead to other rng. The `KeySeq` template
 /// parameter only need to has a memeber function of the form,
 /// ~~~{.cpp}
-/// void generate (const key_type &key, ARSEngine::key_seq_type &key_seq)
+/// void generate (const key_type &key, AESNIEngine::key_seq_type &key_seq)
 /// ~~~
 /// which is similar to that of C++11 `seed_seq`. Given a unique key, a
-/// sequence of keys shall be generated. The default, `ARSKeySeq` use a Weyl
-/// sequence.
+/// sequence of round keys shall be generated and filled into `key_seq`. The
+/// `KeySeq` type also needs to have a member type `key_type`
 ///
-/// The third template argument, `Blocks` specify how many blocks shall be
+/// The third template argument, `R` is the rounds of the algorithm. AES
+/// requires 10 rounds when using a 128-bits key. With reduced strength, any
+/// number of round below 10 can be used.
+///
+/// The fourth template argument, `Blocks` specify how many blocks shall be
 /// used. The AES-NI instructions have noticeable latency but can be started
 /// every two cycles. By allowing generating multiple blocks at once, and
 /// interleaving the instructions, the throughput can be increased at the cost
 /// of space. The default blocks, as in `ARS4x32` is defined by the macro
 /// `VSMC_RNG_ARS_BLOCKS`
-///
-/// The fourth template argument, `R` is the rounds of the algorithm. AES
-/// requires 10 rounds when using a 128-bits key. With reduced strength, any
-/// number of round below 10 can be used.
 template <typename ResultType, typename KeySeq,
-         std::size_t R, std::size_t Blocks, typename KeyType =
-             StaticVector<ResultType, sizeof(__m128i) / sizeof(ResultType)>
-         >
+         std::size_t R, std::size_t Blocks>
 class AESNIEngine
 {
     static VSMC_CONSTEXPR const std::size_t K_ =
@@ -72,7 +70,7 @@ class AESNIEngine
     typedef ResultType result_type;
     typedef StaticVector<ResultType, buffer_size_> buffer_type;
     typedef StaticVector<ResultType, K_> ctr_type;
-    typedef StaticVector<ResultType, K_> key_type;
+    typedef typename KeySeq::key_type key_type;
     typedef StaticVector<__m128i, R + 1> key_seq_type;
 
     explicit AESNIEngine (result_type s = 0) : remain_(0)
@@ -92,6 +90,7 @@ class AESNIEngine
 
     AESNIEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
     {
+        VSMC_STATIC_ASSERT_RNG_AES_NI;
         counter::set(ctr_, c);
         key_seq_init();
     }
@@ -141,7 +140,7 @@ class AESNIEngine
     /// initialized.
     static buffer_type generate (const ctr_type &c, const key_type &k)
     {
-        AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> eng(c, k);
+        AESNIEngine<ResultType, KeySeq, R, Blocks> eng(c, k);
         eng.generate();
 
         return eng.buffer_;
@@ -156,7 +155,7 @@ class AESNIEngine
     /// be saved.
     buffer_type generate (const ctr_type &c) const
     {
-        AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> eng(*this);
+        AESNIEngine<ResultType, KeySeq, R, Blocks> eng(*this);
         eng.ctr(c);
         eng.generate();
 
@@ -204,8 +203,8 @@ class AESNIEngine
     static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
 
     friend inline bool operator== (
-            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng1,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng2)
+            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng1,
+            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng2)
     {
         if (eng1.ctr_ != eng2.ctr_)
             return false;
@@ -221,14 +220,14 @@ class AESNIEngine
     }
 
     friend inline bool operator!= (
-            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng1,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng2)
+            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng1,
+            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng2)
     {return !(eng1 == eng2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng)
+            const AESNIEngine<ResultType, KeySeq, R, Blocks> &eng)
     {
         if (os) os << eng.ctr_ << ' ';
         if (os) os << eng.buffer_ << ' ';
@@ -249,7 +248,7 @@ class AESNIEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            AESNIEngine<ResultType, KeySeq, R, Blocks, KeyType> &eng)
+            AESNIEngine<ResultType, KeySeq, R, Blocks> &eng)
     {
         AESNIEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
