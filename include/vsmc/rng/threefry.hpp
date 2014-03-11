@@ -103,23 +103,15 @@ template <typename ResultType, unsigned N> struct ThreefryRotateImpl;
 template <unsigned N>
 struct ThreefryRotateImpl<uint32_t, N>
 {
-    static uint32_t rotate (uint32_t x) {return (x << left_ | x >> right_);}
-
-    private :
-
-    static VSMC_CONSTEXPR const unsigned left_ = N & 31;
-    static VSMC_CONSTEXPR const unsigned right_ = (32 - N) & 31;
+    static uint32_t rotate (uint32_t x)
+    {return (x << (N & 31) | x >> ((32 - N) & 31));}
 }; // struct ThreefryRotateImpl
 
 template <unsigned N>
 struct ThreefryRotateImpl<uint64_t, N>
 {
-    static uint64_t rotate (uint64_t x) {return (x << left_ | x >> right_);}
-
-    private :
-
-    static VSMC_CONSTEXPR const unsigned left_ = N & 63;
-    static VSMC_CONSTEXPR const unsigned right_ = (64 - N) & 63;
+    static uint64_t rotate (uint64_t x)
+    {return (x << (N & 63) | x >> ((64 - N) & 63));}
 }; // struct ThreefryRotateImpl
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
@@ -273,19 +265,20 @@ class ThreefryEngine
         seed(seq);
     }
 
-    ThreefryEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
+    ThreefryEngine (const ctr_type &c, const key_type &k) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         counter::set(ctr_, c);
-        init_par();
+        init_par(k);
     }
 
     void seed (result_type s)
     {
         counter::reset(ctr_);
-        key_.fill(0);
-        key_.front() = s;
-        init_par();
+        key_type k;
+        k.fill(0);
+        k.front() = s;
+        init_par(k);
         remain_ = 0;
     }
 
@@ -295,14 +288,15 @@ class ThreefryEngine
             VSMC_NULLPTR)
     {
         counter::reset(ctr_);
-        seq.generate(key_.begin(), key_.end());
-        init_par();
+        key_type k;
+        seq.generate(k.begin(), k.end());
+        init_par(k);
         remain_ = 0;
     }
 
     const ctr_type &ctr () const {return counter::get(ctr_);}
 
-    const key_type &key () const {return key_;}
+    const key_type &key () const {return par_.template slice<0, K>();}
 
     void ctr (const ctr_type &c)
     {
@@ -312,17 +306,11 @@ class ThreefryEngine
 
     void key (const key_type &k)
     {
-        key_ = k;
-        init_par();
+        init_par(k);
         remain_ = 0;
     }
 
     /// \brief Generate a buffer of random bits given the counter and key
-    ///
-    /// \details
-    /// This is much slower than calling `operator()` to generate the same
-    /// amount of bits, since each call to this function requires the key to be
-    /// initialized.
     static buffer_type generate (const ctr_type &c, const key_type &k)
     {
         ThreefryEngine<ResultType, K, Rounds> eng(c, k);
@@ -333,11 +321,6 @@ class ThreefryEngine
 
     /// \brief Generate a buffer of random bits given the counter and using the
     /// current key
-    ///
-    /// \details
-    /// This is (hopefully not much) slower than calling `operator()` to
-    /// generate the same amount of bits, since the state of the engine has to
-    /// be saved.
     buffer_type generate (const ctr_type &c) const
     {
         ThreefryEngine<ResultType, K, Rounds> eng(*this);
@@ -394,7 +377,7 @@ class ThreefryEngine
         return
             eng1.ctr_ == eng2.ctr_ &&
             eng1.buffer_ == eng2.buffer_ &&
-            eng1.key_ == eng2.key_ &&
+            eng1.par_ == eng2.par_ &&
             eng1.remain_ == eng2.remain_;
     }
 
@@ -409,7 +392,6 @@ class ThreefryEngine
             const ThreefryEngine<ResultType, K, Rounds> &eng)
     {
         if (os) os << eng.ctr_;    if (os) os << ' ';
-        if (os) os << eng.key_;    if (os) os << ' ';
         if (os) os << eng.buffer_; if (os) os << ' ';
         if (os) os << eng.par_;    if (os) os << ' ';
         if (os) os << eng.remain_;
@@ -424,7 +406,6 @@ class ThreefryEngine
     {
         ThreefryEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
-        if (is) is >> std::ws >> eng_tmp.key_;
         if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.par_;
         if (is) is >> std::ws >> eng_tmp.remain_;
@@ -436,9 +417,8 @@ class ThreefryEngine
     private :
 
     ctr_type ctr_;
-    key_type key_;
-    buffer_type buffer_;
     StaticVector<ResultType, K + 1> par_;
+    buffer_type buffer_;
     std::size_t remain_;
 
     void generate ()
@@ -447,12 +427,21 @@ class ThreefryEngine
         generate<0>(cxx11::true_type());
     }
 
-    void init_par ()
+    void init_par (const key_type &key)
     {
-        par_ = key_.template resize<K + 1>();
         par_.back() = internal::ThreefryPar<ResultType>::value;
-        for (std::size_t i = 0; i != K; ++i)
-            par_.back() ^= par_[i];
+        par_xor<0>(key, cxx11::integral_constant<bool, 0 < K>());
+    }
+
+    template <std::size_t>
+    void par_xor (const key_type &, cxx11::false_type) {}
+
+    template <std::size_t N>
+    void par_xor (const key_type &key, cxx11::true_type)
+    {
+        par_[Position<N>()] = key[Position<N>()];
+        par_.back() ^= key[Position<N>()];
+        par_xor<N + 1>(key, cxx11::integral_constant<bool, N + 1 < K>());
     }
 
     template <std::size_t> void generate (cxx11::false_type) {}
