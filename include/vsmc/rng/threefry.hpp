@@ -21,6 +21,12 @@
     template <> struct ThreefryRotateConstant < T, K, N, I > :               \
         public cxx11::integral_constant< unsigned, val > {};
 
+/// \brief ThreefryEngine default blocks
+/// \ingroup Config
+#ifndef VSMC_RNG_THREEFRY_BLOCKS
+#define VSMC_RNG_THREEFRY_BLOCKS 1
+#endif
+
 /// \brief ThreefryEngine default rounds
 /// \ingroup Config
 #ifndef VSMC_RNG_THREEFRY_ROUNDS
@@ -244,6 +250,7 @@ struct ThreefryInsert<ResultType, 4, N, true>
 /// increment the counter slightly differently, but it still cover the same
 /// range and has the same period as the original.
 template <typename ResultType, std::size_t K,
+         std::size_t Blocks = VSMC_RNG_THREEFRY_BLOCKS,
          std::size_t R = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryEngine
 {
@@ -311,31 +318,35 @@ class ThreefryEngine
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
-            res_ = ctr_;
+            pac_ = ctr_;
             generate<0>(cxx11::true_type());
-            remain_ = K;
+            counter::result(pac_, res_);
+            remain_ = K * Blocks;
         }
+        --remain_;
 
-        return res_[--remain_];
+        return res_[remain_];
     }
 
     void discard (std::size_t nskip)
     {
-        if (nskip == 0)
-            return;
-
-        --nskip;
-        counter::increment(ctr_, nskip);
-        remain_ = 0;
-        operator()();
-        nskip = nskip % K;
-        if (remain_ >= nskip) {
+        if (nskip <= remain_) {
             remain_ -= nskip;
             return;
         }
 
         nskip -= remain_;
-        remain_ = K - nskip;
+        if (nskip <= K * Blocks) {
+            remain_ = 0;
+            operator()();
+            remain_ = K * Blocks - nskip;
+            return;
+        }
+
+        remain_ = 0;
+        counter::increment(ctr_, nskip / (K * Blocks));
+        operator()();
+        remain_ = K * Blocks - nskip % (K * Blocks);
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -367,6 +378,7 @@ class ThreefryEngine
             const ThreefryEngine<ResultType, K, R> &eng)
     {
         if (os) os << eng.ctr_; if (os) os << ' ';
+        if (os) os << eng.pac_; if (os) os << ' ';
         if (os) os << eng.res_; if (os) os << ' ';
         if (os) os << eng.key_; if (os) os << ' ';
         if (os) os << eng.par_; if (os) os << ' ';
@@ -382,6 +394,7 @@ class ThreefryEngine
     {
         ThreefryEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
+        if (is) is >> std::ws >> eng_tmp.pac_;
         if (is) is >> std::ws >> eng_tmp.res_;
         if (is) is >> std::ws >> eng_tmp.key_;
         if (is) is >> std::ws >> eng_tmp.par_;
@@ -393,9 +406,10 @@ class ThreefryEngine
 
     private :
 
-    ctr_type ctr_;
-    ctr_type res_;
+    StaticVector<ctr_type, Blocks> ctr_;
+    StaticVector<ResultType, K * Blocks> res_;
     key_type key_;
+    StaticVector<ctr_type, Blocks> pac_;
     StaticVector<ResultType, K + 1> par_;
     std::size_t remain_;
 
@@ -412,9 +426,33 @@ class ThreefryEngine
     template <std::size_t N>
     void generate (cxx11::true_type)
     {
-        internal::ThreefryRotate<ResultType, K, N>::rotate(res_);
-        internal::ThreefryInsert<ResultType, K, N>::insert(res_, par_);
+        generate_rotate<0, N>(cxx11::integral_constant<bool, 0 < Blocks>());
+        generate_insert<0, N>(cxx11::integral_constant<bool, 0 < Blocks>());
         generate<N + 1>(cxx11::integral_constant<bool, N < R>());
+    }
+
+    template <std::size_t, std::size_t>
+    void generate_rotate (cxx11::false_type) {}
+
+    template <std::size_t B, std::size_t N>
+    void generate_rotate (cxx11::true_type)
+    {
+        internal::ThreefryRotate<ResultType, K, N>::rotate(
+                pac_[Position<B>()]);
+        generate_rotate<B + 1, N>(
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    template <std::size_t, std::size_t>
+    void generate_insert (cxx11::false_type) {}
+
+    template <std::size_t B, std::size_t N>
+    void generate_insert (cxx11::true_type)
+    {
+        internal::ThreefryInsert<ResultType, K, N>::insert(
+                pac_[Position<B>()], par_);
+        generate_insert<B + 1, N>(
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class ThreefryEngine
 

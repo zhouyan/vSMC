@@ -29,6 +29,12 @@
     template <> struct PhiloxRoundConstant < T, K, I > :                     \
         public cxx11::integral_constant< T, val > {};
 
+/// \brief PhiloxEngine default blocks
+/// \ingroup Config
+#ifndef VSMC_RNG_PHILOX_BLOCKS
+#define VSMC_RNG_PHILOX_BLOCKS 1
+#endif
+
 /// \brief PhiloxEngine default rounds
 /// \ingroup Config
 #ifndef VSMC_RNG_PHILOX_ROUNDS
@@ -269,6 +275,7 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// rounds can be set through traits, `vsmc::traits::PhiloxBumpkConstantTrait`
 /// and `vsmc::traits::PhiloxRoundConstantTrait`.
 template <typename ResultType, std::size_t K,
+         std::size_t Blocks = VSMC_RNG_PHILOX_BLOCKS,
          std::size_t R = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxEngine
 {
@@ -333,32 +340,36 @@ class PhiloxEngine
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
-            res_ = ctr_;
+            pac_ = ctr_;
             par_ = key_;
             generate<0>(cxx11::true_type());
-            remain_ = K;
+            counter::result(pac_, res_);
+            remain_ = K * Blocks;
         }
+        --remain_;
 
-        return res_[--remain_];
+        return res_[remain_];
     }
 
     void discard (std::size_t nskip)
     {
-        if (nskip == 0)
-            return;
-
-        --nskip;
-        counter::increment(ctr_, nskip);
-        remain_ = 0;
-        operator()();
-        nskip = nskip % K;
-        if (remain_ >= nskip) {
+        if (nskip <= remain_) {
             remain_ -= nskip;
             return;
         }
 
         nskip -= remain_;
-        remain_ = K - nskip;
+        if (nskip <= K * Blocks) {
+            remain_ = 0;
+            operator()();
+            remain_ = K * Blocks - nskip;
+            return;
+        }
+
+        remain_ = 0;
+        counter::increment(ctr_, nskip / (K * Blocks));
+        operator()();
+        remain_ = K * Blocks - nskip % (K * Blocks);
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -390,6 +401,7 @@ class PhiloxEngine
             const PhiloxEngine<ResultType, K, R> &eng)
     {
         if (os) os << eng.ctr_; if (os) os << ' ';
+        if (os) os << eng.pac_; if (os) os << ' ';
         if (os) os << eng.res_; if (os) os << ' ';
         if (os) os << eng.key_; if (os) os << ' ';
         if (os) os << eng.par_; if (os) os << ' ';
@@ -405,6 +417,7 @@ class PhiloxEngine
     {
         PhiloxEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
+        if (is) is >> std::ws >> eng_tmp.pac_;
         if (is) is >> std::ws >> eng_tmp.res_;
         if (is) is >> std::ws >> eng_tmp.key_;
         if (is) is >> std::ws >> eng_tmp.par_;
@@ -416,9 +429,10 @@ class PhiloxEngine
 
     private :
 
-    ctr_type ctr_;
-    ctr_type res_;
+    StaticVector<ctr_type, Blocks> ctr_;
+    StaticVector<ResultType, K * Blocks> res_;
     key_type key_;
+    StaticVector<ctr_type, Blocks> pac_;
     key_type par_;
     std::size_t remain_;
 
@@ -428,8 +442,20 @@ class PhiloxEngine
     void generate (cxx11::true_type)
     {
         internal::PhiloxBumpk<ResultType, K, N>::bumpk(par_);
-        internal::PhiloxRound<ResultType, K, N>::round(res_, par_);
+        generate_round<0, N>(cxx11::integral_constant<bool, 0 < Blocks>());
         generate<N + 1>(cxx11::integral_constant<bool, N < R>());
+    }
+
+    template <std::size_t, std::size_t>
+    void generate_round (cxx11::false_type) {}
+
+    template <std::size_t B, std::size_t N>
+    void generate_round (cxx11::true_type)
+    {
+        internal::PhiloxRound<ResultType, K, N>::round(
+                pac_[Position<B>()], par_);
+        generate_round<B + 1, N>(
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class PhiloxEngine
 

@@ -79,7 +79,7 @@ class ARSKeySeq
         __m128i weyl = _mm_set_epi64x(
                 static_cast<int64_t>(traits::ARSWeylConstantTrait<0>::value),
                 static_cast<int64_t>(traits::ARSWeylConstantTrait<1>::value));
-        generate<1>(weyl, key_seq, cxx11::true_type());
+        generate<1>(weyl, key_seq, cxx11::integral_constant<bool, 0 < R>());
     }
 
     private :
@@ -218,7 +218,7 @@ class ARSEngine
         if (remain_ == 0) {
             counter::increment(ctr_);
             pack();
-            generate<1>(cxx11::true_type());
+            generate<1>(cxx11::integral_constant<bool, 1 < R>());
             unpack();
             remain_ = K_ * Blocks;
         }
@@ -317,21 +317,13 @@ class ARSEngine
         return is;
     }
 
-    protected :
-
-    StaticVector<ctr_type, Blocks> &ctr_seq () {return ctr_;}
-    const StaticVector<ctr_type, Blocks> &ctr_seq () const {return ctr_;}
-
-    StaticVector<ctr_type, K_ * Blocks> &res () {return res_;}
-    const StaticVector<ctr_type, K_ * Blocks> &res () const {return res_;}
-
     private :
 
     StaticVector<ctr_type, Blocks> ctr_;
     StaticVector<ResultType, K_ * Blocks> res_;
     key_type key_;
-    key_seq_type key_seq_;
     StaticVector<__m128i, Blocks> pac_;
+    key_seq_type key_seq_;
     std::size_t remain_;
 
     void key_seq_init ()
@@ -371,7 +363,7 @@ class ARSEngine
 
     template <std::size_t> void unpack (cxx11::false_type) {}
 
-    void unpack () {unpack<0>(cxx11::true_type());}
+    void unpack () {unpack<0>(cxx11::integral_constant<bool, 0 < Blocks>());}
 
     template <std::size_t B>
     void unpack (cxx11::true_type)
@@ -381,12 +373,13 @@ class ARSEngine
     }
 
     template <std::size_t>
-    void generate (cxx11::false_type) {generate_last<0>(cxx11::true_type());}
+    void generate (cxx11::false_type)
+    {generate_last<0>(cxx11::integral_constant<bool, 0 < Blocks>());}
 
     template <std::size_t N>
     void generate (cxx11::true_type)
     {
-        generate_step<0, N>(cxx11::true_type());
+        generate_step<0, N>(cxx11::integral_constant<bool, 0 < Blocks>());
         generate<N + 1>(cxx11::integral_constant<bool, N  + 1 < R>());
     }
 
