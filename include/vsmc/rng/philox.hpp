@@ -272,6 +272,8 @@ template <typename ResultType, std::size_t K,
          std::size_t R = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxEngine
 {
+    static VSMC_CONSTEXPR const std::size_t buffer_size_ = K;
+
     typedef internal::RngCounter<ResultType> counter;
 
     public :
@@ -333,14 +335,14 @@ class PhiloxEngine
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
-            res_ = ctr_;
+            buffer_ = ctr_;
             par_ = key_;
             generate<0>(cxx11::true_type());
-            remain_ = K;
+            remain_ = buffer_size_;
         }
         --remain_;
 
-        return res_[remain_];
+        return buffer_[remain_];
     }
 
     void discard (std::size_t nskip)
@@ -351,17 +353,17 @@ class PhiloxEngine
         }
 
         nskip -= remain_;
-        if (nskip <= K) {
+        if (nskip <= buffer_size_) {
             remain_ = 0;
             operator()();
-            remain_ = K - nskip;
+            remain_ = buffer_size_ - nskip;
             return;
         }
 
         remain_ = 0;
-        counter::increment(ctr_, nskip / K);
+        counter::increment(ctr_, nskip / buffer_size_);
         operator()();
-        remain_ = K - nskip % K;
+        remain_ = buffer_size_ - nskip % buffer_size_;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -377,7 +379,7 @@ class PhiloxEngine
     {
         return
             eng1.ctr_ == eng2.ctr_ &&
-            eng1.res_ == eng2.res_ &&
+            eng1.buffer_ == eng2.buffer_ &&
             eng1.key_ == eng2.key_ &&
             eng1.remain_ == eng2.remain_;
     }
@@ -392,10 +394,10 @@ class PhiloxEngine
             std::basic_ostream<CharT, Traits> &os,
             const PhiloxEngine<ResultType, K, R> &eng)
     {
-        if (os) os << eng.ctr_; if (os) os << ' ';
-        if (os) os << eng.key_; if (os) os << ' ';
-        if (os) os << eng.res_; if (os) os << ' ';
-        if (os) os << eng.par_; if (os) os << ' ';
+        if (os) os << eng.ctr_;    if (os) os << ' ';
+        if (os) os << eng.key_;    if (os) os << ' ';
+        if (os) os << eng.buffer_; if (os) os << ' ';
+        if (os) os << eng.par_;    if (os) os << ' ';
         if (os) os << eng.remain_;
 
         return os;
@@ -409,7 +411,7 @@ class PhiloxEngine
         PhiloxEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.key_;
-        if (is) is >> std::ws >> eng_tmp.res_;
+        if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.par_;
         if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
@@ -421,7 +423,7 @@ class PhiloxEngine
 
     ctr_type ctr_;
     key_type key_;
-    ctr_type res_;
+    StaticVector<ResultType, buffer_size_> buffer_;
     key_type par_;
     std::size_t remain_;
 
@@ -431,7 +433,7 @@ class PhiloxEngine
     void generate (cxx11::true_type)
     {
         internal::PhiloxBumpk<ResultType, K, N>::bumpk(par_);
-        internal::PhiloxRound<ResultType, K, N>::round(res_, par_);
+        internal::PhiloxRound<ResultType, K, N>::round(buffer_, par_);
         generate<N + 1>(cxx11::integral_constant<bool, N < R>());
     }
 }; // class PhiloxEngine

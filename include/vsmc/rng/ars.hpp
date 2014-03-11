@@ -152,6 +152,8 @@ class ARSEngine
     static VSMC_CONSTEXPR const std::size_t K_ =
         sizeof(__m128i) / sizeof(ResultType);
 
+    static VSMC_CONSTEXPR const std::size_t buffer_size_ = K_ * Blocks;
+
     typedef internal::RngCounter<ResultType> counter;
 
     public :
@@ -220,11 +222,11 @@ class ARSEngine
             pack();
             generate<1>(cxx11::integral_constant<bool, 1 < R>());
             unpack();
-            remain_ = K_ * Blocks;
+            remain_ = buffer_size_;
         }
         --remain_;
 
-        return res_[remain_];
+        return buffer_[remain_];
     }
 
     void discard (std::size_t nskip)
@@ -235,17 +237,17 @@ class ARSEngine
         }
 
         nskip -= remain_;
-        if (nskip <= K_ * Blocks) {
+        if (nskip <= buffer_size_) {
             remain_ = 0;
             operator()();
-            remain_ = K_ * Blocks - nskip;
+            remain_ = buffer_size_ - nskip;
             return;
         }
 
         remain_ = 0;
-        counter::increment(ctr_, nskip / (K_ * Blocks));
+        counter::increment(ctr_, nskip / buffer_size_);
         operator()();
-        remain_ = K_ * Blocks - nskip % (K_ * Blocks);
+        remain_ = buffer_size_ - nskip % buffer_size_;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -262,7 +264,7 @@ class ARSEngine
         if (eng1.ctr_ != eng2.ctr_)
             return false;
 
-        if (eng1.res_ != eng2.res_)
+        if (eng1.buffer_ != eng2.buffer_)
             return false;
 
         for (std::size_t i = 0; i != key_type::size(); ++i)
@@ -283,7 +285,7 @@ class ARSEngine
             const ARSEngine<ResultType, Blocks, R, KeySeq> &eng)
     {
         if (os) os << eng.ctr_ << ' ';
-        if (os) os << eng.res_ << ' ';
+        if (os) os << eng.buffer_ << ' ';
         if (os) os << eng.key_ << ' ';
         for (std::size_t i = 0; i != key_seq_type::size(); ++i) {
             m128i_output(os, eng.key_seq_[i]);
@@ -305,7 +307,7 @@ class ARSEngine
     {
         ARSEngine eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
-        if (is) is >> std::ws >> eng_tmp.res_;
+        if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.key_;
         for (std::size_t i = 0; i != key_seq_type::size(); ++i)
             m128i_input(is, eng_tmp.key_seq_[i]);
@@ -320,7 +322,7 @@ class ARSEngine
     private :
 
     StaticVector<ctr_type, Blocks> ctr_;
-    StaticVector<ResultType, K_ * Blocks> res_;
+    StaticVector<ResultType, buffer_size_> buffer_;
     key_type key_;
     StaticVector<__m128i, Blocks> pac_;
     key_seq_type key_seq_;
@@ -368,7 +370,7 @@ class ARSEngine
     template <std::size_t B>
     void unpack (cxx11::true_type)
     {
-        m128i_unpack<B * K_>(pac_[Position<B>()], res_);
+        m128i_unpack<B * K_>(pac_[Position<B>()], buffer_);
         unpack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
