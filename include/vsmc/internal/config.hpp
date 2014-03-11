@@ -45,60 +45,16 @@
 #define VSMC_RUNTIME_WARNING_AS_EXCEPTION 0
 #endif
 
-/// \brief Use Random123 for random number generating
+/// \brief Use AES-NI for random number generating
 /// \ingroup Config
+#ifndef VSMC_USE_AES_NI
+#define VSMC_USE_AES_NI 0
+#endif
+
+/// \brief Use Random123 for random number generating
+/// \ingroup ThirdParty
 #ifndef VSMC_USE_RANDOM123
 #define VSMC_USE_RANDOM123 0
-#endif
-
-/// \brief Default RNG type for resampling
-/// \ingroup Config
-#ifndef VSMC_DEFAULT_RESAMPLE_RNG_TYPE
-#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE ::vsmc::cxx11::mt19937
-#endif
-
-/// \brief Default RNG set type
-/// \ingroup Config
-#ifndef VSMC_DEFAULT_RNG_SET_TYPE
-#if VSMC_USE_RANDOM123
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    ::vsmc::RngSet< ::r123::Engine<r123::Philox2x64>, ::vsmc::Vector>
-#else
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    ::vsmc::RngSet< ::vsmc::Threefry2x64, ::vsmc::Vector>
-#endif
-#endif
-
-/// \brief Enable <vsmc/rng/u01.h> etc., double precision when used with vSMC
-#if defined(VSMC_FP_TYPE_IS_FLOAT) && VSMC_FP_TYPE_IS_FLOAT
-#define VSMC_FP_TYPE_IS_DOUBLE 0
-#else
-#define VSMC_FP_TYPE_IS_DOUBLE 1
-#endif
-
-/// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fail
-/// \ingroup Config
-#ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
-#define VSMC_HAS_NATIVE_TIME_LIBRARY 1
-#endif
-
-/// \brief The fallback StopWatch type
-/// \ingroup Config
-///
-/// \details
-/// The class defined by `VSMC_STOP_WATCH_TYPE` need to be defined before
-/// including the `<vsmc/utility/stop_watch.hpp>` header. It shall provide the
-/// same interface as internal::DummyStopWatch. This is only used when both
-/// `VSMC_HAS_CXX11LIB_CHRONO` and `VSMC_HAS_NATIVE_TIME_LIBRARY` are zero, in
-/// which case StopWatch is a typedef of this macro.
-#ifndef VSMC_STOP_WATCH_TYPE
-#define VSMC_STOP_WATCH_TYPE internal::DummyStopWatch
-#endif
-
-/// \brief Default type of Seed
-/// \ingroup Config
-#ifndef VSMC_SEED_TYPE
-#define VSMC_SEED_TYPE ::vsmc::SeedGenerator<NullType>
 #endif
 
 /// \brief Use MPI

@@ -7,6 +7,25 @@
     VSMC_RUNTIME_ASSERT((!(running_ || other.running_)),                     \
             ("CANNOT ADD TWO RUNNING **StopWatch**"))
 
+/// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fail
+/// \ingroup Config
+#ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
+#define VSMC_HAS_NATIVE_TIME_LIBRARY 1
+#endif
+
+/// \brief The fallback StopWatch type
+/// \ingroup Config
+///
+/// \details
+/// The class defined by `VSMC_STOP_WATCH_TYPE` need to be defined before
+/// including the `<vsmc/utility/stop_watch.hpp>` header. It shall provide the
+/// same interface as internal::DummyStopWatch. This is only used when both
+/// `VSMC_HAS_CXX11LIB_CHRONO` and `VSMC_HAS_NATIVE_TIME_LIBRARY` are zero, in
+/// which case StopWatch is a typedef of this macro.
+#ifndef VSMC_STOP_WATCH_TYPE
+#define VSMC_STOP_WATCH_TYPE internal::DummyStopWatch
+#endif
+
 namespace vsmc {
 
 namespace internal {

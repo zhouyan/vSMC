@@ -13,6 +13,12 @@
             ("**SeedGenerator::modulo** "                                    \
              "THE MAXIMUM OF THE INTERNAL SEED IS NO LARGER THAN 1"))
 
+/// \brief Default type of Seed
+/// \ingroup Config
+#ifndef VSMC_SEED_TYPE
+#define VSMC_SEED_TYPE ::vsmc::SeedGenerator<NullType>
+#endif
+
 namespace vsmc {
 
 /// \brief Seed generator

@@ -1,7 +1,6 @@
 #ifndef VSMC_CORE_PARTICLE_HPP
 #define VSMC_CORE_PARTICLE_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/weight_set.hpp>
 #include <vsmc/resample/basic.hpp>

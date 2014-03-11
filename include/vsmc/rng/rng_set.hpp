@@ -1,7 +1,6 @@
 #ifndef VSMC_RNG_RNG_SET_HPP
 #define VSMC_RNG_RNG_SET_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
 
 #if VSMC_USE_RANDOM123
@@ -9,6 +8,10 @@
 #pragma warning(push)
 #pragma warning(disable:4521)
 #endif // _MSC_VER
+#if VSMC_USE_AES_NI
+#include <Random123/aes.h>
+#include <Random123/ars.h>
+#endif // VSMC_USE_AES_NI
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 #include <Random123/conventional/Engine.hpp>
@@ -16,9 +19,35 @@
 #pragma warning(pop)
 #endif // _MSC_VER
 #else //  VSMC_USE_RANDOM123
+#if VSMC_USE_AES_NI
+#include <vsmc/rng/aes.h>
+#include <vsmc/rng/ars.h>
+#endif // VSMC_USE_AES_NI
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
 #endif // VSMC_USE_RANDOM123
+
+/// \brief Default RNG set type
+/// \ingroup Config
+#ifndef VSMC_DEFAULT_RNG_SET_TYPE
+#if VSMC_USE_RANDOM123
+#if VSMC_USE_AES_NI
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    ::vsmc::RngSet< ::r123::Engine<r123::ARS4x32_R<7> >, ::vsmc::Vector>
+#else
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    ::vsmc::RngSet< ::r123::Engine<r123::Philox2x64>, ::vsmc::Vector>
+#endif // VSMC_USE_AES_NI
+#else // VSMC_USE_RANDOM123
+#if VSMC_USE_AES_NI
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    ::vsmc::RngSet< ::vsmc::ARSEngine<uint32_t, 1, 7>, ::vsmc::Vector>
+#else // VSMC_USE_AES_NI
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    ::vsmc::RngSet< ::vsmc::Philox2x64, ::vsmc::Vector>
+#endif // VSMC_USE_AES_NI
+#endif // VSMC_USE_RANDOM123
+#endif // VSMC_DEFAULT_RNG_SET_TYPE
 
 namespace vsmc {
 

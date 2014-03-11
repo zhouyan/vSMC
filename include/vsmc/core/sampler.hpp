@@ -1,7 +1,6 @@
 #ifndef VSMC_CORE_SAMPLER_HPP
 #define VSMC_CORE_SAMPLER_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>

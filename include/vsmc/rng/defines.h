@@ -30,6 +30,14 @@
 #endif
 #endif // VSMC_STATIC_INLINE
 
+/// \brief Enable <vsmc/rng/u01.h> etc., double precision when used with vSMC
+/// \ingroup Config
+#if defined(VSMC_FP_TYPE_IS_FLOAT) && VSMC_FP_TYPE_IS_FLOAT
+#define VSMC_FP_TYPE_IS_DOUBLE 0
+#else
+#define VSMC_FP_TYPE_IS_DOUBLE 1
+#endif
+
 #if defined(VSMC_FP_TYPE_IS_FLOAT) && defined(VSMC_FP_TYPE_IS_DOUBLE)
 #if VSMC_FP_TYPE_IS_FLOAT && VSMC_FP_TYPE_IS_DOUBLE
 #error VSMC_FP_TYPE_IS_FLOAT and VSMC_FP_TYPE_IS_DOUBLE cannot both be non-zero

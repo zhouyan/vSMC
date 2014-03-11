@@ -1,7 +1,6 @@
 #ifndef VSMC_OPENCL_ADAPTER_HPP
 #define VSMC_OPENCL_ADAPTER_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/core/adapter.hpp>
 #include <vsmc/opencl/backend_cl.hpp>
 

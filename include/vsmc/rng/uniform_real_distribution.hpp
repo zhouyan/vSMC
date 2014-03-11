@@ -1,7 +1,7 @@
 #ifndef VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
 #define VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/rng/common.hpp>
 #include <vsmc/rng/u01.h>
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min) \
