@@ -229,12 +229,14 @@ class AES256KeySeq : public AES128KeySeq
 /// \sa AES128KeySeq
 /// \sa AESNIEngine
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AES128Engine : public AESNIEngine<ResultType, AES128KeySeq, 10, Blocks>
+class AES128Engine :
+    public AESNIEngine<ResultType, AES128KeySeq, true, 10, Blocks>
 {
 
     public :
 
-    typedef AESNIEngine<ResultType, AES128KeySeq, 10, Blocks> base_eng_type;
+    typedef AESNIEngine<ResultType, AES128KeySeq, true, 10, Blocks>
+        base_eng_type;
 
     explicit AES128Engine (ResultType s = 0) : base_eng_type(s) {}
 
@@ -261,12 +263,14 @@ typedef AES128Engine<uint64_t> AES128_64;
 /// \sa AES256KeySeq
 /// \sa AESNIEngine
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AES256Engine : public AESNIEngine<ResultType, AES256KeySeq, 14, Blocks>
+class AES256Engine :
+    public AESNIEngine<ResultType, AES256KeySeq, true, 14, Blocks>
 {
 
     public :
 
-    typedef AESNIEngine<ResultType, AES256KeySeq, 14, Blocks> base_eng_type;
+    typedef AESNIEngine<ResultType, AES256KeySeq, true, 14, Blocks>
+        base_eng_type;
 
     explicit AES256Engine (ResultType s = 0) : base_eng_type(s) {}
 
