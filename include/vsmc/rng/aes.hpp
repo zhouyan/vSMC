@@ -71,7 +71,7 @@ class AESKeySeq
     __m128i tmp2_;
 
     template <std::size_t, std::size_t Rp1, typename Traits>
-    void generate_seq (StaticVector<__m128i, Rp1, Traits> &key_seq,
+    void generate_seq (StaticVector<__m128i, Rp1, Traits> &,
             cxx11::false_type) {}
 
     template <std::size_t N, std::size_t Rp1, typename Traits>
@@ -133,10 +133,6 @@ typedef AESEngine<uint32_t> AES4x32;
 /// \brief AES RNG engine returning 64-bits integers with default blocks
 /// \ingroup R123RNG
 typedef AESEngine<uint64_t> AES2x64;
-
-/// \brief AES RNG engine returning 128-bits integers with default blocks
-/// \ingroup R123RNG
-typedef AESEngine<__m128i>  AES1x128;
 
 } // namespace vsmc
 

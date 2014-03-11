@@ -7,9 +7,8 @@
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_same<ResultType, uint32_t>::value ||                  \
-             cxx11::is_same<ResultType, uint64_t>::value ||                  \
-             cxx11::is_same<ResultType, __m128i>::value),                    \
-            USE_AESNIEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t_OR_m128i)
+             cxx11::is_same<ResultType, uint64_t>::value),                   \
+            USE_AESNIEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI \
     VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType);

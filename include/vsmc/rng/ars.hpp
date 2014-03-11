@@ -120,11 +120,6 @@ typedef ARSEngine<uint32_t> ARS4x32;
 /// \ingroup R123RNG
 typedef ARSEngine<uint64_t> ARS2x64;
 
-/// \brief ARS RNG engine returning 128-bits integers with default blocks and
-/// default rounds
-/// \ingroup R123RNG
-typedef ARSEngine<__m128i>  ARS1x128;
-
 } // namespace vsmc
 
 #endif // VSMC_RNG_ARS_HPP
