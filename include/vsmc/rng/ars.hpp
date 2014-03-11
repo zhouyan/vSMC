@@ -94,6 +94,7 @@ class ARSKeySeq
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
 /// \sa ARSKeySeq
+/// \sa AESNIEngine
 template <typename ResultType,
          std::size_t R = VSMC_RNG_ARS_ROUNDS,
          std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>

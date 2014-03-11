@@ -227,6 +227,7 @@ class AES256KeySeq : public AES128KeySeq
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
 /// \sa AES128KeySeq
+/// \sa AESNIEngine
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
 class AES128Engine : public AESNIEngine<ResultType, AES128KeySeq, 10, Blocks>
 {
@@ -258,6 +259,7 @@ typedef AES128Engine<uint64_t> AES128_64;
 /// \ingroup AESNIRNG
 ///
 /// \sa AES256KeySeq
+/// \sa AESNIEngine
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
 class AES256Engine : public AESNIEngine<ResultType, AES256KeySeq, 14, Blocks>
 {

@@ -18,7 +18,7 @@ namespace vsmc {
 ///
 /// \details
 /// Two dervied class AES128Engine and ARSEngine behave exactly the same as
-/// AES and ARS RNG engines as desribed in
+/// AES and ARS RNG engines as described in
 /// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
 /// [Random123][r123lib], when used with `uint32_t` as ResultType. The first
 /// \f$2^{32}\f$ iterations will be exactly the same as
@@ -35,10 +35,29 @@ namespace vsmc {
 /// schedule (the second template argument). The two derived classed merely use
 /// two special key schedule to reproduce the original behavior.
 ///
+/// The terminology used in this engine is slightly different than that in
+/// [Random123][r123lib]. In the later, there is a distinction between
+/// `key_type` and `ukey_type`. They are `key_type` and `key_seq_type` in this
+/// engine, respectively. In other [Random123][r123lib] engines, `key_type` and
+/// `ukey_type` are usually the same. And in ThreefryEngine and PhiloxEngine,
+/// vSMC does not define `ukey_type`. In this engine, the term `key` (`ukey`,
+/// short for unique key, in [Rnadom123][r123lib]) usually refer to the 128-,
+/// 192-, or 256-bits input key in the context of the AES algorithm. And
+/// `key_seq` (`key` in [Random123][r123lib]) refers to the key schedule in the
+/// same context. In the context of C++11, `key_seq` is also sort of like the
+/// `seed_seq` for other RNG (basically both expand a single input value into a
+/// sequence such that the sequence provides extra entropy even the inputs are
+/// not random at all). Therefor vSMC's terminology shall be both familiar to
+/// people familiar with block ciphers (of which AES is one), and people
+/// familiar with C++11, but at the risk of confusing people already familiar
+/// with [Random123[r123lib]. Of course, if only used as a standard C++11
+/// engine, then none of these matters since users only provides seeds or a
+/// seed sequence.
+///
 /// \tparam ResultType The output type of `operator()`
 ///
 /// \tparam KeySeq Using other key schedule can lead to other rng. The `KeySeq`
-/// template parameter needs to has a memeber function of the form,
+/// template parameter needs to has a member function of the form,
 /// ~~~{.cpp}
 /// void generate (const key_type &key, AESNIEngine::key_seq_type &key_seq)
 /// ~~~
@@ -270,10 +289,10 @@ class AESNIEngine
     private :
 
     StaticVector<ctr_type, Blocks> ctr_;
-    buffer_type buffer_;
     key_type key_;
     StaticVector<__m128i, Blocks> pac_;
     key_seq_type key_seq_;
+    buffer_type buffer_;
     std::size_t remain_;
 
     void key_seq_init ()
