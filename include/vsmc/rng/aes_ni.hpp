@@ -293,6 +293,14 @@ class AESNIEngine
         remain_ = 0;
     }
 
+    /// \brief After reset, next call to `operator()` will always increase the
+    /// counter and refresh the buffer
+    void reset () {remain_ = 0;}
+
+    static VSMC_CONSTEXPR std::size_t buffer_size () {return buffer_size_;}
+
+    const buffer_type &buffer () {return buffer_;}
+
     /// \brief Generate a buffer of random bits given a counter and a key
     ///
     /// \details
@@ -360,6 +368,7 @@ class AESNIEngine
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
+            ++ctr_.front().front();
             generate();
             remain_ = buffer_size_;
         }
@@ -404,8 +413,8 @@ class AESNIEngine
     {
         return
             eng1.ctr_ == eng2.ctr_ &&
-            eng1.key_seq_ == eng2.key_seq_ &&
             eng1.buffer_ == eng2.buffer_ &&
+            eng1.key_seq_ == eng2.key_seq_ &&
             eng1.remain_ == eng2.remain_;
     }
 
@@ -422,13 +431,13 @@ class AESNIEngine
             const AESNIEngine<
             ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {
-        if (os) os << eng.ctr_ << ' ';
         for (std::size_t i = 0; i != Blocks; ++i) {
             m128i_output(os, eng.pac_[i]);
             if (os) os << ' ';
         }
-        if (os) os << eng.key_seq_ << ' ';
+        if (os) os << eng.ctr_ << ' ';
         if (os) os << eng.buffer_ << ' ';
+        if (os) os << eng.key_seq_ << ' ';
         if (os) os << eng.remain_;
 
         return os;
@@ -440,12 +449,11 @@ class AESNIEngine
             AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng_tmp;
-        if (is) is >> std::ws >> eng_tmp.ctr_;
-        if (is) is >> std::ws >> eng_tmp.key_;
         for (std::size_t i = 0; i != Blocks; ++i)
             m128i_input(is, eng_tmp.pac_[i]);
-        if (is) is >> std::ws >> eng_tmp.key_seq_;
+        if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.buffer_;
+        if (is) is >> std::ws >> eng_tmp.key_seq_;
         if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
 
@@ -454,10 +462,13 @@ class AESNIEngine
 
     private :
 
-    ctr_block_type ctr_;
+    // FIXME
+    // pac_ is automatically 16 bytes aligned
+    // Thus, we assume that ctr_ and buffer_ will also be 16 bytes alinged
     StaticVector<__m128i, Blocks> pac_;
-    internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
+    ctr_block_type ctr_;
     buffer_type buffer_;
+    internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
     std::size_t remain_;
 
     void generate ()
@@ -514,18 +525,26 @@ class AESNIEngine
         enc_last<B + 1>(ks, cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    void pack ()
+    void pack () {pack<0>(cxx11::true_type());}
+
+    template <std::size_t> void pack (cxx11::false_type) {}
+
+    template <std::size_t B>
+    void pack (cxx11::true_type)
     {
-        std::memcpy(static_cast<void *>(pac_.data()),
-                    static_cast<const void *>(ctr_.data()),
-                    buffer_size_ * sizeof(result_type));
+        m128i_pack<0>(ctr_[Position<B>()], pac_[Position<B>()]);
+        pack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    void unpack ()
+    void unpack () {unpack<0>(cxx11::true_type());}
+
+    template <std::size_t> void unpack (cxx11::false_type) {}
+
+    template <std::size_t B>
+    void unpack (cxx11::true_type)
     {
-        std::memcpy(static_cast<void *>(buffer_.data()),
-                    static_cast<const void *>(pac_.data()),
-                    buffer_size_ * sizeof(result_type));
+        m128i_unpack<B * K_>(pac_[Position<B>()], buffer_);
+        pack<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class AESNIEngine
 
