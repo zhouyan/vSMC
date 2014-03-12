@@ -246,9 +246,13 @@ class AES192KeySeq
     void generate_key_expansion ()
     {
         xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF);        // pshufd xmm2, xmm2, 0xFF
-        xmm3_ = _mm_shuffle_ps   (xmm3_, xmm1_, 0x10); // shufps xmm3, xmm1, 0x10
+        xmm3_ = _mm_castps_si128 (_mm_shuffle_ps(      // shufps xmm3, xmm1, 0x10
+                    _mm_castsi128_ps(xmm3_),
+                    _mm_castsi128_ps(xmm1_), 0x10));
         xmm1_ = _mm_xor_si128    (xmm1_, xmm3_);       // pxor   xmm1, xmm3
-        xmm3_ = _mm_shuffle_ps   (xmm3_, xmm1_, 0x8C); // shufps xmm3, xmm1, 0x8C
+        xmm3_ = _mm_castps_si128(_mm_shuffle_ps(       // shufps xmm3, xmm1, 0x10
+                    _mm_castsi128_ps(xmm3_),
+                    _mm_castsi128_ps(xmm1_), 0x8C));
         xmm1_ = _mm_xor_si128    (xmm1_, xmm3_);       // pxor   xmm1, xmm3
         xmm1_ = _mm_xor_si128    (xmm1_, xmm2_);       // pxor   xmm1, xmm2
     }
@@ -257,7 +261,9 @@ class AES192KeySeq
     {
         xmm5_ = _mm_load_si128   (&xmm4_);             // movdqa xmm5, xmm4
         xmm5_ = _mm_slli_si128   (xmm5_, 0x04);        // pslldq xmm5, 0x04
-        xmm6_ = _mm_shuffle_ps   (xmm6_, xmm1_, 0xF0); // shufps xmm6, xmm1, 0xF0
+        xmm6_ = _mm_castps_si128 (_mm_shuffle_ps(      // shufps xmm6, xmm1, 0x10
+                    _mm_castsi128_ps(xmm6_),
+                    _mm_castsi128_ps(xmm1_), 0xF0));
         xmm6_ = _mm_xor_si128    (xmm6_, xmm5_);       // pxor   xmm6, xmm5
         xmm4_ = _mm_xor_si128    (xmm4_, xmm6_);       // pxor   xmm4, xmm6
         xmm7_ = _mm_shuffle_epi32(xmm4_, 0x0E);        // pshufd xmm7, xmm4, 0x0E
