@@ -11,36 +11,34 @@
 
 namespace vsmc {
 
-namespace internal {
-
+/// \brief Test if an object is aligned for 
 template <typename T>
-struct is_aligned_16 :
-    public cxx11::integral_constant<bool,
-    cxx11::is_same<T, __m128i>::value ||
-    cxx11::is_same<T, __m128d>::value ||
-    cxx11::is_same<T, __m128>::value> {};
+bool is_m128_aligned (T *ptr)
+{return (reinterpret_cast<uintptr_t>(ptr) & static_cast<uintptr_t>(15)) == 0;}
 
+/// \brief Aligned pack
+/// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_pack (const StaticVector<T, N, Traits> &c, __m128i &m,
-        cxx11::true_type)
+inline void m128i_pack_a (const StaticVector<T, N, Traits> &c, __m128i &m)
 {m = _mm_load_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));}
 
+/// \brief Unaligned pack
+/// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_pack (const StaticVector<T, N, Traits> &c, __m128i &m,
-        cxx11::false_type)
+inline void m128i_pack_u (const StaticVector<T, N, Traits> &c, __m128i &m)
 {m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));}
 
+/// \brief Aligned unpack
+/// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_unpack (const __m128i &m, StaticVector<T, N, Traits> &c,
-        cxx11::true_type)
+inline void m128i_unpack_a (const __m128i &m, StaticVector<T, N, Traits> &c)
 {_mm_store_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);}
 
+/// \brief Unaligned unpack
+/// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_unpack (const __m128i &m, StaticVector<T, N, Traits> &c,
-        cxx11::false_type)
+inline void m128i_unpack_u (const __m128i &m, StaticVector<T, N, Traits> &c)
 {_mm_storeu_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);}
-
-} // namespace internal
 
 /// \brief Pack a StaticVector into an __m128i object
 /// \ingroup RNG
@@ -48,7 +46,8 @@ template <std::size_t Offset, typename T, std::size_t N, typename Traits>
 inline void m128i_pack (const StaticVector<T, N, Traits> &c, __m128i &m)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
-    internal::m128i_pack<Offset>(c, m, internal::is_aligned_16<T>());
+    is_m128_aligned(c.data()) ?
+        m128i_pack_a<Offset>(c, m) : m128i_pack_u<Offset>(c, m);
 }
 
 /// \brief Unpack an __m128i object into a StaticVector
@@ -57,7 +56,8 @@ template <std::size_t Offset, typename T, std::size_t N, typename Traits>
 inline void m128i_unpack (const __m128i &m, StaticVector<T, N, Traits> &c)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
-    internal::m128i_unpack<Offset>(m, c, internal::is_aligned_16<T>());
+    is_m128_aligned(c.data()) ?
+        m128i_unpack_a<Offset>(m, c) : m128i_unpack_u<Offset>(m, c);
 }
 
 /// \brief Compare two __m128i objects

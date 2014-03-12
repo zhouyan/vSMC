@@ -525,18 +525,14 @@ class AESNIEngine
 
     void pack ()
     {
-        (reinterpret_cast<uintptr_t>(ctr_.data()) &
-         static_cast<uintptr_t>(0x0F)) == 0 ?
-            pack_a<0>(cxx11::true_type()):
-            pack_u<0>(cxx11::true_type());
+        is_m128_aligned(ctr_.data()) ?
+            pack_a<0>(cxx11::true_type()) : pack_u<0>(cxx11::true_type());
     }
 
     void unpack ()
     {
-        (reinterpret_cast<uintptr_t>(buffer_.data()) &
-         static_cast<uintptr_t>(0x0F)) == 0 ?
-            unpack_a<0>(cxx11::true_type()):
-            unpack_u<0>(cxx11::true_type());
+        is_m128_aligned(buffer_.data()) ?
+            unpack_a<0>(cxx11::true_type()) : unpack_u<0>(cxx11::true_type());
     }
 
     template <std::size_t> void pack_a (cxx11::false_type) {}
@@ -544,8 +540,7 @@ class AESNIEngine
     template <std::size_t B>
     void pack_a (cxx11::true_type)
     {
-        internal::m128i_pack<0>(ctr_[Position<B>()], pac_[Position<B>()],
-                cxx11::true_type());
+        m128i_pack_a<0>(ctr_[Position<B>()], pac_[Position<B>()]);
         pack_a<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
@@ -554,8 +549,7 @@ class AESNIEngine
     template <std::size_t B>
     void pack_u (cxx11::true_type)
     {
-        internal::m128i_pack<0>(ctr_[Position<B>()], pac_[Position<B>()],
-                cxx11::false_type());
+        m128i_pack_u<0>(ctr_[Position<B>()], pac_[Position<B>()]);
         pack_u<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
@@ -564,8 +558,7 @@ class AESNIEngine
     template <std::size_t B>
     void unpack_a (cxx11::true_type)
     {
-        internal::m128i_unpack<B * K_>(pac_[Position<B>()], buffer_,
-                cxx11::true_type());
+        m128i_unpack_a<B * K_>(pac_[Position<B>()], buffer_);
         unpack_a<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
@@ -574,8 +567,7 @@ class AESNIEngine
     template <std::size_t B>
     void unpack_u (cxx11::true_type)
     {
-        internal::m128i_unpack<B * K_>(pac_[Position<B>()], buffer_,
-                cxx11::false_type());
+        m128i_unpack_u<B * K_>(pac_[Position<B>()], buffer_);
         unpack_u<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class AESNIEngine
