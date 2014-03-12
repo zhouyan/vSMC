@@ -30,7 +30,7 @@ inline void m128i_pack (const StaticVector<T, N, Traits> &c, __m128i &m,
         cxx11::false_type)
 {
     const __m128i *src = reinterpret_cast<const __m128i *>(c.data() + Offset);
-    if ((reinterpret_cast<uintptr_t>(src) & static_cast<uintptr_t>(0xFF)) == 0)
+    if ((reinterpret_cast<uintptr_t>(src) & static_cast<uintptr_t>(0x0F)) == 0)
         m = _mm_load_si128(src);
     else
         m = _mm_loadu_si128(src);
@@ -46,7 +46,7 @@ inline void m128i_unpack (const __m128i &m, StaticVector<T, N, Traits> &c,
         cxx11::false_type)
 {
     __m128i *dst = reinterpret_cast<__m128i *>(c.data() + Offset);
-    if ((reinterpret_cast<uintptr_t>(dst) & static_cast<uintptr_t>(0xFF)) == 0)
+    if ((reinterpret_cast<uintptr_t>(dst) & static_cast<uintptr_t>(0x0F)) == 0)
         _mm_store_si128(dst, m);
     else
         _mm_storeu_si128(dst, m);
