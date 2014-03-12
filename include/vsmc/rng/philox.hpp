@@ -274,7 +274,7 @@ class PhiloxEngine
 {
     static VSMC_CONSTEXPR const std::size_t buffer_size_ = K;
 
-    typedef internal::RngCounter<ResultType> counter;
+    typedef StaticCounter<StaticVector<ResultType, K> > counter;
 
     public :
 
@@ -341,8 +341,6 @@ class PhiloxEngine
     /// \brief After reset, next call to `operator()` will always increase the
     /// counter and refresh the buffer
     void reset () {remain_ = 0;}
-
-    static VSMC_CONSTEXPR std::size_t buffer_size () {return buffer_size_;}
 
     const buffer_type &buffer () {return buffer_;}
 

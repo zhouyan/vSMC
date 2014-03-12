@@ -220,7 +220,7 @@ class AESNIEngine
 
     static VSMC_CONSTEXPR const std::size_t buffer_size_ = K_ * Blocks;
 
-    typedef internal::RngCounter<ResultType> counter;
+    typedef StaticCounter<StaticVector<ResultType, K_> > counter;
 
     public :
 
@@ -297,8 +297,6 @@ class AESNIEngine
     /// counter and refresh the buffer
     void reset () {remain_ = 0;}
 
-    static VSMC_CONSTEXPR std::size_t buffer_size () {return buffer_size_;}
-
     const buffer_type &buffer () {return buffer_;}
 
     /// \brief Generate a buffer of random bits given a counter and a key
@@ -368,7 +366,6 @@ class AESNIEngine
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
-            ++ctr_.front().front();
             generate();
             remain_ = buffer_size_;
         }
