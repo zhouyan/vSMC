@@ -294,7 +294,7 @@ class ThreefryEngine
         remain_ = 0;
     }
 
-    const ctr_type &ctr () const {return counter::get(ctr_);}
+    const ctr_type &ctr () const {return ctr_;}
 
     const key_type &key () const {return par_.template slice<0, K>();}
 
@@ -348,25 +348,26 @@ class ThreefryEngine
         return buffer_[remain_];
     }
 
-    void discard (std::size_t nskip)
+    void discard (result_type nskip)
     {
-        if (nskip <= remain_) {
-            remain_ -= nskip;
+        std::size_t n = static_cast<std::size_t>(nskip);
+        if (n <= remain_) {
+            remain_ -= n;
             return;
         }
 
-        nskip -= remain_;
-        if (nskip <= buffer_size_ ) {
+        n -= remain_;
+        if (n <= buffer_size_ ) {
             remain_ = 0;
             operator()();
-            remain_ = buffer_size_ - nskip;
+            remain_ = buffer_size_ - n;
             return;
         }
 
         remain_ = 0;
-        counter::increment(ctr_, nskip / buffer_size_);
+        counter::increment(ctr_, n / buffer_size_);
         operator()();
-        remain_ = buffer_size_ - nskip % buffer_size_;
+        remain_ = buffer_size_ - n % buffer_size_;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
