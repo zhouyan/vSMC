@@ -48,10 +48,6 @@
 #endif // VSMC_HAS_INT128
 #endif // __x86_64__
 
-#define VSMC_STATIC_ASSERT_RNG_COUNTER_RESULT(K, Blocsk, N) \
-    VSMC_STATIC_ASSERT((K * Blocks == N),                                    \
-            USE_RngCounter_result_WITH_INCOMPATIBLE_TYPES)
-
 namespace vsmc {
 
 namespace internal {
