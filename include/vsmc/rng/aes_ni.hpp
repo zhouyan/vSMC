@@ -45,7 +45,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
     friend inline bool operator!= (
             const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks1,
             const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks2)
-    {return !(ks1 == ks1);}
+    {return !(ks1 == ks2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
@@ -110,7 +110,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
     friend inline bool operator!= (
             const AESNIKeySeqStorage<KeySeq, false, Rounds> &ks1,
             const AESNIKeySeqStorage<KeySeq, false, Rounds> &ks2)
-    {return !(ks1 == ks1);}
+    {return !(ks1 == ks2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
@@ -274,11 +274,7 @@ class AESNIEngine
 
     const key_type &key () const {return key_seq_.key();}
 
-    key_seq_type key_seq () const
-    {
-        key_seq_type ks;
-        return key_seq_.get(ks);
-    }
+    key_seq_type key_seq () const {return key_seq_.get();}
 
     void ctr (const ctr_type &c)
     {
