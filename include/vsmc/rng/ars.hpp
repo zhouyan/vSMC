@@ -96,13 +96,14 @@ class ARSKeySeq
 /// \sa ARSKeySeq
 /// \sa AESNIEngine
 template <typename ResultType,
-         std::size_t R = VSMC_RNG_ARS_ROUNDS,
+         std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
          std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
-class ARSEngine : public AESNIEngine<ResultType, ARSKeySeq, false, R, Blocks>
+class ARSEngine :
+    public AESNIEngine<ResultType, ARSKeySeq, false, Rounds, Blocks>
 {
     public :
 
-    typedef AESNIEngine<ResultType, ARSKeySeq, false, R, Blocks>
+    typedef AESNIEngine<ResultType, ARSKeySeq, false, Rounds, Blocks>
         base_eng_type;
 
     explicit ARSEngine (ResultType s = 0) : base_eng_type(s) {}
