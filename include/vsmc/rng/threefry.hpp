@@ -310,6 +310,14 @@ class ThreefryEngine
         remain_ = 0;
     }
 
+    /// \brief After reset, next call to `operator()` will always increase the
+    /// counter and refresh the buffer
+    void reset () {remain_ = 0;}
+
+    static VSMC_CONSTEXPR std::size_t buffer_size () {return buffer_size_;}
+
+    const buffer_type &buffer () {return buffer_;}
+
     /// \brief Generate a buffer of random bits given the counter and key
     static buffer_type generate (const ctr_type &c, const key_type &k)
     {
