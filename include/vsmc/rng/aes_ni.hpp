@@ -4,11 +4,15 @@
 #include <vsmc/rng/m128i.hpp>
 #include <wmmintrin.h>
 
+#define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks) \
+    VSMC_STATIC_ASSERT((Blocks > 0), USE_AESNIEngine_WITH_ZERO_BLOCKS)
+
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),              \
             USE_AESNIEngine_WITH_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI \
+    VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks);                            \
     VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType);
 
 namespace vsmc {
@@ -223,6 +227,7 @@ class AESNIEngine
     typedef ResultType result_type;
     typedef StaticVector<ResultType, buffer_size_> buffer_type;
     typedef StaticVector<ResultType, K_> ctr_type;
+    typedef StaticVector<ctr_type, Blocks> ctr_block_type;
     typedef typename KeySeq::key_type key_type;
     typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
 
@@ -288,7 +293,7 @@ class AESNIEngine
         remain_ = 0;
     }
 
-    /// \brief Generate a buffer of random bits given the counter and key
+    /// \brief Generate a buffer of random bits given a counter and a key
     ///
     /// \details
     /// This is much slower than calling `operator()` to generate the same
@@ -302,7 +307,7 @@ class AESNIEngine
         return eng.buffer_;
     }
 
-    /// \brief Generate a buffer of random bits given the counter and using the
+    /// \brief Generate a buffer of random bits given a counter and using the
     /// current key
     ///
     /// \details
@@ -313,6 +318,39 @@ class AESNIEngine
     {
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(*this);
         eng.ctr(c);
+        eng.generate();
+
+        return eng.buffer_;
+    }
+
+    /// \brief Generate a buffer of random bits given blocks of counters and a
+    /// key
+    ///
+    /// \details
+    /// This is much slower than calling `operator()` to generate the same
+    /// amount of bits, since each call to this function requires the key to be
+    /// initialized.
+    static buffer_type generate (const ctr_block_type &cb, const key_type &k)
+    {
+        AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(
+                cb.front(), k);
+        eng.ctr_ = cb;
+        eng.generate();
+
+        return eng.buffer_;
+    }
+
+    /// \brief Generate a buffer of random bits given blocks of counters and
+    /// using the current key
+    ///
+    /// \details
+    /// This is (hopefully not much) slower than calling `operator()` to
+    /// generate the same amount of bits, since the state of the engine has to
+    /// be saved.
+    buffer_type generate (const ctr_block_type &cb) const
+    {
+        AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(*this);
+        eng.ctr_ = cb;
         eng.generate();
 
         return eng.buffer_;
@@ -416,7 +454,7 @@ class AESNIEngine
 
     private :
 
-    StaticVector<ctr_type, Blocks> ctr_;
+    ctr_block_type ctr_;
     StaticVector<__m128i, Blocks> pac_;
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
     buffer_type buffer_;
@@ -426,9 +464,9 @@ class AESNIEngine
     {
         key_seq_type ks(key_seq_.get());
         pack();
-        enc_first<0>(ks, cxx11::integral_constant<bool, 0 < Blocks>());
+        enc_first<0>(ks, cxx11::true_type());
         enc_round<1>(ks, cxx11::integral_constant<bool, 1 < Rounds>());
-        enc_last <0>(ks, cxx11::integral_constant<bool, 0 < Blocks>());
+        enc_last <0>(ks, cxx11::true_type());
         unpack();
     }
 
@@ -448,8 +486,7 @@ class AESNIEngine
     template <std::size_t N>
     void enc_round (const key_seq_type &ks, cxx11::true_type)
     {
-        enc_round_block<0, N>(ks,
-                cxx11::integral_constant<bool, 0 < Blocks>());
+        enc_round_block<0, N>(ks, cxx11::true_type());
         enc_round<N + 1>(ks,
                 cxx11::integral_constant<bool, N  + 1 < Rounds>());
     }
