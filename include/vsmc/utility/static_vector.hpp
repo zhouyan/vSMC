@@ -618,217 +618,169 @@ inline std::basic_istream<CharT, CharTraits> &operator>> (
     }
 }
 
-namespace internal {
+template <typename> class StaticCounter;
 
-template <typename, bool> struct StaticCounterTypeUnsignedIntegerMax;
-
-template <typename T> struct StaticCounterTypeUnsignedIntegerMax<T, true>
-{static VSMC_CONSTEXPR const T value = static_cast<T>(~(static_cast<T>(0)));};
-
-} // namespace vsmc::internal
-
-template <typename, typename> class StaticCounterBase;
-
-template <typename T, std::size_t K, typename Traits, typename Derived>
-class StaticCounterBase<StaticVector<T, K, Traits>, Derived>
+/// \brief CRTP base class of StaticCounter
+/// \ingroup StaticVector
+template <typename T, std::size_t K, typename Traits>
+class StaticCounter<StaticVector<T, K, Traits> >
 {
     public :
 
     typedef StaticVector<T, K, Traits> ctr_type;
 
-    static const ctr_type &get (const ctr_type &ctr) {return ctr;}
-
-    template <std::size_t Blocks, typename BlockTraits>
-    static const ctr_type &get (
-            const StaticVector<ctr_type, Blocks, BlockTraits> &ctr)
-    {return ctr.back();}
-
+    /// \brief Set the counter to a given value
     static void set (ctr_type &ctr, const ctr_type &c) {ctr = c;}
 
+    /// \brief Set a block of counters
+    ///
+    /// \details
+    /// The first is set to the given value. Each successive one is the one
+    /// before it incremented by one.
     template <std::size_t Blocks, typename BlockTraits>
     static void set (StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
             const ctr_type &c)
     {
         ctr.front() = c;
-        increment_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
+        set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
-    static void reset (ctr_type &ctr) {ctr.fill(0);}
+    /// \brief Reset a counter to zero
+    static void reset (ctr_type &ctr)
+    {std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);}
 
+    /// \brief Reset a block of counters. The first is set to zero. Each
+    /// successive one is the one before it incremented by one.
     template <std::size_t Blocks, typename BlockTraits>
     static void reset (StaticVector<ctr_type, Blocks, BlockTraits> &ctr)
     {
-        ctr.front().fill(0);
-        increment_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
+        std::memset(static_cast<void *>(ctr.front().data()), 0, sizeof(T) * K);
+        set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
-    static void increment_ctr (ctr_type &ctr)
-    {increment_single<0>(ctr, cxx11::integral_constant<bool, 0 < K>());}
+    /// \brief Increment the counter by one
+    static void increment (ctr_type &ctr)
+    {increment_single<0>(ctr, cxx11::true_type());}
 
-    static void increment (ctr_type &ctr) {Derived::increment_ctr(ctr);}
-
-    static void increment (ctr_type &ctr, std::size_t nskip)
-    {
-        if (K == 0)
-            return;
-
-        if (nskip == 0)
-            return;
-
-        if (nskip == 1) {
-            Derived::increment_ctr(ctr);
-            return;
-        }
-
-        uint64_t nskip_64 = static_cast<uint64_t>(nskip);
-        const uint64_t max_64 = static_cast<uint64_t>(max_);
-        if (nskip_64 / K > max_64)
-            nskip_64 %= (K * max_64);
-
-        while (nskip_64 > max_64) {
-            increment_single<0>(ctr, max_,
-                    cxx11::integral_constant<bool, 0 < K>());
-            nskip_64 -= max_64;
-        }
-        increment_single<0>(ctr, static_cast<T>(nskip_64), cxx11::true_type());
-    }
-
+    /// \brief Increment each counter in a block by the number of counter in
+    /// the block
+    ///
+    /// \details
+    /// If the block of counters is set through `set` or `reset` of this class,
+    /// then after the incrementation, each counter is still the one before it
+    /// incremented. And the first is the previous last one incremented by one.
     template <std::size_t Blocks, typename BlockTraits>
     static void increment (StaticVector<ctr_type, Blocks, BlockTraits> &ctr)
-    {
-        ctr.front() = ctr.back();
-        Derived::increment_ctr(ctr.front());
-        increment_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
-    }
+    {increment_block<0>(ctr, cxx11::true_type());}
 
+    /// \brief Increment a counter by a given value
+    static void increment (ctr_type &ctr, T nskip)
+    {increment_single<0>(ctr, nskip, cxx11::true_type());}
+
+    /// \brief Increment the first counter in a block by a given value
+    /// multiplied by the number of counters in the block. Each successive one
+    /// is the one before it incremented by one.
+    ///
+    /// \details
+    /// Limitations: `nskip * Blocks` cannot be larger than the maximum of `T`
     template <std::size_t Blocks, typename BlockTraits>
     static void increment (StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
-            std::size_t nskip)
+            T nskip)
     {
-        if (K == 0 || Blocks == 0)
-            return;
-
-        if (nskip == 0)
-            return;
-
-        if (nskip == 1) {
-            increment(ctr);
-            return;
-        }
-
-        Derived::increment_ctr(ctr.back(), (nskip - 1) * Blocks);
-        increment(ctr);
+        increment(ctr.front(), nskip * Blocks);
+        set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
     private :
 
-    static VSMC_CONSTEXPR const T max_ =
-        internal::StaticCounterTypeUnsignedIntegerMax<T,
-        cxx11::is_unsigned<T>::value>::value;
+    static VSMC_CONSTEXPR const T max_ = static_cast<T>(~(static_cast<T>(0)));
+
+    template <std::size_t>
+    static std::size_t index (const ctr_type &, cxx11::false_type) {return 0;}
+
+    template <std::size_t N>
+    static std::size_t index (const ctr_type &ctr, cxx11::true_type)
+    {
+        return !(~ctr[Position<N>()]) +
+            index<N + 1>(ctr, cxx11::integral_constant<bool, N + 1 < K>());
+    }
 
     template <std::size_t>
     static void increment_single (ctr_type &ctr, cxx11::false_type)
-    {ctr.fill(0);}
+    {std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);}
 
     template <std::size_t N>
     static void increment_single (ctr_type &ctr, cxx11::true_type)
     {
-        if (ctr[Position<N>()] < max_) {
-            ++ctr[Position<N>()];
-            return;
-        }
-        increment_single<N + 1>(ctr,
-                cxx11::integral_constant<bool, N + 1 < K>());
+        const std::size_t k = index<0>(ctr, cxx11::true_type());
+        if (k < K)
+            ++ctr[k];
+        else
+            std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);
     }
 
     template <std::size_t>
     static void increment_single (ctr_type &ctr, T nskip, cxx11::false_type)
     {
-        if (nskip == 0)
-            return;
-
-        ctr.fill(0);
+        std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);
         ctr.front() = nskip - 1;
     }
 
     template <std::size_t N>
     static void increment_single (ctr_type &ctr, T nskip, cxx11::true_type)
     {
-        if (nskip == 0)
-            return;
-
-        const T remain = max_ - ctr[Position<N>()];
-        if (nskip <= remain) {
-            ctr[Position<N>()] += nskip;
+        const std::size_t k = index<0>(ctr, cxx11::true_type());
+        ctr[0] += nskip;
+        if (k == K) {
+            std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);
+            ctr.front() = nskip - 1;
             return;
         }
-        ctr[Position<N>()] = max_;
-        increment_single<N + 1>(ctr, nskip - remain,
-                cxx11::integral_constant<bool, N + 1 < K>());
+
+        if (ctr[k] <= max_ - nskip) {
+            ctr[k] += nskip;
+            return;
+        }
+
+        const T remain = nskip - (max_ - ctr.back());
+        if (k + 1 < K) {
+            ctr[k + 1] = remain;
+            ctr[k] = max_;
+            return;
+        }
+
+        std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);
+        ctr.front() = remain;
     }
 
     template <std::size_t, std::size_t Blocks, typename BlockTraits>
-    static void increment_block (
-            StaticVector<ctr_type, Blocks, BlockTraits> &, cxx11::false_type)
-    {}
+    static void set_block (StaticVector<ctr_type, Blocks, BlockTraits> &,
+            cxx11::false_type) {}
+
+    template <std::size_t B, std::size_t Blocks, typename BlockTraits>
+    static void set_block (StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
+            cxx11::true_type)
+    {
+        ctr[Position<B>()] = ctr[Position<B - 1>()];
+        increment(ctr[Position<B>()]);
+        increment_block<B + 1>(ctr,
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    template <std::size_t, std::size_t Blocks, typename BlockTraits>
+    static void increment_block (StaticVector<ctr_type, Blocks, BlockTraits> &,
+            cxx11::false_type) {}
 
     template <std::size_t B, std::size_t Blocks, typename BlockTraits>
     static void increment_block (
             StaticVector<ctr_type, Blocks, BlockTraits> &ctr, cxx11::true_type)
     {
-        ctr[Position<B>()] = ctr[Position<B - 1>()];
-        Derived::increment(ctr[Position<B>()]);
+        const std::size_t k = index<0>(ctr.back(), cxx11::true_type());
+        increment(ctr[Position<B>()], Blocks);
         increment_block<B + 1>(ctr,
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
-}; // struct StaticCounterBase
-
-template <typename CounterType>
-class StaticCounter :
-    public StaticCounterBase<CounterType, StaticCounter<CounterType> > {};
-
-template <typename T, typename Traits>
-class StaticCounter<StaticVector<T, 1, Traits> > :
-    public StaticCounterBase<StaticVector<T, 1, Traits>,
-    StaticCounter<StaticVector<T, 1, Traits> > >
-{
-    public :
-
-    typedef StaticVector<T, 1, Traits> ctr_type;
-
-    static void increment_ctr (ctr_type &ctr) {++ctr.front();}
-}; // class StaticCounter
-
-template <typename T, typename Traits>
-class StaticCounter<StaticVector<T, 2, Traits> > :
-    public StaticCounterBase<StaticVector<T, 2, Traits>,
-    StaticCounter<StaticVector<T, 2, Traits> > >
-{
-    public :
-
-    typedef StaticVector<T, 2, Traits> ctr_type;
-
-    static void increment_ctr (ctr_type &ctr)
-    {
-        switch ((ctr.front()^max_) | (ctr.back()^max_)) {
-            case 0 :
-                ctr.front() = 0;
-                ctr.back() = 0;
-                break;
-            case max_ :
-                ++ctr.front();
-                break;
-            default :
-                ++ctr.back();
-        }
-    }
-
-    private :
-
-    static VSMC_CONSTEXPR const T max_ =
-        internal::StaticCounterTypeUnsignedIntegerMax<T,
-        cxx11::is_unsigned<T>::value>::value;
-};
+}; // struct StaticCounter
 
 } // namespace vsmc
 
