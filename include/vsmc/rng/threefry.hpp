@@ -369,7 +369,7 @@ class ThreefryEngine
         }
 
         remain_ = 0;
-        counter::increment(ctr_, n / buffer_size_);
+        counter::increment(ctr_, static_cast<result_type>(n / buffer_size_));
         operator()();
         remain_ = buffer_size_ - n % buffer_size_;
     }
