@@ -13,7 +13,7 @@ namespace vsmc {
 
 /// \brief Test if an object is aligned for 
 template <typename T>
-bool is_m128_aligned (T *ptr)
+inline bool is_m128_aligned (T *ptr)
 {return (reinterpret_cast<uintptr_t>(ptr) & static_cast<uintptr_t>(15)) == 0;}
 
 /// \brief Aligned pack
