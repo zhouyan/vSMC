@@ -231,7 +231,9 @@ class AESNIEngine
 
     private :
 
-    typedef StaticCounter<ctr_type> counter;
+    typedef StaticVector<uint64_t, 2> ctype;
+    typedef StaticVector<ctype, Blocks> cbtype;
+    typedef StaticCounter<ctype> counter;
 
     public :
 
@@ -253,7 +255,11 @@ class AESNIEngine
     AESNIEngine (const ctr_type &c, const key_type &k) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
-        counter::set(ctr_, c);
+        ctype cc;
+        std::memcpy(
+                static_cast<void *>(cc.data()),
+                static_cast<const void *>(c.data()), 16);
+        counter::set(ctr_, cc);
         key_seq_.set(k);
     }
 
@@ -279,7 +285,14 @@ class AESNIEngine
         remain_ = 0;
     }
 
-    ctr_type ctr () const {return ctr_.back();}
+    ctr_block_type ctr_block () const
+    {
+        ctr_block_type cb;
+        std::memcpy(
+                static_cast<void *>(cb.data()),
+                static_cast<const void *>(ctr_.data()), buffer_size_);
+        return cb;
+    }
 
     key_type key () const {return key_seq_.key();}
 
@@ -287,7 +300,11 @@ class AESNIEngine
 
     void ctr (const ctr_type &c)
     {
-        counter::set(ctr_, c);
+        ctype cc;
+        std::memcpy(
+                static_cast<void *>(cc.data()),
+                static_cast<const void *>(c.data()), 16);
+        counter::set(ctr_, cc);
         remain_ = 0;
     }
 
@@ -395,7 +412,7 @@ class AESNIEngine
         }
 
         remain_ = 0;
-        counter::increment(ctr_, n / buffer_size_);
+        counter::increment(ctr_, static_cast<result_type>(n / buffer_size_));
         operator()();
         remain_ = buffer_size_ - n % buffer_size_;
     }
@@ -467,8 +484,9 @@ class AESNIEngine
     // FIXME
     // pac_ is automatically 16 bytes aligned
     // Thus, we assume that ctr_ and buffer_ will also be 16 bytes alinged
+
     StaticVector<__m128i, Blocks> pac_;
-    ctr_block_type ctr_;
+    cbtype ctr_;
     buffer_type buffer_;
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
     std::size_t remain_;
