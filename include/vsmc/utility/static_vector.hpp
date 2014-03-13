@@ -664,7 +664,8 @@ class StaticCounter<StaticVector<T, K, Traits> >
     /// \return true if the counter is reset
     static bool increment (ctr_type &ctr)
     {
-        const std::size_t k = index<0>(ctr, cxx11::true_type());
+        const std::size_t k = index(ctr,
+                cxx11::integral_constant<std::size_t, K>());
         if (k < K) {
             ++ctr[k];
             return false;
@@ -695,7 +696,8 @@ class StaticCounter<StaticVector<T, K, Traits> >
         if (nskip == 0)
             return false;
 
-        const std::size_t k = index<0>(ctr, cxx11::true_type());
+        const std::size_t k = index(ctr,
+                cxx11::integral_constant<std::size_t, K>());
 
         if (k == K) {
             reset(ctr);
@@ -745,6 +747,14 @@ class StaticCounter<StaticVector<T, K, Traits> >
 
     static VSMC_CONSTEXPR const T max_ = static_cast<T>(~(static_cast<T>(0)));
 
+    static std::size_t index (const ctr_type &ctr,
+            cxx11::integral_constant<std::size_t, 1>) {return 0;}
+
+    template <std::size_t N>
+    static std::size_t index (const ctr_type &ctr,
+            cxx11::integral_constant<std::size_t, N>)
+    {return index<0>(ctr, cxx11::true_type());}
+
     template <std::size_t>
     static std::size_t index (const ctr_type &, cxx11::false_type) {return 0;}
 
@@ -793,7 +803,8 @@ class StaticCounter<StaticVector<T, K, Traits> >
             StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
             cxx11::integral_constant<std::size_t, Blocks>)
     {
-        std::size_t k = index<0>(ctr.back(), cxx11::true_type());
+        const std::size_t k = index(ctr.back(),
+                cxx11::integral_constant<std::size_t, K>());
 
         // The lower four bits are 0x00 if ctr.back()[k] is not a valid index
         // or after increment by Blocks, it is larger than the maxium of the
