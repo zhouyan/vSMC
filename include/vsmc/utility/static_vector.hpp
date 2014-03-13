@@ -618,6 +618,25 @@ inline std::basic_istream<CharT, CharTraits> &operator>> (
     }
 }
 
+namespace internal {
+
+template <typename T, bool> struct StaticCounterMask;
+
+template <typename T>
+struct StaticCounterMask<T, true>
+{
+    static VSMC_CONSTEXPR const T max_val =
+        static_cast<T>(~(static_cast<T>(0)));
+
+    static VSMC_CONSTEXPR const T mask_hi =
+        static_cast<T>(static_cast<T>(max_val << 8) >> 8);
+
+    static VSMC_CONSTEXPR const T mask_lo =
+        static_cast<T>(mask_hi^max_val);
+}; // struct StaticCounterMask
+
+} // namespace vsmc::internal
+
 template <typename> class StaticCounter;
 
 /// \brief CRTP base class of StaticCounter
@@ -723,9 +742,14 @@ class StaticCounter<StaticVector<T, K, Traits> >
 
     private :
 
-    static VSMC_CONSTEXPR const T max_ = static_cast<T>(~(static_cast<T>(0)));
-    static VSMC_CONSTEXPR const T mask_hi_ = (max_ << 8) >> 8;
-    static VSMC_CONSTEXPR const T mask_lo_ = mask_hi_^max_;
+    static VSMC_CONSTEXPR const T max_ =
+        internal::StaticCounterMask<T, cxx11::is_unsigned<T>::value>::max_val;
+
+    static VSMC_CONSTEXPR const T mask_hi_ =
+        internal::StaticCounterMask<T, cxx11::is_unsigned<T>::value>::mask_hi;
+
+    static VSMC_CONSTEXPR const T mask_lo_ =
+        internal::StaticCounterMask<T, cxx11::is_unsigned<T>::value>::mask_lo;
 
     template <std::size_t>
     static void increment_single (ctr_type &ctr, cxx11::false_type)
@@ -795,7 +819,10 @@ class StaticCounter<StaticVector<T, K, Traits> >
     {increment_block_single<0>(ctr, cxx11::integral_constant<bool, 1 < K>());}
 
     static void increment_block_ctr (ctr_type &ctr, T nskip)
-    {increment_block_nskip(ctr, cxx11::integral_constant<bool, 1 < K>());}
+    {
+        increment_block_nskip(ctr, nskip,
+                cxx11::integral_constant<bool, 1 < K>());
+    }
 
     template <std::size_t>
     static void increment_block_single (ctr_type &ctr, cxx11::false_type)
