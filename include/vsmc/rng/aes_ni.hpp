@@ -220,8 +220,6 @@ class AESNIEngine
 
     static VSMC_CONSTEXPR const std::size_t buffer_size_ = K_ * Blocks;
 
-    typedef StaticCounter<StaticVector<ResultType, K_> > counter;
-
     public :
 
     typedef ResultType result_type;
@@ -230,6 +228,12 @@ class AESNIEngine
     typedef StaticVector<ctr_type, Blocks> ctr_block_type;
     typedef typename KeySeq::key_type key_type;
     typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
+
+    private :
+
+    typedef StaticCounter<ctr_type> counter;
+
+    public :
 
     explicit AESNIEngine (result_type s = 0) : remain_(0)
     {

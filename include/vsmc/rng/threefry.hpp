@@ -241,14 +241,18 @@ class ThreefryEngine
 {
     static VSMC_CONSTEXPR const std::size_t buffer_size_ = K;
 
-    typedef StaticCounter<StaticVector<ResultType, K> > counter;
-
     public :
 
     typedef ResultType result_type;
     typedef StaticVector<ResultType, buffer_size_> buffer_type;
     typedef StaticVector<ResultType, K> ctr_type;
     typedef StaticVector<ResultType, K> key_type;
+
+    private :
+
+    typedef StaticCounter<ctr_type> counter;
+
+    public :
 
     explicit ThreefryEngine (result_type s = 0) : remain_(0)
     {
