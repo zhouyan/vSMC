@@ -259,13 +259,13 @@ class AESNIEngine
         std::memcpy(
                 static_cast<void *>(cc.data()),
                 static_cast<const void *>(c.data()), 16);
-        counter::set(ctr_, cc);
+        counter::set(ctr_block_, cc);
         key_seq_.set(k);
     }
 
     void seed (result_type s)
     {
-        counter::reset(ctr_);
+        counter::reset(ctr_block_);
         key_type k;
         k.fill(0);
         k.front() = s;
@@ -278,19 +278,29 @@ class AESNIEngine
             !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
             VSMC_NULLPTR)
     {
-        counter::reset(ctr_);
+        counter::reset(ctr_block_);
         key_type k;
         seq.generate(k.begin(), k.end());
         key_seq_.set(k);
         remain_ = 0;
     }
 
+    template <std::size_t B>
+    ctr_type ctr () const
+    {
+        ctr_type c;
+        std::memcpy(static_cast<void *>(c.data()), static_cast<const void *>(
+                    ctr_block_[Position<B>()].data()), 16);
+
+        return c;
+    }
+
     ctr_block_type ctr_block () const
     {
         ctr_block_type cb;
-        std::memcpy(
-                static_cast<void *>(cb.data()),
-                static_cast<const void *>(ctr_.data()), buffer_size_);
+        std::memcpy(static_cast<void *>(cb.data()), static_cast<const void *>(
+                    ctr_block_.data()), buffer_size_);
+
         return cb;
     }
 
@@ -301,10 +311,16 @@ class AESNIEngine
     void ctr (const ctr_type &c)
     {
         ctype cc;
-        std::memcpy(
-                static_cast<void *>(cc.data()),
-                static_cast<const void *>(c.data()), 16);
-        counter::set(ctr_, cc);
+        std::memcpy(static_cast<void *>(cc.data()), static_cast<const void *>(
+                    c.data()), 16);
+        counter::set(ctr_block_, cc);
+        remain_ = 0;
+    }
+
+    void ctr_block (const ctr_block_type &cb)
+    {
+        std::memcpy(static_cast<void *>(ctr_block_.data()),
+                static_cast<const void *>(cb.data()), 16);
         remain_ = 0;
     }
 
@@ -361,7 +377,7 @@ class AESNIEngine
     {
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(
                 cb.front(), k);
-        eng.ctr_ = cb;
+        eng.ctr_block(cb);
         eng.generate();
 
         return eng.buffer_;
@@ -377,7 +393,7 @@ class AESNIEngine
     buffer_type generate (const ctr_block_type &cb) const
     {
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(*this);
-        eng.ctr_ = cb;
+        eng.ctr_block(cb);
         eng.generate();
 
         return eng.buffer_;
@@ -386,7 +402,7 @@ class AESNIEngine
     result_type operator() ()
     {
         if (remain_ == 0) {
-            counter::increment(ctr_);
+            counter::increment(ctr_block_);
             generate();
             remain_ = buffer_size_;
         }
@@ -412,7 +428,8 @@ class AESNIEngine
         }
 
         remain_ = 0;
-        counter::increment(ctr_, static_cast<result_type>(n / buffer_size_));
+        counter::increment(ctr_block_,
+                static_cast<result_type>(n / buffer_size_));
         operator()();
         remain_ = buffer_size_ - n % buffer_size_;
     }
@@ -431,7 +448,7 @@ class AESNIEngine
             ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng2)
     {
         return
-            eng1.ctr_ == eng2.ctr_ &&
+            eng1.ctr_block_ == eng2.ctr_block_ &&
             eng1.buffer_ == eng2.buffer_ &&
             eng1.key_seq_ == eng2.key_seq_ &&
             eng1.remain_ == eng2.remain_;
@@ -454,7 +471,7 @@ class AESNIEngine
             m128i_output(os, eng.pac_[i]);
             if (os) os << ' ';
         }
-        if (os) os << eng.ctr_ << ' ';
+        if (os) os << eng.ctr_block_ << ' ';
         if (os) os << eng.buffer_ << ' ';
         if (os) os << eng.key_seq_ << ' ';
         if (os) os << eng.remain_;
@@ -470,7 +487,7 @@ class AESNIEngine
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng_tmp;
         for (std::size_t i = 0; i != Blocks; ++i)
             m128i_input(is, eng_tmp.pac_[i]);
-        if (is) is >> std::ws >> eng_tmp.ctr_;
+        if (is) is >> std::ws >> eng_tmp.ctr_block_;
         if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.key_seq_;
         if (is) is >> std::ws >> eng_tmp.remain_;
@@ -483,10 +500,11 @@ class AESNIEngine
 
     // FIXME
     // pac_ is automatically 16 bytes aligned
-    // Thus, we assume that ctr_ and buffer_ will also be 16 bytes alinged
+    // Thus, we assume that ctr_block_ and buffer_ will also be 16 bytes
+    // alinged
 
     StaticVector<__m128i, Blocks> pac_;
-    cbtype ctr_;
+    cbtype ctr_block_;
     buffer_type buffer_;
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
     std::size_t remain_;
@@ -547,7 +565,7 @@ class AESNIEngine
 
     void pack ()
     {
-        is_m128_aligned(ctr_.data()) ?
+        is_m128_aligned(ctr_block_.data()) ?
             pack_a<0>(cxx11::true_type()) : pack_u<0>(cxx11::true_type());
     }
 
@@ -562,7 +580,7 @@ class AESNIEngine
     template <std::size_t B>
     void pack_a (cxx11::true_type)
     {
-        m128i_pack_a<0>(ctr_[Position<B>()], pac_[Position<B>()]);
+        m128i_pack_a<0>(ctr_block_[Position<B>()], pac_[Position<B>()]);
         pack_a<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
@@ -571,7 +589,7 @@ class AESNIEngine
     template <std::size_t B>
     void pack_u (cxx11::true_type)
     {
-        m128i_pack_u<0>(ctr_[Position<B>()], pac_[Position<B>()]);
+        m128i_pack_u<0>(ctr_block_[Position<B>()], pac_[Position<B>()]);
         pack_u<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
