@@ -255,11 +255,11 @@ class AESNIEngine
     AESNIEngine (const ctr_type &c, const key_type &k) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
-        ctype cc;
+        ctype tmp;
         std::memcpy(
-                static_cast<void *>(cc.data()),
+                static_cast<void *>(tmp.data()),
                 static_cast<const void *>(c.data()), 16);
-        counter::set(ctr_block_, cc);
+        counter::set(ctr_block_, tmp);
         key_seq_.set(k);
     }
 
@@ -288,20 +288,18 @@ class AESNIEngine
     template <std::size_t B>
     ctr_type ctr () const
     {
-        ctr_type c;
-        std::memcpy(static_cast<void *>(c.data()), static_cast<const void *>(
+        ctr_type tmp;
+        std::memcpy(static_cast<void *>(tmp.data()), static_cast<const void *>(
                     ctr_block_[Position<B>()].data()), 16);
-
-        return c;
+        return tmp;
     }
 
     ctr_block_type ctr_block () const
     {
-        ctr_block_type cb;
-        std::memcpy(static_cast<void *>(cb.data()), static_cast<const void *>(
+        ctr_block_type tmp;
+        std::memcpy(static_cast<void *>(tmp.data()), static_cast<const void *>(
                     ctr_block_.data()), buffer_size_);
-
-        return cb;
+        return tmp;
     }
 
     key_type key () const {return key_seq_.key();}
@@ -310,17 +308,23 @@ class AESNIEngine
 
     void ctr (const ctr_type &c)
     {
-        ctype cc;
-        std::memcpy(static_cast<void *>(cc.data()), static_cast<const void *>(
+        ctype tmp;
+        std::memcpy(static_cast<void *>(tmp.data()), static_cast<const void *>(
                     c.data()), 16);
-        counter::set(ctr_block_, cc);
+        counter::set(ctr_block_, tmp);
         remain_ = 0;
     }
 
     void ctr_block (const ctr_block_type &cb)
     {
-        std::memcpy(static_cast<void *>(ctr_block_.data()),
-                static_cast<const void *>(cb.data()), 16);
+        std::ptrdiff_t diff = cb.data() - ctr_block_.data();
+        if (diff < 16 || diff > 16) {
+            std::memcpy(static_cast<void *>(ctr_block_.data()),
+                    static_cast<const void *>(cb.data()), 16);
+        } else {
+            std::memmove(static_cast<void *>(ctr_block_.data()),
+                    static_cast<const void *>(cb.data()), 16);
+        }
         remain_ = 0;
     }
 
