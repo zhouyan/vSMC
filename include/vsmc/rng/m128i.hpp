@@ -72,7 +72,7 @@ inline bool m128i_is_equal (const __m128i &a, const __m128i &b)
     return sa == sb;
 }
 
-/// \brief Write an __m128i object into an output stream as two 64-bits
+/// \brief Write an __m128i object into an output stream as 16 bytes
 /// unsigned integers
 /// \ingroup RNG
 template <typename CharT, typename Traits>
@@ -80,7 +80,7 @@ inline std::basic_ostream<CharT, Traits> &m128i_output (
         std::basic_ostream<CharT, Traits> &os, const __m128i &a)
 {
     if (os) {
-        StaticVector<uint64_t, 2> sa;
+        StaticVector<unsigned char, 16> sa;
         m128i_unpack<0>(a, sa);
         os << sa;
     }
@@ -88,7 +88,7 @@ inline std::basic_ostream<CharT, Traits> &m128i_output (
     return os;
 }
 
-/// \brief Input an __m128i object from an input stream as two 64-bits
+/// \brief Input an __m128i object from an input stream as 16 bytes
 /// unsigned integers written by m128i_output
 /// \ingroup RNG
 template <typename CharT, typename Traits>
@@ -96,7 +96,7 @@ inline std::basic_istream<CharT, Traits> &m128i_input (
         std::basic_istream<CharT, Traits> &is, __m128i &a)
 {
     if (is) {
-        StaticVector<uint64_t, 2> sa;
+        StaticVector<unsigned char, 16> sa;
         is >> sa;
         if (is) m128i_pack<0>(sa, a);
     }
