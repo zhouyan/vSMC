@@ -294,9 +294,9 @@ class ThreefryEngine
         remain_ = 0;
     }
 
-    const ctr_type &ctr () const {return ctr_;}
+    ctr_type ctr () const {return ctr_;}
 
-    const key_type &key () const {return par_.template slice<0, K>();}
+    key_type key () const {return par_.template slice<0, K>();}
 
     void ctr (const ctr_type &c)
     {

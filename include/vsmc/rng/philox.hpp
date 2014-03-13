@@ -322,9 +322,9 @@ class PhiloxEngine
         remain_ = 0;
     }
 
-    const ctr_type &ctr () const {return ctr_;}
+    ctr_type ctr () const {return ctr_;}
 
-    const key_type &key () const {return key_;}
+    key_type key () const {return key_;}
 
     void ctr (const ctr_type &c)
     {

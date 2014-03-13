@@ -39,7 +39,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
         seq.generate(key_, key_seq_);
     }
 
-    const key_type &key () const {return key_;}
+    key_type key () const {return key_;}
 
     friend inline bool operator== (
             const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks1,
@@ -104,7 +104,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 
     void set (const key_type &k) {key_ = k;}
 
-    const key_type &key () const {return key_;}
+    key_type key () const {return key_;}
 
     friend inline bool operator== (
             const AESNIKeySeqStorage<KeySeq, false, Rounds> &ks1,
@@ -275,9 +275,9 @@ class AESNIEngine
         remain_ = 0;
     }
 
-    const ctr_type &ctr () const {return ctr_.back();}
+    ctr_type ctr () const {return ctr_.back();}
 
-    const key_type &key () const {return key_seq_.key();}
+    key_type key () const {return key_seq_.key();}
 
     key_seq_type key_seq () const {return key_seq_.get();}
 
