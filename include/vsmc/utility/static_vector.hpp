@@ -635,226 +635,139 @@ class StaticCounter<StaticVector<T, K, Traits> >
     /// \brief Set a block of counters
     ///
     /// \details
-    /// The first is set to the given value. Each successive one is the one
-    /// before it incremented by one.
+    /// Each counter in the block are are first set to be the input, and then
+    /// the highest eight bits in the last integer of each counter is set to a
+    /// distinctive nonzero value. Therefore the number of counters in the
+    /// block can be at most 256. And those 8 bits are reseved can should not
+    /// be set by the user.
     template <std::size_t Blocks, typename BlockTraits>
     static void set (StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
             const ctr_type &c)
-    {
-        set(ctr.front(), c);
-        set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
-    }
+    {set_block<0>(ctr, c, cxx11::true_type());}
 
     /// \brief Reset a counter to zero
     static void reset (ctr_type &ctr)
     {std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);}
 
-    /// \brief Reset a block of counters. The first is set to zero. Each
-    /// successive one is the one before it incremented by one.
+    /// \brief Reset a block of counters.
+    ///
+    /// \details
+    /// Equivalent to
+    /// ~~~{.cpp}
+    /// ctr_type c;
+    /// reset(c);
+    /// set(ctr, c);
+    /// ~~~
+    /// That is, they are first set to zero, and then eight bits are set.
     template <std::size_t Blocks, typename BlockTraits>
     static void reset (StaticVector<ctr_type, Blocks, BlockTraits> &ctr)
     {
-        reset(ctr.front());
-        set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
+        ctr_type c;
+        reset(c);
+        set_block<0>(ctr, c, cxx11::true_type());
     }
 
-    /// \brief Increment the counter by one
-    ///
-    /// \param ctr The counter to be incremented
-    /// \return true if the counter is reset
-    static bool increment (ctr_type &ctr)
-    {
-        const std::size_t k = index(ctr,
-                cxx11::integral_constant<std::size_t, K>());
-        if (k < K) {
-            ++ctr[k];
-            return false;
-        } else {
-            reset(ctr);
-            return true;
-        }
-    }
+    /// \brief Increment the counter
+    static void increment (ctr_type &ctr)
+    {increment_single<0>(ctr, cxx11::true_type());}
 
-    /// \brief Increment each counter in a block by the number of counters in
-    /// the block
-    ///
-    /// \param ctr The counter to be incremented
-    /// \return true if the counter is reset
+    /// \brief Increment each counter in a block
     template <std::size_t Blocks, typename BlockTraits>
-    static bool increment (StaticVector<ctr_type, Blocks, BlockTraits> &ctr)
-    {
-        return increment_block(ctr,
-                cxx11::integral_constant<std::size_t, Blocks>());
-    }
+    static void increment (StaticVector<ctr_type, Blocks, BlockTraits> &ctr)
+    {increment_block<0>(ctr, cxx11::true_type());}
 
     /// \brief Increment a counter by a given value
-    ///
-    /// \param ctr The counter to be incremented
-    /// \return true if the counter is reset
-    static bool increment (ctr_type &ctr, T nskip)
+    static void increment (ctr_type &ctr, T nskip)
     {
         if (nskip == 0)
-            return false;
+            return;
 
-        const std::size_t k = index(ctr,
-                cxx11::integral_constant<std::size_t, K>());
-
-        if (k == K) {
-            reset(ctr);
-            ctr.front() = nskip - 1;
-            return true;
+        if (nskip == 1) {
+            increment(ctr);
+            return;
         }
 
-        if (ctr[k] <= max_ - nskip) {
-            ctr[k] += nskip;
-            return false;
+        if (ctr.front() <= max_ - nskip) {
+            ctr.front() += nskip;
+            return;
         }
 
-        nskip -= max_ - ctr[k];
-        ctr[k] = max_;
-        if (k + 1 < K) {
-            ctr[k + 1] = nskip;
-            return false;
-        }
-
-        reset(ctr);
+        nskip -= max_ - ctr.front();
+        ctr.front() = max_;
+        increment(ctr);
         ctr.front() = nskip - 1;
-        return true;
     }
 
-    /// \brief Increment each counter in a block by the number of counters in
-    /// the block multplied by a given value
-    ///
-    /// \param ctr The counter to be incremented
-    /// \return true if the counter is reset
-    ///
-    /// \note Behavor for `(nskip * Blocks) > max(T)` is undefined
+    /// \brief Increment each counter in a block by a given value
     template <std::size_t Blocks, typename BlockTraits>
-    static bool increment (StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
+    static void increment (StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
             T nskip)
-    {
-        if (nskip == 0)
-            return false;
-
-        bool ret = increment(ctr.back(), nskip);
-        ctr.front() = ctr.back();
-        set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
-
-        return ret;
-    }
+    {increment_block<0>(ctr, nskip, cxx11::true_type());}
 
     private :
 
     static VSMC_CONSTEXPR const T max_ = static_cast<T>(~(static_cast<T>(0)));
 
-    static std::size_t index (const ctr_type &ctr,
-            cxx11::integral_constant<std::size_t, 1>) {return 0;}
-
-    template <std::size_t N>
-    static std::size_t index (const ctr_type &ctr,
-            cxx11::integral_constant<std::size_t, N>)
-    {return index<0>(ctr, cxx11::true_type());}
-
     template <std::size_t>
-    static std::size_t index (const ctr_type &, cxx11::false_type) {return 0;}
+    static void increment_single (ctr_type &, cxx11::false_type) {}
 
     template <std::size_t N>
-    static std::size_t index (const ctr_type &ctr, cxx11::true_type)
+    static void increment_single (ctr_type &ctr, cxx11::true_type)
     {
-        return !(~ctr[Position<N>()]) +
-            index<N + 1>(ctr, cxx11::integral_constant<bool, N + 1 < K>());
+        if (++ctr[Position<N>()] != 0)
+            return;
+
+        increment_single<N + 1>(ctr,
+                cxx11::integral_constant<bool, N + 1 < K>());
     }
 
     template <std::size_t, std::size_t Blocks, typename BlockTraits>
     static void set_block (StaticVector<ctr_type, Blocks, BlockTraits> &,
-            cxx11::false_type) {}
+            const ctr_type &, cxx11::false_type) {}
 
     template <std::size_t B, std::size_t Blocks, typename BlockTraits>
     static void set_block (StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
+            const ctr_type &c, cxx11::true_type)
+    {
+        T m = max_;
+        m <<= 8;
+        m >>= 8;
+        T b = static_cast<T>(B);
+        b <<= sizeof(T) * 8 - 8;
+        ctr[Position<B>()] = c;
+        ctr[Position<B>()].back() &= m;
+        ctr[Position<B>()].back() ^= b;
+        set_block<B + 1>(ctr, c,
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    template <std::size_t, std::size_t Blocks, typename BlockTraits>
+    static void increment_block (
+            StaticVector<ctr_type, Blocks, BlockTraits> &,
+            cxx11::false_type) {}
+
+    template <std::size_t B, std::size_t Blocks, typename BlockTraits>
+    static void increment_block (
+            StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
             cxx11::true_type)
     {
-        ctr[Position<B>()] = ctr[Position<B - 1>()];
         increment(ctr[Position<B>()]);
-        set_block<B + 1>(ctr,
+        increment_block<B + 1>(ctr,
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t, std::size_t Blocks, typename BlockTraits>
-    static void increment_block (StaticVector<ctr_type, Blocks, BlockTraits> &,
-            std::size_t, cxx11::false_type) {}
+    static void increment_block (
+            StaticVector<ctr_type, Blocks, BlockTraits> &,
+            T, cxx11::false_type) {}
 
     template <std::size_t B, std::size_t Blocks, typename BlockTraits>
     static void increment_block (
             StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
-            std::size_t k, cxx11::true_type)
+            T nskip, cxx11::true_type)
     {
-        ctr[Position<B>()][k] += Blocks;
-        increment_block<B + 1>(ctr, k,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    template <typename BlockTraits>
-    static bool increment_block (StaticVector<ctr_type, 1, BlockTraits> &ctr,
-            cxx11::integral_constant<std::size_t, 1>)
-    {return increment(ctr.front());}
-
-    template <std::size_t Blocks, typename BlockTraits>
-    static bool increment_block (
-            StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
-            cxx11::integral_constant<std::size_t, Blocks>)
-    {
-        const std::size_t k = index(ctr.back(),
-                cxx11::integral_constant<std::size_t, K>());
-
-        // The lower four bits are 0x00 if ctr.back()[k] is not a valid index
-        // or after increment by Blocks, it is larger than the maxium of the
-        // value type
-        // The higher four bits are 0 if k == K, 1 if k == K - 1, otherwise 2
-        unsigned flag = static_cast<unsigned>(K - k);
-        if (flag > 2)
-            flag = 2;
-        if (flag != 0) {
-            flag <<= 4;
-            flag += ctr.back()[k] <= max_ - Blocks ? 1 : 0;
-        }
-
-        // Use the fact that almost always the switch will jump to the default
-        // case, and mispredication only happen once in a long time
-        switch (flag) {
-            case 0x00 : // K == K, ctr.back()[k] invalid
-                reset(ctr);
-                increment_block<0>(ctr, 0, cxx11::true_type());
-                return true;
-            case 0x10 : // k == K - 1, ctr.back()[k] > max_ - Blocks
-                reset(ctr.front());
-                ctr.front().front() = Blocks - (max_ - ctr.back()[k]);
-                set_block<1>(ctr,
-                        cxx11::integral_constant<bool, 1 < Blocks>());
-                return true;
-            case 0x20 : // K < K - 1, ctr.back()[k] > max_ - Blocks
-                ctr.front() = ctr.back();
-                ctr.front()[k] = max_;
-                ctr.front()[k + 1] = Blocks - (max_ - ctr.back()[k]);
-                set_block<1>(ctr,
-                        cxx11::integral_constant<bool, 1 < Blocks>());
-                return false;
-            default : // K < K, ctr.back()[k] <= max_ - Blocks
-                increment_block<0>(ctr, k, cxx11::true_type());
-                return false;
-        }
-    }
-
-    template <std::size_t, std::size_t Blocks, typename BlockTraits>
-    static void increment_block (StaticVector<ctr_type, Blocks, BlockTraits> &,
-            std::size_t, T, cxx11::false_type) {}
-
-    template <std::size_t B, std::size_t Blocks, typename BlockTraits>
-    static void increment_block (
-            StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
-            std::size_t k, T nskip, cxx11::true_type)
-    {
-        ctr[Position<B>()][k] += nskip;
-        increment_block<B + 1>(ctr, k,
+        increment(ctr[Position<B>()], nskip);
+        increment_block<B + 1>(ctr, nskip,
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // struct StaticCounter
