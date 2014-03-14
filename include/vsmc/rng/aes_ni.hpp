@@ -350,13 +350,23 @@ class AESNIEngine
         remain_ = 0;
     }
 
+    /// \brief Set the block of counters
+    ///
+    /// \details
+    /// Behavior is undefined if `cb.data()` points some place within the
+    /// destination object. The class itself does not have any member functions
+    /// that return references or pointers to its internal, so unless someone
+    /// does something nasty such as the following,
+    /// ~~~{.cpp}
+    /// typedef /* engine type */ eng_type;
+    /// eng_type eng;
+    /// const eng_type::ctr_block_type *src = reinterpret_cast<const eng_type::ctr_block_type *>(&eng);
+    /// eng.ctr_block(*src);
+    /// ~~~
+    /// which a sane person should not do, this shall not be a problem.
     void ctr_block (const ctr_block_type &cb)
     {
-        std::ptrdiff_t diff = cb.data() - ctr_block_.data();
-        if (diff < 16 || diff > 16)
-            std::memcpy(ctr_block_.data(), cb.data(), 16);
-        else
-            std::memmove(ctr_block_.data(), cb.data(), 16);
+        std::memcpy(ctr_block_.data(), cb.data(), buffer_size_);
         remain_ = 0;
     }
 
