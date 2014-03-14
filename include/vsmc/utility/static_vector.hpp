@@ -305,6 +305,27 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
+    StaticVector () {}
+
+    /// \brief Initialization using memory buffer of at least N elements
+    ///
+    /// \details
+    /// The behavior is undefined if `mem` points to some place inside the
+    /// newly created object. Since this is contrutor, unless someone does
+    /// something nasty such as the following,
+    /// ~~~{.cpp}
+    /// void *src = std::malloc(sizeof(StaticVector<T, N>));
+    /// StaticVector<T, N> *sv = new (src) StaticVector<T, N>(src);
+    /// ~~~
+    /// which any sane person should not do, this shall not be a problem.
+    ///
+    /// When `T` is not trivally copyable, the behavior is also undefined.
+    StaticVector (const T *mem) {copy_mem(mem, sizeof(T) * N);}
+
+    /// \brief Initialization using memory buffer up to a given number of
+    /// elements
+    StaticVector (const T *mem, std::size_t n) {copy_mem(mem, sizeof(T) * n);}
+
     iterator begin () {return iterator(this->ptr());}
 
     iterator end () {return iterator(this->ptr() + N);}
@@ -428,6 +449,12 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     {return expand<Begin, Size>(cxx11::integral_constant<bool, Begin == 0>());}
 
     private :
+
+    void copy_mem (const void *mem, std::size_t n)
+    {
+        n = n > sizeof(T) * N ? sizeof(T) * N : n;
+        std::memcpy(data(), mem, n);
+    }
 
     template <std::size_t Size>
     StaticVector<T, Size, Traits> resize (cxx11::true_type) const
