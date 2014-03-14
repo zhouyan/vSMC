@@ -68,11 +68,12 @@ struct AESKeyInit
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AESNIRNG
+template <typename ResultType>
 class AES128KeySeq
 {
     public :
 
-    typedef StaticVector<uint64_t, 2> key_type;
+    typedef StaticVector<ResultType, 16 / sizeof(ResultType)> key_type;
 
     AES128KeySeq () : xmm1_(), xmm2_(), xmm3_() {}
 
@@ -134,12 +135,12 @@ class AES128KeySeq
 /// \sa AESNIEngine
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
 class AES128Engine :
-    public AESNIEngine<ResultType, AES128KeySeq, true, 10, Blocks>
+    public AESNIEngine<ResultType, AES128KeySeq<ResultType>, true, 10, Blocks>
 {
 
     public :
 
-    typedef AESNIEngine<ResultType, AES128KeySeq, true, 10, Blocks>
+    typedef AESNIEngine<ResultType, AES128KeySeq<ResultType>, true, 10, Blocks>
         base_eng_type;
 
     explicit AES128Engine (ResultType s = 0) : base_eng_type(s) {}
@@ -163,11 +164,12 @@ typedef AES128Engine<uint64_t> AES128_64;
 
 /// \brief AES192Engine key sequence generator
 /// \ingroup AESNIRNG
+template <typename ResultType>
 class AES192KeySeq
 {
     public :
 
-    typedef StaticVector<uint64_t, 3> key_type;
+    typedef StaticVector<ResultType, 24 / sizeof(ResultType)> key_type;
 
     AES192KeySeq () :
         xmm1_(), xmm2_(), xmm3_(), xmm4_(), xmm5_(), xmm6_(), xmm7_() {}
@@ -176,7 +178,8 @@ class AES192KeySeq
     void generate (const key_type &key,
             StaticVector<__m128i, Rp1, Traits> &key_seq)
     {
-        key_type key_tmp(key);
+        StaticVector<uint64_t, 3> key_tmp;
+        std::memcpy(key_tmp.data(), key.data(), 24);
         internal::AESKeyInit::key_init<0, 0>(key_tmp, key_seq, xmm1_);
         key_tmp.at<0>() = key_tmp.at<2>();
         key_tmp.at<1>() = 0;
@@ -289,12 +292,12 @@ class AES192KeySeq
 /// \sa AESNIEngine
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
 class AES192Engine :
-    public AESNIEngine<ResultType, AES192KeySeq, true, 12, Blocks>
+    public AESNIEngine<ResultType, AES192KeySeq<ResultType>, true, 12, Blocks>
 {
 
     public :
 
-    typedef AESNIEngine<ResultType, AES192KeySeq, true, 12, Blocks>
+    typedef AESNIEngine<ResultType, AES192KeySeq<ResultType>, true, 12, Blocks>
         base_eng_type;
 
     explicit AES192Engine (ResultType s = 0) : base_eng_type(s) {}
@@ -318,11 +321,12 @@ typedef AES192Engine<uint64_t> AES192_64;
 
 /// \brief AES256Engine key sequence generator
 /// \ingroup AESNIRNG
+template <typename ResultType>
 class AES256KeySeq
 {
     public :
 
-    typedef StaticVector<uint64_t, 4> key_type;
+    typedef StaticVector<ResultType, 32 / sizeof(ResultType)> key_type;
 
     AES256KeySeq () : xmm1_(), xmm2_(), xmm3_(), xmm4_() {}
 
@@ -331,7 +335,8 @@ class AES256KeySeq
             StaticVector<__m128i, Rp1, Traits> &key_seq)
     {
         internal::AESKeyInit::key_init<0, 0>(key, key_seq, xmm1_);
-        internal::AESKeyInit::key_init<2, 1>(key, key_seq, xmm3_);
+        internal::AESKeyInit::key_init<16 / sizeof(ResultType), 1>(
+                key, key_seq, xmm3_);
         generate_seq<2>(key_seq, cxx11::integral_constant<bool, 2 < Rp1>());
     }
 
@@ -406,12 +411,12 @@ class AES256KeySeq
 /// \sa AESNIEngine
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
 class AES256Engine :
-    public AESNIEngine<ResultType, AES256KeySeq, true, 14, Blocks>
+    public AESNIEngine<ResultType, AES256KeySeq<ResultType>, true, 14, Blocks>
 {
 
     public :
 
-    typedef AESNIEngine<ResultType, AES256KeySeq, true, 14, Blocks>
+    typedef AESNIEngine<ResultType, AES256KeySeq<ResultType>, true, 14, Blocks>
         base_eng_type;
 
     explicit AES256Engine (ResultType s = 0) : base_eng_type(s) {}

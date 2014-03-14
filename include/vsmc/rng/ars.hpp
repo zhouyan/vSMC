@@ -44,11 +44,12 @@ template <std::size_t N> struct ARSWeylConstantTrait :
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG
+template <typename ResultType>
 class ARSKeySeq
 {
     public :
 
-    typedef StaticVector<uint64_t, 2> key_type;
+    typedef StaticVector<ResultType, 16 / sizeof(ResultType)> key_type;
 
     ARSKeySeq () : weyl_(_mm_set_epi64x(
                 static_cast<int64_t>(traits::ARSWeylConstantTrait<0>::value),
@@ -99,12 +100,13 @@ template <typename ResultType,
          std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
          std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
 class ARSEngine :
-    public AESNIEngine<ResultType, ARSKeySeq, false, Rounds, Blocks>
+    public AESNIEngine<ResultType, ARSKeySeq<ResultType>,
+    false, Rounds, Blocks>
 {
     public :
 
-    typedef AESNIEngine<ResultType, ARSKeySeq, false, Rounds, Blocks>
-        base_eng_type;
+    typedef AESNIEngine<ResultType, ARSKeySeq<ResultType>,
+            false, Rounds, Blocks> base_eng_type;
 
     explicit ARSEngine (ResultType s = 0) : base_eng_type(s) {}
 
