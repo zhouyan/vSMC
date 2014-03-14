@@ -21,7 +21,8 @@ template <typename, std::size_t = VSMC_RD_RAND_NTRIAL_MAX> struct RdRandStep;
 
 /// \brief RdRand generator with 16-bits output
 /// \ingroup RDRNG
-template <std::size_t NTrialMax> struct RdRandStep<uint16_t, NTrialMax>
+template <std::size_t NTrialMax>
+struct RdRandStep<uint16_t, NTrialMax>
 {
     static uint16_t generate ()
     {
@@ -37,7 +38,8 @@ template <std::size_t NTrialMax> struct RdRandStep<uint16_t, NTrialMax>
 
 /// \brief RdRand generator with 32-bits output
 /// \ingroup RDRNG
-template <std::size_t NTrialMax> struct RdRandStep<uint32_t, NTrialMax>
+template <std::size_t NTrialMax>
+struct RdRandStep<uint32_t, NTrialMax>
 {
     static uint32_t generate ()
     {
@@ -53,7 +55,8 @@ template <std::size_t NTrialMax> struct RdRandStep<uint32_t, NTrialMax>
 
 /// \brief RdRand generator with 64-bits output
 /// \ingroup RDRNG
-template <std::size_t NTrialMax> struct RdRandStep<uint64_t, NTrialMax>
+template <std::size_t NTrialMax>
+struct RdRandStep<uint64_t, NTrialMax>
 {
     static uint64_t generate ()
     {
