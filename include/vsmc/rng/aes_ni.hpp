@@ -297,7 +297,7 @@ class AESNIEngine
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         ctr_block_type tmp;
         StaticCounter<ctr_type>::set(tmp, c);
-        std::memcpy(ctr_block_.data(), tmp.data(), buffer_size_);
+        std::memcpy(ctr_block_.data(), tmp.data(), 16 * Blocks);
         key_seq_.set(k);
     }
 
@@ -334,7 +334,7 @@ class AESNIEngine
     ctr_block_type ctr_block () const
     {
         ctr_block_type tmp;
-        std::memcpy(tmp.data(), ctr_block_.data(), buffer_size_);
+        std::memcpy(tmp.data(), ctr_block_.data(), 16 * Blocks);
         return tmp;
     }
 
@@ -346,7 +346,7 @@ class AESNIEngine
     {
         ctr_block_type tmp;
         StaticCounter<ctr_type>::set(tmp, c);
-        std::memcpy(ctr_block_.data(), tmp.data(), buffer_size_);
+        std::memcpy(ctr_block_.data(), tmp.data(), 16 * Blocks);
         remain_ = 0;
     }
 
@@ -366,7 +366,7 @@ class AESNIEngine
     /// which a sane person should not do, this shall not be a problem.
     void ctr_block (const ctr_block_type &cb)
     {
-        std::memcpy(ctr_block_.data(), cb.data(), buffer_size_);
+        std::memcpy(ctr_block_.data(), cb.data(), 16 * Blocks);
         remain_ = 0;
     }
 
