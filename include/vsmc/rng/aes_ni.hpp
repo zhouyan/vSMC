@@ -170,7 +170,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// The terminology used in this engine is slightly different than that in
 /// [Random123][r123lib]. In the later, there is a distinction between
 /// `key_type` and `ukey_type`. They are `key_type` and `key_seq_type` in this
-/// engine, respectively. In other [Random123][r123lib] engines, `key_type` and
+/// class, respectively. In other [Random123][r123lib] engines, `key_type` and
 /// `ukey_type` are usually the same. And in ThreefryEngine and PhiloxEngine,
 /// vSMC does not define `ukey_type`. In this engine, the term `key` (`ukey`,
 /// short for unique key, in [Rnadom123][r123lib]) usually refer to the 128-,
@@ -179,14 +179,54 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// same context. In the context of C++11, `key_seq` is also sort of like the
 /// `seed_seq` for other RNG (basically both expand a single input value into a
 /// sequence such that the sequence provides extra entropy even the inputs are
-/// not random at all). Therefor vSMC's terminology shall be both familiar to
+/// not random at all). Therefore vSMC's terminology shall be both familiar to
 /// people familiar with block ciphers (of which AES is one), and people
 /// familiar with C++11, but at the risk of confusing people already familiar
 /// with [Random123[r123lib]. Of course, if only used as a standard C++11
 /// engine, then none of these matters since users only provides seeds or a
 /// seed sequence.
 ///
-/// \tparam ResultType The output type of `operator()`
+/// \tparam ResultType The output type of `operator()`. Unlike ThreefryEngine
+/// and PhiloxEngine, where the `ResultType` and the size of the counter are
+/// both specified by the user, this engine only allows specification of the
+/// type of output. Internally, it may use any type of counters whose total
+/// width is 128-bits. Therefore, increment a counter of type
+/// `AESNIEngine::ctr_type` manually is not the same as having the engine
+/// increment it internally. The engine only guarantee that each 128-bits
+/// output are generated using different counters (until all \f$2^128\f$
+/// possible counters are used). The `ctr_type` and `key_type` are only
+/// convenient way for user to specify the memory input when generating exact
+/// results using the `generate` member functions. For example, one may specify
+/// the counter as,
+/// ~~~{.cpp}
+/// unsigned char input = {
+///     0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,
+///     0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF
+/// };
+/// typedef AES128Engine<unsigned char> eng_type; // A derived class
+/// eng_type::ctr_type ctr;
+/// eng_type::key_type key;
+/// std::memcpy(ctr.data(), input, 16);
+/// std::memcpy(key.data(), input, 16);
+/// ~~~
+/// or
+/// ~~~{.cpp}
+/// typedef AES128Engine<uint64_t> eng_type;
+/// eng_type::ctr_type ctr;
+/// eng_type::ctr_type key;
+/// ctr[0] = 0x7766554433221100; // Assuming little-endian such as x86
+/// ctr[1] = 0xFFEEDDCCBBAA9988;
+/// key[0] = 0x7766554433221100;
+/// key[1] = 0xFFEEDDCCBBAA9988;
+/// ~~~
+/// In either case, the following
+/// ~~~{.cpp}
+/// eng_type eng;
+/// eng_type::buffer_type buffer(eng.generate(ctr, key));
+/// unsigned char output[16];
+/// std::memcpy(output, buffer.data(), 16);
+/// ~~~
+/// will give exactly the same `output` array.
 ///
 /// \tparam KeySeq Using other key schedule can lead to other rng. The `KeySeq`
 /// template parameter needs to has a member function of the form,

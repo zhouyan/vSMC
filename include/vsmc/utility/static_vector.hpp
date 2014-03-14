@@ -639,8 +639,37 @@ struct StaticCounterMask<T, true>
 
 template <typename> class StaticCounter;
 
-/// \brief CRTP base class of StaticCounter
+/// \brief Using StaticVector of unsigned integers as counters
 /// \ingroup StaticVector
+///
+/// \details
+/// This class provides methods for using StaticVector of unsigned integers as
+/// large integer counters.
+///
+/// It deals with two types of counters. The first type is in the form
+/// `StaticVector<T, K, Traits>` where `T` is an unsigned integer type, treated
+/// as a `sizeof(T) * K * 8` bits integer. For example,
+/// `StaticVector<uint32_t, 4>` is treated as an 128-bits integer. The counter
+/// start with all elements being zero. The value of the integer can be
+/// calculated as, \f$c_0 + c_1 M + c_2 M^2 +\cdots + c_{K-1} M^{K - 1}\f$,
+/// where \f$c_i\f$ is the \f$i\f$th element in the StaticVector and has a
+/// range from zero to \f$M - 1\f$, \f$M\f$ is the largest number of type `T`
+/// plus one, that is \f$2^n\f$ with \f$n\f$ being the number of bits in type
+/// `T`.
+///
+/// The second type is blocks of counters of the first type. For example,
+/// `StaticVector<ctr_type, Blocks, BlockTraits>`, where `ctr_type` is a
+/// counter of the first type. When set and incremented using methods in this
+/// class, all `Blocks` counters are maintained such that, they are always
+/// distinctive. This is done by reserving eight bits as counter IDs.
+/// Therefore, there can be at most 256 blocks. The eight bits reserved are the
+/// 8 higher bits in the last element of each counter. In a little-endian
+/// representation, such as on x86, the last bytes in the memory of counter is
+/// reserved. The increment works by increment each counter the same way as in
+/// the first type, except that the last element, \f$c_{K-1}\f$ has a range
+/// from zero to \f$2^{n - 8} - 1\f$ where \f$n\f$ is the number of bits in
+/// type `T`. Therefore, in the extreme case where `ctr_type` is
+/// `StaticVector<uint8_t, 1>`, increment won't change the counter at all.
 template <typename T, std::size_t K, typename Traits>
 class StaticCounter<StaticVector<T, K, Traits> >
 {
@@ -651,14 +680,7 @@ class StaticCounter<StaticVector<T, K, Traits> >
     /// \brief Set the counter to a given value
     static void set (ctr_type &ctr, const ctr_type &c) {ctr = c;}
 
-    /// \brief Set a block of counters
-    ///
-    /// \details
-    /// Each counter in the block are are first set to be the input, and then
-    /// the highest eight bits in the last integer of each counter is set to a
-    /// distinctive nonzero value. Therefore the number of counters in the
-    /// block can be at most 256. And those 8 bits are reseved can should not
-    /// be set by the user.
+    /// \brief Set a block of counters given the value of the first counter
     template <std::size_t Blocks, typename BlockTraits>
     static void set (StaticVector<ctr_type, Blocks, BlockTraits> &ctr,
             const ctr_type &c)
@@ -671,16 +693,7 @@ class StaticCounter<StaticVector<T, K, Traits> >
     static void reset (ctr_type &ctr)
     {std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);}
 
-    /// \brief Reset a block of counters.
-    ///
-    /// \details
-    /// Equivalent to
-    /// ~~~{.cpp}
-    /// ctr_type c;
-    /// reset(c);
-    /// set(ctr, c);
-    /// ~~~
-    /// That is, they are first set to zero, and then eight bits are set.
+    /// \brief Reset a block of counters with the first set to zero
     template <std::size_t Blocks, typename BlockTraits>
     static void reset (StaticVector<ctr_type, Blocks, BlockTraits> &ctr)
     {
@@ -688,11 +701,11 @@ class StaticCounter<StaticVector<T, K, Traits> >
         set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
-    /// \brief Increment the counter
+    /// \brief Increment the counter by one
     static void increment (ctr_type &ctr)
     {increment_single<0>(ctr, cxx11::integral_constant<bool, 1 < K>());}
 
-    /// \brief Increment each counter in a block
+    /// \brief Increment each counter in a block by one
     template <std::size_t Blocks, typename BlockTraits>
     static void increment (StaticVector<ctr_type, Blocks, BlockTraits> &ctr)
     {increment_block<0>(ctr, cxx11::true_type());}
