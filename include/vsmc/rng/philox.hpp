@@ -344,7 +344,11 @@ class PhiloxEngine
 
     /// \brief After reset, next call to `operator()` will always increase the
     /// counter and refresh the buffer
-    void reset () {remain_ = 0;}
+    void reset ()
+    {
+        counter::reset(ctr_);
+        remain_ = 0;
+    }
 
     const buffer_type &buffer () {return buffer_;}
 

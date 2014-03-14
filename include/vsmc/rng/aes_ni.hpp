@@ -255,11 +255,9 @@ class AESNIEngine
     AESNIEngine (const ctr_type &c, const key_type &k) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
-        ctype tmp;
-        std::memcpy(
-                static_cast<void *>(tmp.data()),
-                static_cast<const void *>(c.data()), 16);
-        counter::set(ctr_block_, tmp);
+        ctr_block_type tmp;
+        StaticCounter<ctr_type>::set(tmp, c);
+        std::memcpy(ctr_block_.data(), tmp.data(), buffer_size_);
         key_seq_.set(k);
     }
 
@@ -289,16 +287,14 @@ class AESNIEngine
     ctr_type ctr () const
     {
         ctr_type tmp;
-        std::memcpy(static_cast<void *>(tmp.data()), static_cast<const void *>(
-                    ctr_block_[Position<B>()].data()), 16);
+        std::memcpy(tmp.data(), ctr_block_[Position<B>()].data(), 16);
         return tmp;
     }
 
     ctr_block_type ctr_block () const
     {
         ctr_block_type tmp;
-        std::memcpy(static_cast<void *>(tmp.data()), static_cast<const void *>(
-                    ctr_block_.data()), buffer_size_);
+        std::memcpy(tmp.data(), ctr_block_.data(), buffer_size_);
         return tmp;
     }
 
@@ -308,23 +304,19 @@ class AESNIEngine
 
     void ctr (const ctr_type &c)
     {
-        ctype tmp;
-        std::memcpy(static_cast<void *>(tmp.data()), static_cast<const void *>(
-                    c.data()), 16);
-        counter::set(ctr_block_, tmp);
+        ctr_block_type tmp;
+        StaticCounter<ctr_type>::set(tmp, c);
+        std::memcpy(ctr_block_.data(), tmp.data(), buffer_size_);
         remain_ = 0;
     }
 
     void ctr_block (const ctr_block_type &cb)
     {
         std::ptrdiff_t diff = cb.data() - ctr_block_.data();
-        if (diff < 16 || diff > 16) {
-            std::memcpy(static_cast<void *>(ctr_block_.data()),
-                    static_cast<const void *>(cb.data()), 16);
-        } else {
-            std::memmove(static_cast<void *>(ctr_block_.data()),
-                    static_cast<const void *>(cb.data()), 16);
-        }
+        if (diff < 16 || diff > 16)
+            std::memcpy(ctr_block_.data(), cb.data(), 16);
+        else
+            std::memmove(ctr_block_.data(), cb.data(), 16);
         remain_ = 0;
     }
 
@@ -336,7 +328,11 @@ class AESNIEngine
 
     /// \brief After reset, next call to `operator()` will always increase the
     /// counter and refresh the buffer
-    void reset () {remain_ = 0;}
+    void reset ()
+    {
+        counter::reset(ctr_block_);
+        remain_ = 0;
+    }
 
     const buffer_type &buffer () {return buffer_;}
 

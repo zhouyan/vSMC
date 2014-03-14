@@ -278,8 +278,7 @@ class AES192KeySeq
             const unsigned char *ks_ptr, cxx11::true_type)
     {
         unsigned char *dst = reinterpret_cast<unsigned char *>(key_seq.data());
-        std::memcpy(static_cast<void *>(dst + 24),
-                static_cast<const void *>(ks_ptr + 24), Rp1 * 16 - 24);
+        std::memcpy(dst + 24, ks_ptr + 24, Rp1 * 16 - 24);
     }
 }; // class AES192KeySeq
 
