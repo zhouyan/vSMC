@@ -352,18 +352,16 @@ class PhiloxEngine
 
     const buffer_type &buffer () {return buffer_;}
 
-    /// \brief Generate a buffer of random bits given the counter and key
-    ///
-    /// \details
-    /// This is much slower than calling `operator()` to generate the same
-    /// amount of bits, since each call to this function requires the key to be
-    /// initialized.
-    static buffer_type generate (const ctr_type &c, const key_type &k)
+    result_type operator() ()
     {
-        PhiloxEngine<ResultType, K, Rounds> eng(c, k);
-        eng.generate();
+        if (remain_ == 0) {
+            counter::increment(ctr_);
+            generate_buffer(ctr_, buffer_);
+            remain_ = buffer_size_;
+        }
+        --remain_;
 
-        return eng.buffer_;
+        return buffer_[remain_];
     }
 
     /// \brief Generate a buffer of random bits given the counter and using the
@@ -373,25 +371,12 @@ class PhiloxEngine
     /// This is (hopefully not much) slower than calling `operator()` to
     /// generate the same amount of bits, since the state of the engine has to
     /// be saved.
-    buffer_type generate (const ctr_type &c) const
+    buffer_type operator() (const ctr_type &c) const
     {
-        PhiloxEngine<ResultType, K, Rounds> eng(*this);
-        eng.ctr(c);
-        eng.generate();
+        buffer_type buf;
+        generate_buffer(c, buf);
 
-        return eng.buffer_;
-    }
-
-    result_type operator() ()
-    {
-        if (remain_ == 0) {
-            counter::increment(ctr_);
-            generate();
-            remain_ = buffer_size_;
-        }
-        --remain_;
-
-        return buffer_[remain_];
+        return buf;
     }
 
     void discard (result_type nskip)
@@ -446,7 +431,6 @@ class PhiloxEngine
     {
         if (os) os << eng.ctr_;    if (os) os << ' ';
         if (os) os << eng.key_;    if (os) os << ' ';
-        if (os) os << eng.par_;    if (os) os << ' ';
         if (os) os << eng.buffer_; if (os) os << ' ';
         if (os) os << eng.remain_;
 
@@ -461,7 +445,6 @@ class PhiloxEngine
         PhiloxEngine<ResultType, K, Rounds> eng_tmp;
         if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.key_;
-        if (is) is >> std::ws >> eng_tmp.par_;
         if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
@@ -473,25 +456,28 @@ class PhiloxEngine
 
     ctr_type ctr_;
     key_type key_;
-    key_type par_;
     buffer_type buffer_;
     std::size_t remain_;
 
-    void generate ()
+    void generate_buffer (const ctr_type c, buffer_type &buf) const
     {
-        buffer_ = ctr_;
-        par_ = key_;
-        generate<0>(cxx11::true_type());
+        buf = c;
+        key_type par = key_;
+        generate_buffer<0>(buf, par, cxx11::true_type());
     }
 
-    template <std::size_t> void generate (cxx11::false_type) {}
+    template <std::size_t>
+    void generate_buffer (buffer_type &, key_type &,
+            cxx11::false_type) const {}
 
     template <std::size_t N>
-    void generate (cxx11::true_type)
+    void generate_buffer (buffer_type &buf, key_type &par,
+            cxx11::true_type) const
     {
-        internal::PhiloxBumpk<ResultType, K, N>::bumpk(par_);
-        internal::PhiloxRound<ResultType, K, N>::round(buffer_, par_);
-        generate<N + 1>(cxx11::integral_constant<bool, N < Rounds>());
+        internal::PhiloxBumpk<ResultType, K, N>::bumpk(par);
+        internal::PhiloxRound<ResultType, K, N>::round(buf, par);
+        generate_buffer<N + 1>(buf, par,
+                cxx11::integral_constant<bool, N < Rounds>());
     }
 }; // class PhiloxEngine
 

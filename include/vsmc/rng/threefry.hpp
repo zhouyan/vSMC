@@ -322,38 +322,26 @@ class ThreefryEngine
         remain_ = 0;
     }
 
-    const buffer_type &buffer () {return buffer_;}
-
-    /// \brief Generate a buffer of random bits given the counter and key
-    static buffer_type generate (const ctr_type &c, const key_type &k)
-    {
-        ThreefryEngine<ResultType, K, Rounds> eng(c, k);
-        eng.generate();
-
-        return eng.buffer_;
-    }
-
-    /// \brief Generate a buffer of random bits given the counter and using the
-    /// current key
-    buffer_type generate (const ctr_type &c) const
-    {
-        ThreefryEngine<ResultType, K, Rounds> eng(*this);
-        eng.ctr(c);
-        eng.generate();
-
-        return eng.buffer_;
-    }
-
     result_type operator() ()
     {
         if (remain_ == 0) {
             counter::increment(ctr_);
-            generate();
+            generate_buffer(ctr_, buffer_);
             remain_ = buffer_size_;
         }
         --remain_;
 
         return buffer_[remain_];
+    }
+
+    /// \brief Generate a buffer of random bits given the counter and using the
+    /// current key
+    buffer_type operator() (const ctr_type &c) const
+    {
+        buffer_type buf;
+        generate_buffer(c, buf);
+
+        return buf;
     }
 
     void discard (result_type nskip)
@@ -436,10 +424,22 @@ class ThreefryEngine
     buffer_type buffer_;
     std::size_t remain_;
 
-    void generate ()
+    void generate_buffer (const ctr_type &c, buffer_type &buf) const
     {
-        buffer_ = ctr_;
-        generate<0>(cxx11::true_type());
+        buf = c;
+        generate_buffer<0>(buf, cxx11::true_type());
+    }
+
+    template <std::size_t>
+    void generate_buffer (buffer_type &, cxx11::false_type) const {}
+
+    template <std::size_t N>
+    void generate_buffer (buffer_type &buf, cxx11::true_type) const
+    {
+        internal::ThreefryRotate<ResultType, K, N>::rotate(buf);
+        internal::ThreefryInsert<ResultType, K, N>::insert(buf, par_);
+        generate_buffer<N + 1>(buf,
+                cxx11::integral_constant<bool, N < Rounds>());
     }
 
     void init_par (const key_type &key)
@@ -457,16 +457,6 @@ class ThreefryEngine
         par_[Position<N>()] = key[Position<N>()];
         par_.back() ^= key[Position<N>()];
         par_xor<N + 1>(key, cxx11::integral_constant<bool, N + 1 < K>());
-    }
-
-    template <std::size_t> void generate (cxx11::false_type) {}
-
-    template <std::size_t N>
-    void generate (cxx11::true_type)
-    {
-        internal::ThreefryRotate<ResultType, K, N>::rotate(buffer_);
-        internal::ThreefryInsert<ResultType, K, N>::insert(buffer_, par_);
-        generate<N + 1>(cxx11::integral_constant<bool, N < Rounds>());
     }
 }; // class ThreefryEngine
 

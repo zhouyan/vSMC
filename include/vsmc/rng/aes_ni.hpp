@@ -263,7 +263,7 @@ class AESNIEngine
     public :
 
     typedef ResultType result_type;
-    typedef StaticVector<ResultType, buffer_size_> buffer_type;
+    typedef StaticVector<__m128i, Blocks> buffer_type;
     typedef StaticVector<ResultType, K_> ctr_type;
     typedef StaticVector<ctr_type, Blocks> ctr_block_type;
     typedef typename KeySeq::key_type key_type;
@@ -384,20 +384,16 @@ class AESNIEngine
         remain_ = 0;
     }
 
-    const buffer_type &buffer () {return buffer_;}
-
-    /// \brief Generate a buffer of random bits given a counter and a key
-    ///
-    /// \details
-    /// This is much slower than calling `operator()` to generate the same
-    /// amount of bits, since each call to this function requires the key to be
-    /// initialized.
-    static buffer_type generate (const ctr_type &c, const key_type &k)
+    result_type operator() ()
     {
-        AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(c, k);
-        eng.generate();
+        if (remain_ == 0) {
+            counter::increment(ctr_block_);
+            generate_buffer(ctr_block_, buffer_);
+            remain_ = buffer_size_;
+        }
+        --remain_;
 
-        return eng.buffer_;
+        return reinterpret_cast<const ResultType *>(&buffer_)[remain_];
     }
 
     /// \brief Generate a buffer of random bits given a counter and using the
@@ -407,30 +403,14 @@ class AESNIEngine
     /// This is (hopefully not much) slower than calling `operator()` to
     /// generate the same amount of bits, since the state of the engine has to
     /// be saved.
-    buffer_type generate (const ctr_type &c) const
+    buffer_type operator() (const ctr_type &c) const
     {
-        AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(*this);
-        eng.ctr(c);
-        eng.generate();
+        ctr_block_type cb;
+        StaticCounter<ctr_type>::set(cb, c);
+        buffer_type buf;
+        generate_buffer(*(reinterpret_cast<const cbtype *>(&cb)), buf);
 
-        return eng.buffer_;
-    }
-
-    /// \brief Generate a buffer of random bits given blocks of counters and a
-    /// key
-    ///
-    /// \details
-    /// This is much slower than calling `operator()` to generate the same
-    /// amount of bits, since each call to this function requires the key to be
-    /// initialized.
-    static buffer_type generate (const ctr_block_type &cb, const key_type &k)
-    {
-        AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(
-                cb.front(), k);
-        eng.ctr_block(cb);
-        eng.generate();
-
-        return eng.buffer_;
+        return buf;
     }
 
     /// \brief Generate a buffer of random bits given blocks of counters and
@@ -440,25 +420,12 @@ class AESNIEngine
     /// This is (hopefully not much) slower than calling `operator()` to
     /// generate the same amount of bits, since the state of the engine has to
     /// be saved.
-    buffer_type generate (const ctr_block_type &cb) const
+    buffer_type operator() (const ctr_block_type &cb) const
     {
-        AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng(*this);
-        eng.ctr_block(cb);
-        eng.generate();
+        buffer_type buf;
+        generate_buffer(*(reinterpret_cast<const cbtype *>(&cb)), buf);
 
-        return eng.buffer_;
-    }
-
-    result_type operator() ()
-    {
-        if (remain_ == 0) {
-            counter::increment(ctr_block_);
-            generate();
-            remain_ = buffer_size_;
-        }
-        --remain_;
-
-        return buffer_[remain_];
+        return buf;
     }
 
     void discard (result_type nskip)
@@ -518,11 +485,10 @@ class AESNIEngine
             ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {
         for (std::size_t i = 0; i != Blocks; ++i) {
-            m128i_output(os, eng.pac_[i]);
+            m128i_output(os, eng.buffer_[i]);
             if (os) os << ' ';
         }
         if (os) os << eng.ctr_block_ << ' ';
-        if (os) os << eng.buffer_ << ' ';
         if (os) os << eng.key_seq_ << ' ';
         if (os) os << eng.remain_;
 
@@ -536,9 +502,8 @@ class AESNIEngine
     {
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng_tmp;
         for (std::size_t i = 0; i != Blocks; ++i)
-            m128i_input(is, eng_tmp.pac_[i]);
+            m128i_input(is, eng_tmp.buffer_[i]);
         if (is) is >> std::ws >> eng_tmp.ctr_block_;
-        if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.key_seq_;
         if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
@@ -549,116 +514,105 @@ class AESNIEngine
     private :
 
     // FIXME
-    // pac_ is automatically 16 bytes aligned
+    // buffer_ is automatically 16 bytes aligned
     // Thus, we assume that ctr_block_ and buffer_ will also be 16 bytes
     // alinged
 
-    StaticVector<__m128i, Blocks> pac_;
-    cbtype ctr_block_;
     buffer_type buffer_;
+    cbtype ctr_block_;
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
     std::size_t remain_;
 
-    void generate ()
+    void generate_buffer (const cbtype &cb, buffer_type &buf) const
     {
         key_seq_type ks(key_seq_.get());
-        pack();
-        enc_first<0>(ks, cxx11::true_type());
-        enc_round<1>(ks, cxx11::integral_constant<bool, 1 < Rounds>());
-        enc_last <0>(ks, cxx11::true_type());
-        unpack();
+        pack(cb, buf);
+        enc_first<0>(ks, buf, cxx11::true_type());
+        enc_round<1>(ks, buf, cxx11::integral_constant<bool, 1 < Rounds>());
+        enc_last <0>(ks, buf, cxx11::true_type());
     }
 
     template <std::size_t>
-    void enc_first (const key_seq_type &, cxx11::false_type) {}
+    void enc_first (const key_seq_type &, buffer_type &,
+            cxx11::false_type) const {}
 
     template <std::size_t B>
-    void enc_first (const key_seq_type &ks, cxx11::true_type)
+    void enc_first (const key_seq_type &ks, buffer_type &buf,
+            cxx11::true_type) const
     {
-        pac_[Position<B>()] = _mm_xor_si128(pac_[Position<B>()], ks.front());
-        enc_first<B + 1>(ks, cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    template <std::size_t>
-    void enc_round (const key_seq_type &, cxx11::false_type) {}
-
-    template <std::size_t N>
-    void enc_round (const key_seq_type &ks, cxx11::true_type)
-    {
-        enc_round_block<0, N>(ks, cxx11::true_type());
-        enc_round<N + 1>(ks,
-                cxx11::integral_constant<bool, N  + 1 < Rounds>());
-    }
-
-    template <std::size_t, std::size_t>
-    void enc_round_block (const key_seq_type &, cxx11::false_type) {}
-
-    template <std::size_t B, std::size_t N>
-    void enc_round_block (const key_seq_type &ks, cxx11::true_type)
-    {
-        pac_[Position<B>()] = _mm_aesenc_si128(
-                pac_[Position<B>()], ks[Position<N>()]);
-        enc_round_block<B + 1, N>(ks,
+        buf[Position<B>()] = _mm_xor_si128(buf[Position<B>()], ks.front());
+        enc_first<B + 1>(ks, buf,
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t>
-    void enc_last (const key_seq_type &, cxx11::false_type) {}
+    void enc_round (const key_seq_type &, buffer_type &,
+            cxx11::false_type) const {}
+
+    template <std::size_t N>
+    void enc_round (const key_seq_type &ks, buffer_type &buf,
+            cxx11::true_type) const
+    {
+        enc_round_block<0, N>(ks, buf, cxx11::true_type());
+        enc_round<N + 1>(ks, buf,
+                cxx11::integral_constant<bool, N  + 1 < Rounds>());
+    }
+
+    template <std::size_t, std::size_t>
+    void enc_round_block (const key_seq_type &, buffer_type &,
+            cxx11::false_type) const {}
+
+    template <std::size_t B, std::size_t N>
+    void enc_round_block (const key_seq_type &ks, buffer_type &buf,
+            cxx11::true_type) const
+    {
+        buf[Position<B>()] = _mm_aesenc_si128(
+                buf[Position<B>()], ks[Position<N>()]);
+        enc_round_block<B + 1, N>(ks, buf,
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    template <std::size_t>
+    void enc_last (const key_seq_type &, buffer_type &,
+            cxx11::false_type) const {}
 
     template <std::size_t B>
-    void enc_last (const key_seq_type &ks, cxx11::true_type)
+    void enc_last (const key_seq_type &ks, buffer_type &buf,
+            cxx11::true_type) const
     {
-        pac_[Position<B>()] = _mm_aesenclast_si128(
-                pac_[Position<B>()], ks.back());
-        enc_last<B + 1>(ks, cxx11::integral_constant<bool, B + 1 < Blocks>());
+        buf[Position<B>()] = _mm_aesenclast_si128(
+                buf[Position<B>()], ks.back());
+        enc_last<B + 1>(ks, buf,
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    void pack ()
+    void pack (const cbtype &cb, buffer_type &buf) const
     {
-        is_m128_aligned(ctr_block_.data()) ?
-            pack_a<0>(cxx11::true_type()) : pack_u<0>(cxx11::true_type());
+        is_m128_aligned(cb.data()) ?
+            pack_a<0>(cb, buf, cxx11::true_type()):
+            pack_u<0>(cb, buf, cxx11::true_type());
     }
 
-    void unpack ()
-    {
-        is_m128_aligned(buffer_.data()) ?
-            unpack_a<0>(cxx11::true_type()) : unpack_u<0>(cxx11::true_type());
-    }
-
-    template <std::size_t> void pack_a (cxx11::false_type) {}
+    template <std::size_t>
+    void pack_a (const cbtype &, buffer_type &, cxx11::false_type) const {}
 
     template <std::size_t B>
-    void pack_a (cxx11::true_type)
+    void pack_a (const cbtype &cb, buffer_type &buf, cxx11::true_type) const
     {
-        m128i_pack_a<0>(ctr_block_[Position<B>()], pac_[Position<B>()]);
-        pack_a<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+        m128i_pack_a<0>(cb[Position<B>()], buf[Position<B>()]);
+        pack_a<B + 1>(cb, buf,
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    template <std::size_t> void pack_u (cxx11::false_type) {}
+    template <std::size_t>
+    void pack_u (const cbtype &, buffer_type &, cxx11::false_type) const {}
 
     template <std::size_t B>
-    void pack_u (cxx11::true_type)
+    void pack_u (const cbtype &cb, buffer_type &buf, cxx11::true_type) const
     {
-        m128i_pack_u<0>(ctr_block_[Position<B>()], pac_[Position<B>()]);
-        pack_u<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    template <std::size_t> void unpack_a (cxx11::false_type) {}
-
-    template <std::size_t B>
-    void unpack_a (cxx11::true_type)
-    {
-        m128i_unpack_a<B * K_>(pac_[Position<B>()], buffer_);
-        unpack_a<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    template <std::size_t> void unpack_u (cxx11::false_type) {}
-
-    template <std::size_t B>
-    void unpack_u (cxx11::true_type)
-    {
-        m128i_unpack_u<B * K_>(pac_[Position<B>()], buffer_);
-        unpack_u<B + 1>(cxx11::integral_constant<bool, B + 1 < Blocks>());
+        m128i_pack_u<0>(cb[Position<B>()], buf[Position<B>()]);
+        pack_u<B + 1>(cb, buf,
+                cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class AESNIEngine
 
