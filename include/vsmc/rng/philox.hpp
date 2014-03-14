@@ -364,13 +364,8 @@ class PhiloxEngine
         return buffer_[remain_];
     }
 
-    /// \brief Generate a buffer of random bits given the counter and using the
+    /// \brief Generate a buffer of random bits given a counter using the
     /// current key
-    ///
-    /// \details
-    /// This is (hopefully not much) slower than calling `operator()` to
-    /// generate the same amount of bits, since the state of the engine has to
-    /// be saved.
     buffer_type operator() (const ctr_type &c) const
     {
         buffer_type buf;
@@ -378,6 +373,11 @@ class PhiloxEngine
 
         return buf;
     }
+
+    /// \brief Generate random bits in a pre-allocated buffer given a counter
+    /// using the current key
+    void operator() (const ctr_type &c, buffer_type &buf) const
+    {generate_buffer(c, buf);}
 
     void discard (result_type nskip)
     {

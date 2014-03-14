@@ -397,7 +397,7 @@ class AESNIEngine
         return reinterpret_cast<const ResultType *>(&buffer_)[remain_];
     }
 
-    /// \brief Generate a buffer of random bits given a counter and using the
+    /// \brief Generate a buffer of random bits given a counter using the
     /// current key
     buffer_type operator() (const ctr_type &c) const
     {
@@ -409,8 +409,8 @@ class AESNIEngine
         return buf;
     }
 
-    /// \brief Generate a buffer of random bits given preloaded buffer and
-    /// using the current key
+    /// \brief Generate a buffer of random bits given a block of counters using
+    /// the current key
     buffer_type operator() (const ctr_block_type &cb) const
     {
         buffer_type buf;
@@ -418,6 +418,20 @@ class AESNIEngine
 
         return buf;
     }
+
+    /// \brief Generate random bits in a pre-allocated buffer given a counter
+    /// using the current key
+    void operator() (const ctr_type &c, buffer_type &buf) const
+    {
+        ctr_block_type cb;
+        StaticCounter<ctr_type>::set(cb, c);
+        generate_buffer(*(reinterpret_cast<const cbtype *>(&cb)), buf);
+    }
+
+    /// \brief Generate ranodm bits in a pre-allocated buffer given a block of
+    /// counters using the current key
+    void operator() (const ctr_block_type &cb, buffer_type &buf) const
+    {generate_buffer(*(reinterpret_cast<const cbtype *>(&cb)), buf);}
 
     void discard (result_type nskip)
     {
@@ -516,7 +530,7 @@ class AESNIEngine
 
     void generate_buffer (const cbtype &cb, buffer_type &buf) const
     {
-        key_seq_type ks(key_seq_.get());
+        const key_seq_type ks(key_seq_.get());
         pack(cb, buf);
         enc_first<0>(ks, buf, cxx11::true_type());
         enc_round<1>(ks, buf, cxx11::integral_constant<bool, 1 < Rounds>());
