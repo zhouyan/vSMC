@@ -398,11 +398,6 @@ class AESNIEngine
 
     /// \brief Generate a buffer of random bits given a counter and using the
     /// current key
-    ///
-    /// \details
-    /// This is (hopefully not much) slower than calling `operator()` to
-    /// generate the same amount of bits, since the state of the engine has to
-    /// be saved.
     buffer_type operator() (const ctr_type &c) const
     {
         ctr_block_type cb;
@@ -413,13 +408,8 @@ class AESNIEngine
         return buf;
     }
 
-    /// \brief Generate a buffer of random bits given blocks of counters and
+    /// \brief Generate a buffer of random bits given preloaded buffer and
     /// using the current key
-    ///
-    /// \details
-    /// This is (hopefully not much) slower than calling `operator()` to
-    /// generate the same amount of bits, since the state of the engine has to
-    /// be saved.
     buffer_type operator() (const ctr_block_type &cb) const
     {
         buffer_type buf;
