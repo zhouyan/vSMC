@@ -404,7 +404,7 @@ class AESNIEngine
         ctr_block_type cb;
         StaticCounter<ctr_type>::set(cb, c);
         buffer_type buf;
-        generate_buffer(*(reinterpret_cast<const cbtype *>(&cb)), buf);
+        generate_buffer(cb, buf);
 
         return buf;
     }
@@ -414,7 +414,7 @@ class AESNIEngine
     buffer_type operator() (const ctr_block_type &cb) const
     {
         buffer_type buf;
-        generate_buffer(*(reinterpret_cast<const cbtype *>(&cb)), buf);
+        generate_buffer(cb, buf);
 
         return buf;
     }
@@ -425,13 +425,13 @@ class AESNIEngine
     {
         ctr_block_type cb;
         StaticCounter<ctr_type>::set(cb, c);
-        generate_buffer(*(reinterpret_cast<const cbtype *>(&cb)), buf);
+        generate_buffer(cb, buf);
     }
 
     /// \brief Generate ranodm bits in a pre-allocated buffer given a block of
     /// counters using the current key
     void operator() (const ctr_block_type &cb, buffer_type &buf) const
-    {generate_buffer(*(reinterpret_cast<const cbtype *>(&cb)), buf);}
+    {generate_buffer(cb, buf);}
 
     void discard (result_type nskip)
     {
@@ -528,7 +528,8 @@ class AESNIEngine
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
     std::size_t remain_;
 
-    void generate_buffer (const cbtype &cb, buffer_type &buf) const
+    template <typename CBType>
+    void generate_buffer (const CBType &cb, buffer_type &buf) const
     {
         const key_seq_type ks(key_seq_.get());
         pack(cb, buf);
@@ -591,29 +592,30 @@ class AESNIEngine
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    void pack (const cbtype &cb, buffer_type &buf) const
+    template <typename CBType>
+    void pack (const CBType &cb, buffer_type &buf) const
     {
         is_m128_aligned(cb.data()) ?
             pack_a<0>(cb, buf, cxx11::true_type()):
             pack_u<0>(cb, buf, cxx11::true_type());
     }
 
-    template <std::size_t>
-    void pack_a (const cbtype &, buffer_type &, cxx11::false_type) const {}
+    template <std::size_t, typename CBType>
+    void pack_a (const CBType &, buffer_type &, cxx11::false_type) const {}
 
-    template <std::size_t B>
-    void pack_a (const cbtype &cb, buffer_type &buf, cxx11::true_type) const
+    template <std::size_t B, typename CBType>
+    void pack_a (const CBType &cb, buffer_type &buf, cxx11::true_type) const
     {
         m128i_pack_a<0>(cb[Position<B>()], buf[Position<B>()]);
         pack_a<B + 1>(cb, buf,
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    template <std::size_t>
-    void pack_u (const cbtype &, buffer_type &, cxx11::false_type) const {}
+    template <std::size_t, typename CBType>
+    void pack_u (const CBType &, buffer_type &, cxx11::false_type) const {}
 
-    template <std::size_t B>
-    void pack_u (const cbtype &cb, buffer_type &buf, cxx11::true_type) const
+    template <std::size_t B, typename CBType>
+    void pack_u (const CBType &cb, buffer_type &buf, cxx11::true_type) const
     {
         m128i_pack_u<0>(cb[Position<B>()], buf[Position<B>()]);
         pack_u<B + 1>(cb, buf,
