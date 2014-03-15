@@ -191,7 +191,6 @@
 #include <vsmc/rng/seed.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/rng/generator_wrapper.hpp>
-#include <vsmc/rng/engine_result_wrapper.hpp>
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
 #include <vsmc/rng/xorshift.hpp>

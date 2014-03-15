@@ -30,7 +30,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
     typedef typename KeySeq::key_type key_type;
     typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
 
-    key_seq_type get (const key_type &k) const {return key_seq_;}
+    key_seq_type get (const key_type &) const {return key_seq_;}
 
     void set (const key_type &k)
     {
@@ -86,7 +86,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
         return ks;
     }
 
-    void set (const key_type &k) {}
+    void set (const key_type &) {}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
