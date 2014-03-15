@@ -2,7 +2,6 @@
 #define VSMC_RD_RSEED_HPP
 
 #include <vsmc/rng/generator_wrapper.hpp>
-#include <vsmc/rng/engine_result_wrapper.hpp>
 #include <immintrin.h>
 
 #ifndef VSMC_RD_SEED_NTRIAL_MAX
@@ -81,18 +80,6 @@ typedef RdSeedEngine<uint32_t, RdSeedStep<uint32_t> > RdSeed32;
 /// \brief C++11 Engine that wraps _rdseed64_step
 /// \ingroup RDRNG
 typedef RdSeedEngine<uint64_t, RdSeedStep<uint64_t> > RdSeed64;
-
-/// \brief C++11 Engine that wraps _rdseed32_step but output 16-bits integers
-/// \ingroup RDRNG
-typedef EngineResultWrapper<uint16_t, RdSeed32> RdSeed32_16;
-
-/// \brief C++11 Engine that wraps _rdseed64_step but output 16-bits integers
-/// \ingroup RDRNG
-typedef EngineResultWrapper<uint16_t, RdSeed64> RdSeed64_16;
-
-/// \brief C++11 Engine that wraps _rdseed64_step but output 32-bits integers
-/// \ingroup RDRNG
-typedef EngineResultWrapper<uint32_t, RdSeed64> RdSeed64_32;
 
 } // namespace vsmc
 

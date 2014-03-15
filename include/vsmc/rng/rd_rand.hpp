@@ -2,7 +2,6 @@
 #define VSMC_RNG_RD_RAND_HPP
 
 #include <vsmc/rng/generator_wrapper.hpp>
-#include <vsmc/rng/engine_result_wrapper.hpp>
 #include <immintrin.h>
 
 #ifndef VSMC_RD_RAND_NTRIAL_MAX
@@ -81,18 +80,6 @@ typedef GeneratorWrapper<uint32_t, RdRandStep<uint32_t> > RdRand32;
 /// \brief C++11 Engine that wraps _rdrand64_step
 /// \ingroup RDRNG
 typedef GeneratorWrapper<uint64_t, RdRandStep<uint64_t> > RdRand64;
-
-/// \brief C++11 Engine that wraps _rdrand32_step but output 16-bits integers
-/// \ingroup RDRNG
-typedef EngineResultWrapper<uint16_t, RdRand32> RdRand32_16;
-
-/// \brief C++11 Engine that wraps _rdrand64_step but output 16-bits integers
-/// \ingroup RDRNG
-typedef EngineResultWrapper<uint16_t, RdRand64> RdRand64_16;
-
-/// \brief C++11 Engine that wraps _rdrand64_step but output 32-bits integers
-/// \ingroup RDRNG
-typedef EngineResultWrapper<uint32_t, RdRand64> RdRand64_32;
 
 } // namespace vsmc
 
