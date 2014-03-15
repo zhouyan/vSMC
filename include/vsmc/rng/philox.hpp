@@ -272,12 +272,10 @@ template <typename ResultType, std::size_t K,
          std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxEngine
 {
-    static VSMC_CONSTEXPR const std::size_t buffer_size_ = K;
-
     public :
 
     typedef ResultType result_type;
-    typedef StaticVector<ResultType, buffer_size_> buffer_type;
+    typedef StaticVector<ResultType, K> buffer_type;
     typedef StaticVector<ResultType, K> ctr_type;
     typedef StaticVector<ResultType, K / 2> key_type;
 
@@ -357,7 +355,7 @@ class PhiloxEngine
         if (remain_ == 0) {
             counter::increment(ctr_);
             generate_buffer(ctr_, buffer_);
-            remain_ = buffer_size_;
+            remain_ = static_cast<result_type>(K);
         }
         --remain_;
 
@@ -381,24 +379,24 @@ class PhiloxEngine
 
     void discard (result_type nskip)
     {
-        std::size_t n = static_cast<std::size_t>(nskip);
-        if (n <= remain_) {
-            remain_ -= n;
+        const result_type k = static_cast<result_type>(K);
+        if (nskip <= remain_) {
+            remain_ -= nskip;
             return;
         }
 
-        n -= remain_;
-        if (n <= buffer_size_) {
+        nskip -= remain_;
+        if (nskip <= k) {
             remain_ = 0;
             operator()();
-            remain_ = buffer_size_ - n;
+            remain_ = k - nskip;
             return;
         }
 
         remain_ = 0;
-        counter::increment(ctr_, static_cast<result_type>(n / buffer_size_));
+        counter::increment(ctr_, nskip / k);
         operator()();
-        remain_ = buffer_size_ - n % buffer_size_;
+        remain_ = k - nskip % k;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -413,10 +411,9 @@ class PhiloxEngine
             const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {
         return
+            eng1.remain_ == eng2.remain_ &&
             eng1.ctr_ == eng2.ctr_ &&
-            eng1.key_ == eng2.key_ &&
-            eng1.buffer_ == eng2.buffer_ &&
-            eng1.remain_ == eng2.remain_;
+            eng1.key_ == eng2.key_;
     }
 
     friend inline bool operator!= (
@@ -443,9 +440,9 @@ class PhiloxEngine
             PhiloxEngine<ResultType, K, Rounds> &eng)
     {
         PhiloxEngine<ResultType, K, Rounds> eng_tmp;
+        if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.ctr_;
         if (is) is >> std::ws >> eng_tmp.key_;
-        if (is) is >> std::ws >> eng_tmp.buffer_;
         if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
 
@@ -457,7 +454,7 @@ class PhiloxEngine
     ctr_type ctr_;
     key_type key_;
     buffer_type buffer_;
-    std::size_t remain_;
+    result_type remain_;
 
     void generate_buffer (const ctr_type c, buffer_type &buf) const
     {

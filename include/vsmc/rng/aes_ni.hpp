@@ -30,33 +30,19 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
     typedef typename KeySeq::key_type key_type;
     typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
 
-    key_seq_type get () const {return key_seq_;}
+    key_seq_type get (const key_type &k) const {return key_seq_;}
 
     void set (const key_type &k)
     {
         KeySeq seq;
-        key_ = k;
-        seq.generate(key_, key_seq_);
+        seq.generate(k, key_seq_);
     }
-
-    key_type key () const {return key_;}
-
-    friend inline bool operator== (
-            const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks1,
-            const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks2)
-    {return ks1.key_ == ks2.key_;}
-
-    friend inline bool operator!= (
-            const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks1,
-            const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks2)
-    {return !(ks1 == ks2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
     {
-        if (os) os << ks.key_; if (os) os << ' ';
         for (std::size_t i = 0; i != Rounds + 1; ++i) {
             m128i_output(os, ks.key_seq_[i]);
             if (os) os << ' ';
@@ -71,7 +57,6 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
             AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
     {
         AESNIKeySeqStorage<KeySeq, true, Rounds> ks_tmp;
-        if (is) is >> std::ws >> ks_tmp.key_;
         for (std::size_t i = 0; i != Rounds + 1; ++i)
             m128i_input(is, ks_tmp.key_seq_[i]);
         if (is) ks = ks_tmp;
@@ -81,7 +66,6 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
 
     private :
 
-    key_type key_;
     key_seq_type key_seq_;
 }; // struct AESNIKeySeqStorage
 
@@ -93,54 +77,26 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
     typedef typename KeySeq::key_type key_type;
     typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
 
-    key_seq_type get () const
+    key_seq_type get (const key_type &k) const
     {
         key_seq_type ks;
         KeySeq seq;
-        seq.generate(key_, ks);
+        seq.generate(k, ks);
 
         return ks;
     }
 
-    void set (const key_type &k) {key_ = k;}
-
-    key_type key () const {return key_;}
-
-    friend inline bool operator== (
-            const AESNIKeySeqStorage<KeySeq, false, Rounds> &ks1,
-            const AESNIKeySeqStorage<KeySeq, false, Rounds> &ks2)
-    {return ks1.key_ == ks2.key_;}
-
-    friend inline bool operator!= (
-            const AESNIKeySeqStorage<KeySeq, false, Rounds> &ks1,
-            const AESNIKeySeqStorage<KeySeq, false, Rounds> &ks2)
-    {return !(ks1 == ks2);}
+    void set (const key_type &k) {}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
-            const AESNIKeySeqStorage<KeySeq, false, Rounds> &ks)
-    {
-        if (os) os << ks.key_; if (os) os << ' ';
-
-        return os;
-    }
+            const AESNIKeySeqStorage<KeySeq, false, Rounds> &) {return os;}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
-            AESNIKeySeqStorage<KeySeq, false, Rounds> &ks)
-    {
-        AESNIKeySeqStorage<KeySeq, false, Rounds> ks_tmp;
-        if (is) is >> std::ws >> ks_tmp.key_;
-        if (is) ks = ks_tmp;
-
-        return is;
-    }
-
-    private :
-
-    key_type key_;
+            AESNIKeySeqStorage<KeySeq, false, Rounds> &) {return is;}
 }; // struct AESNIKeySeqStorage
 
 } // namespace vsmc::internal
@@ -293,7 +249,7 @@ class AESNIEngine
         seed(seq);
     }
 
-    AESNIEngine (const ctr_type &c, const key_type &k) : remain_(0)
+    AESNIEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         ctr_block_type tmp;
@@ -305,10 +261,9 @@ class AESNIEngine
     void seed (result_type s)
     {
         counter::reset(ctr_block_);
-        key_type k;
-        k.fill(0);
-        k.front() = s;
-        key_seq_.set(k);
+        key_.fill(0);
+        key_.front() = s;
+        key_seq_.set(key_);
         remain_ = 0;
     }
 
@@ -318,9 +273,8 @@ class AESNIEngine
             VSMC_NULLPTR)
     {
         counter::reset(ctr_block_);
-        key_type k;
-        seq.generate(k.begin(), k.end());
-        key_seq_.set(k);
+        seq.generate(key_.begin(), key_.end());
+        key_seq_.set(key_);
         remain_ = 0;
     }
 
@@ -329,6 +283,7 @@ class AESNIEngine
     {
         ctr_type tmp;
         std::memcpy(tmp.data(), ctr_block_[Position<B>()].data(), 16);
+
         return tmp;
     }
 
@@ -336,12 +291,13 @@ class AESNIEngine
     {
         ctr_block_type tmp;
         std::memcpy(tmp.data(), ctr_block_.data(), 16 * Blocks);
+
         return tmp;
     }
 
-    key_type key () const {return key_seq_.key();}
+    key_type key () const {return key_;}
 
-    key_seq_type key_seq () const {return key_seq_.get();}
+    key_seq_type key_seq () const {return key_seq_.get(key_);}
 
     void ctr (const ctr_type &c)
     {
@@ -373,6 +329,7 @@ class AESNIEngine
 
     void key (const key_type &k)
     {
+        key_ = k;
         key_seq_.set(k);
         remain_ = 0;
     }
@@ -469,11 +426,9 @@ class AESNIEngine
             const AESNIEngine<
             ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng2)
     {
-        return
-            eng1.ctr_block_ == eng2.ctr_block_ &&
-            eng1.buffer_ == eng2.buffer_ &&
-            eng1.key_seq_ == eng2.key_seq_ &&
-            eng1.remain_ == eng2.remain_;
+        return eng1.remain_ == eng2.remain_ &&
+            eng1.key_ == eng2.key_ &&
+            eng1.ctr_block_ == eng2.ctr_block_;
     }
 
     friend inline bool operator!= (
@@ -494,7 +449,7 @@ class AESNIEngine
             if (os) os << ' ';
         }
         if (os) os << eng.ctr_block_ << ' ';
-        if (os) os << eng.key_seq_ << ' ';
+        if (os) os << eng.key_ << ' ';
         if (os) os << eng.remain_;
 
         return os;
@@ -509,7 +464,7 @@ class AESNIEngine
         for (std::size_t i = 0; i != Blocks; ++i)
             m128i_input(is, eng_tmp.buffer_[i]);
         if (is) is >> std::ws >> eng_tmp.ctr_block_;
-        if (is) is >> std::ws >> eng_tmp.key_seq_;
+        if (is) is >> std::ws >> eng_tmp.key_;
         if (is) is >> std::ws >> eng_tmp.remain_;
         if (is) eng = eng_tmp;
 
@@ -526,12 +481,13 @@ class AESNIEngine
     buffer_type buffer_;
     cbtype ctr_block_;
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
+    key_type key_;
     std::size_t remain_;
 
     template <typename CBType>
     void generate_buffer (const CBType &cb, buffer_type &buf) const
     {
-        const key_seq_type ks(key_seq_.get());
+        const key_seq_type ks(key_seq_.get(key_));
         pack(cb, buf);
         enc_first<0>(ks, buf, cxx11::true_type());
         enc_round<1>(ks, buf, cxx11::integral_constant<bool, 1 < Rounds>());
