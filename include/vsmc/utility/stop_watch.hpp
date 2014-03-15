@@ -7,7 +7,7 @@
     VSMC_RUNTIME_ASSERT((!(running_ || other.running_)),                     \
             ("CANNOT ADD TWO RUNNING **StopWatch**"))
 
-/// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fail
+/// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fails
 /// \ingroup Config
 #ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
 #define VSMC_HAS_NATIVE_TIME_LIBRARY 1
@@ -24,6 +24,13 @@
 /// which case StopWatch is a typedef of this macro.
 #ifndef VSMC_STOP_WATCH_TYPE
 #define VSMC_STOP_WATCH_TYPE internal::DummyStopWatch
+#endif
+
+/// \brief Default C++11 clock used as StopWatch if `VSMC_HAS_CXX11LIB_CHRONO`
+/// test successes
+/// \ingroup Config
+#ifndef VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE
+#define VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE std::chrono::high_resolution_clock
 #endif
 
 namespace vsmc {
@@ -55,69 +62,6 @@ class DummyStopWatch
 
 } // namespace vsmc::internal
 
-/// \brief StopWatch as a wrapper of C++11 clock
-/// \ingroup StopWatch
-template <typename ClockType>
-class StopWatchClockWrapper
-{
-    public :
-
-    typedef ClockType clock_type;
-
-    StopWatchClockWrapper () : elapsed_(0), running_(false) {reset();}
-
-    bool running () const {return running_;}
-
-    void start () const
-    {
-        running_ = true;
-        start_time_ = clock_type::now();
-    }
-
-    void stop () const
-    {
-        typename clock_type::time_point stop_time = clock_type::now();
-        elapsed_ += stop_time - start_time_;
-        running_ = false;
-    }
-
-    void reset () const
-    {
-        start();
-        elapsed_ = typename clock_type::duration(0);
-        running_ = false;
-    }
-
-    typename clock_type::duration elapsed () const {return elapsed_;}
-
-    StopWatchClockWrapper<ClockType> &operator+= (
-            const StopWatchClockWrapper<ClockType> &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_ += other.elapsed_;
-
-        return *this;
-    }
-
-    StopWatchClockWrapper<ClockType> operator+ (
-            const StopWatchClockWrapper<ClockType> &other) const
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        StopWatchClockWrapper<ClockType> watch(*this);
-        watch += other;
-
-        return watch;
-    }
-
-    private :
-
-    mutable typename clock_type::duration elapsed_;
-    mutable typename clock_type::time_point start_time_;
-    mutable bool running_;
-}; // class StopWatchClockWrapper
-
 /// \brief Start and stop a StopWatch in scope
 /// \ingroup StopWatch
 template <typename WatchType>
@@ -147,49 +91,105 @@ class ScopedStopWatch
 
 namespace vsmc {
 
-/// \brief Stop watch
+/// \brief StopWatch as an adapter of C++11 clock
 /// \ingroup StopWatch
-class StopWatch :
-    public StopWatchClockWrapper<std::chrono::high_resolution_clock>
+template <typename ClockType>
+class StopWatchClockAdapter
 {
     public :
+
+    typedef ClockType clock_type;
+
+    StopWatchClockAdapter () : elapsed_(0), running_(false) {reset();}
+
+    bool running () const {return running_;}
+
+    void start () const
+    {
+        running_ = true;
+        start_time_ = clock_type::now();
+    }
+
+    void stop () const
+    {
+        typename clock_type::time_point stop_time = clock_type::now();
+        elapsed_ += stop_time - start_time_;
+        running_ = false;
+    }
+
+    void reset () const
+    {
+        start();
+        elapsed_ = typename clock_type::duration(0);
+        running_ = false;
+    }
+
+    StopWatchClockAdapter<ClockType> &operator+= (
+            const StopWatchClockAdapter<ClockType> &other)
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
+
+        elapsed_ += other.elapsed_;
+
+        return *this;
+    }
+
+    friend StopWatchClockAdapter<ClockType> operator+ (
+            const StopWatchClockAdapter<ClockType> &sw1,
+            const StopWatchClockAdapter<ClockType> &sw2)
+    {
+        StopWatchClockAdapter<ClockType> watch(sw1);
+        watch += sw2;
+
+        return watch;
+    }
 
     double nanoseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::nano> >(this->elapsed()).count();
+            double, std::nano> >(elapsed_).count();
     }
 
     double microseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::micro> >(this->elapsed()).count();
+            double, std::micro> >(elapsed_).count();
     }
 
     double milliseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::milli> >(this->elapsed()).count();
+            double, std::milli> >(elapsed_).count();
     }
 
     double seconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::ratio<1> > >(this->elapsed()).count();
+            double, std::ratio<1> > >(elapsed_).count();
     }
 
     double minutes () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::ratio<60> > >(this->elapsed()).count();
+            double, std::ratio<60> > >(elapsed_).count();
     }
 
     double hours () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
-            double, std::ratio<3600> > >(this->elapsed()).count();
+            double, std::ratio<3600> > >(elapsed_).count();
     }
-}; // class StopWatch
+
+    private :
+
+    mutable typename clock_type::duration elapsed_;
+    mutable typename clock_type::time_point start_time_;
+    mutable bool running_;
+}; // class StopWatchClockAdapter
+
+/// \brief Stop watch
+/// \ingroup StopWatch
+typedef StopWatchClockAdapter<VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE> StopWatch;
 
 } // namespace vsmc
 
@@ -291,8 +291,19 @@ class StopWatch
     mutable uint64_t start_time_;
     mutable mach_timebase_info_data_t timebase_;
     mutable bool running_;
-    static VSMC_CONSTEXPR const uint64_t ratio_ = 1000000000UL; // 9 zero
+    static VSMC_CONSTEXPR const uint64_t ratio_ =
+        static_cast<uint64_t>(1000000000ULL); // 9 zero
 }; // class StopWatch
+
+/// \brief StopWatch operator+
+/// \ingroup StopWatch
+inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
+{
+    StopWatch watch(sw1);
+    watch += sw2;
+
+    return watch;
+}
 
 } // namespace vsmc
 
@@ -393,8 +404,19 @@ class StopWatch
     mutable timespec elapsed_;
     mutable timespec start_time_;
     mutable bool running_;
-    static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
+    static VSMC_CONSTEXPR const long ratio_ =
+        static_cast<uint64_t>(1000000000LL); // 9 zero
 }; // class StopWatch
+
+/// \brief StopWatch operator+
+/// \ingroup StopWatch
+inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
+{
+    StopWatch watch(sw1);
+    watch += sw2;
+
+    return watch;
+}
 
 } // namespace vsmc
 
@@ -478,6 +500,16 @@ class StopWatch
     mutable bool running_;
 }; // class StopWatch
 
+/// \brief StopWatch operator+
+/// \ingroup StopWatch
+inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
+{
+    StopWatch watch(sw1);
+    watch += sw2;
+
+    return watch;
+}
+
 } // namespace vsmc
 
 #endif // VSMC_HAS_NATIVE_TIME_LIBRARY
@@ -491,20 +523,5 @@ typedef VSMC_STOP_WATCH_TYPE StopWatch;
 #else
 #undef VSMC_STOP_WATCH_DEFINED
 #endif
-
-namespace vsmc {
-
-/// \brief StopWatch operator+
-/// \ingroup StopWatch
-inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
-{
-    StopWatch watch(sw1);
-    watch += sw2;
-
-    return watch;
-}
-
-} // namespace vsmc
-
 
 #endif // VSMC_UTILITY_STOP_WATCH_HPP
