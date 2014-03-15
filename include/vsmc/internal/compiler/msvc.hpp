@@ -217,7 +217,7 @@
 
 // C++11 library features
 
-#if _MSC_VER >= 1700
+#if _MSC_VER >= VSMC_MSVC_NONEXIST
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_HAS_CXX11LIB_CHRONO 1
 #endif
