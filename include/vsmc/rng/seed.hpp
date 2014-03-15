@@ -3,6 +3,10 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
+#define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType) \
+    VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),		     \
+	    USE_SeedGenerator_WITH_A_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
+
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem) \
     VSMC_RUNTIME_ASSERT((div > rem),                                         \
             ("**SeedGenerator::modulo** "                                    \
@@ -43,16 +47,16 @@ namespace vsmc {
 /// For multithreading programs, the access to this member function shall be
 /// protected by mutex, if it is called from multiple threads. Or one can use
 /// distinct type `ID` to initialized distinct SeedGenerator instances.
-template <typename ID>
+template <typename ID, typename ResultType = unsigned>
 class SeedGenerator
 {
     public :
 
-    typedef unsigned result_type;
+    typedef ResultType result_type;
 
-    static SeedGenerator<ID> &instance ()
+    static SeedGenerator<ID, ResultType> &instance ()
     {
-        static SeedGenerator<ID> seed;
+        static SeedGenerator<ID, ResultType> seed;
 
         return seed;
     }
@@ -110,16 +114,19 @@ class SeedGenerator
     private :
 
     result_type seed_;
-    result_type seed_max_;
     result_type divisor_;
     result_type remainder_;
+    result_type seed_max_;
 
     SeedGenerator () :
-        seed_(0), seed_max_(std::numeric_limits<result_type>::max VSMC_MNE ()),
-        divisor_(1), remainder_(0) {}
+        seed_(0), divisor_(1), remainder_(0)
+	seed_max_(static_cast<result_type>(~(static_cast<result_type>(0)))),
+    {VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType);}
 
-    SeedGenerator (const SeedGenerator<ID> &);
-    SeedGenerator<ID> &operator= (const SeedGenerator<ID> &);
+    SeedGenerator (const SeedGenerator<ID, ResultType> &);
+
+    SeedGenerator<ID, ResultType> &operator= (
+	    const SeedGenerator<ID, ResultType> &);
 }; // class SeedGenerator
 
 typedef VSMC_SEED_TYPE Seed;
