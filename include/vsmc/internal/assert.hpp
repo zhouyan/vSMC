@@ -15,9 +15,8 @@
 #else // VSMC_HAS_CXX11_STATIC_ASSERT
 #define VSMC_STATIC_ASSERT(cond, msg) \
 {                                                                            \
-    struct VSMC_STATIC_ASSERT_FAILURE_##msg {};                              \
-    ::vsmc::StaticAssert<bool(cond)>::test(                                  \
-                VSMC_STATIC_ASSERT_FAILURE_##msg());                         \
+    struct VSMC_STATIC_ASSERT_FAILURE {enum msg {err};};                     \
+    ::vsmc::StaticAssert<bool(cond)>::test(VSMC_STATIC_ASSERT_FAILURE::err); \
 }
 #endif // VSMC_HAS_CXX11_STATIC_ASSERT
 #endif // VSMC_NO_STATIC_ASSERT
@@ -61,7 +60,7 @@
 
 namespace vsmc {
 
-template <bool> struct StaticAssert {static void test (int) {}};
+template <bool> struct StaticAssert {static void test (int *) {}};
 
 template <>
 struct StaticAssert<true> {static void test (...) {}};
