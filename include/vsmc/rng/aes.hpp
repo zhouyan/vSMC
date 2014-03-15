@@ -75,8 +75,6 @@ class AES128KeySeq
 
     typedef StaticVector<ResultType, 16 / sizeof(ResultType)> key_type;
 
-    AES128KeySeq () : xmm1_(), xmm2_(), xmm3_() {}
-
     template <std::size_t Rp1, typename Traits>
     void generate (const key_type &key,
             StaticVector<__m128i, Rp1, Traits> &key_seq)
@@ -170,9 +168,6 @@ class AES192KeySeq
     public :
 
     typedef StaticVector<ResultType, 24 / sizeof(ResultType)> key_type;
-
-    AES192KeySeq () :
-        xmm1_(), xmm2_(), xmm3_(), xmm4_(), xmm5_(), xmm6_(), xmm7_() {}
 
     template <std::size_t Rp1, typename Traits>
     void generate (const key_type &key,
@@ -327,8 +322,6 @@ class AES256KeySeq
     public :
 
     typedef StaticVector<ResultType, 32 / sizeof(ResultType)> key_type;
-
-    AES256KeySeq () : xmm1_(), xmm2_(), xmm3_(), xmm4_() {}
 
     template <std::size_t Rp1, typename Traits>
     void generate (const key_type &key,

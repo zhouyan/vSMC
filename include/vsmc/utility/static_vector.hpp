@@ -35,19 +35,13 @@ class StaticVectorStorage<T, N, true>
 {
     public :
 
-    static VSMC_CONSTEXPR const bool is_static = true;
-
     T &operator[] (std::size_t i) {return data_[i];}
 
     const T &operator[] (std::size_t i) const {return data_[i];}
 
-    protected :
+    T *data () {return data_;}
 
-    StaticVectorStorage () : data_() {}
-
-    T *ptr () {return data_;}
-
-    const T *ptr () const {return data_;}
+    const T *data () const {return data_;}
 
     void swap_data (StaticVectorStorage<T, N, true> &other)
     {
@@ -60,41 +54,12 @@ class StaticVectorStorage<T, N, true>
     private :
 
     T data_[N];
-
-    static VSMC_CONSTEXPR const std::size_t max_unroll_ = 16;
-
-    void copy (const StaticVectorStorage<T, N, true> &other, cxx11::false_type)
-    {
-        for (std::size_t i = 0; i != N; ++i)
-            data_[i] = other.data_[i];
-    }
-
-    void copy (const StaticVectorStorage<T, N, true> &other, cxx11::true_type)
-    {copy<0>(other, cxx11::integral_constant<bool, 0 < N>());}
-
-    template <std::size_t>
-    void copy (const StaticVectorStorage<T, N, true> &, cxx11::false_type) {}
-
-    template <std::size_t I>
-    void copy (const StaticVectorStorage<T, N, true> &other, cxx11::true_type)
-    {
-        data_[I] = other.data_[I];
-        copy<I + 1>(other, cxx11::integral_constant<bool, I + 1 < N>());
-    }
 }; // class StaticVectorStorage
 
 template <typename T, std::size_t N>
 class StaticVectorStorage<T, N, false>
 {
     public :
-
-    static VSMC_CONSTEXPR const bool is_static = false;
-
-    T &operator[] (std::size_t i) {return data_[i];}
-
-    const T &operator[] (std::size_t i) const {return data_[i];}
-
-    protected :
 
     StaticVectorStorage () : data_(new T[N]()) {}
 
@@ -140,9 +105,13 @@ class StaticVectorStorage<T, N, false>
             delete [] data_;
     }
 
-    T *ptr () {return data_;}
+    T &operator[] (std::size_t i) {return data_[i];}
 
-    const T *ptr () const {return data_;}
+    const T &operator[] (std::size_t i) const {return data_[i];}
+
+    T *data () {return data_;}
+
+    const T *data () const {return data_;}
 
     void swap_data (StaticVectorStorage<T, N, false> &other)
     {std::swap(data_, other.data_);}
@@ -305,17 +274,17 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    iterator begin () {return iterator(this->ptr());}
+    iterator begin () {return iterator(this->data());}
 
-    iterator end () {return iterator(this->ptr() + N);}
+    iterator end () {return iterator(this->data() + N);}
 
-    const_iterator begin () const {return cosnt_iterator(this->ptr());}
+    const_iterator begin () const {return cosnt_iterator(this->data());}
 
-    const_iterator end () const {return const_iterator(this->ptr() + N);}
+    const_iterator end () const {return const_iterator(this->data() + N);}
 
-    const_iterator cbegin () const {return const_iterator(this->ptr());}
+    const_iterator cbegin () const {return const_iterator(this->data());}
 
-    const_iterator cend () const {return const_iterator(this->ptr() + N);}
+    const_iterator cend () const {return const_iterator(this->data() + N);}
 
     reverse_iterator rbegin () {return reverse_iterator(end());}
 
@@ -392,10 +361,6 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     reference back () {return at<N - 1>();}
 
     const_reference back () const {return at<N - 1>();}
-
-    pointer data () {return this->ptr();}
-
-    const_pointer data () const {return this->ptr();}
 
     static VSMC_CONSTEXPR bool empty () {return N == 0;}
 
