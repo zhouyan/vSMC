@@ -236,7 +236,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// ~~~
 /// which is similar to that of C++11 `seed_seq`. Given a unique key, a
 /// sequence of round keys shall be generated and filled into `key_seq`. The
-/// `KeySeq` type also needs to have a member type `key_type`
+/// `KeySeq` type also needs to have a member type `key_type`.
 ///
 /// \tparam KeySeqInit The key sequence can be computed when the engine is
 /// constructed or seeded, or computed each time it is needed. Prepare the key
