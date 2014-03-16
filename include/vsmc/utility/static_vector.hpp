@@ -227,48 +227,48 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     reference at (size_type i)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N);
-        return this->operator[](i);
+        return storage_type::operator[](i);
     }
 
     const_reference at (size_type i) const
     {
         VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N);
-        return this->operator[](i);
+        return storage_type::operator[](i);
     }
 
     template <size_type Pos>
     reference at ()
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->operator[](Pos);
+        return storage_type::operator[](Pos);
     }
 
     template <size_type Pos>
     const_reference at () const
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->operator[](Pos);
+        return storage_type::operator[](Pos);
     }
 
     template <size_type Pos>
     reference at (Position<Pos>)
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->operator[](Pos);
+        return storage_type::operator[](Pos);
     }
 
     template <size_type Pos>
     const_reference at (Position<Pos>) const
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return this->operator[](Pos);
+        return storage_type::operator[](Pos);
     }
 
     reference operator[] (size_type i)
-    {return this->operator[](i);}
+    {return storage_type::operator[](i);}
 
     const_reference operator[] (size_type i) const
-    {return this->operator[](i);}
+    {return storage_type::operator[](i);}
 
     template <size_type Pos>
     reference operator[] (Position<Pos>) {return at<Pos>();}
@@ -291,7 +291,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     void fill (const T &value)
     {
         for (size_type i = 0; i != N; ++i)
-            this->operator[](i) = value;
+            storage_type::operator[](i) = value;
     }
 
     void swap (StaticVector<T, N, Traits> &other) {this->swap_data(other);}
@@ -415,7 +415,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     {
         StaticVector<T, Size, Traits> res;
         for (std::size_t i = 0, j = 0; i != N && j != Size; ++i, ++j)
-            res[j] = this->operator[](i);
+            res[j] = storage_type::operator[](i);
 
         return res;
     }
@@ -431,7 +431,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_END(End, N);
         StaticVector<T, End - Begin, Traits> res;
         for (std::size_t i = Begin, j = 0; i != End; ++i, ++j)
-            res[j] = this->operator[](i);
+            res[j] = storage_type::operator[](i);
 
         return res;
     }
@@ -446,7 +446,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_SLICE_BEGIN(Begin, N);
         StaticVector<T, Size, Traits> res;
         for (std::size_t i = Begin, j = 0; i != N && j != Size; ++i, ++j)
-            res[j] = this->operator[](i);
+            res[j] = storage_type::operator[](i);
 
         return res;
     }
