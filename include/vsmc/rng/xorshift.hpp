@@ -252,16 +252,27 @@ class XorshiftEngine
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
-    {if (os) os << eng.state_; return os;}
+    {
+        if (!os.good())
+            return os;
+
+        os << eng.state_;
+
+        return os;
+    }
 
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
             XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
     {
+        if (!is.good())
+            return is;
+
         StaticVector<ResultType, K> tmp;
-        if (is) is >> std::ws >> tmp;
-        if (is) {
+        is >> std::ws >> tmp;
+
+        if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
             eng.state_ = cxx11::move(tmp);
 #else
@@ -349,18 +360,29 @@ class XorwowEngine
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const XorwowEngine<Eng, D, DInit> &eng)
-    {return (os << eng.eng_ << ' ' << eng.weyl_);}
+    {
+        if (!os.good())
+            return os;
+
+        os << eng.eng_ << ' ' << eng.weyl_;
+
+        return os;
+    }
 
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
             XorwowEngine<Eng, D, DInit> &eng)
     {
+        if (!is.good())
+            return is;
+
         engine_type eng_tmp;
         result_type weyl_tmp = 0;
-        if (is) is >> std::ws >> eng_tmp;
-        if (is) is >> std::ws >> weyl_tmp;
-        if (is) {
+        is >> std::ws >> eng_tmp;
+        is >> std::ws >> weyl_tmp;
+
+        if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
             eng.eng_ = cxx11::move(eng_tmp);
 #else

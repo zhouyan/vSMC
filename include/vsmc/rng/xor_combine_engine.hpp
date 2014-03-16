@@ -94,8 +94,10 @@ class XorCombineEngine
             std::basic_ostream<CharT, Traits> &os,
             const XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
     {
-        if (os) os << eng.eng1_ << ' ';
-        if (os) os << eng.eng2_;
+        if (!os.good())
+            return os;
+
+        os << eng.eng1_ << ' ' << eng.eng2_;
 
         return os;
     }
@@ -105,11 +107,15 @@ class XorCombineEngine
             std::basic_istream<CharT, Traits> &is,
             XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
     {
+        if (!is.good())
+            return is;
+
         engine1_type eng1_tmp;
         engine2_type eng2_tmp;
-        if (is) is >> std::ws >> eng1_tmp;
-        if (is) is >> std::ws >> eng2_tmp;
-        if (is) {
+        is >> std::ws >> eng1_tmp;
+        is >> std::ws >> eng2_tmp;
+
+        if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
             eng.eng1_ = cxx11::move(eng1_tmp);
             eng.eng2_ = cxx11::move(eng2_tmp);

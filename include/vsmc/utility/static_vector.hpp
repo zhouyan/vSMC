@@ -373,12 +373,12 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
             std::basic_ostream<CharT, CharTraits> &os,
             const StaticVector<T, N, Traits> &sv)
     {
-        if (!os)
+        if (!os.good())
             return os;
 
         for (std::size_t i = 0; i < N - 1; ++i)
-            if (os) os << sv[i] << ' ';
-        if (os) os << sv[N - 1];
+            os << sv[i] << ' ';
+        os << sv[N - 1];
 
         return os;
     }
@@ -388,19 +388,18 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
             std::basic_istream<CharT, CharTraits> &is,
             StaticVector<T, N, Traits> &sv)
     {
-        if (!is)
+        if (!is.good())
             return is;
 
-        StaticVector<T, N, Traits> tmp;
-        for (std::size_t i = 0; i != N; ++i) {
-            if (!is) return is;
-            is >> std::ws >> tmp[i];
-        }
-        if (is) {
+        StaticVector<T, N, Traits> sv_tmp;
+        for (std::size_t i = 0; i != N; ++i)
+            is >> std::ws >> sv_tmp[i];
+
+        if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            sv = cxx11::move(tmp);
+            sv = cxx11::move(sv_tmp);
 #else
-            sv = tmp;
+            sv = sv_tmp;
 #endif
         }
     }

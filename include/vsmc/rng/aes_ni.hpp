@@ -43,9 +43,12 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
             std::basic_ostream<CharT, Traits> &os,
             const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
     {
+        if (!os.good())
+            return os;
+
         for (std::size_t i = 0; i != Rounds + 1; ++i) {
             m128i_output(os, ks.key_seq_[i]);
-            if (os) os << ' ';
+            os << ' ';
         }
 
         return os;
@@ -56,10 +59,20 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
             std::basic_istream<CharT, Traits> &is,
             AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
     {
+        if (!is.good())
+            return is;
+
         AESNIKeySeqStorage<KeySeq, true, Rounds> ks_tmp;
         for (std::size_t i = 0; i != Rounds + 1; ++i)
             m128i_input(is, ks_tmp.key_seq_[i]);
-        if (is) ks = ks_tmp;
+
+        if (is.good()) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            ks = cxx11::move(ks_tmp);
+#else
+            ks = ks_tmp;
+#endif
+        }
 
         return is;
     }
@@ -444,13 +457,16 @@ class AESNIEngine
             const AESNIEngine<
             ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {
+        if (!os.good())
+            return os;
+
         for (std::size_t i = 0; i != Blocks; ++i) {
             m128i_output(os, eng.buffer_[i]);
-            if (os) os << ' ';
+            os << ' ';
         }
-        if (os) os << eng.ctr_block_ << ' ';
-        if (os) os << eng.key_ << ' ';
-        if (os) os << eng.remain_;
+        os << eng.ctr_block_ << ' ';
+        os << eng.key_ << ' ';
+        os << eng.remain_;
 
         return os;
     }
@@ -460,13 +476,23 @@ class AESNIEngine
             std::basic_istream<CharT, Traits> &is,
             AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {
+        if (!is.good())
+            return is;
+
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng_tmp;
         for (std::size_t i = 0; i != Blocks; ++i)
             m128i_input(is, eng_tmp.buffer_[i]);
-        if (is) is >> std::ws >> eng_tmp.ctr_block_;
-        if (is) is >> std::ws >> eng_tmp.key_;
-        if (is) is >> std::ws >> eng_tmp.remain_;
-        if (is) eng = eng_tmp;
+        is >> std::ws >> eng_tmp.ctr_block_;
+        is >> std::ws >> eng_tmp.key_;
+        is >> std::ws >> eng_tmp.remain_;
+
+        if (is.good()) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            eng = cxx11::move(eng_tmp);
+#else
+            eng = eng_tmp;
+#endif
+        }
 
         return is;
     }

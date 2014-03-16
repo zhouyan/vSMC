@@ -396,10 +396,13 @@ class ThreefryEngine
             std::basic_ostream<CharT, Traits> &os,
             const ThreefryEngine<ResultType, K, Rounds> &eng)
     {
-        if (os) os << eng.ctr_;    if (os) os << ' ';
-        if (os) os << eng.par_;    if (os) os << ' ';
-        if (os) os << eng.buffer_; if (os) os << ' ';
-        if (os) os << eng.remain_;
+        if (!os.good())
+            return os;
+
+        os << eng.ctr_ << ' ';
+        os << eng.par_ << ' ';
+        os << eng.buffer_ << ' ';
+        os << eng.remain_;
 
         return os;
     }
@@ -409,12 +412,22 @@ class ThreefryEngine
             std::basic_istream<CharT, Traits> &is,
             ThreefryEngine<ResultType, K, Rounds> &eng)
     {
+        if (!is.good())
+            return is;
+
         ThreefryEngine<ResultType, K, Rounds> eng_tmp;
-        if (is) is >> std::ws >> eng_tmp.ctr_;
-        if (is) is >> std::ws >> eng_tmp.par_;
-        if (is) is >> std::ws >> eng_tmp.buffer_;
-        if (is) is >> std::ws >> eng_tmp.remain_;
-        if (is) eng = eng_tmp;
+        is >> std::ws >> eng_tmp.ctr_;
+        is >> std::ws >> eng_tmp.par_;
+        is >> std::ws >> eng_tmp.buffer_;
+        is >> std::ws >> eng_tmp.remain_;
+
+        if (is.good()) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            eng = cxx11::move(eng_tmp);
+#else
+            eng = eng_tmp;
+#endif
+        }
 
         return is;
     }

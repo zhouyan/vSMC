@@ -97,8 +97,10 @@ class UniformRealDistribution
         friend inline std::basic_ostream<CharT, Traits> &operator<< (
                 std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
-            if (os) os << param.a_; if (os) os << ' ';
-            if (os) os << param.b_;
+            if (!os.good())
+                return os;
+
+            os << param.a_ << ' ' << param.b_;
 
             return os;
         }
@@ -107,11 +109,15 @@ class UniformRealDistribution
         friend inline std::basic_istream<CharT, Traits> &operator>> (
                 std::basic_istream<CharT, Traits> &is, param_type &param)
         {
+            if (!is.good())
+                return is;
+
             result_type a = 1;
             result_type b = 0;
-            if (is) is >> std::ws >> a;
-            if (is) is >> std::ws >> b;
-            if (is) {
+            is >> std::ws >> a;
+            is >> std::ws >> b;
+
+            if (is.good()) {
                 if (a <= b) {
                     param.a_ = a;
                     param.b_ = b;
@@ -210,7 +216,6 @@ class UniformRealDistribution
         return true;
     }
     
-    template <typename FPType, typename Left, typename Right>
     friend inline bool operator!= (
             const UniformRealDistribution<FPType, Left, Right> &runif1,
             const UniformRealDistribution<FPType, Left, Right> &runif2)
@@ -221,8 +226,10 @@ class UniformRealDistribution
             std::basic_ostream<CharT, Traits> &os,
             const UniformRealDistribution<FPType, Left, Right> &runif)
     {
-        if (os) os << runif.a_; if (os) os << ' ';
-        if (os) os << runif.b_;
+        if (!os.good())
+            return os;
+
+        os << runif.a_ << ' ' << runif.b_;
     
         return os;
     }
@@ -232,11 +239,14 @@ class UniformRealDistribution
             std::basic_istream<CharT, Traits> &is,
             UniformRealDistribution<FPType, Left, Right> &runif)
     {
+        if (!is.good())
+            return is;
+
         FPType a = 1;
         FPType b = 0;
-        if (is) is >> std::ws >> a;
-        if (is) is >> std::ws >> b;
-        if (is) {
+        is >> std::ws >> a;
+        is >> std::ws >> b;
+        if (is.good()) {
             if (a <= b) {
                 runif.a_ = a;
                 runif.b_ = b;

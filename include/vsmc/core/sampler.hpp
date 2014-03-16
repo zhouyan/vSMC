@@ -510,6 +510,9 @@ class Sampler
     void print (std::size_t sampler_id,
             std::basic_ostream<CharT, Traits> &os) const
     {
+        if (!os.good())
+            return;
+
         std::size_t var_num = summary_header_size();
         std::size_t dat_num = var_num * iter_size();
         std::vector<std::string> header(var_num);
@@ -536,6 +539,15 @@ class Sampler
 
     void print (std::size_t sampler_id = 0) const
     {print(sampler_id, std::cout);}
+
+    template<typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
+    {
+        sampler.print(0, os);
+
+        return os;
+    }
 
     private :
 
@@ -718,13 +730,6 @@ class Sampler
         return first;
     }
 }; // class Sampler
-
-/// \brief Print the Sampler
-/// \ingroup Core
-template<typename T, typename CharT, typename Traits>
-inline std::basic_ostream<CharT, Traits> &operator<< (
-        std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
-{sampler.print(0, os); return os;}
 
 } // namespace vsmc
 
