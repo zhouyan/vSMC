@@ -217,7 +217,7 @@ typedef integral_constant<bool, false> false_type;
 namespace internal {
 typedef char tp_test_true;
 struct tp_test_false {char a[2];};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 
 /// @}
 
@@ -230,7 +230,7 @@ struct tp_test_false {char a[2];};
 namespace internal {
 template <typename> struct is_void_impl       : public false_type {};
 template <>         struct is_void_impl<void> : public true_type  {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_void :
     public internal::is_void_impl<typename remove_cv<T>::type> {};
 
@@ -240,7 +240,7 @@ template <typename T> struct is_null_pointer_impl : public false_type {};
 #if VSMC_HAS_CXX11_NULLPTR
 template <> struct is_null_pointer_impl<std::nullptr_t> : public true_type {};
 #endif
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_null_pointer :
     public internal::is_null_pointer_impl<typename remove_cv<T>::type> {};
 
@@ -265,7 +265,7 @@ template <> struct is_integral_impl<unsigned long long> : public true_type {};
 template <> struct is_integral_impl<char16_t> : public true_type {};
 template <> struct is_integral_impl<char32_t> : public true_type {};
 #endif
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_integral :
     public internal::is_integral_impl<typename remove_cv<T>::type> {};
 
@@ -275,7 +275,7 @@ template <typename> struct is_floating_point_impl : public false_type {};
 template <> struct is_floating_point_impl<float      > : public true_type  {};
 template <> struct is_floating_point_impl<double     > : public true_type  {};
 template <> struct is_floating_point_impl<long double> : public true_type  {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_floating_point :
     public internal::is_floating_point_impl<typename remove_cv<T>::type> {};
 
@@ -297,7 +297,7 @@ template <typename T> struct is_enum :
 // is_union
 namespace internal {
 template <typename> struct is_union_impl : public false_type {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_union :
     public internal::is_union_impl<typename remove_cv<T>::type> {};
 
@@ -305,7 +305,7 @@ template <typename T> struct is_union :
 namespace internal {
 template <typename T> tp_test_true  is_class_test (int T::*);
 template <typename>   tp_test_false is_class_test (...);
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_class :
     public integral_constant<bool,
     sizeof(internal::is_class_test<T>(0)) == sizeof(internal::tp_test_true) &&
@@ -324,7 +324,7 @@ struct is_function_impl :
     sizeof(is_function_test<T>(is_function_test_src<T>())) ==
     sizeof(tp_test_true)> {};
 template <typename T> struct is_function_impl<T, true> : public false_type {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_function :
     public internal::is_function_impl<T> {};
 
@@ -332,7 +332,7 @@ template <typename T> struct is_function :
 namespace internal {
 template <typename>   struct is_pointer_impl :      public false_type {};
 template <typename T> struct is_pointer_impl<T *> : public true_type  {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_pointer :
     public internal::is_pointer_impl<typename remove_cv<T>::type> {};
 
@@ -357,7 +357,7 @@ template <typename>
 struct is_member_function_pointer_impl         : public false_type     {};
 template <typename T, typename U>
 struct is_member_function_pointer_impl<T U::*> : public is_function<T> {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_member_function_pointer :
     public internal::is_member_function_pointer_impl<
     typename remove_cv<T>::type> {};
@@ -410,7 +410,7 @@ template <typename>
 struct is_member_pointer_impl         : public false_type {};
 template <typename T, typename U>
 struct is_member_pointer_impl<T U::*> : public true_type  {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_member_pointer :
     public internal::is_member_pointer_impl<typename remove_cv<T>::type> {};
 
@@ -446,7 +446,7 @@ template <typename is_empty_base>
 struct is_empty_derived : public is_empty_base {double x;};
 template <typename>
 struct is_empty_standalone {double x;};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_empty :
     public integral_constant<bool,
     sizeof(internal::is_empty_derived<T>) ==
@@ -463,7 +463,7 @@ template <typename T> tp_test_true is_polymorphic_test (
                     dynamic_cast<const volatile void *>(declval<T *>())
                     ))) != 0, int>::type);
 template <typename> tp_test_false is_polymorphic_test (...);
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_polymorphic :
     public integral_constant<bool,
     sizeof(internal::is_polymorphic_test<T>(0)) ==
@@ -478,7 +478,7 @@ template <typename T, bool = is_class<T>::value> struct is_abstract_impl :
     public integral_constant<bool,
     sizeof(is_abstract_test<T>(0)) == sizeof(tp_test_true)> {};
 template <typename T> struct is_abstract_impl<T, false> : public false_type {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_abstract :
     public internal::is_abstract_impl<T> {};
 
@@ -492,7 +492,7 @@ struct is_signed_num_impl<T, false> : public true_type {};
 template <typename T, bool = is_arithmetic<T>::value> struct is_signed_impl :
     public is_signed_num_impl<T> {};
 template <typename T> struct is_signed_impl<T, false> : public false_type {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_signed :
     public internal::is_signed_impl<T> {};
 
@@ -506,7 +506,7 @@ struct is_unsigned_num_impl<T, false> : public false_type {};
 template <typename T, bool = is_arithmetic<T>::value> struct is_unsigned_impl :
     public is_unsigned_num_impl<T> {};
 template <typename T> struct is_unsigned_impl<T, false> : public false_type {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct is_unsigned :
     public internal::is_unsigned_impl<T> {};
 
@@ -600,7 +600,7 @@ typename is_base_of_fail<sizeof(
         is_base_of_dest<B>(declval<is_base_of_src<D> >())
         )>::type is_base_of_test (int);
 template <typename B, typename D> tp_test_true is_base_of_test (...);
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename B, typename D> struct is_base_of :
     public integral_constant<bool, is_class<B>::value &&
     sizeof(internal::is_base_of_test<B, D>(0)) ==
@@ -722,7 +722,7 @@ template <typename T1, typename T2>
 struct is_convertible_impl<T1, T2, 1, 3> : public false_type {};
 template <typename T1, typename T2>
 struct is_convertible_impl<T1, T2, 3, 3> : public true_type {};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T1, typename T2> struct is_convertible :
     public internal::is_convertible_impl<T1, T2> {};
 
@@ -762,7 +762,7 @@ template <typename T, bool =
 struct add_const_impl {typedef T type;};
 template <typename T>
 struct add_const_impl<T, false> {typedef const T type;};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct add_const
 {typedef typename internal::add_const_impl<T>::type type;};
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
@@ -776,7 +776,7 @@ template <typename T, bool =
 struct add_volatile_impl {typedef T type;};
 template <typename T>
 struct add_volatile_impl<T, false> {typedef volatile T type;};
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T> struct add_volatile
 {typedef typename internal::add_volatile_impl<T>::type type;};
 #if VSMC_HAS_CXX11_ALIAS_TEMPLATES
@@ -905,7 +905,7 @@ template <typename T, typename U> struct apply_cv<T &&, U, false, true>
 template <typename T, typename U> struct apply_cv<T &&, U, false, false>
 {typedef U && type;};
 #endif
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 
 // make_signed
 namespace internal {
@@ -931,7 +931,7 @@ template <> struct make_signed_impl<unsigned long, true>
 template <> struct make_signed_impl<unsigned long long, true>
 {typedef signed long long type;};
 #endif
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T>
 struct make_signed
 {
@@ -967,7 +967,7 @@ template <> struct make_unsigned_impl<unsigned long, true>
 template <> struct make_unsigned_impl<unsigned long long, true>
 {typedef unsigned long long type;};
 #endif
-} // namespace vsmc::internal
+} // namespace vsmc::cxx11::internal
 template <typename T>
 struct make_unsigned
 {
