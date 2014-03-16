@@ -71,6 +71,10 @@
 /// \ingroup Math
 /// \brief Mathematical constants
 
+/// \defgroup IntegerFunction Integer functions
+/// \ingroup Math
+/// \brief Compile time evaluation of integer functions
+
 /// \defgroup RNG Random number generating
 /// \brief Utilities for managing RNG engines
 
@@ -165,6 +169,7 @@
 #include <vsmc/integrate/nintegrate_newton_cotes.hpp>
 
 #include <vsmc/math/constants.hpp>
+#include <vsmc/math/integer_function.hpp>
 
 #if VSMC_USE_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
