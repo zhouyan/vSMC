@@ -1,15 +1,8 @@
 #ifndef VSMC_RNG_INTERNAL_COMMON_HPP
 #define VSMC_RNG_INTERNAL_COMMON_HPP
 
-#include <vsmc/internal/assert.hpp>
-#include <vsmc/internal/defines.hpp>
-#include <vsmc/internal/forward.hpp>
-#include <vsmc/cxx11/random.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
-#include <vsmc/utility/static_vector.hpp>
-#include <cstdlib>
-#include <iomanip>
-#include <iostream>
+#include <vsmc/utility/array.hpp>
+#include <vsmc/utility/counter.hpp>
 #include <stdint.h>
 
 #ifndef UINT64_C
@@ -54,12 +47,11 @@ namespace internal {
 
 template <std::size_t K, std::size_t, std::size_t,
          typename T, typename Traits>
-inline void rng_array_left_assign (StaticVector<T, K, Traits> &,
-        cxx11::false_type) {}
+inline void rng_array_left_assign (Array<T, K, Traits> &, cxx11::false_type) {}
 
 template <std::size_t K, std::size_t A, std::size_t I,
          typename T, typename Traits>
-inline void rng_array_left_assign (StaticVector<T, K, Traits> &state,
+inline void rng_array_left_assign (Array<T, K, Traits> &state,
         cxx11::true_type)
 {
     state[Position<I>()] = state[Position<I + A>()];
@@ -68,12 +60,10 @@ inline void rng_array_left_assign (StaticVector<T, K, Traits> &state,
 }
 
 template <std::size_t K, std::size_t, typename T, typename Traits>
-inline void rng_array_left_zero (StaticVector<T, K, Traits> &,
-        cxx11::false_type) {}
+inline void rng_array_left_zero (Array<T, K, Traits> &, cxx11::false_type) {}
 
 template <std::size_t K, std::size_t I, typename T, typename Traits>
-inline void rng_array_left_zero (StaticVector<T, K, Traits> &state,
-        cxx11::true_type)
+inline void rng_array_left_zero (Array<T, K, Traits> &state, cxx11::true_type)
 {
     state[Position<I>()] = 0;
     rng_array_left_zero<K, I + 1>(state,
@@ -82,7 +72,7 @@ inline void rng_array_left_zero (StaticVector<T, K, Traits> &state,
 
 template <std::size_t K, std::size_t A, bool fillzero,
         typename T, typename Traits>
-inline void rng_array_left_shift (StaticVector<T, K, Traits> &state)
+inline void rng_array_left_shift (Array<T, K, Traits> &state)
 {
     rng_array_left_assign<K, A, 0>(state,
             cxx11::integral_constant<bool, (A > 0 && A < K)>());
@@ -92,12 +82,12 @@ inline void rng_array_left_shift (StaticVector<T, K, Traits> &state)
 
 template <std::size_t K, std::size_t, std::size_t,
          typename T, typename Traits>
-inline void rng_array_right_assign (StaticVector<T, K, Traits> &,
+inline void rng_array_right_assign (Array<T, K, Traits> &,
         cxx11::false_type) {}
 
 template <std::size_t K, std::size_t A, std::size_t I,
         typename T, typename Traits>
-inline void rng_array_right_assign (StaticVector<T, K, Traits> &state,
+inline void rng_array_right_assign (Array<T, K, Traits> &state,
         cxx11::true_type)
 {
     state[Position<I>()] = state[Position<I - A>()];
@@ -106,11 +96,10 @@ inline void rng_array_right_assign (StaticVector<T, K, Traits> &state,
 }
 
 template <std::size_t K, std::size_t, typename T, typename Traits>
-inline void rng_array_right_zero (StaticVector<T, K, Traits> &,
-        cxx11::false_type) {}
+inline void rng_array_right_zero (Array<T, K, Traits> &, cxx11::false_type) {}
 
 template <std::size_t K, std::size_t I, typename T, typename Traits>
-inline void rng_array_right_zero (StaticVector<T, K, Traits> &state,
+inline void rng_array_right_zero (Array<T, K, Traits> &state,
         cxx11::true_type)
 {
     state[Position<I>()] = 0;
@@ -120,7 +109,7 @@ inline void rng_array_right_zero (StaticVector<T, K, Traits> &state,
 
 template <std::size_t K, std::size_t A, bool fillzero,
         typename T, typename Traits>
-inline void rng_array_right_shift (StaticVector<T, K, Traits> &state)
+inline void rng_array_right_shift (Array<T, K, Traits> &state)
 {
     rng_array_right_assign<K, A, K - 1>(state,
             cxx11::integral_constant<bool, (A > 0 && A < K)>());

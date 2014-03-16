@@ -106,7 +106,7 @@ struct XorshiftIndex
     static VSMC_CONSTEXPR std::size_t s () {return K - S;}
     static VSMC_CONSTEXPR std::size_t k () {return K - 1;}
 
-    static void shift (StaticVector<ResultType, K> &state)
+    static void shift (Array<ResultType, K> &state)
     {rng_array_left_shift<K, 1, false>(state);}
 }; // struct XorshiftIndex
 
@@ -121,7 +121,7 @@ struct XorshiftIndex<ResultType, K, R, S, false>
     std::size_t s () {return (K - S + iter_) % K;}
     std::size_t k () {return (K - 1 + iter_) % K;}
 
-    void shift (StaticVector<ResultType, K> &)
+    void shift (Array<ResultType, K> &)
     {iter_ = (iter_ + 1) % K;}
 
     private :
@@ -131,7 +131,7 @@ struct XorshiftIndex<ResultType, K, R, S, false>
 
 template <unsigned A, unsigned B, unsigned C, unsigned,
     typename ResultType, std::size_t R, std::size_t S>
-inline ResultType xorshift (StaticVector<ResultType, 1> &state,
+inline ResultType xorshift (Array<ResultType, 1> &state,
         XorshiftIndex<ResultType, 1, R, S> &)
 {
     state.front() ^= (state.front())<<A;
@@ -143,7 +143,7 @@ inline ResultType xorshift (StaticVector<ResultType, 1> &state,
 
 template <unsigned A, unsigned B, unsigned C, unsigned D,
     typename ResultType, std::size_t K, std::size_t R, std::size_t S>
-inline ResultType xorshift (StaticVector<ResultType, K> &state,
+inline ResultType xorshift (Array<ResultType, K> &state,
         XorshiftIndex<ResultType, K, R, S> &index)
 {
     ResultType xr = state[index.r()];
@@ -204,7 +204,7 @@ class XorshiftEngine
     void seed (result_type s)
     {
         index_.reset();
-        StaticVector<uint32_t, 1> seed;
+        Array<uint32_t, 1> seed;
         seed.front() = static_cast<uint32_t>(s % uint32_t_max_);
         internal::XorshiftIndex<uint32_t, 1, 0, 0> index;
         for (std::size_t i = 0; i != K; ++i)
@@ -269,7 +269,7 @@ class XorshiftEngine
         if (!is.good())
             return is;
 
-        StaticVector<ResultType, K> tmp;
+        Array<ResultType, K> tmp;
         is >> std::ws >> tmp;
 
         if (is.good()) {
@@ -286,7 +286,7 @@ class XorshiftEngine
     private :
 
     internal::XorshiftIndex<ResultType, K, R, S> index_;
-    StaticVector<ResultType, K> state_;
+    Array<ResultType, K> state_;
 
     static VSMC_CONSTEXPR const result_type uint32_t_max_ =
         static_cast<result_type>(static_cast<uint32_t>(

@@ -5,6 +5,7 @@
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>
 #include <vsmc/utility/backup.hpp>
+#include <map>
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func) \
     VSMC_RUNTIME_ASSERT((iter != map.end()),                                 \

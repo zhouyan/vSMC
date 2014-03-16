@@ -19,41 +19,41 @@ inline bool is_m128_aligned (T *ptr)
 /// \brief Aligned pack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_pack_a (const StaticVector<T, N, Traits> &c, __m128i &m)
+inline void m128i_pack_a (const Array<T, N, Traits> &c, __m128i &m)
 {m = _mm_load_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));}
 
 /// \brief Unaligned pack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_pack_u (const StaticVector<T, N, Traits> &c, __m128i &m)
+inline void m128i_pack_u (const Array<T, N, Traits> &c, __m128i &m)
 {m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));}
 
 /// \brief Aligned unpack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_unpack_a (const __m128i &m, StaticVector<T, N, Traits> &c)
+inline void m128i_unpack_a (const __m128i &m, Array<T, N, Traits> &c)
 {_mm_store_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);}
 
 /// \brief Unaligned unpack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_unpack_u (const __m128i &m, StaticVector<T, N, Traits> &c)
+inline void m128i_unpack_u (const __m128i &m, Array<T, N, Traits> &c)
 {_mm_storeu_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);}
 
-/// \brief Pack a StaticVector into an __m128i object
+/// \brief Pack an Array into an __m128i object
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_pack (const StaticVector<T, N, Traits> &c, __m128i &m)
+inline void m128i_pack (const Array<T, N, Traits> &c, __m128i &m)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
     is_m128_aligned(c.data()) ?
         m128i_pack_a<Offset>(c, m) : m128i_pack_u<Offset>(c, m);
 }
 
-/// \brief Unpack an __m128i object into a StaticVector
+/// \brief Unpack an __m128i object into an Array
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_unpack (const __m128i &m, StaticVector<T, N, Traits> &c)
+inline void m128i_unpack (const __m128i &m, Array<T, N, Traits> &c)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
     is_m128_aligned(c.data()) ?
@@ -64,8 +64,8 @@ inline void m128i_unpack (const __m128i &m, StaticVector<T, N, Traits> &c)
 /// \ingroup RNG
 inline bool m128i_is_equal (const __m128i &a, const __m128i &b)
 {
-    StaticVector<uint64_t, 2> sa;
-    StaticVector<uint64_t, 2> sb;
+    Array<uint64_t, 2> sa;
+    Array<uint64_t, 2> sb;
     m128i_unpack<0>(a, sa);
     m128i_unpack<0>(b, sb);
 
@@ -80,7 +80,7 @@ inline std::basic_ostream<CharT, Traits> &m128i_output (
         std::basic_ostream<CharT, Traits> &os, const __m128i &a)
 {
     if (os.good()) {
-        StaticVector<unsigned char, 16> sa;
+        Array<unsigned char, 16> sa;
         m128i_unpack<0>(a, sa);
         os << sa;
     }
@@ -96,7 +96,7 @@ inline std::basic_istream<CharT, Traits> &m128i_input (
         std::basic_istream<CharT, Traits> &is, __m128i &a)
 {
     if (is.good()) {
-        StaticVector<unsigned char, 16> sa;
+        Array<unsigned char, 16> sa;
         is >> sa;
         if (is) m128i_pack<0>(sa, a);
     }

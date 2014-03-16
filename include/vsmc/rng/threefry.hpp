@@ -115,12 +115,12 @@ struct ThreefryRotateImpl<uint64_t, N>
 }; // struct ThreefryRotateImpl
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
-struct ThreefryRotate {static void rotate (StaticVector<ResultType, K> &) {}};
+struct ThreefryRotate {static void rotate (Array<ResultType, K> &) {}};
 
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 2, N, true>
 {
-    static void rotate (StaticVector<ResultType, 2> &state)
+    static void rotate (Array<ResultType, 2> &state)
     {
         state[Position<0>()] += state[Position<1>()];
         state[Position<1>()] =
@@ -137,7 +137,7 @@ struct ThreefryRotate<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 4, N, true>
 {
-    static void rotate (StaticVector<ResultType, 4> &state)
+    static void rotate (Array<ResultType, 4> &state)
     {
         state[Position<0>()] += state[Position<i0_>()];
         state[Position<i0_>()] =
@@ -163,15 +163,15 @@ template <typename ResultType, std::size_t K, std::size_t N,
          bool = (N % 4 == 0)>
 struct ThreefryInsert
 {
-    static void insert (StaticVector<ResultType, K> &,
-            const StaticVector<ResultType, K + 1> &) {}
+    static void insert (Array<ResultType, K> &,
+            const Array<ResultType, K + 1> &) {}
 }; // struct ThreefryInsert
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsert<ResultType, 2, N, true>
 {
-    static void insert (StaticVector<ResultType, 2> &state,
-            const StaticVector<ResultType, 3> &par)
+    static void insert (Array<ResultType, 2> &state,
+            const Array<ResultType, 3> &par)
     {
         state[Position<0>()] += par[Position<i0_>()];
         state[Position<1>()] += par[Position<i1_>()];
@@ -188,8 +188,8 @@ struct ThreefryInsert<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct ThreefryInsert<ResultType, 4, N, true>
 {
-    static void insert (StaticVector<ResultType, 4> &state,
-            const StaticVector<ResultType, 5> &par)
+    static void insert (Array<ResultType, 4> &state,
+            const Array<ResultType, 5> &par)
     {
         state[Position<0>()] += par[Position<i0_>()];
         state[Position<1>()] += par[Position<i1_>()];
@@ -242,13 +242,13 @@ class ThreefryEngine
     public :
 
     typedef ResultType result_type;
-    typedef StaticVector<ResultType, K> buffer_type;
-    typedef StaticVector<ResultType, K> ctr_type;
-    typedef StaticVector<ResultType, K> key_type;
+    typedef Array<ResultType, K> buffer_type;
+    typedef Array<ResultType, K> ctr_type;
+    typedef Array<ResultType, K> key_type;
 
     private :
 
-    typedef StaticCounter<ctr_type> counter;
+    typedef Counter<ctr_type> counter;
 
     public :
 
@@ -435,7 +435,7 @@ class ThreefryEngine
     private :
 
     ctr_type ctr_;
-    StaticVector<ResultType, K + 1> par_;
+    Array<ResultType, K + 1> par_;
     buffer_type buffer_;
     result_type remain_;
 

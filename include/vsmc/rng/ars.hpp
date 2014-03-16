@@ -49,7 +49,7 @@ class ARSKeySeq
 {
     public :
 
-    typedef StaticVector<ResultType, 16 / sizeof(ResultType)> key_type;
+    typedef Array<ResultType, 16 / sizeof(ResultType)> key_type;
 
     ARSKeySeq () : weyl_(_mm_set_epi64x(
                 static_cast<int64_t>(traits::ARSWeylConstantTrait<0>::value),
@@ -57,8 +57,7 @@ class ARSKeySeq
     {}
 
     template <std::size_t Rp1, typename Traits>
-    void generate (const key_type &key,
-            StaticVector<__m128i, Rp1, Traits> &key_seq)
+    void generate (const key_type &key, Array<__m128i, Rp1, Traits> &key_seq)
     {
         m128i_pack<0>(key, key_seq.front());
         generate_seq<1>(key_seq, cxx11::integral_constant<bool, 1 < Rp1>());
@@ -69,12 +68,10 @@ class ARSKeySeq
     __m128i weyl_;
 
     template <std::size_t, std::size_t Rp1, typename Traits>
-    void generate_seq (StaticVector<__m128i, Rp1, Traits> &,
-            cxx11::false_type) {}
+    void generate_seq (Array<__m128i, Rp1, Traits> &, cxx11::false_type) {}
 
     template <std::size_t N, std::size_t Rp1, typename Traits>
-    void generate_seq (StaticVector<__m128i, Rp1, Traits> &key_seq,
-            cxx11::true_type)
+    void generate_seq (Array<__m128i, Rp1, Traits> &key_seq, cxx11::true_type)
     {
         key_seq[Position<N>()] = _mm_add_epi64(
                 key_seq[Position<N - 1>()], weyl_);

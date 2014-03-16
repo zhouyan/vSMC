@@ -104,12 +104,12 @@ struct PhiloxRoundConstantTrait :
 namespace internal {
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 1)>
-struct PhiloxBumpk {static void bumpk (StaticVector<ResultType, K / 2> &) {}};
+struct PhiloxBumpk {static void bumpk (Array<ResultType, K / 2> &) {}};
 
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 2, N, true>
 {
-    static void bumpk (StaticVector<ResultType, 1> &par)
+    static void bumpk (Array<ResultType, 1> &par)
     {
         par[Position<0>()] +=
             traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
@@ -119,7 +119,7 @@ struct PhiloxBumpk<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpk<ResultType, 4, N, true>
 {
-    static void bumpk (StaticVector<ResultType, 2> &par)
+    static void bumpk (Array<ResultType, 2> &par)
     {
         par[Position<0>()] +=
             traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
@@ -193,15 +193,15 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct PhiloxRound
 {
-    static void round (StaticVector<ResultType, K> &,
-            const StaticVector<ResultType, K / 2> &) {}
+    static void round (Array<ResultType, K> &,
+            const Array<ResultType, K / 2> &) {}
 }; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true>
 {
-    static void round (StaticVector<ResultType, 2> &state,
-            const StaticVector<ResultType, 1> &par)
+    static void round (Array<ResultType, 2> &state,
+            const Array<ResultType, 1> &par)
     {
         ResultType hi = 0;
         ResultType lo = 0;
@@ -214,8 +214,8 @@ struct PhiloxRound<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true>
 {
-    static void round (StaticVector<ResultType, 4> &state,
-            const StaticVector<ResultType, 2> &par)
+    static void round (Array<ResultType, 4> &state,
+            const Array<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
         ResultType hi1 = 0;
@@ -275,13 +275,13 @@ class PhiloxEngine
     public :
 
     typedef ResultType result_type;
-    typedef StaticVector<ResultType, K> buffer_type;
-    typedef StaticVector<ResultType, K> ctr_type;
-    typedef StaticVector<ResultType, K / 2> key_type;
+    typedef Array<ResultType, K> buffer_type;
+    typedef Array<ResultType, K> ctr_type;
+    typedef Array<ResultType, K / 2> key_type;
 
     private :
 
-    typedef StaticCounter<ctr_type> counter;
+    typedef Counter<ctr_type> counter;
 
     public :
 

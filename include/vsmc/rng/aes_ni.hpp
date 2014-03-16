@@ -28,7 +28,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
     public :
 
     typedef typename KeySeq::key_type key_type;
-    typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
+    typedef Array<__m128i, Rounds + 1> key_seq_type;
 
     key_seq_type get (const key_type &) const {return key_seq_;}
 
@@ -88,7 +88,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
     public :
 
     typedef typename KeySeq::key_type key_type;
-    typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
+    typedef Array<__m128i, Rounds + 1> key_seq_type;
 
     key_seq_type get (const key_type &k) const
     {
@@ -233,17 +233,17 @@ class AESNIEngine
     public :
 
     typedef ResultType result_type;
-    typedef StaticVector<__m128i, Blocks> buffer_type;
-    typedef StaticVector<ResultType, K_> ctr_type;
-    typedef StaticVector<ctr_type, Blocks> ctr_block_type;
+    typedef Array<__m128i, Blocks> buffer_type;
+    typedef Array<ResultType, K_> ctr_type;
+    typedef Array<ctr_type, Blocks> ctr_block_type;
     typedef typename KeySeq::key_type key_type;
-    typedef StaticVector<__m128i, Rounds + 1> key_seq_type;
+    typedef Array<__m128i, Rounds + 1> key_seq_type;
 
     private :
 
-    typedef StaticVector<uint64_t, 2> ctype;
-    typedef StaticVector<ctype, Blocks> cbtype;
-    typedef StaticCounter<ctype> counter;
+    typedef Array<uint64_t, 2> ctype;
+    typedef Array<ctype, Blocks> cbtype;
+    typedef Counter<ctype> counter;
 
     public :
 
@@ -266,7 +266,7 @@ class AESNIEngine
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         ctr_block_type tmp;
-        StaticCounter<ctr_type>::set(tmp, c);
+        Counter<ctr_type>::set(tmp, c);
         std::memcpy(ctr_block_.data(), tmp.data(), 16 * Blocks);
         key_seq_.set(k);
     }
@@ -315,7 +315,7 @@ class AESNIEngine
     void ctr (const ctr_type &c)
     {
         ctr_block_type tmp;
-        StaticCounter<ctr_type>::set(tmp, c);
+        Counter<ctr_type>::set(tmp, c);
         std::memcpy(ctr_block_.data(), tmp.data(), 16 * Blocks);
         remain_ = 0;
     }
@@ -372,7 +372,7 @@ class AESNIEngine
     buffer_type operator() (const ctr_type &c) const
     {
         ctr_block_type cb;
-        StaticCounter<ctr_type>::set(cb, c);
+        Counter<ctr_type>::set(cb, c);
         buffer_type buf;
         generate_buffer(cb, buf);
 
@@ -394,7 +394,7 @@ class AESNIEngine
     void operator() (const ctr_type &c, buffer_type &buf) const
     {
         ctr_block_type cb;
-        StaticCounter<ctr_type>::set(cb, c);
+        Counter<ctr_type>::set(cb, c);
         generate_buffer(cb, buf);
     }
 
