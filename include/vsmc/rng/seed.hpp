@@ -4,8 +4,8 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType) \
-    VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),		     \
-	    USE_SeedGenerator_WITH_A_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
+    VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),              \
+            USE_SeedGenerator_WITH_A_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem) \
     VSMC_RUNTIME_ASSERT((div > rem),                                         \
@@ -119,14 +119,14 @@ class SeedGenerator
     result_type seed_max_;
 
     SeedGenerator () :
-        seed_(0), divisor_(1), remainder_(0)
-	seed_max_(static_cast<result_type>(~(static_cast<result_type>(0)))),
+        seed_(0), divisor_(1), remainder_(0),
+        seed_max_(static_cast<result_type>(~(static_cast<result_type>(0))))
     {VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType);}
 
     SeedGenerator (const SeedGenerator<ID, ResultType> &);
 
     SeedGenerator<ID, ResultType> &operator= (
-	    const SeedGenerator<ID, ResultType> &);
+            const SeedGenerator<ID, ResultType> &);
 }; // class SeedGenerator
 
 typedef VSMC_SEED_TYPE Seed;
