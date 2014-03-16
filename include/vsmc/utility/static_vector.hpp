@@ -288,11 +288,7 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
 
     static VSMC_CONSTEXPR size_type size () {return N;}
 
-    void fill (const T &value)
-    {
-        for (size_type i = 0; i != N; ++i)
-            storage_type::operator[](i) = value;
-    }
+    void fill (const T &value) {fill(value, cxx11::is_unsigned<T>());}
 
     void swap (StaticVector<T, N, Traits> &other) {this->swap_data(other);}
 
@@ -449,6 +445,20 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
             res[j] = storage_type::operator[](i);
 
         return res;
+    }
+
+    void fill (const T &value, cxx11::true_type)
+    {
+        if (value == 0)
+            std::memset(this->data(), 0, sizeof(T) * N);
+        else
+            fill(value, cxx11::false_type());
+    }
+
+    void fill (const T &value, cxx11::false_type)
+    {
+        for (size_type i = 0; i != N; ++i)
+            storage_type::operator[](i) = value;
     }
 }; // class StaticVector
 
