@@ -25,10 +25,6 @@ class Particle
     typedef cxx11::function<
         void (std::size_t, resample_rng_type &, const double *, size_type *)>
         resample_type;
-    typedef ParticleIterator<T, SingleParticle> iterator;
-    typedef ParticleIterator<T, ConstSingleParticle> const_iterator;
-    typedef std::reverse_iterator<iterator> reverse_iterator;
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     explicit Particle (size_type N) :
         size_(N), value_(N),
@@ -54,38 +50,6 @@ class Particle
 
     /// \brief Number of particles
     size_type size () const {return size_;}
-
-    const SingleParticle<T> &sp (size_type i) {return sp_[i + 1];}
-
-    const ConstSingleParticle<T> &sp (size_type i) const {return csp_[i + 1];}
-
-    iterator begin () {return iterator(&sp(0));}
-
-    iterator end () {return iterator(&sp(size_));}
-
-    const_iterator begin () const {return cosnt_iterator(&sp(0));}
-
-    const_iterator end () const {return const_iterator(&sp(size_));}
-
-    const_iterator cbegin () const {return const_iterator(&sp(0));}
-
-    const_iterator cend () const {return const_iterator(&sp(size_));}
-
-    reverse_iterator rbegin () {return reverse_iterator(end());}
-
-    reverse_iterator rend () {return reverse_iterator(begin());}
-
-    const_reverse_iterator rbegin () const
-    {return const_reverse_iterator(end());}
-
-    const_reverse_iterator rend () const
-    {return const_reverse_iterator(begin());}
-
-    const_reverse_iterator crbegin () const
-    {return const_reverse_iterator(cend());}
-
-    const_reverse_iterator crend () const
-    {return const_reverse_iterator(cbegin());}
 
     /// \brief Read and write access to the value collection object
     value_type &value () {return value_;}

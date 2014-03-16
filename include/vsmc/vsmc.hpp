@@ -224,7 +224,6 @@
 #if VSMC_USE_TBB
 #include <vsmc/smp/backend_tbb.hpp>
 #endif
-#include <vsmc/smp/iterator.hpp>
 #include <vsmc/smp/state_matrix.hpp>
 #if VSMC_HAS_CXX11LIB_TUPLE
 #include <vsmc/smp/state_tuple.hpp>

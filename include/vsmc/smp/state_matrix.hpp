@@ -2,7 +2,6 @@
 #define VSMC_SMP_STATE_MATRIX_HPP
 
 #include <vsmc/core/single_particle.hpp>
-#include <vsmc/smp/iterator.hpp>
 
 #define VSMC_STATIC_ASSERT_SMP_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
     VSMC_STATIC_ASSERT((Dim == ::vsmc::Dynamic),                             \
@@ -32,11 +31,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     typedef std::size_t size_type;
     typedef std::vector<T> state_pack_type;
     typedef T state_type;
-    typedef typename std::vector<T>::iterator iterator;
-    typedef typename std::vector<T>::const_iterator const_iterator;
-    typedef typename std::vector<T>::reverse_iterator reverse_iterator;
-    typedef typename std::vector<T>::const_reverse_iterator
-        const_reverse_iterator;
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S>
@@ -86,42 +80,26 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_DIM_SIZE(dim);
 
         traits::DimTrait<Dim>::resize_dim(dim);
-        state_.resize(StateMatrix<Order, Dim, T>::storage_size(size_, dim));
+        data_.resize(size_ * dim);
     }
 
     size_type size () const {return size_;}
 
-    T *data () {return &state_[0];}
+    state_type &operator() (std::size_t i, std::size_t pos)
+    {
+        return static_cast<StateMatrix<Order, Dim, T> *>(this)->
+            state(i, pos);
+    }
 
-    const T *data () const {return &state_[0];}
+    const state_type &operator() (std::size_t i, std::size_t pos) const
+    {
+        return static_cast<const StateMatrix<Order, Dim, T> *>(this)->
+            state(i, pos);
+    }
 
-    iterator begin() {return state_.begin();}
+    T *data () {return &data_[0];}
 
-    iterator end () {return state_.begin() + this->dim() * size_;}
-
-    const_iterator begin () const {return state_.begin();}
-
-    const_iterator end () const {return state_.begin() + this->dim() * size_;}
-
-    const_iterator cbegin () const {return state_.begin();}
-
-    const_iterator cend () const {return state_.begin() + this->dim() * size_;}
-
-    reverse_iterator rbegin () {return reverse_iterator(end());}
-
-    reverse_iterator rend () {return reverse_iterator(begin());}
-
-    const_reverse_iterator rbegin () const
-    {return const_reverse_iterator(end());}
-
-    const_reverse_iterator rend () const
-    {return const_reverse_iterator(begin());}
-
-    const_reverse_iterator crbegin () const
-    {return const_reverse_iterator(cend());}
-
-    const_reverse_iterator crend () const
-    {return const_reverse_iterator(cbegin());}
+    const T *data () const {return &data_[0];}
 
     state_pack_type state_pack (size_type id) const
     {
@@ -185,7 +163,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     {
         if (ROrder == Order) {
             for (std::size_t i = 0; i != this->dim() * size_; ++i, ++first)
-                *first = state_[i];
+                *first = data_[i];
         } else {
             const StateMatrix<Order, Dim, T> *sptr =
                 static_cast<const StateMatrix<Order, Dim, T> *>(this);
@@ -226,11 +204,20 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         return os;
     }
 
+    template <typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os,
+            const StateMatrixBase<Order, Dim, T> &smatrix)
+    {
+        if (os.good())
+            smatrix.print(os);
+
+        return os;
+    }
+
     protected :
 
-    explicit StateMatrixBase (size_type N) :
-        size_(N), state_(StateMatrix<Order, Dim, T>::storage_size(size_, Dim))
-    {}
+    explicit StateMatrixBase (size_type N) : size_(N), data_(N * Dim) {}
 
     void copy_particle (size_type from, size_type to)
     {
@@ -241,14 +228,10 @@ class StateMatrixBase : public traits::DimTrait<Dim>
                 sptr->state(to, d) = sptr->state(from, d);
     }
 
-    std::vector<T> &state_matrix () {return state_;}
-
-    const std::vector<T> &state_matrix () const {return state_;}
-
     private :
 
     size_type size_;
-    std::vector<T> state_;
+    std::vector<T> data_;
 }; // class StateMatrixBase
 
 /// \brief Particle::value_type subtype
@@ -260,33 +243,14 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     typedef StateMatrixBase<RowMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
-    typedef typename std::vector<T>::iterator
-        row_iterator;
-    typedef typename std::vector<T>::const_iterator
-        row_const_iterator;
-    typedef typename std::vector<T>::reverse_iterator
-        row_reverse_iterator;
-    typedef typename std::vector<T>::const_reverse_iterator
-        row_const_reverse_iterator;
-    typedef StepRandomIterator<typename std::vector<T>::iterator>
-        col_iterator;
-    typedef StepRandomIterator<typename std::vector<T>::const_iterator>
-        col_const_iterator;
-    typedef std::reverse_iterator<col_iterator>
-        col_reverse_iterator;
-    typedef std::reverse_iterator<col_const_iterator>
-        col_const_reverse_iterator;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
 
-    static std::size_t storage_size (std::size_t N, std::size_t dim)
-    {return (N + 1) * dim;}
-
     T &state (size_type id, std::size_t pos)
-    {return this->state_matrix()[id * this->dim() + pos];}
+    {return this->data()[id * this->dim() + pos];}
 
     const T &state (size_type id, std::size_t pos) const
-    {return this->state_matrix()[id * this->dim() + pos];}
+    {return this->data()[id * this->dim() + pos];}
 
     template <std::size_t Pos>
     T &state (size_type id, Position<Pos>)
@@ -309,84 +273,6 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     const T *row_data (size_type id) const
     {return this->data() + id * this->dim();}
-
-    row_iterator row_begin (std::size_t i)
-    {return this->state_matrix().begin() + i * this->dim();}
-
-    row_iterator row_end (std::size_t i)
-    {return row_begin(i) + this->dim();}
-
-    row_const_iterator row_begin (std::size_t i) const
-    {return this->state_matrix().begin() + i * this->dim();}
-
-    row_const_iterator row_end (std::size_t i) const
-    {return row_begin(i) + this->dim();}
-
-    row_const_iterator row_cbegin (std::size_t i) const
-    {return this->state_matrix().begin() + i * this->dim();}
-
-    row_const_iterator row_cend (std::size_t i) const
-    {return row_cbegin(i) + this->dim();}
-
-    row_reverse_iterator row_rbegin (std::size_t i)
-    {return row_reverse_iterator(row_end(i));}
-
-    row_reverse_iterator row_rend (std::size_t i)
-    {return row_reverse_iterator(row_begin(i));}
-
-    row_const_reverse_iterator row_rbegin (std::size_t i) const
-    {return row_const_reverse_iterator(row_end(i));}
-
-    row_const_reverse_iterator row_rend (std::size_t i) const
-    {return row_const_reverse_iterator(row_begin(i));}
-
-    row_const_reverse_iterator row_crbegin (std::size_t i) const
-    {return row_const_reverse_iterator(row_cend(i));}
-
-    row_const_reverse_iterator row_crend (std::size_t i) const
-    {return row_const_reverse_iterator(row_cbegin(i));}
-
-    col_iterator col_begin (std::size_t i)
-    {return col_iterator(this->state_matrix().begin() + i, this->dim());}
-
-    col_iterator col_end (std::size_t i)
-    {return col_begin(i) + this->size();}
-
-    col_const_iterator col_begin (std::size_t i) const
-    {
-        return col_const_iterator(
-                this->state_matrix().begin() + i, this->dim());
-    }
-
-    col_const_iterator col_end (std::size_t i) const
-    {return col_begin(i) + this->size();}
-
-    col_const_iterator col_cbegin (std::size_t i) const
-    {
-        return col_const_iterator(
-                this->state_matrix().begin() + i, this->dim());
-    }
-
-    col_const_iterator col_cend (std::size_t i) const
-    {return col_cbegin(i) + this->size();}
-
-    col_reverse_iterator col_rbegin (std::size_t i)
-    {return col_reverse_iterator(col_end(i));}
-
-    col_reverse_iterator col_rend (std::size_t i)
-    {return col_reverse_iterator(col_begin(i));}
-
-    col_const_reverse_iterator col_rbegin (std::size_t i) const
-    {return col_const_reverse_iterator(col_end(i));}
-
-    col_const_reverse_iterator col_rend (std::size_t i) const
-    {return col_const_reverse_iterator(col_begin(i));}
-
-    col_const_reverse_iterator col_crbegin (std::size_t i) const
-    {return col_const_reverse_iterator(col_cend(i));}
-
-    col_const_reverse_iterator col_crend (std::size_t i) const
-    {return col_const_reverse_iterator(col_cbegin(i));}
 }; // class StateMatrix
 
 /// \brief Particle::value_type subtype
@@ -398,33 +284,14 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     typedef StateMatrixBase<ColMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
-    typedef StepRandomIterator<typename std::vector<T>::iterator>
-        row_iterator;
-    typedef StepRandomIterator<typename std::vector<T>::const_iterator>
-        row_const_iterator;
-    typedef std::reverse_iterator<row_iterator>
-        row_reverse_iterator;
-    typedef std::reverse_iterator<row_const_iterator>
-        row_const_reverse_iterator;
-    typedef typename std::vector<T>::iterator
-        col_iterator;
-    typedef typename std::vector<T>::const_iterator
-        col_const_iterator;
-    typedef typename std::vector<T>::reverse_iterator
-        col_reverse_iterator;
-    typedef typename std::vector<T>::const_reverse_iterator
-        col_const_reverse_iterator;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
 
-    static std::size_t storage_size (std::size_t N, std::size_t dim)
-    {return N * (dim + 1);}
-
     T &state (size_type id, std::size_t pos)
-    {return this->state_matrix()[pos * this->size() + id];}
+    {return this->data()[pos * this->size() + id];}
 
     const T &state (size_type id, std::size_t pos) const
-    {return this->state_matrix()[pos * this->size() + id];}
+    {return this->data()[pos * this->size() + id];}
 
     template <std::size_t Pos>
     T &state (size_type id, Position<Pos>)
@@ -447,84 +314,6 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     const T *col_data (std::size_t pos) const
     {return this->data() + pos * this->size();}
-
-    row_iterator row_begin (std::size_t i)
-    {return row_iterator(this->state_matrix().begin() + i, this->size());}
-
-    row_iterator row_end (std::size_t i)
-    {return row_begin(i) + this->dim();}
-
-    row_const_iterator row_begin (std::size_t i) const
-    {
-        return row_const_iterator(
-                this->state_matrix().begin() + i, this->size());
-    }
-
-    row_const_iterator row_end (std::size_t i) const
-    {return row_begin(i) + this->dim();}
-
-    row_const_iterator row_cbegin (std::size_t i) const
-    {
-        return row_const_iterator(
-                this->state_matrix().begin() + i, this->size());
-    }
-
-    row_const_iterator row_cend (std::size_t i) const
-    {return row_cbegin(i) + this->dim();}
-
-    row_reverse_iterator row_rbegin (std::size_t i)
-    {return row_reverse_iterator(row_end(i));}
-
-    row_reverse_iterator row_rend (std::size_t i)
-    {return row_reverse_iterator(row_begin(i));}
-
-    row_const_reverse_iterator row_rbegin (std::size_t i) const
-    {return row_const_reverse_iterator(row_end(i));}
-
-    row_const_reverse_iterator row_rend (std::size_t i) const
-    {return row_const_reverse_iterator(row_begin(i));}
-
-    row_const_reverse_iterator row_crbegin (std::size_t i) const
-    {return row_const_reverse_iterator(row_cend(i));}
-
-    row_const_reverse_iterator row_crend (std::size_t i) const
-    {return row_const_reverse_iterator(row_cbegin(i));}
-
-    col_iterator col_begin (std::size_t i)
-    {return this->state_matrix().begin() + i * this->size();}
-
-    col_iterator col_end (std::size_t i)
-    {return col_begin(i) + this->size();}
-
-    col_const_iterator col_begin (std::size_t i) const
-    {return this->state_matrix().begin() + i * this->size();}
-
-    col_const_iterator col_end (std::size_t i) const
-    {return col_begin(i) + this->size();}
-
-    col_const_iterator col_cbegin (std::size_t i) const
-    {return this->state_matrix().begin() + i * this->size();}
-
-    col_const_iterator col_cend (std::size_t i) const
-    {return col_cbegin(i) + this->size();}
-
-    col_reverse_iterator col_rbegin (std::size_t i)
-    {return col_reverse_iterator(col_end(i));}
-
-    col_reverse_iterator col_rend (std::size_t i)
-    {return col_reverse_iterator(col_begin(i));}
-
-    col_const_reverse_iterator col_rbegin (std::size_t i) const
-    {return col_const_reverse_iterator(col_end(i));}
-
-    col_const_reverse_iterator col_rend (std::size_t i) const
-    {return col_const_reverse_iterator(col_begin(i));}
-
-    col_const_reverse_iterator col_crbegin (std::size_t i) const
-    {return col_const_reverse_iterator(col_cend(i));}
-
-    col_const_reverse_iterator col_crend (std::size_t i) const
-    {return col_const_reverse_iterator(col_cbegin(i));}
 }; // class StateMatrix
 
 } // namespace vsmc
