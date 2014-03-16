@@ -132,84 +132,6 @@ template <typename T> struct StaticVectorTrait
 
 } // namespace vsmc::traits
 
-/// \brief StaticVector iterator
-/// \ingroup StaticVector
-template <typename T>
-class StaticVectorIterator :
-    public std::iterator<std::random_access_iterator_tag, T>
-{
-    typedef std::iterator<std::random_access_iterator_tag, T>
-        base_iterator_type;
-
-    public :
-
-    typedef typename base_iterator_type::value_type value_type;
-    typedef typename base_iterator_type::difference_type difference_type;
-    typedef typename base_iterator_type::pointer pointer;
-    typedef typename base_iterator_type::reference reference;
-    typedef std::random_access_iterator_tag iterator_category;
-
-    StaticVectorIterator () : ptr_(VSMC_NULLPTR) {}
-
-    StaticVectorIterator (pointer ptr) : ptr_(ptr) {}
-
-    reference operator* () const {return *ptr_;}
-
-    pointer operator-> () const {return ptr_;}
-
-    value_type operator[] (difference_type diff) const {return *(ptr_ + diff);}
-
-    StaticVectorIterator<T> &operator++ () {++ptr_; return *this;}
-
-    StaticVectorIterator<T> operator++ (int) const
-    {StaticVectorIterator<T> iter(*this); return ++iter;}
-
-    StaticVectorIterator<T> &operator-- () {--ptr_; return *this;}
-
-    StaticVectorIterator<T> operator-- (int) const
-    {StaticVectorIterator<T> iter(*this); return --iter;}
-
-    StaticVectorIterator<T> &operator+= (difference_type diff)
-    {ptr_ += diff; return *this;}
-
-    StaticVectorIterator<T> &operator-= (difference_type diff)
-    {ptr_ -= diff; return *this;}
-
-    friend inline bool operator== (
-            const StaticVectorIterator<T> &iter1,
-            const StaticVectorIterator<T> &iter2)
-    {return iter1.ptr_ == iter2.ptr_;}
-
-    friend inline bool operator!= (
-            const StaticVectorIterator<T> &iter1,
-            const StaticVectorIterator<T> &iter2)
-    {return iter1.ptr_ != iter2.ptr_;}
-
-    friend inline difference_type operator- (
-            const StaticVectorIterator<T> &iter1,
-            const StaticVectorIterator<T> &iter2)
-    {return iter1.ptr_ - iter2.ptr_;}
-
-    friend inline StaticVectorIterator<T> operator+ (
-            const StaticVectorIterator<T> &iter,
-            difference_type diff)
-    {return StaticVectorIterator<T>(iter.ptr_ + diff);}
-
-    friend inline StaticVectorIterator<T> operator+ (
-            difference_type diff,
-            const StaticVectorIterator<T> &iter)
-    {return StaticVectorIterator<T>(iter.ptr_ + diff);}
-
-    friend inline StaticVectorIterator<T> operator- (
-            const StaticVectorIterator<T> &iter,
-            difference_type diff)
-    {return StaticVectorIterator<T>(iter.ptr_ - diff);}
-
-    private :
-
-    pointer ptr_;
-}; // class StaticVectorIterator
-
 /// \brief Container class with static size but possible dynamic memory
 /// allocation
 /// \ingroup StaticVector
@@ -269,22 +191,22 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     typedef T * pointer;
     typedef const T * const_pointer;
 
-    typedef StaticVectorIterator<T> iterator;
-    typedef StaticVectorIterator<const T> const_iterator;
+    typedef pointer iterator;
+    typedef const_pointer const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    iterator begin () {return iterator(this->data());}
+    iterator begin () {return this->data();}
 
-    iterator end () {return iterator(this->data() + N);}
+    iterator end () {return this->data() + N;}
 
-    const_iterator begin () const {return cosnt_iterator(this->data());}
+    const_iterator begin () const {return this->data();}
 
-    const_iterator end () const {return const_iterator(this->data() + N);}
+    const_iterator end () const {return this->data() + N;}
 
-    const_iterator cbegin () const {return const_iterator(this->data());}
+    const_iterator cbegin () const {return this->data();}
 
-    const_iterator cend () const {return const_iterator(this->data() + N);}
+    const_iterator cend () const {return this->data() + N;}
 
     reverse_iterator rbegin () {return reverse_iterator(end());}
 
