@@ -227,48 +227,48 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     reference at (size_type i)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N);
-        return storage_type::operator[](i);
+        return this->operator[](i);
     }
 
     const_reference at (size_type i) const
     {
         VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_RANGE(i, N);
-        return storage_type::operator[](i);
+        return this->operator[](i);
     }
 
     template <size_type Pos>
     reference at ()
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return storage_type::operator[](Pos);
+        return this->operator[](Pos);
     }
 
     template <size_type Pos>
     const_reference at () const
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return storage_type::operator[](Pos);
+        return this->operator[](Pos);
     }
 
     template <size_type Pos>
     reference at (Position<Pos>)
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return storage_type::operator[](Pos);
+        return this->operator[](Pos);
     }
 
     template <size_type Pos>
     const_reference at (Position<Pos>) const
     {
         VSMC_STATIC_ASSERT_UTILITY_STATIC_VECTOR_RANGE(Pos, N);
-        return storage_type::operator[](Pos);
+        return this->operator[](Pos);
     }
 
     reference operator[] (size_type i)
-    {return storage_type::operator[](i);}
+    {return this->operator[](i);}
 
     const_reference operator[] (size_type i) const
-    {return storage_type::operator[](i);}
+    {return this->operator[](i);}
 
     template <size_type Pos>
     reference operator[] (Position<Pos>) {return at<Pos>();}
@@ -313,6 +313,97 @@ class StaticVector : public internal::StaticVectorStorage<T, N,
     template <std::size_t Begin, std::size_t Size>
     StaticVector<T, Size, Traits> expand () const
     {return expand<Begin, Size>(cxx11::integral_constant<bool, Begin == 0>());}
+
+    friend inline bool operator== (
+            const StaticVector<T, N, Traits> &sv1,
+            const StaticVector<T, N, Traits> &sv2)
+    {
+        for (std::size_t i = 0; i != N; ++i)
+            if (sv1[i] != sv2[i])
+                return false;
+
+        return true;
+    }
+
+    friend inline bool operator!= (
+            const StaticVector<T, N, Traits> &sv1,
+            const StaticVector<T, N, Traits> &sv2)
+    {return !(sv1 == sv2);}
+
+    friend inline bool operator< (
+            const StaticVector<T, N, Traits> &sv1,
+            const StaticVector<T, N, Traits> &sv2)
+    {
+        for (std::size_t i = 0; i != N; ++i) {
+            if (sv1[i] < sv2[i])
+                return true;
+            if (sv2[i] < sv1[i])
+                return false;
+        }
+
+        return false;
+    }
+
+    friend inline bool operator<= (
+            const StaticVector<T, N, Traits> &sv1,
+            const StaticVector<T, N, Traits> &sv2)
+    {
+        for (std::size_t i = 0; i != N; ++i) {
+            if (sv1[i] < sv2[i])
+                return true;
+            if (sv2[i] < sv1[i])
+                return false;
+        }
+
+        return true;
+    }
+
+    friend inline bool operator> (
+            const StaticVector<T, N, Traits> &sv1,
+            const StaticVector<T, N, Traits> &sv2)
+    {return !(sv1 <= sv2);}
+
+    friend inline bool operator>= (
+            const StaticVector<T, N, Traits> &sv1,
+            const StaticVector<T, N, Traits> &sv2)
+    {return !(sv1 < sv2);}
+
+    template <typename CharT, typename CharTraits>
+    friend inline std::basic_ostream<CharT, CharTraits> &operator<< (
+            std::basic_ostream<CharT, CharTraits> &os,
+            const StaticVector<T, N, Traits> &sv)
+    {
+        if (!os)
+            return os;
+
+        for (std::size_t i = 0; i < N - 1; ++i)
+            if (os) os << sv[i] << ' ';
+        if (os) os << sv[N - 1];
+
+        return os;
+    }
+
+    template <typename CharT, typename CharTraits>
+    friend inline std::basic_istream<CharT, CharTraits> &operator>> (
+            std::basic_istream<CharT, CharTraits> &is,
+            StaticVector<T, N, Traits> &sv)
+    {
+        if (!is)
+            return is;
+
+        StaticVector<T, N, Traits> tmp;
+        for (std::size_t i = 0; i != N; ++i) {
+            if (!is) return is;
+            is >> std::ws >> tmp[i];
+        }
+        if (is) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            sv = cxx11::move(tmp);
+#else
+            sv = tmp;
+#endif
+        }
+    }
 
     private :
 
@@ -389,121 +480,6 @@ template <std::size_t I, typename T, std::size_t N, typename Traits>
 inline T &&get (StaticVector<T, N, Traits> &&sv)
 {return cxx11::move(sv.template at<I>());}
 #endif
-
-/// \brief StaticVector operator==
-/// \ingroup StaticVector
-template <typename T, std::size_t N, typename Traits>
-inline bool operator== (
-        const StaticVector<T, N, Traits> &sv1,
-        const StaticVector<T, N, Traits> &sv2)
-{
-    for (std::size_t i = 0; i != N; ++i)
-        if (sv1[i] != sv2[i])
-            return false;
-
-    return true;
-}
-
-/// \brief StaticVector operator!=
-/// \ingroup StaticVector
-template <typename T, std::size_t N, typename Traits>
-inline bool operator!= (
-        const StaticVector<T, N, Traits> &sv1,
-        const StaticVector<T, N, Traits> &sv2)
-{return !(sv1 == sv2);}
-
-/// \brief StaticVector operator<
-/// \ingroup StaticVector
-template <typename T, std::size_t N, typename Traits>
-inline bool operator< (
-        const StaticVector<T, N, Traits> &sv1,
-        const StaticVector<T, N, Traits> &sv2)
-{
-    for (std::size_t i = 0; i != N; ++i) {
-        if (sv1[i] < sv2[i])
-            return true;
-        if (sv2[i] < sv1[i])
-            return false;
-    }
-
-    return false;
-}
-
-/// \brief StaticVector operator<=
-/// \ingroup StaticVector
-template <typename T, std::size_t N, typename Traits>
-inline bool operator<= (
-        const StaticVector<T, N, Traits> &sv1,
-        const StaticVector<T, N, Traits> &sv2)
-{
-    for (std::size_t i = 0; i != N; ++i) {
-        if (sv1[i] < sv2[i])
-            return true;
-        if (sv2[i] < sv1[i])
-            return false;
-    }
-
-    return true;
-}
-
-/// \brief StaticVector operator>
-/// \ingroup StaticVector
-template <typename T, std::size_t N, typename Traits>
-inline bool operator> (
-        const StaticVector<T, N, Traits> &sv1,
-        const StaticVector<T, N, Traits> &sv2)
-{return !(sv1 <= sv2);}
-
-/// \brief StaticVector operator>=
-/// \ingroup StaticVector
-template <typename T, std::size_t N, typename Traits>
-inline bool operator>= (
-        const StaticVector<T, N, Traits> &sv1,
-        const StaticVector<T, N, Traits> &sv2)
-{return !(sv1 < sv2);}
-
-/// \brief StaticVector operator<<
-/// \ingroup StaticVector
-template <typename T, std::size_t N, typename Traits,
-         typename CharT, typename CharTraits>
-inline std::basic_ostream<CharT, CharTraits> &operator<< (
-        std::basic_ostream<CharT, CharTraits> &os,
-        const StaticVector<T, N, Traits> &sv)
-{
-    if (!os)
-        return os;
-
-    for (std::size_t i = 0; i < N - 1; ++i)
-        if (os) os << sv[i] << ' ';
-    if (os) os << sv[N - 1];
-
-    return os;
-}
-
-/// \brief StaticVector operator>>
-/// \ingroup StaticVector
-template <typename T, std::size_t N, typename Traits,
-         typename CharT, typename CharTraits>
-inline std::basic_istream<CharT, CharTraits> &operator>> (
-        std::basic_istream<CharT, CharTraits> &is,
-        StaticVector<T, N, Traits> &sv)
-{
-    if (!is)
-        return is;
-
-    StaticVector<T, N, Traits> tmp;
-    for (std::size_t i = 0; i != N; ++i) {
-        if (!is) return is;
-        is >> std::ws >> tmp[i];
-    }
-    if (is) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-        sv = cxx11::move(tmp);
-#else
-        sv = tmp;
-#endif
-    }
-}
 
 namespace internal {
 

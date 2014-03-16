@@ -124,26 +124,6 @@ class StopWatchClockAdapter
         running_ = false;
     }
 
-    StopWatchClockAdapter<ClockType> &operator+= (
-            const StopWatchClockAdapter<ClockType> &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_ += other.elapsed_;
-
-        return *this;
-    }
-
-    friend StopWatchClockAdapter<ClockType> operator+ (
-            const StopWatchClockAdapter<ClockType> &sw1,
-            const StopWatchClockAdapter<ClockType> &sw2)
-    {
-        StopWatchClockAdapter<ClockType> watch(sw1);
-        watch += sw2;
-
-        return watch;
-    }
-
     double nanoseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
@@ -178,6 +158,26 @@ class StopWatchClockAdapter
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::ratio<3600> > >(elapsed_).count();
+    }
+
+    StopWatchClockAdapter<ClockType> &operator+= (
+            const StopWatchClockAdapter<ClockType> &other)
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
+
+        elapsed_ += other.elapsed_;
+
+        return *this;
+    }
+
+    friend StopWatchClockAdapter<ClockType> operator+ (
+            const StopWatchClockAdapter<ClockType> &sw1,
+            const StopWatchClockAdapter<ClockType> &sw2)
+    {
+        StopWatchClockAdapter<ClockType> watch(sw1);
+        watch += sw2;
+
+        return watch;
     }
 
     private :
@@ -284,6 +284,15 @@ class StopWatch
         return *this;
     }
 
+    friend inline StopWatch operator+ (
+            const StopWatch &sw1, const StopWatch &sw2)
+    {
+        StopWatch watch(sw1);
+        watch += sw2;
+
+        return watch;
+    }
+
     private :
 
     mutable uint64_t elapsed_sec_;
@@ -294,16 +303,6 @@ class StopWatch
     static VSMC_CONSTEXPR const uint64_t ratio_ =
         static_cast<uint64_t>(1000000000ULL); // 9 zero
 }; // class StopWatch
-
-/// \brief StopWatch operator+
-/// \ingroup StopWatch
-inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
-{
-    StopWatch watch(sw1);
-    watch += sw2;
-
-    return watch;
-}
 
 } // namespace vsmc
 
@@ -399,6 +398,15 @@ class StopWatch
         return *this;
     }
 
+    friend inline StopWatch operator+ (
+            const StopWatch &sw1, const StopWatch &sw2)
+    {
+        StopWatch watch(sw1);
+        watch += sw2;
+
+        return watch;
+    }
+
     private :
 
     mutable timespec elapsed_;
@@ -407,16 +415,6 @@ class StopWatch
     static VSMC_CONSTEXPR const long ratio_ =
         static_cast<uint64_t>(1000000000LL); // 9 zero
 }; // class StopWatch
-
-/// \brief StopWatch operator+
-/// \ingroup StopWatch
-inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
-{
-    StopWatch watch(sw1);
-    watch += sw2;
-
-    return watch;
-}
 
 } // namespace vsmc
 
@@ -492,6 +490,15 @@ class StopWatch
         return *this;
     }
 
+    friend inline StopWatch operator+ (
+            const StopWatch &sw1, const StopWatch &sw2)
+    {
+        StopWatch watch(sw1);
+        watch += sw2;
+
+        return watch;
+    }
+
     private :
 
     mutable __int64 elapsed_;
@@ -499,16 +506,6 @@ class StopWatch
     mutable double frequency_;
     mutable bool running_;
 }; // class StopWatch
-
-/// \brief StopWatch operator+
-/// \ingroup StopWatch
-inline StopWatch operator+ (const StopWatch &sw1, const StopWatch &sw2)
-{
-    StopWatch watch(sw1);
-    watch += sw2;
-
-    return watch;
-}
 
 } // namespace vsmc
 
