@@ -51,12 +51,6 @@
 #define VSMC_USE_AES_NI 0
 #endif
 
-/// \brief Use Random123 for random number generating
-/// \ingroup ThirdParty
-#ifndef VSMC_USE_RANDOM123
-#define VSMC_USE_RANDOM123 0
-#endif
-
 /// \brief Use MPI
 /// \ingroup ThirdParty
 #ifndef VSMC_USE_MPI

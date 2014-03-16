@@ -60,10 +60,6 @@ Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
 not all C++11 implementations of `<functional>` and `<random>` work properly
 even they are present.
 
-The library can optionally use the [Random123][Random123] library for
-parallelized random number generator, and the default behavior is assuming this
-is available.
-
 # Compiler support
 
 This library makes heavy use of some template metaprogramming techniques. It
@@ -112,7 +108,6 @@ in the `LICENSE` file distributed with the source.
 [MSVC]: http://msdn.microsoft.com/en-us/vstudio//default.aspx
 [OpenCL]: http://www.khronos.org/opencl/
 [OpenMP]: http://www.openmp.org/
-[Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [libc++]: http://libcxx.llvm.org
 [libdispatch]: http://libdispatch.macosforge.org/
