@@ -125,9 +125,13 @@
 /// \ingroup Utility
 /// \brief Process program command line options
 
-/// \defgroup StaticVector Static vector
+/// \defgroup Array Array
 /// \ingroup Utility
 /// \brief Container with static size but possible dynamic memory allocation
+
+/// \defgroup Counter Counter
+/// \ingroup Utility
+/// \brief Using Array of unsinged integers as counters
 
 /// \defgroup STDTBB STDTBB
 /// \ingroup Utility

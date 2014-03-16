@@ -27,7 +27,7 @@ struct CounterMask<T, true>
 template <typename> class Counter;
 
 /// \brief Using Array of unsigned integers as counters
-/// \ingroup Array
+/// \ingroup Counter
 ///
 /// \details
 /// This class provides methods for using Array of unsigned integers as
