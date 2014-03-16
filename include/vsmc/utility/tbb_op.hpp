@@ -2,6 +2,7 @@
 #define VSMC_UTILITY_TBB_OP_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <limits>
 
 #define VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OBJECT(name, uni) \
 template <typename T>                                                        \

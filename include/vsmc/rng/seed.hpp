@@ -91,7 +91,7 @@ class SeedGenerator
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_ = std::numeric_limits<result_type>::max VSMC_MNE ();
+        seed_max_ = static_cast<ResultType>(~static_cast<ResultType>(0));
         seed_max_ -= seed_max_ % divisor_;
         seed_max_ /= divisor_;
 

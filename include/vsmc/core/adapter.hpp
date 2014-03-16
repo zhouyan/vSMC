@@ -2,6 +2,7 @@
 #define VSMC_CORE_ADAPTER_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/cxx11/functional.hpp>
 
 #define VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(name, RT, Args)                  \
 template <typename U>                                                        \

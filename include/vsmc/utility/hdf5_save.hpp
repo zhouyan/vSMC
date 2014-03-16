@@ -2,6 +2,7 @@
 #define VSMC_UTILITY_HDF5_SAVE_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <sstream>
 #include <hdf5.h>
 
 #if VSMC_HAS_CXX11LIB_TUPLE

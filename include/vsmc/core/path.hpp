@@ -2,6 +2,7 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/cxx11/functional.hpp>
 #include <vsmc/integrate/nintegrate_newton_cotes.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func) \

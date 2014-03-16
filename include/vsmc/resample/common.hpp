@@ -2,6 +2,7 @@
 #define VSMC_RESAMPLE_COMMON_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/cxx11/random.hpp>
 
 /// \brief Default RNG type for resampling
 /// \ingroup Config

@@ -4,6 +4,7 @@
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/rng/seed.hpp>
+#include <sstream>
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim) \
     VSMC_STATIC_ASSERT((Dim == ::vsmc::Dynamic),                             \

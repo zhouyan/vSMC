@@ -1,6 +1,7 @@
 #ifndef VSMC_RNG_INTERNAL_COMMON_HPP
 #define VSMC_RNG_INTERNAL_COMMON_HPP
 
+#include <vsmc/cxx11/random.hpp>
 #include <vsmc/utility/array.hpp>
 #include <vsmc/utility/counter.hpp>
 #include <stdint.h>

@@ -7,8 +7,6 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
-#include <vsmc/cxx11/functional.hpp>
-#include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
 #include <cassert>
@@ -18,14 +16,9 @@
 #include <cstdio>
 #include <cstring>
 
-#include <limits>
-#include <stdexcept>
-#include <utility>
-
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
 
 #include <string>
 #include <vector>

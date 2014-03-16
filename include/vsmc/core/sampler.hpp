@@ -4,7 +4,9 @@
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>
+#include <vsmc/cxx11/functional.hpp>
 #include <vsmc/utility/backup.hpp>
+#include <limits>
 #include <map>
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func) \

@@ -1,7 +1,6 @@
 #ifndef VSMC_MATH_INTEGER_FUNCTION_HPP
 #define VSMC_MATH_INTEGER_FUNCTION_HPP
 
-#include <vsmc/internal/assert.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
 #ifndef VSMC_MATH_INTEGER_FUNCTION_UINT
