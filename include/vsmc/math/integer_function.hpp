@@ -78,21 +78,21 @@ namespace internal {
 template <VSMC_MATH_INTEGER_FUNCTION_INT N, VSMC_MATH_INTEGER_FUNCTION_UINT K>
 struct PowerImpl
 {
-    static VSMC_CONSTEXPR VSMC_MATH_INTEGER_FUNCTION_INT value =
+    static VSMC_CONSTEXPR const VSMC_MATH_INTEGER_FUNCTION_INT value =
         N * PowerImpl<N, K - 1>::value;
 }; // struct PowerImpl
 
 template <>
 struct PowerImpl<0, 0>
-{static VSMC_CONSTEXPR VSMC_MATH_INTEGER_FUNCTION_INT value = 1;};
+{static VSMC_CONSTEXPR const VSMC_MATH_INTEGER_FUNCTION_INT value = 1;};
 
 template <VSMC_MATH_INTEGER_FUNCTION_UINT K>
 struct PowerImpl<0, K>
-{static VSMC_CONSTEXPR VSMC_MATH_INTEGER_FUNCTION_INT value = 0;};
+{static VSMC_CONSTEXPR const VSMC_MATH_INTEGER_FUNCTION_INT value = 0;};
 
 template <VSMC_MATH_INTEGER_FUNCTION_INT N>
 struct PowerImpl<N, 0>
-{static VSMC_CONSTEXPR VSMC_MATH_INTEGER_FUNCTION_INT value = 1;};
+{static VSMC_CONSTEXPR const VSMC_MATH_INTEGER_FUNCTION_INT value = 1;};
 
 } // namespace vsmc::math::internal
 
@@ -109,21 +109,21 @@ template <VSMC_MATH_INTEGER_FUNCTION_UINT K,
          VSMC_MATH_INTEGER_FUNCTION_INT A, VSMC_MATH_INTEGER_FUNCTION_INT B>
 struct FibonacciImpl
 {
-    static VSMC_CONSTEXPR VSMC_MATH_INTEGER_FUNCTION_INT value =
+    static VSMC_CONSTEXPR const VSMC_MATH_INTEGER_FUNCTION_INT value =
         FibonacciImpl<K - 1, A, B>::value + FibonacciImpl<K - 2, A, B>::value;
 }; // struct FibonacciImpl
 
 template <VSMC_MATH_INTEGER_FUNCTION_INT A, VSMC_MATH_INTEGER_FUNCTION_INT B>
 struct FibonacciImpl<0, A, B>
-{static VSMC_CONSTEXPR VSMC_MATH_INTEGER_FUNCTION_INT value = 0;};
+{static VSMC_CONSTEXPR const VSMC_MATH_INTEGER_FUNCTION_INT value = 0;};
 
 template <VSMC_MATH_INTEGER_FUNCTION_INT A, VSMC_MATH_INTEGER_FUNCTION_INT B>
 struct FibonacciImpl<1, A, B>
-{static VSMC_CONSTEXPR VSMC_MATH_INTEGER_FUNCTION_INT value = A;};
+{static VSMC_CONSTEXPR const VSMC_MATH_INTEGER_FUNCTION_INT value = A;};
 
 template <VSMC_MATH_INTEGER_FUNCTION_INT A, VSMC_MATH_INTEGER_FUNCTION_INT B>
 struct FibonacciImpl<2, A, B>
-{static VSMC_CONSTEXPR VSMC_MATH_INTEGER_FUNCTION_INT value = B;};
+{static VSMC_CONSTEXPR const VSMC_MATH_INTEGER_FUNCTION_INT value = B;};
 
 } // namespace vsmc::math::internal
 
