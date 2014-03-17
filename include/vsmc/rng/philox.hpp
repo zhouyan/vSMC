@@ -206,7 +206,7 @@ struct PhiloxRound<ResultType, 2, N, true>
         ResultType hi = 0;
         ResultType lo = 0;
         philox_hilo<2, 0>(state[Position<0>()], hi, lo);
-        state[Position<0>()] = hi^par[Position<0>()]^state[Position<1>()];
+        state[Position<0>()] = hi^(par[Position<0>()]^state[Position<1>()]);
         state[Position<1>()] = lo;
     }
 }; // struct PhiloxRound
@@ -218,15 +218,18 @@ struct PhiloxRound<ResultType, 4, N, true>
             const Array<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
-        ResultType hi1 = 0;
-        ResultType lo0 = 0;
         ResultType lo1 = 0;
-        philox_hilo<4, 0>(state[Position<0>()], hi0, lo0);
-        philox_hilo<4, 1>(state[Position<2>()], hi1, lo1);
-        state[Position<0>()] = hi1^state[Position<1>()]^par[Position<0>()];
+        ResultType hi2 = 0;
+        ResultType lo3 = 0;
+        philox_hilo<4, 1>(state[Position<2>()], hi0, lo1);
+        philox_hilo<4, 0>(state[Position<0>()], hi2, lo3);
+
+        hi0 ^= par[Position<0>()];
+        hi2 ^= par[Position<1>()];
+        state[Position<0>()] = hi0^state[Position<1>()];
         state[Position<1>()] = lo1;
-        state[Position<2>()] = hi0^state[Position<3>()]^par[Position<1>()];
-        state[Position<3>()] = lo0;
+        state[Position<2>()] = hi2^state[Position<3>()];
+        state[Position<3>()] = lo3;
     }
 }; // struct PhiloxRound
 
