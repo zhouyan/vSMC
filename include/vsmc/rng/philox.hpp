@@ -82,9 +82,9 @@ namespace traits {
 /// is either 0 or 1. Specializing the class templates
 /// `PhiloxBumpkConstantTrait<uint64_t, 0>` etc., are equivalent to define
 /// macros `PHILOX_W64_0` etc., in the original implementation.
-template <typename ResultType, std::size_t N>
+template <typename ResultType, std::size_t I>
 struct PhiloxBumpkConstantTrait :
-    public ::vsmc::internal::PhiloxBumpkConstant<ResultType, N> {};
+    public ::vsmc::internal::PhiloxBumpkConstant<ResultType, I> {};
 
 /// \brief Traits of PhiloxEngine constants for rounding
 /// \ingroup Traits
@@ -95,9 +95,9 @@ struct PhiloxBumpkConstantTrait :
 /// Specializing the class templates `PhiloxRoundConstantTrait<uint64_t, 4, 0>`
 /// etc., are equivalent to define macros `PHILOX_M4x64_0` etc., in the
 /// original implementation.
-template <typename ResultType, std::size_t K, std::size_t N>
+template <typename ResultType, std::size_t K, std::size_t I>
 struct PhiloxRoundConstantTrait :
-    public ::vsmc::internal::PhiloxRoundConstant<ResultType, K, N> {};
+    public ::vsmc::internal::PhiloxRoundConstant<ResultType, K, I> {};
 
 } // namespace vsmc::traits
 
@@ -128,36 +128,36 @@ struct PhiloxBumpk<ResultType, 4, N, true>
     }
 }; // struct PhiloxBumpk
 
-template <std::size_t K, std::size_t N>
+template <std::size_t K, std::size_t I>
 inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
 {
     uint64_t prod =
         static_cast<uint64_t>(b) *
         static_cast<uint64_t>(
-                traits::PhiloxRoundConstantTrait<uint32_t, K, N>::value);
+                traits::PhiloxRoundConstantTrait<uint32_t, K, I>::value);
     hi = prod >> 32;
     lo = static_cast<uint32_t>(prod);
 }
 
 #if VSMC_HAS_INT128
 
-template <std::size_t K, std::size_t N>
+template <std::size_t K, std::size_t I>
 inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
     unsigned VSMC_INT128 prod =
         static_cast<unsigned VSMC_INT128>(b) *
         static_cast<unsigned VSMC_INT128>(
-                traits::PhiloxRoundConstantTrait<uint64_t, K, N>::value);
+                traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value);
     hi = prod >> 64;
     lo = static_cast<uint64_t>(prod);
 }
 
 #elif defined(_MSC_VER) // VSMC_HAS_INT128
 
-template <std::size_t K, std::size_t N>
+template <std::size_t K, std::size_t I>
 inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
-    lo = _umul128(traits::PhiloxRoundConstantTrait<uint64_t, K, N>::value, b,
+    lo = _umul128(traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value, b,
             &hi);
 }
 
@@ -173,15 +173,15 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 
     lo = static_cast<uint64_t>(a * b);
 
-    uint64_t ahi = a >> whalf;
-    uint64_t alo = a & lomask;
-    uint64_t bhi = b >> whalf;
-    uint64_t blo = b & lomask;
+    const uint64_t ahi = a >> whalf;
+    const uint64_t alo = a & lomask;
+    const uint64_t bhi = b >> whalf;
+    const uint64_t blo = b & lomask;
 
-    uint64_t ahbl = ahi * blo;
-    uint64_t albh = alo * bhi;
+    const uint64_t ahbl = ahi * blo;
+    const uint64_t albh = alo * bhi;
 
-    uint64_t ahbl_albh = ((ahbl & lomask) + (albh & lomask));
+    const uint64_t ahbl_albh = ((ahbl & lomask) + (albh & lomask));
 
     hi = ahi * bhi + (ahbl >> whalf) + (albh >> whalf);
     hi += ahbl_albh >> whalf;

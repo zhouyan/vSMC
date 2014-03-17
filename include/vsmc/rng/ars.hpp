@@ -65,7 +65,7 @@ class ARSKeySeq
 
     private :
 
-    __m128i weyl_;
+    const __m128i weyl_;
 
     template <std::size_t, std::size_t Rp1, typename Traits>
     void generate_seq (Array<__m128i, Rp1, Traits> &, cxx11::false_type) {}
