@@ -11,7 +11,7 @@
 
 namespace vsmc {
 
-/// \brief Test if an object is aligned for 
+/// \brief Test if an object is aligned for 16 bytes
 template <typename T>
 inline bool is_m128_aligned (T *ptr)
 {return (reinterpret_cast<uintptr_t>(ptr) & static_cast<uintptr_t>(15)) == 0;}

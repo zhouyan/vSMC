@@ -215,12 +215,12 @@ class UniformRealDistribution
             return false;
         return true;
     }
-    
+
     friend inline bool operator!= (
             const UniformRealDistribution<FPType, Left, Right> &runif1,
             const UniformRealDistribution<FPType, Left, Right> &runif2)
     {return !(runif1 == runif2);}
-    
+
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
@@ -230,10 +230,10 @@ class UniformRealDistribution
             return os;
 
         os << runif.a_ << ' ' << runif.b_;
-    
+
         return os;
     }
-    
+
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
@@ -254,7 +254,7 @@ class UniformRealDistribution
                 is.setstate(std::ios_base::failbit);
             }
         }
-    
+
         return is;
     }
 
