@@ -412,8 +412,7 @@ class StopWatch
     mutable timespec elapsed_;
     mutable timespec start_time_;
     mutable bool running_;
-    static VSMC_CONSTEXPR const long ratio_ =
-        static_cast<uint64_t>(1000000000LL); // 9 zero
+    static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
 }; // class StopWatch
 
 } // namespace vsmc
