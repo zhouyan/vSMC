@@ -124,10 +124,13 @@ class ArrayStorage<T, N, false>
 
 namespace traits {
 
-/// \brief Default traits of Array
+/// \brief Default trait of Array
 /// \ingroup Traits
 template <typename T> struct ArrayTrait
-{static VSMC_CONSTEXPR const std::size_t max_static_size = 1024;};
+{
+    static VSMC_CONSTEXPR const std::size_t max_static_size =
+        static_cast<std::size_t>(~(static_cast<std::size_t>(0)));
+}; // struct ArrayTrait
 
 } // namespace vsmc::traits
 
@@ -137,40 +140,46 @@ template <typename T> struct ArrayTrait
 ///
 /// \details
 /// Array and C++11 `std::array` are efficient when the size is known at
-/// compile time. However, whent the size is large, the benefits can be
+/// compile time. However, when the size is large, the benefits can be
 /// negligible. And in the worst case, it can even cause stack overflow or
 /// degenerate the performance. There are other undesired effects of
 /// `std::array`. For example, the `swap` operation has a complexity linear to
 /// the size while with `std::vector`, it has a constant complexity.
 ///
-/// The Array container is sort of a hybrid of `std::array` and
-/// `std::vector`.  When the size is small, it uses array to allocate the
-/// memory and therefore if the object is allocated on the stack, then no
-/// dynamic memory allocation happens at all. And if a sequence of Array
-/// is allocated, the internal storage is allocated next to each other. When
-/// the size is large, it uses dynamic memory allocation and it still behaves
-/// much like a `std::array` except one does not need to worry that very large
-/// stack allocation will happen.
-///
-/// The interface is almost identical to that of `std::array` with a few
+/// The Array container is sort of a hybrid of `std::array` and `std::vector`.
+/// The default behavior is almost identical to `std::array` with a few minor
 /// differences.
 /// - There is no `max_size()` member function
 /// - The `size()` and `empty()` member functions are `static` and can be used
-/// as constant expression if `constexpr` is supported
-/// - There are additional `at<Pos>()` and `at(Position<Pos>())` member
-/// functions, which perform static assertions of the index instead of runtime
-/// assertion. They can also be used to write loop unrolling functions for the
-/// container. They are preferred way to access elements. They are (slightly)
-/// more efficient than `operator[]` and also safer.
+/// as constant expression if C++11 `constexpr` is supported
+/// - There are additional `at<Pos>()`, `at(Position<Pos>)` and
+/// `operator[](Position<Pos>)` member functions, which perform static
+/// assertions of the index instead of runtime assertion. They can also be used
+/// to write loop unrolling functions for the container. They are preferred way
+/// to access elements since they provide bounds checking without performance
+/// penalty.
 /// - The non-member function `get` and `swap` are defined in the namespace
 /// `vsmc`. Use the swap idiom,
 /// ~~~{.cpp}
 /// using std::swap;
 /// swap(obj1, obj2);
 /// ~~~
-/// instead of calling `std::swap(obj1, obj2)`. See "Effective C++".
+/// instead of calling `std::swap(obj1, obj2)`. See "Effective C++". The
+/// library does not pollute the `std` namespace in anyway.
 /// - The helper classes `std::tuple_size` and `std::tuple_element` are not
-/// defined for Array
+/// defined for Array. Same reason as above. Instead, use `vsmc::ArraySize` and
+/// `vsmc::ArrayElement`.
+///
+/// It also provides a few other member functions not presented in
+/// `std::array`, see the documents.
+///
+/// The class has an additional template parameter, `Traits`. The class check
+/// the static constant member data `max_static_size`, which by default is the
+/// maximum of `std::size_t`. If the size of the array, `sizeof(T) * N`, is
+/// smaller than or equal to `max_static_size`, then the memory is allocated
+/// with array. Otherwise, it is allocated on the heap. Though the memory is
+/// allocated dynamically, the size still has to be known at compile time. In
+/// addition, the statical bounds checking can still be used.
 template <typename T, std::size_t N,
          typename Traits = traits::ArrayTrait<T> >
 class Array : public internal::ArrayStorage<T, N,
@@ -488,6 +497,21 @@ template <std::size_t I, typename T, std::size_t N, typename Traits>
 inline T &&get (Array<T, N, Traits> &&sv)
 {return cxx11::move(sv.template at<I>());}
 #endif
+
+template <typename> struct ArraySize;
+
+/// \brief The size of Array
+/// \ingroup Array
+template <typename T, std::size_t N, typename Traits>
+struct ArraySize<Array<T, N, Traits> > :
+public cxx11::integral_constant<std::size_t, N> {};
+
+template <std::size_t, typename> struct ArrayElement;
+
+/// \brief The type of Array
+/// \ingroup Array
+template <std::size_t I, typename T, std::size_t N, typename Traits>
+struct ArrayElement<I, Array<T, N, Traits> > {typedef T type;};
 
 } // namespace vsmc
 
