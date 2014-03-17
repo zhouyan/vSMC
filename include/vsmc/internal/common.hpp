@@ -22,5 +22,6 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 
 #endif // VSMC_INTERNAL_COMMON_HPP
