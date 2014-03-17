@@ -135,7 +135,7 @@ inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
         static_cast<uint64_t>(b) *
         static_cast<uint64_t>(
                 traits::PhiloxRoundConstantTrait<uint32_t, K, I>::value);
-    hi = prod >> 32;
+    hi = static_cast<uint32_t>(prod >> 32);
     lo = static_cast<uint32_t>(prod);
 }
 
@@ -148,7 +148,7 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
         static_cast<unsigned VSMC_INT128>(b) *
         static_cast<unsigned VSMC_INT128>(
                 traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value);
-    hi = prod >> 64;
+    hi = static_cast<uint64_t>(prod >> 64);
     lo = static_cast<uint64_t>(prod);
 }
 
