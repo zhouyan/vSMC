@@ -37,8 +37,8 @@ namespace traits {
 /// \details
 /// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bits or
 /// the Weyl constant.
-template <std::size_t N> struct ARSWeylConstantTrait :
-    public ::vsmc::internal::ARSWeylConstantValue<N> {};
+template <std::size_t I> struct ARSWeylConstantTrait :
+    public ::vsmc::internal::ARSWeylConstantValue<I> {};
 
 } // namespace vsmc::traits
 

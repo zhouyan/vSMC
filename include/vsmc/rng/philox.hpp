@@ -21,12 +21,12 @@
         VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);               \
         VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K);
 
-#define VSMC_DEFINE_RNG_PHILOX_BUMPK_CONSTANT(T, I, val) \
-    template <> struct PhiloxBumpkConstant < T, I > :                        \
+#define VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(T, I, val) \
+    template <> struct PhiloxWeylConstantValue < T, I > :                    \
         public cxx11::integral_constant< T, val > {};
 
 #define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(T, K, I, val) \
-    template <> struct PhiloxRoundConstant < T, K, I > :                     \
+    template <> struct PhiloxRoundConstantValue < T, K, I > :                \
         public cxx11::integral_constant< T, val > {};
 
 /// \brief PhiloxEngine default rounds
@@ -39,19 +39,19 @@ namespace vsmc {
 
 namespace internal {
 
-template <typename, std::size_t> struct PhiloxBumpkConstant;
+template <typename, std::size_t> struct PhiloxWeylConstantValue;
 
-VSMC_DEFINE_RNG_PHILOX_BUMPK_CONSTANT(uint32_t, 0,
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 0,
         static_cast<uint32_t>(0x9E3779B9))
-VSMC_DEFINE_RNG_PHILOX_BUMPK_CONSTANT(uint32_t, 1,
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 1,
         static_cast<uint32_t>(0xBB67AE85))
 
-VSMC_DEFINE_RNG_PHILOX_BUMPK_CONSTANT(uint64_t, 0,
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t, 0,
         UINT64_C(0x9E3779B97F4A7C15))
-VSMC_DEFINE_RNG_PHILOX_BUMPK_CONSTANT(uint64_t, 1,
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t, 1,
         UINT64_C(0xBB67AE8584CAA73B))
 
-template <typename, std::size_t, std::size_t> struct PhiloxRoundConstant;
+template <typename, std::size_t, std::size_t> struct PhiloxRoundConstantValue;
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 2, 0,
         static_cast<uint32_t>(0xd256d193))
@@ -80,11 +80,11 @@ namespace traits {
 /// \details
 /// The first template argument is either `uint32_t` or `uint64_t`. The second
 /// is either 0 or 1. Specializing the class templates
-/// `PhiloxBumpkConstantTrait<uint64_t, 0>` etc., are equivalent to define
+/// `PhiloxWeylConstantTrait<uint64_t, 0>` etc., are equivalent to define
 /// macros `PHILOX_W64_0` etc., in the original implementation.
 template <typename ResultType, std::size_t I>
-struct PhiloxBumpkConstantTrait :
-    public ::vsmc::internal::PhiloxBumpkConstant<ResultType, I> {};
+struct PhiloxWeylConstantTrait :
+    public ::vsmc::internal::PhiloxWeylConstantValue<ResultType, I> {};
 
 /// \brief Traits of PhiloxEngine constants for rounding
 /// \ingroup Traits
@@ -97,36 +97,36 @@ struct PhiloxBumpkConstantTrait :
 /// original implementation.
 template <typename ResultType, std::size_t K, std::size_t I>
 struct PhiloxRoundConstantTrait :
-    public ::vsmc::internal::PhiloxRoundConstant<ResultType, K, I> {};
+    public ::vsmc::internal::PhiloxRoundConstantValue<ResultType, K, I> {};
 
 } // namespace vsmc::traits
 
 namespace internal {
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 1)>
-struct PhiloxBumpk {static void bumpk (Array<ResultType, K / 2> &) {}};
+struct PhiloxBumpKey {static void eval (Array<ResultType, K / 2> &) {}};
 
 template <typename ResultType, std::size_t N>
-struct PhiloxBumpk<ResultType, 2, N, true>
+struct PhiloxBumpKey<ResultType, 2, N, true>
 {
-    static void bumpk (Array<ResultType, 1> &par)
+    static void eval (Array<ResultType, 1> &par)
     {
         par[Position<0>()] +=
-            traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
+            traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
     }
-}; // struct PhiloxBumpk
+}; // struct PhiloxBumpKey
 
 template <typename ResultType, std::size_t N>
-struct PhiloxBumpk<ResultType, 4, N, true>
+struct PhiloxBumpKey<ResultType, 4, N, true>
 {
-    static void bumpk (Array<ResultType, 2> &par)
+    static void eval (Array<ResultType, 2> &par)
     {
         par[Position<0>()] +=
-            traits::PhiloxBumpkConstantTrait<ResultType, 0>::value;
+            traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
         par[Position<1>()] +=
-            traits::PhiloxBumpkConstantTrait<ResultType, 1>::value;
+            traits::PhiloxWeylConstantTrait<ResultType, 1>::value;
     }
-}; // struct PhiloxBumpk
+}; // struct PhiloxBumpKey
 
 template <std::size_t K, std::size_t I>
 inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
@@ -193,14 +193,14 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct PhiloxRound
 {
-    static void round (Array<ResultType, K> &,
+    static void eval (Array<ResultType, K> &,
             const Array<ResultType, K / 2> &) {}
 }; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true>
 {
-    static void round (Array<ResultType, 2> &state,
+    static void eval (Array<ResultType, 2> &state,
             const Array<ResultType, 1> &par)
     {
         ResultType hi = 0;
@@ -214,7 +214,7 @@ struct PhiloxRound<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true>
 {
-    static void round (Array<ResultType, 4> &state,
+    static void eval (Array<ResultType, 4> &state,
             const Array<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
@@ -266,7 +266,7 @@ struct PhiloxRound<ResultType, 4, N, true>
 /// range and has the same period as the original.
 ///
 /// The constants of bumping the key (Weyl constants) and those used in each
-/// rounds can be set through traits, `vsmc::traits::PhiloxBumpkConstantTrait`
+/// rounds can be set through traits, `vsmc::traits::PhiloxWeylConstantTrait`
 /// and `vsmc::traits::PhiloxRoundConstantTrait`.
 template <typename ResultType, std::size_t K,
          std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
@@ -484,8 +484,8 @@ class PhiloxEngine
     void generate_buffer (buffer_type &buf, key_type &par,
             cxx11::true_type) const
     {
-        internal::PhiloxBumpk<ResultType, K, N>::bumpk(par);
-        internal::PhiloxRound<ResultType, K, N>::round(buf, par);
+        internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
+        internal::PhiloxRound<ResultType, K, N>::eval(buf, par);
         generate_buffer<N + 1>(buf, par,
                 cxx11::integral_constant<bool, N < Rounds>());
     }
