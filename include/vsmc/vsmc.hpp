@@ -117,7 +117,7 @@
 /// \ingroup Utility
 /// \brief C++ wrapper of Apple GCD
 
-/// \defgroup HDF5Save HDF5 objects saving
+/// \defgroup HDF5IO HDF5 objects saving
 /// \ingroup Utility
 /// \brief Functions for saving objects in HDF5 format
 

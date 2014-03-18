@@ -68,55 +68,55 @@ struct HDF5DataPtr
 template <typename> inline hid_t hdf5io_datatype () {return -1;}
 
 /// \brief HDF5 data type specialization for char
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<char> ()
 {return H5Tcopy(H5T_NATIVE_CHAR);}
 
 /// \brief HDF5 data type specialization for signed char
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<signed char> ()
 {return H5Tcopy(H5T_NATIVE_SCHAR);}
 
 /// \brief HDF5 data type specialization for unsigned char
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<unsigned char> ()
 {return H5Tcopy(H5T_NATIVE_UCHAR);}
 
 /// \brief HDF5 data type specialization for short
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<short> ()
 {return H5Tcopy(H5T_NATIVE_SHORT);}
 
 /// \brief HDF5 data type specialization for unsigned short
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<unsigned short> ()
 {return H5Tcopy(H5T_NATIVE_UCHAR);}
 
 /// \brief HDF5 data type specialization for int
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<int> ()
 {return H5Tcopy(H5T_NATIVE_INT);}
 
 /// \brief HDF5 data type specialization for unsigned int
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<unsigned int> ()
 {return H5Tcopy(H5T_NATIVE_UINT);}
 
 /// \brief HDF5 data type specialization for long
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<long> ()
 {return H5Tcopy(H5T_NATIVE_LONG);}
 
 /// \brief HDF5 data type specialization for unsigned long
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<unsigned long> ()
 {return H5Tcopy(H5T_NATIVE_ULONG);}
@@ -124,13 +124,13 @@ inline hid_t hdf5io_datatype<unsigned long> ()
 #if VSMC_HAS_CXX11_LONG_LONG
 
 /// \brief HDF5 data type specialization for long long
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<long long> ()
 {return H5Tcopy(H5T_NATIVE_LLONG);}
 
 /// \brief HDF5 data type specialization for unsigned long
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<unsigned long long> ()
 {return H5Tcopy(H5T_NATIVE_ULLONG);}
@@ -138,19 +138,19 @@ inline hid_t hdf5io_datatype<unsigned long long> ()
 #endif // VSMC_HAS_CXX11_LONG_LONG
 
 /// \brief HDF5 data type specialization for float
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<float> ()
 {return H5Tcopy(H5T_NATIVE_FLOAT);}
 
 /// \brief HDF5 data type specialization for double
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<double> ()
 {return H5Tcopy(H5T_NATIVE_DOUBLE);}
 
 /// \brief HDF5 data type specialization for long double
-/// \ingroup HDFSave
+/// \ingroup HDF5IO
 template <>
 inline hid_t hdf5io_datatype<long double> ()
 {return H5Tcopy(H5T_NATIVE_LDOUBLE);}
