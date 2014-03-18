@@ -1,5 +1,5 @@
-#ifndef VSMC_UTILITY_HDF5_SAVE_HPP
-#define VSMC_UTILITY_HDF5_SAVE_HPP
+#ifndef VSMC_UTILITY_HDF5IO_HPP
+#define VSMC_UTILITY_HDF5IO_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <sstream>
@@ -14,10 +14,10 @@ namespace vsmc {
 namespace internal {
 
 template <MatrixOrder>
-inline void hdf5_matrix_dim (std::size_t, std::size_t, hsize_t *);
+inline void hdf5io_matrix_dim (std::size_t, std::size_t, hsize_t *);
 
 template <>
-inline void hdf5_matrix_dim<RowMajor> (std::size_t nrow, std::size_t ncol,
+inline void hdf5io_matrix_dim<RowMajor> (std::size_t nrow, std::size_t ncol,
         hsize_t *dim)
 {
     dim[0] = ncol;
@@ -25,7 +25,7 @@ inline void hdf5_matrix_dim<RowMajor> (std::size_t nrow, std::size_t ncol,
 }
 
 template <>
-inline void hdf5_matrix_dim<ColMajor> (std::size_t nrow, std::size_t ncol,
+inline void hdf5io_matrix_dim<ColMajor> (std::size_t nrow, std::size_t ncol,
         hsize_t *dim)
 {
     dim[1] = ncol;
@@ -33,10 +33,8 @@ inline void hdf5_matrix_dim<ColMajor> (std::size_t nrow, std::size_t ncol,
 }
 
 template <typename T>
-class HDF5DataPtr
+struct HDF5DataPtr
 {
-    public :
-
     HDF5DataPtr () : ptr_(VSMC_NULLPTR) {}
 
     template <typename InputIter>
@@ -61,66 +59,66 @@ class HDF5DataPtr
 
     const T *ptr_;
     std::vector<T> data_;
-}; // class HDF5DataPtr
+}; // struct HDF5DataPtr
 
 } // namespace vsmc::internal
 
 /// \brief HDF5 data type
-/// \ingroup HDFSave
-template <typename> inline hid_t hdf5_datatype () {return -1;}
+/// \ingroup HDFIO
+template <typename> inline hid_t hdf5io_datatype () {return -1;}
 
 /// \brief HDF5 data type specialization for char
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<char> ()
+inline hid_t hdf5io_datatype<char> ()
 {return H5Tcopy(H5T_NATIVE_CHAR);}
 
 /// \brief HDF5 data type specialization for signed char
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<signed char> ()
+inline hid_t hdf5io_datatype<signed char> ()
 {return H5Tcopy(H5T_NATIVE_SCHAR);}
 
 /// \brief HDF5 data type specialization for unsigned char
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<unsigned char> ()
+inline hid_t hdf5io_datatype<unsigned char> ()
 {return H5Tcopy(H5T_NATIVE_UCHAR);}
 
 /// \brief HDF5 data type specialization for short
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<short> ()
+inline hid_t hdf5io_datatype<short> ()
 {return H5Tcopy(H5T_NATIVE_SHORT);}
 
 /// \brief HDF5 data type specialization for unsigned short
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<unsigned short> ()
+inline hid_t hdf5io_datatype<unsigned short> ()
 {return H5Tcopy(H5T_NATIVE_UCHAR);}
 
 /// \brief HDF5 data type specialization for int
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<int> ()
+inline hid_t hdf5io_datatype<int> ()
 {return H5Tcopy(H5T_NATIVE_INT);}
 
 /// \brief HDF5 data type specialization for unsigned int
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<unsigned int> ()
+inline hid_t hdf5io_datatype<unsigned int> ()
 {return H5Tcopy(H5T_NATIVE_UINT);}
 
 /// \brief HDF5 data type specialization for long
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<long> ()
+inline hid_t hdf5io_datatype<long> ()
 {return H5Tcopy(H5T_NATIVE_LONG);}
 
 /// \brief HDF5 data type specialization for unsigned long
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<unsigned long> ()
+inline hid_t hdf5io_datatype<unsigned long> ()
 {return H5Tcopy(H5T_NATIVE_ULONG);}
 
 #if VSMC_HAS_CXX11_LONG_LONG
@@ -128,13 +126,13 @@ inline hid_t hdf5_datatype<unsigned long> ()
 /// \brief HDF5 data type specialization for long long
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<long long> ()
+inline hid_t hdf5io_datatype<long long> ()
 {return H5Tcopy(H5T_NATIVE_LLONG);}
 
 /// \brief HDF5 data type specialization for unsigned long
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<unsigned long long> ()
+inline hid_t hdf5io_datatype<unsigned long long> ()
 {return H5Tcopy(H5T_NATIVE_ULLONG);}
 
 #endif // VSMC_HAS_CXX11_LONG_LONG
@@ -142,23 +140,23 @@ inline hid_t hdf5_datatype<unsigned long long> ()
 /// \brief HDF5 data type specialization for float
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<float> ()
+inline hid_t hdf5io_datatype<float> ()
 {return H5Tcopy(H5T_NATIVE_FLOAT);}
 
 /// \brief HDF5 data type specialization for double
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<double> ()
+inline hid_t hdf5io_datatype<double> ()
 {return H5Tcopy(H5T_NATIVE_DOUBLE);}
 
 /// \brief HDF5 data type specialization for long double
 /// \ingroup HDFSave
 template <>
-inline hid_t hdf5_datatype<long double> ()
+inline hid_t hdf5io_datatype<long double> ()
 {return H5Tcopy(H5T_NATIVE_LDOUBLE);}
 
 /// \brief Save a matrix in the HDF5 format from an input iterator
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 ///
 /// \tparam Order Storage order (RowMajor or ColMajor)
 /// \tparam T Type of the data
@@ -170,7 +168,7 @@ inline hid_t hdf5_datatype<long double> ()
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
 template <MatrixOrder Order, typename T, typename InputIter>
-inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
+inline InputIter hdf5store_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIter first, bool append = false)
 {
@@ -181,7 +179,7 @@ inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
 
     std::string dataset_name("/" + data_name);
     hsize_t dim[2];
-    internal::hdf5_matrix_dim<Order>(nrow, ncol, dim);
+    internal::hdf5io_matrix_dim<Order>(nrow, ncol, dim);
     internal::HDF5DataPtr<T> data_ptr;
     InputIter last = data_ptr.set(nrow * ncol, first);
     const T *data = data_ptr.get();
@@ -194,7 +192,7 @@ inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
                 H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     }
     hid_t dataspace = H5Screate_simple(2, dim, VSMC_NULLPTR);
-    hid_t datatype = hdf5_datatype<T>();
+    hid_t datatype = hdf5io_datatype<T>();
     hid_t dataset = H5Dcreate(datafile, dataset_name.c_str(),
             datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
@@ -208,7 +206,7 @@ inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
 }
 
 /// \brief Save a data frame in the HDF5 format from an iterator to iterators
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 ///
 /// \details
 /// A data frame is similar to that in R. It is much like a matrix except that
@@ -231,7 +229,7 @@ inline InputIter hdf5_save_matrix (std::size_t nrow, std::size_t ncol,
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
 template <typename T, typename InputIterIter, typename SInputIter>
-inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
+inline void hdf5store_data_frame (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIterIter first, SInputIter sfirst, bool append = false)
 {
@@ -250,7 +248,7 @@ inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
 
     if (nrow != 0 && ncol != 0) {
         hid_t dataspace = H5Screate_simple(1, dim, VSMC_NULLPTR);
-        hid_t datatype = hdf5_datatype<T>();
+        hid_t datatype = hdf5io_datatype<T>();
         internal::HDF5DataPtr<T> data_ptr;
         for (std::size_t j = 0; j != ncol; ++j, ++first, ++sfirst) {
             data_ptr.set(nrow, *first);
@@ -271,7 +269,7 @@ inline void hdf5_save_data_frame (std::size_t nrow, std::size_t ncol,
 }
 
 /// \brief Insert a variable into an existing data frame saved in HDF5 format
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 ///
 /// \param N The length of the variable vector. It may be different from that
 /// of the existing data frame.
@@ -292,7 +290,7 @@ inline void hdf5_insert_data_frame (std::size_t N,
 
     hid_t datafile = H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
     hid_t dataspace = H5Screate_simple(1, dim, VSMC_NULLPTR);
-    hid_t datatype = hdf5_datatype<T>();
+    hid_t datatype = hdf5io_datatype<T>();
     internal::HDF5DataPtr<T> data_ptr;
     data_ptr.set(N, first);
     const T *data = data_ptr.get();
@@ -395,7 +393,7 @@ inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
 } // namespace vsmc::internal
 
 /// \brief Save a data frame in the HDF5 format from tuple of iterators
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 ///
 /// \details
 /// A data frame is similar to that in R. It is much like a matrix except that
@@ -412,7 +410,7 @@ inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
 template <typename SInputIter, typename InputIter, typename... InputIters>
-inline void hdf5_save_data_frame (std::size_t nrow,
+inline void hdf5store_data_frame (std::size_t nrow,
         const std::string &file_name, const std::string &data_name,
         const std::tuple<InputIter, InputIters...> &first,
         SInputIter sfirst, bool append = false)
@@ -421,7 +419,7 @@ inline void hdf5_save_data_frame (std::size_t nrow,
     internal::HDF5DataPtr<std::string> vnames;
     vnames.set(dim, sfirst);
     const std::string *sptr = vnames.get() + dim;
-    hdf5_save_data_frame<int>(0, 0, file_name, data_name,
+    hdf5store_data_frame<int>(0, 0, file_name, data_name,
             static_cast<int **>(VSMC_NULLPTR),
             static_cast<std::string *>(VSMC_NULLPTR), append);
     internal::hdf5_insert_data_frame_tuple(nrow, file_name, data_name, first,
@@ -431,9 +429,9 @@ inline void hdf5_save_data_frame (std::size_t nrow,
 #endif // VSMC_HAS_CXX11LIB_TUPLE
 
 /// \brief Save a Sampler in the HDF5 format
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 template <typename T>
-inline void hdf5_save (const Sampler<T> &sampler,
+inline void hdf5store (const Sampler<T> &sampler,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
 {
@@ -449,29 +447,29 @@ inline void hdf5_save (const Sampler<T> &sampler,
     for (std::size_t j = 0; j != ncol; ++j)
         data_ptr[j] = &data[j * nrow];
 
-    hdf5_save_data_frame<double>(nrow, ncol, file_name, data_name,
+    hdf5store_data_frame<double>(nrow, ncol, file_name, data_name,
             data_ptr.begin(), header.begin(), append);
     hdf5_insert_data_frame<int>(nrow, file_name, data_name,
             resampled.begin(), "Resampled");
 }
 
 /// \brief Save a StateMatrix in the HDF5 format
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 template <MatrixOrder Order, std::size_t Dim, typename T>
-inline void hdf5_save (const StateMatrix<Order, Dim, T> &state,
+inline void hdf5store (const StateMatrix<Order, Dim, T> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
 {
-    hdf5_save_matrix<Order, T>(state.size(), state.dim(), file_name, data_name,
+    hdf5store_matrix<Order, T>(state.size(), state.dim(), file_name, data_name,
             state.data(), append);
 }
 
 #if VSMC_HAS_CXX11LIB_TUPLE
 
 /// \brief Save a StateTuple in the HDF5 format
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 template <typename T, typename... Types>
-inline void hdf5_save (const StateTuple<RowMajor, T, Types...> &state,
+inline void hdf5store (const StateTuple<RowMajor, T, Types...> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
 {
@@ -493,14 +491,14 @@ inline void hdf5_save (const StateTuple<RowMajor, T, Types...> &state,
     typename std::tuple<const T *, const Types *...> data_ptr;
     internal::hdf5_tuple_vector_ptr(data_vec, data_ptr, Position<dim - 1>());
 
-    hdf5_save_data_frame(state.size(), file_name, data_name, data_ptr,
+    hdf5store_data_frame(state.size(), file_name, data_name, data_ptr,
             &vnames[0], append);
 }
 
 /// \brief Save a StateTuple in the HDF5 format
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 template <typename T, typename... Types>
-inline void hdf5_save (const StateTuple<ColMajor, T, Types...> &state,
+inline void hdf5store (const StateTuple<ColMajor, T, Types...> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
 {
@@ -512,17 +510,17 @@ inline void hdf5_save (const StateTuple<ColMajor, T, Types...> &state,
         ss << 'V' << i;
         vnames.push_back(ss.str());
     }
-    hdf5_save_data_frame(state.size(), file_name, data_name,
+    hdf5store_data_frame(state.size(), file_name, data_name,
             state.data(), &vnames[0], append);
 }
 
 #endif // VSMC_HAS_CXX11LIB_TUPLE
 
 /// \brief Save a StateCL in the HDF5 format
-/// \ingroup HDF5Save
+/// \ingroup HDF5IO
 template <MatrixOrder Order, typename T,
          std::size_t StateSize, typename FPType, typename ID>
-inline void hdf5_save (const StateCL<StateSize, FPType, ID> &state,
+inline void hdf5store (const StateCL<StateSize, FPType, ID> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
 {
@@ -531,10 +529,10 @@ inline void hdf5_save (const StateCL<StateSize, FPType, ID> &state,
     std::size_t N = nrow * ncol;
     std::vector<T> data(N);
     state.manager().template read_buffer<T>(state.state_buffer(), N, &data[0]);
-    hdf5_save_matrix<Order, T>(nrow, ncol, file_name, data_name,
+    hdf5store_matrix<Order, T>(nrow, ncol, file_name, data_name,
             &data[0], append);
 }
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_HDF5_SAVE_HPP
+#endif // VSMC_UTILITY_HDF5IO_HPP
