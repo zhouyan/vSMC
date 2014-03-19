@@ -24,7 +24,7 @@
 /// ### Examples
 ///
 /// ~~~{.c}
-/// #define VSMC_FP_TYPE_IS_DOUBLE 1
+/// #define VSMC_OPENCL_USE_DOUBLE 1
 /// #include <vsmc/rng/normal01.h>
 ///
 /// cburng4x32_rng_t rng;
@@ -46,17 +46,8 @@
 #include <vsmc/rng/urng.h>
 #include <vsmc/rng/u01.h>
 
-#if VSMC_FP_TYPE_IS_FLOAT
-#define NORMAL01_2x32      normal01_2x32_24
-#define NORMAL01_2x32_INIT normal01_2x32_24_init
-#define NORMAL01_2x32_RAND normal01_2x32_24_rand
+#if VSMC_OPENCL_USE_DOUBLE
 
-#define NORMAL01_4x32      normal01_4x32_24
-#define NORMAL01_4x32_INIT normal01_4x32_24_init
-#define NORMAL01_4x32_RAND normal01_4x32_24_rand
-#endif // VSMC_FP_TYPE_IS_FLOAT
-
-#if VSMC_FP_TYPE_IS_DOUBLE
 #define NORMAL01_2x32      normal01_2x32_53
 #define NORMAL01_2x32_INIT normal01_2x32_53_init
 #define NORMAL01_2x32_RAND normal01_2x32_53_rand
@@ -72,7 +63,18 @@
 #define NORMAL01_4x64      normal01_4x64_53
 #define NORMAL01_4x64_INIT normal01_4x64_53_init
 #define NORMAL01_4x64_RAND normal01_4x64_53_rand
-#endif // VSMC_FP_TYPE_IS_DOUBLE
+
+#else // VSMC_OPENCL_USE_DOUBLE
+
+#define NORMAL01_2x32      normal01_2x32_24
+#define NORMAL01_2x32_INIT normal01_2x32_24_init
+#define NORMAL01_2x32_RAND normal01_2x32_24_rand
+
+#define NORMAL01_4x32      normal01_4x32_24
+#define NORMAL01_4x32_INIT normal01_4x32_24_init
+#define NORMAL01_4x32_RAND normal01_4x32_24_rand
+
+#endif // VSMC_OPENCL_USE_DOUBLE
 
 #define VSMC_DEFINE_RNG_NORMAL01(N, W, F, FT) \
     typedef struct {                                                         \
@@ -119,7 +121,8 @@ VSMC_DEFINE_RNG_NORMAL01_RAND(2, 32, 24, float)
 /// \ingroup R123RNG
 VSMC_DEFINE_RNG_NORMAL01_RAND(4, 32, 24, float)
 
-#if VSMC_FP_TYPE_IS_DOUBLE
+#if VSMC_OPENCL_USE_DOUBLE
+
 /// \ingroup R123RNG
 VSMC_DEFINE_RNG_NORMAL01(2, 32, 53, double)
 /// \ingroup R123RNG
@@ -149,6 +152,7 @@ VSMC_DEFINE_RNG_NORMAL01_INIT(4, 64, 53, double)
 VSMC_DEFINE_RNG_NORMAL01_RAND(2, 64, 53, double)
 /// \ingroup R123RNG
 VSMC_DEFINE_RNG_NORMAL01_RAND(4, 64, 53, double)
-#endif // VSMC_USE_U01_DOUBLE
+
+#endif // VSMC_OPENCL_USE_DOUBLE
 
 #endif // VSMC_RNG_NORMAL01_H

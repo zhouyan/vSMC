@@ -23,7 +23,7 @@
 /// ### Examples
 ///
 /// ~~~{.c}
-/// #define VSMC_FP_TYPE_IS_DOUBLE 1
+/// #define VSMC_OPENCL_USE_DOUBLE 1
 /// #include <vsmc/rng/u01.h>
 ///
 /// cburng4x32_rng_t rng;
@@ -38,14 +38,8 @@
 
 #include <vsmc/rng/internal/defines.h>
 
-#if VSMC_FP_TYPE_IS_FLOAT
-#define U01_OPEN_OPEN_32     u01_open_open_32_24
-#define U01_OPEN_CLOSED_32   u01_open_closed_32_24
-#define U01_CLOSED_OPEN_32   u01_closed_closed_32_24
-#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_24
-#endif // VSMC_FP_TYPE_IS_FLOAT
+#if VSMC_OPENCL_USE_DOUBLE
 
-#if VSMC_FP_TYPE_IS_DOUBLE
 #define U01_OPEN_OPEN_32     u01_open_open_32_53
 #define U01_OPEN_CLOSED_32   u01_open_closed_32_53
 #define U01_CLOSED_OPEN_32   u01_closed_closed_32_53
@@ -55,7 +49,15 @@
 #define U01_OPEN_CLOSED_64   u01_open_closed_64_53
 #define U01_CLOSED_OPEN_64   u01_closed_closed_64_53
 #define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53
-#endif // VSMC_FP_TYPE_IS_DOUBLE
+
+#else // VSMC_OPENCL_USE_DOUBLE
+
+#define U01_OPEN_OPEN_32     u01_open_open_32_24
+#define U01_OPEN_CLOSED_32   u01_open_closed_32_24
+#define U01_CLOSED_OPEN_32   u01_closed_closed_32_24
+#define U01_CLOSED_CLOSED_32 u01_closed_closed_32_24
+
+#endif // VSMC_OPENCL_USE_DOUBLE
 
 #define VSMC_0x1p_31f (1.0f / (1024.0f * 1024.0f * 1024.0f * 2.0f))
 #define VSMC_0x1p_24f (128.0f * VSMC_0x1p_31f)
@@ -81,7 +83,7 @@ VSMC_STATIC_INLINE float u01_open_closed_32_24 (uint32_t i)
 VSMC_STATIC_INLINE float u01_open_open_32_24 (uint32_t i)
 {return (0.5f + (i>>9)) * VSMC_0x1p_23f;}
 
-#if VSMC_FP_TYPE_IS_DOUBLE
+#if VSMC_OPENCL_USE_DOUBLE
 
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)
@@ -121,6 +123,6 @@ VSMC_STATIC_INLINE double u01_open_closed_32_53 (uint32_t i)
 VSMC_STATIC_INLINE double u01_open_open_32_53 (uint32_t i)
 {return (0.5 + i) * VSMC_0x1p_32;}
 
-#endif // VSMC_FP_TYPE_IS_DOUBLE
+#endif // VSMC_OPENCL_USE_DOUBLE
 
 #endif // VSMC_RNG_U01_H

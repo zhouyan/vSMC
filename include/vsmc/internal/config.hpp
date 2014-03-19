@@ -1,10 +1,6 @@
 #ifndef VSMC_INTERNAL_CONFIG_HPP
 #define VSMC_INTERNAL_CONFIG_HPP
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-
 #include <vsmc/internal/compiler.hpp>
 
 /// \brief Disable vSMC static assertions (fatal error)

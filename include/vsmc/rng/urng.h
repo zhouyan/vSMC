@@ -109,17 +109,17 @@
 /// Not all OpenCL devices have `double` precision support. Therefore by
 /// default, only 32-bits and `float` versions of these types and functions are
 /// defined. To enable 64-bits and `double` versions, define the macro
-/// `VSMC_FP_TYPE_IS_DOUBLE` with a non-zero value.
+/// `VSMC_OPENCL_USE_DOUBLE` with a non-zero value.
 ///
 /// In a single program, usually only `float` or `double` precision is used.
-/// Macros are defined according to the value of `VSMC_FP_TYPE_IS_DOUBLE`. For
+/// Macros are defined according to the value of `VSMC_OPENCL_USE_DOUBLE`. For
 /// example,
 /// ~~~{.c}
 /// NORMAL01_4x32
 /// ~~~
 /// is the type used to construct objects that can be used to generate standard
 /// Normal random variates using `threefry4x32` engines. The generated results
-/// is `double` if `VSMC_FP_TYPE_IS_DOUBLE` is defined and non-zero or `float`
+/// is `double` if `VSMC_OPENCL_USE_DOUBLE` is defined and non-zero or `float`
 /// otherwise.
 ///
 /// In the documentation of each distribution, the following notations are

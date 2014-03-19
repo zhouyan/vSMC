@@ -12,9 +12,13 @@
     #define VSMC_STATIC_INLINE inline
   #endif
 #else
+  #ifdef VSMC_OPENCL_USE_DOUBLE
+  #undef VSMC_OPENCL_USE_DOUBLE
+  #endif
+  #define VSMC_OPENCL_USE_DOUBLE 1
   #include <stdint.h>
   #ifndef UINT64_C
-    #error You must define __STC_CONSTANT_MACROS before #include<stdint.h>
+    #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
   #endif
   #ifdef __cplusplus
     #define VSMC_STATIC_INLINE inline
@@ -23,7 +27,7 @@
     #if defined(__STDC_VERSION__) && __STDC_VERSION__ > 199901L
       #define VSMC_STATIC_INLINE static inline
     #else
-      #error Define VSMC_STATIC_INLINE first
+      #error VSMC_STATIC_INLINE not defined
     #endif
     #include <math.h>
   #endif
@@ -32,33 +36,8 @@
 
 /// \brief Enable <vsmc/rng/u01.h> etc., double precision when used with vSMC
 /// \ingroup Config
-#if defined(VSMC_FP_TYPE_IS_FLOAT) && VSMC_FP_TYPE_IS_FLOAT
-#define VSMC_FP_TYPE_IS_DOUBLE 0
-#else
-#define VSMC_FP_TYPE_IS_DOUBLE 1
-#endif
-
-#if defined(VSMC_FP_TYPE_IS_FLOAT) && defined(VSMC_FP_TYPE_IS_DOUBLE)
-#if VSMC_FP_TYPE_IS_FLOAT && VSMC_FP_TYPE_IS_DOUBLE
-#error VSMC_FP_TYPE_IS_FLOAT and VSMC_FP_TYPE_IS_DOUBLE cannot both be non-zero
-#endif
-#endif
-
-#ifndef VSMC_FP_TYPE_IS_FLOAT
-#define VSMC_FP_TYPE_IS_FLOAT 0
-#endif
-
-#ifndef VSMC_FP_TYPE_IS_DOUBLE
-#define VSMC_FP_TYPE_IS_DOUBLE 0
-#endif
-
-#if !(VSMC_FP_TYPE_IS_FLOAT || VSMC_FP_TYPE_IS_DOUBLE)
-#undef VSMC_FP_TYPE_IS_FLOAT
-#define VSMC_FP_TYPE_IS_FLOAT 1
-#endif
-
-#ifndef VSMC_USE_THREEFRY_CBURNG
-#define VSMC_USE_THREEFRY_CBURNG 0
+#ifndef VSMC_OPENCL_USE_DOUBLE
+#define VSMC_OPENCL_USE_DOUBLE 0
 #endif
 
 #endif // VSMC_OPENCL_INTERNAL_DEFINES_H

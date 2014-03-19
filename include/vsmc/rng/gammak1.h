@@ -29,7 +29,7 @@
 /// ### Examples
 ///
 /// ~~~{.c}
-/// #define VSMC_FP_TYPE_IS_DOUBLE 1
+/// #define VSMC_OPENCL_USE_DOUBLE 1
 /// #include <vsmc/rng/gammak1.h>
 ///
 /// cburng4x32_rng_t rng;
@@ -52,17 +52,8 @@
 #include <vsmc/rng/normal01.h>
 #include <vsmc/rng/u01.h>
 
-#if VSMC_FP_TYPE_IS_FLOAT
-#define GAMMAK1_2x32      gammak1_2x32_24
-#define GAMMAK1_2x32_INIT gammak1_2x32_24_init
-#define GAMMAK1_2x32_RAND gammak1_2x32_24_rand
+#if VSMC_OPENCL_USE_DOUBLE
 
-#define GAMMAK1_4x32      gammak1_4x32_24
-#define GAMMAK1_4x32_INIT gammak1_4x32_24_init
-#define GAMMAK1_4x32_RAND gammak1_4x32_24_rand
-#endif // VSMC_FP_TYPE_IS_FLOAT
-
-#if VSMC_FP_TYPE_IS_DOUBLE
 #define GAMMAK1_2x32      gammak1_2x32_53
 #define GAMMAK1_2x32_INIT gammak1_2x32_53_init
 #define GAMMAK1_2x32_RAND gammak1_2x32_53_rand
@@ -78,7 +69,18 @@
 #define GAMMAK1_4x64      gammak1_4x64_53
 #define GAMMAK1_4x64_INIT gammak1_4x64_53_init
 #define GAMMAK1_4x64_RAND gammak1_4x64_53_rand
-#endif // VSMC_FP_TYPE_IS_DOUBLE
+
+#else // VSMC_OPENCL_USE_DOUBLE
+
+#define GAMMAK1_2x32      gammak1_2x32_24
+#define GAMMAK1_2x32_INIT gammak1_2x32_24_init
+#define GAMMAK1_2x32_RAND gammak1_2x32_24_rand
+
+#define GAMMAK1_4x32      gammak1_4x32_24
+#define GAMMAK1_4x32_INIT gammak1_4x32_24_init
+#define GAMMAK1_4x32_RAND gammak1_4x32_24_rand
+
+#endif // VSMC_OPENCL_USE_DOUBLE
 
 #define VSMC_DEFINE_RNG_GAMMAK1(N, W, F, FT) \
     typedef struct {                                                         \
@@ -267,7 +269,8 @@ VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 32, 24, float)
 /// \ingroup R123RNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 32, 24, float)
 
-#if VSMC_FP_TYPE_IS_DOUBLE
+#if VSMC_OPENCL_USE_DOUBLE
+
 /// \ingroup R123RNG
 VSMC_DEFINE_RNG_GAMMAK1(2, 32, 53, double)
 /// \ingroup R123RNG
@@ -297,6 +300,7 @@ VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 64, 53, double)
 VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 64, 53, double)
 /// \ingroup R123RNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 64, 53, double)
-#endif // VSMC_USE_U01_DOUBLE
+
+#endif // VSMC_OPENCL_USE_DOUBLE
 
 #endif // VSMC_RNG_GAMMAK1_H

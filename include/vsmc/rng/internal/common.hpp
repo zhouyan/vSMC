@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifndef UINT64_C
-#define DEFINE MACRO __STDC_CONSTANT_MACROS BEFORE INCLUDING <stdint.h>
+#error __STDC_CONSTANT_MACROS not defined before #<stdint.h>
 #endif
 
 #ifndef VSMC_INT64

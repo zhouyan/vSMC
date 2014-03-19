@@ -1,10 +1,6 @@
 #ifndef VSMC_OPENCL_INTERNAL_CL_WRAPPER_HPP
 #define VSMC_OPENCL_INTERNAL_CL_WRAPPER_HPP
 
-#ifndef __CL_ENABLE_EXCEPTIONS
-#define __CL_ENABLE_EXCEPTIONS
-#endif
-
 #if defined(__GNUC__) && defined(__GNC_MINOR__) && !defined(__INTEL_COMPILER)
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
 #pragma GCC diagnostic push
@@ -13,6 +9,10 @@
 #endif
 
 #include <cl.hpp>
+
+#ifndef __CL_ENABLE_EXCEPTIONS
+#error __CL_ENABLE_EXCEPTIONS not defined before #include<cl.hpp>
+#endif
 
 #if defined(__GNUC__) && defined(__GNC_MINOR__) && !defined(__INTEL_COMPILER)
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
