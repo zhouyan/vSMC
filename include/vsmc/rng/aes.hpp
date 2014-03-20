@@ -4,7 +4,7 @@
 #include <vsmc/rng/aes_ni.hpp>
 
 #define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val) \
-    template <> struct AESRoundConstant< N > :                               \
+    template <> struct AESRoundConstantValue< N > :                          \
         public cxx11::integral_constant<int, val > {};
 
 /// \brief AESEngine default blocks
@@ -17,7 +17,7 @@ namespace vsmc {
 
 namespace internal {
 
-template <std::size_t N> struct AESRoundConstant;
+template <std::size_t N> struct AESRoundConstantValue;
 
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0x00, 0x8D)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0x01, 0x01)
@@ -94,7 +94,7 @@ class AES128KeySeq
     void generate_seq (Array<__m128i, Rp1, Traits> &key_seq, cxx11::true_type)
     {
         xmm2_ = _mm_aeskeygenassist_si128(xmm1_,
-                internal::AESRoundConstant<N>::value);
+                internal::AESRoundConstantValue<N>::value);
         expand_key();
         key_seq[Position<N>()] = xmm1_;
         generate_seq<N + 1>(key_seq,
@@ -216,7 +216,7 @@ class AES192KeySeq
         // Required Storage: N * 24 + 16;
 
         xmm2_ = _mm_aeskeygenassist_si128(xmm4_,
-                internal::AESRoundConstant<N>::value);
+                internal::AESRoundConstantValue<N>::value);
         generate_key_expansion();
         _mm_storeu_si128(reinterpret_cast<__m128i *>(
                     ks_ptr + N * 24), xmm1_);
@@ -349,7 +349,7 @@ class AES256KeySeq
     void generate_key (Array<__m128i, Rp1, Traits> &key_seq, cxx11::true_type)
     {
         xmm2_ = _mm_aeskeygenassist_si128(xmm3_,
-                internal::AESRoundConstant<N / 2>::value);
+                internal::AESRoundConstantValue<N / 2>::value);
         expand_key(cxx11::true_type());
         key_seq[Position<N>()] = xmm1_;
     }
