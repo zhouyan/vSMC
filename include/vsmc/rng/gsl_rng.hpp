@@ -82,17 +82,17 @@ class GSLGenerator
     public :
 
     GSLGenerator () :
-        rng_(gsl_rng_alloc(internal::GSLRngTypePointer<RngType>::get())) {}
+        rng_(::gsl_rng_alloc(internal::GSLRngTypePointer<RngType>::get())) {}
 
     GSLGenerator (const GSLGenerator<RngType> &other) :
-        rng_(gsl_rng_clone(other.rng_)) {}
+        rng_(::gsl_rng_clone(other.rng_)) {}
 
     GSLGenerator<RngType> &operator= (const GSLGenerator<RngType> &other)
     {
         if (this != &other) {
             if (rng_ != VSMC_NULLPTR)
-                gsl_rng_free(rng_);
-            rng_ = gsl_rng_memcpy(other.rng_);
+                ::gsl_rng_free(rng_);
+            rng_ = ::gsl_rng_memcpy(other.rng_);
         }
 
         return *this;
@@ -106,7 +106,7 @@ class GSLGenerator
     {
         if (this != &other) {
             if (rng_ != VSMC_NULLPTR)
-                gsl_rng_free(rng_);
+                ::gsl_rng_free(rng_);
             rng_ = other.rng_;
             other.rng_ = VSMC_NULLPTR;
         }
@@ -118,25 +118,25 @@ class GSLGenerator
     ~GSLGenerator ()
     {
         if (rng_ != VSMC_NULLPTR)
-            gsl_rng_free(rng_);
+            ::gsl_rng_free(rng_);
     }
 
     void seed (unsigned long s)
     {
         if (rng_ != VSMC_NULLPTR)
-            gsl_rng_set(rng_, s);
+            ::gsl_rng_set(rng_, s);
     }
 
     unsigned long generate ()
     {
         if (rng_ != VSMC_NULLPTR)
-            return gsl_rng_get(rng_);
+            return ::gsl_rng_get(rng_);
 
         return 0;
     }
 
-    unsigned long min VSMC_MNE () const {return gsl_rng_min(rng_);}
-    unsigned long max VSMC_MNE () const {return gsl_rng_max(rng_);}
+    unsigned long min VSMC_MNE () const {return ::gsl_rng_min(rng_);}
+    unsigned long max VSMC_MNE () const {return ::gsl_rng_max(rng_);}
 
     private :
 

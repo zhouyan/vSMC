@@ -15,7 +15,7 @@ WHILE (ARG_MAX LESS VSMC_OPENCL_CL_SET_KERNEL_ARGS_MAX)
     SET (FUNC "${FUNC}${TAB}typename Arg${ARG_MAX}>\n")
 
     SET (FUNC "${FUNC}inline void cl_set_kernel_args")
-    SET (FUNC "${FUNC} (cl::Kernel &kern, cl_uint offset,\n")
+    SET (FUNC "${FUNC} (::cl::Kernel &kern, cl_uint offset,\n")
     SET (FARG 0)
     WHILE (FARG LESS ARG_MAX)
         SET (FUNC "${FUNC}${TAB}const Arg${FARG} &arg${FARG},\n")
