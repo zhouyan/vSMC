@@ -6,8 +6,8 @@
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \
-            (::vsmc::cxx11::is_same<FPType, float>::value ||                 \
-             ::vsmc::cxx11::is_same<FPType, double>::value),                 \
+            (cxx11::is_same<FPType, float>::value ||                         \
+             cxx11::is_same<FPType, double>::value),                         \
             USE_MKL##Dist##Distribution_##WITH_A_RESULT_TYPE_OTHER_THAN_float_OR_double)
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_RNG_OFFSET(offset) \

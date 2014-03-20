@@ -7,8 +7,7 @@
 /// \brief Default RNG set type
 /// \ingroup Config
 #ifndef VSMC_DEFAULT_RNG_SET_TYPE
-#define VSMC_DEFAULT_RNG_SET_TYPE \
-    ::vsmc::RngSet< ::vsmc::Philox2x32, ::vsmc::Vector>
+#define VSMC_DEFAULT_RNG_SET_TYPE RngSet<Philox2x32, Vector>
 #endif
 
 namespace vsmc {

@@ -20,7 +20,7 @@
 /// \brief Default type of Seed
 /// \ingroup Config
 #ifndef VSMC_SEED_TYPE
-#define VSMC_SEED_TYPE ::vsmc::SeedGenerator<NullType>
+#define VSMC_SEED_TYPE SeedGenerator<NullType, unsigned>
 #endif
 
 namespace vsmc {

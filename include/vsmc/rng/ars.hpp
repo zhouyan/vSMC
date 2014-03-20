@@ -17,6 +17,8 @@
 
 namespace vsmc {
 
+namespace traits {
+
 namespace internal {
 
 template <std::size_t> struct ARSWeylConstantValue;
@@ -27,9 +29,7 @@ template <> struct ARSWeylConstantValue<0> :
 template <> struct ARSWeylConstantValue<1> :
     public cxx11::integral_constant<uint64_t, UINT64_C(0x9E3779B97F4A7C15)> {};
 
-} // namespace vsmc::internal
-
-namespace traits {
+} // namespace vsmc::traits::internal
 
 /// \brief ARSEngine Weyl sequence constants
 /// \ingroup Traits
@@ -38,7 +38,7 @@ namespace traits {
 /// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bits or
 /// the Weyl constant.
 template <std::size_t I> struct ARSWeylConstantTrait :
-    public ::vsmc::internal::ARSWeylConstantValue<I> {};
+    public internal::ARSWeylConstantValue<I> {};
 
 } // namespace vsmc::traits
 

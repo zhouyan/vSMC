@@ -7,7 +7,7 @@
 /// \brief Default RNG type for resampling
 /// \ingroup Config
 #ifndef VSMC_DEFAULT_RESAMPLE_RNG_TYPE
-#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE ::vsmc::cxx11::mt19937
+#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE cxx11::mt19937
 #endif
 
 namespace vsmc {

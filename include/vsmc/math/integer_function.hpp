@@ -13,7 +13,9 @@
 #endif
 #endif
 
-namespace vsmc { namespace math {
+namespace vsmc {
+
+namespace math {
 
 namespace internal {
 
@@ -143,6 +145,8 @@ struct Fibonacci :
     public cxx11::integral_constant<VSMC_MATH_INTEGER_FUNCTION_INT,
     internal::FibonacciImpl<K, A, B>::value> {};
 
-} } // namespace vsmc::math
+} // namespace vsmc::math
+
+} // namespace vsmc
 
 #endif // VSMC_MATH_INTEGER_FUNCTION_HPP

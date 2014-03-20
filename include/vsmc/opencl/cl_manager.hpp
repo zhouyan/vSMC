@@ -191,19 +191,19 @@ class CLManager
     }
 
     /// \brief The platform currently being used
-    const ::cl::Platform &platform () const {return platform_;}
+    const cl::Platform &platform () const {return platform_;}
 
     /// \brief The context currently being used
-    const ::cl::Context &context () const {return context_;}
+    const cl::Context &context () const {return context_;}
 
     /// \brief The device currently being used
-    const ::cl::Device &device () const {return device_;}
+    const cl::Device &device () const {return device_;}
 
     /// \brief The vector of all device that the manager found in the platform
-    const std::vector< ::cl::Device> &device_vec () const {return device_vec_;}
+    const std::vector<cl::Device> &device_vec () const {return device_vec_;}
 
     /// \brief The command queue currently being used
-    const ::cl::CommandQueue &command_queue () const {return command_queue_;}
+    const cl::CommandQueue &command_queue () const {return command_queue_;}
 
     /// \brief Whether the platform, context, device and command queue has been
     /// setup correctly
@@ -224,8 +224,8 @@ class CLManager
     /// \details
     /// After this member function call setup() will return `true` in future
     /// calls
-    bool setup (const ::cl::Platform &plat, const ::cl::Context &ctx,
-            const ::cl::Device &dev, const ::cl::CommandQueue &cmd)
+    bool setup (const cl::Platform &plat, const cl::Context &ctx,
+            const cl::Device &dev, const cl::CommandQueue &cmd)
     {
         setup_ = false;
         platform_ = plat;
@@ -240,7 +240,7 @@ class CLManager
 
     /// \brief Print build log
     template <typename CharT, typename Traits>
-    void print_build_log (::cl::Program &program,
+    void print_build_log (cl::Program &program,
             std::basic_ostream<CharT, Traits> &os = std::cout)
     {
         cl_build_status status = CL_BUILD_SUCCESS;
@@ -249,7 +249,7 @@ class CLManager
         std::string log;
         std::string dname;
 
-        for (std::vector< ::cl::Device>::const_iterator
+        for (std::vector<cl::Device>::const_iterator
                 diter = device_vec_.begin();
                 diter != device_vec_.end(); ++diter) {
             program.getBuildInfo(*diter, CL_PROGRAM_BUILD_STATUS, &status);
@@ -265,19 +265,19 @@ class CLManager
 
     /// \brief Create an OpenCL buffer of a given type and number of elements
     template<typename CLType>
-    ::cl::Buffer create_buffer (std::size_t num) const
+    cl::Buffer create_buffer (std::size_t num) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
 
         if (!num)
-            return ::cl::Buffer();
+            return cl::Buffer();
 
-        return ::cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
+        return cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
     }
 
     /// \brief Create an OpenCL buffer of a given type from a range of elements
     template<typename CLType, typename InputIter>
-    ::cl::Buffer create_buffer (InputIter first, InputIter last) const
+    cl::Buffer create_buffer (InputIter first, InputIter last) const
     {
         using std::distance;
 
@@ -287,9 +287,9 @@ class CLManager
                 std::abs(distance(first, last)));
 
         if (!num)
-            return ::cl::Buffer();
+            return cl::Buffer();
 
-        ::cl::Buffer buf(create_buffer<CLType>(num));
+        cl::Buffer buf(create_buffer<CLType>(num));
         write_buffer<CLType>(buf, num, first);
 
         return buf;
@@ -298,7 +298,7 @@ class CLManager
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into an iterator
     template <typename CLType, typename OutputIter>
-    OutputIter read_buffer (const ::cl::Buffer &buf, std::size_t num,
+    OutputIter read_buffer (const cl::Buffer &buf, std::size_t num,
             OutputIter first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
@@ -317,7 +317,7 @@ class CLManager
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into a pointer
     template <typename CLType>
-    CLType *read_buffer (const ::cl::Buffer &buf, std::size_t num,
+    CLType *read_buffer (const cl::Buffer &buf, std::size_t num,
             CLType *first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
@@ -332,7 +332,7 @@ class CLManager
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from an iterator
     template <typename CLType, typename InputIter>
-    InputIter write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    InputIter write_buffer (const cl::Buffer &buf, std::size_t num,
             InputIter first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
@@ -350,7 +350,7 @@ class CLManager
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from a pointer
     template <typename CLType>
-    const CLType *write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    const CLType *write_buffer (const cl::Buffer &buf, std::size_t num,
             const CLType *first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
@@ -366,7 +366,7 @@ class CLManager
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from a pointer
     template <typename CLType>
-    CLType *write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    CLType *write_buffer (const cl::Buffer &buf, std::size_t num,
             CLType *first) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
@@ -381,8 +381,8 @@ class CLManager
     /// \brief Copy an OpenCL buffer into another of a given type and number of
     /// elements
     template <typename CLType>
-    void copy_buffer (const ::cl::Buffer &src, std::size_t num,
-            const ::cl::Buffer &dst) const
+    void copy_buffer (const cl::Buffer &src, std::size_t num,
+            const cl::Buffer &dst) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
 
@@ -392,8 +392,8 @@ class CLManager
     }
 
     /// \brief Create a program given the source within the current context
-    ::cl::Program create_program (const std::string &source) const
-    {return ::cl::Program(context_, source);}
+    cl::Program create_program (const std::string &source) const
+    {return cl::Program(context_, source);}
 
     /// \brief Run a given kernel with one dimensional global size and local
     /// size on the current command queue
@@ -409,11 +409,11 @@ class CLManager
     /// calculate the correct global size yourself, you can simple call
     /// `run_kernel(kern, N, K)`. But within the kernel, you need to check
     /// `get_global_id(0) < N`
-    void run_kernel (const ::cl::Kernel &kern,
+    void run_kernel (const cl::Kernel &kern,
             std::size_t N, std::size_t local_size) const
     {
         command_queue_.finish();
-        command_queue_.enqueueNDRangeKernel(kern, ::cl::NullRange,
+        command_queue_.enqueueNDRangeKernel(kern, cl::NullRange,
                 get_global_nd_range(N, local_size),
                 get_local_nd_range(local_size));
         command_queue_.finish();
@@ -421,11 +421,11 @@ class CLManager
 
     private :
 
-    ::cl::Platform platform_;
-    ::cl::Context context_;
-    ::cl::Device device_;
-    std::vector< ::cl::Device> device_vec_;
-    ::cl::CommandQueue command_queue_;
+    cl::Platform platform_;
+    cl::Context context_;
+    cl::Device device_;
+    std::vector<cl::Device> device_vec_;
+    cl::CommandQueue command_queue_;
 
     bool setup_;
     CLSetup<ID> &setup_default_;
@@ -461,8 +461,8 @@ class CLManager
         bool setup_context = false;
         bool setup_device = false;
         try {
-            std::vector< ::cl::Device> dev_pool;
-            std::vector< ::cl::Device> dev_select;
+            std::vector<cl::Device> dev_pool;
+            std::vector<cl::Device> dev_select;
             platform_.getDevices(dev_type, &dev_pool);
             device_filter(dev_pool, dev_select);
             if (dev_select.size() != 0) {
@@ -470,13 +470,13 @@ class CLManager
                     static_cast<cl_context_properties>(CL_CONTEXT_PLATFORM),
                     reinterpret_cast<cl_context_properties>(platform_()), 0
                 };
-                context_ = ::cl::Context(dev_select, context_properties);
+                context_ = cl::Context(dev_select, context_properties);
                 setup_context = true;
                 device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
                 device_ = device_vec_[0];
                 setup_device = true;
             }
-        } catch (::cl::Error) {}
+        } catch (cl::Error) {}
         VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT;
         VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE;
         if (!setup_context) return;
@@ -484,9 +484,9 @@ class CLManager
 
         bool setup_command_queue = false;
         try {
-            command_queue_ = ::cl::CommandQueue(context_, device_, 0);
+            command_queue_ = cl::CommandQueue(context_, device_, 0);
             setup_command_queue = true;
-        } catch (::cl::Error) {}
+        } catch (cl::Error) {}
         VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE;
         if (!setup_command_queue) return;
 
@@ -495,10 +495,10 @@ class CLManager
 
     bool platform_filter (cl_device_type dev_type)
     {
-        std::vector< ::cl::Platform> platform_vec;
+        std::vector<cl::Platform> platform_vec;
         try {
-            ::cl::Platform::get(&platform_vec);
-        } catch (::cl::Error) {
+            cl::Platform::get(&platform_vec);
+        } catch (cl::Error) {
             platform_vec.clear();
         }
         if (platform_vec.size() == 0)
@@ -514,29 +514,29 @@ class CLManager
                         platform_ = platform_vec[p];
                         return true;
                     }
-                } catch (::cl::Error) {}
+                } catch (cl::Error) {}
             }
         }
 
         // Using default platform: finding the first that has the device type
         for (std::size_t p = 0; p != platform_vec.size(); ++p) {
             try {
-                std::vector< ::cl::Device> dev_pool;
-                std::vector< ::cl::Device> dev_select;
+                std::vector<cl::Device> dev_pool;
+                std::vector<cl::Device> dev_select;
                 platform_vec[p].getDevices(dev_type, &dev_pool);
                 device_filter(dev_pool, dev_select);
                 if (dev_select.size() != 0) {
                     platform_ = platform_vec[p];
                     return true;
                 }
-            } catch (::cl::Error) {}
+            } catch (cl::Error) {}
         }
 
         return false;
     }
 
-    void device_filter (const std::vector< ::cl::Device> &dev_pool,
-            std::vector< ::cl::Device> &dev_select)
+    void device_filter (const std::vector<cl::Device> &dev_pool,
+            std::vector<cl::Device> &dev_select)
     {
         std::vector<bool> dev_select_idx(dev_pool.size(), true);
 
@@ -548,7 +548,7 @@ class CLManager
                     dev_pool[d].getInfo(CL_DEVICE_VENDOR, &str);
                     if (!setup_default_.check_device_vendor(str))
                         dev_select_idx[d] = false;
-                } catch (::cl::Error) {
+                } catch (cl::Error) {
                     dev_select_idx[d] = false;
                 }
             }
@@ -562,7 +562,7 @@ class CLManager
                     dev_pool[d].getInfo(CL_DEVICE_NAME, &str);
                     if (!setup_default_.check_device(str))
                         dev_select_idx[d] = false;
-                } catch (::cl::Error) {
+                } catch (cl::Error) {
                     dev_select_idx[d] = false;
                 }
             }
@@ -572,7 +572,7 @@ class CLManager
             if (dev_select_idx[d]) {
                 try {
                     dev_select.push_back(dev_pool[d]);
-                } catch (::cl::Error) {}
+                } catch (cl::Error) {}
             }
         }
     }
@@ -607,15 +607,15 @@ class CLManager
         return static_cast<CLType *>(write_buffer_pool_);
     }
 
-    ::cl::NDRange get_global_nd_range (
+    cl::NDRange get_global_nd_range (
             std::size_t N, std::size_t local_size) const
     {
         return (local_size && N % local_size) ?
-            ::cl::NDRange((N / local_size + 1) * local_size): ::cl::NDRange(N);
+            cl::NDRange((N / local_size + 1) * local_size): cl::NDRange(N);
     }
 
-    ::cl::NDRange get_local_nd_range (std::size_t local_size) const
-    {return local_size ? ::cl::NDRange(local_size) : cl::NullRange;}
+    cl::NDRange get_local_nd_range (std::size_t local_size) const
+    {return local_size ? cl::NDRange(local_size) : cl::NullRange;}
 }; // clss CLManager
 
 } // namespace vsmc

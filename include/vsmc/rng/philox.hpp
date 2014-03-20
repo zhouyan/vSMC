@@ -37,6 +37,8 @@
 
 namespace vsmc {
 
+namespace traits {
+
 namespace internal {
 
 template <typename, std::size_t> struct PhiloxWeylConstantValue;
@@ -69,9 +71,7 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t, 4, 0,
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t, 4, 1,
         UINT64_C(0xCA5A826395121157))
 
-} // namespace vsmc::internal
-
-namespace traits {
+} // namespace vsmc::traits::internal
 
 /// \brief Traits of PhiloxEngine constants for bumping the key (Weyl
 /// sequence)
@@ -84,7 +84,7 @@ namespace traits {
 /// macros `PHILOX_W64_0` etc., in the original implementation.
 template <typename ResultType, std::size_t I>
 struct PhiloxWeylConstantTrait :
-    public ::vsmc::internal::PhiloxWeylConstantValue<ResultType, I> {};
+    public internal::PhiloxWeylConstantValue<ResultType, I> {};
 
 /// \brief Traits of PhiloxEngine constants for rounding
 /// \ingroup Traits
@@ -97,7 +97,7 @@ struct PhiloxWeylConstantTrait :
 /// original implementation.
 template <typename ResultType, std::size_t K, std::size_t I>
 struct PhiloxRoundConstantTrait :
-    public ::vsmc::internal::PhiloxRoundConstantValue<ResultType, K, I> {};
+    public internal::PhiloxRoundConstantValue<ResultType, K, I> {};
 
 } // namespace vsmc::traits
 

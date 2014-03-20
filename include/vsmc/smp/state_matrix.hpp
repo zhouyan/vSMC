@@ -4,7 +4,7 @@
 #include <vsmc/core/single_particle.hpp>
 
 #define VSMC_STATIC_ASSERT_SMP_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
-    VSMC_STATIC_ASSERT((Dim == ::vsmc::Dynamic),                             \
+    VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
             USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
 
 #define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_COPY_SIZE_MISMATCH \

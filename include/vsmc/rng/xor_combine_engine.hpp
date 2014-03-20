@@ -4,12 +4,12 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type) \
-    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<result_type>::value),     \
+    VSMC_STATIC_ASSERT((cxx11::is_unsigned<result_type>::value),             \
             USE_XorCombineEngine_WITH_ENGINES_HAVE_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_SAME_TYPE(Eng1, Eng2) \
-    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_same<                              \
-                typename Eng1::resultType, typename Eng2::resultType>::value),\
+    VSMC_STATIC_ASSERT((cxx11::is_same<typename Eng1::resultType,            \
+                typename Eng2::resultType>::value),                          \
             USE_XorCombineEngine_WITH_TWO_RNG_ENGINES_WITH_DIFFERENT_RESULT_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE \

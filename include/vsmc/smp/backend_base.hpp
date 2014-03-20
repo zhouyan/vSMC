@@ -37,12 +37,12 @@ Name##Impl<T, Derived> &operator= (const Name##Impl<T, Derived> &other)      \
 #else // _MSC_VER
 #define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \
     VSMC_STATIC_ASSERT(                                                      \
-            (::vsmc::cxx11::is_base_of<basename<T, Derived>, Derived>::value),\
+            (cxx11::is_base_of<basename<T, Derived>, Derived>::value),       \
             DERIVED_FROM_##basename##_WITH_INCORRECT_Derived_TEMPLATE_PARAMETER)
 #endif // _MSC_VER
 
 #define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(basename, member)        \
-    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_same<Derived, NullType>::value),   \
+    VSMC_STATIC_ASSERT((cxx11::is_same<Derived, NullType>::value),           \
             DERIVED_FROM_##basename##_WITHOUT_IMPLEMENTATION_OF_##member##_IN_THE_Derived_TEMPLATE_PARAMETER)
 
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \

@@ -6,7 +6,7 @@
 #include <vsmc/internal/defines.hpp>
 
 #define VSMC_STATIC_ASSERT_CXX11_TYPE_TRATIS_FORWARD_RVALUE \
-    VSMC_STATIC_ASSERT((!::vsmc::cxx11::is_lvalue_reference<T>::value),      \
+    VSMC_STATIC_ASSERT((!is_lvalue_reference<T>::value),                     \
             ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE)
 
 namespace vsmc {

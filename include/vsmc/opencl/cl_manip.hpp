@@ -9,7 +9,7 @@ namespace vsmc {
 /// \brief The maximum local size that is a multiple of the preferred factor
 /// \ingroup OpenCL
 inline std::size_t cl_maximum_local_size (
-        const ::cl::Kernel &kern, const ::cl::Device &dev)
+        const cl::Kernel &kern, const cl::Device &dev)
 {
     std::size_t max_s;
     std::size_t mul_s;
@@ -17,7 +17,7 @@ inline std::size_t cl_maximum_local_size (
         kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &max_s);
         kern.getWorkGroupInfo(dev,
                 CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
-    } catch (::cl::Error) {
+    } catch (cl::Error) {
         return 0;
     }
 
@@ -41,7 +41,7 @@ inline std::size_t cl_minimum_global_size (
 ///
 /// \return The difference between the preferred global size and the N
 inline std::size_t cl_preferred_work_size (std::size_t N,
-        const ::cl::Kernel &kern, const ::cl::Device &dev,
+        const cl::Kernel &kern, const cl::Device &dev,
         std::size_t &global_size, std::size_t &local_size)
 {
     std::size_t max_s;
@@ -50,7 +50,7 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
         kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &max_s);
         kern.getWorkGroupInfo(dev,
                 CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &min_local);
-    } catch (::cl::Error) {
+    } catch (cl::Error) {
         global_size = N;
         local_size = 0;
 
@@ -81,7 +81,7 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
     return pref_diff;
 }
 
-inline void cl_set_kernel_args (::cl::Kernel &, cl_uint) {}
+inline void cl_set_kernel_args (cl::Kernel &, cl_uint) {}
 
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 /// \brief Set OpenCL kernel arguments
@@ -94,7 +94,7 @@ inline void cl_set_kernel_args (::cl::Kernel &, cl_uint) {}
 /// by the compiler's implementation).  Otherwise this function supports up to
 /// 16 arguments.
 template <typename Arg1, typename... Args>
-inline void cl_set_kernel_args (::cl::Kernel &kern, cl_uint offset,
+inline void cl_set_kernel_args (cl::Kernel &kern, cl_uint offset,
         const Arg1 &arg1, const Args &... args)
 {
     kern.setArg(offset, arg1);

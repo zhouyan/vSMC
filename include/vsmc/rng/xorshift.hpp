@@ -7,7 +7,7 @@
     VSMC_STATIC_ASSERT((K != 0), USE_XorshiftEngine_WITH_ORDER_EUQAL_TO_ZERO)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType) \
-    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<ResultType>::value),      \
+    VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),              \
             USE_XorshiftEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType) \
@@ -75,7 +75,7 @@ struct XorshiftEngineTrait
     static VSMC_CONSTEXPR const std::size_t max_loop_unroll = 4;
 }; // struct XorshiftEngineTrait
 
-} // vsmc::namespace vsmc::traits
+} // namespace vsmc::traits
 
 namespace internal {
 
