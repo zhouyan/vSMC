@@ -16,7 +16,8 @@
 #define VSMC_STATIC_ASSERT(cond, msg) \
 {                                                                            \
     struct VSMC_STATIC_ASSERT_FAILURE {enum msg {err};};                     \
-    StaticAssert<bool(cond)>::test(VSMC_STATIC_ASSERT_FAILURE::err);         \
+    vsmc::internal::StaticAssert<bool(cond)>::test(                          \
+            VSMC_STATIC_ASSERT_FAILURE::err);                                \
 }
 #endif // VSMC_HAS_CXX11_STATIC_ASSERT
 #endif // VSMC_NO_STATIC_ASSERT
@@ -26,7 +27,7 @@
 #else // VSMC_NO_RUNTIME_ASSERT
 #if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg) \
-{ if (!(cond)) { throw RuntimeAssert(msg); }; }
+{ if (!(cond)) { throw vsmc::RuntimeAssert(msg); }; }
 #else // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg) \
 {                                                                            \
@@ -45,7 +46,7 @@
 #else // VSMC_NO_RUNTIME_WARNING
 #if VSMC_RUNTIME_WARNING_AS_EXCEPTION
 #define VSMC_RUNTIME_WARNING(cond, msg) \
-{ if (!(cond)) { throw RuntimeWarning(msg); }; }
+{ if (!(cond)) { throw vsmc::RuntimeWarning(msg); }; }
 #else // VSMC_RUNTIME_WARNING_AS_EXCEPTION
 #define VSMC_RUNTIME_WARNING(cond, msg)                                      \
 {                                                                            \
@@ -60,10 +61,14 @@
 
 namespace vsmc {
 
+namespace internal {
+
 template <bool> struct StaticAssert {static void test (int *) {}};
 
 template <>
 struct StaticAssert<true> {static void test (...) {}};
+
+} // namespace vsmc::internal
 
 class RuntimeAssert : public std::runtime_error
 {
