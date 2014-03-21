@@ -82,6 +82,10 @@
 /// \ingroup RNG
 /// \brief Random number generating using AES-NI
 
+/// \defgroup CLRNG OpenCL
+/// \ingroup RNG
+/// \brief Random number generating in OpenCL kernels
+
 /// \defgroup GSLRNG GSL
 /// \ingroup RNG
 /// \brief Random number generating using GSL RNG

@@ -254,51 +254,51 @@
         }                                                                    \
     }
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1(2, 32, 24, float)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1(4, 32, 24, float)
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 32, 24, float)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 32, 24, float)
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 32, 24, float)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 32, 24, float)
 
 #if VSMC_OPENCL_USE_DOUBLE
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1(2, 32, 53, double)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1(4, 32, 53, double)
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 32, 53, double)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 32, 53, double)
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 32, 53, double)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 32, 53, double)
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1(2, 64, 53, double)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1(4, 64, 53, double)
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 64, 53, double)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 64, 53, double)
 
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 64, 53, double)
-/// \ingroup R123RNG
+/// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 64, 53, double)
 
 #endif // VSMC_OPENCL_USE_DOUBLE
