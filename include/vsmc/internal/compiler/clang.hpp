@@ -294,14 +294,18 @@
 #if VSMC_HAS_X86_64
 #ifndef VSMC_HAS_INT128
 #define VSMC_HAS_INT128 1
+#endif
 #ifndef VSMC_INT128
 #define VSMC_INT128 __int128
-#endif
 #endif
 #endif
 
 #ifndef VSMC_INT64
 #define VSMC_INT64  long long
+#endif
+
+#ifndef VSMC_HAS_INLINE_ASSEMBLY
+#define VSMC_HAS_INLINE_ASSEMBLY 1
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_CLANG_HPP

@@ -13,4 +13,8 @@
 #endif
 #endif
 
+#ifndef VSMC_HAS_INLINE_ASSEMBLY
+#define VSMC_HAS_INLINE_ASSEMBLY 1
+#endif
+
 #endif // VSMC_INTERNAL_COMPILER_OPEN64_HPP

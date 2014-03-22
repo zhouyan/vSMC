@@ -5,14 +5,13 @@
 #include <vsmc/utility/array.hpp>
 #include <map>
 
-#define VSMC_STATIC_ASSERT_UTILITY_CPUID_EAX(EAX, func) \
-    VSMC_STATIC_ASSERT(((EAX >= 0x00U && EAX <= 0x0FU) ||                    \
-            (EAX >= 0x80000000U && EAX <= 0x8000000FU)),                     \
-            USE_CPUID_##func##_WITH_INVALID_EAX_VALUE)
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_CPUID_EAX(eax, func) \
-    VSMC_RUNTIME_ASSERT(((eax >= 0x00U && eax <= 0x0FU) ||                   \
-            (eax >= 0x80000000U && eax <= 0x8000000FU)),                     \
+    VSMC_RUNTIME_ASSERT(((eax >= 0x00U && eax <= max_eax()) ||               \
+            (eax >= 0x80000000U && eax <= max_eax_ext())),                   \
             ("USE CPUID::" #func " WITH INVALID INPUT EAX VALUE"))
 
 #define VSMC_DEFINE_CPUID_FEATURE_INFO(feat, eax_val, reg_val, bit) \
@@ -328,110 +327,9 @@ VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(PCX_L2I,      0x80000001, 2, 28)
 /// \ingroup CPUID
 class CPUID
 {
-
-    public :
-
     typedef std::map<unsigned, Array<unsigned, 4> > cpuid_map_type;
 
-    /// \brief Initilaization
-    ///
-    /// \details
-    /// Some member functions of CPUID are not thread-safe when it is called
-    /// for the first time. After calling this function, all subsequent call to
-    /// CPUID member functions will be thread-safe
-    ///
-    /// \return true if initialization is successful. If false is returned,
-    /// then other member functions shall not be used.
-    static bool initialize ()
-    {
-        bool init = false;
-
-        init = cpuid_map_find<0x00U>() || init;
-        init = cpuid_map_find<0x01U>() || init;
-        init = cpuid_map_find<0x02U>() || init;
-        init = cpuid_map_find<0x03U>() || init;
-        init = cpuid_map_find<0x04U>() || init;
-        init = cpuid_map_find<0x05U>() || init;
-        init = cpuid_map_find<0x06U>() || init;
-        init = cpuid_map_find<0x07U>() || init;
-        init = cpuid_map_find<0x08U>() || init;
-        init = cpuid_map_find<0x09U>() || init;
-        init = cpuid_map_find<0x0AU>() || init;
-        init = cpuid_map_find<0x0BU>() || init;
-        init = cpuid_map_find<0x0CU>() || init;
-        init = cpuid_map_find<0x0DU>() || init;
-        init = cpuid_map_find<0x0EU>() || init;
-        init = cpuid_map_find<0x0FU>() || init;
-
-        init = cpuid_map_find<0x80000000U>() || init;
-        init = cpuid_map_find<0x80000001U>() || init;
-        init = cpuid_map_find<0x80000002U>() || init;
-        init = cpuid_map_find<0x80000003U>() || init;
-        init = cpuid_map_find<0x80000004U>() || init;
-        init = cpuid_map_find<0x80000005U>() || init;
-        init = cpuid_map_find<0x80000006U>() || init;
-        init = cpuid_map_find<0x80000007U>() || init;
-        init = cpuid_map_find<0x80000008U>() || init;
-        init = cpuid_map_find<0x80000009U>() || init;
-        init = cpuid_map_find<0x8000000AU>() || init;
-        init = cpuid_map_find<0x8000000BU>() || init;
-        init = cpuid_map_find<0x8000000CU>() || init;
-        init = cpuid_map_find<0x8000000DU>() || init;
-        init = cpuid_map_find<0x8000000EU>() || init;
-        init = cpuid_map_find<0x8000000FU>() || init;
-
-        return init;
-    }
-
-    /// \brief Get a map of possible calling parameter EAX and the values
-    static const cpuid_map_type &cpuid_map ()
-    {
-        static cpuid_map_type cmap;
-        static bool initialized = false;
-
-        if (initialized)
-            return cmap;
-
-        const unsigned eax_max = query(0x00U).at<0>();
-        cpuid_map_init<0x00U>(eax_max, cmap);
-        cpuid_map_init<0x01U>(eax_max, cmap);
-        cpuid_map_init<0x02U>(eax_max, cmap);
-        cpuid_map_init<0x03U>(eax_max, cmap);
-        cpuid_map_init<0x04U>(eax_max, cmap);
-        cpuid_map_init<0x05U>(eax_max, cmap);
-        cpuid_map_init<0x06U>(eax_max, cmap);
-        cpuid_map_init<0x07U>(eax_max, cmap);
-        cpuid_map_init<0x08U>(eax_max, cmap);
-        cpuid_map_init<0x09U>(eax_max, cmap);
-        cpuid_map_init<0x0AU>(eax_max, cmap);
-        cpuid_map_init<0x0BU>(eax_max, cmap);
-        cpuid_map_init<0x0CU>(eax_max, cmap);
-        cpuid_map_init<0x0DU>(eax_max, cmap);
-        cpuid_map_init<0x0EU>(eax_max, cmap);
-        cpuid_map_init<0x0FU>(eax_max, cmap);
-
-        const unsigned ext_max = query(0x80000000U).at<0>();
-        cpuid_map_init<0x80000000U>(ext_max, cmap);
-        cpuid_map_init<0x80000001U>(ext_max, cmap);
-        cpuid_map_init<0x80000002U>(ext_max, cmap);
-        cpuid_map_init<0x80000003U>(ext_max, cmap);
-        cpuid_map_init<0x80000004U>(ext_max, cmap);
-        cpuid_map_init<0x80000005U>(ext_max, cmap);
-        cpuid_map_init<0x80000006U>(ext_max, cmap);
-        cpuid_map_init<0x80000007U>(ext_max, cmap);
-        cpuid_map_init<0x80000008U>(ext_max, cmap);
-        cpuid_map_init<0x80000009U>(ext_max, cmap);
-        cpuid_map_init<0x8000000AU>(ext_max, cmap);
-        cpuid_map_init<0x8000000BU>(ext_max, cmap);
-        cpuid_map_init<0x8000000CU>(ext_max, cmap);
-        cpuid_map_init<0x8000000DU>(ext_max, cmap);
-        cpuid_map_init<0x8000000EU>(ext_max, cmap);
-        cpuid_map_init<0x8000000FU>(ext_max, cmap);
-
-        initialized = true;
-
-        return cmap;
-    }
+    public :
 
     /// \brief Query all informations
     template <typename CharT, typename Traits>
@@ -460,6 +358,48 @@ class CPUID
         print_dash(os);
     }
 
+    /// \brief Get CPUID info for a given EAX value
+    ///
+    /// \note This function does not check if `eax` is valid
+    static Array<unsigned, 4> info (unsigned eax) {return info(eax, 0);}
+
+#ifdef _MSC_VER
+    static Array<unsigned, 4> info (unsigned eax, unsigned ecx)
+    {
+        int CPUInfo[4];
+        int InfoType[2];
+        std::memcpy(&InfType[0], &eax, sizeof(int));
+        std::memcpy(&InfType[1], &ecx, sizeof(int));
+        __cpuidex(CPUInfo, InfoType[0], InfoType[1]);
+        Array<unsigned, 4> reg;
+        std::memcpy(reg.data(), CPUInfo, sizeof(int) * 4);
+    }
+#elif VSMC_HAS_INLINE_ASSEMBLY
+    /// \brief Get CPUID info for given EAX and ECX value
+    ///
+    /// \note This function does not check if `eax` and `ecx` are valid
+    static Array<unsigned, 4> info (unsigned eax, unsigned ecx)
+    {
+        unsigned ebx;
+        unsigned edx;
+        __asm__(
+            "cpuid;"
+            :"=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+            :"a"  (eax), "c"  (ecx)
+            );
+
+        Array<unsigned, 4> reg;
+        reg.at<0>() = eax;
+        reg.at<1>() = ebx;
+        reg.at<2>() = ecx;
+        reg.at<3>() = edx;
+
+        return reg;
+    }
+#else // VSMC_HAS_INLINE_ASSEMBLY
+#error Compiler not supported
+#endif // _MSC_VER
+
     /// \brief Maximum of calling parameter eax
     static unsigned max_eax ()
     {return cpuid_map_citer<0x00U>()->second.at<0>();}
@@ -471,43 +411,6 @@ class CPUID
             return 0;
 
         return cpuid_map_citer<0x80000000U>()->second.at<0>();
-    }
-
-    /// \brief Test if a given calling parameter eax is supported
-    template <unsigned EAX>
-    static bool has_eax ()
-    {
-        VSMC_STATIC_ASSERT_UTILITY_CPUID_EAX(EAX, has_eax);
-        return cpuid_map_find<EAX>();
-    }
-
-    /// \brief Test if a given clalling parameter eax is supported
-    static bool has_eax (unsigned eax)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_CPUID_EAX(eax, has_eax);
-        return cpuid_map().find(eax) != cpuid_map().end();
-    }
-
-    /// \brief Get a copy of EAX, EBX, ECX, EDX in an Array
-    template <unsigned EAX>
-    static cpuid_map_type::mapped_type value ()
-    {
-        VSMC_STATIC_ASSERT_UTILITY_CPUID_EAX(EAX, value);
-        if (has_eax<EAX>())
-            return cpuid_map_citer<EAX>()->second;
-        else
-            return cpuid_map_type::mapped_type();
-    }
-
-    /// \brief Get a copy of EAX, EBX, ECX, EDX in an Array
-    static cpuid_map_type::mapped_type value (unsigned eax)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_CPUID_EAX(eax, value);
-        cpuid_map_type::const_iterator citer = cpuid_map().find(eax);
-        if (citer != cpuid_map().end())
-            return citer->second;
-        else
-            return cpuid_map_type::mapped_type();
     }
 
     /// \brief Vendor ID
@@ -690,12 +593,31 @@ class CPUID
 
     private :
 
-    template <unsigned EAX>
-    static bool cpuid_map_init (unsigned eax_max, cpuid_map_type &cmap)
+    static const cpuid_map_type &cpuid_map ()
     {
-        if (eax_max >= EAX)
-            cmap[EAX] = query(EAX);
+        static cpuid_map_type cmap;
+        static bool initialized = false;
+
+        if (initialized)
+            return cmap;
+
+        const unsigned eax_max = info(0x00U).at<0>();
+        cpuid_map_init(0x00U, eax_max, cmap);
+        cpuid_map_init(0x01U, eax_max, cmap);
+        cpuid_map_init(0x07U, eax_max, cmap);
+
+        const unsigned ext_max = info(0x80000000U).at<0>();
+        cpuid_map_init(0x80000000U, ext_max, cmap);
+        cpuid_map_init(0x80000001U, ext_max, cmap);
+
+        initialized = true;
+
+        return cmap;
     }
+
+    static bool cpuid_map_init (unsigned eax, unsigned eax_max,
+            cpuid_map_type &cmap)
+    {if (eax_max >= eax) cmap[eax] = info(eax);}
 
     template <unsigned EAX>
     static cpuid_map_type::const_iterator cpuid_map_citer ()
@@ -711,26 +633,6 @@ class CPUID
         static bool found = cpuid_map_citer<EAX>() != cpuid_map().end();
 
         return found;
-    }
-
-    static Array<unsigned, 4> query (unsigned eax)
-    {
-        unsigned ebx;
-        unsigned ecx;
-        unsigned edx;
-        __asm__(
-            "cpuid;"
-            :"=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-            :"a"  (eax)
-            );
-
-        Array<unsigned, 4> reg;
-        reg.at<0>() = eax;
-        reg.at<1>() = ebx;
-        reg.at<2>() = ecx;
-        reg.at<3>() = edx;
-
-        return reg;
     }
 
     template <CPUIDFeature Feat>
