@@ -117,6 +117,10 @@
 /// \ingroup Utility
 /// \brief Backup and restore objects
 
+/// \defgroup CPUID CPUID
+/// \ingroup Utility
+/// \brief Query CPUID features
+
 /// \defgroup Dispatch Grand Central Dispatch
 /// \ingroup Utility
 /// \brief C++ wrapper of Apple GCD
