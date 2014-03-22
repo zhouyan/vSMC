@@ -10,38 +10,6 @@
 #error __STDC_CONSTANT_MACROS not defined before #<stdint.h>
 #endif
 
-#ifndef VSMC_INT64
-#if defined(__INTEL_COMPILER) || defined(_MSC_VER)
-#define VSMC_INT64  __int64
-#else
-#define VSMC_INT64  long long
-#endif
-#endif // VSMC_INT64
-
-#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
-#ifndef VSMC_HAS_INT128
-#undef VSMC_INT128
-#if defined(__INTEL_COMPILER)
-#define VSMC_HAS_INT128 1
-#define VSMC_INT128  __int128
-#elif defined(__clang__)
-#define VSMC_HAS_INT128 1
-#define VSMC_INT128  __int128
-#elif defined(__OPEN64__)
-#define VSMC_HAS_INT128 0
-#elif defined(__SUNPRO_CC)
-#define VSMC_HAS_INT128 0
-#elif defined(__GNUC__)
-#define VSMC_HAS_INT128 1
-#define VSMC_INT128  __int128
-#elif defined(_MSC_VER)
-#define VSMC_HAS_INT128 0
-#else
-#define VSMC_HAS_INT128 0
-#endif
-#endif // VSMC_HAS_INT128
-#endif // defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
-
 namespace vsmc {
 
 namespace internal {

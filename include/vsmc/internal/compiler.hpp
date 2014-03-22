@@ -313,4 +313,30 @@
 #define VSMC_HAS_C99LIB_MATH 0
 #endif
 
+// Target specific features
+
+/// \brief x86-64
+/// \ingroup Compiler
+#ifndef VSMC_HAS_X86_64
+#define VSMC_HAS_X86_64 0
+#endif
+
+/// \brief 128-bits integers
+/// \ingroup Compiler
+#ifndef VSMC_HAS_INT128
+#define VSMC_HAS_INT128 0
+#endif
+
+/// \brief 64-bits integer used in Intel instructions
+/// \ingroup Compiler
+#ifndef VSMC_INT64
+#define VSMC_INT64  long long
+#endif
+
+/// \brief Inline assembly
+/// \ingroup Compiler
+#ifndef VSMC_HAS_INLINE_ASSEMBLY
+#define VSMC_HAS_INLINE_ASSEMBLY 0
+#endif
+
 #endif // VSMC_INTERNAL_COMPILER_HPP

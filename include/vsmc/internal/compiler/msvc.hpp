@@ -279,4 +279,16 @@
 #endif
 #endif
 
+// Target specific features
+
+#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
+#ifndef VSMC_HAS_X86_64
+#define VSMC_HAS_X86_64 1
+#endif
+#endif
+
+#ifndef VSMC_INT64
+#define VSMC_INT64  __int64
+#endif
+
 #endif // VSMC_INTERNAL_COMPILER_MSVC_HPP
