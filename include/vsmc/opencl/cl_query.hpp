@@ -306,7 +306,17 @@ class CLQuery
     template <typename CharT, typename Traits>
     static void print_name (
             std::basic_ostream<CharT, Traits> &os, const std::string &name)
-    {os << std::setw(40) << std::left << name << ' ';}
+    {
+        if (name.size() <= 40) {
+            char buffer[41];
+            for (std::size_t i = 0; i != name.size(); ++i)
+                buffer[i] = name[i];
+            buffer[name.size()] = '\n';
+            os << const_cast<const char *>(buffer) << ' ';
+        } else {
+            os << name << ' ';
+        }
+    }
 
     template <typename T, typename CharT, typename Traits>
     static void print_val (std::basic_ostream<CharT, Traits> &os, const T &val)
@@ -349,9 +359,14 @@ class CLQuery
         }
 
         os << val_vec[0] << '\n';
-        for (std::size_t i = 1; i != val_vec.size() - 1; ++i)
-            os << std::setw(41) << ' ' << val_vec[i] << '\n';
-        os << std::setw(41) << ' ' << val_vec.back();
+        for (std::size_t i = 1; i != val_vec.size() - 1; ++i) {
+            for (std::size_t s = 0; s != 41; ++s)
+                os << ' ';
+            os << val_vec[i] << '\n';
+        }
+        for (std::size_t i = 0; i != 41; ++i)
+            os << ' ';
+        os << val_vec.back();
     }
 
     template<typename T, typename CharT, typename Traits>

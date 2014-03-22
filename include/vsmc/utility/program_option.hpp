@@ -325,7 +325,11 @@ class ProgramOptionHelp : public ProgramOption
 
     void print_help (const std::string &oname, std::ostream &os) const
     {
-        os << ' ' << std::setw(20) << std::left << oname;
+	os << ' ' << oname;
+	if (oname.size() < 20) {
+	    for (std::size_t i = 0; i != 20 - oname.size(); ++i)
+		os << ' ';
+	}
         os << ' ' << std::setw(40) << "Print help information";
         os << ' ' << "(default: false)";
         os << std::endl;
@@ -358,7 +362,11 @@ class ProgramOptionDefault : public ProgramOption
 
     void print_help (const std::string &oname, std::ostream &os) const
     {
-        os << ' ' << std::setw(20) << std::left << oname;
+	os << ' ' << oname;
+	if (oname.size() < 20) {
+	    for (std::size_t i = 0; i != 20 - oname.size(); ++i)
+		os << ' ';
+	}
         os << ' ' << std::setw(40) << desc_;
         print_default(default_, os);
         os << std::endl;
