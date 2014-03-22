@@ -18,7 +18,7 @@
 #endif
 #endif // VSMC_INT64
 
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
 #ifndef VSMC_HAS_INT128
 #undef VSMC_INT128
 #if defined(__INTEL_COMPILER)
@@ -40,7 +40,7 @@
 #define VSMC_HAS_INT128 0
 #endif
 #endif // VSMC_HAS_INT128
-#endif // __x86_64__
+#endif // defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
 
 namespace vsmc {
 
