@@ -372,7 +372,7 @@ class CPUID
         unsigned ebx = 0;
         unsigned edx = 0;
         __asm__(
-                "cpuid;"
+                "cpuid\n"
                 : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
                 :  "a" (eax),  "c" (ecx)
                );
