@@ -7,26 +7,20 @@
 #ifndef VSMC_X86_64
 #define VSMC_X86_64 1
 #endif
-#ifndef VSMC_X86
-#define VSMC_X86 1
 #endif
-#else
+
 #ifndef VSMC_X86_64
 #define VSMC_X86_64 0
 #endif
-#ifndef VSMC_X86
-#define VSMC_X86 0
-#endif
-#endif
 
-#if defined(__i386__) || defined(_M_I386) || defined(_WIN32)
+#if VSMC_X86_64 || defined(__i386__) || defined(_M_I386) || defined(_WIN32)
 #ifndef VSMC_X86
 #define VSMC_X86 1
 #endif
-#else
+#endif
+
 #ifndef VSMC_X86
 #define VSMC_X86 0
-#endif
 #endif
 
 #if defined(__APPLE__) || defined(__MACOSX)
@@ -357,6 +351,106 @@
 /// \ingroup Compiler
 #ifndef VSMC_HAS_INLINE_ASSEMBLY
 #define VSMC_HAS_INLINE_ASSEMBLY 0
+#endif
+
+/// \brief Intrinsic functions
+/// \ingroup Compiler
+#ifndef VSMC_HAS_INTRINSIC_FUNCTION
+#define VSMC_HAS_INTRINSIC_FUNCTION 0
+#endif
+
+#if VSMC_HAS_INTRINSIC_FUNCTION
+
+#ifdef __MMX__
+#ifndef VSMC_MMX
+#define VSMC_MMX 1
+#endif
+#endif
+
+#ifdef __SSE__
+#ifndef VSMC_SSE
+#define VSMC_SSE 1
+#endif
+#endif
+
+#ifdef __SSE2__
+#ifndef VSMC_SSE2
+#define VSMC_SSE2 1
+#endif
+#endif
+
+#ifdef __SSE3__
+#ifndef VSMC_SSE3
+#define VSMC_SSE3 1
+#endif
+#endif
+
+#ifdef __SSSE3__
+#ifndef VSMC_SSSE3
+#define VSMC_SSSE3 1
+#endif
+#endif
+
+#ifdef __SSE4_1__
+#ifndef VSMC_SSE4_1
+#define VSMC_SSE4_1 1
+#endif
+#endif
+
+#ifdef __SSE4_2__
+#ifndef VSMC_SSE4_2
+#define VSMC_SSE4_2 1
+#endif
+#endif
+
+#ifdef __AVX__
+#ifndef VSMC_AVX
+#define VSMC_AVX 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef VSMC_AVX2
+#define VSMC_AVX2 1
+#endif
+#endif
+
+#endif // VSMC_HAS_INTRINSIC_FUNCTION
+
+#ifndef VSMC_MMX
+#define VSMC_MMX 0
+#endif
+
+#ifndef VSMC_SSE
+#define VSMC_SSE 0
+#endif
+
+#ifndef VSMC_SSE2
+#define VSMC_SSE2 0
+#endif
+
+#ifndef VSMC_SSE3
+#define VSMC_SSE3 0
+#endif
+
+#ifndef VSMC_SSSE3
+#define VSMC_SSSE3 0
+#endif
+
+#ifndef VSMC_SSE4_1
+#define VSMC_SSE4_1 0
+#endif
+
+#ifndef VSMC_SSE4_2
+#define VSMC_SSE4_2 0
+#endif
+
+#ifndef VSMC_AVX
+#define VSMC_AVX 0
+#endif
+
+#ifndef VSMC_AVX2
+#define VSMC_AVX2 0
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP
