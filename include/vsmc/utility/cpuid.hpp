@@ -18,7 +18,7 @@ template<> struct CPUIDFeatureInfo< CPUIDFeature##feat >                     \
 {                                                                            \
     static std::string name () {return std::string(#feat);}                  \
     static VSMC_CONSTEXPR const unsigned eax = eax_val##U;                   \
-    static VSMC_CONSTEXPR const unsigned mask = 1 << bit;                    \
+    static VSMC_CONSTEXPR const unsigned mask = 1U << bit;                   \
     static VSMC_CONSTEXPR const std::size_t reg = reg_val;                   \
 };
 
@@ -27,7 +27,7 @@ template<> struct CPUIDFeatureInfo< CPUIDFeatureExt##feat >                  \
 {                                                                            \
     static std::string name () {return std::string(#feat);}                  \
     static VSMC_CONSTEXPR const unsigned eax = eax_val##U;                   \
-    static VSMC_CONSTEXPR const unsigned mask = 1 << bit;                    \
+    static VSMC_CONSTEXPR const unsigned mask = 1U << bit;                   \
     static VSMC_CONSTEXPR const std::size_t reg = reg_val;                   \
 };
 
@@ -174,7 +174,7 @@ enum CPUIDFeature
     CPUIDFeatureExtPERFCTR_NB,   ///< EAX:0x80000001 ECX:24
     CPUIDFeatureExtDBX,          ///< EAX:0x80000001 ECX:26
     CPUIDFeatureExtPERFTSC,      ///< EAX:0x80000001 ECX:27
-    CPUIDFeatureExtPCX_L2I,      ///< EAX:0x80000001 ECX:28
+    CPUIDFeatureExtPCX_L2I       ///< EAX:0x80000001 ECX:28
 }; // enum CPUIDFeature
 
 namespace internal {
@@ -328,6 +328,23 @@ class CPUID
 {
     public :
 
+    /// \brief Get CPU features using CPUID
+    template <typename CharT, typename Traits>
+    static void info (std::basic_ostream<CharT, Traits> &os)
+    {
+        print_equal(os);
+        os << "Vendor: " << vendor_id() << '\n';
+        print_equal(os);
+        os << "Basic features\n";
+        print_dash(os);
+        features(os);
+        print_equal(os);
+        os << "Extended features\n";
+        print_dash(os);
+        features_ext(os);
+        print_equal(os);
+    }
+
     /// \brief Get CPUID info for a given EAX value
     ///
     /// \note This function does not check if `eax` is valid
@@ -336,12 +353,15 @@ class CPUID
 #ifdef _MSC_VER
     static Array<unsigned, 4> info (unsigned eax, unsigned ecx)
     {
-        int CPUInfo[4];
-        int InfoType[2];
+        int CPUInfo[4] = {0};
+        int InfoType[2] = {0};
         std::memcpy(&InfType[0], &eax, sizeof(int));
         std::memcpy(&InfType[1], &ecx, sizeof(int));
         __cpuidex(CPUInfo, InfoType[0], InfoType[1]);
+        Array<unsigned, 4> reg;
         std::memcpy(reg.data(), CPUInfo, sizeof(int) * 4);
+
+        return reg;
     }
 #elif VSMC_HAS_INLINE_ASSEMBLY
     /// \brief Get CPUID info for given EAX and ECX value
@@ -349,14 +369,13 @@ class CPUID
     /// \note This function does not check if `eax` and `ecx` are valid
     static Array<unsigned, 4> info (unsigned eax, unsigned ecx)
     {
-        unsigned ebx;
-        unsigned edx;
+        unsigned ebx = 0;
+        unsigned edx = 0;
         __asm__(
-            "cpuid;"
-            :"=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-            :"a"  (eax), "c"  (ecx)
-            );
-
+                "cpuid;"
+                : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+                :  "a" (eax),  "c" (ecx),  "c" (ecx),  "d" (edx)
+               );
         Array<unsigned, 4> reg;
         reg.at<0>() = eax;
         reg.at<1>() = ebx;
@@ -621,6 +640,13 @@ class CPUID
         }
     }
 }; // class CPUID
+
+/// \brief Query CPU features using CPUID
+/// \ingroup CPUID
+template<typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os, const CPUID &)
+{CPUID::info(os); return os;}
 
 } // namespace vsmc
 

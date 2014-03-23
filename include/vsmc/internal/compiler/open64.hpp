@@ -7,14 +7,10 @@
 
 // Target specific features
 
-#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
-#ifndef VSMC_HAS_X86_64
-#define VSMC_HAS_X86_64 1
-#endif
-#endif
-
+#if VSMC_X86
 #ifndef VSMC_HAS_INLINE_ASSEMBLY
 #define VSMC_HAS_INLINE_ASSEMBLY 1
+#endif
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_OPEN64_HPP

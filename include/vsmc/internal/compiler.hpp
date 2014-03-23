@@ -3,18 +3,30 @@
 
 #include <cstddef>
 
-#if defined(__INTEL_COMPILER)
-#include <vsmc/internal/compiler/intel.hpp>
-#elif defined(__clang__)
-#include <vsmc/internal/compiler/clang.hpp>
-#elif defined(__OPEN64__)
-#include <vsmc/internal/compiler/open64.hpp>
-#elif defined(__SUNPRO_CC)
-#include <vsmc/internal/compiler/sunpro.hpp>
-#elif defined(__GNUC__)
-#include <vsmc/internal/compiler/gcc.hpp>
-#elif defined(_MSC_VER)
-#include <vsmc/internal/compiler/msvc.hpp>
+#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
+#ifndef VSMC_X86_64
+#define VSMC_X86_64 1
+#endif
+#ifndef VSMC_X86
+#define VSMC_X86 1
+#endif
+#else
+#ifndef VSMC_X86_64
+#define VSMC_X86_64 0
+#endif
+#ifndef VSMC_X86
+#define VSMC_X86 0
+#endif
+#endif
+
+#if defined(__i386__) || defined(_M_I386) || defined(_WIN32)
+#ifndef VSMC_X86
+#define VSMC_X86 1
+#endif
+#else
+#ifndef VSMC_X86
+#define VSMC_X86 0
+#endif
 #endif
 
 #if defined(__APPLE__) || defined(__MACOSX)
@@ -36,6 +48,20 @@
 #define VSMC_MAC_VERSION_MIN_REQUIRED(ver) VSMC_MAC_VERSION >= ver
 #else
 #define VSMC_MAC_VERSION_MIN_REQUIRED(ver) 0
+#endif
+
+#if defined(__INTEL_COMPILER)
+#include <vsmc/internal/compiler/intel.hpp>
+#elif defined(__clang__)
+#include <vsmc/internal/compiler/clang.hpp>
+#elif defined(__OPEN64__)
+#include <vsmc/internal/compiler/open64.hpp>
+#elif defined(__SUNPRO_CC)
+#include <vsmc/internal/compiler/sunpro.hpp>
+#elif defined(__GNUC__)
+#include <vsmc/internal/compiler/gcc.hpp>
+#elif defined(_MSC_VER)
+#include <vsmc/internal/compiler/msvc.hpp>
 #endif
 
 //  C++11 language features
@@ -314,12 +340,6 @@
 #endif
 
 // Target specific features
-
-/// \brief x86-64
-/// \ingroup Compiler
-#ifndef VSMC_HAS_X86_64
-#define VSMC_HAS_X86_64 0
-#endif
 
 /// \brief 128-bits integers
 /// \ingroup Compiler

@@ -285,27 +285,26 @@
 
 // Target specific features
 
-#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
-#ifndef VSMC_HAS_X86_64
-#define VSMC_HAS_X86_64 1
-#endif
-#endif
-
-#if VSMC_HAS_X86_64
+#if VSMC_X86_64
 #ifndef VSMC_HAS_INT128
 #define VSMC_HAS_INT128 1
 #endif
+#endif
+
+#if VSMC_X86_64
 #ifndef VSMC_INT128
 #define VSMC_INT128 __int128
 #endif
 #endif
 
-#ifndef VSMC_INT64
-#define VSMC_INT64  long long
-#endif
-
+#if VSMC_X86
 #ifndef VSMC_HAS_INLINE_ASSEMBLY
 #define VSMC_HAS_INLINE_ASSEMBLY 1
+#endif
+#endif
+
+#ifndef VSMC_INT64
+#define VSMC_INT64 long long
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_CLANG_HPP
