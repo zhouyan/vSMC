@@ -331,33 +331,6 @@ class CPUID
 
     public :
 
-    /// \brief Query all informations
-    template <typename CharT, typename Traits>
-    static void info (std::basic_ostream<CharT, Traits> &os)
-    {
-        print_equal(os);
-        os << "Vendor ID:                                  ";
-        os << vendor_id() << '\n';
-        print_dash(os);
-        os << "Highest CPUID calling parameter:            ";
-        os << max_eax() << '\n';
-        os << "Highest CPUID calling parameter (extended): ";
-        os << max_eax_ext() << '\n';
-
-        print_equal(os);
-        os << "Basic features" << '\n';
-        print_dash(os);
-        features(os);
-
-        if (cpuid_map_find<0x80000001U>()) {
-            print_equal(os);
-            os << "Extended features" << '\n';
-            print_dash(os);
-            features_ext(os);
-        }
-        print_dash(os);
-    }
-
     /// \brief Get CPUID info for a given EAX value
     ///
     /// \note This function does not check if `eax` is valid
@@ -371,7 +344,6 @@ class CPUID
         std::memcpy(&InfType[0], &eax, sizeof(int));
         std::memcpy(&InfType[1], &ecx, sizeof(int));
         __cpuidex(CPUInfo, InfoType[0], InfoType[1]);
-        Array<unsigned, 4> reg;
         std::memcpy(reg.data(), CPUInfo, sizeof(int) * 4);
     }
 #elif VSMC_HAS_INLINE_ASSEMBLY
@@ -401,26 +373,17 @@ class CPUID
 #endif // _MSC_VER
 
     /// \brief Maximum of calling parameter eax
-    static unsigned max_eax ()
-    {return cpuid_map_citer<0x00U>()->second.at<0>();}
+    static unsigned max_eax () {return info(0x00U).at<0>();}
 
     /// \brief Maximum of extended calling parameter eax
-    static unsigned max_eax_ext ()
-    {
-        if (!cpuid_map_find<0x80000000U>())
-            return 0;
-
-        return cpuid_map_citer<0x80000000U>()->second.at<0>();
-    }
+    static unsigned max_eax_ext () {return info(0x80000000U).at<0>();}
 
     /// \brief Vendor ID
     static std::string vendor_id ()
     {
-        if (!cpuid_map_find<0x00U>())
-            return std::string();
-
+        Array<unsigned, 4> reg(info(0x00U));
+        const unsigned *uptr = reg.data();
         char str[sizeof(unsigned) * 3 + 1] = {'\0'};
-        const unsigned *uptr = cpuid_map_citer<0x00U>()->second.data();
         std::memcpy(str + sizeof(unsigned) * 0, uptr + 1, sizeof(unsigned));
         std::memcpy(str + sizeof(unsigned) * 1, uptr + 3, sizeof(unsigned));
         std::memcpy(str + sizeof(unsigned) * 2, uptr + 2, sizeof(unsigned));
@@ -432,11 +395,8 @@ class CPUID
     template <CPUIDFeature Feat>
     static bool has_feature ()
     {
-        if (!cpuid_map_find<internal::CPUIDFeatureInfo<Feat>::eax>())
-            return false;
-
-        return (cpuid_map_citer<internal::CPUIDFeatureInfo<Feat>::eax>()->
-                second.template at<internal::CPUIDFeatureInfo<Feat>::reg>() &
+        return (feature<internal::CPUIDFeatureInfo<Feat>::eax>().template
+                at<internal::CPUIDFeatureInfo<Feat>::reg>() &
                 internal::CPUIDFeatureInfo<Feat>::mask) != 0;
     }
 
@@ -593,46 +553,31 @@ class CPUID
 
     private :
 
-    static const cpuid_map_type &cpuid_map ()
-    {
-        static cpuid_map_type cmap;
-        static bool initialized = false;
-
-        if (initialized)
-            return cmap;
-
-        const unsigned eax_max = info(0x00U).at<0>();
-        cpuid_map_init(0x00U, eax_max, cmap);
-        cpuid_map_init(0x01U, eax_max, cmap);
-        cpuid_map_init(0x07U, eax_max, cmap);
-
-        const unsigned ext_max = info(0x80000000U).at<0>();
-        cpuid_map_init(0x80000000U, ext_max, cmap);
-        cpuid_map_init(0x80000001U, ext_max, cmap);
-
-        initialized = true;
-
-        return cmap;
-    }
-
-    static bool cpuid_map_init (unsigned eax, unsigned eax_max,
-            cpuid_map_type &cmap)
-    {if (eax_max >= eax) cmap[eax] = info(eax);}
-
     template <unsigned EAX>
-    static cpuid_map_type::const_iterator cpuid_map_citer ()
+    static const Array<unsigned, 4> &feature ()
     {
-        static cpuid_map_type::const_iterator citer = cpuid_map().find(EAX);
+        static Array<unsigned, 4> reg;
+        static bool init = false;
 
-        return citer;
-    }
+        if (init)
+            return reg;
 
-    template <unsigned EAX>
-    static bool cpuid_map_find ()
-    {
-        static bool found = cpuid_map_citer<EAX>() != cpuid_map().end();
+        if (EAX < 0x80000000U) {
+            reg = info(0);
+            if (EAX > reg.at<0>())
+                reg.fill(0);
+            else
+                reg = info(EAX);
+        } else {
+            reg = info(0x80000000U);
+            if (EAX > reg.at<0>())
+                reg.fill(0);
+            else
+                reg = info(EAX);
+        }
+        init = true;
 
-        return found;
+        return reg;
     }
 
     template <CPUIDFeature Feat>
