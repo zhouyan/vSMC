@@ -355,8 +355,8 @@ class CPUID
     {
         int CPUInfo[4] = {0};
         int InfoType[2] = {0};
-        std::memcpy(&InfType[0], &eax, sizeof(int));
-        std::memcpy(&InfType[1], &ecx, sizeof(int));
+        std::memcpy(&InfoType[0], &eax, sizeof(int));
+        std::memcpy(&InfoType[1], &ecx, sizeof(int));
         __cpuidex(CPUInfo, InfoType[0], InfoType[1]);
         Array<unsigned, 4> reg;
         std::memcpy(reg.data(), CPUInfo, sizeof(int) * 4);
