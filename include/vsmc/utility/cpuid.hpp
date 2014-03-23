@@ -3,7 +3,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/array.hpp>
-#include <map>
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -327,8 +326,6 @@ VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(PCX_L2I,      0x80000001, 2, 28)
 /// \ingroup CPUID
 class CPUID
 {
-    typedef std::map<unsigned, Array<unsigned, 4> > cpuid_map_type;
-
     public :
 
     /// \brief Get CPUID info for a given EAX value
