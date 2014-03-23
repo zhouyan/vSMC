@@ -374,7 +374,7 @@ class CPUID
         __asm__(
                 "cpuid;"
                 : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-                :  "a" (eax),  "c" (ecx),  "c" (ecx),  "d" (edx)
+                :  "a" (eax),  "b" (ebx),  "c" (ecx),  "d" (edx)
                );
         Array<unsigned, 4> reg;
         reg.at<0>() = eax;
