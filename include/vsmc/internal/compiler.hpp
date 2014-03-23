@@ -341,12 +341,6 @@
 #define VSMC_HAS_INT128 0
 #endif
 
-/// \brief 64-bits integer used in Intel instructions
-/// \ingroup Compiler
-#ifndef VSMC_INT64
-#define VSMC_INT64  long long
-#endif
-
 /// \brief Inline assembly
 /// \ingroup Compiler
 #ifndef VSMC_HAS_INLINE_ASSEMBLY
@@ -357,6 +351,27 @@
 /// \ingroup Compiler
 #ifndef VSMC_HAS_INTRINSIC_FUNCTION
 #define VSMC_HAS_INTRINSIC_FUNCTION 0
+#endif
+
+/// \brief Intrinsic functions defines `__int64`
+/// \ingroup Compiler
+#ifndef VSMC_HAS_INTRINSIC_INT64
+#define VSMC_HAS_INTRINSIC_INT64 0
+#endif
+
+/// \brief Intrinsic functions does not define `__int64` and use `long long` as
+/// 64-bits integers
+/// \ingroup Compiler
+#ifndef VSMC_HAS_INTRINSIC_INT64_LONG_LONG
+#define VSMC_HAS_INTRINSIC_INT64_LONG_LONG 1
+#endif
+
+#if VSMC_HAS_INTRINSIC_INT64
+#define VSMC_INTRINSIC_INT64 __int64
+#elif VSMC_HAS_INTRINSIC_INT64_LONG_LONG
+#define VSMC_INTRINSIC_INT64 long long
+#else
+#define VSMC_INTRINSIC_INT64 long
 #endif
 
 #if VSMC_HAS_INTRINSIC_FUNCTION

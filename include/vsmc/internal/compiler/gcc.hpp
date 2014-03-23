@@ -309,8 +309,16 @@
 #endif
 #endif
 
-#ifndef VSMC_INT64
-#define VSMC_INT64 long long
+#if VSMC_X86
+#ifndef VSMC_HAS_INTRINSIC_INT64
+#define VSMC_HAS_INTRINSIC_INT64 0
+#endif
+#endif
+
+#if VSMC_X86
+#ifndef VSMC_HAS_INTRINSIC_INT64_LONG_LONG
+#define VSMC_HAS_INTRINSIC_INT64_LONG_LONG 1
+#endif
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_GCC_HPP

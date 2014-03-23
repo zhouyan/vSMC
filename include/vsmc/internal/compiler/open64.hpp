@@ -5,12 +5,4 @@
 #define VSMC_HAS_CXX11_LONG_LONG 1
 #endif
 
-// Target specific features
-
-#if VSMC_X86
-#ifndef VSMC_HAS_INLINE_ASSEMBLY
-#define VSMC_HAS_INLINE_ASSEMBLY 1
-#endif
-#endif
-
 #endif // VSMC_INTERNAL_COMPILER_OPEN64_HPP
