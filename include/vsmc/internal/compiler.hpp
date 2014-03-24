@@ -58,7 +58,7 @@
 #include <vsmc/internal/compiler/msvc.hpp>
 #endif
 
-#if VSMC_DOXYGEN
+#ifdef VSMC_DOXYGEN
 #undef VSMC_HAS_CXX11_LONG_LONG
 #undef VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
 #undef VSMC_HAS_CXX11_ALIAS_TEMPLATES
