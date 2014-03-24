@@ -1935,6 +1935,7 @@ INCLUDE_FILE_PATTERNS  = *.h *.hpp *.c *.cpp *.cl
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
+PREDEFINED +=VSMC_DOXYGEN
 PREDEFINED +=VSMC_HAS_CXX11_LONG_LONG
 PREDEFINED +=VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE
 PREDEFINED +=VSMC_HAS_CXX11_ALIAS_TEMPLATES
@@ -1997,7 +1998,6 @@ PREDEFINED +=__MAC_10_7=1070
 PREDEFINED +=__MAC_10_8=1080
 PREDEFINED +=__MAC_10_9=1090
 PREDEFINED +=__BLOCKS__
-PREDEFINED +=_OPENMP
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
