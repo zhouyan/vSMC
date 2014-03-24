@@ -75,6 +75,10 @@
 /// \ingroup Math
 /// \brief Compile time evaluation of integer functions
 
+/// \defgroup vMath Vector math functions
+/// \ingroup Math
+/// \brief Math functions on vectors (optional optimization through Intel MKL)
+
 /// \defgroup RNG Random number generating
 /// \brief Utilities for managing RNG engines
 
