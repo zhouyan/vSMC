@@ -9,8 +9,8 @@
 /// \brief Third-party related configuration macros
 /// \ingroup Config
 
-/// \defgroup Definitions Constants definitions
-/// \brief Enumerators and macro definitions
+/// \defgroup Definitions Enumerators and macros
+/// \brief Enumerator and macro definitions
 
 /// \defgroup Traits Traits
 /// \brief Trait classes
