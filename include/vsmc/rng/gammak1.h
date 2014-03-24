@@ -29,7 +29,7 @@
 /// ### Examples
 ///
 /// ~~~{.c}
-/// #define VSMC_OPENCL_USE_DOUBLE 1
+/// #define VSMC_HAS_OPENCL_DOUBLE 1
 /// #include <vsmc/rng/gammak1.h>
 ///
 /// cburng4x32_rng_t rng;
@@ -52,7 +52,7 @@
 #include <vsmc/rng/normal01.h>
 #include <vsmc/rng/u01.h>
 
-#if VSMC_OPENCL_USE_DOUBLE
+#if VSMC_HAS_OPENCL_DOUBLE
 
 #define GAMMAK1_2x32      gammak1_2x32_53
 #define GAMMAK1_2x32_INIT gammak1_2x32_53_init
@@ -70,7 +70,7 @@
 #define GAMMAK1_4x64_INIT gammak1_4x64_53_init
 #define GAMMAK1_4x64_RAND gammak1_4x64_53_rand
 
-#else // VSMC_OPENCL_USE_DOUBLE
+#else // VSMC_HAS_OPENCL_DOUBLE
 
 #define GAMMAK1_2x32      gammak1_2x32_24
 #define GAMMAK1_2x32_INIT gammak1_2x32_24_init
@@ -80,7 +80,7 @@
 #define GAMMAK1_4x32_INIT gammak1_4x32_24_init
 #define GAMMAK1_4x32_RAND gammak1_4x32_24_rand
 
-#endif // VSMC_OPENCL_USE_DOUBLE
+#endif // VSMC_HAS_OPENCL_DOUBLE
 
 #define VSMC_DEFINE_RNG_GAMMAK1(N, W, F, FT) \
     typedef struct {                                                         \
@@ -269,7 +269,7 @@ VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 32, 24, float)
 /// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 32, 24, float)
 
-#if VSMC_OPENCL_USE_DOUBLE
+#if VSMC_HAS_OPENCL_DOUBLE
 
 /// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1(2, 32, 53, double)
@@ -301,6 +301,6 @@ VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 64, 53, double)
 /// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 64, 53, double)
 
-#endif // VSMC_OPENCL_USE_DOUBLE
+#endif // VSMC_HAS_OPENCL_DOUBLE
 
 #endif // VSMC_RNG_GAMMAK1_H

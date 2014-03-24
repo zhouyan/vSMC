@@ -366,6 +366,12 @@
 #define VSMC_HAS_INTRINSIC_INT64_LONG_LONG 1
 #endif
 
+/// \brief Enable <vsmc/rng/u01.h> etc., double precision when used with vSMC
+/// \ingroup Config
+#ifndef VSMC_HAS_OPENCL_DOUBLE
+#define VSMC_HAS_OPENCL_DOUBLE 1
+#endif
+
 #if VSMC_HAS_INTRINSIC_INT64
 #define VSMC_INTRINSIC_INT64 __int64
 #elif VSMC_HAS_INTRINSIC_INT64_LONG_LONG

@@ -40,7 +40,7 @@ template<>
 inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
 {
     ss << "typedef float fp_type;\n";
-    ss << "#define VSMC_OPENCL_USE_DOUBLE 0\n";
+    ss << "#define VSMC_HAS_OPENCL_DOUBLE 0\n";
 }
 
 template<>
@@ -53,7 +53,7 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
     ss << "#endif\n";
 
     ss << "typedef double fp_type;\n";
-    ss << "#define VSMC_OPENCL_USE_DOUBLE 1\n";
+    ss << "#define VSMC_HAS_OPENCL_DOUBLE 1\n";
 }
 
 template <typename D>

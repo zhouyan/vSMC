@@ -1,43 +1,46 @@
 #ifndef VSMC_OPENCL_INTERNAL_DEFINES_H
 #define VSMC_OPENCL_INTERNAL_DEFINES_H
 
-#ifndef VSMC_STATIC_INLINE
 #ifdef __OPENCL_VERSION__
+  #ifndef VSMC_HAS_OPENCL_DOUBLE
+  #define VSMC_HAS_OPENCL_DOUBLE 0
+  #endif
   #ifndef UINT64_C
   #define UINT64_C(x) ((ulong)(x##UL))
   #endif
+  #ifndef VSMC_STATIC_INLINE
   #if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
     #define VSMC_STATIC_INLINE static inline
   #else
     #define VSMC_STATIC_INLINE inline
   #endif
-#else
-  #ifdef VSMC_OPENCL_USE_DOUBLE
-  #undef VSMC_OPENCL_USE_DOUBLE
+  #endif // VSMC_STATIC_INLINE
+#else // __OPENCL_VERSION__
+  #ifndef VSMC_HAS_OPENCL_DOUBLE
+  #define VSMC_HAS_OPENCL_DOUBLE 1
   #endif
-  #define VSMC_OPENCL_USE_DOUBLE 1
+  #ifndef __STDC_CONSTANT_MACROS
+  #define __STDC_CONSTANT_MACROS
+  #endif
   #include <stdint.h>
   #ifndef UINT64_C
-    #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
+  #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
   #endif
   #ifdef __cplusplus
+    #ifndef VSMC_STATIC_INLINE
     #define VSMC_STATIC_INLINE inline
+    #endif
     #include <cmath>
-  #else
-    #if defined(__STDC_VERSION__) && __STDC_VERSION__ > 199901L
+  #else // __cplusplus
+    #ifndef VSMC_STATIC_INLINE
+    #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
       #define VSMC_STATIC_INLINE static inline
     #else
-      #error VSMC_STATIC_INLINE not defined
+      #define VSMC_STATIC_INLINE static
     #endif
+    #endif // VSMC_STATIC_INLINE
     #include <math.h>
-  #endif
-#endif
-#endif // VSMC_STATIC_INLINE
-
-/// \brief Enable <vsmc/rng/u01.h> etc., double precision when used with vSMC
-/// \ingroup Config
-#ifndef VSMC_OPENCL_USE_DOUBLE
-#define VSMC_OPENCL_USE_DOUBLE 0
-#endif
+  #endif // __cplusplus
+#endif // __OPENCL_VERSION__
 
 #endif // VSMC_OPENCL_INTERNAL_DEFINES_H

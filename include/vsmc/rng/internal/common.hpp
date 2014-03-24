@@ -4,6 +4,10 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/utility/array.hpp>
 #include <vsmc/utility/counter.hpp>
+
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
 #include <stdint.h>
 
 #ifndef UINT64_C
