@@ -149,9 +149,8 @@ template <typename T> struct ArrayTrait
 /// The Array container is sort of a hybrid of `std::array` and `std::vector`.
 /// The default behavior is almost identical to `std::array` with a few minor
 /// differences.
-/// - There is no `max_size()` member function
-/// - The `size()` and `empty()` member functions are `static` and can be used
-/// as constant expression if C++11 `constexpr` is supported
+/// - The `size()`, `max_size()` and `empty()` member functions are `static`
+/// and can be used as constant expression if C++11 `constexpr` is supported
 /// - There are additional `at<Pos>()`, `at(Position<Pos>)` and
 /// `operator[](Position<Pos>)` member functions, which perform static
 /// assertions of the index instead of runtime assertion. They can also be used
@@ -295,6 +294,9 @@ class Array : public internal::ArrayStorage<T, N,
     static VSMC_CONSTEXPR bool empty () {return N == 0;}
 
     static VSMC_CONSTEXPR size_type size () {return N;}
+
+    static VSMC_CONSTEXPR size_type max_size ()
+    {return static_cast<size_type>(~static_cast<size_type>(0)) / sizeof(T);}
 
     void fill (const T &value) {fill(value, cxx11::is_unsigned<T>());}
 
