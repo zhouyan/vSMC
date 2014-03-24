@@ -2,10 +2,12 @@
 #define VSMC_CXX11_CMATH_HPP
 
 #include <vsmc/internal/config.hpp>
+#include <cmath>
 
 #if VSMC_HAS_CXX11LIB_CMATH
-#include <cmath>
-namespace vsmc {namespace cxx11 {
+
+namespace vsmc { namespace cxx11 {
+
 using std::exp2;
 using std::log2;
 using std::expm1;
@@ -19,9 +21,10 @@ using std::erf;
 using std::erfc;
 using std::lgamma;
 using std::tgamma;
-} }
+
+} } // namespace vsmc::cxx11
+
 #elif VSMC_HAS_C99LIB_MATH
-#include <math.h>
 
 #define VSMC_DEFINE_C99_MATH_SPECIAL(name) \
 inline float       (name) (float       x) {return ::name##f(x);}             \
@@ -31,6 +34,7 @@ template <typename T> inline double (name) (T x)                             \
 {return ::name(static_cast<double>(x));}
 
 namespace vsmc { namespace cxx11 {
+
 inline float       (hypot) (float       x, float       y) {return ::hypotf(x, y);}
 inline double      (hypot) (float       x, double      y) {return ::hypot (x, y);}
 inline long double (hypot) (float       x, long double y) {return ::hypotl(x, y);}
@@ -42,6 +46,7 @@ inline long double (hypot) (long double x, double      y) {return ::hypotl(x, y)
 inline long double (hypot) (long double x, long double y) {return ::hypotl(x, y);}
 template <typename T1, typename T2> inline double (hypot) (T1 x, T2 y)
 {return ::hypot(static_cast<double>(x), static_cast<double>(y));}
+
 VSMC_DEFINE_C99_MATH_SPECIAL(exp2)
 VSMC_DEFINE_C99_MATH_SPECIAL(log2)
 VSMC_DEFINE_C99_MATH_SPECIAL(expm1)
@@ -54,8 +59,11 @@ VSMC_DEFINE_C99_MATH_SPECIAL(erf)
 VSMC_DEFINE_C99_MATH_SPECIAL(erfc)
 VSMC_DEFINE_C99_MATH_SPECIAL(lgamma)
 VSMC_DEFINE_C99_MATH_SPECIAL(tgamma)
-} }
+
+} } // namespace vsmc::cxx11
+
 #else // VSMC_HAS_CXX11LIB_CMATH
+
 #include <boost/math/special_functions/expm1.hpp>
 #include <boost/math/special_functions/log1p.hpp>
 #include <boost/math/special_functions/cbrt.hpp>
@@ -66,7 +74,7 @@ VSMC_DEFINE_C99_MATH_SPECIAL(tgamma)
 #include <boost/math/special_functions/erf.hpp>
 #include <boost/math/special_functions/gamma.hpp>
 
-namespace vsmc {namespace cxx11 {
+namespace vsmc { namespace cxx11 {
 
 inline float (exp2) (float x)
 {using std::exp; using std::log; return exp(x * log(2.f));}
@@ -97,7 +105,9 @@ using boost::math::erf;
 using boost::math::erfc;
 using boost::math::lgamma;
 using boost::math::tgamma;
-} }
+
+} } // namespace vsmc::cxx11
+
 #endif // VSMC_HAS_CXX11LIB_CMATH
 
 #endif // VSMC_CXX11_CMATH_HPP

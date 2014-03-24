@@ -4,8 +4,11 @@
 #include <vsmc/internal/config.hpp>
 
 #if VSMC_HAS_CXX11LIB_RANDOM
+
 #include <random>
+
 namespace vsmc { namespace cxx11 {
+
 using std::linear_congruential_engine;
 using std::mersenne_twister_engine;
 using std::subtract_with_carry_engine;
@@ -45,11 +48,16 @@ using std::student_t_distribution;
 using std::discrete_distribution;
 using std::piecewise_constant_distribution;
 using std::piecewise_linear_distribution;
-} }
+
+} } // namespace vsmc::cxx11
+
 #else // VSMC_HAS_CXX11LIB_RANDOM
+
 #include <boost/random.hpp>
 #include <boost/cstdint.hpp>
+
 namespace vsmc { namespace cxx11 {
+
 using boost::random::linear_congruential_engine;
 using boost::random::mersenne_twister_engine;
 using boost::random::subtract_with_carry_engine;
@@ -95,7 +103,8 @@ using boost::random::student_t_distribution;
 using boost::random::discrete_distribution;
 using boost::random::piecewise_constant_distribution;
 using boost::random::piecewise_linear_distribution;
-} }
+} } //namespace vsmc::cxx11
+
 #endif // VSMC_HAS_CXX11LIB_RANDOM
 
 #endif // VSMC_CXX11_RANDOM_HPP

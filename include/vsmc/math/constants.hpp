@@ -7,7 +7,9 @@ template <> inline float       name <float>       () {return val##f;}        \
 template <> inline double      name <double>      () {return val;}           \
 template <> inline long double name <long double> () {return val##l;}
 
-namespace vsmc { namespace math {
+namespace vsmc {
+
+namespace math {
 
 /// \brief \f$\pi\f$
 /// \ingroup Constants
@@ -259,6 +261,8 @@ VSMC_DEFINE_MATH_CONSTANTS(ln_inv_10,
 VSMC_DEFINE_MATH_CONSTANTS(ln_ln_2,
         -0.36651292058166432701243915823266946946)
 
-} } // namespace vsmc::math
+} // namespace vsmc::math
+
+} // namespace vsmc
 
 #endif // VSMC_MATH_CONSTANTS_HPP
