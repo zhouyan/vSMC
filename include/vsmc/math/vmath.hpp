@@ -33,139 +33,139 @@ namespace vsmc {
 
 namespace math {
 
-/// \brief \f$y_i = |a_i|\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, abs)
 
-/// \brief \f$y_i = \mathrm{acos}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{acos}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, acos)
 
-/// \brief \f$y_i = \mathrm{asin}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{asin}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, asin)
 
-/// \brief \f$y_i = \mathrm{atan}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{atan}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, atan)
 
-/// \brief \f$y_i = \cos(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \cos(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, cos)
 
-/// \brief \f$y_i = \cosh(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \cosh(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, cosh)
 
-/// \brief \f$y_i = e^{a_i}\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = e^{a_i}\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, exp)
 
-/// \brief \f$y_i = \log(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \log(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, log)
 
-/// \brief \f$y_i = \log_{10}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \log_{10}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, log10)
 
-/// \brief \f$y_i = \sin(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \sin(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, sin)
 
-/// \brief \f$y_i = \sinh(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \sinh(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, sinh)
 
-/// \brief \f$y_i = \sqrt{a_i}\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i}\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, sqrt)
 
-/// \brief \f$y_i = \tan(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \tan(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, tan)
 
-/// \brief \f$y_i = \tanh(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \tanh(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(std, tanh)
 
-/// \brief \f$y_i = \mathrm{acosh}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{acosh}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, acosh)
 
-/// \brief \f$y_i = \mathrm{asinh}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{asinh}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, asinh)
 
-/// \brief \f$y_i = \mathrm{atanh}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{atanh}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, atanh)
 
-/// \brief \f$y_i = \sqrt[3]{a_i}\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \sqrt[3]{a_i}\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, cbrt)
 
-/// \brief \f$y_i = \mathrm{Erf}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, erf)
 
-/// \brief \f$y_i = \mathrm{Erfc}(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{Erfc}(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, erfc)
 
-/// \brief \f$y_i = e^{a_i} - 1\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = e^{a_i} - 1\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, expm1)
 
-/// \brief \f$y_i = \log\Gamma(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \log\Gamma(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, lgamma)
 
-/// \brief \f$y_i = \log(a_i - 1)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \log(a_i - 1)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, log1p)
 
-/// \brief \f$y_i = \Gamma(a_i)\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_1(cxx11, tgamma)
 
-/// \brief \f$y_i = a_i^{b_i}\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i^{b_i}\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_2(std, pow)
 
-/// \brief \f$y_i = \sqrt{a_i^2 + b_i^2}\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b_i^2}\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_2(cxx11, hypot)
 
-/// \brief \f$y_i = a_i + b_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i + b_i\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_B(add, +)
 
-/// \brief \f$y_i = a_i - b_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i - b_i\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_B(sub, -)
 
-/// \brief \f$y_i = a_i * b_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i * b_i\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_B(mul, *)
 
-/// \brief \f$y_i = a_i / b_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
 /// \ingroup vMath
 VSMC_DEFINE_VMATH_B(div, /)
 
-/// \brief \f$y_i = a_i^2\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i^2\f$
 /// \ingroup vMath
 template <typename T>
 inline void vsqr (int n, const T *a, T *y)
 {for (int i = 0; i != n; ++i) y[i] = a[i] * a[i];}
 
-/// \brief \f$y_i = a_i^b\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i^b\f$
 /// \ingroup vMath
 template <typename T>
 inline void vpowx (int n, const T *a, T b, T *y)
 {using std::pow; for (int i = 0; i != n; ++i) y[i] = pow(a[i], b);}
 
-/// \brief \f$y_i = 1 / a_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = 1 / a_i\f$
 /// \ingroup vMath
 template <typename T>
 inline void vinv (int n, const T *a, T *y)
@@ -175,7 +175,7 @@ inline void vinv (int n, const T *a, T *y)
         y[i] = one / a[i];
 }
 
-/// \brief \f$y_i = 1 / \sqrt{a_i}\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt{a_i}\f$
 /// \ingroup vMath
 template <typename T>
 inline void vinvsqrt (int n, const T *a, T *y)
@@ -186,7 +186,7 @@ inline void vinvsqrt (int n, const T *a, T *y)
         y[i] = one / sqrt(a[i]);
 }
 
-/// \brief \f$y_i = 1 / \sqrt[3]{a_i}\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt[3]{a_i}\f$
 /// \ingroup vMath
 template <typename T>
 inline void vinvcbrt (int n, const T *a, T *y)
