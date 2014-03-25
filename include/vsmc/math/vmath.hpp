@@ -191,7 +191,7 @@ inline void vinvsqrt (int n, const T *a, T *y)
 template <typename T>
 inline void vinvcbrt (int n, const T *a, T *y)
 {
-    using std::cbrt;
+    using cxx11::cbrt;
     const T one = static_cast<T>(1);
     for (int i = 0; i != n; ++i)
         y[i] = one / cbrt(a[i]);
