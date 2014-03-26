@@ -172,8 +172,6 @@ inline InputIter hdf5store_matrix (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIter first, bool append = false)
 {
-    using std::advance;
-
     if (nrow == 0 || ncol == 0)
         return first;
 
