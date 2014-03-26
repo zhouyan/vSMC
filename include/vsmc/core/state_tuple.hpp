@@ -1,17 +1,17 @@
-#ifndef VSMC_SMP_STATE_TUPLE_HPP
-#define VSMC_SMP_STATE_TUPLE_HPP
+#ifndef VSMC_CORE_STATE_TUPLE_HPP
+#define VSMC_CORE_STATE_TUPLE_HPP
 
 #include <tuple>
 #include <vsmc/core/single_particle.hpp>
 
-#define VSMC_RUNTIME_ASSERT_SMP_STATE_TUPLE_COPY_SIZE_MISMATCH \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
             ("**StateTuple::copy** SIZE MISMATCH"))
 
 namespace vsmc {
 
 /// \brief Base type of StateTuple
-/// \ingroup SMP
+/// \ingroup Core
 template <MatrixOrder Order, typename T, typename... Types>
 class StateTupleBase
 {
@@ -25,10 +25,8 @@ class StateTupleBase
     template <std::size_t Pos> struct state_type
     {typedef typename std::tuple_element<Pos, state_tuple_type>::type type;};
 
-    class state_pack_type
+    struct state_pack_type
     {
-        public :
-
         state_pack_type () {}
 
         state_pack_type (const state_pack_type &other) : data_(other.data_) {}
@@ -88,7 +86,7 @@ class StateTupleBase
 
         template <typename Archive>
         void serialize (Archive &, Position<dim_>) const {}
-    };
+    }; // struct state_pack_type
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S>
@@ -109,7 +107,7 @@ class StateTupleBase
         template <std::size_t Pos>
         typename state_type<Pos>::type &state () const
         {return this->state(Position<Pos>());}
-    };
+    }; // struct single_particle_type
 
     template <typename S>
     struct const_single_particle_type : public ConstSingleParticleBase<S>
@@ -130,7 +128,7 @@ class StateTupleBase
         template <std::size_t Pos>
         const typename state_type<Pos>::type &state () const
         {return this->state(Position<Pos>());}
-    };
+    }; // struct const_single_particle_type
 
     size_type size () const {return size_;}
 
@@ -150,7 +148,7 @@ class StateTupleBase
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_STATE_TUPLE_COPY_SIZE_MISMATCH;
+        VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH;
 
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);
@@ -257,7 +255,7 @@ class StateTupleBase
 }; // class StateTupleBase
 
 /// \brief Particle::value_type subtype
-/// \ingroup SMP
+/// \ingroup Core
 template <typename T, typename... Types>
 class StateTuple<RowMajor, T, Types...> :
     public StateTupleBase<RowMajor, T, Types...>
@@ -300,7 +298,7 @@ class StateTuple<RowMajor, T, Types...> :
 }; // StateTuple
 
 /// \brief Particle::value_type subtype
-/// \ingroup SMP
+/// \ingroup Core
 template <typename T, typename... Types>
 class StateTuple<ColMajor, T, Types...> :
     public StateTupleBase<ColMajor, T, Types...>
@@ -382,4 +380,4 @@ class StateTuple<ColMajor, T, Types...> :
 
 } // namespace vsmc
 
-#endif // VSMC_SMP_STATE_TUPLE_HPP
+#endif // VSMC_CORE_STATE_TUPLE_HPP

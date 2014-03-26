@@ -1,28 +1,28 @@
-#ifndef VSMC_SMP_STATE_MATRIX_HPP
-#define VSMC_SMP_STATE_MATRIX_HPP
+#ifndef VSMC_CORE_STATE_MATRIX_HPP
+#define VSMC_CORE_STATE_MATRIX_HPP
 
 #include <vsmc/core/single_particle.hpp>
 
-#define VSMC_STATIC_ASSERT_SMP_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
+#define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
             USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
 
-#define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_COPY_SIZE_MISMATCH \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
             ("**StateMatrix::copy** SIZE MISMATCH"))
 
-#define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_DIM_SIZE(dim) \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim) \
     VSMC_RUNTIME_ASSERT((dim >= 1),                                          \
             ("**StateMatrix** DIMENSION IS LESS THAN 1"))
 
-#define VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_UNPACK_SIZE(psize, dim, name) \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim, name) \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
             ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
 namespace vsmc {
 
 /// \brief Base type of StateTuple
-/// \ingroup SMP
+/// \ingroup Core
 template <MatrixOrder Order, std::size_t Dim, typename T>
 class StateMatrixBase : public traits::DimTrait<Dim>
 {
@@ -51,7 +51,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         template <std::size_t Pos>
         state_type &state () const
         {return this->state(Pos);}
-    };
+    }; // struct single_particle_type
 
     template <typename S>
     struct const_single_particle_type : public ConstSingleParticleBase<S>
@@ -72,12 +72,12 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         template <std::size_t Pos>
         const state_type &state () const
         {return this->state(Pos);}
-    };
+    }; // struct const_single_particle_type
 
     void resize_dim (std::size_t dim)
     {
-        VSMC_STATIC_ASSERT_SMP_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim);
-        VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_DIM_SIZE(dim);
+        VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim);
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
 
         traits::DimTrait<Dim>::resize_dim(dim);
         data_.resize(size_ * dim);
@@ -114,7 +114,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     void state_unpack (size_type id, const state_pack_type &pack)
     {
-        VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_UNPACK_SIZE(
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
                 pack.size(), this->dim(), Matrix);
 
         StateMatrix<Order, Dim, T> *sptr =
@@ -126,7 +126,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_STATE_MATRIX_COPY_SIZE_MISMATCH;
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
 
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);
@@ -235,7 +235,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 }; // class StateMatrixBase
 
 /// \brief Particle::value_type subtype
-/// \ingroup SMP
+/// \ingroup Core
 template <std::size_t Dim, typename T>
 class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 {
@@ -276,7 +276,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 }; // class StateMatrix
 
 /// \brief Particle::value_type subtype
-/// \ingroup SMP
+/// \ingroup Core
 template <std::size_t Dim, typename T>
 class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 {
@@ -318,4 +318,4 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
 } // namespace vsmc
 
-#endif // VSMC_SMP_STATE_MATRIX_HPP
+#endif // VSMC_CORE_STATE_MATRIX_HPP

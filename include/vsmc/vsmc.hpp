@@ -173,6 +173,10 @@
 #include <vsmc/core/path.hpp>
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/single_particle.hpp>
+#include <vsmc/core/state_matrix.hpp>
+#if VSMC_HAS_CXX11LIB_TUPLE
+#include <vsmc/core/state_tuple.hpp>
+#endif
 #include <vsmc/core/weight_set.hpp>
 
 #include <vsmc/cxx11/cmath.hpp>
@@ -244,10 +248,6 @@
 #endif
 #if VSMC_USE_TBB
 #include <vsmc/smp/backend_tbb.hpp>
-#endif
-#include <vsmc/smp/state_matrix.hpp>
-#if VSMC_HAS_CXX11LIB_TUPLE
-#include <vsmc/smp/state_tuple.hpp>
 #endif
 
 #include <vsmc/utility/backup.hpp>
