@@ -2,6 +2,7 @@
 #define VSMC_CORE_STATE_MATRIX_HPP
 
 #include <vsmc/core/single_particle.hpp>
+#include <vector>
 
 #define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \

@@ -180,6 +180,8 @@
 #include <vsmc/internal/common.hpp>
 #include <list>
 #include <map>
+#include <iomanip>
+#include <iostream>
 #include <sstream>
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func) \

@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/random.hpp>
+#include <cstring>
 #include <limits>
 
 #define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(diff, size, f) \

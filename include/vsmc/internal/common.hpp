@@ -7,21 +7,4 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
-#include <vsmc/cxx11/type_traits.hpp>
-
-#include <cassert>
-#include <cmath>
-#include <cstddef>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-
-#include <string>
-#include <vector>
-#include <utility>
-
 #endif // VSMC_INTERNAL_COMMON_HPP

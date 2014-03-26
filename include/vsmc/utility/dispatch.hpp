@@ -4,6 +4,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #include <dispatch/dispatch.h>
+#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning(push)

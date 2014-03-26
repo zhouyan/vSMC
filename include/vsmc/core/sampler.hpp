@@ -8,6 +8,8 @@
 #include <vsmc/utility/backup.hpp>
 #include <limits>
 #include <map>
+#include <string>
+#include <vector>
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func) \
     VSMC_RUNTIME_ASSERT((iter != map.end()),                                 \

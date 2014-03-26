@@ -3,6 +3,10 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
+#include <cmath>
+#include <cstdlib>
+#include <string>
+#include <iostream>
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
     VSMC_RUNTIME_ASSERT((setup()),                                           \

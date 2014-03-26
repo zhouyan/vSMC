@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/array.hpp>
+#include <vector>
 
 #ifdef _MSC_VER
 #include <intrin.h>

@@ -2,6 +2,9 @@
 #define VSMC_UTILITY_ARRAY_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <cstring>
+#include <iomanip>
+#include <iostream>
 
 #ifdef _MSC_VER
 #pragma warning(push)

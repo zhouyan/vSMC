@@ -2,8 +2,9 @@
 #define VSMC_UTILITY_STDTBB_HPP
 
 #include <vsmc/internal/common.hpp>
-
+#include <cstdlib>
 #include <thread>
+#include <vector>
 
 #if VSMC_HAS_CXX11LIB_FUTURE
 #include <future>
