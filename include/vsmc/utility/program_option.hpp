@@ -178,6 +178,7 @@
 #define VSMC_UTILITY_PROGRAM_OPTION_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <cstring>
 #include <list>
 #include <map>
 #include <iomanip>
