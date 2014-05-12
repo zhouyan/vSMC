@@ -328,12 +328,13 @@ class ProgramOptionHelp : public ProgramOption
 
     void print_help (const std::string &oname, std::ostream &os) const
     {
-	os << ' ' << oname;
-	if (oname.size() < 20) {
-	    for (std::size_t i = 0; i != 20 - oname.size(); ++i)
-		os << ' ';
-	}
-        os << ' ' << std::setw(40) << "Print help information";
+        os << ' ' << oname;
+        if (oname.size() < 20) {
+            for (std::size_t i = 0; i != 20 - oname.size(); ++i)
+                os << ' ';
+        }
+        os << ' ' << "Print help information";
+        os << std::string(18, ' ');
         os << ' ' << "(default: false)";
         os << std::endl;
     }
@@ -365,12 +366,13 @@ class ProgramOptionDefault : public ProgramOption
 
     void print_help (const std::string &oname, std::ostream &os) const
     {
-	os << ' ' << oname;
-	if (oname.size() < 20) {
-	    for (std::size_t i = 0; i != 20 - oname.size(); ++i)
-		os << ' ';
-	}
-        os << ' ' << std::setw(40) << desc_;
+        os << ' ' << oname;
+        if (oname.size() < 20) {
+            for (std::size_t i = 0; i != 20 - oname.size(); ++i)
+                os << ' ';
+        }
+        os << ' ' << desc_;
+        os << std::string(desc_.size() < 40 ? 40 - desc_.size() : 0, ' ');
         print_default(default_, os);
         os << std::endl;
     }
@@ -395,7 +397,7 @@ class ProgramOptionDefault : public ProgramOption
     void print_default (const U &val, std::ostream &os) const
     {
         if (has_default_)
-            os << " (default: " << val;
+            os << " (default: " << val << ")";
     }
 
     void print_default (bool val, std::ostream &os) const
