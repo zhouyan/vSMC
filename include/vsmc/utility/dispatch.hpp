@@ -940,13 +940,13 @@ class DispatchProgress
     static void print_start_ (void *context)
     {
         print_progress(context);
-        static_cast<DispatchProgress *>(context)->os_ << '\r';
+        static_cast<DispatchProgress *>(context)->os_ << '\r' << std::flush;
     }
 
     static void print_stop_ (void *context)
     {
         print_progress(context);
-        static_cast<DispatchProgress *>(context)->os_ << '\n';
+        static_cast<DispatchProgress *>(context)->os_ << '\n' << std::flush;
     }
 }; // class DispatchProgress
 
