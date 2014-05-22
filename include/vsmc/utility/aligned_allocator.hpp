@@ -130,7 +130,7 @@ class AlignedAllocator
     static void construct (pointer ptr, Args &&... args)
     {
         ::new (const_cast<void *>(static_cast<const volatile void *>(ptr)))
-            U(std::forward<Args>(args)...)
+            U(std::forward<Args>(args)...);
     }
 #else
     static void construct (pointer ptr, const_reference val)
