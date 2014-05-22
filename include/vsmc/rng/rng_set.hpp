@@ -2,12 +2,12 @@
 #define VSMC_RNG_RNG_SET_HPP
 
 #include <vsmc/rng/seed.hpp>
-#include <vsmc/rng/philox.hpp>
+#include <vsmc/rng/threefry.hpp>
 
 /// \brief Default RNG set type
 /// \ingroup Config
 #ifndef VSMC_DEFAULT_RNG_SET_TYPE
-#define VSMC_DEFAULT_RNG_SET_TYPE RngSet<Philox2x32, Vector>
+#define VSMC_DEFAULT_RNG_SET_TYPE RngSet<Threefry4x64, Vector>
 #endif
 
 namespace vsmc {
