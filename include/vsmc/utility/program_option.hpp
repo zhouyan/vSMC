@@ -184,6 +184,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func) \
     VSMC_RUNTIME_ASSERT((ptr != VSMC_NULLPTR),                               \
