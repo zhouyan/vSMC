@@ -88,7 +88,7 @@ class Particle
     rng_type &rng (size_type id) {return rng_set_[id];}
 
     /// \brief Get the (sequential) RNG used stream for resampling
-    resample_rng_type &resample_rng () {return resample_rng_;};
+    resample_rng_type &resample_rng () {return resample_rng_;}
 
     /// \brief Performing resampling if ESS/N < threshold
     ///

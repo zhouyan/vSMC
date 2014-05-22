@@ -108,7 +108,7 @@ class AlignedAllocator
     static const_pointer address (const_reference obj)
     {return std::addressof(obj);}
 
-    static pointer allocate (size_type n, const void *hint = VSMC_NULLPTR)
+    static pointer allocate (size_type n, const void * = VSMC_NULLPTR)
     {
         if (n == 0)
             return VSMC_NULLPTR;
@@ -125,7 +125,7 @@ class AlignedAllocator
         internal::aligned_free(ptr);
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES && VSMC_HAS_VARADIC_TEMPLATES
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES && VSMC_HAS_CXX11_VARIADIC_TEMPLATES
     template <typename U, typename... Args>
     static void construct (pointer ptr, Args &&... args)
     {
@@ -140,8 +140,8 @@ class AlignedAllocator
     static void destory (pointer ptr) {ptr->~T();}
 
     friend bool operator== (
-            const AlignedAllocator<T, Alignment> &alloc1,
-            const AlignedAllocator<T, Alignment> &alloc2)
+            const AlignedAllocator<T, Alignment> &,
+            const AlignedAllocator<T, Alignment> &)
     {return true;}
 
     friend bool operator!= (
