@@ -29,7 +29,24 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
 ~~~sh
 make docs
 ~~~
-The documentation can also be found [here][vSMCDoc].
+The documentation can also be found [here][vSMCDoc]. A [tutorial][vSMCTutorial]
+is also available. However, it describes an earlier version of the library.
+There are a few incompatibilities with the current version. It is still highly
+relevant. Users shall use the Doxygen generated documentations when things do
+not work exactly the same way as in the tutorial.
+
+# Examples
+
+[Examples][vSMCExample] are now hosted separately. To get and build them,
+~~~sh
+cd /path_to_vSMC_source
+git clone https://github.com/zhouyan/vSMCExample.git
+mkdir build
+cmake ..
+make example
+~~~
+Most examples also come with their own `README` files that give relevant
+references.
 
 # Parallelization backends
 
@@ -106,10 +123,12 @@ in the `LICENSE` file distributed with the source.
 [Intel TBB]: http://threadingbuildingblocks.org/
 [MS PPL]: http://msdn.microsoft.com/en-us/library/dd492418.aspx
 [MSVC]: http://msdn.microsoft.com/en-us/vstudio//default.aspx
+[Open64]: http://www.open64.net
 [OpenCL]: http://www.khronos.org/opencl/
 [OpenMP]: http://www.openmp.org/
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [libc++]: http://libcxx.llvm.org
 [libdispatch]: http://libdispatch.macosforge.org/
 [vSMCDoc]: http://zhouyan.github.io/vSMCDoc/doc/html/
-[Open64]: http://www.open64.net
+[vSMCExample]: https://github.com/zhouyan/vSMCExample
+[vSMCTutorial]: http://arxiv.org/pdf/1306.5583v1.pdf
