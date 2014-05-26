@@ -86,6 +86,12 @@ enum ResampleScheme {
 /// \ingroup Resample
 template <typename> class Resample;
 
+/// \brief Resampling type of the built-in schemes
+/// \ingroup Resample
+template <ResampleScheme scheme>
+struct ResampleType
+{typedef Resample<cxx11::integral_constant<ResampleScheme, Residual> > type;};
+
 /// \brief Transform replication numbers to parent particle locations
 /// \ingroup Resample
 ///
