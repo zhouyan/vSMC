@@ -20,29 +20,22 @@ class Resample<internal::ResampleStratified>
     public :
 
     template <typename IntType, typename RngType>
-    void operator() (std::size_t N, RngType &rng, const double *weight,
-            IntType *replication)
+    void operator() (std::size_t M, std::size_t N, RngType &rng,
+            const double *weight, IntType *replication)
     {
+        u01_.resize(N);
+        double *const uptr = &u01_[0];
+        cxx11::uniform_real_distribution<double> runif(0, 1);
+        const double delta = 1.0 / N;
         for (std::size_t i = 0; i != N; ++i)
-            replication[i] = 0;
-
-        std::size_t j = 0;
-        std::size_t k = 0;
-        cxx11::uniform_real_distribution<double> unif(0,1);
-        double u = unif(rng);
-        double cw = weight[0];
-        while (j != N) {
-            while (j < cw * N - u && j != N) {
-                ++replication[k];
-                u = unif(rng);
-                ++j;
-            }
-            if (k == N - 1)
-                break;
-            cw += weight[++k];
-        }
-        internal::normalize_replication(N, replication);
+            uptr[i] = runif(rng) * delta + i * delta;
+        inversion_(M, N, weight, uptr, replication, true);
     }
+
+    private :
+
+    internal::Inversion inversion_;
+    std::vector<double> u01_;
 }; // Stratified resampling
 
 } // namespace vsmc

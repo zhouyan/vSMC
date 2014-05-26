@@ -20,13 +20,21 @@ class Resample<internal::ResampleMultinomial>
     public :
 
     template <typename IntType, typename RngType>
-    void operator() (std::size_t N, RngType &rng, const double *weight,
-            IntType *replication)
+    void operator() (std::size_t M, std::size_t N, RngType &rng,
+            const double *weight, IntType *replication)
     {
-        internal::multinomial(N, static_cast<IntType>(N), rng,
-                weight, replication);
-        internal::normalize_replication(N, replication);
+        u01_.resize(N);
+        double *const uptr = &u01_[0];
+        cxx11::uniform_real_distribution<double> runif(0, 1);
+        for (std::size_t i = 0; i != N; ++i)
+            uptr[i] = runif(rng);
+        inversion_(M, N, weight, uptr, replication);
     }
+
+    private :
+
+    internal::Inversion inversion_;
+    std::vector<double> u01_;
 }; // Mulitnomial resampling
 
 } // namespace vsmc

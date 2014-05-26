@@ -24,9 +24,8 @@ class Particle
     typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
     typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
     typedef typename rng_set_type::rng_type rng_type;
-    typedef cxx11::function<
-        void (std::size_t, resample_rng_type &, const double *, size_type *)>
-        resample_type;
+    typedef cxx11::function<void (std::size_t, std::size_t,
+            resample_rng_type &, const double *, size_type *)> resample_type;
 
     explicit Particle (size_type N) :
         size_(N), value_(N),
@@ -142,7 +141,7 @@ class Particle
     /// 8. `return resampled`
     bool resample (const resample_type &op, double threshold)
     {
-        size_type N = static_cast<size_type>(weight_set_.resample_size());
+        std::size_t N = static_cast<std::size_t>(weight_set_.resample_size());
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
             resample_copy_from_.resize(N);
@@ -152,9 +151,9 @@ class Particle
                     &resample_weight_[0]);
             const size_type *cptr = VSMC_NULLPTR;
             if (end == &resample_weight_[0] + N) {
-                op(static_cast<std::size_t>(N), resample_rng_,
-                        &resample_weight_[0], &resample_replication_[0]);
-                resample_copy_from_replication_(N,
+                op(N, N, resample_rng_, &resample_weight_[0],
+                        &resample_replication_[0]);
+                resample_copy_from_replication_(N, N,
                         &resample_replication_[0], &resample_copy_from_[0]);
                 cptr = &resample_copy_from_[0];
             }

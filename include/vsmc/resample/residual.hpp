@@ -20,33 +20,44 @@ class Resample<internal::ResampleResidual>
     public :
 
     template <typename IntType, typename RngType>
-    void operator() (std::size_t N, RngType &rng, const double *weight,
-            IntType *replication)
+    void operator() (std::size_t M, std::size_t N, RngType &rng,
+            const double *weight, IntType *replication)
     {
         using std::modf;
 
-        residual_.resize(N);
-        integral_.resize(N);
+        residual_.resize(M);
+        integral_.resize(M);
         double *const rptr = &residual_[0];
         double *const iptr = &integral_[0];
-        for (std::size_t i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != M; ++i)
             rptr[i] = modf(N * weight[i], iptr + i);
-        double dsize = 0;
-        for (std::size_t i = 0; i != N; ++i)
-            dsize += rptr[i];
-        for (std::size_t i = 0; i != N; ++i)
-            rptr[i] /= dsize;
-        IntType size = static_cast<IntType>(dsize);
-        internal::multinomial(N, size, rng, rptr, replication);
+        double rsum = 0;
+        for (std::size_t i = 0; i != M; ++i)
+            rsum += rptr[i];
+        for (std::size_t i = 0; i != M; ++i)
+            rptr[i] /= rsum;
+
+        IntType R = 0;
+        for (std::size_t i = 0; i != M; ++i)
+            R += static_cast<IntType>(iptr[i]);
+        std::size_t NN = N - static_cast<std::size_t>(R);
+        u01_.resize(NN);
+        double *const uptr = &u01_[0];
+        cxx11::uniform_real_distribution<double> runif(0, 1);
+        for (std::size_t i = 0; i != NN; ++i)
+            uptr[i] = runif(rng);
+        inversion_(M, NN, rptr, uptr, replication);
+
         for (std::size_t i = 0; i != N; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
-        internal::normalize_replication(N, replication);
     }
 
     private :
 
+    internal::Inversion inversion_;
     std::vector<double> residual_;
     std::vector<double> integral_;
+    std::vector<double> u01_;
 }; // Residual resampling
 
 } // namespace vsmc
