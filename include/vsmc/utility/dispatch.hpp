@@ -714,8 +714,8 @@ class DispatchProgress
     void stop (bool finished = false)
     {
         timer_.suspend();
-        if (finished && iter_ < total_)
-            increment(total_ - iter_);
+        if (finished)
+            queue_.async_f(static_cast<void *>(this), increment_last_);
         queue_.sync_f(static_cast<void *>(this), print_stop_);
         watch_.stop();
     }
@@ -935,6 +935,13 @@ class DispatchProgress
         step_context *inc = static_cast<step_context *>(context);
         inc->timer->iter_ += inc->step;
         delete inc;
+    }
+
+    static void increment_last_ (void *context)
+    {
+        DispatchProgress *timer_ptr = static_cast<DispatchProgress *>(context);
+        if (timer_ptr->iter_ < timer_ptr->total_)
+            timer_ptr->iter_ = timer_ptr->total_;
     }
 
     static void print_start_ (void *context)
