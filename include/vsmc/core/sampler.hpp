@@ -48,19 +48,30 @@ class Sampler
     /// constructor to make the intention clear to the library.
     explicit Sampler (size_type N) :
         resample_threshold_(resample_threshold_never()),
-        particle_(N), iter_num_(0),
-        path_(typename Path<T>::eval_type()) {resample_scheme(Stratified);}
+        particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
+    {resample_scheme(Stratified);}
 
     /// \brief Construct a Sampler with a built-in resampling scheme
+    ///
+    /// \details
+    /// If a built-in scheme is chosen, then it is assumed that the user always
+    /// want to perform resampling.
+    Sampler (size_type N, ResampleScheme scheme) :
+        resample_threshold_(resample_threshold_always()),
+        particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
+    {resample_scheme(scheme);}
+
+    /// \brief Construct a Sampler with a built-in resampling scheme and a
+    /// threshold for resampling
     ///
     /// \details
     /// If a built-in scheme is chosen, then it is assumed that at least the
     /// user want to perform resampling at least sometime. So the threshold is
     /// set to 0.5 if not provided as the third parameter.
-    Sampler (size_type N, ResampleScheme scheme,
-            double resample_threshold = 0.5) :
-        resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
-        path_(typename Path<T>::eval_type()) {resample_scheme(scheme);}
+    Sampler (size_type N, ResampleScheme scheme, double resample_threshold) :
+        resample_threshold_(resample_threshold),
+        particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
+    {resample_scheme(scheme);}
 
     /// \brief Construct a Sampler with a user defined resampling operation
     ///
