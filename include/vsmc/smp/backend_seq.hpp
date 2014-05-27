@@ -8,7 +8,7 @@ namespace vsmc {
 VSMC_DEFINE_SMP_FORWARD(SEQ)
 
 /// \brief Particle::value_type subtype
-/// \ingroup Sequential
+/// \ingroup SEQ
 template <typename BaseState>
 class StateSEQ : public BaseState
 {
@@ -20,7 +20,7 @@ class StateSEQ : public BaseState
 }; // class StateSEQ
 
 /// \brief Sampler<T>::init_type subtype
-/// \ingroup Sequential
+/// \ingroup SEQ
 template <typename T, typename Derived>
 class InitializeSEQ : public InitializeBase<T, Derived>
 {
@@ -46,7 +46,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 }; // class InitializeSEQ
 
 /// \brief Sampler<T>::move_type subtype
-/// \ingroup Sequential
+/// \ingroup SEQ
 template <typename T, typename Derived>
 class MoveSEQ : public MoveBase<T, Derived>
 {
@@ -71,7 +71,7 @@ class MoveSEQ : public MoveBase<T, Derived>
 }; // class MoveSEQ
 
 /// \brief Monitor<T>::eval_type subtype
-/// \ingroup Sequential
+/// \ingroup SEQ
 template <typename T, typename Derived>
 class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
@@ -96,7 +96,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 }; // class MonitorEvalSEQ
 
 /// \brief Path<T>::eval_type subtype
-/// \ingroup Sequential
+/// \ingroup SEQ
 template <typename T, typename Derived>
 class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
