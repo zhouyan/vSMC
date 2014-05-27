@@ -2,6 +2,7 @@
 #define VSMC_RESAMPLE_COMMON_HPP
 
 #include <cstring>
+#include <algorithm>
 #include <vector>
 
 #include <vsmc/internal/common.hpp>
