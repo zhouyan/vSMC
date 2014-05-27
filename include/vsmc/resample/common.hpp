@@ -42,25 +42,22 @@ class Inversion
             accw_[i] = accw_[i - 1] + weight[i];
         accw_.back() = 1;
 
-        double *uptr;
+        const double *uptr;
         if (usorted) {
             uptr = u01;
         } else {
             u01_.resize(N);
+            std::memcpy(&u01_[0], u01, sizeof(double) * N);
+            std::sort(u01_.begin(), u01_.end());
             uptr = &u01_[0];
-            std::memcpy(uptr, u01, sizeof(double) * N);
         }
 
         std::size_t offset = 0;
         std::memset(count, 0, sizeof(IntType) * M);
-        for (std::size_t i = 0; i != N; ++i) {
-            if (uptr[i] <= accw_[offset]) {
-                ++count[offset];
-            } else {
-                while (offset != M && uptr[i] > accw_[offset])
-                    ++offset;
-                if (offset != M)
-                    count[offset] = 1;
+        for (std::size_t i = 0; i != M; ++i) {
+            while (offset != N && uptr[offset] <= accw_[i]) {
+                ++count[i];
+                ++offset;
             }
         }
     }
