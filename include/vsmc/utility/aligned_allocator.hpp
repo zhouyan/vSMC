@@ -103,10 +103,16 @@ class AlignedAllocator
     {return static_cast<size_type>(~static_cast<size_type>(0)) / sizeof(T);}
 
     static pointer address (reference obj)
-    {return std::addressof(obj);}
+    {
+        std::allocator<T> alloc;
+        return alloc.address(obj);
+    }
 
     static const_pointer address (const_reference obj)
-    {return std::addressof(obj);}
+    {
+        std::allocator<T> alloc;
+        return alloc.address(obj);
+    }
 
     static pointer allocate (size_type n, const void * = VSMC_NULLPTR)
     {
