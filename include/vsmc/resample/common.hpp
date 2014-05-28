@@ -88,9 +88,9 @@ template <typename> class Resample;
 
 /// \brief Resampling type of the built-in schemes
 /// \ingroup Resample
-template <ResampleScheme scheme>
+template <ResampleScheme Scheme>
 struct ResampleType
-{typedef Resample<cxx11::integral_constant<ResampleScheme, Residual> > type;};
+{typedef Resample<cxx11::integral_constant<ResampleScheme, Scheme> > type;};
 
 /// \brief Transform replication numbers to parent particle locations
 /// \ingroup Resample
