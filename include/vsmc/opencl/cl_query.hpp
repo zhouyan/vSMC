@@ -3,6 +3,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
+#include <cstring>
 #include <iostream>
 #include <string>
 
@@ -311,10 +312,9 @@ class CLQuery
     {
         if (name.size() <= 40) {
             char buffer[41];
+            std::memset(buffer, ' ', 40);
             for (std::size_t i = 0; i != name.size(); ++i)
                 buffer[i] = name[i];
-            for (std::size_t i = name.size(); i != 40; ++i)
-                buffer[i] = ' ';
             buffer[40] = '\0';
             os << const_cast<const char *>(buffer) << ' ';
         } else {
