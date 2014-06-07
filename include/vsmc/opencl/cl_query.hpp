@@ -313,7 +313,9 @@ class CLQuery
             char buffer[41];
             for (std::size_t i = 0; i != name.size(); ++i)
                 buffer[i] = name[i];
-            buffer[name.size()] = '\n';
+            for (std::size_t i = name.size(); i != 40; ++i)
+                buffer[i] = ' ';
+            buffer[40] = '\0';
             os << const_cast<const char *>(buffer) << ' ';
         } else {
             os << name << ' ';
