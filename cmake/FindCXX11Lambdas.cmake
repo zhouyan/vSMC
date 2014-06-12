@@ -1,0 +1,18 @@
+# Find C++11 lambdas support
+#
+# The following variable is set
+#
+# CXX11_LAMBDA_FOUND - TRUE if C++11 lambda is found and work correctly
+
+FILE (READ ${CMAKE_CURRENT_LIST_DIR}/FindCXX11Lambdas.cpp
+    CXX11_LAMBDAS_TEST_SOURCE)
+
+IF (NOT DEFINED CXX11_LAMBDAS_FOUND)
+    INCLUDE (CheckCXXSourceRuns)
+    CHECK_CXX_SOURCE_RUNS ("${CXX11_LAMBDAS_TEST_SOURCE}" CXX11_LAMBDAS_FOUND)
+    IF (CXX11_LAMBDAS_FOUND)
+        MESSAGE (STATUS "Found C++11 lambdas support")
+    ELSE (CXX11_LAMBDAS_FOUND)
+        MESSAGE (STATUS "NOT Found C++11 lambdas support")
+    ENDIF (CXX11_LAMBDAS_FOUND)
+ENDIF (NOT DEFINED CXX11_LAMBDAS_FOUND)
