@@ -85,6 +85,16 @@
 #endif
 #endif
 
+/// \brief Use Apple GCD Mac OS X Lion API
+/// \ingroup ThirdParty
+#ifndef VSMC_USE_GCD_LION
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
+#define VSMC_USE_GCD_LION 1
+#else
+#define VSMC_USE_GCD_LION 0
+#endif
+#endif
+
 /// \brief USE OpenMP
 /// \ingroup ThirdParty
 #ifndef VSMC_USE_OMP
