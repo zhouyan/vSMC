@@ -17,7 +17,7 @@
     <div class="wrapper">
       <header>
         <h1 class="header">vSMC</h1>
-        <p class="header">Vectorized Sequential Monte Carlo</p>
+        <p class="header">vSMC: Scalable Monte Carlo</p>
 
         <ul>
           <li class="download"><a class="buttons" href="https://github.com/zhouyan/vSMC/zipball/master">Download ZIP</a></li>
@@ -66,7 +66,26 @@ make install
 <div class="highlight highlight-sh"><pre>make docs
 </pre></div>
 
-<p>The documentation can also be found <a href="http://zhouyan.github.io/vSMC/doc/html/">here</a>.</p>
+<p>The documentation can also be found <a href="http://zhouyan.github.io/vSMCDoc/doc/html/">here</a>. A <a href="http://arxiv.org/pdf/1306.5583v1.pdf">tutorial</a>
+is also available. However, it describes an earlier version of the library.
+There are a few incompatibilities with the current version. It is still highly
+relevant. Users shall use the Doxygen generated documentations when things do
+not work exactly the same way as in the tutorial.</p>
+
+<h1>
+<a name="examples" class="anchor" href="#examples"><span class="octicon octicon-link"></span></a>Examples</h1>
+
+<p><a href="https://github.com/zhouyan/vSMCExample">Examples</a> are now hosted separately. To get and build them,</p>
+
+<div class="highlight highlight-sh"><pre><span class="nb">cd</span> /path_to_vSMC_source
+git clone https://github.com/zhouyan/vSMCExample.git
+mkdir build
+cmake ..
+make example
+</pre></div>
+
+<p>Most examples also come with their own <code>README</code> files that give relevant
+references.</p>
 
 <h1>
 <a name="parallelization-backends" class="anchor" href="#parallelization-backends"><span class="octicon octicon-link"></span></a>Parallelization backends</h1>
@@ -74,7 +93,7 @@ make install
 <p>The library support various backends for multi-thread parallelization, unified
 under a uniform interface. One is C++11 concurrency. For a full C++11
 implementation, this means no third-party dependency is required to write a
-parallel SMC sampler. Other third-party parallelization include, <a href="http://en.wikipedia.org/wiki/Intel_Cilk_Plus">Intel Cilk
+parallel SMC sampler. Other third-party parallelization include, <a href="https://www.cilkplus.org">Intel Cilk
 Plus</a>, <a href="http://threadingbuildingblocks.org/">Intel TBB</a> and <a href="http://www.openmp.org/">OpenMP</a>. <a href="http://en.wikipedia.org/wiki/Grand_Central_Dispatch">Apple
 Grand Central Dispatch</a> is also supported on Mac OS X and on Linux
 via <a href="http://libdispatch.macosforge.org/">libdispatch</a>. <a href="http://msdn.microsoft.com/en-us/library/dd492418.aspx">Microsoft Parallel Patterns Library</a>
@@ -98,10 +117,6 @@ used by defining suitable macros (see reference manual for details).</p>
 <p>Note that this library is only tested with <a href="http://www.boost.org/">Boost</a> 1.49 or later. Also
 not all C++11 implementations of <code>&lt;functional&gt;</code> and <code>&lt;random&gt;</code> work properly
 even they are present.</p>
-
-<p>The library can optionally use the <a href="http://www.thesalmons.org/john/random123/releases/latest/docs/index.html">Random123</a> library for
-parallelized random number generator, and the default behavior is assuming this
-is available.</p>
 
 <h1>
 <a name="compiler-support" class="anchor" href="#compiler-support"><span class="octicon octicon-link"></span></a>Compiler support</h1>
