@@ -1,11 +1,11 @@
-#ifndef VSMC_UTILITY_TBB_OP_HPP
-#define VSMC_UTILITY_TBB_OP_HPP
+#ifndef VSMC_TBB_UTILITY_OPERATOR_HPP
+#define VSMC_TBB_UTILITY_OPERATOR_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <cmath>
 #include <limits>
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OBJECT(name, uni) \
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_OBJECT(name, uni) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -28,9 +28,9 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T *const result_;                                                        \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OBJECT
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_OBJECT
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OBJECT(name, bin) \
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OBJECT(name, bin) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -55,9 +55,9 @@ class name                                                                   \
     const T *const data_;                                                    \
     T *const result_;                                                        \
     const T val_;                                                            \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OBJECT
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OBJECT
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(name, uni) \
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(name, uni) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -79,9 +79,9 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T *const result_;                                                        \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_FUNCTION(name, bin) \
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_FUNCTION(name, bin) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -105,9 +105,9 @@ class name                                                                   \
     const T *const data_;                                                    \
     T *const result_;                                                        \
     const T val_;                                                            \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_FUNCTION
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_FUNCTION
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OPERATOR(name, uni) \
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_OPERATOR(name, uni) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -129,9 +129,9 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T *const result_;                                                        \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OPERATOR
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_OPERATOR
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(name, bin) \
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(name, bin) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
@@ -155,19 +155,18 @@ class name                                                                   \
     const T *const data_;                                                    \
     T *const result_;                                                        \
     const T val_;                                                            \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OBJECT(name, bin, identity) \
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OBJECT(name, bin, id) \
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
     public :                                                                 \
                                                                              \
-    name (const T *data) : data_(data), result_(identity) {}                 \
+    name (const T *data) : data_(data), result_(id) {}                       \
                                                                              \
     template <typename Split>                                                \
-    name (const name<T> &other, Split) :                                     \
-        data_(other.data_), result_(identity) {}                             \
+    name (const name<T> &other, Split) : data_(other.data_), result_(id) {}  \
                                                                              \
     template <typename Range>                                                \
     void operator() (const Range &range)                                     \
@@ -193,19 +192,18 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T result_;                                                               \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OBJECT
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OBJECT
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_FUNCTION(name, bin, identity)\
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_FUNCTION(name, bin, id)\
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
     public :                                                                 \
                                                                              \
-    name (const T *data) : data_(data), result_(identity) {}                 \
+    name (const T *data) : data_(data), result_(id) {}                       \
                                                                              \
     template <typename Split>                                                \
-    name (const name<T> &other, Split) :                                     \
-        data_(other.data_), result_(identity) {}                             \
+    name (const name<T> &other, Split) :  data_(other.data_), result_(id) {} \
                                                                              \
     template <typename Range>                                                \
     void operator() (const Range &range)                                     \
@@ -226,19 +224,18 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T result_;                                                               \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_FUNCTION
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_FUNCTION
 
-#define VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OPERATOR(name, bin, identity)\
+#define VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OPERATOR(name, bin, id)\
 template <typename T>                                                        \
 class name                                                                   \
 {                                                                            \
     public :                                                                 \
                                                                              \
-    name (const T *data) : data_(data), result_(identity) {}                 \
+    name (const T *data) : data_(data), result_(id) {}                       \
                                                                              \
     template <typename Split>                                                \
-    name (const name<T> &other, Split) :                                     \
-        data_(other.data_), result_(identity) {}                             \
+    name (const name<T> &other, Split) : data_(other.data_), result_(id) {}  \
                                                                              \
     template <typename Range>                                                \
     void operator() (const Range &range)                                     \
@@ -259,95 +256,69 @@ class name                                                                   \
                                                                              \
     const T *const data_;                                                    \
     T result_;                                                               \
-}; // VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OPERATOR
+}; // VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OPERATOR
 
 namespace vsmc {
 
-namespace tbb_op {
+namespace internal {
 
-template <typename T> inline const T &max_fn (const T &a, const T &b)
+template <typename T> inline const T &tbb_max_fn (const T &a, const T &b)
 {return std::max VSMC_MNE (a, b);}
 
-template <typename T> inline const T &min_fn (const T &a, const T &b)
+template <typename T> inline const T &tbb_min_fn (const T &a, const T &b)
 {return std::min VSMC_MNE (a, b);}
 
-/// \brief Positive infinity of a given floating points type (or maximum for
-/// non-floating points type).
-/// \ingroup TBBOp
-///
-/// \details
-/// Specialize this trait to use with tbb_op::minimum
 template <typename T> struct positive_infinity_trait
 {static T value () {return std::numeric_limits<T>::max VSMC_MNE();}};
 
-/// \brief Negative infinity of a given floating points type (or minimum for
-/// non-floating points type)
-/// \ingroup TBBOp
-///
-/// \details
-/// Specialize this trait to use with tbb_op::maximum
 template <typename T> struct negative_infinity_trait
 {static T value () {return std::numeric_limits<T>::min VSMC_MNE();}};
 
-/// \brief Positive infinity of a given floating points type
-/// \ingroup TBBOp
 template <> struct positive_infinity_trait<float>
 {static float value () {return std::numeric_limits<float>::infinity();}};
 
-/// \brief Negative infinity of a given floating points type
-/// \ingroup TBBOp
 template <> struct negative_infinity_trait<float>
 {static float value () {return -std::numeric_limits<float>::infinity();}};
 
-/// \brief Positive infinity of a given floating points type
-/// \ingroup TBBOp
 template <> struct positive_infinity_trait<double>
 {static double value () {return std::numeric_limits<double>::infinity();}};
 
-/// \brief Negative infinity of a given floating points type
-/// \ingroup TBBOp
 template <> struct negative_infinity_trait<double>
 {static double value () {return -std::numeric_limits<double>::infinity();}};
 
-/// \brief Positive infinity of a given floating points type
-/// \ingroup TBBOp
 template <> struct positive_infinity_trait<long double>
 {
     static long double value ()
     {return std::numeric_limits<long double>::infinity();}
 }; // struct positive_infinity_trait
 
-/// \brief Negative infinity of a given floating points type
-/// \ingroup TBBOp
 template <> struct negative_infinity_trait<long double>
 {
     static long double value ()
     {return -std::numeric_limits<long double>::infinity();}
 }; // struct negative_infinity_trait
 
-/// \brief Zero of a given type
-/// \ingroup TBBOp
 template <typename T> struct zero_trait
 {static T value () {return static_cast<T>(0);}};
 
-/// \brief One of a given type
-/// \ingroup TBBOp
 template <typename T> struct one_trait
 {static T value () {return static_cast<T>(1);}};
+
+} // namespace vsmc::internal
 
 /// \brief Summation of squares
 /// \ingroup TBBOp
 template <typename T>
-class square_sum
+class TBBSquareSum
 {
     public :
 
-    square_sum (const T *data) :
-        data_(data), result_(zero_trait<T>::value()) {}
+    TBBSquareSum (const T *data) :
+        data_(data), result_(internal::zero_trait<T>::value()) {}
 
     template <typename Split>
-    square_sum (const square_sum<T> &other, Split) :
-        data_(other.data_), result_(zero_trait<T>::value()) {}
+    TBBSquareSum (const TBBSquareSum<T> &other, Split) :
+        data_(other.data_), result_(internal::zero_trait<T>::value()) {}
 
     template <typename Range>
     void operator() (const Range &range)
@@ -360,7 +331,8 @@ class square_sum
         result_ = result;
     }
 
-    void join (const square_sum<T> &other) {result_ = result_ + other.result_;}
+    void join (const TBBSquareSum<T> &other)
+    {result_ = result_ + other.result_;}
 
     T result () const {return result_;}
 
@@ -368,118 +340,116 @@ class square_sum
 
     const T *const data_;
     T result_;
-}; // class square_sum
+}; // class TBBSquareSum
 
 /// \brief Negation
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_OPERATOR(negate, -)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_OPERATOR(TBBNegate, -)
 
 /// \brief Plus
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(plus, +)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBPlus, +)
 
 /// \brief Minus
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(minus, -)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBMinus, -)
 
 /// \brief Multiple
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(multiplies, *)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBMultiplies, *)
 
 /// \brief Division
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(divides, /)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBDivides, /)
 
 /// \brief Modulo
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_BINARY_OPERATOR(modulus, %)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBModulus, %)
 
 /// \brief Absolute value
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(abs, std::abs)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBAbs, std::abs)
 
 /// \brief Exponential
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(exp, std::exp)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBExp, std::exp)
 
 /// \brief Logarithm
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(log, std::log)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBLog, std::log)
 
 /// \brief Logarithm of 10
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(log10, std::log10)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBLog10, std::log10)
 
 /// \brief Square root
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(sqrt, std::sqrt)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBSqrt, std::sqrt)
 
 /// \brief Sine
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(sin, std::sin)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBSin, std::sin)
 
 /// \brief Cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(cos, std::cos)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBCos, std::cos)
 
 /// \brief Tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(tan, std::tan)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBTan, std::tan)
 
 /// \brief arc sine
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(asin, std::asin)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBAsin, std::asin)
 
-/// \brief arc cosine
+/// \brief Arc cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(acos, std::acos)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBAcos, std::acos)
 
-/// \brief arc tangent
+/// \brief Arc tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(atan, std::atan)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBAtan, std::atan)
 
 /// \brief Hyperbolic sine
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(sinh, std::sinh)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBSinh, std::sinh)
 
 /// \brief Hyperbolic cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(cosh, std::cosh)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBCosh, std::cosh)
 
 /// \brief Hyperbolic tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(tanh, std::tanh)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBTanh, std::tanh)
 
 /// \brief Ceil
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(ceil, std::ceil)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBCeil, std::ceil)
 
 /// \brief Floor
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_FOR_UNARY_FUNCTION(floor, std::floor)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBFloor, std::floor)
 
 /// \brief Maximum
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_FUNCTION(maximum, max_fn,
-        negative_infinity_trait<T>::value())
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_FUNCTION(TBBMaximum, max_fn,
+        internal::negative_infinity_trait<T>::value())
 
 /// \brief Minimum
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_FUNCTION(minimum, min_fn,
-        positive_infinity_trait<T>::value())
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_FUNCTION(TBBMinimum, min_fn,
+        internal::positive_infinity_trait<T>::value())
 
 /// \brief Summation
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OPERATOR(summation, +,
-        zero_trait<T>::value())
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OPERATOR(TBBSummation, +,
+        internal::zero_trait<T>::value())
 
 /// \brief Product
 /// \ingroup TBBOp
-VSMC_DEFINE_UTILITY_TBB_OP_REDUCE_BINARY_OPERATOR(product, *,
-        one_trait<T>::value())
-
-} // namespace vsmc::tbb_op
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OPERATOR(TBBProduct, *,
+        internal::one_trait<T>::value())
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_TBB_OP_HPP
+#endif // VSMC_TBB_UTILITY_OPERATOR_HPP

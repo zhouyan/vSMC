@@ -114,6 +114,13 @@
 /// \ingroup RNG
 /// \brief Random number generating using the Xorshift algorithm
 
+/// \defgroup TBBUtility Intel Threading Building Blocks
+/// \brief Utilities using Intel TBB
+
+/// \defgroup TBBOp TBB operators
+/// \ingroup TBBUtility
+/// \brief Operators for Intel TBB
+
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
@@ -152,10 +159,6 @@
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
 /// \brief Utilities for measuring the time of procedures
-
-/// \defgroup TBBOp TBB/STDTBB operators
-/// \ingroup Utility
-/// \brief Operators for Intel TBB and STDTBB
 
 /// \defgroup Tuple Tuple manipulation
 /// \ingroup Utility
@@ -250,6 +253,10 @@
 #include <vsmc/smp/backend_tbb.hpp>
 #endif
 
+#include <vsmc/tbb/op.hpp>
+#if VSMC_USE_TBB
+#endif
+
 #include <vsmc/utility/backup.hpp>
 #if VSMC_USE_GCD
 #include <vsmc/utility/dispatch.hpp>
@@ -262,7 +269,6 @@
 #include <vsmc/utility/stdtbb.hpp>
 #endif
 #include <vsmc/utility/stop_watch.hpp>
-#include <vsmc/utility/tbb_op.hpp>
 #if VSMC_HAS_CXX11LIB_TUPLE
 #include <vsmc/utility/tuple_manip.hpp>
 #endif
