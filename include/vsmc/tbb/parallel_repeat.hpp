@@ -24,7 +24,7 @@ class ParallelRepeatBody
     {
         ResultType *const result = result_;
         for (std::size_t i = range.begin(); i != range.end(); ++i)
-            result[i] = static_cast<ResultType>(body_());
+            result[i] = static_cast<ResultType>(body_(i));
     }
 
     private :
@@ -43,7 +43,7 @@ class ParallelRepeatBody<ResultType, Body, true>
     void operator() (const tbb::blocked_range<std::size_t> &range) const
     {
         for (std::size_t i = range.begin(); i != range.end(); ++i)
-            body_();
+            body_(i);
     }
 
     private :
