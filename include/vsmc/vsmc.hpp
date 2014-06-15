@@ -253,7 +253,7 @@
 #include <vsmc/smp/backend_tbb.hpp>
 #endif
 
-#include <vsmc/tbb/op.hpp>
+#include <vsmc/tbb/operator.hpp>
 #if VSMC_USE_TBB
 #endif
 
