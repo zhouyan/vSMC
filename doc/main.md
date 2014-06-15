@@ -32,11 +32,11 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
 ~~~sh
 make docs
 ~~~
-The documentation can also be found [here][vSMCDoc]. A [tutorial][vSMCTutorial]
-is also available. However, it describes an earlier version of the library.
-There are a few incompatibilities with the current version. It is still highly
-relevant. Users shall use the Doxygen generated documentations when things do
-not work exactly the same way as in the tutorial.
+The documentation can also be found [here][vSMCDocumentation]. A
+[tutorial][vSMCTutorial] is also available. However, it describes an earlier
+version of the library.  There are a few incompatibilities with the current
+version. It is still highly relevant. Users shall use the Doxygen generated
+documentations when things do not work exactly the same way as in the tutorial.
 
 # Examples
 
@@ -132,7 +132,7 @@ in the `LICENSE` file distributed with the source.
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [libc++]: http://libcxx.llvm.org
 [libdispatch]: http://libdispatch.macosforge.org/
-[vSMCDoc]: http://zhouyan.github.io/vSMCDoc/doc/html/
+[vSMCDocumentation]: http://zhouyan.github.io/vSMCDocumentation
 [vSMCExample]: https://github.com/zhouyan/vSMCExample
 [vSMCTutorial]: http://arxiv.org/pdf/1306.5583v1.pdf
 
