@@ -24,11 +24,15 @@ class RngSet<RngType, Scalar>
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet (size_type N) : size_(N), rng_(Seed::instance().get()) {}
+    explicit RngSet (size_type N) : size_(N) {seed();}
 
     size_type size () const {return size_;}
 
-    void seed () {rng_.seed(Seed::instance().get());}
+    void seed ()
+    {
+        rng_.seed(static_cast<typename rng_type::result_type>(
+                    Seed::instance().get()));
+    }
 
     rng_type &operator[] (size_type) {return rng_;}
 
@@ -48,12 +52,7 @@ class RngSet<RngType, Vector>
     typedef RngType rng_type;
     typedef typename std::vector<rng_type>::size_type size_type;
 
-    explicit RngSet (size_type N) : rng_(N, rng_type())
-    {
-        for (size_type i = 0; i != N; ++i)
-            rng_[i].seed(static_cast<typename rng_type::result_type>(
-                        Seed::instance().get()));
-    }
+    explicit RngSet (size_type N) : rng_(N, rng_type()) {seed();}
 
     size_type size () const {return rng_.size();}
 

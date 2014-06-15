@@ -34,7 +34,8 @@ class Particle
         rng_set_(static_cast<typename
                 traits::SizeTypeTrait<rng_set_type>::type>(N)),
         resample_replication_(N), resample_copy_from_(N), resample_weight_(N),
-        resample_rng_(Seed::instance().get()),
+        resample_rng_(static_cast<typename resample_rng_type::result_type>(
+                    Seed::instance().get())),
         sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
         csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
     {
