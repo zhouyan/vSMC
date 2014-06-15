@@ -2014,7 +2014,8 @@ PREDEFINED             = VSMC_DOXYGEN \
                          __MAC_10_7=1070 \
                          __MAC_10_8=1080 \
                          __MAC_10_9=1090 \
-                         __BLOCKS__
+                         __BLOCKS__ \
+                         __TBB_TASK_GROUP_CONTEXT
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

@@ -114,12 +114,16 @@
 /// \ingroup RNG
 /// \brief Random number generating using the Xorshift algorithm
 
-/// \defgroup TBBUtility Intel Threading Building Blocks
-/// \brief Utilities using Intel TBB
+/// \defgroup TBBExt Intel Threading Building Blocks Extensions
+/// \brief Extensions to Intel TBB
 
-/// \defgroup TBBOp TBB operators
-/// \ingroup TBBUtility
-/// \brief Operators for Intel TBB
+/// \defgroup TBBOp Operators
+/// \ingroup TBBExt
+/// \brief Intel TBB operators
+
+/// \defgroup TBBAlg Algorithms
+/// \ingroup TBBExt
+/// \brief Intel TBB algorithms
 
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
@@ -255,6 +259,7 @@
 
 #include <vsmc/tbb/operator.hpp>
 #if VSMC_USE_TBB
+#include <vsmc/tbb/parallel_repeat.hpp>
 #endif
 
 #include <vsmc/utility/backup.hpp>
