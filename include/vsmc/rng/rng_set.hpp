@@ -28,6 +28,8 @@ class RngSet<RngType, Scalar>
 
     size_type size () const {return size_;}
 
+    void seed () {rng_.seed(Seed::instance().get());}
+
     rng_type &operator[] (size_type) {return rng_;}
 
     private :
@@ -54,6 +56,13 @@ class RngSet<RngType, Vector>
     }
 
     size_type size () const {return rng_.size();}
+
+    void seed ()
+    {
+        for (size_type i = 0; i != rng_.size(); ++i)
+            rng_[i].seed(static_cast<typename rng_type::result_type>(
+                        Seed::instance().get()));
+    }
 
     rng_type &operator[] (size_type id) {return rng_[id];}
 
