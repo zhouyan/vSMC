@@ -260,12 +260,14 @@ class name                                                                   \
 
 namespace vsmc {
 
+namespace tbbext {
+
 namespace internal {
 
-template <typename T> inline const T &tbb_max_fn (const T &a, const T &b)
+template <typename T> inline const T &max_fn (const T &a, const T &b)
 {return std::max VSMC_MNE (a, b);}
 
-template <typename T> inline const T &tbb_min_fn (const T &a, const T &b)
+template <typename T> inline const T &min_fn (const T &a, const T &b)
 {return std::min VSMC_MNE (a, b);}
 
 template <typename T> struct positive_infinity_trait
@@ -304,20 +306,20 @@ template <typename T> struct zero_trait
 template <typename T> struct one_trait
 {static T value () {return static_cast<T>(1);}};
 
-} // namespace vsmc::internal
+} // namespace vsmc::tbbext::internal
 
 /// \brief Summation of squares
 /// \ingroup TBBOp
 template <typename T>
-class TBBSquareSum
+class SquareSum
 {
     public :
 
-    TBBSquareSum (const T *data) :
+    SquareSum (const T *data) :
         data_(data), result_(internal::zero_trait<T>::value()) {}
 
     template <typename Split>
-    TBBSquareSum (const TBBSquareSum<T> &other, Split) :
+    SquareSum (const SquareSum<T> &other, Split) :
         data_(other.data_), result_(internal::zero_trait<T>::value()) {}
 
     template <typename Range>
@@ -331,7 +333,7 @@ class TBBSquareSum
         result_ = result;
     }
 
-    void join (const TBBSquareSum<T> &other)
+    void join (const SquareSum<T> &other)
     {result_ = result_ + other.result_;}
 
     T result () const {return result_;}
@@ -340,115 +342,117 @@ class TBBSquareSum
 
     const T *const data_;
     T result_;
-}; // class TBBSquareSum
+}; // class SquareSum
 
 /// \brief Negation
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_OPERATOR(TBBNegate, -)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_OPERATOR(Negate, -)
 
 /// \brief Plus
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBPlus, +)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(Plus, +)
 
 /// \brief Minus
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBMinus, -)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(Minus, -)
 
 /// \brief Multiple
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBMultiplies, *)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(Multiplies, *)
 
 /// \brief Division
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBDivides, /)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(Divides, /)
 
 /// \brief Modulo
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(TBBModulus, %)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_BINARY_OPERATOR(Modulus, %)
 
 /// \brief Absolute value
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBAbs, std::abs)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Abs, std::abs)
 
 /// \brief Exponential
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBExp, std::exp)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Exp, std::exp)
 
 /// \brief Logarithm
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBLog, std::log)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Log, std::log)
 
 /// \brief Logarithm of 10
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBLog10, std::log10)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Log10, std::log10)
 
 /// \brief Square root
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBSqrt, std::sqrt)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Sqrt, std::sqrt)
 
 /// \brief Sine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBSin, std::sin)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Sin, std::sin)
 
 /// \brief Cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBCos, std::cos)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Cos, std::cos)
 
 /// \brief Tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBTan, std::tan)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Tan, std::tan)
 
 /// \brief arc sine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBAsin, std::asin)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Asin, std::asin)
 
 /// \brief Arc cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBAcos, std::acos)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Acos, std::acos)
 
 /// \brief Arc tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBAtan, std::atan)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Atan, std::atan)
 
 /// \brief Hyperbolic sine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBSinh, std::sinh)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Sinh, std::sinh)
 
 /// \brief Hyperbolic cosine
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBCosh, std::cosh)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Cosh, std::cosh)
 
 /// \brief Hyperbolic tangent
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBTanh, std::tanh)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Tanh, std::tanh)
 
 /// \brief Ceil
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBCeil, std::ceil)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Ceil, std::ceil)
 
 /// \brief Floor
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(TBBFloor, std::floor)
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_FOR_UNARY_FUNCTION(Floor, std::floor)
 
 /// \brief Maximum
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_FUNCTION(TBBMaximum, max_fn,
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_FUNCTION(Maximum, max_fn,
         internal::negative_infinity_trait<T>::value())
 
 /// \brief Minimum
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_FUNCTION(TBBMinimum, min_fn,
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_FUNCTION(Minimum, min_fn,
         internal::positive_infinity_trait<T>::value())
 
 /// \brief Summation
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OPERATOR(TBBSummation, +,
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OPERATOR(Summation, +,
         internal::zero_trait<T>::value())
 
 /// \brief Product
 /// \ingroup TBBOp
-VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OPERATOR(TBBProduct, *,
+VSMC_DEFINE_TBB_UTILITY_OPERATOR_REDUCE_BINARY_OPERATOR(Product, *,
         internal::one_trait<T>::value())
+
+} // namespace vsmc::tbbext
 
 } // namespace vsmc
 
