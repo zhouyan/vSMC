@@ -1,3 +1,5 @@
 build*
 user_options.cmake
 vSMCExample
+
+/doc/main.md
