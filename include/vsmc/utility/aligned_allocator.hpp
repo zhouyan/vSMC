@@ -2,6 +2,7 @@
 #define VSMC_UTILITY_ALIGNED_ALLOCATOR
 
 #include <vsmc/internal/common.hpp>
+#include <cstdlib>
 #include <memory>
 
 namespace vsmc {
