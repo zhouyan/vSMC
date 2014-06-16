@@ -43,7 +43,7 @@ class Inversion
             accw_[i] = accw_[i - 1] + weight[i];
         accw_.back() = 1;
 
-        const double *uptr;
+        const double *uptr = VSMC_NULLPTR;
         if (usorted) {
             uptr = u01;
         } else {
