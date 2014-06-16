@@ -1,5 +1,5 @@
-#ifndef VSMC_TBB_PARALLEL_REPEAT_HPP
-#define VSMC_TBB_PARALLEL_REPEAT_HPP
+#ifndef VSMC_TBBEXT_PARALLEL_REPEAT_HPP
+#define VSMC_TBBEXT_PARALLEL_REPEAT_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
@@ -204,4 +204,4 @@ parallel_repeat (std::size_t n, const Body &body,
 
 } // namespace vsmc
 
-#endif // VSMC_TBB_PARALLEL_REPEAT_HPP
+#endif // VSMC_TBBEXT_PARALLEL_REPEAT_HPP
