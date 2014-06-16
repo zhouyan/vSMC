@@ -41,3 +41,15 @@ SET (OpenCL_LIB_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.0/lib/x64"
     CACHE PATH "OpenCL lib path")
 
 ##############################################################################
+
+# Enable MPI
+SET (VSMC_ENABLE_MPI ON CACHE BOOL "Use MPI")
+# The path to mpiexec
+SET (VSMC_MPIEXEC "/usr/bin/mpiexec" CACHE STRING "mpiexec")
+
+##############################################################################
+
+# Disable checking features
+SET (RD_RAND_FOUND FALSE CACHE BOOL "NO RdRand")
+SET (RD_SEED_FOUND FALSE CACHE BOOL "NO RdSeed")
+SET (AESNI_FOUND   FALSE CACHE BOOL "NO AES-NI")
