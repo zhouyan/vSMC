@@ -92,7 +92,7 @@ class ResultVector<ResultType, true>
 /// \brief Intel TBB parallel repeat algorithm
 /// \ingroup TBBAlg
 template <typename ResultType, typename Body>
-typename internal::ResultVector<ResultType>::type
+inline typename internal::ResultVector<ResultType>::type
 parallel_repeat (std::size_t n, const Body &body)
 {
     internal::ResultVector<ResultType> vec(n);
@@ -106,7 +106,7 @@ parallel_repeat (std::size_t n, const Body &body)
 /// \brief Intel TBB parallel repeat algorithm
 /// \ingroup TBBAlg
 template <typename ResultType, typename Body>
-typename internal::ResultVector<ResultType>::type
+inline typename internal::ResultVector<ResultType>::type
 parallel_repeat (std::size_t n, const Body &body,
         const tbb::auto_partitioner &partitioner)
 {
@@ -121,7 +121,7 @@ parallel_repeat (std::size_t n, const Body &body,
 /// \brief Intel TBB parallel repeat algorithm
 /// \ingroup TBBAlg
 template <typename ResultType, typename Body>
-typename internal::ResultVector<ResultType>::type
+inline typename internal::ResultVector<ResultType>::type
 parallel_repeat (std::size_t n, const Body &body,
         const tbb::simple_partitioner &partitioner)
 {
@@ -136,7 +136,7 @@ parallel_repeat (std::size_t n, const Body &body,
 /// \brief Intel TBB parallel repeat algorithm
 /// \ingroup TBBAlg
 template <typename ResultType, typename Body>
-typename internal::ResultVector<ResultType>::type
+inline typename internal::ResultVector<ResultType>::type
 parallel_repeat (std::size_t n, const Body &body,
         tbb::affinity_partitioner &partitioner)
 {
@@ -153,7 +153,7 @@ parallel_repeat (std::size_t n, const Body &body,
 /// \brief Intel TBB parallel repeat algorithm
 /// \ingroup TBBAlg
 template <typename ResultType, typename Body>
-typename internal::ResultVector<ResultType>::type
+inline typename internal::ResultVector<ResultType>::type
 parallel_repeat (std::size_t n, const Body &body,
         const tbb::auto_partitioner &partitioner,
         tbb::task_group_context &context)
@@ -169,7 +169,7 @@ parallel_repeat (std::size_t n, const Body &body,
 /// \brief Intel TBB parallel repeat algorithm
 /// \ingroup TBBAlg
 template <typename ResultType, typename Body>
-typename internal::ResultVector<ResultType>::type
+inline typename internal::ResultVector<ResultType>::type
 parallel_repeat (std::size_t n, const Body &body,
         const tbb::simple_partitioner &partitioner,
         tbb::task_group_context &context)
@@ -185,7 +185,7 @@ parallel_repeat (std::size_t n, const Body &body,
 /// \brief Intel TBB parallel repeat algorithm
 /// \ingroup TBBAlg
 template <typename ResultType, typename Body>
-typename internal::ResultVector<ResultType>::type
+inline typename internal::ResultVector<ResultType>::type
 parallel_repeat (std::size_t n, const Body &body,
         tbb::affinity_partitioner &partitioner,
         tbb::task_group_context &context)
