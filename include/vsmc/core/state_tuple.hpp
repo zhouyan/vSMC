@@ -289,6 +289,9 @@ class StateTuple<RowMajor, T, Types...> :
     &state (size_type id) const
     {return state(id, Position<Pos>());}
 
+    typename state_tuple_base_type::state_tuple_type *data ()
+    {return &state_[0];}
+
     const typename state_tuple_base_type::state_tuple_type *data () const
     {return &state_[0];}
 
@@ -334,8 +337,16 @@ class StateTuple<ColMajor, T, Types...> :
     {return state(id, Position<Pos>());}
 
     template <std::size_t Pos>
+    typename state_tuple_base_type::template state_type<Pos>::type
+    *data (Position<Pos>) {return &std::get<Pos>(state_)[0];}
+
+    template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type
     *data (Position<Pos>) const {return &std::get<Pos>(state_)[0];}
+
+    template <std::size_t Pos>
+    typename state_tuple_base_type::template state_type<Pos>::type
+    *data () {return &std::get<Pos>(state_)[0];}
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type
