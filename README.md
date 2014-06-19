@@ -42,6 +42,7 @@ documentations when things do not work exactly the same way as in the tutorial.
 cd /path_to_vSMC_source
 git clone https://github.com/zhouyan/vSMCExample.git
 mkdir build
+cd build
 cmake ..
 make example
 ~~~
