@@ -26,12 +26,20 @@ class ISIntegrate
     {
         if (N == 0 || dim == 0)
             return;
+
+        if (dim == 1) {
+            double sum = 0;
+            for (size_type i = 0; i != N; ++i)
+                sum += hX[i] * W[i];
+            *Eh = sum;
+            return;
+        }
+
         for (size_type d = 0; d != dim; ++d)
             Eh[d] = 0;
-        for (size_type i = 0; i != N; ++i) {
-            double w = W[i];
-            for (size_type d = 0; d != dim; ++d)
-                Eh[d] += w * hX[i * dim + d];
+        for (size_type i = 0; i != N; ++i, ++W) {
+            for (size_type d = 0; d != dim; ++d, ++hX)
+                Eh[d] += (*W) * (*hX);
         }
     }
 }; // class ISIntegrate
