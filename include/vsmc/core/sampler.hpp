@@ -19,6 +19,11 @@
     VSMC_RUNTIME_ASSERT(bool(func),                                          \
             ("**Sampler::"#caller"** INVALID "#name" OBJECT"))               \
 
+#define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER \
+    VSMC_RUNTIME_WARNING((!bool(init_)),                                     \
+            ("**Sampler::initialize** A VALID INITIALIZATION OBJECT IS SET " \
+             "BUT INITILIALIZED BY ITERATING"))
+
 namespace vsmc {
 
 /// \brief SMC Sampler
@@ -47,8 +52,7 @@ class Sampler
     /// resampling is consdiered, then use the other two versions of the
     /// constructor to make the intention clear to the library.
     explicit Sampler (size_type N) :
-        init_with_move_(false),
-        resample_threshold_(resample_threshold_never()),
+        init_by_iter_(false), resample_threshold_(resample_threshold_never()),
         particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
     {resample_scheme(Stratified);}
 
@@ -58,8 +62,7 @@ class Sampler
     /// If a built-in scheme is chosen, then it is assumed that the user always
     /// want to perform resampling.
     Sampler (size_type N, ResampleScheme scheme) :
-        init_with_move_(false),
-        resample_threshold_(resample_threshold_always()),
+        init_by_iter_(false), resample_threshold_(resample_threshold_always()),
         particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
     {resample_scheme(scheme);}
 
@@ -71,8 +74,7 @@ class Sampler
     /// user want to perform resampling at least sometime. So the threshold is
     /// set to 0.5 if not provided as the third parameter.
     Sampler (size_type N, ResampleScheme scheme, double resample_threshold) :
-        init_with_move_(false),
-        resample_threshold_(resample_threshold),
+        init_by_iter_(false), resample_threshold_(resample_threshold),
         particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
     {resample_scheme(scheme);}
 
@@ -84,9 +86,9 @@ class Sampler
     /// threshold is set to 0.5 if not provided as the third parameter.
     Sampler (size_type N, const resample_type &res_op,
             double resample_threshold = 0.5) :
-        init_with_move_(false),
-        resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
-        path_(typename Path<T>::eval_type()) {resample_scheme(res_op);}
+        init_by_iter_(false), resample_threshold_(resample_threshold),
+        particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
+    {resample_scheme(res_op);}
 
     /// \brief Number of particles
     size_type size () const {return particle_.size();}
@@ -213,14 +215,6 @@ class Sampler
     /// \brief Read only access to the Particle<T> object
     const Particle<T> &particle () const {return particle_;}
 
-    /// \brief Set if initialization should use the move and mcmc queue
-    ///
-    /// \details
-    /// If set to `false`, then the initialization step use the initialization
-    /// object if it is not empty. Otherwise, it perform the same steps as the
-    /// iteration step.
-    Sampler<T> &init (bool init_with_move) {init_with_move_ = init_with_move;}
-
     /// \brief Set the initialization object of type init_type
     Sampler<T> &init (const init_type &new_init)
     {
@@ -231,14 +225,27 @@ class Sampler
         return *this;
     }
 
+    /// \brief Set if initialization should use the move and mcmc queue
+    ///
+    /// \details
+    /// If set to `false`, then the initialization step use the initialization
+    /// object if it is not empty. Otherwise, it perform the same steps as the
+    /// iteration step.
+    Sampler<T> &init_by_iter (bool initialize_by_iterate)
+    {
+        init_by_iter_ = initialize_by_iterate;
+
+        return *this;
+    }
+
     /// \brief Set the initialization object with a type move_type object
     ///
     /// \details
     /// When called, the iteration parameter passed to this object will be 0
     /// and the `void *` parameter will be ignored.
-    Sampler<T> &init (const move_type &new_move)
+    Sampler<T> &init_by_move (const move_type &new_init)
     {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_move, init, INITIALIZE);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init_by_move, MOVE);
 
         class init_op
         {
@@ -254,7 +261,7 @@ class Sampler
             move_type move_;
         }; // class init_op
 
-        init_ = init_op(new_move);
+        init_ = init_op(new_init);
 
         return *this;
     }
@@ -344,7 +351,8 @@ class Sampler
         VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
                 init_, initialize, INITIALIZE);
 
-        if (init_with_move_) {
+        if (init_by_iter_) {
+            VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
             do_init();
             do_iter();
             do_monitor();
@@ -608,7 +616,7 @@ class Sampler
 
     private :
 
-    bool init_with_move_;
+    bool init_by_iter_;
     init_type init_;
     std::vector<move_type> move_queue_;
     std::vector<mcmc_type> mcmc_queue_;
