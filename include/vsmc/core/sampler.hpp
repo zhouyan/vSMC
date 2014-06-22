@@ -219,6 +219,34 @@ class Sampler
         return *this;
     }
 
+    /// \brief Set the initialization object with a type move_type object
+    ///
+    /// \details
+    /// When called, the iteration parameter passed to this object will be 0
+    /// and the `void *` parameter will be ignored.
+    Sampler<T> &init (const move_type &new_move)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_move, init, INITIALIZE);
+
+        class init_op
+        {
+            public :
+
+            init_op (const move_type &new_move) : move_(new_move) {}
+
+            std::size_t operator() (Particle<T> &particle, void *)
+            {move_(0, particle);}
+
+            private :
+
+            move_type move_;
+        }; // class init_op
+
+        init_ = init_op(new_move);
+
+        return *this;
+    }
+
     /// \brief Clear the move queue
     Sampler<T> &move_queue_clear () {move_queue_.clear(); return *this;}
 
