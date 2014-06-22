@@ -14,14 +14,6 @@
     VSMC_RUNTIME_ASSERT((std::abs(diff) >= static_cast<std::ptrdiff_t>(size)),\
             ("THE SOURCE OF **"#f"** OVERLAPPING WITH THE DESTINATION"))
 
-#if VSMC_USE_MKL
-#define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_MKL_SIZE(N) \
-    VSMC_RUNTIME_ASSERT(                                                     \
-            (static_cast<MKL_INT>(N) <= std::numeric_limits<MKL_INT>::max    \
-             VSMC_MNE ()),                                                   \
-            ("USE **WeightSetMKL** WITH SIZE EXCESSSES THE MAX OF MKL_INT"))
-#endif
-
 namespace vsmc {
 
 /// \brief Weight set class
