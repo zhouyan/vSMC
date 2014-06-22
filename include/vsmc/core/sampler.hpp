@@ -47,6 +47,7 @@ class Sampler
     /// resampling is consdiered, then use the other two versions of the
     /// constructor to make the intention clear to the library.
     explicit Sampler (size_type N) :
+        init_with_move_(false),
         resample_threshold_(resample_threshold_never()),
         particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
     {resample_scheme(Stratified);}
@@ -57,6 +58,7 @@ class Sampler
     /// If a built-in scheme is chosen, then it is assumed that the user always
     /// want to perform resampling.
     Sampler (size_type N, ResampleScheme scheme) :
+        init_with_move_(false),
         resample_threshold_(resample_threshold_always()),
         particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
     {resample_scheme(scheme);}
@@ -69,6 +71,7 @@ class Sampler
     /// user want to perform resampling at least sometime. So the threshold is
     /// set to 0.5 if not provided as the third parameter.
     Sampler (size_type N, ResampleScheme scheme, double resample_threshold) :
+        init_with_move_(false),
         resample_threshold_(resample_threshold),
         particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
     {resample_scheme(scheme);}
@@ -81,6 +84,7 @@ class Sampler
     /// threshold is set to 0.5 if not provided as the third parameter.
     Sampler (size_type N, const resample_type &res_op,
             double resample_threshold = 0.5) :
+        init_with_move_(false),
         resample_threshold_(resample_threshold), particle_(N), iter_num_(0),
         path_(typename Path<T>::eval_type()) {resample_scheme(res_op);}
 
@@ -209,6 +213,14 @@ class Sampler
     /// \brief Read only access to the Particle<T> object
     const Particle<T> &particle () const {return particle_;}
 
+    /// \brief Set if initialization should use the move and mcmc queue
+    ///
+    /// \details
+    /// If set to `false`, then the initialization step use the initialization
+    /// object if it is not empty. Otherwise, it perform the same steps as the
+    /// iteration step.
+    Sampler<T> &init (bool init_with_move) {init_with_move_ = init_with_move;}
+
     /// \brief Set the initialization object of type init_type
     Sampler<T> &init (const init_type &new_init)
     {
@@ -332,9 +344,17 @@ class Sampler
         VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
                 init_, initialize, INITIALIZE);
 
-        do_init(param);
-        do_resample();
-        do_monitor();
+        if (init_with_move_) {
+            do_init();
+            do_iter();
+            do_monitor();
+        } else {
+            do_init();
+            accept_history_.push_back(std::vector<std::size_t>(1,
+                        init_(particle_, param)));
+            do_resample();
+            do_monitor();
+        }
 
         return *this;
     }
@@ -361,12 +381,7 @@ class Sampler
 
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
-            std::size_t ia = 0;
-            ia = do_move(ia);
-            do_resample();
-            ia = do_mcmc(ia);
-            for (; ia != accept_history_.size(); ++ia)
-                accept_history_[ia].push_back(0);
+            do_iter();
             do_monitor();
         }
 
@@ -593,6 +608,7 @@ class Sampler
 
     private :
 
+    bool init_with_move_;
     init_type init_;
     std::vector<move_type> move_queue_;
     std::vector<mcmc_type> mcmc_queue_;
@@ -609,7 +625,7 @@ class Sampler
     Path<T> path_;
     monitor_map_type monitor_;
 
-    void do_init (void *param)
+    void do_init ()
     {
         ess_history_.clear();
         resampled_history_.clear();
@@ -621,8 +637,16 @@ class Sampler
 
         iter_num_ = 0;
         particle_.set_equal_weight();
-        accept_history_.push_back(std::vector<std::size_t>(1,
-                    init_(particle_, param)));
+    }
+
+    void do_iter ()
+    {
+        std::size_t ia = 0;
+        ia = do_move(ia);
+        do_resample();
+        ia = do_mcmc(ia);
+        for (; ia != accept_history_.size(); ++ia)
+            accept_history_[ia].push_back(0);
     }
 
     std::size_t do_move (std::size_t ia)
