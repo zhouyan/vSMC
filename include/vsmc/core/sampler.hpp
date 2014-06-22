@@ -254,7 +254,7 @@ class Sampler
             init_op (const move_type &new_move) : move_(new_move) {}
 
             std::size_t operator() (Particle<T> &particle, void *)
-            {move_(0, particle);}
+            {return move_(0, particle);}
 
             private :
 
