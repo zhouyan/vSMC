@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8.3)
 
 # Disable in source build
 IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-    MESSAGE(FATAL_ERROR "In-source builds not allowed. Please make a new directory and run CMake from there.")
+    MESSAGE(FATAL_ERROR "In-source builds not allowed")
 ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 
 PROJECT (vSMC C CXX)
