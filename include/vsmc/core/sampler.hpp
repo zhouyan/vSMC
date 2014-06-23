@@ -115,9 +115,9 @@ class Sampler
     /// \brief Current iteration number (initialization count as zero)
     ///
     /// \details
-    /// The `iter_size() - iter_num()` is always 1. `iter_size` emphasize that it
-    /// returns the total number of iterations. `iter_num` is more like an
-    /// index of the sampler.
+    /// The value of `iter_size() - iter_num()` is always 1. `iter_size`
+    /// emphasize that it returns the total number of iterations. `iter_num` is
+    /// more of an index of the sampler, starting from zero.
     std::size_t iter_num () const {return iter_num_;}
 
     /// \brief Force resample
@@ -348,21 +348,18 @@ class Sampler
     /// evaluation objects are untouched.
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
-                init_, initialize, INITIALIZE);
-
+        do_init();
+        do_acch();
         if (init_by_iter_) {
             VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
-            do_init();
             do_iter();
-            do_monitor();
         } else {
-            do_init();
-            accept_history_.push_back(std::vector<std::size_t>(1,
-                        init_(particle_, param)));
+            VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
+                    init_, initialize, INITIALIZE);
+            accept_history_[0].push_back(init_(particle_, param));
             do_resample();
-            do_monitor();
         }
+        do_monitor();
 
         return *this;
     }
@@ -378,15 +375,7 @@ class Sampler
         if (num > 1)
             reserve(iter_size() + num);
 
-        if (accept_history_.size() < move_queue_.size() + mcmc_queue_.size()) {
-            std::size_t diff = move_queue_.size() + mcmc_queue_.size() -
-                accept_history_.size();
-            for (std::size_t i = 0; i != diff; ++i) {
-                accept_history_.push_back(
-                        std::vector<std::size_t>(iter_size(), 0));
-            }
-        }
-
+        do_acch();
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
             do_iter();
@@ -632,6 +621,22 @@ class Sampler
 
     Path<T> path_;
     monitor_map_type monitor_;
+
+    void do_acch ()
+    {
+        if (accept_history_.empty())
+            accept_history_.push_back(std::vector<std::size_t>());
+
+        std::size_t acc_size = move_queue_.size() + mcmc_queue_.size();
+        if (accept_history_.size() < acc_size) {
+            std::vector<std::size_t> acc(accept_history_[0].size());
+            for (std::size_t i = 0; i != acc.size(); ++i)
+                acc[i] = 0;
+            std::size_t diff = acc_size - accept_history_.size();
+            for (std::size_t d = 0; d != diff; ++d)
+                accept_history_.push_back(acc);
+        }
+    }
 
     void do_init ()
     {
