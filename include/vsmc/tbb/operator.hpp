@@ -314,11 +314,11 @@ class TBBSquareSum
     public :
 
     TBBSquareSum (const T *data) :
-        data_(data), result_(internal::zero_trait<T>::value()) {}
+        data_(data), result_(internal::tbb_zero_trait<T>::value()) {}
 
     template <typename Split>
-    TBBSquareSum (const SquareSum<T> &other, Split) :
-        data_(other.data_), result_(internal::zero_trait<T>::value()) {}
+    TBBSquareSum (const TBBSquareSum<T> &other, Split) :
+        data_(other.data_), result_(internal::tbb_zero_trait<T>::value()) {}
 
     template <typename Range>
     void operator() (const Range &range)
@@ -331,7 +331,7 @@ class TBBSquareSum
         result_ = result;
     }
 
-    void join (const SquareSum<T> &other)
+    void join (const TBBSquareSum<T> &other)
     {result_ = result_ + other.result_;}
 
     T result () const {return result_;}
