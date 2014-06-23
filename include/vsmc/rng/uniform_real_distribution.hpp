@@ -4,6 +4,11 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01.h>
 
+#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUITON_PARAM_CHECK(a, b) \
+    VSMC_RUNTIME_ASSERT((a <= b),                                            \
+            ("**UniformRealDistribution** CONSTRUCTED WITH INVALID "         \
+             "MINIMUM AND MAXIMUM PARAMTER VALUES"))
+
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min) \
     VSMC_RUNTIME_ASSERT((eng_min == 0),                                      \
             ("**UniformRealDistribution::operator()** "                      \
@@ -70,8 +75,7 @@ class UniformRealDistribution
 
         typedef FPType result_type;
 
-        typedef UniformRealDistribution<FPType, Left, Right>
-            distribution_type;
+        typedef UniformRealDistribution<FPType, Left, Right> distribution_type;
 
         explicit param_type (result_type a = 0, result_type b = 1) :
             a_(a), b_(b) {}
@@ -136,10 +140,12 @@ class UniformRealDistribution
     }; // class param_type
 
     explicit UniformRealDistribution (result_type a = 0, result_type b = 1) :
-        a_(a), b_(b) {}
+        a_(a), b_(b)
+    {VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUITON_PARAM_CHECK(a_, b_);}
 
     UniformRealDistribution (const param_type &param) :
-        a_(param.a()), b_(param.b()) {}
+        a_(param.a()), b_(param.b())
+    {VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUITON_PARAM_CHECK(a_, b_);}
 
     param_type param () const {return param_type(a_, b_);}
 
@@ -242,8 +248,8 @@ class UniformRealDistribution
         if (!is.good())
             return is;
 
-        FPType a = 1;
-        FPType b = 0;
+        result_type a = 1;
+        result_type b = 0;
         is >> std::ws >> a;
         is >> std::ws >> b;
         if (is.good()) {
