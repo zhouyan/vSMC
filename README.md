@@ -115,21 +115,21 @@ The vSMC library is distributed with a 2-clause BSD license which can be found
 in the `LICENSE` file distributed with the source.
 
 [Apple GCD]: http://en.wikipedia.org/wiki/Grand_Central_Dispatch
-[Boost]: http://www.boost.org/
-[CMake]: http://www.cmake.org/
+[Boost]: http://www.boost.org
+[CMake]: http://www.cmake.org
 [Clang]: http://clang.llvm.org
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
 [GCC]: http://gcc.gnu.org
 [Intel Cilk Plus]: https://www.cilkplus.org
-[Intel TBB]: http://threadingbuildingblocks.org/
+[Intel TBB]: http://threadingbuildingblocks.org
 [MS PPL]: http://msdn.microsoft.com/en-us/library/dd492418.aspx
 [MSVC]: http://msdn.microsoft.com/en-us/vstudio//default.aspx
 [Open64]: http://www.open64.net
-[OpenCL]: http://www.khronos.org/opencl/
-[OpenMP]: http://www.openmp.org/
+[OpenCL]: http://www.khronos.org/opencl
+[OpenMP]: http://www.openmp.org
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [libc++]: http://libcxx.llvm.org
-[libdispatch]: http://libdispatch.macosforge.org/
-[vSMCDoc]: http://zhouyan.github.io/vSMCDoc/doc/html
+[libdispatch]: http://libdispatch.macosforge.org
+[vSMCDoc]: http://zhouyan.github.io/vSMCDoc/master
 [vSMCExample]: https://github.com/zhouyan/vSMCExample
 [vSMCTutorial]: http://arxiv.org/pdf/1306.5583v1.pdf
