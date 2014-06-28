@@ -13,7 +13,7 @@ interface, and thus increases code reuse.
 This is a header only template C++ library. To install the library just move
 the contents of the `include` directory into a proper place, e.g.,
 `/usr/local/include` in Unix-alike systems. Alternatively, one can use
-[CMake][CMake] (2.8 or later required),
+[CMake][CMake] (2.8.3 or later required),
 ~~~sh
 cd /path_to_vSMC_source
 mkdir build
