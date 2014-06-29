@@ -5,39 +5,18 @@
 #include <vsmc/cxx11/type_traits.hpp>
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
+#include <iterator>
 
 namespace vsmc {
 
 namespace internal {
 
-template <typename ResultType, typename Body,
-         bool = cxx11::is_void<ResultType>::value>
+template <typename Body>
 class TBBParallelRepeatBody
 {
     public :
 
-    TBBParallelRepeatBody (ResultType *result, const Body &body) :
-        result_(result), body_(body) {}
-
-    void operator() (const tbb::blocked_range<std::size_t> &range) const
-    {
-        ResultType *const result = result_;
-        for (std::size_t i = range.begin(); i != range.end(); ++i)
-            result[i] = static_cast<ResultType>(body_(i));
-    }
-
-    private :
-
-    ResultType *const result_;
-    Body body_;
-}; // class TBBParallelRepeatBody
-
-template <typename ResultType, typename Body>
-class TBBParallelRepeatBody<ResultType, Body, true>
-{
-    public :
-
-    TBBParallelRepeatBody (ResultType *, const Body &body) : body_(body) {}
+    TBBParallelRepeatBody (const Body &body) : body_(body) {}
 
     void operator() (const tbb::blocked_range<std::size_t> &range) const
     {
@@ -47,154 +26,190 @@ class TBBParallelRepeatBody<ResultType, Body, true>
 
     private :
 
-    Body body_;
+    const Body body_;
 }; // class TBBParallelRepeatBody
 
-template <typename ResultType, bool = cxx11::is_void<ResultType>::value>
-class TBBResultVector
+template <typename Body, typename RandomIter>
+class TBBParallelRepeatBodyRI
 {
     public :
 
-    typedef std::vector<ResultType> type;
+    TBBParallelRepeatBodyRI (const Body &body, RandomIter iter) :
+        body_(body), iter_(iter) {}
 
-    TBBResultVector (std::size_t n) : vector_(n) {}
-
-    ResultType *pointer () {return &vector_[0];}
-
-    type result () {return vector_;}
-
-    private :
-
-    type vector_;
-}; // class TBBResultVector
-
-template <typename ResultType>
-class TBBResultVector<ResultType, true>
-{
-    public :
-
-    typedef std::size_t type;
-
-    TBBResultVector (std::size_t n) : size_(n) {}
-
-    ResultType *pointer () {return VSMC_NULLPTR;}
-
-    type result () {return size_;}
+    void operator() (const tbb::blocked_range<std::size_t> &range) const
+    {
+        typedef typename std::iterator_traits<RandomIter>::value_type
+            value_type;
+        RandomIter iter = iter_ + range.begin();
+        for (std::size_t i = range.begin(); i != range.end(); ++i, ++iter)
+            *iter = static_cast<value_type>(body_(i));
+    }
 
     private :
 
-    std::size_t size_;
-}; // class TBBResultVector
+    const Body body_;
+    const RandomIter iter_;
+}; // class TBBParallelRepeatBodyRI
 
 } // namespace vsmc::internal
 
-/// \brief Intel TBB parallel repeat algorithm
+/// \brief parallel_repeat with default partitioner
 /// \ingroup TBBAlg
-template <typename ResultType, typename Body>
-inline typename internal::TBBResultVector<ResultType>::type
-tbb_parallel_repeat (std::size_t n, const Body &body)
+template <typename Body>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body)
 {
-    internal::TBBResultVector<ResultType> vec(n);
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
-            internal::TBBParallelRepeatBody<ResultType, Body>(
-                vec.pointer(), body));
-
-    return vec.result();
+            internal::TBBParallelRepeatBody<Body>(body));
 }
 
-/// \brief Intel TBB parallel repeat algorithm
+/// \brief parallel_repeat with auto_partitioner
 /// \ingroup TBBAlg
-template <typename ResultType, typename Body>
-inline typename internal::TBBResultVector<ResultType>::type
-tbb_parallel_repeat (std::size_t n, const Body &body,
+template <typename Body>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
         const tbb::auto_partitioner &partitioner)
 {
-    internal::TBBResultVector<ResultType> vec(n);
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
-            internal::TBBParallelRepeatBody<ResultType, Body>(
-                vec.pointer(), body), partitioner);
-
-    return vec.result();
+            internal::TBBParallelRepeatBody<Body>(body),
+            partitioner);
 }
 
-/// \brief Intel TBB parallel repeat algorithm
+/// \brief parallel_repeat with simple_partitioner
 /// \ingroup TBBAlg
-template <typename ResultType, typename Body>
-inline typename internal::TBBResultVector<ResultType>::type
-tbb_parallel_repeat (std::size_t n, const Body &body,
+template <typename Body>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
         const tbb::simple_partitioner &partitioner)
 {
-    internal::TBBResultVector<ResultType> vec(n);
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
-            internal::TBBParallelRepeatBody<ResultType, Body>(
-                vec.pointer(), body), partitioner);
-
-    return vec.result();
+            internal::TBBParallelRepeatBody<Body>(body),
+            partitioner);
 }
 
-/// \brief Intel TBB parallel repeat algorithm
+/// \brief parallel_repeat with affinity_partitioner
 /// \ingroup TBBAlg
-template <typename ResultType, typename Body>
-inline typename internal::TBBResultVector<ResultType>::type
-tbb_parallel_repeat (std::size_t n, const Body &body,
+template <typename Body>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
         tbb::affinity_partitioner &partitioner)
 {
-    internal::TBBResultVector<ResultType> vec(n);
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
-            internal::TBBParallelRepeatBody<ResultType, Body>(
-                vec.pointer(), body), partitioner);
+            internal::TBBParallelRepeatBody<Body>(body),
+            partitioner);
+}
 
-    return vec.result();
+/// \brief parallel_repeat with default partitioner and output
+/// \ingroup TBBAlg
+template <typename Body, typename RandomIter>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
+        RandomIter iter)
+{
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
+            internal::TBBParallelRepeatBodyRI<Body, RandomIter>(body, iter));
+}
+
+/// \brief parallel_repeat with auto_partitioner and output
+/// \ingroup TBBAlg
+template <typename Body, typename RandomIter>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
+        RandomIter iter, const tbb::auto_partitioner &partitioner)
+{
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
+            internal::TBBParallelRepeatBodyRI<Body, RandomIter>(body, iter),
+            partitioner);
+}
+
+/// \brief parallel_repeat with simple_partitioner and output
+/// \ingroup TBBAlg
+template <typename Body, typename RandomIter>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
+        RandomIter iter, const tbb::simple_partitioner &partitioner)
+{
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
+            internal::TBBParallelRepeatBodyRI<Body, RandomIter>(body, iter),
+            partitioner);
+}
+/// \brief parallel_repeat with affinity_partitioner and output
+/// \ingroup TBBAlg
+template <typename Body, typename RandomIter>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
+        RandomIter iter, tbb::affinity_partitioner &partitioner)
+{
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
+            internal::TBBParallelRepeatBodyRI<Body, RandomIter>(body, iter),
+            partitioner);
 }
 
 #if __TBB_TASK_GROUP_CONTEXT
 
-/// \brief Intel TBB parallel repeat algorithm
+/// \brief parallel_repeat with auto_partitioner
 /// \ingroup TBBAlg
-template <typename ResultType, typename Body>
-inline typename internal::TBBResultVector<ResultType>::type
-tbb_parallel_repeat (std::size_t n, const Body &body,
+template <typename Body>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
         const tbb::auto_partitioner &partitioner,
         tbb::task_group_context &context)
 {
-    internal::TBBResultVector<ResultType> vec(n);
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
-            internal::TBBParallelRepeatBody<ResultType, Body>(
-                vec.pointer(), body), partitioner, context);
-
-    return vec.result();
+            internal::TBBParallelRepeatBody<Body>(body),
+            partitioner, context);
 }
 
-/// \brief Intel TBB parallel repeat algorithm
+/// \brief parallel_repeat with simple_partitioner
 /// \ingroup TBBAlg
-template <typename ResultType, typename Body>
-inline typename internal::TBBResultVector<ResultType>::type
-tbb_parallel_repeat (std::size_t n, const Body &body,
+template <typename Body>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
         const tbb::simple_partitioner &partitioner,
         tbb::task_group_context &context)
 {
-    internal::TBBResultVector<ResultType> vec(n);
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
-            internal::TBBParallelRepeatBody<ResultType, Body>(
-                vec.pointer(), body), partitioner, context);
-
-    return vec.result();
+            internal::TBBParallelRepeatBody<Body>(body),
+            partitioner, context);
 }
 
-/// \brief Intel TBB parallel repeat algorithm
+/// \brief parallel_repeat with affinity_partitioner
 /// \ingroup TBBAlg
-template <typename ResultType, typename Body>
-inline typename internal::TBBResultVector<ResultType>::type
-tbb_parallel_repeat (std::size_t n, const Body &body,
+template <typename Body>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
         tbb::affinity_partitioner &partitioner,
         tbb::task_group_context &context)
 {
-    internal::TBBResultVector<ResultType> vec(n);
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
-            internal::TBBParallelRepeatBody<ResultType, Body>(
-                vec.pointer(), body), partitioner, context);
+            internal::TBBParallelRepeatBody<Body>(body),
+            partitioner, context);
+}
 
-    return vec.result();
+/// \brief parallel_repeat with auto_partitioner and output
+/// \ingroup TBBAlg
+template <typename Body, typename RandomIter>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
+        RandomIter iter, const tbb::auto_partitioner &partitioner,
+        tbb::task_group_context &context)
+{
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
+            internal::TBBParallelRepeatBodyRI<Body, RandomIter>(body, iter),
+            partitioner, context);
+}
+
+/// \brief parallel_repeat with simple_partitioner and output
+/// \ingroup TBBAlg
+template <typename Body, typename RandomIter>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
+        RandomIter iter, const tbb::simple_partitioner &partitioner,
+        tbb::task_group_context &context)
+{
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
+            internal::TBBParallelRepeatBodyRI<Body, RandomIter>(body, iter),
+            partitioner, context);
+}
+
+/// \brief parallel_repeat with affinity_partitioner and output
+/// \ingroup TBBAlg
+template <typename Body, typename RandomIter>
+inline void tbb_parallel_repeat (std::size_t n, const Body &body,
+        RandomIter iter, tbb::affinity_partitioner &partitioner,
+        tbb::task_group_context &context)
+{
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n),
+            internal::TBBParallelRepeatBodyRI<Body, RandomIter>(body, iter),
+            partitioner, context);
 }
 
 #endif // __TBB_TASK_GROUP_CONTEXT
