@@ -2,7 +2,9 @@
 #define VSMC_SMP_BACKEND_TBB_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-#include <tbb/tbb.h>
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_for.h>
+#include <tbb/parallel_reduce.h>
 
 #define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(args) \
     this->initialize_param(particle, param);                                 \

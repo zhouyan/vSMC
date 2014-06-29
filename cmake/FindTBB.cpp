@@ -1,7 +1,9 @@
 #include <iostream>
 #include <cassert>
 
-#include <tbb/tbb.h>
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_for.h>
+#include <tbb/parallel_reduce.h>
 
 class say
 {

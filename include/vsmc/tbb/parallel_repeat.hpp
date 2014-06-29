@@ -3,7 +3,8 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
-#include <tbb/tbb.h>
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_for.h>
 
 namespace vsmc {
 
