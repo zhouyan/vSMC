@@ -2,7 +2,7 @@
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/internal/defines.hpp>
 
-int fn (int a, double, double, double)
+inline int fn (int a, double, double, double)
 {
     return 2 * a;
 }
