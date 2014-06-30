@@ -30,7 +30,7 @@
 
 /// \brief constexpr
 /// \ingroup Definitions
-#if  VSMC_HAS_CXX11_CONSTEXPR
+#if VSMC_HAS_CXX11_CONSTEXPR
 #define VSMC_CONSTEXPR constexpr
 #else
 #define VSMC_CONSTEXPR

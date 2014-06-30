@@ -13,6 +13,20 @@
 
 #include <vsmc/internal/compiler.hpp>
 
+#ifdef VSMC_DOXYGEN
+#undef VSMC_USE_AES_NI
+#undef VSMC_USE_MPI
+#undef VSMC_USE_OPENCL
+#undef VSMC_USE_MKL
+#undef VSMC_USE_CILK
+#undef VSMC_USE_GCD
+#undef VSMC_USE_GCD_LION
+#undef VSMC_USE_OMP
+#undef VSMC_USE_PPL
+#undef VSMC_USE_TBB
+#undef VSMC_USE_HDF5
+#endif
+
 /// \brief Disable vSMC static assertions (fatal error)
 /// \ingroup Config
 #ifndef VSMC_NO_STATIC_ASSERT
