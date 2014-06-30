@@ -26,11 +26,11 @@
             ("**Sampler::"#func"** INVALID MONITOR NAME"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(func, caller, name) \
-    VSMC_RUNTIME_ASSERT(bool(func),                                          \
+    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                             \
             ("**Sampler::"#caller"** INVALID "#name" OBJECT"))               \
 
 #define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER \
-    VSMC_RUNTIME_WARNING((!bool(init_)),                                     \
+    VSMC_RUNTIME_WARNING((!static_cast<bool>(init_)),                        \
             ("**Sampler::initialize** A VALID INITIALIZATION OBJECT IS SET " \
              "BUT INITILIALIZED BY ITERATING"))
 

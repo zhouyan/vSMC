@@ -26,7 +26,7 @@
 #define VSMC_STATIC_ASSERT(cond, msg) \
 {                                                                            \
     struct VSMC_STATIC_ASSERT_FAILURE {enum msg {err};};                     \
-    vsmc::internal::StaticAssert<bool(cond)>::test(                          \
+    vsmc::internal::StaticAssert<static_cast<bool>(cond)>::test(             \
             VSMC_STATIC_ASSERT_FAILURE::err);                                \
 }
 #endif // VSMC_HAS_CXX11_STATIC_ASSERT

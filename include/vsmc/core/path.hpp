@@ -22,7 +22,7 @@
             ("**Path::"#func"** INVALID ITERATION NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(func, caller, name) \
-    VSMC_RUNTIME_ASSERT(bool(func),                                          \
+    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                             \
             ("**Path::"#caller"** INVALID "#name" OBJECT"))                  \
 
 namespace vsmc {
@@ -124,7 +124,7 @@ class Path
     }
 
     /// \brief Whether the evaluation object is valid
-    bool empty () const {return !bool(eval_);}
+    bool empty () const {return !static_cast<bool>(eval_);}
 
     /// \brief Get the iteration index of the sampler of a given monitor
     /// iteration

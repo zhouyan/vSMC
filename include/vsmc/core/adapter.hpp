@@ -298,13 +298,16 @@ class InitializeAdapterBase<T, NullType, BaseType> : public BaseType
         pre_processor_(pre), post_processor_(post) {}
 
     void initialize_param (Particle<T> &particle, void *param)
-    {if (bool(initialize_param_)) initialize_param_(particle, param);}
+    {
+        if (static_cast<bool>(initialize_param_))
+            initialize_param_(particle, param);
+    }
 
     void pre_processor (Particle<T> &particle)
-    {if (bool(pre_processor_)) pre_processor_(particle);}
+    {if (static_cast<bool>(pre_processor_)) pre_processor_(particle);}
 
     void post_processor (Particle<T> &particle)
-    {if (bool(post_processor_)) post_processor_(particle);}
+    {if (static_cast<bool>(post_processor_)) post_processor_(particle);}
 
     private :
 
@@ -331,10 +334,10 @@ class MoveAdapterBase<T, NullType, BaseType> : public BaseType
         pre_processor_(pre), post_processor_(post) {}
 
     void pre_processor (std::size_t iter, Particle<T> &particle)
-    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
+    {if (static_cast<bool>(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, Particle<T> &particle)
-    {if (bool(post_processor_)) post_processor_(iter, particle);}
+    {if (static_cast<bool>(post_processor_)) post_processor_(iter, particle);}
 
     private :
 
@@ -360,10 +363,10 @@ class MonitorEvalAdapterBase<T, NullType, BaseType> : public BaseType
         pre_processor_(pre), post_processor_(post) {}
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
+    {if (static_cast<bool>(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
-    {if (bool(post_processor_)) post_processor_(iter, particle);}
+    {if (static_cast<bool>(post_processor_)) post_processor_(iter, particle);}
 
     private :
 
@@ -395,10 +398,10 @@ class PathEvalAdapterBase<T, NullType, BaseType> : public BaseType
     {return path_grid_(iter, particle);}
 
     void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {if (bool(pre_processor_)) pre_processor_(iter, particle);}
+    {if (static_cast<bool>(pre_processor_)) pre_processor_(iter, particle);}
 
     void post_processor (std::size_t iter, const Particle<T> &particle)
-    {if (bool(post_processor_)) post_processor_(iter, particle);}
+    {if (static_cast<bool>(post_processor_)) post_processor_(iter, particle);}
 
     private :
 
