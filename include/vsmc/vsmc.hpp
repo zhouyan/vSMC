@@ -14,14 +14,6 @@
 /// \defgroup Config Configuration
 /// \brief Configuration macros and default values if undefined
 
-/// \defgroup Compiler Compiler configration
-/// \brief Compiler related configuration macros
-/// \ingroup Config
-
-/// \defgroup ThirdParty Third-party libraries
-/// \brief Third-party related configuration macros
-/// \ingroup Config
-
 /// \defgroup Definitions Enumerators and macros
 /// \brief Enumerator and macro definitions
 

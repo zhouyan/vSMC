@@ -17,7 +17,8 @@
 /// \brief Default RNG set type
 /// \ingroup Config
 #ifndef VSMC_DEFAULT_RNG_SET_TYPE
-#define VSMC_DEFAULT_RNG_SET_TYPE RngSet<Threefry4x64, Vector>
+#define VSMC_DEFAULT_RNG_SET_TYPE \
+    vsmc::RngSet<vsmc::Threefry4x64, vsmc::Vector>
 #endif
 
 namespace vsmc {

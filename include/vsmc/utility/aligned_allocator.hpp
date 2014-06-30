@@ -21,8 +21,6 @@ namespace internal {
 
 #if defined(__APPLE__) || defined(__MACOSX)
 #if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_5)
-/// \brief Use POSIX posix_memalign
-/// \ingroup Config
 #ifndef VSMC_USE_POSIX_MEMALIGN
 #define VSMC_USE_POSIX_MEMALIGN 1
 #endif

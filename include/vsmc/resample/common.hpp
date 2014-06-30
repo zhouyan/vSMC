@@ -17,11 +17,12 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/random.hpp>
+#include <vsmc/rng/threefry.hpp>
 
 /// \brief Default RNG type for resampling
 /// \ingroup Config
 #ifndef VSMC_DEFAULT_RESAMPLE_RNG_TYPE
-#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE cxx11::mt19937
+#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE vsmc::Threefry4x64
 #endif
 
 namespace vsmc {

@@ -2022,7 +2022,9 @@ PREDEFINED             = VSMC_DOXYGEN \
                          VSMC_USE_OMP \
                          VSMC_USE_PPL \
                          VSMC_USE_TBB \
+                         VSMC_USE_MKL \
                          VSMC_USE_HDF5 \
+                         __APPLE__ \
                          __MAC_OS_X_VERSION_MIN_REQUIRED=1090 \
                          __MAC_10_0=1000 \
                          __MAC_10_1=1010 \
