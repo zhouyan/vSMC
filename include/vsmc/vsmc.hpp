@@ -169,6 +169,10 @@
 /// \ingroup Utility
 /// \brief Using Array of unsinged integers as counters
 
+/// \defgroup Progress Progress
+/// \ingroup Utility
+/// \brief Display progress while algorithms proceed
+
 /// \defgroup STDTBB STDTBB
 /// \ingroup Utility
 /// \brief Parallel constructs using C++11 concurrency
