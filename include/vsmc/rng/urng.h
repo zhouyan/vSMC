@@ -8,6 +8,9 @@
 // See LICENSE for details.
 //============================================================================
 
+#ifndef VSMC_RNG_URNG_H
+#define VSMC_RNG_URNG_H
+
 /// \page rng Generating random numbers
 ///
 /// ## The problem
@@ -147,9 +150,6 @@
 /// \subpage normal01
 ///
 /// \subpage gammak1
-
-#ifndef VSMC_RNG_URNG_H
-#define VSMC_RNG_URNG_H
 
 #include <vsmc/rng/internal/defines.h>
 #include <Random123/threefry.h>

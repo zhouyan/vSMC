@@ -8,6 +8,9 @@
 // See LICENSE for details.
 //============================================================================
 
+#ifndef VSMC_RNG_GAMMAK1_H
+#define VSMC_RNG_GAMMAK1_H
+
 /// \page gammak1 Gamma distribution
 ///
 /// - Header: `<vsmc/rng/gammak1.h>`
@@ -54,9 +57,6 @@
 /// GAMMAK1_4x32_INIT(&rgamma, &rng, shape);
 /// double r = GAMMAK1_4x32_RAND(&rgamma, &rng);
 /// ~~~
-
-#ifndef VSMC_RNG_GAMMAK1_H
-#define VSMC_RNG_GAMMAK1_H
 
 #include <vsmc/rng/urng.h>
 #include <vsmc/rng/normal01.h>

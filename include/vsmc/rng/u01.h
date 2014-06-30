@@ -8,6 +8,9 @@
 // See LICENSE for details.
 //============================================================================
 
+#ifndef VSMC_RNG_U01_H
+#define VSMC_RNG_U01_H
+
 /// \page u01 Uniform real distribution
 ///
 /// - Header: `<vsmc/rng/urng.h>`
@@ -42,9 +45,6 @@
 ///
 /// double u = U01_OPEN_CLOSED_32(cburng4x32_rand(&rng));
 /// ~~~
-
-#ifndef VSMC_RNG_U01_H
-#define VSMC_RNG_U01_H
 
 #include <vsmc/rng/internal/defines.h>
 

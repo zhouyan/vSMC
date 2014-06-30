@@ -8,6 +8,9 @@
 // See LICENSE for details.
 //============================================================================
 
+#ifndef VSMC_HPP
+#define VSMC_HPP
+
 /// \defgroup Config Configuration
 /// \brief Configuration macros and default values if undefined
 
@@ -177,9 +180,6 @@
 /// \defgroup Tuple Tuple manipulation
 /// \ingroup Utility
 /// \brief Classes for manipulating and using C++11 tuple like type lists
-
-#ifndef VSMC_HPP
-#define VSMC_HPP
 
 #include <vsmc/internal/config.hpp>
 

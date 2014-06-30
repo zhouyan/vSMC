@@ -8,6 +8,9 @@
 // See LICENSE for details.
 //============================================================================
 
+#ifndef VSMC_RNG_NORMAL01_H
+#define VSMC_RNG_NORMAL01_H
+
 /// \page normal01 Normal distribution
 ///
 /// - Header: `<vsmc/rng/normal01.h>`
@@ -49,9 +52,6 @@
 /// NORMAL01_4x32_INIT(&rnorm, &rng, shape);
 /// double r = NORMAL01_4x32_RAND(&rnorm, &rng);
 /// ~~~
-
-#ifndef VSMC_RNG_NORMAL01_H
-#define VSMC_RNG_NORMAL01_H
 
 #include <vsmc/rng/urng.h>
 #include <vsmc/rng/u01.h>
