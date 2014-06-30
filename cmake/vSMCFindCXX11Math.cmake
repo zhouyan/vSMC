@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/vSMCFindCXX11Math.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 FILE (READ ${CMAKE_CURRENT_LIST_DIR}/vSMCFindCXX11Math.cpp
     VSMC_CXX11_MATH_TEST_SOURCE)
 

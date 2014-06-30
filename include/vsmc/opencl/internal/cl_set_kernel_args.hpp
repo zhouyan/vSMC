@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/opencl/internal/cl_set_kernel_args.hpp
+// config/vsmc_opencl_internal_cl_set_kernel_args.hpp.in
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

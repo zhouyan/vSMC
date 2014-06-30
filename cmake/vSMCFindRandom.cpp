@@ -1,3 +1,13 @@
+//============================================================================
+// cmake/vSMCFindRandom.cpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #include <cassert>
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/rng/rng_set.hpp>

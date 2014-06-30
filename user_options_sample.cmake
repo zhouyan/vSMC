@@ -1,3 +1,13 @@
+# ============================================================================
+#  user_options_sample.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Unix-like systems usually don't need these settings
 # However, on Windows, if the PATH are not properly set, you can configure the
 # following options to help CMake find vSMC's dependencies

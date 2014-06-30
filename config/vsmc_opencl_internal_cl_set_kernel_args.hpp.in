@@ -1,1 +1,11 @@
+//============================================================================
+// config/vsmc_opencl_internal_cl_set_kernel_args.hpp.in
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 @VSMC_OPENCL_CL_SET_KERNEL_ARGS@

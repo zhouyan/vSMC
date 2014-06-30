@@ -1,3 +1,13 @@
+//============================================================================
+// cmake/vSMCFindConstexprEngine.cpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #include <iostream>
 #include <vsmc/cxx11/random.hpp>
 #include <stdint.h>

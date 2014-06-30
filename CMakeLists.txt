@@ -1,3 +1,13 @@
+# ============================================================================
+#  CMakeLists.txt
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.3)
 
 # Disable in source build

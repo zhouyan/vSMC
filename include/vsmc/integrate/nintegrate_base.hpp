@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/integrate/nintegrate_base.hpp
+// include/vsmc/integrate/nintegrate_base.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

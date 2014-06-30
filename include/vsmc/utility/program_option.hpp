@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/utility/program_option.hpp
+// include/vsmc/utility/program_option.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

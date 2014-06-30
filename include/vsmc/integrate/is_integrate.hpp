@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/integrate/is_integrate.hpp
+// include/vsmc/integrate/is_integrate.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

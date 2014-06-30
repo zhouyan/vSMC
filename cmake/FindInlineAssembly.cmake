@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindInlineAssembly.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find GNU style inline assembly support
 #
 # The following variable is set

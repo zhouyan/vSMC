@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/internal/compiler/open64.hpp
+// include/vsmc/internal/compiler/open64.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

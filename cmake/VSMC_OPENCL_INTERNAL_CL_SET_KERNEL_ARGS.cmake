@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/VSMC_OPENCL_INTERNAL_CL_SET_KERNEL_ARGS.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 IF (NOT DEFINED VSMC_OPENCL_CL_SET_KERNEL_ARGS_MAX)
     SET (VSMC_OPENCL_CL_SET_KERNEL_ARGS_MAX 16)
 ENDIF (NOT DEFINED VSMC_OPENCL_CL_SET_KERNEL_ARGS_MAX)

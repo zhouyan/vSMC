@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/rng/uniform_real_distribution.hpp
+// include/vsmc/rng/uniform_real_distribution.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

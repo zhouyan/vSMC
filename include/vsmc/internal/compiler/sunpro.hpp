@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/internal/compiler/sunpro.hpp
+// include/vsmc/internal/compiler/sunpro.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

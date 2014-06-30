@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/opencl/internal/cl_wrapper.hpp
+// include/vsmc/opencl/internal/cl_wrapper.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

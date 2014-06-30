@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/internal/compiler/intel.hpp
+// include/vsmc/internal/compiler/intel.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindRandom123.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find Random123
 #
 # This module can be used to find Random123 headers

@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindMKL.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find Intel Math Kernel Library
 #
 # This module can be used to find MKL headers and libraries

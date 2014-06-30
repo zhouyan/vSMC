@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/rng/stable_distribution.hpp
+// include/vsmc/rng/stable_distribution.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

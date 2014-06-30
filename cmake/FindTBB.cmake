@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindTBB.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find Intel Threading Building Blocks library
 #
 # This module can be used to find TBB headers and libraries

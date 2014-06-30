@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/resample/multinomial.hpp
+// include/vsmc/resample/multinomial.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

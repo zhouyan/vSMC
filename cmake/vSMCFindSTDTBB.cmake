@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/vSMCFindSTDTBB.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 FILE (READ ${CMAKE_CURRENT_LIST_DIR}/vSMCFindSTDTBB.cpp
     VSMC_STDTBB_TEST_SOURCE)
 

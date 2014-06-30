@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindRdSeed.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find RdSeed support
 #
 # The following variable is set

@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindGSL.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find GSL
 #
 # This module can be used to find GSL headers and libraries

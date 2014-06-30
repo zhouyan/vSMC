@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindCXX11LibTuple.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find C++11 <tuple> support
 #
 # The following variable is set

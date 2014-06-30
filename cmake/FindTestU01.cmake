@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindTestU01.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find TestU01
 #
 # This module can be used to find TestU01 headers and libraries

@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/resample/residual_systematic.hpp
+// include/vsmc/resample/residual_systematic.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

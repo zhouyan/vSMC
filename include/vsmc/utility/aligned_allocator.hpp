@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/utility/aligned_allocator.hpp
+// include/vsmc/utility/aligned_allocator.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

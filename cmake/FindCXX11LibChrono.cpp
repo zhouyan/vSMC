@@ -1,3 +1,13 @@
+//============================================================================
+// cmake/FindCXX11LibChrono.cpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #include <chrono>
 #include <iostream>
 

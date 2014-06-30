@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindIntrinsicFunction.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find intrinsic function support
 #
 # The following variable is set

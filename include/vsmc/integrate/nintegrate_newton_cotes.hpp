@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/integrate/nintegrate_newton_cotes.hpp
+// include/vsmc/integrate/nintegrate_newton_cotes.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

@@ -1,3 +1,13 @@
+//============================================================================
+// cmake/FindBlocks.cpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #include <cassert>
 
 #ifndef __BLOCKS__

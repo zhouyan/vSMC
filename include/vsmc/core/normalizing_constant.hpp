@@ -1,5 +1,5 @@
 //============================================================================
-// vsmc/core/normalizing_constant.hpp
+// include/vsmc/core/normalizing_constant.hpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo

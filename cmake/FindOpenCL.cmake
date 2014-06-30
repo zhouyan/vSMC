@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindOpenCL.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find OpenCL
 #
 # This module can be used to find OpenCL headers and libraries

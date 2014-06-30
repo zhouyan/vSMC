@@ -1,3 +1,13 @@
+# ============================================================================
+#  cmake/FindBlocks.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
 # Find Blocks support
 #
 # The following variable is set
