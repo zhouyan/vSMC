@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/utility/program_option.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 /// \page po Program option
 ///
 /// ## Introduction

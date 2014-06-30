@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/rng/gsl_rng.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_RNG_GSL_RNG_HPP
 #define VSMC_RNG_GSL_RNG_HPP
 

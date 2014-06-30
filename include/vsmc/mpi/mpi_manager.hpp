@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/mpi/mpi_manager.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_MPI_MPI_MANAGER_HPP
 #define VSMC_MPI_MPI_MANAGER_HPP
 

@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/rng/gammak1.h
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 /// \page gammak1 Gamma distribution
 ///
 /// - Header: `<vsmc/rng/gammak1.h>`

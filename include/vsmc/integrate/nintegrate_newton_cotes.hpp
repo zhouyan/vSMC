@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/integrate/nintegrate_newton_cotes.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP
 #define VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP
 

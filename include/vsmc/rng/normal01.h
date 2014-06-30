@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/rng/normal01.h
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 /// \page normal01 Normal distribution
 ///
 /// - Header: `<vsmc/rng/normal01.h>`

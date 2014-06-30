@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/cxx11/type_traits.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_CXX11_TYPE_TRAITS_HPP
 #define VSMC_CXX11_TYPE_TRAITS_HPP
 

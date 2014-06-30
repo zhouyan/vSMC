@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/tbb/parallel_repeat.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_TBB_PARALLEL_REPEAT_HPP
 #define VSMC_TBB_PARALLEL_REPEAT_HPP
 

@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/math/integer_function.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_MATH_INTEGER_FUNCTION_HPP
 #define VSMC_MATH_INTEGER_FUNCTION_HPP
 

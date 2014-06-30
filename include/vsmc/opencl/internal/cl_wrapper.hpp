@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/opencl/internal/cl_wrapper.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_OPENCL_INTERNAL_CL_WRAPPER_HPP
 #define VSMC_OPENCL_INTERNAL_CL_WRAPPER_HPP
 

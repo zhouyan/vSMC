@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/utility/stdtbb.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_UTILITY_STDTBB_HPP
 #define VSMC_UTILITY_STDTBB_HPP
 

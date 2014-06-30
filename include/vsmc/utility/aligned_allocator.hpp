@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/utility/aligned_allocator.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_UTILITY_ALIGNED_ALLOCATOR
 #define VSMC_UTILITY_ALIGNED_ALLOCATOR
 

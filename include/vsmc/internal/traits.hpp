@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/internal/traits.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_INTERNAL_TRAITS_HPP
 #define VSMC_INTERNAL_TRAITS_HPP
 

@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/rng/u01.h
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 /// \page u01 Uniform real distribution
 ///
 /// - Header: `<vsmc/rng/urng.h>`

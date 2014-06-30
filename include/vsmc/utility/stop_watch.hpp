@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/utility/stop_watch.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_UTILITY_STOP_WATCH_HPP
 #define VSMC_UTILITY_STOP_WATCH_HPP
 

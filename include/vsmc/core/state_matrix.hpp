@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/core/state_matrix.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_CORE_STATE_MATRIX_HPP
 #define VSMC_CORE_STATE_MATRIX_HPP
 

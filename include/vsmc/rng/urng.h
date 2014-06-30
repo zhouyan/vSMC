@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/rng/urng.h
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 /// \page rng Generating random numbers
 ///
 /// ## The problem

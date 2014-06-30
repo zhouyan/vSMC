@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/rng/uniform_real_distribution.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
 #define VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
 

@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/internal/compiler/gcc.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_INTERNAL_COMPILER_GCC_HPP
 #define VSMC_INTERNAL_COMPILER_GCC_HPP
 

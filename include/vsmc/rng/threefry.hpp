@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/rng/threefry.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_RNG_THREEFRY_HPP
 #define VSMC_RNG_THREEFRY_HPP
 

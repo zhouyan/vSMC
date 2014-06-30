@@ -1,3 +1,13 @@
+//============================================================================
+// vsmc/resample/stratified.hpp
+//----------------------------------------------------------------------------
+//
+//                         vSMC: Scalable Monte Carlo
+//
+// This file is distribured under the 2-clauses BSD License.
+// See LICENSE for details.
+//============================================================================
+
 #ifndef VSMC_RESAMPLE_STRATIFIED_HPP
 #define VSMC_RESAMPLE_STRATIFIED_HPP
 
