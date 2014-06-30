@@ -32,13 +32,15 @@ namespace vsmc {
 /// ~~~
 /// \tparam ThisThread This shall be a class that provides a `sleep` static
 /// member function that allows the calling thread to sleep for a specified
-/// number of milliseconds. A simple implementation using C++11 `sleep_for` is
-/// as the following,
+/// time in seconds. A simple implementation using C++11 `sleep_for` is as the
+/// following,
 /// ~~~{.cpp}
 /// struct ThisThread
 /// {
-///     static void sleep (unsigned ms)
+///     static void sleep (double s)
 ///     {
+///         // Make the interval acurate to milliseconds
+///         double ms = std::max(1.0, std::floor(s * 1000));
 ///         std::this_thread::sleep_for(std::chrono::milliseconds(
 ///                     static_cast<std::chrono::milliseconds::rep>(ms)));
 ///     }
@@ -65,8 +67,8 @@ class Progress
     ///
     /// \param total Total amount of work represented by an integer, for
     /// example file size or SMC algorithm total number of iterations
-    /// \param interval The sleep interval in milliseconds
-    void start (unsigned total, unsigned interval = 100)
+    /// \param interval The sleep interval in seconds
+    void start (unsigned total, double interval = 100)
     {
         iter_ = 0;
         total_ = total;
@@ -105,7 +107,7 @@ class Progress
 
     unsigned iter_;
     unsigned total_;
-    unsigned interval_;
+    double interval_;
     bool print_first_;
     bool in_progress_;
 
