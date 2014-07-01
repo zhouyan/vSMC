@@ -1,5 +1,4 @@
-build*
-user_options.cmake
-vSMCExample
-
+/build
+/config/user_options.cmake
 /doc/main.md
+/vSMCExample
