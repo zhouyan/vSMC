@@ -26,11 +26,6 @@
 
 namespace vsmc {
 
-/// \brief Test if an object is aligned for 16 bytes
-template <typename T>
-inline bool is_m128_aligned (T *ptr)
-{return (reinterpret_cast<uintptr_t>(ptr) & static_cast<uintptr_t>(15)) == 0;}
-
 /// \brief Aligned pack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N, typename Traits>
@@ -61,8 +56,7 @@ template <std::size_t Offset, typename T, std::size_t N, typename Traits>
 inline void m128i_pack (const Array<T, N, Traits> &c, __m128i &m)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
-    is_m128_aligned(c.data()) ?
-        m128i_pack_a<Offset>(c, m) : m128i_pack_u<Offset>(c, m);
+    m128i_pack_u<Offset>(c, m);
 }
 
 /// \brief Unpack an __m128i object into an Array
@@ -71,8 +65,7 @@ template <std::size_t Offset, typename T, std::size_t N, typename Traits>
 inline void m128i_unpack (const __m128i &m, Array<T, N, Traits> &c)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
-    is_m128_aligned(c.data()) ?
-        m128i_unpack_a<Offset>(m, c) : m128i_unpack_u<Offset>(m, c);
+    m128i_unpack_u<Offset>(m, c);
 }
 
 /// \brief Compare two __m128i objects

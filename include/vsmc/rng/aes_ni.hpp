@@ -586,31 +586,16 @@ class AESNIEngine
 
     template <typename CBType>
     void pack (const CBType &cb, buffer_type &buf) const
-    {
-        is_m128_aligned(cb.data()) ?
-            pack_a<0>(cb, buf, cxx11::true_type()):
-            pack_u<0>(cb, buf, cxx11::true_type());
-    }
+    {pack_ctr<0>(cb, buf, cxx11::true_type());}
 
     template <std::size_t, typename CBType>
-    void pack_a (const CBType &, buffer_type &, cxx11::false_type) const {}
+    void pack_ctr (const CBType &, buffer_type &, cxx11::false_type) const {}
 
     template <std::size_t B, typename CBType>
-    void pack_a (const CBType &cb, buffer_type &buf, cxx11::true_type) const
+    void pack_ctr (const CBType &cb, buffer_type &buf, cxx11::true_type) const
     {
-        m128i_pack_a<0>(cb[Position<B>()], buf[Position<B>()]);
-        pack_a<B + 1>(cb, buf,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    template <std::size_t, typename CBType>
-    void pack_u (const CBType &, buffer_type &, cxx11::false_type) const {}
-
-    template <std::size_t B, typename CBType>
-    void pack_u (const CBType &cb, buffer_type &buf, cxx11::true_type) const
-    {
-        m128i_pack_u<0>(cb[Position<B>()], buf[Position<B>()]);
-        pack_u<B + 1>(cb, buf,
+        m128i_pack<0>(cb[Position<B>()], buf[Position<B>()]);
+        pack_ctr<B + 1>(cb, buf,
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class AESNIEngine
