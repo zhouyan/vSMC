@@ -16,7 +16,7 @@
 #include <thread>
 #include <vector>
 
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_USE_CXX11LIB_FUTURE
 #include <future>
 #endif
 
@@ -76,7 +76,7 @@ class BlockedRange
 /// \ingroup STDTBB
 class ThreadGuard
 {
-#if VSMC_HAS_CXX11_DELETED_FUNCTIONS
+#if VSMC_USE_CXX11LIB_FUTURE
     public :
 
     ThreadGuard (const ThreadGuard &) = delete;
@@ -200,7 +200,7 @@ template <typename Range, typename WorkType>
 inline void parallel_for (const Range &range, WorkType &&work)
 {
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_USE_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
     wg.reserve(range_vec.size());
     for (std::size_t i = 0; i != range_vec.size(); ++i) {
@@ -237,7 +237,7 @@ inline void parallel_reduce (const Range &range, WorkType &work)
 {
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
     std::vector<WorkType> work_vec(range_vec.size(), work);
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_USE_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
     wg.reserve(range_vec.size());
     for (std::size_t i = 0; i != range_vec.size(); ++i) {
@@ -274,7 +274,7 @@ inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
 {
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_USE_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
     wg.reserve(range_vec.size());
     for (std::size_t i = 0; i != range_vec.size(); ++i) {
@@ -318,7 +318,7 @@ inline T parallel_accumulate (const Range &range, WorkType &&work,
 {
     std::vector<Range> range_vec(ThreadInfo::instance().partition(range));
     std::vector<T> result(range_vec.size());
-#if VSMC_HAS_CXX11LIB_FUTURE
+#if VSMC_USE_CXX11LIB_FUTURE
     std::vector<std::future<void> > wg;
     wg.reserve(range_vec.size());
     for (std::size_t i = 0; i != range_vec.size(); ++i) {
