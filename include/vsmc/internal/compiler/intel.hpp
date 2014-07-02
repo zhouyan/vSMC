@@ -13,7 +13,6 @@
 
 #define VSMC_INTEL_NONEXIST 1000000UL
 #define VSMC_GNUC_NONEXIST  1000000UL
-
 #if defined(__GNUC__) && defined(__GNUC_MINOR__)
 #define VSMC_GNUC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)
 #else
