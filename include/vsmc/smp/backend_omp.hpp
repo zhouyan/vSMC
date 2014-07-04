@@ -28,7 +28,9 @@ class StateOMP : public BaseState
     typedef typename traits::OMPSizeTypeTrait<
         typename traits::SizeTypeTrait<BaseState>::type>::type size_type;
 
-    explicit StateOMP (size_type N) : BaseState(N) {}
+    explicit StateOMP (size_type N) :
+        BaseState(static_cast<
+                typename traits::SizeTypeTrait<BaseState>::type>(N)) {}
 
     size_type size () const {return static_cast<size_type>(BaseState::size());}
 
