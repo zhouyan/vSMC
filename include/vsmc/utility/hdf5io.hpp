@@ -53,8 +53,8 @@ struct HDF5DataPtr
     {
         data_.resize(n);
         T *dst = &data_[0];
-        for (std::size_t i = 0; i != n; ++i, ++first, ++dst)
-            *dst = *first;
+        for (std::size_t i = 0; i != n; ++i, ++first)
+            dst[i] = *first;
         ptr_ = &data_[0];
 
         return first;
@@ -338,8 +338,8 @@ inline void hdf5_tuple_vector_copy (std::size_t n, TupleVectorType &vec,
     typedef typename std::tuple_element<0, tuple_type>::type value_type;
     value_type *dst = &std::get<0>(vec)[0];
     InputIter ffirst = first;
-    for (std::size_t i = 0; i != n; ++i, ++ffirst, ++dst)
-        *dst = std::get<0>(*ffirst);
+    for (std::size_t i = 0; i != n; ++i, ++ffirst)
+        dst[i] = std::get<0>(*ffirst);
 }
 
 template <typename TupleVectorType, typename InputIter, std::size_t Pos>
@@ -350,8 +350,8 @@ inline void hdf5_tuple_vector_copy (std::size_t n, TupleVectorType &vec,
     typedef typename std::tuple_element<Pos, tuple_type>::type value_type;
     value_type *dst = &std::get<Pos>(vec)[0];
     InputIter ffirst = first;
-    for (std::size_t i = 0; i != n; ++i, ++ffirst, ++dst)
-        *dst = std::get<Pos>(*ffirst);
+    for (std::size_t i = 0; i != n; ++i, ++ffirst)
+        dst[i] = std::get<Pos>(*ffirst);
     hdf5_tuple_vector_copy(n, vec, first, Position<Pos - 1>());
 }
 
