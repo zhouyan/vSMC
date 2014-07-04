@@ -318,16 +318,16 @@ inline void hdf5_insert_data_frame (std::size_t N,
 namespace internal {
 
 template <typename TupleVectorType>
-inline void hdf5_tuple_vector_reserve (std::size_t n, TupleVectorType &vec,
+inline void hdf5_tuple_vector_resize (std::size_t n, TupleVectorType &vec,
         Position<0>)
-{std::get<0>(vec).reserve(n);}
+{std::get<0>(vec).resize(n);}
 
 template <typename TupleVectorType, std::size_t Pos>
-inline void hdf5_tuple_vector_reserve (std::size_t n, TupleVectorType &vec,
+inline void hdf5_tuple_vector_resize (std::size_t n, TupleVectorType &vec,
         Position<Pos>)
 {
-    std::get<Pos>(vec).reserve(n);
-    hdf5_tuple_vector_reserve(n, vec, Position<Pos - 1>());
+    std::get<Pos>(vec).resize(n);
+    hdf5_tuple_vector_resize(n, vec, Position<Pos - 1>());
 }
 
 template <typename TupleVectorType, typename InputIter>
@@ -337,8 +337,9 @@ inline void hdf5_tuple_vector_copy (std::size_t n, TupleVectorType &vec,
     typedef typename std::iterator_traits<InputIter>::value_type tuple_type;
     typedef typename std::tuple_element<0, tuple_type>::type value_type;
     value_type *dst = &std::get<0>(vec)[0];
-    for (std::size_t i = 0; i != n; ++i, ++first, ++dst)
-        *dst = std::get<0>(*first);
+    InputIter ffirst = first;
+    for (std::size_t i = 0; i != n; ++i, ++ffirst, ++dst)
+        *dst = std::get<0>(*ffirst);
 }
 
 template <typename TupleVectorType, typename InputIter, std::size_t Pos>
@@ -349,9 +350,9 @@ inline void hdf5_tuple_vector_copy (std::size_t n, TupleVectorType &vec,
     typedef typename std::tuple_element<Pos, tuple_type>::type value_type;
     value_type *dst = &std::get<Pos>(vec)[0];
     InputIter ffirst = first;
-    for (std::size_t i = 0; i != n; ++i, ++first, ++dst)
-        *dst = std::get<Pos>(*first);
-    hdf5_tuple_vector_copy(n, vec, ffirst, Position<Pos - 1>());
+    for (std::size_t i = 0; i != n; ++i, ++ffirst, ++dst)
+        *dst = std::get<Pos>(*ffirst);
+    hdf5_tuple_vector_copy(n, vec, first, Position<Pos - 1>());
 }
 
 template <typename TupleVectorType, typename TuplePtrType>
@@ -492,7 +493,7 @@ inline void hdf5store (const StateTuple<RowMajor, T, Types...> &state,
     }
 
     std::tuple<std::vector<T>, std::vector<Types>...> data_vec;
-    internal::hdf5_tuple_vector_reserve(state.size(), data_vec,
+    internal::hdf5_tuple_vector_resize(state.size(), data_vec,
             Position<dim - 1>());
     internal::hdf5_tuple_vector_copy(state.size(), data_vec, state.data(),
             Position<dim - 1>());
@@ -519,8 +520,9 @@ inline void hdf5store (const StateTuple<ColMajor, T, Types...> &state,
         ss << 'V' << i;
         vnames.push_back(ss.str());
     }
-    hdf5store_data_frame(state.size(), file_name, data_name,
-            state.data(), &vnames[0], append);
+
+    hdf5store_data_frame(state.size(), file_name, data_name, state.data(),
+            &vnames[0], append);
 }
 
 #endif // VSMC_HAS_CXX11LIB_TUPLE
