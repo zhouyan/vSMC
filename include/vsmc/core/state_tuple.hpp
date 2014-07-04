@@ -362,6 +362,14 @@ class StateTuple<ColMajor, T, Types...> :
     const typename state_tuple_base_type::template state_type<Pos>::type
     *data () const {return &std::get<Pos>(state_)[0];}
 
+    typename state_tuple_base_type::state_tuple_ptr_type data ()
+    {
+        typename state_tuple_base_type::state_tuple_ptr_type dptr;
+        insert_data(dptr, Position<0>());
+
+        return dptr;
+    }
+
     typename state_tuple_base_type::state_tuple_cptr_type data () const
     {
         typename state_tuple_base_type::state_tuple_cptr_type dptr;
@@ -385,18 +393,15 @@ class StateTuple<ColMajor, T, Types...> :
     void init_state (size_type N, Position<sizeof...(Types)>)
     {std::get<sizeof...(Types)>(state_).resize(N);}
 
-    template <std::size_t Pos>
-    void insert_data (
-            typename state_tuple_base_type::state_tuple_cptr_type &dptr,
-            Position<Pos>) const
+    template <std::size_t Pos, typename PTRType>
+    void insert_data (PTRType &dptr, Position<Pos>) const
     {
         std::get<Pos>(dptr) = data<Pos>();
         insert_data(dptr, Position<Pos + 1>());
     }
 
-    void insert_data (
-            typename state_tuple_base_type::state_tuple_cptr_type &dptr,
-            Position<sizeof...(Types)>) const
+    template <typename PTRType>
+    void insert_data (PTRType &dptr, Position<sizeof...(Types)>) const
     {std::get<sizeof...(Types)>(dptr) = data<sizeof...(Types)>();}
 }; // class StateTuple
 
