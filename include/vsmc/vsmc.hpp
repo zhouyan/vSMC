@@ -23,6 +23,9 @@
 /// \defgroup Core Core
 /// \brief Constructing samplers with operations on the whole particle set
 
+/// \defgroup Dispatch Grand Central Dispatch
+/// \brief C++ wrapper of Apple GCD
+
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
 
@@ -119,17 +122,6 @@
 /// \ingroup RNG
 /// \brief Random number generating using the Xorshift algorithm
 
-/// \defgroup TBBExt Intel Threading Building Blocks Extensions
-/// \brief Extensions to Intel TBB
-
-/// \defgroup TBBOp Operators
-/// \ingroup TBBExt
-/// \brief Intel TBB operators
-
-/// \defgroup TBBAlg Algorithms
-/// \ingroup TBBExt
-/// \brief Intel TBB algorithms
-
 /// \defgroup Thread Thread
 /// \brief C++11 threading support
 
@@ -143,10 +135,6 @@
 /// \defgroup CPUID CPUID
 /// \ingroup Utility
 /// \brief Query CPUID features
-
-/// \defgroup Dispatch Grand Central Dispatch
-/// \ingroup Utility
-/// \brief C++ wrapper of Apple GCD
 
 /// \defgroup HDF5IO HDF5 objects saving
 /// \ingroup Utility
@@ -195,6 +183,14 @@
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
+
+#include <vsmc/gcd/dispatch_function.hpp>
+#if VSMC_USE_GCD
+#include <vsmc/gcd/dispatch_group.hpp>
+#include <vsmc/gcd/dispatch_object.hpp>
+#include <vsmc/gcd/dispatch_queue.hpp>
+#include <vsmc/gcd/dispatch_source.hpp>
+#endif
 
 #include <vsmc/integrate/is_integrate.hpp>
 #include <vsmc/integrate/nintegrate_base.hpp>
@@ -260,11 +256,6 @@
 #endif
 #if VSMC_USE_TBB
 #include <vsmc/smp/backend_tbb.hpp>
-#endif
-
-#include <vsmc/tbb/operator.hpp>
-#if VSMC_USE_TBB
-#include <vsmc/tbb/parallel_repeat.hpp>
 #endif
 
 #include <vsmc/thread/blocked_range.hpp>

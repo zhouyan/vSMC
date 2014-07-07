@@ -12,7 +12,7 @@
 #define VSMC_SMP_BACKEND_GCD_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-#include <vsmc/utility/dispatch.hpp>
+#include <vsmc/gcd/dispatch_queue.hpp>
 
 namespace vsmc {
 
