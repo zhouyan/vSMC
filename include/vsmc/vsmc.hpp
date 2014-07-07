@@ -130,6 +130,9 @@
 /// \ingroup TBBExt
 /// \brief Intel TBB algorithms
 
+/// \defgroup Thread Thread
+/// \brief C++11 threading support
+
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
@@ -164,10 +167,6 @@
 /// \defgroup Progress Progress
 /// \ingroup Utility
 /// \brief Display progress while algorithms proceed
-
-/// \defgroup STDTBB STDTBB
-/// \ingroup Utility
-/// \brief Parallel constructs using C++11 concurrency
 
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
@@ -268,6 +267,15 @@
 #include <vsmc/tbb/parallel_repeat.hpp>
 #endif
 
+#include <vsmc/thread/blocked_range.hpp>
+#if VSMC_HAS_CXX11LIB_THREAD
+#include <vsmc/thread/parallel_accumulate.hpp>
+#include <vsmc/thread/parallel_for.hpp>
+#include <vsmc/thread/parallel_reduce.hpp>
+#include <vsmc/thread/thread_guard.hpp>
+#include <vsmc/thread/thread_num.hpp>
+#endif
+
 #include <vsmc/utility/backup.hpp>
 #if VSMC_USE_GCD
 #include <vsmc/utility/dispatch.hpp>
@@ -276,9 +284,6 @@
 #include <vsmc/utility/hdf5_save.hpp>
 #endif
 #include <vsmc/utility/program_option.hpp>
-#if VSMC_HAS_CXX11LIB_THREAD
-#include <vsmc/utility/stdtbb.hpp>
-#endif
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_HAS_CXX11LIB_TUPLE
 #include <vsmc/utility/tuple_manip.hpp>
