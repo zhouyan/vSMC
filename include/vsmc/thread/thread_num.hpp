@@ -18,7 +18,7 @@
 
 namespace vsmc {
 
-/// \brief Number of thread used by algorithms
+/// \brief Number of threads used by algorithms
 /// \ingroup Thread
 class ThreadNum
 {
@@ -33,6 +33,7 @@ class ThreadNum
 
     std::size_t thread_num () const {return thread_num_;}
 
+    /// \brief Set a new number of threads, return the old number
     std::size_t thread_num (std::size_t num)
     {
         std::size_t old_num = thread_num_;
