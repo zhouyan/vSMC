@@ -12,16 +12,17 @@
 #define VSMC_THREAD_THREAD_GUARD_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <thread>
-#include <utility>
 
 namespace vsmc {
 
-/// \brief Strictly scope-based std::thread ownership wrapper
+/// \brief Strictly scope-based thread ownership wrapper
 /// \ingroup Thread
+template <typename ThreadType>
 class ThreadGuard
 {
     public :
+
+    typedef ThreadType thread_type;
 
     ThreadGuard () noexcept {}
 
@@ -29,20 +30,20 @@ class ThreadGuard
 
     ThreadGuard &operator= (const ThreadGuard &) = delete;
 
-    ThreadGuard (std::thread &&thr) noexcept :
-        thread_(std::move(thr)) {}
+    ThreadGuard (thread_type &&thr) noexcept :
+        thread_(cxx11::move(thr)) {}
 
     ThreadGuard (ThreadGuard &&other) noexcept :
-        thread_(std::move(other.thread_)) {}
+        thread_(cxx11::move(other.thread_)) {}
 
     ThreadGuard &operator= (ThreadGuard &&other) noexcept
-    {thread_ = std::move(other.thread_); return *this;}
+    {thread_ = cxx11::move(other.thread_); return *this;}
 
     ~ThreadGuard () noexcept {if (thread_.joinable()) thread_.join();}
 
     private :
 
-    std::thread thread_;
+    thread_type thread_;
 }; // class ThreadGuard
 
 } // namespace vsmc

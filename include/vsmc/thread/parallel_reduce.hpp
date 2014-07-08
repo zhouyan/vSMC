@@ -37,11 +37,11 @@ inline void parallel_reduce (const Range &range, WorkType &work)
     std::vector<Range> range_vec(ThreadNum::instance().partition(range));
     std::vector<WorkType> work_vec(range_vec.size(), work);
     {
-        std::vector<ThreadGuard> tg;
+        std::vector<ThreadGuard<std::thread>> tg;
         tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
-            tg.push_back(ThreadGuard(std::thread(std::ref(work_vec[i]),
-                            range_vec[i])));
+            tg.push_back(ThreadGuard<std::thread>(std::thread(
+                            std::ref(work_vec[i]), range_vec[i])));
         }
     }
     for (std::size_t i = 0; i != work_vec.size(); ++i) work.join(work_vec[i]);

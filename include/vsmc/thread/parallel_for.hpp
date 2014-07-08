@@ -34,12 +34,12 @@ template <typename Range, typename WorkType>
 inline void parallel_for (const Range &range, WorkType &&work)
 {
     std::vector<Range> range_vec(ThreadNum::instance().partition(range));
-    std::vector<ThreadGuard> tg;
+    std::vector<ThreadGuard<std::thread>> tg;
     tg.reserve(range_vec.size());
     {
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
-            tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
-                            range_vec[i])));
+            tg.push_back(ThreadGuard<std::thread>(std::thread(
+                            std::forward<WorkType>(work), range_vec[i])));
         }
     }
 }

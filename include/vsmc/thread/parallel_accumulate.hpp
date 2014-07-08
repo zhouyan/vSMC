@@ -37,10 +37,11 @@ inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
     std::vector<T> result(range_vec.size());
     // start parallelization
     {
-        std::vector<ThreadGuard> tg;
+        std::vector<ThreadGuard<std::thread>> tg;
         tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
-            tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
+            tg.push_back(ThreadGuard<std::thread>(std::thread(
+                            std::forward<WorkType>(work),
                             range_vec[i], std::ref(result[i]))));
         }
     }
@@ -69,10 +70,11 @@ inline T parallel_accumulate (const Range &range, WorkType &&work,
     std::vector<T> result(range_vec.size());
     // start parallelization
     {
-        std::vector<ThreadGuard> tg;
+        std::vector<ThreadGuard<std::thread>> tg;
         tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
-            tg.push_back(ThreadGuard(std::thread(std::forward<WorkType>(work),
+            tg.push_back(ThreadGuard<std::thread>(std::thread(
+                            std::forward<WorkType>(work),
                             range_vec[i], std::ref(result[i]))));
         }
     }
