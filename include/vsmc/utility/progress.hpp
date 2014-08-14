@@ -68,7 +68,7 @@ class Progress
     /// \param total Total amount of work represented by an integer, for
     /// example file size or SMC algorithm total number of iterations
     /// \param interval The sleep interval in seconds
-    void start (unsigned total, double interval = 100)
+    void start (unsigned total, double interval = 0.1)
     {
         iter_ = 0;
         total_ = total;
