@@ -135,6 +135,8 @@ class Sampler
     {
         particle_.resample(resample_op_,
                 std::numeric_limits<double>::max VSMC_MNE ());
+	if (resampled_history_.size() != 0)
+	    resampled_history_.back() = true;
 
         return *this;
     }
