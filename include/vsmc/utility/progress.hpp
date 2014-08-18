@@ -14,6 +14,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #include <iostream>
+#include <string>
 
 namespace vsmc {
 
@@ -67,14 +68,17 @@ class Progress
     ///
     /// \param total Total amount of work represented by an integer, for
     /// example file size or SMC algorithm total number of iterations
+    /// \param message A (short) discreptive message
     /// \param interval The sleep interval in seconds
-    void start (unsigned total, double interval = 0.1)
+    void start (unsigned total, const std::string &message = std::string(),
+	    double interval = 0.1)
     {
         iter_ = 0;
         total_ = total;
         interval_ = interval;
         print_first_ = true;
         in_progress_ = true;
+	message_ = message;
 
         watch_.reset();
         watch_.start();
@@ -116,6 +120,7 @@ class Progress
     unsigned seconds_;
     unsigned last_iter_;
 
+    std::string message_;
     char display_progress_[128];
     char display_percent_[32];
     char display_time_[32];
@@ -205,7 +210,6 @@ class Progress
 
             char *cstr = ptr->display_progress_;
             std::size_t offset = 0;
-            cstr[offset++] = ' ';
             cstr[offset++] = '[';
             for (unsigned i = 0; i != num_equal; ++i)
                 cstr[offset++] = '=';
@@ -272,6 +276,7 @@ class Progress
             cstr[offset++] = '\0';
         }
 
+	ptr->os_ << ptr->message_ << ' ';
         ptr->os_ << ptr->display_progress_;
         ptr->os_ << ptr->display_percent_;
         ptr->os_ << ptr->display_time_;
