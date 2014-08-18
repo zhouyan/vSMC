@@ -359,14 +359,14 @@ class Sampler
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
         do_init();
-        do_acch();
         if (init_by_iter_) {
             VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
             do_iter();
         } else {
             VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
                     init_, initialize, INITIALIZE);
-            accept_history_[0].push_back(init_(particle_, param));
+            accept_history_.push_back(std::vector<std::size_t>(1,
+                        init_(particle_, param)));
             do_resample();
         }
         do_monitor();
@@ -382,15 +382,18 @@ class Sampler
     /// monitors and Path are computed
     Sampler<T> &iterate (std::size_t num = 1)
     {
+        do_acch();
+
         if (num > 1)
             reserve(iter_size() + num);
 
-        do_acch();
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
             do_iter();
             do_monitor();
         }
+
+        do_acch();
 
         return *this;
     }
@@ -578,7 +581,7 @@ class Sampler
             return;
 
         std::size_t var_num = summary_header_size();
-        std::size_t dat_num = var_num * iter_size();
+        std::size_t dat_num = summary_data_size();
         std::vector<std::string> header(var_num);
         std::vector<double> data(dat_num);
         summary_header(header.begin());
@@ -646,6 +649,13 @@ class Sampler
             for (std::size_t d = 0; d != diff; ++d)
                 accept_history_.push_back(acc);
         }
+        std::size_t max_iter = 0;
+        for (std::size_t i = 0; i != accept_history_.size(); ++i)
+            if (max_iter < accept_history_[i].size())
+                max_iter = accept_history_[i].size();
+        for (std::size_t i = 0; i != accept_history_.size(); ++i)
+            if (accept_history_[i].size() < max_iter)
+                accept_history_[i].resize(max_iter);
     }
 
     void do_init ()
@@ -723,13 +733,13 @@ class Sampler
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             *first = ess_history_[iter] / size();
             ++first;
-            for (std::size_t i = 0; i != accept_history_.size(); ++i) {
+	    for (std::size_t i = 0; i != accept_history_.size(); ++i) {
                 *first = accept_history_[i][iter] /
                     static_cast<double>(size());
                 ++first;
             }
             if (path_.iter_size() > 0) {
-                if (piter == path_.iter_size() ||iter != path_.index(piter)) {
+                if (piter == path_.iter_size() || iter != path_.index(piter)) {
                     *first = missing_data;
                     ++first;
                     *first = missing_data;
