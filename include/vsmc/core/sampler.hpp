@@ -733,7 +733,7 @@ class Sampler
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             *first = ess_history_[iter] / size();
             ++first;
-	    for (std::size_t i = 0; i != accept_history_.size(); ++i) {
+            for (std::size_t i = 0; i != accept_history_.size(); ++i) {
                 *first = accept_history_[i][iter] /
                     static_cast<double>(size());
                 ++first;
