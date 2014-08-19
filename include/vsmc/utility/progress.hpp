@@ -210,6 +210,7 @@ class Progress
 
             char *cstr = ptr->display_progress_;
             std::size_t offset = 0;
+            cstr[offset++] = ' ';
             cstr[offset++] = '[';
             for (unsigned i = 0; i != num_equal; ++i)
                 cstr[offset++] = '=';
@@ -276,11 +277,11 @@ class Progress
             cstr[offset++] = '\0';
         }
 
-        ptr->os_ << ' ' << ptr->message_ << ' ';
         ptr->os_ << ptr->display_progress_;
         ptr->os_ << ptr->display_percent_;
         ptr->os_ << ptr->display_time_;
         ptr->os_ << ptr->display_iter_;
+        ptr->os_ << '[' << ptr->message_ << ']';
     }
 
     template <typename UIntType>
