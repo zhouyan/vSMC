@@ -71,14 +71,14 @@ class Progress
     /// \param message A (short) discreptive message
     /// \param interval The sleep interval in seconds
     void start (unsigned total, const std::string &message = std::string(),
-	    double interval = 0.1)
+            double interval = 0.1)
     {
         iter_ = 0;
         total_ = total;
         interval_ = interval;
         print_first_ = true;
         in_progress_ = true;
-	message_ = message;
+        message_ = message;
 
         watch_.reset();
         watch_.start();
@@ -276,7 +276,7 @@ class Progress
             cstr[offset++] = '\0';
         }
 
-	ptr->os_ << ptr->message_ << ' ';
+        ptr->os_ << ' ' << ptr->message_ << ' ';
         ptr->os_ << ptr->display_progress_;
         ptr->os_ << ptr->display_percent_;
         ptr->os_ << ptr->display_time_;
