@@ -642,20 +642,12 @@ class Sampler
 
         std::size_t acc_size = move_queue_.size() + mcmc_queue_.size();
         if (accept_history_.size() < acc_size) {
-            std::vector<std::size_t> acc(accept_history_[0].size());
-            for (std::size_t i = 0; i != acc.size(); ++i)
-                acc[i] = 0;
             std::size_t diff = acc_size - accept_history_.size();
             for (std::size_t d = 0; d != diff; ++d)
-                accept_history_.push_back(acc);
+                accept_history_.push_back(std::vector<std::size_t>());
         }
-        std::size_t max_iter = 0;
         for (std::size_t i = 0; i != accept_history_.size(); ++i)
-            if (max_iter < accept_history_[i].size())
-                max_iter = accept_history_[i].size();
-        for (std::size_t i = 0; i != accept_history_.size(); ++i)
-            if (accept_history_[i].size() < max_iter)
-                accept_history_[i].resize(max_iter);
+            accept_history_[i].resize(iter_size());
     }
 
     void do_init ()
