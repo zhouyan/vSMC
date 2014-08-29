@@ -198,7 +198,11 @@ class Progress
             ptr->last_iter_ = iter + 1;
         }
 
-        if (ptr->num_equal_ != num_equal) {
+        if (length == 0) {
+            char *cstr = ptr->display_progress_;
+            cstr[0] = ' ';
+            cstr[1] = '\0';
+        } else if (ptr->num_equal_ != num_equal) {
             ptr->num_equal_ = num_equal;
             unsigned num_space = length - num_equal;
             unsigned num_dash = 0;
