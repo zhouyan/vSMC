@@ -59,8 +59,9 @@ class Progress
     /// \brief Construct a Progress with an output stream
     Progress (std::ostream &os = std::cout) :
         thread_ptr_(VSMC_NULLPTR), iter_(0), total_(0), interval_(0),
-        print_first_(true), in_progress_(false),
-        num_equal_(0), percent_(0), seconds_(0), last_iter_(0),
+        length_(60), print_first_(true), in_progress_(false),
+        num_equal_(0),
+        percent_(0), seconds_(0), last_iter_(0),
         display_progress_(), display_percent_(), display_time_(),
         display_iter_(), os_(os) {}
 
@@ -70,12 +71,14 @@ class Progress
     /// example file size or SMC algorithm total number of iterations
     /// \param message A (short) discreptive message
     /// \param interval The sleep interval in seconds
+    /// \param length The length of the progress bar between brackets
     void start (unsigned total, const std::string &message = std::string(),
-            double interval = 0.1)
+            double interval = 0.1, unsigned length = 60)
     {
         iter_ = 0;
         total_ = total;
         interval_ = interval;
+        length_ = length;
         print_first_ = true;
         in_progress_ = true;
         message_ = message;
@@ -112,6 +115,7 @@ class Progress
     unsigned iter_;
     unsigned total_;
     double interval_;
+    unsigned length_;
     bool print_first_;
     bool in_progress_;
 
@@ -127,10 +131,6 @@ class Progress
     char display_iter_[64];
 
     std::ostream &os_;
-
-    static VSMC_CONSTEXPR const unsigned num_equal_max_ = 60;
-    static VSMC_CONSTEXPR const unsigned num_dash_max_ = 1;
-    static VSMC_CONSTEXPR const unsigned percent_max_ = 100;
 
     void fork ()
     {
@@ -174,20 +174,21 @@ class Progress
         const unsigned seconds = static_cast<unsigned>(ptr->watch_.seconds());
         const unsigned iter = ptr->iter_;
         const unsigned total = ptr->total_;
+        const unsigned length = ptr->length_;
 
         const unsigned display_iter = iter <= total ? iter : total;
-        unsigned num_equal = total == 0 ? num_equal_max_ :
+        unsigned num_equal = total == 0 ? length :
             static_cast<unsigned>(
-                    static_cast<double>(num_equal_max_) *
+                    static_cast<double>(length) *
                     static_cast<double>(display_iter) /
                     static_cast<double>(total));
-        num_equal = num_equal <= num_equal_max_ ? num_equal : num_equal_max_;
-        unsigned percent = total == 0 ? percent_max_ :
+        num_equal = num_equal <= length ? num_equal : length;
+        unsigned percent = total == 0 ? 100 :
             static_cast<unsigned>(
-                    static_cast<double>(percent_max_) *
+                    static_cast<double>(100) *
                     static_cast<double>(display_iter) /
                     static_cast<double>(total));
-        percent = percent <= percent_max_ ? percent : percent_max_;
+        percent = percent <= 100 ? percent : 100;
 
         if (ptr->print_first_) {
             ptr->print_first_ = false;
@@ -199,13 +200,11 @@ class Progress
 
         if (ptr->num_equal_ != num_equal) {
             ptr->num_equal_ = num_equal;
-            unsigned num_space = num_equal_max_ - num_equal;
+            unsigned num_space = length - num_equal;
             unsigned num_dash = 0;
-            while (num_space > num_dash) {
-                if (num_dash == num_dash_max_)
-                    break;
+            if (num_space > 0) {
+                num_dash = 1;
                 --num_space;
-                ++num_dash;
             }
 
             char *cstr = ptr->display_progress_;
