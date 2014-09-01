@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -28,7 +29,12 @@ class ThreadGuard
     std::thread thread_;
 }; // class ThreadGuard
 
-void work () {std::cout << "Hello World" << std::endl;}
+void work ()
+{
+    std::chrono::milliseconds dura(100);
+    std::this_thread::sleep_for(dura);
+    std::cout << "Hello World" << std::endl;
+}
 
 int main ()
 {
