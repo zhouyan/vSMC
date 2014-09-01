@@ -16,7 +16,29 @@
 #include <iostream>
 #include <string>
 
+#if VSMC_HAS_CXX11LIB_CHRONO && VSMC_HAS_CXX11LIB_THREAD
+#include <cmath>
+#include <chrono>
+#include <thread>
+#endif
+
 namespace vsmc {
+
+#if VSMC_HAS_CXX11LIB_CHRONO && VSMC_HAS_CXX11LIB_THREAD
+namespace internal {
+
+struct ProgressThisThread
+{
+    static void sleep (double s)
+    {
+        double ms = std::fmax(1.0, std::floor(s * 1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(
+                    static_cast<std::chrono::milliseconds::rep>(ms)));
+    }
+}; // class ProgressThisThread
+
+} // namespace vsmc::internal
+#endif
 
 /// \brief Display a progress bar while algorithm proceed
 /// \ingroup Progress
@@ -49,7 +71,12 @@ namespace vsmc {
 /// ~~~
 /// An implementation using Boost is almost the same except for the namespace
 /// changing from `std` to `boost`.
+#if VSMC_HAS_CXX11LIB_CHRONO && VSMC_HAS_CXX11LIB_THREAD
+template <typename ThreadType = std::thread,
+         typename ThisThread = internal::ProgressThisThread>
+#else
 template <typename ThreadType, typename ThisThread>
+#endif
 class Progress
 {
     public :
