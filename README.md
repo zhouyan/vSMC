@@ -86,17 +86,7 @@ modern compilers, at least in C++98 mode, is able to compile the examples
 distributed with the library.
 
 This library has been regularly tested with recent [Clang][Clang], [GCC][GCC]
-and [Intel C++ Compiler][icpc], in both C++98 and C++11 modes. In particular,
-[Clang][Clang] 3.3 and later with [libc++][libc++] and [GCC][GCC] 4.7 and later
-support all the C++11 features used by the library very well. [Intel C++
-Compiler][icpc] when used with [GCC][GCC] 4.7's standard library can also
-support all the C++11 features. When it is used with [GCC][GCC] 4.8's standard
-library, though all features are supported, some examples fail to compile when
-complex template constructs are involved. The issues are still under
-investigation. The current workaround is to use the [Boost][Boost] Function
-library instead of the standard library `<functional>` (by defining the flag
-`-DVSMC_HAS_CXX11LIB_FUNCTIONAL=0`) when using this compiler configuration in
-C++11 mode.
+and [Intel C++ Compiler][icpc], in both C++98 and C++11 modes.
 
 [Microsoft Visual C++][MSVC] is also supported. Version 2008 and later are able
 to compile the examples in C++98 mode. Version 2012 and later support most of
