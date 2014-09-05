@@ -39,6 +39,8 @@ class RngSet<RngType, Scalar>
 
     size_type size () const {return size_;}
 
+    void resize (std::size_t) {}
+
     void seed ()
     {
         rng_.seed(static_cast<typename rng_type::result_type>(
@@ -66,6 +68,23 @@ class RngSet<RngType, Vector>
     explicit RngSet (size_type N) : rng_(N, rng_type()) {seed();}
 
     size_type size () const {return rng_.size();}
+
+    void resize (std::size_t n)
+    {
+        if (n == rng_.size())
+            return;
+
+        if (n < rng_.size())
+            rng_.resize(n);
+
+        rng_.reserve(n);
+        rng_type rng;
+        for (std::size_t i = rng_.size(); i != n; ++i) {
+            rng.seed(static_cast<typename rng_type::result_type>(
+                        Seed::instance().get()));
+            rng_.push_back(rng);
+        }
+    }
 
     void seed ()
     {

@@ -19,6 +19,7 @@
 #include <limits>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func) \
@@ -99,6 +100,78 @@ class Sampler
         init_by_iter_(false), resample_threshold_(resample_threshold),
         particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
     {resample_scheme(res_op);}
+
+    /// \brief Clone the sampler system except the RNG engines
+    ///
+    /// \details
+    /// The returned Sampler object is constructed with the copy constructor.
+    /// The RNG engines are re-seeded such that the new object is exactly the
+    /// same as the current one, but its RNG sequences will be different.
+    ///
+    /// \note
+    /// This member function is not thread-safe
+    Sampler<T> clone () const
+    {
+        Sampler<T> sampler(*this);
+        sampler.particle().rng_set().seed();
+        sampler.particle().resample_rng().seed(static_cast<typename
+                Particle<T>::resample_rng_type::result_type>(
+                    Seed::instance().get()));
+
+        return sampler;
+    }
+    /// \brief Clone another sampler system except the RNG engines
+    ///
+    /// \details
+    /// The input Sampler object is copied into the current one with the
+    /// assignement operator. The current system's RNG engines are preserved.
+    /// If the sizes differs, then the RNG set is extended with newly seed ones
+    /// or truncated.
+    Sampler<T> &clone (const Sampler<T> &other)
+    {
+        if (this != &other) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            typename Particle<T>::rng_set_type rset(
+                    cxx11::move(particle_.rng_set()));
+            typename Particle<T>::resample_rng_type rrng(
+                    cxx11::move(particle_.resample_rng()));
+            *this = other;
+            particle_.rng_set() = cxx11::move(rset);
+            particle_.resample_rng() = cxx11::move(rrng);
+#else
+            using std::swap;
+
+            typename Particle<T>::rng_set_type rset(0);
+            swap(rset, particle_.rng_set());
+            typename Particle<T>::resample_rng_type rrng(
+                    particle_.resample_rng());
+            *this = other;
+            swap(rset, particle.rng_set());
+            particle_.resample_rng() = rrng;
+#endif
+            particle_.rng_set().resize(other.size());
+        }
+
+        return *this;
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    Sampler<T> &clone (Sampler<T> &&other)
+    {
+        if (this != &other) {
+            typename Particle<T>::rng_set_type rset(
+                    cxx11::move(particle_.rng_set()));
+            typename Particle<T>::resample_rng_type rrng(
+                    cxx11::move(particle_.resample_rng()));
+            *this = cxx11::move(other);
+            particle_.rng_set() = cxx11::move(rset);
+            particle_.resample_rng() = cxx11::move(rrng);
+            particle_.rng_set().resize(other.size());
+        }
+
+        return *this;
+    }
+#endif
 
     /// \brief Number of particles
     size_type size () const {return particle_.size();}

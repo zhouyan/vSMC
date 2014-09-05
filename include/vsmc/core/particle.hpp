@@ -18,6 +18,7 @@
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 #include <limits>
+#include <utility>
 
 namespace vsmc {
 
@@ -45,20 +46,75 @@ class Particle
                 traits::SizeTypeTrait<rng_set_type>::type>(N)),
         resample_replication_(N), resample_copy_from_(N), resample_weight_(N),
         resample_rng_(static_cast<typename resample_rng_type::result_type>(
-                    Seed::instance().get())),
-        sp_(N + 2, SingleParticle<T>(0, VSMC_NULLPTR)),
-        csp_(N + 2, ConstSingleParticle<T>(0, VSMC_NULLPTR))
+                    Seed::instance().get())) {}
+
+    /// \brief Clone the particle system except the RNG engines
+    ///
+    /// \details
+    /// The returned Particle object is constructed with the copy constructor.
+    /// The RNG engines are re-seeded such that the new object is exactly the
+    /// same as the current one, but its RNG sequences will be different.
+    ///
+    /// \note
+    /// This member function is not thread-safe
+    Particle<T> clone () const
     {
-        weight_set_.set_equal_weight();
-        sp_[0] = SingleParticle<T>(std::numeric_limits<size_type>::max
-                VSMC_MNE (), this);
-        csp_[0] = ConstSingleParticle<T>(std::numeric_limits<size_type>::max
-                VSMC_MNE (), this);
-        for (size_type i = 1; i != size_ + 2; ++i) {
-            sp_[i] = SingleParticle<T>(i - 1, this);
-            csp_[i] = ConstSingleParticle<T>(i - 1, this);
-        }
+        Particle<T> particle(*this);
+        particle.rng_set().seed();
+        particle.resample_rng().seed(
+                static_cast<typename resample_rng_type::result_type>(
+                    Seed::instance().get()));
+
+        return particle;
     }
+
+    /// \brief Clone another particle system except the RNG engines
+    ///
+    /// \details
+    /// The input Particle object is copied into the current one with the
+    /// assignement operator. The current system's RNG engines are preserved.
+    /// If the sizes differs, then the RNG set is extended with newly seed ones
+    /// or truncated.
+    Particle<T> &clone (const Particle<T> &other)
+    {
+        if (this != &other) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+            rng_set_type rset(cxx11::move(rng_set_));
+            resample_rng_type rrng(cxx11::move(resample_rng_));
+            *this = other;
+            rng_set_ = cxx11::move(rset);
+            resample_rng_ = cxx11::move(rrng);
+#else
+            using std::swap;
+
+            rng_set_type rset(0);
+            swap(rset, rng_set_);
+            resample_rng_type rrng(resample_rng_);
+            *this = other;
+            swap(rset, rng_set_);
+            resample_rng_ = rrng;
+#endif
+            rng_set_.resize(other.size());
+        }
+
+        return *this;
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    Particle<T> &clone (Particle<T> &&other)
+    {
+        if (this != &other) {
+            rng_set_type rset(cxx11::move(rng_set_));
+            resample_rng_type rrng(cxx11::move(resample_rng_));
+            *this = cxx11::move(other);
+            rng_set_ = cxx11::move(rset);
+            resample_rng_ = cxx11::move(rrng);
+            rng_set_.resize(other.size());
+        }
+
+        return *this;
+    }
+#endif
 
     /// \brief Number of particles
     size_type size () const {return size_;}
@@ -189,8 +245,6 @@ class Particle
         resample_copy_from_replication_;
     typename traits::ResamplePostCopyTypeTrait<T>::type resample_post_copy_;
     resample_rng_type resample_rng_;
-    std::vector<SingleParticle<T> > sp_;
-    std::vector<ConstSingleParticle<T> > csp_;
 }; // class Particle
 
 } // namespace vsmc
