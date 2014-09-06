@@ -29,10 +29,10 @@
             ("**SeedGenerator::modulo** "                                    \
              "THE MAXIMUM OF THE INTERNAL SEED IS NO LARGER THAN 1"))
 
-/// \brief Default type of Seed
+/// \brief Default result type of Seed
 /// \ingroup Config
-#ifndef VSMC_SEED_TYPE
-#define VSMC_SEED_TYPE SeedGenerator<NullType, unsigned>
+#ifndef VSMC_SEED_RESULT_TYPE
+#define VSMC_SEED_RESULT_TYPE unsigned
 #endif
 
 namespace vsmc {
@@ -59,7 +59,7 @@ namespace vsmc {
 /// For multithreading programs, the access to this member function shall be
 /// protected by mutex, if it is called from multiple threads. Or one can use
 /// distinct type `ID` to initialized distinct SeedGenerator instances.
-template <typename ID, typename ResultType = unsigned>
+template <typename ID, typename ResultType = VSMC_SEED_RESULT_TYPE>
 class SeedGenerator
 {
     public :
@@ -141,8 +141,8 @@ class SeedGenerator
             const SeedGenerator<ID, ResultType> &);
 }; // class SeedGenerator
 
-typedef VSMC_SEED_TYPE Seed;
-
+/// \brief Seed generator partial specialization for counters
+/// \ingroup RNG
 template <typename ID, typename T, std::size_t K, typename Traits>
 class SeedGenerator<ID, Array<T, K, Traits> >
 {
@@ -173,6 +173,10 @@ class SeedGenerator<ID, Array<T, K, Traits> >
     SeedGenerator<ID, Array<T, K, Traits> > &operator= (
             const SeedGenerator<ID, Array<T, K, Traits> > &);
 }; // class SeedCTRGenerator
+
+/// \brief The default Seed type
+/// \ingroup RNG
+typedef SeedGenerator<NullType, VSMC_SEED_RESULT_TYPE> Seed;
 
 } // namespace vsmc
 
