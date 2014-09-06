@@ -141,18 +141,20 @@ class SeedGenerator
             const SeedGenerator<ID, ResultType> &);
 }; // class SeedGenerator
 
-/// \brief Seed generator partial specialization for counters
+template <typename, typename> class SeedCounterGenerator;
+
+/// \brief Seed generator counters
 /// \ingroup RNG
 template <typename ID, typename T, std::size_t K, typename Traits>
-class SeedGenerator<ID, Array<T, K, Traits> >
+class SeedCounterGenerator<ID, Array<T, K, Traits> >
 {
     public :
 
     typedef Array<T, K, Traits> result_type;
 
-    static SeedGenerator<ID, Array<T, K, Traits> > &instance ()
+    static SeedCounterGenerator<ID, Array<T, K, Traits> > &instance ()
     {
-        static SeedGenerator<ID, Array<T, K, Traits> > seed;
+        static SeedCounterGenerator<ID, Array<T, K, Traits> > seed;
 
         return seed;
     }
@@ -165,14 +167,14 @@ class SeedGenerator<ID, Array<T, K, Traits> >
 
     result_type seed_;
 
-    SeedGenerator () {Counter<result_type>::reset(seed_);}
+    SeedCounterGenerator () {Counter<result_type>::reset(seed_);}
 
-    SeedGenerator<ID, Array<T, K, Traits> > (
-            const SeedGenerator<ID, Array<T, K, Traits> > &);
+    SeedCounterGenerator<ID, Array<T, K, Traits> > (
+            const SeedCounterGenerator<ID, Array<T, K, Traits> > &);
 
-    SeedGenerator<ID, Array<T, K, Traits> > &operator= (
-            const SeedGenerator<ID, Array<T, K, Traits> > &);
-}; // class SeedCTRGenerator
+    SeedCounterGenerator<ID, Array<T, K, Traits> > &operator= (
+            const SeedCounterGenerator<ID, Array<T, K, Traits> > &);
+}; // class SeedCounterGenerator
 
 /// \brief The default Seed type
 /// \ingroup RNG
