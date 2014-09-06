@@ -50,66 +50,69 @@ class Particle
 
     /// \brief Clone the particle system except the RNG engines
     ///
-    /// \details
-    /// The returned Particle object is constructed with the copy constructor.
-    /// The RNG engines are re-seeded such that the new object is exactly the
-    /// same as the current one, but its RNG sequences will be different.
-    ///
-    /// \note
-    /// This member function is not thread-safe
-    Particle<T> clone () const
+    /// \param new_rng If true, the new particle system has new-seeded RNG.
+    /// Otherwise false, it is exactly the same as the current.
+    Particle<T> clone (bool new_rng) const
     {
         Particle<T> particle(*this);
-        particle.rng_set().seed();
-        particle.resample_rng().seed(
-                static_cast<typename resample_rng_type::result_type>(
-                    Seed::instance().get()));
+        if (new_rng) {
+            particle.rng_set().seed();
+            particle.resample_rng().seed(
+                    static_cast<typename resample_rng_type::result_type>(
+                        Seed::instance().get()));
+        }
 
         return particle;
     }
 
     /// \brief Clone another particle system except the RNG engines
     ///
-    /// \details
-    /// The input Particle object is copied into the current one with the
-    /// assignement operator. The current system's RNG engines are preserved.
-    /// If the sizes differs, then the RNG set is extended with newly seed ones
-    /// or truncated.
-    Particle<T> &clone (const Particle<T> &other)
+    /// \param other The particle system to be cloned
+    /// \param retain_rng If true, retain the current system's RNG. Otherwise,
+    /// it is exactly the same as the new one.
+    Particle<T> &clone (const Particle<T> &other, bool retain_rng)
     {
         if (this != &other) {
+            if (retain_rng) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            rng_set_type rset(cxx11::move(rng_set_));
-            resample_rng_type rrng(cxx11::move(resample_rng_));
-            *this = other;
-            rng_set_ = cxx11::move(rset);
-            resample_rng_ = cxx11::move(rrng);
+                rng_set_type rset(cxx11::move(rng_set_));
+                resample_rng_type rrng(cxx11::move(resample_rng_));
+                *this = other;
+                rng_set_ = cxx11::move(rset);
+                resample_rng_ = cxx11::move(rrng);
 #else
-            using std::swap;
+                using std::swap;
 
-            rng_set_type rset(0);
-            swap(rset, rng_set_);
-            resample_rng_type rrng(resample_rng_);
-            *this = other;
-            swap(rset, rng_set_);
-            resample_rng_ = rrng;
+                rng_set_type rset(0);
+                swap(rset, rng_set_);
+                resample_rng_type rrng(resample_rng_);
+                *this = other;
+                swap(rset, rng_set_);
+                resample_rng_ = rrng;
 #endif
-            rng_set_.resize(other.size());
+                rng_set_.resize(other.size());
+            } else {
+                *this = other;
+            }
         }
 
         return *this;
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Particle<T> &clone (Particle<T> &&other)
+    Particle<T> &clone (Particle<T> &&other, bool retain_rng)
     {
         if (this != &other) {
-            rng_set_type rset(cxx11::move(rng_set_));
-            resample_rng_type rrng(cxx11::move(resample_rng_));
-            *this = cxx11::move(other);
-            rng_set_ = cxx11::move(rset);
-            resample_rng_ = cxx11::move(rrng);
-            rng_set_.resize(other.size());
+            if (retain_rng) {
+                rng_set_type rset(cxx11::move(rng_set_));
+                resample_rng_type rrng(cxx11::move(resample_rng_));
+                *this = cxx11::move(other);
+                rng_set_ = cxx11::move(rset);
+                resample_rng_ = cxx11::move(rrng);
+                rng_set_.resize(other.size());
+            } else {
+                *this = cxx11::move(other);
+            }
         }
 
         return *this;
