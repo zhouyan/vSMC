@@ -171,15 +171,15 @@ class GSLEngine :
 
     template <typename SeedSeq>
     explicit GSLEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
-            VSMC_NULLPTR) : base(seq) {seed(seq);}
+            internal::is_seed_seq<SeedSeq, result_type, GSLEngine<RngType>
+            >::value>::type * = VSMC_NULLPTR) : base(seq) {seed(seq);}
 
     void seed (result_type s)
     {this->generator().seed(static_cast<unsigned long>(s));}
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
+            internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR)
     {
         unsigned long s;

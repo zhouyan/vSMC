@@ -270,11 +270,19 @@ class ThreefryEngine
 
     template <typename SeedSeq>
     explicit ThreefryEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : remain_(0)
+            internal::is_seed_seq<SeedSeq, result_type, key_type,
+            ThreefryEngine<ResultType, K, Rounds>
+            >::value>::type * = VSMC_NULLPTR) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(seq);
+    }
+
+    ThreefryEngine (const key_type &k) : remain_(0)
+    {
+        VSMC_STATIC_ASSERT_RNG_THREEFRY;
+        counter::reset(ctr_);
+        init_par(k);
     }
 
     ThreefryEngine (const ctr_type &c, const key_type &k) : remain_(0)
@@ -295,13 +303,19 @@ class ThreefryEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR)
+    void seed (SeedSeq &seq, typename cxx11::enable_if<internal::is_seed_seq<
+            SeedSeq, result_type, key_type>::value>::type * = VSMC_NULLPTR)
     {
         counter::reset(ctr_);
         key_type k;
         seq.generate(k.begin(), k.end());
+        init_par(k);
+        remain_ = 0;
+    }
+
+    void seed (const key_type &k)
+    {
+        counter::reset(ctr_);
         init_par(k);
         remain_ = 0;
     }

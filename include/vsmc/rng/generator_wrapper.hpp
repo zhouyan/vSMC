@@ -58,9 +58,9 @@ struct GeneratorWrapperMinMaxTrait
 /// For most RNG generators, use only need to write a thin wrapper to use this
 /// class.  Also note that the `operator==` will always return false as this
 /// wrapper assume that the internal states of the RNG cannot be determined by
-/// the this library (otherwise will have to require more interfaces of
-/// Generator). And all member functions, except `operator()`, does nothing. To
-/// seed and change the engine, use the Generator type object.
+/// this library (otherwise will have to require more interfaces of Generator).
+/// And all member functions, except `operator()`, does nothing. To seed and
+/// change the engine, use the Generator type object.
 template <typename ResultType, class Generator, typename Traits =
     traits::GeneratorWrapperMinMaxTrait<ResultType, Generator> >
 class GeneratorWrapper : public Traits
@@ -74,14 +74,16 @@ class GeneratorWrapper : public Traits
 
     template <typename SeedSeq>
     explicit GeneratorWrapper (SeedSeq &, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) {VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER;}
+            internal::is_seed_seq<SeedSeq, result_type,
+            GeneratorWrapper<ResultType, Generator, Traits>
+            >::value>::type * = VSMC_NULLPTR)
+    {VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER;}
 
     void seed (result_type) {}
 
     template <typename SeedSeq>
     void seed (SeedSeq &, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
+            internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
             VSMC_NULLPTR) {}
 
     result_type operator() ()

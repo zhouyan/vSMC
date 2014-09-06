@@ -306,11 +306,18 @@ class PhiloxEngine
 
     template <typename SeedSeq>
     explicit PhiloxEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : remain_(0)
+            internal::is_seed_seq<SeedSeq, result_type, key_type,
+            PhiloxEngine<ResultType, K, Rounds>
+            >::value>::type * = VSMC_NULLPTR) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(seq);
+    }
+
+    PhiloxEngine (const key_type &k) : key_(k), remain_(0)
+    {
+        VSMC_STATIC_ASSERT_RNG_PHILOX;
+        counter::reset(ctr_);
     }
 
     PhiloxEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
@@ -328,12 +335,18 @@ class PhiloxEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR)
+    void seed (SeedSeq &seq, typename cxx11::enable_if<internal::is_seed_seq<
+            SeedSeq, result_type, key_type>::value>::type * = VSMC_NULLPTR)
     {
         counter::reset(ctr_);
         seq.generate(key_.begin(), key_.end());
+        remain_ = 0;
+    }
+
+    void seed (const key_type &k)
+    {
+        counter::reset(ctr_);
+        key_ = k;
         remain_ = 0;
     }
 

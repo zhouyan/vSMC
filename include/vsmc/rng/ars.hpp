@@ -119,8 +119,13 @@ class ARSEngine :
 
     template <typename SeedSeq>
     explicit ARSEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : base_eng_type(seq) {}
+            internal::is_seed_seq<SeedSeq,
+            typename base_eng_type::result_type,
+            typename base_eng_type::key_type,
+            ARSEngine<ResultType, Rounds, Blocks>
+            >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
+
+    ARSEngine (const typename base_eng_type::key_type &k) : base_eng_type(k) {}
 
     ARSEngine (const typename base_eng_type::ctr_type &c,
             const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}

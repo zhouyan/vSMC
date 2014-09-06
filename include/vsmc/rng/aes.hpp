@@ -396,8 +396,14 @@ class AES128Engine :
 
     template <typename SeedSeq>
     explicit AES128Engine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : base_eng_type(seq) {}
+            internal::is_seed_seq<SeedSeq,
+            typename base_eng_type::result_type,
+            typename base_eng_type::key_type,
+            AES128Engine<ResultType, Blocks>
+            >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
+
+    AES128Engine (const typename base_eng_type::key_type &k) :
+        base_eng_type(k) {}
 
     AES128Engine (const typename base_eng_type::ctr_type &c,
             const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
@@ -549,8 +555,14 @@ class AES192Engine :
 
     template <typename SeedSeq>
     explicit AES192Engine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : base_eng_type(seq) {}
+            internal::is_seed_seq<SeedSeq,
+            typename base_eng_type::result_type,
+            typename base_eng_type::key_type,
+            AES192Engine<ResultType, Blocks>
+            >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
+
+    AES192Engine (const typename base_eng_type::key_type &k) :
+        base_eng_type(k) {}
 
     AES192Engine (const typename base_eng_type::ctr_type &c,
             const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
@@ -661,8 +673,14 @@ class AES256Engine :
 
     template <typename SeedSeq>
     explicit AES256Engine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : base_eng_type(seq) {}
+            internal::is_seed_seq<SeedSeq,
+            typename base_eng_type::result_type,
+            typename base_eng_type::key_type,
+            AES256Engine<ResultType, Blocks>
+            >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
+
+    AES256Engine (const typename base_eng_type::key_type &k) :
+        base_eng_type(k) {}
 
     AES256Engine (const typename base_eng_type::ctr_type &c,
             const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}

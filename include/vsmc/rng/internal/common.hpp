@@ -100,11 +100,15 @@ inline void rng_array_right_shift (Array<T, K, Traits> &state)
             cxx11::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
 }
 
-template <typename SeedSeq, typename T>
+template <typename SeedSeq, typename U, typename V = U, typename W = V>
 struct is_seed_seq :
     public cxx11::integral_constant<bool,
-    !cxx11::is_convertible<SeedSeq, T>::value &&
-    !cxx11::is_same<typename cxx11::remove_cv<SeedSeq>::type, T>::value> {};
+    !cxx11::is_convertible<SeedSeq, U>::value &&
+    !cxx11::is_convertible<SeedSeq, V>::value &&
+    !cxx11::is_convertible<SeedSeq, W>::value &&
+    !cxx11::is_same<typename cxx11::remove_cv<SeedSeq>::type, U>::value &&
+    !cxx11::is_same<typename cxx11::remove_cv<SeedSeq>::type, V>::value &&
+    !cxx11::is_same<typename cxx11::remove_cv<SeedSeq>::type, W>::value> {};
 
 } // namespace vsmc::internal
 

@@ -41,11 +41,7 @@ class RngSet<RngType, Scalar>
 
     void resize (std::size_t) {}
 
-    void seed ()
-    {
-        rng_.seed(static_cast<typename rng_type::result_type>(
-                    Seed::instance().get()));
-    }
+    void seed () {rng_.seed(Seed::instance().get());}
 
     rng_type &operator[] (size_type) {return rng_;}
 
@@ -80,8 +76,7 @@ class RngSet<RngType, Vector>
         rng_.reserve(n);
         rng_type rng;
         for (std::size_t i = rng_.size(); i != n; ++i) {
-            rng.seed(static_cast<typename rng_type::result_type>(
-                        Seed::instance().get()));
+            rng.seed(Seed::instance().get());
             rng_.push_back(rng);
         }
     }
@@ -89,8 +84,7 @@ class RngSet<RngType, Vector>
     void seed ()
     {
         for (size_type i = 0; i != rng_.size(); ++i)
-            rng_[i].seed(static_cast<typename rng_type::result_type>(
-                        Seed::instance().get()));
+            rng_[i].seed(Seed::instance().get());
     }
 
     rng_type &operator[] (size_type id) {return rng_[id];}
@@ -103,6 +97,7 @@ class RngSet<RngType, Vector>
 namespace traits {
 
 /// \brief Particle::rng_set_type trait
+/// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type,
         VSMC_DEFAULT_RNG_SET_TYPE)
 

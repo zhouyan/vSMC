@@ -265,11 +265,19 @@ class AESNIEngine
 
     template <typename SeedSeq>
     explicit AESNIEngine (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR) : remain_(0)
+            internal::is_seed_seq<SeedSeq, result_type, key_type,
+            AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
+            >::value>::type * = VSMC_NULLPTR) : remain_(0)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(seq);
+    }
+
+    AESNIEngine (const key_type &k) : key_(k), remain_(0)
+    {
+        VSMC_STATIC_ASSERT_RNG_AES_NI;
+        counter::reset(ctr_block_);
+        key_seq_.set(k);
     }
 
     AESNIEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
@@ -291,13 +299,19 @@ class AESNIEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<
-            !internal::is_seed_seq<SeedSeq, ResultType>::value>::type * =
-            VSMC_NULLPTR)
+    void seed (SeedSeq &seq, typename cxx11::enable_if<internal::is_seed_seq<
+            SeedSeq, result_type, key_type>:: value>::type * = VSMC_NULLPTR)
     {
         counter::reset(ctr_block_);
         seq.generate(key_.begin(), key_.end());
         key_seq_.set(key_);
+        remain_ = 0;
+    }
+
+    void seed (const key_type &k)
+    {
+        counter::reset(ctr_block_);
+        key_seq_.set(k);
         remain_ = 0;
     }
 

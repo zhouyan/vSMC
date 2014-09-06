@@ -12,6 +12,8 @@
 #define VSMC_RNG_SEED_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/utility/array.hpp>
+#include <vsmc/utility/counter.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),              \
@@ -140,6 +142,45 @@ class SeedGenerator
 }; // class SeedGenerator
 
 typedef VSMC_SEED_TYPE Seed;
+
+template <typename ID, typename T, std::size_t K, typename Traits>
+class SeedGenerator<ID, Array<T, K, Traits> >
+{
+    public :
+
+    typedef Array<T, K, Traits> result_type;
+
+    static SeedGenerator<ID, Array<T, K, Traits> > &instance ()
+    {
+        static SeedGenerator<ID, Array<T, K, Traits> > seed;
+
+        return seed;
+    }
+
+    result_type get () {Counter<result_type>::increment(seed_); return seed_;}
+
+    void set (result_type seed) {seed_ = seed;}
+
+    private :
+
+    result_type seed_;
+
+    SeedGenerator () {Counter<result_type>::reset(seed_);}
+
+    SeedGenerator<ID, Array<T, K, Traits> > (
+            const SeedGenerator<ID, Array<T, K, Traits> > &);
+
+    SeedGenerator<ID, Array<T, K, Traits> > &operator= (
+            const SeedGenerator<ID, Array<T, K, Traits> > &);
+}; // class SeedCTRGenerator
+
+namespace traits {
+
+/// \brief Particle::rng_set_type and Particle::resample_rng_type seed trait
+/// \ingroup Traits
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SeedType, seed_type, Seed)
+
+} // namespace vsmc::traits
 
 } // namespace vsmc
 
