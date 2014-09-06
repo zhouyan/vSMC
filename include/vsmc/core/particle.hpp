@@ -34,9 +34,15 @@ class Particle
     typedef typename traits::WeightSetTypeTrait<T>::type weight_set_type;
     typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
     typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
+    typedef typename traits::SeedTypeTrait<T>::type seed_type;
     typedef typename rng_set_type::rng_type rng_type;
+
     typedef cxx11::function<void (std::size_t, std::size_t,
             resample_rng_type &, const double *, size_type *)> resample_type;
+    typedef typename traits::ResampleCopyFromReplicationTypeTrait<T>::type
+        resample_copy_from_replication_type;
+    typedef typename traits::ResamplePostCopyTypeTrait<T>::type
+        resample_post_copy_type;
 
     explicit Particle (size_type N) :
         size_(N), value_(N),
@@ -44,9 +50,7 @@ class Particle
                 traits::SizeTypeTrait<weight_set_type>::type>(N)),
         rng_set_(static_cast<typename
                 traits::SizeTypeTrait<rng_set_type>::type>(N)),
-        resample_replication_(N), resample_copy_from_(N), resample_weight_(N),
-        resample_rng_(static_cast<typename resample_rng_type::result_type>(
-                    Seed::instance().get())) {}
+        resample_rng_(seed_type::instance().get()) {}
 
     /// \brief Clone the particle system except the RNG engines
     ///
@@ -57,9 +61,7 @@ class Particle
         Particle<T> particle(*this);
         if (new_rng) {
             particle.rng_set().seed();
-            particle.resample_rng().seed(
-                    static_cast<typename resample_rng_type::result_type>(
-                        Seed::instance().get()));
+            particle.resample_rng().seed(seed_type::instance().get());
         }
 
         return particle;
@@ -240,14 +242,13 @@ class Particle
     value_type value_;
     weight_set_type weight_set_;
     rng_set_type rng_set_;
-
-    std::vector<size_type> resample_replication_;
-    std::vector<size_type> resample_copy_from_;
-    std::vector<double> resample_weight_;
-    typename traits::ResampleCopyFromReplicationTypeTrait<T>::type
-        resample_copy_from_replication_;
-    typename traits::ResamplePostCopyTypeTrait<T>::type resample_post_copy_;
     resample_rng_type resample_rng_;
+
+    std::vector<size_type> resample_copy_from_;
+    std::vector<size_type> resample_replication_;
+    std::vector<double> resample_weight_;
+    resample_copy_from_replication_type resample_copy_from_replication_;
+    resample_post_copy_type resample_post_copy_;
 }; // class Particle
 
 } // namespace vsmc
