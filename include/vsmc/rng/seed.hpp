@@ -174,14 +174,6 @@ class SeedGenerator<ID, Array<T, K, Traits> >
             const SeedGenerator<ID, Array<T, K, Traits> > &);
 }; // class SeedCTRGenerator
 
-namespace traits {
-
-/// \brief Particle::rng_set_type and Particle::resample_rng_type seed trait
-/// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SeedType, seed_type, Seed)
-
-} // namespace vsmc::traits
-
 } // namespace vsmc
 
 #endif // VSMC_RNG_SEED_HPP

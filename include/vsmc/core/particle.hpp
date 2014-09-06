@@ -34,7 +34,6 @@ class Particle
     typedef typename traits::WeightSetTypeTrait<T>::type weight_set_type;
     typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
     typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
-    typedef typename traits::SeedTypeTrait<T>::type seed_type;
     typedef typename rng_set_type::rng_type rng_type;
 
     typedef cxx11::function<void (std::size_t, std::size_t,
@@ -50,7 +49,8 @@ class Particle
                 traits::SizeTypeTrait<weight_set_type>::type>(N)),
         rng_set_(static_cast<typename
                 traits::SizeTypeTrait<rng_set_type>::type>(N)),
-        resample_rng_(seed_type::instance().get()) {}
+        resample_rng_(static_cast<typename
+                resample_rng_type::result_type>(Seed::instance().get())) {}
 
     /// \brief Clone the particle system except the RNG engines
     ///
@@ -61,7 +61,8 @@ class Particle
         Particle<T> particle(*this);
         if (new_rng) {
             particle.rng_set().seed();
-            particle.resample_rng().seed(seed_type::instance().get());
+            particle.resample_rng().seed(static_cast<typename
+                resample_rng_type::result_type>(Seed::instance().get()));
         }
 
         return particle;

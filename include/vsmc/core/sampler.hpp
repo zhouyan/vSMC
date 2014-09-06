@@ -111,12 +111,14 @@ class Sampler
 
         if (new_rng) {
             sampler.particle().rng_set().seed();
-            sampler.particle().resample_rng().seed(
-                    Particle<T>::seed_type::instance().get());
+            sampler.particle().resample_rng().seed(static_cast<typename 
+                    Particle<T>::resample_rng_type::result_type>(
+                        Seed::instance().get()));
         }
 
         return sampler;
     }
+
     /// \brief Clone another sampler system except the RNG engines
     ///
     /// \param other The particle system to be cloned
