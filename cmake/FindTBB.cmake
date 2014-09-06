@@ -14,11 +14,12 @@
 #
 # The following variables are set
 #
-# TBB_FOUND                 - TRUE if TBB is found and work correctly
-# TBB_INCLUDE_DIR           - The directory containing TBB headers
-# TBB_LINK_LIBRARIES        - TBB libraries that shall be linked to
-# TBB_MALLOC_LINK_LIBRARIES - TBB malloc libraries that shall be linked to
-# TBB_DEFINITIONS           - TBB compile time definitions
+# TBB_FOUND                       - TRUE if TBB is found and work correctly
+# TBB_INCLUDE_DIR                 - The directory containing TBB headers
+# TBB_LINK_LIBRARIES              - TBB libraries that shall be linked to
+# TBB_MALLOC_LINK_LIBRARIES       - TBB malloc libraries
+# TBB_MALLOC_PROXY_LINK_LIBRARIES - TBB malloc proxy libraries
+# TBB_DEFINITIONS                 - TBB compile time definitions
 #
 # The following variables affect the behavior of this module
 #
@@ -102,6 +103,52 @@ IF (NOT DEFINED TBB_MALLOC_LINK_LIBRARIES)
     ENDIF (TBB_MALLOC_LINK_LIBRARIES_RELEASE_FOUND AND
         TBB_MALLOC_LINK_LIBRARIES_DEBUG_FOUND)
 ENDIF (NOT DEFINED TBB_MALLOC_LINK_LIBRARIES)
+
+IF (NOT DEFINED TBB_MALLOC_PROXY_LINK_LIBRARIES)
+    FIND_LIBRARY (TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND
+        tbbmalloc_proxy
+        PATHS ${TBB_LIB_PATH} ENV LIBRARY_PATH ENV LIB NO_DEFAULT_PATH)
+    FIND_LIBRARY (TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND
+        tbbmalloc_proxy)
+    FIND_LIBRARY (TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND
+        tbbmalloc_proxy_debug
+        PATHS ${TBB_LIB_PATH} ENV LIBRARY_PATH ENV LIB NO_DEFAULT_PATH)
+    FIND_LIBRARY (TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND
+        tbbmalloc_proxy_debug)
+    IF (TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND AND
+            TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND)
+        SET (TBB_MALLOC_PROXY_LINK_LIBRARIES
+            optimized ${TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND}
+            debug ${TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND}
+            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
+            "Link to TBB malloc proxy")
+        SET (TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE
+            ${TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND}
+            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
+            "Link to TBB malloc proxy Release")
+        SET (TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG
+            ${TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND}
+            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
+            "Link to TBB malloc proxy Debug")
+        MESSAGE (STATUS
+            "Found TBB malloc proxy libraries: ${TBB_MALLOC_PROXY_LINK_LIBRARIES}")
+    ELSEIF (TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND)
+        SET (TBB_MALLOC_PROXY_LINK_LIBRARIES
+            ${TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND}
+            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
+            "Link to TBB malloc proxy")
+        SET (TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE
+            ${TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND}
+            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
+            "Link to TBB malloc proxy Release")
+        MESSAGE (STATUS
+            "Found TBB malloc proxy libraries: ${TBB_MALLOC_PROXY_LINK_LIBRARIES}")
+    ELSE (TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND AND
+            TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND)
+        MESSAGE (STATUS "NOT Found TBB malloc proxy libraries")
+    ENDIF (TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND AND
+        TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND)
+ENDIF (NOT DEFINED TBB_MALLOC_PROXY_LINK_LIBRARIES)
 
 IF (NOT DEFINED TBB_INCLUDE_DIR)
     FIND_PATH (TBB_INCLUDE_DIR tbb/tbb.h
