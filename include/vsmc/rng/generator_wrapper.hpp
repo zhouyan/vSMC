@@ -56,7 +56,7 @@ struct GeneratorWrapperMinMaxTrait
 /// or lose any bits.
 ///
 /// For most RNG generators, use only need to write a thin wrapper to use this
-/// class.  Also note that the `operator==` will always return false as this
+/// class. Also note that the `operator==` will always return false as this
 /// wrapper assume that the internal states of the RNG cannot be determined by
 /// this library (otherwise will have to require more interfaces of Generator).
 /// And all member functions, except `operator()`, does nothing. To seed and

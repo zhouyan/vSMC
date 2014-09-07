@@ -27,12 +27,12 @@ namespace internal {
 #endif // VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_5)
 #elif defined(__linux__)
 #include <features.h>
-#if defined(_POSIX_C_SOURCE) &&  _POSIX_C_SOURCE >= 200112L
+#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
 #ifndef VSMC_USE_POSIX_MEMALIGN
 #define VSMC_USE_POSIX_MEMALIGN 1
 #endif
 #endif // defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
-#if defined(_XOPEN_SOURCE) &&  _XOPEN_SOURCE >= 600
+#if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 600
 #ifndef VSMC_USE_POSIX_MEMALIGN
 #define VSMC_USE_POSIX_MEMALIGN 1
 #endif

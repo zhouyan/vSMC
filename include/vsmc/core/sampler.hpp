@@ -560,7 +560,7 @@ class Sampler
         std::size_t header_size = 1; // ESS
         header_size += accept_history_.size();
         if (path_.iter_size() > 0)
-            header_size +=  2;
+            header_size += 2;
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             if (m->second.iter_size() > 0)

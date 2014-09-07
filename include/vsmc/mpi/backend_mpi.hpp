@@ -482,7 +482,7 @@ class StateMPI : public BaseState
     /// particle received shall be unpacked. Otherwise,
     /// - If `from = copy_from[to]` is a particle on this node, insert a pair
     /// into `copy_send`, whose values are the rank of the node to which this
-    /// node shall send the particle  and the particle id *on this node* where
+    /// node shall send the particle and the particle id *on this node* where
     /// the particle sent shall be packed. Otherwise do nothing.
     ///
     /// It is important the the vector accessed through `copy_from_first` is

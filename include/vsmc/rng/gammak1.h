@@ -108,11 +108,11 @@
                                                                              \
         if (shape <= 1) {                                                    \
             rgamma->c_s2 = 0;                                                \
-            rgamma->c_s = 0;                                                 \
-            rgamma->c_d = 0;                                                 \
-            rgamma->c_b = 0;                                                 \
+            rgamma->c_s  = 0;                                                \
+            rgamma->c_d  = 0;                                                \
+            rgamma->c_b  = 0;                                                \
             rgamma->c_si = 0;                                                \
-            rgamma->c_c = 0;                                                 \
+            rgamma->c_c  = 0;                                                \
             rgamma->c_q0 = 0;                                                \
             return;                                                          \
         }                                                                    \
@@ -147,13 +147,13 @@
             c_c = 0.1515f / c_s;                                             \
         }                                                                    \
                                                                              \
-        rgamma->c_s2    = c_s2;                                              \
-        rgamma->c_s     = c_s;                                               \
-        rgamma->c_d     = c_d;                                               \
-        rgamma->c_b     = c_b;                                               \
-        rgamma->c_si    = c_si;                                              \
-        rgamma->c_c     = c_c;                                               \
-        rgamma->c_q0    = c_q0;                                              \
+        rgamma->c_s2 = c_s2;                                                 \
+        rgamma->c_s  = c_s;                                                  \
+        rgamma->c_d  = c_d;                                                  \
+        rgamma->c_b  = c_b;                                                  \
+        rgamma->c_si = c_si;                                                 \
+        rgamma->c_c  = c_c;                                                  \
+        rgamma->c_q0 = c_q0;                                                 \
     }
 
 #define VSMC_DEFINE_RNG_GAMMAK1_RAND(N, W, F, FT) \
@@ -238,7 +238,7 @@
             FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));     \
             e = -log(e);                                                     \
             u = u + u - 1;                                                   \
-            FT t = u < 0 ?  c_b - c_si * e : c_b + c_si * e;                 \
+            FT t = u < 0 ? c_b - c_si * e : c_b + c_si * e;                  \
                                                                              \
             const FT c_tau = -0.71874483771719;                              \
             if (t <= c_tau)                                                  \

@@ -247,14 +247,7 @@ class StateCL
     /// like the following
     /// ~~~{.cpp}
     /// typedef float fp_type;
-    /// #define VSMC_FP_TYPE_TYPE_IS_FLOAT  1
-    /// #define VSMC_FP_TYPE_TYPE_IS_DOUBLE 0
-    ///
-    /// #if defined(cl_khr_fp64)
-    /// #pragma OPENCL EXTENSION cl_khr_fp64 : enable
-    /// #elif defined(cl_amd_fp64)
-    /// #pragma OPENCL EXTENSION cl_amd_fp64 : enable
-    /// #endif
+    /// #define VSMC_HAS_OPENCL_DOUBLE 0
     ///
     /// typedef ulong size_type;
     /// #define Size 1000UL;

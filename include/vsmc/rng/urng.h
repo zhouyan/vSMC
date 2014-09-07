@@ -79,7 +79,7 @@
 /// uint32_t res = threefry4x32_rand(&rng);
 /// ~~~
 /// The function `threefry4x32_rand` will be responsible for increasing the
-/// counters.  The keys and counters can also be set manually. For example,
+/// counters. The keys and counters can also be set manually. For example,
 /// ~~~{.c}
 /// rng.key.v[0] = get_global_id(0);
 /// rng.ctr.v[0] = 0;
@@ -268,21 +268,21 @@ typedef threefry2x64_rng_t cburng2x64_rng_t;
 /// \ingroup CLRNG
 typedef threefry4x64_rng_t cburng4x64_rng_t;
 /// \ingroup CLRNG
-#define cburng2x32_init  threefry2x32_init
+#define cburng2x32_init threefry2x32_init
 /// \ingroup CLRNG
-#define cburng4x32_init  threefry4x32_init
+#define cburng4x32_init threefry4x32_init
 /// \ingroup CLRNG
-#define cburng2x64_init  threefry2x64_init
+#define cburng2x64_init threefry2x64_init
 /// \ingroup CLRNG
-#define cburng4x64_init  threefry4x64_init
+#define cburng4x64_init threefry4x64_init
 /// \ingroup CLRNG
-#define cburng2x32_rand  threefry2x32_rand
+#define cburng2x32_rand threefry2x32_rand
 /// \ingroup CLRNG
-#define cburng4x32_rand  threefry4x32_rand
+#define cburng4x32_rand threefry4x32_rand
 /// \ingroup CLRNG
-#define cburng2x64_rand  threefry2x64_rand
+#define cburng2x64_rand threefry2x64_rand
 /// \ingroup CLRNG
-#define cburng4x64_rand  threefry4x64_rand
+#define cburng4x64_rand threefry4x64_rand
 #else
 /// \ingroup CLRNG
 typedef philox2x32_rng_t cburng2x32_rng_t;
@@ -293,21 +293,21 @@ typedef philox2x64_rng_t cburng2x64_rng_t;
 /// \ingroup CLRNG
 typedef philox4x64_rng_t cburng4x64_rng_t;
 /// \ingroup CLRNG
-#define cburng2x32_init  philox2x32_init
+#define cburng2x32_init philox2x32_init
 /// \ingroup CLRNG
-#define cburng4x32_init  philox4x32_init
+#define cburng4x32_init philox4x32_init
 /// \ingroup CLRNG
-#define cburng2x64_init  philox2x64_init
+#define cburng2x64_init philox2x64_init
 /// \ingroup CLRNG
-#define cburng4x64_init  philox4x64_init
+#define cburng4x64_init philox4x64_init
 /// \ingroup CLRNG
-#define cburng2x32_rand  philox2x32_rand
+#define cburng2x32_rand philox2x32_rand
 /// \ingroup CLRNG
-#define cburng4x32_rand  philox4x32_rand
+#define cburng4x32_rand philox4x32_rand
 /// \ingroup CLRNG
-#define cburng2x64_rand  philox2x64_rand
+#define cburng2x64_rand philox2x64_rand
 /// \ingroup CLRNG
-#define cburng4x64_rand  philox4x64_rand
+#define cburng4x64_rand philox4x64_rand
 #endif
 
 #endif // VSMC_RNG_URNG_H

@@ -29,11 +29,11 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
 ~~~sh
 make docs
 ~~~
-The documentation can also be found [here][vSMCDoc]. A
-[tutorial][vSMCTutorial] is also available. However, it describes an earlier
-version of the library.  There are a few incompatibilities with the current
-version. It is still highly relevant. Users shall use the Doxygen generated
-documentations when things do not work exactly the same way as in the tutorial.
+The documentation can also be found [here][vSMCDoc]. A [tutorial][vSMCTutorial]
+is also available. However, it describes an earlier version of the library.
+There are a few incompatibilities with the current version. It is still highly
+relevant. Users shall use the Doxygen generated documentations when things do
+not work exactly the same way as in the tutorial.
 
 # Examples
 

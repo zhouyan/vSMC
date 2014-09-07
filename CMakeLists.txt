@@ -20,7 +20,7 @@ PROJECT (vSMC C CXX)
 SET (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 # Options
-OPTION (VSMC_ENABLE_EXAMPLE  "Enable building of examples" ON)
+OPTION (VSMC_ENABLE_EXAMPLE "Enable building of examples" ON)
 
 # User configurations
 IF (EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
