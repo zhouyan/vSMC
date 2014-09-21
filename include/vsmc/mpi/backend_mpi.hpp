@@ -41,10 +41,10 @@ class WeightSetMPI : public WeightSetBase
 
     explicit WeightSetMPI (size_type N) :
         WeightSetBase(N), world_(MPICommunicator<ID>::instance().get(),
-                boost::mpi::comm_duplicate),
+                ::boost::mpi::comm_duplicate),
         internal_barrier_(true), resample_size_(0)
     {
-        boost::mpi::all_reduce(world_, N, resample_size_,
+        ::boost::mpi::all_reduce(world_, N, resample_size_,
                 std::plus<size_type>());
         this->set_ess(static_cast<double>(resample_size_));
         barrier();
@@ -92,7 +92,7 @@ class WeightSetMPI : public WeightSetBase
     }
 
     /// \brief A duplicated MPI communicator for this weight set object
-    const boost::mpi::communicator &world () const {return world_;}
+    const ::boost::mpi::communicator &world () const {return world_;}
 
     void barrier () const {if (internal_barrier_) world_.barrier();}
 
@@ -112,8 +112,8 @@ class WeightSetMPI : public WeightSetBase
             if (lmax_weight < lwptr[i])
                 lmax_weight = lwptr[i];
         double gmax_weight = 0;
-        boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
-                boost::mpi::maximum<double>());
+        ::boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
+                ::boost::mpi::maximum<double>());
         for (size_type i = 0; i != N; ++i)
             lwptr[i] -= gmax_weight;
 
@@ -131,7 +131,7 @@ class WeightSetMPI : public WeightSetBase
         for (size_type i = 0; i != N; ++i)
             lcoeff += wptr[i];
         double gcoeff = 0;
-        boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
+        ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
         gcoeff = 1 / gcoeff;
         for (size_type i = 0; i != N; ++i)
             wptr[i] *= gcoeff;
@@ -140,7 +140,7 @@ class WeightSetMPI : public WeightSetBase
         for (size_type i = 0; i != N; ++i)
             less += wptr[i] * wptr[i];
         double gess = 0;
-        boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
+        ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
         gess = 1 / gess;
         this->set_ess(gess);
 
@@ -166,8 +166,8 @@ class WeightSetMPI : public WeightSetBase
                 if (lmax_weight < bptr[i])
                     lmax_weight = bptr[i];
             double gmax_weight = 0;
-            boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
-                    boost::mpi::maximum<double>());
+            ::boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
+                    ::boost::mpi::maximum<double>());
             for (size_type i = 0; i != N; ++i)
                 bptr[i] -= gmax_weight;
             for (size_type i = 0; i != N; ++i)
@@ -182,7 +182,7 @@ class WeightSetMPI : public WeightSetBase
         for (size_type i = 0; i != N; ++i)
             lcoeff += bptr[i];
         double gcoeff = 0;
-        boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
+        ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
         gcoeff = 1 / gcoeff;
         for (size_type i = 0; i != N; ++i)
             bptr[i] *= gcoeff;
@@ -191,7 +191,7 @@ class WeightSetMPI : public WeightSetBase
         for (size_type i = 0; i != N; ++i)
             less += bptr[i] * bptr[i];
         double gess = 0;
-        boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
+        ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
         gess = 1 / gess;
 
         barrier();
@@ -225,8 +225,8 @@ class WeightSetMPI : public WeightSetBase
         }
         double gabove = 0;
         double gbelow = 0;
-        boost::mpi::all_reduce(world_, labove, gabove, std::plus<double>());
-        boost::mpi::all_reduce(world_, lbelow, gbelow, std::plus<double>());
+        ::boost::mpi::all_reduce(world_, labove, gabove, std::plus<double>());
+        ::boost::mpi::all_reduce(world_, lbelow, gbelow, std::plus<double>());
 
         barrier();
 
@@ -235,7 +235,7 @@ class WeightSetMPI : public WeightSetBase
 
     private :
 
-    boost::mpi::communicator world_;
+    ::boost::mpi::communicator world_;
     bool internal_barrier_;
     size_type resample_size_;
     mutable std::vector<double> buffer_;
@@ -244,9 +244,9 @@ class WeightSetMPI : public WeightSetBase
     void gather_resample_weight () const
     {
         if (world_.rank() == 0)
-            boost::mpi::gather(world_, this->weight_vec(), weight_all_, 0);
+            ::boost::mpi::gather(world_, this->weight_vec(), weight_all_, 0);
         else
-            boost::mpi::gather(world_, this->weight_vec(), 0);
+            ::boost::mpi::gather(world_, this->weight_vec(), 0);
     }
 }; // class WeightSetMPI
 
@@ -260,10 +260,10 @@ class NormalizingConstantMPI : public NormalizingConstantBase
     NormalizingConstantMPI (std::size_t N) :
         NormalizingConstantBase(N),
         world_(MPICommunicator<ID>::instance().get(),
-                boost::mpi::comm_duplicate),
+                ::boost::mpi::comm_duplicate),
         internal_barrier_(true) {}
 
-    const boost::mpi::communicator &world () const {return world_;}
+    const ::boost::mpi::communicator &world () const {return world_;}
 
     void barrier () const {if (internal_barrier_) world_.barrier();}
 
@@ -277,7 +277,7 @@ class NormalizingConstantMPI : public NormalizingConstantBase
         double linc = NormalizingConstantBase::inc_zconst(
                 N, weight, inc_weight);
         double ginc = 0;
-        boost::mpi::all_reduce(world_, linc, ginc, std::plus<double>());
+        ::boost::mpi::all_reduce(world_, linc, ginc, std::plus<double>());
         barrier();
 
         return ginc;
@@ -285,7 +285,7 @@ class NormalizingConstantMPI : public NormalizingConstantBase
 
     private :
 
-    boost::mpi::communicator world_;
+    ::boost::mpi::communicator world_;
     bool internal_barrier_;
 }; // class NormalizingConstantMPI
 
@@ -304,12 +304,12 @@ class StateMPI : public BaseState
 
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),
-                boost::mpi::comm_duplicate),
+                ::boost::mpi::comm_duplicate),
         internal_barrier_(true),
         offset_(0), global_size_(0), size_equal_(true),
-        copy_tag_(boost::mpi::environment::max_tag())
+        copy_tag_(::boost::mpi::environment::max_tag())
     {
-        boost::mpi::all_gather(world_, N, size_all_);
+        ::boost::mpi::all_gather(world_, N, size_all_);
         const std::size_t R = static_cast<std::size_t>(world_.rank());
         const std::size_t S = static_cast<std::size_t>(world_.size());
         for (std::size_t i = 0; i != R; ++i) {
@@ -335,10 +335,11 @@ class StateMPI : public BaseState
     /// The `BaseState` type is required to have the following members -
     /// `state_pack_type`: A type that used to pack state values. It shall be
     /// serializable. That is, a `state_pack_type` object is acceptable by
-    /// `boost::mpi::communicator::send` etc. Both StateMatrix::state_pack_type
-    /// and StateTuple::state_pack_type satisfy this requirement if their
-    /// template type parameter types are serializable. For user defined types,
-    /// see document of Boost.Serialize of how to serialize a class object.
+    /// `::boost::mpi::communicator::send` etc. Both
+    /// StateMatrix::state_pack_type and StateTuple::state_pack_type satisfy
+    /// this requirement if their template type parameter types are
+    /// serializable. For user defined types, see document of Boost.Serialize
+    /// of how to serialize a class object.
     /// - `state_pack`
     /// ~~~{.cpp}
     /// state_pack_type state_pack (size_type id) const;
@@ -387,7 +388,7 @@ class StateMPI : public BaseState
                     cptr - copy_from, N, StateMPI::copy);
             std::memcpy(cptr, copy_from, sizeof(IntType) * N);
         }
-        boost::mpi::broadcast(world_, copy_from_, 0);
+        ::boost::mpi::broadcast(world_, copy_from_, 0);
 
         copy_this_node(N, &copy_from_[0], copy_recv_, copy_send_);
         barrier();
@@ -400,7 +401,7 @@ class StateMPI : public BaseState
     const std::vector<std::size_t> &copy_send_num () const {return send_num_;}
 
     /// \brief A duplicated MPI communicator for this state value object
-    const boost::mpi::communicator &world () const {return world_;}
+    const ::boost::mpi::communicator &world () const {return world_;}
 
     void barrier () const {if (internal_barrier_) world_.barrier();}
 
@@ -555,7 +556,7 @@ class StateMPI : public BaseState
 
     private :
 
-    boost::mpi::communicator world_;
+    ::boost::mpi::communicator world_;
     bool internal_barrier_;
     size_type offset_;
     size_type global_size_;

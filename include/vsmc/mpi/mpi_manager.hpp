@@ -21,8 +21,8 @@ namespace vsmc {
 /// \ingroup MPI
 ///
 /// \details
-/// Use this class in place of boost::mpi::environment to correctly initialize
-/// Seed
+/// Use this class in place of ::boost::mpi::environment to correctly
+/// initialize Seed
 class MPIEnvironment
 {
     public :
@@ -37,11 +37,11 @@ class MPIEnvironment
 
     private :
 
-    boost::mpi::environment env_;
+    ::boost::mpi::environment env_;
 
     void init_seed () const
     {
-        boost::mpi::communicator world;
+        ::boost::mpi::communicator world;
         Seed::instance().modulo(
                 static_cast<Seed::result_type>(world.size()),
                 static_cast<Seed::result_type>(world.rank()));

@@ -104,17 +104,17 @@ inline long double (log2) (long double x)
 template <typename T> inline double (log2) (T x)
 {using std::log; return log(static_cast<double>(x)) / log(2.);}
 
-using boost::math::expm1;
-using boost::math::log1p;
-using boost::math::cbrt;
-using boost::math::hypot;
-using boost::math::asinh;
-using boost::math::acosh;
-using boost::math::atanh;
-using boost::math::erf;
-using boost::math::erfc;
-using boost::math::lgamma;
-using boost::math::tgamma;
+using ::boost::math::expm1;
+using ::boost::math::log1p;
+using ::boost::math::cbrt;
+using ::boost::math::hypot;
+using ::boost::math::asinh;
+using ::boost::math::acosh;
+using ::boost::math::atanh;
+using ::boost::math::erf;
+using ::boost::math::erfc;
+using ::boost::math::lgamma;
+using ::boost::math::tgamma;
 
 } } // namespace vsmc::cxx11
 

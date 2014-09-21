@@ -68,51 +68,51 @@ using std::piecewise_linear_distribution;
 
 namespace vsmc { namespace cxx11 {
 
-using boost::random::linear_congruential_engine;
-using boost::random::mersenne_twister_engine;
-using boost::random::subtract_with_carry_engine;
-using boost::random::discard_block_engine;
-using boost::random::independent_bits_engine;
-using boost::random::shuffle_order_engine;
-using boost::random::minstd_rand0;
-using boost::random::minstd_rand;
-using boost::random::mt19937;
-using boost::random::mt19937_64;
-// using boost::random::ranlux24_base;
-typedef boost::random::subtract_with_carry_engine<boost::uint32_t, 24, 10, 24>
-    ranlux24_base;
-// using boost::random::ranlux48_base;
-typedef boost::random::subtract_with_carry_engine<boost::uint64_t, 48, 5, 12>
-    ranlux48_base;
-using boost::random::ranlux24;
-using boost::random::ranlux48;
-using boost::random::knuth_b;
-// using boost::random::default_random_engine;
-typedef boost::random::mt19937 default_random_engine;
-// using boost::random::random_device;
-using boost::random::seed_seq;
-using boost::random::generate_canonical;
-using boost::random::uniform_int_distribution;
-using boost::random::uniform_real_distribution;
-// using boost::random::bernoulli_distribution;
-typedef boost::random::bernoulli_distribution<double> bernoulli_distribution;
-using boost::random::binomial_distribution;
-using boost::random::geometric_distribution;
-using boost::random::negative_binomial_distribution;
-using boost::random::poisson_distribution;
-using boost::random::exponential_distribution;
-using boost::random::gamma_distribution;
-using boost::random::weibull_distribution;
-using boost::random::extreme_value_distribution;
-using boost::random::normal_distribution;
-using boost::random::lognormal_distribution;
-using boost::random::chi_squared_distribution;
-using boost::random::cauchy_distribution;
-using boost::random::fisher_f_distribution;
-using boost::random::student_t_distribution;
-using boost::random::discrete_distribution;
-using boost::random::piecewise_constant_distribution;
-using boost::random::piecewise_linear_distribution;
+using ::boost::random::linear_congruential_engine;
+using ::boost::random::mersenne_twister_engine;
+using ::boost::random::subtract_with_carry_engine;
+using ::boost::random::discard_block_engine;
+using ::boost::random::independent_bits_engine;
+using ::boost::random::shuffle_order_engine;
+using ::boost::random::minstd_rand0;
+using ::boost::random::minstd_rand;
+using ::boost::random::mt19937;
+using ::boost::random::mt19937_64;
+// using ::boost::random::ranlux24_base;
+typedef ::boost::random::subtract_with_carry_engine<
+    ::boost::uint32_t, 24, 10, 24> ranlux24_base;
+// using ::boost::random::ranlux48_base;
+typedef ::boost::random::subtract_with_carry_engine<
+    ::boost::uint64_t, 48, 5, 12> ranlux48_base;
+using ::boost::random::ranlux24;
+using ::boost::random::ranlux48;
+using ::boost::random::knuth_b;
+// using ::boost::random::default_random_engine;
+typedef ::boost::random::mt19937 default_random_engine;
+// using ::boost::random::random_device;
+using ::boost::random::seed_seq;
+using ::boost::random::generate_canonical;
+using ::boost::random::uniform_int_distribution;
+using ::boost::random::uniform_real_distribution;
+// using ::boost::random::bernoulli_distribution;
+typedef ::boost::random::bernoulli_distribution<double> bernoulli_distribution;
+using ::boost::random::binomial_distribution;
+using ::boost::random::geometric_distribution;
+using ::boost::random::negative_binomial_distribution;
+using ::boost::random::poisson_distribution;
+using ::boost::random::exponential_distribution;
+using ::boost::random::gamma_distribution;
+using ::boost::random::weibull_distribution;
+using ::boost::random::extreme_value_distribution;
+using ::boost::random::normal_distribution;
+using ::boost::random::lognormal_distribution;
+using ::boost::random::chi_squared_distribution;
+using ::boost::random::cauchy_distribution;
+using ::boost::random::fisher_f_distribution;
+using ::boost::random::student_t_distribution;
+using ::boost::random::discrete_distribution;
+using ::boost::random::piecewise_constant_distribution;
+using ::boost::random::piecewise_linear_distribution;
 } } //namespace vsmc::cxx11
 
 #endif // VSMC_HAS_CXX11LIB_RANDOM

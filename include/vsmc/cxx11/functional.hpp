@@ -29,7 +29,7 @@ using std::function;
 
 namespace vsmc { namespace cxx11 {
 
-using boost::function;
+using ::boost::function;
 
 } } // namespace vsmc::cxx11
 
