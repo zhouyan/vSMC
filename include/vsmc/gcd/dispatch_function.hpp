@@ -16,7 +16,7 @@
 
 namespace vsmc {
 
-/// \brief Wrap a callable object into a `dispatch_function_t` type pointer
+/// \brief Wrap a callable object into a `::dispatch_function_t` type pointer
 /// \ingroup Dispatch
 ///
 /// \details
@@ -62,7 +62,7 @@ class DispatchFunction
 
     void *context () {return static_cast<void *>(this);}
 
-    dispatch_function_t function () const {return function_;}
+    ::dispatch_function_t function () const {return function_;}
 
     private :
 

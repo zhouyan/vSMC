@@ -48,22 +48,22 @@ namespace internal {
 inline void *aligned_malloc (std::size_t n, std::size_t alignment)
 {
     void *ptr;
-    if (posix_memalign(&ptr, alignment, n) != 0)
+    if (::posix_memalign(&ptr, alignment, n) != 0)
         throw std::bad_alloc();
 
     return ptr;
 }
 
-inline void aligned_free (void *ptr) {free(ptr);}
+inline void aligned_free (void *ptr) {std::free(ptr);}
 
 #elif VSMC_USE_MKL
 
 #include <mkl_service.h>
 
 inline void *aligned_malloc (std::size_t n, std::size_t alignment)
-{return mkl_malloc(n, static_cast<int>(alignment));}
+{return ::mkl_malloc(n, static_cast<int>(alignment));}
 
-inline void aligned_free (void *ptr) {mkl_free(ptr);}
+inline void aligned_free (void *ptr) {::mkl_free(ptr);}
 
 #elif defined(_WIN32)
 
@@ -72,7 +72,7 @@ inline void aligned_free (void *ptr) {mkl_free(ptr);}
 inline void *aligned_malloc (std::size_t n, std::size_t alignment)
 {return _aligned_malloc(n, alignment);}
 
-inline void aligned_free (void *ptr) {aligned_free(ptr);}
+inline void aligned_free (void *ptr) {_aligned_free(ptr);}
 
 #else
 

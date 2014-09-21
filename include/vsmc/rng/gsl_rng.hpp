@@ -16,7 +16,7 @@
 
 #define VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(Generator, pointer) \
     template <> struct GSLRngTypePointer< GSL_RNG_TYPE_##Generator >         \
-    {static const gsl_rng_type *get () {return gsl_rng_##pointer ;}};
+    {static const ::gsl_rng_type *get () {return ::gsl_rng_##pointer ;}};
 
 #define VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(Generator, Min, Max) \
 template <> struct GSLRngMinMax< GSL_RNG_TYPE_##Generator >                  \
@@ -34,19 +34,19 @@ namespace vsmc {
 /// \brief GSL RNG algorithms
 /// \ingroup GSLRNG
 enum GSLRngType {
-    GSL_RNG_TYPE_MT19937,    ///< gsl_rng_mt19937
-    GSL_RNG_TYPE_RANLXS0,    ///< gsl_rng_ranlxs0
-    GSL_RNG_TYPE_RANLXS1,    ///< gsl_rng_ranlxs1
-    GSL_RNG_TYPE_RANLXS2,    ///< gsl_rng_ranlxs2
-    GSL_RNG_TYPE_RANLXD1,    ///< gsl_rng_ranlxd1
-    GSL_RNG_TYPE_RANLXD2,    ///< gsl_rng_ranlxd2
-    GSL_RNG_TYPE_RANLUX,     ///< gsl_rng_ranlux
-    GSL_RNG_TYPE_RANLUX389,  ///< gsl_rng_ranlux389
-    GSL_RNG_TYPE_CMRG,       ///< gsl_rng_cmrg
-    GSL_RNG_TYPE_MRG,        ///< gsl_rng_mrg
-    GSL_RNG_TYPE_TAUS,       ///< gsl_rng_taus
-    GSL_RNG_TYPE_TAUS2,      ///< gsl_rng_taus2
-    GSL_RNG_TYPE_GFSR4       ///< gsl_rng_gfsr4
+    GSL_RNG_TYPE_MT19937,    ///< ::gsl_rng_mt19937
+    GSL_RNG_TYPE_RANLXS0,    ///< ::gsl_rng_ranlxs0
+    GSL_RNG_TYPE_RANLXS1,    ///< ::gsl_rng_ranlxs1
+    GSL_RNG_TYPE_RANLXS2,    ///< ::gsl_rng_ranlxs2
+    GSL_RNG_TYPE_RANLXD1,    ///< ::gsl_rng_ranlxd1
+    GSL_RNG_TYPE_RANLXD2,    ///< ::gsl_rng_ranlxd2
+    GSL_RNG_TYPE_RANLUX,     ///< ::gsl_rng_ranlux
+    GSL_RNG_TYPE_RANLUX389,  ///< ::gsl_rng_ranlux389
+    GSL_RNG_TYPE_CMRG,       ///< ::gsl_rng_cmrg
+    GSL_RNG_TYPE_MRG,        ///< ::gsl_rng_mrg
+    GSL_RNG_TYPE_TAUS,       ///< ::gsl_rng_taus
+    GSL_RNG_TYPE_TAUS2,      ///< ::gsl_rng_taus2
+    GSL_RNG_TYPE_GFSR4       ///< ::gsl_rng_gfsr4
 }; // enum GSLRngType
 
 namespace internal {
@@ -150,7 +150,7 @@ class GSLGenerator
 
     private :
 
-    gsl_rng *rng_;
+    ::gsl_rng *rng_;
 }; // class GSLGenerator
 
 /// \brief GSL RNG Engine

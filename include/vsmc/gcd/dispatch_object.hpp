@@ -88,7 +88,7 @@ class DispatchObject
     void set_context (void *context) const
     {::dispatch_set_context(object_, context);}
 
-    void set_finalizer_f (dispatch_function_t finalizer) const
+    void set_finalizer_f (::dispatch_function_t finalizer) const
     {::dispatch_set_finalizer_f(object_, finalizer);}
 
     private :

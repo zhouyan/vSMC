@@ -36,16 +36,16 @@ template <DispatchSourceType> class DispatchSource;
 /// \ingroup Dispatch
 ///
 /// \bug A DispachSource object is manually retained when created. It is
-/// supposed to be retained by `dispatch_source_create` according to the
+/// supposed to be retained by `::dispatch_source_create` according to the
 /// documents. But this seems not to be the case in the current implementation
 /// (Mac OS X 10.9). The worst case is that a source object is retained one
 /// more time than it is released. A simple test example is,
 /// ~~~{.cpp}
-/// dispatch_source_t source = dispatch_source_create( /* arguments */ );
-/// dispatch_release(source); // generate error
+/// ::dispatch_source_t source = ::dispatch_source_create( /* arguments */ );
+/// ::dispatch_release(source); // generate error
 /// ~~~
 template <DispatchSourceType Type>
-class DispatchSourceBase : public DispatchObject<dispatch_source_t>
+class DispatchSourceBase : public DispatchObject< ::dispatch_source_t>
 {
     public :
 
@@ -67,14 +67,14 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     unsigned long get_mask () const
     {return ::dispatch_source_get_mask(this->object());}
 
-    void set_cancel_handler_f (dispatch_function_t cancel_handler) const
+    void set_cancel_handler_f (::dispatch_function_t cancel_handler) const
     {::dispatch_source_set_cancel_handler_f(this->object(), cancel_handler);}
 
-    void set_event_handler_f (dispatch_function_t event_handler) const
+    void set_event_handler_f (::dispatch_function_t event_handler) const
     {::dispatch_source_set_event_handler_f(this->object(), event_handler);}
 
 #if VSMC_USE_GCD_LION
-    void set_registration_handler_f (dispatch_function_t
+    void set_registration_handler_f (::dispatch_function_t
             registration_handler) const
     {
         ::dispatch_source_set_registration_handler_f(
@@ -83,14 +83,14 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
 #endif // VSMC_USE_GCD_LION
 
 #ifdef __BLOCKS__
-    void set_cancel_handler (dispatch_block_t cancel_handler) const
+    void set_cancel_handler (::dispatch_block_t cancel_handler) const
     {::dispatch_source_set_cancel_handler(this->object(), cancel_handler);}
 
-    void set_event_handler (dispatch_block_t event_handler) const
+    void set_event_handler (::dispatch_block_t event_handler) const
     {::dispatch_source_set_event_handler(this->object(), event_handler);}
 
 #if VSMC_USE_GCD_LION
-    void set_registration_handler (dispatch_block_t
+    void set_registration_handler (::dispatch_block_t
             registration_handler) const
     {
         ::dispatch_source_set_registration_handler(
@@ -106,8 +106,8 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     protected :
 
     DispatchSourceBase (uintptr_t handle, unsigned long mask,
-            dispatch_queue_t queue) :
-        DispatchObject<dispatch_source_t>(::dispatch_source_create(
+            ::dispatch_queue_t queue) :
+        DispatchObject< ::dispatch_source_t>(::dispatch_source_create(
                     source_type_t(source_type<Type>()),
                     handle, mask, queue))
     {
@@ -116,7 +116,7 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     }
 
     DispatchSourceBase (const DispatchSourceBase &other) :
-        DispatchObject<dispatch_source_t>(other)
+        DispatchObject< ::dispatch_source_t>(other)
     {
         if (this->object() != VSMC_NULLPTR)
             ::dispatch_retain(this->object());
@@ -125,9 +125,9 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     DispatchSourceBase &operator= (const DispatchSourceBase &other)
     {
         if (this != &other) {
-            DispatchObject<dispatch_source_t>::operator=(other);
+            DispatchObject< ::dispatch_source_t>::operator=(other);
             if (this->object() != VSMC_NULLPTR)
-                ::dispatch_retain(this->object());
+		::dispatch_retain(this->object());
         }
 
         return *this;
@@ -136,39 +136,49 @@ class DispatchSourceBase : public DispatchObject<dispatch_source_t>
     ~DispatchSourceBase ()
     {
         if (this->object() != VSMC_NULLPTR)
-            ::dispatch_release(this->object());
+	    ::dispatch_release(this->object());
     }
 
     private :
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchDataAdd>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchDataAdd>)
     {return DISPATCH_SOURCE_TYPE_DATA_ADD;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchDataOr>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchDataOr>)
     {return DISPATCH_SOURCE_TYPE_DATA_OR;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchMachRecv>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchMachRecv>)
     {return DISPATCH_SOURCE_TYPE_MACH_RECV;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchMachSend>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchMachSend>)
     {return DISPATCH_SOURCE_TYPE_MACH_SEND;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchProc>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchProc>)
     {return DISPATCH_SOURCE_TYPE_PROC;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchRead>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchRead>)
     {return DISPATCH_SOURCE_TYPE_READ;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchSignal>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchSignal>)
     {return DISPATCH_SOURCE_TYPE_SIGNAL;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchTimer>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchTimer>)
     {return DISPATCH_SOURCE_TYPE_TIMER;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchVnode>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchVnode>)
     {return DISPATCH_SOURCE_TYPE_VNODE;}
 
-    static dispatch_source_type_t source_type_t (source_type<DispatchWrite>)
+    static ::dispatch_source_type_t source_type_t (
+	    source_type<DispatchWrite>)
     {return DISPATCH_SOURCE_TYPE_WRITE;}
 }; // class DispatchSourceBase
 
@@ -185,7 +195,7 @@ class DispatchSource : public DispatchSourceBase<Type>
         DispatchSourceBase<Type>(handle, mask, queue.object()) {}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
-            dispatch_queue_t queue) :
+            ::dispatch_queue_t queue) :
         DispatchSourceBase<Type>(handle, mask, queue) {}
 }; // class DispatchSource
 
@@ -203,7 +213,7 @@ class DispatchSource<DispatchDataAdd> :
         DispatchSourceBase<DispatchDataAdd>(handle, mask, queue.object()) {}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
-            dispatch_queue_t queue) :
+            ::dispatch_queue_t queue) :
         DispatchSourceBase<DispatchDataAdd>(handle, mask, queue) {}
 
     void merge_data (unsigned long value) const
@@ -224,7 +234,7 @@ class DispatchSource<DispatchDataOr> :
         DispatchSourceBase<DispatchDataOr>(handle, mask, queue.object()) {}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
-            dispatch_queue_t queue) :
+            ::dispatch_queue_t queue) :
         DispatchSourceBase<DispatchDataOr>(handle, mask, queue) {}
 
     void merge_data (unsigned long value) const
@@ -245,10 +255,10 @@ class DispatchSource<DispatchTimer> :
         DispatchSourceBase<DispatchTimer>(handle, mask, queue.object()) {}
 
     DispatchSource (uintptr_t handle, unsigned long mask,
-            dispatch_queue_t queue) :
+            ::dispatch_queue_t queue) :
         DispatchSourceBase<DispatchTimer>(handle, mask, queue) {}
 
-    void set_timer (dispatch_time_t start,
+    void set_timer (::dispatch_time_t start,
             uint64_t interval, uint64_t leeway) const
     {::dispatch_source_set_timer(this->object(), start, interval, leeway);}
 }; // class DispatchSource

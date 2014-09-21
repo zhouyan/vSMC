@@ -151,7 +151,7 @@ inline void mkl_rng_error_check (MKL_INT, int, const char *, const char *) {}
 /// \brief Check MKL RNG error status
 /// \ingroup MKLRNG
 inline void mkl_rng_error_check (MKL_INT BRNG, int status,
-        const char *func, const char *vslf)
+        const char *func, const char *mklf)
 {
     if (status == VSL_ERROR_OK)
         return;
@@ -160,7 +160,7 @@ inline void mkl_rng_error_check (MKL_INT BRNG, int status,
     msg += func;
     msg += " failure";
     msg += "; MKL function: ";
-    msg += vslf;
+    msg += mklf;
 
     msg += "; BRNG: ";
     msg += mkl_rng_brng_str(BRNG);
@@ -274,7 +274,7 @@ struct MKLSkipAheadVSL
 
         int status = ::vslSkipAheadStream(stream.ptr(), nskip);
         mkl_rng_error_check(BRNG, status,
-                "MKLSkipAheadVSL::skip", "vslSkipAheadStream");
+                "MKLSkipAheadVSL::skip", "::vslSkipAheadStream");
     }
 
     static void buffer_size (MKL_INT) {}
@@ -369,11 +369,11 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
         status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), seed_);
         mkl_rng_error_check(BRNG, status,
-                "MKLStream::Stream", "vslNewStream");
+                "MKLStream::Stream", "::vslNewStream");
 
         status = ::vslGetBrngProperties(BRNG, &property_);
         mkl_rng_error_check(BRNG, status,
-                "MKLStream::Stream", "vslGetBrngProperties");
+                "MKLStream::Stream", "::vslGetBrngProperties");
     }
 
     template <typename SeedSeq>
@@ -387,11 +387,11 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
         status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), seed_);
         mkl_rng_error_check(BRNG, status,
-                "MKLStream::Stream", "vslNewStream");
+                "MKLStream::Stream", "::vslNewStream");
 
         status = ::vslGetBrngProperties(BRNG, &property_);
         mkl_rng_error_check(BRNG, status,
-                "MKLStream::Stream", "vslGetBrngProperties");
+                "MKLStream::Stream", "::vslGetBrngProperties");
     }
 
     MKLStream (const MKLStream<BRNG> &other) :
@@ -400,7 +400,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     {
         int status = ::vslCopyStream(&stream_ptr_, other.stream_ptr_);
         mkl_rng_error_check(BRNG, status,
-                "MKLStream::Stream", "vslCopyStream");
+                "MKLStream::Stream", "::vslCopyStream");
     }
 
     MKLStream<BRNG> &operator= (const MKLStream<BRNG> &other)
@@ -409,7 +409,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
             internal::MKLOffset<BRNG>::type::operator=(other);
             int status = ::vslCopyStreamState(stream_ptr_, other.stream_ptr_);
             mkl_rng_error_check(BRNG, status,
-                    "MKLStream::operator=", "vslCopyStreamState");
+                    "MKLStream::operator=", "::vslCopyStreamState");
             property_ = other.property_;
         }
 
@@ -452,21 +452,21 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         if (empty()) {
             status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), s);
             mkl_rng_error_check(BRNG, status,
-                    "MKLStream::seed", "vslNewStream");
+                    "MKLStream::seed", "::vslNewStream");
         } else {
             VSLStreamStatePtr new_stream_ptr;
 
             status = ::vslNewStream(&new_stream_ptr, BRNG + this->offset(), s);
             mkl_rng_error_check(BRNG, status,
-                    "MKLStream::seed", "vslNewStream");
+                    "MKLStream::seed", "::vslNewStream");
 
             status = ::vslCopyStreamState(stream_ptr_, new_stream_ptr);
             mkl_rng_error_check(BRNG, status,
-                    "MKLStream::seed", "vslCopyStreamState");
+                    "MKLStream::seed", "::vslCopyStreamState");
 
             status = ::vslDeleteStream(&new_stream_ptr);
             mkl_rng_error_check(BRNG, status,
-                    "MKLStream::seed", "vslDeleteStream");
+                    "MKLStream::seed", "::vslDeleteStream");
         }
 
     }
@@ -727,10 +727,10 @@ class MKLDistribution
 
         std::string dist_name(name);
         dist_name = "MKL" + dist_name + "Distribution::generate";
-        std::string vsl_name(vsl_name_prefix(static_cast<result_type>(0)));
-        vsl_name += "Rng";
-        vsl_name += name;
-        mkl_rng_error_check(BRNG, status, dist_name.c_str(), vsl_name.c_str());
+        std::string mkl_name(mkl_name_prefix(static_cast<result_type>(0)));
+        mkl_name += "Rng";
+        mkl_name += name;
+        mkl_rng_error_check(BRNG, status, dist_name.c_str(), mkl_name.c_str());
     }
 
     private :
@@ -739,11 +739,11 @@ class MKLDistribution
     MKL_INT buffer_size_;
     MKL_INT remain_;
 
-    std::string vsl_name_prefix (MKL_INT)            {return "vi";}
-    std::string vsl_name_prefix (unsigned)           {return "vi";}
-    std::string vsl_name_prefix (unsigned MKL_INT64) {return "vi";}
-    std::string vsl_name_prefix (float)              {return "vs";}
-    std::string vsl_name_prefix (double)             {return "vd";}
+    std::string mkl_name_prefix (MKL_INT)            {return "vi";}
+    std::string mkl_name_prefix (unsigned)           {return "vi";}
+    std::string mkl_name_prefix (unsigned MKL_INT64) {return "vi";}
+    std::string mkl_name_prefix (float)              {return "vs";}
+    std::string mkl_name_prefix (double)             {return "vd";}
 }; // class MKLDistribution
 
 /// \brief MKL uniform bits distribution (32-bits)
