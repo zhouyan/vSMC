@@ -19,8 +19,8 @@ namespace vsmc {
 /// \ingroup Dispatch
 enum DispatchQueueType {
     DispatchMain,    ///< The queue obtained by `dispatch_get_main_queue`
-    DispatchGlobal,  ///< The queue obtained by `::dispatch_get_gloal_queue`
-    DispatchPrivate  ///< The queue created by `::dispatch_queue_create`
+    DispatchGlobal,  ///< The queue obtained by `dispatch_get_gloal_queue`
+    DispatchPrivate  ///< The queue created by `dispatch_queue_create`
 }; // enum DispatchQueueType
 
 template <DispatchQueueType> class DispatchQueue;
@@ -125,7 +125,7 @@ class DispatchQueue<DispatchMain> : public DispatchQueueBase
     DispatchQueue () : DispatchQueueBase(dispatch_get_main_queue()) {}
 }; // class DispatchQueue
 
-/// \brief The global dispatch queue (`::dispatch_get_gloal_queue`)
+/// \brief The global dispatch queue (`dispatch_get_gloal_queue`)
 /// \ingroup Dispatch
 template <>
 class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
@@ -142,7 +142,7 @@ class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 #endif // VSMC_USE_GCD_LION
 }; // class DispatchQueue
 
-/// \brief A private dispatch queue (`::dispatch_queue_create`)
+/// \brief A private dispatch queue (`dispatch_queue_create`)
 /// \ingroup Dispatch
 template <>
 class DispatchQueue<DispatchPrivate> : public DispatchQueueBase

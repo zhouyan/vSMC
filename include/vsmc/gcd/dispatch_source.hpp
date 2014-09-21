@@ -36,7 +36,7 @@ template <DispatchSourceType> class DispatchSource;
 /// \ingroup Dispatch
 ///
 /// \bug A DispachSource object is manually retained when created. It is
-/// supposed to be retained by `::dispatch_source_create` according to the
+/// supposed to be retained by `dispatch_source_create` according to the
 /// documents. But this seems not to be the case in the current implementation
 /// (Mac OS X 10.9). The worst case is that a source object is retained one
 /// more time than it is released. A simple test example is,

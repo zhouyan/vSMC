@@ -16,7 +16,7 @@
 
 namespace vsmc {
 
-/// \brief Wrap a callable object into a `::dispatch_function_t` type pointer
+/// \brief Wrap a callable object into a `dispatch_function_t` type pointer
 /// \ingroup Dispatch
 ///
 /// \details

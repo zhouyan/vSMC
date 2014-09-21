@@ -335,11 +335,10 @@ class StateMPI : public BaseState
     /// The `BaseState` type is required to have the following members -
     /// `state_pack_type`: A type that used to pack state values. It shall be
     /// serializable. That is, a `state_pack_type` object is acceptable by
-    /// `::boost::mpi::communicator::send` etc. Both
-    /// StateMatrix::state_pack_type and StateTuple::state_pack_type satisfy
-    /// this requirement if their template type parameter types are
-    /// serializable. For user defined types, see document of Boost.Serialize
-    /// of how to serialize a class object.
+    /// `boost::mpi::communicator::send` etc. Both StateMatrix::state_pack_type
+    /// and StateTuple::state_pack_type satisfy this requirement if their
+    /// template type parameter types are serializable. For user defined types,
+    /// see document of Boost.Serialize of how to serialize a class object.
     /// - `state_pack`
     /// ~~~{.cpp}
     /// state_pack_type state_pack (size_type id) const;

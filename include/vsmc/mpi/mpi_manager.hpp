@@ -21,7 +21,7 @@ namespace vsmc {
 /// \ingroup MPI
 ///
 /// \details
-/// Use this class in place of ::boost::mpi::environment to correctly
+/// Use this class in place of `boost::mpi::environment` to correctly
 /// initialize Seed
 class MPIEnvironment
 {

@@ -393,7 +393,7 @@ class StateCL
 /// void kern (__global param *state, __global ulong *accept);
 /// ~~~
 /// is also acceptable, but now `state` has to be treat as a length `N` array.
-/// In summary, on the host side, it is a `::cl::Buffer` object being passed to
+/// In summary, on the host side, it is a `cl::Buffer` object being passed to
 /// the kernel, which is not much unlike `void *` pointer.
 template <typename T, typename>
 class InitializeCL
