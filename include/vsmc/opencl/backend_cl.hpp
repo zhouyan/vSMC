@@ -106,7 +106,7 @@ class ConfigureCL
     void local_size (std::size_t new_size) {local_size_ = new_size;}
 
     void local_size (std::size_t N,
-            const cl::Kernel &kern, const cl::Device &dev)
+            const ::cl::Kernel &kern, const ::cl::Device &dev)
     {
         std::size_t global_size;
         cl_preferred_work_size(N, kern, dev, global_size, local_size_);
@@ -228,10 +228,10 @@ class StateCL
     static manager_type &manager () {return manager_type::instance();}
 
     /// \brief The OpenCL buffer that stores the state values
-    const cl::Buffer &state_buffer () const {return state_buffer_;}
+    const ::cl::Buffer &state_buffer () const {return state_buffer_;}
 
     /// \brief The OpenCL program associated with this value collection
-    const cl::Program &program () const {return program_;}
+    const ::cl::Program &program () const {return program_;}
 
     /// \brief Build the OpenCL program from source
     ///
@@ -325,11 +325,11 @@ class StateCL
     ///
     /// \details
     /// If build() does not return `true`, then calling this is an error
-    cl::Kernel create_kernel (const std::string &name) const
+    ::cl::Kernel create_kernel (const std::string &name) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(create_kernel);
 
-        return cl::Kernel(program_, name.c_str());
+	return ::cl::Kernel(program_, name.c_str());
     }
 
     template<typename IntType>
@@ -355,8 +355,8 @@ class StateCL
     std::size_t state_size_;
     size_type size_;
 
-    cl::Program program_;
-    cl::Kernel kernel_copy_;
+    ::cl::Program program_;
+    ::cl::Kernel kernel_copy_;
     ConfigureCL configure_copy_;
 
     bool build_;
@@ -364,8 +364,8 @@ class StateCL
     std::string build_source_;
     std::string build_options_;
 
-    cl::Buffer state_buffer_;
-    cl::Buffer copy_from_buffer_;
+    ::cl::Buffer state_buffer_;
+    ::cl::Buffer copy_from_buffer_;
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype using OpenCL
@@ -393,7 +393,7 @@ class StateCL
 /// void kern (__global param *state, __global ulong *accept);
 /// ~~~
 /// is also acceptable, but now `state` has to be treat as a length `N` array.
-/// In summary, on the host side, it is a `cl::Buffer` object being passed to
+/// In summary, on the host side, it is a `::cl::Buffer` object being passed to
 /// the kernel, which is not much unlike `void *` pointer.
 template <typename T, typename>
 class InitializeCL
@@ -469,9 +469,9 @@ class InitializeCL
 
     const ConfigureCL &configure () const {return configure_;}
 
-    cl::Kernel &kernel () {return kernel_;}
+    ::cl::Kernel &kernel () {return kernel_;}
 
-    const cl::Kernel &kernel () const {return kernel_;}
+    const ::cl::Kernel &kernel () const {return kernel_;}
 
     void set_kernel (const Particle<T> &particle)
     {
@@ -495,10 +495,10 @@ class InitializeCL
 
     ConfigureCL configure_;
     int build_id_;
-    cl::Kernel kernel_;
+    ::cl::Kernel kernel_;
     std::string kernel_name_;
     std::vector<cl_ulong> accept_host_;
-    cl::Buffer accept_buffer_;
+    ::cl::Buffer accept_buffer_;
 }; // class InitializeCL
 
 /// \brief Sampler<T>::move_type subtype using OpenCL
@@ -582,9 +582,9 @@ class MoveCL
 
     const ConfigureCL &configure () const {return configure_;}
 
-    cl::Kernel &kernel () {return kernel_;}
+    ::cl::Kernel &kernel () {return kernel_;}
 
-    const cl::Kernel &kernel () const {return kernel_;}
+    const ::cl::Kernel &kernel () const {return kernel_;}
 
     void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
@@ -609,10 +609,10 @@ class MoveCL
 
     ConfigureCL configure_;
     int build_id_;
-    cl::Kernel kernel_;
+    ::cl::Kernel kernel_;
     std::string kernel_name_;
     std::vector<cl_ulong> accept_host_;
-    cl::Buffer accept_buffer_;
+    ::cl::Buffer accept_buffer_;
 }; // class MoveCL
 
 /// \brief Monitor<T>::eval_type subtype using OpenCL
@@ -693,9 +693,9 @@ class MonitorEvalCL
 
     const ConfigureCL &configure () const {return configure_;}
 
-    cl::Kernel &kernel () {return kernel_;}
+    ::cl::Kernel &kernel () {return kernel_;}
 
-    const cl::Kernel &kernel () const {return kernel_;}
+    const ::cl::Kernel &kernel () const {return kernel_;}
 
     void set_kernel (std::size_t iter, std::size_t dim,
             const Particle<T> &particle)
@@ -722,10 +722,10 @@ class MonitorEvalCL
 
     ConfigureCL configure_;
     int build_id_;
-    cl::Kernel kernel_;
+    ::cl::Kernel kernel_;
     std::string kernel_name_;
     std::size_t buffer_size_;
-    cl::Buffer buffer_;
+    ::cl::Buffer buffer_;
 }; // class MonitorEvalCL
 
 /// \brief Path<T>::eval_type subtype using OpenCL
@@ -809,9 +809,9 @@ class PathEvalCL
 
     const ConfigureCL &configure () const {return configure_;}
 
-    cl::Kernel &kernel () {return kernel_;}
+    ::cl::Kernel &kernel () {return kernel_;}
 
-    const cl::Kernel &kernel () const {return kernel_;}
+    const ::cl::Kernel &kernel () const {return kernel_;}
 
     void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
@@ -836,10 +836,10 @@ class PathEvalCL
 
     ConfigureCL configure_;
     int build_id_;
-    cl::Kernel kernel_;
+    ::cl::Kernel kernel_;
     std::string kernel_name_;
     std::size_t buffer_size_;
-    cl::Buffer buffer_;
+    ::cl::Buffer buffer_;
 }; // class PathEvalCL
 
 } // namespace vsmc
