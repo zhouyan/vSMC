@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
+#include <vector>
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
     VSMC_RUNTIME_ASSERT((setup()),                                           \
@@ -286,7 +287,7 @@ class CLManager
         if (!num)
             return ::cl::Buffer();
 
-	return ::cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
+        return ::cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
     }
 
     /// \brief Create an OpenCL buffer of a given type from a range of elements
@@ -317,13 +318,13 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
-        CLType *temp = read_buffer_pool<CLType>(num);
+        std::vector<CLType> buffer(num);
         command_queue_.finish();
         command_queue_.enqueueReadBuffer(buf, CL_TRUE, 0,
-                sizeof(CLType) * num, static_cast<void *>(temp));
+                sizeof(CLType) * num, static_cast<void *>(&buffer[0]));
 
         for (std::size_t i = 0; i != num; ++i, ++first)
-            *first = temp[i];
+            *first = buffer[i];
 
         return first;
     }
@@ -351,12 +352,12 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
-        CLType *temp = write_buffer_pool<CLType>(num);
+        std::vector<CLType> buffer(num);
         for (std::size_t i = 0; i != num; ++i, ++first)
-            temp[i] = *first;
+            buffer[i] = *first;
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, 0,
-                sizeof(CLType) * num, static_cast<void *>(temp));
+                sizeof(CLType) * num, static_cast<void *>(&buffer[0]));
 
         return first;
     }
@@ -444,25 +445,11 @@ class CLManager
     bool setup_;
     CLSetup<ID> &setup_default_;
 
-    mutable std::size_t read_buffer_pool_bytes_;
-    mutable std::size_t write_buffer_pool_bytes_;
-    mutable void *read_buffer_pool_;
-    mutable void *write_buffer_pool_;
-
-    CLManager () :
-        setup_(false), setup_default_(CLSetup<ID>::instance()),
-        read_buffer_pool_bytes_(0), write_buffer_pool_bytes_(0),
-        read_buffer_pool_(VSMC_NULLPTR), write_buffer_pool_(VSMC_NULLPTR)
+    CLManager () : setup_(false), setup_default_(CLSetup<ID>::instance())
     {setup_cl_manager(setup_default_.device_type());}
 
     CLManager (const CLManager<ID> &);
     CLManager<ID> &operator= (const CLManager<ID> &);
-
-    ~CLManager ()
-    {
-        std::free(read_buffer_pool_);
-        std::free(write_buffer_pool_);
-    }
 
     void setup_cl_manager (cl_device_type dev_type)
     {
@@ -589,36 +576,6 @@ class CLManager
                 } catch (::cl::Error) {}
             }
         }
-    }
-
-    template <typename CLType>
-    CLType *read_buffer_pool (std::size_t num) const
-    {
-        std::size_t new_bytes = num * sizeof(CLType);
-        if (new_bytes > read_buffer_pool_bytes_) {
-            std::free(read_buffer_pool_);
-            read_buffer_pool_ = std::malloc(new_bytes);
-            if (!read_buffer_pool_ && new_bytes)
-                throw std::bad_alloc();
-            read_buffer_pool_bytes_ = new_bytes;
-        }
-
-        return static_cast<CLType *>(read_buffer_pool_);
-    }
-
-    template <typename CLType>
-    CLType *write_buffer_pool (std::size_t num) const
-    {
-        std::size_t new_bytes = num * sizeof(CLType);
-        if (new_bytes > write_buffer_pool_bytes_) {
-            std::free(write_buffer_pool_);
-            write_buffer_pool_ = std::malloc(new_bytes);
-            if (!write_buffer_pool_ && new_bytes)
-                throw std::bad_alloc();
-            write_buffer_pool_bytes_ = new_bytes;
-        }
-
-        return static_cast<CLType *>(write_buffer_pool_);
     }
 
     ::cl::NDRange get_global_nd_range (
