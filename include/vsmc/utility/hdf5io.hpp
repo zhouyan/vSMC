@@ -25,11 +25,11 @@ namespace vsmc {
 namespace internal {
 
 template <MatrixOrder>
-inline void hdf5io_matrix_dim (std::size_t, std::size_t, hsize_t *);
+inline void hdf5io_matrix_dim (std::size_t, std::size_t, ::hsize_t *);
 
 template <>
 inline void hdf5io_matrix_dim<RowMajor> (std::size_t nrow, std::size_t ncol,
-        hsize_t *dim)
+        ::hsize_t *dim)
 {
     dim[0] = ncol;
     dim[1] = nrow;
@@ -37,7 +37,7 @@ inline void hdf5io_matrix_dim<RowMajor> (std::size_t nrow, std::size_t ncol,
 
 template <>
 inline void hdf5io_matrix_dim<ColMajor> (std::size_t nrow, std::size_t ncol,
-        hsize_t *dim)
+        ::hsize_t *dim)
 {
     dim[1] = ncol;
     dim[0] = nrow;
@@ -76,95 +76,95 @@ struct HDF5DataPtr
 
 /// \brief HDF5 data type
 /// \ingroup HDFIO
-template <typename> inline hid_t hdf5io_datatype () {return -1;}
+template <typename> inline ::hid_t hdf5io_datatype () {return -1;}
 
 /// \brief HDF5 data type specialization for char
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<char> ()
-{return H5Tcopy(H5T_NATIVE_CHAR);}
+inline ::hid_t hdf5io_datatype<char> ()
+{return ::H5Tcopy(H5T_NATIVE_CHAR);}
 
 /// \brief HDF5 data type specialization for signed char
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<signed char> ()
-{return H5Tcopy(H5T_NATIVE_SCHAR);}
+inline ::hid_t hdf5io_datatype<signed char> ()
+{return ::H5Tcopy(H5T_NATIVE_SCHAR);}
 
 /// \brief HDF5 data type specialization for unsigned char
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<unsigned char> ()
-{return H5Tcopy(H5T_NATIVE_UCHAR);}
+inline ::hid_t hdf5io_datatype<unsigned char> ()
+{return ::H5Tcopy(H5T_NATIVE_UCHAR);}
 
 /// \brief HDF5 data type specialization for short
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<short> ()
-{return H5Tcopy(H5T_NATIVE_SHORT);}
+inline ::hid_t hdf5io_datatype<short> ()
+{return ::H5Tcopy(H5T_NATIVE_SHORT);}
 
 /// \brief HDF5 data type specialization for unsigned short
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<unsigned short> ()
-{return H5Tcopy(H5T_NATIVE_UCHAR);}
+inline ::hid_t hdf5io_datatype<unsigned short> ()
+{return ::H5Tcopy(H5T_NATIVE_UCHAR);}
 
 /// \brief HDF5 data type specialization for int
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<int> ()
-{return H5Tcopy(H5T_NATIVE_INT);}
+inline ::hid_t hdf5io_datatype<int> ()
+{return ::H5Tcopy(H5T_NATIVE_INT);}
 
 /// \brief HDF5 data type specialization for unsigned int
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<unsigned int> ()
-{return H5Tcopy(H5T_NATIVE_UINT);}
+inline ::hid_t hdf5io_datatype<unsigned int> ()
+{return ::H5Tcopy(H5T_NATIVE_UINT);}
 
 /// \brief HDF5 data type specialization for long
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<long> ()
-{return H5Tcopy(H5T_NATIVE_LONG);}
+inline ::hid_t hdf5io_datatype<long> ()
+{return ::H5Tcopy(H5T_NATIVE_LONG);}
 
 /// \brief HDF5 data type specialization for unsigned long
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<unsigned long> ()
-{return H5Tcopy(H5T_NATIVE_ULONG);}
+inline ::hid_t hdf5io_datatype<unsigned long> ()
+{return ::H5Tcopy(H5T_NATIVE_ULONG);}
 
 #if VSMC_HAS_CXX11_LONG_LONG
 
 /// \brief HDF5 data type specialization for long long
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<long long> ()
-{return H5Tcopy(H5T_NATIVE_LLONG);}
+inline ::hid_t hdf5io_datatype<long long> ()
+{return ::H5Tcopy(H5T_NATIVE_LLONG);}
 
 /// \brief HDF5 data type specialization for unsigned long
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<unsigned long long> ()
-{return H5Tcopy(H5T_NATIVE_ULLONG);}
+inline ::hid_t hdf5io_datatype<unsigned long long> ()
+{return ::H5Tcopy(H5T_NATIVE_ULLONG);}
 
 #endif // VSMC_HAS_CXX11_LONG_LONG
 
 /// \brief HDF5 data type specialization for float
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<float> ()
-{return H5Tcopy(H5T_NATIVE_FLOAT);}
+inline ::hid_t hdf5io_datatype<float> ()
+{return ::H5Tcopy(H5T_NATIVE_FLOAT);}
 
 /// \brief HDF5 data type specialization for double
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<double> ()
-{return H5Tcopy(H5T_NATIVE_DOUBLE);}
+inline ::hid_t hdf5io_datatype<double> ()
+{return ::H5Tcopy(H5T_NATIVE_DOUBLE);}
 
 /// \brief HDF5 data type specialization for long double
 /// \ingroup HDF5IO
 template <>
-inline hid_t hdf5io_datatype<long double> ()
-{return H5Tcopy(H5T_NATIVE_LDOUBLE);}
+inline ::hid_t hdf5io_datatype<long double> ()
+{return ::H5Tcopy(H5T_NATIVE_LDOUBLE);}
 
 /// \brief Save a matrix in the HDF5 format from an input iterator
 /// \ingroup HDF5IO
@@ -187,29 +187,29 @@ inline InputIter hdf5store_matrix (std::size_t nrow, std::size_t ncol,
         return first;
 
     std::string dataset_name("/" + data_name);
-    hsize_t dim[2];
+    ::hsize_t dim[2];
     internal::hdf5io_matrix_dim<Order>(nrow, ncol, dim);
     internal::HDF5DataPtr<T> data_ptr;
     InputIter last = data_ptr.set(nrow * ncol, first);
     const T *data = data_ptr.get();
 
-    hid_t datafile;
+    ::hid_t datafile;
     if (append) {
-        datafile = H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+        datafile = ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
     } else {
-        datafile = H5Fcreate(file_name.c_str(),
+        datafile = ::H5Fcreate(file_name.c_str(),
                 H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     }
-    hid_t dataspace = H5Screate_simple(2, dim, VSMC_NULLPTR);
-    hid_t datatype = hdf5io_datatype<T>();
-    hid_t dataset = H5Dcreate(datafile, dataset_name.c_str(),
+    ::hid_t dataspace = ::H5Screate_simple(2, dim, VSMC_NULLPTR);
+    ::hid_t datatype = hdf5io_datatype<T>();
+    ::hid_t dataset = ::H5Dcreate(datafile, dataset_name.c_str(),
             datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    ::H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
-    H5Dclose(dataset);
-    H5Tclose(datatype);
-    H5Sclose(dataspace);
-    H5Fclose(datafile);
+    ::H5Dclose(dataset);
+    ::H5Tclose(datatype);
+    ::H5Sclose(dataspace);
+    ::H5Fclose(datafile);
 
     return last;
 }
@@ -243,38 +243,38 @@ inline void hdf5store_data_frame (std::size_t nrow, std::size_t ncol,
         InputIterIter first, SInputIter sfirst, bool append = false)
 {
     std::string group_name("/" + data_name);
-    hsize_t dim[1] = {nrow};
+    ::hsize_t dim[1] = {nrow};
 
-    hid_t datafile;
+    ::hid_t datafile;
     if (append) {
-        datafile = H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+        datafile = ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
     } else {
-        datafile = H5Fcreate(file_name.c_str(),
+        datafile = ::H5Fcreate(file_name.c_str(),
                 H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     }
-    hid_t datagroup = H5Gcreate(datafile, group_name.c_str(),
+    ::hid_t datagroup = ::H5Gcreate(datafile, group_name.c_str(),
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     if (nrow != 0 && ncol != 0) {
-        hid_t dataspace = H5Screate_simple(1, dim, VSMC_NULLPTR);
-        hid_t datatype = hdf5io_datatype<T>();
+        ::hid_t dataspace = ::H5Screate_simple(1, dim, VSMC_NULLPTR);
+        ::hid_t datatype = hdf5io_datatype<T>();
         internal::HDF5DataPtr<T> data_ptr;
         for (std::size_t j = 0; j != ncol; ++j, ++first, ++sfirst) {
             data_ptr.set(nrow, *first);
             const T *data = data_ptr.get();
             std::string dataset_name(group_name + "/" + (*sfirst));
-            hid_t dataset = H5Dcreate(datafile, dataset_name.c_str(),
+            ::hid_t dataset = ::H5Dcreate(datafile, dataset_name.c_str(),
                     datatype, dataspace,
                     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-            H5Dclose(dataset);
+            ::H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+            ::H5Dclose(dataset);
         }
-        H5Tclose(datatype);
-        H5Sclose(dataspace);
+        ::H5Tclose(datatype);
+        ::H5Sclose(dataspace);
     }
 
-    H5Gclose(datagroup);
-    H5Fclose(datafile);
+    ::H5Gclose(datagroup);
+    ::H5Fclose(datafile);
 }
 
 /// \brief Insert a variable into an existing data frame saved in HDF5 format
@@ -295,22 +295,22 @@ inline void hdf5_insert_data_frame (std::size_t N,
         return;
 
     std::string dataset_name("/" + data_name + "/" + vname);
-    hsize_t dim[1] = {N};
+    ::hsize_t dim[1] = {N};
 
-    hid_t datafile = H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-    hid_t dataspace = H5Screate_simple(1, dim, VSMC_NULLPTR);
-    hid_t datatype = hdf5io_datatype<T>();
+    ::hid_t datafile = ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    ::hid_t dataspace = ::H5Screate_simple(1, dim, VSMC_NULLPTR);
+    ::hid_t datatype = hdf5io_datatype<T>();
     internal::HDF5DataPtr<T> data_ptr;
     data_ptr.set(N, first);
     const T *data = data_ptr.get();
-    hid_t dataset = H5Dcreate(datafile, dataset_name.c_str(),
+    ::hid_t dataset = ::H5Dcreate(datafile, dataset_name.c_str(),
             datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    ::H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
-    H5Dclose(dataset);
-    H5Tclose(datatype);
-    H5Sclose(dataspace);
-    H5Fclose(datafile);
+    ::H5Dclose(dataset);
+    ::H5Tclose(datatype);
+    ::H5Sclose(dataspace);
+    ::H5Fclose(datafile);
 }
 
 #if VSMC_HAS_CXX11LIB_TUPLE
