@@ -229,16 +229,16 @@ class ProgramOption
 
     virtual bool is_bool () const = 0;
     virtual bool is_vector () const = 0;
-    virtual bool set (std::stringstream &, const std::string &,
-            const std::string &, bool, std::ostream &) = 0;
+    virtual bool set (const std::string &, const std::string &, bool,
+            std::ostream &) = 0;
     virtual bool set_default () = 0;
     virtual void print_help (const std::string &, std::ostream &) const = 0;
     virtual ProgramOption *clone () const = 0;
 
     protected :
 
-    bool set_value (std::stringstream &, const std::string &oname,
-            const std::string &sval, bool *dest, bool silent, std::ostream &os)
+    bool set_value (const std::string &oname, const std::string &sval,
+            bool *dest, bool silent, std::ostream &os)
     {
         const char *const sptr = sval.c_str();
         const std::size_t size = sval.size();
@@ -296,10 +296,10 @@ class ProgramOption
     }
 
     template <typename T>
-    bool set_value (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, T *dest, bool silent, std::ostream &os)
+    bool set_value (const std::string &oname, const std::string &sval,
+            T *dest, bool silent, std::ostream &os)
     {
-        ss.clear();
+        std::stringstream ss;
         ss.str(sval);
         T tval;
         ss >> tval;
@@ -331,9 +331,9 @@ class ProgramOptionHelp : public ProgramOption
 
     bool is_vector () const {return false;}
 
-    bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, bool silent, std::ostream &os)
-    {return set_value(ss, oname, sval, &help_, silent, os);}
+    bool set (const std::string &oname, const std::string &sval, bool silent,
+            std::ostream &os)
+    {return set_value(oname, sval, &help_, silent, os);}
 
     bool set_default () {return false;}
 
@@ -434,9 +434,9 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 
     bool is_vector () const {return false;}
 
-    bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, bool silent, std::ostream &os)
-    {return this->set_value(ss, oname, sval, ptr_, silent, os);}
+    bool set (const std::string &oname, const std::string &sval, bool silent,
+            std::ostream &os)
+    {return this->set_value(oname, sval, ptr_, silent, os);}
 
     bool set_default () {return this->set_value_default(ptr_);}
 
@@ -465,10 +465,10 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
 
     bool is_vector () const {return true;}
 
-    bool set (std::stringstream &ss, const std::string &oname,
-            const std::string &sval, bool silent, std::ostream &os)
+    bool set (const std::string &oname, const std::string &sval, bool silent,
+            std::ostream &os)
     {
-        bool success = this->set_value(ss, oname, sval, &val_, silent, os);
+        bool success = this->set_value(oname, sval, &val_, silent, os);
 
         if (success)
             ptr_->push_back(val_);
@@ -783,7 +783,6 @@ class ProgramOptionMap
     ProgramOptionHelp *help_ptr_;
     option_map_type option_map_;
     option_list_type option_list_;
-    mutable std::stringstream ss_;
 
     option_list_type::iterator option_list_find (const std::string &oname)
     {
@@ -892,7 +891,7 @@ class ProgramOptionMap
             return false;
         }
 
-        return iter->second.first->set(ss_, iter->first, sval, silent_, os);
+        return iter->second.first->set(iter->first, sval, silent_, os);
     }
 
     bool is_option (const std::string &str) const

@@ -154,8 +154,8 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        buffer_.resize(N);
-        double *const bptr = &buffer_[0];
+        std::vector<double> buffer(N);
+        double *const bptr = &buffer[0];
 
         if (use_log) {
             const double *const lwptr = this->log_weight_ptr();
@@ -208,9 +208,10 @@ class WeightSetMPI : public WeightSetBase
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
         const double *const wptr = this->weight_ptr();
+        std::vector<double> buffer;
         if (use_log) {
-            buffer_.resize(N);
-            double *const cptr = &buffer_[0];
+            buffer.resize(N);
+            double *const cptr = &buffer[0];
             for (size_type i = 0; i != N; ++i)
                 cptr[i] = exp(first[i]);
             bptr = cptr;
@@ -238,7 +239,6 @@ class WeightSetMPI : public WeightSetBase
     ::boost::mpi::communicator world_;
     bool internal_barrier_;
     size_type resample_size_;
-    mutable std::vector<double> buffer_;
     mutable std::vector<std::vector<double> > weight_all_;
 
     void gather_resample_weight () const
