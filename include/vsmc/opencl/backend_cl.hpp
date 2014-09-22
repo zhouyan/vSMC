@@ -329,7 +329,7 @@ class StateCL
     {
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(create_kernel);
 
-	return ::cl::Kernel(program_, name.c_str());
+        return ::cl::Kernel(program_, name.c_str());
     }
 
     template<typename IntType>
