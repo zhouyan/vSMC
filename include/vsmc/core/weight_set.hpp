@@ -81,8 +81,8 @@ class WeightSet
     template <typename InputIter>
     double ess (InputIter first, bool use_log) const
     {
-        data_buffer_.resize(size_);
-        double *const bptr = &data_buffer_[0];
+        std::vector<double> buffer(size_);
+        double *const bptr = &buffer[0];
         for (size_type i = 0; i != size_; ++i, ++first)
             bptr[i] = *first;
 
@@ -93,8 +93,8 @@ class WeightSet
     template <typename RandomIter>
     double ess (RandomIter first, int stride, bool use_log) const
     {
-        data_buffer_.resize(size_);
-        double *const bptr = &data_buffer_[0];
+        std::vector<double> buffer(size_);
+        double *const bptr = &buffer[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             bptr[i] = *first;
 
@@ -105,8 +105,8 @@ class WeightSet
     template <typename InputIter>
     double cess (InputIter first, bool use_log) const
     {
-        data_buffer_.resize(size_);
-        double *const bptr = &data_buffer_[0];
+        std::vector<double> buffer(size_);
+        double *const bptr = &buffer[0];
         for (size_type i = 0; i != size_; ++i, ++first)
             bptr[i] = *first;
 
@@ -117,8 +117,8 @@ class WeightSet
     template <typename RandomIter>
     double cess (RandomIter first, int stride, bool use_log) const
     {
-        data_buffer_.resize(size_);
-        double *const bptr = &data_buffer_[0];
+        std::vector<double> buffer(size_);
+        double *const bptr = &buffer[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             bptr[i] = *first;
 
@@ -468,8 +468,8 @@ class WeightSet
     {
         using std::exp;
 
-        compute_buffer_.resize(size_);
-        double *const bptr = &compute_buffer_[0];
+        std::vector<double> buffer(size_);
+        double *const bptr = &buffer[0];
 
         if (use_log) {
             const double *const lwptr = log_weight_ptr();
@@ -511,9 +511,10 @@ class WeightSet
 
         const double *bptr = first;
         const double *const wptr = weight_ptr();
+        std::vector<double> buffer;
         if (use_log) {
-            compute_buffer_.resize(size_);
-            double *const cptr = &compute_buffer_[0];
+            buffer.resize(size_);
+            double *const cptr = &buffer[0];
             for (size_type i = 0; i != size_; ++i)
                 cptr[i] = exp(first[i]);
             bptr = cptr;
@@ -536,8 +537,6 @@ class WeightSet
     double ess_;
     std::vector<double> weight_;
     std::vector<double> log_weight_;
-    mutable std::vector<double> data_buffer_;
-    mutable std::vector<double> compute_buffer_;
 
     void post_set_log_weight ()
     {

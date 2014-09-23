@@ -70,9 +70,9 @@ inline void aligned_free (void *ptr) {::mkl_free(ptr);}
 #include <malloc.h>
 
 inline void *aligned_malloc (std::size_t n, std::size_t alignment)
-{return _aligned_malloc(n, alignment);}
+{return ::_aligned_malloc(n, alignment);}
 
-inline void aligned_free (void *ptr) {_aligned_free(ptr);}
+inline void aligned_free (void *ptr) {::_aligned_free(ptr);}
 
 #else
 

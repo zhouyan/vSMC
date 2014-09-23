@@ -52,9 +52,9 @@ class DummyStopWatch
     public :
 
     bool running () const {return running_;}
-    void start () const {running_ = true;}
-    void stop  () const {running_ = false;}
-    void reset () const {running_ = false;}
+    void start () {running_ = true;}
+    void stop  () {running_ = false;}
+    void reset () {running_ = false;}
 
     double nanoseconds  () const {return 1;}
     double microseconds () const {return 1e-3;}
@@ -67,7 +67,7 @@ class DummyStopWatch
 
     private :
 
-    mutable bool running_;
+    bool running_;
 }; // class DummyStopWatch
 
 } // namespace vsmc::internal
@@ -114,20 +114,20 @@ class StopWatchClockAdapter
 
     bool running () const {return running_;}
 
-    void start () const
+    void start ()
     {
         running_ = true;
         start_time_ = clock_type::now();
     }
 
-    void stop () const
+    void stop ()
     {
         typename clock_type::time_point stop_time = clock_type::now();
         elapsed_ += stop_time - start_time_;
         running_ = false;
     }
 
-    void reset () const
+    void reset ()
     {
         start();
         elapsed_ = typename clock_type::duration(0);
@@ -192,9 +192,9 @@ class StopWatchClockAdapter
 
     private :
 
-    mutable typename clock_type::duration elapsed_;
-    mutable typename clock_type::time_point start_time_;
-    mutable bool running_;
+    typename clock_type::duration elapsed_;
+    typename clock_type::time_point start_time_;
+    bool running_;
 }; // class StopWatchClockAdapter
 
 /// \brief Stop watch
@@ -218,17 +218,17 @@ class StopWatch
 
     StopWatch () : running_(false) {reset();}
 
-    bool running () const {return running_;}
+    bool running () {return running_;}
 
-    void start () const
+    void start ()
     {
         running_ = true;
-        start_time_ = mach_absolute_time();
+        start_time_ = ::mach_absolute_time();
     }
 
-    void stop () const
+    void stop ()
     {
-        uint64_t stop_time = mach_absolute_time();
+        uint64_t stop_time = ::mach_absolute_time();
         uint64_t elapsed_abs = stop_time - start_time_;
         uint64_t elapsed_nsec = elapsed_abs *
             timebase_.numer / timebase_.denom;
@@ -239,12 +239,12 @@ class StopWatch
         running_ = false;
     }
 
-    void reset () const
+    void reset ()
     {
         start();
         elapsed_sec_ = 0;
         elapsed_nsec_ = 0;
-        mach_timebase_info(&timebase_);
+        ::mach_timebase_info(&timebase_);
         running_ = false;
     }
 
@@ -305,11 +305,11 @@ class StopWatch
 
     private :
 
-    mutable uint64_t elapsed_sec_;
-    mutable uint64_t elapsed_nsec_;
-    mutable uint64_t start_time_;
-    mutable mach_timebase_info_data_t timebase_;
-    mutable bool running_;
+    uint64_t elapsed_sec_;
+    uint64_t elapsed_nsec_;
+    uint64_t start_time_;
+    ::mach_timebase_info_data_t timebase_;
+    bool running_;
     static VSMC_CONSTEXPR const uint64_t ratio_ =
         static_cast<uint64_t>(1000000000ULL); // 9 zero
 }; // class StopWatch
@@ -332,18 +332,18 @@ class StopWatch
 
     StopWatch () : running_(false) {reset();}
 
-    bool running () const {return running_;}
+    bool running () {return running_;}
 
-    void start () const
+    void start ()
     {
         running_ = true;
-        clock_gettime(CLOCK_REALTIME, &start_time_);
+        ::clock_gettime(CLOCK_REALTIME, &start_time_);
     }
 
-    void stop () const
+    void stop ()
     {
         timespec stop_time;
-        clock_gettime(CLOCK_REALTIME, &stop_time);
+        ::clock_gettime(CLOCK_REALTIME, &stop_time);
         time_t sec = stop_time.tv_sec - start_time_.tv_sec;
         long nsec = stop_time.tv_nsec - start_time_.tv_nsec;
 
@@ -354,7 +354,7 @@ class StopWatch
         running_ = false;
     }
 
-    void reset () const
+    void reset ()
     {
         start();
         elapsed_.tv_sec = 0;
@@ -419,9 +419,9 @@ class StopWatch
 
     private :
 
-    mutable timespec elapsed_;
-    mutable timespec start_time_;
-    mutable bool running_;
+    ::timespec elapsed_;
+    ::timespec start_time_;
+    bool running_;
     static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
 }; // class StopWatch
 
@@ -444,30 +444,30 @@ class StopWatch
         elapsed_(0), start_time_(0), frequency_(0), running_(false)
     {reset();}
 
-    bool running () const {return running_;}
+    bool running () {return running_;}
 
-    void start () const
+    void start ()
     {
         running_ = true;
         LARGE_INTEGER time;
-        QueryPerformanceCounter(&time);
+        ::QueryPerformanceCounter(&time);
         start_time_ = time.QuadPart;
     }
 
-    void stop () const
+    void stop ()
     {
         LARGE_INTEGER time;
-        QueryPerformanceCounter(&time);
+        ::QueryPerformanceCounter(&time);
         elapsed_ += time.QuadPart - start_time_;
         running_ = false;
     }
 
-    void reset () const
+    void reset ()
     {
         start();
         elapsed_ = 0;
         LARGE_INTEGER freq;
-        QueryPerformanceFrequency(&freq);
+        ::QueryPerformanceFrequency(&freq);
         frequency_ = static_cast<double>(freq.QuadPart);
         running_ = false;
     }
@@ -510,10 +510,10 @@ class StopWatch
 
     private :
 
-    mutable __int64 elapsed_;
-    mutable __int64 start_time_;
-    mutable double frequency_;
-    mutable bool running_;
+    __int64 elapsed_;
+    __int64 start_time_;
+    double frequency_;
+    bool running_;
 }; // class StopWatch
 
 } // namespace vsmc
