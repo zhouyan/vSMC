@@ -624,12 +624,12 @@ class CLManager
     ::cl::NDRange get_global_nd_range (
             std::size_t N, std::size_t local_size) const
     {
-        return (local_size && N % local_size) ?
-            ::cl::NDRange((N / local_size + 1) * local_size): ::cl::NDRange(N);
+        return (local_size && N % local_size) == 0 ? ::cl::NDRange(N) :
+            ::cl::NDRange((N / local_size + 1) * local_size);
     }
 
     ::cl::NDRange get_local_nd_range (std::size_t local_size) const
-    {return local_size ? ::cl::NDRange(local_size) : ::cl::NullRange;}
+    {return local_size == 0 ? ::cl::NullRange : ::cl::NDRange(local_size);}
 }; // clss CLManager
 
 } // namespace vsmc
