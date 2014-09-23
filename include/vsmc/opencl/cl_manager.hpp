@@ -255,7 +255,7 @@ class CLManager
 
     /// \brief Print build log
     template <typename CharT, typename Traits>
-    void print_build_log (::cl::Program &program,
+    void print_build_log (const ::cl::Program &program,
             std::basic_ostream<CharT, Traits> &os = std::cout)
     {
         cl_build_status status = CL_BUILD_SUCCESS;
@@ -284,7 +284,7 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
 
-        if (!num)
+        if (num == 0)
             return ::cl::Buffer();
 
         return ::cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
@@ -301,7 +301,7 @@ class CLManager
         std::size_t num = static_cast<std::size_t>(
                 std::abs(distance(first, last)));
 
-        if (!num)
+        if (num == 0)
             return ::cl::Buffer();
 
         ::cl::Buffer buf(create_buffer<CLType>(num));
