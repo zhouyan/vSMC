@@ -101,11 +101,16 @@ class ConfigureCL
 
     ConfigureCL () : local_size_(0) {}
 
-    ConfigureCL (std::size_t lsize) : local_size_(lsize) {}
-
     std::size_t local_size () const {return local_size_;}
 
     void local_size (std::size_t new_size) {local_size_ = new_size;}
+
+    void local_size (std::size_t N,
+            const ::cl::Kernel &kern, const ::cl::Device &dev)
+    {
+        std::size_t global_size;
+        cl_preferred_work_size(N, kern, dev, global_size, local_size_);
+    }
 
     private :
 
@@ -294,6 +299,7 @@ class StateCL
         }
 
         kernel_copy_ = create_kernel("copy");
+        configure_copy_.local_size(size_, kernel_copy_, manager().device());
     }
 
     void build (const std::string &source,
@@ -336,7 +342,8 @@ class StateCL
                 copy_from_buffer_, size_, copy_from);
         kernel_copy_.setArg(0, state_buffer_);
         kernel_copy_.setArg(1, copy_from_buffer_);
-        manager().run_kernel(kernel_copy_, N, configure_copy_.local_size());
+        manager().run_kernel(
+                kernel_copy_, N, configure_copy_.local_size());
     }
 
     ConfigureCL &configure_copy () {return configure_copy_;}
@@ -440,11 +447,6 @@ class InitializeCL
 
     InitializeCL () : build_id_(-1) {}
 
-    InitializeCL (std::size_t lsize) : build_id_(-1), configure_(lsize) {}
-
-    InitializeCL (const ConfigureCL &configure) :
-	build_id_(-1), configure_(configure) {}
-
     InitializeCL (const InitializeCL<T> &other) :
         configure_(other.configure_), build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
@@ -481,6 +483,8 @@ class InitializeCL
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
+            configure_.local_size(particle.size(),
+                    kernel_, particle.value().manager().device());
         }
 
         kernel_.setArg(0, particle.value().state_buffer());
@@ -556,11 +560,6 @@ class MoveCL
 
     MoveCL () : build_id_(-1) {}
 
-    MoveCL (std::size_t lsize) : build_id_(-1), configure_(lsize) {}
-
-    MoveCL (const ConfigureCL &configure) :
-	build_id_(-1), configure_(configure) {}
-
     MoveCL (const MoveCL<T> &other) :
         configure_(other.configure_), build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
@@ -597,6 +596,8 @@ class MoveCL
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
+            configure_.local_size(particle.size(),
+                    kernel_, particle.value().manager().device());
         }
 
         kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
@@ -669,11 +670,6 @@ class MonitorEvalCL
 
     MonitorEvalCL () : build_id_(-1), buffer_size_(0) {}
 
-    MonitorEvalCL (std::size_t lsize) : build_id_(-1), configure_(lsize) {}
-
-    MonitorEvalCL (const ConfigureCL &configure) :
-	build_id_(-1), configure_(configure) {}
-
     MonitorEvalCL (const MonitorEvalCL<T> &other) :
         configure_(other.configure_), build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
@@ -712,6 +708,8 @@ class MonitorEvalCL
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
+            configure_.local_size(particle.size(),
+                    kernel_, particle.value().manager().device());
         }
 
         kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
@@ -788,11 +786,6 @@ class PathEvalCL
 
     PathEvalCL () : build_id_(-1), buffer_size_(0) {}
 
-    PathEvalCL (std::size_t lsize) : build_id_(-1), configure_(lsize) {}
-
-    PathEvalCL (const ConfigureCL &configure) :
-	build_id_(-1), configure_(configure) {}
-
     PathEvalCL (const PathEvalCL<T> &other) :
         configure_(other.configure_), build_id_(other.build_id_),
         kernel_(other.kernel_), kernel_name_(other.kernel_name_),
@@ -830,6 +823,8 @@ class PathEvalCL
             build_id_ = particle.value().build_id();
             kernel_name_ = kname;
             kernel_ = particle.value().create_kernel(kernel_name_);
+            configure_.local_size(particle.size(),
+                    kernel_, particle.value().manager().device());
         }
 
         kernel_.setArg<cl_ulong>(0, static_cast<cl_ulong>(iter));
