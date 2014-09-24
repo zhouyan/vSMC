@@ -424,8 +424,8 @@ class CLManager
     /// calculate the correct global size yourself, you can simple call
     /// `run_kernel(kern, N, K)`. But within the kernel, you need to check
     /// `get_global_id(0) < N`
-    void run_kernel (const ::cl::Kernel &kern,
-            std::size_t N, std::size_t local_size) const
+    void run_kernel (const ::cl::Kernel &kern, std::size_t N,
+	    std::size_t local_size = 0) const
     {
         command_queue_.finish();
         command_queue_.enqueueNDRangeKernel(kern, ::cl::NullRange,
@@ -581,8 +581,13 @@ class CLManager
     ::cl::NDRange get_global_nd_range (
             std::size_t N, std::size_t local_size) const
     {
-        return (local_size && N % local_size) == 0 ? ::cl::NDRange(N) :
-            ::cl::NDRange((N / local_size + 1) * local_size);
+	if (local_size == 0)
+	    return ::cl::NDRange(N);
+
+	if (N % local_size == 0)
+	    return ::cl::NDRange(N);
+
+	return ::cl::NDRange((N / local_size + 1) * local_size);
     }
 
     ::cl::NDRange get_local_nd_range (std::size_t local_size) const
