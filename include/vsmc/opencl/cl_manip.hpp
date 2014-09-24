@@ -16,6 +16,21 @@
 
 namespace vsmc {
 
+/// \brief The minimum local size that is a multiple of the preferred factor
+inline std::size_t cl_minimum_local_size (
+        const ::cl::Kernel &kern, const ::cl::Device &dev)
+{
+    std::size_t mul_s;
+    try {
+        kern.getWorkGroupInfo(dev,
+                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
+    } catch (::cl::Error) {
+        return 0;
+    }
+
+    return mul_s;
+}
+
 /// \brief The maximum local size that is a multiple of the preferred factor
 /// \ingroup OpenCL
 inline std::size_t cl_maximum_local_size (
@@ -54,6 +69,21 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
         const ::cl::Kernel &kern, const ::cl::Device &dev,
         std::size_t &global_size, std::size_t &local_size)
 {
+    cl::size_t<3> reqd_size;
+    try {
+        kern.getWorkGroupInfo(dev,
+                CL_KERNEL_COMPILE_WORK_GROUP_SIZE, &reqd_size);
+    } catch (::cl::Error) {
+        reqd_size[0] = 0;
+    }
+
+    if (reqd_size[0] != 0) {
+        local_size = reqd_size[0];
+        global_size = cl_minimum_global_size(N, local_size);
+
+        return global_size - N;
+    }
+
     std::size_t max_s;
     std::size_t min_local;
     try {
