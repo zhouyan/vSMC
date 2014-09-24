@@ -34,17 +34,17 @@ class Inversion
     public :
 
     // Given N U01 random variates,
-    // Compute M counts based on M weights
+    // Compute M replication numbers based on M weights
     template <typename IntType>
     void operator() (std::size_t M, std::size_t N,
-            const double *weight, const double *u01, IntType *count,
+            const double *weight, const double *u01, IntType *replication,
             bool usorted = false)
     {
         if (M == 0)
             return;
 
         if (M == 1) {
-            *count = static_cast<IntType>(N);
+            *replication = static_cast<IntType>(N);
             return;
         }
 
@@ -65,10 +65,10 @@ class Inversion
         }
 
         std::size_t offset = 0;
-        std::memset(count, 0, sizeof(IntType) * M);
+        std::memset(replication, 0, sizeof(IntType) * M);
         for (std::size_t i = 0; i != M; ++i) {
             while (offset != N && uptr[offset] <= accw_[i]) {
-                ++count[i];
+                ++replication[i];
                 ++offset;
             }
         }
