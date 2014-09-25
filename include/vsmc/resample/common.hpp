@@ -135,7 +135,7 @@ class ResampleCopyFromReplication
                     copy_from[to] = static_cast<IntType2>(to);
                 } else {
                     // replication[to] has zero child, copy from elsewhere
-                    if (replication[from] - time <= 1) {
+                    if (replication[from] < time + 2) {
                         // only 1 child left on replication[from]
                         time = 0;
                         do // move from to a position with at least 2 children
