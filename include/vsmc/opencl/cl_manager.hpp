@@ -253,34 +253,6 @@ class CLManager
         return setup_;
     }
 
-    /// \brief Whether profiler is enabled for the command queue
-    bool profiler () const {return profiler_;}
-
-    /// \brief Enable profiling for the command queue
-    ///
-    /// \details
-    /// Can only be used after successful setup
-    void profiler (bool flag)
-    {
-	if (flag == profiler())
-	    return;
-
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(profiler);
-
-	try {
-	    cl::CommandQueue new_queue;
-	    if (flag) {
-		new_queue = ::cl::CommandQueue(context_, device_,
-			CL_QUEUE_PROFILING_ENABLE);
-	    } else {
-		new_queue = ::cl::CommandQueue(context_, device_, 0);
-	    }
-	    command_queue_ = new_queue;
-	    profiler_ = flag;
-	} catch (::cl::Error) {}
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE;
-    }
-
     /// \brief Print build log
     template <typename CharT, typename Traits>
     void print_build_log (const ::cl::Program &program,
@@ -492,12 +464,9 @@ class CLManager
     ::cl::CommandQueue command_queue_;
 
     bool setup_;
-    bool profiler_;
     CLSetup<ID> &setup_default_;
 
-    CLManager () :
-	setup_(false), profiler_(false),
-	setup_default_(CLSetup<ID>::instance())
+    CLManager () : setup_(false), setup_default_(CLSetup<ID>::instance())
     {setup_cl_manager(setup_default_.device_type());}
 
     CLManager (const CLManager<ID> &);
