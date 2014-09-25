@@ -147,7 +147,7 @@ class StateCL
         copy_from_buffer_(manager().template create_buffer<size_type>(size_))
     {
         manager().template copy_buffer<char>(
-                other.state_buffer_, state_size_ * size_, state_buffer_);
+                other.state_buffer_, state_buffer_, state_size_ * size_);
     }
 
     StateCL<StateSize, FPType, ID> &operator= (
@@ -169,7 +169,7 @@ class StateCL
             copy_from_buffer_ =
                 manager().template create_buffer<size_type>(size_);
             manager().template copy_buffer<char>(
-                    other.state_buffer_, state_size_ * size_, state_buffer_);
+                    other.state_buffer_, state_buffer_, state_size_ * size_);
         }
 
         return *this;
