@@ -33,7 +33,7 @@ inline void cl_minmax_local_size (
                 CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &factor);
         kern.getWorkGroupInfo(dev,
                 CL_KERNEL_WORK_GROUP_SIZE, &lmax);
-        if (factor == 0 || factor < lmax) {
+        if (factor == 0 || factor > lmax) {
             factor = lmax = lmulmax = 0;
             return;
         }
@@ -88,23 +88,22 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
         return global_size - N;
     }
 
-    std::size_t lpref = lmulmax;
-    std::size_t gpref = cl_min_global_size(N, lpref);
-    std::size_t dpref = gpref - N;
-    while (lpref > factor) {
-        std::size_t l = lpref - factor;
+    local_size = lmulmax;
+    global_size = cl_min_global_size(N, local_size);
+    std::size_t diff_size = global_size - N;
+    std::size_t maxmul = lmulmax / factor;
+    for (std::size_t mul = maxmul; mul >= 1; ++mul) {
+        std::size_t l = mul * factor;
         std::size_t g = cl_min_global_size(N, l);
         std::size_t d = g - N;
-        if (d < dpref) {
-            lpref = l;
-            gpref = g;
-            dpref = d;
+        if (d < diff_size) {
+            local_size = l;
+            global_size = g;
+            diff_size = d;
         }
     }
-    local_size = lpref;
-    global_size = gpref;
 
-    return dpref;
+    return diff_size;
 }
 
 inline void cl_set_kernel_args (::cl::Kernel &, cl_uint) {}
