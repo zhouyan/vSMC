@@ -16,43 +16,36 @@
 
 namespace vsmc {
 
-/// \brief The minimum local size that is a multiple of the preferred factor
-inline std::size_t cl_minimum_local_size (
-        const ::cl::Kernel &kern, const ::cl::Device &dev)
-{
-    std::size_t mul_s;
-    try {
-        kern.getWorkGroupInfo(dev,
-                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
-    } catch (::cl::Error) {
-        return 0;
-    }
-
-    return mul_s;
-}
-
-/// \brief The maximum local size that is a multiple of the preferred factor
+/// \brief Query the preferred factor of local size
 /// \ingroup OpenCL
-inline std::size_t cl_maximum_local_size (
-        const ::cl::Kernel &kern, const ::cl::Device &dev)
+/// 
+/// \param kern An OpenCL kernel
+/// \param dev An OpenCL device
+/// \param factor Multiplier factor of local size for optimzied performance
+/// \param lmax Maximum of the local size
+/// \param lmulmax Maximum of the local size that is a multiple of the factor
+inline void cl_minmax_local_size (
+        const ::cl::Kernel &kern, const ::cl::Device &dev,
+        std::size_t &factor, std::size_t &lmax, std::size_t &lmulmax)
 {
-    std::size_t max_s;
-    std::size_t mul_s;
     try {
-        kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &max_s);
         kern.getWorkGroupInfo(dev,
-                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &mul_s);
+                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &factor);
+        kern.getWorkGroupInfo(dev,
+                CL_KERNEL_WORK_GROUP_SIZE, &lmax);
+        if (factor == 0 || factor < lmax) {
+            factor = lmax = lmulmax = 0;
+            return;
+        }
+        lmulmax = (lmax / factor) * factor;
     } catch (::cl::Error) {
-        return 0;
+        factor = lmax = lmulmax = 0;
     }
-
-    return (max_s / mul_s) * mul_s;
 }
 
 /// \brief The minimum global size that is a multiple of the local size
 /// \ingroup OpenCL
-inline std::size_t cl_minimum_global_size (
-        std::size_t N, std::size_t local_size)
+inline std::size_t cl_min_global_size (std::size_t N, std::size_t local_size)
 {
     if (local_size == 0)
         return N;
@@ -79,46 +72,37 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
 
     if (reqd_size[0] != 0) {
         local_size = reqd_size[0];
-        global_size = cl_minimum_global_size(N, local_size);
+        global_size = cl_min_global_size(N, local_size);
 
         return global_size - N;
     }
 
-    std::size_t max_s;
-    std::size_t min_local;
-    try {
-        kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &max_s);
-        kern.getWorkGroupInfo(dev,
-                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &min_local);
-    } catch (::cl::Error) {
+    std::size_t factor;
+    std::size_t lmax;
+    std::size_t lmulmax;
+    cl_minmax_local_size(kern, dev, factor, lmax, lmulmax);
+    if (lmax == 0) {
         global_size = N;
         local_size = 0;
 
-        return 0;
+        return global_size - N;
     }
 
-    std::size_t max_local = (max_s / min_local) * min_local;
-    std::size_t mul_local = max_local / min_local;
-
-    std::size_t pref_local  = max_local;
-    std::size_t pref_global = cl_minimum_global_size(N, max_local);
-    std::size_t pref_diff   = pref_global - N;
-
-    for (std::size_t i = mul_local; i != 0; --i) {
-        std::size_t local  = i * min_local;
-        std::size_t global = cl_minimum_global_size(N, local);
-        std::size_t diff   = global - N;
-        if (diff < pref_diff) {
-            pref_local  = local;
-            pref_global = global;
-            pref_diff   = diff;
+    std::size_t lpref = lmulmax;
+    std::size_t gpref = cl_min_global_size(N, lpref);
+    std::size_t dpref = gpref - N;
+    while (lpref > factor) {
+        std::size_t l = lpref - factor;
+        std::size_t g = cl_min_global_size(N, l);
+        std::size_t d = g - N;
+        if (d < dpref) {
+            lpref = l;
+            gpref = g;
+            dpref = d;
         }
     }
 
-    global_size = pref_global;
-    local_size = pref_local;
-
-    return pref_diff;
+    return dpref;
 }
 
 inline void cl_set_kernel_args (::cl::Kernel &, cl_uint) {}
