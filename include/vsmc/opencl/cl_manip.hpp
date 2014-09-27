@@ -101,6 +101,8 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
             dpref = d;
         }
     }
+    local_size = lpref;
+    global_size = gpref;
 
     return dpref;
 }
