@@ -14,8 +14,8 @@
 /// \defgroup Config Configuration
 /// \brief Configuration macros and default values if undefined
 
-/// \defgroup Definitions Enumerators and macros
-/// \brief Enumerator and macro definitions
+/// \defgroup Definitions Enumerators, placeholders and macros
+/// \brief Enumerator, placeholder and macro definitions
 
 /// \defgroup Traits Traits
 /// \brief Trait classes

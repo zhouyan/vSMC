@@ -21,7 +21,7 @@
 ///
 /// \details
 /// This macro is defined to `virtual` if compiled in when
-/// `VSMC_NO_RUNTIME_ASSERT` is disabled; otherwise it is empty.
+/// `VSMC_NO_RUNTIME_ASSERT` is enabled; otherwise it is empty.
 #if VSMC_NO_RUNTIME_ASSERT
 #define VSMC_CRTP_DESTRUCTOR_PREFIX
 #else
@@ -65,7 +65,7 @@ namespace vsmc {
 /// \brief Dynamic dimension
 /// \ingroup Definitions
 enum {
-    Dynamic ///< Used to specify a dimension template parameter is dynamic
+    Dynamic = 0 ///< Used to specify a dimension template parameter is dynamic
 }; // enum Dynamic
 
 /// \brief Matrix order
@@ -74,6 +74,34 @@ enum MatrixOrder {
     RowMajor = 101, ///< Data are stored row by row in memory
     ColMajor = 102  ///< Data are stored column by column in memory
 }; // enum MatrixOrder
+
+/// \brief Class template argument used for scalar variant
+/// \ingroup Definitions
+struct Scalar
+{
+    static VSMC_CONSTEXPR const bool is_scalar = true;
+    static VSMC_CONSTEXPR const bool is_vector = false;
+}; // struct Scalar
+
+/// \brief Class template argument used for vector variant
+/// \ingroup Definitions
+struct Vector
+{
+    static VSMC_CONSTEXPR const bool is_scalar = false;
+    static VSMC_CONSTEXPR const bool is_vector = true;
+}; // struct Vector
+
+/// \brief Function template argument used for position
+/// \ingroup Definitions
+template <std::size_t N>
+struct Position
+{
+    typedef std::size_t size_type;
+    typedef Position<N> type;
+    static VSMC_CONSTEXPR const size_type value = N;
+    VSMC_CONSTEXPR operator size_type () const {return value;}
+    VSMC_CONSTEXPR size_type operator() () const {return value;}
+}; // struct Position
 
 } // namespace vsmc
 
