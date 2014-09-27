@@ -23,10 +23,10 @@ namespace vsmc {
 /// \param dev An OpenCL device
 /// \param factor Multiplier factor of local size for optimzied performance
 /// \param lmax Maximum of the local size
-/// \param lmulmax Maximum of the local size that is a multiple of the factor
+/// \param mmax Maximum of the multiplier of the factor
 inline void cl_minmax_local_size (
         const ::cl::Kernel &kern, const ::cl::Device &dev,
-        std::size_t &factor, std::size_t &lmax, std::size_t &lmulmax)
+        std::size_t &factor, std::size_t &lmax, std::size_t &mmax)
 {
     try {
         kern.getWorkGroupInfo(dev,
@@ -34,12 +34,12 @@ inline void cl_minmax_local_size (
         kern.getWorkGroupInfo(dev,
                 CL_KERNEL_WORK_GROUP_SIZE, &lmax);
         if (factor == 0 || factor > lmax) {
-            factor = lmax = lmulmax = 0;
+            factor = lmax = mmax = 0;
             return;
         }
-        lmulmax = (lmax / factor) * factor;
+        mmax = lmax / factor;
     } catch (::cl::Error) {
-        factor = lmax = lmulmax = 0;
+        factor = lmax = mmax = 0;
     }
 }
 
@@ -79,8 +79,8 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
 
     std::size_t factor;
     std::size_t lmax;
-    std::size_t lmulmax;
-    cl_minmax_local_size(kern, dev, factor, lmax, lmulmax);
+    std::size_t mmax;
+    cl_minmax_local_size(kern, dev, factor, lmax, mmax);
     if (lmax == 0) {
         global_size = N;
         local_size = 0;
@@ -88,12 +88,11 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
         return global_size - N;
     }
 
-    local_size = lmulmax;
+    local_size = factor;
     global_size = cl_min_global_size(N, local_size);
     std::size_t diff_size = global_size - N;
-    std::size_t maxmul = lmulmax / factor;
-    for (std::size_t mul = maxmul; mul >= 1; --mul) {
-        std::size_t l = mul * factor;
+    for (std::size_t m = 1; m <= mmax; ++m) {
+        std::size_t l = m * factor;
         std::size_t g = cl_min_global_size(N, l);
         std::size_t d = g - N;
         if (d < diff_size) {
