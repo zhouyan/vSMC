@@ -48,26 +48,27 @@ class Inversion
             return;
         }
 
+        std::memset(replication, 0, sizeof(IntType) * M);
+
+	if (N == 0)
+	    return;
+
         accw_.resize(M);
         accw_[0] = weight[0];
         for (std::size_t i = 1; i != M; ++i)
             accw_[i] = accw_[i - 1] + weight[i];
         accw_.back() = 1;
 
-        const double *uptr = VSMC_NULLPTR;
-        if (usorted) {
-            uptr = u01;
-        } else {
-            u01_.resize(N);
-            std::memcpy(&u01_[0], u01, sizeof(double) * N);
-            std::sort(u01_.begin(), u01_.end());
-            uptr = &u01_[0];
-        }
+	u01_.resize(N);
+	std::memcpy(&u01_[0], u01, sizeof(double) * N);
+        if (!usorted)
+	    std::sort(u01_.begin(), u01_.end());
+	if (u01_.back() > 1)
+	    u01_.back() = 1;
 
         std::size_t offset = 0;
-        std::memset(replication, 0, sizeof(IntType) * M);
         for (std::size_t i = 0; i != M; ++i) {
-            while (offset != N && uptr[offset] <= accw_[i]) {
+            while (offset != N && u01_[offset] <= accw_[i]) {
                 ++replication[i];
                 ++offset;
             }
