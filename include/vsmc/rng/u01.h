@@ -46,7 +46,7 @@
 /// double u = U01_OPEN_CLOSED_32(cburng4x32_rand(&rng));
 /// ~~~
 
-#include <vsmc/rng/internal/defines.h>
+#include <vsmc/rng/internal/common.h>
 
 #if VSMC_HAS_OPENCL_DOUBLE
 

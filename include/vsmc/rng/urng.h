@@ -151,7 +151,7 @@
 ///
 /// \subpage gammak1
 
-#include <vsmc/rng/internal/defines.h>
+#include <vsmc/rng/internal/common.h>
 #include <Random123/threefry.h>
 #include <Random123/philox.h>
 

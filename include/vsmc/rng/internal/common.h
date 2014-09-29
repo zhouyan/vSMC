@@ -1,5 +1,5 @@
 //============================================================================
-// include/vsmc/rng/internal/defines.h
+// include/vsmc/rng/internal/common.h
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo
@@ -8,8 +8,12 @@
 // See LICENSE for details.
 //============================================================================
 
-#ifndef VSMC_OPENCL_INTERNAL_DEFINES_H
-#define VSMC_OPENCL_INTERNAL_DEFINES_H
+#ifndef VSMC_RNG_INTERNAL_COMMON_H
+#define VSMC_RNG_INTERNAL_COMMON_H
+
+#ifndef VSMC_HAS_OPENCL_DOUBLE
+#define VSMC_HAS_OPENCL_DOUBLE 0
+#endif
 
 #ifdef __OPENCL_VERSION__
   #ifndef VSMC_HAS_OPENCL_DOUBLE
@@ -53,4 +57,4 @@
   #endif // __cplusplus
 #endif // __OPENCL_VERSION__
 
-#endif // VSMC_OPENCL_INTERNAL_DEFINES_H
+#endif // VSMC_RNG_INTERNAL_COMMON_H
