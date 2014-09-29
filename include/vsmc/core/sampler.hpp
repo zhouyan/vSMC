@@ -776,9 +776,9 @@ class Sampler
 
     void do_resample ()
     {
-        bool resampled = particle_.resample(resample_op_, resample_threshold_);
         ess_history_.push_back(particle_.ess());
-        resampled_history_.push_back(resampled);
+        resampled_history_.push_back(particle_.resample(
+                    resample_op_, resample_threshold_));
     }
 
     void do_monitor ()
