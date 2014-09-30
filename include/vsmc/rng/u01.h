@@ -69,69 +69,81 @@
 
 #endif // VSMC_HAS_OPENCL_DOUBLE
 
-#define VSMC_0x1p_31f (1.0f / (1024.0f * 1024.0f * 1024.0f * 2.0f))
-#define VSMC_0x1p_24f (128.0f * VSMC_0x1p_31f)
-#define VSMC_0x1p_23f (256.0f * VSMC_0x1p_31f)
-#define VSMC_0x1p_32  (1.0 / (1024.0 *1024.0 * 1024.0 * 4.0))
-#define VSMC_0x1p_63  (2.0 * VSMC_0x1p_32 * VSMC_0x1p_32)
-#define VSMC_0x1p_53  (1024.0 * VSMC_0x1p_63)
-#define VSMC_0x1p_52  (2048.0 * VSMC_0x1p_63)
+#define VSMC_RNG_U01_31f (1.0f / (1024.0f * 1024.0f * 1024.0f * 2.0f))
+#define VSMC_RNG_U01_24f (128.0f * VSMC_RNG_U01_31f)
+#define VSMC_RNG_U01_23f (256.0f * VSMC_RNG_U01_31f)
+#define VSMC_RNG_U01_32  (1.0 / (1024.0 *1024.0 * 1024.0 * 4.0))
+#define VSMC_RNG_U01_63  (2.0 * VSMC_RNG_U01_32 * VSMC_RNG_U01_32)
+#define VSMC_RNG_U01_53  (1024.0 * VSMC_RNG_U01_63)
+#define VSMC_RNG_U01_52  (2048.0 * VSMC_RNG_U01_63)
 
+/// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_closed_closed_32_24 (uint32_t i)
-{return ((i&0x7fffffc0) + (i&0x40)) * VSMC_0x1p_31f;}
+{return ((i&0x7fffffc0) + (i&0x40)) * VSMC_RNG_U01_31f;}
 
+/// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1)\f$
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_closed_open_32_24 (uint32_t i)
-{return (i>>8) * VSMC_0x1p_24f;}
+{return (i>>8) * VSMC_RNG_U01_24f;}
 
+/// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1]\f$
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_open_closed_32_24 (uint32_t i)
-{return (1.0f + (i>>8)) * VSMC_0x1p_24f;}
+{return (1.0f + (i>>8)) * VSMC_RNG_U01_24f;}
 
+/// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1)\f$
 /// \ingroup RNG
 VSMC_STATIC_INLINE float u01_open_open_32_24 (uint32_t i)
-{return (0.5f + (i>>9)) * VSMC_0x1p_23f;}
+{return (0.5f + (i>>9)) * VSMC_RNG_U01_23f;}
 
 #if VSMC_HAS_OPENCL_DOUBLE
 
-/// \ingroup RNG
-VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)
-{return ((i&UINT64_C(0x7ffffffffffffe00)) + (i&0x200)) * VSMC_0x1p_63;}
-
-/// \ingroup RNG
-VSMC_STATIC_INLINE double u01_closed_open_64_53 (uint64_t i)
-{return (i>>11) * VSMC_0x1p_53;}
-
-/// \ingroup RNG
-VSMC_STATIC_INLINE double u01_open_closed_64_53 (uint64_t i)
-{return (1.0 + (i>>11)) * VSMC_0x1p_53;}
-
-/// \ingroup RNG
-VSMC_STATIC_INLINE double u01_open_open_64_53 (uint64_t i)
-{return (0.5 + (i>>12)) * VSMC_0x1p_52;}
-
+/// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1]\f$
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_closed_32_53 (uint32_t i)
 {
 #ifdef __cplusplus
-    return (static_cast<double>(i&1) + i) * VSMC_0x1p_32;
+    return (static_cast<double>(i&1) + i) * VSMC_RNG_U01_32;
 #else
-    return (((double)(i&1)) + i) * VSMC_0x1p_32;
+    return (((double)(i&1)) + i) * VSMC_RNG_U01_32;
 #endif
 }
 
+/// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1)\f$
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_closed_open_32_53 (uint32_t i)
-{return i * VSMC_0x1p_32;}
+{return i * VSMC_RNG_U01_32;}
 
+/// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1]\f$
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_open_closed_32_53 (uint32_t i)
-{return (1.0 + i) * VSMC_0x1p_32;}
+{return (1.0 + i) * VSMC_RNG_U01_32;}
 
+/// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1)\f$
 /// \ingroup RNG
 VSMC_STATIC_INLINE double u01_open_open_32_53 (uint32_t i)
-{return (0.5 + i) * VSMC_0x1p_32;}
+{return (0.5 + i) * VSMC_RNG_U01_32;}
+
+/// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1]\f$
+/// \ingroup RNG
+VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)
+{return ((i&UINT64_C(0x7ffffffffffffe00)) + (i&0x200)) * VSMC_RNG_U01_63;}
+
+/// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1)\f$
+/// \ingroup RNG
+VSMC_STATIC_INLINE double u01_closed_open_64_53 (uint64_t i)
+{return (i>>11) * VSMC_RNG_U01_53;}
+
+/// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1]\f$
+/// \ingroup RNG
+VSMC_STATIC_INLINE double u01_open_closed_64_53 (uint64_t i)
+{return (1.0 + (i>>11)) * VSMC_RNG_U01_53;}
+
+/// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1)\f$
+/// \ingroup RNG
+VSMC_STATIC_INLINE double u01_open_open_64_53 (uint64_t i)
+{return (0.5 + (i>>12)) * VSMC_RNG_U01_52;}
 
 #endif // VSMC_HAS_OPENCL_DOUBLE
 

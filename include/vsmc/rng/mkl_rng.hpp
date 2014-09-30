@@ -613,7 +613,7 @@ class MKLEngine
     MKL_INT remain_;
 }; // class MKLEngine
 
-/// \brief A 59-bit multiplicative congruential generator
+/// \brief A 59-bits multiplicative congruential generator
 /// \ingroup MKLRNG
 typedef MKLEngine<VSL_BRNG_MCG59, unsigned> MKL_MCG59;
 

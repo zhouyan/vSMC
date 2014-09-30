@@ -160,10 +160,6 @@
 /// \ingroup Utility
 /// \brief Utilities for measuring the time of procedures
 
-/// \defgroup Tuple Tuple manipulation
-/// \ingroup Utility
-/// \brief Classes for manipulating and using C++11 tuple like type lists
-
 #include <vsmc/internal/config.hpp>
 
 #include <vsmc/core/adapter.hpp>
@@ -276,8 +272,5 @@
 #endif
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#if VSMC_HAS_CXX11LIB_TUPLE
-#include <vsmc/utility/tuple_manip.hpp>
-#endif
 
 #endif // VSMC_HPP
