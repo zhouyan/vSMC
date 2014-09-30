@@ -44,43 +44,41 @@ template <typename> class Counter;
 /// large integer counters.
 ///
 /// It deals with two types of counters. The first type is in the form
-/// `Array<T, K, Traits>` where `T` is an unsigned integer type, treated
-/// as a `sizeof(T) * K * 8` bits integer. For example,
-/// `Array<uint32_t, 4>` is treated as an 128-bits integer. The counter
-/// start with all elements being zero. The value of the integer can be
-/// calculated as, \f$c_0 + c_1 M + c_2 M^2 +\cdots + c_{K-1} M^{K - 1}\f$,
-/// where \f$c_i\f$ is the \f$i\f$th element in the Array and has a
-/// range from zero to \f$M - 1\f$, \f$M\f$ is the largest number of type `T`
-/// plus one, that is \f$2^n\f$ with \f$n\f$ being the number of bits in type
-/// `T`.
+/// `Array<T, K>` where `T` is an unsigned integer type, treated as a
+/// `sizeof(T) * K * 8` bits integer. For example, `Array<uint32_t, 4>` is
+/// treated as an 128-bits integer. The counter start with all elements being
+/// zero. The value of the integer can be calculated as, \f$c_0 + c_1 M + c_2
+/// M^2 +\cdots + c_{K-1} M^{K - 1}\f$, where \f$c_i\f$ is the \f$i\f$th
+/// element in the Array and has a range from zero to \f$M - 1\f$, \f$M\f$ is
+/// the largest number of type `T` plus one, that is \f$2^n\f$ with \f$n\f$
+/// being the number of bits in type `T`.
 ///
 /// The second type is blocks of counters of the first type. For example,
-/// `Array<ctr_type, Blocks, BlockTraits>`, where `ctr_type` is a
-/// counter of the first type. When set and incremented using methods in this
-/// class, all `Blocks` counters are maintained such that, they are always
-/// distinctive. This is done by reserving eight bits as counter IDs.
-/// Therefore, there can be at most 256 blocks. The eight bits reserved are the
-/// 8 higher bits in the last element of each counter. In a little-endian
-/// representation, such as on x86, the last bytes in the memory of counter is
-/// reserved. The increment works by increment each counter the same way as in
-/// the first type, except that the last element, \f$c_{K-1}\f$ has a range
-/// from zero to \f$2^{n - 8} - 1\f$ where \f$n\f$ is the number of bits in
-/// type `T`. Therefore, in the extreme case where `ctr_type` is
-/// `Array<uint8_t, 1>`, increment won't change the counter at all.
-template <typename T, std::size_t K, typename Traits>
-class Counter<Array<T, K, Traits> >
+/// `Array<ctr_type, Blocks>`, where `ctr_type` is a counter of the first type.
+/// When set and incremented using methods in this class, all `Blocks` counters
+/// are maintained such that, they are always distinctive. This is done by
+/// reserving eight bits as counter IDs.  Therefore, there can be at most 256
+/// blocks. The eight bits reserved are the 8 higher bits in the last element
+/// of each counter. In a little-endian representation, such as on x86, the
+/// last bytes in the memory of counter is reserved. The increment works by
+/// increment each counter the same way as in the first type, except that the
+/// last element, \f$c_{K-1}\f$ has a range from zero to \f$2^{n - 8} - 1\f$
+/// where \f$n\f$ is the number of bits in type `T`. Therefore, in the extreme
+/// case where `ctr_type` is `Array<uint8_t, 1>`, increment won't change the
+/// counter at all.
+template <typename T, std::size_t K>
+class Counter<Array<T, K> >
 {
     public :
 
-    typedef Array<T, K, Traits> ctr_type;
+    typedef Array<T, K> ctr_type;
 
     /// \brief Set the counter to a given value
     static void set (ctr_type &ctr, const ctr_type &c) {ctr = c;}
 
     /// \brief Set a block of counters given the value of the first counter
-    template <std::size_t Blocks, typename BlockTraits>
-    static void set (Array<ctr_type, Blocks, BlockTraits> &ctr,
-            const ctr_type &c)
+    template <std::size_t Blocks>
+    static void set (Array<ctr_type, Blocks> &ctr, const ctr_type &c)
     {
         ctr.front() = c;
         set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
@@ -91,8 +89,8 @@ class Counter<Array<T, K, Traits> >
     {std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);}
 
     /// \brief Reset a block of counters with the first set to zero
-    template <std::size_t Blocks, typename BlockTraits>
-    static void reset (Array<ctr_type, Blocks, BlockTraits> &ctr)
+    template <std::size_t Blocks>
+    static void reset (Array<ctr_type, Blocks> &ctr)
     {
         reset(ctr.front());
         set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
@@ -103,8 +101,8 @@ class Counter<Array<T, K, Traits> >
     {increment_single<0>(ctr, cxx11::integral_constant<bool, 1 < K>());}
 
     /// \brief Increment each counter in a block by one
-    template <std::size_t Blocks, typename BlockTraits>
-    static void increment (Array<ctr_type, Blocks, BlockTraits> &ctr)
+    template <std::size_t Blocks>
+    static void increment (Array<ctr_type, Blocks> &ctr)
     {increment_block<0>(ctr, cxx11::true_type());}
 
     /// \brief Increment a counter by a given value
@@ -135,9 +133,8 @@ class Counter<Array<T, K, Traits> >
     }
 
     /// \brief Increment each counter in a block by a given value
-    template <std::size_t Blocks, typename BlockTraits>
-    static void increment (Array<ctr_type, Blocks, BlockTraits> &ctr,
-            T nskip)
+    template <std::size_t Blocks>
+    static void increment (Array<ctr_type, Blocks> &ctr, T nskip)
     {
         if (nskip == 0)
             return;
@@ -175,13 +172,11 @@ class Counter<Array<T, K, Traits> >
                 cxx11::integral_constant<bool, N + 2 < K>());
     }
 
-    template <std::size_t, std::size_t Blocks, typename BlockTraits>
-    static void set_block (Array<ctr_type, Blocks, BlockTraits> &,
-            cxx11::false_type) {}
+    template <std::size_t, std::size_t Blocks>
+    static void set_block (Array<ctr_type, Blocks> &, cxx11::false_type) {}
 
-    template <std::size_t B, std::size_t Blocks, typename BlockTraits>
-    static void set_block (Array<ctr_type, Blocks, BlockTraits> &ctr,
-            cxx11::true_type)
+    template <std::size_t B, std::size_t Blocks>
+    static void set_block (Array<ctr_type, Blocks> &ctr, cxx11::true_type)
     {
         T m = ctr[Position<B - 1>()].back() & mask_lo_;
         m >>= sizeof(T) * 8 - 8;
@@ -195,30 +190,26 @@ class Counter<Array<T, K, Traits> >
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    template <std::size_t, std::size_t Blocks, typename BlockTraits>
+    template <std::size_t, std::size_t Blocks>
     static void increment_block (
-            Array<ctr_type, Blocks, BlockTraits> &,
-            cxx11::false_type) {}
+            Array<ctr_type, Blocks> &, cxx11::false_type) {}
 
-    template <std::size_t B, std::size_t Blocks, typename BlockTraits>
+    template <std::size_t B, std::size_t Blocks>
     static void increment_block (
-            Array<ctr_type, Blocks, BlockTraits> &ctr,
-            cxx11::true_type)
+            Array<ctr_type, Blocks> &ctr, cxx11::true_type)
     {
         increment_block_ctr(ctr[Position<B>()]);
         increment_block<B + 1>(ctr,
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    template <std::size_t, std::size_t Blocks, typename BlockTraits>
+    template <std::size_t, std::size_t Blocks>
     static void increment_block (
-            Array<ctr_type, Blocks, BlockTraits> &,
-            T, cxx11::false_type) {}
+            Array<ctr_type, Blocks> &, T, cxx11::false_type) {}
 
-    template <std::size_t B, std::size_t Blocks, typename BlockTraits>
+    template <std::size_t B, std::size_t Blocks>
     static void increment_block (
-            Array<ctr_type, Blocks, BlockTraits> &ctr,
-            T nskip, cxx11::true_type)
+            Array<ctr_type, Blocks> &ctr, T nskip, cxx11::true_type)
     {
         increment_block_ctr(ctr[Position<B>()], nskip);
         increment_block<B + 1>(ctr, nskip,

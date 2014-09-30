@@ -28,32 +28,32 @@ namespace vsmc {
 
 /// \brief Aligned pack
 /// \ingroup RNG
-template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_pack_a (const Array<T, N, Traits> &c, __m128i &m)
+template <std::size_t Offset, typename T, std::size_t N>
+inline void m128i_pack_a (const Array<T, N> &c, __m128i &m)
 {m = _mm_load_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));}
 
 /// \brief Unaligned pack
 /// \ingroup RNG
-template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_pack_u (const Array<T, N, Traits> &c, __m128i &m)
+template <std::size_t Offset, typename T, std::size_t N>
+inline void m128i_pack_u (const Array<T, N> &c, __m128i &m)
 {m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));}
 
 /// \brief Aligned unpack
 /// \ingroup RNG
-template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_unpack_a (const __m128i &m, Array<T, N, Traits> &c)
+template <std::size_t Offset, typename T, std::size_t N>
+inline void m128i_unpack_a (const __m128i &m, Array<T, N> &c)
 {_mm_store_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);}
 
 /// \brief Unaligned unpack
 /// \ingroup RNG
-template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_unpack_u (const __m128i &m, Array<T, N, Traits> &c)
+template <std::size_t Offset, typename T, std::size_t N>
+inline void m128i_unpack_u (const __m128i &m, Array<T, N> &c)
 {_mm_storeu_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);}
 
 /// \brief Pack an Array into an __m128i object
 /// \ingroup RNG
-template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_pack (const Array<T, N, Traits> &c, __m128i &m)
+template <std::size_t Offset, typename T, std::size_t N>
+inline void m128i_pack (const Array<T, N> &c, __m128i &m)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
     m128i_pack_u<Offset>(c, m);
@@ -61,8 +61,8 @@ inline void m128i_pack (const Array<T, N, Traits> &c, __m128i &m)
 
 /// \brief Unpack an __m128i object into an Array
 /// \ingroup RNG
-template <std::size_t Offset, typename T, std::size_t N, typename Traits>
-inline void m128i_unpack (const __m128i &m, Array<T, N, Traits> &c)
+template <std::size_t Offset, typename T, std::size_t N>
+inline void m128i_unpack (const __m128i &m, Array<T, N> &c)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
     m128i_unpack_u<Offset>(m, c);
