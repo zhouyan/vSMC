@@ -8,8 +8,8 @@
 // See LICENSE for details.
 //============================================================================
 
-#ifndef VSMC_RD_RSEED_HPP
-#define VSMC_RD_RSEED_HPP
+#ifndef VSMC_RNG_RD_SEED_HPP
+#define VSMC_RNG_RD_SEED_HPP
 
 #include <vsmc/rng/generator_wrapper.hpp>
 #include <immintrin.h>
@@ -93,4 +93,4 @@ typedef RdSeedEngine<uint64_t, RdSeedStep<uint64_t> > RdSeed64;
 
 } // namespace vsmc
 
-#endif // VSMC_RD_RSEED_HPP
+#endif // VSMC_RNG_RD_SEED_HPP
