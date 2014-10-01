@@ -15,27 +15,27 @@
 
 #define VSMC_DEFINE_VMATH_1(ns, name) \
     template <typename T>                                                    \
-    inline void v##name (int n, const T *a, T *y)                            \
+    inline void v##name (std::size_t n, const T *a, T *y)                    \
     {                                                                        \
         using ns::name;                                                      \
-        for (int i = 0; i != n; ++i)                                         \
+        for (std::size_t i = 0; i != n; ++i)                                 \
             y[i] = name(a[i]);                                               \
     }
 
 #define VSMC_DEFINE_VMATH_2(ns, name) \
     template <typename T>                                                    \
-    inline void v##name (int n, const T *a, const T *b, T *y)                \
+    inline void v##name (std::size_t n, const T *a, const T *b, T *y)        \
     {                                                                        \
         using ns::name;                                                      \
-        for (int i = 0; i != n; ++i)                                         \
+        for (std::size_t i = 0; i != n; ++i)                                 \
             y[i] = name(a[i], b[i]);                                         \
     }
 
 #define VSMC_DEFINE_VMATH_B(name, op) \
     template <typename T>                                                    \
-    inline void v##name (int n, const T *a, const T *b, T *y)                \
+    inline void v##name (std::size_t n, const T *a, const T *b, T *y)        \
     {                                                                        \
-        for (int i = 0; i != n; ++i)                                         \
+        for (std::size_t i = 0; i != n; ++i)                                 \
             y[i] = a[i] op b[i];                                             \
     }
 
@@ -166,44 +166,44 @@ VSMC_DEFINE_VMATH_B(div, /)
 /// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i^2\f$
 /// \ingroup vMath
 template <typename T>
-inline void vsqr (int n, const T *a, T *y)
-{for (int i = 0; i != n; ++i) y[i] = a[i] * a[i];}
+inline void vsqr (std::size_t n, const T *a, T *y)
+{for (std::size_t i = 0; i != n; ++i) y[i] = a[i] * a[i];}
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i^b\f$
 /// \ingroup vMath
 template <typename T>
-inline void vpowx (int n, const T *a, T b, T *y)
-{using std::pow; for (int i = 0; i != n; ++i) y[i] = pow(a[i], b);}
+inline void vpowx (std::size_t n, const T *a, T b, T *y)
+{using std::pow; for (std::size_t i = 0; i != n; ++i) y[i] = pow(a[i], b);}
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = 1 / a_i\f$
 /// \ingroup vMath
 template <typename T>
-inline void vinv (int n, const T *a, T *y)
+inline void vinv (std::size_t n, const T *a, T *y)
 {
     const T one = static_cast<T>(1);
-    for (int i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i)
         y[i] = one / a[i];
 }
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt{a_i}\f$
 /// \ingroup vMath
 template <typename T>
-inline void vinvsqrt (int n, const T *a, T *y)
+inline void vinvsqrt (std::size_t n, const T *a, T *y)
 {
     using std::sqrt;
     const T one = static_cast<T>(1);
-    for (int i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i)
         y[i] = one / sqrt(a[i]);
 }
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt[3]{a_i}\f$
 /// \ingroup vMath
 template <typename T>
-inline void vinvcbrt (int n, const T *a, T *y)
+inline void vinvcbrt (std::size_t n, const T *a, T *y)
 {
     using cxx11::cbrt;
     const T one = static_cast<T>(1);
-    for (int i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i)
         y[i] = one / cbrt(a[i]);
 }
 
@@ -217,18 +217,18 @@ inline void vinvcbrt (int n, const T *a, T *y)
 
 #define VSMC_DEFINE_VMATH_MKL_1(name, vname) \
     template <> inline void v##name<float>                                   \
-    (int n, const float *a, float *y)                                        \
+    (std::size_t n, const float *a, float *y)                                \
     {::vs##vname(static_cast<MKL_INT>(n), a, y);}                            \
     template <> inline void v##name<double>                                  \
-    (int n, const double *a, double *y)                                      \
+    (std::size_t n, const double *a, double *y)                              \
     {::vd##vname(static_cast<MKL_INT>(n), a, y);}
 
 #define VSMC_DEFINE_VMATH_MKL_2(name, vname) \
     template <> inline void v##name<float>                                   \
-    (int n, const float *a, const float *b, float *y)                        \
+    (std::size_t n, const float *a, const float *b, float *y)                \
     {::vs##vname(static_cast<MKL_INT>(n), a, b, y);}                         \
     template <> inline void v##name<double>                                  \
-    (int n, const double *a, const double *b, double *y)                     \
+    (std::size_t n, const double *a, const double *b, double *y)             \
     {::vd##vname(static_cast<MKL_INT>(n), a, b, y);}
 
 namespace vsmc {
@@ -272,11 +272,11 @@ VSMC_DEFINE_VMATH_MKL_2(pow,   Pow)
 VSMC_DEFINE_VMATH_MKL_2(sub,   Sub)
 
 template<>
-inline void vpowx<float> (int n, const float *a, float b, float *y)
+inline void vpowx<float> (std::size_t n, const float *a, float b, float *y)
 {::vsPowx(static_cast<MKL_INT>(n), a, b, y);}
 
 template<>
-inline void vpowx<double> (int n, const double *a, double b, double *y)
+inline void vpowx<double> (std::size_t n, const double *a, double b, double *y)
 {::vdPowx(static_cast<MKL_INT>(n), a, b, y);}
 
 } // namespace vsmc::math
