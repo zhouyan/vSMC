@@ -13,6 +13,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/random.hpp>
+#include <vsmc/math/vmath.hpp>
 #include <cstring>
 #include <limits>
 
@@ -415,25 +416,11 @@ class WeightSet
 
     /// \brief Compute unormalized logarithm weights from normalized weights
     virtual void log_weight2weight ()
-    {
-        using std::exp;
-
-        double *const wptr = weight_ptr();
-        const double *const lwptr = log_weight_ptr();
-        for (size_type i = 0; i != size_; ++i)
-            wptr[i] = exp(lwptr[i]);
-    }
+    {math::vexp(size_, log_weight_ptr(), weight_ptr());}
 
     /// \brief Compute unormalized weights from normalized logarithm weights
     virtual void weight2log_weight ()
-    {
-        using std::log;
-
-        const double *const wptr = weight_ptr();
-        double *const lwptr = log_weight_ptr();
-        for (size_type i = 0; i != size_; ++i)
-            lwptr[i] = log(wptr[i]);
-    }
+    {math::vlog(size_, weight_ptr(), log_weight_ptr());}
 
     /// \brief Normalize logarithm weights such that the maximum is zero
     virtual void normalize_log_weight ()
@@ -466,27 +453,20 @@ class WeightSet
     /// \brief Compute ESS given (logarithm) unormalzied incremental weights
     virtual double compute_ess (const double *first, bool use_log) const
     {
-        using std::exp;
-
         std::vector<double> buffer(size_);
         double *const bptr = &buffer[0];
 
         if (use_log) {
-            const double *const lwptr = log_weight_ptr();
-            for (size_type i = 0; i != size_; ++i)
-                bptr[i] = lwptr[i] + first[i];
+            math::vadd(size_, log_weight_ptr(), first, bptr);
             double max_weight = bptr[0];
             for (size_type i = 0; i != size_; ++i)
                 if (max_weight < bptr[i])
                     max_weight = bptr[i];
             for (size_type i = 0; i != size_; ++i)
                 bptr[i] -= max_weight;
-            for (size_type i = 0; i != size_; ++i)
-                bptr[i] = exp(bptr[i]);
+            math::vexp(size_, bptr, bptr);
         } else {
-            const double *const wptr = weight_ptr();
-            for (size_type i = 0; i != size_; ++i)
-                bptr[i] = wptr[i] * first[i];
+            math::vmul(size_, weight_ptr(), first, bptr);
         }
 
         double coeff = 0;
@@ -507,17 +487,13 @@ class WeightSet
     /// \brief Compute CESS given (logarithm) unormalized incremental weights
     virtual double compute_cess (const double *first, bool use_log) const
     {
-        using std::exp;
-
         const double *bptr = first;
         const double *const wptr = weight_ptr();
         std::vector<double> buffer;
         if (use_log) {
             buffer.resize(size_);
-            double *const cptr = &buffer[0];
-            for (size_type i = 0; i != size_; ++i)
-                cptr[i] = exp(first[i]);
-            bptr = cptr;
+            math::vexp(size_, first, &buffer[0]);
+            bptr = &buffer[0];
         }
 
         double above = 0;
@@ -638,7 +614,7 @@ class WeightSetEmpty
     private :
 
     static double max_ess ()
-    {return std::numeric_limits<double>::max VSMC_MNE();}
+    {return std::numeric_limits<double>::max VSMC_MNE ();}
 }; // class WeightSetEmtpy
 
 } // namespace vsmc
