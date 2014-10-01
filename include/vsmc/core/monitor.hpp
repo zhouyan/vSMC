@@ -271,16 +271,9 @@ class Monitor
         particle.read_weight(weight);
 
         eval_(iter, dim_, particle, buffer);
-        if (dim_ == 1) {
-            double res = 0;
-            for (std::size_t i = 0; i != N; ++i)
-                res += buffer[i] * weight[i];
-            result[0] = res;
-        } else {
-            is_integrate_(static_cast<ISIntegrate::size_type>(N),
-                    static_cast<ISIntegrate::size_type>(dim_),
-                    buffer, weight, result);
-        }
+        is_integrate_(static_cast<ISIntegrate::size_type>(N),
+                static_cast<ISIntegrate::size_type>(dim_),
+                buffer, weight, result);
 
         index_.push_back(iter);
         for (std::size_t d = 0; d != dim_; ++d)
