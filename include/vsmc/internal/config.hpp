@@ -49,6 +49,14 @@
 #define VSMC_USE_AES_NI 0
 #endif
 
+#ifndef VSMC_USE_RD_RAND
+#define VSMC_USE_RD_RAND 0
+#endif
+
+#ifndef VSMC_USE_RD_SEED
+#define VSMC_USE_RD_SEED 0
+#endif
+
 #ifndef VSMC_USE_CXX11LIB_FUTURE
 #define VSMC_USE_CXX11LIB_FUTURE VSMC_HAS_CXX11LIB_FUTURE
 #endif
