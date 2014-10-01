@@ -13,6 +13,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+#if VSMC_USE_MKL
+#include <mkl_cblas.h>
+#endif
+
 namespace vsmc {
 
 /// \brief Compute the importance sampling integration of multivariate variable
@@ -27,10 +31,10 @@ class ISIntegrate
     ///
     /// \param N Number of particles
     /// \param dim Number of variables
-    /// \param hX A `N` by `dim` row major matrix, each row `i` contains
-    /// \f$h(X_i) = (h_1(X_i), h_2(X_i), \dots, h_d(X_i))\f$
-    /// \param W Normalized weights
-    /// \param Eh The importance sampling estiamtes of \f$E[h(X)]\f$
+    /// \param hX An `N` by `dim` row major matrix, each row `i` contains
+    /// \f$h(X_i) = (h_1(X_i),\dots,h_d(X_i))\f$
+    /// \param W Normalized weights, an `N`-vector
+    /// \param Eh The importance sampling estiamtes of \f$E[h(X)] = [h(X)]'W\f$
     void operator() (size_type N, size_type dim,
             const double *hX, const double *W, double *Eh) const
     {
@@ -45,12 +49,18 @@ class ISIntegrate
             return;
         }
 
+#if VSMC_USE_MKL
+        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
+                static_cast<MKL_INT>(dim), static_cast<MKL_INT>(N),
+                1, hX, static_cast<MKL_INT>(dim), W, 1, 0, Eh, 1);
+#else
         for (size_type d = 0; d != dim; ++d)
             Eh[d] = 0;
         for (size_type i = 0; i != N; ++i, ++W) {
             for (size_type d = 0; d != dim; ++d, ++hX)
                 Eh[d] += (*W) * (*hX);
         }
+#endif
     }
 }; // class ISIntegrate
 
