@@ -15,6 +15,7 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <utility>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -74,21 +75,21 @@ class Array
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    reference at (size_type i)
+    reference at (size_type pos)
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_ARRAY_RANGE(i, N);
-        return data_[i];
+        VSMC_RUNTIME_ASSERT_UTILITY_ARRAY_RANGE(pos, N);
+        return data_[pos];
     }
 
-    const_reference at (size_type i) const
+    const_reference at (size_type pos) const
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_ARRAY_RANGE(i, N);
-        return data_[i];
+        VSMC_RUNTIME_ASSERT_UTILITY_ARRAY_RANGE(pos, N);
+        return data_[pos];
     }
 
-    reference operator[] (size_type i) {return data_[i];}
+    reference operator[] (size_type pos) {return data_[pos];}
 
-    const_reference operator[] (size_type i) const {return data_[i];}
+    const_reference operator[] (size_type pos) const {return data_[pos];}
 
     reference front () {return at<0>();}
 
