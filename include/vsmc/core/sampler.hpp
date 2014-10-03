@@ -18,6 +18,7 @@
 #include <vsmc/utility/backup.hpp>
 #include <limits>
 #include <map>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -580,18 +581,13 @@ class Sampler
         *first = std::string("ESS");
         ++first;
 
-        char acc_name[32];
+        std::stringstream ss;
+
         unsigned accd = static_cast<unsigned>(accept_history_.size());
         for (unsigned i = 0; i != accd; ++i) {
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4996)
-#endif
-            std::sprintf(acc_name, "Accept.%u", i + 1);
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-            *first = std::string(acc_name);
+            ss.str(std::string());
+            ss << "Accept." << i + 1;
+            *first = ss.str();
             ++first;
         }
 
@@ -605,20 +601,16 @@ class Sampler
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             if (m->second.iter_size() > 0) {
-                char *mon_name = new char[m->first.size() + 32];
                 unsigned mond = static_cast<unsigned>(m->second.dim());
                 for (unsigned i = 0; i != mond; ++i, ++first) {
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4996)
-#endif
-                    std::sprintf(mon_name, "%s.%u", m->first.c_str(), i + 1);
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-                    *first = std::string(mon_name);
+                    if (!m->second.name(i).empty()) {
+                        *first = m->second.name(i);
+                    } else {
+                        ss.str(std::string());
+                        ss << m->first << '.' << i + 1;
+                        *first = ss.str();
+                    }
                 }
-                delete [] mon_name;
             }
         }
 

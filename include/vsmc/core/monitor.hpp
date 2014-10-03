@@ -14,14 +14,15 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/integrate/is_integrate.hpp>
+#include <string>
 #include <vector>
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func) \
-    VSMC_RUNTIME_ASSERT((id < this->dim()),                                  \
+    VSMC_RUNTIME_ASSERT((id < dim()),                                        \
             ("**Monitor::"#func"** INVALID ID NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(func) \
-    VSMC_RUNTIME_ASSERT((iter < this->iter_size()),                          \
+    VSMC_RUNTIME_ASSERT((iter < iter_size()),                                \
             ("**Monitor::"#func"** INVALID ITERATION NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(func, caller, name) \
@@ -71,51 +72,7 @@ class Monitor
     /// sampling estimates are recorded and can be retrived by `index()` and
     /// `record()`.
     explicit Monitor (std::size_t dim, const eval_type &eval) :
-        dim_(dim), eval_(eval), recording_(true) {}
-
-    Monitor (const Monitor<T> &other) :
-        dim_(other.dim_), eval_(other.eval_), recording_(other.recording_),
-        index_(other.index_), record_(other.record_),
-        is_integrate_(other.is_integrate_) {}
-
-    Monitor<T> &operator= (const Monitor<T> &other)
-    {
-        if (this != &other) {
-            dim_          = other.dim_;
-            eval_         = other.eval_;
-            recording_    = other.recording_;
-            index_        = other.index_;
-            record_       = other.record_;
-            is_integrate_ = other.is_integrate_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Monitor (Monitor<T> &&other) :
-        dim_(other.dim_), eval_(cxx11::move(other.eval_)),
-        recording_(other.recording_),
-        index_(cxx11::move(other.index_)),
-        record_(cxx11::move(other.record_)),
-        is_integrate_(other.is_integrate_) {}
-
-    Monitor<T> &operator= (Monitor<T> &&other)
-    {
-        if (this != &other) {
-            dim_          = other.dim_;
-            eval_         = cxx11::move(other.eval_);
-            recording_    = other.recording_;
-            index_        = cxx11::move(other.index_);
-            record_       = cxx11::move(other.record_);
-            is_integrate_ = cxx11::move(other.is_integrate_);
-        }
-
-        return *this;
-    }
-#endif
-
-    virtual ~Monitor () {}
+        dim_(dim), eval_(eval), recording_(true), name_(dim) {}
 
     /// \brief The dimension of the Monitor
     std::size_t dim () const {return dim_;}
@@ -138,6 +95,28 @@ class Monitor
 
     /// \brief Whether the evaluation object is valid
     bool empty () const {return !static_cast<bool>(eval_);}
+
+    /// \brief Read and write access to the names of variables
+    ///
+    /// \details
+    /// By default, each variable of a Monitor is unnamed and the returned
+    /// string is empty. However, the user can selectively set the names of
+    /// each variable. This effect how Sampler will print the headers of the
+    /// summary table.
+    std::string &name (std::size_t id)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(name);
+
+        return name_[id];
+    }
+
+    /// \brief Read only access to the names of variables
+    const std::string &name (std::size_t id) const
+    {
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(name);
+
+        return name_[id];
+    }
 
     /// \brief Get the iteration index of the sampler of a given Monitor
     /// iteration
@@ -256,7 +235,7 @@ class Monitor
     /// iteration. It does nothing if `recording()` returns `false`. Otherwise
     /// it use the user defined evaluation object to compute results. When a
     /// Monitor is constructed, `recording()` always returns `true`. It can be
-    /// turned off by `turnoff()` and turned on later by `turnon()`.
+    /// turned off by `turn_off()` and turned on later by `turn_on()`.
     void eval (std::size_t iter, const Particle<T> &particle)
     {
         if (!recording_)
@@ -265,19 +244,21 @@ class Monitor
         VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(eval_, eval, EVALUATION);
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
-        double *const result = malloc_result(dim_);
-        double *const buffer = malloc_eval_integrand(N * dim_);
-        double *const weight = malloc_weight(N);
-        particle.read_weight(weight);
+        result_.resize(dim_);
+        weight_.resize(N);
+        buffer_.resize(N * dim_);
+        double *const rptr = &result_[0];
+        double *const wptr = &weight_[0];
+        double *const bptr = &buffer_[0];
+        particle.read_weight(wptr);
 
-        eval_(iter, dim_, particle, buffer);
+        eval_(iter, dim_, particle, bptr);
         is_integrate_(static_cast<ISIntegrate::size_type>(N),
-                static_cast<ISIntegrate::size_type>(dim_),
-                buffer, weight, result);
+                static_cast<ISIntegrate::size_type>(dim_), bptr, wptr, rptr);
 
         index_.push_back(iter);
         for (std::size_t d = 0; d != dim_; ++d)
-            record_.push_back(result[d]);
+            record_.push_back(rptr[d]);
     }
 
     /// \brief Clear all records of the index and integrations
@@ -291,39 +272,17 @@ class Monitor
     bool recording () const {return recording_;}
 
     /// \brief Turn on the recording
-    void turnon () {recording_ = true;}
+    void turn_on () {recording_ = true;}
 
     /// \brief Turn off the recording
-    void turnoff () {recording_ = false;}
-
-    protected :
-
-    virtual double *malloc_result (std::size_t N)
-    {
-        result_.resize(N);
-
-        return &result_[0];
-    }
-
-    virtual double *malloc_weight (std::size_t N)
-    {
-        weight_.resize(N);
-
-        return &weight_[0];
-    }
-
-    virtual double *malloc_eval_integrand (std::size_t N)
-    {
-        buffer_.resize(N);
-
-        return &buffer_[0];
-    }
+    void turn_off () {recording_ = false;}
 
     private :
 
     std::size_t dim_;
     eval_type eval_;
     bool recording_;
+    std::vector<std::string> name_;
     std::vector<std::size_t> index_;
     std::vector<double> record_;
     std::vector<double> result_;

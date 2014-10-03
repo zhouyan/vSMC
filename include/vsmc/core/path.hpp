@@ -18,7 +18,7 @@
 #include <vector>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func) \
-    VSMC_RUNTIME_ASSERT((iter < this->iter_size()),                          \
+    VSMC_RUNTIME_ASSERT((iter < iter_size()),                                \
             ("**Path::"#func"** INVALID ITERATION NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(func, caller, name) \
@@ -65,50 +65,6 @@ class Path
     /// \f$(g_{\alpha_t}(X_0),\dots)\f$ and the return value is \f$\alpha_t\f$.
     explicit Path (const eval_type &eval) :
         eval_(eval), recording_(true), log_zconst_(0) {}
-
-    Path (const Path<T> &other) :
-        eval_(other.eval_), recording_(other.recording_),
-        log_zconst_(other.log_zconst_), index_(other.index_),
-        integrand_(other.integrand_), grid_(other.grid_) {}
-
-    Path<T> &operator= (const Path<T> &other)
-    {
-        if (this != &other) {
-            eval_       = other.eval_;
-            recording_  = other.recording_;
-            log_zconst_ = other.log_zconst_;
-            index_      = other.index_;
-            integrand_  = other.integrand_;
-            grid_       = other.grid_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Path (Path<T> &&other) :
-        eval_(cxx11::move(other.eval_)),
-        recording_(other.recording_), log_zconst_(other.log_zconst_),
-        index_(cxx11::move(other.index_)),
-        integrand_(cxx11::move(other.integrand_)),
-        grid_(cxx11::move(other.grid_)) {}
-
-    Path<T> &operator= (Path<T> &&other)
-    {
-        if (this != &other) {
-            eval_       = cxx11::move(other.eval_);
-            recording_  = other.recording_;
-            log_zconst_ = other.log_zconst_;
-            index_      = cxx11::move(other.index_);
-            integrand_  = cxx11::move(other.integrand_);
-            grid_       = cxx11::move(other.grid_);
-        }
-
-        return *this;
-    }
-#endif
-
-    virtual ~Path () {}
 
     /// \brief The number of iterations has been recorded
     ///
@@ -205,16 +161,18 @@ class Path
         VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(eval_, eval, EVALUATION);
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
-        double *const buffer = malloc_eval_integrand(N);
-        double *const weight = malloc_weight(N);
-        particle.read_weight(weight);
+        weight_.resize(N);
+        buffer_.resize(N);
+        double *const wptr = &weight_[0];
+        double *const bptr = &buffer_[0];
+        particle.read_weight(wptr);
 
         index_.push_back(iter);
-        grid_.push_back(eval_(iter, particle, buffer));
+        grid_.push_back(eval_(iter, particle, bptr));
 
         double res = 0;
         for (std::size_t i = 0; i != N; ++i)
-            res += buffer[i] * weight[i];
+            res += wptr[i] * bptr[i];
         integrand_.push_back(res);
 
         if (iter_size() > 1) {
@@ -243,26 +201,10 @@ class Path
     bool recording () const {return recording_;}
 
     /// \brief Turn on the recording
-    void turnon () {recording_ = true;}
+    void turn_on () {recording_ = true;}
 
     /// \brief Turn off the recording
-    void turnoff () {recording_ = false;}
-
-    protected :
-
-    virtual double *malloc_weight (std::size_t N)
-    {
-        weight_.resize(N);
-
-        return &weight_[0];
-    }
-
-    virtual double *malloc_eval_integrand (std::size_t N)
-    {
-        buffer_.resize(N);
-
-        return &buffer_[0];
-    }
+    void turn_off () {recording_ = false;}
 
     private :
 
