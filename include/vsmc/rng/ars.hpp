@@ -136,10 +136,50 @@ class ARSEngine :
 /// \ingroup AESNIRNG
 typedef ARSEngine<uint32_t> ARS_32;
 
+/// \brief ARS RNG engine with 32-bits integers output, 1 block and default
+/// rounds
+/// \ingroup AESNIRNG
+typedef ARSEngine<uint32_t, VSMC_RNG_ARS_ROUNDS, 1> ARS_1x32;
+
+/// \brief ARS RNG engine with 32-bits integers output, 2 blocks and default
+/// rounds
+/// \ingroup AESNIRNG
+typedef ARSEngine<uint32_t, VSMC_RNG_ARS_ROUNDS, 2> ARS_2x32;
+
+/// \brief ARS RNG engine with 32-bits integers output, 4 blocks and default
+/// rounds
+/// \ingroup AESNIRNG
+typedef ARSEngine<uint32_t, VSMC_RNG_ARS_ROUNDS, 4> ARS_4x32;
+
+/// \brief ARS RNG engine with 32-bits integers output, 8 blocks and default
+/// rounds
+/// \ingroup AESNIRNG
+typedef ARSEngine<uint32_t, VSMC_RNG_ARS_ROUNDS, 8> ARS_8x32;
+
 /// \brief ARS RNG engine with 64-bits integers output, default blocks and
 /// default rounds
 /// \ingroup AESNIRNG
 typedef ARSEngine<uint64_t> ARS_64;
+
+/// \brief ARS RNG engine with 64-bits integers output, 1 block and default
+/// rounds
+/// \ingroup AESNIRNG
+typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 1> ARS_1x64;
+
+/// \brief ARS RNG engine with 64-bits integers output, 2 blocks and default
+/// rounds
+/// \ingroup AESNIRNG
+typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 2> ARS_2x64;
+
+/// \brief ARS RNG engine with 64-bits integers output, 4 blocks and default
+/// rounds
+/// \ingroup AESNIRNG
+typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 4> ARS_4x64;
+
+/// \brief ARS RNG engine with 64-bits integers output, 8 blocks and default
+/// rounds
+/// \ingroup AESNIRNG
+typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 8> ARS_8x64;
 
 } // namespace vsmc
 
