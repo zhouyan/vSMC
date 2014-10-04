@@ -27,11 +27,15 @@ class DispatchObject
 
     /// \brief Create a DispatchObject from its C-type object
     ///
-    /// \details
-    /// The original object will be retained by this object
-    explicit DispatchObject (const DispatchType &object) : object_(object)
+    /// \param object The raw object to be aquired
+    /// \param retained Whether the object is already retained. Some objects
+    /// are retained at least once when it is created. These objects shall not
+    /// be retained again by this constructor. Passing `true` as this argument
+    /// prevent the constructor to retain the object.
+    explicit DispatchObject (const DispatchType &object, bool retained) :
+        object_(object)
     {
-        if (object_ != VSMC_NULLPTR)
+        if (!retained && object_ != VSMC_NULLPTR)
             ::dispatch_retain(object);
     }
 

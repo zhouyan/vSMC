@@ -34,33 +34,9 @@ class DispatchFunction
 
     DispatchFunction (const T &work) : work_(work) {}
 
-    DispatchFunction (const DispatchFunction<T> &other) :
-        work_(other.work_) {}
-
-    DispatchFunction<T> &operator= (const DispatchFunction<T> &other)
-    {
-        if (this != &other)
-            work_ = other.work_;
-
-        return *this;
-    }
-
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     DispatchFunction (T &&work) VSMC_NOEXCEPT : work_(cxx11::move(work)) {}
-
-    DispatchFunction (DispatchFunction<T> &&other) VSMC_NOEXCEPT :
-        work_(cxx11::move(other.work_)) {}
-
-    DispatchFunction<T> &operator= (DispatchFunction<T> &&other) VSMC_NOEXCEPT
-    {
-        if (this != &other)
-            work_ = cxx11::move(other.work_);
-
-        return *this;
-    }
 #endif
-
-    ~DispatchFunction () {}
 
     void *context () {return static_cast<void *>(this);}
 

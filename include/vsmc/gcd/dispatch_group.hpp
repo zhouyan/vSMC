@@ -22,44 +22,7 @@ class DispatchGroup : public DispatchObject< ::dispatch_group_t>
     public :
 
     DispatchGroup () :
-        DispatchObject< ::dispatch_group_t>(::dispatch_group_create()) {}
-
-    DispatchGroup (const DispatchGroup &other) :
-        DispatchObject< ::dispatch_group_t>(other)
-    {
-        if (this->object() != VSMC_NULLPTR)
-            ::dispatch_retain(this->object());
-    }
-
-    DispatchGroup &operator= (const DispatchGroup &other)
-    {
-        if (this != &other) {
-            DispatchObject< ::dispatch_group_t>::operator=(other);
-            if (this->object() != VSMC_NULLPTR)
-                ::dispatch_retain(this->object());
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    DispatchGroup (DispatchGroup &&other) :
-        DispatchObject< ::dispatch_group_t>(cxx11::move(other)) {}
-
-    DispatchGroup &operator= (DispatchGroup &&other)
-    {
-        if (this != &other)
-            DispatchObject< ::dispatch_group_t>::operator=(cxx11::move(other));
-
-        return *this;
-    }
-#endif
-
-    ~DispatchGroup ()
-    {
-        if (this->object() != VSMC_NULLPTR)
-            ::dispatch_release(this->object());
-    }
+        DispatchObject< ::dispatch_group_t>(::dispatch_group_create(), true) {}
 
     void enter () const {::dispatch_group_enter(this->object());}
 

@@ -100,34 +100,8 @@ class DispatchQueueBase : public DispatchObject< ::dispatch_queue_t>
 
     protected :
 
-    DispatchQueueBase (::dispatch_queue_t queue) :
-        DispatchObject< ::dispatch_queue_t>(queue) {}
-
-    DispatchQueueBase (const DispatchQueueBase &other) :
-        DispatchObject< ::dispatch_queue_t>(other) {}
-
-    DispatchQueueBase &operator= (const DispatchQueueBase &other)
-    {
-        if (this != &other)
-            DispatchObject< ::dispatch_queue_t>::operator=(other);
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERNECES
-    DispatchQueueBase (DispatchQueueBase &&other) :
-        DispatchObject< ::dispatch_queue_t>(cxx11::move(other)) {}
-
-    DispatchQueueBase &operator= (DispatchQueueBase &&other)
-    {
-        if (this != &other)
-            DispatchObject< ::dispatch_queue_t>::operator=(cxx11::move(other));
-
-        return *this;
-    }
-#endif
-
-    ~DispatchQueueBase () {}
+    DispatchQueueBase (::dispatch_queue_t queue, bool retained) :
+        DispatchObject< ::dispatch_queue_t>(queue, retained) {}
 }; // class DispatchQueueBase
 
 /// \brief The main dispatch queue (`dipatch_get_main_queue`)
@@ -137,7 +111,7 @@ class DispatchQueue<DispatchMain> : public DispatchQueueBase
 {
     public :
 
-    DispatchQueue () : DispatchQueueBase(dispatch_get_main_queue()) {}
+    DispatchQueue () : DispatchQueueBase(dispatch_get_main_queue(), false) {}
 }; // class DispatchQueue
 
 /// \brief The global dispatch queue (`dispatch_get_gloal_queue`)
@@ -150,10 +124,12 @@ class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 #if VSMC_USE_GCD_LION
     DispatchQueue (::dispatch_queue_priority_t priority =
             DISPATCH_QUEUE_PRIORITY_DEFAULT, unsigned long flags = 0) :
-        DispatchQueueBase(::dispatch_get_global_queue(priority, flags)) {}
+        DispatchQueueBase(::dispatch_get_global_queue(priority, flags), false)
+    {}
 #else // VSMC_USE_GCD_LION
     DispatchQueue (long priority = 0, unsigned long flags = 0) :
-        DispatchQueueBase(::dispatch_get_global_queue(priority, flags)) {}
+        DispatchQueueBase(::dispatch_get_global_queue(priority, flags), false)
+    {}
 #endif // VSMC_USE_GCD_LION
 }; // class DispatchQueue
 
@@ -166,32 +142,7 @@ class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
 
     DispatchQueue (const char *label = VSMC_NULLPTR,
             ::dispatch_queue_attr_t attr = VSMC_NULLPTR) :
-        DispatchQueueBase(::dispatch_queue_create(label, attr)) {}
-
-    DispatchQueue (const DispatchQueue<DispatchPrivate> &other) :
-        DispatchQueueBase(other)
-    {
-        if (this->object() != VSMC_NULLPTR)
-            ::dispatch_retain(this->object());
-    }
-
-    DispatchQueue<DispatchPrivate> &operator= (
-            const DispatchQueue<DispatchPrivate> &other)
-    {
-        if (this != &other) {
-            DispatchQueueBase::operator=(other);
-            if (this->object() != VSMC_NULLPTR)
-                ::dispatch_retain(this->object());
-        }
-
-        return *this;
-    }
-
-    ~DispatchQueue ()
-    {
-        if (this->object() != VSMC_NULLPTR)
-            ::dispatch_release(this->object());
-    }
+        DispatchQueueBase(::dispatch_queue_create(label, attr), true) {}
 }; // class DispatchQueue
 
 } // namespace vsmc

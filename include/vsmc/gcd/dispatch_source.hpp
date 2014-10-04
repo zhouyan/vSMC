@@ -109,49 +109,7 @@ class DispatchSourceBase : public DispatchObject< ::dispatch_source_t>
             ::dispatch_queue_t queue) :
         DispatchObject< ::dispatch_source_t>(::dispatch_source_create(
                     source_type_t(source_type<Type>()),
-                    handle, mask, queue))
-    {
-        if (this->object() != VSMC_NULLPTR)
-            ::dispatch_retain(this->object());
-    }
-
-    DispatchSourceBase (const DispatchSourceBase &other) :
-        DispatchObject< ::dispatch_source_t>(other)
-    {
-        if (this->object() != VSMC_NULLPTR)
-            ::dispatch_retain(this->object());
-    }
-
-    DispatchSourceBase &operator= (const DispatchSourceBase &other)
-    {
-        if (this != &other) {
-            DispatchObject< ::dispatch_source_t>::operator=(other);
-            if (this->object() != VSMC_NULLPTR)
-                ::dispatch_retain(this->object());
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    DispatchSourceBase (DispatchSourceBase &&other) :
-        DispatchObject< ::dispatch_source_t>(cxx11::move(other)) {}
-
-    DispatchSourceBase &operator= (DispatchSourceBase &&other)
-    {
-        if (this != &other)
-            DispatchObject< ::dispatch_source_t>::operator=(
-                    cxx11::move(other));
-
-        return *this;
-    }
-#endif
-
-    ~DispatchSourceBase ()
-    {
-        if (this->object() != VSMC_NULLPTR)
-            ::dispatch_release(this->object());
-    }
+                    handle, mask, queue), false) {}
 
     private :
 
