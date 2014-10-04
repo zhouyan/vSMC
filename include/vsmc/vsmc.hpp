@@ -128,10 +128,6 @@
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
-/// \defgroup Backup Object backup
-/// \ingroup Utility
-/// \brief Backup and restore objects
-
 /// \defgroup CPUID CPUID
 /// \ingroup Utility
 /// \brief Query CPUID features

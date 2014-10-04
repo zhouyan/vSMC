@@ -15,7 +15,6 @@
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>
 #include <vsmc/cxx11/functional.hpp>
-#include <vsmc/utility/backup.hpp>
 #include <limits>
 #include <map>
 #include <sstream>
