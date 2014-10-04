@@ -14,8 +14,6 @@
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/defines.hpp>
 
-#include <cstddef>
-
 #define VSMC_DEFINE_SMP_FORWARD(Name) \
 template <typename T, typename = Virtual> class Initialize##Name;            \
 template <typename T, typename = Virtual> class Move##Name;                  \
