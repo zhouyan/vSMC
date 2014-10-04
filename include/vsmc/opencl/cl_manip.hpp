@@ -18,7 +18,7 @@ namespace vsmc {
 
 /// \brief Query the preferred factor of local size
 /// \ingroup OpenCL
-/// 
+///
 /// \param kern An OpenCL kernel
 /// \param dev An OpenCL device
 /// \param factor Multiplier factor of local size for optimzied performance

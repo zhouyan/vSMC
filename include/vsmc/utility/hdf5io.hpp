@@ -539,7 +539,8 @@ inline void hdf5store (const StateCL<StateSize, FPType, ID> &state,
     std::size_t ncol = state.state_size() / sizeof(T);
     std::size_t N = nrow * ncol;
     std::vector<T> data(N);
-    state.manager().template read_buffer<T>(state.state_buffer(), N, &data[0]);
+    state.manager().template read_buffer<T>(state.state_buffer().data(), N,
+            &data[0]);
     hdf5store_matrix<Order, T>(nrow, ncol, file_name, data_name,
             &data[0], append);
 }

@@ -199,6 +199,7 @@
 #if VSMC_USE_OPENCL
 #include <vsmc/opencl/adapter.hpp>
 #include <vsmc/opencl/backend_cl.hpp>
+#include <vsmc/opencl/cl_buffer.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/cl_query.hpp>

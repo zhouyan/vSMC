@@ -24,6 +24,8 @@ class CLSetup
 {
     public :
 
+    typedef ID id;
+
     static CLSetup<ID> &instance ()
     {
         static CLSetup<ID> config;

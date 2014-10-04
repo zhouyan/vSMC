@@ -14,7 +14,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_setup.hpp>
 #include <cmath>
-#include <cstdlib>
 #include <string>
 #include <iostream>
 #include <iterator>
@@ -106,6 +105,8 @@ template <typename ID = CLDefault>
 class CLManager
 {
     public :
+
+    typedef ID id;
 
     /// \brief Get an instance of the manager singleton
     static CLManager<ID> &instance ()
@@ -202,7 +203,9 @@ class CLManager
 
     /// \brief Create an OpenCL buffer of a given type from a range of elements
     template<typename CLType, typename InputIter>
-    ::cl::Buffer create_buffer (InputIter first, InputIter last) const
+    ::cl::Buffer create_buffer (InputIter first, InputIter last,
+            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
+            ::cl::Event *event = VSMC_NULLPTR) const
     {
         using std::distance;
 
@@ -215,7 +218,7 @@ class CLManager
             return ::cl::Buffer();
 
         ::cl::Buffer buf(create_buffer<CLType>(num));
-        write_buffer<CLType>(buf, num, first);
+        write_buffer<CLType>(buf, num, first, 0, events, event);
 
         return buf;
     }
@@ -225,8 +228,8 @@ class CLManager
     template <typename CLType, typename OutputIter>
     OutputIter read_buffer (const ::cl::Buffer &buf, std::size_t num,
             OutputIter first, std::size_t offset = 0,
-	    const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-	    ::cl::Event *event = VSMC_NULLPTR) const
+            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
+            ::cl::Event *event = VSMC_NULLPTR) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
@@ -234,7 +237,7 @@ class CLManager
         command_queue_.finish();
         command_queue_.enqueueReadBuffer(buf, CL_TRUE, offset,
                 sizeof(CLType) * num, static_cast<void *>(&buffer[0]),
-		events, event);
+                events, event);
 
         for (std::size_t i = 0; i != num; ++i, ++first)
             *first = buffer[i];
@@ -247,15 +250,15 @@ class CLManager
     template <typename CLType>
     CLType *read_buffer (const ::cl::Buffer &buf, std::size_t num,
             CLType *first, std::size_t offset = 0,
-	    const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-	    ::cl::Event *event = VSMC_NULLPTR) const
+            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
+            ::cl::Event *event = VSMC_NULLPTR) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
         command_queue_.finish();
         command_queue_.enqueueReadBuffer(buf, CL_TRUE, offset,
                 sizeof(CLType) * num, static_cast<void *>(first),
-		events, event);
+                events, event);
 
         return first + num;
     }
@@ -265,8 +268,8 @@ class CLManager
     template <typename CLType, typename InputIter>
     InputIter write_buffer (const ::cl::Buffer &buf, std::size_t num,
             InputIter first, std::size_t offset = 0,
-	    const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-	    ::cl::Event *event = VSMC_NULLPTR) const
+            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
+            ::cl::Event *event = VSMC_NULLPTR) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
@@ -276,7 +279,7 @@ class CLManager
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
                 sizeof(CLType) * num, static_cast<void *>(&buffer[0]),
-		events, event);
+                events, event);
 
         return first;
     }
@@ -286,8 +289,8 @@ class CLManager
     template <typename CLType>
     const CLType *write_buffer (const ::cl::Buffer &buf, std::size_t num,
             const CLType *first, std::size_t offset = 0,
-	    const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-	    ::cl::Event *event = VSMC_NULLPTR) const
+            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
+            ::cl::Event *event = VSMC_NULLPTR) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
@@ -295,7 +298,7 @@ class CLManager
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
                 sizeof(CLType) * num,
                 static_cast<void *>(const_cast<CLType *>(first)),
-		events, event);
+                events, event);
 
         return first + num;
     }
@@ -305,15 +308,15 @@ class CLManager
     template <typename CLType>
     CLType *write_buffer (const ::cl::Buffer &buf, std::size_t num,
             CLType *first, std::size_t offset = 0,
-	    const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-	    ::cl::Event *event = VSMC_NULLPTR) const
+            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
+            ::cl::Event *event = VSMC_NULLPTR) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
                 sizeof(CLType) * num, static_cast<void *>(first),
-		events, event);
+                events, event);
 
         return first + num;
     }
@@ -322,16 +325,16 @@ class CLManager
     /// elements
     template <typename CLType>
     void copy_buffer (const ::cl::Buffer &src, const ::cl::Buffer &dst,
-	    std::size_t num,
-	    std::size_t src_offset = 0, std::size_t dst_offset = 0,
-	    const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-	    ::cl::Event *event = VSMC_NULLPTR) const
+            std::size_t num,
+            std::size_t src_offset = 0, std::size_t dst_offset = 0,
+            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
+            ::cl::Event *event = VSMC_NULLPTR) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
 
         command_queue_.finish();
         command_queue_.enqueueCopyBuffer(src, dst, src_offset, dst_offset,
-		sizeof(CLType) * num, events, event);
+                sizeof(CLType) * num, events, event);
         command_queue_.finish();
     }
 
@@ -355,8 +358,8 @@ class CLManager
     /// `get_global_id(0) < N`
     void run_kernel (const ::cl::Kernel &kern, std::size_t N,
             std::size_t local_size = 0,
-	    const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-	    ::cl::Event *event = VSMC_NULLPTR) const
+            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
+            ::cl::Event *event = VSMC_NULLPTR) const
     {
         command_queue_.finish();
         command_queue_.enqueueNDRangeKernel(kern, ::cl::NullRange,
