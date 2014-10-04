@@ -50,8 +50,8 @@ class Inversion
 
         std::memset(replication, 0, sizeof(IntType) * M);
 
-	if (N == 0)
-	    return;
+        if (N == 0)
+            return;
 
         accw_.resize(M);
         accw_[0] = weight[0];
@@ -59,12 +59,12 @@ class Inversion
             accw_[i] = accw_[i - 1] + weight[i];
         accw_.back() = 1;
 
-	u01_.resize(N);
-	std::memcpy(&u01_[0], u01, sizeof(double) * N);
+        u01_.resize(N);
+        std::memcpy(&u01_[0], u01, sizeof(double) * N);
         if (!usorted)
-	    std::sort(u01_.begin(), u01_.end());
-	if (u01_.back() > 1)
-	    u01_.back() = 1;
+            std::sort(u01_.begin(), u01_.end());
+        if (u01_.back() > 1)
+            u01_.back() = 1;
 
         std::size_t offset = 0;
         for (std::size_t i = 0; i != M; ++i) {
