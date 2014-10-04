@@ -60,6 +60,26 @@ class DispatchObject
         return *this;
     }
 
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    DispatchObject (DispatchObject<DispatchType> &&other)
+    {
+        object_ = other.object_;
+        other.object_ = VSMC_NULLPTR;
+    }
+
+    DispatchObject<DispatchType> &operator= (
+            DispatchObject<DispatchType> &&other)
+    {
+        if (this != &other) {
+            DispatchType tmp = object_;
+            object_ = other.object_;
+            other.object_ = tmp;
+        }
+
+        return *this;
+    }
+#endif
+
     ~DispatchObject ()
     {
         if (object_ != VSMC_NULLPTR)

@@ -104,6 +104,15 @@ class SingleParticle :
 
     SingleParticle<T> &operator= (const SingleParticle<T> &other)
     {base::operator=(other); return *this;}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    SingleParticle (SingleParticle<T> &&other) : base(cxx11::move(other)) {}
+
+    SingleParticle<T> &operator= (SingleParticle<T> &&other)
+    {base::operator=(cxx11::move(other)); return *this;}
+#endif
+
+    ~SingleParticle () {}
 }; // class SingleParticle
 
 /// \brief A const variant to SingleParticle
@@ -129,6 +138,22 @@ class ConstSingleParticle :
 
     ConstSingleParticle<T> &operator= (const SingleParticle<T> &other)
     {base::operator=(base(other.id(), other.particle_ptr())); return *this;}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    ConstSingleParticle (ConstSingleParticle<T> &&other) :
+        base(cxx11::move(other)) {}
+
+    ConstSingleParticle (SingleParticle<T> &&other) :
+        base(other.id(), other.particle_ptr()) {}
+
+    ConstSingleParticle<T> &operator= (ConstSingleParticle<T> &&other)
+    {base::operator=(cxx11::move(other)); return *this;}
+
+    ConstSingleParticle<T> &operator= (SingleParticle<T> &&other)
+    {base::operator=(base(other.id(), other.particle_ptr())); return *this;}
+#endif
+
+    ~ConstSingleParticle () {}
 }; // class ConstSingleParticle
 
 } // namespace vsmc

@@ -288,12 +288,6 @@ struct MKLSkipAheadForce
 
     MKLSkipAheadForce () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
 
-    MKLSkipAheadForce (const MKLSkipAheadForce &other) :
-        buffer_size_(other.buffer_size_) {}
-
-    MKLSkipAheadForce &operator= (const MKLSkipAheadForce &other)
-    {buffer_size_ = other.buffer_size_;}
-
     void operator() (const MKLStream<BRNG> &stream, size_type nskip)
     {
         if (nskip == 0)
@@ -512,47 +506,6 @@ class MKLEngine
             MKLEngine<BRNG, ResultType> >::value>::type * = VSMC_NULLPTR) :
         stream_(seq), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), remain_(0) {}
 
-    MKLEngine (const MKLEngine<BRNG, ResultType> &other) :
-        stream_(other.stream_), skip_ahead_(other.skip_ahead_),
-        buffer_(other.buffer_), buffer_size_(other.buffer_size_),
-        remain_(other.remain_) {}
-
-    MKLEngine<BRNG, ResultType> &operator= (
-            const MKLEngine<BRNG, ResultType> &other)
-    {
-        if (this != &other) {
-            stream_ = other.stream_;
-            skip_ahead_ = other.skip_ahead_;
-            buffer_ = other.buffer_;
-            buffer_size_ = other.buffer_size_;
-            remain_ = other.remain_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    MKLEngine (MKLEngine<BRNG, ResultType> &&other) :
-        stream_(cxx11::move(other.stream_)),
-        skip_ahead_(cxx11::move(other.skip_ahead_)),
-        buffer_(cxx11::move(other.buffer_)), buffer_size_(other.buffer_size_),
-        remain_(other.remain_) {}
-
-    MKLEngine<BRNG, ResultType> &operator= (
-            MKLEngine<BRNG, ResultType> &&other)
-    {
-        if (this != &other) {
-            stream_ = cxx11::move(other.stream_);
-            skip_ahead_ = cxx11::move(other.skip_ahead_);
-            buffer_ = cxx11::move(other.buffer_);
-            buffer_size_ = other.buffer_size_;
-            remain_ = other.remain_;
-        }
-
-        return *this;
-    }
-#endif
-
     bool empty () const {return stream_.empty();}
 
     void seed (MKL_UINT s) {stream_.seed(s);}
@@ -660,38 +613,6 @@ class MKLDistribution
     typedef ResultType result_type;
 
     MKLDistribution () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), remain_(0) {}
-
-    MKLDistribution (const MKLDistribution &other) :
-        buffer_(other.buffer_), buffer_size_(other.buffer_size_),
-        remain_(other.remain_) {}
-
-    MKLDistribution &operator= (const MKLDistribution &other)
-    {
-        if (this != &other) {
-            buffer_ = other.buffer_;
-            buffer_size_ = other.buffer_size_;
-            remain_ = other.remain_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    MKLDistribution (MKLDistribution &&other) :
-        buffer_(cxx11::move(other.buffer_)),
-        buffer_size_(other.buffer_size_), remain_(other.remain_) {}
-
-    MKLDistribution &operator= (MKLDistribution &&other)
-    {
-        if (this != &other) {
-            buffer_ = cxx11::move(other.buffer_);
-            buffer_size_ = other.buffer_size_;
-            remain_ = other.remain_;
-        }
-
-        return *this;
-    }
-#endif
 
     template <MKL_INT BRNG>
     result_type operator() (const MKLStream<BRNG> &stream)

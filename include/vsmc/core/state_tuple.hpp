@@ -40,6 +40,8 @@ class StateTupleBase
     {
         state_pack_type () {}
 
+        state_pack_type (const state_tuple_type &data) : data_(data) {}
+
         state_pack_type (const state_pack_type &other) : data_(other.data_) {}
 
         state_pack_type &operator= (const state_pack_type &other)
@@ -53,7 +55,7 @@ class StateTupleBase
         {data_ = cxx11::move(other.data_); return *this;}
 #endif
 
-        state_pack_type (const state_tuple_type &data) : data_(data) {}
+        ~state_pack_type () {}
 
         operator state_tuple_type () {return data_;}
 

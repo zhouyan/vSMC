@@ -42,6 +42,19 @@ class DispatchGroup : public DispatchObject< ::dispatch_group_t>
         return *this;
     }
 
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    DispatchGroup (DispatchGroup &&other) :
+        DispatchObject< ::dispatch_group_t>(cxx11::move(other)) {}
+
+    DispatchGroup &operator= (DispatchGroup &&other)
+    {
+        if (this != &other)
+            DispatchObject< ::dispatch_group_t>::operator=(cxx11::move(other));
+
+        return *this;
+    }
+#endif
+
     ~DispatchGroup ()
     {
         if (this->object() != VSMC_NULLPTR)

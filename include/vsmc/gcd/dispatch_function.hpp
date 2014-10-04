@@ -60,6 +60,8 @@ class DispatchFunction
     }
 #endif
 
+    ~DispatchFunction () {}
+
     void *context () {return static_cast<void *>(this);}
 
     ::dispatch_function_t function () const {return function_;}

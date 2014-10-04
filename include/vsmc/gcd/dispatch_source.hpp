@@ -133,6 +133,20 @@ class DispatchSourceBase : public DispatchObject< ::dispatch_source_t>
         return *this;
     }
 
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    DispatchSourceBase (DispatchSourceBase &&other) :
+        DispatchObject< ::dispatch_source_t>(cxx11::move(other)) {}
+
+    DispatchSourceBase &operator= (DispatchSourceBase &&other)
+    {
+        if (this != &other)
+            DispatchObject< ::dispatch_source_t>::operator=(
+                    cxx11::move(other));
+
+        return *this;
+    }
+#endif
+
     ~DispatchSourceBase ()
     {
         if (this->object() != VSMC_NULLPTR)

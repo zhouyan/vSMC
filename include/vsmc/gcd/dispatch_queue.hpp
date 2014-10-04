@@ -113,6 +113,21 @@ class DispatchQueueBase : public DispatchObject< ::dispatch_queue_t>
 
         return *this;
     }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERNECES
+    DispatchQueueBase (DispatchQueueBase &&other) :
+        DispatchObject< ::dispatch_queue_t>(cxx11::move(other)) {}
+
+    DispatchQueueBase &operator= (DispatchQueueBase &&other)
+    {
+        if (this != &other)
+            DispatchObject< ::dispatch_queue_t>::operator=(cxx11::move(other));
+
+        return *this;
+    }
+#endif
+
+    ~DispatchQueueBase () {}
 }; // class DispatchQueueBase
 
 /// \brief The main dispatch queue (`dipatch_get_main_queue`)
