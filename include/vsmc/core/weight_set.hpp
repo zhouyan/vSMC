@@ -38,6 +38,14 @@ class WeightSet
     explicit WeightSet (size_type N) :
         size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
+#if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
+    WeightSet (const WeightSet &) = default;
+    WeightSet &operator= (const WeightSet &) = default;
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    WeightSet (WeightSet &&) = default;
+    WeightSet &operator= (WeightSet &&) = default;
+#endif
+#else // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
     WeightSet (const WeightSet &other) :
         size_(other.size_), ess_(other.ess_),
         weight_(other.weight_), log_weight_(other.log_weight_) {}
@@ -70,6 +78,7 @@ class WeightSet
         return *this;
     }
 #endif
+#endif // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
 
     virtual ~WeightSet () {}
 
