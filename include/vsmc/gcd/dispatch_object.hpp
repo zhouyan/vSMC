@@ -13,6 +13,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <dispatch/dispatch.h>
+#include <utility>
 
 namespace vsmc {
 
@@ -32,63 +33,41 @@ class DispatchObject
     /// are retained at least once when it is created. These objects shall not
     /// be retained again by this constructor. Passing `true` as this argument
     /// prevent the constructor to retain the object.
-    explicit DispatchObject (const DispatchType &object, bool retained) :
-        object_(object)
-    {
-        if (!retained && object_ != VSMC_NULLPTR)
-            ::dispatch_retain(object);
-    }
+    DispatchObject (const DispatchType &object, bool retained) :
+        object_(object) {if (!retained) retain();}
 
     DispatchObject (const DispatchObject<DispatchType> &other) :
-        object_(other.object_)
-    {
-        if (object_ != VSMC_NULLPTR)
-            ::dispatch_retain(object_);
-    }
+        object_(other.object_) {retain();}
 
     DispatchObject<DispatchType> &operator= (
             const DispatchObject<DispatchType> &other)
     {
-        if (this == &other)
-            return *this;
-
-        if (object_ == other.object_)
-            return *this;
-
-        if (object_ != VSMC_NULLPTR)
-            ::dispatch_release(object_);
-        object_ = other.object_;
-        if (object_ != VSMC_NULLPTR)
-            ::dispatch_retain(object_);
+        if (this != &other && object_ != other.object_) {
+            release();
+            object_ = other.object_;
+            retain();
+        }
 
         return *this;
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    DispatchObject (DispatchObject<DispatchType> &&other)
-    {
-        object_ = other.object_;
-        other.object_ = VSMC_NULLPTR;
-    }
+    DispatchObject (DispatchObject<DispatchType> &&other) :
+        object_(cxx11::move(other.object_)) {other.object_ = VSMC_NULLPTR;}
 
     DispatchObject<DispatchType> &operator= (
             DispatchObject<DispatchType> &&other)
     {
-        if (this != &other) {
-            DispatchType tmp = object_;
-            object_ = other.object_;
-            other.object_ = tmp;
-        }
+        using std::swap;
+
+        if (this != &other && object_ != other.object_)
+            swap(object_, other.object_);
 
         return *this;
     }
 #endif
 
-    ~DispatchObject ()
-    {
-        if (object_ != VSMC_NULLPTR)
-            ::dispatch_release(object_);
-    }
+    ~DispatchObject () {release();}
 
     /// \brief Return the underlying Dispatch object
     DispatchType object () const {return object_;}
@@ -96,14 +75,11 @@ class DispatchObject
     /// \brief Set the underlying Dispatch object and retain it
     void object (DispatchType obj)
     {
-        if (object_ == obj)
-            return;
-
-        if (object_ != VSMC_NULLPTR)
-            ::dispatch_release(object_);
-        object_ = obj;
-        if (object_ != VSMC_NULLPTR)
-            ::dispatch_retain(object_);
+        if (object_ != obj) {
+            release();
+            object_ = obj;
+            retain();
+        }
     }
 
     void *get_context () const
@@ -118,6 +94,18 @@ class DispatchObject
     private :
 
     DispatchType object_;
+
+    void retain ()
+    {
+        if (object_ != VSMC_NULLPTR)
+            ::dispatch_retain(object_);
+    }
+
+    void release ()
+    {
+        if (object_ != VSMC_NULLPTR)
+            ::dispatch_release(object_);
+    }
 }; // class DispatchObject
 
 } // namespace vsmc

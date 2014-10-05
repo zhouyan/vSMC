@@ -12,6 +12,7 @@
 #define VSMC_OPENCL_CL_BUFFER_HPP
 
 #include <vsmc/opencl/cl_manager.hpp>
+#include <utility>
 
 namespace vsmc {
 
@@ -35,11 +36,11 @@ class CLBuffer
 
     CLBuffer (size_type N) :
         size_(N),
-        buffer_(manager().template create_buffer<value_type>(size_)) {}
+        data_(manager().template create_buffer<value_type>(size_)) {}
 
     CLBuffer (const CLBuffer<T, ID> &other) :
         size_(other.size_),
-        buffer_(manager().template create_buffer<value_type>(size_)) {}
+        data_(manager().template create_buffer<value_type>(size_)) {}
 
     CLBuffer<T, ID> &operator= (const CLBuffer<T, ID> &other)
     {
@@ -47,7 +48,7 @@ class CLBuffer
             resize(other.size_);
             if (size_ != 0) {
                 manager().template copy_buffer<value_type>(
-                        other.buffer_, buffer_, size_);
+                        other.data_, data_, size_);
             }
         }
 
@@ -56,21 +57,18 @@ class CLBuffer
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     CLBuffer (CLBuffer<T, ID> &&other) :
-        size_(other.size_), buffer_(cxx11::move(other.buffer_))
+        size_(other.size_), data_(cxx11::move(other.data_))
     {
         other.size_ = 0;
-        other.buffer_ = ::cl::Buffer();
+        other.data_ = ::cl::Buffer();
     }
 
     CLBuffer<T, ID> &operator= (CLBuffer<T, ID> &&other)
     {
+        using std::swap;
         if (this != &other) {
-            size_type s = size_;
-            ::cl::Buffer buf = buffer_;
-            size_ = other.size_;
-            buffer_ = other.buffer_;
-            other.size_ = s;
-            other.buffer_ = buf;
+            swap(size_, other.size_);
+            swap(data_, other.data_);
         }
 
         return *this;
@@ -89,7 +87,7 @@ class CLBuffer
     /// \details
     /// This is alike the `data` method of C++11 `std::vector` ect. It provides
     /// direct access to the raw buffer.
-    const ::cl::Buffer &data () const {return buffer_;}
+    const ::cl::Buffer &data () const {return data_;}
 
     void resize (size_type N)
     {
@@ -97,13 +95,13 @@ class CLBuffer
             return;
 
         size_ = N;
-        buffer_ = manager().template create_buffer<value_type>(N);
+        data_ = manager().template create_buffer<value_type>(N);
     }
 
     private :
 
     size_type size_;
-    ::cl::Buffer buffer_;
+    ::cl::Buffer data_;
 }; // class CLBuffer
 
 } // namespace vsmc

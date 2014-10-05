@@ -13,6 +13,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <mkl_vsl.h>
+#include <utility>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \
@@ -418,12 +419,13 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     MKLStream<BRNG> &operator= (MKLStream<BRNG> &&other)
     {
+        using std::swap;
+
         if (this != other) {
             internal::MKLOffset<BRNG>::type::operator=(cxx11::move(other));
-            seed_ = other.seed_;
-            stream_ptr_ = other.stream_ptr_;
-            property_ = other.property_;
-            other.stream_ptr_ = VSMC_NULLPTR;
+            swap(seed_, other.seed_);
+            swap(stream_ptr_, other.stream_ptr_);
+            swap(property_, other.property_);
         }
 
         return *this;
@@ -432,18 +434,16 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     ~MKLStream ()
     {
-        if (!empty())
+        if (stream_ptr_ != VSMC_NULLPTR)
             ::vslDeleteStream(&stream_ptr_);
     }
-
-    bool empty () const {return stream_ptr_ == VSMC_NULLPTR;}
 
     void seed (MKL_UINT s)
     {
         seed_ = s;
         int status = VSL_ERROR_OK;
 
-        if (empty()) {
+        if (stream_ptr_ == VSMC_NULLPTR) {
             status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), s);
             mkl_rng_error_check(BRNG, status,
                     "MKLStream::seed", "::vslNewStream");
@@ -505,8 +505,6 @@ class MKLEngine
             internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, ResultType> >::value>::type * = VSMC_NULLPTR) :
         stream_(seq), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), remain_(0) {}
-
-    bool empty () const {return stream_.empty();}
 
     void seed (MKL_UINT s) {stream_.seed(s);}
 

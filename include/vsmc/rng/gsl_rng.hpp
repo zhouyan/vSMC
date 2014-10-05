@@ -13,6 +13,7 @@
 
 #include <vsmc/rng/generator_wrapper.hpp>
 #include <gsl/gsl_rng.h>
+#include <utility>
 
 #define VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(Generator, pointer) \
     template <> struct GSLRngTypePointer< GSL_RNG_TYPE_##Generator >         \
@@ -99,11 +100,8 @@ class GSLGenerator
 
     GSLGenerator<RngType> &operator= (const GSLGenerator<RngType> &other)
     {
-        if (this != &other) {
-            if (rng_ != VSMC_NULLPTR)
-                ::gsl_rng_free(rng_);
-            rng_ = ::gsl_rng_memcpy(other.rng_);
-        }
+        if (this != &other)
+            ::gsl_rng_memcpy(rng_, other.rng_);
 
         return *this;
     }
@@ -114,12 +112,10 @@ class GSLGenerator
 
     GSLGenerator<RngType> &operator= (GSLGenerator<RngType> &&other)
     {
-        if (this != &other) {
-            if (rng_ != VSMC_NULLPTR)
-                ::gsl_rng_free(rng_);
-            rng_ = other.rng_;
-            other.rng_ = VSMC_NULLPTR;
-        }
+        using std::swap;
+
+        if (this != &other)
+            swap(rng_, other.rng_);
 
         return *this;
     }
