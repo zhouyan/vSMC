@@ -41,6 +41,88 @@
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == size_), ("**StateCL::copy** SIZE MISMATCH"))
 
+#if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
+
+#define VSMC_DEFINE_OPENCL_COPY(Name) \
+Name () : build_id_(-1) {}                                                   \
+Name (const Name<T, PlaceHolder> &) = default;                               \
+Name<T, PlaceHolder> &operator= (const Name<T, PlaceHolder> &) = default;    \
+virtual ~Name () {}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+#define VSMC_DEFINE_OPENCL_MOVE(Name) \
+Name (Name<T, PlaceHolder> &&) = default;                                    \
+Name<T, PlaceHolder> &operator= (Name<T, PlaceHolder> &&) = default;
+#else
+#define VSMC_DEFINE_OPENCL_MOVE(Name)
+#endif
+
+#else // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
+
+#define VSMC_DEFINE_OPENCL_COPY(Name) \
+Name () : build_id_(-1) {}                                                   \
+Name (const Name<T, PlaceHolder> &other) :                                   \
+    configure_(other.configure_),                                            \
+    build_id_(other.build_id_),                                              \
+    kernel_(other.kernel_),                                                  \
+    kernel_name_(other.kernel_name_) {}                                      \
+Name<T, PlaceHolder> &operator= (const Name<T, PlaceHolder> &other)          \
+{                                                                            \
+    if (this != &other) {                                                    \
+        configure_   = other.configure_;                                     \
+        build_id_    = other.build_id_;                                      \
+        kernel_      = other.kernel_;                                        \
+        kernel_name_ = other.kernel_name_;                                   \
+    }                                                                        \
+}                                                                            \
+virtual ~Name () {}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+#define VSMC_DEFINE_OPENCL_MOVE(Name) \
+Name (Name<T, PlaceHolder> &&other) :                                        \
+    configure_(cxx11::move(other.configure_)),                               \
+    build_id_(other.build_id_),                                              \
+    kernel_(cxx11::move(other.kernel_)),                                     \
+    kernel_name_(cxx11::move(other.kernel_name_)) {}                         \
+                                                                             \
+Name<T, PlaceHolder> &operator= (Name<T, PlaceHolder> &&other)               \
+{                                                                            \
+    if (this != &other) {                                                    \
+        configure_   = cxx11::move(other.configure_);                        \
+        build_id_    = other.build_id_;                                      \
+        kernel_      = cxx11::move(other.kernel_);                           \
+        kernel_name_ = cxx11::move(other.kernel_name_);                      \
+    }                                                                        \
+                                                                             \
+    return *this;                                                            \
+}
+#else
+#define VSMC_DEFINE_OPENCL_MOVE(Name)
+#endif
+
+#endif // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
+
+#define VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL \
+ConfigureCL &configure () {return configure_;}                               \
+const ConfigureCL &configure () const {return configure_;}                   \
+::cl::Kernel &kernel () {return kernel_;}                                    \
+const ::cl::Kernel &kernel () const {return kernel_;}
+
+#define VSMC_DEFINE_OPENCL_SET_KERNEL \
+if (build_id_ != particle.value().build_id() || kernel_name_ != kname) {     \
+    build_id_ = particle.value().build_id();                                 \
+    kernel_name_ = kname;                                                    \
+    kernel_ = particle.value().create_kernel(kernel_name_);                  \
+    configure_.local_size(particle.size(),                                   \
+            kernel_, particle.value().manager().device());                   \
+}
+
+#define VSMC_DEFINE_OPENCL_MEMBER_DATA \
+ConfigureCL configure_;                                                      \
+int build_id_;                                                               \
+::cl::Kernel kernel_;                                                        \
+std::string kernel_name_
+
 namespace vsmc {
 
 namespace internal {
@@ -88,11 +170,6 @@ struct IsDerivedFromStateCL :
     public cxx11::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
 
 } // namespace vsmc::internal
-
-template <typename, typename = NullType> class InitializeCL;
-template <typename, typename = NullType> class MoveCL;
-template <typename, typename = NullType> class MonitorEvalCL;
-template <typename, typename = NullType> class PathEvalCL;
 
 /// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
 /// \ingroup OpenCL
@@ -321,7 +398,7 @@ class StateCL
 /// is also acceptable, but now `state` has to be treat as a length `N` array.
 /// In summary, on the host side, it is a `cl::Buffer` object being passed to
 /// the kernel, which is not much unlike `void *` pointer.
-template <typename T, typename>
+template <typename T, typename PlaceHolder = NullType>
 class InitializeCL
 {
     public :
@@ -364,75 +441,22 @@ class InitializeCL
 
     protected :
 
-    InitializeCL () : build_id_(-1) {}
-
-    InitializeCL (const InitializeCL<T> &other) :
-        configure_(other.configure_), build_id_(other.build_id_),
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
-
-    InitializeCL<T> &operator= (const InitializeCL<T> &other)
-    {
-        if (this != &other) {
-            configure_   = other.configure_;
-            build_id_    = other.build_id_;
-            kernel_      = other.kernel_;
-            kernel_name_ = other.kernel_name_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    InitializeCL (InitializeCL<T> &&other) :
-        configure_(cxx11::move(other.configure_)), build_id_(other.build_id_),
-        kernel_(cxx11::move(other.kernel_)),
-        kernel_name_(cxx11::move(other.kernel_name_)) {}
-
-    InitializeCL<T> &operator= (InitializeCL<T> &&other)
-    {
-        if (this != &other) {
-            configure_   = cxx11::move(other.configure_);
-            build_id_    = other.build_id_;
-            kernel_      = cxx11::move(other.kernel_);
-            kernel_name_ = cxx11::move(other.kernel_name_);
-        }
-
-        return *this;
-    }
-#endif
-
-    virtual ~InitializeCL () {}
-
-    ConfigureCL &configure () {return configure_;}
-
-    const ConfigureCL &configure () const {return configure_;}
-
-    ::cl::Kernel &kernel () {return kernel_;}
-
-    const ::cl::Kernel &kernel () const {return kernel_;}
+    VSMC_DEFINE_OPENCL_COPY(InitializeCL)
+    VSMC_DEFINE_OPENCL_MOVE(InitializeCL)
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
 
     void set_kernel (const Particle<T> &particle)
     {
         std::string kname;
         initialize_state(kname);
-        if (build_id_ != particle.value().build_id()
-                || kernel_name_ != kname) {
-            build_id_ = particle.value().build_id();
-            kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_);
-            configure_.local_size(particle.size(),
-                    kernel_, particle.value().manager().device());
-        }
+        VSMC_DEFINE_OPENCL_SET_KERNEL;
         cl_set_kernel_args(kernel_, 0,
                 particle.value().state_buffer().data(), accept_buffer_.data());
     }
 
     private :
 
-    ConfigureCL configure_;
-    int build_id_;
-    ::cl::Kernel kernel_;
-    std::string kernel_name_;
+    VSMC_DEFINE_OPENCL_MEMBER_DATA;
     std::vector<cl_ulong> accept_host_;
     CLBuffer<cl_ulong, typename T::id> accept_buffer_;
 }; // class InitializeCL
@@ -446,7 +470,7 @@ class InitializeCL
 /// __kernel
 /// void kern (ulong iter, __global state_type *state, __global ulong *accept);
 /// ~~~
-template <typename T, typename>
+template <typename T, typename PlaceHolder = NullType>
 class MoveCL
 {
     public :
@@ -487,75 +511,22 @@ class MoveCL
 
     protected :
 
-    MoveCL () : build_id_(-1) {}
-
-    MoveCL (const MoveCL<T> &other) :
-        configure_(other.configure_), build_id_(other.build_id_),
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
-
-    MoveCL<T> &operator= (const MoveCL<T> &other)
-    {
-        if (this != &other) {
-            configure_   = other.configure_;
-            build_id_    = other.build_id_;
-            kernel_      = other.kernel_;
-            kernel_name_ = other.kernel_name_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    MoveCL (MoveCL<T> &&other) :
-        configure_(cxx11::move(other.configure_)), build_id_(other.build_id_),
-        kernel_(cxx11::move(other.kernel_)),
-        kernel_name_(cxx11::move(other.kernel_name_)) {}
-
-    MoveCL<T> &operator= (MoveCL<T> &&other)
-    {
-        if (this != &other) {
-            configure_   = cxx11::move(other.configure_);
-            build_id_    = other.build_id_;
-            kernel_      = cxx11::move(other.kernel_);
-            kernel_name_ = cxx11::move(other.kernel_name_);
-        }
-
-        return *this;
-    }
-#endif
-
-    virtual ~MoveCL () {}
-
-    ConfigureCL &configure () {return configure_;}
-
-    const ConfigureCL &configure () const {return configure_;}
-
-    ::cl::Kernel &kernel () {return kernel_;}
-
-    const ::cl::Kernel &kernel () const {return kernel_;}
+    VSMC_DEFINE_OPENCL_COPY(MoveCL)
+    VSMC_DEFINE_OPENCL_MOVE(MoveCL)
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
 
     void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
         move_state(iter, kname);
-        if (build_id_ != particle.value().build_id()
-                || kernel_name_ != kname) {
-            build_id_ = particle.value().build_id();
-            kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_);
-            configure_.local_size(particle.size(),
-                    kernel_, particle.value().manager().device());
-        }
+        VSMC_DEFINE_OPENCL_SET_KERNEL;
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 particle.value().state_buffer().data(), accept_buffer_.data());
     }
 
     private :
 
-    ConfigureCL configure_;
-    int build_id_;
-    ::cl::Kernel kernel_;
-    std::string kernel_name_;
+    VSMC_DEFINE_OPENCL_MEMBER_DATA;
     std::vector<cl_ulong> accept_host_;
     CLBuffer<cl_ulong, typename T::id> accept_buffer_;
 }; // class MoveCL
@@ -570,7 +541,7 @@ class MoveCL
 /// void kern (ulong iter, ulong dim, __global state_type *state,
 ///            __global fp_type *res);
 /// ~~~
-template <typename T, typename>
+template <typename T, typename PlaceHolder = NullType>
 class MonitorEvalCL
 {
     public :
@@ -607,66 +578,16 @@ class MonitorEvalCL
 
     protected :
 
-    MonitorEvalCL () : build_id_(-1) {}
-
-    MonitorEvalCL (const MonitorEvalCL<T> &other) :
-        configure_(other.configure_), build_id_(other.build_id_),
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
-
-    MonitorEvalCL<T> &operator= (const MonitorEvalCL<T> &other)
-    {
-        if (this != &other) {
-            configure_   = other.configure_;
-            build_id_    = other.build_id_;
-            kernel_      = other.kernel_;
-            kernel_name_ = other.kernel_name_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    MonitorEvalCL (MonitorEvalCL<T> &&other) :
-        configure_(cxx11::move(other.configure_)), build_id_(other.build_id_),
-        kernel_(cxx11::move(other.kernel_)),
-        kernel_name_(cxx11::move(other.kernel_name_)) {}
-
-    MonitorEvalCL<T> &operator= (MonitorEvalCL<T> &&other)
-    {
-        if (this != &other) {
-            configure_   = cxx11::move(other.configure_);
-            build_id_    = other.build_id_;
-            kernel_      = cxx11::move(other.kernel_);
-            kernel_name_ = cxx11::move(other.kernel_name_);
-        }
-
-        return *this;
-    }
-#endif
-
-    virtual ~MonitorEvalCL () {}
-
-    ConfigureCL &configure () {return configure_;}
-
-    const ConfigureCL &configure () const {return configure_;}
-
-    ::cl::Kernel &kernel () {return kernel_;}
-
-    const ::cl::Kernel &kernel () const {return kernel_;}
+    VSMC_DEFINE_OPENCL_COPY(MonitorEvalCL)
+    VSMC_DEFINE_OPENCL_MOVE(MonitorEvalCL)
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
 
     void set_kernel (std::size_t iter, std::size_t dim,
             const Particle<T> &particle)
     {
         std::string kname;
         monitor_state(iter, kname);
-        if (build_id_ != particle.value().build_id()
-                || kernel_name_ != kname) {
-            build_id_ = particle.value().build_id();
-            kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_);
-            configure_.local_size(particle.size(),
-                    kernel_, particle.value().manager().device());
-        }
+        VSMC_DEFINE_OPENCL_SET_KERNEL;
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 static_cast<cl_ulong>(dim),
                 particle.value().state_buffer().data(), buffer_.data());
@@ -674,10 +595,7 @@ class MonitorEvalCL
 
     private :
 
-    ConfigureCL configure_;
-    int build_id_;
-    ::cl::Kernel kernel_;
-    std::string kernel_name_;
+    VSMC_DEFINE_OPENCL_MEMBER_DATA;
     CLBuffer<typename T::fp_type, typename T::id> buffer_;
 }; // class MonitorEvalCL
 
@@ -691,7 +609,7 @@ class MonitorEvalCL
 /// void kern (ulong iter, __global state_type *state,
 ///            __global state_type *res);
 /// ~~~
-template <typename T, typename>
+template <typename T, typename PlaceHolder = NullType>
 class PathEvalCL
 {
     public :
@@ -731,75 +649,22 @@ class PathEvalCL
 
     protected :
 
-    PathEvalCL () : build_id_(-1) {}
-
-    PathEvalCL (const PathEvalCL<T> &other) :
-        configure_(other.configure_), build_id_(other.build_id_),
-        kernel_(other.kernel_), kernel_name_(other.kernel_name_) {}
-
-    PathEvalCL<T> &operator= (const PathEvalCL<T> &other)
-    {
-        if (this != &other) {
-            configure_   = other.configure_;
-            build_id_    = other.build_id_;
-            kernel_      = other.kernel_;
-            kernel_name_ = other.kernel_name_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    PathEvalCL (PathEvalCL<T> &&other) :
-        configure_(cxx11::move(other.configure_)), build_id_(other.build_id_),
-        kernel_(cxx11::move(other.kernel_)),
-        kernel_name_(cxx11::move(other.kernel_name_)) {}
-
-    PathEvalCL<T> &operator= (PathEvalCL<T> &&other)
-    {
-        if (this != &other) {
-            configure_   = cxx11::move(other.configure_);
-            build_id_    = other.build_id_;
-            kernel_      = cxx11::move(other.kernel_);
-            kernel_name_ = cxx11::move(other.kernel_name_);
-        }
-
-        return *this;
-    }
-#endif
-
-    virtual ~PathEvalCL () {}
-
-    ConfigureCL &configure () {return configure_;}
-
-    const ConfigureCL &configure () const {return configure_;}
-
-    ::cl::Kernel &kernel () {return kernel_;}
-
-    const ::cl::Kernel &kernel () const {return kernel_;}
+    VSMC_DEFINE_OPENCL_COPY(PathEvalCL)
+    VSMC_DEFINE_OPENCL_MOVE(PathEvalCL)
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
 
     void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
         path_state(iter, kname);
-        if (build_id_ != particle.value().build_id()
-                || kernel_name_ != kname) {
-            build_id_ = particle.value().build_id();
-            kernel_name_ = kname;
-            kernel_ = particle.value().create_kernel(kernel_name_);
-            configure_.local_size(particle.size(),
-                    kernel_, particle.value().manager().device());
-        }
+        VSMC_DEFINE_OPENCL_SET_KERNEL;
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 particle.value().state_buffer().data(), buffer_.data());
     }
 
     private :
 
-    ConfigureCL configure_;
-    int build_id_;
-    ::cl::Kernel kernel_;
-    std::string kernel_name_;
+    VSMC_DEFINE_OPENCL_MEMBER_DATA;
     CLBuffer<typename T::fp_type, typename T::id> buffer_;
 }; // class PathEvalCL
 
