@@ -232,7 +232,8 @@ class ProgramOption
     virtual bool set (const std::string &, const std::string &, bool,
             std::ostream &) = 0;
     virtual bool set_default () = 0;
-    virtual void print_help (const std::string &, std::ostream &) const = 0;
+    virtual std::string description () const = 0;
+    virtual std::string default_str () const = 0;
     virtual ProgramOption *clone () const = 0;
 
     protected :
@@ -337,18 +338,11 @@ class ProgramOptionHelp : public ProgramOption
 
     bool set_default () {return false;}
 
-    void print_help (const std::string &oname, std::ostream &os) const
-    {
-        os << ' ' << oname;
-        if (oname.size() < 20) {
-            for (std::size_t i = 0; i != 20 - oname.size(); ++i)
-                os << ' ';
-        }
-        os << ' ' << "Print help information";
-        os << std::string(18, ' ');
-        os << ' ' << "(default: false)";
-        os << std::endl;
-    }
+    std::string description () const
+    {return std::string("Print this help information");}
+
+    std::string default_str () const
+    {return std::string("false");}
 
     ProgramOption *clone () const {return new ProgramOptionHelp;}
 
@@ -375,18 +369,10 @@ class ProgramOptionDefault : public ProgramOption
 
     bool is_bool () const {return cxx11::is_same<T, bool>::value;}
 
-    void print_help (const std::string &oname, std::ostream &os) const
-    {
-        os << ' ' << oname;
-        if (oname.size() < 20) {
-            for (std::size_t i = 0; i != 20 - oname.size(); ++i)
-                os << ' ';
-        }
-        os << ' ' << desc_;
-        os << std::string(desc_.size() < 40 ? 40 - desc_.size() : 0, ' ');
-        print_default(default_, os);
-        os << std::endl;
-    }
+    std::string description () const {return desc_;}
+
+    std::string default_str () const
+    {return has_default_ ? default_val2str(default_) : std::string();}
 
     protected :
 
@@ -405,17 +391,16 @@ class ProgramOptionDefault : public ProgramOption
     bool has_default_;
 
     template <typename U>
-    void print_default (const U &val, std::ostream &os) const
+    std::string default_val2str (const U &val) const
     {
-        if (has_default_)
-            os << " (default: " << val << ")";
+        std::stringstream ss;
+        ss << val;
+
+        return ss.str();
     }
 
-    void print_default (bool val, std::ostream &os) const
-    {
-        if (has_default_)
-            os << " (default: " << (val ? "true" : "false") << ')';
-    }
+    std::string default_val2str (bool val) const
+    {return val ? std::string("true") : std::string("false");}
 }; // ProgramOptionDefault
 
 /// \brief Option with a single value
@@ -581,7 +566,7 @@ class ProgramOptionMap
     {
         for (option_map_type::iterator iter = option_map_.begin();
                 iter != option_map_.end(); ++iter) {
-            if (iter->second.first)
+            if (iter->second.first != VSMC_NULLPTR)
                 delete iter->second.first;
         }
     }
@@ -681,7 +666,7 @@ class ProgramOptionMap
         const std::string oname("--" + name);
         option_map_type::iterator iter = option_map_.find(oname);
         if (iter != option_map_.end()) {
-            if (iter->second.first)
+            if (iter->second.first != VSMC_NULLPTR)
                 delete iter->second.first;
             option_map_.erase(iter);
             option_list_type::iterator liter = option_list_find(oname);
@@ -732,9 +717,24 @@ class ProgramOptionMap
     /// \brief Print help information for each option
     void print_help (std::ostream &os = std::cout) const
     {
+        std::size_t len[2] = {0, 0};
+        std::vector<std::string> vec[3];
         for (option_list_type::const_iterator liter = option_list_.begin();
                 liter != option_list_.end(); ++liter) {
-            liter->second->print_help(liter->first, os);
+            vec[0].push_back(liter->first);
+            vec[1].push_back(liter->second->description());
+            vec[2].push_back(liter->second->default_str());
+            if (len[0] < vec[0].back().size())
+                len[0] = vec[0].back().size();
+            if (len[1] < vec[1].back().size())
+                len[1] = vec[1].back().size();
+        }
+        len[0] += 4;
+        len[1] += 4;
+        for (std::size_t i = 0; i != vec[0].size(); ++i) {
+            os << vec[0][i] << std::string(len[0] - vec[0][i].size(), ' ');
+            os << vec[1][i] << std::string(len[1] - vec[1][i].size(), ' ');
+            os << "(default:" << vec[2][i] << ')' << std::endl;
         }
     }
 
@@ -802,7 +802,7 @@ class ProgramOptionMap
         if (insert.second) {
             option_list_.push_back(std::make_pair(oname, optr));
         } else {
-            if (insert.first->second.first)
+            if (insert.first->second.first != VSMC_NULLPTR)
                 delete insert.first->second.first;
             insert.first->second.first = optr;
             option_list_type::iterator liter = option_list_find(oname);
