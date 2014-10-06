@@ -350,7 +350,15 @@ class StateMPI : public BaseState
     /// void state_unpack (size_type id, const state_pack_type &pack);
     /// ~~~
     /// Given a local particle id and a `state_pack_type` object, unpack it
-    /// into the given position on this node.
+    /// into the given position on this node. If C++11 rvalue reference is
+    /// supported, then an rvalue version of this function can be defined to
+    /// improved the performance as `pack` will be passed as an rvalue. e.g.,
+    /// ~~~{.cpp}
+    /// void state_unpack (size_type id, state_pack_type &&pack);
+    /// ~~~
+    /// As usual, if `state_pack_type` needs to explicitly define move
+    /// constructor or assignment operator, care shall be taken to make sure
+    /// that after the move `pack` is still a valid, assignable object.
     ///
     /// In vSMC, the resampling algorithms generate the number of replications
     /// of each particle. Particles with replication zero need to copy other
@@ -371,9 +379,9 @@ class StateMPI : public BaseState
     /// possible reasons,
     /// - Stage one is not needed or too expansive
     /// - Stage three is too expansive. The default implementation assumes
-    /// `this->state_pack(id)` is not too expansive, and inter-node copy is
-    /// rare anyway. If this is not the case, then it can be a performance
-    /// bottle neck.
+    /// `this->state_pack(id)` and `this->state_unpack(id, pack) is not too
+    /// expansive, and inter-node copy is rare anyway. If this is not the case,
+    /// then it can be a performance bottle neck.
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
@@ -539,14 +547,19 @@ class StateMPI : public BaseState
             if (rank_this == r) {
                 for (std::size_t i = 0; i != copy_recv.size(); ++i) {
                     world_.recv(copy_recv_[i].first, copy_tag_, pack_recv_);
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+                    this->state_unpack(copy_recv[i].second,
+                            cxx11::move(pack_recv_));
+#else
                     this->state_unpack(copy_recv[i].second, pack_recv_);
+#endif
                 }
             } else {
                 for (std::size_t i = 0; i != copy_send.size(); ++i) {
                     if (copy_send_[i].first == r) {
                         pack_send_ = this->state_pack(copy_send[i].second);
-                        world_.send(copy_send_[i].first,
-                                copy_tag_, pack_send_);
+                        world_.send(copy_send_[i].first, copy_tag_,
+                                pack_send_);
                     }
                 }
             }

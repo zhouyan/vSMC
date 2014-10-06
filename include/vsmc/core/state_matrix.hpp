@@ -134,6 +134,19 @@ class StateMatrixBase : public traits::DimTrait<Dim>
             sptr->state(id, d) = pack[d];
     }
 
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    void state_unpack (size_type id, state_pack_type &&pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim(), Matrix);
+
+        StateMatrix<Order, Dim, T> *sptr =
+            static_cast<StateMatrix<Order, Dim, T> *>(this);
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            sptr->state(id, d) = cxx11::move(pack[d]);
+    }
+#endif
+
     template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
