@@ -20,9 +20,9 @@ namespace vsmc {
 /// \ingroup OpenCL
 ///
 /// \details
-/// Unlike `::cl::Buffer`, this class performs deep copy instead of shallow
-/// copy. Each CLBuffer object is tied to a specific CLManager, and thus its
-/// context and command queue, which are used to create and copy the buffers.
+/// Unlike `cl::Buffer`, this class performs deep copy instead of shallow copy.
+/// Each CLBuffer object is tied to a specific CLManager, and thus its context
+/// and command queue, which are used to create and copy the buffers.
 template <typename T, typename ID = CLDefault>
 class CLBuffer
 {
@@ -82,7 +82,7 @@ class CLBuffer
 
     static manager_type &manager () {return manager_type::instance();}
 
-    /// \brief Read only access to the raw `::cl::Buffer` object
+    /// \brief Read only access to the raw `cl::Buffer` object
     ///
     /// \details
     /// This is alike the `data` method of C++11 `std::vector` ect. It provides
