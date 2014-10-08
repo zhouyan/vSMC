@@ -78,8 +78,8 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        double *const weight = this->weight_ptr();
-        double *const log_weight = this->log_weight_ptr();
+        double *const weight = &this->weight()[0];
+        double *const log_weight = &this->log_weight()[0];
 
         this->set_ess(static_cast<double>(resample_size_));
         const double ew = 1 / this->ess();
@@ -105,7 +105,7 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        double *const lwptr = this->log_weight_ptr();
+        double *const lwptr = &this->log_weight()[0];
 
         double lmax_weight = lwptr[0];
         for (size_type i = 0; i != N; ++i)
@@ -125,7 +125,7 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        double *const wptr = this->weight_ptr();
+        double *const wptr = &this->weight()[0];
 
         double lcoeff = 0;
         for (size_type i = 0; i != N; ++i)
@@ -158,7 +158,7 @@ class WeightSetMPI : public WeightSetBase
         double *const bptr = &buffer[0];
 
         if (use_log) {
-            const double *const lwptr = this->log_weight_ptr();
+            const double *const lwptr = &this->log_weight()[0];
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = lwptr[i] + first[i];
             double lmax_weight = bptr[0];
@@ -173,7 +173,7 @@ class WeightSetMPI : public WeightSetBase
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = exp(bptr[i]);
         } else {
-            const double *const wptr = this->weight_ptr();
+            const double *const wptr = &this->weight()[0];
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = wptr[i] * first[i];
         }
@@ -207,7 +207,7 @@ class WeightSetMPI : public WeightSetBase
 
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
-        const double *const wptr = this->weight_ptr();
+        const double *const wptr = &this->weight()[0];
         std::vector<double> buffer;
         if (use_log) {
             buffer.resize(N);
@@ -244,9 +244,9 @@ class WeightSetMPI : public WeightSetBase
     void gather_resample_weight () const
     {
         if (world_.rank() == 0)
-            ::boost::mpi::gather(world_, this->weight_vec(), weight_all_, 0);
+            ::boost::mpi::gather(world_, this->weight(), weight_all_, 0);
         else
-            ::boost::mpi::gather(world_, this->weight_vec(), 0);
+            ::boost::mpi::gather(world_, this->weight(), 0);
     }
 }; // class WeightSetMPI
 
