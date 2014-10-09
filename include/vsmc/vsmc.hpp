@@ -79,10 +79,6 @@
 /// \ingroup Math
 /// \brief Mathematical constants
 
-/// \defgroup IntegerFunction Integer functions
-/// \ingroup Math
-/// \brief Compile time evaluation of integer functions
-
 /// \defgroup vMath Vector math functions
 /// \ingroup Math
 /// \brief Math functions on vectors (optional optimization through Intel MKL)
@@ -189,7 +185,7 @@
 #include <vsmc/integrate/nintegrate_newton_cotes.hpp>
 
 #include <vsmc/math/constants.hpp>
-#include <vsmc/math/integer_function.hpp>
+#include <vsmc/math/vmath.hpp>
 
 #if VSMC_USE_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
