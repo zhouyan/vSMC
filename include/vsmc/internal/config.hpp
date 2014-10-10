@@ -73,6 +73,18 @@
 #define VSMC_USE_MKL 0
 #endif
 
+#ifndef VSMC_USE_MKL_CBLAS
+#define VSMC_USE_MKL_CBLAS VSMC_USE_MKL
+#endif
+
+#ifndef VSMC_USE_MKL_VML
+#define VSMC_USE_MKL_VML VSMC_USE_MKL
+#endif
+
+#ifndef VSMC_USE_MKL_VSL
+#define VSMC_USE_MKL_VSL VSMC_USE_MKL
+#endif
+
 #ifndef VSMC_USE_CILK
 #if defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 1210
 #define VSMC_USE_CILK 1

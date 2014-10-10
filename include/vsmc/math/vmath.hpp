@@ -211,78 +211,106 @@ inline void vinvcbrt (std::size_t n, const T *a, T *y)
 
 } // namespace vsmc
 
-#if VSMC_USE_MKL
+#if VSMC_USE_MKL_VML
 
 #include <mkl_vml.h>
 
-#define VSMC_DEFINE_VMATH_MKL_1(name, vname) \
-    template <> inline void v##name<float>                                   \
+#define VSMC_DEFINE_VMATH_VML_1(name, vname) \
+    inline void v##name                                                      \
     (std::size_t n, const float *a, float *y)                                \
     {::vs##vname(static_cast<MKL_INT>(n), a, y);}                            \
-    template <> inline void v##name<double>                                  \
+    inline void v##name                                                      \
+    (std::size_t n, float *a, float *y)                                      \
+    {::vs##vname(static_cast<MKL_INT>(n), a, y);}                            \
+    inline void v##name                                                      \
     (std::size_t n, const double *a, double *y)                              \
+    {::vd##vname(static_cast<MKL_INT>(n), a, y);}                            \
+    inline void v##name                                                      \
+    (std::size_t n, double *a, double *y)                                    \
     {::vd##vname(static_cast<MKL_INT>(n), a, y);}
 
-#define VSMC_DEFINE_VMATH_MKL_2(name, vname) \
-    template <> inline void v##name<float>                                   \
+#define VSMC_DEFINE_VMATH_VML_2(name, vname) \
+    inline void v##name                                                      \
     (std::size_t n, const float *a, const float *b, float *y)                \
     {::vs##vname(static_cast<MKL_INT>(n), a, b, y);}                         \
-    template <> inline void v##name<double>                                  \
+    inline void v##name                                                      \
+    (std::size_t n, float *a, const float *b, float *y)                      \
+    {::vs##vname(static_cast<MKL_INT>(n), a, b, y);}                         \
+    inline void v##name                                                      \
+    (std::size_t n, const float *a, float *b, float *y)                      \
+    {::vs##vname(static_cast<MKL_INT>(n), a, b, y);}                         \
+    inline void v##name                                                      \
+    (std::size_t n, float *a, float *b, float *y)                            \
+    {::vs##vname(static_cast<MKL_INT>(n), a, b, y);}                         \
+    inline void v##name                                                      \
     (std::size_t n, const double *a, const double *b, double *y)             \
+    {::vd##vname(static_cast<MKL_INT>(n), a, b, y);}                         \
+    inline void v##name                                                      \
+    (std::size_t n, double *a, const double *b, double *y)                   \
+    {::vd##vname(static_cast<MKL_INT>(n), a, b, y);}                         \
+    inline void v##name                                                      \
+    (std::size_t n, const double *a, double *b, double *y)                   \
+    {::vd##vname(static_cast<MKL_INT>(n), a, b, y);}                         \
+    inline void v##name                                                      \
+    (std::size_t n, double *a, double *b, double *y)                         \
     {::vd##vname(static_cast<MKL_INT>(n), a, b, y);}
 
 namespace vsmc {
 
 namespace math {
 
-VSMC_DEFINE_VMATH_MKL_1(abs,     Abs)
-VSMC_DEFINE_VMATH_MKL_1(acos,    Acos)
-VSMC_DEFINE_VMATH_MKL_1(acosh,   Acosh)
-VSMC_DEFINE_VMATH_MKL_1(asin,    Asin)
-VSMC_DEFINE_VMATH_MKL_1(asinh,   Asinh)
-VSMC_DEFINE_VMATH_MKL_1(atan,    Atan)
-VSMC_DEFINE_VMATH_MKL_1(atanh,   Atanh)
-VSMC_DEFINE_VMATH_MKL_1(cbrt,    Cbrt)
-VSMC_DEFINE_VMATH_MKL_1(cos,     Cos)
-VSMC_DEFINE_VMATH_MKL_1(cosh,    Cosh)
-VSMC_DEFINE_VMATH_MKL_1(erf,     Erf)
-VSMC_DEFINE_VMATH_MKL_1(erfc,    Erfc)
-VSMC_DEFINE_VMATH_MKL_1(exp,     Exp)
-VSMC_DEFINE_VMATH_MKL_1(expm1,   Expm1)
-VSMC_DEFINE_VMATH_MKL_1(inv,     Inv)
-VSMC_DEFINE_VMATH_MKL_1(invcbrt, InvCbrt)
-VSMC_DEFINE_VMATH_MKL_1(invsqrt, InvSqrt)
-VSMC_DEFINE_VMATH_MKL_1(lgamma,  LGamma)
-VSMC_DEFINE_VMATH_MKL_1(log,     Ln)
-VSMC_DEFINE_VMATH_MKL_1(log10,   Log10)
-VSMC_DEFINE_VMATH_MKL_1(log1p,   Log1p)
-VSMC_DEFINE_VMATH_MKL_1(sin,     Sin)
-VSMC_DEFINE_VMATH_MKL_1(sinh,    Sinh)
-VSMC_DEFINE_VMATH_MKL_1(sqr,     Sqr)
-VSMC_DEFINE_VMATH_MKL_1(sqrt,    Sqrt)
-VSMC_DEFINE_VMATH_MKL_1(tan,     Tan)
-VSMC_DEFINE_VMATH_MKL_1(tanh,    Tanh)
-VSMC_DEFINE_VMATH_MKL_1(tgamma,  TGamma)
+VSMC_DEFINE_VMATH_VML_1(abs,     Abs)
+VSMC_DEFINE_VMATH_VML_1(acos,    Acos)
+VSMC_DEFINE_VMATH_VML_1(acosh,   Acosh)
+VSMC_DEFINE_VMATH_VML_1(asin,    Asin)
+VSMC_DEFINE_VMATH_VML_1(asinh,   Asinh)
+VSMC_DEFINE_VMATH_VML_1(atan,    Atan)
+VSMC_DEFINE_VMATH_VML_1(atanh,   Atanh)
+VSMC_DEFINE_VMATH_VML_1(cbrt,    Cbrt)
+VSMC_DEFINE_VMATH_VML_1(cos,     Cos)
+VSMC_DEFINE_VMATH_VML_1(cosh,    Cosh)
+VSMC_DEFINE_VMATH_VML_1(erf,     Erf)
+VSMC_DEFINE_VMATH_VML_1(erfc,    Erfc)
+VSMC_DEFINE_VMATH_VML_1(exp,     Exp)
+VSMC_DEFINE_VMATH_VML_1(expm1,   Expm1)
+VSMC_DEFINE_VMATH_VML_1(inv,     Inv)
+VSMC_DEFINE_VMATH_VML_1(invcbrt, InvCbrt)
+VSMC_DEFINE_VMATH_VML_1(invsqrt, InvSqrt)
+VSMC_DEFINE_VMATH_VML_1(lgamma,  LGamma)
+VSMC_DEFINE_VMATH_VML_1(log,     Ln)
+VSMC_DEFINE_VMATH_VML_1(log10,   Log10)
+VSMC_DEFINE_VMATH_VML_1(log1p,   Log1p)
+VSMC_DEFINE_VMATH_VML_1(sin,     Sin)
+VSMC_DEFINE_VMATH_VML_1(sinh,    Sinh)
+VSMC_DEFINE_VMATH_VML_1(sqr,     Sqr)
+VSMC_DEFINE_VMATH_VML_1(sqrt,    Sqrt)
+VSMC_DEFINE_VMATH_VML_1(tan,     Tan)
+VSMC_DEFINE_VMATH_VML_1(tanh,    Tanh)
+VSMC_DEFINE_VMATH_VML_1(tgamma,  TGamma)
 
-VSMC_DEFINE_VMATH_MKL_2(add,   Add)
-VSMC_DEFINE_VMATH_MKL_2(div,   Div)
-VSMC_DEFINE_VMATH_MKL_2(hypot, Hypot)
-VSMC_DEFINE_VMATH_MKL_2(mul,   Mul)
-VSMC_DEFINE_VMATH_MKL_2(pow,   Pow)
-VSMC_DEFINE_VMATH_MKL_2(sub,   Sub)
+VSMC_DEFINE_VMATH_VML_2(add,   Add)
+VSMC_DEFINE_VMATH_VML_2(div,   Div)
+VSMC_DEFINE_VMATH_VML_2(hypot, Hypot)
+VSMC_DEFINE_VMATH_VML_2(mul,   Mul)
+VSMC_DEFINE_VMATH_VML_2(pow,   Pow)
+VSMC_DEFINE_VMATH_VML_2(sub,   Sub)
 
-template<>
-inline void vpowx<float> (std::size_t n, const float *a, float b, float *y)
+inline void vpowx (std::size_t n, const float *a, float b, float *y)
 {::vsPowx(static_cast<MKL_INT>(n), a, b, y);}
 
-template<>
-inline void vpowx<double> (std::size_t n, const double *a, double b, double *y)
+inline void vpowx (std::size_t n, float *a, float b, float *y)
+{::vsPowx(static_cast<MKL_INT>(n), a, b, y);}
+
+inline void vpowx (std::size_t n, const double *a, double b, double *y)
+{::vdPowx(static_cast<MKL_INT>(n), a, b, y);}
+
+inline void vpowx (std::size_t n, double *a, double b, double *y)
 {::vdPowx(static_cast<MKL_INT>(n), a, b, y);}
 
 } // namespace vsmc::math
 
 } // namespace vsmc
 
-#endif // VSMC_USE_MKL
+#endif // VSMC_USE_MKL_VML
 
 #endif // VSMC_MATH_VMATH_HPP

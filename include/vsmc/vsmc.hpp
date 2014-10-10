@@ -217,7 +217,7 @@
 #include <vsmc/rng/threefry.hpp>
 #include <vsmc/rng/xorshift.hpp>
 #include <vsmc/rng/xor_combine_engine.hpp>
-#if VSMC_USE_MKL
+#if VSMC_USE_MKL_VSL
 #include <vsmc/rng/mkl_rng.hpp>
 #endif
 #include <vsmc/rng/urng.h>

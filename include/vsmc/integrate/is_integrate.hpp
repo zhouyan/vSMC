@@ -13,7 +13,7 @@
 
 #include <vsmc/internal/common.hpp>
 
-#if VSMC_USE_MKL
+#if VSMC_USE_MKL_CBLAS
 #include <mkl_cblas.h>
 #endif
 
@@ -49,7 +49,7 @@ class ISIntegrate
             return;
         }
 
-#if VSMC_USE_MKL
+#if VSMC_USE_MKL_CBLAS
         ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
                 static_cast<MKL_INT>(dim), static_cast<MKL_INT>(N),
                 1, hX, static_cast<MKL_INT>(dim), W, 1, 0, Eh, 1);
