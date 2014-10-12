@@ -13,7 +13,9 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <mkl_vsl.h>
+#include <string>
 #include <utility>
+#include <vector>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \
@@ -549,6 +551,7 @@ class MKLEngine
     stream_type &stream () {return stream_;}
     const stream_type &stream () const {return stream_;}
 
+    /// \brief Set the buffer size, zero or negative value restore the default
     void buffer_size (MKL_INT size)
     {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_BUFFER_SIZE;}
 
@@ -639,6 +642,7 @@ class MKLDistribution
 
     void reset () {remain_ = 0;}
 
+    /// \brief Set the buffer size, zero or negative value restore the default
     void buffer_size (MKL_INT size)
     {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_BUFFER_SIZE;}
 

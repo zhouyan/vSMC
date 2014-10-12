@@ -24,6 +24,8 @@
 #error __STDC_CONSTANT_MACROS not defined before #<stdint.h>
 #endif
 
+#include <cstddef>
+
 namespace vsmc {
 
 namespace internal {
