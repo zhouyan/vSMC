@@ -47,7 +47,7 @@
 /// The general form of the member function `ProgramOptionMap::add` is
 /// ~~~{.cpp}
 /// template <typename T, typename Dest, typename V>
-/// ProgramOptionMap &add (const std::string &name, const std::string &desc, Dest *dest, const V &val);
+/// ProgramOptionMap &add (const std::string &name, const std::string &desc, Dest *dest, V val);
 /// ~~~
 /// where `T` is the value type of the option. If the fourth (optional)
 /// argument is present, it is taken to be the default value of the option. The
@@ -364,7 +364,7 @@ class ProgramOptionDefault : public ProgramOption
         desc_(desc), default_(T()), has_default_(false) {}
 
     template <typename V>
-    ProgramOptionDefault (const std::string &desc, const V &val) :
+    ProgramOptionDefault (const std::string &desc, V val) :
         desc_(desc), default_(static_cast<T>(val)), has_default_(true) {}
 
     bool is_bool () const {return cxx11::is_same<T, bool>::value;}
@@ -414,7 +414,7 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
         ProgramOptionDefault<T>(desc), ptr_(ptr) {}
 
     template <typename V>
-    ProgramOptionScalar (const std::string &desc, T *ptr, const V &val) :
+    ProgramOptionScalar (const std::string &desc, T *ptr, V val) :
         ProgramOptionDefault<T>(desc, val), ptr_(ptr) {}
 
     bool is_vector () const {return false;}
@@ -435,17 +435,16 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 
 /// \brief Option with multiple values
 /// \ingroup Option
-template <typename T, typename Cont>
+template <typename T>
 class ProgramOptionVector : public ProgramOptionDefault<T>
 {
     public :
 
-    ProgramOptionVector (const std::string &desc, Cont *ptr) :
+    ProgramOptionVector (const std::string &desc, std::vector<T> *ptr) :
         ProgramOptionDefault<T>(desc), val_(T()), ptr_(ptr) {}
 
     template <typename V>
-    ProgramOptionVector (const std::string &desc, Cont *ptr,
-            const V &val) :
+    ProgramOptionVector (const std::string &desc, std::vector<T> *ptr, V val) :
         ProgramOptionDefault<T>(desc, val), val_(T()), ptr_(ptr) {}
 
     bool is_vector () const {return true;}
@@ -471,13 +470,12 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
         return success;
     }
 
-    ProgramOption *clone () const
-    {return new ProgramOptionVector<T, Cont>(*this);}
+    ProgramOption *clone () const {return new ProgramOptionVector<T>(*this);}
 
     private :
 
     T val_;
-    Cont *const ptr_;
+    std::vector<T> *const ptr_;
 }; // class ProgramOptionVector
 
 /// \brief A map of ProgramOption
@@ -592,7 +590,7 @@ class ProgramOptionMap
     /// \brief Add an option with a single value, with a default value
     template <typename T, typename V>
     ProgramOptionMap &add (const std::string &name, const std::string &desc,
-            T *ptr, const V &val)
+            T *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
@@ -609,8 +607,7 @@ class ProgramOptionMap
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOption *optr =
-            new ProgramOptionVector<T, std::vector<T> >(desc, ptr);
+        ProgramOption *optr = new ProgramOptionVector<T>(desc, ptr);
         add_option(oname, optr);
 
         return *this;
@@ -619,43 +616,11 @@ class ProgramOptionMap
     /// \brief Add an option with multiple value, with a default value
     template <typename T, typename V>
     ProgramOptionMap &add (const std::string &name, const std::string &desc,
-            std::vector<T> *ptr, const V &val)
+            std::vector<T> *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
-        ProgramOption *optr =
-            new ProgramOptionVector<T, std::vector<T> >(desc, ptr, val);
-        add_option(oname, optr);
-
-        return *this;
-    }
-
-    /// \brief Add an option with multiple value with a container other than
-    /// `std::vector`
-    template <typename T, typename Cont>
-    typename cxx11::enable_if<!cxx11::is_same<T, Cont>::value,
-             ProgramOptionMap &>::type
-    add (const std::string &name, const std::string &desc, Cont *ptr)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
-        const std::string oname("--" + name);
-        ProgramOption *optr = new ProgramOptionVector<T, Cont>(desc, ptr);
-        add_option(oname, optr);
-
-        return *this;
-    }
-
-    /// \brief Add an option with multiple value, with a default value, with a
-    /// container other than `std::vector`.
-    template <typename T, typename Cont, typename V>
-    typename cxx11::enable_if<!cxx11::is_same<T, Cont>::value,
-             ProgramOptionMap &>::type
-    add (const std::string &name, const std::string &desc, Cont *ptr,
-            const V &val)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
-        const std::string oname("--" + name);
-        ProgramOption *optr = new ProgramOptionVector<T, Cont>(desc, ptr, val);
+        ProgramOption *optr = new ProgramOptionVector<T>(desc, ptr, val);
         add_option(oname, optr);
 
         return *this;
