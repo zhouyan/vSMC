@@ -181,8 +181,8 @@ namespace traits {
 /// To use MKLEngine with those MKL BRNG that has not been typedefed by vSMC,
 /// one need to specialize this trait, which has member type `type`, and this
 /// type has member
-/// `operator() (const MKLStream<BRNG> &, MKL_INT, ResultType *)` such that
-/// given the stream object, it is able to generate uniform integers.
+/// `operator() (MKLStream<BRNG> &, MKL_INT, ResultType *)` such that given the
+/// stream object, it is able to generate uniform integers.
 ///
 /// This traits also need to have two static constant member data, `min` and
 /// `max`
@@ -268,7 +268,7 @@ struct MKLSkipAheadVSL
     typedef long long size_type;
 
     template <MKL_INT BRNG>
-    void operator() (const MKLStream<BRNG> &stream, size_type nskip)
+    void operator() (MKLStream<BRNG> &stream, size_type nskip)
     {
         if (nskip == 0)
             return;
@@ -289,7 +289,7 @@ struct MKLSkipAheadForce
 
     MKLSkipAheadForce () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
 
-    void operator() (const MKLStream<BRNG> &stream, size_type nskip)
+    void operator() (MKLStream<BRNG> &stream, size_type nskip)
     {
         if (nskip == 0)
             return;
@@ -613,7 +613,7 @@ class MKLDistribution
     MKLDistribution () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), remain_(0) {}
 
     template <MKL_INT BRNG>
-    result_type operator() (const MKLStream<BRNG> &stream)
+    result_type operator() (MKLStream<BRNG> &stream)
     {
         if (remain_ == 0) {
             buffer_.resize(static_cast<std::size_t>(buffer_size_));
@@ -626,8 +626,16 @@ class MKLDistribution
     }
 
     template <MKL_INT BRNG>
-    void operator() (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void operator() (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {static_cast<Derived *>(this)->generate(stream, n, r);}
+
+    template <MKL_INT BRNG, typename RT>
+    result_type operator() (MKLEngine<BRNG, RT> &engine)
+    {operator()(engine.stream());}
+
+    template <MKL_INT BRNG, typename RT>
+    void operator() (MKLEngine<BRNG, RT> &engine, MKL_INT n, result_type *r)
+    {operator()(engine.stream(), n, r);}
 
     void reset () {remain_ = 0;}
 
@@ -675,7 +683,7 @@ class MKLUniformBits32Distribution :
     typedef unsigned result_type;
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = ::viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
                 stream.ptr(), n, r);
@@ -693,7 +701,7 @@ class MKLUniformBits64Distribution :
     typedef unsigned MKL_INT64 result_type;
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = ::viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
                 stream.ptr(), n, r);
@@ -716,7 +724,7 @@ class MKLUniformDistribution :
         a_(a), b_(b) {}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Uniform");
@@ -750,7 +758,7 @@ class MKLBernoulliDistribution :
     explicit MKLBernoulliDistribution (double p = 0.5) : p_(p) {}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = ::viRngBernoulli(Method, stream.ptr(), n, r, p_);
         this->template generate_error_check<BRNG>(status, "Bernoulli");
@@ -774,7 +782,7 @@ class MKLGeometricDistribution :
     explicit MKLGeometricDistribution (double p = 0.5) : p_(p) {}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = ::viRngGeometric(Method, stream.ptr(), n, r, p_);
         this->template generate_error_check<BRNG>(status, "Geometric");
@@ -799,7 +807,7 @@ class MKLBinomialDistribution :
         ntrial_(ntrial), p_(p) {}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = ::viRngBinomial(Method, stream.ptr(), n, r, ntrial_, p_);
         this->template generate_error_check<BRNG>(status, "Binomial");
@@ -826,7 +834,7 @@ class MKLHypergeometricDistribution :
         l_(population), s_(sample), m_(mask) {}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = ::viRngHypergeometric(Method, stream.ptr(),
                 n, r, l_, s_, m_);
@@ -853,7 +861,7 @@ class MKLPoissonDistribution :
     explicit MKLPoissonDistribution (double lambda = 1) : lambda_(lambda) {}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = ::viRngPoisson(Method, stream.ptr(), n, r, lambda_);
         this->template generate_error_check<BRNG>(status, "Poisson");
@@ -878,7 +886,7 @@ class MKLNegBinomialDistribution :
         ntrial_(ntrial), p_(p) {}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = ::viRngNegBinomial(Method, stream.ptr(),
                 n, r, ntrial_, p_);
@@ -906,7 +914,7 @@ class MKLGaussianDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gaussian);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Gaussian");
@@ -939,7 +947,7 @@ class MKLExponentialDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Exponential);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Exponential");
@@ -972,7 +980,7 @@ class MKLLaplaceDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Laplace);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Laplace");
@@ -1006,7 +1014,7 @@ class MKLWeibullDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Weibull);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Weibull");
@@ -1040,7 +1048,7 @@ class MKLCauchyDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Cauchy);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Cauchy");
@@ -1073,7 +1081,7 @@ class MKLRayleighDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Rayleigh);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Rayleigh");
@@ -1108,7 +1116,7 @@ class MKLLognormalDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Lognormal);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Lognormal");
@@ -1143,7 +1151,7 @@ class MKLGumbelDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gumbel);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Gumbel");
@@ -1177,7 +1185,7 @@ class MKLGammaDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gamma);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Gamma");
@@ -1213,7 +1221,7 @@ class MKLBetaDistribution :
     {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Beta);}
 
     template <MKL_INT BRNG>
-    void generate (const MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
+    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {
         int status = generate(stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "Beta");
