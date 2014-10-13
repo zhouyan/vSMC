@@ -204,7 +204,7 @@ class SeedGenerator<ID, Array<T, K> >
 
     SeedGenerator<ID, Array<T, K> > &operator= (
             const SeedGenerator<ID, Array<T, K> > &);
-}; // class SeedCounterGenerator
+}; // class SeedGenerator
 
 /// \brief The default Seed type
 /// \ingroup RNG
