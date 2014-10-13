@@ -287,7 +287,7 @@ class StateCL
 
         ss << "#include <vsmc/opencl/internal/device.h>\n";
         ss << source << '\n';
-        Seed::instance().skip(static_cast<Seed::result_type>(size_));
+        Seed::instance().skip(static_cast<Seed::skip_type>(size_));
 
         try {
             program_ = manager().create_program(ss.str());
