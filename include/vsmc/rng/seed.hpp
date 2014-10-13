@@ -15,14 +15,19 @@
 #include <vsmc/utility/array.hpp>
 #include <vsmc/utility/counter.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType) \
-    VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),              \
+#define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T) \
+    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<T>::value),               \
             USE_SeedGenerator_WITH_A_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem) \
     VSMC_RUNTIME_ASSERT((div > rem),                                         \
             ("**SeedGenerator::modulo** "                                    \
              "REMAINDER IS NOT SMALLER THAN THE DIVISOR"))
+
+#define VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem) \
+    VSMC_RUNTIME_WARNING((div == 1 && rem == 0),                             \
+            ("**SeedGenerator::modulo** "                                    \
+             "COUNTER TYPE SEED DOES NOT SUPPORT MODULO"))
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(seed_max) \
     VSMC_RUNTIME_ASSERT((seed_max > 1),                                      \
@@ -65,6 +70,7 @@ class SeedGenerator
     public :
 
     typedef ResultType result_type;
+    typedef ResultType skip_type;
 
     static SeedGenerator<ID, ResultType> &instance ()
     {
@@ -91,13 +97,13 @@ class SeedGenerator
     result_type seed_max () const {return seed_max_;}
 
     /// \brief The divisor of the output seed
-    result_type divisor () const {return divisor_;}
+    skip_type divisor () const {return divisor_;}
 
     /// \brief The remainder of the output seed
-    result_type remainder () const {return remainder_;}
+    skip_type remainder () const {return remainder_;}
 
     /// \brief Set the divisor and the remainder
-    void modulo (result_type div, result_type rem)
+    void modulo (skip_type div, skip_type rem)
     {
         VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem);
 
@@ -113,7 +119,7 @@ class SeedGenerator
     }
 
     /// \brief Skip the internal seed by a given steps
-    void skip (result_type steps)
+    void skip (skip_type steps)
     {
         result_type incr = steps % seed_max_;
         result_type diff = seed_max_ - seed_;
@@ -121,7 +127,7 @@ class SeedGenerator
     }
 
     /// \brief Skip the internal seed by 1 step
-    void skip () {seed_ = seed_ < seed_max_ ? (seed_ + 1) : 1;}
+    void skip () {seed_ = seed_ == seed_max_ ? 1 : (seed_ + 1);}
 
     private :
 
@@ -141,39 +147,63 @@ class SeedGenerator
             const SeedGenerator<ID, ResultType> &);
 }; // class SeedGenerator
 
-template <typename, typename> class SeedCounterGenerator;
-
 /// \brief Seed generator counters
 /// \ingroup RNG
 template <typename ID, typename T, std::size_t K>
-class SeedCounterGenerator<ID, Array<T, K> >
+class SeedGenerator<ID, Array<T, K> >
 {
     public :
 
     typedef Array<T, K> result_type;
+    typedef T skip_type;
 
-    static SeedCounterGenerator<ID, Array<T, K> > &instance ()
+    static SeedGenerator<ID, Array<T, K> > &instance ()
     {
-        static SeedCounterGenerator<ID, Array<T, K> > seed;
+        static SeedGenerator<ID, Array<T, K> > seed;
 
         return seed;
     }
 
-    result_type get () {Counter<result_type>::increment(seed_); return seed_;}
+    result_type get () {skip(); return seed_;}
 
     void set (result_type seed) {seed_ = seed;}
+
+    result_type seed () const {return seed_;}
+
+    result_type seed_max () const
+    {
+        result_type s;
+        s.fill(static_cast<T>(~static_cast<T>(0)));
+
+        return s;
+    }
+
+    skip_type divisor () const {return 1;}
+
+    skip_type remainder () const {return 0;}
+
+    void modulo (skip_type div, skip_type rem)
+    {VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem);}
+
+    void skip (skip_type steps)
+    {Counter<result_type>::increment(seed_, steps);}
+
+    void skip () {Counter<result_type>::increment(seed_);}
 
     private :
 
     result_type seed_;
 
-    SeedCounterGenerator () {Counter<result_type>::reset(seed_);}
+    SeedGenerator ()
+    {
+        VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T);
+        Counter<result_type>::reset(seed_);
+    }
 
-    SeedCounterGenerator<ID, Array<T, K> > (
-            const SeedCounterGenerator<ID, Array<T, K> > &);
+    SeedGenerator<ID, Array<T, K> > (const SeedGenerator<ID, Array<T, K> > &);
 
-    SeedCounterGenerator<ID, Array<T, K> > &operator= (
-            const SeedCounterGenerator<ID, Array<T, K> > &);
+    SeedGenerator<ID, Array<T, K> > &operator= (
+            const SeedGenerator<ID, Array<T, K> > &);
 }; // class SeedCounterGenerator
 
 /// \brief The default Seed type
