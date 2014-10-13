@@ -111,9 +111,7 @@ class Sampler
 
         if (new_rng) {
             sampler.particle().rng_set().seed();
-            sampler.particle().resample_rng().seed(static_cast<typename
-                    Particle<T>::resample_rng_type::result_type>(
-                        Seed::instance().get()));
+            sampler.particle().resample_rng().seed(Seed::instance().get());
         }
 
         return sampler;
