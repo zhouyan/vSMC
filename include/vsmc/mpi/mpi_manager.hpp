@@ -42,16 +42,23 @@ class MPIEnvironment
     void init_seed () const
     {
         ::boost::mpi::communicator world;
-        if (Seed::is_counter()) {
-            Seed::result_type s(Seed::instance().get());
-            s.back() = static_cast<Seed::skip_type>(world.rank());
-            Seed::instance().set(s);
-        } else {
-            Seed::instance().modulo(
-                    static_cast<Seed::skip_type>(world.size()),
-                    static_cast<Seed::skip_type>(world.rank()));
-        }
+        init_seed(cxx11::integral_constant<bool,
+                cxx11::is_unsigned<Seed::result_type>::value>());
         world.barrier();
+    }
+
+    void init_seed (cxx11::true_type)
+    {
+        Seed::instance().modulo(
+                static_cast<Seed::skip_type>(world.size()),
+                static_cast<Seed::skip_type>(world.rank()));
+    }
+
+    void init_seed (cxx11::false_type)
+    {
+        Seed::result_type s(Seed::instance().get());
+        s.back() = static_cast<Seed::skip_type>(world.rank());
+        Seed::instance().set(s);
     }
 }; // class MPIEnvironment
 

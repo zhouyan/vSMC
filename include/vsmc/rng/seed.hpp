@@ -129,8 +129,6 @@ class SeedGenerator
     /// \brief Skip the internal seed by 1 step
     void skip () {seed_ = seed_ == seed_max_ ? 1 : (seed_ + 1);}
 
-    static VSMC_CONSTEXPR bool is_counter () {return false;}
-
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
@@ -256,8 +254,6 @@ class SeedGenerator<ID, Array<T, K> >
     {Counter<result_type>::increment(seed_, steps);}
 
     void skip () {Counter<result_type>::increment(seed_);}
-
-    static VSMC_CONSTEXPR bool is_counter () {return true;}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
