@@ -417,11 +417,11 @@ class WeightSet
 
     /// \brief Compute unormalized logarithm weights from normalized weights
     virtual void log_weight2weight ()
-    {math::vexp(size_, &log_weight_[0], &weight_[0]);}
+    {math::vExp(size_, &log_weight_[0], &weight_[0]);}
 
     /// \brief Compute unormalized weights from normalized logarithm weights
     virtual void weight2log_weight ()
-    {math::vlog(size_, &weight_[0], &log_weight_[0]);}
+    {math::vLn(size_, &weight_[0], &log_weight_[0]);}
 
     /// \brief Normalize logarithm weights such that the maximum is zero
     virtual void normalize_log_weight ()
@@ -458,16 +458,16 @@ class WeightSet
         double *const bptr = &buffer[0];
 
         if (use_log) {
-            math::vadd(size_, &log_weight_[0], first, bptr);
+            math::vAdd(size_, &log_weight_[0], first, bptr);
             double max_weight = bptr[0];
             for (size_type i = 0; i != size_; ++i)
                 if (max_weight < bptr[i])
                     max_weight = bptr[i];
             for (size_type i = 0; i != size_; ++i)
                 bptr[i] -= max_weight;
-            math::vexp(size_, bptr, bptr);
+            math::vExp(size_, bptr, bptr);
         } else {
-            math::vmul(size_, &weight_[0], first, bptr);
+            math::vMul(size_, &weight_[0], first, bptr);
         }
 
         double coeff = 0;
@@ -493,7 +493,7 @@ class WeightSet
         std::vector<double> buffer;
         if (use_log) {
             buffer.resize(size_);
-            math::vexp(size_, first, &buffer[0]);
+            math::vExp(size_, first, &buffer[0]);
             bptr = &buffer[0];
         }
 
