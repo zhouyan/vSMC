@@ -109,7 +109,7 @@ class SeedGenerator
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_ = static_cast<ResultType>(~static_cast<ResultType>(0));
+        seed_max_ = static_cast<skip_type>(~static_cast<skip_type>(0));
         seed_max_ -= seed_max_ % divisor_;
         seed_max_ /= divisor_;
 
@@ -129,17 +129,21 @@ class SeedGenerator
     /// \brief Skip the internal seed by 1 step
     void skip () {seed_ = seed_ == seed_max_ ? 1 : (seed_ + 1);}
 
+    static VSMC_CONSTEXPR bool is_counter () {return false;}
+
     private :
 
     result_type seed_;
-    result_type divisor_;
-    result_type remainder_;
     result_type seed_max_;
+    skip_type divisor_;
+    skip_type remainder_;
 
-    SeedGenerator () :
-        seed_(0), divisor_(1), remainder_(0),
-        seed_max_(static_cast<result_type>(~(static_cast<result_type>(0))))
-    {VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType);}
+    SeedGenerator () : seed_(0), seed_max_(0), divisor_(1), remainder_(0)
+    {
+        VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType);
+
+        modulo(divisor_, remainder_);
+    }
 
     SeedGenerator (const SeedGenerator<ID, ResultType> &);
 
@@ -149,6 +153,24 @@ class SeedGenerator
 
 /// \brief Seed generator counters
 /// \ingroup RNG
+///
+/// \details
+/// When SeedGenerator is used with an counter, the `modulo` has no effect and
+/// a warning will be generated if `div != 1` or `rem != 0`. If the program
+/// need to be parallelized on distributed memory system, it shall be
+/// sufficient to set the the last component of the counter to be unique to
+/// each node. For example,
+/// ~~~{.cpp}
+/// #include <vsmc/rng/seed.hpp>
+///
+/// typedef SeedGeneartor<NullType, Array<uint32_t, 4> > Seed4x32;
+/// Seed4x32 &seed = SeedType::instance();
+/// boost::mpi::communicator world;
+/// Seed4x32::result_type s;
+/// s.fill(0);
+/// s.back() = world.rank();
+/// seed.set(s);
+/// ~~~
 template <typename ID, typename T, std::size_t K>
 class SeedGenerator<ID, Array<T, K> >
 {
@@ -170,34 +192,44 @@ class SeedGenerator<ID, Array<T, K> >
 
     result_type seed () const {return seed_;}
 
-    result_type seed_max () const
-    {
-        result_type s;
-        s.fill(static_cast<T>(~static_cast<T>(0)));
+    result_type seed_max () const {return seed_max_;}
 
-        return s;
-    }
+    skip_type divisor () const {return divisor_;}
 
-    skip_type divisor () const {return 1;}
-
-    skip_type remainder () const {return 0;}
+    skip_type remainder () const {return remainder_;}
 
     void modulo (skip_type div, skip_type rem)
-    {VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem);}
+    {
+        VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem);
+
+        divisor_ = div;
+        remainder_ = rem;
+        seed_max_.fill(static_cast<skip_type>(~static_cast<skip_type>(0)));
+
+        sed(seed_);
+    }
 
     void skip (skip_type steps)
     {Counter<result_type>::increment(seed_, steps);}
 
     void skip () {Counter<result_type>::increment(seed_);}
 
+    static VSMC_CONSTEXPR bool is_counter () {return true;}
+
     private :
 
     result_type seed_;
+    result_type seed_max_;
+    skip_type divisor_;
+    skip_type remainder_;
 
-    SeedGenerator ()
+    SeedGenerator () : divisor_(1), remainder_(0)
     {
         VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T);
-        Counter<result_type>::reset(seed_);
+
+        seed_.fill(0);
+        seed_max_.fill(0);
+        modulo(divisor_, remainder_);
     }
 
     SeedGenerator<ID, Array<T, K> > (const SeedGenerator<ID, Array<T, K> > &);
