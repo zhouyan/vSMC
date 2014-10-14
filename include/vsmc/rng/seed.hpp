@@ -131,6 +131,49 @@ class SeedGenerator
 
     static VSMC_CONSTEXPR bool is_counter () {return false;}
 
+    template <typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os,
+            const SeedGenerator<ID, ResultType> &sg)
+    {
+        if (!os.good())
+            return os;
+
+        os << sg.seed_     << ' ';
+        os << sg.seed_max_ << ' ';
+        os << sg.divisor_  << ' ';
+        os << sg.remainder_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_istream<CharT, Traits> &operator>> (
+            std::basic_istream<CharT, Traits> &is,
+            SeedGenerator<ID, ResultType> &sg)
+    {
+        if (!is.good())
+            return is;
+
+        result_type seed_tmp;
+        result_type seed_max_tmp;
+        skip_type divisor_tmp;
+        skip_type remainder_tmp;
+        is >> std::ws >> seed_tmp;
+        is >> std::ws >> seed_max_tmp;
+        is >> std::ws >> divisor_tmp;
+        is >> std::ws >> remainder_tmp;
+
+        if (is.good()) {
+            sg.seed_      = seed_tmp;
+            sg.seed_max_  = seed_max_tmp;
+            sg.divisor_   = divisor_tmp;
+            sg.remainder_ = remainder_tmp;
+        }
+
+        return is;
+    }
+
     private :
 
     result_type seed_;
@@ -206,7 +249,7 @@ class SeedGenerator<ID, Array<T, K> >
         remainder_ = rem;
         seed_max_.fill(static_cast<skip_type>(~static_cast<skip_type>(0)));
 
-        sed(seed_);
+        set(seed_);
     }
 
     void skip (skip_type steps)
@@ -215,6 +258,49 @@ class SeedGenerator<ID, Array<T, K> >
     void skip () {Counter<result_type>::increment(seed_);}
 
     static VSMC_CONSTEXPR bool is_counter () {return true;}
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os,
+            const SeedGenerator<ID, Array<T, K> > &sg)
+    {
+        if (!os.good())
+            return os;
+
+        os << sg.seed_     << ' ';
+        os << sg.seed_max_ << ' ';
+        os << sg.divisor_  << ' ';
+        os << sg.remainder_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_istream<CharT, Traits> &operator>> (
+            std::basic_istream<CharT, Traits> &is,
+            SeedGenerator<ID, Array<T, K> > &sg)
+    {
+        if (!is.good())
+            return is;
+
+        result_type seed_tmp;
+        result_type seed_max_tmp;
+        skip_type divisor_tmp;
+        skip_type remainder_tmp;
+        is >> std::ws >> seed_tmp;
+        is >> std::ws >> seed_max_tmp;
+        is >> std::ws >> divisor_tmp;
+        is >> std::ws >> remainder_tmp;
+
+        if (is.good()) {
+            sg.seed_      = seed_tmp;
+            sg.seed_max_  = seed_max_tmp;
+            sg.divisor_   = divisor_tmp;
+            sg.remainder_ = remainder_tmp;
+        }
+
+        return is;
+    }
 
     private :
 
