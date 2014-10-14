@@ -17,6 +17,21 @@
 
 namespace vsmc {
 
+namespace internal {
+
+template <typename ResultType, typename IntType1, typename IntType2>
+inline void mpi_init_seed (ResultType &, IntType1 D, IntType2 R)
+{
+    Seed::instance().modulo(
+            static_cast<Seed::skip_type>(D), static_cast<Seed::skip_type>(R));
+}
+
+template <typename T, std::size_t K, typename IntType1, typename IntType2>
+inline void mpi_init_seed (vsmc::Array<T, K> &s, IntType1, IntType2 R)
+{s.back() = static_cast<Seed::skip_type>(R);}
+
+} // namespace vsmc::internal
+
 /// \brief MPI Environment
 /// \ingroup MPI
 ///
@@ -42,23 +57,10 @@ class MPIEnvironment
     void init_seed () const
     {
         ::boost::mpi::communicator world;
-        init_seed(cxx11::integral_constant<bool,
-                cxx11::is_unsigned<Seed::result_type>::value>());
-        world.barrier();
-    }
-
-    void init_seed (cxx11::true_type)
-    {
-        Seed::instance().modulo(
-                static_cast<Seed::skip_type>(world.size()),
-                static_cast<Seed::skip_type>(world.rank()));
-    }
-
-    void init_seed (cxx11::false_type)
-    {
         Seed::result_type s(Seed::instance().get());
-        s.back() = static_cast<Seed::skip_type>(world.rank());
+        internal::mpi_init_seed(s, world.size(), world.rank());
         Seed::instance().set(s);
+        world.barrier();
     }
 }; // class MPIEnvironment
 
