@@ -182,20 +182,40 @@ class UniformRealDistribution
     /// )
     /// ~~~
     template <typename Eng>
-    result_type operator() (Eng &eng) const
+    result_type operator() (Eng &eng)
+    {
+#if VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
+	operator()(eng, cxx11::true_type());
+#else
+	operator()(eng, cxx11::false_type());
+#endif
+    }
+
+    /// \brief static dispatch based on `Eng::min()` and `Eng::max()`, both
+    /// need to be constant expression
+    template <typename Eng>
+    result_type operator() (Eng &eng, cxx11::true_type) const
     {
         typedef cxx11::integral_constant<std::size_t, sizeof(result_type)>
-            fp_bits;
-
-#if VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
+            fbits;
         typedef typename internal::UniformRealDistributionFullRangeIntgerType<
             Eng::min VSMC_MNE (), Eng::max VSMC_MNE ()>::type eng_uint_t;
         typedef cxx11::integral_constant<std::size_t, sizeof(eng_uint_t)>
-            u_bits;
+            ubits;
 
         result_type u = u01(static_cast<eng_uint_t>(eng()), Left(), Right(),
-                u_bits(), fp_bits());
-#else // VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
+                ubits(), fbits());
+
+        return u * (b_ - a_) + a_;
+    }
+
+    /// \brief Dynamic dispatch based on `eng.min()` and `eng.max()`
+    template <typename Eng>
+    result_type operator() (Eng &eng, cxx11::false_type) const
+    {
+        typedef cxx11::integral_constant<std::size_t, sizeof(result_type)>
+            fbits;
+
         static const uint64_t eng_max = static_cast<uint64_t>(
                 eng.max VSMC_MNE ());
 
@@ -207,16 +227,15 @@ class UniformRealDistribution
         switch (eng_max) {
             case uint32_t_max_ :
                 u = u01(static_cast<uint32_t>(eng()), Left(), Right(),
-                        u32(), fp_bits());
+                        u32(), fbits());
                 break;
             case uint64_t_max_ :
                 u = u01(static_cast<uint64_t>(eng()), Left(), Right(),
-                        u64(), fp_bits());
+                        u64(), fbits());
                 break;
             default :
                 return 0;
         }
-#endif // VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
 
         return u * (b_ - a_) + a_;
     }
