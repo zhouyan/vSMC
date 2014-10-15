@@ -286,52 +286,52 @@ class UniformRealDistribution
             ~(static_cast<uint64_t>(0)));
 #endif
 
-    static float u01 (uint32_t i, Open, Open, u32, f24)
+    static float u01(uint32_t i, Open, Open, u32, f24)
     {return ::u01_open_open_32_24(i);}
 
-    static float u01 (uint32_t i, Open, Closed, u32, f24)
+    static float u01(uint32_t i, Open, Closed, u32, f24)
     {return ::u01_open_closed_32_24(i);}
 
-    static float u01 (uint32_t i, Closed, Open, u32, f24)
+    static float u01(uint32_t i, Closed, Open, u32, f24)
     {return ::u01_closed_open_32_24(i);}
 
-    static float u01 (uint32_t i, Closed, Closed, u32, f24)
+    static float u01(uint32_t i, Closed, Closed, u32, f24)
     {return ::u01_closed_closed_32_24(i);}
 
-    static double u01 (uint32_t i, Open, Open, u32, f53)
+    static double u01(uint32_t i, Open, Open, u32, f53)
     {return ::u01_open_open_32_53(i);}
 
-    static double u01 (uint32_t i, Open, Closed, u32, f53)
+    static double u01(uint32_t i, Open, Closed, u32, f53)
     {return ::u01_open_closed_32_53(i);}
 
-    static double u01 (uint32_t i, Closed, Open, u32, f53)
+    static double u01(uint32_t i, Closed, Open, u32, f53)
     {return ::u01_closed_open_32_53(i);}
 
-    static double u01 (uint32_t i, Closed, Closed, u32, f53)
+    static double u01(uint32_t i, Closed, Closed, u32, f53)
     {return ::u01_closed_closed_32_53(i);}
 
-    static float u01 (uint64_t i, Open, Open, u64, f24)
+    static float u01(uint64_t i, Open, Open, u64, f24)
     {return static_cast<float>(::u01_open_open_64_53(i));}
 
-    static float u01 (uint64_t i, Open, Closed, u64, f24)
+    static float u01(uint64_t i, Open, Closed, u64, f24)
     {return static_cast<float>(::u01_open_closed_64_53(i));}
 
-    static float u01 (uint64_t i, Closed, Open, u64, f24)
+    static float u01(uint64_t i, Closed, Open, u64, f24)
     {return static_cast<float>(::u01_closed_open_64_53(i));}
 
-    static float u01 (uint64_t i, Closed, Closed, u64, f24)
+    static float u01(uint64_t i, Closed, Closed, u64, f24)
     {return static_cast<float>(::u01_closed_closed_64_53(i));}
 
-    static double u01 (uint64_t i, Open, Open, u64, f53)
+    static double u01(uint64_t i, Open, Open, u64, f53)
     {return ::u01_open_open_64_53(i);}
 
-    static double u01 (uint64_t i, Open, Closed, u64, f53)
+    static double u01(uint64_t i, Open, Closed, u64, f53)
     {return ::u01_open_closed_64_53(i);}
 
-    static double u01 (uint64_t i, Closed, Open, u64, f53)
+    static double u01(uint64_t i, Closed, Open, u64, f53)
     {return ::u01_closed_open_64_53(i);}
 
-    static double u01 (uint64_t i, Closed, Closed, u64, f53)
+    static double u01(uint64_t i, Closed, Closed, u64, f53)
     {return ::u01_closed_closed_64_53(i);}
 }; // class UniformRealDistributionBase
 
