@@ -95,34 +95,68 @@ inline T vmath_cdfnorminv (T a)
 /// \defgroup vArithmetic Arithmetic functions
 /// \ingroup vMath
 /// @{
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i + b_i\f$
 VSMC_DEFINE_VMATH_B(+, Add)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b_i\f$
 VSMC_DEFINE_VMATH_B(-, Sub)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^2\f$
 VSMC_DEFINE_VMATH_1(internal, vmath_sqr, Sqr)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i\f$
 VSMC_DEFINE_VMATH_B(*, Mul)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
 VSMC_DEFINE_VMATH_1(std, abs, Abs)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = (\beta_a a_i + \mu_a) / (\beta_b b_i + \mu_b)\f$
 template <typename T>
 inline void vLinearFrac (std::size_t n, const T *a, const T *b,
-        T scalea, T scaleb, T shifta, T shiftb, T *y)
+        T beta_a, T beta_b, T mu_a, T mu_b, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = scalea * a[i] + shifta;
+        y[i] = beta_a * a[i] + mu_a;
     for (std::size_t i = 0; i != n; ++i)
-        y[i] /= scaleb * b[i] + shiftb;
+        y[i] /= beta_b * b[i] + mu_b;
 }
+
 /// @}
 
 /// \defgroup vPower Power and root functions
 /// \ingroup vMath
 /// @{
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{-1}\f$
 VSMC_DEFINE_VMATH_1(internal, vmath_inv, Inv)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
 VSMC_DEFINE_VMATH_B(/, Div)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i}\f$
 VSMC_DEFINE_VMATH_1(std, sqrt, Sqrt)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt{a_i}\f$
 VSMC_DEFINE_VMATH_1(internal, vmath_invsqrt, InvSqrt)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt[3]{a_i}\f$
 VSMC_DEFINE_VMATH_1(cxx11, cbrt, Cbrt)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt[3]{a_i}\f$
 VSMC_DEFINE_VMATH_1(internal, vmath_invcbrt, InvCbrt)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{2/3}\f$
 VSMC_DEFINE_VMATH_1(internal, vmath_pow2o3, Pow2o3)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{3/2}\f$
 VSMC_DEFINE_VMATH_1(internal, vmath_pow3o2, Pow3o2)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{b_i}\f$
 VSMC_DEFINE_VMATH_2(std, pow, Pow)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^b\f$
 template <typename T>
 inline void vPowx (std::size_t n, const T *a, T b, T *y)
 {
@@ -130,24 +164,44 @@ inline void vPowx (std::size_t n, const T *a, T b, T *y)
     for (std::size_t i = 0; i != n; ++i)
         y[i] = pow(a[i], b);
 }
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b_i^2}\f$
 VSMC_DEFINE_VMATH_2(cxx11, hypot, Hypot)
+
 /// @}
 
 /// \defgroup vExponential Exponential and logarithm functions
 /// \ingroup vMath
 /// @{
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i}\f$
 VSMC_DEFINE_VMATH_1(std, exp, Exp)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i} - 1\f$
 VSMC_DEFINE_VMATH_1(cxx11, expm1, Expm1)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, log, Ln)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log_{10}(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, log10, Log10)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i + 1)\f$
 VSMC_DEFINE_VMATH_1(cxx11, log1p, Log1p)
 /// @}
 
 /// \defgroup vTrigonometric Trigonometric functions
 /// \ingroup vMath
 /// @{
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sin(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, cos, Cos)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cos(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, sin, Sin)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \sin(a_i), z_i = \cos(a_i)\f$
 template <typename T>
 inline void vSinCos (std::size_t n, const T *a, T *y, T *z)
 {
@@ -158,34 +212,82 @@ inline void vSinCos (std::size_t n, const T *a, T *y, T *z)
     for (std::size_t i = 0; i != n; ++i)
         z[i] = cos(a[i]);
 }
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, tan, Tan)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arccos(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, acos, Acos)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arcsin(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, asin, Asin)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, atan, Atan)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i / b_i)\f$ with
+/// signs to determine the quadrant
 VSMC_DEFINE_VMATH_2(std, atan2, Atan2)
+
 /// @}
 
 /// \defgroup vHyperbolic Hyperbolic functions
 /// \ingroup vMath
 /// @{
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cosh(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, cosh, Cosh)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sinh(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, sinh, Sinh)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tanh(a_i)\f$
 VSMC_DEFINE_VMATH_1(std, tanh, Tanh)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\cosh(a_i)\f$
 VSMC_DEFINE_VMATH_1(cxx11, acosh, Acosh)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\sinh(a_i)\f$
 VSMC_DEFINE_VMATH_1(cxx11, asinh, Asinh)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\tanh(a_i)\f$
 VSMC_DEFINE_VMATH_1(cxx11, atanh, Atanh)
+
 /// @}
 
 /// \defgroup vSpecial Special functions
 /// \ingroup vMath
 /// @{
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}(a_i)\f$
 VSMC_DEFINE_VMATH_1(cxx11, erf, Erf)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \mathrm{Erfc}(a_i) = \mathrm{Erf}(1 - a_i)\f$
 VSMC_DEFINE_VMATH_1(cxx11, erfc, Erfc)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = 1 - \mathrm{Erfc}(a_i / \sqrt{2}) / 2\f$, the standard Normal CDF
 VSMC_DEFINE_VMATH_1(internal, vmath_cdfnorm, CdfNorm)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}^{-1}(a_i)\f$
 VSMC_DEFINE_VMATH_1(internal, vmath_erfinv, ErfInv)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \mathrm{Erf}^{-1}(1 - a_i)\f$
 VSMC_DEFINE_VMATH_1(internal, vmath_erfcinv, ErfcInv)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \sqrt{2}\mathrm{Erf}^{-1}(2a_i - 1)\f$, inverse of the standard
+/// Nomral CDF
 VSMC_DEFINE_VMATH_1(internal, vmath_cdfnorminv, CdfNormInv)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$,
+/// logarithm of the Gamma function
 VSMC_DEFINE_VMATH_1(cxx11, lgamma, LGamma)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$, the Gamma
+/// function
 VSMC_DEFINE_VMATH_1(cxx11, tgamma, TGamma)
 /// @}
 
@@ -243,20 +345,20 @@ VSMC_DEFINE_VMATH_VML_1(Sqr)
 VSMC_DEFINE_VMATH_VML_2(Mul)
 VSMC_DEFINE_VMATH_VML_1(Abs)
 inline void vLinearFrac (std::size_t n, const float *a, const float *b,
-        float scalea, float scaleb, float shifta, float shiftb, float *y)
+        float beta_a, float beta_b, float mu_a, float mu_b, float *y)
 {
     n < VSMC_VMATH_VML_THRESHOLD ?
-        vLinearFrac<float>(n, a, b, scalea, scaleb, shifta, shiftb, y):
+        vLinearFrac<float>(n, a, b, beta_a, beta_b, mu_a, mu_b, y):
         ::vsLinearFrac(static_cast<MKL_INT>(n), a, b,
-                scalea, scaleb, shifta, shiftb, y);
+                beta_a, beta_b, mu_a, mu_b, y);
 }
 inline void vLinearFrac (std::size_t n, const double *a, const double *b,
-        double scalea, double scaleb, double shifta, double shiftb, double *y)
+        double beta_a, double beta_b, double mu_a, double mu_b, double *y)
 {
     n < VSMC_VMATH_VML_THRESHOLD ?
-        vLinearFrac<double>(n, a, b, scalea, scaleb, shifta, shiftb, y):
+        vLinearFrac<double>(n, a, b, beta_a, beta_b, mu_a, mu_b, y):
         ::vdLinearFrac(static_cast<MKL_INT>(n), a, b,
-                scalea, scaleb, shifta, shiftb, y);
+                beta_a, beta_b, mu_a, mu_b, y);
 }
 
 VSMC_DEFINE_VMATH_VML_1(Inv)
