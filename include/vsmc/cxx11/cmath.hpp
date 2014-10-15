@@ -74,35 +74,28 @@ VSMC_DEFINE_C99_MATH_SPECIAL(tgamma)
 
 #else // VSMC_HAS_CXX11LIB_CMATH
 
-#include <boost/math/special_functions/expm1.hpp>
-#include <boost/math/special_functions/log1p.hpp>
-#include <boost/math/special_functions/cbrt.hpp>
-#include <boost/math/special_functions/hypot.hpp>
-#include <boost/math/special_functions/asinh.hpp>
-#include <boost/math/special_functions/acosh.hpp>
-#include <boost/math/special_functions/atanh.hpp>
-#include <boost/math/special_functions/erf.hpp>
-#include <boost/math/special_functions/gamma.hpp>
+#include <vsmc/math/constants.hpp>
+#include <boost/math/special_functions.hpp>
 
 namespace vsmc { namespace cxx11 {
 
 inline float (exp2) (float x)
-{using std::exp; using std::log; return exp(x * log(2.f));}
+{using std::exp; return exp(x * math::ln_2<float>());}
 inline double (exp2) (double x)
-{using std::exp; using std::log; return exp(x * log(2.));}
+{using std::exp; return exp(x * math::ln_2<double>());}
 inline long double (exp2) (long double x)
-{using std::exp; using std::log; return exp(x * log(2.l));}
+{using std::exp; return exp(x * math::ln_2<long double>());}
 template <typename T> inline double (exp2) (T x)
-{using std::exp; using std::log; return exp(static_cast<double>(x) * log(2.));}
+{using std::exp; return exp(static_cast<double>(x) * math::ln_2<double>());}
 
 inline float (log2) (float x)
-{using std::log; return log(x) / log(2.f);}
+{using std::log; return log(x) * math::ln_inv_2<float>();}
 inline double (log2) (double x)
-{using std::log; return log(x) / log(2.);}
+{using std::log; return log(x) * math::ln_inv_2<double>();}
 inline long double (log2) (long double x)
-{using std::log; return log(x) * log(2.l);}
+{using std::log; return log(x) * math::ln_inv_2<long double>();}
 template <typename T> inline double (log2) (T x)
-{using std::log; return log(static_cast<double>(x)) / log(2.);}
+{using std::log; return log(static_cast<double>(x)) * math::ln_inv_2<double>();}
 
 using ::boost::math::expm1;
 using ::boost::math::log1p;
