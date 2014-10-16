@@ -67,15 +67,15 @@ class UniformRealDistributionOp
                 (eng.min VSMC_MNE ()));
         VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(eng_max);
 
-	if (eng_max == uint32_t_max_)
-	    return U01<uint32_t, FPType, Left, Right>::uint2fp(
-		    static_cast<uint32_t>(eng()));
+        if (eng_max == uint32_t_max_)
+            return U01<Left, Right, uint32_t, FPType>::uint2fp(
+                    static_cast<uint32_t>(eng()));
 
-	if (eng_max == uint64_t_max_)
-	    return U01<uint32_t, FPType, Left, Right>::uint2fp(
-		    static_cast<uint64_t>(eng()));
+        if (eng_max == uint64_t_max_)
+            return U01<Left, Right, uint64_t, FPType>::uint2fp(
+                    static_cast<uint64_t>(eng()));
 
-	return 0;
+        return 0;
     }
 }; // class UniformRealDistributionOp
 
@@ -84,14 +84,14 @@ template <typename FPType, typename Left, typename Right, typename Eng>
 class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 {
     typedef typename internal::UniformRealDistributionFRIntType<
-	Eng::min VSMC_MNE(), Eng::max VSMC_MNE ()>::type eng_uint_t;
+        Eng::min VSMC_MNE(), Eng::max VSMC_MNE ()>::type eng_uint_t;
 
     public :
 
     static FPType uint2fp (Eng &eng)
     {
-	return U01<eng_uint_t, FPType, Left, Right>::uint2fp(
-		static_cast<eng_uint_t>(eng()));
+        return U01<Left, Right, eng_uint_t, FPType>::uint2fp(
+                static_cast<eng_uint_t>(eng()));
     }
 }; // class UniformRealDistributionOp
 #endif
@@ -116,18 +116,16 @@ class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 /// ~~~{.cpp}
 /// struct Engine1
 /// {
-///	static constexpr uint32_t min () {return 0;}
-///	static constexpr uint32_t max ()
-///	{return static_cast<uint32_t>(~static_cast<uint32_t>(0));}
-///	uint32_t operator() () { /* generating 32-bits random integers */ }
+///     static constexpr uint32_t min ();
+///     static constexpr uint32_t max ();
+///     uint32_t operator() ();
 /// };
 ///
 /// struct Engine2
 /// {
-///	uint32_t min () {return 0;}
-///	uint32_t max ()
-///	{return static_cast<uint32_t>(~static_cast<uint32_t>(0));}
-///	uint32_t operator() () { /* generating 32-bits random integers */ }
+///     uint32_t min ();
+///     uint32_t max ();
+///     uint32_t operator() ();
 /// };
 ///
 /// Engine1 eng1;
@@ -149,8 +147,8 @@ class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 /// integers does not cover the full range of either 32-bits or 64-bits
 /// unsigned integers.
 template <typename FPType = double,
-	 typename Left = Closed, typename Right = Open,
-	 bool MinMaxIsConstexpr = false>
+         typename Left = Closed, typename Right = Open,
+         bool MinMaxIsConstexpr = false>
 class UniformRealDistribution
 {
     public :
@@ -164,7 +162,7 @@ class UniformRealDistribution
         typedef FPType result_type;
 
         typedef UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
-	    distribution_type;
+            distribution_type;
 
         explicit param_type (result_type a = 0, result_type b = 1) :
             a_(a), b_(b) {}
@@ -263,16 +261,16 @@ class UniformRealDistribution
     template <typename Eng>
     result_type operator() (Eng &eng) const
     {
-	return internal::UniformRealDistributionOp<
-	    FPType, Left, Right, Eng, MinMaxIsConstexpr
-	    >::uint2fp(eng) * (b_ - a_) + a_;
+        return internal::UniformRealDistributionOp<
+            FPType, Left, Right, Eng, MinMaxIsConstexpr
+            >::uint2fp(eng) * (b_ - a_) + a_;
     }
 
     friend inline bool operator== (
             const UniformRealDistribution<
-	    FPType, Left, Right, MinMaxIsConstexpr> &runif1,
+            FPType, Left, Right, MinMaxIsConstexpr> &runif1,
             const UniformRealDistribution<
-	    FPType, Left, Right, MinMaxIsConstexpr> &runif2)
+            FPType, Left, Right, MinMaxIsConstexpr> &runif2)
     {
         if (runif1.a_ < runif2.a_ ||runif1.a_ > runif1.a_)
             return false;
@@ -283,16 +281,16 @@ class UniformRealDistribution
 
     friend inline bool operator!= (
             const UniformRealDistribution<
-	    FPType, Left, Right, MinMaxIsConstexpr> &runif1,
+            FPType, Left, Right, MinMaxIsConstexpr> &runif1,
             const UniformRealDistribution<
-	    FPType, Left, Right, MinMaxIsConstexpr> &runif2)
+            FPType, Left, Right, MinMaxIsConstexpr> &runif2)
     {return !(runif1 == runif2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const UniformRealDistribution<
-	    FPType, Left, Right, MinMaxIsConstexpr> &runif)
+            FPType, Left, Right, MinMaxIsConstexpr> &runif)
     {
         if (!os.good())
             return os;
@@ -306,7 +304,7 @@ class UniformRealDistribution
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
             UniformRealDistribution<
-	    FPType, Left, Right, MinMaxIsConstexpr> &runif)
+            FPType, Left, Right, MinMaxIsConstexpr> &runif)
     {
         if (!is.good())
             return is;
