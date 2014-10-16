@@ -2004,7 +2004,6 @@ PREDEFINED             = VSMC_DOXYGEN \
                          VSMC_HAS_CXX11LIB_FUTURE \
                          VSMC_HAS_CXX11LIB_MUTEX \
                          VSMC_HAS_CXX11LIB_RANDOM \
-                         VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX \
                          VSMC_HAS_CXX11LIB_THREAD \
                          VSMC_HAS_CXX11LIB_TUPLE \
                          VSMC_HAS_C99LIB_MATH \
