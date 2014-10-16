@@ -11,10 +11,6 @@
 #ifndef VSMC_RNG_INTERNAL_COMMON_H
 #define VSMC_RNG_INTERNAL_COMMON_H
 
-#ifndef VSMC_HAS_OPENCL_DOUBLE
-#define VSMC_HAS_OPENCL_DOUBLE 0
-#endif
-
 #ifdef __OPENCL_VERSION__
   #ifndef VSMC_HAS_OPENCL_DOUBLE
   #define VSMC_HAS_OPENCL_DOUBLE 0
@@ -56,5 +52,9 @@
     #include <math.h>
   #endif // __cplusplus
 #endif // __OPENCL_VERSION__
+
+#ifndef VSMC_HAS_OPENCL_DOUBLE
+#define VSMC_HAS_OPENCL_DOUBLE 0
+#endif
 
 #endif // VSMC_RNG_INTERNAL_COMMON_H
