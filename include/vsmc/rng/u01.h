@@ -78,29 +78,29 @@
 #define VSMC_RNG_U01_52  (2048.0 * VSMC_RNG_U01_63)
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE float u01_closed_closed_32_24 (uint32_t i)
 {return ((i&0x7fffffc0) + (i&0x40)) * VSMC_RNG_U01_31f;}
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE float u01_closed_open_32_24 (uint32_t i)
 {return (i>>8) * VSMC_RNG_U01_24f;}
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE float u01_open_closed_32_24 (uint32_t i)
 {return (1.0f + (i>>8)) * VSMC_RNG_U01_24f;}
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE float u01_open_open_32_24 (uint32_t i)
 {return (0.5f + (i>>9)) * VSMC_RNG_U01_23f;}
 
 #if VSMC_HAS_OPENCL_DOUBLE
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE double u01_closed_closed_32_53 (uint32_t i)
 {
 #ifdef __cplusplus
@@ -111,39 +111,83 @@ VSMC_STATIC_INLINE double u01_closed_closed_32_53 (uint32_t i)
 }
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE double u01_closed_open_32_53 (uint32_t i)
 {return i * VSMC_RNG_U01_32;}
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE double u01_open_closed_32_53 (uint32_t i)
 {return (1.0 + i) * VSMC_RNG_U01_32;}
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE double u01_open_open_32_53 (uint32_t i)
 {return (0.5 + i) * VSMC_RNG_U01_32;}
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE double u01_closed_closed_64_53 (uint64_t i)
 {return ((i&UINT64_C(0x7ffffffffffffe00)) + (i&0x200)) * VSMC_RNG_U01_63;}
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE double u01_closed_open_64_53 (uint64_t i)
 {return (i>>11) * VSMC_RNG_U01_53;}
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE double u01_open_closed_64_53 (uint64_t i)
 {return (1.0 + (i>>11)) * VSMC_RNG_U01_53;}
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_STATIC_INLINE double u01_open_open_64_53 (uint64_t i)
 {return (0.5 + (i>>12)) * VSMC_RNG_U01_52;}
+
+/// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1]\f$
+/// \ingroup U01
+VSMC_STATIC_INLINE float u01_closed_closed_64_24 (uint64_t i)
+{
+#ifdef __cplusplus
+    return static_cast<float>(u01_closed_closed_64_53(i));
+#else
+    return (float) u01_closed_closed_64_53(i);
+#endif
+}
+
+/// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1)\f$
+/// \ingroup U01
+VSMC_STATIC_INLINE float u01_closed_open_64_24 (uint64_t i)
+{
+#ifdef __cplusplus
+    return static_cast<float>(u01_closed_open_64_53(i));
+#else
+    return (float) u01_closed_open_64_53(i);
+#endif
+}
+
+/// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1]\f$
+/// \ingroup U01
+VSMC_STATIC_INLINE float u01_open_closed_64_24 (uint64_t i)
+{
+#ifdef __cplusplus
+    return static_cast<float>(u01_open_closed_64_53(i));
+#else
+    return (float) u01_open_closed_64_53(i);
+#endif
+}
+
+/// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1)\f$
+/// \ingroup U01
+VSMC_STATIC_INLINE float u01_open_open_64_24 (uint64_t i)
+{
+#ifdef __cplusplus
+    return static_cast<float>(u01_open_open_64_53(i));
+#else
+    return (float) u01_open_open_64_53(i);
+#endif
+}
 
 #endif // VSMC_HAS_OPENCL_DOUBLE
 

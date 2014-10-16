@@ -34,7 +34,7 @@
 namespace vsmc {
 
 /// \brief Stable distribution
-/// \ingroup RNG
+/// \ingroup Distribution
 template <typename FPType>
 class StableDistribution
 {

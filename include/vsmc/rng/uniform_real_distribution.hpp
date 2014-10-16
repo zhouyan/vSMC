@@ -12,7 +12,7 @@
 #define VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/u01.h>
+#include <vsmc/rng/u01.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a, b) \
     VSMC_RUNTIME_ASSERT((a <= b),                                            \
@@ -32,14 +32,6 @@
 
 namespace vsmc {
 
-/// \brief Parameter type for open interval
-/// \ingroup RNG
-struct Open {};
-
-/// \brief Parameter type for closed interval
-/// \ingroup RNG
-struct Closed {};
-
 namespace internal {
 
 template<uint64_t, uint64_t>
@@ -55,69 +47,9 @@ struct UniformRealDistributionFRIntType<0,
     static_cast<uint64_t>(~(static_cast<uint64_t>(0)))>
 {typedef uint64_t type;};
 
-class UniformRealDistributionU01
+template <typename FPType, typename Left, typename Right, typename Eng, bool>
+class UniformRealDistributionOp
 {
-    protected :
-
-    typedef cxx11::integral_constant<std::size_t, sizeof(float)> f24;
-    typedef cxx11::integral_constant<std::size_t, sizeof(double)> f53;
-    typedef cxx11::integral_constant<std::size_t, sizeof(uint32_t)> u32;
-    typedef cxx11::integral_constant<std::size_t, sizeof(uint64_t)> u64;
-
-    static float u01(uint32_t i, Open, Open, u32, f24)
-    {return ::u01_open_open_32_24(i);}
-
-    static float u01(uint32_t i, Open, Closed, u32, f24)
-    {return ::u01_open_closed_32_24(i);}
-
-    static float u01(uint32_t i, Closed, Open, u32, f24)
-    {return ::u01_closed_open_32_24(i);}
-
-    static float u01(uint32_t i, Closed, Closed, u32, f24)
-    {return ::u01_closed_closed_32_24(i);}
-
-    static double u01(uint32_t i, Open, Open, u32, f53)
-    {return ::u01_open_open_32_53(i);}
-
-    static double u01(uint32_t i, Open, Closed, u32, f53)
-    {return ::u01_open_closed_32_53(i);}
-
-    static double u01(uint32_t i, Closed, Open, u32, f53)
-    {return ::u01_closed_open_32_53(i);}
-
-    static double u01(uint32_t i, Closed, Closed, u32, f53)
-    {return ::u01_closed_closed_32_53(i);}
-
-    static float u01(uint64_t i, Open, Open, u64, f24)
-    {return static_cast<float>(::u01_open_open_64_53(i));}
-
-    static float u01(uint64_t i, Open, Closed, u64, f24)
-    {return static_cast<float>(::u01_open_closed_64_53(i));}
-
-    static float u01(uint64_t i, Closed, Open, u64, f24)
-    {return static_cast<float>(::u01_closed_open_64_53(i));}
-
-    static float u01(uint64_t i, Closed, Closed, u64, f24)
-    {return static_cast<float>(::u01_closed_closed_64_53(i));}
-
-    static double u01(uint64_t i, Open, Open, u64, f53)
-    {return ::u01_open_open_64_53(i);}
-
-    static double u01(uint64_t i, Open, Closed, u64, f53)
-    {return ::u01_open_closed_64_53(i);}
-
-    static double u01(uint64_t i, Closed, Open, u64, f53)
-    {return ::u01_closed_open_64_53(i);}
-
-    static double u01(uint64_t i, Closed, Closed, u64, f53)
-    {return ::u01_closed_closed_64_53(i);}
-}; // class UniformRealDistributionU01
-
-template <typename FPType, bool, typename Left, typename Right, typename Eng>
-class UniformRealDistributionOp : public UniformRealDistributionU01
-{
-    typedef cxx11::integral_constant<std::size_t, sizeof(FPType)> fbits;
-
     static VSMC_CONSTEXPR const uint64_t uint32_t_max_ = static_cast<uint64_t>(
             static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
 
@@ -126,7 +58,7 @@ class UniformRealDistributionOp : public UniformRealDistributionU01
 
     public :
 
-    static FPType generate (Eng &eng)
+    static FPType uint2fp (Eng &eng)
     {
         static const uint64_t eng_max = static_cast<uint64_t>(
                 eng.max VSMC_MNE ());
@@ -135,38 +67,31 @@ class UniformRealDistributionOp : public UniformRealDistributionU01
                 (eng.min VSMC_MNE ()));
         VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(eng_max);
 
-        FPType u = 0;
-        switch (eng_max) {
-            case uint32_t_max_ :
-                u = u01(static_cast<uint32_t>(eng()), Left(), Right(),
-                        u32(), fbits());
-                break;
-            case uint64_t_max_ :
-                u = u01(static_cast<uint64_t>(eng()), Left(), Right(),
-                        u64(), fbits());
-                break;
-            default :
-                return 0;
-        }
+	if (eng_max == uint32_t_max_)
+	    return U01<uint32_t, FPType, Left, Right>::uint2fp(
+		    static_cast<uint32_t>(eng()));
+
+	if (eng_max == uint64_t_max_)
+	    return U01<uint32_t, FPType, Left, Right>::uint2fp(
+		    static_cast<uint64_t>(eng()));
+
+	return 0;
     }
 }; // class UniformRealDistributionOp
 
 #if VSMC_HAS_CXX11_CONSTEXPR
 template <typename FPType, typename Left, typename Right, typename Eng>
-class UniformRealDistributionOp<FPType, true, Left, Right, Eng> :
-    public UniformRealDistributionU01
+class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 {
-    typedef cxx11::integral_constant<std::size_t, sizeof(FPType)> fbits;
     typedef typename internal::UniformRealDistributionFRIntType<
 	Eng::min VSMC_MNE(), Eng::max VSMC_MNE ()>::type eng_uint_t;
-    typedef cxx11::integral_constant<std::size_t, sizeof(eng_uint_t)> ubits;
 
     public :
 
-    static FPType generate (Eng &eng)
+    static FPType uint2fp (Eng &eng)
     {
-	return u01(static_cast<eng_uint_t>(eng()), Left(), Right(),
-		ubits(), fbits());
+	return U01<eng_uint_t, FPType, Left, Right>::uint2fp(
+		static_cast<eng_uint_t>(eng()));
     }
 }; // class UniformRealDistributionOp
 #endif
@@ -174,7 +99,7 @@ class UniformRealDistributionOp<FPType, true, Left, Right, Eng> :
 } // namespace vsmc::interal
 
 /// \brief Uniform real distribution with variants open/closed variants
-/// \ingroup RNG
+/// \ingroup Distribution
 ///
 /// \details
 /// This distribution is almost identical to C++11
@@ -183,6 +108,8 @@ class UniformRealDistributionOp<FPType, true, Left, Right, Eng> :
 /// - It requires that the uniform random number generator to produce integers
 ///   on the full range of either `uint32_t` or `uint64_t`.
 /// \tparam FPType The floating points type of results
+/// \tparam Left Shall the left side of the interval be Open or Closed
+/// \tparam Right Shall the right side of the interval be Open or Closed
 /// \tparam MinMaxIsConstexpr Whether or not UniformRealDistribution shall
 /// expect RNG engines that will be used with it has their `min` and `max`
 /// member functions defined as contant expresssion. For example,
@@ -221,10 +148,9 @@ class UniformRealDistributionOp<FPType, true, Left, Right, Eng> :
 /// compile time, and will rais a static assertion failure if the generated
 /// integers does not cover the full range of either 32-bits or 64-bits
 /// unsigned integers.
-/// \tparam Left Shall the left side of the interval be Open or Closed
-/// \tparam Right Shall the right side of the interval be Open or Closed
-template <typename FPType = double, bool MinMaxIsConstexpr = false,
-	 typename Left = Closed, typename Right = Open>
+template <typename FPType = double,
+	 typename Left = Closed, typename Right = Open,
+	 bool MinMaxIsConstexpr = false>
 class UniformRealDistribution
 {
     public :
@@ -237,7 +163,7 @@ class UniformRealDistribution
 
         typedef FPType result_type;
 
-        typedef UniformRealDistribution<FPType, MinMaxIsConstexpr, Left, Right>
+        typedef UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
 	    distribution_type;
 
         explicit param_type (result_type a = 0, result_type b = 1) :
@@ -335,19 +261,18 @@ class UniformRealDistribution
     /// )
     /// ~~~
     template <typename Eng>
-    result_type operator() (Eng &eng)
+    result_type operator() (Eng &eng) const
     {
-	result_type u = internal::UniformRealDistributionOp<
-	    FPType, MinMaxIsConstexpr, Left, Right, Eng>::generate(eng);
-
-        return u * (b_ - a_) + a_;
+	return internal::UniformRealDistributionOp<
+	    FPType, Left, Right, Eng, MinMaxIsConstexpr
+	    >::uint2fp(eng) * (b_ - a_) + a_;
     }
 
     friend inline bool operator== (
             const UniformRealDistribution<
-	    FPType, MinMaxIsConstexpr, Left, Right> &runif1,
+	    FPType, Left, Right, MinMaxIsConstexpr> &runif1,
             const UniformRealDistribution<
-	    FPType, MinMaxIsConstexpr, Left, Right> &runif2)
+	    FPType, Left, Right, MinMaxIsConstexpr> &runif2)
     {
         if (runif1.a_ < runif2.a_ ||runif1.a_ > runif1.a_)
             return false;
@@ -358,16 +283,16 @@ class UniformRealDistribution
 
     friend inline bool operator!= (
             const UniformRealDistribution<
-	    FPType, MinMaxIsConstexpr, Left, Right> &runif1,
+	    FPType, Left, Right, MinMaxIsConstexpr> &runif1,
             const UniformRealDistribution<
-	    FPType, MinMaxIsConstexpr, Left, Right> &runif2)
+	    FPType, Left, Right, MinMaxIsConstexpr> &runif2)
     {return !(runif1 == runif2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const UniformRealDistribution<
-	    FPType, MinMaxIsConstexpr, Left, Right> &runif)
+	    FPType, Left, Right, MinMaxIsConstexpr> &runif)
     {
         if (!os.good())
             return os;
@@ -381,7 +306,7 @@ class UniformRealDistribution
     friend inline std::basic_istream<CharT, Traits> &operator>> (
             std::basic_istream<CharT, Traits> &is,
             UniformRealDistribution<
-	    FPType, MinMaxIsConstexpr, Left, Right> &runif)
+	    FPType, Left, Right, MinMaxIsConstexpr> &runif)
     {
         if (!is.good())
             return is;

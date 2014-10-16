@@ -94,6 +94,10 @@
 /// \ingroup RNG
 /// \brief Random number generating in OpenCL kernels
 
+/// \defgroup Distribution Distribution
+/// \ingroup RNG
+/// \brief Distribution random varaites
+
 /// \defgroup GSLRNG GSL
 /// \ingroup RNG
 /// \brief Random number generating using GSL RNG
@@ -113,6 +117,10 @@
 /// \defgroup RNGWrapper Wrapper
 /// \ingroup RNG
 /// \brief C++11 RNG engines that wrap other RNG generators
+
+/// \defgroup U01 U01
+/// \ingroup RNG
+/// \brief Converting unsigned integers to floating points
 
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
