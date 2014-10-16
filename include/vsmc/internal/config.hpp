@@ -86,6 +86,9 @@
 #endif
 
 #ifndef VSMC_USE_VECLIB
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_4)
+#define VSMC_USE_VECLIB 1
+#else
 #define VSMC_USE_VECLIB 0
 #endif
 
