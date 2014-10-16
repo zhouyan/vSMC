@@ -430,6 +430,98 @@ VSMC_DEFINE_VMATH_VML_1(TGamma)
 
 } // namespace vsmc
 
+#elif VSMC_USE_VECLIB_VFORCE
+
+#include <vecLib/vForce.h>
+
+#ifndef VSMC_VMATH_VFORCE_THRESHOLD
+#define VSMC_VMATH_VFORCE_THRESHOLD 1000
+#endif
+
+#define VSMC_DEFINE_VMATH_VFORCE_1(func, name) \
+inline void v##name                                                          \
+(std::size_t n, const float *a, float *y)                                    \
+{                                                                            \
+    const int in = static_cast<int>(n);                                      \
+    n < VSMC_VMATH_VFORCE_THRESHOLD ?                                        \
+        v##name<float>(n, a, y):                                             \
+        ::vv##func##f(y, a, &in);                                            \
+}                                                                            \
+inline void v##name                                                          \
+(std::size_t n, const double *a, double *y)                                  \
+{                                                                            \
+    const int in = static_cast<int>(n);                                      \
+    n < VSMC_VMATH_VFORCE_THRESHOLD ?                                        \
+        v##name<double>(n, a, y):                                            \
+        ::vv##func(y, a, &in);                                               \
+}
+
+#define VSMC_DEFINE_VMATH_VFORCE_2(func, name) \
+inline void v##name                                                          \
+(std::size_t n, const float *a, const float *b, float *y)                    \
+{                                                                            \
+    const int in = static_cast<int>(n);                                      \
+    n < VSMC_VMATH_VFORCE_THRESHOLD ?                                        \
+        v##name<float>(n, a, b, y):                                          \
+        ::vv##func##f(y, a, b, &in);                                         \
+}                                                                            \
+inline void v##name                                                          \
+(std::size_t n, const double *a, const double *b, double *y)                 \
+{                                                                            \
+    const int in = static_cast<int>(n);                                      \
+    n < VSMC_VMATH_VFORCE_THRESHOLD ?                                        \
+        v##name<double>(n, a, b, y):                                         \
+        ::vv##func(y, a, b, &in);                                            \
+}
+
+namespace vsmc {
+
+namespace math {
+
+VSMC_DEFINE_VMATH_VFORCE_1(rec,   Inv)
+VSMC_DEFINE_VMATH_VFORCE_2(div,   Div)
+VSMC_DEFINE_VMATH_VFORCE_1(sqrt,  Sqrt)
+VSMC_DEFINE_VMATH_VFORCE_1(rsqrt, InvSqrt)
+VSMC_DEFINE_VMATH_VFORCE_2(pow,   Pow)
+
+VSMC_DEFINE_VMATH_VFORCE_1(exp,   Exp)
+VSMC_DEFINE_VMATH_VFORCE_1(log,   Ln)
+VSMC_DEFINE_VMATH_VFORCE_1(log10, Log10)
+VSMC_DEFINE_VMATH_VFORCE_1(log1p, Log1p)
+
+VSMC_DEFINE_VMATH_VFORCE_1(cos, Cos)
+VSMC_DEFINE_VMATH_VFORCE_1(sin, Sin)
+inline void vSinCos (std::size_t n, const float *a, float *y, float *z)
+{
+    int in = static_cast<int>(n);
+    n < VSMC_VMATH_VFORCE_THRESHOLD ?
+        vSinCos<float>(n, a, y, z):
+        ::vvsincosf(z, y, a, &in);
+}
+inline void vSinCos (std::size_t n, const double *a, double *y, double *z)
+{
+    int in = static_cast<int>(n);
+    n < VSMC_VMATH_VFORCE_THRESHOLD ?
+        vSinCos<double>(n, a, y, z):
+        ::vvsincos(z, y, a, &in);
+}
+VSMC_DEFINE_VMATH_VFORCE_1(tan,   Tan)
+VSMC_DEFINE_VMATH_VFORCE_1(acos,  Acos)
+VSMC_DEFINE_VMATH_VFORCE_1(asin,  Asin)
+VSMC_DEFINE_VMATH_VFORCE_1(atan,  Atan)
+VSMC_DEFINE_VMATH_VFORCE_2(atan2, Atan2)
+
+VSMC_DEFINE_VMATH_VFORCE_1(cosh,  Cosh)
+VSMC_DEFINE_VMATH_VFORCE_1(sinh,  Sinh)
+VSMC_DEFINE_VMATH_VFORCE_1(tanh,  Tanh)
+VSMC_DEFINE_VMATH_VFORCE_1(acosh,  Acosh)
+VSMC_DEFINE_VMATH_VFORCE_1(asinh,  Asinh)
+VSMC_DEFINE_VMATH_VFORCE_1(atanh,  Atanh)
+
+} // namespace vsmc::math
+
+} // namespace vsmc
+
 #endif // VSMC_USE_MKL_VML
 
 #endif // VSMC_MATH_VMATH_HPP

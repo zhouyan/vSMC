@@ -15,6 +15,8 @@
 
 #if VSMC_USE_MKL_CBLAS
 #include <mkl_cblas.h>
+#elif VSMC_USE_VECLIB_CBLAS
+#include <vecLib/cblas.h>
 #endif
 
 namespace vsmc {
@@ -53,6 +55,10 @@ class ISIntegrate
         ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
                 static_cast<MKL_INT>(dim), static_cast<MKL_INT>(N),
                 1, hX, static_cast<MKL_INT>(dim), W, 1, 0, Eh, 1);
+#elif VSMC_USE_VECLIB_CBLAS
+        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
+                static_cast<int>(dim), static_cast<int>(N),
+                1, hX, static_cast<int>(dim), W, 1, 0, Eh, 1);
 #else
         for (size_type d = 0; d != dim; ++d)
             Eh[d] = 0;
