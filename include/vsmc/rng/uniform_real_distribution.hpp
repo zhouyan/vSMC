@@ -298,12 +298,11 @@ class UniformRealDistribution
     result_type a_;
     result_type b_;
 
-#if !VSMC_HAS_CXX11LIB_RANDOM_CONSTEXPR_MINMAX
     static VSMC_CONSTEXPR const uint64_t uint32_t_max_ = static_cast<uint64_t>(
             static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
+
     static VSMC_CONSTEXPR const uint64_t uint64_t_max_ = static_cast<uint64_t>(
             ~(static_cast<uint64_t>(0)));
-#endif
 
     static float u01(uint32_t i, Open, Open, u32, f24)
     {return ::u01_open_open_32_24(i);}
