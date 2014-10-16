@@ -47,10 +47,8 @@ class StatePPL : public BaseState
     private :
 
     template <typename IntType>
-    class copy_work_
+    struct copy_work_
     {
-        public :
-
         copy_work_ (StatePPL<BaseState> *state, const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
 
@@ -91,10 +89,8 @@ class InitializePPL : public InitializeBase<T, Derived>
 
     private :
 
-    class work_
+    struct work_
     {
-        public :
-
         typedef typename Particle<T>::size_type size_type;
 
         work_ (InitializePPL<T, Derived> *init,
@@ -145,10 +141,8 @@ class MovePPL : public MoveBase<T, Derived>
 
     private :
 
-    class work_
+    struct work_
     {
-        public :
-
         typedef typename Particle<T>::size_type size_type;
 
         work_ (MovePPL<T, Derived> *move, std::size_t iter,
@@ -198,10 +192,8 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 
     private :
 
-    class work_
+    struct work_
     {
-        public :
-
         typedef typename Particle<T>::size_type size_type;
 
         work_ (MonitorEvalPPL<T, Derived> *monitor,
@@ -252,10 +244,8 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
 
     private :
 
-    class work_
+    struct work_
     {
-        public :
-
         typedef typename Particle<T>::size_type size_type;
 
         work_ (PathEvalPPL<T, Derived> *path, std::size_t iter,

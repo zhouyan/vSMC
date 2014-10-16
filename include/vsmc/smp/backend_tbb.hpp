@@ -69,10 +69,8 @@ class StateTBB : public BaseState
     protected :
 
     template <typename IntType>
-    class parallel_copy_work
+    struct parallel_copy_work
     {
-        public :
-
         parallel_copy_work (StateTBB<BaseState> *state,
                 const IntType *copy_from) :
             state_(state), copy_from_(copy_from) {}
@@ -175,10 +173,8 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
     VSMC_DEFINE_SMP_IMPL_COPY(TBB, Initialize)
 
-    class parallel_work
+    struct parallel_work
     {
-        public :
-
         typedef typename Particle<T>::size_type size_type;
 
         parallel_work (InitializeTBB<T, Derived> *init,
@@ -284,10 +280,8 @@ class MoveTBB : public MoveBase<T, Derived>
 
     VSMC_DEFINE_SMP_IMPL_COPY(TBB, Move)
 
-    class parallel_work
+    struct parallel_work
     {
-        public :
-
         typedef typename Particle<T>::size_type size_type;
 
         parallel_work (MoveTBB<T, Derived> *move, std::size_t iter,
@@ -397,10 +391,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
     VSMC_DEFINE_SMP_IMPL_COPY(TBB, MonitorEval)
 
-    class parallel_work
+    struct parallel_work
     {
-        public :
-
         typedef typename Particle<T>::size_type size_type;
 
         parallel_work (MonitorEvalTBB<T, Derived> *monitor,
@@ -515,10 +507,8 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
     VSMC_DEFINE_SMP_IMPL_COPY(TBB, PathEval)
 
-    class parallel_work
+    struct parallel_work
     {
-        public :
-
         typedef typename Particle<T>::size_type size_type;
 
         parallel_work (PathEvalTBB<T, Derived> *path, std::size_t iter,

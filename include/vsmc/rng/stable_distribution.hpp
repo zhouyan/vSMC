@@ -44,10 +44,8 @@ class StableDistribution
 
     typedef FPType result_type;
 
-    class param_type
+    struct param_type
     {
-        public :
-
         typedef FPType result_type;
 
         typedef StableDistribution<FPType> distribution_type;

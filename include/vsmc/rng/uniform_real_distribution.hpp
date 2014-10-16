@@ -155,10 +155,8 @@ class UniformRealDistribution
 
     typedef FPType result_type;
 
-    class param_type
+    struct param_type
     {
-        public :
-
         typedef FPType result_type;
 
         typedef UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
