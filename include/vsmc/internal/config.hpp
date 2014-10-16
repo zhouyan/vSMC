@@ -91,6 +91,7 @@
 #else
 #define VSMC_USE_VECLIB 0
 #endif
+#endif
 
 #ifndef VSMC_USE_VECLIB_CBLAS
 #define VSMC_USE_VECLIB_CBLAS VSMC_USE_VECLIB
