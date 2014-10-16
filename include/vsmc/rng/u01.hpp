@@ -11,10 +11,11 @@
 #ifndef VSMC_RNG_U01_HPP
 #define VSMC_RNG_U01_HPP
 
+#include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01.h>
 
 #define VSMC_DEFINE_U01(FPType, Left, Right, left, right, UBits, FBits) \
-template <> struct U01<uint##UBits##_t, FPType, Left, Right>                 \
+template <> struct U01<Left, Right, uint##UBits##_t, FPType>                 \
 {                                                                            \
     FPType operator() (uint##UBits##_t u) const                              \
     {return ::u01_##left##_##right##_##UBits##_##FBits(u);}                  \
@@ -33,8 +34,7 @@ struct Open {};
 /// \ingroup U01
 struct Closed {};
 
-template <typename UIntType, typename FPType, typename Left, typename Right>
-struct U01;
+template <typename, typename, typename, typename> struct U01;
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup U01
