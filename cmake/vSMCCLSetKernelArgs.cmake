@@ -1,5 +1,5 @@
 # ============================================================================
-#  cmake/VSMC_OPENCL_INTERNAL_CL_SET_KERNEL_ARGS.cmake
+#  cmake/vSMCCLSetKernelArgs.cmake
 # ----------------------------------------------------------------------------
 #
 #                          vSMC: Scalable Monte Carlo
