@@ -137,9 +137,8 @@ class SeedGenerator
         if (!os.good())
             return os;
 
-        os << sg.seed_     << ' ';
-        os << sg.seed_max_ << ' ';
-        os << sg.divisor_  << ' ';
+        os << sg.seed_ << ' ';
+        os << sg.divisor_ << ' ';
         os << sg.remainder_;
 
         return os;
@@ -153,20 +152,16 @@ class SeedGenerator
         if (!is.good())
             return is;
 
-        result_type seed_tmp;
-        result_type seed_max_tmp;
-        skip_type divisor_tmp;
-        skip_type remainder_tmp;
-        is >> std::ws >> seed_tmp;
-        is >> std::ws >> seed_max_tmp;
-        is >> std::ws >> divisor_tmp;
-        is >> std::ws >> remainder_tmp;
+        result_type s;
+        skip_type div;
+        skip_type rem;
+        is >> std::ws >> s;
+        is >> std::ws >> div;
+        is >> std::ws >> rem;
 
         if (is.good()) {
-            sg.seed_      = seed_tmp;
-            sg.seed_max_  = seed_max_tmp;
-            sg.divisor_   = divisor_tmp;
-            sg.remainder_ = remainder_tmp;
+            sg.modulo(div, rem);
+            sg.set(s);
         }
 
         return is;
@@ -263,10 +258,9 @@ class SeedGenerator<ID, Array<T, K> >
         if (!os.good())
             return os;
 
-        os << sg.seed_     << ' ';
-        os << sg.seed_max_ << ' ';
-        os << sg.divisor_  << ' ';
-        os << sg.remainder_;
+        os << sg.seed_ << ' ';
+        os << sg.divisor_ << ' ';
+        os << sg.remainder_ << ' ';
 
         return os;
     }
@@ -279,20 +273,16 @@ class SeedGenerator<ID, Array<T, K> >
         if (!is.good())
             return is;
 
-        result_type seed_tmp;
-        result_type seed_max_tmp;
-        skip_type divisor_tmp;
-        skip_type remainder_tmp;
-        is >> std::ws >> seed_tmp;
-        is >> std::ws >> seed_max_tmp;
-        is >> std::ws >> divisor_tmp;
-        is >> std::ws >> remainder_tmp;
+        result_type s;
+        skip_type div;
+        skip_type rem;
+        is >> std::ws >> s;
+        is >> std::ws >> div;
+        is >> std::ws >> rem;
 
         if (is.good()) {
-            sg.seed_      = seed_tmp;
-            sg.seed_max_  = seed_max_tmp;
-            sg.divisor_   = divisor_tmp;
-            sg.remainder_ = remainder_tmp;
+            sg.modulo(div, rem);
+            sg.set(s);
         }
 
         return is;
