@@ -388,7 +388,7 @@ class AESNIEngine
         }
         --remain_;
 
-        return reinterpret_cast<const ResultType *>(&buffer_)[remain_];
+        return reinterpret_cast<const result_type *>(&buffer_)[remain_];
     }
 
     /// \brief Generate a buffer of random bits given a counter using the
