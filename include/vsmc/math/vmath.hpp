@@ -14,8 +14,8 @@
 #include <vsmc/cxx11/cmath.hpp>
 #include <vsmc/math/constants.hpp>
 
-/// \brief When MKL (VML) or vecLib (vForce) is available, the threshold above
-/// which these libraries will be used.
+/// \brief When MKL (VML) or vecLib (vForce) is available, the threshold of the
+/// number of elements above which these libraries will be used.
 /// \ingroup Config
 #ifndef VSMC_VMATH_THRESHOLD
 #define VSMC_VMATH_THRESHOLD 1000
@@ -116,7 +116,7 @@ VSMC_DEFINE_VMATH_1(internal, vmath_sqr, Sqr)
 VSMC_DEFINE_VMATH_B(*, Mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
-VSMC_DEFINE_VMATH_1(std, abs, Abs)
+VSMC_DEFINE_VMATH_1(std, fabs, Abs)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = (\beta_a a_i + \mu_a) / (\beta_b b_i + \mu_b)\f$

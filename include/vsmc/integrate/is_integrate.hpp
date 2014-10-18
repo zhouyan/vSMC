@@ -12,12 +12,7 @@
 #define VSMC_INTEGRATE_ISINTEGRATE_HPP
 
 #include <vsmc/internal/common.hpp>
-
-#if VSMC_USE_MKL_CBLAS
-#include <mkl_cblas.h>
-#elif VSMC_USE_VECLIB_CBLAS
-#include <vecLib/cblas.h>
-#endif
+#include <vsmc/math/cblas.hpp>
 
 namespace vsmc {
 
@@ -44,21 +39,15 @@ class ISIntegrate
             return;
 
         if (dim == 1) {
-            double sum = 0;
-            for (size_type i = 0; i != N; ++i)
-                sum += hX[i] * W[i];
-            *Eh = sum;
+            *Eh = math::dot(N, hX, W);
             return;
         }
 
-#if VSMC_USE_MKL_CBLAS
+#ifdef VSMC_CBLAS_INT
         ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
-                static_cast<MKL_INT>(dim), static_cast<MKL_INT>(N),
-                1, hX, static_cast<MKL_INT>(dim), W, 1, 0, Eh, 1);
-#elif VSMC_USE_VECLIB_CBLAS
-        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
-                static_cast<int>(dim), static_cast<int>(N),
-                1, hX, static_cast<int>(dim), W, 1, 0, Eh, 1);
+                static_cast<VSMC_CBLAS_INT>(dim),
+                static_cast<VSMC_CBLAS_INT>(N), 1, hX,
+                static_cast<VSMC_CBLAS_INT>(dim), W, 1, 0, Eh, 1);
 #else
         for (size_type d = 0; d != dim; ++d)
             Eh[d] = 0;

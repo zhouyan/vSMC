@@ -14,6 +14,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/integrate/nintegrate_newton_cotes.hpp>
+#include <vsmc/math/cblas.hpp>
 #include <cmath>
 #include <vector>
 
@@ -169,11 +170,7 @@ class Path
 
         index_.push_back(iter);
         grid_.push_back(eval_(iter, particle, bptr));
-
-        double res = 0;
-        for (std::size_t i = 0; i != N; ++i)
-            res += wptr[i] * bptr[i];
-        integrand_.push_back(res);
+        integrand_.push_back(math::dot(N, wptr, bptr));
 
         if (iter_size() > 1) {
             std::size_t i = iter_size() - 1;
