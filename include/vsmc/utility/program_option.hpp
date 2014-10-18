@@ -699,7 +699,7 @@ class ProgramOptionMap
         for (std::size_t i = 0; i != vec[0].size(); ++i) {
             os << vec[0][i] << std::string(len[0] - vec[0][i].size(), ' ');
             os << vec[1][i] << std::string(len[1] - vec[1][i].size(), ' ');
-            os << "(default:" << vec[2][i] << ')' << std::endl;
+            os << '(' << vec[2][i] << ')' << std::endl;
         }
     }
 
