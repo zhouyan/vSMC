@@ -264,7 +264,7 @@ class CPUID
     struct cache_param_type
     {
         cache_param_type (const reg_type &reg) :
-            level_(0), max_proc_id_sharing_(0), max_proc_id_physical_(0),
+            level_(0), max_proc_sharing_(0), max_proc_physical_(0),
             line_size_(0), partitions_(0), ways_(0), sets_(0),
             self_initializing_(false), fully_associative_(false),
             wbinvd_(false), inclusiveness_(false), complex_indexing_(false)
@@ -288,8 +288,8 @@ class CPUID
             level_ = extract_bits<7, 5>(reg.at<0>());
             self_initializing_ = test_bit<8>(reg.at<0>());
             fully_associative_ = test_bit<9>(reg.at<0>());
-            max_proc_id_sharing_ = extract_bits<25, 14>(reg.at<0>()) + 1;
-            max_proc_id_physical_ = extract_bits<31, 26>(reg.at<0>()) + 1;
+            max_proc_sharing_ = extract_bits<25, 14>(reg.at<0>()) + 1;
+            max_proc_physical_ = extract_bits<31, 26>(reg.at<0>()) + 1;
 
             line_size_ = extract_bits<11, 0>(reg.at<1>()) + 1;
             partitions_ = extract_bits<21, 12>(reg.at<1>()) + 1;
@@ -308,13 +308,13 @@ class CPUID
         /// \brief The level of this cache
         unsigned level () const {return level_;}
 
-        /// \brief Maximum number of addressable IDs for logical processors
-        /// sharing this cache
-        unsigned max_proc_id_sharing () const {return max_proc_id_sharing_;}
+        /// \brief Maximum number of addressable logical processors sharing
+        /// this cache
+        unsigned max_proc_sharing () const {return max_proc_sharing_;}
 
-        /// \brief Maximum number of addressable IDs for processor cores in the
+        /// \brief Maximum number of addressable processor cores in the
         /// physical
-        unsigned max_proc_id_physical () const {return max_proc_id_physical_;}
+        unsigned max_proc_physical () const {return max_proc_physical_;}
 
         /// \brief Coherency line size in byte
         unsigned line_size () const {return line_size_;}
@@ -351,8 +351,8 @@ class CPUID
 
         CPUIDCacheType type_;
         unsigned level_;
-        unsigned max_proc_id_sharing_;
-        unsigned max_proc_id_physical_;
+        unsigned max_proc_sharing_;
+        unsigned max_proc_physical_;
         unsigned line_size_;
         unsigned partitions_;
         unsigned ways_;
@@ -451,37 +451,22 @@ class CPUID
     template <unsigned EAX, unsigned ECX>
     static const reg_type &cpuid ()
     {
-        static reg_type reg;
-        static bool initialized = false;
-
-        if (initialized)
-            return reg;
-
-        if (EAX < 0x80000000U) {
-            reg = cpuid(0x00, 0x00);
-            if (EAX > reg.at<0>())
-                reg.fill(0);
-            else
-                reg = cpuid(EAX, ECX);
-        } else {
-            reg = cpuid(0x80000000U, 0x00);
-            if (EAX > reg.at<0>())
-                reg.fill(0);
-            else
-                reg = cpuid(EAX, ECX);
-        }
-        initialized = true;
+        static reg_type reg(cpuid<EAX, ECX>(
+                    cxx11::integral_constant<bool,
+                    EAX == 0x00 || EAX == 0x80000000U>(),
+                    cxx11::integral_constant<bool,
+                    EAX < 0x8000000U>()));
 
         return reg;
     }
 
     /// \brief Max calling parameter EAX
     static unsigned max_eax ()
-    {return cpuid<0, 0>().at<0>();}
+    {return cpuid<0x00, 0x00>().at<0>();}
 
     /// \brief Max extended calling parameter EAX
     static unsigned max_eax_ext ()
-    {return cpuid<0x80000000U, 0>().at<0>();}
+    {return cpuid<0x80000000U, 0x00>().at<0>();}
 
     /// \brief Vendor ID (EAX = 0x00; EBX, EDX, ECX)
     static std::string vendor ()
@@ -578,6 +563,29 @@ class CPUID
 
     private :
 
+    template <unsigned, unsigned>
+    static reg_type cpuid (cxx11::true_type, cxx11::true_type)
+    {return cpuid(0x00, 0x00);}
+
+    template <unsigned, unsigned>
+    static reg_type cpuid (cxx11::true_type, cxx11::false_type)
+    {return cpuid(0x80000000U, 0x00);}
+
+    template <unsigned EAX, unsigned ECX, bool Basic>
+    static reg_type cpuid (cxx11::false_type,
+            cxx11::integral_constant<bool, Basic>)
+    {
+        reg_type reg(cpuid(cxx11::true_type(),
+                    cxx11::integral_constant<bool, Basic>()));
+
+        if (EAX > reg.at<0>())
+            reg.fill(0);
+        else
+            reg = cpuid(EAX, ECX);
+
+        return reg;
+    }
+
     template <typename CharT, typename Traits>
     static void print_equal (std::basic_ostream<CharT, Traits> &os)
     {os << std::string(95, '=') << '\n';}
@@ -639,12 +647,12 @@ class CPUID
 
         os << "Max Proc ID sharing        ";
         for (std::size_t i = 0; i != caches.size(); ++i)
-            os << std::setw(fix) << caches[i].max_proc_id_sharing();
+            os << std::setw(fix) << caches[i].max_proc_sharing();
         os << '\n';
 
         os << "Max Proc ID phiysical      ";
         for (std::size_t i = 0; i != caches.size(); ++i)
-            os << std::setw(fix) << caches[i].max_proc_id_physical();
+            os << std::setw(fix) << caches[i].max_proc_physical();
         os << '\n';
 
         os << "Coherency line size (byte) ";
