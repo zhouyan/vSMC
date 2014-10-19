@@ -640,7 +640,7 @@ class Sampler
     ///
     /// \param sampler_id The ID of the sampler
     /// \param os The ostream to which the contents are printed
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     void print (std::size_t sampler_id,
             std::basic_ostream<CharT, Traits> &os) const
     {
@@ -674,7 +674,7 @@ class Sampler
     void print (std::size_t sampler_id = 0) const
     {print(sampler_id, std::cout);}
 
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
     {

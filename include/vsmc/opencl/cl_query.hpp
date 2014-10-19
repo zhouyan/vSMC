@@ -26,7 +26,7 @@ class CLQuery
     public :
 
     /// \brief Query information of all platforms and devices
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os)
     {
         std::vector< ::cl::Platform> platform;
@@ -38,7 +38,7 @@ class CLQuery
     }
 
     /// \brief Query information of a given platform and all of its devices
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os,
             const ::cl::Platform &plat)
     {
@@ -63,7 +63,7 @@ class CLQuery
     }
 
     /// \brief Query information of a given device
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os,
             const ::cl::Device &dev)
     {
@@ -247,15 +247,15 @@ class CLQuery
 
     private :
 
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     static void print_equal (std::basic_ostream<CharT, Traits> &os)
     {os << std::string(80, '=') << '\n';}
 
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     static void print_dash (std::basic_ostream<CharT, Traits> &os)
     {os << std::string(80, '-') << '\n';}
 
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     static void print_dev_type (
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
@@ -290,7 +290,7 @@ class CLQuery
         }
     }
 
-    template<typename T, typename CLInfoType,
+    template <typename T, typename CLInfoType,
         typename ObjType, typename InfoType, typename CharT, typename Traits>
     static void print_info_val (std::basic_ostream<CharT, Traits> &os,
             const ObjType &obj, InfoType info,
@@ -384,7 +384,7 @@ class CLQuery
         os << val_vec.back();
     }
 
-    template<typename T, typename CharT, typename Traits>
+    template <typename T, typename CharT, typename Traits>
     static void print_val (std::basic_ostream<CharT, Traits> &os,
             const std::vector<T> &val)
     {
@@ -396,7 +396,7 @@ class CLQuery
 
 /// \brief Query information of all platforms and devices
 /// \ingroup OpenCL
-template<typename CharT, typename Traits>
+template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const CLQuery &)
 {CLQuery::info(os); return os;}

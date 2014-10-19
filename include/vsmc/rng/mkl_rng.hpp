@@ -213,7 +213,7 @@ template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64>
 
 /// \brief Default seed for MKL RNG
 /// \ingroup Traits
-template<MKL_INT> struct MKLSeedTrait :
+template <MKL_INT> struct MKLSeedTrait :
     public cxx11::integral_constant<MKL_UINT, 101> {};
 
 /// \brief Default seed for MKL Sobol quasi-RNG

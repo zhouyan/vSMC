@@ -190,7 +190,7 @@ class CLManager
     }
 
     /// \brief Create an OpenCL buffer of a given type and number of elements
-    template<typename CLType>
+    template <typename CLType>
     ::cl::Buffer create_buffer (std::size_t num) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
@@ -202,7 +202,7 @@ class CLManager
     }
 
     /// \brief Create an OpenCL buffer of a given type from a range of elements
-    template<typename CLType, typename InputIter>
+    template <typename CLType, typename InputIter>
     ::cl::Buffer create_buffer (InputIter first, InputIter last,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR) const
