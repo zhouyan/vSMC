@@ -44,7 +44,7 @@ template <> struct CPUIDFeatureInfo<CPUIDFeatureExt##feat>                   \
 
 namespace vsmc {
 
-/// \brief Basic CPU features
+/// \brief Basic CPU feature
 /// \ingroup CPUID
 ///
 /// \details
@@ -247,7 +247,7 @@ VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512VBMI,   0x07, 3,  1)
 
 } // namespace vsmc::internal
 
-/// \brief Query CPUID informations
+/// \brief Query CPUID information
 /// \ingroup CPUID
 ///
 /// \note Most member functions are not thread-safe. However, normal program
@@ -260,7 +260,7 @@ class CPUID
     /// \brief The array type that holds EAX, EBX, ECX, and EDX, in that order
     typedef Array<unsigned, 4> reg_type;
 
-    /// \brief Structure of cache information
+    /// \brief Structure of deterministic cache parameter
     struct cache_param_type
     {
         cache_param_type (const reg_type &reg) :
@@ -365,7 +365,7 @@ class CPUID
         bool complex_indexing_;
     }; // struct cache_param_type
 
-    /// \brief Get CPU features using CPUID
+    /// \brief Get CPU feature using CPUID
     template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os)
     {
@@ -380,12 +380,12 @@ class CPUID
         }
         if (max_eax() >= 0x04) {
             print_equal(os);
-            os << "Cache information\n";
+            os << "Deterministic cache parameters\n";
             print_dash(os);
             print_cache(os);
         }
         print_equal(os);
-        print_features(os);
+        print_feature(os);
         print_equal(os);
     }
 
@@ -687,13 +687,13 @@ class CPUID
     }
 
     template <typename CharT, typename Traits>
-    static void print_features (std::basic_ostream<CharT, Traits> &os)
+    static void print_feature (std::basic_ostream<CharT, Traits> &os)
     {
         std::vector<std::string> feats;
         feature_str(feats);
         os << "Basic features\n";
         print_dash(os);
-        print_features(os, feats);
+        print_feature(os, feats);
         if (max_eax() >= 0x07) {
             std::vector<std::string> feats_ext;
             feature_str_ext(feats_ext);
@@ -701,14 +701,14 @@ class CPUID
                 print_equal(os);
                 os << "Extended features\n";
                 print_dash(os);
-                print_features(os, feats_ext);
+                print_feature(os, feats_ext);
             }
         }
         os << std::flush;
     }
 
     template <typename CharT, typename Traits>
-    static void print_features (std::basic_ostream<CharT, Traits> &os,
+    static void print_feature (std::basic_ostream<CharT, Traits> &os,
             std::vector<std::string> &feats)
     {
         std::sort(feats.begin(), feats.end());
@@ -838,7 +838,7 @@ class CPUID
     }
 }; // class CPUID
 
-/// \brief Query CPU features using CPUID
+/// \brief Query CPU information using CPUID
 /// \ingroup CPUID
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (

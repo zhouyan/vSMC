@@ -19,13 +19,13 @@
 
 namespace vsmc {
 
-/// \brief Query information of OpenCL devices
+/// \brief Query OpenCL information
 /// \ingroup OpenCL
 class CLQuery
 {
     public :
 
-    /// \brief Query information of all platforms and devices
+    /// \brief Query all information
     template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os)
     {
@@ -37,7 +37,7 @@ class CLQuery
         print_equal(os);
     }
 
-    /// \brief Query information of a given platform and all of its devices
+    /// \brief Query platform information
     template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os,
             const ::cl::Platform &plat)
@@ -62,7 +62,7 @@ class CLQuery
             info(os, *d);
     }
 
-    /// \brief Query information of a given device
+    /// \brief Query device information
     template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os,
             const ::cl::Device &dev)
@@ -187,7 +187,7 @@ class CLQuery
 #endif // VSMC_OPENCL_VERSION >= 110
     }
 
-    /// \brief Query information of all devices in a context
+    /// \brief Query context information
     template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os,
             const ::cl::Context &ctx)
@@ -199,7 +199,7 @@ class CLQuery
             info(os, *d);
     }
 
-    /// \brief Query informaiton of a program
+    /// \brief Query program informaiton
     template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os,
             const ::cl::Program &prog)
@@ -210,7 +210,7 @@ class CLQuery
                 CL_PROGRAM_BINARY_SIZES, "CL_PROGRAM_BINARY_SIZES", "byte");
     }
 
-    /// \brief Query information of a kernel
+    /// \brief Query kernel information
     template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os,
             const ::cl::Kernel &kern)
@@ -394,7 +394,7 @@ class CLQuery
     }
 }; //class CLQuery
 
-/// \brief Query information of all platforms and devices
+/// \brief Query OpenCL information using CLQuery
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
@@ -405,35 +405,35 @@ inline std::basic_ostream<CharT, Traits> &operator<< (
 
 namespace cl {
 
-/// \brief Query information of all devices in a given platform
+/// \brief Query device information in a given platform
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Platform &plat)
 {vsmc::CLQuery::info(os, plat); return os;}
 
-/// \brief Query information of all devices in a given context
+/// \brief Query device information in a given context
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Context &ctx)
 {vsmc::CLQuery::info(os, ctx); return os;}
 
-/// \brief Query information a given device
+/// \brief Query device information
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Device &dev)
 {vsmc::CLQuery::info(os, dev); return os;}
 
-/// \brief Query information a given program
+/// \brief Query program information
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Program &prog)
 {vsmc::CLQuery::info(os, prog); return os;}
 
-/// \brief Query information a given kernel
+/// \brief Query kernel information
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
