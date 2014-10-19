@@ -266,21 +266,23 @@ class CPUID
     static void info (std::basic_ostream<CharT, Traits> &os)
     {
         print_equal(os);
-        os << "Vendor ID:                       " << vendor_id()   << '\n';
+        os << "Vendor ID:                       " << vendor()      << '\n';
         os << "Cache line size (bytes):         " << cl_size ()    << '\n';
         os << "Maximum processor ID:            " << max_proc_id() << '\n';
+        if (max_eax_ext() >= 0x80000004U)
+            os << "Processor brand:                 " << brand() << '\n';
         if (max_eax() >= 0x16) {
-            os << "Base frequency (MHz):            " << base_freq()   << '\n';
-            os << "Maximum frequency (MHz):         " << max_freq()    << '\n';
-            os << "Bus (reference) frequency (MHz): " << bus_freq()    << '\n';
+            os << "Base frequency (MHz):            " << base_freq() << '\n';
+            os << "Maximum frequency (MHz):         " << max_freq()  << '\n';
+            os << "Bus (reference) frequency (MHz): " << bus_freq()  << '\n';
         }
         print_equal(os);
         features(os);
         print_equal(os);
     }
 
-    /// \brief Vendor ID, (EAX = 0x00; EBX, EDX, ECX)
-    static std::string vendor_id ()
+    /// \brief Vendor ID (EAX = 0x00; EBX, EDX, ECX)
+    static std::string vendor ()
     {
         reg_type reg(cpuid<0x00, 0x00>());
         const unsigned *uptr = reg.data();
@@ -288,6 +290,22 @@ class CPUID
         std::memcpy(str + sizeof(unsigned) * 0, uptr + 1, sizeof(unsigned));
         std::memcpy(str + sizeof(unsigned) * 1, uptr + 3, sizeof(unsigned));
         std::memcpy(str + sizeof(unsigned) * 2, uptr + 2, sizeof(unsigned));
+
+        return std::string(str);
+    }
+
+    /// \brief Processor brand string (EAX = 0x80000002,0x80000003,0x80000004; EAX,
+    /// EBX, ECX)
+    static std::string brand ()
+    {
+        reg_type reg2(cpuid<0x80000002U, 0x00>());
+        reg_type reg3(cpuid<0x80000003U, 0x00>());
+        reg_type reg4(cpuid<0x80000004U, 0x00>());
+        const std::size_t reg_size = sizeof(unsigned) * 4;
+        char str[reg_size * 3] = {'\0'};
+        std::memcpy(str + reg_size * 0, reg2.data(), reg_size);
+        std::memcpy(str + reg_size * 1, reg3.data(), reg_size);
+        std::memcpy(str + reg_size * 2, reg4.data(), reg_size);
 
         return std::string(str);
     }
