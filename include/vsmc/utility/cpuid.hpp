@@ -140,7 +140,7 @@ enum CPUIDFeature
     CPUIDFeatureExtAVX512VL,     ///< EAX = 0x07; EBX[31]
 
     CPUIDFeatureExtPREFETCHWT1,  ///< EAX = 0x07; ECX[00]
-    CPUIDFeatureExtAVX512VBMI,   ///< EAX = 0x07; ECX[01]
+    CPUIDFeatureExtAVX512VBMI    ///< EAX = 0x07; ECX[01]
 }; // enum CPUIDFeature
 
 enum CPUIDCacheType
