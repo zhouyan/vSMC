@@ -14,6 +14,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/array.hpp>
 #include <algorithm>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,15 @@
 
 #define VSMC_DEFINE_CPUID_FEATURE_INFO(feat, eax_val, reg_val, bit) \
 template<> struct CPUIDFeatureInfo< CPUIDFeature##feat >                     \
+{                                                                            \
+    static std::string name () {return std::string(#feat);}                  \
+    static VSMC_CONSTEXPR const unsigned eax = eax_val##U;                   \
+    static VSMC_CONSTEXPR const unsigned mask = 1U << bit;                   \
+    static VSMC_CONSTEXPR const std::size_t reg = reg_val;                   \
+};
+
+#define VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(feat, eax_val, reg_val, bit) \
+template<> struct CPUIDFeatureInfo< CPUIDFeatureExt##feat >                  \
 {                                                                            \
     static std::string name () {return std::string(#feat);}                  \
     static VSMC_CONSTEXPR const unsigned eax = eax_val##U;                   \
@@ -196,33 +206,33 @@ VSMC_DEFINE_CPUID_FEATURE_INFO(TM,           0x01, 3, 29)
 VSMC_DEFINE_CPUID_FEATURE_INFO(IA64,         0x01, 3, 30)
 VSMC_DEFINE_CPUID_FEATURE_INFO(PBE,          0x01, 3, 31)
 
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtFSGSBASE,     0x07, 1,  0)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtBMI1,         0x07, 1,  3)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtHLE,          0x07, 1,  4)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX2,         0x07, 1,  5)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtSMEP,         0x07, 1,  7)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtBMI2,         0x07, 1,  8)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtERMS,         0x07, 1,  9)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtINVPCID,      0x07, 1, 10)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtRTM,          0x07, 1, 11)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtMPX,          0x07, 1, 14)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512F,      0x07, 1, 16)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512DQ,     0x07, 1, 17)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtRDSEED,       0x07, 1, 18)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtADX,          0x07, 1, 19)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtSMAP,         0x07, 1, 20)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512IFMA52, 0x07, 1, 21)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtCLFLUSHOPT,   0x07, 1, 23)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtINTEL_TRACE,  0x07, 1, 25)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512PF,     0x07, 1, 26)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512ER,     0x07, 1, 27)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512CD,     0x07, 1, 28)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtSHA,          0x07, 1, 29)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512BW,     0x07, 1, 30)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512VL,     0x07, 1, 31)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(FSGSBASE,     0x07, 1,  0)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(BMI1,         0x07, 1,  3)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(HLE,          0x07, 1,  4)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX2,         0x07, 1,  5)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(SMEP,         0x07, 1,  7)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(BMI2,         0x07, 1,  8)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(ERMS,         0x07, 1,  9)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(INVPCID,      0x07, 1, 10)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(RTM,          0x07, 1, 11)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(MPX,          0x07, 1, 14)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512F,      0x07, 1, 16)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512DQ,     0x07, 1, 17)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(RDSEED,       0x07, 1, 18)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(ADX,          0x07, 1, 19)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(SMAP,         0x07, 1, 20)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512IFMA52, 0x07, 1, 21)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(CLFLUSHOPT,   0x07, 1, 23)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(INTEL_TRACE,  0x07, 1, 25)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512PF,     0x07, 1, 26)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512ER,     0x07, 1, 27)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512CD,     0x07, 1, 28)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(SHA,          0x07, 1, 29)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512BW,     0x07, 1, 30)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512VL,     0x07, 1, 31)
 
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtPREFETCHWT1,  0x07, 3,  0)
-VSMC_DEFINE_CPUID_FEATURE_INFO(ExtAVX512VBMI,   0x07, 3,  1)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(PREFETCHWT1,  0x07, 3,  0)
+VSMC_DEFINE_CPUID_FEATURE_EXT_INFO(AVX512VBMI,   0x07, 3,  1)
 
 } // namespace vsmc::internal
 
@@ -245,11 +255,11 @@ class CPUID
 
     /// \brief Max calling parameter EAX
     static unsigned max_eax ()
-    {return extract_bits<0, 0>(cpuid<0, 0>().at<0>());}
+    {return cpuid<0, 0>().at<0>();}
 
     /// \brief Max extended calling parameter EAX
     static unsigned max_eax_ext ()
-    {return extract_bits<0, 0>(cpuid<0x80000000U, 0>().at<0>());}
+    {return cpuid<0x80000000U, 0>().at<0>();}
 
     /// \brief Get CPU features using CPUID
     template <typename CharT, typename Traits>
@@ -326,6 +336,7 @@ class CPUID
             std::vector<std::string> feats_ext;
             feature_str_ext(feats_ext);
             os << "Extended features\n";
+            print_dash(os);
             print_features(os, feats_ext, 20);
         }
         os << std::flush;
