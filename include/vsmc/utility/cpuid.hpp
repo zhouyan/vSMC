@@ -506,7 +506,8 @@ class CPUID
     {return cache_param_type(info(0x04, cache_index));}
 
     /// \brief Intel Turbo Boost (EAX = 0x06; EAX[1])
-    static intel_turbo_boost () {return test_bit<1>(info<0x06, 0>().at<0>());}
+    static bool intel_turbo_boost ()
+    {return test_bit<1>(info<0x06, 0>().at<0>());}
 
     /// \brief Base frequency in MHz (EAX = 0x16; EAX[15:0])
     static unsigned base_freq ()
