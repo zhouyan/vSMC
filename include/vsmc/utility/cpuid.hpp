@@ -445,11 +445,11 @@ class CPUID
         return reg;
     }
 
-    /// \brief Max calling parameter EAX
+    /// \brief Max calling parameter EAX (EAX = 0; EAX)
     static unsigned max_eax ()
     {return info<0, 0>().at<0>();}
 
-    /// \brief Max extended calling parameter EAX
+    /// \brief Max extended calling parameter EAX (EAX = 0x80000000; EAX)
     static unsigned max_eax_ext ()
     {return info<ext0_, 0>().at<0>();}
 
@@ -467,7 +467,7 @@ class CPUID
     }
 
     /// \brief Processor brand string (EAX = 0x80000002,0x80000003,0x80000004;
-    /// EAX, EBX, ECX)
+    /// EAX, EBX, ECX, EDX)
     static std::string brand ()
     {
         reg_type reg2(info<ext0_ + 2, 0>());
@@ -498,12 +498,15 @@ class CPUID
         return ecx;
     }
 
-    /// \brief Get the cache parameters
+    /// \brief Get the cache parameters (EAX = 0x04; EAX, EBX, ECX, EDX)
     ///
     /// \note The maximum of the `cache_index` parameter is the length of the
     /// vector returned by `cache_levels` minus 1.
     static cache_param_type cache_param (unsigned cache_index)
     {return cache_param_type(info(0x04, cache_index));}
+
+    /// \brief Intel Turbo Boost (EAX = 0x06; EAX[1])
+    static intel_turbo_boost () {return test_bit<1>(info<0x06, 0>().at<0>());}
 
     /// \brief Base frequency in MHz (EAX = 0x16; EAX[15:0])
     static unsigned base_freq ()
