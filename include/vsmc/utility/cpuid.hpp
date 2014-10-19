@@ -365,26 +365,13 @@ class CPUID
         bool complex_indexing_;
     }; // struct cache_param_type
 
-    /// \brief Extract bits from an unsigned integer
-    ///
-    /// \tparam Hi The highest bit (0-31)
-    /// \tparam Lo The lowest bit (0-31)
-    template <unsigned Hi, unsigned Lo>
-    static unsigned extract_bits (unsigned val)
-    {return (val << (31U - Hi)) >> (31U - Hi + Lo);}
-
-    /// \brief Test if a certain bit is set in an unsigned integer
-    template <unsigned Bit>
-    static unsigned test_bit (unsigned val)
-    {return val & (1U << Bit);}
-
     /// \brief Get CPU features using CPUID
     template <typename CharT, typename Traits>
     static void info (std::basic_ostream<CharT, Traits> &os)
     {
         print_equal(os);
         os << "Vendor ID                  " << vendor() << '\n';
-        if (max_eax_ext() >= 0x80000004U)
+        if (max_eax_ext() >= ext0_ + 4)
             os << "Processor brand            " << brand() << '\n';
         if (max_eax() >= 0x16) {
             os << "Base frequency (MHz)       " << base_freq() << '\n';
@@ -398,12 +385,12 @@ class CPUID
             print_cache(os);
         }
         print_equal(os);
-        features(os);
+        print_features(os);
         print_equal(os);
     }
 
 #ifdef _MSC_VER
-    static reg_type cpuid (unsigned eax, unsigned ecx)
+    static reg_type info (unsigned eax, unsigned ecx)
     {
         int CPUInfo[4] = {0};
         int InfoType[2] = {0};
@@ -421,7 +408,7 @@ class CPUID
     ///
     /// \note This member function is thread-safe. The CPUID instruction will
     /// be called each time this function is called.
-    static reg_type cpuid (unsigned eax, unsigned ecx)
+    static reg_type info (unsigned eax, unsigned ecx)
     {
         unsigned ebx = 0;
         unsigned edx = 0;
@@ -449,29 +436,27 @@ class CPUID
     /// Therefore, for subsequent calls of this function with the same value of
     /// EAX and ECX, the CPUID instruction will not be called.
     template <unsigned EAX, unsigned ECX>
-    static const reg_type &cpuid ()
+    static const reg_type &info ()
     {
-        static reg_type reg(cpuid<EAX, ECX>(
-                    cxx11::integral_constant<bool,
-                    EAX == 0x00 || EAX == 0x80000000U>(),
-                    cxx11::integral_constant<bool,
-                    EAX < 0x8000000U>()));
+        static reg_type reg(info_dispatch<EAX, ECX>(
+                    cxx11::integral_constant<bool, EAX == 0 || EAX == ext0_>(),
+                    cxx11::integral_constant<bool, EAX < ext0_>()));
 
         return reg;
     }
 
     /// \brief Max calling parameter EAX
     static unsigned max_eax ()
-    {return cpuid<0x00, 0x00>().at<0>();}
+    {return info<0, 0>().at<0>();}
 
     /// \brief Max extended calling parameter EAX
     static unsigned max_eax_ext ()
-    {return cpuid<0x80000000U, 0x00>().at<0>();}
+    {return info<ext0_, 0>().at<0>();}
 
-    /// \brief Vendor ID (EAX = 0x00; EBX, EDX, ECX)
+    /// \brief Vendor ID (EAX = 0; EBX, EDX, ECX)
     static std::string vendor ()
     {
-        reg_type reg(cpuid<0x00, 0x00>());
+        reg_type reg(info<0, 0>());
         const unsigned *uptr = reg.data();
         char str[sizeof(unsigned) * 3 + 1] = {'\0'};
         std::memcpy(str + sizeof(unsigned) * 0, uptr + 1, sizeof(unsigned));
@@ -481,13 +466,13 @@ class CPUID
         return std::string(str);
     }
 
-    /// \brief Processor brand string (EAX = 0x80000002,0x80000003,0x80000004; EAX,
-    /// EBX, ECX)
+    /// \brief Processor brand string (EAX = 0x80000002,0x80000003,0x80000004;
+    /// EAX, EBX, ECX)
     static std::string brand ()
     {
-        reg_type reg2(cpuid<0x80000002U, 0x00>());
-        reg_type reg3(cpuid<0x80000003U, 0x00>());
-        reg_type reg4(cpuid<0x80000004U, 0x00>());
+        reg_type reg2(info<ext0_ + 2, 0>());
+        reg_type reg3(info<ext0_ + 3, 0>());
+        reg_type reg4(info<ext0_ + 4, 0>());
         const std::size_t reg_size = sizeof(unsigned) * 4;
         char str[reg_size * 3] = {'\0'};
         std::memcpy(str + reg_size * 0, reg2.data(), reg_size);
@@ -504,7 +489,7 @@ class CPUID
         reg_type reg;
         unsigned ecx = 0;
         while (true) {
-            reg = cpuid(0x04, ecx);
+            reg = info(0x04, ecx);
             if (extract_bits<4, 0>(reg.at<0>()) == 0)
                 break;
             ++ecx;
@@ -518,73 +503,63 @@ class CPUID
     /// \note The maximum of the `cache_index` parameter is the length of the
     /// vector returned by `cache_levels` minus 1.
     static cache_param_type cache_param (unsigned cache_index)
-    {return cache_param_type(cpuid(0x04, cache_index));}
+    {return cache_param_type(info(0x04, cache_index));}
 
     /// \brief Base frequency in MHz (EAX = 0x16; EAX[15:0])
     static unsigned base_freq ()
-    {return extract_bits<15, 0>(cpuid<0x16, 0x00>().at<0>());}
+    {return extract_bits<15, 0>(info<0x16, 0>().at<0>());}
 
     /// \brief Maximum frequency in MHz (EAX = 0x16; EBX[15:0])
     static unsigned max_freq ()
-    {return extract_bits<15, 0>(cpuid<0x16, 0x00>().at<1>());}
+    {return extract_bits<15, 0>(info<0x16, 0>().at<1>());}
 
     /// \brief Bus (reference) frequency in MHz (EAX = 0x16; ECX[15:0])
     static unsigned bus_freq ()
-    {return extract_bits<15, 0>(cpuid<0x16, 0x00>().at<2>());}
+    {return extract_bits<15, 0>(info<0x16, 0>().at<2>());}
 
     /// \brief CPU feature
     template <CPUIDFeature Feat>
     static bool has_feature ()
     {
         return test_bit<internal::CPUIDFeatureInfo<Feat>::bit>(
-                cpuid<internal::CPUIDFeatureInfo<Feat>::eax, 0x00>().template
+                info<internal::CPUIDFeatureInfo<Feat>::eax, 0>().template
                 at<internal::CPUIDFeatureInfo<Feat>::reg>()) != 0;
-    }
-
-    /// \brief Query all basic features
-    template <typename CharT, typename Traits>
-    static void features (std::basic_ostream<CharT, Traits> &os)
-    {
-        std::vector<std::string> feats;
-        feature_str(feats);
-        os << "Basic features\n";
-        print_dash(os);
-        print_features(os, feats);
-        if (max_eax() >= 0x07) {
-            print_equal(os);
-            std::vector<std::string> feats_ext;
-            feature_str_ext(feats_ext);
-            os << "Extended features\n";
-            print_dash(os);
-            print_features(os, feats_ext);
-        }
-        os << std::flush;
     }
 
     private :
 
-    template <unsigned, unsigned>
-    static reg_type cpuid (cxx11::true_type, cxx11::true_type)
-    {return cpuid(0x00, 0x00);}
+    static VSMC_CONSTEXPR const unsigned ext0_ = 0x80000000U;
 
     template <unsigned, unsigned>
-    static reg_type cpuid (cxx11::true_type, cxx11::false_type)
-    {return cpuid(0x80000000U, 0x00);}
+    static reg_type info_dispatch (cxx11::true_type, cxx11::true_type)
+    {return info(0, 0);}
+
+    template <unsigned, unsigned>
+    static reg_type info_dispatch (cxx11::true_type, cxx11::false_type)
+    {return info(ext0_, 0);}
 
     template <unsigned EAX, unsigned ECX, bool Basic>
-    static reg_type cpuid (cxx11::false_type,
+    static reg_type info_dispatch (cxx11::false_type,
             cxx11::integral_constant<bool, Basic>)
     {
-        reg_type reg(cpuid(cxx11::true_type(),
+        reg_type reg(info_dispatch<EAX, ECX>(cxx11::true_type(),
                     cxx11::integral_constant<bool, Basic>()));
 
         if (EAX > reg.at<0>())
             reg.fill(0);
         else
-            reg = cpuid(EAX, ECX);
+            reg = info(EAX, ECX);
 
         return reg;
     }
+
+    template <unsigned Hi, unsigned Lo>
+    static unsigned extract_bits (unsigned val)
+    {return (val << (31U - Hi)) >> (31U - Hi + Lo);}
+
+    template <unsigned Bit>
+    static unsigned test_bit (unsigned val)
+    {return val & (1U << Bit);}
 
     template <typename CharT, typename Traits>
     static void print_equal (std::basic_ostream<CharT, Traits> &os)
@@ -712,6 +687,27 @@ class CPUID
     }
 
     template <typename CharT, typename Traits>
+    static void print_features (std::basic_ostream<CharT, Traits> &os)
+    {
+        std::vector<std::string> feats;
+        feature_str(feats);
+        os << "Basic features\n";
+        print_dash(os);
+        print_features(os, feats);
+        if (max_eax() >= 0x07) {
+            std::vector<std::string> feats_ext;
+            feature_str_ext(feats_ext);
+            if (feats_ext.size() != 0) {
+                print_equal(os);
+                os << "Extended features\n";
+                print_dash(os);
+                print_features(os, feats_ext);
+            }
+        }
+        os << std::flush;
+    }
+
+    template <typename CharT, typename Traits>
     static void print_features (std::basic_ostream<CharT, Traits> &os,
             std::vector<std::string> &feats)
     {
@@ -733,10 +729,6 @@ class CPUID
     static void print_feat (std::basic_ostream<CharT, Traits> &os,
             std::string &str, std::size_t fix)
     {
-        if (str[str.size() - 1] == '*') {
-            str[str.size() - 1] = ' ';
-            str[0] = '*';
-        }
         os << str;
         if (str.size() < fix)
             os << std::string(fix - str.size(), ' ');
@@ -841,8 +833,8 @@ class CPUID
     template <CPUIDFeature Feat>
     static void feature_str (std::vector<std::string> &feats)
     {
-        feats.push_back(" " + internal::CPUIDFeatureInfo<Feat>::str() +
-                (has_feature<Feat>() ? "*" : " "));
+        if (has_feature<Feat>())
+            feats.push_back(internal::CPUIDFeatureInfo<Feat>::str());
     }
 }; // class CPUID
 
