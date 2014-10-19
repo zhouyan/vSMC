@@ -63,8 +63,6 @@ class DummyStopWatch
     double minutes      () const {return 1e-9 / 60;}
     double hours        () const {return 1e-9 / 3600;}
 
-    DummyStopWatch &operator+= (const DummyStopWatch &) {return *this;}
-
     private :
 
     bool running_;
@@ -170,26 +168,6 @@ class StopWatchClockAdapter
             double, std::ratio<3600> > >(elapsed_).count();
     }
 
-    StopWatchClockAdapter<ClockType> &operator+= (
-            const StopWatchClockAdapter<ClockType> &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_ += other.elapsed_;
-
-        return *this;
-    }
-
-    friend StopWatchClockAdapter<ClockType> operator+ (
-            const StopWatchClockAdapter<ClockType> &sw1,
-            const StopWatchClockAdapter<ClockType> &sw2)
-    {
-        StopWatchClockAdapter<ClockType> watch(sw1);
-        watch += sw2;
-
-        return watch;
-    }
-
     private :
 
     typename clock_type::duration elapsed_;
@@ -282,25 +260,6 @@ class StopWatch
     {
         return static_cast<double>(elapsed_sec_) / 3600.0 +
             static_cast<double>(elapsed_nsec_) * 1e-9 / 3600.0;
-    }
-
-    StopWatch &operator+= (const StopWatch &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_sec_  += other.elapsed_sec_;
-        elapsed_nsec_ += other.elapsed_nsec_;
-
-        return *this;
-    }
-
-    friend inline StopWatch operator+ (
-            const StopWatch &sw1, const StopWatch &sw2)
-    {
-        StopWatch watch(sw1);
-        watch += sw2;
-
-        return watch;
     }
 
     private :
@@ -398,25 +357,6 @@ class StopWatch
             static_cast<double>(elapsed_.tv_nsec) * 1e-9 / 3600.0;
     }
 
-    StopWatch &operator+= (const StopWatch &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_.tv_sec  += other.elapsed_.tv_sec;
-        elapsed_.tv_nsec += other.elapsed_.tv_nsec;
-
-        return *this;
-    }
-
-    friend inline StopWatch operator+ (
-            const StopWatch &sw1, const StopWatch &sw2)
-    {
-        StopWatch watch(sw1);
-        watch += sw2;
-
-        return watch;
-    }
-
     private :
 
     ::timespec elapsed_;
@@ -489,24 +429,6 @@ class StopWatch
 
     double hours () const
     {return static_cast<double>(elapsed_) / frequency_ / 3600.0;}
-
-    StopWatch &operator+= (const StopWatch &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_ += other.elapsed_;
-
-        return *this;
-    }
-
-    friend inline StopWatch operator+ (
-            const StopWatch &sw1, const StopWatch &sw2)
-    {
-        StopWatch watch(sw1);
-        watch += sw2;
-
-        return watch;
-    }
 
     private :
 
