@@ -34,6 +34,7 @@ class CLQuery
         for (std::vector< ::cl::Platform>::const_iterator p = platform.begin();
                 p != platform.end(); ++p)
             info(os, *p);
+        print_equal(os);
     }
 
     /// \brief Query information of a given platform and all of its devices
