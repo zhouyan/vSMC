@@ -138,7 +138,11 @@ class Array
     static VSMC_CONSTEXPR size_type max_size ()
     {return static_cast<size_type>(~static_cast<size_type>(0)) / sizeof(T);}
 
-    void fill (const T &value) {fill(value, cxx11::is_integral<T>());}
+    void fill (const T &value)
+    {
+        fill(value, cxx11::integral_constant<bool,
+                cxx11::is_integral<T>::value && N >= 100>());
+    }
 
     void swap (Array<T, N> &other)
     {
