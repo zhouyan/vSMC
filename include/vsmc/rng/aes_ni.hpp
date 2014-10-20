@@ -249,9 +249,7 @@ class AESNIEngine
 
     private :
 
-    typedef Array<uint64_t, 2> ctype;
-    typedef Array<ctype, Blocks> cbtype;
-    typedef Counter<ctype> counter;
+    typedef Counter<ctr_type> counter;
 
     public :
 
@@ -281,9 +279,7 @@ class AESNIEngine
     AESNIEngine (const ctr_type &c, const key_type &k) : key_(k), index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
-        ctr_block_type tmp;
-        Counter<ctr_type>::set(tmp, c);
-        std::memcpy(ctr_block_.data(), tmp.data(), 16 * Blocks);
+        counter::set(ctr_block_, c);
         key_seq_.set(k);
     }
 
@@ -314,21 +310,9 @@ class AESNIEngine
     }
 
     template <std::size_t B>
-    ctr_type ctr () const
-    {
-        ctr_type tmp;
-        std::memcpy(tmp.data(), ctr_block_[Position<B>()].data(), 16);
+    ctr_type ctr () const {return ctr_block_[Position<B>()];}
 
-        return tmp;
-    }
-
-    ctr_block_type ctr_block () const
-    {
-        ctr_block_type tmp;
-        std::memcpy(tmp.data(), ctr_block_.data(), 16 * Blocks);
-
-        return tmp;
-    }
+    ctr_block_type ctr_block () const {return ctr_block_;}
 
     key_type key () const {return key_;}
 
@@ -336,29 +320,13 @@ class AESNIEngine
 
     void ctr (const ctr_type &c)
     {
-        ctr_block_type tmp;
-        Counter<ctr_type>::set(tmp, c);
-        std::memcpy(ctr_block_.data(), tmp.data(), 16 * Blocks);
+        counter::set(ctr_block_, c);
         index_ = K_;
     }
 
-    /// \brief Set the block of counters
-    ///
-    /// \details
-    /// Behavior is undefined if `cb.data()` points some place within the
-    /// destination object. The class itself does not have any member functions
-    /// that return references or pointers to its internal, so unless someone
-    /// does something nasty such as the following,
-    /// ~~~{.cpp}
-    /// typedef /* engine type */ eng_type;
-    /// eng_type eng;
-    /// const eng_type::ctr_block_type *src = reinterpret_cast<const eng_type::ctr_block_type *>(&eng);
-    /// eng.ctr_block(*src);
-    /// ~~~
-    /// which a sane person should not do, this shall not be a problem.
     void ctr_block (const ctr_block_type &cb)
     {
-        std::memcpy(ctr_block_.data(), cb.data(), 16 * Blocks);
+        ctr_block_ = cb;
         index_ = K_;
     }
 
@@ -393,7 +361,7 @@ class AESNIEngine
     buffer_type operator() (const ctr_type &c) const
     {
         ctr_block_type cb;
-        Counter<ctr_type>::set(cb, c);
+        counter::set(cb, c);
         buffer_type buf;
         generate_buffer(cb, buf);
 
@@ -415,7 +383,7 @@ class AESNIEngine
     void operator() (const ctr_type &c, buffer_type &buf) const
     {
         ctr_block_type cb;
-        Counter<ctr_type>::set(cb, c);
+        counter::set(cb, c);
         generate_buffer(cb, buf);
     }
 
@@ -525,13 +493,12 @@ class AESNIEngine
     // alinged
 
     buffer_type buffer_;
-    cbtype ctr_block_;
+    ctr_block_type ctr_block_;
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
     key_type key_;
     std::size_t index_;
 
-    template <typename CBType>
-    void generate_buffer (const CBType &cb, buffer_type &buf) const
+    void generate_buffer (const ctr_block_type &cb, buffer_type &buf) const
     {
         const key_seq_type ks(key_seq_.get(key_));
         pack(cb, buf);
@@ -594,15 +561,16 @@ class AESNIEngine
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    template <typename CBType>
-    void pack (const CBType &cb, buffer_type &buf) const
+    void pack (const ctr_block_type &cb, buffer_type &buf) const
     {pack_ctr<0>(cb, buf, cxx11::true_type());}
 
-    template <std::size_t, typename CBType>
-    void pack_ctr (const CBType &, buffer_type &, cxx11::false_type) const {}
+    template <std::size_t>
+    void pack_ctr (const ctr_block_type &, buffer_type &,
+            cxx11::false_type) const {}
 
-    template <std::size_t B, typename CBType>
-    void pack_ctr (const CBType &cb, buffer_type &buf, cxx11::true_type) const
+    template <std::size_t B>
+    void pack_ctr (const ctr_block_type &cb, buffer_type &buf,
+            cxx11::true_type) const
     {
         m128i_pack<0>(cb[Position<B>()], buf[Position<B>()]);
         pack_ctr<B + 1>(cb, buf,
