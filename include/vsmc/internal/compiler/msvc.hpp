@@ -285,10 +285,6 @@
 
 // Target specific features
 
-#ifndef VSMC_HAS_INTRINSIC_FUNCTION
-#define VSMC_HAS_INTRINSIC_FUNCTION 1
-#endif
-
 #ifndef VSMC_HAS_INTRINSIC_INT64
 #define VSMC_HAS_INTRINSIC_INT64 1
 #endif

@@ -135,9 +135,17 @@
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
+/// \defgroup Array Array
+/// \ingroup Utility
+/// \brief Container with static size but possible dynamic memory allocation
+
 /// \defgroup CPUID CPUID
 /// \ingroup Utility
-/// \brief Query CPUID features
+/// \brief Query CPUID information
+
+/// \defgroup Counter Counter
+/// \ingroup Utility
+/// \brief Using Array of unsinged integers as counters
 
 /// \defgroup HDF5IO HDF5 objects saving
 /// \ingroup Utility
@@ -147,17 +155,13 @@
 /// \ingroup Utility
 /// \brief Process program command line options
 
-/// \defgroup Array Array
-/// \ingroup Utility
-/// \brief Container with static size but possible dynamic memory allocation
-
-/// \defgroup Counter Counter
-/// \ingroup Utility
-/// \brief Using Array of unsinged integers as counters
-
 /// \defgroup Progress Progress
 /// \ingroup Utility
 /// \brief Display progress while algorithms proceed
+
+/// \defgroup RDTSCP RDTSCP
+/// \ingroup Utility
+/// \brief CPU clock cycles count using RDTSCP
 
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility

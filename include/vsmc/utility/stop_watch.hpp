@@ -49,8 +49,8 @@ class StopWatchNull
     public :
 
     bool running () const {return false;}
-    void start () {}
-    void stop  () {}
+    bool start () {return false;}
+    bool stop () {return false;}
     void reset () {}
 
     double nanoseconds  () const {return 1;}
@@ -101,21 +101,48 @@ class StopWatchClockAdapter
 
     StopWatchClockAdapter () : elapsed_(0), running_(false) {reset();}
 
+    /// \brief If the watch is running
+    ///
+    /// \details
+    /// If `start()` has been called and no `stop()` call since, then it is
+    /// running, otherwise it is stoped.
     bool running () const {return running_;}
 
-    void start ()
+    /// \brief Start the watch, no effect if already started
+    ///
+    /// \return `true` if it is started by this call, and the `elapsed` time
+    /// will be incremented next time `stop()` is called. The increment will be
+    /// relative to the time point of this call. `false` if it is already
+    /// started earlier.
+    bool start ()
     {
+        if (running_)
+            return false;
+
         running_ = true;
         start_time_ = clock_type::now();
+
+        return true;
     }
 
-    void stop ()
+    /// \brief Stop the watch, no effect if already stopped
+    ///
+    /// \return `true` if it is stoped by this call, and the `elapsed` time has
+    /// been incremented. `false` if it is already stopped or wasn't started
+    /// before.
+    bool stop ()
     {
+        if (!running_)
+            return false;
+
         typename clock_type::time_point stop_time = clock_type::now();
         elapsed_ += stop_time - start_time_;
         running_ = false;
+
+        return true;
     }
 
+    /// \brief Stop and reset the `elapsed` time to zero
     void reset ()
     {
         start();
@@ -123,36 +150,42 @@ class StopWatchClockAdapter
         running_ = false;
     }
 
+    /// \brief Return the accumulated elapsed time in nanoseconds
     double nanoseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::nano> >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in microseconds
     double microseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::micro> >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in milliseconds
     double milliseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::milli> >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in seconds
     double seconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::ratio<1> > >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in minutes
     double minutes () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::ratio<60> > >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in hours
     double hours () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
@@ -189,14 +222,22 @@ class StopWatch
 
     bool running () {return running_;}
 
-    void start ()
+    bool start ()
     {
+        if (running_)
+            return false;
+
         running_ = true;
         start_time_ = ::mach_absolute_time();
+
+        return true;
     }
 
-    void stop ()
+    bool stop ()
     {
+        if (!running_)
+            return false;
+
         uint64_t stop_time = ::mach_absolute_time();
         uint64_t elapsed_abs = stop_time - start_time_;
         uint64_t elapsed_nsec = elapsed_abs *
@@ -206,6 +247,8 @@ class StopWatch
         elapsed_sec_ += inc_sec;
         elapsed_nsec_ += inc_nsec;
         running_ = false;
+
+        return true;
     }
 
     void reset ()
@@ -284,14 +327,22 @@ class StopWatch
 
     bool running () {return running_;}
 
-    void start ()
+    bool start ()
     {
+        if (running_)
+            return false;
+
         running_ = true;
         ::clock_gettime(CLOCK_REALTIME, &start_time_);
+
+        return true;
     }
 
-    void stop ()
+    bool stop ()
     {
+        if (!running_)
+            return false;
+
         timespec stop_time;
         ::clock_gettime(CLOCK_REALTIME, &stop_time);
         time_t sec = stop_time.tv_sec - start_time_.tv_sec;
@@ -302,6 +353,8 @@ class StopWatch
         elapsed_.tv_sec += inc_sec;
         elapsed_.tv_nsec += inc_nsec;
         running_ = false;
+
+        true;
     }
 
     void reset ()
@@ -377,20 +430,30 @@ class StopWatch
 
     bool running () {return running_;}
 
-    void start ()
+    bool start ()
     {
+        if (running_)
+            return false;
+
         running_ = true;
         LARGE_INTEGER time;
         ::QueryPerformanceCounter(&time);
         start_time_ = time.QuadPart;
+
+        return true;
     }
 
-    void stop ()
+    bool stop ()
     {
+        if (!running_)
+            return false;
+
         LARGE_INTEGER time;
         ::QueryPerformanceCounter(&time);
         elapsed_ += time.QuadPart - start_time_;
         running_ = false;
+
+        return true;
     }
 
     void reset ()

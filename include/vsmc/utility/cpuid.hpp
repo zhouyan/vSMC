@@ -545,7 +545,7 @@ class CPUID
 #ifdef _MSC_VER
         __cpuidex(reinterpret_cast<int *>(reg.data),
                 static_cast<int>(eax), static_cast<int>(ecx));
-#elif VSMC_HAS_INLINE_ASSEMBLY
+#else // _MSC_VER
         unsigned ebx = 0x00;
         unsigned edx = 0x00;
         __asm__(
@@ -557,8 +557,6 @@ class CPUID
         reg.at<1>() = ebx;
         reg.at<2>() = ecx;
         reg.at<3>() = edx;
-#else // VSMC_HAS_INLINE_ASSEMBLY
-#error Compiler not supported
 #endif // _MSC_VER
 
         return reg;
