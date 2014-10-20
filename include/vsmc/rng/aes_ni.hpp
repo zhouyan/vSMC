@@ -236,15 +236,13 @@ template <typename ResultType, typename KeySeq, bool KeySeqInit,
 class AESNIEngine
 {
     static VSMC_CONSTEXPR const std::size_t K_ =
-        sizeof(__m128i) / sizeof(ResultType);
-
-    static VSMC_CONSTEXPR const std::size_t buffer_size_ = K_ * Blocks;
+        sizeof(__m128i) / sizeof(ResultType) * Blocks;
 
     public :
 
     typedef ResultType result_type;
     typedef Array<__m128i, Blocks> buffer_type;
-    typedef Array<ResultType, K_> ctr_type;
+    typedef Array<ResultType, sizeof(__m128i) / sizeof(ResultType)> ctr_type;
     typedef Array<ctr_type, Blocks> ctr_block_type;
     typedef typename KeySeq::key_type key_type;
     typedef Array<__m128i, Rounds + 1> key_seq_type;
@@ -257,7 +255,7 @@ class AESNIEngine
 
     public :
 
-    explicit AESNIEngine (result_type s = 0) : index_(buffer_size_)
+    explicit AESNIEngine (result_type s = 0) : index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(s);
@@ -267,21 +265,20 @@ class AESNIEngine
     explicit AESNIEngine (SeedSeq &seq, typename cxx11::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, key_type,
             AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
-            >::value>::type * = VSMC_NULLPTR) : index_(buffer_size_)
+            >::value>::type * = VSMC_NULLPTR) : index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(seq);
     }
 
-    AESNIEngine (const key_type &k) : key_(k), index_(buffer_size_)
+    AESNIEngine (const key_type &k) : key_(k), index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         counter::reset(ctr_block_);
         key_seq_.set(k);
     }
 
-    AESNIEngine (const ctr_type &c, const key_type &k) :
-        key_(k), index_(buffer_size_)
+    AESNIEngine (const ctr_type &c, const key_type &k) : key_(k), index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         ctr_block_type tmp;
@@ -296,7 +293,7 @@ class AESNIEngine
         key_.fill(0);
         key_.front() = s;
         key_seq_.set(key_);
-        index_ = buffer_size_;
+        index_ = K_;
     }
 
     template <typename SeedSeq>
@@ -306,14 +303,14 @@ class AESNIEngine
         counter::reset(ctr_block_);
         seq.generate(key_.begin(), key_.end());
         key_seq_.set(key_);
-        index_ = buffer_size_;
+        index_ = K_;
     }
 
     void seed (const key_type &k)
     {
         counter::reset(ctr_block_);
         key_seq_.set(k);
-        index_ = buffer_size_;
+        index_ = K_;
     }
 
     template <std::size_t B>
@@ -342,7 +339,7 @@ class AESNIEngine
         ctr_block_type tmp;
         Counter<ctr_type>::set(tmp, c);
         std::memcpy(ctr_block_.data(), tmp.data(), 16 * Blocks);
-        index_ = buffer_size_;
+        index_ = K_;
     }
 
     /// \brief Set the block of counters
@@ -362,14 +359,14 @@ class AESNIEngine
     void ctr_block (const ctr_block_type &cb)
     {
         std::memcpy(ctr_block_.data(), cb.data(), 16 * Blocks);
-        index_ = buffer_size_;
+        index_ = K_;
     }
 
     void key (const key_type &k)
     {
         key_ = k;
         key_seq_.set(k);
-        index_ = buffer_size_;
+        index_ = K_;
     }
 
     /// \brief After reset, next call to `operator()` will always increase the
@@ -377,12 +374,12 @@ class AESNIEngine
     void reset ()
     {
         counter::reset(ctr_block_);
-        index_ = buffer_size_;
+        index_ = K_;
     }
 
     result_type operator() ()
     {
-        if (index_ == buffer_size_) {
+        if (index_ == K_) {
             counter::increment(ctr_block_);
             generate_buffer(ctr_block_, buffer_);
             index_ = 0;
@@ -430,24 +427,23 @@ class AESNIEngine
     void discard (result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
-        if (index_ + n <= buffer_size_) {
+        if (index_ + n <= K_) {
             index_ += n;
             return;
         }
 
-        n -= buffer_size_ - index_;
-        if (n <= buffer_size_) {
-            index_ = buffer_size_;
+        n -= K_ - index_;
+        if (n <= K_) {
+            index_ = K_;
             operator()();
             index_ = n;
             return;
         }
 
-        counter::increment(ctr_block_,
-                static_cast<result_type>(n / buffer_size_));
-        index_ = buffer_size_;
+        counter::increment(ctr_block_, static_cast<result_type>(n / K_));
+        index_ = K_;
         operator()();
-        index_ = n % buffer_size_;
+        index_ = n % K_;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
