@@ -12,14 +12,21 @@
 
 #ifdef _MSC_VER
 #include <intrin.h>
-#else
-#include <x86intrin.h>
 #endif
 
 int main ()
 {
-    unsigned tsc = 0;
-    __rdtscp(&tsc);
+#ifdef _MSC_VER
+        __rdtscp(aux)
+#else // _MSC_VER
+        unsigned eax = 0x00;
+        unsigned edx = 0x00;
+        unsigned ecx = 0x00;
+        __asm__(
+                "rdtscp\\n"
+                : "=a" (eax), "=d" (edx), "=c" (ecx)
+               );
+#endif // _MSC_VER
 
     return 0;
 }

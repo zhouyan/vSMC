@@ -15,8 +15,6 @@
 
 #ifdef _MSC_VER
 #include <intrin.h>
-#else
-#include <x86intrin.h>
 #endif
 
 namespace vsmc {
@@ -51,7 +49,7 @@ class RDTSCPCounter
 	    return false;
 
 	running_ = true;
-	start_ = __rdtscp(&start_id_);
+	start_ = now(&start_id_);
 
 	return true;
     }
@@ -73,7 +71,7 @@ class RDTSCPCounter
 	    return false;
 
 	unsigned stop_id = 0;
-	result_type stop = __rdtscp(&stop_id);
+	result_type stop = now(&stop_id);
 	bool same_id = stop_id == start_id_;
 	if (same_id)
 	    elapsed_ += stop - start_;
@@ -99,7 +97,26 @@ class RDTSCPCounter
     result_type start_;
     unsigned start_id_;
     bool running_;
-}; // class RDTSCP
+
+    result_type now (unsigned *aux)
+    {
+#ifdef _MSC_VER
+        return __rdtscp(aux)
+#else // _MSC_VER
+        unsigned eax = 0x00;
+        unsigned edx = 0x00;
+        unsigned ecx = 0x00;
+        __asm__(
+                "rdtscp\n"
+                : "=a" (eax), "=d" (edx), "=c" (ecx)
+               );
+        *aux = ecx;
+
+        return (static_cast<result_type>(edx) << 32) +
+            static_cast<result_type>(eax);
+#endif // _MSC_VER
+    }
+}; // class RDTSCPCounter
 
 } // namespace vsmc
 
