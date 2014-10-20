@@ -1,5 +1,5 @@
 //============================================================================
-// cmake/FindIntrinsicFunction.cpp
+// cmake/vSMCFindIntrinsicFunction.cpp
 //----------------------------------------------------------------------------
 //
 //                         vSMC: Scalable Monte Carlo
@@ -11,25 +11,26 @@
 #include <cassert>
 #include <cstring>
 
-#ifdef _MSC_VER
-#include <intrin.h>
+#include <vsmc/internal/intrin.hpp>
+
+#undef VSMC_INTRISIC_INT64
+
+#if defined(VSMC_INTRINSIC_INT64_FOUND)
+#define VSMC_INTRINSIC_INT64 __int64
+#elif defined(VSMC_INTRINSIC_INT64_LONG_LONG_FOUND)
+#define VSMC_INTRINSIC_INT64 long long
 #else
-#include <emmintrin.h>
+#define VSMC_VSMC_INTRINSIC_INT64 long
 #endif
 
 int main ()
 {
-#if defined(INTRINSIC_INT64_FOUND)
-    __int64 a = 0;
-    __int64 b = 1;
-#elif defined(INTRINSIC_INT64_LONG_LONG_FOUND)
-    long long a = 0;
-    long long b = 1;
-#else
-    long a = 0;
-    long b = 1;
-#endif
 
+    unsigned tsc_aux = 0;
+    unsigned VSMC_INTRINSIC_INT64 r = __rdtscp(&tsc_aux);
+
+    VSMC_INTRINSIC_INT64 a = 0;
+    VSMC_INTRINSIC_INT64 b = 1;
     _mm_stream_si64(&b, a);
     assert(b == 0);
 

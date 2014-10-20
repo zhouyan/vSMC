@@ -13,10 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING \
-    VSMC_RUNTIME_ASSERT((!(running_ || other.running_)),                     \
-            ("CANNOT ADD TWO RUNNING **StopWatch**"))
-
 /// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fails
 /// \ingroup Config
 #ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
@@ -45,14 +41,17 @@
 
 namespace vsmc {
 
+/// \brief A StopWatch that provides the interface but does nothing and thus
+/// cost no CPU cycles itself.
+/// \ingroup StopWatch
 class StopWatchNull
 {
     public :
 
-    bool running () const {return running_;}
-    void start () {running_ = true;}
-    void stop  () {running_ = false;}
-    void reset () {running_ = false;}
+    bool running () const {return false;}
+    void start () {}
+    void stop  () {}
+    void reset () {}
 
     double nanoseconds  () const {return 1;}
     double microseconds () const {return 1e-3;}
@@ -60,31 +59,27 @@ class StopWatchNull
     double seconds      () const {return 1e-9;}
     double minutes      () const {return 1e-9 / 60;}
     double hours        () const {return 1e-9 / 3600;}
-
-    private :
-
-    bool running_;
 }; // class StopWatchNull
 
-/// \brief Start and stop a StopWatch in scope
+/// \brief Start and stop a StopWatch in scope (similiar to a mutex lock guard)
 /// \ingroup StopWatch
 template <typename WatchType>
-class ScopedStopWatch
+class StopWatchGuard
 {
     public :
 
     typedef WatchType watch_type;
 
-    ScopedStopWatch (watch_type &watch, bool start = true) :
+    StopWatchGuard (watch_type &watch, bool start = true) :
         start_(start), watch_(watch) {if (start_) watch_.start();}
 
-    ~ScopedStopWatch () {if (start_) watch_.stop();}
+    ~StopWatchGuard () {if (start_) watch_.stop();}
 
     private :
 
     const bool start_;
     watch_type &watch_;
-}; // class ScopedStopWatch
+}; // class StopWatchGuard
 
 } // namespace vsmc
 

@@ -1,0 +1,56 @@
+# ============================================================================
+#  cmake/vSMCFindIntrinsicFunction.cmake
+# ----------------------------------------------------------------------------
+#
+#                          vSMC: Scalable Monte Carlo
+#
+#  This file is distribured under the 2-clauses BSD License.
+#  See LICENSE for details.
+# ============================================================================
+
+# Find intrinsic function support
+#
+# The following variable is set
+#
+# VSMC_INTRINSIC_FUNCTION_FOUND        - TRUE if intrinsic function
+# VSMC_INTRINSIC_INT64_FOUND           - TRUE if __int64 is defined
+# VSMC_INTRINSIC_INT64_LONG_LONG_FOUND - TRUE if __int64 is long long
+#                                        FALSE if it is long
+
+IF (DEFINED VSMC_INTRINSIC_FUNCTION_FOUND)
+    RETURN ()
+ENDIF (DEFINED VSMC_INTRINSIC_FUNCTION_FOUND)
+
+FILE (READ ${CMAKE_CURRENT_LIST_DIR}/vSMCFindIntrinsicFunction.cpp
+    VSMC_INTRINSIC_FUNCTION_TEST_SOURCE)
+INCLUDE (CheckCXXSourceRuns)
+IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" OR MSVC)
+    CHECK_CXX_SOURCE_RUNS ("${VSMC_INTRINSIC_FUNCTION_TEST_SOURCE}"
+	VSMC_INTRINSIC_INT64_FOUND)
+ENDIF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" OR MSVC)
+IF (NOT VSMC_INTRINSIC_INT64_FOUND)
+    CHECK_CXX_SOURCE_RUNS ("${VSMC_INTRINSIC_FUNCTION_TEST_SOURCE}"
+	VSMC_INTRINSIC_INT64_LONG_LONG_FOUND)
+ENDIF (NOT VSMC_INTRINSIC_INT64_FOUND)
+IF (NOT VSMC_INTRINSIC_INT64_FOUND AND NOT
+       	VSMC_INTRINSIC_INT64_LONG_LONG_FOUND)
+    CHECK_CXX_SOURCE_RUNS ("${VSMC_INTRINSIC_FUNCTION_TEST_SOURCE}"
+	VSMC_INTRINSIC_INT64_LONG_FOUND)
+ENDIF (NOT VSMC_INTRINSIC_INT64_FOUND AND NOT
+    VSMC_INTRINSIC_INT64_LONG_LONG_FOUND)
+
+IF (VSMC_INTRINSIC_INT64_FOUND OR
+	VSMC_INTRINSIC_INT64_LONG_LONG_FOUND OR
+       	VSMC_INTRINSIC_INT64_LONG_FOUND)
+    MESSAGE (STATUS "Found intrinsic function")
+    SET (VSMC_INTRINSIC_FUNCTION_FOUND TRUE CACHE BOOL
+        "Found intrinsic function")
+ELSE (VSMC_INTRINSIC_INT64_FOUND OR
+	VSMC_INTRINSIC_INT64_LONG_LONG_FOUND OR
+       	VSMC_INTRINSIC_INT64_LONG_FOUND)
+    MESSAGE (STATUS "NOT Found intrinsic function")
+    SET (VSMC_INTRINSIC_FUNCTION_FOUND FALSE CACHE BOOL
+        "NOT Found intrinsic function")
+ENDIF (VSMC_INTRINSIC_INT64_FOUND OR
+    VSMC_INTRINSIC_INT64_LONG_LONG_FOUND OR
+    VSMC_INTRINSIC_INT64_LONG_FOUND)
