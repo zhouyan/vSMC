@@ -702,11 +702,11 @@ class CPUID
 
     template <typename CharT, typename Traits>
     static void print_equal (std::basic_ostream<CharT, Traits> &os)
-    {os << std::string(95, '=') << '\n';}
+    {os << std::string(90, '=') << '\n';}
 
     template <typename CharT, typename Traits>
     static void print_dash (std::basic_ostream<CharT, Traits> &os)
-    {os << std::string(95, '-') << '\n';}
+    {os << std::string(90, '-') << '\n';}
 
     template <typename CharT, typename Traits>
     static void print_cache (std::basic_ostream<CharT, Traits> &os)
