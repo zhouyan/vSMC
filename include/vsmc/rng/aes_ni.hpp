@@ -430,7 +430,7 @@ class AESNIEngine
     void discard (result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
-        if (index_ + n <= buffer_sie_) {
+        if (index_ + n <= buffer_size_) {
             index_ += n;
             return;
         }
