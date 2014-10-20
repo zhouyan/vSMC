@@ -106,7 +106,7 @@ class RDTSCPCounter
         unsigned eax = 0x00;
         unsigned edx = 0x00;
         unsigned ecx = 0x00;
-        __asm__(
+        __asm__ volatile(
                 "rdtscp\n"
                 : "=a" (eax), "=d" (edx), "=c" (ecx)
                );
