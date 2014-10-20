@@ -24,125 +24,196 @@
 #include <intrin.h>
 #endif
 
-#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(feat, eax_val, i, b) \
-template <> struct CPUIDFeatureInfo<CPUIDFeature##feat>                      \
+#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(prefix, a, c, feat, i, b) \
+template <> struct CPUIDFeatureInfo<CPUIDFeature##prefix##feat>              \
 {                                                                            \
     static std::string str () {return std::string(#feat);}                   \
-    static VSMC_CONSTEXPR const unsigned eax = eax_val##U;                   \
-    static VSMC_CONSTEXPR const unsigned bit = b;                            \
-    static VSMC_CONSTEXPR const std::size_t reg = i;                         \
+    static VSMC_CONSTEXPR const unsigned eax = a##U;                         \
+    static VSMC_CONSTEXPR const unsigned ecx = c##U;                         \
+    static VSMC_CONSTEXPR const unsigned bit = b##U;                         \
+    static VSMC_CONSTEXPR const std::size_t index = i;                       \
 };
 
-#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(feat, eax_val, i, b) \
-template <> struct CPUIDFeatureInfo<CPUIDFeatureExt##feat>                   \
-{                                                                            \
-    static std::string str () {return std::string(#feat);}                   \
-    static VSMC_CONSTEXPR const unsigned eax = eax_val##U;                   \
-    static VSMC_CONSTEXPR const unsigned bit = b;                            \
-    static VSMC_CONSTEXPR const std::size_t reg = i;                         \
-};
+#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(feat, i, b) \
+    VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(, 0x01, 0x00, feat, i, b)
+
+#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(feat, i, b) \
+    VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(, 0x07, 0x00, feat, i, b)
+
+#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(feat, i, b) \
+    VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(Ext, 0x80000001, 0x00, feat, i, b)
 
 namespace vsmc {
 
-/// \brief Basic CPU feature
+/// \brief CPU features
 /// \ingroup CPUID
-///
-/// \details
-/// This table is named according to Intel specification. AMD CPUID
-/// specification may be slightly different.
 enum CPUIDFeature
 {
-    CPUIDFeatureSSE3,         ///< EAX = 0x01; ECX[00]
-    CPUIDFeaturePCLMULQDQ,    ///< EAX = 0x01; ECX[01]
-    CPUIDFeatureDTES64,       ///< EAX = 0x01; ECX[02]
-    CPUIDFeatureMONITOR,      ///< EAX = 0x01; ECX[03]
-    CPUIDFeatureDS_CPL,       ///< EAX = 0x01; ECX[04]
-    CPUIDFeatureVMX,          ///< EAX = 0x01; ECX[05]
-    CPUIDFeatureSMX,          ///< EAX = 0x01; ECX[06]
-    CPUIDFeatureEST,          ///< EAX = 0x01; ECX[07]
-    CPUIDFeatureTM2,          ///< EAX = 0x01; ECX[08]
-    CPUIDFeatureSSSE3,        ///< EAX = 0x01; ECX[09]
-    CPUIDFeatureCNXT_ID,      ///< EAX = 0x01; ECX[10]
-    CPUIDFeatureFMA,          ///< EAX = 0x01; ECX[12]
-    CPUIDFeatureCX16,         ///< EAX = 0x01; ECX[13]
-    CPUIDFeatureXTPR,         ///< EAX = 0x01; ECX[14]
-    CPUIDFeaturePDCM,         ///< EAX = 0x01; ECX[15]
-    CPUIDFeaturePCID,         ///< EAX = 0x01; ECX[17]
-    CPUIDFeatureDCA,          ///< EAX = 0x01; ECX[18]
-    CPUIDFeatureSSE4_1,       ///< EAX = 0x01; ECX[19]
-    CPUIDFeatureSSE4_2,       ///< EAX = 0x01; ECX[20]
-    CPUIDFeatureX2APIC,       ///< EAX = 0x01; ECX[21]
-    CPUIDFeatureMOVBE,        ///< EAX = 0x01; ECX[22]
-    CPUIDFeaturePOPCNT,       ///< EAX = 0x01; ECX[23]
-    CPUIDFeatureTSC_DEADLINE, ///< EAX = 0x01; ECX[24]
-    CPUIDFeatureAES,          ///< EAX = 0x01; ECX[25]
-    CPUIDFeatureXSAVE,        ///< EAX = 0x01; ECX[26]
-    CPUIDFeatureOSXSAVE,      ///< EAX = 0x01; ECX[27]
-    CPUIDFeatureAVX,          ///< EAX = 0x01; ECX[28]
-    CPUIDFeatureF16C,         ///< EAX = 0x01; ECX[29]
-    CPUIDFeatureRDRND,        ///< EAX = 0x01; ECX[30]
-    CPUIDFeatureHYPERVISOR,   ///< EAX = 0x01; ECX[31]
+    /// \defgroup CPUIDFeatureBasic Processor infor and feature bits
+    /// \ingroup CPUID
+    /// \brief Defined by Intel; Input: EAX = 0x01, ECX = 0x00; Output: ECX,
+    /// EDX
+    /// @{
+    CPUIDFeatureSSE3,         ///< ECX[00]
+    CPUIDFeaturePCLMULQDQ,    ///< ECX[01]
+    CPUIDFeatureDTES64,       ///< ECX[02]
+    CPUIDFeatureMONITOR,      ///< ECX[03]
+    CPUIDFeatureDS_CPL,       ///< ECX[04]
+    CPUIDFeatureVMX,          ///< ECX[05]
+    CPUIDFeatureSMX,          ///< ECX[06]
+    CPUIDFeatureEST,          ///< ECX[07]
+    CPUIDFeatureTM2,          ///< ECX[08]
+    CPUIDFeatureSSSE3,        ///< ECX[09]
+    CPUIDFeatureCNXT_ID,      ///< ECX[10]
+    CPUIDFeatureFMA,          ///< ECX[12]
+    CPUIDFeatureCX16,         ///< ECX[13]
+    CPUIDFeatureXTPR,         ///< ECX[14]
+    CPUIDFeaturePDCM,         ///< ECX[15]
+    CPUIDFeaturePCID,         ///< ECX[17]
+    CPUIDFeatureDCA,          ///< ECX[18]
+    CPUIDFeatureSSE4_1,       ///< ECX[19]
+    CPUIDFeatureSSE4_2,       ///< ECX[20]
+    CPUIDFeatureX2APIC,       ///< ECX[21]
+    CPUIDFeatureMOVBE,        ///< ECX[22]
+    CPUIDFeaturePOPCNT,       ///< ECX[23]
+    CPUIDFeatureTSC_DEADLINE, ///< ECX[24]
+    CPUIDFeatureAES,          ///< ECX[25]
+    CPUIDFeatureXSAVE,        ///< ECX[26]
+    CPUIDFeatureOSXSAVE,      ///< ECX[27]
+    CPUIDFeatureAVX,          ///< ECX[28]
+    CPUIDFeatureF16C,         ///< ECX[29]
+    CPUIDFeatureRDRND,        ///< ECX[30]
+    CPUIDFeatureHYPERVISOR,   ///< ECX[31]
 
-    CPUIDFeatureFPU,          ///< EAX = 0x01; EDX[00]
-    CPUIDFeatureVME,          ///< EAX = 0x01; EDX[01]
-    CPUIDFeatureDE,           ///< EAX = 0x01; EDX[02]
-    CPUIDFeaturePSE,          ///< EAX = 0x01; EDX[03]
-    CPUIDFeatureTSC,          ///< EAX = 0x01; EDX[04]
-    CPUIDFeatureMSR,          ///< EAX = 0x01; EDX[05]
-    CPUIDFeaturePAE,          ///< EAX = 0x01; EDX[06]
-    CPUIDFeatureMCE,          ///< EAX = 0x01; EDX[07]
-    CPUIDFeatureCX8,          ///< EAX = 0x01; EDX[08]
-    CPUIDFeatureAPIC,         ///< EAX = 0x01; EDX[09]
-    CPUIDFeatureSEP,          ///< EAX = 0x01; EDX[11]
-    CPUIDFeatureMTRR,         ///< EAX = 0x01; EDX[12]
-    CPUIDFeaturePGE,          ///< EAX = 0x01; EDX[13]
-    CPUIDFeatureMCA,          ///< EAX = 0x01; EDX[14]
-    CPUIDFeatureCMOV,         ///< EAX = 0x01; EDX[15]
-    CPUIDFeaturePAT,          ///< EAX = 0x01; EDX[16]
-    CPUIDFeaturePSE_36,       ///< EAX = 0x01; EDX[17]
-    CPUIDFeaturePSN,          ///< EAX = 0x01; EDX[18]
-    CPUIDFeatureCLFSH,        ///< EAX = 0x01; EDX[19]
-    CPUIDFeatureDS,           ///< EAX = 0x01; EDX[21]
-    CPUIDFeatureACPI,         ///< EAX = 0x01; EDX[22]
-    CPUIDFeatureMMX,          ///< EAX = 0x01; EDX[23]
-    CPUIDFeatureFXSR,         ///< EAX = 0x01; EDX[24]
-    CPUIDFeatureSSE,          ///< EAX = 0x01; EDX[25]
-    CPUIDFeatureSSE2,         ///< EAX = 0x01; EDX[26]
-    CPUIDFeatureSS,           ///< EAX = 0x01; EDX[27]
-    CPUIDFeatureHTT,          ///< EAX = 0x01; EDX[28]
-    CPUIDFeatureTM,           ///< EAX = 0x01; EDX[29]
-    CPUIDFeatureIA64,         ///< EAX = 0x01; EDX[30]
-    CPUIDFeaturePBE,          ///< EAX = 0x01; EDX[31]
+    CPUIDFeatureFPU,          ///< EDX[00]
+    CPUIDFeatureVME,          ///< EDX[01]
+    CPUIDFeatureDE,           ///< EDX[02]
+    CPUIDFeaturePSE,          ///< EDX[03]
+    CPUIDFeatureTSC,          ///< EDX[04]
+    CPUIDFeatureMSR,          ///< EDX[05]
+    CPUIDFeaturePAE,          ///< EDX[06]
+    CPUIDFeatureMCE,          ///< EDX[07]
+    CPUIDFeatureCX8,          ///< EDX[08]
+    CPUIDFeatureAPIC,         ///< EDX[09]
+    CPUIDFeatureSEP,          ///< EDX[11]
+    CPUIDFeatureMTRR,         ///< EDX[12]
+    CPUIDFeaturePGE,          ///< EDX[13]
+    CPUIDFeatureMCA,          ///< EDX[14]
+    CPUIDFeatureCMOV,         ///< EDX[15]
+    CPUIDFeaturePAT,          ///< EDX[16]
+    CPUIDFeaturePSE_36,       ///< EDX[17]
+    CPUIDFeaturePSN,          ///< EDX[18]
+    CPUIDFeatureCLFSH,        ///< EDX[19]
+    CPUIDFeatureDS,           ///< EDX[21]
+    CPUIDFeatureACPI,         ///< EDX[22]
+    CPUIDFeatureMMX,          ///< EDX[23]
+    CPUIDFeatureFXSR,         ///< EDX[24]
+    CPUIDFeatureSSE,          ///< EDX[25]
+    CPUIDFeatureSSE2,         ///< EDX[26]
+    CPUIDFeatureSS,           ///< EDX[27]
+    CPUIDFeatureHTT,          ///< EDX[28]
+    CPUIDFeatureTM,           ///< EDX[29]
+    CPUIDFeatureIA64,         ///< EDX[30]
+    CPUIDFeaturePBE,          ///< EDX[31]
+    ///@}
 
-    CPUIDFeatureExtFSGSBASE,     ///< EAX = 0x07; EBX[00]
-    CPUIDFeatureExtBMI1,         ///< EAX = 0x07; EBX[03]
-    CPUIDFeatureExtHLE,          ///< EAX = 0x07; EBX[04]
-    CPUIDFeatureExtAVX2,         ///< EAX = 0x07; EBX[05]
-    CPUIDFeatureExtSMEP,         ///< EAX = 0x07; EBX[07]
-    CPUIDFeatureExtBMI2,         ///< EAX = 0x07; EBX[08]
-    CPUIDFeatureExtERMS,         ///< EAX = 0x07; EBX[09]
-    CPUIDFeatureExtINVPCID,      ///< EAX = 0x07; EBX[10]
-    CPUIDFeatureExtRTM,          ///< EAX = 0x07; EBX[11]
-    CPUIDFeatureExtMPX,          ///< EAX = 0x07; EBX[14]
-    CPUIDFeatureExtAVX512F,      ///< EAX = 0x07; EBX[16]
-    CPUIDFeatureExtAVX512DQ,     ///< EAX = 0x07; EBX[17]
-    CPUIDFeatureExtRDSEED,       ///< EAX = 0x07; EBX[18]
-    CPUIDFeatureExtADX,          ///< EAX = 0x07; EBX[19]
-    CPUIDFeatureExtSMAP,         ///< EAX = 0x07; EBX[20]
-    CPUIDFeatureExtAVX512IFMA52, ///< EAX = 0x07; EBX[21]
-    CPUIDFeatureExtCLFLUSHOPT,   ///< EAX = 0x07; EBX[23]
-    CPUIDFeatureExtINTEL_TRACE,  ///< EAX = 0x07; EBX[25]
-    CPUIDFeatureExtAVX512PF,     ///< EAX = 0x07; EBX[26]
-    CPUIDFeatureExtAVX512ER,     ///< EAX = 0x07; EBX[27]
-    CPUIDFeatureExtAVX512CD,     ///< EAX = 0x07; EBX[28]
-    CPUIDFeatureExtSHA,          ///< EAX = 0x07; EBX[29]
-    CPUIDFeatureExtAVX512BW,     ///< EAX = 0x07; EBX[30]
-    CPUIDFeatureExtAVX512VL,     ///< EAX = 0x07; EBX[31]
+    /// \defgroup CPUIDFeatureExt Extended features
+    /// \ingroup CPUID
+    /// \brief Defined by Intel; Input: EAX = 0x07, ECX = 0x00; Output: EBX,
+    /// ECX
+    /// @{
+    CPUIDFeatureFSGSBASE,     ///< EBX[00]
+    CPUIDFeatureBMI1,         ///< EBX[03]
+    CPUIDFeatureHLE,          ///< EBX[04]
+    CPUIDFeatureAVX2,         ///< EBX[05]
+    CPUIDFeatureSMEP,         ///< EBX[07]
+    CPUIDFeatureBMI2,         ///< EBX[08]
+    CPUIDFeatureERMS,         ///< EBX[09]
+    CPUIDFeatureINVPCID,      ///< EBX[10]
+    CPUIDFeatureRTM,          ///< EBX[11]
+    CPUIDFeatureMPX,          ///< EBX[14]
+    CPUIDFeatureAVX512F,      ///< EBX[16]
+    CPUIDFeatureAVX512DQ,     ///< EBX[17]
+    CPUIDFeatureRDSEED,       ///< EBX[18]
+    CPUIDFeatureADX,          ///< EBX[19]
+    CPUIDFeatureSMAP,         ///< EBX[20]
+    CPUIDFeatureAVX512IFMA52, ///< EBX[21]
+    CPUIDFeatureCLFLUSHOPT,   ///< EBX[23]
+    CPUIDFeatureINTEL_TRACE,  ///< EBX[25]
+    CPUIDFeatureAVX512PF,     ///< EBX[26]
+    CPUIDFeatureAVX512ER,     ///< EBX[27]
+    CPUIDFeatureAVX512CD,     ///< EBX[28]
+    CPUIDFeatureSHA,          ///< EBX[29]
+    CPUIDFeatureAVX512BW,     ///< EBX[30]
+    CPUIDFeatureAVX512VL,     ///< EBX[31]
 
-    CPUIDFeatureExtPREFETCHWT1,  ///< EAX = 0x07; ECX[00]
-    CPUIDFeatureExtAVX512VBMI    ///< EAX = 0x07; ECX[01]
+    CPUIDFeaturePREFETCHWT1,  ///< ECX[00]
+    CPUIDFeatureAVX512VBMI,   ///< ECX[01]
+    /// @}
+
+    /// \defgroup CPUIDFeatureAMD Extended processor info and feature bits
+    /// \ingroup CPUID
+    /// \brief Defined by AMD; Input: EAX = 0x80000001, ECX = 0x00; Ouptut ECX,
+    /// EDX
+    /// @{
+    CPUIDFeatureExtLAHF_LM,       ///< ECX[00]
+    CPUIDFeatureExtCMP_LEGACY,    ///< ECX[01]
+    CPUIDFeatureExtSVM,           ///< ECX[02]
+    CPUIDFeatureExtEXTAPIC,       ///< ECX[03]
+    CPUIDFeatureExtCR8_LEGACY,    ///< ECX[04]
+    CPUIDFeatureExtABM,           ///< ECX[05]
+    CPUIDFeatureExtSSE4A,         ///< ECX[06]
+    CPUIDFeatureExtMISALIGNSSE,   ///< ECX[07]
+    CPUIDFeatureExt3DNOWPREFETCH, ///< ECX[08]
+    CPUIDFeatureExtOSVW,          ///< ECX[09]
+    CPUIDFeatureExtIBS,           ///< ECX[10]
+    CPUIDFeatureExtXOP,           ///< ECX[11]
+    CPUIDFeatureExtSKINIT,        ///< ECX[12]
+    CPUIDFeatureExtWDT,           ///< ECX[13]
+    CPUIDFeatureExtLWP,           ///< ECX[15]
+    CPUIDFeatureExtFMA4,          ///< ECX[16]
+    CPUIDFeatureExtTCE,           ///< ECX[17]
+    CPUIDFeatureExtNODEID_MSR,    ///< ECX[19]
+    CPUIDFeatureExtTBM,           ///< ECX[21]
+    CPUIDFeatureExtTOPOEXT,       ///< ECX[22]
+    CPUIDFeatureExtPERFCTR_CORE,  ///< ECX[23]
+    CPUIDFeatureExtPERFCTR_NB,    ///< ECX[24]
+    CPUIDFeatureExtDBX,           ///< ECX[26]
+    CPUIDFeatureExtPERFTSC,       ///< ECX[27]
+    CPUIDFeatureExtPCX_L2I,       ///< ECX[28]
+
+    CPUIDFeatureExtFPU,           ///< EDX[00]
+    CPUIDFeatureExtVME,           ///< EDX[01]
+    CPUIDFeatureExtDE,            ///< EDX[02]
+    CPUIDFeatureExtPSE,           ///< EDX[03]
+    CPUIDFeatureExtTSC,           ///< EDX[04]
+    CPUIDFeatureExtMSR,           ///< EDX[05]
+    CPUIDFeatureExtPAE,           ///< EDX[06]
+    CPUIDFeatureExtMCE,           ///< EDX[07]
+    CPUIDFeatureExtCX8,           ///< EDX[08]
+    CPUIDFeatureExtAPIC,          ///< EDX[09]
+    CPUIDFeatureExtSYSCALL,       ///< EDX[11]
+    CPUIDFeatureExtMTRR,          ///< EDX[12]
+    CPUIDFeatureExtPGE,           ///< EDX[13]
+    CPUIDFeatureExtMCA,           ///< EDX[14]
+    CPUIDFeatureExtCMOV,          ///< EDX[15]
+    CPUIDFeatureExtPAT,           ///< EDX[16]
+    CPUIDFeatureExtPSE36,         ///< EDX[17]
+    CPUIDFeatureExtMP,            ///< EDX[19]
+    CPUIDFeatureExtNX,            ///< EDX[20]
+    CPUIDFeatureExtMMX,           ///< EDX[22]
+    CPUIDFeatureExtMMXEXT,        ///< EDX[23]
+    CPUIDFeatureExtFXSR,          ///< EDX[24]
+    CPUIDFeatureExtFXSR_OPT,      ///< EDX[25]
+    CPUIDFeatureExtGBPAGES,       ///< EDX[26]
+    CPUIDFeatureExtRDTSCP,        ///< EDX[27]
+    CPUIDFeatureExtLM,            ///< EDX[29]
+    CPUIDFeatureExt3DNOWEXT,      ///< EDX[30]
+    CPUIDFeatureExt3DNOW,         ///< EDX[31]
+    /// @}
 }; // enum CPUIDFeature
 
+/// \brief Type of CPU caches
 enum CPUIDCacheType
 {
     CPUIDCacheTypeNull,        ///< No more cache
@@ -151,101 +222,174 @@ enum CPUIDCacheType
     CPUIDCacheTypeUnified      ///< Unified cache
 }; // enum CPUIDCacheType
 
-namespace internal {
+/// \brief CPU feature information
+/// \ingroup CPUID
+///
+/// \details
+/// This class is specialized for each value of CPUIDFeature
+template <CPUIDFeature>
+struct CPUIDFeatureInfo
+{
+    /// \brief A short string representing the feature
+    static std::string str ();
 
-template <CPUIDFeature> struct CPUIDFeatureInfo;
+    /// \brief The value of the calling parameter EAX
+    static VSMC_CONSTEXPR const unsigned eax = 0x00U;
 
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSE3,         0x01, 2,  0)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PCLMULQDQ,    0x01, 2,  1)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(DTES64,       0x01, 2,  2)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(MONITOR,      0x01, 2,  3)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(DS_CPL,       0x01, 2,  4)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(VMX,          0x01, 2,  5)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SMX,          0x01, 2,  6)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(EST,          0x01, 2,  7)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(TM2,          0x01, 2,  8)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSSE3,        0x01, 2,  9)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(CNXT_ID,      0x01, 2, 10)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(FMA,          0x01, 2, 12)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(CX16,         0x01, 2, 13)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(XTPR,         0x01, 2, 14)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PDCM,         0x01, 2, 15)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PCID,         0x01, 2, 17)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(DCA,          0x01, 2, 18)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSE4_1,       0x01, 2, 19)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSE4_2,       0x01, 2, 20)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(X2APIC,       0x01, 2, 21)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(MOVBE,        0x01, 2, 22)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(POPCNT,       0x01, 2, 23)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(TSC_DEADLINE, 0x01, 2, 24)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(AES,          0x01, 2, 25)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(XSAVE,        0x01, 2, 26)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(OSXSAVE,      0x01, 2, 27)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(AVX,          0x01, 2, 28)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(F16C,         0x01, 2, 29)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(RDRND,        0x01, 2, 30)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(HYPERVISOR,   0x01, 2, 31)
+    /// \brief The value of the calling parameter ECX
+    static VSMC_CONSTEXPR const unsigned ecx = 0x00U;
 
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(FPU,          0x01, 3,  0)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(VME,          0x01, 3,  1)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(DE,           0x01, 3,  2)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PSE,          0x01, 3,  3)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(TSC,          0x01, 3,  4)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(MSR,          0x01, 3,  5)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PAE,          0x01, 3,  6)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(MCE,          0x01, 3,  7)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(CX8,          0x01, 3,  8)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(APIC,         0x01, 3,  9)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SEP,          0x01, 3, 11)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(MTRR,         0x01, 3, 12)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PGE,          0x01, 3, 13)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(MCA,          0x01, 3, 14)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(CMOV,         0x01, 3, 15)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PAT,          0x01, 3, 16)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PSE_36,       0x01, 3, 17)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PSN,          0x01, 3, 18)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(CLFSH,        0x01, 3, 19)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(DS,           0x01, 3, 21)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(ACPI,         0x01, 3, 22)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(MMX,          0x01, 3, 23)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(FXSR,         0x01, 3, 24)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSE,          0x01, 3, 25)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSE2,         0x01, 3, 26)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SS,           0x01, 3, 27)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(HTT,          0x01, 3, 28)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(TM,           0x01, 3, 29)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(IA64,         0x01, 3, 30)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PBE,          0x01, 3, 31)
+    /// \brief The index of in `CPUID::reg_type` of the output register
+    static VSMC_CONSTEXPR const unsigned index = 0x00U;
 
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(FSGSBASE,     0x07, 1,  0)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(BMI1,         0x07, 1,  3)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(HLE,          0x07, 1,  4)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX2,         0x07, 1,  5)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(SMEP,         0x07, 1,  7)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(BMI2,         0x07, 1,  8)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(ERMS,         0x07, 1,  9)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(INVPCID,      0x07, 1, 10)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(RTM,          0x07, 1, 11)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(MPX,          0x07, 1, 14)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512F,      0x07, 1, 16)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512DQ,     0x07, 1, 17)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(RDSEED,       0x07, 1, 18)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(ADX,          0x07, 1, 19)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(SMAP,         0x07, 1, 20)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512IFMA52, 0x07, 1, 21)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(CLFLUSHOPT,   0x07, 1, 23)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(INTEL_TRACE,  0x07, 1, 25)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512PF,     0x07, 1, 26)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512ER,     0x07, 1, 27)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512CD,     0x07, 1, 28)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(SHA,          0x07, 1, 29)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512BW,     0x07, 1, 30)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512VL,     0x07, 1, 31)
+    /// \brief The bit number of the feature in the register
+    static VSMC_CONSTEXPR const unsigned bit = 0x00U;
+}; // struct CPUIDFeatureInfo
 
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(PREFETCHWT1,  0x07, 3,  0)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_EXT_INFO(AVX512VBMI,   0x07, 3,  1)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SSE3,         2,  0)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PCLMULQDQ,    2,  1)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(DTES64,       2,  2)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(MONITOR,      2,  3)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(DS_CPL,       2,  4)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(VMX,          2,  5)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SMX,          2,  6)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(EST,          2,  7)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(TM2,          2,  8)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SSSE3,        2,  9)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(CNXT_ID,      2, 10)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(FMA,          2, 12)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(CX16,         2, 13)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(XTPR,         2, 14)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PDCM,         2, 15)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PCID,         2, 17)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(DCA,          2, 18)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SSE4_1,       2, 19)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SSE4_2,       2, 20)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(X2APIC,       2, 21)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(MOVBE,        2, 22)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(POPCNT,       2, 23)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(TSC_DEADLINE, 2, 24)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(AES,          2, 25)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(XSAVE,        2, 26)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(OSXSAVE,      2, 27)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(AVX,          2, 28)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(F16C,         2, 29)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(RDRND,        2, 30)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(HYPERVISOR,   2, 31)
 
-} // namespace vsmc::internal
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(FPU,          3,  0)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(VME,          3,  1)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(DE,           3,  2)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PSE,          3,  3)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(TSC,          3,  4)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(MSR,          3,  5)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PAE,          3,  6)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(MCE,          3,  7)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(CX8,          3,  8)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(APIC,         3,  9)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SEP,          3, 11)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(MTRR,         3, 12)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PGE,          3, 13)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(MCA,          3, 14)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(CMOV,         3, 15)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PAT,          3, 16)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PSE_36,       3, 17)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PSN,          3, 18)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(CLFSH,        3, 19)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(DS,           3, 21)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(ACPI,         3, 22)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(MMX,          3, 23)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(FXSR,         3, 24)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SSE,          3, 25)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SSE2,         3, 26)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(SS,           3, 27)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(HTT,          3, 28)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(TM,           3, 29)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(IA64,         3, 30)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_BASIC(PBE,          3, 31)
+
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(FSGSBASE,     1,  0)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(BMI1,         1,  3)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(HLE,          1,  4)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX2,         1,  5)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(SMEP,         1,  7)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(BMI2,         1,  8)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(ERMS,         1,  9)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(INVPCID,      1, 10)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(RTM,          1, 11)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(MPX,          1, 14)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512F,      1, 16)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512DQ,     1, 17)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(RDSEED,       1, 18)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(ADX,          1, 19)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(SMAP,         1, 20)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512IFMA52, 1, 21)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(CLFLUSHOPT,   1, 23)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(INTEL_TRACE,  1, 25)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512PF,     1, 26)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512ER,     1, 27)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512CD,     1, 28)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(SHA,          1, 29)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512BW,     1, 30)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512VL,     1, 31)
+
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(PREFETCHWT1,  3,  0)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(AVX512VBMI,   3,  1)
+
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(LAHF_LM,       2,  0)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(CMP_LEGACY,    2,  1)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(SVM,           2,  2)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(EXTAPIC,       2,  3)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(CR8_LEGACY,    2,  4)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(ABM,           2,  5)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(SSE4A,         2,  6)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(MISALIGNSSE,   2,  7)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(3DNOWPREFETCH, 2,  8)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(OSVW,          2,  9)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(IBS,           2, 10)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(XOP,           2, 11)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(SKINIT,        2, 12)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(WDT,           2, 13)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(LWP,           2, 15)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(FMA4,          2, 16)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(TCE,           2, 17)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(NODEID_MSR,    2, 19)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(TBM,           2, 21)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(TOPOEXT,       2, 22)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PERFCTR_CORE,  2, 23)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PERFCTR_NB,    2, 24)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(DBX,           2, 26)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PERFTSC,       2, 27)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PCX_L2I,       2, 28)
+
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(FPU,           3,  0)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(VME,           3,  1)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(DE,            3,  2)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PSE,           3,  3)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(TSC,           3,  4)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(MSR,           3,  5)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PAE,           3,  6)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(MCE,           3,  7)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(CX8,           3,  8)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(APIC,          3,  9)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(SYSCALL,       3, 11)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(MTRR,          3, 12)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PGE,           3, 13)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(MCA,           3, 14)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(CMOV,          3, 15)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PAT,           3, 16)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(PSE36,         3, 17)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(MP,            3, 19)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(NX,            3, 20)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(MMX,           3, 22)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(MMXEXT,        3, 23)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(FXSR,          3, 24)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(FXSR_OPT,      3, 25)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(GBPAGES,       3, 26)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(RDTSCP,        3, 27)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(LM,            3, 29)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(3DNOWEXT,      3, 30)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_AMD(3DNOW,         3, 31)
 
 /// \brief Query CPUID information
 /// \ingroup CPUID
@@ -371,7 +515,7 @@ class CPUID
     {
         print_equal(os);
         os << "Vendor ID                  " << vendor() << '\n';
-        if (max_eax_ext() >= ext0_ + 4)
+        if (max_eax_ext() >= ext0_ + 4U)
             os << "Processor brand            " << brand() << '\n';
         if (max_eax() >= 0x16) {
             os << "Base frequency (MHz)       " << base_freq() << '\n';
@@ -389,20 +533,6 @@ class CPUID
         print_equal(os);
     }
 
-#ifdef _MSC_VER
-    static reg_type info (unsigned eax, unsigned ecx)
-    {
-        int CPUInfo[4] = {0};
-        int InfoType[2] = {0};
-        std::memcpy(&InfoType[0], &eax, sizeof(int));
-        std::memcpy(&InfoType[1], &ecx, sizeof(int));
-        __cpuidex(CPUInfo, InfoType[0], InfoType[1]);
-        reg_type reg;
-        std::memcpy(reg.data(), CPUInfo, sizeof(int) * 4);
-
-        return reg;
-    }
-#elif VSMC_HAS_INLINE_ASSEMBLY
     /// \brief Get the CPUID information stored in EAX, EBX, ECX and EDX, given
     /// input EAX and ECX values
     ///
@@ -410,24 +540,29 @@ class CPUID
     /// be called each time this function is called.
     static reg_type info (unsigned eax, unsigned ecx)
     {
-        unsigned ebx = 0;
-        unsigned edx = 0;
+        reg_type reg;
+
+#ifdef _MSC_VER
+        __cpuidex(reinterpret_cast<int *>(reg.data),
+                static_cast<int>(eax), static_cast<int>(ecx));
+#elif VSMC_HAS_INLINE_ASSEMBLY
+        unsigned ebx = 0x00;
+        unsigned edx = 0x00;
         __asm__(
                 "cpuid\n"
                 : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
                 :  "a" (eax),  "c" (ecx)
                );
-        reg_type reg;
         reg.at<0>() = eax;
         reg.at<1>() = ebx;
         reg.at<2>() = ecx;
         reg.at<3>() = edx;
-
-        return reg;
-    }
 #else // VSMC_HAS_INLINE_ASSEMBLY
 #error Compiler not supported
 #endif // _MSC_VER
+
+        return reg;
+    }
 
     /// \brief Get the CPUID information stored in EAX, EBX, ECX and EDX, given
     /// input EAX and ECX values.
@@ -439,24 +574,25 @@ class CPUID
     static const reg_type &info ()
     {
         static reg_type reg(info_dispatch<EAX, ECX>(
-                    cxx11::integral_constant<bool, EAX == 0 || EAX == ext0_>(),
+                    cxx11::integral_constant<bool,
+                    EAX == 0x00 || EAX == ext0_>(),
                     cxx11::integral_constant<bool, EAX < ext0_>()));
 
         return reg;
     }
 
-    /// \brief Max calling parameter EAX (EAX = 0; EAX)
+    /// \brief Max calling parameter EAX (EAX = 0x00; EAX)
     static unsigned max_eax ()
-    {return info<0, 0>().at<0>();}
+    {return info<0x00, 0x00>().at<0>();}
 
     /// \brief Max extended calling parameter EAX (EAX = 0x80000000; EAX)
     static unsigned max_eax_ext ()
-    {return info<ext0_, 0>().at<0>();}
+    {return info<ext0_, 0x00>().at<0>();}
 
-    /// \brief Vendor ID (EAX = 0; EBX, EDX, ECX)
+    /// \brief Vendor ID (EAX = 0x00; EBX, EDX, ECX)
     static std::string vendor ()
     {
-        reg_type reg(info<0, 0>());
+        reg_type reg(info<0x00, 0x00>());
         const unsigned *uptr = reg.data();
         char str[sizeof(unsigned) * 3 + 1] = {'\0'};
         std::memcpy(str + sizeof(unsigned) * 0, uptr + 1, sizeof(unsigned));
@@ -470,9 +606,9 @@ class CPUID
     /// EAX, EBX, ECX, EDX)
     static std::string brand ()
     {
-        reg_type reg2(info<ext0_ + 2, 0>());
-        reg_type reg3(info<ext0_ + 3, 0>());
-        reg_type reg4(info<ext0_ + 4, 0>());
+        reg_type reg2(info<ext0_ + 2U, 0>());
+        reg_type reg3(info<ext0_ + 3U, 0>());
+        reg_type reg4(info<ext0_ + 4U, 0>());
         const std::size_t reg_size = sizeof(unsigned) * 4;
         char str[reg_size * 3] = {'\0'};
         std::memcpy(str + reg_size * 0, reg2.data(), reg_size);
@@ -487,7 +623,7 @@ class CPUID
     static unsigned max_cache_index ()
     {
         reg_type reg;
-        unsigned ecx = 0;
+        unsigned ecx = 0x00;
         while (true) {
             reg = info(0x04, ecx);
             if (extract_bits<4, 0>(reg.at<0>()) == 0)
@@ -507,27 +643,27 @@ class CPUID
 
     /// \brief Intel Turbo Boost (EAX = 0x06; EAX[1])
     static bool intel_turbo_boost ()
-    {return test_bit<1>(info<0x06, 0>().at<0>());}
+    {return test_bit<1>(info<0x06, 0x00>().at<0>());}
 
     /// \brief Base frequency in MHz (EAX = 0x16; EAX[15:0])
     static unsigned base_freq ()
-    {return extract_bits<15, 0>(info<0x16, 0>().at<0>());}
+    {return extract_bits<15, 0>(info<0x16, 0x00>().at<0>());}
 
     /// \brief Maximum frequency in MHz (EAX = 0x16; EBX[15:0])
     static unsigned max_freq ()
-    {return extract_bits<15, 0>(info<0x16, 0>().at<1>());}
+    {return extract_bits<15, 0>(info<0x16, 0x00>().at<1>());}
 
     /// \brief Bus (reference) frequency in MHz (EAX = 0x16; ECX[15:0])
     static unsigned bus_freq ()
-    {return extract_bits<15, 0>(info<0x16, 0>().at<2>());}
+    {return extract_bits<15, 0>(info<0x16, 0x00>().at<2>());}
 
     /// \brief CPU feature
     template <CPUIDFeature Feat>
     static bool has_feature ()
     {
-        return test_bit<internal::CPUIDFeatureInfo<Feat>::bit>(
-                info<internal::CPUIDFeatureInfo<Feat>::eax, 0>().template
-                at<internal::CPUIDFeatureInfo<Feat>::reg>()) != 0;
+        return test_bit<CPUIDFeatureInfo<Feat>::bit>(info<
+                CPUIDFeatureInfo<Feat>::eax, CPUIDFeatureInfo<Feat>::ecx
+                >().template at<CPUIDFeatureInfo<Feat>::index>());
     }
 
     private :
@@ -536,11 +672,11 @@ class CPUID
 
     template <unsigned, unsigned>
     static reg_type info_dispatch (cxx11::true_type, cxx11::true_type)
-    {return info(0, 0);}
+    {return info(0x00, 0x00);}
 
     template <unsigned, unsigned>
     static reg_type info_dispatch (cxx11::true_type, cxx11::false_type)
-    {return info(ext0_, 0);}
+    {return info(ext0_, 0x00);}
 
     template <unsigned EAX, unsigned ECX, bool Basic>
     static reg_type info_dispatch (cxx11::false_type,
@@ -578,7 +714,7 @@ class CPUID
     {
         std::vector<cache_param_type> caches;
         unsigned max_ecx = max_cache_index();
-        for (unsigned ecx = 0; ecx != max_ecx; ++ecx)
+        for (unsigned ecx = 0x00; ecx != max_ecx; ++ecx)
             caches.push_back(cache_param(ecx));
 
         const std::size_t fix = 12;
@@ -693,22 +829,35 @@ class CPUID
     template <typename CharT, typename Traits>
     static void print_feature (std::basic_ostream<CharT, Traits> &os)
     {
-        std::vector<std::string> feats;
-        feature_str(feats);
-        os << "Basic features\n";
-        print_dash(os);
-        print_feature(os, feats);
+        if (max_eax() >= 0x01) {
+            std::vector<std::string> feats;
+            feature_str(feats);
+            if (feats.size() != 0) {
+                os << "Processor info and features\n";
+                print_dash(os);
+                print_feature(os, feats);
+            }
+        }
         if (max_eax() >= 0x07) {
-            std::vector<std::string> feats_ext;
-            feature_str_ext(feats_ext);
-            if (feats_ext.size() != 0) {
+            std::vector<std::string> feats;
+            feature_str_ext(feats);
+            if (feats.size() != 0) {
                 print_equal(os);
                 os << "Extended features\n";
                 print_dash(os);
-                print_feature(os, feats_ext);
+                print_feature(os, feats);
             }
         }
-        os << std::flush;
+        if (max_eax_ext() >= ext0_ + 1U) {
+            std::vector<std::string> feats;
+            feature_str_amd(feats);
+            if (feats.size() != 0) {
+                print_equal(os);
+                os << "Extended processor info and features\n";
+                print_dash(os);
+                print_feature(os, feats);
+            }
+        }
     }
 
     template <typename CharT, typename Traits>
@@ -803,42 +952,100 @@ class CPUID
         feature_str<CPUIDFeaturePBE>         (feats);
     }
 
-    static void feature_str_ext (std::vector<std::string> &feats_ext)
+    static void feature_str_ext (std::vector<std::string> &feats)
     {
-        feature_str<CPUIDFeatureExtFSGSBASE>    (feats_ext);
-        feature_str<CPUIDFeatureExtBMI1>        (feats_ext);
-        feature_str<CPUIDFeatureExtHLE>         (feats_ext);
-        feature_str<CPUIDFeatureExtAVX2>        (feats_ext);
-        feature_str<CPUIDFeatureExtSMEP>        (feats_ext);
-        feature_str<CPUIDFeatureExtBMI2>        (feats_ext);
-        feature_str<CPUIDFeatureExtERMS>        (feats_ext);
-        feature_str<CPUIDFeatureExtINVPCID>     (feats_ext);
-        feature_str<CPUIDFeatureExtRTM>         (feats_ext);
-        feature_str<CPUIDFeatureExtMPX>         (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512F>     (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512DQ>    (feats_ext);
-        feature_str<CPUIDFeatureExtRDSEED>      (feats_ext);
-        feature_str<CPUIDFeatureExtADX>         (feats_ext);
-        feature_str<CPUIDFeatureExtSMAP>        (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512IFMA52>(feats_ext);
-        feature_str<CPUIDFeatureExtCLFLUSHOPT>  (feats_ext);
-        feature_str<CPUIDFeatureExtINTEL_TRACE> (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512PF>    (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512ER>    (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512CD>    (feats_ext);
-        feature_str<CPUIDFeatureExtSHA>         (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512BW>    (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512VL>    (feats_ext);
+        feature_str<CPUIDFeatureFSGSBASE>    (feats);
+        feature_str<CPUIDFeatureBMI1>        (feats);
+        feature_str<CPUIDFeatureHLE>         (feats);
+        feature_str<CPUIDFeatureAVX2>        (feats);
+        feature_str<CPUIDFeatureSMEP>        (feats);
+        feature_str<CPUIDFeatureBMI2>        (feats);
+        feature_str<CPUIDFeatureERMS>        (feats);
+        feature_str<CPUIDFeatureINVPCID>     (feats);
+        feature_str<CPUIDFeatureRTM>         (feats);
+        feature_str<CPUIDFeatureMPX>         (feats);
+        feature_str<CPUIDFeatureAVX512F>     (feats);
+        feature_str<CPUIDFeatureAVX512DQ>    (feats);
+        feature_str<CPUIDFeatureRDSEED>      (feats);
+        feature_str<CPUIDFeatureADX>         (feats);
+        feature_str<CPUIDFeatureSMAP>        (feats);
+        feature_str<CPUIDFeatureAVX512IFMA52>(feats);
+        feature_str<CPUIDFeatureCLFLUSHOPT>  (feats);
+        feature_str<CPUIDFeatureINTEL_TRACE> (feats);
+        feature_str<CPUIDFeatureAVX512PF>    (feats);
+        feature_str<CPUIDFeatureAVX512ER>    (feats);
+        feature_str<CPUIDFeatureAVX512CD>    (feats);
+        feature_str<CPUIDFeatureSHA>         (feats);
+        feature_str<CPUIDFeatureAVX512BW>    (feats);
+        feature_str<CPUIDFeatureAVX512VL>    (feats);
 
-        feature_str<CPUIDFeatureExtPREFETCHWT1> (feats_ext);
-        feature_str<CPUIDFeatureExtAVX512VBMI>  (feats_ext);
+        feature_str<CPUIDFeaturePREFETCHWT1> (feats);
+        feature_str<CPUIDFeatureAVX512VBMI>  (feats);
+    }
+
+    static void feature_str_amd (std::vector<std::string> &feats)
+    {
+        feature_str<CPUIDFeatureExtLAHF_LM>      (feats);
+        feature_str<CPUIDFeatureExtCMP_LEGACY>   (feats);
+        feature_str<CPUIDFeatureExtSVM>          (feats);
+        feature_str<CPUIDFeatureExtEXTAPIC>      (feats);
+        feature_str<CPUIDFeatureExtCR8_LEGACY>   (feats);
+        feature_str<CPUIDFeatureExtABM>          (feats);
+        feature_str<CPUIDFeatureExtSSE4A>        (feats);
+        feature_str<CPUIDFeatureExtMISALIGNSSE>  (feats);
+        feature_str<CPUIDFeatureExt3DNOWPREFETCH>(feats);
+        feature_str<CPUIDFeatureExtOSVW>         (feats);
+        feature_str<CPUIDFeatureExtIBS>          (feats);
+        feature_str<CPUIDFeatureExtXOP>          (feats);
+        feature_str<CPUIDFeatureExtSKINIT>       (feats);
+        feature_str<CPUIDFeatureExtWDT>          (feats);
+        feature_str<CPUIDFeatureExtLWP>          (feats);
+        feature_str<CPUIDFeatureExtFMA4>         (feats);
+        feature_str<CPUIDFeatureExtTCE>          (feats);
+        feature_str<CPUIDFeatureExtNODEID_MSR>   (feats);
+        feature_str<CPUIDFeatureExtTBM>          (feats);
+        feature_str<CPUIDFeatureExtTOPOEXT>      (feats);
+        feature_str<CPUIDFeatureExtPERFCTR_CORE> (feats);
+        feature_str<CPUIDFeatureExtPERFCTR_NB>   (feats);
+        feature_str<CPUIDFeatureExtDBX>          (feats);
+        feature_str<CPUIDFeatureExtPERFTSC>      (feats);
+        feature_str<CPUIDFeatureExtPCX_L2I>      (feats);
+
+        feature_str<CPUIDFeatureExtFPU>          (feats);
+        feature_str<CPUIDFeatureExtVME>          (feats);
+        feature_str<CPUIDFeatureExtDE>           (feats);
+        feature_str<CPUIDFeatureExtPSE>          (feats);
+        feature_str<CPUIDFeatureExtTSC>          (feats);
+        feature_str<CPUIDFeatureExtMSR>          (feats);
+        feature_str<CPUIDFeatureExtPAE>          (feats);
+        feature_str<CPUIDFeatureExtMCE>          (feats);
+        feature_str<CPUIDFeatureExtCX8>          (feats);
+        feature_str<CPUIDFeatureExtAPIC>         (feats);
+        feature_str<CPUIDFeatureExtSYSCALL>      (feats);
+        feature_str<CPUIDFeatureExtMTRR>         (feats);
+        feature_str<CPUIDFeatureExtPGE>          (feats);
+        feature_str<CPUIDFeatureExtMCA>          (feats);
+        feature_str<CPUIDFeatureExtCMOV>         (feats);
+        feature_str<CPUIDFeatureExtPAT>          (feats);
+        feature_str<CPUIDFeatureExtPSE36>        (feats);
+        feature_str<CPUIDFeatureExtMP>           (feats);
+        feature_str<CPUIDFeatureExtNX>           (feats);
+        feature_str<CPUIDFeatureExtMMX>          (feats);
+        feature_str<CPUIDFeatureExtMMXEXT>       (feats);
+        feature_str<CPUIDFeatureExtFXSR>         (feats);
+        feature_str<CPUIDFeatureExtFXSR_OPT>     (feats);
+        feature_str<CPUIDFeatureExtGBPAGES>      (feats);
+        feature_str<CPUIDFeatureExtRDTSCP>       (feats);
+        feature_str<CPUIDFeatureExtLM>           (feats);
+        feature_str<CPUIDFeatureExt3DNOWEXT>     (feats);
+        feature_str<CPUIDFeatureExt3DNOW>        (feats);
     }
 
     template <CPUIDFeature Feat>
     static void feature_str (std::vector<std::string> &feats)
     {
         if (has_feature<Feat>())
-            feats.push_back(internal::CPUIDFeatureInfo<Feat>::str());
+            feats.push_back(CPUIDFeatureInfo<Feat>::str());
     }
 }; // class CPUID
 
