@@ -89,7 +89,7 @@ class RDTSCPCounter
     }
 
     /// \brief Return the accumulated elapsed cycle count
-    result_type elapsed () const {return elapsed_;}
+    result_type cycles () const {return elapsed_;}
 
     private :
 
