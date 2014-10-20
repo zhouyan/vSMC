@@ -39,7 +39,7 @@ class RDTSCPCounter
 
     /// \brief Start the counter, no effect if already started
     ///
-    /// \return `true` if it is started by this call, and the `elapsed` cycle
+    /// \return `true` if it is started by this call, and the elapsed cycle
     /// count will be incremented next time `stop()` is called. The increment
     /// will be relative to the time point of this call. `false` if it is
     /// already started earlier.
@@ -56,9 +56,9 @@ class RDTSCPCounter
 
     /// \brief Stop the counter, no effect if already stopped
     ///
-    /// \return `true` if it is stoped by this call, and the `elapsed` cycle
+    /// \return `true` if it is stoped by this call, and the elapsed cycle
     /// count has been incremented. `false` in one of the following situations.
-    /// In all these situations, the `elapsed` cycle count will not be
+    /// In all these situations, the elapsed cycle count will not be
     /// incremented.
     /// - It already stopped or wasn't started before.
     /// - The logical processor has changed since the last successful `start()`
@@ -80,7 +80,7 @@ class RDTSCPCounter
 	return same_id;
     }
 
-    /// \brief Stop and reset the `elapsed` cycle count to zero
+    /// \brief Stop and reset the elapsed cycle count to zero
     void reset ()
     {
 	start();

@@ -110,7 +110,7 @@ class StopWatchClockAdapter
 
     /// \brief Start the watch, no effect if already started
     ///
-    /// \return `true` if it is started by this call, and the `elapsed` time
+    /// \return `true` if it is started by this call, and the elapsed time
     /// will be incremented next time `stop()` is called. The increment will be
     /// relative to the time point of this call. `false` if it is already
     /// started earlier.
@@ -127,7 +127,7 @@ class StopWatchClockAdapter
 
     /// \brief Stop the watch, no effect if already stopped
     ///
-    /// \return `true` if it is stoped by this call, and the `elapsed` time has
+    /// \return `true` if it is stoped by this call, and the elapsed time has
     /// been incremented. `false` if it is already stopped or wasn't started
     /// before.
     bool stop ()
@@ -142,7 +142,7 @@ class StopWatchClockAdapter
         return true;
     }
 
-    /// \brief Stop and reset the `elapsed` time to zero
+    /// \brief Stop and reset the elapsed time to zero
     void reset ()
     {
         start();
