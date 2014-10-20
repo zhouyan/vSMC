@@ -257,7 +257,7 @@ class AESNIEngine
 
     public :
 
-    explicit AESNIEngine (result_type s = 0) : remain_(0)
+    explicit AESNIEngine (result_type s = 0) : index_(buffer_size_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(s);
@@ -267,20 +267,21 @@ class AESNIEngine
     explicit AESNIEngine (SeedSeq &seq, typename cxx11::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, key_type,
             AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
-            >::value>::type * = VSMC_NULLPTR) : remain_(0)
+            >::value>::type * = VSMC_NULLPTR) : index_(buffer_size_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(seq);
     }
 
-    AESNIEngine (const key_type &k) : key_(k), remain_(0)
+    AESNIEngine (const key_type &k) : key_(k), index_(buffer_size_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         counter::reset(ctr_block_);
         key_seq_.set(k);
     }
 
-    AESNIEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
+    AESNIEngine (const ctr_type &c, const key_type &k) :
+        key_(k), index_(buffer_size_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         ctr_block_type tmp;
@@ -295,7 +296,7 @@ class AESNIEngine
         key_.fill(0);
         key_.front() = s;
         key_seq_.set(key_);
-        remain_ = 0;
+        index_ = buffer_size_;
     }
 
     template <typename SeedSeq>
@@ -305,14 +306,14 @@ class AESNIEngine
         counter::reset(ctr_block_);
         seq.generate(key_.begin(), key_.end());
         key_seq_.set(key_);
-        remain_ = 0;
+        index_ = buffer_size_;
     }
 
     void seed (const key_type &k)
     {
         counter::reset(ctr_block_);
         key_seq_.set(k);
-        remain_ = 0;
+        index_ = buffer_size_;
     }
 
     template <std::size_t B>
@@ -341,7 +342,7 @@ class AESNIEngine
         ctr_block_type tmp;
         Counter<ctr_type>::set(tmp, c);
         std::memcpy(ctr_block_.data(), tmp.data(), 16 * Blocks);
-        remain_ = 0;
+        index_ = buffer_size_;
     }
 
     /// \brief Set the block of counters
@@ -361,14 +362,14 @@ class AESNIEngine
     void ctr_block (const ctr_block_type &cb)
     {
         std::memcpy(ctr_block_.data(), cb.data(), 16 * Blocks);
-        remain_ = 0;
+        index_ = buffer_size_;
     }
 
     void key (const key_type &k)
     {
         key_ = k;
         key_seq_.set(k);
-        remain_ = 0;
+        index_ = buffer_size_;
     }
 
     /// \brief After reset, next call to `operator()` will always increase the
@@ -376,19 +377,18 @@ class AESNIEngine
     void reset ()
     {
         counter::reset(ctr_block_);
-        remain_ = 0;
+        index_ = buffer_size_;
     }
 
     result_type operator() ()
     {
-        if (remain_ == 0) {
+        if (index_ == buffer_size_) {
             counter::increment(ctr_block_);
             generate_buffer(ctr_block_, buffer_);
-            remain_ = buffer_size_;
+            index_ = 0;
         }
-        --remain_;
 
-        return reinterpret_cast<const result_type *>(&buffer_)[remain_];
+        return reinterpret_cast<const result_type *>(&buffer_)[index_++];
     }
 
     /// \brief Generate a buffer of random bits given a counter using the
@@ -430,24 +430,24 @@ class AESNIEngine
     void discard (result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
-        if (n <= remain_) {
-            remain_ -= n;
+        if (index_ + n <= buffer_sie_) {
+            index_ += n;
             return;
         }
 
-        n -= remain_;
+        n -= buffer_size_ - index_;
         if (n <= buffer_size_) {
-            remain_ = 0;
+            index_ = buffer_size_;
             operator()();
-            remain_ = buffer_size_ - n;
+            index_ = n;
             return;
         }
 
-        remain_ = 0;
         counter::increment(ctr_block_,
                 static_cast<result_type>(n / buffer_size_));
+        index_ = buffer_size_;
         operator()();
-        remain_ = buffer_size_ - n % buffer_size_;
+        index_ = n % buffer_size_;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -463,7 +463,7 @@ class AESNIEngine
             const AESNIEngine<
             ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng2)
     {
-        return eng1.remain_ == eng2.remain_ &&
+        return eng1.index_ == eng2.index_ &&
             eng1.key_ == eng2.key_ &&
             eng1.ctr_block_ == eng2.ctr_block_;
     }
@@ -490,7 +490,7 @@ class AESNIEngine
         }
         os << eng.ctr_block_ << ' ';
         os << eng.key_ << ' ';
-        os << eng.remain_;
+        os << eng.index_;
 
         return os;
     }
@@ -508,7 +508,7 @@ class AESNIEngine
             m128i_input(is, eng_tmp.buffer_[i]);
         is >> std::ws >> eng_tmp.ctr_block_;
         is >> std::ws >> eng_tmp.key_;
-        is >> std::ws >> eng_tmp.remain_;
+        is >> std::ws >> eng_tmp.index_;
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
@@ -532,7 +532,7 @@ class AESNIEngine
     cbtype ctr_block_;
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
     key_type key_;
-    std::size_t remain_;
+    std::size_t index_;
 
     template <typename CBType>
     void generate_buffer (const CBType &cb, buffer_type &buf) const
