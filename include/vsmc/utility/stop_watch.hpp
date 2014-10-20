@@ -354,7 +354,7 @@ class StopWatch
         elapsed_.tv_nsec += inc_nsec;
         running_ = false;
 
-        true;
+        return true;
     }
 
     void reset ()
