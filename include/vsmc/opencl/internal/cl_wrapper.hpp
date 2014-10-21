@@ -18,6 +18,11 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4996)
+#endif
+
 #include <cl.hpp>
 
 #ifndef __CL_ENABLE_EXCEPTIONS
@@ -28,6 +33,10 @@
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
 #pragma GCC diagnostic pop
 #endif
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(pop)
 #endif
 
 #if defined(CL_VERSION_2_0)
