@@ -102,9 +102,9 @@ class RDTSCPCounter
 #ifdef _MSC_VER
         return static_cast<uint64_t>(__rdtscp(&ecx));
 #else // _MSC_VER
-        unsigned eax = 0x00;
-        unsigned edx = 0x00;
-        unsigned ecx = 0x00;
+        unsigned eax = 0;
+        unsigned edx = 0;
+        unsigned ecx = 0;
         __asm__ volatile(
                 "rdtscp\n"
                 : "=a" (eax), "=d" (edx), "=c" (ecx)

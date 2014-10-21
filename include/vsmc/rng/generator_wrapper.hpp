@@ -51,7 +51,7 @@ struct GeneratorWrapperMinMaxTrait
 /// `uint16_t`, `uint32_t` and `uint64_t`. Note that, the generator does not
 /// necessarily returns one of these types. For example, on some platforms,
 /// some RNG returns `unsigned long long`, which is 64-bits, while `uint64_t`
-/// is also 64-bits but a typedef of `unsigned long`. It is ok as long the
+/// is also 64-bits but a typedef of `unsigned long`. It is ok as long as the
 /// `static_cast` from the returned value to `uint64_t` does not change, add,
 /// or lose any bits.
 ///

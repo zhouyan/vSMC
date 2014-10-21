@@ -8,13 +8,22 @@
 // See LICENSE for details.
 //============================================================================
 
-#include <immintrin.h>
-#include <iostream>
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
 
 int main ()
 {
     unsigned short r;
-    while (!(_rdseed16_step(&r)))
-        ;
-    std::cout << r << std::endl;
+#ifdef _MSC_VER
+    _rdseed16_step(&r);
+#else
+    unsigned char cf = 0;
+    __asm__ volatile(
+            "rdseedw %0; setcb %1\\n"
+            : "=r" (r), "=qm" (cf));
+#endif
+
+    return 0;
 }
+

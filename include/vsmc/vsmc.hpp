@@ -169,7 +169,6 @@
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/core/adapter.hpp>
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/normalizing_constant.hpp>
 #include <vsmc/core/particle.hpp>
@@ -177,9 +176,6 @@
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/state_matrix.hpp>
-#if VSMC_HAS_CXX11LIB_TUPLE
-#include <vsmc/core/state_tuple.hpp>
-#endif
 #include <vsmc/core/weight_set.hpp>
 
 #include <vsmc/cxx11/cmath.hpp>
@@ -187,97 +183,6 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
-#include <vsmc/gcd/dispatch_function.hpp>
-#if VSMC_USE_GCD
-#include <vsmc/gcd/dispatch_group.hpp>
-#include <vsmc/gcd/dispatch_object.hpp>
-#include <vsmc/gcd/dispatch_queue.hpp>
-#include <vsmc/gcd/dispatch_source.hpp>
-#endif
-
-#include <vsmc/integrate/is_integrate.hpp>
-#include <vsmc/integrate/nintegrate_base.hpp>
-#include <vsmc/integrate/nintegrate_newton_cotes.hpp>
-
-#include <vsmc/math/constants.hpp>
-#include <vsmc/math/vmath.hpp>
-
-#if VSMC_USE_MPI
-#include <vsmc/mpi/backend_mpi.hpp>
-#include <vsmc/mpi/mpi_manager.hpp>
-#endif
-
-#if VSMC_USE_OPENCL
-#include <vsmc/opencl/adapter.hpp>
-#include <vsmc/opencl/backend_cl.hpp>
-#include <vsmc/opencl/cl_buffer.hpp>
-#include <vsmc/opencl/cl_manager.hpp>
-#include <vsmc/opencl/cl_manip.hpp>
-#include <vsmc/opencl/cl_query.hpp>
-#endif
-
-#include <vsmc/resample/basic.hpp>
-#include <vsmc/resample/multinomial.hpp>
-#include <vsmc/resample/residual.hpp>
-#include <vsmc/resample/residual_stratified.hpp>
-#include <vsmc/resample/residual_systematic.hpp>
-#include <vsmc/resample/stratified.hpp>
-#include <vsmc/resample/systematic.hpp>
-
-#include <vsmc/rng/rng_set.hpp>
-#include <vsmc/rng/seed.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
-#include <vsmc/rng/generator_wrapper.hpp>
-#include <vsmc/rng/philox.hpp>
-#include <vsmc/rng/threefry.hpp>
-#include <vsmc/rng/xorshift.hpp>
-#include <vsmc/rng/xor_combine_engine.hpp>
-#if VSMC_USE_MKL_VSL
-#include <vsmc/rng/mkl_rng.hpp>
-#endif
-#include <vsmc/rng/urng.h>
-#include <vsmc/rng/gammak1.h>
-#include <vsmc/rng/normal01.h>
-#include <vsmc/rng/u01.h>
-
-#include <vsmc/smp/adapter.hpp>
-#include <vsmc/smp/backend_base.hpp>
-#if VSMC_USE_CILK
-#include <vsmc/smp/backend_cilk.hpp>
-#endif
-#if VSMC_USE_GCD
-#include <vsmc/smp/backend_gcd.hpp>
-#endif
-#if VSMC_USE_OMP
-#include <vsmc/smp/backend_omp.hpp>
-#endif
-#if VSMC_USE_PPL
-#include <vsmc/smp/backend_ppl.hpp>
-#endif
-#include <vsmc/smp/backend_seq.hpp>
-#if VSMC_HAS_CXX11LIB_THREAD
-#include <vsmc/smp/backend_std.hpp>
-#endif
-#if VSMC_USE_TBB
-#include <vsmc/smp/backend_tbb.hpp>
-#endif
-
-#include <vsmc/thread/blocked_range.hpp>
-#if VSMC_HAS_CXX11LIB_THREAD
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
-#include <vsmc/thread/parallel_reduce.hpp>
-#include <vsmc/thread/thread_guard.hpp>
-#include <vsmc/thread/thread_num.hpp>
-#endif
-
-#include <vsmc/utility/backup.hpp>
-#if VSMC_USE_GCD
-#include <vsmc/utility/dispatch.hpp>
-#endif
-#if VSMC_USE_HDF5
-#include <vsmc/utility/hdf5_save.hpp>
-#endif
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 

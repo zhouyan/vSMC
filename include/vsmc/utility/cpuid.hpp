@@ -78,7 +78,7 @@ enum CPUIDFeature
     CPUIDFeatureOSXSAVE,          ///< EAX = 0x01, ECX = 0x00; ECX[27]
     CPUIDFeatureAVX,              ///< EAX = 0x01, ECX = 0x00; ECX[28]
     CPUIDFeatureF16C,             ///< EAX = 0x01, ECX = 0x00; ECX[29]
-    CPUIDFeatureRDRND,            ///< EAX = 0x01, ECX = 0x00; ECX[30]
+    CPUIDFeatureRDRAND,           ///< EAX = 0x01, ECX = 0x00; ECX[30]
     CPUIDFeatureHYPERVISOR,       ///< EAX = 0x01, ECX = 0x00; ECX[31]
 
     CPUIDFeatureFPU,              ///< EAX = 0x01, ECX = 0x00; EDX[00]
@@ -257,7 +257,7 @@ VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(XSAVE,        0x01, 0x00, 2, 26)
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(OSXSAVE,      0x01, 0x00, 2, 27)
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(AVX,          0x01, 0x00, 2, 28)
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(F16C,         0x01, 0x00, 2, 29)
-VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(RDRND,        0x01, 0x00, 2, 30)
+VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(RDRAND,       0x01, 0x00, 2, 30)
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(HYPERVISOR,   0x01, 0x00, 2, 31)
 
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(FPU,          0x01, 0x00, 3,  0)
@@ -898,7 +898,7 @@ class CPUID
         feature_str<CPUIDFeatureOSXSAVE>     (feats);
         feature_str<CPUIDFeatureAVX>         (feats);
         feature_str<CPUIDFeatureF16C>        (feats);
-        feature_str<CPUIDFeatureRDRND>       (feats);
+        feature_str<CPUIDFeatureRDRAND>      (feats);
         feature_str<CPUIDFeatureHYPERVISOR>  (feats);
 
         feature_str<CPUIDFeatureFPU>         (feats);

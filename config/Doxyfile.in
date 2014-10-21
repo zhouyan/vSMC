@@ -2008,21 +2008,20 @@ PREDEFINED             = VSMC_DOXYGEN \
                          VSMC_HAS_CXX11LIB_TUPLE \
                          VSMC_HAS_C99LIB_MATH \
                          VSMC_HAS_INT128 \
-                         VSMC_HAS_INLINE_ASSEMBLY \
-                         VSMC_HAS_INTRINSIC_FUNCTION \
-                         VSMC_HAS_INTRINSIC_INT64 \
                          VSMC_HAS_OPENCL_DOUBLE \
-                         VSMC_USE_AES_NI \
-                         VSMC_USE_MPI \
-                         VSMC_USE_OPENCL \
-                         VSMC_USE_CILK \
-                         VSMC_USE_GCD \
-                         VSMC_USE_GCD_LION \
-                         VSMC_USE_OMP \
-                         VSMC_USE_PPL \
-                         VSMC_USE_TBB \
-                         VSMC_USE_MKL \
-                         VSMC_USE_HDF5 \
+                         VSMC_HAS_AES_NI \
+                         VSMC_HAS_RDRAND \
+                         VSMC_HAS_RDSEED \
+                         VSMC_HAS_MPI \
+                         VSMC_HAS_OPENCL \
+                         VSMC_HAS_CILK \
+                         VSMC_HAS_GCD \
+                         VSMC_HAS_GCD_LION \
+                         VSMC_HAS_OMP \
+                         VSMC_HAS_PPL \
+                         VSMC_HAS_TBB \
+                         VSMC_HAS_MKL \
+                         VSMC_HAS_HDF5 \
                          __APPLE__ \
                          __MAC_OS_X_VERSION_MIN_REQUIRED=1090 \
                          __MAC_10_0=1000 \
