@@ -12,6 +12,7 @@
 #define VSMC_UTILITY_RDTSCP_COUNTER_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <stdint.h>
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -24,8 +25,6 @@ namespace vsmc {
 class RDTSCPCounter
 {
     public :
-
-    typedef unsigned VSMC_INTRINSIC_INT64 result_type;
 
     RDTSCPCounter () : elapsed_(0), start_(0), start_id_(0), running_(false)
     {reset();}
@@ -45,13 +44,13 @@ class RDTSCPCounter
     /// already started earlier.
     bool start ()
     {
-	if (running_)
-	    return false;
+        if (running_)
+            return false;
 
-	running_ = true;
-	start_ = now(&start_id_);
+        running_ = true;
+        start_ = now(&start_id_);
 
-	return true;
+        return true;
     }
 
     /// \brief Stop the counter, no effect if already stopped
@@ -67,41 +66,41 @@ class RDTSCPCounter
     /// that the TSC MSR has been reset.
     bool stop ()
     {
-	if (!running_)
-	    return false;
+        if (!running_)
+            return false;
 
-	unsigned stop_id = 0;
-	result_type stop = now(&stop_id);
-	bool same_id = stop_id == start_id_;
-	if (same_id)
-	    elapsed_ += stop - start_;
-	running_ = false;
+        unsigned stop_id = 0;
+        uint64_t stop = now(&stop_id);
+        bool same_id = stop_id == start_id_;
+        if (same_id)
+            elapsed_ += stop - start_;
+        running_ = false;
 
-	return same_id;
+        return same_id;
     }
 
     /// \brief Stop and reset the elapsed cycle count to zero
     void reset ()
     {
-	start();
-	elapsed_ = 0;
-	running_ = false;
+        start();
+        elapsed_ = 0;
+        running_ = false;
     }
 
     /// \brief Return the accumulated elapsed cycle count
-    result_type cycles () const {return elapsed_;}
+    uint64_t cycles () const {return elapsed_;}
 
     private :
 
-    result_type elapsed_;
-    result_type start_;
+    uint64_t elapsed_;
+    uint64_t start_;
     unsigned start_id_;
     bool running_;
 
-    result_type now (unsigned *aux)
+    uint64_t now (unsigned *aux)
     {
 #ifdef _MSC_VER
-        return __rdtscp(aux);
+        return static_cast<uint64_t>(__rdtscp(&ecx));
 #else // _MSC_VER
         unsigned eax = 0x00;
         unsigned edx = 0x00;
@@ -112,8 +111,7 @@ class RDTSCPCounter
                );
         *aux = ecx;
 
-        return (static_cast<result_type>(edx) << 32) +
-            static_cast<result_type>(eax);
+        return (static_cast<uint64_t>(edx) << 32) + static_cast<uint64_t>(eax);
 #endif // _MSC_VER
     }
 }; // class RDTSCPCounter
