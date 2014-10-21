@@ -129,8 +129,8 @@ class ResampleCopyFromReplication
             const IntType1 *replication, IntType2 *copy_from) const
     {
         if (M == N) {
-            std::size_t from = 0;
-            std::size_t time = 0;
+            IntType1 time = 0;
+            IntType2 from = 0;
             for (std::size_t to = 0; to != N; ++to) {
                 if (replication[to] != 0) {
                     copy_from[to] = static_cast<IntType2>(to);
@@ -143,7 +143,7 @@ class ResampleCopyFromReplication
                             ++from;
                         while (replication[from] < 2);
                     }
-                    copy_from[to] = static_cast<IntType2>(from);
+                    copy_from[to] = from;
                     ++time;
                 }
             }
