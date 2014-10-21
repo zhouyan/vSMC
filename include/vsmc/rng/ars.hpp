@@ -156,11 +156,6 @@ typedef ARSEngine<uint32_t, VSMC_RNG_ARS_ROUNDS, 4> ARS_4x32;
 /// \ingroup AESNIRNG
 typedef ARSEngine<uint32_t, VSMC_RNG_ARS_ROUNDS, 8> ARS_8x32;
 
-/// \brief ARS RNG engine with 32-bits integers output, 16 blocks and default
-/// rounds
-/// \ingroup AESNIRNG
-typedef ARSEngine<uint32_t, VSMC_RNG_ARS_ROUNDS, 16> ARS_16x32;
-
 /// \brief ARS RNG engine with 64-bits integers output, default blocks and
 /// default rounds
 /// \ingroup AESNIRNG
@@ -185,11 +180,6 @@ typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 4> ARS_4x64;
 /// rounds
 /// \ingroup AESNIRNG
 typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 8> ARS_8x64;
-
-/// \brief ARS RNG engine with 64-bits integers output, 16 blocks and default
-/// rounds
-/// \ingroup AESNIRNG
-typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 16> ARS_16x64;
 
 } // namespace vsmc
 
