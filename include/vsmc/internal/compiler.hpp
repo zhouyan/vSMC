@@ -264,10 +264,6 @@
 #define VSMC_HAS_RDRAND 0
 #endif
 
-#ifndef VSMC_HAS_RDSEED
-#define VSMC_HAS_RDSEED 0
-#endif
-
 #ifndef VSMC_HAS_OPENCL_DOUBLE
 #define VSMC_HAS_OPENCL_DOUBLE 1
 #endif

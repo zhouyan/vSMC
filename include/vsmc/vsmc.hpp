@@ -115,7 +115,7 @@
 
 /// \defgroup RDRNG Intel DRNG
 /// \ingroup RNG
-/// \brief Random number generating using Intel RDRAND and RDSEED instructions
+/// \brief Random number generating using Intel RDRAND instructions
 
 /// \defgroup RNGWrapper Wrapper
 /// \ingroup RNG

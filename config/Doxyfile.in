@@ -2011,7 +2011,6 @@ PREDEFINED             = VSMC_DOXYGEN \
                          VSMC_HAS_OPENCL_DOUBLE \
                          VSMC_HAS_AES_NI \
                          VSMC_HAS_RDRAND \
-                         VSMC_HAS_RDSEED \
                          VSMC_HAS_MPI \
                          VSMC_HAS_OPENCL \
                          VSMC_HAS_CILK \
