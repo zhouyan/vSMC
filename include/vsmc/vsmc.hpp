@@ -113,9 +113,9 @@
 /// \ingroup RNG
 /// \brief Random number generating using Random123 RNG
 
-/// \defgroup RDRNG RdRand and RdSeed
+/// \defgroup RDRNG RDRAND and RDSEED
 /// \ingroup RNG
-/// \brief Random number generating using Intel RdRand and RdSeed
+/// \brief Random number generating using Intel RDRAND and RDSEED
 
 /// \defgroup RNGWrapper Wrapper
 /// \ingroup RNG
