@@ -101,7 +101,7 @@ class RDTSCPCounter
     result_type now (unsigned *aux)
     {
 #ifdef _MSC_VER
-        return __rdtscp(aux)
+        return __rdtscp(aux);
 #else // _MSC_VER
         unsigned eax = 0x00;
         unsigned edx = 0x00;
