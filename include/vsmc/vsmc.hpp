@@ -87,7 +87,7 @@
 /// \brief Math functions on vectors (optional optimization through Intel MKL)
 
 /// \defgroup RNG Random number generating
-/// \brief Utilities for managing RNG engines
+/// \brief Random number generating engines and utilities
 
 /// \defgroup AESNIRNG AES-NI
 /// \ingroup RNG
@@ -113,9 +113,9 @@
 /// \ingroup RNG
 /// \brief Random number generating using Random123 RNG
 
-/// \defgroup RDRNG RDRAND and RDSEED
+/// \defgroup RDRNG Intel DRNG
 /// \ingroup RNG
-/// \brief Random number generating using Intel RDRAND and RDSEED
+/// \brief Random number generating using Intel RDRAND and RDSEED instructions
 
 /// \defgroup RNGWrapper Wrapper
 /// \ingroup RNG
@@ -123,7 +123,7 @@
 
 /// \defgroup U01 U01
 /// \ingroup RNG
-/// \brief Converting unsigned integers to floating points
+/// \brief Converting random integers to random floating points
 
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
