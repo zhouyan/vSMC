@@ -17,7 +17,8 @@
 int main ()
 {
 #ifdef _MSC_VER
-        __rdtscp(aux)
+        unsigned aux = 0x00;
+        __rdtscp(&aux);
 #else // _MSC_VER
         unsigned eax = 0x00;
         unsigned edx = 0x00;
