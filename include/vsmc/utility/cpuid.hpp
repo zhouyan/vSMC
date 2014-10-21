@@ -526,7 +526,7 @@ class CPUID
         reg_type reg;
 
 #ifdef _MSC_VER
-        __cpuidex(reinterpret_cast<int *>(reg.data),
+        __cpuidex(reinterpret_cast<int *>(reg.data()),
                 static_cast<int>(eax), static_cast<int>(ecx));
 #else // _MSC_VER
         unsigned ebx = 0x00;
@@ -679,8 +679,8 @@ class CPUID
     {return (val << (31U - Hi)) >> (31U - Hi + Lo);}
 
     template <unsigned Bit>
-    static unsigned test_bit (unsigned val)
-    {return val & (1U << Bit);}
+    static bool test_bit (unsigned val)
+    {return (val & (1U << Bit)) != 0;}
 
     template <typename CharT, typename Traits>
     static void print_equal (std::basic_ostream<CharT, Traits> &os)
