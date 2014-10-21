@@ -7,22 +7,22 @@ class ThreadGuard
 {
     public :
 
-    ThreadGuard () noexcept {}
+    ThreadGuard () {}
 
     ThreadGuard (const ThreadGuard &) = delete;
 
     ThreadGuard &operator= (const ThreadGuard &) = delete;
 
-    ThreadGuard (std::thread &&thr) noexcept :
+    ThreadGuard (std::thread &&thr) :
         thread_(std::move(thr)) {}
 
-    ThreadGuard (ThreadGuard &&other) noexcept :
+    ThreadGuard (ThreadGuard &&other) :
         thread_(std::move(other.thread_)) {}
 
-    ThreadGuard &operator= (ThreadGuard &&other) noexcept
+    ThreadGuard &operator= (ThreadGuard &&other)
     {thread_ = std::move(other.thread_); return *this;}
 
-    ~ThreadGuard () noexcept {if (thread_.joinable()) thread_.join();}
+    ~ThreadGuard () {if (thread_.joinable()) thread_.join();}
 
     private :
 
