@@ -112,17 +112,11 @@ template <typename ResultType, unsigned N> struct ThreefryRotateImpl;
 
 template <unsigned N>
 struct ThreefryRotateImpl<uint32_t, N>
-{
-    static uint32_t eval (uint32_t x)
-    {return (x << (N & 31) | x >> ((32 - N) & 31));}
-}; // struct ThreefryRotateImpl
+{static uint32_t eval (uint32_t x) {return x << N | x >> (32 - N);}};
 
 template <unsigned N>
 struct ThreefryRotateImpl<uint64_t, N>
-{
-    static uint64_t eval (uint64_t x)
-    {return (x << (N & 63) | x >> ((64 - N) & 63));}
-}; // struct ThreefryRotateImpl
+{static uint64_t eval (uint64_t x) {return x << N | x >> (64 - N);}};
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct ThreefryRotate {static void eval (Array<ResultType, K> &) {}};
