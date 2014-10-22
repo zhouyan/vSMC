@@ -232,6 +232,8 @@ class Array
             sv = sv_tmp;
 #endif
         }
+
+        return is;
     }
 
     template <size_type Pos>
