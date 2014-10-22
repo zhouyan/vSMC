@@ -26,11 +26,12 @@ int main ()
     unsigned ebx = 0;
     unsigned ecx = 0;
     unsigned edx = 0;
-    __asm__(
-            "cpuid\\n"
-            : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-            :  "a" (eax),  "c" (ecx)
-           );
+    __asm__ volatile
+        (
+         "cpuid\\n\\t"
+         : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+         :  "a" (eax),  "c" (ecx)
+        );
     assert(eax > 0);
 #endif
 

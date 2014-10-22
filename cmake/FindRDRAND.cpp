@@ -19,9 +19,12 @@ int main ()
     _rdrand16_step(&r);
 #else
     unsigned char cf = 0;
-    __asm__ volatile(
-            "rdrandw %0; setcb %1\\n"
-            : "=r" (r), "=qm" (cf));
+    __asm__ volatile
+        (
+         "rdrandw %0\\n\\t"
+         "setcb %1\\n"
+         : "=r" (r), "=qm" (cf)
+         );
 #endif
 
     return 0;

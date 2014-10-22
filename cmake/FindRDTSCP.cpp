@@ -23,10 +23,11 @@ int main ()
         unsigned eax = 0x00;
         unsigned edx = 0x00;
         unsigned ecx = 0x00;
-        __asm__ volatile(
-                "rdtscp\\n"
-                : "=a" (eax), "=d" (edx), "=c" (ecx)
-               );
+        __asm__ volatile
+            (
+             "rdtscp\\n"
+             : "=a" (eax), "=d" (edx), "=c" (ecx)
+            );
 #endif // _MSC_VER
 
     return 0;
