@@ -856,10 +856,8 @@ class CPUID
             std::vector<std::string> &feats)
     {
         std::sort(feats.begin(), feats.end());
-        const std::size_t N = feats.size();
-        const std::size_t fix = 15;
         for (std::size_t i = 0; i != feats.size(); ++i) {
-            print_feat(os, feats[i], fix);
+            print_feat(os, feats[i], 15);
             if (i % 6 == 5 || i == feats.size() - 1)
                 os << '\n';
         }
