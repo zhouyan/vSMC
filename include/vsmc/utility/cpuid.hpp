@@ -46,6 +46,30 @@ template <> struct CPUIDFeatureInfo<CPUIDFeatureExt##feat>                   \
 
 namespace vsmc {
 
+/// \brief Get the CPUID information stored in EAX, EBX, ECX and EDX, given
+/// input EAX and ECX values
+/// \ingroup CPUID
+inline void cpuid (unsigned eax, unsigned ecx, unsigned *reg)
+{
+#ifdef _MSC_VER
+    __cpuidex(reinterpret_cast<int *>(reg),
+            static_cast<int>(eax), static_cast<int>(ecx));
+#else // _MSC_VER
+    unsigned ebx = 0x00;
+    unsigned edx = 0x00;
+    __asm__ volatile
+        (
+         "cpuid\n"
+         : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+         :  "a" (eax),  "c" (ecx)
+        );
+    reg[0] = eax;
+    reg[1] = ebx;
+    reg[2] = ecx;
+    reg[3] = edx;
+#endif // _MSC_VER
+}
+
 /// \brief CPU features
 /// \ingroup CPUID
 enum CPUIDFeature
@@ -517,35 +541,6 @@ class CPUID
     }
 
     /// \brief Get the CPUID information stored in EAX, EBX, ECX and EDX, given
-    /// input EAX and ECX values
-    ///
-    /// \note This member function is thread-safe. The CPUID instruction will
-    /// be called each time this function is called.
-    static reg_type info (unsigned eax, unsigned ecx)
-    {
-        reg_type reg;
-
-#ifdef _MSC_VER
-        __cpuidex(reinterpret_cast<int *>(reg.data()),
-                static_cast<int>(eax), static_cast<int>(ecx));
-#else // _MSC_VER
-        unsigned ebx = 0x00;
-        unsigned edx = 0x00;
-        __asm__(
-                "cpuid\n"
-                : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-                :  "a" (eax),  "c" (ecx)
-               );
-        reg.at<0>() = eax;
-        reg.at<1>() = ebx;
-        reg.at<2>() = ecx;
-        reg.at<3>() = edx;
-#endif // _MSC_VER
-
-        return reg;
-    }
-
-    /// \brief Get the CPUID information stored in EAX, EBX, ECX and EDX, given
     /// input EAX and ECX values.
     ///
     /// \note Unlike the `cpuid(eax, ecx)` call, the results are cached.
@@ -606,7 +601,7 @@ class CPUID
         reg_type reg;
         unsigned ecx = 0x00;
         while (true) {
-            reg = info(0x04, ecx);
+            cpuid(0x04, ecx, reg.data());
             if (extract_bits<4, 0>(reg.at<0>()) == 0)
                 break;
             ++ecx;
@@ -620,7 +615,12 @@ class CPUID
     /// \note The maximum of the `cache_index` parameter is the length of the
     /// vector returned by `cache_levels` minus 1.
     static cache_param_type cache_param (unsigned cache_index)
-    {return cache_param_type(info(0x04, cache_index));}
+    {
+        reg_type reg;
+        cpuid(0x04, cache_index, reg.data());
+
+        return cache_param_type(reg);
+    }
 
     /// \brief Intel Turbo Boost (EAX = 0x06; EAX[1])
     static bool intel_turbo_boost ()
@@ -653,11 +653,21 @@ class CPUID
 
     template <unsigned, unsigned>
     static reg_type info_dispatch (cxx11::true_type, cxx11::true_type)
-    {return info(0x00, 0x00);}
+    {
+        reg_type reg;
+        cpuid(0x00, 0x00, reg.data());
+
+        return reg;
+    }
 
     template <unsigned, unsigned>
     static reg_type info_dispatch (cxx11::true_type, cxx11::false_type)
-    {return info(ext0_, 0x00);}
+    {
+        reg_type reg;
+        cpuid(ext0_, 0x00, reg.data());
+
+        return reg;
+    }
 
     template <unsigned EAX, unsigned ECX, bool Basic>
     static reg_type info_dispatch (cxx11::false_type,
@@ -669,7 +679,7 @@ class CPUID
         if (EAX > reg.at<0>())
             reg.fill(0);
         else
-            reg = info(EAX, ECX);
+            cpuid(EAX, ECX, reg.data());
 
         return reg;
     }

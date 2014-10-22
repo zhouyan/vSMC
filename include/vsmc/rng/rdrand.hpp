@@ -75,9 +75,12 @@ template <> inline bool rdrand<uint64_t> (uint64_t *rand)
 template <> inline bool rdrand<uint16_t> (uint16_t *rand)
 {
     unsigned char cf = 0;
-    __asm__ volatile(
-            "rdrandw %0; setcb %1\n"
-            : "=r" (*rand), "=qm" (cf));
+    __asm__ volatile
+        (
+         "rdrandw %0\n\t"
+         "setcb %1\n"
+         : "=r" (*rand), "=qm" (cf)
+        );
 
     return cf != 0;
 }
@@ -85,9 +88,12 @@ template <> inline bool rdrand<uint16_t> (uint16_t *rand)
 template <> inline bool rdrand<uint32_t> (uint32_t *rand)
 {
     unsigned char cf = 0;
-    __asm__ volatile(
-            "rdrandl %0; setcb %1\n"
-            : "=r" (*rand), "=qm" (cf));
+    __asm__ volatile
+        (
+         "rdrandl %0\n\t"
+         "setcb %1\n"
+         : "=r" (*rand), "=qm" (cf)
+        );
 
     return cf != 0;
 }
@@ -95,9 +101,12 @@ template <> inline bool rdrand<uint32_t> (uint32_t *rand)
 template <> inline bool rdrand<uint64_t> (uint64_t *rand)
 {
     unsigned char cf = 0;
-    __asm__ volatile(
-            "rdrandq %0; setcb %1\n"
-            : "=r" (*rand), "=qm" (cf));
+    __asm__ volatile
+        (
+         "rdrandq %0\n\t"
+         "setcb %1\n"
+         : "=r" (*rand), "=qm" (cf)
+        );
 
     return cf != 0;
 }

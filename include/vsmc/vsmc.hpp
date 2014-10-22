@@ -159,9 +159,9 @@
 /// \ingroup Utility
 /// \brief Display progress while algorithms proceed
 
-/// \defgroup RDTSCP RDTSCP
+/// \defgroup RDTSC RDTSC
 /// \ingroup Utility
-/// \brief CPU clock cycles count using RDTSCP
+/// \brief CPU clock cycles count using RDTSC and RDTSCP
 
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
