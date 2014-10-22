@@ -858,14 +858,10 @@ class CPUID
         std::sort(feats.begin(), feats.end());
         const std::size_t N = feats.size();
         const std::size_t fix = 15;
-        const std::size_t cols = 6;
-        std::size_t rows = N / cols + (N % cols == 0 ? 0 : 1);
-        std::size_t index = 0;
-        for (std::size_t r = 0; r != rows; ++r) {
-            for (std::size_t c = 0; c != cols; ++c)
-                if ((index = r + rows * c) < N)
-                    print_feat(os, feats[index], fix);
-            os << '\n';
+        for (std::size_t i = 0; i != feats.size(); ++i) {
+            print_feat(os, feats[i], fix);
+            if (i % 6 == 5 || i == feats.size() - 1)
+                os << '\n';
         }
     }
 
