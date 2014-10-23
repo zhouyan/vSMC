@@ -404,6 +404,10 @@ class WeightSet
         return i;
     }
 
+    const double *weight_data () const {return &weight_[0];}
+
+    const double *log_weight_data () const {return &log_weight_[0];}
+
     protected :
 
     void set_ess (double e) {ess_ = e;}
