@@ -245,12 +245,10 @@ class Monitor
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
         result_.resize(dim_);
-        weight_.resize(N);
         buffer_.resize(N * dim_);
         double *const rptr = &result_[0];
-        double *const wptr = &weight_[0];
         double *const bptr = &buffer_[0];
-        particle.read_weight(wptr);
+        const double *const wptr = particle.weight_set().weight_data();
 
         eval_(iter, dim_, particle, bptr);
         is_integrate_(static_cast<ISIntegrate::size_type>(N),
@@ -286,7 +284,6 @@ class Monitor
     std::vector<std::size_t> index_;
     std::vector<double> record_;
     std::vector<double> result_;
-    std::vector<double> weight_;
     std::vector<double> buffer_;
     ISIntegrate is_integrate_;
 }; // class Monitor

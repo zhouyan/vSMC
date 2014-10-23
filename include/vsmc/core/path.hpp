@@ -162,11 +162,9 @@ class Path
         VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(eval_, eval, EVALUATION);
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
-        weight_.resize(N);
         buffer_.resize(N);
-        double *const wptr = &weight_[0];
         double *const bptr = &buffer_[0];
-        particle.read_weight(wptr);
+        const double *const wptr = particle.weight_set().weight_data();
 
         index_.push_back(iter);
         grid_.push_back(eval_(iter, particle, bptr));
@@ -211,7 +209,6 @@ class Path
     std::vector<std::size_t> index_;
     std::vector<double> integrand_;
     std::vector<double> grid_;
-    std::vector<double> weight_;
     std::vector<double> buffer_;
 }; // class PathSampling
 
