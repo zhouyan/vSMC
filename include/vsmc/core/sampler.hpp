@@ -441,8 +441,8 @@ class Sampler
         } else {
             VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
                     init_, initialize, INITIALIZE);
-            accept_history_.push_back(std::vector<std::size_t>(1,
-                        init_(particle_, param)));
+            std::size_t acc = init_(particle_, param);
+            accept_history_.push_back(std::vector<std::size_t>(1, acc));
             do_resample();
         }
         do_monitor();
@@ -745,7 +745,8 @@ class Sampler
     {
         for (typename std::vector<move_type>::iterator
                 m = move_queue_.begin(); m != move_queue_.end(); ++m) {
-            accept_history_[ia].push_back((*m)(iter_num_, particle_));
+            std::size_t acc = (*m)(iter_num_, particle_);
+            accept_history_[ia].push_back(acc);
             ++ia;
         }
 
@@ -756,7 +757,8 @@ class Sampler
     {
         for (typename std::vector<mcmc_type>::iterator
                 m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
-            accept_history_[ia].push_back((*m)(iter_num_, particle_));
+            std::size_t acc = (*m)(iter_num_, particle_);
+            accept_history_[ia].push_back(acc);
             ++ia;
         }
 
