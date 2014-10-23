@@ -311,7 +311,8 @@ class Progress
         ptr->os_ << ptr->display_percent_;
         ptr->os_ << ptr->display_time_;
         ptr->os_ << ptr->display_iter_;
-        ptr->os_ << '[' << ptr->message_ << ']';
+        if (ptr->message_.size() != 0)
+            ptr->os_ << '[' << ptr->message_ << ']';
     }
 
     template <typename UIntType>
