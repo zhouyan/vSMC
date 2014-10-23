@@ -12,8 +12,6 @@
 #define VSMC_RNG_SEED_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/utility/array.hpp>
-#include <vsmc/utility/counter.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T) \
     VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<T>::value),               \
