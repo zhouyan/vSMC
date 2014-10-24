@@ -85,30 +85,38 @@ class Progress
 
     /// \brief Construct a Progress with an output stream
     Progress (std::ostream &os = std::cout) :
-        thread_ptr_(VSMC_NULLPTR), iter_(0), total_(0), interval_(0),
-        length_(60), print_first_(true), in_progress_(false),
-        num_equal_(0),
-        percent_(0), seconds_(0), last_iter_(0),
-        display_progress_(), display_percent_(), display_time_(),
-        display_iter_(), os_(os) {}
+        thread_ptr_(VSMC_NULLPTR), interval_(0), iter_(0), total_(0),
+        length_(0), show_iter_(false), print_first_(true), in_progress_(false),
+        num_equal_(0), percent_(0), seconds_(0), last_iter_(0),
+        cstr_bar_(), cstr_percent_(), cstr_time_(), cstr_iter_(), os_(os) {}
 
     /// \brief Start to print the progress
     ///
     /// \param total Total amount of work represented by an integer, for
     /// example file size or SMC algorithm total number of iterations
-    /// \param message A (short) discreptive message
+    /// \param msg A (short) discreptive message
+    /// \param length The length of the progress bar between brackets. If it is
+    /// zero, then no bar is displayed at all
+    /// \param show_iter Shall the iteration count be displayed.
     /// \param interval The sleep interval in seconds
-    /// \param length The length of the progress bar between brackets
-    void start (std::size_t total, const std::string &message = std::string(),
-            double interval = 0.1, std::size_t length = 60)
+    void start (std::size_t total, const std::string &msg = std::string(),
+            std::size_t length = 0, bool show_iter = false,
+            double interval = 0.1)
     {
-        iter_ = 0;
         total_ = total;
-        interval_ = interval;
+        msg_ = msg;
         length_ = length;
+        show_iter_ = show_iter;
+        interval_ = interval;
+
+        iter_ = 0;
         print_first_ = true;
         in_progress_ = true;
-        message_ = message;
+
+        if (length_ == 0) {
+            cstr_bar_[0] = ' ';
+            cstr_bar_[1] = '\0';
+        }
 
         watch_.reset();
         watch_.start();
@@ -139,10 +147,11 @@ class Progress
     StopWatch watch_;
     thread_type *thread_ptr_;
 
+    double interval_;
     std::size_t iter_;
     std::size_t total_;
-    double interval_;
     std::size_t length_;
+    bool show_iter_;
     bool print_first_;
     bool in_progress_;
 
@@ -151,11 +160,11 @@ class Progress
     std::size_t seconds_;
     std::size_t last_iter_;
 
-    std::string message_;
-    char display_progress_[128];
-    char display_percent_[32];
-    char display_time_[32];
-    char display_iter_[64];
+    std::string msg_;
+    char cstr_bar_[128];
+    char cstr_percent_[32];
+    char cstr_time_[32];
+    char cstr_iter_[64];
 
     std::ostream &os_;
 
@@ -200,22 +209,19 @@ class Progress
         ptr->watch_.start();
         const std::size_t seconds =
             static_cast<std::size_t>(ptr->watch_.seconds());
-        const std::size_t iter = ptr->iter_;
-        const std::size_t total = ptr->total_;
-        const std::size_t length = ptr->length_;
 
-        const std::size_t display_iter = iter <= total ? iter : total;
-        std::size_t num_equal = total == 0 ? length :
-            static_cast<std::size_t>(
-                    static_cast<double>(length) *
+        const std::size_t display_iter = ptr->iter_ <= ptr->total_ ?
+            ptr->iter_ : ptr->total_;
+        std::size_t num_equal = (ptr->total_ | ptr->length_) == 0 ?
+            ptr->length_ : static_cast<std::size_t>(
+                    static_cast<double>(ptr->length_) *
                     static_cast<double>(display_iter) /
-                    static_cast<double>(total));
-        num_equal = num_equal <= length ? num_equal : length;
-        std::size_t percent = total == 0 ? 100 :
-            static_cast<std::size_t>(
-                    static_cast<double>(100) *
+                    static_cast<double>(ptr->total_));
+        num_equal = num_equal <= ptr->length_ ? num_equal : ptr->length_;
+        std::size_t percent = ptr->total_ == 0 ? 100 :
+            static_cast<std::size_t>(100.0 *
                     static_cast<double>(display_iter) /
-                    static_cast<double>(total));
+                    static_cast<double>(ptr->total_));
         percent = percent <= 100 ? percent : 100;
 
         if (ptr->print_first_) {
@@ -223,23 +229,19 @@ class Progress
             ptr->num_equal_ = num_equal + 1;
             ptr->percent_ = percent + 1;
             ptr->seconds_ = seconds + 1;
-            ptr->last_iter_ = iter + 1;
+            ptr->last_iter_ = ptr->iter_ + 1;
         }
 
-        if (length == 0) {
-            char *cstr = ptr->display_progress_;
-            cstr[0] = ' ';
-            cstr[1] = '\0';
-        } else if (ptr->num_equal_ != num_equal) {
+        if (ptr->length_ != 0 && ptr->num_equal_ != num_equal) {
             ptr->num_equal_ = num_equal;
-            std::size_t num_space = length - num_equal;
+            std::size_t num_space = ptr->length_ - num_equal;
             std::size_t num_dash = 0;
             if (num_space > 0) {
                 num_dash = 1;
                 --num_space;
             }
 
-            char *cstr = ptr->display_progress_;
+            char *cstr = ptr->cstr_bar_;
             std::size_t offset = 0;
             cstr[offset++] = ' ';
             cstr[offset++] = '[';
@@ -257,7 +259,7 @@ class Progress
             ptr->percent_ = percent;
             const std::size_t num_space = 3 - uint_digit(percent);
 
-            char *cstr = ptr->display_percent_;
+            char *cstr = ptr->cstr_percent_;
             std::size_t offset = 0;
             cstr[offset++] = '[';
             for (std::size_t i = 0; i != num_space; ++i)
@@ -274,7 +276,7 @@ class Progress
             const std::size_t display_minute = (seconds / 60) % 60;
             const std::size_t display_hour   = seconds / 3600;
 
-            char *cstr = ptr->display_time_;
+            char *cstr = ptr->cstr_time_;
             std::size_t offset = 0;
             cstr[offset++] = '[';
             if (display_hour > 0) {
@@ -290,30 +292,29 @@ class Progress
             cstr[offset++] = '\0';
         }
 
-        if (ptr->last_iter_ != iter) {
-            ptr->last_iter_ = iter;
-            const std::size_t dtotal = uint_digit(total);
-            const std::size_t diter = uint_digit(iter);
+        if (ptr->show_iter_ && ptr->last_iter_ != ptr->iter_) {
+            ptr->last_iter_ = ptr->iter_;
+            const std::size_t dtotal = uint_digit(ptr->total_);
+            const std::size_t diter = uint_digit(ptr->iter_);
             const std::size_t num_space = dtotal > diter ? dtotal - diter : 0;
-            char *cstr = ptr->display_iter_;
 
+            char *cstr = ptr->cstr_iter_;
             std::size_t offset = 0;
             cstr[offset++] = '[';
             for (std::size_t i = 0; i < num_space; ++i)
                 cstr[offset++] = ' ';
-            uint_to_char(iter, cstr, offset);
+            uint_to_char(ptr->iter_, cstr, offset);
             cstr[offset++] = '/';
-            uint_to_char(total, cstr, offset);
+            uint_to_char(ptr->total_, cstr, offset);
             cstr[offset++] = ']';
             cstr[offset++] = '\0';
         }
 
-        ptr->os_ << ptr->display_progress_;
-        ptr->os_ << ptr->display_percent_;
-        ptr->os_ << ptr->display_time_;
-        ptr->os_ << ptr->display_iter_;
-        if (ptr->message_.size() != 0)
-            ptr->os_ << '[' << ptr->message_ << ']';
+        if (ptr->length_ != 0) ptr->os_ << ptr->cstr_bar_;
+        ptr->os_ << ptr->cstr_percent_;
+        ptr->os_ << ptr->cstr_time_;
+        if (ptr->show_iter_) ptr->os_ << ptr->cstr_iter_;
+        if (ptr->msg_.size() != 0) ptr->os_ << '[' << ptr->msg_ << ']';
     }
 
     template <typename UIntType>
