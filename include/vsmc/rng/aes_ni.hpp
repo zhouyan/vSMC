@@ -165,49 +165,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// engine, then none of these matters since users only provides seeds or a
 /// seed sequence.
 ///
-/// \tparam ResultType The output type of `operator()`. Unlike ThreefryEngine
-/// and PhiloxEngine, where the `ResultType` and the size of the counter are
-/// both specified by the user, this engine only allows specification of the
-/// type of output. Internally, it may use any type of counters whose total
-/// width is 128-bits. Therefore, increment a counter of type
-/// `AESNIEngine::ctr_type` manually is not the same as having the engine
-/// increment it internally. The engine only guarantee that each 128-bits
-/// output are generated using different counters (until all \f$2^128\f$
-/// possible counters are used). The `ctr_type` and `key_type` are only
-/// convenient way for user to specify the memory input when generating exact
-/// results using the `generate` member functions. For example, one may specify
-/// the counter as,
-/// ~~~{.cpp}
-/// unsigned char input = {
-///     0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,
-///     0x88,0x99,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF
-/// };
-/// typedef AES128Engine<unsigned char> eng_type; // A derived class
-/// eng_type::ctr_type ctr;
-/// eng_type::key_type key;
-/// std::memcpy(ctr.data(), input, 16);
-/// std::memcpy(key.data(), input, 16);
-/// ~~~
-/// or
-/// ~~~{.cpp}
-/// typedef AES128Engine<uint64_t> eng_type;
-/// eng_type::ctr_type ctr;
-/// eng_type::ctr_type key;
-/// ctr[0] = 0x7766554433221100; // Assuming little-endian such as x86
-/// ctr[1] = 0xFFEEDDCCBBAA9988;
-/// key[0] = 0x7766554433221100;
-/// key[1] = 0xFFEEDDCCBBAA9988;
-/// ~~~
-/// In either case, the following
-/// ~~~{.cpp}
-/// eng_type eng;
-/// eng.key(key);
-/// eng_type::buffer_type buffer(eng(ctr));
-/// unsigned char output[16];
-/// std::memcpy(output, buffer.data(), 16);
-/// ~~~
-/// will give exactly the same `output` array.
-///
+/// \tparam ResultType The output type of `operator()`
 /// \tparam KeySeq Using other key schedule can lead to other rng. The `KeySeq`
 /// template parameter needs to has a member function of the form,
 /// ~~~{.cpp}
@@ -216,16 +174,13 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// which is similar to that of C++11 `seed_seq`. Given a unique key, a
 /// sequence of round keys shall be generated and filled into `key_seq`. The
 /// `KeySeq` type also needs to have a member type `key_type`.
-///
 /// \tparam KeySeqInit The key sequence can be computed when the engine is
 /// constructed or seeded, or computed each time it is needed. Prepare the key
 /// when seeding increase the size of the engine considerably. But in some
 /// cases such as AES128Engine, etc, it increase the throughput significantly.
-///
 /// \tparam Rounds The third template argument is the rounds of the algorithm.
 /// AES requires 10 rounds when using a 128-bits key. With reduced strength,
 /// any number of round below 10 can be used.
-///
 /// \tparam Blocks The fourth template argument specifies how many blocks shall
 /// be used. The AES-NI instructions have noticeable latency but can be started
 /// every two cycles. By allowing generating multiple blocks at once, and
