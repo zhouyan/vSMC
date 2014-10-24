@@ -126,9 +126,6 @@ class ARSEngine :
             >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
 
     ARSEngine (const typename base_eng_type::key_type &k) : base_eng_type(k) {}
-
-    ARSEngine (const typename base_eng_type::ctr_type &c,
-            const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
 }; // class ARSEngine
 
 /// \brief ARS RNG engine with 32-bits integers output, default blocks and

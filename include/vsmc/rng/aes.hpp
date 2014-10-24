@@ -401,9 +401,6 @@ class AES128Engine :
 
     AES128Engine (const typename base_eng_type::key_type &k) :
         base_eng_type(k) {}
-
-    AES128Engine (const typename base_eng_type::ctr_type &c,
-            const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
 }; // class AES128Engine
 
 /// \brief AES-128 RNG engine with 32-bits integers output and default blocks
@@ -592,9 +589,6 @@ class AES192Engine :
 
     AES192Engine (const typename base_eng_type::key_type &k) :
         base_eng_type(k) {}
-
-    AES192Engine (const typename base_eng_type::ctr_type &c,
-            const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
 }; // class AES192Engine
 
 /// \brief AES-192 RNG engine with 32-bits integers output and default blocks
@@ -742,9 +736,6 @@ class AES256Engine :
 
     AES256Engine (const typename base_eng_type::key_type &k) :
         base_eng_type(k) {}
-
-    AES256Engine (const typename base_eng_type::ctr_type &c,
-            const typename base_eng_type::key_type &k) : base_eng_type(c, k) {}
 }; // class AES256Engine
 
 /// \brief AES-256 RNG engine with 32-bits integers output and default blocks

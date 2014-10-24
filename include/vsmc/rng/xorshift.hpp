@@ -203,9 +203,9 @@ class XorshiftEngine
     }
 
     template <typename SeedSeq>
-    explicit XorshiftEngine (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type,
-            XorshiftEngine<ResultType, K, A, B, C, D, R, S>
+    explicit XorshiftEngine (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, XorshiftEngine<ResultType, K, A, B, C, D, R, S>
             >::value>::type * = VSMC_NULLPTR)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
@@ -224,9 +224,10 @@ class XorshiftEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
-            VSMC_NULLPTR)
+    void seed (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, XorshiftEngine<ResultType, K, A, B, C, D, R, S>
+            >::value>::type * = VSMC_NULLPTR)
     {
         index_.reset();
         seq.generate(state_.begin(), state_.end());
@@ -322,10 +323,10 @@ class XorwowEngine
     explicit XorwowEngine (result_type s = 1) : eng_(s), weyl_(DInit) {}
 
     template <typename SeedSeq>
-    explicit XorwowEngine (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type,
-            XorwowEngine<Eng, D, DInit> >::value>::type * = VSMC_NULLPTR) :
-        eng_(seq), weyl_(DInit) {}
+    explicit XorwowEngine (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, XorwowEngine<Eng, D, DInit>
+            >::value>::type * = VSMC_NULLPTR) : eng_(seq), weyl_(DInit) {}
 
     void seed (result_type s)
     {
@@ -334,9 +335,10 @@ class XorwowEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
-            VSMC_NULLPTR)
+    void seed (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, XorwowEngine<Eng, D, DInit>
+            >::value>::type * = VSMC_NULLPTR)
     {
         eng_.seed(seq);
         weyl_ = DInit;

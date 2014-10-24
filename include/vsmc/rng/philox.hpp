@@ -298,32 +298,26 @@ class PhiloxEngine
 
     public :
 
-    explicit PhiloxEngine (result_type s = 0) : index_(K)
+    explicit PhiloxEngine (result_type s = 0)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(s);
     }
 
     template <typename SeedSeq>
-    explicit PhiloxEngine (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type, key_type,
-            PhiloxEngine<ResultType, K, Rounds>
-            >::value>::type * = VSMC_NULLPTR) : index_(K)
+    explicit PhiloxEngine (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, key_type, PhiloxEngine<ResultType, K, Rounds>
+            >::value>::type * = VSMC_NULLPTR)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(seq);
     }
 
-    PhiloxEngine (const key_type &k) : key_(k), index_(K)
+    PhiloxEngine (const key_type &k)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
-        counter::reset(ctr_);
-    }
-
-    PhiloxEngine (const ctr_type &c, const key_type &k) : key_(k), index_(K)
-    {
-        VSMC_STATIC_ASSERT_RNG_PHILOX;
-        counter::set(ctr_, c);
+        seed(k);
     }
 
     void seed (result_type s)
@@ -335,8 +329,10 @@ class PhiloxEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<internal::is_seed_seq<
-            SeedSeq, result_type, key_type>::value>::type * = VSMC_NULLPTR)
+    void seed (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, key_type, PhiloxEngine<ResultType, K, Rounds>
+            >::value>::type * = VSMC_NULLPTR)
     {
         counter::reset(ctr_);
         seq.generate(key_.begin(), key_.end());
@@ -373,8 +369,6 @@ class PhiloxEngine
         counter::reset(ctr_);
         index_ = K;
     }
-
-    const buffer_type &buffer () {return buffer_;}
 
     result_type operator() ()
     {

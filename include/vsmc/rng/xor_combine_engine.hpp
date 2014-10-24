@@ -45,9 +45,9 @@ class XorCombineEngine
     {VSMC_STATIC_ASSERT_RNG_XOR_COMBINE;}
 
     template <typename SeedSeq>
-    explicit XorCombineEngine (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type,
-            XorCombineEngine<Eng1, Eng2, S1, S2>
+    explicit XorCombineEngine (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, XorCombineEngine<Eng1, Eng2, S1, S2>
             >::value>::type * = VSMC_NULLPTR) : eng1_(seq), eng2_(seq)
     {VSMC_STATIC_ASSERT_RNG_XOR_COMBINE;}
 
@@ -58,9 +58,10 @@ class XorCombineEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
-            VSMC_NULLPTR)
+    void seed (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, XorCombineEngine<Eng1, Eng2, S1, S2>
+            >::value>::type * = VSMC_NULLPTR)
     {
         eng1_.seed(seq);
         eng2_.seed(seq);

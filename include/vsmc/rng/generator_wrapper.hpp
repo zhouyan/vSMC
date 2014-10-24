@@ -73,18 +73,19 @@ class GeneratorWrapper : public Traits
     {VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER;}
 
     template <typename SeedSeq>
-    explicit GeneratorWrapper (SeedSeq &, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type,
-            GeneratorWrapper<ResultType, Generator, Traits>
+    explicit GeneratorWrapper (SeedSeq &,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, GeneratorWrapper<ResultType, Generator, Traits>
             >::value>::type * = VSMC_NULLPTR)
     {VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER;}
 
     void seed (result_type) {}
 
     template <typename SeedSeq>
-    void seed (SeedSeq &, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type>::value>::type * =
-            VSMC_NULLPTR) {}
+    void seed (SeedSeq &,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, GeneratorWrapper<ResultType, Generator, Traits>
+            >::value>::type * = VSMC_NULLPTR) {}
 
     result_type operator() ()
     {return static_cast<result_type>(generator_.generate());}

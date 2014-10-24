@@ -208,7 +208,7 @@ class AESNIEngine
 
     public :
 
-    explicit AESNIEngine (result_type s = 0) : index_(K_)
+    explicit AESNIEngine (result_type s = 0)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(s);
@@ -218,23 +218,16 @@ class AESNIEngine
     explicit AESNIEngine (SeedSeq &seq, typename cxx11::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, key_type,
             AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
-            >::value>::type * = VSMC_NULLPTR) : index_(K_)
+            >::value>::type * = VSMC_NULLPTR)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(seq);
     }
 
-    AESNIEngine (const key_type &k) : key_(k), index_(K_)
+    AESNIEngine (const key_type &k)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         counter::reset(ctr_block_);
-        key_seq_.set(k);
-    }
-
-    AESNIEngine (const ctr_type &c, const key_type &k) : key_(k), index_(K_)
-    {
-        VSMC_STATIC_ASSERT_RNG_AES_NI;
-        counter::set(ctr_block_, c);
         key_seq_.set(k);
     }
 
@@ -260,6 +253,7 @@ class AESNIEngine
     void seed (const key_type &k)
     {
         counter::reset(ctr_block_);
+        key_ = k;
         key_seq_.set(k);
         index_ = K_;
     }

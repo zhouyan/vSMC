@@ -256,34 +256,26 @@ class ThreefryEngine
 
     public :
 
-    explicit ThreefryEngine (result_type s = 0) : index_(K)
+    explicit ThreefryEngine (result_type s = 0)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(s);
     }
 
     template <typename SeedSeq>
-    explicit ThreefryEngine (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type, key_type,
-            ThreefryEngine<ResultType, K, Rounds>
-            >::value>::type * = VSMC_NULLPTR) : index_(K)
+    explicit ThreefryEngine (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, key_type, ThreefryEngine<ResultType, K, Rounds>
+            >::value>::type * = VSMC_NULLPTR)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(seq);
     }
 
-    ThreefryEngine (const key_type &k) : index_(K)
+    ThreefryEngine (const key_type &k)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
-        counter::reset(ctr_);
-        init_par(k);
-    }
-
-    ThreefryEngine (const ctr_type &c, const key_type &k) : index_(K)
-    {
-        VSMC_STATIC_ASSERT_RNG_THREEFRY;
-        counter::set(ctr_, c);
-        init_par(k);
+        seed(k);
     }
 
     void seed (result_type s)
@@ -297,8 +289,10 @@ class ThreefryEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<internal::is_seed_seq<
-            SeedSeq, result_type, key_type>::value>::type * = VSMC_NULLPTR)
+    void seed (SeedSeq &seq,
+            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            result_type, key_type, ThreefryEngine<ResultType, K, Rounds>
+            >::value>::type * = VSMC_NULLPTR)
     {
         counter::reset(ctr_);
         key_type k;
@@ -316,7 +310,14 @@ class ThreefryEngine
 
     ctr_type ctr () const {return ctr_;}
 
-    key_type key () const {return par_.template slice<0, K>();}
+    key_type key () const
+    {
+        key_type k;
+        for (std::size_t i = 0; i != K; ++i)
+            k[i] = par_[i];
+
+        return k;
+    }
 
     void ctr (const ctr_type &c)
     {
