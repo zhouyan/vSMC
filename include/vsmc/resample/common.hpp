@@ -21,8 +21,8 @@
 
 /// \brief Default RNG type for resampling
 /// \ingroup Config
-#ifndef VSMC_DEFAULT_RESAMPLE_RNG_TYPE
-#define VSMC_DEFAULT_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x64
+#ifndef VSMC_RESAMPLE_RNG_TYPE
+#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x64
 #endif
 
 namespace vsmc {
@@ -170,7 +170,7 @@ namespace traits {
 /// \brief Particle::resample_rng_type trait
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
-        VSMC_DEFAULT_RESAMPLE_RNG_TYPE)
+        VSMC_RESAMPLE_RNG_TYPE)
 
 /// \brief Particle::resample_copy_from_replication_type trait
 /// \ingroup Traits
