@@ -73,14 +73,14 @@ class DispatchSourceBase : public DispatchObject< ::dispatch_source_t>
     void set_event_handler_f (::dispatch_function_t event_handler) const
     {::dispatch_source_set_event_handler_f(this->object(), event_handler);}
 
-#if VSMC_USE_GCD_LION
+#if VSMC_HAS_GCD_LION
     void set_registration_handler_f (::dispatch_function_t
             registration_handler) const
     {
         ::dispatch_source_set_registration_handler_f(
                 this->object(), registration_handler);
     }
-#endif // VSMC_USE_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 
 #ifdef __BLOCKS__
     void set_cancel_handler (::dispatch_block_t cancel_handler) const
@@ -89,14 +89,14 @@ class DispatchSourceBase : public DispatchObject< ::dispatch_source_t>
     void set_event_handler (::dispatch_block_t event_handler) const
     {::dispatch_source_set_event_handler(this->object(), event_handler);}
 
-#if VSMC_USE_GCD_LION
+#if VSMC_HAS_GCD_LION
     void set_registration_handler (::dispatch_block_t
             registration_handler) const
     {
         ::dispatch_source_set_registration_handler(
                 this->object(), registration_handler);
     }
-#endif // VSMC_USE_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 #endif // __BLOCKS__
 
     private :

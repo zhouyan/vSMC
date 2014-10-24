@@ -47,6 +47,8 @@ class Monitor
     ///
     /// \param dim The dimension of the Monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
+    /// \param record_only The monitor only records results instead of
+    /// calculating them itself
     ///
     /// The evaluation object has the signature
     /// ~~~{.cpp}
@@ -56,6 +58,9 @@ class Monitor
     /// end of each iteration. The evaluation occurs after the possible MCMC
     /// moves. The output parameter `result` shall contain the results of the
     /// evaluation.
+    ///
+    /// If `record_only` is true, then the monitor only records the values
+    /// stored in `result`. Otherwise, the behavior is explained below
     ///
     /// The array `result` is of length `particle.size() * dim`, and it
     /// represents a row major matrix of dimension `particle.size()` by `dim`,
@@ -71,8 +76,10 @@ class Monitor
     /// After each evaluation, the iteration number `iter` and the imporatance
     /// sampling estimates are recorded and can be retrived by `index()` and
     /// `record()`.
-    explicit Monitor (std::size_t dim, const eval_type &eval) :
-        dim_(dim), eval_(eval), recording_(true), name_(dim) {}
+    explicit Monitor (std::size_t dim, const eval_type &eval,
+            bool record_only = false) :
+        dim_(dim), eval_(eval), recording_(true), record_only_(record_only),
+        name_(dim) {}
 
     /// \brief The dimension of the Monitor
     std::size_t dim () const {return dim_;}
@@ -243,22 +250,23 @@ class Monitor
 
         VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(eval_, eval, EVALUATION);
 
-        const std::size_t N = static_cast<std::size_t>(particle.size());
         result_.resize(dim_);
-        weight_.resize(N);
-        buffer_.resize(N * dim_);
         double *const rptr = &result_[0];
-        double *const wptr = &weight_[0];
-        double *const bptr = &buffer_[0];
-        particle.read_weight(wptr);
+        if (record_only_) {
+            eval_(iter, dim_, particle, rptr);
+            push_back(iter, rptr);
 
+            return;
+        }
+
+        const std::size_t N = static_cast<std::size_t>(particle.size());
+        buffer_.resize(N * dim_);
+        double *const bptr = &buffer_[0];
+        const double *const wptr = particle.weight_set().weight_data();
         eval_(iter, dim_, particle, bptr);
         is_integrate_(static_cast<ISIntegrate::size_type>(N),
                 static_cast<ISIntegrate::size_type>(dim_), bptr, wptr, rptr);
-
-        index_.push_back(iter);
-        for (std::size_t d = 0; d != dim_; ++d)
-            record_.push_back(rptr[d]);
+        push_back(iter, rptr);
     }
 
     /// \brief Clear all records of the index and integrations
@@ -282,13 +290,20 @@ class Monitor
     std::size_t dim_;
     eval_type eval_;
     bool recording_;
+    bool record_only_;
     std::vector<std::string> name_;
     std::vector<std::size_t> index_;
     std::vector<double> record_;
     std::vector<double> result_;
-    std::vector<double> weight_;
     std::vector<double> buffer_;
     ISIntegrate is_integrate_;
+
+    void push_back (std::size_t iter, const double *rptr)
+    {
+        index_.push_back(iter);
+        for (std::size_t d = 0; d != dim_; ++d)
+            record_.push_back(rptr[d]);
+    }
 }; // class Monitor
 
 } // namespace vsmc

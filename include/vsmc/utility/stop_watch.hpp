@@ -13,10 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING \
-    VSMC_RUNTIME_ASSERT((!(running_ || other.running_)),                     \
-            ("CANNOT ADD TWO RUNNING **StopWatch**"))
-
 /// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fails
 /// \ingroup Config
 #ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
@@ -29,11 +25,11 @@
 /// \details
 /// The class defined by `VSMC_STOP_WATCH_TYPE` need to be defined before
 /// including the `<vsmc/utility/stop_watch.hpp>` header. It shall provide the
-/// same interface as internal::DummyStopWatch. This is only used when both
+/// same interface as StopWatchNull. This is only used when both
 /// `VSMC_HAS_CXX11LIB_CHRONO` and `VSMC_HAS_NATIVE_TIME_LIBRARY` are zero, in
 /// which case StopWatch is a typedef of this macro.
 #ifndef VSMC_STOP_WATCH_TYPE
-#define VSMC_STOP_WATCH_TYPE internal::DummyStopWatch
+#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNull
 #endif
 
 /// \brief Default C++11 clock used as StopWatch if `VSMC_HAS_CXX11LIB_CHRONO`
@@ -45,16 +41,17 @@
 
 namespace vsmc {
 
-namespace internal {
-
-class DummyStopWatch
+/// \brief A StopWatch that provides the interface but does nothing and thus
+/// cost no CPU cycles itself.
+/// \ingroup StopWatch
+class StopWatchNull
 {
     public :
 
-    bool running () const {return running_;}
-    void start () {running_ = true;}
-    void stop  () {running_ = false;}
-    void reset () {running_ = false;}
+    bool running () const {return false;}
+    bool start () {return false;}
+    bool stop () {return false;}
+    void reset () {}
 
     double nanoseconds  () const {return 1;}
     double microseconds () const {return 1e-3;}
@@ -62,35 +59,27 @@ class DummyStopWatch
     double seconds      () const {return 1e-9;}
     double minutes      () const {return 1e-9 / 60;}
     double hours        () const {return 1e-9 / 3600;}
+}; // class StopWatchNull
 
-    DummyStopWatch &operator+= (const DummyStopWatch &) {return *this;}
-
-    private :
-
-    bool running_;
-}; // class DummyStopWatch
-
-} // namespace vsmc::internal
-
-/// \brief Start and stop a StopWatch in scope
+/// \brief Start and stop a StopWatch in scope (similiar to a mutex lock guard)
 /// \ingroup StopWatch
 template <typename WatchType>
-class ScopedStopWatch
+class StopWatchGuard
 {
     public :
 
     typedef WatchType watch_type;
 
-    ScopedStopWatch (watch_type &watch, bool start = true) :
+    StopWatchGuard (watch_type &watch, bool start = true) :
         start_(start), watch_(watch) {if (start_) watch_.start();}
 
-    ~ScopedStopWatch () {if (start_) watch_.stop();}
+    ~StopWatchGuard () {if (start_) watch_.stop();}
 
     private :
 
     const bool start_;
     watch_type &watch_;
-}; // class ScopedStopWatch
+}; // class StopWatchGuard
 
 } // namespace vsmc
 
@@ -112,21 +101,48 @@ class StopWatchClockAdapter
 
     StopWatchClockAdapter () : elapsed_(0), running_(false) {reset();}
 
+    /// \brief If the watch is running
+    ///
+    /// \details
+    /// If `start()` has been called and no `stop()` call since, then it is
+    /// running, otherwise it is stoped.
     bool running () const {return running_;}
 
-    void start ()
+    /// \brief Start the watch, no effect if already started
+    ///
+    /// \return `true` if it is started by this call, and the elapsed time
+    /// will be incremented next time `stop()` is called. The increment will be
+    /// relative to the time point of this call. `false` if it is already
+    /// started earlier.
+    bool start ()
     {
+        if (running_)
+            return false;
+
         running_ = true;
         start_time_ = clock_type::now();
+
+        return true;
     }
 
-    void stop ()
+    /// \brief Stop the watch, no effect if already stopped
+    ///
+    /// \return `true` if it is stoped by this call, and the elapsed time has
+    /// been incremented. `false` if it is already stopped or wasn't started
+    /// before.
+    bool stop ()
     {
+        if (!running_)
+            return false;
+
         typename clock_type::time_point stop_time = clock_type::now();
         elapsed_ += stop_time - start_time_;
         running_ = false;
+
+        return true;
     }
 
+    /// \brief Stop and reset the elapsed time to zero
     void reset ()
     {
         start();
@@ -134,60 +150,46 @@ class StopWatchClockAdapter
         running_ = false;
     }
 
+    /// \brief Return the accumulated elapsed time in nanoseconds
     double nanoseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::nano> >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in microseconds
     double microseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::micro> >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in milliseconds
     double milliseconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::milli> >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in seconds
     double seconds () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::ratio<1> > >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in minutes
     double minutes () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::ratio<60> > >(elapsed_).count();
     }
 
+    /// \brief Return the accumulated elapsed time in hours
     double hours () const
     {
         return std::chrono::duration_cast<std::chrono::duration<
             double, std::ratio<3600> > >(elapsed_).count();
-    }
-
-    StopWatchClockAdapter<ClockType> &operator+= (
-            const StopWatchClockAdapter<ClockType> &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_ += other.elapsed_;
-
-        return *this;
-    }
-
-    friend StopWatchClockAdapter<ClockType> operator+ (
-            const StopWatchClockAdapter<ClockType> &sw1,
-            const StopWatchClockAdapter<ClockType> &sw2)
-    {
-        StopWatchClockAdapter<ClockType> watch(sw1);
-        watch += sw2;
-
-        return watch;
     }
 
     private :
@@ -220,14 +222,22 @@ class StopWatch
 
     bool running () {return running_;}
 
-    void start ()
+    bool start ()
     {
+        if (running_)
+            return false;
+
         running_ = true;
         start_time_ = ::mach_absolute_time();
+
+        return true;
     }
 
-    void stop ()
+    bool stop ()
     {
+        if (!running_)
+            return false;
+
         uint64_t stop_time = ::mach_absolute_time();
         uint64_t elapsed_abs = stop_time - start_time_;
         uint64_t elapsed_nsec = elapsed_abs *
@@ -237,6 +247,8 @@ class StopWatch
         elapsed_sec_ += inc_sec;
         elapsed_nsec_ += inc_nsec;
         running_ = false;
+
+        return true;
     }
 
     void reset ()
@@ -284,25 +296,6 @@ class StopWatch
             static_cast<double>(elapsed_nsec_) * 1e-9 / 3600.0;
     }
 
-    StopWatch &operator+= (const StopWatch &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_sec_  += other.elapsed_sec_;
-        elapsed_nsec_ += other.elapsed_nsec_;
-
-        return *this;
-    }
-
-    friend inline StopWatch operator+ (
-            const StopWatch &sw1, const StopWatch &sw2)
-    {
-        StopWatch watch(sw1);
-        watch += sw2;
-
-        return watch;
-    }
-
     private :
 
     uint64_t elapsed_sec_;
@@ -334,14 +327,22 @@ class StopWatch
 
     bool running () {return running_;}
 
-    void start ()
+    bool start ()
     {
+        if (running_)
+            return false;
+
         running_ = true;
         ::clock_gettime(CLOCK_REALTIME, &start_time_);
+
+        return true;
     }
 
-    void stop ()
+    bool stop ()
     {
+        if (!running_)
+            return false;
+
         timespec stop_time;
         ::clock_gettime(CLOCK_REALTIME, &stop_time);
         time_t sec = stop_time.tv_sec - start_time_.tv_sec;
@@ -352,6 +353,8 @@ class StopWatch
         elapsed_.tv_sec += inc_sec;
         elapsed_.tv_nsec += inc_nsec;
         running_ = false;
+
+        return true;
     }
 
     void reset ()
@@ -398,25 +401,6 @@ class StopWatch
             static_cast<double>(elapsed_.tv_nsec) * 1e-9 / 3600.0;
     }
 
-    StopWatch &operator+= (const StopWatch &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_.tv_sec  += other.elapsed_.tv_sec;
-        elapsed_.tv_nsec += other.elapsed_.tv_nsec;
-
-        return *this;
-    }
-
-    friend inline StopWatch operator+ (
-            const StopWatch &sw1, const StopWatch &sw2)
-    {
-        StopWatch watch(sw1);
-        watch += sw2;
-
-        return watch;
-    }
-
     private :
 
     ::timespec elapsed_;
@@ -446,20 +430,30 @@ class StopWatch
 
     bool running () {return running_;}
 
-    void start ()
+    bool start ()
     {
+        if (running_)
+            return false;
+
         running_ = true;
         LARGE_INTEGER time;
         ::QueryPerformanceCounter(&time);
         start_time_ = time.QuadPart;
+
+        return true;
     }
 
-    void stop ()
+    bool stop ()
     {
+        if (!running_)
+            return false;
+
         LARGE_INTEGER time;
         ::QueryPerformanceCounter(&time);
         elapsed_ += time.QuadPart - start_time_;
         running_ = false;
+
+        return true;
     }
 
     void reset ()
@@ -489,24 +483,6 @@ class StopWatch
 
     double hours () const
     {return static_cast<double>(elapsed_) / frequency_ / 3600.0;}
-
-    StopWatch &operator+= (const StopWatch &other)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_STOP_WATCH_ADDING_RUNNING;
-
-        elapsed_ += other.elapsed_;
-
-        return *this;
-    }
-
-    friend inline StopWatch operator+ (
-            const StopWatch &sw1, const StopWatch &sw2)
-    {
-        StopWatch watch(sw1);
-        watch += sw2;
-
-        return watch;
-    }
 
     private :
 

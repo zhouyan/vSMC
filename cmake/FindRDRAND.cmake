@@ -1,5 +1,5 @@
 # ============================================================================
-#  cmake/FindRdRand.cmake
+#  cmake/FindRDRAND.cmake
 # ----------------------------------------------------------------------------
 #
 #                          vSMC: Scalable Monte Carlo
@@ -8,22 +8,22 @@
 #  See LICENSE for details.
 # ============================================================================
 
-# Find RdRand support
+# Find RDRAND support
 #
 # The following variable is set
 #
-# RD_RAND_FOUND - TRUE if RdRand is found and work correctly
+# RDRAND_FOUND - TRUE if RDRAND is found and work correctly
 
-IF (DEFINED RD_RAND_FOUND)
+IF (DEFINED RDRAND_FOUND)
     RETURN ()
-ENDIF (DEFINED RD_RAND_FOUND)
+ENDIF (DEFINED RDRAND_FOUND)
 
-FILE (READ ${CMAKE_CURRENT_LIST_DIR}/FindRdRand.cpp RD_RAND_TEST_SOURCE)
+FILE (READ ${CMAKE_CURRENT_LIST_DIR}/FindRDRAND.cpp RDRAND_TEST_SOURCE)
 
 INCLUDE (CheckCXXSourceRuns)
-CHECK_CXX_SOURCE_RUNS ("${RD_RAND_TEST_SOURCE}" RD_RAND_FOUND)
-IF (RD_RAND_FOUND)
-    MESSAGE (STATUS "Found RdRand support")
-ELSE (RD_RAND_FOUND)
-    MESSAGE (STATUS "NOT Found RdRand support")
-ENDIF (RD_RAND_FOUND)
+CHECK_CXX_SOURCE_RUNS ("${RDRAND_TEST_SOURCE}" RDRAND_FOUND)
+IF (RDRAND_FOUND)
+    MESSAGE (STATUS "Found RDRAND support")
+ELSE (RDRAND_FOUND)
+    MESSAGE (STATUS "NOT Found RDRAND support")
+ENDIF (RDRAND_FOUND)

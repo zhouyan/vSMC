@@ -14,7 +14,7 @@
 #
 # The following variables are set
 #
-# OPENCl_FOUND          - TRUE if OpenCL headers and libraries are found
+# OPENCL_FOUND          - TRUE if OpenCL headers and libraries are found
 #                         But it is untested by real OpenCL programs
 # OpenCL_INCLUDE_DIR    - The directory containing OpenCL headers
 # OpenCL_LINK_LIBRARIES - OpenCL libraries that shall be linked to

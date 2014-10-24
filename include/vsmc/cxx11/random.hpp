@@ -113,6 +113,7 @@ using ::boost::random::student_t_distribution;
 using ::boost::random::discrete_distribution;
 using ::boost::random::piecewise_constant_distribution;
 using ::boost::random::piecewise_linear_distribution;
+
 } } //namespace vsmc::cxx11
 
 #endif // VSMC_HAS_CXX11LIB_RANDOM

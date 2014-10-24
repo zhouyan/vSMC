@@ -13,6 +13,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/random.hpp>
+#include <vsmc/math/cblas.hpp>
 #include <vsmc/math/vmath.hpp>
 #include <cstring>
 #include <limits>
@@ -403,6 +404,10 @@ class WeightSet
         return i;
     }
 
+    const double *weight_data () const {return &weight_[0];}
+
+    const double *log_weight_data () const {return &log_weight_[0];}
+
     protected :
 
     void set_ess (double e) {ess_ = e;}
@@ -427,28 +432,22 @@ class WeightSet
     virtual void normalize_log_weight ()
     {
         double *const lwptr = &log_weight_[0];
-        double max_weight = lwptr[0];
+        double dmax = lwptr[0];
         for (size_type i = 0; i != size_; ++i)
-            if (max_weight < lwptr[i])
-                max_weight = lwptr[i];
+            if (dmax < lwptr[i])
+                dmax = lwptr[i];
+        dmax = -dmax;
         for (size_type i = 0; i != size_; ++i)
-            lwptr[i] -= max_weight;
+            lwptr[i] += dmax;
     }
 
     /// \brief Normalize weights such that the summation is one
     virtual void normalize_weight ()
     {
         double *const wptr = &weight_[0];
-        double coeff = 0;
-        for (size_type i = 0; i != size_; ++i)
-            coeff += wptr[i];
-        coeff = 1 / coeff;
-        for (size_type i = 0; i != size_; ++i)
-            wptr[i] *= coeff;
-        ess_ = 0;
-        for (size_type i = 0; i != size_; ++i)
-            ess_ += wptr[i] * wptr[i];
-        ess_ = 1 / ess_;
+        double coeff = 1 / math::asum(size_, wptr);
+        math::scal(size_, coeff, wptr);
+        ess_ = 1 / math::dot(size_, wptr, wptr);
     }
 
     /// \brief Compute ESS given (logarithm) unormalzied incremental weights
@@ -459,30 +458,22 @@ class WeightSet
 
         if (use_log) {
             math::vAdd(size_, &log_weight_[0], first, bptr);
-            double max_weight = bptr[0];
+            double dmax = bptr[0];
             for (size_type i = 0; i != size_; ++i)
-                if (max_weight < bptr[i])
-                    max_weight = bptr[i];
+                if (dmax < bptr[i])
+                    dmax = bptr[i];
+            dmax = -dmax;
             for (size_type i = 0; i != size_; ++i)
-                bptr[i] -= max_weight;
+                bptr[i] += dmax;
             math::vExp(size_, bptr, bptr);
         } else {
             math::vMul(size_, &weight_[0], first, bptr);
         }
 
-        double coeff = 0;
-        for (size_type i = 0; i != size_; ++i)
-            coeff += bptr[i];
-        coeff = 1 / coeff;
-        for (size_type i = 0; i != size_; ++i)
-            bptr[i] *= coeff;
+        double coeff = 1 / math::asum(size_, bptr);
+        math::scal(size_, coeff, bptr);
 
-        double res = 0;
-        for (size_type i = 0; i != size_; ++i)
-            res += bptr[i] * bptr[i];
-        res = 1 / res;
-
-        return res;
+        return 1 / math::dot(size_, bptr, bptr);
     }
 
     /// \brief Compute CESS given (logarithm) unormalized incremental weights

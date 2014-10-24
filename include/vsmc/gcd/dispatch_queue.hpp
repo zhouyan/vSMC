@@ -38,14 +38,14 @@ class DispatchQueueBase : public DispatchObject< ::dispatch_queue_t>
     const char *get_label () const
     {return ::dispatch_queue_get_label(this->object());}
 
-#if VSMC_USE_GCD_LION
+#if VSMC_HAS_GCD_LION
     void *get_specific (const void *key) const
     {return ::dispatch_queue_get_specific(this->object(), key);}
 
     void set_specific (const void *key, void *context,
             ::dispatch_function_t destructor) const
     {::dispatch_queue_set_specific(this->object(), key, context, destructor);}
-#endif // VSMC_USE_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 
     template <typename DispatchType>
     void set_target_queue (const DispatchObject<DispatchType> &object) const
@@ -68,13 +68,13 @@ class DispatchQueueBase : public DispatchObject< ::dispatch_queue_t>
     void sync_f (void *context, ::dispatch_function_t work) const
     {::dispatch_sync_f(this->object(), context, work);}
 
-#if VSMC_USE_GCD_LION
+#if VSMC_HAS_GCD_LION
     void barrier_async_f (void *context, ::dispatch_function_t work) const
     {::dispatch_barrier_async_f(this->object(), context, work);}
 
     void barrier_sync_f (void *context, ::dispatch_function_t work) const
     {::dispatch_barrier_sync_f(this->object(), context, work);}
-#endif // VSMC_USE_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 
 #ifdef __BLOCKS__
     void after (::dispatch_time_t when, ::dispatch_block_t block) const
@@ -89,13 +89,13 @@ class DispatchQueueBase : public DispatchObject< ::dispatch_queue_t>
     void sync (::dispatch_block_t block) const
     {::dispatch_sync(this->object(), block);}
 
-#if VSMC_USE_GCD_LION
+#if VSMC_HAS_GCD_LION
     void barrier_async (::dispatch_block_t block) const
     {::dispatch_barrier_async(this->object(), block);}
 
     void barrier_sync (::dispatch_block_t block) const
     {::dispatch_barrier_sync(this->object(), block);}
-#endif // VSMC_USE_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 #endif // __BLOCKS__
 
     protected :
@@ -121,16 +121,16 @@ class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 {
     public :
 
-#if VSMC_USE_GCD_LION
+#if VSMC_HAS_GCD_LION
     DispatchQueue (::dispatch_queue_priority_t priority =
             DISPATCH_QUEUE_PRIORITY_DEFAULT, unsigned long flags = 0) :
         DispatchQueueBase(::dispatch_get_global_queue(priority, flags), false)
     {}
-#else // VSMC_USE_GCD_LION
+#else // VSMC_HAS_GCD_LION
     DispatchQueue (long priority = 0, unsigned long flags = 0) :
         DispatchQueueBase(::dispatch_get_global_queue(priority, flags), false)
     {}
-#endif // VSMC_USE_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 }; // class DispatchQueue
 
 /// \brief A private dispatch queue (`dispatch_queue_create`)

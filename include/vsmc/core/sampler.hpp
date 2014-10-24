@@ -441,8 +441,8 @@ class Sampler
         } else {
             VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
                     init_, initialize, INITIALIZE);
-            accept_history_.push_back(std::vector<std::size_t>(1,
-                        init_(particle_, param)));
+            std::size_t acc = init_(particle_, param);
+            accept_history_.push_back(std::vector<std::size_t>(1, acc));
             do_resample();
         }
         do_monitor();
@@ -481,8 +481,9 @@ class Sampler
     const Path<T> &path () const {return path_;}
 
     /// \brief Set the Path sampling evaluation object
-    Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval)
-    {path_.set_eval(eval); return *this;}
+    Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval,
+            bool record_only = false)
+    {path_.set_eval(eval, record_only); return *this;}
 
     /// \brief Path sampling estimate of the logarithm of normalizing constants
     /// ratio
@@ -500,11 +501,15 @@ class Sampler
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
+    /// \param record_only The monitor only records results
+    ///
+    /// \sa Monitor
     Sampler<T> &monitor (const std::string &name, std::size_t dim,
-            const typename Monitor<T>::eval_type &eval)
+            const typename Monitor<T>::eval_type &eval,
+            bool record_only = false)
     {
         monitor_.insert(typename monitor_map_type::value_type(
-                    name, Monitor<T>(dim, eval)));
+                    name, Monitor<T>(dim, eval, record_only)));
 
         return *this;
     }
@@ -640,7 +645,7 @@ class Sampler
     ///
     /// \param sampler_id The ID of the sampler
     /// \param os The ostream to which the contents are printed
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     void print (std::size_t sampler_id,
             std::basic_ostream<CharT, Traits> &os) const
     {
@@ -674,7 +679,7 @@ class Sampler
     void print (std::size_t sampler_id = 0) const
     {print(sampler_id, std::cout);}
 
-    template<typename CharT, typename Traits>
+    template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
     {
@@ -728,7 +733,7 @@ class Sampler
             m->second.clear();
 
         iter_num_ = 0;
-        particle_.set_equal_weight();
+        particle_.weight_set().set_equal_weight();
     }
 
     void do_iter ()
@@ -745,7 +750,8 @@ class Sampler
     {
         for (typename std::vector<move_type>::iterator
                 m = move_queue_.begin(); m != move_queue_.end(); ++m) {
-            accept_history_[ia].push_back((*m)(iter_num_, particle_));
+            std::size_t acc = (*m)(iter_num_, particle_);
+            accept_history_[ia].push_back(acc);
             ++ia;
         }
 
@@ -756,7 +762,8 @@ class Sampler
     {
         for (typename std::vector<mcmc_type>::iterator
                 m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
-            accept_history_[ia].push_back((*m)(iter_num_, particle_));
+            std::size_t acc = (*m)(iter_num_, particle_);
+            accept_history_[ia].push_back(acc);
             ++ia;
         }
 
@@ -765,7 +772,7 @@ class Sampler
 
     void do_resample ()
     {
-        ess_history_.push_back(particle_.ess());
+        ess_history_.push_back(particle_.weight_set().ess());
         resampled_history_.push_back(particle_.resample(
                     resample_op_, resample_threshold_));
     }

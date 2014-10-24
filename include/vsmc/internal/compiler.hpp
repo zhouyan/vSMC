@@ -256,126 +256,16 @@
 #define VSMC_HAS_INT128 0
 #endif
 
-#ifndef VSMC_HAS_INLINE_ASSEMBLY
-#define VSMC_HAS_INLINE_ASSEMBLY 0
+#ifndef VSMC_HAS_AES_NI
+#define VSMC_HAS_AES_NI 0
 #endif
 
-#ifndef VSMC_HAS_INTRINSIC_FUNCTION
-#define VSMC_HAS_INTRINSIC_FUNCTION 0
-#endif
-
-#ifndef VSMC_HAS_INTRINSIC_INT64
-#define VSMC_HAS_INTRINSIC_INT64 0
-#endif
-
-#ifndef VSMC_HAS_INTRINSIC_INT64_LONG_LONG
-#define VSMC_HAS_INTRINSIC_INT64_LONG_LONG 1
+#ifndef VSMC_HAS_RDRAND
+#define VSMC_HAS_RDRAND 0
 #endif
 
 #ifndef VSMC_HAS_OPENCL_DOUBLE
 #define VSMC_HAS_OPENCL_DOUBLE 1
-#endif
-
-#if VSMC_HAS_INTRINSIC_INT64
-#define VSMC_INTRINSIC_INT64 __int64
-#elif VSMC_HAS_INTRINSIC_INT64_LONG_LONG
-#define VSMC_INTRINSIC_INT64 long long
-#else
-#define VSMC_INTRINSIC_INT64 long
-#endif
-
-#if VSMC_HAS_INTRINSIC_FUNCTION
-
-#ifdef __MMX__
-#ifndef VSMC_HAS_MMX
-#define VSMC_HAS_MMX 1
-#endif
-#endif
-
-#ifdef __SSE__
-#ifndef VSMC_HAS_SSE
-#define VSMC_HAS_SSE 1
-#endif
-#endif
-
-#ifdef __SSE2__
-#ifndef VSMC_HAS_SSE2
-#define VSMC_HAS_SSE2 1
-#endif
-#endif
-
-#ifdef __SSE3__
-#ifndef VSMC_HAS_SSE3
-#define VSMC_HAS_SSE3 1
-#endif
-#endif
-
-#ifdef __SSSE3__
-#ifndef VSMC_HAS_SSSE3
-#define VSMC_HAS_SSSE3 1
-#endif
-#endif
-
-#ifdef __SSE4_1__
-#ifndef VSMC_HAS_SSE4_1
-#define VSMC_HAS_SSE4_1 1
-#endif
-#endif
-
-#ifdef __SSE4_2__
-#ifndef VSMC_HAS_SSE4_2
-#define VSMC_HAS_SSE4_2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef VSMC_HAS_AVX
-#define VSMC_HAS_AVX 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef VSMC_HAS_AVX2
-#define VSMC_HAS_AVX2 1
-#endif
-#endif
-
-#endif // VSMC_HAS_INTRINSIC_FUNCTION
-
-#ifndef VSMC_HAS_MMX
-#define VSMC_HAS_MMX 0
-#endif
-
-#ifndef VSMC_HAS_SSE
-#define VSMC_HAS_SSE 0
-#endif
-
-#ifndef VSMC_HAS_SSE2
-#define VSMC_HAS_SSE2 0
-#endif
-
-#ifndef VSMC_HAS_SSE3
-#define VSMC_HAS_SSE3 0
-#endif
-
-#ifndef VSMC_HAS_SSSE3
-#define VSMC_HAS_SSSE3 0
-#endif
-
-#ifndef VSMC_HAS_SSE4_1
-#define VSMC_HAS_SSE4_1 0
-#endif
-
-#ifndef VSMC_HAS_SSE4_2
-#define VSMC_HAS_SSE4_2 0
-#endif
-
-#ifndef VSMC_HAS_AVX
-#define VSMC_HAS_AVX 0
-#endif
-
-#ifndef VSMC_HAS_AVX2
-#define VSMC_HAS_AVX2 0
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

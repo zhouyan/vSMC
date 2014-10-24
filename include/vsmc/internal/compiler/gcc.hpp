@@ -301,28 +301,4 @@
 #endif
 #endif
 
-#if VSMC_X86
-#ifndef VSMC_HAS_INLINE_ASSEMBLY
-#define VSMC_HAS_INLINE_ASSEMBLY 1
-#endif
-#endif
-
-#if VSMC_X86
-#ifndef VSMC_HAS_INTRINSIC_FUNCTION
-#define VSMC_HAS_INTRINSIC_FUNCTION 1
-#endif
-#endif
-
-#if VSMC_X86
-#ifndef VSMC_HAS_INTRINSIC_INT64
-#define VSMC_HAS_INTRINSIC_INT64 0
-#endif
-#endif
-
-#if VSMC_X86
-#ifndef VSMC_HAS_INTRINSIC_INT64_LONG_LONG
-#define VSMC_HAS_INTRINSIC_INT64_LONG_LONG 1
-#endif
-#endif
-
 #endif // VSMC_INTERNAL_COMPILER_GCC_HPP

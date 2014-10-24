@@ -298,7 +298,7 @@ class PhiloxEngine
 
     public :
 
-    explicit PhiloxEngine (result_type s = 0) : remain_(0)
+    explicit PhiloxEngine (result_type s = 0) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(s);
@@ -308,19 +308,19 @@ class PhiloxEngine
     explicit PhiloxEngine (SeedSeq &seq, typename cxx11::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, key_type,
             PhiloxEngine<ResultType, K, Rounds>
-            >::value>::type * = VSMC_NULLPTR) : remain_(0)
+            >::value>::type * = VSMC_NULLPTR) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(seq);
     }
 
-    PhiloxEngine (const key_type &k) : key_(k), remain_(0)
+    PhiloxEngine (const key_type &k) : key_(k), index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         counter::reset(ctr_);
     }
 
-    PhiloxEngine (const ctr_type &c, const key_type &k) : key_(k), remain_(0)
+    PhiloxEngine (const ctr_type &c, const key_type &k) : key_(k), index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         counter::set(ctr_, c);
@@ -331,7 +331,7 @@ class PhiloxEngine
         counter::reset(ctr_);
         key_.fill(0);
         key_.front() = s;
-        remain_ = 0;
+        index_ = K;
     }
 
     template <typename SeedSeq>
@@ -340,14 +340,14 @@ class PhiloxEngine
     {
         counter::reset(ctr_);
         seq.generate(key_.begin(), key_.end());
-        remain_ = 0;
+        index_ = K;
     }
 
     void seed (const key_type &k)
     {
         counter::reset(ctr_);
         key_ = k;
-        remain_ = 0;
+        index_ = K;
     }
 
     ctr_type ctr () const {return ctr_;}
@@ -357,13 +357,13 @@ class PhiloxEngine
     void ctr (const ctr_type &c)
     {
         counter::set(ctr_, c);
-        remain_ = 0;
+        index_ = K;
     }
 
     void key (const key_type &k)
     {
         key_ = k;
-        remain_ = 0;
+        index_ = K;
     }
 
     /// \brief After reset, next call to `operator()` will always increase the
@@ -371,21 +371,20 @@ class PhiloxEngine
     void reset ()
     {
         counter::reset(ctr_);
-        remain_ = 0;
+        index_ = K;
     }
 
     const buffer_type &buffer () {return buffer_;}
 
     result_type operator() ()
     {
-        if (remain_ == 0) {
+        if (index_ == K) {
             counter::increment(ctr_);
             generate_buffer(ctr_, buffer_);
-            remain_ = static_cast<result_type>(K);
+            index_ = 0;
         }
-        --remain_;
 
-        return buffer_[remain_];
+        return buffer_[index_++];
     }
 
     /// \brief Generate a buffer of random bits given a counter using the
@@ -405,24 +404,24 @@ class PhiloxEngine
 
     void discard (result_type nskip)
     {
-        const result_type k = static_cast<result_type>(K);
-        if (nskip <= remain_) {
-            remain_ -= nskip;
+        std::size_t n = static_cast<std::size_t>(nskip);
+        if (index_ + n <= K) {
+            index_ += n;
             return;
         }
 
-        nskip -= remain_;
-        if (nskip <= k) {
-            remain_ = 0;
+        n -= K - index_;
+        if (n <= K) {
+            index_ = K;
             operator()();
-            remain_ = k - nskip;
+            index_ = n;
             return;
         }
 
-        remain_ = 0;
-        counter::increment(ctr_, nskip / k);
+        counter::increment(ctr_, static_cast<result_type>(n / K));
+        index_ = K;
         operator()();
-        remain_ = k - nskip % k;
+        index_ = n % K;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -437,7 +436,7 @@ class PhiloxEngine
             const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {
         return
-            eng1.remain_ == eng2.remain_ &&
+            eng1.index_ == eng2.index_ &&
             eng1.ctr_ == eng2.ctr_ &&
             eng1.key_ == eng2.key_;
     }
@@ -458,7 +457,7 @@ class PhiloxEngine
         os << eng.ctr_ << ' ';
         os << eng.key_ << ' ';
         os << eng.buffer_ << ' ';
-        os << eng.remain_;
+        os << eng.index_;
 
         return os;
     }
@@ -475,7 +474,7 @@ class PhiloxEngine
         is >> std::ws >> eng_tmp.buffer_;
         is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.key_;
-        is >> std::ws >> eng_tmp.remain_;
+        is >> std::ws >> eng_tmp.index_;
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
@@ -493,7 +492,7 @@ class PhiloxEngine
     ctr_type ctr_;
     key_type key_;
     buffer_type buffer_;
-    result_type remain_;
+    std::size_t index_;
 
     void generate_buffer (const ctr_type c, buffer_type &buf) const
     {

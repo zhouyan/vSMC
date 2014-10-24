@@ -213,7 +213,7 @@ template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64>
 
 /// \brief Default seed for MKL RNG
 /// \ingroup Traits
-template<MKL_INT> struct MKLSeedTrait :
+template <MKL_INT> struct MKLSeedTrait :
     public cxx11::integral_constant<MKL_UINT, 101> {};
 
 /// \brief Default seed for MKL Sobol quasi-RNG
@@ -500,13 +500,14 @@ class MKLEngine
     explicit MKLEngine (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
             MKL_INT offset = 0) :
         stream_(s, offset), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE),
-        remain_(0) {}
+        index_(buffer_size_) {}
 
     template <typename SeedSeq>
     explicit MKLEngine (SeedSeq &seq, typename cxx11::enable_if<
             internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, ResultType> >::value>::type * = VSMC_NULLPTR) :
-        stream_(seq), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), remain_(0) {}
+        stream_(seq), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE),
+        index_(buffer_size_) {}
 
     void seed (MKL_UINT s) {stream_.seed(s);}
 
@@ -517,13 +518,13 @@ class MKLEngine
 
     result_type operator() ()
     {
-        if (remain_ == 0) {
+        if (index_ == buffer_size_) {
             buffer_.resize(static_cast<std::size_t>(buffer_size_));
             uniform_bits_(stream_, buffer_size_, &buffer_[0]);
-            remain_ = buffer_size_;
+            index_ = 0;
         }
 
-        return buffer_[static_cast<std::size_t>(--remain_)];
+        return buffer_[static_cast<std::size_t>(index_++)];
     }
 
     /// \brief Discard results
@@ -536,8 +537,9 @@ class MKLEngine
     void discard (std::size_t nskip)
     {
         skip_ahead_(stream_, static_cast<typename
-                internal::MKLSkipAhead<BRNG, ResultType>::type::size_type>
-                (nskip));
+                internal::MKLSkipAhead<BRNG, ResultType>::type::size_type
+                >(nskip));
+        index_ = buffer_size_;
     }
 
     static VSMC_CONSTEXPR const result_type _Min =
@@ -564,7 +566,7 @@ class MKLEngine
     typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     std::vector<result_type> buffer_;
     MKL_INT buffer_size_;
-    MKL_INT remain_;
+    MKL_INT index_;
 }; // class MKLEngine
 
 /// \brief A 59-bits multiplicative congruential generator
@@ -613,19 +615,20 @@ class MKLDistribution
 
     typedef ResultType result_type;
 
-    MKLDistribution () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), remain_(0) {}
+    MKLDistribution () :
+        buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), index_(buffer_size_) {}
 
     template <MKL_INT BRNG>
     result_type operator() (MKLStream<BRNG> &stream)
     {
-        if (remain_ == 0) {
+        if (index_ == buffer_size_) {
             buffer_.resize(static_cast<std::size_t>(buffer_size_));
             static_cast<Derived *>(this)->generate(stream, buffer_size_,
                     &buffer_[0]);
-            remain_ = buffer_size_;
+            index_ = 0;
         }
 
-        return buffer_[static_cast<std::size_t>(--remain_)];
+        return buffer_[index_++];
     }
 
     template <MKL_INT BRNG>
@@ -640,7 +643,7 @@ class MKLDistribution
     void operator() (MKLEngine<BRNG, RT> &engine, MKL_INT n, result_type *r)
     {operator()(engine.stream(), n, r);}
 
-    void reset () {remain_ = 0;}
+    void reset () {index_ = buffer_size_;}
 
     /// \brief Set the buffer size, zero or negative value restore the default
     void buffer_size (MKL_INT size)
@@ -668,7 +671,7 @@ class MKLDistribution
 
     std::vector<result_type> buffer_;
     MKL_INT buffer_size_;
-    MKL_INT remain_;
+    MKL_INT index_;
 
     std::string mkl_name_prefix (MKL_INT)            {return "vi";}
     std::string mkl_name_prefix (unsigned)           {return "vi";}

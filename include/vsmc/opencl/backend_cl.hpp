@@ -129,14 +129,14 @@ namespace internal {
 
 template <typename> void set_cl_fp_type (std::stringstream &);
 
-template<>
+template <>
 inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
 {
     ss << "typedef float fp_type;\n";
     ss << "#define VSMC_HAS_OPENCL_DOUBLE 0\n";
 }
 
-template<>
+template <>
 inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
 {
     ss << "#if defined(cl_khr_fp64)\n";
@@ -335,7 +335,7 @@ class StateCL
         return ::cl::Kernel(program_, name.c_str());
     }
 
-    template<typename IntType>
+    template <typename IntType>
     void copy (size_type N, const IntType *copy_from)
     {
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(copy);

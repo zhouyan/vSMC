@@ -14,6 +14,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/functional.hpp>
 #include <vsmc/integrate/nintegrate_newton_cotes.hpp>
+#include <vsmc/math/cblas.hpp>
 #include <cmath>
 #include <vector>
 
@@ -41,6 +42,8 @@ class Path
     /// \brief Construct a Path with an evaluation object
     ///
     /// \param eval The evaluation object of type Path::eval_type
+    /// \param record_only The Path monitor only records the integrands instead
+    /// of calculating them itself
     ///
     /// A Path object is very similar to a Monitor object. It is a special case
     /// for Path sampling Monitor. The dimension of the Monitor is always one.
@@ -57,14 +60,19 @@ class Path
     /// Path sampling integrands. The return value shall be the Path sampling
     /// integration grid.
     ///
+    /// If `record_only` is true, then the Path monitor only records the
+    /// integrand estimate stored in `integrand`. Otherwise the behavior is
+    /// explained below,
+    ///
     /// For example, say the Path sampling is computed through integration of
     /// \f$\lambda = \int_0^1 E[g_\alpha(X)]\,\mathrm{d}\alpha\f$. The integral
     /// is approximated with numerical integration at point
     /// \f$\alpha_0 = 0, \alpha_1, \dots, \alpha_T = 1\f$, then at iteration
     /// \f$t\f$, the output parameter `integrand` contains
     /// \f$(g_{\alpha_t}(X_0),\dots)\f$ and the return value is \f$\alpha_t\f$.
-    explicit Path (const eval_type &eval) :
-        eval_(eval), recording_(true), log_zconst_(0) {}
+    explicit Path (const eval_type &eval, bool record_only = false) :
+        eval_(eval), recording_(true), record_only_(record_only),
+        log_zconst_(0) {}
 
     /// \brief The number of iterations has been recorded
     ///
@@ -148,7 +156,8 @@ class Path
     }
 
     /// \brief Set a new evaluation object of type eval_type
-    void set_eval (const eval_type &new_eval) {eval_ = new_eval;}
+    void set_eval (const eval_type &new_eval, bool record_only = false)
+    {eval_ = new_eval; record_only_ = record_only;}
 
     /// Perform the evaluation for a given iteration and a Particle<T> object
     ///
@@ -160,26 +169,21 @@ class Path
 
         VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(eval_, eval, EVALUATION);
 
-        const std::size_t N = static_cast<std::size_t>(particle.size());
-        weight_.resize(N);
-        buffer_.resize(N);
-        double *const wptr = &weight_[0];
-        double *const bptr = &buffer_[0];
-        particle.read_weight(wptr);
+        if (record_only_) {
+            double integrand = 0;
+            double grid = eval_(iter, particle, &integrand);
+            push_back(iter, grid, integrand);
 
-        index_.push_back(iter);
-        grid_.push_back(eval_(iter, particle, bptr));
-
-        double res = 0;
-        for (std::size_t i = 0; i != N; ++i)
-            res += wptr[i] * bptr[i];
-        integrand_.push_back(res);
-
-        if (iter_size() > 1) {
-            std::size_t i = iter_size() - 1;
-            log_zconst_ += 0.5 * (grid_[i] - grid_[i - 1]) *
-                (integrand_[i] + integrand_[i - 1]);
+            return;
         }
+
+        const std::size_t N = static_cast<std::size_t>(particle.size());
+        buffer_.resize(N);
+        double *const bptr = &buffer_[0];
+        const double *const wptr = particle.weight_set().weight_data();
+        double grid = eval_(iter, particle, bptr);
+        double integrand = math::dot(N, wptr, bptr);
+        push_back(iter, grid, integrand);
     }
 
     /// \brief Get the nomralizing constants ratio estimates
@@ -210,12 +214,24 @@ class Path
 
     eval_type eval_;
     bool recording_;
+    bool record_only_;
     double log_zconst_;
     std::vector<std::size_t> index_;
     std::vector<double> integrand_;
     std::vector<double> grid_;
-    std::vector<double> weight_;
     std::vector<double> buffer_;
+
+    void push_back (std::size_t iter, double grid, double integrand)
+    {
+        index_.push_back(iter);
+        grid_.push_back(grid);
+        integrand_.push_back(integrand);
+        if (iter_size() > 1) {
+            std::size_t i = iter_size() - 1;
+            log_zconst_ += 0.5 * (grid_[i] - grid_[i - 1]) *
+                (integrand_[i] + integrand_[i - 1]);
+        }
+    }
 }; // class PathSampling
 
 } // namespace vsmc

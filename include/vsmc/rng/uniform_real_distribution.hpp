@@ -34,15 +34,15 @@ namespace vsmc {
 
 namespace internal {
 
-template<uint64_t, uint64_t>
+template <uint64_t, uint64_t>
 struct UniformRealDistributionFRIntType;
 
-template<>
+template <>
 struct UniformRealDistributionFRIntType<0,
     static_cast<uint64_t>(static_cast<uint32_t>(~(static_cast<uint32_t>(0))))>
 {typedef uint32_t type;};
 
-template<>
+template <>
 struct UniformRealDistributionFRIntType<0,
     static_cast<uint64_t>(~(static_cast<uint64_t>(0)))>
 {typedef uint64_t type;};

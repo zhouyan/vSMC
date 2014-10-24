@@ -24,22 +24,22 @@ class ThreadGuard
 
     typedef ThreadType thread_type;
 
-    ThreadGuard () noexcept {}
+    ThreadGuard () VSMC_NOEXCEPT {}
 
     ThreadGuard (const ThreadGuard &) = delete;
 
     ThreadGuard &operator= (const ThreadGuard &) = delete;
 
-    ThreadGuard (thread_type &&thr) noexcept :
+    ThreadGuard (thread_type &&thr) VSMC_NOEXCEPT :
         thread_(cxx11::move(thr)) {}
 
-    ThreadGuard (ThreadGuard &&other) noexcept :
+    ThreadGuard (ThreadGuard &&other) VSMC_NOEXCEPT :
         thread_(cxx11::move(other.thread_)) {}
 
-    ThreadGuard &operator= (ThreadGuard &&other) noexcept
+    ThreadGuard &operator= (ThreadGuard &&other) VSMC_NOEXCEPT
     {thread_ = cxx11::move(other.thread_); return *this;}
 
-    ~ThreadGuard () noexcept {if (thread_.joinable()) thread_.join();}
+    ~ThreadGuard () VSMC_NOEXCEPT {if (thread_.joinable()) thread_.join();}
 
     private :
 

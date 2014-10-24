@@ -39,7 +39,7 @@ CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/doc/main.md)
 
 # Generate headers
-INCLUDE (VSMC_OPENCL_INTERNAL_CL_SET_KERNEL_ARGS)
+INCLUDE (vSMCCLSetKernelArgs)
 
 # Installation
 IF (NOT VSMC_INSTALL_INC_DIR)

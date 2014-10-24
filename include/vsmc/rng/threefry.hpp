@@ -112,17 +112,11 @@ template <typename ResultType, unsigned N> struct ThreefryRotateImpl;
 
 template <unsigned N>
 struct ThreefryRotateImpl<uint32_t, N>
-{
-    static uint32_t eval (uint32_t x)
-    {return (x << (N & 31) | x >> ((32 - N) & 31));}
-}; // struct ThreefryRotateImpl
+{static uint32_t eval (uint32_t x) {return x << N | x >> (32 - N);}};
 
 template <unsigned N>
 struct ThreefryRotateImpl<uint64_t, N>
-{
-    static uint64_t eval (uint64_t x)
-    {return (x << (N & 63) | x >> ((64 - N) & 63));}
-}; // struct ThreefryRotateImpl
+{static uint64_t eval (uint64_t x) {return x << N | x >> (64 - N);}};
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct ThreefryRotate {static void eval (Array<ResultType, K> &) {}};
@@ -262,7 +256,7 @@ class ThreefryEngine
 
     public :
 
-    explicit ThreefryEngine (result_type s = 0) : remain_(0)
+    explicit ThreefryEngine (result_type s = 0) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(s);
@@ -272,20 +266,20 @@ class ThreefryEngine
     explicit ThreefryEngine (SeedSeq &seq, typename cxx11::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, key_type,
             ThreefryEngine<ResultType, K, Rounds>
-            >::value>::type * = VSMC_NULLPTR) : remain_(0)
+            >::value>::type * = VSMC_NULLPTR) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(seq);
     }
 
-    ThreefryEngine (const key_type &k) : remain_(0)
+    ThreefryEngine (const key_type &k) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         counter::reset(ctr_);
         init_par(k);
     }
 
-    ThreefryEngine (const ctr_type &c, const key_type &k) : remain_(0)
+    ThreefryEngine (const ctr_type &c, const key_type &k) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         counter::set(ctr_, c);
@@ -299,7 +293,7 @@ class ThreefryEngine
         k.fill(0);
         k.front() = s;
         init_par(k);
-        remain_ = 0;
+        index_ = K;
     }
 
     template <typename SeedSeq>
@@ -310,14 +304,14 @@ class ThreefryEngine
         key_type k;
         seq.generate(k.begin(), k.end());
         init_par(k);
-        remain_ = 0;
+        index_ = K;
     }
 
     void seed (const key_type &k)
     {
         counter::reset(ctr_);
         init_par(k);
-        remain_ = 0;
+        index_ = K;
     }
 
     ctr_type ctr () const {return ctr_;}
@@ -327,13 +321,13 @@ class ThreefryEngine
     void ctr (const ctr_type &c)
     {
         counter::set(ctr_, c);
-        remain_ = 0;
+        index_ = K;
     }
 
     void key (const key_type &k)
     {
         init_par(k);
-        remain_ = 0;
+        index_ = K;
     }
 
     /// \brief After reset, next call to `operator()` will always increase the
@@ -341,19 +335,18 @@ class ThreefryEngine
     void reset ()
     {
         counter::reset(ctr_);
-        remain_ = 0;
+        index_ = K;
     }
 
     result_type operator() ()
     {
-        if (remain_ == 0) {
+        if (index_ == K) {
             counter::increment(ctr_);
             generate_buffer(ctr_, buffer_);
-            remain_ = static_cast<result_type>(K);
+            index_ = 0;
         }
-        --remain_;
 
-        return buffer_[remain_];
+        return buffer_[index_++];
     }
 
     /// \brief Generate a buffer of random bits given a counter using the
@@ -373,24 +366,24 @@ class ThreefryEngine
 
     void discard (result_type nskip)
     {
-        const result_type k = static_cast<result_type>(K);
-        if (nskip <= remain_) {
-            remain_ -= nskip;
+        std::size_t n = static_cast<std::size_t>(nskip);
+        if (index_ + n <= K) {
+            index_ += n;
             return;
         }
 
-        nskip -= remain_;
-        if (nskip <= k) {
-            remain_ = 0;
+        n -= K - index_;
+        if (n <= K) {
+            index_ = K;
             operator()();
-            remain_ = k - nskip;
+            index_ = n;
             return;
         }
 
-        remain_ = 0;
-        counter::increment(ctr_, nskip / k);
+        counter::increment(ctr_, static_cast<result_type>(n / K));
+        index_ = K;
         operator()();
-        remain_ = k - nskip % k;
+        index_ = n % K;
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
@@ -405,7 +398,7 @@ class ThreefryEngine
             const ThreefryEngine<ResultType, K, Rounds> &eng2)
     {
         return
-            eng1.remain_ == eng2.remain_ &&
+            eng1.index_ == eng2.index_ &&
             eng1.ctr_ == eng2.ctr_ &&
             eng1.par_ == eng2.par_;
     }
@@ -426,7 +419,7 @@ class ThreefryEngine
         os << eng.ctr_ << ' ';
         os << eng.par_ << ' ';
         os << eng.buffer_ << ' ';
-        os << eng.remain_;
+        os << eng.index_;
 
         return os;
     }
@@ -443,7 +436,7 @@ class ThreefryEngine
         is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.par_;
         is >> std::ws >> eng_tmp.buffer_;
-        is >> std::ws >> eng_tmp.remain_;
+        is >> std::ws >> eng_tmp.index_;
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
@@ -461,7 +454,7 @@ class ThreefryEngine
     ctr_type ctr_;
     Array<ResultType, K + 1> par_;
     buffer_type buffer_;
-    result_type remain_;
+    std::size_t index_;
 
     void generate_buffer (const ctr_type &c, buffer_type &buf) const
     {

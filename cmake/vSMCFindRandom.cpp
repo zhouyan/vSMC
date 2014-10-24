@@ -12,7 +12,7 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/rng/rng_set.hpp>
 
-#if VSMC_USE_RANDOM123
+#if VSMC_HAS_RANDOM123
 #include <Random123/philox.h>
 #include <Random123/conventional/Engine.hpp>
 #endif
@@ -33,7 +33,7 @@ int main ()
     {vsmc::cxx11::ranlux48      eng; u = ru01(eng); assert(u >=0 && u <= 1);}
     {vsmc::cxx11::knuth_b       eng; u = ru01(eng); assert(u >=0 && u <= 1);}
 
-#if VSMC_USE_RANDOM123
+#if VSMC_HAS_RANDOM123
     vsmc::RngSet<r123::Engine<r123::Philox2x32>, vsmc::Vector> eng(N);
 #else
     vsmc::traits::RngSetTypeTrait<vsmc::NullType>::type eng(N);

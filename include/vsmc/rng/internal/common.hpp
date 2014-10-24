@@ -14,6 +14,8 @@
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/utility/array.hpp>
 #include <vsmc/utility/counter.hpp>
+#include <iostream>
+#include <iomanip>
 
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS

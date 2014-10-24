@@ -99,8 +99,8 @@ class Progress
     /// \param message A (short) discreptive message
     /// \param interval The sleep interval in seconds
     /// \param length The length of the progress bar between brackets
-    void start (unsigned total, const std::string &message = std::string(),
-            double interval = 0.1, unsigned length = 60)
+    void start (std::size_t total, const std::string &message = std::string(),
+            double interval = 0.1, std::size_t length = 60)
     {
         iter_ = 0;
         total_ = total;
@@ -132,24 +132,24 @@ class Progress
     }
 
     /// \brief Increment the iteration count
-    void increment (unsigned step = 1) {iter_ += step;}
+    void increment (std::size_t step = 1) {iter_ += step;}
 
     private :
 
     StopWatch watch_;
     thread_type *thread_ptr_;
 
-    unsigned iter_;
-    unsigned total_;
+    std::size_t iter_;
+    std::size_t total_;
     double interval_;
-    unsigned length_;
+    std::size_t length_;
     bool print_first_;
     bool in_progress_;
 
-    unsigned num_equal_;
-    unsigned percent_;
-    unsigned seconds_;
-    unsigned last_iter_;
+    std::size_t num_equal_;
+    std::size_t percent_;
+    std::size_t seconds_;
+    std::size_t last_iter_;
 
     std::string message_;
     char display_progress_[128];
@@ -198,20 +198,21 @@ class Progress
 
         ptr->watch_.stop();
         ptr->watch_.start();
-        const unsigned seconds = static_cast<unsigned>(ptr->watch_.seconds());
-        const unsigned iter = ptr->iter_;
-        const unsigned total = ptr->total_;
-        const unsigned length = ptr->length_;
+        const std::size_t seconds =
+            static_cast<std::size_t>(ptr->watch_.seconds());
+        const std::size_t iter = ptr->iter_;
+        const std::size_t total = ptr->total_;
+        const std::size_t length = ptr->length_;
 
-        const unsigned display_iter = iter <= total ? iter : total;
-        unsigned num_equal = total == 0 ? length :
-            static_cast<unsigned>(
+        const std::size_t display_iter = iter <= total ? iter : total;
+        std::size_t num_equal = total == 0 ? length :
+            static_cast<std::size_t>(
                     static_cast<double>(length) *
                     static_cast<double>(display_iter) /
                     static_cast<double>(total));
         num_equal = num_equal <= length ? num_equal : length;
-        unsigned percent = total == 0 ? 100 :
-            static_cast<unsigned>(
+        std::size_t percent = total == 0 ? 100 :
+            static_cast<std::size_t>(
                     static_cast<double>(100) *
                     static_cast<double>(display_iter) /
                     static_cast<double>(total));
@@ -231,8 +232,8 @@ class Progress
             cstr[1] = '\0';
         } else if (ptr->num_equal_ != num_equal) {
             ptr->num_equal_ = num_equal;
-            unsigned num_space = length - num_equal;
-            unsigned num_dash = 0;
+            std::size_t num_space = length - num_equal;
+            std::size_t num_dash = 0;
             if (num_space > 0) {
                 num_dash = 1;
                 --num_space;
@@ -242,11 +243,11 @@ class Progress
             std::size_t offset = 0;
             cstr[offset++] = ' ';
             cstr[offset++] = '[';
-            for (unsigned i = 0; i != num_equal; ++i)
+            for (std::size_t i = 0; i != num_equal; ++i)
                 cstr[offset++] = '=';
-            for (unsigned i = 0; i != num_dash; ++i)
+            for (std::size_t i = 0; i != num_dash; ++i)
                 cstr[offset++] = '-';
-            for (unsigned i = 0; i != num_space; ++i)
+            for (std::size_t i = 0; i != num_space; ++i)
                 cstr[offset++] = ' ';
             cstr[offset++] = ']';
             cstr[offset++] = '\0';
@@ -254,12 +255,12 @@ class Progress
 
         if (ptr->percent_ != percent) {
             ptr->percent_ = percent;
-            const unsigned num_space = 3 - uint_digit(percent);
+            const std::size_t num_space = 3 - uint_digit(percent);
 
             char *cstr = ptr->display_percent_;
             std::size_t offset = 0;
             cstr[offset++] = '[';
-            for (unsigned i = 0; i != num_space; ++i)
+            for (std::size_t i = 0; i != num_space; ++i)
                 cstr[offset++] = ' ';
             uint_to_char(percent, cstr, offset);
             cstr[offset++] = '%';
@@ -269,9 +270,9 @@ class Progress
 
         if (ptr->seconds_ != seconds) {
             ptr->seconds_ = seconds;
-            const unsigned display_second = seconds % 60;
-            const unsigned display_minute = (seconds / 60) % 60;
-            const unsigned display_hour   = seconds / 3600;
+            const std::size_t display_second = seconds % 60;
+            const std::size_t display_minute = (seconds / 60) % 60;
+            const std::size_t display_hour   = seconds / 3600;
 
             char *cstr = ptr->display_time_;
             std::size_t offset = 0;
@@ -291,14 +292,14 @@ class Progress
 
         if (ptr->last_iter_ != iter) {
             ptr->last_iter_ = iter;
-            const unsigned dtotal = uint_digit(total);
-            const unsigned diter = uint_digit(iter);
-            const unsigned num_space = dtotal > diter ? dtotal - diter : 0;
+            const std::size_t dtotal = uint_digit(total);
+            const std::size_t diter = uint_digit(iter);
+            const std::size_t num_space = dtotal > diter ? dtotal - diter : 0;
             char *cstr = ptr->display_iter_;
 
             std::size_t offset = 0;
             cstr[offset++] = '[';
-            for (unsigned i = 0; i < num_space; ++i)
+            for (std::size_t i = 0; i < num_space; ++i)
                 cstr[offset++] = ' ';
             uint_to_char(iter, cstr, offset);
             cstr[offset++] = '/';
@@ -311,7 +312,8 @@ class Progress
         ptr->os_ << ptr->display_percent_;
         ptr->os_ << ptr->display_time_;
         ptr->os_ << ptr->display_iter_;
-        ptr->os_ << '[' << ptr->message_ << ']';
+        if (ptr->message_.size() != 0)
+            ptr->os_ << '[' << ptr->message_ << ']';
     }
 
     template <typename UIntType>
@@ -333,12 +335,12 @@ class Progress
     }
 
     template <typename UIntType>
-    static unsigned uint_digit (UIntType num)
+    static std::size_t uint_digit (UIntType num)
     {
         if (num == 0)
             return 1;
 
-        unsigned digit = 0;
+        std::size_t digit = 0;
         while (num != 0) {
             ++digit;
             num /= 10;
