@@ -481,8 +481,9 @@ class Sampler
     const Path<T> &path () const {return path_;}
 
     /// \brief Set the Path sampling evaluation object
-    Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval)
-    {path_.set_eval(eval); return *this;}
+    Sampler<T> &path_sampling (const typename Path<T>::eval_type &eval,
+            bool record_only = false)
+    {path_.set_eval(eval, record_only); return *this;}
 
     /// \brief Path sampling estimate of the logarithm of normalizing constants
     /// ratio
@@ -500,11 +501,15 @@ class Sampler
     /// \param name The name of the monitor
     /// \param dim The dimension of the monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
+    /// \param record_only The monitor only records results
+    ///
+    /// \sa Monitor
     Sampler<T> &monitor (const std::string &name, std::size_t dim,
-            const typename Monitor<T>::eval_type &eval)
+            const typename Monitor<T>::eval_type &eval,
+            bool record_only = false)
     {
         monitor_.insert(typename monitor_map_type::value_type(
-                    name, Monitor<T>(dim, eval)));
+                    name, Monitor<T>(dim, eval, record_only)));
 
         return *this;
     }
