@@ -288,4 +288,14 @@
 #define VSMC_HAS_C99LIB_MATH 1
 #endif
 
+// Target specific features
+
+// Parallelization features
+
+#ifdef _OPENMP
+#ifndef VSMC_HAS_OMP
+#define VSMC_HAS_OMP 1
+#endif
+#endif
+
 #endif // VSMC_INTERNAL_COMPILER_SUNPRO_HPP

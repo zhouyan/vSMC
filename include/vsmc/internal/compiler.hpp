@@ -13,41 +13,19 @@
 
 #include <cstddef>
 
-#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
-#ifndef VSMC_X86_64
-#define VSMC_X86_64 1
-#endif
-#endif
-
-#ifndef VSMC_X86_64
-#define VSMC_X86_64 0
-#endif
-
-#if VSMC_X86_64 || defined(__i386__) || defined(_M_I386) || defined(_WIN32)
-#ifndef VSMC_X86
-#define VSMC_X86 1
-#endif
-#endif
-
-#ifndef VSMC_X86
-#define VSMC_X86 0
-#endif
-
 #if defined(__APPLE__) || defined(__MACOSX)
 #include <Availability.h>
-#endif
-
-#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(__MAC_10_0)
-#define VSMC_MAC_10_0 __MAC_10_0
-#define VSMC_MAC_10_1 __MAC_10_1
-#define VSMC_MAC_10_2 __MAC_10_2
-#define VSMC_MAC_10_3 __MAC_10_3
-#define VSMC_MAC_10_4 __MAC_10_4
-#define VSMC_MAC_10_5 __MAC_10_5
-#define VSMC_MAC_10_6 __MAC_10_6
-#define VSMC_MAC_10_7 __MAC_10_7
-#define VSMC_MAC_10_8 __MAC_10_8
-#define VSMC_MAC_10_9 __MAC_10_9
+#define VSMC_MAC_10_0  __MAC_10_0
+#define VSMC_MAC_10_1  __MAC_10_1
+#define VSMC_MAC_10_2  __MAC_10_2
+#define VSMC_MAC_10_3  __MAC_10_3
+#define VSMC_MAC_10_4  __MAC_10_4
+#define VSMC_MAC_10_5  __MAC_10_5
+#define VSMC_MAC_10_6  __MAC_10_6
+#define VSMC_MAC_10_7  __MAC_10_7
+#define VSMC_MAC_10_8  __MAC_10_8
+#define VSMC_MAC_10_9  __MAC_10_9
+#define VSMC_MAC_10_10 __MAC_10_10
 #define VSMC_MAC_VERSION __MAC_OS_X_VERSION_MIN_REQUIRED
 #define VSMC_MAC_VERSION_MIN_REQUIRED(ver) VSMC_MAC_VERSION >= ver
 #else
@@ -244,6 +222,10 @@
 #define VSMC_HAS_CXX11LIB_TUPLE 0
 #endif
 
+#ifndef VSMC_USE_CXX11LIB_FUTURE
+#define VSMC_USE_CXX11LIB_FUTURE VSMC_HAS_CXX11LIB_FUTURE
+#endif
+
 // C99 library features
 
 #ifndef VSMC_HAS_C99LIB_MATH
@@ -264,8 +246,26 @@
 #define VSMC_HAS_RDRAND 0
 #endif
 
-#ifndef VSMC_HAS_OPENCL_DOUBLE
-#define VSMC_HAS_OPENCL_DOUBLE 1
+// Parallelization features
+
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_6)
+#ifndef VSMC_HAS_GCD
+#define VSMC_HAS_GCD 1
+#endif
+#endif
+
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
+#ifndef VSMC_HAS_GCD_LION
+#define VSMC_HAS_GCD_LION 1
+#endif
+#endif
+
+// Optional libraries
+
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_4)
+#ifndef VSMC_HAS_VECLIB
+#define VSMC_HAS_VECLIB 1
+#endif
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

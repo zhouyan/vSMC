@@ -298,15 +298,29 @@
 
 // Target specific features
 
-#if VSMC_X86_64
+#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
 #ifndef VSMC_HAS_INT128
 #define VSMC_HAS_INT128 1
 #endif
 #endif
 
-#if VSMC_X86_64
+#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
 #ifndef VSMC_INT128
 #define VSMC_INT128 __int128
+#endif
+#endif
+
+// Parallelization features
+
+#if VSMC_INTEL_VERSION >= 1210
+#ifndef VSMC_HAS_CILK
+#define VSMC_HAS_CILK 1
+#endif
+#endif
+
+#ifdef _OPENMP
+#ifndef VSMC_HAS_OMP
+#define VSMC_HAS_OMP 1
 #endif
 #endif
 

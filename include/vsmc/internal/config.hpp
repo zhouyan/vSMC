@@ -45,8 +45,30 @@
 #define VSMC_RUNTIME_WARNING_AS_EXCEPTION 0
 #endif
 
-#ifndef VSMC_USE_CXX11LIB_FUTURE
-#define VSMC_USE_CXX11LIB_FUTURE VSMC_HAS_CXX11LIB_FUTURE
+// Parallelization features
+
+#ifndef VSMC_HAS_CILK
+#define VSMC_HAS_CILK 0
+#endif
+
+#ifndef VSMC_HAS_GCD
+#define VSMC_HAS_GCD 0
+#endif
+
+#ifndef VSMC_HAS_GCD_LION
+#define VSMC_HAS_GCD_LION 0
+#endif
+
+#ifndef VSMC_HAS_OMP
+#define VSMC_HAS_OMP 0
+#endif
+
+#ifndef VSMC_HAS_PPL
+#define VSMC_HAS_PPL 0
+#endif
+
+#ifndef VSMC_HAS_TBB
+#define VSMC_HAS_TBB 0
 #endif
 
 #ifndef VSMC_HAS_MPI
@@ -55,6 +77,12 @@
 
 #ifndef VSMC_HAS_OPENCL
 #define VSMC_HAS_OPENCL 0
+#endif
+
+// Optional libraries
+
+#ifndef VSMC_HAS_HDF5
+#define VSMC_HAS_HDF5 0
 #endif
 
 #ifndef VSMC_HAS_MKL
@@ -74,11 +102,7 @@
 #endif
 
 #ifndef VSMC_HAS_VECLIB
-#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_4)
-#define VSMC_HAS_VECLIB 1
-#else
 #define VSMC_HAS_VECLIB 0
-#endif
 #endif
 
 #ifndef VSMC_USE_VECLIB_CBLAS
@@ -87,54 +111,6 @@
 
 #ifndef VSMC_USE_VECLIB_VFORCE
 #define VSMC_USE_VECLIB_VFORCE VSMC_HAS_VECLIB
-#endif
-
-#ifndef VSMC_HAS_CILK
-#if defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 1210
-#define VSMC_HAS_CILK 1
-#else
-#define VSMC_HAS_CILK 0
-#endif
-#endif
-
-#ifndef VSMC_HAS_GCD
-#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_6)
-#define VSMC_HAS_GCD 1
-#else
-#define VSMC_HAS_GCD 0
-#endif
-#endif
-
-#ifndef VSMC_HAS_GCD_LION
-#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
-#define VSMC_HAS_GCD_LION 1
-#else
-#define VSMC_HAS_GCD_LION 0
-#endif
-#endif
-
-#ifndef VSMC_HAS_OMP
-#ifdef _OPENMP
-#define VSMC_HAS_OMP 1
-#else
-#define VSMC_HAS_OMP 0
-#endif
-#endif
-
-#ifndef VSMC_HAS_PPL
-#if defined(_MSC_VER) && _MSC_VER >= 1600
-#define VSMC_HAS_PPL 1
-#else
-#define VSMC_HAS_PPL 0
-#endif
-#endif
-
-#ifndef VSMC_HAS_TBB
-#define VSMC_HAS_TBB 0
-#endif
-
-#ifndef VSMC_HAS_HDF5
-#define VSMC_HAS_HDF5 0
 #endif
 
 #endif // VSMC_INTERNAL_CONFIG_HPP

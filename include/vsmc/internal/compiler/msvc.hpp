@@ -285,4 +285,12 @@
 
 // Target specific features
 
+// Parallelization features
+
+#if _MSC_VER >= 1600
+#ifndef VSMC_HAS_PPL
+#define VSMC_HAS_PPL 1
+#endif
+#endif
+
 #endif // VSMC_INTERNAL_COMPILER_MSVC_HPP
