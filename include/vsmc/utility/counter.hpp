@@ -57,15 +57,12 @@ template <typename> class Counter;
 /// `Array<ctr_type, Blocks>`, where `ctr_type` is a counter of the first type.
 /// When set and incremented using methods in this class, all `Blocks` counters
 /// are maintained such that, they are always distinctive. This is done by
-/// reserving eight bits as counter IDs.  Therefore, there can be at most 256
-/// blocks. The eight bits reserved are the 8 higher bits in the last element
-/// of each counter. In a little-endian representation, such as on x86, the
-/// last bytes in the memory of counter is reserved. The increment works by
-/// increment each counter the same way as in the first type, except that the
-/// last element, \f$c_{K-1}\f$ has a range from zero to \f$2^{n - 8} - 1\f$
-/// where \f$n\f$ is the number of bits in type `T`. Therefore, in the extreme
-/// case where `ctr_type` is `Array<uint8_t, 1>`, increment won't change the
-/// counter at all.
+/// reserving eight bits as counter IDs. Therefore, there can be at most 256
+/// blocks. The increment works by incrementing each counter the same way as in
+/// the first type, except that the last element, \f$c_{K-1}\f$ has a range
+/// from zero to \f$2^{n - 8} - 1\f$ where \f$n\f$ is the number of bits in
+/// type `T`. Therefore, in the extreme case where `ctr_type` is
+/// `Array<uint8_t, 1>`, increment won't change the counter at all.
 template <typename T, std::size_t K>
 class Counter<Array<T, K> >
 {
