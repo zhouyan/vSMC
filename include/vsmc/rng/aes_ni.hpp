@@ -273,12 +273,6 @@ class AESNIEngine
         index_ = K_;
     }
 
-    void ctr_block (const ctr_block_type &cb)
-    {
-        ctr_block_ = cb;
-        index_ = K_;
-    }
-
     void key (const key_type &k)
     {
         key_ = k;
