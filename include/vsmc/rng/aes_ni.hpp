@@ -227,8 +227,7 @@ class AESNIEngine
     AESNIEngine (const key_type &k)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
-        counter::reset(ctr_block_);
-        key_seq_.set(k);
+        seed(k);
     }
 
     void seed (result_type s)
@@ -296,7 +295,7 @@ class AESNIEngine
             index_ = 0;
         }
 
-        return reinterpret_cast<const result_type *>(&buffer_)[index_++];
+        return reinterpret_cast<const result_type *>(buffer_.data())[index_++];
     }
 
     /// \brief Generate a buffer of random bits given a counter using the
@@ -436,8 +435,8 @@ class AESNIEngine
     // alinged
 
     buffer_type buffer_;
-    ctr_block_type ctr_block_;
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
+    ctr_block_type ctr_block_;
     key_type key_;
     std::size_t index_;
 
