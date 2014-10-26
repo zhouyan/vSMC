@@ -307,9 +307,9 @@
 #endif
 #endif
 
-#ifndef __RDRND__
+#ifdef __RDRND__
 #ifndef VSMC_HAS_RDRAND
-#define VSMC_HAS_RDRAND
+#define VSMC_HAS_RDRAND 1
 #endif
 #endif
 
