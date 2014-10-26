@@ -394,13 +394,13 @@ class ProgramOptionDefault : public ProgramOption
     std::string default_val2str (const U &val) const
     {
         std::stringstream ss;
-        ss << val;
+        ss << '(' << val << ')';
 
         return ss.str();
     }
 
     std::string default_val2str (bool val) const
-    {return val ? std::string("true") : std::string("false");}
+    {return val ? std::string("(true)") : std::string("(false)");}
 }; // ProgramOptionDefault
 
 /// \brief Option with a single value
@@ -699,7 +699,7 @@ class ProgramOptionMap
         for (std::size_t i = 0; i != vec[0].size(); ++i) {
             os << vec[0][i] << std::string(len[0] - vec[0][i].size(), ' ');
             os << vec[1][i] << std::string(len[1] - vec[1][i].size(), ' ');
-            os << '(' << vec[2][i] << ')' << std::endl;
+            os << vec[2][i] << std::endl;
         }
     }
 
