@@ -464,7 +464,7 @@ class CPUID
         unsigned max_proc_sharing () const {return max_proc_sharing_;}
 
         /// \brief Maximum number of addressable processor cores in the
-        /// physical
+        /// physical package
         unsigned max_proc_physical () const {return max_proc_physical_;}
 
         /// \brief Coherency line size in byte
@@ -527,7 +527,7 @@ class CPUID
         if (max_eax() >= 0x16) {
             os << "Base frequency (MHz)       " << base_freq() << '\n';
             os << "Maximum frequency (MHz)    " << max_freq()  << '\n';
-            os << "Bus  frequency (MHz)       " << bus_freq()  << '\n';
+            os << "Bus frequency (MHz)        " << bus_freq()  << '\n';
         }
         if (max_eax() >= 0x04) {
             print_equal(os);
@@ -557,11 +557,11 @@ class CPUID
         return reg;
     }
 
-    /// \brief Max calling parameter EAX (EAX = 0x00; EAX)
+    /// \brief Maximum calling parameter EAX (EAX = 0x00; EAX)
     static unsigned max_eax ()
     {return info<0x00, 0x00>().at<0>();}
 
-    /// \brief Max extended calling parameter EAX (EAX = 0x80000000; EAX)
+    /// \brief Maximum extended calling parameter EAX (EAX = 0x80000000; EAX)
     static unsigned max_eax_ext ()
     {return info<ext0_, 0x00>().at<0>();}
 
@@ -751,12 +751,12 @@ class CPUID
         }
         os << '\n';
 
-        os << "Max Proc ID sharing        ";
+        os << "Maximum Proc ID sharing    ";
         for (std::size_t i = 0; i != caches.size(); ++i)
             os << std::setw(fix) << caches[i].max_proc_sharing();
         os << '\n';
 
-        os << "Max Proc ID phiysical      ";
+        os << "Maximum Proc ID physical   ";
         for (std::size_t i = 0; i != caches.size(); ++i)
             os << std::setw(fix) << caches[i].max_proc_physical();
         os << '\n';
