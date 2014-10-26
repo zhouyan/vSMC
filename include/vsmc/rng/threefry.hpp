@@ -256,7 +256,7 @@ class ThreefryEngine
 
     public :
 
-    explicit ThreefryEngine (result_type s = 0)
+    explicit ThreefryEngine (result_type s = 0) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(s);
@@ -266,13 +266,13 @@ class ThreefryEngine
     explicit ThreefryEngine (SeedSeq &seq,
             typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, key_type, ThreefryEngine<ResultType, K, Rounds>
-            >::value>::type * = VSMC_NULLPTR)
+            >::value>::type * = VSMC_NULLPTR) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(seq);
     }
 
-    ThreefryEngine (const key_type &k)
+    ThreefryEngine (const key_type &k) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
         seed(k);

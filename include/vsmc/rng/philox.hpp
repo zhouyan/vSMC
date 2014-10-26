@@ -298,7 +298,7 @@ class PhiloxEngine
 
     public :
 
-    explicit PhiloxEngine (result_type s = 0)
+    explicit PhiloxEngine (result_type s = 0) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(s);
@@ -308,13 +308,13 @@ class PhiloxEngine
     explicit PhiloxEngine (SeedSeq &seq,
             typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, key_type, PhiloxEngine<ResultType, K, Rounds>
-            >::value>::type * = VSMC_NULLPTR)
+            >::value>::type * = VSMC_NULLPTR) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(seq);
     }
 
-    PhiloxEngine (const key_type &k)
+    PhiloxEngine (const key_type &k) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
         seed(k);
