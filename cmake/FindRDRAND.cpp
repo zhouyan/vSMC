@@ -10,20 +10,31 @@
 
 #ifdef _MSC_VER
 #include <intrin.h>
+#else
+#include <stdint.h>
 #endif
 
 int main ()
 {
-    unsigned short r;
 #ifdef _MSC_VER
-    _rdrand16_step(&r);
+    unsigned short r16;
+    unsigned r32;
+    unsigned __int64 r64;
+    _rdrand16_step(&r16);
+    _rdrand32_step(&r32);
+    _rdrand64_step(&r64);
 #else
     unsigned char cf = 0;
+    uint16_t r16;
+    uint32_t r32;
+    uint64_t r64;
     __asm__ volatile
         (
-         "rdrandw %0\\n\\t"
-         "setcb %1\\n"
-         : "=r" (r), "=qm" (cf)
+         "rdrand %0\\n\\t"
+         "rdrand %1\\n\\t"
+         "rdrand %2\\n\\t"
+         "setcb %3\\n"
+         : "=r" (r16), "=r" (r32), "=r" (r64), "=qm" (cf)
          );
 #endif
 
