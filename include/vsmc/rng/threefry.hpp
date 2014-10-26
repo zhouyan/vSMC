@@ -44,12 +44,12 @@ namespace internal {
 template <typename> struct ThreefryKSConstantValue;
 
 template <> struct ThreefryKSConstantValue<uint32_t> :
-    public cxx11::integral_constant<uint32_t, 0x1BD11BDA> {};
+    public cxx11::integral_constant<uint32_t,
+           UINT32_C(0x1BD11BDA)> {};
 
 template <> struct ThreefryKSConstantValue<uint64_t> :
     public cxx11::integral_constant<uint64_t,
-           (static_cast<uint64_t>(0xA9FC1A22) +
-            (static_cast<uint64_t>(0x1BD11BDA) << 32))> {};
+           UINT64_C(0x1BD11BDAA9FC1A22)> {};
 
 template <typename, std::size_t, std::size_t, std::size_t>
 struct ThreefryRotateConstantValue;

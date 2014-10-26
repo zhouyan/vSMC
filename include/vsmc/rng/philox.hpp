@@ -54,9 +54,9 @@ namespace internal {
 template <typename, std::size_t> struct PhiloxWeylConstantValue;
 
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 0,
-        static_cast<uint32_t>(0x9E3779B9))
+        UINT32_C(0x9E3779B9))
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 1,
-        static_cast<uint32_t>(0xBB67AE85))
+        UINT32_C(0xBB67AE85))
 
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t, 0,
         UINT64_C(0x9E3779B97F4A7C15))
@@ -66,12 +66,12 @@ VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t, 1,
 template <typename, std::size_t, std::size_t> struct PhiloxRoundConstantValue;
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 2, 0,
-        static_cast<uint32_t>(0xd256d193))
+        UINT32_C(0xd256d193))
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 4, 0,
-        static_cast<uint32_t>(0xD2511F53))
+        UINT32_C(0xD2511F53))
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 4, 1,
-        static_cast<uint32_t>(0xCD9E8D57))
+        UINT32_C(0xCD9E8D57))
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t, 2, 0,
         UINT64_C(0xD2B74407B1CE6E93))

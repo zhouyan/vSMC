@@ -11,15 +11,15 @@
 #ifndef VSMC_RNG_INTERNAL_COMMON_HPP
 #define VSMC_RNG_INTERNAL_COMMON_HPP
 
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
+
 #include <vsmc/cxx11/random.hpp>
 #include <vsmc/utility/array.hpp>
 #include <vsmc/utility/counter.hpp>
 #include <iostream>
 #include <iomanip>
-
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
 #include <stdint.h>
 
 #ifndef UINT64_C
