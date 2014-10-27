@@ -113,11 +113,6 @@ class Progress
         print_first_ = true;
         in_progress_ = true;
 
-        if (length_ == 0) {
-            cstr_bar_[0] = ' ';
-            cstr_bar_[1] = '\0';
-        }
-
         watch_.reset();
         watch_.start();
         fork();
@@ -243,7 +238,6 @@ class Progress
 
             char *cstr = ptr->cstr_bar_;
             std::size_t offset = 0;
-            cstr[offset++] = ' ';
             cstr[offset++] = '[';
             for (std::size_t i = 0; i != num_equal; ++i)
                 cstr[offset++] = '=';
@@ -310,6 +304,7 @@ class Progress
             cstr[offset++] = '\0';
         }
 
+        ptr->os_ << ' ';
         if (ptr->length_ != 0) ptr->os_ << ptr->cstr_bar_;
         ptr->os_ << ptr->cstr_percent_;
         ptr->os_ << ptr->cstr_time_;
