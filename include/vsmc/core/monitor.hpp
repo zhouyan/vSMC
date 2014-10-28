@@ -180,6 +180,12 @@ class Monitor
         return first;
     }
 
+    /// \brief Read only access to the raw data of the index vector
+    const std::size_t *index_data () const {return &index_[0];}
+
+    /// \brief Read only access to the raw data of records (a row major matrix)
+    const double *record_data () const {return &record_[0];}
+
     /// \brief Read the record history for a given variable through an output
     /// iterator
     template <typename OutputIter>

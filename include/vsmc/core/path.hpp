@@ -117,6 +117,15 @@ class Path
         return grid_[iter];
     }
 
+    /// \brief Read only access to the raw data of the index vector
+    const std::size_t *index_data () const {return &index_[0];}
+
+    /// \brief Read only access to the raw data of the integrand vector
+    const std::size_t *integrand_data () const {return &integrand_[0];}
+
+    /// \brief Read only access to the raw data of the grid vector
+    const std::size_t *grid_data () const {return &grid_[0];}
+
     /// \brief Read the index history through an output iterator
     ///
     /// \sa Monitor::read_index()
