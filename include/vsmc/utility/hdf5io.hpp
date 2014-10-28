@@ -49,7 +49,7 @@ struct HDF5LoadDataPtr
     HDF5LoadDataPtr () : ptr_(VSMC_NULLPTR) {}
 
     template <typename OutputIter>
-    void set (std::size_t n, OutputIter first) {data_.resize(n);}
+    void set (std::size_t n, OutputIter) {data_.resize(n);}
 
     void set (std::size_t, T *ptr) {ptr_ = ptr;}
 
