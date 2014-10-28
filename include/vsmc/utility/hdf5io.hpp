@@ -166,7 +166,7 @@ template <>
 inline ::hid_t hdf5io_datatype<long double> ()
 {return ::H5Tcopy(H5T_NATIVE_LDOUBLE);}
 
-/// \brief Save a matrix in the HDF5 format from an input iterator
+/// \brief Store a matrix in the HDF5 format from an input iterator
 /// \ingroup HDF5IO
 ///
 /// \tparam Order Storage order (RowMajor or ColMajor)
@@ -214,7 +214,7 @@ inline InputIter hdf5store_matrix (std::size_t nrow, std::size_t ncol,
     return last;
 }
 
-/// \brief Save a data frame in the HDF5 format from an iterator to iterators
+/// \brief Store a data frame in the HDF5 format from an iterator to iterators
 /// \ingroup HDF5IO
 ///
 /// \details
@@ -402,7 +402,7 @@ inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
 
 } // namespace vsmc::internal
 
-/// \brief Save a data frame in the HDF5 format from tuple of iterators
+/// \brief Store a data frame in the HDF5 format from tuple of iterators
 /// \ingroup HDF5IO
 ///
 /// \details
@@ -438,7 +438,7 @@ inline void hdf5store_data_frame (std::size_t nrow,
 
 #endif // VSMC_HAS_CXX11LIB_TUPLE
 
-/// \brief Save a Sampler in the HDF5 format
+/// \brief Store a Sampler in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T>
 inline void hdf5store (const Sampler<T> &sampler,
@@ -463,7 +463,7 @@ inline void hdf5store (const Sampler<T> &sampler,
             resampled.begin(), "Resampled");
 }
 
-/// \brief Save a StateMatrix in the HDF5 format
+/// \brief Store a StateMatrix in the HDF5 format
 /// \ingroup HDF5IO
 template <MatrixOrder Order, std::size_t Dim, typename T>
 inline void hdf5store (const StateMatrix<Order, Dim, T> &state,
@@ -476,7 +476,7 @@ inline void hdf5store (const StateMatrix<Order, Dim, T> &state,
 
 #if VSMC_HAS_CXX11LIB_TUPLE
 
-/// \brief Save a StateTuple in the HDF5 format
+/// \brief Store a StateTuple in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T, typename... Types>
 inline void hdf5store (const StateTuple<RowMajor, T, Types...> &state,
@@ -505,7 +505,7 @@ inline void hdf5store (const StateTuple<RowMajor, T, Types...> &state,
             &vnames[0], append);
 }
 
-/// \brief Save a StateTuple in the HDF5 format
+/// \brief Store a StateTuple in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T, typename... Types>
 inline void hdf5store (const StateTuple<ColMajor, T, Types...> &state,
@@ -527,7 +527,7 @@ inline void hdf5store (const StateTuple<ColMajor, T, Types...> &state,
 
 #endif // VSMC_HAS_CXX11LIB_TUPLE
 
-/// \brief Save a StateCL in the HDF5 format
+/// \brief Store a StateCL in the HDF5 format
 /// \ingroup HDF5IO
 template <MatrixOrder Order, typename T,
          std::size_t StateSize, typename FPType, typename ID>
