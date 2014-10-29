@@ -638,14 +638,6 @@ class MKLDistribution
     void operator() (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
     {static_cast<Derived *>(this)->generate(stream, n, r);}
 
-    template <MKL_INT BRNG, typename RT>
-    result_type operator() (MKLEngine<BRNG, RT> &engine)
-    {operator()(engine.stream());}
-
-    template <MKL_INT BRNG, typename RT>
-    void operator() (MKLEngine<BRNG, RT> &engine, MKL_INT n, result_type *r)
-    {operator()(engine.stream(), n, r);}
-
     void reset () {index_ = buffer_size_;}
 
     /// \brief Set the buffer size, zero or negative value restore the default
