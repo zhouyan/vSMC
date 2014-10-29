@@ -362,14 +362,6 @@ class PhiloxEngine
         index_ = K;
     }
 
-    /// \brief After reset, next call to `operator()` will always increase the
-    /// counter and refresh the buffer
-    void reset ()
-    {
-        counter::reset(ctr_);
-        index_ = K;
-    }
-
     result_type operator() ()
     {
         if (index_ == K) {

@@ -279,14 +279,6 @@ class AESNIEngine
         index_ = K_;
     }
 
-    /// \brief After reset, next call to `operator()` will always increase the
-    /// counter and refresh the buffer
-    void reset ()
-    {
-        counter::reset(ctr_block_);
-        index_ = K_;
-    }
-
     result_type operator() ()
     {
         if (index_ == K_) {
