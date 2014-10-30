@@ -17,6 +17,11 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/cxx11/random.hpp>
+#if VSMC_HAS_AES_NI
+#include <vsmc/rng/aes.hpp>
+#include <vsmc/rng/ars.hpp>
+#endif
+#include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
 
 /// \brief Default RNG type for resampling

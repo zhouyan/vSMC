@@ -12,6 +12,11 @@
 #define VSMC_RNG_RNG_SET_HPP
 
 #include <vsmc/rng/seed.hpp>
+#if VSMC_HAS_AES_NI
+#include <vsmc/rng/aes.hpp>
+#include <vsmc/rng/ars.hpp>
+#endif
+#include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
 
 /// \brief Default RNG set type
