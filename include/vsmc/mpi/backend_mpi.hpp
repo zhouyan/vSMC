@@ -73,6 +73,14 @@ class WeightSetMPI : public WeightSetBase
         return first;
     }
 
+    const double *resample_weight_data () const {return &weight_[0];}
+    {
+        resample_weight_.resize(resample_size_);
+        read_resample_weight(&resample_weight_[0]);
+
+        return world_.rank() == 0 ? &resample_weight_[0] : VSMC_NULLPTR;
+    }
+
     void set_equal_weight ()
     {
         barrier();
@@ -239,6 +247,7 @@ class WeightSetMPI : public WeightSetBase
     ::boost::mpi::communicator world_;
     bool internal_barrier_;
     size_type resample_size_;
+    mutable std::vector<double> resample_weight_;
     mutable std::vector<std::vector<double> > weight_all_;
 
     void gather_resample_weight () const

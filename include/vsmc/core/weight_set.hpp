@@ -404,6 +404,9 @@ class WeightSet
         return i;
     }
 
+    /// \brief Read only access to the resampling weights
+    virtual const double *resample_weight_data () const {return &weight_[0];}
+
     /// \brief Read only access to the raw data of weight
     const double *weight_data () const {return &weight_[0];}
 
