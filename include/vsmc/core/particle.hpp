@@ -215,18 +215,15 @@ class Particle
         std::size_t N = static_cast<std::size_t>(weight_set_.resample_size());
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
-            resample_copy_from_.resize(N);
-            resample_replication_.resize(N);
-            resample_weight_.resize(N);
-            double *end = weight_set_.read_resample_weight(
-                    &resample_weight_[0]);
-            const size_type *cptr = VSMC_NULLPTR;
-            if (end == &resample_weight_[0] + N) {
-                op(N, N, resample_rng_, &resample_weight_[0],
-                        &resample_replication_[0]);
-                resample_copy_from_replication_(N, N,
-                        &resample_replication_[0], &resample_copy_from_[0]);
+            size_type *cptr = VSMC_NULLPTR;
+            const double *wptr = weight_set_.resample_weight_data();
+            if (wptr != VSMC_NULLPTR) {
+                resample_copy_from_.resize(N);
+                resample_replication_.resize(N);
                 cptr = &resample_copy_from_[0];
+                size_type *rptr = &resample_replication_[0];
+                op(N, N, resample_rng_, wptr, rptr);
+                resample_copy_from_replication_(N, N, rptr, cptr);
             }
             value_.copy(N, cptr);
             resample_post_copy_(weight_set_);
@@ -245,7 +242,6 @@ class Particle
 
     std::vector<size_type> resample_copy_from_;
     std::vector<size_type> resample_replication_;
-    std::vector<double> resample_weight_;
     resample_copy_from_replication_type resample_copy_from_replication_;
     resample_post_copy_type resample_post_copy_;
 }; // class Particle
