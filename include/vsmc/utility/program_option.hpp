@@ -342,7 +342,7 @@ class ProgramOptionHelp : public ProgramOption
     {return std::string("Print this help information");}
 
     std::string default_str () const
-    {return std::string("false");}
+    {return std::string("(false)");}
 
     ProgramOption *clone () const {return new ProgramOptionHelp;}
 
