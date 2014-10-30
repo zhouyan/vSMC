@@ -37,6 +37,8 @@ class SingleParticleBase
 
     protected :
 
+    Particle<T> &mutable_particle () const {return *particle_ptr_;}
+
     Particle<T> *mutable_particle_ptr () const {return particle_ptr_;}
 
     private :
