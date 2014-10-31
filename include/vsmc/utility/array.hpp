@@ -15,6 +15,7 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <utility>
 
 #ifdef _MSC_VER
@@ -78,12 +79,14 @@ class Array
     reference at (size_type pos)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ARRAY_RANGE(pos, N);
+
         return data_[pos];
     }
 
     const_reference at (size_type pos) const
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ARRAY_RANGE(pos, N);
+
         return data_[pos];
     }
 
@@ -153,26 +156,39 @@ class Array
     }
 
     friend inline bool operator== (
-            const Array<T, N> &sv1, const Array<T, N> &sv2)
+            const Array<T, N> &ary1, const Array<T, N> &ary2)
     {
         for (size_type i = 0; i != N; ++i)
-            if (sv1[i] != sv2[i])
+            if (ary1[i] != ary2[i])
                 return false;
 
         return true;
     }
 
     friend inline bool operator!= (
-            const Array<T, N> &sv1, const Array<T, N> &sv2)
-    {return !(sv1 == sv2);}
+            const Array<T, N> &ary1, const Array<T, N> &ary2)
+    {return !(ary1 == ary2);}
 
     friend inline bool operator< (
-            const Array<T, N> &sv1, const Array<T, N> &sv2)
+            const Array<T, N> &ary1, const Array<T, N> &ary2)
     {
         for (size_type i = 0; i != N; ++i) {
-            if (sv1[i] < sv2[i])
+            if (ary1[i] < ary2[i])
                 return true;
-            if (sv2[i] < sv1[i])
+            if (ary2[i] < ary1[i])
+                return false;
+        }
+
+        return false;
+    }
+
+    friend inline bool operator> (
+            const Array<T, N> &ary1, const Array<T, N> &ary2)
+    {
+        for (size_type i = 0; i != N; ++i) {
+            if (ary1[i] > ary2[i])
+                return true;
+            if (ary2[i] > ary1[i])
                 return false;
         }
 
@@ -180,56 +196,43 @@ class Array
     }
 
     friend inline bool operator<= (
-            const Array<T, N> &sv1, const Array<T, N> &sv2)
-    {
-        for (size_type i = 0; i != N; ++i) {
-            if (sv1[i] < sv2[i])
-                return true;
-            if (sv2[i] < sv1[i])
-                return false;
-        }
-
-        return true;
-    }
-
-    friend inline bool operator> (
-            const Array<T, N> &sv1, const Array<T, N> &sv2)
-    {return !(sv1 <= sv2);}
+            const Array<T, N> &ary1, const Array<T, N> &ary2)
+    {return !(ary1 > ary2);}
 
     friend inline bool operator>= (
-            const Array<T, N> &sv1, const Array<T, N> &sv2)
-    {return !(sv1 < sv2);}
+            const Array<T, N> &ary1, const Array<T, N> &ary2)
+    {return !(ary1 < ary2);}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os, const Array<T, N> &sv)
+            std::basic_ostream<CharT, Traits> &os, const Array<T, N> &ary)
     {
         if (!os.good())
             return os;
 
         for (size_type i = 0; i < N - 1; ++i)
-            os << sv[i] << ' ';
-        os << sv[N - 1];
+            os << ary[i] << ' ';
+        os << ary[N - 1];
 
         return os;
     }
 
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>> (
-            std::basic_istream<CharT, Traits> &is, Array<T, N> &sv)
+            std::basic_istream<CharT, Traits> &is, Array<T, N> &ary)
     {
         if (!is.good())
             return is;
 
-        Array<T, N> sv_tmp;
+        Array<T, N> ary_tmp;
         for (size_type i = 0; i != N; ++i)
-            is >> std::ws >> sv_tmp[i];
+            is >> std::ws >> ary_tmp[i];
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            sv = cxx11::move(sv_tmp);
+            ary = cxx11::move(ary_tmp);
 #else
-            sv = sv_tmp;
+            ary = ary_tmp;
 #endif
         }
 
@@ -289,23 +292,23 @@ class Array
 /// \brief Array ADL of swap
 /// \ingroup Array
 template <typename T, std::size_t N>
-inline void swap (Array<T, N> &sv1, Array<T, N> &sv2) {sv1.swap(sv2);}
+inline void swap (Array<T, N> &ary1, Array<T, N> &ary2) {ary1.swap(ary2);}
 
 /// \brief Array ADL of get
 /// \ingroup Array
 template <std::size_t I, typename T, std::size_t N>
-inline T &get (Array<T, N> &sv) {return sv.template at<I>();}
+inline T &get (Array<T, N> &ary) {return ary.template at<I>();}
 
 /// \brief Array ADL of get
 /// \ingroup Array
 template <std::size_t I, typename T, std::size_t N>
-inline const T &get (const Array<T, N> &sv) {return sv.template at<I>();}
+inline const T &get (const Array<T, N> &ary) {return ary.template at<I>();}
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
 /// \brief Array ADL of get
 /// \ingroup Array
 template <std::size_t I, typename T, std::size_t N>
-inline T &&get (Array<T, N> &&sv) {return cxx11::move(sv.template at<I>());}
+inline T &&get (Array<T, N> &&ary) {return cxx11::move(ary.template at<I>());}
 #endif
 
 template <typename> struct TupleSize;
