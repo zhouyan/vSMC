@@ -137,7 +137,11 @@
 
 /// \defgroup Array Array
 /// \ingroup Utility
-/// \brief Container with static size but possible dynamic memory allocation
+/// \brief Container with static size
+
+/// \defgroup AVector AVector
+/// \ingroup Utility
+/// \brief Container for arithmetic types with aligned memory allocation
 
 /// \defgroup CPUID CPUID
 /// \ingroup Utility
