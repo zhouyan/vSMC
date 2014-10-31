@@ -73,7 +73,7 @@ class WeightSetMPI : public WeightSetBase
         return first;
     }
 
-    const double *resample_weight_data () const {return &weight_[0];}
+    const double *resample_weight_data () const
     {
         resample_weight_.resize(resample_size_);
         read_resample_weight(&resample_weight_[0]);
