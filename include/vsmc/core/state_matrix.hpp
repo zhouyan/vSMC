@@ -12,6 +12,7 @@
 #define VSMC_CORE_STATE_MATRIX_HPP
 
 #include <vsmc/core/single_particle.hpp>
+#include <cstring>
 #include <vector>
 
 #define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
@@ -245,17 +246,39 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     void copy_particle (size_type from, size_type to)
     {
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        if (from != to)
-            for (std::size_t d = 0; d != this->dim(); ++d)
-                sptr->state(to, d) = sptr->state(from, d);
+        copy_particle_dispatch(from, to, cxx11::integral_constant<bool,
+                cxx11::is_arithmetic<T>::value && Order == RowMajor &&
+                (Dim * sizeof(T) >= 64 || Dim == Dynamic)>());
     }
 
     private :
 
     size_type size_;
     std::vector<T> data_;
+
+    void copy_particle_dispatch (size_type from, size_type to,
+            cxx11::true_type)
+    {
+        if (from == to)
+            return;
+
+        StateMatrix<Order, Dim, T> *sptr =
+            static_cast<StateMatrix<Order, Dim, T> *>(this);
+        std::memcpy(&sptr->state(to, 0), &sptr->state(from, 0),
+                sizeof(T) * this->dim());
+    }
+
+    void copy_particle_dispatch (size_type from, size_type to,
+            cxx11::false_type)
+    {
+        if (from == to)
+            return;
+
+        StateMatrix<Order, Dim, T> *sptr =
+            static_cast<StateMatrix<Order, Dim, T> *>(this);
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            sptr->state(to, d) = sptr->state(from, d);
+    }
 }; // class StateMatrixBase
 
 /// \brief Particle::value_type subtype
