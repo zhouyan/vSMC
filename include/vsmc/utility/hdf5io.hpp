@@ -559,28 +559,21 @@ inline void hdf5store (const Sampler<T> &sampler,
 {
     std::size_t nrow = sampler.iter_size();
     std::size_t ncol = sampler.summary_header_size();
+
     std::vector<std::string> header(ncol);
+    sampler.summary_header(header.begin());
     std::vector<double> data(nrow * ncol);
     sampler.template summary_data<ColMajor>(data.begin());
     std::vector<const double *> data_ptr(ncol);
     for (std::size_t j = 0; j != ncol; ++j)
-        data_ptr[j] = &data[j * nrow];
+        data_ptr[j] = &data[0] + j * nrow;
+    hdf5store_data_frame<double>(nrow, ncol, file_name, data_name,
+            data_ptr.begin(), header.begin(), append);
 
     std::vector<int> resampled(nrow);
     sampler.read_resampled_history(resampled.begin());
-
-    std::vector<std::size_t> iteration(nrow);
-    for (std::size_t i = 0; i != nrow; ++i)
-        iteration[i] = i;
-
-    sampler.summary_header(header.begin());
-
-    hdf5store_data_frame<double>(nrow, ncol, file_name, data_name,
-            data_ptr.begin(), header.begin(), append);
     hdf5_insert_data_frame<int>(nrow, file_name, data_name,
             &resampled[0], "Resampled");
-    hdf5_insert_data_frame<std::size_t>(nrow, file_name, data_name,
-            &iteration[0], "Iteration");
 }
 
 /// \brief Store a StateMatrix in the HDF5 format
