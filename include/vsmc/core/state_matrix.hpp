@@ -245,8 +245,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     void copy_particle (size_type from, size_type to)
     {
         copy_particle_dispatch(from, to, cxx11::integral_constant<bool,
-                cxx11::is_arithmetic<T>::value && Order == RowMajor &&
-                (Dim * sizeof(T) >= 64 || Dim == Dynamic)>());
+                (Dim * sizeof(T) >= 64 || Dim == Dynamic) &&
+                Order == RowMajor>());
     }
 
     private :
@@ -262,8 +262,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
         StateMatrix<Order, Dim, T> *sptr =
             static_cast<StateMatrix<Order, Dim, T> *>(this);
-        std::memmove(&sptr->state(to, 0), &sptr->state(from, 0),
-                sizeof(T) * this->dim());
+        T *to_ptr = &sptr->state(to, 0);
+        T *from_ptr = &sptr->state(from, 0);
+        std::copy(to_ptr, to_ptr + this->dim(), from_ptr);
     }
 
     void copy_particle_dispatch (size_type from, size_type to,

@@ -60,7 +60,7 @@ class Inversion
         accw_.back() = 1;
 
         u01_.resize(N);
-        std::memmove(&u01_[0], u01, sizeof(double) * N);
+        std::copy(u01, u01 + N, u01_.begin());
         if (!usorted)
             std::sort(u01_.begin(), u01_.end());
         if (u01_.back() > 1)

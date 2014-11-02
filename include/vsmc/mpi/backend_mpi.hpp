@@ -57,11 +57,8 @@ class WeightSetMPI : public WeightSetBase
         if (world_.rank() == 0) {
             const std::size_t S = static_cast<std::size_t>(world_.size());
             for (std::size_t r = 0; r != S; ++r) {
-                const std::size_t N =
-                    static_cast<std::size_t>(weight_all_[r].size());
-                const double *const wptr = &weight_all_[r][0];
-                std::memmove(first, wptr, sizeof(double) * N);
-                first += N;
+                first = std::copy(weight_all_[r].begin(), weight_all_[r].end(),
+                        first);
             }
         }
         barrier();
@@ -355,15 +352,11 @@ class StateMPI : public BaseState
 
         barrier();
         copy_from_.resize(N);
-        IntType *const cptr = &copy_from_[0];
-        if (world_.rank() == 0) {
-            std::memmove(cptr, copy_from, sizeof(IntType) * N);
-        }
+        if (world_.rank() == 0)
+            std::copy(copy_from, copy_from + N, copy_from_.begin());
         ::boost::mpi::broadcast(world_, copy_from_, 0);
-
-        copy_this_node(N, &copy_from_[0], copy_recv_, copy_send_);
+        copy_this_node(N, copy_from_.begin(), copy_recv_, copy_send_);
         barrier();
-
         copy_inter_node(copy_recv_, copy_send_);
         barrier();
     }

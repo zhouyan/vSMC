@@ -79,12 +79,11 @@ class WeightSet
     template <typename InputIter>
     double ess (InputIter first, bool use_log) const
     {
-        std::vector<double> buffer(size_);
-        double *const bptr = &buffer[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            bptr[i] = *first;
+        InputIter last = first;
+        std::advance(last, size_);
+        std::vector<double> buffer(first, last);
 
-        return compute_ess(bptr, use_log);
+        return compute_ess(&buffer[0], use_log);
     }
 
     /// \brief Compute ESS given (log) incremental weights
@@ -103,12 +102,11 @@ class WeightSet
     template <typename InputIter>
     double cess (InputIter first, bool use_log) const
     {
-        std::vector<double> buffer(size_);
-        double *const bptr = &buffer[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            bptr[i] = *first;
+        InputIter last = first;
+        std::advance(last, size_);
+        std::vector<double> buffer(first, last);
 
-        return compute_cess(bptr, use_log);
+        return compute_cess(&buffer[0], use_log);
     }
 
     /// \brief Compute CESS given (log) incremental weights
@@ -148,15 +146,6 @@ class WeightSet
         return first;
     }
 
-    /// \brief Read normalized weights through a pointer
-    double *read_weight (double *first) const
-    {
-        const double *const wptr = &weight_[0];
-        std::memmove(first, wptr, sizeof(double) * size_);
-
-        return first + size_;
-    }
-
     /// \brief Read unnormalized logarithm weights through an output iterator
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
@@ -172,15 +161,6 @@ class WeightSet
             *first = lwptr[i];
 
         return first;
-    }
-
-    /// \brief Read unnormalized logarithm weights through a pointer
-    double *read_log_weight (double *first) const
-    {
-        const double *const lwptr = &log_weight_[0];
-        std::memmove(first, lwptr, sizeof(double) * size_);
-
-        return first + size_;
     }
 
     /// \brief Get the normalized weight of the id'th particle
@@ -203,12 +183,12 @@ class WeightSet
     template <typename InputIter>
     InputIter set_weight (InputIter first)
     {
-        double *const wptr = &weight_[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            wptr[i] = *first;
+        InputIter last = first;
+        std::advance(last, size_);
+        std::copy(first, last, weight_.begin());
         post_set_weight();
 
-        return first;
+        return last;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -223,24 +203,6 @@ class WeightSet
         post_set_weight();
 
         return first;
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) weights directly through a pointer
-    const double *set_weight (const double *first)
-    {
-        double *const wptr = &weight_[0];
-        std::memmove(wptr, first, sizeof(double) * size_);
-        post_set_weight();
-
-        return first + size_;
-    }
-
-    double *set_weight (double *first)
-    {
-        set_weight(static_cast<const double *>(first));
-
-        return first + size_;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -278,12 +240,12 @@ class WeightSet
     template <typename InputIter>
     InputIter set_log_weight (InputIter first)
     {
-        double *const lwptr = &log_weight_[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            lwptr[i] = *first;
+        InputIter last = first;
+        std::advance(last, size_);
+        std::copy(first, last, log_weight_.begin());
         post_set_log_weight();
 
-        return first;
+        return last;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -298,25 +260,6 @@ class WeightSet
         post_set_log_weight();
 
         return first;
-    }
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) logarithm weights directly through
-    /// a pointer
-    const double *set_log_weight (const double *first)
-    {
-        double *const lwptr = &log_weight_[0];
-        std::memmove(lwptr, first, sizeof(double) * size_);
-        post_set_log_weight();
-
-        return first + size_;
-    }
-
-    double *set_log_weight (double *first)
-    {
-        set_log_weight(static_cast<const double *>(first));
-
-        return first + size_;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by

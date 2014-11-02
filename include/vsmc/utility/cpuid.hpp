@@ -565,9 +565,9 @@ class CPUID
         reg_type reg(info<0x00, 0x00>());
         const unsigned *uptr = reg.data();
         char str[sizeof(unsigned) * 3 + 1] = {'\0'};
-        std::memmove(str + sizeof(unsigned) * 0, uptr + 1, sizeof(unsigned));
-        std::memmove(str + sizeof(unsigned) * 1, uptr + 3, sizeof(unsigned));
-        std::memmove(str + sizeof(unsigned) * 2, uptr + 2, sizeof(unsigned));
+        std::memcpy(str + sizeof(unsigned) * 0, uptr + 1, sizeof(unsigned));
+        std::memcpy(str + sizeof(unsigned) * 1, uptr + 3, sizeof(unsigned));
+        std::memcpy(str + sizeof(unsigned) * 2, uptr + 2, sizeof(unsigned));
 
         return std::string(str);
     }
@@ -581,9 +581,9 @@ class CPUID
         reg_type reg4(info<ext0_ + 4U, 0>());
         const std::size_t reg_size = sizeof(unsigned) * 4;
         char str[reg_size * 3] = {'\0'};
-        std::memmove(str + reg_size * 0, reg2.data(), reg_size);
-        std::memmove(str + reg_size * 1, reg3.data(), reg_size);
-        std::memmove(str + reg_size * 2, reg4.data(), reg_size);
+        std::memcpy(str + reg_size * 0, reg2.data(), reg_size);
+        std::memcpy(str + reg_size * 1, reg3.data(), reg_size);
+        std::memcpy(str + reg_size * 2, reg4.data(), reg_size);
 
         return std::string(str);
     }
