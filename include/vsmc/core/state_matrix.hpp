@@ -186,8 +186,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     OutputIter read_state_matrix (OutputIter first) const
     {
         if (ROrder == Order) {
-            for (std::size_t i = 0; i != this->dim() * size_; ++i, ++first)
-                *first = data_[i];
+            first = std::copy(data_.begin(), data_.end(), first);
         } else {
             const StateMatrix<Order, Dim, T> *sptr =
                 static_cast<const StateMatrix<Order, Dim, T> *>(this);
@@ -263,7 +262,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
         StateMatrix<Order, Dim, T> *sptr =
             static_cast<StateMatrix<Order, Dim, T> *>(this);
-        std::memcpy(&sptr->state(to, 0), &sptr->state(from, 0),
+        std::memmove(&sptr->state(to, 0), &sptr->state(from, 0),
                 sizeof(T) * this->dim());
     }
 

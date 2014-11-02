@@ -457,7 +457,7 @@ class AES192KeySeq
     void generate (const key_type &key, Array<__m128i, Rp1> &key_seq)
     {
         Array<uint64_t, 3> key_tmp;
-        std::memcpy(key_tmp.data(), key.data(), 24);
+        std::memmove(key_tmp.data(), key.data(), 24);
         internal::AESKeyInit::key_init<0, 0>(key_tmp, key_seq, xmm1_);
         key_tmp.at<0>() = key_tmp.at<2>();
         key_tmp.at<1>() = 0;
@@ -559,7 +559,7 @@ class AES192KeySeq
             const unsigned char *ks_ptr, cxx11::true_type)
     {
         unsigned char *dst = reinterpret_cast<unsigned char *>(key_seq.data());
-        std::memcpy(dst + 24, ks_ptr + 24, Rp1 * 16 - 24);
+        std::memmove(dst + 24, ks_ptr + 24, Rp1 * 16 - 24);
     }
 }; // class AES192KeySeq
 

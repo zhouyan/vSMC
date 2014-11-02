@@ -60,9 +60,7 @@ class WeightSetMPI : public WeightSetBase
                 const std::size_t N =
                     static_cast<std::size_t>(weight_all_[r].size());
                 const double *const wptr = &weight_all_[r][0];
-                VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_OUT(
-                        first - wptr, N, WeightSetMPI::read_resample_weight);
-                std::memcpy(first, wptr, sizeof(double) * N);
+                std::memmove(first, wptr, sizeof(double) * N);
                 first += N;
             }
         }
@@ -359,9 +357,7 @@ class StateMPI : public BaseState
         copy_from_.resize(N);
         IntType *const cptr = &copy_from_[0];
         if (world_.rank() == 0) {
-            VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(
-                    cptr - copy_from, N, StateMPI::copy);
-            std::memcpy(cptr, copy_from, sizeof(IntType) * N);
+            std::memmove(cptr, copy_from, sizeof(IntType) * N);
         }
         ::boost::mpi::broadcast(world_, copy_from_, 0);
 

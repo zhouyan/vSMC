@@ -168,14 +168,7 @@ class Monitor
     /// \brief Read the index history through an output iterator
     template <typename OutputIter>
     OutputIter read_index (OutputIter first) const
-    {
-        const std::size_t N = index_.size();
-        const std::size_t *const iptr = &index_[0];
-        for (std::size_t i = 0; i != N; ++i, ++first)
-            *first = iptr[i];
-
-        return first;
-    }
+    {return std::copy(index_.begin(), index_.end(), first);}
 
     /// \brief Read only access to the raw data of the index vector
     const std::size_t *index_data () const {return &index_[0];}
@@ -224,12 +217,8 @@ class Monitor
             for (std::size_t d = 0; d != dim_; ++d)
                 first = read_record(d, first);
 
-        if (Order == RowMajor) {
-            const std::size_t N = record_.size();
-            const double *const rptr = &record_[0];
-            for (std::size_t i = 0; i != N; ++i, ++first)
-                *first = rptr[i];
-        }
+        if (Order == RowMajor)
+            first = std::copy(record_.begin(), record_.end(), first);
 
         return first;
     }

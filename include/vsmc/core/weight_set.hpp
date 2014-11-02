@@ -13,14 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(diff, size, f) \
-    VSMC_RUNTIME_ASSERT((std::abs(diff) >= static_cast<std::ptrdiff_t>(size)),\
-            ("THE DESTINATION OF **"#f"** OVERLAPPING WITH THE SOURCE"))
-
-#define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_OUT(diff, size, f) \
-    VSMC_RUNTIME_ASSERT((std::abs(diff) >= static_cast<std::ptrdiff_t>(size)),\
-            ("THE SOURCE OF **"#f"** OVERLAPPING WITH THE DESTINATION"))
-
 namespace vsmc {
 
 /// \brief Weight set class
@@ -142,11 +134,7 @@ class WeightSet
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
-    {
-        const double *const wptr = &weight_[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            *first = wptr[i];
-    }
+    {return std::copy(weight_.begin(), weight_.end(), first);}
 
     /// \brief Read normalized weights through a random access iterator with
     /// (possible non-uniform stride)
@@ -164,9 +152,7 @@ class WeightSet
     double *read_weight (double *first) const
     {
         const double *const wptr = &weight_[0];
-        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_OUT(
-                first - wptr, size_, WeightSet::read_weight);
-        std::memcpy(first, wptr, sizeof(double) * size_);
+        std::memmove(first, wptr, sizeof(double) * size_);
 
         return first + size_;
     }
@@ -174,11 +160,7 @@ class WeightSet
     /// \brief Read unnormalized logarithm weights through an output iterator
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
-    {
-        const double *const lwptr = &log_weight_[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            *first = lwptr[i];
-    }
+    {return std::copy(log_weight_.begin(), log_weight_.end(), first);}
 
     /// \brief Read unnormalized logarithm weights through a random access
     /// iterator with (possible non-uniform stride)
@@ -196,9 +178,7 @@ class WeightSet
     double *read_log_weight (double *first) const
     {
         const double *const lwptr = &log_weight_[0];
-        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_OUT(
-                first - lwptr, size_, WeightSet::read_log_weight);
-        std::memcpy(first, lwptr, sizeof(double) * size_);
+        std::memmove(first, lwptr, sizeof(double) * size_);
 
         return first + size_;
     }
@@ -250,9 +230,7 @@ class WeightSet
     const double *set_weight (const double *first)
     {
         double *const wptr = &weight_[0];
-        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(
-                first - wptr, size_, WeightSet::set_weight);
-        std::memcpy(wptr, first, sizeof(double) * size_);
+        std::memmove(wptr, first, sizeof(double) * size_);
         post_set_weight();
 
         return first + size_;
@@ -328,9 +306,7 @@ class WeightSet
     const double *set_log_weight (const double *first)
     {
         double *const lwptr = &log_weight_[0];
-        VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(
-                first - lwptr, size_, WeightSet::set_log_weight);
-        std::memcpy(lwptr, first, sizeof(double) * size_);
+        std::memmove(lwptr, first, sizeof(double) * size_);
         post_set_log_weight();
 
         return first + size_;
