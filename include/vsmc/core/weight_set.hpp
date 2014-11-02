@@ -89,8 +89,7 @@ class WeightSet
     {
         std::vector<double> buffer(size_);
         double *const bptr = &buffer[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            bptr[i] = *first;
+        std::copy_n(first, size_, bptr);
 
         return compute_ess(bptr, use_log);
     }
@@ -113,8 +112,7 @@ class WeightSet
     {
         std::vector<double> buffer(size_);
         double *const bptr = &buffer[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            bptr[i] = *first;
+        std::copy_n(first, size_, bptr);
 
         return compute_cess(bptr, use_log);
     }
@@ -142,13 +140,7 @@ class WeightSet
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
-    {
-        const double *const wptr = &weight_[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            *first = wptr[i];
-
-        return first;
-    }
+    {return std::copy_n(&weight_[0], size_, first);}
 
     /// \brief Read normalized weights through a random access iterator with
     /// (possible non-uniform stride)
@@ -176,13 +168,7 @@ class WeightSet
     /// \brief Read unnormalized logarithm weights through an output iterator
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
-    {
-        const double *const lwptr = &log_weight_[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            *first = lwptr[i];
-
-        return first;
-    }
+    {return std::copy_n(&log_weight_[0], size_, first);}
 
     /// \brief Read unnormalized logarithm weights through a random access
     /// iterator with (possible non-uniform stride)
@@ -217,14 +203,8 @@ class WeightSet
     /// such that each particle has a equal weight
     void set_equal_weight ()
     {
-        ess_ = static_cast<double>(size_);
-        double ew = 1 / ess_;
-        double *const wptr = &weight_[0];
-        double *const lwptr = &log_weight_[0];
-        for (size_type i = 0; i != size_; ++i) {
-            wptr[i] = ew;
-            lwptr[i] = 0;
-        }
+        std::fill_n(&weight_[0], size_, 1 / static_cast<double>(size_));
+        std::memset(&log_weight_[0], 0, sizeof(double) * size_);
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -233,9 +213,8 @@ class WeightSet
     template <typename InputIter>
     InputIter set_weight (InputIter first)
     {
-        double *const wptr = &weight_[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            wptr[i] = *first;
+        std::copy_n(first, size_, &weight_[0]);
+        std::advance(first, size_);
         post_set_weight();
 
         return first;
@@ -310,9 +289,8 @@ class WeightSet
     template <typename InputIter>
     InputIter set_log_weight (InputIter first)
     {
-        double *const lwptr = &log_weight_[0];
-        for (size_type i = 0; i != size_; ++i, ++first)
-            lwptr[i] = *first;
+        std::copy_n(first, size_, &log_weight_[0]);
+        std::advance(first, size_);
         post_set_log_weight();
 
         return first;
