@@ -13,23 +13,14 @@
 
 #include <vsmc/internal/common.hpp>
 
-/// \brief Use native timing library if `VSMC_HAS_CXX11LIB_CHRONO` test fails
-/// \ingroup Config
-#ifndef VSMC_HAS_NATIVE_TIME_LIBRARY
-#define VSMC_HAS_NATIVE_TIME_LIBRARY 1
-#endif
-
-/// \brief The fallback StopWatch type
-/// \ingroup Config
-///
-/// \details
-/// The class defined by `VSMC_STOP_WATCH_TYPE` need to be defined before
-/// including the `<vsmc/utility/stop_watch.hpp>` header. It shall provide the
-/// same interface as StopWatchNull. This is only used when both
-/// `VSMC_HAS_CXX11LIB_CHRONO` and `VSMC_HAS_NATIVE_TIME_LIBRARY` are zero, in
-/// which case StopWatch is a typedef of this macro.
-#ifndef VSMC_STOP_WATCH_TYPE
-#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNull
+#if VSMC_HAS_CXX11LIB_CHRONO
+#include <chrono>
+#elif defined(__APPLE__) || defined(__MACOSX)
+#include <mach/mach_time.h>
+#elif VSMC_HAS_POSIX
+#include <time.h>
+#elif defined(WIN32)
+#include <windows.h>
 #endif
 
 /// \brief Default C++11 clock used as StopWatch if `VSMC_HAS_CXX11LIB_CHRONO`
@@ -40,26 +31,6 @@
 #endif
 
 namespace vsmc {
-
-/// \brief A StopWatch that provides the interface but does nothing and thus
-/// cost no CPU cycles itself.
-/// \ingroup StopWatch
-class StopWatchNull
-{
-    public :
-
-    bool running () const {return false;}
-    bool start () {return false;}
-    bool stop () {return false;}
-    void reset () {}
-
-    double nanoseconds  () const {return 1;}
-    double microseconds () const {return 1e-3;}
-    double milliseconds () const {return 1e-6;}
-    double seconds      () const {return 1e-9;}
-    double minutes      () const {return 1e-9 / 60;}
-    double hours        () const {return 1e-9 / 3600;}
-}; // class StopWatchNull
 
 /// \brief Start and stop a StopWatch in scope (similiar to a mutex lock guard)
 /// \ingroup StopWatch
@@ -81,14 +52,7 @@ class StopWatchGuard
     watch_type &watch_;
 }; // class StopWatchGuard
 
-} // namespace vsmc
-
-#if VSMC_HAS_CXX11LIB_CHRONO
-#define VSMC_STOP_WATCH_DEFINED
-
-#include <chrono>
-
-namespace vsmc {
+#if VSMC_HAS_CXX11LIB_CHRONO && !defined(_MSC_VER)
 
 /// \brief StopWatch as an adapter of C++11 clock
 /// \ingroup StopWatch
@@ -203,16 +167,7 @@ class StopWatchClockAdapter
 /// \ingroup StopWatch
 typedef StopWatchClockAdapter<VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE> StopWatch;
 
-} // namespace vsmc
-
-#elif VSMC_HAS_NATIVE_TIME_LIBRARY
-
-#if defined(__APPLE__) || defined(__MACOSX)
-#define VSMC_STOP_WATCH_DEFINED
-
-#include <mach/mach_time.h>
-
-namespace vsmc {
+#elif defined(__APPLE__) || defined(__MACOSX)
 
 class StopWatch
 {
@@ -307,17 +262,7 @@ class StopWatch
         static_cast<uint64_t>(1000000000ULL); // 9 zero
 }; // class StopWatch
 
-} // namespace vsmc
-
-#elif defined(__linux__)
-
-#include <time.h>
-#include <features.h>
-
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 199309L
-#define VSMC_STOP_WATCH_DEFINED
-
-namespace vsmc {
+#elif VSMC_HAS_POSIX
 
 class StopWatch
 {
@@ -409,16 +354,7 @@ class StopWatch
     static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
 }; // class StopWatch
 
-} // namespace vsmc
-
-#endif // _POSIX_C_SOURCE
-
 #elif defined(WIN32)
-
-#include <windows.h>
-#define VSMC_STOP_WATCH_DEFINED
-
-namespace vsmc {
 
 class StopWatch
 {
@@ -492,18 +428,27 @@ class StopWatch
     bool running_;
 }; // class StopWatch
 
-} // namespace vsmc
+#else // VSMC_HAS_CXX11LIB_CHRONO
 
-#endif // VSMC_HAS_NATIVE_TIME_LIBRARY
+class StopWatch
+{
+    public :
+
+    bool running () const {return false;}
+    bool start () {return false;}
+    bool stop () {return false;}
+    void reset () {}
+
+    double nanoseconds  () const {return 1;}
+    double microseconds () const {return 1e-3;}
+    double milliseconds () const {return 1e-6;}
+    double seconds      () const {return 1e-9;}
+    double minutes      () const {return 1e-9 / 60;}
+    double hours        () const {return 1e-9 / 3600;}
+}; // class StopWatch
 
 #endif // VSMC_HAS_CXX11LIB_CHRONO
 
-#ifndef VSMC_STOP_WATCH_DEFINED
-namespace vsmc {
-typedef VSMC_STOP_WATCH_TYPE StopWatch;
 } // namespace vsmc
-#else
-#undef VSMC_STOP_WATCH_DEFINED
-#endif
 
 #endif // VSMC_UTILITY_STOP_WATCH_HPP
