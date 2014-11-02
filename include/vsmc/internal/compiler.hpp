@@ -214,6 +214,10 @@
 
 //  C++11 library features
 
+#ifndef VSMC_HAS_CXX11LIB_ALGORITHM
+#define VSMC_HAS_CXX11LIB_ALGORITHM 0
+#endif
+
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_HAS_CXX11LIB_CHRONO 0
 #endif

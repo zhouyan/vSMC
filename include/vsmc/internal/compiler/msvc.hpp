@@ -227,6 +227,12 @@
 
 // C++11 library features
 
+#if _MSC_VER >= 1600
+#ifndef VSMC_HAS_CXX11LIB_ALGORITHM
+#define VSMC_HAS_CXX11LIB_ALGORITHM 1
+#endif
+#endif
+
 #if _MSC_VER >= VSMC_MSVC_NONEXIST
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_HAS_CXX11LIB_CHRONO 1

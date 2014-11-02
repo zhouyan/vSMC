@@ -79,11 +79,16 @@ class WeightSet
     template <typename InputIter>
     double ess (InputIter first, bool use_log) const
     {
-        InputIter last = first;
-        std::advance(last, size_);
-        std::vector<double> buffer(first, last);
+        std::vector<double> buffer(size_);
+        double *const bptr = &buffer[0];
+#if VSMC_HAS_CXX11LIB_ALGORITHM
+        std::copy_n(first, size_, bptr);
+#else
+        for (size_type i = 0; i != size_; ++i, ++first)
+            bptr[i] = *first;
+#endif
 
-        return compute_ess(&buffer[0], use_log);
+        return compute_ess(bptr, use_log);
     }
 
     /// \brief Compute ESS given (log) incremental weights
@@ -102,11 +107,16 @@ class WeightSet
     template <typename InputIter>
     double cess (InputIter first, bool use_log) const
     {
-        InputIter last = first;
-        std::advance(last, size_);
-        std::vector<double> buffer(first, last);
+        std::vector<double> buffer(size_);
+        double *const bptr = &buffer[0];
+#if VSMC_HAS_CXX11LIB_ALGORITHM
+        std::copy_n(first, size_, bptr);
+#else
+        for (size_type i = 0; i != size_; ++i, ++first)
+            bptr[i] = *first;
+#endif
 
-        return compute_cess(&buffer[0], use_log);
+        return compute_cess(bptr, use_log);
     }
 
     /// \brief Compute CESS given (log) incremental weights
@@ -181,14 +191,16 @@ class WeightSet
     /// changing the (possible unnormalized) weights directly through an input
     /// iterator
     template <typename InputIter>
-    InputIter set_weight (InputIter first)
+    void set_weight (InputIter first)
     {
-        InputIter last = first;
-        std::advance(last, size_);
-        std::copy(first, last, weight_.begin());
+        double *const wptr = &weight_[0];
+#if VSMC_HAS_CXX11LIB_ALGORITHM
+        std::copy_n(first, size_, wptr);
+#else
+        for (size_type i = 0; i != size_; ++i, ++first)
+            wptr[i] = *first;
+#endif
         post_set_weight();
-
-        return last;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -209,14 +221,12 @@ class WeightSet
     /// multiply the normalized weight with (possible unnormalized) incremental
     /// weights through an input iterator
     template <typename InputIter>
-    InputIter mul_weight (InputIter first)
+    void mul_weight (InputIter first)
     {
         double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
             wptr[i] *= *first;
         post_set_weight();
-
-        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -238,14 +248,16 @@ class WeightSet
     /// changing the (possible unnormalized) logarithm weights directly through
     /// an input iterator
     template <typename InputIter>
-    InputIter set_log_weight (InputIter first)
+    void set_log_weight (InputIter first)
     {
-        InputIter last = first;
-        std::advance(last, size_);
-        std::copy(first, last, log_weight_.begin());
+        double *const lwptr = &log_weight_[0];
+#if VSMC_HAS_CXX11LIB_ALGORITHM
+        std::copy_n(first, size_, lwptr);
+#else
+        for (size_type i = 0; i != size_; ++i, ++first)
+            lwptr[i] = *first;
+#endif
         post_set_log_weight();
-
-        return last;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -266,14 +278,12 @@ class WeightSet
     /// adding to the unnormalized logarithm weights with (possible
     /// unormalized) logarithm incremental weights through an input iterator
     template <typename InputIter>
-    InputIter add_log_weight (InputIter first)
+    void add_log_weight (InputIter first)
     {
         double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
             lwptr[i] += *first;
         post_set_log_weight();
-
-        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -439,13 +449,13 @@ class WeightSet
 /// algorithms where weights are irrelevant. Any attempt of using member
 /// functions of this class will not result in compile time or runtime errors,
 /// but the results might not be what one will be expecting.
-class WeightSetEmpty
+class WeightSetNull
 {
     public :
 
     typedef std::size_t size_type;
 
-    explicit WeightSetEmpty (size_type) {}
+    explicit WeightSetNull (size_type) {}
 
     size_type size () const {return 0;}
 
