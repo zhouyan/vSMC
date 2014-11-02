@@ -89,7 +89,8 @@ class WeightSet
     {
         std::vector<double> buffer(size_);
         double *const bptr = &buffer[0];
-        std::copy_n(first, size_, bptr);
+        for (size_type i = 0; i != size_; ++i, ++first)
+            bptr[i] = *first;
 
         return compute_ess(bptr, use_log);
     }
@@ -112,7 +113,8 @@ class WeightSet
     {
         std::vector<double> buffer(size_);
         double *const bptr = &buffer[0];
-        std::copy_n(first, size_, bptr);
+        for (size_type i = 0; i != size_; ++i, ++first)
+            bptr[i] = *first;
 
         return compute_cess(bptr, use_log);
     }
@@ -140,7 +142,11 @@ class WeightSet
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
     OutputIter read_weight (OutputIter first) const
-    {return std::copy_n(&weight_[0], size_, first);}
+    {
+        const double *const wptr = &weight_[0];
+        for (size_type i = 0; i != size_; ++i, ++first)
+            *first = wptr[i];
+    }
 
     /// \brief Read normalized weights through a random access iterator with
     /// (possible non-uniform stride)
@@ -168,7 +174,11 @@ class WeightSet
     /// \brief Read unnormalized logarithm weights through an output iterator
     template <typename OutputIter>
     OutputIter read_log_weight (OutputIter first) const
-    {return std::copy_n(&log_weight_[0], size_, first);}
+    {
+        const double *const lwptr = &log_weight_[0];
+        for (size_type i = 0; i != size_; ++i, ++first)
+            *first = lwptr[i];
+    }
 
     /// \brief Read unnormalized logarithm weights through a random access
     /// iterator with (possible non-uniform stride)
@@ -213,8 +223,9 @@ class WeightSet
     template <typename InputIter>
     InputIter set_weight (InputIter first)
     {
-        std::copy_n(first, size_, &weight_[0]);
-        std::advance(first, size_);
+        double *const wptr = &weight_[0];
+        for (size_type i = 0; i != size_; ++i, ++first)
+            wptr[i] = *first;
         post_set_weight();
 
         return first;
@@ -289,8 +300,9 @@ class WeightSet
     template <typename InputIter>
     InputIter set_log_weight (InputIter first)
     {
-        std::copy_n(first, size_, &log_weight_[0]);
-        std::advance(first, size_);
+        double *const lwptr = &log_weight_[0];
+        for (size_type i = 0; i != size_; ++i, ++first)
+            lwptr[i] = *first;
         post_set_log_weight();
 
         return first;
