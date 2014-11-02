@@ -167,22 +167,8 @@
 /// \ingroup Utility
 /// \brief Utilities for measuring the time of procedures
 
-#include <vsmc/internal/config.hpp>
-
-#include <vsmc/core/monitor.hpp>
-#include <vsmc/core/normalizing_constant.hpp>
-#include <vsmc/core/particle.hpp>
-#include <vsmc/core/path.hpp>
 #include <vsmc/core/sampler.hpp>
-#include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/state_matrix.hpp>
-#include <vsmc/core/weight_set.hpp>
-
-#include <vsmc/cxx11/cmath.hpp>
-#include <vsmc/cxx11/functional.hpp>
-#include <vsmc/cxx11/random.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
-
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 

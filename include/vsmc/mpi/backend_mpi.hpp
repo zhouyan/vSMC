@@ -13,7 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight_set.hpp>
-#include <vsmc/core/normalizing_constant.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
 
 #define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH \
@@ -28,8 +27,6 @@ struct MPIDefault;
 
 template <typename, typename = MPIDefault> class StateMPI;
 template <typename = WeightSet, typename = MPIDefault> class WeightSetMPI;
-template <typename = NormalizingConstant, typename = MPIDefault>
-class NormalizingConstantMPI;
 
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
@@ -259,45 +256,6 @@ class WeightSetMPI : public WeightSetBase
             ::boost::mpi::gather(world_, this->weight(), 0);
     }
 }; // class WeightSetMPI
-
-/// \brief Calculating normalizing constant ratio using MPI
-/// \ingroup MPI
-template <typename NormalizingConstantBase, typename ID>
-class NormalizingConstantMPI : public NormalizingConstantBase
-{
-    public :
-
-    NormalizingConstantMPI (std::size_t N) :
-        NormalizingConstantBase(N),
-        world_(MPICommunicator<ID>::instance().get(),
-                ::boost::mpi::comm_duplicate),
-        internal_barrier_(true) {}
-
-    const ::boost::mpi::communicator &world () const {return world_;}
-
-    void barrier () const {if (internal_barrier_) world_.barrier();}
-
-    void internal_barrier (bool use) {internal_barrier_ = use;}
-
-    protected:
-
-    double inc_zconst (std::size_t N,
-            const double *weight, const double *inc_weight) const
-    {
-        double linc = NormalizingConstantBase::inc_zconst(
-                N, weight, inc_weight);
-        double ginc = 0;
-        ::boost::mpi::all_reduce(world_, linc, ginc, std::plus<double>());
-        barrier();
-
-        return ginc;
-    }
-
-    private :
-
-    ::boost::mpi::communicator world_;
-    bool internal_barrier_;
-}; // class NormalizingConstantMPI
 
 /// \brief Particle::value_type subtype using MPI
 /// \ingroup MPI
