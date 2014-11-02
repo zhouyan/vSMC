@@ -32,6 +32,30 @@
 #define VSMC_MAC_VERSION_MIN_REQUIRED(ver) 0
 #endif
 
+#if defined(__APPLE__) || defined(__MACOSX)
+#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_5)
+#ifndef VSMC_HAS_POSIX
+#define VSMC_HAS_POISX 1
+#endif
+#endif
+#else
+#include <stdlib.h>
+#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+#ifndef VSMC_HAS_POSIX
+#define VSMC_HAS_POSIX 1
+#endif
+#endif // _POSIX_C_SOURCE >= 200112L
+#if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 600
+#ifndef VSMC_HAS_POSIX
+#define VSMC_HAS_POSIX 1
+#endif
+#endif // _XOPEN_SOURCE >= 600
+#endif // __APPLE__
+
+#ifndef VSMC_HAS_POSIX
+#define VSMC_HAS_POSIX 0
+#endif
+
 #if defined(__INTEL_COMPILER)
 #include <vsmc/internal/compiler/intel.hpp>
 #elif defined(__clang__)
