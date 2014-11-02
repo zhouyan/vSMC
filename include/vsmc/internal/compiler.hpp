@@ -284,12 +284,4 @@
 #endif
 #endif
 
-// Optional libraries
-
-#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_4)
-#ifndef VSMC_HAS_VECLIB
-#define VSMC_HAS_VECLIB 1
-#endif
-#endif
-
 #endif // VSMC_INTERNAL_COMPILER_HPP

@@ -15,6 +15,12 @@
 #include <vsmc/cxx11/cmath.hpp>
 #include <vsmc/math/constants.hpp>
 
+#if VSMC_USE_MKL_VML
+#include <mkl_vml.h>
+#elif VSMC_USE_VECLIB_VFORCE
+#include <vecLib/vForce.h>
+#endif
+
 /// \brief When MKL (VML) or vecLib (vForce) is available, the threshold of the
 /// number of elements above which these libraries will be used.
 /// \ingroup Config
@@ -489,8 +495,6 @@ VSMC_DEFINE_MATH_VMATH_1(cxx11, tgamma, TGamma)
 
 #if VSMC_USE_MKL_VML
 
-#include <mkl_vml.h>
-
 #define VSMC_DEFINE_MATH_VMATH_VML_1(name) \
 inline void v##name                                                          \
 (std::size_t n, const float *a, float *y)                                    \
@@ -619,8 +623,6 @@ VSMC_DEFINE_MATH_VMATH_VML_1(TGamma)
 } // namespace vsmc
 
 #elif VSMC_USE_VECLIB_VFORCE
-
-#include <vecLib/vForce.h>
 
 #define VSMC_DEFINE_MATH_VMATH_VFORCE_1(func, name) \
 inline void v##name                                                          \
