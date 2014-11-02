@@ -13,11 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_setup.hpp>
-#include <cmath>
-#include <string>
-#include <iostream>
-#include <iterator>
-#include <vector>
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
     VSMC_RUNTIME_ASSERT((setup()),                                           \

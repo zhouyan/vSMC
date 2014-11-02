@@ -12,7 +12,6 @@
 #define VSMC_INTEGRATE_NINTEGRATE_BASE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/cxx11/functional.hpp>
 
 #ifdef _MSC_VER
 #define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED

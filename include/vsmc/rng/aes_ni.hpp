@@ -11,6 +11,7 @@
 #ifndef VSMC_RNG_AES_NI_HPP
 #define VSMC_RNG_AES_NI_HPP
 
+#include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/m128i.hpp>
 #include <wmmintrin.h>
 

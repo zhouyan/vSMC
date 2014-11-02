@@ -11,6 +11,8 @@
 #ifndef VSMC_GCD_DISPATCH_SOURCE_HPP
 #define VSMC_GCD_DISPATCH_SOURCE_HPP
 
+#include <vsmc/internal/common.hpp>
+#include <vsmc/gcd/dispatch_object.hpp>
 #include <vsmc/gcd/dispatch_queue.hpp>
 
 namespace vsmc {

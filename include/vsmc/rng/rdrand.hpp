@@ -11,6 +11,7 @@
 #ifndef VSMC_RNG_RDRAND_HPP
 #define VSMC_RNG_RDRAND_HPP
 
+#include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/generator_wrapper.hpp>
 
 #ifdef _MSC_VER

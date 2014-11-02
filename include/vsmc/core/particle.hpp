@@ -11,14 +11,12 @@
 #ifndef VSMC_CORE_PARTICLE_HPP
 #define VSMC_CORE_PARTICLE_HPP
 
+#include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/weight_set.hpp>
-#include <vsmc/cxx11/functional.hpp>
 #include <vsmc/resample/basic.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
-#include <limits>
-#include <utility>
 
 namespace vsmc {
 

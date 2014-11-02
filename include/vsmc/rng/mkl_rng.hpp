@@ -13,9 +13,6 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <mkl_vsl.h>
-#include <string>
-#include <utility>
-#include <vector>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \

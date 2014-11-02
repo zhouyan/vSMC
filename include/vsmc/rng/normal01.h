@@ -53,6 +53,7 @@
 /// double r = NORMAL01_4x32_RAND(&rnorm, &rng);
 /// ~~~
 
+#include <vsmc/rng/internal/common.h>
 #include <vsmc/rng/urng.h>
 #include <vsmc/rng/u01.h>
 

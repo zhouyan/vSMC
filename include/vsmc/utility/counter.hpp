@@ -11,6 +11,7 @@
 #ifndef VSMC_UTILITY_COUNTER_HPP
 #define VSMC_UTILITY_COUNTER_HPP
 
+#include <vsmc/internal/common.hpp>
 #include <vsmc/utility/array.hpp>
 
 namespace  vsmc {

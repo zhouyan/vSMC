@@ -12,7 +12,6 @@
 #define VSMC_SMP_BACKEND_BASE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/weight_set.hpp>
 
 #define VSMC_DEFINE_SMP_BASE_COPY(Name) \
 Name##Base () {}                                                             \

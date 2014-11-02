@@ -11,6 +11,7 @@
 #ifndef VSMC_RNG_RNG_SET_HPP
 #define VSMC_RNG_RNG_SET_HPP
 
+#include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
 #if VSMC_HAS_AES_NI
 #include <vsmc/rng/aes.hpp>

@@ -12,8 +12,7 @@
 #define VSMC_SMP_BACKEND_STD_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
+#include <vsmc/thread/thread.hpp>
 
 namespace vsmc {
 

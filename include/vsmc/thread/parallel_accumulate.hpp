@@ -16,8 +16,6 @@
 #include <vsmc/thread/thread_guard.hpp>
 #include <vsmc/thread/thread_num.hpp>
 #include <thread>
-#include <utility>
-#include <vector>
 
 namespace vsmc {
 

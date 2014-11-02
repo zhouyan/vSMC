@@ -12,9 +12,6 @@
 #define VSMC_STABLE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/cxx11/random.hpp>
-#include <vsmc/math/constants.hpp>
-#include <limits>
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(a) \
     VSMC_RUNTIME_ASSERT((a > 0 && a <= 2),                                   \

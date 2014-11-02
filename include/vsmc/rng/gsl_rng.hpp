@@ -11,9 +11,9 @@
 #ifndef VSMC_RNG_GSL_RNG_HPP
 #define VSMC_RNG_GSL_RNG_HPP
 
+#include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/generator_wrapper.hpp>
 #include <gsl/gsl_rng.h>
-#include <utility>
 
 #define VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(Generator, pointer) \
     template <> struct GSLRngTypePointer< GSL_RNG_TYPE_##Generator >         \

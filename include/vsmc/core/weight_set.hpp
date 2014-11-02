@@ -12,11 +12,6 @@
 #define VSMC_CORE_WEIGHT_SET_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/cxx11/random.hpp>
-#include <vsmc/math/cblas.hpp>
-#include <vsmc/math/vmath.hpp>
-#include <cstring>
-#include <limits>
 
 #define VSMC_RUNTIME_ASSERT_CORE_WEIGHT_SET_INVALID_MEMCPY_IN(diff, size, f) \
     VSMC_RUNTIME_ASSERT((std::abs(diff) >= static_cast<std::ptrdiff_t>(size)),\

@@ -11,16 +11,10 @@
 #ifndef VSMC_CORE_SAMPLER_HPP
 #define VSMC_CORE_SAMPLER_HPP
 
+#include <vsmc/internal/common.hpp>
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>
-#include <vsmc/cxx11/functional.hpp>
-#include <limits>
-#include <map>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <vector>
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func) \
     VSMC_RUNTIME_ASSERT((iter != map.end()),                                 \

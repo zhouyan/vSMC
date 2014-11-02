@@ -13,11 +13,8 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#include <iostream>
-#include <string>
 
 #if VSMC_HAS_CXX11LIB_CHRONO && VSMC_HAS_CXX11LIB_THREAD
-#include <cmath>
 #include <chrono>
 #include <thread>
 #endif

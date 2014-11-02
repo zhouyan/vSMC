@@ -13,7 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/adapter.hpp>
-#include <vsmc/cxx11/functional.hpp>
 
 namespace vsmc {
 

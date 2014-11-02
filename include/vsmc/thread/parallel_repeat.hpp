@@ -14,7 +14,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/thread/blocked_range.hpp>
 #include <vsmc/thread/parallel_for.hpp>
-#include <utility>
 
 namespace vsmc {
 

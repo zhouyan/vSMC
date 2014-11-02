@@ -11,9 +11,10 @@
 #ifndef VSMC_MPI_BACKEND_MPI_HPP
 #define VSMC_MPI_BACKEND_MPI_HPP
 
-#include <vsmc/mpi/mpi_manager.hpp>
+#include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight_set.hpp>
 #include <vsmc/core/normalizing_constant.hpp>
+#include <vsmc/mpi/mpi_manager.hpp>
 
 #define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == global_size_),                                 \

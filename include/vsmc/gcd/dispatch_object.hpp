@@ -13,7 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <dispatch/dispatch.h>
-#include <utility>
 
 namespace vsmc {
 

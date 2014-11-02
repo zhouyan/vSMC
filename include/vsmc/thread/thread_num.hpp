@@ -12,9 +12,7 @@
 #define VSMC_THREAD_THREAD_NUM_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <cstdlib>
 #include <thread>
-#include <vector>
 
 namespace vsmc {
 

@@ -12,8 +12,6 @@
 #define VSMC_UTILITY_HDF5IO_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <sstream>
-#include <vector>
 #include <hdf5.h>
 
 #if VSMC_HAS_CXX11LIB_TUPLE

@@ -11,6 +11,7 @@
 #ifndef VSMC_RNG_ARS_HPP
 #define VSMC_RNG_ARS_HPP
 
+#include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/aes_ni.hpp>
 
 /// \brief ARSEngine default blocks

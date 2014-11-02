@@ -11,7 +11,10 @@
 #ifndef VSMC_GCD_DISPATCH_GROUP_HPP
 #define VSMC_GCD_DISPATCH_GROUP_HPP
 
+#include <vsmc/internal/common.hpp>
+#include <vsmc/gcd/dispatch_object.hpp>
 #include <vsmc/gcd/dispatch_queue.hpp>
+#include <dispatch/dispatch.h>
 
 namespace vsmc {
 

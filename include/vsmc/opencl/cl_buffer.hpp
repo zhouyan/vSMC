@@ -11,8 +11,8 @@
 #ifndef VSMC_OPENCL_CL_BUFFER_HPP
 #define VSMC_OPENCL_CL_BUFFER_HPP
 
+#include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
-#include <utility>
 
 namespace vsmc {
 

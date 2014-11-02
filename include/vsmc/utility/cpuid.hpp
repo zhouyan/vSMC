@@ -13,12 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/array.hpp>
-#include <algorithm>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
 
 #ifdef _MSC_VER
 #include <intrin.h>

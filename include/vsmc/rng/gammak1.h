@@ -58,6 +58,7 @@
 /// double r = GAMMAK1_4x32_RAND(&rgamma, &rng);
 /// ~~~
 
+#include <vsmc/rng/internal/common.h>
 #include <vsmc/rng/urng.h>
 #include <vsmc/rng/normal01.h>
 #include <vsmc/rng/u01.h>

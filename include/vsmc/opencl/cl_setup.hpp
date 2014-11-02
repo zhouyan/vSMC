@@ -13,7 +13,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
-#include <string>
 
 namespace vsmc {
 

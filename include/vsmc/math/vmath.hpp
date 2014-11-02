@@ -11,6 +11,7 @@
 #ifndef VSMC_MATH_VMATH_HPP
 #define VSMC_MATH_VMATH_HPP
 
+#include <vsmc/internal/config.hpp>
 #include <vsmc/cxx11/cmath.hpp>
 #include <vsmc/math/constants.hpp>
 

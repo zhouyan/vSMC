@@ -12,8 +12,6 @@
 #define VSMC_CORE_NORMALIZING_CONSTANT_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <cmath>
-#include <vector>
 
 namespace vsmc {
 

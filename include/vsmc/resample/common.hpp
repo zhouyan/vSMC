@@ -11,12 +11,7 @@
 #ifndef VSMC_RESAMPLE_COMMON_HPP
 #define VSMC_RESAMPLE_COMMON_HPP
 
-#include <cstring>
-#include <algorithm>
-#include <vector>
-
 #include <vsmc/internal/common.hpp>
-#include <vsmc/cxx11/random.hpp>
 #if VSMC_HAS_AES_NI
 #include <vsmc/rng/aes.hpp>
 #include <vsmc/rng/ars.hpp>

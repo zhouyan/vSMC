@@ -11,6 +11,7 @@
 #ifndef VSMC_RNG_AES_HPP
 #define VSMC_RNG_AES_HPP
 
+#include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/aes_ni.hpp>
 
 #define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val) \
