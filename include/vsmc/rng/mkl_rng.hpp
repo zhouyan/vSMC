@@ -12,7 +12,7 @@
 #define VSMC_RNG_MKL_RNG_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <mkl_vsl.h>
+#include <mkl.h>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \

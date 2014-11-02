@@ -270,14 +270,6 @@
 #define VSMC_HAS_RDRAND 0
 #endif
 
-// Parallelization features
-
-#if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_6)
-#ifndef VSMC_HAS_GCD
-#define VSMC_HAS_GCD 1
-#endif
-#endif
-
 #if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 #ifndef VSMC_HAS_GCD_LION
 #define VSMC_HAS_GCD_LION 1

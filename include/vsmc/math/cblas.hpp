@@ -15,10 +15,10 @@
 #include <cmath>
 
 #if VSMC_USE_MKL_CBLAS
-#include <mkl_cblas.h>
+#include <mkl.h>
 #define VSMC_CBLAS_INT MKL_INT
 #elif VSMC_USE_VECLIB_CBLAS
-#include <vecLib/cblas.h>
+#include <Accelerate/Accelerate.h>
 #define VSMC_CBLAS_INT int
 #endif
 

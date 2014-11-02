@@ -16,9 +16,9 @@
 #include <vsmc/math/constants.hpp>
 
 #if VSMC_USE_MKL_VML
-#include <mkl_vml.h>
+#include <mkl.h>
 #elif VSMC_USE_VECLIB_VFORCE
-#include <vecLib/vForce.h>
+#include <Accelerate/Accelerate.h>
 #endif
 
 /// \brief When MKL (VML) or vecLib (vForce) is available, the threshold of the
