@@ -218,8 +218,8 @@ struct integral_constant
     typedef T value_type;
     typedef integral_constant<T, v> type;
     static VSMC_CONSTEXPR const T value = v;
-    VSMC_CONSTEXPR operator value_type () const {return value;}
-    VSMC_CONSTEXPR value_type operator() () const {return value;}
+    VSMC_CONSTEXPR operator value_type () const VSMC_NOEXCEPT {return value;}
+    VSMC_CONSTEXPR value_type operator() () const VSMC_NOEXCEPT {return value;}
 }; // struct integral_constant
 typedef integral_constant<bool, true>  true_type;
 typedef integral_constant<bool, false> false_type;
