@@ -120,6 +120,6 @@ in the `LICENSE` file distributed with the source.
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [libc++]: http://libcxx.llvm.org
 [libdispatch]: http://libdispatch.macosforge.org
-[vSMCDoc]: http://zhouyan.github.io/vSMCDoc/master
+[vSMCDoc]: http://zhouyan.github.io/vSMCDoc/develop
 [vSMCExample]: https://github.com/zhouyan/vSMCExample
 [vSMCTutorial]: http://arxiv.org/pdf/1306.5583v1.pdf
