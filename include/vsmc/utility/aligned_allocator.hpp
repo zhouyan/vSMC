@@ -144,14 +144,8 @@ class AlignedAllocator : public std::allocator<T>
 {
     public :
 
-    typedef T value_type;
-    typedef T * pointer;
-    typedef const T * const_pointer;
-    typedef T & reference;
-    typedef const T & const_reference;
-    typedef std::size_t size_type;
-    typedef std::ptrdiff_t difference_type;
-    typedef cxx11::true_type propagate_on_container_move_assignment;
+    typedef typename std::allocator<T>::size_type size_type;
+    typedef typename std::allocator<T>::pointer pointer;
 
     template <typename U> struct rebind
     {typedef AlignedAllocator<U, Alignment> other;};
@@ -164,25 +158,19 @@ class AlignedAllocator : public std::allocator<T>
 
     template <typename U>
     AlignedAllocator (const AlignedAllocator<U, Alignment> &other) :
-        std::allocator<T>(other)
+        std::allocator<T>(static_cast<std::allocator<U> >(other))
     {VSMC_STATIC_ASSERT_UTILITY_ALIGNED_ALLOCATOR;}
 
     ~AlignedAllocator () {}
 
-    static pointer allocate (size_type n, const void * = VSMC_NULLPTR)
+    pointer allocate (size_type n,
+            std::allocator<void>::const_pointer = VSMC_NULLPTR)
     {
-        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_ALLOCATOR;
-
         return static_cast<pointer>(
                 internal::aligned_malloc<Alignment>(sizeof(T) * n));
     }
 
-    static void deallocate (pointer ptr, size_type)
-    {
-        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_ALLOCATOR;
-
-        internal::aligned_free(ptr);
-    }
+    void deallocate (pointer ptr, size_type) {internal::aligned_free(ptr);}
 }; // class AlignedAllocator
 
 } // namespace vsmc
