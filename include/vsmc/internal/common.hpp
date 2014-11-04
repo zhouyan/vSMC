@@ -26,6 +26,8 @@
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>
 
+#include <stdint.h>
+
 #include <cassert>
 #include <cmath>
 #include <cstddef>

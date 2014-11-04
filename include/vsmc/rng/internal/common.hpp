@@ -18,7 +18,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/array.hpp>
 #include <vsmc/utility/counter.hpp>
-#include <stdint.h>
 
 #ifndef UINT64_C
 #error __STDC_CONSTANT_MACROS not defined before #<stdint.h>

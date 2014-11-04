@@ -12,7 +12,6 @@
 #define VSMC_UTILITY_RDTSC_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <stdint.h>
 
 #ifdef _MSC_VER
 #include <intrin.h>
