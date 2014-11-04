@@ -15,12 +15,6 @@
 
 #if VSMC_HAS_CXX11LIB_CHRONO
 #include <chrono>
-#elif defined(__APPLE__) || defined(__MACOSX)
-#include <mach/mach_time.h>
-#elif VSMC_HAS_POSIX
-#include <time.h>
-#elif defined(WIN32)
-#include <windows.h>
 #endif
 
 /// \brief Default C++11 clock used as StopWatch if `VSMC_HAS_CXX11LIB_CHRONO`
@@ -28,6 +22,27 @@
 /// \ingroup Config
 #ifndef VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE
 #define VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE std::chrono::high_resolution_clock
+#endif
+
+/// \brief Use native time library instead of C++11 `<chrono>` even if it is
+/// available
+/// \ingroup Config
+#ifndef VSMC_USE_NATIVE_TIME_LIBRARY
+#ifdef _MSC_VER
+#define VSMC_USE_NATIVE_TIME_LIBRARY 1
+#else
+#define VSMC_USE_NATIVE_TIME_LIBRARY 0
+#endif
+#endif
+
+#if !VSMC_HAS_CXX11LIB_CHRONO || VSMC_USE_NATIVE_TIME_LIBRARY
+#if defined(__APPLE__) || defined(__MACOSX)
+#include <mach/mach_time.h>
+#elif VSMC_HAS_POSIX
+#include <time.h>
+#elif defined(WIN32)
+#include <windows.h>
+#endif
 #endif
 
 namespace vsmc {
@@ -52,7 +67,7 @@ class StopWatchGuard
     watch_type &watch_;
 }; // class StopWatchGuard
 
-#if VSMC_HAS_CXX11LIB_CHRONO && !defined(_MSC_VER)
+#if VSMC_HAS_CXX11LIB_CHRONO
 
 /// \brief StopWatch as an adapter of C++11 clock
 /// \ingroup StopWatch
@@ -162,6 +177,10 @@ class StopWatchClockAdapter
     typename clock_type::time_point start_time_;
     bool running_;
 }; // class StopWatchClockAdapter
+
+#endif // VSMC_HAS_CXX11LIB_CHRONO
+
+#if VSMC_HAS_CXX11LIB_CHRONO && !VSMC_USE_NATIVE_TIME_LIBRARY
 
 /// \brief Stop watch
 /// \ingroup StopWatch
@@ -428,7 +447,7 @@ class StopWatch
     bool running_;
 }; // class StopWatch
 
-#else // VSMC_HAS_CXX11LIB_CHRONO
+#else // VSMC_HAS_CXX11LIB_CHRONO && !VSMC_USE_NATIVE_TIME_LIBRARY
 
 class StopWatch
 {
@@ -447,7 +466,7 @@ class StopWatch
     double hours        () const {return 1e-9 / 3600;}
 }; // class StopWatch
 
-#endif // VSMC_HAS_CXX11LIB_CHRONO
+#endif // VSMC_HAS_CXX11LIB_CHRONO && !VSMC_USE_NATIVE_TIME_LIBRARY
 
 } // namespace vsmc
 
