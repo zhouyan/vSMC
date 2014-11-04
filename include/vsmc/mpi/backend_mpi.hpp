@@ -75,24 +75,6 @@ class WeightSetMPI : public WeightSetBase
         return world_.rank() == 0 ? &resample_weight_[0] : VSMC_NULLPTR;
     }
 
-    void set_equal_weight ()
-    {
-        barrier();
-
-        const size_type N = static_cast<size_type>(this->size());
-        double *const weight = &this->weight()[0];
-        double *const log_weight = &this->log_weight()[0];
-
-        this->set_ess(static_cast<double>(resample_size_));
-        const double ew = 1 / this->ess();
-        for (size_type i = 0; i != N; ++i) {
-            weight[i] = ew;
-            log_weight[i] = 0;
-        }
-
-        barrier();
-    }
-
     /// \brief A duplicated MPI communicator for this weight set object
     const ::boost::mpi::communicator &world () const {return world_;}
 
@@ -107,7 +89,7 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        double *const lwptr = &this->log_weight()[0];
+        double *const lwptr = this->mutable_log_weight_data();
 
         double lmax_weight = lwptr[0];
         for (size_type i = 0; i != N; ++i)
@@ -127,7 +109,7 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        double *const wptr = &this->weight()[0];
+        double *const wptr = this->mutable_weight_data();
 
         double lcoeff = 0;
         for (size_type i = 0; i != N; ++i)
@@ -160,7 +142,7 @@ class WeightSetMPI : public WeightSetBase
         double *const bptr = &buffer[0];
 
         if (use_log) {
-            const double *const lwptr = &this->log_weight()[0];
+            const double *const lwptr = this->log_weight_data();
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = lwptr[i] + first[i];
             double lmax_weight = bptr[0];
@@ -175,7 +157,7 @@ class WeightSetMPI : public WeightSetBase
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = exp(bptr[i]);
         } else {
-            const double *const wptr = &this->weight()[0];
+            const double *const wptr = this->weight_data();
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = wptr[i] * first[i];
         }
@@ -209,7 +191,7 @@ class WeightSetMPI : public WeightSetBase
 
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
-        const double *const wptr = &this->weight()[0];
+        const double *const wptr = this->weight_data();
         std::vector<double, AlignedAllocator<double> > buffer;
         if (use_log) {
             buffer.resize(N);
@@ -241,16 +223,18 @@ class WeightSetMPI : public WeightSetBase
     ::boost::mpi::communicator world_;
     bool internal_barrier_;
     size_type resample_size_;
-    mutable std::vector<double, AlignedAllocator<double> > resample_weight_;
-    mutable std::vector<std::vector<double, AlignedAllocator<double> > >
-        weight_all_;
+    mutable std::vector<double> resample_weight_;
+    mutable std::vector<double> weight_;
+    mutable std::vector<std::vector<double> > weight_all_;
 
     void gather_resample_weight () const
     {
+        weight_.resize(this->size());
+        this->read_weight(&weight_[0]);
         if (world_.rank() == 0)
-            ::boost::mpi::gather(world_, this->weight(), weight_all_, 0);
+            ::boost::mpi::gather(world_, weight_, weight_all_, 0);
         else
-            ::boost::mpi::gather(world_, this->weight(), 0);
+            ::boost::mpi::gather(world_, weight_, 0);
     }
 }; // class WeightSetMPI
 

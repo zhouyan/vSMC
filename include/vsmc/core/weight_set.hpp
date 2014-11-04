@@ -184,7 +184,8 @@ class WeightSet
     /// such that each particle has a equal weight
     void set_equal_weight ()
     {
-        std::fill_n(&weight_[0], size_, 1 / static_cast<double>(size_));
+        ess_ = static_cast<double>(resample_size());
+        std::fill_n(&weight_[0], size_, 1 / ess_);
         std::memset(&log_weight_[0], 0, sizeof(double) * size_);
     }
 
@@ -332,17 +333,9 @@ class WeightSet
 
     void set_ess (double e) {ess_ = e;}
 
-    std::vector<double, AlignedAllocator<double> > &weight ()
-    {return weight_;}
+    double *mutable_weight_data () {return &weight_[0];}
 
-    const std::vector<double, AlignedAllocator<double> > &weight () const
-    {return weight_;}
-
-    std::vector<double, AlignedAllocator<double> > &log_weight ()
-    {return log_weight_;}
-
-    const std::vector<double, AlignedAllocator<double> > &log_weight () const
-    {return log_weight_;}
+    double *mutable_log_weight_data () {return &log_weight_[0];}
 
     /// \brief Compute unormalized logarithm weights from normalized weights
     virtual void log_weight2weight ()
