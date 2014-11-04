@@ -45,7 +45,7 @@ class Resample<internal::ResampleStratified>
     private :
 
     internal::Inversion inversion_;
-    std::vector<double> u01_;
+    std::vector<double, AlignedAllocator<double> > u01_;
 }; // Stratified resampling
 
 } // namespace vsmc

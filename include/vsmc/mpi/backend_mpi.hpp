@@ -14,6 +14,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight_set.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
+#include <vsmc/utility/aligned_allocator.hpp>
 
 #define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == global_size_),                                 \
@@ -155,7 +156,7 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        std::vector<double> buffer(N);
+        std::vector<double, AlignedAllocator<double> > buffer(N);
         double *const bptr = &buffer[0];
 
         if (use_log) {
@@ -209,7 +210,7 @@ class WeightSetMPI : public WeightSetBase
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
         const double *const wptr = &this->weight()[0];
-        std::vector<double> buffer;
+        std::vector<double, AlignedAllocator<double> > buffer;
         if (use_log) {
             buffer.resize(N);
             double *const cptr = &buffer[0];
@@ -240,8 +241,9 @@ class WeightSetMPI : public WeightSetBase
     ::boost::mpi::communicator world_;
     bool internal_barrier_;
     size_type resample_size_;
-    mutable std::vector<double> resample_weight_;
-    mutable std::vector<std::vector<double> > weight_all_;
+    mutable std::vector<double, AlignedAllocator<double> > resample_weight_;
+    mutable std::vector<std::vector<double, AlignedAllocator<double> > >
+        weight_all_;
 
     void gather_resample_weight () const
     {

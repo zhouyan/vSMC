@@ -46,7 +46,7 @@ class Resample<internal::ResampleSystematic>
     private :
 
     internal::Inversion inversion_;
-    std::vector<double> u01_;
+    std::vector<double, AlignedAllocator<double> > u01_;
 }; // Systematic resampling
 
 } // namespace vsmc

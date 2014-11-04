@@ -19,6 +19,7 @@
 #endif
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
+#include <vsmc/utility/aligned_allocator.hpp>
 
 /// \brief Default RNG set type
 /// \ingroup Config
@@ -64,7 +65,8 @@ class RngSet<RngType, Vector>
     public :
 
     typedef RngType rng_type;
-    typedef typename std::vector<rng_type>::size_type size_type;
+    typedef typename std::vector<rng_type, AlignedAllocator<rng_type> >::
+        size_type size_type;
 
     explicit RngSet (size_type N) : rng_(N, rng_type()) {seed();}
 
@@ -96,7 +98,7 @@ class RngSet<RngType, Vector>
 
     private :
 
-    std::vector<rng_type> rng_;
+    std::vector<rng_type, AlignedAllocator<rng_type> > rng_;
 }; // class RngSet
 
 namespace traits {

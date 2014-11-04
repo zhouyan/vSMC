@@ -12,6 +12,7 @@
 #define VSMC_CORE_WEIGHT_SET_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/utility/aligned_allocator.hpp>
 
 namespace vsmc {
 
@@ -79,7 +80,7 @@ class WeightSet
     template <typename InputIter>
     double ess (InputIter first, bool use_log) const
     {
-        std::vector<double> buffer(size_);
+        std::vector<double, AlignedAllocator<double> > buffer(size_);
         double *const bptr = &buffer[0];
 #if VSMC_HAS_CXX11LIB_ALGORITHM
         std::copy_n(first, size_, bptr);
@@ -95,7 +96,7 @@ class WeightSet
     template <typename RandomIter>
     double ess (RandomIter first, int stride, bool use_log) const
     {
-        std::vector<double> buffer(size_);
+        std::vector<double, AlignedAllocator<double> > buffer(size_);
         double *const bptr = &buffer[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             bptr[i] = *first;
@@ -107,7 +108,7 @@ class WeightSet
     template <typename InputIter>
     double cess (InputIter first, bool use_log) const
     {
-        std::vector<double> buffer(size_);
+        std::vector<double, AlignedAllocator<double> > buffer(size_);
         double *const bptr = &buffer[0];
 #if VSMC_HAS_CXX11LIB_ALGORITHM
         std::copy_n(first, size_, bptr);
@@ -123,7 +124,7 @@ class WeightSet
     template <typename RandomIter>
     double cess (RandomIter first, int stride, bool use_log) const
     {
-        std::vector<double> buffer(size_);
+        std::vector<double, AlignedAllocator<double> > buffer(size_);
         double *const bptr = &buffer[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             bptr[i] = *first;
@@ -331,13 +332,17 @@ class WeightSet
 
     void set_ess (double e) {ess_ = e;}
 
-    std::vector<double> &weight () {return weight_;}
+    std::vector<double, AlignedAllocator<double> > &weight ()
+    {return weight_;}
 
-    const std::vector<double> &weight () const {return weight_;}
+    const std::vector<double, AlignedAllocator<double> > &weight () const
+    {return weight_;}
 
-    std::vector<double> &log_weight () {return log_weight_;}
+    std::vector<double, AlignedAllocator<double> > &log_weight ()
+    {return log_weight_;}
 
-    const std::vector<double> &log_weight () const {return log_weight_;}
+    const std::vector<double, AlignedAllocator<double> > &log_weight () const
+    {return log_weight_;}
 
     /// \brief Compute unormalized logarithm weights from normalized weights
     virtual void log_weight2weight ()
@@ -372,7 +377,7 @@ class WeightSet
     /// \brief Compute ESS given (logarithm) unormalzied incremental weights
     virtual double compute_ess (const double *first, bool use_log) const
     {
-        std::vector<double> buffer(size_);
+        std::vector<double, AlignedAllocator<double> > buffer(size_);
         double *const bptr = &buffer[0];
 
         if (use_log) {
@@ -400,7 +405,7 @@ class WeightSet
     {
         const double *bptr = first;
         const double *const wptr = &weight_[0];
-        std::vector<double> buffer;
+        std::vector<double, AlignedAllocator<double> > buffer;
         if (use_log) {
             buffer.resize(size_);
             math::vExp(size_, first, &buffer[0]);
@@ -422,8 +427,8 @@ class WeightSet
 
     size_type size_;
     double ess_;
-    std::vector<double> weight_;
-    std::vector<double> log_weight_;
+    std::vector<double, AlignedAllocator<double> > weight_;
+    std::vector<double, AlignedAllocator<double> > log_weight_;
 
     void post_set_log_weight ()
     {

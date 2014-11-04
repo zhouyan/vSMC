@@ -13,6 +13,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/integrate/is_integrate.hpp>
+#include <vsmc/utility/aligned_allocator.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func) \
     VSMC_RUNTIME_ASSERT((id < dim()),                                        \
@@ -285,9 +286,9 @@ class Monitor
     bool record_only_;
     std::vector<std::string> name_;
     std::vector<std::size_t> index_;
-    std::vector<double> record_;
-    std::vector<double> result_;
-    std::vector<double> buffer_;
+    std::vector<double, AlignedAllocator<double> > record_;
+    std::vector<double, AlignedAllocator<double> > result_;
+    std::vector<double, AlignedAllocator<double> > buffer_;
     ISIntegrate is_integrate_;
 
     void push_back (std::size_t iter, const double *rptr)

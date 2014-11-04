@@ -13,6 +13,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
+#include <vsmc/utility/aligned_allocator.hpp>
 
 #define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
@@ -252,7 +253,10 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     private :
 
     size_type size_;
-    std::vector<T> data_;
+    typename cxx11::conditional<cxx11::is_arithmetic<T>::value,
+             std::vector<T, AlignedAllocator<T> >,
+             std::vector<T> >::type data_;
+
 
     void copy_particle_dispatch (size_type from, size_type to,
             cxx11::true_type)

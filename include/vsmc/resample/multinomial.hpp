@@ -44,7 +44,7 @@ class Resample<internal::ResampleMultinomial>
     private :
 
     internal::Inversion inversion_;
-    std::vector<double> u01_;
+    std::vector<double, AlignedAllocator<double> > u01_;
 }; // Mulitnomial resampling
 
 } // namespace vsmc

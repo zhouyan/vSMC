@@ -18,6 +18,7 @@
 #endif
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
+#include <vsmc/utility/aligned_allocator.hpp>
 
 /// \brief Default RNG type for resampling
 /// \ingroup Config
@@ -77,8 +78,8 @@ class Inversion
 
     private :
 
-    std::vector<double> accw_;
-    std::vector<double> u01_;
+    std::vector<double, AlignedAllocator<double> > accw_;
+    std::vector<double, AlignedAllocator<double> > u01_;
 }; // class Inversion
 
 } // namespace vsmc::internal

@@ -12,6 +12,7 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/utility/aligned_allocator.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func) \
     VSMC_RUNTIME_ASSERT((iter < iter_size()),                                \
@@ -200,9 +201,9 @@ class Path
     bool record_only_;
     double log_zconst_;
     std::vector<std::size_t> index_;
-    std::vector<double> integrand_;
-    std::vector<double> grid_;
-    std::vector<double> buffer_;
+    std::vector<double, AlignedAllocator<double> > integrand_;
+    std::vector<double, AlignedAllocator<double> > grid_;
+    std::vector<double, AlignedAllocator<double> > buffer_;
 
     void push_back (std::size_t iter, double grid, double integrand)
     {
