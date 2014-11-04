@@ -745,12 +745,12 @@ class CPUID
         }
         os << '\n';
 
-        os << "Maximum Proc ID sharing    ";
+        os << "Maximum Proc sharing       ";
         for (std::size_t i = 0; i != caches.size(); ++i)
             os << std::setw(fix) << caches[i].max_proc_sharing();
         os << '\n';
 
-        os << "Maximum Proc ID physical   ";
+        os << "Maximum Proc physical      ";
         for (std::size_t i = 0; i != caches.size(); ++i)
             os << std::setw(fix) << caches[i].max_proc_physical();
         os << '\n';
