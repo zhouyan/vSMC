@@ -115,9 +115,10 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i)
+        for (size_type i = 0; i < N; ++i) {
             this->monitor_state(iter, dim,
                     ConstSingleParticle<T>(i, &particle), res + i * dim);
+        }
         this->post_processor(iter, particle);
     }
 
@@ -141,9 +142,10 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i)
+        for (size_type i = 0; i < N; ++i) {
             res[i] = this->path_state(iter,
                     ConstSingleParticle<T>(i, &particle));
+        }
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);
