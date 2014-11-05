@@ -35,7 +35,7 @@
 #if defined(__APPLE__) || defined(__MACOSX)
 #if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_5)
 #ifndef VSMC_HAS_POSIX
-#define VSMC_HAS_POISX 1
+#define VSMC_HAS_POSIX 1
 #endif
 #endif
 #else
