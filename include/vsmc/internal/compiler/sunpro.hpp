@@ -294,6 +294,8 @@
 #define VSMC_HAS_C99LIB_MATH 1
 #endif
 
+// Preprocessor features
+
 // Target specific features
 
 // Parallelization features

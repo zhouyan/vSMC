@@ -260,6 +260,12 @@
 #define VSMC_HAS_C99LIB_MATH 0
 #endif
 
+// Preprocessor features
+
+#ifndef VSMC_HAS_WARNING
+#define VSMC_HAS_WARNING 0
+#endif
+
 // Target specific features
 
 #ifndef VSMC_HAS_INT128

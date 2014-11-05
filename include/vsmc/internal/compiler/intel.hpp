@@ -287,6 +287,12 @@
 #define VSMC_HAS_C99LIB_MATH 1
 #endif
 
+// Preprocessor features
+
+#ifndef VSMC_HAS_WARNING
+#define VSMC_HAS_WARNING 1
+#endif
+
 // Target specific features
 
 #if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
