@@ -4,7 +4,7 @@
 //
 //                         vSMC: Scalable Monte Carlo
 //
-// This file is distribured under the 2-clauses BSD License.
+// This file is distributed under the 2-clauses BSD License.
 // See LICENSE for details.
 //============================================================================
 
@@ -123,7 +123,7 @@
 
 /// \defgroup U01 U01
 /// \ingroup RNG
-/// \brief Converting random integers to random floating points
+/// \brief Convert random integers to random floating points
 
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
@@ -135,6 +135,10 @@
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
+/// \defgroup AlignedAllocator Aligned memory allocation
+/// \ingroup Utility
+/// \brief Memory allocation with alignment requirement
+
 /// \defgroup Array Array
 /// \ingroup Utility
 /// \brief Container with static size
@@ -145,11 +149,11 @@
 
 /// \defgroup Counter Counter
 /// \ingroup Utility
-/// \brief Using Array of unsinged integers as counters
+/// \brief Use Array of unsinged integers as counters
 
-/// \defgroup HDF5IO HDF5 objects saving
+/// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility
-/// \brief Functions for saving objects in HDF5 format
+/// \brief Load and store objects in the HDF5 format
 
 /// \defgroup Option Program option
 /// \ingroup Utility
@@ -165,7 +169,7 @@
 
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
-/// \brief Utilities for measuring the time of procedures
+/// \brief Time measurement
 
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
