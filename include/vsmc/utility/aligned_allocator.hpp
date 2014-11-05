@@ -108,24 +108,26 @@ inline void aligned_free (void *ptr) {mkl_free(ptr);}
 template <std::size_t Alignment>
 inline void *aligned_malloc (std::size_t n)
 {
-    uintptr_t address = reinterpret_cast<uintptr_t>(
-            std::malloc(n + Alignment + sizeof(void *)));
-    uintptr_t offset = Alignment - address % Alignment;
-    uintptr_t address_ptr = address + sizeof(void *) + offset;
-    uintptr_t address_orig = address_ptr - sizeof(void *);
-    void *ptr = reinterpret_cast<void *>(address_ptr);
-    void **orig = reinterpret_cast<void **>(address_orig);
-    *orig = reinterpret_cast<void *>(address);
+    if (n == 0)
+        return VSMC_NULLPTR;
+
+    void *orig_ptr = std::malloc(n + Alignment + sizeof(void *));
+    if (orig_ptr == VSMC_NULLPTR)
+        throw std::bad_alloc();
+
+    uintptr_t address = reinterpret_cast<uintptr_t>(orig_ptr);
+    uintptr_t offset = Alignment - (address + sizeof(void *)) % Alignment;
+    void *ptr = reinterpret_cast<void *>(address + offset + sizeof(void *));
+    void **orig = reinterpret_cast<void **>(address + offset);
+    *orig = orig_ptr;
 
     return ptr;
 }
 
-inline void *aligned_free (void *ptr)
+inline void aligned_free (void *ptr)
 {
-    uintptr_t address_ptr = reinterpret_cast<uintptr_t>(ptr);
-    uintptr_t address_orig = address_ptr - sizeof(void *);
-    void **orig = reinterpret_cast<void **>(address_orig);
-    std::free(*orig);
+    std::free(*reinterpret_cast<void **>(
+                reinterpret_cast<uintptr_t>(ptr) - sizeof(void *)));
 }
 
 #endif // VSMC_HAS_POSIX
