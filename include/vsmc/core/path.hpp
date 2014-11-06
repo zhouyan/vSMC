@@ -12,7 +12,7 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/aligned_allocator.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func) \
     VSMC_RUNTIME_ASSERT((iter < iter_size()),                                \
