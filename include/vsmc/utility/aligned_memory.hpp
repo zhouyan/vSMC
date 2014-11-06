@@ -41,7 +41,6 @@
 #endif
 #endif
 
-
 #define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment) \
     VSMC_STATIC_ASSERT((Alignment != 0 && (Alignment & (Alignment - 1)) == 0),\
             USE_AlignedAllocator_WITH_ALIGNEMNT_NOT_A_POWER_OF_TWO)
