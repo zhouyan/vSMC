@@ -739,7 +739,7 @@ class CPUID
             } else if ((b /= 1024) < 1024) {
                 ss << b << "M";
             } else {
-                ss << b / 1024 << "GB";
+                ss << b / 1024 << "G";
             }
             os << std::setw(fix) << ss.str();
         }
