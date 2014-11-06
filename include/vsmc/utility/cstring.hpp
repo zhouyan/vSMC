@@ -64,6 +64,7 @@ inline void *memcpy_avx<da, sa, nt> (                                        \
         _mm256_##store##_pd(dstd + 4, m2);                                   \
     }                                                                        \
     internal::memcpy_generic(dstd, srcd, n % 64);                            \
+    _mm256_zeroupper();                                                      \
                                                                              \
     return dst;                                                              \
 }
