@@ -11,10 +11,6 @@
 #ifndef VSMC_RNG_INTERNAL_COMMON_HPP
 #define VSMC_RNG_INTERNAL_COMMON_HPP
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/array.hpp>
