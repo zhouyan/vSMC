@@ -24,25 +24,25 @@
 #define VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE std::chrono::high_resolution_clock
 #endif
 
-/// \brief Use native time library instead of C++11 `<chrono>` even if it is
-/// available
+/// \brief Default StopWatch type
 /// \ingroup Config
-#ifndef VSMC_USE_NATIVE_TIME_LIBRARY
-#ifdef _MSC_VER
-#define VSMC_USE_NATIVE_TIME_LIBRARY 1
+#ifndef VSMC_STOP_WATCH_TYPE
+#if VSMC_HAS_CXX11LIB_CHRONO
+#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchChrono
+#elif defined(__APPLE__) || defined(__MACOSX) \
+    || VSMC_HAS_POSIX || defined(_MSC_VER)
+#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNative
 #else
-#define VSMC_USE_NATIVE_TIME_LIBRARY 0
+#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNull
 #endif
 #endif
 
-#if !VSMC_HAS_CXX11LIB_CHRONO || VSMC_USE_NATIVE_TIME_LIBRARY
 #if defined(__APPLE__) || defined(__MACOSX)
 #include <mach/mach_time.h>
 #elif VSMC_HAS_POSIX
 #include <time.h>
-#elif defined(WIN32)
+#elif defined(_MSC_VER)
 #include <windows.h>
-#endif
 #endif
 
 namespace vsmc {
@@ -66,6 +66,28 @@ class StopWatchGuard
     const bool start_;
     watch_type &watch_;
 }; // class StopWatchGuard
+
+/// \brief A null StopWatch
+/// \ingroup StopWatch
+///
+/// \details
+/// This class provides StopWatch interface but does nothing
+class StopWatchNull
+{
+    public :
+
+    bool running () const {return false;}
+    bool start () {return false;}
+    bool stop () {return false;}
+    void reset () {}
+
+    double nanoseconds  () const {return 1;}
+    double microseconds () const {return 1e-3;}
+    double milliseconds () const {return 1e-6;}
+    double seconds      () const {return 1e-9;}
+    double minutes      () const {return 1e-9 / 60;}
+    double hours        () const {return 1e-9 / 3600;}
+}; // class StopWatch
 
 #if VSMC_HAS_CXX11LIB_CHRONO
 
@@ -178,21 +200,26 @@ class StopWatchClockAdapter
     bool running_;
 }; // class StopWatchClockAdapter
 
+/// \brief Stop watch using `<chrono>`
+/// \ingroup StopWatch
+typedef StopWatchClockAdapter<VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE>
+StopWatchChrono;
+
 #endif // VSMC_HAS_CXX11LIB_CHRONO
 
-#if VSMC_HAS_CXX11LIB_CHRONO && !VSMC_USE_NATIVE_TIME_LIBRARY
+#if defined(__APPLE__) || defined(__MACOSX)
 
-/// \brief Stop watch
+/// \brief Stop watch using system native API
 /// \ingroup StopWatch
-typedef StopWatchClockAdapter<VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE> StopWatch;
-
-#elif defined(__APPLE__) || defined(__MACOSX)
-
-class StopWatch
+///
+/// \details
+/// This class use `mach_absolute_time` on Mac OS X, `clock_gettime` on other
+/// POSIX systems, and `QueryPerformanceCounter` on Windows.
+class StopWatchNative
 {
     public :
 
-    StopWatch () : running_(false) {reset();}
+    StopWatchNative () : running_(false) {reset();}
 
     bool running () {return running_;}
 
@@ -279,15 +306,15 @@ class StopWatch
     bool running_;
     static VSMC_CONSTEXPR const uint64_t ratio_ =
         static_cast<uint64_t>(1000000000ULL); // 9 zero
-}; // class StopWatch
+}; // class StopWatchNative
 
 #elif VSMC_HAS_POSIX
 
-class StopWatch
+class StopWatchNative
 {
     public :
 
-    StopWatch () : running_(false) {reset();}
+    StopWatchNative () : running_(false) {reset();}
 
     bool running () {return running_;}
 
@@ -371,15 +398,15 @@ class StopWatch
     ::timespec start_time_;
     bool running_;
     static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
-}; // class StopWatch
+}; // class StopWatchNative
 
-#elif defined(WIN32)
+#elif defined(_MSC_VER)
 
-class StopWatch
+class StopWatchNative
 {
     public :
 
-    StopWatch () :
+    StopWatchNative () :
         elapsed_(0), start_time_(0), frequency_(0), running_(false)
     {reset();}
 
@@ -445,28 +472,13 @@ class StopWatch
     __int64 start_time_;
     double frequency_;
     bool running_;
-}; // class StopWatch
+}; // class StopWatchNative
 
-#else // VSMC_HAS_CXX11LIB_CHRONO && !VSMC_USE_NATIVE_TIME_LIBRARY
+#endif // defined(__APPLE__) || defined(__MACOSX)
 
-class StopWatch
-{
-    public :
-
-    bool running () const {return false;}
-    bool start () {return false;}
-    bool stop () {return false;}
-    void reset () {}
-
-    double nanoseconds  () const {return 1;}
-    double microseconds () const {return 1e-3;}
-    double milliseconds () const {return 1e-6;}
-    double seconds      () const {return 1e-9;}
-    double minutes      () const {return 1e-9 / 60;}
-    double hours        () const {return 1e-9 / 3600;}
-}; // class StopWatch
-
-#endif // VSMC_HAS_CXX11LIB_CHRONO && !VSMC_USE_NATIVE_TIME_LIBRARY
+/// \brief The default StopWatch
+/// \ingroup StopWatch
+typedef VSMC_STOP_WATCH_TYPE StopWatch;
 
 } // namespace vsmc
 
