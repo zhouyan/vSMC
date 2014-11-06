@@ -135,7 +135,7 @@
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
-/// \defgroup AlignedAllocator Aligned memory allocation
+/// \defgroup AlignedMemory Aligned memory allocation
 /// \ingroup Utility
 /// \brief Memory allocation with alignment requirement
 

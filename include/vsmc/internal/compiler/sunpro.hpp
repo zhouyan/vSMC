@@ -210,11 +210,9 @@
 #endif
 #endif
 
-#ifndef _WIN32
 #if __SUNPRO_CC >= 0x5130UL
 #ifndef VSMC_HAS_CXX11_UNRESTRICTED_UNIONS
 #define VSMC_HAS_CXX11_UNRESTRICTED_UNIONS 1
-#endif
 #endif
 #endif
 

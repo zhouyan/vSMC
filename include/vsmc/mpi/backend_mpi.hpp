@@ -14,7 +14,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight_set.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
-#include <vsmc/utility/aligned_allocator.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == global_size_),                                 \

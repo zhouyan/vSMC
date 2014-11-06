@@ -19,7 +19,6 @@
 #endif
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
-#include <vsmc/utility/aligned_allocator.hpp>
 
 /// \brief Default RNG set type
 /// \ingroup Config

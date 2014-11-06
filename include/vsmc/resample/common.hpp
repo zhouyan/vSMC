@@ -18,7 +18,7 @@
 #endif
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
-#include <vsmc/utility/aligned_allocator.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 
 /// \brief Default RNG type for resampling
 /// \ingroup Config

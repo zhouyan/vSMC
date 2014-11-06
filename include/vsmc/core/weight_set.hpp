@@ -12,7 +12,7 @@
 #define VSMC_CORE_WEIGHT_SET_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/aligned_allocator.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 
 namespace vsmc {
 
