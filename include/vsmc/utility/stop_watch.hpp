@@ -31,7 +31,7 @@
 #define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchChrono
 #elif defined(__APPLE__) || defined(__MACOSX) \
     || VSMC_HAS_POSIX || defined(_MSC_VER)
-#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNative
+#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchSYS
 #else
 #define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNull
 #endif
@@ -215,11 +215,11 @@ StopWatchChrono;
 /// \details
 /// This class use `mach_absolute_time` on Mac OS X, `clock_gettime` on other
 /// POSIX systems, and `QueryPerformanceCounter` on Windows.
-class StopWatchNative
+class StopWatchSYS
 {
     public :
 
-    StopWatchNative () : running_(false) {reset();}
+    StopWatchSYS () : running_(false) {reset();}
 
     bool running () {return running_;}
 
@@ -306,15 +306,15 @@ class StopWatchNative
     bool running_;
     static VSMC_CONSTEXPR const uint64_t ratio_ =
         static_cast<uint64_t>(1000000000ULL); // 9 zero
-}; // class StopWatchNative
+}; // class StopWatchSYS
 
 #elif VSMC_HAS_POSIX
 
-class StopWatchNative
+class StopWatchSYS
 {
     public :
 
-    StopWatchNative () : running_(false) {reset();}
+    StopWatchSYS () : running_(false) {reset();}
 
     bool running () {return running_;}
 
@@ -398,15 +398,15 @@ class StopWatchNative
     ::timespec start_time_;
     bool running_;
     static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
-}; // class StopWatchNative
+}; // class StopWatchSYS
 
 #elif defined(_MSC_VER)
 
-class StopWatchNative
+class StopWatchSYS
 {
     public :
 
-    StopWatchNative () :
+    StopWatchSYS () :
         elapsed_(0), start_time_(0), frequency_(0), running_(false)
     {reset();}
 
@@ -472,7 +472,7 @@ class StopWatchNative
     __int64 start_time_;
     double frequency_;
     bool running_;
-}; // class StopWatchNative
+}; // class StopWatchSYS
 
 #endif // defined(__APPLE__) || defined(__MACOSX)
 

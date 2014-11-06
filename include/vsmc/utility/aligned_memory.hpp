@@ -31,7 +31,7 @@
 /// \ingroup Config
 #ifndef VSMC_ALIGNED_MEMORY_TYPE
 #if VSMC_HAS_POSIX || defined(_MSC_VER)
-#define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryNative
+#define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemorySYS
 #elif VSMC_HAS_TBB
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryTBB
 #elif VSMC_HAS_MKL
@@ -112,7 +112,7 @@ class AlignedMemorySTD
 /// \details
 /// This class use `posix_memalign` and `free` on POSIX systems (Mac OS X,
 /// Linux, etc.) and `_aligned_malloc` and `_aligned_free` on Windows.
-class AlignedMemoryNative
+class AlignedMemorySYS
 {
     public :
 
@@ -131,11 +131,11 @@ class AlignedMemoryNative
     }
 
     static void aligned_free (void *ptr) {free(ptr);}
-}; // class AlignedMallocNative
+}; // class AlignedMallocSYS
 
 #elif defined(_MSC_VER)
 
-class AlignedMemoryNative
+class AlignedMemorySYS
 {
     public :
 
@@ -154,7 +154,7 @@ class AlignedMemoryNative
     }
 
     static void aligned_free (void *ptr) {_aligned_free(ptr);}
-}; // class AlignedMemoryNative
+}; // class AlignedMemorySYS
 
 #endif // VSMC_HAS_POSIX
 
