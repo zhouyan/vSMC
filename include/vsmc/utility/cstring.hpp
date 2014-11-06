@@ -89,7 +89,7 @@ inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
     if (n < small)                                                           \
         return internal::memcpy_generic(dst, src, n);                        \
                                                                              \
-    unsigned flag_nt = MemcpyNonTemporalThreshold::instance().over(n);       \
+    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
     unsigned flag_dst = internal::memcpy_is_aligned_##simd(dst);             \
     unsigned flag_src = internal::memcpy_is_aligned_##simd(src);             \
     unsigned flag = (flag_dst << 2) | (flag_src << 1) | (flag_nt & flag_dst);\
@@ -109,7 +109,7 @@ namespace vsmc {
 /// \brief The threshold of buffer size above which `memcpy` use non-temporal
 /// instructions.
 /// \ingroup CString
-class MemcpyNonTemporalThreshold
+class CStringNonTemporalThreshold
 {
     public :
 
@@ -118,9 +118,9 @@ class MemcpyNonTemporalThreshold
     /// \note If any `memcpy` functions in this module is to be called from
     /// multiple thread, then this member function need to be called at least
     /// once before entering threads.
-    static MemcpyNonTemporalThreshold &instance ()
+    static CStringNonTemporalThreshold &instance ()
     {
-        static MemcpyNonTemporalThreshold ntt;
+        static CStringNonTemporalThreshold ntt;
 
         return ntt;
     }
@@ -154,12 +154,13 @@ class MemcpyNonTemporalThreshold
 
     std::size_t threshold_;
 
-    MemcpyNonTemporalThreshold () : threshold_(0) {set();}
+    CStringNonTemporalThreshold () : threshold_(0) {set();}
 
-    MemcpyNonTemporalThreshold (const MemcpyNonTemporalThreshold &);
+    CStringNonTemporalThreshold (const CStringNonTemporalThreshold &);
 
-    MemcpyNonTemporalThreshold &operator= (const MemcpyNonTemporalThreshold &);
-}; // class MemcpyNonTemporalThreshold
+    CStringNonTemporalThreshold &operator= (
+            const CStringNonTemporalThreshold &);
+}; // class CStringNonTemporalThreshold
 
 namespace internal {
 
