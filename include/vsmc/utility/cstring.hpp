@@ -227,6 +227,10 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
     if (srca + n <= dsta || dsta + n <= srca)                                \
         return memcpy_sse(dst, src, n);                                      \
                                                                              \
+    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
+    flag_nt &= CStringNonTemporalThreshold::instance().over(                 \
+            dsta > srca ? dsta - srca : srca - dsta);                        \
+                                                                             \
     if (dsta < srca) {                                                       \
         char *dstc = static_cast<char *>(dst);                               \
         const char *srcc = static_cast<const char *>(src);                   \
@@ -240,7 +244,6 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
         }                                                                    \
                                                                              \
         unsigned flag_src = internal::cstring_is_aligned_##simd(srcc);       \
-        unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);  \
         unsigned flag = (flag_src << 1) | flag_nt;                           \
         switch (flag) {                                                      \
             case 0 : internal::forward_##simd<false, false>(dstc, srcc, n);  \
@@ -274,7 +277,6 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
     }                                                                        \
                                                                              \
     unsigned flag_src = internal::cstring_is_aligned_##simd(srcc);           \
-    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
     unsigned flag = (flag_src << 1) | flag_nt;                               \
     switch (flag) {                                                          \
         case 0 : internal::backward_##simd<false, false>(dstc, srcc, n);     \
