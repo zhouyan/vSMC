@@ -142,12 +142,15 @@ class CStringNonTemporalThreshold
     /// By default, we set a pretty high threshold (the LLC size).
     void set ()
     {
+        threshold_ = 0;
+
         unsigned max_ecx = CPUID::max_cache_index();
         if (max_ecx >= 3)
-            threshold_ = CPUID::cache_param(3).size();
+            threshold_ = CPUID::cache_param(3).size() / 2;
         else if (max_ecx >= 2)
-            threshold_ = CPUID::cache_param(2).size();
-        else
+            threshold_ = CPUID::cache_param(2).size() / 2;
+
+        if (threshold_ == 0)
             threshold_ = 1UL << 18; // 256K
     }
 
