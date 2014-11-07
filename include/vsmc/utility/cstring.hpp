@@ -20,6 +20,12 @@
 #define VSMC_CSTRING_RUNTIME_DISPACH 0
 #endif
 
+/// \brief Threshold of bytes below which to call functions in system libraries
+/// \ingroup Config
+#ifndef VSMC_CSTRING_SYSTEM_THRESHOLD
+#define VSMC_CSTRING_SYSTEM_THRESHOLD (1 << 10)
+#endif
+
 #ifdef __SSE2__
 #include <emmintrin.h>
 
@@ -71,7 +77,7 @@ inline void *memcpy_avx<srca, nt> (                                          \
 
 #endif // __AVX__
 
-#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(align, small, SIMD, simd) \
+#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(align, SIMD, simd) \
 inline unsigned memcpy_is_aligned_##simd (const void *ptr)                   \
 {return reinterpret_cast<uintptr_t>(ptr) % align == 0 ? 1 : 0;}              \
                                                                              \
@@ -85,16 +91,16 @@ VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  true,  load,  stream)       \
                                                                              \
 inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
 {                                                                            \
-    if (n < small)                                                           \
-        return internal::memcpy_generic(dst, src, n);                        \
+    if (n < align)                                                           \
+        return memcpy_generic(dst, src, n);                                  \
                                                                              \
     void *dstd = dst;                                                        \
     const void *srcd = src;                                                  \
     std::size_t offset = reinterpret_cast<uintptr_t>(dst) % align;           \
     if (offset != 0) {                                                       \
         offset = align - offset;                                             \
-        n -= offset;                                                         \
         memcpy_generic(dst, src, offset);                                    \
+        n -= offset;                                                         \
         dstd = static_cast<void *>(static_cast<char *>(dst) + offset);       \
         srcd = static_cast<const void *>(                                    \
                 static_cast<const char *>(src) + offset);                    \
@@ -142,9 +148,19 @@ class CStringNonTemporalThreshold
     /// By default, we set a pretty high threshold (the LLC size).
     void set ()
     {
-        CPUID::cache_param_type param(
-                CPUID::cache_param(CPUID::cache_param_num() - 1));
-        threshold_ = param.size() > 2 ? param.size() / 2 : 1U << 18;
+        unsigned cache_index = 0;
+        unsigned cache_index_max = CPUID::cache_param_num();
+        unsigned cache_level = 0;
+        for (unsigned index = 0; index != cache_index_max; ++index) {
+            unsigned level = CPUID::cache_param(index).level();
+            if (level <= 3 && level > cache_level) {
+                cache_index = index;
+                cache_level = level;
+            }
+        }
+        threshold_ = CPUID::cache_param(cache_index).size() / 2;
+        if (threshold_ == 0)
+            threshold_ = 1U << 18;
     }
 
     /// \brief Set the threshold to a specific size
@@ -171,43 +187,20 @@ class CStringNonTemporalThreshold
 
 namespace internal {
 
-inline void *memcpy_char (void *dst, const void *src, std::size_t n)
-{
-    if (n == 0)
-        return dst;
-
-    char *dstc = static_cast<char *>(dst);
-    const char *srcc = static_cast<const char *>(src);
-    for (std::size_t i = 0; i != n; ++i, ++dstc, ++srcc)
-        *dstc = *srcc;
-
-    return dst;
-}
-
 inline void *memcpy_generic (void *dst, const void *src, std::size_t n)
 {
     if (n == 0)
         return dst;
 
-    if (n < 8)
-        return memcpy_char(dst, src, n);
-
-    double *dstd = static_cast<double *>(dst);
-    const double *srcd = static_cast<const double *>(src);
-    std::size_t nd = n / 8;
-    for (std::size_t i = 0; i != nd; ++i, ++dstd, ++srcd)
-        *dstd = *srcd;
-    memcpy_char(dstd, srcd, n % 8);
-
-    return dst;
+    return std::memcpy(dst, src, n);
 }
 
 #ifdef __SSE2__
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(16, 32, SSE2, sse2)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(16, SSE2, sse2)
 #endif
 
 #ifdef __AVX__
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(32, 64, AVX, avx)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(32, AVX, avx)
 #endif
 
 class CStringRuntimeDispatch
@@ -222,7 +215,12 @@ class CStringRuntimeDispatch
     }
 
     void *memcpy (void *dst, const void *src, std::size_t n) const
-    {return memcpy_(dst, src, n);}
+    {
+        if (n <= VSMC_CSTRING_SYSTEM_THRESHOLD)
+            return std::memcpy(dst, src, n);
+
+        return memcpy_(dst, src, n);
+    }
 
     private :
 
@@ -263,6 +261,8 @@ inline void *memcpy (void *dst, const void *src, std::size_t n)
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memcpy(dst, src, n);
 #else
+    if (n <= VSMC_CSTRING_SYSTEM_THRESHOLD)
+        return internal::memcpy_generic(dst, src, n);
 #if defined(__AVX__)
     return internal::memcpy_avx(dst, src, n);
 #elif defined(__SSE2__)
