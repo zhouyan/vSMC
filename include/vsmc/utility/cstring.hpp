@@ -23,9 +23,9 @@
 #ifdef __SSE2__
 #include <emmintrin.h>
 
-#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_SSE2(da, sa, nt, store, load) \
+#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_SSE2(srca, nt, load, store) \
 template <>                                                                  \
-inline void *memcpy_sse2<da, sa, nt> (                                       \
+inline void *memcpy_sse2<srca, nt> (                                         \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     double *dstd = static_cast<double *>(dst);                               \
@@ -48,9 +48,9 @@ inline void *memcpy_sse2<da, sa, nt> (                                       \
 #ifdef __AVX__
 #include <immintrin.h>
 
-#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_AVX(da, sa, nt, store, load) \
+#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_AVX(srca, nt, load, store) \
 template <>                                                                  \
-inline void *memcpy_avx<da, sa, nt> (                                        \
+inline void *memcpy_avx<srca, nt> (                                          \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     double *dstd = static_cast<double *>(dst);                               \
@@ -75,34 +75,41 @@ inline void *memcpy_avx<da, sa, nt> (                                        \
 inline unsigned memcpy_is_aligned_##simd (const void *ptr)                   \
 {return reinterpret_cast<uintptr_t>(ptr) % align == 0 ? 1 : 0;}              \
                                                                              \
-template <bool, bool, bool>                                                  \
+template <bool, bool>                                                        \
 inline void *memcpy_##simd (void *, const void *, std::size_t);              \
                                                                              \
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  true,  true,  stream, load) \
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  false, true,  stream, loadu)\
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  true,  false, store,  load) \
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  false, false, store,  loadu)\
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(false, true,  false, storeu, load) \
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(false, false, false, storeu, loadu)\
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(false, false, loadu, store)        \
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(false, true,  loadu, stream)       \
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  false, load,  store)        \
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  true,  load,  stream)       \
                                                                              \
 inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
 {                                                                            \
     if (n < small)                                                           \
         return internal::memcpy_generic(dst, src, n);                        \
                                                                              \
-    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
-    unsigned flag_dst = internal::memcpy_is_aligned_##simd(dst);             \
+    std::size_t offset = reinterpret_cast<uintptr_t>(dst) % align;           \
+    if (offset != 0) {                                                       \
+        offset = align - offset;                                             \
+        memcpy_generic(dst, src, offset);                                    \
+        dst = static_cast<void *>(static_cast<char *>(dst) + offset);        \
+        src = static_cast<const void *>(                                     \
+                static_cast<const char *>(src) + offset);                    \
+    }                                                                        \
+                                                                             \
     unsigned flag_src = internal::memcpy_is_aligned_##simd(src);             \
-    unsigned flag = (flag_dst << 2) | (flag_src << 1) | (flag_nt & flag_dst);\
+    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
+    unsigned flag = (flag_src << 1) | flag_nt;                               \
                                                                              \
     switch (flag) {                                                          \
-        case 7  : return memcpy_##simd<true,  true,  true >(dst, src, n);    \
-        case 5  : return memcpy_##simd<true,  false, true >(dst, src, n);    \
-        case 6  : return memcpy_##simd<true,  true,  false>(dst, src, n);    \
-        case 4  : return memcpy_##simd<true,  false, false>(dst, src, n);    \
-        case 2  : return memcpy_##simd<false, true,  false>(dst, src, n);    \
-        default : return memcpy_##simd<false, false, false>(dst, src, n);    \
+        case 0  : memcpy_##simd<false, false>(dst, src, n); break;           \
+        case 1  : memcpy_##simd<false, true >(dst, src, n); break;           \
+        case 2  : memcpy_##simd<true,  false>(dst, src, n); break;           \
+        case 3  : memcpy_##simd<true,  true >(dst, src, n); break;           \
+        default : break;                                                     \
     }                                                                        \
+                                                                             \
+    return dst;                                                              \
 }
 
 namespace vsmc {
@@ -167,6 +174,9 @@ namespace internal {
 
 inline void *memcpy_char (void *dst, const void *src, std::size_t n)
 {
+    if (n == 0)
+        return dst;
+
     char *dstc = static_cast<char *>(dst);
     const char *srcc = static_cast<const char *>(src);
     for (std::size_t i = 0; i != n; ++i, ++dstc, ++srcc)
@@ -177,6 +187,12 @@ inline void *memcpy_char (void *dst, const void *src, std::size_t n)
 
 inline void *memcpy_generic (void *dst, const void *src, std::size_t n)
 {
+    if (n == 0)
+        return dst;
+
+    if (n < 8)
+        return memcpy_char(dst, src, n);
+
     double *dstd = static_cast<double *>(dst);
     const double *srcd = static_cast<const double *>(src);
     std::size_t nd = n / 8;
