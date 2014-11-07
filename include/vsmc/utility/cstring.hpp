@@ -170,7 +170,7 @@ inline void backward_avx<srca, nt> (void *dst, const void *src, std::size_t n)\
 #endif // __AVX__
 
 #define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(simd, align) \
-inline void *memcpy_sse (void *dst, const void *src, std::size_t n)          \
+inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
 {                                                                            \
     if (dst == src)                                                          \
         return dst;                                                          \
@@ -214,7 +214,7 @@ inline void *memcpy_sse (void *dst, const void *src, std::size_t n)          \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(simd, align) \
-inline void *memmove_sse (void *dst, const void *src, std::size_t n)         \
+inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
 {                                                                            \
     if (dst == src)                                                          \
         return dst;                                                          \
