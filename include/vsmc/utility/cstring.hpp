@@ -226,7 +226,7 @@ class CStringRuntimeDispatch
 
     void *(*memcpy_) (void *, const void *, std::size_t);
 
-    CStringRuntimeDispatch ()
+    CStringRuntimeDispatch () : memcpy_(memcpy_generic)
     {
 #ifdef __AVX__
         if (CPUID::has_feature<CPUIDFeatureAVX>()) {
