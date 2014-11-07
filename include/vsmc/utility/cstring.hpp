@@ -141,7 +141,11 @@ class CStringNonTemporalThreshold
     /// \details
     /// By default, we set a pretty high threshold (the LLC size).
     void set ()
-    {threshold_ = CPUID::cache_param(CPUID::max_cache_index()).size() / 2;}
+    {
+        CPUID::cache_param_type param(
+                CPUID::cache_param(CPUID::cache_param_num() - 1));
+        threshold_ = param.size() > 2 ? param.size() / 2 : 1U << 18;
+    }
 
     /// \brief Set the threshold to a specific size
     void set (std::size_t threshold) {threshold_ = threshold;}
