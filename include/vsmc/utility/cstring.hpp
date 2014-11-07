@@ -216,7 +216,7 @@ class CStringRuntimeDispatch
 
     void *memcpy (void *dst, const void *src, std::size_t n) const
     {
-        if (n <= VSMC_CSTRING_SYSTEM_THRESHOLD)
+        if (n < VSMC_CSTRING_SYSTEM_THRESHOLD)
             return std::memcpy(dst, src, n);
 
         return memcpy_(dst, src, n);
@@ -261,7 +261,7 @@ inline void *memcpy (void *dst, const void *src, std::size_t n)
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memcpy(dst, src, n);
 #else
-    if (n <= VSMC_CSTRING_SYSTEM_THRESHOLD)
+    if (n < VSMC_CSTRING_SYSTEM_THRESHOLD)
         return internal::memcpy_generic(dst, src, n);
 #if defined(__AVX__)
     return internal::memcpy_avx(dst, src, n);
