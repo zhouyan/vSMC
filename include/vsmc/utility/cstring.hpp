@@ -8,6 +8,65 @@
 // See LICENSE for details.
 //============================================================================
 
+/// \addtogroup CString
+///
+/// This module implement the `memcpy`, etc., function in the `vsmc` namespace.
+/// The implementaions are optimzied with either SSE or AVX. Three groups of
+/// functions are provided.
+///
+/// - `memcpy_std` etc., they simply call `std::memcpy` etc.
+/// - `memcpy_sse` etc., they are avialable if at least SSE2 is supported and
+/// are optimized with SSE instructions
+/// - `memcpy_avx` etc., they are avialable if at least AVX is supported and
+///
+/// are optimized with AVX instructions
+/// There are also generic `vsmc::memcpy` etc. They dispatch the call based on
+/// the following rules.
+///
+/// - If buffer size (in bytes) is smaller than `VSMC_CSTRING_STD_THRESHOLD`,
+/// call `memcpy_std` etc.
+/// - Else if AVX is available, then call `memcpy_avx` etc.
+/// - Else if SSE2 is available, then call `memcpy_sse` etc.
+/// - Else call `memcpy_std`.
+///
+/// This dispatch can be done at compile time if the configuration macro
+/// `VSMC_CSTRING_RUNTIME_DISPATCH` is zero. This will possibly allow better
+/// inlining opportunity. If the macro is non-zero, then it will be done at
+/// runtime using `CPUID` information.
+///
+/// Before using any of these vSMC provided functions. A few factors shall be
+/// considered.
+///
+/// - For large buffers, vSMC functions use non-temporal store instructions. In
+/// this case, the performance is likely to be better than the system library
+/// or compiler builtins. On Haswell and Nehalem, about 30% performance gain
+/// were observed, though 70% were observed in some situations. A more
+/// important benefits is that cache pollution may be avoided in this case. The
+/// threshold is set to be half the size of the LLC (last level cache). Note
+/// that, only up to level 3 cache is considered. Some newer Intel CPUs have
+/// level 4 cache, which is shared with the integrated GPU. This threshold can
+/// be changed at compile time by define `VSMC_CSTRING_NON_TEMPORAL_THRESHOLD`
+/// or at runtime via CStringNonTemporalThreshold singleton.
+/// - For moderate size buffers (from 1KB upto the non-temporal threshold), the
+/// performance is most likely to be only comparable to the system. At worst,
+/// 20% perforamnce degrade was observed, though in most cases, it is almost as
+/// fast as or slightly faster than system library.
+/// - For small buffer size (< 1KB), `vsmc::memcpy` etc., simply call
+/// `std::memcpy`. The overhead is minimal.
+/// - The performance is only tested on limited models of CPUs. As a single
+/// person I don't have much resources. In particle, AMD CPUs were not tested
+/// at all.
+///
+/// In any case, most systems's standard C library is likely to be optimized
+/// enough to suffice most usage situations. And even when there is a
+/// noticeable perforamnce difference, unless all the program do is copy and
+/// moving memories, the difference is not likely to be big enough to make a
+/// difference. And taking caching into consideration, those difference seem in
+/// memory dedicated benchmarks might well not exist at all in real programs.
+///
+/// In summary, do some benchmark of real programs before deciding if using
+/// these functions are beneficial.
+
 #ifndef VSMC_UTILITY_CSTRING_HPP
 #define VSMC_UTILITY_CSTRING_HPP
 
@@ -20,18 +79,18 @@
 #define VSMC_CSTRING_RUNTIME_DISPACH 0
 #endif
 
-/// \brief Threshold of bytes below which to call functions in system libraries
+/// \brief Threshold of bytes below which to call standard library functions
 /// \ingroup Config
-#ifndef VSMC_CSTRING_SYSTEM_THRESHOLD
-#define VSMC_CSTRING_SYSTEM_THRESHOLD (1 << 10)
+#ifndef VSMC_CSTRING_STD_THRESHOLD
+#define VSMC_CSTRING_STD_THRESHOLD (1 << 10)
 #endif
 
 #ifdef __SSE2__
 #include <emmintrin.h>
 
-#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_SSE2(srca, nt, load, store) \
+#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_SSE(srca, nt, load, store) \
 template <>                                                                  \
-inline void *memcpy_sse2<srca, nt> (                                         \
+inline void *memcpy_sse<srca, nt> (                                          \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     double *dstd = static_cast<double *>(dst);                               \
@@ -44,7 +103,7 @@ inline void *memcpy_sse2<srca, nt> (                                         \
         _mm_##store##_pd(dstd, m1);                                          \
         _mm_##store##_pd(dstd + 2, m2);                                      \
     }                                                                        \
-    internal::memcpy_generic(dstd, srcd, n % 32);                            \
+    memcpy_std(dstd, srcd, n % 32);                                          \
                                                                              \
     return dst;                                                              \
 }
@@ -69,7 +128,7 @@ inline void *memcpy_avx<srca, nt> (                                          \
         _mm256_##store##_pd(dstd, m1);                                       \
         _mm256_##store##_pd(dstd + 4, m2);                                   \
     }                                                                        \
-    internal::memcpy_generic(dstd, srcd, n % 64);                            \
+    memcpy_std(dstd, srcd, n % 64);                                          \
     _mm256_zeroupper();                                                      \
                                                                              \
     return dst;                                                              \
@@ -77,49 +136,6 @@ inline void *memcpy_avx<srca, nt> (                                          \
 
 #endif // __AVX__
 
-#define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(align, SIMD, simd) \
-inline unsigned memcpy_is_aligned_##simd (const void *ptr)                   \
-{return reinterpret_cast<uintptr_t>(ptr) % align == 0 ? 1 : 0;}              \
-                                                                             \
-template <bool, bool>                                                        \
-inline void *memcpy_##simd (void *, const void *, std::size_t);              \
-                                                                             \
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(false, false, loadu, store)        \
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(false, true,  loadu, stream)       \
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  false, load,  store)        \
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_##SIMD(true,  true,  load,  stream)       \
-                                                                             \
-inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
-{                                                                            \
-    if (n < align)                                                           \
-        return memcpy_generic(dst, src, n);                                  \
-                                                                             \
-    void *dstd = dst;                                                        \
-    const void *srcd = src;                                                  \
-    std::size_t offset = reinterpret_cast<uintptr_t>(dst) % align;           \
-    if (offset != 0) {                                                       \
-        offset = align - offset;                                             \
-        memcpy_generic(dst, src, offset);                                    \
-        n -= offset;                                                         \
-        dstd = static_cast<void *>(static_cast<char *>(dst) + offset);       \
-        srcd = static_cast<const void *>(                                    \
-                static_cast<const char *>(src) + offset);                    \
-    }                                                                        \
-                                                                             \
-    unsigned flag_src = internal::memcpy_is_aligned_##simd(srcd);            \
-    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
-    unsigned flag = (flag_src << 1) | flag_nt;                               \
-                                                                             \
-    switch (flag) {                                                          \
-        case 0  : memcpy_##simd<false, false>(dstd, srcd, n); break;         \
-        case 1  : memcpy_##simd<false, true >(dstd, srcd, n); break;         \
-        case 2  : memcpy_##simd<true,  false>(dstd, srcd, n); break;         \
-        case 3  : memcpy_##simd<true,  true >(dstd, srcd, n); break;         \
-        default : break;                                                     \
-    }                                                                        \
-                                                                             \
-    return dst;                                                              \
-}
 
 namespace vsmc {
 
@@ -185,9 +201,7 @@ class CStringNonTemporalThreshold
             const CStringNonTemporalThreshold &);
 }; // class CStringNonTemporalThreshold
 
-namespace internal {
-
-inline void *memcpy_generic (void *dst, const void *src, std::size_t n)
+inline void *memcpy_std (void *dst, const void *src, std::size_t n)
 {
     if (n == 0)
         return dst;
@@ -196,12 +210,110 @@ inline void *memcpy_generic (void *dst, const void *src, std::size_t n)
 }
 
 #ifdef __SSE2__
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(16, SSE2, sse2)
+
+namespace internal {
+
+inline unsigned cstring_is_aligned_sse (const void *ptr)
+{return reinterpret_cast<uintptr_t>(ptr) % 16 == 0 ? 1 : 0;}
+
+template <bool, bool>
+inline void *memcpy_sse (void *, const void *, std::size_t);
+
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_SSE(false, false, loadu, store)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_SSE(false, true,  loadu, stream)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_SSE(true,  false, load,  store)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_SSE(true,  true,  load,  stream)
+
+} // namespace vsmc::internal
+
+/// \brief SSE optimized `memcpy` with non-temporal store for large buffers
+/// \ingroup CString
+inline void *memcpy_sse (void *dst, const void *src, std::size_t n)
+{
+    if (n < 16)
+        return memcpy_std(dst, src, n);
+
+    void *dstd = dst;
+    const void *srcd = src;
+    std::size_t offset = reinterpret_cast<uintptr_t>(dst) % 16;
+    if (offset != 0) {
+        offset = 16 - offset;
+        memcpy_std(dst, src, offset);
+        n -= offset;
+        dstd = static_cast<void *>(static_cast<char *>(dst) + offset);
+        srcd = static_cast<const void *>(
+                static_cast<const char *>(src) + offset);
+    }
+
+    unsigned flag_src = internal::cstring_is_aligned_sse(srcd);
+    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);
+    unsigned flag = (flag_src << 1) | flag_nt;
+    switch (flag) {
+        case 0 : internal::memcpy_sse<false, false>(dstd, srcd, n); break;
+        case 1 : internal::memcpy_sse<false, true >(dstd, srcd, n); break;
+        case 2 : internal::memcpy_sse<true,  false>(dstd, srcd, n); break;
+        case 3 : internal::memcpy_sse<true,  true >(dstd, srcd, n); break;
+        default : break;
+    }
+
+    return dst;
+}
+
 #endif
 
 #ifdef __AVX__
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(32, AVX, avx)
+
+namespace internal {
+
+inline unsigned cstring_is_aligned_avx (const void *ptr)
+{return reinterpret_cast<uintptr_t>(ptr) % 32 == 0 ? 1 : 0;}
+
+template <bool, bool>
+inline void *memcpy_avx (void *, const void *, std::size_t);
+
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_AVX(false, false, loadu, store)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_AVX(false, true,  loadu, stream)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_AVX(true,  false, load,  store)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY_AVX(true,  true,  load,  stream)
+
+} // namespace vsmc::internal
+
+/// \brief AVX optimized `memcpy` with non-temporal store for large buffers
+/// \ingroup CString
+inline void *memcpy_avx (void *dst, const void *src, std::size_t n)
+{
+    if (n < 32)
+        return memcpy_std(dst, src, n);
+
+    void *dstd = dst;
+    const void *srcd = src;
+    std::size_t offset = reinterpret_cast<uintptr_t>(dst) % 32;
+    if (offset != 0) {
+        offset = 32 - offset;
+        memcpy_std(dst, src, offset);
+        n -= offset;
+        dstd = static_cast<void *>(static_cast<char *>(dst) + offset);
+        srcd = static_cast<const void *>(
+                static_cast<const char *>(src) + offset);
+    }
+
+    unsigned flag_src = internal::cstring_is_aligned_avx(srcd);
+    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);
+    unsigned flag = (flag_src << 1) | flag_nt;
+    switch (flag) {
+        case 0 : internal::memcpy_avx<false, false>(dstd, srcd, n); break;
+        case 1 : internal::memcpy_avx<false, true >(dstd, srcd, n); break;
+        case 2 : internal::memcpy_avx<true,  false>(dstd, srcd, n); break;
+        case 3 : internal::memcpy_avx<true,  true >(dstd, srcd, n); break;
+        default : break;
+    }
+
+    return dst;
+}
+
 #endif
+
+namespace internal {
 
 class CStringRuntimeDispatch
 {
@@ -216,7 +328,7 @@ class CStringRuntimeDispatch
 
     void *memcpy (void *dst, const void *src, std::size_t n) const
     {
-        if (n < VSMC_CSTRING_SYSTEM_THRESHOLD)
+        if (n < VSMC_CSTRING_STD_THRESHOLD)
             return std::memcpy(dst, src, n);
 
         return memcpy_(dst, src, n);
@@ -226,11 +338,11 @@ class CStringRuntimeDispatch
 
     void *(*memcpy_) (void *, const void *, std::size_t);
 
-    CStringRuntimeDispatch () : memcpy_(memcpy_generic)
+    CStringRuntimeDispatch () : memcpy_(memcpy_std)
     {
 #ifdef __AVX__
         if (CPUID::has_feature<CPUIDFeatureAVX>()) {
-            memcpy_ = memcpy_avx;
+            memcpy_ = ::vsmc::memcpy_avx;
 
             return;
         }
@@ -238,13 +350,13 @@ class CStringRuntimeDispatch
 
 #ifdef __SSE2__
         if (CPUID::has_feature<CPUIDFeatureSSE2>()) {
-            memcpy_ = memcpy_sse2;
+            memcpy_ = ::vsmc::memcpy_sse;
 
             return;
         }
 #endif
 
-        memcpy_ = memcpy_generic;
+        memcpy_ = memcpy_std;
     }
 
     CStringRuntimeDispatch (const CStringRuntimeDispatch &);
@@ -261,14 +373,14 @@ inline void *memcpy (void *dst, const void *src, std::size_t n)
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memcpy(dst, src, n);
 #else
-    if (n < VSMC_CSTRING_SYSTEM_THRESHOLD)
-        return internal::memcpy_generic(dst, src, n);
+    if (n < VSMC_CSTRING_STD_THRESHOLD)
+        return memcpy_std(dst, src, n);
 #if defined(__AVX__)
-    return internal::memcpy_avx(dst, src, n);
+    return memcpy_avx(dst, src, n);
 #elif defined(__SSE2__)
-    return internal::memcpy_sse2(dst, src, n);
+    return memcpy_sse(dst, src, n);
 #else
-    return internal::memcpy_generic(dst, src, n);
+    return memcpy_std(dst, src, n);
 #endif
 #endif
 }
