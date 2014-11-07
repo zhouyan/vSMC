@@ -88,24 +88,27 @@ inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
     if (n < small)                                                           \
         return internal::memcpy_generic(dst, src, n);                        \
                                                                              \
+    void *dstd = dst;                                                        \
+    const void *srcd = src;                                                  \
     std::size_t offset = reinterpret_cast<uintptr_t>(dst) % align;           \
     if (offset != 0) {                                                       \
         offset = align - offset;                                             \
+        n -= offset;                                                         \
         memcpy_generic(dst, src, offset);                                    \
-        dst = static_cast<void *>(static_cast<char *>(dst) + offset);        \
-        src = static_cast<const void *>(                                     \
+        dstd = static_cast<void *>(static_cast<char *>(dst) + offset);       \
+        srcd = static_cast<const void *>(                                    \
                 static_cast<const char *>(src) + offset);                    \
     }                                                                        \
                                                                              \
-    unsigned flag_src = internal::memcpy_is_aligned_##simd(src);             \
+    unsigned flag_src = internal::memcpy_is_aligned_##simd(srcd);            \
     unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
     unsigned flag = (flag_src << 1) | flag_nt;                               \
                                                                              \
     switch (flag) {                                                          \
-        case 0  : memcpy_##simd<false, false>(dst, src, n); break;           \
-        case 1  : memcpy_##simd<false, true >(dst, src, n); break;           \
-        case 2  : memcpy_##simd<true,  false>(dst, src, n); break;           \
-        case 3  : memcpy_##simd<true,  true >(dst, src, n); break;           \
+        case 0  : memcpy_##simd<false, false>(dstd, srcd, n); break;         \
+        case 1  : memcpy_##simd<false, true >(dstd, srcd, n); break;         \
+        case 2  : memcpy_##simd<true,  false>(dstd, srcd, n); break;         \
+        case 3  : memcpy_##simd<true,  true >(dstd, srcd, n); break;         \
         default : break;                                                     \
     }                                                                        \
                                                                              \
