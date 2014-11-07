@@ -169,9 +169,7 @@ namespace internal {
 
 inline void *memcpy_char (void *dst, const void *src, std::size_t n)
 {
-    if (n == 0)
-        return dst;
-
+    // n shall shall never be bigger than 8
     char *dstc = static_cast<char *>(dst);
     const char *srcc = static_cast<const char *>(src);
     for (std::size_t i = 0; i != n; ++i, ++dstc, ++srcc)
@@ -182,6 +180,7 @@ inline void *memcpy_char (void *dst, const void *src, std::size_t n)
 
 inline void *memcpy_generic (void *dst, const void *src, std::size_t n)
 {
+    // n is usually no more than 64
     if (n == 0)
         return dst;
 
