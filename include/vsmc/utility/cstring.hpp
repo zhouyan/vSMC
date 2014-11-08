@@ -103,7 +103,7 @@
 
 #define VSMC_DEFINE_UTILITY_CSTRING_SIMD(sa, nt, simd, align, c, m, l, s) \
 template <>                                                                  \
-inline void forward_##simd<sa, nt> (                                         \
+inline void cpy_front_##simd<sa, nt> (                                       \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     c *dstc = static_cast<c *>(dst);                                         \
@@ -121,7 +121,7 @@ inline void forward_##simd<sa, nt> (                                         \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void backward_##simd<sa, nt> (                                        \
+inline void cpy_back_##simd<sa, nt> (                                        \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     c *dstc = static_cast<c *>(dst);                                         \
@@ -161,13 +161,13 @@ inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
     unsigned flag = CStringNonTemporalThreshold::instance().over(n);         \
     flag |= internal::cstring_is_aligned<align>(srcc);                       \
     switch (flag) {                                                          \
-        case 0 : internal::forward_##simd<false, false>(dstc, srcc, n);      \
+        case 0 : internal::cpy_front_##simd<false, false>(dstc, srcc, n);    \
                  break;                                                      \
-        case 1 : internal::forward_##simd<false, true >(dstc, srcc, n);      \
+        case 1 : internal::cpy_front_##simd<false, true >(dstc, srcc, n);    \
                  break;                                                      \
-        case 2 : internal::forward_##simd<true,  false>(dstc, srcc, n);      \
+        case 2 : internal::cpy_front_##simd<true,  false>(dstc, srcc, n);    \
                  break;                                                      \
-        case 3 : internal::forward_##simd<true,  true >(dstc, srcc, n);      \
+        case 3 : internal::cpy_front_##simd<true,  true >(dstc, srcc, n);    \
                  break;                                                      \
         default :                                                            \
                  break;                                                      \
@@ -211,13 +211,13 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
         flag &= CStringNonTemporalThreshold::instance().over(srca - dsta);   \
         flag |= internal::cstring_is_aligned<align>(srcc);                   \
         switch (flag) {                                                      \
-            case 0 : internal::forward_##simd<false, false>(dstc, srcc, n);  \
+            case 0 : internal::cpy_front_##simd<false, false>(dstc, srcc, n);\
                      break;                                                  \
-            case 1 : internal::forward_##simd<false, true >(dstc, srcc, n);  \
+            case 1 : internal::cpy_front_##simd<false,true >(dstc, srcc, n); \
                      break;                                                  \
-            case 2 : internal::forward_##simd<true,  false>(dstc, srcc, n);  \
+            case 2 : internal::cpy_front_##simd<true, false>(dstc, srcc, n); \
                      break;                                                  \
-            case 3 : internal::forward_##simd<true,  true >(dstc, srcc, n);  \
+            case 3 : internal::cpy_front_##simd<true, true>(dstc, srcc, n);  \
                      break;                                                  \
             default :                                                        \
                      break;                                                  \
@@ -245,13 +245,13 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
     flag &= CStringNonTemporalThreshold::instance().over(dsta - srca);       \
     flag |= internal::cstring_is_aligned<align>(srcc);                       \
     switch (flag) {                                                          \
-        case 0 : internal::backward_##simd<false, false>(dstc, srcc, n);     \
+        case 0 : internal::cpy_back_##simd<false, false>(dstc, srcc, n);     \
                  break;                                                      \
-        case 1 : internal::backward_##simd<false, true >(dstc, srcc, n);     \
+        case 1 : internal::cpy_back_##simd<false, true >(dstc, srcc, n);     \
                  break;                                                      \
-        case 2 : internal::backward_##simd<true,  false>(dstc, srcc, n);     \
+        case 2 : internal::cpy_back_##simd<true,  false>(dstc, srcc, n);     \
                  break;                                                      \
-        case 3 : internal::backward_##simd<true,  true >(dstc, srcc, n);     \
+        case 3 : internal::cpy_back_##simd<true,  true >(dstc, srcc, n);     \
                  break;                                                      \
         default :                                                            \
                  break;                                                      \
@@ -359,10 +359,10 @@ inline void *memmove_std (void *dst, const void *src, std::size_t n)
 namespace internal {
 
 template <bool, bool>
-inline void forward_sse2 (void *, const void *, std::size_t);
+inline void cpy_front_sse2 (void *, const void *, std::size_t);
 
 template <bool, bool>
-inline void backward_sse2 (void *, const void *, std::size_t);
+inline void cpy_back_sse2 (void *, const void *, std::size_t);
 
 VSMC_DEFINE_UTILITY_CSTRING_SIMD(false, false, sse2, 16,
         double, __m128d, _mm_loadu_pd, _mm_store_pd)
@@ -390,10 +390,10 @@ VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(sse2, 16)
 namespace internal {
 
 template <bool, bool>
-inline void forward_sse3 (void *, const void *, std::size_t);
+inline void cpy_front_sse3 (void *, const void *, std::size_t);
 
 template <bool, bool>
-inline void backward_sse3 (void *, const void *, std::size_t);
+inline void cpy_back_sse3 (void *, const void *, std::size_t);
 
 VSMC_DEFINE_UTILITY_CSTRING_SIMD(false, false, sse3, 16,
         __m128i, __m128i, _mm_lddqu_si128, _mm_store_si128)
@@ -421,10 +421,10 @@ VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(sse3, 16)
 namespace internal {
 
 template <bool, bool>
-inline void forward_avx (void *, const void *, std::size_t);
+inline void cpy_front_avx (void *, const void *, std::size_t);
 
 template <bool, bool>
-inline void backward_avx (void *, const void *, std::size_t);
+inline void cpy_back_avx (void *, const void *, std::size_t);
 
 VSMC_DEFINE_UTILITY_CSTRING_SIMD(false, false, avx, 32,
         __m256i, __m256i, _mm256_lddqu_si256, _mm256_store_si256)
