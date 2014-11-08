@@ -17,8 +17,6 @@
 /// - `memcpy_std` etc., they simply call `std::memcpy` etc.
 /// - `memcpy_sse2` etc., they are avialable if at least SSE2 is supported and
 /// are optimized with SSE2 instructions
-/// - `memcpy_sse3` etc., they are avialable if at least SSE3 is supported and
-/// are optimized with SSE3 instructions
 /// - `memcpy_avx` etc., they are avialable if at least AVX is supported and
 ///
 /// are optimized with AVX instructions
@@ -29,7 +27,6 @@
 /// call `memcpy_std` etc.
 /// - Else if AVX is available, then call `memcpy_avx` etc.
 /// - Else if SSE2 is available, then call `memcpy_sse2` etc.
-/// - Else if SSE3 is available, then call `memcpy_sse3` etc.
 /// - Else call `memcpy_std`.
 ///
 /// This dispatch can be done at compile time if the configuration macro
@@ -85,16 +82,12 @@
 /// \brief Threshold of bytes below which to call standard library functions
 /// \ingroup Config
 #ifndef VSMC_CSTRING_STD_THRESHOLD
-#define VSMC_CSTRING_STD_THRESHOLD (1 << 10)
+#define VSMC_CSTRING_STD_THRESHOLD 1024
 #endif
 
 #ifdef __SSE2__
 #include <emmintrin.h>
 #endif // __SSE2__
-
-#ifdef __SSE3__
-#include <pmmintrin.h>
-#endif // __SSE3__
 
 #ifdef __AVX__
 #include <immintrin.h>
@@ -109,14 +102,56 @@ inline void cpy_front_##simd<sa, nt> (                                       \
     c *dstc = static_cast<c *>(dst);                                         \
     const c *srcc = static_cast<const c *>(src);                             \
                                                                              \
-    std::size_t nm = n / (align * 2);                                        \
+    std::size_t nm = n / (align * 8);                                        \
     for (std::size_t i = 0; i != nm; ++i) {                                  \
-        m m1 = l(srcc);                                                      \
-        m m2 = l(srcc + (align / sizeof(c)));                                \
-        s(dstc, m1);                                                         \
-        s(dstc + (align / sizeof(c)), m2);                                   \
-        dstc += align / sizeof(c) * 2;                                       \
-        srcc += align / sizeof(c) * 2;                                       \
+        m m0 = l(srcc + align * 0 / sizeof(c));                              \
+        m m1 = l(srcc + align * 1 / sizeof(c));                              \
+        m m2 = l(srcc + align * 2 / sizeof(c));                              \
+        m m3 = l(srcc + align * 3 / sizeof(c));                              \
+        m m4 = l(srcc + align * 4 / sizeof(c));                              \
+        m m5 = l(srcc + align * 5 / sizeof(c));                              \
+        m m6 = l(srcc + align * 6 / sizeof(c));                              \
+        m m7 = l(srcc + align * 7 / sizeof(c));                              \
+        s(dstc + align * 0 / sizeof(c), m0);                                 \
+        s(dstc + align * 1 / sizeof(c), m1);                                 \
+        s(dstc + align * 2 / sizeof(c), m2);                                 \
+        s(dstc + align * 3 / sizeof(c), m3);                                 \
+        s(dstc + align * 4 / sizeof(c), m4);                                 \
+        s(dstc + align * 5 / sizeof(c), m5);                                 \
+        s(dstc + align * 6 / sizeof(c), m6);                                 \
+        s(dstc + align * 7 / sizeof(c), m7);                                 \
+        dstc += align * 8 / sizeof(c);                                       \
+        srcc += align * 8 / sizeof(c);                                       \
+    }                                                                        \
+    n = n % (align * 8);                                                     \
+    if (n >= align * 4) {                                                    \
+        n -= align * 4;                                                      \
+        m m0 = l(srcc + align * 0 / sizeof(c));                              \
+        m m1 = l(srcc + align * 1 / sizeof(c));                              \
+        m m2 = l(srcc + align * 2 / sizeof(c));                              \
+        m m3 = l(srcc + align * 3 / sizeof(c));                              \
+        s(dstc + align * 0 / sizeof(c), m0);                                 \
+        s(dstc + align * 1 / sizeof(c), m1);                                 \
+        s(dstc + align * 2 / sizeof(c), m2);                                 \
+        s(dstc + align * 3 / sizeof(c), m3);                                 \
+        dstc += align * 4 / sizeof(c);                                       \
+        srcc += align * 4 / sizeof(c);                                       \
+    }                                                                        \
+    if (n >= align * 2) {                                                    \
+        n -= align * 2;                                                      \
+        m m0 = l(srcc + align * 0 / sizeof(c));                              \
+        m m1 = l(srcc + align * 1 / sizeof(c));                              \
+        s(dstc + align * 0 / sizeof(c), m0);                                 \
+        s(dstc + align * 1 / sizeof(c), m1);                                 \
+        dstc += align * 2 / sizeof(c);                                       \
+        srcc += align * 2 / sizeof(c);                                       \
+    }                                                                        \
+    if (n >= align * 1) {                                                    \
+        n -= align * 1;                                                      \
+        m m0 = l(srcc + align * 0 / sizeof(c));                              \
+        s(dstc + align * 0 / sizeof(c), m0);                                 \
+        dstc += align * 1 / sizeof(c);                                       \
+        srcc += align * 1 / sizeof(c);                                       \
     }                                                                        \
 }                                                                            \
                                                                              \
@@ -127,14 +162,56 @@ inline void cpy_back_##simd<sa, nt> (                                        \
     c *dstc = static_cast<c *>(dst);                                         \
     const c *srcc = static_cast<const c *>(src);                             \
                                                                              \
-    std::size_t nm = n / (align * 2);                                        \
+    std::size_t nm = n / (align * 8);                                        \
     for (std::size_t i = 0; i != nm; ++i) {                                  \
-        dstc -= align / sizeof(c) * 2;                                       \
-        srcc -= align / sizeof(c) * 2;                                       \
-        m m1 = l(srcc);                                                      \
-        m m2 = l(srcc + (align / sizeof(c)));                                \
-        s(dstc, m1);                                                         \
-        s(dstc + (align / sizeof(c)), m2);                                   \
+        dstc -= align * 8 / sizeof(c);                                       \
+        srcc -= align * 8 / sizeof(c);                                       \
+        m m0 = l(srcc + align * 0 / sizeof(c));                              \
+        m m1 = l(srcc + align * 1 / sizeof(c));                              \
+        m m2 = l(srcc + align * 2 / sizeof(c));                              \
+        m m3 = l(srcc + align * 3 / sizeof(c));                              \
+        m m4 = l(srcc + align * 4 / sizeof(c));                              \
+        m m5 = l(srcc + align * 5 / sizeof(c));                              \
+        m m6 = l(srcc + align * 6 / sizeof(c));                              \
+        m m7 = l(srcc + align * 7 / sizeof(c));                              \
+        s(dstc + align * 0 / sizeof(c), m0);                                 \
+        s(dstc + align * 1 / sizeof(c), m1);                                 \
+        s(dstc + align * 2 / sizeof(c), m2);                                 \
+        s(dstc + align * 3 / sizeof(c), m3);                                 \
+        s(dstc + align * 4 / sizeof(c), m4);                                 \
+        s(dstc + align * 5 / sizeof(c), m5);                                 \
+        s(dstc + align * 6 / sizeof(c), m6);                                 \
+        s(dstc + align * 7 / sizeof(c), m7);                                 \
+    }                                                                        \
+    n = n % (align * 8);                                                     \
+    if (n >= align * 4) {                                                    \
+        n -= align * 4;                                                      \
+        dstc -= align * 4 / sizeof(c);                                       \
+        srcc -= align * 4 / sizeof(c);                                       \
+        m m0 = l(srcc + align * 0 / sizeof(c));                              \
+        m m1 = l(srcc + align * 1 / sizeof(c));                              \
+        m m2 = l(srcc + align * 2 / sizeof(c));                              \
+        m m3 = l(srcc + align * 3 / sizeof(c));                              \
+        s(dstc + align * 0 / sizeof(c), m0);                                 \
+        s(dstc + align * 1 / sizeof(c), m1);                                 \
+        s(dstc + align * 2 / sizeof(c), m2);                                 \
+        s(dstc + align * 3 / sizeof(c), m3);                                 \
+    }                                                                        \
+    if (n >= align * 2) {                                                    \
+        n -= align * 2;                                                      \
+        dstc -= align * 2 / sizeof(c);                                       \
+        srcc -= align * 2 / sizeof(c);                                       \
+        m m0 = l(srcc + align * 0 / sizeof(c));                              \
+        m m1 = l(srcc + align * 1 / sizeof(c));                              \
+        s(dstc + align * 0 / sizeof(c), m0);                                 \
+        s(dstc + align * 1 / sizeof(c), m1);                                 \
+    }                                                                        \
+    if (n >= align * 1) {                                                    \
+        n -= align * 1;                                                      \
+        dstc -= align * 1 / sizeof(c);                                       \
+        srcc -= align * 1 / sizeof(c);                                       \
+        m m0 = l(srcc + align * 0 / sizeof(c));                              \
+        s(dstc + align * 0 / sizeof(c), m0);                                 \
     }                                                                        \
 }
 
@@ -144,17 +221,17 @@ inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
     if (dst == src)                                                          \
         return dst;                                                          \
                                                                              \
-    if (n < align * 4)                                                       \
+    if (n < align * 16)                                                      \
         return memcpy_std(dst, src, n);                                      \
                                                                              \
     char *dstc = static_cast<char *>(dst);                                   \
     const char *srcc = static_cast<const char *>(src);                       \
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % align;          \
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (align * 8);    \
     if (offset != 0) {                                                       \
-        offset = align - offset;                                             \
+        offset = align * 8 - offset;                                         \
+        n -= offset;                                                         \
         dstc += offset;                                                      \
         srcc += offset;                                                      \
-        n -= offset;                                                         \
         memcpy_std(dst, src, offset);                                        \
     }                                                                        \
                                                                              \
@@ -163,20 +240,21 @@ inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
     switch (flag) {                                                          \
         case 0 : internal::cpy_front_##simd<false, false>(dstc, srcc, n);    \
                  break;                                                      \
-        case 1 : internal::cpy_front_##simd<false, true >(dstc, srcc, n);    \
+        case 1 : internal::cpy_front_##simd<false, true>(dstc, srcc, n);     \
                  break;                                                      \
-        case 2 : internal::cpy_front_##simd<true,  false>(dstc, srcc, n);    \
+        case 2 : internal::cpy_front_##simd<true, false>(dstc, srcc, n);     \
                  break;                                                      \
-        case 3 : internal::cpy_front_##simd<true,  true >(dstc, srcc, n);    \
+        case 3 : internal::cpy_front_##simd<true, true>(dstc, srcc, n);      \
                  break;                                                      \
         default :                                                            \
                  break;                                                      \
     }                                                                        \
                                                                              \
-    std::size_t m = (n / (align * 2)) * (align * 2);                         \
+    std::size_t r = n % align;                                               \
+    std::size_t m = n - r;                                                   \
     dstc += m;                                                               \
     srcc += m;                                                               \
-    memcpy_std(dstc, srcc, n % (align * 2));                                 \
+    memmove_std(dstc, srcc, r);                                              \
                                                                              \
     return dst;                                                              \
 }
@@ -187,23 +265,21 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
     if (dst == src)                                                          \
         return dst;                                                          \
                                                                              \
-    if (n < align * 4)                                                       \
+    if (n < align * 16)                                                      \
         return memmove_std(dst, src, n);                                     \
                                                                              \
     uintptr_t dsta = reinterpret_cast<uintptr_t>(dst);                       \
     uintptr_t srca = reinterpret_cast<uintptr_t>(src);                       \
-    if (srca + n <= dsta || dsta + n <= srca)                                \
-        return memcpy_sse2(dst, src, n);                                     \
                                                                              \
     if (dsta < srca) {                                                       \
         char *dstc = static_cast<char *>(dst);                               \
         const char *srcc = static_cast<const char *>(src);                   \
-        std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % align;      \
+        std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (align * 8);\
         if (offset != 0) {                                                   \
-            offset = align - offset;                                         \
+            offset = align * 8 - offset;                                     \
+            n -= offset;                                                     \
             dstc += offset;                                                  \
             srcc += offset;                                                  \
-            n -= offset;                                                     \
             memmove_std(dst, src, offset);                                   \
         }                                                                    \
                                                                              \
@@ -223,21 +299,22 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
                      break;                                                  \
         }                                                                    \
                                                                              \
-        std::size_t m = (n / (align * 2)) * (align * 2);                     \
+        std::size_t r = n % align;                                           \
+        std::size_t m = n - r;                                               \
         dstc += m;                                                           \
         srcc += m;                                                           \
-        memmove_std(dstc, srcc, n % (align * 2));                            \
+        memmove_std(dstc, srcc, r);                                          \
                                                                              \
         return dst;                                                          \
     }                                                                        \
                                                                              \
     char *dstc = static_cast<char *>(dst) + n;                               \
     const char *srcc = static_cast<const char *>(src) + n;                   \
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % align;          \
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (align * 8);    \
     if (offset != 0) {                                                       \
+        n -= offset;                                                         \
         dstc -= offset;                                                      \
         srcc -= offset;                                                      \
-        n -= offset;                                                         \
         memmove_std(dstc, srcc, offset);                                     \
     }                                                                        \
                                                                              \
@@ -247,17 +324,17 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
     switch (flag) {                                                          \
         case 0 : internal::cpy_back_##simd<false, false>(dstc, srcc, n);     \
                  break;                                                      \
-        case 1 : internal::cpy_back_##simd<false, true >(dstc, srcc, n);     \
+        case 1 : internal::cpy_back_##simd<false, true>(dstc, srcc, n);      \
                  break;                                                      \
-        case 2 : internal::cpy_back_##simd<true,  false>(dstc, srcc, n);     \
+        case 2 : internal::cpy_back_##simd<true, false>(dstc, srcc, n);      \
                  break;                                                      \
-        case 3 : internal::cpy_back_##simd<true,  true >(dstc, srcc, n);     \
+        case 3 : internal::cpy_back_##simd<true, true>(dstc, srcc, n);       \
                  break;                                                      \
         default :                                                            \
                  break;                                                      \
     }                                                                        \
                                                                              \
-    memmove_std(dst, src, n % (align * 2));                                  \
+    memmove_std(dst, src, n % align);                                        \
                                                                              \
     return dst;                                                              \
 }
@@ -385,37 +462,6 @@ VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(sse2, 16)
 
 #endif // __SSE2__
 
-#ifdef __SSE3__
-
-namespace internal {
-
-template <bool, bool>
-inline void cpy_front_sse3 (void *, const void *, std::size_t);
-
-template <bool, bool>
-inline void cpy_back_sse3 (void *, const void *, std::size_t);
-
-VSMC_DEFINE_UTILITY_CSTRING_SIMD(false, false, sse3, 16,
-        __m128i, __m128i, _mm_lddqu_si128, _mm_store_si128)
-VSMC_DEFINE_UTILITY_CSTRING_SIMD(false, true, sse3, 16,
-        __m128i, __m128i, _mm_lddqu_si128, _mm_stream_si128)
-VSMC_DEFINE_UTILITY_CSTRING_SIMD(true, false, sse3, 16,
-        double, __m128d, _mm_load_pd, _mm_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SIMD(true, true, sse3, 16,
-        double, __m128d, _mm_load_pd, _mm_stream_pd)
-
-} // namespace vsmc::internal
-
-/// \brief SSE3 optimized `memcpy` with non-temporal store for large buffers
-/// \ingroup CString
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(sse3, 16)
-
-/// \brief SSE3 optimized `memmove` with non-temporal store for large buffers
-/// \ingroup CString
-VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(sse3, 16)
-
-#endif __SSE3__
-
 #ifdef __AVX__
 
 namespace internal {
@@ -427,9 +473,9 @@ template <bool, bool>
 inline void cpy_back_avx (void *, const void *, std::size_t);
 
 VSMC_DEFINE_UTILITY_CSTRING_SIMD(false, false, avx, 32,
-        __m256i, __m256i, _mm256_lddqu_si256, _mm256_store_si256)
+        double, __m256d, _mm256_loadu_pd, _mm256_store_pd)
 VSMC_DEFINE_UTILITY_CSTRING_SIMD(false, true, avx, 32,
-        __m256i, __m256i, _mm256_lddqu_si256, _mm256_stream_si256)
+        double, __m256d, _mm256_loadu_pd, _mm256_stream_pd)
 VSMC_DEFINE_UTILITY_CSTRING_SIMD(true, false, avx, 32,
         double, __m256d, _mm256_load_pd, _mm256_store_pd)
 VSMC_DEFINE_UTILITY_CSTRING_SIMD(true, true, avx, 32,
@@ -493,15 +539,6 @@ class CStringRuntimeDispatch
         }
 #endif // __SSE2__
 
-#ifdef __SSE3__
-        if (CPUID::has_feature<CPUIDFeatureSSE3>()) {
-            memcpy_ = ::vsmc::memcpy_sse3;
-            memmove_ = ::vsmc::memmove_sse3;
-
-            return;
-        }
-#endif // __SSE2__
-
         memcpy_ = memcpy_std;
         memmove_ = memmove_std;
     }
@@ -524,8 +561,6 @@ inline void *memcpy (void *dst, const void *src, std::size_t n)
         return memcpy_std(dst, src, n);
 #if defined(__AVX__)
     return memcpy_avx(dst, src, n);
-#elif defined(__SSE3__)
-    return memcpy_sse3(dst, src, n);
 #elif defined(__SSE2__)
     return memcpy_sse2(dst, src, n);
 #else
@@ -545,8 +580,6 @@ inline void *memmove (void *dst, const void *src, std::size_t n)
         return memmove_std(dst, src, n);
 #if defined(__AVX__)
     return memmove_avx(dst, src, n);
-#elif defined(__SSE3__)
-    return memmove_sse3(dst, src, n);
 #elif defined(__SSE2__)
     return memmove_sse2(dst, src, n);
 #else
