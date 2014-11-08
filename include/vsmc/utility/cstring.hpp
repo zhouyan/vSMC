@@ -11,12 +11,12 @@
 /// \addtogroup CString
 ///
 /// This module implement the `memcpy`, etc., function in the `vsmc` namespace.
-/// The implementaions are optimzied with either SSE or AVX. Three groups of
+/// The implementaions are optimzied with SIMD instructions. Three groups of
 /// functions are provided.
 ///
 /// - `memcpy_std` etc., they simply call `std::memcpy` etc.
-/// - `memcpy_sse` etc., they are avialable if at least SSE2 is supported and
-/// are optimized with SSE instructions
+/// - `memcpy_sse2` etc., they are avialable if at least SSE2 is supported and
+/// are optimized with SSE2 instructions
 /// - `memcpy_avx` etc., they are avialable if at least AVX is supported and
 ///
 /// are optimized with AVX instructions
@@ -26,7 +26,7 @@
 /// - If buffer size (in bytes) is smaller than `VSMC_CSTRING_STD_THRESHOLD`,
 /// call `memcpy_std` etc.
 /// - Else if AVX is available, then call `memcpy_avx` etc.
-/// - Else if SSE2 is available, then call `memcpy_sse` etc.
+/// - Else if SSE2 is available, then call `memcpy_sse2` etc.
 /// - Else call `memcpy_std`.
 ///
 /// This dispatch can be done at compile time if the configuration macro
@@ -88,9 +88,9 @@
 #ifdef __SSE2__
 #include <emmintrin.h>
 
-#define VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE(srca, nt, load, store) \
+#define VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(srca, nt, load, store) \
 template <>                                                                  \
-inline void forward_sse<srca, nt> (void *dst, const void *src, std::size_t n)\
+inline void forward_sse2<srca, nt> (void *dst, const void *src, std::size_t n)\
 {                                                                            \
     double *dstd = static_cast<double *>(dst);                               \
     const double *srcd = static_cast<const double *>(src);                   \
@@ -106,9 +106,9 @@ inline void forward_sse<srca, nt> (void *dst, const void *src, std::size_t n)\
     }                                                                        \
 }
 
-#define VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE(srca, nt, load, store) \
+#define VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(srca, nt, load, store) \
 template <>                                                                  \
-inline void backward_sse<srca, nt> (void *dst, const void *src, std::size_t n)\
+inline void backward_sse2<srca, nt> (void *dst, const void *src, std::size_t n)\
 {                                                                            \
     double *dstd = static_cast<double *>(dst);                               \
     const double *srcd = static_cast<const double *>(src);                   \
@@ -189,9 +189,8 @@ inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
         memcpy_std(dst, src, offset);                                        \
     }                                                                        \
                                                                              \
-    unsigned flag_src = internal::cstring_is_aligned_##simd(srcc);           \
-    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
-    unsigned flag = (flag_src << 1) | flag_nt;                               \
+    unsigned flag = CStringNonTemporalThreshold::instance().over(n);         \
+    flag |= internal::cstring_is_aligned<align>(srcc);                       \
     switch (flag) {                                                          \
         case 0 : internal::forward_##simd<false, false>(dstc, srcc, n);      \
                  break;                                                      \
@@ -225,11 +224,7 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
     uintptr_t dsta = reinterpret_cast<uintptr_t>(dst);                       \
     uintptr_t srca = reinterpret_cast<uintptr_t>(src);                       \
     if (srca + n <= dsta || dsta + n <= srca)                                \
-        return memcpy_sse(dst, src, n);                                      \
-                                                                             \
-    unsigned flag_nt = CStringNonTemporalThreshold::instance().over(n);      \
-    flag_nt &= CStringNonTemporalThreshold::instance().over(                 \
-            dsta > srca ? dsta - srca : srca - dsta);                        \
+        return memcpy_sse2(dst, src, n);                                     \
                                                                              \
     if (dsta < srca) {                                                       \
         char *dstc = static_cast<char *>(dst);                               \
@@ -243,8 +238,9 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
             memmove_std(dst, src, offset);                                   \
         }                                                                    \
                                                                              \
-        unsigned flag_src = internal::cstring_is_aligned_##simd(srcc);       \
-        unsigned flag = (flag_src << 1) | flag_nt;                           \
+        unsigned flag = CStringNonTemporalThreshold::instance().over(n);     \
+        flag &= CStringNonTemporalThreshold::instance().over(srca - dsta);   \
+        flag |= internal::cstring_is_aligned<align>(srcc);                   \
         switch (flag) {                                                      \
             case 0 : internal::forward_##simd<false, false>(dstc, srcc, n);  \
                      break;                                                  \
@@ -276,8 +272,9 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
         memmove_std(dstc, srcc, offset);                                     \
     }                                                                        \
                                                                              \
-    unsigned flag_src = internal::cstring_is_aligned_##simd(srcc);           \
-    unsigned flag = (flag_src << 1) | flag_nt;                               \
+    unsigned flag = CStringNonTemporalThreshold::instance().over(n);         \
+    flag &= CStringNonTemporalThreshold::instance().over(dsta - srca);       \
+    flag |= internal::cstring_is_aligned<align>(srcc);                       \
     switch (flag) {                                                          \
         case 0 : internal::backward_##simd<false, false>(dstc, srcc, n);     \
                  break;                                                      \
@@ -297,6 +294,14 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
 }
 
 namespace vsmc {
+
+namespace internal {
+
+template <std::size_t Alignment>
+inline unsigned cstring_is_aligned (const void *ptr)
+{return reinterpret_cast<uintptr_t>(ptr) % Alignment == 0 ? 2 : 0;}
+
+} // namespace internal
 
 /// \brief The threshold of buffer size above which `memcpy` use non-temporal
 /// instructions.
@@ -384,43 +389,37 @@ inline void *memmove_std (void *dst, const void *src, std::size_t n)
 
 namespace internal {
 
-inline unsigned cstring_is_aligned_sse (const void *ptr)
-{return reinterpret_cast<uintptr_t>(ptr) % 16 == 0 ? 1 : 0;}
+template <bool, bool>
+inline void forward_sse2 (void *, const void *, std::size_t);
+
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(false, false, loadu, store)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(false, true,  loadu, stream)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(true,  false, load,  store)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(true,  true,  load,  stream)
 
 template <bool, bool>
-inline void forward_sse (void *, const void *, std::size_t);
+inline void backward_sse2 (void *, const void *, std::size_t);
 
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE(false, false, loadu, store)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE(false, true,  loadu, stream)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE(true,  false, load,  store)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE(true,  true,  load,  stream)
-
-template <bool, bool>
-inline void backward_sse (void *, const void *, std::size_t);
-
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE(false, false, loadu, store)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE(false, true,  loadu, stream)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE(true,  false, load,  store)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE(true,  true,  load,  stream)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(false, false, loadu, store)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(false, true,  loadu, stream)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(true,  false, load,  store)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(true,  true,  load,  stream)
 
 } // namespace vsmc::internal
 
-/// \brief SSE optimized `memcpy` with non-temporal store for large buffers
+/// \brief SSE2 optimized `memcpy` with non-temporal store for large buffers
 /// \ingroup CString
-VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(sse, 16)
+VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(sse2, 16)
 
-/// \brief SSE optimized `memmove` with non-temporal store for large buffers
+/// \brief SSE2 optimized `memmove` with non-temporal store for large buffers
 /// \ingroup CString
-VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(sse, 16)
+VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(sse2, 16)
 
 #endif // __SSE2__
 
 #ifdef __AVX__
 
 namespace internal {
-
-inline unsigned cstring_is_aligned_avx (const void *ptr)
-{return reinterpret_cast<uintptr_t>(ptr) % 32 == 0 ? 1 : 0;}
 
 template <bool, bool>
 inline void forward_avx (void *, const void *, std::size_t);
@@ -489,8 +488,8 @@ class CStringRuntimeDispatch
 
 #ifdef __SSE2__
         if (CPUID::has_feature<CPUIDFeatureSSE2>()) {
-            memcpy_ = ::vsmc::memcpy_sse;
-            memmove_ = ::vsmc::memmove_sse;
+            memcpy_ = ::vsmc::memcpy_sse2;
+            memmove_ = ::vsmc::memmove_sse2;
 
             return;
         }
@@ -519,7 +518,7 @@ inline void *memcpy (void *dst, const void *src, std::size_t n)
 #if defined(__AVX__)
     return memcpy_avx(dst, src, n);
 #elif defined(__SSE2__)
-    return memcpy_sse(dst, src, n);
+    return memcpy_sse2(dst, src, n);
 #else
     return memcpy_std(dst, src, n);
 #endif // defined(__AVX__)
@@ -538,7 +537,7 @@ inline void *memmove (void *dst, const void *src, std::size_t n)
 #if defined(__AVX__)
     return memmove_avx(dst, src, n);
 #elif defined(__SSE2__)
-    return memmove_sse(dst, src, n);
+    return memmove_sse2(dst, src, n);
 #else
     return memmove_std(dst, src, n);
 #endif // defined(__AVX__)
