@@ -87,87 +87,50 @@
 
 #ifdef __SSE2__
 #include <emmintrin.h>
-
-#define VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(srca, nt, load, store) \
-template <>                                                                  \
-inline void forward_sse2<srca, nt> (void *dst, const void *src, std::size_t n)\
-{                                                                            \
-    double *dstd = static_cast<double *>(dst);                               \
-    const double *srcd = static_cast<const double *>(src);                   \
-                                                                             \
-    std::size_t nm = n / 32;                                                 \
-    for (std::size_t i = 0; i != nm; ++i) {                                  \
-        __m128d m1 = _mm_##load##_pd(srcd);                                  \
-        __m128d m2 = _mm_##load##_pd(srcd + 2);                              \
-        _mm_##store##_pd(dstd, m1);                                          \
-        _mm_##store##_pd(dstd + 2, m2);                                      \
-        dstd += 4;                                                           \
-        srcd += 4;                                                           \
-    }                                                                        \
-}
-
-#define VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(srca, nt, load, store) \
-template <>                                                                  \
-inline void backward_sse2<srca, nt> (void *dst, const void *src, std::size_t n)\
-{                                                                            \
-    double *dstd = static_cast<double *>(dst);                               \
-    const double *srcd = static_cast<const double *>(src);                   \
-                                                                             \
-    std::size_t nm = n / 32;                                                 \
-    for (std::size_t i = 0; i != nm; ++i) {                                  \
-        dstd -= 4;                                                           \
-        srcd -= 4;                                                           \
-        __m128d m1 = _mm_##load##_pd(srcd);                                  \
-        __m128d m2 = _mm_##load##_pd(srcd + 2);                              \
-        _mm_##store##_pd(dstd, m1);                                          \
-        _mm_##store##_pd(dstd + 2, m2);                                      \
-    }                                                                        \
-}
-
 #endif // __SSE2__
 
 #ifdef __AVX__
 #include <immintrin.h>
 
-#define VSMC_DEFINE_UTILITY_CSTRING_FORWARD_AVX(srca, nt, load, store) \
-template <>                                                                  \
-inline void forward_avx<srca, nt> (void *dst, const void *src, std::size_t n)\
-{                                                                            \
-    double *dstd = static_cast<double *>(dst);                               \
-    const double *srcd = static_cast<const double *>(src);                   \
-                                                                             \
-    std::size_t nm = n / 64;                                                 \
-    for (std::size_t i = 0; i != nm; ++i) {                                  \
-        __m256d m1 = _mm256_##load##_pd(srcd);                               \
-        __m256d m2 = _mm256_##load##_pd(srcd + 4);                           \
-        _mm256_##store##_pd(dstd, m1);                                       \
-        _mm256_##store##_pd(dstd + 4, m2);                                   \
-        dstd += 8;                                                           \
-        srcd += 8;                                                           \
-    }                                                                        \
-    _mm256_zeroupper();                                                      \
-}
-
-#define VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_AVX(srca, nt, load, store) \
-template <>                                                                  \
-inline void backward_avx<srca, nt> (void *dst, const void *src, std::size_t n)\
-{                                                                            \
-    double *dstd = static_cast<double *>(dst);                               \
-    const double *srcd = static_cast<const double *>(src);                   \
-                                                                             \
-    std::size_t nm = n / 64;                                                 \
-    for (std::size_t i = 0; i != nm; ++i) {                                  \
-        dstd -= 8;                                                           \
-        srcd -= 8;                                                           \
-        __m256d m1 = _mm256_##load##_pd(srcd);                               \
-        __m256d m2 = _mm256_##load##_pd(srcd + 4);                           \
-        _mm256_##store##_pd(dstd, m1);                                       \
-        _mm256_##store##_pd(dstd + 4, m2);                                   \
-    }                                                                        \
-    _mm256_zeroupper();                                                      \
-}
-
 #endif // __AVX__
+
+#define VSMC_DEFINE_UTILITY_CSTRING_FORWARD(sa, nt, simd, align, md, ld, sd)\
+template <>                                                                  \
+inline void forward_##simd<sa, nt> (                                         \
+        void *dst, const void *src, std::size_t n)                           \
+{                                                                            \
+    double *dstd = static_cast<double *>(dst);                               \
+    const double *srcd = static_cast<const double *>(src);                   \
+                                                                             \
+    std::size_t nm = n / (align * 2);                                        \
+    for (std::size_t i = 0; i != nm; ++i) {                                  \
+        md m1 = ld(srcd);                                                    \
+        md m2 = ld(srcd + (align / 8));                                      \
+        sd(dstd, m1);                                                        \
+        sd(dstd + (align / 8), m2);                                          \
+        dstd += align / 4;                                                   \
+        srcd += align / 4;                                                   \
+    }                                                                        \
+}
+
+#define VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(sa, nt, simd, align, md, ld, sd)\
+template <>                                                                  \
+inline void backward_##simd<sa, nt> (                                        \
+        void *dst, const void *src, std::size_t n)                           \
+{                                                                            \
+    double *dstd = static_cast<double *>(dst);                               \
+    const double *srcd = static_cast<const double *>(src);                   \
+                                                                             \
+    std::size_t nm = n / (align * 2);                                        \
+    for (std::size_t i = 0; i != nm; ++i) {                                  \
+        dstd -= align / 4;                                                   \
+        srcd -= align / 4;                                                   \
+        md m1 = ld(srcd);                                                    \
+        md m2 = ld(srcd + (align / 8));                                      \
+        sd(dstd, m1);                                                        \
+        sd(dstd + (align / 8), m2);                                          \
+    }                                                                        \
+}
 
 #define VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(simd, align) \
 inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
@@ -392,18 +355,26 @@ namespace internal {
 template <bool, bool>
 inline void forward_sse2 (void *, const void *, std::size_t);
 
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(false, false, loadu, store)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(false, true,  loadu, stream)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(true,  false, load,  store)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_SSE2(true,  true,  load,  stream)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD(false, false, sse2, 16, __m128d,
+        _mm_loadu_pd, _mm_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD(false, true, sse2, 16, __m128d,
+        _mm_loadu_pd, _mm_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD(true, false, sse2, 16, __m128d,
+        _mm_load_pd, _mm_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD(true, true, sse2, 16, __m128d,
+        _mm_load_pd, _mm_stream_pd)
 
 template <bool, bool>
 inline void backward_sse2 (void *, const void *, std::size_t);
 
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(false, false, loadu, store)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(false, true,  loadu, stream)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(true,  false, load,  store)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_SSE2(true,  true,  load,  stream)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(false, false, sse2, 16, __m128d,
+        _mm_loadu_pd, _mm_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(false, true, sse2, 16, __m128d,
+        _mm_loadu_pd, _mm_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(true, false, sse2, 16, __m128d,
+        _mm_load_pd,  _mm_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(true, true, sse2, 16, __m128d,
+        _mm_load_pd,  _mm_stream_pd)
 
 } // namespace vsmc::internal
 
@@ -424,18 +395,26 @@ namespace internal {
 template <bool, bool>
 inline void forward_avx (void *, const void *, std::size_t);
 
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_AVX(false, false, loadu, store)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_AVX(false, true,  loadu, stream)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_AVX(true,  false, load,  store)
-VSMC_DEFINE_UTILITY_CSTRING_FORWARD_AVX(true,  true,  load,  stream)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD(false, false, avx, 32, __m256d,
+        _mm256_loadu_pd, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD(false, true, avx, 32, __m256d,
+        _mm256_loadu_pd, _mm256_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD(true, false, avx, 32, __m256d,
+        _mm256_load_pd, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_FORWARD(true, true, avx, 32, __m256d,
+        _mm256_load_pd, _mm256_stream_pd)
 
 template <bool, bool>
 inline void backward_avx (void *, const void *, std::size_t);
 
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_AVX(false, false, loadu, store)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_AVX(false, true,  loadu, stream)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_AVX(true,  false, load,  store)
-VSMC_DEFINE_UTILITY_CSTRING_BACKWARD_AVX(true,  true,  load,  stream)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(false, false, avx, 32, __m256d,
+        _mm256_loadu_pd, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(false, true, avx, 32, __m256d,
+        _mm256_loadu_pd, _mm256_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(true, false, avx, 32, __m256d,
+        _mm256_load_pd, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_BACKWARD(true, true, avx, 32, __m256d,
+        _mm256_load_pd, _mm256_stream_pd)
 
 } // namespace vsmc::internal
 
