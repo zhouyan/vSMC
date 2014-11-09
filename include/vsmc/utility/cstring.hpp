@@ -54,6 +54,9 @@
 /// - The performance is only tested on limited models of CPUs. As a single
 /// person I don't have much resources. In particle, AMD CPUs were not tested
 /// at all.
+/// - At the moment, `vsmc::memcpy` is more optimized than `vsmc::memmove`.
+/// System `memmove` is likely to outpeform `vsmc::memmove` considerably except
+/// for large buffers.
 ///
 /// In any case, most systems's standard C library is likely to be optimized
 /// enough to suffice most usage situations. And even when there is a
