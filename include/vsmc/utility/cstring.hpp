@@ -760,7 +760,7 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(false, true, false, avx, 32,
         double, __m256d, _mm256_loadu_pd, _mm256_store_pd)
 VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(false, true, true, avx, 32,
         double, __m256d, _mm256_loadu_pd, _mm256_stream_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(true, false, true, avx, 32,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(true, false, false, avx, 32,
         double, __m256d, _mm256_load_pd, _mm256_storeu_pd)
 VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(true, true, false, avx, 32,
         double, __m256d, _mm256_load_pd, _mm256_store_pd)
