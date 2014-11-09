@@ -88,17 +88,35 @@
 
 /// \brief Threshold below which `std::memset` will be called
 #ifndef VSMC_CSTRING_STD_MEMSET_THRESHOLD
-#define VSMC_CSTRING_STD_MEMSET_THRESHOLD 1024
+#if defined(__APPLE__) || defined(__MACOSX)
+#define VSMC_CSTRING_STD_MEMSET_THRESHOLD 4096
+#elif defined(__linux__)
+#define VSMC_CSTRING_STD_MEMSET_THRESHOLD 2048
+#else
+#define VSMC_CSTRING_STD_MEMSET_THRESHOLD 4096
+#endif
 #endif
 
 /// \brief Threshold below which `std::memcpy` will be called
 #ifndef VSMC_CSTRING_STD_MEMCPY_THRESHOLD
+#if defined(__APPLE__) || defined(__MACOSX)
+#define VSMC_CSTRING_STD_MEMCPY_THRESHOLD 2048
+#elif defined(__linux__)
 #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD 1024
+#else
+#define VSMC_CSTRING_STD_MEMCPY_THRESHOLD 4096
+#endif
 #endif
 
 /// \brief Threshold below which `std::memmove` will be called
 #ifndef VSMC_CSTRING_STD_MEMMOVE_THRESHOLD
-#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD 1024
+#if defined(__APPLE__) || defined(__MACOSX)
+#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD 4096
+#elif defined(__linux__)
+#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD 2048
+#else
+#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD 4096
+#endif
 #endif
 
 #ifdef __SSE2__
@@ -476,8 +494,34 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
                                                                              \
     uintptr_t dsta = reinterpret_cast<uintptr_t>(dst);                       \
     uintptr_t srca = reinterpret_cast<uintptr_t>(src);                       \
-    if (dsta < srca)                                                         \
-        return memcpy_##simd(dst, src, n);                                   \
+    if (dsta < srca) {                                                       \
+        char *dstc = static_cast<char *>(dst);                               \
+        const char *srcc = static_cast<const char *>(src);                   \
+                                                                             \
+        unsigned flag = internal::cstring_is_aligned<align>(dstc) >> 1;      \
+        flag |= internal::cstring_is_aligned<align>(srcc);                   \
+                                                                             \
+        if (n < align * 8) {                                                 \
+            internal::cpy_front_##simd##_8(dstc, srcc, n, flag);             \
+            return dst;                                                      \
+        }                                                                    \
+                                                                             \
+        std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (align * 8);\
+        if (offset != 0) {                                                   \
+            offset = (align * 8) - offset;                                   \
+            internal::cpy_front_##simd##_8(dstc, srcc, offset, flag);        \
+            n -= offset;                                                     \
+            dstc += offset;                                                  \
+            srcc += offset;                                                  \
+        }                                                                    \
+                                                                             \
+        flag = CStringNonTemporalThreshold::instance().over(n);              \
+        flag &= CStringNonTemporalThreshold::instance().over(srca - dsta);   \
+        flag |= (internal::cstring_is_aligned<align>(srcc) << 1) | 2;        \
+        internal::cpy_front_##simd(dstc, srcc, n, flag);                     \
+                                                                             \
+        return dst;                                                          \
+    }                                                                        \
                                                                              \
     char *dstc = static_cast<char *>(dst) + n;                               \
     const char *srcc = static_cast<const char *>(src) + n;                   \
@@ -498,8 +542,9 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
         srcc -= offset;                                                      \
     }                                                                        \
                                                                              \
-    flag = CStringNonTemporalThreshold::instance().over(n) | 2;              \
-    flag |= internal::cstring_is_aligned<align>(srcc) << 1;                  \
+    flag = CStringNonTemporalThreshold::instance().over(n);                  \
+    flag &= CStringNonTemporalThreshold::instance().over(dsta - srca);       \
+    flag |= (internal::cstring_is_aligned<align>(srcc) << 1) | 2;            \
     internal::cpy_back_##simd(dstc, srcc, n, flag);                          \
                                                                              \
     return dst;                                                              \
