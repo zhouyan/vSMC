@@ -396,32 +396,17 @@ inline unsigned cstring_is_aligned (const void *ptr)
 
 inline void cpy_front_1 (void *dst, const void *src, std::size_t n)
 {
-    if (n == 0)
-        return;
-
-    char *dstc = reinterpret_cast<char *>(dst);
-    const char *srcc = reinterpret_cast<const char *>(src);
-    do {
-        --n;
-        *dstc = *srcc;
-        ++dstc;
-        ++srcc;
-    } while (n != 0);
+    if (n != 0)
+        std::memmove(dst, src, n);
 }
 
 inline void cpy_back_1 (void *dst, const void *src, std::size_t n)
 {
-    if (n == 0)
-        return;
-
-    char *dstc = reinterpret_cast<char *>(dst);
-    const char *srcc = reinterpret_cast<const char *>(src);
-    do {
-        --n;
-        --dstc;
-        --srcc;
-        *dstc = *srcc;
-    } while (n != 0);
+    if (n != 0) {
+        dst = static_cast<void *>(static_cast<char *>(dst) - n);
+        src = static_cast<const void *>(static_cast<const char *>(src) - n);
+        std::memmove(dst, src, n);
+    }
 }
 
 } // namespace internal
