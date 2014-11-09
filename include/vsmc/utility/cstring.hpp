@@ -86,9 +86,19 @@
 #define VSMC_CSTRING_NON_TEMPORAL_THRESHOLD 0
 #endif
 
+/// \brief Threshold below which `std::memset` will be called
+#ifndef VSMC_CSTRING_STD_MEMSET_THRESHOLD
+#define VSMC_CSTRING_STD_MEMSET_THRESHOLD 1024
+#endif
+
 /// \brief Threshold below which `std::memcpy` will be called
-#ifndef VSMC_CSTRING_STD_THRESHOLD
-#define VSMC_CSTRING_STD_THRESHOLD 1024
+#ifndef VSMC_CSTRING_STD_MEMCPY_THRESHOLD
+#define VSMC_CSTRING_STD_MEMCPY_THRESHOLD 1024
+#endif
+
+/// \brief Threshold below which `std::memmove` will be called
+#ifndef VSMC_CSTRING_STD_MEMMOVE_THRESHOLD
+#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD 1024
 #endif
 
 #ifdef __SSE2__
@@ -97,8 +107,10 @@
 
 #ifdef __AVX__
 #include <immintrin.h>
-
 #endif // __AVX__
+
+#define VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_FLAG(func) \
+    VSMC_RUNTIME_ASSERT(false, ("**vsmc::internal::"#func" UNDEFINED FLAG"))
 
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_8(\
         da, simd, align, c, m, cs, s1, s) \
@@ -133,6 +145,14 @@ inline void set_##simd##_8<da> (void *dst, int ch, std::size_t n)            \
     set_1(dstc, ch, n);                                                      \
 }
 
+#define VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_8_FLAG(simd) \
+inline void set_##simd##_8 (void *dst, int ch, std::size_t n, unsigned flag) \
+{                                                                            \
+    flag == 0 ?                                                              \
+        set_##simd##_8<false>(dst, ch, n):                                   \
+        set_##simd##_8<true >(dst, ch, n);                                   \
+}
+
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD(\
         da, nt, simd, align, c, m, cs, s1, s) \
 template <>                                                                  \
@@ -157,6 +177,19 @@ inline void set_##simd<da, nt> (void *dst, int ch, std::size_t n)            \
         dstc += align * 8 / sizeof(c);                                       \
     }                                                                        \
     set_##simd##_8<da>(dstc, ch, n % (align * 8));                           \
+}
+
+#define VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_FLAG(simd) \
+inline void set_##simd (void *dst, int ch, std::size_t n, unsigned flag)     \
+{                                                                            \
+    switch (flag) {                                                          \
+        case 0: set_##simd<false, false>(dst, ch, n); break;                 \
+        case 2: set_##simd<true,  false>(dst, ch, n); break;                 \
+        case 3: set_##simd<true,  true >(dst, ch, n); break;                 \
+        default :                                                            \
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_FLAG(set_##simd);            \
+            break;                                                           \
+    }                                                                        \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_8(\
@@ -215,34 +248,63 @@ inline void cpy_back_##simd##_8<sa, da> (                                    \
                                                                              \
     if (n >= align * 4) {                                                    \
         n -= align * 4;                                                      \
+        m m1 = l(srcc - align * 1 / sizeof(c));                              \
+        m m2 = l(srcc - align * 2 / sizeof(c));                              \
+        m m3 = l(srcc - align * 3 / sizeof(c));                              \
+        m m4 = l(srcc - align * 4 / sizeof(c));                              \
+        s(dstc - align * 1 / sizeof(c), m1);                                 \
+        s(dstc - align * 2 / sizeof(c), m2);                                 \
+        s(dstc - align * 3 / sizeof(c), m3);                                 \
+        s(dstc - align * 4 / sizeof(c), m4);                                 \
         dstc -= align * 4 / sizeof(c);                                       \
         srcc -= align * 4 / sizeof(c);                                       \
-        m m0 = l(srcc + align * 0 / sizeof(c));                              \
-        m m1 = l(srcc + align * 1 / sizeof(c));                              \
-        m m2 = l(srcc + align * 2 / sizeof(c));                              \
-        m m3 = l(srcc + align * 3 / sizeof(c));                              \
-        s(dstc + align * 0 / sizeof(c), m0);                                 \
-        s(dstc + align * 1 / sizeof(c), m1);                                 \
-        s(dstc + align * 2 / sizeof(c), m2);                                 \
-        s(dstc + align * 3 / sizeof(c), m3);                                 \
     }                                                                        \
     if (n >= align * 2) {                                                    \
         n -= align * 2;                                                      \
+        m m1 = l(srcc - align * 1 / sizeof(c));                              \
+        m m2 = l(srcc - align * 2 / sizeof(c));                              \
+        s(dstc - align * 1 / sizeof(c), m1);                                 \
+        s(dstc - align * 2 / sizeof(c), m2);                                 \
         dstc -= align * 2 / sizeof(c);                                       \
         srcc -= align * 2 / sizeof(c);                                       \
-        m m0 = l(srcc + align * 0 / sizeof(c));                              \
-        m m1 = l(srcc + align * 1 / sizeof(c));                              \
-        s(dstc + align * 0 / sizeof(c), m0);                                 \
-        s(dstc + align * 1 / sizeof(c), m1);                                 \
     }                                                                        \
     if (n >= align * 1) {                                                    \
         n -= align * 1;                                                      \
+        m m1 = l(srcc - align * 1 / sizeof(c));                              \
+        s(dstc - align * 1 / sizeof(c), m1);                                 \
         dstc -= align * 1 / sizeof(c);                                       \
         srcc -= align * 1 / sizeof(c);                                       \
-        m m0 = l(srcc + align * 0 / sizeof(c));                              \
-        s(dstc + align * 0 / sizeof(c), m0);                                 \
     }                                                                        \
     cpy_back_1(dstc, srcc, n);                                               \
+}
+
+#define VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_8_FLAG(simd) \
+inline void cpy_front_##simd##_8 (void *dst, const void *src, std::size_t n, \
+        unsigned flag)                                                       \
+{                                                                            \
+    switch (flag) {                                                          \
+        case 0 : cpy_front_##simd##_8<false, false>(dst, src, n); break;     \
+        case 1 : cpy_front_##simd##_8<false, true >(dst, src, n); break;     \
+        case 2 : cpy_front_##simd##_8<true,  false>(dst, src, n); break;     \
+        case 3 : cpy_front_##simd##_8<true,  true >(dst, src, n); break;     \
+        default :                                                            \
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_FLAG(cpy_front_##simd##_8);  \
+            break;                                                           \
+    }                                                                        \
+}                                                                            \
+                                                                             \
+inline void cpy_back_##simd##_8 (void *dst, const void *src, std::size_t n,  \
+        unsigned flag)                                                       \
+{                                                                            \
+    switch (flag) {                                                          \
+        case 0 : cpy_back_##simd##_8<false, false>(dst, src, n); break;      \
+        case 1 : cpy_back_##simd##_8<false, true >(dst, src, n); break;      \
+        case 2 : cpy_back_##simd##_8<true,  false>(dst, src, n); break;      \
+        case 3 : cpy_back_##simd##_8<true,  true >(dst, src, n); break;      \
+        default :                                                            \
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_FLAG(cpy_back_##simd##_8);   \
+            break;                                                           \
+    }                                                                        \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(\
@@ -282,7 +344,7 @@ inline void cpy_front_##simd<sa, da, nt> (                                   \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_##simd<sa, da, nt> (                                   \
+inline void cpy_back_##simd<sa, da, nt> (                                    \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
@@ -293,26 +355,59 @@ inline void cpy_back_##simd<sa, da, nt> (                                   \
                                                                              \
     std::size_t nm = n / (align * 8);                                        \
     for (std::size_t i = 0; i != nm; ++i) {                                  \
+        m m1 = l(srcc - align * 1 / sizeof(c));                              \
+        m m2 = l(srcc - align * 2 / sizeof(c));                              \
+        m m3 = l(srcc - align * 3 / sizeof(c));                              \
+        m m4 = l(srcc - align * 4 / sizeof(c));                              \
+        m m5 = l(srcc - align * 5 / sizeof(c));                              \
+        m m6 = l(srcc - align * 6 / sizeof(c));                              \
+        m m7 = l(srcc - align * 7 / sizeof(c));                              \
+        m m8 = l(srcc - align * 8 / sizeof(c));                              \
+        s(dstc - align * 1 / sizeof(c), m1);                                 \
+        s(dstc - align * 2 / sizeof(c), m2);                                 \
+        s(dstc - align * 3 / sizeof(c), m3);                                 \
+        s(dstc - align * 4 / sizeof(c), m4);                                 \
+        s(dstc - align * 5 / sizeof(c), m5);                                 \
+        s(dstc - align * 6 / sizeof(c), m6);                                 \
+        s(dstc - align * 7 / sizeof(c), m7);                                 \
+        s(dstc - align * 8 / sizeof(c), m8);                                 \
         dstc -= align * 8 / sizeof(c);                                       \
         srcc -= align * 8 / sizeof(c);                                       \
-        m m0 = l(srcc + align * 0 / sizeof(c));                              \
-        m m1 = l(srcc + align * 1 / sizeof(c));                              \
-        m m2 = l(srcc + align * 2 / sizeof(c));                              \
-        m m3 = l(srcc + align * 3 / sizeof(c));                              \
-        m m4 = l(srcc + align * 4 / sizeof(c));                              \
-        m m5 = l(srcc + align * 5 / sizeof(c));                              \
-        m m6 = l(srcc + align * 6 / sizeof(c));                              \
-        m m7 = l(srcc + align * 7 / sizeof(c));                              \
-        s(dstc + align * 0 / sizeof(c), m0);                                 \
-        s(dstc + align * 1 / sizeof(c), m1);                                 \
-        s(dstc + align * 2 / sizeof(c), m2);                                 \
-        s(dstc + align * 3 / sizeof(c), m3);                                 \
-        s(dstc + align * 4 / sizeof(c), m4);                                 \
-        s(dstc + align * 5 / sizeof(c), m5);                                 \
-        s(dstc + align * 6 / sizeof(c), m6);                                 \
-        s(dstc + align * 7 / sizeof(c), m7);                                 \
     }                                                                        \
     cpy_back_##simd##_8<sa, da>(dstc, srcc, n % (align * 8));                \
+}
+
+#define VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_FLAG(simd) \
+inline void cpy_front_##simd (void *dst, const void *src, std::size_t n,     \
+        unsigned flag)                                                       \
+{                                                                            \
+    switch (flag) {                                                          \
+        case 0 : cpy_front_##simd<false, false, false>(dst, src, n); break;  \
+        case 2 : cpy_front_##simd<false, true,  false>(dst, src, n); break;  \
+        case 3 : cpy_front_##simd<false, true,  true >(dst, src, n); break;  \
+        case 4 : cpy_front_##simd<true,  false, false>(dst, src, n); break;  \
+        case 6 : cpy_front_##simd<true,  true,  false>(dst, src, n); break;  \
+        case 7 : cpy_front_##simd<true,  true,  true >(dst, src, n); break;  \
+        default :                                                            \
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_FLAG(cpy_front_##simd);      \
+            break;                                                           \
+    }                                                                        \
+}                                                                            \
+                                                                             \
+inline void cpy_back_##simd (void *dst, const void *src, std::size_t n,      \
+        unsigned flag)                                                       \
+{                                                                            \
+    switch (flag) {                                                          \
+        case 0 : cpy_back_##simd<false, false, false>(dst, src, n); break;   \
+        case 2 : cpy_back_##simd<false, true,  false>(dst, src, n); break;   \
+        case 3 : cpy_back_##simd<false, true,  true >(dst, src, n); break;   \
+        case 4 : cpy_back_##simd<true,  false, false>(dst, src, n); break;   \
+        case 6 : cpy_back_##simd<true,  true,  false>(dst, src, n); break;   \
+        case 7 : cpy_back_##simd<true,  true,  true >(dst, src, n); break;   \
+        default :                                                            \
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_FLAG(cpy_back_##simd);       \
+            break;                                                           \
+    }                                                                        \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_MEMSET(simd, align) \
@@ -320,24 +415,23 @@ inline void *memset_##simd (void *dst, int ch, std::size_t n)                \
 {                                                                            \
     char *dstc = static_cast<char *>(dst);                                   \
                                                                              \
+    unsigned flag = internal::cstring_is_aligned<align>(dstc);               \
     if (n < align * 8) {                                                     \
-        internal::set_##simd##_8<false>(dstc, ch, n);                        \
+        internal::set_##simd##_8(dstc, ch, n, flag);                         \
         return dst;                                                          \
     }                                                                        \
                                                                              \
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % align;          \
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (align * 8);    \
     if (offset != 0) {                                                       \
-        offset = align - offset;                                             \
-        internal::set_1(dstc, ch, offset);                                   \
+        offset = (align * 8) - offset;                                       \
+        internal::set_##simd##_8(dstc, ch, offset, flag);                    \
         n -= offset;                                                         \
         dstc += offset;                                                      \
     }                                                                        \
                                                                              \
-    unsigned flag = CStringNonTemporalThreshold::instance().over(n);         \
-    if (flag == 0)                                                           \
-        internal::set_##simd<true, false>(dstc, ch, n);                      \
-    else                                                                     \
-        internal::set_##simd<true, true>(dstc, ch, n);                       \
+    flag = CStringNonTemporalThreshold::instance().over(n) | 2;              \
+    internal::set_##simd(dstc, ch, n, flag);                                 \
+                                                                             \
     return dst;                                                              \
 }
 
@@ -350,38 +444,26 @@ inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
     char *dstc = static_cast<char *>(dst);                                   \
     const char *srcc = static_cast<const char *>(src);                       \
                                                                              \
+    unsigned flag = internal::cstring_is_aligned<align>(dstc) >> 1;          \
+    flag |= internal::cstring_is_aligned<align>(srcc);                       \
+                                                                             \
     if (n < align * 8) {                                                     \
-        internal::cpy_front_##simd##_8<false, false>(dstc, srcc, n);         \
+        internal::cpy_front_##simd##_8(dstc, srcc, n, flag);                 \
         return dst;                                                          \
     }                                                                        \
                                                                              \
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % align;          \
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (align * 8);    \
     if (offset != 0) {                                                       \
-        offset = align - offset;                                             \
-        internal::cpy_front_1(dstc, srcc, offset);                           \
+        offset = (align * 8) - offset;                                       \
+        internal::cpy_front_##simd##_8(dstc, srcc, offset, flag);            \
         n -= offset;                                                         \
         dstc += offset;                                                      \
         srcc += offset;                                                      \
     }                                                                        \
                                                                              \
-    unsigned flag = CStringNonTemporalThreshold::instance().over(n);         \
-    flag |= internal::cstring_is_aligned<align>(srcc);                       \
-    switch (flag) {                                                          \
-        case 0 :                                                             \
-            internal::cpy_front_##simd<false, true, false>(dstc, srcc, n);   \
-            break;                                                           \
-        case 1 :                                                             \
-            internal::cpy_front_##simd<false, true, true>(dstc, srcc, n);    \
-            break;                                                           \
-        case 2 :                                                             \
-            internal::cpy_front_##simd<true, true, false>(dstc, srcc, n);    \
-            break;                                                           \
-        case 3 :                                                             \
-            internal::cpy_front_##simd<true, true, true>(dstc, srcc, n);     \
-            break;                                                           \
-        default :                                                            \
-            break;                                                           \
-    }                                                                        \
+    flag = CStringNonTemporalThreshold::instance().over(n) | 2;              \
+    flag |= internal::cstring_is_aligned<align>(srcc) << 1;                  \
+    internal::cpy_front_##simd(dstc, srcc, n, flag);                         \
                                                                              \
     return dst;                                                              \
 }
@@ -394,80 +476,31 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
                                                                              \
     uintptr_t dsta = reinterpret_cast<uintptr_t>(dst);                       \
     uintptr_t srca = reinterpret_cast<uintptr_t>(src);                       \
-    if (dsta < srca) {                                                       \
-        char *dstc = static_cast<char *>(dst);                               \
-        const char *srcc = static_cast<const char *>(src);                   \
-                                                                             \
-        if (n < align * 8) {                                                 \
-            internal::cpy_front_##simd##_8<false, false>(dstc, srcc, n);     \
-            return dst;                                                      \
-        }                                                                    \
-                                                                             \
-        std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % align;      \
-        if (offset != 0) {                                                   \
-            offset = align - offset;                                         \
-            internal::cpy_front_1(dstc, srcc, offset);                       \
-            n -= offset;                                                     \
-            dstc += offset;                                                  \
-            srcc += offset;                                                  \
-        }                                                                    \
-                                                                             \
-        unsigned flag = CStringNonTemporalThreshold::instance().over(n);     \
-        flag |= internal::cstring_is_aligned<align>(srcc);                   \
-        switch (flag) {                                                      \
-            case 0 :                                                         \
-                internal::cpy_front_##simd<false, true, false>(dstc, srcc, n);\
-                break;                                                       \
-            case 1 :                                                         \
-                internal::cpy_front_##simd<false, true, true>(dstc, srcc, n);\
-                break;                                                       \
-            case 2 :                                                         \
-                internal::cpy_front_##simd<true, true, false>(dstc, srcc, n);\
-                break;                                                       \
-            case 3 :                                                         \
-                internal::cpy_front_##simd<true, true, true>(dstc, srcc, n); \
-                break;                                                       \
-            default :                                                        \
-                break;                                                       \
-        }                                                                    \
-                                                                             \
-        return dst;                                                          \
-    }                                                                        \
+    if (dsta < srca)                                                         \
+        return memcpy_##simd(dst, src, n);                                   \
                                                                              \
     char *dstc = static_cast<char *>(dst) + n;                               \
     const char *srcc = static_cast<const char *>(src) + n;                   \
                                                                              \
+    unsigned flag = internal::cstring_is_aligned<align>(dstc) >> 1;          \
+    flag |= internal::cstring_is_aligned<align>(srcc);                       \
+                                                                             \
     if (n < align * 8) {                                                     \
-        internal::cpy_back_##simd##_8<false, false>(dstc, srcc, n);          \
+        internal::cpy_back_##simd##_8(dstc, srcc, n, flag);                  \
         return dst;                                                          \
     }                                                                        \
                                                                              \
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % align;          \
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (align * 8);    \
     if (offset != 0) {                                                       \
-        internal::cpy_back_1(dstc, srcc, offset);                            \
+        internal::cpy_back_##simd##_8(dstc, srcc, offset, flag);             \
         n -= offset;                                                         \
         dstc -= offset;                                                      \
         srcc -= offset;                                                      \
     }                                                                        \
                                                                              \
-    unsigned flag = CStringNonTemporalThreshold::instance().over(n);         \
-    flag |= internal::cstring_is_aligned<align>(srcc);                       \
-    switch (flag) {                                                          \
-        case 0 :                                                             \
-            internal::cpy_back_##simd<false, true, false>(dstc, srcc, n);    \
-            break;                                                           \
-        case 1 :                                                             \
-            internal::cpy_back_##simd<false, true, true>(dstc, srcc, n);     \
-            break;                                                           \
-        case 2 :                                                             \
-            internal::cpy_back_##simd<true, true, false>(dstc, srcc, n);     \
-            break;                                                           \
-        case 3 :                                                             \
-            internal::cpy_back_##simd<true, true, true>(dstc, srcc, n);      \
-            break;                                                           \
-        default :                                                            \
-            break;                                                           \
-    }                                                                        \
+    flag = CStringNonTemporalThreshold::instance().over(n) | 2;              \
+    flag |= internal::cstring_is_aligned<align>(srcc) << 1;                  \
+    internal::cpy_back_##simd(dstc, srcc, n, flag);                          \
                                                                              \
     return dst;                                                              \
 }
@@ -570,32 +603,17 @@ class CStringNonTemporalThreshold
 /// \brief Direct call to `std::memset`
 /// \ingroup CString
 inline void *memset_std (void *dst, int ch, std::size_t n)
-{
-    if (n == 0)
-        return dst;
-
-    return std::memset(dst, ch, n);
-}
+{return std::memset(dst, ch, n);}
 
 /// \brief Direct call to `std::memcpy`
 /// \ingroup CString
 inline void *memcpy_std (void *dst, const void *src, std::size_t n)
-{
-    if (dst == src || n == 0)
-        return dst;
-
-    return std::memcpy(dst, src, n);
-}
+{return std::memcpy(dst, src, n);}
 
 /// \brief Direct call to `std::memmove`
 /// \ingroup CString
 inline void *memmove_std (void *dst, const void *src, std::size_t n)
-{
-    if (dst == src || n == 0)
-        return dst;
-
-    return std::memmove(dst, src, n);
-}
+{return std::memmove(dst, src, n);}
 
 #ifdef __SSE2__
 
@@ -611,6 +629,8 @@ VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_8(true, sse2, 16,
         double, __m128d, _mm_castsi128_pd, _mm_set1_epi8,
         _mm_store_pd)
 
+VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_8_FLAG(sse2)
+
 template <bool, bool>
 inline void set_sse2 (void *, int, std::size_t);
 
@@ -623,6 +643,8 @@ VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD(true, false, sse2, 16,
 VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD(true, true, sse2, 16,
         double, __m128d, _mm_castsi128_pd, _mm_set1_epi8,
         _mm_stream_pd)
+
+VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_FLAG(sse2)
 
 template <bool, bool>
 inline void cpy_front_sse2_8 (void *, const void *, std::size_t);
@@ -638,6 +660,8 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_8(true, false, sse2, 16,
         double, __m128d, _mm_load_pd, _mm_storeu_pd)
 VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_8(true, true, sse2, 16,
         double, __m128d, _mm_load_pd, _mm_store_pd)
+
+VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_8_FLAG(sse2)
 
 template <bool, bool, bool>
 inline void cpy_front_sse2 (void *, const void *, std::size_t);
@@ -657,6 +681,8 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(true, true, false, sse2, 16,
         double, __m128d, _mm_load_pd, _mm_store_pd)
 VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(true, true, true, sse2, 16,
         double, __m128d, _mm_load_pd, _mm_stream_pd)
+
+VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_FLAG(sse2)
 
 } // namespace vsmc::internal
 
@@ -688,6 +714,8 @@ VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_8(true, avx, 32,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
         _mm256_store_pd)
 
+VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_8_FLAG(avx)
+
 template <bool, bool>
 inline void set_avx (void *, int, std::size_t);
 
@@ -700,6 +728,8 @@ VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD(true, false, avx, 32,
 VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD(true, true, avx, 32,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
         _mm256_stream_pd)
+
+VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_FLAG(avx)
 
 template <bool, bool>
 inline void cpy_front_avx_8 (void *, const void *, std::size_t);
@@ -715,6 +745,8 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_8(true, false, avx, 32,
         double, __m256d, _mm256_load_pd, _mm256_storeu_pd)
 VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_8(true, true, avx, 32,
         double, __m256d, _mm256_load_pd, _mm256_store_pd)
+
+VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_8_FLAG(avx)
 
 template <bool, bool, bool>
 inline void cpy_front_avx (void *, const void *, std::size_t);
@@ -734,6 +766,8 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(true, true, false, avx, 32,
         double, __m256d, _mm256_load_pd, _mm256_store_pd)
 VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD(true, true, true, avx, 32,
         double, __m256d, _mm256_load_pd, _mm256_stream_pd)
+
+VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_FLAG(avx)
 
 } // namespace vsmc::internal
 
@@ -814,7 +848,7 @@ class CStringRuntimeDispatch
 /// \ingroup CString
 inline void *memset (void *dst, int ch, std::size_t n)
 {
-    if (n < VSMC_CSTRING_STD_THRESHOLD)
+    if (n < VSMC_CSTRING_STD_MEMSET_THRESHOLD)
         return memset_std(dst, ch, n);
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memset(dst, ch, n);
@@ -833,8 +867,8 @@ inline void *memset (void *dst, int ch, std::size_t n)
 /// \ingroup CString
 inline void *memcpy (void *dst, const void *src, std::size_t n)
 {
-    if (n < VSMC_CSTRING_STD_THRESHOLD)
-        return memmove_std(dst, src, n);
+    if (n < VSMC_CSTRING_STD_MEMCPY_THRESHOLD)
+        return memcpy_std(dst, src, n);
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memcpy(dst, src, n);
 #else
@@ -852,7 +886,7 @@ inline void *memcpy (void *dst, const void *src, std::size_t n)
 /// \ingroup CString
 inline void *memmove (void *dst, const void *src, std::size_t n)
 {
-    if (n < VSMC_CSTRING_STD_THRESHOLD)
+    if (n < VSMC_CSTRING_STD_MEMMOVE_THRESHOLD)
         return memmove_std(dst, src, n);
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memmove(dst, src, n);
