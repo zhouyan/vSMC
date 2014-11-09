@@ -88,36 +88,60 @@
 
 /// \brief Threshold below which `std::memset` will be called
 #ifndef VSMC_CSTRING_STD_MEMSET_THRESHOLD
-#if defined(__APPLE__) || defined(__MACOSX)
-#define VSMC_CSTRING_STD_MEMSET_THRESHOLD 4096
-#elif defined(__linux__)
-#define VSMC_CSTRING_STD_MEMSET_THRESHOLD 2048
-#else
-#define VSMC_CSTRING_STD_MEMSET_THRESHOLD 4096
-#endif
-#endif
+  #ifdef __INTEL_COMPILER
+    #ifdef __AVX__
+      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 8)
+    #else
+      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 24)
+    #endif
+  #else // __INTEL_COMPILER
+    #if defined(__APPLE__) || defined(__MACOSX)
+      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 12)
+    #elif defined(__linux__)
+      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 12)
+    #else
+      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 12)
+    #endif
+  #endif // __INTEL_COMPILER
+#endif // VSMC_CSTRING_STD_MEMSET_THRESHOLD
 
 /// \brief Threshold below which `std::memcpy` will be called
 #ifndef VSMC_CSTRING_STD_MEMCPY_THRESHOLD
-#if defined(__APPLE__) || defined(__MACOSX)
-#define VSMC_CSTRING_STD_MEMCPY_THRESHOLD 2048
-#elif defined(__linux__)
-#define VSMC_CSTRING_STD_MEMCPY_THRESHOLD 1024
-#else
-#define VSMC_CSTRING_STD_MEMCPY_THRESHOLD 4096
-#endif
-#endif
+  #ifdef __INTEL_COMPILER
+    #ifdef __AVX__
+      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 8)
+    #else
+      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 24)
+    #endif
+  #else // __INTEL_COMPILER
+    #if defined(__APPLE__) || defined(__MACOSX)
+      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 12)
+    #elif defined(__linux__)
+      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 12)
+    #else
+      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 12)
+    #endif
+  #endif // __INTEL_COMPILER
+#endif // VSMC_CSTRING_STD_MEMCPY_THRESHOLD
 
 /// \brief Threshold below which `std::memmove` will be called
 #ifndef VSMC_CSTRING_STD_MEMMOVE_THRESHOLD
-#if defined(__APPLE__) || defined(__MACOSX)
-#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD 4096
-#elif defined(__linux__)
-#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD 2048
-#else
-#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD 4096
-#endif
-#endif
+  #ifdef __INTEL_COMPILER
+    #ifdef __AVX__
+      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 8)
+    #else
+      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 24)
+    #endif
+  #else // __INTEL_COMPILER
+    #if defined(__APPLE__) || defined(__MACOSX)
+      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 12)
+    #elif defined(__linux__)
+      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 12)
+    #else
+      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 12)
+    #endif
+  #endif // __INTEL_COMPILER
+#endif // VSMC_CSTRING_STD_MEMMOVE_THRESHOLD
 
 #ifdef __SSE2__
 #include <emmintrin.h>
