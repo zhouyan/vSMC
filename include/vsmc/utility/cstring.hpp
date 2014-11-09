@@ -95,13 +95,7 @@
       #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 24)
     #endif
   #else // __INTEL_COMPILER
-    #if defined(__APPLE__) || defined(__MACOSX)
-      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 12)
-    #elif defined(__linux__)
-      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 12)
-    #else
-      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 12)
-    #endif
+    #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 12)
   #endif // __INTEL_COMPILER
 #endif // VSMC_CSTRING_STD_MEMSET_THRESHOLD
 
@@ -114,33 +108,13 @@
       #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 24)
     #endif
   #else // __INTEL_COMPILER
-    #if defined(__APPLE__) || defined(__MACOSX)
-      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 12)
-    #elif defined(__linux__)
-      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 12)
-    #else
-      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 12)
-    #endif
+    #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 12)
   #endif // __INTEL_COMPILER
 #endif // VSMC_CSTRING_STD_MEMCPY_THRESHOLD
 
 /// \brief Threshold below which `std::memmove` will be called
 #ifndef VSMC_CSTRING_STD_MEMMOVE_THRESHOLD
-  #ifdef __INTEL_COMPILER
-    #ifdef __AVX__
-      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 8)
-    #else
-      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 24)
-    #endif
-  #else // __INTEL_COMPILER
-    #if defined(__APPLE__) || defined(__MACOSX)
-      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 12)
-    #elif defined(__linux__)
-      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 12)
-    #else
-      #define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 12)
-    #endif
-  #endif // __INTEL_COMPILER
+#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 16)
 #endif // VSMC_CSTRING_STD_MEMMOVE_THRESHOLD
 
 #ifdef __SSE2__
