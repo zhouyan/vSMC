@@ -577,6 +577,15 @@ class CStringNonTemporalThreshold
         return ntt;
     }
 
+    /// \brief The maximum level of cache considered in `set()`.
+    std::size_t max_level () const {return max_level_;}
+
+    /// \brief Set new maximum level of cache considered in `set()`.
+    ///
+    /// \note
+    /// This will automatically call `set()` to set the new threshold.
+    void max_level (std::size_t level) {max_level_ = level; set();}
+
     /// \brief Set the threshold to default
     ///
     /// \details
@@ -588,7 +597,7 @@ class CStringNonTemporalThreshold
         unsigned cache_level = 0;
         for (unsigned index = 0; index != cache_index_max; ++index) {
             unsigned level = CPUID::cache_param(index).level();
-            if (level <= 3 && level > cache_level) {
+            if (level <= max_level_ && level > cache_level) {
                 cache_index = index;
                 cache_level = level;
             }
@@ -611,9 +620,10 @@ class CStringNonTemporalThreshold
     private :
 
     std::size_t threshold_;
+    std::size_t max_level_;
 
     CStringNonTemporalThreshold () :
-        threshold_(VSMC_CSTRING_NON_TEMPORAL_THRESHOLD)
+        max_level_(3), threshold_(VSMC_CSTRING_NON_TEMPORAL_THRESHOLD)
     {if (threshold_ == 0) set();}
 
     CStringNonTemporalThreshold (const CStringNonTemporalThreshold &);
