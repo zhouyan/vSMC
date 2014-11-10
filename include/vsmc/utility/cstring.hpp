@@ -99,10 +99,12 @@
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_MEMCPY(dst, src, n) \
     VSMC_RUNTIME_ASSERT((                                                    \
-                (static_cast<const char *>(dst) -                            \
-                 static_cast<const char *>(src)) <= n &&                     \
-                (static_cast<const char *>(src) -                            \
-                 static_cast<const char *>(dst)) <= n),                      \
+                static_cast<const char *>(dst) -                             \
+                static_cast<const char *>(src) <=                            \
+                static_cast<std::ptrdiff_t>(n) &&                            \
+                static_cast<const char *>(src) -                             \
+                static_cast<const char *>(dst) <=                            \
+                static_cast<std::ptrdiff_t>(n)),                             \
             ("**vsmc::memcpy** OVERLAPPING BUFFERS"))
 
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_8(\
