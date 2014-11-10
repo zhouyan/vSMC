@@ -86,37 +86,6 @@
 #define VSMC_CSTRING_NON_TEMPORAL_THRESHOLD 0
 #endif
 
-/// \brief Threshold below which `std::memset` will be called
-#ifndef VSMC_CSTRING_STD_MEMSET_THRESHOLD
-  #ifdef __INTEL_COMPILER
-    #ifdef __AVX__
-      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 8)
-    #else
-      #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 24)
-    #endif
-  #else // __INTEL_COMPILER
-    #define VSMC_CSTRING_STD_MEMSET_THRESHOLD (1 << 12)
-  #endif // __INTEL_COMPILER
-#endif // VSMC_CSTRING_STD_MEMSET_THRESHOLD
-
-/// \brief Threshold below which `std::memcpy` will be called
-#ifndef VSMC_CSTRING_STD_MEMCPY_THRESHOLD
-  #ifdef __INTEL_COMPILER
-    #ifdef __AVX__
-      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 8)
-    #else
-      #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 24)
-    #endif
-  #else // __INTEL_COMPILER
-    #define VSMC_CSTRING_STD_MEMCPY_THRESHOLD (1 << 12)
-  #endif // __INTEL_COMPILER
-#endif // VSMC_CSTRING_STD_MEMCPY_THRESHOLD
-
-/// \brief Threshold below which `std::memmove` will be called
-#ifndef VSMC_CSTRING_STD_MEMMOVE_THRESHOLD
-#define VSMC_CSTRING_STD_MEMMOVE_THRESHOLD (1 << 16)
-#endif // VSMC_CSTRING_STD_MEMMOVE_THRESHOLD
-
 #define VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(func) \
     VSMC_RUNTIME_ASSERT(false, ("**vsmc::internal::"#func" UNDEFINED FLAG"))
 
@@ -899,8 +868,6 @@ class CStringRuntimeDispatch
 /// \ingroup CString
 inline void *memset (void *dst, int ch, std::size_t n)
 {
-    if (n < VSMC_CSTRING_STD_MEMSET_THRESHOLD)
-        return memset_std(dst, ch, n);
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memset(dst, ch, n);
 #else
@@ -919,8 +886,6 @@ inline void *memset (void *dst, int ch, std::size_t n)
 inline void *memcpy (void *dst, const void *src, std::size_t n)
 {
     VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_MEMCPY(dst, src,n);
-    if (n < VSMC_CSTRING_STD_MEMCPY_THRESHOLD)
-        return memcpy_std(dst, src, n);
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memcpy(dst, src, n);
 #else
@@ -938,8 +903,6 @@ inline void *memcpy (void *dst, const void *src, std::size_t n)
 /// \ingroup CString
 inline void *memmove (void *dst, const void *src, std::size_t n)
 {
-    if (n < VSMC_CSTRING_STD_MEMMOVE_THRESHOLD)
-        return memmove_std(dst, src, n);
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memmove(dst, src, n);
 #else
