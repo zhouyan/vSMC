@@ -74,6 +74,14 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cpuid.hpp>
 
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif // __SSE2__
+
+#ifdef __AVX__
+#include <immintrin.h>
+#endif // __AVX__
+
 /// \brief Shall functions in this module do runtime dispatch
 /// \ingroup Config
 #ifndef VSMC_CSTRING_RUNTIME_DISPACH
@@ -96,14 +104,6 @@
                 (static_cast<const char *>(src) -                            \
                  static_cast<const char *>(dst)) <= n),                      \
             ("**vsmc::memcpy** OVERLAPPING BUFFERS"))
-
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif // __SSE2__
-
-#ifdef __AVX__
-#include <immintrin.h>
-#endif // __AVX__
 
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_8(\
         da, simd, align, c, m, cs, s1, s) \
@@ -158,7 +158,8 @@ inline void set_##simd<da, nt> (void *dst, int ch, std::size_t n)            \
     m m0 = cs(s1(static_cast<char>(static_cast<unsigned char>(ch))));        \
                                                                              \
     std::size_t nm = n / (align * 8);                                        \
-    for (std::size_t i = 0; i != nm; ++i) {                                  \
+    while (n >= align * 8) {                                                 \
+        n -= align * 8;                                                      \
         s(dstc + align * 0 / sizeof(c), m0);                                 \
         s(dstc + align * 1 / sizeof(c), m0);                                 \
         s(dstc + align * 2 / sizeof(c), m0);                                 \
@@ -169,7 +170,7 @@ inline void set_##simd<da, nt> (void *dst, int ch, std::size_t n)            \
         s(dstc + align * 7 / sizeof(c), m0);                                 \
         dstc += align * 8 / sizeof(c);                                       \
     }                                                                        \
-    set_##simd##_8<da>(dstc, ch, n % (align * 8));                           \
+    set_##simd##_8<da>(dstc, ch, n);                                         \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_SIMD_SWITCH(simd) \
@@ -312,8 +313,8 @@ inline void cpy_front_##simd<sa, da, nt> (                                   \
     c *dstc = static_cast<c *>(dst);                                         \
     const c *srcc = static_cast<const c *>(src);                             \
                                                                              \
-    std::size_t nm = n / (align * 8);                                        \
-    for (std::size_t i = 0; i != nm; ++i) {                                  \
+    while (n >= align * 8) {                                                 \
+        n -= align * 8;                                                      \
         m m0 = l(srcc + align * 0 / sizeof(c));                              \
         m m1 = l(srcc + align * 1 / sizeof(c));                              \
         m m2 = l(srcc + align * 2 / sizeof(c));                              \
@@ -333,7 +334,7 @@ inline void cpy_front_##simd<sa, da, nt> (                                   \
         dstc += align * 8 / sizeof(c);                                       \
         srcc += align * 8 / sizeof(c);                                       \
     }                                                                        \
-    cpy_front_##simd##_8<sa, da>(dstc, srcc, n % (align * 8));               \
+    cpy_front_##simd##_8<sa, da>(dstc, srcc, n);                             \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -346,8 +347,8 @@ inline void cpy_back_##simd<sa, da, nt> (                                    \
     c *dstc = static_cast<c *>(dst);                                         \
     const c *srcc = static_cast<const c *>(src);                             \
                                                                              \
-    std::size_t nm = n / (align * 8);                                        \
-    for (std::size_t i = 0; i != nm; ++i) {                                  \
+    while (n >= align * 8) {                                                 \
+        n -= align * 8;                                                      \
         m m1 = l(srcc - align * 1 / sizeof(c));                              \
         m m2 = l(srcc - align * 2 / sizeof(c));                              \
         m m3 = l(srcc - align * 3 / sizeof(c));                              \
@@ -367,7 +368,7 @@ inline void cpy_back_##simd<sa, da, nt> (                                    \
         dstc -= align * 8 / sizeof(c);                                       \
         srcc -= align * 8 / sizeof(c);                                       \
     }                                                                        \
-    cpy_back_##simd##_8<sa, da>(dstc, srcc, n % (align * 8));                \
+    cpy_back_##simd##_8<sa, da>(dstc, srcc, n);                              \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY_SIMD_SWITCH(simd) \
