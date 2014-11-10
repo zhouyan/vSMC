@@ -19,7 +19,7 @@
 #include <malloc.h>
 #endif
 
-#if VSMC_HAS_TBB
+#if VSMC_HAS_TBB_MALLOC
 #include <tbb/scalable_allocator.h>
 #endif
 
@@ -32,7 +32,7 @@
 #ifndef VSMC_ALIGNED_MEMORY_TYPE
 #if VSMC_HAS_POSIX || defined(_MSC_VER)
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemorySYS
-#elif VSMC_HAS_TBB
+#elif VSMC_HAS_TBB_MALLOC
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryTBB
 #elif VSMC_HAS_MKL
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryMKL
@@ -158,7 +158,7 @@ class AlignedMemorySYS
 
 #endif // VSMC_HAS_POSIX
 
-#if VSMC_HAS_TBB
+#if VSMC_HAS_TBB_MALLOC
 
 /// \brief Aligned memory using Intel TBB `scalable_aligned_malloc` and
 /// `scalable_aligned_free`.
@@ -184,7 +184,7 @@ class AlignedMemoryTBB
     static void aligned_free (void *ptr) {scalable_aligned_free(ptr);}
 }; // class AlignedMemoryTBB
 
-#endif // VSMC_HAS_TBB
+#endif // VSMC_HAS_TBB_MALLOC
 
 #if VSMC_HAS_MKL
 
