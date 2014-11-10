@@ -408,9 +408,14 @@ inline void cpy_back_##simd (void *dst, const void *src, std::size_t n,      \
 #define VSMC_DEFINE_UTILITY_CSTRING_MEMSET(simd, align) \
 inline void *memset_##simd (void *dst, int ch, std::size_t n)                \
 {                                                                            \
-    char *dstc = static_cast<char *>(dst);                                   \
+    if (n < align) {                                                         \
+        internal::set_1(dst, ch, n);                                         \
+        return dst;                                                          \
+    }                                                                        \
                                                                              \
+    char *dstc = static_cast<char *>(dst);                                   \
     unsigned flag = internal::cstring_is_aligned<align>(dstc);               \
+                                                                             \
     if (n < align * 8) {                                                     \
         internal::set_##simd##_8(dstc, ch, n, flag);                         \
         return dst;                                                          \
@@ -436,9 +441,13 @@ inline void *memcpy_##simd (void *dst, const void *src, std::size_t n)       \
     if (dst == src)                                                          \
         return dst;                                                          \
                                                                              \
+    if (n < align) {                                                         \
+        internal::cpy_front_1(dst, src, n);                                  \
+        return dst;                                                          \
+    }                                                                        \
+                                                                             \
     char *dstc = static_cast<char *>(dst);                                   \
     const char *srcc = static_cast<const char *>(src);                       \
-                                                                             \
     unsigned flag = internal::cstring_is_aligned<align>(dstc) >> 1;          \
     flag |= internal::cstring_is_aligned<align>(srcc);                       \
                                                                              \
@@ -469,12 +478,16 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
     if (dst == src)                                                          \
         return dst;                                                          \
                                                                              \
+    if (n < align) {                                                         \
+        internal::move_front_1(dst, src, n);                                 \
+        return dst;                                                          \
+    }                                                                        \
+                                                                             \
     uintptr_t dsta = reinterpret_cast<uintptr_t>(dst);                       \
     uintptr_t srca = reinterpret_cast<uintptr_t>(src);                       \
     if (dsta < srca) {                                                       \
         char *dstc = static_cast<char *>(dst);                               \
         const char *srcc = static_cast<const char *>(src);                   \
-                                                                             \
         unsigned flag = internal::cstring_is_aligned<align>(dstc) >> 1;      \
         flag |= internal::cstring_is_aligned<align>(srcc);                   \
                                                                              \
@@ -502,7 +515,6 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
                                                                              \
     char *dstc = static_cast<char *>(dst) + n;                               \
     const char *srcc = static_cast<const char *>(src) + n;                   \
-                                                                             \
     unsigned flag = internal::cstring_is_aligned<align>(dstc) >> 1;          \
     flag |= internal::cstring_is_aligned<align>(srcc);                       \
                                                                              \
@@ -548,6 +560,21 @@ inline void cpy_front_1 (void *dst, const void *src, std::size_t n)
 }
 
 inline void cpy_back_1 (void *dst, const void *src, std::size_t n)
+{
+    if (n != 0) {
+        dst = static_cast<void *>(static_cast<char *>(dst) - n);
+        src = static_cast<const void *>(static_cast<const char *>(src) - n);
+        std::memmove(dst, src, n);
+    }
+}
+
+inline void move_front_1 (void *dst, const void *src, std::size_t n)
+{
+    if (n != 0)
+        std::memmove(dst, src, n);
+}
+
+inline void move_back_1 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0) {
         dst = static_cast<void *>(static_cast<char *>(dst) - n);
