@@ -259,7 +259,11 @@ class AlignedAllocator : public std::allocator<T>
                 memory_.aligned_malloc(sizeof(T) * n, Alignment));
     }
 
-    void deallocate (pointer ptr, size_type) {memory_.aligned_free(ptr);}
+    void deallocate (pointer ptr, size_type)
+    {
+        if (ptr != VSMC_NULLPTR)
+            memory_.aligned_free(ptr);
+    }
 
     private :
 

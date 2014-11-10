@@ -588,9 +588,8 @@ class CPUID
         return std::string(str);
     }
 
-    /// \brief Get the cache level corresponding each cache index (the index of
-    /// the returned vector)
-    static unsigned max_cache_index ()
+    /// \brief Get the number of caches
+    static unsigned cache_param_num ()
     {
         reg_type reg;
         unsigned ecx = 0x00;
@@ -606,8 +605,8 @@ class CPUID
 
     /// \brief Get the cache parameters (EAX = 0x04; EAX, EBX, ECX, EDX)
     ///
-    /// \note The maximum of the `cache_index` parameter is the length of the
-    /// vector returned by `cache_levels` minus 1.
+    /// \note The maximum of the `cache_index` parameter
+    /// `cache_param_num() - 1`
     static cache_param_type cache_param (unsigned cache_index)
     {
         reg_type reg;
@@ -698,7 +697,7 @@ class CPUID
     static void print_cache (std::basic_ostream<CharT, Traits> &os)
     {
         std::vector<cache_param_type> caches;
-        unsigned max_ecx = max_cache_index();
+        unsigned max_ecx = cache_param_num();
         for (unsigned ecx = 0x00; ecx != max_ecx; ++ecx)
             caches.push_back(cache_param(ecx));
 
@@ -739,7 +738,7 @@ class CPUID
             } else if ((b /= 1024) < 1024) {
                 ss << b << "M";
             } else {
-                ss << b / 1024 << "GB";
+                ss << b / 1024 << "G";
             }
             os << std::setw(fix) << ss.str();
         }

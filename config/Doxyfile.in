@@ -2022,6 +2022,14 @@ PREDEFINED             = VSMC_DOXYGEN \
                          VSMC_HAS_MKL \
                          VSMC_HAS_HDF5 \
                          __APPLE__ \
+                         __AVX__ \
+                         __AVX2__ \
+                         __SSE__ \
+                         __SSE2__ \
+                         __SSE3__ \
+                         __SSSE3__ \
+                         __SSE4_1__ \
+                         __SSE4_2__ \
                          __MAC_OS_X_VERSION_MIN_REQUIRED=1090 \
                          __MAC_10_0=1000 \
                          __MAC_10_1=1010 \

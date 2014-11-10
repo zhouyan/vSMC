@@ -135,7 +135,7 @@
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
-/// \defgroup AlignedMemory Aligned memory allocation
+/// \defgroup AlignedMemory Memory alignment
 /// \ingroup Utility
 /// \brief Memory allocation with alignment requirement
 
@@ -150,6 +150,10 @@
 /// \defgroup Counter Counter
 /// \ingroup Utility
 /// \brief Use Array of unsinged integers as counters
+
+/// \defgroup CString CString
+/// \ingroup Utility
+/// \brief Optimized `<cstring>` functions
 
 /// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility
