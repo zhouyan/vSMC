@@ -13,7 +13,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #include <intrin.h>
 #endif
 
@@ -162,7 +162,7 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
     lo = static_cast<uint64_t>(prod);
 }
 
-#elif defined(_MSC_VER) // VSMC_HAS_INT128
+#elif defined(VSMC_MSVC) // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
 inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)

@@ -13,7 +13,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #include <intrin.h>
 #else
 #include <emmintrin.h>

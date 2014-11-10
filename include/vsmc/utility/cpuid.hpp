@@ -14,7 +14,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/array.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #include <intrin.h>
 #endif
 
@@ -45,10 +45,10 @@ namespace vsmc {
 /// \ingroup CPUID
 inline void cpuid (unsigned eax, unsigned ecx, unsigned *reg)
 {
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
     __cpuidex(reinterpret_cast<int *>(reg),
             static_cast<int>(eax), static_cast<int>(ecx));
-#else // _MSC_VER
+#else // VSMC_MSVC
     unsigned ebx = 0x00;
     unsigned edx = 0x00;
     __asm__ volatile
@@ -61,7 +61,7 @@ inline void cpuid (unsigned eax, unsigned ecx, unsigned *reg)
     reg[1] = ebx;
     reg[2] = ecx;
     reg[3] = edx;
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 }
 
 /// \brief CPU features

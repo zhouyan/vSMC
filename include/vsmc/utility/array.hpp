@@ -13,7 +13,7 @@
 
 #include <vsmc/internal/common.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #pragma warning(push)
 #pragma warning(disable:4351)
 #endif
@@ -323,7 +323,7 @@ struct TupleElement<I, Array<T, N> > {typedef T type;};
 
 } // namespace vsmc
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #pragma warning(pop)
 #endif
 

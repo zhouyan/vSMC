@@ -18,7 +18,7 @@ namespace vsmc {
 
 VSMC_DEFINE_SMP_FORWARD(PPL)
 
-#if _MSC_VER >= 1700
+#if VSMC_MSVC_VERSION >= 1700
 namespace ppl = ::concurrency;
 #else
 namespace ppl = ::Concurrency;

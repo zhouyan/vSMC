@@ -11,14 +11,10 @@
 #ifndef VSMC_OPENCL_INTERNAL_CL_WRAPPER_HPP
 #define VSMC_OPENCL_INTERNAL_CL_WRAPPER_HPP
 
-#if defined(__GNUC__) && defined(__GNC_MINOR__) && !defined(__INTEL_COMPILER)
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
+#if defined(VSMC_GCC) && VSMC_GCC_VERSION >= 40600
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-#endif
-
-#ifdef _MSC_VER
+#elif defined(VSMC_MSVC)
 #pragma warning(push)
 #pragma warning(disable:4996)
 #endif
@@ -29,13 +25,9 @@
 #error __CL_ENABLE_EXCEPTIONS not defined before #include<cl.hpp>
 #endif
 
-#if defined(__GNUC__) && defined(__GNC_MINOR__) && !defined(__INTEL_COMPILER)
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
+#if defined(VSMC_GCC) && VSMC_GCC_VERSION >= 40600
 #pragma GCC diagnostic pop
-#endif
-#endif
-
-#ifdef _MSC_VER
+#elif defined(VSM_MSVC)
 #pragma warning(pop)
 #endif
 

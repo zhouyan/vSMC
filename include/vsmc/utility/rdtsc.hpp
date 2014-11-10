@@ -13,7 +13,7 @@
 
 #include <vsmc/internal/common.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #include <intrin.h>
 #endif
 
@@ -23,9 +23,9 @@ namespace vsmc {
 /// \ingroup RDTSC
 inline uint64_t rdtsc ()
 {
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
     return static_cast<uint64_t>(__rdtsc());
-#else // _MSC_VER
+#else // VSMC_MSVC
     unsigned eax = 0;
     unsigned edx = 0;
     __asm__ volatile
@@ -35,16 +35,16 @@ inline uint64_t rdtsc ()
         );
 
     return (static_cast<uint64_t>(edx) << 32) + static_cast<uint64_t>(eax);
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 }
 
 /// \brief Return the TSC and TSC_AUX values using RDTSCP instruction
 /// \ingroup RDTSC
 inline uint64_t rdtscp (unsigned *aux)
 {
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
     return static_cast<uint64_t>(__rdtscp(aux));
-#else // _MSC_VER
+#else // VSMC_MSVC
     unsigned eax = 0;
     unsigned ecx = 0;
     unsigned edx = 0;
@@ -56,7 +56,7 @@ inline uint64_t rdtscp (unsigned *aux)
     *aux = ecx;
 
     return static_cast<uint64_t>(eax) + (static_cast<uint64_t>(edx) << 32);
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 }
 
 /// \brief CPU clock cycle counter using RDTSC

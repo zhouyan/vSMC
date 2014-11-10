@@ -650,7 +650,7 @@ class CStringNonTemporalThreshold
     std::size_t max_level_;
 
     CStringNonTemporalThreshold () :
-        max_level_(3), threshold_(VSMC_CSTRING_NON_TEMPORAL_THRESHOLD)
+        threshold_(VSMC_CSTRING_NON_TEMPORAL_THRESHOLD), max_level_(3)
     {if (threshold_ == 0) set();}
 
     CStringNonTemporalThreshold (const CStringNonTemporalThreshold &);

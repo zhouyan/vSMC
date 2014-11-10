@@ -13,14 +13,14 @@
 
 #include <vsmc/internal/common.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED
-#else // _MSC_VER
+#else // VSMC_MSVC
 #define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_base_of<NIntegrateBase<Derived>, Derived>::value),    \
             USE_CRTP_NIntegrateBase_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE)
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 
 #define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_NO_IMPL(member) \
     VSMC_STATIC_ASSERT((cxx11::is_same<Derived, NullType>::value),           \

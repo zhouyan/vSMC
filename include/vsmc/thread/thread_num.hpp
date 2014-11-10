@@ -78,12 +78,12 @@ class ThreadNum
             static_cast<std::size_t>(1) :
             static_cast<std::size_t>(std::thread::hardware_concurrency()))
     {
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #pragma warning(push)
 #pragma warning(disable:4996)
 #endif
         const char *num_str = std::getenv("VSMC_THREAD_NUM");
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #pragma warning(pop)
 #endif
         if (num_str) {

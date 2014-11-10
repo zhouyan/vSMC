@@ -15,6 +15,11 @@
 #define VSMC_HAS_CXX11_LONG_LONG 1
 #endif
 
+#define VSMC_CLANG_NONEXIST 0xFFFFFFFFUL
+
+#define VSMC_CLANG_VERSION \
+    (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
+
 #if __cplusplus >= 201103L
 
 // C++11 language features

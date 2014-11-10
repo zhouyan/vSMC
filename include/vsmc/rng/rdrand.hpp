@@ -14,7 +14,7 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/generator_wrapper.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #include <intrin.h>
 #endif
 
@@ -42,7 +42,7 @@ namespace vsmc {
 /// \ingroup RDRNG
 template <typename UIntType> inline bool rdrand (UIntType *);
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 
 template <> inline bool rdrand<uint16_t> (uint16_t *rand)
 {
@@ -71,7 +71,7 @@ template <> inline bool rdrand<uint64_t> (uint64_t *rand)
     return cf != 0;
 }
 
-#else // _MSC_VER
+#else // VSMC_MSVC
 
 template <> inline bool rdrand<uint16_t> (uint16_t *rand)
 {
@@ -112,7 +112,7 @@ template <> inline bool rdrand<uint64_t> (uint64_t *rand)
     return cf != 0;
 }
 
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 
 /// \brief RDRAND generator
 /// \ingroup RDRNG

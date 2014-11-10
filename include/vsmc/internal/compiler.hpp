@@ -14,6 +14,7 @@
 #include <cstddef>
 
 #if defined(__APPLE__) || defined(__MACOSX)
+#define VSMC_MACOSX
 #include <Availability.h>
 #define VSMC_MAC_10_0  __MAC_10_0
 #define VSMC_MAC_10_1  __MAC_10_1
@@ -32,13 +33,13 @@
 #define VSMC_MAC_VERSION_MIN_REQUIRED(ver) 0
 #endif
 
-#if defined(__APPLE__) || defined(__MACOSX)
+#ifdef VSMC_MACOSX
 #if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_5)
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 1
 #endif
 #endif
-#else
+#else // VSMC_MACOSX
 #include <stdlib.h>
 #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
 #ifndef VSMC_HAS_POSIX
@@ -50,23 +51,29 @@
 #define VSMC_HAS_POSIX 1
 #endif
 #endif // _XOPEN_SOURCE >= 600
-#endif // __APPLE__
+#endif // VSMC_MACOSX
 
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 0
 #endif
 
 #if defined(__INTEL_COMPILER)
+#define VSMC_INTEL
 #include <vsmc/internal/compiler/intel.hpp>
 #elif defined(__clang__)
+#define VSMC_CLANG
 #include <vsmc/internal/compiler/clang.hpp>
 #elif defined(__OPEN64__)
+#define VSMC_OPEN64
 #include <vsmc/internal/compiler/open64.hpp>
 #elif defined(__SUNPRO_CC)
+#define VSMC_SUNPRO
 #include <vsmc/internal/compiler/sunpro.hpp>
 #elif defined(__GNUC__)
+#define VSMC_GCC
 #include <vsmc/internal/compiler/gcc.hpp>
 #elif defined(_MSC_VER)
+#define VSMC_MSVC
 #include <vsmc/internal/compiler/msvc.hpp>
 #endif
 

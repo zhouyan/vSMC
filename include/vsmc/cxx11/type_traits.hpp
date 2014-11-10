@@ -463,10 +463,10 @@ template <typename T> struct is_empty :
     sizeof(internal::is_empty_standalone<T>)> {};
 
 // is_polymorphic
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 template <typename T> struct is_polymorphic :
     public integral_constant<bool, __is_polymorphic(T)> {};
-#else // _MSC_VER
+#else // VSMC_MSVC
 namespace internal {
 template <typename T> tp_test_true is_polymorphic_test (
         typename enable_if<sizeof(static_cast<T *>(const_cast<void *>(
@@ -478,7 +478,7 @@ template <typename T> struct is_polymorphic :
     public integral_constant<bool,
     sizeof(internal::is_polymorphic_test<T>(0)) ==
     sizeof(internal::tp_test_true)> {};
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 
 // is_abstract
 namespace internal {

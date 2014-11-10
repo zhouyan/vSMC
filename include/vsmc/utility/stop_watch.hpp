@@ -29,19 +29,18 @@
 #ifndef VSMC_STOP_WATCH_TYPE
 #if VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchChrono
-#elif defined(__APPLE__) || defined(__MACOSX) \
-    || VSMC_HAS_POSIX || defined(_MSC_VER)
+#elif defined(VSMC_MACOSX) || VSMC_HAS_POSIX || defined(VSMC_MSVC)
 #define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchSYS
 #else
 #define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNull
 #endif
 #endif
 
-#if defined(__APPLE__) || defined(__MACOSX)
+#if defined(VSMC_MACOSX)
 #include <mach/mach_time.h>
 #elif VSMC_HAS_POSIX
 #include <time.h>
-#elif defined(_MSC_VER)
+#elif defined(VSMC_MSVC)
 #include <windows.h>
 #endif
 
@@ -207,7 +206,7 @@ StopWatchChrono;
 
 #endif // VSMC_HAS_CXX11LIB_CHRONO
 
-#if defined(__APPLE__) || defined(__MACOSX)
+#if defined(VSMC_MACOSX)
 
 /// \brief Stop watch using system native API
 /// \ingroup StopWatch
@@ -400,7 +399,7 @@ class StopWatchSYS
     static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
 }; // class StopWatchSYS
 
-#elif defined(_MSC_VER)
+#elif defined(VSMC_MSVC)
 
 class StopWatchSYS
 {
@@ -474,7 +473,7 @@ class StopWatchSYS
     bool running_;
 }; // class StopWatchSYS
 
-#endif // defined(__APPLE__) || defined(__MACOSX)
+#endif // defined(VSMC_MACOSX)
 
 /// \brief The default StopWatch
 /// \ingroup StopWatch

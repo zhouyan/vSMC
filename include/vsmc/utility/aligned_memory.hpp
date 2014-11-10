@@ -15,7 +15,7 @@
 
 #if VSMC_HAS_POSIX
 #include <stdlib.h>
-#elif defined(_MSC_VER)
+#elif defined(VSMC_MSVC)
 #include <malloc.h>
 #endif
 
@@ -30,7 +30,7 @@
 /// \brief Default AlignedMemory type
 /// \ingroup Config
 #ifndef VSMC_ALIGNED_MEMORY_TYPE
-#if VSMC_HAS_POSIX || defined(_MSC_VER)
+#if VSMC_HAS_POSIX || defined(VSMC_MSVC)
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemorySYS
 #elif VSMC_HAS_TBB_MALLOC
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryTBB
@@ -133,7 +133,7 @@ class AlignedMemorySYS
     static void aligned_free (void *ptr) {free(ptr);}
 }; // class AlignedMallocSYS
 
-#elif defined(_MSC_VER)
+#elif defined(VSMC_MSVC)
 
 class AlignedMemorySYS
 {
