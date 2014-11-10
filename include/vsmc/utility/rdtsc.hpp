@@ -19,26 +19,19 @@
 
 namespace vsmc {
 
-/// \brief Return the TSC value using RDTSC instruction after synchronization
-/// with CPUID instruction
+/// \brief Return the TSC value using RDTSC instruction
 /// \ingroup RDTSC
 inline uint64_t rdtsc ()
 {
 #ifdef _MSC_VER
-    int aux[4];
-    __cpuidex(aux, 0, 0);
-
     return static_cast<uint64_t>(__rdtsc());
 #else // _MSC_VER
     unsigned eax = 0;
-    unsigned ecx = 0;
     unsigned edx = 0;
     __asm__ volatile
         (
-         "cpuid\n\t"
          "rdtsc\n"
          : "=a" (eax), "=d" (edx)
-         :  "a" (eax),  "c" (ecx)
         );
 
     return (static_cast<uint64_t>(edx) << 32) + static_cast<uint64_t>(eax);
@@ -53,8 +46,8 @@ inline uint64_t rdtscp (unsigned *aux)
     return static_cast<uint64_t>(__rdtscp(aux));
 #else // _MSC_VER
     unsigned eax = 0;
-    unsigned edx = 0;
     unsigned ecx = 0;
+    unsigned edx = 0;
     __asm__ volatile
         (
          "rdtscp\n"
