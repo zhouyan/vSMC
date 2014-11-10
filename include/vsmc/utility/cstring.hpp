@@ -84,8 +84,8 @@
 
 /// \brief Shall functions in this module do runtime dispatch
 /// \ingroup Config
-#ifndef VSMC_CSTRING_RUNTIME_DISPACH
-#define VSMC_CSTRING_RUNTIME_DISPACH 0
+#ifndef VSMC_CSTRING_RUNTIME_DISPATCH
+#define VSMC_CSTRING_RUNTIME_DISPATCH 0
 #endif
 
 /// \brief Threshold above which non-temporal copy shall be used (0 for auto)
@@ -157,7 +157,6 @@ inline void set_##simd<da, nt> (void *dst, int ch, std::size_t n)            \
     c *dstc = static_cast<c *>(dst);                                         \
     m m0 = cs(s1(static_cast<char>(static_cast<unsigned char>(ch))));        \
                                                                              \
-    std::size_t nm = n / (align * 8);                                        \
     while (n >= align * 8) {                                                 \
         n -= align * 8;                                                      \
         s(dstc + align * 0 / sizeof(c), m0);                                 \
