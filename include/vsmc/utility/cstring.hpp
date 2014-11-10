@@ -493,7 +493,7 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
         }                                                                    \
                                                                              \
         flag = CStringNonTemporalThreshold::instance().over(n);              \
-        flag &= CStringNonTemporalThreshold::instance().over(srca - dsta);   \
+        flag &= (srca - dsta) >= align * 8 ? 1 : 0;                          \
         flag |= (internal::cstring_is_aligned<align>(srcc) << 1) | 2;        \
         internal::cpy_front_##simd(dstc, srcc, n, flag);                     \
                                                                              \
@@ -520,7 +520,7 @@ inline void *memmove_##simd (void *dst, const void *src, std::size_t n)      \
     }                                                                        \
                                                                              \
     flag = CStringNonTemporalThreshold::instance().over(n);                  \
-    flag &= CStringNonTemporalThreshold::instance().over(dsta - srca);       \
+    flag &= (dsta - srca) >= align * 8 ? 1 : 0;                              \
     flag |= (internal::cstring_is_aligned<align>(srcc) << 1) | 2;            \
     internal::cpy_back_##simd(dstc, srcc, n, flag);                          \
                                                                              \
