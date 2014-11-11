@@ -11,6 +11,8 @@
 #ifndef VSMC_OPENCL_INTERNAL_CL_WRAPPER_HPP
 #define VSMC_OPENCL_INTERNAL_CL_WRAPPER_HPP
 
+#include <vsmc/internal/config.hpp>
+
 #if defined(VSMC_GCC)
 #if VSMC_GCC_VERSION >= 40600
 #pragma GCC diagnostic push
