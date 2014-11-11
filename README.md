@@ -58,7 +58,7 @@ parallel SMC sampler. Other third-party parallelization include, [Intel Cilk
 Plus][Intel Cilk Plus], [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple
 Grand Central Dispatch][Apple GCD] is also supported on Mac OS X and on Linux
 via [libdispatch][libdispatch]. [Microsoft Parallel Patterns Library][MS PPL]
-is supported on Windows when compiled with MSVC 2010 or later. In addition,
+is supported on Windows when compiled with MSVC 2012 or later. In addition,
 this library also support using [OpenCL][OpenCL] for GPGPU computing, though
 the interface is different than others.
 
@@ -88,9 +88,8 @@ distributed with the library.
 This library has been regularly tested with recent [Clang][Clang], [GCC][GCC]
 and [Intel C++ Compiler][icpc], in both C++98 and C++11 modes.
 
-[Microsoft Visual C++][MSVC] is also supported. Version 2008 and later are able
-to compile the examples in C++98 mode. Version 2012 and later support most of
-the C++11 features. However, this compiler is tested less regularly.
+[Microsoft Visual C++][MSVC] 2012 or later are also supported. However, this
+compiler is tested less regularly.
 
 Other compilers such as [Open64][Open64] were previously tested in C++98 mode
 (most of them don't support C++11 at all). Future developments will rely more
