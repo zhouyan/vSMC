@@ -309,6 +309,14 @@
 #endif
 #endif
 
+#ifdef __AVX__
+#define VSMC_HAS_AES_NI 1
+#endif
+
+#ifdef __AVX2__
+#define VSMC_HAS_RDRAND 1
+#endif
+
 // Parallelization features
 
 #if VSMC_INTEL_VERSION >= 1210
