@@ -303,7 +303,7 @@
 
 // Parallelization features
 
-#if VSMC_MSVC_VERSION >= 1600
+#if VSMC_MSVC_VERSION >= 1700
 #ifndef VSMC_HAS_PPL
 #define VSMC_HAS_PPL 1
 #endif
