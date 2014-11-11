@@ -295,6 +295,12 @@
 
 // Target specific features
 
+#ifndef VSMC_HAS_SSE2
+#if _M_IX86_FP == 2 || defined(__AVX__)
+#define VSMC_HAS_SSE2 1
+#endif
+#endif
+
 // Parallelization features
 
 #if VSMC_MSVC_VERSION >= 1600

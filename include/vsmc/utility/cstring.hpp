@@ -74,13 +74,13 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cpuid.hpp>
 
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif // __SSE2__
-
-#ifdef __AVX__
+#if VSMC_HAS_AVX
 #include <immintrin.h>
-#endif // __AVX__
+#endif
+
+#if VSMC_HAS_SSE2
+#include <emmintrin.h>
+#endif
 
 /// \brief Shall functions in this module do runtime dispatch
 /// \ingroup Config
@@ -674,7 +674,7 @@ inline void *memcpy_std (void *dst, const void *src, std::size_t n)
 inline void *memmove_std (void *dst, const void *src, std::size_t n)
 {return std::memmove(dst, src, n);}
 
-#ifdef __SSE2__
+#if VSMC_HAS_SSE2
 
 namespace internal {
 
@@ -757,9 +757,9 @@ VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(sse2, 16)
 /// \ingroup CString
 VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(sse2, 16)
 
-#endif // __SSE2__
+#endif // VSMC_HAS_SSE2
 
-#ifdef __AVX__
+#if VSMC_HAS_AVX
 
 namespace internal {
 
@@ -842,7 +842,7 @@ VSMC_DEFINE_UTILITY_CSTRING_MEMCPY(avx, 32)
 /// \ingroup CString
 VSMC_DEFINE_UTILITY_CSTRING_MEMMOVE(avx, 32)
 
-#endif // __AVX__
+#endif // VSMC_HAS_AVX
 
 namespace internal {
 
@@ -877,15 +877,15 @@ class CStringRuntimeDispatch
         memcpy_ = memcpy_std;
         memmove_ = memmove_std;
 
-#ifdef __SSE2__
+#if VSMC_HAS_SSE2
         if (CPUID::has_feature<CPUIDFeatureSSE2>()) {
             memset_ = ::vsmc::memset_sse2;
             memcpy_ = ::vsmc::memcpy_sse2;
             memmove_ = ::vsmc::memmove_sse2;
         }
-#endif // __SSE2__
+#endif // VSMC_HAS_SSE2
 
-#ifdef __AVX__
+#if VSMC_HAS_AVX
         if (CPUID::has_feature<CPUIDFeatureAVX>()) {
             memset_ = ::vsmc::memset_avx;
             memcpy_ = ::vsmc::memcpy_avx;
@@ -893,7 +893,7 @@ class CStringRuntimeDispatch
 
             return;
         }
-#endif // __AVX__
+#endif // VSMC_HAS_AVX
     }
 
     CStringRuntimeDispatch (const CStringRuntimeDispatch &);
@@ -910,13 +910,13 @@ inline void *memset (void *dst, int ch, std::size_t n)
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memset(dst, ch, n);
 #else
-#if defined(__AVX__)
+#if VSMC_HAS_AVX
     return memset_avx(dst, ch, n);
-#elif defined(__SSE2__)
+#elif VSMC_HAS_SSE2
     return memset_sse2(dst, ch, n);
 #else
     return memset_std(dst, ch, n);
-#endif // defined(__AVX__)
+#endif
 #endif // VSMC_CSTRING_RUNTIME_DISPATCH
 }
 
@@ -928,13 +928,13 @@ inline void *memcpy (void *dst, const void *src, std::size_t n)
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memcpy(dst, src, n);
 #else
-#if defined(__AVX__)
+#if VSMC_HAS_AVX
     return memcpy_avx(dst, src, n);
-#elif defined(__SSE2__)
+#elif VSMC_HAS_SSE2
     return memcpy_sse2(dst, src, n);
 #else
     return memcpy_std(dst, src, n);
-#endif // defined(__AVX__)
+#endif
 #endif // VSMC_CSTRING_RUNTIME_DISPATCH
 }
 
@@ -945,13 +945,13 @@ inline void *memmove (void *dst, const void *src, std::size_t n)
 #if VSMC_CSTRING_RUNTIME_DISPATCH
     return internal::CStringRuntimeDispatch::instance().memmove(dst, src, n);
 #else
-#if defined(__AVX__)
+#if VSMC_HAS_AVX
     return memmove_avx(dst, src, n);
-#elif defined(__SSE2__)
+#elif VSMC_HAS_SSE2
     return memmove_sse2(dst, src, n);
 #else
     return memmove_std(dst, src, n);
-#endif // defined(__AVX__)
+#endif
 #endif // VSMC_CSTRING_RUNTIME_DISPATCH
 }
 
