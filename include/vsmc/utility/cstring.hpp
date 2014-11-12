@@ -107,10 +107,10 @@
                 static_cast<std::ptrdiff_t>(n)),                             \
             ("**vsmc::memcpy** OVERLAPPING BUFFERS"))
 
-#define VSMC_DEFINE_UTILITY_CSTRING_SET_16(ISA, da, c, m,\
+#define VSMC_DEFINE_UTILITY_CSTRING_SET_N(ISA, da, c, m,\
         cast, set1, store) \
 template <>                                                                  \
-inline void set_2<ISA, da> (void *dst, int ch, std::size_t n)                \
+inline void set_n<ISA, 1, da> (void *dst, int ch, std::size_t n)             \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -122,11 +122,11 @@ inline void set_2<ISA, da> (void *dst, int ch, std::size_t n)                \
         store(dstc, m0);                                                     \
         dstc += traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
     }                                                                        \
-    set_1<ISA>(dstc, ch, n);                                                 \
+    set_0<ISA>(dstc, ch, n);                                                 \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void set_4<ISA, da> (void *dst, int ch, std::size_t n)                \
+inline void set_n<ISA, 2, da> (void *dst, int ch, std::size_t n)             \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -139,11 +139,11 @@ inline void set_4<ISA, da> (void *dst, int ch, std::size_t n)                \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
     }                                                                        \
-    set_2<ISA, da>(dstc, ch, n);                                             \
+    set_n<ISA, 1, da>(dstc, ch, n);                                          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void set_8<ISA, da> (void *dst, int ch, std::size_t n)                \
+inline void set_n<ISA, 4, da> (void *dst, int ch, std::size_t n)             \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -158,11 +158,11 @@ inline void set_8<ISA, da> (void *dst, int ch, std::size_t n)                \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    set_4<ISA, da>(dstc, ch, n);                                             \
+    set_n<ISA, 2, da>(dstc, ch, n);                                          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void set_16<ISA, da> (void *dst, int ch, std::size_t n)               \
+inline void set_n<ISA, 8, da> (void *dst, int ch, std::size_t n)             \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -181,13 +181,32 @@ inline void set_16<ISA, da> (void *dst, int ch, std::size_t n)               \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    set_8<ISA, da>(dstc, ch, n);                                             \
+    set_n<ISA, 4, da>(dstc, ch, n);                                          \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_LOOP(ISA, da, nt, c, m,\
         cast, set1, store) \
 template <>                                                                  \
-inline void set_loop<ISA, da, nt> (void *dst, int ch, std::size_t n)         \
+inline void set_loop<ISA, 4, da, nt> (void *dst, int ch, std::size_t n)      \
+{                                                                            \
+    if (n == 0)                                                              \
+        return;                                                              \
+                                                                             \
+    c *dstc = static_cast<c *>(dst);                                         \
+    m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));    \
+    while (n >= traits::SIMDTrait<ISA>::alignment * 4) {                     \
+        n -= traits::SIMDTrait<ISA>::alignment * 4;                          \
+        store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c), m0); \
+        store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c), m0); \
+        store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c), m0); \
+        store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c), m0); \
+        dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
+    }                                                                        \
+    set_n<ISA, 2, da>(dstc, ch, n);                                          \
+}                                                                            \
+                                                                             \
+template <>                                                                  \
+inline void set_loop<ISA, 8, da, nt> (void *dst, int ch, std::size_t n)      \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -206,12 +225,12 @@ inline void set_loop<ISA, da, nt> (void *dst, int ch, std::size_t n)         \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    set_8<ISA, da>(dstc, ch, n);                                             \
+    set_n<ISA, 4, da>(dstc, ch, n);                                          \
 }
 
-#define VSMC_DEFINE_UTILITY_CSTRING_CPY_16(ISA, sa, da, c, m, load, store) \
+#define VSMC_DEFINE_UTILITY_CSTRING_CPY_N(ISA, sa, da, c, m, load, store) \
 template <>                                                                  \
-inline void cpy_front_2<ISA, sa, da> (void *dst, const void *src,            \
+inline void cpy_front_n<ISA, 1, sa, da> (void *dst, const void *src,         \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -226,11 +245,11 @@ inline void cpy_front_2<ISA, sa, da> (void *dst, const void *src,            \
         dstc += traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
         srcc += traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
     }                                                                        \
-    cpy_front_1<ISA>(dstc, srcc, n);                                         \
+    cpy_front_0<ISA>(dstc, srcc, n);                                         \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_front_4<ISA, sa, da> (void *dst, const void *src,            \
+inline void cpy_front_n<ISA, 2, sa, da> (void *dst, const void *src,         \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -247,12 +266,12 @@ inline void cpy_front_4<ISA, sa, da> (void *dst, const void *src,            \
         dstc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
     }                                                                        \
-    cpy_front_2<ISA, sa, da>(dstc, srcc, n);                                 \
+    cpy_front_n<ISA, 1, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
                                                                              \
 template <>                                                                  \
-inline void cpy_front_8<ISA, sa, da> (void *dst, const void *src,            \
+inline void cpy_front_n<ISA, 4, sa, da> (void *dst, const void *src,         \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -273,11 +292,11 @@ inline void cpy_front_8<ISA, sa, da> (void *dst, const void *src,            \
         dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    cpy_front_4<ISA, sa, da>(dstc, srcc, n);                                 \
+    cpy_front_n<ISA, 2, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_front_16<ISA, sa, da> (void *dst, const void *src,           \
+inline void cpy_front_n<ISA, 8, sa, da> (void *dst, const void *src,         \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -306,11 +325,11 @@ inline void cpy_front_16<ISA, sa, da> (void *dst, const void *src,           \
         dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    cpy_front_8<ISA, sa, da>(dstc, srcc, n);                                 \
+    cpy_front_n<ISA, 4, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_2<ISA, sa, da> (void *dst, const void *src,             \
+inline void cpy_back_n<ISA, 1, sa, da> (void *dst, const void *src,          \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -325,11 +344,11 @@ inline void cpy_back_2<ISA, sa, da> (void *dst, const void *src,             \
         dstc -= traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
         srcc -= traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
     }                                                                        \
-    cpy_back_1<ISA>(dstc, srcc, n);                                          \
+    cpy_back_0<ISA>(dstc, srcc, n);                                          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_4<ISA, sa, da> (void *dst, const void *src,             \
+inline void cpy_back_n<ISA, 2, sa, da> (void *dst, const void *src,          \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -346,11 +365,11 @@ inline void cpy_back_4<ISA, sa, da> (void *dst, const void *src,             \
         dstc -= traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
     }                                                                        \
-    cpy_back_2<ISA, sa, da>(dstc, srcc, n);                                  \
+    cpy_back_n<ISA, 1, sa, da>(dstc, srcc, n);                               \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_8<ISA, sa, da> (void *dst, const void *src,             \
+inline void cpy_back_n<ISA, 4, sa, da> (void *dst, const void *src,          \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -371,11 +390,11 @@ inline void cpy_back_8<ISA, sa, da> (void *dst, const void *src,             \
         dstc -= traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    cpy_back_4<ISA, sa, da>(dstc, srcc, n);                                  \
+    cpy_back_n<ISA, 2, sa, da>(dstc, srcc, n);                               \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_16<ISA, sa, da> (void *dst, const void *src,            \
+inline void cpy_back_n<ISA, 8, sa, da> (void *dst, const void *src,          \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -404,13 +423,38 @@ inline void cpy_back_16<ISA, sa, da> (void *dst, const void *src,            \
         dstc -= traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    cpy_back_8<ISA, sa, da>(dstc, srcc, n);                                  \
+    cpy_back_n<ISA, 4, sa, da>(dstc, srcc, n);                               \
 }                                                                            \
 
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(ISA, sa, da, nt,\
         c, m, load, store) \
 template <>                                                                  \
-inline void cpy_front_loop<ISA, sa, da, nt> (void *dst, const void *src,     \
+inline void cpy_front_loop<ISA, 4, sa, da, nt> (void *dst, const void *src,  \
+        std::size_t n)                                                       \
+{                                                                            \
+    if (n == 0)                                                              \
+        return;                                                              \
+                                                                             \
+    c *dstc = static_cast<c *>(dst);                                         \
+    const c *srcc = static_cast<const c *>(src);                             \
+    while (n >= traits::SIMDTrait<ISA>::alignment * 4) {                     \
+        n -= traits::SIMDTrait<ISA>::alignment * 4;                          \
+        m m0 = load(srcc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));\
+        m m1 = load(srcc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));\
+        m m2 = load(srcc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));\
+        m m3 = load(srcc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));\
+        store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c), m0); \
+        store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c), m1); \
+        store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c), m2); \
+        store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c), m3); \
+        dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
+        srcc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
+    }                                                                        \
+    cpy_front_n<ISA, 2, sa, da>(dstc, srcc, n);                              \
+}                                                                            \
+                                                                             \
+template <>                                                                  \
+inline void cpy_front_loop<ISA, 8, sa, da, nt> (void *dst, const void *src,  \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -439,11 +483,36 @@ inline void cpy_front_loop<ISA, sa, da, nt> (void *dst, const void *src,     \
         dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    cpy_front_8<ISA, sa, da>(dstc, srcc, n);                                 \
+    cpy_front_n<ISA, 4, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_loop<ISA, sa, da, nt> (void *dst, const void *src,      \
+inline void cpy_back_loop<ISA, 4, sa, da, nt> (void *dst, const void *src,   \
+        std::size_t n)                                                       \
+{                                                                            \
+    if (n == 0)                                                              \
+        return;                                                              \
+                                                                             \
+    c *dstc = static_cast<c *>(dst);                                         \
+    const c *srcc = static_cast<const c *>(src);                             \
+    while (n >= traits::SIMDTrait<ISA>::alignment * 4) {                     \
+        n -= traits::SIMDTrait<ISA>::alignment * 4;                          \
+        m m1 = load(srcc - traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));\
+        m m2 = load(srcc - traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));\
+        m m3 = load(srcc - traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));\
+        m m4 = load(srcc - traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c));\
+        store(dstc - traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c), m1); \
+        store(dstc - traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c), m2); \
+        store(dstc - traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c), m3); \
+        store(dstc - traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c), m4); \
+        dstc -= traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
+        srcc -= traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
+    }                                                                        \
+    cpy_back_n<ISA, 2, sa, da>(dstc, srcc, n);                               \
+}                                                                            \
+                                                                             \
+template <>                                                                  \
+inline void cpy_back_loop<ISA, 8, sa, da, nt> (void *dst, const void *src,   \
         std::size_t n)                                                       \
 {                                                                            \
     if (n == 0)                                                              \
@@ -472,196 +541,7 @@ inline void cpy_back_loop<ISA, sa, da, nt> (void *dst, const void *src,      \
         dstc -= traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    cpy_back_8<ISA, sa, da>(dstc, srcc, n);                                  \
-}
-
-#define VSMC_DEFINE_UTILITY_CSTRING_SWITCH(ISA) \
-template <>                                                                  \
-inline void set_2_switch<ISA> (void *dst, int ch, std::size_t n,             \
-        unsigned flag)                                                       \
-{flag == 0 ? set_2<ISA, false>(dst, ch, n): set_2<ISA, true>(dst, ch, n);}   \
-                                                                             \
-template <>                                                                  \
-inline void set_4_switch<ISA> (void *dst, int ch, std::size_t n,             \
-        unsigned flag)                                                       \
-{flag == 0 ? set_4<ISA, false>(dst, ch, n): set_4<ISA, true>(dst, ch, n);}   \
-                                                                             \
-template <>                                                                  \
-inline void set_8_switch<ISA> (void *dst, int ch, std::size_t n,             \
-        unsigned flag)                                                       \
-{flag == 0 ? set_8<ISA, false>(dst, ch, n): set_8<ISA, true>(dst, ch, n);}   \
-                                                                             \
-template <>                                                                  \
-inline void set_16_switch<ISA> (void *dst, int ch, std::size_t n,            \
-        unsigned flag)                                                       \
-{flag == 0 ? set_16<ISA, false>(dst, ch, n): set_16<ISA, true>(dst, ch, n);} \
-                                                                             \
-template <>                                                                  \
-inline void set_loop_switch<ISA> (void *dst, int ch, std::size_t n,          \
-        unsigned flag)                                                       \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: set_loop<ISA, false, false>(dst, ch, n); break;              \
-        case 2: set_loop<ISA, true,  false>(dst, ch, n); break;              \
-        case 3: set_loop<ISA, true,  true >(dst, ch, n); break;              \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(set_loop_switch);     \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_front_2_switch<ISA> (void *dst, const void *src,             \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: cpy_front_2<ISA, false, false>(dst, src, n); break;          \
-        case 1: cpy_front_2<ISA, false, true >(dst, src, n); break;          \
-        case 2: cpy_front_2<ISA, true,  false>(dst, src, n); break;          \
-        case 3: cpy_front_2<ISA, true,  true >(dst, src, n); break;          \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_2_switch);  \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_front_4_switch<ISA> (void *dst, const void *src,             \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: cpy_front_4<ISA, false, false>(dst, src, n); break;          \
-        case 1: cpy_front_4<ISA, false, true >(dst, src, n); break;          \
-        case 2: cpy_front_4<ISA, true,  false>(dst, src, n); break;          \
-        case 3: cpy_front_4<ISA, true,  true >(dst, src, n); break;          \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_4_switch);  \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_front_8_switch<ISA> (void *dst, const void *src,             \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: cpy_front_8<ISA, false, false>(dst, src, n); break;          \
-        case 1: cpy_front_8<ISA, false, true >(dst, src, n); break;          \
-        case 2: cpy_front_8<ISA, true,  false>(dst, src, n); break;          \
-        case 3: cpy_front_8<ISA, true,  true >(dst, src, n); break;          \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_8_switch);  \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_front_16_switch<ISA> (void *dst, const void *src,            \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: cpy_front_16<ISA, false, false>(dst, src, n); break;         \
-        case 1: cpy_front_16<ISA, false, true >(dst, src, n); break;         \
-        case 2: cpy_front_16<ISA, true,  false>(dst, src, n); break;         \
-        case 3: cpy_front_16<ISA, true,  true >(dst, src, n); break;         \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_16_switch); \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_front_loop_switch<ISA> (void *dst, const void *src,          \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0 : cpy_front_loop<ISA, false, false, false>(dst, src, n); break;\
-        case 2 : cpy_front_loop<ISA, false, true,  false>(dst, src, n); break;\
-        case 3 : cpy_front_loop<ISA, false, true,  true >(dst, src, n); break;\
-        case 4 : cpy_front_loop<ISA, true,  false, false>(dst, src, n); break;\
-        case 6 : cpy_front_loop<ISA, true,  true,  false>(dst, src, n); break;\
-        case 7 : cpy_front_loop<ISA, true,  true,  true >(dst, src, n); break;\
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_loop_switch);\
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_back_2_switch<ISA> (void *dst, const void *src,              \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: cpy_back_2<ISA, false, false>(dst, src, n); break;           \
-        case 1: cpy_back_2<ISA, false, true >(dst, src, n); break;           \
-        case 2: cpy_back_2<ISA, true,  false>(dst, src, n); break;           \
-        case 3: cpy_back_2<ISA, true,  true >(dst, src, n); break;           \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_2_switch);   \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_back_4_switch<ISA> (void *dst, const void *src,              \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: cpy_back_4<ISA, false, false>(dst, src, n); break;           \
-        case 1: cpy_back_4<ISA, false, true >(dst, src, n); break;           \
-        case 2: cpy_back_4<ISA, true,  false>(dst, src, n); break;           \
-        case 3: cpy_back_4<ISA, true,  true >(dst, src, n); break;           \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_4_switch);   \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_back_8_switch<ISA> (void *dst, const void *src,              \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: cpy_back_8<ISA, false, false>(dst, src, n); break;           \
-        case 1: cpy_back_8<ISA, false, true >(dst, src, n); break;           \
-        case 2: cpy_back_8<ISA, true,  false>(dst, src, n); break;           \
-        case 3: cpy_back_8<ISA, true,  true >(dst, src, n); break;           \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_8_switch);   \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_back_16_switch<ISA> (void *dst, const void *src,             \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0: cpy_back_16<ISA, false, false>(dst, src, n); break;          \
-        case 1: cpy_back_16<ISA, false, true >(dst, src, n); break;          \
-        case 2: cpy_back_16<ISA, true,  false>(dst, src, n); break;          \
-        case 3: cpy_back_16<ISA, true,  true >(dst, src, n); break;          \
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_16_switch);  \
-            break;                                                           \
-    }                                                                        \
-}                                                                            \
-                                                                             \
-template <>                                                                  \
-inline void cpy_back_loop_switch<ISA> (void *dst, const void *src,           \
-        std::size_t n, unsigned flag)                                        \
-{                                                                            \
-    switch (flag) {                                                          \
-        case 0 : cpy_back_loop<ISA, false, false, false>(dst, src, n); break;\
-        case 2 : cpy_back_loop<ISA, false, true,  false>(dst, src, n); break;\
-        case 3 : cpy_back_loop<ISA, false, true,  true >(dst, src, n); break;\
-        case 4 : cpy_back_loop<ISA, true,  false, false>(dst, src, n); break;\
-        case 6 : cpy_back_loop<ISA, true,  true,  false>(dst, src, n); break;\
-        case 7 : cpy_back_loop<ISA, true,  true,  true >(dst, src, n); break;\
-        default :                                                            \
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_loop_switch);\
-            break;                                                           \
-    }                                                                        \
+    cpy_back_n<ISA, 4, sa, da>(dstc, srcc, n);                               \
 }
 
 namespace vsmc {
@@ -676,21 +556,21 @@ inline unsigned cstring_is_aligned (const void *ptr)
 }
 
 template <SIMD>
-inline void set_1 (void *dst, int ch, std::size_t n)
+inline void set_0 (void *dst, int ch, std::size_t n)
 {
     if (n != 0)
         std::memset(dst, ch, n);
 }
 
 template <SIMD>
-inline void cpy_front_1 (void *dst, const void *src, std::size_t n)
+inline void cpy_front_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0)
         std::memmove(dst, src, n);
 }
 
 template <SIMD>
-inline void cpy_back_1 (void *dst, const void *src, std::size_t n)
+inline void cpy_back_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0) {
         dst = static_cast<void *>(static_cast<char *>(dst) - n);
@@ -700,14 +580,14 @@ inline void cpy_back_1 (void *dst, const void *src, std::size_t n)
 }
 
 template <SIMD>
-inline void move_front_1 (void *dst, const void *src, std::size_t n)
+inline void move_front_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0)
         std::memmove(dst, src, n);
 }
 
 template <SIMD>
-inline void move_back_1 (void *dst, const void *src, std::size_t n)
+inline void move_back_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0) {
         dst = static_cast<void *>(static_cast<char *>(dst) - n);
@@ -716,80 +596,27 @@ inline void move_back_1 (void *dst, const void *src, std::size_t n)
     }
 }
 
-template <SIMD, bool> inline void set_2 (
+template <SIMD, std::size_t, bool> inline void set_n (
         void *, int, std::size_t);
-template <SIMD, bool> inline void set_4 (
-        void *, int, std::size_t);
-template <SIMD, bool> inline void set_8 (
-        void *, int, std::size_t);
-template <SIMD, bool> inline void set_16 (
-        void *, int, std::size_t);
-template <SIMD, bool, bool> inline void set_loop (
+template <SIMD, std::size_t, bool, bool> inline void set_loop (
         void *, int, std::size_t);
 
-template <SIMD, bool, bool> inline void cpy_front_2 (
+template <SIMD, std::size_t, bool, bool> inline void cpy_front_n (
         void *, const void *, std::size_t);
-template <SIMD, bool, bool> inline void cpy_front_4 (
-        void *, const void *, std::size_t);
-template <SIMD, bool, bool> inline void cpy_front_8 (
-        void *, const void *, std::size_t);
-template <SIMD, bool, bool> inline void cpy_front_16 (
-        void *, const void *, std::size_t);
-template <SIMD, bool, bool, bool> inline void cpy_front_loop (
+template <SIMD, std::size_t, bool, bool, bool> inline void cpy_front_loop (
         void *, const void *, std::size_t);
 
-
-template <SIMD, bool, bool> inline void cpy_back_2 (
+template <SIMD, std::size_t, bool, bool> inline void cpy_back_n (
         void *, const void *, std::size_t);
-template <SIMD, bool, bool> inline void cpy_back_4 (
+template <SIMD, std::size_t, bool, bool, bool> inline void cpy_back_loop (
         void *, const void *, std::size_t);
-template <SIMD, bool, bool> inline void cpy_back_8 (
-        void *, const void *, std::size_t);
-template <SIMD, bool, bool> inline void cpy_back_16 (
-        void *, const void *, std::size_t);
-template <SIMD, bool, bool, bool> inline void cpy_back_loop (
-        void *, const void *, std::size_t);
-
-template <SIMD> inline void set_2_switch (
-        void *, int, std::size_t, unsigned);
-template <SIMD> inline void set_4_switch (
-        void *, int, std::size_t, unsigned);
-template <SIMD> inline void set_16_switch (
-        void *, int, std::size_t, unsigned);
-template <SIMD> inline void set_8_switch (
-        void *, int, std::size_t, unsigned);
-template <SIMD> inline void set_loop_switch (
-        void *, int, std::size_t, unsigned);
-
-template <SIMD> inline void cpy_front_2_switch (
-        void *, const void *, std::size_t, unsigned);
-template <SIMD> inline void cpy_front_4_switch (
-        void *, const void *, std::size_t, unsigned);
-template <SIMD> inline void cpy_front_8_switch (
-        void *, const void *, std::size_t, unsigned);
-template <SIMD> inline void cpy_front_16_switch (
-        void *, const void *, std::size_t, unsigned);
-template <SIMD> inline void cpy_front_loop_switch (
-        void *, const void *, std::size_t, unsigned);
-
-template <SIMD> inline void cpy_back_2_switch (
-        void *, const void *, std::size_t, unsigned);
-template <SIMD> inline void cpy_back_4_switch (
-        void *, const void *, std::size_t, unsigned);
-template <SIMD> inline void cpy_back_8_switch (
-        void *, const void *, std::size_t, unsigned);
-template <SIMD> inline void cpy_back_16_switch (
-        void *, const void *, std::size_t, unsigned);
-template <SIMD> inline void cpy_back_loop_switch (
-        void *, const void *, std::size_t, unsigned);
-
 
 #if VSMC_HAS_SSE2
 
-VSMC_DEFINE_UTILITY_CSTRING_SET_16(SSE2, false,
+VSMC_DEFINE_UTILITY_CSTRING_SET_N(SSE2, false,
         double, __m128d, _mm_castsi128_pd, _mm_set1_epi8,
         _mm_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET_16(SSE2, true,
+VSMC_DEFINE_UTILITY_CSTRING_SET_N(SSE2, true,
         double, __m128d, _mm_castsi128_pd, _mm_set1_epi8,
         _mm_store_pd)
 
@@ -803,13 +630,13 @@ VSMC_DEFINE_UTILITY_CSTRING_SET_LOOP(SSE2, true, true,
         double, __m128d, _mm_castsi128_pd, _mm_set1_epi8,
         _mm_stream_pd)
 
-VSMC_DEFINE_UTILITY_CSTRING_CPY_16(SSE2, false, false,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_N(SSE2, false, false,
         double, __m128d, _mm_loadu_pd, _mm_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY_16(SSE2, false, true,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_N(SSE2, false, true,
         double, __m128d, _mm_loadu_pd, _mm_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY_16(SSE2, true, false,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_N(SSE2, true, false,
         double, __m128d, _mm_load_pd, _mm_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY_16(SSE2, true, true,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_N(SSE2, true, true,
         double, __m128d, _mm_load_pd, _mm_store_pd)
 
 VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(SSE2, false, false, false,
@@ -825,12 +652,11 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(SSE2, true, true, false,
 VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(SSE2, true, true, true,
         double, __m128d, _mm_load_pd, _mm_stream_pd)
 
-VSMC_DEFINE_UTILITY_CSTRING_SWITCH(SSE2)
-
 #endif // VSMC_HAS_SSE2
 
 #if VSMC_HAS_AVX
 
+/*****************************************************************************
 template <>
 inline void set_1<AVX> (void *dst, int ch, std::size_t n)
 {
@@ -909,15 +735,16 @@ inline void cpy_back_1<AVX> (void *dst, const void *src, std::size_t n)
 template <>
 inline void move_front_1<AVX> (void *dst, const void *src, std::size_t n)
 {cpy_front_1<AVX>(dst, src, n);}
+*****************************************************************************/
 
 template <>
 inline void move_back_1<AVX> (void *dst, const void *src, std::size_t n)
 {cpy_back_1<AVX>(dst, src, n);}
 
-VSMC_DEFINE_UTILITY_CSTRING_SET_16(AVX, false,
+VSMC_DEFINE_UTILITY_CSTRING_SET_N(AVX, false,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
         _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET_16(AVX, true,
+VSMC_DEFINE_UTILITY_CSTRING_SET_N(AVX, true,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
         _mm256_store_pd)
 
@@ -931,13 +758,13 @@ VSMC_DEFINE_UTILITY_CSTRING_SET_LOOP(AVX, true, true,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
         _mm256_stream_pd)
 
-VSMC_DEFINE_UTILITY_CSTRING_CPY_16(AVX, false, false,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_N(AVX, false, false,
         double, __m256d, _mm256_loadu_pd, _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY_16(AVX, false, true,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_N(AVX, false, true,
         double, __m256d, _mm256_loadu_pd, _mm256_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY_16(AVX, true, false,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_N(AVX, true, false,
         double, __m256d, _mm256_load_pd, _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY_16(AVX, true, true,
+VSMC_DEFINE_UTILITY_CSTRING_CPY_N(AVX, true, true,
         double, __m256d, _mm256_load_pd, _mm256_store_pd)
 
 VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(AVX, false, false, false,
@@ -953,9 +780,104 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(AVX, true, true, false,
 VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(AVX, true, true, true,
         double, __m256d, _mm256_load_pd, _mm256_stream_pd)
 
-VSMC_DEFINE_UTILITY_CSTRING_SWITCH(AVX)
-
 #endif // VSMC_HAS_AVX
+
+template <SIMD ISA, std::size_t N>
+inline void set_n_switch (void *dst, int ch, std::size_t n, unsigned flag)
+{
+    flag == 0 ?
+        set_n<ISA, N, false>(dst, ch, n):
+        set_n<ISA, N, true>(dst, ch, n);
+}
+
+template <SIMD ISA, std::size_t N>
+inline void set_loop_switch (void *dst, int ch, std::size_t n, unsigned flag)
+{
+    switch (flag) {
+        case 0: set_loop<ISA, N, false, false>(dst, ch, n); break;
+        case 2: set_loop<ISA, N, true,  false>(dst, ch, n); break;
+        case 3: set_loop<ISA, N, true,  true >(dst, ch, n); break;
+        default :
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(set_loop_switch);
+            break;
+    }
+}
+
+template <SIMD ISA, std::size_t N>
+inline void cpy_front_n_switch (void *dst, const void *src, std::size_t n,
+        unsigned flag)
+{
+    switch (flag) {
+        case 0: cpy_front_n<ISA, N, false, false>(dst, src, n); break;
+        case 1: cpy_front_n<ISA, N, false, true >(dst, src, n); break;
+        case 2: cpy_front_n<ISA, N, true,  false>(dst, src, n); break;
+        case 3: cpy_front_n<ISA, N, true,  true >(dst, src, n); break;
+        default :
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_n_switch);
+            break;
+    }
+}
+
+template <SIMD ISA, std::size_t N>
+inline void cpy_back_n_switch (void *dst, const void *src, std::size_t n,
+        unsigned flag)
+{
+    switch (flag) {
+        case 0: cpy_back_n<ISA, N, false, false>(dst, src, n); break;
+        case 1: cpy_back_n<ISA, N, false, true >(dst, src, n); break;
+        case 2: cpy_back_n<ISA, N, true,  false>(dst, src, n); break;
+        case 3: cpy_back_n<ISA, N, true,  true >(dst, src, n); break;
+        default :
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_n_switch);
+            break;
+    }
+}
+
+template <SIMD ISA, std::size_t N>
+inline void cpy_front_loop_switch (void *dst, const void *src, std::size_t n,
+        unsigned flag)
+{
+    switch (flag) {
+        case 0 :
+            cpy_front_loop<ISA, N, false, false, false>(dst, src, n); break;
+        case 2 :
+            cpy_front_loop<ISA, N, false, true,  false>(dst, src, n); break;
+        case 3 :
+            cpy_front_loop<ISA, N, false, true,  true >(dst, src, n); break;
+        case 4 :
+            cpy_front_loop<ISA, N, true,  false, false>(dst, src, n); break;
+        case 6 :
+            cpy_front_loop<ISA, N, true,  true,  false>(dst, src, n); break;
+        case 7 :
+            cpy_front_loop<ISA, N, true,  true,  true >(dst, src, n); break;
+        default :
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_loop_switch);
+            break;
+    }
+}
+
+template <SIMD ISA, std::size_t N>
+inline void cpy_back_loop_switch (void *dst, const void *src, std::size_t n,
+        unsigned flag)
+{
+    switch (flag) {
+        case 0 :
+            cpy_back_loop<ISA, N, false, false, false>(dst, src, n); break;
+        case 2 :
+            cpy_back_loop<ISA, N, false, true,  false>(dst, src, n); break;
+        case 3 :
+            cpy_back_loop<ISA, N, false, true,  true >(dst, src, n); break;
+        case 4 :
+            cpy_back_loop<ISA, N, true,  false, false>(dst, src, n); break;
+        case 6 :
+            cpy_back_loop<ISA, N, true,  true,  false>(dst, src, n); break;
+        case 7 :
+            cpy_back_loop<ISA, N, true,  true,  true >(dst, src, n); break;
+        default :
+            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_loop_switch);
+            break;
+    }
+}
 
 } // namespace internal
 
@@ -1033,6 +955,122 @@ class CStringNonTemporalThreshold
             const CStringNonTemporalThreshold &);
 }; // class CStringNonTemporalThreshold
 
+namespace internal {
+
+template <SIMD ISA>
+inline void *memset_simd (void *dst, int ch, std::size_t n)
+{
+    if (n < traits::SIMDTrait<ISA>::alignment) {
+        set_0<ISA>(dst, ch, n);
+        return dst;
+    }
+
+    unsigned flag = cstring_is_aligned<ISA>(dst);
+    if (n <= 128) {
+        set_n_switch<ISA, 128 / traits::SIMDTrait<ISA>::alignment>(
+                dst, ch, n, flag);
+        return dst;
+    }
+
+    char *dstc = static_cast<char *>(dst);
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 128;
+    if (offset != 0) {
+        offset = 128 - offset;
+        set_n_switch<ISA, 64 / traits::SIMDTrait<ISA>::alignment>(
+                dstc, ch, offset, flag);
+        n -= offset;
+        dstc += offset;
+    }
+    flag = CStringNonTemporalThreshold::instance().over(n) | 2;
+    set_loop_switch<ISA, 128 / traits::SIMDTrait<ISA>::alignment>(
+            dstc, ch, n, flag);
+
+    return dst;
+}
+
+template <SIMD ISA>
+inline void *memcpy_simd (void *dst, const void *src, std::size_t n)
+{
+    if (dst == src)
+        return dst;
+
+    if (n < traits::SIMDTrait<ISA>::alignment) {
+        cpy_front_0<ISA>(dst, src, n);
+        return dst;
+    }
+
+    unsigned flag = cstring_is_aligned<ISA>(dst) >> 1;
+    flag |= cstring_is_aligned<ISA>(src);
+    if (n <= 128) {
+        cpy_front_n_switch<ISA, 128 / traits::SIMDTrait<ISA>::alignment>(
+                dst, src, n, flag);
+        return dst;
+    }
+
+    char *dstc = static_cast<char *>(dst);
+    const char *srcc = static_cast<const char *>(src);
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 128;
+    if (offset != 0) {
+        offset = 128 - offset;
+        cpy_front_n_switch<ISA, 64 / traits::SIMDTrait<ISA>::alignment>(
+                dstc, srcc, offset, flag);
+        n -= offset;
+        dstc += offset;
+        srcc += offset;
+    }
+    flag = CStringNonTemporalThreshold::instance().over(n) | 2;
+    flag |= cstring_is_aligned<ISA>(srcc) << 1;
+    cpy_front_loop_switch<ISA, 128 / traits::SIMDTrait<ISA>::alignment>(
+            dstc, srcc, n, flag);
+
+    return dst;
+}
+
+template <SIMD ISA>
+inline void *memmove_simd (void *dst, const void *src, std::size_t n)
+{
+    if (dst == src)
+        return dst;
+
+    uintptr_t dsta = reinterpret_cast<uintptr_t>(dst);
+    uintptr_t srca = reinterpret_cast<uintptr_t>(src);
+    if (dsta < srca)
+        return memcpy_simd<ISA>(dst, src, n);
+
+    if (n < traits::SIMDTrait<ISA>::alignment) {
+        move_front_0<ISA>(dst, src, n);
+        return dst;
+    }
+
+    char *dstc = static_cast<char *>(dst) + n;
+    const char *srcc = static_cast<const char *>(src) + n;
+    unsigned flag = cstring_is_aligned<ISA>(dstc) >> 1;
+    flag |= cstring_is_aligned<ISA>(srcc);
+    if (n <= 128) {
+        cpy_back_n_switch<ISA, 128 / traits::SIMDTrait<ISA>::alignment>(
+                dstc, srcc, n, flag);
+        return dst;
+    }
+
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 128;
+    if (offset != 0) {
+        cpy_back_n_switch<ISA, 64 / traits::SIMDTrait<ISA>::alignment>(
+                dstc, srcc, offset, flag);
+        n -= offset;
+        dstc -= offset;
+        srcc -= offset;
+    }
+    flag = CStringNonTemporalThreshold::instance().over(n);
+    flag &= dsta - srca < 128 ? 0 : 1;
+    flag |= (cstring_is_aligned<ISA>(srcc) << 1) | 2;
+    cpy_back_loop_switch<ISA, 128 / traits::SIMDTrait<ISA>::alignment>(
+            dstc, srcc, n, flag);
+
+    return dst;
+}
+
+} // namespace vsmc::internal
+
 /// \brief Direct call to `std::memset`
 /// \ingroup CString
 inline void *memset_std (void *dst, int ch, std::size_t n)
@@ -1048,158 +1086,22 @@ inline void *memcpy_std (void *dst, const void *src, std::size_t n)
 inline void *memmove_std (void *dst, const void *src, std::size_t n)
 {return std::memmove(dst, src, n);}
 
-/// \brief SIMD optimized `memset` with non-temporal store for large buffers
-/// \ingroup CString
-template <SIMD ISA>
-inline void *memset_simd (void *dst, int ch, std::size_t n)
-{
-    if (n < traits::SIMDTrait<ISA>::alignment) {
-        internal::set_1<ISA>(dst, ch, n);
-        return dst;
-    }
-
-    unsigned flag = internal::cstring_is_aligned<ISA>(dst);
-    if (n < traits::SIMDTrait<ISA>::alignment * 16) {
-        internal::set_16_switch<ISA>(dst, ch, n, flag);
-        return dst;
-    }
-
-    char *dstc = static_cast<char *>(dst);
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (
-            traits::SIMDTrait<ISA>::alignment * 8);
-    if (offset != 0) {
-        offset = traits::SIMDTrait<ISA>::alignment * 8 - offset;
-        internal::set_8_switch<ISA>(dstc, ch, offset, flag);
-        n -= offset;
-        dstc += offset;
-    }
-    flag = CStringNonTemporalThreshold::instance().over(n) | 2;
-    internal::set_loop_switch<ISA>(dstc, ch, n, flag);
-
-    return dst;
-}
-
-/// \brief SIMD optimized `memcpy` with non-temporal store for large buffers
-/// \ingroup CString
-template <SIMD ISA>
-inline void *memcpy_simd (void *dst, const void *src, std::size_t n)
-{
-    if (dst == src)
-        return dst;
-
-    if (n < traits::SIMDTrait<ISA>::alignment) {
-        internal::cpy_front_1<ISA>(dst, src, n);
-        return dst;
-    }
-
-    unsigned flag = internal::cstring_is_aligned<ISA>(dst) >> 1;
-    flag |= internal::cstring_is_aligned<ISA>(src);
-    if (n < traits::SIMDTrait<ISA>::alignment * 16) {
-        internal::cpy_front_16_switch<ISA>(dst, src, n, flag);
-        return dst;
-    }
-
-    char *dstc = static_cast<char *>(dst);
-    const char *srcc = static_cast<const char *>(src);
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (
-            traits::SIMDTrait<ISA>::alignment * 8);
-    if (offset != 0) {
-        offset = traits::SIMDTrait<ISA>::alignment * 8 - offset;
-        internal::cpy_front_8_switch<ISA>(dstc, srcc, offset, flag);
-        n -= offset;
-        dstc += offset;
-        srcc += offset;
-    }
-    flag = CStringNonTemporalThreshold::instance().over(n) | 2;
-    flag |= internal::cstring_is_aligned<ISA>(srcc) << 1;
-    internal::cpy_front_loop_switch<ISA>(dstc, srcc, n, flag);
-
-    return dst;
-}
-
-/// \brief SIMD optimized `memmove` with non-temporal store for large buffers
-/// \ingroup CString
-template <SIMD ISA>
-inline void *memmove_simd (void *dst, const void *src, std::size_t n)
-{
-    if (dst == src)
-        return dst;
-
-    if (n < traits::SIMDTrait<ISA>::alignment) {
-        internal::move_front_1<ISA>(dst, src, n);
-        return dst;
-    }
-
-    uintptr_t dsta = reinterpret_cast<uintptr_t>(dst);
-    uintptr_t srca = reinterpret_cast<uintptr_t>(src);
-    if (dsta < srca) {
-        unsigned flag = internal::cstring_is_aligned<ISA>(dst) >> 1;
-        flag |= internal::cstring_is_aligned<ISA>(src);
-        if (n < traits::SIMDTrait<ISA>::alignment * 16) {
-            internal::cpy_front_16_switch<ISA>(dst, src, n, flag);
-            return dst;
-        }
-
-        char *dstc = static_cast<char *>(dst);
-        const char *srcc = static_cast<const char *>(src);
-        std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (
-                traits::SIMDTrait<ISA>::alignment * 8);\
-        if (offset != 0) {
-            offset = traits::SIMDTrait<ISA>::alignment * 8 - offset;
-            internal::cpy_front_8_switch<ISA>(dstc, srcc, offset, flag);
-            n -= offset;
-            dstc += offset;
-            srcc += offset;
-        }
-        flag = CStringNonTemporalThreshold::instance().over(n);
-        flag &= CStringNonTemporalThreshold::instance().over(srca - dsta);
-        flag |= (internal::cstring_is_aligned<ISA>(srcc) << 1) | 2;
-        internal::cpy_front_loop_switch<ISA>(dstc, srcc, n, flag);
-
-        return dst;
-    }
-
-    char *dstc = static_cast<char *>(dst) + n;
-    const char *srcc = static_cast<const char *>(src) + n;
-    unsigned flag = internal::cstring_is_aligned<ISA>(dstc) >> 1;
-    flag |= internal::cstring_is_aligned<ISA>(srcc);
-    if (n < traits::SIMDTrait<ISA>::alignment * 16) {
-        internal::cpy_back_16_switch<ISA>(dstc, srcc, n, flag);
-        return dst;
-    }
-
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (
-            traits::SIMDTrait<ISA>::alignment * 8);
-    if (offset != 0) {
-        internal::cpy_back_8_switch<ISA>(dstc, srcc, offset, flag);
-        n -= offset;
-        dstc -= offset;
-        srcc -= offset;
-    }
-    flag = CStringNonTemporalThreshold::instance().over(n);
-    flag &= CStringNonTemporalThreshold::instance().over(dsta - srca);
-    flag |= (internal::cstring_is_aligned<ISA>(srcc) << 1) | 2;
-    internal::cpy_back_loop_switch<ISA>(dstc, srcc, n, flag);
-
-    return dst;
-}
-
 #if VSMC_HAS_SSE2
 
 /// \brief SSE2 optimized `memset` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memset_sse2 (void *dst, int ch, std::size_t n)
-{return memset_simd<SSE2>(dst, ch, n);}
+{return internal::memset_simd<SSE2>(dst, ch, n);}
 
 /// \brief SSE2 optimized `memcpy` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memcpy_sse2 (void *dst, const void *src, std::size_t n)
-{return memcpy_simd<SSE2>(dst, src, n);}
+{return internal::memcpy_simd<SSE2>(dst, src, n);}
 
 /// \brief SSE2 optimized `memmove` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memmove_sse2 (void *dst, const void *src, std::size_t n)
-{return memmove_simd<SSE2>(dst, src, n);}
+{return internal::memmove_simd<SSE2>(dst, src, n);}
 
 #endif // VSMC_HAS_SSE2
 
@@ -1208,17 +1110,17 @@ inline void *memmove_sse2 (void *dst, const void *src, std::size_t n)
 /// \brief AVX optimized `memset` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memset_avx (void *dst, int ch, std::size_t n)
-{return memset_simd<AVX>(dst, ch, n);}
+{return internal::memset_simd<AVX>(dst, ch, n);}
 
 /// \brief AVX optimized `memcpy` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memcpy_avx (void *dst, const void *src, std::size_t n)
-{return memcpy_simd<AVX>(dst, src, n);}
+{return internal::memcpy_simd<AVX>(dst, src, n);}
 
 /// \brief AVX optimized `memmove` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memmove_avx (void *dst, const void *src, std::size_t n)
-{return memmove_simd<AVX>(dst, src, n);}
+{return internal::memmove_simd<AVX>(dst, src, n);}
 
 #endif // VSMC_HAS_AVX
 
