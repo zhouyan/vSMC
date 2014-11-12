@@ -978,7 +978,7 @@ inline void *memset_simd (void *dst, int ch, std::size_t n)
             traits::SIMDTrait<ISA>::grainsize);
     if (offset != 0) {
         offset = traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::alignment - offset;
+            traits::SIMDTrait<ISA>::grainsize - offset;
         set_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize / 2>(
                 dstc, ch, offset, flag);
         n -= offset;
@@ -1017,7 +1017,7 @@ inline void *memcpy_simd (void *dst, const void *src, std::size_t n)
             traits::SIMDTrait<ISA>::grainsize);
     if (offset != 0) {
         offset = traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize- offset;
+            traits::SIMDTrait<ISA>::grainsize - offset;
         cpy_front_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize / 2>(
                 dstc, srcc, offset, flag);
         n -= offset;
@@ -1051,7 +1051,7 @@ inline void *memmove_simd_front (void *dst, const void *src, std::size_t n)
             traits::SIMDTrait<ISA>::grainsize);
     if (offset != 0) {
         offset = traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize- offset;
+            traits::SIMDTrait<ISA>::grainsize - offset;
         cpy_front_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize / 2>(
                 dstc, srcc, offset, flag);
         n -= offset;
