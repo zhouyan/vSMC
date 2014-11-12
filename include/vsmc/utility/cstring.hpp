@@ -832,6 +832,38 @@ VSMC_DEFINE_UTILITY_CSTRING_SWITCH(SSE2)
 #if VSMC_HAS_AVX
 
 template <>
+inline void set_1<AVX> (void *dst, int ch, std::size_t n)
+{
+    if (n == 0)
+        return;
+
+    if (n % 4 != 0) {
+        std::memset(dst, ch, n);
+        return;
+    }
+
+    // FIXME: Only thread-safe after first call
+    static const int s = static_cast<int>(~(0U));
+    static const __m256i mask[] = {
+        _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, 0),
+        _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, s),
+        _mm256_set_epi32(0, 0, 0, 0, 0, 0, s, s),
+        _mm256_set_epi32(0, 0, 0, 0, 0, s, s, s),
+        _mm256_set_epi32(0, 0, 0, 0, s, s, s, s),
+        _mm256_set_epi32(0, 0, 0, s, s, s, s, s),
+        _mm256_set_epi32(0, 0, s, s, s, s, s, s),
+        _mm256_set_epi32(0, s, s, s, s, s, s, s),
+        _mm256_set_epi32(s, s, s, s, s, s, s, s)
+    };
+
+    n /= 4;
+    float *dstc = static_cast<float *>(dst);
+    __m256 m = _mm256_castsi256_ps(_mm256_set1_epi8(
+                static_cast<char>(static_cast<unsigned char>(ch))));
+    _mm256_maskstore_ps(dstc, mask[n], m);
+}
+
+template <>
 inline void cpy_front_1<AVX> (void *dst, const void *src, std::size_t n)
 {
     if (n == 0)
@@ -842,24 +874,45 @@ inline void cpy_front_1<AVX> (void *dst, const void *src, std::size_t n)
         return;
     }
 
-    n /= 4;
-    const int s = static_cast<int>(~(0U));
-    const __m256i mask[] = {
+    // FIXME: Only thread-safe after first call
+    static const int s = static_cast<int>(~(0U));
+    static const __m256i mask[] = {
         _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, 0),
-        _mm256_set_epi32(s, 0, 0, 0, 0, 0, 0, 0),
-        _mm256_set_epi32(s, s, 0, 0, 0, 0, 0, 0),
-        _mm256_set_epi32(s, s, s, 0, 0, 0, 0, 0),
-        _mm256_set_epi32(s, s, s, s, 0, 0, 0, 0),
-        _mm256_set_epi32(s, s, s, s, s, 0, 0, 0),
-        _mm256_set_epi32(s, s, s, s, s, s, 0, 0),
-        _mm256_set_epi32(s, s, s, s, s, s, s, 0),
+        _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, s),
+        _mm256_set_epi32(0, 0, 0, 0, 0, 0, s, s),
+        _mm256_set_epi32(0, 0, 0, 0, 0, s, s, s),
+        _mm256_set_epi32(0, 0, 0, 0, s, s, s, s),
+        _mm256_set_epi32(0, 0, 0, s, s, s, s, s),
+        _mm256_set_epi32(0, 0, s, s, s, s, s, s),
+        _mm256_set_epi32(0, s, s, s, s, s, s, s),
         _mm256_set_epi32(s, s, s, s, s, s, s, s)
     };
+
+    n /= 4;
     float *dstc = static_cast<float *>(dst);
     const float *srcc = static_cast<const float *>(src);
     __m256 m = _mm256_maskload_ps(srcc, mask[n]);
     _mm256_maskstore_ps(dstc, mask[n], m);
 }
+
+template <>
+inline void cpy_back_1<AVX> (void *dst, const void *src, std::size_t n)
+{
+    if (n == 0)
+        return;
+
+    dst = static_cast<void *>(static_cast<char *>(dst) - n);
+    src = static_cast<const void *>(static_cast<const char *>(src) - n);
+    cpy_front_1<AVX>(dst, src, n);
+}
+
+template <>
+inline void move_front_1<AVX> (void *dst, const void *src, std::size_t n)
+{cpy_front_1<AVX>(dst, src, n);}
+
+template <>
+inline void move_back_1<AVX> (void *dst, const void *src, std::size_t n)
+{cpy_back_1<AVX>(dst, src, n);}
 
 VSMC_DEFINE_UTILITY_CSTRING_SET_16(AVX, false,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
