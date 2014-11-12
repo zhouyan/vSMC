@@ -729,16 +729,16 @@ inline void cpy_back_0<AVX> (void *dst, const void *src, std::size_t n)
 
     dst = static_cast<void *>(static_cast<char *>(dst) - n);
     src = static_cast<const void *>(static_cast<const char *>(src) - n);
-    cpy_front_1<AVX>(dst, src, n);
+    cpy_front_0<AVX>(dst, src, n);
 }
 
 template <>
 inline void move_front_0<AVX> (void *dst, const void *src, std::size_t n)
-{cpy_front_1<AVX>(dst, src, n);}
+{cpy_front_0<AVX>(dst, src, n);}
 
 template <>
 inline void move_back_0<AVX> (void *dst, const void *src, std::size_t n)
-{cpy_back_1<AVX>(dst, src, n);}
+{cpy_back_0<AVX>(dst, src, n);}
 //***************************************************************************/
 
 VSMC_DEFINE_UTILITY_CSTRING_SET_N(AVX, false,
