@@ -121,19 +121,45 @@ template <typename T> struct OMPSizeTypeTrait
 {typedef typename std::ptrdiff_t type;};
 #endif
 
-/// \brief SIMD ISA traits
+/// \brief SIMD traits
 /// \ingroup Traits
 template <SIMD> struct SIMDTrait;
 
-/// \brief SSE2 ISA traits
+/// \brief SSE2 traits
 /// \ingroup Traits
 template <> struct SIMDTrait<SSE2>
-{static VSMC_CONSTEXPR const std::size_t alignment = 16;};
+{
+    static VSMC_CONSTEXPR const std::size_t alignment = 16;
+    static VSMC_CONSTEXPR const std::size_t grainsize = 8;
+};
 
-/// \brief AVX ISA traits
+/// \brief SSE3 traits
+/// \ingroup Traits
+template <> struct SIMDTrait<SSE3> : public SIMDTrait<SSE2> {};
+
+/// \brief SSSE3 traits
+/// \ingroup Traits
+template <> struct SIMDTrait<SSSE3> : public SIMDTrait<SSE3> {};
+
+/// \brief SSE4_1 traits
+/// \ingroup Traits
+template <> struct SIMDTrait<SSE4_1> : public SIMDTrait<SSSE3> {};
+
+/// \brief SSE4_2 traits
+/// \ingroup Traits
+template <> struct SIMDTrait<SSE4_2> : public SIMDTrait<SSE4_1> {};
+
+/// \brief AVX traits
 /// \ingroup Traits
 template <> struct SIMDTrait<AVX>
-{static VSMC_CONSTEXPR const std::size_t alignment = 32;};
+{
+    static VSMC_CONSTEXPR const std::size_t alignment = 32;
+    static VSMC_CONSTEXPR const std::size_t grainsize = 4;
+};
+
+/// \brief AVX2 traits
+/// \ingroup Traits
+template <> struct SIMDTrait<AVX2> : public SIMDTrait<AVX> {};
 
 /// \brief Dimension trait for StateMatrix and StateCL (fixed dimension)
 /// \ingroup Traits
