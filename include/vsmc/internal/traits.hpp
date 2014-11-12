@@ -12,6 +12,7 @@
 #define VSMC_INTERNAL_TRAITS_HPP
 
 #include <vsmc/internal/config.hpp>
+#include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
@@ -119,6 +120,20 @@ template <typename T> struct OMPSizeTypeTrait {typedef T type;};
 template <typename T> struct OMPSizeTypeTrait
 {typedef typename std::ptrdiff_t type;};
 #endif
+
+/// \brief SIMD ISA traits
+/// \ingroup Traits
+template <SIMD> struct SIMDTrait;
+
+/// \brief SSE2 ISA traits
+/// \ingroup Traits
+template <> struct SIMDTrait<SSE2>
+{static VSMC_CONSTEXPR const std::size_t alignment = 16;};
+
+/// \brief AVX ISA traits
+/// \ingroup Traits
+template <> struct SIMDTrait<AVX>
+{static VSMC_CONSTEXPR const std::size_t alignment = 32;};
 
 /// \brief Dimension trait for StateMatrix and StateCL (fixed dimension)
 /// \ingroup Traits

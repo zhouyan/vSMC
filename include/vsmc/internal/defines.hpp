@@ -62,6 +62,10 @@
 
 namespace vsmc {
 
+/// \brief SIMD instructions
+/// \ingroup Definitions
+enum SIMD {SSE2, AVX};
+
 /// \brief Dynamic dimension
 /// \ingroup Definitions
 enum {
