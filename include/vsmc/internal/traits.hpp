@@ -154,7 +154,7 @@ template <> struct SIMDTrait<SSE4_2> : public SIMDTrait<SSE4_1> {};
 template <> struct SIMDTrait<AVX>
 {
     static VSMC_CONSTEXPR const std::size_t alignment = 32;
-    static VSMC_CONSTEXPR const std::size_t grainsize = 4;
+    static VSMC_CONSTEXPR const std::size_t grainsize = 8;
 };
 
 /// \brief AVX2 traits
