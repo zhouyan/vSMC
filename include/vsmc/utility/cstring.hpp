@@ -658,7 +658,7 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(SSE2, true, true, true,
 
 /*****************************************************************************
 template <>
-inline void set_1<AVX> (void *dst, int ch, std::size_t n)
+inline void set_0<AVX> (void *dst, int ch, std::size_t n)
 {
     if (n == 0)
         return;
@@ -690,7 +690,7 @@ inline void set_1<AVX> (void *dst, int ch, std::size_t n)
 }
 
 template <>
-inline void cpy_front_1<AVX> (void *dst, const void *src, std::size_t n)
+inline void cpy_front_0<AVX> (void *dst, const void *src, std::size_t n)
 {
     if (n == 0)
         return;
@@ -722,7 +722,7 @@ inline void cpy_front_1<AVX> (void *dst, const void *src, std::size_t n)
 }
 
 template <>
-inline void cpy_back_1<AVX> (void *dst, const void *src, std::size_t n)
+inline void cpy_back_0<AVX> (void *dst, const void *src, std::size_t n)
 {
     if (n == 0)
         return;
@@ -733,13 +733,13 @@ inline void cpy_back_1<AVX> (void *dst, const void *src, std::size_t n)
 }
 
 template <>
-inline void move_front_1<AVX> (void *dst, const void *src, std::size_t n)
+inline void move_front_0<AVX> (void *dst, const void *src, std::size_t n)
 {cpy_front_1<AVX>(dst, src, n);}
-*****************************************************************************/
 
 template <>
-inline void move_back_1<AVX> (void *dst, const void *src, std::size_t n)
+inline void move_back_0<AVX> (void *dst, const void *src, std::size_t n)
 {cpy_back_1<AVX>(dst, src, n);}
+//***************************************************************************/
 
 VSMC_DEFINE_UTILITY_CSTRING_SET_N(AVX, false,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
