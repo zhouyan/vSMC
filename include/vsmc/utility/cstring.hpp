@@ -139,7 +139,7 @@ inline void set_n<ISA, 2, da> (void *dst, int ch, std::size_t n)             \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
     }                                                                        \
-    set_0<ISA>(dstc, ch, n);                                                 \
+    set_n<ISA, 1, da>(dstc, ch, n);                                          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -158,7 +158,7 @@ inline void set_n<ISA, 4, da> (void *dst, int ch, std::size_t n)             \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    set_0<ISA>(dstc, ch, n);                                                 \
+    set_n<ISA, 2, da>(dstc, ch, n);                                          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -181,7 +181,7 @@ inline void set_n<ISA, 8, da> (void *dst, int ch, std::size_t n)             \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    set_0<ISA>(dstc, ch, n);                                                 \
+    set_n<ISA, 4, da>(dstc, ch, n);                                          \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_LOOP(ISA, da, nt, c, m,\
@@ -202,7 +202,7 @@ inline void set_loop<ISA, 4, da, nt> (void *dst, int ch, std::size_t n)      \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    set_0<ISA>(dstc, ch, n);                                                 \
+    set_n<ISA, 2, da>(dstc, ch, n);                                          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -225,7 +225,7 @@ inline void set_loop<ISA, 8, da, nt> (void *dst, int ch, std::size_t n)      \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    set_0<ISA>(dstc, ch, n);                                                 \
+    set_n<ISA, 4, da>(dstc, ch, n);                                          \
 }
 
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY_N(ISA, sa, da, c, m, load, store) \
@@ -266,7 +266,7 @@ inline void cpy_front_n<ISA, 2, sa, da> (void *dst, const void *src,         \
         dstc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
     }                                                                        \
-    cpy_front_0<ISA>(dstc, srcc, n);                                         \
+    cpy_front_n<ISA, 1, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
                                                                              \
@@ -292,7 +292,7 @@ inline void cpy_front_n<ISA, 4, sa, da> (void *dst, const void *src,         \
         dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    cpy_front_0<ISA>(dstc, srcc, n);                                         \
+    cpy_front_n<ISA, 2, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -325,7 +325,7 @@ inline void cpy_front_n<ISA, 8, sa, da> (void *dst, const void *src,         \
         dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    cpy_front_0<ISA>(dstc, srcc, n);                                         \
+    cpy_front_n<ISA, 4, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -365,7 +365,7 @@ inline void cpy_back_n<ISA, 2, sa, da> (void *dst, const void *src,          \
         dstc -= traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
     }                                                                        \
-    cpy_back_0<ISA>(dstc, srcc, n);                                          \
+    cpy_back_n<ISA, 1, sa, da>(dstc, srcc, n);                               \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -390,7 +390,7 @@ inline void cpy_back_n<ISA, 4, sa, da> (void *dst, const void *src,          \
         dstc -= traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    cpy_back_0<ISA>(dstc, srcc, n);                                          \
+    cpy_back_n<ISA, 2, sa, da>(dstc, srcc, n);                               \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -423,7 +423,7 @@ inline void cpy_back_n<ISA, 8, sa, da> (void *dst, const void *src,          \
         dstc -= traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    cpy_back_0<ISA>(dstc, srcc, n);                                          \
+    cpy_back_n<ISA, 4, sa, da>(dstc, srcc, n);                               \
 }                                                                            \
 
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(ISA, sa, da, nt,\
@@ -450,7 +450,7 @@ inline void cpy_front_loop<ISA, 4, sa, da, nt> (void *dst, const void *src,  \
         dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    cpy_front_0<ISA>(dstc, srcc, n);                                         \
+    cpy_front_n<ISA, 2, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -483,7 +483,7 @@ inline void cpy_front_loop<ISA, 8, sa, da, nt> (void *dst, const void *src,  \
         dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
         srcc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    cpy_front_0<ISA>(dstc, srcc, n);                                         \
+    cpy_front_n<ISA, 4, sa, da>(dstc, srcc, n);                              \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -508,7 +508,7 @@ inline void cpy_back_loop<ISA, 4, sa, da, nt> (void *dst, const void *src,   \
         dstc -= traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);           \
     }                                                                        \
-    cpy_back_0<ISA>(dstc, srcc, n);                                          \
+    cpy_back_n<ISA, 2, sa, da>(dstc, srcc, n);                               \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -541,7 +541,7 @@ inline void cpy_back_loop<ISA, 8, sa, da, nt> (void *dst, const void *src,   \
         dstc -= traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
         srcc -= traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);           \
     }                                                                        \
-    cpy_back_0<ISA>(dstc, srcc, n);                                          \
+    cpy_back_n<ISA, 4, sa, da>(dstc, srcc, n);                               \
 }
 
 namespace vsmc {
