@@ -116,9 +116,9 @@ inline void set_n<ISA, 1, da> (void *dst, int ch, std::size_t n)             \
         return;                                                              \
                                                                              \
     c *dstc = static_cast<c *>(dst);                                         \
+    m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));    \
     if (n >= traits::SIMDTrait<ISA>::alignment) {                            \
         n -= traits::SIMDTrait<ISA>::alignment;                              \
-        m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));\
         store(dstc, m0);                                                     \
         dstc += traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
     }                                                                        \
@@ -132,9 +132,9 @@ inline void set_n<ISA, 2, da> (void *dst, int ch, std::size_t n)             \
         return;                                                              \
                                                                              \
     c *dstc = static_cast<c *>(dst);                                         \
+    m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));    \
     if (n >= traits::SIMDTrait<ISA>::alignment * 2) {                        \
         n -= traits::SIMDTrait<ISA>::alignment * 2;                          \
-        m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));\
         store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c), m0); \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c), m0); \
         dstc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);           \
@@ -149,9 +149,9 @@ inline void set_n<ISA, 4, da> (void *dst, int ch, std::size_t n)             \
         return;                                                              \
                                                                              \
     c *dstc = static_cast<c *>(dst);                                         \
+    m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));    \
     if (n >= traits::SIMDTrait<ISA>::alignment * 4) {                        \
         n -= traits::SIMDTrait<ISA>::alignment * 4;                          \
-        m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));\
         store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c), m0); \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c), m0); \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c), m0); \
@@ -168,9 +168,9 @@ inline void set_n<ISA, 8, da> (void *dst, int ch, std::size_t n)             \
         return;                                                              \
                                                                              \
     c *dstc = static_cast<c *>(dst);                                         \
+    m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));    \
     if (n >= traits::SIMDTrait<ISA>::alignment * 8) {                        \
         n -= traits::SIMDTrait<ISA>::alignment * 8;                          \
-        m m0 = cast(set1(static_cast<char>(static_cast<unsigned char>(ch))));\
         store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c), m0); \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c), m0); \
         store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c), m0); \
@@ -638,54 +638,6 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(SSE2, true, true, true,
 #endif // VSMC_HAS_SSE2
 
 #if VSMC_HAS_AVX
-
-template <>
-inline void set_0<AVX, false> (void *dst, int ch, std::size_t n)
-{_mm256_zeroupper(); set_n<SSE2, 1, false>(dst, ch, n);}
-
-template <>
-inline void set_0<AVX, true> (void *dst, int ch, std::size_t n)
-{_mm256_zeroupper(); set_n<SSE2, 1, true>(dst, ch, n);}
-
-template <>
-inline void cpy_front_0<AVX, false, false> (void *dst, const void *src,
-        std::size_t n)
-{_mm256_zeroupper(); cpy_front_n<SSE2, 1, false, false>(dst, src, n);}
-
-template <>
-inline void cpy_front_0<AVX, false, true> (void *dst, const void *src,
-        std::size_t n)
-{_mm256_zeroupper(); cpy_front_n<SSE2, 1, false, true>(dst, src, n);}
-
-template <>
-inline void cpy_front_0<AVX, true, false> (void *dst, const void *src,
-        std::size_t n)
-{_mm256_zeroupper(); cpy_front_n<SSE2, 1, true, false>(dst, src, n);}
-
-template <>
-inline void cpy_front_0<AVX, true, true> (void *dst, const void *src,
-        std::size_t n)
-{_mm256_zeroupper(); cpy_front_n<SSE2, 1, true, true>(dst, src, n);}
-
-template <>
-inline void cpy_back_0<AVX, false, false> (void *dst, const void *src,
-        std::size_t n)
-{_mm256_zeroupper(); cpy_back_n<SSE2, 1, false, false>(dst, src, n);}
-
-template <>
-inline void cpy_back_0<AVX, false, true> (void *dst, const void *src,
-        std::size_t n)
-{_mm256_zeroupper(); cpy_back_n<SSE2, 1, false, true>(dst, src, n);}
-
-template <>
-inline void cpy_back_0<AVX, true, false> (void *dst, const void *src,
-        std::size_t n)
-{_mm256_zeroupper(); cpy_back_n<SSE2, 1, true, false>(dst, src, n);}
-
-template <>
-inline void cpy_back_0<AVX, true, true> (void *dst, const void *src,
-        std::size_t n)
-{_mm256_zeroupper(); cpy_back_n<SSE2, 1, true, true>(dst, src, n);}
 
 VSMC_DEFINE_UTILITY_CSTRING_SET_N(AVX, false,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
