@@ -74,12 +74,12 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/cpuid.hpp>
 
-#if VSMC_HAS_AVX
-#include <immintrin.h>
-#endif
-
 #if VSMC_HAS_SSE2
 #include <emmintrin.h>
+#endif
+
+#if VSMC_HAS_AVX
+#include <immintrin.h>
 #endif
 
 /// \brief Shall functions in this module do runtime dispatch
@@ -122,7 +122,7 @@ inline void set_n<ISA, 1, da> (void *dst, int ch, std::size_t n)             \
         store(dstc, m0);                                                     \
         dstc += traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
     }                                                                        \
-    set_0<ISA>(dstc, ch, n);                                                 \
+    set_0<ISA, da>(dstc, ch, n);                                             \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -245,7 +245,7 @@ inline void cpy_front_n<ISA, 1, sa, da> (void *dst, const void *src,         \
         dstc += traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
         srcc += traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
     }                                                                        \
-    cpy_front_0<ISA>(dstc, srcc, n);                                         \
+    cpy_front_0<ISA, sa, da>(dstc, srcc, n);                                 \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -344,7 +344,7 @@ inline void cpy_back_n<ISA, 1, sa, da> (void *dst, const void *src,          \
         dstc -= traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
         srcc -= traits::SIMDTrait<ISA>::alignment / sizeof(c);               \
     }                                                                        \
-    cpy_back_0<ISA>(dstc, srcc, n);                                          \
+    cpy_back_0<ISA, sa, da>(dstc, srcc, n);                                  \
 }                                                                            \
                                                                              \
 template <>                                                                  \
@@ -555,39 +555,22 @@ inline unsigned cstring_is_aligned (const void *ptr)
         traits::SIMDTrait<ISA>::alignment == 0 ? 2 : 0;
 }
 
-template <SIMD>
+template <SIMD, bool>
 inline void set_0 (void *dst, int ch, std::size_t n)
 {
     if (n != 0)
         std::memset(dst, ch, n);
 }
 
-template <SIMD>
+template <SIMD, bool, bool>
 inline void cpy_front_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0)
         std::memmove(dst, src, n);
 }
 
-template <SIMD>
+template <SIMD, bool, bool>
 inline void cpy_back_0 (void *dst, const void *src, std::size_t n)
-{
-    if (n != 0) {
-        dst = static_cast<void *>(static_cast<char *>(dst) - n);
-        src = static_cast<const void *>(static_cast<const char *>(src) - n);
-        std::memmove(dst, src, n);
-    }
-}
-
-template <SIMD>
-inline void move_front_0 (void *dst, const void *src, std::size_t n)
-{
-    if (n != 0)
-        std::memmove(dst, src, n);
-}
-
-template <SIMD>
-inline void move_back_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0) {
         dst = static_cast<void *>(static_cast<char *>(dst) - n);
@@ -656,90 +639,53 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(SSE2, true, true, true,
 
 #if VSMC_HAS_AVX
 
-/*****************************************************************************
 template <>
-inline void set_0<AVX> (void *dst, int ch, std::size_t n)
-{
-    if (n == 0)
-        return;
-
-    if (n % 4 != 0) {
-        std::memset(dst, ch, n);
-        return;
-    }
-
-    // FIXME: Only thread-safe after first call
-    static const int s = static_cast<int>(~(0U));
-    static const __m256i mask[] = {
-        _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, 0),
-        _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, s),
-        _mm256_set_epi32(0, 0, 0, 0, 0, 0, s, s),
-        _mm256_set_epi32(0, 0, 0, 0, 0, s, s, s),
-        _mm256_set_epi32(0, 0, 0, 0, s, s, s, s),
-        _mm256_set_epi32(0, 0, 0, s, s, s, s, s),
-        _mm256_set_epi32(0, 0, s, s, s, s, s, s),
-        _mm256_set_epi32(0, s, s, s, s, s, s, s),
-        _mm256_set_epi32(s, s, s, s, s, s, s, s)
-    };
-
-    n /= 4;
-    float *dstc = static_cast<float *>(dst);
-    __m256 m = _mm256_castsi256_ps(_mm256_set1_epi8(
-                static_cast<char>(static_cast<unsigned char>(ch))));
-    _mm256_maskstore_ps(dstc, mask[n], m);
-}
+inline void set_0<AVX, false> (void *dst, int ch, std::size_t n)
+{_mm256_zeroupper(); set_n<SSE2, 1, false>(dst, ch, n);}
 
 template <>
-inline void cpy_front_0<AVX> (void *dst, const void *src, std::size_t n)
-{
-    if (n == 0)
-        return;
-
-    if (n % 4 != 0) {
-        std::memmove(dst, src, n);
-        return;
-    }
-
-    // FIXME: Only thread-safe after first call
-    static const int s = static_cast<int>(~(0U));
-    static const __m256i mask[] = {
-        _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, 0),
-        _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, s),
-        _mm256_set_epi32(0, 0, 0, 0, 0, 0, s, s),
-        _mm256_set_epi32(0, 0, 0, 0, 0, s, s, s),
-        _mm256_set_epi32(0, 0, 0, 0, s, s, s, s),
-        _mm256_set_epi32(0, 0, 0, s, s, s, s, s),
-        _mm256_set_epi32(0, 0, s, s, s, s, s, s),
-        _mm256_set_epi32(0, s, s, s, s, s, s, s),
-        _mm256_set_epi32(s, s, s, s, s, s, s, s)
-    };
-
-    n /= 4;
-    float *dstc = static_cast<float *>(dst);
-    const float *srcc = static_cast<const float *>(src);
-    __m256 m = _mm256_maskload_ps(srcc, mask[n]);
-    _mm256_maskstore_ps(dstc, mask[n], m);
-}
+inline void set_0<AVX, true> (void *dst, int ch, std::size_t n)
+{_mm256_zeroupper(); set_n<SSE2, 1, true>(dst, ch, n);}
 
 template <>
-inline void cpy_back_0<AVX> (void *dst, const void *src, std::size_t n)
-{
-    if (n == 0)
-        return;
-
-    dst = static_cast<void *>(static_cast<char *>(dst) - n);
-    src = static_cast<const void *>(static_cast<const char *>(src) - n);
-    cpy_front_0<AVX>(dst, src, n);
-}
+inline void cpy_front_0<AVX, false, false> (void *dst, const void *src,
+        std::size_t n)
+{_mm256_zeroupper(); cpy_front_n<SSE2, 1, false, false>(dst, src, n);}
 
 template <>
-inline void move_front_0<AVX> (void *dst, const void *src, std::size_t n)
-{cpy_front_0<AVX>(dst, src, n);}
+inline void cpy_front_0<AVX, false, true> (void *dst, const void *src,
+        std::size_t n)
+{_mm256_zeroupper(); cpy_front_n<SSE2, 1, false, true>(dst, src, n);}
 
 template <>
-inline void move_back_0<AVX> (void *dst, const void *src, std::size_t n)
-{cpy_back_0<AVX>(dst, src, n);}
-//***************************************************************************/
+inline void cpy_front_0<AVX, true, false> (void *dst, const void *src,
+        std::size_t n)
+{_mm256_zeroupper(); cpy_front_n<SSE2, 1, true, false>(dst, src, n);}
+
+template <>
+inline void cpy_front_0<AVX, true, true> (void *dst, const void *src,
+        std::size_t n)
+{_mm256_zeroupper(); cpy_front_n<SSE2, 1, true, true>(dst, src, n);}
+
+template <>
+inline void cpy_back_0<AVX, false, false> (void *dst, const void *src,
+        std::size_t n)
+{_mm256_zeroupper(); cpy_back_n<SSE2, 1, false, false>(dst, src, n);}
+
+template <>
+inline void cpy_back_0<AVX, false, true> (void *dst, const void *src,
+        std::size_t n)
+{_mm256_zeroupper(); cpy_back_n<SSE2, 1, false, true>(dst, src, n);}
+
+template <>
+inline void cpy_back_0<AVX, true, false> (void *dst, const void *src,
+        std::size_t n)
+{_mm256_zeroupper(); cpy_back_n<SSE2, 1, true, false>(dst, src, n);}
+
+template <>
+inline void cpy_back_0<AVX, true, true> (void *dst, const void *src,
+        std::size_t n)
+{_mm256_zeroupper(); cpy_back_n<SSE2, 1, true, true>(dst, src, n);}
 
 VSMC_DEFINE_UTILITY_CSTRING_SET_N(AVX, false,
         double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
@@ -961,7 +907,7 @@ template <SIMD ISA>
 inline void *memset_simd (void *dst, int ch, std::size_t n)
 {
     if (n < traits::SIMDTrait<ISA>::alignment) {
-        set_0<ISA>(dst, ch, n);
+        set_0<ISA, false>(dst, ch, n);
         return dst;
     }
 
@@ -997,7 +943,7 @@ inline void *memcpy_simd (void *dst, const void *src, std::size_t n)
         return dst;
 
     if (n < traits::SIMDTrait<ISA>::alignment) {
-        cpy_front_0<ISA>(dst, src, n);
+        cpy_front_0<ISA, false, false>(dst, src, n);
         return dst;
     }
 
@@ -1035,6 +981,14 @@ inline void *memcpy_simd (void *dst, const void *src, std::size_t n)
 template <SIMD ISA>
 inline void *memmove_simd_front (void *dst, const void *src, std::size_t n)
 {
+    if (dst == src)
+        return dst;
+
+    if (n < traits::SIMDTrait<ISA>::alignment) {
+        cpy_front_0<ISA, false, false>(dst, src, n);
+        return dst;
+    }
+
     unsigned flag = cstring_is_aligned<ISA>(dst) >> 1;
     flag |= cstring_is_aligned<ISA>(src);
     if (n <= traits::SIMDTrait<ISA>::alignment *
@@ -1074,8 +1028,16 @@ inline void *memmove_simd_front (void *dst, const void *src, std::size_t n)
 template <SIMD ISA>
 inline void *memmove_simd_back (void *dst, const void *src, std::size_t n)
 {
+    if (dst == src)
+        return dst;
+
     char *dstc = static_cast<char *>(dst) + n;
     const char *srcc = static_cast<const char *>(src) + n;
+    if (n < traits::SIMDTrait<ISA>::alignment) {
+        cpy_back_0<ISA, false, false>(dstc, srcc, n);
+        return dst;
+    }
+
     unsigned flag = cstring_is_aligned<ISA>(dstc) >> 1;
     flag |= cstring_is_aligned<ISA>(srcc);
     if (n <= traits::SIMDTrait<ISA>::alignment *
@@ -1111,18 +1073,11 @@ inline void *memmove_simd_back (void *dst, const void *src, std::size_t n)
 template <SIMD ISA>
 inline void *memmove_simd (void *dst, const void *src, std::size_t n)
 {
-    if (dst == src)
-        return dst;
-
-    if (n < traits::SIMDTrait<ISA>::alignment) {
-        move_front_0<ISA>(dst, src, n);
-        return dst;
-    }
-
-    if (reinterpret_cast<uintptr_t>(dst) < reinterpret_cast<uintptr_t>(src))
-        return memmove_simd_front<ISA>(dst, src, n);
-
-    return memmove_simd_back<ISA>(dst, src, n);
+    return
+        reinterpret_cast<uintptr_t>(dst) <
+        reinterpret_cast<uintptr_t>(src) ?
+        memmove_simd_front<ISA>(dst, src, n):
+        memmove_simd_back<ISA>(dst, src, n);
 }
 
 } // namespace vsmc::internal
@@ -1166,17 +1121,17 @@ inline void *memmove_sse2 (void *dst, const void *src, std::size_t n)
 /// \brief AVX optimized `memset` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memset_avx (void *dst, int ch, std::size_t n)
-{return internal::memset_simd<AVX>(dst, ch, n);}
+{return internal::memset_simd<AVX>(dst, ch, n); _mm256_zeroupper();}
 
 /// \brief AVX optimized `memcpy` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memcpy_avx (void *dst, const void *src, std::size_t n)
-{return internal::memcpy_simd<AVX>(dst, src, n);}
+{return internal::memcpy_simd<AVX>(dst, src, n); _mm256_zeroupper();}
 
 /// \brief AVX optimized `memmove` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memmove_avx (void *dst, const void *src, std::size_t n)
-{return internal::memmove_simd<AVX>(dst, src, n);}
+{return internal::memmove_simd<AVX>(dst, src, n); _mm256_zeroupper();}
 
 #endif // VSMC_HAS_AVX
 
