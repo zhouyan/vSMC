@@ -291,7 +291,7 @@
 #endif
 #endif
 
-// Preprocessor features
+// Compiler features
 
 // Target specific features
 
