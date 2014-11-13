@@ -1058,13 +1058,13 @@ inline void *memmove_simd_front (void *dst, const void *src, std::size_t n)
         dstc += offset;
         srcc += offset;
     }
-    flag = CStringNonTemporalThreshold::instance().over(n) | 2;
-    flag |= cstring_is_aligned<ISA>(srcc) << 1;
-    flag &=
+    flag =
         reinterpret_cast<uintptr_t>(src) -
-        reinterpret_cast<uintptr_t>(dst) < (
-                traits::SIMDTrait<ISA>::alignment *
-                traits::SIMDTrait<ISA>::grainsize) ? 0 : 1;
+        reinterpret_cast<uintptr_t>(dst) <
+        traits::SIMDTrait<ISA>::alignment *
+        traits::SIMDTrait<ISA>::grainsize ? 0 : 1;
+    flag &= CStringNonTemporalThreshold::instance().over(n);
+    flag |= (cstring_is_aligned<ISA>(srcc) << 1) | 2;
     cpy_front_loop_switch<ISA, traits::SIMDTrait<ISA>::grainsize>(
             dstc, srcc, n, flag);
 
@@ -1095,12 +1095,12 @@ inline void *memmove_simd_back (void *dst, const void *src, std::size_t n)
         dstc -= offset;
         srcc -= offset;
     }
-    flag = CStringNonTemporalThreshold::instance().over(n);
-    flag &=
+    flag =
         reinterpret_cast<uintptr_t>(dst) -
-        reinterpret_cast<uintptr_t>(src) < (
-                traits::SIMDTrait<ISA>::alignment *
-                traits::SIMDTrait<ISA>::grainsize) ? 0 : 1;
+        reinterpret_cast<uintptr_t>(src) <
+        traits::SIMDTrait<ISA>::alignment *
+        traits::SIMDTrait<ISA>::grainsize ? 0 : 1;
+    flag &= CStringNonTemporalThreshold::instance().over(n);
     flag |= (cstring_is_aligned<ISA>(srcc) << 1) | 2;
     cpy_back_loop_switch<ISA, traits::SIMDTrait<ISA>::grainsize>(
             dstc, srcc, n, flag);
