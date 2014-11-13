@@ -273,6 +273,10 @@
 #define VSMC_HAS_WARNING 0
 #endif
 
+#ifndef VSMC_STRONG_INLINE
+#define VSMC_STRONG_INLINE inline
+#endif
+
 // Target specific features
 
 #ifndef VSMC_HAS_INT128

@@ -110,7 +110,7 @@
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_N(ISA, da, c, m,\
         cast, set1, store) \
 template <>                                                                  \
-inline void set_n<ISA, 1, da> (void *dst, int ch, std::size_t n)             \
+VSMC_STRONG_INLINE void set_n<ISA, 1, da> (void *dst, int ch, std::size_t n) \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -126,7 +126,7 @@ inline void set_n<ISA, 1, da> (void *dst, int ch, std::size_t n)             \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void set_n<ISA, 2, da> (void *dst, int ch, std::size_t n)             \
+VSMC_STRONG_INLINE void set_n<ISA, 2, da> (void *dst, int ch, std::size_t n) \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -143,7 +143,7 @@ inline void set_n<ISA, 2, da> (void *dst, int ch, std::size_t n)             \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void set_n<ISA, 4, da> (void *dst, int ch, std::size_t n)             \
+VSMC_STRONG_INLINE void set_n<ISA, 4, da> (void *dst, int ch, std::size_t n) \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -162,7 +162,7 @@ inline void set_n<ISA, 4, da> (void *dst, int ch, std::size_t n)             \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void set_n<ISA, 8, da> (void *dst, int ch, std::size_t n)             \
+VSMC_STRONG_INLINE void set_n<ISA, 8, da> (void *dst, int ch, std::size_t n) \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -187,7 +187,8 @@ inline void set_n<ISA, 8, da> (void *dst, int ch, std::size_t n)             \
 #define VSMC_DEFINE_UTILITY_CSTRING_SET_LOOP(ISA, da, nt, c, m,\
         cast, set1, store) \
 template <>                                                                  \
-inline void set_loop<ISA, 4, da, nt> (void *dst, int ch, std::size_t n)      \
+VSMC_STRONG_INLINE void set_loop<ISA, 4, da, nt> (                           \
+        void *dst, int ch, std::size_t n)                                    \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -206,7 +207,8 @@ inline void set_loop<ISA, 4, da, nt> (void *dst, int ch, std::size_t n)      \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void set_loop<ISA, 8, da, nt> (void *dst, int ch, std::size_t n)      \
+VSMC_STRONG_INLINE void set_loop<ISA, 8, da, nt> (                           \
+        void *dst, int ch, std::size_t n)                                    \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -230,8 +232,8 @@ inline void set_loop<ISA, 8, da, nt> (void *dst, int ch, std::size_t n)      \
 
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY_N(ISA, sa, da, c, m, load, store) \
 template <>                                                                  \
-inline void cpy_front_n<ISA, 1, sa, da> (void *dst, const void *src,         \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_front_n<ISA, 1, sa, da> (                        \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -249,8 +251,8 @@ inline void cpy_front_n<ISA, 1, sa, da> (void *dst, const void *src,         \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_front_n<ISA, 2, sa, da> (void *dst, const void *src,         \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_front_n<ISA, 2, sa, da> (                        \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -271,8 +273,8 @@ inline void cpy_front_n<ISA, 2, sa, da> (void *dst, const void *src,         \
                                                                              \
                                                                              \
 template <>                                                                  \
-inline void cpy_front_n<ISA, 4, sa, da> (void *dst, const void *src,         \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_front_n<ISA, 4, sa, da> (                        \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -296,8 +298,8 @@ inline void cpy_front_n<ISA, 4, sa, da> (void *dst, const void *src,         \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_front_n<ISA, 8, sa, da> (void *dst, const void *src,         \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_front_n<ISA, 8, sa, da> (                        \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -329,8 +331,8 @@ inline void cpy_front_n<ISA, 8, sa, da> (void *dst, const void *src,         \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_n<ISA, 1, sa, da> (void *dst, const void *src,          \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_back_n<ISA, 1, sa, da> (                         \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -348,8 +350,8 @@ inline void cpy_back_n<ISA, 1, sa, da> (void *dst, const void *src,          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_n<ISA, 2, sa, da> (void *dst, const void *src,          \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_back_n<ISA, 2, sa, da> (                         \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -369,8 +371,8 @@ inline void cpy_back_n<ISA, 2, sa, da> (void *dst, const void *src,          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_n<ISA, 4, sa, da> (void *dst, const void *src,          \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_back_n<ISA, 4, sa, da> (                         \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -394,8 +396,8 @@ inline void cpy_back_n<ISA, 4, sa, da> (void *dst, const void *src,          \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_n<ISA, 8, sa, da> (void *dst, const void *src,          \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_back_n<ISA, 8, sa, da> (                         \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -429,8 +431,8 @@ inline void cpy_back_n<ISA, 8, sa, da> (void *dst, const void *src,          \
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(ISA, sa, da, nt,\
         c, m, load, store) \
 template <>                                                                  \
-inline void cpy_front_loop<ISA, 4, sa, da, nt> (void *dst, const void *src,  \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_front_loop<ISA, 4, sa, da, nt> (                 \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -454,8 +456,8 @@ inline void cpy_front_loop<ISA, 4, sa, da, nt> (void *dst, const void *src,  \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_front_loop<ISA, 8, sa, da, nt> (void *dst, const void *src,  \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_front_loop<ISA, 8, sa, da, nt> (                 \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -487,8 +489,8 @@ inline void cpy_front_loop<ISA, 8, sa, da, nt> (void *dst, const void *src,  \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_loop<ISA, 4, sa, da, nt> (void *dst, const void *src,   \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_back_loop<ISA, 4, sa, da, nt> (                  \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -512,8 +514,8 @@ inline void cpy_back_loop<ISA, 4, sa, da, nt> (void *dst, const void *src,   \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-inline void cpy_back_loop<ISA, 8, sa, da, nt> (void *dst, const void *src,   \
-        std::size_t n)                                                       \
+VSMC_STRONG_INLINE void cpy_back_loop<ISA, 8, sa, da, nt> (                  \
+        void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -549,28 +551,28 @@ namespace vsmc {
 namespace internal {
 
 template <SIMD ISA>
-inline unsigned cstring_is_aligned (const void *ptr)
+VSMC_STRONG_INLINE unsigned cstring_is_aligned (const void *ptr)
 {
     return reinterpret_cast<uintptr_t>(ptr) %
         traits::SIMDTrait<ISA>::alignment == 0 ? 2 : 0;
 }
 
 template <SIMD>
-inline void set_0 (void *dst, int ch, std::size_t n)
+VSMC_STRONG_INLINE void set_0 (void *dst, int ch, std::size_t n)
 {
     if (n != 0)
         std::memset(dst, ch, n);
 }
 
 template <SIMD>
-inline void cpy_front_0 (void *dst, const void *src, std::size_t n)
+VSMC_STRONG_INLINE void cpy_front_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0)
         std::memmove(dst, src, n);
 }
 
 template <SIMD>
-inline void cpy_back_0 (void *dst, const void *src, std::size_t n)
+VSMC_STRONG_INLINE void cpy_back_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0) {
         dst = static_cast<void *>(static_cast<char *>(dst) - n);
@@ -579,20 +581,20 @@ inline void cpy_back_0 (void *dst, const void *src, std::size_t n)
     }
 }
 
-template <SIMD, std::size_t, bool> inline void set_n (
-        void *, int, std::size_t);
-template <SIMD, std::size_t, bool, bool> inline void set_loop (
-        void *, int, std::size_t);
+template <SIMD, std::size_t, bool>
+VSMC_STRONG_INLINE void set_n (void *, int, std::size_t);
+template <SIMD, std::size_t, bool, bool>
+VSMC_STRONG_INLINE void set_loop (void *, int, std::size_t);
 
-template <SIMD, std::size_t, bool, bool> inline void cpy_front_n (
-        void *, const void *, std::size_t);
-template <SIMD, std::size_t, bool, bool, bool> inline void cpy_front_loop (
-        void *, const void *, std::size_t);
+template <SIMD, std::size_t, bool, bool>
+VSMC_STRONG_INLINE void cpy_front_n (void *, const void *, std::size_t);
+template <SIMD, std::size_t, bool, bool, bool>
+VSMC_STRONG_INLINE void cpy_front_loop (void *, const void *, std::size_t);
 
-template <SIMD, std::size_t, bool, bool> inline void cpy_back_n (
-        void *, const void *, std::size_t);
-template <SIMD, std::size_t, bool, bool, bool> inline void cpy_back_loop (
-        void *, const void *, std::size_t);
+template <SIMD, std::size_t, bool, bool>
+VSMC_STRONG_INLINE void cpy_back_n (void *, const void *, std::size_t);
+template <SIMD, std::size_t, bool, bool, bool>
+VSMC_STRONG_INLINE void cpy_back_loop (void *, const void *, std::size_t);
 
 #if VSMC_HAS_SSE2
 
@@ -681,7 +683,8 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY_LOOP(AVX, true, true, true,
 #endif // VSMC_HAS_AVX
 
 template <SIMD ISA, std::size_t N>
-inline void set_n_switch (void *dst, int ch, std::size_t n, unsigned flag)
+VSMC_STRONG_INLINE void set_n_switch (
+        void *dst, int ch, std::size_t n, unsigned flag)
 {
     flag == 0 ?
         set_n<ISA, N, false>(dst, ch, n):
@@ -689,7 +692,8 @@ inline void set_n_switch (void *dst, int ch, std::size_t n, unsigned flag)
 }
 
 template <SIMD ISA, std::size_t N>
-inline void set_loop_switch (void *dst, int ch, std::size_t n, unsigned flag)
+VSMC_STRONG_INLINE void set_loop_switch (
+        void *dst, int ch, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0: set_loop<ISA, N, false, false>(dst, ch, n); break;
@@ -702,8 +706,8 @@ inline void set_loop_switch (void *dst, int ch, std::size_t n, unsigned flag)
 }
 
 template <SIMD ISA, std::size_t N>
-inline void cpy_front_n_switch (void *dst, const void *src, std::size_t n,
-        unsigned flag)
+VSMC_STRONG_INLINE void cpy_front_n_switch (
+        void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0: cpy_front_n<ISA, N, false, false>(dst, src, n); break;
@@ -717,8 +721,8 @@ inline void cpy_front_n_switch (void *dst, const void *src, std::size_t n,
 }
 
 template <SIMD ISA, std::size_t N>
-inline void cpy_back_n_switch (void *dst, const void *src, std::size_t n,
-        unsigned flag)
+VSMC_STRONG_INLINE void cpy_back_n_switch (
+        void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0: cpy_back_n<ISA, N, false, false>(dst, src, n); break;
@@ -732,8 +736,8 @@ inline void cpy_back_n_switch (void *dst, const void *src, std::size_t n,
 }
 
 template <SIMD ISA, std::size_t N>
-inline void cpy_front_loop_switch (void *dst, const void *src, std::size_t n,
-        unsigned flag)
+VSMC_STRONG_INLINE void cpy_front_loop_switch (
+        void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0 :
@@ -755,8 +759,8 @@ inline void cpy_front_loop_switch (void *dst, const void *src, std::size_t n,
 }
 
 template <SIMD ISA, std::size_t N>
-inline void cpy_back_loop_switch (void *dst, const void *src, std::size_t n,
-        unsigned flag)
+VSMC_STRONG_INLINE void cpy_back_loop_switch (
+        void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0 :
@@ -856,7 +860,8 @@ class CStringNonTemporalThreshold
 namespace internal {
 
 template <SIMD ISA>
-inline void *memset_simd (void *dst, int ch, std::size_t n)
+VSMC_STRONG_INLINE void *memset_simd (
+        void *dst, int ch, std::size_t n)
 {
     if (n < traits::SIMDTrait<ISA>::alignment) {
         set_0<ISA>(dst, ch, n);
@@ -889,7 +894,8 @@ inline void *memset_simd (void *dst, int ch, std::size_t n)
 }
 
 template <SIMD ISA>
-inline void *memcpy_simd (void *dst, const void *src, std::size_t n)
+VSMC_STRONG_INLINE void *memcpy_simd (
+        void *dst, const void *src, std::size_t n)
 {
     if (dst == src)
         return dst;
@@ -931,7 +937,8 @@ inline void *memcpy_simd (void *dst, const void *src, std::size_t n)
 }
 
 template <SIMD ISA>
-inline void *memmove_simd_front (void *dst, const void *src, std::size_t n)
+VSMC_STRONG_INLINE void *memmove_simd_front (
+        void *dst, const void *src, std::size_t n)
 {
     if (dst == src)
         return dst;
@@ -978,7 +985,8 @@ inline void *memmove_simd_front (void *dst, const void *src, std::size_t n)
 }
 
 template <SIMD ISA>
-inline void *memmove_simd_back (void *dst, const void *src, std::size_t n)
+VSMC_STRONG_INLINE void *memmove_simd_back (
+        void *dst, const void *src, std::size_t n)
 {
     if (dst == src)
         return dst;
@@ -1023,7 +1031,8 @@ inline void *memmove_simd_back (void *dst, const void *src, std::size_t n)
 }
 
 template <SIMD ISA>
-inline void *memmove_simd (void *dst, const void *src, std::size_t n)
+VSMC_STRONG_INLINE void *memmove_simd (
+        void *dst, const void *src, std::size_t n)
 {
     return
         reinterpret_cast<uintptr_t>(dst) <
@@ -1036,17 +1045,19 @@ inline void *memmove_simd (void *dst, const void *src, std::size_t n)
 
 /// \brief Direct call to `std::memset`
 /// \ingroup CString
-inline void *memset_std (void *dst, int ch, std::size_t n)
+VSMC_STRONG_INLINE void *memset_std (void *dst, int ch, std::size_t n)
 {return std::memset(dst, ch, n);}
 
 /// \brief Direct call to `std::memcpy`
 /// \ingroup CString
-inline void *memcpy_std (void *dst, const void *src, std::size_t n)
+VSMC_STRONG_INLINE void *memcpy_std (
+        void *dst, const void *src, std::size_t n)
 {return std::memcpy(dst, src, n);}
 
 /// \brief Direct call to `std::memmove`
 /// \ingroup CString
-inline void *memmove_std (void *dst, const void *src, std::size_t n)
+VSMC_STRONG_INLINE void *memmove_std (
+        void *dst, const void *src, std::size_t n)
 {return std::memmove(dst, src, n);}
 
 #if VSMC_HAS_SSE2

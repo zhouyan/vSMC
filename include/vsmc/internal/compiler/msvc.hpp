@@ -293,6 +293,10 @@
 
 // Compiler features
 
+#ifndef VSMC_STRONG_INLINE
+#define VSMC_STRONG_INLINE __foceinline
+#endif
+
 // Target specific features
 
 #ifndef VSMC_HAS_SSE2

@@ -304,6 +304,12 @@
 #define VSMC_HAS_WARNING 1
 #endif
 
+#ifndef VSMC_STRONG_INLINE
+#if __has_attribute(always_inline)
+#define VSMC_STRONG_INLINE __attribute__((always_inline)) inline
+#endif
+#endif
+
 // Target specific features
 
 #if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
