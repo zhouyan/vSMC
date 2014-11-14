@@ -10,16 +10,16 @@
 
 /// \addtogroup CString
 ///
-/// This module implement the `memcpy`, etc., function in the `vsmc` namespace.
-/// The implementaions are optimzied with SIMD instructions. Fource groups of
-/// functions are provided.
+/// This module implement the `memcpy`, etc., functions in the `vsmc`
+/// namespace. The implementaions are optimzied with SIMD instructions. Three
+/// groups of functions are provided.
 ///
 /// - `memcpy_std` etc., they simply call `std::memcpy` etc.
 /// - `memcpy_sse2` etc., they are avialable if at least SSE2 is supported and
 /// are optimized with SSE2 instructions
 /// - `memcpy_avx` etc., they are avialable if at least AVX is supported and
-///
 /// are optimized with AVX instructions
+///
 /// There are also generic `vsmc::memcpy` etc. They dispatch the call based on
 /// the following rules.
 ///
@@ -28,9 +28,8 @@
 /// - Else call `memcpy_std`.
 ///
 /// This dispatch can be done at compile time if the configuration macro
-/// `VSMC_CSTRING_RUNTIME_DISPATCH` is zero. This will possibly allow better
-/// inlining opportunity. If the macro is non-zero, then it will be done at
-/// runtime using `CPUID` information.
+/// `VSMC_CSTRING_RUNTIME_DISPATCH` is zero. If the macro is non-zero, then it
+/// will be done at runtime using `CPUID` information.
 ///
 /// Before using any of these vSMC provided functions. A few factors shall be
 /// considered.
@@ -48,9 +47,15 @@
 /// - For moderate size buffers (from 1KB upto the non-temporal threshold), the
 /// performance is most likely to be only comparable to the system. At worst,
 /// 20% perforamnce degrade was observed, though in most cases, it is almost as
-/// fast as or slightly faster than system library.
-/// - For small buffer size (< 1KB), `vsmc::memcpy` etc., simply call
-/// `std::memcpy`. The overhead is minimal.
+/// fast as or slightly faster than system library. To change the threshold,
+/// ~~~{.cpp}
+/// vsmc::CStringNonTemporalThreshold::instance().set(new_threshold);
+/// ~~~
+/// To change the maximum level of cache to be considered and reset the
+/// threshold accordingly.
+/// ~~~{.cpp}
+/// vsmc::CStringNonTemporalThreshold::instance().max_level(new_level);
+/// ~~~
 /// - The performance is only tested on limited models of CPUs. As a single
 /// person I don't have much resources. In particle, AMD CPUs were not tested
 /// at all.
