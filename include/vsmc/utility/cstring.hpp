@@ -1089,17 +1089,17 @@ inline void *memmove_sse2 (void *dst, const void *src, std::size_t n)
 /// \brief AVX optimized `memset` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memset_avx (void *dst, int ch, std::size_t n)
-{return internal::memset_simd<AVX>(dst, ch, n); _mm256_zeroupper();}
+{return internal::memset_simd<AVX>(dst, ch, n);}
 
 /// \brief AVX optimized `memcpy` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memcpy_avx (void *dst, const void *src, std::size_t n)
-{return internal::memcpy_simd<AVX>(dst, src, n); _mm256_zeroupper();}
+{return internal::memcpy_simd<AVX>(dst, src, n);}
 
 /// \brief AVX optimized `memmove` with non-temporal store for large buffers
 /// \ingroup CString
 inline void *memmove_avx (void *dst, const void *src, std::size_t n)
-{return internal::memmove_simd<AVX>(dst, src, n); _mm256_zeroupper();}
+{return internal::memmove_simd<AVX>(dst, src, n);}
 
 #endif // VSMC_HAS_AVX
 
