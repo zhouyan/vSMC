@@ -112,19 +112,26 @@ template <typename ResultType, unsigned N> struct ThreefryRotateImpl;
 
 template <unsigned N>
 struct ThreefryRotateImpl<uint32_t, N>
-{static uint32_t eval (uint32_t x) {return x << N | x >> (32 - N);}};
+{
+    static VSMC_STRONG_INLINE uint32_t eval (uint32_t x)
+    {return x << N | x >> (32 - N);}
+};
 
 template <unsigned N>
 struct ThreefryRotateImpl<uint64_t, N>
-{static uint64_t eval (uint64_t x) {return x << N | x >> (64 - N);}};
+{
+    static VSMC_STRONG_INLINE uint64_t eval (uint64_t x)
+    {return x << N | x >> (64 - N);}
+};
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
-struct ThreefryRotate {static void eval (Array<ResultType, K> &) {}};
+struct ThreefryRotate
+{static VSMC_STRONG_INLINE void eval (Array<ResultType, K> &) {}};
 
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 2, N, true>
 {
-    static void eval (Array<ResultType, 2> &state)
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, 2> &state)
     {
         state[Position<0>()] += state[Position<1>()];
         state[Position<1>()] =
@@ -141,7 +148,7 @@ struct ThreefryRotate<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 4, N, true>
 {
-    static void eval (Array<ResultType, 4> &state)
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, 4> &state)
     {
         state[Position<0>()] += state[Position<i0_>()];
         state[Position<i0_>()] =
@@ -167,14 +174,14 @@ template <typename ResultType, std::size_t K, std::size_t N,
          bool = (N % 4 == 0)>
 struct ThreefryInsertKey
 {
-    static void eval (Array<ResultType, K> &,
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, K> &,
             const Array<ResultType, K + 1> &) {}
 }; // struct ThreefryInsertKey
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsertKey<ResultType, 2, N, true>
 {
-    static void eval (Array<ResultType, 2> &state,
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, 2> &state,
             const Array<ResultType, 3> &par)
     {
         state[Position<0>()] += par[Position<i0_>()];
@@ -192,7 +199,7 @@ struct ThreefryInsertKey<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct ThreefryInsertKey<ResultType, 4, N, true>
 {
-    static void eval (Array<ResultType, 4> &state,
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, 4> &state,
             const Array<ResultType, 5> &par)
     {
         state[Position<0>()] += par[Position<i0_>()];
@@ -449,17 +456,20 @@ class ThreefryEngine
     buffer_type buffer_;
     std::size_t index_;
 
-    void generate_buffer (const ctr_type &c, buffer_type &buf) const
+    void VSMC_STRONG_INLINE generate_buffer (const ctr_type &c,
+            buffer_type &buf) const
     {
         buf = c;
         generate_buffer<0>(buf, cxx11::true_type());
     }
 
     template <std::size_t>
-    void generate_buffer (buffer_type &, cxx11::false_type) const {}
+    void VSMC_STRONG_INLINE generate_buffer (buffer_type &,
+            cxx11::false_type) const {}
 
     template <std::size_t N>
-    void generate_buffer (buffer_type &buf, cxx11::true_type) const
+    void VSMC_STRONG_INLINE generate_buffer (buffer_type &buf,
+            cxx11::true_type) const
     {
         internal::ThreefryRotate<ResultType, K, N>::eval(buf);
         internal::ThreefryInsertKey<ResultType, K, N>::eval(buf, par_);

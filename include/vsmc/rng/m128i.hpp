@@ -29,31 +29,31 @@ namespace vsmc {
 /// \brief Aligned pack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_pack_a (const Array<T, N> &c, __m128i &m)
+VSMC_STRONG_INLINE void m128i_pack_a (const Array<T, N> &c, __m128i &m)
 {m = _mm_load_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));}
 
 /// \brief Unaligned pack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_pack_u (const Array<T, N> &c, __m128i &m)
+VSMC_STRONG_INLINE void m128i_pack_u (const Array<T, N> &c, __m128i &m)
 {m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));}
 
 /// \brief Aligned unpack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_unpack_a (const __m128i &m, Array<T, N> &c)
+VSMC_STRONG_INLINE void m128i_unpack_a (const __m128i &m, Array<T, N> &c)
 {_mm_store_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);}
 
 /// \brief Unaligned unpack
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_unpack_u (const __m128i &m, Array<T, N> &c)
+VSMC_STRONG_INLINE void m128i_unpack_u (const __m128i &m, Array<T, N> &c)
 {_mm_storeu_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);}
 
 /// \brief Pack an Array into an __m128i object
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_pack (const Array<T, N> &c, __m128i &m)
+VSMC_STRONG_INLINE void m128i_pack (const Array<T, N> &c, __m128i &m)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
     m128i_pack_u<Offset>(c, m);
@@ -62,7 +62,7 @@ inline void m128i_pack (const Array<T, N> &c, __m128i &m)
 /// \brief Unpack an __m128i object into an Array
 /// \ingroup RNG
 template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_unpack (const __m128i &m, Array<T, N> &c)
+VSMC_STRONG_INLINE void m128i_unpack (const __m128i &m, Array<T, N> &c)
 {
     VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N);
     m128i_unpack_u<Offset>(m, c);
@@ -70,7 +70,7 @@ inline void m128i_unpack (const __m128i &m, Array<T, N> &c)
 
 /// \brief Compare two __m128i objects
 /// \ingroup RNG
-inline bool m128i_is_equal (const __m128i &a, const __m128i &b)
+VSMC_STRONG_INLINE bool m128i_is_equal (const __m128i &a, const __m128i &b)
 {
     Array<uint64_t, 2> sa;
     Array<uint64_t, 2> sb;
@@ -84,7 +84,7 @@ inline bool m128i_is_equal (const __m128i &a, const __m128i &b)
 /// unsigned integers
 /// \ingroup RNG
 template <typename CharT, typename Traits>
-inline std::basic_ostream<CharT, Traits> &m128i_output (
+VSMC_STRONG_INLINE std::basic_ostream<CharT, Traits> &m128i_output (
         std::basic_ostream<CharT, Traits> &os, const __m128i &a)
 {
     if (os.good()) {
@@ -100,7 +100,7 @@ inline std::basic_ostream<CharT, Traits> &m128i_output (
 /// unsigned integers written by m128i_output
 /// \ingroup RNG
 template <typename CharT, typename Traits>
-inline std::basic_istream<CharT, Traits> &m128i_input (
+VSMC_STRONG_INLINE std::basic_istream<CharT, Traits> &m128i_input (
         std::basic_istream<CharT, Traits> &is, __m128i &a)
 {
     if (is.good()) {
