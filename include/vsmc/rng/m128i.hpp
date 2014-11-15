@@ -84,7 +84,7 @@ VSMC_STRONG_INLINE bool m128i_is_equal (const __m128i &a, const __m128i &b)
 /// unsigned integers
 /// \ingroup RNG
 template <typename CharT, typename Traits>
-VSMC_STRONG_INLINE std::basic_ostream<CharT, Traits> &m128i_output (
+inline std::basic_ostream<CharT, Traits> &m128i_output (
         std::basic_ostream<CharT, Traits> &os, const __m128i &a)
 {
     if (os.good()) {
@@ -100,7 +100,7 @@ VSMC_STRONG_INLINE std::basic_ostream<CharT, Traits> &m128i_output (
 /// unsigned integers written by m128i_output
 /// \ingroup RNG
 template <typename CharT, typename Traits>
-VSMC_STRONG_INLINE std::basic_istream<CharT, Traits> &m128i_input (
+inline std::basic_istream<CharT, Traits> &m128i_input (
         std::basic_istream<CharT, Traits> &is, __m128i &a)
 {
     if (is.good()) {
