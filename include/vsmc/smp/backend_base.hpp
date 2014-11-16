@@ -61,14 +61,14 @@ Name##Impl<T, Derived> &operator= (const Name##Impl<T, Derived> &other)      \
 }                                                                            \
 ~Name##Impl () {}
 
-#ifdef VSMC_MSVC
+#if defined(VSMC_MSVC) || defined(VSMC_SUNPRO)
 #define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)
-#else // VSMC_MSVC
+#else // defined(VSMC_MSVC) || defined(VSMC_SUNPRO)
 #define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_base_of<basename<T, Derived>, Derived>::value),       \
             DERIVED_FROM_##basename##_WITH_INCORRECT_Derived_TEMPLATE_PARAMETER)
-#endif // VSMC_MSVC
+#endif // defined(VSMC_MSVC) || defined(VSMC_SUNPRO)
 
 #define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(basename, member)        \
     VSMC_STATIC_ASSERT((cxx11::is_same<Derived, NullType>::value),           \

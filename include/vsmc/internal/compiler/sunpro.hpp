@@ -32,14 +32,20 @@
 #ifndef VSMC_INTERNAL_COMPILER_SUNPRO_HPP
 #define VSMC_INTERNAL_COMPILER_SUNPRO_HPP
 
-#pragma error_messages(off, nonewline)
 #pragma error_messages(off, anonnotype)
+#pragma error_messages(off, doubunder)
+#pragma error_messages(off, hidef)
+#pragma error_messages(off, inlasmpnu)
+#pragma error_messages(off, inllargeint)
+#pragma error_messages(off, inllargeuse)
+#pragma error_messages(off, nonewline)
+#pragma error_messages(off, notused)
 
 #ifndef VSMC_HAS_CXX11_LONG_LONG
 #define VSMC_HAS_CXX11_LONG_LONG 1
 #endif
 
-#define VSMC_SUNPRO_NONEXIST 0xFFFFUL
+#define VSMC_SUNPRO_NONEXIST 0xFFFFFFFFUL
 
 #define VSMC_SUNPRO_VERSION __SUNPRO_CC
 
@@ -301,7 +307,7 @@
 #endif
 #endif
 
-#if VSMC_SUNPRO_VERSION >= 0x5130UL
+#if VSMC_SUNPRO_VERSION >= VSMC_SUNPRO_NONEXIST
 #ifndef VSMC_HAS_CXX11LIB_TUPLE
 #define VSMC_HAS_CXX11LIB_TUPLE 1
 #endif

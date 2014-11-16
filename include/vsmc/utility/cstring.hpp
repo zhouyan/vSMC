@@ -727,7 +727,6 @@ VSMC_STRONG_INLINE void set_loop_switch (
         case 3: set_loop<ISA, N, true,  true >(dst, ch, n); break;
         default :
             VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(set_loop_switch);
-            break;
     }
 }
 
@@ -742,7 +741,6 @@ VSMC_STRONG_INLINE void cpy_front_n_switch (
         case 3: cpy_front_n<ISA, N, true,  true >(dst, src, n); break;
         default :
             VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_n_switch);
-            break;
     }
 }
 
@@ -757,7 +755,6 @@ VSMC_STRONG_INLINE void cpy_back_n_switch (
         case 3: cpy_back_n<ISA, N, true,  true >(dst, src, n); break;
         default :
             VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_n_switch);
-            break;
     }
 }
 
@@ -780,7 +777,6 @@ VSMC_STRONG_INLINE void cpy_front_loop_switch (
             cpy_front_loop<ISA, N, true,  true,  true >(dst, src, n); break;
         default :
             VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_loop_switch);
-            break;
     }
 }
 
@@ -803,7 +799,6 @@ VSMC_STRONG_INLINE void cpy_back_loop_switch (
             cpy_back_loop<ISA, N, true,  true,  true >(dst, src, n); break;
         default :
             VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_loop_switch);
-            break;
     }
 }
 
