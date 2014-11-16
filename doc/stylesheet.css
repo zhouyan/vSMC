@@ -11,13 +11,13 @@ div.contents {
     border-bottom-right-radius:8px;
     border-bottom-left-radius:8px;
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.15);
-    /* firefox specific markup */
     -moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.15);
-    /* webkit specific markup */
     -webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.15);
 }
 
 body, table, div, p, dl {
     font: 400 14px/19px
-    'Lucida Grande', 'Lucida Sans', Geneva, Helvetica, Arial, sans-serif;
+    'Helvetica Neue', Helvetica,
+    'Lucida Grande', 'Lucida Sans',
+    Geneva, Arial, sans-serif;
 }
