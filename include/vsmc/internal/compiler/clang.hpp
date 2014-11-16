@@ -41,6 +41,14 @@
 #define VSMC_CLANG_VERSION \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
+#define VSMC_LIBCPP_NONEXIST 0xFFFFFFFFUL
+
+#ifdef _LIBCPP_VERSION
+#define VSMC_LIBCPP_VERSION _LIBCPP_VERSION
+#else
+#define VSMC_LIBCPP_VERSION 0
+#endif
+
 #if __cplusplus >= 201103L
 
 // C++11 language features
@@ -251,67 +259,133 @@
 
 // C++11 library features
 
-#if defined(_LIBCPP_VERSION)
-
-#define VSMC_LIBCPP_NONEXIST 1000000UL
-
-#if _LIBCPP_VERSION >= 1101
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_ALGORITHM
 #define VSMC_HAS_CXX11LIB_ALGORITHM 1
 #endif
 #endif
 
-#if _LIBCPP_VERSION >= 1101
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_HAS_CXX11LIB_CHRONO 1
 #endif
 #endif
 
-#if _LIBCPP_VERSION >= 1101
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_CMATH
 #define VSMC_HAS_CXX11LIB_CMATH 1
 #endif
 #endif
 
-#if _LIBCPP_VERSION >= 1101
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_HAS_CXX11LIB_FUNCTIONAL 1
 #endif
 #endif
 
-#if _LIBCPP_VERSION >= VSMC_LIBCPP_NONEXIST
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_FUTURE
 #define VSMC_HAS_CXX11LIB_FUTURE 1
 #endif
 #endif
 
-#if _LIBCPP_VERSION >= 1101
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_MUTEX
 #define VSMC_HAS_CXX11LIB_MUTEX 1
 #endif
 #endif
 
-#if _LIBCPP_VERSION >= 1101
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_RANDOM
 #define VSMC_HAS_CXX11LIB_RANDOM 1
 #endif
 #endif
 
-#if _LIBCPP_VERSION >= 1101
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_THREAD
 #define VSMC_HAS_CXX11LIB_THREAD 1
 #endif
 #endif
 
-#if _LIBCPP_VERSION >= 1101
+#if VSMC_LIBCPP_VERSION >= 1101
 #ifndef VSMC_HAS_CXX11LIB_TUPLE
 #define VSMC_HAS_CXX11LIB_TUPLE 1
 #endif
 #endif
 
-#endif // defined(_LIBCPP_VERSION)
-
 #endif // __cplusplus >= 201103L
+
+#if __cplusplus >= 201402L
+
+// C++14 language features
+
+#if __has_feature(cxx_binary_literals)
+#ifndef VSMC_HAS_CXX14_BINARY_LITERALS
+#define VSMC_HAS_CXX14_BINARY_LITERALS 1
+#endif
+#endif
+
+#if __has_feature(cxx_contextual_conversions)
+#ifndef VSMC_HAS_CXX14_CONTEXTUAL_CONVERSIONS
+#define VSMC_HAS_CXX14_CONTEXTUAL_CONVERSIONS 1
+#endif
+#endif
+
+#if __has_feature(cxx_decltype_auto)
+#ifndef VSMC_HAS_CXX14_DECLTYPE_AUTO
+#define VSMC_HAS_CXX14_DECLTYPE_AUTO 1
+#endif
+#endif
+
+#if __has_feature(cxx_digit_seperators)
+#ifndef VSMC_HAS_CXX14_DIGIT_SEPERATORS
+#define VSMC_HAS_CXX14_DIGIT_SEPERATORS 1
+#endif
+#endif
+
+#if __has_feature(cxx_aggregate_nsdmi)
+#ifndef VSMC_HAS_CXX14_AGGREGATE_NSDMI
+#define VSMC_HAS_CXX14_AGGREGATE_NSDMI 1
+#endif
+#endif
+
+#if __has_feature(cxx_init_captures)
+#ifndef VSMC_HAS_CXX14_INIT_CAPTURES
+#define VSMC_HAS_CXX14_INIT_CAPTURES 1
+#endif
+#endif
+
+#if __has_feature(cxx_generic_lambdas)
+#ifndef VSMC_HAS_CXX14_GENERIC_LAMBDAS
+#define VSMC_HAS_CXX14_GENERIC_LAMBDAS 1
+#endif
+#endif
+
+#if __has_feature(cxx_relaxed_constexpr)
+#ifndef VSMC_HAS_CXX14_RELAXED_CONSTEXPR
+#define VSMC_HAS_CXX14_RELAXED_CONSTEXPR 1
+#endif
+#endif
+
+#if __has_feature(cxx_return_type_deduction)
+#ifndef VSMC_HAS_CXX14_RETURN_TYPE_DEDUCTION
+#define VSMC_HAS_CXX14_RETURN_TYPE_DEDUCTION 1
+#endif
+#endif
+
+#if __has_feature(cxx_runtime_sized_arrays)
+#ifndef VSMC_HAS_CXX14_RUNTIME_SIZED_ARRAYS
+#define VSMC_HAS_CXX14_RUNTIME_SIZED_ARRAYS 1
+#endif
+#endif
+
+#if __has_feature(cxx_variable_templates)
+#ifndef VSMC_HAS_CXX14_VARIABLE_TEMPLATES
+#define VSMC_HAS_CXX14_VARIABLE_TEMPLATES 1
+#endif
+#endif
+
+#endif // __cplusplus >= 201402L
 
 // C99 library features
 
