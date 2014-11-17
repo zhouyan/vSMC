@@ -374,6 +374,10 @@
 
 // Target specific features
 
+#ifndef VSMC_INT64
+#define VSMC_INT64 long long
+#endif
+
 #ifndef VSMC_HAS_INT128
 #define VSMC_HAS_INT128 0
 #endif

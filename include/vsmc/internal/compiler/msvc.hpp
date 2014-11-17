@@ -382,6 +382,10 @@
 
 // Compiler features
 
+#ifndef VSMC_INT64
+#define VSMC_INT64 __int64
+#endif
+
 #ifndef VSMC_STRONG_INLINE
 #define VSMC_STRONG_INLINE __foceinline
 #endif

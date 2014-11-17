@@ -389,6 +389,10 @@
 
 // Compiler features
 
+#ifndef VSMC_INT64
+#define VSMC_INT64 long long
+#endif
+
 #ifndef VSMC_HAS_WARNING
 #define VSMC_HAS_WARNING 1
 #endif

@@ -395,6 +395,10 @@
 
 // Compiler features
 
+#ifndef VSMC_INT64
+#define VSMC_INT64 long long
+#endif
+
 // Target specific features
 
 // Parallelization features

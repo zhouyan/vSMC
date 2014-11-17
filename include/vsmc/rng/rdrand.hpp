@@ -63,8 +63,8 @@ namespace vsmc {
 /// \ingroup RDRNG
 template <typename UIntType> inline bool rdrand (UIntType *);
 
-#ifdef VSMC_MSVC
-
+/// \brief Invoke the 16-bits RDRAND instruction and return the carry flag
+/// \ingroup RDRNG
 template <> inline bool rdrand<uint16_t> (uint16_t *rand)
 {
     unsigned short r;
@@ -74,6 +74,8 @@ template <> inline bool rdrand<uint16_t> (uint16_t *rand)
     return cf != 0;
 }
 
+/// \brief Invoke the 32-bits RDRAND instruction and return the carry flag
+/// \ingroup RDRNG
 template <> inline bool rdrand<uint32_t> (uint32_t *rand)
 {
     unsigned r;
@@ -83,57 +85,16 @@ template <> inline bool rdrand<uint32_t> (uint32_t *rand)
     return cf != 0;
 }
 
+/// \brief Invoke the 64-bits RDRAND instruction and return the carry flag
+/// \ingroup RDRNG
 template <> inline bool rdrand<uint64_t> (uint64_t *rand)
 {
-    unsigned __int64 r;
+    unsigned VSMC_INT64 r;
     int cf = _rdrand64_step(&r);
     *rand = static_cast<uint64_t>(r);
 
     return cf != 0;
 }
-
-#else // VSMC_MSVC
-
-template <> inline bool rdrand<uint16_t> (uint16_t *rand)
-{
-    unsigned char cf = 0;
-    __asm__ volatile
-        (
-         "rdrand %0\n\t"
-         "setcb %1\n"
-         : "=r" (*rand), "=qm" (cf)
-        );
-
-    return cf != 0;
-}
-
-template <> inline bool rdrand<uint32_t> (uint32_t *rand)
-{
-    unsigned char cf = 0;
-    __asm__ volatile
-        (
-         "rdrand %0\n\t"
-         "setcb %1\n"
-         : "=r" (*rand), "=qm" (cf)
-        );
-
-    return cf != 0;
-}
-
-template <> inline bool rdrand<uint64_t> (uint64_t *rand)
-{
-    unsigned char cf = 0;
-    __asm__ volatile
-        (
-         "rdrand %0\n\t"
-         "setcb %1\n"
-         : "=r" (*rand), "=qm" (cf)
-        );
-
-    return cf != 0;
-}
-
-#endif // VSMC_MSVC
 
 /// \brief RDRAND generator
 /// \ingroup RDRNG
