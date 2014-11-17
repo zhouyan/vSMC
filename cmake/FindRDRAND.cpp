@@ -29,11 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifdef _MSC_VER
-#include <intrin.h>
-#else
-#include <stdint.h>
-#endif
 #include <immintrin.h>
 
 int main ()

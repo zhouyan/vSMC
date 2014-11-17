@@ -34,10 +34,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/generator_wrapper.hpp>
-
-#ifdef VSMC_MSVC
-#include <intrin.h>
-#endif
+#include <immintrin.h>
 
 #ifndef VSMC_RDRAND_NTRIAL_MAX
 #define VSMC_RDRAND_NTRIAL_MAX 10

@@ -33,12 +33,7 @@
 #define VSMC_RNG_M128I_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-
-#ifdef VSMC_MSVC
-#include <intrin.h>
-#else
 #include <emmintrin.h>
-#endif
 
 #define VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N) \
     VSMC_STATIC_ASSERT(                                                      \
