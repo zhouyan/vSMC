@@ -330,6 +330,14 @@
 
 // Compiler features
 
+#ifndef VSMC_INT64
+#define VSMC_INT64 long long
+#endif
+
+#ifndef VSMC_HAS_INT128
+#define VSMC_HAS_INT128 0
+#endif
+
 #ifndef VSMC_HAS_WARNING
 #define VSMC_HAS_WARNING 0
 #endif
@@ -366,15 +374,7 @@
 #define __has_include_next(x) 0
 #endif
 
-// Target specific features
-
-#ifndef VSMC_INT64
-#define VSMC_INT64 long long
-#endif
-
-#ifndef VSMC_HAS_INT128
-#define VSMC_HAS_INT128 0
-#endif
+// Target features
 
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 0
@@ -439,6 +439,8 @@
 #define VSMC_HAS_SSE2 VSMC_HAS_SSE3
 #endif
 #endif
+
+// OS features
 
 #if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)
 #ifndef VSMC_HAS_GCD_LION

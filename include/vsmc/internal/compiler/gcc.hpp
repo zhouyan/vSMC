@@ -393,6 +393,15 @@
 #define VSMC_INT64 long long
 #endif
 
+#ifdef __x86_64__
+#ifndef VSMC_HAS_INT128
+#define VSMC_HAS_INT128 1
+#endif
+#ifndef VSMC_INT128
+#define VSMC_INT128 __int128
+#endif
+#endif
+
 #ifndef VSMC_HAS_WARNING
 #define VSMC_HAS_WARNING 1
 #endif
@@ -401,19 +410,7 @@
 #define VSMC_STRONG_INLINE __attribute__((always_inline)) inline
 #endif
 
-// Target specific features
-
-#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
-#ifndef VSMC_HAS_INT128
-#define VSMC_HAS_INT128 1
-#endif
-#endif
-
-#if defined(__x86_64__) || defined(_M_AMD64) || defined (_M_X64)
-#ifndef VSMC_INT128
-#define VSMC_INT128 __int128
-#endif
-#endif
+// Target features
 
 #ifdef __AES__
 #ifndef VSMC_HAS_AES_NI
@@ -426,6 +423,8 @@
 #define VSMC_HAS_RDRAND 1
 #endif
 #endif
+
+// Parallelization features
 
 #ifdef _OPENMP
 #ifndef VSMC_HAS_OMP

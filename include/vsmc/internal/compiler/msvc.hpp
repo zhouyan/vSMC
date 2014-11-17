@@ -390,10 +390,10 @@
 #define VSMC_STRONG_INLINE __foceinline
 #endif
 
-// Target specific features
+// Target features
 
-#ifndef VSMC_HAS_SSE2
 #if _M_IX86_FP == 2 || defined(__AVX__)
+#ifndef VSMC_HAS_SSE2
 #define VSMC_HAS_SSE2 1
 #endif
 #endif
@@ -403,6 +403,12 @@
 #if VSMC_MSVC_VERSION >= 1700
 #ifndef VSMC_HAS_PPL
 #define VSMC_HAS_PPL 1
+#endif
+#endif
+
+#ifdef _OPENMP
+#ifndef VSMC_HAS_OMP
+#define VSMC_HAS_OMP 1
 #endif
 #endif
 
