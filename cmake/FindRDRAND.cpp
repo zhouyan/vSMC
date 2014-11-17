@@ -34,12 +34,13 @@
 #else
 #include <stdint.h>
 #endif
+#include <immintrin.h>
 
 int main ()
 {
     unsigned short r16;
     unsigned r32;
-#if define(_MSC_VER) || defined(__INTEL_COMPILER)
+#if defined(_MSC_VER) || defined(__INTEL_COMPILER)
     unsigned __int64 r64;
 #else
     unsigned long long r64;
