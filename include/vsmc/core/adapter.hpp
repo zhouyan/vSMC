@@ -36,12 +36,27 @@
 
 #define VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(name, RT, Args)                  \
 template <typename U>                                                        \
-struct has_##name##_non_static_                                              \
+struct has_##name##_non_static_non_const_                                    \
 {                                                                            \
     private :                                                                \
                                                                              \
     struct char2 {char c1; char c2;};                                        \
     template <typename V, RT (V::*) Args> struct sfinae_;                    \
+    template <typename V> static char test (sfinae_<V, &V::name> *);         \
+    template <typename V> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename U>                                                        \
+struct has_##name##_non_static_const_                                        \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename V, RT (V::*) Args const> struct sfinae_;              \
     template <typename V> static char test (sfinae_<V, &V::name> *);         \
     template <typename V> static char2 test (...);                           \
                                                                              \
@@ -67,7 +82,8 @@ struct has_##name##_static_                                                  \
                                                                              \
 template <typename U>                                                        \
 struct has_##name##_ : public cxx11::integral_constant<bool,                 \
-    has_##name##_non_static_<U>::value ||                                    \
+    has_##name##_non_static_non_const_<U>::value ||                          \
+    has_##name##_non_static_const_<U>::value ||                              \
     has_##name##_static_<U>::value> {};
 
 namespace vsmc {
