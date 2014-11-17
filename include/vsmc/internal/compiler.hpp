@@ -84,12 +84,6 @@
 #elif defined(__clang__)
 #define VSMC_CLANG
 #include <vsmc/internal/compiler/clang.hpp>
-#elif defined(__OPEN64__)
-#define VSMC_OPEN64
-#include <vsmc/internal/compiler/open64.hpp>
-#elif defined(__SUNPRO_CC)
-#define VSMC_SUNPRO
-#include <vsmc/internal/compiler/sunpro.hpp>
 #elif defined(__GNUC__)
 #define VSMC_GCC
 #include <vsmc/internal/compiler/gcc.hpp>
