@@ -861,13 +861,10 @@ VSMC_STRONG_INLINE void *memset_simd (
     }
 
     char *dstc = static_cast<char *>(dst);
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (
-            traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize);
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 64;
     if (offset != 0) {
-        offset = traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize - offset;
-        set_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize / 2>(
+        offset = 64 - offset;
+        set_n_switch<ISA, 32 / traits::SIMDTrait<ISA>::alignment>(
                 dstc, ch, offset, flag);
         n -= offset;
         dstc += offset;
@@ -901,13 +898,10 @@ VSMC_STRONG_INLINE void *memcpy_simd (
 
     char *dstc = static_cast<char *>(dst);
     const char *srcc = static_cast<const char *>(src);
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (
-            traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize);
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 64;
     if (offset != 0) {
-        offset = traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize - offset;
-        cpy_front_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize / 2>(
+        offset = 64 - offset;
+        cpy_front_n_switch<ISA, 32 / traits::SIMDTrait<ISA>::alignment>(
                 dstc, srcc, offset, flag);
         n -= offset;
         dstc += offset;
@@ -944,13 +938,10 @@ VSMC_STRONG_INLINE void *memmove_simd_front (
 
     char *dstc = static_cast<char *>(dst);
     const char *srcc = static_cast<const char *>(src);
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (
-            traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize);
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 64;
     if (offset != 0) {
-        offset = traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize - offset;
-        cpy_front_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize / 2>(
+        offset = 64 - offset;
+        cpy_front_n_switch<ISA, 64 / traits::SIMDTrait<ISA>::alignment>(
                 dstc, srcc, offset, flag);
         n -= offset;
         dstc += offset;
@@ -992,11 +983,9 @@ VSMC_STRONG_INLINE void *memmove_simd_back (
         return dst;
     }
 
-    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % (
-            traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize);
+    std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 64;
     if (offset != 0) {
-        cpy_back_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize / 2>(
+        cpy_back_n_switch<ISA, 32 / traits::SIMDTrait<ISA>::alignment>(
                 dstc, srcc, offset, flag);
         n -= offset;
         dstc -= offset;
