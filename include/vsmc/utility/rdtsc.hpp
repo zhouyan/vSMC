@@ -42,6 +42,9 @@ namespace vsmc {
 
 /// \brief Return the TSC value using RDTSC instruction
 /// \ingroup RDTSC
+///
+/// \note This function does not sync by itself. Call `cpuid` to sync if more
+/// accurate measurement is needed.
 inline uint64_t rdtsc ()
 {
 #ifdef VSMC_MSVC
@@ -80,7 +83,7 @@ inline uint64_t rdtscp (unsigned *aux)
 #endif // VSMC_MSVC
 }
 
-/// \brief CPU clock cycle counter using RDTSC
+/// \brief CPU clock cycle counter using `rdtsc`
 /// \ingroup RDTSC
 class RDTSCCounter
 {
@@ -153,7 +156,7 @@ class RDTSCCounter
     bool running_;
 }; // class RDTSCCounter
 
-/// \brief CPU clock cycle counter using RDTSCP
+/// \brief CPU clock cycle counter using `rdtscp`
 /// \ingroup RDTSC
 ///
 /// \details
