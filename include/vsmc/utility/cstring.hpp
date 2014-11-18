@@ -120,9 +120,6 @@
 #define VSMC_CSTRING_NON_TEMPORAL_THRESHOLD 0
 #endif
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(func) \
-    VSMC_RUNTIME_ASSERT(false, ("**vsmc::internal::"#func" UNDEFINED FLAG"))
-
 #define VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_MEMCPY(dst, src, n) \
     VSMC_RUNTIME_ASSERT((                                                    \
                 static_cast<const char *>(dst) -                             \
@@ -624,55 +621,61 @@ VSMC_STRONG_INLINE void cpy_back_l (void *, const void *, std::size_t);
 
 #if VSMC_HAS_SSE2
 
-VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, false, false,
-        double, __m128d, _mm_castsi128_pd, _mm_set1_epi8,
-        _mm_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, true, false,
-        double, __m128d, _mm_castsi128_pd, _mm_set1_epi8,
-        _mm_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, true, true,
-        double, __m128d, _mm_castsi128_pd, _mm_set1_epi8,
-        _mm_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, false, false, double, __m128d,
+        _mm_castsi128_pd, _mm_set1_epi8, _mm_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, false, true,  double, __m128d,
+        _mm_castsi128_pd, _mm_set1_epi8, _mm_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, true,  false, double, __m128d,
+        _mm_castsi128_pd, _mm_set1_epi8, _mm_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, true,  true,  double, __m128d,
+        _mm_castsi128_pd, _mm_set1_epi8, _mm_stream_pd)
 
-VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, false, false, false,
-        double, __m128d, _mm_loadu_pd, _mm_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, false, true, false,
-        double, __m128d, _mm_loadu_pd, _mm_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, false, true, true,
-        double, __m128d, _mm_loadu_pd, _mm_stream_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, true, false, false,
-        double, __m128d, _mm_load_pd, _mm_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, true, true, false,
-        double, __m128d, _mm_load_pd, _mm_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, true, true, true,
-        double, __m128d, _mm_load_pd, _mm_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, false, false, false, double, __m128d,
+        _mm_loadu_pd, _mm_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, false, false, true,  double, __m128d,
+        _mm_loadu_pd, _mm_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, false, true,  false, double, __m128d,
+        _mm_loadu_pd, _mm_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, false, true,  true,  double, __m128d,
+        _mm_loadu_pd, _mm_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, true,  false, false, double, __m128d,
+        _mm_load_pd, _mm_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, true,  false, true,  double, __m128d,
+        _mm_load_pd, _mm_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, true,  true,  false, double, __m128d,
+        _mm_load_pd, _mm_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(SSE2, true,  true,  true,  double, __m128d,
+        _mm_load_pd, _mm_stream_pd)
 
 #endif // VSMC_HAS_SSE2
 
 #if VSMC_HAS_AVX
 
-VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, false, false,
-        double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
-        _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, true, false,
-        double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
-        _mm256_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, true, true,
-        double, __m256d, _mm256_castsi256_pd, _mm256_set1_epi8,
-        _mm256_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, false, false, double, __m256d,
+        _mm256_castsi256_pd, _mm256_set1_epi8, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, false, true,  double, __m256d,
+        _mm256_castsi256_pd, _mm256_set1_epi8, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, true,  false, double, __m256d,
+        _mm256_castsi256_pd, _mm256_set1_epi8, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, true,  true,  double, __m256d,
+        _mm256_castsi256_pd, _mm256_set1_epi8, _mm256_stream_pd)
 
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, false, false,
-        double, __m256d, _mm256_loadu_pd, _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, true, false,
-        double, __m256d, _mm256_loadu_pd, _mm256_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, true, true,
-        double, __m256d, _mm256_loadu_pd, _mm256_stream_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true, false, false,
-        double, __m256d, _mm256_load_pd, _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true, true, false,
-        double, __m256d, _mm256_load_pd, _mm256_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true, true, true,
-        double, __m256d, _mm256_load_pd, _mm256_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, false, false, double, __m256d,
+        _mm256_loadu_pd, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, false, true,  double, __m256d,
+        _mm256_loadu_pd, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, true,  false, double, __m256d,
+        _mm256_loadu_pd, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, true,  true,  double, __m256d,
+        _mm256_loadu_pd, _mm256_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true,  false, false, double, __m256d,
+        _mm256_load_pd, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true,  false, true,  double, __m256d,
+        _mm256_load_pd, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true,  true,  false, double, __m256d,
+        _mm256_load_pd, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true,  true,  true,  double, __m256d,
+        _mm256_load_pd, _mm256_stream_pd)
 
 #endif // VSMC_HAS_AVX
 
@@ -682,10 +685,10 @@ VSMC_STRONG_INLINE void set_n_switch (
 {
     switch (flag) {
         case 0: set_n<ISA, N, false, false>(dst, ch, n); break;
+        case 1: set_n<ISA, N, false, true >(dst, ch, n); break;
         case 2: set_n<ISA, N, true,  false>(dst, ch, n); break;
-        // case 3: set_n<ISA, N, true,  true >(dst, ch, n); break;
-        default :
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(set_n_switch);
+        case 3: set_n<ISA, N, true,  true >(dst, ch, n); break;
+        default : break;
     }
 }
 
@@ -695,10 +698,10 @@ VSMC_STRONG_INLINE void set_l_switch (
 {
     switch (flag) {
         case 0: set_l<ISA, N, false, false>(dst, ch, n); break;
+        case 1: set_l<ISA, N, false, true >(dst, ch, n); break;
         case 2: set_l<ISA, N, true,  false>(dst, ch, n); break;
         case 3: set_l<ISA, N, true,  true >(dst, ch, n); break;
-        default :
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(set_l_switch);
+        default : break;
     }
 }
 
@@ -707,14 +710,15 @@ VSMC_STRONG_INLINE void cpy_front_n_switch (
         void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
-        case 6 : cpy_front_n<ISA, N, true,  true,  false>(dst, src, n); break;
-        case 4 : cpy_front_n<ISA, N, true,  false, false>(dst, src, n); break;
-        case 2 : cpy_front_n<ISA, N, false, true,  false>(dst, src, n); break;
         case 0 : cpy_front_n<ISA, N, false, false, false>(dst, src, n); break;
-        case 7 : cpy_front_n<ISA, N, true,  true,  true >(dst, src, n); break;
+        case 1 : cpy_front_n<ISA, N, false, false, true >(dst, src, n); break;
+        case 2 : cpy_front_n<ISA, N, false, true,  false>(dst, src, n); break;
         case 3 : cpy_front_n<ISA, N, false, true,  true >(dst, src, n); break;
-        default :
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_n_switch);
+        case 4 : cpy_front_n<ISA, N, true,  false, false>(dst, src, n); break;
+        case 5 : cpy_front_n<ISA, N, true,  false, true >(dst, src, n); break;
+        case 6 : cpy_front_n<ISA, N, true,  true,  false>(dst, src, n); break;
+        case 7 : cpy_front_n<ISA, N, true,  true,  true >(dst, src, n); break;
+        default : break;
     }
 }
 
@@ -723,14 +727,15 @@ VSMC_STRONG_INLINE void cpy_front_l_switch (
         void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
-        case 6 : cpy_front_l<ISA, N, true,  true,  false>(dst, src, n); break;
-        case 4 : cpy_front_l<ISA, N, true,  false, false>(dst, src, n); break;
-        case 2 : cpy_front_l<ISA, N, false, true,  false>(dst, src, n); break;
         case 0 : cpy_front_l<ISA, N, false, false, false>(dst, src, n); break;
-        case 7 : cpy_front_l<ISA, N, true,  true,  true >(dst, src, n); break;
+        case 1 : cpy_front_l<ISA, N, false, false, true >(dst, src, n); break;
+        case 2 : cpy_front_l<ISA, N, false, true,  false>(dst, src, n); break;
         case 3 : cpy_front_l<ISA, N, false, true,  true >(dst, src, n); break;
-        default :
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_front_l_switch);
+        case 4 : cpy_front_l<ISA, N, true,  false, false>(dst, src, n); break;
+        case 5 : cpy_front_l<ISA, N, true,  false, true >(dst, src, n); break;
+        case 6 : cpy_front_l<ISA, N, true,  true,  false>(dst, src, n); break;
+        case 7 : cpy_front_l<ISA, N, true,  true,  true >(dst, src, n); break;
+        default : break;
     }
 }
 
@@ -739,14 +744,15 @@ VSMC_STRONG_INLINE void cpy_back_n_switch (
         void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
-        case 6 : cpy_back_n<ISA, N, true,  true,  false>(dst, src, n); break;
-        case 4 : cpy_back_n<ISA, N, true,  false, false>(dst, src, n); break;
-        case 2 : cpy_back_n<ISA, N, false, true,  false>(dst, src, n); break;
         case 0 : cpy_back_n<ISA, N, false, false, false>(dst, src, n); break;
-        case 7 : cpy_back_n<ISA, N, true,  true,  true >(dst, src, n); break;
+        case 1 : cpy_back_n<ISA, N, false, false, true >(dst, src, n); break;
+        case 2 : cpy_back_n<ISA, N, false, true,  false>(dst, src, n); break;
         case 3 : cpy_back_n<ISA, N, false, true,  true >(dst, src, n); break;
-        default :
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_n_switch);
+        case 4 : cpy_back_n<ISA, N, true,  false, false>(dst, src, n); break;
+        case 5 : cpy_back_n<ISA, N, true,  false, true >(dst, src, n); break;
+        case 6 : cpy_back_n<ISA, N, true,  true,  false>(dst, src, n); break;
+        case 7 : cpy_back_n<ISA, N, true,  true,  true >(dst, src, n); break;
+        default : break;
     }
 }
 
@@ -755,14 +761,15 @@ VSMC_STRONG_INLINE void cpy_back_l_switch (
         void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
-        case 6 : cpy_back_l<ISA, N, true,  true,  false>(dst, src, n); break;
-        case 4 : cpy_back_l<ISA, N, true,  false, false>(dst, src, n); break;
-        case 2 : cpy_back_l<ISA, N, false, true,  false>(dst, src, n); break;
         case 0 : cpy_back_l<ISA, N, false, false, false>(dst, src, n); break;
-        case 7 : cpy_back_l<ISA, N, true,  true,  true >(dst, src, n); break;
+        case 1 : cpy_back_l<ISA, N, false, false, true >(dst, src, n); break;
+        case 2 : cpy_back_l<ISA, N, false, true,  false>(dst, src, n); break;
         case 3 : cpy_back_l<ISA, N, false, true,  true >(dst, src, n); break;
-        default :
-            VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_SWITCH(cpy_back_l_switch);
+        case 4 : cpy_back_l<ISA, N, true,  false, false>(dst, src, n); break;
+        case 5 : cpy_back_l<ISA, N, true,  false, true >(dst, src, n); break;
+        case 6 : cpy_back_l<ISA, N, true,  true,  false>(dst, src, n); break;
+        case 7 : cpy_back_l<ISA, N, true,  true,  true >(dst, src, n); break;
+        default : break;
     }
 }
 
@@ -848,13 +855,18 @@ template <SIMD ISA>
 VSMC_STRONG_INLINE void *memset_simd (
         void *dst, int ch, std::size_t n)
 {
-    if (n <= traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize) {
+    if (n < traits::SIMDTrait<ISA>::alignment) {
         set_0<ISA>(dst, ch, n);
         return dst;
     }
 
     unsigned flag = cstring_is_aligned<ISA>(dst);
+    if (n <= traits::SIMDTrait<ISA>::alignment *
+            traits::SIMDTrait<ISA>::grainsize) {
+        set_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize>(dst, ch, n, flag);
+        return dst;
+    }
+
     char *dstc = static_cast<char *>(dst);
     std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 64;
     if (offset != 0) {
@@ -877,14 +889,20 @@ VSMC_STRONG_INLINE void *memcpy_simd (
     if (dst == src)
         return dst;
 
-    if (n <= traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize) {
+    if (n < traits::SIMDTrait<ISA>::alignment) {
         cpy_front_0<ISA>(dst, src, n);
         return dst;
     }
 
     unsigned flag = cstring_is_aligned<ISA>(dst);
     flag |= cstring_is_aligned<ISA>(src) << 1;
+    if (n <= traits::SIMDTrait<ISA>::alignment *
+            traits::SIMDTrait<ISA>::grainsize) {
+        cpy_front_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize>(
+                dst, src, n, flag);
+        return dst;
+    }
+
     char *dstc = static_cast<char *>(dst);
     const char *srcc = static_cast<const char *>(src);
     std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 64;
@@ -911,14 +929,20 @@ VSMC_STRONG_INLINE void *memmove_simd_front (
     if (dst == src)
         return dst;
 
-    if (n <= traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize) {
+    if (n <= traits::SIMDTrait<ISA>::alignment) {
         cpy_front_0<ISA>(dst, src, n);
         return dst;
     }
 
     unsigned flag = cstring_is_aligned<ISA>(dst);
     flag |= cstring_is_aligned<ISA>(src) << 1;
+    if (n <= traits::SIMDTrait<ISA>::alignment *
+            traits::SIMDTrait<ISA>::grainsize) {
+        cpy_front_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize>(
+                dst, src, n, flag);
+        return dst;
+    }
+
     char *dstc = static_cast<char *>(dst);
     const char *srcc = static_cast<const char *>(src);
     std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 64;
@@ -952,14 +976,20 @@ VSMC_STRONG_INLINE void *memmove_simd_back (
 
     char *dstc = static_cast<char *>(dst) + n;
     const char *srcc = static_cast<const char *>(src) + n;
-    if (n < traits::SIMDTrait<ISA>::alignment *
-            traits::SIMDTrait<ISA>::grainsize) {
+    if (n < traits::SIMDTrait<ISA>::alignment) {
         cpy_back_0<ISA>(dstc, srcc, n);
         return dst;
     }
 
     unsigned flag = cstring_is_aligned<ISA>(dstc);
     flag |= cstring_is_aligned<ISA>(srcc) << 1;
+    if (n <= traits::SIMDTrait<ISA>::alignment *
+            traits::SIMDTrait<ISA>::grainsize) {
+        cpy_back_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize>(
+                dstc, srcc, n, flag);
+        return dst;
+    }
+
     std::size_t offset = reinterpret_cast<uintptr_t>(dstc) % 64;
     if (offset != 0) {
         cpy_back_n_switch<ISA, 32 / traits::SIMDTrait<ISA>::alignment>(
