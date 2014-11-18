@@ -278,6 +278,10 @@
 
 // C++14 language features
 
+#ifndef VSMC_HAS_CXX14_AGGREGATE_NSDMI
+#define VSMC_HAS_CXX14_AGGREGATE_NSDMI 0
+#endif
+
 #ifndef VSMC_HAS_CXX14_BINARY_LITERALS
 #define VSMC_HAS_CXX14_BINARY_LITERALS 0
 #endif
@@ -294,16 +298,12 @@
 #define VSMC_HAS_CXX14_DIGIT_SEPERATORS 0
 #endif
 
-#ifndef VSMC_HAS_CXX14_AGGREGATE_NSDMI
-#define VSMC_HAS_CXX14_AGGREGATE_NSDMI 0
+#ifndef VSMC_HAS_CXX14_GENERIC_LAMBDAS
+#define VSMC_HAS_CXX14_GENERIC_LAMBDAS 0
 #endif
 
 #ifndef VSMC_HAS_CXX14_INIT_CAPTURES
 #define VSMC_HAS_CXX14_INIT_CAPTURES 0
-#endif
-
-#ifndef VSMC_HAS_CXX14_GENERIC_LAMBDAS
-#define VSMC_HAS_CXX14_GENERIC_LAMBDAS 0
 #endif
 
 #ifndef VSMC_HAS_CXX14_RELAXED_CONSTEXPR
@@ -344,34 +344,6 @@
 
 #ifndef VSMC_STRONG_INLINE
 #define VSMC_STRONG_INLINE inline
-#endif
-
-#ifndef __has_builtin
-#define __has_builtin(x) 0
-#endif
-
-#ifndef __has_feature
-#define __has_feature(x) 0
-#endif
-
-#ifndef __has_extension
-#define __has_extension(x) 0
-#endif
-
-#ifndef __has_cpp_attribute
-#define __has_cpp_attribute(x) 0
-#endif
-
-#ifndef __has_attribute
-#define __has_attribute(x) 0
-#endif
-
-#ifndef __has_include
-#define __has_include(x) 0
-#endif
-
-#ifndef __has_include_next
-#define __has_include_next(x) 0
 #endif
 
 // Target features

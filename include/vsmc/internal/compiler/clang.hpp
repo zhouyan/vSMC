@@ -319,6 +319,12 @@
 
 // C++14 language features
 
+#if __has_feature(cxx_aggregate_nsdmi)
+#ifndef VSMC_HAS_CXX14_AGGREGATE_NSDMI
+#define VSMC_HAS_CXX14_AGGREGATE_NSDMI 1
+#endif
+#endif
+
 #if __has_feature(cxx_binary_literals)
 #ifndef VSMC_HAS_CXX14_BINARY_LITERALS
 #define VSMC_HAS_CXX14_BINARY_LITERALS 1
@@ -343,21 +349,15 @@
 #endif
 #endif
 
-#if __has_feature(cxx_aggregate_nsdmi)
-#ifndef VSMC_HAS_CXX14_AGGREGATE_NSDMI
-#define VSMC_HAS_CXX14_AGGREGATE_NSDMI 1
+#if __has_feature(cxx_generic_lambdas)
+#ifndef VSMC_HAS_CXX14_GENERIC_LAMBDAS
+#define VSMC_HAS_CXX14_GENERIC_LAMBDAS 1
 #endif
 #endif
 
 #if __has_feature(cxx_init_captures)
 #ifndef VSMC_HAS_CXX14_INIT_CAPTURES
 #define VSMC_HAS_CXX14_INIT_CAPTURES 1
-#endif
-#endif
-
-#if __has_feature(cxx_generic_lambdas)
-#ifndef VSMC_HAS_CXX14_GENERIC_LAMBDAS
-#define VSMC_HAS_CXX14_GENERIC_LAMBDAS 1
 #endif
 #endif
 
