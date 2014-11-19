@@ -61,19 +61,6 @@ Name##Impl<T, Derived> &operator= (const Name##Impl<T, Derived> &other)      \
 }                                                                            \
 ~Name##Impl () {}
 
-#if defined(VSMC_MSVC) || defined(VSMC_SUNPRO)
-#define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)
-#else // defined(VSMC_MSVC) || defined(VSMC_SUNPRO)
-#define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \
-    VSMC_STATIC_ASSERT(                                                      \
-            (cxx11::is_base_of<basename<T, Derived>, Derived>::value),       \
-            DERIVED_FROM_##basename##_WITH_INCORRECT_Derived_TEMPLATE_PARAMETER)
-#endif // defined(VSMC_MSVC) || defined(VSMC_SUNPRO)
-
-#define VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(basename, member)        \
-    VSMC_STATIC_ASSERT((cxx11::is_same<Derived, NullType>::value),           \
-            DERIVED_FROM_##basename##_WITHOUT_IMPLEMENTATION_OF_##member##_IN_THE_Derived_TEMPLATE_PARAMETER)
-
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename) \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != VSMC_NULLPTR),     \
             ("DERIVED FROM " #basename                                       \
@@ -115,76 +102,44 @@ class InitializeBase
     template <typename D>
     std::size_t initialize_state_dispatch (SingleParticle<T> sp,
             std::size_t (D::*) (SingleParticle<T>))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        return static_cast<Derived *>(this)->initialize_state(sp);
-    }
+    {return static_cast<Derived *>(this)->initialize_state(sp);}
 
     template <typename D>
     void initialize_param_dispatch (Particle<T> &particle, void *param,
             void (D::*) (Particle<T> &, void *))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        static_cast<Derived *>(this)->initialize_param(particle, param);
-    }
+    {static_cast<Derived *>(this)->initialize_param(particle, param);}
 
     template <typename D>
     void pre_processor_dispatch (Particle<T> &particle,
             void (D::*) (Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        static_cast<Derived *>(this)->pre_processor(particle);
-    }
+    {static_cast<Derived *>(this)->pre_processor(particle);}
 
     template <typename D>
     void post_processor_dispatch (Particle<T> &particle,
             void (D::*) (Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        static_cast<Derived *>(this)->post_processor(particle);
-    }
+    {static_cast<Derived *>(this)->post_processor(particle);}
 
     // non-static const
 
     template <typename D>
     std::size_t initialize_state_dispatch (SingleParticle<T> sp,
             std::size_t (D::*) (SingleParticle<T>) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        return static_cast<Derived *>(this)->initialize_state(sp);
-    }
+    {return static_cast<Derived *>(this)->initialize_state(sp);}
 
     template <typename D>
     void initialize_param_dispatch (Particle<T> &particle, void *param,
             void (D::*) (Particle<T> &, void *) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        static_cast<Derived *>(this)->initialize_param(particle, param);
-    }
+    {static_cast<Derived *>(this)->initialize_param(particle, param);}
 
     template <typename D>
     void pre_processor_dispatch (Particle<T> &particle,
             void (D::*) (Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        static_cast<Derived *>(this)->pre_processor(particle);
-    }
+    {static_cast<Derived *>(this)->pre_processor(particle);}
 
     template <typename D>
     void post_processor_dispatch (Particle<T> &particle,
             void (D::*) (Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(InitializeBase);
-        static_cast<Derived *>(this)->post_processor(particle);
-    }
+    {static_cast<Derived *>(this)->post_processor(particle);}
 
     // static
 
@@ -208,11 +163,7 @@ class InitializeBase
 
     std::size_t initialize_state_dispatch (SingleParticle<T>,
             std::size_t (InitializeBase::*) (SingleParticle<T>))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(
-                InitializeBase, initialize_state);
-        return 0;
-    }
+    {return 0;}
 
     void initialize_param_dispatch (Particle<T> &, void *,
             void (InitializeBase::*) (Particle<T> &, void *)) {}
@@ -231,7 +182,7 @@ class InitializeBase<T, Virtual>
 {
     public :
 
-    virtual std::size_t initialize_state (SingleParticle<T>) = 0;
+    virtual std::size_t initialize_state (SingleParticle<T>) {return 0;}
     virtual void initialize_param (Particle<T> &, void *) {}
     virtual void pre_processor (Particle<T> &) {}
     virtual void post_processor (Particle<T> &) {}
@@ -268,58 +219,34 @@ class MoveBase
     template <typename D>
     std::size_t move_state_dispatch (std::size_t iter, SingleParticle<T> sp,
             std::size_t (D::*) (std::size_t, SingleParticle<T>))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        return static_cast<Derived *>(this)->move_state(iter, sp);
-    }
+    {return static_cast<Derived *>(this)->move_state(iter, sp);}
 
     template <typename D>
     void pre_processor_dispatch (std::size_t iter, Particle<T> &particle,
             void (D::*) (std::size_t, Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        static_cast<Derived *>(this)->pre_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->pre_processor(iter, particle);}
 
     template <typename D>
     void post_processor_dispatch (std::size_t iter, Particle<T> &particle,
             void (D::*) (std::size_t, Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        static_cast<Derived *>(this)->post_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->post_processor(iter, particle);}
 
     // non-static const
 
     template <typename D>
     std::size_t move_state_dispatch (std::size_t iter, SingleParticle<T> sp,
             std::size_t (D::*) (std::size_t, SingleParticle<T>) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        return static_cast<Derived *>(this)->move_state(iter, sp);
-    }
+    {return static_cast<Derived *>(this)->move_state(iter, sp);}
 
     template <typename D>
     void pre_processor_dispatch (std::size_t iter, Particle<T> &particle,
             void (D::*) (std::size_t, Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        static_cast<Derived *>(this)->pre_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->pre_processor(iter, particle);}
 
     template <typename D>
     void post_processor_dispatch (std::size_t iter, Particle<T> &particle,
             void (D::*) (std::size_t, Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MoveBase);
-        static_cast<Derived *>(this)->post_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->post_processor(iter, particle);}
 
     // static
 
@@ -339,10 +266,7 @@ class MoveBase
 
     std::size_t move_state_dispatch (std::size_t, SingleParticle<T>,
             std::size_t (MoveBase::*) (std::size_t, SingleParticle<T>))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(MoveBase, move_state);
-        return 0;
-    }
+    {return 0;}
 
     void pre_processor_dispatch (std::size_t, Particle<T> &,
             void (MoveBase::*) (std::size_t, Particle<T> &)) {}
@@ -358,7 +282,7 @@ class MoveBase<T, Virtual>
 {
     public :
 
-    virtual std::size_t move_state (std::size_t, SingleParticle<T>) = 0;
+    virtual std::size_t move_state (std::size_t, SingleParticle<T>) {return 0;}
     virtual void pre_processor (std::size_t, Particle<T> &) {}
     virtual void post_processor (std::size_t, Particle<T> &) {}
 
@@ -397,31 +321,19 @@ class MonitorEvalBase
             ConstSingleParticle<T> csp, double *res,
             void (D::*) (std::size_t, std::size_t, ConstSingleParticle<T>,
                 double *))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);
-    }
+    {static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);}
 
     template <typename D>
     void pre_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        static_cast<Derived *>(this)->pre_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->pre_processor(iter, particle);}
 
     template <typename D>
     void post_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        static_cast<Derived *>(this)->post_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->post_processor(iter, particle);}
 
     // non-static const
 
@@ -430,31 +342,19 @@ class MonitorEvalBase
             ConstSingleParticle<T> csp, double *res,
             void (D::*) (std::size_t, std::size_t, ConstSingleParticle<T>,
                 double *) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);
-    }
+    {static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);}
 
     template <typename D>
     void pre_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        static_cast<Derived *>(this)->pre_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->pre_processor(iter, particle);}
 
     template <typename D>
     void post_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(MonitorEvalBase);
-        static_cast<Derived *>(this)->post_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->post_processor(iter, particle);}
 
     // static
 
@@ -479,11 +379,7 @@ class MonitorEvalBase
     void monitor_state_dispatch (std::size_t, std::size_t ,
             ConstSingleParticle<T>, double *,
             void (MonitorEvalBase::*)
-            (std::size_t, std::size_t, ConstSingleParticle<T>, double *))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(
-                MonitorEvalBase, monitor_state);
-    }
+            (std::size_t, std::size_t, ConstSingleParticle<T>, double *)) {}
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (MonitorEvalBase::*) (std::size_t, const Particle<T> &)) {}
@@ -500,7 +396,7 @@ class MonitorEvalBase<T, Virtual>
     public :
 
     virtual void monitor_state (std::size_t, std::size_t,
-            ConstSingleParticle<T>, double *) = 0;
+            ConstSingleParticle<T>, double *) {}
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
@@ -539,80 +435,48 @@ class PathEvalBase
     template <typename D>
     double path_state_dispatch (std::size_t iter, ConstSingleParticle<T> csp,
             double (D::*) (std::size_t, ConstSingleParticle<T>))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        return static_cast<Derived *>(this)->path_state(iter, csp);
-    }
+    {return static_cast<Derived *>(this)->path_state(iter, csp);}
 
     template <typename D>
     double path_grid_dispatch (std::size_t iter, const Particle<T> &particle,
             double (D::*) (std::size_t, const Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        return static_cast<Derived *>(this)->path_grid(iter, particle);
-    }
+    {return static_cast<Derived *>(this)->path_grid(iter, particle);}
 
     template <typename D>
     void pre_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        static_cast<Derived *>(this)->pre_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->pre_processor(iter, particle);}
 
     template <typename D>
     void post_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        static_cast<Derived *>(this)->post_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->post_processor(iter, particle);}
 
     // non-static const
 
     template <typename D>
     double path_state_dispatch (std::size_t iter, ConstSingleParticle<T> csp,
             double (D::*) (std::size_t, ConstSingleParticle<T>) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        return static_cast<Derived *>(this)->path_state(iter, csp);
-    }
+    {return static_cast<Derived *>(this)->path_state(iter, csp);}
 
     template <typename D>
     double path_grid_dispatch (std::size_t iter, const Particle<T> &particle,
             double (D::*) (std::size_t, const Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        return static_cast<Derived *>(this)->path_grid(iter, particle);
-    }
+    {return static_cast<Derived *>(this)->path_grid(iter, particle);}
 
     template <typename D>
     void pre_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        static_cast<Derived *>(this)->pre_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->pre_processor(iter, particle);}
 
     template <typename D>
     void post_processor_dispatch (std::size_t iter,
             const Particle<T> &particle,
             void (D::*) (std::size_t, const Particle<T> &) const)
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(PathEvalBase);
-        static_cast<Derived *>(this)->post_processor(iter, particle);
-    }
+    {static_cast<Derived *>(this)->post_processor(iter, particle);}
 
     // static
 
@@ -637,17 +501,11 @@ class PathEvalBase
 
     double path_state_dispatch (std::size_t, ConstSingleParticle<T>,
             double (PathEvalBase::*) (std::size_t, ConstSingleParticle<T>))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(PathEvalBase, path_state);
-        return 0;
-    }
+    {return 0;}
 
     double path_grid_dispatch (std::size_t, const Particle<T> &,
             double (PathEvalBase::*) (std::size_t, const Particle<T> &))
-    {
-        VSMC_STATIC_ASSERT_SMP_BACKEND_BASE_NO_IMPL(PathEvalBase, path_grid);
-        return 0;
-    }
+    {return 0;}
 
     void pre_processor_dispatch (std::size_t, const Particle<T> &,
             void (PathEvalBase::*) (std::size_t, const Particle<T> &)) {}
@@ -663,8 +521,8 @@ class PathEvalBase<T, Virtual>
 {
     public :
 
-    virtual double path_state (std::size_t, ConstSingleParticle<T>) = 0;
-    virtual double path_grid (std::size_t, const Particle<T> &) = 0;
+    virtual double path_state (std::size_t, ConstSingleParticle<T>) {return 0;}
+    virtual double path_grid (std::size_t, const Particle<T> &) {return 0;}
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
