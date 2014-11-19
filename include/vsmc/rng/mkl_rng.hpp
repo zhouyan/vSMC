@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/rng/mkl_rng.hpp
+// vSMC/include/vsmc/rng/mkl_rng.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_RNG_MKL_RNG_HPP
@@ -316,7 +337,7 @@ struct MKLSkipAheadForce
 
     private :
 
-    std::vector<ResultType> buffer_;
+    std::vector<ResultType, AlignedAllocator<ResultType> > buffer_;
     typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     MKL_INT buffer_size_;
 }; // strut SkipAheadForce
@@ -564,7 +585,7 @@ class MKLEngine
     stream_type stream_;
     typename internal::MKLSkipAhead<BRNG, ResultType>::type skip_ahead_;
     typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
-    std::vector<result_type> buffer_;
+    std::vector<result_type, AlignedAllocator<result_type> > buffer_;
     MKL_INT buffer_size_;
     MKL_INT index_;
 }; // class MKLEngine
@@ -661,7 +682,7 @@ class MKLDistribution
 
     private :
 
-    std::vector<result_type> buffer_;
+    std::vector<result_type, AlignedAllocator<result_type> > buffer_;
     MKL_INT buffer_size_;
     MKL_INT index_;
 

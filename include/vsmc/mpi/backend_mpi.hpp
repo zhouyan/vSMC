@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/mpi/backend_mpi.hpp
+// vSMC/include/vsmc/mpi/backend_mpi.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_MPI_BACKEND_MPI_HPP
@@ -14,6 +35,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight_set.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == global_size_),                                 \
@@ -74,24 +96,6 @@ class WeightSetMPI : public WeightSetBase
         return world_.rank() == 0 ? &resample_weight_[0] : VSMC_NULLPTR;
     }
 
-    void set_equal_weight ()
-    {
-        barrier();
-
-        const size_type N = static_cast<size_type>(this->size());
-        double *const weight = &this->weight()[0];
-        double *const log_weight = &this->log_weight()[0];
-
-        this->set_ess(static_cast<double>(resample_size_));
-        const double ew = 1 / this->ess();
-        for (size_type i = 0; i != N; ++i) {
-            weight[i] = ew;
-            log_weight[i] = 0;
-        }
-
-        barrier();
-    }
-
     /// \brief A duplicated MPI communicator for this weight set object
     const ::boost::mpi::communicator &world () const {return world_;}
 
@@ -106,7 +110,7 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        double *const lwptr = &this->log_weight()[0];
+        double *const lwptr = this->mutable_log_weight_data();
 
         double lmax_weight = lwptr[0];
         for (size_type i = 0; i != N; ++i)
@@ -126,7 +130,7 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        double *const wptr = &this->weight()[0];
+        double *const wptr = this->mutable_weight_data();
 
         double lcoeff = 0;
         for (size_type i = 0; i != N; ++i)
@@ -155,11 +159,11 @@ class WeightSetMPI : public WeightSetBase
         barrier();
 
         const size_type N = static_cast<size_type>(this->size());
-        std::vector<double> buffer(N);
+        std::vector<double, AlignedAllocator<double> > buffer(N);
         double *const bptr = &buffer[0];
 
         if (use_log) {
-            const double *const lwptr = &this->log_weight()[0];
+            const double *const lwptr = this->log_weight_data();
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = lwptr[i] + first[i];
             double lmax_weight = bptr[0];
@@ -174,7 +178,7 @@ class WeightSetMPI : public WeightSetBase
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = exp(bptr[i]);
         } else {
-            const double *const wptr = &this->weight()[0];
+            const double *const wptr = this->weight_data();
             for (size_type i = 0; i != N; ++i)
                 bptr[i] = wptr[i] * first[i];
         }
@@ -208,8 +212,8 @@ class WeightSetMPI : public WeightSetBase
 
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
-        const double *const wptr = &this->weight()[0];
-        std::vector<double> buffer;
+        const double *const wptr = this->weight_data();
+        std::vector<double, AlignedAllocator<double> > buffer;
         if (use_log) {
             buffer.resize(N);
             double *const cptr = &buffer[0];
@@ -241,14 +245,17 @@ class WeightSetMPI : public WeightSetBase
     bool internal_barrier_;
     size_type resample_size_;
     mutable std::vector<double> resample_weight_;
+    mutable std::vector<double> weight_;
     mutable std::vector<std::vector<double> > weight_all_;
 
     void gather_resample_weight () const
     {
+        weight_.resize(this->size());
+        this->read_weight(&weight_[0]);
         if (world_.rank() == 0)
-            ::boost::mpi::gather(world_, this->weight(), weight_all_, 0);
+            ::boost::mpi::gather(world_, weight_, weight_all_, 0);
         else
-            ::boost::mpi::gather(world_, this->weight(), 0);
+            ::boost::mpi::gather(world_, weight_, 0);
     }
 }; // class WeightSetMPI
 

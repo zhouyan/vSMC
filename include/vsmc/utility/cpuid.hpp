@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/utility/cpuid.hpp
+// vSMC/include/vsmc/utility/cpuid.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_UTILITY_CPUID_HPP
@@ -14,7 +35,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/array.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #include <intrin.h>
 #endif
 
@@ -45,10 +66,10 @@ namespace vsmc {
 /// \ingroup CPUID
 inline void cpuid (unsigned eax, unsigned ecx, unsigned *reg)
 {
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
     __cpuidex(reinterpret_cast<int *>(reg),
             static_cast<int>(eax), static_cast<int>(ecx));
-#else // _MSC_VER
+#else // VSMC_MSVC
     unsigned ebx = 0x00;
     unsigned edx = 0x00;
     __asm__ volatile
@@ -61,7 +82,7 @@ inline void cpuid (unsigned eax, unsigned ecx, unsigned *reg)
     reg[1] = ebx;
     reg[2] = ecx;
     reg[3] = edx;
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 }
 
 /// \brief CPU features
@@ -588,9 +609,8 @@ class CPUID
         return std::string(str);
     }
 
-    /// \brief Get the cache level corresponding each cache index (the index of
-    /// the returned vector)
-    static unsigned max_cache_index ()
+    /// \brief Get the number of caches
+    static unsigned cache_param_num ()
     {
         reg_type reg;
         unsigned ecx = 0x00;
@@ -606,8 +626,8 @@ class CPUID
 
     /// \brief Get the cache parameters (EAX = 0x04; EAX, EBX, ECX, EDX)
     ///
-    /// \note The maximum of the `cache_index` parameter is the length of the
-    /// vector returned by `cache_levels` minus 1.
+    /// \note The maximum of the `cache_index` parameter
+    /// `cache_param_num() - 1`
     static cache_param_type cache_param (unsigned cache_index)
     {
         reg_type reg;
@@ -698,7 +718,7 @@ class CPUID
     static void print_cache (std::basic_ostream<CharT, Traits> &os)
     {
         std::vector<cache_param_type> caches;
-        unsigned max_ecx = max_cache_index();
+        unsigned max_ecx = cache_param_num();
         for (unsigned ecx = 0x00; ecx != max_ecx; ++ecx)
             caches.push_back(cache_param(ecx));
 
@@ -739,18 +759,18 @@ class CPUID
             } else if ((b /= 1024) < 1024) {
                 ss << b << "M";
             } else {
-                ss << b / 1024 << "GB";
+                ss << b / 1024 << "G";
             }
             os << std::setw(fix) << ss.str();
         }
         os << '\n';
 
-        os << "Maximum Proc ID sharing    ";
+        os << "Maximum Proc sharing       ";
         for (std::size_t i = 0; i != caches.size(); ++i)
             os << std::setw(fix) << caches[i].max_proc_sharing();
         os << '\n';
 
-        os << "Maximum Proc ID physical   ";
+        os << "Maximum Proc physical      ";
         for (std::size_t i = 0; i != caches.size(); ++i)
             os << std::setw(fix) << caches[i].max_proc_physical();
         os << '\n';

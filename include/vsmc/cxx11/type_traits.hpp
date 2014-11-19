@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/cxx11/type_traits.hpp
+// vSMC/include/vsmc/cxx11/type_traits.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_CXX11_TYPE_TRAITS_HPP
@@ -218,8 +239,8 @@ struct integral_constant
     typedef T value_type;
     typedef integral_constant<T, v> type;
     static VSMC_CONSTEXPR const T value = v;
-    VSMC_CONSTEXPR operator value_type () const {return value;}
-    VSMC_CONSTEXPR value_type operator() () const {return value;}
+    VSMC_CONSTEXPR operator value_type () const VSMC_NOEXCEPT {return value;}
+    VSMC_CONSTEXPR value_type operator() () const VSMC_NOEXCEPT {return value;}
 }; // struct integral_constant
 typedef integral_constant<bool, true>  true_type;
 typedef integral_constant<bool, false> false_type;
@@ -463,10 +484,10 @@ template <typename T> struct is_empty :
     sizeof(internal::is_empty_standalone<T>)> {};
 
 // is_polymorphic
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 template <typename T> struct is_polymorphic :
     public integral_constant<bool, __is_polymorphic(T)> {};
-#else // _MSC_VER
+#else // VSMC_MSVC
 namespace internal {
 template <typename T> tp_test_true is_polymorphic_test (
         typename enable_if<sizeof(static_cast<T *>(const_cast<void *>(
@@ -478,7 +499,7 @@ template <typename T> struct is_polymorphic :
     public integral_constant<bool,
     sizeof(internal::is_polymorphic_test<T>(0)) ==
     sizeof(internal::tp_test_true)> {};
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 
 // is_abstract
 namespace internal {

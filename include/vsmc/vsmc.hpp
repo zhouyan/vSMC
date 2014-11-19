@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/vsmc.hpp
+// vSMC/include/vsmc/vsmc.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_HPP
@@ -123,7 +144,7 @@
 
 /// \defgroup U01 U01
 /// \ingroup RNG
-/// \brief Converting random integers to random floating points
+/// \brief Convert random integers to random floating points
 
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
@@ -135,6 +156,10 @@
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
+/// \defgroup AlignedMemory Memory alignment
+/// \ingroup Utility
+/// \brief Memory allocation with alignment requirement
+
 /// \defgroup Array Array
 /// \ingroup Utility
 /// \brief Container with static size
@@ -145,11 +170,15 @@
 
 /// \defgroup Counter Counter
 /// \ingroup Utility
-/// \brief Using Array of unsinged integers as counters
+/// \brief Use Array of unsinged integers as counters
 
-/// \defgroup HDF5IO HDF5 objects saving
+/// \defgroup CString CString
 /// \ingroup Utility
-/// \brief Functions for saving objects in HDF5 format
+/// \brief Optimized `<cstring>` functions
+
+/// \defgroup HDF5IO HDF5 objects IO
+/// \ingroup Utility
+/// \brief Load and store objects in the HDF5 format
 
 /// \defgroup Option Program option
 /// \ingroup Utility
@@ -165,7 +194,7 @@
 
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
-/// \brief Utilities for measuring the time of procedures
+/// \brief Time measurement
 
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>

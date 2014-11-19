@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/core/particle.hpp
+// vSMC/include/vsmc/core/particle.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_CORE_PARTICLE_HPP
@@ -17,6 +38,7 @@
 #include <vsmc/resample/basic.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 
 namespace vsmc {
 
@@ -33,6 +55,8 @@ class Particle
     typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
     typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
     typedef typename rng_set_type::rng_type rng_type;
+    typedef SingleParticle<T> sp_type;
+    typedef ConstSingleParticle<T> csp_type;
 
     typedef cxx11::function<void (std::size_t, std::size_t,
             resample_rng_type &, const double *, size_type *)> resample_type;
@@ -155,6 +179,18 @@ class Particle
     /// \brief Get an (parallel) RNG stream for a given particle
     rng_type &rng (size_type id) {return rng_set_[id];}
 
+    /// \brief Get a SingleParticle
+    sp_type sp (size_type id) {return sp_type(id, this);}
+
+    /// \brief Get a ConstSingleParticle
+    csp_type sp (size_type id) const {return csp_type(id, this);}
+
+    /// \brief Get a ConstSingleParticle
+    csp_type csp (size_type id) {return csp_type(id, this);}
+
+    /// \brief Get a ConstSingleParticle
+    csp_type csp (size_type id) const {return csp_type(id, this);}
+
     /// \brief Get the (sequential) RNG used stream for resampling
     resample_rng_type &resample_rng () {return resample_rng_;}
 
@@ -238,8 +274,8 @@ class Particle
     rng_set_type rng_set_;
     resample_rng_type resample_rng_;
 
-    std::vector<size_type> resample_copy_from_;
-    std::vector<size_type> resample_replication_;
+    std::vector<size_type, AlignedAllocator<size_type> > resample_copy_from_;
+    std::vector<size_type, AlignedAllocator<size_type> > resample_replication_;
     resample_copy_from_replication_type resample_copy_from_replication_;
     resample_post_copy_type resample_post_copy_;
 }; // class Particle

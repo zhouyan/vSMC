@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/core/adapter.hpp
+// vSMC/include/vsmc/core/adapter.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_CORE_ADAPTER_HPP
@@ -15,12 +36,27 @@
 
 #define VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(name, RT, Args)                  \
 template <typename U>                                                        \
-struct has_##name##_non_static_                                              \
+struct has_##name##_non_static_non_const_                                    \
 {                                                                            \
     private :                                                                \
                                                                              \
     struct char2 {char c1; char c2;};                                        \
     template <typename V, RT (V::*) Args> struct sfinae_;                    \
+    template <typename V> static char test (sfinae_<V, &V::name> *);         \
+    template <typename V> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};            \
+};                                                                           \
+                                                                             \
+template <typename U>                                                        \
+struct has_##name##_non_static_const_                                        \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename V, RT (V::*) Args const> struct sfinae_;              \
     template <typename V> static char test (sfinae_<V, &V::name> *);         \
     template <typename V> static char2 test (...);                           \
                                                                              \
@@ -46,7 +82,8 @@ struct has_##name##_static_                                                  \
                                                                              \
 template <typename U>                                                        \
 struct has_##name##_ : public cxx11::integral_constant<bool,                 \
-    has_##name##_non_static_<U>::value ||                                    \
+    has_##name##_non_static_non_const_<U>::value ||                          \
+    has_##name##_non_static_const_<U>::value ||                              \
     has_##name##_static_<U>::value> {};
 
 namespace vsmc {

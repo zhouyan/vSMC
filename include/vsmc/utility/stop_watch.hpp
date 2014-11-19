@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/utility/stop_watch.hpp
+// vSMC/include/vsmc/utility/stop_watch.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_UTILITY_STOP_WATCH_HPP
@@ -15,12 +36,6 @@
 
 #if VSMC_HAS_CXX11LIB_CHRONO
 #include <chrono>
-#elif defined(__APPLE__) || defined(__MACOSX)
-#include <mach/mach_time.h>
-#elif VSMC_HAS_POSIX
-#include <time.h>
-#elif defined(WIN32)
-#include <windows.h>
 #endif
 
 /// \brief Default C++11 clock used as StopWatch if `VSMC_HAS_CXX11LIB_CHRONO`
@@ -28,6 +43,26 @@
 /// \ingroup Config
 #ifndef VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE
 #define VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE std::chrono::high_resolution_clock
+#endif
+
+/// \brief Default StopWatch type
+/// \ingroup Config
+#ifndef VSMC_STOP_WATCH_TYPE
+#if VSMC_HAS_CXX11LIB_CHRONO
+#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchChrono
+#elif defined(VSMC_MACOSX) || VSMC_HAS_POSIX || defined(VSMC_MSVC)
+#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchSYS
+#else
+#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNull
+#endif
+#endif
+
+#if defined(VSMC_MACOSX)
+#include <mach/mach_time.h>
+#elif VSMC_HAS_POSIX
+#include <time.h>
+#elif defined(VSMC_MSVC)
+#include <windows.h>
 #endif
 
 namespace vsmc {
@@ -52,7 +87,29 @@ class StopWatchGuard
     watch_type &watch_;
 }; // class StopWatchGuard
 
-#if VSMC_HAS_CXX11LIB_CHRONO && !defined(_MSC_VER)
+/// \brief A null StopWatch
+/// \ingroup StopWatch
+///
+/// \details
+/// This class provides StopWatch interface but does nothing
+class StopWatchNull
+{
+    public :
+
+    bool running () const {return false;}
+    bool start () {return false;}
+    bool stop () {return false;}
+    void reset () {}
+
+    double nanoseconds  () const {return 1;}
+    double microseconds () const {return 1e-3;}
+    double milliseconds () const {return 1e-6;}
+    double seconds      () const {return 1e-9;}
+    double minutes      () const {return 1e-9 / 60;}
+    double hours        () const {return 1e-9 / 3600;}
+}; // class StopWatch
+
+#if VSMC_HAS_CXX11LIB_CHRONO
 
 /// \brief StopWatch as an adapter of C++11 clock
 /// \ingroup StopWatch
@@ -163,17 +220,26 @@ class StopWatchClockAdapter
     bool running_;
 }; // class StopWatchClockAdapter
 
-/// \brief Stop watch
+/// \brief Stop watch using `<chrono>`
 /// \ingroup StopWatch
-typedef StopWatchClockAdapter<VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE> StopWatch;
+typedef StopWatchClockAdapter<VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE>
+StopWatchChrono;
 
-#elif defined(__APPLE__) || defined(__MACOSX)
+#endif // VSMC_HAS_CXX11LIB_CHRONO
 
-class StopWatch
+#if defined(VSMC_MACOSX)
+
+/// \brief Stop watch using system native API
+/// \ingroup StopWatch
+///
+/// \details
+/// This class use `mach_absolute_time` on Mac OS X, `clock_gettime` on other
+/// POSIX systems, and `QueryPerformanceCounter` on Windows.
+class StopWatchSYS
 {
     public :
 
-    StopWatch () : running_(false) {reset();}
+    StopWatchSYS () : running_(false) {reset();}
 
     bool running () {return running_;}
 
@@ -260,15 +326,15 @@ class StopWatch
     bool running_;
     static VSMC_CONSTEXPR const uint64_t ratio_ =
         static_cast<uint64_t>(1000000000ULL); // 9 zero
-}; // class StopWatch
+}; // class StopWatchSYS
 
 #elif VSMC_HAS_POSIX
 
-class StopWatch
+class StopWatchSYS
 {
     public :
 
-    StopWatch () : running_(false) {reset();}
+    StopWatchSYS () : running_(false) {reset();}
 
     bool running () {return running_;}
 
@@ -352,15 +418,15 @@ class StopWatch
     ::timespec start_time_;
     bool running_;
     static VSMC_CONSTEXPR const long ratio_ = 1000000000L; // 9 zero
-}; // class StopWatch
+}; // class StopWatchSYS
 
-#elif defined(WIN32)
+#elif defined(VSMC_MSVC)
 
-class StopWatch
+class StopWatchSYS
 {
     public :
 
-    StopWatch () :
+    StopWatchSYS () :
         elapsed_(0), start_time_(0), frequency_(0), running_(false)
     {reset();}
 
@@ -426,28 +492,13 @@ class StopWatch
     __int64 start_time_;
     double frequency_;
     bool running_;
-}; // class StopWatch
+}; // class StopWatchSYS
 
-#else // VSMC_HAS_CXX11LIB_CHRONO
+#endif // defined(VSMC_MACOSX)
 
-class StopWatch
-{
-    public :
-
-    bool running () const {return false;}
-    bool start () {return false;}
-    bool stop () {return false;}
-    void reset () {}
-
-    double nanoseconds  () const {return 1;}
-    double microseconds () const {return 1e-3;}
-    double milliseconds () const {return 1e-6;}
-    double seconds      () const {return 1e-9;}
-    double minutes      () const {return 1e-9 / 60;}
-    double hours        () const {return 1e-9 / 3600;}
-}; // class StopWatch
-
-#endif // VSMC_HAS_CXX11LIB_CHRONO
+/// \brief The default StopWatch
+/// \ingroup StopWatch
+typedef VSMC_STOP_WATCH_TYPE StopWatch;
 
 } // namespace vsmc
 

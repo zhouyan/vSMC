@@ -1,7 +1,7 @@
 # Introduction
 
-vSMC library provide a framework for implementing SMC algorithms. It provides a
-core module which perform resampling, etc., operations common to all SMC
+The vSMC library provides a framework for implementing SMC algorithms. It has a
+core module which performs resampling, etc., operations common to all SMC
 algorithms and applications. In addition, it provides the bases for
 implementing parallelized samplers. The SMC algorithms are highly
 parallelizable, but there are many frameworks for doing this. This library
@@ -29,11 +29,13 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
 ~~~sh
 make docs
 ~~~
-The documentation can also be found [here][vSMCDoc]. A [tutorial][vSMCTutorial]
-is also available. However, it describes an earlier version of the library.
-There are a few incompatibilities with the current version. It is still highly
-relevant. Users shall use the Doxygen generated documentations when things do
-not work exactly the same way as in the tutorial.
+The documentation of the [master][vSMCDocMaster] and
+[develop][vSMCDocDevelop] branches can be found online.
+
+A [tutorial][vSMCTutorial] is also available. However, it describes an earlier
+version of the library.  There are a few incompatibilities with the current
+version. It is still highly relevant. Users shall use the Doxygen generated
+documentations when things do not work exactly the same way as in the tutorial.
 
 # Examples
 
@@ -56,11 +58,11 @@ under a uniform interface. One is C++11 concurrency. For a full C++11
 implementation, this means no third-party dependency is required to write a
 parallel SMC sampler. Other third-party parallelization include, [Intel Cilk
 Plus][Intel Cilk Plus], [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple
-Grand Central Dispatch][Apple GCD] is also supported on Mac OS X and on Linux
-via [libdispatch][libdispatch]. [Microsoft Parallel Patterns Library][MS PPL]
-is supported on Windows when compiled with MSVC 2010 or later. In addition,
-this library also support using [OpenCL][OpenCL] for GPGPU computing, though
-the interface is different than others.
+Grand Central Dispatch][Apple GCD] is also supported on Mac OS X. [Microsoft
+Parallel Patterns Library][MS PPL] is supported on Windows when compiled with
+[Microsoft Visual C++][MSVC] 2012 or later. In addition, this library also
+support using [OpenCL][OpenCL] for GPGPU computing, though the interface is
+different than others.
 
 # Third-party dependencies
 
@@ -68,36 +70,25 @@ This library has no dependences other than C++ standard libraries (C++11). Any
 C++11 language features are optional.
 
 In particular, the library use the `<functional>` and `<random>` headers, which
-are parts of the C++11 standard libraries. Equivalences can be found in
-[Boost][Boost]. By default the library will use the [Boost][Boost] library as
-C++11 implementations are not mature at the time writing. But if the C++
-implementation has them correctly implemented, the standard headers can also be
-used by defining suitable macros (see reference manual for details).
-
-Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
-not all C++11 implementations of `<functional>` and `<random>` work properly
-even they are present.
+are parts of the C++11 standard libraries. Equivalences can be found in recent
+versions of [Boost][Boost]. The library does its best to detect a usable C++11
+solution and falls back to [Boost][Boost] if it fails to do so. This behavior
+can be changed explicitly through configuration macros.
 
 # Compiler support
 
 This library makes heavy use of some template metaprogramming techniques. It
 requires a standard conforming compiler. Fortunately, most commonly used
 modern compilers, at least in C++98 mode, is able to compile the examples
-distributed with the library.
+distributed with the library, provided that they can compile the Boost library.
 
 This library has been regularly tested with recent [Clang][Clang], [GCC][GCC]
 and [Intel C++ Compiler][icpc], in both C++98 and C++11 modes.
 
-[Microsoft Visual C++][MSVC] is also supported. Version 2008 and later are able
-to compile the examples in C++98 mode. Version 2012 and later support most of
-the C++11 features. However, this compiler is tested less regularly.
+[Microsoft Visual C++][MSVC] 2012 or later are also supported. However, this
+compiler is tested less regularly.
 
-Other compilers such as [Open64][Open64] were previously tested in C++98 mode
-(most of them don't support C++11 at all). Future developments will rely more
-on C++11 features. There are likely to be new (optional) features that are
-C++11 only. Therefore, these outdated compilers won't be tested anymore.
-However, for the foreseeable future, all basic features should be supported by
-a C++98 compiler.
+Other compilers might work but are not tested.
 
 # License
 
@@ -114,12 +105,10 @@ in the `LICENSE` file distributed with the source.
 [Intel TBB]: http://threadingbuildingblocks.org
 [MS PPL]: http://msdn.microsoft.com/en-us/library/dd492418.aspx
 [MSVC]: http://msdn.microsoft.com/en-us/vstudio//default.aspx
-[Open64]: http://www.open64.net
 [OpenCL]: http://www.khronos.org/opencl
 [OpenMP]: http://www.openmp.org
 [icpc]: http://software.intel.com/en-us/intel-compilers
-[libc++]: http://libcxx.llvm.org
-[libdispatch]: http://libdispatch.macosforge.org
-[vSMCDoc]: http://zhouyan.github.io/vSMCDoc/master
+[vSMCDocMaster]: http://zhouyan.github.io/vSMCDoc/master
+[vSMCDocDevelop]: http://zhouyan.github.io/vSMCDoc/develop
 [vSMCExample]: https://github.com/zhouyan/vSMCExample
 [vSMCTutorial]: http://arxiv.org/pdf/1306.5583v1.pdf

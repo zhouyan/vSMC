@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/rng/philox.hpp
+// vSMC/include/vsmc/rng/philox.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_RNG_PHILOX_HPP
@@ -13,7 +34,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #include <intrin.h>
 #endif
 
@@ -119,7 +140,7 @@ struct PhiloxBumpKey {static void eval (Array<ResultType, K / 2> &) {}};
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpKey<ResultType, 2, N, true>
 {
-    static void eval (Array<ResultType, 1> &par)
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, 1> &par)
     {
         par[Position<0>()] +=
             traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
@@ -129,7 +150,7 @@ struct PhiloxBumpKey<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpKey<ResultType, 4, N, true>
 {
-    static void eval (Array<ResultType, 2> &par)
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, 2> &par)
     {
         par[Position<0>()] +=
             traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
@@ -139,7 +160,7 @@ struct PhiloxBumpKey<ResultType, 4, N, true>
 }; // struct PhiloxBumpKey
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
+VSMC_STRONG_INLINE void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
 {
     uint64_t prod =
         static_cast<uint64_t>(b) *
@@ -152,7 +173,7 @@ inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
 #if VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
     unsigned VSMC_INT128 prod =
         static_cast<unsigned VSMC_INT128>(b) *
@@ -162,10 +183,10 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
     lo = static_cast<uint64_t>(prod);
 }
 
-#elif defined(_MSC_VER) // VSMC_HAS_INT128
+#elif defined(VSMC_MSVC) // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
     lo = _umul128(traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value, b,
             &hi);
@@ -174,7 +195,7 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 #else // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
     const uint64_t a =
         traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value;
@@ -203,14 +224,14 @@ inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct PhiloxRound
 {
-    static void eval (Array<ResultType, K> &,
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, K> &,
             const Array<ResultType, K / 2> &) {}
 }; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true>
 {
-    static void eval (Array<ResultType, 2> &state,
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, 2> &state,
             const Array<ResultType, 1> &par)
     {
         ResultType hi = 0;
@@ -224,7 +245,7 @@ struct PhiloxRound<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true>
 {
-    static void eval (Array<ResultType, 4> &state,
+    static VSMC_STRONG_INLINE void eval (Array<ResultType, 4> &state,
             const Array<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
@@ -480,7 +501,8 @@ class PhiloxEngine
     buffer_type buffer_;
     std::size_t index_;
 
-    void generate_buffer (const ctr_type c, buffer_type &buf) const
+    void VSMC_STRONG_INLINE generate_buffer (const ctr_type c,
+            buffer_type &buf) const
     {
         buf = c;
         key_type par = key_;
@@ -488,11 +510,11 @@ class PhiloxEngine
     }
 
     template <std::size_t>
-    void generate_buffer (buffer_type &, key_type &,
+    void VSMC_STRONG_INLINE generate_buffer (buffer_type &, key_type &,
             cxx11::false_type) const {}
 
     template <std::size_t N>
-    void generate_buffer (buffer_type &buf, key_type &par,
+    void VSMC_STRONG_INLINE generate_buffer (buffer_type &buf, key_type &par,
             cxx11::true_type) const
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);

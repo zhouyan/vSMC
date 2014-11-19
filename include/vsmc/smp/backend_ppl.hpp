@@ -1,11 +1,32 @@
 //============================================================================
-// include/vsmc/smp/backend_ppl.hpp
+// vSMC/include/vsmc/smp/backend_ppl.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_SMP_BACKEND_PPL_HPP
@@ -17,12 +38,6 @@
 namespace vsmc {
 
 VSMC_DEFINE_SMP_FORWARD(PPL)
-
-#if _MSC_VER >= 1700
-namespace ppl = ::concurrency;
-#else
-namespace ppl = ::Concurrency;
-#endif
 
 /// \brief Particle::value_type subtype using Parallel Pattern Library
 /// \ingroup PPL
@@ -40,7 +55,7 @@ class StatePPL : public BaseState
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(PPL);
 
-        ppl::parallel_for(static_cast<size_type>(0), N,
+        ::concurrency::parallel_for(static_cast<size_type>(0), N,
                 copy_work_<IntType>(this, copy_from));
     }
 
@@ -75,8 +90,8 @@ class InitializePPL : public InitializeBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        ppl::combinable<std::size_t> accept(accept_init_);
-        ppl::parallel_for(static_cast<size_type>(0), N,
+        ::concurrency::combinable<std::size_t> accept(accept_init_);
+        ::concurrency::parallel_for(static_cast<size_type>(0), N,
                 work_(this, &particle, &accept));
         this->post_processor(particle);
 
@@ -94,7 +109,8 @@ class InitializePPL : public InitializeBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
 
         work_ (InitializePPL<T, Derived> *init,
-                Particle<T> *particle, ppl::combinable<std::size_t> *accept) :
+                Particle<T> *particle,
+                ::concurrency::combinable<std::size_t> *accept) :
             init_(init), particle_(particle), accept_(accept) {}
 
         void operator() (size_type i) const
@@ -107,7 +123,7 @@ class InitializePPL : public InitializeBase<T, Derived>
 
         InitializePPL<T, Derived> *const init_;
         Particle<T> *const particle_;
-        ppl::combinable<std::size_t> *const accept_;
+        ::concurrency::combinable<std::size_t> *const accept_;
     }; // class work_
 
     static std::size_t accept_init_ () {return 0;}
@@ -127,8 +143,8 @@ class MovePPL : public MoveBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        ppl::combinable<std::size_t> accept(accept_init_);
-        ppl::parallel_for(static_cast<size_type>(0), N,
+        ::concurrency::combinable<std::size_t> accept(accept_init_);
+        ::concurrency::parallel_for(static_cast<size_type>(0), N,
                 work_(this, iter, &particle, &accept));
         this->post_processor(iter, particle);
 
@@ -146,7 +162,8 @@ class MovePPL : public MoveBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
 
         work_ (MovePPL<T, Derived> *move, std::size_t iter,
-                Particle<T> *particle, ppl::combinable<std::size_t> *accept):
+                Particle<T> *particle,
+                ::concurrency::combinable<std::size_t> *accept):
             move_(move), particle_(particle), accept_(accept), iter_(iter) {}
 
         void operator() (size_type i) const
@@ -159,7 +176,7 @@ class MovePPL : public MoveBase<T, Derived>
 
         MovePPL<T, Derived> *const move_;
         Particle<T> *const particle_;
-        ppl::combinable<std::size_t> *const accept_;
+        ::concurrency::combinable<std::size_t> *const accept_;
         const std::size_t iter_;
     }; // class work_
 
@@ -181,7 +198,7 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        ppl::parallel_for(static_cast<size_type>(0), N,
+        ::concurrency::parallel_for(static_cast<size_type>(0), N,
                 work_(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
@@ -231,7 +248,7 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        ppl::parallel_for(static_cast<size_type>(0), N,
+        ::concurrency::parallel_for(static_cast<size_type>(0), N,
                 work_(this, iter, &particle, res));
         this->post_processor(iter, particle);
 

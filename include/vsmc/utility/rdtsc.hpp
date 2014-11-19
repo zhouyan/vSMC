@@ -1,61 +1,77 @@
 //============================================================================
-// include/vsmc/utility/rdtsc.hpp
+// vSMC/include/vsmc/utility/rdtsc.hpp
 //----------------------------------------------------------------------------
-//
 //                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
 //
-// This file is distribured under the 2-clauses BSD License.
-// See LICENSE for details.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
 #ifndef VSMC_UTILITY_RDTSC_HPP
 #define VSMC_UTILITY_RDTSC_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <stdint.h>
 
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
 #include <intrin.h>
 #endif
 
 namespace vsmc {
 
-/// \brief Return the TSC value using RDTSC instruction after synchronization
-/// with CPUID instruction
+/// \brief Return the TSC value using RDTSC instruction
 /// \ingroup RDTSC
+///
+/// \note This function does not sync by itself. Call `cpuid` to sync if more
+/// accurate measurement is needed.
 inline uint64_t rdtsc ()
 {
-#ifdef _MSC_VER
-    int aux[4];
-    __cpuidex(aux, 0, 0);
-
+#ifdef VSMC_MSVC
     return static_cast<uint64_t>(__rdtsc());
-#else // _MSC_VER
+#else // VSMC_MSVC
     unsigned eax = 0;
-    unsigned ecx = 0;
     unsigned edx = 0;
     __asm__ volatile
         (
-         "cpuid\n\t"
          "rdtsc\n"
          : "=a" (eax), "=d" (edx)
-         :  "a" (eax),  "c" (ecx)
         );
 
     return (static_cast<uint64_t>(edx) << 32) + static_cast<uint64_t>(eax);
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 }
 
 /// \brief Return the TSC and TSC_AUX values using RDTSCP instruction
 /// \ingroup RDTSC
 inline uint64_t rdtscp (unsigned *aux)
 {
-#ifdef _MSC_VER
+#ifdef VSMC_MSVC
     return static_cast<uint64_t>(__rdtscp(aux));
-#else // _MSC_VER
+#else // VSMC_MSVC
     unsigned eax = 0;
-    unsigned edx = 0;
     unsigned ecx = 0;
+    unsigned edx = 0;
     __asm__ volatile
         (
          "rdtscp\n"
@@ -64,10 +80,10 @@ inline uint64_t rdtscp (unsigned *aux)
     *aux = ecx;
 
     return static_cast<uint64_t>(eax) + (static_cast<uint64_t>(edx) << 32);
-#endif // _MSC_VER
+#endif // VSMC_MSVC
 }
 
-/// \brief CPU clock cycle counter using RDTSC
+/// \brief CPU clock cycle counter using `rdtsc`
 /// \ingroup RDTSC
 class RDTSCCounter
 {
@@ -140,7 +156,7 @@ class RDTSCCounter
     bool running_;
 }; // class RDTSCCounter
 
-/// \brief CPU clock cycle counter using RDTSCP
+/// \brief CPU clock cycle counter using `rdtscp`
 /// \ingroup RDTSC
 ///
 /// \details
