@@ -29,11 +29,13 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
 ~~~sh
 make docs
 ~~~
-The documentation can also be found [here][vSMCDoc]. A [tutorial][vSMCTutorial]
-is also available. However, it describes an earlier version of the library.
-There are a few incompatibilities with the current version. It is still highly
-relevant. Users shall use the Doxygen generated documentations when things do
-not work exactly the same way as in the tutorial.
+The documentation of the [master][vSMCDocMaster] and
+[develop][vSMCDocDevelop] branches can be found online.
+
+A [tutorial][vSMCTutorial] is also available. However, it describes an earlier
+version of the library.  There are a few incompatibilities with the current
+version. It is still highly relevant. Users shall use the Doxygen generated
+documentations when things do not work exactly the same way as in the tutorial.
 
 # Examples
 
@@ -68,15 +70,10 @@ This library has no dependences other than C++ standard libraries (C++11). Any
 C++11 language features are optional.
 
 In particular, the library use the `<functional>` and `<random>` headers, which
-are parts of the C++11 standard libraries. Equivalences can be found in
-[Boost][Boost]. By default the library will use the [Boost][Boost] library as
-C++11 implementations are not mature at the time writing. But if the C++
-implementation has them correctly implemented, the standard headers can also be
-used by defining suitable macros (see reference manual for details).
-
-Note that this library is only tested with [Boost][Boost] 1.49 or later. Also
-not all C++11 implementations of `<functional>` and `<random>` work properly
-even they are present.
+are parts of the C++11 standard libraries. Equivalences can be found in recent
+versions of [Boost][Boost]. The library does its best to detect a usable C++11
+solution and falls back to [Boost][Boost] if it fails to do so. This behavior
+can be changed explicitly through configuration macros.
 
 # Compiler support
 
@@ -111,6 +108,7 @@ in the `LICENSE` file distributed with the source.
 [OpenCL]: http://www.khronos.org/opencl
 [OpenMP]: http://www.openmp.org
 [icpc]: http://software.intel.com/en-us/intel-compilers
-[vSMCDoc]: http://zhouyan.github.io/vSMCDoc/develop
+[vSMCDocMaster]: http://zhouyan.github.io/vSMCDoc/master
+[vSMCDocDevelop]: http://zhouyan.github.io/vSMCDoc/develop
 [vSMCExample]: https://github.com/zhouyan/vSMCExample
 [vSMCTutorial]: http://arxiv.org/pdf/1306.5583v1.pdf
