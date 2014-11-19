@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/vSMCExample/utility/include/utility_cstring_memmove.hpp
+// vSMC/example/utility/include/utility_cstring_memmove.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------

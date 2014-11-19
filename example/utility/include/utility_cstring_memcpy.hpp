@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/vSMCExample/utility/include/utility_cstring_memcpy.hpp
+// vSMC/example/utility/include/utility_cstring_memcpy.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------

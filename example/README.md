@@ -1,6 +1,6 @@
 # Examples of the vSMC library
 
-This repository contains examples of the [vSMC][vSMC] library. See the
+This directory contains examples of the [vSMC][vSMC] library. See the
 `README.md` files in each subdirectory for a description of the examples and
 references.
 
