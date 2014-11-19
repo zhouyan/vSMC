@@ -1,0 +1,138 @@
+//============================================================================
+// vSMC/vSMCExample/rng/src/rng_xorshift_testu01.cpp
+//----------------------------------------------------------------------------
+//                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013,2014, Yan Zhou
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//============================================================================
+
+#include "rng_testu01.hpp"
+#include <vsmc/rng/xorshift.hpp>
+
+VSMC_RNG_TESTU01_FUNCTION(Xorshift1x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift2x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift4x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift8x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift16x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift32x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift64x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift128x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift1x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift2x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift4x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift8x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift16x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift32x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorshift64x64)
+
+VSMC_RNG_TESTU01_FUNCTION(Xorwow1x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow2x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow4x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow8x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow16x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow32x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow64x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow128x32)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow1x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow2x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow4x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow8x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow16x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow32x64)
+VSMC_RNG_TESTU01_FUNCTION(Xorwow64x64)
+
+int main (int argc, char **argv)
+{
+    VSMC_RNG_TESTU01_OPTION_PRE;
+
+    VSMC_RNG_TESTU01_OPTION(Xorshift1x32);
+    VSMC_RNG_TESTU01_OPTION(Xorshift2x32);
+    VSMC_RNG_TESTU01_OPTION(Xorshift4x32);
+    VSMC_RNG_TESTU01_OPTION(Xorshift8x32);
+    VSMC_RNG_TESTU01_OPTION(Xorshift16x32);
+    VSMC_RNG_TESTU01_OPTION(Xorshift32x32);
+    VSMC_RNG_TESTU01_OPTION(Xorshift64x32);
+    VSMC_RNG_TESTU01_OPTION(Xorshift128x32);
+    VSMC_RNG_TESTU01_OPTION(Xorshift1x64);
+    VSMC_RNG_TESTU01_OPTION(Xorshift2x64);
+    VSMC_RNG_TESTU01_OPTION(Xorshift4x64);
+    VSMC_RNG_TESTU01_OPTION(Xorshift8x64);
+    VSMC_RNG_TESTU01_OPTION(Xorshift16x64);
+    VSMC_RNG_TESTU01_OPTION(Xorshift32x64);
+    VSMC_RNG_TESTU01_OPTION(Xorshift64x64);
+
+    VSMC_RNG_TESTU01_OPTION(Xorwow1x32);
+    VSMC_RNG_TESTU01_OPTION(Xorwow2x32);
+    VSMC_RNG_TESTU01_OPTION(Xorwow4x32);
+    VSMC_RNG_TESTU01_OPTION(Xorwow8x32);
+    VSMC_RNG_TESTU01_OPTION(Xorwow16x32);
+    VSMC_RNG_TESTU01_OPTION(Xorwow32x32);
+    VSMC_RNG_TESTU01_OPTION(Xorwow64x32);
+    VSMC_RNG_TESTU01_OPTION(Xorwow128x32);
+    VSMC_RNG_TESTU01_OPTION(Xorwow1x64);
+    VSMC_RNG_TESTU01_OPTION(Xorwow2x64);
+    VSMC_RNG_TESTU01_OPTION(Xorwow4x64);
+    VSMC_RNG_TESTU01_OPTION(Xorwow8x64);
+    VSMC_RNG_TESTU01_OPTION(Xorwow16x64);
+    VSMC_RNG_TESTU01_OPTION(Xorwow32x64);
+    VSMC_RNG_TESTU01_OPTION(Xorwow64x64);
+
+    VSMC_RNG_TESTU01_OPTION_POST;
+
+    VSMC_RNG_TESTU01(Xorshift1x32);
+    VSMC_RNG_TESTU01(Xorshift2x32);
+    VSMC_RNG_TESTU01(Xorshift4x32);
+    VSMC_RNG_TESTU01(Xorshift8x32);
+    VSMC_RNG_TESTU01(Xorshift16x32);
+    VSMC_RNG_TESTU01(Xorshift32x32);
+    VSMC_RNG_TESTU01(Xorshift64x32);
+    VSMC_RNG_TESTU01(Xorshift128x32);
+    VSMC_RNG_TESTU01(Xorshift1x64);
+    VSMC_RNG_TESTU01(Xorshift2x64);
+    VSMC_RNG_TESTU01(Xorshift4x64);
+    VSMC_RNG_TESTU01(Xorshift8x64);
+    VSMC_RNG_TESTU01(Xorshift16x64);
+    VSMC_RNG_TESTU01(Xorshift32x64);
+    VSMC_RNG_TESTU01(Xorshift64x64);
+
+    VSMC_RNG_TESTU01(Xorwow1x32);
+    VSMC_RNG_TESTU01(Xorwow2x32);
+    VSMC_RNG_TESTU01(Xorwow4x32);
+    VSMC_RNG_TESTU01(Xorwow8x32);
+    VSMC_RNG_TESTU01(Xorwow16x32);
+    VSMC_RNG_TESTU01(Xorwow32x32);
+    VSMC_RNG_TESTU01(Xorwow64x32);
+    VSMC_RNG_TESTU01(Xorwow128x32);
+    VSMC_RNG_TESTU01(Xorwow1x64);
+    VSMC_RNG_TESTU01(Xorwow2x64);
+    VSMC_RNG_TESTU01(Xorwow4x64);
+    VSMC_RNG_TESTU01(Xorwow8x64);
+    VSMC_RNG_TESTU01(Xorwow16x64);
+    VSMC_RNG_TESTU01(Xorwow32x64);
+    VSMC_RNG_TESTU01(Xorwow64x64);
+
+    return 0;
+}

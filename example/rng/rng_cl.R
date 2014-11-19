@@ -1,0 +1,72 @@
+# ============================================================================
+#  vSMC/vSMCExample/rng/rng_cl.R
+# ----------------------------------------------------------------------------
+#                          vSMC: Scalable Monte Carlo
+# ----------------------------------------------------------------------------
+#  Copyright (c) 2013,2014, Yan Zhou
+#  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are met:
+#
+#    Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+#
+#    Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+# ============================================================================
+
+suppressPackageStartupMessages(library(ggplot2))
+
+source("rng_cl_dt.R")
+dist.names <- dimnames(refoutput)[[2]]
+if (file.exists("rng_cl.hdf5")) {
+    suppressPackageStartupMessages(library(rhdf5))
+    cppoutput <- h5read("rng_cl.hdf5", "/rng_cl")
+} else {
+    cppoutput <- read.table("rng_cl.txt", header = TRUE)
+}
+
+output <- list()
+for (dname in dist.names) {
+    output[[dname]] <- c(refoutput[[dname]], cppoutput[[dname]])
+}
+output <- as.data.frame(output)
+
+output$Prog <- c(rep("R", N), rep("C++", N),
+    rep("OpenCL 2x32", N), rep("OpenCL 4x32", N))
+
+for (dname in dist.names) {
+    if (dname != "Prog") {
+        name <- paste("plot.", dname, sep ="")
+        dat <- data.frame(Value = output[[dname]], Prog = output$Prog)
+        .GlobalEnv[[name]] <- ggplot(dat)
+        .GlobalEnv[[name]] <- .GlobalEnv[[name]] + aes(x = Value)
+        .GlobalEnv[[name]] <- .GlobalEnv[[name]] + aes(group = Prog)
+        .GlobalEnv[[name]] <- .GlobalEnv[[name]] + aes(color = Prog)
+        .GlobalEnv[[name]] <- .GlobalEnv[[name]] + geom_density()
+        .GlobalEnv[[name]] <- .GlobalEnv[[name]] + ggtitle(dname)
+    }
+}
+
+pdf("rng_cl.pdf", width = 12.8, height = 7.2)
+for (dname in dist.names) {
+    if (dname != "Prog") {
+        name <- paste("plot.", dname, sep ="")
+        print(.GlobalEnv[[name]])
+    }
+}
+garbage <- dev.off()
