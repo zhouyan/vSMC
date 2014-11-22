@@ -48,9 +48,9 @@
     VSMC_RUNTIME_ASSERT((dim >= 1),                                          \
             ("**StateMatrix** DIMENSION IS LESS THAN 1"))
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim, name) \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim) \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
-            ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
+            ("**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
 namespace vsmc {
 
@@ -133,41 +133,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     T *data () {return &data_[0];}
 
     const T *data () const {return &data_[0];}
-
-    state_pack_type state_pack (size_type id) const
-    {
-        const StateMatrix<Order, Dim, T> *sptr =
-            static_cast<const StateMatrix<Order, Dim, T> *>(this);
-        state_pack_type pack(this->dim());
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            pack[d] = sptr->state(id, d);
-
-        return pack;
-    }
-
-    void state_unpack (size_type id, const state_pack_type &pack)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
-                pack.size(), this->dim(), Matrix);
-
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            sptr->state(id, d) = pack[d];
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    void state_unpack (size_type id, state_pack_type &&pack)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
-                pack.size(), this->dim(), Matrix);
-
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            sptr->state(id, d) = cxx11::move(pack[d]);
-    }
-#endif
 
     template <typename OutputIter>
     OutputIter read_state (std::size_t pos, OutputIter first) const
@@ -272,6 +237,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     typedef StateMatrixBase<RowMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
+    typedef typename state_matrix_base_type::state_pack_type state_pack_type;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
 
@@ -312,6 +278,29 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
             copy_particle(copy_from[to], to);
     }
 
+    state_pack_type state_pack (size_type id) const
+    {return state_pack_type(row_data(id), row_data(id +1));}
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim());
+
+        const T *ptr = &pack[0];
+        std::copy(ptr, ptr + this->dim(), row_data(id));
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES && VSMC_HAS_CXX11LIB_ALGORITHM
+    void state_unpack (size_type id, state_pack_type &&pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim());
+
+        const T *ptr = &pack[0];
+        std::move(ptr, ptr + this->dim(), row_data(id));
+    }
+#endif
+
     protected :
 
     void copy_particle (size_type from, size_type to)
@@ -332,6 +321,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     typedef StateMatrixBase<ColMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
+    typedef typename state_matrix_base_type::state_pack_type state_pack_type;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
 
@@ -371,6 +361,36 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         for (size_type to = 0; to != N; ++to)
             copy_particle(copy_from[to], to);
     }
+
+    state_pack_type state_pack (size_type id) const
+    {
+        state_pack_type pack;
+        pack.reserve(this->dim());
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            pack.push_back(state(id, d));
+
+        return pack;
+    }
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim());
+
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            state(id, d) = pack[d];
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    void state_unpack (size_type id, state_pack_type &&pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim());
+
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            state(id, d) = cxx11::move(pack[d]);
+    }
+#endif
 
     protected :
 
