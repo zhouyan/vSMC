@@ -287,9 +287,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
         StateMatrix<Order, Dim, T> *sptr =
             static_cast<StateMatrix<Order, Dim, T> *>(this);
-        T *to_ptr = &sptr->state(to, 0);
         T *from_ptr = &sptr->state(from, 0);
-        std::copy(to_ptr, to_ptr + this->dim(), from_ptr);
+        T *to_ptr = &sptr->state(to, 0);
+        std::copy(from_ptr, from_ptr + this->dim(), to_ptr);
     }
 
     void copy_particle_dispatch (size_type from, size_type to,
