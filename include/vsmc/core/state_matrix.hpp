@@ -169,15 +169,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     }
 #endif
 
-    template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
-
-        for (size_type to = 0; to != N; ++to)
-            copy_particle(copy_from[to], to);
-    }
-
     template <typename OutputIter>
     OutputIter read_state (std::size_t pos, OutputIter first) const
     {
@@ -264,45 +255,12 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     explicit StateMatrixBase (size_type N) : size_(N), data_(N * Dim) {}
 
-    void copy_particle (size_type from, size_type to)
-    {
-        copy_particle_dispatch(from, to, cxx11::integral_constant<bool,
-                (Dim * sizeof(T) >= 64 || Dim == Dynamic) &&
-                Order == RowMajor>());
-    }
-
     private :
 
     size_type size_;
     typename cxx11::conditional<cxx11::is_arithmetic<T>::value,
              std::vector<T, AlignedAllocator<T> >,
              std::vector<T> >::type data_;
-
-
-    void copy_particle_dispatch (size_type from, size_type to,
-            cxx11::true_type)
-    {
-        if (from == to)
-            return;
-
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        T *from_ptr = &sptr->state(from, 0);
-        T *to_ptr = &sptr->state(to, 0);
-        std::copy(from_ptr, from_ptr + this->dim(), to_ptr);
-    }
-
-    void copy_particle_dispatch (size_type from, size_type to,
-            cxx11::false_type)
-    {
-        if (from == to)
-            return;
-
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            sptr->state(to, d) = sptr->state(from, d);
-    }
 }; // class StateMatrixBase
 
 /// \brief Particle::value_type subtype
@@ -344,6 +302,25 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     const T *row_data (size_type id) const
     {return this->data() + id * this->dim();}
+
+    template <typename IntType>
+    void copy (size_type N, const IntType *copy_from)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
+
+        for (size_type to = 0; to != N; ++to)
+            copy_particle(copy_from[to], to);
+    }
+
+    protected :
+
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        std::copy(row_data(from), row_data(from + 1), row_data(to));
+    }
 }; // class StateMatrix
 
 /// \brief Particle::value_type subtype
@@ -385,6 +362,26 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     const T *col_data (std::size_t pos) const
     {return this->data() + pos * this->size();}
+
+    template <typename IntType>
+    void copy (size_type N, const IntType *copy_from)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
+
+        for (size_type to = 0; to != N; ++to)
+            copy_particle(copy_from[to], to);
+    }
+
+    protected :
+
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            state(to, d) = state(from, d);
+    }
 }; // class StateMatrix
 
 } // namespace vsmc
