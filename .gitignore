@@ -1,5 +1,6 @@
 /build
-/user_options.cmake
 /doc/main.md
-/vSMCExample
+/example/pet/pet_conv.data
+/example/pet/pet_real.data
 /include/cl.hpp
+/user_options.cmake
