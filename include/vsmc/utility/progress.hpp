@@ -148,7 +148,7 @@ class Progress
         join();
         if (finished && iter_ < total_)
             iter_ = total_;
-        print_stop_(static_cast<void *>(this));
+        print_stop_(this);
         watch_.stop();
     }
 
@@ -184,7 +184,7 @@ class Progress
     void fork ()
     {
         join();
-        thread_ptr_ = new thread_type(print_start_, static_cast<void *>(this));
+        thread_ptr_ = new thread_type(print_start_, this);
     }
 
     void join ()
@@ -226,15 +226,10 @@ class Progress
         const std::size_t display_iter = ptr->iter_ <= ptr->total_ ?
             ptr->iter_ : ptr->total_;
         std::size_t num_equal = (ptr->total_ | ptr->length_) == 0 ?
-            ptr->length_ : static_cast<std::size_t>(
-                    static_cast<double>(ptr->length_) *
-                    static_cast<double>(display_iter) /
-                    static_cast<double>(ptr->total_));
+            ptr->length_ : ptr->length_ * display_iter / ptr->total_;
         num_equal = num_equal <= ptr->length_ ? num_equal : ptr->length_;
         std::size_t percent = ptr->total_ == 0 ? 100 :
-            static_cast<std::size_t>(100.0 *
-                    static_cast<double>(display_iter) /
-                    static_cast<double>(ptr->total_));
+            100 * display_iter / ptr->total_;
         percent = percent <= 100 ? percent : 100;
 
         if (ptr->print_first_) {

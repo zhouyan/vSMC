@@ -44,7 +44,7 @@ class TestGCD
         begin_ = begin;
         dispatch_apply_f(num,
                 dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                static_cast<void *>(this), norm_work);
+                this, norm_work);
         IntType sum = 0;
         for (IntType i = 0; i != end - begin; ++i)
             sum += square_[i];

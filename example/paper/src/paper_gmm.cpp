@@ -660,7 +660,7 @@ int main (
         .mcmc(gmm_move_lambda(), true)
         .mcmc(gmm_move_weight(), true)
         .path_sampling(gmm_path())
-        .initialize(static_cast<void *>(const_cast<char *>(DataFile.c_str())))
+        .initialize(const_cast<char *>(DataFile.c_str()))
         .iterate(IterNum);
 
     double ps = sampler.path().log_zconst();

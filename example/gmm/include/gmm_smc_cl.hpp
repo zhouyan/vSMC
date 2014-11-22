@@ -413,8 +413,7 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
     ss << "#define DataNum " << info.data_num << "U\n";
     sampler.particle().value().build(ss.str() + src, opt);
     for (std::size_t i = 0; i != repeat; ++i) {
-        sampler.initialize(
-                static_cast<void *>(const_cast<data_info *>(&info)));
+        sampler.initialize(const_cast<data_info *>(&info));
         vsmc::StopWatch watch;
         watch.start();
         while (sampler.particle().value().alpha() < 1)
