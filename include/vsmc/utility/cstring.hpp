@@ -899,8 +899,8 @@ class CStringRuntimeDispatch
         if (CPUID::has_feature<CPUIDFeatureAVX>()) {
             memset_ = ::vsmc::memset_avx;
             memcpy_ = ::vsmc::memcpy_avx;
-            memset_nt_ = ::vsmc::memset_avx_nt_;
-            memcpy_nt_ = ::vsmc::memcpy_avx_nt_;
+            memset_nt_ = ::vsmc::memset_avx_nt;
+            memcpy_nt_ = ::vsmc::memcpy_avx_nt;
         }
 #endif // VSMC_HAS_AVX
     }
