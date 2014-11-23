@@ -345,29 +345,56 @@ inline InputIter hdf5store_matrix (std::size_t nrow, std::size_t ncol,
     return last;
 }
 
-/// \brief Store a data frame in the HDF5 format from an iterator to iterators
+/// \brief Create an empty list
 /// \ingroup HDF5IO
 ///
-/// \details
-/// A data frame is similar to that in R. It is much like a matrix except that
-/// each column will be stored seperatedly as an variable and given a name.
+/// \param file_name Name of the HDF5 file
+/// \param data_name Name of the list
+/// \param append If true the data is appended into an existing file, otherwise
+/// save in a new file
+inline void hdf5store_list_empty (const std::string &file_name,
+        const std::string &data_name, bool append)
+{
+    std::string group_name("/" + data_name);
+
+    ::hid_t datafile;
+    if (append) {
+        datafile = ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    } else {
+        datafile = ::H5Fcreate(file_name.c_str(),
+                H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    ::hid_t datagroup = ::H5Gcreate(datafile, group_name.c_str(),
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    ::H5Gclose(datagroup);
+    ::H5Fclose(datafile);
+}
+
+/// \brief Store a list in the HDF5 format from an iterator to iterators
+/// \ingroup HDF5IO
 ///
 /// \tparam T Type of the data
 /// \tparam InputIterIter The input iterator type, which points to input
 /// iterators
 /// \tparam SInputIter The input iterator type of names
-/// \param nrow Number of rows
-/// \param ncol Number of columns
+/// \param nrow Number of elements in each element of the list
+/// \param ncol Number of elements in the list
 /// \param file_name Name of the HDF5 file
-/// \param data_name Name of the data frame
-/// \param first An iterator points to a sequence of iterations of length ncol.
-/// Each derefence of the iterator is iteself an iterator that points to the
-/// beginning of a column of the data frame.
+/// \param data_name Name of the list
+/// \param first An iterator points to a sequence of iterators of length ncol.
+/// Each derefence of an iterator is iteself an iterator that points to the
+/// beginning of an element of the list.
 /// \param sfirst An iterator points to the beginning of a sequence of strings
 /// that store the names of each column. The dereference need to be convertible
 /// to std::string
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
+///
+/// \note
+/// Each element in the list is assumed to be a vector of the same length. If
+/// the list contains elements of different length, then create an empty list,
+/// which is exactly an empty group in HDF5 terminology and use
+/// `hdf5store_list_insert` to insert each element.
 template <typename T, typename InputIterIter, typename SInputIter>
 inline void hdf5store_list (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
@@ -408,17 +435,17 @@ inline void hdf5store_list (std::size_t nrow, std::size_t ncol,
     ::H5Fclose(datafile);
 }
 
-/// \brief Insert a variable into an existing data frame saved in HDF5 format
+/// \brief Insert a variable into an existing list saved in HDF5 format
 /// \ingroup HDF5IO
 ///
 /// \param N The length of the variable vector. It may be different from that
-/// of the existing data frame.
+/// of the existing list.
 /// \param file_name Name of the HDF5 file
-/// \param data_name Name of the data frame
+/// \param data_name Name of the list
 /// \param first An iterator points to the beginning of the variable vector
 /// \param vname Name of the new variable
 template <typename T, typename InputIter>
-inline void hdf5_insert_list (std::size_t N,
+inline void hdf5store_list_insert (std::size_t N,
         const std::string &file_name, const std::string &data_name,
         InputIter first, const std::string &vname)
 {
@@ -500,7 +527,7 @@ inline void hdf5_tuple_vector_ptr(
 }
 
 template <typename InputIter, typename... InputIters>
-inline void hdf5_insert_list_tuple (std::size_t nrow,
+inline void hdf5store_list_insert_tuple (std::size_t nrow,
         const std::string &file_name, const std::string &data_name,
         const std::tuple<InputIter, InputIters...> &first,
         const std::string *sptr, Position<0>)
@@ -511,11 +538,11 @@ inline void hdf5_insert_list_tuple (std::size_t nrow,
     internal::HDF5StoreDataPtr<dtype> data_ptr;
     data_ptr.set(nrow, std::get<0>(first));
     const dtype *data = data_ptr.get();
-    hdf5_insert_list<dtype>(nrow, file_name, data_name, data, *sptr);
+    hdf5store_list_insert<dtype>(nrow, file_name, data_name, data, *sptr);
 }
 
 template <typename InputIter, typename... InputIters, std::size_t Pos>
-inline void hdf5_insert_list_tuple (std::size_t nrow,
+inline void hdf5store_list_insert_tuple (std::size_t nrow,
         const std::string &file_name, const std::string &data_name,
         const std::tuple<InputIter, InputIters...> &first,
         const std::string *sptr, Position<Pos>)
@@ -526,25 +553,25 @@ inline void hdf5_insert_list_tuple (std::size_t nrow,
     internal::HDF5StoreDataPtr<dtype> data_ptr;
     data_ptr.set(nrow, std::get<Pos>(first));
     const dtype *data = data_ptr.get();
-    hdf5_insert_list<dtype>(nrow, file_name, data_name, data, *sptr);
-    hdf5_insert_list_tuple(nrow, file_name, data_name, first, --sptr,
+    hdf5store_list_insert<dtype>(nrow, file_name, data_name, data, *sptr);
+    hdf5store_list_insert_tuple(nrow, file_name, data_name, first, --sptr,
             Position<Pos - 1>());
 }
 
 } // namespace vsmc::internal
 
-/// \brief Store a data frame in the HDF5 format from tuple of iterators
+/// \brief Store a list in the HDF5 format from tuple of iterators
 /// \ingroup HDF5IO
 ///
 /// \details
-/// A data frame is similar to that in R. It is much like a matrix except that
+/// A list is similar to that in R. It is much like a matrix except that
 /// each column will be stored seperatedly as an variable and given a name.
 ///
 /// \param nrow Number of rows
 /// \param file_name Name of the HDF5 file
-/// \param data_name Name of the data frame
+/// \param data_name Name of the list
 /// \param first A `std::tuple` type object whose element types are iterators.
-/// Each element is the beginning of a column of the data frame.
+/// Each element is the beginning of an element of the list.
 /// \param sfirst An iterator points to the beginning of a sequence of strings
 /// that store the names of each column. The dereference need to be convertible
 /// to std::string
@@ -563,7 +590,7 @@ inline void hdf5store_list (std::size_t nrow,
     hdf5store_list<int>(0, 0, file_name, data_name,
             static_cast<int **>(VSMC_NULLPTR),
             static_cast<std::string *>(VSMC_NULLPTR), append);
-    internal::hdf5_insert_list_tuple(nrow, file_name, data_name, first,
+    internal::hdf5store_list_insert_tuple(nrow, file_name, data_name, first,
             --sptr, Position<dim - 1>());
 }
 
@@ -591,7 +618,7 @@ inline void hdf5store (const Sampler<T> &sampler,
 
     std::vector<int> resampled(nrow);
     sampler.read_resampled_history(resampled.begin());
-    hdf5_insert_list<int>(nrow, file_name, data_name,
+    hdf5store_list_insert<int>(nrow, file_name, data_name,
             &resampled[0], "Resampled");
 }
 
