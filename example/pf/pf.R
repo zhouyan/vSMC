@@ -62,19 +62,19 @@ for (rowcol in c(".row", ".col", "")) {
         save_file.txt  <- paste(filename, rowcol,        ".txt", sep = "")
         save_file0.txt <- paste(filename, rowcol, ".r0", ".txt", sep = "")
         save_file1.txt <- paste(filename, rowcol, ".r1", ".txt", sep = "")
-        save_file.hdf5  <- paste(filename, rowcol,        ".hdf5", sep = "")
-        save_file0.hdf5 <- paste(filename, rowcol, ".r0", ".hdf5", sep = "")
-        save_file1.hdf5 <- paste(filename, rowcol, ".r1", ".hdf5", sep = "")
-        if (file.exists(save_file.hdf5)) {
+        save_file.h5   <- paste(filename, rowcol,        ".h5",  sep = "")
+        save_file0.h5  <- paste(filename, rowcol, ".r0", ".h5",  sep = "")
+        save_file1.h5  <- paste(filename, rowcol, ".r1", ".h5",  sep = "")
+        if (file.exists(save_file.h5)) {
             suppressPackageStartupMessages(library(rhdf5))
-            xy <- as.data.frame(h5read(save_file.hdf5, "/Sampler"))
+            xy <- as.data.frame(h5read(save_file.h5, "/Sampler"))
             read.xy <- TRUE
         } else if (file.exists(save_file.txt)) {
             xy <- read.table(save_file.txt, header = TRUE)
             read.xy <- TRUE
-        } else if (file.exists(save_file0.hdf5) && file.exists(save_file1.hdf5)) {
-            xy0 <- as.data.frame(h5read(save_file0.hdf5, "/Sampler"))
-            xy1 <- as.data.frame(h5read(save_file1.hdf5, "/Sampler"))
+        } else if (file.exists(save_file0.h5) && file.exists(save_file1.h5)) {
+            xy0 <- as.data.frame(h5read(save_file0.h5, "/Sampler"))
+            xy1 <- as.data.frame(h5read(save_file1.h5, "/Sampler"))
             xy <- xy0 + xy1
             read.xy <- TRUE
         } else if (file.exists(save_file0.txt) && file.exists(save_file1.txt)) {

@@ -55,13 +55,13 @@ inline void cv_do (vsmc::ResampleScheme res, char **argv,
 #if VSMC_HAS_HDF5
     sampler.initialize(argv[1]);
     vsmc::hdf5store(sampler.particle().value(),
-            argv[2] + rname + ".trace.hdf5", "Trace.0");
+            argv[2] + rname + ".trace.h5", "Trace.0");
     for (std::size_t i = 0; i != DataNum - 1; ++i) {
         std::stringstream tss;
         tss << "Trace." << (i + 1);
         sampler.iterate();
         vsmc::hdf5store(sampler.particle().value(),
-                argv[2] + rname + ".trace.hdf5", tss.str(), true);
+                argv[2] + rname + ".trace.h5", tss.str(), true);
     }
 #else
     sampler.initialize(argv[1]);
@@ -84,7 +84,7 @@ inline void cv_do (vsmc::ResampleScheme res, char **argv,
     send_file.close();
 
 #if VSMC_HAS_HDF5
-    vsmc::hdf5store(sampler, argv[2] + rname + ".hdf5", "Sampler");
+    vsmc::hdf5store(sampler, argv[2] + rname + ".h5", "Sampler");
 #endif
 }
 

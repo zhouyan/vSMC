@@ -54,7 +54,7 @@ inline void rng_output_data (const std::string &base_name,
     std::vector<const T *> vptr(M);
     for (std::size_t j = 0; j != M; ++j)
         vptr[j] = &values[j][0];
-    vsmc::hdf5store_list<T>(N, M, (base_name + ".hdf5"), base_name,
+    vsmc::hdf5store_list<T>(N, M, (base_name + ".h5"), base_name,
             vptr.begin(), vnames.begin());
 }
 

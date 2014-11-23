@@ -33,9 +33,9 @@ suppressPackageStartupMessages(library(ggplot2))
 
 source("rng_cl_dt.R")
 dist.names <- dimnames(refoutput)[[2]]
-if (file.exists("rng_cl.hdf5")) {
+if (file.exists("rng_cl.h5")) {
     suppressPackageStartupMessages(library(rhdf5))
-    cppoutput <- h5read("rng_cl.hdf5", "/rng_cl")
+    cppoutput <- h5read("rng_cl.h5", "/rng_cl")
 } else {
     cppoutput <- read.table("rng_cl.txt", header = TRUE)
 }
