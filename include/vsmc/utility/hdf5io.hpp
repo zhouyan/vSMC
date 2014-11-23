@@ -369,7 +369,7 @@ inline InputIter hdf5store_matrix (std::size_t nrow, std::size_t ncol,
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
 template <typename T, typename InputIterIter, typename SInputIter>
-inline void hdf5store_data_frame (std::size_t nrow, std::size_t ncol,
+inline void hdf5store_list (std::size_t nrow, std::size_t ncol,
         const std::string &file_name, const std::string &data_name,
         InputIterIter first, SInputIter sfirst, bool append = false)
 {
@@ -418,7 +418,7 @@ inline void hdf5store_data_frame (std::size_t nrow, std::size_t ncol,
 /// \param first An iterator points to the beginning of the variable vector
 /// \param vname Name of the new variable
 template <typename T, typename InputIter>
-inline void hdf5_insert_data_frame (std::size_t N,
+inline void hdf5_insert_list (std::size_t N,
         const std::string &file_name, const std::string &data_name,
         InputIter first, const std::string &vname)
 {
@@ -500,7 +500,7 @@ inline void hdf5_tuple_vector_ptr(
 }
 
 template <typename InputIter, typename... InputIters>
-inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
+inline void hdf5_insert_list_tuple (std::size_t nrow,
         const std::string &file_name, const std::string &data_name,
         const std::tuple<InputIter, InputIters...> &first,
         const std::string *sptr, Position<0>)
@@ -511,11 +511,11 @@ inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
     internal::HDF5StoreDataPtr<dtype> data_ptr;
     data_ptr.set(nrow, std::get<0>(first));
     const dtype *data = data_ptr.get();
-    hdf5_insert_data_frame<dtype>(nrow, file_name, data_name, data, *sptr);
+    hdf5_insert_list<dtype>(nrow, file_name, data_name, data, *sptr);
 }
 
 template <typename InputIter, typename... InputIters, std::size_t Pos>
-inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
+inline void hdf5_insert_list_tuple (std::size_t nrow,
         const std::string &file_name, const std::string &data_name,
         const std::tuple<InputIter, InputIters...> &first,
         const std::string *sptr, Position<Pos>)
@@ -526,8 +526,8 @@ inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
     internal::HDF5StoreDataPtr<dtype> data_ptr;
     data_ptr.set(nrow, std::get<Pos>(first));
     const dtype *data = data_ptr.get();
-    hdf5_insert_data_frame<dtype>(nrow, file_name, data_name, data, *sptr);
-    hdf5_insert_data_frame_tuple(nrow, file_name, data_name, first, --sptr,
+    hdf5_insert_list<dtype>(nrow, file_name, data_name, data, *sptr);
+    hdf5_insert_list_tuple(nrow, file_name, data_name, first, --sptr,
             Position<Pos - 1>());
 }
 
@@ -551,7 +551,7 @@ inline void hdf5_insert_data_frame_tuple (std::size_t nrow,
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
 template <typename SInputIter, typename InputIter, typename... InputIters>
-inline void hdf5store_data_frame (std::size_t nrow,
+inline void hdf5store_list (std::size_t nrow,
         const std::string &file_name, const std::string &data_name,
         const std::tuple<InputIter, InputIters...> &first,
         SInputIter sfirst, bool append = false)
@@ -560,10 +560,10 @@ inline void hdf5store_data_frame (std::size_t nrow,
     internal::HDF5StoreDataPtr<std::string> vnames;
     vnames.set(dim, sfirst);
     const std::string *sptr = vnames.get() + dim;
-    hdf5store_data_frame<int>(0, 0, file_name, data_name,
+    hdf5store_list<int>(0, 0, file_name, data_name,
             static_cast<int **>(VSMC_NULLPTR),
             static_cast<std::string *>(VSMC_NULLPTR), append);
-    internal::hdf5_insert_data_frame_tuple(nrow, file_name, data_name, first,
+    internal::hdf5_insert_list_tuple(nrow, file_name, data_name, first,
             --sptr, Position<dim - 1>());
 }
 
@@ -586,12 +586,12 @@ inline void hdf5store (const Sampler<T> &sampler,
     std::vector<const double *> data_ptr(ncol);
     for (std::size_t j = 0; j != ncol; ++j)
         data_ptr[j] = &data[0] + j * nrow;
-    hdf5store_data_frame<double>(nrow, ncol, file_name, data_name,
+    hdf5store_list<double>(nrow, ncol, file_name, data_name,
             data_ptr.begin(), header.begin(), append);
 
     std::vector<int> resampled(nrow);
     sampler.read_resampled_history(resampled.begin());
-    hdf5_insert_data_frame<int>(nrow, file_name, data_name,
+    hdf5_insert_list<int>(nrow, file_name, data_name,
             &resampled[0], "Resampled");
 }
 
@@ -633,7 +633,7 @@ inline void hdf5store (const StateTuple<RowMajor, T, Types...> &state,
     typename std::tuple<const T *, const Types *...> data_ptr;
     internal::hdf5_tuple_vector_ptr(data_vec, data_ptr, Position<dim - 1>());
 
-    hdf5store_data_frame(state.size(), file_name, data_name, data_ptr,
+    hdf5store_list(state.size(), file_name, data_name, data_ptr,
             &vnames[0], append);
 }
 
@@ -653,7 +653,7 @@ inline void hdf5store (const StateTuple<ColMajor, T, Types...> &state,
         vnames.push_back(ss.str());
     }
 
-    hdf5store_data_frame(state.size(), file_name, data_name, state.data(),
+    hdf5store_list(state.size(), file_name, data_name, state.data(),
             &vnames[0], append);
 }
 
