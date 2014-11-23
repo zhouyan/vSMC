@@ -107,7 +107,7 @@ class Counter<Array<T, K> >
 
     /// \brief Reset a counter to zero
     static VSMC_STRONG_INLINE void reset (ctr_type &ctr)
-    {std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);}
+    {std::memset(ctr.data(), 0, sizeof(T) * K);}
 
     /// \brief Reset a block of counters with the first set to zero
     template <std::size_t Blocks>

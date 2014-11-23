@@ -1,0 +1,8 @@
+1e-3 1e-5 1e-5 # phi_lb0
+1e-2 1e-1 1e-1 # phi_ub0
+1e-4 1e-5 1e-5 # theta_lb0
+1e-3 1e-1 1e-1 # theta_ub0
+1e-1 # lambda_a0
+10   # lambda_b0
+0    # nu_a0
+5e-1 # nu_b0

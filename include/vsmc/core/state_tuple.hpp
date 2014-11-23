@@ -59,6 +59,35 @@ class StateTupleBase
 
     struct state_pack_type
     {
+        state_pack_type () {}
+
+        state_pack_type (const state_pack_type &other) : data_(other.data_) {}
+
+        state_pack_type (const state_tuple_type &tp) : data_(tp) {}
+
+        state_pack_type &operator= (const state_pack_type &other)
+        {
+            if (this != &other)
+                data_ = other.data_;
+
+            return *this;
+        }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        state_pack_type (state_pack_type &&other) :
+            data_(cxx11::move(other.data_)) {}
+
+        state_pack_type (state_tuple_type &&tp) : data_(cxx11::move(tp)) {}
+
+        state_pack_type &operator= (state_pack_type &&other)
+        {
+            if (this != &other)
+                data_ = cxx11::move(other.data_);
+
+            return *this;
+        }
+#endif
+
         state_tuple_type &data () {return data_;}
 
         const state_tuple_type &data () const {return data_;}
@@ -143,31 +172,6 @@ class StateTupleBase
 
     static VSMC_CONSTEXPR std::size_t dim () {return dim_;}
 
-    state_pack_type state_pack (size_type id) const
-    {
-        state_pack_type pack;
-        pack_particle(id, pack, Position<0>());
-
-        return pack;
-    }
-
-    void state_unpack (size_type id, const state_pack_type &pack)
-    {unpack_particle(id, pack, Position<0>());}
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    void state_unpack (size_type id, state_pack_type &&pack)
-    {unpack_particle(id, cxx11::move(pack), Position<0>());}
-#endif
-
-    template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH;
-
-        for (size_type to = 0; to != N; ++to)
-            copy_particle(copy_from[to], to);
-    }
-
     template <std::size_t Pos, typename OutputIter>
     OutputIter read_state (Position<Pos>, OutputIter first) const
     {
@@ -200,68 +204,10 @@ class StateTupleBase
 
     explicit StateTupleBase (size_type N) : size_(N) {}
 
-    void copy_particle (size_type from, size_type to)
-    {
-        if (from != to)
-            copy_particle(from, to, Position<0>());
-    }
-
     private :
 
     size_type size_;
     static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
-
-    template <std::size_t Pos>
-    void pack_particle (size_type id, state_pack_type &pack,
-            Position<Pos>) const
-    {
-        const StateTuple<Order, T, Types...> *sptr =
-            static_cast<const StateTuple<Order, T, Types...> *>(this);
-        std::get<Pos>(pack.data()) = sptr->state(id, Position<Pos>());
-        pack_particle(id, pack, Position<Pos + 1>());
-    }
-
-    void pack_particle (size_type, state_pack_type &,
-            Position<dim_>) const {}
-
-    template <std::size_t Pos>
-    void unpack_particle (size_type id, const state_pack_type &pack,
-            Position<Pos>)
-    {
-        StateTuple<Order, T, Types...> *sptr =
-            static_cast<StateTuple<Order, T, Types...> *>(this);
-        sptr->state(id, Position<Pos>()) = std::get<Pos>(pack.data());
-        unpack_particle(id, pack, Position<Pos + 1>());
-    }
-
-    void unpack_particle (size_type, const state_pack_type &,
-            Position<dim_>) {}
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    template <std::size_t Pos>
-    void unpack_particle (size_type id, state_pack_type &&pack,
-            Position<Pos>)
-    {
-        StateTuple<Order, T, Types...> *sptr =
-            static_cast<StateTuple<Order, T, Types...> *>(this);
-        sptr->state(id, Position<Pos>()) = cxx11::move(
-                std::get<Pos>(pack.data()));
-        unpack_particle(id, cxx11::move(pack), Position<Pos + 1>());
-    }
-
-    void unpack_particle (size_type, state_pack_type &&, Position<dim_>) {}
-#endif
-
-    template <std::size_t Pos>
-    void copy_particle (size_type from, size_type to, Position<Pos>)
-    {
-        StateTuple<Order, T, Types...> *sptr =
-            static_cast<StateTuple<Order, T, Types...> *>(this);
-        sptr->state(to, Position<Pos>()) = sptr->state(from, Position<Pos>());
-        copy_particle(from, to, Position<Pos + 1>());
-    }
-
-    void copy_particle (size_type, size_type, Position<dim_>) {}
 
     template <std::size_t Pos, typename CharT, typename Traits>
     void print_particle (std::basic_ostream<CharT, Traits> &os, size_type id,
@@ -294,6 +240,7 @@ class StateTuple<RowMajor, T, Types...> :
     typedef StateTupleBase<RowMajor, T, Types...>
         state_tuple_base_type;
     typedef typename state_tuple_base_type::size_type size_type;
+    typedef typename state_tuple_base_type::state_pack_type state_pack_type;
 
     explicit StateTuple (size_type N) : state_tuple_base_type(N), state_(N) {}
 
@@ -323,6 +270,31 @@ class StateTuple<RowMajor, T, Types...> :
     const typename state_tuple_base_type::state_tuple_type *data () const
     {return &state_[0];}
 
+    template <typename IntType>
+    void copy (size_type N, const IntType *copy_from)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH;
+
+        for (size_type to = 0; to != N; ++to)
+            copy_particle(copy_from[to], to);
+    }
+
+    state_pack_type state_pack (size_type id) const
+    {return state_pack_type(state_[id]);}
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {state_[id] = pack.data();}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    void state_unpack (size_type id, state_pack_type &&pack)
+    {state_[id] = cxx11::move(pack.data());}
+#endif
+
+    protected :
+
+    void copy_particle (size_type from, size_type to)
+    {state_[to] = state_[from];}
+
     private :
 
     static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
@@ -340,6 +312,7 @@ class StateTuple<ColMajor, T, Types...> :
     typedef StateTupleBase<ColMajor, T, Types...>
         state_tuple_base_type;
     typedef typename state_tuple_base_type::size_type size_type;
+    typedef typename state_tuple_base_type::state_pack_type state_pack_type;
 
     explicit StateTuple (size_type N) : state_tuple_base_type(N)
     {init_state(N, Position<0>());}
@@ -396,6 +369,41 @@ class StateTuple<ColMajor, T, Types...> :
         return dptr;
     }
 
+    template <typename IntType>
+    void copy (size_type N, const IntType *copy_from)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH;
+
+        for (size_type to = 0; to != N; ++to)
+            copy_particle(copy_from[to], to);
+    }
+
+    state_pack_type state_pack (size_type id) const
+    {
+        state_pack_type pack;
+        pack_particle(id, pack, Position<0>());
+
+        return pack;
+    }
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {unpack_particle(id, pack, Position<0>());}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    void state_unpack (size_type id, state_pack_type &&pack)
+    {unpack_particle(id, cxx11::move(pack), Position<0>());}
+#endif
+
+    protected :
+
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        copy_particle(from, to, Position<0>());
+    }
+
     private :
 
     static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
@@ -421,6 +429,49 @@ class StateTuple<ColMajor, T, Types...> :
     template <typename PTRType>
     void insert_data (PTRType &dptr, Position<sizeof...(Types)>) const
     {std::get<sizeof...(Types)>(dptr) = data<sizeof...(Types)>();}
+
+    template <std::size_t Pos>
+    void copy_particle (size_type from, size_type to, Position<Pos>)
+    {
+        state(to, Position<Pos>()) = state(from, Position<Pos>());
+        copy_particle(from, to, Position<Pos + 1>());
+    }
+
+    void copy_particle (size_type, size_type, Position<dim_>) {}
+
+    template <std::size_t Pos>
+    void pack_particle (size_type id, state_pack_type &pack,
+            Position<Pos>) const
+    {
+        std::get<Pos>(pack.data()) = state(id, Position<Pos>());
+        pack_particle(id, pack, Position<Pos + 1>());
+    }
+
+    void pack_particle (size_type, state_pack_type &,
+            Position<dim_>) const {}
+
+    template <std::size_t Pos>
+    void unpack_particle (size_type id, const state_pack_type &pack,
+            Position<Pos>)
+    {
+        state(id, Position<Pos>()) = std::get<Pos>(pack.data());
+        unpack_particle(id, pack, Position<Pos + 1>());
+    }
+
+    void unpack_particle (size_type, const state_pack_type &,
+            Position<dim_>) {}
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    template <std::size_t Pos>
+    void unpack_particle (size_type id, state_pack_type &&pack,
+            Position<Pos>)
+    {
+        state(id, Position<Pos>()) = cxx11::move(std::get<Pos>(pack.data()));
+        unpack_particle(id, cxx11::move(pack), Position<Pos + 1>());
+    }
+
+    void unpack_particle (size_type, state_pack_type &&, Position<dim_>) {}
+#endif
 }; // class StateTuple
 
 } // namespace vsmc

@@ -46,7 +46,7 @@ class WeightSet
     typedef std::size_t size_type;
 
     explicit WeightSet (size_type N) :
-        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
+        size_(N), ess_(N), weight_(N), log_weight_(N) {}
 
 #if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
     WeightSet (const WeightSet &) = default;
@@ -205,7 +205,7 @@ class WeightSet
     /// such that each particle has a equal weight
     void set_equal_weight ()
     {
-        ess_ = static_cast<double>(resample_size());
+        ess_ = resample_size();
         std::fill_n(&weight_[0], size_, 1 / ess_);
         std::memset(&log_weight_[0], 0, sizeof(double) * size_);
     }

@@ -387,7 +387,7 @@
 #endif
 
 #ifndef VSMC_STRONG_INLINE
-#define VSMC_STRONG_INLINE __foceinline
+#define VSMC_STRONG_INLINE __forceinline
 #endif
 
 // Target features
