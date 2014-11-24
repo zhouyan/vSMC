@@ -189,16 +189,23 @@ class StateTupleBase
 
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print (
-            std::basic_ostream<CharT, Traits> &os, std::size_t iter = 0,
-            char sepchar = ' ', char eolchar = '\n') const
+            std::basic_ostream<CharT, Traits> &os,
+            char sepchar = '\t') const
     {
-        for (size_type i = 0; i != size_; ++i) {
-            os << iter << sepchar;
-            print_particle(os, i, sepchar, eolchar, Position<0>());
-        }
+        if (dim_ == 0 || size_ == 0 || !os.good())
+            return os;
+
+        for (size_type i = 0; i != size_; ++i)
+            print_particle(os, i, sepchar, Position<0>());
 
         return os;
     }
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os,
+            const StateTupleBase<Order, T, Types...> &stuple)
+    {return stuple.print(os);}
 
     protected :
 
@@ -211,21 +218,21 @@ class StateTupleBase
 
     template <std::size_t Pos, typename CharT, typename Traits>
     void print_particle (std::basic_ostream<CharT, Traits> &os, size_type id,
-            char sepchar, char eolchar, Position<Pos>) const
+            char sepchar, Position<Pos>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
         os << sptr->state(id, Position<Pos>()) << sepchar;
-        print_particle(os, id, sepchar, eolchar, Position<Pos + 1>());
+        print_particle(os, id, sepchar, Position<Pos + 1>());
     }
 
     template <typename CharT, typename Traits>
     void print_particle (std::basic_ostream<CharT, Traits> &os, size_type id,
-            char, char eolchar, Position<dim_ - 1>) const
+            char, Position<dim_ - 1>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
-        os << sptr->state(id, Position<dim_ - 1>()) << eolchar;
+        os << sptr->state(id, Position<dim_ - 1>()) << '\n';
     }
 }; // class StateTupleBase
 

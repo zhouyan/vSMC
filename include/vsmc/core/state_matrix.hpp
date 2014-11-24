@@ -190,16 +190,18 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print (
-            std::basic_ostream<CharT, Traits> &os, std::size_t iter = 0,
-            char sepchar = ' ', char eolchar = '\n') const
+            std::basic_ostream<CharT, Traits> &os = std::cout,
+            char sepchar = '\t') const
     {
+        if (this->dim() == 0 || size_ == 0 || !os.good())
+            return os;
+
         const StateMatrix<Order, Dim, T> *sptr =
             static_cast<const StateMatrix<Order, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i) {
-            os << iter << sepchar;
             for (std::size_t d = 0; d != this->dim() - 1; ++d)
                 os << sptr->state(i, d) << sepchar;
-            os << sptr->state(i, this->dim() - 1) << eolchar;
+            os << sptr->state(i, this->dim() - 1) << '\n';
         }
 
         return os;
@@ -209,12 +211,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const StateMatrixBase<Order, Dim, T> &smatrix)
-    {
-        if (os.good())
-            smatrix.print(os);
-
-        return os;
-    }
+    {return smatrix.print(os);}
 
     protected :
 
