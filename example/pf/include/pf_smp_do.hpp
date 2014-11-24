@@ -62,10 +62,14 @@ inline void cv_do (vsmc::ResampleScheme res, char **argv,
     sampler.iterate(DataNum - 1);
 #endif
 
-    std::string est_file_name(argv[2] + name + ".txt");
+    std::string est_file_name(argv[2] + name + ".tsv");
     std::ofstream est_file;
     est_file.open(est_file_name.c_str());
     est_file << sampler << std::endl;
+    est_file.close();
+    est_file_name = argv[2] + name + ".trace.tsv";
+    est_file.open(est_file_name.c_str());
+    est_file << sampler.particle().value() << std::endl;
     est_file.close();
 
 #if VSMC_HAS_HDF5
