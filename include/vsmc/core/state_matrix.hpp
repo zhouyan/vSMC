@@ -190,8 +190,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print (
-            std::basic_ostream<CharT, Traits> &os = std::cout,
-            char sepchar = '\t') const
+            std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
         if (this->dim() == 0 || size_ == 0 || !os.good())
             return os;

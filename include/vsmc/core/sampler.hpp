@@ -662,8 +662,7 @@ class Sampler
     /// \param sepchar The seperator of fields
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print (
-            std::basic_ostream<CharT, Traits> &os = std::cout,
-            char sepchar = '\t') const
+            std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
         if (iter_size() == 0 || !os.good())
             return os;

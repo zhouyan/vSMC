@@ -189,8 +189,7 @@ class StateTupleBase
 
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print (
-            std::basic_ostream<CharT, Traits> &os,
-            char sepchar = '\t') const
+            std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
         if (dim_ == 0 || size_ == 0 || !os.good())
             return os;
