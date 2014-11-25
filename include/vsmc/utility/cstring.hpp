@@ -141,8 +141,7 @@
 #define VSMC_DEFINE_UTILITY_CSTRING_SET(ISA, da, nt, c, m,\
         cast, set1, store) \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memset_n<ISA, 1, da, nt> (                           \
-        void *dst, int ch, std::size_t n)                                    \
+inline void memset_n<ISA, 1, da, nt> (void *dst, int ch, std::size_t n)      \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -158,8 +157,7 @@ VSMC_STRONG_INLINE void memset_n<ISA, 1, da, nt> (                           \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memset_n<ISA, 2, da, nt> (                           \
-        void *dst, int ch, std::size_t n)                                    \
+inline void memset_n<ISA, 2, da, nt> (void *dst, int ch, std::size_t n)      \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -176,8 +174,7 @@ VSMC_STRONG_INLINE void memset_n<ISA, 2, da, nt> (                           \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memset_n<ISA, 4, da, nt> (                           \
-        void *dst, int ch, std::size_t n)                                    \
+inline void memset_n<ISA, 4, da, nt> (void *dst, int ch, std::size_t n)      \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -196,8 +193,7 @@ VSMC_STRONG_INLINE void memset_n<ISA, 4, da, nt> (                           \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memset_n<ISA, 8, da, nt> (                           \
-        void *dst, int ch, std::size_t n)                                    \
+inline void memset_n<ISA, 8, da, nt> (void *dst, int ch, std::size_t n)      \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -220,8 +216,7 @@ VSMC_STRONG_INLINE void memset_n<ISA, 8, da, nt> (                           \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memset_l<ISA, 4, da, nt> (                           \
-        void *dst, int ch, std::size_t n)                                    \
+inline void memset_l<ISA, 4, da, nt> (void *dst, int ch, std::size_t n)      \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -240,8 +235,7 @@ VSMC_STRONG_INLINE void memset_l<ISA, 4, da, nt> (                           \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memset_l<ISA, 8, da, nt> (                           \
-        void *dst, int ch, std::size_t n)                                    \
+inline void memset_l<ISA, 8, da, nt> (void *dst, int ch, std::size_t n)      \
 {                                                                            \
     if (n == 0)                                                              \
         return;                                                              \
@@ -265,7 +259,7 @@ VSMC_STRONG_INLINE void memset_l<ISA, 8, da, nt> (                           \
 
 #define VSMC_DEFINE_UTILITY_CSTRING_CPY(ISA, sa, da, nt, c, m, load, store) \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memcpy_n<ISA, 1, sa, da, nt> (                       \
+inline void memcpy_n<ISA, 1, sa, da, nt> (                                   \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
@@ -284,7 +278,7 @@ VSMC_STRONG_INLINE void memcpy_n<ISA, 1, sa, da, nt> (                       \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memcpy_n<ISA, 2, sa, da, nt> (                       \
+inline void memcpy_n<ISA, 2, sa, da, nt> (                                   \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
@@ -306,7 +300,7 @@ VSMC_STRONG_INLINE void memcpy_n<ISA, 2, sa, da, nt> (                       \
                                                                              \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memcpy_n<ISA, 4, sa, da, nt> (                       \
+inline void memcpy_n<ISA, 4, sa, da, nt> (                                   \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
@@ -331,7 +325,7 @@ VSMC_STRONG_INLINE void memcpy_n<ISA, 4, sa, da, nt> (                       \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memcpy_n<ISA, 8, sa, da, nt> (                       \
+inline void memcpy_n<ISA, 8, sa, da, nt> (                                   \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
@@ -364,7 +358,7 @@ VSMC_STRONG_INLINE void memcpy_n<ISA, 8, sa, da, nt> (                       \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memcpy_l<ISA, 4, sa, da, nt> (                       \
+inline void memcpy_l<ISA, 4, sa, da, nt> (                                   \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
@@ -389,7 +383,7 @@ VSMC_STRONG_INLINE void memcpy_l<ISA, 4, sa, da, nt> (                       \
 }                                                                            \
                                                                              \
 template <>                                                                  \
-VSMC_STRONG_INLINE void memcpy_l<ISA, 8, sa, da, nt> (                       \
+inline void memcpy_l<ISA, 8, sa, da, nt> (                                   \
         void *dst, const void *src, std::size_t n)                           \
 {                                                                            \
     if (n == 0)                                                              \
@@ -426,35 +420,37 @@ namespace vsmc {
 namespace internal {
 
 template <SIMD ISA>
-VSMC_STRONG_INLINE unsigned cstring_is_aligned (const void *ptr)
+inline unsigned cstring_is_aligned (const void *ptr)
 {
     return reinterpret_cast<uintptr_t>(ptr) %
         traits::SIMDTrait<ISA>::alignment == 0 ? 2 : 0;
 }
 
 template <SIMD>
-VSMC_STRONG_INLINE void memset_0 (void *dst, int ch, std::size_t n)
+inline void memset_0 (void *dst, int ch, std::size_t n)
 {
     if (n != 0)
         std::memset(dst, ch, n);
 }
 
 template <SIMD>
-VSMC_STRONG_INLINE void memcpy_0 (void *dst, const void *src, std::size_t n)
+inline void memcpy_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0)
         std::memmove(dst, src, n);
 }
 
 template <SIMD, std::size_t, bool, bool>
-VSMC_STRONG_INLINE void memset_n (void *, int, std::size_t);
+inline void memset_n (void *, int, std::size_t);
+
 template <SIMD, std::size_t, bool, bool>
-VSMC_STRONG_INLINE void memset_l (void *, int, std::size_t);
+inline void memset_l (void *, int, std::size_t);
 
 template <SIMD, std::size_t, bool, bool, bool>
-VSMC_STRONG_INLINE void memcpy_n (void *, const void *, std::size_t);
+inline void memcpy_n (void *, const void *, std::size_t);
+
 template <SIMD, std::size_t, bool, bool, bool>
-VSMC_STRONG_INLINE void memcpy_l (void *, const void *, std::size_t);
+inline void memcpy_l (void *, const void *, std::size_t);
 
 #if VSMC_HAS_SSE2
 
@@ -517,8 +513,7 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true,  true,  true,  double, __m256d,
 #endif // VSMC_HAS_AVX
 
 template <SIMD ISA, std::size_t N>
-VSMC_STRONG_INLINE void memset_n_switch (
-        void *dst, int ch, std::size_t n, unsigned flag)
+inline void memset_n_switch (void *dst, int ch, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0: memset_n<ISA, N, false, false>(dst, ch, n); break;
@@ -530,8 +525,7 @@ VSMC_STRONG_INLINE void memset_n_switch (
 }
 
 template <SIMD ISA, std::size_t N>
-VSMC_STRONG_INLINE void memset_l_switch (
-        void *dst, int ch, std::size_t n, unsigned flag)
+inline void memset_l_switch (void *dst, int ch, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0: memset_l<ISA, N, false, false>(dst, ch, n); break;
@@ -543,8 +537,8 @@ VSMC_STRONG_INLINE void memset_l_switch (
 }
 
 template <SIMD ISA, std::size_t N>
-VSMC_STRONG_INLINE void memcpy_n_switch (
-        void *dst, const void *src, std::size_t n, unsigned flag)
+inline void memcpy_n_switch (void *dst, const void *src, std::size_t n,
+        unsigned flag)
 {
     switch (flag) {
         case 0 : memcpy_n<ISA, N, false, false, false>(dst, src, n); break;
@@ -560,8 +554,8 @@ VSMC_STRONG_INLINE void memcpy_n_switch (
 }
 
 template <SIMD ISA, std::size_t N>
-VSMC_STRONG_INLINE void memcpy_l_switch (
-        void *dst, const void *src, std::size_t n, unsigned flag)
+inline void memcpy_l_switch (void *dst, const void *src, std::size_t n,
+        unsigned flag)
 {
     switch (flag) {
         case 0 : memcpy_l<ISA, N, false, false, false>(dst, src, n); break;
@@ -655,8 +649,7 @@ class CStringNonTemporalThreshold
 namespace internal {
 
 template <SIMD ISA>
-VSMC_STRONG_INLINE void *memset_simd (
-        void *dst, int ch, std::size_t n)
+inline void *memset_simd (void *dst, int ch, std::size_t n)
 {
     if (n < traits::SIMDTrait<ISA>::alignment) {
         memset_0<ISA>(dst, ch, n);
@@ -687,8 +680,7 @@ VSMC_STRONG_INLINE void *memset_simd (
 }
 
 template <SIMD ISA>
-VSMC_STRONG_INLINE void *memcpy_simd (
-        void *dst, const void *src, std::size_t n)
+inline void *memcpy_simd (void *dst, const void *src, std::size_t n)
 {
     if (dst == src)
         return dst;
@@ -727,8 +719,7 @@ VSMC_STRONG_INLINE void *memcpy_simd (
 }
 
 template <SIMD ISA>
-VSMC_STRONG_INLINE void *memset_simd_nt (
-        void *dst, int ch, std::size_t n)
+inline void *memset_simd_nt (void *dst, int ch, std::size_t n)
 {
     VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_ALIGNED_DST(ISA, dst, memset_simd_nt);
 
@@ -745,8 +736,7 @@ VSMC_STRONG_INLINE void *memset_simd_nt (
 }
 
 template <SIMD ISA>
-VSMC_STRONG_INLINE void *memcpy_simd_nt (
-        void *dst, const void *src, std::size_t n)
+inline void *memcpy_simd_nt (void *dst, const void *src, std::size_t n)
 {
     if (dst == src)
         return dst;
@@ -782,13 +772,12 @@ VSMC_STRONG_INLINE void *memcpy_simd_nt (
 
 /// \brief Direct call to `std::memset`
 /// \ingroup CString
-VSMC_STRONG_INLINE void *memset_std (void *dst, int ch, std::size_t n)
+inline void *memset_std (void *dst, int ch, std::size_t n)
 {return std::memset(dst, ch, n);}
 
 /// \brief Direct call to `std::memcpy`
 /// \ingroup CString
-VSMC_STRONG_INLINE void *memcpy_std (
-        void *dst, const void *src, std::size_t n)
+inline void *memcpy_std (void *dst, const void *src, std::size_t n)
 {return std::memcpy(dst, src, n);}
 
 #if VSMC_HAS_SSE2

@@ -62,10 +62,9 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
     typedef typename KeySeq::key_type key_type;
     typedef Array<__m128i, Rounds + 1> key_seq_type;
 
-    key_seq_type VSMC_STRONG_INLINE get (const key_type &) const
-    {return key_seq_;}
+    key_seq_type get (const key_type &) const {return key_seq_;}
 
-    void VSMC_STRONG_INLINE set (const key_type &k)
+    void set (const key_type &k)
     {
         KeySeq seq;
         seq.generate(k, key_seq_);
@@ -123,7 +122,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
     typedef typename KeySeq::key_type key_type;
     typedef Array<__m128i, Rounds + 1> key_seq_type;
 
-    key_seq_type VSMC_STRONG_INLINE get (const key_type &k) const
+    key_seq_type get (const key_type &k) const
     {
         key_seq_type ks;
         KeySeq seq;
@@ -132,7 +131,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
         return ks;
     }
 
-    void VSMC_STRONG_INLINE set (const key_type &) {}
+    void set (const key_type &) {}
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
@@ -455,7 +454,7 @@ class AESNIEngine
     key_type key_;
     std::size_t index_;
 
-    void VSMC_STRONG_INLINE generate_buffer (const ctr_block_type &cb,
+    void generate_buffer (const ctr_block_type &cb,
             buffer_type &buf) const
     {
         const key_seq_type ks(key_seq_.get(key_));
@@ -466,12 +465,12 @@ class AESNIEngine
     }
 
     template <std::size_t>
-    void VSMC_STRONG_INLINE enc_first (const key_seq_type &, buffer_type &,
+    void enc_first (const key_seq_type &, buffer_type &,
             cxx11::false_type) const {}
 
     template <std::size_t B>
-    void VSMC_STRONG_INLINE enc_first (const key_seq_type &ks,
-            buffer_type &buf, cxx11::true_type) const
+    void enc_first (const key_seq_type &ks, buffer_type &buf,
+            cxx11::true_type) const
     {
         buf[Position<B>()] = _mm_xor_si128(buf[Position<B>()], ks.front());
         enc_first<B + 1>(ks, buf,
@@ -479,12 +478,12 @@ class AESNIEngine
     }
 
     template <std::size_t>
-    void VSMC_STRONG_INLINE enc_round (const key_seq_type &, buffer_type &,
+    void enc_round (const key_seq_type &, buffer_type &,
             cxx11::false_type) const {}
 
     template <std::size_t N>
-    void VSMC_STRONG_INLINE enc_round (const key_seq_type &ks,
-            buffer_type &buf, cxx11::true_type) const
+    void enc_round (const key_seq_type &ks, buffer_type &buf,
+            cxx11::true_type) const
     {
         enc_round_block<0, N>(ks, buf, cxx11::true_type());
         enc_round<N + 1>(ks, buf,
@@ -492,12 +491,12 @@ class AESNIEngine
     }
 
     template <std::size_t, std::size_t>
-    void VSMC_STRONG_INLINE enc_round_block (const key_seq_type &,
-            buffer_type &, cxx11::false_type) const {}
+    void enc_round_block (const key_seq_type &, buffer_type &,
+            cxx11::false_type) const {}
 
     template <std::size_t B, std::size_t N>
-    void VSMC_STRONG_INLINE enc_round_block (const key_seq_type &ks,
-            buffer_type &buf, cxx11::true_type) const
+    void enc_round_block (const key_seq_type &ks, buffer_type &buf,
+            cxx11::true_type) const
     {
         buf[Position<B>()] = _mm_aesenc_si128(
                 buf[Position<B>()], ks[Position<N>()]);
@@ -506,12 +505,12 @@ class AESNIEngine
     }
 
     template <std::size_t>
-    void VSMC_STRONG_INLINE enc_last (const key_seq_type &,
-            buffer_type &, cxx11::false_type) const {}
+    void enc_last (const key_seq_type &, buffer_type &,
+            cxx11::false_type) const {}
 
     template <std::size_t B>
-    void VSMC_STRONG_INLINE enc_last (const key_seq_type &ks,
-            buffer_type &buf, cxx11::true_type) const
+    void enc_last (const key_seq_type &ks, buffer_type &buf,
+            cxx11::true_type) const
     {
         buf[Position<B>()] = _mm_aesenclast_si128(
                 buf[Position<B>()], ks.back());
@@ -519,17 +518,16 @@ class AESNIEngine
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    void VSMC_STRONG_INLINE pack (const ctr_block_type &cb,
-            buffer_type &buf) const
+    void pack (const ctr_block_type &cb, buffer_type &buf) const
     {pack_ctr<0>(cb, buf, cxx11::true_type());}
 
     template <std::size_t>
-    void VSMC_STRONG_INLINE pack_ctr (const ctr_block_type &, buffer_type &,
+    void pack_ctr (const ctr_block_type &, buffer_type &,
             cxx11::false_type) const {}
 
     template <std::size_t B>
-    void VSMC_STRONG_INLINE pack_ctr (const ctr_block_type &cb,
-            buffer_type &buf, cxx11::true_type) const
+    void pack_ctr (const ctr_block_type &cb, buffer_type &buf,
+            cxx11::true_type) const
     {
         m128i_pack<0>(cb[Position<B>()], buf[Position<B>()]);
         pack_ctr<B + 1>(cb, buf,
