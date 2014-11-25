@@ -66,7 +66,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
         this->pre_processor(particle);
         accept_.resize(N);
         work_param_ wp(this, &particle, &accept_[0]);
-        queue_.apply_f(N, static_cast<void *>(&wp), work_);
+        queue_.apply_f(N, &wp, work_);
         this->post_processor(particle);
 
         std::size_t acc = 0;
@@ -119,7 +119,7 @@ class MoveGCD : public MoveBase<T, Derived>
         this->pre_processor(iter, particle);
         accept_.resize(N);
         work_param_ wp(this, &particle, &accept_[0], iter);
-        queue_.apply_f(N, static_cast<void *>(&wp), work_);
+        queue_.apply_f(N, &wp, work_);
         this->post_processor(iter, particle);
 
         std::size_t acc = 0;
@@ -173,7 +173,7 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_param_ wp(this, &particle, res, iter, dim);
-        queue_.apply_f(N, static_cast<void *>(&wp), work_);
+        queue_.apply_f(N, &wp, work_);
         this->post_processor(iter, particle);
     }
 
@@ -223,7 +223,7 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         work_param_ wp(this, &particle, res, iter);
-        queue_.apply_f(N, static_cast<void *>(&wp), work_);
+        queue_.apply_f(N, &wp, work_);
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);

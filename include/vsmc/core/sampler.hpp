@@ -658,14 +658,14 @@ class Sampler
 
     /// \brief Print the history of the Sampler
     ///
-    /// \param sampler_id The ID of the sampler
     /// \param os The ostream to which the contents are printed
+    /// \param sepchar The seperator of fields
     template <typename CharT, typename Traits>
-    void print (std::size_t sampler_id,
-            std::basic_ostream<CharT, Traits> &os) const
+    std::basic_ostream<CharT, Traits> &print (
+            std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
-        if (!os.good())
-            return;
+        if (iter_size() == 0 || !os.good())
+            return os;
 
         std::size_t var_num = summary_header_size();
         std::size_t dat_num = summary_data_size();
@@ -674,34 +674,26 @@ class Sampler
         summary_header(header.begin());
         summary_data<RowMajor>(data.begin());
 
-        os << "Sampler.ID Iteration Resampled";
+        os << "Resampled";
         for (std::size_t i = 0; i != header.size(); ++i)
-            os << ' ' << header[i];
-        if (iter_size() > 0)
-            os << '\n';
+            os << sepchar << header[i];
+        os << '\n';
 
-        std::size_t data_offset = 0;
+        std::size_t offset = 0;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            os << sampler_id;
-            os << ' ' << iter;
-            os << ' ' << resampled_history_[iter];
+            os << sepchar << resampled_history_[iter];
             for (std::size_t i = 0; i != var_num; ++i)
-                os << ' ' << data[data_offset++];
+                os << sepchar << data[offset++];
             os << '\n';
         }
-    }
 
-    void print (std::size_t sampler_id = 0) const
-    {print(sampler_id, std::cout);}
+        return os;
+    }
 
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
-    {
-        sampler.print(0, os);
-
-        return os;
-    }
+    {return sampler.print(os);}
 
     private :
 

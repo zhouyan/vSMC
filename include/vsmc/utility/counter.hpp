@@ -93,41 +93,39 @@ class Counter<Array<T, K> >
     typedef Array<T, K> ctr_type;
 
     /// \brief Set the counter to a given value
-    static VSMC_STRONG_INLINE void set (ctr_type &ctr, const ctr_type &c)
-    {ctr = c;}
+    static inline void set (ctr_type &ctr, const ctr_type &c) {ctr = c;}
 
     /// \brief Set a block of counters given the value of the first counter
     template <std::size_t Blocks>
-    static VSMC_STRONG_INLINE void set (Array<ctr_type, Blocks> &ctr,
-            const ctr_type &c)
+    static inline void set (Array<ctr_type, Blocks> &ctr, const ctr_type &c)
     {
         ctr.front() = c;
         set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
     /// \brief Reset a counter to zero
-    static VSMC_STRONG_INLINE void reset (ctr_type &ctr)
-    {std::memset(static_cast<void *>(ctr.data()), 0, sizeof(T) * K);}
+    static inline void reset (ctr_type &ctr)
+    {std::memset(ctr.data(), 0, sizeof(T) * K);}
 
     /// \brief Reset a block of counters with the first set to zero
     template <std::size_t Blocks>
-    static VSMC_STRONG_INLINE void reset (Array<ctr_type, Blocks> &ctr)
+    static inline void reset (Array<ctr_type, Blocks> &ctr)
     {
         reset(ctr.front());
         set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
     }
 
     /// \brief Increment the counter by one
-    static VSMC_STRONG_INLINE void increment (ctr_type &ctr)
+    static inline void increment (ctr_type &ctr)
     {increment_single<0>(ctr, cxx11::integral_constant<bool, 1 < K>());}
 
     /// \brief Increment each counter in a block by one
     template <std::size_t Blocks>
-    static VSMC_STRONG_INLINE void increment (Array<ctr_type, Blocks> &ctr)
+    static inline void increment (Array<ctr_type, Blocks> &ctr)
     {increment_block<0>(ctr, cxx11::true_type());}
 
     /// \brief Increment a counter by a given value
-    static VSMC_STRONG_INLINE void increment (ctr_type &ctr, T nskip)
+    static inline void increment (ctr_type &ctr, T nskip)
     {
         if (nskip == 0)
             return;
@@ -155,8 +153,7 @@ class Counter<Array<T, K> >
 
     /// \brief Increment each counter in a block by a given value
     template <std::size_t Blocks>
-    static VSMC_STRONG_INLINE void increment (Array<ctr_type, Blocks> &ctr,
-            T nskip)
+    static inline void increment (Array<ctr_type, Blocks> &ctr, T nskip)
     {
         if (nskip == 0)
             return;
@@ -181,12 +178,11 @@ class Counter<Array<T, K> >
         internal::CounterMask<T, cxx11::is_unsigned<T>::value>::mask_lo;
 
     template <std::size_t>
-    static VSMC_STRONG_INLINE void increment_single (ctr_type &ctr,
-            cxx11::false_type) {++ctr.back();}
+    static inline void increment_single (ctr_type &ctr, cxx11::false_type)
+    {++ctr.back();}
 
     template <std::size_t N>
-    static VSMC_STRONG_INLINE void increment_single (ctr_type &ctr,
-            cxx11::true_type)
+    static inline void increment_single (ctr_type &ctr, cxx11::true_type)
     {
         if (++ctr[Position<N>()] != 0)
             return;
@@ -196,11 +192,11 @@ class Counter<Array<T, K> >
     }
 
     template <std::size_t, std::size_t Blocks>
-    static VSMC_STRONG_INLINE void set_block (Array<ctr_type, Blocks> &,
+    static inline void set_block (Array<ctr_type, Blocks> &,
             cxx11::false_type) {}
 
     template <std::size_t B, std::size_t Blocks>
-    static VSMC_STRONG_INLINE void set_block (Array<ctr_type, Blocks> &ctr,
+    static inline void set_block (Array<ctr_type, Blocks> &ctr,
             cxx11::true_type)
     {
         T m = ctr[Position<B - 1>()].back() & mask_lo_;
@@ -216,12 +212,12 @@ class Counter<Array<T, K> >
     }
 
     template <std::size_t, std::size_t Blocks>
-    static VSMC_STRONG_INLINE void increment_block (
-            Array<ctr_type, Blocks> &, cxx11::false_type) {}
+    static inline void increment_block (Array<ctr_type, Blocks> &,
+            cxx11::false_type) {}
 
     template <std::size_t B, std::size_t Blocks>
-    static VSMC_STRONG_INLINE void increment_block (
-            Array<ctr_type, Blocks> &ctr, cxx11::true_type)
+    static inline void increment_block (Array<ctr_type, Blocks> &ctr,
+            cxx11::true_type)
     {
         increment_block_ctr(ctr[Position<B>()]);
         increment_block<B + 1>(ctr,
@@ -229,29 +225,29 @@ class Counter<Array<T, K> >
     }
 
     template <std::size_t, std::size_t Blocks>
-    static VSMC_STRONG_INLINE void increment_block (
-            Array<ctr_type, Blocks> &, T, cxx11::false_type) {}
+    static inline void increment_block (Array<ctr_type, Blocks> &, T,
+            cxx11::false_type) {}
 
     template <std::size_t B, std::size_t Blocks>
-    static VSMC_STRONG_INLINE void increment_block (
-            Array<ctr_type, Blocks> &ctr, T nskip, cxx11::true_type)
+    static inline void increment_block (Array<ctr_type, Blocks> &ctr, T nskip,
+            cxx11::true_type)
     {
         increment_block_ctr(ctr[Position<B>()], nskip);
         increment_block<B + 1>(ctr, nskip,
                 cxx11::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    static VSMC_STRONG_INLINE void increment_block_ctr (ctr_type &ctr)
+    static inline void increment_block_ctr (ctr_type &ctr)
     {increment_block_single<0>(ctr, cxx11::integral_constant<bool, 1 < K>());}
 
-    static VSMC_STRONG_INLINE void increment_block_ctr (ctr_type &ctr, T nskip)
+    static inline void increment_block_ctr (ctr_type &ctr, T nskip)
     {
         increment_block_nskip(ctr, nskip,
                 cxx11::integral_constant<bool, 1 < K>());
     }
 
     template <std::size_t>
-    static VSMC_STRONG_INLINE void increment_block_single (ctr_type &ctr,
+    static inline void increment_block_single (ctr_type &ctr,
             cxx11::false_type)
     {
         T m = ctr.back() & mask_lo_;
@@ -263,7 +259,7 @@ class Counter<Array<T, K> >
     }
 
     template <std::size_t N>
-    static VSMC_STRONG_INLINE void increment_block_single (ctr_type &ctr,
+    static inline void increment_block_single (ctr_type &ctr,
             cxx11::true_type)
     {
         if (++ctr[Position<N>()] != 0)
@@ -273,8 +269,8 @@ class Counter<Array<T, K> >
                 cxx11::integral_constant<bool, N + 2 < K>());
     }
 
-    static VSMC_STRONG_INLINE void increment_block_nskip (ctr_type &ctr,
-            T nskip, cxx11::false_type)
+    static inline void increment_block_nskip (ctr_type &ctr, T nskip,
+            cxx11::false_type)
     {
         T m = ctr.back() & mask_lo_;
         T b = ctr.back();
@@ -298,8 +294,8 @@ class Counter<Array<T, K> >
         ctr.back() = b;
     }
 
-    static VSMC_STRONG_INLINE void increment_block_nskip (ctr_type &ctr,
-            T nskip, cxx11::true_type)
+    static inline void increment_block_nskip (ctr_type &ctr, T nskip,
+            cxx11::true_type)
     {
         if (nskip == 0)
             return;

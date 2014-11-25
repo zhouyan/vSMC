@@ -140,7 +140,7 @@ struct PhiloxBumpKey {static void eval (Array<ResultType, K / 2> &) {}};
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpKey<ResultType, 2, N, true>
 {
-    static VSMC_STRONG_INLINE void eval (Array<ResultType, 1> &par)
+    static void eval (Array<ResultType, 1> &par)
     {
         par[Position<0>()] +=
             traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
@@ -150,7 +150,7 @@ struct PhiloxBumpKey<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpKey<ResultType, 4, N, true>
 {
-    static VSMC_STRONG_INLINE void eval (Array<ResultType, 2> &par)
+    static void eval (Array<ResultType, 2> &par)
     {
         par[Position<0>()] +=
             traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
@@ -160,7 +160,7 @@ struct PhiloxBumpKey<ResultType, 4, N, true>
 }; // struct PhiloxBumpKey
 
 template <std::size_t K, std::size_t I>
-VSMC_STRONG_INLINE void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
+inline void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
 {
     uint64_t prod =
         static_cast<uint64_t>(b) *
@@ -173,7 +173,7 @@ VSMC_STRONG_INLINE void philox_hilo (uint32_t b, uint32_t &hi, uint32_t &lo)
 #if VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
     unsigned VSMC_INT128 prod =
         static_cast<unsigned VSMC_INT128>(b) *
@@ -186,7 +186,7 @@ VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 #elif defined(VSMC_MSVC) // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
     lo = _umul128(traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value, b,
             &hi);
@@ -195,7 +195,7 @@ VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 #else // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
+inline void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 {
     const uint64_t a =
         traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value;
@@ -224,14 +224,14 @@ VSMC_STRONG_INLINE void philox_hilo (uint64_t b, uint64_t &hi, uint64_t &lo)
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct PhiloxRound
 {
-    static VSMC_STRONG_INLINE void eval (Array<ResultType, K> &,
+    static void eval (Array<ResultType, K> &,
             const Array<ResultType, K / 2> &) {}
 }; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true>
 {
-    static VSMC_STRONG_INLINE void eval (Array<ResultType, 2> &state,
+    static void eval (Array<ResultType, 2> &state,
             const Array<ResultType, 1> &par)
     {
         ResultType hi = 0;
@@ -245,7 +245,7 @@ struct PhiloxRound<ResultType, 2, N, true>
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true>
 {
-    static VSMC_STRONG_INLINE void eval (Array<ResultType, 4> &state,
+    static void eval (Array<ResultType, 4> &state,
             const Array<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
@@ -501,8 +501,7 @@ class PhiloxEngine
     buffer_type buffer_;
     std::size_t index_;
 
-    void VSMC_STRONG_INLINE generate_buffer (const ctr_type c,
-            buffer_type &buf) const
+    void generate_buffer (const ctr_type c, buffer_type &buf) const
     {
         buf = c;
         key_type par = key_;
@@ -510,11 +509,11 @@ class PhiloxEngine
     }
 
     template <std::size_t>
-    void VSMC_STRONG_INLINE generate_buffer (buffer_type &, key_type &,
+    void generate_buffer (buffer_type &, key_type &,
             cxx11::false_type) const {}
 
     template <std::size_t N>
-    void VSMC_STRONG_INLINE generate_buffer (buffer_type &buf, key_type &par,
+    void generate_buffer (buffer_type &buf, key_type &par,
             cxx11::true_type) const
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);

@@ -48,9 +48,9 @@
     VSMC_RUNTIME_ASSERT((dim >= 1),                                          \
             ("**StateMatrix** DIMENSION IS LESS THAN 1"))
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim, name) \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim) \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
-            ("**State"#name"::state_unpack** INPUT PACK SIZE TOO SMALL"))
+            ("**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
 namespace vsmc {
 
@@ -134,50 +134,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     const T *data () const {return &data_[0];}
 
-    state_pack_type state_pack (size_type id) const
-    {
-        const StateMatrix<Order, Dim, T> *sptr =
-            static_cast<const StateMatrix<Order, Dim, T> *>(this);
-        state_pack_type pack(this->dim());
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            pack[d] = sptr->state(id, d);
-
-        return pack;
-    }
-
-    void state_unpack (size_type id, const state_pack_type &pack)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
-                pack.size(), this->dim(), Matrix);
-
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            sptr->state(id, d) = pack[d];
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    void state_unpack (size_type id, state_pack_type &&pack)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
-                pack.size(), this->dim(), Matrix);
-
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            sptr->state(id, d) = cxx11::move(pack[d]);
-    }
-#endif
-
-    template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
-
-        for (size_type to = 0; to != N; ++to)
-            copy_particle(copy_from[to], to);
-    }
-
     template <typename OutputIter>
     OutputIter read_state (std::size_t pos, OutputIter first) const
     {
@@ -234,16 +190,17 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print (
-            std::basic_ostream<CharT, Traits> &os, std::size_t iter = 0,
-            char sepchar = ' ', char eolchar = '\n') const
+            std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
+        if (this->dim() == 0 || size_ == 0 || !os.good())
+            return os;
+
         const StateMatrix<Order, Dim, T> *sptr =
             static_cast<const StateMatrix<Order, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i) {
-            os << iter << sepchar;
             for (std::size_t d = 0; d != this->dim() - 1; ++d)
                 os << sptr->state(i, d) << sepchar;
-            os << sptr->state(i, this->dim() - 1) << eolchar;
+            os << sptr->state(i, this->dim() - 1) << '\n';
         }
 
         return os;
@@ -253,23 +210,11 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     friend inline std::basic_ostream<CharT, Traits> &operator<< (
             std::basic_ostream<CharT, Traits> &os,
             const StateMatrixBase<Order, Dim, T> &smatrix)
-    {
-        if (os.good())
-            smatrix.print(os);
-
-        return os;
-    }
+    {return smatrix.print(os);}
 
     protected :
 
     explicit StateMatrixBase (size_type N) : size_(N), data_(N * Dim) {}
-
-    void copy_particle (size_type from, size_type to)
-    {
-        copy_particle_dispatch(from, to, cxx11::integral_constant<bool,
-                (Dim * sizeof(T) >= 64 || Dim == Dynamic) &&
-                Order == RowMajor>());
-    }
 
     private :
 
@@ -277,32 +222,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     typename cxx11::conditional<cxx11::is_arithmetic<T>::value,
              std::vector<T, AlignedAllocator<T> >,
              std::vector<T> >::type data_;
-
-
-    void copy_particle_dispatch (size_type from, size_type to,
-            cxx11::true_type)
-    {
-        if (from == to)
-            return;
-
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        T *to_ptr = &sptr->state(to, 0);
-        T *from_ptr = &sptr->state(from, 0);
-        std::copy(to_ptr, to_ptr + this->dim(), from_ptr);
-    }
-
-    void copy_particle_dispatch (size_type from, size_type to,
-            cxx11::false_type)
-    {
-        if (from == to)
-            return;
-
-        StateMatrix<Order, Dim, T> *sptr =
-            static_cast<StateMatrix<Order, Dim, T> *>(this);
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            sptr->state(to, d) = sptr->state(from, d);
-    }
 }; // class StateMatrixBase
 
 /// \brief Particle::value_type subtype
@@ -314,6 +233,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     typedef StateMatrixBase<RowMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
+    typedef typename state_matrix_base_type::state_pack_type state_pack_type;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
 
@@ -344,6 +264,48 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     const T *row_data (size_type id) const
     {return this->data() + id * this->dim();}
+
+    template <typename IntType>
+    void copy (size_type N, const IntType *copy_from)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
+
+        for (size_type to = 0; to != N; ++to)
+            copy_particle(copy_from[to], to);
+    }
+
+    state_pack_type state_pack (size_type id) const
+    {return state_pack_type(row_data(id), row_data(id +1));}
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim());
+
+        const T *ptr = &pack[0];
+        std::copy(ptr, ptr + this->dim(), row_data(id));
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES && VSMC_HAS_CXX11LIB_ALGORITHM
+    void state_unpack (size_type id, state_pack_type &&pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim());
+
+        const T *ptr = &pack[0];
+        std::move(ptr, ptr + this->dim(), row_data(id));
+    }
+#endif
+
+    protected :
+
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        std::copy(row_data(from), row_data(from + 1), row_data(to));
+    }
 }; // class StateMatrix
 
 /// \brief Particle::value_type subtype
@@ -355,6 +317,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     typedef StateMatrixBase<ColMajor, Dim, T> state_matrix_base_type;
     typedef typename state_matrix_base_type::size_type size_type;
+    typedef typename state_matrix_base_type::state_pack_type state_pack_type;
 
     explicit StateMatrix (size_type N) : state_matrix_base_type(N) {}
 
@@ -385,6 +348,56 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     const T *col_data (std::size_t pos) const
     {return this->data() + pos * this->size();}
+
+    template <typename IntType>
+    void copy (size_type N, const IntType *copy_from)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
+
+        for (size_type to = 0; to != N; ++to)
+            copy_particle(copy_from[to], to);
+    }
+
+    state_pack_type state_pack (size_type id) const
+    {
+        state_pack_type pack;
+        pack.reserve(this->dim());
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            pack.push_back(state(id, d));
+
+        return pack;
+    }
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim());
+
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            state(id, d) = pack[d];
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    void state_unpack (size_type id, state_pack_type &&pack)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+                pack.size(), this->dim());
+
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            state(id, d) = cxx11::move(pack[d]);
+    }
+#endif
+
+    protected :
+
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            state(to, d) = state(from, d);
+    }
 }; // class StateMatrix
 
 } // namespace vsmc

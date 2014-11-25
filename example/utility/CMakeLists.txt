@@ -45,11 +45,7 @@ ADD_EXECUTABLE (utility_cstring_memset
     ${PROJECT_SOURCE_DIR}/src/utility_cstring_memset.cpp)
 ADD_EXECUTABLE (utility_cstring_memcpy
     ${PROJECT_SOURCE_DIR}/src/utility_cstring_memcpy.cpp)
-ADD_EXECUTABLE (utility_cstring_memmove
-    ${PROJECT_SOURCE_DIR}/src/utility_cstring_memmove.cpp)
 TARGET_LINK_LIBRARIES (utility_cstring_memset  ${VSMC_LINK_LIBRARIES})
 TARGET_LINK_LIBRARIES (utility_cstring_memcpy  ${VSMC_LINK_LIBRARIES})
-TARGET_LINK_LIBRARIES (utility_cstring_memmove ${VSMC_LINK_LIBRARIES})
 ADD_DEPENDENCIES (utility utility_cstring_memset)
 ADD_DEPENDENCIES (utility utility_cstring_memcpy)
-ADD_DEPENDENCIES (utility utility_cstring_memmove)

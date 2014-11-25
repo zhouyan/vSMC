@@ -49,27 +49,31 @@ inline void cv_do (vsmc::ResampleScheme res, char **argv,
 #if VSMC_HAS_HDF5
     sampler.initialize(argv[1]);
     vsmc::hdf5store(sampler.particle().value(),
-            argv[2] + name + ".trace.hdf5", "Trace.0");
+            argv[2] + name + ".trace.h5", "Trace.0");
     for (std::size_t i = 0; i != DataNum - 1; ++i) {
         std::stringstream ss;
         ss << "Trace." << (i + 1);
         sampler.iterate();
         vsmc::hdf5store(sampler.particle().value(),
-                argv[2] + name + ".trace.hdf5", ss.str(), true);
+                argv[2] + name + ".trace.h5", ss.str(), true);
     }
 #else
     sampler.initialize(argv[1]);
     sampler.iterate(DataNum - 1);
 #endif
 
-    std::string est_file_name(argv[2] + name + ".txt");
+    std::string est_file_name(argv[2] + name + ".tsv");
     std::ofstream est_file;
     est_file.open(est_file_name.c_str());
     est_file << sampler << std::endl;
     est_file.close();
+    est_file_name = argv[2] + name + ".trace.tsv";
+    est_file.open(est_file_name.c_str());
+    est_file << sampler.particle().value() << std::endl;
+    est_file.close();
 
 #if VSMC_HAS_HDF5
-    vsmc::hdf5store(sampler, argv[2] + name + ".hdf5", "Sampler");
+    vsmc::hdf5store(sampler, argv[2] + name + ".h5", "Sampler");
 #endif
 }
 

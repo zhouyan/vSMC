@@ -282,40 +282,22 @@ class StopWatchSYS
     }
 
     double nanoseconds () const
-    {
-        return static_cast<double>(elapsed_sec_) * 1e9 +
-            static_cast<double>(elapsed_nsec_);
-    }
+    {return elapsed_sec_ * 1e9 + elapsed_nsec_;}
 
     double microseconds () const
-    {
-        return static_cast<double>(elapsed_sec_) * 1e6 +
-            static_cast<double>(elapsed_nsec_) * 1e-3;
-    }
+    {return elapsed_sec_ * 1e6 + elapsed_nsec_ * 1e-3;}
 
     double milliseconds () const
-    {
-        return static_cast<double>(elapsed_sec_) * 1e3 +
-            static_cast<double>(elapsed_nsec_) * 1e-6;
-    }
+    {return elapsed_sec_ * 1e3 + elapsed_nsec_ * 1e-6;}
 
     double seconds () const
-    {
-        return static_cast<double>(elapsed_sec_) +
-            static_cast<double>(elapsed_nsec_) * 1e-9;
-    }
+    {return elapsed_sec_ + elapsed_nsec_ * 1e-9;}
 
     double minutes () const
-    {
-        return static_cast<double>(elapsed_sec_) / 60.0 +
-            static_cast<double>(elapsed_nsec_) * 1e-9 / 60.0;
-    }
+    {return seconds() / 60;}
 
     double hours () const
-    {
-        return static_cast<double>(elapsed_sec_) / 3600.0 +
-            static_cast<double>(elapsed_nsec_) * 1e-9 / 3600.0;
-    }
+    {return seconds() / 3600;}
 
     private :
 
@@ -377,40 +359,22 @@ class StopWatchSYS
     }
 
     double nanoseconds () const
-    {
-        return static_cast<double>(elapsed_.tv_sec) * 1e9 +
-            static_cast<double>(elapsed_.tv_nsec);
-    }
+    {return elapsed_.tv_sec * 1e9 + elapsed_.tv_nsec;}
 
     double microseconds () const
-    {
-        return static_cast<double>(elapsed_.tv_sec) * 1e6 +
-            static_cast<double>(elapsed_.tv_nsec) * 1e-3;
-    }
+    {return elapsed_.tv_sec * 1e6 + elapsed_.tv_nsec * 1e-3;}
 
     double milliseconds () const
-    {
-        return static_cast<double>(elapsed_.tv_sec) * 1e3 +
-            static_cast<double>(elapsed_.tv_nsec) * 1e-6;
-    }
+    {return elapsed_.tv_sec * 1e3 + elapsed_.tv_nsec * 1e-6;}
 
     double seconds () const
-    {
-        return static_cast<double>(elapsed_.tv_sec) +
-            static_cast<double>(elapsed_.tv_nsec) * 1e-9;
-    }
+    {return elapsed_.tv_sec + elapsed_.tv_nsec * 1e-9;}
 
     double minutes () const
-    {
-        return static_cast<double>(elapsed_.tv_sec) / 60.0 +
-            static_cast<double>(elapsed_.tv_nsec) * 1e-9 / 60.0;
-    }
+    {return seconds() / 60;}
 
     double hours () const
-    {
-        return static_cast<double>(elapsed_.tv_sec) / 3600.0 +
-            static_cast<double>(elapsed_.tv_nsec) * 1e-9 / 3600.0;
-    }
+    {return seconds() / 3600;}
 
     private :
 
@@ -464,33 +428,33 @@ class StopWatchSYS
         elapsed_ = 0;
         LARGE_INTEGER freq;
         ::QueryPerformanceFrequency(&freq);
-        frequency_ = static_cast<double>(freq.QuadPart);
+        frequency_ = freq.QuadPart;
         running_ = false;
     }
 
     double nanoseconds () const
-    {return static_cast<double>(elapsed_) / frequency_ * 1e9;}
+    {return elapsed_ / (frequency_ * 1e-9);}
 
     double microseconds () const
-    {return static_cast<double>(elapsed_) / frequency_ * 1e6;}
+    {return elapsed_ / (frequency_ * 1e-6);}
 
     double milliseconds () const
-    {return static_cast<double>(elapsed_) / frequency_ * 1e3;}
+    {return elapsed_ / (frequency_ * 1e-3);}
 
     double seconds () const
-    {return static_cast<double>(elapsed_) / frequency_;}
+    {return elapsed_ / static_cast<double>(frequency_);}
 
     double minutes () const
-    {return static_cast<double>(elapsed_) / frequency_ / 60.0;}
+    {return seconds() / 60;}
 
     double hours () const
-    {return static_cast<double>(elapsed_) / frequency_ / 3600.0;}
+    {return seconds() / 3600;}
 
     private :
 
     __int64 elapsed_;
     __int64 start_time_;
-    double frequency_;
+    __int64 frequency_;
     bool running_;
 }; // class StopWatchSYS
 

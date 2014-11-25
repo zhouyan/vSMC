@@ -252,8 +252,7 @@ class CLManager
         std::vector<CLType> buffer(num);
         command_queue_.finish();
         command_queue_.enqueueReadBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, static_cast<void *>(&buffer[0]),
-                events, event);
+                sizeof(CLType) * num, &buffer[0], events, event);
 
         for (std::size_t i = 0; i != num; ++i, ++first)
             *first = buffer[i];
@@ -273,8 +272,7 @@ class CLManager
 
         command_queue_.finish();
         command_queue_.enqueueReadBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, static_cast<void *>(first),
-                events, event);
+                sizeof(CLType) * num, first, events, event);
 
         return first + num;
     }
@@ -294,8 +292,7 @@ class CLManager
             buffer[i] = *first;
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, static_cast<void *>(&buffer[0]),
-                events, event);
+                sizeof(CLType) * num, &buffer[0], events, event);
 
         return first;
     }
@@ -312,8 +309,7 @@ class CLManager
 
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num,
-                static_cast<void *>(const_cast<CLType *>(first)),
+                sizeof(CLType) * num, const_cast<CLType *>(first),
                 events, event);
 
         return first + num;
@@ -331,8 +327,7 @@ class CLManager
 
         command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, static_cast<void *>(first),
-                events, event);
+                sizeof(CLType) * num, first, events, event);
 
         return first + num;
     }
