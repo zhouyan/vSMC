@@ -202,13 +202,17 @@ if (!exists("Bench.OCL")) {
 
 ##############################################################################
 
-Scale.X    <- scale_x_log10     (breaks = 10^(1:50),   labels = math_format()(1:50))
-Scale.Y.10 <- scale_y_log10     (breaks = 10^(-10:10), labels = math_format()(-10:10))
-Scale.Y.2  <- scale_y_continuous(breaks = 2^(-10:10),  labels = math_format(2^.x)(-10:10),
-                                 trans = log2_trans())
+Scale.X <- scale_x_log10(breaks = 10^(1:50),
+    labels = math_format()(1:50))
+Scale.Y.10 <- scale_y_log10(breaks = 10^(-10:10),
+    labels = math_format()(-10:10))
+Scale.Y.2 <- scale_y_continuous(breaks = 2^(-10:10),
+    labels = math_format(2^.x)(-10:10), trans = log2_trans())
 
 Lab <- xlab("Number of particles")
-Theme <- theme_bw() + theme(legend.position = "top", legend.direction = "horizontal")
+Theme <- theme_bw(base_size = 24)
+Theme <- Theme + theme(
+    legend.position = "top", legend.direction = "horizontal")
 Guides <- guides(color = guide_legend(ncol = 6))
 
 ##############################################################################
@@ -218,7 +222,8 @@ Create.List <- function(particle.number, implementation,
 {
     Time.All <- numeric()
     for (i in 1:nrepeat) {
-        Time.All <- cbind(Time.All, read.table(paste(timefile, i, sep = "."), header = TRUE)$Time)
+        Time.All <- cbind(Time.All,
+            read.table(paste(timefile, i, sep = "."), header = TRUE)$Time)
     }
 
     Time <- numeric()
@@ -388,7 +393,8 @@ Run.Benchmark <- function (particle.number, name, implementation, nrepeat = 1)
             cat("Done ... ", Time.Step, " sec\n", sep = "")
         }
 
-        file.rename("time.implementation", paste("time.implementation", name, sep = "."))
+        file.rename("time.implementation",
+            paste("time.implementation", name, sep = "."))
     }
 }
 
@@ -470,11 +476,13 @@ Save.List <- function (benchmark.list, suffix = "")
     if (length(smp.list) > 0) {
         save(smp.list, file = File.Name("smp", "perf", "RData", suffix))
 
-        pdf(File.Name("smp", "time", "pdf", suffix), width = 10, height = 6)
+        pdf(File.Name("smp", "time", "pdf", suffix),
+            width = 28.8, height = 18)
         print(smp.list$Time.Plot)
         GC <- dev.off()
 
-        pdf(File.Name("smp", "speedup", "pdf", suffix), width = 10, height = 6)
+        pdf(File.Name("smp", "speedup", "pdf", suffix),
+            width = 28.8, height = 18)
         print(smp.list$Speedup.Plot)
         GC <- dev.off()
     }
@@ -482,11 +490,13 @@ Save.List <- function (benchmark.list, suffix = "")
     if (length(ocl.list) > 0) {
         save(ocl.list, file = File.Name("ocl", "perf", "RData", suffix))
 
-        pdf(File.Name("ocl", "time", "pdf", suffix), width = 10, height = 6)
+        pdf(File.Name("ocl", "time", "pdf", suffix),
+            width = 28.8, height = 18)
         print(ocl.list$Time.Plot)
         GC <- dev.off()
 
-        pdf(File.Name("ocl", "speedup", "pdf", suffix), width = 10, height = 6)
+        pdf(File.Name("ocl", "speedup", "pdf", suffix),
+            width = 28.8, height = 18)
         print(ocl.list$Speedup.Plot)
         GC <- dev.off()
     }
@@ -519,11 +529,11 @@ if (!interactive() || Force.Run.Benchmark) {
     Save.List(Benchmark.Running.List, "running")
     Save.List(Benchmark.Elapsed.List, "elapsed")
 
-    pdf("Benchmark.Running.pdf", width = 20, height = 12)
+    pdf("Benchmark.Running.pdf", width = 28.8, height = 18)
     Print.Benchmark.List(Benchmark.Running.List)
     GC <- dev.off()
 
-    pdf("Benchmark.Elapsed.pdf", width = 20, height = 12)
+    pdf("Benchmark.Elapsed.pdf", width = 28.8, height = 18)
     Print.Benchmark.List(Benchmark.Elapsed.List)
     GC <- dev.off()
 
