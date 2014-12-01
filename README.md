@@ -39,10 +39,9 @@ documentations when things do not work exactly the same way as in the tutorial.
 
 # Examples
 
-[Examples][vSMCExample] are now hosted separately. To get and build them,
+Examples are in the `example` subdirectory, to build them,
 ~~~sh
 cd /path_to_vSMC_source
-git clone https://github.com/zhouyan/vSMCExample.git
 mkdir build
 cd build
 cmake ..
