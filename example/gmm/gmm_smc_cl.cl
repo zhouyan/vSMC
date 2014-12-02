@@ -124,8 +124,9 @@ void gmm_init (__global gmm_param *state, __global ulong *accept,
         param.weight[d] = weight_host[d * Size + id];
     }
 
+    barrier(CLK_LOCAL_MEM_FENCE);
     async_work_group_copy(obs, dat, DataNum, 0);
-    mem_fence(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, 0, mu0, sd0, shape0, scale0);
     state[id] = param;
     accept[id] = 0;
@@ -175,8 +176,9 @@ void gmm_move_mu (ulong iter,
     for (uint d = 0; d != CompNum; ++d)
         param.mu[d] += NORMAL01_4x32_RAND(&rnorm, &rng) * sd;
 
+    barrier(CLK_LOCAL_MEM_FENCE);
     async_work_group_copy(obs, dat, DataNum, 0);
-    mem_fence(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
     fp_type p = param.log_target - log_target_old;
     fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
@@ -225,8 +227,9 @@ void gmm_move_lambda (ulong iter,
     for (uint d = 0; d != CompNum; ++d)
         param.lambda[d] *= exp(NORMAL01_4x32_RAND(&rnorm, &rng) * sd);
 
+    barrier(CLK_LOCAL_MEM_FENCE);
     async_work_group_copy(obs, dat, DataNum, 0);
-    mem_fence(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
     fp_type p = param.log_target - log_target_old;
     for (uint d = 0; d != CompNum; ++d)
@@ -307,8 +310,9 @@ void gmm_move_weight (ulong iter,
     sum_llw -= CompNum * log(sum_lw);
     fp_type lp_old = sum_llw;
 
+    barrier(CLK_LOCAL_MEM_FENCE);
     async_work_group_copy(obs, dat, DataNum, 0);
-    mem_fence(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
     fp_type p = param.log_target - log_target_old + lp - lp_old;
     fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
