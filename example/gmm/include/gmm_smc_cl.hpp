@@ -543,7 +543,7 @@ template <typename FPType>
 inline void gmm_do_smc (std::size_t particle_num, std::size_t iter_num,
         std::size_t data_num, const std::string &data_file, double threshold,
         const std::string &vsmc_inc_path, const std::string &r123_inc_path,
-        std::size_t local_size,
+        const std::string &build_option, std::size_t local_size,
         std::size_t sm, std::size_t cm, std::size_t repeat)
 {
     if (iter_num < 1)
@@ -569,6 +569,7 @@ inline void gmm_do_smc (std::size_t particle_num, std::size_t iter_num,
     std::string opt;
     opt += " -I " + vsmc_inc_path;
     opt += " -I " + r123_inc_path;
+    opt += " " + build_option;
 
     data_info info(data_num, data_file.c_str());
     std::ofstream save_file;

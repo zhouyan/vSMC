@@ -34,6 +34,7 @@ std::string R123IncPath;
 std::string PlatformName;
 std::string DeviceType;
 std::string DeviceVendorName;
+std::string BuildOption;
 std::size_t LocalSize;
 std::size_t FPTypeBits;
 std::size_t ParticleNum;
@@ -62,5 +63,7 @@ Config
         &DeviceVendorName, "vSMCOpenCLDefault")
 .add("cl_fp_type_bits",  "Bits of OpenCL fp type (32: float; 64: double)",
         &FPTypeBits, 32)
-.add("threshold",     "Threshold for resampling, only used by SMC",
+.add("cl_build_option", "Additional build options for OpenCL",
+        &BuildOption, "")
+.add("threshold", "Threshold for resampling, only used by SMC",
         &Threshold, 0.5);

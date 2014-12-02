@@ -175,6 +175,21 @@ OCL.Vendor.Name <- c(
     nvidia.gpu.32 = "NVIDIA",
     nvidia.gpu.64 = "NVIDIA")
 
+OCL.Option.Name <- c(
+    amd.cpu       = "-cl-fast-relaxed-math",
+    amd.gpu.32    = "-cl-fast-relaxed-math",
+    amd.gpu.64    = "-cl-fast-relaxed-math",
+    apple.cpu     = "-cl-fast-relaxed-math",
+    apple.gpu.32  = "-cl-fast-relaxed-math",
+    apple.gpu.64  = "-cl-fast-relaxed-math",
+    apple.igpu.32 = "-cl-fast-relaxed-math",
+    apple.igpu.64 = "-cl-fast-relaxed-math",
+    intel.cpu     = "-cl-fast-relaxed-math",
+    intel.gpu.32  = "-cl-fast-relaxed-math",
+    intel.gpu.64  = "-cl-fast-relaxed-math",
+    nvidia.gpu.32 = "",
+    nvidia.gpu.64 = "")
+
 if (!exists("Bench.SMP")) {
     Bench.SMP <- character()
     for (exe in names(SMP.Name)) {
@@ -364,6 +379,8 @@ Run.Benchmark <- function (particle.number, name, implementation, nrepeat = 1)
                                     OCL.Vendor.Name[exe],
                                     " --cl_fp_type_bits ",
                                     OCL.Bits.Name[exe],
+                                    " --cl_build_option ",
+                                    OCL.Option.Name[exe],
                                     " ", redirect, sep = ""),
                                 intern = TRUE, ignore.stdout = TRUE))[3])
                 }

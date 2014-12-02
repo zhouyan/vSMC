@@ -404,7 +404,7 @@ class CLManager
     /// \note This function relies on StopWatch to work correctly.
     template <typename Func>
     std::size_t profile_kernel (::cl::Kernel &kern, std::size_t N,
-            const Func &func, std::size_t lmin = 0, std::size_t repeat = 3)
+            const Func &func, std::size_t lmin = 0, std::size_t repeat = 10)
     {
         cl::size_t<3> reqd_size;
         try {
