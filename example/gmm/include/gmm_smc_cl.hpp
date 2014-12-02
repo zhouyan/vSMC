@@ -480,6 +480,8 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
         std::cout << "Host size allocated for each gmm_param\t\t\t"
             << sampler.particle().value().state_size() << std::endl;
         std::cout << std::string(78, '-') << std::endl;
+        vsmc::CLQuery::info(std::cout, sampler.particle().value().program());
+        std::cout << std::string(78, '-') << std::endl;
         vsmc::CLQuery::info(std::cout, sampler.particle().value().program(),
                 "gmm_init");
         std::cout << std::string(78, '-') << std::endl;
