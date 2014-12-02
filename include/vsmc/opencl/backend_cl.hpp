@@ -467,14 +467,14 @@ class InitializeCL
     virtual void pre_processor (Particle<T> &) {}
     virtual void post_processor (Particle<T> &) {}
 
-    void set_kernel (const Particle<T> &particle)
+    virtual void set_kernel (const Particle<T> &particle)
     {
         std::string kname;
         initialize_state(kname);
         VSMC_DEFINE_OPENCL_SET_KERNEL;
     }
 
-    void set_kernel_args (const Particle<T> &particle)
+    virtual void set_kernel_args (const Particle<T> &particle)
     {
         accept_host_.resize(particle.size());
         accept_buffer_.resize(particle.size());
@@ -546,14 +546,15 @@ class MoveCL
     virtual void pre_processor (std::size_t, Particle<T> &) {}
     virtual void post_processor (std::size_t, Particle<T> &) {}
 
-    void set_kernel (std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
         move_state(iter, kname);
         VSMC_DEFINE_OPENCL_SET_KERNEL;
     }
 
-    void set_kernel_args (std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel_args (std::size_t iter,
+            const Particle<T> &particle)
     {
         accept_host_.resize(particle.size());
         accept_buffer_.resize(particle.size());
@@ -623,7 +624,7 @@ class MonitorEvalCL
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
-    void set_kernel (std::size_t iter, std::size_t,
+    virtual void set_kernel (std::size_t iter, std::size_t,
             const Particle<T> &particle)
     {
         std::string kname;
@@ -631,7 +632,7 @@ class MonitorEvalCL
         VSMC_DEFINE_OPENCL_SET_KERNEL;
     }
 
-    void set_kernel_args (std::size_t iter, std::size_t dim,
+    virtual void set_kernel_args (std::size_t iter, std::size_t dim,
             const Particle<T> &particle)
     {
         buffer_.resize(particle.size() * dim);
@@ -704,14 +705,15 @@ class PathEvalCL
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
-    void set_kernel (std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
         path_state(iter, kname);
         VSMC_DEFINE_OPENCL_SET_KERNEL;
     }
 
-    void set_kernel_args (std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel_args (std::size_t iter,
+            const Particle<T> &particle)
     {
         buffer_.resize(particle.size());
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
