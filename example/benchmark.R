@@ -51,7 +51,7 @@ Process.Args("--pnum_smp_hi", "Particle.Number.SMP.Hi")
 Process.Args("--pnum_ocl_lo", "Particle.Number.OCL.Lo")
 Process.Args("--pnum_ocl_hi", "Particle.Number.OCL.Hi")
 
-if (!exists("N.Repeat")) N.Repeat <- 1
+if (!exists("N.Repeat")) N.Repeat <- 3
 if (!exists("Particle.Number.SMP.Lo")) Particle.Number.SMP.Lo <- 3
 if (!exists("Particle.Number.SMP.Hi")) Particle.Number.SMP.Hi <- 14
 if (!exists("Particle.Number.OCL.Lo")) Particle.Number.OCL.Lo <- 9
