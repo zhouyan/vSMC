@@ -70,22 +70,6 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
             create_buffer<struct r123array4x32>(N);
     }
 
-    ~gmm_state ()
-    {
-        if (watch_.nanoseconds() > 100) {
-            std::cout << "Time kernel copy:\t\t"
-                << watch_.seconds() << std::endl;
-        }
-    }
-
-    template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
-    {
-        watch_.start();
-        base::copy(N, copy_from);
-        watch_.stop();
-    }
-
     const cl::Buffer &obs () const {return obs_;}
     const cl::Buffer &counter () const {return counter_;}
 
@@ -174,8 +158,6 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
     fp_type mu_sd_;
     fp_type lambda_sd_;
     fp_type weight_sd_;
-
-    vsmc::StopWatch watch_;
 };
 
 template <typename FPType>
@@ -262,14 +244,6 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
 
     gmm_move_smc (std::size_t iter_num) : iter_num_(iter_num) {}
 
-    ~gmm_move_smc ()
-    {
-        if (watch_.nanoseconds() > 100) {
-            std::cout << "Time kernel gmm_move_smc\t"
-                << watch_.seconds() << std::endl;
-        }
-    }
-
     void move_state (std::size_t, std::string &kernel_name)
     {kernel_name = std::string("gmm_move_smc");}
 
@@ -299,15 +273,12 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
         vsmc::cl_set_kernel_args(this->kernel(),
                 this->kernel_args_offset(), inc_weight_device_,
                 static_cast<FPType>(state.alpha_inc()));
-        watch_.start();
     }
 
     void post_processor (std::size_t,
             vsmc::Particle<gmm_state<FPType> > &particle)
     {
         using std::exp;
-
-        watch_.stop();
 
         gmm_state<FPType> &state = particle.value();
         state.manager().template read_buffer<FPType>(
@@ -336,7 +307,6 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
     std::vector<double> weight_;
     std::vector<double> inc_weight_;
     std::vector<double> exp_weight_;
-    vsmc::StopWatch watch_;
 };
 
 template <typename Move, typename FPType>
@@ -361,14 +331,6 @@ class gmm_move_mu : public vsmc::MoveCL<gmm_state<FPType> >
     gmm_move_mu (std::size_t local_size) :
         profiled_(false), local_size_(local_size) {}
 
-    ~gmm_move_mu ()
-    {
-        if (watch_.nanoseconds() > 100) {
-            std::cout << "Time kernel gmm_move_mu\t\t"
-                << watch_.seconds() << std::endl;
-        }
-    }
-
     void move_state (std::size_t, std::string &kernel_name)
     {kernel_name = std::string("gmm_move_mu");}
 
@@ -388,18 +350,12 @@ class gmm_move_mu : public vsmc::MoveCL<gmm_state<FPType> >
 
         if (local_size_ != 0)
             this->configure().local_size(local_size_);
-
-        watch_.start();
     }
-
-    void post_processor (std::size_t, vsmc::Particle<gmm_state<FPType> > &)
-    {watch_.stop();}
 
     private :
 
     bool profiled_;
     std::size_t local_size_;
-    vsmc::StopWatch watch_;
 };
 
 template <typename FPType>
@@ -409,14 +365,6 @@ class gmm_move_lambda : public vsmc::MoveCL<gmm_state<FPType> >
 
     gmm_move_lambda (std::size_t local_size) :
         profiled_(false), local_size_(local_size) {}
-
-    ~gmm_move_lambda ()
-    {
-        if (watch_.nanoseconds() > 100) {
-            std::cout << "Time kernel gmm_move_lambda\t"
-                << watch_.seconds() << std::endl;
-        }
-    }
 
     void move_state (std::size_t, std::string &kernel_name)
     {kernel_name = std::string("gmm_move_lambda");}
@@ -437,18 +385,12 @@ class gmm_move_lambda : public vsmc::MoveCL<gmm_state<FPType> >
 
         if (local_size_ != 0)
             this->configure().local_size(local_size_);
-
-        watch_.start();
     }
-
-    void post_processor (std::size_t, vsmc::Particle<gmm_state<FPType> > &)
-    {watch_.stop();}
 
     private :
 
     bool profiled_;
     std::size_t local_size_;
-    vsmc::StopWatch watch_;
 };
 
 template <typename FPType>
@@ -458,14 +400,6 @@ class gmm_move_weight : public vsmc::MoveCL<gmm_state<FPType> >
 
     gmm_move_weight (std::size_t local_size) :
         profiled_(false), local_size_(local_size) {}
-
-    ~gmm_move_weight ()
-    {
-        if (watch_.nanoseconds() > 100) {
-            std::cout << "Time kernel gmm_move_weight\t"
-                << watch_.seconds() << std::endl;
-        }
-    }
 
     void move_state (std::size_t, std::string &kernel_name)
     {kernel_name = std::string("gmm_move_weight");}
@@ -486,18 +420,12 @@ class gmm_move_weight : public vsmc::MoveCL<gmm_state<FPType> >
 
         if (local_size_ != 0)
             this->configure().local_size(local_size_);
-
-        watch_.start();
     }
-
-    void post_processor (std::size_t, vsmc::Particle<gmm_state<FPType> > &)
-    {watch_.stop();}
 
     private :
 
     bool profiled_;
     std::size_t local_size_;
-    vsmc::StopWatch watch_;
 };
 
 template <typename FPType>
@@ -507,30 +435,12 @@ class gmm_path : public vsmc::PathEvalCL<gmm_state<FPType> >
 
     gmm_path () {}
 
-    ~gmm_path ()
-    {
-        if (watch_.nanoseconds() > 100) {
-            std::cout << "Time kernel gmm_path\t\t"
-                << watch_.seconds() << std::endl;
-        }
-    }
-
     void path_state (std::size_t, std::string &kernel_name)
     {kernel_name = std::string("gmm_path_state");}
 
     double path_grid (std::size_t,
             const vsmc::Particle<gmm_state<FPType> > &particle)
     {return particle.value().alpha();}
-
-    void pre_processor (std::size_t,
-            const vsmc::Particle<gmm_state<FPType> > &) {watch_.start();}
-
-    void post_processor (std::size_t,
-            const vsmc::Particle<gmm_state<FPType> > &) {watch_.stop();}
-
-    private :
-
-    vsmc::StopWatch watch_;
 };
 
 template <typename FPType>
@@ -565,45 +475,17 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
             sampler.iterate();
         watch.stop();
 
-        cl::Kernel kern_size =
-            sampler.particle().value().create_kernel("query_size");
-        cl::Buffer buff_size =
-            sampler.particle().value().manager().template
-            create_buffer<cl_uint>(3);
-        kern_size.setArg(0, buff_size);
-        sampler.particle().value().manager().run_kernel(kern_size, 1, 0);
-        std::vector<cl_uint> ans(3);
-        sampler.particle().value().manager().template read_buffer<cl_uint>(
-                buff_size, 3, ans.begin());
-
         // log(2 pi) / 2 * data_num;
         const double ll_const = -0.9189385332046727 * info.data_num;
-        std::cout << std::string(78, '=') << std::endl;
-        std::cout << "Model order\t\t\t\t\t\t"
+        std::cout << std::string(78, '-') << std::endl;
+        std::cout << "Model order\t\t\t\t\t"
             << model_num << std::endl;
-        std::cout << "Log normalizing constant estimate standard\t\t"
+        std::cout << "Log normalizing constant estimate standard\t"
             << std::fixed << sampler.particle().value().zconst() + ll_const
             << std::endl;
-        std::cout << "Log normalizing constant estimate path sampling\t\t"
+        std::cout << "Log normalizing constant estimate path sampling\t"
             << std::fixed << sampler.path_sampling() + ll_const << std::endl;
-        std::cout << std::string(78, '-') << std::endl;
-        std::cout << "Device size of gmm_param\t\t\t\t"
-            << ans[0] << std::endl;
-        std::cout << "Device size of an array of gmm_param of size "
-            << ans[1] << "\t\t" << ans[2] << std::endl;
-        std::cout << "Host size allocated for each gmm_param\t\t\t"
-            << sampler.particle().value().state_size() << std::endl;
-        std::cout << std::string(78, '-') << std::endl;
-        vsmc::CLQuery::info(std::cout, sampler.particle().value().program(),
-                "gmm_move_mu");
-        std::cout << std::string(78, '-') << std::endl;
-        vsmc::CLQuery::info(std::cout, sampler.particle().value().program(),
-                "gmm_move_lambda");
-        std::cout << std::string(78, '-') << std::endl;
-        vsmc::CLQuery::info(std::cout, sampler.particle().value().program(),
-                "gmm_move_weight");
-        std::cout << std::string(78, '-') << std::endl;
-        std::fprintf(stderr, "time.model.order.%u\t\t%f\n",
+        std::fprintf(stderr, "time.model.order.%u\t\t\t\t%f\n",
                 static_cast<unsigned>(model_num), watch.seconds());
         std::cout << std::string(78, '=') << std::endl;
     }
@@ -622,14 +504,15 @@ inline void gmm_do_smc (std::size_t particle_num, std::size_t iter_num,
     vsmc::Sampler<gmm_state<FPType> > sampler(
             particle_num, vsmc::Stratified, threshold);
 
-    std::cout << std::string(78, '=') << std::endl;
     std::string name;
+    std::cout << std::string(78, '=') << std::endl;
     gmm_state<FPType>::manager_type::instance().platform().getInfo(
             static_cast<cl_device_info>(CL_PLATFORM_NAME), &name);
     std::cout << "Using platform\t" << name << std::endl;
     gmm_state<FPType>::manager_type::instance().device().getInfo(
             static_cast<cl_device_info>(CL_DEVICE_NAME), &name);
-    std::cout << "Using device\t" << name << std::endl;
+    std::cout << "Using Device\t" << name << std::endl;
+    std::cout << std::string(78, '=') << std::endl;
 
     std::ifstream src_file("gmm_smc_cl.cl");
     std::string src((std::istreambuf_iterator<char>(src_file)),

@@ -89,17 +89,6 @@ VSMC_STATIC_INLINE fp_type log_target (gmm_param *pparam,
 }
 
 __kernel
-void query_size (__global uint *sizes)
-{
-    if (!get_global_id(0)) {
-        gmm_param gmm_param_array[2];
-        sizes[0] = sizeof(gmm_param);
-        sizes[1] = 2;
-        sizes[2] = sizeof(gmm_param_array);
-    }
-}
-
-__kernel
 void gmm_init (__global gmm_param *state, __global ulong *accept,
         __global const fp_type *lambda_host,
         __global const fp_type *weight_host,
