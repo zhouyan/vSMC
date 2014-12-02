@@ -379,6 +379,27 @@ class StateCL
 
     const ConfigureCL &configure_copy () const {return configure_copy_;}
 
+    /// \brief Used by InitializeCL and MoveCL to compute acceptance count
+    ///
+    /// \details
+    /// The default implementation copy the buffer to host and use CPU to
+    /// compute the accumulation. This overhead is likely to be acceptale if
+    /// kernels are non-trivial. And it is also very likely to be much faster
+    /// than naive implemented reduction on device side. If more optimized
+    /// implementation (usually they require insights of the specific
+    /// platforms) is available, one can consider to override this function.
+    virtual std::size_t accept_count (
+            const CLBuffer<cl_ulong, ID> &accept_buffer)
+    {
+        accept_host_.resize(accept_buffer.size());
+        manager().read_buffer(
+                accept_buffer.data(), accept_buffer.size(), &accept_host_[0]);
+
+        return static_cast<std::size_t>(std::accumulate(
+                    accept_host_.begin(), accept_host_.end(),
+                    static_cast<cl_ulong>(0)));
+    }
+
     private :
 
     std::size_t state_size_;
@@ -395,6 +416,8 @@ class StateCL
 
     CLBuffer<char, ID> state_buffer_;
     CLBuffer<size_type, ID> copy_from_buffer_;
+
+    std::vector<cl_ulong> accept_host_;
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype using OpenCL
@@ -453,13 +476,8 @@ class InitializeCL
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         post_processor(particle);
-        particle.value().manager().template read_buffer<cl_ulong>(
-                accept_buffer_.data(), particle.size(), &accept_host_[0]);
-        cl_ulong acc = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
-            acc += accept_host_[i];
 
-        return acc;
+        return particle.value().accept_count(accept_buffer_);
     }
 
     virtual void initialize_param (Particle<T> &, void *) {}
@@ -476,7 +494,6 @@ class InitializeCL
 
     virtual void set_kernel_args (const Particle<T> &particle)
     {
-        accept_host_.resize(particle.size());
         accept_buffer_.resize(particle.size());
         cl_set_kernel_args(kernel_, 0,
                 particle.value().state_buffer().data(), accept_buffer_.data());
@@ -492,7 +509,6 @@ class InitializeCL
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    std::vector<cl_ulong> accept_host_;
     CLBuffer<cl_ulong, typename T::id> accept_buffer_;
 }; // class InitializeCL
 
@@ -533,13 +549,8 @@ class MoveCL
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         post_processor(iter, particle);
-        particle.value().manager().template read_buffer<cl_ulong>(
-                accept_buffer_.data(), particle.size(), &accept_host_[0]);
-        cl_ulong acc = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
-            acc += accept_host_[i];
 
-        return acc;
+        return particle.value().accept_count(accept_buffer_);
     }
 
     virtual void move_state (std::size_t, std::string &) {}
@@ -556,7 +567,6 @@ class MoveCL
     virtual void set_kernel_args (std::size_t iter,
             const Particle<T> &particle)
     {
-        accept_host_.resize(particle.size());
         accept_buffer_.resize(particle.size());
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 particle.value().state_buffer().data(), accept_buffer_.data());
@@ -572,7 +582,6 @@ class MoveCL
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    std::vector<cl_ulong> accept_host_;
     CLBuffer<cl_ulong, typename T::id> accept_buffer_;
 }; // class MoveCL
 
