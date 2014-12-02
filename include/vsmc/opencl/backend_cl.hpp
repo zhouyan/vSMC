@@ -131,13 +131,17 @@ const ::cl::Kernel &kernel () const {return kernel_;}                        \
 const std::string &kernel_name () const {return kernel_name_;}
 
 #define VSMC_DEFINE_OPENCL_SET_KERNEL \
+if (kname.empty()) {                                                         \
+    kernel_name_.clear();                                                    \
+    return;                                                                  \
+}                                                                            \
 if (build_id_ != particle.value().build_id() || kernel_name_ != kname) {     \
     build_id_ = particle.value().build_id();                                 \
     kernel_name_ = kname;                                                    \
     kernel_ = particle.value().create_kernel(kernel_name_);                  \
     configure_.local_size(particle.size(),                                   \
             kernel_, particle.value().manager().device());                   \
-}
+}                                                                            \
 
 #define VSMC_DEFINE_OPENCL_MEMBER_DATA \
 ConfigureCL configure_;                                                      \
@@ -439,12 +443,13 @@ class InitializeCL
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, InitializeCL);
 
-        if (!set_kernel(particle))
+        set_kernel(particle);
+        if (kernel_name_.empty())
             return 0;
 
+        set_kernel_args(particle);
         initialize_param(particle, param);
         pre_processor(particle);
-        set_kernel_args(particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         post_processor(particle);
@@ -462,16 +467,11 @@ class InitializeCL
     virtual void pre_processor (Particle<T> &) {}
     virtual void post_processor (Particle<T> &) {}
 
-    bool set_kernel (const Particle<T> &particle)
+    void set_kernel (const Particle<T> &particle)
     {
         std::string kname;
         initialize_state(kname);
-        if (kname.size() == 0)
-            return false;
-
         VSMC_DEFINE_OPENCL_SET_KERNEL;
-
-        return true;
     }
 
     void set_kernel_args (const Particle<T> &particle)
@@ -524,11 +524,12 @@ class MoveCL
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, MoveCL);
 
-        if (!set_kernel(iter, particle))
+        set_kernel(iter, particle);
+        if (kernel_name_.empty())
             return 0;
 
-        pre_processor(iter, particle);
         set_kernel_args(iter, particle);
+        pre_processor(iter, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         post_processor(iter, particle);
@@ -545,16 +546,11 @@ class MoveCL
     virtual void pre_processor (std::size_t, Particle<T> &) {}
     virtual void post_processor (std::size_t, Particle<T> &) {}
 
-    bool set_kernel (std::size_t iter, const Particle<T> &particle)
+    void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
         move_state(iter, kname);
-        if (kname.size() == 0)
-            return false;
-
         VSMC_DEFINE_OPENCL_SET_KERNEL;
-
-        return true;
     }
 
     void set_kernel_args (std::size_t iter, const Particle<T> &particle)
@@ -609,11 +605,12 @@ class MonitorEvalCL
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, MonitorEvalCL);
 
-        if (!set_kernel(iter, dim, particle))
+        set_kernel(iter, dim, particle);
+        if (kernel_name_.empty())
             return;
 
-        pre_processor(iter, particle);
         set_kernel_args(iter, dim, particle);
+        pre_processor(iter, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template
@@ -626,17 +623,12 @@ class MonitorEvalCL
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
-    bool set_kernel (std::size_t iter, std::size_t,
+    void set_kernel (std::size_t iter, std::size_t,
             const Particle<T> &particle)
     {
         std::string kname;
         monitor_state(iter, kname);
-        if (kname.size() == 0)
-            return false;
-
         VSMC_DEFINE_OPENCL_SET_KERNEL;
-
-        return true;
     }
 
     void set_kernel_args (std::size_t iter, std::size_t dim,
@@ -691,11 +683,12 @@ class PathEvalCL
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, PathEvalCL);
 
-        if (!set_kernel(iter, particle))
+        set_kernel(iter, particle);
+        if (kernel_name_.empty())
             return 0;
 
-        pre_processor(iter, particle);
         set_kernel_args(iter, particle);
+        pre_processor(iter, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template
@@ -711,16 +704,11 @@ class PathEvalCL
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
-    bool set_kernel (std::size_t iter, const Particle<T> &particle)
+    void set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
         path_state(iter, kname);
-        if (kname.size() == 0)
-            return false;
-
         VSMC_DEFINE_OPENCL_SET_KERNEL;
-
-        return true;
     }
 
     void set_kernel_args (std::size_t iter, const Particle<T> &particle)
