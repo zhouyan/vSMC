@@ -50,7 +50,7 @@ class CLBuffer
     public :
 
     typedef T value_type;
-    typedef std::size_t size_type;
+    typedef cl_ulong size_type;
     typedef CLManager<ID> manager_type;
 
     CLBuffer () : size_(0) {}
