@@ -72,6 +72,7 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
     const cl::Buffer &obs () const {return obs_;}
     const cl::Buffer &counter () const {return counter_;}
 
+    std::size_t obs_num () const {return obs_num_;}
     std::size_t comp_num () const {return comp_num_;}
     fp_type alpha () const {return alpha_;}
     fp_type alpha_inc () const {return alpha_inc_;}
@@ -98,6 +99,7 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
         std::ifstream data;
         data.open(info->file_name);
         std::vector<fp_type> obs(info->data_num);
+        obs_num_ = obs.size();
         for (std::size_t i = 0; i != obs.size(); ++i)
             data >> obs[i];
         obs_ = this->manager().template
@@ -141,6 +143,7 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
     cl::Buffer obs_;
     cl::Buffer counter_;
 
+    std::size_t obs_num_;
     std::size_t comp_num_;
     fp_type alpha_;
     fp_type alpha_inc_;
@@ -221,6 +224,7 @@ class gmm_init : public vsmc::InitializeCL<gmm_state<FPType> >
         vsmc::cl_set_kernel_args(this->kernel(),
                 this->kernel_args_offset(),
                 lambda_init_, weight_init_, state.obs(),
+                cl::Local(sizeof(FPType) * state.obs_num()),
                 static_cast<FPType>(state.mu0()),
                 static_cast<FPType>(state.sd0()),
                 static_cast<FPType>(state.shape0()),
@@ -320,6 +324,7 @@ class gmm_move_mu : public vsmc::MoveCL<gmm_state<FPType> >
         gmm_state<FPType> &state = particle.value();
         vsmc::cl_set_kernel_args(this->kernel(),
                 this->kernel_args_offset(), state.obs(),
+                cl::Local(sizeof(FPType) * state.obs_num()),
                 static_cast<FPType>(state.alpha()),
                 static_cast<FPType>(state.mu_sd()),
                 static_cast<FPType>(state.mu0()),
@@ -344,6 +349,7 @@ class gmm_move_lambda : public vsmc::MoveCL<gmm_state<FPType> >
         gmm_state<FPType> &state = particle.value();
         vsmc::cl_set_kernel_args(this->kernel(),
                 this->kernel_args_offset(), state.obs(),
+                cl::Local(sizeof(FPType) * state.obs_num()),
                 static_cast<FPType>(state.alpha()),
                 static_cast<FPType>(state.lambda_sd()),
                 static_cast<FPType>(state.mu0()),
@@ -368,6 +374,7 @@ class gmm_move_weight : public vsmc::MoveCL<gmm_state<FPType> >
         gmm_state<FPType> &state = particle.value();
         vsmc::cl_set_kernel_args(this->kernel(),
                 this->kernel_args_offset(), state.obs(),
+                cl::Local(sizeof(FPType) * state.obs_num()),
                 static_cast<FPType>(state.alpha()),
                 static_cast<FPType>(state.weight_sd()),
                 static_cast<FPType>(state.mu0()),

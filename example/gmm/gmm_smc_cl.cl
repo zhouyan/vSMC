@@ -103,7 +103,7 @@ __kernel
 void gmm_init (__global gmm_param *state, __global ulong *accept,
         __global const fp_type *lambda_host,
         __global const fp_type *weight_host,
-        __global const fp_type *dat,
+        __global const fp_type *dat, __local fp_type *obs,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
@@ -124,7 +124,6 @@ void gmm_init (__global gmm_param *state, __global ulong *accept,
         param.weight[d] = weight_host[d * Size + id];
     }
 
-    __local fp_type obs[DataNum];
     async_work_group_copy(obs, dat, DataNum, 0);
     mem_fence(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, 0, mu0, sd0, shape0, scale0);
@@ -149,7 +148,8 @@ void gmm_move_smc (ulong iter,
 __kernel
 void gmm_move_mu (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat, fp_type alpha, fp_type sd,
+        __global const fp_type *dat, __local fp_type *obs,
+        fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
@@ -175,7 +175,6 @@ void gmm_move_mu (ulong iter,
     for (uint d = 0; d != CompNum; ++d)
         param.mu[d] += NORMAL01_4x32_RAND(&rnorm, &rng) * sd;
 
-    __local fp_type obs[DataNum];
     async_work_group_copy(obs, dat, DataNum, 0);
     mem_fence(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
@@ -199,7 +198,8 @@ void gmm_move_mu (ulong iter,
 __kernel
 void gmm_move_lambda (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat, fp_type alpha, fp_type sd,
+        __global const fp_type *dat, __local fp_type *obs,
+        fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
@@ -225,7 +225,6 @@ void gmm_move_lambda (ulong iter,
     for (uint d = 0; d != CompNum; ++d)
         param.lambda[d] *= exp(NORMAL01_4x32_RAND(&rnorm, &rng) * sd);
 
-    __local fp_type obs[DataNum];
     async_work_group_copy(obs, dat, DataNum, 0);
     mem_fence(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
@@ -251,7 +250,8 @@ void gmm_move_lambda (ulong iter,
 __kernel
 void gmm_move_weight (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat, fp_type alpha, fp_type sd,
+        __global const fp_type *dat, __local fp_type *obs,
+        fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
@@ -307,7 +307,6 @@ void gmm_move_weight (ulong iter,
     sum_llw -= CompNum * log(sum_lw);
     fp_type lp_old = sum_llw;
 
-    __local fp_type obs[DataNum];
     async_work_group_copy(obs, dat, DataNum, 0);
     mem_fence(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);

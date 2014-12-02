@@ -437,7 +437,7 @@ template <SIMD>
 inline void memcpy_0 (void *dst, const void *src, std::size_t n)
 {
     if (n != 0)
-        std::memmove(dst, src, n);
+        std::memcpy(dst, src, n);
 }
 
 template <SIMD, std::size_t, bool, bool>
