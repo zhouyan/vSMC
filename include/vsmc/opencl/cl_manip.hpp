@@ -109,10 +109,10 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
         return global_size - N;
     }
 
-    local_size = factor;
+    local_size = lmax;
     global_size = cl_min_global_size(N, local_size);
     std::size_t diff_size = global_size - N;
-    for (std::size_t m = 1; m <= mmax; ++m) {
+    for (std::size_t m = mmax; m >= 1; --m) {
         std::size_t l = m * factor;
         std::size_t g = cl_min_global_size(N, l);
         std::size_t d = g - N;
