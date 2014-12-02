@@ -34,6 +34,8 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_setup.hpp>
+#include <vsmc/opencl/cl_manip.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
     VSMC_RUNTIME_ASSERT((setup()),                                           \
@@ -377,6 +379,65 @@ class CLManager
                 get_global_nd_range(N, local_size),
                 get_local_nd_range(local_size), events, event);
         command_queue_.finish();
+    }
+
+    /// \brief Run the kernel with all local size that are multiples of the
+    /// preferred factor, return the local size that is the fatest.
+    ///
+    /// \note This function relies on StopWatch to work correctly.
+    template <typename Func>
+    std::size_t profile_kernel (::cl::Kernel &kern, std::size_t N,
+            const Func &func, std::size_t repeat = 3)
+    {
+        cl::size_t<3> reqd_size;
+        try {
+            kern.getWorkGroupInfo(device_,
+                    CL_KERNEL_COMPILE_WORK_GROUP_SIZE, &reqd_size);
+        } catch (::cl::Error) {
+            reqd_size[0] = 0;
+        }
+
+        if (reqd_size[0] != 0)
+            return reqd_size[0];
+
+        std::size_t factor;
+        std::size_t lmax;
+        std::size_t mmax;
+        cl_minmax_local_size(kern, device_, factor, lmax, mmax);
+        if (lmax == 0)
+            return 0;
+
+        double time = std::numeric_limits<double>::max VSMC_MNE ();
+        std::size_t lsize = lmax;
+        vsmc::StopWatch watch;
+        Func f(func);
+        for (std::size_t m = mmax; m >= 1; --m) {
+            std::size_t l = m * factor;
+            f(kern);
+            run_kernel(kern, N, l);
+            watch.reset();
+            watch.start();
+            for (std::size_t r = 0; r != repeat; ++r) {
+                f(kern);
+                run_kernel(kern, N, l);
+            }
+            watch.stop();
+            if (time > watch.milliseconds()) {
+                time = watch.milliseconds();
+                lsize = l;
+            }
+        }
+
+        return lsize;
+    }
+
+    std::size_t profile_kernel (::cl::Kernel &kern, std::size_t N,
+            std::size_t repeat = 3)
+    {
+        struct Func {void operator() (::cl::Kernel &) const {}}
+        Func func;
+
+        return profile_kernel(kern, N, func, repeat);
     }
 
     private :

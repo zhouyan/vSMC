@@ -103,10 +103,15 @@ __kernel
 void gmm_init (__global gmm_param *state, __global ulong *accept,
         __global const fp_type *lambda_host,
         __global const fp_type *weight_host,
-        __global const fp_type *dat, __local fp_type *obs,
+        __global const fp_type *dat,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
+    __local fp_type obs[DataNum];
+    barrier(CLK_LOCAL_MEM_FENCE);
+    async_work_group_copy(obs, dat, DataNum, 0);
+    barrier(CLK_LOCAL_MEM_FENCE);
+
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
@@ -123,10 +128,6 @@ void gmm_init (__global gmm_param *state, __global ulong *accept,
         param.lambda[d] = lambda_host[d * Size + id];
         param.weight[d] = weight_host[d * Size + id];
     }
-
-    barrier(CLK_LOCAL_MEM_FENCE);
-    async_work_group_copy(obs, dat, DataNum, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, 0, mu0, sd0, shape0, scale0);
     state[id] = param;
     accept[id] = 0;
@@ -149,11 +150,16 @@ void gmm_move_smc (ulong iter,
 __kernel
 void gmm_move_mu (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat, __local fp_type *obs,
+        __global const fp_type *dat,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
+    __local fp_type obs[DataNum];
+    barrier(CLK_LOCAL_MEM_FENCE);
+    async_work_group_copy(obs, dat, DataNum, 0);
+    barrier(CLK_LOCAL_MEM_FENCE);
+
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
@@ -175,10 +181,6 @@ void gmm_move_mu (ulong iter,
 
     for (uint d = 0; d != CompNum; ++d)
         param.mu[d] += NORMAL01_4x32_RAND(&rnorm, &rng) * sd;
-
-    barrier(CLK_LOCAL_MEM_FENCE);
-    async_work_group_copy(obs, dat, DataNum, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
     fp_type p = param.log_target - log_target_old;
     fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
@@ -200,11 +202,16 @@ void gmm_move_mu (ulong iter,
 __kernel
 void gmm_move_lambda (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat, __local fp_type *obs,
+        __global const fp_type *dat,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
+    __local fp_type obs[DataNum];
+    barrier(CLK_LOCAL_MEM_FENCE);
+    async_work_group_copy(obs, dat, DataNum, 0);
+    barrier(CLK_LOCAL_MEM_FENCE);
+
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
@@ -226,10 +233,6 @@ void gmm_move_lambda (ulong iter,
 
     for (uint d = 0; d != CompNum; ++d)
         param.lambda[d] *= exp(NORMAL01_4x32_RAND(&rnorm, &rng) * sd);
-
-    barrier(CLK_LOCAL_MEM_FENCE);
-    async_work_group_copy(obs, dat, DataNum, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
     fp_type p = param.log_target - log_target_old;
     for (uint d = 0; d != CompNum; ++d)
@@ -253,11 +256,16 @@ void gmm_move_lambda (ulong iter,
 __kernel
 void gmm_move_weight (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat, __local fp_type *obs,
+        __global const fp_type *dat,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
+    __local fp_type obs[DataNum];
+    barrier(CLK_LOCAL_MEM_FENCE);
+    async_work_group_copy(obs, dat, DataNum, 0);
+    barrier(CLK_LOCAL_MEM_FENCE);
+
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
@@ -309,10 +317,6 @@ void gmm_move_weight (ulong iter,
     }
     sum_llw -= CompNum * log(sum_lw);
     fp_type lp_old = sum_llw;
-
-    barrier(CLK_LOCAL_MEM_FENCE);
-    async_work_group_copy(obs, dat, DataNum, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
     fp_type p = param.log_target - log_target_old + lp - lp_old;
     fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
