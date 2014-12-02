@@ -127,7 +127,8 @@ Name<T, PlaceHolder> &operator= (Name<T, PlaceHolder> &&other)               \
 ConfigureCL &configure () {return configure_;}                               \
 const ConfigureCL &configure () const {return configure_;}                   \
 ::cl::Kernel &kernel () {return kernel_;}                                    \
-const ::cl::Kernel &kernel () const {return kernel_;}
+const ::cl::Kernel &kernel () const {return kernel_;}                        \
+const std::string &kernel_name () const {return kernel_name_;}
 
 #define VSMC_DEFINE_OPENCL_SET_KERNEL \
 if (build_id_ != particle.value().build_id() || kernel_name_ != kname) {     \
@@ -443,6 +444,7 @@ class InitializeCL
 
         initialize_param(particle, param);
         pre_processor(particle);
+        set_kernel_args(particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         post_processor(particle);
@@ -460,12 +462,6 @@ class InitializeCL
     virtual void pre_processor (Particle<T> &) {}
     virtual void post_processor (Particle<T> &) {}
 
-    protected :
-
-    VSMC_DEFINE_OPENCL_COPY(InitializeCL)
-    VSMC_DEFINE_OPENCL_MOVE(InitializeCL)
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
-
     bool set_kernel (const Particle<T> &particle)
     {
         std::string kname;
@@ -474,13 +470,24 @@ class InitializeCL
             return false;
 
         VSMC_DEFINE_OPENCL_SET_KERNEL;
+
+        return true;
+    }
+
+    void set_kernel_args (const Particle<T> &particle)
+    {
         accept_host_.resize(particle.size());
         accept_buffer_.resize(particle.size());
         cl_set_kernel_args(kernel_, 0,
                 particle.value().state_buffer().data(), accept_buffer_.data());
-
-        return true;
     }
+
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+
+    protected :
+
+    VSMC_DEFINE_OPENCL_COPY(InitializeCL)
+    VSMC_DEFINE_OPENCL_MOVE(InitializeCL)
 
     private :
 
@@ -521,6 +528,7 @@ class MoveCL
             return 0;
 
         pre_processor(iter, particle);
+        set_kernel_args(iter, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         post_processor(iter, particle);
@@ -537,12 +545,6 @@ class MoveCL
     virtual void pre_processor (std::size_t, Particle<T> &) {}
     virtual void post_processor (std::size_t, Particle<T> &) {}
 
-    protected :
-
-    VSMC_DEFINE_OPENCL_COPY(MoveCL)
-    VSMC_DEFINE_OPENCL_MOVE(MoveCL)
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
-
     bool set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
@@ -551,13 +553,24 @@ class MoveCL
             return false;
 
         VSMC_DEFINE_OPENCL_SET_KERNEL;
+
+        return true;
+    }
+
+    void set_kernel_args (std::size_t iter, const Particle<T> &particle)
+    {
         accept_host_.resize(particle.size());
         accept_buffer_.resize(particle.size());
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 particle.value().state_buffer().data(), accept_buffer_.data());
-
-        return true;
     }
+
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+
+    protected :
+
+    VSMC_DEFINE_OPENCL_COPY(MoveCL)
+    VSMC_DEFINE_OPENCL_MOVE(MoveCL)
 
     private :
 
@@ -600,6 +613,7 @@ class MonitorEvalCL
             return;
 
         pre_processor(iter, particle);
+        set_kernel_args(iter, dim, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template
@@ -612,13 +626,7 @@ class MonitorEvalCL
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
-    protected :
-
-    VSMC_DEFINE_OPENCL_COPY(MonitorEvalCL)
-    VSMC_DEFINE_OPENCL_MOVE(MonitorEvalCL)
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
-
-    bool set_kernel (std::size_t iter, std::size_t dim,
+    bool set_kernel (std::size_t iter, std::size_t,
             const Particle<T> &particle)
     {
         std::string kname;
@@ -627,13 +635,25 @@ class MonitorEvalCL
             return false;
 
         VSMC_DEFINE_OPENCL_SET_KERNEL;
+
+        return true;
+    }
+
+    void set_kernel_args (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle)
+    {
         buffer_.resize(particle.size() * dim);
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 static_cast<cl_ulong>(dim),
                 particle.value().state_buffer().data(), buffer_.data());
-
-        return true;
     }
+
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+
+    protected :
+
+    VSMC_DEFINE_OPENCL_COPY(MonitorEvalCL)
+    VSMC_DEFINE_OPENCL_MOVE(MonitorEvalCL)
 
     private :
 
@@ -675,6 +695,7 @@ class PathEvalCL
             return 0;
 
         pre_processor(iter, particle);
+        set_kernel_args(iter, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template
@@ -690,12 +711,6 @@ class PathEvalCL
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
-    protected :
-
-    VSMC_DEFINE_OPENCL_COPY(PathEvalCL)
-    VSMC_DEFINE_OPENCL_MOVE(PathEvalCL)
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
-
     bool set_kernel (std::size_t iter, const Particle<T> &particle)
     {
         std::string kname;
@@ -704,12 +719,23 @@ class PathEvalCL
             return false;
 
         VSMC_DEFINE_OPENCL_SET_KERNEL;
-        buffer_.resize(particle.size());
-        cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
-                particle.value().state_buffer().data(), buffer_.data());
 
         return true;
     }
+
+    void set_kernel_args (std::size_t iter, const Particle<T> &particle)
+    {
+        buffer_.resize(particle.size());
+        cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
+                particle.value().state_buffer().data(), buffer_.data());
+    }
+
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+
+    protected :
+
+    VSMC_DEFINE_OPENCL_COPY(PathEvalCL)
+    VSMC_DEFINE_OPENCL_MOVE(PathEvalCL)
 
     private :
 
