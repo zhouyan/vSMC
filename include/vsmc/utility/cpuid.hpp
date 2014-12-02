@@ -533,8 +533,12 @@ class CPUID
 
     /// \brief Get CPU feature using CPUID
     template <typename CharT, typename Traits>
-    static void info (std::basic_ostream<CharT, Traits> &os)
+    static std::basic_ostream<CharT, Traits> &info (
+            std::basic_ostream<CharT, Traits> &os)
     {
+        if (!os.good())
+            return os;
+
         print_equal(os);
         os << "Vendor ID                  " << vendor() << '\n';
         if (max_eax_ext() >= ext0_ + 4U)
@@ -553,6 +557,8 @@ class CPUID
         print_equal(os);
         print_feature(os);
         print_equal(os);
+
+        return os;
     }
 
     /// \brief Get the CPUID information stored in EAX, EBX, ECX and EDX, given
@@ -1053,7 +1059,7 @@ class CPUID
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const CPUID &)
-{CPUID::info(os); return os;}
+{return CPUID::info(os);} 
 
 } // namespace vsmc
 

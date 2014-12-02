@@ -45,21 +45,30 @@ class CLQuery
 
     /// \brief Query all information
     template <typename CharT, typename Traits>
-    static void info (std::basic_ostream<CharT, Traits> &os)
+    static std::basic_ostream<CharT, Traits> &info (
+            std::basic_ostream<CharT, Traits> &os)
     {
+        if (!os.good())
+            return os;
+
         std::vector< ::cl::Platform> platform;
         ::cl::Platform::get(&platform);
         for (std::vector< ::cl::Platform>::const_iterator p = platform.begin();
                 p != platform.end(); ++p)
             info(os, *p);
         print_equal(os);
+
+        return os;
     }
 
     /// \brief Query platform information
     template <typename CharT, typename Traits>
-    static void info (std::basic_ostream<CharT, Traits> &os,
-            const ::cl::Platform &plat)
+    static std::basic_ostream<CharT, Traits> &info (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Platform &plat)
     {
+        if (!os.good())
+            return os;
+
         print_equal(os);
 
         print_info_val<std::string, cl_platform_info>(os, plat,
@@ -78,13 +87,18 @@ class CLQuery
         for (std::vector< ::cl::Device>::const_iterator d = device.begin();
                 d != device.end(); ++d)
             info(os, *d);
+
+        return os;
     }
 
     /// \brief Query device information
     template <typename CharT, typename Traits>
-    static void info (std::basic_ostream<CharT, Traits> &os,
-            const ::cl::Device &dev)
+    static std::basic_ostream<CharT, Traits> &info (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
+        if (!os.good())
+            return os;
+
         print_dash(os);
 
         print_info_val<std::string, cl_device_info>(os, dev,
@@ -203,36 +217,51 @@ class CLQuery
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF");
 #endif // VSMC_OPENCL_VERSION >= 110
+
+        return os;
     }
 
     /// \brief Query context information
     template <typename CharT, typename Traits>
-    static void info (std::basic_ostream<CharT, Traits> &os,
-            const ::cl::Context &ctx)
+    static std::basic_ostream<CharT, Traits> &info (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Context &ctx)
     {
+        if (!os.good())
+            return os;
+
         std::vector< ::cl::Device> device;
         ctx.getInfo(static_cast<cl_context_info>(CL_CONTEXT_DEVICES), &device);
         for (std::vector< ::cl::Device>::const_iterator d = device.begin();
                 d != device.end(); ++d)
             info(os, *d);
+
+        return os;
     }
 
     /// \brief Query program informaiton
     template <typename CharT, typename Traits>
-    static void info (std::basic_ostream<CharT, Traits> &os,
-            const ::cl::Program &prog)
+    static std::basic_ostream<CharT, Traits> &info (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Program &prog)
     {
+        if (!os.good())
+            return os;
+
         print_info_val<cl_uint, cl_program_info>(os, prog,
                 CL_PROGRAM_NUM_DEVICES, "CL_PROGRAM_NUM_DEVICES");
         print_info_val<std::size_t, cl_program_info>(os, prog,
                 CL_PROGRAM_BINARY_SIZES, "CL_PROGRAM_BINARY_SIZES", "byte");
+
+        return os;
     }
 
     /// \brief Query kernel information
     template <typename CharT, typename Traits>
-    static void info (std::basic_ostream<CharT, Traits> &os,
-            const ::cl::Kernel &kern)
+    static std::basic_ostream<CharT, Traits> &info (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Kernel &kern)
     {
+        if (!os.good())
+            return os;
+
         ::cl::Context ctx;
         kern.getInfo(static_cast<cl_kernel_info>(CL_KERNEL_CONTEXT), &ctx);
         std::vector< ::cl::Device> device;
@@ -261,6 +290,24 @@ class CLQuery
                     CL_KERNEL_PRIVATE_MEM_SIZE,
                     "CL_KERNEL_PRIVATE_MEM_SIZE", "byte");
         }
+
+        return os;
+    }
+
+    /// \brief Query kernel information given a program the name of kernel and
+    /// a program
+    template <typename CharT, typename Traits>
+    static std::basic_ostream<CharT, Traits> &info (
+            std::basic_ostream<CharT, Traits> &os,
+            const ::cl::Program &prog, const std::string &kname)
+    {
+        if (!os.good())
+            return os;
+
+        ::cl::Kernel kern(prog, kname.c_str());
+        info(os, kern);
+
+        return os;
     }
 
     private :
@@ -417,7 +464,7 @@ class CLQuery
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const CLQuery &)
-{CLQuery::info(os); return os;}
+{return CLQuery::info(os);}
 
 } // namespace vsmc
 
@@ -428,35 +475,35 @@ namespace cl {
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Platform &plat)
-{vsmc::CLQuery::info(os, plat); return os;}
+{return vsmc::CLQuery::info(os, plat);}
 
 /// \brief Query device information in a given context
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Context &ctx)
-{vsmc::CLQuery::info(os, ctx); return os;}
+{return vsmc::CLQuery::info(os, ctx);}
 
 /// \brief Query device information
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Device &dev)
-{vsmc::CLQuery::info(os, dev); return os;}
+{return vsmc::CLQuery::info(os, dev);}
 
 /// \brief Query program information
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Program &prog)
-{vsmc::CLQuery::info(os, prog); return os;}
+{return vsmc::CLQuery::info(os, prog);}
 
 /// \brief Query kernel information
 /// \ingroup OpenCL
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const Kernel &kern)
-{vsmc::CLQuery::info(os, kern); return os;}
+{return vsmc::CLQuery::info(os, kern);}
 
 } // namespace cl
 
