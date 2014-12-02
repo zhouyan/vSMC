@@ -53,10 +53,12 @@ int main (int argc, char **argv)
 
     if (FPTypeBits == 32) {
         gmm_do_smc<cl_float>(ParticleNum, IterNum, DataNum, DataFile,
-                Threshold, vSMCIncPath, R123IncPath, SM, CM, Repeat);
+                Threshold, vSMCIncPath, R123IncPath, LocalSize,
+                SM, CM, Repeat);
     } else if (FPTypeBits == 64) {
         gmm_do_smc<cl_double>(ParticleNum, IterNum, DataNum, DataFile,
-                Threshold, vSMCIncPath, R123IncPath, SM, CM, Repeat);
+                Threshold, vSMCIncPath, R123IncPath, LocalSize,
+                SM, CM, Repeat);
     } else {
         std::fprintf(stderr, "cl_type_bits has to be 32 or 64\n");
         return -1;
