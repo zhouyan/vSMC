@@ -681,7 +681,7 @@ class Sampler
 
         std::size_t offset = 0;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            os << sepchar << resampled_history_[iter];
+            os << resampled_history_[iter];
             for (std::size_t i = 0; i != var_num; ++i)
                 os << sepchar << data[offset++];
             os << '\n';
