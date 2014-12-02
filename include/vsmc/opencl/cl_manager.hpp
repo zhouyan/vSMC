@@ -384,10 +384,27 @@ class CLManager
     /// \brief Run the kernel with all local size that are multiples of the
     /// preferred factor, return the local size that is the fatest.
     ///
+    /// \param kern The kernel to be profiled
+    /// \param N The global size
+    /// \param func A functor that has the following signature,
+    /// ~~~{.cpp}
+    /// void func (::cl::Kernel &kern)
+    /// ~~~
+    /// It will be applied to `kern` before it is run each time
+    /// \param lmin The minimum local size to be considered. This function will
+    /// consider all local sizes that are a multiple of this value. If `lmin =
+    /// 0` (the default), then the preferred multiplier queried from the device
+    /// is used. If its value is bigger than the allowed maximum local size,
+    /// then it is treated as if it is set to zero.
+    /// \param repeat The number of repeatition of runs. The profiling is done
+    /// by run the kernel once to heat it up, and then repeat runs for this
+    /// given value. The time of the later is measured and compared for each
+    /// considered local size.
+    ///
     /// \note This function relies on StopWatch to work correctly.
     template <typename Func>
     std::size_t profile_kernel (::cl::Kernel &kern, std::size_t N,
-            const Func &func, std::size_t repeat = 3)
+            const Func &func, std::size_t lmin = 0, std::size_t repeat = 3)
     {
         cl::size_t<3> reqd_size;
         try {
@@ -406,6 +423,12 @@ class CLManager
         cl_minmax_local_size(kern, device_, factor, lmax, mmax);
         if (lmax == 0)
             return 0;
+
+        if (lmin != 0 && lmin <= lmax) {
+            factor = lmin;
+            mmax = lmax / factor;
+            lmax = mmax * factor;
+        }
 
         double time = std::numeric_limits<double>::max VSMC_MNE ();
         std::size_t lsize = lmax;
@@ -432,12 +455,12 @@ class CLManager
     }
 
     std::size_t profile_kernel (::cl::Kernel &kern, std::size_t N,
-            std::size_t repeat = 3)
+            std::size_t lmin = 0, std::size_t repeat = 3)
     {
         struct Func {void operator() (::cl::Kernel &) const {}}
         Func func;
 
-        return profile_kernel(kern, N, func, repeat);
+        return profile_kernel(kern, N, func, lmin, repeat);
     }
 
     private :
