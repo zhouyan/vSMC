@@ -309,35 +309,18 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
 };
 
 template <typename Move, typename FPType>
-class gmm_move_set_args
+inline void gmm_move_set_args (Move *move, const gmm_state<FPType> &state,
+        FPType sd)
 {
-    public :
-
-    gmm_move_set_args (std::size_t iter,
-            const vsmc::Particle<gmm_state<FPType> > &particle,
-            Move &move, FPType sd) :
-    iter_(iter), particle_(particle), move_(move), sd_(sd) {}
-
-    void operator() (::cl::Kernel &) const
-    {
-        move_.set_kernel_args(iter_, particle_);
-        vsmc::cl_set_kernel_args(move_.kernel(), move_.kernel_args_offset(),
-                particle_.value().obs(),
-                static_cast<FPType>(particle_.value().alpha()), sd_,
-                static_cast<FPType>(particle_.value().mu0()),
-                static_cast<FPType>(particle_.value().sd0()),
-                static_cast<FPType>(particle_.value().shape0()),
-                static_cast<FPType>(particle_.value().scale0()),
-                particle_.value().counter());
-    }
-
-    private :
-
-    std::size_t iter_;
-    const vsmc::Particle<gmm_state<FPType> > &particle_;
-    Move &move_;
-    FPType sd_;
-};
+    vsmc::cl_set_kernel_args(move->kernel(), move->kernel_args_offset(),
+            state.obs(),
+            static_cast<FPType>(state.alpha()), sd,
+            static_cast<FPType>(state.mu0()),
+            static_cast<FPType>(state.sd0()),
+            static_cast<FPType>(state.shape0()),
+            static_cast<FPType>(state.scale0()),
+            state.counter());
+}
 
 template <typename FPType>
 class gmm_move_mu : public vsmc::MoveCL<gmm_state<FPType> >
@@ -350,24 +333,22 @@ class gmm_move_mu : public vsmc::MoveCL<gmm_state<FPType> >
     void move_state (std::size_t, std::string &kernel_name)
     {kernel_name = std::string("gmm_move_mu");}
 
-    void pre_processor (std::size_t iter,
+    void pre_processor (std::size_t,
             vsmc::Particle<gmm_state<FPType> > &particle)
     {
-        gmm_move_set_args<gmm_move_mu<FPType>, FPType> set_args(
-                iter, particle, *this, particle.value().mu_sd());
+        gmm_move_set_args(this, particle.value(),
+                particle.value().mu_sd());
 
         if (!profiled_ && local_size_ == 0) {
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
-                    this->kernel(), particle.size(), set_args);
+                    this->kernel(), particle.size());
             std::cout << "Profiled local size of kernel gmm_move_mu\t"
                 << local_size_ << std::endl;
         }
 
         if (local_size_ != 0)
             this->configure().local_size(local_size_);
-
-        set_args(this->kernel());
     }
 
     private :
@@ -387,24 +368,22 @@ class gmm_move_lambda : public vsmc::MoveCL<gmm_state<FPType> >
     void move_state (std::size_t, std::string &kernel_name)
     {kernel_name = std::string("gmm_move_lambda");}
 
-    void pre_processor (std::size_t iter,
+    void pre_processor (std::size_t,
             vsmc::Particle<gmm_state<FPType> > &particle)
     {
-        gmm_move_set_args<gmm_move_lambda<FPType>, FPType> set_args(
-                iter, particle, *this, particle.value().lambda_sd());
+        gmm_move_set_args(this, particle.value(),
+                particle.value().lambda_sd());
 
         if (!profiled_ && local_size_ == 0) {
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
-                    this->kernel(), particle.size(), set_args);
+                    this->kernel(), particle.size());
             std::cout << "Profiled local size of kernel gmm_move_lambda\t"
                 << local_size_ << std::endl;
         }
 
         if (local_size_ != 0)
             this->configure().local_size(local_size_);
-
-        set_args(this->kernel());
     }
 
     private :
@@ -424,24 +403,22 @@ class gmm_move_weight : public vsmc::MoveCL<gmm_state<FPType> >
     void move_state (std::size_t, std::string &kernel_name)
     {kernel_name = std::string("gmm_move_weight");}
 
-    void pre_processor (std::size_t iter,
+    void pre_processor (std::size_t,
             vsmc::Particle<gmm_state<FPType> > &particle)
     {
-        gmm_move_set_args<gmm_move_weight<FPType>, FPType> set_args(
-                iter, particle, *this, particle.value().weight_sd());
+        gmm_move_set_args(this, particle.value(),
+                particle.value().weight_sd());
 
         if (!profiled_ && local_size_ == 0) {
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
-                    this->kernel(), particle.size(), set_args);
+                    this->kernel(), particle.size());
             std::cout << "Profiled local size of kernel gmm_move_weight\t"
                 << local_size_ << std::endl;
         }
 
         if (local_size_ != 0)
             this->configure().local_size(local_size_);
-
-        set_args(this->kernel());
     }
 
     private :
