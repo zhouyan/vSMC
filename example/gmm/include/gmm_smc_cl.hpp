@@ -359,7 +359,7 @@ class gmm_move_mu : public vsmc::MoveCL<gmm_state<FPType> >
         if (!profiled_ && local_size_ == 0) {
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
-                    this->kernel(), particle.size(), set_args, 0, 10);
+                    this->kernel(), particle.size(), set_args);
             std::cout << "Profiled local size of kernel gmm_move_mu\t"
                 << local_size_ << std::endl;
         }
@@ -396,7 +396,7 @@ class gmm_move_lambda : public vsmc::MoveCL<gmm_state<FPType> >
         if (!profiled_ && local_size_ == 0) {
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
-                    this->kernel(), particle.size(), set_args, 0, 10);
+                    this->kernel(), particle.size(), set_args);
             std::cout << "Profiled local size of kernel gmm_move_lambda\t"
                 << local_size_ << std::endl;
         }
@@ -433,7 +433,7 @@ class gmm_move_weight : public vsmc::MoveCL<gmm_state<FPType> >
         if (!profiled_ && local_size_ == 0) {
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
-                    this->kernel(), particle.size(), set_args, 0, 10);
+                    this->kernel(), particle.size(), set_args);
             std::cout << "Profiled local size of kernel gmm_move_weight\t"
                 << local_size_ << std::endl;
         }
