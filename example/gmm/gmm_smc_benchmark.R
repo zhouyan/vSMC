@@ -198,7 +198,7 @@ Scale.Y.2 <- scale_y_continuous(breaks = 2^(-10:10),
 Lab <- xlab("Number of particles")
 Theme <- theme_bw(base_size = 24) + theme(
     legend.position = "top", legend.direction = "horizontal")
-Guides <- guides(color = guide_legend(ncol = 4))
+Guides <- guides(color = guide_legend(ncol = 3))
 Width  <- 25.6
 Height <- 14.4
 
