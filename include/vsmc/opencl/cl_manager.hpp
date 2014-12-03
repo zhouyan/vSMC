@@ -433,6 +433,9 @@ class CLManager
             lmax = mmax * factor;
         }
 
+        if (mmax < 2)
+            return lmax;
+
         double time = std::numeric_limits<double>::max VSMC_MNE ();
         std::size_t lsize = lmax;
         vsmc::StopWatch watch;
