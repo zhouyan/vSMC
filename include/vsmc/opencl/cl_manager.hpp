@@ -548,6 +548,8 @@ class CLManager
                     }
                 } catch (::cl::Error) {}
             }
+
+            return false;
         }
 
         // Using default platform: finding the first that has the device type
