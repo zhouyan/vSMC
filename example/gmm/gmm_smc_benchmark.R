@@ -81,21 +81,15 @@ SMP.Name <- c(
     std  = "C++11 <thread>")
 
 OCL.Name <- c(
-    amd.cpu        = "AMD CPU",
-    amd.gpu.32     = "AMD GPU (32)",
-    amd.gpu.64     = "AMD GPU (64)",
-    apple.cpu      = "Apple CPU",
-    apple.agpu.32  = "Apple AMD GPU (32)",
-    apple.agpu.64  = "Apple AMD GPU (64)",
-    apple.igpu.32  = "Apple Intel GPU (32)",
-    apple.igpu.64  = "Apple Intel GPU (64)",
-    apple.ngpu.32  = "Apple NVIDIA GPU (32)",
-    apple.ngpu.64  = "Apple NVIDIA GPU (64)",
-    intel.cpu      = "Intel CPU",
-    intel.gpu.32   = "Intel GPU (32)",
-    intel.gpu.64   = "Intel GPU (64)",
-    nvidia.gpu.32  = "NVIDIA GPU (32)",
-    nvidia.gpu.64  = "NVIDIA GPU (64)")
+    amd.cpu    = "AMD CPU",
+    amd.gpu    = "AMD GPU",
+    apple.cpu  = "Apple CPU",
+    apple.agpu = "Apple AMD GPU",
+    apple.igpu = "Apple Intel GPU",
+    apple.ngpu = "Apple NVIDIA GPU",
+    intel.cpu  = "Intel CPU",
+    intel.gpu  = "Intel GPU",
+    nvidia.gpu = "NVIDIA GPU")
 
 Bench.Name <- c(SMP.Name, OCL.Name)
 
@@ -122,22 +116,15 @@ OCL.Option.String <- function (
 ##############################################################################
 
 OCL.Option <- c(
-    amd.cpu   = OCL.Option.String("AMD",   "CPU"),
-    apple.cpu = OCL.Option.String("Apple", "CPU"),
-    intel.cpu = OCL.Option.String("Intel", "CPU"),
-
-    amd.gpu.32     = OCL.Option.String("AMD",    "GPU", "AMD",    32),
-    amd.gpu.64     = OCL.Option.String("AMD",    "GPU", "AMD",    64),
-    apple.agpu.32  = OCL.Option.String("Apple",  "GPU", "AMD",    32),
-    apple.agpu.64  = OCL.Option.String("Apple",  "GPU", "AMD",    64),
-    apple.igpu.32  = OCL.Option.String("Apple",  "GPU", "Intel",  32),
-    apple.igpu.64  = OCL.Option.String("Apple",  "GPU", "Intel",  64),
-    apple.ngpu.32  = OCL.Option.String("Apple",  "GPU", "NVIDIA", 32),
-    apple.ngpu.64  = OCL.Option.String("Apple",  "GPU", "NVIDIA", 64),
-    intel.gpu.32   = OCL.Option.String("Intel",  "GPU", "Intel",  32),
-    intel.gpu.64   = OCL.Option.String("Intel",  "GPU", "Intel",  64),
-    nvidia.gpu.32  = OCL.Option.String("NVIDIA", "GPU", "NVIDIA", 32),
-    nvidia.gpu.64  = OCL.Option.String("NVIDIA", "GPU", "NVIDIA", 64))
+    amd.cpu    = OCL.Option.String("AMD",    "CPU"),
+    apple.cpu  = OCL.Option.String("Apple",  "CPU"),
+    intel.cpu  = OCL.Option.String("Intel",  "CPU"),
+    amd.gpu    = OCL.Option.String("AMD",    "GPU", "AMD",    32),
+    apple.agpu = OCL.Option.String("Apple",  "GPU", "AMD",    32),
+    apple.igpu = OCL.Option.String("Apple",  "GPU", "Intel",  32),
+    apple.ngpu = OCL.Option.String("Apple",  "GPU", "NVIDIA", 32),
+    intel.gpu  = OCL.Option.String("Intel",  "GPU", "Intel",  32),
+    nvidia.gpu = OCL.Option.String("NVIDIA", "GPU", "NVIDIA", 32))
 
 ##############################################################################
 
@@ -205,9 +192,9 @@ Scale.Y.2 <- scale_y_continuous(breaks = 2^(-10:10),
     labels = math_format(2^.x)(-10:10), trans = log2_trans())
 
 Lab <- xlab("Number of particles")
-Theme <- theme_bw(base_size = 24) + theme(
+Theme <- theme_bw(base_size = 18) + theme(
     legend.position = "top", legend.direction = "horizontal")
-Guides <- guides(color = guide_legend(ncol = 3))
+Guides <- guides(color = guide_legend(ncol = 6))
 Width  <- 25.6
 Height <- 14.4
 
