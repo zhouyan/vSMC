@@ -34,8 +34,10 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_buffer.hpp>
+#include <vsmc/opencl/cl_configure.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
+#include <vsmc/opencl/internal/cl_copy.hpp>
 #include <vsmc/rng/seed.hpp>
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim) \
@@ -60,7 +62,8 @@
     VSMC_RUNTIME_ASSERT((state_size >= 1), ("STATE SIZE IS LESS THAN 1"))
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH \
-    VSMC_RUNTIME_ASSERT((N == size_), ("**StateCL::copy** SIZE MISMATCH"))
+    VSMC_RUNTIME_ASSERT((N == copy_.size()),                                 \
+            ("**StateCL::copy** SIZE MISMATCH"))
 
 #if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
 
@@ -124,8 +127,8 @@ Name<T, PlaceHolder> &operator= (Name<T, PlaceHolder> &&other)               \
 #endif // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
 
 #define VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL \
-ConfigureCL &configure () {return configure_;}                               \
-const ConfigureCL &configure () const {return configure_;}                   \
+CLConfigure &configure () {return configure_;}                               \
+const CLConfigure &configure () const {return configure_;}                   \
 ::cl::Kernel &kernel () {return kernel_;}                                    \
 const ::cl::Kernel &kernel () const {return kernel_;}                        \
 const std::string &kernel_name () const {return kernel_name_;}
@@ -144,7 +147,7 @@ if (build_id_ != particle.value().build_id() || kernel_name_ != kname) {     \
 }                                                                            \
 
 #define VSMC_DEFINE_OPENCL_MEMBER_DATA \
-ConfigureCL configure_;                                                      \
+CLConfigure configure_;                                                      \
 int build_id_;                                                               \
 ::cl::Kernel kernel_;                                                        \
 std::string kernel_name_
@@ -196,30 +199,6 @@ struct IsDerivedFromStateCL :
     public cxx11::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
 
 } // namespace vsmc::internal
-
-/// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
-/// \ingroup OpenCL
-class ConfigureCL
-{
-    public :
-
-    ConfigureCL () : local_size_(0) {}
-
-    std::size_t local_size () const {return local_size_;}
-
-    void local_size (std::size_t new_size) {local_size_ = new_size;}
-
-    void local_size (std::size_t N,
-            const ::cl::Kernel &kern, const ::cl::Device &dev)
-    {
-        std::size_t global_size;
-        cl_preferred_work_size(N, kern, dev, global_size, local_size_);
-    }
-
-    private :
-
-    std::size_t local_size_;
-}; // class ConfigureCL
 
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
@@ -283,9 +262,6 @@ class StateCL
     /// #define StateSize 4UL;
     /// #define Seed 101UL;
     /// // The actual seed is vsmc::Seed::instance().get()
-    ///
-    /// #include <vsmc/opencl/internal/device.h>
-    ///
     /// // ... User source, passed by the source argument
     /// ~~~
     /// After build, `vsmc::Seed::instance().skip(N)` is called with `N`
@@ -305,13 +281,6 @@ class StateCL
         ss << "#define Size " << size_ << "UL\n";
         ss << "#define StateSize " << state_size_ << "UL\n";
         ss << "#define Seed " << Seed::instance().get() << "UL\n";
-
-        ss << "typedef struct {\n";
-        for (std::size_t i = 0; i != state_size_; ++i)
-            ss << "char c" << i << ";\n";
-        ss << "} copy_state_struct;\n";
-
-        ss << "#include <vsmc/opencl/internal/device.h>\n";
         ss << source << '\n';
         Seed::instance().skip(static_cast<Seed::skip_type>(size_));
 
@@ -321,14 +290,13 @@ class StateCL
             program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
             program_.getBuildInfo(manager().device(),
                     CL_PROGRAM_BUILD_OPTIONS, &build_options_);
+            copy_.build(size_, state_size_);
             build_ = true;
         } catch (...) {
             manager().print_build_log(program_, os);
+            manager().print_build_log(copy_.program(), os);
             throw;
         }
-
-        kernel_copy_ = create_kernel("copy");
-        configure_copy_.local_size(size_, kernel_copy_, manager().device());
     }
 
     void build (const std::string &source,
@@ -362,22 +330,14 @@ class StateCL
     }
 
     template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
+    void copy (std::size_t N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(copy);
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH;
 
         manager().template write_buffer<size_type>(
-                copy_from_buffer_.data(), size_, copy_from);
-        cl_set_kernel_args(kernel_copy_, 0,
-                state_buffer_.data(), copy_from_buffer_.data());
-        manager().run_kernel(
-                kernel_copy_, N, configure_copy_.local_size());
+                copy_from_buffer_.data(), N, copy_from);
+        copy_(copy_from_buffer_.data(), state_buffer_.data());
     }
-
-    ConfigureCL &configure_copy () {return configure_copy_;}
-
-    const ConfigureCL &configure_copy () const {return configure_copy_;}
 
     private :
 
@@ -385,8 +345,6 @@ class StateCL
     size_type size_;
 
     ::cl::Program program_;
-    ::cl::Kernel kernel_copy_;
-    ConfigureCL configure_copy_;
 
     bool build_;
     int build_id_;
@@ -395,6 +353,7 @@ class StateCL
 
     CLBuffer<char, ID> state_buffer_;
     CLBuffer<size_type, ID> copy_from_buffer_;
+    internal::CLCopy<ID> copy_;
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype using OpenCL

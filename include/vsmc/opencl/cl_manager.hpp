@@ -466,14 +466,13 @@ class CLManager
 
     private :
 
+    struct profile_kernel_func_ {void operator() (::cl::Kernel &) const {}};
+
     ::cl::Platform platform_;
     ::cl::Context context_;
     ::cl::Device device_;
     std::vector< ::cl::Device> device_vec_;
     ::cl::CommandQueue command_queue_;
-
-    struct profile_kernel_func_ {void operator() (::cl::Kernel &) const {}};
-
 
     bool setup_;
     CLSetup<ID> &setup_default_;

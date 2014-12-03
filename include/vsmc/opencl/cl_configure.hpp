@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/opencl/internal/device.h
+// vSMC/include/vsmc/opencl/cl_configure.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,19 +29,38 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_OPENCL_DEVICE_H
-#define VSMC_OPENCL_DEVICE_H
+#ifndef VSMC_OPENCL_CL_CONFIGURE_HPP
+#define VSMC_OPENCL_CL_CONFIGURE_HPP
 
-__kernel
-void copy (__global copy_state_struct *state, __global size_type *copy_from)
+#include <vsmc/internal/common.hpp>
+#include <vsmc/opencl/cl_manip.hpp>
+
+namespace vsmc {
+
+/// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
+/// \ingroup OpenCL
+class CLConfigure
 {
-    size_type to = get_global_id(0);
+    public :
 
-    if (to >= Size)
-        return;
+    CLConfigure () : local_size_(0) {}
 
-    size_type from = copy_from[to];
-    state[to] = state[from];
-}
+    std::size_t local_size () const {return local_size_;}
 
-#endif // VSMC_OPENCL_DEVICE_H
+    void local_size (std::size_t new_size) {local_size_ = new_size;}
+
+    void local_size (std::size_t N,
+            const ::cl::Kernel &kern, const ::cl::Device &dev)
+    {
+        std::size_t global_size;
+        cl_preferred_work_size(N, kern, dev, global_size, local_size_);
+    }
+
+    private :
+
+    std::size_t local_size_;
+}; // class CLConfigure
+
+} // namespace vsmc
+
+#endif // VSMC_OPENCL_CL_CONFIGURE_HPP
