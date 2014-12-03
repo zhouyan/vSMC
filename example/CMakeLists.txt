@@ -450,7 +450,6 @@ ADD_DEFINITIONS (${EXAMPLE_DEFINITIONS})
 ##############################################################################
 
 ADD_CUSTOM_TARGET (example-files)
-COPY_FILE (example benchmark.R)
 ADD_DEPENDENCIES (example example-files)
 
 SET (EXAMPLES ${EXAMPLES} "vsmc")

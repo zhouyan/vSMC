@@ -37,31 +37,34 @@ int main (int argc, char **argv)
 #include "gmm_options_cl.hpp"
 #include "options_process.hpp"
 
-    vsmc::CLSetup<gmm_device> &gmm_setup =
-        vsmc::CLSetup<gmm_device>::instance();
-    gmm_setup.platform(PlatformName);
-    gmm_setup.device_vendor(DeviceVendorName);
-    gmm_setup.device_type(DeviceType);
+    try {
+        vsmc::CLSetup<gmm_device> &gmm_setup =
+            vsmc::CLSetup<gmm_device>::instance();
+        gmm_setup.platform(PlatformName);
+        gmm_setup.device_vendor(DeviceVendorName);
+        gmm_setup.device_type(DeviceType);
 
-    if (!vsmc::CLManager<gmm_device>::instance().setup()) {
-        std::cout << "Failed to setup OpenCL environment" << std::endl;
-        std::cout << "Platform name: " << PlatformName << std::endl;
-        std::cout << "Device type:   " << DeviceType << std::endl;
-        std::cout << "Device vendor: " << DeviceVendorName << std::endl;
-        return -1;
-    }
+        if (!vsmc::CLManager<gmm_device>::instance().setup()) {
+            std::cout << "Failed to setup OpenCL environment" << std::endl;
+            std::cout << "Platform name: " << PlatformName << std::endl;
+            std::cout << "Device type:   " << DeviceType << std::endl;
+            std::cout << "Device vendor: " << DeviceVendorName << std::endl;
+            return 0;
+        }
 
-    if (FPTypeBits == 32) {
-        gmm_do_smc<cl_float>(ParticleNum, IterNum, DataNum, DataFile,
-                Threshold, vSMCIncPath, R123IncPath, BuildOption, LocalSize,
-                SM, CM, Repeat);
-    } else if (FPTypeBits == 64) {
-        gmm_do_smc<cl_double>(ParticleNum, IterNum, DataNum, DataFile,
-                Threshold, vSMCIncPath, R123IncPath, BuildOption, LocalSize,
-                SM, CM, Repeat);
-    } else {
-        std::fprintf(stderr, "cl_type_bits has to be 32 or 64\n");
-        return -1;
+        if (FPTypeBits == 32) {
+            gmm_do_smc<cl_float>(ParticleNum, IterNum, DataNum, DataFile,
+                    Threshold, vSMCIncPath, R123IncPath, BuildOption,
+                    LocalSize, SM, CM, Repeat);
+        } else if (FPTypeBits == 64) {
+            gmm_do_smc<cl_double>(ParticleNum, IterNum, DataNum, DataFile,
+                    Threshold, vSMCIncPath, R123IncPath, BuildOption,
+                    LocalSize, SM, CM, Repeat);
+        } else {
+            std::cout << "cl_type_bits has to be 32 or 64" << std::endl;
+        }
+    } catch (...) {
+        std::cout << "Runtime Error" << std::endl;
     }
 
     return 0;

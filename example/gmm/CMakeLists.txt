@@ -36,6 +36,7 @@ INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 ADD_EXAMPLE (gmm smc; smc_pair; pmcmc; rjsmc; rjmcmc)
 
 COPY_FILE (gmm gmm.data)
+COPY_FILE (gmm gmm_smc_benchmark.R)
 
 IF (OPENCL_FOUND AND RANDOM123_FOUND)
     COPY_FILE (gmm gmm_smc_cl.cl)
