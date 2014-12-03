@@ -441,9 +441,9 @@ Combine.Benchmark.List <- function (lists)
 File.Name <- function (base, func, suffix, extra = "")
 {
     if (extra == "") {
-        paste("gmm_smc-", base, "-", func, ".", suffix, sep = "")
+        paste("gmm_smc_", base, "_", func, ".", suffix, sep = "")
     } else {
-        paste("gmm_smc-", base, "-", func, "-", extra, ".", suffix, sep = "")
+        paste("gmm_smc_", base, "_", func, "_", extra, ".", suffix, sep = "")
     }
 }
 
@@ -510,11 +510,11 @@ if (!interactive() || Force.Run.Benchmark) {
     Save.List(Benchmark.Running.List, "running")
     Save.List(Benchmark.Elapsed.List, "elapsed")
 
-    pdf("gmm_smc-benchmark-running.pdf", width = Width, height = Height)
+    pdf("gmm_smc_benchmark_running.pdf", width = Width, height = Height)
     Print.Benchmark.List(Benchmark.Running.List)
     GC <- dev.off()
 
-    pdf("gmm_smc-benchmark-elapsed.pdf", width = Width, height = Height)
+    pdf("gmm_smc_benchmark_elapsed.pdf", width = Width, height = Height)
     Print.Benchmark.List(Benchmark.Elapsed.List)
     GC <- dev.off()
 
