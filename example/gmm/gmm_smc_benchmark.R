@@ -97,6 +97,8 @@ OCL.Name <- c(
     nvidia.gpu.32  = "NVIDIA GPU (32)",
     nvidia.gpu.64  = "NVIDIA GPU (64)")
 
+Bench.Name <- c(SMP.Name, OCL.Name)
+
 ##############################################################################
 
 SMC.Option.String <- function (particle_num)
@@ -170,6 +172,12 @@ OCL.TryRun <- function (exe)
 
 if (!exists("Bench.OCL")) {
     Bench.OCL <- character()
+    for (exe in Bench.SMP) {
+        if (exe != "seq") {
+            Bench.OCL <- c(Bench.OCL, exe)
+            break
+        }
+    }
     if (file.exists(paste(ExePath, "gmm_smc_cl", ExeSuffix, sep = ""))) {
         for (exe in names(OCL.Name)) {
             if (OCL.TryRun(exe)) Bench.OCL <- c(Bench.OCL, exe)
@@ -182,8 +190,9 @@ if (!exists("Bench.OCL")) {
 cat(rep("=", Line.Width), "\n", sep = "")
 cat("Benchmark setting\n")
 cat(rep("-", Line.Width), "\n", sep = "")
-for (exe in Bench.SMP) cat(SMP.Name[exe], "\n", sep = "")
-for (exe in Bench.OCL) cat(OCL.Name[exe], "\n", sep = "")
+for (exe in Bench.SMP) cat(Bench.Name[exe], "\n", sep = "")
+cat(rep("-", Line.Width), "\n", sep = "")
+for (exe in Bench.OCL) cat(Bench.Name[exe], "\n", sep = "")
 cat(rep("=", Line.Width), "\n", sep = "")
 
 ##############################################################################
@@ -249,7 +258,7 @@ Create.List <- function(particle.number, implementation,
     Speedup.Plot <- Speedup.Plot + geom_line() + geom_point()
     Speedup.Plot <- Speedup.Plot + Aes + Scale.X + Scale.Y.2 + Lab
     Speedup.Plot <- Speedup.Plot + ylab("Speedup")
-    Speedup.Plot <- Speedup.Plot + Theme
+    Speedup.Plot <- Speedup.Plot + Theme + Guides
 
     list(Perf.Data = Perf.Data,
         Time.Plot = Time.Plot, Speedup.Plot = Speedup.Plot)
@@ -432,9 +441,9 @@ Combine.Benchmark.List <- function (lists)
 File.Name <- function (base, func, suffix, extra = "")
 {
     if (extra == "") {
-        paste("bench-", base, "-", func, ".", suffix, sep = "")
+        paste("gmm_smc-", base, "-", func, ".", suffix, sep = "")
     } else {
-        paste("bench-", base, "-", func, "-", extra, ".", suffix, sep = "")
+        paste("gmm_smc-", base, "-", func, "-", extra, ".", suffix, sep = "")
     }
 }
 
@@ -501,11 +510,11 @@ if (!interactive() || Force.Run.Benchmark) {
     Save.List(Benchmark.Running.List, "running")
     Save.List(Benchmark.Elapsed.List, "elapsed")
 
-    pdf("Benchmark.Running.pdf", width = Width, height = Height)
+    pdf("gmm_smc-benchmark-running.pdf", width = Width, height = Height)
     Print.Benchmark.List(Benchmark.Running.List)
     GC <- dev.off()
 
-    pdf("Benchmark.Elapsed.pdf", width = Width, height = Height)
+    pdf("gmm_smc-benchmark-elapsed.pdf", width = Width, height = Height)
     Print.Benchmark.List(Benchmark.Elapsed.List)
     GC <- dev.off()
 
