@@ -458,11 +458,11 @@ class InitializeCL
         std::string kname;
         initialize_state(kname);
         VSMC_DEFINE_OPENCL_SET_KERNEL;
-        accept_host_.resize(particle.size());
     }
 
     virtual void set_kernel_args (const Particle<T> &particle)
     {
+        accept_host_.resize(particle.size());
 #if VSMC_OPENCL_VERSION >= 120
         if (particle.value().manager().opencl_version() >= 120) {
             accept_buffer_.resize(particle.size(),
@@ -555,12 +555,12 @@ class MoveCL
         std::string kname;
         move_state(iter, kname);
         VSMC_DEFINE_OPENCL_SET_KERNEL;
-        accept_host_.resize(particle.size());
     }
 
     virtual void set_kernel_args (std::size_t iter,
             const Particle<T> &particle)
     {
+        accept_host_.resize(particle.size());
 #if VSMC_OPENCL_VERSION >= 120
         if (particle.value().manager().opencl_version() >= 120) {
             accept_buffer_.resize(particle.size(),
