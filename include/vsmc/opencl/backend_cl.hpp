@@ -215,8 +215,19 @@ class StateCL
     explicit StateCL (size_type N) :
         state_size_(StateSize == Dynamic ? 1 : StateSize),
         size_(N), build_(false), build_id_(0),
-        state_buffer_(state_size_ * size_),
-        copy_from_buffer_(size_, CL_MEM_READ_ONLY|CL_MEM_HOST_WRITE_ONLY) {}
+        state_buffer_(state_size_ * size_)
+        {
+#if VSMC_OPENCL_VERSION >= 120
+            if (manager().opencl_version() >= 120) {
+                copy_from_buffer_.resize(size_,
+                        CL_MEM_READ_ONLY|CL_MEM_HOST_WRITE_ONLY);
+            } else {
+                copy_from_buffer_.resize(size_, CL_MEM_READ_ONLY);
+            }
+#else
+            copy_from_buffer_.resize(size_, CL_MEM_READ_ONLY);
+#endif
+        }
 
     size_type size () const {return size_;}
 
@@ -447,14 +458,24 @@ class InitializeCL
         std::string kname;
         initialize_state(kname);
         VSMC_DEFINE_OPENCL_SET_KERNEL;
+        accept_host_.resize(particle.size());
     }
 
     virtual void set_kernel_args (const Particle<T> &particle)
     {
-        accept_host_.resize(particle.size());
+#if VSMC_OPENCL_VERSION >= 120
+        if (particle.value().manager().opencl_version() >= 120) {
+            accept_buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY|
+                    CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+        } else {
+            accept_buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+        }
+#else
         accept_buffer_.resize(particle.size(),
-                CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY|CL_MEM_USE_HOST_PTR,
-                &accept_host_[0]);
+                CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+#endif
         cl_set_kernel_args(kernel_, 0,
                 particle.value().state_buffer().data(), accept_buffer_.data());
     }
@@ -534,15 +555,25 @@ class MoveCL
         std::string kname;
         move_state(iter, kname);
         VSMC_DEFINE_OPENCL_SET_KERNEL;
+        accept_host_.resize(particle.size());
     }
 
     virtual void set_kernel_args (std::size_t iter,
             const Particle<T> &particle)
     {
-        accept_host_.resize(particle.size());
+#if VSMC_OPENCL_VERSION >= 120
+        if (particle.value().manager().opencl_version() >= 120) {
+            accept_buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY|
+                    CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+        } else {
+            accept_buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+        }
+#else
         accept_buffer_.resize(particle.size(),
-                CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY|CL_MEM_USE_HOST_PTR,
-                &accept_host_[0]);
+                CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+#endif
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 particle.value().state_buffer().data(), accept_buffer_.data());
     }
@@ -620,8 +651,16 @@ class MonitorEvalCL
     virtual void set_kernel_args (std::size_t iter, std::size_t dim,
             const Particle<T> &particle)
     {
-        buffer_.resize(particle.size() * dim,
-                CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY);
+#if VSMC_OPENCL_VERSION >= 120
+        if (particle.value().manager().opencl_version() >= 120) {
+            buffer_.resize(particle.size() * dim,
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY);
+        } else {
+            buffer_.resize(particle.size() * dim);
+        }
+#else
+        buffer_.resize(particle.size() * dim);
+#endif
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 static_cast<cl_ulong>(dim),
                 particle.value().state_buffer().data(), buffer_.data());
@@ -701,8 +740,16 @@ class PathEvalCL
     virtual void set_kernel_args (std::size_t iter,
             const Particle<T> &particle)
     {
-        buffer_.resize(particle.size(),
-                CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY);
+#if VSMC_OPENCL_VERSION >= 120
+        if (particle.value().manager().opencl_version() >= 120) {
+            buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY);
+        } else {
+            buffer_.resize(particle.size());
+        }
+#else
+        buffer_.resize(particle.size());
+#endif
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 particle.value().state_buffer().data(), buffer_.data());
     }

@@ -35,6 +35,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_setup.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
+#include <vsmc/opencl/cl_query.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
@@ -134,6 +135,18 @@ class CLManager
         return manager;
     }
 
+    /// \brief The minimum OpenCL version supported by all devices in the
+    /// context of this manager
+    ///
+    /// \sa CLQuery::opencl_version
+    int opencl_version () const {return opencl_version_;}
+
+    /// \brief The minimum OpenCL C version supported by all devices in the
+    /// context of this manager
+    ///
+    /// \sa CLQuery::opencl_version
+    int opencl_c_version () const {return opencl_c_version_;}
+
     /// \brief The platform currently being used
     const ::cl::Platform &platform () const {return platform_;}
 
@@ -143,7 +156,7 @@ class CLManager
     /// \brief The device currently being used
     const ::cl::Device &device () const {return device_;}
 
-    /// \brief The vector of all device that the manager found in the platform
+    /// \brief The vector of all device that is in the context of this manager
     const std::vector< ::cl::Device> &device_vec () const {return device_vec_;}
 
     /// \brief The command queue currently being used
@@ -177,6 +190,7 @@ class CLManager
         device_ = dev;
         device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
         command_queue_ = cmd;
+        check_opencl_version();
         setup_ = true;
 
         return setup_;
@@ -478,6 +492,8 @@ class CLManager
 
     bool setup_;
     CLSetup<ID> &setup_default_;
+    int opencl_version_;
+    int opencl_c_version_;
 
     CLManager () : setup_(false), setup_default_(CLSetup<ID>::instance())
     {setup_cl_manager(setup_default_.device_type());}
@@ -485,6 +501,20 @@ class CLManager
     CLManager (const CLManager<ID> &);
 
     CLManager<ID> &operator= (const CLManager<ID> &);
+
+    void check_opencl_version ()
+    {
+        opencl_version_ = CLQuery::opencl_version(device_);
+        opencl_c_version_ = CLQuery::opencl_c_version(device_);
+        for (std::size_t i = 0; i != device_vec_.size(); ++i) {
+            int ocl = CLQuery::opencl_version(device_vec_[i]);
+            int oclc = CLQuery::opencl_c_version(device_vec_[i]);
+            if (opencl_version_ > ocl)
+                opencl_version_ = ocl;
+            if (opencl_c_version_ > ocl)
+                opencl_c_version_ = oclc;
+        }
+    }
 
     void setup_cl_manager (cl_device_type dev_type)
     {
@@ -502,9 +532,9 @@ class CLManager
             platform_.getDevices(dev_type, &dev_pool);
             device_filter(dev_pool, dev_select);
             if (dev_select.size() != 0) {
-                cl_context_properties context_properties[] = {
-                    static_cast<cl_context_properties>(CL_CONTEXT_PLATFORM),
-                    reinterpret_cast<cl_context_properties>(platform_()), 0
+                ::cl_context_properties context_properties[] = {
+                    static_cast< ::cl_context_properties>(CL_CONTEXT_PLATFORM),
+                    reinterpret_cast< ::cl_context_properties>(platform_()), 0
                 };
                 context_ = ::cl::Context(dev_select, context_properties);
                 setup_context = true;
@@ -525,6 +555,8 @@ class CLManager
         } catch (::cl::Error) {}
         VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE;
         if (!setup_command_queue) return;
+
+        check_opencl_version();
 
         setup_ = true;
     }

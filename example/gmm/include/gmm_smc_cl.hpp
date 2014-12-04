@@ -66,10 +66,20 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
 
     gmm_state (size_type N) : base(N)
     {
-        this->update_state(CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
+#if VSMC_OPENCL_VERSION >= 120
+        if (this->manager().opencl_version() >= 120) {
+            this->update_state(CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
+            counter_ = this->manager().template
+                create_buffer<struct r123array4x32>(N,
+                        CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
+        } else {
+            counter_ = this->manager().template
+                create_buffer<struct r123array4x32>(N);
+        }
+#else
         counter_ = this->manager().template
-            create_buffer<struct r123array4x32>(N,
-                    CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
+            create_buffer<struct r123array4x32>(N);
+#endif
     }
 
     const cl::Buffer &obs () const {return obs_;}
@@ -105,10 +115,22 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
         obs_num_ = obs.size();
         for (std::size_t i = 0; i != obs.size(); ++i)
             data >> obs[i];
+#if VSMC_OPENCL_VERSION >= 120
+        if (this->manager().opencl_version() >= 120) {
+            obs_ = this->manager().template
+                create_buffer<fp_type>(obs.size(),
+                        CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR|
+                        CL_MEM_HOST_WRITE_ONLY, &obs[0]);
+        } else {
+            obs_ = this->manager().template
+                create_buffer<fp_type>(obs.size(),
+                        CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, &obs[0]);
+        }
+#else
         obs_ = this->manager().template
             create_buffer<fp_type>(obs.size(),
-                    CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR|
-                    CL_MEM_HOST_WRITE_ONLY, &obs[0]);
+                    CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, &obs[0]);
+#endif
         data.close();
         data.clear();
 
@@ -259,10 +281,24 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
         gmm_state<FPType> &state = particle.value();
         if (exp_weight_.size() != state.size()) {
             exp_weight_.resize(state.size());
+#if VSMC_OPENCL_VERSION >= 120
+            if (state.manager().opencl_version() >= 120) {
+                exp_weight_device_ = state.manager().template
+                    create_buffer<FPType>(state.size(),
+                            CL_MEM_WRITE_ONLY|CL_MEM_HOST_READ_ONLY|
+                            CL_MEM_USE_HOST_PTR, &exp_weight_[0]);
+            } else {
+                exp_weight_device_ = state.manager().template
+                    create_buffer<FPType>(state.size(),
+                            CL_MEM_WRITE_ONLY|CL_MEM_USE_HOST_PTR,
+                            &exp_weight_[0]);
+            }
+#else
             exp_weight_device_ = state.manager().template
                 create_buffer<FPType>(state.size(),
-                        CL_MEM_WRITE_ONLY|CL_MEM_HOST_READ_ONLY|
-                        CL_MEM_USE_HOST_PTR, &exp_weight_[0]);
+                        CL_MEM_WRITE_ONLY|CL_MEM_USE_HOST_PTR,
+                        &exp_weight_[0]);
+#endif
         }
 
         FPType a = static_cast<FPType>(iter) / iter_num_;
@@ -503,12 +539,14 @@ inline void gmm_do_smc (std::size_t particle_num, std::size_t iter_num,
 
     std::string name;
     std::cout << std::string(78, '=') << std::endl;
-    gmm_state<FPType>::manager_type::instance().platform().getInfo(
+    gmm_state<FPType>::manager().platform().getInfo(
             static_cast<cl_device_info>(CL_PLATFORM_NAME), &name);
     std::cout << "Using platform\t" << name << std::endl;
-    gmm_state<FPType>::manager_type::instance().device().getInfo(
+    gmm_state<FPType>::manager().device().getInfo(
             static_cast<cl_device_info>(CL_DEVICE_NAME), &name);
-    std::cout << "Using Device\t" << name << std::endl;
+    std::cout << "Using device\t" << name << std::endl;
+    std::cout << "Using OpenCL\t"
+        << gmm_state<FPType>::manager().opencl_version() / 100.0 << std::endl;
     std::cout << std::string(78, '=') << std::endl;
 
     std::ifstream src_file("gmm_smc_cl.cl");
