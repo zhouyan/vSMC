@@ -133,123 +133,27 @@ class CLQuery
             return os;
 
         print_dash(os);
-
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-                CL_DEVICE_NAME, "CL_DEVICE_NAME");
-        print_dev_type(os, dev);
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-                CL_DEVICE_VENDOR, "CL_DEVICE_VENDOR");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_VENDOR_ID, "CL_DEVICE_VENDOR_ID");
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-                CL_DRIVER_VERSION, "CL_DRIVER_VERSION");
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-                CL_DEVICE_PROFILE, "CL_DEVICE_PROFILE");
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-                CL_DEVICE_VERSION, "CL_DEVICE_VERSION");
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-                CL_DEVICE_OPENCL_C_VERSION, "CL_DEVICE_OPENCL_C_VERSION");
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-                CL_DEVICE_EXTENSIONS, "CL_DEVICE_EXTENSIONS");
+        print_dev_version(os, dev);
         os << '\n';
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_COMPUTE_UNITS,
-                "CL_DEVICE_MAX_COMPUTE_UNITS");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
-                "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS");
-        print_info_val<std::vector<std::size_t>, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_WORK_ITEM_SIZES,
-                "CL_DEVICE_MAX_WORK_ITEM_SIZES");
-        print_info_val<std::size_t, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_WORK_GROUP_SIZE,
-                "CL_DEVICE_MAX_WORK_GROUP_SIZE");
+        print_dev_processor(os, dev);
         os << '\n';
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_CLOCK_FREQUENCY,
-                "CL_DEVICE_MAX_CLOCK_FREQUENCY", "MHz");
-        print_info_val<std::size_t, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_PARAMETER_SIZE,
-                "CL_DEVICE_MAX_PARAMETER_SIZE", "byte");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_ADDRESS_BITS,
-                "CL_DEVICE_ADDRESS_BITS", "bit");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_MEM_BASE_ADDR_ALIGN,
-                "CL_DEVICE_MEM_BASE_ADDR_ALIGN", "bit");
-        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_MEM_ALLOC_SIZE,
-                "CL_DEVICE_MAX_MEM_ALLOC_SIZE", "byte");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
-                "CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE", "byte");
-        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
-                CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
-                "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE", "byte");
-        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
-                CL_DEVICE_GLOBAL_MEM_SIZE,
-                "CL_DEVICE_GLOBAL_MEM_SIZE", "byte");
-        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
-                "CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE", "byte");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_MAX_CONSTANT_ARGS,
-                "CL_DEVICE_MAX_CONSTANT_ARGS");
-        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
-                CL_DEVICE_LOCAL_MEM_SIZE,
-                "CL_DEVICE_LOCAL_MEM_SIZE", "byte");
-        print_info_val<cl_bool, ::cl_device_info>(os, dev,
-                CL_DEVICE_ERROR_CORRECTION_SUPPORT,
-                "CL_DEVICE_ERROR_CORRECTION_SUPPORT");
-        print_info_val<std::size_t, ::cl_device_info>(os, dev,
-                CL_DEVICE_PROFILING_TIMER_RESOLUTION,
-                "CL_DEVICE_PROFILING_TIMER_RESOLUTION", "ns");
+        print_dev_memory(os, dev);
         os << '\n';
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
-                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
-                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
-                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
-                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
-                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE,
-                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
-                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF");
-        os << '\n';
-#if VSMC_OPENCL_VERSION >= 110
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR,
-                "CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT,
-                "CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_NATIVE_VECTOR_WIDTH_INT,
-                "CL_DEVICE_NATIVE_VECTOR_WIDTH_INT");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG,
-                "CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT,
-                "CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE,
-                "CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE");
-        print_info_val<cl_uint, ::cl_device_info>(os, dev,
-                CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF,
-                "CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF");
-#endif // VSMC_OPENCL_VERSION >= 110
+        print_dev_vector(os, dev);
+#if VSMC_OPENCL_VERSION >= 120
+        if (opencl_version(dev) >= 120) {
+            os << '\n';
+            print_info_val<std::string, ::cl_device_info>(os, dev,
+                    CL_DEVICE_BUILT_IN_KERNELS,
+                    "CL_DEVICE_BUILT_IN_KERNELS");
+            os << '\n';
+            print_dev_single_fp_config(os, dev);
+            os << '\n';
+            print_dev_double_fp_config(os, dev);
+            os << '\n';
+            print_dev_image_support(os, dev);
+        }
+#endif // VSMC_OPENCL_VERSION >= 120
 
         return os;
     }
@@ -373,22 +277,45 @@ class CLQuery
     {os << std::string(90, '-') << '\n';}
 
     template <typename CharT, typename Traits>
+    static void print_dev_version (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
+    {
+        print_info_val<std::string, ::cl_device_info>(os, dev,
+                CL_DEVICE_NAME, "CL_DEVICE_NAME");
+        print_dev_type(os, dev);
+        print_info_val<std::string, ::cl_device_info>(os, dev,
+                CL_DEVICE_VENDOR, "CL_DEVICE_VENDOR");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_VENDOR_ID, "CL_DEVICE_VENDOR_ID");
+        print_info_val<std::string, ::cl_device_info>(os, dev,
+                CL_DRIVER_VERSION, "CL_DRIVER_VERSION");
+        print_info_val<std::string, ::cl_device_info>(os, dev,
+                CL_DEVICE_PROFILE, "CL_DEVICE_PROFILE");
+        print_info_val<std::string, ::cl_device_info>(os, dev,
+                CL_DEVICE_VERSION, "CL_DEVICE_VERSION");
+        print_info_val<std::string, ::cl_device_info>(os, dev,
+                CL_DEVICE_OPENCL_C_VERSION, "CL_DEVICE_OPENCL_C_VERSION");
+        print_info_val<std::string, ::cl_device_info>(os, dev,
+                CL_DEVICE_EXTENSIONS, "CL_DEVICE_EXTENSIONS");
+    }
+
+    template <typename CharT, typename Traits>
     static void print_dev_type (
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
-        cl_device_type type;
+        ::cl_device_type type;
         std::string info;
         dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_TYPE), &type);
 
-        append_bit_field<cl_device_type>(CL_DEVICE_TYPE_CPU,
+        append_bit_field< ::cl_device_type>(CL_DEVICE_TYPE_CPU,
                 type, "CL_DEVICE_TYPE_CPU", info);
-        append_bit_field<cl_device_type>(CL_DEVICE_TYPE_GPU,
+        append_bit_field< ::cl_device_type>(CL_DEVICE_TYPE_GPU,
                 type, "CL_DEVICE_TYPE_GPU", info);
-        append_bit_field<cl_device_type>(CL_DEVICE_TYPE_ACCELERATOR,
+        append_bit_field< ::cl_device_type>(CL_DEVICE_TYPE_ACCELERATOR,
                 type, "CL_DEVICE_TYPE_ACCELERATOR", info);
-        append_bit_field<cl_device_type>(CL_DEVICE_TYPE_DEFAULT,
+        append_bit_field< ::cl_device_type>(CL_DEVICE_TYPE_DEFAULT,
                 type, "CL_DEVICE_TYPE_DEFAULT", info);
-        append_bit_field<cl_device_type>(CL_DEVICE_TYPE_CUSTOM,
+        append_bit_field< ::cl_device_type>(CL_DEVICE_TYPE_CUSTOM,
                 type, "CL_DEVICE_TYPE_CUSTOM", info);
 
         print_name(os, "CL_DEVICE_TYPE");
@@ -396,13 +323,236 @@ class CLQuery
         os << '\n';
     }
 
+    template <typename CharT, typename Traits>
+    static void print_dev_processor (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
+    {
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_CLOCK_FREQUENCY,
+                "CL_DEVICE_MAX_CLOCK_FREQUENCY", "MHz");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_COMPUTE_UNITS,
+                "CL_DEVICE_MAX_COMPUTE_UNITS");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
+                "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS");
+        print_info_val<std::vector<std::size_t>, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_WORK_ITEM_SIZES,
+                "CL_DEVICE_MAX_WORK_ITEM_SIZES");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_WORK_GROUP_SIZE,
+                "CL_DEVICE_MAX_WORK_GROUP_SIZE");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_PROFILING_TIMER_RESOLUTION,
+                "CL_DEVICE_PROFILING_TIMER_RESOLUTION", "ns");
+    }
+
+    template <typename CharT, typename Traits>
+    static void print_dev_memory (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
+    {
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_PARAMETER_SIZE,
+                "CL_DEVICE_MAX_PARAMETER_SIZE", "byte");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_ADDRESS_BITS,
+                "CL_DEVICE_ADDRESS_BITS", "bit");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_MEM_BASE_ADDR_ALIGN,
+                "CL_DEVICE_MEM_BASE_ADDR_ALIGN", "bit");
+        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_MEM_ALLOC_SIZE,
+                "CL_DEVICE_MAX_MEM_ALLOC_SIZE", "byte");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
+                "CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE", "byte");
+        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
+                CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
+                "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE", "byte");
+        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
+                CL_DEVICE_GLOBAL_MEM_SIZE,
+                "CL_DEVICE_GLOBAL_MEM_SIZE", "byte");
+        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
+                "CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE", "byte");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_CONSTANT_ARGS,
+                "CL_DEVICE_MAX_CONSTANT_ARGS");
+        print_info_val<cl_ulong, ::cl_device_info>(os, dev,
+                CL_DEVICE_LOCAL_MEM_SIZE,
+                "CL_DEVICE_LOCAL_MEM_SIZE", "byte");
+        print_info_val<cl_bool, ::cl_device_info>(os, dev,
+                CL_DEVICE_ERROR_CORRECTION_SUPPORT,
+                "CL_DEVICE_ERROR_CORRECTION_SUPPORT");
+    }
+
+    template <typename CharT, typename Traits>
+    static void print_dev_vector (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
+    {
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
+                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
+                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
+                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
+                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
+                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE,
+                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
+                "CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF");
+#if VSMC_OPENCL_VERSION >= 110
+        if (opencl_version(dev) >= 110) {
+            os << '\n';
+            print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                    CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR,
+                    "CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR");
+            print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                    CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT,
+                    "CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT");
+            print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                    CL_DEVICE_NATIVE_VECTOR_WIDTH_INT,
+                    "CL_DEVICE_NATIVE_VECTOR_WIDTH_INT");
+            print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                    CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG,
+                    "CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG");
+            print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                    CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT,
+                    "CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT");
+            print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                    CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE,
+                    "CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE");
+            print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                    CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF,
+                    "CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF");
+        }
+#endif // VSMC_OPENCL_VERSION >= 110
+    }
+
+#if VSMC_OPENCL_VERSION >= 120
+    template <typename CharT, typename Traits>
+    static void print_dev_single_fp_config (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
+    {
+        ::cl_device_fp_config config;
+        std::string info;
+        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_SINGLE_FP_CONFIG),
+                &config);
+
+        append_bit_field< ::cl_device_fp_config>(CL_FP_DENORM,
+                config, "CL_FP_DENORM", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_INF_NAN,
+                config, "CL_FP_INF_NAN", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_ROUND_TO_NEAREST,
+                config, "CL_FP_ROUND_TO_NEAREST", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_ROUND_TO_ZERO,
+                config, "CL_FP_ROUND_TO_ZERO", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_ROUND_TO_INF,
+                config, "CL_FP_ROUND_TO_INF", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_FMA,
+                config, "CL_FP_FMA", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_SOFT_FLOAT,
+                config, "CL_FP_SOFT_FLOAT", info);
+        append_bit_field< ::cl_device_fp_config>(
+                CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT,
+                config, "CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT", info);
+
+        print_name(os, "CL_DEVICE_SINGLE_FP_CONFIG");
+        print_val(os, info);
+        os << '\n';
+    }
+
+    template <typename CharT, typename Traits>
+    static void print_dev_double_fp_config (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
+    {
+        ::cl_device_fp_config config;
+        std::string info;
+        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_DOUBLE_FP_CONFIG),
+                &config);
+
+        append_bit_field< ::cl_device_fp_config>(CL_FP_DENORM,
+                config, "CL_FP_DENORM", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_INF_NAN,
+                config, "CL_FP_INF_NAN", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_ROUND_TO_NEAREST,
+                config, "CL_FP_ROUND_TO_NEAREST", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_ROUND_TO_ZERO,
+                config, "CL_FP_ROUND_TO_ZERO", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_ROUND_TO_INF,
+                config, "CL_FP_ROUND_TO_INF", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_FMA,
+                config, "CL_FP_FMA", info);
+        append_bit_field< ::cl_device_fp_config>(CL_FP_SOFT_FLOAT,
+                config, "CL_FP_SOFT_FLOAT", info);
+
+        print_name(os, "CL_DEVICE_DOUBLE_FP_CONFIG");
+        print_val(os, info);
+        os << '\n';
+    }
+
+    template <typename CharT, typename Traits>
+    static void print_dev_image_support (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
+    {
+        cl_bool support;
+        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_IMAGE_SUPPORT),
+                &support);
+        if (support == 0)
+            return;
+        print_info_val<cl_bool, ::cl_device_info>(os, dev,
+                CL_DEVICE_IMAGE_SUPPORT,
+                "CL_DEVICE_IMAGE_SUPPORT");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_READ_IMAGE_ARGS,
+                "CL_DEVICE_MAX_READ_IMAGE_ARGS");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_WRITE_IMAGE_ARGS,
+                "CL_DEVICE_MAX_WRITE_IMAGE_ARGS");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_IMAGE2D_MAX_WIDTH,
+                "CL_DEVICE_IMAGE2D_MAX_WIDTH", "pixel");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_IMAGE2D_MAX_HEIGHT,
+                "CL_DEVICE_IMAGE2D_MAX_HEIGHT", "pixel");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_IMAGE3D_MAX_WIDTH,
+                "CL_DEVICE_IMAGE3D_MAX_WIDTH", "pixel");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_IMAGE3D_MAX_HEIGHT,
+                "CL_DEVICE_IMAGE3D_MAX_HEIGHT", "pixel");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_IMAGE3D_MAX_DEPTH,
+                "CL_DEVICE_IMAGE3D_MAX_DEPTH", "pixel");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_IMAGE_MAX_BUFFER_SIZE,
+                "CL_DEVICE_IMAGE_MAX_BUFFER_SIZE", "pixel");
+        print_info_val<std::size_t, ::cl_device_info>(os, dev,
+                CL_DEVICE_IMAGE_MAX_ARRAY_SIZE,
+                "CL_DEVICE_IMAGE_MAX_ARRAY_SIZE");
+        print_info_val<cl_uint, ::cl_device_info>(os, dev,
+                CL_DEVICE_MAX_SAMPLERS,
+                "CL_DEVICE_MAX_SAMPLERS");
+    }
+#endif // VSMC_OPENCL_VERSION >= 120
+
     template <typename T>
     static void append_bit_field (T info, T val,
             const std::string &name, std::string &orig)
     {
-        if (info & val) {
-            if (orig.length())
-                orig.append(" | ");
+        if ((info & val) != 0) {
+            if (orig.length() != 0)
+                orig.append(" ");
             orig.append(name);
         }
     }
@@ -463,8 +613,13 @@ class CLQuery
             return;
         }
 
-        std::string::size_type pos = val.find(' ');
-        if (pos == std::string::npos) {
+        char sepchar;
+        std::size_t pos;
+        if ((pos = val.find(' ')) != std::string::npos)
+            sepchar = ' ';
+        else if ((pos = val.find(';')) != std::string::npos)
+            sepchar = ';';
+        else {
             os << val;
             return;
         }
@@ -475,7 +630,7 @@ class CLQuery
         while (pos != std::string::npos) {
             val_tmp.push_back(val.substr(init, pos - init + 1));
             init = pos + 1;
-            pos = val.find(' ', init);
+            pos = val.find(sepchar, init);
         }
         for (std::size_t i = 0; i != val_tmp.size(); ++i) {
             if (val_tmp[i] != std::string(" "))
