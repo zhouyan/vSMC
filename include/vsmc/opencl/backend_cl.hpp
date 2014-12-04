@@ -215,12 +215,14 @@ class StateCL
     explicit StateCL (size_type N) :
         state_size_(StateSize == Dynamic ? 1 : StateSize),
         size_(N), build_(false), build_id_(0),
-        state_buffer_(state_size_ * size_), copy_from_buffer_(size_) {}
+        state_buffer_(state_size_ * size_),
+        copy_from_buffer_(size_, CL_MEM_READ_ONLY|CL_MEM_HOST_WRITE_ONLY) {}
 
     size_type size () const {return size_;}
 
     std::size_t state_size () const {return state_size_;}
 
+    /// \brief Change state size
     void resize_state (std::size_t state_size)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(
@@ -230,6 +232,14 @@ class StateCL
         state_size_ = state_size;
         state_buffer_.resize(state_size_ * size_);
     }
+
+    /// \brief Change state buffer flag (cause reallocation)
+    void update_state (::cl_mem_flags flag)
+    {state_buffer_.resize(state_size_ * size_, flag);}
+
+    /// \brief Change state buffer flag and host pointer (cause reallocation)
+    void update_state (::cl_mem_flags flag, void *host_ptr)
+    {state_buffer_.resize(state_size_ * size_, flag, host_ptr);}
 
     /// \brief The instance of the CLManager signleton associated with this
     /// value collcection
@@ -413,7 +423,7 @@ class InitializeCL
                 kernel_, particle.size(), configure_.local_size());
         post_processor(particle);
 
-        return accept_count(particle, accept_buffer_.data());
+        return accept_count(particle, accept_buffer_);
     }
 
     virtual void initialize_param (Particle<T> &, void *) {}
@@ -422,11 +432,10 @@ class InitializeCL
     virtual void post_processor (Particle<T> &) {}
 
     virtual std::size_t accept_count (Particle<T> &particle,
-            const ::cl::Buffer &accept_buffer)
+            const CLBuffer<cl_ulong, typename T::id> &accept_buffer)
     {
-        accept_host_.resize(particle.size());
         particle.value().manager().read_buffer(
-                accept_buffer, particle.size(), &accept_host_[0]);
+                accept_buffer.data(), particle.size(), &accept_host_[0]);
 
         return static_cast<std::size_t>(std::accumulate(
                     accept_host_.begin(), accept_host_.end(),
@@ -442,7 +451,10 @@ class InitializeCL
 
     virtual void set_kernel_args (const Particle<T> &particle)
     {
-        accept_buffer_.resize(particle.size());
+        accept_host_.resize(particle.size());
+        accept_buffer_.resize(particle.size(),
+                CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY|CL_MEM_USE_HOST_PTR,
+                &accept_host_[0]);
         cl_set_kernel_args(kernel_, 0,
                 particle.value().state_buffer().data(), accept_buffer_.data());
     }
@@ -499,7 +511,7 @@ class MoveCL
                 kernel_, particle.size(), configure_.local_size());
         post_processor(iter, particle);
 
-        return accept_count(particle, accept_buffer_.data());
+        return accept_count(particle, accept_buffer_);
     }
 
     virtual void move_state (std::size_t, std::string &) {}
@@ -507,11 +519,10 @@ class MoveCL
     virtual void post_processor (std::size_t, Particle<T> &) {}
 
     virtual std::size_t accept_count (Particle<T> &particle,
-            const ::cl::Buffer &accept_buffer)
+            const CLBuffer<cl_ulong, typename T::id> &accept_buffer)
     {
-        accept_host_.resize(particle.size());
         particle.value().manager().read_buffer(
-                accept_buffer, particle.size(), &accept_host_[0]);
+                accept_buffer.data(), particle.size(), &accept_host_[0]);
 
         return static_cast<std::size_t>(std::accumulate(
                     accept_host_.begin(), accept_host_.end(),
@@ -528,7 +539,10 @@ class MoveCL
     virtual void set_kernel_args (std::size_t iter,
             const Particle<T> &particle)
     {
-        accept_buffer_.resize(particle.size());
+        accept_host_.resize(particle.size());
+        accept_buffer_.resize(particle.size(),
+                CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY|CL_MEM_USE_HOST_PTR,
+                &accept_host_[0]);
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 particle.value().state_buffer().data(), accept_buffer_.data());
     }
@@ -606,7 +620,8 @@ class MonitorEvalCL
     virtual void set_kernel_args (std::size_t iter, std::size_t dim,
             const Particle<T> &particle)
     {
-        buffer_.resize(particle.size() * dim);
+        buffer_.resize(particle.size() * dim,
+                CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY);
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 static_cast<cl_ulong>(dim),
                 particle.value().state_buffer().data(), buffer_.data());
@@ -686,7 +701,8 @@ class PathEvalCL
     virtual void set_kernel_args (std::size_t iter,
             const Particle<T> &particle)
     {
-        buffer_.resize(particle.size());
+        buffer_.resize(particle.size(),
+                CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY);
         cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
                 particle.value().state_buffer().data(), buffer_.data());
     }

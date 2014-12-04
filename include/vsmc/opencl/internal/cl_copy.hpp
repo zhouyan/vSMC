@@ -43,9 +43,13 @@ class CLCopy
 {
     public :
 
+    typedef CLManager<ID> manager_type;
+
     CLCopy () : size_(0) {}
 
     std::size_t size () {return size_;}
+
+    static manager_type &manager() {return manager_type::instance();}
 
     void operator() (const ::cl::Buffer &copy_from, const ::cl::Buffer &state)
     {
@@ -94,8 +98,6 @@ class CLCopy
     ::cl::Program program_;
     ::cl::Kernel kernel_;
     CLConfigure configure_;
-
-    CLManager<ID> &manager() {return CLManager<ID>::instance();}
 }; // class CLCopy
 
 } } // namespace vsmc::internal

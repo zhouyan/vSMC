@@ -209,14 +209,16 @@ class CLManager
 
     /// \brief Create an OpenCL buffer of a given type and number of elements
     template <typename CLType>
-    ::cl::Buffer create_buffer (std::size_t num) const
+    ::cl::Buffer create_buffer (std::size_t num,
+            ::cl_mem_flags flag = CL_MEM_READ_WRITE,
+            void *host_ptr = VSMC_NULLPTR) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
 
         if (num == 0)
             return ::cl::Buffer();
 
-        return ::cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
+        return ::cl::Buffer(context_, flag, sizeof(CLType) * num, host_ptr);
     }
 
     /// \brief Create an OpenCL buffer of a given type from a range of elements

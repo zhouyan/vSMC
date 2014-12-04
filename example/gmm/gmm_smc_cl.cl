@@ -126,13 +126,13 @@ void gmm_init (__global gmm_param *state, __global ulong *accept,
 __kernel
 void gmm_move_smc (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global fp_type *inc_weight, fp_type alpha_inc)
+        __global fp_type *exp_weight, fp_type alpha_inc)
 {
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
 
-    inc_weight[id] = alpha_inc * state[id].log_likelihood;
+    exp_weight[id] = exp(alpha_inc * state[id].log_likelihood);
     accept[id] = 0;
 }
 

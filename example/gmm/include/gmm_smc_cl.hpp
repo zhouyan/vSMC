@@ -66,8 +66,10 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
 
     gmm_state (size_type N) : base(N)
     {
+        this->update_state(CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
         counter_ = this->manager().template
-            create_buffer<struct r123array4x32>(N);
+            create_buffer<struct r123array4x32>(N,
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
     }
 
     const cl::Buffer &obs () const {return obs_;}
@@ -104,7 +106,9 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
         for (std::size_t i = 0; i != obs.size(); ++i)
             data >> obs[i];
         obs_ = this->manager().template
-            create_buffer<fp_type>(obs.begin(), obs.end());
+            create_buffer<fp_type>(obs.size(),
+                    CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR|
+                    CL_MEM_HOST_WRITE_ONLY, &obs[0]);
         data.close();
         data.clear();
 
@@ -253,12 +257,12 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
         using std::sqrt;
 
         gmm_state<FPType> &state = particle.value();
-        if (weight_.size() != state.size()) {
-            inc_weight_device_ = state.manager().template
-                create_buffer<FPType>(state.size());
-            weight_.resize(state.size());
-            inc_weight_.resize(state.size());
+        if (exp_weight_.size() != state.size()) {
             exp_weight_.resize(state.size());
+            exp_weight_device_ = state.manager().template
+                create_buffer<FPType>(state.size(),
+                        CL_MEM_WRITE_ONLY|CL_MEM_HOST_READ_ONLY|
+                        CL_MEM_USE_HOST_PTR, &exp_weight_[0]);
         }
 
         FPType a = static_cast<FPType>(iter) / iter_num_;
@@ -271,7 +275,7 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
         state.weight_sd() = (1 + sqrt(1 / a)) * 0.20f;
 
         vsmc::cl_set_kernel_args(this->kernel(),
-                this->kernel_args_offset(), inc_weight_device_,
+                this->kernel_args_offset(), exp_weight_device_,
                 static_cast<FPType>(state.alpha_inc()));
     }
 
@@ -282,31 +286,24 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
 
         gmm_state<FPType> &state = particle.value();
         state.manager().template read_buffer<FPType>(
-                inc_weight_device_, state.size(), &inc_weight_[0]);
+                exp_weight_device_, state.size(), &exp_weight_[0]);
 
-        for (typename vsmc::Particle<gmm_state<FPType> >::size_type i = 0;
-                i != state.size(); ++i) {
-            exp_weight_[i] = exp(inc_weight_[i]);
-        }
-
-        particle.weight_set().read_weight(&weight_[0]);
         double sum = 0;
+        const double *wptr = particle.weight_set().weight_data();
         for (typename vsmc::Particle<gmm_state<FPType> >::size_type i = 0;
                 i != state.size(); ++i) {
-            sum += weight_[i] * exp_weight_[i];
+            sum += wptr[i] * exp_weight_[i];
         }
 
         state.zconst() += log(sum);
-        particle.weight_set().add_log_weight(&inc_weight_[0]);
+        particle.weight_set().mul_weight(&exp_weight_[0]);
     }
 
     private :
 
     std::size_t iter_num_;
-    cl::Buffer inc_weight_device_;
-    std::vector<double> weight_;
-    std::vector<double> inc_weight_;
-    std::vector<double> exp_weight_;
+    cl::Buffer exp_weight_device_;
+    std::vector<FPType> exp_weight_;
 };
 
 template <typename Move, typename FPType>
