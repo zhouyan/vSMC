@@ -41,7 +41,8 @@ namespace vsmc {
 /// \ingroup OpenCL
 enum OpenCLDeviceFeature
 {
-    OpenCLDeviceDoubleFP ///< double precision floating points
+    OpenCLDeviceDoubleFP,    ///< Double precision floating points
+    OpenCLDeviceImageSupport ///< Image support
 };
 
 /// \brief Query OpenCL information
@@ -291,6 +292,19 @@ class CLQuery
         ::cl_device_fp_config config;
         dev.getInfo(CL_DEVICE_DOUBLE_FP_CONFIG, &config);
         if (config != 0)
+            return true;
+#endif
+        return false;
+    }
+
+    static bool check_feature (const ::cl::Device &dev,
+            cxx11::integral_constant<OpenCLDeviceFeature,
+            OpenCLDeviceImageSupport>)
+    {
+#if VSMC_OPENCL_VERSION >= 120
+        cl_bool support;
+        dev.getInfo(CL_DEVICE_IMAGE_SUPPORT, &support);
+        if (support != 0)
             return true;
 #endif
         return false;
@@ -554,13 +568,9 @@ class CLQuery
     static void print_dev_image_support (
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
-        cl_bool support;
-        dev.getInfo(CL_DEVICE_IMAGE_SUPPORT, &support);
-        if (support == 0)
+        if (!has_feature<OpenCLDeviceImageSupport>(dev))
             return;
-        print_info_val<cl_bool, ::cl_device_info>(os, dev,
-                CL_DEVICE_IMAGE_SUPPORT,
-                "CL_DEVICE_IMAGE_SUPPORT");
+
         print_info_val<cl_uint, ::cl_device_info>(os, dev,
                 CL_DEVICE_MAX_READ_IMAGE_ARGS,
                 "CL_DEVICE_MAX_READ_IMAGE_ARGS");
@@ -599,6 +609,30 @@ class CLQuery
             const std::string &name, std::vector<std::string> &strvec)
     {if ((info & val) != 0) strvec.push_back(name);}
 
+    template <typename T>
+    static std::string byte_string (const T &val, cxx11::true_type)
+    {
+        std::size_t B = static_cast<std::size_t>(val);
+        std::size_t K = 1024;
+        std::size_t M = 1024 * K;
+        std::size_t G = 1024 * M;
+        std::stringstream ss;
+        if (B >= G)
+            ss << (B % G == 0 ? B / G : static_cast<double>(B) / G) << 'G';
+        else if (B >= M)
+            ss << (B % M == 0 ? B / M : static_cast<double>(B) / M) << 'M';
+        else if (B >= K)
+            ss << (B % K == 0 ? B / K : static_cast<double>(B) / K) << 'K';
+        else
+            ss << B;
+
+        return ss.str();
+    }
+
+    template <typename T>
+    static std::string byte_string (const T &, cxx11::false_type)
+    {return std::string();}
+
     static std::vector<std::string> split_string (const std::string &str)
     {
         std::istringstream ss(str);
@@ -616,7 +650,10 @@ class CLQuery
         T val;
         obj.getInfo(static_cast<CLInfoType>(info), &val);
         print_name(os, name);
-        print_val(os, val);
+        if (cxx11::is_integral<T>::value && unit == std::string("byte"))
+            print_val(os, byte_string(val, cxx11::is_integral<T>()));
+        else
+            print_val(os, val);
         os << ' ' << unit << '\n';
     }
 
