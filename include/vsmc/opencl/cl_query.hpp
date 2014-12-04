@@ -37,6 +37,13 @@
 
 namespace vsmc {
 
+/// \brief OpenCL device features
+/// \ingroup OpenCL
+enum OpenCLDeviceFeature
+{
+    OpenCLDeviceDoubleFP ///< double precision floating points
+};
+
 /// \brief Query OpenCL information
 /// \ingroup OpenCL
 class CLQuery
@@ -58,8 +65,7 @@ class CLQuery
     static int opencl_version (const ::cl::Device &dev)
     {
         std::string version;
-        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_VERSION),
-                &version);
+        dev.getInfo(CL_DEVICE_VERSION, &version);
 
         return check_opencl_version(version.substr(7, 3));
     }
@@ -70,10 +76,16 @@ class CLQuery
     static int opencl_c_version (const ::cl::Device &dev)
     {
         std::string version;
-        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_OPENCL_C_VERSION),
-                &version);
+        dev.getInfo(CL_DEVICE_OPENCL_C_VERSION, &version);
 
         return check_opencl_version(version.substr(9, 3));
+    }
+
+    template <OpenCLDeviceFeature feat>
+    static bool has_feature (const ::cl::Device &dev)
+    {
+        return check_feature(dev,
+                cxx11::integral_constant<OpenCLDeviceFeature, feat>());
     }
 
     /// \brief Query all information
@@ -168,8 +180,7 @@ class CLQuery
             return os;
 
         std::vector< ::cl::Device> device;
-        ctx.getInfo(static_cast< ::cl_context_info>(CL_CONTEXT_DEVICES),
-                &device);
+        ctx.getInfo(CL_CONTEXT_DEVICES, &device);
         for (std::vector< ::cl::Device>::const_iterator d = device.begin();
                 d != device.end(); ++d)
             info(os, *d);
@@ -202,10 +213,9 @@ class CLQuery
             return os;
 
         ::cl::Context ctx;
-        kern.getInfo(static_cast< ::cl_kernel_info>(CL_KERNEL_CONTEXT), &ctx);
+        kern.getInfo(CL_KERNEL_CONTEXT, &ctx);
         std::vector< ::cl::Device> device;
-        ctx.getInfo(static_cast< ::cl_kernel_info>(CL_CONTEXT_DEVICES),
-                &device);
+        ctx.getInfo(CL_CONTEXT_DEVICES, &device);
         for (std::vector< ::cl::Device>::const_iterator d = device.begin();
                 d != device.end(); ++d) {
             print_info_val<std::string, ::cl_device_info>(os, *d,
@@ -269,6 +279,23 @@ class CLQuery
         return 100;
     }
 
+    static bool check_feature (const ::cl::Device &dev,
+            cxx11::integral_constant<OpenCLDeviceFeature,
+            OpenCLDeviceDoubleFP>)
+    {
+        std::string info;
+        dev.getInfo(CL_DEVICE_EXTENSIONS, &info);
+        if (info.find("cl_khr_fp64") != std::string::npos)
+            return true;
+#if VSMC_OPENCL_VERSION >= 120
+        ::cl_device_fp_config config;
+        dev.getInfo(CL_DEVICE_DOUBLE_FP_CONFIG, &config);
+        if (config != 0)
+            return true;
+#endif
+        return false;
+    }
+
     template <typename CharT, typename Traits>
     static void print_equal (std::basic_ostream<CharT, Traits> &os)
     {os << std::string(90, '=') << '\n';}
@@ -282,8 +309,7 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const ::cl::Platform &plat)
     {
         std::string info;
-        plat.getInfo(static_cast< ::cl_platform_info>(CL_PLATFORM_EXTENSIONS),
-                &info);
+        plat.getInfo(CL_PLATFORM_EXTENSIONS, &info);
         print_name(os, "CL_PLATFORM_EXTENSIONS");
         print_val(os, split_string(info));
         os << '\n';
@@ -315,8 +341,7 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
         std::string info;
-        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_EXTENSIONS),
-                &info);
+        dev.getInfo(CL_DEVICE_EXTENSIONS, &info);
         print_name(os, "CL_DEVICE_EXTENSIONS");
         print_val(os, split_string(info));
         os << '\n';
@@ -328,7 +353,7 @@ class CLQuery
     {
         ::cl_device_type type;
         std::vector<std::string> info;
-        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_TYPE), &type);
+        dev.getInfo(CL_DEVICE_TYPE, &type);
 
         append_bit_field< ::cl_device_type>(CL_DEVICE_TYPE_CPU,
                 type, "CL_DEVICE_TYPE_CPU", info);
@@ -469,8 +494,7 @@ class CLQuery
     {
         ::cl_device_fp_config config;
         std::vector<std::string> info;
-        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_SINGLE_FP_CONFIG),
-                &config);
+        dev.getInfo(CL_DEVICE_SINGLE_FP_CONFIG, &config);
 
         append_bit_field< ::cl_device_fp_config>(CL_FP_DENORM,
                 config, "CL_FP_DENORM", info);
@@ -499,10 +523,12 @@ class CLQuery
     static void print_dev_double_fp_config (
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
+        if (!has_feature<OpenCLDeviceDoubleFP>(dev))
+            return;
+
         ::cl_device_fp_config config;
         std::vector<std::string> info;
-        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_DOUBLE_FP_CONFIG),
-                &config);
+        dev.getInfo(CL_DEVICE_DOUBLE_FP_CONFIG, &config);
 
         append_bit_field< ::cl_device_fp_config>(CL_FP_DENORM,
                 config, "CL_FP_DENORM", info);
@@ -529,8 +555,7 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
         cl_bool support;
-        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_IMAGE_SUPPORT),
-                &support);
+        dev.getInfo(CL_DEVICE_IMAGE_SUPPORT, &support);
         if (support == 0)
             return;
         print_info_val<cl_bool, ::cl_device_info>(os, dev,
