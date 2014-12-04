@@ -112,8 +112,7 @@ class CLQuery
                 CL_PLATFORM_VERSION, "CL_PLATFORM_VERSION");
         print_info_val<std::string, ::cl_platform_info>(os, plat,
                 CL_PLATFORM_PROFILE, "CL_PLATFORM_PROFILE");
-        print_info_val<std::string, ::cl_platform_info>(os, plat,
-                CL_PLATFORM_EXTENSIONS, "CL_PLATFORM_EXTENSIONS");
+        print_plat_extensions(os, plat);
 
         std::vector< ::cl::Device> device;
         plat.getDevices(CL_DEVICE_TYPE_ALL, &device);
@@ -135,21 +134,23 @@ class CLQuery
         print_dash(os);
         print_dev_version(os, dev);
         os << '\n';
+        print_dev_extensions(os, dev);
+        os << '\n';
         print_dev_processor(os, dev);
         os << '\n';
         print_dev_memory(os, dev);
         os << '\n';
         print_dev_vector(os, dev);
 #if VSMC_OPENCL_VERSION >= 120
+        os << '\n';
+        print_dev_single_fp_config(os, dev);
+        os << '\n';
+        print_dev_double_fp_config(os, dev);
         if (opencl_version(dev) >= 120) {
             os << '\n';
             print_info_val<std::string, ::cl_device_info>(os, dev,
                     CL_DEVICE_BUILT_IN_KERNELS,
                     "CL_DEVICE_BUILT_IN_KERNELS");
-            os << '\n';
-            print_dev_single_fp_config(os, dev);
-            os << '\n';
-            print_dev_double_fp_config(os, dev);
             os << '\n';
             print_dev_image_support(os, dev);
         }
@@ -277,6 +278,18 @@ class CLQuery
     {os << std::string(90, '-') << '\n';}
 
     template <typename CharT, typename Traits>
+    static void print_plat_extensions (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Platform &plat)
+    {
+        std::string info;
+        plat.getInfo(static_cast< ::cl_platform_info>(CL_PLATFORM_EXTENSIONS),
+                &info);
+        print_name(os, "CL_PLATFORM_EXTENSIONS");
+        print_val(os, split_string(info));
+        os << '\n';
+    }
+
+    template <typename CharT, typename Traits>
     static void print_dev_version (
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
@@ -295,8 +308,18 @@ class CLQuery
                 CL_DEVICE_VERSION, "CL_DEVICE_VERSION");
         print_info_val<std::string, ::cl_device_info>(os, dev,
                 CL_DEVICE_OPENCL_C_VERSION, "CL_DEVICE_OPENCL_C_VERSION");
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-                CL_DEVICE_EXTENSIONS, "CL_DEVICE_EXTENSIONS");
+    }
+
+    template <typename CharT, typename Traits>
+    static void print_dev_extensions (
+            std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
+    {
+        std::string info;
+        dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_EXTENSIONS),
+                &info);
+        print_name(os, "CL_DEVICE_EXTENSIONS");
+        print_val(os, split_string(info));
+        os << '\n';
     }
 
     template <typename CharT, typename Traits>
@@ -304,7 +327,7 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
         ::cl_device_type type;
-        std::string info;
+        std::vector<std::string> info;
         dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_TYPE), &type);
 
         append_bit_field< ::cl_device_type>(CL_DEVICE_TYPE_CPU,
@@ -445,7 +468,7 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
         ::cl_device_fp_config config;
-        std::string info;
+        std::vector<std::string> info;
         dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_SINGLE_FP_CONFIG),
                 &config);
 
@@ -477,7 +500,7 @@ class CLQuery
             std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
         ::cl_device_fp_config config;
-        std::string info;
+        std::vector<std::string> info;
         dev.getInfo(static_cast< ::cl_device_info>(CL_DEVICE_DOUBLE_FP_CONFIG),
                 &config);
 
@@ -548,13 +571,15 @@ class CLQuery
 
     template <typename T>
     static void append_bit_field (T info, T val,
-            const std::string &name, std::string &orig)
+            const std::string &name, std::vector<std::string> &strvec)
+    {if ((info & val) != 0) strvec.push_back(name);}
+
+    static std::vector<std::string> split_string (const std::string &str)
     {
-        if ((info & val) != 0) {
-            if (orig.length() != 0)
-                orig.append(" ");
-            orig.append(name);
-        }
+        std::istringstream ss(str);
+        return std::vector<std::string>(
+                std::istream_iterator<std::string>(ss),
+                std::istream_iterator<std::string>());
     }
 
     template <typename T, typename CLInfoType,
@@ -604,58 +629,31 @@ class CLQuery
     static void print_val (std::basic_ostream<CharT, Traits> &os, const T &val)
     {os << val;}
 
-    template <typename CharT, typename Traits>
-    static void print_val (std::basic_ostream<CharT, Traits> &os,
-            const std::string &val)
-    {
-        if (val.size() <= 60) {
-            os << val;
-            return;
-        }
-
-        std::size_t pos = val.find(' ');
-        if (pos == std::string::npos)
-            os << val;
-            return;
-        }
-
-        std::string::size_type init = 0;
-        std::vector<std::string> val_tmp;
-        std::vector<std::string> val_vec;
-        while (pos != std::string::npos) {
-            val_tmp.push_back(val.substr(init, pos - init + 1));
-            init = pos + 1;
-            pos = val.find(' ', init);
-        }
-        for (std::size_t i = 0; i != val_tmp.size(); ++i) {
-            if (val_tmp[i] != std::string(" "))
-                val_vec.push_back(val_tmp[i]);
-        }
-
-        if (val_vec.size() == 0)
-            return;
-
-        if (val_vec.size() == 1) {
-            os << val_vec[0];
-            return;
-        }
-
-        os << val_vec[0] << '\n';
-        for (std::size_t i = 1; i != val_vec.size() - 1; ++i) {
-            os << std::string(41, ' ');
-            os << val_vec[i] << '\n';
-        }
-        os << std::string(41, ' ');
-        os << val_vec.back();
-    }
-
     template <typename T, typename CharT, typename Traits>
     static void print_val (std::basic_ostream<CharT, Traits> &os,
             const std::vector<T> &val)
     {
-        for (typename std::vector<T>::const_iterator v = val.begin();
-                v != val.end(); ++v)
-            os << *v << ' ';
+        for (std::size_t i = 0; i != val.size(); ++i)
+            os << val[i] << ' ';
+    }
+
+    template <typename CharT, typename Traits>
+    static void print_val (std::basic_ostream<CharT, Traits> &os,
+            const std::vector<std::string> &val)
+    {
+        if (val.size() == 0)
+            return;
+
+        if (val.size() == 1) {
+            os << val[0];
+            return;
+        }
+
+        os << val[0] << '\n';
+        for (std::size_t i = 1; i != val.size() - 1; ++i) {
+            os << std::string(41, ' ') << val[i] << '\n';
+        }
+        os << std::string(41, ' ') << val.back();
     }
 }; //class CLQuery
 
