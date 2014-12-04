@@ -613,13 +613,8 @@ class CLQuery
             return;
         }
 
-        char sepchar;
-        std::size_t pos;
-        if ((pos = val.find(' ')) != std::string::npos)
-            sepchar = ' ';
-        else if ((pos = val.find(';')) != std::string::npos)
-            sepchar = ';';
-        else {
+        std::size_t pos = val.find(' ');
+        if (pos == std::string::npos)
             os << val;
             return;
         }
@@ -630,7 +625,7 @@ class CLQuery
         while (pos != std::string::npos) {
             val_tmp.push_back(val.substr(init, pos - init + 1));
             init = pos + 1;
-            pos = val.find(sepchar, init);
+            pos = val.find(' ', init);
         }
         for (std::size_t i = 0; i != val_tmp.size(); ++i) {
             if (val_tmp[i] != std::string(" "))
@@ -647,12 +642,10 @@ class CLQuery
 
         os << val_vec[0] << '\n';
         for (std::size_t i = 1; i != val_vec.size() - 1; ++i) {
-            for (std::size_t s = 0; s != 41; ++s)
-                os << ' ';
+            os << std::string(41, ' ');
             os << val_vec[i] << '\n';
         }
-        for (std::size_t i = 0; i != 41; ++i)
-            os << ' ';
+        os << std::string(41, ' ');
         os << val_vec.back();
     }
 

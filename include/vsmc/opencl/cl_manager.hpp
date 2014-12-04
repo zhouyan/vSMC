@@ -168,7 +168,7 @@ class CLManager
 
     /// \brief Try to setup the platform, context, device and command queue
     /// using the given device type
-    bool setup (cl_device_type dev)
+    bool setup (::cl_device_type dev)
     {
         setup_ = false;
         setup_cl_manager(dev);
@@ -516,7 +516,7 @@ class CLManager
         }
     }
 
-    void setup_cl_manager (cl_device_type dev_type)
+    void setup_cl_manager (::cl_device_type dev_type)
     {
         setup_ = false;
 
@@ -561,7 +561,7 @@ class CLManager
         setup_ = true;
     }
 
-    bool platform_filter (cl_device_type dev_type)
+    bool platform_filter (::cl_device_type dev_type)
     {
         std::vector< ::cl::Platform> platform_vec;
         try {
