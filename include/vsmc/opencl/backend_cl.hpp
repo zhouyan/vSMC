@@ -360,6 +360,14 @@ class StateCL
         copy_(copy_from_buffer_.data(), state_buffer_.data());
     }
 
+    CLConfigure &copy_configure () {return copy_.configure();}
+
+    const CLConfigure &copy_configure () const {return copy_.configure();}
+
+    ::cl::Kernel &copy_kernel () {return copy_.kernel();}
+
+    const ::cl::Kernel &copy_kernel () const {return copy_.kernel();}
+
     private :
 
     std::size_t state_size_;
