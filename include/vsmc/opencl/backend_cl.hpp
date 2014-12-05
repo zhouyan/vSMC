@@ -49,8 +49,8 @@
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type) \
-    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value                \
-                || cxx11::is_same<type, cl_double>::value),                  \
+    VSMC_STATIC_ASSERT((cxx11::is_same<type, ::cl_float>::value              \
+                || cxx11::is_same<type, ::cl_double>::value),                \
             USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func) \
@@ -207,7 +207,7 @@ class StateCL
 {
     public :
 
-    typedef cl_ulong size_type;
+    typedef ::cl_ulong size_type;
     typedef FPType fp_type;
     typedef ID id;
     typedef CLManager<ID> manager_type;
@@ -417,7 +417,7 @@ class InitializeCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 2;}
+    static VSMC_CONSTEXPR ::cl_uint kernel_args_offset () {return 2;}
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
@@ -443,14 +443,14 @@ class InitializeCL
     virtual void post_processor (Particle<T> &) {}
 
     virtual std::size_t accept_count (Particle<T> &particle,
-            const CLBuffer<cl_ulong, typename T::id> &accept_buffer)
+            const CLBuffer< ::cl_ulong, typename T::id> &accept_buffer)
     {
         particle.value().manager().read_buffer(
                 accept_buffer.data(), particle.size(), &accept_host_[0]);
 
         return static_cast<std::size_t>(std::accumulate(
                     accept_host_.begin(), accept_host_.end(),
-                    static_cast<cl_ulong>(0)));
+                    static_cast< ::cl_ulong>(0)));
     }
 
     virtual void set_kernel (const Particle<T> &particle)
@@ -490,8 +490,8 @@ class InitializeCL
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    CLBuffer<cl_ulong, typename T::id> accept_buffer_;
-    std::vector<cl_ulong> accept_host_;
+    CLBuffer< ::cl_ulong, typename T::id> accept_buffer_;
+    std::vector< ::cl_ulong> accept_host_;
 }; // class InitializeCL
 
 /// \brief Sampler<T>::move_type subtype using OpenCL
@@ -516,7 +516,7 @@ class MoveCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 3;}
+    static VSMC_CONSTEXPR ::cl_uint kernel_args_offset () {return 3;}
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
@@ -540,14 +540,14 @@ class MoveCL
     virtual void post_processor (std::size_t, Particle<T> &) {}
 
     virtual std::size_t accept_count (Particle<T> &particle,
-            const CLBuffer<cl_ulong, typename T::id> &accept_buffer)
+            const CLBuffer< ::cl_ulong, typename T::id> &accept_buffer)
     {
         particle.value().manager().read_buffer(
                 accept_buffer.data(), particle.size(), &accept_host_[0]);
 
         return static_cast<std::size_t>(std::accumulate(
                     accept_host_.begin(), accept_host_.end(),
-                    static_cast<cl_ulong>(0)));
+                    static_cast< ::cl_ulong>(0)));
     }
 
     virtual void set_kernel (std::size_t iter, const Particle<T> &particle)
@@ -574,7 +574,7 @@ class MoveCL
         accept_buffer_.resize(particle.size(),
                 CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
 #endif
-        cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
+        cl_set_kernel_args(kernel_, 0, static_cast< ::cl_ulong>(iter),
                 particle.value().state_buffer().data(), accept_buffer_.data());
     }
 
@@ -588,8 +588,8 @@ class MoveCL
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    CLBuffer<cl_ulong, typename T::id> accept_buffer_;
-    std::vector<cl_ulong> accept_host_;
+    CLBuffer< ::cl_ulong, typename T::id> accept_buffer_;
+    std::vector< ::cl_ulong> accept_host_;
 }; // class MoveCL
 
 /// \brief Monitor<T>::eval_type subtype using OpenCL
@@ -615,7 +615,7 @@ class MonitorEvalCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 4;}
+    static VSMC_CONSTEXPR ::cl_uint kernel_args_offset () {return 4;}
 
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
@@ -661,8 +661,8 @@ class MonitorEvalCL
 #else
         buffer_.resize(particle.size() * dim);
 #endif
-        cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
-                static_cast<cl_ulong>(dim),
+        cl_set_kernel_args(kernel_, 0, static_cast< ::cl_ulong>(iter),
+                static_cast< ::cl_ulong>(dim),
                 particle.value().state_buffer().data(), buffer_.data());
     }
 
@@ -702,7 +702,7 @@ class PathEvalCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 3;}
+    static VSMC_CONSTEXPR ::cl_uint kernel_args_offset () {return 3;}
 
     double operator() (std::size_t iter, const Particle<T> &particle,
         double *res)
@@ -750,7 +750,7 @@ class PathEvalCL
 #else
         buffer_.resize(particle.size());
 #endif
-        cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
+        cl_set_kernel_args(kernel_, 0, static_cast< ::cl_ulong>(iter),
                 particle.value().state_buffer().data(), buffer_.data());
     }
 

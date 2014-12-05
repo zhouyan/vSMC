@@ -126,7 +126,7 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
     return diff_size;
 }
 
-inline void cl_set_kernel_args (::cl::Kernel &, cl_uint) {}
+inline void cl_set_kernel_args (::cl::Kernel &, ::cl_uint) {}
 
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 /// \brief Set OpenCL kernel arguments
@@ -139,7 +139,7 @@ inline void cl_set_kernel_args (::cl::Kernel &, cl_uint) {}
 /// by the compiler's implementation). Otherwise this function supports up to
 /// 16 arguments.
 template <typename Arg1, typename... Args>
-inline void cl_set_kernel_args (::cl::Kernel &kern, cl_uint offset,
+inline void cl_set_kernel_args (::cl::Kernel &kern, ::cl_uint offset,
         const Arg1 &arg1, const Args &... args)
 {
     kern.setArg(offset, arg1);

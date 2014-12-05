@@ -213,8 +213,7 @@ class CLManager
             program.getBuildInfo(*diter, CL_PROGRAM_BUILD_STATUS, &status);
             if (status != CL_BUILD_SUCCESS) {
                 program.getBuildInfo(device_, CL_PROGRAM_BUILD_LOG, &log);
-                diter->getInfo(static_cast<cl_device_info>(CL_DEVICE_NAME),
-                        &dname);
+                diter->getInfo(CL_DEVICE_NAME, &dname);
                 os << line << "Build failed for : " << dname << std::endl;
                 os << line << log << std::endl << line << std::endl;
             }
@@ -533,7 +532,7 @@ class CLManager
             device_filter(dev_pool, dev_select);
             if (dev_select.size() != 0) {
                 ::cl_context_properties context_properties[] = {
-                    static_cast< ::cl_context_properties>(CL_CONTEXT_PLATFORM),
+                    CL_CONTEXT_PLATFORM,
                     reinterpret_cast< ::cl_context_properties>(platform_()), 0
                 };
                 context_ = ::cl::Context(dev_select, context_properties);

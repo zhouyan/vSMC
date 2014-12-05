@@ -53,7 +53,7 @@ class CLCopy
 
     void operator() (const ::cl::Buffer &copy_from, const ::cl::Buffer &state)
     {
-        vsmc::cl_set_kernel_args(kernel_, 0, copy_from, state);
+        cl_set_kernel_args(kernel_, 0, copy_from, state);
         manager().run_kernel(kernel_, size_, configure_.local_size());
     }
 
