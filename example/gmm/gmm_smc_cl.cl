@@ -91,6 +91,20 @@ VSMC_STATIC_INLINE fp_type log_target (gmm_param *pparam,
     return pparam->log_target = lt;
 }
 
+VSMC_STATIC_INLINE fp_type lp_weight (const fp_type *weight)
+{
+    fp_type sum_lw = 1;
+    fp_type sum_llw = 0;
+    for (unsigned d = 0; d != CompNum - 1; ++d) {
+        fp_type w = weight[d] / weight[CompNum - 1];
+        sum_lw += w;
+        sum_llw += log(w);
+    }
+    sum_llw -= CompNum * log(sum_lw);
+
+    return sum_llw;
+}
+
 __kernel
 void gmm_init (__global gmm_param *state, __global ulong *accept,
         __global const fp_type *lambda_host,
@@ -147,13 +161,7 @@ void gmm_move_mu (ulong iter,
         return;
 
     gmm_param param = state[id];
-    fp_type mu_old[CompNum];
-    for (uint d = 0; d != CompNum; ++d)
-        mu_old[d] = param.mu[d];
-    const fp_type log_prior_old = param.log_prior;
-    const fp_type log_likelihood_old = param.log_likelihood;
-    const fp_type log_target_old =
-        param.log_prior + alpha * param.log_likelihood;
+    fp_type p = -(param.log_prior + alpha * param.log_likelihood);
 
     cburng4x32_rng_t rng;
     cburng4x32_init(&rng, Seed + id);
@@ -164,19 +172,14 @@ void gmm_move_mu (ulong iter,
     for (uint d = 0; d != CompNum; ++d)
         param.mu[d] += NORMAL01_4x32_RAND(&rnorm, &rng) * sd;
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
-    fp_type p = param.log_target - log_target_old;
+    p += param.log_target;
     fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
-    ulong acc = 1;
-    if (p < u) {
-        for (uint d = 0; d != CompNum; ++d)
-            param.mu[d] = mu_old[d];
-        param.log_prior      = log_prior_old;
-        param.log_likelihood = log_likelihood_old;
-        param.log_target     = log_target_old;
-        acc = 0;
+    ulong acc = 0;
+    if (p > u) {
+        acc = 1;
+        state[id] = param;
     }
 
-    state[id] = param;
     accept[id] = acc;
     counter[id] = rng.ctr;
 }
@@ -194,13 +197,9 @@ void gmm_move_lambda (ulong iter,
         return;
 
     gmm_param param = state[id];
-    fp_type lambda_old[CompNum];
+    fp_type p = -(param.log_prior + alpha * param.log_likelihood);
     for (uint d = 0; d != CompNum; ++d)
-        lambda_old[d] = param.lambda[d];
-    const fp_type log_prior_old = param.log_prior;
-    const fp_type log_likelihood_old = param.log_likelihood;
-    const fp_type log_target_old =
-        param.log_prior + alpha * param.log_likelihood;
+        p -= log(param.lambda[d]);
 
     cburng4x32_rng_t rng;
     cburng4x32_init(&rng, Seed + id);
@@ -211,21 +210,16 @@ void gmm_move_lambda (ulong iter,
     for (uint d = 0; d != CompNum; ++d)
         param.lambda[d] *= exp(NORMAL01_4x32_RAND(&rnorm, &rng) * sd);
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
-    fp_type p = param.log_target - log_target_old;
+    p += param.log_target;
     for (uint d = 0; d != CompNum; ++d)
-        p += log(param.lambda[d]) - log(lambda_old[d]);
+        p += log(param.lambda[d]);
     fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
-    ulong acc = 1;
-    if (p < u) {
-        for (uint d = 0; d != CompNum; ++d)
-            param.lambda[d] = lambda_old[d];
-        param.log_prior      = log_prior_old;
-        param.log_likelihood = log_likelihood_old;
-        param.log_target     = log_target_old;
-        acc = 0;
+    ulong acc = 0;
+    if (p > u) {
+        acc = 1;
+        state[id] = param;
     }
 
-    state[id] = param;
     accept[id] = acc;
     counter[id] = rng.ctr;
 }
@@ -243,13 +237,8 @@ void gmm_move_weight (ulong iter,
         return;
 
     gmm_param param = state[id];
-    fp_type weight_old[CompNum];
-    for (uint d = 0; d != CompNum; ++d)
-        weight_old[d] = param.weight[d];
-    const fp_type log_prior_old = param.log_prior;
-    const fp_type log_likelihood_old = param.log_likelihood;
-    const fp_type log_target_old =
-        param.log_prior + alpha * param.log_likelihood;
+    fp_type p = -(param.log_prior + alpha * param.log_likelihood);
+    p -= lp_weight(param.weight);
 
     cburng4x32_rng_t rng;
     cburng4x32_init(&rng, Seed + id);
@@ -268,41 +257,15 @@ void gmm_move_weight (ulong iter,
     for (unsigned d = 0; d != CompNum; ++d)
         param.weight[d] /= sum_weight;
 
-    fp_type sum_lw, sum_llw;
-
-    sum_lw = 1;
-    sum_llw = 0;
-    for (unsigned d = 0; d != CompNum - 1; ++d) {
-        fp_type w = param.weight[d] / param.weight[CompNum - 1];
-        sum_lw += w;
-        sum_llw += log(w);
-    }
-    sum_llw -= CompNum * log(sum_lw);
-    fp_type lp = sum_llw;
-
-    sum_lw = 1;
-    sum_llw = 0;
-    for (unsigned d = 0; d != CompNum - 1; ++d) {
-        fp_type w = weight_old[d] / weight_old[CompNum - 1];
-        sum_lw += w;
-        sum_llw += log(w);
-    }
-    sum_llw -= CompNum * log(sum_lw);
-    fp_type lp_old = sum_llw;
     log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
-    fp_type p = param.log_target - log_target_old + lp - lp_old;
+    p += param.log_target + lp_weight(param.weight);
     fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
-    ulong acc = 1;
-    if (p < u) {
-        for (uint d = 0; d != CompNum; ++d)
-            param.weight[d] = weight_old[d];
-        param.log_prior      = log_prior_old;
-        param.log_likelihood = log_likelihood_old;
-        param.log_target     = log_target_old;
-        acc = 0;
+    ulong acc = 0;
+    if (p > u) {
+        acc = 1;
+        state[id] = param;
     }
 
-    state[id] = param;
     accept[id] = acc;
     counter[id] = rng.ctr;
 }
