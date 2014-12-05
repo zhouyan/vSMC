@@ -44,7 +44,7 @@ namespace vsmc {
 /// Unlike `cl::Buffer`, this class performs deep copy instead of shallow copy.
 /// Each CLBuffer object is tied to a specific CLManager, and thus its context
 /// and command queue, which are used to create and copy the buffers.
-template <typename T, typename ID = CLDefault>
+template <typename T, typename ID>
 class CLBuffer
 {
     public :
