@@ -58,20 +58,20 @@ VSMC_STATIC_INLINE fp_type log_prior (gmm_param *pparam,
 VSMC_STATIC_INLINE fp_type log_likelihood (gmm_param *pparam,
         __global const fp_type *obs)
 {
-    fp_type log_lambda[CompNum];
-    for (uint d = 0; d != CompNum; ++d)
-        log_lambda[d] = log(pparam->lambda[d]);
-
     const fp_type hlf = 0.5;
     const fp_type drift = 1e-13;
+
+    fp_type log_lambda[CompNum];
+    for (uint d = 0; d != CompNum; ++d)
+        log_lambda[d] = hlf * log(pparam->lambda[d]);
 
     fp_type ll = 0;
     for (uint i = 0; i != DataNum; ++i) {
         const fp_type y = obs[i];
         fp_type lli = 0;
         for (uint d = 0; d != CompNum; ++d) {
-            fp_type resid = y - pparam->mu[d];
-            lli += pparam->weight[d] * exp(hlf * log_lambda[d]
+            const fp_type resid = y - pparam->mu[d];
+            lli += pparam->weight[d] * exp(log_lambda[d]
                     - hlf * pparam->lambda[d] * resid * resid);
         }
         ll += log(lli + drift);
