@@ -279,32 +279,7 @@ VSMC_DEFINE_RNG_URNG_RAND(philox, 2, 64)
 /// \ingroup CLRNG
 VSMC_DEFINE_RNG_URNG_RAND(philox, 4, 64)
 
-#if VSMC_USE_THREEFRY_CBURNG
-/// \ingroup CLRNG
-typedef threefry2x32_rng_t cburng2x32_rng_t;
-/// \ingroup CLRNG
-typedef threefry4x32_rng_t cburng4x32_rng_t;
-/// \ingroup CLRNG
-typedef threefry2x64_rng_t cburng2x64_rng_t;
-/// \ingroup CLRNG
-typedef threefry4x64_rng_t cburng4x64_rng_t;
-/// \ingroup CLRNG
-#define cburng2x32_init threefry2x32_init
-/// \ingroup CLRNG
-#define cburng4x32_init threefry4x32_init
-/// \ingroup CLRNG
-#define cburng2x64_init threefry2x64_init
-/// \ingroup CLRNG
-#define cburng4x64_init threefry4x64_init
-/// \ingroup CLRNG
-#define cburng2x32_rand threefry2x32_rand
-/// \ingroup CLRNG
-#define cburng4x32_rand threefry4x32_rand
-/// \ingroup CLRNG
-#define cburng2x64_rand threefry2x64_rand
-/// \ingroup CLRNG
-#define cburng4x64_rand threefry4x64_rand
-#else
+#if VSMC_USE_PHILOX_CBURNG
 /// \ingroup CLRNG
 typedef philox2x32_rng_t cburng2x32_rng_t;
 /// \ingroup CLRNG
@@ -329,6 +304,31 @@ typedef philox4x64_rng_t cburng4x64_rng_t;
 #define cburng2x64_rand philox2x64_rand
 /// \ingroup CLRNG
 #define cburng4x64_rand philox4x64_rand
-#endif
+#else // VSMC_USE_PHILOX_CBURNG
+/// \ingroup CLRNG
+typedef threefry2x32_rng_t cburng2x32_rng_t;
+/// \ingroup CLRNG
+typedef threefry4x32_rng_t cburng4x32_rng_t;
+/// \ingroup CLRNG
+typedef threefry2x64_rng_t cburng2x64_rng_t;
+/// \ingroup CLRNG
+typedef threefry4x64_rng_t cburng4x64_rng_t;
+/// \ingroup CLRNG
+#define cburng2x32_init threefry2x32_init
+/// \ingroup CLRNG
+#define cburng4x32_init threefry4x32_init
+/// \ingroup CLRNG
+#define cburng2x64_init threefry2x64_init
+/// \ingroup CLRNG
+#define cburng4x64_init threefry4x64_init
+/// \ingroup CLRNG
+#define cburng2x32_rand threefry2x32_rand
+/// \ingroup CLRNG
+#define cburng4x32_rand threefry4x32_rand
+/// \ingroup CLRNG
+#define cburng2x64_rand threefry2x64_rand
+/// \ingroup CLRNG
+#define cburng4x64_rand threefry4x64_rand
+#endif // VSMC_USE_PHILOX_CBURNG
 
 #endif // VSMC_RNG_URNG_H
