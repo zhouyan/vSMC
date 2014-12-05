@@ -70,15 +70,15 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
         if (this->manager().opencl_version() >= 120) {
             this->update_state(CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
             counter_ = this->manager().template
-                create_buffer<struct r123array4x32>(N,
+                create_buffer<struct r123array2x32>(N,
                         CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
         } else {
             counter_ = this->manager().template
-                create_buffer<struct r123array4x32>(N);
+                create_buffer<struct r123array2x32>(N);
         }
 #else
         counter_ = this->manager().template
-            create_buffer<struct r123array4x32>(N);
+            create_buffer<struct r123array2x32>(N);
 #endif
     }
 
@@ -94,7 +94,7 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
 
     void comp_num (std::size_t num)
     {
-        this->resize_state((num * 3 + 3) * sizeof(fp_type));
+        this->resize_state((num * 3 + 2) * sizeof(fp_type));
         comp_num_ = num;
     }
 

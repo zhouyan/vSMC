@@ -37,7 +37,6 @@ typedef struct {
     fp_type weight[CompNum];
     fp_type log_prior;
     fp_type log_likelihood;
-    fp_type log_target;
 } gmm_param;
 
 VSMC_STATIC_INLINE fp_type log_prior (gmm_param *pparam,
@@ -85,10 +84,8 @@ VSMC_STATIC_INLINE fp_type log_target (gmm_param *pparam,
         __global const fp_type *obs, fp_type alpha,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0)
 {
-    fp_type lt = log_prior(pparam, mu0, sd0, shape0, scale0) +
+    return log_prior(pparam, mu0, sd0, shape0, scale0) +
         alpha * log_likelihood(pparam, obs);
-
-    return pparam->log_target = lt;
 }
 
 VSMC_STATIC_INLINE fp_type lp_weight (const fp_type *weight)
@@ -111,7 +108,7 @@ void gmm_init (__global gmm_param *state, __global ulong *accept,
         __global const fp_type *weight_host,
         __global const fp_type *obs,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
-        __global struct r123array4x32 *counter)
+        __global struct r123array2x32 *counter)
 {
     size_type id = get_global_id(0);
     if (id >= Size)
@@ -119,13 +116,13 @@ void gmm_init (__global gmm_param *state, __global ulong *accept,
 
     gmm_param param  = state[id];
 
-    cburng4x32_rng_t rng;
-    cburng4x32_init(&rng, Seed + id);
-    NORMAL01_4x32 rnorm;
-    NORMAL01_4x32_INIT(&rnorm, &rng);
+    cburng2x32_rng_t rng;
+    cburng2x32_init(&rng, Seed + id);
+    NORMAL01_2x32 rnorm;
+    NORMAL01_2x32_INIT(&rnorm, &rng);
 
     for (uint d = 0; d != CompNum; ++d) {
-        param.mu[d] =  mu0 + NORMAL01_4x32_RAND(&rnorm, &rng) * sd0;
+        param.mu[d] =  mu0 + NORMAL01_2x32_RAND(&rnorm, &rng) * sd0;
         param.lambda[d] = lambda_host[d * Size + id];
         param.weight[d] = weight_host[d * Size + id];
     }
@@ -154,7 +151,7 @@ void gmm_move_mu (ulong iter,
         __global const fp_type *obs,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
-        __global struct r123array4x32 *counter)
+        __global struct r123array2x32 *counter)
 {
     size_type id = get_global_id(0);
     if (id >= Size)
@@ -163,17 +160,16 @@ void gmm_move_mu (ulong iter,
     gmm_param param = state[id];
     fp_type p = -(param.log_prior + alpha * param.log_likelihood);
 
-    cburng4x32_rng_t rng;
-    cburng4x32_init(&rng, Seed + id);
+    cburng2x32_rng_t rng;
+    cburng2x32_init(&rng, Seed + id);
     rng.ctr = counter[id];
-    NORMAL01_4x32 rnorm;
-    NORMAL01_4x32_INIT(&rnorm, &rng);
+    NORMAL01_2x32 rnorm;
+    NORMAL01_2x32_INIT(&rnorm, &rng);
 
     for (uint d = 0; d != CompNum; ++d)
-        param.mu[d] += NORMAL01_4x32_RAND(&rnorm, &rng) * sd;
-    log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
-    p += param.log_target;
-    fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
+        param.mu[d] += NORMAL01_2x32_RAND(&rnorm, &rng) * sd;
+    p += log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
+    fp_type u = log(U01_OPEN_CLOSED_32(cburng2x32_rand(&rng)));
     ulong acc = 0;
     if (p > u) {
         acc = 1;
@@ -190,7 +186,7 @@ void gmm_move_lambda (ulong iter,
         __global const fp_type *obs,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
-        __global struct r123array4x32 *counter)
+        __global struct r123array2x32 *counter)
 {
     size_type id = get_global_id(0);
     if (id >= Size)
@@ -201,19 +197,18 @@ void gmm_move_lambda (ulong iter,
     for (uint d = 0; d != CompNum; ++d)
         p -= log(param.lambda[d]);
 
-    cburng4x32_rng_t rng;
-    cburng4x32_init(&rng, Seed + id);
+    cburng2x32_rng_t rng;
+    cburng2x32_init(&rng, Seed + id);
     rng.ctr = counter[id];
-    NORMAL01_4x32 rnorm;
-    NORMAL01_4x32_INIT(&rnorm, &rng);
+    NORMAL01_2x32 rnorm;
+    NORMAL01_2x32_INIT(&rnorm, &rng);
 
     for (uint d = 0; d != CompNum; ++d)
-        param.lambda[d] *= exp(NORMAL01_4x32_RAND(&rnorm, &rng) * sd);
-    log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
-    p += param.log_target;
+        param.lambda[d] *= exp(NORMAL01_2x32_RAND(&rnorm, &rng) * sd);
+    p += log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
     for (uint d = 0; d != CompNum; ++d)
         p += log(param.lambda[d]);
-    fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
+    fp_type u = log(U01_OPEN_CLOSED_32(cburng2x32_rand(&rng)));
     ulong acc = 0;
     if (p > u) {
         acc = 1;
@@ -230,7 +225,7 @@ void gmm_move_weight (ulong iter,
         __global const fp_type *obs,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
-        __global struct r123array4x32 *counter)
+        __global struct r123array2x32 *counter)
 {
     size_type id = get_global_id(0);
     if (id >= Size)
@@ -240,16 +235,16 @@ void gmm_move_weight (ulong iter,
     fp_type p = -(param.log_prior + alpha * param.log_likelihood);
     p -= lp_weight(param.weight);
 
-    cburng4x32_rng_t rng;
-    cburng4x32_init(&rng, Seed + id);
+    cburng2x32_rng_t rng;
+    cburng2x32_init(&rng, Seed + id);
     rng.ctr = counter[id];
-    NORMAL01_4x32 rnorm;
-    NORMAL01_4x32_INIT(&rnorm, &rng);
+    NORMAL01_2x32 rnorm;
+    NORMAL01_2x32_INIT(&rnorm, &rng);
 
     fp_type sum_weight = 1;
     for (uint d = 0; d != CompNum - 1; ++d) {
         param.weight[d] = log(param.weight[d] / param.weight[CompNum - 1]);
-        param.weight[d] += NORMAL01_4x32_RAND(&rnorm, &rng) * sd;
+        param.weight[d] += NORMAL01_2x32_RAND(&rnorm, &rng) * sd;
         param.weight[d] = exp(param.weight[d]);
         sum_weight += param.weight[d];
     }
@@ -257,9 +252,9 @@ void gmm_move_weight (ulong iter,
     for (unsigned d = 0; d != CompNum; ++d)
         param.weight[d] /= sum_weight;
 
-    log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
-    p += param.log_target + lp_weight(param.weight);
-    fp_type u = log(U01_OPEN_CLOSED_32(cburng4x32_rand(&rng)));
+    p += log_target(&param, obs, alpha, mu0, sd0, shape0, scale0);
+    p += lp_weight(param.weight);
+    fp_type u = log(U01_OPEN_CLOSED_32(cburng2x32_rand(&rng)));
     ulong acc = 0;
     if (p > u) {
         acc = 1;
