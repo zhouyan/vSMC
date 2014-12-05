@@ -70,9 +70,12 @@ class CLBuffer
     {
         if (this != &other) {
             resize(other.size_, other.flag_, other.host_ptr_);
-            if (size_ != 0 &&
-                    (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0 &&
-                    (flag_ & CL_MEM_HOST_READ_ONLY) != 0) {
+            if (size_ != 0
+#if VSMC_OPENCL_VERSION >= 120
+                    && (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0
+                    && (flag_ & CL_MEM_HOST_READ_ONLY) != 0
+#endif
+                    ) {
                 manager().template copy_buffer<value_type>(
                         other.data_, data_, size_);
             }
