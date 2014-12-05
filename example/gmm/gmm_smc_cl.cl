@@ -43,10 +43,12 @@ typedef struct {
 VSMC_STATIC_INLINE fp_type log_prior (gmm_param *pparam,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0)
 {
+    const fp_type hlf = -0.5;
+
     fp_type lp = 0;
     for (uint d = 0; d != CompNum; ++d) {
         fp_type resid = pparam->mu[d] - mu0;
-        lp += -0.5F * (resid * resid) / (sd0 * sd0);
+        lp += hlf * (resid * resid) / (sd0 * sd0);
         lp += (shape0 - 1) * log(pparam->lambda[d]) -
             pparam->lambda[d] / scale0;
     }
@@ -55,7 +57,7 @@ VSMC_STATIC_INLINE fp_type log_prior (gmm_param *pparam,
 }
 
 VSMC_STATIC_INLINE fp_type log_likelihood (gmm_param *pparam,
-        __local const fp_type *obs)
+        __global const fp_type *obs)
 {
     fp_type log_lambda[CompNum];
     for (uint d = 0; d != CompNum; ++d)
@@ -66,9 +68,10 @@ VSMC_STATIC_INLINE fp_type log_likelihood (gmm_param *pparam,
 
     fp_type ll = 0;
     for (uint i = 0; i != DataNum; ++i) {
+        const fp_type y = obs[i];
         fp_type lli = 0;
         for (uint d = 0; d != CompNum; ++d) {
-            fp_type resid = obs[i] - pparam->mu[d];
+            fp_type resid = y - pparam->mu[d];
             lli += pparam->weight[d] * exp(hlf * log_lambda[d]
                     - hlf * pparam->lambda[d] * resid * resid);
         }
@@ -79,7 +82,7 @@ VSMC_STATIC_INLINE fp_type log_likelihood (gmm_param *pparam,
 }
 
 VSMC_STATIC_INLINE fp_type log_target (gmm_param *pparam,
-        __local const fp_type *obs, fp_type alpha,
+        __global const fp_type *obs, fp_type alpha,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0)
 {
     fp_type lt = log_prior(pparam, mu0, sd0, shape0, scale0) +
@@ -92,15 +95,10 @@ __kernel
 void gmm_init (__global gmm_param *state, __global ulong *accept,
         __global const fp_type *lambda_host,
         __global const fp_type *weight_host,
-        __global const fp_type *dat,
+        __global const fp_type *obs,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
-    __local fp_type obs[DataNum];
-    barrier(CLK_LOCAL_MEM_FENCE);
-    async_work_group_copy(obs, dat, DataNum, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
-
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
@@ -139,16 +137,11 @@ void gmm_move_smc (ulong iter,
 __kernel
 void gmm_move_mu (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat,
+        __global const fp_type *obs,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
-    __local fp_type obs[DataNum];
-    barrier(CLK_LOCAL_MEM_FENCE);
-    async_work_group_copy(obs, dat, DataNum, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
-
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
@@ -191,16 +184,11 @@ void gmm_move_mu (ulong iter,
 __kernel
 void gmm_move_lambda (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat,
+        __global const fp_type *obs,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
-    __local fp_type obs[DataNum];
-    barrier(CLK_LOCAL_MEM_FENCE);
-    async_work_group_copy(obs, dat, DataNum, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
-
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
@@ -245,16 +233,11 @@ void gmm_move_lambda (ulong iter,
 __kernel
 void gmm_move_weight (ulong iter,
         __global gmm_param *state, __global ulong *accept,
-        __global const fp_type *dat,
+        __global const fp_type *obs,
         fp_type alpha, fp_type sd,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array4x32 *counter)
 {
-    __local fp_type obs[DataNum];
-    barrier(CLK_LOCAL_MEM_FENCE);
-    async_work_group_copy(obs, dat, DataNum, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
-
     size_type id = get_global_id(0);
     if (id >= Size)
         return;
