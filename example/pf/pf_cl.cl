@@ -72,7 +72,7 @@ void cv_init (__global cv *state,
     cv sp = state[i];
 
     cburng4x32_rng_t rng;
-    cburng4x32_init(&rng, Seed + i);
+    cburng4x32_init(&rng, SEED + i);
     NORMAL01_4x32 rnorm;
     NORMAL01_4x32_INIT(&rnorm, &rng);
 
@@ -105,7 +105,7 @@ void cv_move (ulong iter, __global cv *state,
     cv sp = state[i];
 
     cburng4x32_rng_t rng;
-    cburng4x32_init(&rng, Seed + i);
+    cburng4x32_init(&rng, SEED + i);
     rng.ctr = counter[i];
     NORMAL01_4x32 rnorm;
     NORMAL01_4x32_INIT(&rnorm, &rng);
