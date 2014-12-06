@@ -487,6 +487,17 @@ class CLManager
     ::cl::Program create_program (const std::string &source) const
     {return ::cl::Program(context_, source);}
 
+    /// \brief Create a program given a vector of sources within the current
+    /// context
+    ::cl::Program create_program (const std::vector<std::string> &source) const
+    {
+        std::vector<std::pair<const char *, std::size_t> > src;
+        for (std::size_t i = 0; i != source.size(); ++i)
+            src.push_back(std::make_pair(source[i].c_str(), source[i].size()));
+
+        return ::cl::Program(context_, src);
+    }
+
     private :
 
     struct profile_kernel_func_ {void operator() (::cl::Kernel &) const {}};
