@@ -142,6 +142,13 @@
  * \endcode
  *
  */
+
+#ifdef CL_HPP_ // already included by the user
+#ifndef __CL_ENABLE_EXCEPTIONS
+#error __CL_ENABLE_EXCEPTIONS not defined before including cl.hpp
+#endif
+#endif
+
 #ifndef CL_HPP_
 #define CL_HPP_
 
@@ -151,6 +158,10 @@
 #pragma clang system_header
 #elif defined(__GNUC__)
 #pragma GCC system_header
+#endif
+
+#ifndef __CL_ENABLE_EXCEPTIONS
+#define __CL_ENABLE_EXCEPTIONS 1
 #endif
 
 #ifdef _WIN32
