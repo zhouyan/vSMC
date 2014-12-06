@@ -426,8 +426,8 @@ class StateCL
             copy_.build(size_, state_size_);
             build_ = true;
         } catch (...) {
-            manager().print_build_log(program_, os);
-            manager().print_build_log(copy_.program(), os);
+            CLQuery::print_program_build_log(program_, os);
+            CLQuery::print_program_build_log(copy_.program(), os);
             throw;
         }
     }

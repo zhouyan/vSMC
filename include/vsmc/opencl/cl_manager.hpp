@@ -200,30 +200,6 @@ class CLManager
         return setup_;
     }
 
-    /// \brief Print build log
-    template <typename CharT, typename Traits>
-    void print_build_log (const ::cl::Program &program,
-            std::basic_ostream<CharT, Traits> &os = std::cout)
-    {
-        cl_build_status status = CL_BUILD_SUCCESS;
-        std::string line(78, '=');
-        line += "\n";
-        std::string log;
-        std::string dname;
-
-        for (std::vector< ::cl::Device>::const_iterator
-                diter = device_vec_.begin();
-                diter != device_vec_.end(); ++diter) {
-            program.getBuildInfo(*diter, CL_PROGRAM_BUILD_STATUS, &status);
-            if (status != CL_BUILD_SUCCESS) {
-                program.getBuildInfo(device_, CL_PROGRAM_BUILD_LOG, &log);
-                diter->getInfo(CL_DEVICE_NAME, &dname);
-                os << line << "Build failed for : " << dname << std::endl;
-                os << line << log << std::endl << line << std::endl;
-            }
-        }
-    }
-
     /// \brief Create an OpenCL buffer of a given type and number of elements
     template <typename CLType>
     ::cl::Buffer create_buffer (std::size_t num,
@@ -491,11 +467,36 @@ class CLManager
     /// context
     ::cl::Program create_program (const std::vector<std::string> &source) const
     {
-        std::vector<std::pair<const char *, std::size_t> > src;
+        std::vector<std::pair<const char *, std::size_t> > src(source.size());
         for (std::size_t i = 0; i != source.size(); ++i)
-            src.push_back(std::make_pair(source[i].c_str(), source[i].size()));
+            src[i] = std::make_pair(source[i].data(), source[i].size());
 
         return ::cl::Program(context_, src);
+    }
+
+    /// \brief Create a program given binaries within the current context
+    ///
+    /// \param binary A vector of binaries. The binary buffers are stored in
+    /// `std::string`
+    /// \param devices The devices for which the program shall be created. If
+    /// it is `NULL`, then the program will be created for all devices in the
+    /// current context
+    /// \param status Return the status of loading the binaries for each
+    /// device. It is ignored if `NULL`.
+    ::cl::Program create_program (const std::vector<std::string> &binary,
+            const std::vector< ::cl::Device> *devices,
+            std::vector< ::cl_int> *status = VSMC_NULLPTR) const
+    {
+        std::vector<std::pair<const void *, std::size_t> > bin(binary.size());
+        for (std::size_t i = 0; i != binary.size(); ++i) {
+            bin[i] = std::make_pair(
+                    static_cast<const void *>(binary[i].data()),
+                    binary[i].size());
+        }
+
+        return devices == VSMC_NULLPTR ?
+            ::cl::Program(context_, device_vec_, bin, status):
+            ::cl::Program(context_, *devices, bin, status);
     }
 
     private :
