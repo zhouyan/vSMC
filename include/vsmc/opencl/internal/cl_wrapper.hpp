@@ -34,23 +34,13 @@
 
 #include <vsmc/internal/config.hpp>
 
-#ifndef __CL_ENABLE_EXCEPTIONS
-#error __CL_ENABLE_EXCEPTIONS not defined before #include<cl.hpp>
-#endif
-
-#if defined(VSMC_INTEL)
-#pragma system_header
-#elif defined(VSMC_CLANG)
-#pragma clang system_header
-#elif defined(VSMC_GCC)
-#pragma GCC system_header
-#elif defined(VSMC_MSVC)
+#ifdef VSMC_MSVC
 #pragma warning(push, 0)
 #endif
 
 #include <vsmc/opencl/internal/cl.hpp>
 
-#if defined(VSMC_MSVC)
+#ifdef VSMC_MSVC
 #pragma warning(pop)
 #endif
 
