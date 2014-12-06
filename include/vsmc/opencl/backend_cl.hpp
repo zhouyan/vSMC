@@ -338,64 +338,29 @@ class StateCL
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(fp_type);
 
-        ++build_id_;
-
-        try {
-            std::string src(internal::cl_source_macros<fp_type>(
-                        size_, state_size_, Seed::instance().get()) + source);
-            Seed::instance().skip(static_cast<Seed::skip_type>(size_));
-            program_ = manager().create_program(src);
-            program_.build(manager().device_vec(), flags.c_str());
-            copy_.build(size_, state_size_);
-            build_ = true;
-        } catch (...) {
-            manager().print_build_log(program_, os);
-            manager().print_build_log(copy_.program(), os);
-            throw;
-        }
-    }
-
-    /// \brief Build the OpenCL program from a vector of sources
-    ///
-    /// \param source The vector of sources of the program
-    /// \param flags The OpenCL compiler flags, e.g., `-I`
-    /// \param os The output stream to write the output when error occurs
-    ///
-    /// \details
-    /// Note that a few macros are defined before each of the user supplied
-    /// `source`.
-    template <typename CharT, typename Traits>
-    void build (const std::vector<std::string> &source,
-            const std::string &flags, std::basic_ostream<CharT, Traits> &os)
-    {
-        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(fp_type);
-
-        ++build_id_;
-
-        try {
-            std::string macros(internal::cl_source_macros<fp_type>(
-                        size_, state_size_, Seed::instance().get()));
-            Seed::instance().skip(static_cast<Seed::skip_type>(size_));
-            std::vector<std::string> src;
-            for (std::size_t i = 0; i != source.size(); ++i)
-                src.push_back(macros + source[i]);
-            program_ = manager().create_program(src);
-            program_.build(manager().device_vec(), flags.c_str());
-            copy_.build(size_, state_size_);
-        } catch (...) {
-            manager().print_build_log(program_, os);
-            manager().print_build_log(copy_.program(), os);
-            throw;
-        }
+        std::string src(internal::cl_source_macros<fp_type>(
+                    size_, state_size_, Seed::instance().get()) + source);
+        Seed::instance().skip(static_cast<Seed::skip_type>(size_));
+        program_ = manager().create_program(src);
+        build_program(flags, os);
     }
 
     void build (const std::string &source,
             const std::string &flags = std::string())
     {build(source, flags, std::cout);}
 
-    void build (const std::vector<std::string> &source,
+    /// \brief Build from an existing program
+    template <typename CharT, typename Traits>
+    void build (const ::cl::Program &program,
+            const std::string &flags, std::basic_ostream<CharT, Traits> &os)
+    {
+        program_ = program;
+        build_program(flags, os);
+    }
+
+    void build (const ::cl::Program &program,
             const std::string &flags = std::string())
-    {build(source, flags, std::cout);}
+    {build(program, flags, std::cout);}
 
     /// \brief Whether the last attempted building success
     bool build () const {return build_;}
@@ -448,6 +413,24 @@ class StateCL
     CLBuffer<char, ID> state_buffer_;
     CLBuffer<size_type, ID> copy_from_buffer_;
     internal::CLCopy<ID> copy_;
+
+    template <typename CharT, typename Traits>
+    void build_program (const std::string flags,
+            std::basic_ostream<CharT, Traits> &os)
+    {
+        ++build_id_;
+
+        build_ = false;
+        try {
+            program_.build(manager().device_vec(), flags.c_str());
+            copy_.build(size_, state_size_);
+            build_ = true;
+        } catch (...) {
+            manager().print_build_log(program_, os);
+            manager().print_build_log(copy_.program(), os);
+            throw;
+        }
+    }
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype using OpenCL
