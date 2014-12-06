@@ -159,14 +159,20 @@ namespace internal {
 template <typename> void set_cl_fp_type (std::stringstream &);
 
 template <>
-inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
+inline void set_cl_fp_type<cl_float> (std::stringstream &ss)
 {
+    ss << "#ifndef FP_TYPE\n";
+    ss << "#define FP_TYPE float\n";
     ss << "typedef float fp_type;\n";
+    ss << "#endif\n";
+
+    ss << "#ifndef VSMC_HAS_OPENCL_DOUBLE\n";
     ss << "#define VSMC_HAS_OPENCL_DOUBLE 0\n";
+    ss << "#endif\n";
 }
 
 template <>
-inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
+inline void set_cl_fp_type<cl_double> (std::stringstream &ss)
 {
     ss << "#if defined(cl_khr_fp64)\n";
     ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
@@ -174,8 +180,35 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
     ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
     ss << "#endif\n";
 
+    ss << "#define FP_TYPE double\n";
     ss << "typedef double fp_type;\n";
+    ss << "#endif\n";
+
+    ss << "#ifndef VSMC_HAS_OPENCL_DOUBLE\n";
     ss << "#define VSMC_HAS_OPENCL_DOUBLE 1\n";
+    ss << "#endif\n";
+}
+
+template <typename FPType>
+inline std::string cl_source_macros (
+        std::size_t size, std::size_t state_size, std::size_t seed)
+{
+    std::stringstream ss;
+    set_cl_fp_type<FPType>(ss);
+
+    ss << "#ifndef SIZE\n";
+    ss << "#define SIZE " << size << "UL\n";
+    ss << "#endif\n";
+
+    ss << "#ifndef STATE_SIZE\n";
+    ss << "#define STATE_SIZE " << state_size << "UL\n";
+    ss << "#endif\n";
+
+    ss << "#ifndef SEED\n";
+    ss << "#define SEED " << seed << "UL\n";
+    ss << "#endif\n";
+
+    return ss.str();
 }
 
 template <typename D>
@@ -266,53 +299,89 @@ class StateCL
     ///
     /// \param source The source of the program
     /// \param flags The OpenCL compiler flags, e.g., `-I`
-    /// \param os The output stream to write the output
+    /// \param os The output stream to write the output when error occurs
     ///
     /// \details
-    /// Note that a few macros and headers are included before the user
-    /// supplied `source`. Say the template parameter `StateSize == 4`,
-    /// `FPType` of this class is set to `cl_double`, and there are `1000`
-    /// particles, then the complete source, which acutally get compiled looks
-    /// like the following
+    /// Note that a few macros are defined before the user supplied `source`.
+    /// Say the template parameter `StateSize == 4`, `FPType` of this class is
+    /// set to `cl_float`, and there are `1000` particles, then the complete
+    /// source, which acutally get compiled looks like the following
     /// ~~~{.cpp}
+    /// #ifndef FP_TYPE
+    /// #define FP_TYPE float
     /// typedef float fp_type;
-    /// #define VSMC_HAS_OPENCL_DOUBLE 0
+    /// #endif
     ///
-    /// typedef ulong size_type;
-    /// #define Size 1000UL;
-    /// #define StateSize 4UL;
-    /// #define Seed 101UL;
+    /// #ifndef VSMC_HAS_OPENCL_DOUBLE
+    /// #define VSMC_HAS_OPENCL_DOUBLE 0
+    /// #endif
+    ///
+    /// #ifndef SIZE
+    /// #define SIZE 1000UL;
+    /// #endif
+    ///
+    /// #ifndef STATE_SIZE
+    /// #define STATE_SIZE 4UL;
+    /// #endif
+    ///
+    /// #ifndef SEED
+    /// #define SEED 101UL;
+    /// #endif
     /// // The actual seed is vsmc::Seed::instance().get()
     /// // ... User source, passed by the source argument
     /// ~~~
     /// After build, `vsmc::Seed::instance().skip(N)` is called with `N`
     /// being the nubmer of particles.
     template <typename CharT, typename Traits>
-    void build (const std::string &source, const std::string &flags,
-            std::basic_ostream<CharT, Traits> &os)
+    void build (const std::string &source,
+            const std::string &flags, std::basic_ostream<CharT, Traits> &os)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(fp_type);
 
         ++build_id_;
 
-        std::stringstream ss;
-        internal::set_cl_fp_type<fp_type>(ss);
-
-        ss << "typedef ulong size_type;\n";
-        ss << "#define Size " << size_ << "UL\n";
-        ss << "#define StateSize " << state_size_ << "UL\n";
-        ss << "#define Seed " << Seed::instance().get() << "UL\n";
-        ss << source << '\n';
-        Seed::instance().skip(static_cast<Seed::skip_type>(size_));
-
         try {
-            program_ = manager().create_program(ss.str());
+            std::string src(internal::cl_source_macros<fp_type>(
+                        size_, state_size_, Seed::instance().get()) + source);
+            Seed::instance().skip(static_cast<Seed::skip_type>(size_));
+            program_ = manager().create_program(src);
             program_.build(manager().device_vec(), flags.c_str());
-            program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
-            program_.getBuildInfo(manager().device(),
-                    CL_PROGRAM_BUILD_OPTIONS, &build_options_);
             copy_.build(size_, state_size_);
             build_ = true;
+        } catch (...) {
+            manager().print_build_log(program_, os);
+            manager().print_build_log(copy_.program(), os);
+            throw;
+        }
+    }
+
+    /// \brief Build the OpenCL program from a vector of sources
+    ///
+    /// \param source The vector of sources of the program
+    /// \param flags The OpenCL compiler flags, e.g., `-I`
+    /// \param os The output stream to write the output when error occurs
+    ///
+    /// \details
+    /// Note that a few macros are defined before each of the user supplied
+    /// `source`.
+    template <typename CharT, typename Traits>
+    void build (const std::vector<std::string> &source,
+            const std::string &flags, std::basic_ostream<CharT, Traits> &os)
+    {
+        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(fp_type);
+
+        ++build_id_;
+
+        try {
+            std::string macros(internal::cl_source_macros<fp_type>(
+                        size_, state_size_, Seed::instance().get()));
+            Seed::instance().skip(static_cast<Seed::skip_type>(size_));
+            std::vector<std::string> src;
+            for (std::size_t i = 0; i != source.size(); ++i)
+                src.push_back(macros + source[i]);
+            program_ = manager().create_program(src);
+            program_.build(manager().device_vec(), flags.c_str());
+            copy_.build(size_, state_size_);
         } catch (...) {
             manager().print_build_log(program_, os);
             manager().print_build_log(copy_.program(), os);
@@ -324,6 +393,10 @@ class StateCL
             const std::string &flags = std::string())
     {build(source, flags, std::cout);}
 
+    void build (const std::vector<std::string> &source,
+            const std::string &flags = std::string())
+    {build(source, flags, std::cout);}
+
     /// \brief Whether the last attempted building success
     bool build () const {return build_;}
 
@@ -332,12 +405,6 @@ class StateCL
     /// \details
     /// This function returns a non-decreasing sequence of integers
     int build_id () const {return build_id_;}
-
-    /// \brief The source of the program of the last attempted building
-    const char *build_source () const {return build_source_.c_str();}
-
-    /// \brief The build options of the program of the last attempted building
-    const char *build_options () const {return build_options_.c_str();}
 
     /// \brief Create kernel with the current program
     ///
@@ -377,8 +444,6 @@ class StateCL
 
     bool build_;
     int build_id_;
-    std::string build_source_;
-    std::string build_options_;
 
     CLBuffer<char, ID> state_buffer_;
     CLBuffer<size_type, ID> copy_from_buffer_;
@@ -416,9 +481,6 @@ template <typename T, typename PlaceHolder = NullType>
 class InitializeCL
 {
     public :
-
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
 
     /// \brief The index offset of additional kernel arguments set by the user
     ///
@@ -516,9 +578,6 @@ class MoveCL
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
-
     /// \brief The index offset of additional kernel arguments set by the user
     ///
     /// \details
@@ -615,9 +674,6 @@ class MonitorEvalCL
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
-
     /// \brief The index offset of additional kernel arguments set by the user
     ///
     /// \details
@@ -701,9 +757,6 @@ template <typename T, typename PlaceHolder = NullType>
 class PathEvalCL
 {
     public :
-
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
 
     /// \brief The index offset of additional kernel arguments set by the user
     ///

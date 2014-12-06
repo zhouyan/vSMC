@@ -63,8 +63,8 @@ void cv_init (__global cv *state,
         __global fp_type *x_obs, __global fp_type *y_obs,
         __global struct r123array4x32 *counter)
 {
-    size_type i = get_global_id(0);
-    if (i >= Size)
+    ulong i = get_global_id(0);
+    if (i >= SIZE)
         return;
 
     const fp_type sd_pos0 = 2;
@@ -93,8 +93,8 @@ void cv_move (ulong iter, __global cv *state,
         __global fp_type *x_obs, __global fp_type *y_obs,
         __global struct r123array4x32 *counter)
 {
-    size_type i = get_global_id(0);
-    if (i >= Size)
+    ulong i = get_global_id(0);
+    if (i >= SIZE)
         return;
 
     const fp_type var_pos = 0.02F;
@@ -124,8 +124,8 @@ void cv_move (ulong iter, __global cv *state,
 __kernel
 void cv_est (ulong iter, ulong dim, __global cv *state, __global cv_pos *est)
 {
-    size_type i = get_global_id(0);
-    if (i >= Size)
+    ulong i = get_global_id(0);
+    if (i >= SIZE)
         return;
 
     est[i].x_pos = state[i].x_pos;

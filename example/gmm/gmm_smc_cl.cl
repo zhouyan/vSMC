@@ -110,21 +110,21 @@ void gmm_init (__global gmm_param *state, __global ulong *accept,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array2x32 *counter)
 {
-    size_type id = get_global_id(0);
-    if (id >= Size)
+    ulong id = get_global_id(0);
+    if (id >= SIZE)
         return;
 
     gmm_param param  = state[id];
 
     cburng2x32_rng_t rng;
-    cburng2x32_init(&rng, Seed + id);
+    cburng2x32_init(&rng, SEED + id);
     NORMAL01_2x32 rnorm;
     NORMAL01_2x32_INIT(&rnorm, &rng);
 
     for (uint d = 0; d != CompNum; ++d) {
         param.mu[d] =  mu0 + NORMAL01_2x32_RAND(&rnorm, &rng) * sd0;
-        param.lambda[d] = lambda_host[d * Size + id];
-        param.weight[d] = weight_host[d * Size + id];
+        param.lambda[d] = lambda_host[d * SIZE + id];
+        param.weight[d] = weight_host[d * SIZE + id];
     }
     log_target(&param, obs, 0, mu0, sd0, shape0, scale0);
     state[id] = param;
@@ -137,8 +137,8 @@ void gmm_move_smc (ulong iter,
         __global gmm_param *state, __global ulong *accept,
         __global fp_type *exp_weight, fp_type alpha_inc)
 {
-    size_type id = get_global_id(0);
-    if (id >= Size)
+    ulong id = get_global_id(0);
+    if (id >= SIZE)
         return;
 
     exp_weight[id] = exp(alpha_inc * state[id].log_likelihood);
@@ -153,15 +153,15 @@ void gmm_move_mu (ulong iter,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array2x32 *counter)
 {
-    size_type id = get_global_id(0);
-    if (id >= Size)
+    ulong id = get_global_id(0);
+    if (id >= SIZE)
         return;
 
     gmm_param param = state[id];
     fp_type p = -(param.log_prior + alpha * param.log_likelihood);
 
     cburng2x32_rng_t rng;
-    cburng2x32_init(&rng, Seed + id);
+    cburng2x32_init(&rng, SEED + id);
     rng.ctr = counter[id];
     NORMAL01_2x32 rnorm;
     NORMAL01_2x32_INIT(&rnorm, &rng);
@@ -188,8 +188,8 @@ void gmm_move_lambda (ulong iter,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array2x32 *counter)
 {
-    size_type id = get_global_id(0);
-    if (id >= Size)
+    ulong id = get_global_id(0);
+    if (id >= SIZE)
         return;
 
     gmm_param param = state[id];
@@ -198,7 +198,7 @@ void gmm_move_lambda (ulong iter,
         p -= log(param.lambda[d]);
 
     cburng2x32_rng_t rng;
-    cburng2x32_init(&rng, Seed + id);
+    cburng2x32_init(&rng, SEED + id);
     rng.ctr = counter[id];
     NORMAL01_2x32 rnorm;
     NORMAL01_2x32_INIT(&rnorm, &rng);
@@ -227,8 +227,8 @@ void gmm_move_weight (ulong iter,
         fp_type mu0, fp_type sd0, fp_type shape0, fp_type scale0,
         __global struct r123array2x32 *counter)
 {
-    size_type id = get_global_id(0);
-    if (id >= Size)
+    ulong id = get_global_id(0);
+    if (id >= SIZE)
         return;
 
     gmm_param param = state[id];
@@ -236,7 +236,7 @@ void gmm_move_weight (ulong iter,
     p -= lp_weight(param.weight);
 
     cburng2x32_rng_t rng;
-    cburng2x32_init(&rng, Seed + id);
+    cburng2x32_init(&rng, SEED + id);
     rng.ctr = counter[id];
     NORMAL01_2x32 rnorm;
     NORMAL01_2x32_INIT(&rnorm, &rng);
@@ -269,8 +269,8 @@ __kernel
 void gmm_path_state (ulong iter, __global gmm_param *state,
         __global fp_type *res)
 {
-    size_type id = get_global_id(0);
-    if (id >= Size)
+    ulong id = get_global_id(0);
+    if (id >= SIZE)
         return;
 
     res[id] = state[id].log_likelihood;
