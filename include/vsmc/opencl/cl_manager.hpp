@@ -59,6 +59,10 @@
     VSMC_RUNTIME_WARNING(setup_command_queue,                                \
             ("**CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
 
+#define VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(func, block, event) \
+    VSMC_RUNTIME_WARNING((block || event != VSMC_NULLPTR),                   \
+            ("**CLManager::"#func" NOT BLOCKING BUT WITH NULL EVENT"))
+
 namespace vsmc {
 
 /// \brief OpenCL Manager
@@ -262,12 +266,13 @@ class CLManager
     void read_buffer (const ::cl::Buffer &buf, std::size_t num,
             OutputIter first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
+        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(read_buffer, block, event);
 
         std::vector<CLType> buffer(num);
-        command_queue_.enqueueReadBuffer(buf, CL_TRUE,
+        command_queue_.enqueueReadBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 &buffer[0], events, event);
         std::copy(buffer.begin(), buffer.end(), first);
@@ -279,11 +284,12 @@ class CLManager
     void read_buffer (const ::cl::Buffer &buf, std::size_t num,
             CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
+        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(read_buffer, block, event);
 
-        command_queue_.enqueueReadBuffer(buf, CL_TRUE,
+        command_queue_.enqueueReadBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 first, events, event);
     }
@@ -294,9 +300,10 @@ class CLManager
     void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             InputIter first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(write_buffer, block, event);
 
         std::vector<CLType> buffer(num);
 #if VSMC_HAS_CXX11LIB_ALGORITHM
@@ -305,7 +312,7 @@ class CLManager
         for (std::size_t i = 0; i != num; ++i, ++first)
             buffer[i] = *first;
 #endif
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
+        command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 &buffer[0], events, event);
     }
@@ -316,11 +323,12 @@ class CLManager
     void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             const CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(write_buffer, block, event);
 
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
+        command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 const_cast<CLType *>(first), events, event);
     }
@@ -331,11 +339,12 @@ class CLManager
     void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(write_buffer, block, event);
 
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
+        command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 first, events, event);
     }
@@ -347,18 +356,19 @@ class CLManager
             std::size_t num,
             std::size_t src_offset = 0, std::size_t dst_offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
+        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(copy_buffer, block, event);
 
+        ::cl::Event e;
+        ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
         command_queue_.enqueueCopyBuffer(src, dst,
                 sizeof(CLType) * src_offset, sizeof(CLType) * dst_offset,
-                sizeof(CLType) * num, events, event);
+                sizeof(CLType) * num, events, eptr);
+        if (block)
+            eptr->wait();
     }
-
-    /// \brief Create a program given the source within the current context
-    ::cl::Program create_program (const std::string &source) const
-    {return ::cl::Program(context_, source);}
 
     /// \brief Run a given kernel with one dimensional global size and local
     /// size on the current command queue
@@ -377,14 +387,17 @@ class CLManager
     void run_kernel (const ::cl::Kernel &kern, std::size_t N,
             std::size_t local_size = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
+        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(run_kernel, block, event);
+
         ::cl::Event e;
         ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
         command_queue_.enqueueNDRangeKernel(kern, ::cl::NullRange,
                 get_global_nd_range(N, local_size),
                 get_local_nd_range(local_size), events, eptr);
-        eptr->wait();
+        if (block)
+            eptr->wait();
     }
 
     /// \brief Run the kernel with all local size that are multiples of the
@@ -469,6 +482,10 @@ class CLManager
     std::size_t profile_kernel (::cl::Kernel &kern, std::size_t N,
             std::size_t lmin = 0, std::size_t repeat = 3)
     {return profile_kernel(kern, N, profile_kernel_func_(), lmin, repeat);}
+
+    /// \brief Create a program given the source within the current context
+    ::cl::Program create_program (const std::string &source) const
+    {return ::cl::Program(context_, source);}
 
     private :
 
