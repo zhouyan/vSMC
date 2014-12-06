@@ -173,19 +173,17 @@ class StateTupleBase
     static VSMC_CONSTEXPR std::size_t dim () {return dim_;}
 
     template <std::size_t Pos, typename OutputIter>
-    OutputIter read_state (Position<Pos>, OutputIter first) const
+    void read_state (Position<Pos>, OutputIter first) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
                 *first = sptr->state(i, Position<Pos>());
-
-        return first;
     }
 
     template <std::size_t Pos, typename OutputIter>
-    OutputIter read_state (OutputIter first) const
-    {return read_state(Position<Pos>(), first);}
+    void read_state (OutputIter first) const
+    {read_state(Position<Pos>(), first);}
 
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print (

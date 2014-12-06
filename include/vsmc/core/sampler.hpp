@@ -284,13 +284,8 @@ class Sampler
 
     /// \brief Read ESS history through an output iterator
     template <typename OutputIter>
-    OutputIter read_ess_history (OutputIter first) const
-    {
-        for (std::size_t i = 0; i != ess_history_.size(); ++i, ++first)
-            *first = ess_history_[i];
-
-        return first;
-    }
+    void read_ess_history (OutputIter first) const
+    {std::copy(ess_history_.begin(), ess_history_.end(), first);}
 
     /// \brief Get resampling indicator of a given iteration
     bool resampled_history (std::size_t iter) const
@@ -298,13 +293,8 @@ class Sampler
 
     /// \brief Read resampling indicator history through an output iterator
     template <typename OutputIter>
-    OutputIter read_resampled_history (OutputIter first) const
-    {
-        for (std::size_t i = 0; i != resampled_history_.size(); ++i, ++first)
-            *first = resampled_history_[i];
-
-        return first;
-    }
+    void read_resampled_history (OutputIter first) const
+    {std::copy(resampled_history_.begin(), resampled_history_.end(), first);}
 
     /// \brief Get the accept count of a given move id and the iteration
     std::size_t accept_history (std::size_t id, std::size_t iter) const
@@ -590,10 +580,10 @@ class Sampler
 
     /// \brief Sampler summary header
     template <typename OutputIter>
-    OutputIter summary_header (OutputIter first) const
+    void summary_header (OutputIter first) const
     {
         if (summary_header_size() == 0)
-            return first;
+            return;
 
         *first = std::string("ESS");
         ++first;
@@ -630,8 +620,6 @@ class Sampler
                 }
             }
         }
-
-        return first;
     }
 
     /// \brief The size of Sampler summary data
@@ -642,18 +630,16 @@ class Sampler
     ///
     /// \param first The beginning of the output
     template <MatrixOrder Order, typename OutputIter>
-    OutputIter summary_data (OutputIter first) const
+    void summary_data (OutputIter first) const
     {
         if (summary_data_size() == 0)
-            return first;
+            return;
 
         if (Order == RowMajor)
-            first = summary_data_row(first);
+            summary_data_row(first);
 
         if (Order == ColMajor)
-            first = summary_data_col(first);
-
-        return first;
+            summary_data_col(first);
     }
 
     /// \brief Print the history of the Sampler
@@ -797,7 +783,7 @@ class Sampler
     }
 
     template <typename OutputIter>
-    OutputIter summary_data_row (OutputIter first) const
+    void summary_data_row (OutputIter first) const
     {
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
@@ -843,12 +829,10 @@ class Sampler
                 }
             }
         }
-
-        return first;
     }
 
     template <typename OutputIter>
-    OutputIter summary_data_col (OutputIter first) const
+    void summary_data_col (OutputIter first) const
     {
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
@@ -898,8 +882,6 @@ class Sampler
                 }
             }
         }
-
-        return first;
     }
 }; // class Sampler
 

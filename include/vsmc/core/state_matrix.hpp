@@ -135,23 +135,21 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     const T *data () const {return &data_[0];}
 
     template <typename OutputIter>
-    OutputIter read_state (std::size_t pos, OutputIter first) const
+    void read_state (std::size_t pos, OutputIter first) const
     {
         const StateMatrix<Order, Dim, T> *sptr =
             static_cast<const StateMatrix<Order, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
                 *first = sptr->state(i, pos);
-
-        return first;
     }
 
     template <std::size_t Pos, typename OutputIter>
-    OutputIter read_state (Position<Pos>, OutputIter first) const
-    {return read_state(Pos, first);}
+    void read_state (Position<Pos>, OutputIter first) const
+    {read_state(Pos, first);}
 
     template <std::size_t Pos, typename OutputIter>
-    OutputIter read_state (OutputIter first) const
-    {return read_state(Pos, first);}
+    void read_state (OutputIter first) const
+    {read_state(Pos, first);}
 
     template <typename OutputIterIter>
     void read_state_matrix (OutputIterIter first) const
@@ -161,10 +159,10 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     }
 
     template <MatrixOrder ROrder, typename OutputIter>
-    OutputIter read_state_matrix (OutputIter first) const
+    void read_state_matrix (OutputIter first) const
     {
         if (ROrder == Order) {
-            first = std::copy(data_.begin(), data_.end(), first);
+            std::copy(data_.begin(), data_.end(), first);
         } else {
             const StateMatrix<Order, Dim, T> *sptr =
                 static_cast<const StateMatrix<Order, Dim, T> *>(this);
@@ -184,8 +182,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
                 }
             }
         }
-
-        return first;
     }
 
     template <typename CharT, typename Traits>

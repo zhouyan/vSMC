@@ -147,18 +147,18 @@ class Path
     ///
     /// \sa Monitor::read_index()
     template <typename OutputIter>
-    OutputIter read_index (OutputIter first) const
-    {return std::copy(index_.begin(), index_.end(), first);}
+    void read_index (OutputIter first) const
+    {std::copy(index_.begin(), index_.end(), first);}
 
     /// \brief Read the integrand history through an output iterator
     template <typename OutputIter>
-    OutputIter read_integrand (OutputIter first) const
-    {return std::copy(integrand_.begin(), integrand_.end(), first);}
+    void read_integrand (OutputIter first) const
+    {std::copy(integrand_.begin(), integrand_.end(), first);}
 
     /// \brief Read the grid history through an output iterator
     template <typename OutputIter>
-    OutputIter read_grid (OutputIter first) const
-    {return std::copy(grid_.begin(), grid_.end(), first);}
+    void read_grid (OutputIter first) const
+    {std::copy(grid_.begin(), grid_.end(), first);}
 
     /// \brief Set a new evaluation object of type eval_type
     void set_eval (const eval_type &new_eval, bool record_only = false)

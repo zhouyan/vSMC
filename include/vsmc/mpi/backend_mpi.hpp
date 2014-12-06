@@ -72,7 +72,7 @@ class WeightSetMPI : public WeightSetBase
 
     size_type resample_size () const {return resample_size_;}
 
-    double *read_resample_weight (double *first) const
+    void read_resample_weight (double *first) const
     {
         barrier();
         gather_resample_weight();
@@ -84,8 +84,6 @@ class WeightSetMPI : public WeightSetBase
             }
         }
         barrier();
-
-        return first;
     }
 
     const double *resample_weight_data () const

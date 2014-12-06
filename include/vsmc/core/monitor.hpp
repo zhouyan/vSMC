@@ -189,8 +189,8 @@ class Monitor
 
     /// \brief Read the index history through an output iterator
     template <typename OutputIter>
-    OutputIter read_index (OutputIter first) const
-    {return std::copy(index_.begin(), index_.end(), first);}
+    void read_index (OutputIter first) const
+    {std::copy(index_.begin(), index_.end(), first);}
 
     /// \brief Read only access to the raw data of the index vector
     const std::size_t *index_data () const {return &index_[0];}
@@ -201,14 +201,12 @@ class Monitor
     /// \brief Read the record history for a given variable through an output
     /// iterator
     template <typename OutputIter>
-    OutputIter read_record (std::size_t id, OutputIter first) const
+    void read_record (std::size_t id, OutputIter first) const
     {
         const std::size_t N = iter_size();
         const double *riter = &record_[id];
         for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
             *first = *riter;
-
-        return first;
     }
 
     /// \brief Read the record history of all variables through an array of
@@ -233,16 +231,19 @@ class Monitor
     /// record(i, j)`. That is, the output is an `iter_size()` by `dim()`
     /// matrix, with the usual meaning of column or row major order.
     template <MatrixOrder Order, typename OutputIter>
-    OutputIter read_record_matrix (OutputIter first) const
+    void read_record_matrix (OutputIter first) const
     {
-        if (Order == ColMajor)
-            for (std::size_t d = 0; d != dim_; ++d)
-                first = read_record(d, first);
+        const std::size_t N = iter_size();
+        if (Order == ColMajor) {
+            for (std::size_t d = 0; d != dim_; ++d) {
+                const double *riter = &record_[d];
+                for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
+                    *first = *riter;
+            }
+        }
 
         if (Order == RowMajor)
-            first = std::copy(record_.begin(), record_.end(), first);
-
-        return first;
+            std::copy(record_.begin(), record_.end(), first);
     }
 
     /// \brief Set a new evaluation object of type eval_type

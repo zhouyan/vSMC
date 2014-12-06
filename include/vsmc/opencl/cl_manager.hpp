@@ -259,7 +259,7 @@ class CLManager
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into an iterator
     template <typename CLType, typename OutputIter>
-    OutputIter read_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void read_buffer (const ::cl::Buffer &buf, std::size_t num,
             OutputIter first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR) const
@@ -267,37 +267,31 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
         std::vector<CLType> buffer(num);
-        command_queue_.finish();
-        command_queue_.enqueueReadBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, &buffer[0], events, event);
-
-        for (std::size_t i = 0; i != num; ++i, ++first)
-            *first = buffer[i];
-
-        return first;
+        command_queue_.enqueueReadBuffer(buf, CL_TRUE,
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                &buffer[0], events, event);
+        std::copy(buffer.begin(), buffer.end(), first);
     }
 
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into a pointer
     template <typename CLType>
-    CLType *read_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void read_buffer (const ::cl::Buffer &buf, std::size_t num,
             CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR) const
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
 
-        command_queue_.finish();
-        command_queue_.enqueueReadBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, first, events, event);
-
-        return first + num;
+        command_queue_.enqueueReadBuffer(buf, CL_TRUE,
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                first, events, event);
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from an iterator
     template <typename CLType, typename InputIter>
-    InputIter write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             InputIter first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR) const
@@ -308,16 +302,15 @@ class CLManager
         for (std::size_t i = 0; i != num; ++i, ++first)
             buffer[i] = *first;
         command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, &buffer[0], events, event);
-
-        return first;
+        command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                &buffer[0], events, event);
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from a pointer
     template <typename CLType>
-    const CLType *write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             const CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR) const
@@ -325,17 +318,15 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
         command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, const_cast<CLType *>(first),
-                events, event);
-
-        return first + num;
+        command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                const_cast<CLType *>(first), events, event);
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from a pointer
     template <typename CLType>
-    CLType *write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR) const
@@ -343,10 +334,9 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
         command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, first, events, event);
-
-        return first + num;
+        command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                first, events, event);
     }
 
     /// \brief Copy an OpenCL buffer into another of a given type and number of
@@ -361,7 +351,8 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
 
         command_queue_.finish();
-        command_queue_.enqueueCopyBuffer(src, dst, src_offset, dst_offset,
+        command_queue_.enqueueCopyBuffer(src, dst,
+                sizeof(CLType) * src_offset, sizeof(CLType) * dst_offset,
                 sizeof(CLType) * num, events, event);
         command_queue_.finish();
     }
