@@ -49,17 +49,24 @@
 #define __has_feature(x) 0
 #endif
 
-#include <cl.hpp>
-#include <vector>
+#if defined(__APPLE__) || defined(__MACOSX)
+#include <OpenCL/opencl.h>
+#else
+#include <CL/opencl.h>
+#endif
+
 #include <cassert>
 
 int main ()
 {
-    std::vector<cl::Platform> plat;
-    cl::Platform::get(&plat);
-    std::vector<cl::Device> dev;
-    plat[0].getDevices(CL_DEVICE_TYPE_ALL, &dev);
-    assert(dev.size() != 0);
+    ::cl_platform_id platform;
+    ::cl_device_id device;
+    ::cl_uint num;
+    ::cl_int status;
+    status = clGetPlatformIDs(1, &platform, &num);
+    assert(status == CL_SUCCESS && num != 0);
+    status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 1, &device, &num);
+    assert(status == CL_SUCCESS && num != 0);
 
     return 0;
 }
