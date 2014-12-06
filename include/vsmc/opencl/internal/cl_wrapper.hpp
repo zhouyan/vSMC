@@ -44,7 +44,7 @@
 #pragma warning(disable:4996)
 #endif
 
-#include <cl.hpp>
+#include <vsmc/opencl/internal/cl.hpp>
 
 #ifndef __CL_ENABLE_EXCEPTIONS
 #error __CL_ENABLE_EXCEPTIONS not defined before #include<cl.hpp>
