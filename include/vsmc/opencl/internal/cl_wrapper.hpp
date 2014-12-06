@@ -34,27 +34,23 @@
 
 #include <vsmc/internal/config.hpp>
 
-#if defined(VSMC_GCC)
-#if VSMC_GCC_VERSION >= 40600
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-#elif defined(VSMC_MSVC)
-#pragma warning(push)
-#pragma warning(disable:4996)
-#endif
-
-#include <vsmc/opencl/internal/cl.hpp>
-
 #ifndef __CL_ENABLE_EXCEPTIONS
 #error __CL_ENABLE_EXCEPTIONS not defined before #include<cl.hpp>
 #endif
 
-#if defined(VSMC_GCC)
-#if VSMC_GCC_VERSION >= 40600
-#pragma GCC diagnostic pop
+#if defined(VSMC_INTEL)
+#pragma system_header
+#elif defined(VSMC_CLANG)
+#pragma clang system_header
+#elif defined(VSMC_GCC)
+#pragma GCC system_header
+#elif defined(VSMC_MSVC)
+#pragma warning(push, 0)
 #endif
-#elif defined(VSM_MSVC)
+
+#include <vsmc/opencl/internal/cl.hpp>
+
+#if defined(VSMC_MSVC)
 #pragma warning(pop)
 #endif
 

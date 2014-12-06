@@ -145,6 +145,14 @@
 #ifndef CL_HPP_
 #define CL_HPP_
 
+#if defined(__INTEL_COMPILER)
+#pragma system_header
+#elif defined(__clang__)
+#pragma clang system_header
+#elif defined(__GNUC__)
+#pragma GCC system_header
+#endif
+
 #ifdef _WIN32
 
 #include <windows.h>
