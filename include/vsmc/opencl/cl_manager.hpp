@@ -299,9 +299,12 @@ class CLManager
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
         std::vector<CLType> buffer(num);
+#if VSMC_HAS_CXX11LIB_ALGORITHM
+        std::copy_n(first, num, &buffer[0]);
+#else
         for (std::size_t i = 0; i != num; ++i, ++first)
             buffer[i] = *first;
-        command_queue_.finish();
+#endif
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 &buffer[0], events, event);
@@ -317,7 +320,6 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
-        command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 const_cast<CLType *>(first), events, event);
@@ -333,7 +335,6 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
 
-        command_queue_.finish();
         command_queue_.enqueueWriteBuffer(buf, CL_TRUE,
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 first, events, event);
@@ -350,11 +351,9 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
 
-        command_queue_.finish();
         command_queue_.enqueueCopyBuffer(src, dst,
                 sizeof(CLType) * src_offset, sizeof(CLType) * dst_offset,
                 sizeof(CLType) * num, events, event);
-        command_queue_.finish();
     }
 
     /// \brief Create a program given the source within the current context
@@ -380,11 +379,12 @@ class CLManager
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR) const
     {
-        command_queue_.finish();
+        ::cl::Event e;
+        ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
         command_queue_.enqueueNDRangeKernel(kern, ::cl::NullRange,
                 get_global_nd_range(N, local_size),
-                get_local_nd_range(local_size), events, event);
-        command_queue_.finish();
+                get_local_nd_range(local_size), events, eptr);
+        eptr->wait();
     }
 
     /// \brief Run the kernel with all local size that are multiples of the
