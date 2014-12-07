@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/thread/thread.hpp
+// vSMC/include/vsmc/smp/smp.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,37 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_THREAD_THREAD_HPP
-#define VSMC_THREAD_THREAD_HPP
+#ifndef VSMC_SMP_SMP_HPP
+#define VSMC_SMP_SMP_HPP
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/thread/blocked_range.hpp>
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
-#include <vsmc/thread/parallel_reduce.hpp>
-#include <vsmc/thread/parallel_repeat.hpp>
-#include <vsmc/thread/thread_guard.hpp>
-#include <vsmc/thread/thread_num.hpp>
+#include <vsmc/smp/adapter.hpp>
+#include <vsmc/smp/backend_base.hpp>
+#include <vsmc/smp/backend_seq.hpp>
 
-#endif // VSMC_THREAD_THREAD_HPP
+#if VSMC_HAS_CILK
+#include <vsmc/smp/backend_cilk.hpp>
+#endif
+
+#if VSMC_HAS_GCD
+#include <vsmc/smp/backend_gcd.hpp>
+#endif
+
+#if VSMC_HAS_OMP
+#include <vsmc/smp/backend_omp.hpp>
+#endif
+
+#if VSMC_HAS_PPL
+#include <vsmc/smp/backend_ppl.hpp>
+#endif
+
+#if VSMC_HAS_CXX11LIB_THREAD
+#include <vsmc/smp/backend_std.hpp>
+#endif
+
+#if VSMC_HAS_TBB
+#include <vsmc/smp/backend_tbb.hpp>
+#endif
+
+#endif // VSMC_SMP_SMP_HPP

@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/thread/thread.hpp
+// vSMC/include/vsmc/utility/utility.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,26 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_THREAD_THREAD_HPP
-#define VSMC_THREAD_THREAD_HPP
+#ifndef VSMC_UTILITY_UTILITY_HPP
+#define VSMC_UTILITY_UTILITY_HPP
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/thread/blocked_range.hpp>
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
-#include <vsmc/thread/parallel_reduce.hpp>
-#include <vsmc/thread/parallel_repeat.hpp>
-#include <vsmc/thread/thread_guard.hpp>
-#include <vsmc/thread/thread_num.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
+#include <vsmc/utility/array.hpp>
+#include <vsmc/utility/counter.hpp>
+#include <vsmc/utility/cstring.hpp>
+#include <vsmc/utility/program_option.hpp>
+#include <vsmc/utility/progress.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 
-#endif // VSMC_THREAD_THREAD_HPP
+#if VSMC_HAS_X86
+#include <vsmc/utility/cpuid.hpp>
+#include <vsmc/utility/rdtsc.hpp>
+#endif
+
+#if VSMC_HAS_HDF5
+#include <vsmc/utility/hdf5io.hpp>
+#endif
+
+#endif // VSMC_UTILITY_UTILITY_HPP

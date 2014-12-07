@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/resample/basic.hpp
+// vSMC/include/vsmc/gcd/gcd.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,14 +29,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RESAMPLE_BASIC_HPP
-#define VSMC_RESAMPLE_BASIC_HPP
+#ifndef VSMC_GCD_GCD_HPP
+#define VSMC_GCD_GCD_HPP
 
-#include <vsmc/resample/multinomial.hpp>
-#include <vsmc/resample/residual.hpp>
-#include <vsmc/resample/stratified.hpp>
-#include <vsmc/resample/systematic.hpp>
-#include <vsmc/resample/residual_stratified.hpp>
-#include <vsmc/resample/residual_systematic.hpp>
+#include <vsmc/internal/config.hpp>
 
-#endif // VSMC_RESAMPLE_BASIC_HPP
+#include <vsmc/gcd/dispatch_function.hpp>
+#include <vsmc/gcd/dispatch_group.hpp>
+#include <vsmc/gcd/dispatch_object.hpp>
+#include <vsmc/gcd/dispatch_queue.hpp>
+#include <vsmc/gcd/dispatch_source.hpp>
+
+#endif // VSMC_GCD_GCD_HPP

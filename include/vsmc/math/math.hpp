@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/gcd/dispatch.hpp
+// vSMC/include/vsmc/math/math.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,13 +29,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_GCD_DISPATCH_HPP
-#define VSMC_GCD_DISPATCH_HPP
+#ifndef VSMC_MATH_MATH_HPP
+#define VSMC_MATH_MATH_HPP
 
-#include <vsmc/gcd/dispatch_function.hpp>
-#include <vsmc/gcd/dispatch_group.hpp>
-#include <vsmc/gcd/dispatch_object.hpp>
-#include <vsmc/gcd/dispatch_queue.hpp>
-#include <vsmc/gcd/dispatch_source.hpp>
+#include <vsmc/internal/config.hpp>
 
-#endif // VSMC_GCD_DISPATCH_HPP
+#include <vsmc/math/cblas.hpp>
+#include <vsmc/math/constants.hpp>
+#include <vsmc/math/vmath.hpp>
+
+#endif // VSMC_MATH_MATH_HPP

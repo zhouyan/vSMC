@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/thread/thread.hpp
+// vSMC/include/vsmc/rng/rng.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,46 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_THREAD_THREAD_HPP
-#define VSMC_THREAD_THREAD_HPP
+#ifndef VSMC_RNG_RNG_HPP
+#define VSMC_RNG_RNG_HPP
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/thread/blocked_range.hpp>
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
-#include <vsmc/thread/parallel_reduce.hpp>
-#include <vsmc/thread/parallel_repeat.hpp>
-#include <vsmc/thread/thread_guard.hpp>
-#include <vsmc/thread/thread_num.hpp>
+#include <vsmc/rng/rng_set.hpp>
+#include <vsmc/rng/seed.hpp>
 
-#endif // VSMC_THREAD_THREAD_HPP
+#include <vsmc/rng/generator_wrapper.hpp>
+
+#include <vsmc/rng/xor_combine_engine.hpp>
+#include <vsmc/rng/xorshift.hpp>
+
+#include <vsmc/rng/philox.hpp>
+#include <vsmc/rng/threefry.hpp>
+
+#if VSMC_HAS_AES_NI
+#include <vsmc/rng/aes.hpp>
+#include <vsmc/rng/aes_ni.hpp>
+#include <vsmc/rng/ars.hpp>
+#endif
+
+#if VSMC_HAS_GSL
+#include <vsmc/rng/gsl_rng.hpp>
+#endif
+
+#if VSMC_HAS_MKL
+#include <vsmc/rng/mkl_rng.hpp>
+#endif
+
+#if VSMC_HAS_RDRAND
+#include <vsmc/rng/rdrand.hpp>
+#endif
+
+#include <vsmc/rng/stable_distribution.hpp>
+#include <vsmc/rng/u01.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
+
+#if VSMC_HAS_SSE2
+#include <vsmc/rng/m128i.hpp>
+#endif
+
+#endif // VSMC_RNG_RNG_HPP

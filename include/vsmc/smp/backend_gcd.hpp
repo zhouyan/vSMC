@@ -33,7 +33,7 @@
 #define VSMC_SMP_BACKEND_GCD_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-#include <vsmc/gcd/dispatch.hpp>
+#include <vsmc/gcd/gcd.hpp>
 
 namespace vsmc {
 
