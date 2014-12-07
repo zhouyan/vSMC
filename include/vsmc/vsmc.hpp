@@ -196,9 +196,30 @@
 /// \ingroup Utility
 /// \brief Time measurement
 
-#include <vsmc/core/sampler.hpp>
-#include <vsmc/core/state_matrix.hpp>
-#include <vsmc/utility/program_option.hpp>
-#include <vsmc/utility/stop_watch.hpp>
+#include <vsmc/internal/config.hpp>
+
+#include <vsmc/core/core.hpp>
+#include <vsmc/integrate/integrate.hpp>
+#include <vsmc/math/math.hpp>
+#include <vsmc/resample/resample.hpp>
+#include <vsmc/rng/rng.hpp>
+#include <vsmc/smp/smp.hpp>
+#include <vsmc/utility/utility.hpp>
+
+#if VSMC_HAS_GCD
+#include <vsmc/gcd/gcd.hpp>
+#endif
+
+#if VSMC_HAS_MPI
+#include <vsmc/mpi/mpi.hpp>
+#endif
+
+#if VSMC_HAS_OPENCL
+#include <vsmc/opencl/opencl.hpp>
+#endif
+
+#if VSMC_HAS_CXX11LIB_THREAD
+#include <vsmc/thread/thread.hpp>
+#endif
 
 #endif // VSMC_HPP

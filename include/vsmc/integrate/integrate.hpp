@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/thread/thread.hpp
+// vSMC/include/vsmc/integrate/integrate.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_THREAD_THREAD_HPP
-#define VSMC_THREAD_THREAD_HPP
+#ifndef VSMC_INTEGRATE_INTEGRATE_HPP
+#define VSMC_INTEGRATE_INTEGRATE_HPP
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/thread/blocked_range.hpp>
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
-#include <vsmc/thread/parallel_reduce.hpp>
-#include <vsmc/thread/parallel_repeat.hpp>
-#include <vsmc/thread/thread_guard.hpp>
-#include <vsmc/thread/thread_num.hpp>
+#include <vsmc/integrate/is_integrate.hpp>
+#include <vsmc/integrate/nintegrate_base.hpp>
+#include <vsmc/integrate/nintegrate_newton_cotes.hpp>
 
-#endif // VSMC_THREAD_THREAD_HPP
+#endif // VSMC_INTEGRATE_INTEGRATE_HPP

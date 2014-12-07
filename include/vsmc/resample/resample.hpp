@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/thread/thread.hpp
+// vSMC/include/vsmc/resample/resample.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_THREAD_THREAD_HPP
-#define VSMC_THREAD_THREAD_HPP
+#ifndef VSMC_RESAMPLE_RESAMPLE_HPP
+#define VSMC_RESAMPLE_RESAMPLE_HPP
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/thread/blocked_range.hpp>
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
-#include <vsmc/thread/parallel_reduce.hpp>
-#include <vsmc/thread/parallel_repeat.hpp>
-#include <vsmc/thread/thread_guard.hpp>
-#include <vsmc/thread/thread_num.hpp>
+#include <vsmc/resample/multinomial.hpp>
+#include <vsmc/resample/residual.hpp>
+#include <vsmc/resample/stratified.hpp>
+#include <vsmc/resample/systematic.hpp>
+#include <vsmc/resample/residual_stratified.hpp>
+#include <vsmc/resample/residual_systematic.hpp>
 
-#endif // VSMC_THREAD_THREAD_HPP
+#endif // VSMC_RESAMPLE_RESAMPLE_HPP

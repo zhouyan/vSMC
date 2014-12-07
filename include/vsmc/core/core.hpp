@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/thread/thread.hpp
+// vSMC/include/vsmc/core/core.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,20 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_THREAD_THREAD_HPP
-#define VSMC_THREAD_THREAD_HPP
+#ifndef VSMC_CORE_CORE_HPP
+#define VSMC_CORE_CORE_HPP
 
-#include <vsmc/internal/config.hpp>
+#include <adapter.hpp>
+#include <monitor.hpp>
+#include <particle.hpp>
+#include <path.hpp>
+#include <sampler.hpp>
+#include <single_particle.hpp>
+#include <weight_set.hpp>
 
-#include <vsmc/thread/blocked_range.hpp>
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
-#include <vsmc/thread/parallel_reduce.hpp>
-#include <vsmc/thread/parallel_repeat.hpp>
-#include <vsmc/thread/thread_guard.hpp>
-#include <vsmc/thread/thread_num.hpp>
+#include <state_matrix.hpp>
+#if VSMC_HAS_CXX11LIB_TUPLE
+#include <state_tuple.hpp>
+#endif
 
-#endif // VSMC_THREAD_THREAD_HPP
+#endif // VSMC_CORE_CORE_HPP

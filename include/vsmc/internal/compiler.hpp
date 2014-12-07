@@ -430,6 +430,14 @@
 #endif
 #endif
 
+#ifndef VSMC_HAS_X86
+#if defined(__x86__) || (__x86_64__)
+#define VSMC_HAS_X86 1
+#else
+#define VSMC_HAS_X86 VSMC_HAS_SSE2
+#endif
+#endif
+
 // OS features
 
 #if VSMC_MAC_VERSION_MIN_REQUIRED(VSMC_MAC_10_7)

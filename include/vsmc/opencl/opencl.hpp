@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/thread/thread.hpp
+// vSMC/include/vsmc/opencl/opencl.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_THREAD_THREAD_HPP
-#define VSMC_THREAD_THREAD_HPP
+#ifndef VSMC_OPENCL_OPENCL_HPP
+#define VSMC_OPENCL_OPENCL_HPP
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/thread/blocked_range.hpp>
-#include <vsmc/thread/parallel_accumulate.hpp>
-#include <vsmc/thread/parallel_for.hpp>
-#include <vsmc/thread/parallel_reduce.hpp>
-#include <vsmc/thread/parallel_repeat.hpp>
-#include <vsmc/thread/thread_guard.hpp>
-#include <vsmc/thread/thread_num.hpp>
+#include <vsmc/opencl/adapter.hpp>
+#include <vsmc/opencl/backend_cl.hpp>
+#include <vsmc/opencl/cl_buffer.hpp>
+#include <vsmc/opencl/cl_configure.hpp>
+#include <vsmc/opencl/cl_manager.hpp>
+#include <vsmc/opencl/cl_manip.hpp>
+#include <vsmc/opencl/cl_query.hpp>
+#include <vsmc/opencl/cl_setup.hpp>
 
-#endif // VSMC_THREAD_THREAD_HPP
+#endif // VSMC_OPENCL_OPENCL_HPP
