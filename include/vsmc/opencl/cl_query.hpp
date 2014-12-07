@@ -90,16 +90,7 @@ class CLQuery
                 cxx11::integral_constant<OpenCLDeviceFeature, feat>());
     }
 
-    /// \brief Get the program source
-    static std::string program_source (const ::cl::Program &program)
-    {
-        std::string src;
-        program.getInfo(CL_PROGRAM_SOURCE, &src);
-
-        return src;
-    }
-
-    /// \brief Get the program binary vector
+    /// \brief Program binary vector
     static std::vector<std::string> program_binary (
             const ::cl::Program &program)
     {
@@ -124,7 +115,7 @@ class CLQuery
         return bin;
     }
 
-    /// \brief Get the program device vector
+    /// \brief Program device vector
     static std::vector< ::cl::Device> program_device (
             const ::cl::Program program) 
     {
@@ -137,34 +128,56 @@ class CLQuery
         return devices;
     }
 
-    /// \brief Print build log
-    template <typename CharT, typename Traits>
-    static void print_program_build_log (const ::cl::Program &program,
-            std::basic_ostream<CharT, Traits> &os)
+    /// \brief Program source
+    static std::string program_source (const ::cl::Program &program)
     {
-        ::cl_build_status status = CL_BUILD_SUCCESS;
-        std::string line(78, '=');
-        line += "\n";
-        std::string log;
-        std::string dname;
+        std::string src;
+        program.getInfo(CL_PROGRAM_SOURCE, &src);
 
-        std::vector< ::cl::Device> devices(CLQuery::program_device(program));
-
-        for (std::size_t i = 0; i != devices.size(); ++i) {
-            program.getBuildInfo(devices[i], CL_PROGRAM_BUILD_STATUS,
-                    &status);
-            if (status != CL_BUILD_SUCCESS) {
-                program.getBuildInfo(devices[i], CL_PROGRAM_BUILD_LOG,
-                        &log);
-                devices[i].getInfo(CL_DEVICE_NAME, &dname);
-                os << line << "Build failed for : " << dname << std::endl;
-                os << line << log << std::endl << line << std::endl;
-            }
-        }
+        return src;
     }
 
-    static void print_program_build_log (const ::cl::Program &program)
-    {print_program_build_log(program, std::cout);}
+    /// \brief Program build log and status
+    static std::vector<std::pair< ::cl_build_status, std::string> >
+    program_build_log (const ::cl::Program &program)
+    {
+        std::string log;
+        ::cl_build_status status = CL_BUILD_SUCCESS;
+        std::vector< ::cl::Device> devices(program_device(program));
+        std::vector<std::pair< ::cl_build_status, std::string> > build_log;
+        for (std::size_t i = 0; i != devices.size(); ++i) {
+            program.getBuildInfo(devices[i], CL_PROGRAM_BUILD_STATUS, &status);
+            program.getBuildInfo(devices[i], CL_PROGRAM_BUILD_LOG, &log);
+            build_log.push_back(std::make_pair(status, log));
+        }
+
+        return build_log;
+    }
+
+    /// \brief Print program build log and status
+    template <typename CharT, typename Traits>
+    static std::vector<std::pair< ::cl_build_status, std::string> >
+    program_build_log (const ::cl::Program &program,
+            std::basic_ostream<CharT, Traits> &os)
+    {
+        std::string line(78, '=');
+        line += "\n";
+
+        std::string dname;
+        std::vector< ::cl::Device> devices(program_device(program));
+        std::vector<std::pair< ::cl_build_status, std::string> > build_log(
+                program_build_log(program));
+        for (std::size_t i = 0; i != build_log.size(); ++i) {
+                devices[i].getInfo(CL_DEVICE_NAME, &dname);
+            if (build_log[i].first == CL_BUILD_SUCCESS)
+                os << line << "Build successed for : " << dname << std::endl;
+            else
+                os << line << "Build failed for : " << dname << std::endl;
+            os << line << build_log[i].second << '\n' << line << std::endl;
+        }
+
+        return build_log;
+    }
 
     /// \brief Query all information
     template <typename CharT, typename Traits>
