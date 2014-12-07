@@ -123,42 +123,49 @@ FUNCTION (VSMC_HEADER basepath cond)
         ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
 
         FOREACH (arg ${ARGN})
-            IF (${arg} STREQUAL "MPI")
+            IF (${arg} STREQUAL "MPI" AND VSMC_MPI_FOUND)
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${VSMC_MPI_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "MPI")
-            IF (${arg} STREQUAL "OPENCL")
+            ENDIF (${arg} STREQUAL "MPI" AND VSMC_MPI_FOUND)
+
+            IF (${arg} STREQUAL "OPENCL" AND OPENCL_FOUND)
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${OpenCL_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "OPENCL")
-            IF (${arg} STREQUAL "GSL")
+            ENDIF (${arg} STREQUAL "OPENCL" AND OPENCL_FOUND)
+
+            IF (${arg} STREQUAL "GSL" AND GSL_FOUND)
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${GSL_LINK_LIBRARIES})
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${GSL_CBLAS_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "GSL")
-            IF (${arg} STREQUAL "MKL")
+            ENDIF (${arg} STREQUAL "GSL" AND GSL_FOUND)
+
+            IF (${arg} STREQUAL "MKL" AND MKL_FOUND)
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${MKL_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "MKL")
-            IF (${arg} STREQUAL "GCD")
+            ENDIF (${arg} STREQUAL "MKL" AND MKL_FOUND)
+
+            IF (${arg} STREQUAL "GCD" AND GCD_FOUND)
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${GCD_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "GCD")
-            IF (${arg} STREQUAL "OPENMP")
+            ENDIF (${arg} STREQUAL "GCD" AND GCD_FOUND)
+
+            IF (${arg} STREQUAL "OPENMP" AND VSMC_OPENMP_FOUND)
                 SET_TARGET_PROPERTIES (${basename}_hpp
                     PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}")
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${OpenMP_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "OPENMP")
-            IF (${arg} STREQUAL "TBB")
+            ENDIF (${arg} STREQUAL "OPENMP" AND VSMC_OPENMP_FOUND)
+
+            IF (${arg} STREQUAL "TBB" AND TBB_FOUND)
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${TBB_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "TBB")
-            IF (${arg} STREQUAL "THREAD")
+            ENDIF (${arg} STREQUAL "TBB" AND TBB_FOUND)
+
+            IF (${arg} STREQUAL "THREAD" AND CXX11LIB_THREAD_FOUND)
                 TARGET_LINK_LIBRARIES (${basename}_hpp
                     ${CMAKE_THREAD_LIBS_INIT})
-            ENDIF (${arg} STREQUAL "THREAD")
+            ENDIF (${arg} STREQUAL "THREAD" AND CXX11LIB_THREAD_FOUND)
         ENDFOREACH (arg ${ARGN})
 
         TARGET_LINK_LIBRARIES (${basename}_hpp ${VSMC_LINK_LIBRARIES})
