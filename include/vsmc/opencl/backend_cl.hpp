@@ -487,7 +487,7 @@ class InitializeCL
                 kernel_, particle.size(), configure_.local_size());
         post_processor(particle);
 
-        return accept_count(particle, accept_buffer_);
+        return accept_count(particle, accept_buffer_.data());
     }
 
     virtual void initialize_param (Particle<T> &, void *) {}
@@ -496,10 +496,10 @@ class InitializeCL
     virtual void post_processor (Particle<T> &) {}
 
     virtual std::size_t accept_count (Particle<T> &particle,
-            const CLBuffer< ::cl_ulong, typename T::id> &accept_buffer)
+            const ::cl::Buffer &accept_buffer)
     {
         particle.value().manager().read_buffer(
-                accept_buffer.data(), particle.size(), &accept_host_[0]);
+                accept_buffer, particle.size(), &accept_host_[0]);
 
         return static_cast<std::size_t>(std::accumulate(
                     accept_host_.begin(), accept_host_.end(),
@@ -582,7 +582,7 @@ class MoveCL
                 kernel_, particle.size(), configure_.local_size());
         post_processor(iter, particle);
 
-        return accept_count(particle, accept_buffer_);
+        return accept_count(particle, accept_buffer_.data());
     }
 
     virtual void move_state (std::size_t, std::string &) {}
@@ -590,10 +590,10 @@ class MoveCL
     virtual void post_processor (std::size_t, Particle<T> &) {}
 
     virtual std::size_t accept_count (Particle<T> &particle,
-            const CLBuffer< ::cl_ulong, typename T::id> &accept_buffer)
+            const ::cl::Buffer &accept_buffer)
     {
         particle.value().manager().read_buffer(
-                accept_buffer.data(), particle.size(), &accept_host_[0]);
+                accept_buffer, particle.size(), &accept_host_[0]);
 
         return static_cast<std::size_t>(std::accumulate(
                     accept_host_.begin(), accept_host_.end(),
