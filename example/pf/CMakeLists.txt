@@ -69,7 +69,7 @@ FUNCTION (ADD_PF_MPI_CHECK pf_state smp)
     ADD_DEPENDENCIES (pf_${state}_mpi-check pf_${state}_mpi_${smp}-check)
 ENDFUNCTION (ADD_PF_MPI_CHECK base smp)
 
-ADD_EXAMPLE (pf ${PF_STATE})
+ADD_SMP_EXAMPLE (pf "${PF_STATE}" "HDF5")
 
 COPY_FILE (pf pf.data)
 COPY_FILE (pf pf.R)
@@ -94,9 +94,8 @@ ENDFOREACH (state ${PF_SMP_STATE})
 
 IF (OPENCL_FOUND AND RANDOM123_FOUND)
     COPY_FILE (pf pf_cl.cl)
-    ADD_EXECUTABLE (pf_cl ${PROJECT_SOURCE_DIR}/src/pf_cl.cpp)
-    TARGET_LINK_LIBRARIES (pf_cl ${VSMC_LINK_LIBRARIES})
-    TARGET_LINK_LIBRARIES (pf_cl ${OpenCL_LINK_LIBRARIES})
+    ADD_VSMC_EXECUTABLE (pf_cl ${PROJECT_SOURCE_DIR}/src/pf_cl.cpp
+        "OCL" "HDF5" "MKL")
     ADD_DEPENDENCIES (pf pf_cl)
     ADD_DEPENDENCIES (example_cl pf_cl)
     ADD_CUSTOM_TARGET (pf_cl-check

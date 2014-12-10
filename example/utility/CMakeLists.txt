@@ -36,16 +36,14 @@ ADD_CUSTOM_TARGET(utility)
 ADD_DEPENDENCIES (example utility)
 
 IF (CPUID_FOUND)
-    ADD_EXECUTABLE (cpuid_info ${PROJECT_SOURCE_DIR}/src/cpuid_info.cpp)
-    TARGET_LINK_LIBRARIES (cpuid_info ${VSMC_LINK_LIBRARIES})
+    ADD_VSMC_EXECUTABLE (cpuid_info ${PROJECT_SOURCE_DIR}/src/cpuid_info.cpp)
     ADD_DEPENDENCIES (utility cpuid_info)
 ENDIF (CPUID_FOUND)
 
-ADD_EXECUTABLE (utility_cstring_memset
+ADD_VSMC_EXECUTABLE (utility_cstring_memset
     ${PROJECT_SOURCE_DIR}/src/utility_cstring_memset.cpp)
-ADD_EXECUTABLE (utility_cstring_memcpy
-    ${PROJECT_SOURCE_DIR}/src/utility_cstring_memcpy.cpp)
-TARGET_LINK_LIBRARIES (utility_cstring_memset  ${VSMC_LINK_LIBRARIES})
-TARGET_LINK_LIBRARIES (utility_cstring_memcpy  ${VSMC_LINK_LIBRARIES})
 ADD_DEPENDENCIES (utility utility_cstring_memset)
+
+ADD_VSMC_EXECUTABLE (utility_cstring_memcpy
+    ${PROJECT_SOURCE_DIR}/src/utility_cstring_memcpy.cpp)
 ADD_DEPENDENCIES (utility utility_cstring_memcpy)

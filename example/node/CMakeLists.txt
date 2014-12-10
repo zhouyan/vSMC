@@ -33,6 +33,8 @@ PROJECT (vSMCExample-node CXX)
 INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR}/include)
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 
-ADD_EXAMPLE (node smc; pmcmc)
+SET (NODE_ALGS smc; pmcmc)
+ADD_SMP_EXAMPLE (node "${NODE_ALGS}")
+
 COPY_FILE (node node_s.data)
 COPY_FILE (node node_c.data)

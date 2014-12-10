@@ -34,6 +34,6 @@ PROJECT (vSMCExample-opencl CXX)
 ADD_CUSTOM_TARGET(opencl)
 ADD_DEPENDENCIES (example opencl)
 
-ADD_EXECUTABLE (opencl_info ${PROJECT_SOURCE_DIR}/src/opencl_info.cpp)
-TARGET_LINK_LIBRARIES (opencl_info ${OpenCL_LINK_LIBRARIES})
+ADD_VSMC_EXECUTABLE (opencl_info
+    ${PROJECT_SOURCE_DIR}/src/opencl_info.cpp "OCL")
 ADD_DEPENDENCIES (opencl opencl_info)
