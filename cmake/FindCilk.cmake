@@ -74,8 +74,12 @@ ENDFOREACH (flag ${Cilk_FLAG_CANDIDATES})
 
 IF (CILK_FOUND)
     MESSAGE (STATUS "Found Cilk Plus support [${Cilk_CXX_FLAGS}]")
-    SET (Cilk_LINK_LIBRARIES ${Cilk_CXX_FLAGS} CACHE STRING
-        "Cilk Link Libraries")
+    IF (NOT "${Cilk_CXX_FLAGS}" STREQUAL " ")
+        SET (Cilk_LINK_LIBRARIES ${Cilk_CXX_FLAGS} CACHE STRING
+            "Cilk Link Libraries")
+    ELSE (NOT "${Cilk_CXX_FLAGS}" STREQUAL " ")
+        SET (Cilk_LINK_LIBRARIES "" CACHE STRING "Cilk Link Libraries")
+    ENDIF (NOT "${Cilk_CXX_FLAGS}" STREQUAL " ")
 ELSE (CILK_FOUND)
     MESSAGE (STATUS "NOT Found Cilk Plus support")
 ENDIF (CILK_FOUND)
