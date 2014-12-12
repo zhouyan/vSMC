@@ -35,6 +35,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
+#include <vsmc/utility/array.hpp>
 
 #define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim) \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
@@ -62,8 +63,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     public :
 
     typedef std::size_t size_type;
-    typedef std::vector<T> state_pack_type;
     typedef T state_type;
+    typedef typename cxx11::conditional<Dim == Dynamic,
+             std::vector<T>, Array<T, Dim> >::type state_pack_type;
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S>
@@ -212,12 +214,26 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     explicit StateMatrixBase (size_type N) : size_(N), data_(N * Dim) {}
 
+    state_pack_type create_pack () const
+    {
+        return create_pack_dispatch(
+                cxx11::integral_constant<bool, Dim == Dynamic>());
+    }
+
     private :
 
     size_type size_;
     typename cxx11::conditional<cxx11::is_arithmetic<T>::value,
              std::vector<T, AlignedAllocator<T> >,
              std::vector<T> >::type data_;
+
+    private :
+
+    std::vector<T> create_pack_dispatch (cxx11::true_type) const
+    {return std::vector<T>(this->dim());}
+
+    Array<T, Dim> create_pack_dispatch (cxx11::false_type) const
+    {return Array<T, Dim>();}
 }; // class StateMatrixBase
 
 /// \brief Particle::value_type subtype
@@ -271,7 +287,12 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     state_pack_type state_pack (size_type id) const
-    {return state_pack_type(row_data(id), row_data(id +1));}
+    {
+        state_pack_type pack(this->create_pack());
+        std::copy(row_data(id), row_data(id + 1), &pack[0]);
+
+        return pack;
+    }
 
     void state_unpack (size_type id, const state_pack_type &pack)
     {
@@ -356,10 +377,9 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     state_pack_type state_pack (size_type id) const
     {
-        state_pack_type pack;
-        pack.reserve(this->dim());
+        state_pack_type pack(this->create_pack());
         for (std::size_t d = 0; d != this->dim(); ++d)
-            pack.push_back(state(id, d));
+            pack[d] = state(id, d);
 
         return pack;
     }

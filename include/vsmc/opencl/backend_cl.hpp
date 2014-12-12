@@ -39,6 +39,7 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/internal/cl_copy.hpp>
 #include <vsmc/rng/seed.hpp>
+#include <vsmc/utility/array.hpp>
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim) \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
@@ -64,6 +65,10 @@
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH \
     VSMC_RUNTIME_ASSERT((N == copy_.size()),                                 \
             ("**StateCL::copy** SIZE MISMATCH"))
+
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_UNPACK_SIZE(psize, dim) \
+    VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
+            ("**StateCL::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
 #if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
 
@@ -244,6 +249,8 @@ class StateCL
     typedef FPType fp_type;
     typedef ID id;
     typedef CLManager<ID> manager_type;
+    typedef typename cxx11::conditional<StateSize == Dynamic,
+             std::vector<char>, Array<char, StateSize> >::type state_pack_type;
 
     explicit StateCL (size_type N) :
         state_size_(StateSize == Dynamic ? 1 : StateSize),
@@ -392,6 +399,24 @@ class StateCL
         copy_(copy_from_buffer_.data(), state_buffer_.data());
     }
 
+    state_pack_type state_pack (size_type id) const
+    {
+        state_pack_type pack(create_pack());
+        manager().read_buffer(state_buffer_.data(), state_size_,
+                &pack[0], id * state_size_);
+
+        return pack;
+    }
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {
+        VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_UNPACK_SIZE(
+                pack.size(), state_size_);
+
+        manager().write_buffer(state_buffer_.data(), state_size_,
+                &pack[0], id * state_size_);
+    }
+
     CLConfigure &copy_configure () {return copy_.configure();}
 
     const CLConfigure &copy_configure () const {return copy_.configure();}
@@ -431,6 +456,18 @@ class StateCL
             throw;
         }
     }
+
+    state_pack_type create_pack () const
+    {
+        return create_pack_dispatch(
+                cxx11::integral_constant<bool, StateSize == Dynamic>());
+    }
+
+    std::vector<char> create_pack_dispatch (cxx11::true_type) const
+    {return std::vector<char>(this->dim());}
+
+    Array<char, StateSize> create_pack_dispatch (cxx11::false_type) const
+    {return Array<char, StateSize>();}
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype using OpenCL
