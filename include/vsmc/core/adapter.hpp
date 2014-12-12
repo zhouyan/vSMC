@@ -34,58 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(name, RT, Args)                  \
-template <typename U>                                                        \
-struct has_##name##_non_static_non_const_                                    \
-{                                                                            \
-    private :                                                                \
-                                                                             \
-    struct char2 {char c1; char c2;};                                        \
-    template <typename V, RT (V::*) Args> struct sfinae_;                    \
-    template <typename V> static char test (sfinae_<V, &V::name> *);         \
-    template <typename V> static char2 test (...);                           \
-                                                                             \
-    public :                                                                 \
-                                                                             \
-    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};            \
-};                                                                           \
-                                                                             \
-template <typename U>                                                        \
-struct has_##name##_non_static_const_                                        \
-{                                                                            \
-    private :                                                                \
-                                                                             \
-    struct char2 {char c1; char c2;};                                        \
-    template <typename V, RT (V::*) Args const> struct sfinae_;              \
-    template <typename V> static char test (sfinae_<V, &V::name> *);         \
-    template <typename V> static char2 test (...);                           \
-                                                                             \
-    public :                                                                 \
-                                                                             \
-    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};            \
-};                                                                           \
-                                                                             \
-template <typename U>                                                        \
-struct has_##name##_static_                                                  \
-{                                                                            \
-    private :                                                                \
-                                                                             \
-    struct char2 {char c1; char c2;};                                        \
-    template <typename V, RT (*) Args> struct sfinae_;                       \
-    template <typename V> static char test (sfinae_<V, &V::name> *);         \
-    template <typename V> static char2 test (...);                           \
-                                                                             \
-    public :                                                                 \
-                                                                             \
-    enum {value = sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char)};            \
-};                                                                           \
-                                                                             \
-template <typename U>                                                        \
-struct has_##name##_ : public cxx11::integral_constant<bool,                 \
-    has_##name##_non_static_non_const_<U>::value ||                          \
-    has_##name##_non_static_const_<U>::value ||                              \
-    has_##name##_static_<U>::value> {};
-
 namespace vsmc {
 
 template <typename, template <typename, typename> class,
@@ -134,11 +82,11 @@ class InitializeAdapterBase : public BaseType
 
     F f_;
 
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(initialize_param,
+    VSMC_DEFINE_METHOD_CHECKER(initialize_param,
             void, (Particle<T> &, void *))
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(pre_processor,
+    VSMC_DEFINE_METHOD_CHECKER(pre_processor,
             void, (Particle<T> &))
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(post_processor,
+    VSMC_DEFINE_METHOD_CHECKER(post_processor,
             void, (Particle<T> &))
 
     void initialize_param_dispatch (Particle<T> &particle, void *param,
@@ -190,9 +138,9 @@ class MoveAdapterBase : public BaseType
 
     F f_;
 
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(pre_processor,
+    VSMC_DEFINE_METHOD_CHECKER(pre_processor,
             void, (std::size_t, Particle<T> &))
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(post_processor,
+    VSMC_DEFINE_METHOD_CHECKER(post_processor,
             void, (std::size_t, Particle<T> &))
 
     void pre_processor_dispatch (std::size_t iter, Particle<T> &particle,
@@ -240,9 +188,9 @@ class MonitorEvalAdapterBase : public BaseType
 
     F f_;
 
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(pre_processor,
+    VSMC_DEFINE_METHOD_CHECKER(pre_processor,
             void, (std::size_t, const Particle<T> &))
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(post_processor,
+    VSMC_DEFINE_METHOD_CHECKER(post_processor,
             void, (std::size_t, const Particle<T> &))
 
     void pre_processor_dispatch (std::size_t iter,
@@ -293,9 +241,9 @@ class PathEvalAdapterBase : public BaseType
 
     F f_;
 
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(pre_processor,
+    VSMC_DEFINE_METHOD_CHECKER(pre_processor,
             void, (std::size_t, const Particle<T> &))
-    VSMC_DEFINE_CORE_ADAPTER_MF_CHECKER(post_processor,
+    VSMC_DEFINE_METHOD_CHECKER(post_processor,
             void, (std::size_t, const Particle<T> &))
 
     void pre_processor_dispatch (std::size_t iter,
