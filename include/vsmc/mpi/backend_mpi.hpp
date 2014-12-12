@@ -268,7 +268,7 @@ class StateMPI : public BaseState
     typedef WeightSetMPI<
         typename traits::WeightSetTypeTrait<BaseState>::type, ID
         > weight_set_type;
-    typedef ID id_type;
+    typedef ID id;
 
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),
@@ -355,6 +355,9 @@ class StateMPI : public BaseState
     {
         VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH;
 
+        copy_pre_processor_dispatch(
+                typename has_copy_pre_processor_<BaseState>::type());
+
         barrier();
         copy_from_.resize(N);
         if (world_.rank() == 0)
@@ -364,6 +367,9 @@ class StateMPI : public BaseState
         barrier();
         copy_inter_node(copy_recv_, copy_send_);
         barrier();
+
+        copy_post_processor_dispatch(
+                typename has_copy_post_processor_<BaseState>::type());
     }
 
     /// \brief History of number of particles send from this node during copy
@@ -544,6 +550,25 @@ class StateMPI : public BaseState
     typename BaseState::state_pack_type pack_recv_;
     typename BaseState::state_pack_type pack_send_;
     std::vector<std::size_t> send_num_;
+
+    VSMC_DEFINE_METHOD_CHECKER(copy_pre_processor, void, ())
+    VSMC_DEFINE_METHOD_CHECKER(copy_post_processor, void, ())
+
+    void copy_pre_processor_dispatch (cxx11::true_type)
+    {
+        barrier();
+        this->copy_pre_processor();
+    }
+
+    void copy_pre_processor_dispatch (cxx11::false_type) {}
+
+    void copy_post_processor_dispatch (cxx11::true_type)
+    {
+        this->copy_post_processor();
+        barrier();
+    }
+
+    void copy_post_processor_dispatch (cxx11::false_type) {}
 }; // class StateMPI
 
 } // namespace vsmc
