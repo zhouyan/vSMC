@@ -76,9 +76,7 @@ class Inversion
             return;
 
         accw_.resize(M);
-        accw_[0] = weight[0];
-        for (std::size_t i = 1; i != M; ++i)
-            accw_[i] = accw_[i - 1] + weight[i];
+        std::partial_sum(weight, weight + M, accw_.begin());
         accw_.back() = 1;
 
         u01_.resize(N);
