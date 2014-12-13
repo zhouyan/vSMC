@@ -60,7 +60,7 @@ class node_state :
     {
         using std::log;
 
-        return -(data_num() * (vsmc::math::ln_2pi<double>() + 2 * log(sd0_)));
+        return -(data_num() * (vsmc::math::ln_pi_2<double>() + 2 * log(sd0_)));
     }
 
     double log_prior (node_param &state) const

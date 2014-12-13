@@ -60,7 +60,7 @@ class gmm_state :
 
         double lp = 0;
         lp -= comp_num * log(sd0_);
-        lp -= 0.5 * comp_num * vsmc::math::ln_2pi<double>();
+        lp -= 0.5 * comp_num * vsmc::math::ln_pi_2<double>();
         lp -= comp_num * (shape0_ * log(scale0_) +
                 vsmc::cxx11::lgamma(shape0_));
 
@@ -68,7 +68,7 @@ class gmm_state :
     }
 
     double log_likelihood_const () const
-    {return -0.5 * obs_.size() * vsmc::math::ln_2pi<double>();}
+    {return -0.5 * obs_.size() * vsmc::math::ln_pi_2<double>();}
 
     double log_prior (gmm_param &state) const
     {
