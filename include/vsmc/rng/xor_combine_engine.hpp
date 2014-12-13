@@ -50,7 +50,7 @@
 namespace vsmc {
 
 /// \brief Combine two RNG engines using XOR
-/// \ingroup RNGWraper
+/// \ingroup RNGAdapter
 template <typename Eng1, typename Eng2,
          typename Eng1::result_type S1 = 0,
          typename Eng2::result_type S2 = 0>

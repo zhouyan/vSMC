@@ -37,7 +37,7 @@
 namespace vsmc {
 
 /// \brief Draw a single sample given weights
-/// \ingroup RNG
+/// \ingroup Distribution
 template <typename IntType = int>
 class DiscreteDistribution : public cxx11::discrete_distribution<IntType>
 {
