@@ -196,5 +196,4 @@ inline void cv_do (vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
 #endif
 }
 
-
 #endif // VSMC_EXAMPLE_PF_CL_HPP
