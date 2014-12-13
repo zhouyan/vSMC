@@ -66,6 +66,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <utility>
