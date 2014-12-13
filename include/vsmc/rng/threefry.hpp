@@ -522,6 +522,14 @@ typedef ThreefryEngine<uint64_t, 2> Threefry2x64;
 /// \ingroup R123RNG
 typedef ThreefryEngine<uint64_t, 4> Threefry4x64;
 
+/// \brief The default 32-bits Threefry engine
+/// \ingroup R123RNG
+typedef Threefry4x32 Threefry;
+
+/// \brief The default 64-bits Threefry engine
+/// \ingroup R123RNG
+typedef Threefry4x64 Threefry_64;
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_THREEFRY_HPP
