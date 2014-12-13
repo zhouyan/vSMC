@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
-#define VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP
+#define VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01.hpp>
@@ -352,4 +352,4 @@ class UniformRealDistribution
 
 } // namespace vsmc
 
-#endif // VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
+#endif // VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP

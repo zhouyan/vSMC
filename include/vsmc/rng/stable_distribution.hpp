@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_STABLE_DISTRIBUTION_HPP
-#define VSMC_STABLE_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_STABLE_DISTRIBUTION_HPP
+#define VSMC_RNG_STABLE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 
@@ -364,4 +364,4 @@ class StableDistribution
 
 } // namespace vsmc
 
-#endif // VSMC_STABLE_DISTRIBUTION_HPP
+#endif // VSMC_RNG_STABLE_DISTRIBUTION_HPP
