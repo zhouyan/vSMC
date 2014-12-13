@@ -305,7 +305,7 @@ class pet_state :
     }
 
     double log_likelihood_const_normal () const
-    {return -0.5 * data_num() * vsmc::math::ln_2pi<double>();}
+    {return -0.5 * data_num() * vsmc::math::ln_pi_2<double>();}
 
     double log_likelihood_const_studentt () const
     {return -0.5 * data_num() * vsmc::math::ln_pi<double>();}
