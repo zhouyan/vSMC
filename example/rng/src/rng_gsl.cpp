@@ -30,7 +30,7 @@
 //============================================================================
 
 #include "rng_test.hpp"
-#include <vsmc/rng/gsl_rng.hpp>
+#include <vsmc/rng/gsl.hpp>
 
 int main (int argc, char **argv)
 {

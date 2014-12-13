@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/gsl_rng.hpp
+// vSMC/include/vsmc/rng/gsl.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_GSL_RNG_HPP
-#define VSMC_RNG_GSL_RNG_HPP
+#ifndef VSMC_RNG_GSL_HPP
+#define VSMC_RNG_GSL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/generator_wrapper.hpp>
@@ -262,4 +262,4 @@ typedef GSLEngine<GSL_RNG_TYPE_GFSR4> GSL_GFSR4;
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_GSL_RNG_HPP
+#endif // VSMC_RNG_GSL_HPP

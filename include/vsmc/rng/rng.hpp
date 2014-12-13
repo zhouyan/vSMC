@@ -52,11 +52,11 @@
 #endif
 
 #if VSMC_HAS_GSL
-#include <vsmc/rng/gsl_rng.hpp>
+#include <vsmc/rng/gsl.hpp>
 #endif
 
 #if VSMC_HAS_MKL
-#include <vsmc/rng/mkl_rng.hpp>
+#include <vsmc/rng/mkl.hpp>
 #endif
 
 #if VSMC_HAS_RDRAND

@@ -30,7 +30,7 @@
 //============================================================================
 
 #include "rng_testu01.hpp"
-#include <vsmc/rng/mkl_rng.hpp>
+#include <vsmc/rng/mkl.hpp>
 
 VSMC_RNG_TESTU01_FUNCTION(MKL_MCG59)
 VSMC_RNG_TESTU01_FUNCTION(MKL_MT19937)

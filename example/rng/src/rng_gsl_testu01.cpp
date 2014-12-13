@@ -30,7 +30,7 @@
 //============================================================================
 
 #include "rng_testu01.hpp"
-#include <vsmc/rng/gsl_rng.hpp>
+#include <vsmc/rng/gsl.hpp>
 
 VSMC_RNG_TESTU01_FUNCTION(GSL_MT19937)
 VSMC_RNG_TESTU01_FUNCTION(GSL_RANLXS0)
