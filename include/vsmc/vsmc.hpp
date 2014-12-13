@@ -138,9 +138,9 @@
 /// \ingroup RNG
 /// \brief Random number generating using Intel RDRAND instructions
 
-/// \defgroup RNGWrapper Wrapper
+/// \defgroup RNGAdapter Adapter
 /// \ingroup RNG
-/// \brief C++11 RNG engines that wrap other RNG generators
+/// \brief C++11 RNG engines that adapt other RNG generators
 
 /// \defgroup U01 U01
 /// \ingroup RNG
