@@ -101,5 +101,14 @@ int main ()
         double n = rnorm(eng[i]);
     }
 
+    std::vector<double> wvec(N);
+    for (int i = 0; i != N; ++i)
+        wvec[i] = runif(eng[i]);
+    vsmc::cxx11::discrete_distribution<int> rdisc(wvec.begin(), wvec.end());
+    for (int i = 0; i != N; ++i) {
+        int n = rdisc(eng[i]);
+        assert(n >= 0 && n < N);
+    }
+
     return 0;
 }

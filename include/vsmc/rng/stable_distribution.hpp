@@ -169,7 +169,7 @@ class StableDistribution
         invariant();
     }
 
-    StableDistribution (const param_type &param) :
+    explicit StableDistribution (const param_type &param) :
         stability_(param.stability()), skewness_(param.skewness()),
         location_(param.location()), scale_(param.scale()),
         zeta_(0), xi_(0), stability_1_(false)

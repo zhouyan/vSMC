@@ -249,7 +249,7 @@ class UniformRealDistribution
         a_(a), b_(b)
     {VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a_, b_);}
 
-    UniformRealDistribution (const param_type &param) :
+    explicit UniformRealDistribution (const param_type &param) :
         a_(param.a()), b_(param.b())
     {VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a_, b_);}
 

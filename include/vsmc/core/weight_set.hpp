@@ -33,6 +33,7 @@
 #define VSMC_CORE_WEIGHT_SET_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/rng/discrete_distribution.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
 namespace vsmc {
@@ -315,19 +316,7 @@ class WeightSet
     /// \brief Draw a sample according to the weights
     template <typename URNG>
     size_type draw (URNG &eng) const
-    {
-        cxx11::uniform_real_distribution<double> runif(0, 1);
-        double u = runif(eng);
-        size_type i = 0;
-        const double *w = &weight_[0];
-        double sum = w[0];
-        while (sum < u) {
-            ++i;
-            sum += w[i];
-        }
-
-        return i;
-    }
+    {return draw_(eng, weight_.begin(), weight_.end(), true);}
 
     /// \brief Read only access to the resampling weights
     virtual const double *resample_weight_data () const {return &weight_[0];}
@@ -431,6 +420,7 @@ class WeightSet
     double ess_;
     std::vector<double, AlignedAllocator<double> > weight_;
     std::vector<double, AlignedAllocator<double> > log_weight_;
+    DiscreteDistribution<size_type> draw_;
 
     void post_set_log_weight ()
     {
