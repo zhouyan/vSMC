@@ -31,13 +31,13 @@
 
 std::string vSMCIncPath;
 std::string R123IncPath;
-std::string PlatformName;
-std::string DeviceType;
-std::string DeviceVendorName;
-std::string BuildOption;
-std::size_t LocalSize;
+std::vector<std::string> PlatformName;
+std::vector<std::string> DeviceType;
+std::vector<std::string> DeviceVendorName;
+std::vector<std::string> BuildOption;
+std::vector<std::size_t> LocalSize;
 std::size_t FPTypeBits;
-std::size_t ParticleNum;
+std::vector<std::size_t> ParticleNum;
 double Threshold;
 std::size_t IterNum;
 std::string DataFile;

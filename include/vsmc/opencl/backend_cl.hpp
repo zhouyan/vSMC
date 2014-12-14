@@ -464,7 +464,7 @@ class StateCL
     }
 
     std::vector<char> create_pack_dispatch (cxx11::true_type) const
-    {return std::vector<char>(this->dim());}
+    {return std::vector<char>(this->state_size());}
 
     Array<char, StateSize> create_pack_dispatch (cxx11::false_type) const
     {return Array<char, StateSize>();}

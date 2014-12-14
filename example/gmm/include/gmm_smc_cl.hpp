@@ -44,6 +44,10 @@ const std::size_t MaxCompNum = 10;
 #include <vsmc/opencl/cl_query.hpp>
 #include <Random123/array.h>
 
+#ifdef VSMC_GMM_SMC_CL_MPI
+#include <vsmc/mpi/backend_mpi.hpp>
+#endif
+
 struct data_info
 {
     const std::size_t data_num;
@@ -53,12 +57,21 @@ struct data_info
         data_num(num), file_name(file) {}
 };
 
+
 template <typename FPType>
+#ifdef VSMC_GMM_SMC_CL_MPI
+class gmm_state : public vsmc::StateMPI<vsmc::StateCL<vsmc::Dynamic, FPType> >
+#else
 class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType>
+#endif
 {
     public :
 
+#ifdef VSMC_GMM_SMC_CL_MPI
+    typedef vsmc::StateMPI<vsmc::StateCL<vsmc::Dynamic, FPType> > base;
+#else
     typedef vsmc::StateCL<vsmc::Dynamic, FPType> base;
+#endif
     typedef typename base::size_type size_type;
     typedef typename base::fp_type fp_type;
 
@@ -380,8 +393,6 @@ class gmm_move_mu : public vsmc::MoveCL<gmm_state<FPType> >
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
                     this->kernel(), particle.size());
-            std::cout << "Profiled local size of kernel gmm_move_mu\t"
-                << local_size_ << std::endl;
         }
 
         if (local_size_ != 0)
@@ -415,8 +426,6 @@ class gmm_move_lambda : public vsmc::MoveCL<gmm_state<FPType> >
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
                     this->kernel(), particle.size());
-            std::cout << "Profiled local size of kernel gmm_move_lambda\t"
-                << local_size_ << std::endl;
         }
 
         if (local_size_ != 0)
@@ -450,8 +459,6 @@ class gmm_move_weight : public vsmc::MoveCL<gmm_state<FPType> >
             profiled_ = true;
             local_size_ = particle.value().manager().profile_kernel(
                     this->kernel(), particle.size());
-            std::cout << "Profiled local size of kernel gmm_move_weight\t"
-                << local_size_ << std::endl;
         }
 
         if (local_size_ != 0)
@@ -513,6 +520,33 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
 
         // log(2 pi) / 2 * data_num;
         const double ll_const = -0.9189385332046727 * info.data_num;
+#ifdef VSMC_GMM_SMC_CL_MPI
+        double ds = sampler.particle().value().zconst();
+        double ps = sampler.path_sampling();
+        double ts = watch.seconds();
+        double ds_sum = 0;
+        double ps_sum = 0;
+        double ts_max = 0;
+        boost::mpi::reduce(sampler.particle().value().world(),
+                ds, ds_sum, std::plus<double>(), 0);
+        boost::mpi::reduce(sampler.particle().value().world(),
+                ps, ps_sum, std::plus<double>(), 0);
+        boost::mpi::reduce(sampler.particle().value().world(),
+                ts, ts_max, boost::mpi::maximum<double>(), 0);
+        if (sampler.particle().value().world().rank() == 0) {
+            std::cout << std::string(78, '-') << std::endl;
+            std::cout << "Model order\t\t\t\t\t"
+                << model_num << std::endl;
+            std::cout << "Log normalizing constant estimate standard\t"
+                << std::fixed << ds_sum + ll_const << std::endl;
+            std::cout << "Log normalizing constant estimate path sampling\t"
+                << std::fixed << ps_sum + ll_const << std::endl;
+            std::fprintf(stderr, "time.model.order.%u\t\t\t\t%f\n",
+                    static_cast<unsigned>(model_num), ts_max);
+            std::cout << std::string(78, '=') << std::endl;
+        }
+        sampler.particle().value().barrier();
+#else
         std::cout << std::string(78, '-') << std::endl;
         std::cout << "Model order\t\t\t\t\t"
             << model_num << std::endl;
@@ -520,10 +554,12 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
             << std::fixed << sampler.particle().value().zconst() + ll_const
             << std::endl;
         std::cout << "Log normalizing constant estimate path sampling\t"
-            << std::fixed << sampler.path_sampling() + ll_const << std::endl;
+            << std::fixed << sampler.path_sampling() + ll_const
+            << std::endl;
         std::fprintf(stderr, "time.model.order.%u\t\t\t\t%f\n",
                 static_cast<unsigned>(model_num), watch.seconds());
         std::cout << std::string(78, '=') << std::endl;
+#endif
     }
 }
 
