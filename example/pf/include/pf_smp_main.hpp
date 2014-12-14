@@ -33,9 +33,11 @@ try {
 
 } catch (vsmc::RuntimeAssert &err) {
     std::fprintf(stderr, "%s\n", err.what());
+    std::fflush(stderr);
     throw err;
 } catch (std::exception &err) {
     std::fprintf(stderr, "Uncaught expections: %s\n", err.what());
+    std::fflush(stderr);
     throw err;
 }
 

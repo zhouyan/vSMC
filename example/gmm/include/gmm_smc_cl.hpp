@@ -547,6 +547,7 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
                 << std::fixed << ps_sum + ll_const << std::endl;
             std::fprintf(stderr, "time.model.order.%u\t\t\t\t%f\n",
                     static_cast<unsigned>(model_num), ts_max);
+            std::fflush(stderr);
             std::cout << std::string(78, '=') << std::endl;
         }
         sampler.particle().value().barrier();
@@ -562,6 +563,7 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
             << std::endl;
         std::fprintf(stderr, "time.model.order.%u\t\t\t\t%f\n",
                 static_cast<unsigned>(model_num), watch.seconds());
+        std::fflush(stderr);
         std::cout << std::string(78, '=') << std::endl;
 #endif
     }

@@ -66,6 +66,7 @@
         std::fprintf(stderr,                                                 \
                 "vSMC runtime assertion failed; File: %s; Line: %d\n%s\n",   \
                 __FILE__, __LINE__, msg);                                    \
+        std::fflush(stderr);
     };                                                                       \
     assert(cond);                                                            \
 }
@@ -85,6 +86,7 @@
         std::fprintf(stderr,                                                 \
                 "vSMC runtime warning; File: %s; Line: %d\n%s\n",            \
                 __FILE__, __LINE__, msg);                                    \
+        std::fflush(stderr);
     };                                                                       \
 }
 #endif // VSMC_RUNTIME_WARNING_AS_EXCEPTION
