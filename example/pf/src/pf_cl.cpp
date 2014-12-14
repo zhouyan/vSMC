@@ -81,8 +81,10 @@ int main (int argc, char **argv)
             static_cast<cl_device_info>(CL_DEVICE_NAME), &name);
     std::cout << "Using device:   " << name << std::endl;
 
-    sampler.init(cv_init()).move(cv_move(), true).monitor("pos", 2,
-            vsmc::MonitorEvalAdapter<cv, vsmc::MonitorEvalCL>("cv_est"));
+    cv_init init;
+    cv_move move;
+    vsmc::MonitorEvalAdapter<cv, vsmc::MonitorEvalCL> monitor("cv_est");
+    sampler.init(init).move(move, false).monitor("pos", 2, monitor);
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
 
