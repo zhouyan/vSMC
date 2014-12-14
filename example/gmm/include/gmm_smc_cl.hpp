@@ -351,6 +351,13 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType> >
             sum += wptr[i] * exp_weight_[i];
         }
 
+#ifdef VSMC_GMM_SMC_CL_MPI
+        double ssum;
+        ::boost::mpi::all_reduce(particle.value().world(),
+                sum, ssum, std::plus<double>());
+        sum = ssum;
+#endif
+
         state.zconst() += log(sum);
         particle.weight_set().mul_weight(&exp_weight_[0]);
     }
@@ -525,16 +532,11 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
         // log(2 pi) / 2 * data_num;
         const double ll_const = -0.9189385332046727 * info.data_num;
 #ifdef VSMC_GMM_SMC_CL_MPI
-        double ds = sampler.particle().value().zconst();
-        double ps = sampler.path_sampling();
         double ts = watch.seconds();
-        double ds_sum = 0;
         double ps_sum = 0;
         double ts_max = 0;
         boost::mpi::reduce(sampler.particle().value().world(),
-                ds, ds_sum, std::plus<double>(), 0);
-        boost::mpi::reduce(sampler.particle().value().world(),
-                ps, ps_sum, std::plus<double>(), 0);
+                sampler.path_sampling(), ps_sum, std::plus<double>(), 0);
         boost::mpi::reduce(sampler.particle().value().world(),
                 ts, ts_max, boost::mpi::maximum<double>(), 0);
         if (sampler.particle().value().world().rank() == 0) {
@@ -542,7 +544,8 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
             std::cout << "Model order\t\t\t\t\t"
                 << model_num << std::endl;
             std::cout << "Log normalizing constant estimate standard\t"
-                << std::fixed << ds_sum + ll_const << std::endl;
+                << std::fixed << sampler.particle().value().zconst() + ll_const
+                << std::endl;
             std::cout << "Log normalizing constant estimate path sampling\t"
                 << std::fixed << ps_sum + ll_const << std::endl;
             std::fprintf(stderr, "time.model.order.%u\t\t\t\t%f\n",
