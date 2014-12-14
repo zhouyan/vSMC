@@ -59,13 +59,19 @@ template <typename> class ConstSingleParticleBase;
 class WeightSet;
 class NormalizingConstant;
 
-// SMP states
+// SMP
 template <MatrixOrder, std::size_t, typename> class StateMatrix;
 #if VSMC_HAS_CXX11LIB_TUPLE
 template <MatrixOrder, typename, typename...> class StateTuple;
 #endif
 
-// OpenCL state
+// MPI
+struct MPIDefault;
+template <typename = MPIDefault> class MPICommunicator;
+template <typename, typename = MPIDefault> class WeightSetMPI;
+template <typename, typename = MPIDefault> class StateMPI;
+
+// OpenCL
 struct CLDefault;
 template <std::size_t, typename, typename = CLDefault> class StateCL;
 

@@ -45,12 +45,13 @@ namespace vsmc {
 
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
-template <typename WeightSetBase, typename ID = MPIDefault>
+template <typename WeightSetBase, typename ID>
 class WeightSetMPI : public WeightSetBase
 {
     public :
 
     typedef typename WeightSetBase::size_type size_type;
+    typedef ID mpi_id;
 
     explicit WeightSetMPI (size_type N) :
         WeightSetBase(N), world_(MPICommunicator<ID>::instance().get(),
@@ -252,16 +253,15 @@ class WeightSetMPI : public WeightSetBase
 
 /// \brief Particle::value_type subtype using MPI
 /// \ingroup MPI
-template <typename BaseState, typename ID = MPIDefault>
+template <typename BaseState, typename ID>
 class StateMPI : public BaseState
 {
     public :
 
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
-    typedef WeightSetMPI<
-        typename traits::WeightSetTypeTrait<BaseState>::type, ID
-        > weight_set_type;
-    typedef ID id;
+    typedef WeightSetMPI<typename traits::WeightSetTypeTrait<BaseState>::type,
+            ID> weight_set_type;
+    typedef ID mpi_id;
 
     explicit StateMPI (size_type N) :
         BaseState(N), world_(MPICommunicator<ID>::instance().get(),

@@ -53,10 +53,6 @@ inline void mpi_init_seed (vsmc::Array<T, K> &s, IntType1, IntType2 R)
 
 } // namespace vsmc::internal
 
-/// \brief Default MPI manager ID
-/// \ingroup MPI
-struct MPIDefault;
-
 /// \brief MPI Environment
 /// \ingroup MPI
 ///
@@ -94,7 +90,7 @@ class MPIEnvironment
 ///
 /// \details
 /// Use specialization of the singleton to configure different StateMPI
-template <typename ID = MPIDefault>
+template <typename ID>
 class MPICommunicator
 {
     public :
