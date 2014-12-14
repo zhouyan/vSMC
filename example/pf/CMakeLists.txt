@@ -125,7 +125,7 @@ IF (OPENCL_FOUND AND RANDOM123_FOUND)
             "-I ${VSMC_INCLUDE_DIR} -I ${Random123_INCLUDE_DIR}" ">>pf_cl.out"
             COMMENT "Running pf_cl_mpi"
             WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-        ADD_DEPENDENCIES (pf-check pf_cl-check)
+        ADD_DEPENDENCIES (pf-check pf_cl_mpi-check)
     ENDIF (VSMC_MPI_FOUND)
 ENDIF (OPENCL_FOUND AND RANDOM123_FOUND)
 
