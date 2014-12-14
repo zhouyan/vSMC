@@ -214,28 +214,6 @@ class CLManager
         return ::cl::Buffer(context_, flag, sizeof(CLType) * num, host_ptr);
     }
 
-    /// \brief Create an OpenCL buffer of a given type from a range of elements
-    template <typename CLType, typename InputIter>
-    ::cl::Buffer create_buffer (InputIter first, InputIter last,
-            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
-    {
-        using std::distance;
-
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
-
-        std::size_t num = static_cast<std::size_t>(
-                std::abs(distance(first, last)));
-
-        if (num == 0)
-            return ::cl::Buffer();
-
-        ::cl::Buffer buf(create_buffer<CLType>(num));
-        write_buffer<CLType>(buf, num, first, 0, events, event);
-
-        return buf;
-    }
-
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into an iterator
     template <typename CLType, typename OutputIter>

@@ -241,10 +241,15 @@ class gmm_init : public vsmc::InitializeCL<gmm_state<FPType> >
             }
         }
 
-        lambda_init_ = state.manager().template
-            create_buffer<FPType>(lambda_init.begin(), lambda_init.end());
-        weight_init_ = state.manager().template
-            create_buffer<FPType>(weight_init.begin(), weight_init.end());
+        lambda_init_ = state.manager().template create_buffer<FPType>(
+                lambda_init.size());
+        weight_init_ = state.manager().template create_buffer<FPType>(
+                weight_init.size());
+
+        state.manager().template write_buffer<FPType>(
+                lambda_init_, lambda_init.size(), &lambda_init[0]);
+        state.manager().template write_buffer<FPType>(
+                weight_init_, weight_init.size(), &weight_init[0]);
 
         vsmc::cl_set_kernel_args(this->kernel(),
                 this->kernel_args_offset(),

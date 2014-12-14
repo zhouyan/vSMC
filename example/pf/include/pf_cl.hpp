@@ -64,34 +64,35 @@ class cv : public cv_base
 {
     public :
 
-    cv (size_type N) : cv_base(N)
-    {counter_ = manager().create_buffer<struct r123array4x32>(N);}
+    cv (size_type N) : cv_base(N), counter_(N) {}
 
-    const cl::Buffer &obs_x () const {return obs_x_;}
-    const cl::Buffer &obs_y () const {return obs_y_;}
-    const cl::Buffer &counter () const {return counter_;}
+    const cl::Buffer &obs_x () const {return obs_x_.data();}
+    const cl::Buffer &obs_y () const {return obs_y_.data();}
+    const cl::Buffer &counter () const {return counter_.data();}
 
     void read_data (const char *file)
     {
         if (!file)
             return;
 
-        std::vector<cv::fp_type> x(DataNum);
-        std::vector<cv::fp_type> y(DataNum);
+        std::vector<cl_float> x(DataNum);
+        std::vector<cl_float> y(DataNum);
         std::ifstream data(file);
         for (std::size_t i = 0; i != DataNum; ++i)
             data >> x[i] >> y[i];
         data.close();
 
-        obs_x_ = manager().create_buffer<cv::fp_type>(x.begin(), x.end());
-        obs_y_ = manager().create_buffer<cv::fp_type>(y.begin(), y.end());
+        obs_x_.resize(DataNum);
+        obs_y_.resize(DataNum);
+        manager().write_buffer(obs_x_.data(), DataNum, &x[0]);
+        manager().write_buffer(obs_y_.data(), DataNum, &y[0]);
     }
 
     private :
 
-    cl::Buffer obs_x_;
-    cl::Buffer obs_y_;
-    cl::Buffer counter_;
+    vsmc::CLBuffer<cl_float> obs_x_;
+    vsmc::CLBuffer<cl_float> obs_y_;
+    vsmc::CLBuffer<struct r123array4x32> counter_;
 };
 
 class cv_init : public vsmc::InitializeCL<cv>
@@ -106,15 +107,12 @@ class cv_init : public vsmc::InitializeCL<cv>
 
     void pre_processor (vsmc::Particle<cv> &particle)
     {
-        if (log_weight_.size() != particle.size()) {
-            log_weight_device_ = particle.value().manager()
-                .create_buffer<cv::fp_type>(particle.size());
-            log_weight_.resize(particle.size());
-        }
+        log_weight_.resize(particle.size());
+        log_weight_buffer_.resize(particle.size());
 
         vsmc::cl_set_kernel_args(
                 kernel(), kernel_args_offset(),
-                log_weight_device_,
+                log_weight_buffer_.data(),
                 particle.value().obs_x(),
                 particle.value().obs_y(),
                 particle.value().counter());
@@ -122,15 +120,15 @@ class cv_init : public vsmc::InitializeCL<cv>
 
     void post_processor (vsmc::Particle<cv> &particle)
     {
-        particle.value().manager().read_buffer<cv::fp_type>(
-                log_weight_device_, particle.size(), &log_weight_[0]);
+        particle.value().manager().read_buffer(
+                log_weight_buffer_.data(), particle.size(), &log_weight_[0]);
         particle.weight_set().set_log_weight(&log_weight_[0]);
     }
 
     private :
 
-    cl::Buffer log_weight_device_;
-    std::vector<double> log_weight_;
+    vsmc::CLBuffer<cl_float> log_weight_buffer_;
+    std::vector<cl_float> log_weight_;
 };
 
 class cv_move : public vsmc::MoveCL<cv>
@@ -142,15 +140,12 @@ class cv_move : public vsmc::MoveCL<cv>
 
     void pre_processor (std::size_t, vsmc::Particle<cv> &particle)
     {
-        if (inc_weight_.size() != particle.size()) {
-            inc_weight_device_ = particle.value().manager()
-                .create_buffer<cv::fp_type>(particle.size());
-            inc_weight_.resize(particle.size());
-        }
+        inc_weight_.resize(particle.size());
+        inc_weight_buffer_.resize(particle.size());
 
         vsmc::cl_set_kernel_args(
                 kernel(), kernel_args_offset(),
-                inc_weight_device_,
+                inc_weight_buffer_.data(),
                 particle.value().obs_x(),
                 particle.value().obs_y(),
                 particle.value().counter());
@@ -158,15 +153,15 @@ class cv_move : public vsmc::MoveCL<cv>
 
     void post_processor (std::size_t, vsmc::Particle<cv> &particle)
     {
-        particle.value().manager().read_buffer<cv::fp_type>(
-                inc_weight_device_, particle.size(), &inc_weight_[0]);
+        particle.value().manager().read_buffer(
+                inc_weight_buffer_.data(), particle.size(), &inc_weight_[0]);
         particle.weight_set().add_log_weight(&inc_weight_[0]);
     }
 
     private :
 
-    cl::Buffer inc_weight_device_;
-    std::vector<double> inc_weight_;
+    vsmc::CLBuffer<cl_float> inc_weight_buffer_;
+    std::vector<cl_float> inc_weight_;
 };
 
 inline void cv_do (vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
@@ -185,14 +180,14 @@ inline void cv_do (vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
 
 #if VSMC_HAS_HDF5
     sampler.initialize(argv[1]);
-    vsmc::hdf5store<vsmc::RowMajor, cv::fp_type>(
+    vsmc::hdf5store<vsmc::RowMajor, cl_float>(
             sampler.particle().value(),
             argv[2] + rname + ".trace.h5", "Trace.0");
     for (std::size_t i = 0; i != DataNum - 1; ++i) {
         std::stringstream tss;
         tss << "Trace." << (i + 1);
         sampler.iterate();
-        vsmc::hdf5store<vsmc::RowMajor, cv::fp_type>(
+        vsmc::hdf5store<vsmc::RowMajor, cl_float>(
                 sampler.particle().value(),
                 argv[2] + rname + ".trace.h5", tss.str(), true);
     }

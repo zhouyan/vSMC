@@ -123,6 +123,9 @@ ENDIF (VSMC_CXX11_MATH_C99_FOUND)
 SET (BACKENDS "Sequential")
 SET (SMP_EXECUTABLES seq)
 
+# Thread
+INCLUDE (FindThread)
+
 # Intel Cilk Plus
 INCLUDE (FindCilk)
 IF (CILK_FOUND)

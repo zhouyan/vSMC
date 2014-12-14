@@ -83,9 +83,9 @@ FUNCTION (ADD_VSMC_EXECUTABLE exe src)
             TARGET_LINK_LIBRARIES (${exe} ${TBB_MALLOC_LINK_LIBRARIES})
         ENDIF (${arg} STREQUAL "TBB_MALLOC" AND TBB_MALLOC_FOUND)
 
-        IF (${arg} STREQUAL "STD" AND CMAKE_THREAD_LIBS_INIT)
-            TARGET_LINK_LIBRARIES (${exe} ${CMAKE_THREAD_LIBS_INIT})
-        ENDIF (${arg} STREQUAL "STD" AND CMAKE_THREAD_LIBS_INIT)
+        IF (${arg} STREQUAL "STD" AND THREAD_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${Thread_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "STD" AND THREAD_FOUND)
 
         IF (${arg} STREQUAL "CILK" AND CILK_FOUND)
             SET (compile_flags "${compile_flags} ${Cilk_CXX_FLAGS}")
@@ -120,12 +120,12 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
     IF (${source} MATCHES "_mpi")
         ADD_VSMC_EXECUTABLE (${source}_${smp}
             ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp
-            ${SMP} "MKL" "RT" "MPI" ${ARGN})
+            "${SMP}" "MKL" "RT" "MPI" ${ARGN})
         ADD_DEPENDENCIES (example_mpi ${source}_${smp})
     ELSE (${source} MATCHES "_mpi" ${ARGN})
         ADD_VSMC_EXECUTABLE (${source}_${smp}
             ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp
-            ${SMP} "MKL" "RT" ${ARGN})
+            "${SMP}" "MKL" "RT" ${ARGN})
     ENDIF (${source} MATCHES "_mpi")
     ADD_DEPENDENCIES (${base} ${source}_${smp})
     ADD_DEPENDENCIES (example_${smp} ${source}_${smp})
