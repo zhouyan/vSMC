@@ -35,9 +35,11 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_buffer.hpp>
 #include <vsmc/opencl/cl_configure.hpp>
+#include <vsmc/opencl/cl_error.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/internal/cl_copy.hpp>
+#include <vsmc/opencl/internal/cl_wrapper.hpp>
 #include <vsmc/rng/seed.hpp>
 #include <vsmc/utility/array.hpp>
 
@@ -490,10 +492,10 @@ class StateCL
             program_.build(manager().device_vec(), flags.c_str());
             copy_.build(size_, state_size_);
             build_ = true;
-        } catch (...) {
+        } catch (const ::cl::Error &err) {
             CLQuery::program_build_log(program_, os);
             CLQuery::program_build_log(copy_.program(), os);
-            throw;
+            throw CLError(err);
         }
     }
 

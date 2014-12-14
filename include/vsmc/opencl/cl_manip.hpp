@@ -59,7 +59,7 @@ inline void cl_minmax_local_size (
             return;
         }
         mmax = lmax / factor;
-    } catch (::cl::Error) {
+    } catch (const ::cl::Error &) {
         factor = lmax = mmax = 0;
     }
 }
@@ -87,7 +87,7 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
     try {
         kern.getWorkGroupInfo(dev,
                 CL_KERNEL_COMPILE_WORK_GROUP_SIZE, &reqd_size);
-    } catch (::cl::Error) {
+    } catch (const ::cl::Error &) {
         reqd_size[0] = 0;
     }
 

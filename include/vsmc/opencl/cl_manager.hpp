@@ -36,6 +36,7 @@
 #include <vsmc/opencl/cl_setup.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/cl_query.hpp>
+#include <vsmc/opencl/internal/cl_wrapper.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(func) \
@@ -392,7 +393,7 @@ class CLManager
         try {
             kern.getWorkGroupInfo(device_,
                     CL_KERNEL_COMPILE_WORK_GROUP_SIZE, &reqd_size);
-        } catch (::cl::Error) {
+        } catch (const ::cl::Error &) {
             reqd_size[0] = 0;
         }
 
@@ -545,7 +546,7 @@ class CLManager
                 device_ = device_vec_[0];
                 setup_device = true;
             }
-        } catch (::cl::Error) {}
+        } catch (const ::cl::Error &) {}
         VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_CONTEXT;
         VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE;
         if (!setup_context) return;
@@ -555,7 +556,7 @@ class CLManager
         try {
             command_queue_ = ::cl::CommandQueue(context_, device_, 0);
             setup_command_queue = true;
-        } catch (::cl::Error) {}
+        } catch (const ::cl::Error &) {}
         VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE;
         if (!setup_command_queue) return;
 
@@ -569,7 +570,7 @@ class CLManager
         std::vector< ::cl::Platform> platform_vec;
         try {
             ::cl::Platform::get(&platform_vec);
-        } catch (::cl::Error) {
+        } catch (const ::cl::Error &) {
             platform_vec.clear();
         }
         if (platform_vec.size() == 0)
@@ -585,7 +586,7 @@ class CLManager
                         platform_ = platform_vec[p];
                         return true;
                     }
-                } catch (::cl::Error) {}
+                } catch (const ::cl::Error &) {}
             }
 
             return false;
@@ -602,7 +603,7 @@ class CLManager
                     platform_ = platform_vec[p];
                     return true;
                 }
-            } catch (::cl::Error) {}
+            } catch (const ::cl::Error &) {}
         }
 
         return false;
@@ -621,7 +622,7 @@ class CLManager
                     dev_pool[d].getInfo(CL_DEVICE_VENDOR, &str);
                     if (!setup_default_.check_device_vendor(str))
                         dev_select_idx[d] = false;
-                } catch (::cl::Error) {
+                } catch (const ::cl::Error &) {
                     dev_select_idx[d] = false;
                 }
             }
@@ -635,7 +636,7 @@ class CLManager
                     dev_pool[d].getInfo(CL_DEVICE_NAME, &str);
                     if (!setup_default_.check_device(str))
                         dev_select_idx[d] = false;
-                } catch (::cl::Error) {
+                } catch (const ::cl::Error &) {
                     dev_select_idx[d] = false;
                 }
             }
@@ -645,7 +646,7 @@ class CLManager
             if (dev_select_idx[d]) {
                 try {
                     dev_select.push_back(dev_pool[d]);
-                } catch (::cl::Error) {}
+                } catch (const ::cl::Error &) {}
             }
         }
     }

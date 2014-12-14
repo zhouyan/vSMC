@@ -33,10 +33,12 @@
 #define VSMC_INTERNAL_ASSERT_HPP
 
 #include <vsmc/internal/config.hpp>
+#include <vsmc/internal/defines.hpp>
 
 #include <cassert>
 #include <cstdio>
 #include <stdexcept>
+#include <string>
 
 #if VSMC_NO_STATIC_ASSERT
 #define VSMC_STATIC_ASSERT(cond, msg)
@@ -66,7 +68,7 @@
         std::fprintf(stderr,                                                 \
                 "vSMC runtime assertion failed; File: %s; Line: %d\n%s\n",   \
                 __FILE__, __LINE__, msg);                                    \
-        std::fflush(stderr);
+        std::fflush(stderr);                                                 \
     };                                                                       \
     assert(cond);                                                            \
 }
@@ -86,7 +88,7 @@
         std::fprintf(stderr,                                                 \
                 "vSMC runtime warning; File: %s; Line: %d\n%s\n",            \
                 __FILE__, __LINE__, msg);                                    \
-        std::fflush(stderr);
+        std::fflush(stderr);                                                 \
     };                                                                       \
 }
 #endif // VSMC_RUNTIME_WARNING_AS_EXCEPTION
@@ -107,16 +109,22 @@ class RuntimeAssert : public std::runtime_error
 {
     public :
 
-    RuntimeAssert (const std::string &msg) : std::runtime_error(msg) {}
-    RuntimeAssert (const char *msg) : std::runtime_error(msg) {}
+    explicit RuntimeAssert (const char *msg) :
+        std::runtime_error(msg) {}
+
+    explicit RuntimeAssert (const std::string &msg) :
+        std::runtime_error(msg) {}
 }; // class RuntimeAssert
 
 class RuntimeWarning : public std::runtime_error
 {
     public :
 
-    RuntimeWarning (const std::string &msg) : std::runtime_error(msg) {}
-    RuntimeWarning (const char *msg) : std::runtime_error(msg) {}
+    explicit RuntimeWarning (const char *msg) :
+        std::runtime_error(msg) {}
+
+    explicit RuntimeWarning (const std::string &msg) :
+        std::runtime_error(msg) {}
 }; // class RuntimeWarning
 
 } // namespace vsmc

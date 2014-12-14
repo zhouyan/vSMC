@@ -38,6 +38,7 @@
 #include <vsmc/opencl/backend_cl.hpp>
 #include <vsmc/opencl/cl_buffer.hpp>
 #include <vsmc/opencl/cl_configure.hpp>
+#include <vsmc/opencl/cl_error.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/cl_query.hpp>

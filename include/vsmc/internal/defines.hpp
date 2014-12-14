@@ -70,7 +70,7 @@
 #if VSMC_HAS_CXX11_NOEXCEPT
 #define VSMC_NOEXCEPT noexcept
 #else
-#define VSMC_NOEXCEPT
+#define VSMC_NOEXCEPT throw()
 #endif
 
 /// \brief nullptr
