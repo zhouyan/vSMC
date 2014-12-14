@@ -58,13 +58,25 @@ class CLBuffer
 
     CLBuffer (size_type N, ::cl_mem_flags flag = CL_MEM_READ_WRITE,
             void *host_ptr = VSMC_NULLPTR) :
-        size_(N), flag_(flag), host_ptr_(host_ptr), data_(manager().template
+        size_(N), flag_(flag), host_ptr_(host_ptr),
+        data_(manager().template
                 create_buffer<value_type>(size_, flag_, host_ptr_)) {}
 
     CLBuffer (const CLBuffer<T, ID> &other) :
         size_(other.size_), flag_(other.flag_), host_ptr_(other.host_ptr_),
         data_(manager().template
-                create_buffer<value_type>(size_, flag_, host_ptr_)) {}
+                create_buffer<value_type>(size_, flag_, host_ptr_))
+    {
+            if (size_ != 0
+#if VSMC_OPENCL_VERSION >= 120
+                    && (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0
+                    && (flag_ & CL_MEM_HOST_READ_ONLY) != 0
+#endif
+                    ) {
+                manager().template copy_buffer<value_type>(
+                        other.data_, data_, size_);
+            }
+    }
 
     CLBuffer<T, ID> &operator= (const CLBuffer<T, ID> &other)
     {
@@ -112,13 +124,13 @@ class CLBuffer
 
     ~CLBuffer () {}
 
+    static manager_type &manager () {return manager_type::instance();}
+
     size_type size () const {return size_;}
 
     ::cl_mem_flags flag () const {return flag_;}
 
     void *host_ptr () const {return host_ptr_;}
-
-    static manager_type &manager () {return manager_type::instance();}
 
     /// \brief Read only access to the raw `cl::Buffer` object
     ///
@@ -129,7 +141,6 @@ class CLBuffer
 
     void resize (size_type N)
     {
-        std::cout << N << std::endl;
         if (N == size_)
             return;
 

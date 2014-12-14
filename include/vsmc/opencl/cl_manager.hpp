@@ -38,28 +38,28 @@
 #include <vsmc/opencl/cl_query.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
+#define VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(func) \
     VSMC_RUNTIME_ASSERT((setup()),                                           \
             ("**CLManager::"#func"** CAN ONLY BE CALLED AFTER TRUE "         \
              "**CLManager::setup**"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_PLATFORM \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_PLATFORM \
     VSMC_RUNTIME_WARNING(setup_platform,                                     \
             ("**CLManager::setup** FAILED TO SETUP A PLATFORM"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_CONTEXT \
     VSMC_RUNTIME_WARNING(setup_context,                                      \
             ("**CLManager::setup** FAILED TO SETUP A CONTEXT"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE \
     VSMC_RUNTIME_WARNING(setup_device,                                       \
             ("**CLManager::setup** FAILED TO SETUP A DEVICE"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE \
     VSMC_RUNTIME_WARNING(setup_command_queue,                                \
             ("**CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(func, block, event) \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(func, block, event) \
     VSMC_RUNTIME_WARNING((block || event != VSMC_NULLPTR),                   \
             ("**CLManager::"#func" NOT BLOCKING BUT WITH NULL EVENT"))
 
@@ -129,7 +129,7 @@ class CLManager
 {
     public :
 
-    typedef ID id;
+    typedef ID cl_id;
 
     /// \brief Get an instance of the manager singleton
     static CLManager<ID> &instance ()
@@ -206,7 +206,7 @@ class CLManager
             ::cl_mem_flags flag = CL_MEM_READ_WRITE,
             void *host_ptr = VSMC_NULLPTR) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(create_buffer);
 
         if (num == 0)
             return ::cl::Buffer();
@@ -222,8 +222,9 @@ class CLManager
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
-        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(read_buffer, block, event);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(read_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(read_buffer, block,
+                event);
 
         std::vector<CLType> buffer(num);
         command_queue_.enqueueReadBuffer(buf, static_cast< ::cl_bool>(block),
@@ -240,8 +241,9 @@ class CLManager
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
-        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(read_buffer, block, event);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(read_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(read_buffer, block,
+                event);
 
         command_queue_.enqueueReadBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
@@ -256,8 +258,9 @@ class CLManager
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
-        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(write_buffer, block, event);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(write_buffer, block,
+                event);
 
         std::vector<CLType> buffer(num);
 #if VSMC_HAS_CXX11LIB_ALGORITHM
@@ -279,8 +282,9 @@ class CLManager
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
-        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(write_buffer, block, event);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(write_buffer, block,
+                event);
 
         command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
@@ -295,8 +299,9 @@ class CLManager
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
-        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(write_buffer, block, event);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(write_buffer, block,
+                event);
 
         command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
@@ -312,8 +317,9 @@ class CLManager
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
-        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(copy_buffer, block, event);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(copy_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(copy_buffer, block,
+                event);
 
         ::cl::Event e;
         ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
@@ -343,7 +349,7 @@ class CLManager
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
             ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_WARNING_CL_MANAGER_BLOCK(run_kernel, block, event);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(run_kernel, block, event);
 
         ::cl::Event e;
         ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
@@ -518,7 +524,7 @@ class CLManager
         setup_ = false;
 
         bool setup_platform = platform_filter(dev_type);
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_PLATFORM;
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_PLATFORM;
         if (!setup_platform) return;
 
         bool setup_context = false;
@@ -540,8 +546,8 @@ class CLManager
                 setup_device = true;
             }
         } catch (::cl::Error) {}
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT;
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE;
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_CONTEXT;
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE;
         if (!setup_context) return;
         if (!setup_device) return;
 
@@ -550,7 +556,7 @@ class CLManager
             command_queue_ = ::cl::CommandQueue(context_, device_, 0);
             setup_command_queue = true;
         } catch (::cl::Error) {}
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE;
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE;
         if (!setup_command_queue) return;
 
         check_opencl_version();

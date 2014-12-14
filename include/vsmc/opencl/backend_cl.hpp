@@ -247,7 +247,7 @@ class StateCL
 
     typedef ::cl_ulong size_type;
     typedef FPType fp_type;
-    typedef ID id;
+    typedef ID cl_id;
     typedef CLManager<ID> manager_type;
     typedef typename cxx11::conditional<StateSize == Dynamic,
              std::vector<char>, Array<char, StateSize> >::type state_pack_type;
@@ -580,7 +580,7 @@ class InitializeCL
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    CLBuffer< ::cl_ulong, typename T::id> accept_buffer_;
+    CLBuffer< ::cl_ulong, typename T::cl_id> accept_buffer_;
     std::vector< ::cl_ulong> accept_host_;
 }; // class InitializeCL
 
@@ -675,7 +675,7 @@ class MoveCL
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    CLBuffer< ::cl_ulong, typename T::id> accept_buffer_;
+    CLBuffer< ::cl_ulong, typename T::cl_id> accept_buffer_;
     std::vector< ::cl_ulong> accept_host_;
 }; // class MoveCL
 
@@ -760,7 +760,7 @@ class MonitorEvalCL
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    CLBuffer<typename T::fp_type, typename T::id> buffer_;
+    CLBuffer<typename T::fp_type, typename T::cl_id> buffer_;
 }; // class MonitorEvalCL
 
 /// \brief Path<T>::eval_type subtype using OpenCL
@@ -845,7 +845,7 @@ class PathEvalCL
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    CLBuffer<typename T::fp_type, typename T::id> buffer_;
+    CLBuffer<typename T::fp_type, typename T::cl_id> buffer_;
 }; // class PathEvalCL
 
 } // namespace vsmc
