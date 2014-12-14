@@ -33,7 +33,6 @@
 #define VSMC_INTERNAL_ASSERT_HPP
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/internal/defines.hpp>
 
 #include <cassert>
 #include <cstdio>
