@@ -53,14 +53,12 @@ struct data_info
         data_num(num), file_name(file) {}
 };
 
-struct gmm_device;
-
 template <typename FPType>
-class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device>
+class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType>
 {
     public :
 
-    typedef vsmc::StateCL<vsmc::Dynamic, FPType, gmm_device> base;
+    typedef vsmc::StateCL<vsmc::Dynamic, FPType> base;
     typedef typename base::size_type size_type;
     typedef typename base::fp_type fp_type;
 

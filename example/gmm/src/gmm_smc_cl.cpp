@@ -38,13 +38,12 @@ int main (int argc, char **argv)
 #include "options_process.hpp"
 
     try {
-        vsmc::CLSetup<gmm_device> &gmm_setup =
-            vsmc::CLSetup<gmm_device>::instance();
+        vsmc::CLSetup<> &gmm_setup = vsmc::CLSetup<>::instance();
         gmm_setup.platform(PlatformName);
         gmm_setup.device_vendor(DeviceVendorName);
         gmm_setup.device_type(DeviceType);
 
-        if (!vsmc::CLManager<gmm_device>::instance().setup()) {
+        if (!vsmc::CLManager<>::instance().setup()) {
             std::cout << "Failed to setup OpenCL environment" << std::endl;
             std::cout << "Platform name: " << PlatformName << std::endl;
             std::cout << "Device type:   " << DeviceType << std::endl;
