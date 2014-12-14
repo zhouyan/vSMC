@@ -45,9 +45,16 @@ FUNCTION (ADD_VSMC_EXECUTABLE exe src)
         UNSET (compile_flags)
     ENDIF (NOT compile_flags)
 
+    GET_TARGET_PROPERTY (link_flags ${exe} LINK_FLAGS)
+    IF (NOT link_flags)
+        UNSET (link_flags)
+    ENDIF (NOT link_flags)
+
     FOREACH (arg ${ARGN})
         IF (${arg} STREQUAL "MPI" AND VSMC_MPI_FOUND)
             TARGET_LINK_LIBRARIES (${exe} ${VSMC_MPI_LINK_LIBRARIES})
+            SET (compile_flags "${compile_flags} ${MPI_CXX_COMPILE_FLAGS}")
+            SET (link_flags "${link_flags} ${MPI_CXX_LINK_FLAGS}")
         ENDIF (${arg} STREQUAL "MPI" AND VSMC_MPI_FOUND)
 
         IF (${arg} STREQUAL "OCL" AND OPENCL_FOUND)
@@ -102,6 +109,11 @@ FUNCTION (ADD_VSMC_EXECUTABLE exe src)
         SET_TARGET_PROPERTIES (${exe} PROPERTIES COMPILE_FLAGS
             "${compile_flags}")
     ENDIF (compile_flags)
+
+    IF (link_flags)
+        SET_TARGET_PROPERTIES (${exe} PROPERTIES LINK_FLAGS
+            "${link_flags}")
+    ENDIF (link_flags)
 ENDFUNCTION (ADD_VSMC_EXECUTABLE)
 
 FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
