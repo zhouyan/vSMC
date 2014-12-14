@@ -399,11 +399,46 @@ class StateCL
         copy_(copy_from_buffer_.data(), state_buffer_.data());
     }
 
+    void copy_pre_processor ()
+    {
+        state_idx_host_.resize(size_);
+#if VSMC_OPENCL_VERSION >= 120
+        if (manager().opencl_version() >= 120) {
+            state_idx_buffer_.resize(size_,
+                    CL_MEM_READ_ONLY|CL_MEM_HOST_WRITE_ONLY|
+                    CL_MEM_USE_HOST_PTR, &state_idx_host_[0]);
+        } else {
+            state_idx_buffer_.resize(size_,
+                    CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, &state_idx_host_[0]);
+        }
+#else
+        state_idx_buffer_.resize(size_,
+                CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, &state_idx_host_[0]);
+#endif
+
+        state_tmp_host_.resize(size_ * state_size_);
+        state_tmp_buffer_.resize(size_ * state_size_,
+                CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, &state_tmp_host_[0]);
+
+        std::memset(&state_idx_host_[0], 0, size_);
+        manager().read_buffer(state_tmp_buffer_.data(), size_ * state_size_,
+                &state_tmp_host_[0]);
+    }
+
+    void copy_post_processor ()
+    {
+        manager().write_buffer(state_idx_buffer_.data(), size_,
+                &state_idx_host_[0]);
+        manager().write_buffer(state_tmp_buffer_.data(), size_ * state_size_,
+                &state_tmp_host_[0]);
+        copy_(state_idx_buffer_.data(), state_tmp_buffer_.data(),
+                state_buffer_.data());
+    }
+
     state_pack_type state_pack (size_type id) const
     {
         state_pack_type pack(create_pack());
-        manager().read_buffer(state_buffer_.data(), state_size_,
-                &pack[0], id * state_size_);
+        std::memcpy(&pack[0], &state_tmp_host_[id * state_size_], state_size_);
 
         return pack;
     }
@@ -413,8 +448,8 @@ class StateCL
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_UNPACK_SIZE(
                 pack.size(), state_size_);
 
-        manager().write_buffer(state_buffer_.data(), state_size_,
-                &pack[0], id * state_size_);
+        state_idx_host_[id] = 1;
+        std::memcpy(&state_tmp_host_[id * state_size_], &pack[0], state_size_);
     }
 
     CLConfigure &copy_configure () {return copy_.configure();}
@@ -438,6 +473,11 @@ class StateCL
     CLBuffer<char, ID> state_buffer_;
     CLBuffer<size_type, ID> copy_from_buffer_;
     internal::CLCopy<ID> copy_;
+
+    CLBuffer<char, ID> state_idx_buffer_;
+    CLBuffer<char, ID> state_tmp_buffer_;
+    std::vector<char, AlignedAllocator<char> > state_idx_host_;
+    std::vector<char, AlignedAllocator<char> > state_tmp_host_;
 
     template <typename CharT, typename Traits>
     void build_program (const std::string flags,

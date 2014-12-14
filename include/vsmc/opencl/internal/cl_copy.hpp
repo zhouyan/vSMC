@@ -57,6 +57,13 @@ class CLCopy
         manager().run_kernel(kernel_, size_, configure_.local_size());
     }
 
+    void operator () (const ::cl::Buffer &idx, const ::cl::Buffer &tmp,
+            const ::cl::Buffer &state)
+    {
+        cl_set_kernel_args(kernel_post_, 0, idx, tmp, state);
+        manager().run_kernel(kernel_, size_, configure_post_.local_size());
+    }
+
     void build (std::size_t size, std::size_t state_size)
     {
         size_ = size;
@@ -76,10 +83,21 @@ class CLCopy
         ss << "    state[to] = state[from];\n";
         ss << "}\n";
 
+        ss << "__kernel void copy_post (__global const char *idx,\n";
+        ss << "                         __global const state_type *tmp,\n";
+        ss << "                         __global state_type *state)\n";
+        ss << "{\n";
+        ss << "    ulong id = get_global_id(0);\n";
+        ss << "    if (id >= Size) return;\n";
+        ss << "    if (idx[id] != 0) state[id] = tmp[id];\n";
+        ss << "}\n";
+
         program_ = manager().create_program(ss.str());
         program_.build(manager().device_vec());
         kernel_ = ::cl::Kernel(program_, "copy");
+        kernel_post_ = ::cl::Kernel(program_, "copy_post");
         configure_.local_size(size, kernel_, manager().device());
+        configure_post_.local_size(size, kernel_post_, manager().device());
     }
 
     ::cl::Program &program () {return program_;}
@@ -97,7 +115,9 @@ class CLCopy
 
     ::cl::Program program_;
     ::cl::Kernel kernel_;
+    ::cl::Kernel kernel_post_;
     CLConfigure configure_;
+    CLConfigure configure_post_;
 }; // class CLCopy
 
 } } // namespace vsmc::internal
