@@ -90,6 +90,35 @@ class CLQuery
                 cxx11::integral_constant<OpenCLDeviceFeature, feat>());
     }
 
+    /// \brief Check if a device type exists in a platform
+    template < ::cl_device_type DevType>
+    static bool has_device (const ::cl::Platform &plat)
+    {
+        std::vector< ::cl::Device> device;
+        plat.getDevices(CL_DEVICE_TYPE_ALL, &device);
+        for (std::size_t i = 0; i != device.size(); ++i) {
+            ::cl_device_type type;
+            device[i].getInfo(CL_DEVICE_TYPE, &type);
+            if ((type & DevType) != 0)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// \brief Check if a device type exists in any platform
+    template < ::cl_device_type DevType>
+    static bool has_device ()
+    {
+        std::vector< ::cl::Platform> platform;
+        ::cl::Platform::get(&platform);
+        for (std::size_t i = 0; i != platform.size(); ++i)
+            if (has_device<DevType>(platform[i]))
+                return true;
+
+        return false;
+    }
+
     /// \brief Program binary vector
     static std::vector<std::string> program_binary (
             const ::cl::Program &program)
@@ -189,9 +218,8 @@ class CLQuery
 
         std::vector< ::cl::Platform> platform;
         ::cl::Platform::get(&platform);
-        for (std::vector< ::cl::Platform>::const_iterator p = platform.begin();
-                p != platform.end(); ++p)
-            info(os, *p);
+        for (std::size_t i = 0; i != platform.size(); ++i)
+            info(os, platform[i]);
         print_equal(os);
 
         return os;
@@ -219,9 +247,8 @@ class CLQuery
 
         std::vector< ::cl::Device> device;
         plat.getDevices(CL_DEVICE_TYPE_ALL, &device);
-        for (std::vector< ::cl::Device>::const_iterator d = device.begin();
-                d != device.end(); ++d)
-            info(os, *d);
+        for (std::size_t i = 0; i != device.size(); ++i)
+            info(os, device[i]);
 
         return os;
     }
@@ -272,9 +299,8 @@ class CLQuery
 
         std::vector< ::cl::Device> device;
         ctx.getInfo(CL_CONTEXT_DEVICES, &device);
-        for (std::vector< ::cl::Device>::const_iterator d = device.begin();
-                d != device.end(); ++d)
-            info(os, *d);
+        for (std::size_t i = 0; i != device.size(); ++i)
+            info(os, device[i]);
 
         return os;
     }
@@ -307,9 +333,8 @@ class CLQuery
         kern.getInfo(CL_KERNEL_CONTEXT, &ctx);
         std::vector< ::cl::Device> device;
         ctx.getInfo(CL_CONTEXT_DEVICES, &device);
-        for (std::vector< ::cl::Device>::const_iterator d = device.begin();
-                d != device.end(); ++d) {
-            print_info_val<std::string, ::cl_device_info>(os, *d,
+        for (std::size_t i = 0; i != device.size(); ++i) {
+            print_info_val<std::string, ::cl_device_info>(os, device[i],
                     CL_DEVICE_NAME,
                     "CL_DEVICE_NAME");
             print_info_val<std::string, ::cl_kernel_info>(os, kern,
@@ -318,16 +343,16 @@ class CLQuery
             print_info_val< ::cl_uint, ::cl_kernel_info>(os, kern,
                     CL_KERNEL_NUM_ARGS,
                     "CL_KERNEL_NUM_ARGS");
-            print_kernwginfo_val<std::size_t>(os, kern, *d,
+            print_kernwginfo_val<std::size_t>(os, kern, device[i],
                     CL_KERNEL_WORK_GROUP_SIZE,
                     "CL_KERNEL_WORK_GROUP_SIZE");
-            print_kernwginfo_val<std::size_t>(os, kern, *d,
+            print_kernwginfo_val<std::size_t>(os, kern, device[i],
                     CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
                     "CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE");
-            print_kernwginfo_val< ::cl_ulong>(os, kern, *d,
+            print_kernwginfo_val< ::cl_ulong>(os, kern, device[i],
                     CL_KERNEL_LOCAL_MEM_SIZE,
                     "CL_KERNEL_LOCAL_MEM_SIZE", "byte");
-            print_kernwginfo_val< ::cl_ulong>(os, kern, *d,
+            print_kernwginfo_val< ::cl_ulong>(os, kern, device[i],
                     CL_KERNEL_PRIVATE_MEM_SIZE,
                     "CL_KERNEL_PRIVATE_MEM_SIZE", "byte");
         }

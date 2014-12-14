@@ -42,7 +42,20 @@ int main (int argc, char **argv)
         return -1;
     }
 
-    if (!vsmc::CLManager<vsmc::CLDefault>::instance().setup()) {
+#ifdef VSMC_PF_CL_MPI
+    vsmc::MPIEnvironment env(argc, argv);
+    boost::mpi::communicator world(vsmc::MPICommunicator<>::instance().get(),
+            boost::mpi::comm_duplicate);
+    if (world.rank() == 0) {
+        if (vsmc::CLQuery::has_device<CL_DEVICE_TYPE_CPU>())
+            vsmc::CLManager<>::instance().setup(CL_DEVICE_TYPE_CPU);
+    } else {
+        if (vsmc::CLQuery::has_device<CL_DEVICE_TYPE_GPU>())
+            vsmc::CLManager<>::instance().setup(CL_DEVICE_TYPE_GPU);
+    }
+#endif
+
+    if (!vsmc::CLManager<>::instance().setup()) {
         std::cout << "Failed to setup OpenCL environment" << std::endl;
         return -1;
     }

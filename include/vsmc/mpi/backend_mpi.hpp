@@ -43,16 +43,9 @@
 
 namespace vsmc {
 
-/// \brief Default MPI manager ID
-/// \ingroup MPI
-struct MPIDefault;
-
-template <typename, typename = MPIDefault> class StateMPI;
-template <typename = WeightSet, typename = MPIDefault> class WeightSetMPI;
-
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
-template <typename WeightSetBase, typename ID>
+template <typename WeightSetBase, typename ID = MPIDefault>
 class WeightSetMPI : public WeightSetBase
 {
     public :
@@ -259,7 +252,7 @@ class WeightSetMPI : public WeightSetBase
 
 /// \brief Particle::value_type subtype using MPI
 /// \ingroup MPI
-template <typename BaseState, typename ID>
+template <typename BaseState, typename ID = MPIDefault>
 class StateMPI : public BaseState
 {
     public :

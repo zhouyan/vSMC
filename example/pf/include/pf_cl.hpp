@@ -37,6 +37,10 @@
 #include <vsmc/opencl/backend_cl.hpp>
 #include <Random123/array.h>
 
+#ifdef VSMC_PF_CL_MPI
+#include <vsmc/mpi/backend_mpi.hpp>
+#endif
+
 #if VSMC_HAS_HDF5
 #include <vsmc/utility/hdf5io.hpp>
 #endif
@@ -50,14 +54,18 @@ static const std::size_t DataNum = 100;
 static const std::size_t ParticleNum = 10000;
 static const std::size_t StateSize = 4 * sizeof(cl_float);
 
-class cv : public vsmc::StateCL<StateSize, cl_float, vsmc::CLDefault>
+#ifdef VSMC_PF_CL_MPI
+typedef vsmc::StateMPI<vsmc::StateCL<StateSize, cl_float> > cv_base;
+#else
+typedef vsmc::StateCL<StateSize, cl_float> cv_base;
+#endif
+
+class cv : public cv_base
 {
     public :
 
-    cv (size_type N) : vsmc::StateCL<StateSize, cl_float, vsmc::CLDefault>(N)
-    {
-        counter_ = manager().create_buffer<struct r123array4x32>(N);
-    }
+    cv (size_type N) : cv_base(N)
+    {counter_ = manager().create_buffer<struct r123array4x32>(N);}
 
     const cl::Buffer &obs_x () const {return obs_x_;}
     const cl::Buffer &obs_y () const {return obs_y_;}
@@ -167,32 +175,40 @@ inline void cv_do (vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
     sampler.resample_scheme(res);
     sampler.resample_threshold(0.5);
 
+    std::stringstream ss;
+#ifdef VSMC_PF_CL_MPI
+    ss << name << ".r" << sampler.particle().value().world().rank();
+#else
+    ss << name;
+#endif
+    std::string rname(ss.str());
+
 #if VSMC_HAS_HDF5
     sampler.initialize(argv[1]);
     vsmc::hdf5store<vsmc::RowMajor, cv::fp_type>(
             sampler.particle().value(),
-            argv[2] + name + ".trace.h5", "Trace.0");
+            argv[2] + rname + ".trace.h5", "Trace.0");
     for (std::size_t i = 0; i != DataNum - 1; ++i) {
-        std::stringstream ss;
-        ss << "Trace." << (i + 1);
+        std::stringstream tss;
+        tss << "Trace." << (i + 1);
         sampler.iterate();
         vsmc::hdf5store<vsmc::RowMajor, cv::fp_type>(
                 sampler.particle().value(),
-                argv[2] + name + ".trace.h5", ss.str(), true);
+                argv[2] + rname + ".trace.h5", tss.str(), true);
     }
 #else
     sampler.initialize(argv[1]);
     sampler.iterate(DataNum - 1);
 #endif
 
-    std::string est_file_name(argv[2] + name + ".txt");
+    std::string est_file_name(argv[2] + rname + ".tsv");
     std::ofstream est_file;
     est_file.open(est_file_name.c_str());
     est_file << sampler << std::endl;
     est_file.close();
 
 #if VSMC_HAS_HDF5
-    vsmc::hdf5store(sampler, argv[2] + name + ".h5", "Sampler");
+    vsmc::hdf5store(sampler, argv[2] + rname + ".h5", "Sampler");
 #endif
 }
 

@@ -108,7 +108,6 @@ class CLBuffer
 
         return *this;
     }
-
 #endif
 
     ~CLBuffer () {}
@@ -130,6 +129,7 @@ class CLBuffer
 
     void resize (size_type N)
     {
+        std::cout << N << std::endl;
         if (N == size_)
             return;
 
