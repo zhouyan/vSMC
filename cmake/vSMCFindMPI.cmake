@@ -29,7 +29,6 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-UNSET (VSMC_MPI_FOUND CACHE)
 IF (DEFINED VSMC_MPI_FOUND)
     RETURN ()
 ENDIF (DEFINED VSMC_MPI_FOUND)
