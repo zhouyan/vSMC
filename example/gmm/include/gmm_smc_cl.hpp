@@ -79,7 +79,9 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType>
     {
 #if VSMC_OPENCL_VERSION >= 120
         if (this->manager().opencl_version() >= 120) {
+#ifndef VSMC_GMM_SMC_CL_MPI
             this->update_state(CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);
+#endif
             counter_ = this->manager().template
                 create_buffer<struct r123array2x32>(N,
                         CL_MEM_READ_WRITE|CL_MEM_HOST_NO_ACCESS);

@@ -95,6 +95,10 @@ int main (int argc, char **argv)
         } else {
             std::cout << "cl_type_bits has to be 32 or 64" << std::endl;
         }
+    } catch (cl::Error &err) {
+        std::cout << "Runtime Error" << std::endl;
+        std::cout << err.err() << std::endl;
+        std::cout << err.what() << std::endl;
     } catch (...) {
         std::cout << "Runtime Error" << std::endl;
     }
