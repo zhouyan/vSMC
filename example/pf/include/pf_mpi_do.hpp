@@ -37,8 +37,8 @@ inline void cv_do (vsmc::ResampleScheme res, char **argv,
         const std::string &name)
 {
     vsmc::Seed::instance().set(101);
-    std::size_t N = (ParticleNum / 3) *
-        static_cast<std::size_t>(boost::mpi::communicator().rank() + 1);
+    std::size_t N = ParticleNum / static_cast<std::size_t>(
+            boost::mpi::communicator().size());
     vsmc::Sampler<cv_state<Order> > sampler(N, res, 0.5);
     sampler
         .init(cv_init<Order>())

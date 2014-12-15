@@ -34,6 +34,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/weight_set.hpp>
+#include <vsmc/mpi/mpi_datatype.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
@@ -325,7 +326,7 @@ class StateMPI : public BaseState
         if (world_.rank() == 0)
             std::copy(copy_from, copy_from + N, copy_from_.begin());
         ::boost::mpi::broadcast(world_, copy_from_, 0);
-        copy_this_node(N, copy_from_.begin(), copy_recv_, copy_send_);
+        copy_this_node(N, &copy_from_[0], copy_recv_, copy_send_);
         copy_inter_node(copy_recv_, copy_send_);
         copy_post_processor_dispatch(has_copy_post_processor_<BaseState>());
     }
@@ -393,14 +394,13 @@ class StateMPI : public BaseState
     /// \brief Perform local copy
     ///
     /// \param N The number of particles on all nodes
-    /// \param copy_from_first The beginning of the copy_from vector
+    /// \param copy_from The beginning of the copy_from vector
     /// \param copy_recv All particles that shall be received at this node
     /// \param copy_send All particles that shall be send from this node
     ///
     /// \details
-    /// `copy_from_first` can be a one-pass input iterator used to access a
-    /// vector of size `N`, say `copy_from`.
-    /// For each `to` in the range `0` to `N - 1`
+    /// `copy_from` is a pointer that can access a vector of size `N`. For each
+    /// `to` in the range `0` to `N - 1`
     /// - If both `to` and `from = copy_from[to]` are particles on this node,
     /// use `BaseState::copy` to copy the parties. Otherwise,
     /// - If `to` is a particle on this node, insert a pair into `copy_recv`,
@@ -414,19 +414,16 @@ class StateMPI : public BaseState
     ///
     /// It is important the the vector accessed through `copy_from_first` is
     /// the same for all nodes. Otherwise the behavior is undefined.
-    template <typename InputIter>
-    void copy_this_node (size_type N, InputIter copy_from_first,
+    void copy_this_node (size_type N, const size_type *copy_from,
             std::vector<std::pair<int, size_type> > &copy_recv,
             std::vector<std::pair<int, size_type> > &copy_send)
     {
         using std::advance;
 
-        int rank_this = world_.rank();
+        const int rank_this = world_.rank();
 
         copy_from_this_.resize(this->size());
-        InputIter first = copy_from_first;
-        advance(first, static_cast<typename std::iterator_traits<InputIter>::
-                difference_type>(offset_));
+        const size_type *first = copy_from + offset_;
         for (size_type to = 0; to != this->size(); ++to, ++first) {
             size_type from = *first;
             copy_from_this_[to] =
@@ -436,8 +433,8 @@ class StateMPI : public BaseState
 
         copy_recv.clear();
         copy_send.clear();
-        for (size_type to = 0; to != N; ++to, ++copy_from_first) {
-            size_type from = *copy_from_first;
+        for (size_type to = 0; to != N; ++to, ++copy_from) {
+            size_type from = *copy_from;
             int rank_recv = rank(to);
             int rank_send = rank(from);
             size_type id_recv = local_id(to);
@@ -460,24 +457,24 @@ class StateMPI : public BaseState
             const std::vector<std::pair<int, size_type> > &copy_recv,
             const std::vector<std::pair<int, size_type> > &copy_send)
     {
-        int rank_this = world_.rank();
+        const int rank_this = world_.rank();
         for (int r = 0; r != world_.size(); ++r) {
             if (rank_this == r) {
                 for (std::size_t i = 0; i != copy_recv.size(); ++i) {
-                    world_.recv(copy_recv_[i].first, copy_tag_, pack_recv_);
+                    world_.recv(copy_recv[i].first, copy_tag_, pack_recv_);
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
                     this->state_unpack(copy_recv[i].second,
                             cxx11::move(pack_recv_));
 #else
-                    this->state_unpack(copy_recv[i].second, pack_recv_);
+                    this->state_unpack(copy_recv[i].second,
+                            pack_recv_);
 #endif
                 }
             } else {
                 for (std::size_t i = 0; i != copy_send.size(); ++i) {
-                    if (copy_send_[i].first == r) {
+                    if (copy_send[i].first == r) {
                         pack_send_ = this->state_pack(copy_send[i].second);
-                        world_.send(copy_send_[i].first, copy_tag_,
-                                pack_send_);
+                        world_.send(copy_send[i].first, copy_tag_, pack_send_);
                     }
                 }
             }

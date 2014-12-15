@@ -70,7 +70,7 @@ class CLCopy
 
         std::stringstream ss;
 
-        ss << "#define Size " << size << "UL\n"; 
+        ss << "#define Size " << size << "UL\n";
         ss << "typedef struct {char c[" << state_size << "];} state_type;";
 
         ss << "__kernel void copy (__global const ulong *copy_from,\n";

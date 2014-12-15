@@ -136,7 +136,7 @@ class CLQuery
             bin_ptr[i] = &bin_vec[i][0];
         }
         program.getInfo(CL_PROGRAM_BINARIES, &bin_ptr);
-        
+
         std::vector<std::string> bin(num);
         for (std::size_t i = 0; i != bin_vec.size(); ++i)
             bin[i] = std::string(bin_vec[i].begin(), bin_vec[i].end());
@@ -146,7 +146,7 @@ class CLQuery
 
     /// \brief Program device vector
     static std::vector< ::cl::Device> program_device (
-            const ::cl::Program program) 
+            const ::cl::Program program)
     {
         ::cl_uint num;
         program.getInfo(CL_PROGRAM_NUM_DEVICES, &num);

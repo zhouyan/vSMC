@@ -1059,7 +1059,7 @@ class CPUID
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<< (
         std::basic_ostream<CharT, Traits> &os, const CPUID &)
-{return CPUID::info(os);} 
+{return CPUID::info(os);}
 
 } // namespace vsmc
 
