@@ -523,7 +523,7 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
     sampler.iterate();
     for (std::size_t i = 0; i != repeat; ++i) {
 #ifdef VSMC_GMM_SMC_CL_MPI
-        sampler.particle().value().barrier();
+        sampler.particle().value().world().barrier();
 #endif
         sampler.initialize(const_cast<data_info *>(&info));
         vsmc::StopWatch watch;
@@ -533,6 +533,7 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
         watch.stop();
 
         // log(2 pi) / 2 * data_num;
+        const double ll_const = -0.9189385332046727 * info.data_num;
 #ifdef VSMC_GMM_SMC_CL_MPI
         if (sampler.particle().value().world().rank() == 0) {
             double ps_sum = 0;
@@ -542,7 +543,6 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
             boost::mpi::reduce(sampler.particle().value().world(),
                     watch.seconds(), ts_max, boost::mpi::maximum<double>(), 0);
 
-            const double ll_const = -0.9189385332046727 * info.data_num;
             std::cout << std::string(78, '-') << std::endl;
             std::cout << "Model order\t\t\t\t\t"
                 << model_num << std::endl;
@@ -551,9 +551,8 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
                 << std::endl;
             std::cout << "Log normalizing constant estimate path sampling\t"
                 << std::fixed << ps_sum + ll_const << std::endl;
-            std::fprintf(stderr, "time.model.order.%u\t\t\t\t%f\n",
-                    static_cast<unsigned>(model_num), ts_max);
-            std::fflush(stderr);
+            std::cout << "time.model.order." << model_num << "\t\t\t\t"
+                << ts_max << std::endl;
             std::cout << std::string(78, '=') << std::endl;
         } else {
             boost::mpi::reduce(sampler.particle().value().world(),
@@ -571,9 +570,8 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
         std::cout << "Log normalizing constant estimate path sampling\t"
             << std::fixed << sampler.path_sampling() + ll_const
             << std::endl;
-        std::fprintf(stderr, "time.model.order.%u\t\t\t\t%f\n",
-                static_cast<unsigned>(model_num), watch.seconds());
-        std::fflush(stderr);
+        std::cout << "time.model.order." << model_num << "\t\t\t\t"
+            << watch.seconds() << std::endl;
         std::cout << std::string(78, '=') << std::endl;
 #endif
     }
