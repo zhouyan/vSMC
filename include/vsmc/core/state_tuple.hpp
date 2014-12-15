@@ -283,6 +283,9 @@ class StateTuple<RowMajor, T, Types...> :
             copy_particle(copy_from[to], to);
     }
 
+    void copy_particle (size_type from, size_type to)
+    {state_[to] = state_[from];}
+
     state_pack_type state_pack (size_type id) const
     {return state_pack_type(state_[id]);}
 
@@ -293,11 +296,6 @@ class StateTuple<RowMajor, T, Types...> :
     void state_unpack (size_type id, state_pack_type &&pack)
     {state_[id] = cxx11::move(pack.data());}
 #endif
-
-    protected :
-
-    void copy_particle (size_type from, size_type to)
-    {state_[to] = state_[from];}
 
     private :
 
@@ -382,6 +380,14 @@ class StateTuple<ColMajor, T, Types...> :
             copy_particle(copy_from[to], to);
     }
 
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        copy_particle(from, to, Position<0>());
+    }
+
     state_pack_type state_pack (size_type id) const
     {
         state_pack_type pack;
@@ -397,16 +403,6 @@ class StateTuple<ColMajor, T, Types...> :
     void state_unpack (size_type id, state_pack_type &&pack)
     {unpack_particle(id, cxx11::move(pack), Position<0>());}
 #endif
-
-    protected :
-
-    void copy_particle (size_type from, size_type to)
-    {
-        if (from == to)
-            return;
-
-        copy_particle(from, to, Position<0>());
-    }
 
     private :
 

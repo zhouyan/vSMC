@@ -286,6 +286,14 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
             copy_particle(copy_from[to], to);
     }
 
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        std::copy(row_data(from), row_data(from + 1), row_data(to));
+    }
+
     state_pack_type state_pack (size_type id) const
     {
         state_pack_type pack(this->create_pack());
@@ -313,16 +321,6 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         std::move(ptr, ptr + this->dim(), row_data(id));
     }
 #endif
-
-    protected :
-
-    void copy_particle (size_type from, size_type to)
-    {
-        if (from == to)
-            return;
-
-        std::copy(row_data(from), row_data(from + 1), row_data(to));
-    }
 }; // class StateMatrix
 
 /// \brief Particle::value_type subtype
@@ -375,6 +373,15 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             copy_particle(copy_from[to], to);
     }
 
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            state(to, d) = state(from, d);
+    }
+
     state_pack_type state_pack (size_type id) const
     {
         state_pack_type pack(this->create_pack());
@@ -403,17 +410,6 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             state(id, d) = cxx11::move(pack[d]);
     }
 #endif
-
-    protected :
-
-    void copy_particle (size_type from, size_type to)
-    {
-        if (from == to)
-            return;
-
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            state(to, d) = state(from, d);
-    }
 }; // class StateMatrix
 
 } // namespace vsmc
