@@ -37,9 +37,6 @@ INCLUDE (vSMCExampleFunctions)
 # C++ 11 options
 OPTION (VSMC_ENABLE_CXX11 "Enable C++11 features and libraries" ON)
 
-# MPI option
-OPTION (VSMC_ENABLE_MPI "Enable MPI" OFF)
-
 # Boost
 INCLUDE (FindBoost)
 IF (Boost_FOUND)
@@ -218,9 +215,7 @@ ELSE (OPENCL_FOUND)
 ENDIF (OPENCL_FOUND)
 
 # MPI
-IF (VSMC_ENABLE_MPI)
-    INCLUDE (vSMCFindMPI)
-ENDIF (VSMC_ENABLE_MPI)
+INCLUDE (vSMCFindMPI)
 IF (VSMC_MPI_FOUND)
     SET (BACKENDS ${BACKENDS} "MPI")
     ADD_CUSTOM_TARGET (example_mpi)
