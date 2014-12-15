@@ -522,6 +522,9 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
     sampler.initialize(const_cast<data_info *>(&info));
     sampler.iterate();
     for (std::size_t i = 0; i != repeat; ++i) {
+#ifdef VSMC_GMM_SMC_CL_MPI
+        sampler.particle().value().barrier();
+#endif
         sampler.initialize(const_cast<data_info *>(&info));
         vsmc::StopWatch watch;
         watch.start();
@@ -530,16 +533,16 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
         watch.stop();
 
         // log(2 pi) / 2 * data_num;
-        const double ll_const = -0.9189385332046727 * info.data_num;
 #ifdef VSMC_GMM_SMC_CL_MPI
-        double ts = watch.seconds();
-        double ps_sum = 0;
-        double ts_max = 0;
-        boost::mpi::reduce(sampler.particle().value().world(),
-                sampler.path_sampling(), ps_sum, std::plus<double>(), 0);
-        boost::mpi::reduce(sampler.particle().value().world(),
-                ts, ts_max, boost::mpi::maximum<double>(), 0);
         if (sampler.particle().value().world().rank() == 0) {
+            double ps_sum = 0;
+            double ts_max = 0;
+            boost::mpi::reduce(sampler.particle().value().world(),
+                    sampler.path_sampling(), ps_sum, std::plus<double>(), 0);
+            boost::mpi::reduce(sampler.particle().value().world(),
+                    watch.seconds(), ts_max, boost::mpi::maximum<double>(), 0);
+
+            const double ll_const = -0.9189385332046727 * info.data_num;
             std::cout << std::string(78, '-') << std::endl;
             std::cout << "Model order\t\t\t\t\t"
                 << model_num << std::endl;
@@ -552,8 +555,12 @@ inline void gmm_do_smc_model (vsmc::Sampler<gmm_state<FPType> > &sampler,
                     static_cast<unsigned>(model_num), ts_max);
             std::fflush(stderr);
             std::cout << std::string(78, '=') << std::endl;
+        } else {
+            boost::mpi::reduce(sampler.particle().value().world(),
+                    sampler.path_sampling(), std::plus<double>(), 0);
+            boost::mpi::reduce(sampler.particle().value().world(),
+                    watch.seconds(), boost::mpi::maximum<double>(), 0);
         }
-        sampler.particle().value().barrier();
 #else
         std::cout << std::string(78, '-') << std::endl;
         std::cout << "Model order\t\t\t\t\t"
