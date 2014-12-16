@@ -198,12 +198,6 @@ class StateTupleBase
         return os;
     }
 
-    template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os,
-            const StateTupleBase<Order, T, Types...> &stuple)
-    {return stuple.print(os);}
-
     protected :
 
     explicit StateTupleBase (size_type N) : size_(N) {}
@@ -232,6 +226,13 @@ class StateTupleBase
         os << sptr->state(id, Position<dim_ - 1>()) << '\n';
     }
 }; // class StateTupleBase
+
+template <typename CharT, typename Traits,
+    MatrixOrder Order, typename T, typename... Types>
+inline std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os,
+        const StateTupleBase<Order, T, Types...> &stuple)
+{return stuple.print(os);}
 
 /// \brief Particle::value_type subtype
 /// \ingroup Core

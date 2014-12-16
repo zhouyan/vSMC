@@ -204,12 +204,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         return os;
     }
 
-    template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os,
-            const StateMatrixBase<Order, Dim, T> &smatrix)
-    {return smatrix.print(os);}
-
     protected :
 
     explicit StateMatrixBase (size_type N) : size_(N), data_(N * Dim) {}
@@ -235,6 +229,13 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     Array<T, Dim> create_pack_dispatch (cxx11::false_type) const
     {return Array<T, Dim>();}
 }; // class StateMatrixBase
+
+template <typename CharT, typename Traits,
+    MatrixOrder Order, std::size_t Dim, typename T>
+inline std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os,
+        const StateMatrixBase<Order, Dim, T> &smatrix)
+{return smatrix.print(os);}
 
 /// \brief Particle::value_type subtype
 /// \ingroup Core

@@ -676,11 +676,6 @@ class Sampler
         return os;
     }
 
-    template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
-    {return sampler.print(os);}
-
     private :
 
     bool init_by_iter_;
@@ -884,6 +879,11 @@ class Sampler
         }
     }
 }; // class Sampler
+
+template <typename CharT, typename Traits, typename T>
+inline std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
+{return sampler.print(os);}
 
 } // namespace vsmc
 
