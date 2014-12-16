@@ -33,39 +33,99 @@
 #define VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/math/cblas.hpp>
 
 namespace vsmc {
 
 /// \brief Draw a single sample given weights
 /// \ingroup Distribution
 template <typename IntType = int>
-class DiscreteDistribution : public cxx11::discrete_distribution<IntType>
+class DiscreteDistribution
 {
     public :
 
-    typedef cxx11::discrete_distribution<IntType> base_distribution_type;
-    typedef typename base_distribution_type::result_type result_type;
-    typedef typename base_distribution_type::param_type param_type;
+    typedef IntType result_type;
+    typedef std::vector<double> param_type;
 
     DiscreteDistribution () {}
 
     template <typename InputIter>
     DiscreteDistribution (InputIter first, InputIter last) :
-        base_distribution_type(first, last) {}
+        param_(first, last)
+    {
+        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
+        normalize()
+    }
 
 #if VSMC_HAS_CXX11LIB_INITIALIZER_LIST
     DiscreteDistribution (std::initializer_list<double> weights) :
-        base_distribution_type(weights.begin(), weights.end()) {}
+        param_(weights.begin(), weights.end())
+    {
+        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
+        normalize()
+    }
 #endif
 
     template <typename UnaryOperation>
     DiscreteDistribution (std::size_t count, double xmin, double xmax,
-            UnaryOperation unary_op) :
-        base_distribution_type(count, xmin, xmax, unary_op) {}
+            UnaryOperation unary_op)
+    {
+        param_.reserve(count);
+        double delta = (xmax - xmin) / static_cast<double>(count);
+        double xmin += 0.5 * delta;
+        for (std::size_t i = 0; i != count; ++i)
+            param_.push_back(unary_op(xmin + static_cast<double>(i) * delta));
+        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
+        normalize();
+    }
 
-    explicit DiscreteDistribution (const param_type &param) :
-        base_distribution_type(param) {}
+    explicit DiscreteDistribution (const param_type &param)
+    {
+        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
+        param_ = param;
+        normalize();
+    }
 
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    explicit DiscreteDistribution (param_type &&param)
+    {
+        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
+        param_ = cxx11::move(param);
+        normalize();
+    }
+#endif
+
+    param_type param () const {return param_;}
+
+    void param (const param_type &param)
+    {
+        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
+        param_ = param;
+        normalize();
+    }
+
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+    void param (param_type &&param)
+    {
+        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
+        param_ = cxx11::move(param);
+        normalize();
+    }
+#endif
+
+    void reset () {}
+
+    result_type min VSMC_MNE () const {return 0;}
+    result_type max VSMC_MNE () const
+    {return param_.size() == 0 ? 0 : param_.size() - 1;}
+
+    std::vector<double> probability () const {return param_;}
+
+    template <typename URNG>
+    result_type operator() (URNG &eng) const
+    {return operator()(eng, param_.begin(), param_.end(), true);}
+
+    /// \brief Draw sample with external probabilities
     ///
     /// \param eng A uniform random number generator
     /// \param first The first iterator of the weights sequence.
@@ -89,7 +149,7 @@ class DiscreteDistribution : public cxx11::discrete_distribution<IntType>
     /// calling this function.
     template <typename URNG, typename InputIter>
     result_type operator() (URNG &eng, InputIter first, InputIter last,
-            bool normalized = false)
+            bool normalized = false) const
     {
         typedef typename  std::iterator_traits<InputIter>::value_type
             value_type;
@@ -124,6 +184,97 @@ class DiscreteDistribution : public cxx11::discrete_distribution<IntType>
         }
 
         return index - 1;
+    }
+
+    friend inline bool operator== (
+            const DiscreteDistribution<IntType> &rdisc1,
+            const DiscreteDistribution<IntType> &rdisc2)
+    {return rdisc1.param_ == rdisc2.param_;}
+
+    friend inline bool operator!= (
+            const DiscreteDistribution<IntType> &rdisc1,
+            const DiscreteDistribution<IntType> &rdisc2)
+    {return rdisc1.param_ != rdisc2.param_;}
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_ostream<CharT, Traits> &operator<< (
+            std::basic_ostream<CharT, Traits> &os,
+            const DiscreteDistribution<IntType> &rdisc)
+    {
+        if (!os.good())
+            return os;
+
+        os << rdisc.param_.size() << ' ';
+
+        if (param_.size() == 0)
+            return os;
+
+        if (param_.size() == 1) {
+            os << param_[0];
+            return os;
+        }
+
+        for (std::size_t i = 0; i != param_.size() - 1; ++i)
+            os << rdisc.param_[i] << ' ';
+        os << rdisc.param_.back();
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend inline std::basic_istream<CharT, Traits> &operator>> (
+            std::basic_istream<CharT, Traits> &is,
+            DiscreteDistribution<IntType> &rdisc)
+    {
+        if (!is.good())
+            return is;
+
+        std::size_t n;
+        is >> std::ws >> n;
+
+        std::vector<double> param(n);
+        for (std::size_t i = 0; i != n; ++i)
+            is >> std::ws >> param[i];
+
+        if (is.good()) {
+            if (is_positive(param)) {
+#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+                param_ = cxx11::move(param);
+#else
+                param_ = param;
+#endif
+                normalize();
+            } else {
+                is.setstate(std::ios_base::failbit);
+            }
+        }
+
+        return is;
+    }
+
+    private :
+
+    param_type param_;
+
+    void normalize ()
+    {
+        if (param_.size() == 0)
+            return;
+
+        double sumw = std::accumulate(param_.begin(), param_.end(), 0.0);
+        math::scal(param_.size(), 1 / sumw, &param_[0]);
+    }
+
+    bool is_positive (const param_type &param)
+    {
+        for (std::size_t i = 0; i != param.size(); ++i)
+            if (param[i] < 0)
+                return false;
+
+        if (std::accumulate(param.begin(), param.end(), 0.0) <= 0)
+            return false;
+
+        return true;
     }
 }; // class DiscreteDistribution
 

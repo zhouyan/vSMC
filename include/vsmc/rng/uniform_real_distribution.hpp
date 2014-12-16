@@ -291,9 +291,9 @@ class UniformRealDistribution
             const UniformRealDistribution<
             FPType, Left, Right, MinMaxIsConstexpr> &runif2)
     {
-        if (runif1.a_ < runif2.a_ ||runif1.a_ > runif1.a_)
+        if (runif1.a_ < runif2.a_ || runif1.a_ > runif1.a_)
             return false;
-        if (runif1.b_ < runif2.b_ ||runif1.b_ > runif1.b_)
+        if (runif1.b_ < runif2.b_ || runif1.b_ > runif1.b_)
             return false;
         return true;
     }
