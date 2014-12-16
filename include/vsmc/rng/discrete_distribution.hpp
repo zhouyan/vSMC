@@ -35,6 +35,10 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/math/cblas.hpp>
 
+#define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param) \
+    VSMC_RUNTIME_ASSERT(is_positive(param),                                  \
+            ("**DiscreteDistribution** WEIGHTS ARE NOT NON-NEGATIVE"));
+
 namespace vsmc {
 
 /// \brief Draw a single sample given weights
@@ -54,7 +58,7 @@ class DiscreteDistribution
         param_(first, last)
     {
         VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
-        normalize()
+        normalize();
     }
 
 #if VSMC_HAS_CXX11LIB_INITIALIZER_LIST
@@ -62,7 +66,7 @@ class DiscreteDistribution
         param_(weights.begin(), weights.end())
     {
         VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
-        normalize()
+        normalize();
     }
 #endif
 
@@ -72,7 +76,7 @@ class DiscreteDistribution
     {
         param_.reserve(count);
         double delta = (xmax - xmin) / static_cast<double>(count);
-        double xmin += 0.5 * delta;
+        xmin += 0.5 * delta;
         for (std::size_t i = 0; i != count; ++i)
             param_.push_back(unary_op(xmin + static_cast<double>(i) * delta));
         VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
@@ -206,15 +210,15 @@ class DiscreteDistribution
 
         os << rdisc.param_.size() << ' ';
 
-        if (param_.size() == 0)
+        if (rdisc.param_.size() == 0)
             return os;
 
-        if (param_.size() == 1) {
-            os << param_[0];
+        if (rdisc.param_.size() == 1) {
+            os << rdisc.param_[0];
             return os;
         }
 
-        for (std::size_t i = 0; i != param_.size() - 1; ++i)
+        for (std::size_t i = 0; i != rdisc.param_.size() - 1; ++i)
             os << rdisc.param_[i] << ' ';
         os << rdisc.param_.back();
 
@@ -237,13 +241,9 @@ class DiscreteDistribution
             is >> std::ws >> param[i];
 
         if (is.good()) {
-            if (is_positive(param)) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-                param_ = cxx11::move(param);
-#else
-                param_ = param;
-#endif
-                normalize();
+            if (rdisc.is_positive(param)) {
+                std::swap(rdisc.param_, param);
+                rdisc.normalize();
             } else {
                 is.setstate(std::ios_base::failbit);
             }
@@ -270,6 +270,9 @@ class DiscreteDistribution
         for (std::size_t i = 0; i != param.size(); ++i)
             if (param[i] < 0)
                 return false;
+
+        if (param.size() == 0)
+            return true;
 
         if (std::accumulate(param.begin(), param.end(), 0.0) <= 0)
             return false;
