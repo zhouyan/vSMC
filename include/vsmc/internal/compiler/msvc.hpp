@@ -298,7 +298,7 @@
 #endif
 #endif
 
-#if VSMC_MSVC_VERSION >= 1700
+#if VSMC_MSVC_VERSION >= 1800
 #ifndef VSMC_HAS_CXX11LIB_THREAD
 #define VSMC_HAS_CXX11LIB_THREAD 1
 #endif

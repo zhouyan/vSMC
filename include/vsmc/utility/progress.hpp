@@ -49,7 +49,9 @@ struct ProgressThisThread
 {
     static void sleep (double s)
     {
-        double ms = std::fmax(1.0, std::floor(s * 1000));
+        double ms = std::floor(s * 1000);
+        if (s < 1.0)
+            s = 1.0;
         std::this_thread::sleep_for(std::chrono::milliseconds(
                     static_cast<std::chrono::milliseconds::rep>(ms)));
     }
