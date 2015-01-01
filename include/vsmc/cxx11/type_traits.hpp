@@ -229,7 +229,6 @@ typename add_lvalue_reference<T>::type declval() VSMC_NOEXCEPT;
 
 /// \defgroup CXX11TraitsHelper Helper classes
 /// \brief Helper classes
-/// \ingroup CXX11Traits
 /// @{
 
 // integral_constant
@@ -254,7 +253,6 @@ struct tp_test_false {char a[2];};
 
 /// \defgroup CXX11TraitsPrimary Primary type categories
 /// \brief Primary type categories
-/// \ingroup CXX11Traits
 /// @{
 
 // is_void
@@ -397,7 +395,6 @@ template <typename T> struct is_member_function_pointer :
 
 /// \defgroup CXX11TraitsComposite Composite type categories
 /// \brief Composite type categories
-/// \ingroup CXX11Traits
 /// @{
 
 // is_fundamental
@@ -449,7 +446,6 @@ template <typename T> struct is_member_pointer :
 
 /// \defgroup CXX11TraitsProperties Type properties
 /// \brief Type properties
-/// \ingroup CXX11Traits
 /// @{
 
 // is_const
@@ -545,7 +541,6 @@ template <typename T> struct is_unsigned :
 
 /// \defgroup CXX11TraitsSupport Supported operations
 /// \brief Supported operations
-/// \ingroup CXX11Traits
 /// @{
 
 // is_constructible
@@ -578,7 +573,6 @@ template <typename T> struct is_unsigned :
 
 /// \defgroup CXX11TraitsQueries Property queries
 /// \brief Property queries
-/// \ingroup CXX11Traits
 /// @{
 
 // alignment_of
@@ -607,7 +601,6 @@ template <typename T, std::size_t N, unsigned I> struct extent<T [N], I> :
 
 /// \defgroup CXX11TraitsRelations Type relations
 /// \brief Type relations
-/// \ingroup CXX11Traits
 /// @{
 
 // is_same
@@ -761,7 +754,6 @@ template <typename T1, typename T2> struct is_convertible :
 
 /// \defgroup CXX11TraitsCV Const-volatility specifiers
 /// \brief Const-volatility specifiers
-/// \ingroup CXX11Traits
 /// @{
 
 // remove_const
@@ -825,7 +817,6 @@ template <typename T> using add_cv_t = typename add_cv<T>::type;
 
 /// \defgroup CXX11TraitsRef References
 /// \brief References
-/// \ingroup CXX11Traits
 /// @{
 
 // remove_reference
@@ -876,7 +867,6 @@ template <typename T> using add_rvalue_reference_t =
 
 /// \defgroup CXX11TraitsPtr Pointers
 /// \brief Pointers
-/// \ingroup CXX11Traits
 /// @{
 
 // remove_pointer
@@ -902,7 +892,6 @@ template <typename T> using add_pointer_t = typename add_pointer<T>::type;
 
 /// \defgroup CXX11TraitsSign Sign modifiers
 /// \brief Sign modifiers
-/// \ingroup CXX11Traits
 /// @{
 
 namespace internal {
@@ -1014,7 +1003,6 @@ template <typename T> using make_unsigned_t = typename make_unsigned<T>::type;
 
 /// \defgroup CXX11TraitsArray Arrays
 /// \brief Arrays
-/// \ingroup CXX11Traits
 /// @{
 
 // remove_extent
@@ -1043,7 +1031,6 @@ template <typename T> using remove_all_extents_t =
 
 /// \defgroup CXX11TraitsMisc Miscellaneous transformations
 /// \brief Miscellaneous transformations
-/// \ingroup CXX11Traits
 /// @{
 
 // aligned_storage
@@ -1099,7 +1086,6 @@ template <bool B, typename T, typename F> using conditional_t =
 
 /// \defgroup CXX11TraitsUtility Utilities
 /// \brief Utilities
-/// \ingroup CXX11Traits
 /// @{
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
