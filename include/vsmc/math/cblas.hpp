@@ -34,6 +34,7 @@
 
 #include <vsmc/internal/config.hpp>
 #include <cmath>
+#include <numeric>
 
 #if VSMC_USE_MKL_CBLAS
 #include <mkl.h>
@@ -72,13 +73,7 @@ inline T asum (std::size_t n, const T *x)
 /// \ingroup CBLAS
 template <typename T>
 inline T dot (std::size_t n, const T *x, const T *y)
-{
-    T sum = 0;
-    for (std::size_t i = 0; i != n; ++i)
-        sum += x[i] * y[i];
-
-    return sum;
-}
+{return std::inner_product(x, x + n, y, static_cast<T>(0));}
 
 /// \brief Scale a vector
 template <typename T>

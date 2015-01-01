@@ -32,6 +32,8 @@
 #ifndef VSMC_THREAD_THREAD_HPP
 #define VSMC_THREAD_THREAD_HPP
 
+#include <vsmc/internal/config.hpp>
+
 #include <vsmc/thread/blocked_range.hpp>
 #include <vsmc/thread/parallel_accumulate.hpp>
 #include <vsmc/thread/parallel_for.hpp>

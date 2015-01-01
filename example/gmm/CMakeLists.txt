@@ -33,16 +33,27 @@ PROJECT (vSMCExample-gmm CXX)
 INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR}/include)
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 
-ADD_EXAMPLE (gmm smc; smc_pair; pmcmc; rjsmc; rjmcmc)
+SET (GMM_ALGS smc; smc_pair; pmcmc; rjsmc; rjmcmc)
+ADD_SMP_EXAMPLE (gmm "${GMM_ALGS}")
 
 COPY_FILE (gmm gmm.data)
+COPY_FILE (gmm gmm_smc_benchmark.R)
 
 IF (OPENCL_FOUND AND RANDOM123_FOUND)
     COPY_FILE (gmm gmm_smc_cl.cl)
-    ADD_EXECUTABLE (gmm_smc_cl ${PROJECT_SOURCE_DIR}/src/gmm_smc_cl.cpp)
-    TARGET_LINK_LIBRARIES (gmm_smc_cl ${VSMC_LINK_LIBRARIES})
-    TARGET_LINK_LIBRARIES (gmm_smc_cl ${OpenCL_LINK_LIBRARIES})
+    ADD_VSMC_EXECUTABLE (gmm_smc_cl
+        ${PROJECT_SOURCE_DIR}/src/gmm_smc_cl.cpp "OCL" "MKL")
     ADD_DEPENDENCIES (gmm gmm_smc_cl)
     ADD_DEPENDENCIES (gmm_smc gmm_smc_cl)
     ADD_DEPENDENCIES (example_cl gmm_smc_cl)
+    IF (VSMC_MPI_FOUND)
+        ADD_VSMC_EXECUTABLE (gmm_smc_cl_mpi
+            ${PROJECT_SOURCE_DIR}/src/gmm_smc_cl.cpp "OCL" "MKL" "MPI")
+        SET_TARGET_PROPERTIES (gmm_smc_cl_mpi PROPERTIES COMPILE_FLAGS
+            "-DVSMC_GMM_SMC_CL_MPI")
+        ADD_DEPENDENCIES (gmm gmm_smc_cl_mpi)
+        ADD_DEPENDENCIES (gmm_smc gmm_smc_cl_mpi)
+        ADD_DEPENDENCIES (example_cl gmm_smc_cl_mpi)
+        ADD_DEPENDENCIES (example_mpi gmm_smc_cl_mpi)
+    ENDIF (VSMC_MPI_FOUND)
 ENDIF (OPENCL_FOUND AND RANDOM123_FOUND)

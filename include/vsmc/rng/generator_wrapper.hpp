@@ -64,7 +64,7 @@ struct GeneratorWrapperMinMaxTrait
 } // namespace traits
 
 /// \brief A thin wrapper over any RNG Generator for use with C++11 API
-/// \ingroup RNGWrapper
+/// \ingroup RNGAdapter
 ///
 /// \details
 /// Generator need to have a member function named `generate` which returns

@@ -37,8 +37,8 @@ inline void cv_do (vsmc::ResampleScheme res, char **argv,
         const std::string &name)
 {
     vsmc::Seed::instance().set(101);
-    std::size_t N = (ParticleNum / 3) *
-        static_cast<std::size_t>(boost::mpi::communicator().rank() + 1);
+    std::size_t N = ParticleNum / static_cast<std::size_t>(
+            boost::mpi::communicator().size());
     vsmc::Sampler<cv_state<Order> > sampler(N, res, 0.5);
     sampler
         .init(cv_init<Order>())
@@ -77,15 +77,6 @@ inline void cv_do (vsmc::ResampleScheme res, char **argv,
     est_file.open(est_file_name.c_str());
     est_file << sampler.particle().value() << std::endl;
     est_file.close();
-
-    const std::vector<std::size_t> &send_num =
-        sampler.particle().value().copy_send_num();
-    std::string send_file_name(argv[2] + rname + ".send");
-    std::ofstream send_file;
-    send_file.open(send_file_name.c_str());
-    for (std::size_t i = 0; i != send_num.size(); ++i)
-        send_file << send_num[i] << '\n';
-    send_file.close();
 
 #if VSMC_HAS_HDF5
     vsmc::hdf5store(sampler, argv[2] + rname + ".h5", "Sampler");

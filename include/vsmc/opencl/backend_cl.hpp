@@ -34,9 +34,14 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_buffer.hpp>
+#include <vsmc/opencl/cl_configure.hpp>
+#include <vsmc/opencl/cl_error.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
+#include <vsmc/opencl/internal/cl_copy.hpp>
+#include <vsmc/opencl/internal/cl_wrapper.hpp>
 #include <vsmc/rng/seed.hpp>
+#include <vsmc/utility/array.hpp>
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim) \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
@@ -47,8 +52,8 @@
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type) \
-    VSMC_STATIC_ASSERT((cxx11::is_same<type, cl_float>::value                \
-                || cxx11::is_same<type, cl_double>::value),                  \
+    VSMC_STATIC_ASSERT((cxx11::is_same<type, ::cl_float>::value              \
+                || cxx11::is_same<type, ::cl_double>::value),                \
             USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func) \
@@ -60,7 +65,12 @@
     VSMC_RUNTIME_ASSERT((state_size >= 1), ("STATE SIZE IS LESS THAN 1"))
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH \
-    VSMC_RUNTIME_ASSERT((N == size_), ("**StateCL::copy** SIZE MISMATCH"))
+    VSMC_RUNTIME_ASSERT((N == copy_.size()),                                 \
+            ("**StateCL::copy** SIZE MISMATCH"))
+
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_UNPACK_SIZE(psize, dim) \
+    VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
+            ("**StateCL::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
 #if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
 
@@ -124,22 +134,27 @@ Name<T, PlaceHolder> &operator= (Name<T, PlaceHolder> &&other)               \
 #endif // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
 
 #define VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL \
-ConfigureCL &configure () {return configure_;}                               \
-const ConfigureCL &configure () const {return configure_;}                   \
+CLConfigure &configure () {return configure_;}                               \
+const CLConfigure &configure () const {return configure_;}                   \
 ::cl::Kernel &kernel () {return kernel_;}                                    \
-const ::cl::Kernel &kernel () const {return kernel_;}
+const ::cl::Kernel &kernel () const {return kernel_;}                        \
+const std::string &kernel_name () const {return kernel_name_;}
 
 #define VSMC_DEFINE_OPENCL_SET_KERNEL \
+if (kname.empty()) {                                                         \
+    kernel_name_.clear();                                                    \
+    return;                                                                  \
+}                                                                            \
 if (build_id_ != particle.value().build_id() || kernel_name_ != kname) {     \
     build_id_ = particle.value().build_id();                                 \
     kernel_name_ = kname;                                                    \
     kernel_ = particle.value().create_kernel(kernel_name_);                  \
     configure_.local_size(particle.size(),                                   \
             kernel_, particle.value().manager().device());                   \
-}
+}                                                                            \
 
 #define VSMC_DEFINE_OPENCL_MEMBER_DATA \
-ConfigureCL configure_;                                                      \
+CLConfigure configure_;                                                      \
 int build_id_;                                                               \
 ::cl::Kernel kernel_;                                                        \
 std::string kernel_name_
@@ -151,14 +166,20 @@ namespace internal {
 template <typename> void set_cl_fp_type (std::stringstream &);
 
 template <>
-inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
+inline void set_cl_fp_type<cl_float> (std::stringstream &ss)
 {
+    ss << "#ifndef FP_TYPE\n";
+    ss << "#define FP_TYPE float\n";
     ss << "typedef float fp_type;\n";
+    ss << "#endif\n";
+
+    ss << "#ifndef VSMC_HAS_OPENCL_DOUBLE\n";
     ss << "#define VSMC_HAS_OPENCL_DOUBLE 0\n";
+    ss << "#endif\n";
 }
 
 template <>
-inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
+inline void set_cl_fp_type<cl_double> (std::stringstream &ss)
 {
     ss << "#if defined(cl_khr_fp64)\n";
     ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
@@ -166,8 +187,35 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
     ss << "#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n";
     ss << "#endif\n";
 
+    ss << "#define FP_TYPE double\n";
     ss << "typedef double fp_type;\n";
+    ss << "#endif\n";
+
+    ss << "#ifndef VSMC_HAS_OPENCL_DOUBLE\n";
     ss << "#define VSMC_HAS_OPENCL_DOUBLE 1\n";
+    ss << "#endif\n";
+}
+
+template <typename FPType>
+inline std::string cl_source_macros (
+        std::size_t size, std::size_t state_size, std::size_t seed)
+{
+    std::stringstream ss;
+    set_cl_fp_type<FPType>(ss);
+
+    ss << "#ifndef SIZE\n";
+    ss << "#define SIZE " << size << "UL\n";
+    ss << "#endif\n";
+
+    ss << "#ifndef STATE_SIZE\n";
+    ss << "#define STATE_SIZE " << state_size << "UL\n";
+    ss << "#endif\n";
+
+    ss << "#ifndef SEED\n";
+    ss << "#define SEED " << seed << "UL\n";
+    ss << "#endif\n";
+
+    return ss.str();
 }
 
 template <typename D>
@@ -192,30 +240,6 @@ struct IsDerivedFromStateCL :
 
 } // namespace vsmc::internal
 
-/// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
-/// \ingroup OpenCL
-class ConfigureCL
-{
-    public :
-
-    ConfigureCL () : local_size_(0) {}
-
-    std::size_t local_size () const {return local_size_;}
-
-    void local_size (std::size_t new_size) {local_size_ = new_size;}
-
-    void local_size (std::size_t N,
-            const ::cl::Kernel &kern, const ::cl::Device &dev)
-    {
-        std::size_t global_size;
-        cl_preferred_work_size(N, kern, dev, global_size, local_size_);
-    }
-
-    private :
-
-    std::size_t local_size_;
-}; // class ConfigureCL
-
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
 template <std::size_t StateSize, typename FPType, typename ID>
@@ -223,20 +247,35 @@ class StateCL
 {
     public :
 
-    typedef cl_ulong size_type;
+    typedef ::cl_ulong size_type;
     typedef FPType fp_type;
-    typedef ID id;
+    typedef ID cl_id;
     typedef CLManager<ID> manager_type;
+    typedef typename cxx11::conditional<StateSize == Dynamic,
+             std::vector<char>, Array<char, StateSize> >::type state_pack_type;
 
     explicit StateCL (size_type N) :
         state_size_(StateSize == Dynamic ? 1 : StateSize),
         size_(N), build_(false), build_id_(0),
-        state_buffer_(state_size_ * size_), copy_from_buffer_(size_) {}
+        state_buffer_(state_size_ * size_)
+        {
+#if VSMC_OPENCL_VERSION >= 120
+            if (manager().opencl_version() >= 120) {
+                copy_from_buffer_.resize(size_,
+                        CL_MEM_READ_ONLY|CL_MEM_HOST_WRITE_ONLY);
+            } else {
+                copy_from_buffer_.resize(size_, CL_MEM_READ_ONLY);
+            }
+#else
+            copy_from_buffer_.resize(size_, CL_MEM_READ_ONLY);
+#endif
+        }
 
     size_type size () const {return size_;}
 
     std::size_t state_size () const {return state_size_;}
 
+    /// \brief Change state size
     void resize_state (std::size_t state_size)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(
@@ -246,6 +285,14 @@ class StateCL
         state_size_ = state_size;
         state_buffer_.resize(state_size_ * size_);
     }
+
+    /// \brief Change state buffer flag (cause reallocation)
+    void update_state (::cl_mem_flags flag)
+    {state_buffer_.resize(state_size_ * size_, flag);}
+
+    /// \brief Change state buffer flag and host pointer (cause reallocation)
+    void update_state (::cl_mem_flags flag, void *host_ptr)
+    {state_buffer_.resize(state_size_ * size_, flag, host_ptr);}
 
     /// \brief The instance of the CLManager signleton associated with this
     /// value collcection
@@ -261,74 +308,68 @@ class StateCL
     ///
     /// \param source The source of the program
     /// \param flags The OpenCL compiler flags, e.g., `-I`
-    /// \param os The output stream to write the output
+    /// \param os The output stream to write the output when error occurs
     ///
     /// \details
-    /// Note that a few macros and headers are included before the user
-    /// supplied `source`. Say the template parameter `StateSize == 4`,
-    /// `FPType` of this class is set to `cl_double`, and there are `1000`
-    /// particles, then the complete source, which acutally get compiled looks
-    /// like the following
+    /// Note that a few macros are defined before the user supplied `source`.
+    /// Say the template parameter `StateSize == 4`, `FPType` of this class is
+    /// set to `cl_float`, and there are `1000` particles, then the complete
+    /// source, which acutally get compiled looks like the following
     /// ~~~{.cpp}
+    /// #ifndef FP_TYPE
+    /// #define FP_TYPE float
     /// typedef float fp_type;
+    /// #endif
+    ///
+    /// #ifndef VSMC_HAS_OPENCL_DOUBLE
     /// #define VSMC_HAS_OPENCL_DOUBLE 0
+    /// #endif
     ///
-    /// typedef ulong size_type;
-    /// #define Size 1000UL;
-    /// #define StateSize 4UL;
-    /// #define Seed 101UL;
+    /// #ifndef SIZE
+    /// #define SIZE 1000UL;
+    /// #endif
+    ///
+    /// #ifndef STATE_SIZE
+    /// #define STATE_SIZE 4UL;
+    /// #endif
+    ///
+    /// #ifndef SEED
+    /// #define SEED 101UL;
+    /// #endif
     /// // The actual seed is vsmc::Seed::instance().get()
-    ///
-    /// #include <vsmc/opencl/internal/device.h>
-    ///
     /// // ... User source, passed by the source argument
     /// ~~~
     /// After build, `vsmc::Seed::instance().skip(N)` is called with `N`
     /// being the nubmer of particles.
     template <typename CharT, typename Traits>
-    void build (const std::string &source, const std::string &flags,
-            std::basic_ostream<CharT, Traits> &os)
+    void build (const std::string &source,
+            const std::string &flags, std::basic_ostream<CharT, Traits> &os)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(fp_type);
 
-        ++build_id_;
-
-        std::stringstream ss;
-        internal::set_cl_fp_type<fp_type>(ss);
-
-        ss << "typedef ulong size_type;\n";
-        ss << "#define Size " << size_ << "UL\n";
-        ss << "#define StateSize " << state_size_ << "UL\n";
-        ss << "#define Seed " << Seed::instance().get() << "UL\n";
-
-        ss << "typedef struct {\n";
-        for (std::size_t i = 0; i != state_size_; ++i)
-            ss << "char c" << i << ";\n";
-        ss << "} copy_state_struct;\n";
-
-        ss << "#include <vsmc/opencl/internal/device.h>\n";
-        ss << source << '\n';
+        std::string src(internal::cl_source_macros<fp_type>(
+                    size_, state_size_, Seed::instance().get()) + source);
         Seed::instance().skip(static_cast<Seed::skip_type>(size_));
-
-        try {
-            program_ = manager().create_program(ss.str());
-            program_.build(manager().device_vec(), flags.c_str());
-            program_.getInfo(CL_PROGRAM_SOURCE, &build_source_);
-            program_.getBuildInfo(manager().device(),
-                    CL_PROGRAM_BUILD_OPTIONS, &build_options_);
-            build_ = true;
-        } catch (...) {
-            manager().print_build_log(program_, os);
-            throw;
-        }
-
-        kernel_copy_ = create_kernel("copy");
-        configure_copy_.local_size(size_, kernel_copy_, manager().device());
+        program_ = manager().create_program(src);
+        build_program(flags, os);
     }
 
     void build (const std::string &source,
             const std::string &flags = std::string())
     {build(source, flags, std::cout);}
+
+    /// \brief Build from an existing program
+    template <typename CharT, typename Traits>
+    void build (const ::cl::Program &program,
+            const std::string &flags, std::basic_ostream<CharT, Traits> &os)
+    {
+        program_ = program;
+        build_program(flags, os);
+    }
+
+    void build (const ::cl::Program &program,
+            const std::string &flags = std::string())
+    {build(program, flags, std::cout);}
 
     /// \brief Whether the last attempted building success
     bool build () const {return build_;}
@@ -338,12 +379,6 @@ class StateCL
     /// \details
     /// This function returns a non-decreasing sequence of integers
     int build_id () const {return build_id_;}
-
-    /// \brief The source of the program of the last attempted building
-    const char *build_source () const {return build_source_.c_str();}
-
-    /// \brief The build options of the program of the last attempted building
-    const char *build_options () const {return build_options_.c_str();}
 
     /// \brief Create kernel with the current program
     ///
@@ -357,22 +392,75 @@ class StateCL
     }
 
     template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
+    void copy (std::size_t N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(copy);
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH;
 
         manager().template write_buffer<size_type>(
-                copy_from_buffer_.data(), size_, copy_from);
-        cl_set_kernel_args(kernel_copy_, 0,
-                state_buffer_.data(), copy_from_buffer_.data());
-        manager().run_kernel(
-                kernel_copy_, N, configure_copy_.local_size());
+                copy_from_buffer_.data(), N, copy_from);
+        copy_(copy_from_buffer_.data(), state_buffer_.data());
     }
 
-    ConfigureCL &configure_copy () {return configure_copy_;}
+    void copy_pre_processor ()
+    {
+        state_idx_host_.resize(size_);
+#if VSMC_OPENCL_VERSION >= 120
+        if (manager().opencl_version() >= 120) {
+            state_idx_buffer_.resize(size_,
+                    CL_MEM_READ_ONLY|CL_MEM_HOST_WRITE_ONLY|
+                    CL_MEM_USE_HOST_PTR, &state_idx_host_[0]);
+        } else {
+            state_idx_buffer_.resize(size_,
+                    CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, &state_idx_host_[0]);
+        }
+#else
+        state_idx_buffer_.resize(size_,
+                CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, &state_idx_host_[0]);
+#endif
 
-    const ConfigureCL &configure_copy () const {return configure_copy_;}
+        state_tmp_host_.resize(size_ * state_size_);
+        state_tmp_buffer_.resize(size_ * state_size_,
+                CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, &state_tmp_host_[0]);
+
+        std::memset(&state_idx_host_[0], 0, size_);
+        manager().read_buffer(state_tmp_buffer_.data(), size_ * state_size_,
+                &state_tmp_host_[0]);
+    }
+
+    void copy_post_processor ()
+    {
+        manager().write_buffer(state_idx_buffer_.data(), size_,
+                &state_idx_host_[0]);
+        manager().write_buffer(state_tmp_buffer_.data(), size_ * state_size_,
+                &state_tmp_host_[0]);
+        copy_(state_idx_buffer_.data(), state_tmp_buffer_.data(),
+                state_buffer_.data());
+    }
+
+    state_pack_type state_pack (size_type id) const
+    {
+        state_pack_type pack(create_pack());
+        std::memcpy(&pack[0], &state_tmp_host_[id * state_size_], state_size_);
+
+        return pack;
+    }
+
+    void state_unpack (size_type id, const state_pack_type &pack)
+    {
+        VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_UNPACK_SIZE(
+                pack.size(), state_size_);
+
+        state_idx_host_[id] = 1;
+        std::memcpy(&state_tmp_host_[id * state_size_], &pack[0], state_size_);
+    }
+
+    CLConfigure &copy_configure () {return copy_.configure();}
+
+    const CLConfigure &copy_configure () const {return copy_.configure();}
+
+    ::cl::Kernel &copy_kernel () {return copy_.kernel();}
+
+    const ::cl::Kernel &copy_kernel () const {return copy_.kernel();}
 
     private :
 
@@ -380,16 +468,48 @@ class StateCL
     size_type size_;
 
     ::cl::Program program_;
-    ::cl::Kernel kernel_copy_;
-    ConfigureCL configure_copy_;
 
     bool build_;
     int build_id_;
-    std::string build_source_;
-    std::string build_options_;
 
     CLBuffer<char, ID> state_buffer_;
     CLBuffer<size_type, ID> copy_from_buffer_;
+    internal::CLCopy<ID> copy_;
+
+    CLBuffer<char, ID> state_idx_buffer_;
+    CLBuffer<char, ID> state_tmp_buffer_;
+    std::vector<char, AlignedAllocator<char> > state_idx_host_;
+    std::vector<char, AlignedAllocator<char> > state_tmp_host_;
+
+    template <typename CharT, typename Traits>
+    void build_program (const std::string flags,
+            std::basic_ostream<CharT, Traits> &os)
+    {
+        ++build_id_;
+
+        build_ = false;
+        try {
+            program_.build(manager().device_vec(), flags.c_str());
+            copy_.build(size_, state_size_);
+            build_ = true;
+        } catch (const ::cl::Error &err) {
+            CLQuery::program_build_log(program_, os);
+            CLQuery::program_build_log(copy_.program(), os);
+            throw CLError(err);
+        }
+    }
+
+    state_pack_type create_pack () const
+    {
+        return create_pack_dispatch(
+                cxx11::integral_constant<bool, StateSize == Dynamic>());
+    }
+
+    std::vector<char> create_pack_dispatch (cxx11::true_type) const
+    {return std::vector<char>(this->state_size());}
+
+    Array<char, StateSize> create_pack_dispatch (cxx11::false_type) const
+    {return Array<char, StateSize>();}
 }; // class StateCL
 
 /// \brief Sampler<T>::init_type subtype using OpenCL
@@ -424,62 +544,86 @@ class InitializeCL
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
-
     /// \brief The index offset of additional kernel arguments set by the user
     ///
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 2;}
+    static VSMC_CONSTEXPR ::cl_uint kernel_args_offset () {return 2;}
 
     std::size_t operator() (Particle<T> &particle, void *param)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, InitializeCL);
 
-        accept_host_.resize(particle.size());
-        accept_buffer_.resize(particle.size());
         set_kernel(particle);
+        if (kernel_name_.empty())
+            return 0;
+
+        set_kernel_args(particle);
         initialize_param(particle, param);
         pre_processor(particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         post_processor(particle);
-        particle.value().manager().template read_buffer<cl_ulong>(
-                accept_buffer_.data(), particle.size(), &accept_host_[0]);
-        cl_ulong acc = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
-            acc += accept_host_[i];
 
-        return acc;
+        return accept_count(particle, accept_buffer_.data());
     }
 
     virtual void initialize_param (Particle<T> &, void *) {}
-    virtual void initialize_state (std::string &) = 0;
+    virtual void initialize_state (std::string &) {}
     virtual void pre_processor (Particle<T> &) {}
     virtual void post_processor (Particle<T> &) {}
+
+    virtual std::size_t accept_count (Particle<T> &particle,
+            const ::cl::Buffer &accept_buffer)
+    {
+        particle.value().manager().read_buffer(
+                accept_buffer, particle.size(), &accept_host_[0]);
+
+        return static_cast<std::size_t>(std::accumulate(
+                    accept_host_.begin(), accept_host_.end(),
+                    static_cast< ::cl_ulong>(0)));
+    }
+
+    virtual void set_kernel (const Particle<T> &particle)
+    {
+        std::string kname;
+        initialize_state(kname);
+        VSMC_DEFINE_OPENCL_SET_KERNEL;
+    }
+
+    virtual void set_kernel_args (const Particle<T> &particle)
+    {
+        accept_host_.resize(particle.size());
+#if VSMC_OPENCL_VERSION >= 120
+        if (particle.value().manager().opencl_version() >= 120) {
+            accept_buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY|
+                    CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+        } else {
+            accept_buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+        }
+#else
+        accept_buffer_.resize(particle.size(),
+                CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+#endif
+        cl_set_kernel_args(kernel_, 0,
+                particle.value().state_buffer().data(), accept_buffer_.data());
+    }
+
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
 
     protected :
 
     VSMC_DEFINE_OPENCL_COPY(InitializeCL)
     VSMC_DEFINE_OPENCL_MOVE(InitializeCL)
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
-
-    void set_kernel (const Particle<T> &particle)
-    {
-        std::string kname;
-        initialize_state(kname);
-        VSMC_DEFINE_OPENCL_SET_KERNEL;
-        cl_set_kernel_args(kernel_, 0,
-                particle.value().state_buffer().data(), accept_buffer_.data());
-    }
 
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    std::vector<cl_ulong> accept_host_;
-    CLBuffer<cl_ulong, typename T::id> accept_buffer_;
+    CLBuffer< ::cl_ulong, typename T::cl_id> accept_buffer_;
+    std::vector< ::cl_ulong> accept_host_;
 }; // class InitializeCL
 
 /// \brief Sampler<T>::move_type subtype using OpenCL
@@ -496,60 +640,85 @@ class MoveCL
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
-
     /// \brief The index offset of additional kernel arguments set by the user
     ///
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 3;}
+    static VSMC_CONSTEXPR ::cl_uint kernel_args_offset () {return 3;}
 
     std::size_t operator() (std::size_t iter, Particle<T> &particle)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, MoveCL);
 
-        accept_host_.resize(particle.size());
-        accept_buffer_.resize(particle.size());
         set_kernel(iter, particle);
+        if (kernel_name_.empty())
+            return 0;
+
+        set_kernel_args(iter, particle);
         pre_processor(iter, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
         post_processor(iter, particle);
-        particle.value().manager().template read_buffer<cl_ulong>(
-                accept_buffer_.data(), particle.size(), &accept_host_[0]);
-        cl_ulong acc = 0;
-        for (size_type i = 0; i != particle.size(); ++i)
-            acc += accept_host_[i];
 
-        return acc;
+        return accept_count(particle, accept_buffer_.data());
     }
 
-    virtual void move_state (std::size_t, std::string &) = 0;
+    virtual void move_state (std::size_t, std::string &) {}
     virtual void pre_processor (std::size_t, Particle<T> &) {}
     virtual void post_processor (std::size_t, Particle<T> &) {}
+
+    virtual std::size_t accept_count (Particle<T> &particle,
+            const ::cl::Buffer &accept_buffer)
+    {
+        particle.value().manager().read_buffer(
+                accept_buffer, particle.size(), &accept_host_[0]);
+
+        return static_cast<std::size_t>(std::accumulate(
+                    accept_host_.begin(), accept_host_.end(),
+                    static_cast< ::cl_ulong>(0)));
+    }
+
+    virtual void set_kernel (std::size_t iter, const Particle<T> &particle)
+    {
+        std::string kname;
+        move_state(iter, kname);
+        VSMC_DEFINE_OPENCL_SET_KERNEL;
+    }
+
+    virtual void set_kernel_args (std::size_t iter,
+            const Particle<T> &particle)
+    {
+        accept_host_.resize(particle.size());
+#if VSMC_OPENCL_VERSION >= 120
+        if (particle.value().manager().opencl_version() >= 120) {
+            accept_buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY|
+                    CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+        } else {
+            accept_buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+        }
+#else
+        accept_buffer_.resize(particle.size(),
+                CL_MEM_READ_WRITE|CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+#endif
+        cl_set_kernel_args(kernel_, 0, static_cast< ::cl_ulong>(iter),
+                particle.value().state_buffer().data(), accept_buffer_.data());
+    }
+
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
 
     protected :
 
     VSMC_DEFINE_OPENCL_COPY(MoveCL)
     VSMC_DEFINE_OPENCL_MOVE(MoveCL)
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
-
-    void set_kernel (std::size_t iter, const Particle<T> &particle)
-    {
-        std::string kname;
-        move_state(iter, kname);
-        VSMC_DEFINE_OPENCL_SET_KERNEL;
-        cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
-                particle.value().state_buffer().data(), accept_buffer_.data());
-    }
 
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    std::vector<cl_ulong> accept_host_;
-    CLBuffer<cl_ulong, typename T::id> accept_buffer_;
+    CLBuffer< ::cl_ulong, typename T::cl_id> accept_buffer_;
+    std::vector< ::cl_ulong> accept_host_;
 }; // class MoveCL
 
 /// \brief Monitor<T>::eval_type subtype using OpenCL
@@ -567,23 +736,23 @@ class MonitorEvalCL
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
-
     /// \brief The index offset of additional kernel arguments set by the user
     ///
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 4;}
+    static VSMC_CONSTEXPR ::cl_uint kernel_args_offset () {return 4;}
 
     void operator() (std::size_t iter, std::size_t dim,
             const Particle<T> &particle, double *res)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, MonitorEvalCL);
 
-        buffer_.resize(particle.size() * dim);
         set_kernel(iter, dim, particle);
+        if (kernel_name_.empty())
+            return;
+
+        set_kernel_args(iter, dim, particle);
         pre_processor(iter, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
@@ -593,31 +762,47 @@ class MonitorEvalCL
         post_processor(iter, particle);
     }
 
-    virtual void monitor_state (std::size_t, std::string &) = 0;
+    virtual void monitor_state (std::size_t, std::string &) {}
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
 
-    protected :
-
-    VSMC_DEFINE_OPENCL_COPY(MonitorEvalCL)
-    VSMC_DEFINE_OPENCL_MOVE(MonitorEvalCL)
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
-
-    void set_kernel (std::size_t iter, std::size_t dim,
+    virtual void set_kernel (std::size_t iter, std::size_t,
             const Particle<T> &particle)
     {
         std::string kname;
         monitor_state(iter, kname);
         VSMC_DEFINE_OPENCL_SET_KERNEL;
-        cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
-                static_cast<cl_ulong>(dim),
+    }
+
+    virtual void set_kernel_args (std::size_t iter, std::size_t dim,
+            const Particle<T> &particle)
+    {
+#if VSMC_OPENCL_VERSION >= 120
+        if (particle.value().manager().opencl_version() >= 120) {
+            buffer_.resize(particle.size() * dim,
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY);
+        } else {
+            buffer_.resize(particle.size() * dim);
+        }
+#else
+        buffer_.resize(particle.size() * dim);
+#endif
+        cl_set_kernel_args(kernel_, 0, static_cast< ::cl_ulong>(iter),
+                static_cast< ::cl_ulong>(dim),
                 particle.value().state_buffer().data(), buffer_.data());
     }
+
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+
+    protected :
+
+    VSMC_DEFINE_OPENCL_COPY(MonitorEvalCL)
+    VSMC_DEFINE_OPENCL_MOVE(MonitorEvalCL)
 
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    CLBuffer<typename T::fp_type, typename T::id> buffer_;
+    CLBuffer<typename T::fp_type, typename T::cl_id> buffer_;
 }; // class MonitorEvalCL
 
 /// \brief Path<T>::eval_type subtype using OpenCL
@@ -635,23 +820,23 @@ class PathEvalCL
 {
     public :
 
-    typedef typename Particle<T>::size_type size_type;
-    typedef T value_type;
-
     /// \brief The index offset of additional kernel arguments set by the user
     ///
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR cl_uint kernel_args_offset () {return 3;}
+    static VSMC_CONSTEXPR ::cl_uint kernel_args_offset () {return 3;}
 
     double operator() (std::size_t iter, const Particle<T> &particle,
         double *res)
     {
         VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, PathEvalCL);
 
-        buffer_.resize(particle.size());
         set_kernel(iter, particle);
+        if (kernel_name_.empty())
+            return 0;
+
+        set_kernel_args(iter, particle);
         pre_processor(iter, particle);
         particle.value().manager().run_kernel(
                 kernel_, particle.size(), configure_.local_size());
@@ -663,30 +848,46 @@ class PathEvalCL
         return this->path_grid(iter, particle);
     }
 
-    virtual void path_state (std::size_t, std::string &) = 0;
-    virtual double path_grid (std::size_t, const Particle<T> &) = 0;
+    virtual void path_state (std::size_t, std::string &) {}
+    virtual double path_grid (std::size_t, const Particle<T> &) {return 0;}
     virtual void pre_processor (std::size_t, const Particle<T> &) {}
     virtual void post_processor (std::size_t, const Particle<T> &) {}
+
+    virtual void set_kernel (std::size_t iter, const Particle<T> &particle)
+    {
+        std::string kname;
+        path_state(iter, kname);
+        VSMC_DEFINE_OPENCL_SET_KERNEL;
+    }
+
+    virtual void set_kernel_args (std::size_t iter,
+            const Particle<T> &particle)
+    {
+#if VSMC_OPENCL_VERSION >= 120
+        if (particle.value().manager().opencl_version() >= 120) {
+            buffer_.resize(particle.size(),
+                    CL_MEM_READ_WRITE|CL_MEM_HOST_READ_ONLY);
+        } else {
+            buffer_.resize(particle.size());
+        }
+#else
+        buffer_.resize(particle.size());
+#endif
+        cl_set_kernel_args(kernel_, 0, static_cast< ::cl_ulong>(iter),
+                particle.value().state_buffer().data(), buffer_.data());
+    }
+
+    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
 
     protected :
 
     VSMC_DEFINE_OPENCL_COPY(PathEvalCL)
     VSMC_DEFINE_OPENCL_MOVE(PathEvalCL)
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
-
-    void set_kernel (std::size_t iter, const Particle<T> &particle)
-    {
-        std::string kname;
-        path_state(iter, kname);
-        VSMC_DEFINE_OPENCL_SET_KERNEL;
-        cl_set_kernel_args(kernel_, 0, static_cast<cl_ulong>(iter),
-                particle.value().state_buffer().data(), buffer_.data());
-    }
 
     private :
 
     VSMC_DEFINE_OPENCL_MEMBER_DATA;
-    CLBuffer<typename T::fp_type, typename T::id> buffer_;
+    CLBuffer<typename T::fp_type, typename T::cl_id> buffer_;
 }; // class PathEvalCL
 
 } // namespace vsmc

@@ -220,6 +220,8 @@ class XorshiftEngine
     explicit XorshiftEngine (result_type s = 1)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
+        if (s == 0)
+            s = 1;
         seed(s);
     }
 
@@ -495,13 +497,13 @@ typedef XorshiftEngine<uint64_t, 32, 35, 27, 26, 37, 32, 1> Xorshift32x64;
 /// \ingroup Xorshift
 typedef XorshiftEngine<uint64_t, 64, 33, 26, 27, 29, 64, 53> Xorshift64x64;
 
-/// \brief THe default 32-bits Xorshift RNG engine
+/// \brief The default 32-bits Xorshift RNG engine
 /// \ingroup Xorshift
 typedef Xorshift128x32 Xorshift;
 
-/// \brief THe default 64-bits Xorshift RNG engine
+/// \brief The default 64-bits Xorshift RNG engine
 /// \ingroup Xorshift
-typedef Xorshift64x64  Xorshift_64;
+typedef Xorshift64x64 Xorshift_64;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{32}-1\f$ 32-bits integers
 /// \ingroup Xorshift
@@ -563,13 +565,13 @@ typedef XorwowEngine<Xorshift32x64> Xorwow32x64;
 /// \ingroup Xorshift
 typedef XorwowEngine<Xorshift64x64> Xorwow64x64;
 
-/// \brief THe default 32-bits Xorwow RNG engine
+/// \brief The default 32-bits Xorwow RNG engine
 /// \ingroup Xorshift
 typedef Xorwow128x32 Xorwow;
 
-/// \brief THe default 64-bits Xorwow RNG engine
+/// \brief The default 64-bits Xorwow RNG engine
 /// \ingroup Xorshift
-typedef Xorwow64x64  Xorwow_64;
+typedef Xorwow64x64 Xorwow_64;
 
 } // namespace vsmc
 

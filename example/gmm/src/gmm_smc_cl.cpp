@@ -37,29 +37,70 @@ int main (int argc, char **argv)
 #include "gmm_options_cl.hpp"
 #include "options_process.hpp"
 
-    vsmc::CLSetup<gmm_device> &gmm_setup =
-        vsmc::CLSetup<gmm_device>::instance();
-    gmm_setup.platform(PlatformName);
-    gmm_setup.device_vendor(DeviceVendorName);
-    gmm_setup.device_type(DeviceType);
+    std::string platform_name;
+    std::string device_type;
+    std::string device_vendor_name;
+    std::string build_option;
+    std::size_t local_size;
+    std::size_t particle_num;
 
-    if (!vsmc::CLManager<gmm_device>::instance().setup()) {
-        std::cout << "Failed to setup OpenCL environment" << std::endl;
-        std::cout << "Platform name: " << PlatformName << std::endl;
-        std::cout << "Device type:   " << DeviceType << std::endl;
-        std::cout << "Device vendor: " << DeviceVendorName << std::endl;
-        return -1;
-    }
+#ifdef VSMC_GMM_SMC_CL_MPI
+    vsmc::MPIEnvironment env(argc, argv);
+    boost::mpi::communicator world(vsmc::MPICommunicator<>::instance().get(),
+            boost::mpi::comm_duplicate);
+    std::size_t R = static_cast<std::size_t>(world.rank());
+    std::size_t S = static_cast<std::size_t>(world.size());
+    platform_name = PlatformName.size() >= S ?
+        PlatformName[R] : PlatformName.front();
+    device_type = DeviceType.size() >= S ?
+        DeviceType[R] : DeviceType.front();
+    device_vendor_name = DeviceVendorName.size() >= S ?
+        DeviceVendorName[R] : DeviceVendorName.front();
+    build_option = BuildOption.size() >= S ?
+        BuildOption[R] : BuildOption.front();
+    local_size = LocalSize.size() >= S ?
+        LocalSize[R] : LocalSize.front();
+    particle_num = ParticleNum.size() >= S ?
+        ParticleNum[R] : ParticleNum.front();
+#else
+    platform_name = PlatformName.front();
+    device_type = DeviceType.front();
+    device_vendor_name = DeviceVendorName.front();
+    build_option = BuildOption.front();
+    local_size = LocalSize.front();
+    particle_num = ParticleNum.front();
+#endif
 
-    if (FPTypeBits == 32) {
-        gmm_do_smc<cl_float>(ParticleNum, IterNum, DataNum, DataFile,
-                Threshold, vSMCIncPath, R123IncPath, SM, CM, Repeat);
-    } else if (FPTypeBits == 64) {
-        gmm_do_smc<cl_double>(ParticleNum, IterNum, DataNum, DataFile,
-                Threshold, vSMCIncPath, R123IncPath, SM, CM, Repeat);
-    } else {
-        std::fprintf(stderr, "cl_type_bits has to be 32 or 64\n");
-        return -1;
+    try {
+        vsmc::CLSetup<> &gmm_setup = vsmc::CLSetup<>::instance();
+        gmm_setup.platform(platform_name);
+        gmm_setup.device_type(device_type);
+        gmm_setup.device_vendor(device_vendor_name);
+        if (!vsmc::CLManager<>::instance().setup()) {
+            std::cout << "Failed to setup OpenCL environment" << std::endl;
+            std::cout << "Platform name: " << platform_name << std::endl;
+            std::cout << "Device type:   " << device_type << std::endl;
+            std::cout << "Device vendor: " << device_vendor_name << std::endl;
+            return 0;
+        }
+
+        if (FPTypeBits == 32) {
+            gmm_do_smc<cl_float>(particle_num, IterNum, DataNum, DataFile,
+                    Threshold, vSMCIncPath, R123IncPath, build_option,
+                    local_size, SM, CM, Repeat);
+        } else if (FPTypeBits == 64) {
+            gmm_do_smc<cl_double>(particle_num, IterNum, DataNum, DataFile,
+                    Threshold, vSMCIncPath, R123IncPath, build_option,
+                    local_size, SM, CM, Repeat);
+        } else {
+            std::cout << "cl_type_bits has to be 32 or 64" << std::endl;
+        }
+    } catch (cl::Error &err) {
+        std::cout << "Runtime Error" << std::endl;
+        std::cout << err.err() << std::endl;
+        std::cout << err.what() << std::endl;
+    } catch (...) {
+        std::cout << "Runtime Error" << std::endl;
     }
 
     return 0;

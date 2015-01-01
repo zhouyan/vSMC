@@ -284,7 +284,7 @@ class gmm_state : public gmm_state_base
 
     double update_log_likelihood (gmm_param &param) const
     {
-        double ll = -0.5 * obs_.size() * vsmc::math::ln_2pi<double>();
+        double ll = -0.5 * obs_.size() * vsmc::math::ln_pi_2<double>();
         param.update_log_lambda();
         for (std::size_t k = 0; k != obs_.size(); ++k) {
             double lli = 0;

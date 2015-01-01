@@ -33,7 +33,8 @@ PROJECT (vSMCExample-pet CXX)
 INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR}/include)
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 
-ADD_EXAMPLE (pet smc; pmcmc; is)
+SET (PET_ALGS smc; pmcmc; is)
+ADD_SMP_EXAMPLE (pet "${PET_ALGS}")
 
 COPY_FILE (pet pet_simulate.data)
 COPY_FILE (pet pet_time.data)

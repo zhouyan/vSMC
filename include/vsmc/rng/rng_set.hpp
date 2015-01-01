@@ -49,7 +49,7 @@
 
 namespace vsmc {
 
-template <typename, typename> class RngSet;
+template <typename = Threefry4x64, typename = Vector> class RngSet;
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
@@ -61,7 +61,7 @@ class RngSet<RngType, Scalar>
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet (size_type N) : size_(N) {seed();}
+    explicit RngSet (size_type N = 0) : size_(N) {seed();}
 
     size_type size () const {return size_;}
 
@@ -88,7 +88,7 @@ class RngSet<RngType, Vector>
     typedef typename std::vector<rng_type, AlignedAllocator<rng_type> >::
         size_type size_type;
 
-    explicit RngSet (size_type N) : rng_(N, rng_type()) {seed();}
+    explicit RngSet (size_type N = 0) : rng_(N, rng_type()) {seed();}
 
     size_type size () const {return rng_.size();}
 

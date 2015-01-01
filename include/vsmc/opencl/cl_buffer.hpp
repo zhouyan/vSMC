@@ -34,6 +34,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
+#include <vsmc/opencl/internal/cl_wrapper.hpp>
 
 namespace vsmc {
 
@@ -53,21 +54,41 @@ class CLBuffer
     typedef std::size_t size_type;
     typedef CLManager<ID> manager_type;
 
-    CLBuffer () : size_(0) {}
+    CLBuffer () :
+        size_(0), flag_(CL_MEM_READ_WRITE), host_ptr_(VSMC_NULLPTR) {}
 
-    CLBuffer (size_type N) :
-        size_(N),
-        data_(manager().template create_buffer<value_type>(size_)) {}
+    CLBuffer (size_type N, ::cl_mem_flags flag = CL_MEM_READ_WRITE,
+            void *host_ptr = VSMC_NULLPTR) :
+        size_(N), flag_(flag), host_ptr_(host_ptr),
+        data_(manager().template
+                create_buffer<value_type>(size_, flag_, host_ptr_)) {}
 
     CLBuffer (const CLBuffer<T, ID> &other) :
-        size_(other.size_),
-        data_(manager().template create_buffer<value_type>(size_)) {}
+        size_(other.size_), flag_(other.flag_), host_ptr_(other.host_ptr_),
+        data_(manager().template
+                create_buffer<value_type>(size_, flag_, host_ptr_))
+    {
+            if (size_ != 0
+#if VSMC_OPENCL_VERSION >= 120
+                    && (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0
+                    && (flag_ & CL_MEM_HOST_READ_ONLY) != 0
+#endif
+                    ) {
+                manager().template copy_buffer<value_type>(
+                        other.data_, data_, size_);
+            }
+    }
 
     CLBuffer<T, ID> &operator= (const CLBuffer<T, ID> &other)
     {
         if (this != &other) {
-            resize(other.size_);
-            if (size_ != 0) {
+            resize(other.size_, other.flag_, other.host_ptr_);
+            if (size_ != 0
+#if VSMC_OPENCL_VERSION >= 120
+                    && (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0
+                    && (flag_ & CL_MEM_HOST_READ_ONLY) != 0
+#endif
+                    ) {
                 manager().template copy_buffer<value_type>(
                         other.data_, data_, size_);
             }
@@ -78,35 +99,44 @@ class CLBuffer
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     CLBuffer (CLBuffer<T, ID> &&other) :
-        size_(other.size_), data_(cxx11::move(other.data_))
+        size_(other.size_), flag_(other.flag_), host_ptr_(other.host_ptr_),
+        data_(cxx11::move(other.data_))
     {
         other.size_ = 0;
+        other.flag_ = CL_MEM_READ_WRITE;
+        other.host_ptr_ = VSMC_NULLPTR;
         other.data_ = ::cl::Buffer();
     }
 
     CLBuffer<T, ID> &operator= (CLBuffer<T, ID> &&other)
     {
         using std::swap;
+
         if (this != &other) {
             swap(size_, other.size_);
+            swap(flag_, other.flag_);
+            swap(host_ptr_, other.host_ptr_);
             swap(data_, other.data_);
         }
 
         return *this;
     }
-
 #endif
 
     ~CLBuffer () {}
 
+    static manager_type &manager () {return manager_type::instance();}
+
     size_type size () const {return size_;}
 
-    static manager_type &manager () {return manager_type::instance();}
+    ::cl_mem_flags flag () const {return flag_;}
+
+    void *host_ptr () const {return host_ptr_;}
 
     /// \brief Read only access to the raw `cl::Buffer` object
     ///
     /// \details
-    /// This is alike the `data` method of C++11 `std::vector` ect. It provides
+    /// This is alike the `data` method of C++11 `std::vector` etc. It provides
     /// direct access to the raw buffer.
     const ::cl::Buffer &data () const {return data_;}
 
@@ -116,12 +146,38 @@ class CLBuffer
             return;
 
         size_ = N;
-        data_ = manager().template create_buffer<value_type>(N);
+        data_ = manager().template create_buffer<value_type>(
+                size_, flag_, host_ptr_);
+    }
+
+    void resize (size_type N, ::cl_mem_flags flag)
+    {
+        if (N == size_ && flag == flag_)
+            return;
+
+        size_ = N;
+        flag_ = flag;
+        data_ = manager().template create_buffer<value_type>(
+                size_, flag_, host_ptr_);
+    }
+
+    void resize (size_type N, ::cl_mem_flags flag, void *host_ptr)
+    {
+        if (N == size_ && flag == flag_ && host_ptr == host_ptr_)
+            return;
+
+        size_ = N;
+        flag_ = flag;
+        host_ptr_ = host_ptr;
+        data_ = manager().template create_buffer<value_type>(
+                size_, flag_, host_ptr_);
     }
 
     private :
 
     size_type size_;
+    ::cl_mem_flags flag_;
+    void *host_ptr_;
     ::cl::Buffer data_;
 }; // class CLBuffer
 

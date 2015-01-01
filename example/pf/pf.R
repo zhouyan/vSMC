@@ -39,7 +39,7 @@ basenames <- c(basenames, paste("pf_matrix", execnames, sep = "_"))
 basenames <- c(basenames, paste("pf_tuple", execnames, sep = "_"))
 basenames <- c(basenames, paste("pf_matrix_mpi", execnames, sep = "_"))
 basenames <- c(basenames, paste("pf_tuple_mpi", execnames, sep = "_"))
-basenames <- c(basenames, "pf_cl")
+basenames <- c(basenames, "pf_cl", "pf_cl_mpi")
 resenames <- c(
     "Multinomial",
     "Residual",

@@ -69,7 +69,7 @@ FUNCTION (ADD_PF_MPI_CHECK pf_state smp)
     ADD_DEPENDENCIES (pf_${state}_mpi-check pf_${state}_mpi_${smp}-check)
 ENDFUNCTION (ADD_PF_MPI_CHECK base smp)
 
-ADD_EXAMPLE (pf ${PF_STATE})
+ADD_SMP_EXAMPLE (pf "${PF_STATE}" "HDF5")
 
 COPY_FILE (pf pf.data)
 COPY_FILE (pf pf.R)
@@ -94,9 +94,8 @@ ENDFOREACH (state ${PF_SMP_STATE})
 
 IF (OPENCL_FOUND AND RANDOM123_FOUND)
     COPY_FILE (pf pf_cl.cl)
-    ADD_EXECUTABLE (pf_cl ${PROJECT_SOURCE_DIR}/src/pf_cl.cpp)
-    TARGET_LINK_LIBRARIES (pf_cl ${VSMC_LINK_LIBRARIES})
-    TARGET_LINK_LIBRARIES (pf_cl ${OpenCL_LINK_LIBRARIES})
+    ADD_VSMC_EXECUTABLE (pf_cl ${PROJECT_SOURCE_DIR}/src/pf_cl.cpp
+        "OCL" "HDF5" "MKL")
     ADD_DEPENDENCIES (pf pf_cl)
     ADD_DEPENDENCIES (example_cl pf_cl)
     ADD_CUSTOM_TARGET (pf_cl-check
@@ -106,6 +105,28 @@ IF (OPENCL_FOUND AND RANDOM123_FOUND)
         COMMENT "Running pf_cl"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
     ADD_DEPENDENCIES (pf-check pf_cl-check)
+
+    IF (VSMC_MPI_FOUND)
+        ADD_VSMC_EXECUTABLE (pf_cl_mpi ${PROJECT_SOURCE_DIR}/src/pf_cl.cpp
+            "OCL" "HDF5" "MKL" "MPI")
+        SET_TARGET_PROPERTIES (pf_cl_mpi PROPERTIES COMPILE_FLAGS
+            "-DVSMC_PF_CL_MPI")
+        ADD_DEPENDENCIES (pf pf_cl_mpi)
+        ADD_DEPENDENCIES (example_cl pf_cl_mpi)
+        ADD_DEPENDENCIES (example_mpi pf_cl_mpi)
+        ADD_CUSTOM_TARGET (pf_cl_mpi-check
+            DEPENDS pf_cl_mpi pf-files
+            COMMAND ${VSMC_MPIEXEC}
+            ${VSMC_MPIEXEC_NUMPROC_FLAG} "2"
+            ${VSMC_MPIEXEC_PREFLAGS}
+            ${PROJECT_BINARY_DIR}/pf_cl_mpi
+            ${VSMC_MPIEXEC_POSTFLAGS}
+            "pf.data" "pf_cl_mpi"
+            "-I ${VSMC_INCLUDE_DIR} -I ${Random123_INCLUDE_DIR}" ">>pf_cl.out"
+            COMMENT "Running pf_cl_mpi"
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+        ADD_DEPENDENCIES (pf-check pf_cl_mpi-check)
+    ENDIF (VSMC_MPI_FOUND)
 ENDIF (OPENCL_FOUND AND RANDOM123_FOUND)
 
 ADD_CUSTOM_TARGET (pf-pdf

@@ -37,12 +37,11 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/cxx11/type_traits.hpp>
 
-#include <string>
-
-#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)               \
+#define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default) \
 template <typename T> struct Outer##Trait;                                   \
                                                                              \
 namespace internal {                                                         \
+                                                                             \
 template <typename T>                                                        \
 struct Has##Outer##Impl                                                      \
 {                                                                            \
@@ -54,12 +53,12 @@ struct Has##Outer##Impl                                                      \
                                                                              \
     public :                                                                 \
                                                                              \
-    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
+    static VSMC_CONSTEXPR const bool value =                                 \
+        sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);                       \
 };                                                                           \
                                                                              \
-template <typename T>                                                        \
-struct Has##Outer :                                                          \
-    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};    \
+template <typename T> struct Has##Outer :                                    \
+public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};        \
                                                                              \
 template <typename T, bool> struct Outer##Dispatch;                          \
                                                                              \
@@ -68,18 +67,20 @@ template <typename T> struct Outer##Dispatch<T, false>                       \
                                                                              \
 template <typename T> struct Outer##Dispatch<T, true>                        \
 {typedef typename T::Inner type;};                                           \
+                                                                             \
 }                                                                            \
                                                                              \
 template <typename T> struct Outer##Trait                                    \
 {                                                                            \
-    enum {value = internal::Has##Outer<T>::value};                           \
+    static VSMC_CONSTEXPR const bool value = internal::Has##Outer<T>::value; \
     typedef typename internal::Outer##Dispatch<T, value>::type type;         \
-}; // VSMC_DEFINE_TYPE_DISPATCH_TRAIT
+};
 
-#define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)      \
+#define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default) \
 template <typename T> struct Outer##Trait;                                   \
                                                                              \
 namespace internal {                                                         \
+                                                                             \
 template <typename T>                                                        \
 struct Has##Outer##Impl                                                      \
 {                                                                            \
@@ -91,12 +92,12 @@ struct Has##Outer##Impl                                                      \
                                                                              \
     public :                                                                 \
                                                                              \
-    enum {value = sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char)};            \
+    static VSMC_CONSTEXPR const bool value =                                 \
+        sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);                       \
 };                                                                           \
                                                                              \
-template <typename T>                                                        \
-struct Has##Outer :                                                          \
-    public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};    \
+template <typename T> struct Has##Outer :                                    \
+public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};        \
                                                                              \
 template <typename T,  bool> struct Outer##Dispatch;                         \
                                                                              \
@@ -105,13 +106,38 @@ template <typename T> struct Outer##Dispatch<T, false>                       \
                                                                              \
 template <typename T> struct Outer##Dispatch<T, true>                        \
 {typedef typename T::template Inner<T> type;};                               \
+                                                                             \
 }                                                                            \
                                                                              \
 template <typename T> struct Outer##Trait                                    \
 {                                                                            \
-    enum {value = internal::Has##Outer<T>::value};                           \
+    static VSMC_CONSTEXPR const bool value = internal::Has##Outer<T>::value; \
     typedef typename internal::Outer##Dispatch<T, value>::type type;         \
-}; // VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT
+};
+
+#define VSMC_DEFINE_METHOD_CHECKER(name, RT, Args) \
+template <typename U>                                                        \
+struct has_##name##_impl_                                                    \
+{                                                                            \
+    private :                                                                \
+                                                                             \
+    struct char2 {char c1; char c2;};                                        \
+    template <typename V, RT (V::*) Args> struct sfinae_;                    \
+    template <typename V, RT (V::*) Args const> struct sfinae_const_;        \
+    template <typename V, RT (*) Args> struct sfinae_static_;                \
+    template <typename V> static char test (sfinae_<V, &V::name> *);         \
+    template <typename V> static char test (sfinae_const_<V, &V::name> *);   \
+    template <typename V> static char test (sfinae_static_<V, &V::name> *);  \
+    template <typename V> static char2 test (...);                           \
+                                                                             \
+    public :                                                                 \
+                                                                             \
+    static VSMC_CONSTEXPR const bool value =                                 \
+        sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char);                       \
+};                                                                           \
+                                                                             \
+template <typename U> struct has_##name##_ :                                 \
+public cxx11::integral_constant<bool, has_##name##_impl_<U>::value> {};
 
 namespace vsmc {
 

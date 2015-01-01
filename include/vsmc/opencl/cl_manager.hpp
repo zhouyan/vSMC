@@ -34,27 +34,35 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/cl_setup.hpp>
+#include <vsmc/opencl/cl_manip.hpp>
+#include <vsmc/opencl/cl_query.hpp>
+#include <vsmc/opencl/internal/cl_wrapper.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(func) \
+#define VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(func) \
     VSMC_RUNTIME_ASSERT((setup()),                                           \
             ("**CLManager::"#func"** CAN ONLY BE CALLED AFTER TRUE "         \
              "**CLManager::setup**"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_PLATFORM \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_PLATFORM \
     VSMC_RUNTIME_WARNING(setup_platform,                                     \
             ("**CLManager::setup** FAILED TO SETUP A PLATFORM"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_CONTEXT \
     VSMC_RUNTIME_WARNING(setup_context,                                      \
             ("**CLManager::setup** FAILED TO SETUP A CONTEXT"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE \
     VSMC_RUNTIME_WARNING(setup_device,                                       \
             ("**CLManager::setup** FAILED TO SETUP A DEVICE"));
 
-#define VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE \
     VSMC_RUNTIME_WARNING(setup_command_queue,                                \
             ("**CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
+
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(func, block, event) \
+    VSMC_RUNTIME_WARNING((block || event != VSMC_NULLPTR),                   \
+            ("**CLManager::"#func" NOT BLOCKING BUT WITH NULL EVENT"))
 
 namespace vsmc {
 
@@ -122,7 +130,7 @@ class CLManager
 {
     public :
 
-    typedef ID id;
+    typedef ID cl_id;
 
     /// \brief Get an instance of the manager singleton
     static CLManager<ID> &instance ()
@@ -131,6 +139,18 @@ class CLManager
 
         return manager;
     }
+
+    /// \brief The minimum OpenCL version supported by all devices in the
+    /// context of this manager
+    ///
+    /// \sa CLQuery::opencl_version
+    int opencl_version () const {return opencl_version_;}
+
+    /// \brief The minimum OpenCL C version supported by all devices in the
+    /// context of this manager
+    ///
+    /// \sa CLQuery::opencl_version
+    int opencl_c_version () const {return opencl_c_version_;}
 
     /// \brief The platform currently being used
     const ::cl::Platform &platform () const {return platform_;}
@@ -141,7 +161,7 @@ class CLManager
     /// \brief The device currently being used
     const ::cl::Device &device () const {return device_;}
 
-    /// \brief The vector of all device that the manager found in the platform
+    /// \brief The vector of all device that is in the context of this manager
     const std::vector< ::cl::Device> &device_vec () const {return device_vec_;}
 
     /// \brief The command queue currently being used
@@ -153,7 +173,7 @@ class CLManager
 
     /// \brief Try to setup the platform, context, device and command queue
     /// using the given device type
-    bool setup (cl_device_type dev)
+    bool setup (::cl_device_type dev)
     {
         setup_ = false;
         setup_cl_manager(dev);
@@ -175,161 +195,118 @@ class CLManager
         device_ = dev;
         device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();
         command_queue_ = cmd;
+        check_opencl_version();
         setup_ = true;
 
         return setup_;
     }
 
-    /// \brief Print build log
-    template <typename CharT, typename Traits>
-    void print_build_log (const ::cl::Program &program,
-            std::basic_ostream<CharT, Traits> &os = std::cout)
-    {
-        cl_build_status status = CL_BUILD_SUCCESS;
-        std::string line(78, '=');
-        line += "\n";
-        std::string log;
-        std::string dname;
-
-        for (std::vector< ::cl::Device>::const_iterator
-                diter = device_vec_.begin();
-                diter != device_vec_.end(); ++diter) {
-            program.getBuildInfo(*diter, CL_PROGRAM_BUILD_STATUS, &status);
-            if (status != CL_BUILD_SUCCESS) {
-                program.getBuildInfo(device_, CL_PROGRAM_BUILD_LOG, &log);
-                diter->getInfo(static_cast<cl_device_info>(CL_DEVICE_NAME),
-                        &dname);
-                os << line << "Build failed for : " << dname << std::endl;
-                os << line << log << std::endl << line << std::endl;
-            }
-        }
-    }
-
     /// \brief Create an OpenCL buffer of a given type and number of elements
     template <typename CLType>
-    ::cl::Buffer create_buffer (std::size_t num) const
+    ::cl::Buffer create_buffer (std::size_t num,
+            ::cl_mem_flags flag = CL_MEM_READ_WRITE,
+            void *host_ptr = VSMC_NULLPTR) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(create_buffer);
 
         if (num == 0)
             return ::cl::Buffer();
 
-        return ::cl::Buffer(context_, CL_MEM_READ_WRITE, sizeof(CLType) * num);
-    }
-
-    /// \brief Create an OpenCL buffer of a given type from a range of elements
-    template <typename CLType, typename InputIter>
-    ::cl::Buffer create_buffer (InputIter first, InputIter last,
-            const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
-    {
-        using std::distance;
-
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(create_buffer);
-
-        std::size_t num = static_cast<std::size_t>(
-                std::abs(distance(first, last)));
-
-        if (num == 0)
-            return ::cl::Buffer();
-
-        ::cl::Buffer buf(create_buffer<CLType>(num));
-        write_buffer<CLType>(buf, num, first, 0, events, event);
-
-        return buf;
+        return ::cl::Buffer(context_, flag, sizeof(CLType) * num, host_ptr);
     }
 
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into an iterator
     template <typename CLType, typename OutputIter>
-    OutputIter read_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void read_buffer (const ::cl::Buffer &buf, std::size_t num,
             OutputIter first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(read_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(read_buffer, block,
+                event);
 
         std::vector<CLType> buffer(num);
-        command_queue_.finish();
-        command_queue_.enqueueReadBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, &buffer[0], events, event);
-
-        for (std::size_t i = 0; i != num; ++i, ++first)
-            *first = buffer[i];
-
-        return first;
+        command_queue_.enqueueReadBuffer(buf, static_cast< ::cl_bool>(block),
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                &buffer[0], events, event);
+        std::copy(buffer.begin(), buffer.end(), first);
     }
 
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into a pointer
     template <typename CLType>
-    CLType *read_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void read_buffer (const ::cl::Buffer &buf, std::size_t num,
             CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(read_buffer);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(read_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(read_buffer, block,
+                event);
 
-        command_queue_.finish();
-        command_queue_.enqueueReadBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, first, events, event);
-
-        return first + num;
+        command_queue_.enqueueReadBuffer(buf, static_cast< ::cl_bool>(block),
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                first, events, event);
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from an iterator
     template <typename CLType, typename InputIter>
-    InputIter write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             InputIter first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(write_buffer, block,
+                event);
 
         std::vector<CLType> buffer(num);
+#if VSMC_HAS_CXX11LIB_ALGORITHM
+        std::copy_n(first, num, &buffer[0]);
+#else
         for (std::size_t i = 0; i != num; ++i, ++first)
             buffer[i] = *first;
-        command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, &buffer[0], events, event);
-
-        return first;
+#endif
+        command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                &buffer[0], events, event);
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from a pointer
     template <typename CLType>
-    const CLType *write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             const CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(write_buffer, block,
+                event);
 
-        command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, const_cast<CLType *>(first),
-                events, event);
-
-        return first + num;
+        command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                const_cast<CLType *>(first), events, event);
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from a pointer
     template <typename CLType>
-    CLType *write_buffer (const ::cl::Buffer &buf, std::size_t num,
+    void write_buffer (const ::cl::Buffer &buf, std::size_t num,
             CLType *first, std::size_t offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(write_buffer, block,
+                event);
 
-        command_queue_.finish();
-        command_queue_.enqueueWriteBuffer(buf, CL_TRUE, offset,
-                sizeof(CLType) * num, first, events, event);
-
-        return first + num;
+        command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
+                sizeof(CLType) * offset, sizeof(CLType) * num,
+                first, events, event);
     }
 
     /// \brief Copy an OpenCL buffer into another of a given type and number of
@@ -339,19 +316,20 @@ class CLManager
             std::size_t num,
             std::size_t src_offset = 0, std::size_t dst_offset = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        VSMC_RUNTIME_ASSERT_CL_MANAGER_SETUP(copy_buffer);
+        VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(copy_buffer);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(copy_buffer, block,
+                event);
 
-        command_queue_.finish();
-        command_queue_.enqueueCopyBuffer(src, dst, src_offset, dst_offset,
-                sizeof(CLType) * num, events, event);
-        command_queue_.finish();
+        ::cl::Event e;
+        ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
+        command_queue_.enqueueCopyBuffer(src, dst,
+                sizeof(CLType) * src_offset, sizeof(CLType) * dst_offset,
+                sizeof(CLType) * num, events, eptr);
+        if (block)
+            eptr->wait();
     }
-
-    /// \brief Create a program given the source within the current context
-    ::cl::Program create_program (const std::string &source) const
-    {return ::cl::Program(context_, source);}
 
     /// \brief Run a given kernel with one dimensional global size and local
     /// size on the current command queue
@@ -370,16 +348,145 @@ class CLManager
     void run_kernel (const ::cl::Kernel &kern, std::size_t N,
             std::size_t local_size = 0,
             const std::vector< ::cl::Event> *events = VSMC_NULLPTR,
-            ::cl::Event *event = VSMC_NULLPTR) const
+            ::cl::Event *event = VSMC_NULLPTR, bool block = true) const
     {
-        command_queue_.finish();
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(run_kernel, block, event);
+
+        ::cl::Event e;
+        ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
         command_queue_.enqueueNDRangeKernel(kern, ::cl::NullRange,
                 get_global_nd_range(N, local_size),
-                get_local_nd_range(local_size), events, event);
-        command_queue_.finish();
+                get_local_nd_range(local_size), events, eptr);
+        if (block)
+            eptr->wait();
+    }
+
+    /// \brief Run the kernel with all local size that are multiples of the
+    /// preferred factor, return the local size that is the fatest.
+    ///
+    /// \param kern The kernel to be profiled
+    /// \param N The global size
+    /// \param func A functor that has the following signature,
+    /// ~~~{.cpp}
+    /// void func (::cl::Kernel &kern)
+    /// ~~~
+    /// It will be applied to `kern` before it is run each time
+    /// \param lmin The minimum local size to be considered. This function will
+    /// consider all local sizes that are a multiple of this value. If `lmin =
+    /// 0` (the default), then the preferred multiplier queried from the device
+    /// is used. If its value is bigger than the allowed maximum local size,
+    /// then it is treated as if it is set to zero.
+    /// \param repeat The number of repeatition of runs. The profiling is done
+    /// by run the kernel once to heat it up, and then repeat runs for this
+    /// given value. The time of the later is measured and compared for each
+    /// considered local size.
+    ///
+    /// \note This function relies on StopWatch to work correctly.
+    template <typename Func>
+    typename cxx11::enable_if<
+    !cxx11::is_same<Func, std::size_t>::value &&
+    !cxx11::is_convertible<Func, std::size_t>::value, std::size_t>::type
+    profile_kernel (::cl::Kernel &kern, std::size_t N,
+            const Func &func, std::size_t lmin = 0, std::size_t repeat = 10)
+    {
+        cl::size_t<3> reqd_size;
+        try {
+            kern.getWorkGroupInfo(device_,
+                    CL_KERNEL_COMPILE_WORK_GROUP_SIZE, &reqd_size);
+        } catch (const ::cl::Error &) {
+            reqd_size[0] = 0;
+        }
+
+        if (reqd_size[0] != 0)
+            return reqd_size[0];
+
+        std::size_t factor;
+        std::size_t lmax;
+        std::size_t mmax;
+        cl_minmax_local_size(kern, device_, factor, lmax, mmax);
+        if (lmax == 0)
+            return 0;
+
+        if (lmin != 0 && lmin <= lmax) {
+            factor = lmin;
+            mmax = lmax / factor;
+            lmax = mmax * factor;
+        }
+
+        if (mmax < 2)
+            return lmax;
+
+        double time = std::numeric_limits<double>::max VSMC_MNE ();
+        std::size_t lsize = lmax;
+        vsmc::StopWatch watch;
+        Func f(func);
+        for (std::size_t m = mmax; m >= 1; --m) {
+            std::size_t l = m * factor;
+            f(kern);
+            run_kernel(kern, N, l);
+            watch.reset();
+            watch.start();
+            for (std::size_t r = 0; r != repeat; ++r) {
+                f(kern);
+                run_kernel(kern, N, l);
+            }
+            watch.stop();
+            if (time > watch.milliseconds()) {
+                time = watch.milliseconds();
+                lsize = l;
+            }
+        }
+
+        return lsize;
+    }
+
+    std::size_t profile_kernel (::cl::Kernel &kern, std::size_t N,
+            std::size_t lmin = 0, std::size_t repeat = 3)
+    {return profile_kernel(kern, N, profile_kernel_func_(), lmin, repeat);}
+
+    /// \brief Create a program given the source within the current context
+    ::cl::Program create_program (const std::string &source) const
+    {return ::cl::Program(context_, source);}
+
+    /// \brief Create a program given a vector of sources within the current
+    /// context
+    ::cl::Program create_program (const std::vector<std::string> &source) const
+    {
+        std::vector<std::pair<const char *, std::size_t> > src(source.size());
+        for (std::size_t i = 0; i != source.size(); ++i)
+            src[i] = std::make_pair(source[i].data(), source[i].size());
+
+        return ::cl::Program(context_, src);
+    }
+
+    /// \brief Create a program given binaries within the current context
+    ///
+    /// \param binary A vector of binaries. The binary buffers are stored in
+    /// `std::string`
+    /// \param devices The devices for which the program shall be created. If
+    /// it is `NULL`, then the program will be created for all devices in the
+    /// current context
+    /// \param status Return the status of loading the binaries for each
+    /// device. It is ignored if `NULL`.
+    ::cl::Program create_program (const std::vector<std::string> &binary,
+            const std::vector< ::cl::Device> *devices,
+            std::vector< ::cl_int> *status = VSMC_NULLPTR) const
+    {
+        std::vector<std::pair<const void *, std::size_t> > bin(binary.size());
+        for (std::size_t i = 0; i != binary.size(); ++i) {
+            bin[i] = std::make_pair(
+                    static_cast<const void *>(binary[i].data()),
+                    binary[i].size());
+        }
+
+        return devices == VSMC_NULLPTR ?
+            ::cl::Program(context_, device_vec_, bin, status):
+            ::cl::Program(context_, *devices, bin, status);
     }
 
     private :
+
+    struct profile_kernel_func_ {void operator() (::cl::Kernel &) const {}};
 
     ::cl::Platform platform_;
     ::cl::Context context_;
@@ -389,6 +496,8 @@ class CLManager
 
     bool setup_;
     CLSetup<ID> &setup_default_;
+    int opencl_version_;
+    int opencl_c_version_;
 
     CLManager () : setup_(false), setup_default_(CLSetup<ID>::instance())
     {setup_cl_manager(setup_default_.device_type());}
@@ -397,12 +506,26 @@ class CLManager
 
     CLManager<ID> &operator= (const CLManager<ID> &);
 
-    void setup_cl_manager (cl_device_type dev_type)
+    void check_opencl_version ()
+    {
+        opencl_version_ = CLQuery::opencl_version(device_);
+        opencl_c_version_ = CLQuery::opencl_c_version(device_);
+        for (std::size_t i = 0; i != device_vec_.size(); ++i) {
+            int ocl = CLQuery::opencl_version(device_vec_[i]);
+            int oclc = CLQuery::opencl_c_version(device_vec_[i]);
+            if (opencl_version_ > ocl)
+                opencl_version_ = ocl;
+            if (opencl_c_version_ > ocl)
+                opencl_c_version_ = oclc;
+        }
+    }
+
+    void setup_cl_manager (::cl_device_type dev_type)
     {
         setup_ = false;
 
         bool setup_platform = platform_filter(dev_type);
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_PLATFORM;
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_PLATFORM;
         if (!setup_platform) return;
 
         bool setup_context = false;
@@ -413,9 +536,9 @@ class CLManager
             platform_.getDevices(dev_type, &dev_pool);
             device_filter(dev_pool, dev_select);
             if (dev_select.size() != 0) {
-                cl_context_properties context_properties[] = {
-                    static_cast<cl_context_properties>(CL_CONTEXT_PLATFORM),
-                    reinterpret_cast<cl_context_properties>(platform_()), 0
+                ::cl_context_properties context_properties[] = {
+                    CL_CONTEXT_PLATFORM,
+                    reinterpret_cast< ::cl_context_properties>(platform_()), 0
                 };
                 context_ = ::cl::Context(dev_select, context_properties);
                 setup_context = true;
@@ -423,9 +546,9 @@ class CLManager
                 device_ = device_vec_[0];
                 setup_device = true;
             }
-        } catch (::cl::Error) {}
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_CONTEXT;
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_DEVICE;
+        } catch (const ::cl::Error &) {}
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_CONTEXT;
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE;
         if (!setup_context) return;
         if (!setup_device) return;
 
@@ -433,19 +556,21 @@ class CLManager
         try {
             command_queue_ = ::cl::CommandQueue(context_, device_, 0);
             setup_command_queue = true;
-        } catch (::cl::Error) {}
-        VSMC_RUNTIME_WARNING_CL_MANAGER_SETUP_COMMAND_QUEUE;
+        } catch (const ::cl::Error &) {}
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE;
         if (!setup_command_queue) return;
+
+        check_opencl_version();
 
         setup_ = true;
     }
 
-    bool platform_filter (cl_device_type dev_type)
+    bool platform_filter (::cl_device_type dev_type)
     {
         std::vector< ::cl::Platform> platform_vec;
         try {
             ::cl::Platform::get(&platform_vec);
-        } catch (::cl::Error) {
+        } catch (const ::cl::Error &) {
             platform_vec.clear();
         }
         if (platform_vec.size() == 0)
@@ -461,8 +586,10 @@ class CLManager
                         platform_ = platform_vec[p];
                         return true;
                     }
-                } catch (::cl::Error) {}
+                } catch (const ::cl::Error &) {}
             }
+
+            return false;
         }
 
         // Using default platform: finding the first that has the device type
@@ -476,7 +603,7 @@ class CLManager
                     platform_ = platform_vec[p];
                     return true;
                 }
-            } catch (::cl::Error) {}
+            } catch (const ::cl::Error &) {}
         }
 
         return false;
@@ -495,7 +622,7 @@ class CLManager
                     dev_pool[d].getInfo(CL_DEVICE_VENDOR, &str);
                     if (!setup_default_.check_device_vendor(str))
                         dev_select_idx[d] = false;
-                } catch (::cl::Error) {
+                } catch (const ::cl::Error &) {
                     dev_select_idx[d] = false;
                 }
             }
@@ -509,7 +636,7 @@ class CLManager
                     dev_pool[d].getInfo(CL_DEVICE_NAME, &str);
                     if (!setup_default_.check_device(str))
                         dev_select_idx[d] = false;
-                } catch (::cl::Error) {
+                } catch (const ::cl::Error &) {
                     dev_select_idx[d] = false;
                 }
             }
@@ -519,7 +646,7 @@ class CLManager
             if (dev_select_idx[d]) {
                 try {
                     dev_select.push_back(dev_pool[d]);
-                } catch (::cl::Error) {}
+                } catch (const ::cl::Error &) {}
             }
         }
     }

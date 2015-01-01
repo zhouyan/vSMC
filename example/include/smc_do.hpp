@@ -68,6 +68,7 @@ inline void smc_do (vsmc::Sampler<T> &sampler, std::ostream &zconst_file,
     watch.stop();
     std::fprintf(stderr, "time.model.order.%u %f\n",
             static_cast<unsigned>(model_num), watch.seconds());
+    std::fflush(stderr);
 
     zconst_file << sampler.iter_size() - 1 << ' ';
     zconst_file << sampler.particle().value().zconst()

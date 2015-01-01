@@ -45,8 +45,8 @@ ADD_CUSTOM_TARGET (rng-pdf)
 ADD_DEPENDENCIES (pdf rng-pdf)
 
 FUNCTION (ADD_RNG_TEST name)
-    ADD_EXECUTABLE (rng_${name} ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
-    TARGET_LINK_LIBRARIES (rng_${name} ${VSMC_LINK_LIBRARIES})
+    ADD_VSMC_EXECUTABLE (rng_${name}
+        ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp ${ARGN})
     ADD_DEPENDENCIES (rng rng_${name})
     ADD_CUSTOM_TARGET (rng_${name}-check
         COMMAND rng_${name} ">>rng.out"
@@ -58,10 +58,8 @@ ENDFUNCTION (ADD_RNG_TEST)
 
 FUNCTION (ADD_U01_TEST name)
     IF (TESTU01_FOUND)
-        ADD_EXECUTABLE (rng_${name}_testu01
-            ${PROJECT_SOURCE_DIR}/src/rng_${name}_testu01.cpp)
-        TARGET_LINK_LIBRARIES (rng_${name}_testu01 ${VSMC_LINK_LIBRARIES})
-        TARGET_LINK_LIBRARIES (rng_${name}_testu01 ${TestU01_LINK_LIBRARIES})
+        ADD_VSMC_EXECUTABLE (rng_${name}_testu01
+            ${PROJECT_SOURCE_DIR}/src/rng_${name}_testu01.cpp "U01" ${ARGN})
         ADD_DEPENDENCIES (rng rng_${name}_testu01)
     ENDIF (TESTU01_FOUND)
 ENDFUNCTION (ADD_U01_TEST)
@@ -85,9 +83,8 @@ IF (AESNI_FOUND)
     ADD_U01_TEST(aes)
     ADD_RNG_TEST(ars)
     ADD_U01_TEST(ars)
-    ADD_EXECUTABLE (rng_aes_validation
+    ADD_VSMC_EXECUTABLE (rng_aes_validation
         ${PROJECT_SOURCE_DIR}/src/rng_aes_validation.cpp)
-    TARGET_LINK_LIBRARIES (rng_aes_validation ${VSMC_LINK_LIBRARIES})
     ADD_DEPENDENCIES (rng rng_aes_validation)
 ENDIF (AESNI_FOUND)
 
@@ -102,31 +99,20 @@ IF (VSMC_RANDOM123_FOUND)
 ENDIF (VSMC_RANDOM123_FOUND)
 
 IF (GSL_FOUND)
-    ADD_RNG_TEST(gsl)
-    TARGET_LINK_LIBRARIES (rng_gsl ${GSL_LINK_LIBRARIES})
-    TARGET_LINK_LIBRARIES (rng_gsl ${GSL_CBLAS_LINK_LIBRARIES})
-    IF (TESTU01_FOUND)
-        ADD_U01_TEST(gsl)
-        TARGET_LINK_LIBRARIES (rng_gsl_testu01 ${GSL_LINK_LIBRARIES})
-        TARGET_LINK_LIBRARIES (rng_gsl_testu01 ${GSL_CBLAS_LINK_LIBRARIES})
-    ENDIF (TESTU01_FOUND)
+    ADD_RNG_TEST(gsl "GSL")
+    ADD_U01_TEST(gsl "GSL")
 ENDIF (GSL_FOUND)
 
 IF (MKL_FOUND)
-    ADD_RNG_TEST(mkl)
-    TARGET_LINK_LIBRARIES (rng_mkl ${MKL_LINK_LIBRARIES})
-    IF (TESTU01_FOUND)
-        ADD_U01_TEST(mkl)
-        TARGET_LINK_LIBRARIES (rng_mkl_testu01 ${MKL_LINK_LIBRARIES})
-    ENDIF (TESTU01_FOUND)
+    ADD_RNG_TEST(mkl "MKL")
+    ADD_U01_TEST(mkl "MKL")
 ENDIF (MKL_FOUND)
 
 IF (OPENCL_FOUND AND RANDOM123_FOUND)
     COPY_FILE (rng rng_cl.cl)
     COPY_FILE (rng rng_cl.R)
-    ADD_EXECUTABLE (rng_cl ${PROJECT_SOURCE_DIR}/src/rng_cl.cpp)
-    TARGET_LINK_LIBRARIES (rng_cl ${VSMC_LINK_LIBRARIES})
-    TARGET_LINK_LIBRARIES (rng_cl ${OpenCL_LINK_LIBRARIES})
+    ADD_VSMC_EXECUTABLE (rng_cl
+        ${PROJECT_SOURCE_DIR}/src/rng_cl.cpp "OCL" "HDF5")
     ADD_DEPENDENCIES (rng rng_cl)
     ADD_DEPENDENCIES (example_cl rng_cl)
     ADD_CUSTOM_TARGET (rng_cl-check

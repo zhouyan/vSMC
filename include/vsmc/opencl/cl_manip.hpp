@@ -59,7 +59,7 @@ inline void cl_minmax_local_size (
             return;
         }
         mmax = lmax / factor;
-    } catch (::cl::Error) {
+    } catch (const ::cl::Error &) {
         factor = lmax = mmax = 0;
     }
 }
@@ -87,7 +87,7 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
     try {
         kern.getWorkGroupInfo(dev,
                 CL_KERNEL_COMPILE_WORK_GROUP_SIZE, &reqd_size);
-    } catch (::cl::Error) {
+    } catch (const ::cl::Error &) {
         reqd_size[0] = 0;
     }
 
@@ -109,10 +109,10 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
         return global_size - N;
     }
 
-    local_size = factor;
+    local_size = lmax;
     global_size = cl_min_global_size(N, local_size);
     std::size_t diff_size = global_size - N;
-    for (std::size_t m = 1; m <= mmax; ++m) {
+    for (std::size_t m = mmax; m >= 1; --m) {
         std::size_t l = m * factor;
         std::size_t g = cl_min_global_size(N, l);
         std::size_t d = g - N;
@@ -126,7 +126,7 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
     return diff_size;
 }
 
-inline void cl_set_kernel_args (::cl::Kernel &, cl_uint) {}
+inline void cl_set_kernel_args (::cl::Kernel &, ::cl_uint) {}
 
 #if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 /// \brief Set OpenCL kernel arguments
@@ -139,7 +139,7 @@ inline void cl_set_kernel_args (::cl::Kernel &, cl_uint) {}
 /// by the compiler's implementation). Otherwise this function supports up to
 /// 16 arguments.
 template <typename Arg1, typename... Args>
-inline void cl_set_kernel_args (::cl::Kernel &kern, cl_uint offset,
+inline void cl_set_kernel_args (::cl::Kernel &kern, ::cl_uint offset,
         const Arg1 &arg1, const Args &... args)
 {
     kern.setArg(offset, arg1);

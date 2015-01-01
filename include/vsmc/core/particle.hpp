@@ -35,7 +35,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/weight_set.hpp>
-#include <vsmc/resample/basic.hpp>
+#include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
@@ -162,19 +162,6 @@ class Particle
 
     /// \brief Read only access to the RNG collection object
     const rng_set_type &rng_set () const {return rng_set_;}
-
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS
-    /// such that each particle has a equal weight
-    void set_equal_weight () {weight_set_.set_equal_weight();}
-
-    /// \brief Read normalized weights through an output iterator
-    template <typename OutputIter>
-    OutputIter read_weight (OutputIter first) const
-    {return weight_set_.read_weight(first);}
-
-    /// \brief Get the ESS of the particle collection based on the current
-    /// weights
-    double ess () const {return weight_set_.ess();}
 
     /// \brief Get an (parallel) RNG stream for a given particle
     rng_type &rng (size_type id) {return rng_set_[id];}

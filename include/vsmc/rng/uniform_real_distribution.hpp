@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
-#define VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP
+#define VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01.hpp>
@@ -249,7 +249,7 @@ class UniformRealDistribution
         a_(a), b_(b)
     {VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a_, b_);}
 
-    UniformRealDistribution (const param_type &param) :
+    explicit UniformRealDistribution (const param_type &param) :
         a_(param.a()), b_(param.b())
     {VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a_, b_);}
 
@@ -291,9 +291,9 @@ class UniformRealDistribution
             const UniformRealDistribution<
             FPType, Left, Right, MinMaxIsConstexpr> &runif2)
     {
-        if (runif1.a_ < runif2.a_ ||runif1.a_ > runif1.a_)
+        if (runif1.a_ < runif2.a_ || runif1.a_ > runif1.a_)
             return false;
-        if (runif1.b_ < runif2.b_ ||runif1.b_ > runif1.b_)
+        if (runif1.b_ < runif2.b_ || runif1.b_ > runif1.b_)
             return false;
         return true;
     }
@@ -352,4 +352,4 @@ class UniformRealDistribution
 
 } // namespace vsmc
 
-#endif // VSMC_UNIFORM_REAL_DISTRIBUTION_HPP
+#endif // VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP

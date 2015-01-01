@@ -77,12 +77,12 @@ class CLSetup
         return true;
     }
 
-    void device_type   (cl_device_type type)     {device_type_   = type;}
+    void device_type   (::cl_device_type type)   {device_type_   = type;}
     void device        (const std::string &name) {device_        = name;}
     void device_vendor (const std::string &name) {device_vendor_ = name;}
     void platform      (const std::string &name) {platform_      = name;}
 
-    cl_device_type device_type       () const {return device_type_;}
+    ::cl_device_type device_type     () const {return device_type_;}
     const std::string &device        () const {return device_;}
     const std::string &device_vendor () const {return device_vendor_;}
     const std::string &platform      () const {return platform_;}
@@ -105,7 +105,7 @@ class CLSetup
 
     private :
 
-    cl_device_type device_type_;
+    ::cl_device_type device_type_;
     std::string default_;
     std::string device_;
     std::string device_vendor_;

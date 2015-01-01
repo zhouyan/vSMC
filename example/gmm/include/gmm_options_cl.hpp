@@ -31,11 +31,13 @@
 
 std::string vSMCIncPath;
 std::string R123IncPath;
-std::string PlatformName;
-std::string DeviceType;
-std::string DeviceVendorName;
+std::vector<std::string> PlatformName;
+std::vector<std::string> DeviceType;
+std::vector<std::string> DeviceVendorName;
+std::vector<std::string> BuildOption;
+std::vector<std::size_t> LocalSize;
 std::size_t FPTypeBits;
-std::size_t ParticleNum;
+std::vector<std::size_t> ParticleNum;
 double Threshold;
 std::size_t IterNum;
 std::string DataFile;
@@ -50,8 +52,9 @@ Config
 .add("data_file",     "Name of data file",  &DataFile,    "gmm.data")
 .add("simple_model",  "Enable simple model with components number",  &SM, 4)
 .add("complex_model", "Enable complex model with components number", &CM, 5)
-.add("vsmc_inc_path",    "vSMC include path",      &vSMCIncPath, ".")
-.add("r123_inc_path",    "Random123 include path", &R123IncPath, ".")
+.add("vsmc_inc_path", "vSMC include path",      &vSMCIncPath, ".")
+.add("r123_inc_path", "Random123 include path", &R123IncPath, ".")
+.add("cl_local_size", "Local size of mcmc moves", &LocalSize, 0)
 .add("cl_platform_name", "Platform name",
         &PlatformName, "vSMCOpenCLDefault")
 .add("cl_device_type", "Device type",
@@ -60,5 +63,7 @@ Config
         &DeviceVendorName, "vSMCOpenCLDefault")
 .add("cl_fp_type_bits",  "Bits of OpenCL fp type (32: float; 64: double)",
         &FPTypeBits, 32)
-.add("threshold",     "Threshold for resampling, only used by SMC",
+.add("cl_build_option", "Additional build options for OpenCL",
+        &BuildOption, "")
+.add("threshold", "Threshold for resampling, only used by SMC",
         &Threshold, 0.5);

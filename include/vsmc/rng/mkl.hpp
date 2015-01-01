@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/mkl_rng.hpp
+// vSMC/include/vsmc/rng/mkl.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,32 +29,30 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_MKL_RNG_HPP
-#define VSMC_RNG_MKL_RNG_HPP
+#ifndef VSMC_RNG_MKL_HPP
+#define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <mkl.h>
 
-#define VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Dist) \
+#define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \
             (cxx11::is_same<FPType, float>::value ||                         \
              cxx11::is_same<FPType, double>::value),                         \
             USE_MKL##Dist##Distribution_##WITH_A_RESULT_TYPE_OTHER_THAN_float_OR_double)
 
-#define VSMC_RUNTIME_ASSERT_RNG_MKL_RNG_OFFSET(offset) \
+#define VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(offset) \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE ()),                          \
             ("**MKLOffsetDynamic** "                                         \
              "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
 
-#ifndef VSMC_RNG_MKL_BUFFER_SIZE
-#define VSMC_RNG_MKL_BUFFER_SIZE 1024
+#ifndef VSMC_RNG_MKL_VSL_BUFFER_SIZE
+#define VSMC_RNG_MKL_VSL_BUFFER_SIZE 1024
 #endif
 
-#define VSMC_DEFINE_RNG_MKL_RNG_BRNG(BRNG) \
-    case BRNG : return #BRNG
+#define VSMC_DEFINE_RNG_MKL_VSL_BRNG(BRNG) case BRNG : return #BRNG
 
-#define VSMC_DEFINE_RNG_MKL_RNG_ERR(STATUS) \
-    case STATUS : return #STATUS
+#define VSMC_DEFINE_RNG_MKL_VSL_ERR(STATUS) case STATUS : return #STATUS
 
 namespace vsmc {
 
@@ -101,77 +99,71 @@ class MKLGammaDistribution;
 template <typename = double, MKL_INT = VSL_RNG_METHOD_BETA_CJA>
 class MKLBetaDistribution;
 
-/// \brief Transfer MKL BRNG index to string
-/// \ingroup MKLRNG
-inline std::string mkl_rng_brng_str (MKL_INT BRNG)
+namespace internal {
+
+inline std::string mkl_vsl_brng_str (MKL_INT BRNG)
 {
     switch (BRNG) {
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_MCG31);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_R250);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_MRG32K3A);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_WH);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_MCG59);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_MT19937);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_MT2203);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_SFMT19937);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_SOBOL);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_NIEDERR);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_IABSTRACT);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_DABSTRACT);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_SABSTRACT);
-        VSMC_DEFINE_RNG_MKL_RNG_BRNG(VSL_BRNG_NONDETERM);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MCG31);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_R250);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MRG32K3A);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_WH);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MCG59);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MT19937);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MT2203);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SFMT19937);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SOBOL);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_NIEDERR);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_IABSTRACT);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_DABSTRACT);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SABSTRACT);
+        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_NONDETERM);
         default : return "Unknown";
     }
 }
 
-/// \brief Transfer MKL error code to string
-/// \ingroup MKLRNG
-inline std::string mkl_rng_error_str (int status)
+inline std::string mkl_vsl_error_str (int status)
 {
     switch (status) {
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_ERROR_OK);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_ERROR_BADARGS);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_ERROR_CPU_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_ERROR_FEATURE_NOT_IMPLEMENTED);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_ERROR_MEM_FAILURE);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_ERROR_NULL_PTR);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_ERROR_UNKNOWN);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BAD_FILE_FORMAT);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BAD_MEM_FORMAT);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BAD_NBITS);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BAD_NSEEDS);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BAD_STREAM);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BAD_UPDATE);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BAD_WORD_SIZE);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BRNG_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BRNG_TABLE_FULL);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_BRNGS_INCOMPATIBLE);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_FILE_CLOSE);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_FILE_OPEN);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_FILE_READ);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_FILE_WRITE);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_INVALID_BRNG_INDEX);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_NO_NUMBERS);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_UNSUPPORTED_FILE_VER);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_RNG_ERR(VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_OK);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_BADARGS);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_CPU_NOT_SUPPORTED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_FEATURE_NOT_IMPLEMENTED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_MEM_FAILURE);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_NULL_PTR);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_UNKNOWN);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_FILE_FORMAT);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_MEM_FORMAT);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_NBITS);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_NSEEDS);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_STREAM);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_UPDATE);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_WORD_SIZE);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNG_NOT_SUPPORTED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNG_TABLE_FULL);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNGS_INCOMPATIBLE);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_CLOSE);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_OPEN);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_READ);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_WRITE);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_INVALID_BRNG_INDEX);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NO_NUMBERS);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_UNSUPPORTED_FILE_VER);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED);
         default : return "UNKNOWN";
     }
 }
 
 #if VSMC_NO_RUNTIME_ASSERT
-/// \brief Check MKL RNG error status
-/// \ingroup MKLRNG
-inline void mkl_rng_error_check (MKL_INT, int, const char *, const char *) {}
+inline void mkl_vsl_error_check (MKL_INT, int, const char *, const char *) {}
 #else
-/// \brief Check MKL RNG error status
-/// \ingroup MKLRNG
-inline void mkl_rng_error_check (MKL_INT BRNG, int status,
+inline void mkl_vsl_error_check (MKL_INT BRNG, int status,
         const char *func, const char *mklf)
 {
     if (status == VSL_ERROR_OK)
@@ -184,13 +176,15 @@ inline void mkl_rng_error_check (MKL_INT BRNG, int status,
     msg += mklf;
 
     msg += "; BRNG: ";
-    msg += mkl_rng_brng_str(BRNG);
+    msg += mkl_vsl_brng_str(BRNG);
     msg += "; Error code: ";
-    msg += mkl_rng_error_str(status);
+    msg += mkl_vsl_error_str(status);
 
     VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
 } // error_check
 #endif
+
+} // namespace vsmc::internal
 
 namespace traits {
 
@@ -264,7 +258,7 @@ struct MKLOffsetDynamic
 
     void offset (MKL_INT n)
     {
-        VSMC_RUNTIME_ASSERT_RNG_MKL_RNG_OFFSET(n);
+        VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(n);
         offset_ = n;
     }
 
@@ -294,7 +288,7 @@ struct MKLSkipAheadVSL
             return;
 
         int status = ::vslSkipAheadStream(stream.ptr(), nskip);
-        mkl_rng_error_check(BRNG, status,
+        internal::mkl_vsl_error_check(BRNG, status,
                 "MKLSkipAheadVSL::skip", "::vslSkipAheadStream");
     }
 
@@ -307,7 +301,7 @@ struct MKLSkipAheadForce
 {
     typedef MKL_INT size_type;
 
-    MKLSkipAheadForce () : buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE) {}
+    MKLSkipAheadForce () : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE) {}
 
     void operator() (MKLStream<BRNG> &stream, size_type nskip)
     {
@@ -331,7 +325,7 @@ struct MKLSkipAheadForce
     }
 
     void buffer_size (MKL_INT size)
-    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_BUFFER_SIZE;}
+    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;}
 
     MKL_INT buffer_size () {return buffer_size_;}
 
@@ -383,11 +377,11 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         int status = VSL_ERROR_OK;
 
         status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), seed_);
-        mkl_rng_error_check(BRNG, status,
+        internal::mkl_vsl_error_check(BRNG, status,
                 "MKLStream::Stream", "::vslNewStream");
 
         status = ::vslGetBrngProperties(BRNG, &property_);
-        mkl_rng_error_check(BRNG, status,
+        internal::mkl_vsl_error_check(BRNG, status,
                 "MKLStream::Stream", "::vslGetBrngProperties");
     }
 
@@ -401,11 +395,11 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         int status = VSL_ERROR_OK;
 
         status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), seed_);
-        mkl_rng_error_check(BRNG, status,
+        internal::mkl_vsl_error_check(BRNG, status,
                 "MKLStream::Stream", "::vslNewStream");
 
         status = ::vslGetBrngProperties(BRNG, &property_);
-        mkl_rng_error_check(BRNG, status,
+        internal::mkl_vsl_error_check(BRNG, status,
                 "MKLStream::Stream", "::vslGetBrngProperties");
     }
 
@@ -414,7 +408,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         seed_(other.seed_), property_(other.property_)
     {
         int status = ::vslCopyStream(&stream_ptr_, other.stream_ptr_);
-        mkl_rng_error_check(BRNG, status,
+        internal::mkl_vsl_error_check(BRNG, status,
                 "MKLStream::Stream", "::vslCopyStream");
     }
 
@@ -423,7 +417,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         if (this != &other) {
             internal::MKLOffset<BRNG>::type::operator=(other);
             int status = ::vslCopyStreamState(stream_ptr_, other.stream_ptr_);
-            mkl_rng_error_check(BRNG, status,
+            internal::mkl_vsl_error_check(BRNG, status,
                     "MKLStream::operator=", "::vslCopyStreamState");
             property_ = other.property_;
         }
@@ -465,21 +459,21 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
         if (stream_ptr_ == VSMC_NULLPTR) {
             status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), s);
-            mkl_rng_error_check(BRNG, status,
+            internal::mkl_vsl_error_check(BRNG, status,
                     "MKLStream::seed", "::vslNewStream");
         } else {
             VSLStreamStatePtr new_stream_ptr;
 
             status = ::vslNewStream(&new_stream_ptr, BRNG + this->offset(), s);
-            mkl_rng_error_check(BRNG, status,
+            internal::mkl_vsl_error_check(BRNG, status,
                     "MKLStream::seed", "::vslNewStream");
 
             status = ::vslCopyStreamState(stream_ptr_, new_stream_ptr);
-            mkl_rng_error_check(BRNG, status,
+            internal::mkl_vsl_error_check(BRNG, status,
                     "MKLStream::seed", "::vslCopyStreamState");
 
             status = ::vslDeleteStream(&new_stream_ptr);
-            mkl_rng_error_check(BRNG, status,
+            internal::mkl_vsl_error_check(BRNG, status,
                     "MKLStream::seed", "::vslDeleteStream");
         }
 
@@ -517,7 +511,7 @@ class MKLEngine
 
     explicit MKLEngine (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
             MKL_INT offset = 0) :
-        stream_(s, offset), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE),
+        stream_(s, offset), buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
         index_(buffer_size_) {}
 
     template <typename SeedSeq>
@@ -525,7 +519,7 @@ class MKLEngine
             typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
             MKL_UINT, MKLEngine<BRNG, ResultType>
             >::value>::type * = VSMC_NULLPTR) :
-        stream_(seq), buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE),
+        stream_(seq), buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
         index_(buffer_size_) {}
 
     void seed (MKL_UINT s) {stream_.seed(s);}
@@ -576,7 +570,7 @@ class MKLEngine
 
     /// \brief Set the buffer size, zero or negative value restore the default
     void buffer_size (MKL_INT size)
-    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_BUFFER_SIZE;}
+    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;}
 
     MKL_INT buffer_size () {return buffer_size_;}
 
@@ -637,7 +631,7 @@ class MKLDistribution
     typedef ResultType result_type;
 
     MKLDistribution () :
-        buffer_size_(VSMC_RNG_MKL_BUFFER_SIZE), index_(buffer_size_) {}
+        buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE), index_(buffer_size_) {}
 
     template <MKL_INT BRNG>
     result_type operator() (MKLStream<BRNG> &stream)
@@ -660,7 +654,7 @@ class MKLDistribution
 
     /// \brief Set the buffer size, zero or negative value restore the default
     void buffer_size (MKL_INT size)
-    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_BUFFER_SIZE;}
+    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;}
 
     MKL_INT buffer_size () const {return buffer_size_;}
 
@@ -674,10 +668,12 @@ class MKLDistribution
 
         std::string dist_name(name);
         dist_name = "MKL" + dist_name + "Distribution::generate";
-        std::string mkl_name(mkl_name_prefix(static_cast<result_type>(0)));
-        mkl_name += "Rng";
-        mkl_name += name;
-        mkl_rng_error_check(BRNG, status, dist_name.c_str(), mkl_name.c_str());
+        std::string mkl_vsl_name(mkl_vsl_name_prefix(
+                    static_cast<result_type>(0)));
+        mkl_vsl_name += "Rng";
+        mkl_vsl_name += name;
+        internal::mkl_vsl_error_check(BRNG, status,
+                dist_name.c_str(), mkl_vsl_name.c_str());
     }
 
     private :
@@ -686,11 +682,11 @@ class MKLDistribution
     MKL_INT buffer_size_;
     MKL_INT index_;
 
-    std::string mkl_name_prefix (MKL_INT)            {return "vi";}
-    std::string mkl_name_prefix (unsigned)           {return "vi";}
-    std::string mkl_name_prefix (unsigned MKL_INT64) {return "vi";}
-    std::string mkl_name_prefix (float)              {return "vs";}
-    std::string mkl_name_prefix (double)             {return "vd";}
+    std::string mkl_vsl_name_prefix (MKL_INT)            {return "vi";}
+    std::string mkl_vsl_name_prefix (unsigned)           {return "vi";}
+    std::string mkl_vsl_name_prefix (unsigned MKL_INT64) {return "vi";}
+    std::string mkl_vsl_name_prefix (float)              {return "vs";}
+    std::string mkl_vsl_name_prefix (double)             {return "vd";}
 }; // class MKLDistribution
 
 /// \brief MKL uniform bits distribution (32-bits)
@@ -931,7 +927,7 @@ class MKLGaussianDistribution :
 
     explicit MKLGaussianDistribution (result_type mean = 0,
             result_type sd = 1) : mean_(mean), sd_(sd)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gaussian);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gaussian);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -964,7 +960,7 @@ class MKLExponentialDistribution :
 
     explicit MKLExponentialDistribution (result_type displacement = 0,
             result_type scale = 1) : disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Exponential);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Exponential);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -997,7 +993,7 @@ class MKLLaplaceDistribution :
 
     explicit MKLLaplaceDistribution (result_type mean = 0,
             result_type scale = 1) : mean_(mean), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Laplace);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Laplace);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -1031,7 +1027,7 @@ class MKLWeibullDistribution :
     explicit MKLWeibullDistribution (result_type shape = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape_(shape), disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Weibull);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Weibull);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -1065,7 +1061,7 @@ class MKLCauchyDistribution :
 
     explicit MKLCauchyDistribution (result_type displacement = 0,
             result_type scale = 1) : disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Cauchy);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Cauchy);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -1098,7 +1094,7 @@ class MKLRayleighDistribution :
 
     explicit MKLRayleighDistribution (result_type displacement = 0,
             result_type scale = 1) : disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Rayleigh);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Rayleigh);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -1133,7 +1129,7 @@ class MKLLognormalDistribution :
             result_type mean = 0, result_type sd = 1,
             result_type displacement = 0, result_type scale = 1) :
         mean_(mean), sd_(sd), disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Lognormal);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Lognormal);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -1168,7 +1164,7 @@ class MKLGumbelDistribution :
 
     explicit MKLGumbelDistribution (result_type displacement = 0,
             result_type scale = 1) : disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gumbel);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gumbel);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -1202,7 +1198,7 @@ class MKLGammaDistribution :
     explicit MKLGammaDistribution (result_type shape = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape_(shape), disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Gamma);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gamma);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -1238,7 +1234,7 @@ class MKLBetaDistribution :
             result_type shape1 = 1, result_type shape2 = 1,
             result_type displacement = 0, result_type scale = 1) :
         shape1_(shape1), shape2_(shape2), disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_RNG_DISTRIBUTION_FPTYPE(FPType, Beta);}
+    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Beta);}
 
     template <MKL_INT BRNG>
     void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -1263,4 +1259,4 @@ class MKLBetaDistribution :
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_MKL_RNG_HPP
+#endif // VSMC_RNG_MKL_HPP

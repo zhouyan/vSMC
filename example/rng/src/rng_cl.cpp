@@ -90,9 +90,9 @@ int main (int argc, char **argv)
     output_log.open("rng_cl.log");
     try {
         program.build(manager.device_vec(), opt.c_str());
-        manager.print_build_log(program, output_log);
+        vsmc::CLQuery::program_build_log(program, output_log);
     } catch (...) {
-        manager.print_build_log(program, output_log);
+        vsmc::CLQuery::program_build_log(program, output_log);
         output_log.close();
         output_log.clear();
         throw;

@@ -33,6 +33,7 @@
 #define VSMC_SMP_BACKEND_STD_HPP
 
 #include <vsmc/smp/backend_base.hpp>
+#include <vsmc/smp/internal/parallel_work.hpp>
 #include <vsmc/thread/thread.hpp>
 
 namespace vsmc {
@@ -56,28 +57,9 @@ class StateSTD : public BaseState
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(STD);
 
         parallel_for(BlockedRange<size_type>(0, N),
-                copy_work_<IntType>(this, copy_from));
+                internal::ParallelCopyParticle<
+                StateSTD<BaseState>, IntType>(this, copy_from));
     }
-
-    private :
-
-    template <typename IntType>
-    struct copy_work_
-    {
-        copy_work_ (StateSTD<BaseState> *state, const IntType *copy_from) :
-            state_(state), copy_from_(copy_from) {}
-
-        void operator() (const BlockedRange<size_type> &range) const
-        {
-            for (size_type to = range.begin(); to != range.end(); ++to)
-                state_->copy_particle(copy_from_[to], to);
-        }
-
-        private :
-
-        StateSTD<BaseState> *const state_;
-        const IntType *const copy_from_;
-    }; // class copy_work_
 }; // class StateSTD
 
 /// \brief Sampler<T>::init_type subtype using C++11 concurrency
@@ -93,42 +75,17 @@ class InitializeSTD : public InitializeBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        std::size_t accept = parallel_accumulate(BlockedRange<size_type>(0, N),
-                work_(this, &particle), static_cast<std::size_t>(0));
+        internal::ParallelInitializeState<T, InitializeSTD<T, Derived> > work(
+                this, &particle);
+        parallel_reduce(BlockedRange<size_type>(0, N), work);
         this->post_processor(particle);
 
-        return accept;
+        return work.accept();
     }
 
     protected :
 
     VSMC_DEFINE_SMP_IMPL_COPY(STD, Initialize)
-
-    private :
-
-    struct work_
-    {
-        typedef typename Particle<T>::size_type size_type;
-
-        work_ (InitializeSTD<T, Derived> *init,
-                Particle<T> *particle) :
-            init_(init), particle_(particle) {}
-
-        void operator() (const BlockedRange<size_type> &range,
-                std::size_t &accept) const
-        {
-            Particle<T> *const part = particle_;
-            std::size_t acc = 0;
-            for (size_type i = range.begin(); i != range.end(); ++i)
-                acc += init_->initialize_state(SingleParticle<T>(i, part));
-            accept = acc;
-        }
-
-        private :
-
-        InitializeSTD<T, Derived> *const init_;
-        Particle<T> *const particle_;
-    }; // class work_
 }; // class InitializeSTD
 
 /// \brief Sampler<T>::move_type subtype using C++11 concurrency
@@ -143,44 +100,17 @@ class MoveSTD : public MoveBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        std::size_t accept = parallel_accumulate(BlockedRange<size_type>(0, N),
-                work_(this, iter, &particle), static_cast<std::size_t>(0));
+        internal::ParallelMoveState<T, MoveSTD<T, Derived> > work(
+                this, iter, &particle);
+        parallel_reduce(BlockedRange<size_type>(0, N), work);
         this->post_processor(iter, particle);
 
-        return accept;
+        return work.accept();
     }
 
     protected :
 
     VSMC_DEFINE_SMP_IMPL_COPY(STD, Move)
-
-    private :
-
-    struct work_
-    {
-        typedef typename Particle<T>::size_type size_type;
-
-        work_ (MoveSTD<T, Derived> *move, std::size_t iter,
-                Particle<T> *particle):
-            move_(move), iter_(iter), particle_(particle) {}
-
-        void operator() (const BlockedRange<size_type> &range,
-                std::size_t &accept) const
-        {
-            Particle<T> *const part = particle_;
-            const std::size_t iter = iter_;
-            std::size_t acc = 0;
-            for (size_type i = range.begin(); i != range.end(); ++i)
-                acc += move_->move_state(iter, SingleParticle<T>(i, part));
-            accept = acc;
-        }
-
-        private :
-
-        MoveSTD<T, Derived> *const move_;
-        const std::size_t iter_;
-        Particle<T> *const particle_;
-    }; // class work_
 }; // class MoveSTD
 
 /// \brief Monitor<T>::eval_type subtype using C++11 concurrency
@@ -197,47 +127,14 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         parallel_for(BlockedRange<size_type>(0, N),
-                work_(this, iter, dim, &particle, res));
+                internal::ParallelMonitorState<T, MonitorEvalSTD<T, Derived> >(
+                    this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
 
     protected :
 
     VSMC_DEFINE_SMP_IMPL_COPY(STD, MonitorEval)
-
-    private :
-
-    struct work_
-    {
-        typedef typename Particle<T>::size_type size_type;
-
-        work_ (MonitorEvalSTD<T, Derived> *monitor,
-                std::size_t iter, std::size_t dim,
-                const Particle<T> *particle, double *res) :
-            monitor_(monitor), iter_(iter), dim_(dim), particle_(particle),
-            res_(res) {}
-
-        void operator() (const BlockedRange<size_type> &range) const
-        {
-            const Particle<T> *const part = particle_;
-            const std::size_t iter = iter_;
-            const std::size_t dim = dim_;
-            double *const res = res_;
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                double *const r = res + i * dim;
-                monitor_->monitor_state(iter, dim,
-                        ConstSingleParticle<T>(i, part), r);
-            }
-        }
-
-        private :
-
-        MonitorEvalSTD<T, Derived> *const monitor_;
-        const std::size_t iter_;
-        const std::size_t dim_;
-        const Particle<T> *const particle_;
-        double *const res_;
-    }; // class work_
 }; // class MonitorEvalSTD
 
 /// \brief Path<T>::eval_type subtype using C++11 concurrency
@@ -254,7 +151,8 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         parallel_for(BlockedRange<size_type>(0, N),
-                work_(this, iter, &particle, res));
+                internal::ParallelPathState<T, PathEvalSTD<T, Derived> >(
+                    this, iter, &particle, res));
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);
@@ -263,35 +161,6 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
     protected :
 
     VSMC_DEFINE_SMP_IMPL_COPY(STD, PathEval)
-
-    private :
-
-    struct work_
-    {
-        typedef typename Particle<T>::size_type size_type;
-
-        work_ (PathEvalSTD<T, Derived> *path, std::size_t iter,
-                const Particle<T> *particle, double *res) :
-            path_(path), iter_(iter), particle_(particle), res_(res) {}
-
-        void operator() (const BlockedRange<size_type> &range) const
-        {
-            const Particle<T> *const part = particle_;
-            const std::size_t iter = iter_;
-            double *const res = res_;
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                res[i] = path_->path_state(iter,
-                        ConstSingleParticle<T>(i, part));
-            }
-        }
-
-        private :
-
-        PathEvalSTD<T, Derived> *const path_;
-        const std::size_t iter_;
-        const Particle<T> *const particle_;
-        double *const res_;
-    }; // class work_
 }; // PathEvalSTD
 
 } // namespace vsmc

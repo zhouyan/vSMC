@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/opencl/internal/device.h
+// vSMC/cmake/FindCXX11LibInitializerList.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,19 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_OPENCL_DEVICE_H
-#define VSMC_OPENCL_DEVICE_H
+#include <initializer_list>
+#include <vector>
 
-__kernel
-void copy (__global copy_state_struct *state, __global size_type *copy_from)
+int main ()
 {
-    size_type to = get_global_id(0);
+    std::initializer_list<double> list = {1.0, 2.0, 3.0, 4.0};
+    std::vector<double> vec1(list);
+    std::vector<double> vec2(list.begin(), list.end());
 
-    if (to >= Size)
-        return;
-
-    size_type from = copy_from[to];
-    state[to] = state[from];
+    return 0;
 }
-
-#endif // VSMC_OPENCL_DEVICE_H

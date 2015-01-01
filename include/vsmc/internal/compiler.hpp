@@ -32,6 +32,28 @@
 #ifndef VSMC_INTERNAL_COMPILER_HPP
 #define VSMC_INTERNAL_COMPILER_HPP
 
+// Compiler feature check macros
+
+#ifndef __has_attribute
+#define __has_attribute(x) 0
+#endif
+
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
+
+#ifndef __has_cpp_attribute
+#define __has_cpp_attribute(x) 0
+#endif
+
+#ifndef __has_extension
+#define __has_extension(x) 0
+#endif
+
+#ifndef __has_feature
+#define __has_feature(x) 0
+#endif
+
 #include <cstddef>
 
 #if defined(__APPLE__) || defined(__MACOSX)
@@ -256,6 +278,10 @@
 #define VSMC_HAS_CXX11LIB_FUTURE 0
 #endif
 
+#ifndef VSMC_HAS_CXX11LIB_INITIALIZER_LIST
+#define VSMC_HAS_CXX11LIB_INITIALIZER_LIST 0
+#endif
+
 #ifndef VSMC_HAS_CXX11LIB_MUTEX
 #define VSMC_HAS_CXX11LIB_MUTEX 0
 #endif
@@ -405,6 +431,14 @@
 #define VSMC_HAS_SSE2 1
 #else
 #define VSMC_HAS_SSE2 VSMC_HAS_SSE3
+#endif
+#endif
+
+#ifndef VSMC_HAS_X86
+#if defined(__x86__) || (__x86_64__)
+#define VSMC_HAS_X86 1
+#else
+#define VSMC_HAS_X86 VSMC_HAS_SSE2
 #endif
 #endif
 

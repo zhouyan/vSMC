@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/pf/include/pf_smp_main.hpp
+// vSMC/include/vsmc/opencl/cl_configure.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,14 +29,39 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-try {
+#ifndef VSMC_OPENCL_CL_CONFIGURE_HPP
+#define VSMC_OPENCL_CL_CONFIGURE_HPP
 
-} catch (vsmc::RuntimeAssert &err) {
-    std::fprintf(stderr, "%s\n", err.what());
-    throw err;
-} catch (std::exception &err) {
-    std::fprintf(stderr, "Uncaught expections: %s\n", err.what());
-    throw err;
-}
+#include <vsmc/internal/common.hpp>
+#include <vsmc/opencl/cl_manip.hpp>
+#include <vsmc/opencl/internal/cl_wrapper.hpp>
 
-return 0;
+namespace vsmc {
+
+/// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
+/// \ingroup OpenCL
+class CLConfigure
+{
+    public :
+
+    CLConfigure () : local_size_(0) {}
+
+    std::size_t local_size () const {return local_size_;}
+
+    void local_size (std::size_t new_size) {local_size_ = new_size;}
+
+    void local_size (std::size_t N,
+            const ::cl::Kernel &kern, const ::cl::Device &dev)
+    {
+        std::size_t global_size;
+        cl_preferred_work_size(N, kern, dev, global_size, local_size_);
+    }
+
+    private :
+
+    std::size_t local_size_;
+}; // class CLConfigure
+
+} // namespace vsmc
+
+#endif // VSMC_OPENCL_CL_CONFIGURE_HPP

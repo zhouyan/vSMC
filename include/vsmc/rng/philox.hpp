@@ -539,6 +539,14 @@ typedef PhiloxEngine<uint64_t, 2> Philox2x64;
 /// \ingroup R123RNG
 typedef PhiloxEngine<uint64_t, 4> Philox4x64;
 
+/// \brief The default 32-bits Philox engine
+/// \ingroup R123RNG
+typedef Philox4x32 Philox;
+
+/// \brief The default 64-bits Philox engine
+/// \ingroup R123RNG
+typedef Philox4x64 Philox_64;
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_PHILOX_HPP

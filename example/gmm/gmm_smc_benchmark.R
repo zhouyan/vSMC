@@ -1,5 +1,5 @@
 # ============================================================================
-#  vSMC/example/benchmark.R
+#  vSMC/example/gmm/gmm_smc_benchmark.R
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
@@ -35,64 +35,44 @@ suppressPackageStartupMessages(library(scales))
 
 ##############################################################################
 
-Process.Args <- function (arg.name, var.name)
+Process.Args <- function (arg.name, var.name, default)
 {
     args <- commandArgs()
     idx <- grep(arg.name, args)
     if (length(idx) > 0) {
         .GlobalEnv[[var.name]] <- max(
             c(1, as.integer(args[idx[length(idx)] + 1])))
+    } else {
+        .GlobalEnv[[var.name]] <- default
     }
 }
 
-Process.Args("--nrepeat", "N.Repeat")
-Process.Args("--pnum_smp_lo", "Particle.Number.SMP.Lo")
-Process.Args("--pnum_smp_hi", "Particle.Number.SMP.Hi")
-Process.Args("--pnum_ocl_lo", "Particle.Number.OCL.Lo")
-Process.Args("--pnum_ocl_hi", "Particle.Number.OCL.Hi")
+Process.Args("--nrepeat", "N.Repeat", 3)
+Process.Args("--pnum_smp_lo", "Particle.Number.SMP.Lo", 3)
+Process.Args("--pnum_smp_hi", "Particle.Number.SMP.Hi", 14)
+Process.Args("--pnum_ocl_lo", "Particle.Number.OCL.Lo", 9)
+Process.Args("--pnum_ocl_hi", "Particle.Number.OCL.Hi", 20)
 
-if (!exists("N.Repeat")) N.Repeat <- 3
-if (!exists("Particle.Number.SMP.Lo")) Particle.Number.SMP.Lo <- 3
-if (!exists("Particle.Number.SMP.Hi")) Particle.Number.SMP.Hi <- 14
-if (!exists("Particle.Number.OCL.Lo")) Particle.Number.OCL.Lo <- 9
-if (!exists("Particle.Number.OCL.Hi")) Particle.Number.OCL.Hi <- 20
+Particle.Number.SMP <- 2^(Particle.Number.SMP.Lo:Particle.Number.SMP.Hi)
+Particle.Number.OCL <- 2^(Particle.Number.OCL.Lo:Particle.Number.OCL.Hi)
 
-if (!exists("Particle.Number.SMP")) Particle.Number.SMP <-
-    2^(Particle.Number.SMP.Lo:Particle.Number.SMP.Hi)
-if (!exists("Particle.Number.OCL")) Particle.Number.OCL <-
-    2^(Particle.Number.OCL.Lo:Particle.Number.OCL.Hi)
+if (!exists("ExePath")) {
+    if (.Platform$OS.type == "unix") ExePath <- "./" else ExePath <- "./Release/"
+}
+if (!exists("ExeSuffix")) {
+    if (.Platform$OS.type == "unix") ExeSuffix <- "" else ExeSuffix <- ".exe"
+}
 
-if (!exists("EXECUTABLE_PATH")) {
-    if (.Platform$OS.type == "unix") EXECUTABLE_PATH <- "."
-    else EXECUTABLE_PATH <- "./Release"
-}
-if (!exists("EXECUTABLE_SUFFIX")) {
-    if (.Platform$OS.type == "unix") EXECUTABLE_SUFFIX <- ""
-    else EXECUTABLE_SUFFIX <- ".exe"
-}
-if (!exists("EXECUTABLE_BASE")) {
-    EXECUTABLE_BASE <- ""
-    if (file.exists(paste(
-                EXECUTABLE_PATH, "/gmm_smc_seq",
-                EXECUTABLE_SUFFIX, sep = ""))) {
-        EXECUTABLE_BASE <- "gmm"
-    }
-    if (file.exists(paste(
-                EXECUTABLE_PATH, "/node_smc_seq",
-                EXECUTABLE_SUFFIX, sep = ""))) {
-        EXECUTABLE_BASE <- "node"
-    }
-    if (file.exists(paste(
-                EXECUTABLE_PATH, "/pet_smc_seq",
-                EXECUTABLE_SUFFIX, sep = ""))) {
-        EXECUTABLE_BASE <- "pet"
-    }
-}
+if (.Platform$OS.type == "unix") Redirect <- " 2>&1 " else Redirect <- " "
+
 if (!exists("Force.Run.Benchmark")) Force.Run.Benchmark <- FALSE
+
+if (!exists("Line.Width")) Line.Width <- 80
 
 ##############################################################################
 
 SMP.Name <- c(
+    seq  = "Sequential",
     tbb  = "Intel TBB",
     gcd  = "Apple GCD",
     ppl  = "Microsoft PPL",
@@ -101,104 +81,106 @@ SMP.Name <- c(
     std  = "C++11 <thread>")
 
 OCL.Name <- c(
-    amd.cpu       = "AMD CPU",
-    amd.gpu.32    = "AMD GPU (32)",
-    amd.gpu.64    = "AMD GPU (64)",
-    apple.cpu     = "Apple CPU",
-    apple.gpu.32  = "Apple GPU (32)",
-    apple.gpu.64  = "Apple GPU (64)",
-    apple.igpu.32 = "Apple iGPU (32)",
-    apple.igpu.64 = "Apple iGPU (64)",
-    intel.cpu     = "Intel CPU",
-    intel.gpu.32  = "Intel GPU (32)",
-    intel.gpu.64  = "Intel GPU (64)",
-    nvidia.gpu.32 = "NVIDIA GPU (32)",
-    nvidia.gpu.64 = "NVIDIA GPU (64)")
+    amd.cpu    = "AMD CPU",
+    amd.gpu    = "AMD GPU",
+    apple.cpu  = "Apple CPU",
+    apple.agpu = "Apple AMD GPU",
+    apple.igpu = "Apple Intel GPU",
+    apple.ngpu = "Apple NVIDIA GPU",
+    intel.cpu  = "Intel CPU",
+    intel.gpu  = "Intel GPU",
+    nvidia.gpu = "NVIDIA GPU")
 
-OCL.Platform.Name <- c(
-    amd.cpu       = "AMD",
-    amd.gpu.32    = "AMD",
-    amd.gpu.64    = "AMD",
-    apple.cpu     = "Apple",
-    apple.gpu.32  = "Apple",
-    apple.gpu.64  = "Apple",
-    apple.igpu.32 = "Apple",
-    apple.igpu.64 = "Apple",
-    intel.cpu     = "Intel",
-    intel.gpu.32  = "Intel",
-    intel.gpu.64  = "Intel",
-    nvidia.gpu.32 = "NVIDIA",
-    nvidia.gpu.64 = "NVIDIA")
+Bench.Name <- c(SMP.Name, OCL.Name)
 
-OCL.Device.Name <- c(
-    amd.cpu       = "CPU",
-    amd.gpu.32    = "GPU",
-    amd.gpu.64    = "GPU",
-    apple.cpu     = "CPU",
-    apple.gpu.32  = "GPU",
-    apple.gpu.64  = "GPU",
-    apple.igpu.32 = "GPU",
-    apple.igpu.64 = "GPU",
-    intel.cpu     = "CPU",
-    intel.gpu.32  = "GPU",
-    intel.gpu.64  = "GPU",
-    nvidia.gpu.32 = "GPU",
-    nvidia.gpu.64 = "GPU")
+##############################################################################
 
-OCL.Bits.Name <- c(
-    amd.cpu       = "64",
-    amd.gpu.32    = "32",
-    amd.gpu.64    = "64",
-    apple.cpu     = "64",
-    apple.gpu.32  = "32",
-    apple.gpu.64  = "64",
-    apple.igpu.32 = "32",
-    apple.igpu.64 = "64",
-    intel.cpu     = "64",
-    intel.gpu.32  = "32",
-    intel.gpu.64  = "64",
-    nvidia.gpu.32 = "32",
-    nvidia.gpu.64 = "64")
+SMC.Option.String <- function (particle_num)
+{paste(" --particle_num", particle_num, "--prior2 100 --complex_model 0 ")}
 
-OCL.Vendor.Name <- c(
-    amd.cpu       = "Intel",
-    amd.gpu.32    = "AMD",
-    amd.gpu.64    = "AMD",
-    apple.cpu     = "Intel",
-    apple.gpu.32  = "NVIDIA",
-    apple.gpu.64  = "NVIDIA",
-    apple.igpu.32 = "Intel",
-    apple.igpu.64 = "Intel",
-    intel.cpu     = "Intel",
-    intel.gpu.32  = "Intel",
-    intel.gpu.64  = "Intel",
-    nvidia.gpu.32 = "NVIDIA",
-    nvidia.gpu.64 = "NVIDIA")
+OCL.Option.String <- function (
+    platform_name = "vSMCOpenCLDefault",
+    device_type   = "vSMCOpenCLDefault",
+    device_vendor = "vSMCOpenCLDefault",
+    fp_type_bits  = 64)
+{
+    paste(
+        " ",
+        "--cl_platform_name", platform_name,
+        "--cl_device_type",   device_type,
+        "--cl_device_vendor", device_vendor,
+        "--cl_fp_type_bits",  fp_type_bits,
+        "--cl_build_option -cl-fast-relaxed-math ")
+}
+
+##############################################################################
+
+OCL.Option <- c(
+    amd.cpu    = OCL.Option.String("AMD",    "CPU"),
+    apple.cpu  = OCL.Option.String("Apple",  "CPU"),
+    intel.cpu  = OCL.Option.String("Intel",  "CPU"),
+    amd.gpu    = OCL.Option.String("AMD",    "GPU", "AMD",    32),
+    apple.agpu = OCL.Option.String("Apple",  "GPU", "AMD",    32),
+    apple.igpu = OCL.Option.String("Apple",  "GPU", "Intel",  32),
+    apple.ngpu = OCL.Option.String("Apple",  "GPU", "NVIDIA", 32),
+    intel.gpu  = OCL.Option.String("Intel",  "GPU", "Intel",  32),
+    nvidia.gpu = OCL.Option.String("NVIDIA", "GPU", "NVIDIA", 32))
+
+##############################################################################
 
 if (!exists("Bench.SMP")) {
     Bench.SMP <- character()
     for (exe in names(SMP.Name)) {
-        if (file.exists(paste(
-                    EXECUTABLE_PATH, "/",
-                    EXECUTABLE_BASE, "_smc_", exe,
-                    EXECUTABLE_SUFFIX, sep = ""))) {
+        if (file.exists(paste(ExePath, "gmm_smc_", exe, ExeSuffix, sep = ""))) {
             Bench.SMP <- c(Bench.SMP, exe)
         }
     }
 }
 
+##############################################################################
+
+OCL.TryRun <- function (exe)
+{
+    output <- system(paste(ExePath, "gmm_smc_cl", ExeSuffix,
+            SMC.Option.String(1024), OCL.Option[exe], "--cl_local_size 1",
+            Redirect, sep = ""),
+        intern = TRUE, ignore.stdout = TRUE)
+
+    timed <- FALSE
+    error <- FALSE
+    for (line in output) {
+        if (length(grep("time.model.order", line)) > 0) timed <- TRUE
+        if (length(grep("Runtime Error",    line)) > 0) error <- TRUE
+        if (length(grep("Failed to setup",  line)) > 0) error <- TRUE
+    }
+
+    timed && !error
+}
+
 if (!exists("Bench.OCL")) {
-    if (file.exists(paste(
-                EXECUTABLE_PATH, "/",
-                EXECUTABLE_BASE, "_smc_cl",
-                EXECUTABLE_SUFFIX, sep = ""))) {
-        if (length(grep("darwin", version$os)) > 0) Bench.OCL <-
-            c("tbb", "apple.igpu.32", "apple.gpu.32")
-        else Bench.OCL <- c("tbb")
-    } else {
-        Bench.OCL <- character()
+    Bench.OCL <- character()
+    for (exe in Bench.SMP) {
+        if (exe != "seq") {
+            Bench.OCL <- c(Bench.OCL, exe)
+            break
+        }
+    }
+    if (file.exists(paste(ExePath, "gmm_smc_cl", ExeSuffix, sep = ""))) {
+        for (exe in names(OCL.Name)) {
+            if (OCL.TryRun(exe)) Bench.OCL <- c(Bench.OCL, exe)
+        }
     }
 }
+
+##############################################################################
+
+cat(rep("=", Line.Width), "\n", sep = "")
+cat("Benchmark setting\n")
+cat(rep("-", Line.Width), "\n", sep = "")
+for (exe in Bench.SMP) cat(Bench.Name[exe], "\n", sep = "")
+cat(rep("-", Line.Width), "\n", sep = "")
+for (exe in Bench.OCL) cat(Bench.Name[exe], "\n", sep = "")
+cat(rep("=", Line.Width), "\n", sep = "")
 
 ##############################################################################
 
@@ -210,10 +192,11 @@ Scale.Y.2 <- scale_y_continuous(breaks = 2^(-10:10),
     labels = math_format(2^.x)(-10:10), trans = log2_trans())
 
 Lab <- xlab("Number of particles")
-Theme <- theme_bw(base_size = 24)
-Theme <- Theme + theme(
+Theme <- theme_bw(base_size = 18) + theme(
     legend.position = "top", legend.direction = "horizontal")
 Guides <- guides(color = guide_legend(ncol = 6))
+Width  <- 25.6
+Height <- 14.4
 
 ##############################################################################
 
@@ -262,7 +245,7 @@ Create.List <- function(particle.number, implementation,
     Speedup.Plot <- Speedup.Plot + geom_line() + geom_point()
     Speedup.Plot <- Speedup.Plot + Aes + Scale.X + Scale.Y.2 + Lab
     Speedup.Plot <- Speedup.Plot + ylab("Speedup")
-    Speedup.Plot <- Speedup.Plot + Theme
+    Speedup.Plot <- Speedup.Plot + Theme + Guides
 
     list(Perf.Data = Perf.Data,
         Time.Plot = Time.Plot, Speedup.Plot = Speedup.Plot)
@@ -309,15 +292,12 @@ Print.Benchmark.List <- function (benchmark.list)
 
 Run.Benchmark <- function (particle.number, name, implementation, nrepeat = 1)
 {
-    cat(rep("=", 63), "\n", sep = "")
+    cat(rep("=", Line.Width), "\n", sep = "")
     cat(toupper(name), " Benchmark\n", sep = "")
     name <- tolower(name)
 
-    if (.Platform$OS.type == "unix") redirect <- "2>&1"
-    else redirect <- ""
-
     for (r in 1:nrepeat) {
-        cat(rep("-", 63), "\n", sep = "")
+        cat(rep("-", Line.Width), "\n", sep = "")
         cat("Run number: ", r, "\n", sep = "")
 
         sink(paste("time", name, "running", r, sep = "."))
@@ -331,7 +311,7 @@ Run.Benchmark <- function (particle.number, name, implementation, nrepeat = 1)
         Time <- numeric()
         for (n in particle.number) {
             cat("Number of particles: ",
-            "\t2^", log2(n), "\t(", n, ") ... ", sep = "")
+                "\t2^", log2(n), "\t(", n, ") ... ", sep = "")
             Time.Step <- 0
             for (exe in implementation) {
                 if (!is.na(SMP.Name[exe])) {
@@ -339,11 +319,9 @@ Run.Benchmark <- function (particle.number, name, implementation, nrepeat = 1)
                     cat("\"", SMP.Name[exe], "\"\n", sep = "")
                     sink()
                     Time <- c(Time, system.time(time.tmp <- system(paste(
-                                    EXECUTABLE_PATH, "/",
-                                    EXECUTABLE_BASE, "_smc_", exe,
-                                    " --particle_num ", n,
-                                    " --prior2 100 --complex_model 0",
-                                    " ", redirect, sep = ""),
+                                    ExePath, "gmm_smc_", exe, ExeSuffix,
+                                    SMC.Option.String(n),
+                                    Redirect, sep = ""),
                                 intern = TRUE, ignore.stdout = TRUE))[3])
                 }
 
@@ -352,19 +330,9 @@ Run.Benchmark <- function (particle.number, name, implementation, nrepeat = 1)
                     cat("\"", OCL.Name[exe], "\"\n", sep = "")
                     sink()
                     Time <- c(Time, system.time(time.tmp <- system(paste(
-                                    EXECUTABLE_PATH, "/",
-                                    EXECUTABLE_BASE, "_smc_cl",
-                                    " --particle_num ", n,
-                                    " --prior2 100 --complex_model 0",
-                                    " --cl_platform_name ",
-                                    OCL.Platform.Name[exe],
-                                    " --cl_device_type ",
-                                    OCL.Device.Name[exe],
-                                    " --cl_device_vendor ",
-                                    OCL.Vendor.Name[exe],
-                                    " --cl_fp_type_bits ",
-                                    OCL.Bits.Name[exe],
-                                    " ", redirect, sep = ""),
+                                    ExePath, "gmm_smc_cl", ExeSuffix,
+                                    SMC.Option.String(n), OCL.Option[exe],
+                                    Redirect, sep = ""),
                                 intern = TRUE, ignore.stdout = TRUE))[3])
                 }
 
@@ -460,9 +428,9 @@ Combine.Benchmark.List <- function (lists)
 File.Name <- function (base, func, suffix, extra = "")
 {
     if (extra == "") {
-        paste("bench-", base, "-", func, ".", suffix, sep = "")
+        paste("gmm_smc_", base, "_", func, ".", suffix, sep = "")
     } else {
-        paste("bench-", base, "-", func, "-", extra, ".", suffix, sep = "")
+        paste("gmm_smc_", base, "_", func, "_", extra, ".", suffix, sep = "")
     }
 }
 
@@ -477,12 +445,12 @@ Save.List <- function (benchmark.list, suffix = "")
         save(smp.list, file = File.Name("smp", "perf", "RData", suffix))
 
         pdf(File.Name("smp", "time", "pdf", suffix),
-            width = 28.8, height = 18)
+            width = Width, height = Height)
         print(smp.list$Time.Plot)
         GC <- dev.off()
 
         pdf(File.Name("smp", "speedup", "pdf", suffix),
-            width = 28.8, height = 18)
+            width = Width, height = Height)
         print(smp.list$Speedup.Plot)
         GC <- dev.off()
     }
@@ -491,12 +459,12 @@ Save.List <- function (benchmark.list, suffix = "")
         save(ocl.list, file = File.Name("ocl", "perf", "RData", suffix))
 
         pdf(File.Name("ocl", "time", "pdf", suffix),
-            width = 28.8, height = 18)
+            width = Width, height = Height)
         print(ocl.list$Time.Plot)
         GC <- dev.off()
 
         pdf(File.Name("ocl", "speedup", "pdf", suffix),
-            width = 28.8, height = 18)
+            width = Width, height = Height)
         print(ocl.list$Speedup.Plot)
         GC <- dev.off()
     }
@@ -529,11 +497,11 @@ if (!interactive() || Force.Run.Benchmark) {
     Save.List(Benchmark.Running.List, "running")
     Save.List(Benchmark.Elapsed.List, "elapsed")
 
-    pdf("Benchmark.Running.pdf", width = 28.8, height = 18)
+    pdf("gmm_smc_benchmark_running.pdf", width = Width, height = Height)
     Print.Benchmark.List(Benchmark.Running.List)
     GC <- dev.off()
 
-    pdf("Benchmark.Elapsed.pdf", width = 28.8, height = 18)
+    pdf("gmm_smc_benchmark_elapsed.pdf", width = Width, height = Height)
     Print.Benchmark.List(Benchmark.Elapsed.List)
     GC <- dev.off()
 

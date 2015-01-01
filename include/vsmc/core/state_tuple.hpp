@@ -173,19 +173,17 @@ class StateTupleBase
     static VSMC_CONSTEXPR std::size_t dim () {return dim_;}
 
     template <std::size_t Pos, typename OutputIter>
-    OutputIter read_state (Position<Pos>, OutputIter first) const
+    void read_state (Position<Pos>, OutputIter first) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
                 *first = sptr->state(i, Position<Pos>());
-
-        return first;
     }
 
     template <std::size_t Pos, typename OutputIter>
-    OutputIter read_state (OutputIter first) const
-    {return read_state(Position<Pos>(), first);}
+    void read_state (OutputIter first) const
+    {read_state(Position<Pos>(), first);}
 
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print (
@@ -199,12 +197,6 @@ class StateTupleBase
 
         return os;
     }
-
-    template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os,
-            const StateTupleBase<Order, T, Types...> &stuple)
-    {return stuple.print(os);}
 
     protected :
 
@@ -234,6 +226,13 @@ class StateTupleBase
         os << sptr->state(id, Position<dim_ - 1>()) << '\n';
     }
 }; // class StateTupleBase
+
+template <typename CharT, typename Traits,
+    MatrixOrder Order, typename T, typename... Types>
+inline std::basic_ostream<CharT, Traits> &operator<< (
+        std::basic_ostream<CharT, Traits> &os,
+        const StateTupleBase<Order, T, Types...> &stuple)
+{return stuple.print(os);}
 
 /// \brief Particle::value_type subtype
 /// \ingroup Core
@@ -285,6 +284,9 @@ class StateTuple<RowMajor, T, Types...> :
             copy_particle(copy_from[to], to);
     }
 
+    void copy_particle (size_type from, size_type to)
+    {state_[to] = state_[from];}
+
     state_pack_type state_pack (size_type id) const
     {return state_pack_type(state_[id]);}
 
@@ -295,11 +297,6 @@ class StateTuple<RowMajor, T, Types...> :
     void state_unpack (size_type id, state_pack_type &&pack)
     {state_[id] = cxx11::move(pack.data());}
 #endif
-
-    protected :
-
-    void copy_particle (size_type from, size_type to)
-    {state_[to] = state_[from];}
 
     private :
 
@@ -384,6 +381,14 @@ class StateTuple<ColMajor, T, Types...> :
             copy_particle(copy_from[to], to);
     }
 
+    void copy_particle (size_type from, size_type to)
+    {
+        if (from == to)
+            return;
+
+        copy_particle(from, to, Position<0>());
+    }
+
     state_pack_type state_pack (size_type id) const
     {
         state_pack_type pack;
@@ -399,16 +404,6 @@ class StateTuple<ColMajor, T, Types...> :
     void state_unpack (size_type id, state_pack_type &&pack)
     {unpack_particle(id, cxx11::move(pack), Position<0>());}
 #endif
-
-    protected :
-
-    void copy_particle (size_type from, size_type to)
-    {
-        if (from == to)
-            return;
-
-        copy_particle(from, to, Position<0>());
-    }
 
     private :
 

@@ -92,6 +92,12 @@ class Array
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
+    template <typename Archive>
+    void serialize (Archive &ar, const unsigned) {ar & data_;}
+
+    template <typename Archive>
+    void serialize (Archive &ar, const unsigned) const {ar & data_;}
+
     reference at (size_type pos)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ARRAY_RANGE(pos, N);

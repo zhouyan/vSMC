@@ -32,15 +32,15 @@
 PROJECT (vSMCExample-paper CXX)
 
 IF (VSMC_MPI_FOUND)
-    ADD_EXAMPLE (paper gmm; gmm_mpi)
+    SET (PAPER_GMM gmm; gmm_mpi)
 ELSE (VSMC_MPI_FOUND)
-    ADD_EXAMPLE (paper gmm)
+    SET (PAPER_GMM gmm)
 ENDIF (VSMC_MPI_FOUND)
+ADD_SMP_EXAMPLE (paper "${PAPER_GMM}")
 
 COPY_FILE (paper paper_pf.data)
 COPY_FILE (paper paper_pf.R)
 COPY_FILE (paper paper_gmm.data)
 
-ADD_EXECUTABLE (paper_pf ${PROJECT_SOURCE_DIR}/src/paper_pf.cpp)
-TARGET_LINK_LIBRARIES (paper_pf ${VSMC_LINK_LIBRARIES})
+ADD_VSMC_EXECUTABLE (paper_pf ${PROJECT_SOURCE_DIR}/src/paper_pf.cpp "MKL")
 ADD_DEPENDENCIES (paper paper_pf)

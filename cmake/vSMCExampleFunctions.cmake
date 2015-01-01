@@ -29,6 +29,85 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
+FUNCTION (ADD_VSMC_EXECUTABLE exe src)
+    ADD_EXECUTABLE(${exe} ${src})
+
+    IF (DEFINED VSMC_LINK_LIBRARIES)
+        TARGET_LINK_LIBRARIES (${exe} ${VSMC_LINK_LIBRARIES})
+    ENDIF (DEFINED VSMC_LINK_LIBRARIES)
+
+    IF (LINUX_LIBRT)
+        TARGET_LINK_LIBRARIES (${exe} ${LINUX_LIBRT})
+    ENDIF (LINUX_LIBRT)
+
+    GET_TARGET_PROPERTY (compile_flags ${exe} COMPILE_FLAGS)
+    IF (NOT compile_flags)
+        UNSET (compile_flags)
+    ENDIF (NOT compile_flags)
+
+    GET_TARGET_PROPERTY (link_flags ${exe} LINK_FLAGS)
+    IF (NOT link_flags)
+        UNSET (link_flags)
+    ENDIF (NOT link_flags)
+
+    FOREACH (arg ${ARGN})
+        IF (${arg} STREQUAL "MPI" AND VSMC_MPI_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${VSMC_MPI_LINK_LIBRARIES})
+            SET (compile_flags "${compile_flags} ${MPI_CXX_COMPILE_FLAGS}")
+            SET (link_flags "${link_flags} ${MPI_CXX_LINK_FLAGS}")
+        ENDIF (${arg} STREQUAL "MPI" AND VSMC_MPI_FOUND)
+
+        IF (${arg} STREQUAL "OCL" AND OPENCL_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${OpenCL_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "OCL" AND OPENCL_FOUND)
+
+        IF (${arg} STREQUAL "GSL" AND GSL_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${GSL_LINK_LIBRARIES})
+            TARGET_LINK_LIBRARIES (${exe} ${GSL_CBLAS_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "GSL" AND GSL_FOUND)
+
+        IF (${arg} STREQUAL "HDF5" AND HDF5_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${HDF5_LIBRARIES})
+        ENDIF (${arg} STREQUAL "HDF5" AND HDF5_FOUND)
+
+        IF (${arg} STREQUAL "U01" AND TESTU01_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${TestU01_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "U01" AND TESTU01_FOUND)
+
+        IF (${arg} STREQUAL "GCD" AND GCD_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${GCD_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "GCD" AND GCD_FOUND)
+
+        IF (${arg} STREQUAL "TBB" AND TBB_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${TBB_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "TBB" AND TBB_FOUND)
+
+        IF (${arg} STREQUAL "STD" AND THREAD_FOUND)
+            TARGET_LINK_LIBRARIES (${exe} ${Thread_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "STD" AND THREAD_FOUND)
+
+        IF (${arg} STREQUAL "CILK" AND CILK_FOUND)
+            SET (compile_flags "${compile_flags} ${Cilk_CXX_FLAGS}")
+            TARGET_LINK_LIBRARIES (${exe} ${Cilk_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "CILK" AND CILK_FOUND)
+
+        IF (${arg} STREQUAL "OMP" AND VSMC_OPENMP_FOUND)
+            SET (compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
+            TARGET_LINK_LIBRARIES (${exe} ${OpenMP_LINK_LIBRARIES})
+        ENDIF (${arg} STREQUAL "OMP" AND VSMC_OPENMP_FOUND)
+    ENDFOREACH (arg ${ARGN})
+
+    IF (compile_flags)
+        SET_TARGET_PROPERTIES (${exe} PROPERTIES COMPILE_FLAGS
+            "${compile_flags}")
+    ENDIF (compile_flags)
+
+    IF (link_flags)
+        SET_TARGET_PROPERTIES (${exe} PROPERTIES LINK_FLAGS
+            "${link_flags}")
+    ENDIF (link_flags)
+ENDFUNCTION (ADD_VSMC_EXECUTABLE)
+
 FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
     STRING (TOUPPER "${smp_name}" SMP)
     STRING (TOLOWER "${smp_name}" smp)
@@ -42,43 +121,33 @@ FUNCTION (ADD_SMP_EXECUTABLE base header source smp_name)
         ${PROJECT_SOURCE_DIR}/src/${source}.cpp
         ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp)
 
-    ADD_EXECUTABLE (${source}_${smp}
-        ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp)
-
-    IF (${smp} STREQUAL "omp")
-        SET_TARGET_PROPERTIES (${source}_${smp} PROPERTIES COMPILE_FLAGS
-            "${OpenMP_CXX_FLAGS}")
-        TARGET_LINK_LIBRARIES (${source}_${smp} ${OpenMP_LINK_LIBRARIES})
-    ELSEIF (${smp} STREQUAL "std")
-        TARGET_LINK_LIBRARIES (${source}_${smp} ${CMAKE_THREAD_LIBS_INIT})
-    ELSEIF (${smp} STREQUAL "tbb")
-        TARGET_LINK_LIBRARIES (${source}_${smp} ${TBB_LINK_LIBRARIES})
-    ENDIF (${smp} STREQUAL "omp")
-
     IF (${source} MATCHES "_mpi")
-        TARGET_LINK_LIBRARIES (${source}_${smp} ${VSMC_MPI_LINK_LIBRARIES})
+        ADD_VSMC_EXECUTABLE (${source}_${smp}
+            ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp
+            "${SMP}" "MKL" "RT" "MPI" ${ARGN})
         ADD_DEPENDENCIES (example_mpi ${source}_${smp})
+    ELSE (${source} MATCHES "_mpi" ${ARGN})
+        ADD_VSMC_EXECUTABLE (${source}_${smp}
+            ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp
+            "${SMP}" "MKL" "RT" ${ARGN})
     ENDIF (${source} MATCHES "_mpi")
-
-    TARGET_LINK_LIBRARIES (${source}_${smp} ${VSMC_LINK_LIBRARIES})
-
     ADD_DEPENDENCIES (${base} ${source}_${smp})
     ADD_DEPENDENCIES (example_${smp} ${source}_${smp})
 ENDFUNCTION (ADD_SMP_EXECUTABLE)
 
-FUNCTION (ADD_EXAMPLE base)
+FUNCTION (ADD_SMP_EXAMPLE base algs)
     ADD_CUSTOM_TARGET (${base})
     ADD_CUSTOM_TARGET (${base}-files)
     ADD_DEPENDENCIES (${base} ${base}-files)
     ADD_DEPENDENCIES (example ${base})
-    FOREACH (alg ${ARGN})
+    FOREACH (alg ${algs})
         ADD_CUSTOM_TARGET (${base}_${alg})
         FOREACH (smp ${SMP_EXECUTABLES})
-            ADD_SMP_EXECUTABLE (${base} ${base} ${base}_${alg} ${smp})
+            ADD_SMP_EXECUTABLE (${base} ${base} ${base}_${alg} ${smp} ${ARGN})
             ADD_DEPENDENCIES (${base}_${alg} ${base}_${alg}_${smp})
         ENDFOREACH (smp)
     ENDFOREACH (alg)
-ENDFUNCTION (ADD_EXAMPLE)
+ENDFUNCTION (ADD_SMP_EXAMPLE)
 
 FUNCTION (COPY_FILE basename filename)
     IF (UNIX)
@@ -109,60 +178,18 @@ FUNCTION (COPY_FILE_OPTIONAL basename filename)
     ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/${filename})
 ENDFUNCTION (COPY_FILE_OPTIONAL)
 
-FUNCTION (VSMC_HEADER basepath cond)
+FUNCTION (ADD_HEADER_EXECUTABLE basepath cond)
     IF (${cond})
         STRING (REPLACE "/" "_" basename "${basepath}")
         IF (EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
-            ADD_EXECUTABLE (${basename}_hpp
-                ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
+            ADD_VSMC_EXECUTABLE (${basename}_hpp
+                ${PROJECT_SOURCE_DIR}/src/${basename}.cpp ${ARGN})
         ELSE (EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
             CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/src/vsmc.cpp
                 ${PROJECT_BINARY_DIR}/src/${basename}.cpp)
-            ADD_EXECUTABLE (${basename}_hpp
-                ${PROJECT_BINARY_DIR}/src/${basename}.cpp)
+            ADD_VSMC_EXECUTABLE (${basename}_hpp
+                ${PROJECT_BINARY_DIR}/src/${basename}.cpp ${ARGN})
         ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
-
-        FOREACH (arg ${ARGN})
-            IF (${arg} STREQUAL "MPI")
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${VSMC_MPI_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "MPI")
-            IF (${arg} STREQUAL "OPENCL")
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${OpenCL_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "OPENCL")
-            IF (${arg} STREQUAL "GSL")
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${GSL_LINK_LIBRARIES})
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${GSL_CBLAS_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "GSL")
-            IF (${arg} STREQUAL "MKL")
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${MKL_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "MKL")
-            IF (${arg} STREQUAL "GCD")
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${GCD_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "GCD")
-            IF (${arg} STREQUAL "OPENMP")
-                SET_TARGET_PROPERTIES (${basename}_hpp
-                    PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}")
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${OpenMP_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "OPENMP")
-            IF (${arg} STREQUAL "TBB")
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${TBB_LINK_LIBRARIES})
-            ENDIF (${arg} STREQUAL "TBB")
-            IF (${arg} STREQUAL "THREAD")
-                TARGET_LINK_LIBRARIES (${basename}_hpp
-                    ${CMAKE_THREAD_LIBS_INIT})
-            ENDIF (${arg} STREQUAL "THREAD")
-        ENDFOREACH (arg ${ARGN})
-
-        TARGET_LINK_LIBRARIES (${basename}_hpp ${VSMC_LINK_LIBRARIES})
-
         ADD_DEPENDENCIES (vsmc ${basename}_hpp)
     ENDIF (${cond})
-ENDFUNCTION (VSMC_HEADER)
+ENDFUNCTION (ADD_HEADER_EXECUTABLE)

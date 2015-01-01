@@ -33,6 +33,7 @@
 #define VSMC_CORE_WEIGHT_SET_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/rng/discrete_distribution.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
 namespace vsmc {
@@ -46,7 +47,7 @@ class WeightSet
     typedef std::size_t size_type;
 
     explicit WeightSet (size_type N) :
-        size_(N), ess_(N), weight_(N), log_weight_(N) {}
+        size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N) {}
 
 #if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
     WeightSet (const WeightSet &) = default;
@@ -158,41 +159,37 @@ class WeightSet
 
     /// \brief Read normalized weights through an output iterator for the
     /// purpose of resampling
-    virtual double *read_resample_weight (double *first) const
-    {return read_weight(first);}
+    virtual void read_resample_weight (double *first) const
+    {read_weight(first);}
 
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
-    OutputIter read_weight (OutputIter first) const
-    {return std::copy(weight_.begin(), weight_.end(), first);}
+    void read_weight (OutputIter first) const
+    {std::copy(weight_.begin(), weight_.end(), first);}
 
     /// \brief Read normalized weights through a random access iterator with
     /// (possible non-uniform stride)
     template <typename RandomIter>
-    RandomIter read_weight (RandomIter first, int stride) const
+    void read_weight (RandomIter first, int stride) const
     {
         const double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             *first = wptr[i];
-
-        return first;
     }
 
     /// \brief Read unnormalized logarithm weights through an output iterator
     template <typename OutputIter>
-    OutputIter read_log_weight (OutputIter first) const
-    {return std::copy(log_weight_.begin(), log_weight_.end(), first);}
+    void read_log_weight (OutputIter first) const
+    {std::copy(log_weight_.begin(), log_weight_.end(), first);}
 
     /// \brief Read unnormalized logarithm weights through a random access
     /// iterator with (possible non-uniform stride)
     template <typename RandomIter>
-    RandomIter read_log_weight (RandomIter first, int stride) const
+    void read_log_weight (RandomIter first, int stride) const
     {
         const double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             *first = lwptr[i];
-
-        return first;
     }
 
     /// \brief Get the normalized weight of the id'th particle
@@ -205,7 +202,7 @@ class WeightSet
     /// such that each particle has a equal weight
     void set_equal_weight ()
     {
-        ess_ = resample_size();
+        ess_ = static_cast<double>(resample_size());
         std::fill_n(&weight_[0], size_, 1 / ess_);
         std::memset(&log_weight_[0], 0, sizeof(double) * size_);
     }
@@ -230,14 +227,12 @@ class WeightSet
     /// changing the (possible unnormalized) weights directly through a random
     /// access iterator with (possible non-uniform) stride
     template <typename RandomIter>
-    RandomIter set_weight (RandomIter first, int stride)
+    void set_weight (RandomIter first, int stride)
     {
         double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             wptr[i] = *first;
         post_set_weight();
-
-        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -257,14 +252,12 @@ class WeightSet
     /// weights through a random access iterator with (possible non-uniform)
     /// stride
     template <typename RandomIter>
-    RandomIter mul_weight (RandomIter first, int stride)
+    void mul_weight (RandomIter first, int stride)
     {
         double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             wptr[i] *= *first;
         post_set_weight();
-
-        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -287,14 +280,12 @@ class WeightSet
     /// changing the (possible unnormalized) logarithm weights directly through
     /// a random access iterator with (possible non-uniform) stride
     template <typename RandomIter>
-    RandomIter set_log_weight (RandomIter first, int stride)
+    void set_log_weight (RandomIter first, int stride)
     {
         double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             lwptr[i] = *first;
         post_set_log_weight();
-
-        return first;
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -314,32 +305,18 @@ class WeightSet
     /// unormalized) logarithm incremental weights through a ranodm access
     /// iterator with (possible non-uniform) stride
     template <typename RandomIter>
-    RandomIter add_log_weight (RandomIter first, int stride)
+    void add_log_weight (RandomIter first, int stride)
     {
         double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, first += stride)
             lwptr[i] += *first;
         post_set_log_weight();
-
-        return first;
     }
 
     /// \brief Draw a sample according to the weights
     template <typename URNG>
     size_type draw (URNG &eng) const
-    {
-        cxx11::uniform_real_distribution<double> runif(0, 1);
-        double u = runif(eng);
-        size_type i = 0;
-        const double *w = &weight_[0];
-        double sum = w[0];
-        while (sum < u) {
-            ++i;
-            sum += w[i];
-        }
-
-        return i;
-    }
+    {return draw_(eng, weight_.begin(), weight_.end(), true);}
 
     /// \brief Read only access to the resampling weights
     virtual const double *resample_weight_data () const {return &weight_[0];}
@@ -443,6 +420,7 @@ class WeightSet
     double ess_;
     std::vector<double, AlignedAllocator<double> > weight_;
     std::vector<double, AlignedAllocator<double> > log_weight_;
+    DiscreteDistribution<size_type> draw_;
 
     void post_set_log_weight ()
     {
@@ -494,19 +472,19 @@ class WeightSetNull
 
     size_type resample_size () const {return 0;}
 
-    double *read_resample_weight (double *) const {return VSMC_NULLPTR;}
+    void read_resample_weight (double *) const {}
 
     template <typename OutputIter>
-    OutputIter read_weight (OutputIter first) const {return first;}
+    void read_weight (OutputIter) const {}
 
     template <typename RandomIter>
-    RandomIter read_weight (RandomIter first, int) const {return first;}
+    void read_weight (RandomIter, int) const {}
 
     template <typename OutputIter>
-    OutputIter read_log_weight (OutputIter first) const {return first;}
+    void read_log_weight (OutputIter) const {}
 
     template <typename RandomIter>
-    RandomIter read_log_weight (RandomIter first, int) const {return first;}
+    void read_log_weight (RandomIter, int) const {}
 
     double weight (size_type) const {return 1;}
 
