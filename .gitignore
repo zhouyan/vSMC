@@ -3,4 +3,16 @@
 /example/pet/pet_conv.data
 /example/pet/pet_real.data
 /include/cl.hpp
+/tutorial/tutorial.aux
+/tutorial/tutorial.bbl
+/tutorial/tutorial.bcf
+/tutorial/tutorial.blg
+/tutorial/tutorial.fdb_latexmk
+/tutorial/tutorial.fls
+/tutorial/tutorial.log
+/tutorial/tutorial.out
+/tutorial/tutorial.pyg
+/tutorial/tutorial.run.xml
+/tutorial/tutorial.synctex.gz*
+/tutorial/.minted-tutorial
 /user_options.cmake
