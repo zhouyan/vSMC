@@ -1,4 +1,4 @@
-\def\CitePkg#1#2{\csgdef{c#1}{\csuse{#1}\xspace\cite{#2}}}
+\def\CitePkg#1#2{\csgdef{c#1}{\href{#2}{\csuse{#1}}\footnote{\url{#2}}}}
 
 \UseAbbr{ais}
 \UseAbbr{cpu}
@@ -22,7 +22,7 @@
 \UseAbbr[\bugs][\sffamily]{BUGS}
 \UseAbbr[\cilk][\sffamily]{Cilk Plus}
 \UseAbbr[\cmake][\sffamily]{CMake}
-\UseAbbr[\clang][\sffamily]{Clang}
+\UseAbbr[\clang][\sffamily]{clang}
 \UseAbbr[\cppne][\sffamily]{C++98}
 \UseAbbr[\cppoo][\sffamily]{C++11}
 \UseAbbr[\cpp][\sffamily]{C++}
@@ -44,29 +44,23 @@
 \UseAbbr[\tbb][\sffamily]{Intel Threading Building Blocks}
 \UseAbbr[\vsmc][\sffamily]{vSMC}
 
-\CitePkg{aocl}{aocl}
-\CitePkg{biips}{BiiPS}
-\CitePkg{blitz}{Blitz}
-\CitePkg{boost}{Boost}
-\CitePkg{bugs}{bugs}
-\CitePkg{cilk}{cilk}
-\CitePkg{cmake}{cmake}
-\CitePkg{clang}{clang}
-\CitePkg{doxygen}{doxygen}
-\CitePkg{gcc}{gcc}
-\CitePkg{git}{git}
-\CitePkg{icpc}{icpc}
-\CitePkg{iocl}{iocl}
-\CitePkg{libbi}{Murray2013bi}
-\CitePkg{libcpp}{libcpp}
-\CitePkg{mpi}{mpi}
-\CitePkg{msvc}{msvc}
-\CitePkg{opencl}{opencl}
-\CitePkg{openmp}{openmp}
-\CitePkg{random}{random}
-\CitePkg{rlang}{rlang}
-\CitePkg{smctc}{smctc}
-\CitePkg{tbb}{tbb}
+\CitePkg{aocl}{http://developer.amd.com/tools-and-sdks/opencl-zone/}
+\CitePkg{blitz}{http://blitz.sourceforge.net}
+\CitePkg{boost}{http://www.boost.org}
+\CitePkg{cilk}{https://www.cilkplus.org}
+\CitePkg{cmake}{http://www.cmake.org}
+\CitePkg{clang}{http://clang.llvm.org}
+\CitePkg{doxygen}{http://www.stack.nl/~dimitri/doxygen/}
+\CitePkg{gcc}{https://gcc.gnu.org}
+\CitePkg{git}{http://git-scm.com}
+\CitePkg{icpc}{https://software.intel.com/en-us/c-compilers}
+\CitePkg{iocl}{https://software.intel.com/en-us/intel-opencl}
+\CitePkg{libcpp}{http://libcxx.llvm.org}
+\CitePkg{mpi}{http://www.mpi-forum.org}
+\CitePkg{msvc}{https://msdn.microsoft.com/en-us/vstudio/hh386302.aspx}
+\CitePkg{opencl}{https://www.khronos.org/opencl/}
+\CitePkg{openmp}{http://openmp.org/wp/}
+\CitePkg{tbb}{https://www.threadingbuildingblocks.org}
 
 \UseMathCal{D}
 \UseMathCal{G}
@@ -81,12 +75,11 @@
 \def\xobs{x_{\mathrm{obs}}}
 \def\yobs{y_{\mathrm{obs}}}
 
-\def\STATESKIP{\hskip.68cm}
+\def\STATESKIP{\hskip2em}
 
+% Minted
+\usemintedstyle{solarizedlight}
 \newminted{cpp}{}
 \newmintinline{cpp}{}
-
 \newminted{sh}{}
 \newmintinline{sh}{}
-
-\usemintedstyle{solarizedlight}

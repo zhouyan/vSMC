@@ -3,6 +3,7 @@
 /example/pet/pet_conv.data
 /example/pet/pet_real.data
 /include/cl.hpp
+/tutorial/.minted-tutorial
 /tutorial/tutorial.aux
 /tutorial/tutorial.bbl
 /tutorial/tutorial.bcf
@@ -14,5 +15,5 @@
 /tutorial/tutorial.pyg
 /tutorial/tutorial.run.xml
 /tutorial/tutorial.synctex.gz*
-/tutorial/.minted-tutorial
+/tutorial/tutorial.tex.latexmain
 /user_options.cmake

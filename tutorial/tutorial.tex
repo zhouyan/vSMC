@@ -1,9 +1,9 @@
 \documentclass[11pt, fontset=Minion, showoverfull,
-bib, biblatexstyle=numeric, mintcode, minted=cache]{marticle}
+bib, mintcode, minted=cache]{marticle}
 \addbibresource{tutorial.bib}
 \input{macro}
 
-\title{vSMC: Parallel Sequential Monte Carlo in C++}
+\title{\protect\vsmc{} -- Parallel Sequential Monte Carlo in C++}
 \author{Yan Zhou}
 
 \begin{document}
@@ -16,23 +16,24 @@ bib, biblatexstyle=numeric, mintcode, minted=cache]{marticle}
 Sequential Monte Carlo (\smc) is a class of sampling algorithms that combine
 importance sampling and resampling. They have been used as ``particle
 filters'' to solve optimal filtering problems; see, for example,
-\cite{Cappe:2007hz} and \cite{Doucet:2011us} for recent reviews. They are also
-used in a static setting where a target distribution is of interest, for
-example, a posterior distribution in Bayesian modeling. This was proposed by
-\cite{DelMoral:2006hc} and developed by \cite{Peters:2005wh} and
-\cite{DelMoral:2006wv}. This framework involves the construction of a sequence
-of artificial distributions on spaces of increasing dimensions which admit the
-distributions of interest as particular marginals.
+\textcite{Cappe:2007hz} and \textcite{Doucet:2011us} for recent reviews. They
+are also used in a static setting where a target distribution is of interest,
+for example, a posterior distribution in Bayesian modeling. This was proposed
+by \textcite{DelMoral:2006hc} and developed by \textcite{Peters:2005wh} and
+\textcite{DelMoral:2006wv}. This framework involves the construction of a
+sequence of artificial distributions on spaces of increasing dimensions which
+admit the distributions of interest as particular marginals.
 
 \smc algorithms are perceived as being difficult to implement while general
-tools were not available until the development of \csmctc. \smc algorithms
-admit natural and scalable parallelization. However, there are only parallel
-implementations of \smc algorithms for many problem specific applications,
-usually associated with specific researches. \cite{Lee:2010fm} studied the
-parallelization of \smc algorithms on \gpu{}s with some generality. There are
-few tools to implement generic \smc algorithms on parallel hardware though
-multicore \cpu{}s are very common today and computing on specialized hardware
-such as \gpu{}s are attracting considerable interests.
+tools were not available until the development of \smctc \parencite{smctc}.
+\smc algorithms admit natural and scalable parallelization. However, there are
+only parallel implementations of \smc algorithms for many problem specific
+applications, usually associated with specific researches.
+\textcite{Lee:2010fm} studied the parallelization of \smc algorithms on
+\gpu{}s with some generality. There are few tools to implement generic \smc
+algorithms on parallel hardware though multicore \cpu{}s are very common today
+and computing on specialized hardware such as \gpu{}s are attracting
+considerable interests.
 
 The purpose of the current work is to provide a framework for implementing
 generic \smc algorithms on both sequential and parallel hardware. There are
@@ -144,7 +145,7 @@ In practice, the resampling algorithm is usually chosen such that $M = N$ and
 $\bar{W}^{(i)} = 1/N$ for $i=1,\dots,N$. Resampling can be performed at each
 time $t$ or adaptively based on some criteria of the discrepancy. One popular
 quantity used to monitor the discrepancy is the \emph{effective sample size}
-(\ess), introduced by \cite{Liu:1998iu}, defined as
+(\ess), introduced by \textcite{Liu:1998iu}, defined as
 \begin{equation}
   \ess_t = \frac{1}{\sum_{i=1}^N (W_t^{(i)})^2},
 \end{equation}
@@ -164,7 +165,7 @@ to parallel performance, it is also desired to avoid resampling unless it is
 necessary. It is a common practice to perform resampling only when $\ess_t\le
 \alpha N$ where $\alpha\in[0,1]$. There are little theoretical guidelines on
 the choosing of the threshold $\alpha$. However, $\alpha = 0.5$ is often seen
-in practice, for example, see \cite{Jasra:2010eh}.
+in practice, for example, see \textcite{Jasra:2010eh}.
 
 A common practice of resampling is to replicate particles with large weights
 and discard those with small weights. In other words, instead of generating
@@ -175,7 +176,7 @@ is replicated $R^{(i)}$ times in the new particle system. The distribution of
 $\{R^{(i)}\}_{i=1}^N$ shall fulfill the requirement of
 Equation~\ref{eq:resample}. One such distribution is a multinomial
 distribution of size $N$ and weights $(W_t^{(i)},\dots,W_t^{(N)})$. See
-\cite{Douc:2005wa} for some commonly used resampling algorithms.
+\textcite{Douc:2005wa} for some commonly used resampling algorithms.
 
 \subsection[SMC samplers]{\protect\smc samplers}
 \label{sub:SMC Samplers}
@@ -187,7 +188,7 @@ of auxiliary distributions $\{\tilde\pi_t\}_{t\ge0}$ on spaces of increasing
 dimensions, $\tilde\pi_t(x_{0:t})=\pi_t (x_t) \prod_{s=0}^{t-1}
 L_s(x_{s+1},x_s)$, where the sequence of Markov kernels $\{L_s\}_{s=0}^{t-1}$,
 termed the \emph{backward kernels}, is formally arbitrary but critically
-influences the estimator variance. See \cite{DelMoral:2006hc} for further
+influences the estimator variance. See \textcite{DelMoral:2006hc} for further
 details and guidance on the selection of these kernels.
 
 Standard sequential importance sampling and resampling algorithms can then be
@@ -228,7 +229,7 @@ normalizing constant $Z_t/Z_{t-1}$ by,
   \sum_{i=1}^N W_{t-1}^{(i)}w_t(X_{t-1}^{(i)},X_t^{(i)}).
 \end{equation}
 Sequentially, the normalizing constant between initial distribution $\pi_0$
-and some target $\pi_T$, $T\ge1$ can be estimated. See \cite{DelMoral:2006hc}
+and some target $\pi_T$, $T\ge1$ can be estimated. See \textcite{DelMoral:2006hc}
 for details on  calculating the incremental weights. In particular, when $K_t$
 is invariant to $\pi_t$, and an approximated suboptimal backward kernel
 \begin{equation}
@@ -327,11 +328,11 @@ only the most common usage scenarios of the library are introduced.
 
 Some other commonly used sequential Monte Carlo algorithms can be viewed as
 special cases of algorithms introduced above. The annealed importance sampling
-(\ais; \cite{Neal:2001we}) can be viewed as \smc samplers without resampling.
+(\ais; \textcite{Neal:2001we}) can be viewed as \smc samplers without resampling.
 
 Particle filters as seen in the physics and signal processing literature, can
 also be interpreted as the sequential importance sampling and resampling
-algorithms. See \cite{Doucet:2011us} for a review of this topic. A simple
+algorithms. See \textcite{Doucet:2011us} for a review of this topic. A simple
 particle filter example is used in Section~\ref{sub:A simple particle filter}
 to demonstrate basic features of the \vsmc library.
 
@@ -426,16 +427,16 @@ be found on \url{http://zhouyan.github.io/vSMCDoc/master}.
 The library does not have mandatory third-party dependencies. However, there
 are a few libraries that might be of interest to users.
 
-\vsmc uses \crandom counter-based \rng for random number generating. For an
-\smc sampler with $N$ particles, \vsmc constructs $N$ (statistically)
-independent \rng streams. It is possible to use millions of such streams
-without a huge memory footprint or other performance penalties. Since each
-particle has its own independent \rng stream, it frees users from many
-thread-safety and statistical independence considerations. \vsmc provides its
-own implementations of the same algorithms in \random. It is not necessary for
-users to install this library. However, the performance of the implementations
-in \vsmc can be either faster or slightly slower than \random, depending on
-the platforms. And therefore, using \random instead of the \vsmc
+\vsmc uses \random \parencite{random} counter-based \rng for random number
+generating. For an \smc sampler with $N$ particles, \vsmc constructs $N$
+(statistically) independent \rng streams. It is possible to use millions of
+such streams without a huge memory footprint or other performance penalties.
+Since each particle has its own independent \rng stream, it frees users from
+many thread-safety and statistical independence considerations. \vsmc provides
+its own implementations of the same algorithms in \random. It is not necessary
+for users to install this library. However, the performance of the
+implementations in \vsmc can be either faster or slightly slower than \random,
+depending on the platforms. And therefore, using \random instead of the \vsmc
 implementation can be desirable for some users. We will show how to replace
 the \rng used by \vsmc later in Section~\ref{sub:Core module}. Within \vsmc,
 these \rng streams are wrapped under \cppoo \rng engines, and can be replaced
@@ -741,7 +742,7 @@ to functions through \cppinline{void} pointer is a common idiom used by many
 researchers, and thus here we also support this kind of usage.
 
 Before initializing the sampler or after a certain time point, one can add
-monitors to the sampler. The concept is similar to \cbugs's
+monitors to the sampler. The concept is similar to \bugs \parencite{bugs}
 \cppinline{monitor} statement, except it does not monitor the individual
 values but rather the importance sampling estimates. Consider approximating
 $\Exp[h(X_t)]$, where $h(X_t) = (h_1(X_t),\dots,h_m(X_t))$ is an $m$-vector
@@ -942,9 +943,9 @@ value.read_state_matrix(iter.first());
 If the compiler support \cppoo{} \cppinline{<tuple>}, \vsmc also provides a
 \cppinline{StateTuple} class template, which is similar to
 \cppinline{StateMatrix} except that the types of values do not have to be the
-same for each variable.  This is similar to \crlang's \cppinline{data.frame}.
-For example, suppose each particle's state is formed by two
-\cppinline{double}'s, an \cppinline{int} and a user defined type
+same for each variable.  This is similar to \rlang \parencite{rlang}
+\cppinline{data.frame}.  For example, suppose each particle's state is formed
+by two \cppinline{double}'s, an \cppinline{int} and a user defined type
 \cppinline{StateType}, then the following constructs a value collection using
 \cppinline{StateTuple},
 \begin{cppcode}
@@ -1262,13 +1263,13 @@ parallel performance.
 
 \subsubsection{The model and algorithm}
 
-This is an example used in \csmctc. Through this example, we will show how to
-re-implement a simple particle filter in \vsmc. It shall walk one through the
-basic features of the library. \smctc is the first general framework for
-implementing \smc algorithms in \cpp and serves as one of the most important
-inspirations for the \vsmc library. It is widely used by many researchers. One
-of the goals of the current work is that users familiar with \smctc shall find
-little difficulty in using the new library.
+This is an example used in \smctc \parencite{smctc}. Through this example, we
+will show how to re-implement a simple particle filter in \vsmc. It shall walk
+one through the basic features of the library. \smctc is the first general
+framework for implementing \smc algorithms in \cpp and serves as one of the
+most important inspirations for the \vsmc library. It is widely used by many
+researchers. One of the goals of the current work is that users familiar with
+\smctc shall find little difficulty in using the new library.
 
 The state space model, known as the almost constant velocity model in the
 tracking literature, provides a simple scenario. The state vector $X_t$
@@ -1605,11 +1606,11 @@ member functions of a class that defines \cppinline{operator()}.
 
 \subsubsection{The model and algorithm}
 
-Since \cite{Richardson:1997ea}, the Gaussian mixture model (\gmm) has provided
+Since \textcite{Richardson:1997ea}, the Gaussian mixture model (\gmm) has provided
 a canonical example of a model-order-determination problem. We use the same
-model as in \cite{DelMoral:2006hc} to illustrate the implementation of this
+model as in \textcite{DelMoral:2006hc} to illustrate the implementation of this
 classical example in Monte Carlo literature. This model is also used in
-\cite{Zhou2013mc} for demonstration of the use of \smc in the context of
+\textcite{Zhou2013mc} for demonstration of the use of \smc in the context of
 Bayesian model comparison, which provides more details of the following
 setting. The model is as the following, data $\bfy = (y_1,\dots,y_n)$ are
 independently and identically distributed as
@@ -1627,12 +1628,12 @@ $\lambda_j\sim\calG(\nu,\chi)$ and $\omega_{1:r}\sim\calD(\rho)$ where
 $\calD(\rho)$ is the symmetric Dirichlet distribution with parameter $\rho$
 and $\calG(\nu,\chi)$ is the Gamma distribution with shape $\nu$ and scale
 $\chi$. The prior parameters are set in the same manner as in
-\cite{Richardson:1997ea}; also see \cite{Zhou2013mc} for details. The data
+\textcite{Richardson:1997ea}; also see \textcite{Zhou2013mc} for details. The data
 is simulated from a four components model with $\mu_{1:4} = (-3, 0,3, 6)$, and
 $\lambda_j =2$, $\omega_j = 0.25$, $j = 1,\dots,4$. Our interest is to
 simulate the posterior distribution of models with $r$ components, denoted by
 $M_r$ and obtaining the normalizing constant for the purpose of Bayesian model
-comparison \cite[chap.~7]{Robert:2007tc}.
+comparison \textcite[chap.~7]{Robert:2007tc}.
 
 Numerous strategies are possible to construct a sequence of distributions for
 the purpose of \smc sampling. One option is to use for each model $M_r$,
@@ -1683,7 +1684,7 @@ three-blocks Metropolis random walk,
 \end{enumerate}
 
 The standard direct estimate of the normalizing constants
-\cite{DelMoral:2006hc} can be obtained from the output of this \smc algorithm
+\textcite{DelMoral:2006hc} can be obtained from the output of this \smc algorithm
 as,
 \begin{equation}
   \hat\lambda_{\text{\textsc{ds}}}^{T_r,N} =
@@ -1696,10 +1697,10 @@ where $W_{t-1}^{(i)}$ is the importance weight of sample $\theta_{t-1}^{(i)}$.
 
 \subsubsection{Path sampling for estimation of normalizing constants}
 
-As shown in \cite{Zhou2013mc} the estimation of the normalizing constant
+As shown in \textcite{Zhou2013mc} the estimation of the normalizing constant
 associated with our sequence of distributions can also be achieved by a Monte
 Carlo approximation to the \emph{path sampling} formulation given by
-\cite{Gelman:1998ei}, also known as thermodynamic integration or Ogata's
+\textcite{Gelman:1998ei}, also known as thermodynamic integration or Ogata's
 method. Given a parameter $\alpha$ which defines a family of distributions,
 $\{p_{\alpha} = q_{\alpha} / Z_\alpha\}_{\alpha \in [0,1]}$ that moves
 smoothly from $p_0 = q_0 / Z_0$ to $p_1 = q_1 / Z_1$ as $\alpha$ increases
@@ -1707,7 +1708,7 @@ from zero to one, one can estimate the logarithm of the ratio of their
 normalizing constants via a simple integral relationship,
 \begin{equation}
   \log\biggl( \frac{Z_1}{Z_0} \biggr) =
-  \int_{0}^{1} \Exp_\alpha \biggl[ \rnd{\log q_{\alpha}(\cdot)}{\alpha}
+  \int_{0}^{1} \Exp_\alpha \biggl[ \fracd{\log q_{\alpha}(\cdot)}{\alpha}
   \biggr] \intd\alpha, \label{eq:path_identity}
 \end{equation}
 where $\Exp_\alpha$ denotes expectation under $p_\alpha$. The sequence of
@@ -1729,7 +1730,8 @@ estimator of the ratio of normalizing constants $\lambda^{T_r} =
 where
 \begin{equation}
   U_t^N = \sum_{i=1}^N
-  W_t^{(i)} \rnd{\log q_{\alpha}(X_t^{(i)})}{\alpha}\Bigm|_{\alpha = \alpha_t}.
+  W_t^{(i)} \fracd{\log q_{\alpha}(X_t^{(i)})}{\alpha}
+  \Bigm|_{\alpha = \alpha_t}.
   \label{eq:path_import}
 \end{equation}
 
@@ -2166,7 +2168,7 @@ in Equation~\ref{eq:path_est}. The return value shall be the value of
 $\alpha_t$.  The output parameter \cppinline{res} shall store the array of
 values
 \begin{equation*}
-  \rnd{\log q_{\alpha}(X_t^{(i)})}{\alpha}\Bigm|_{\alpha = \alpha_t}.
+  \fracd{\log q_{\alpha}(X_t^{(i)})}{\alpha}\Bigm|_{\alpha = \alpha_t}.
 \end{equation*}
 Our implementation of \cppinline{gmm_path} is a subclass of an \smp module
 base class, which provides an \cppinline{operator()} that satisfies the above
@@ -2192,8 +2194,8 @@ class gmm_path : public BASE_PATH<gmm_state, gmm_path>
 \subsubsection{Results}
 
 After compiling and running the algorithm, the results were consistent with
-those reported in \cite{DelMoral:2006hc}. For a more in depth analyze of the
-methodologies, extensions and the results see \cite{Zhou2013mc}.
+those reported in \textcite{DelMoral:2006hc}. For a more in depth analyze of the
+methodologies, extensions and the results see \textcite{Zhou2013mc}.
 
 \subsubsection[Extending the implementation using MPI]{Extending the
   implementation using \mpi}
@@ -2370,13 +2372,13 @@ algorithms further. However, there is a balance between performance,
 flexibility and the ease of use. \vsmc aims to be developer-friendly and to
 provide users as much control as possible for all performance related aspects.
 For a \bugs-like interface, users may be interested in other software such as
-\cbiips. In addition \clibbi provides a user friendly and high performance
-alternative with a focus on state-space models. Compared with these recent
-developments, \vsmc is less accessible to those with little or no knowledge of
-\cpp. However, for researchers with expertise in \cpp and template
-metaprogramming in particular, \vsmc provides a framework within which
-potential superior performance can be obtained and greater flexibility and
-extensibility are possible.
+\biips \parencite{BiiPS}. In addition \libbi \parencite{Murray2013bi} provides
+a user friendly and high performance alternative with a focus on state-space
+models. Compared with these recent developments, \vsmc is less accessible to
+those with little or no knowledge of \cpp. However, for researchers with
+expertise in \cpp and template metaprogramming in particular, \vsmc provides a
+framework within which potential superior performance can be obtained and
+greater flexibility and extensibility are possible.
 
 \clearpage
 \appendix
@@ -2456,8 +2458,8 @@ passing a parameter to a \vsmc function. When the algorithm is not directly
 supported by the library, users can replace \vsmc's implementation without
 knowing the internal of the library while reusing as much as possible the rest
 of the library. For example, the library can be used to implement population
-\mcmc algorithms, such as those used in \cite{Calderhead:2009bd} for Bayesian
-model comparison. In addition, when multiple algorithms share common
+\mcmc algorithms, such as those used in \textcite{Calderhead:2009bd} for
+Bayesian model comparison. In addition, when multiple algorithms share common
 operations, such as \mcmc kernels, they can be implemented once and shared
 between different algorithms easily. See the examples distributed with the
 source, where an \smc and a population \mcmc implementation of the same \gmm
@@ -2481,5 +2483,7 @@ that \vsmc has the potential to provide better performance. The last but not
 least, though no software can be said to be ``future-proof'', it is possible
 to enhance \vsmc with new parallel programming models while reusing existing
 implementations of algorithms.
+
+\printbibliography[heading=reference]
 
 \end{document}
