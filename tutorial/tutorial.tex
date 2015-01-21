@@ -81,7 +81,7 @@ absolutely continuous, based on the identity,
   \Exp_{\pi}[\varphi(X)]
   = \int\varphi(x)\pi(x)\intd x
   = \int\frac{\varphi(x)\pi(x)}{\eta(x)}\eta(x)\intd x
-  = \Exp_{\eta}\Bigl[\frac{\varphi(X)\pi(X)}{\eta(X)}\Bigr].
+  = \Exp_{\eta}\Square[Big]{\frac{\varphi(X)\pi(X)}{\eta(X)}}.
 \end{equation}
 Let $\{X^{(i)}\}_{i=1}^N$ be samples from $\eta$, then
 $\Exp_{\pi}[\varphi(X)]$ can be approximated by,
@@ -135,8 +135,8 @@ $\pi_t$ becomes larger. Resampling techniques are applied such that, a new
 particle system $\{\bar{W}_t^{(i)},\bar{X}_{0:t}^{(i)}\}_{i=1}^M$ with the
 following property is generated,
 \begin{equation}
-  \Exp\Bigl[\sum_{i=1}^M\bar{W}_t^{(i)}\varphi_t(\bar{X}_{0:t}^{(i)})\Bigr] =
-  \Exp\Bigl[\sum_{i=1}^NW_t^{(i)}\varphi_t(X_{0:t}^{(i)})\Bigr].
+  \Exp\Square[Big]{\sum_{i=1}^M\bar{W}_t^{(i)}\varphi_t(\bar{X}_{0:t}^{(i)})}
+  = \Exp\Square[Big]{\sum_{i=1}^NW_t^{(i)}\varphi_t(X_{0:t}^{(i)})}.
   \label{eq:resample}
 \end{equation}
 In practice, the resampling algorithm is usually chosen such that $M = N$ and
@@ -179,7 +179,7 @@ distribution of size $N$ and weights $(W_t^{(i)},\dots,W_t^{(N)})$. See
 \subsection[SMC samplers]{\protect\smc samplers}
 \label{sub:SMC Samplers}
 
-\smc samplers allow us to obtain, iteratively, collections of weighted samples
+\Smc samplers allow us to obtain, iteratively, collections of weighted samples
 from a sequence of distributions $\{\pi_t\}_{t\ge0}$ over essentially any
 random variables on some spaces $\{E_t\}_{t\ge0}$, by constructing a sequence
 of auxiliary distributions $\{\tilde\pi_t\}_{t\ge0}$ on spaces of increasing
@@ -227,9 +227,10 @@ normalizing constant $Z_t/Z_{t-1}$ by,
   \sum_{i=1}^N W_{t-1}^{(i)}w_t(X_{t-1}^{(i)},X_t^{(i)}).
 \end{equation}
 Sequentially, the normalizing constant between initial distribution $\pi_0$
-and some target $\pi_T$, $T\ge1$ can be estimated. See \textcite{DelMoral:2006hc}
-for details on  calculating the incremental weights. In particular, when $K_t$
-is invariant to $\pi_t$, and an approximated suboptimal backward kernel
+and some target $\pi_T$, $T\ge1$ can be estimated. See
+\textcite{DelMoral:2006hc} for details on  calculating the incremental
+weights. In particular, when $K_t$ is invariant to $\pi_t$, and an
+approximated suboptimal backward kernel
 \begin{equation}
   L_{t-1}(x_t, x_{t-1}) = \frac{\pi(x_{t-1})K_t(x_{t-1}, x_t)}{\pi_t(x_t)},
 \end{equation}
@@ -326,7 +327,8 @@ only the most common usage scenarios of the library are introduced.
 
 Some other commonly used sequential Monte Carlo algorithms can be viewed as
 special cases of algorithms introduced above. The annealed importance sampling
-(\ais; \textcite{Neal:2001we}) can be viewed as \smc samplers without resampling.
+(\ais; \textcite{Neal:2001we}) can be viewed as \smc samplers without
+resampling.
 
 Particle filters as seen in the physics and signal processing literature, can
 also be interpreted as the sequential importance sampling and resampling
@@ -431,15 +433,15 @@ generating. For an \smc sampler with $N$ particles, \vsmc constructs $N$
 such streams without a huge memory footprint or other performance penalties.
 Since each particle has its own independent \rng stream, it frees users from
 many thread-safety and statistical independence considerations. \vsmc provides
-its own implementations of the same algorithms in \lrandom. It is not necessary
-for users to install this library. However, the performance of the
-implementations in \vsmc can be either faster or slightly slower than \lrandom,
-depending on the platforms. And therefore, using \lrandom instead of the \vsmc
-implementation can be desirable for some users. We will show how to replace
-the \rng used by \vsmc later in Section~\ref{sub:Core module}. Within \vsmc,
-these \rng streams are wrapped under \cppoo \rng engines, and can be replaced
-by other compatible \rng engines seamlessly. Users only need to be familiar
-with classes defined in \cppoo \cppinline{<random>} or their \fboost
+its own implementations of the same algorithms in \lrandom. It is not
+necessary for users to install this library. However, the performance of the
+implementations in \vsmc can be either faster or slightly slower than
+\lrandom, depending on the platforms. And therefore, using \lrandom instead of
+the \vsmc implementation can be desirable for some users. We will show how to
+replace the \rng used by \vsmc later in Section~\ref{sub:Core module}. Within
+\vsmc, these \rng streams are wrapped under \cppoo \rng engines, and can be
+replaced by other compatible \rng engines seamlessly. Users only need to be
+familiar with classes defined in \cppoo \cppinline{<random>} or their \fboost
 equivalents to use these \rng streams. See the documentation of the
 corresponding libraries for details, as well as examples in
 Section~\ref{sec:Example}.
@@ -470,16 +472,16 @@ to use the \lboost library.
 \fmsvc. \vsmc can optionally use some \cppoo features to improve performance
 and usability. In particular, as mentioned before, \vsmc can use \cppoo
 standard libraries instead of the \lboost library. At the time of writing,
-\lclang with \flibcpp has the most comprehensive support of \cppoo with respect
-to standard compliant and feature completion. \lgcc~4.8 , \lmsvc~2012 and
-\licpc~2013 also have very good \cppoo support. Note that, provided the \lboost
-library is available, all \cppoo language and library features are optional.
-\vsmc can be used with any \cppne conforming compilers. However, due to the
-heavy usage of templates, older compilers may require considerable longer time
-and more memory to compile the library. More recent compilers can perform
-significantly better. From the author's experience, \lclang~3.3, \lgcc~4.7,
-\licpc~2010 and \lmsvc~2010, or later versions of these compilers are
-recommended. They are also regularly tested during the development of the
+\lclang with \flibcpp has the most comprehensive support of \cppoo with
+respect to standard compliant and feature completion. \lgcc~4.8, \lmsvc~2012
+and \licpc~2013 also have very good \cppoo support. Note that, provided the
+\lboost library is available, all \cppoo language and library features are
+optional.  \vsmc can be used with any \cppne conforming compilers. However,
+due to the heavy usage of templates, older compilers may require considerable
+longer time and more memory to compile the library. More recent compilers can
+perform significantly better. From the author's experience, \lclang~3.3,
+\lgcc~4.7, \licpc~2010 and \lmsvc~2010, or later versions of these compilers
+are recommended. They are also regularly tested during the development of the
 library.
 
 \section{The vSMC library}
@@ -563,9 +565,9 @@ provide the following definition,
 \begin{cppcode}
 typedef SizeType size_type;
 \end{cppcode}
-If \cppinline{size_type} is found inside a value collection type \cppinline{T}, \vsmc
-classes such as \cppinline{Particle<T>} will define their own
-\cppinline{size_type} to exactly the same type. Since \vsmc allows one to
+If \cppinline{size_type} is found inside a value collection type
+\cppinline{T}, \vsmc classes such as \cppinline{Particle<T>} will define their
+own \cppinline{size_type} to exactly the same type. Since \vsmc allows one to
 allocate the states in any way suitable, one needs to provide this constructor
 which \cppinline{Particle<T>} can use to allocate them.
 
@@ -580,13 +582,13 @@ void copy (std::size_t N, const SizeType *copy_from);
 \end{cppcode}
 The pointer \cppinline{copy_from} points to an array that has $N$ elements,
 where $N$ is the number of particles. After calling this member function, the
-value of particle \cppinline{i} shall be copied from the particle \cppinline{j
-  = copy_from[i]}. In other words, particle \cppinline{i} is a child of
-particle \cppinline{copy_from[i]}, or \cppinline{copy_from[i]} is the parent
-of particle \cppinline{i}. If a particle \cppinline{j} shall remain itself,
-then \cppinline{copy_from[j] == j}. How the values are actually copied is user
-defined. Note that, the member function can take other forms, as usual when
-using \cpp template programming. The actual type of the pointer
+value of particle \cppinline{i} shall be copied from the particle
+\cppinline{j = copy_from[i]}. In other words, particle \cppinline{i} is a
+child of particle \cppinline{copy_from[i]}, or \cppinline{copy_from[i]} is the
+parent of particle \cppinline{i}. If a particle \cppinline{j} shall remain
+itself, then \cppinline{copy_from[j] == j}. How the values are actually copied
+is user defined. Note that, the member function can take other forms, as usual
+when using \cpp template programming. The actual type of the pointer
 \cppinline{copy_from}, \cppinline{SizeType}, is
 \cppinline{Particle<T>::size_type}, which depends on the type \cppinline{T}.
 For example, defining the member function as the following is also allowed,
@@ -1064,16 +1066,16 @@ std::size_t move_func (std::size_t iter, Particle<T> &particle)
     particle.weight_set().add_log_weight(inc_weight.begin());
 }
 \end{cppcode}
-where \cppinline{cal_inc_weight} is some function that calculates the logarithm
-incremental weights. As we see, there are three main parts of a typical move.
-First, we allocate a vector named \cppinline{inc_weight}. Second, we generate
-normal random variates for each particle and calculate the incremental
-weights. This is done through a \cppinline{for} loop. Third, we add the
-logarithm incremental weights. The first and the third are \emph{global}
-operations while the second is \emph{local}. The first and the third are often
-optional and absent. The local operation is also usually the most
-computational intensive part of \smc algorithms and can benefit the most from
-parallelization.
+where \cppinline{cal_inc_weight} is some function that calculates the
+logarithm incremental weights. As we see, there are three main parts of a
+typical move.  First, we allocate a vector named \cppinline{inc_weight}.
+Second, we generate normal random variates for each particle and calculate the
+incremental weights. This is done through a \cppinline{for} loop. Third, we
+add the logarithm incremental weights. The first and the third are
+\emph{global} operations while the second is \emph{local}. The first and the
+third are often optional and absent. The local operation is also usually the
+most computational intensive part of \smc algorithms and can benefit the most
+from parallelization.
 
 With \cppinline{MoveSEQ<T>}, one can derive from this class, which defines the
 \cppinline{operator()} required by the core module interface,
@@ -1113,8 +1115,8 @@ class move : public MoveSEQ<T>
     std::vector<double> inc_weight_;
 };
 \end{cppcode}
-The \cppinline{operator()} of \cppinline{MoveSEQ<T>} is equivalent to the single
-function implementation as shown before.
+The \cppinline{operator()} of \cppinline{MoveSEQ<T>} is equivalent to the
+single function implementation as shown before.
 
 In the simplest case, \cppinline{MoveSEQ} only takes away the loop around the
 local operations. However if one implements the move in such a way, and then
@@ -1127,12 +1129,12 @@ class move : public MoveOMP<T>;
 \end{cppcode}
 and use exactly the same implementation as before. Now when
 \cppinline{move::operator()} is called, it will be parallelized by \lopenmp.
-Other backends are also supported in case that \lopenmp is not available. Among
-them there are \fcilk and \ltbb. In addition to these well known
+Other backends are also supported in case that \lopenmp is not available.
+Among them there are \fcilk and \ltbb. In addition to these well known
 parallelization programming models, \vsmc also has its own implementation
-using \cppoo \cppinline{<thread>}. There are other backends documented in
-the reference manual. To use any of them, all one needs to do is to change a
-few base class names. In practice, one can use conditional compilation. For
+using \cppoo \cppinline{<thread>}. There are other backends documented in the
+reference manual. To use any of them, all one needs to do is to change a few
+base class names. In practice, one can use conditional compilation. For
 example, to use a sequential implementation or a \lopenmp parallelized one, we
 can write,
 \begin{cppcode}
@@ -1179,9 +1181,9 @@ MoveAdapter<T, MoveCILK> move_obj(move_state);
 MoveAdapter<T, MoveOMP>  move_obj(move_state);
 sampler.move(move_obj, false);
 \end{cppcode}
-These are respectively, sequential, \cppoo \cppinline{<thread>}, \ltbb, \lcilk,
-and \lopenmp implementations. The first template parameter is the type of
-value collection and the second is the name of the base class template.
+These are respectively, sequential, \cppoo \cppinline{<thread>}, \ltbb,
+\lcilk, and \lopenmp implementations. The first template parameter is the type
+of value collection and the second is the name of the base class template.
 Actually, the \cppinline{MoveAdapter}'s constructor accepts two more optional
 arguments, the \cppinline{pre_processor} and the \cppinline{post_processor},
 corresponding to the other two aforementioned member functions. Similar
@@ -1213,11 +1215,11 @@ mutable member functions on the same object from different threads is usually
 not safe. Calling immutable member functions is generally safe. There are a
 few exceptions,
 \begin{itemize}
-  \item The constructors of \cppinline{Particle} and \cppinline{Sampler} are not
-    thread-safe. Therefore if one need to construct multiple \cppinline{Sampler}
-    from different threads, a mutex protection is needed. However, subsequent
-    member function calls on the constructed objects are thread-safe according
-    to the above rules.
+  \item The constructors of \cppinline{Particle} and \cppinline{Sampler} are
+    not thread-safe. Therefore if one need to construct multiple
+    \cppinline{Sampler} from different threads, a mutex protection is needed.
+    However, subsequent member function calls on the constructed objects are
+    thread-safe according to the above rules.
   \item Member functions that concern a single particle are generally
     thread-safe in the sense that one can call them on the same object from
     different threads as long as they are called for different particles. For
@@ -1227,8 +1229,8 @@ few exceptions,
 In general, one can safely manipulate different individual particles from
 different threads, which is the minimal requirement for scalable
 parallelization. But one cannot manipulate the whole particle collection from
-different threads. For example, \cppinline{WeightSet::set_log_weight} cannot be
-called from multiple threads on the same object.
+different threads. For example, \cppinline{WeightSet::set_log_weight} cannot
+be called from multiple threads on the same object.
 
 User defined callbacks shall generally follow the same rules. For example, for
 a \cppinline{MoveOMP} subclass, \cppinline{pre_processor} and
@@ -1583,8 +1585,8 @@ For people familiar with the \lsmctc library, the implementation demonstrated
 here is not very different. Users still implement the same functions that
 calculate the log-likelihood etc. In fact, the complete implementation in vSMC
 requires users to write roughly the same amount of code as an implementation
-in \lsmctc. However, now we can benefit from parallelization. In addition, even
-the sequential version runs about twice faster than that of \lsmctc. The
+in \lsmctc. However, now we can benefit from parallelization. In addition,
+even the sequential version runs about twice faster than that of \lsmctc. The
 object-oriented design of \vsmc also allows better and safer implementations.
 For example, in \lsmctc, to pass informations to a callback, one can only do
 that through a \cppinline{void} pointer. And in some cases, it is simply
@@ -1603,14 +1605,14 @@ member functions of a class that defines \cppinline{operator()}.
 
 \subsubsection{The model and algorithm}
 
-Since \textcite{Richardson:1997ea}, the Gaussian mixture model (\gmm) has provided
-a canonical example of a model-order-determination problem. We use the same
-model as in \textcite{DelMoral:2006hc} to illustrate the implementation of this
-classical example in Monte Carlo literature. This model is also used in
-\textcite{Zhou2013mc} for demonstration of the use of \smc in the context of
-Bayesian model comparison, which provides more details of the following
-setting. The model is as the following, data $\bfy = (y_1,\dots,y_n)$ are
-independently and identically distributed as
+Since \textcite{Richardson:1997ea}, the Gaussian mixture model (\gmm) has
+provided a canonical example of a model-order-determination problem. We use
+the same model as in \textcite{DelMoral:2006hc} to illustrate the
+implementation of this classical example in Monte Carlo literature. This model
+is also used in \textcite{Zhou2013mc} for demonstration of the use of \smc in
+the context of Bayesian model comparison, which provides more details of the
+following setting. The model is as the following, data $\bfy =
+(y_1,\dots,y_n)$ are independently and identically distributed as
 \begin{equation*}
   y_i|\theta_r \sim \sum_{j=1}^r \omega_j\calN(\mu_j,\lambda_j^{-1}),
 \end{equation*}
@@ -1620,17 +1622,17 @@ $\mu_j$ and precision $\lambda_j$; $\theta_r =
 each model. The parameter space is thus $\Real^r\times\Real^{+r}\times S_r$
 where $S_r = \{\omega_{1:r}:0\le\omega_j\le1; \sum_{j=1}^r\omega_j=1\}$ is the
 standard $(r-1)$-simplex. The priors which are the same for each component are
-taken to be $\mu_j\sim\calN(\xi,\kappa^{-1})$,
-$\lambda_j\sim\calG(\nu,\chi)$ and $\omega_{1:r}\sim\calD(\rho)$ where
-$\calD(\rho)$ is the symmetric Dirichlet distribution with parameter $\rho$
-and $\calG(\nu,\chi)$ is the Gamma distribution with shape $\nu$ and scale
-$\chi$. The prior parameters are set in the same manner as in
-\textcite{Richardson:1997ea}; also see \textcite{Zhou2013mc} for details. The data
-is simulated from a four components model with $\mu_{1:4} = (-3, 0,3, 6)$, and
-$\lambda_j =2$, $\omega_j = 0.25$, $j = 1,\dots,4$. Our interest is to
-simulate the posterior distribution of models with $r$ components, denoted by
-$M_r$ and obtaining the normalizing constant for the purpose of Bayesian model
-comparison \textcite[chap.~7]{Robert:2007tc}.
+taken to be $\mu_j\sim\calN(\xi,\kappa^{-1})$, $\lambda_j\sim\calG(\nu,\chi)$
+and $\omega_{1:r}\sim\calD(\rho)$ where $\calD(\rho)$ is the symmetric
+Dirichlet distribution with parameter $\rho$ and $\calG(\nu,\chi)$ is the
+Gamma distribution with shape $\nu$ and scale $\chi$. The prior parameters are
+set in the same manner as in \textcite{Richardson:1997ea}; also see
+\textcite{Zhou2013mc} for details. The data is simulated from a four
+components model with $\mu_{1:4} = (-3, 0,3, 6)$, and $\lambda_j =2$,
+$\omega_j = 0.25$, $j = 1,\dots,4$. Our interest is to simulate the posterior
+distribution of models with $r$ components, denoted by $M_r$ and obtaining the
+normalizing constant for the purpose of Bayesian model comparison
+\textcite[chap.~7]{Robert:2007tc}.
 
 Numerous strategies are possible to construct a sequence of distributions for
 the purpose of \smc sampling. One option is to use for each model $M_r$,
@@ -1681,8 +1683,8 @@ three-blocks Metropolis random walk,
 \end{enumerate}
 
 The standard direct estimate of the normalizing constants
-\textcite{DelMoral:2006hc} can be obtained from the output of this \smc algorithm
-as,
+\textcite{DelMoral:2006hc} can be obtained from the output of this \smc
+algorithm as,
 \begin{equation}
   \hat\lambda_{\text{\textsc{ds}}}^{T_r,N} =
   \sum_{i=1}^N \frac{\pi(\theta_r^{(i,0)}|M_r)}{\nu(\theta_0^{(i,0)})} \times
@@ -1704,9 +1706,9 @@ smoothly from $p_0 = q_0 / Z_0$ to $p_1 = q_1 / Z_1$ as $\alpha$ increases
 from zero to one, one can estimate the logarithm of the ratio of their
 normalizing constants via a simple integral relationship,
 \begin{equation}
-  \log\biggl( \frac{Z_1}{Z_0} \biggr) =
-  \int_{0}^{1} \Exp_\alpha \biggl[ \fracd{\log q_{\alpha}(\cdot)}{\alpha}
-  \biggr] \intd\alpha, \label{eq:path_identity}
+  \log\Round[bigg]{\frac{Z_1}{Z_0}} = \int_{0}^{1} \Exp_\alpha
+  \Square[bigg]{\fracd{\log q_{\alpha}(\cdot)}{\alpha}} \intd\alpha,
+  \label{eq:path_identity}
 \end{equation}
 where $\Exp_\alpha$ denotes expectation under $p_\alpha$. The sequence of
 distributions in the \smc algorithm for this example can be interpreted as
@@ -2191,8 +2193,8 @@ class gmm_path : public BASE_PATH<gmm_state, gmm_path>
 \subsubsection{Results}
 
 After compiling and running the algorithm, the results were consistent with
-those reported in \textcite{DelMoral:2006hc}. For a more in depth analyze of the
-methodologies, extensions and the results see \textcite{Zhou2013mc}.
+those reported in \textcite{DelMoral:2006hc}. For a more in depth analyze of
+the methodologies, extensions and the results see \textcite{Zhou2013mc}.
 
 \subsubsection{Extending the implementation using \lmpi}
 
@@ -2281,7 +2283,7 @@ CXXFLAGS=-O3 -xHost -fp-model precise  \
          -DVSMC_HAS_CXX11LIB_FUNCTIONAL=1  \
          -DVSMC_HAS_CXX11LIB_RANDOM=1
 \end{cppcode}
-on a Ubuntu 12.10 workstation with an Xeon W3550 (3.06GHz, 4 cores, 8 hardware
+on a Ubuntu~12.10 workstation with an Xeon W3550 (3.06GHz, 4 cores, 8 hardware
 threads through hyper-threading) \cpu. A four components model and $100$
 iterations with a prior annealing scheme is used for all implementations. A
 range of numbers of particles are tested, from $2^3$ to $2^{17}$.
@@ -2316,11 +2318,11 @@ typical applications, the difference is not very significant.
 \lopencl implementations are also compared on the same workstation, which also
 has an NVIDIA Quadro 2000 graphic card. \lopencl programs can be compiled to
 run on both \cpu{}s and \gpu{}s. For \cpu implementation, there are \fiocl and
-\faocl platforms. We use the \ltbb implementation as a baseline for comparison.
-The same \lopencl implementation are used for all the \cpu and \gpu runtimes.
-Therefore they are not particularly optimized for any of them. For the \gpu
-implementation, in addition to double precision, we also tested a single
-precision configuration. Unlike modern \cpu{}s, which have the same
+\faocl platforms. We use the \ltbb implementation as a baseline for
+comparison.  The same \lopencl implementation are used for all the \cpu and
+\gpu runtimes.  Therefore they are not particularly optimized for any of them.
+For the \gpu implementation, in addition to double precision, we also tested a
+single precision configuration. Unlike modern \cpu{}s, which have the same
 performance for double and single precision floating point operations (unless
 \simd), \gpu{}s penalize double precision performance heavily.
 
@@ -2420,17 +2422,18 @@ template <typename SizeType>
 void resample (std::size_t N, const double *weight, SizeType *copy_from);
 \end{cppcode}
 which given the normalized weights generates the number of replicates of each
-particle. And in the \cppinline{Sampler}'s constructor, one pass it this object
-instead of the name of the built-in resampling scheme name. \vsmc's
+particle. And in the \cppinline{Sampler}'s constructor, one pass it this
+object instead of the name of the built-in resampling scheme name. \vsmc's
 implementations of gathering the normalized weights into an array, and copying
 particles according to the replication numbers can be reused. This particular
 example is of interest when the sampler is parallelized using \lmpi, where
 copying particles across all nodes requires some effort that may not be
 trivial. On the other hand, if an existing resampling algorithm is sufficient,
 but the parallelization requires special memory management, all one needs to
-do is providing \vsmc with a specialized \cppinline{copy} member function inside
-their value collection class. And the implementation of the resampling can be
-reused. (This is exactly what \vsmc does for the \lopencl and \lmpi module.)
+do is providing \vsmc with a specialized \cppinline{copy} member function
+inside their value collection class. And the implementation of the resampling
+can be reused. (This is exactly what \vsmc does for the \lopencl and \lmpi
+module.)
 
 In some situations, \lsmctc might appear to be easier to use than \vsmc. For
 example, it allows one to define a class that abstracts a single particle. And
