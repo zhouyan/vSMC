@@ -1,25 +1,23 @@
-\def\CitePkg#1#2{\csgdef{c#1}{\href{#2}{\csuse{#1}}\footnote{\url{#2}}}}
+\UseAbbr{ais}   \UseAbbr{Ais}
+\UseAbbr{cpu}   \UseAbbr{Cpu}
+\UseAbbr{gmm}   \UseAbbr{Gmm}
+\UseAbbr{gpgpu} \UseAbbr{Gpgpu}
+\UseAbbr{gpu}   \UseAbbr{Gpu}
+\UseAbbr{gui}   \UseAbbr{Gui}
+\UseAbbr{io}    \UseAbbr{Io}
+\UseAbbr{mcmc}  \UseAbbr{Mcmc}
+\UseAbbr{rng}   \UseAbbr{Rng}
+\UseAbbr{simd}  \UseAbbr{Simd}
+\UseAbbr{sis}   \UseAbbr{Sis}
+\UseAbbr{smc}   \UseAbbr{Smc}
+\UseAbbr{smp}   \UseAbbr{Smp}
+\UseAbbr{ess}   \UseAbbr{Ess}
 
-\UseAbbr{ais}
-\UseAbbr{cpu}
-\UseAbbr{gmm}
-\UseAbbr{gpgpu}
-\UseAbbr{gpu}
-\UseAbbr{gui}
-\UseAbbr{io}
-\UseAbbr{mcmc}
-\UseAbbr{rng}
-\UseAbbr{simd}
-\UseAbbr{sis}
-\UseAbbr{smc}
-\UseAbbr{smp}
-\UseAbbr{ess}
-
-\UseAbbr[\aocl][\sffamily]{AMD APP OpenCL}
+\UseAbbr[\aocl][\sffamily\scshape]{amd app OpenCL}
 \UseAbbr[\biips][\sffamily]{BiiPS}
 \UseAbbr[\blitz][\sffamily]{Blitz++}
 \UseAbbr[\boost][\sffamily]{Boost}
-\UseAbbr[\bugs][\sffamily]{BUGS}
+\UseAbbr[\bugs][\sffamily\scshape]{bugs}
 \UseAbbr[\cilk][\sffamily]{Cilk Plus}
 \UseAbbr[\cmake][\sffamily]{CMake}
 \UseAbbr[\clang][\sffamily]{clang}
@@ -27,40 +25,50 @@
 \UseAbbr[\cppoo][\sffamily]{C++11}
 \UseAbbr[\cpp][\sffamily]{C++}
 \UseAbbr[\doxygen][\sffamily]{Doxygen}
-\UseAbbr[\gcc][\sffamily]{GCC}
+\UseAbbr[\gcc][\sffamily\scshape]{gcc}
 \UseAbbr[\git][\sffamily]{Git}
-\UseAbbr[\html][\sffamily]{HTML}
+\UseAbbr[\html][\sffamily\scshape]{html}
 \UseAbbr[\icpc][\sffamily]{Intel C++ Compiler}
 \UseAbbr[\iocl][\sffamily]{Intel OpenCL}
 \UseAbbr[\libbi][\sffamily]{LibBi}
 \UseAbbr[\libcpp][\sffamily]{libc++}
-\UseAbbr[\mpi][\sffamily]{MPI}
+\UseAbbr[\mpi][\sffamily\scshape]{mpi}
 \UseAbbr[\msvc][\sffamily]{Microsoft Visual C++}
 \UseAbbr[\opencl][\sffamily]{OpenCL}
 \UseAbbr[\openmp][\sffamily]{OpenMP}
 \UseAbbr[\random][\sffamily]{Random123}
 \UseAbbr[\rlang][\sffamily]{R}
-\UseAbbr[\smctc][\sffamily]{SMCTC}
+\UseAbbr[\smctc][\sffamily\scshape]{smctc}
 \UseAbbr[\tbb][\sffamily]{Intel Threading Building Blocks}
 \UseAbbr[\vsmc][\sffamily]{vSMC}
 
-\CitePkg{aocl}{http://developer.amd.com/tools-and-sdks/opencl-zone/}
-\CitePkg{blitz}{http://blitz.sourceforge.net}
-\CitePkg{boost}{http://www.boost.org}
-\CitePkg{cilk}{https://www.cilkplus.org}
-\CitePkg{cmake}{http://www.cmake.org}
-\CitePkg{clang}{http://clang.llvm.org}
-\CitePkg{doxygen}{http://www.stack.nl/~dimitri/doxygen/}
-\CitePkg{gcc}{https://gcc.gnu.org}
-\CitePkg{git}{http://git-scm.com}
-\CitePkg{icpc}{https://software.intel.com/en-us/c-compilers}
-\CitePkg{iocl}{https://software.intel.com/en-us/intel-opencl}
-\CitePkg{libcpp}{http://libcxx.llvm.org}
-\CitePkg{mpi}{http://www.mpi-forum.org}
-\CitePkg{msvc}{https://msdn.microsoft.com/en-us/vstudio/hh386302.aspx}
-\CitePkg{opencl}{https://www.khronos.org/opencl/}
-\CitePkg{openmp}{http://openmp.org/wp/}
-\CitePkg{tbb}{https://www.threadingbuildingblocks.org}
+\def\LinkAbbr#1#2{
+  \csgdef{l#1}{\href{#2}{\csuse{#1}}}
+  \csgdef{f#1}{\href{#2}{\csuse{#1}}\footnote{\url{#2}}\xspace}%
+}
+\LinkAbbr{aocl}{http://developer.amd.com/tools-and-sdks/opencl-zone/}
+\LinkAbbr{biips}{https://alea.bordeaux.inria.fr/biips/doku.php}
+\LinkAbbr{blitz}{http://blitz.sourceforge.net}
+\LinkAbbr{boost}{http://www.boost.org}
+\LinkAbbr{bugs}{http://www.mrc-bsu.cam.ac.uk/software/bugs/}
+\LinkAbbr{cilk}{https://www.cilkplus.org}
+\LinkAbbr{clang}{http://clang.llvm.org}
+\LinkAbbr{cmake}{http://www.cmake.org}
+\LinkAbbr{doxygen}{http://www.stack.nl/~dimitri/doxygen/}
+\LinkAbbr{gcc}{https://gcc.gnu.org}
+\LinkAbbr{git}{http://git-scm.com}
+\LinkAbbr{icpc}{https://software.intel.com/en-us/c-compilers}
+\LinkAbbr{iocl}{https://software.intel.com/en-us/intel-opencl}
+\LinkAbbr{libbi}{http://libbi.org}
+\LinkAbbr{libcpp}{http://libcxx.llvm.org}
+\LinkAbbr{mpi}{http://www.mpi-forum.org}
+\LinkAbbr{msvc}{https://msdn.microsoft.com/en-us/vstudio/hh386302.aspx}
+\LinkAbbr{opencl}{https://www.khronos.org/opencl/}
+\LinkAbbr{openmp}{http://openmp.org/wp/}
+\LinkAbbr{random}{http://www.deshawresearch.com/resources_random123.html}
+\LinkAbbr{rlang}{http://www.r-project.org}
+\LinkAbbr{smctc}{http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/smctc/}
+\LinkAbbr{tbb}{https://www.threadingbuildingblocks.org}
 
 \UseMathCal{D}
 \UseMathCal{G}
@@ -77,9 +85,14 @@
 
 \def\STATESKIP{\hskip2em}
 
-% Minted
+% minted
 \usemintedstyle{solarizedlight}
 \newminted{cpp}{}
 \newmintinline{cpp}{}
 \newminted{sh}{}
 \newmintinline{sh}{}
+
+% biblatex
+\renewbibmacro{in:}
+{\ifentrytype{article}{}{\printtext{\bibstring{in}\intitlepunct}}}
+\addbibresource{tutorial.bib}

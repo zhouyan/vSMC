@@ -1,6 +1,5 @@
 \documentclass[11pt, fontset=Minion, showoverfull,
 bib, mintcode, minted=cache]{marticle}
-\addbibresource{tutorial.bib}
 \input{macro}
 
 \title{\protect\vsmc{} -- Parallel Sequential Monte Carlo in C++}
@@ -24,26 +23,25 @@ by \textcite{DelMoral:2006hc} and developed by \textcite{Peters:2005wh} and
 sequence of artificial distributions on spaces of increasing dimensions which
 admit the distributions of interest as particular marginals.
 
-\smc algorithms are perceived as being difficult to implement while general
-tools were not available until the development of \smctc \parencite{smctc}.
-\smc algorithms admit natural and scalable parallelization. However, there are
+\Smc algorithms are perceived as being difficult to implement while general
+tools were not available until the development of \fsmctc \parencite{smctc}.
+\Smc algorithms admit natural and scalable parallelization. However, there are
 only parallel implementations of \smc algorithms for many problem specific
-applications, usually associated with specific researches.
-\textcite{Lee:2010fm} studied the parallelization of \smc algorithms on
-\gpu{}s with some generality. There are few tools to implement generic \smc
-algorithms on parallel hardware though multicore \cpu{}s are very common today
-and computing on specialized hardware such as \gpu{}s are attracting
-considerable interests.
+applications. \textcite{Lee:2010fm} studied the parallelization of \smc
+algorithms on \gpu{}s with some generality. There are few tools to implement
+generic \smc algorithms on parallel hardware though multicore \cpu{}s are very
+common today and computing on specialized hardware such as \gpu{}s are
+attracting considerable interests.
 
 The purpose of the current work is to provide a framework for implementing
 generic \smc algorithms on both sequential and parallel hardware. There are
 two main goals of the presented framework. The first is reusability. It will
 be demonstrated that the same implementation source can be used to build a
 serialized sampler, or using different programming models (for example,
-\copenmp and \ctbb) to build parallelized samplers for multicore \cpu{}s. They
-can be scaled for clusters using \cmpi with few modifications. And with a
+\fopenmp and \ftbb) to build parallelized samplers for multicore \cpu{}s. They
+can be scaled for clusters using \fmpi with few modifications. And with a
 little effort they can also be used to build parallelized samplers on
-specialized massive parallel hardware such as \gpu{}s using \copencl. The
+specialized massive parallel hardware such as \gpu{}s using \fopencl. The
 second is extensibility. It is possible to write a backend for \vsmc to use
 new parallel programming models while reusing existing implementations. It is
 also possible to enhance the library to improve performance for specific
@@ -53,7 +51,7 @@ application, they can be replaced while being integrated with other components
 seamlessly.
 
 Though \vsmc is a new library designed from the ground up, it has some
-similarity to the aforementioned \smctc, which is by intention. For example,
+similarity to the aforementioned \lsmctc, which is by intention. For example,
 they both use user defined callbacks to perform application specific
 operations while the library only implements tasks that are common to all
 samplers. However, there are also significant differences. First of all, \vsmc
@@ -62,7 +60,7 @@ more flexible and enjoys better performance. The reusability and extensibility
 of \vsmc lead to better algorithm implementation design, such that less
 duplicate work need to be done for different algorithms. Both flexibility and
 better performance are made possible through the use of template
-metaprogramming, a technique pioneered by \cblitz. Some differences of the two
+metaprogramming, a technique pioneered by \fblitz. Some differences of the two
 libraries and the advantage of the approach of \vsmc will be discussed when
 features are introduced in Section~\ref{sec:The vSMC library}. A more detailed
 comparison can be found in Appendix~\ref{sec:vsmc and smctc}. We will not
@@ -360,20 +358,20 @@ included in these modules are introduced later in context.
     method defined through classes of this module can be used by
     \cppinline{Sampler} as callback objects. This module is documented in
     Section~\ref{sub:SMP module}.
-  \item[Message Passing Interface] \mpi is the \emph{de facto} standard for
+  \item[Message Passing Interface] \lmpi is the \emph{de facto} standard for
     parallel programming on distributed memory architectures. This module
     enables users to adapt implementations of algorithms using the \smp module
-    such that the same sampler can be parallelized using \mpi. In addition,
+    such that the same sampler can be parallelized using \lmpi. In addition,
     when used with the \smp module, it allows easy implementation of hybrid
-    parallelization such as \mpi/\openmp. In Section~\ref{sub:Bayesian
+    parallelization such as \lmpi/\lopenmp. In Section~\ref{sub:Bayesian
       Modeling of Gaussian mixture model}, an example is shown how to extend
     existing \smp parallelized samplers using this module.
   \item[OpenCL] This module is similar to the two above except it eases the
-    parallelization through \opencl, such as for the purpose of General
-    Purpose \gpu Programming (\gpgpu). \opencl is a framework for writing
-    programs that can be executed across heterogeneous platforms. \opencl
+    parallelization through \lopencl, such as for the purpose of General
+    Purpose \gpu Programming (\gpgpu). \lopencl is a framework for writing
+    programs that can be executed across heterogeneous platforms. \lopencl
     programs can run on either \cpu{}s or \gpu{}s. It is beyond the scope of
-    this paper to give a proper introduction to \gpgpu, \opencl and their use
+    this paper to give a proper introduction to \gpgpu, \lopencl and their use
     in \vsmc. However, later we will demonstrate the relative performance of
     this programming model on both \cpu{}s and \gpu{}s in
     Section~\ref{sub:Bayesian Modeling of Gaussian mixture model}.
@@ -395,7 +393,7 @@ this paper to document every feature of the library. In many places we will
 refer to this reference manual for further information.
 
 The source of examples are in the \cppinline{vSMCExample} directory. To build
-the examples distributed with the library, one need \ccmake, version 2.8.3 or
+the examples distributed with the library, one need \fcmake, version~2.8.3 or
 later.
 \begin{shcode}
 cd path_to_vSMC_source
@@ -411,14 +409,14 @@ these two examples are in the \cppinline{paper} subdirectory of the
 
 The library is under active development. See the homepage of the library,
 \url{http://zhouyan.github.io/vSMC}, for latest information. In particular,
-one can use \cgit to obtain the latest source of the library and the examples,
+one can use \lgit to obtain the latest source of the library and the examples,
 \begin{shcode}
 git clone https://github.com/zhouyan/vSMC.git
 cd vSMC
 git clone https://github.com/zhouyan/vSMCExample.git
 \end{shcode}
-One can proceed as before using the \cmake script to build the examples. In
-addition, given \cdoxygen, version 1.8.3 or later, one can build the reference
+One can proceed as before using the \lcmake script to build the examples. In
+addition, given \fdoxygen, version~1.8.3 or later, one can build the reference
 manual by invoking \cppinline{make docs}. The latest reference manual can also
 be found on \url{http://zhouyan.github.io/vSMCDoc/master}.
 
@@ -427,33 +425,33 @@ be found on \url{http://zhouyan.github.io/vSMCDoc/master}.
 The library does not have mandatory third-party dependencies. However, there
 are a few libraries that might be of interest to users.
 
-\vsmc uses \random \parencite{random} counter-based \rng for random number
+\vsmc uses \frandom \parencite{random} counter-based \rng for random number
 generating. For an \smc sampler with $N$ particles, \vsmc constructs $N$
 (statistically) independent \rng streams. It is possible to use millions of
 such streams without a huge memory footprint or other performance penalties.
 Since each particle has its own independent \rng stream, it frees users from
 many thread-safety and statistical independence considerations. \vsmc provides
-its own implementations of the same algorithms in \random. It is not necessary
+its own implementations of the same algorithms in \lrandom. It is not necessary
 for users to install this library. However, the performance of the
-implementations in \vsmc can be either faster or slightly slower than \random,
-depending on the platforms. And therefore, using \random instead of the \vsmc
+implementations in \vsmc can be either faster or slightly slower than \lrandom,
+depending on the platforms. And therefore, using \lrandom instead of the \vsmc
 implementation can be desirable for some users. We will show how to replace
 the \rng used by \vsmc later in Section~\ref{sub:Core module}. Within \vsmc,
 these \rng streams are wrapped under \cppoo \rng engines, and can be replaced
 by other compatible \rng engines seamlessly. Users only need to be familiar
-with classes defined in \cppoo{} \cppinline{<random>} or their \cboost
+with classes defined in \cppoo \cppinline{<random>} or their \fboost
 equivalents to use these \rng streams. See the documentation of the
 corresponding libraries for details, as well as examples in
 Section~\ref{sec:Example}.
 
 The library makes use of some \cppoo libraries, in particular the
 \cppinline{<functional>} and \cppinline{<random>} headers. However, if \cppoo
-features are not available, one can use the \boost library instead. Version
+features are not available, one can use the \lboost library instead. Version
 1.49 or later is required. In most cases, the library is able to check the
 availability of the \cppoo features automatically. When it is not able to
 determine the usability of these \cppoo headers with certainty, it falls back
-to using their \boost equivalents. In these cases, to instruct the library to
-use the standard library headers instead of falling back to the \boost
+to using their \lboost equivalents. In these cases, to instruct the library to
+use the standard library headers instead of falling back to the \lboost
 library, one needs to define configuration macros before including any \vsmc
 headers. For example,
 \begin{shcode}
@@ -462,25 +460,25 @@ clang++ -std=c++11 -stdlib=libc++        \
         -DVSMC_HAS_CXX11LIB_RANDOM=1     \
         -o prog prog.cpp
 \end{shcode}
-tells the library to use \cppoo{} \cppinline{<functional>} and
-\cppinline{<random>}.  Defining these macros to \cppinline{0} will force \vsmc
-to use the \boost library.
+tells the library to use \cppoo \cppinline{<functional>} and
+\cppinline{<random>}. Defining these macros to \cppinline{0} will force \vsmc
+to use the \lboost library.
 
 \subsection{Compiler support}
 
-\vsmc has been tested with recent versions of \clang, \cgcc, \cicpc and
-\cmsvc. \vsmc can optionally use some \cppoo features to improve performance
+\vsmc has been tested with recent versions of \fclang, \fgcc, \ficpc and
+\fmsvc. \vsmc can optionally use some \cppoo features to improve performance
 and usability. In particular, as mentioned before, \vsmc can use \cppoo
-standard libraries instead of the \boost library. At the time of writing,
-\clang with \libcpp has the most comprehensive support of \cppoo with respect
-to standard compliant and feature completion. \gcc 4.8 , \msvc 2012 and \icpc
-2013 also have very good \cppoo support. Note that, provided the \boost
+standard libraries instead of the \lboost library. At the time of writing,
+\lclang with \flibcpp has the most comprehensive support of \cppoo with respect
+to standard compliant and feature completion. \lgcc~4.8 , \lmsvc~2012 and
+\licpc~2013 also have very good \cppoo support. Note that, provided the \lboost
 library is available, all \cppoo language and library features are optional.
 \vsmc can be used with any \cppne conforming compilers. However, due to the
 heavy usage of templates, older compilers may require considerable longer time
 and more memory to compile the library. More recent compilers can perform
-significantly better. From the author's experience, \clang 3.3, \gcc 4.7,
-\icpc 2010 and \msvc 2010, or later versions of these compilers are
+significantly better. From the author's experience, \lclang~3.3, \lgcc~4.7,
+\licpc~2010 and \lmsvc~2010, or later versions of these compilers are
 recommended. They are also regularly tested during the development of the
 library.
 
@@ -525,7 +523,7 @@ functions, are declared in the namespace \cppinline{vsmc}.
 Note that within the core module, all operations are applied to
 \cppinline{Particle<T>} objects, that is $\{W_t^{(i)},X_t^{(i)}\}_{i=1}^N$,
 instead of a single particle. This is one of the major differences between
-\vsmc and \smctc. In the later library, users define classes that abstract
+\vsmc and \lsmctc. In the later library, users define classes that abstract
 $X_t^{(i)}$ and user defined callbacks operate on $(W_t^{(i)},X_t^{(i)})$ for
 each $i=1, \dots, N$. As we will see very soon, the \vsmc approach provides
 greater flexibility. And later we will see also how to write operations that
@@ -596,7 +594,7 @@ For example, defining the member function as the following is also allowed,
 void copy (int N, const std::size_t *copy_from);
 \end{cppcode}
 provided that \cppinline{Particle<T>::size_type} is indeed
-\cppinline{std::size_t}.  However, writing it as a member function template
+\cppinline{std::size_t}. However, writing it as a member function template
 releases users from finding the actual type of pointer \cppinline{copy_from}
 and the sometimes troubling forward declaration issues. We will not elaborate
 such more technical issues further.
@@ -666,14 +664,14 @@ or
 \begin{cppcode}
 sampler.init(init_class());
 \end{cppcode}
-respectively. \cppoo{} \cppinline{std::function} or its \boost equivalent
+respectively. \cppoo \cppinline{std::function} or its \lboost equivalent
 \cppinline{boost::function} can also be used. For example,
 \begin{cppcode}
 std::function<std::size_t (Particle<T> &, void *)> init_obj(init_func);
 sampler.init(init_obj);
 \end{cppcode}
 In principle, when \vsmc requires a user defined callback, any object that
-supports function calling syntax can be used. Unlike \smctc, only function
+supports function calling syntax can be used. Unlike \lsmctc, only function
 pointers are accepted. This design of \vsmc allows users to structure the
 program with a more object-oriented design, if it is desired.
 
@@ -742,7 +740,7 @@ to functions through \cppinline{void} pointer is a common idiom used by many
 researchers, and thus here we also support this kind of usage.
 
 Before initializing the sampler or after a certain time point, one can add
-monitors to the sampler. The concept is similar to \bugs \parencite{bugs}
+monitors to the sampler. The concept is similar to \fbugs \parencite{bugs}
 \cppinline{monitor} statement, except it does not monitor the individual
 values but rather the importance sampling estimates. Consider approximating
 $\Exp[h(X_t)]$, where $h(X_t) = (h_1(X_t),\dots,h_m(X_t))$ is an $m$-vector
@@ -787,12 +785,12 @@ this weight set object. A user defined weight set class that abstracts
 $\{W_t^{(i)}\}_{i=1}^N$ can also be used. The details involve some more
 advanced \cpp template techniques and are documented in the reference manual.
 One possible reason for replacing the default is to provide special memory
-management of the weight set. For example, the \mpi module provides a special
+management of the weight set. For example, the \lmpi module provides a special
 weight set class that manages weights across multiple nodes and perform proper
 normalization, computation of \ess, and other tasks.
 
 The default \cppinline{WeightSet} object provides some ways of retrieving
-weights.  Here we document some of the most commonly used. See the reference
+eights. Here we document some of the most commonly used. See the reference
 manual for details of others. The weights can be accessed one by one, for
 example,
 \begin{cppcode}
@@ -842,40 +840,39 @@ their arguments.
 \subsubsection{Generating random numbers}
 
 The \cppinline{Particle<T>} object has a sub-object, a collection of \rng
-engines that can be used with \cppoo{} \cppinline{<random>} or \boost
+engines that can be used with \cppoo \cppinline{<random>} or \lboost
 distributions. For each particle \cppinline{i}, one can obtain an engine that
 produces an \rng stream independent of others by
 \begin{cppcode}
 particle.rng(i);
 \end{cppcode}
 To generate distribution random variates, one can use the
-\cppoo{} \cppinline{<random>} library. For example,
+\cppoo \cppinline{<random>} library. For example,
 \begin{cppcode}
 std::normal_distribution<double> rnorm(mean, sd);
 double r = rnorm(particle.rng(i));
 \end{cppcode}
-or the \boost library,
+or the \lboost library,
 \begin{cppcode}
 boost::random::normal_distribution<double> rnorm(mean, sd);
 double r = rnorm(particle.rng(i));
 \end{cppcode}
-\vsmc itself also uses of \cppoo{} \cppinline{<random>} or \boost depending on
+\vsmc itself also uses of \cppoo \cppinline{<random>} or \lboost depending on
 the value of the configuration macro \cppinline{VSMC_HAS_CXX11LIB_RANDOM}.
 Though users are free to choose which one to use in their own code, there is a
-convenient alternative. For each class defined in \cppoo{}
-\cppinline{<random>}, it is imported to the \cppinline{cxx11} namespace.
-Therefore one can use
+convenient alternative. For each class defined in \cppoo \cppinline{<random>},
+it is imported to the \cppinline{cxx11} namespace.  Therefore one can use
 \begin{cppcode}
 cxx11::normal_distribution<double> rnorm(mean, sd);
 \end{cppcode}
 while the underlying implementation of \cppinline{normal_distribution} can be
-either \cppoo standard library or \boost. Note that, \vsmc defines classes
-that are available in \cppoo{} \cppinline{<random>} but not in \boost inside
-the \cppinline{cxx11} namespace if \boost is used, but not \emph{vice versa}.
+either \cppoo standard library or \lboost. Note that, \vsmc defines classes
+that are available in \cppoo \cppinline{<random>} but not in \lboost inside
+the \cppinline{cxx11} namespace if \lboost is used, but not \emph{vice versa}.
 The benefit is that if one needs to develop on multiple platforms, and only
-some of them support \cppoo and some of them have the \boost library, then
+some of them support \cppoo and some of them have the \lboost library, then
 only the configuration macro \cppinline{VSMC_HAS_CXX11LIB_RANDOM} needs to be
-changed. This can be configured through \cmake and other build systems. Of
+changed. This can be configured through \lcmake and other build systems. Of
 course, one can also use an entirely different \rng system than those provided
 by \vsmc.
 
@@ -889,7 +886,7 @@ types. For example, a simple particle filter whose state is a vector of length
 \cppinline{Dim} and type \cppinline{double} can be viewed as an $N$ by
 \cppinline{Dim} matrix where $N$ is the number of particles. A
 trans-dimensional problem can use an $N$ by $1$ matrix whose type is a user
-defined class, say \cppinline{StateType}.  For this kind of problems, \vsmc
+defined class, say \cppinline{StateType}. For this kind of problems, \vsmc
 provides a class template
 \begin{cppcode}
 template <MatrixOrder Order, std::size_t Dim, typename StateType>
@@ -897,7 +894,7 @@ class StateMatrix;
 \end{cppcode}
 which provides the constructor and the \cppinline{copy} member function
 required by the core module interface, as well as methods for accessing
-individual values.  The first template parameter (possible values
+individual values. The first template parameter (possible values
 \cppinline{RowMajor} or \cppinline{ColMajor}) specifies how the values are
 ordered in memory. Usually one shall choose \cppinline{RowMajor} to optimize
 data access. The second template parameter is the number of variables, an
@@ -940,11 +937,11 @@ for (std::size_t i = 0; i != Dim; ++i)
 value.read_state_matrix(iter.first());
 \end{cppcode}
 
-If the compiler support \cppoo{} \cppinline{<tuple>}, \vsmc also provides a
+If the compiler support \cppoo \cppinline{<tuple>}, \vsmc also provides a
 \cppinline{StateTuple} class template, which is similar to
 \cppinline{StateMatrix} except that the types of values do not have to be the
-same for each variable.  This is similar to \rlang \parencite{rlang}
-\cppinline{data.frame}.  For example, suppose each particle's state is formed
+same for each variable. This is similar to \frlang \parencite{rlang}
+\cppinline{data.frame}. For example, suppose each particle's state is formed
 by two \cppinline{double}'s, an \cppinline{int} and a user defined type
 \cppinline{StateType}, then the following constructs a value collection using
 \cppinline{StateTuple},
@@ -985,7 +982,7 @@ of \cppinline{SingleParticle<T>}. Instead, one can only get write access to a
 single particle. For example, If \cppinline{T} is a \cppinline{StateMatrix}
 instantiation or its derived class, then \cppinline{sp.state(pos)} is
 equivalent to \cppinline{particle.value().state(i, pos)} and the reference it
-returns is mutable.  See the reference manual for more informations on the
+returns is mutable. See the reference manual for more informations on the
 interface of the \cppinline{SingleParticle} class template.
 \cppinline{SingleParticle<T>} objects are usually not constructed by users,
 but rather by other classes in the \smp module, and passed to user defined
@@ -1122,21 +1119,21 @@ function implementation as shown before.
 In the simplest case, \cppinline{MoveSEQ} only takes away the loop around the
 local operations. However if one implements the move in such a way, and then
 replace \cppinline{MoveSEQ} with \cppinline{MoveOMP}, the changing of the base
-class name causes \vsmc to use \openmp to parallelize the loop. For example,
+class name causes \vsmc to use \lopenmp to parallelize the loop. For example,
 one can declare the class as
 \begin{cppcode}
 #include <vsmc/smp/backend_omp.hpp>
 class move : public MoveOMP<T>;
 \end{cppcode}
 and use exactly the same implementation as before. Now when
-\cppinline{move::operator()} is called, it will be parallelized by \openmp.
-Other backends are also supported in case that \openmp is not available. Among
-them there are \ccilk and \tbb. In addition to these well known
+\cppinline{move::operator()} is called, it will be parallelized by \lopenmp.
+Other backends are also supported in case that \lopenmp is not available. Among
+them there are \fcilk and \ltbb. In addition to these well known
 parallelization programming models, \vsmc also has its own implementation
-using \cppoo{} \cppinline{<thread>}. There are other backends documented in
-the reference manual.  To use any of them, all one needs to do is to change a
-few base class names.  In practice, one can use conditional compilation. For
-example, to use a sequential implementation or a \openmp parallelized one, we
+using \cppoo \cppinline{<thread>}. There are other backends documented in
+the reference manual. To use any of them, all one needs to do is to change a
+few base class names. In practice, one can use conditional compilation. For
+example, to use a sequential implementation or a \lopenmp parallelized one, we
 can write,
 \begin{cppcode}
 #ifdef USE_SEQ
@@ -1159,7 +1156,7 @@ prog-seq : prog.cpp
 prog-omp : prog.cpp
         $(CXX) $(CXXFLAGS) -DUSE_OMP -o prog-omp prog.cpp
 \end{shcode}
-Or one can configure the source file through a build system such as \cmake,
+Or one can configure the source file through a build system such as \lcmake,
 which can also determine which programming model is available on the system.
 
 \subsubsection{Adapter}
@@ -1182,9 +1179,9 @@ MoveAdapter<T, MoveCILK> move_obj(move_state);
 MoveAdapter<T, MoveOMP>  move_obj(move_state);
 sampler.move(move_obj, false);
 \end{cppcode}
-These are respectively, sequential, \cppoo{} \cppinline{<thread>}, \tbb,
-\cilk, and \openmp implementations. The first template parameter is the type
-of value collection and the second is the name of the base class template.
+These are respectively, sequential, \cppoo \cppinline{<thread>}, \ltbb, \lcilk,
+and \lopenmp implementations. The first template parameter is the type of
+value collection and the second is the name of the base class template.
 Actually, the \cppinline{MoveAdapter}'s constructor accepts two more optional
 arguments, the \cppinline{pre_processor} and the \cppinline{post_processor},
 corresponding to the other two aforementioned member functions. Similar
@@ -1245,13 +1242,13 @@ generate Normal random variates, is defined within \cppinline{move_state}
 instead of being a class member data even though it is created with the same
 parameters for all particles. This is because the call
 \cppinline{rnorm(sp.rng())} is not thread-safe in some implementations, for
-example, when using the \boost library.
+example, when using the \lboost library.
 
 For scalable performance, certain practices should be avoided when
 implementing member functions such as \cppinline{move_state}. For example,
 dynamic memory allocation is usually lock-based and thus should be avoided.
 Alternatively one can use a scalable memory allocator such as the one provided
-by \tbb. In general, in functions such as \cppinline{move_state}, one should
+by \ltbb. In general, in functions such as \cppinline{move_state}, one should
 avoid using locks to guarantee thread-safety, which can be a bottleneck to
 parallel performance.
 
@@ -1263,13 +1260,13 @@ parallel performance.
 
 \subsubsection{The model and algorithm}
 
-This is an example used in \smctc \parencite{smctc}. Through this example, we
+This is an example used in \lsmctc \parencite{smctc}. Through this example, we
 will show how to re-implement a simple particle filter in \vsmc. It shall walk
-one through the basic features of the library. \smctc is the first general
+one through the basic features of the library. \lsmctc is the first general
 framework for implementing \smc algorithms in \cpp and serves as one of the
 most important inspirations for the \vsmc library. It is widely used by many
 researchers. One of the goals of the current work is that users familiar with
-\smctc shall find little difficulty in using the new library.
+\lsmctc shall find little difficulty in using the new library.
 
 The state space model, known as the almost constant velocity model in the
 tracking literature, provides a simple scenario. The state vector $X_t$
@@ -1542,7 +1539,7 @@ incremental weights. After the first resizing, subsequent calls to
 \cppinline{resize} will only cause reallocation if the size changed. In our
 example, the size of the particle system is fixed, so we don't need to worry
 about excessive dynamic memory allocations. The \cppinline{move_state} member
-function moves each particle according to our model.  And after
+function moves each particle according to our model. And after
 \cppinline{move_state} is called for each particle, the
 \cppinline{post_processor} will be called and we simply add the logarithm
 incremental weights.
@@ -1579,17 +1576,17 @@ est << sampler << std::endl;
 The output file contains the \ess, resampling, importance sampling estimates
 and other informations in a table. This file can be read by most statistical
 softwares for further analysis. For instance, we can process this file with
-\rlang, and get the plot of the estimates of positions against the
+\lrlang, and get the plot of the estimates of positions against the
 observations, as shown in Figure~\ref{fig:pf}.
 
-For people familiar with the \smctc library, the implementation demonstrated
+For people familiar with the \lsmctc library, the implementation demonstrated
 here is not very different. Users still implement the same functions that
 calculate the log-likelihood etc. In fact, the complete implementation in vSMC
 requires users to write roughly the same amount of code as an implementation
-in \smctc. However, now we can benefit from parallelization. In addition, even
-the sequential version runs about twice faster than that of \smctc. The
+in \lsmctc. However, now we can benefit from parallelization. In addition, even
+the sequential version runs about twice faster than that of \lsmctc. The
 object-oriented design of \vsmc also allows better and safer implementations.
-For example, in \smctc, to pass informations to a callback, one can only do
+For example, in \lsmctc, to pass informations to a callback, one can only do
 that through a \cppinline{void} pointer. And in some cases, it is simply
 impossible to do so. In \vsmc, this can be easily done through constructors or
 member functions of a class that defines \cppinline{operator()}.
@@ -1782,11 +1779,11 @@ sequential sampler is compiled with the following header and macros,
 #define BASE_PATH PathEvalSEQ
 \end{cppcode}
 The definitions of these macros will be changed at compile time to build
-parallelized samplers. For example, when using \openmp parallelization, the
+parallelized samplers. For example, when using \lopenmp parallelization, the
 header \cppinline{backend_omp.hpp} will be used instead of
 \cppinline{backend_seq.hpp}; and \cppinline{StateSEQ} will be changed to
 \cppinline{StateOMP} along with similar changes to the other macros. In the
-distributed source, this is configured by the \cmake build system.
+distributed source, this is configured by the \lcmake build system.
 
 Again, we first introduce the \cppinline{main} function. The required headers
 are the same as the last particle filter example in addition to the \smp
@@ -2165,7 +2162,7 @@ double path_eval (std::size_t iter, const Particle<T> &, double *res);
 \end{cppcode}
 The input parameter \cppinline{iter} is the iteration number, the value of $t$
 in Equation~\ref{eq:path_est}. The return value shall be the value of
-$\alpha_t$.  The output parameter \cppinline{res} shall store the array of
+$\alpha_t$. The output parameter \cppinline{res} shall store the array of
 values
 \begin{equation*}
   \fracd{\log q_{\alpha}(X_t^{(i)})}{\alpha}\Bigm|_{\alpha = \alpha_t}.
@@ -2197,20 +2194,19 @@ After compiling and running the algorithm, the results were consistent with
 those reported in \textcite{DelMoral:2006hc}. For a more in depth analyze of the
 methodologies, extensions and the results see \textcite{Zhou2013mc}.
 
-\subsubsection[Extending the implementation using MPI]{Extending the
-  implementation using \mpi}
+\subsubsection{Extending the implementation using \lmpi}
 
-\vsmc's \mpi module assumes that identical samplers are constructed on each
+\vsmc's \lmpi module assumes that identical samplers are constructed on each
 node, with possible different number of particles to accommodate the
 difference in capacities among nodes. To extend the above \smp implementation
-for use with \mpi, first at the beginning of the \cppinline{main} function, we
-add the following,
+for use with \lmpi, first at the beginning of the \cppinline{main} function,
+we add the following,
 \begin{cppcode}
 MPIEnvironment env(argc, argv);
 \end{cppcode}
-to initialize the \mpi environment. When the object \cppinline{env} is
-destroyed at the exit of the \cppinline{main} function, the \mpi environment
-is finalized.  Second, we need to replace base value collection class template
+to initialize the \lmpi environment. When the object \cppinline{env} is
+destroyed at the exit of the \cppinline{main} function, the \lmpi environment
+is finalized. Second, we need to replace base value collection class template
 with \cppinline{StateMPI}. So now \cppinline{gmm_state} is declared as the
 following,
 \begin{cppcode}
@@ -2218,11 +2214,11 @@ class gmm_state :
     public StateMPI<BASE_STATE<StateMatrix<RowMajor, 1, gmm_param> > >;
 \end{cppcode}
 The implementation is exactly the same as before. Third, the
-\cppinline{gmm_param} class now needs to be transferable using \mpi. Unlike
+\cppinline{gmm_param} class now needs to be transferable using \lmpi. Unlike
 the \smp situations, a simple copy constructor is not enough. \vsmc uses
-\boost{} \mpi library, and thus one only needs to write a
+\lboost \lmpi library, and thus one only needs to write a
 \cppinline{serialize} member function for \cppinline{gmm_param} such that the
-data can be serialized into bytes. See documents of \boost{} \mpi and
+data can be serialized into bytes. See documents of \lboost \lmpi and
 serialization libraries for details. In summary, the following member function
 accepts an \cppinline{Archive} object as input, and it can perform a store or
 a load operation based on the \cppinline{Archive} type. In a load operation,
@@ -2261,11 +2257,11 @@ boost::mpi::reduce(World, ps, ps_sum, std::plus<double>(), 0);
 ps = ps_sum;
 \end{cppcode}
 
-After these few lines of change, the sampler is now parallelized using \mpi
+After these few lines of change, the sampler is now parallelized using \lmpi
 and can be deployed to clusters and other distributed memory architecture. On
 each node, the selected \smp parallelization is used to perform
-multi-threading parallelization locally. \vsmc's \mpi module will take care of
-normalizing weights and other tasks.
+multi-threading parallelization locally. \vsmc's \lmpi module will take care
+of normalizing weights and other tasks.
 
 \subsubsection{Parallelization performance}
 
@@ -2273,11 +2269,11 @@ One of the main motivation behind the creation of \vsmc is to ease the
 parallelization with different programming models. The same implementation can
 be used to built different samplers based on what kind of parallel programming
 model is supported on users' platforms. In this section we compare the
-performance of various \smp parallel programming models and \opencl
+performance of various \smp parallel programming models and \lopencl
 parallelization.
 
-We consider five different implementations supported by \icpc 2013:
-sequential, \tbb, \cilk, \openmp and \cppoo{} \cppinline{<thread>}. The
+We consider five different implementations supported by \licpc 2013:
+sequential, \ltbb, \lcilk, \lopenmp and \cppoo \cppinline{<thread>}. The
 samplers are compiled with
 \begin{cppcode}
 CXX=icpc -std=c++11 -gcc-name=gcc-4.7 -gxx-name=g++-4.7
@@ -2311,17 +2307,17 @@ typical applications, the difference is not very significant.
   \centering
   \includegraphics[width=\linewidth]{fig/bench-ocl-time-running}
   \includegraphics[width=\linewidth]{fig/bench-ocl-speedup-running}
-  \caption{Performance of \opencl implementations of Bayesian modeling for
+  \caption{Performance of \lopencl implementations of Bayesian modeling for
     Gaussian mixture model (Linux; Xeon W3550 \gpu, 3.06GHz, 4 cores, 8
     threads; NVIDIA Quadro 2000).}
   \label{fig:bench-ocl-perf}
 \end{figure}
 
-\opencl implementations are also compared on the same workstation, which also
-has an NVIDIA Quadro 2000 graphic card. \opencl programs can be compiled to
-run on both \cpu{}s and \gpu{}s. For \cpu implementation, there are \ciocl and
-\caocl platforms. We use the \tbb implementation as a baseline for comparison.
-The same \opencl implementation are used for all the \cpu and \gpu runtimes.
+\lopencl implementations are also compared on the same workstation, which also
+has an NVIDIA Quadro 2000 graphic card. \lopencl programs can be compiled to
+run on both \cpu{}s and \gpu{}s. For \cpu implementation, there are \fiocl and
+\faocl platforms. We use the \ltbb implementation as a baseline for comparison.
+The same \lopencl implementation are used for all the \cpu and \gpu runtimes.
 Therefore they are not particularly optimized for any of them. For the \gpu
 implementation, in addition to double precision, we also tested a single
 precision configuration. Unlike modern \cpu{}s, which have the same
@@ -2330,10 +2326,10 @@ performance for double and single precision floating point operations (unless
 
 For different number of particles, the wall clock time and speed up are
 plotted in Figure~\ref{fig:bench-ocl-perf}. With smaller number of particles,
-the \opencl implementations have a high overhead when compared to the \tbb
-implementation. With a large number of particles, \aocl has a similar
-performance as the \tbb implementation. \iocl is about 40\% faster than the
-\tbb implementation. This is due to more efficient vectorization and compiler
+the \lopencl implementations have a high overhead when compared to the \ltbb
+implementation. With a large number of particles, \laocl has a similar
+performance as the \ltbb implementation. \liocl is about 40\% faster than the
+\ltbb implementation. This is due to more efficient vectorization and compiler
 optimizations. The double precision performance of the NVIDIA \gpu has a 220\%
 speedup and the single precision performance has near 1600\% speedup. As a
 rough reference for the expected performance gain, the \cpu has a theoretical
@@ -2341,11 +2337,11 @@ peak performance of 24.48 GFLOPS. The \gpu has a theoretical peak performance
 of 60 GFLOPS in double precision and 480 GFLOPS in single precision. This
 represents 245\% and 1960\% speedup compared to the \cpu, respectively.
 
-It is widely believed that \opencl programming is tedious and hard. However,
-\vsmc provides facilities to manage \opencl platforms and devices as well as
-common operations. Limited by the scope of this paper, the \opencl
+It is widely believed that \lopencl programming is tedious and hard. However,
+\vsmc provides facilities to manage \lopencl platforms and devices as well as
+common operations. Limited by the scope of this paper, the \lopencl
 implementation (distributed with the \vsmc source) is not documented in this
-paper. Overall the \opencl implementation has about 800 lines including both
+paper. Overall the \lopencl implementation has about 800 lines including both
 host and device code. It is not an enormous increase in effort when compared
 to the 500 lines \smp implementation. Less than doubling the code base but
 gaining more than 15 times performance speedup, we consider the programming
@@ -2371,36 +2367,36 @@ Some future work may worth the effort to ease the implementation of \smc
 algorithms further. However, there is a balance between performance,
 flexibility and the ease of use. \vsmc aims to be developer-friendly and to
 provide users as much control as possible for all performance related aspects.
-For a \bugs-like interface, users may be interested in other software such as
-\biips \parencite{BiiPS}. In addition \libbi \parencite{Murray2013bi} provides
-a user friendly and high performance alternative with a focus on state-space
-models. Compared with these recent developments, \vsmc is less accessible to
-those with little or no knowledge of \cpp. However, for researchers with
-expertise in \cpp and template metaprogramming in particular, \vsmc provides a
-framework within which potential superior performance can be obtained and
-greater flexibility and extensibility are possible.
+For a \lbugs-like interface, users may be interested in other software such as
+\fbiips \parencite{BiiPS}. In addition \flibbi \parencite{Murray2013bi}
+provides a user friendly and high performance alternative with a focus on
+state-space models. Compared with these recent developments, \vsmc is less
+accessible to those with little or no knowledge of \cpp. However, for
+researchers with expertise in \cpp and template metaprogramming in particular,
+\vsmc provides a framework within which potential superior performance can be
+obtained and greater flexibility and extensibility are possible.
 
 \clearpage
 \appendix
 
-\section[vsmc and smctc]{\protect\vsmc and \protect\smctc}
+\section{\protect\vsmc and \protect\smctc}
 \label{sec:vsmc and smctc}
 
-As noted by one referee, it is of interest to compare the \vsmc and \smctc
+As noted by one referee, it is of interest to compare the \vsmc and \lsmctc
 libraries. In particular, the differences and advantages of \vsmc when
 parallel computing is not involved.
 
 As mentioned in Section~\ref{sec:Introduction}, the \vsmc library has some
-similarity to \smctc. This is by intention so users already familiar with
-\smctc can learn the new library easier. For example, they both use user
+similarity to \lsmctc. This is by intention so users already familiar with
+\lsmctc can learn the new library easier. For example, they both use user
 defined type to abstract algorithm specific state space. They also both use
 user defined callbacks to perform algorithm specific operations such as
 updating particles. However there are also differences.
 
 The most significant difference is perhaps how the particle system is
-abstracted. In \smctc, users write custom classes to abstract $X^{(i)}$. In
+abstracted. In \lsmctc, users write custom classes to abstract $X^{(i)}$. In
 \vsmc, users define classes to abstract $\{X^{(i)}\}_{i=1}^N$. In addition, in
-\smctc user defined callbacks operate on each particle individually while in
+\lsmctc user defined callbacks operate on each particle individually while in
 \vsmc they operate on all particles as a whole. This design of \vsmc allows
 different parallelization models to be implemented. For example, suppose that
 \simd vectorization is desired, which is not currently directly supported by
@@ -2408,14 +2404,14 @@ different parallelization models to be implemented. For example, suppose that
 values are properly aligned in memory and in each callback, \simd operations
 can be applied to the whole value collection since the \vsmc interface allows
 users to access them all at once. This kind of constructs is not possible in
-\smctc without changing the internal of the library. See also
+\lsmctc without changing the internal of the library. See also
 Section~\ref{sub:Core module} on the value collection type of \vsmc.
 
 Apart from parallelization, \vsmc also has other advantages. Internally it has
-a very different design to that of \smctc. It is more modular and almost all
+a very different design to that of \lsmctc. It is more modular and almost all
 parts of the sampler can be replaced without changing the internal of the
 library. For example, consider that a new resampling algorithm is desired. In
-\smctc, if it is not provided by the library, users have to implement all the
+\lsmctc, if it is not provided by the library, users have to implement all the
 operations ranging from generating replication numbers to copying each
 particle. In \vsmc, one only needs to implement a function with the following
 signature,
@@ -2428,27 +2424,27 @@ particle. And in the \cppinline{Sampler}'s constructor, one pass it this object
 instead of the name of the built-in resampling scheme name. \vsmc's
 implementations of gathering the normalized weights into an array, and copying
 particles according to the replication numbers can be reused. This particular
-example is of interest when the sampler is parallelized using \mpi, where
+example is of interest when the sampler is parallelized using \lmpi, where
 copying particles across all nodes requires some effort that may not be
 trivial. On the other hand, if an existing resampling algorithm is sufficient,
 but the parallelization requires special memory management, all one needs to
 do is providing \vsmc with a specialized \cppinline{copy} member function inside
 their value collection class. And the implementation of the resampling can be
-reused. (This is exactly what \vsmc does for the \opencl and \mpi module.)
+reused. (This is exactly what \vsmc does for the \lopencl and \lmpi module.)
 
-In some situations, \smctc might appear to be easier to use than \vsmc. For
+In some situations, \lsmctc might appear to be easier to use than \vsmc. For
 example, it allows one to define a class that abstracts a single particle. And
 naturally such classes can easily define operations that manipulate a single
 particle. In contrast, in \vsmc users can only interact with a single particle
 through the \cppinline{SingleParticle<T>} object. However, as shown in
 Section~\ref{sub:SMP module}, users can obtain similar effects by defining the
 \cppinline{single_particle_type} class template inside the value collection
-type.  Alternatively, one can also reuse classes defined for \smctc by
+type. Alternatively, one can also reuse classes defined for \lsmctc by
 combining them with \cppinline{StateMatrix} or \cppinline{StateTuple}. The
 \cppinline{single_particle_type} and resampling example are only two of many
 places where \vsmc allows users to extend or replace its default
 implementations. Through the use of template metaprogramming, \vsmc is much
-more flexible than \smctc.
+more flexible than \lsmctc.
 
 In summary, \vsmc aims to be as flexible as possible. To quote Larry Wall,
 ``Easy things should be easy, and hard things should be possible''. In \vsmc,
@@ -2468,9 +2464,9 @@ model share a large amount of code.
 \vsmc also enjoys higher performance even for sequential implementations. For
 instance, as noted before, a sequential implementation in \vsmc of the
 particle filter in Section~\ref{sub:A simple particle filter} is about twice
-faster than that in \smctc.
+faster than that in \lsmctc.
 
-In the author's opinion, \smctc is suitable for implementing algorithms that
+In the author's opinion, \lsmctc is suitable for implementing algorithms that
 can fit into its framework easily. In contrast, \vsmc might be more suitable
 for developing new algorithms, especially those related to \smc. \vsmc is also
 useful when different parallelization of the same algorithm is desired. For
