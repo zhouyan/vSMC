@@ -43,7 +43,7 @@
 \UseAbbr[\vsmc][\sffamily]{vSMC}
 
 \def\LinkAbbr#1#2{
-  \csgdef{l#1}{\href{#2}{\csuse{#1}}}
+  \csgdef{l#1}{\href{#2}{\csuse{#1}\xspace}}
   \csgdef{f#1}{\href{#2}{\csuse{#1}}\footnote{\url{#2}}\xspace}%
 }
 \LinkAbbr{aocl}{http://developer.amd.com/tools-and-sdks/opencl-zone/}
