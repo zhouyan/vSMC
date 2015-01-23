@@ -12,8 +12,8 @@ bib, mintcode, minted=cache]{marticle}
 \section{Introduction}
 \label{sec:Introduction}
 
-Sequential Monte Carlo (\smc) is a class of sampling algorithms that combine
-importance sampling and resampling. They have been used as ``particle
+\emph{Sequential Monte Carlo} (\smc) is a class of sampling algorithms that
+combine importance sampling and resampling. They have been used as ``particle
 filters'' to solve optimal filtering problems; see, for example,
 \textcite{Cappe:2007hz} and \textcite{Doucet:2011us} for recent reviews. They
 are also used in a static setting where a target distribution is of interest,
@@ -51,19 +51,19 @@ application, they can be replaced while being integrated with other components
 seamlessly.
 
 Though \vsmc is a new library designed from the ground up, it has some
-similarity to the aforementioned \lsmctc, which is by intention. For example,
-they both use user defined callbacks to perform application specific
+similarity to the aforementioned \lsmctc library, which is by intention. For
+example, they both use user defined callbacks to perform application specific
 operations while the library only implements tasks that are common to all
 samplers. However, there are also significant differences. First of all, \vsmc
 allows easy implementation of parallelized algorithms. The library is also
 more flexible and enjoys better performance. The reusability and extensibility
 of \vsmc lead to better algorithm implementation design, such that less
-duplicate work need to be done for different algorithms. Both flexibility and
+duplicate work needs to be done for different algorithms. Both flexibility and
 better performance are made possible through the use of template
 metaprogramming, a technique pioneered by \fblitz. Some differences of the two
 libraries and the advantage of the approach of \vsmc will be discussed when
-features are introduced in Section~\ref{sec:The vSMC library}. A more detailed
-comparison can be found in Appendix~\ref{sec:vsmc and smctc}. We will not
+features are introduced in section~\ref{sec:The vSMC library}. A more detailed
+comparison can be found in appendix~\appref{sec:vsmc and smctc}. We will not
 elaborate this topic further before the \smc algorithms and the library are
 properly introduced in the following sections.
 
@@ -73,7 +73,7 @@ properly introduced in the following sections.
 \subsection{Sequential importance sampling and resampling}
 \label{sub:Sequential importance sampling and resampling}
 
-Importance sampling is a technique which allows the calculation of the
+\emph{Importance sampling} is a technique which allows the calculation of the
 expectation of a function $\varphi$ with respect to a distribution $\pi$ using
 samples from some other distribution $\eta$ with respect to which $\pi$ is
 absolutely continuous, based on the identity,
@@ -103,9 +103,9 @@ or
 where $W^{(i)}\propto w^{(i)}$ and are normalized such that $\sum_{i=1}^N
 W^{(i)} = 1$.
 
-Sequential importance sampling (\sis) generalizes the importance sampling
-technique for a sequence of distributions $\{\pi_t\}_{t\ge0}$ defined on
-spaces $\{\prod_{k=0}^tE_k\}_{t\ge0}$. At time $t = 0$, the samples
+\emph{Sequential importance sampling} (\sis) generalizes the importance
+sampling technique for a sequence of distributions $\{\pi_t\}_{t\ge0}$ defined
+on spaces $\{\prod_{k=0}^tE_k\}_{t\ge0}$. At time $t = 0$, the samples
 $\{X_0^{(i)}\}_{i=1}^N$ are generated from $\eta_0$ and the weights are
 calculated as $W_0^{(i)} \propto \pi_0(X_0^{(i)})/\eta_0(X_0^{(i)})$. At time
 $t\ge1$, each sample $X_{0:t-1}^{(i)}$, usually termed \emph{particles} in the
@@ -126,13 +126,13 @@ and
   {q_t(X_{0:t}^{(i)}|X_{0:t-1}^{(i)})\pi_{t-1}(X_{0:t-1}^{(i)})}W_{t-1}^{(i)}.
   \label{eq:si}
 \end{align}
-Importance sampling estimate of $\Exp_{\pi_t}[\varphi_t(X_{0:t})]$ can be
+The importance sampling estimate of $\Exp_{\pi_t}[\varphi_t(X_{0:t})]$ can be
 obtained using $\{W_t^{(i)},X_{0:t}^{(i)}\}_{i=1}^N$.
 
 However this approach fails as $t$ becomes large. The weights tend to become
 concentrated on a few particles as the discrepancy between $\eta_t$ and
-$\pi_t$ becomes larger. Resampling techniques are applied such that, a new
-particle system $\{\bar{W}_t^{(i)},\bar{X}_{0:t}^{(i)}\}_{i=1}^M$ with the
+$\pi_t$ becomes larger. \emph{Resampling} techniques are applied such that, a
+new particle system $\{\bar{W}_t^{(i)},\bar{X}_{0:t}^{(i)}\}_{i=1}^M$ with the
 following property is generated,
 \begin{equation}
   \Exp\Square[Big]{\sum_{i=1}^M\bar{W}_t^{(i)}\varphi_t(\bar{X}_{0:t}^{(i)})}
@@ -202,7 +202,7 @@ $\eta_t$ and $\tilde\pi_t$, Equation~\ref{eq:si} is applied and in this case,
 \begin{equation}
   W_t^{(i)} \propto \frac{\tilde\pi_t(X_{0:t}^{(i)})}{\eta_t(X_{0:t}^{(i)})}
   = \frac{\pi_t(X_t^{(i)})\prod_{s=0}^{t-1}L_s(X_{s+1}^{(i)}, X_s^{(i)})}
-  {\eta_0(X_0^{(i)})\prod_{k=1}^tK_t(X_{t-1}^{(i)},X_t^{(i)})}
+  {\eta_0(X_0^{(i)})\prod_{k=1}^tK_k(X_{k-1}^{(i)},X_k^{(i)})}
   \propto \tilde{w}_t(X_{t-1}^{(i)}, X_t^{(i)})W_{t-1}^{(i)},
 \end{equation}
 where $\tilde{w}_t$, termed the \emph{incremental weights}, are calculated as,
@@ -333,10 +333,10 @@ resampling.
 Particle filters as seen in the physics and signal processing literature, can
 also be interpreted as the sequential importance sampling and resampling
 algorithms. See \textcite{Doucet:2011us} for a review of this topic. A simple
-particle filter example is used in Section~\ref{sub:A simple particle filter}
+particle filter example is used in section~\ref{sub:A simple particle filter}
 to demonstrate basic features of the \vsmc library.
 
-\section{Using the vSMC library}
+\section[Using the vSMC library]{Using the \protect\vsmc library}
 \label{sec:Using the vSMC library}
 
 \subsection{Overview}
@@ -351,7 +351,7 @@ included in these modules are introduced later in context.
     \cppinline{Particle} and others. These classes use user defined callback
     functions or callable objects, such as functors, to perform problem
     specific operations, such as updating particle values and weights. This
-    module is documented in Section~\ref{sub:Core module}.
+    module is documented in section~\ref{sub:Core module}.
   \item[Symmetric Multiprocessing (\smp)] This is the form of computing most
     people use everyday, including multiprocessor workstations, multicore
     desktops and laptops. Classes within this module make it possible to write
@@ -359,13 +359,13 @@ included in these modules are introduced later in context.
     sequentially or in parallel through various parallel programming models. A
     method defined through classes of this module can be used by
     \cppinline{Sampler} as callback objects. This module is documented in
-    Section~\ref{sub:SMP module}.
+    section~\ref{sub:SMP module}.
   \item[Message Passing Interface] \lmpi is the \emph{de facto} standard for
     parallel programming on distributed memory architectures. This module
     enables users to adapt implementations of algorithms using the \smp module
     such that the same sampler can be parallelized using \lmpi. In addition,
     when used with the \smp module, it allows easy implementation of hybrid
-    parallelization such as \lmpi/\lopenmp. In Section~\ref{sub:Bayesian
+    parallelization such as \lmpi/\lopenmp. In section~\ref{sub:Bayesian
       Modeling of Gaussian mixture model}, an example is shown how to extend
     existing \smp parallelized samplers using this module.
   \item[OpenCL] This module is similar to the two above except it eases the
@@ -376,25 +376,25 @@ included in these modules are introduced later in context.
     this paper to give a proper introduction to \gpgpu, \lopencl and their use
     in \vsmc. However, later we will demonstrate the relative performance of
     this programming model on both \cpu{}s and \gpu{}s in
-    Section~\ref{sub:Bayesian Modeling of Gaussian mixture model}.
+    section~\ref{sub:Bayesian Modeling of Gaussian mixture model}.
 \end{description}
 
 \subsection{Obtaining, installation and documentation}
 
 \vsmc is a header only library. There is practically no installation step. The
-library can be downloaded from
-\url{http://zhouyan.github.io/vSMC/vSMC_JSS.zip}. After downloading and
-unpacking, one can start using \vsmc by ensuring that the compiler can find
-the headers inside the \cppinline{include} directory. To permanently install
-the library in a system directory, one can simply copy the contents of the
-\cppinline{include} directory to an appropriate place.
+stable version of the library can be downloaded from
+\url{https://github.com/zhouyan/vSMC/archive/master.zip}. After downloading
+and unpacking, one can start using \vsmc by ensuring that the compiler can
+find the headers inside the \shinline{include} directory. To permanently
+install the library in a system directory, one can simply copy the contents of
+the \shinline{include} directory to an appropriate place.
 
 A reference manual can be found on
-\url{http://zhouyan.github.io/vSMCDoc/vSMC_JSS}. It is beyond the scope of
-this paper to document every feature of the library. In many places we will
-refer to this reference manual for further information.
+\url{http://zhouyan.github.io/vSMCDoc/master}. It is beyond the scope of this
+paper to document every feature of the library. In many places we will refer
+to this reference manual for further information.
 
-The source of examples are in the \cppinline{vSMCExample} directory. To build
+The source of examples are in the \shinline{example} directory. To build
 the examples distributed with the library, one need \fcmake, version~2.8.3 or
 later.
 \begin{shcode}
@@ -405,9 +405,9 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 make example
 \end{shcode}
 To build only the two examples documented in this paper, change the target of
-\cppinline{make} from \cppinline{example} to \cppinline{paper}. The source of
-these two examples are in the \cppinline{paper} subdirectory of the
-\cppinline{vSMCExample} directory.
+\shinline{make} from \shinline{example} to \shinline{paper}. The source of
+these two examples are in the \shinline{paper} subdirectory of the
+\shinline{example} directory.
 
 The library is under active development. See the homepage of the library,
 \url{http://zhouyan.github.io/vSMC}, for latest information. In particular,
@@ -415,12 +415,12 @@ one can use \lgit to obtain the latest source of the library and the examples,
 \begin{shcode}
 git clone https://github.com/zhouyan/vSMC.git
 cd vSMC
-git clone https://github.com/zhouyan/vSMCExample.git
+git checkout develop
 \end{shcode}
 One can proceed as before using the \lcmake script to build the examples. In
 addition, given \fdoxygen, version~1.8.3 or later, one can build the reference
-manual by invoking \cppinline{make docs}. The latest reference manual can also
-be found on \url{http://zhouyan.github.io/vSMCDoc/master}.
+manual by invoking \shinline{make docs}. The latest reference manual can also
+be found on \url{http://zhouyan.github.io/vSMCDoc/develop}.
 
 \subsection{Third-party dependencies}
 
@@ -433,18 +433,18 @@ generating. For an \smc sampler with $N$ particles, \vsmc constructs $N$
 such streams without a huge memory footprint or other performance penalties.
 Since each particle has its own independent \rng stream, it frees users from
 many thread-safety and statistical independence considerations. \vsmc provides
-its own implementations of the same algorithms in \lrandom. It is not
-necessary for users to install this library. However, the performance of the
-implementations in \vsmc can be either faster or slightly slower than
+its own implementations of the same algorithms in \parencite{random}. It is
+not necessary for users to install this library. However, the performance of
+the implementations in \vsmc can be either faster or slightly slower than
 \lrandom, depending on the platforms. And therefore, using \lrandom instead of
 the \vsmc implementation can be desirable for some users. We will show how to
-replace the \rng used by \vsmc later in Section~\ref{sub:Core module}. Within
+replace the \rng used by \vsmc later in section~\ref{sub:Core module}. Within
 \vsmc, these \rng streams are wrapped under \cppoo \rng engines, and can be
 replaced by other compatible \rng engines seamlessly. Users only need to be
 familiar with classes defined in \cppoo \cppinline{<random>} or their \fboost
 equivalents to use these \rng streams. See the documentation of the
 corresponding libraries for details, as well as examples in
-Section~\ref{sec:Example}.
+section~\ref{sec:Example}.
 
 The library makes use of some \cppoo libraries, in particular the
 \cppinline{<functional>} and \cppinline{<random>} headers. However, if \cppoo
@@ -471,20 +471,16 @@ to use the \lboost library.
 \vsmc has been tested with recent versions of \fclang, \fgcc, \ficpc and
 \fmsvc. \vsmc can optionally use some \cppoo features to improve performance
 and usability. In particular, as mentioned before, \vsmc can use \cppoo
-standard libraries instead of the \lboost library. At the time of writing,
-\lclang with \flibcpp has the most comprehensive support of \cppoo with
-respect to standard compliant and feature completion. \lgcc~4.8, \lmsvc~2012
-and \licpc~2013 also have very good \cppoo support. Note that, provided the
-\lboost library is available, all \cppoo language and library features are
-optional.  \vsmc can be used with any \cppne conforming compilers. However,
-due to the heavy usage of templates, older compilers may require considerable
-longer time and more memory to compile the library. More recent compilers can
-perform significantly better. From the author's experience, \lclang~3.3,
-\lgcc~4.7, \licpc~2010 and \lmsvc~2010, or later versions of these compilers
-are recommended. They are also regularly tested during the development of the
-library.
+standard libraries instead of the \lboost library. At the time writing,
+\lclang~3.4, \lgcc~4.8, \lmsvc~2013 and \licpc~2014 or later versions of these
+compilers have decent \cppoo support. Note that, provided the \lboost library
+is available, all \cppoo language and library features are optional.  \vsmc
+can be used with any \cppne conforming compilers. However, due to the heavy
+usage of templates, older compilers may require considerable longer time and
+more memory to compile the library. More recent compilers can perform
+significantly better.
 
-\section{The vSMC library}
+\section[The vSMC library]{The \protect\vsmc library}
 \label{sec:The vSMC library}
 
 \subsection{Core module}
@@ -510,7 +506,7 @@ functions, are declared in the namespace \cppinline{vsmc}.
     value collection object. Another is an object that abstracts weights
     $\{W_t^{(i)}\}_{i=1}^N$. By default this is a \cppinline{WeightSet}
     object. The last is a collection of \rng streams, one for each particle.
-    By default this is an \cppinline{RngSet<Threefry4x32, Vector>} object.
+    By default this is an \cppinline{RngSet<Threefry4x64, Vector>} object.
   \item Operations that perform tasks common to all samplers to these
     particles, such as resampling. These are the member functions of
     \cppinline{Particle<T>}.
@@ -656,7 +652,7 @@ std::size_t init_func (Particle<T> &particle, void *param);
 or a class with \cppinline{operator()} properly defined, such as
 \begin{cppcode}
 struct init_class
-{ std::size_t operator() (Particle<T> &particle, void *param); };
+{std::size_t operator() (Particle<T> &particle, void *param);};
 \end{cppcode}
 They can be added to the sampler through
 \begin{cppcode}
@@ -753,7 +749,7 @@ compute this importance sampling estimate, one need to define the following
 evaluation function (or a class with \cppinline{operator()} properly defined),
 \begin{cppcode}
 void monitor_eval (std::size_t iter, std::size_t m,
-        const Particle<T> &particle, double *res)
+                   const Particle<T> &particle, double *res)
 \end{cppcode}
 and add it to the sampler by calling,
 \begin{cppcode}
@@ -878,7 +874,7 @@ changed. This can be configured through \lcmake and other build systems. Of
 course, one can also use an entirely different \rng system than those provided
 by \vsmc.
 
-\subsection{SMP module}
+\subsection[SMP module]{\protect\smp module}
 \label{sub:SMP module}
 
 \subsubsection{The value collection}
@@ -1005,8 +1001,8 @@ class UserValueType : public StateMatrix<RowMajor, 2, double>
     class single_particle_type :
         public typename base_type::single_particle_type<T>
     {
-        double mean () const { return this->state(0); }
-        double sd   () const { return this->state(1); }
+        double mean () const {return this->state(0);}
+        double sd   () const {return this->state(1);}
     };
 };
 \end{cppcode}
@@ -1212,8 +1208,8 @@ Classes in the \vsmc library usually guarantee that their member functions are
 thread-safe in the sense that calling the same member function on different
 objects at the same time from different threads is safe. However, calling
 mutable member functions on the same object from different threads is usually
-not safe. Calling immutable member functions is generally safe. There are a
-few exceptions,
+unsafe. Calling immutable member functions is generally safe. There are a few
+exceptions,
 \begin{itemize}
   \item The constructors of \cppinline{Particle} and \cppinline{Sampler} are
     not thread-safe. Therefore if one need to construct multiple
@@ -1223,19 +1219,20 @@ few exceptions,
   \item Member functions that concern a single particle are generally
     thread-safe in the sense that one can call them on the same object from
     different threads as long as they are called for different particles. For
-    example, \cppinline{Particle::rng} and \cppinline{StateMatrix::state} are
-    thread-safe.
+    example, \cppinline{Particle::rng}.
 \end{itemize}
 In general, one can safely manipulate different individual particles from
 different threads, which is the minimal requirement for scalable
 parallelization. But one cannot manipulate the whole particle collection from
-different threads. For example, \cppinline{WeightSet::set_log_weight} cannot
-be called from multiple threads on the same object.
+different threads. For example, one cannot call
+\cppinline{WeightSet::set_log_weight} from multiple threads on the same
+object. This also follows the above rule that mutable member functions is
+unsafe.
 
 User defined callbacks shall generally follow the same rules. For example, for
 a \cppinline{MoveOMP} subclass, \cppinline{pre_processor} and
-\cppinline{post_processor} does not have to be thread-safe, but
-\cppinline{move_state} needs to be. In general, avoid write access to memory
+\cppinline{post_processor} does not have to be thread-safe, but it needs to be
+so for \cppinline{move_state}. In general, avoid write access to memory
 locations shared by all particles from \cppinline{move_state} and other
 similar member functions. One needs to take some extra care when using
 third-party libraries. For example, in our example implementation of the
@@ -1302,7 +1299,7 @@ observation noise, $W_t$ comprises independent, identically distributed
 $t$-distributed random variables with degree of freedom $\nu = 10$. The prior
 at time $0$ corresponds to an axis-aligned Gaussian with variance $4$ for the
 position coordinates and $1$ for the velocity coordinates. The particle filter
-algorithm is shown in Algorithm~\ref{alg:pf}.
+algorithm is shown in algorithm~\ref{alg:pf}.
 
 \begin{algorithm}[t]
 \begin{algorithmic}
@@ -1380,13 +1377,17 @@ two position parameters. Next, we initialized the sampler with data file
 processed. The last step is that we output the results into a file called
 \cppinline{paper_pf.est}.
 
-The class \cppinline{cv} will be our value collection which is a subclass of
-\cppinline{StateMatrix<RowMajor, Dim, double>}. To illustrate both the core
-module and the \smp module, the initialization \cppinline{cv_init} will be
-implemented as a standalone function. The move \cppinline{cv_move} will be
-implemented as a derived class of \cppinline{MoveSEQ<cv>}. To monitor the
-importance sampling estimates of the two position parameters, we will
-implement a simple function \cppinline{cv_monitor_state} and use the adapter
+The class \cppinline{cv} will be our value collection. It is defined as a
+subclass of,
+\begin{cppcode}
+StateMatrix<RowMajor, Dim, double>
+\end{cppcode}
+To illustrate both the core module and the \smp module, the initialization
+\cppinline{cv_init} will be implemented as a standalone function. The move
+\cppinline{cv_move} will be implemented as a derived class of
+\cppinline{MoveSEQ<cv>}. To monitor the importance sampling estimates of the
+two position parameters, we will implement a simple function
+\cppinline{cv_monitor_state} and use the adapter
 \cppinline{MonitorEvalAdapter<cv, MonitorEvalSEQ>}.
 
 The value collection is an $N$ by \cppinline{Dim} (in this case
@@ -1535,7 +1536,7 @@ class cv_move : public MoveSEQ<cv>
 };
 \end{cppcode}
 First, before calling any \cppinline{move_state}, the
-\cppinline{pre_processor} will be called, as described in Section~\ref{sub:SMP
+\cppinline{pre_processor} will be called, as described in section~\ref{sub:SMP
   module}. At this step, we will resize the vector used for storing
 incremental weights. After the first resizing, subsequent calls to
 \cppinline{resize} will only cause reallocation if the size changed. In our
@@ -1579,7 +1580,7 @@ The output file contains the \ess, resampling, importance sampling estimates
 and other informations in a table. This file can be read by most statistical
 softwares for further analysis. For instance, we can process this file with
 \lrlang, and get the plot of the estimates of positions against the
-observations, as shown in Figure~\ref{fig:pf}.
+observations, as shown in figure~\ref{fig:pf}.
 
 For people familiar with the \lsmctc library, the implementation demonstrated
 here is not very different. Users still implement the same functions that
@@ -1644,7 +1645,7 @@ $r\in\{1,2,\dots\}$, the sequence $\{\pi_t\}_{t=0}^{T_r}$, defined by
 \end{equation}
 where the number of distributions, $T_r$, and the annealing schedule,
 $\alpha:[0,1]\to[0,1]$, may be different for each model. This leads to
-Algorithm~\ref{alg:gmm}.
+algorithm~\ref{alg:gmm}.
 
 \begin{algorithm}[t]
 \begin{algorithmic}
@@ -1672,7 +1673,7 @@ Algorithm~\ref{alg:gmm}.
 \label{alg:gmm}
 \end{algorithm}
 
-The \mcmc kernel $K_t$ in Algorithm~\ref{alg:gmm} is constructed as a
+The \mcmc kernel $K_t$ in algorithm~\ref{alg:gmm} is constructed as a
 three-blocks Metropolis random walk,
 \begin{enumerate}
   \item Update $\mu_{1:r}$ through a Normal random walk.
@@ -1839,10 +1840,10 @@ calculate the path sampling integration. Then we initialize and iterate the
 sampler and get the normalizing constant estimates.
 
 It is obvious that the parameter class \cppinline{gmm_param} needs to store
-the parameters $(\mu_{1:r},\lambda_{1:r},\omega_{1:r})$. We also associate
-with each particle its log-likelihood and log-prior. Here is the definition of
-the \cppinline{gmm_param} class. We omitted definitions of some data access
-member functions.
+the parameter vector $(\mu_{1:r},\lambda_{1:r},\omega_{1:r})$. We also
+associate with each particle its log-likelihood and log-prior. Here is the
+definition of the \cppinline{gmm_param} class. We omitted definitions of some
+data access member functions.
 \begin{cppcode}
 class gmm_param
 {
@@ -2172,7 +2173,7 @@ values
 Our implementation of \cppinline{gmm_path} is a subclass of an \smp module
 base class, which provides an \cppinline{operator()} that satisfies the above
 interface requirement. Its usage is similar to the \cppinline{MoveSEQ}
-template introduced in Section~\ref{sub:SMP module}.
+template introduced in section~\ref{sub:SMP module}.
 
 The path sampling integrands under this geometry annealing scheme are simply
 the log-likelihood. Therefore the implementation of \cppinline{gmm_path} class
@@ -2196,7 +2197,7 @@ After compiling and running the algorithm, the results were consistent with
 those reported in \textcite{DelMoral:2006hc}. For a more in depth analyze of
 the methodologies, extensions and the results see \textcite{Zhou2013mc}.
 
-\subsubsection{Extending the implementation using \lmpi}
+\subsubsection{Extending the implementation using \protect\mpi}
 
 \vsmc's \lmpi module assumes that identical samplers are constructed on each
 node, with possible different number of particles to accommodate the
@@ -2289,7 +2290,7 @@ iterations with a prior annealing scheme is used for all implementations. A
 range of numbers of particles are tested, from $2^3$ to $2^{17}$.
 
 For different number of particles, the wall clock time and speedup are shown
-in Figure~\ref{fig:bench-smp-perf}. For $10^4$ or more particles, the
+in figure~\ref{fig:bench-smp-perf}. For $10^4$ or more particles, the
 differences are minimal among all the programming models. They all have
 roughly 550\% speedup. With smaller number of particles, \vsmc's \cppoo
 parallelization is less efficient than other industry strength programming
@@ -2327,7 +2328,7 @@ performance for double and single precision floating point operations (unless
 \simd), \gpu{}s penalize double precision performance heavily.
 
 For different number of particles, the wall clock time and speed up are
-plotted in Figure~\ref{fig:bench-ocl-perf}. With smaller number of particles,
+plotted in figure~\ref{fig:bench-ocl-perf}. With smaller number of particles,
 the \lopencl implementations have a high overhead when compared to the \ltbb
 implementation. With a large number of particles, \laocl has a similar
 performance as the \ltbb implementation. \liocl is about 40\% faster than the
@@ -2381,14 +2382,14 @@ obtained and greater flexibility and extensibility are possible.
 \clearpage
 \appendix
 
-\section{\protect\vsmc and \protect\smctc}
+\section[vSMC and SMCTC]{\protect\vsmc and \protect\smctc}
 \label{sec:vsmc and smctc}
 
 As noted by one referee, it is of interest to compare the \vsmc and \lsmctc
 libraries. In particular, the differences and advantages of \vsmc when
 parallel computing is not involved.
 
-As mentioned in Section~\ref{sec:Introduction}, the \vsmc library has some
+As mentioned in section~\ref{sec:Introduction}, the \vsmc library has some
 similarity to \lsmctc. This is by intention so users already familiar with
 \lsmctc can learn the new library easier. For example, they both use user
 defined type to abstract algorithm specific state space. They also both use
@@ -2407,7 +2408,7 @@ values are properly aligned in memory and in each callback, \simd operations
 can be applied to the whole value collection since the \vsmc interface allows
 users to access them all at once. This kind of constructs is not possible in
 \lsmctc without changing the internal of the library. See also
-Section~\ref{sub:Core module} on the value collection type of \vsmc.
+section~\ref{sub:Core module} on the value collection type of \vsmc.
 
 Apart from parallelization, \vsmc also has other advantages. Internally it has
 a very different design to that of \lsmctc. It is more modular and almost all
@@ -2440,7 +2441,7 @@ example, it allows one to define a class that abstracts a single particle. And
 naturally such classes can easily define operations that manipulate a single
 particle. In contrast, in \vsmc users can only interact with a single particle
 through the \cppinline{SingleParticle<T>} object. However, as shown in
-Section~\ref{sub:SMP module}, users can obtain similar effects by defining the
+section~\ref{sub:SMP module}, users can obtain similar effects by defining the
 \cppinline{single_particle_type} class template inside the value collection
 type. Alternatively, one can also reuse classes defined for \lsmctc by
 combining them with \cppinline{StateMatrix} or \cppinline{StateTuple}. The
@@ -2466,7 +2467,7 @@ model share a large amount of code.
 
 \vsmc also enjoys higher performance even for sequential implementations. For
 instance, as noted before, a sequential implementation in \vsmc of the
-particle filter in Section~\ref{sub:A simple particle filter} is about twice
+particle filter in section~\ref{sub:A simple particle filter} is about twice
 faster than that in \lsmctc.
 
 In the author's opinion, \lsmctc is suitable for implementing algorithms that
