@@ -36,7 +36,7 @@
 # The following variables are set
 #
 # RANDOM123_FOUND       - TRUE if Random123 headers are found
-# Random123_INCLUDE_DIR - The directory containing OpenCL headers
+# Random123_INCLUDE_DIR - The directory containing Random123 headers
 #
 # The following variables affect the behavior of this module
 #
