@@ -30,14 +30,21 @@
 //============================================================================
 
 #include <cassert>
+#include <stdint.h>
 #include <stdlib.h>
 #include <jemalloc/jemalloc.h>
 
 int main ()
 {
+#if VSMC_HAS_JEMALLOC_STDAPI
+    void *ptr = aligned_alloc(128, 1000000);
+    assert(((uintptr_t) ptr) % 128 == 0);
+    free(ptr);
+#else
     void *ptr = je_aligned_alloc(128, 1000000);
     assert(((uintptr_t) ptr) % 128 == 0);
     je_free(ptr);
+#endif
 
     return 0;
 }

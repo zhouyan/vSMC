@@ -201,14 +201,25 @@ class AlignedMemoryJE
         if (n == 0)
             return VSMC_NULLPTR;
 
+#if VSMC_HAS_JEMALLOC_STDAPI
+        void *ptr = aligned_alloc(alignment, n);
+#else
         void *ptr = je_aligned_alloc(alignment, n);
+#endif
         if (ptr == VSMC_NULLPTR)
             throw std::bad_alloc();
 
         return ptr;
     }
 
-    static void aligned_free (void *ptr) {je_free(ptr);}
+    static void aligned_free (void *ptr)
+    {
+#if VSMC_HAS_JEMALLOC_STDAPI
+        free(ptr);
+#else
+        je_free(ptr);
+#endif
+    }
 }; // AlignedMemoryJE
 
 #endif // VSMC_HAS_JEMALLOC

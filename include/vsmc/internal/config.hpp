@@ -114,6 +114,10 @@
 #define VSMC_HAS_JEMALLOC 0
 #endif
 
+#ifndef VSMC_HAS_JEMALLOC_STDAPI
+#define VSMC_HAS_JEMALLOC_STDAPI 0
+#endif
+
 #ifndef VSMC_HAS_MKL
 #define VSMC_HAS_MKL 0
 #endif
