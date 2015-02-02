@@ -622,6 +622,33 @@ inline void hdf5store (const Sampler<T> &sampler,
             &resampled[0], "Resampled");
 }
 
+/// \brief Store a Particle in the HDF5 format
+/// \ingroup HDF5IO
+template <typename T>
+inline void hdf5store (const Particle<T> &particle,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    hdf5store_list_empty(file_name, data_name, append);
+    hdf5store(particle.value(), file_name, data_name + "/value", true);
+    hdf5store_matrix<ColMajor, double>(particle.size(), 1, file_name,
+            data_name + "/weight", particle.weight_set().weight_data(), true);
+}
+
+/// \brief Store a Particle with StateCL value type in the HDF5 format
+/// \ingroup HDF5IO
+template <MatrixOrder Order, typename T, typename U>
+inline void hdf5store (const Particle<U> &particle,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    hdf5store_list_empty(file_name, data_name, append);
+    hdf5store<Order, T>(particle.value(), file_name, data_name + "/value",
+            append);
+    hdf5store_matrix<ColMajor, double>(particle.size(), 1, file_name,
+            data_name + "/weight", particle.weight_set().weight_data(), true);
+}
+
 /// \brief Store a StateMatrix in the HDF5 format
 /// \ingroup HDF5IO
 template <MatrixOrder Order, std::size_t Dim, typename T>
@@ -689,7 +716,7 @@ inline void hdf5store (const StateTuple<ColMajor, T, Types...> &state,
 /// \brief Store a StateCL in the HDF5 format
 /// \ingroup HDF5IO
 template <MatrixOrder Order, typename T,
-         std::size_t StateSize, typename FPType, typename ID>
+    std::size_t StateSize, typename FPType, typename ID>
 inline void hdf5store (const StateCL<StateSize, FPType, ID> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
