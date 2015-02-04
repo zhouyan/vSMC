@@ -208,7 +208,6 @@ inline ::hid_t hdf5io_datatype<long double> ()
 
 /// \brief Get the number of bytes of the data in the HDF5 format
 /// \ingroup HDF5IO
-template <typename T>
 inline ::hsize_t hdf5size (const std::string &file_name,
         const std::string &data_name)
 {
@@ -227,7 +226,7 @@ inline ::hsize_t hdf5size (const std::string &file_name,
     ::H5Dclose(dataset);
     ::H5Fclose(datafile);
 
-    return bytes / sizeof(T);
+    return bytes;
 }
 
 /// \brief Load raw data in the HDF5 format
@@ -236,7 +235,7 @@ template <typename T, typename OutputIter>
 inline OutputIter hdf5load (const std::string &file_name,
         const std::string &data_name, OutputIter first)
 {
-    std::size_t n = hdf5size<T>(file_name, data_name);
+    std::size_t n = hdf5size(file_name, data_name) / sizeof(T);
     internal::HDF5LoadDataPtr<T> data_ptr;
     data_ptr.set(n, first);
     T *data = data_ptr.get();

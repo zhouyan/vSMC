@@ -12,5 +12,10 @@
 * `AlignedMemory` and `AlignedAllocator` by default use [jemalloc][jemalloc] if
   it is available.
 
+## Bug fixes
+
+* `hdf5size` now correctly return the number of *bytes* of data and it is no
+  longer a template.
+
 [HDF5]: http://www.hdfgroup.org/HDF5/
 [jemalloc]: http://www.canonware.com/jemalloc/
