@@ -106,7 +106,7 @@ class Progress
     /// \brief Construct a Progress with an output stream
     Progress (std::ostream &os = std::cout) :
         thread_ptr_(VSMC_NULLPTR), interval_(0), iter_(0), total_(0),
-        length_(0), show_iter_(false), print_first_(true), in_progress_(false),
+        length_(0), show_iter_(true), print_first_(true), in_progress_(false),
         num_equal_(0), percent_(0), seconds_(0), last_iter_(0),
         cstr_bar_(), cstr_percent_(), cstr_time_(), cstr_iter_(), os_(os) {}
 
@@ -120,7 +120,7 @@ class Progress
     /// \param show_iter Shall the iteration count be displayed.
     /// \param interval The sleep interval in seconds
     void start (std::size_t total, const std::string &msg = std::string(),
-            std::size_t length = 0, bool show_iter = false,
+            std::size_t length = 0, bool show_iter = true,
             double interval = 0.1)
     {
         total_ = total;
@@ -144,7 +144,7 @@ class Progress
     /// finished, and at the end the progress will be shown as `100%` and
     /// `total/total`, where total is the first parameter of `start`.
     /// Otherwise, whatever progress has been made will be shown.
-    void stop (bool finished = false)
+    void stop (bool finished = true)
     {
         in_progress_ = false;
         join();
