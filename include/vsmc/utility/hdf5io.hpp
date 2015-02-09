@@ -259,6 +259,15 @@ inline OutputIter hdf5load (const std::string &file_name,
     return first;
 }
 
+/// \brief Create a new HDF5 file for store data
+/// \ingroup HDF5IO
+inline void hdf5store_new (const std::string &file_name)
+{
+    ::hid_t datafile = ::H5Fcreate(file_name.c_str(),
+            H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    ::H5Fclose(datafile);
+}
+
 /// \brief Store a matrix in the HDF5 format from an input iterator
 /// \ingroup HDF5IO
 ///
