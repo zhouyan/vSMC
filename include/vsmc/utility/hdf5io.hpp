@@ -361,7 +361,7 @@ inline InputIter hdf5store_matrix (std::size_t nrow, std::size_t ncol,
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
 inline void hdf5store_list_empty (const std::string &file_name,
-        const std::string &data_name, bool append)
+        const std::string &data_name, bool append = false)
 {
     std::string group_name("/" + data_name);
 
