@@ -157,6 +157,9 @@ class Progress
     /// \brief Increment the iteration count
     void increment (std::size_t step = 1) {iter_ += step;}
 
+    /// \brief Set a new message for display
+    void message (const std::string &msg) {msg_ = msg;}
+
     private :
 
     StopWatch watch_;
