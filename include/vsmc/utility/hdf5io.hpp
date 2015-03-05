@@ -624,6 +624,11 @@ inline void hdf5store (const Sampler<T> &sampler,
     hdf5store_list<double>(nrow, ncol, file_name, data_name,
             data_ptr.begin(), header.begin(), append);
 
+    std::vector<std::size_t> size(nrow);
+    sampler.read_size_history(size.begin());
+    hdf5store_list_insert<int>(nrow, file_name, data_name,
+            &size[0], "Size");
+
     std::vector<int> resampled(nrow);
     sampler.read_resampled_history(resampled.begin());
     hdf5store_list_insert<int>(nrow, file_name, data_name,

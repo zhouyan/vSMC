@@ -211,7 +211,7 @@ class Sampler
     }
 
     /// \brief Number of iterations (including initialization)
-    std::size_t iter_size () const {return ess_history_.size();}
+    std::size_t iter_size () const {return size_history_.size();}
 
     /// \brief Current iteration number (initialization count as zero)
     ///
@@ -278,6 +278,15 @@ class Sampler
     /// resampling will always be performed
     static double resample_threshold_always ()
     {return std::numeric_limits<double>::infinity();}
+
+    /// \brief Get sampler size of a given iteration, initialization count as
+    /// iter 0
+    double size_history (std::size_t iter) const {return size_history_[iter];}
+
+    /// \brief Read sampler size history through an output iterator
+    template <typename OutputIter>
+    void read_size_history (OutputIter first) const
+    {std::copy(size_history_.begin(), size_history_.end(), first);}
 
     /// \brief Get ESS of a given iteration, initialization count as iter 0
     double ess_history (std::size_t iter) const {return ess_history_[iter];}
@@ -660,14 +669,14 @@ class Sampler
         summary_header(header.begin());
         summary_data<RowMajor>(data.begin());
 
-        os << "Resampled";
+        os << "Size Resampled";
         for (std::size_t i = 0; i != header.size(); ++i)
             os << sepchar << header[i];
         os << '\n';
 
         std::size_t offset = 0;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            os << resampled_history_[iter];
+            os << size_history_[iter] << sepchar << resampled_history_[iter];
             for (std::size_t i = 0; i != var_num; ++i)
                 os << sepchar << data[offset++];
             os << '\n';
@@ -688,6 +697,7 @@ class Sampler
 
     Particle<T> particle_;
     std::size_t iter_num_;
+    std::vector<std::size_t> size_history_;
     std::vector<double> ess_history_;
     std::vector<bool> resampled_history_;
     std::vector<std::vector<std::size_t> > accept_history_;
@@ -760,6 +770,7 @@ class Sampler
 
     void do_resample ()
     {
+        size_history_.push_back(size());
         ess_history_.push_back(particle_.weight_set().ess());
         resampled_history_.push_back(particle_.resample(
                     resample_op_, resample_threshold_));
@@ -785,11 +796,11 @@ class Sampler
         std::size_t piter = 0;
         std::vector<std::size_t> miter(monitor_.size(), 0);
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            *first = ess_history_[iter] / size();
+            *first = ess_history_[iter] / size_history_[iter];
             ++first;
             for (std::size_t i = 0; i != accept_history_.size(); ++i) {
                 *first = accept_history_[i][iter] /
-                    static_cast<double>(size());
+                    static_cast<double>(size_history_[iter]);
                 ++first;
             }
             if (path_.iter_size() > 0) {
@@ -832,11 +843,11 @@ class Sampler
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
         for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first)
-            *first = ess_history_[iter] / size();
+            *first = ess_history_[iter] / size_history_[iter];
         for (std::size_t i = 0; i != accept_history_.size(); ++i) {
             for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first)
                 *first = accept_history_[i][iter] /
-                    static_cast<double>(size());
+                    static_cast<double>(size_history_[iter]);
         }
         if (path_.iter_size() > 0) {
             std::size_t piter;
