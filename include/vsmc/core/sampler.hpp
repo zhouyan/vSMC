@@ -197,6 +197,7 @@ class Sampler
     /// \brief Reserve space for a specified number of iterations
     void reserve (std::size_t num)
     {
+        size_history_.reserve(num);
         ess_history_.reserve(num);
         resampled_history_.reserve(num);
         for (std::size_t i = 0; i != accept_history_.size(); ++i)
