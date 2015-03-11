@@ -440,14 +440,14 @@ class Sampler
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
         do_init();
+        do_acch();
         if (init_by_iter_) {
             VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
             do_iter();
         } else {
             VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
                     init_, initialize, INITIALIZE);
-            std::size_t acc = init_(particle_, param);
-            accept_history_.push_back(std::vector<std::size_t>(1, acc));
+            accept_history_[0].push_back(init_(particle_, param));
             do_resample();
         }
         do_monitor();
