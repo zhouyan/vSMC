@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/pf/include/pf_smp_do.hpp
+// vSMC/cmake/FindJEMALLOC.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,52 +29,22 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_EXAMPLE_PF_SMP_DO_HPP
-#define VSMC_EXAMPLE_PF_SMP_DO_HPP
+#include <cassert>
+#include <stdint.h>
+#include <stdlib.h>
+#include <jemalloc/jemalloc.h>
 
-template <vsmc::MatrixOrder Order>
-inline void cv_do (vsmc::ResampleScheme res, char **argv,
-        const std::string &name)
+int main ()
 {
-    vsmc::Seed::instance().set(101);
-    vsmc::Sampler<cv_state<Order> > sampler(ParticleNum, res, 0.5);
-    sampler
-        .init(cv_init<Order>())
-        .move(vsmc::MoveAdapter<
-                cv_state<Order>, BASE_MOVE, cv_move<Order> >(), true)
-        .monitor("pos", 2, vsmc::MonitorEvalAdapter<
-                cv_state<Order>, BASE_MONITOR>(cv_est<Order>));
-    sampler.monitor("pos").name(0) = "pos.x";
-    sampler.monitor("pos").name(1) = "pos.y";
-#if VSMC_HAS_HDF5
-    sampler.initialize(argv[1]);
-    vsmc::hdf5store(sampler.particle(), argv[2] + name + ".trace.h5",
-            "Trace.0");
-    for (std::size_t i = 0; i != DataNum - 1; ++i) {
-        std::stringstream ss;
-        ss << "Trace." << (i + 1);
-        sampler.iterate();
-        vsmc::hdf5store(sampler.particle(), argv[2] + name + ".trace.h5",
-                ss.str(), true);
-    }
+#if VSMC_HAS_JEMALLOC_STDAPI
+    void *ptr = aligned_alloc(128, 1000000);
+    assert(((uintptr_t) ptr) % 128 == 0);
+    free(ptr);
 #else
-    sampler.initialize(argv[1]);
-    sampler.iterate(DataNum - 1);
+    void *ptr = je_aligned_alloc(128, 1000000);
+    assert(((uintptr_t) ptr) % 128 == 0);
+    je_free(ptr);
 #endif
 
-    std::string est_file_name(argv[2] + name + ".tsv");
-    std::ofstream est_file;
-    est_file.open(est_file_name.c_str());
-    est_file << sampler << std::endl;
-    est_file.close();
-    est_file_name = argv[2] + name + ".trace.tsv";
-    est_file.open(est_file_name.c_str());
-    est_file << sampler.particle().value() << std::endl;
-    est_file.close();
-
-#if VSMC_HAS_HDF5
-    vsmc::hdf5store(sampler, argv[2] + name + ".h5", "Sampler");
-#endif
+    return 0;
 }
-
-#endif // VSMC_EXAMPLE_PF_SMP_DO_HPP

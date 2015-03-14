@@ -180,15 +180,13 @@ inline void cv_do (vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
 
 #if VSMC_HAS_HDF5
     sampler.initialize(argv[1]);
-    vsmc::hdf5store<vsmc::RowMajor, cl_float>(
-            sampler.particle().value(),
+    vsmc::hdf5store<vsmc::RowMajor, cl_float>(sampler.particle(),
             argv[2] + rname + ".trace.h5", "Trace.0");
     for (std::size_t i = 0; i != DataNum - 1; ++i) {
         std::stringstream tss;
         tss << "Trace." << (i + 1);
         sampler.iterate();
-        vsmc::hdf5store<vsmc::RowMajor, cl_float>(
-                sampler.particle().value(),
+        vsmc::hdf5store<vsmc::RowMajor, cl_float>(sampler.particle(),
                 argv[2] + rname + ".trace.h5", tss.str(), true);
     }
 #else

@@ -208,7 +208,6 @@ inline ::hid_t hdf5io_datatype<long double> ()
 
 /// \brief Get the number of bytes of the data in the HDF5 format
 /// \ingroup HDF5IO
-template <typename T>
 inline ::hsize_t hdf5size (const std::string &file_name,
         const std::string &data_name)
 {
@@ -227,7 +226,7 @@ inline ::hsize_t hdf5size (const std::string &file_name,
     ::H5Dclose(dataset);
     ::H5Fclose(datafile);
 
-    return bytes / sizeof(T);
+    return bytes;
 }
 
 /// \brief Load raw data in the HDF5 format
@@ -236,7 +235,7 @@ template <typename T, typename OutputIter>
 inline OutputIter hdf5load (const std::string &file_name,
         const std::string &data_name, OutputIter first)
 {
-    std::size_t n = hdf5size<T>(file_name, data_name);
+    std::size_t n = hdf5size(file_name, data_name) / sizeof(T);
     internal::HDF5LoadDataPtr<T> data_ptr;
     data_ptr.set(n, first);
     T *data = data_ptr.get();
@@ -258,6 +257,15 @@ inline OutputIter hdf5load (const std::string &file_name,
     ::H5Fclose(datafile);
 
     return first;
+}
+
+/// \brief Create a new HDF5 file for store data
+/// \ingroup HDF5IO
+inline void hdf5store_new (const std::string &file_name)
+{
+    ::hid_t datafile = ::H5Fcreate(file_name.c_str(),
+            H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    ::H5Fclose(datafile);
 }
 
 /// \brief Store a matrix in the HDF5 format from an input iterator
@@ -353,7 +361,7 @@ inline InputIter hdf5store_matrix (std::size_t nrow, std::size_t ncol,
 /// \param append If true the data is appended into an existing file, otherwise
 /// save in a new file
 inline void hdf5store_list_empty (const std::string &file_name,
-        const std::string &data_name, bool append)
+        const std::string &data_name, bool append = false)
 {
     std::string group_name("/" + data_name);
 
@@ -616,6 +624,11 @@ inline void hdf5store (const Sampler<T> &sampler,
     hdf5store_list<double>(nrow, ncol, file_name, data_name,
             data_ptr.begin(), header.begin(), append);
 
+    std::vector<int> size(nrow);
+    sampler.read_size_history(size.begin());
+    hdf5store_list_insert<int>(nrow, file_name, data_name,
+            &size[0], "Size");
+
     std::vector<int> resampled(nrow);
     sampler.read_resampled_history(resampled.begin());
     hdf5store_list_insert<int>(nrow, file_name, data_name,
@@ -689,7 +702,7 @@ inline void hdf5store (const StateTuple<ColMajor, T, Types...> &state,
 /// \brief Store a StateCL in the HDF5 format
 /// \ingroup HDF5IO
 template <MatrixOrder Order, typename T,
-         std::size_t StateSize, typename FPType, typename ID>
+    std::size_t StateSize, typename FPType, typename ID>
 inline void hdf5store (const StateCL<StateSize, FPType, ID> &state,
         const std::string &file_name, const std::string &data_name,
         bool append = false)
@@ -702,6 +715,33 @@ inline void hdf5store (const StateCL<StateSize, FPType, ID> &state,
             &data[0]);
     hdf5store_matrix<Order, T>(nrow, ncol, file_name, data_name,
             &data[0], append);
+}
+
+/// \brief Store a Particle in the HDF5 format
+/// \ingroup HDF5IO
+template <typename T>
+inline void hdf5store (const Particle<T> &particle,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    hdf5store_list_empty(file_name, data_name, append);
+    hdf5store(particle.value(), file_name, data_name + "/value", true);
+    hdf5store_matrix<ColMajor, double>(particle.size(), 1, file_name,
+            data_name + "/weight", particle.weight_set().weight_data(), true);
+}
+
+/// \brief Store a Particle with StateCL value type in the HDF5 format
+/// \ingroup HDF5IO
+template <MatrixOrder Order, typename T, typename U>
+inline void hdf5store (const Particle<U> &particle,
+        const std::string &file_name, const std::string &data_name,
+        bool append = false)
+{
+    hdf5store_list_empty(file_name, data_name, append);
+    hdf5store<Order, T>(particle.value(), file_name,
+            data_name + "/value", true);
+    hdf5store_matrix<ColMajor, double>(particle.size(), 1, file_name,
+            data_name + "/weight", particle.weight_set().weight_data(), true);
 }
 
 } // namespace vsmc
