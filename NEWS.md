@@ -19,6 +19,8 @@
 
 * `hdf5size` now correctly return the number of *bytes* of data and it is no
   longer a template.
+* Fix a memory bug when using "initialization by iteration"
+  (`Sampler::init_by_iter(true)`).
 
 [HDF5]: http://www.hdfgroup.org/HDF5/
 [jemalloc]: http://www.canonware.com/jemalloc/
