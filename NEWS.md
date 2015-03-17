@@ -1,3 +1,20 @@
+# Changes since v1.1.0
+
+## New features
+
+## Changed behaviors
+
+* `Sampler` summary member functions, such as `summary_data` etc., now only
+  deal with floating point data, such as importance sampling estimates. Integer
+  data, such as acceptance counts are dealt with new member functions
+  `summary_data_int` etc.
+* `Sampler` summary now output raw results of ESS and acceptance counts. They
+  are no longer scaled by the number of particles.
+
+## Bug fixes
+
+* `Sampler` now correctly clear size history during initialization
+
 # Changes since v1.0.0
 
 ## New features

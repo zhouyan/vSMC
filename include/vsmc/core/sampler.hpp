@@ -569,14 +569,22 @@ class Sampler
     /// \brief Erase all monitors
     Sampler<T> &clear_monitor () {monitor_.clear(); return *this;}
 
-    /// \brief The size of Sampler summary header
+    /// \brief The size of Sampler summary header (integer data, size etc.)
+    std::size_t summary_header_size_int () const
+    {
+        if (iter_size() == 0)
+            return 0;
+
+        return accept_history_.size() + 2;
+    }
+
+    /// \brief The size of Sampler summary header (floating point data)
     std::size_t summary_header_size () const
     {
         if (iter_size() == 0)
             return 0;
 
-        std::size_t header_size = 1; // ESS
-        header_size += accept_history_.size();
+        std::size_t header_size = 1;
         if (path_.iter_size() > 0)
             header_size += 2;
         for (typename monitor_map_type::const_iterator
@@ -588,33 +596,39 @@ class Sampler
         return header_size;
     }
 
-    /// \brief Sampler summary header
+    /// \brief Sampler summary header (integer data)
+    template <typename OutputIter>
+    void summary_header_int (OutputIter first) const
+    {
+        if (summary_header_size_int() == 0)
+            return;
+
+        *first++ = std::string("Size");
+        *first++ = std::string("Resampled");
+
+        std::stringstream ss;
+        for (std::size_t i = 0; i != accept_history_.size(); ++i) {
+            ss.str(std::string());
+            ss << "Accept." << i;
+            *first++ = ss.str();
+        }
+    }
+
+    /// \brief Sampler summary header (floating point data)
     template <typename OutputIter>
     void summary_header (OutputIter first) const
     {
         if (summary_header_size() == 0)
             return;
 
-        *first = std::string("ESS");
-        ++first;
-
-        std::stringstream ss;
-
-        unsigned accd = static_cast<unsigned>(accept_history_.size());
-        for (unsigned i = 0; i != accd; ++i) {
-            ss.str(std::string());
-            ss << "Accept." << i + 1;
-            *first = ss.str();
-            ++first;
-        }
+        *first++ = std::string("ESS");
 
         if (path_.iter_size() > 0) {
-            *first = std::string("Path.Integrand");
-            ++first;
-            *first = std::string("Path.Grid");
-            ++first;
+            *first++ = std::string("Path.Integrand");
+            *first++ = std::string("Path.Grid");
         }
 
+        std::stringstream ss;
         for (typename monitor_map_type::const_iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             if (m->second.iter_size() > 0) {
@@ -624,7 +638,7 @@ class Sampler
                         *first = m->second.name(i);
                     } else {
                         ss.str(std::string());
-                        ss << m->first << '.' << i + 1;
+                        ss << m->first << '.' << i;
                         *first = ss.str();
                     }
                 }
@@ -632,13 +646,29 @@ class Sampler
         }
     }
 
-    /// \brief The size of Sampler summary data
+    /// \brief The size of Sampler summary data (integer data)
+    std::size_t summary_data_size_int () const
+    {return summary_header_size_int() * iter_size();}
+
+    /// \brief The size of Sampler summary data (floating point data)
     std::size_t summary_data_size () const
     {return summary_header_size() * iter_size();}
 
-    /// \brief Sampler summary data
-    ///
-    /// \param first The beginning of the output
+    /// \brief Sampler summary data (integer data)
+    template <MatrixOrder Order, typename OutputIter>
+    void summary_data_int (OutputIter first) const
+    {
+        if (summary_data_size_int() == 0)
+            return;
+
+        if (Order == RowMajor)
+            summary_data_row_int(first);
+
+        if (Order == ColMajor)
+            summary_data_col_int(first);
+    }
+
+    /// \brief Sampler summary data (floating point data)
     template <MatrixOrder Order, typename OutputIter>
     void summary_data (OutputIter first) const
     {
@@ -663,6 +693,13 @@ class Sampler
         if (iter_size() == 0 || !os.good())
             return os;
 
+        std::size_t var_num_int = summary_header_size_int();
+        std::size_t dat_num_int = summary_data_size_int();
+        std::vector<std::string> header_int(var_num_int);
+        std::vector<std::size_t> data_int(dat_num_int);
+        summary_header_int(header_int.begin());
+        summary_data_int<RowMajor>(data_int.begin());
+
         std::size_t var_num = summary_header_size();
         std::size_t dat_num = summary_data_size();
         std::vector<std::string> header(var_num);
@@ -670,16 +707,19 @@ class Sampler
         summary_header(header.begin());
         summary_data<RowMajor>(data.begin());
 
-        os << "Size Resampled";
+        for (std::size_t i = 0; i != header_int.size(); ++i)
+            os << header_int[i] << sepchar;
         for (std::size_t i = 0; i != header.size(); ++i)
-            os << sepchar << header[i];
+            os << header[i] << sepchar;
         os << '\n';
 
+        std::size_t offset_int = 0;
         std::size_t offset = 0;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            os << size_history_[iter] << sepchar << resampled_history_[iter];
+            for (std::size_t i = 0; i != var_num_int; ++i)
+                os << data_int[offset_int++] << sepchar;
             for (std::size_t i = 0; i != var_num; ++i)
-                os << sepchar << data[offset++];
+                os << data[offset++] << sepchar;
             os << '\n';
         }
 
@@ -791,6 +831,32 @@ class Sampler
     }
 
     template <typename OutputIter>
+    void summary_data_row_int (OutputIter first) const
+    {
+        typedef typename std::iterator_traits<OutputIter>::value_type int_type;
+        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+            *first++ = static_cast<int_type>(size_history_[iter]);
+            *first++ = static_cast<int_type>(resampled_history_[iter]);
+            for (std::size_t i = 0; i != accept_history_.size(); ++i)
+                *first++ = static_cast<int_type>(accept_history_[i][iter]);
+        }
+    }
+
+    template <typename OutputIter>
+    void summary_data_col_int (OutputIter first) const
+    {
+        first = std::copy(size_history_.begin(), size_history_.end(),
+                first);
+        first = std::copy(resampled_history_.begin(), resampled_history_.end(),
+                first);
+        for (std::size_t i = 0; i != accept_history_.size(); ++i) {
+            first = std::copy(accept_history_[i].begin(),
+                    accept_history_[i].end(), first);
+        }
+    }
+
+
+    template <typename OutputIter>
     void summary_data_row (OutputIter first) const
     {
         double missing_data = std::numeric_limits<double>::quiet_NaN();
@@ -798,24 +864,14 @@ class Sampler
         std::size_t piter = 0;
         std::vector<std::size_t> miter(monitor_.size(), 0);
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            *first = ess_history_[iter] / size_history_[iter];
-            ++first;
-            for (std::size_t i = 0; i != accept_history_.size(); ++i) {
-                *first = accept_history_[i][iter] /
-                    static_cast<double>(size_history_[iter]);
-                ++first;
-            }
+            *first++ = ess_history_[iter];
             if (path_.iter_size() > 0) {
                 if (piter == path_.iter_size() || iter != path_.index(piter)) {
-                    *first = missing_data;
-                    ++first;
-                    *first = missing_data;
-                    ++first;
+                    *first++ = missing_data;
+                    *first++ = missing_data;
                 } else {
-                    *first = path_.integrand(piter);
-                    ++first;
-                    *first = path_.grid(piter);
-                    ++first;
+                    *first++ = path_.integrand(piter);
+                    *first++ = path_.grid(piter);
                     ++piter;
                 }
             }
@@ -845,12 +901,7 @@ class Sampler
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
         for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first)
-            *first = ess_history_[iter] / size_history_[iter];
-        for (std::size_t i = 0; i != accept_history_.size(); ++i) {
-            for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first)
-                *first = accept_history_[i][iter] /
-                    static_cast<double>(size_history_[iter]);
-        }
+            *first = ess_history_[iter];
         if (path_.iter_size() > 0) {
             std::size_t piter;
             piter = 0;

@@ -612,27 +612,37 @@ inline void hdf5store (const Sampler<T> &sampler,
         bool append = false)
 {
     std::size_t nrow = sampler.iter_size();
-    std::size_t ncol = sampler.summary_header_size();
 
+    if (nrow == 0)
+        return;
+
+    std::size_t ncol_int = sampler.summary_header_size_int();
+    std::vector<std::string> header_int(ncol_int);
+    std::vector<int> data_int(nrow * ncol_int);
+    sampler.summary_header_int(header_int.begin());
+    sampler.template summary_data_int<ColMajor>(data_int.begin());
+    std::vector<const int *> data_ptr_int(ncol_int);
+    for (std::size_t j = 0; j != ncol_int; ++j)
+        data_ptr_int[j] = &data_int[0] + j * nrow;
+
+    std::size_t ncol = sampler.summary_header_size();
     std::vector<std::string> header(ncol);
-    sampler.summary_header(header.begin());
     std::vector<double> data(nrow * ncol);
+    sampler.summary_header(header.begin());
     sampler.template summary_data<ColMajor>(data.begin());
     std::vector<const double *> data_ptr(ncol);
     for (std::size_t j = 0; j != ncol; ++j)
         data_ptr[j] = &data[0] + j * nrow;
-    hdf5store_list<double>(nrow, ncol, file_name, data_name,
-            data_ptr.begin(), header.begin(), append);
 
-    std::vector<int> size(nrow);
-    sampler.read_size_history(size.begin());
-    hdf5store_list_insert<int>(nrow, file_name, data_name,
-            &size[0], "Size");
+    hdf5store_list_empty(file_name, data_name, append);
 
-    std::vector<int> resampled(nrow);
-    sampler.read_resampled_history(resampled.begin());
-    hdf5store_list_insert<int>(nrow, file_name, data_name,
-            &resampled[0], "Resampled");
+    for (std::size_t j = 0; j != ncol_int; ++j)
+        hdf5store_list_insert<int>(nrow, file_name, data_name,
+                data_ptr_int[j], header_int[j]);
+
+    for (std::size_t j = 0; j != ncol; ++j)
+        hdf5store_list_insert<double>(nrow, file_name, data_name,
+                data_ptr[j], header[j]);
 }
 
 /// \brief Store a StateMatrix in the HDF5 format
