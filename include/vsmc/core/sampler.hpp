@@ -723,6 +723,7 @@ class Sampler
 
     void do_init ()
     {
+        size_history_.clear();
         ess_history_.clear();
         resampled_history_.clear();
         accept_history_.clear();
