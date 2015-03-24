@@ -104,6 +104,14 @@ enum MatrixOrder {
     ColMajor = 102  ///< Data are stored column by column in memory
 }; // enum MatrixOrder
 
+/// \brief Monitor stage
+/// \ingroup Definitions
+enum MonitorStage {
+    MonitorMove,     ///< Monitor evaluated after moves
+    MonitorResample, ///< Monitor evaluated after resampling
+    MonitorMCMC      ///< Monitor evaluated after MCMC moves
+}; // enum MonitorStage
+
 /// \brief Class template argument used for scalar variant
 /// \ingroup Definitions
 struct Scalar

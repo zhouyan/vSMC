@@ -1,6 +1,14 @@
-# Changes since v1.1.0
+# Changes since v1.1.1
 
 ## New features
+
+* `Monitor` gains a new parameter `stage`. A monitor maybe evaluated in
+  different stages of the initialization and iterations. See the documents of
+  `Monitor` constructor.
+* A new optional argument of `Sampler::monitor` that allows setting the above
+  `stage` parameter when adding a new `Monitor`.
+
+# Changes since v1.1.0
 
 ## Changed behaviors
 

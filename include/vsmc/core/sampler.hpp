@@ -47,7 +47,7 @@
 
 #define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER \
     VSMC_RUNTIME_WARNING((!static_cast<bool>(init_)),                        \
-            ("**Sampler::initialize** A VALID INITIALIZATION OBJECT IS SET " \
+            ("**Sampler::initialize** A VALID INIT OBJECT IS SET "           \
              "BUT INITILIALIZED BY ITERATING"))
 
 namespace vsmc {
@@ -319,7 +319,7 @@ class Sampler
     /// \brief Set the initialization object of type init_type
     Sampler<T> &init (const init_type &new_init)
     {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init, INITIALIZE);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init, INIT);
 
         init_ = new_init;
 
@@ -449,18 +449,14 @@ class Sampler
     /// evaluation objects are untouched.
     Sampler<T> &initialize (void *param = VSMC_NULLPTR)
     {
-        do_init();
+        do_reset();
         do_acch();
         if (init_by_iter_) {
             VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
             do_iter();
         } else {
-            VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
-                    init_, initialize, INITIALIZE);
-            accept_history_[0].push_back(init_(particle_, param));
-            do_resample();
+            do_init(param);
         }
-        do_monitor();
 
         return *this;
     }
@@ -481,7 +477,6 @@ class Sampler
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
             do_iter();
-            do_monitor();
         }
 
         do_acch();
@@ -513,18 +508,19 @@ class Sampler
 
     /// \brief Add a monitor with an evaluation object
     ///
-    /// \param name The name of the monitor
-    /// \param dim The dimension of the monitor, i.e., the number of variables
+    /// \param name The name of the Monitor
+    /// \param dim The dimension of the Monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
-    /// \param record_only The monitor only records results
+    /// \param record_only The Monitor only records results
+    /// \param stage The stage of the Monitor
     ///
     /// \sa Monitor
     Sampler<T> &monitor (const std::string &name, std::size_t dim,
             const typename Monitor<T>::eval_type &eval,
-            bool record_only = false)
+            bool record_only = false, MonitorStage stage = MonitorMCMC)
     {
         monitor_.insert(typename monitor_map_type::value_type(
-                    name, Monitor<T>(dim, eval, record_only)));
+                    name, Monitor<T>(dim, eval, record_only, stage)));
 
         return *this;
     }
@@ -761,7 +757,7 @@ class Sampler
             accept_history_[i].resize(iter_size());
     }
 
-    void do_init ()
+    void do_reset ()
     {
         size_history_.clear();
         ess_history_.clear();
@@ -776,23 +772,33 @@ class Sampler
         particle_.weight_set().set_equal_weight();
     }
 
+    void do_init (void *param)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(init_, initialize, INIT);
+        accept_history_[0].push_back(init_(particle_, param));
+        do_monitor(MonitorMove);
+        do_resample();
+        do_monitor(MonitorResample);
+        do_monitor(MonitorMCMC);
+    }
+
     void do_iter ()
     {
         std::size_t ia = 0;
         ia = do_move(ia);
+        do_monitor(MonitorMove);
         do_resample();
+        do_monitor(MonitorResample);
         ia = do_mcmc(ia);
-        for (; ia != accept_history_.size(); ++ia)
-            accept_history_[ia].push_back(0);
+        do_monitor(MonitorMCMC);
     }
 
     std::size_t do_move (std::size_t ia)
     {
         for (typename std::vector<move_type>::iterator
-                m = move_queue_.begin(); m != move_queue_.end(); ++m) {
+                m = move_queue_.begin(); m != move_queue_.end(); ++m, ++ia) {
             std::size_t acc = (*m)(iter_num_, particle_);
             accept_history_[ia].push_back(acc);
-            ++ia;
         }
 
         return ia;
@@ -801,10 +807,9 @@ class Sampler
     std::size_t do_mcmc (std::size_t ia)
     {
         for (typename std::vector<mcmc_type>::iterator
-                m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m) {
+                m = mcmc_queue_.begin(); m != mcmc_queue_.end(); ++m, ++ia) {
             std::size_t acc = (*m)(iter_num_, particle_);
             accept_history_[ia].push_back(acc);
-            ++ia;
         }
 
         return ia;
@@ -818,15 +823,15 @@ class Sampler
                     resample_op_, resample_threshold_));
     }
 
-    void do_monitor ()
+    void do_monitor (MonitorStage stage)
     {
-        if (!path_.empty())
+        if (!path_.empty() && stage == MonitorMCMC)
             path_.eval(iter_num_, particle_);
 
         for (typename monitor_map_type::iterator
                 m = monitor_.begin(); m != monitor_.end(); ++m) {
             if (!m->second.empty())
-                m->second.eval(iter_num_, particle_);
+                m->second.eval(iter_num_, particle_, stage);
         }
     }
 

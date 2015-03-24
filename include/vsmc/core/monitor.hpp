@@ -66,8 +66,15 @@ class Monitor
     ///
     /// \param dim The dimension of the Monitor, i.e., the number of variables
     /// \param eval The evaluation object of type Monitor::eval_type
-    /// \param record_only The monitor only records results instead of
+    /// \param record_only The Monitor only records results instead of
     /// calculating them itself
+    /// \param stage The stage of the Monitor. A Monitor may be evaluated after
+    /// all steps that move the particles but before any resampling
+    /// (`MonitorMove`), or the possible resampling step but before any MCMC
+    /// steps (`MonitorResample`), all after all MCMC steps (`MonitorMCMC`). If
+    /// a Monitor is present during initialization, then the initialization are
+    /// taken as the step that moves particles, and both `MonitorResample` and
+    /// `MonitorMCMC` are considered after the possible resampling.
     ///
     /// The evaluation object has the signature
     /// ~~~{.cpp}
@@ -96,12 +103,18 @@ class Monitor
     /// sampling estimates are recorded and can be retrived by `index()` and
     /// `record()`.
     explicit Monitor (std::size_t dim, const eval_type &eval,
-            bool record_only = false) :
-        dim_(dim), eval_(eval), recording_(true), record_only_(record_only),
-        name_(dim) {}
+            bool record_only = false, MonitorStage stage = MonitorMCMC) :
+        dim_(dim), eval_(eval), recording_(true),
+        record_only_(record_only), stage_(stage), name_(dim) {}
 
     /// \brief The dimension of the Monitor
     std::size_t dim () const {return dim_;}
+
+    /// \brief If this is a record only Monitor
+    bool record_only () const {return record_only_;}
+
+    /// \brief The stage of the Montior
+    MonitorStage stage () const {return stage_;}
 
     /// \brief The number of iterations has been recorded
     ///
@@ -258,9 +271,13 @@ class Monitor
     /// it use the user defined evaluation object to compute results. When a
     /// Monitor is constructed, `recording()` always returns `true`. It can be
     /// turned off by `turn_off()` and turned on later by `turn_on()`.
-    void eval (std::size_t iter, const Particle<T> &particle)
+    void eval (std::size_t iter, const Particle<T> &particle,
+            MonitorStage stage)
     {
         if (!recording_)
+            return;
+
+        if (stage != stage_)
             return;
 
         VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(eval_, eval, EVALUATION);
@@ -306,6 +323,7 @@ class Monitor
     eval_type eval_;
     bool recording_;
     bool record_only_;
+    MonitorStage stage_;
     std::vector<std::string> name_;
     std::vector<std::size_t> index_;
     std::vector<double, AlignedAllocator<double> > record_;
