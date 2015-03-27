@@ -7,6 +7,9 @@
   `Monitor` constructor.
 * A new optional argument of `Sampler::monitor` that allows setting the above
   `stage` parameter when adding a new `Monitor`.
+* `StateMatrix` has new overloaded `data` member function that is equivalent to
+  either `row_data` (`StateMatrix<RowMajor, Dim, T>`) or `col_data`
+  (`StateMatrix<ColMajor, Dim, T>`).
 
 # Changes since v1.1.0
 
