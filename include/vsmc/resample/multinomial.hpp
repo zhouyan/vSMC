@@ -60,12 +60,11 @@ class Resample<internal::ResampleMultinomial>
         for (std::size_t i = 0; i != N; ++i)
             uptr[i] = runif(rng);
         std::sort(uptr, uptr + N);
-        inversion_(M, N, weight, uptr, replication);
+        internal::inversion(M, N, weight, uptr, replication);
     }
 
     private :
 
-    internal::Inversion inversion_;
     std::vector<double, AlignedAllocator<double> > u01_;
 }; // Mulitnomial resampling
 

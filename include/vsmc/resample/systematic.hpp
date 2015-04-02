@@ -61,12 +61,11 @@ class Resample<internal::ResampleSystematic>
         const double u = runif(rng) * delta;
         for (std::size_t i = 0; i != N; ++i)
             uptr[i] = u + i * delta;
-        inversion_(M, N, weight, uptr, replication);
+        internal::inversion(M, N, weight, uptr, replication);
     }
 
     private :
 
-    internal::Inversion inversion_;
     std::vector<double, AlignedAllocator<double> > u01_;
 }; // Systematic resampling
 

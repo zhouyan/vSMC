@@ -78,7 +78,7 @@ class Resample<internal::ResampleResidualStratified>
         const double delta = 1.0 / N;
         for (std::size_t i = 0; i != NN; ++i)
             uptr[i] = runif(rng) * delta + i * delta;
-        inversion_(M, NN, rptr, uptr, replication);
+        internal::inversion(M, NN, rptr, uptr, replication);
 
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
@@ -86,7 +86,6 @@ class Resample<internal::ResampleResidualStratified>
 
     private :
 
-    internal::Inversion inversion_;
     std::vector<double, AlignedAllocator<double> > residual_;
     std::vector<double, AlignedAllocator<double> > integral_;
     std::vector<double, AlignedAllocator<double> > u01_;

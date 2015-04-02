@@ -51,41 +51,37 @@ namespace vsmc {
 
 namespace internal {
 
-class Inversion
+
+// Given N sorted U01 random variates 
+// Compute M replication numbers based on M weights
+template <typename IntType>
+void inversion (std::size_t M, std::size_t N,
+        const double *weight, const double *u01, IntType *replication)
 {
-    public :
+    if (M == 0)
+        return;
 
-    // Given N sorted U01 random variates 
-    // Compute M replication numbers based on M weights
-    template <typename IntType>
-    void operator() (std::size_t M, std::size_t N,
-            const double *weight, const double *u01, IntType *replication)
-    {
-        if (M == 0)
-            return;
-
-        if (M == 1) {
-            *replication = static_cast<IntType>(N);
-            return;
-        }
-
-        std::memset(replication, 0, sizeof(IntType) * M);
-
-        if (N == 0)
-            return;
-
-        std::size_t n = 0;
-        double accw = 0;
-        for (std::size_t i = 0; i != M - 1; ++i) {
-            accw += weight[i];
-            while (n != N && u01[n] <= accw) {
-                ++replication[i];
-                ++n;
-            }
-        }
-        replication[M - 1] = N - n;
+    if (M == 1) {
+        *replication = static_cast<IntType>(N);
+        return;
     }
-}; // class Inversion
+
+    std::memset(replication, 0, sizeof(IntType) * M);
+
+    if (N == 0)
+        return;
+
+    std::size_t n = 0;
+    double accw = 0;
+    for (std::size_t i = 0; i != M - 1; ++i) {
+        accw += weight[i];
+        while (n != N && u01[n] <= accw) {
+            ++replication[i];
+            ++n;
+        }
+    }
+    replication[M - 1] = N - n;
+}
 
 } // namespace vsmc::internal
 
