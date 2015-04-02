@@ -81,7 +81,7 @@ class Resample<internal::ResampleResidualSystematic>
             uptr[i] = u + i * delta;
         inversion_(M, NN, rptr, uptr, replication, true);
 
-        for (std::size_t i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
     }
 

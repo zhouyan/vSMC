@@ -11,6 +11,11 @@
   either `row_data` (`StateMatrix<RowMajor, Dim, T>`) or `col_data`
   (`StateMatrix<ColMajor, Dim, T>`).
 
+## Bug fixes
+
+* Fix Residual and related resampling algorithms in situations where the new
+  system has number of particles unequal to the old system.
+
 # Changes since v1.1.0
 
 ## Changed behaviors

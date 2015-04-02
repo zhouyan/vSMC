@@ -79,7 +79,7 @@ class Resample<internal::ResampleResidual>
             uptr[i] = runif(rng);
         inversion_(M, NN, rptr, uptr, replication, false);
 
-        for (std::size_t i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
     }
 
