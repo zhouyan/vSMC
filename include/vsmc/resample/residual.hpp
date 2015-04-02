@@ -77,7 +77,8 @@ class Resample<internal::ResampleResidual>
         cxx11::uniform_real_distribution<double> runif(0, 1);
         for (std::size_t i = 0; i != NN; ++i)
             uptr[i] = runif(rng);
-        inversion_(M, NN, rptr, uptr, replication, false);
+        std::sort(uptr, uptr + NN);
+        inversion_(M, NN, rptr, uptr, replication);
 
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);

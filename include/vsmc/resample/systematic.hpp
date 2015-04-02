@@ -61,7 +61,7 @@ class Resample<internal::ResampleSystematic>
         const double u = runif(rng) * delta;
         for (std::size_t i = 0; i != N; ++i)
             uptr[i] = u + i * delta;
-        inversion_(M, N, weight, uptr, replication, true);
+        inversion_(M, N, weight, uptr, replication);
     }
 
     private :

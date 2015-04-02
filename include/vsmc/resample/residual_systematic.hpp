@@ -79,7 +79,7 @@ class Resample<internal::ResampleResidualSystematic>
         const double u = runif(rng) * delta;
         for (std::size_t i = 0; i != NN; ++i)
             uptr[i] = u + i * delta;
-        inversion_(M, NN, rptr, uptr, replication, true);
+        inversion_(M, NN, rptr, uptr, replication);
 
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);

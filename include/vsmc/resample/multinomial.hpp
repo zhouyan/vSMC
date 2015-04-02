@@ -59,7 +59,8 @@ class Resample<internal::ResampleMultinomial>
         cxx11::uniform_real_distribution<double> runif(0, 1);
         for (std::size_t i = 0; i != N; ++i)
             uptr[i] = runif(rng);
-        inversion_(M, N, weight, uptr, replication, false);
+        std::sort(uptr, uptr + N);
+        inversion_(M, N, weight, uptr, replication);
     }
 
     private :

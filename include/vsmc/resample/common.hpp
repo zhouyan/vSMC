@@ -55,12 +55,11 @@ class Inversion
 {
     public :
 
-    // Given N U01 random variates,
+    // Given N sorted U01 random variates 
     // Compute M replication numbers based on M weights
     template <typename IntType>
     void operator() (std::size_t M, std::size_t N,
-            const double *weight, const double *u01, IntType *replication,
-            bool usorted)
+            const double *weight, const double *u01, IntType *replication)
     {
         if (M == 0)
             return;
@@ -75,30 +74,17 @@ class Inversion
         if (N == 0)
             return;
 
-        accw_.resize(M);
-        std::partial_sum(weight, weight + M, accw_.begin());
-        accw_.back() = 1;
-
-        u01_.resize(N);
-        std::copy(u01, u01 + N, u01_.begin());
-        if (!usorted)
-            std::sort(u01_.begin(), u01_.end());
-        if (u01_.back() > 1)
-            u01_.back() = 1;
-
-        std::size_t offset = 0;
-        for (std::size_t i = 0; i != M; ++i) {
-            while (offset != N && u01_[offset] <= accw_[i]) {
+        std::size_t n = 0;
+        double accw = 0;
+        for (std::size_t i = 0; i != M - 1; ++i) {
+            accw += weight[i];
+            while (n != N && u01[n] <= accw) {
                 ++replication[i];
-                ++offset;
+                ++n;
             }
         }
+        replication[M - 1] = N - n;
     }
-
-    private :
-
-    std::vector<double, AlignedAllocator<double> > accw_;
-    std::vector<double, AlignedAllocator<double> > u01_;
 }; // class Inversion
 
 } // namespace vsmc::internal

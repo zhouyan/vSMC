@@ -78,7 +78,7 @@ class Resample<internal::ResampleResidualStratified>
         const double delta = 1.0 / N;
         for (std::size_t i = 0; i != NN; ++i)
             uptr[i] = runif(rng) * delta + i * delta;
-        inversion_(M, NN, rptr, uptr, replication, true);
+        inversion_(M, NN, rptr, uptr, replication);
 
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
