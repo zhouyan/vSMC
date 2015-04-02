@@ -321,6 +321,9 @@ class AlignedAllocator : public std::allocator<T>
 
     pointer allocate (size_type n, const void * = VSMC_NULLPTR)
     {
+        if (n == 0)
+            return VSMC_NULLPTR;
+
         return static_cast<pointer>(
                 memory_.aligned_malloc(sizeof(T) * n, Alignment));
     }
