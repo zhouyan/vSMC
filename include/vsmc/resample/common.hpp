@@ -169,9 +169,11 @@ class ResampleCopyFromReplication
             }
         } else {
             std::size_t to = 0;
-            for (std::size_t from = 0; from != M; ++from)
-                for (IntType1 i = 0; i != replication[from]; ++i)
+            for (std::size_t from = 0; from != M; ++from) {
+                const IntType1 rep = replication[from];
+                for (IntType1 r = 0; r != rep; ++r)
                     copy_from[to++] = static_cast<IntType2>(from);
+            }
         }
     }
 }; // class ResampleCopyFromReplication
