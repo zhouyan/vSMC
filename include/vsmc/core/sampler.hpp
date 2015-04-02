@@ -457,6 +457,7 @@ class Sampler
         } else {
             do_init(param);
         }
+        do_acch();
 
         return *this;
     }
@@ -470,15 +471,12 @@ class Sampler
     Sampler<T> &iterate (std::size_t num = 1)
     {
         do_acch();
-
         if (num > 1)
             reserve(iter_size() + num);
-
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
             do_iter();
         }
-
         do_acch();
 
         return *this;
