@@ -60,7 +60,7 @@ class Inversion
     template <typename IntType>
     void operator() (std::size_t M, std::size_t N,
             const double *weight, const double *u01, IntType *replication,
-            bool usorted = false)
+            bool usorted)
     {
         if (M == 0)
             return;
