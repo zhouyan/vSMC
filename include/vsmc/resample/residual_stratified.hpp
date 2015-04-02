@@ -72,13 +72,8 @@ class Resample<internal::ResampleResidualStratified>
         for (std::size_t i = 0; i != M; ++i)
             R += static_cast<IntType>(iptr[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
-        u01_.resize(NN);
-        double *const uptr = &u01_[0];
-        cxx11::uniform_real_distribution<double> runif(0, 1);
-        const double delta = 1.0 / N;
-        for (std::size_t i = 0; i != NN; ++i)
-            uptr[i] = runif(rng) * delta + i * delta;
-        internal::inversion(M, NN, rptr, uptr, replication);
+        internal::U01SeqStratified<RngType> u01seq(1.0 / N, rng);
+        internal::inversion(M, NN, rptr, u01seq, replication);
 
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
@@ -88,7 +83,6 @@ class Resample<internal::ResampleResidualStratified>
 
     std::vector<double, AlignedAllocator<double> > residual_;
     std::vector<double, AlignedAllocator<double> > integral_;
-    std::vector<double, AlignedAllocator<double> > u01_;
 }; // Residual stratified resampling
 
 } // namespace vsmc

@@ -51,12 +51,11 @@ namespace vsmc {
 
 namespace internal {
 
-
 // Given N sorted U01 random variates 
 // Compute M replication numbers based on M weights
-template <typename IntType>
+template <typename IntType, typename U01SeqType>
 void inversion (std::size_t M, std::size_t N,
-        const double *weight, const double *u01, IntType *replication)
+        const double *weight, U01SeqType &u01seq, IntType *replication)
 {
     if (M == 0)
         return;
@@ -75,13 +74,50 @@ void inversion (std::size_t M, std::size_t N,
     double accw = 0;
     for (std::size_t i = 0; i != M - 1; ++i) {
         accw += weight[i];
-        while (n != N && u01[n] <= accw) {
+        while (n != N && u01seq[n] <= accw) {
             ++replication[i];
             ++n;
         }
     }
     replication[M - 1] = N - n;
 }
+
+template <typename RngType>
+class U01SeqStratified
+{
+    public :
+
+    U01SeqStratified (double delta, RngType &rng) :
+        delta_(delta), rng_(rng), runif_(0, 1) {}
+
+    double operator[] (std::size_t n)
+    {return runif_(rng_) * delta_ + n * delta_;}
+
+    private :
+
+    double delta_;
+    RngType &rng_;
+    cxx11::uniform_real_distribution<double> runif_;
+}; // class U01SeqStratified
+
+template <typename RngType>
+class U01SeqSystematic
+{
+    public :
+
+    U01SeqSystematic (double delta, RngType &rng) : u_(0), delta_(delta)
+    {
+        cxx11::uniform_real_distribution<double> runif(0, 1);
+        u_ = runif(rng) * delta_;
+    }
+
+    double operator[] (std::size_t n) {return u_ + n * delta_;}
+
+    private :
+
+    double u_;
+    double delta_;
+}; // class U01SeqSystematic
 
 } // namespace vsmc::internal
 

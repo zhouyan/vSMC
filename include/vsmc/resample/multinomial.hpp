@@ -55,12 +55,11 @@ class Resample<internal::ResampleMultinomial>
             const double *weight, IntType *replication)
     {
         u01_.resize(N);
-        double *const uptr = &u01_[0];
         cxx11::uniform_real_distribution<double> runif(0, 1);
         for (std::size_t i = 0; i != N; ++i)
-            uptr[i] = runif(rng);
-        std::sort(uptr, uptr + N);
-        internal::inversion(M, N, weight, uptr, replication);
+            u01_[i] = runif(rng);
+        std::sort(u01_.begin(), u01_.end());
+        internal::inversion(M, N, weight, u01_, replication);
     }
 
     private :
