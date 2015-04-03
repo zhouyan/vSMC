@@ -11,6 +11,12 @@
   either `row_data` (`StateMatrix<RowMajor, Dim, T>`) or `col_data`
   (`StateMatrix<ColMajor, Dim, T>`).
 
+## Changed behaviors
+
+* `CBlas` and `vMath` functions (vExp, etc.) no longer check threshold
+  configuration macros. In particular, the macro `VSMC_CLABS_THRESHOLD` and
+  `VSMC_VMATH_THRESHOLD` are no longer checked.
+
 ## Bug fixes
 
 * Fix Residual and related resampling algorithms in situations where the new
