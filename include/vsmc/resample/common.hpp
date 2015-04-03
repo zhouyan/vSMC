@@ -54,7 +54,7 @@ namespace internal {
 // Given N sorted U01 random variates 
 // Compute M replication numbers based on M weights
 template <typename IntType, typename U01SeqType>
-void inversion (std::size_t M, std::size_t N,
+inline void inversion (std::size_t M, std::size_t N,
         const double *weight, U01SeqType &u01seq, IntType *replication)
 {
     if (M == 0)
