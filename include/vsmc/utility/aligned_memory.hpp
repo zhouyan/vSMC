@@ -56,10 +56,10 @@
 /// \brief Default AlignedMemory type
 /// \ingroup Config
 #ifndef VSMC_ALIGNED_MEMORY_TYPE
-#if VSMC_HAS_JEMALLOC
-#define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryJE
-#elif VSMC_HAS_TBB_MALLOC
+#if VSMC_HAS_TBB_MALLOC
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryTBB
+#elif VSMC_HAS_JEMALLOC
+#define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryJE
 #elif VSMC_HAS_MKL
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryMKL
 #elif VSMC_HAS_POSIX || defined(VSMC_MSVC)
