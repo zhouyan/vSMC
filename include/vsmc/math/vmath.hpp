@@ -38,7 +38,7 @@
 
 #if VSMC_USE_MKL_VML
 #include <mkl.h>
-#elif VSMC_USE_VECLIB_VFORCE
+#elif VSMC_USE_ACCELERATE_VFORCE
 #include <Accelerate/Accelerate.h>
 #endif
 
@@ -410,7 +410,7 @@ VSMC_DEFINE_MATH_VMATH_VML_1(TGamma)
 
 } // namespace vsmc
 
-#elif VSMC_USE_VECLIB_VFORCE
+#elif VSMC_USE_ACCELERATE_VFORCE
 
 #define VSMC_DEFINE_MATH_VMATH_VFORCE_1(func, name) \
 inline void v##name                                                          \
