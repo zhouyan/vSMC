@@ -40,6 +40,164 @@
     VSMC_STATIC_ASSERT((!is_lvalue_reference<T>::value),                     \
             ATTEMPT_TO_FORWARD_AN_RVALUE_AS_AN_LVALUE)
 
+#define VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(name) \
+    template <typename> struct name : public false_type {};
+#define VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TYPE(name)
+
+#if VSMC_HAS_CXX11LIB_TYPE_TRAITS
+
+#ifdef __GLIBCXX__
+#define VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(name) \
+    template <typename> struct name : public false_type {};
+#define VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TYPE(name)
+#else // __GLIBCXX__
+#define VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(name) using std::name;
+#define VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TYPE(name) using std::name;
+#endif // __GLIBCXX__
+
+#include <type_traits>
+#include <utility>
+
+namespace vsmc {
+
+namespace cxx11 {
+
+// Helper classes
+using std::integral_constant;
+using std::true_type;
+using std::false_type;
+
+// Primary type categories
+using std::is_void;
+using std::is_integral;
+using std::is_floating_point;
+using std::is_array;
+using std::is_enum;
+using std::is_union;
+using std::is_class;
+using std::is_function;
+using std::is_pointer;
+using std::is_lvalue_reference;
+using std::is_rvalue_reference;
+using std::is_member_object_pointer;
+using std::is_member_function_pointer;
+
+// Composite type categories
+using std::is_fundamental;
+using std::is_arithmetic;
+using std::is_scalar;
+using std::is_object;
+using std::is_compound;
+using std::is_reference;
+using std::is_member_pointer;
+
+// Type properties
+using std::is_const;
+using std::is_volatile;
+using std::is_trivial;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(is_trivially_copyable)
+using std::is_standard_layout;
+using std::is_pod;
+using std::is_literal_type;
+using std::is_empty;
+using std::is_polymorphic;
+using std::is_abstract;
+using std::is_signed;
+using std::is_unsigned;
+
+// Supported operations
+using std::is_constructible;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(is_trivially_constructible)
+using std::is_nothrow_constructible;
+using std::is_default_constructible;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(is_trivially_default_constructible)
+using std::is_nothrow_default_constructible;
+using std::is_copy_constructible;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(is_trivially_copy_constructible)
+using std::is_nothrow_copy_constructible;
+using std::is_move_constructible;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(is_trivially_move_constructible)
+using std::is_nothrow_move_constructible;
+using std::is_assignable;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(is_trivially_assignable)
+using std::is_nothrow_assignable;
+using std::is_copy_assignable;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(is_trivially_copy_assignable)
+using std::is_nothrow_copy_assignable;
+using std::is_move_assignable;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TEST(is_trivially_move_assignable)
+using std::is_nothrow_move_assignable;
+using std::is_destructible;
+using std::is_trivially_destructible;
+using std::is_nothrow_destructible;
+using std::has_virtual_destructor;
+
+// Property queries
+using std::alignment_of;
+using std::rank;
+using std::extent;
+
+// Type relations
+using std::is_same;
+using std::is_base_of;
+using std::is_convertible;
+
+// Const-volatility specifiers
+using std::remove_cv;
+using std::remove_const;
+using std::remove_volatile;
+using std::add_cv;
+using std::add_const;
+using std::add_volatile;
+
+// References
+using std::remove_reference;
+using std::add_lvalue_reference;
+using std::add_rvalue_reference;
+
+// Pointers
+using std::remove_pointer;
+using std::add_pointer;
+
+// Sign modifiers
+using std::make_signed;
+using std::make_unsigned;
+
+// Arrays
+using std::remove_extent;
+using std::remove_all_extents;
+
+// Miscellaneous transformations
+using std::aligned_storage;
+VSMC_DEFINE_CXX11_TYPE_TRAITS_LIBSTDCPP_TYPE(aligned_union)
+using std::decay;
+using std::enable_if;
+using std::conditional;
+using std::common_type;
+using std::underlying_type;
+using std::result_of;
+
+// Utilities
+using std::declval;
+using std::move;
+
+// is_null_pointer
+namespace internal {
+template <typename T> struct is_null_pointer_impl : public false_type {};
+#if VSMC_HAS_CXX11_NULLPTR
+template <> struct is_null_pointer_impl<std::nullptr_t> : public true_type {};
+#endif
+} // namespace vsmc::cxx11::internal
+template <typename T> struct is_null_pointer :
+    public internal::is_null_pointer_impl<typename remove_cv<T>::type> {};
+
+
+} // namespace vsmc::cxx11
+
+} // namespace vsmc
+
+#else // VSMC_HAS_CXX11LIB_TYPE_TRAITS
+
 namespace vsmc {
 
 namespace cxx11 {
@@ -59,7 +217,8 @@ namespace cxx11 {
 /// parameter type is a union, while it should derive from
 /// vsmc::cxx11::false_type
 ///
-/// \todo The following traits are declared but not implemented yet
+/// \todo The following traits are declared but not implemented correctly. They
+/// will always derive from `false_type`.
 /// ~~~{.cpp}
 /// template <typename> struct is_trivial;
 /// template <typename> struct is_trivially_copyable;
@@ -106,6 +265,8 @@ namespace cxx11 {
 
 // Helper classes
 template <typename T, T> struct integral_constant;
+// true_type
+// false_type
 
 // Primary type categories
 template <typename> struct is_void;
@@ -456,10 +617,10 @@ template <typename T> struct is_const<const T> : public true_type  {};
 template <typename>   struct is_volatile             : public false_type {};
 template <typename T> struct is_volatile<volatile T> : public true_type  {};
 
-// is_trivial
-// is_trivially_copyable
-// is_standard_layout
-// is_pod
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivial)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_copyable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_standard_layout)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_pod)
 
 // is_literal_type
 template <typename T> struct is_literal_type :
@@ -543,31 +704,31 @@ template <typename T> struct is_unsigned :
 /// \brief Supported operations
 /// @{
 
-// is_constructible
-// is_trivially_constructible
-// is_nothrow_constructible
-// is_default_constructible
-// is_trivially_default_constructible
-// is_nothrow_default_constructible
-// is_copy_constructible
-// is_trivially_copy_constructible
-// is_nothrow_copy_constructible
-// is_move_constructible
-// is_trivially_move_constructible
-// is_nothrow_move_constructible
-// is_assignable
-// is_trivially_assignable
-// is_nothrow_assignable
-// is_copy_assignable
-// is_trivially_copy_assignable
-// is_nothrow_copy_assignable
-// is_move_assignable
-// is_trivially_move_assignable
-// is_nothrow_move_assignable
-// is_destructible
-// is_trivially_destructible
-// is_nothrow_destructible
-// has_virtual_destructor
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_nothrow_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_default_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_default_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_nothrow_default_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_copy_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_copy_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_nothrow_copy_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_move_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_move_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_nothrow_move_constructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_nothrow_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_copy_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_copy_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_nothrow_copy_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_move_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_move_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_nothrow_move_assignable)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_destructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_trivially_destructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(is_nothrow_destructible)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TEST(has_virtual_destructor)
 
 /// @}
 
@@ -575,7 +736,7 @@ template <typename T> struct is_unsigned :
 /// \brief Property queries
 /// @{
 
-// alignment_of
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TYPE(alignment_of)
 
 // rank
 template <typename> struct rank :
@@ -1033,8 +1194,8 @@ template <typename T> using remove_all_extents_t =
 /// \brief Miscellaneous transformations
 /// @{
 
-// aligned_storage
-// aligned_union
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TYPE(aligned_storage)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TYPE(aligned_union)
 
 // decay
 template <typename T>
@@ -1074,9 +1235,9 @@ template <bool B, typename T, typename F> using conditional_t =
     typename conditional<B, T, F>::type;
 #endif
 
-// common_type
-// underlying_type
-// result_of
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TYPE(common_type)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TYPE(underlying_type)
+VSMC_DEFINE_CXX11_TYPE_TRAITS_NO_IMPL_TYPE(result_of)
 
 /// @}
 
@@ -1118,5 +1279,7 @@ inline T &&forward (typename remove_reference<T>::type &&t) VSMC_NOEXCEPT
 } // namespace vsmc::cxx11
 
 } // namespace vsmc
+
+#endif // VSMC_HAS_CXX11LIB_TYPE_TRAITS
 
 #endif // VSMC_CXX11_TYPE_TRAITS_HPP

@@ -10,6 +10,8 @@
 * `StateMatrix` has new overloaded `data` member function that is equivalent to
   either `row_data` (`StateMatrix<RowMajor, Dim, T>`) or `col_data`
   (`StateMatrix<ColMajor, Dim, T>`).
+* The library now optionally use `<type_traits>` standard header. The
+  configuration macro is `VSMC_HAS_CXX11LIB_TYPE_TRAITS`.
 
 ## Changed behaviors
 
