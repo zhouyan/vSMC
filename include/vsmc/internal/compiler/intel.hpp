@@ -343,6 +343,14 @@
 #endif
 #endif
 
+#if VSMC_INTEL_VERSION >= 1500
+#if VSMC_LIBCPP_VERSION >= 1101 || VSMC_LIBSTDCPP_VERSION >= 40900
+#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
+#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 1
+#endif
+#endif
+#endif
+
 #endif // __cplusplus >= 201103L
 
 #if __cplusplus >= 201402L

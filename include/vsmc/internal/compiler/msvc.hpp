@@ -310,6 +310,12 @@
 #endif
 #endif
 
+#if VSMC_MSVC_VERSION >= 1800
+#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
+#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 1
+#endif
+#endif
+
 // C++14 language features
 
 #if VSMC_MSVC_VERSION >= VSMC_MSVC_NONEXIST
