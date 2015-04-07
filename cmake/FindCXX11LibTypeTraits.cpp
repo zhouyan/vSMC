@@ -163,6 +163,8 @@ using std::result_of;
 
 // Utilities
 using std::declval;
+using std::move;
+using std::forward;
 
 int main ()
 {

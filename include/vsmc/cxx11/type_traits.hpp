@@ -180,6 +180,7 @@ using std::result_of;
 // Utilities
 using std::declval;
 using std::move;
+using std::forward;
 
 // is_null_pointer
 namespace internal {
