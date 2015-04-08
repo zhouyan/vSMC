@@ -88,13 +88,24 @@ class U01SeqStratified
     public :
 
     U01SeqStratified (double delta, RngType &rng) :
-        delta_(delta), rng_(rng), runif_(0, 1) {}
+        n_(std::numeric_limits<std::size_t>::max VSMC_MNE ()),
+        u_(0), delta_(delta), rng_(rng), runif_(0, 1) {}
 
     double operator[] (std::size_t n)
-    {return runif_(rng_) * delta_ + n * delta_;}
+    {
+        if (n == n_)
+            return u_;
+
+        n_ = n;
+        u_ = runif_(rng_) * delta_ + n * delta_;
+
+        return u_;
+    }
 
     private :
 
+    std::size_t n_;
+    double u_;
     double delta_;
     RngType &rng_;
     cxx11::uniform_real_distribution<double> runif_;
