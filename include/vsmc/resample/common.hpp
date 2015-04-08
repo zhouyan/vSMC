@@ -116,17 +116,30 @@ class U01SeqSystematic
 {
     public :
 
-    U01SeqSystematic (double delta, RngType &rng) : u_(0), delta_(delta)
+    U01SeqSystematic (double delta, RngType &rng) :
+        n_(std::numeric_limits<std::size_t>::max VSMC_MNE ()),
+        u_(0), u0_(0), delta_(delta)
     {
         cxx11::uniform_real_distribution<double> runif(0, 1);
-        u_ = runif(rng) * delta_;
+        u0_ = runif(rng) * delta_;
     }
 
-    double operator[] (std::size_t n) {return u_ + n * delta_;}
+    double operator[] (std::size_t n)
+    {
+        if (n == n_)
+            return u_;
+
+        n_ = n;
+        u_ = u0_ + n * delta_;
+
+        return u_;
+    }
 
     private :
 
+    std::size_t n_;
     double u_;
+    double u0_;
     double delta_;
 }; // class U01SeqSystematic
 
