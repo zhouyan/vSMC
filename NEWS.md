@@ -12,6 +12,9 @@
   (`StateMatrix<ColMajor, Dim, T>`).
 * The library now optionally use `<type_traits>` standard header. The
   configuration macro is `VSMC_HAS_CXX11LIB_TYPE_TRAITS`.
+* Multinomial and Residual resampling algorithms now use `tbb::parallel_sort`
+  to improve performance. This can be disabled by setting `VSMC_USE_TBB` to
+  zero even if `VSMC_HAS_TBB` is non-zero.
 
 ## Changed behaviors
 
