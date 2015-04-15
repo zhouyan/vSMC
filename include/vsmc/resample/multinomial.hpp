@@ -59,7 +59,7 @@ class Resample<internal::ResampleMultinomial>
         for (std::size_t i = 0; i != N; ++i)
             u01_[i] = runif(rng);
 #if VSMC_USE_TBB
-        tbb::parallel_sort(u01_.begin(), u01_.end());
+        ::tbb::parallel_sort(u01_.begin(), u01_.end());
 #else
         std::sort(u01_.begin(), u01_.end());
 #endif
