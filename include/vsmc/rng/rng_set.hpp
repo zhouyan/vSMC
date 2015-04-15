@@ -40,16 +40,29 @@
 #endif
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
+#if VSMC_HAS_TBB
+#include <tbb/tbb.h>
+#endif
 
 /// \brief Default RNG set type
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSet< ::vsmc::Threefry4x64, ::vsmc::Vector>
+#if VSMC_USE_TBB
+#define VSMC_RNG_SET_TYPE \
+    ::vsmc::RngSet< ::vsmc::Threefry4x64, ::vsmc::ThreadLocal>
+#else
+#define VSMC_RNG_SET_TYPE \
+    ::vsmc::RngSet< ::vsmc::Threefry4x64, ::vsmc::Vector>
+#endif
 #endif
 
 namespace vsmc {
 
+#if VSMC_USE_TBB
+template <typename = Threefry4x64, typename = ThreadLocal> class RngSet;
+#else
 template <typename = Threefry4x64, typename = Vector> class RngSet;
+#endif
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
@@ -120,6 +133,44 @@ class RngSet<RngType, Vector>
 
     std::vector<rng_type, AlignedAllocator<rng_type> > rng_;
 }; // class RngSet
+
+#if VSMC_HAS_TBB
+
+/// \brief Thread local RNG set
+/// \ingroup RNG
+template <typename RngType>
+class RngSet<RngType, ThreadLocal>
+{
+    public :
+
+    typedef RngType rng_type;
+    typedef std::size_t size_type;
+
+    explicit RngSet (size_type N = 0) : size_(N), rng_(rng_tpl_) {rng_tpl_();}
+
+    size_type size () const {return size_;}
+
+    void resize (std::size_t) {}
+
+    void seed () {rng_.clear();}
+
+    rng_type &operator[] (size_type) {return rng_.local();}
+
+    private :
+
+    std::size_t size_;
+    ::tbb::combinable<rng_type> rng_;
+
+    static rng_type rng_tpl_ ()
+    {
+        static ::tbb::mutex mtx;
+        ::tbb::mutex::scoped_lock(rng_mtx);
+
+        return rng_type(Seed::instance().get());
+    }
+}; // class RngSet
+
+#endif // VSMC_HAS_TBB
 
 namespace traits {
 

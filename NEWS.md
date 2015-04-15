@@ -15,6 +15,7 @@
 * Multinomial and Residual resampling algorithms now use `tbb::parallel_sort`
   to improve performance. This can be disabled by setting `VSMC_USE_TBB` to
   zero even if `VSMC_HAS_TBB` is non-zero.
+* New Intel TBB based thread local version of `RngSet`
 
 ## Changed behaviors
 

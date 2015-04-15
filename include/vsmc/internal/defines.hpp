@@ -118,6 +118,7 @@ struct Scalar
 {
     static VSMC_CONSTEXPR const bool is_scalar = true;
     static VSMC_CONSTEXPR const bool is_vector = false;
+    static VSMC_CONSTEXPR const bool is_thread_local = false;
 }; // struct Scalar
 
 /// \brief Class template argument used for vector variant
@@ -126,7 +127,17 @@ struct Vector
 {
     static VSMC_CONSTEXPR const bool is_scalar = false;
     static VSMC_CONSTEXPR const bool is_vector = true;
+    static VSMC_CONSTEXPR const bool is_thread_local = false;
 }; // struct Vector
+
+/// \brief Class template argument used for thread local storage variant
+/// \ingroup Definitions
+struct ThreadLocal
+{
+    static VSMC_CONSTEXPR const bool is_scalar = false;
+    static VSMC_CONSTEXPR const bool is_vector = false;
+    static VSMC_CONSTEXPR const bool is_thread_local = true;
+}; // struct ThreadLocal
 
 /// \brief Function template argument used for position
 /// \ingroup Definitions
