@@ -83,7 +83,6 @@ class Resample<internal::ResampleResidualSystematic>
 
     std::vector<double, AlignedAllocator<double> > residual_;
     std::vector<double, AlignedAllocator<double> > integral_;
-    std::vector<double, AlignedAllocator<double> > u01_;
 }; // Residual systematic resampling
 
 } // namespace vsmc
