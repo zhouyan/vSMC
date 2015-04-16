@@ -55,15 +55,17 @@ class Resample<internal::ResampleMultinomial>
             const double *weight, IntType *replication)
     {
         u01_.resize(N);
+        double *const uptr = &u01_[0];
+
         cxx11::uniform_real_distribution<double> runif(0, 1);
         for (std::size_t i = 0; i != N; ++i)
-            u01_[i] = runif(rng);
+            uptr[i] = runif(rng);
 #if VSMC_USE_TBB
-        ::tbb::parallel_sort(u01_.begin(), u01_.end());
+        ::tbb::parallel_sort(uptr, uptr + N);
 #else
-        std::sort(u01_.begin(), u01_.end());
+        std::sort(uptr, uptr + N);
 #endif
-        internal::inversion(M, N, weight, u01_, replication);
+        internal::inversion(M, N, weight, uptr, replication);
     }
 
     private :

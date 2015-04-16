@@ -73,15 +73,16 @@ class Resample<internal::ResampleResidual>
             R += static_cast<IntType>(iptr[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
         u01_.resize(NN);
+        double *const uptr = &u01_[0];
         cxx11::uniform_real_distribution<double> runif(0, 1);
         for (std::size_t i = 0; i != NN; ++i)
-            u01_[i] = runif(rng);
+            uptr[i] = runif(rng);
 #if VSMC_USE_TBB
-        ::tbb::parallel_sort(u01_.begin(), u01_.end());
+        ::tbb::parallel_sort(uptr, uptr + NN);
 #else
-        std::sort(u01_.begin(), u01_.end());
+        std::sort(uptr, uptr + NN);
 #endif
-        internal::inversion(M, NN, rptr, u01_, replication);
+        internal::inversion(M, NN, rptr, uptr, replication);
 
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
