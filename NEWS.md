@@ -16,6 +16,8 @@
   to improve performance. This can be disabled by setting `VSMC_USE_TBB` to
   zero even if `VSMC_HAS_TBB` is non-zero.
 * New Intel TBB based thread local version of `RngSet`
+* `WeightSet` now has a set of static member functions that can be used to
+  implement weights related operations.
 
 ## Changed behaviors
 
