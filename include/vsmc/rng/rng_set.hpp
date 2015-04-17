@@ -164,9 +164,11 @@ class RngSet<RngType, ThreadLocal>
     static rng_type rng_tpl_ ()
     {
         static ::tbb::mutex mtx;
-        ::tbb::mutex::scoped_lock(rng_mtx);
 
-        return rng_type(Seed::instance().get());
+        ::tbb::mutex::scoped_lock lock(mtx);
+        rng_type rng(Seed::instance().get());
+
+        return rng;
     }
 }; // class RngSet
 
