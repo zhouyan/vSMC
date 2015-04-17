@@ -221,8 +221,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
              std::vector<T, AlignedAllocator<T> >,
              std::vector<T> >::type data_;
 
-    private :
-
     std::vector<T> create_pack_dispatch (cxx11::true_type) const
     {return std::vector<T>(this->dim());}
 
