@@ -146,7 +146,7 @@ class RngSet<RngType, ThreadLocal>
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet (size_type N = 0) : size_(N), rng_(rng_tpl_) {rng_tpl_();}
+    explicit RngSet (size_type N = 0) : size_(N), rng_(rng_init) {rng_init();}
 
     size_type size () const {return size_;}
 
@@ -161,7 +161,7 @@ class RngSet<RngType, ThreadLocal>
     std::size_t size_;
     ::tbb::combinable<rng_type> rng_;
 
-    static rng_type rng_tpl_ ()
+    static rng_type rng_init ()
     {
         static ::tbb::mutex mtx;
 
