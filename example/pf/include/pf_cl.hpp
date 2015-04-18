@@ -51,7 +51,7 @@
 #define PF_CV_DO(Res) cv_do(sampler, vsmc::Res, argv, "."#Res);
 
 static const std::size_t DataNum = 100;
-static const std::size_t ParticleNum = 1000000;
+static const std::size_t ParticleNum = 1000;
 static const std::size_t StateSize = 4 * sizeof(cl_float);
 
 #ifdef VSMC_PF_CL_MPI
