@@ -62,17 +62,14 @@ class Resample<internal::ResampleResidualSystematic>
         double *const iptr = &integral_[0];
         for (std::size_t i = 0; i != M; ++i)
             rptr[i] = modf(N * weight[i], iptr + i);
-        double rsum = 0;
-        for (std::size_t i = 0; i != M; ++i)
-            rsum += rptr[i];
-        for (std::size_t i = 0; i != M; ++i)
-            rptr[i] /= rsum;
+        double coeff = 1 / math::asum(M, rptr);
+        math::scal(M, coeff, rptr);
 
         IntType R = 0;
         for (std::size_t i = 0; i != M; ++i)
             R += static_cast<IntType>(iptr[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
-        internal::U01SeqSystematic<RngType> u01seq(1.0 / N, rng);
+        internal::U01SeqSystematic<RngType> u01seq(1.0 / NN, rng);
         internal::inversion(M, NN, rptr, u01seq, replication);
 
         for (std::size_t i = 0; i != M; ++i)
