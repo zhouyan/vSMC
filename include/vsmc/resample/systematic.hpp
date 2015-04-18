@@ -54,7 +54,7 @@ class Resample<internal::ResampleSystematic>
     void operator() (std::size_t M, std::size_t N, RngType &rng,
             const double *weight, IntType *replication)
     {
-        internal::U01SeqSystematic<RngType> u01seq(N, rng);
+        U01SequenceSystematic<RngType> u01seq(N, rng);
         internal::inversion(M, N, weight, u01seq, replication);
     }
 }; // Systematic resampling

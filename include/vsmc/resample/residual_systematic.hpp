@@ -69,7 +69,7 @@ class Resample<internal::ResampleResidualSystematic>
         for (std::size_t i = 0; i != M; ++i)
             R += static_cast<IntType>(iptr[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
-        internal::U01SeqSystematic<RngType> u01seq(NN, rng);
+        U01SequenceSystematic<RngType> u01seq(NN, rng);
         internal::inversion(M, NN, rptr, u01seq, replication);
 
         for (std::size_t i = 0; i != M; ++i)

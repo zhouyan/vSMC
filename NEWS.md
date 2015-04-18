@@ -18,6 +18,10 @@
 * New [Intel TBB][TBB] based thread local version of `RngSet`
 * `WeightSet` now has a set of static member functions that can be used to
   implement weights related operations.
+* New classes in `rng/u01.hpp`, `U01SequenceSorted`, `U01SequenceStratified`,
+  `U01SequenceSystematic`, for generating sorted uniform random variates with
+  O(N) runtime cost and O(1) memory cost. These are primarily used resampling
+  algorithms within the library but can find other usages.
 
 ## Changed behaviors
 

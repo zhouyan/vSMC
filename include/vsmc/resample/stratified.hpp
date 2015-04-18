@@ -54,7 +54,7 @@ class Resample<internal::ResampleStratified>
     void operator() (std::size_t M, std::size_t N, RngType &rng,
             const double *weight, IntType *replication)
     {
-        internal::U01SeqStratified<RngType> u01seq(N, rng);
+        U01SequenceStratified<RngType> u01seq(N, rng);
         internal::inversion(M, N, weight, u01seq, replication);
     }
 }; // Stratified resampling
