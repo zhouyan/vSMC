@@ -286,7 +286,7 @@ class Monitor
         double *const rptr = &result_[0];
         if (record_only_) {
             eval_(iter, dim_, particle, rptr);
-            push_back(iter, rptr);
+            push_back(iter);
 
             return;
         }
@@ -298,7 +298,7 @@ class Monitor
         eval_(iter, dim_, particle, bptr);
         is_integrate_(static_cast<ISIntegrate::size_type>(N),
                 static_cast<ISIntegrate::size_type>(dim_), bptr, wptr, rptr);
-        push_back(iter, rptr);
+        push_back(iter);
     }
 
     /// \brief Clear all records of the index and integrations
@@ -331,11 +331,10 @@ class Monitor
     std::vector<double, AlignedAllocator<double> > buffer_;
     ISIntegrate is_integrate_;
 
-    void push_back (std::size_t iter, const double *rptr)
+    void push_back (std::size_t iter)
     {
         index_.push_back(iter);
-        for (std::size_t d = 0; d != dim_; ++d)
-            record_.push_back(rptr[d]);
+        record_.insert(result_.end(), result_.begin(), result_.end());
     }
 }; // class Monitor
 
