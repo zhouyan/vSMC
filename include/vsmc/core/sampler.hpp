@@ -80,7 +80,7 @@ class Sampler
     explicit Sampler (size_type N) :
         init_by_iter_(false), resample_threshold_(resample_threshold_never()),
         particle_(N), iter_num_(0), path_(typename Path<T>::eval_type())
-    {resample_scheme(Stratified);}
+    {resample_scheme(Multinomial);}
 
     /// \brief Construct a Sampler with a built-in resampling scheme
     ///
