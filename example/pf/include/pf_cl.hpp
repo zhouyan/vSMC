@@ -51,7 +51,7 @@
 #define PF_CV_DO(Res) cv_do(sampler, vsmc::Res, argv, "."#Res);
 
 static const std::size_t DataNum = 100;
-static const std::size_t ParticleNum = 10000;
+static const std::size_t ParticleNum = 1000000;
 static const std::size_t StateSize = 4 * sizeof(cl_float);
 
 #ifdef VSMC_PF_CL_MPI
@@ -169,6 +169,8 @@ inline void cv_do (vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
 {
     sampler.resample_scheme(res);
     sampler.resample_threshold(0.5);
+    sampler.initialize(argv[1]);
+    sampler.iterate(DataNum - 1);
 
     std::stringstream ss;
 #ifdef VSMC_PF_CL_MPI
@@ -177,23 +179,6 @@ inline void cv_do (vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
     ss << name;
 #endif
     std::string rname(ss.str());
-
-#if VSMC_HAS_HDF5
-    sampler.initialize(argv[1]);
-    vsmc::hdf5store<vsmc::RowMajor, cl_float>(sampler.particle(),
-            argv[2] + rname + ".trace.h5", "Trace.0");
-    for (std::size_t i = 0; i != DataNum - 1; ++i) {
-        std::stringstream tss;
-        tss << "Trace." << (i + 1);
-        sampler.iterate();
-        vsmc::hdf5store<vsmc::RowMajor, cl_float>(sampler.particle(),
-                argv[2] + rname + ".trace.h5", tss.str(), true);
-    }
-#else
-    sampler.initialize(argv[1]);
-    sampler.iterate(DataNum - 1);
-#endif
-
     std::string est_file_name(argv[2] + rname + ".tsv");
     std::ofstream est_file;
     est_file.open(est_file_name.c_str());
