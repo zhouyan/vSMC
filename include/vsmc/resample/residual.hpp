@@ -69,17 +69,8 @@ class Resample<internal::ResampleResidual>
         for (std::size_t i = 0; i != M; ++i)
             R += static_cast<IntType>(iptr[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
-        u01_.resize(NN);
-        double *const uptr = &u01_[0];
-        cxx11::uniform_real_distribution<double> runif(0, 1);
-        for (std::size_t i = 0; i != NN; ++i)
-            uptr[i] = runif(rng);
-#if VSMC_USE_TBB
-        ::tbb::parallel_sort(uptr, uptr + NN);
-#else
-        std::sort(uptr, uptr + NN);
-#endif
-        internal::inversion(M, NN, rptr, uptr, replication);
+        internal::U01SeqSorted<RngType> u01seq(NN, rng);
+        internal::inversion(M, NN, rptr, u01seq, replication);
 
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
@@ -89,7 +80,6 @@ class Resample<internal::ResampleResidual>
 
     std::vector<double, AlignedAllocator<double> > residual_;
     std::vector<double, AlignedAllocator<double> > integral_;
-    std::vector<double, AlignedAllocator<double> > u01_;
 }; // Residual resampling
 
 } // namespace vsmc
