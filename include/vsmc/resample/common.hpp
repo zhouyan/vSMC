@@ -51,11 +51,15 @@
 #define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x64
 #endif
 
+#define VSMC_RUNTIME_ASSERT_RESAMPLE_COMMON_U01SEQ(Method, n, N) \
+    VSMC_RUNTIME_ASSERT((n >= 0 && n < N),                                 \
+            ("**U01Seq"#Method"::operator[]** INVALID INDEX"))
+
 namespace vsmc {
 
 namespace internal {
 
-// Given N sorted U01 random variates 
+// Given N sorted U01 random variates
 // Compute M replication numbers based on M weights
 template <typename IntType, typename U01SeqType>
 inline void inversion (std::size_t M, std::size_t N,
@@ -121,16 +125,52 @@ inline void cfrp_trans (std::size_t M, std::size_t N,
 }
 
 template <typename RngType>
+class U01SeqSorted
+{
+    public :
+
+    U01SeqSorted (std::size_t N, RngType &rng) :
+        N_(N), n_(N), u_(0), lmax_(0), rng_(rng), runif_(0, 1) {}
+
+    double operator[] (std::size_t n)
+    {
+        using std::exp;
+        using std::log;
+
+        VSMC_RUNTIME_ASSERT_RESAMPLE_COMMON_U01SEQ(Sorted, n, N_);
+
+        if (n == n_)
+            return u_;
+
+        lmax_ += log(1 - runif_(rng_)) / (N_ - n);
+        n_ = n;
+        u_ = 1 - exp(lmax_);
+
+        return u_;
+    }
+
+    private :
+
+    std::size_t N_;
+    std::size_t n_;
+    double u_;
+    double lmax_;
+    RngType &rng_;
+    cxx11::uniform_real_distribution<double> runif_;
+};
+
+template <typename RngType>
 class U01SeqStratified
 {
     public :
 
-    U01SeqStratified (double delta, RngType &rng) :
-        n_(std::numeric_limits<std::size_t>::max VSMC_MNE ()),
-        u_(0), delta_(delta), rng_(rng), runif_(0, 1) {}
+    U01SeqStratified (std::size_t N, RngType &rng) :
+        N_(N), n_(N), u_(0), delta_(1.0 / N), rng_(rng), runif_(0, 1) {}
 
     double operator[] (std::size_t n)
     {
+        VSMC_RUNTIME_ASSERT_RESAMPLE_COMMON_U01SEQ(Stratified, n, N_);
+
         if (n == n_)
             return u_;
 
@@ -142,6 +182,7 @@ class U01SeqStratified
 
     private :
 
+    std::size_t N_;
     std::size_t n_;
     double u_;
     double delta_;
@@ -154,9 +195,8 @@ class U01SeqSystematic
 {
     public :
 
-    U01SeqSystematic (double delta, RngType &rng) :
-        n_(std::numeric_limits<std::size_t>::max VSMC_MNE ()),
-        u_(0), u0_(0), delta_(delta)
+    U01SeqSystematic (std::size_t N, RngType &rng) :
+        N_(N), n_(N), u_(0), u0_(0), delta_(1.0 / N)
     {
         cxx11::uniform_real_distribution<double> runif(0, 1);
         u0_ = runif(rng) * delta_;
@@ -164,6 +204,8 @@ class U01SeqSystematic
 
     double operator[] (std::size_t n)
     {
+        VSMC_RUNTIME_ASSERT_RESAMPLE_COMMON_U01SEQ(Systematic, n, N_);
+
         if (n == n_)
             return u_;
 
@@ -175,6 +217,7 @@ class U01SeqSystematic
 
     private :
 
+    std::size_t N_;
     std::size_t n_;
     double u_;
     double u0_;
