@@ -334,7 +334,7 @@ class Monitor
     void push_back (std::size_t iter)
     {
         index_.push_back(iter);
-        record_.insert(result_.end(), result_.begin(), result_.end());
+        record_.insert(record_.end(), result_.begin(), result_.end());
     }
 }; // class Monitor
 
