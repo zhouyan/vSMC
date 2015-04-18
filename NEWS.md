@@ -24,6 +24,10 @@
 * `CBlas` and `vMath` functions (vExp, etc.) no longer check threshold
   configuration macros. In particular, the macro `VSMC_CLABS_THRESHOLD` and
   `VSMC_VMATH_THRESHOLD` are no longer checked.
+* `Particle` no longer check `resample_copy_from_replication_type` and
+  `resample_post_copy_type` for user defined resampling behaviors. It is easier
+  to write customized resampling algorithms as a `move` instead of messing with
+  `Particle`'s internal this way.
 
 ## Bug fixes
 

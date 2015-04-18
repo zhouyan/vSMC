@@ -86,6 +86,40 @@ inline void inversion (std::size_t M, std::size_t N,
     replication[M - 1] = N - n;
 }
 
+// Given replication numbers, transfer them to copy_from index
+template <typename IntType1, typename IntType2>
+inline void cfrp_trans (std::size_t M, std::size_t N,
+        const IntType1 *replication, IntType2 *copy_from)
+{
+    if (M == N) {
+        IntType1 time = 0;
+        IntType2 from = 0;
+        for (std::size_t to = 0; to != N; ++to) {
+            if (replication[to] != 0) {
+                copy_from[to] = static_cast<IntType2>(to);
+            } else {
+                // replication[to] has zero child, copy from elsewhere
+                if (replication[from] < time + 2) {
+                    // only 1 child left on replication[from]
+                    time = 0;
+                    do // move from to a position with at least 2 children
+                        ++from;
+                    while (replication[from] < 2);
+                }
+                copy_from[to] = from;
+                ++time;
+            }
+        }
+    } else {
+        std::size_t to = 0;
+        for (std::size_t from = 0; from != M; ++from) {
+            const IntType1 rep = replication[from];
+            for (IntType1 r = 0; r != rep; ++r)
+                copy_from[to++] = static_cast<IntType2>(from);
+        }
+    }
+}
+
 template <typename RngType>
 class U01SeqStratified
 {
@@ -170,73 +204,12 @@ template <ResampleScheme Scheme>
 struct ResampleType
 {typedef Resample<cxx11::integral_constant<ResampleScheme, Scheme> > type;};
 
-/// \brief Transform replication numbers to parent particle locations
-/// \ingroup Resample
-class ResampleCopyFromReplication
-{
-    public :
-
-    template <typename IntType1, typename IntType2>
-    void operator() (std::size_t M, std::size_t N,
-            const IntType1 *replication, IntType2 *copy_from) const
-    {
-        if (M == N) {
-            IntType1 time = 0;
-            IntType2 from = 0;
-            for (std::size_t to = 0; to != N; ++to) {
-                if (replication[to] != 0) {
-                    copy_from[to] = static_cast<IntType2>(to);
-                } else {
-                    // replication[to] has zero child, copy from elsewhere
-                    if (replication[from] < time + 2) {
-                        // only 1 child left on replication[from]
-                        time = 0;
-                        do // move from to a position with at least 2 children
-                            ++from;
-                        while (replication[from] < 2);
-                    }
-                    copy_from[to] = from;
-                    ++time;
-                }
-            }
-        } else {
-            std::size_t to = 0;
-            for (std::size_t from = 0; from != M; ++from) {
-                const IntType1 rep = replication[from];
-                for (IntType1 r = 0; r != rep; ++r)
-                    copy_from[to++] = static_cast<IntType2>(from);
-            }
-        }
-    }
-}; // class ResampleCopyFromReplication
-
-/// \brief Actions taken after copying particles
-/// \ingroup Resample
-class ResamplePostCopy
-{
-    public :
-
-    template <typename WeightSetType>
-    void operator() (WeightSetType &weight_set) const
-    {weight_set.set_equal_weight();}
-}; // class ResamplePostCopy
-
 namespace traits {
 
 /// \brief Particle::resample_rng_type trait
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
         VSMC_RESAMPLE_RNG_TYPE)
-
-/// \brief Particle::resample_copy_from_replication_type trait
-/// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleCopyFromReplicationType,
-        resample_copy_from_replication_type, ResampleCopyFromReplication)
-
-/// \brief Particle::resample_post_copy_type trait
-/// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResamplePostCopyType,
-        resample_post_copy_type, ResamplePostCopy)
 
 } // namespace vsmc::traits
 
