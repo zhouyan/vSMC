@@ -41,10 +41,6 @@
 #include <vsmc/rng/threefry.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
-#if VSMC_USE_TBB
-#include <tbb/tbb.h>
-#endif
-
 /// \brief Default RNG type for resampling
 /// \ingroup Config
 #ifndef VSMC_RESAMPLE_RNG_TYPE
