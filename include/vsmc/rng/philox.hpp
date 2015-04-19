@@ -40,8 +40,8 @@
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
-            (cxx11::is_same<ResultType, uint32_t>::value ||                  \
-             cxx11::is_same<ResultType, uint64_t>::value),                   \
+            (std::is_same<ResultType, uint32_t>::value ||                  \
+             std::is_same<ResultType, uint64_t>::value),                   \
             USE_PhiloxEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K) \
@@ -54,11 +54,11 @@
 
 #define VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(T, I, val) \
     template <> struct PhiloxWeylConstantValue < T, I > :                    \
-        public cxx11::integral_constant< T, val > {};
+        public std::integral_constant< T, val > {};
 
 #define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(T, K, I, val) \
     template <> struct PhiloxRoundConstantValue < T, K, I > :                \
-        public cxx11::integral_constant< T, val > {};
+        public std::integral_constant< T, val > {};
 
 /// \brief PhiloxEngine default rounds
 /// \ingroup Config
@@ -327,7 +327,7 @@ class PhiloxEngine
 
     template <typename SeedSeq>
     explicit PhiloxEngine (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, key_type, PhiloxEngine<ResultType, K, Rounds>
             >::value>::type * = VSMC_NULLPTR) : index_(K)
     {
@@ -351,7 +351,7 @@ class PhiloxEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, key_type, PhiloxEngine<ResultType, K, Rounds>
             >::value>::type * = VSMC_NULLPTR)
     {
@@ -485,7 +485,7 @@ class PhiloxEngine
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            eng = cxx11::move(eng_tmp);
+            eng = std::move(eng_tmp);
 #else
             eng = eng_tmp;
 #endif
@@ -505,21 +505,21 @@ class PhiloxEngine
     {
         buf = c;
         key_type par = key_;
-        generate_buffer<0>(buf, par, cxx11::true_type());
+        generate_buffer<0>(buf, par, std::true_type());
     }
 
     template <std::size_t>
     void generate_buffer (buffer_type &, key_type &,
-            cxx11::false_type) const {}
+            std::false_type) const {}
 
     template <std::size_t N>
     void generate_buffer (buffer_type &buf, key_type &par,
-            cxx11::true_type) const
+            std::true_type) const
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
         internal::PhiloxRound<ResultType, K, N>::eval(buf, par);
         generate_buffer<N + 1>(buf, par,
-                cxx11::integral_constant<bool, N < Rounds>());
+                std::integral_constant<bool, N < Rounds>());
     }
 }; // class PhiloxEngine
 

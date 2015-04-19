@@ -35,11 +35,11 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type) \
-    VSMC_STATIC_ASSERT((cxx11::is_unsigned<result_type>::value),             \
+    VSMC_STATIC_ASSERT((std::is_unsigned<result_type>::value),             \
             USE_XorCombineEngine_WITH_ENGINES_HAVE_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_SAME_TYPE(Eng1, Eng2) \
-    VSMC_STATIC_ASSERT((cxx11::is_same<typename Eng1::resultType,            \
+    VSMC_STATIC_ASSERT((std::is_same<typename Eng1::resultType,            \
                 typename Eng2::resultType>::value),                          \
             USE_XorCombineEngine_WITH_TWO_RNG_ENGINES_WITH_DIFFERENT_RESULT_TYPE)
 
@@ -67,7 +67,7 @@ class XorCombineEngine
 
     template <typename SeedSeq>
     explicit XorCombineEngine (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, XorCombineEngine<Eng1, Eng2, S1, S2>
             >::value>::type * = VSMC_NULLPTR) : eng1_(seq), eng2_(seq)
     {VSMC_STATIC_ASSERT_RNG_XOR_COMBINE;}
@@ -80,7 +80,7 @@ class XorCombineEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, XorCombineEngine<Eng1, Eng2, S1, S2>
             >::value>::type * = VSMC_NULLPTR)
     {
@@ -150,8 +150,8 @@ class XorCombineEngine
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            eng.eng1_ = cxx11::move(eng1_tmp);
-            eng.eng2_ = cxx11::move(eng2_tmp);
+            eng.eng1_ = std::move(eng1_tmp);
+            eng.eng2_ = std::move(eng2_tmp);
 #else
             eng.eng1_ = eng1_tmp;
             eng.eng2_ = eng2_tmp;

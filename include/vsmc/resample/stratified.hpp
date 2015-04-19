@@ -38,7 +38,7 @@ namespace vsmc {
 
 namespace internal {
 
-typedef cxx11::integral_constant<ResampleScheme, Stratified>
+typedef std::integral_constant<ResampleScheme, Stratified>
     ResampleStratified;
 
 } // namespace vsmc::internal

@@ -52,8 +52,8 @@
             USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type) \
-    VSMC_STATIC_ASSERT((cxx11::is_same<type, ::cl_float>::value              \
-                || cxx11::is_same<type, ::cl_double>::value),                \
+    VSMC_STATIC_ASSERT((std::is_same<type, ::cl_float>::value              \
+                || std::is_same<type, ::cl_double>::value),                \
             USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func) \
@@ -111,18 +111,18 @@ virtual ~Name () {}
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
 #define VSMC_DEFINE_OPENCL_MOVE(Name) \
 Name (Name<T, PlaceHolder> &&other) :                                        \
-    configure_(cxx11::move(other.configure_)),                               \
+    configure_(std::move(other.configure_)),                               \
     build_id_(other.build_id_),                                              \
-    kernel_(cxx11::move(other.kernel_)),                                     \
-    kernel_name_(cxx11::move(other.kernel_name_)) {}                         \
+    kernel_(std::move(other.kernel_)),                                     \
+    kernel_name_(std::move(other.kernel_name_)) {}                         \
                                                                              \
 Name<T, PlaceHolder> &operator= (Name<T, PlaceHolder> &&other)               \
 {                                                                            \
     if (this != &other) {                                                    \
-        configure_   = cxx11::move(other.configure_);                        \
+        configure_   = std::move(other.configure_);                        \
         build_id_    = other.build_id_;                                      \
-        kernel_      = cxx11::move(other.kernel_);                           \
-        kernel_name_ = cxx11::move(other.kernel_name_);                      \
+        kernel_      = std::move(other.kernel_);                           \
+        kernel_name_ = std::move(other.kernel_name_);                      \
     }                                                                        \
                                                                              \
     return *this;                                                            \
@@ -236,7 +236,7 @@ struct IsDerivedFromStateCLImpl
 
 template <typename D>
 struct IsDerivedFromStateCL :
-    public cxx11::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
+    public std::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value>{};
 
 } // namespace vsmc::internal
 
@@ -251,7 +251,7 @@ class StateCL
     typedef FPType fp_type;
     typedef ID cl_id;
     typedef CLManager<ID> manager_type;
-    typedef typename cxx11::conditional<StateSize == Dynamic,
+    typedef typename std::conditional<StateSize == Dynamic,
              std::vector<char>, Array<char, StateSize> >::type state_pack_type;
 
     explicit StateCL (size_type N) :
@@ -502,13 +502,13 @@ class StateCL
     state_pack_type create_pack () const
     {
         return create_pack_dispatch(
-                cxx11::integral_constant<bool, StateSize == Dynamic>());
+                std::integral_constant<bool, StateSize == Dynamic>());
     }
 
-    std::vector<char> create_pack_dispatch (cxx11::true_type) const
+    std::vector<char> create_pack_dispatch (std::true_type) const
     {return std::vector<char>(this->state_size());}
 
-    Array<char, StateSize> create_pack_dispatch (cxx11::false_type) const
+    Array<char, StateSize> create_pack_dispatch (std::false_type) const
     {return Array<char, StateSize>();}
 }; // class StateCL
 

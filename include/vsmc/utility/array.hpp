@@ -165,8 +165,8 @@ class Array
 
     void fill (const T &value)
     {
-        fill(value, cxx11::integral_constant<bool,
-                cxx11::is_integral<T>::value && N >= 100>());
+        fill(value, std::integral_constant<bool,
+                std::is_integral<T>::value && N >= 100>());
     }
 
     void swap (Array<T, N> &other)
@@ -252,7 +252,7 @@ class Array
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            ary = cxx11::move(ary_tmp);
+            ary = std::move(ary_tmp);
 #else
             ary = ary_tmp;
 #endif
@@ -299,15 +299,15 @@ class Array
 
     value_type data_[N];
 
-    void fill (const T &value, cxx11::true_type)
+    void fill (const T &value, std::true_type)
     {
         if (value == 0)
             std::memset(data_, 0, sizeof(T) * N);
         else
-            fill(value, cxx11::false_type());
+            fill(value, std::false_type());
     }
 
-    void fill (const T &value, cxx11::false_type)
+    void fill (const T &value, std::false_type)
     {for (size_type i = 0; i != N; ++i) data_[i] = value;}
 }; // class Array
 
@@ -330,7 +330,7 @@ inline const T &get (const Array<T, N> &ary) {return ary.template at<I>();}
 /// \brief Array ADL of get
 /// \ingroup Array
 template <std::size_t I, typename T, std::size_t N>
-inline T &&get (Array<T, N> &&ary) {return cxx11::move(ary.template at<I>());}
+inline T &&get (Array<T, N> &&ary) {return std::move(ary.template at<I>());}
 #endif
 
 template <typename> struct TupleSize;
@@ -339,7 +339,7 @@ template <typename> struct TupleSize;
 /// \ingroup Array
 template <typename T, std::size_t N>
 struct TupleSize<Array<T, N> > :
-public cxx11::integral_constant<std::size_t, N> {};
+public std::integral_constant<std::size_t, N> {};
 
 template <std::size_t, typename> struct TupleElement;
 

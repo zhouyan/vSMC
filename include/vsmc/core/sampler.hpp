@@ -62,10 +62,10 @@ class Sampler
     typedef typename Particle<T>::size_type size_type;
     typedef typename Particle<T>::resample_type resample_type;
     typedef T value_type;
-    typedef cxx11::function<std::size_t (Particle<T> &, void *)> init_type;
-    typedef cxx11::function<std::size_t (std::size_t, Particle<T> &)>
+    typedef std::function<std::size_t (Particle<T> &, void *)> init_type;
+    typedef std::function<std::size_t (std::size_t, Particle<T> &)>
         move_type;
-    typedef cxx11::function<std::size_t (std::size_t, Particle<T> &)>
+    typedef std::function<std::size_t (std::size_t, Particle<T> &)>
         mcmc_type;
     typedef std::map<std::string, Monitor<T> > monitor_map_type;
 
@@ -143,12 +143,12 @@ class Sampler
             if (retain_rng) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
                 typename Particle<T>::rng_set_type rset(
-                        cxx11::move(particle_.rng_set()));
+                        std::move(particle_.rng_set()));
                 typename Particle<T>::resample_rng_type rrng(
-                        cxx11::move(particle_.resample_rng()));
+                        std::move(particle_.resample_rng()));
                 *this = other;
-                particle_.rng_set() = cxx11::move(rset);
-                particle_.resample_rng() = cxx11::move(rrng);
+                particle_.rng_set() = std::move(rset);
+                particle_.resample_rng() = std::move(rrng);
 #else
                 using std::swap;
 
@@ -175,15 +175,15 @@ class Sampler
         if (this != &other) {
             if (retain_rng) {
                 typename Particle<T>::rng_set_type rset(
-                        cxx11::move(particle_.rng_set()));
+                        std::move(particle_.rng_set()));
                 typename Particle<T>::resample_rng_type rrng(
-                        cxx11::move(particle_.resample_rng()));
-                *this = cxx11::move(other);
-                particle_.rng_set() = cxx11::move(rset);
-                particle_.resample_rng() = cxx11::move(rrng);
+                        std::move(particle_.resample_rng()));
+                *this = std::move(other);
+                particle_.rng_set() = std::move(rset);
+                particle_.resample_rng() = std::move(rrng);
                 particle_.rng_set().resize(other.size());
             } else {
-                *this = cxx11::move(other);
+                *this = std::move(other);
             }
         }
 

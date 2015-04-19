@@ -62,7 +62,7 @@ class gmm_state :
         lp -= comp_num * log(sd0_);
         lp -= 0.5 * comp_num * vsmc::math::ln_pi_2<double>();
         lp -= comp_num * (shape0_ * log(scale0_) +
-                vsmc::cxx11::lgamma(shape0_));
+                std::lgamma(shape0_));
 
         return lp;
     }

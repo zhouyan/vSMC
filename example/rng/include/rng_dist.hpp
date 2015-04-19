@@ -34,7 +34,6 @@
 
 #include "rng_test.hpp"
 
-#include <vsmc/cxx11/random.hpp>
 #include <vsmc/rng/threefry.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #include <fstream>
@@ -44,25 +43,25 @@
 
 #define VSMC_RNG_DIST_B1(Dist, p1) \
 {                                                                            \
-    vsmc::cxx11::Dist##_distribution dist(p1);                               \
+    std::Dist##_distribution dist(p1);                               \
     rng_dist(N, dist, #Dist"("#p1")", names, size, sw, bytes, cycles);       \
 }
 
 #define VSMC_RNG_DIST_B2(Dist, p1, p2) \
 {                                                                            \
-    vsmc::cxx11::Dist##_distribution dist(p1, p2);                           \
+    std::Dist##_distribution dist(p1, p2);                           \
     rng_dist(N, dist, #Dist"("#p1", "#p2")", names, size, sw, bytes, cycles);\
 }
 
 #define VSMC_RNG_DIST_T1(Dist, p1) \
 {                                                                            \
-    vsmc::cxx11::Dist##_distribution<> dist(p1);                             \
+    std::Dist##_distribution<> dist(p1);                             \
     rng_dist(N, dist, #Dist"("#p1")", names, size, sw, bytes, cycles);       \
 }
 
 #define VSMC_RNG_DIST_T2(Dist, p1, p2) \
 {                                                                            \
-    vsmc::cxx11::Dist##_distribution<> dist(p1, p2);                         \
+    std::Dist##_distribution<> dist(p1, p2);                         \
     rng_dist(N, dist, #Dist"("#p1", "#p2")", names, size, sw, bytes, cycles);\
 }
 

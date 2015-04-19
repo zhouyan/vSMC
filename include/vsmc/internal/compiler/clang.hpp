@@ -41,14 +41,6 @@
 #define VSMC_CLANG_VERSION \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
-#define VSMC_LIBCPP_NONEXIST 0xFFFFFFFFUL
-
-#ifdef _LIBCPP_VERSION
-#define VSMC_LIBCPP_VERSION _LIBCPP_VERSION
-#else
-#define VSMC_LIBCPP_VERSION 0
-#endif
-
 #if __cplusplus >= 201103L
 
 // C++11 language features
@@ -257,80 +249,6 @@
 #endif
 #endif
 
-// C++11 library features
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_ALGORITHM
-#define VSMC_HAS_CXX11LIB_ALGORITHM 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_ATOMIC
-#define VSMC_HAS_CXX11LIB_ATOMIC 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_CHRONO
-#define VSMC_HAS_CXX11LIB_CHRONO 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_CMATH
-#define VSMC_HAS_CXX11LIB_CMATH 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_FUNCTIONAL
-#define VSMC_HAS_CXX11LIB_FUNCTIONAL 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_FUTURE
-#define VSMC_HAS_CXX11LIB_FUTURE 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_INITIALIZER_LIST
-#define VSMC_HAS_CXX11LIB_INITIALIZER_LIST 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_MUTEX
-#define VSMC_HAS_CXX11LIB_MUTEX 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_RANDOM
-#define VSMC_HAS_CXX11LIB_RANDOM 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_THREAD
-#define VSMC_HAS_CXX11LIB_THREAD 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_TUPLE
-#define VSMC_HAS_CXX11LIB_TUPLE 1
-#endif
-#endif
-
-#if VSMC_LIBCPP_VERSION >= 1101
-#ifndef VSMC_HAS_CXX11LIB_TYPE_TRAITS
-#define VSMC_HAS_CXX11LIB_TYPE_TRAITS 1
-#endif
-#endif
-
 #endif // __cplusplus >= 201103L
 
 #if __cplusplus >= 201402L
@@ -404,12 +322,6 @@
 #endif
 
 #endif // __cplusplus >= 201402L
-
-// C99 library features
-
-#ifndef VSMC_HAS_C99LIB_MATH
-#define VSMC_HAS_C99LIB_MATH 1
-#endif
 
 // Compiler features
 

@@ -35,10 +35,6 @@
 #include <vsmc/internal/common.hpp>
 #include <hdf5.h>
 
-#if VSMC_HAS_CXX11LIB_TUPLE
-#include <tuple>
-#endif
-
 namespace vsmc {
 
 namespace internal {
@@ -479,8 +475,6 @@ inline void hdf5store_list_insert (std::size_t N,
     ::H5Fclose(datafile);
 }
 
-#if VSMC_HAS_CXX11LIB_TUPLE
-
 namespace internal {
 
 template <typename TupleVectorType>
@@ -602,8 +596,6 @@ inline void hdf5store_list (std::size_t nrow,
             --sptr, Position<dim - 1>());
 }
 
-#endif // VSMC_HAS_CXX11LIB_TUPLE
-
 /// \brief Store a Sampler in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T>
@@ -656,8 +648,6 @@ inline void hdf5store (const StateMatrix<Order, Dim, T> &state,
             state.data(), append);
 }
 
-#if VSMC_HAS_CXX11LIB_TUPLE
-
 /// \brief Store a StateTuple in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T, typename... Types>
@@ -706,8 +696,6 @@ inline void hdf5store (const StateTuple<ColMajor, T, Types...> &state,
     hdf5store_list(state.size(), file_name, data_name, state.data(),
             &vnames[0], append);
 }
-
-#endif // VSMC_HAS_CXX11LIB_TUPLE
 
 /// \brief Store a StateCL in the HDF5 format
 /// \ingroup HDF5IO

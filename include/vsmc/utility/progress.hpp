@@ -34,19 +34,16 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-
-#if VSMC_HAS_CXX11LIB_CHRONO && VSMC_HAS_CXX11LIB_THREAD
-#include <chrono>
 #include <thread>
-#endif
 
 namespace vsmc {
 
-#if VSMC_HAS_CXX11LIB_CHRONO && VSMC_HAS_CXX11LIB_THREAD
-namespace internal {
-
-struct ProgressThisThread
+/// \brief The default `ThisThread` structure
+/// \ingroup Progress
+class ProgressThisThread
 {
+    public :
+
     static void sleep (double s)
     {
         double ms = std::floor(s * 1000);
@@ -56,9 +53,6 @@ struct ProgressThisThread
                     static_cast<std::chrono::milliseconds::rep>(ms)));
     }
 }; // class ProgressThisThread
-
-} // namespace vsmc::internal
-#endif
 
 /// \brief Display a progress bar while algorithm proceed
 /// \ingroup Progress
@@ -91,12 +85,8 @@ struct ProgressThisThread
 /// ~~~
 /// An implementation using Boost is almost the same except for the namespace
 /// changing from `std` to `boost`.
-#if VSMC_HAS_CXX11LIB_CHRONO && VSMC_HAS_CXX11LIB_THREAD
 template <typename ThreadType = std::thread,
-         typename ThisThread = internal::ProgressThisThread>
-#else
-template <typename ThreadType, typename ThisThread>
-#endif
+         typename ThisThread = ProgressThisThread>
 class Progress
 {
     public :

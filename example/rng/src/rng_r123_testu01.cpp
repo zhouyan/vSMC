@@ -54,7 +54,7 @@ extern "C" {                                                                 \
     inline double rng_##Eng (void)                                           \
     {                                                                        \
         static r123::Engine<r123::Eng> eng;                                  \
-        static vsmc::cxx11::uniform_real_distribution<double> runif(0, 1);   \
+        static std::uniform_real_distribution<double> runif(0, 1);           \
                                                                              \
         return runif(eng);                                                   \
     }                                                                        \

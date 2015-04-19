@@ -56,7 +56,7 @@ class DispatchFunction
     DispatchFunction (const T &work) : work_(work) {}
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    DispatchFunction (T &&work) VSMC_NOEXCEPT : work_(cxx11::move(work)) {}
+    DispatchFunction (T &&work) VSMC_NOEXCEPT : work_(std::move(work)) {}
 #endif
 
     void *context () {return static_cast<void *>(this);}
@@ -81,12 +81,12 @@ class DispatchFunction
 /// \param work A callable object with signature `void f(void)`
 template <typename T>
 inline DispatchFunction<
-typename cxx11::remove_cv<typename cxx11::remove_reference<T>::type>::type>
+typename std::remove_cv<typename std::remove_reference<T>::type>::type>
 *dispatch_function_new (T &&work) VSMC_NOEXCEPT
 {
-    typedef typename cxx11::remove_reference<T>::type U;
-    typedef typename cxx11::remove_cv<U>::type V;
-    return new DispatchFunction<V>(cxx11::forward<T>(work));
+    typedef typename std::remove_reference<T>::type U;
+    typedef typename std::remove_cv<U>::type V;
+    return new DispatchFunction<V>(std::forward<T>(work));
 }
 #else
 template <typename T>

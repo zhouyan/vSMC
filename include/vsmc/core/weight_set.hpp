@@ -75,15 +75,15 @@ class WeightSet
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     WeightSet (WeightSet &&other) :
         size_(other.size_), ess_(other.ess_),
-        weight_(cxx11::move(other.weight_)),
-        log_weight_(cxx11::move(other.log_weight_)) {}
+        weight_(std::move(other.weight_)),
+        log_weight_(std::move(other.log_weight_)) {}
 
     WeightSet &operator= (WeightSet &&other) {
         if (this != &other) {
             size_       = other.size_;
             ess_        = other.ess_;
-            weight_     = cxx11::move(other.weight_);
-            log_weight_ = cxx11::move(other.log_weight_);
+            weight_     = std::move(other.weight_);
+            log_weight_ = std::move(other.log_weight_);
         }
 
         return *this;
@@ -135,12 +135,7 @@ class WeightSet
     {
         std::vector<double, AlignedAllocator<double> > buffer(size_);
         double *const bptr = &buffer[0];
-#if VSMC_HAS_CXX11LIB_ALGORITHM
         std::copy_n(first, size_, bptr);
-#else
-        for (size_type i = 0; i != size_; ++i, ++first)
-            bptr[i] = *first;
-#endif
 
         return compute_ess(bptr, use_log);
     }
@@ -163,12 +158,7 @@ class WeightSet
     {
         std::vector<double, AlignedAllocator<double> > buffer(size_);
         double *const bptr = &buffer[0];
-#if VSMC_HAS_CXX11LIB_ALGORITHM
         std::copy_n(first, size_, bptr);
-#else
-        for (size_type i = 0; i != size_; ++i, ++first)
-            bptr[i] = *first;
-#endif
 
         return compute_cess(bptr, use_log);
     }
@@ -244,12 +234,7 @@ class WeightSet
     void set_weight (InputIter first)
     {
         double *const wptr = &weight_[0];
-#if VSMC_HAS_CXX11LIB_ALGORITHM
         std::copy_n(first, size_, wptr);
-#else
-        for (size_type i = 0; i != size_; ++i, ++first)
-            wptr[i] = *first;
-#endif
         post_set_weight();
     }
 
@@ -297,12 +282,7 @@ class WeightSet
     void set_log_weight (InputIter first)
     {
         double *const lwptr = &log_weight_[0];
-#if VSMC_HAS_CXX11LIB_ALGORITHM
         std::copy_n(first, size_, lwptr);
-#else
-        for (size_type i = 0; i != size_; ++i, ++first)
-            lwptr[i] = *first;
-#endif
         post_set_log_weight();
     }
 

@@ -38,7 +38,7 @@ namespace vsmc {
 
 namespace internal {
 
-typedef cxx11::integral_constant<ResampleScheme, Multinomial>
+typedef std::integral_constant<ResampleScheme, Multinomial>
     ResampleMultinomial;
 
 } // namespace vsmc::internal

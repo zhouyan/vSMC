@@ -33,8 +33,8 @@
 #define VSMC_MATH_VMATH_HPP
 
 #include <vsmc/internal/config.hpp>
-#include <vsmc/cxx11/cmath.hpp>
 #include <vsmc/math/constants.hpp>
+#include <cmath>
 
 #if VSMC_USE_MKL_VML
 #include <mkl.h>
@@ -88,11 +88,11 @@ inline T vmath_invsqrt (T a)
 
 template <typename T>
 inline T vmath_invcbrt (T a)
-{using cxx11::cbrt; return static_cast<T>(1) / cbrt(a);}
+{using std::cbrt; return static_cast<T>(1) / cbrt(a);}
 
 template <typename T>
 inline T vmath_pow2o3 (T a)
-{using cxx11::cbrt; a = cbrt(a); return a * a;}
+{using std::cbrt; a = cbrt(a); return a * a;}
 
 template <typename T>
 inline T vmath_pow3o2 (T a)
@@ -101,14 +101,14 @@ inline T vmath_pow3o2 (T a)
 template <typename T>
 inline T vmath_cdfnorm (T a)
 {
-    using cxx11::erf;
+    using std::erf;
     return static_cast<T>(0.5) + static_cast<T>(0.5) * erf(
             a *  sqrt_1by2<T>());
 }
 
 template <typename T>
 inline T vmath_erfinv (T a)
-{using cxx11::erf; return static_cast<T>(1) / erf(a);}
+{using std::erf; return static_cast<T>(1) / erf(a);}
 
 template <typename T>
 inline T vmath_erfcinv (T a)
@@ -170,7 +170,7 @@ VSMC_DEFINE_MATH_VMATH_1(std, sqrt, Sqrt)
 VSMC_DEFINE_MATH_VMATH_1(internal, vmath_invsqrt, InvSqrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt[3]{a_i}\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, cbrt, Cbrt)
+VSMC_DEFINE_MATH_VMATH_1(std, cbrt, Cbrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt[3]{a_i}\f$
 VSMC_DEFINE_MATH_VMATH_1(internal, vmath_invcbrt, InvCbrt)
@@ -194,7 +194,7 @@ inline void vPowx (std::size_t n, const T *a, T b, T *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b_i^2}\f$
-VSMC_DEFINE_MATH_VMATH_2(cxx11, hypot, Hypot)
+VSMC_DEFINE_MATH_VMATH_2(std, hypot, Hypot)
 
 /// @}
 
@@ -206,7 +206,7 @@ VSMC_DEFINE_MATH_VMATH_2(cxx11, hypot, Hypot)
 VSMC_DEFINE_MATH_VMATH_1(std, exp, Exp)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i} - 1\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, expm1, Expm1)
+VSMC_DEFINE_MATH_VMATH_1(std, expm1, Expm1)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln(a_i)\f$
 VSMC_DEFINE_MATH_VMATH_1(std, log, Ln)
@@ -215,7 +215,7 @@ VSMC_DEFINE_MATH_VMATH_1(std, log, Ln)
 VSMC_DEFINE_MATH_VMATH_1(std, log10, Log10)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i + 1)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, log1p, Log1p)
+VSMC_DEFINE_MATH_VMATH_1(std, log1p, Log1p)
 /// @}
 
 /// \defgroup vTrigonometric Trigonometric functions
@@ -273,13 +273,13 @@ VSMC_DEFINE_MATH_VMATH_1(std, sinh, Sinh)
 VSMC_DEFINE_MATH_VMATH_1(std, tanh, Tanh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\cosh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, acosh, Acosh)
+VSMC_DEFINE_MATH_VMATH_1(std, acosh, Acosh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\sinh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, asinh, Asinh)
+VSMC_DEFINE_MATH_VMATH_1(std, asinh, Asinh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\tanh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, atanh, Atanh)
+VSMC_DEFINE_MATH_VMATH_1(std, atanh, Atanh)
 
 /// @}
 
@@ -288,11 +288,11 @@ VSMC_DEFINE_MATH_VMATH_1(cxx11, atanh, Atanh)
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, erf, Erf)
+VSMC_DEFINE_MATH_VMATH_1(std, erf, Erf)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \mathrm{Erfc}(a_i) = \mathrm{Erf}(1 - a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, erfc, Erfc)
+VSMC_DEFINE_MATH_VMATH_1(std, erfc, Erfc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = 1 - \mathrm{Erfc}(a_i / \sqrt{2}) / 2\f$, the standard Normal CDF
@@ -312,11 +312,11 @@ VSMC_DEFINE_MATH_VMATH_1(internal, vmath_cdfnorminv, CdfNormInv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$,
 /// logarithm of the Gamma function
-VSMC_DEFINE_MATH_VMATH_1(cxx11, lgamma, LGamma)
+VSMC_DEFINE_MATH_VMATH_1(std, lgamma, LGamma)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$, the Gamma
 /// function
-VSMC_DEFINE_MATH_VMATH_1(cxx11, tgamma, TGamma)
+VSMC_DEFINE_MATH_VMATH_1(std, tgamma, TGamma)
 /// @}
 
 } // namespace vsmc::math

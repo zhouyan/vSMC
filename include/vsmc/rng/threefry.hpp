@@ -36,8 +36,8 @@
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType) \
     VSMC_STATIC_ASSERT(                                                      \
-            (cxx11::is_same<ResultType, uint32_t>::value ||                  \
-             cxx11::is_same<ResultType, uint64_t>::value),                   \
+            (std::is_same<ResultType, uint32_t>::value ||                  \
+             std::is_same<ResultType, uint64_t>::value),                   \
             USE_ThreefryEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K) \
@@ -50,7 +50,7 @@
 
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val) \
     template <> struct ThreefryRotateConstantValue < T, K, N, I > :          \
-        public cxx11::integral_constant< unsigned, val > {};
+        public std::integral_constant< unsigned, val > {};
 
 /// \brief ThreefryEngine default rounds
 /// \ingroup Config
@@ -65,11 +65,11 @@ namespace internal {
 template <typename> struct ThreefryKSConstantValue;
 
 template <> struct ThreefryKSConstantValue<uint32_t> :
-    public cxx11::integral_constant<uint32_t,
+    public std::integral_constant<uint32_t,
            UINT32_C(0x1BD11BDA)> {};
 
 template <> struct ThreefryKSConstantValue<uint64_t> :
-    public cxx11::integral_constant<uint64_t,
+    public std::integral_constant<uint64_t,
            UINT64_C(0x1BD11BDAA9FC1A22)> {};
 
 template <typename, std::size_t, std::size_t, std::size_t>
@@ -285,7 +285,7 @@ class ThreefryEngine
 
     template <typename SeedSeq>
     explicit ThreefryEngine (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, key_type, ThreefryEngine<ResultType, K, Rounds>
             >::value>::type * = VSMC_NULLPTR) : index_(K)
     {
@@ -311,7 +311,7 @@ class ThreefryEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, key_type, ThreefryEngine<ResultType, K, Rounds>
             >::value>::type * = VSMC_NULLPTR)
     {
@@ -454,7 +454,7 @@ class ThreefryEngine
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            eng = cxx11::move(eng_tmp);
+            eng = std::move(eng_tmp);
 #else
             eng = eng_tmp;
 #endif
@@ -473,36 +473,36 @@ class ThreefryEngine
     void generate_buffer (const ctr_type &c, buffer_type &buf) const
     {
         buf = c;
-        generate_buffer<0>(buf, cxx11::true_type());
+        generate_buffer<0>(buf, std::true_type());
     }
 
     template <std::size_t>
-    void generate_buffer (buffer_type &, cxx11::false_type) const {}
+    void generate_buffer (buffer_type &, std::false_type) const {}
 
     template <std::size_t N>
-    void generate_buffer (buffer_type &buf, cxx11::true_type) const
+    void generate_buffer (buffer_type &buf, std::true_type) const
     {
         internal::ThreefryRotate<ResultType, K, N>::eval(buf);
         internal::ThreefryInsertKey<ResultType, K, N>::eval(buf, par_);
         generate_buffer<N + 1>(buf,
-                cxx11::integral_constant<bool, N < Rounds>());
+                std::integral_constant<bool, N < Rounds>());
     }
 
     void init_par (const key_type &key)
     {
         par_.back() = internal::ThreefryKSConstantValue<ResultType>::value;
-        par_xor<0>(key, cxx11::integral_constant<bool, 0 < K>());
+        par_xor<0>(key, std::integral_constant<bool, 0 < K>());
     }
 
     template <std::size_t>
-    void par_xor (const key_type &, cxx11::false_type) {}
+    void par_xor (const key_type &, std::false_type) {}
 
     template <std::size_t N>
-    void par_xor (const key_type &key, cxx11::true_type)
+    void par_xor (const key_type &key, std::true_type)
     {
         par_[Position<N>()] = key[Position<N>()];
         par_.back() ^= key[Position<N>()];
-        par_xor<N + 1>(key, cxx11::integral_constant<bool, N + 1 < K>());
+        par_xor<N + 1>(key, std::integral_constant<bool, N + 1 < K>());
     }
 }; // class ThreefryEngine
 

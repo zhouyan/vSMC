@@ -188,7 +188,7 @@ class GSLEngine :
 
     template <typename SeedSeq>
     explicit GSLEngine (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, GSLEngine<RngType>
             >::value>::type * = VSMC_NULLPTR) : base(seq) {seed(seq);}
 
@@ -197,7 +197,7 @@ class GSLEngine :
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, GSLEngine<RngType>
             >::value>::type * = VSMC_NULLPTR)
     {

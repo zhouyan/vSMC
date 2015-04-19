@@ -35,8 +35,8 @@
 extern "C" {                                                                 \
     inline double rng_##Eng (void)                                           \
     {                                                                        \
-        static vsmc::cxx11::Eng eng;                                         \
-        static vsmc::cxx11::uniform_real_distribution<double> runif(0, 1);   \
+        static std::Eng eng;                                         \
+        static std::uniform_real_distribution<double> runif(0, 1);   \
                                                                              \
         return runif(eng);                                                   \
     }                                                                        \
@@ -44,7 +44,7 @@ extern "C" {                                                                 \
 
 #define VSMC_RNG_TESTU01_OPTION_CXX11(Eng) \
     bool rng_testu01_##Eng = false;                                          \
-    option.add(#Eng, "Test vsmc::cxx11::" #Eng, &rng_testu01_##Eng, false);
+    option.add(#Eng, "Test std::" #Eng, &rng_testu01_##Eng, false);
 
 VSMC_RNG_TESTU01_FUNCTION_CXX11(mt19937)
 VSMC_RNG_TESTU01_FUNCTION_CXX11(mt19937_64)

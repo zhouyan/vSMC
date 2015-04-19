@@ -75,14 +75,14 @@ class StateTupleBase
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
         state_pack_type (state_pack_type &&other) :
-            data_(cxx11::move(other.data_)) {}
+            data_(std::move(other.data_)) {}
 
-        state_pack_type (state_tuple_type &&tp) : data_(cxx11::move(tp)) {}
+        state_pack_type (state_tuple_type &&tp) : data_(std::move(tp)) {}
 
         state_pack_type &operator= (state_pack_type &&other)
         {
             if (this != &other)
-                data_ = cxx11::move(other.data_);
+                data_ = std::move(other.data_);
 
             return *this;
         }
@@ -295,7 +295,7 @@ class StateTuple<RowMajor, T, Types...> :
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     void state_unpack (size_type id, state_pack_type &&pack)
-    {state_[id] = cxx11::move(pack.data());}
+    {state_[id] = std::move(pack.data());}
 #endif
 
     private :
@@ -402,7 +402,7 @@ class StateTuple<ColMajor, T, Types...> :
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     void state_unpack (size_type id, state_pack_type &&pack)
-    {unpack_particle(id, cxx11::move(pack), Position<0>());}
+    {unpack_particle(id, std::move(pack), Position<0>());}
 #endif
 
     private :
@@ -467,8 +467,8 @@ class StateTuple<ColMajor, T, Types...> :
     void unpack_particle (size_type id, state_pack_type &&pack,
             Position<Pos>)
     {
-        state(id, Position<Pos>()) = cxx11::move(std::get<Pos>(pack.data()));
-        unpack_particle(id, cxx11::move(pack), Position<Pos + 1>());
+        state(id, Position<Pos>()) = std::move(std::get<Pos>(pack.data()));
+        unpack_particle(id, std::move(pack), Position<Pos + 1>());
     }
 
     void unpack_particle (size_type, state_pack_type &&, Position<dim_>) {}

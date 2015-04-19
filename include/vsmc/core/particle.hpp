@@ -58,7 +58,7 @@ class Particle
     typedef SingleParticle<T> sp_type;
     typedef ConstSingleParticle<T> csp_type;
 
-    typedef cxx11::function<void (std::size_t, std::size_t,
+    typedef std::function<void (std::size_t, std::size_t,
             resample_rng_type &, const double *, size_type *)> resample_type;
 
     explicit Particle (size_type N) :
@@ -94,11 +94,11 @@ class Particle
         if (this != &other) {
             if (retain_rng) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-                rng_set_type rset(cxx11::move(rng_set_));
-                resample_rng_type rrng(cxx11::move(resample_rng_));
+                rng_set_type rset(std::move(rng_set_));
+                resample_rng_type rrng(std::move(resample_rng_));
                 *this = other;
-                rng_set_ = cxx11::move(rset);
-                resample_rng_ = cxx11::move(rrng);
+                rng_set_ = std::move(rset);
+                resample_rng_ = std::move(rrng);
 #else
                 using std::swap;
 
@@ -123,14 +123,14 @@ class Particle
     {
         if (this != &other) {
             if (retain_rng) {
-                rng_set_type rset(cxx11::move(rng_set_));
-                resample_rng_type rrng(cxx11::move(resample_rng_));
-                *this = cxx11::move(other);
-                rng_set_ = cxx11::move(rset);
-                resample_rng_ = cxx11::move(rrng);
+                rng_set_type rset(std::move(rng_set_));
+                resample_rng_type rrng(std::move(resample_rng_));
+                *this = std::move(other);
+                rng_set_ = std::move(rset);
+                resample_rng_ = std::move(rrng);
                 rng_set_.resize(other.size());
             } else {
-                *this = cxx11::move(other);
+                *this = std::move(other);
             }
         }
 

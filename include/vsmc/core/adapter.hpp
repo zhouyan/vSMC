@@ -90,21 +90,21 @@ class InitializeAdapterBase : public BaseType
             void, (Particle<T> &))
 
     void initialize_param_dispatch (Particle<T> &particle, void *param,
-            cxx11::true_type)
+            std::true_type)
     {f_.initialize_param(particle, param);}
 
-    void pre_processor_dispatch (Particle<T> &particle, cxx11::true_type)
+    void pre_processor_dispatch (Particle<T> &particle, std::true_type)
     {f_.pre_processor(particle);}
 
-    void post_processor_dispatch (Particle<T> &particle, cxx11::true_type)
+    void post_processor_dispatch (Particle<T> &particle, std::true_type)
     {f_.post_processor(particle);}
 
     void initialize_param_dispatch
-        (Particle<T> &, void *, cxx11::false_type) {}
+        (Particle<T> &, void *, std::false_type) {}
     void pre_processor_dispatch
-        (Particle<T> &, cxx11::false_type) {}
+        (Particle<T> &, std::false_type) {}
     void post_processor_dispatch
-        (Particle<T> &, cxx11::false_type) {}
+        (Particle<T> &, std::false_type) {}
 }; // InitializeAdapterBase
 
 /// \brief Move class adapter base
@@ -144,17 +144,17 @@ class MoveAdapterBase : public BaseType
             void, (std::size_t, Particle<T> &))
 
     void pre_processor_dispatch (std::size_t iter, Particle<T> &particle,
-            cxx11::true_type)
+            std::true_type)
     {f_.pre_processor(iter, particle);}
 
     void post_processor_dispatch (std::size_t iter, Particle<T> &particle,
-            cxx11::true_type)
+            std::true_type)
     {f_.post_processor(iter, particle);}
 
     void pre_processor_dispatch
-        (std::size_t, Particle<T> &, cxx11::false_type) {}
+        (std::size_t, Particle<T> &, std::false_type) {}
     void post_processor_dispatch
-        (std::size_t, Particle<T> &, cxx11::false_type) {}
+        (std::size_t, Particle<T> &, std::false_type) {}
 }; // MoveAdapterBase
 
 /// \brief Monitor evaluation base
@@ -194,17 +194,17 @@ class MonitorEvalAdapterBase : public BaseType
             void, (std::size_t, const Particle<T> &))
 
     void pre_processor_dispatch (std::size_t iter,
-            const Particle<T> &particle, cxx11::true_type)
+            const Particle<T> &particle, std::true_type)
     {f_.pre_processor(iter, particle);}
 
     void post_processor_dispatch (std::size_t iter,
-            const Particle<T> &particle, cxx11::true_type)
+            const Particle<T> &particle, std::true_type)
     {f_.post_processor(iter, particle);}
 
     void pre_processor_dispatch
-        (std::size_t, const Particle<T> &, cxx11::false_type) {}
+        (std::size_t, const Particle<T> &, std::false_type) {}
     void post_processor_dispatch
-        (std::size_t, const Particle<T> &, cxx11::false_type) {}
+        (std::size_t, const Particle<T> &, std::false_type) {}
 }; // MonitorEvalAdapterBase
 
 /// \brief Path evaluation class base
@@ -247,17 +247,17 @@ class PathEvalAdapterBase : public BaseType
             void, (std::size_t, const Particle<T> &))
 
     void pre_processor_dispatch (std::size_t iter,
-            const Particle<T> &particle, cxx11::true_type)
+            const Particle<T> &particle, std::true_type)
     {f_.pre_processor(iter, particle);}
 
     void post_processor_dispatch (std::size_t iter,
-            const Particle<T> &particle, cxx11::true_type)
+            const Particle<T> &particle, std::true_type)
     {f_.post_processor(iter, particle);}
 
     void pre_processor_dispatch
-        (std::size_t, const Particle<T> &, cxx11::false_type) {}
+        (std::size_t, const Particle<T> &, std::false_type) {}
     void post_processor_dispatch
-        (std::size_t, const Particle<T> &, cxx11::false_type) {}
+        (std::size_t, const Particle<T> &, std::false_type) {}
 }; // PathEvalAdapterBase
 
 /// \brief Initialize class adapter base
@@ -267,11 +267,11 @@ class InitializeAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public :
 
-    typedef cxx11::function<void (Particle<T> &, void *)>
+    typedef std::function<void (Particle<T> &, void *)>
         initialize_param_type;
-    typedef cxx11::function<void (Particle<T> &)>
+    typedef std::function<void (Particle<T> &)>
         pre_processor_type;
-    typedef cxx11::function<void (Particle<T> &)>
+    typedef std::function<void (Particle<T> &)>
         post_processor_type;
 
     InitializeAdapterBase (
@@ -307,9 +307,9 @@ class MoveAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public :
 
-    typedef cxx11::function<void (std::size_t, Particle<T> &)>
+    typedef std::function<void (std::size_t, Particle<T> &)>
         pre_processor_type;
-    typedef cxx11::function<void (std::size_t, Particle<T> &)>
+    typedef std::function<void (std::size_t, Particle<T> &)>
         post_processor_type;
 
     MoveAdapterBase (
@@ -336,9 +336,9 @@ class MonitorEvalAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public :
 
-    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
+    typedef std::function<void (std::size_t, const Particle<T> &)>
         pre_processor_type;
-    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
+    typedef std::function<void (std::size_t, const Particle<T> &)>
         post_processor_type;
 
     MonitorEvalAdapterBase (
@@ -365,11 +365,11 @@ class PathEvalAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public :
 
-    typedef cxx11::function<double (std::size_t, const Particle<T> &)>
+    typedef std::function<double (std::size_t, const Particle<T> &)>
         path_grid_type;
-    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
+    typedef std::function<void (std::size_t, const Particle<T> &)>
         pre_processor_type;
-    typedef cxx11::function<void (std::size_t, const Particle<T> &)>
+    typedef std::function<void (std::size_t, const Particle<T> &)>
         post_processor_type;
 
     PathEvalAdapterBase (

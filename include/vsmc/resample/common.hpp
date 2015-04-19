@@ -138,7 +138,7 @@ template <typename> class Resample;
 /// \ingroup Resample
 template <ResampleScheme Scheme>
 struct ResampleType
-{typedef Resample<cxx11::integral_constant<ResampleScheme, Scheme> > type;};
+{typedef Resample<std::integral_constant<ResampleScheme, Scheme> > type;};
 
 namespace traits {
 

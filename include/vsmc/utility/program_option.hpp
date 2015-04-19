@@ -156,7 +156,7 @@
 /// ~~~
 /// A more useful example is as the following,
 /// ~~~{.cpp}
-/// vsmc::cxx11::uniform_real_distribution<double> runif;
+/// std::uniform_real_distribution<double> runif;
 /// Map.add("runif", "desc", &runif);
 /// ~~~
 /// ~~~{.sh}
@@ -167,7 +167,7 @@
 /// If for a multi-value option, each value needs to contain multiple sub
 /// values, proper shell quoting is required. For example
 /// ~~~{.cpp}
-/// std::vector<vsmc::cxx11::uniform_real_distribution<double> > vrunif;
+/// std::vector<std::uniform_real_distribution<double> > vrunif;
 /// Map.add("vrunif", "desc", &vrunif);
 /// ~~~
 /// ~~~{.sh}
@@ -324,11 +324,7 @@ class ProgramOption
             ss.clear();
             return false;
         }
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-        *dest = cxx11::move(tval);
-#else
-        *dest = tval;
-#endif
+        *dest = std::move(tval);
 
         return true;
     }
@@ -381,7 +377,7 @@ class ProgramOptionDefault : public ProgramOption
     ProgramOptionDefault (const std::string &desc, V val) :
         desc_(desc), default_(static_cast<T>(val)), has_default_(true) {}
 
-    bool is_bool () const {return cxx11::is_same<T, bool>::value;}
+    bool is_bool () const {return std::is_same<T, bool>::value;}
 
     std::string description () const {return desc_;}
 
@@ -550,8 +546,8 @@ class ProgramOptionMap
     ProgramOptionMap (ProgramOptionMap &&other) :
         silent_(other.silent_), auto_help_(other.auto_help_),
         help_ptr_(other.help_ptr_),
-        option_map_(cxx11::move(other.option_map_)),
-        option_list_(cxx11::move(other.option_list_))
+        option_map_(std::move(other.option_map_)),
+        option_list_(std::move(other.option_list_))
     {
         other.help_ptr_ = VSMC_NULLPTR;
         other.option_map_.clear();
@@ -563,8 +559,8 @@ class ProgramOptionMap
         if (this != &other) {
             silent_ = other.silent_;
             help_ptr_ = other.help_ptr_;
-            option_map_ = cxx11::move(other.option_map_);
-            option_list_ = cxx11::move(other.option_list_);
+            option_map_ = std::move(other.option_map_);
+            option_list_ = std::move(other.option_list_);
             other.help_ptr_ = VSMC_NULLPTR;
             other.option_map_.clear();
             other.option_list_.clear();

@@ -100,7 +100,7 @@ class Counter<Array<T, K> >
     static inline void set (Array<ctr_type, Blocks> &ctr, const ctr_type &c)
     {
         ctr.front() = c;
-        set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
+        set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
     }
 
     /// \brief Reset a counter to zero
@@ -112,17 +112,17 @@ class Counter<Array<T, K> >
     static inline void reset (Array<ctr_type, Blocks> &ctr)
     {
         reset(ctr.front());
-        set_block<1>(ctr, cxx11::integral_constant<bool, 1 < Blocks>());
+        set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
     }
 
     /// \brief Increment the counter by one
     static inline void increment (ctr_type &ctr)
-    {increment_single<0>(ctr, cxx11::integral_constant<bool, 1 < K>());}
+    {increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());}
 
     /// \brief Increment each counter in a block by one
     template <std::size_t Blocks>
     static inline void increment (Array<ctr_type, Blocks> &ctr)
-    {increment_block<0>(ctr, cxx11::true_type());}
+    {increment_block<0>(ctr, std::true_type());}
 
     /// \brief Increment a counter by a given value
     static inline void increment (ctr_type &ctr, T nskip)
@@ -163,41 +163,41 @@ class Counter<Array<T, K> >
             return;
         }
 
-        increment_block<0>(ctr, nskip, cxx11::true_type());
+        increment_block<0>(ctr, nskip, std::true_type());
     }
 
     private :
 
     static VSMC_CONSTEXPR const T max_ =
-        internal::CounterMask<T, cxx11::is_unsigned<T>::value>::max_val;
+        internal::CounterMask<T, std::is_unsigned<T>::value>::max_val;
 
     static VSMC_CONSTEXPR const T mask_hi_ =
-        internal::CounterMask<T, cxx11::is_unsigned<T>::value>::mask_hi;
+        internal::CounterMask<T, std::is_unsigned<T>::value>::mask_hi;
 
     static VSMC_CONSTEXPR const T mask_lo_ =
-        internal::CounterMask<T, cxx11::is_unsigned<T>::value>::mask_lo;
+        internal::CounterMask<T, std::is_unsigned<T>::value>::mask_lo;
 
     template <std::size_t>
-    static inline void increment_single (ctr_type &ctr, cxx11::false_type)
+    static inline void increment_single (ctr_type &ctr, std::false_type)
     {++ctr.back();}
 
     template <std::size_t N>
-    static inline void increment_single (ctr_type &ctr, cxx11::true_type)
+    static inline void increment_single (ctr_type &ctr, std::true_type)
     {
         if (++ctr[Position<N>()] != 0)
             return;
 
         increment_single<N + 1>(ctr,
-                cxx11::integral_constant<bool, N + 2 < K>());
+                std::integral_constant<bool, N + 2 < K>());
     }
 
     template <std::size_t, std::size_t Blocks>
     static inline void set_block (Array<ctr_type, Blocks> &,
-            cxx11::false_type) {}
+            std::false_type) {}
 
     template <std::size_t B, std::size_t Blocks>
     static inline void set_block (Array<ctr_type, Blocks> &ctr,
-            cxx11::true_type)
+            std::true_type)
     {
         T m = ctr[Position<B - 1>()].back() & mask_lo_;
         m >>= sizeof(T) * 8 - 8;
@@ -208,47 +208,47 @@ class Counter<Array<T, K> >
         ctr[Position<B>()].back() &= mask_hi_;
         ctr[Position<B>()].back() ^= m;
         set_block<B + 1>(ctr,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
+                std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t, std::size_t Blocks>
     static inline void increment_block (Array<ctr_type, Blocks> &,
-            cxx11::false_type) {}
+            std::false_type) {}
 
     template <std::size_t B, std::size_t Blocks>
     static inline void increment_block (Array<ctr_type, Blocks> &ctr,
-            cxx11::true_type)
+            std::true_type)
     {
         increment_block_ctr(ctr[Position<B>()]);
         increment_block<B + 1>(ctr,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
+                std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t, std::size_t Blocks>
     static inline void increment_block (Array<ctr_type, Blocks> &, T,
-            cxx11::false_type) {}
+            std::false_type) {}
 
     template <std::size_t B, std::size_t Blocks>
     static inline void increment_block (Array<ctr_type, Blocks> &ctr, T nskip,
-            cxx11::true_type)
+            std::true_type)
     {
         increment_block_ctr(ctr[Position<B>()], nskip);
         increment_block<B + 1>(ctr, nskip,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
+                std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     static inline void increment_block_ctr (ctr_type &ctr)
-    {increment_block_single<0>(ctr, cxx11::integral_constant<bool, 1 < K>());}
+    {increment_block_single<0>(ctr, std::integral_constant<bool, 1 < K>());}
 
     static inline void increment_block_ctr (ctr_type &ctr, T nskip)
     {
         increment_block_nskip(ctr, nskip,
-                cxx11::integral_constant<bool, 1 < K>());
+                std::integral_constant<bool, 1 < K>());
     }
 
     template <std::size_t>
     static inline void increment_block_single (ctr_type &ctr,
-            cxx11::false_type)
+            std::false_type)
     {
         T m = ctr.back() & mask_lo_;
         ctr.back() <<= 8;
@@ -260,17 +260,17 @@ class Counter<Array<T, K> >
 
     template <std::size_t N>
     static inline void increment_block_single (ctr_type &ctr,
-            cxx11::true_type)
+            std::true_type)
     {
         if (++ctr[Position<N>()] != 0)
             return;
 
         increment_block_single<N + 1>(ctr,
-                cxx11::integral_constant<bool, N + 2 < K>());
+                std::integral_constant<bool, N + 2 < K>());
     }
 
     static inline void increment_block_nskip (ctr_type &ctr, T nskip,
-            cxx11::false_type)
+            std::false_type)
     {
         T m = ctr.back() & mask_lo_;
         T b = ctr.back();
@@ -295,7 +295,7 @@ class Counter<Array<T, K> >
     }
 
     static inline void increment_block_nskip (ctr_type &ctr, T nskip,
-            cxx11::true_type)
+            std::true_type)
     {
         if (nskip == 0)
             return;

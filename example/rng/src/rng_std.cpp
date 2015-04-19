@@ -30,21 +30,20 @@
 //============================================================================
 
 #include "rng_test.hpp"
-#include <vsmc/cxx11/random.hpp>
 
 int main (int argc, char **argv)
 {
     VSMC_RNG_TEST_PRE(rng_std);
 
-    VSMC_RNG_TEST(vsmc::cxx11::mt19937);
-    VSMC_RNG_TEST(vsmc::cxx11::mt19937_64);
-    VSMC_RNG_TEST(vsmc::cxx11::minstd_rand0);
-    VSMC_RNG_TEST(vsmc::cxx11::minstd_rand);
-    VSMC_RNG_TEST(vsmc::cxx11::ranlux24_base);
-    VSMC_RNG_TEST(vsmc::cxx11::ranlux48_base);
-    VSMC_RNG_TEST(vsmc::cxx11::ranlux24);
-    VSMC_RNG_TEST(vsmc::cxx11::ranlux48);
-    VSMC_RNG_TEST(vsmc::cxx11::knuth_b);
+    VSMC_RNG_TEST(std::mt19937);
+    VSMC_RNG_TEST(std::mt19937_64);
+    VSMC_RNG_TEST(std::minstd_rand0);
+    VSMC_RNG_TEST(std::minstd_rand);
+    VSMC_RNG_TEST(std::ranlux24_base);
+    VSMC_RNG_TEST(std::ranlux48_base);
+    VSMC_RNG_TEST(std::ranlux24);
+    VSMC_RNG_TEST(std::ranlux48);
+    VSMC_RNG_TEST(std::knuth_b);
 
     VSMC_RNG_TEST_POST;
 

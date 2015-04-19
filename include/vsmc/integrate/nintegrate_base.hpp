@@ -39,12 +39,12 @@
 #else // VSMC_MSVC
 #define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED \
     VSMC_STATIC_ASSERT(                                                      \
-            (cxx11::is_base_of<NIntegrateBase<Derived>, Derived>::value),    \
+            (std::is_base_of<NIntegrateBase<Derived>, Derived>::value),    \
             USE_CRTP_NIntegrateBase_WITH_A_CLASS_NOT_DERIVED_FROM_THE_BASE)
 #endif // VSMC_MSVC
 
 #define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_BASE_NO_IMPL(member) \
-    VSMC_STATIC_ASSERT((cxx11::is_same<Derived, NullType>::value),           \
+    VSMC_STATIC_ASSERT((std::is_same<Derived, NullType>::value),           \
             DERIVED_FROM_NIntegrateBase_WITHOUT_IMPLEMENTATION_OF_##member##_IN_THE_Derived_TEMPLATE_PARAMETER)
 
 #define VSMC_RUNTIME_ASSERT_INTEGRATE_NINTEGRATE_BASE_DERIVED \
@@ -62,7 +62,7 @@ class NIntegrateBase
     protected :
 
     typedef std::size_t size_type;
-    typedef cxx11::function<double (double)> eval_type;
+    typedef std::function<double (double)> eval_type;
 
     NIntegrateBase () {}
     NIntegrateBase (const NIntegrateBase<Derived> &) {}
@@ -137,7 +137,7 @@ class NIntegrateBase<Virtual>
     public :
 
     typedef std::size_t size_type;
-    typedef cxx11::function<double (double)> eval_type;
+    typedef std::function<double (double)> eval_type;
 
     protected :
 

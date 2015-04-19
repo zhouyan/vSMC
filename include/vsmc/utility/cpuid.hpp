@@ -571,9 +571,9 @@ class CPUID
     static const reg_type &info ()
     {
         static reg_type reg(info_dispatch<EAX, ECX>(
-                    cxx11::integral_constant<bool,
+                    std::integral_constant<bool,
                     EAX == 0x00 || EAX == ext0_>(),
-                    cxx11::integral_constant<bool, EAX < ext0_>()));
+                    std::integral_constant<bool, EAX < ext0_>()));
 
         return reg;
     }
@@ -672,7 +672,7 @@ class CPUID
     static VSMC_CONSTEXPR const unsigned ext0_ = 0x80000000U;
 
     template <unsigned, unsigned>
-    static reg_type info_dispatch (cxx11::true_type, cxx11::true_type)
+    static reg_type info_dispatch (std::true_type, std::true_type)
     {
         reg_type reg;
         cpuid(0x00, 0x00, reg.data());
@@ -681,7 +681,7 @@ class CPUID
     }
 
     template <unsigned, unsigned>
-    static reg_type info_dispatch (cxx11::true_type, cxx11::false_type)
+    static reg_type info_dispatch (std::true_type, std::false_type)
     {
         reg_type reg;
         cpuid(ext0_, 0x00, reg.data());
@@ -690,11 +690,11 @@ class CPUID
     }
 
     template <unsigned EAX, unsigned ECX, bool Basic>
-    static reg_type info_dispatch (cxx11::false_type,
-            cxx11::integral_constant<bool, Basic>)
+    static reg_type info_dispatch (std::false_type,
+            std::integral_constant<bool, Basic>)
     {
-        reg_type reg(info_dispatch<EAX, ECX>(cxx11::true_type(),
-                    cxx11::integral_constant<bool, Basic>()));
+        reg_type reg(info_dispatch<EAX, ECX>(std::true_type(),
+                    std::integral_constant<bool, Basic>()));
 
         if (EAX > reg.at<0>())
             reg.fill(0);

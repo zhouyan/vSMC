@@ -38,38 +38,41 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
-#include <vsmc/cxx11/cmath.hpp>
-#include <vsmc/cxx11/functional.hpp>
-#include <vsmc/cxx11/random.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
 
 #include <vsmc/math/cblas.hpp>
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>
 
-#include <stdint.h>
-
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 #include <algorithm>
+#include <numeric>
+#include <random>
+
+#include <iterator>
+#include <list>
+#include <map>
+#include <tuple>
+#include <vector>
+
+#include <chrono>
 #include <exception>
+#include <functional>
+#include <limits>
+#include <memory>
+#include <type_traits>
+#include <utility>
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <iterator>
-#include <limits>
-#include <list>
-#include <map>
-#include <memory>
-#include <numeric>
 #include <sstream>
 #include <string>
-#include <utility>
-#include <vector>
 
 #endif // VSMC_INTERNAL_COMMON_HPP

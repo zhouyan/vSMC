@@ -464,7 +464,7 @@ class StateMPI : public BaseState
                     world_.recv(copy_recv[i].first, copy_tag_, pack_recv_);
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
                     this->state_unpack(copy_recv[i].second,
-                            cxx11::move(pack_recv_));
+                            std::move(pack_recv_));
 #else
                     this->state_unpack(copy_recv[i].second,
                             pack_recv_);
@@ -499,15 +499,15 @@ class StateMPI : public BaseState
     VSMC_DEFINE_METHOD_CHECKER(copy_pre_processor, void, ())
     VSMC_DEFINE_METHOD_CHECKER(copy_post_processor, void, ())
 
-    void copy_pre_processor_dispatch (cxx11::true_type)
+    void copy_pre_processor_dispatch (std::true_type)
     {BaseState::copy_pre_processor();}
 
-    void copy_pre_processor_dispatch (cxx11::false_type) {}
+    void copy_pre_processor_dispatch (std::false_type) {}
 
-    void copy_post_processor_dispatch (cxx11::true_type)
+    void copy_post_processor_dispatch (std::true_type)
     {BaseState::copy_post_processor();}
 
-    void copy_post_processor_dispatch (cxx11::false_type) {}
+    void copy_post_processor_dispatch (std::false_type) {}
 }; // class StateMPI
 
 } // namespace vsmc

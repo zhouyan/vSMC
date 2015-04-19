@@ -40,8 +40,8 @@ class gmm_move_mu : public BASE_MOVE<gmm_state, gmm_move_mu>
     {
         using std::log;
 
-        vsmc::cxx11::normal_distribution<> rmu(0, sp.state(0).mu_sd());
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::normal_distribution<> rmu(0, sp.state(0).mu_sd());
+        std::uniform_real_distribution<> runif(0, 1);
         const std::size_t cn = sp.state(0).comp_num();
         sp.state(0).save_old();
 
@@ -67,9 +67,9 @@ class gmm_move_lambda : public BASE_MOVE<gmm_state, gmm_move_lambda>
     {
         using std::log;
 
-        vsmc::cxx11::lognormal_distribution<> rlambda(
+        std::lognormal_distribution<> rlambda(
                 0, sp.state(0).lambda_sd());
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::uniform_real_distribution<> runif(0, 1);
         const std::size_t cn = sp.state(0).comp_num();
         sp.state(0).save_old();
 
@@ -93,9 +93,9 @@ class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
         using std::log;
         using std::exp;
 
-        vsmc::cxx11::normal_distribution<> rweight(
+        std::normal_distribution<> rweight(
                 0, sp.state(0).weight_sd());
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::uniform_real_distribution<> runif(0, 1);
         const std::size_t cn = sp.state(0).comp_num();
         sp.state(0).save_old();
 

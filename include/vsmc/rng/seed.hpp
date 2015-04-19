@@ -35,7 +35,7 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T) \
-    VSMC_STATIC_ASSERT((::vsmc::cxx11::is_unsigned<T>::value),               \
+    VSMC_STATIC_ASSERT((std::is_unsigned<T>::value),                         \
             USE_SeedGenerator_WITH_A_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem) \

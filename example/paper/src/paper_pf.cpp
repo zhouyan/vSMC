@@ -83,8 +83,8 @@ inline std::size_t cv_init (vsmc::Particle<cv> &particle, void *filename)
 
     const double sd_pos0 = 2;
     const double sd_vel0 = 1;
-    vsmc::cxx11::normal_distribution<double> norm_pos(0, sd_pos0);
-    vsmc::cxx11::normal_distribution<double> norm_vel(0, sd_vel0);
+    std::normal_distribution<double> norm_pos(0, sd_pos0);
+    std::normal_distribution<double> norm_vel(0, sd_vel0);
     std::vector<double> log_weight(particle.size());
 
     for (vsmc::Particle<cv>::size_type i = 0; i != particle.size(); ++i) {
@@ -111,8 +111,8 @@ class cv_move : public vsmc::MoveSEQ<cv>
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
         const double delta = 0.1;
-        vsmc::cxx11::normal_distribution<double> norm_pos(0, sd_pos);
-        vsmc::cxx11::normal_distribution<double> norm_vel(0, sd_vel);
+        std::normal_distribution<double> norm_pos(0, sd_pos);
+        std::normal_distribution<double> norm_vel(0, sd_vel);
 
         sp.state(0) += norm_pos(sp.rng()) + delta * sp.state(2);
         sp.state(1) += norm_pos(sp.rng()) + delta * sp.state(3);

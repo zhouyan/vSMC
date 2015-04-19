@@ -40,8 +40,8 @@ class node_move_a0 : public BASE_MOVE<node_state, node_move_a0>
     {
         using std::log;
 
-        vsmc::cxx11::lognormal_distribution<> ra0(0, sp.state(0).a0_sd());
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::lognormal_distribution<> ra0(0, sp.state(0).a0_sd());
+        std::uniform_real_distribution<> runif(0, 1);
         sp.state(0).save_old();
 
         sp.state(0).a0() *= ra0(sp.rng());
@@ -64,8 +64,8 @@ class node_move_a1 : public BASE_MOVE<node_state, node_move_a1>
     {
         using std::log;
 
-        vsmc::cxx11::lognormal_distribution<> ra1(0, sp.state(0).a1_sd());
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::lognormal_distribution<> ra1(0, sp.state(0).a1_sd());
+        std::uniform_real_distribution<> runif(0, 1);
         sp.state(0).save_old();
 
         sp.state(0).a1() *= ra1(sp.rng());
@@ -88,8 +88,8 @@ class node_move_a2 : public BASE_MOVE<node_state, node_move_a2>
     {
         using std::log;
 
-        vsmc::cxx11::lognormal_distribution<> ra2(0, sp.state(0).a2_sd());
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::lognormal_distribution<> ra2(0, sp.state(0).a2_sd());
+        std::uniform_real_distribution<> runif(0, 1);
         sp.state(0).save_old();
 
         sp.state(0).a2() *= ra2(sp.rng());
@@ -117,8 +117,8 @@ class node_move_k : public BASE_MOVE<node_state, node_move_k>
         if (k_id_ >= sp.state(0).comp_num() - 1)
             return 0;
 
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
-        vsmc::cxx11::lognormal_distribution<> rk(0, sp.state(0).k_sd(k_id_));
+        std::uniform_real_distribution<> runif(0, 1);
+        std::lognormal_distribution<> rk(0, sp.state(0).k_sd(k_id_));
 
         sp.state(0).save_old();
         sp.state(0).k(k_id_) *= rk(sp.rng());

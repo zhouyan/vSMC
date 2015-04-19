@@ -39,7 +39,6 @@
 #define BASE_PATH    vsmc::PathEval@SMP@
 
 #include <vsmc/smp/backend_@smp@.hpp>
-#include <vsmc/cxx11/cmath.hpp>
 
 static const std::size_t InitCompNum = 1;
 static const std::size_t MinCompNum = 1;

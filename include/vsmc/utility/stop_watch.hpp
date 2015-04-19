@@ -34,12 +34,7 @@
 
 #include <vsmc/internal/common.hpp>
 
-#if VSMC_HAS_CXX11LIB_CHRONO
-#include <chrono>
-#endif
-
-/// \brief Default C++11 clock used as StopWatch if `VSMC_HAS_CXX11LIB_CHRONO`
-/// test successes
+/// \brief Default C++11 clock used as StopWatch
 /// \ingroup Config
 #ifndef VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE
 #define VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE std::chrono::high_resolution_clock
@@ -48,13 +43,7 @@
 /// \brief Default StopWatch type
 /// \ingroup Config
 #ifndef VSMC_STOP_WATCH_TYPE
-#if VSMC_HAS_CXX11LIB_CHRONO
 #define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchChrono
-#elif defined(VSMC_MACOSX) || VSMC_HAS_POSIX || defined(VSMC_MSVC)
-#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchSYS
-#else
-#define VSMC_STOP_WATCH_TYPE ::vsmc::StopWatchNull
-#endif
 #endif
 
 #if defined(VSMC_MACOSX)
@@ -108,8 +97,6 @@ class StopWatchNull
     double minutes      () const {return 1e-9 / 60;}
     double hours        () const {return 1e-9 / 3600;}
 }; // class StopWatch
-
-#if VSMC_HAS_CXX11LIB_CHRONO
 
 /// \brief StopWatch as an adapter of C++11 clock
 /// \ingroup StopWatch
@@ -224,8 +211,6 @@ class StopWatchClockAdapter
 /// \ingroup StopWatch
 typedef StopWatchClockAdapter<VSMC_STOP_WATCH_CHRONO_CLOCK_TYPE>
 StopWatchChrono;
-
-#endif // VSMC_HAS_CXX11LIB_CHRONO
 
 #if defined(VSMC_MACOSX)
 

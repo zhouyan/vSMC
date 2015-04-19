@@ -226,8 +226,8 @@ class gmm_init : public vsmc::InitializeCL<gmm_state<FPType> >
         FPType shape0 = state.shape0();
         FPType scale0 = state.scale0();
 
-        vsmc::cxx11::gamma_distribution<> rlambda(shape0, scale0);
-        vsmc::cxx11::gamma_distribution<> rweight(1.0, 1.0);
+        std::gamma_distribution<> rlambda(shape0, scale0);
+        std::gamma_distribution<> rweight(1.0, 1.0);
 
         const std::size_t cn = state.comp_num();
         std::vector<FPType> lambda_init(state.size() * cn);

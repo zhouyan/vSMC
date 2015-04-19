@@ -87,7 +87,7 @@ class pmcmc_local_serial : public MoveType
         if (size_ != particle.size()) {
             size_ = particle.size();
             sample_ =
-                vsmc::cxx11::uniform_int_distribution<size_type>(0, size_ - 1);
+                std::uniform_int_distribution<size_type>(0, size_ - 1);
         }
 
         size_type c = sample_(particle.rng(0));
@@ -97,7 +97,7 @@ class pmcmc_local_serial : public MoveType
     private :
 
     size_type size_;
-    vsmc::cxx11::uniform_int_distribution<size_type> sample_;
+    std::uniform_int_distribution<size_type> sample_;
 };
 
 template <typename MoveType> class pmcmc_local_parallel : public MoveType {};
@@ -118,7 +118,7 @@ class pmcmc_global
         if (size_ != particle.size()) {
             size_ = particle.size();
             sample_ =
-                vsmc::cxx11::uniform_int_distribution<size_type>(0, size_ - 2);
+                std::uniform_int_distribution<size_type>(0, size_ - 2);
         }
 
         size_type c1 = sample_(particle.rng(0));
@@ -148,8 +148,8 @@ class pmcmc_global
     private :
 
     size_type size_;
-    vsmc::cxx11::uniform_int_distribution<size_type> sample_;
-    vsmc::cxx11::uniform_real_distribution<> runif_;
+    std::uniform_int_distribution<size_type> sample_;
+    std::uniform_real_distribution<> runif_;
 };
 
 template <typename T>

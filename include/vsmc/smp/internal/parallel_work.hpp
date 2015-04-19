@@ -56,7 +56,7 @@ class ParallelCopyParticle
         state_(state), copy_from_(copy_from) {}
 
     template <typename SizeType>
-    typename cxx11::enable_if<cxx11::is_integral<SizeType>::value>::type
+    typename std::enable_if<std::is_integral<SizeType>::value>::type
     operator() (SizeType id) const
     {
         typedef typename traits::SizeTypeTrait<T>::type size_type;
@@ -67,7 +67,7 @@ class ParallelCopyParticle
     }
 
     template <typename RangeType>
-    typename cxx11::enable_if<!cxx11::is_integral<RangeType>::value>::type
+    typename std::enable_if<!std::is_integral<RangeType>::value>::type
     operator() (const RangeType &range) const
     {
         typedef typename traits::RangeTypeConstIteratorTrait<RangeType>::type
@@ -101,7 +101,7 @@ class ParallelInitializeState
         init_(other.init_), particle_(other.particle_), accept_(0) {}
 
     template <typename SizeType>
-    typename cxx11::enable_if<cxx11::is_integral<SizeType>::value>::type
+    typename std::enable_if<std::is_integral<SizeType>::value>::type
     operator() (SizeType id)
     {
         typedef typename traits::SizeTypeTrait<T>::type size_type;
@@ -111,7 +111,7 @@ class ParallelInitializeState
     }
 
     template <typename RangeType>
-    typename cxx11::enable_if<!cxx11::is_integral<RangeType>::value>::type
+    typename std::enable_if<!std::is_integral<RangeType>::value>::type
     operator() (const RangeType &range)
     {
         typedef typename traits::RangeTypeConstIteratorTrait<RangeType>::type
@@ -155,7 +155,7 @@ class ParallelMoveState
         accept_(0) {}
 
     template <typename SizeType>
-    typename cxx11::enable_if<cxx11::is_integral<SizeType>::value>::type
+    typename std::enable_if<std::is_integral<SizeType>::value>::type
     operator() (SizeType id)
     {
         typedef typename traits::SizeTypeTrait<T>::type size_type;
@@ -165,7 +165,7 @@ class ParallelMoveState
     }
 
     template <typename RangeType>
-    typename cxx11::enable_if<!cxx11::is_integral<RangeType>::value>::type
+    typename std::enable_if<!std::is_integral<RangeType>::value>::type
     operator() (const RangeType &range)
     {
         typedef typename traits::RangeTypeConstIteratorTrait<RangeType>::type
@@ -204,7 +204,7 @@ class ParallelMonitorState
         particle_(particle), res_(res) {}
 
     template <typename SizeType>
-    typename cxx11::enable_if<cxx11::is_integral<SizeType>::value>::type
+    typename std::enable_if<std::is_integral<SizeType>::value>::type
     operator() (SizeType id) const
     {
         typedef typename traits::SizeTypeTrait<T>::type size_type;
@@ -215,7 +215,7 @@ class ParallelMonitorState
     }
 
     template <typename RangeType>
-    typename cxx11::enable_if<!cxx11::is_integral<RangeType>::value>::type
+    typename std::enable_if<!std::is_integral<RangeType>::value>::type
     operator() (const RangeType &range) const
     {
         typedef typename traits::RangeTypeConstIteratorTrait<RangeType>::type
@@ -248,7 +248,7 @@ class ParallelPathState
         path_(path), iter_(iter), particle_(particle), res_(res) {}
 
     template <typename SizeType>
-    typename cxx11::enable_if<cxx11::is_integral<SizeType>::value>::type
+    typename std::enable_if<std::is_integral<SizeType>::value>::type
     operator() (SizeType id) const
     {
         typedef typename traits::SizeTypeTrait<T>::type size_type;
@@ -258,7 +258,7 @@ class ParallelPathState
     }
 
     template <typename RangeType>
-    typename cxx11::enable_if<!cxx11::is_integral<RangeType>::value>::type
+    typename std::enable_if<!std::is_integral<RangeType>::value>::type
     operator() (const RangeType &range) const
     {
         typedef typename traits::RangeTypeConstIteratorTrait<RangeType>::type

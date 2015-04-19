@@ -151,8 +151,8 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order> >
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
-        vsmc::cxx11::normal_distribution<> norm_pos(0, sd_pos0);
-        vsmc::cxx11::normal_distribution<> norm_vel(0, sd_vel0);
+        std::normal_distribution<> norm_pos(0, sd_pos0);
+        std::normal_distribution<> norm_vel(0, sd_vel0);
 
         typedef typename vsmc::Particle<cv>::rng_type rng_type;
         rng_type eng(sp.rng());
@@ -212,8 +212,8 @@ class cv_move
         const double sd_pos = sqrt(0.02);
         const double sd_vel = sqrt(0.001);
         const double delta = 0.1;
-        vsmc::cxx11::normal_distribution<> norm_pos(0, sd_pos);
-        vsmc::cxx11::normal_distribution<> norm_vel(0, sd_vel);
+        std::normal_distribution<> norm_pos(0, sd_pos);
+        std::normal_distribution<> norm_vel(0, sd_vel);
 
         typedef typename vsmc::Particle<cv>::rng_type rng_type;
         rng_type eng(sp.rng());

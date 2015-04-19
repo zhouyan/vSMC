@@ -64,7 +64,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     typedef std::size_t size_type;
     typedef T state_type;
-    typedef typename cxx11::conditional<Dim == Dynamic,
+    typedef typename std::conditional<Dim == Dynamic,
              std::vector<T>, Array<T, Dim> >::type state_pack_type;
 
     template <typename S>
@@ -211,20 +211,20 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     state_pack_type create_pack () const
     {
         return create_pack_dispatch(
-                cxx11::integral_constant<bool, Dim == Dynamic>());
+                std::integral_constant<bool, Dim == Dynamic>());
     }
 
     private :
 
     size_type size_;
-    typename cxx11::conditional<cxx11::is_arithmetic<T>::value,
+    typename std::conditional<std::is_arithmetic<T>::value,
              std::vector<T, AlignedAllocator<T> >,
              std::vector<T> >::type data_;
 
-    std::vector<T> create_pack_dispatch (cxx11::true_type) const
+    std::vector<T> create_pack_dispatch (std::true_type) const
     {return std::vector<T>(this->dim());}
 
-    Array<T, Dim> create_pack_dispatch (cxx11::false_type) const
+    Array<T, Dim> create_pack_dispatch (std::false_type) const
     {return Array<T, Dim>();}
 }; // class StateMatrixBase
 
@@ -316,7 +316,6 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         std::copy(ptr, ptr + this->dim(), row_data(id));
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES && VSMC_HAS_CXX11LIB_ALGORITHM
     void state_unpack (size_type id, state_pack_type &&pack)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
@@ -325,7 +324,6 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         const T *ptr = &pack[0];
         std::move(ptr, ptr + this->dim(), row_data(id));
     }
-#endif
 }; // class StateMatrix
 
 /// \brief Particle::value_type subtype
@@ -418,7 +416,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
                 pack.size(), this->dim());
 
         for (std::size_t d = 0; d != this->dim(); ++d)
-            state(id, d) = cxx11::move(pack[d]);
+            state(id, d) = std::move(pack[d]);
     }
 #endif
 }; // class StateMatrix

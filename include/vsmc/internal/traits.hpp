@@ -35,7 +35,7 @@
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
+#include <type_traits>
 
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default) \
 template <typename T> struct Outer##Trait;                                   \
@@ -58,7 +58,7 @@ struct Has##Outer##Impl                                                      \
 };                                                                           \
                                                                              \
 template <typename T> struct Has##Outer :                                    \
-public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};        \
+public std::integral_constant<bool, Has##Outer##Impl<T>::value> {};        \
                                                                              \
 template <typename T, bool> struct Outer##Dispatch;                          \
                                                                              \
@@ -97,7 +97,7 @@ struct Has##Outer##Impl                                                      \
 };                                                                           \
                                                                              \
 template <typename T> struct Has##Outer :                                    \
-public cxx11::integral_constant<bool, Has##Outer##Impl<T>::value> {};        \
+public std::integral_constant<bool, Has##Outer##Impl<T>::value> {};        \
                                                                              \
 template <typename T,  bool> struct Outer##Dispatch;                         \
                                                                              \
@@ -137,7 +137,7 @@ struct has_##name##_impl_                                                    \
 };                                                                           \
                                                                              \
 template <typename U> struct has_##name##_ :                                 \
-public cxx11::integral_constant<bool, has_##name##_impl_<U>::value> {};
+public std::integral_constant<bool, has_##name##_impl_<U>::value> {};
 
 namespace vsmc {
 

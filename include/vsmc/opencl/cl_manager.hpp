@@ -264,12 +264,7 @@ class CLManager
                 event);
 
         std::vector<CLType> buffer(num);
-#if VSMC_HAS_CXX11LIB_ALGORITHM
         std::copy_n(first, num, &buffer[0]);
-#else
-        for (std::size_t i = 0; i != num; ++i, ++first)
-            buffer[i] = *first;
-#endif
         command_queue_.enqueueWriteBuffer(buf, static_cast< ::cl_bool>(block),
                 sizeof(CLType) * offset, sizeof(CLType) * num,
                 &buffer[0], events, event);
@@ -383,9 +378,9 @@ class CLManager
     ///
     /// \note This function relies on StopWatch to work correctly.
     template <typename Func>
-    typename cxx11::enable_if<
-    !cxx11::is_same<Func, std::size_t>::value &&
-    !cxx11::is_convertible<Func, std::size_t>::value, std::size_t>::type
+    typename std::enable_if<
+    !std::is_same<Func, std::size_t>::value &&
+    !std::is_convertible<Func, std::size_t>::value, std::size_t>::type
     profile_kernel (::cl::Kernel &kern, std::size_t N,
             const Func &func, std::size_t lmin = 0, std::size_t repeat = 10)
     {

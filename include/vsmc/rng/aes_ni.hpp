@@ -40,7 +40,7 @@
     VSMC_STATIC_ASSERT((Blocks > 0), USE_AESNIEngine_WITH_ZERO_BLOCKS)
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType) \
-    VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),              \
+    VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),              \
             USE_AESNIEngine_WITH_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI \
@@ -100,7 +100,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            ks = cxx11::move(ks_tmp);
+            ks = std::move(ks_tmp);
 #else
             ks = ks_tmp;
 #endif
@@ -237,7 +237,7 @@ class AESNIEngine
     }
 
     template <typename SeedSeq>
-    explicit AESNIEngine (SeedSeq &seq, typename cxx11::enable_if<
+    explicit AESNIEngine (SeedSeq &seq, typename std::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, key_type,
             AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
             >::value>::type * = VSMC_NULLPTR) : index_(K_)
@@ -262,7 +262,7 @@ class AESNIEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename cxx11::enable_if<internal::is_seed_seq<
+    void seed (SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<
             SeedSeq, result_type, key_type>:: value>::type * = VSMC_NULLPTR)
     {
         counter::reset(ctr_block_);
@@ -432,7 +432,7 @@ class AESNIEngine
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            eng = cxx11::move(eng_tmp);
+            eng = std::move(eng_tmp);
 #else
             eng = eng_tmp;
 #endif
@@ -459,79 +459,79 @@ class AESNIEngine
     {
         const key_seq_type ks(key_seq_.get(key_));
         pack(cb, buf);
-        enc_first<0>(ks, buf, cxx11::true_type());
-        enc_round<1>(ks, buf, cxx11::integral_constant<bool, 1 < Rounds>());
-        enc_last <0>(ks, buf, cxx11::true_type());
+        enc_first<0>(ks, buf, std::true_type());
+        enc_round<1>(ks, buf, std::integral_constant<bool, 1 < Rounds>());
+        enc_last <0>(ks, buf, std::true_type());
     }
 
     template <std::size_t>
     void enc_first (const key_seq_type &, buffer_type &,
-            cxx11::false_type) const {}
+            std::false_type) const {}
 
     template <std::size_t B>
     void enc_first (const key_seq_type &ks, buffer_type &buf,
-            cxx11::true_type) const
+            std::true_type) const
     {
         buf[Position<B>()] = _mm_xor_si128(buf[Position<B>()], ks.front());
         enc_first<B + 1>(ks, buf,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
+                std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t>
     void enc_round (const key_seq_type &, buffer_type &,
-            cxx11::false_type) const {}
+            std::false_type) const {}
 
     template <std::size_t N>
     void enc_round (const key_seq_type &ks, buffer_type &buf,
-            cxx11::true_type) const
+            std::true_type) const
     {
-        enc_round_block<0, N>(ks, buf, cxx11::true_type());
+        enc_round_block<0, N>(ks, buf, std::true_type());
         enc_round<N + 1>(ks, buf,
-                cxx11::integral_constant<bool, N  + 1 < Rounds>());
+                std::integral_constant<bool, N  + 1 < Rounds>());
     }
 
     template <std::size_t, std::size_t>
     void enc_round_block (const key_seq_type &, buffer_type &,
-            cxx11::false_type) const {}
+            std::false_type) const {}
 
     template <std::size_t B, std::size_t N>
     void enc_round_block (const key_seq_type &ks, buffer_type &buf,
-            cxx11::true_type) const
+            std::true_type) const
     {
         buf[Position<B>()] = _mm_aesenc_si128(
                 buf[Position<B>()], ks[Position<N>()]);
         enc_round_block<B + 1, N>(ks, buf,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
+                std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t>
     void enc_last (const key_seq_type &, buffer_type &,
-            cxx11::false_type) const {}
+            std::false_type) const {}
 
     template <std::size_t B>
     void enc_last (const key_seq_type &ks, buffer_type &buf,
-            cxx11::true_type) const
+            std::true_type) const
     {
         buf[Position<B>()] = _mm_aesenclast_si128(
                 buf[Position<B>()], ks.back());
         enc_last<B + 1>(ks, buf,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
+                std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     void pack (const ctr_block_type &cb, buffer_type &buf) const
-    {pack_ctr<0>(cb, buf, cxx11::true_type());}
+    {pack_ctr<0>(cb, buf, std::true_type());}
 
     template <std::size_t>
     void pack_ctr (const ctr_block_type &, buffer_type &,
-            cxx11::false_type) const {}
+            std::false_type) const {}
 
     template <std::size_t B>
     void pack_ctr (const ctr_block_type &cb, buffer_type &buf,
-            cxx11::true_type) const
+            std::true_type) const
     {
         m128i_pack<0>(cb[Position<B>()], buf[Position<B>()]);
         pack_ctr<B + 1>(cb, buf,
-                cxx11::integral_constant<bool, B + 1 < Blocks>());
+                std::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class AESNIEngine
 

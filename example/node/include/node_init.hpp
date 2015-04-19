@@ -56,7 +56,7 @@ class node_init : public BASE_INIT<node_state, node_init>
         double shape0 = sp.particle().value().shape0();
         double scale0 = sp.particle().value().scale0();
 
-        vsmc::cxx11::gamma_distribution<> rgamma(shape0, scale0);
+        std::gamma_distribution<> rgamma(shape0, scale0);
 
         const std::size_t cn = sp.state(0).comp_num();
         sp.state(0).a0() = rgamma(sp.rng());

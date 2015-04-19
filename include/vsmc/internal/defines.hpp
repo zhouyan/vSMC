@@ -67,19 +67,11 @@
 
 /// \brief noexcept
 /// \ingroup Definitions
-#if VSMC_HAS_CXX11_NOEXCEPT
 #define VSMC_NOEXCEPT noexcept
-#else
-#define VSMC_NOEXCEPT throw()
-#endif
 
 /// \brief nullptr
 /// \ingroup Definitions
-#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
 #define VSMC_NULLPTR nullptr
-#else
-#define VSMC_NULLPTR 0
-#endif
 
 namespace vsmc {
 

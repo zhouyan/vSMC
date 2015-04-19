@@ -52,13 +52,13 @@ class ThreadGuard
     ThreadGuard &operator= (const ThreadGuard &) = delete;
 
     ThreadGuard (thread_type &&thr) VSMC_NOEXCEPT :
-        thread_(cxx11::move(thr)) {}
+        thread_(std::move(thr)) {}
 
     ThreadGuard (ThreadGuard &&other) VSMC_NOEXCEPT :
-        thread_(cxx11::move(other.thread_)) {}
+        thread_(std::move(other.thread_)) {}
 
     ThreadGuard &operator= (ThreadGuard &&other) VSMC_NOEXCEPT
-    {thread_ = cxx11::move(other.thread_); return *this;}
+    {thread_ = std::move(other.thread_); return *this;}
 
     ~ThreadGuard () VSMC_NOEXCEPT {if (thread_.joinable()) thread_.join();}
 

@@ -205,6 +205,7 @@
 #include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng.hpp>
 #include <vsmc/smp/smp.hpp>
+#include <vsmc/thread/thread.hpp>
 #include <vsmc/utility/utility.hpp>
 
 #if VSMC_HAS_GCD
@@ -217,10 +218,6 @@
 
 #if VSMC_HAS_OPENCL
 #include <vsmc/opencl/opencl.hpp>
-#endif
-
-#if VSMC_HAS_CXX11LIB_THREAD
-#include <vsmc/thread/thread.hpp>
 #endif
 
 #endif // VSMC_HPP

@@ -56,10 +56,10 @@ namespace internal {
 template <std::size_t> struct ARSWeylConstantValue;
 
 template <> struct ARSWeylConstantValue<0> :
-    public cxx11::integral_constant<uint64_t, UINT64_C(0xBB67AE8584CAA73B)> {};
+    public std::integral_constant<uint64_t, UINT64_C(0xBB67AE8584CAA73B)> {};
 
 template <> struct ARSWeylConstantValue<1> :
-    public cxx11::integral_constant<uint64_t, UINT64_C(0x9E3779B97F4A7C15)> {};
+    public std::integral_constant<uint64_t, UINT64_C(0x9E3779B97F4A7C15)> {};
 
 } // namespace vsmc::traits::internal
 
@@ -92,7 +92,7 @@ class ARSKeySeq
     void generate (const key_type &key, Array<__m128i, Rp1> &key_seq)
     {
         m128i_pack<0>(key, key_seq.front());
-        generate_seq<1>(key_seq, cxx11::integral_constant<bool, 1 < Rp1>());
+        generate_seq<1>(key_seq, std::integral_constant<bool, 1 < Rp1>());
     }
 
     private :
@@ -100,15 +100,15 @@ class ARSKeySeq
     const __m128i weyl_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &, cxx11::false_type) {}
+    void generate_seq (Array<__m128i, Rp1> &, std::false_type) {}
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &key_seq, cxx11::true_type)
+    void generate_seq (Array<__m128i, Rp1> &key_seq, std::true_type)
     {
         key_seq[Position<N>()] = _mm_add_epi64(
                 key_seq[Position<N - 1>()], weyl_);
         generate_seq<N + 1>(key_seq,
-                cxx11::integral_constant<bool, N + 1 < Rp1>());
+                std::integral_constant<bool, N + 1 < Rp1>());
     }
 }; // class ARSKeySeq
 
@@ -140,7 +140,7 @@ class ARSEngine :
     explicit ARSEngine (ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
-    explicit ARSEngine (SeedSeq &seq, typename cxx11::enable_if<
+    explicit ARSEngine (SeedSeq &seq, typename std::enable_if<
             internal::is_seed_seq<SeedSeq,
             typename base_eng_type::result_type,
             typename base_eng_type::key_type,

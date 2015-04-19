@@ -32,7 +32,6 @@
 #ifndef VSMC_EXAMPLE_RNG_OPENCL_HPP
 #define VSMC_EXAMPLE_RNG_OPENCL_HPP
 
-#include <vsmc/cxx11/random.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/utility/stop_watch.hpp>
@@ -129,7 +128,7 @@ inline void rng_cl_test (std::size_t N, cl::Program &program,
     vsmc::CLManager<rng_device> &manager =
         vsmc::CLManager<rng_device>::instance();
 
-    vsmc::cxx11::mt19937_64 eng;
+    std::mt19937_64 eng;
     std::vector<cl::Kernel> kernel_vec;
 
     cl::Buffer buffer     (manager.create_buffer<FP>(N));
@@ -217,7 +216,7 @@ inline void rng_cl_test (std::size_t N, cl::Program &program,
     std::cout << std::string(120, '-') << std::endl;
 
     // Test u01
-    vsmc::cxx11::uniform_real_distribution<FP> runif(0, 1);
+    std::uniform_real_distribution<FP> runif(0, 1);
     dnames.push_back("u01");
     rcodes.push_back("runif(N)");
     set_kernel_vec("u01", program, kernel_vec);
@@ -225,7 +224,7 @@ inline void rng_cl_test (std::size_t N, cl::Program &program,
     values.push_back(host);
 
     // Test normal01
-    vsmc::cxx11::normal_distribution<FP> rnorm(0, 1);
+    std::normal_distribution<FP> rnorm(0, 1);
     dnames.push_back("normal01");
     rcodes.push_back("rnorm(N)");
     set_kernel_vec("normal01", program, kernel_vec);
@@ -251,7 +250,7 @@ inline void rng_cl_test (std::size_t N, cl::Program &program,
         std::stringstream rcode;
         rcode << "rgamma(N, " << gammak1_shape[i] << ")";
 
-        vsmc::cxx11::gamma_distribution<FP> rgamma(gammak1_shape[i], 1);
+        std::gamma_distribution<FP> rgamma(gammak1_shape[i], 1);
         dnames.push_back(dname.str());
         rcodes.push_back(rcode.str());
         set_kernel_vec("gammak1", program, kernel_vec);

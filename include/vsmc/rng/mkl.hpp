@@ -37,8 +37,8 @@
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist) \
     VSMC_STATIC_ASSERT(                                                      \
-            (cxx11::is_same<FPType, float>::value ||                         \
-             cxx11::is_same<FPType, double>::value),                         \
+            (std::is_same<FPType, float>::value ||                         \
+             std::is_same<FPType, double>::value),                         \
             USE_MKL##Dist##Distribution_##WITH_A_RESULT_TYPE_OTHER_THAN_float_OR_double)
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(offset) \
@@ -226,15 +226,15 @@ template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64>
 /// \brief Default seed for MKL RNG
 /// \ingroup Traits
 template <MKL_INT> struct MKLSeedTrait :
-    public cxx11::integral_constant<MKL_UINT, 101> {};
+    public std::integral_constant<MKL_UINT, 101> {};
 
 /// \brief Default seed for MKL Sobol quasi-RNG
 template <> struct MKLSeedTrait<VSL_BRNG_SOBOL> :
-    public cxx11::integral_constant<MKL_UINT, 10> {};
+    public std::integral_constant<MKL_UINT, 10> {};
 
 /// \brief Default seed for MKL Niederr quasi-RNG
 template <> struct MKLSeedTrait<VSL_BRNG_NIEDERR> :
-    public cxx11::integral_constant<MKL_UINT, 10> {};
+    public std::integral_constant<MKL_UINT, 10> {};
 
 } // namespace traits
 
@@ -387,7 +387,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     template <typename SeedSeq>
     explicit MKLStream (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             MKL_UINT, MKLStream<BRNG> >::value>::type * = VSMC_NULLPTR) :
         seed_(0), stream_ptr_(VSMC_NULLPTR), property_()
     {
@@ -427,7 +427,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     MKLStream (MKLStream<BRNG> &&other) :
-        internal::MKLOffset<BRNG>::type(cxx11::move(other)),
+        internal::MKLOffset<BRNG>::type(std::move(other)),
         seed_(other.seed_), stream_ptr_(other.stream_ptr_),
         property_(other.property_) {other.stream_ptr_ = VSMC_NULLPTR;}
 
@@ -436,7 +436,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         using std::swap;
 
         if (this != other) {
-            internal::MKLOffset<BRNG>::type::operator=(cxx11::move(other));
+            internal::MKLOffset<BRNG>::type::operator=(std::move(other));
             swap(seed_, other.seed_);
             swap(stream_ptr_, other.stream_ptr_);
             swap(property_, other.property_);
@@ -481,7 +481,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             MKL_UINT, MKLStream<BRNG> >::value>::type * = VSMC_NULLPTR)
     {
         seq.generate(&seed_, &seed_ + 1);
@@ -516,7 +516,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             MKL_UINT, MKLEngine<BRNG, ResultType>
             >::value>::type * = VSMC_NULLPTR) :
         stream_(seq), buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
@@ -526,7 +526,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             MKL_UINT, MKLEngine<BRNG, ResultType>
             >::value>::type * = VSMC_NULLPTR)
     {stream_.seed(seq);}

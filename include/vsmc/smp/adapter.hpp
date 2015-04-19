@@ -130,7 +130,7 @@ class InitializeAdapter<T, Impl, NullType> :
 
     public :
 
-    typedef cxx11::function<std::size_t (SingleParticle<T>)>
+    typedef std::function<std::size_t (SingleParticle<T>)>
         initialize_state_type;
     typedef typename base::initialize_param_type initialize_param_type;
     typedef typename base::pre_processor_type pre_processor_type;
@@ -162,7 +162,7 @@ class MoveAdapter<T, Impl, NullType> :
 
     public :
 
-    typedef cxx11::function<std::size_t (std::size_t, SingleParticle<T>)>
+    typedef std::function<std::size_t (std::size_t, SingleParticle<T>)>
         move_state_type;
     typedef typename base::pre_processor_type pre_processor_type;
     typedef typename base::post_processor_type post_processor_type;
@@ -192,7 +192,7 @@ class MonitorEvalAdapter<T, Impl, NullType> :
 
     public :
 
-    typedef cxx11::function<
+    typedef std::function<
         void (std::size_t, std::size_t, ConstSingleParticle<T>, double *)>
         monitor_state_type;
     typedef typename base::pre_processor_type pre_processor_type;
@@ -224,7 +224,7 @@ class PathEvalAdapter<T, Impl, NullType> :
 
     public :
 
-    typedef cxx11::function<double (std::size_t, ConstSingleParticle<T>)>
+    typedef std::function<double (std::size_t, ConstSingleParticle<T>)>
         path_state_type;
     typedef typename base::path_grid_type path_grid_type;
     typedef typename base::pre_processor_type pre_processor_type;

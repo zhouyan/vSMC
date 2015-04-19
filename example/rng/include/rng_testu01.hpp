@@ -32,7 +32,6 @@
 #ifndef VSMC_EXAMPLE_RNG_TESTU01_HPP
 #define VSMC_EXAMPLE_RNG_TESTU01_HPP
 
-#include <vsmc/cxx11/random.hpp>
 #include <vsmc/utility/program_option.hpp>
 
 extern "C" {
@@ -45,7 +44,7 @@ extern "C" {                                                                 \
     inline double rng_##Eng (void)                                           \
     {                                                                        \
         static vsmc::Eng eng;                                                \
-        static vsmc::cxx11::uniform_real_distribution<double> runif(0, 1);   \
+        static std::uniform_real_distribution<double> runif(0, 1);           \
                                                                              \
         return runif(eng);                                                   \
     }                                                                        \

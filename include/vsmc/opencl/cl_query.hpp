@@ -87,7 +87,7 @@ class CLQuery
     static bool has_feature (const ::cl::Device &dev)
     {
         return check_feature(dev,
-                cxx11::integral_constant<OpenCLDeviceFeature, feat>());
+                std::integral_constant<OpenCLDeviceFeature, feat>());
     }
 
     /// \brief Check if a device type exists in a platform
@@ -396,7 +396,7 @@ class CLQuery
     }
 
     static bool check_feature (const ::cl::Device &dev,
-            cxx11::integral_constant<OpenCLDeviceFeature,
+            std::integral_constant<OpenCLDeviceFeature,
             OpenCLDeviceDoubleFP>)
     {
         std::string info;
@@ -413,7 +413,7 @@ class CLQuery
     }
 
     static bool check_feature (const ::cl::Device &dev,
-            cxx11::integral_constant<OpenCLDeviceFeature,
+            std::integral_constant<OpenCLDeviceFeature,
             OpenCLDeviceImageSupport>)
     {
 #if VSMC_OPENCL_VERSION >= 120
@@ -725,7 +725,7 @@ class CLQuery
     {if ((info & val) != 0) strvec.push_back(name);}
 
     template <typename T>
-    static std::string byte_string (const T &val, cxx11::true_type)
+    static std::string byte_string (const T &val, std::true_type)
     {
         std::size_t B = static_cast<std::size_t>(val);
         std::size_t K = 1024;
@@ -745,7 +745,7 @@ class CLQuery
     }
 
     template <typename T>
-    static std::string byte_string (const T &, cxx11::false_type)
+    static std::string byte_string (const T &, std::false_type)
     {return std::string();}
 
     static std::vector<std::string> split_string (const std::string &str)
@@ -765,8 +765,8 @@ class CLQuery
         T val;
         obj.getInfo(static_cast<CLInfoType>(info), &val);
         print_name(os, name);
-        if (cxx11::is_integral<T>::value && unit == std::string("byte"))
-            print_val(os, byte_string(val, cxx11::is_integral<T>()));
+        if (std::is_integral<T>::value && unit == std::string("byte"))
+            print_val(os, byte_string(val, std::is_integral<T>()));
         else
             print_val(os, val);
         os << ' ' << unit << '\n';

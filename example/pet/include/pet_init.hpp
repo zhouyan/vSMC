@@ -62,23 +62,23 @@ class pet_init : public BASE_INIT<pet_state, pet_init>
                 sp.particle().value().theta_lb0(d);
             double theta_ub0 = sp.particle().value().theta_ub0(d);
 
-            vsmc::cxx11::uniform_real_distribution<> rphi(
+            std::uniform_real_distribution<> rphi(
                     phi_lb0, phi_ub0);
-            vsmc::cxx11::uniform_real_distribution<> rtheta(
+            std::uniform_real_distribution<> rtheta(
                     theta_lb0, theta_ub0);
             sp.state(0).phi(d) = rphi(sp.rng());
             sp.state(0).theta(d) = rtheta(sp.rng());
         }
         double lambda_a0 = sp.particle().value().lambda_a0();
         double lambda_b0 = sp.particle().value().lambda_b0();
-        vsmc::cxx11::gamma_distribution<> rlambda(lambda_a0, lambda_b0);
+        std::gamma_distribution<> rlambda(lambda_a0, lambda_b0);
         sp.state(0).lambda() = rlambda(sp.rng());
         if (sp.state(0).lambda() < 1e-13)
             sp.state(0).lambda() = 1e-13;
         if (sp.particle().value().model() == StudentT) {
             double nu_a0 = sp.particle().value().nu_a0();
             double nu_b0 = sp.particle().value().nu_b0();
-            vsmc::cxx11::uniform_real_distribution<> rnu(nu_a0, nu_b0);
+            std::uniform_real_distribution<> rnu(nu_a0, nu_b0);
             sp.state(0).nu() = 1 / rnu(sp.rng());
         }
         sp.particle().value().log_target(sp.state(0));

@@ -58,9 +58,9 @@ class gmm_init : public BASE_INIT<gmm_state, gmm_init>
         double shape0 = sp.particle().value().shape0();
         double scale0 = sp.particle().value().scale0();
 
-        vsmc::cxx11::normal_distribution<> rmu(mu0, sd0);
-        vsmc::cxx11::gamma_distribution<>  rlambda(shape0, scale0);
-        vsmc::cxx11::gamma_distribution<>  rweight(1, 1);
+        std::normal_distribution<> rmu(mu0, sd0);
+        std::gamma_distribution<>  rlambda(shape0, scale0);
+        std::gamma_distribution<>  rweight(1, 1);
 
         const std::size_t cn = sp.state(0).comp_num();
         double sum_weight = 0;
@@ -103,7 +103,7 @@ class gmm_init_rjsmc : public gmm_init
 
     std::size_t initialize_state (vsmc::SingleParticle<gmm_state> sp)
     {
-        vsmc::cxx11::uniform_int_distribution<> rcn(
+        std::uniform_int_distribution<> rcn(
                 static_cast<int>(min_comp_), static_cast<int>(max_comp_));
         sp.state(0).comp_num(static_cast<std::size_t>(rcn(sp.rng())));
         return gmm_init::initialize_state(sp);

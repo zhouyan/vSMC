@@ -100,7 +100,7 @@ class CLBuffer
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     CLBuffer (CLBuffer<T, ID> &&other) :
         size_(other.size_), flag_(other.flag_), host_ptr_(other.host_ptr_),
-        data_(cxx11::move(other.data_))
+        data_(std::move(other.data_))
     {
         other.size_ = 0;
         other.flag_ = CL_MEM_READ_WRITE;

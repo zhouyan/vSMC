@@ -38,7 +38,7 @@
     VSMC_STATIC_ASSERT((K != 0), USE_XorshiftEngine_WITH_ORDER_EUQAL_TO_ZERO)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType) \
-    VSMC_STATIC_ASSERT((cxx11::is_unsigned<ResultType>::value),              \
+    VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),              \
             USE_XorshiftEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType) \
@@ -227,7 +227,7 @@ class XorshiftEngine
 
     template <typename SeedSeq>
     explicit XorshiftEngine (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, XorshiftEngine<ResultType, K, A, B, C, D, R, S>
             >::value>::type * = VSMC_NULLPTR)
     {
@@ -248,7 +248,7 @@ class XorshiftEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, XorshiftEngine<ResultType, K, A, B, C, D, R, S>
             >::value>::type * = VSMC_NULLPTR)
     {
@@ -309,7 +309,7 @@ class XorshiftEngine
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            eng.state_ = cxx11::move(tmp);
+            eng.state_ = std::move(tmp);
 #else
             eng.state_ = tmp;
 #endif
@@ -347,7 +347,7 @@ class XorwowEngine
 
     template <typename SeedSeq>
     explicit XorwowEngine (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, XorwowEngine<Eng, D, DInit>
             >::value>::type * = VSMC_NULLPTR) : eng_(seq), weyl_(DInit) {}
 
@@ -359,7 +359,7 @@ class XorwowEngine
 
     template <typename SeedSeq>
     void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
+            typename std::enable_if<internal::is_seed_seq<SeedSeq,
             result_type, XorwowEngine<Eng, D, DInit>
             >::value>::type * = VSMC_NULLPTR)
     {
@@ -421,7 +421,7 @@ class XorwowEngine
 
         if (is.good()) {
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-            eng.eng_ = cxx11::move(eng_tmp);
+            eng.eng_ = std::move(eng_tmp);
 #else
             eng.eng_ = eng_tmp;
 #endif

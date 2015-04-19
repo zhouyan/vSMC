@@ -33,18 +33,15 @@
 #define VSMC_MPI_MPI_DATATYPE_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/core/state_tuple.hpp>
 #include <vsmc/utility/array.hpp>
 #include <boost/mpi.hpp>
-
-#if VSMC_HAS_CXX11LIB_TUPLE
-#include <vsmc/core/state_tuple.hpp>
-#endif
 
 namespace boost { namespace mpi {
 
 template <typename T, std::size_t N>
 struct is_mpi_datatype< ::vsmc::Array<T, N> > :
-public ::vsmc::cxx11::conditional< ::vsmc::cxx11::is_fundamental<T>::value,
+public std::conditional<std::is_fundamental<T>::value,
        mpl::true_, mpl::false_>::type {};
 
 } } // namespace boost::mpi

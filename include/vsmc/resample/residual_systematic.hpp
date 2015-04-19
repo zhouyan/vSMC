@@ -38,7 +38,7 @@ namespace vsmc {
 
 namespace internal {
 
-typedef cxx11::integral_constant<ResampleScheme, ResidualSystematic>
+typedef std::integral_constant<ResampleScheme, ResidualSystematic>
     ResampleResidualSystematic;
 
 } // namespace vsmc::internal

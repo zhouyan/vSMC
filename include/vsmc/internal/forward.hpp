@@ -61,9 +61,7 @@ class NormalizingConstant;
 
 // SMP
 template <MatrixOrder, std::size_t, typename> class StateMatrix;
-#if VSMC_HAS_CXX11LIB_TUPLE
 template <MatrixOrder, typename, typename...> class StateTuple;
-#endif
 
 // MPI
 struct MPIDefault;

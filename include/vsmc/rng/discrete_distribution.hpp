@@ -61,14 +61,12 @@ class DiscreteDistribution
         normalize();
     }
 
-#if VSMC_HAS_CXX11LIB_INITIALIZER_LIST
     DiscreteDistribution (std::initializer_list<double> weights) :
         param_(weights.begin(), weights.end())
     {
         VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
         normalize();
     }
-#endif
 
     template <typename UnaryOperation>
     DiscreteDistribution (std::size_t count, double xmin, double xmax,
@@ -94,7 +92,7 @@ class DiscreteDistribution
     explicit DiscreteDistribution (param_type &&param)
     {
         VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
-        param_ = cxx11::move(param);
+        param_ = std::move(param);
         normalize();
     }
 #endif
@@ -112,7 +110,7 @@ class DiscreteDistribution
     void param (param_type &&param)
     {
         VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
-        param_ = cxx11::move(param);
+        param_ = std::move(param);
         normalize();
     }
 #endif
@@ -154,7 +152,7 @@ class DiscreteDistribution
         typedef typename  std::iterator_traits<InputIter>::value_type
             value_type;
 
-        cxx11::uniform_real_distribution<value_type> runif(0, 1);
+        std::uniform_real_distribution<value_type> runif(0, 1);
         value_type u = runif(eng);
 
         if (!normalized) {

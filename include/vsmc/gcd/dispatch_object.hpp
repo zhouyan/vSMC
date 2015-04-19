@@ -73,7 +73,7 @@ class DispatchObject
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
     DispatchObject (DispatchObject<DispatchType> &&other) :
-        object_(cxx11::move(other.object_)) {other.object_ = VSMC_NULLPTR;}
+        object_(std::move(other.object_)) {other.object_ = VSMC_NULLPTR;}
 
     DispatchObject<DispatchType> &operator= (
             DispatchObject<DispatchType> &&other)

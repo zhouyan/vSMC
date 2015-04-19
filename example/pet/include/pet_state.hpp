@@ -330,8 +330,8 @@ class pet_state :
         using std::log;
 
         double ll = data_num() * (
-                vsmc::cxx11::lgamma(0.5 * (state.nu() + 1)) -
-                vsmc::cxx11::lgamma(0.5 * state.nu()) +
+                std::lgamma(0.5 * (state.nu() + 1)) -
+                std::lgamma(0.5 * state.nu()) +
                 0.5 * log(state.lambda()) - 0.5 * log(state.nu()));
         for (std::size_t i = 0; i != data_num(); ++i) {
             double fv = fit_value(i, state);

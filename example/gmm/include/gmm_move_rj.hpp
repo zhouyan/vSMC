@@ -111,14 +111,14 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
         else if (cn == min_comp_)
             split = true;
         else {
-            vsmc::cxx11::bernoulli_distribution rsplit(0.5);
+            std::bernoulli_distribution rsplit(0.5);
             split = rsplit(sp.rng());
         }
 
         if (split) { // do split move
-            vsmc::cxx11::gamma_distribution<> rgamma2(2, 1);
-            vsmc::cxx11::uniform_int_distribution<std::size_t> rj(0, cn - 1);
-            vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+            std::gamma_distribution<> rgamma2(2, 1);
+            std::uniform_int_distribution<std::size_t> rj(0, cn - 1);
+            std::uniform_real_distribution<> runif(0, 1);
 
             // generate u1, u2, u3
             double a, b;
@@ -187,8 +187,8 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
 
             return sp.state(0).mh_reject_rj(p, u);
         } else { // do combine move
-            vsmc::cxx11::uniform_int_distribution<std::size_t> rj(0, cn - 2);
-            vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+            std::uniform_int_distribution<std::size_t> rj(0, cn - 2);
+            std::uniform_real_distribution<> runif(0, 1);
             std::size_t id1 = rj(sp.rng());
             std::size_t id2 = id1 + 1;
 
@@ -273,19 +273,19 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd> >
         else if (cn == min_comp_)
             birth = true;
         else {
-            vsmc::cxx11::bernoulli_distribution rbirth(0.5);
+            std::bernoulli_distribution rbirth(0.5);
             birth = rbirth(sp.rng());
         }
 
         if (birth) { // do birth move
-            vsmc::cxx11::gamma_distribution<> rgamma1(1, 1);
-            vsmc::cxx11::gamma_distribution<> rgammak(
+            std::gamma_distribution<> rgamma1(1, 1);
+            std::gamma_distribution<> rgammak(
                     static_cast<double>(cn), 1);
-            vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
-            vsmc::cxx11::normal_distribution<> rmu(
+            std::uniform_real_distribution<> runif(0, 1);
+            std::normal_distribution<> rmu(
                     sp.particle().value().mu0(),
                     sp.particle().value().sd0());
-            vsmc::cxx11::gamma_distribution<> rlambda(
+            std::gamma_distribution<> rlambda(
                     sp.particle().value().shape0(),
                     sp.particle().value().scale0());
 
@@ -327,8 +327,8 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd> >
 
             return sp.state(0).mh_reject_rj(p, u);
         } else { // do death move
-            vsmc::cxx11::uniform_int_distribution<std::size_t> rj(0, cn - 1);
-            vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+            std::uniform_int_distribution<std::size_t> rj(0, cn - 1);
+            std::uniform_real_distribution<> runif(0, 1);
 
             std::size_t id = rj(sp.rng());
             double weight_1 = 1 - sp.state(0).weight(id);

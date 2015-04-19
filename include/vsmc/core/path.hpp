@@ -53,7 +53,7 @@ class Path
     public :
 
     typedef T value_type;
-    typedef cxx11::function<double (
+    typedef std::function<double (
             std::size_t, const Particle<T> &, double *)> eval_type;
 
     /// \brief Construct a Path with an evaluation object

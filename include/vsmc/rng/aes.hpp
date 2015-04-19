@@ -37,7 +37,7 @@
 
 #define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val) \
     template <> struct AESRoundConstantValue< N > :                          \
-        public cxx11::integral_constant<int, val > {};
+        public std::integral_constant<int, val > {};
 
 /// \brief AESEngine default blocks
 /// \ingroup Config
@@ -316,7 +316,7 @@ struct AESKeyInit
             Array<__m128i, Rp1> &key_seq, __m128i &xmm)
     {
         key_init_xmm<Offset, N>(key, key_seq, xmm,
-                cxx11::integral_constant<bool, N < Rp1>());
+                std::integral_constant<bool, N < Rp1>());
     }
 
     private :
@@ -324,13 +324,13 @@ struct AESKeyInit
     template <std::size_t, std::size_t,
              typename T, std::size_t KeySize, std::size_t Rp1>
     static void key_init_xmm (const Array<T, KeySize> &,
-            Array<__m128i, Rp1> &, __m128i &, cxx11::false_type) {}
+            Array<__m128i, Rp1> &, __m128i &, std::false_type) {}
 
     template <std::size_t Offset, std::size_t N,
              typename T, std::size_t KeySize,
              std::size_t Rp1>
     static void key_init_xmm (const Array<T, KeySize> &key,
-            Array<__m128i, Rp1> &key_seq, __m128i &xmm, cxx11::true_type)
+            Array<__m128i, Rp1> &key_seq, __m128i &xmm, std::true_type)
     {
         m128i_pack<Offset>(key, xmm);
         key_seq[Position<N>()] = xmm;
@@ -352,7 +352,7 @@ class AES128KeySeq
     void generate (const key_type &key, Array<__m128i, Rp1> &key_seq)
     {
         internal::AESKeyInit::key_init<0, 0>(key, key_seq, xmm1_);
-        generate_seq<1>(key_seq, cxx11::integral_constant<bool, 1 < Rp1>());
+        generate_seq<1>(key_seq, std::integral_constant<bool, 1 < Rp1>());
     }
 
     private :
@@ -362,17 +362,17 @@ class AES128KeySeq
     __m128i xmm3_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &, cxx11::false_type) {}
+    void generate_seq (Array<__m128i, Rp1> &, std::false_type) {}
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &key_seq, cxx11::true_type)
+    void generate_seq (Array<__m128i, Rp1> &key_seq, std::true_type)
     {
         xmm2_ = _mm_aeskeygenassist_si128(xmm1_,
                 internal::AESRoundConstantValue<N>::value);
         expand_key();
         key_seq[Position<N>()] = xmm1_;
         generate_seq<N + 1>(key_seq,
-                cxx11::integral_constant<bool, N + 1 < Rp1>());
+                std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     void expand_key ()
@@ -414,7 +414,7 @@ class AES128Engine :
     explicit AES128Engine (ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
-    explicit AES128Engine (SeedSeq &seq, typename cxx11::enable_if<
+    explicit AES128Engine (SeedSeq &seq, typename std::enable_if<
             internal::is_seed_seq<SeedSeq,
             typename base_eng_type::result_type,
             typename base_eng_type::key_type,
@@ -490,9 +490,9 @@ class AES192KeySeq
 
         Array<unsigned char, Rp1 * 16 + 16> ks_tmp;
         generate_seq<1, Rp1>(ks_tmp.data(),
-                cxx11::integral_constant<bool, 24 < Rp1 * 16>());
+                std::integral_constant<bool, 24 < Rp1 * 16>());
         copy_key(key_seq, ks_tmp.data(),
-                cxx11::integral_constant<bool, 24 < Rp1 * 16>());
+                std::integral_constant<bool, 24 < Rp1 * 16>());
     }
 
     private :
@@ -506,16 +506,16 @@ class AES192KeySeq
     __m128i xmm7_;
 
     template <std::size_t, std::size_t>
-    void generate_seq (unsigned char *, cxx11::false_type) {}
+    void generate_seq (unsigned char *, std::false_type) {}
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq (unsigned char *ks_ptr, cxx11::true_type)
+    void generate_seq (unsigned char *ks_ptr, std::true_type)
     {
         generate_key<N>(ks_ptr);
         complete_key<N>(ks_ptr,
-                cxx11::integral_constant<bool, N * 24 + 16 < Rp1 * 16>());
+                std::integral_constant<bool, N * 24 + 16 < Rp1 * 16>());
         generate_seq<N + 1, Rp1>(ks_ptr,
-                cxx11::integral_constant<bool, N * 24 + 24 < Rp1 * 16>());
+                std::integral_constant<bool, N * 24 + 24 < Rp1 * 16>());
     }
 
     template <std::size_t N>
@@ -532,10 +532,10 @@ class AES192KeySeq
     }
 
     template <std::size_t>
-    void complete_key (unsigned char *, cxx11::false_type) {}
+    void complete_key (unsigned char *, std::false_type) {}
 
     template <std::size_t N>
-    void complete_key (unsigned char *ks_ptr, cxx11::true_type)
+    void complete_key (unsigned char *ks_ptr, std::true_type)
     {
         // In entry, N * 24 + 16 < Rp1 * 16
         // Required storage: N * 24 + 32
@@ -573,11 +573,11 @@ class AES192KeySeq
 
     template <std::size_t Rp1>
     void copy_key (Array<__m128i, Rp1> &,
-            const unsigned char *, cxx11::false_type) {}
+            const unsigned char *, std::false_type) {}
 
     template <std::size_t Rp1>
     void copy_key (Array<__m128i, Rp1> &key_seq,
-            const unsigned char *ks_ptr, cxx11::true_type)
+            const unsigned char *ks_ptr, std::true_type)
     {
         unsigned char *dst = reinterpret_cast<unsigned char *>(key_seq.data());
         std::memcpy(dst + 24, ks_ptr + 24, Rp1 * 16 - 24);
@@ -602,7 +602,7 @@ class AES192Engine :
     explicit AES192Engine (ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
-    explicit AES192Engine (SeedSeq &seq, typename cxx11::enable_if<
+    explicit AES192Engine (SeedSeq &seq, typename std::enable_if<
             internal::is_seed_seq<SeedSeq,
             typename base_eng_type::result_type,
             typename base_eng_type::key_type,
@@ -668,7 +668,7 @@ class AES256KeySeq
         internal::AESKeyInit::key_init<0, 0>(key, key_seq, xmm1_);
         internal::AESKeyInit::key_init<16 / sizeof(ResultType), 1>(
                 key, key_seq, xmm3_);
-        generate_seq<2>(key_seq, cxx11::integral_constant<bool, 2 < Rp1>());
+        generate_seq<2>(key_seq, std::integral_constant<bool, 2 < Rp1>());
     }
 
     private :
@@ -679,34 +679,34 @@ class AES256KeySeq
     __m128i xmm4_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &, cxx11::false_type) {}
+    void generate_seq (Array<__m128i, Rp1> &, std::false_type) {}
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &key_seq, cxx11::true_type)
+    void generate_seq (Array<__m128i, Rp1> &key_seq, std::true_type)
     {
-        generate_key<N>(key_seq, cxx11::integral_constant<bool, N % 2 == 0>());
+        generate_key<N>(key_seq, std::integral_constant<bool, N % 2 == 0>());
         generate_seq<N + 1>(key_seq,
-                cxx11::integral_constant<bool, N + 1 < Rp1>());
+                std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key (Array<__m128i, Rp1> &key_seq, cxx11::true_type)
+    void generate_key (Array<__m128i, Rp1> &key_seq, std::true_type)
     {
         xmm2_ = _mm_aeskeygenassist_si128(xmm3_,
                 internal::AESRoundConstantValue<N / 2>::value);
-        expand_key(cxx11::true_type());
+        expand_key(std::true_type());
         key_seq[Position<N>()] = xmm1_;
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key (Array<__m128i, Rp1> &key_seq, cxx11::false_type)
+    void generate_key (Array<__m128i, Rp1> &key_seq, std::false_type)
     {
         xmm4_ = _mm_aeskeygenassist_si128(xmm1_, 0);
-        expand_key(cxx11::false_type());
+        expand_key(std::false_type());
         key_seq[Position<N>()] = xmm3_;
     }
 
-    void expand_key (cxx11::true_type)
+    void expand_key (std::true_type)
     {
         xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF);  // pshufd xmm2, xmm2, 0xFF
         xmm4_ = _mm_slli_si128   (xmm1_, 0x04);  // pshufb xmm4, xmm5
@@ -718,7 +718,7 @@ class AES256KeySeq
         xmm1_ = _mm_xor_si128    (xmm1_, xmm2_); // pxor   xmm1, xmm2
     }
 
-    void expand_key (cxx11::false_type)
+    void expand_key (std::false_type)
     {
         xmm2_ = _mm_shuffle_epi32(xmm4_, 0xAA);  // pshufd xmm2, xmm4, 0xAA
         xmm4_ = _mm_slli_si128   (xmm3_, 0x04);  // pshufb xmm4, xmm5
@@ -749,7 +749,7 @@ class AES256Engine :
     explicit AES256Engine (ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
-    explicit AES256Engine (SeedSeq &seq, typename cxx11::enable_if<
+    explicit AES256Engine (SeedSeq &seq, typename std::enable_if<
             internal::is_seed_seq<SeedSeq,
             typename base_eng_type::result_type,
             typename base_eng_type::key_type,

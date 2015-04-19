@@ -40,12 +40,12 @@ class pet_move_phi : public BASE_MOVE<pet_state, pet_move_phi>
     {
         using std::log;
 
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::uniform_real_distribution<> runif(0, 1);
         const std::size_t cn = sp.state(0).comp_num();
         sp.state(0).save_old();
 
         for (std::size_t d = 0; d != cn; ++d) {
-            vsmc::cxx11::normal_distribution<> rphi(
+            std::normal_distribution<> rphi(
                     0, sp.state(0).phi_sd(d));
             sp.state(0).phi(d) += rphi(sp.rng());
         }
@@ -70,12 +70,12 @@ class pet_move_theta : public BASE_MOVE<pet_state, pet_move_theta>
     {
         using std::log;
 
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::uniform_real_distribution<> runif(0, 1);
         const std::size_t cn = sp.state(0).comp_num();
         sp.state(0).save_old();
 
         for (std::size_t d = 0; d != cn; ++d) {
-            vsmc::cxx11::normal_distribution<> rtheta(
+            std::normal_distribution<> rtheta(
                     0, sp.state(0).theta_sd(d));
             sp.state(0).theta(d) += rtheta(sp.rng());
         }
@@ -100,9 +100,9 @@ class pet_move_lambda : public BASE_MOVE<pet_state, pet_move_lambda>
     {
         using std::log;
 
-        vsmc::cxx11::lognormal_distribution<> rlambda(
+        std::lognormal_distribution<> rlambda(
                 0, sp.state(0).lambda_sd());
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::uniform_real_distribution<> runif(0, 1);
         sp.state(0).save_old();
 
         sp.state(0).lambda() *= rlambda(sp.rng());
@@ -131,8 +131,8 @@ class pet_move_nu : public BASE_MOVE<pet_state, pet_move_nu>
         if (sp.particle().value().model() != StudentT)
             return 0;
 
-        vsmc::cxx11::lognormal_distribution<> rnu(0, sp.state(0).nu_sd());
-        vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+        std::lognormal_distribution<> rnu(0, sp.state(0).nu_sd());
+        std::uniform_real_distribution<> runif(0, 1);
         sp.state(0).save_old();
 
         sp.state(0).nu() *= rnu(sp.rng());
