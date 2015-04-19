@@ -252,7 +252,7 @@
 #endif
 #endif
 
-#endif // __cplusplus >= 201103L
+#endif  // __cplusplus >= 201103L
 
 #if __cplusplus >= 201402L
 
@@ -324,7 +324,7 @@
 #endif
 #endif
 
-#endif // __cplusplus >= 201402L
+#endif  // __cplusplus >= 201402L
 
 // Compiler features
 
@@ -375,4 +375,4 @@
 #endif
 #endif
 
-#endif // VSMC_INTERNAL_COMPILER_INTEL_HPP
+#endif  // VSMC_INTERNAL_COMPILER_INTEL_HPP

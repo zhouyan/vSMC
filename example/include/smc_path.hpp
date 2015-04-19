@@ -32,16 +32,18 @@
 #ifndef VSMC_EXAMPLE_SMC_PATH_HPP
 #define VSMC_EXAMPLE_SMC_PATH_HPP
 
-template <typename T>
-class smc_path : public BASE_PATH<T, smc_path<T> >
+template <typename T> class smc_path : public BASE_PATH<T, smc_path<T>>
 {
-    public :
+    public:
+    double path_state(std::size_t, vsmc::ConstSingleParticle<T> csp)
+    {
+        return csp.state(0).log_likelihood();
+    }
 
-    double path_state (std::size_t, vsmc::ConstSingleParticle<T> csp)
-    {return csp.state(0).log_likelihood();}
-
-    double path_grid (std::size_t, const vsmc::Particle<T> &particle)
-    {return particle.value().state(0, 0).alpha();}
+    double path_grid(std::size_t, const vsmc::Particle<T> &particle)
+    {
+        return particle.value().state(0, 0).alpha();
+    }
 };
 
-#endif // VSMC_EXAMPLE_SMC_PATH_HPP
+#endif  // VSMC_EXAMPLE_SMC_PATH_HPP

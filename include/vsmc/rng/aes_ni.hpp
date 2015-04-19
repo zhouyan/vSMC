@@ -36,20 +36,23 @@
 #include <vsmc/rng/m128i.hpp>
 #include <wmmintrin.h>
 
-#define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks) \
+#define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                         \
     VSMC_STATIC_ASSERT((Blocks > 0), USE_AESNIEngine_WITH_ZERO_BLOCKS)
 
-#define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType) \
-    VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),              \
-            USE_AESNIEngine_WITH_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
+#define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType)                \
+    VSMC_STATIC_ASSERT(                                                      \
+        (std::is_unsigned<ResultType>::value),                               \
+        USE_AESNIEngine_WITH_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
-#define VSMC_STATIC_ASSERT_RNG_AES_NI \
+#define VSMC_STATIC_ASSERT_RNG_AES_NI                                        \
     VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks);                            \
     VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType);
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
 template <typename KeySeq, bool KeySeqInit, std::size_t Rounds>
 class AESNIKeySeqStorage;
@@ -57,23 +60,22 @@ class AESNIKeySeqStorage;
 template <typename KeySeq, std::size_t Rounds>
 class AESNIKeySeqStorage<KeySeq, true, Rounds>
 {
-    public :
-
+    public:
     typedef typename KeySeq::key_type key_type;
     typedef Array<__m128i, Rounds + 1> key_seq_type;
 
-    key_seq_type get (const key_type &) const {return key_seq_;}
+    key_seq_type get(const key_type &) const { return key_seq_; }
 
-    void set (const key_type &k)
+    void set(const key_type &k)
     {
         KeySeq seq;
         seq.generate(k, key_seq_);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os,
-            const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
+    friend inline std::basic_ostream<CharT, Traits> &
+        operator<<(std::basic_ostream<CharT, Traits> &os,
+                   const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
     {
         if (!os.good())
             return os;
@@ -87,9 +89,9 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>> (
-            std::basic_istream<CharT, Traits> &is,
-            AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
+    friend inline std::basic_istream<CharT, Traits> &
+        operator>>(std::basic_istream<CharT, Traits> &is,
+                   AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
     {
         if (!is.good())
             return is;
@@ -109,20 +111,18 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
         return is;
     }
 
-    private :
-
+    private:
     key_seq_type key_seq_;
-}; // struct AESNIKeySeqStorage
+};  // struct AESNIKeySeqStorage
 
 template <typename KeySeq, std::size_t Rounds>
 class AESNIKeySeqStorage<KeySeq, false, Rounds>
 {
-    public :
-
+    public:
     typedef typename KeySeq::key_type key_type;
     typedef Array<__m128i, Rounds + 1> key_seq_type;
 
-    key_seq_type get (const key_type &k) const
+    key_seq_type get(const key_type &k) const
     {
         key_seq_type ks;
         KeySeq seq;
@@ -131,20 +131,26 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
         return ks;
     }
 
-    void set (const key_type &) {}
+    void set(const key_type &) {}
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os,
-            const AESNIKeySeqStorage<KeySeq, false, Rounds> &) {return os;}
+    friend inline std::basic_ostream<CharT, Traits> &
+        operator<<(std::basic_ostream<CharT, Traits> &os,
+                   const AESNIKeySeqStorage<KeySeq, false, Rounds> &)
+    {
+        return os;
+    }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>> (
-            std::basic_istream<CharT, Traits> &is,
-            AESNIKeySeqStorage<KeySeq, false, Rounds> &) {return is;}
-}; // struct AESNIKeySeqStorage
+    friend inline std::basic_istream<CharT, Traits> &
+        operator>>(std::basic_istream<CharT, Traits> &is,
+                   AESNIKeySeqStorage<KeySeq, false, Rounds> &)
+    {
+        return is;
+    }
+};  // struct AESNIKeySeqStorage
 
-} // namespace vsmc::internal
+}  // namespace vsmc::internal
 
 /// \brief RNG engine using AES-NI instructions
 /// \ingroup AESNIRNG
@@ -152,7 +158,8 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// \details
 /// Two dervied class AES128Engine and ARSEngine behave exactly the same as
 /// AES and ARS RNG engines as described in
-/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
+/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented
+/// in
 /// [Random123][r123lib], when used with `uint32_t` as ResultType. The first
 /// \f$2^{32}\f$ iterations will be exactly the same as
 /// `r123::Engine<r123:AESNI4x32>` and `r123::Engine<r123:ARS4x32_R<10> >`.
@@ -165,7 +172,8 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 ///
 /// This implementation is more flexible than the original. First, it allows
 /// using any unsigned integers as output. Second, it allows user defined key
-/// schedule (the second template argument). The two derived classed merely use
+/// schedule (the second template argument). The two derived classed merely
+/// use
 /// two special key schedule to reproduce the original behavior.
 ///
 /// The terminology used in this engine is slightly different than that in
@@ -176,9 +184,11 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// vSMC does not define `ukey_type`. In this engine, the term `key` (`ukey`,
 /// short for unique key, in [Rnadom123][r123lib]) usually refer to the 128-,
 /// 192-, or 256-bits input key in the context of the AES algorithm. And
-/// `key_seq` (`key` in [Random123][r123lib]) refers to the key schedule in the
+/// `key_seq` (`key` in [Random123][r123lib]) refers to the key schedule in
+/// the
 /// same context. In the context of C++11, `key_seq` is also sort of like the
-/// `seed_seq` for other RNG (basically both expand a single input value into a
+/// `seed_seq` for other RNG (basically both expand a single input value into
+/// a
 /// sequence such that the sequence provides extra entropy even the inputs are
 /// not random at all). Therefore vSMC's terminology shall be both familiar to
 /// people familiar with block ciphers (of which AES is one), and people
@@ -188,7 +198,8 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// seed sequence.
 ///
 /// \tparam ResultType The output type of `operator()`
-/// \tparam KeySeq Using other key schedule can lead to other rng. The `KeySeq`
+/// \tparam KeySeq Using other key schedule can lead to other rng. The
+/// `KeySeq`
 /// template parameter needs to has a member function of the form,
 /// ~~~{.cpp}
 /// void generate (const key_type &key, AESNIEngine::key_seq_type &key_seq)
@@ -203,20 +214,24 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// \tparam Rounds The third template argument is the rounds of the algorithm.
 /// AES requires 10 rounds when using a 128-bits key. With reduced strength,
 /// any number of round below 10 can be used.
-/// \tparam Blocks The fourth template argument specifies how many blocks shall
-/// be used. The AES-NI instructions have noticeable latency but can be started
+/// \tparam Blocks The fourth template argument specifies how many blocks
+/// shall
+/// be used. The AES-NI instructions have noticeable latency but can be
+/// started
 /// every two cycles. By allowing generating multiple blocks at once, and
 /// interleaving the instructions, the throughput can be increased at the cost
 /// of space.
-template <typename ResultType, typename KeySeq, bool KeySeqInit,
-         std::size_t Rounds, std::size_t Blocks>
+template <typename ResultType,
+          typename KeySeq,
+          bool KeySeqInit,
+          std::size_t Rounds,
+          std::size_t Blocks>
 class AESNIEngine
 {
     static VSMC_CONSTEXPR const std::size_t K_ =
         sizeof(__m128i) / sizeof(ResultType) * Blocks;
 
-    public :
-
+    public:
     typedef ResultType result_type;
     typedef Array<__m128i, Blocks> buffer_type;
     typedef Array<ResultType, sizeof(__m128i) / sizeof(ResultType)> ctr_type;
@@ -224,35 +239,38 @@ class AESNIEngine
     typedef typename KeySeq::key_type key_type;
     typedef Array<__m128i, Rounds + 1> key_seq_type;
 
-    private :
-
+    private:
     typedef Counter<ctr_type> counter;
 
-    public :
-
-    explicit AESNIEngine (result_type s = 0) : index_(K_)
+    public:
+    explicit AESNIEngine(result_type s = 0) : index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(s);
     }
 
     template <typename SeedSeq>
-    explicit AESNIEngine (SeedSeq &seq, typename std::enable_if<
-            internal::is_seed_seq<SeedSeq, result_type, key_type,
-            AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
-            >::value>::type * = VSMC_NULLPTR) : index_(K_)
+    explicit AESNIEngine(
+        SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<
+            SeedSeq,
+            result_type,
+            key_type,
+            AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>>::
+                                    value>::type * = VSMC_NULLPTR)
+        : index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(seq);
     }
 
-    AESNIEngine (const key_type &k) : index_(K_)
+    AESNIEngine(const key_type &k) : index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(k);
     }
 
-    void seed (result_type s)
+    void seed(result_type s)
     {
         counter::reset(ctr_block_);
         key_.fill(0);
@@ -262,8 +280,11 @@ class AESNIEngine
     }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<
-            SeedSeq, result_type, key_type>:: value>::type * = VSMC_NULLPTR)
+    void seed(
+        SeedSeq &seq,
+        typename std::enable_if<
+            internal::is_seed_seq<SeedSeq, result_type, key_type>::value>::
+            type * = VSMC_NULLPTR)
     {
         counter::reset(ctr_block_);
         seq.generate(key_.begin(), key_.end());
@@ -271,7 +292,7 @@ class AESNIEngine
         index_ = K_;
     }
 
-    void seed (const key_type &k)
+    void seed(const key_type &k)
     {
         counter::reset(ctr_block_);
         key_ = k;
@@ -279,29 +300,31 @@ class AESNIEngine
         index_ = K_;
     }
 
-    template <std::size_t B>
-    ctr_type ctr () const {return ctr_block_[Position<B>()];}
+    template <std::size_t B> ctr_type ctr() const
+    {
+        return ctr_block_[Position<B>()];
+    }
 
-    ctr_block_type ctr_block () const {return ctr_block_;}
+    ctr_block_type ctr_block() const { return ctr_block_; }
 
-    key_type key () const {return key_;}
+    key_type key() const { return key_; }
 
-    key_seq_type key_seq () const {return key_seq_.get(key_);}
+    key_seq_type key_seq() const { return key_seq_.get(key_); }
 
-    void ctr (const ctr_type &c)
+    void ctr(const ctr_type &c)
     {
         counter::set(ctr_block_, c);
         index_ = K_;
     }
 
-    void key (const key_type &k)
+    void key(const key_type &k)
     {
         key_ = k;
         key_seq_.set(k);
         index_ = K_;
     }
 
-    result_type operator() ()
+    result_type operator()()
     {
         if (index_ == K_) {
             counter::increment(ctr_block_);
@@ -309,12 +332,13 @@ class AESNIEngine
             index_ = 0;
         }
 
-        return reinterpret_cast<const result_type *>(buffer_.data())[index_++];
+        return reinterpret_cast<const result_type *>(
+            buffer_.data())[index_++];
     }
 
     /// \brief Generate a buffer of random bits given a counter using the
     /// current key
-    buffer_type operator() (const ctr_type &c) const
+    buffer_type operator()(const ctr_type &c) const
     {
         ctr_block_type cb;
         counter::set(cb, c);
@@ -324,9 +348,10 @@ class AESNIEngine
         return buf;
     }
 
-    /// \brief Generate a buffer of random bits given a block of counters using
+    /// \brief Generate a buffer of random bits given a block of counters
+    /// using
     /// the current key
-    buffer_type operator() (const ctr_block_type &cb) const
+    buffer_type operator()(const ctr_block_type &cb) const
     {
         buffer_type buf;
         generate_buffer(cb, buf);
@@ -336,7 +361,7 @@ class AESNIEngine
 
     /// \brief Generate random bits in a pre-allocated buffer given a counter
     /// using the current key
-    void operator() (const ctr_type &c, buffer_type &buf) const
+    void operator()(const ctr_type &c, buffer_type &buf) const
     {
         ctr_block_type cb;
         counter::set(cb, c);
@@ -345,10 +370,12 @@ class AESNIEngine
 
     /// \brief Generate ranodm bits in a pre-allocated buffer given a block of
     /// counters using the current key
-    void operator() (const ctr_block_type &cb, buffer_type &buf) const
-    {generate_buffer(cb, buf);}
+    void operator()(const ctr_block_type &cb, buffer_type &buf) const
+    {
+        generate_buffer(cb, buf);
+    }
 
-    void discard (result_type nskip)
+    void discard(result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
         if (index_ + n <= K_) {
@@ -371,35 +398,36 @@ class AESNIEngine
     }
 
     static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max = static_cast<result_type>(
-            ~(static_cast<result_type>(0)));
+    static VSMC_CONSTEXPR const result_type _Max =
+        static_cast<result_type>(~(static_cast<result_type>(0)));
 
-    static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
-    static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
+    static VSMC_CONSTEXPR result_type min VSMC_MNE() { return _Min; }
+    static VSMC_CONSTEXPR result_type max VSMC_MNE() { return _Max; }
 
-    friend inline bool operator== (
-            const AESNIEngine<
-            ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng1,
-            const AESNIEngine<
-            ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng2)
+    friend inline bool operator==(
+        const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
+            &eng1,
+        const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
+            &eng2)
     {
-        return eng1.index_ == eng2.index_ &&
-            eng1.key_ == eng2.key_ &&
-            eng1.ctr_block_ == eng2.ctr_block_;
+        return eng1.index_ == eng2.index_ && eng1.key_ == eng2.key_ &&
+               eng1.ctr_block_ == eng2.ctr_block_;
     }
 
-    friend inline bool operator!= (
-            const AESNIEngine<
-            ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng1,
-            const AESNIEngine<
-            ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng2)
-    {return !(eng1 == eng2);}
+    friend inline bool operator!=(
+        const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
+            &eng1,
+        const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
+            &eng2)
+    {
+        return !(eng1 == eng2);
+    }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os,
-            const AESNIEngine<
-            ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
+            &eng)
     {
         if (!os.good())
             return os;
@@ -416,9 +444,9 @@ class AESNIEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>> (
-            std::basic_istream<CharT, Traits> &is,
-            AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {
         if (!is.good())
             return is;
@@ -441,8 +469,7 @@ class AESNIEngine
         return is;
     }
 
-    private :
-
+    private:
     // FIXME
     // buffer_ is automatically 16 bytes aligned
     // Thus, we assume that ctr_block_ and buffer_ will also be 16 bytes
@@ -454,87 +481,101 @@ class AESNIEngine
     key_type key_;
     std::size_t index_;
 
-    void generate_buffer (const ctr_block_type &cb,
-            buffer_type &buf) const
+    void generate_buffer(const ctr_block_type &cb, buffer_type &buf) const
     {
         const key_seq_type ks(key_seq_.get(key_));
         pack(cb, buf);
         enc_first<0>(ks, buf, std::true_type());
         enc_round<1>(ks, buf, std::integral_constant<bool, 1 < Rounds>());
-        enc_last <0>(ks, buf, std::true_type());
+        enc_last<0>(ks, buf, std::true_type());
     }
 
     template <std::size_t>
-    void enc_first (const key_seq_type &, buffer_type &,
-            std::false_type) const {}
+    void enc_first(const key_seq_type &, buffer_type &, std::false_type) const
+    {
+    }
 
     template <std::size_t B>
-    void enc_first (const key_seq_type &ks, buffer_type &buf,
-            std::true_type) const
+    void enc_first(const key_seq_type &ks,
+                   buffer_type &buf,
+                   std::true_type) const
     {
         buf[Position<B>()] = _mm_xor_si128(buf[Position<B>()], ks.front());
-        enc_first<B + 1>(ks, buf,
-                std::integral_constant<bool, B + 1 < Blocks>());
+        enc_first<B + 1>(
+            ks, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t>
-    void enc_round (const key_seq_type &, buffer_type &,
-            std::false_type) const {}
+    void enc_round(const key_seq_type &, buffer_type &, std::false_type) const
+    {
+    }
 
     template <std::size_t N>
-    void enc_round (const key_seq_type &ks, buffer_type &buf,
-            std::true_type) const
+    void enc_round(const key_seq_type &ks,
+                   buffer_type &buf,
+                   std::true_type) const
     {
         enc_round_block<0, N>(ks, buf, std::true_type());
-        enc_round<N + 1>(ks, buf,
-                std::integral_constant<bool, N  + 1 < Rounds>());
+        enc_round<N + 1>(
+            ks, buf, std::integral_constant<bool, N + 1 < Rounds>());
     }
 
     template <std::size_t, std::size_t>
-    void enc_round_block (const key_seq_type &, buffer_type &,
-            std::false_type) const {}
+    void enc_round_block(const key_seq_type &,
+                         buffer_type &,
+                         std::false_type) const
+    {
+    }
 
     template <std::size_t B, std::size_t N>
-    void enc_round_block (const key_seq_type &ks, buffer_type &buf,
-            std::true_type) const
+    void enc_round_block(const key_seq_type &ks,
+                         buffer_type &buf,
+                         std::true_type) const
     {
-        buf[Position<B>()] = _mm_aesenc_si128(
-                buf[Position<B>()], ks[Position<N>()]);
-        enc_round_block<B + 1, N>(ks, buf,
-                std::integral_constant<bool, B + 1 < Blocks>());
+        buf[Position<B>()] =
+            _mm_aesenc_si128(buf[Position<B>()], ks[Position<N>()]);
+        enc_round_block<B + 1, N>(
+            ks, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t>
-    void enc_last (const key_seq_type &, buffer_type &,
-            std::false_type) const {}
-
-    template <std::size_t B>
-    void enc_last (const key_seq_type &ks, buffer_type &buf,
-            std::true_type) const
+    void enc_last(const key_seq_type &, buffer_type &, std::false_type) const
     {
-        buf[Position<B>()] = _mm_aesenclast_si128(
-                buf[Position<B>()], ks.back());
-        enc_last<B + 1>(ks, buf,
-                std::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    void pack (const ctr_block_type &cb, buffer_type &buf) const
-    {pack_ctr<0>(cb, buf, std::true_type());}
+    template <std::size_t B>
+    void enc_last(const key_seq_type &ks,
+                  buffer_type &buf,
+                  std::true_type) const
+    {
+        buf[Position<B>()] =
+            _mm_aesenclast_si128(buf[Position<B>()], ks.back());
+        enc_last<B + 1>(
+            ks, buf, std::integral_constant<bool, B + 1 < Blocks>());
+    }
+
+    void pack(const ctr_block_type &cb, buffer_type &buf) const
+    {
+        pack_ctr<0>(cb, buf, std::true_type());
+    }
 
     template <std::size_t>
-    void pack_ctr (const ctr_block_type &, buffer_type &,
-            std::false_type) const {}
+    void
+        pack_ctr(const ctr_block_type &, buffer_type &, std::false_type) const
+    {
+    }
 
     template <std::size_t B>
-    void pack_ctr (const ctr_block_type &cb, buffer_type &buf,
-            std::true_type) const
+    void pack_ctr(const ctr_block_type &cb,
+                  buffer_type &buf,
+                  std::true_type) const
     {
         m128i_pack<0>(cb[Position<B>()], buf[Position<B>()]);
-        pack_ctr<B + 1>(cb, buf,
-                std::integral_constant<bool, B + 1 < Blocks>());
+        pack_ctr<B + 1>(
+            cb, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }
-}; // class AESNIEngine
+};  // class AESNIEngine
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_RNG_AES_NI_HPP
+#endif  // VSMC_RNG_AES_NI_HPP

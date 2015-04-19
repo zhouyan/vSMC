@@ -71,4 +71,4 @@
 #include <vsmc/rng/m128i.hpp>
 #endif
 
-#endif // VSMC_RNG_RNG_HPP
+#endif  // VSMC_RNG_RNG_HPP

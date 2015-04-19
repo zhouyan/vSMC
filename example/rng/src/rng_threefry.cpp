@@ -32,7 +32,7 @@
 #include "rng_test.hpp"
 #include <vsmc/rng/threefry.hpp>
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TEST_PRE(rng_threefry);
 

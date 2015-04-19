@@ -348,4 +348,4 @@
 #endif
 #endif
 
-#endif // VSMC_INTERNAL_COMPILER_MSVC_HPP
+#endif  // VSMC_INTERNAL_COMPILER_MSVC_HPP

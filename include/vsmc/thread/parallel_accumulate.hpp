@@ -38,7 +38,8 @@
 #include <vsmc/thread/thread_num.hpp>
 #include <thread>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Parallel accumulate using C++11 concurrency
 /// \ingroup Thread
@@ -50,7 +51,7 @@ namespace vsmc {
 /// work(range, res); // res: T reference type
 /// ~~~
 template <typename Range, typename T, typename WorkType>
-inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
+inline T parallel_accumulate(const Range &range, WorkType &&work, T init)
 {
     std::vector<Range> range_vec(ThreadNum::instance().partition(range));
     std::vector<T> result(range_vec.size());
@@ -59,9 +60,10 @@ inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
         std::vector<ThreadGuard<std::thread>> tg;
         tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
-            tg.push_back(ThreadGuard<std::thread>(std::thread(
-                            std::forward<WorkType>(work),
-                            range_vec[i], std::ref(result[i]))));
+            tg.push_back(ThreadGuard<std::thread>(
+                std::thread(std::forward<WorkType>(work),
+                            range_vec[i],
+                            std::ref(result[i]))));
         }
     }
     // stop parallelization
@@ -82,8 +84,10 @@ inline T parallel_accumulate (const Range &range, WorkType &&work, T init)
 /// work(range, res); // res: T reference type
 /// ~~~
 template <typename Range, typename T, typename Bin, typename WorkType>
-inline T parallel_accumulate (const Range &range, WorkType &&work,
-        T init, Bin bin_op)
+inline T parallel_accumulate(const Range &range,
+                             WorkType &&work,
+                             T init,
+                             Bin bin_op)
 {
     std::vector<Range> range_vec(ThreadNum::instance().partition(range));
     std::vector<T> result(range_vec.size());
@@ -92,9 +96,10 @@ inline T parallel_accumulate (const Range &range, WorkType &&work,
         std::vector<ThreadGuard<std::thread>> tg;
         tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
-            tg.push_back(ThreadGuard<std::thread>(std::thread(
-                            std::forward<WorkType>(work),
-                            range_vec[i], std::ref(result[i]))));
+            tg.push_back(ThreadGuard<std::thread>(
+                std::thread(std::forward<WorkType>(work),
+                            range_vec[i],
+                            std::ref(result[i]))));
         }
     }
     // stop parallelization
@@ -105,6 +110,6 @@ inline T parallel_accumulate (const Range &range, WorkType &&work,
     return acc;
 }
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_THREAD_PARALLEL_ACCUMULATE_HPP
+#endif  // VSMC_THREAD_PARALLEL_ACCUMULATE_HPP

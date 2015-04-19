@@ -35,13 +35,14 @@
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/defines.hpp>
 
-#define VSMC_DEFINE_SMP_FORWARD(Name) \
-template <typename T, typename = Virtual> class Initialize##Name;            \
-template <typename T, typename = Virtual> class Move##Name;                  \
-template <typename T, typename = Virtual> class MonitorEval##Name;           \
-template <typename T, typename = Virtual> class PathEval##Name;
+#define VSMC_DEFINE_SMP_FORWARD(Name)                                        \
+    template <typename T, typename = Virtual> class Initialize##Name;        \
+    template <typename T, typename = Virtual> class Move##Name;              \
+    template <typename T, typename = Virtual> class MonitorEval##Name;       \
+    template <typename T, typename = Virtual> class PathEval##Name;
 
-namespace vsmc {
+namespace vsmc
+{
 
 // Template default arguments
 struct Virtual;
@@ -73,6 +74,6 @@ template <typename, typename = MPIDefault> class StateMPI;
 struct CLDefault;
 template <std::size_t, typename, typename = CLDefault> class StateCL;
 
-} // namesapce vsmc
+}  // namesapce vsmc
 
-#endif // VSMC_INTERNAL_FORWARD_HPP
+#endif  // VSMC_INTERNAL_FORWARD_HPP

@@ -64,7 +64,7 @@ VSMC_RNG_TESTU01_FUNCTION(Xorwow16x64)
 VSMC_RNG_TESTU01_FUNCTION(Xorwow32x64)
 VSMC_RNG_TESTU01_FUNCTION(Xorwow64x64)
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TESTU01_OPTION_PRE;
 

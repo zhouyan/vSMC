@@ -34,25 +34,27 @@
 
 #include <vsmc/resample/common.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
-typedef std::integral_constant<ResampleScheme, Residual>
-    ResampleResidual;
+typedef std::integral_constant<ResampleScheme, Residual> ResampleResidual;
 
-} // namespace vsmc::internal
+}  // namespace vsmc::internal
 
 /// \brief Residual resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleResidual>
+template <> class Resample<internal::ResampleResidual>
 {
-    public :
-
+    public:
     template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
+    void operator()(std::size_t M,
+                    std::size_t N,
+                    RngType &rng,
+                    const double *weight,
+                    IntType *replication)
     {
         using std::modf;
 
@@ -76,12 +78,11 @@ class Resample<internal::ResampleResidual>
             replication[i] += static_cast<IntType>(iptr[i]);
     }
 
-    private :
+    private:
+    std::vector<double, AlignedAllocator<double>> residual_;
+    std::vector<double, AlignedAllocator<double>> integral_;
+};  // Residual resampling
 
-    std::vector<double, AlignedAllocator<double> > residual_;
-    std::vector<double, AlignedAllocator<double> > integral_;
-}; // Residual resampling
+}  // namespace vsmc
 
-} // namespace vsmc
-
-#endif // VSMC_RESAMPLE_RESIDUAL_HPP
+#endif  // VSMC_RESAMPLE_RESIDUAL_HPP

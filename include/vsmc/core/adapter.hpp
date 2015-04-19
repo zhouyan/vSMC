@@ -34,366 +34,425 @@
 
 #include <vsmc/internal/common.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
-template <typename, template <typename, typename> class,
-         typename = NullType> class InitializeAdapter;
-template <typename, template <typename, typename> class,
-         typename = NullType> class MoveAdapter;
-template <typename, template <typename, typename> class,
-         typename = NullType> class MonitorEvalAdapter;
-template <typename, template <typename, typename> class,
-         typename = NullType> class PathEvalAdapter;
+template <typename, template <typename, typename> class, typename = NullType>
+class InitializeAdapter;
+template <typename, template <typename, typename> class, typename = NullType>
+class MoveAdapter;
+template <typename, template <typename, typename> class, typename = NullType>
+class MonitorEvalAdapter;
+template <typename, template <typename, typename> class, typename = NullType>
+class PathEvalAdapter;
 
 /// \brief Initialize class adapter base
 /// \ingroup Adapter
 template <typename T, typename F, typename BaseType>
 class InitializeAdapterBase : public BaseType
 {
-    public :
+    public:
+    InitializeAdapterBase() {}
 
-    InitializeAdapterBase () {}
+    InitializeAdapterBase(const F &f) : f_(f) {}
 
-    InitializeAdapterBase (const F &f) : f_(f) {}
-
-    void initialize_param (Particle<T> &particle, void *param)
+    void initialize_param(Particle<T> &particle, void *param)
     {
-        initialize_param_dispatch(particle, param,
-                typename has_initialize_param_<F>::type());
+        initialize_param_dispatch(
+            particle, param, typename has_initialize_param_<F>::type());
     }
 
-    void pre_processor (Particle<T> &particle)
+    void pre_processor(Particle<T> &particle)
     {
         pre_processor_dispatch(particle,
-            typename has_pre_processor_<F>::type());
+                               typename has_pre_processor_<F>::type());
     }
 
-    void post_processor (Particle<T> &particle)
+    void post_processor(Particle<T> &particle)
     {
         post_processor_dispatch(particle,
-                typename has_post_processor_<F>::type());
+                                typename has_post_processor_<F>::type());
     }
 
-    F &implementation () {return f_;}
+    F &implementation() { return f_; }
 
-    const F &implementation () const {return f_;}
+    const F &implementation() const { return f_; }
 
-    private :
-
+    private:
     F f_;
 
     VSMC_DEFINE_METHOD_CHECKER(initialize_param,
-            void, (Particle<T> &, void *))
-    VSMC_DEFINE_METHOD_CHECKER(pre_processor,
-            void, (Particle<T> &))
-    VSMC_DEFINE_METHOD_CHECKER(post_processor,
-            void, (Particle<T> &))
+                               void,
+                               (Particle<T> &, void *))
+    VSMC_DEFINE_METHOD_CHECKER(pre_processor, void, (Particle<T> &))
+    VSMC_DEFINE_METHOD_CHECKER(post_processor, void, (Particle<T> &))
 
-    void initialize_param_dispatch (Particle<T> &particle, void *param,
-            std::true_type)
-    {f_.initialize_param(particle, param);}
+    void initialize_param_dispatch(Particle<T> &particle,
+                                   void *param,
+                                   std::true_type)
+    {
+        f_.initialize_param(particle, param);
+    }
 
-    void pre_processor_dispatch (Particle<T> &particle, std::true_type)
-    {f_.pre_processor(particle);}
+    void pre_processor_dispatch(Particle<T> &particle, std::true_type)
+    {
+        f_.pre_processor(particle);
+    }
 
-    void post_processor_dispatch (Particle<T> &particle, std::true_type)
-    {f_.post_processor(particle);}
+    void post_processor_dispatch(Particle<T> &particle, std::true_type)
+    {
+        f_.post_processor(particle);
+    }
 
-    void initialize_param_dispatch
-        (Particle<T> &, void *, std::false_type) {}
-    void pre_processor_dispatch
-        (Particle<T> &, std::false_type) {}
-    void post_processor_dispatch
-        (Particle<T> &, std::false_type) {}
-}; // InitializeAdapterBase
+    void initialize_param_dispatch(Particle<T> &, void *, std::false_type) {}
+    void pre_processor_dispatch(Particle<T> &, std::false_type) {}
+    void post_processor_dispatch(Particle<T> &, std::false_type) {}
+};  // InitializeAdapterBase
 
 /// \brief Move class adapter base
 /// \ingroup Adapter
 template <typename T, typename F, typename BaseType>
 class MoveAdapterBase : public BaseType
 {
-    public :
+    public:
+    MoveAdapterBase() {}
 
-    MoveAdapterBase () {}
+    MoveAdapterBase(const F &f) : f_(f) {}
 
-    MoveAdapterBase (const F &f) : f_(f) {}
-
-    void pre_processor (std::size_t iter, Particle<T> &particle)
+    void pre_processor(std::size_t iter, Particle<T> &particle)
     {
-        pre_processor_dispatch(iter, particle,
-                typename has_pre_processor_<F>::type());
+        pre_processor_dispatch(
+            iter, particle, typename has_pre_processor_<F>::type());
     }
 
-    void post_processor (std::size_t iter, Particle<T> &particle)
+    void post_processor(std::size_t iter, Particle<T> &particle)
     {
-        post_processor_dispatch(iter, particle,
-                typename has_post_processor_<F>::type());
+        post_processor_dispatch(
+            iter, particle, typename has_post_processor_<F>::type());
     }
 
-    F &implementation () {return f_;}
+    F &implementation() { return f_; }
 
-    const F &implementation () const {return f_;}
+    const F &implementation() const { return f_; }
 
-    private :
-
+    private:
     F f_;
 
     VSMC_DEFINE_METHOD_CHECKER(pre_processor,
-            void, (std::size_t, Particle<T> &))
+                               void,
+                               (std::size_t, Particle<T> &))
     VSMC_DEFINE_METHOD_CHECKER(post_processor,
-            void, (std::size_t, Particle<T> &))
+                               void,
+                               (std::size_t, Particle<T> &))
 
-    void pre_processor_dispatch (std::size_t iter, Particle<T> &particle,
-            std::true_type)
-    {f_.pre_processor(iter, particle);}
+    void pre_processor_dispatch(std::size_t iter,
+                                Particle<T> &particle,
+                                std::true_type)
+    {
+        f_.pre_processor(iter, particle);
+    }
 
-    void post_processor_dispatch (std::size_t iter, Particle<T> &particle,
-            std::true_type)
-    {f_.post_processor(iter, particle);}
+    void post_processor_dispatch(std::size_t iter,
+                                 Particle<T> &particle,
+                                 std::true_type)
+    {
+        f_.post_processor(iter, particle);
+    }
 
-    void pre_processor_dispatch
-        (std::size_t, Particle<T> &, std::false_type) {}
-    void post_processor_dispatch
-        (std::size_t, Particle<T> &, std::false_type) {}
-}; // MoveAdapterBase
+    void pre_processor_dispatch(std::size_t, Particle<T> &, std::false_type)
+    {
+    }
+    void post_processor_dispatch(std::size_t, Particle<T> &, std::false_type)
+    {
+    }
+};  // MoveAdapterBase
 
 /// \brief Monitor evaluation base
 /// \ingroup Adapter
 template <typename T, typename F, typename BaseType>
 class MonitorEvalAdapterBase : public BaseType
 {
-    public :
+    public:
+    MonitorEvalAdapterBase() {}
 
-    MonitorEvalAdapterBase () {}
+    MonitorEvalAdapterBase(const F &f) : f_(f) {}
 
-    MonitorEvalAdapterBase (const F &f) : f_(f) {}
-
-    void pre_processor (std::size_t iter, const Particle<T> &particle)
+    void pre_processor(std::size_t iter, const Particle<T> &particle)
     {
-        pre_processor_dispatch(iter, particle,
-                typename has_pre_processor_<F>::type());
+        pre_processor_dispatch(
+            iter, particle, typename has_pre_processor_<F>::type());
     }
 
-    void post_processor (std::size_t iter, const Particle<T> &particle)
+    void post_processor(std::size_t iter, const Particle<T> &particle)
     {
-        post_processor_dispatch(iter, particle,
-                typename has_post_processor_<F>::type());
+        post_processor_dispatch(
+            iter, particle, typename has_post_processor_<F>::type());
     }
 
-    F &implementation () {return f_;}
+    F &implementation() { return f_; }
 
-    const F &implementation () const {return f_;}
+    const F &implementation() const { return f_; }
 
-    private :
-
+    private:
     F f_;
 
     VSMC_DEFINE_METHOD_CHECKER(pre_processor,
-            void, (std::size_t, const Particle<T> &))
+                               void,
+                               (std::size_t, const Particle<T> &))
     VSMC_DEFINE_METHOD_CHECKER(post_processor,
-            void, (std::size_t, const Particle<T> &))
+                               void,
+                               (std::size_t, const Particle<T> &))
 
-    void pre_processor_dispatch (std::size_t iter,
-            const Particle<T> &particle, std::true_type)
-    {f_.pre_processor(iter, particle);}
+    void pre_processor_dispatch(std::size_t iter,
+                                const Particle<T> &particle,
+                                std::true_type)
+    {
+        f_.pre_processor(iter, particle);
+    }
 
-    void post_processor_dispatch (std::size_t iter,
-            const Particle<T> &particle, std::true_type)
-    {f_.post_processor(iter, particle);}
+    void post_processor_dispatch(std::size_t iter,
+                                 const Particle<T> &particle,
+                                 std::true_type)
+    {
+        f_.post_processor(iter, particle);
+    }
 
-    void pre_processor_dispatch
-        (std::size_t, const Particle<T> &, std::false_type) {}
-    void post_processor_dispatch
-        (std::size_t, const Particle<T> &, std::false_type) {}
-}; // MonitorEvalAdapterBase
+    void pre_processor_dispatch(std::size_t,
+                                const Particle<T> &,
+                                std::false_type)
+    {
+    }
+    void post_processor_dispatch(std::size_t,
+                                 const Particle<T> &,
+                                 std::false_type)
+    {
+    }
+};  // MonitorEvalAdapterBase
 
 /// \brief Path evaluation class base
 /// \ingroup Adapter
 template <typename T, typename F, typename BaseType>
 class PathEvalAdapterBase : public BaseType
 {
-    public :
+    public:
+    PathEvalAdapterBase() {}
 
-    PathEvalAdapterBase () {}
+    PathEvalAdapterBase(const F &f) : f_(f) {}
 
-    PathEvalAdapterBase (const F &f) : f_(f) {}
-
-    double path_grid (std::size_t iter, const Particle<T> &particle)
-    {return f_.path_grid(iter, particle);}
-
-    void pre_processor (std::size_t iter, const Particle<T> &particle)
+    double path_grid(std::size_t iter, const Particle<T> &particle)
     {
-        pre_processor_dispatch(iter, particle,
-                typename has_pre_processor_<F>::type());
+        return f_.path_grid(iter, particle);
     }
 
-    void post_processor (std::size_t iter, const Particle<T> &particle)
+    void pre_processor(std::size_t iter, const Particle<T> &particle)
     {
-        post_processor_dispatch(iter, particle,
-                typename has_post_processor_<F>::type());
+        pre_processor_dispatch(
+            iter, particle, typename has_pre_processor_<F>::type());
     }
 
-    F &implementation () {return f_;}
+    void post_processor(std::size_t iter, const Particle<T> &particle)
+    {
+        post_processor_dispatch(
+            iter, particle, typename has_post_processor_<F>::type());
+    }
 
-    const F &implementation () const {return f_;}
+    F &implementation() { return f_; }
 
-    private :
+    const F &implementation() const { return f_; }
 
+    private:
     F f_;
 
     VSMC_DEFINE_METHOD_CHECKER(pre_processor,
-            void, (std::size_t, const Particle<T> &))
+                               void,
+                               (std::size_t, const Particle<T> &))
     VSMC_DEFINE_METHOD_CHECKER(post_processor,
-            void, (std::size_t, const Particle<T> &))
+                               void,
+                               (std::size_t, const Particle<T> &))
 
-    void pre_processor_dispatch (std::size_t iter,
-            const Particle<T> &particle, std::true_type)
-    {f_.pre_processor(iter, particle);}
+    void pre_processor_dispatch(std::size_t iter,
+                                const Particle<T> &particle,
+                                std::true_type)
+    {
+        f_.pre_processor(iter, particle);
+    }
 
-    void post_processor_dispatch (std::size_t iter,
-            const Particle<T> &particle, std::true_type)
-    {f_.post_processor(iter, particle);}
+    void post_processor_dispatch(std::size_t iter,
+                                 const Particle<T> &particle,
+                                 std::true_type)
+    {
+        f_.post_processor(iter, particle);
+    }
 
-    void pre_processor_dispatch
-        (std::size_t, const Particle<T> &, std::false_type) {}
-    void post_processor_dispatch
-        (std::size_t, const Particle<T> &, std::false_type) {}
-}; // PathEvalAdapterBase
+    void pre_processor_dispatch(std::size_t,
+                                const Particle<T> &,
+                                std::false_type)
+    {
+    }
+    void post_processor_dispatch(std::size_t,
+                                 const Particle<T> &,
+                                 std::false_type)
+    {
+    }
+};  // PathEvalAdapterBase
 
 /// \brief Initialize class adapter base
 /// \ingroup Adapter
 template <typename T, typename BaseType>
 class InitializeAdapterBase<T, NullType, BaseType> : public BaseType
 {
-    public :
+    public:
+    typedef std::function<void(Particle<T> &, void *)> initialize_param_type;
+    typedef std::function<void(Particle<T> &)> pre_processor_type;
+    typedef std::function<void(Particle<T> &)> post_processor_type;
 
-    typedef std::function<void (Particle<T> &, void *)>
-        initialize_param_type;
-    typedef std::function<void (Particle<T> &)>
-        pre_processor_type;
-    typedef std::function<void (Particle<T> &)>
-        post_processor_type;
+    InitializeAdapterBase(
+        const initialize_param_type &init_param = initialize_param_type(),
+        const pre_processor_type &pre = pre_processor_type(),
+        const post_processor_type &post = post_processor_type())
+        : initialize_param_(init_param),
+          pre_processor_(pre),
+          post_processor_(post)
+    {
+    }
 
-    InitializeAdapterBase (
-            const initialize_param_type &init_param = initialize_param_type(),
-            const pre_processor_type &pre = pre_processor_type(),
-            const post_processor_type &post = post_processor_type()) :
-        initialize_param_(init_param),
-        pre_processor_(pre), post_processor_(post) {}
-
-    void initialize_param (Particle<T> &particle, void *param)
+    void initialize_param(Particle<T> &particle, void *param)
     {
         if (static_cast<bool>(initialize_param_))
             initialize_param_(particle, param);
     }
 
-    void pre_processor (Particle<T> &particle)
-    {if (static_cast<bool>(pre_processor_)) pre_processor_(particle);}
+    void pre_processor(Particle<T> &particle)
+    {
+        if (static_cast<bool>(pre_processor_))
+            pre_processor_(particle);
+    }
 
-    void post_processor (Particle<T> &particle)
-    {if (static_cast<bool>(post_processor_)) post_processor_(particle);}
+    void post_processor(Particle<T> &particle)
+    {
+        if (static_cast<bool>(post_processor_))
+            post_processor_(particle);
+    }
 
-    private :
-
+    private:
     const initialize_param_type initialize_param_;
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
-}; // class InitializeAdapterBase
+};  // class InitializeAdapterBase
 
 /// \brief Move class adapter base
 /// \ingroup Adapter
 template <typename T, typename BaseType>
 class MoveAdapterBase<T, NullType, BaseType> : public BaseType
 {
-    public :
-
-    typedef std::function<void (std::size_t, Particle<T> &)>
+    public:
+    typedef std::function<void(std::size_t, Particle<T> &)>
         pre_processor_type;
-    typedef std::function<void (std::size_t, Particle<T> &)>
+    typedef std::function<void(std::size_t, Particle<T> &)>
         post_processor_type;
 
-    MoveAdapterBase (
-            const pre_processor_type &pre = pre_processor_type(),
-            const post_processor_type &post = post_processor_type()) :
-        pre_processor_(pre), post_processor_(post) {}
+    MoveAdapterBase(const pre_processor_type &pre = pre_processor_type(),
+                    const post_processor_type &post = post_processor_type())
+        : pre_processor_(pre), post_processor_(post)
+    {
+    }
 
-    void pre_processor (std::size_t iter, Particle<T> &particle)
-    {if (static_cast<bool>(pre_processor_)) pre_processor_(iter, particle);}
+    void pre_processor(std::size_t iter, Particle<T> &particle)
+    {
+        if (static_cast<bool>(pre_processor_))
+            pre_processor_(iter, particle);
+    }
 
-    void post_processor (std::size_t iter, Particle<T> &particle)
-    {if (static_cast<bool>(post_processor_)) post_processor_(iter, particle);}
+    void post_processor(std::size_t iter, Particle<T> &particle)
+    {
+        if (static_cast<bool>(post_processor_))
+            post_processor_(iter, particle);
+    }
 
-    private :
-
+    private:
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
-}; // class MoveAdapterBase
+};  // class MoveAdapterBase
 
 /// \brief Monitor evaluation base
 /// \ingroup Adapter
 template <typename T, typename BaseType>
 class MonitorEvalAdapterBase<T, NullType, BaseType> : public BaseType
 {
-    public :
-
-    typedef std::function<void (std::size_t, const Particle<T> &)>
+    public:
+    typedef std::function<void(std::size_t, const Particle<T> &)>
         pre_processor_type;
-    typedef std::function<void (std::size_t, const Particle<T> &)>
+    typedef std::function<void(std::size_t, const Particle<T> &)>
         post_processor_type;
 
-    MonitorEvalAdapterBase (
-            const pre_processor_type &pre = pre_processor_type(),
-            const post_processor_type &post = post_processor_type()) :
-        pre_processor_(pre), post_processor_(post) {}
+    MonitorEvalAdapterBase(
+        const pre_processor_type &pre = pre_processor_type(),
+        const post_processor_type &post = post_processor_type())
+        : pre_processor_(pre), post_processor_(post)
+    {
+    }
 
-    void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {if (static_cast<bool>(pre_processor_)) pre_processor_(iter, particle);}
+    void pre_processor(std::size_t iter, const Particle<T> &particle)
+    {
+        if (static_cast<bool>(pre_processor_))
+            pre_processor_(iter, particle);
+    }
 
-    void post_processor (std::size_t iter, const Particle<T> &particle)
-    {if (static_cast<bool>(post_processor_)) post_processor_(iter, particle);}
+    void post_processor(std::size_t iter, const Particle<T> &particle)
+    {
+        if (static_cast<bool>(post_processor_))
+            post_processor_(iter, particle);
+    }
 
-    private :
-
+    private:
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
-}; // class MonitorEvalAdapterBase
+};  // class MonitorEvalAdapterBase
 
 /// \brief Path evaluation class base
 /// \ingroup Adapter
 template <typename T, typename BaseType>
 class PathEvalAdapterBase<T, NullType, BaseType> : public BaseType
 {
-    public :
-
-    typedef std::function<double (std::size_t, const Particle<T> &)>
+    public:
+    typedef std::function<double(std::size_t, const Particle<T> &)>
         path_grid_type;
-    typedef std::function<void (std::size_t, const Particle<T> &)>
+    typedef std::function<void(std::size_t, const Particle<T> &)>
         pre_processor_type;
-    typedef std::function<void (std::size_t, const Particle<T> &)>
+    typedef std::function<void(std::size_t, const Particle<T> &)>
         post_processor_type;
 
-    PathEvalAdapterBase (
-            const path_grid_type &path_grid,
-            const pre_processor_type &pre = pre_processor_type(),
-            const post_processor_type &post = post_processor_type()) :
-        path_grid_(path_grid), pre_processor_(pre), post_processor_(post) {}
+    PathEvalAdapterBase(
+        const path_grid_type &path_grid,
+        const pre_processor_type &pre = pre_processor_type(),
+        const post_processor_type &post = post_processor_type())
+        : path_grid_(path_grid), pre_processor_(pre), post_processor_(post)
+    {
+    }
 
-    double path_grid (std::size_t iter, const Particle<T> &particle)
-    {return path_grid_(iter, particle);}
+    double path_grid(std::size_t iter, const Particle<T> &particle)
+    {
+        return path_grid_(iter, particle);
+    }
 
-    void pre_processor (std::size_t iter, const Particle<T> &particle)
-    {if (static_cast<bool>(pre_processor_)) pre_processor_(iter, particle);}
+    void pre_processor(std::size_t iter, const Particle<T> &particle)
+    {
+        if (static_cast<bool>(pre_processor_))
+            pre_processor_(iter, particle);
+    }
 
-    void post_processor (std::size_t iter, const Particle<T> &particle)
-    {if (static_cast<bool>(post_processor_)) post_processor_(iter, particle);}
+    void post_processor(std::size_t iter, const Particle<T> &particle)
+    {
+        if (static_cast<bool>(post_processor_))
+            post_processor_(iter, particle);
+    }
 
-    private :
-
+    private:
     const path_grid_type path_grid_;
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
-}; // class PathEvalAdapterBase
+};  // class PathEvalAdapterBase
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_CORE_ADAPTER_HPP
+#endif  // VSMC_CORE_ADAPTER_HPP

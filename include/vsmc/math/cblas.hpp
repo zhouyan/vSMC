@@ -44,14 +44,15 @@
 #define VSMC_CBLAS_INT int
 #endif
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace math {
+namespace math
+{
 
 /// \brief Sum of vector magnitudes
 /// \ingroup CBLAS
-template <typename T>
-inline T asum (std::size_t n, const T *x)
+template <typename T> inline T asum(std::size_t n, const T *x)
 {
     using std::fabs;
 
@@ -64,50 +65,65 @@ inline T asum (std::size_t n, const T *x)
 
 /// \brief The dot product
 /// \ingroup CBLAS
-template <typename T>
-inline T dot (std::size_t n, const T *x, const T *y)
-{return std::inner_product(x, x + n, y, static_cast<T>(0));}
+template <typename T> inline T dot(std::size_t n, const T *x, const T *y)
+{
+    return std::inner_product(x, x + n, y, static_cast<T>(0));
+}
 
 /// \brief Scale a vector
-template <typename T>
-inline void scal (std::size_t n, T a, T *x)
+template <typename T> inline void scal(std::size_t n, T a, T *x)
 {
     for (std::size_t i = 0; i != n; ++i)
         x[i] *= a;
 }
 
-} // namespace vsmc::math
+}  // namespace vsmc::math
 
-} // namespace vsmc
+}  // namespace vsmc
 
 #ifdef VSMC_CBLAS_INT
 
-#define VSMC_DEFINE_MATH_CBLAS_S1(name, sname, dname) \
-inline float name (std::size_t n, const float *x)                            \
-{return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1);}              \
-inline double name (std::size_t n, const double *x)                          \
-{return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1);}
+#define VSMC_DEFINE_MATH_CBLAS_S1(name, sname, dname)                        \
+    inline float name(std::size_t n, const float *x)                         \
+    {                                                                        \
+        return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1);        \
+    }                                                                        \
+    inline double name(std::size_t n, const double *x)                       \
+    {                                                                        \
+        return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1);        \
+    }
 
-#define VSMC_DEFINE_MATH_CBLAS_S2(name, sname, dname) \
-inline float name (std::size_t n, const float *x, const float *y)            \
-{return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);}        \
-inline double name (std::size_t n, const double *x, const double *y)         \
-{return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);}
+#define VSMC_DEFINE_MATH_CBLAS_S2(name, sname, dname)                        \
+    inline float name(std::size_t n, const float *x, const float *y)         \
+    {                                                                        \
+        return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);  \
+    }                                                                        \
+    inline double name(std::size_t n, const double *x, const double *y)      \
+    {                                                                        \
+        return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);  \
+    }
 
-#define VSMC_DEFINE_MATH_CBLAS_SV(name, sname, dname) \
-inline void name (std::size_t n, float a, float *x)                          \
-{::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);}                  \
-inline void name (std::size_t n, double a, double *x)                        \
-{::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);}
+#define VSMC_DEFINE_MATH_CBLAS_SV(name, sname, dname)                        \
+    inline void name(std::size_t n, float a, float *x)                       \
+    {                                                                        \
+        ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);            \
+    }                                                                        \
+    inline void name(std::size_t n, double a, double *x)                     \
+    {                                                                        \
+        ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);            \
+    }
 
-namespace vsmc { namespace math {
+namespace vsmc
+{
+namespace math
+{
 
 VSMC_DEFINE_MATH_CBLAS_S1(asum, sasum, dasum)
 VSMC_DEFINE_MATH_CBLAS_S2(dot, sdot, ddot)
 VSMC_DEFINE_MATH_CBLAS_SV(scal, sscal, dscal)
+}
+}  // namespace vsmc::math
 
-} } // namespace vsmc::math
+#endif  // VSMC_CBLAS_INT
 
-#endif // VSMC_CBLAS_INT
-
-#endif // VSMC_MATH_CBLAS_HPP
+#endif  // VSMC_MATH_CBLAS_HPP

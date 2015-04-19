@@ -36,32 +36,32 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Configure OpenCL runtime behavior (used by MoveCL etc)
 /// \ingroup OpenCL
 class CLConfigure
 {
-    public :
+    public:
+    CLConfigure() : local_size_(0) {}
 
-    CLConfigure () : local_size_(0) {}
+    std::size_t local_size() const { return local_size_; }
 
-    std::size_t local_size () const {return local_size_;}
+    void local_size(std::size_t new_size) { local_size_ = new_size; }
 
-    void local_size (std::size_t new_size) {local_size_ = new_size;}
-
-    void local_size (std::size_t N,
-            const ::cl::Kernel &kern, const ::cl::Device &dev)
+    void local_size(std::size_t N,
+                    const ::cl::Kernel &kern,
+                    const ::cl::Device &dev)
     {
         std::size_t global_size;
         cl_preferred_work_size(N, kern, dev, global_size, local_size_);
     }
 
-    private :
-
+    private:
     std::size_t local_size_;
-}; // class CLConfigure
+};  // class CLConfigure
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_OPENCL_CL_CONFIGURE_HPP
+#endif  // VSMC_OPENCL_CL_CONFIGURE_HPP

@@ -32,104 +32,95 @@
 #ifndef VSMC_EXAMPLE_MOVE_ALPHA_HPP
 #define VSMC_EXAMPLE_MOVE_ALPHA_HPP
 
-template <typename T>
-class alpha_null
+template <typename T> class alpha_null
 {
-    public :
-
+    public:
     typedef double value_type;
-    alpha_null () {}
-    alpha_null (value_type) {}
-    void alpha_iter (std::size_t, vsmc::Particle<T> &) {}
-    void alpha_init (vsmc::Particle<T> &) {}
+    alpha_null() {}
+    alpha_null(value_type) {}
+    void alpha_iter(std::size_t, vsmc::Particle<T> &) {}
+    void alpha_init(vsmc::Particle<T> &) {}
 };
 
-template <typename T>
-class alpha_fixed
+template <typename T> class alpha_fixed
 {
-    public :
+    public:
+    typedef std::vector<double> *value_type;
 
-    typedef std::vector<double> * value_type;
+    alpha_fixed(value_type config = 0) : alpha_(*config) {}
 
-    alpha_fixed (value_type config = 0) : alpha_(*config) {}
-
-    void alpha_iter (std::size_t iter, vsmc::Particle<T> &particle)
+    void alpha_iter(std::size_t iter, vsmc::Particle<T> &particle)
     {
         if (iter < alpha_.size())
             particle.value().alpha(alpha_[iter]);
     }
 
-    void alpha_init (vsmc::Particle<T> &particle)
+    void alpha_init(vsmc::Particle<T> &particle)
     {
-        assert(static_cast<typename vsmc::Particle<T>::size_type>
-                (alpha_.size()) >= particle.size());
+        assert(static_cast<typename vsmc::Particle<T>::size_type>(
+                   alpha_.size()) >= particle.size());
         const std::size_t nchain = static_cast<std::size_t>(particle.size());
         for (std::size_t i = 0; i != nchain; ++i)
             particle.value().state(i, 0).alpha() = alpha_[i];
     }
 
-    private :
-
+    private:
     std::vector<double> alpha_;
 };
 
-template <typename T>
-class alpha_mh
+template <typename T> class alpha_mh
 {
-    public :
-
+    public:
     typedef double value_type;
 
-    alpha_mh (value_type alpha = 1) : alpha_(alpha) {}
+    alpha_mh(value_type alpha = 1) : alpha_(alpha) {}
 
-    void alpha_iter (std::size_t, vsmc::Particle<T> &particle)
-    {particle.value().alpha(alpha_);}
+    void alpha_iter(std::size_t, vsmc::Particle<T> &particle)
+    {
+        particle.value().alpha(alpha_);
+    }
 
-    void alpha_init (vsmc::Particle<T> &particle)
-    {particle.value().alpha(alpha_);}
+    void alpha_init(vsmc::Particle<T> &particle)
+    {
+        particle.value().alpha(alpha_);
+    }
 
-    private :
-
+    private:
     double alpha_;
 };
 
-template <typename T>
-class alpha_linear
+template <typename T> class alpha_linear
 {
-    public :
-
+    public:
     typedef std::size_t value_type;
 
-    alpha_linear (value_type iter_num = 100) : iter_num_(iter_num) {}
+    alpha_linear(value_type iter_num = 100) : iter_num_(iter_num) {}
 
-    void alpha_iter (std::size_t iter, vsmc::Particle<T> &particle)
+    void alpha_iter(std::size_t iter, vsmc::Particle<T> &particle)
     {
         double a = static_cast<double>(iter) / iter_num_;
         particle.value().alpha(a);
     }
 
-    void alpha_init (vsmc::Particle<T> &particle)
+    void alpha_init(vsmc::Particle<T> &particle)
     {
         const std::size_t nchain = static_cast<std::size_t>(particle.size());
         for (std::size_t i = 0; i != nchain; ++i)
             particle.value().state(i, 0).alpha() = i / (nchain - 1.0);
     }
 
-    private :
-
+    private:
     std::size_t iter_num_;
 };
 
-template <typename T, std::size_t Power>
-class alpha_prior
+template <typename T, std::size_t Power> class alpha_prior
 {
-    public :
-
+    public:
     typedef std::size_t value_type;
 
-    alpha_prior (value_type iter_num = 100) : iter_num_(iter_num) {}
+    alpha_prior(value_type iter_num = 100) : iter_num_(iter_num) {}
 
-    void alpha_iter (std::size_t iter, vsmc::Particle<T> &particle)
+    void alpha_iter(std::size_t iter, vsmc::Particle<T> &particle)
     {
         double b = static_cast<double>(iter) / iter_num_;
         double a = 1;
@@ -138,7 +129,7 @@ class alpha_prior
         particle.value().alpha(a);
     }
 
-    void alpha_init (vsmc::Particle<T> &particle)
+    void alpha_init(vsmc::Particle<T> &particle)
     {
         const std::size_t nchain = static_cast<std::size_t>(particle.size());
         for (std::size_t i = 0; i != nchain; ++i) {
@@ -150,21 +141,18 @@ class alpha_prior
         }
     }
 
-    private :
-
+    private:
     std::size_t iter_num_;
 };
 
-template <typename T, std::size_t Power>
-class alpha_posterior
+template <typename T, std::size_t Power> class alpha_posterior
 {
-    public :
-
+    public:
     typedef std::size_t value_type;
 
-    alpha_posterior (value_type iter_num = 100) : iter_num_(iter_num) {}
+    alpha_posterior(value_type iter_num = 100) : iter_num_(iter_num) {}
 
-    void alpha_iter (std::size_t iter, vsmc::Particle<T> &particle)
+    void alpha_iter(std::size_t iter, vsmc::Particle<T> &particle)
     {
         double b = static_cast<double>(iter_num_ - iter) / iter_num_;
         double a = 1;
@@ -173,7 +161,7 @@ class alpha_posterior
         particle.value().alpha(1 - a);
     }
 
-    void alpha_init (vsmc::Particle<T> &particle)
+    void alpha_init(vsmc::Particle<T> &particle)
     {
         const std::size_t nchain = static_cast<std::size_t>(particle.size());
         for (std::size_t i = 0; i != nchain; ++i) {
@@ -185,69 +173,68 @@ class alpha_posterior
         }
     }
 
-    private :
-
+    private:
     std::size_t iter_num_;
 };
 
-template <typename T>
-class ess01
+template <typename T> class ess01
 {
-    public :
-
-    double operator () (const vsmc::Particle<T> &particle,
-            const double *mul_weight) const
-    {return particle.weight_set().ess(mul_weight, false);}
+    public:
+    double operator()(const vsmc::Particle<T> &particle,
+                      const double *mul_weight) const
+    {
+        return particle.weight_set().ess(mul_weight, false);
+    }
 };
 
-template <typename T>
-class cess01
+template <typename T> class cess01
 {
-    public :
-
-    double operator () (const vsmc::Particle<T> &particle,
-            const double *mul_weight) const
-    {return particle.weight_set().cess(mul_weight, false);}
+    public:
+    double operator()(const vsmc::Particle<T> &particle,
+                      const double *mul_weight) const
+    {
+        return particle.weight_set().cess(mul_weight, false);
+    }
 };
 
 template <typename T, typename ESS> class ess_new;
 
-template <typename T>
-class ess_new<T, ess01<T> >
+template <typename T> class ess_new<T, ess01<T>>
 {
-    public :
-
-    double operator () (const vsmc::Particle<T> &particle, double drop) const
-    {return (1 - drop) * particle.weight_set().ess();}
+    public:
+    double operator()(const vsmc::Particle<T> &particle, double drop) const
+    {
+        return (1 - drop) * particle.weight_set().ess();
+    }
 };
 
-template <typename T>
-class ess_new<T, cess01<T> >
+template <typename T> class ess_new<T, cess01<T>>
 {
-    public :
-
-    double operator () (const vsmc::Particle<T> &, double drop) const
-    {return 1 - drop;}
+    public:
+    double operator()(const vsmc::Particle<T> &, double drop) const
+    {
+        return 1 - drop;
+    }
 };
 
-template <typename T, typename ESS>
-class alpha_ess
+template <typename T, typename ESS> class alpha_ess
 {
-    public :
-
+    public:
     typedef double value_type;
 
-    alpha_ess (value_type ess_drop = 0.1) : ess_drop_(ess_drop) {}
+    alpha_ess(value_type ess_drop = 0.1) : ess_drop_(ess_drop) {}
 
-    void alpha_iter (std::size_t, vsmc::Particle<T> &particle)
+    void alpha_iter(std::size_t, vsmc::Particle<T> &particle)
     {
         using std::exp;
 
         log_likelihood_.resize(particle.size());
         mul_weight_.resize(particle.size());
         for (typename vsmc::Particle<T>::size_type i = 0;
-                i != particle.size(); ++i)
-            log_likelihood_[i] = particle.value().state(i,0).log_likelihood();
+             i != particle.size();
+             ++i)
+            log_likelihood_[i] =
+                particle.value().state(i, 0).log_likelihood();
 
         double ess_new = ess_new_(particle, ess_drop_);
 
@@ -260,11 +247,13 @@ class alpha_ess
         while (std::abs(u - l) > e && l <= 1) {
             double a_diff = a - a_old;
             for (typename vsmc::Particle<T>::size_type i = 0;
-                    i != particle.size(); ++i) {
+                 i != particle.size();
+                 ++i) {
                 mul_weight_[i] = a_diff * log_likelihood_[i];
             }
             for (typename vsmc::Particle<T>::size_type i = 0;
-                    i != particle.size(); ++i)
+                 i != particle.size();
+                 ++i)
                 mul_weight_[i] = exp(mul_weight_[i]);
             ess = ess_(particle, &mul_weight_[0]);
             if (ess < ess_new) {
@@ -278,8 +267,7 @@ class alpha_ess
         particle.value().alpha(a);
     }
 
-    private :
-
+    private:
     std::vector<double> log_likelihood_;
     std::vector<double> mul_weight_;
     ESS ess_;
@@ -287,4 +275,4 @@ class alpha_ess
     double ess_drop_;
 };
 
-#endif // VSMC_EXAMPLE_MOVE_ALPHA_HPP
+#endif  // VSMC_EXAMPLE_MOVE_ALPHA_HPP

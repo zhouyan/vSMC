@@ -35,25 +35,25 @@
 #include <vsmc/internal/common.hpp>
 #include <thread>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Number of threads used by algorithms
 /// \ingroup Thread
 class ThreadNum
 {
-    public :
-
-    static ThreadNum &instance ()
+    public:
+    static ThreadNum &instance()
     {
         static ThreadNum num;
 
         return num;
     }
 
-    std::size_t thread_num () const {return thread_num_;}
+    std::size_t thread_num() const { return thread_num_; }
 
     /// \brief Set a new number of threads, return the old number
-    std::size_t thread_num (std::size_t num)
+    std::size_t thread_num(std::size_t num)
     {
         std::size_t old_num = thread_num_;
         thread_num_ = num;
@@ -62,12 +62,12 @@ class ThreadNum
     }
 
     template <typename Range>
-    std::vector<Range> partition (const Range &range) const
+    std::vector<Range> partition(const Range &range) const
     {
         typedef typename Range::const_iterator size_type;
         size_type N = range.end() - range.begin();
         size_type tn = static_cast<size_type>(thread_num());
-        size_type block_size =  0;
+        size_type block_size = 0;
 
         if (N < tn)
             block_size = 1;
@@ -89,19 +89,20 @@ class ThreadNum
         return range_vec;
     }
 
-    private :
-
+    private:
     std::size_t thread_num_;
 
-    ThreadNum () : thread_num_(
-            static_cast<std::size_t>(1) >
-            static_cast<std::size_t>(std::thread::hardware_concurrency()) ?
-            static_cast<std::size_t>(1) :
-            static_cast<std::size_t>(std::thread::hardware_concurrency()))
+    ThreadNum()
+        : thread_num_(static_cast<std::size_t>(1) >
+                              static_cast<std::size_t>(
+                                  std::thread::hardware_concurrency()) ?
+                          static_cast<std::size_t>(1) :
+                          static_cast<std::size_t>(
+                              std::thread::hardware_concurrency()))
     {
 #ifdef VSMC_MSVC
 #pragma warning(push)
-#pragma warning(disable:4996)
+#pragma warning(disable : 4996)
 #endif
         const char *num_str = std::getenv("VSMC_THREAD_NUM");
 #ifdef VSMC_MSVC
@@ -113,10 +114,10 @@ class ThreadNum
         }
     }
 
-    ThreadNum (const ThreadNum &) = delete;
-    ThreadNum &operator= (const ThreadNum &) = delete;
-}; // class ThreadInfo
+    ThreadNum(const ThreadNum &) = delete;
+    ThreadNum &operator=(const ThreadNum &) = delete;
+};  // class ThreadInfo
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_THREAD_THREAD_NUM_HPP
+#endif  // VSMC_THREAD_THREAD_NUM_HPP

@@ -35,17 +35,16 @@
 #include <vsmc/internal/common.hpp>
 #include <dispatch/dispatch.h>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Base class of Dispatch objects
 /// \ingroup Dispatch
 ///
 /// \details All Dispatch objects are reference counting shared objects
-template <typename DispatchType>
-class DispatchObject
+template <typename DispatchType> class DispatchObject
 {
-    public :
-
+    public:
     /// \brief Create a DispatchObject from its C-type object
     ///
     /// \param object The raw object to be aquired
@@ -53,14 +52,21 @@ class DispatchObject
     /// are retained at least once when it is created. These objects shall not
     /// be retained again by this constructor. Passing `true` as this argument
     /// prevent the constructor to retain the object.
-    DispatchObject (const DispatchType &object, bool retained) :
-        object_(object) {if (!retained) retain();}
+    DispatchObject(const DispatchType &object, bool retained)
+        : object_(object)
+    {
+        if (!retained)
+            retain();
+    }
 
-    DispatchObject (const DispatchObject<DispatchType> &other) :
-        object_(other.object_) {retain();}
+    DispatchObject(const DispatchObject<DispatchType> &other)
+        : object_(other.object_)
+    {
+        retain();
+    }
 
-    DispatchObject<DispatchType> &operator= (
-            const DispatchObject<DispatchType> &other)
+    DispatchObject<DispatchType> &
+        operator=(const DispatchObject<DispatchType> &other)
     {
         if (this != &other && object_ != other.object_) {
             release();
@@ -72,11 +78,14 @@ class DispatchObject
     }
 
 #if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    DispatchObject (DispatchObject<DispatchType> &&other) :
-        object_(std::move(other.object_)) {other.object_ = VSMC_NULLPTR;}
+    DispatchObject(DispatchObject<DispatchType> &&other)
+        : object_(std::move(other.object_))
+    {
+        other.object_ = VSMC_NULLPTR;
+    }
 
-    DispatchObject<DispatchType> &operator= (
-            DispatchObject<DispatchType> &&other)
+    DispatchObject<DispatchType> &
+        operator=(DispatchObject<DispatchType> &&other)
     {
         using std::swap;
 
@@ -87,13 +96,13 @@ class DispatchObject
     }
 #endif
 
-    ~DispatchObject () {release();}
+    ~DispatchObject() { release(); }
 
     /// \brief Return the underlying Dispatch object
-    DispatchType object () const {return object_;}
+    DispatchType object() const { return object_; }
 
     /// \brief Set the underlying Dispatch object and retain it
-    void object (DispatchType obj)
+    void object(DispatchType obj)
     {
         if (object_ != obj) {
             release();
@@ -102,32 +111,34 @@ class DispatchObject
         }
     }
 
-    void *get_context () const
-    {return ::dispatch_get_context(object_);}
+    void *get_context() const { return ::dispatch_get_context(object_); }
 
-    void set_context (void *context) const
-    {::dispatch_set_context(object_, context);}
+    void set_context(void *context) const
+    {
+        ::dispatch_set_context(object_, context);
+    }
 
-    void set_finalizer_f (::dispatch_function_t finalizer) const
-    {::dispatch_set_finalizer_f(object_, finalizer);}
+    void set_finalizer_f(::dispatch_function_t finalizer) const
+    {
+        ::dispatch_set_finalizer_f(object_, finalizer);
+    }
 
-    private :
-
+    private:
     DispatchType object_;
 
-    void retain ()
+    void retain()
     {
         if (object_ != VSMC_NULLPTR)
             ::dispatch_retain(object_);
     }
 
-    void release ()
+    void release()
     {
         if (object_ != VSMC_NULLPTR)
             ::dispatch_release(object_);
     }
-}; // class DispatchObject
+};  // class DispatchObject
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_GCD_DISPATCH_OBJECT_HPP
+#endif  // VSMC_GCD_DISPATCH_OBJECT_HPP

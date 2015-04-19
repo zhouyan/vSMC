@@ -44,10 +44,9 @@ static std::vector<std::size_t> Prior5IterNum;
 static std::vector<std::size_t> Posterior2IterNum;
 static std::vector<std::size_t> Posterior5IterNum;
 
-
 #include "move_alpha.hpp"
 #include "move_smc.hpp"
 #include "smc_path.hpp"
 #include "smc_do.hpp"
 
-#endif // VSMC_EXAMPLE_SMC_HPP
+#endif  // VSMC_EXAMPLE_SMC_HPP

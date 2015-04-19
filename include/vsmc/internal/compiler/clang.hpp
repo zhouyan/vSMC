@@ -38,7 +38,7 @@
 
 #define VSMC_CLANG_NONEXIST 0xFFFFFFFFUL
 
-#define VSMC_CLANG_VERSION \
+#define VSMC_CLANG_VERSION                                                   \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
 #if __cplusplus >= 201103L
@@ -249,7 +249,7 @@
 #endif
 #endif
 
-#endif // __cplusplus >= 201103L
+#endif  // __cplusplus >= 201103L
 
 #if __cplusplus >= 201402L
 
@@ -321,7 +321,7 @@
 #endif
 #endif
 
-#endif // __cplusplus >= 201402L
+#endif  // __cplusplus >= 201402L
 
 // Compiler features
 
@@ -362,4 +362,4 @@
 #endif
 #endif
 
-#endif // VSMC_INTERNAL_COMPILER_CLANG_HPP
+#endif  // VSMC_INTERNAL_COMPILER_CLANG_HPP

@@ -34,30 +34,28 @@
 
 #include <vsmc/smp/backend_base.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
 VSMC_DEFINE_SMP_FORWARD(SEQ)
 
 /// \brief Particle::value_type subtype
 /// \ingroup SEQ
-template <typename BaseState>
-class StateSEQ : public BaseState
+template <typename BaseState> class StateSEQ : public BaseState
 {
-    public :
-
+    public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StateSEQ (size_type N) : BaseState(N) {}
-}; // class StateSEQ
+    explicit StateSEQ(size_type N) : BaseState(N) {}
+};  // class StateSEQ
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup SEQ
 template <typename T, typename Derived>
 class InitializeSEQ : public InitializeBase<T, Derived>
 {
-    public :
-
-    std::size_t operator() (Particle<T> &particle, void *param)
+    public:
+    std::size_t operator()(Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -71,19 +69,17 @@ class InitializeSEQ : public InitializeBase<T, Derived>
         return accept;
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(SEQ, Initialize)
-}; // class InitializeSEQ
+};  // class InitializeSEQ
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup SEQ
 template <typename T, typename Derived>
 class MoveSEQ : public MoveBase<T, Derived>
 {
-    public :
-
-    std::size_t operator() (std::size_t iter, Particle<T> &particle)
+    public:
+    std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -96,63 +92,62 @@ class MoveSEQ : public MoveBase<T, Derived>
         return accept;
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(SEQ, Move)
-}; // class MoveSEQ
+};  // class MoveSEQ
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup SEQ
 template <typename T, typename Derived>
 class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
-    public :
-
-    void operator() (std::size_t iter, std::size_t dim,
-            const Particle<T> &particle, double *res)
+    public:
+    void operator()(std::size_t iter,
+                    std::size_t dim,
+                    const Particle<T> &particle,
+                    double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i) {
-            this->monitor_state(iter, dim,
-                    ConstSingleParticle<T>(i, &particle), res + i * dim);
+            this->monitor_state(iter,
+                                dim,
+                                ConstSingleParticle<T>(i, &particle),
+                                res + i * dim);
         }
         this->post_processor(iter, particle);
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(SEQ, MonitorEval)
-}; // class MonitorEvalSEQ
+};  // class MonitorEvalSEQ
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup SEQ
 template <typename T, typename Derived>
 class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
-    public :
-
-    double operator() (std::size_t iter, const Particle<T> &particle,
-            double *res)
+    public:
+    double
+        operator()(std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i) {
-            res[i] = this->path_state(iter,
-                    ConstSingleParticle<T>(i, &particle));
+            res[i] =
+                this->path_state(iter, ConstSingleParticle<T>(i, &particle));
         }
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(SEQ, PathEval)
-}; // class PathEvalSEQ
+};  // class PathEvalSEQ
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_SMP_BACKEND_SEQ_HPP
+#endif  // VSMC_SMP_BACKEND_SEQ_HPP

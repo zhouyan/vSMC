@@ -34,9 +34,8 @@
 
 class gmm_move_mu : public BASE_MOVE<gmm_state, gmm_move_mu>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         using std::log;
 
@@ -61,14 +60,12 @@ class gmm_move_mu : public BASE_MOVE<gmm_state, gmm_move_mu>
 
 class gmm_move_lambda : public BASE_MOVE<gmm_state, gmm_move_lambda>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         using std::log;
 
-        std::lognormal_distribution<> rlambda(
-                0, sp.state(0).lambda_sd());
+        std::lognormal_distribution<> rlambda(0, sp.state(0).lambda_sd());
         std::uniform_real_distribution<> runif(0, 1);
         const std::size_t cn = sp.state(0).comp_num();
         sp.state(0).save_old();
@@ -76,8 +73,8 @@ class gmm_move_lambda : public BASE_MOVE<gmm_state, gmm_move_lambda>
         for (std::size_t d = 0; d != cn; ++d)
             sp.state(0).lambda(d) *= rlambda(sp.rng());
         sp.particle().value().log_target(sp.state(0));
-        double p = sp.state(0).log_target_diff() +
-            sp.state(0).log_lambda_diff();
+        double p =
+            sp.state(0).log_target_diff() + sp.state(0).log_lambda_diff();
         double u = log(runif(sp.rng()));
 
         return sp.state(0).mh_reject_lambda(p, u);
@@ -86,24 +83,21 @@ class gmm_move_lambda : public BASE_MOVE<gmm_state, gmm_move_lambda>
 
 class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         using std::log;
         using std::exp;
 
-        std::normal_distribution<> rweight(
-                0, sp.state(0).weight_sd());
+        std::normal_distribution<> rweight(0, sp.state(0).weight_sd());
         std::uniform_real_distribution<> runif(0, 1);
         const std::size_t cn = sp.state(0).comp_num();
         sp.state(0).save_old();
 
         double sum_weight = 1;
         for (std::size_t d = 0; d != cn - 1; ++d) {
-            sp.state(0).weight(d) = log(
-                    sp.state(0).weight(d) /
-                    sp.state(0).weight(cn - 1));
+            sp.state(0).weight(d) =
+                log(sp.state(0).weight(d) / sp.state(0).weight(cn - 1));
             sp.state(0).weight(d) += rweight(sp.rng());
             sp.state(0).weight(d) = exp(sp.state(0).weight(d));
             sum_weight += sp.state(0).weight(d);
@@ -112,8 +106,8 @@ class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
         for (std::size_t d = 0; d != cn; ++d)
             sp.state(0).weight(d) /= sum_weight;
         sp.particle().value().log_target(sp.state(0));
-        double p = sp.state(0).log_target_diff() +
-            sp.state(0).logit_weight_diff();
+        double p =
+            sp.state(0).log_target_diff() + sp.state(0).logit_weight_diff();
         double u = log(runif(sp.rng()));
 
         return sp.state(0).mh_reject_weight(p, u);
@@ -122,10 +116,9 @@ class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
 
 class gmm_move : public BASE_MOVE<gmm_state, gmm_move>
 {
-    public :
-
-    std::size_t move_state (std::size_t iter,
-            vsmc::SingleParticle<gmm_state> sp)
+    public:
+    std::size_t move_state(std::size_t iter,
+                           vsmc::SingleParticle<gmm_state> sp)
     {
         std::size_t acc = 0;
         acc += move_mu_.move_state(iter, sp);
@@ -135,11 +128,10 @@ class gmm_move : public BASE_MOVE<gmm_state, gmm_move>
         return acc;
     }
 
-    private :
-
-    gmm_move_mu     move_mu_;
+    private:
+    gmm_move_mu move_mu_;
     gmm_move_lambda move_lambda_;
     gmm_move_weight move_weight_;
 };
 
-#endif // VSMC_EXAMPLE_GMM_MOVE_HPP
+#endif  // VSMC_EXAMPLE_GMM_MOVE_HPP

@@ -41,7 +41,7 @@ VSMC_RNG_TESTU01_FUNCTION(ARS_2x64)
 VSMC_RNG_TESTU01_FUNCTION(ARS_4x64)
 VSMC_RNG_TESTU01_FUNCTION(ARS_8x64)
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TESTU01_OPTION_PRE;
 

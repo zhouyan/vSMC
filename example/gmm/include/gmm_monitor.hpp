@@ -34,10 +34,11 @@
 
 class gmm_monitor : public BASE_MONITOR<gmm_state, gmm_monitor>
 {
-    public :
-
-    void monitor_state (std::size_t, std::size_t dim,
-            vsmc::ConstSingleParticle<gmm_state> csp, double *res)
+    public:
+    void monitor_state(std::size_t,
+                       std::size_t dim,
+                       vsmc::ConstSingleParticle<gmm_state> csp,
+                       double *res)
     {
         assert(!(dim % 3));
         assert(csp.state(0).comp_num() >= dim / 3);
@@ -52,19 +53,23 @@ class gmm_monitor : public BASE_MONITOR<gmm_state, gmm_monitor>
 
 class gmm_comp_num : public BASE_MONITOR<gmm_state, gmm_comp_num>
 {
-    public :
-
-    void monitor_state (std::size_t, std::size_t,
-            vsmc::ConstSingleParticle<gmm_state> csp, double *res)
-    {*res = static_cast<double>(csp.state(0).comp_num());}
+    public:
+    void monitor_state(std::size_t,
+                       std::size_t,
+                       vsmc::ConstSingleParticle<gmm_state> csp,
+                       double *res)
+    {
+        *res = static_cast<double>(csp.state(0).comp_num());
+    }
 };
 
 class gmm_rm_mu : public BASE_MONITOR<gmm_state, gmm_rm_mu>
 {
-    public :
-
-    void monitor_state (std::size_t, std::size_t dim,
-            vsmc::ConstSingleParticle<gmm_state> csp, double *res)
+    public:
+    void monitor_state(std::size_t,
+                       std::size_t dim,
+                       vsmc::ConstSingleParticle<gmm_state> csp,
+                       double *res)
     {
         double mu = 0;
         const std::size_t cn = csp.state(0).comp_num();
@@ -79,10 +84,11 @@ class gmm_rm_mu : public BASE_MONITOR<gmm_state, gmm_rm_mu>
 
 class gmm_rm_lambda : public BASE_MONITOR<gmm_state, gmm_rm_lambda>
 {
-    public :
-
-    void monitor_state (std::size_t, std::size_t dim,
-            vsmc::ConstSingleParticle<gmm_state> csp, double *res)
+    public:
+    void monitor_state(std::size_t,
+                       std::size_t dim,
+                       vsmc::ConstSingleParticle<gmm_state> csp,
+                       double *res)
     {
         using std::log;
 
@@ -99,10 +105,11 @@ class gmm_rm_lambda : public BASE_MONITOR<gmm_state, gmm_rm_lambda>
 
 class gmm_rm_weight : public BASE_MONITOR<gmm_state, gmm_rm_weight>
 {
-    public :
-
-    void monitor_state (std::size_t, std::size_t dim,
-            vsmc::ConstSingleParticle<gmm_state> csp, double *res)
+    public:
+    void monitor_state(std::size_t,
+                       std::size_t dim,
+                       vsmc::ConstSingleParticle<gmm_state> csp,
+                       double *res)
     {
         double max_w = csp.state(0).weight(0);
         const std::size_t cn = csp.state(0).comp_num();
@@ -111,7 +118,7 @@ class gmm_rm_weight : public BASE_MONITOR<gmm_state, gmm_rm_weight>
                 max_w = csp.state(0).weight(i);
         double logit_weight = 0;
         for (std::size_t i = 0; i != cn; ++i)
-                logit_weight += csp.state(0).weight(i) / max_w;
+            logit_weight += csp.state(0).weight(i) / max_w;
         logit_weight /= cn;
         res[0] = logit_weight;
         for (std::size_t d = 1; d != dim; ++d)
@@ -121,10 +128,11 @@ class gmm_rm_weight : public BASE_MONITOR<gmm_state, gmm_rm_weight>
 
 class gmm_moments : public BASE_MONITOR<gmm_state, gmm_moments>
 {
-    public :
-
-    void monitor_state (std::size_t, std::size_t dim,
-            vsmc::ConstSingleParticle<gmm_state> csp, double *res)
+    public:
+    void monitor_state(std::size_t,
+                       std::size_t dim,
+                       vsmc::ConstSingleParticle<gmm_state> csp,
+                       double *res)
     {
         for (std::size_t i = 0; i != dim; ++i)
             res[i] = 0;
@@ -140,4 +148,4 @@ class gmm_moments : public BASE_MONITOR<gmm_state, gmm_moments>
     }
 };
 
-#endif // VSMC_EXAMPLE_GMM_MONITOR_HPP
+#endif  // VSMC_EXAMPLE_GMM_MONITOR_HPP

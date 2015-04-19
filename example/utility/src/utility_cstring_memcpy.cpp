@@ -31,7 +31,7 @@
 
 #include "utility_cstring_memcpy.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     std::vector<int> bits;
     if (argc > 1) {

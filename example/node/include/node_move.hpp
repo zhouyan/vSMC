@@ -34,9 +34,8 @@
 
 class node_move_a0 : public BASE_MOVE<node_state, node_move_a0>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<node_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<node_state> sp)
     {
         using std::log;
 
@@ -46,21 +45,18 @@ class node_move_a0 : public BASE_MOVE<node_state, node_move_a0>
 
         sp.state(0).a0() *= ra0(sp.rng());
         sp.particle().value().log_target(sp.state(0));
-        double p = sp.state(0).log_target_diff() +
-            sp.state(0).log_a0_diff();
+        double p = sp.state(0).log_target_diff() + sp.state(0).log_a0_diff();
         double u = log(runif(sp.rng()));
 
-        return is_valid(p) ?
-            sp.state(0).mh_reject_a0(p, u):
-            sp.state(0).mh_reject_a0(0, 1);
+        return is_valid(p) ? sp.state(0).mh_reject_a0(p, u) :
+                             sp.state(0).mh_reject_a0(0, 1);
     }
 };
 
 class node_move_a1 : public BASE_MOVE<node_state, node_move_a1>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<node_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<node_state> sp)
     {
         using std::log;
 
@@ -70,21 +66,18 @@ class node_move_a1 : public BASE_MOVE<node_state, node_move_a1>
 
         sp.state(0).a1() *= ra1(sp.rng());
         sp.particle().value().log_target(sp.state(0));
-        double p = sp.state(0).log_target_diff() +
-            sp.state(0).log_a1_diff();
+        double p = sp.state(0).log_target_diff() + sp.state(0).log_a1_diff();
         double u = log(runif(sp.rng()));
 
-        return is_valid(p) ?
-            sp.state(0).mh_reject_a1(p, u):
-            sp.state(0).mh_reject_a1(0, 1);
+        return is_valid(p) ? sp.state(0).mh_reject_a1(p, u) :
+                             sp.state(0).mh_reject_a1(0, 1);
     }
 };
 
 class node_move_a2 : public BASE_MOVE<node_state, node_move_a2>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<node_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<node_state> sp)
     {
         using std::log;
 
@@ -94,23 +87,20 @@ class node_move_a2 : public BASE_MOVE<node_state, node_move_a2>
 
         sp.state(0).a2() *= ra2(sp.rng());
         sp.particle().value().log_target(sp.state(0));
-        double p = sp.state(0).log_target_diff() +
-            sp.state(0).log_a2_diff();
+        double p = sp.state(0).log_target_diff() + sp.state(0).log_a2_diff();
         double u = log(runif(sp.rng()));
 
-        return is_valid(p) ?
-            sp.state(0).mh_reject_a2(p, u):
-            sp.state(0).mh_reject_a2(0, 1);
+        return is_valid(p) ? sp.state(0).mh_reject_a2(p, u) :
+                             sp.state(0).mh_reject_a2(0, 1);
     }
 };
 
 class node_move_k : public BASE_MOVE<node_state, node_move_k>
 {
-    public :
+    public:
+    node_move_k(std::size_t k_id) : k_id_(k_id) {}
 
-    node_move_k (std::size_t k_id) : k_id_(k_id) {}
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<node_state> sp)
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<node_state> sp)
     {
         using std::log;
 
@@ -123,32 +113,29 @@ class node_move_k : public BASE_MOVE<node_state, node_move_k>
         sp.state(0).save_old();
         sp.state(0).k(k_id_) *= rk(sp.rng());
         sp.particle().value().log_target(sp.state(0));
-        double p = sp.state(0).log_target_diff()
-            + sp.state(0).log_k_diff(k_id_);
+        double p =
+            sp.state(0).log_target_diff() + sp.state(0).log_k_diff(k_id_);
         double u = log(runif(sp.rng()));
 
-        return is_valid(p) ?
-            sp.state(0).mh_reject_k(p, u, k_id_):
-            sp.state(0).mh_reject_k(0, 1, k_id_);
+        return is_valid(p) ? sp.state(0).mh_reject_k(p, u, k_id_) :
+                             sp.state(0).mh_reject_k(0, 1, k_id_);
     }
 
-    private :
-
+    private:
     std::size_t k_id_;
 };
 
 class node_move : public BASE_MOVE<node_state, node_move>
 {
-    public :
-
-    node_move ()
+    public:
+    node_move()
     {
         for (std::size_t i = 0; i != MaxCompNum - 1; ++i)
             move_k_.push_back(node_move_k(i));
     }
 
-    std::size_t move_state (std::size_t iter,
-            vsmc::SingleParticle<node_state> sp)
+    std::size_t move_state(std::size_t iter,
+                           vsmc::SingleParticle<node_state> sp)
     {
         std::size_t acc = 0;
         acc += move_a0_.move_state(iter, sp);
@@ -160,12 +147,11 @@ class node_move : public BASE_MOVE<node_state, node_move>
         return acc;
     }
 
-    private :
-
+    private:
     node_move_a0 move_a0_;
     node_move_a1 move_a1_;
     node_move_a2 move_a2_;
     std::vector<node_move_k> move_k_;
 };
 
-#endif // VSMC_EXAMPLE_NODE_MOVE_HPP
+#endif  // VSMC_EXAMPLE_NODE_MOVE_HPP

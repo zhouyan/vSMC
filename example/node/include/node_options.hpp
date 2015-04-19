@@ -29,11 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-Config
-.add("data_file", "Name of data file", &DataFile, "node-c.data")
-.add("data_num",  "Number of data",    &DataNum, 80)
-.add("simple_model",  "Enable simple model components number",  &SM, 3)
-.add("complex_model", "Enable complex model components number", &CM, 5)
-.add("shape0", "Scale of Gamma prior", &Shape0, 0.1)
-.add("scale0", "Scale of Gamma prior", &Scale0, 0.1)
-.add("resolution", "Resolution of ODE solver", &Resolution, 0.05);
+Config.add("data_file", "Name of data file", &DataFile, "node-c.data")
+    .add("data_num", "Number of data", &DataNum, 80)
+    .add("simple_model", "Enable simple model components number", &SM, 3)
+    .add("complex_model", "Enable complex model components number", &CM, 5)
+    .add("shape0", "Scale of Gamma prior", &Shape0, 0.1)
+    .add("scale0", "Scale of Gamma prior", &Scale0, 0.1)
+    .add("resolution", "Resolution of ODE solver", &Resolution, 0.05);

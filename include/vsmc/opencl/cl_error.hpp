@@ -35,13 +35,16 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 
-#define VSMC_DEFINE_OPENCL_CL_ERROR_ERR(STATUS) case STATUS : return #STATUS
+#define VSMC_DEFINE_OPENCL_CL_ERROR_ERR(STATUS)                              \
+    case STATUS: return #STATUS
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
-inline std::string cl_error_str (cl_int status)
+inline std::string cl_error_str(cl_int status)
 {
     switch (status) {
         VSMC_DEFINE_OPENCL_CL_ERROR_ERR(CL_SUCCESS);
@@ -60,7 +63,7 @@ inline std::string cl_error_str (cl_int status)
 #if VSMC_OPENCL_VERSION >= 110
         VSMC_DEFINE_OPENCL_CL_ERROR_ERR(CL_MISALIGNED_SUB_BUFFER_OFFSET);
         VSMC_DEFINE_OPENCL_CL_ERROR_ERR(
-                CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST);
+            CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST);
 #endif
 #if VSMC_OPENCL_VERSION >= 120
         VSMC_DEFINE_OPENCL_CL_ERROR_ERR(CL_COMPILE_PROGRAM_FAILURE);
@@ -70,7 +73,7 @@ inline std::string cl_error_str (cl_int status)
         VSMC_DEFINE_OPENCL_CL_ERROR_ERR(CL_KERNEL_ARG_INFO_NOT_AVAILABLE);
 #endif
 #if VSMC_OPENCL_VERSION >= 200
-        // No new error code in OpenCL 2.0
+// No new error code in OpenCL 2.0
 #endif
 
         VSMC_DEFINE_OPENCL_CL_ERROR_ERR(CL_INVALID_VALUE);
@@ -120,11 +123,11 @@ inline std::string cl_error_str (cl_int status)
         VSMC_DEFINE_OPENCL_CL_ERROR_ERR(CL_INVALID_PIPE_SIZE);
         VSMC_DEFINE_OPENCL_CL_ERROR_ERR(CL_INVALID_DEVICE_QUEUE);
 #endif
-        default : return "UNKNOWN";
+        default: return "UNKNOWN";
     }
 }
 
-} // namespace vsmc::internal
+}  // namespace vsmc::internal
 
 /// \brief OpenCL exception
 /// \ingroup OpenCL
@@ -137,36 +140,45 @@ inline std::string cl_error_str (cl_int status)
 class CLError : public std::runtime_error
 {
     public:
+    CLError()
+        : std::runtime_error(internal::cl_error_str(CL_SUCCESS)),
+          status_(CL_SUCCESS)
+    {
+    }
 
-    CLError () :
-        std::runtime_error(internal::cl_error_str(CL_SUCCESS)),
-        status_(CL_SUCCESS) {}
+    explicit CLError(cl_int status)
+        : std::runtime_error(internal::cl_error_str(status)), status_(status)
+    {
+    }
 
-    explicit CLError (cl_int status) :
-        std::runtime_error(internal::cl_error_str(status)),
-        status_(status) {}
+    explicit CLError(const ::cl::Error &err)
+        : std::runtime_error(std::string(err.what()) + ":" +
+                             internal::cl_error_str(err.err())),
+          status_(err.err())
+    {
+    }
 
-    explicit CLError (const ::cl::Error &err) :
-        std::runtime_error(std::string(err.what()) + ":" +
-                internal::cl_error_str(err.err())), status_(err.err()) {}
+    CLError(cl_int status, const char *msg)
+        : std::runtime_error(std::string(msg) + ":" +
+                             internal::cl_error_str(status)),
+          status_(status)
+    {
+    }
 
-    CLError (cl_int status, const char * msg) :
-        std::runtime_error(std::string(msg) + ":" +
-                internal::cl_error_str(status)), status_(status) {}
+    CLError(cl_int status, const std::string &msg)
+        : std::runtime_error(msg + ":" + internal::cl_error_str(status)),
+          status_(status)
+    {
+    }
 
-    CLError (cl_int status, const std::string &msg) :
-        std::runtime_error(msg + ":" +
-                internal::cl_error_str(status)), status_(status) {}
+    cl_int err() const { return status_; }
 
-    cl_int err () const {return status_;}
-
-    cl_int status () const {return status_;}
+    cl_int status() const { return status_; }
 
     private:
-
     cl_int status_;
-}; // class CLError
+};  // class CLError
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_OPENCL_CL_ERROR_HPP
+#endif  // VSMC_OPENCL_CL_ERROR_HPP

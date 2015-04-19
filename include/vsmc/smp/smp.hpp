@@ -59,4 +59,4 @@
 #include <vsmc/smp/backend_tbb.hpp>
 #endif
 
-#endif // VSMC_SMP_SMP_HPP
+#endif  // VSMC_SMP_SMP_HPP

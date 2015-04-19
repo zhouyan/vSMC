@@ -47,77 +47,88 @@
 #define VSMC_RNG_ARS_ROUNDS 7
 #endif
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace traits {
+namespace traits
+{
 
-namespace internal {
+namespace internal
+{
 
 template <std::size_t> struct ARSWeylConstantValue;
 
-template <> struct ARSWeylConstantValue<0> :
-    public std::integral_constant<uint64_t, UINT64_C(0xBB67AE8584CAA73B)> {};
+template <>
+struct ARSWeylConstantValue<0>
+    : public std::integral_constant<uint64_t, UINT64_C(0xBB67AE8584CAA73B)> {
+};
 
-template <> struct ARSWeylConstantValue<1> :
-    public std::integral_constant<uint64_t, UINT64_C(0x9E3779B97F4A7C15)> {};
+template <>
+struct ARSWeylConstantValue<1>
+    : public std::integral_constant<uint64_t, UINT64_C(0x9E3779B97F4A7C15)> {
+};
 
-} // namespace vsmc::traits::internal
+}  // namespace vsmc::traits::internal
 
 /// \brief ARSEngine Weyl sequence constants
 /// \ingroup Traits
 ///
 /// \details
-/// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bits or
+/// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bits
+/// or
 /// the Weyl constant.
-template <std::size_t I> struct ARSWeylConstantTrait :
-    public internal::ARSWeylConstantValue<I> {};
+template <std::size_t I>
+struct ARSWeylConstantTrait : public internal::ARSWeylConstantValue<I> {
+};
 
-} // namespace vsmc::traits
+}  // namespace vsmc::traits
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG
-template <typename ResultType>
-class ARSKeySeq
+template <typename ResultType> class ARSKeySeq
 {
-    public :
-
+    public:
     typedef Array<ResultType, 16 / sizeof(ResultType)> key_type;
 
-    ARSKeySeq () : weyl_(_mm_set_epi64x(
-                static_cast<int64_t>(traits::ARSWeylConstantTrait<0>::value),
-                static_cast<int64_t>(traits::ARSWeylConstantTrait<1>::value)))
-    {}
+    ARSKeySeq()
+        : weyl_(_mm_set_epi64x(
+              static_cast<int64_t>(traits::ARSWeylConstantTrait<0>::value),
+              static_cast<int64_t>(traits::ARSWeylConstantTrait<1>::value)))
+    {
+    }
 
     template <std::size_t Rp1>
-    void generate (const key_type &key, Array<__m128i, Rp1> &key_seq)
+    void generate(const key_type &key, Array<__m128i, Rp1> &key_seq)
     {
         m128i_pack<0>(key, key_seq.front());
         generate_seq<1>(key_seq, std::integral_constant<bool, 1 < Rp1>());
     }
 
-    private :
-
+    private:
     const __m128i weyl_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &, std::false_type) {}
+    void generate_seq(Array<__m128i, Rp1> &, std::false_type)
+    {
+    }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &key_seq, std::true_type)
+    void generate_seq(Array<__m128i, Rp1> &key_seq, std::true_type)
     {
-        key_seq[Position<N>()] = _mm_add_epi64(
-                key_seq[Position<N - 1>()], weyl_);
+        key_seq[Position<N>()] =
+            _mm_add_epi64(key_seq[Position<N - 1>()], weyl_);
         generate_seq<N + 1>(key_seq,
-                std::integral_constant<bool, N + 1 < Rp1>());
+                            std::integral_constant<bool, N + 1 < Rp1>());
     }
-}; // class ARSKeySeq
+};  // class ARSKeySeq
 
 /// \brief ARS RNG engine
 /// \ingroup AESNIRNG
 ///
 /// \details
 /// This is a reimplementation of the ARS engine as described in
-/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
+/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented
+/// in
 /// [Random123][r123lib].
 ///
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
@@ -126,29 +137,38 @@ class ARSKeySeq
 /// \sa ARSKeySeq
 /// \sa AESNIEngine
 template <typename ResultType,
-         std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
-         std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
-class ARSEngine :
-    public AESNIEngine<ResultType, ARSKeySeq<ResultType>,
-    false, Rounds, Blocks>
+          std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
+          std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
+class ARSEngine : public AESNIEngine<ResultType,
+                                     ARSKeySeq<ResultType>,
+                                     false,
+                                     Rounds,
+                                     Blocks>
 {
-    public :
+    public:
+    typedef AESNIEngine<ResultType,
+                        ARSKeySeq<ResultType>,
+                        false,
+                        Rounds,
+                        Blocks> base_eng_type;
 
-    typedef AESNIEngine<ResultType, ARSKeySeq<ResultType>,
-            false, Rounds, Blocks> base_eng_type;
-
-    explicit ARSEngine (ResultType s = 0) : base_eng_type(s) {}
+    explicit ARSEngine(ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
-    explicit ARSEngine (SeedSeq &seq, typename std::enable_if<
-            internal::is_seed_seq<SeedSeq,
+    explicit ARSEngine(
+        SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<
+            SeedSeq,
             typename base_eng_type::result_type,
             typename base_eng_type::key_type,
-            ARSEngine<ResultType, Rounds, Blocks>
-            >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
+            ARSEngine<ResultType, Rounds, Blocks>>::value>::type * =
+            VSMC_NULLPTR)
+        : base_eng_type(seq)
+    {
+    }
 
-    ARSEngine (const typename base_eng_type::key_type &k) : base_eng_type(k) {}
-}; // class ARSEngine
+    ARSEngine(const typename base_eng_type::key_type &k) : base_eng_type(k) {}
+};  // class ARSEngine
 
 /// \brief ARS RNG engine with 32-bits integers output, default blocks and
 /// default rounds
@@ -200,6 +220,6 @@ typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 4> ARS_4x64;
 /// \ingroup AESNIRNG
 typedef ARSEngine<uint64_t, VSMC_RNG_ARS_ROUNDS, 8> ARS_8x64;
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_RNG_ARS_HPP
+#endif  // VSMC_RNG_ARS_HPP

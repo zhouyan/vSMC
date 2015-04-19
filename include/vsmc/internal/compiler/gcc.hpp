@@ -34,7 +34,7 @@
 
 #define VSMC_GCC_NONEXIST 0xFFFFFFFFUL
 
-#define VSMC_GCC_VERSION \
+#define VSMC_GCC_VERSION                                                     \
     (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
 #if VSMC_GCC_VERSION >= 40300
@@ -251,7 +251,7 @@
 #endif
 #endif
 
-#endif // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
+#endif  // defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 
 #if __cplusplus >= 201402L
 
@@ -323,7 +323,7 @@
 #endif
 #endif
 
-#endif // __cplusplus >= 201402L
+#endif  // __cplusplus >= 201402L
 
 // Compiler features
 
@@ -370,4 +370,4 @@
 #endif
 #endif
 
-#endif // VSMC_INTERNAL_COMPILER_GCC_HPP
+#endif  // VSMC_INTERNAL_COMPILER_GCC_HPP

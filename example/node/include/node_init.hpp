@@ -34,16 +34,15 @@
 
 class node_init : public BASE_INIT<node_state, node_init>
 {
-    public :
-
-    void pre_processor (vsmc::Particle<node_state> &particle)
+    public:
+    void pre_processor(vsmc::Particle<node_state> &particle)
     {
         particle.value().alpha(0);
         particle.value().alpha_inc(0);
         particle.weight_set().set_equal_weight();
     }
 
-    void initialize_param (vsmc::Particle<node_state> &particle, void *info)
+    void initialize_param(vsmc::Particle<node_state> &particle, void *info)
     {
         if (particle.value().state(0, 0).comp_num() == 0)
             particle.value().comp_num(InitCompNum);
@@ -51,7 +50,7 @@ class node_init : public BASE_INIT<node_state, node_init>
             particle.value().read_data(static_cast<const data_info *>(info));
     }
 
-    std::size_t initialize_state (vsmc::SingleParticle<node_state> sp)
+    std::size_t initialize_state(vsmc::SingleParticle<node_state> sp)
     {
         double shape0 = sp.particle().value().shape0();
         double scale0 = sp.particle().value().scale0();
@@ -70,4 +69,4 @@ class node_init : public BASE_INIT<node_state, node_init>
     }
 };
 
-#endif // VSMC_EXAMPLE_NODE_INIT_HPP
+#endif  // VSMC_EXAMPLE_NODE_INIT_HPP

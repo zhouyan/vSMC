@@ -34,8 +34,8 @@
 
 #include "utility_cstring.hpp"
 
-inline void test (char *y, char *z, int ch,
-        std::size_t B, int offset, std::size_t R)
+inline void
+    test(char *y, char *z, int ch, std::size_t B, int offset, std::size_t R)
 {
     std::cout << std::setw(10) << B;
     std::cout << std::setw(10) << size_h(B);
@@ -98,4 +98,4 @@ inline void test (char *y, char *z, int ch,
     std::cout << std::endl;
 }
 
-#endif // VSMC_EXAMPLE_UTILITY_CSTRING_MEMSET_HPP
+#endif  // VSMC_EXAMPLE_UTILITY_CSTRING_MEMSET_HPP

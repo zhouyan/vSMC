@@ -48,15 +48,15 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
 #if VSMC_USE_TBB
-#define VSMC_RNG_SET_TYPE \
-    ::vsmc::RngSet< ::vsmc::Threefry4x64, ::vsmc::ThreadLocal>
+#define VSMC_RNG_SET_TYPE                                                    \
+    ::vsmc::RngSet<::vsmc::Threefry4x64, ::vsmc::ThreadLocal>
 #else
-#define VSMC_RNG_SET_TYPE \
-    ::vsmc::RngSet< ::vsmc::Threefry4x64, ::vsmc::Vector>
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSet<::vsmc::Threefry4x64, ::vsmc::Vector>
 #endif
 #endif
 
-namespace vsmc {
+namespace vsmc
+{
 
 #if VSMC_USE_TBB
 template <typename = Threefry4x64, typename = ThreadLocal> class RngSet;
@@ -66,46 +66,42 @@ template <typename = Threefry4x64, typename = Vector> class RngSet;
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
-template <typename RngType>
-class RngSet<RngType, Scalar>
+template <typename RngType> class RngSet<RngType, Scalar>
 {
-    public :
-
+    public:
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet (size_type N = 0) : size_(N) {seed();}
+    explicit RngSet(size_type N = 0) : size_(N) { seed(); }
 
-    size_type size () const {return size_;}
+    size_type size() const { return size_; }
 
-    void resize (std::size_t) {}
+    void resize(std::size_t) {}
 
-    void seed () {rng_.seed(Seed::instance().get());}
+    void seed() { rng_.seed(Seed::instance().get()); }
 
-    rng_type &operator[] (size_type) {return rng_;}
+    rng_type &operator[](size_type) { return rng_; }
 
-    private :
-
+    private:
     std::size_t size_;
     rng_type rng_;
-}; // class RngSet
+};  // class RngSet
 
 /// \brief Vector RNG set
 /// \ingroup RNG
-template <typename RngType>
-class RngSet<RngType, Vector>
+template <typename RngType> class RngSet<RngType, Vector>
 {
-    public :
-
+    public:
     typedef RngType rng_type;
-    typedef typename std::vector<rng_type, AlignedAllocator<rng_type> >::
-        size_type size_type;
+    typedef
+        typename std::vector<rng_type, AlignedAllocator<rng_type>>::size_type
+            size_type;
 
-    explicit RngSet (size_type N = 0) : rng_(N, rng_type()) {seed();}
+    explicit RngSet(size_type N = 0) : rng_(N, rng_type()) { seed(); }
 
-    size_type size () const {return rng_.size();}
+    size_type size() const { return rng_.size(); }
 
-    void resize (std::size_t n)
+    void resize(std::size_t n)
     {
         if (n == rng_.size())
             return;
@@ -121,47 +117,46 @@ class RngSet<RngType, Vector>
         }
     }
 
-    void seed ()
+    void seed()
     {
         for (size_type i = 0; i != rng_.size(); ++i)
             rng_[i].seed(Seed::instance().get());
     }
 
-    rng_type &operator[] (size_type id) {return rng_[id];}
+    rng_type &operator[](size_type id) { return rng_[id]; }
 
-    private :
-
-    std::vector<rng_type, AlignedAllocator<rng_type> > rng_;
-}; // class RngSet
+    private:
+    std::vector<rng_type, AlignedAllocator<rng_type>> rng_;
+};  // class RngSet
 
 #if VSMC_HAS_TBB
 
 /// \brief Thread local RNG set
 /// \ingroup RNG
-template <typename RngType>
-class RngSet<RngType, ThreadLocal>
+template <typename RngType> class RngSet<RngType, ThreadLocal>
 {
-    public :
-
+    public:
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet (size_type N = 0) : size_(N), rng_(rng_init) {rng_init();}
+    explicit RngSet(size_type N = 0) : size_(N), rng_(rng_init)
+    {
+        rng_init();
+    }
 
-    size_type size () const {return size_;}
+    size_type size() const { return size_; }
 
-    void resize (std::size_t) {}
+    void resize(std::size_t) {}
 
-    void seed () {rng_.clear();}
+    void seed() { rng_.clear(); }
 
-    rng_type &operator[] (size_type) {return rng_.local();}
+    rng_type &operator[](size_type) { return rng_.local(); }
 
-    private :
-
+    private:
     std::size_t size_;
     ::tbb::combinable<rng_type> rng_;
 
-    static rng_type rng_init ()
+    static rng_type rng_init()
     {
         static ::tbb::mutex mtx;
 
@@ -170,18 +165,19 @@ class RngSet<RngType, ThreadLocal>
 
         return rng;
     }
-}; // class RngSet
+};  // class RngSet
 
-#endif // VSMC_HAS_TBB
+#endif  // VSMC_HAS_TBB
 
-namespace traits {
+namespace traits
+{
 
 /// \brief Particle::rng_set_type trait
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, VSMC_RNG_SET_TYPE)
 
-} // namespace vsmc::traits
+}  // namespace vsmc::traits
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_RNG_RNG_SET_HPP
+#endif  // VSMC_RNG_RNG_SET_HPP

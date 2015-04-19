@@ -31,4 +31,4 @@
 
 #include <@basepath@.hpp>
 
-int main () {}
+int main() {}

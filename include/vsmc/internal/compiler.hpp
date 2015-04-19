@@ -59,16 +59,16 @@
 #if defined(__APPLE__) || defined(__MACOSX)
 #define VSMC_MACOSX
 #include <Availability.h>
-#define VSMC_MAC_10_0  __MAC_10_0
-#define VSMC_MAC_10_1  __MAC_10_1
-#define VSMC_MAC_10_2  __MAC_10_2
-#define VSMC_MAC_10_3  __MAC_10_3
-#define VSMC_MAC_10_4  __MAC_10_4
-#define VSMC_MAC_10_5  __MAC_10_5
-#define VSMC_MAC_10_6  __MAC_10_6
-#define VSMC_MAC_10_7  __MAC_10_7
-#define VSMC_MAC_10_8  __MAC_10_8
-#define VSMC_MAC_10_9  __MAC_10_9
+#define VSMC_MAC_10_0 __MAC_10_0
+#define VSMC_MAC_10_1 __MAC_10_1
+#define VSMC_MAC_10_2 __MAC_10_2
+#define VSMC_MAC_10_3 __MAC_10_3
+#define VSMC_MAC_10_4 __MAC_10_4
+#define VSMC_MAC_10_5 __MAC_10_5
+#define VSMC_MAC_10_6 __MAC_10_6
+#define VSMC_MAC_10_7 __MAC_10_7
+#define VSMC_MAC_10_8 __MAC_10_8
+#define VSMC_MAC_10_9 __MAC_10_9
 #define VSMC_MAC_10_10 __MAC_10_10
 #define VSMC_MAC_VERSION __MAC_OS_X_VERSION_MIN_REQUIRED
 #define VSMC_MAC_VERSION_MIN_REQUIRED(ver) VSMC_MAC_VERSION >= ver
@@ -82,19 +82,19 @@
 #define VSMC_HAS_POSIX 1
 #endif
 #endif
-#else // VSMC_MACOSX
+#else  // VSMC_MACOSX
 #include <stdlib.h>
 #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 1
 #endif
-#endif // _POSIX_C_SOURCE >= 200112L
+#endif  // _POSIX_C_SOURCE >= 200112L
 #if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 600
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 1
 #endif
-#endif // _XOPEN_SOURCE >= 600
-#endif // VSMC_MACOSX
+#endif  // _XOPEN_SOURCE >= 600
+#endif  // VSMC_MACOSX
 
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 0
@@ -402,4 +402,4 @@
 #endif
 #endif
 
-#endif // VSMC_INTERNAL_COMPILER_HPP
+#endif  // VSMC_INTERNAL_COMPILER_HPP

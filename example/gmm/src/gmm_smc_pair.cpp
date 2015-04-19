@@ -34,16 +34,22 @@
 #include "move_smc_pair.hpp"
 #include "smc.hpp"
 
-template <typename MoveType, typename RJMoveType, typename MoveQueueType,
-    typename T>
-inline void smc_pair_do (
-        vsmc::Sampler<T> &sampler, const std::string &,
-        std::ostream &zconst_file, const std::string &schedule_name,
-        typename MoveType::alpha_type::value_type alpha_config,
-        typename MoveType::proposal_type::value_type proposal_config,
-        const MoveQueueType &move_queue, const MoveQueueType &rjmove_queue,
-        std::size_t simple_model, std::size_t complex_model,
-        std::size_t repeat)
+template <typename MoveType,
+          typename RJMoveType,
+          typename MoveQueueType,
+          typename T>
+inline void
+    smc_pair_do(vsmc::Sampler<T> &sampler,
+                const std::string &,
+                std::ostream &zconst_file,
+                const std::string &schedule_name,
+                typename MoveType::alpha_type::value_type alpha_config,
+                typename MoveType::proposal_type::value_type proposal_config,
+                const MoveQueueType &move_queue,
+                const MoveQueueType &rjmove_queue,
+                std::size_t simple_model,
+                std::size_t complex_model,
+                std::size_t repeat)
 {
 
     for (std::size_t i = 0; i != repeat; ++i) {
@@ -58,19 +64,21 @@ inline void smc_pair_do (
         while (sampler.particle().value().state(0, 0).alpha() < 1)
             sampler.iterate();
         sampler.move(RJMoveType(simple_model, complex_model, alpha_config),
-                false);
+                     false);
         sampler.mcmc(rjmove_queue.begin(), rjmove_queue.end(), false);
         while (sampler.particle().value().state(0, 0).beta() < 1)
             sampler.iterate();
         zconst_file << sampler.iter_size() - 1 << ' ';
-        zconst_file << sampler.particle().value().zconst()
-            + sampler.particle().value().log_prior_const(complex_model)
-            - sampler.particle().value().log_prior_const(simple_model) << ' ';
+        zconst_file << sampler.particle().value().zconst() +
+                           sampler.particle().value().log_prior_const(
+                               complex_model) -
+                           sampler.particle().value().log_prior_const(
+                               simple_model) << ' ';
         zconst_file << std::endl;
     }
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 #include "options_main.hpp"
 #include "options_smc.hpp"
@@ -79,7 +87,8 @@ int main (int argc, char **argv)
 
     //////////////////////////////////////////////////////////////////////
 
-    vsmc::Sampler<gmm_state> sampler(ParticleNum, vsmc::Stratified, Threshold);
+    vsmc::Sampler<gmm_state> sampler(
+        ParticleNum, vsmc::Stratified, Threshold);
     sampler.particle().value().ordered() = true;
     sampler.init(gmm_init_pair());
     std::vector<vsmc::Sampler<gmm_state>::move_type> move_queue;
@@ -107,63 +116,120 @@ int main (int argc, char **argv)
     typedef gmm_state gmm;
     typedef gmm_proposal sd;
 
-    typedef move_smc<gmm, alpha_ess<gmm_state, ess01<gmm_state> >,  sd> ess;
-    typedef move_smc<gmm, alpha_ess<gmm_state, cess01<gmm_state> >, sd> cess;
-    typedef move_smc<gmm, alpha_linear   <gmm>,    sd> linear;
-    typedef move_smc<gmm, alpha_prior    <gmm, 2>, sd> prior2;
-    typedef move_smc<gmm, alpha_prior    <gmm, 5>, sd> prior5;
+    typedef move_smc<gmm, alpha_ess<gmm_state, ess01<gmm_state>>, sd> ess;
+    typedef move_smc<gmm, alpha_ess<gmm_state, cess01<gmm_state>>, sd> cess;
+    typedef move_smc<gmm, alpha_linear<gmm>, sd> linear;
+    typedef move_smc<gmm, alpha_prior<gmm, 2>, sd> prior2;
+    typedef move_smc<gmm, alpha_prior<gmm, 5>, sd> prior5;
     typedef move_smc<gmm, alpha_posterior<gmm, 2>, sd> posterior2;
     typedef move_smc<gmm, alpha_posterior<gmm, 5>, sd> posterior5;
 
-    typedef move_smc_pair<gmm, alpha_ess<gmm_state, ess01<gmm_state> > >
-        rj_ess;
-    typedef move_smc_pair<gmm, alpha_ess<gmm_state, cess01<gmm_state> > >
+    typedef move_smc_pair<gmm, alpha_ess<gmm_state, ess01<gmm_state>>> rj_ess;
+    typedef move_smc_pair<gmm, alpha_ess<gmm_state, cess01<gmm_state>>>
         rj_cess;
-    typedef move_smc_pair<gmm, alpha_linear   <gmm> >    rj_linear;
-    typedef move_smc_pair<gmm, alpha_prior    <gmm, 2> > rj_prior2;
-    typedef move_smc_pair<gmm, alpha_prior    <gmm, 5> > rj_prior5;
-    typedef move_smc_pair<gmm, alpha_posterior<gmm, 2> > rj_posterior2;
-    typedef move_smc_pair<gmm, alpha_posterior<gmm, 5> > rj_posterior5;
+    typedef move_smc_pair<gmm, alpha_linear<gmm>> rj_linear;
+    typedef move_smc_pair<gmm, alpha_prior<gmm, 2>> rj_prior2;
+    typedef move_smc_pair<gmm, alpha_prior<gmm, 5>> rj_prior5;
+    typedef move_smc_pair<gmm, alpha_posterior<gmm, 2>> rj_posterior2;
+    typedef move_smc_pair<gmm, alpha_posterior<gmm, 5>> rj_posterior5;
 
     if (Config.count("ess"))
         for (std::size_t i = 0; i != ESSDrop.size(); ++i)
-            smc_pair_do<ess, rj_ess>(sampler, Suffix, zconst_file, "ESS",
-                    ESSDrop[i], 0, move_queue, rjmove_queue, SM, CM, Repeat);
+            smc_pair_do<ess, rj_ess>(sampler,
+                                     Suffix,
+                                     zconst_file,
+                                     "ESS",
+                                     ESSDrop[i],
+                                     0,
+                                     move_queue,
+                                     rjmove_queue,
+                                     SM,
+                                     CM,
+                                     Repeat);
 
     if (Config.count("cess"))
         for (std::size_t i = 0; i != CESSDrop.size(); ++i)
-            smc_pair_do<cess, rj_cess>(sampler, Suffix, zconst_file, "CESS",
-                    CESSDrop[i], 0, move_queue, rjmove_queue, SM, CM, Repeat);
+            smc_pair_do<cess, rj_cess>(sampler,
+                                       Suffix,
+                                       zconst_file,
+                                       "CESS",
+                                       CESSDrop[i],
+                                       0,
+                                       move_queue,
+                                       rjmove_queue,
+                                       SM,
+                                       CM,
+                                       Repeat);
 
     if (Config.count("linear"))
         for (std::size_t i = 0; i != LinearIterNum.size(); ++i)
-            smc_pair_do<linear, rj_linear>(sampler, Suffix, zconst_file,
-                    "Linear", LinearIterNum[i], 0, move_queue, rjmove_queue,
-                    SM, CM, Repeat);
+            smc_pair_do<linear, rj_linear>(sampler,
+                                           Suffix,
+                                           zconst_file,
+                                           "Linear",
+                                           LinearIterNum[i],
+                                           0,
+                                           move_queue,
+                                           rjmove_queue,
+                                           SM,
+                                           CM,
+                                           Repeat);
 
     if (Config.count("prior2"))
         for (std::size_t i = 0; i != Prior2IterNum.size(); ++i)
-            smc_pair_do<prior2, rj_prior2>(sampler, Suffix, zconst_file,
-                    "Prior2", Prior2IterNum[i], 0, move_queue, rjmove_queue,
-                    SM, CM, Repeat);
+            smc_pair_do<prior2, rj_prior2>(sampler,
+                                           Suffix,
+                                           zconst_file,
+                                           "Prior2",
+                                           Prior2IterNum[i],
+                                           0,
+                                           move_queue,
+                                           rjmove_queue,
+                                           SM,
+                                           CM,
+                                           Repeat);
 
     if (Config.count("prior5"))
         for (std::size_t i = 0; i != Prior5IterNum.size(); ++i)
-            smc_pair_do<prior5, rj_prior5>(sampler, Suffix, zconst_file,
-                    "Prior5", Prior5IterNum[i], 0, move_queue, rjmove_queue,
-                    SM, CM, Repeat);
+            smc_pair_do<prior5, rj_prior5>(sampler,
+                                           Suffix,
+                                           zconst_file,
+                                           "Prior5",
+                                           Prior5IterNum[i],
+                                           0,
+                                           move_queue,
+                                           rjmove_queue,
+                                           SM,
+                                           CM,
+                                           Repeat);
 
     if (Config.count("posterior2"))
         for (std::size_t i = 0; i != Posterior2IterNum.size(); ++i)
-            smc_pair_do<posterior2, rj_posterior2>(sampler, Suffix,
-                    zconst_file, "Posterior2", Posterior2IterNum[i], 0,
-                    move_queue, rjmove_queue, SM, CM, Repeat);
+            smc_pair_do<posterior2, rj_posterior2>(sampler,
+                                                   Suffix,
+                                                   zconst_file,
+                                                   "Posterior2",
+                                                   Posterior2IterNum[i],
+                                                   0,
+                                                   move_queue,
+                                                   rjmove_queue,
+                                                   SM,
+                                                   CM,
+                                                   Repeat);
 
     if (Config.count("posterior5"))
         for (std::size_t i = 0; i != Posterior5IterNum.size(); ++i)
-            smc_pair_do<posterior5, rj_posterior5>(sampler, Suffix,
-                    zconst_file, "Posterior5", Posterior5IterNum[i], 0,
-                    move_queue, rjmove_queue, SM, CM, Repeat);
+            smc_pair_do<posterior5, rj_posterior5>(sampler,
+                                                   Suffix,
+                                                   zconst_file,
+                                                   "Posterior5",
+                                                   Posterior5IterNum[i],
+                                                   0,
+                                                   move_queue,
+                                                   rjmove_queue,
+                                                   SM,
+                                                   CM,
+                                                   Repeat);
 
     //////////////////////////////////////////////////////////////////////
 

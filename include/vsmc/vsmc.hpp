@@ -220,4 +220,4 @@
 #include <vsmc/opencl/opencl.hpp>
 #endif
 
-#endif // VSMC_HPP
+#endif  // VSMC_HPP

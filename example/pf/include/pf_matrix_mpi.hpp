@@ -37,11 +37,11 @@
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/mpi/backend_mpi.hpp>
 
-template <vsmc::MatrixOrder Order>
-struct BaseState
-{typedef BASE_SMP_STATE<vsmc::StateMatrix<Order, 5, double> > type;};
+template <vsmc::MatrixOrder Order> struct BaseState {
+    typedef BASE_SMP_STATE<vsmc::StateMatrix<Order, 5, double>> type;
+};
 
 #include "pf_smp.hpp"
 #include "pf_mpi_do.hpp"
 
-#endif // VSMC_EXAMPLE_PF_MATRIX_MPI_@SMP@_HPP
+#endif  // VSMC_EXAMPLE_PF_MATRIX_MPI_@SMP@_HPP

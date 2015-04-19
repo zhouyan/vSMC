@@ -32,7 +32,7 @@
 #include "gmm_@smp@.hpp"
 #include "smc.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 #include "options_main.hpp"
 #include "options_smc.hpp"
@@ -41,16 +41,15 @@ int main (int argc, char **argv)
 
     //////////////////////////////////////////////////////////////////////
 
-    vsmc::Sampler<gmm_state> sampler(ParticleNum, vsmc::Stratified, Threshold);
-    sampler
-        .init(gmm_init())
+    vsmc::Sampler<gmm_state> sampler(
+        ParticleNum, vsmc::Stratified, Threshold);
+    sampler.init(gmm_init())
         .mcmc(gmm_move_mu(), true)
         .mcmc(gmm_move_lambda(), true)
         .mcmc(gmm_move_weight(), true)
         .path_sampling(smc_path<gmm_state>());
     if (ProposalScale == 2) {
-        sampler
-            .monitor("rm.mu", 2, gmm_rm_mu())
+        sampler.monitor("rm.mu", 2, gmm_rm_mu())
             .monitor("rm.lambda", 2, gmm_rm_lambda())
             .monitor("rm.weight", 2, gmm_rm_weight());
     }

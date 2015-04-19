@@ -34,16 +34,15 @@
 
 class gmm_init : public BASE_INIT<gmm_state, gmm_init>
 {
-    public :
-
-    void pre_processor (vsmc::Particle<gmm_state> &particle)
+    public:
+    void pre_processor(vsmc::Particle<gmm_state> &particle)
     {
         particle.value().alpha(0);
         particle.value().alpha_inc(0);
         particle.weight_set().set_equal_weight();
     }
 
-    void initialize_param (vsmc::Particle<gmm_state> &particle, void *info)
+    void initialize_param(vsmc::Particle<gmm_state> &particle, void *info)
     {
         if (particle.value().state(0, 0).comp_num() == 0)
             particle.value().comp_num(InitCompNum);
@@ -51,21 +50,21 @@ class gmm_init : public BASE_INIT<gmm_state, gmm_init>
             particle.value().read_data(static_cast<const data_info *>(info));
     }
 
-    std::size_t initialize_state (vsmc::SingleParticle<gmm_state> sp)
+    std::size_t initialize_state(vsmc::SingleParticle<gmm_state> sp)
     {
-        double mu0    = sp.particle().value().mu0();
-        double sd0    = sp.particle().value().sd0();
+        double mu0 = sp.particle().value().mu0();
+        double sd0 = sp.particle().value().sd0();
         double shape0 = sp.particle().value().shape0();
         double scale0 = sp.particle().value().scale0();
 
         std::normal_distribution<> rmu(mu0, sd0);
-        std::gamma_distribution<>  rlambda(shape0, scale0);
-        std::gamma_distribution<>  rweight(1, 1);
+        std::gamma_distribution<> rlambda(shape0, scale0);
+        std::gamma_distribution<> rweight(1, 1);
 
         const std::size_t cn = sp.state(0).comp_num();
         double sum_weight = 0;
         for (std::size_t d = 0; d != cn; ++d) {
-            sp.state(0).mu(d)     = rmu(sp.rng());
+            sp.state(0).mu(d) = rmu(sp.rng());
             sp.state(0).lambda(d) = rlambda(sp.rng());
             sp.state(0).weight(d) = rweight(sp.rng());
             sum_weight += sp.state(0).weight(d);
@@ -82,9 +81,8 @@ class gmm_init : public BASE_INIT<gmm_state, gmm_init>
 
 class gmm_init_pair : public gmm_init
 {
-    public :
-
-    void pre_processor (vsmc::Particle<gmm_state> &particle)
+    public:
+    void pre_processor(vsmc::Particle<gmm_state> &particle)
     {
         gmm_init::pre_processor(particle);
         particle.value().beta(0);
@@ -94,48 +92,47 @@ class gmm_init_pair : public gmm_init
 
 class gmm_init_rjsmc : public gmm_init
 {
-    public :
-
-    gmm_init_rjsmc (
-            std::size_t min_comp = MinCompNum,
-            std::size_t max_comp = MaxCompNum) :
-        min_comp_(min_comp), max_comp_(max_comp) {}
-
-    std::size_t initialize_state (vsmc::SingleParticle<gmm_state> sp)
+    public:
+    gmm_init_rjsmc(std::size_t min_comp = MinCompNum,
+                   std::size_t max_comp = MaxCompNum)
+        : min_comp_(min_comp), max_comp_(max_comp)
     {
-        std::uniform_int_distribution<> rcn(
-                static_cast<int>(min_comp_), static_cast<int>(max_comp_));
+    }
+
+    std::size_t initialize_state(vsmc::SingleParticle<gmm_state> sp)
+    {
+        std::uniform_int_distribution<> rcn(static_cast<int>(min_comp_),
+                                            static_cast<int>(max_comp_));
         sp.state(0).comp_num(static_cast<std::size_t>(rcn(sp.rng())));
         return gmm_init::initialize_state(sp);
     }
 
-    private :
-
+    private:
     std::size_t min_comp_;
     std::size_t max_comp_;
 };
 
 class gmm_init_rjmcmc : public gmm_init_rjsmc
 {
-    public :
+    public:
+    gmm_init_rjmcmc(std::size_t min_comp = MinCompNum,
+                    std::size_t max_comp = MaxCompNum)
+        : gmm_init_rjsmc(min_comp, max_comp)
+    {
+    }
 
-    gmm_init_rjmcmc (
-            std::size_t min_comp = MinCompNum,
-            std::size_t max_comp = MaxCompNum) :
-        gmm_init_rjsmc(min_comp, max_comp) {}
-
-    void pre_processor (vsmc::Particle<gmm_state> &particle)
+    void pre_processor(vsmc::Particle<gmm_state> &particle)
     {
         particle.value().alpha(1);
         particle.value().alpha_inc(0);
         particle.weight_set().set_equal_weight();
         vsmc::Particle<gmm_state>::size_type N = particle.size();
         for (vsmc::Particle<gmm_state>::size_type i = 0; i != N; ++i) {
-            particle.value().state(i, 0).mu_sd()     = 0.15;
+            particle.value().state(i, 0).mu_sd() = 0.15;
             particle.value().state(i, 0).lambda_sd() = 0.15;
             particle.value().state(i, 0).weight_sd() = 0.2;
         }
     }
 };
 
-#endif // VSMC_EXAMPLE_GMM_INIT_HPP
+#endif  // VSMC_EXAMPLE_GMM_INIT_HPP

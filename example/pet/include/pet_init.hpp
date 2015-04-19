@@ -34,16 +34,15 @@
 
 class pet_init : public BASE_INIT<pet_state, pet_init>
 {
-    public :
-
-    void pre_processor (vsmc::Particle<pet_state> &particle)
+    public:
+    void pre_processor(vsmc::Particle<pet_state> &particle)
     {
         particle.value().alpha(0);
         particle.value().alpha_inc(0);
         particle.weight_set().set_equal_weight();
     }
 
-    void initialize_param (vsmc::Particle<pet_state> &particle, void *info)
+    void initialize_param(vsmc::Particle<pet_state> &particle, void *info)
     {
         if (particle.value().state(0, 0).comp_num() == 0)
             particle.value().comp_num(InitCompNum);
@@ -51,21 +50,18 @@ class pet_init : public BASE_INIT<pet_state, pet_init>
             particle.value().read_data(static_cast<const pet_info *>(info));
     }
 
-    std::size_t initialize_state (vsmc::SingleParticle<pet_state> sp)
+    std::size_t initialize_state(vsmc::SingleParticle<pet_state> sp)
     {
         const std::size_t cn = sp.state(0).comp_num();
         for (std::size_t d = 0; d != cn; ++d) {
             double phi_lb0 = sp.particle().value().phi_lb0(d);
             double phi_ub0 = sp.particle().value().phi_ub0(d);
-            double theta_lb0 = d ?
-                sp.state(0).theta(d - 1):
-                sp.particle().value().theta_lb0(d);
+            double theta_lb0 = d ? sp.state(0).theta(d - 1) :
+                                   sp.particle().value().theta_lb0(d);
             double theta_ub0 = sp.particle().value().theta_ub0(d);
 
-            std::uniform_real_distribution<> rphi(
-                    phi_lb0, phi_ub0);
-            std::uniform_real_distribution<> rtheta(
-                    theta_lb0, theta_ub0);
+            std::uniform_real_distribution<> rphi(phi_lb0, phi_ub0);
+            std::uniform_real_distribution<> rtheta(theta_lb0, theta_ub0);
             sp.state(0).phi(d) = rphi(sp.rng());
             sp.state(0).theta(d) = rtheta(sp.rng());
         }
@@ -87,4 +83,4 @@ class pet_init : public BASE_INIT<pet_state, pet_init>
     }
 };
 
-#endif // VSMC_EXAMPLE_PET_INIT_HPP
+#endif  // VSMC_EXAMPLE_PET_INIT_HPP

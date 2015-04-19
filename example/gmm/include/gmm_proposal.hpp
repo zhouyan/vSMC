@@ -34,47 +34,46 @@
 
 class gmm_proposal
 {
-    public :
+    public:
+    typedef const vsmc::Sampler<gmm_state> *value_type;
 
-    typedef const vsmc::Sampler<gmm_state> * value_type;
+    gmm_proposal() {}
+    gmm_proposal(value_type) {}
 
-    gmm_proposal () {}
-    gmm_proposal (value_type) {}
-
-    void proposal_iter (std::size_t, vsmc::Particle<gmm_state> &particle) const
+    void proposal_iter(std::size_t, vsmc::Particle<gmm_state> &particle) const
     {
         double alpha = particle.value().state(0, 0).alpha();
         double weight_sd, mu_sd, lambda_sd;
         alpha2sd(alpha, mu_sd, lambda_sd, weight_sd);
-        for (vsmc::Particle<gmm_state>::size_type i = 0;
-                i != particle.size(); ++i) {
-            particle.value().state(i, 0).mu_sd()     = mu_sd;
+        for (vsmc::Particle<gmm_state>::size_type i = 0; i != particle.size();
+             ++i) {
+            particle.value().state(i, 0).mu_sd() = mu_sd;
             particle.value().state(i, 0).lambda_sd() = lambda_sd;
             particle.value().state(i, 0).weight_sd() = weight_sd;
         }
     }
 
-    void proposal_init (vsmc::Particle<gmm_state> &particle) const
+    void proposal_init(vsmc::Particle<gmm_state> &particle) const
     {
-        for (vsmc::Particle<gmm_state>::size_type i = 0;
-                i != particle.size(); ++i) {
-            alpha2sd(
-                    particle.value().state(i, 0).alpha(),
-                    particle.value().state(i, 0).mu_sd(),
-                    particle.value().state(i, 0).lambda_sd(),
-                    particle.value().state(i, 0).weight_sd());
+        for (vsmc::Particle<gmm_state>::size_type i = 0; i != particle.size();
+             ++i) {
+            alpha2sd(particle.value().state(i, 0).alpha(),
+                     particle.value().state(i, 0).mu_sd(),
+                     particle.value().state(i, 0).lambda_sd(),
+                     particle.value().state(i, 0).weight_sd());
         }
     }
 
-    private :
-
-    void alpha2sd (double alpha,
-            double &mu_sd, double &lambda_sd, double &weight_sd) const
+    private:
+    void alpha2sd(double alpha,
+                  double &mu_sd,
+                  double &lambda_sd,
+                  double &weight_sd) const
     {
         using std::sqrt;
 
         alpha = alpha < 0.05 ? 0.05 : alpha;
-        mu_sd     = 0.15 / alpha;
+        mu_sd = 0.15 / alpha;
         lambda_sd = (1 + sqrt(1.0 / alpha)) * 0.15;
         weight_sd = (1 + sqrt(1.0 / alpha)) * 0.2;
     }
@@ -82,34 +81,32 @@ class gmm_proposal
 
 class gmm_proposal_adaptive
 {
-    public :
+    public:
+    typedef const vsmc::Sampler<gmm_state> *value_type;
 
-    typedef const vsmc::Sampler<gmm_state> * value_type;
+    gmm_proposal_adaptive(value_type sampler) : sampler_(sampler) {}
 
-    gmm_proposal_adaptive (value_type sampler) : sampler_(sampler) {}
-
-    void proposal_iter (std::size_t, vsmc::Particle<gmm_state> &particle) const
+    void proposal_iter(std::size_t, vsmc::Particle<gmm_state> &particle) const
     {
         using std::sqrt;
 
         double coeff = 2.38 / sqrt(static_cast<double>(
-                    particle.value().state(0, 0).comp_num()));
-        double mu_sd     = coeff * get_sd("rm.mu");
+                                  particle.value().state(0, 0).comp_num()));
+        double mu_sd = coeff * get_sd("rm.mu");
         double lambda_sd = coeff * get_sd("rm.lambda");
         double weight_sd = coeff * get_sd("rm.weight");
-        for (vsmc::Particle<gmm_state>::size_type i = 0;
-                i != particle.size(); ++i) {
-            particle.value().state(i, 0).mu_sd()     = mu_sd;
+        for (vsmc::Particle<gmm_state>::size_type i = 0; i != particle.size();
+             ++i) {
+            particle.value().state(i, 0).mu_sd() = mu_sd;
             particle.value().state(i, 0).lambda_sd() = lambda_sd;
             particle.value().state(i, 0).weight_sd() = weight_sd;
         }
     }
 
-    private :
-
+    private:
     const vsmc::Sampler<gmm_state> *const sampler_;
 
-    double get_sd (const std::string &name) const
+    double get_sd(const std::string &name) const
     {
         using std::sqrt;
 
@@ -121,4 +118,4 @@ class gmm_proposal_adaptive
     }
 };
 
-#endif // VSMC_EXAMPLE_GMM_PROPOSAL_HPP
+#endif  // VSMC_EXAMPLE_GMM_PROPOSAL_HPP

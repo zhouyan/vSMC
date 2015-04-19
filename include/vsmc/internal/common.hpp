@@ -38,7 +38,6 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
-
 #include <vsmc/math/cblas.hpp>
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>
@@ -75,4 +74,4 @@
 #include <sstream>
 #include <string>
 
-#endif // VSMC_INTERNAL_COMMON_HPP
+#endif  // VSMC_INTERNAL_COMMON_HPP

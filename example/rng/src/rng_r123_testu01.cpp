@@ -42,31 +42,36 @@
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4521)
+#pragma warning(disable : 4521)
 #endif
 #include <Random123/conventional/Engine.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
-#define VSMC_RNG_TESTU01_FUNCTION_R123(Eng) \
-extern "C" {                                                                 \
-    inline double rng_##Eng (void)                                           \
+#define VSMC_RNG_TESTU01_FUNCTION_R123(Eng)                                  \
+    extern "C" {                                                             \
+    inline double rng_##Eng(void)                                            \
     {                                                                        \
         static r123::Engine<r123::Eng> eng;                                  \
         static std::uniform_real_distribution<double> runif(0, 1);           \
                                                                              \
         return runif(eng);                                                   \
     }                                                                        \
-}
+    }
 
-#define VSMC_RNG_TESTU01_OPTION_R123(Eng) \
+#define VSMC_RNG_TESTU01_OPTION_R123(Eng)                                    \
     bool rng_testu01_##Eng = false;                                          \
-    option.add(#Eng, "Test r123::Engine<r123::" #Eng ">", &rng_testu01_##Eng,\
-            false);
+    option.add(#Eng,                                                         \
+               "Test r123::Engine<r123::" #Eng ">",                          \
+               &rng_testu01_##Eng,                                           \
+               false);
 
 #if VSMC_HAS_AES_NI
-namespace r123 {typedef ARS4x32_R<7> ARS4x32_R7;}
+namespace r123
+{
+typedef ARS4x32_R<7> ARS4x32_R7;
+}
 VSMC_RNG_TESTU01_FUNCTION_R123(AESNI4x32)
 VSMC_RNG_TESTU01_FUNCTION_R123(ARS4x32_R7)
 #endif
@@ -79,7 +84,7 @@ VSMC_RNG_TESTU01_FUNCTION_R123(Threefry4x32)
 VSMC_RNG_TESTU01_FUNCTION_R123(Threefry2x64)
 VSMC_RNG_TESTU01_FUNCTION_R123(Threefry4x64)
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TESTU01_OPTION_PRE;
 

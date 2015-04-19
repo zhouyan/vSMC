@@ -34,31 +34,34 @@
 
 #include <vsmc/resample/common.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
 typedef std::integral_constant<ResampleScheme, Multinomial>
     ResampleMultinomial;
 
-} // namespace vsmc::internal
+}  // namespace vsmc::internal
 
 /// \brief Multinomial resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleMultinomial>
+template <> class Resample<internal::ResampleMultinomial>
 {
-    public :
-
+    public:
     template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
+    void operator()(std::size_t M,
+                    std::size_t N,
+                    RngType &rng,
+                    const double *weight,
+                    IntType *replication)
     {
         U01SequenceSorted<RngType> u01seq(N, rng);
         internal::inversion(M, N, weight, u01seq, replication);
     }
-}; // Mulitnomial resampling
+};  // Mulitnomial resampling
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif //  VSMC_RESAMPLE_MULTINOMIAL_HPP
+#endif  //  VSMC_RESAMPLE_MULTINOMIAL_HPP

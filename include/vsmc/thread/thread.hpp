@@ -42,4 +42,4 @@
 #include <vsmc/thread/thread_guard.hpp>
 #include <vsmc/thread/thread_num.hpp>
 
-#endif // VSMC_THREAD_THREAD_HPP
+#endif  // VSMC_THREAD_THREAD_HPP

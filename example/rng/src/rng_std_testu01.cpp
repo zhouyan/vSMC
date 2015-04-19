@@ -31,18 +31,18 @@
 
 #include "rng_testu01.hpp"
 
-#define VSMC_RNG_TESTU01_FUNCTION_CXX11(Eng) \
-extern "C" {                                                                 \
-    inline double rng_##Eng (void)                                           \
+#define VSMC_RNG_TESTU01_FUNCTION_CXX11(Eng)                                 \
+    extern "C" {                                                             \
+    inline double rng_##Eng(void)                                            \
     {                                                                        \
-        static std::Eng eng;                                         \
-        static std::uniform_real_distribution<double> runif(0, 1);   \
+        static std::Eng eng;                                                 \
+        static std::uniform_real_distribution<double> runif(0, 1);           \
                                                                              \
         return runif(eng);                                                   \
     }                                                                        \
-}
+    }
 
-#define VSMC_RNG_TESTU01_OPTION_CXX11(Eng) \
+#define VSMC_RNG_TESTU01_OPTION_CXX11(Eng)                                   \
     bool rng_testu01_##Eng = false;                                          \
     option.add(#Eng, "Test std::" #Eng, &rng_testu01_##Eng, false);
 
@@ -56,7 +56,7 @@ VSMC_RNG_TESTU01_FUNCTION_CXX11(ranlux24)
 VSMC_RNG_TESTU01_FUNCTION_CXX11(ranlux48)
 VSMC_RNG_TESTU01_FUNCTION_CXX11(knuth_b)
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TESTU01_OPTION_PRE;
 

@@ -31,16 +31,14 @@
 
 #include "rng_cl.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     if (argc < 6) {
-        std::cout << "Usage: " << argv[0]
-            << " <platform name>"
-            << " <device vendor>"
-            << " <device type>"
-            << " <fp type>"
-            << " <number of samples>"
-            << std::endl;
+        std::cout << "Usage: " << argv[0] << " <platform name>"
+                  << " <device vendor>"
+                  << " <device type>"
+                  << " <fp type>"
+                  << " <number of samples>" << std::endl;
         return -1;
     }
 
@@ -67,24 +65,22 @@ int main (int argc, char **argv)
     std::size_t N = static_cast<std::size_t>(std::atoi(argv[5]));
 
     std::ifstream src_file("rng_cl.cl");
-    std::string src(
-            (std::istreambuf_iterator<char>(src_file)),
-            (std::istreambuf_iterator<char>()));
+    std::string src((std::istreambuf_iterator<char>(src_file)),
+                    (std::istreambuf_iterator<char>()));
     src_file.close();
-    src = use_double ?
-        "#define VSMC_HAS_OPENCL_DOUBLE 1\n" + src:
-        "#define VSMC_HAS_OPENCL_DOUBLE 0\n" + src;
+    src = use_double ? "#define VSMC_HAS_OPENCL_DOUBLE 1\n" + src :
+                       "#define VSMC_HAS_OPENCL_DOUBLE 0\n" + src;
 
     std::string opt;
     for (int i = 6; i != argc; ++i) {
         opt += " ";
-        opt += argv[i] ;
+        opt += argv[i];
     }
 
     cl::Program program = manager.create_program(src);
     std::string name;
     manager.platform().getInfo(static_cast<cl_device_info>(CL_PLATFORM_NAME),
-            &name);
+                               &name);
 
     std::ofstream output_log;
     output_log.open("rng_cl.log");
@@ -103,10 +99,10 @@ int main (int argc, char **argv)
     std::cout << std::string(120, '=') << std::endl;
     std::cout << "Using platform: " << name << std::endl;
     manager.device().getInfo(static_cast<cl_device_info>(CL_DEVICE_NAME),
-            &name);
+                             &name);
     std::cout << "Using device:   " << name << std::endl;
     std::cout << "Using fp type:  " << (use_double ? "double" : "float")
-        << std::endl;
+              << std::endl;
     std::cout << std::string(120, '-') << std::endl;
     std::cout << "Number of samples: " << N << std::endl;
 

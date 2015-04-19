@@ -29,7 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-Config
-.add("data_file", "Name of data config", &DataFile, "pet_simulate_data.config")
-.add("simple_model",  "Enable simple model with components number",  &SM, 1)
-.add("complex_model", "Enable complex model with components number", &CM, 2);
+Config.add("data_file",
+           "Name of data config",
+           &DataFile,
+           "pet_simulate_data.config")
+    .add("simple_model", "Enable simple model with components number", &SM, 1)
+    .add("complex_model",
+         "Enable complex model with components number",
+         &CM,
+         2);

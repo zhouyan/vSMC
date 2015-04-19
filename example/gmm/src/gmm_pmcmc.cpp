@@ -32,7 +32,7 @@
 #include "gmm_@smp@.hpp"
 #include "pmcmc.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 #include "options_main.hpp"
 #include "options_pmcmc.hpp"
@@ -45,9 +45,8 @@ int main (int argc, char **argv)
     sampler.init(gmm_init());
     sampler.mcmc(pmcmc_global<gmm_state>(), false);
 
-    Parallel ?
-        sampler.move(pmcmc_local_parallel<gmm_move>(), false):
-        sampler.move(pmcmc_local_serial<gmm_state, gmm_move>(), false);
+    Parallel ? sampler.move(pmcmc_local_parallel<gmm_move>(), false) :
+               sampler.move(pmcmc_local_serial<gmm_state, gmm_move>(), false);
 
     data_info info(DataNum, DataFile.c_str());
     sampler.initialize(&info);
@@ -58,8 +57,10 @@ int main (int argc, char **argv)
     std::ofstream zconst_file;
     zconst_file.open(zconst_file_name.c_str());
     zconst_file << "Schedule Chains";
-    if (SM) zconst_file << " Path." << SM << ' ';
-    if (CM) zconst_file << " Path." << CM << ' ';
+    if (SM)
+        zconst_file << " Path." << SM << ' ';
+    if (CM)
+        zconst_file << " Path." << CM << ' ';
     zconst_file << std::endl;
     pmcmc_do<gmm_state, gmm_init, gmm_proposal>(Config, sampler, zconst_file);
     zconst_file.close();

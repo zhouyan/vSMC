@@ -46,9 +46,9 @@ bool UseStudentT = false;
 std::ifstream config_file;
 
 config_file.open(DataFile.c_str());
-config_file >> Decay >> DataSetNum >> DataStart >> DataStop
-    >> ModelNum >> DataNum >> ConvNum >> ConvMul
-    >> DataFile >> TimeFile >> ConvFile >> PriorFile >> SDFile >> UseStudentT;
+config_file >> Decay >> DataSetNum >> DataStart >> DataStop >> ModelNum >>
+    DataNum >> ConvNum >> ConvMul >> DataFile >> TimeFile >> ConvFile >>
+    PriorFile >> SDFile >> UseStudentT;
 config_file.close();
 config_file.clear();
 
@@ -58,7 +58,7 @@ if (UseStudentT)
 
 std::ifstream data_file;
 
-std::vector<double> Data(DataNum * DataSetNum);
+std::vector<double> Data(DataNum *DataSetNum);
 data_file.open(DataFile.c_str());
 for (std::size_t r = 0; r != DataSetNum; ++r)
     for (std::size_t c = 0; c != DataNum; ++c)
@@ -73,7 +73,7 @@ for (std::size_t i = 0; i != DataNum; ++i)
 data_file.close();
 data_file.clear();
 
-std::vector<double> Conv(DataNum * ConvNum);
+std::vector<double> Conv(DataNum *ConvNum);
 data_file.open(ConvFile.c_str());
 for (std::size_t r = 0; r != ConvNum; ++r)
     for (std::size_t c = 0; c != DataNum; ++c)
@@ -85,17 +85,25 @@ std::vector<double> Prior(ModelNum * 8 + 4);
 std::size_t prior_offset = 0;
 data_file.open(PriorFile.c_str());
 for (std::size_t i = 0; i != ModelNum; ++i)
-    data_file >> Prior[prior_offset++]; pet_ignore(data_file); // phi_lb0
+    data_file >> Prior[prior_offset++];
+pet_ignore(data_file);  // phi_lb0
 for (std::size_t i = 0; i != ModelNum; ++i)
-    data_file >> Prior[prior_offset++]; pet_ignore(data_file); // phi_ub0
+    data_file >> Prior[prior_offset++];
+pet_ignore(data_file);  // phi_ub0
 for (std::size_t i = 0; i != ModelNum; ++i)
-    data_file >> Prior[prior_offset++]; pet_ignore(data_file); // theta_lb0
+    data_file >> Prior[prior_offset++];
+pet_ignore(data_file);  // theta_lb0
 for (std::size_t i = 0; i != ModelNum; ++i)
-    data_file >> Prior[prior_offset++]; pet_ignore(data_file); // theta_ub0
-data_file >> Prior[prior_offset++]; pet_ignore(data_file); // lambda_a0
-data_file >> Prior[prior_offset++]; pet_ignore(data_file); // lambda_b0
-data_file >> Prior[prior_offset++]; pet_ignore(data_file); // nu_a0
-data_file >> Prior[prior_offset++]; pet_ignore(data_file); // nu_b0
+    data_file >> Prior[prior_offset++];
+pet_ignore(data_file);  // theta_ub0
+data_file >> Prior[prior_offset++];
+pet_ignore(data_file);  // lambda_a0
+data_file >> Prior[prior_offset++];
+pet_ignore(data_file);  // lambda_b0
+data_file >> Prior[prior_offset++];
+pet_ignore(data_file);  // nu_a0
+data_file >> Prior[prior_offset++];
+pet_ignore(data_file);  // nu_b0
 data_file.close();
 data_file.clear();
 
@@ -103,28 +111,36 @@ std::vector<double> SD(ModelNum * 2 + 2);
 std::size_t sd_offset = 0;
 data_file.open(SDFile.c_str());
 for (std::size_t i = 0; i != ModelNum; ++i)
-    data_file >> SD[sd_offset++]; pet_ignore(data_file); // phi_sd
+    data_file >> SD[sd_offset++];
+pet_ignore(data_file);  // phi_sd
 for (std::size_t i = 0; i != ModelNum; ++i)
-    data_file >> SD[sd_offset++]; pet_ignore(data_file); // theta_sd
-data_file >> SD[sd_offset++]; pet_ignore(data_file); // lamda_sd;
-data_file >> SD[sd_offset++]; pet_ignore(data_file); // nu_sd;
+    data_file >> SD[sd_offset++];
+pet_ignore(data_file);  // theta_sd
+data_file >> SD[sd_offset++];
+pet_ignore(data_file);  // lamda_sd;
+data_file >> SD[sd_offset++];
+pet_ignore(data_file);  // nu_sd;
 data_file.close();
 data_file.clear();
 
-data_info  info_d = {DataNum, &Data[0]};
-time_info  info_t = {DataNum, &Time[0]};
-conv_info  info_c = {ConvNum, ConvMul, &Conv[0]};
+data_info info_d = {DataNum, &Data[0]};
+time_info info_t = {DataNum, &Time[0]};
+conv_info info_c = {ConvNum, ConvMul, &Conv[0]};
 prior_info info_p = {ModelNum, &Prior[0]};
-sd_info    info_s = {ModelNum, &SD[0]};
+sd_info info_s = {ModelNum, &SD[0]};
 model_info info_m = {Decay, ModelType};
-pet_info info = {
-    &info_d, true,
-    &info_t, true,
-    &info_c, true,
-    &info_p, true,
-    &info_s, true,
-    &info_m, true
-};
+pet_info info = {&info_d,
+                 true,
+                 &info_t,
+                 true,
+                 &info_c,
+                 true,
+                 &info_p,
+                 true,
+                 &info_s,
+                 true,
+                 &info_m,
+                 true};
 
 if (Interactive) {
     std::cout << "Data reading is done." << std::endl;

@@ -34,9 +34,8 @@
 
 class pet_move_phi : public BASE_MOVE<pet_state, pet_move_phi>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<pet_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<pet_state> sp)
     {
         using std::log;
 
@@ -45,8 +44,7 @@ class pet_move_phi : public BASE_MOVE<pet_state, pet_move_phi>
         sp.state(0).save_old();
 
         for (std::size_t d = 0; d != cn; ++d) {
-            std::normal_distribution<> rphi(
-                    0, sp.state(0).phi_sd(d));
+            std::normal_distribution<> rphi(0, sp.state(0).phi_sd(d));
             sp.state(0).phi(d) += rphi(sp.rng());
         }
 
@@ -64,9 +62,8 @@ class pet_move_phi : public BASE_MOVE<pet_state, pet_move_phi>
 
 class pet_move_theta : public BASE_MOVE<pet_state, pet_move_theta>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<pet_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<pet_state> sp)
     {
         using std::log;
 
@@ -75,8 +72,7 @@ class pet_move_theta : public BASE_MOVE<pet_state, pet_move_theta>
         sp.state(0).save_old();
 
         for (std::size_t d = 0; d != cn; ++d) {
-            std::normal_distribution<> rtheta(
-                    0, sp.state(0).theta_sd(d));
+            std::normal_distribution<> rtheta(0, sp.state(0).theta_sd(d));
             sp.state(0).theta(d) += rtheta(sp.rng());
         }
 
@@ -94,14 +90,12 @@ class pet_move_theta : public BASE_MOVE<pet_state, pet_move_theta>
 
 class pet_move_lambda : public BASE_MOVE<pet_state, pet_move_lambda>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<pet_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<pet_state> sp)
     {
         using std::log;
 
-        std::lognormal_distribution<> rlambda(
-                0, sp.state(0).lambda_sd());
+        std::lognormal_distribution<> rlambda(0, sp.state(0).lambda_sd());
         std::uniform_real_distribution<> runif(0, 1);
         sp.state(0).save_old();
 
@@ -112,8 +106,8 @@ class pet_move_lambda : public BASE_MOVE<pet_state, pet_move_lambda>
         if (!is_valid(sp.particle().value().log_likelihood(sp.state(0))))
             return sp.state(0).mh_reject_lambda(0, 1);
         sp.particle().value().log_target(sp.state(0), false);
-        double p = sp.state(0).log_target_diff() +
-            sp.state(0).log_lambda_diff();
+        double p =
+            sp.state(0).log_target_diff() + sp.state(0).log_lambda_diff();
         double u = log(runif(sp.rng()));
 
         return sp.state(0).mh_reject_lambda(p, u);
@@ -122,9 +116,8 @@ class pet_move_lambda : public BASE_MOVE<pet_state, pet_move_lambda>
 
 class pet_move_nu : public BASE_MOVE<pet_state, pet_move_nu>
 {
-    public :
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<pet_state> sp)
+    public:
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<pet_state> sp)
     {
         using std::log;
 
@@ -151,10 +144,9 @@ class pet_move_nu : public BASE_MOVE<pet_state, pet_move_nu>
 
 class pet_move : public BASE_MOVE<pet_state, pet_move>
 {
-    public :
-
-    std::size_t move_state (std::size_t iter,
-            vsmc::SingleParticle<pet_state> sp)
+    public:
+    std::size_t move_state(std::size_t iter,
+                           vsmc::SingleParticle<pet_state> sp)
     {
         std::size_t acc = 0;
         acc += move_phi_.move_state(iter, sp);
@@ -165,12 +157,11 @@ class pet_move : public BASE_MOVE<pet_state, pet_move>
         return acc;
     }
 
-    private :
-
-    pet_move_phi    move_phi_;
-    pet_move_theta  move_theta_;
+    private:
+    pet_move_phi move_phi_;
+    pet_move_theta move_theta_;
     pet_move_lambda move_lambda_;
-    pet_move_nu     move_nu_;
+    pet_move_nu move_nu_;
 };
 
-#endif // VSMC_EXAMPLE_PET_MOVE
+#endif  // VSMC_EXAMPLE_PET_MOVE

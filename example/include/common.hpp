@@ -49,8 +49,7 @@ static int ProposalScale;
 
 static vsmc::ProgramOptionMap Config;
 
-template <typename T>
-inline void grow (std::size_t num, T &orig)
+template <typename T> inline void grow(std::size_t num, T &orig)
 {
     if (orig.size() < num && num > 0) {
         T temp(num);
@@ -62,12 +61,12 @@ inline void grow (std::size_t num, T &orig)
     }
 }
 
-inline bool is_valid (double val)
+inline bool is_valid(double val)
 {
-    const double val_max = std::numeric_limits<double>::max VSMC_MNE ();
+    const double val_max = std::numeric_limits<double>::max VSMC_MNE();
     if (val > -val_max && val < val_max)
         return true;
     return false;
 }
 
-#endif // VSMC_EXAMPLE_COMMON_HPP
+#endif  // VSMC_EXAMPLE_COMMON_HPP

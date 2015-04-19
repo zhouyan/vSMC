@@ -61,11 +61,13 @@
 /// standard normal random variates. It is fine if we just happen to need four
 /// random numbers. But this is rarely the case. Then we need some tricky code
 /// to keep track of when to call `threefry4x32` again etc., or call it every
-/// time we need a random number and waste a lot of time and generated numbers.
+/// time we need a random number and waste a lot of time and generated
+/// numbers.
 ///
 /// vSMC's RNG module provide some facilities to partially solve this problem.
 ///
-/// [Random123]: http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
+/// [Random123]:
+/// http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
 ///
 /// ## RNG engines
 ///
@@ -141,7 +143,8 @@
 /// precision standard Normal random variates using `threefry4x32` engines.
 ///
 /// Not all OpenCL devices have `double` precision support. Therefore by
-/// default, only 32-bits and `float` versions of these types and functions are
+/// default, only 32-bits and `float` versions of these types and functions
+/// are
 /// defined. To enable 64-bits and `double` versions, define the macro
 /// `VSMC_HAS_OPENCL_DOUBLE` with a non-zero value.
 ///
@@ -151,7 +154,8 @@
 /// ~~~{.c}
 /// NORMAL01_4x32
 /// ~~~
-/// is the type used to construct objects that can be used to generate standard
+/// is the type used to construct objects that can be used to generate
+/// standard
 /// Normal random variates using `threefry4x32` engines. The generated results
 /// is `double` if `VSMC_HAS_OPENCL_DOUBLE` is defined and non-zero or `float`
 /// otherwise.
@@ -176,7 +180,7 @@
 #include <Random123/threefry.h>
 #include <Random123/philox.h>
 
-#define VSMC_DEFINE_RNG_URNG_RNG_T(RNG, N, W) \
+#define VSMC_DEFINE_RNG_URNG_RNG_T(RNG, N, W)                                \
     typedef struct {                                                         \
         RNG##N##x##W##_key_t key;                                            \
         RNG##N##x##W##_ctr_t ctr;                                            \
@@ -184,9 +188,9 @@
         unsigned char remain;                                                \
     } RNG##N##x##W##_rng_t;
 
-#define VSMC_DEFINE_RNG_URNG_INIT(RNG, N, W) \
-    VSMC_STATIC_INLINE void RNG##N##x##W##_init(                             \
-            RNG##N##x##W##_rng_t *rng, uint##W##_t seed)                     \
+#define VSMC_DEFINE_RNG_URNG_INIT(RNG, N, W)                                 \
+    VSMC_STATIC_INLINE void RNG##N##x##W##_init(RNG##N##x##W##_rng_t *rng,   \
+                                                uint##W##_t seed)            \
     {                                                                        \
         RNG##N##x##W##_ctr_t init_ctr = {{}};                                \
         RNG##N##x##W##_ukey_t ukey = {{}};                                   \
@@ -197,9 +201,9 @@
         rng->remain = 0;                                                     \
     }
 
-#define VSMC_DEFINE_RNG_URNG_RAND(RNG, N, W) \
+#define VSMC_DEFINE_RNG_URNG_RAND(RNG, N, W)                                 \
     VSMC_STATIC_INLINE uint##W##_t RNG##N##x##W##_rand(                      \
-            RNG##N##x##W##_rng_t *rng)                                       \
+        RNG##N##x##W##_rng_t *rng)                                           \
     {                                                                        \
         unsigned char remain = rng->remain;                                  \
         RNG##N##x##W##_ctr_t rnd = rng->rnd;                                 \
@@ -304,7 +308,7 @@ typedef philox4x64_rng_t cburng4x64_rng_t;
 #define cburng2x64_rand philox2x64_rand
 /// \ingroup CLRNG
 #define cburng4x64_rand philox4x64_rand
-#else // VSMC_USE_PHILOX_CBURNG
+#else  // VSMC_USE_PHILOX_CBURNG
 /// \ingroup CLRNG
 typedef threefry2x32_rng_t cburng2x32_rng_t;
 /// \ingroup CLRNG
@@ -329,6 +333,6 @@ typedef threefry4x64_rng_t cburng4x64_rng_t;
 #define cburng2x64_rand threefry2x64_rand
 /// \ingroup CLRNG
 #define cburng4x64_rand threefry4x64_rand
-#endif // VSMC_USE_PHILOX_CBURNG
+#endif  // VSMC_USE_PHILOX_CBURNG
 
-#endif // VSMC_RNG_URNG_H
+#endif  // VSMC_RNG_URNG_H

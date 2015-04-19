@@ -32,7 +32,7 @@
 #include "node_@smp@.hpp"
 #include "smc.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 #include "options_main.hpp"
 #include "options_smc.hpp"
@@ -41,10 +41,9 @@ int main (int argc, char **argv)
 
     //////////////////////////////////////////////////////////////////////
 
-    vsmc::Sampler<node_state> sampler(ParticleNum,
-            vsmc::Stratified, Threshold);
-    sampler
-        .init(node_init())
+    vsmc::Sampler<node_state> sampler(
+        ParticleNum, vsmc::Stratified, Threshold);
+    sampler.init(node_init())
         .mcmc(node_move_a0(), true)
         .mcmc(node_move_a1(), true)
         .mcmc(node_move_a2(), true)
@@ -52,8 +51,8 @@ int main (int argc, char **argv)
     for (std::size_t i = 0; i != (SM > CM ? SM : CM) - 1; ++i)
         sampler.mcmc(node_move_k(i), true);
     if (ProposalScale == 2) {
-        sampler.monitor("node_moments", 2 * (2 + (SM > CM ? SM : CM)),
-                node_moments());
+        sampler.monitor(
+            "node_moments", 2 * (2 + (SM > CM ? SM : CM)), node_moments());
     }
 
     data_info info(DataNum, Resolution, DataFile.c_str());

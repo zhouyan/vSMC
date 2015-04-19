@@ -41,84 +41,99 @@
 #error __STDC_CONSTANT_MACROS not defined before #<stdint.h>
 #endif
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
 template <std::size_t K, std::size_t, std::size_t, typename T>
-inline void rng_array_left_assign (Array<T, K> &, std::false_type) {}
+inline void rng_array_left_assign(Array<T, K> &, std::false_type)
+{
+}
 
 template <std::size_t K, std::size_t A, std::size_t I, typename T>
-inline void rng_array_left_assign (Array<T, K> &state, std::true_type)
+inline void rng_array_left_assign(Array<T, K> &state, std::true_type)
 {
     state[Position<I>()] = state[Position<I + A>()];
-    rng_array_left_assign<K, A, I + 1>(state,
-            std::integral_constant<bool, (I + A + 1 < K)>());
+    rng_array_left_assign<K, A, I + 1>(
+        state, std::integral_constant<bool, (I + A + 1 < K)>());
 }
 
 template <std::size_t K, std::size_t, typename T>
-inline void rng_array_left_zero (Array<T, K> &, std::false_type) {}
+inline void rng_array_left_zero(Array<T, K> &, std::false_type)
+{
+}
 
 template <std::size_t K, std::size_t I, typename T>
-inline void rng_array_left_zero (Array<T, K> &state, std::true_type)
+inline void rng_array_left_zero(Array<T, K> &state, std::true_type)
 {
     state[Position<I>()] = 0;
-    rng_array_left_zero<K, I + 1>(state,
-            std::integral_constant<bool, (I + 1 < K)>());
+    rng_array_left_zero<K, I + 1>(
+        state, std::integral_constant<bool, (I + 1 < K)>());
 }
 
 template <std::size_t K, std::size_t A, bool fillzero, typename T>
-inline void rng_array_left_shift (Array<T, K> &state)
+inline void rng_array_left_shift(Array<T, K> &state)
 {
-    rng_array_left_assign<K, A, 0>(state,
-            std::integral_constant<bool, (A > 0 && A < K)>());
-    rng_array_left_zero<K, K - A>(state,
-            std::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
+    rng_array_left_assign<K, A, 0>(
+        state, std::integral_constant<bool, (A > 0 && A < K)>());
+    rng_array_left_zero<K, K - A>(
+        state, std::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
 }
 
 template <std::size_t K, std::size_t, std::size_t, typename T>
-inline void rng_array_right_assign (Array<T, K> &, std::false_type) {}
+inline void rng_array_right_assign(Array<T, K> &, std::false_type)
+{
+}
 
 template <std::size_t K, std::size_t A, std::size_t I, typename T>
-inline void rng_array_right_assign (Array<T, K> &state, std::true_type)
+inline void rng_array_right_assign(Array<T, K> &state, std::true_type)
 {
     state[Position<I>()] = state[Position<I - A>()];
-    rng_array_right_assign<K, A, I - 1>(state,
-            std::integral_constant<bool, (A < I)>());
+    rng_array_right_assign<K, A, I - 1>(
+        state, std::integral_constant<bool, (A < I)>());
 }
 
 template <std::size_t K, std::size_t, typename T>
-inline void rng_array_right_zero (Array<T, K> &, std::false_type) {}
+inline void rng_array_right_zero(Array<T, K> &, std::false_type)
+{
+}
 
 template <std::size_t K, std::size_t I, typename T>
-inline void rng_array_right_zero (Array<T, K> &state, std::true_type)
+inline void rng_array_right_zero(Array<T, K> &state, std::true_type)
 {
     state[Position<I>()] = 0;
     rng_array_right_zero<K, I - 1>(state,
-            std::integral_constant<bool, (I > 0)>());
+                                   std::integral_constant<bool, (I > 0)>());
 }
 
 template <std::size_t K, std::size_t A, bool fillzero, typename T>
-inline void rng_array_right_shift (Array<T, K> &state)
+inline void rng_array_right_shift(Array<T, K> &state)
 {
-    rng_array_right_assign<K, A, K - 1>(state,
-            std::integral_constant<bool, (A > 0 && A < K)>());
-    rng_array_right_zero<K, A - 1>(state,
-            std::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
+    rng_array_right_assign<K, A, K - 1>(
+        state, std::integral_constant<bool, (A > 0 && A < K)>());
+    rng_array_right_zero<K, A - 1>(
+        state, std::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
 }
 
 template <typename SeedSeq, typename U, typename V = U, typename W = V>
-struct is_seed_seq :
-    public std::integral_constant<bool,
-    !std::is_convertible<SeedSeq, U>::value &&
-    !std::is_convertible<SeedSeq, V>::value &&
-    !std::is_convertible<SeedSeq, W>::value &&
-    !std::is_same<typename std::remove_cv<SeedSeq>::type, U>::value &&
-    !std::is_same<typename std::remove_cv<SeedSeq>::type, V>::value &&
-    !std::is_same<typename std::remove_cv<SeedSeq>::type, W>::value> {};
+struct is_seed_seq
+    : public std::integral_constant<
+          bool,
+          !std::is_convertible<SeedSeq, U>::value &&
+              !std::is_convertible<SeedSeq, V>::value &&
+              !std::is_convertible<SeedSeq, W>::value &&
+              !std::is_same<typename std::remove_cv<SeedSeq>::type,
+                            U>::value &&
+              !std::is_same<typename std::remove_cv<SeedSeq>::type,
+                            V>::value &&
+              !std::is_same<typename std::remove_cv<SeedSeq>::type,
+                            W>::value> {
+};
 
-} // namespace vsmc::internal
+}  // namespace vsmc::internal
 
-} // namespace vsmc
+}  // namespace vsmc
 
-#endif // VSMC_RNG_INTERNAL_COMMON_HPP
+#endif  // VSMC_RNG_INTERNAL_COMMON_HPP

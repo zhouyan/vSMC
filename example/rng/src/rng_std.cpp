@@ -31,7 +31,7 @@
 
 #include "rng_test.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TEST_PRE(rng_std);
 
