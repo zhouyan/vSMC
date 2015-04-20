@@ -34,68 +34,21 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/stop_watch.hpp>
+#include <chrono>
 #include <thread>
 
 namespace vsmc
 {
 
-/// \brief The default `ThisThread` structure
-/// \ingroup Progress
-class ProgressThisThread
-{
-    public:
-    static void sleep(double s)
-    {
-        double ms = std::floor(s * 1000);
-        if (s < 1.0)
-            s = 1.0;
-        std::this_thread::sleep_for(std::chrono::milliseconds(
-            static_cast<std::chrono::milliseconds::rep>(ms)));
-    }
-}; // class ProgressThisThread
-
 /// \brief Display a progress bar while algorithm proceed
 /// \ingroup Progress
-///
-/// \tparam ThreadType Any type that (partially) follows C++11 `std::thread`
-/// interface. In particular, the following calls shal be supported,
-/// ~~~{.cpp}
-/// void (task *) (void *); // A function pointer
-/// void *context;          // A void pointer
-/// ThreadType *thread_ptr_ = new ThreadType(task, context);
-/// thread_ptr_->joinable();
-/// thread_ptr_->join();
-/// delete thread_ptr_;
-/// ~~~
-/// \tparam ThisThread This shall be a class that provides a `sleep` static
-/// member function that allows the calling thread to sleep for a specified
-/// time in seconds. A simple implementation using C++11 `sleep_for` is as the
-/// following,
-/// ~~~{.cpp}
-/// struct ThisThread
-/// {
-///     static void sleep (double s)
-///     {
-///         // Make the interval acurate to milliseconds
-///         double ms = std::max(1.0, std::floor(s * 1000));
-///         std::this_thread::sleep_for(std::chrono::milliseconds(
-///                     static_cast<std::chrono::milliseconds::rep>(ms)));
-///     }
-/// };
-/// ~~~
-/// An implementation using Boost is almost the same except for the namespace
-/// changing from `std` to `boost`.
-template <typename ThreadType = std::thread,
-    typename ThisThread = ProgressThisThread>
 class Progress
 {
     public:
-    typedef ThreadType thread_type;
-
     /// \brief Construct a Progress with an output stream
     Progress(std::ostream &os = std::cout)
         : thread_ptr_(nullptr),
-          interval_(0),
+          interval_ms_(0),
           iter_(0),
           total_(0),
           length_(0),
@@ -114,24 +67,26 @@ class Progress
     {
     }
 
+    ~Progress() { join(); }
+
     /// \brief Start to print the progress
     ///
     /// \param total Total amount of work represented by an integer, for
     /// example file size or SMC algorithm total number of iterations
     /// \param msg A (short) discreptive message
     /// \param length The length of the progress bar between brackets. If it
-    /// is
-    /// zero, then no bar is displayed at all
+    /// is zero, then no bar is displayed at all
     /// \param show_iter Shall the iteration count be displayed.
-    /// \param interval The sleep interval in seconds
+    /// \param interval_s The sleep interval in seconds
     void start(std::size_t total, const std::string &msg = std::string(),
-        std::size_t length = 0, bool show_iter = true, double interval = 0.1)
+        std::size_t length = 0, bool show_iter = true,
+        double interval_s = 0.1)
     {
         total_ = total;
         msg_ = msg;
         length_ = length;
         show_iter_ = show_iter;
-        interval_ = interval;
+        interval_ms_ = std::max(1.0, interval_s * 1000);
 
         iter_ = 0;
         print_first_ = true;
@@ -166,9 +121,9 @@ class Progress
 
     private:
     StopWatch watch_;
-    thread_type *thread_ptr_;
+    std::thread *thread_ptr_;
 
-    double interval_;
+    double interval_ms_;
     std::size_t iter_;
     std::size_t total_;
     std::size_t length_;
@@ -192,7 +147,7 @@ class Progress
     void fork()
     {
         join();
-        thread_ptr_ = new thread_type(print_start_, this);
+        thread_ptr_ = new std::thread(print_start_, this);
     }
 
     void join()
@@ -211,7 +166,9 @@ class Progress
         while (ptr->in_progress_) {
             print_progress(context);
             ptr->os_ << '\r' << std::flush;
-            ThisThread::sleep(ptr->interval_);
+            std::this_thread::sleep_for(std::chrono::milliseconds(
+                static_cast<std::chrono::milliseconds::rep>(
+                    ptr->interval_ms_)));
         }
     }
 

@@ -4,7 +4,8 @@
 
 The library will be C++11 only from this point.
 
-* `vsmc::Array` is no more and its use has been replaced by `std::array`
+* `Array` is no more and its use has been replaced by `std::array`.
+* `Progress` is no longer a class template.
 
 # Changes since v1.1.1
 
