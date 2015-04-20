@@ -38,10 +38,9 @@
 
 class say
 {
-    public :
-
+    public:
     template <typename IntType>
-    void operator() (const tbb::blocked_range<IntType> &block) const
+    void operator()(const tbb::blocked_range<IntType> &block) const
     {
         IntType sum = 0;
         for (IntType i = block.begin(); i != block.end(); ++i)
@@ -52,19 +51,15 @@ class say
 
 class sum
 {
-    public :
+    public:
+    sum() : res_(0) {}
 
-    sum () : res_(0) {}
+    sum(const sum &other, tbb::split) : res_(0) {}
 
-    sum (const sum &other, tbb::split) : res_(0) {}
-
-    void join (const sum &other)
-    {
-        res_ += other.res_;
-    }
+    void join(const sum &other) { res_ += other.res_; }
 
     template <typename IntType>
-    void operator() (const tbb::blocked_range<IntType> &block)
+    void operator()(const tbb::blocked_range<IntType> &block)
     {
         long r = res_;
         for (IntType i = block.begin(); i != block.end(); ++i)
@@ -72,16 +67,13 @@ class sum
         res_ = r;
     }
 
-    long res () const
-    {
-        return res_;
-    }
+    long res() const { return res_; }
 
-    private :
+    private:
     long res_;
 };
 
-int main ()
+int main()
 {
     tbb::parallel_for(tbb::blocked_range<int>(0, 100), say());
     sum s;

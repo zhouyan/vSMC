@@ -56,15 +56,14 @@
 template <typename IntType>
 class TestGCD
 {
-    public :
-
-    IntType norm (IntType begin, IntType end)
+    public:
+    IntType norm(IntType begin, IntType end)
     {
         std::size_t num = static_cast<std::size_t>(end - begin);
         begin_ = begin;
         dispatch_apply_f(num,
-                dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                this, norm_work);
+            dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+            this, norm_work);
         IntType sum = 0;
         for (IntType i = 0; i != end - begin; ++i)
             sum += square_[i];
@@ -72,9 +71,8 @@ class TestGCD
         return sum;
     }
 
-    private :
-
-    static void norm_work (void *test, std::size_t i)
+    private:
+    static void norm_work(void *test, std::size_t i)
     {
         TestGCD<IntType> *pt = static_cast<TestGCD<IntType> *>(test);
         IntType n = static_cast<IntType>(i) + pt->begin_;
@@ -85,7 +83,7 @@ class TestGCD
     IntType begin_;
 };
 
-int main ()
+int main()
 {
     TestGCD<int> test;
     assert(test.norm(1, 11) == 385);

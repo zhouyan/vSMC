@@ -57,7 +57,7 @@
 
 #include <cassert>
 
-int main ()
+int main()
 {
     ::cl_platform_id platform;
     ::cl_device_id device;

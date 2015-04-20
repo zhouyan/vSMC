@@ -31,7 +31,7 @@
 
 #include <immintrin.h>
 
-int main ()
+int main()
 {
     unsigned short r16;
     unsigned r32;

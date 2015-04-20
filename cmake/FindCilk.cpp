@@ -32,7 +32,7 @@
 #include <cilk/cilk.h>
 #include <cilk/reducer_opadd.h>
 
-int main ()
+int main()
 {
     unsigned N = 1000;
     unsigned C = (N * (N - 1)) / 2;

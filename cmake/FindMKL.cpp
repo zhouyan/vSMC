@@ -32,7 +32,7 @@
 #include <vector>
 #include <mkl_vml.h>
 
-int main ()
+int main()
 {
     const std::size_t N = 1000;
     std::vector<double> x(N);

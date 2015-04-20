@@ -35,18 +35,16 @@
 
 class Element
 {
-    public :
+    public:
+    Element(int i, std::vector<int> *src) : i_(i), src_(src) {}
 
-    Element (int i, std::vector<int> *src) : i_(i), src_(src) {}
+    Element(const Element &other) : i_(other.i_), src_(other.src_) {}
 
-    Element (const Element &other) : i_(other.i_), src_(other.src_) {}
+    int i() const { return i_; }
+    int size() const { return src_->size(); }
+    int src() const { return (*src_)[i_]; }
 
-    int i () const {return i_;}
-    int size () const {return src_->size();}
-    int src () const {return (*src_)[i_];}
-
-    private :
-
+    private:
     const int i_;
     std::vector<int> *const src_;
 };
@@ -54,33 +52,31 @@ class Element
 template <typename Derived>
 class Base
 {
-    protected :
+    protected:
+    virtual ~Base() {}
 
-    virtual ~Base () {}
-
-    void eval (int dim, Element elem, int *res)
+    void eval(int dim, Element elem, int *res)
     {
         eval_dispatch(dim, elem, res, &Derived::eval);
     }
 
-    private :
-
+    private:
     template <typename D>
-    void eval_dispatch(int dim, Element elem, int *res,
-            void (D::*) (int, Element, int *))
+    void eval_dispatch(
+        int dim, Element elem, int *res, void (D::*)(int, Element, int *))
     {
         assert((dynamic_cast<Derived *>(this)));
         static_cast<Derived *>(this)->eval(dim, elem, res);
     }
 
-    void eval_dispatch(int dim, Element elem, int *res,
-            void (*) (int, Element, int *))
+    void eval_dispatch(
+        int dim, Element elem, int *res, void (*)(int, Element, int *))
     {
         Derived::eval(dim, elem, res);
     }
 
-    void eval_dispatch(int dim, Element elem, int *res,
-            void (Base::*) (int, Element, int *))
+    void eval_dispatch(
+        int dim, Element elem, int *res, void (Base::*)(int, Element, int *))
     {
         for (int d = 0; d != dim; ++d)
             res[d] = elem.src();
@@ -90,10 +86,9 @@ class Base
 template <>
 class Base<int>
 {
-    protected :
-
-    virtual ~Base () {}
-    virtual void eval (int dim, Element elem, int *res);
+    protected:
+    virtual ~Base() {}
+    virtual void eval(int dim, Element elem, int *res);
 };
 
 // A middle-man who provides the interface operator(), call Base::eval, and
@@ -101,9 +96,8 @@ class Base<int>
 template <typename Derived>
 class Evaluator : public Base<Derived>
 {
-    public :
-
-    void operator() (int N , int dim, int *res)
+    public:
+    void operator()(int N, int dim, int *res)
     {
         std::vector<int> src(N);
         for (int i = 0; i != N; ++i)
@@ -117,9 +111,8 @@ class Evaluator : public Base<Derived>
 
 class StaticImpl : public Evaluator<StaticImpl>
 {
-    public :
-
-    static void eval (int dim, Element elem, int *res)
+    public:
+    static void eval(int dim, Element elem, int *res)
     {
         for (int d = 0; d != dim; ++d)
             res[d] = elem.src();
@@ -128,9 +121,8 @@ class StaticImpl : public Evaluator<StaticImpl>
 
 class NonStaticImpl : public Evaluator<NonStaticImpl>
 {
-    public :
-
-    void eval (int dim, Element elem, int *r)
+    public:
+    void eval(int dim, Element elem, int *r)
     {
         for (int d = 0; d != dim; ++d)
             r[d] = elem.src();
@@ -139,9 +131,8 @@ class NonStaticImpl : public Evaluator<NonStaticImpl>
 
 class VirtualImpl : public Evaluator<VirtualImpl>
 {
-    public :
-
-    void eval (int dim, Element elem, int *r)
+    public:
+    void eval(int dim, Element elem, int *r)
     {
         for (int d = 0; d != dim; ++d)
             r[d] = elem.src();
@@ -149,9 +140,10 @@ class VirtualImpl : public Evaluator<VirtualImpl>
 };
 
 class DefaultImpl : public Evaluator<DefaultImpl>
-{};
+{
+};
 
-int main ()
+int main()
 {
 #ifndef _OPENMP
     assert(0);
@@ -185,7 +177,7 @@ int main ()
         for (int i = 0; i != N; ++i)
             assert(res[i * Dim + d] == i);
 
-    delete [] res;
+    delete[] res;
 
     return 0;
 }

@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <jemalloc/jemalloc.h>
 
-int main ()
+int main()
 {
 #if VSMC_HAS_JEMALLOC_STDAPI
     void *ptr = aligned_alloc(128, 1000000);
