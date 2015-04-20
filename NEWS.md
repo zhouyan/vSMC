@@ -1,3 +1,11 @@
+# Changes since v1.2.0
+
+## Major change
+
+The library will be C++11 only from this point.
+
+* `vsmc::Array` is no more and its use has been replaced by `std::array`
+
 # Changes since v1.1.1
 
 ## New features
