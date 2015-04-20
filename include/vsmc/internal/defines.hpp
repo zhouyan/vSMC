@@ -37,6 +37,9 @@
 /// \brief Avoid MSVC stupid behavior: MNE = Macro No Expansion
 #define VSMC_MNE
 
+/// \brief A constant expression that give maximum of unsigned integer types
+#define VSMC_MAX_UINT(type) static_cast<type>(~(static_cast<type>(0)))
+
 /// \brief CRTP style base classes (virtual) destructor
 /// \ingroup Definitions
 ///

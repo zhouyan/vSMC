@@ -216,8 +216,7 @@ template <MKL_INT, typename> struct MKLUniformBitsTrait;
 template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned> {
     typedef MKLUniformBits32Distribution type;
     static constexpr const unsigned min VSMC_MNE = 0;
-    static constexpr const unsigned max VSMC_MNE =
-        static_cast<unsigned>(~(static_cast<unsigned>(0)));
+    static constexpr const unsigned max VSMC_MNE = VSMC_MAX_UINT(unsigned);
 }; // struct MKLUniformBitsTrait
 
 /// \brief Default uniform bits generator for MKLEngine with
@@ -227,8 +226,7 @@ template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
     typedef MKLUniformBits64Distribution type;
     static constexpr const unsigned MKL_INT64 min VSMC_MNE = 0;
     static constexpr const unsigned MKL_INT64 max VSMC_MNE =
-        static_cast<unsigned MKL_INT64>(
-            ~(static_cast<unsigned MKL_INT64>(0)));
+        VSMC_MAX_UINT(unsigned MKL_INT64);
 }; // struct MKLUniformBitsTrait
 
 /// \brief Default seed for MKL RNG

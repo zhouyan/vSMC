@@ -268,8 +268,7 @@ class XorshiftEngine
     }
 
     static constexpr const result_type _Min = 0;
-    static constexpr const result_type _Max =
-        static_cast<result_type>(~(static_cast<result_type>(0)));
+    static constexpr const result_type _Max = VSMC_MAX_UINT(result_type);
 
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
@@ -323,8 +322,7 @@ class XorshiftEngine
     Array<ResultType, K> state_;
 
     static constexpr const result_type uint32_t_max_ =
-        static_cast<result_type>(
-            static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
+        static_cast<result_type>(VSMC_MAX_UINT(uint32_t));
 }; // class XorshiftEngine
 
 /// \brief Xorwow RNG engine
@@ -374,8 +372,7 @@ class XorwowEngine
     }
 
     static constexpr const result_type _Min = 0;
-    static constexpr const result_type _Max =
-        static_cast<result_type>(~(static_cast<result_type>(0)));
+    static constexpr const result_type _Max = VSMC_MAX_UINT(result_type);
 
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }

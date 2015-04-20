@@ -137,7 +137,7 @@ class SeedGenerator
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_ = static_cast<skip_type>(~static_cast<skip_type>(0));
+        seed_max_ = VSMC_MAX_UINT(skip_type);
         seed_max_ -= seed_max_ % divisor_;
         seed_max_ /= divisor_;
 
@@ -270,7 +270,7 @@ class SeedGenerator<ID, Array<T, K>>
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_.fill(static_cast<skip_type>(~static_cast<skip_type>(0)));
+        seed_max_.fill(VSMC_MAX_UINT(skip_type));
 
         set(seed_);
     }
