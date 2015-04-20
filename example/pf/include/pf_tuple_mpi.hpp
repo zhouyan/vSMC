@@ -45,4 +45,4 @@ template <vsmc::MatrixOrder Order> struct BaseState {
 #include "pf_smp.hpp"
 #include "pf_mpi_do.hpp"
 
-#endif  // VSMC_EXAMPLE_PF_TUPLE_MPI_HPP
+#endif // VSMC_EXAMPLE_PF_TUPLE_MPI_HPP

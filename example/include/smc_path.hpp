@@ -46,4 +46,4 @@ template <typename T> class smc_path : public BASE_PATH<T, smc_path<T>>
     }
 };
 
-#endif  // VSMC_EXAMPLE_SMC_PATH_HPP
+#endif // VSMC_EXAMPLE_SMC_PATH_HPP

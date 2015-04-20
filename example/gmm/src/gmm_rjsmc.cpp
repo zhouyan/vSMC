@@ -34,14 +34,11 @@
 #include "smc.hpp"
 
 template <typename MoveType, typename T>
-inline void
-    do_rjsmc(vsmc::Sampler<T> &sampler,
-             const std::string &,
-             std::ostream &zconst_file,
-             const std::string &,
-             typename MoveType::alpha_type::value_type alpha_config,
-             typename MoveType::proposal_type::value_type proposal_config,
-             std::size_t repeat)
+inline void do_rjsmc(vsmc::Sampler<T> &sampler, const std::string &,
+    std::ostream &zconst_file, const std::string &,
+    typename MoveType::alpha_type::value_type alpha_config,
+    typename MoveType::proposal_type::value_type proposal_config,
+    std::size_t repeat)
 {
     sampler.move(MoveType(alpha_config, proposal_config), false);
     std::vector<double> cn(MaxCompNum);
@@ -117,53 +114,28 @@ int main(int argc, char **argv)
 
     if (Config.count("linear"))
         for (std::size_t i = 0; i != LinearIterNum.size(); ++i)
-            do_rjsmc<linear>(sampler,
-                             Suffix,
-                             zconst_file,
-                             "Linear",
-                             LinearIterNum[i],
-                             0,
-                             Repeat);
+            do_rjsmc<linear>(sampler, Suffix, zconst_file, "Linear",
+                LinearIterNum[i], 0, Repeat);
 
     if (Config.count("prior2"))
         for (std::size_t i = 0; i != Prior2IterNum.size(); ++i)
-            do_rjsmc<prior2>(sampler,
-                             Suffix,
-                             zconst_file,
-                             "Prior2",
-                             Prior2IterNum[i],
-                             0,
-                             Repeat);
+            do_rjsmc<prior2>(sampler, Suffix, zconst_file, "Prior2",
+                Prior2IterNum[i], 0, Repeat);
 
     if (Config.count("prior5"))
         for (std::size_t i = 0; i != Prior5IterNum.size(); ++i)
-            do_rjsmc<prior5>(sampler,
-                             Suffix,
-                             zconst_file,
-                             "Prior5",
-                             Prior5IterNum[i],
-                             0,
-                             Repeat);
+            do_rjsmc<prior5>(sampler, Suffix, zconst_file, "Prior5",
+                Prior5IterNum[i], 0, Repeat);
 
     if (Config.count("posterior2"))
         for (std::size_t i = 0; i != Posterior2IterNum.size(); ++i)
-            do_rjsmc<posterior2>(sampler,
-                                 Suffix,
-                                 zconst_file,
-                                 "Posterior2",
-                                 Posterior2IterNum[i],
-                                 0,
-                                 Repeat);
+            do_rjsmc<posterior2>(sampler, Suffix, zconst_file, "Posterior2",
+                Posterior2IterNum[i], 0, Repeat);
 
     if (Config.count("posterior5"))
         for (std::size_t i = 0; i != Posterior5IterNum.size(); ++i)
-            do_rjsmc<posterior5>(sampler,
-                                 Suffix,
-                                 zconst_file,
-                                 "Posterior5",
-                                 Posterior5IterNum[i],
-                                 0,
-                                 Repeat);
+            do_rjsmc<posterior5>(sampler, Suffix, zconst_file, "Posterior5",
+                Posterior5IterNum[i], 0, Repeat);
 
     //////////////////////////////////////////////////////////////////////
 

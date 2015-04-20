@@ -114,7 +114,7 @@ template <typename T> inline T vmath_cdfnorm(T a)
 {
     using std::erf;
     return static_cast<T>(0.5) +
-           static_cast<T>(0.5) * erf(a * sqrt_1by2<T>());
+        static_cast<T>(0.5) * erf(a * sqrt_1by2<T>());
 }
 
 template <typename T> inline T vmath_erfinv(T a)
@@ -133,7 +133,7 @@ template <typename T> inline T vmath_cdfnorminv(T a)
     return static_cast<T>(1) / vmath_cdfnorm(a);
 }
 
-}  // namespace vsmc::math::internal
+} // namespace vsmc::math::internal
 
 /// \defgroup vArithmetic Arithmetic functions
 /// \ingroup vMath
@@ -157,14 +157,8 @@ VSMC_DEFINE_MATH_VMATH_1(std, fabs, Abs)
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = (\beta_a a_i + \mu_a) / (\beta_b b_i + \mu_b)\f$
 template <typename T>
-inline void vLinearFrac(std::size_t n,
-                        const T *a,
-                        const T *b,
-                        T beta_a,
-                        T beta_b,
-                        T mu_a,
-                        T mu_b,
-                        T *y)
+inline void vLinearFrac(std::size_t n, const T *a, const T *b, T beta_a,
+    T beta_b, T mu_a, T mu_b, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
         y[i] = beta_a * a[i] + mu_a;
@@ -339,9 +333,9 @@ VSMC_DEFINE_MATH_VMATH_1(std, lgamma, LGamma)
 VSMC_DEFINE_MATH_VMATH_1(std, tgamma, TGamma)
 /// @}
 
-}  // namespace vsmc::math
+} // namespace vsmc::math
 
-}  // namespace vsmc
+} // namespace vsmc
 
 #if VSMC_USE_MKL_VML
 
@@ -378,26 +372,14 @@ VSMC_DEFINE_MATH_VMATH_VML_2(Sub)
 VSMC_DEFINE_MATH_VMATH_VML_1(Sqr)
 VSMC_DEFINE_MATH_VMATH_VML_2(Mul)
 VSMC_DEFINE_MATH_VMATH_VML_1(Abs)
-inline void vLinearFrac(std::size_t n,
-                        const float *a,
-                        const float *b,
-                        float beta_a,
-                        float beta_b,
-                        float mu_a,
-                        float mu_b,
-                        float *y)
+inline void vLinearFrac(std::size_t n, const float *a, const float *b,
+    float beta_a, float beta_b, float mu_a, float mu_b, float *y)
 {
     ::vsLinearFrac(
         static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
 }
-inline void vLinearFrac(std::size_t n,
-                        const double *a,
-                        const double *b,
-                        double beta_a,
-                        double beta_b,
-                        double mu_a,
-                        double mu_b,
-                        double *y)
+inline void vLinearFrac(std::size_t n, const double *a, const double *b,
+    double beta_a, double beta_b, double mu_a, double mu_b, double *y)
 {
     ::vdLinearFrac(
         static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
@@ -460,9 +442,9 @@ VSMC_DEFINE_MATH_VMATH_VML_1(CdfNormInv)
 VSMC_DEFINE_MATH_VMATH_VML_1(LGamma)
 VSMC_DEFINE_MATH_VMATH_VML_1(TGamma)
 
-}  // namespace vsmc::math
+} // namespace vsmc::math
 
-}  // namespace vsmc
+} // namespace vsmc
 
 #elif VSMC_USE_ACCELERATE_VFORCE
 
@@ -534,10 +516,10 @@ VSMC_DEFINE_MATH_VMATH_VFORCE_1(acosh, Acosh)
 VSMC_DEFINE_MATH_VMATH_VFORCE_1(asinh, Asinh)
 VSMC_DEFINE_MATH_VMATH_VFORCE_1(atanh, Atanh)
 
-}  // namespace vsmc::math
+} // namespace vsmc::math
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_USE_MKL_VML
+#endif // VSMC_USE_MKL_VML
 
-#endif  // VSMC_MATH_VMATH_HPP
+#endif // VSMC_MATH_VMATH_HPP

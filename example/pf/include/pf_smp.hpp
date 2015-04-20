@@ -137,11 +137,9 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
 #if VSMC_EXAMPLE_PF_USE_TBB
     std::size_t operator()(vsmc::Particle<cv> &particle, void *param)
     {
-        return this->parallel_run(
-            particle,
-            param,
-            tbb::blocked_range<typename vsmc::Particle<cv>::size_type>(
-                0, particle.size(), particle.size() / 20),
+        return this->parallel_run(particle, param,
+            tbb::blocked_range<typename vsmc::Particle<cv>::size_type>(0,
+                                      particle.size(), particle.size() / 20),
             tbb::simple_partitioner());
     }
 #endif
@@ -196,16 +194,14 @@ template <vsmc::MatrixOrder Order> class cv_move
     std::size_t operator()(std::size_t iter, vsmc::Particle<cv> &particle)
     {
         static tbb::affinity_partitioner partitioner;
-        return this->parallel_run(
-            iter,
-            particle,
+        return this->parallel_run(iter, particle,
             tbb::blocked_range<typename vsmc::Particle<cv>::size_type>(
-                0, particle.size(), partitioner));
+                                      0, particle.size(), partitioner));
     }
 #endif
 
-    std::size_t move_state(std::size_t iter,
-                           vsmc::SingleParticle<cv> sp) const
+    std::size_t move_state(
+        std::size_t iter, vsmc::SingleParticle<cv> sp) const
     {
         using std::sqrt;
 
@@ -249,13 +245,11 @@ template <vsmc::MatrixOrder Order> class cv_move
 };
 
 template <vsmc::MatrixOrder Order>
-inline void cv_est(std::size_t,
-                   std::size_t,
-                   vsmc::ConstSingleParticle<cv_state<Order>> csp,
-                   double *res)
+inline void cv_est(std::size_t, std::size_t,
+    vsmc::ConstSingleParticle<cv_state<Order>> csp, double *res)
 {
     res[0] = csp.state(vsmc::Position<0>());
     res[1] = csp.state(vsmc::Position<1>());
 }
 
-#endif  // VSMC_EXAMPLE_PF_SMP_HPP
+#endif // VSMC_EXAMPLE_PF_SMP_HPP

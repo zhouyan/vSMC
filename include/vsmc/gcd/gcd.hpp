@@ -40,4 +40,4 @@
 #include <vsmc/gcd/dispatch_queue.hpp>
 #include <vsmc/gcd/dispatch_source.hpp>
 
-#endif  // VSMC_GCD_GCD_HPP
+#endif // VSMC_GCD_GCD_HPP

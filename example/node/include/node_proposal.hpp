@@ -40,16 +40,15 @@ class node_proposal
     node_proposal() {}
     node_proposal(value_type) {}
 
-    void proposal_iter(std::size_t,
-                       vsmc::Particle<node_state> &particle) const
+    void proposal_iter(
+        std::size_t, vsmc::Particle<node_state> &particle) const
     {
         double alpha = particle.value().state(0, 0).alpha();
         std::size_t cn = particle.value().state(0, 0).comp_num();
         double a0_sd, a1_sd, a2_sd, k_sd;
         alpha2sd(alpha, a0_sd, a1_sd, a2_sd, k_sd);
         for (vsmc::Particle<node_state>::size_type i = 0;
-             i != particle.size();
-             ++i) {
+             i != particle.size(); ++i) {
             particle.value().state(i, 0).a0_sd() = a0_sd;
             particle.value().state(i, 0).a1_sd() = a1_sd;
             particle.value().state(i, 0).a2_sd() = a2_sd;
@@ -61,8 +60,7 @@ class node_proposal
     void proposal_init(vsmc::Particle<node_state> &particle) const
     {
         for (vsmc::Particle<node_state>::size_type i = 0;
-             i != particle.size();
-             ++i) {
+             i != particle.size(); ++i) {
             double alpha = particle.value().state(i, 0).alpha();
             std::size_t cn = particle.value().state(i, 0).comp_num();
             double a0_sd, a1_sd, a2_sd, k_sd;
@@ -76,11 +74,8 @@ class node_proposal
     }
 
     private:
-    void alpha2sd(double alpha,
-                  double &a0_sd,
-                  double &a1_sd,
-                  double &a2_sd,
-                  double &k_sd) const
+    void alpha2sd(double alpha, double &a0_sd, double &a1_sd, double &a2_sd,
+        double &k_sd) const
     {
         using std::sqrt;
 
@@ -98,8 +93,8 @@ class node_proposal_adaptive
 
     node_proposal_adaptive(value_type sampler) : sampler_(sampler) {}
 
-    void proposal_iter(std::size_t,
-                       vsmc::Particle<node_state> &particle) const
+    void proposal_iter(
+        std::size_t, vsmc::Particle<node_state> &particle) const
     {
         using std::sqrt;
 
@@ -109,21 +104,20 @@ class node_proposal_adaptive
 
         const double coeff = 2.38;
         double a0_sd = coeff * sqrt(monitor.record(2 + cn) -
-                                    monitor.record(0) * monitor.record(0));
+                                   monitor.record(0) * monitor.record(0));
         double a1_sd = coeff * sqrt(monitor.record(3 + cn) -
-                                    monitor.record(1) * monitor.record(1));
+                                   monitor.record(1) * monitor.record(1));
         double a2_sd = coeff * sqrt(monitor.record(4 + cn) -
-                                    monitor.record(2) * monitor.record(2));
+                                   monitor.record(2) * monitor.record(2));
         std::vector<double> k_sd(cn - 1);
         for (std::size_t d = 0; d != cn - 1; ++d) {
             k_sd[d] =
                 coeff * sqrt(monitor.record(5 + cn + d) -
-                             monitor.record(3 + d) * monitor.record(3 + d));
+                            monitor.record(3 + d) * monitor.record(3 + d));
         }
 
         for (vsmc::Particle<node_state>::size_type i = 0;
-             i != particle.size();
-             ++i) {
+             i != particle.size(); ++i) {
             particle.value().state(i, 0).a0_sd() = a0_sd;
             particle.value().state(i, 0).a1_sd() = a1_sd;
             particle.value().state(i, 0).a2_sd() = a2_sd;
@@ -136,4 +130,4 @@ class node_proposal_adaptive
     const vsmc::Sampler<node_state> *sampler_;
 };
 
-#endif  // VSMC_EXAMPLE_NODE_PROPOSAL_HPP
+#endif // VSMC_EXAMPLE_NODE_PROPOSAL_HPP

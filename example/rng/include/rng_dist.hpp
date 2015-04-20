@@ -51,14 +51,8 @@
 #define VSMC_RNG_DIST_B2(Dist, p1, p2)                                       \
     {                                                                        \
         std::Dist##_distribution dist(p1, p2);                               \
-        rng_dist(N,                                                          \
-                 dist,                                                       \
-                 #Dist "(" #p1 ", " #p2 ")",                                 \
-                 names,                                                      \
-                 size,                                                       \
-                 sw,                                                         \
-                 bytes,                                                      \
-                 cycles);                                                    \
+        rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw,       \
+            bytes, cycles);                                                  \
     }
 
 #define VSMC_RNG_DIST_T1(Dist, p1)                                           \
@@ -71,25 +65,15 @@
 #define VSMC_RNG_DIST_T2(Dist, p1, p2)                                       \
     {                                                                        \
         std::Dist##_distribution<> dist(p1, p2);                             \
-        rng_dist(N,                                                          \
-                 dist,                                                       \
-                 #Dist "(" #p1 ", " #p2 ")",                                 \
-                 names,                                                      \
-                 size,                                                       \
-                 sw,                                                         \
-                 bytes,                                                      \
-                 cycles);                                                    \
+        rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw,       \
+            bytes, cycles);                                                  \
     }
 
 template <typename Dist>
-inline void rng_dist(std::size_t N,
-                     Dist &dist,
-                     const std::string &name,
-                     std::vector<std::string> &names,
-                     std::vector<std::size_t> &size,
-                     std::vector<vsmc::StopWatch> &sw,
-                     std::vector<std::size_t> &bytes,
-                     std::vector<uint64_t> &cycles)
+inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
+    std::vector<std::string> &names, std::vector<std::size_t> &size,
+    std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
+    std::vector<uint64_t> &cycles)
 {
     vsmc::Threefry4x64 eng;
     vsmc::StopWatch watch;
@@ -116,4 +100,4 @@ inline void rng_dist(std::size_t N,
     cycles.push_back(counter.cycles());
 }
 
-#endif  // VSMC_EXAMPLE_RNG_DIST_HPP
+#endif // VSMC_EXAMPLE_RNG_DIST_HPP

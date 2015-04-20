@@ -36,13 +36,12 @@
 #include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func)                             \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (iter < iter_size()),                                                \
+    VSMC_RUNTIME_ASSERT((iter < iter_size()),                                \
         ("**Path::" #func "** INVALID ITERATION NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(func, caller, name)            \
     VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                             \
-                        ("**Path::" #caller "** INVALID " #name " OBJECT"))
+        ("**Path::" #caller "** INVALID " #name " OBJECT"))
 
 namespace vsmc
 {
@@ -249,11 +248,11 @@ template <typename T> class Path
         if (iter_size() > 1) {
             std::size_t i = iter_size() - 1;
             log_zconst_ += 0.5 * (grid_[i] - grid_[i - 1]) *
-                           (integrand_[i] + integrand_[i - 1]);
+                (integrand_[i] + integrand_[i - 1]);
         }
     }
-};  // class PathSampling
+}; // class PathSampling
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_PATH_HPP
+#endif // VSMC_CORE_PATH_HPP

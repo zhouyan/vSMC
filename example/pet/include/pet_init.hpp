@@ -83,4 +83,4 @@ class pet_init : public BASE_INIT<pet_state, pet_init>
     }
 };
 
-#endif  // VSMC_EXAMPLE_PET_INIT_HPP
+#endif // VSMC_EXAMPLE_PET_INIT_HPP

@@ -132,7 +132,7 @@ class pet_state
             lp *= theta_ub0_[d] - state.theta(d - 1);
         lp = -log(lp);
         lp += (lambda_a0_ - 1) * log(state.lambda()) -
-              state.lambda() / lambda_b0_;
+            state.lambda() / lambda_b0_;
         if (model_ == StudentT)
             lp -= 2 * log(state.nu());
 
@@ -149,10 +149,9 @@ class pet_state
 
     double log_target(pet_param &state, bool compute = true) const
     {
-        double lt =
-            compute ?
-                log_prior(state) + state.alpha() * log_likelihood(state) :
-                state.log_prior() + state.alpha() * state.log_likelihood();
+        double lt = compute ?
+            log_prior(state) + state.alpha() * log_likelihood(state) :
+            state.log_prior() + state.alpha() * state.log_likelihood();
 
         return state.log_target() = lt;
     }
@@ -279,10 +278,10 @@ class pet_state
     PETModel model_;
     double decay_;
     double conv_mul_;
-    double lambda_a0_;  // shape of lambda
-    double lambda_b0_;  // scale of lambda
-    double nu_a0_;      // lower bound of 1 / nu
-    double nu_b0_;      // upper bound of 1 / nu
+    double lambda_a0_; // shape of lambda
+    double lambda_b0_; // scale of lambda
+    double nu_a0_;     // lower bound of 1 / nu
+    double nu_b0_;     // upper bound of 1 / nu
     double lambda_sd_;
     double nu_sd_;
     double zconst_;
@@ -336,16 +335,15 @@ class pet_state
     {
         using std::log;
 
-        double ll =
-            data_num() * (std::lgamma(0.5 * (state.nu() + 1)) -
-                          std::lgamma(0.5 * state.nu()) +
-                          0.5 * log(state.lambda()) - 0.5 * log(state.nu()));
+        double ll = data_num() *
+            (std::lgamma(0.5 * (state.nu() + 1)) -
+                        std::lgamma(0.5 * state.nu()) +
+                        0.5 * log(state.lambda()) - 0.5 * log(state.nu()));
         for (std::size_t i = 0; i != data_num(); ++i) {
             double fv = fit_value(i, state);
             double resid = obs_[i] - fv;
             fv = time_[i] / fv;
-            ll +=
-                0.5 * log(fv) -
+            ll += 0.5 * log(fv) -
                 0.5 * (state.nu() + 1) *
                     log(1 + fv * state.lambda() / state.nu() * resid * resid);
         }
@@ -372,4 +370,4 @@ class pet_state
     }
 };
 
-#endif  // VSMC_EXAMPLE_PET_STATE_HPP
+#endif // VSMC_EXAMPLE_PET_STATE_HPP

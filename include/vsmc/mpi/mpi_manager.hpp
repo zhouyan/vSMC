@@ -45,8 +45,8 @@ namespace internal
 template <typename ResultType, typename IntType1, typename IntType2>
 inline void mpi_init_seed(ResultType &, IntType1 D, IntType2 R)
 {
-    Seed::instance().modulo(static_cast<Seed::skip_type>(D),
-                            static_cast<Seed::skip_type>(R));
+    Seed::instance().modulo(
+        static_cast<Seed::skip_type>(D), static_cast<Seed::skip_type>(R));
 }
 
 template <typename T, std::size_t K, typename IntType1, typename IntType2>
@@ -55,7 +55,7 @@ inline void mpi_init_seed(vsmc::Array<T, K> &s, IntType1, IntType2 R)
     s.back() = static_cast<Seed::skip_type>(R);
 }
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief MPI Environment
 /// \ingroup MPI
@@ -91,7 +91,7 @@ class MPIEnvironment
         Seed::instance().set(s);
         world.barrier();
     }
-};  // class MPIEnvironment
+}; // class MPIEnvironment
 
 /// \brief MPI Communicator
 /// \ingroup MPI
@@ -118,8 +118,8 @@ template <typename ID> class MPICommunicator
     MPICommunicator() : comm_(MPI_COMM_WORLD) {}
     MPICommunicator(const MPICommunicator<ID> &);
     MPICommunicator<ID> &operator=(const MPICommunicator<ID> &);
-};  // class MPICommunicator
+}; // class MPICommunicator
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_MPI_MPI_MANAGER_HPP
+#endif // VSMC_MPI_MPI_MANAGER_HPP

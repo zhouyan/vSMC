@@ -52,7 +52,7 @@ class ProgressThisThread
         std::this_thread::sleep_for(std::chrono::milliseconds(
             static_cast<std::chrono::milliseconds::rep>(ms)));
     }
-};  // class ProgressThisThread
+}; // class ProgressThisThread
 
 /// \brief Display a progress bar while algorithm proceed
 /// \ingroup Progress
@@ -86,7 +86,7 @@ class ProgressThisThread
 /// An implementation using Boost is almost the same except for the namespace
 /// changing from `std` to `boost`.
 template <typename ThreadType = std::thread,
-          typename ThisThread = ProgressThisThread>
+    typename ThisThread = ProgressThisThread>
 class Progress
 {
     public:
@@ -124,11 +124,8 @@ class Progress
     /// zero, then no bar is displayed at all
     /// \param show_iter Shall the iteration count be displayed.
     /// \param interval The sleep interval in seconds
-    void start(std::size_t total,
-               const std::string &msg = std::string(),
-               std::size_t length = 0,
-               bool show_iter = true,
-               double interval = 0.1)
+    void start(std::size_t total, const std::string &msg = std::string(),
+        std::size_t length = 0, bool show_iter = true, double interval = 0.1)
     {
         total_ = total;
         msg_ = msg;
@@ -237,8 +234,8 @@ class Progress
         const std::size_t display_iter =
             ptr->iter_ <= ptr->total_ ? ptr->iter_ : ptr->total_;
         std::size_t num_equal = (ptr->total_ | ptr->length_) == 0 ?
-                                    ptr->length_ :
-                                    ptr->length_ * display_iter / ptr->total_;
+            ptr->length_ :
+            ptr->length_ * display_iter / ptr->total_;
         num_equal = num_equal <= ptr->length_ ? num_equal : ptr->length_;
         std::size_t percent =
             ptr->total_ == 0 ? 100 : 100 * display_iter / ptr->total_;
@@ -371,8 +368,8 @@ class Progress
 
         return digit;
     }
-};  // class Progress
+}; // class Progress
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_UTILITY_PROGRESS_HPP
+#endif // VSMC_UTILITY_PROGRESS_HPP

@@ -31,10 +31,8 @@
 
 Config.add("threshold", "Threshold for resampling", &Threshold, 0.5)
     .add("particle_num", "Particle number", &ParticleNum, 1000)
-    .add("proposal_scale",
-         "Proposal: 1: Default; 2: Adaptive",
-         &ProposalScale,
-         1)
+    .add("proposal_scale", "Proposal: 1: Default; 2: Adaptive",
+        &ProposalScale, 1)
     .add("mh_alpha", "MH schedule (alph == 1)", &MHAlpha)
     .add("mh_iter", "MH iteration number", &MHIterNum)
     .add("ess", "Enable ESS adaptive schedule", &ESSDrop)

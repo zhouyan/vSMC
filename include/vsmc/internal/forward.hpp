@@ -74,6 +74,6 @@ template <typename, typename = MPIDefault> class StateMPI;
 struct CLDefault;
 template <std::size_t, typename, typename = CLDefault> class StateCL;
 
-}  // namesapce vsmc
+} // namesapce vsmc
 
-#endif  // VSMC_INTERNAL_FORWARD_HPP
+#endif // VSMC_INTERNAL_FORWARD_HPP

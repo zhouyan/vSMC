@@ -135,8 +135,8 @@ template <typename ID = CLDefault> class CLSetup
             return true;
         return name.find(stored) != std::string::npos;
     }
-};  // class CLSetup
+}; // class CLSetup
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_OPENCL_CL_SETUP_HPP
+#endif // VSMC_OPENCL_CL_SETUP_HPP

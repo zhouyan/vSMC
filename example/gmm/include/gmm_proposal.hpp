@@ -58,17 +58,15 @@ class gmm_proposal
         for (vsmc::Particle<gmm_state>::size_type i = 0; i != particle.size();
              ++i) {
             alpha2sd(particle.value().state(i, 0).alpha(),
-                     particle.value().state(i, 0).mu_sd(),
-                     particle.value().state(i, 0).lambda_sd(),
-                     particle.value().state(i, 0).weight_sd());
+                particle.value().state(i, 0).mu_sd(),
+                particle.value().state(i, 0).lambda_sd(),
+                particle.value().state(i, 0).weight_sd());
         }
     }
 
     private:
-    void alpha2sd(double alpha,
-                  double &mu_sd,
-                  double &lambda_sd,
-                  double &weight_sd) const
+    void alpha2sd(double alpha, double &mu_sd, double &lambda_sd,
+        double &weight_sd) const
     {
         using std::sqrt;
 
@@ -118,4 +116,4 @@ class gmm_proposal_adaptive
     }
 };
 
-#endif  // VSMC_EXAMPLE_GMM_PROPOSAL_HPP
+#endif // VSMC_EXAMPLE_GMM_PROPOSAL_HPP

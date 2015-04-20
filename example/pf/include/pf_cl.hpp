@@ -111,12 +111,9 @@ class cv_init : public vsmc::InitializeCL<cv>
         log_weight_.resize(particle.size());
         log_weight_buffer_.resize(particle.size());
 
-        vsmc::cl_set_kernel_args(kernel(),
-                                 kernel_args_offset(),
-                                 log_weight_buffer_.data(),
-                                 particle.value().obs_x(),
-                                 particle.value().obs_y(),
-                                 particle.value().counter());
+        vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
+            log_weight_buffer_.data(), particle.value().obs_x(),
+            particle.value().obs_y(), particle.value().counter());
     }
 
     void post_processor(vsmc::Particle<cv> &particle)
@@ -144,12 +141,9 @@ class cv_move : public vsmc::MoveCL<cv>
         inc_weight_.resize(particle.size());
         inc_weight_buffer_.resize(particle.size());
 
-        vsmc::cl_set_kernel_args(kernel(),
-                                 kernel_args_offset(),
-                                 inc_weight_buffer_.data(),
-                                 particle.value().obs_x(),
-                                 particle.value().obs_y(),
-                                 particle.value().counter());
+        vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
+            inc_weight_buffer_.data(), particle.value().obs_x(),
+            particle.value().obs_y(), particle.value().counter());
     }
 
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
@@ -164,10 +158,8 @@ class cv_move : public vsmc::MoveCL<cv>
     std::vector<cl_float> inc_weight_;
 };
 
-inline void cv_do(vsmc::Sampler<cv> &sampler,
-                  vsmc::ResampleScheme res,
-                  char **argv,
-                  const std::string &name)
+inline void cv_do(vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
+    char **argv, const std::string &name)
 {
     sampler.resample_scheme(res);
     sampler.resample_threshold(0.5);
@@ -192,4 +184,4 @@ inline void cv_do(vsmc::Sampler<cv> &sampler,
 #endif
 }
 
-#endif  // VSMC_EXAMPLE_PF_CL_HPP
+#endif // VSMC_EXAMPLE_PF_CL_HPP

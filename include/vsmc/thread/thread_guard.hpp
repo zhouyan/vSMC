@@ -72,8 +72,8 @@ template <typename ThreadType> class ThreadGuard
 
     private:
     thread_type thread_;
-};  // class ThreadGuard
+}; // class ThreadGuard
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_THREAD_THREAD_GUARD_HPP
+#endif // VSMC_THREAD_THREAD_GUARD_HPP

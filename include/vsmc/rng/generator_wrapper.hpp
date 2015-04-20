@@ -35,10 +35,9 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER_RESULT_TYPE(ResultType)     \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_same<ResultType, uint16_t>::value ||                        \
-         std::is_same<ResultType, uint32_t>::value ||                        \
-         std::is_same<ResultType, uint64_t>::value),                         \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||         \
+                           std::is_same<ResultType, uint32_t>::value ||      \
+                           std::is_same<ResultType, uint64_t>::value),       \
         USE_GeneratorWrapper_WITH_RESULT_TYPE_OTHER_THAN_uint16_t_OR_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER                             \
@@ -60,9 +59,9 @@ struct GeneratorWrapperMinMaxTrait {
 
     static constexpr ResultType min VSMC_MNE() { return _Min; }
     static constexpr ResultType max VSMC_MNE() { return _Max; }
-};  // struct GeneratorWrapperMinMaxTrait
+}; // struct GeneratorWrapperMinMaxTrait
 
-}  // namespace traits
+} // namespace traits
 
 /// \brief A thin wrapper over any RNG Generator for use with C++11 API
 /// \ingroup RNGAdapter
@@ -84,10 +83,9 @@ struct GeneratorWrapperMinMaxTrait {
 /// Generator).
 /// And all member functions, except `operator()`, does nothing. To seed and
 /// change the engine, use the Generator type object.
-template <typename ResultType,
-          class Generator,
-          typename Traits =
-              traits::GeneratorWrapperMinMaxTrait<ResultType, Generator>>
+template <typename ResultType, class Generator,
+    typename Traits =
+        traits::GeneratorWrapperMinMaxTrait<ResultType, Generator>>
 class GeneratorWrapper : public Traits
 {
     public:
@@ -99,11 +97,8 @@ class GeneratorWrapper : public Traits
     }
 
     template <typename SeedSeq>
-    explicit GeneratorWrapper(
-        SeedSeq &,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            result_type,
+    explicit GeneratorWrapper(SeedSeq &,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
             GeneratorWrapper<ResultType, Generator, Traits>>::value>::type * =
             nullptr)
     {
@@ -113,11 +108,8 @@ class GeneratorWrapper : public Traits
     void seed(result_type) {}
 
     template <typename SeedSeq>
-    void seed(
-        SeedSeq &,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            result_type,
+    void seed(SeedSeq &,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
             GeneratorWrapper<ResultType, Generator, Traits>>::value>::type * =
             nullptr)
     {
@@ -138,40 +130,40 @@ class GeneratorWrapper : public Traits
 
     const Generator &generator() const { return generator_; }
 
-    friend inline bool
-        operator==(const GeneratorWrapper<ResultType, Generator, Traits> &,
-                   const GeneratorWrapper<ResultType, Generator, Traits> &)
+    friend inline bool operator==(
+        const GeneratorWrapper<ResultType, Generator, Traits> &,
+        const GeneratorWrapper<ResultType, Generator, Traits> &)
     {
         return false;
     }
 
-    friend inline bool
-        operator!=(const GeneratorWrapper<ResultType, Generator, Traits> &,
-                   const GeneratorWrapper<ResultType, Generator, Traits> &)
+    friend inline bool operator!=(
+        const GeneratorWrapper<ResultType, Generator, Traits> &,
+        const GeneratorWrapper<ResultType, Generator, Traits> &)
     {
         return true;
     }
 
     template <typename CharT, typename CharTraits>
-    friend inline std::basic_ostream<CharT, CharTraits> &
-        operator<<(std::basic_ostream<CharT, CharTraits> &os,
-                   const GeneratorWrapper<ResultType, Generator, Traits> &)
+    friend inline std::basic_ostream<CharT, CharTraits> &operator<<(
+        std::basic_ostream<CharT, CharTraits> &os,
+        const GeneratorWrapper<ResultType, Generator, Traits> &)
     {
         return os;
     }
 
     template <typename CharT, typename CharTraits>
-    friend inline std::basic_istream<CharT, CharTraits> &
-        operator>>(std::basic_istream<CharT, CharTraits> &is,
-                   GeneratorWrapper<ResultType, Generator, Traits> &)
+    friend inline std::basic_istream<CharT, CharTraits> &operator>>(
+        std::basic_istream<CharT, CharTraits> &is,
+        GeneratorWrapper<ResultType, Generator, Traits> &)
     {
         return is;
     }
 
     private:
     Generator generator_;
-};  // clss GeneratorWrapper
+}; // clss GeneratorWrapper
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_GENERATOR_WRAPPER_HPP
+#endif // VSMC_RNG_GENERATOR_WRAPPER_HPP

@@ -230,9 +230,9 @@
 #include <vsmc/internal/common.hpp>
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func)        \
-    VSMC_RUNTIME_ASSERT((ptr != nullptr),                               \
-                        ("**ProgramOptionMap::" #func                        \
-                         "** ATTEMPT TO SET OPTION WITH A NULL POINTER"))
+    VSMC_RUNTIME_ASSERT(                                                     \
+        (ptr != nullptr), ("**ProgramOptionMap::" #func                      \
+                           "** ATTEMPT TO SET OPTION WITH A NULL POINTER"))
 
 namespace vsmc
 {
@@ -240,9 +240,7 @@ namespace vsmc
 /// \brief Program option warning messages
 /// \ingroup Option
 inline void program_option_warning(const std::string &oname,
-                                   const std::string &msg,
-                                   bool silent,
-                                   std::ostream &os)
+    const std::string &msg, bool silent, std::ostream &os)
 {
     if (silent)
         return;
@@ -264,21 +262,16 @@ class ProgramOption
 
     virtual bool is_bool() const = 0;
     virtual bool is_vector() const = 0;
-    virtual bool set(const std::string &,
-                     const std::string &,
-                     bool,
-                     std::ostream &) = 0;
+    virtual bool set(
+        const std::string &, const std::string &, bool, std::ostream &) = 0;
     virtual bool set_default() = 0;
     virtual std::string description() const = 0;
     virtual std::string default_str() const = 0;
     virtual ProgramOption *clone() const = 0;
 
     protected:
-    bool set_value(const std::string &oname,
-                   const std::string &sval,
-                   bool *dest,
-                   bool silent,
-                   std::ostream &os)
+    bool set_value(const std::string &oname, const std::string &sval,
+        bool *dest, bool silent, std::ostream &os)
     {
         const char *const sptr = sval.c_str();
         const std::size_t size = sval.size();
@@ -336,11 +329,8 @@ class ProgramOption
     }
 
     template <typename T>
-    bool set_value(const std::string &oname,
-                   const std::string &sval,
-                   T *dest,
-                   bool silent,
-                   std::ostream &os)
+    bool set_value(const std::string &oname, const std::string &sval, T *dest,
+        bool silent, std::ostream &os)
     {
         std::stringstream ss;
         ss.str(sval);
@@ -356,7 +346,7 @@ class ProgramOption
 
         return true;
     }
-};  // class ProgramOption
+}; // class ProgramOption
 
 /// \brief Option `--help`
 /// \ingroup Option
@@ -369,10 +359,8 @@ class ProgramOptionHelp : public ProgramOption
 
     bool is_vector() const { return false; }
 
-    bool set(const std::string &oname,
-             const std::string &sval,
-             bool silent,
-             std::ostream &os)
+    bool set(const std::string &oname, const std::string &sval, bool silent,
+        std::ostream &os)
     {
         return set_value(oname, sval, &help_, silent, os);
     }
@@ -392,7 +380,7 @@ class ProgramOptionHelp : public ProgramOption
 
     private:
     bool help_;
-};  // ProgramOptionHelp
+}; // ProgramOptionHelp
 
 /// \brief Option with a default value
 /// \ingroup Option
@@ -445,7 +433,7 @@ template <typename T> class ProgramOptionDefault : public ProgramOption
     {
         return val ? std::string("(true)") : std::string("(false)");
     }
-};  // ProgramOptionDefault
+}; // ProgramOptionDefault
 
 /// \brief Option with a single value
 /// \ingroup Option
@@ -466,10 +454,8 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 
     bool is_vector() const { return false; }
 
-    bool set(const std::string &oname,
-             const std::string &sval,
-             bool silent,
-             std::ostream &os)
+    bool set(const std::string &oname, const std::string &sval, bool silent,
+        std::ostream &os)
     {
         return this->set_value(oname, sval, ptr_, silent, os);
     }
@@ -480,7 +466,7 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 
     private:
     T *const ptr_;
-};  // class ProgramOptionScalar
+}; // class ProgramOptionScalar
 
 /// \brief Option with multiple values
 /// \ingroup Option
@@ -501,10 +487,8 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
 
     bool is_vector() const { return true; }
 
-    bool set(const std::string &oname,
-             const std::string &sval,
-             bool silent,
-             std::ostream &os)
+    bool set(const std::string &oname, const std::string &sval, bool silent,
+        std::ostream &os)
     {
         bool success = this->set_value(oname, sval, &val_, silent, os);
 
@@ -529,7 +513,7 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
     private:
     T val_;
     std::vector<T> *const ptr_;
-};  // class ProgramOptionVector
+}; // class ProgramOptionVector
 
 /// \brief A map of ProgramOption
 /// \ingroup Option
@@ -557,8 +541,7 @@ class ProgramOptionMap
           option_list_(other.option_list_)
     {
         for (option_map_type::iterator iter = option_map_.begin();
-             iter != option_map_.end();
-             ++iter) {
+             iter != option_map_.end(); ++iter) {
             if (iter->second.first)
                 iter->second.first = iter->second.first->clone();
         }
@@ -570,8 +553,7 @@ class ProgramOptionMap
             silent_ = other.silent_;
             auto_help_ = other.auto_help_;
             for (option_map_type::iterator iter = option_map_.begin();
-                 iter != option_map_.end();
-                 ++iter) {
+                 iter != option_map_.end(); ++iter) {
                 if (iter->second.first)
                     delete iter->second.first;
             }
@@ -580,8 +562,7 @@ class ProgramOptionMap
             option_list_ = other.option_list_;
 
             for (option_map_type::iterator iter = option_map_.begin();
-                 iter != option_map_.end();
-                 ++iter) {
+                 iter != option_map_.end(); ++iter) {
                 if (iter->second.first)
                     iter->second.first = iter->second.first->clone();
             }
@@ -620,8 +601,7 @@ class ProgramOptionMap
     ~ProgramOptionMap()
     {
         for (option_map_type::iterator iter = option_map_.begin();
-             iter != option_map_.end();
-             ++iter) {
+             iter != option_map_.end(); ++iter) {
             if (iter->second.first != nullptr)
                 delete iter->second.first;
         }
@@ -634,8 +614,8 @@ class ProgramOptionMap
     /// \param desc A descritpion stream of the option
     /// \param ptr The destination that store the option value
     template <typename T>
-    ProgramOptionMap &
-        add(const std::string &name, const std::string &desc, T *ptr)
+    ProgramOptionMap &add(
+        const std::string &name, const std::string &desc, T *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
@@ -647,8 +627,8 @@ class ProgramOptionMap
 
     /// \brief Add an option with a single value, with a default value
     template <typename T, typename V>
-    ProgramOptionMap &
-        add(const std::string &name, const std::string &desc, T *ptr, V val)
+    ProgramOptionMap &add(
+        const std::string &name, const std::string &desc, T *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
@@ -660,9 +640,8 @@ class ProgramOptionMap
 
     /// \brief Add an option with multiple value
     template <typename T>
-    ProgramOptionMap &add(const std::string &name,
-                          const std::string &desc,
-                          std::vector<T> *ptr)
+    ProgramOptionMap &add(
+        const std::string &name, const std::string &desc, std::vector<T> *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
@@ -674,10 +653,8 @@ class ProgramOptionMap
 
     /// \brief Add an option with multiple value, with a default value
     template <typename T, typename V>
-    ProgramOptionMap &add(const std::string &name,
-                          const std::string &desc,
-                          std::vector<T> *ptr,
-                          V val)
+    ProgramOptionMap &add(const std::string &name, const std::string &desc,
+        std::vector<T> *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
         const std::string oname("--" + name);
@@ -746,8 +723,7 @@ class ProgramOptionMap
         std::size_t len[2] = {0, 0};
         std::vector<std::string> vec[3];
         for (option_list_type::const_iterator liter = option_list_.begin();
-             liter != option_list_.end();
-             ++liter) {
+             liter != option_list_.end(); ++liter) {
             vec[0].push_back(liter->first);
             vec[1].push_back(liter->second->description());
             vec[2].push_back(liter->second->default_str());
@@ -837,8 +813,8 @@ class ProgramOptionMap
         }
     }
 
-    void process_arg_vector(std::vector<std::string> &arg_vector,
-                            std::ostream &os)
+    void process_arg_vector(
+        std::vector<std::string> &arg_vector, std::ostream &os)
     {
         std::string option_value;
         const std::vector<std::string> option_value_vec;
@@ -859,10 +835,9 @@ class ProgramOptionMap
 
         const std::string sval_true("1");
         for (std::vector<std::pair<std::string,
-                                   std::vector<std::string>>>::iterator iter =
+                 std::vector<std::string>>>::iterator iter =
                  option_vector.begin();
-             iter != option_vector.end();
-             ++iter) {
+             iter != option_vector.end(); ++iter) {
             option_map_type::iterator miter = option_map_.find(iter->first);
             if (miter == option_map_.end()) {
                 program_option_warning(
@@ -892,8 +867,7 @@ class ProgramOptionMap
         }
 
         for (option_map_type::iterator iter = option_map_.begin();
-             iter != option_map_.end();
-             ++iter) {
+             iter != option_map_.end(); ++iter) {
             if (iter->second.second == 0)
                 if (iter->second.first->set_default())
                     iter->second.second = 1;
@@ -914,8 +888,7 @@ class ProgramOptionMap
     }
 
     bool process_option(option_map_type::iterator iter,
-                        const std::string &sval,
-                        std::ostream &os)
+        const std::string &sval, std::ostream &os)
     {
         if (sval.empty()) {
             program_option_warning(
@@ -939,8 +912,8 @@ class ProgramOptionMap
 
         return true;
     }
-};  // class ProgramOptionMap
+}; // class ProgramOptionMap
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_UTILITY_PROGRAM_OPTION_HPP
+#endif // VSMC_UTILITY_PROGRAM_OPTION_HPP

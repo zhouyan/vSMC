@@ -43,7 +43,7 @@
 
 #if VSMC_NO_RUNTIME_ASSERT
 #define VSMC_RUNTIME_ASSERT(cond, msg)
-#else  // VSMC_NO_RUNTIME_ASSERT
+#else // VSMC_NO_RUNTIME_ASSERT
 #if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                       \
     {                                                                        \
@@ -51,26 +51,23 @@
             throw vsmc::RuntimeAssert(msg);                                  \
         };                                                                   \
     }
-#else  // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#else // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                       \
     {                                                                        \
         if (!(cond)) {                                                       \
-            std::fprintf(                                                    \
-                stderr,                                                      \
+            std::fprintf(stderr,                                             \
                 "vSMC runtime assertion failed; File: %s; Line: %d\n%s\n",   \
-                __FILE__,                                                    \
-                __LINE__,                                                    \
-                msg);                                                        \
+                __FILE__, __LINE__, msg);                                    \
             std::fflush(stderr);                                             \
         };                                                                   \
         assert(cond);                                                        \
     }
-#endif  // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
-#endif  // VSMC_NO_RUNTIME_ASSERT
+#endif // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+#endif // VSMC_NO_RUNTIME_ASSERT
 
 #if VSMC_NO_RUNTIME_WARNING
 #define VSMC_RUNTIME_WARNING(cond, msg)
-#else  // VSMC_NO_RUNTIME_WARNING
+#else // VSMC_NO_RUNTIME_WARNING
 #if VSMC_RUNTIME_WARNING_AS_EXCEPTION
 #define VSMC_RUNTIME_WARNING(cond, msg)                                      \
     {                                                                        \
@@ -78,20 +75,18 @@
             throw vsmc::RuntimeWarning(msg);                                 \
         };                                                                   \
     }
-#else  // VSMC_RUNTIME_WARNING_AS_EXCEPTION
+#else // VSMC_RUNTIME_WARNING_AS_EXCEPTION
 #define VSMC_RUNTIME_WARNING(cond, msg)                                      \
     {                                                                        \
         if (!(cond)) {                                                       \
             std::fprintf(stderr,                                             \
-                         "vSMC runtime warning; File: %s; Line: %d\n%s\n",   \
-                         __FILE__,                                           \
-                         __LINE__,                                           \
-                         msg);                                               \
+                "vSMC runtime warning; File: %s; Line: %d\n%s\n", __FILE__,  \
+                __LINE__, msg);                                              \
             std::fflush(stderr);                                             \
         };                                                                   \
     }
-#endif  // VSMC_RUNTIME_WARNING_AS_EXCEPTION
-#endif  // VSMC_NO_RUNTIME_WARNING
+#endif // VSMC_RUNTIME_WARNING_AS_EXCEPTION
+#endif // VSMC_NO_RUNTIME_WARNING
 
 namespace vsmc
 {
@@ -107,7 +102,7 @@ template <> struct StaticAssert<true> {
     static void test(...) {}
 };
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 class RuntimeAssert : public std::runtime_error
 {
@@ -117,7 +112,7 @@ class RuntimeAssert : public std::runtime_error
     explicit RuntimeAssert(const std::string &msg) : std::runtime_error(msg)
     {
     }
-};  // class RuntimeAssert
+}; // class RuntimeAssert
 
 class RuntimeWarning : public std::runtime_error
 {
@@ -127,8 +122,8 @@ class RuntimeWarning : public std::runtime_error
     explicit RuntimeWarning(const std::string &msg) : std::runtime_error(msg)
     {
     }
-};  // class RuntimeWarning
+}; // class RuntimeWarning
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_INTERNAL_ASSERT_HPP
+#endif // VSMC_INTERNAL_ASSERT_HPP

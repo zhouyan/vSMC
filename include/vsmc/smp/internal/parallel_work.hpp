@@ -42,11 +42,10 @@ namespace vsmc
 namespace traits
 {
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RangeTypeConstIterator,
-                                const_iterator,
-                                std::size_t)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
+    RangeTypeConstIterator, const_iterator, std::size_t)
 
-}  // namespace traits
+} // namespace traits
 
 namespace internal
 {
@@ -66,7 +65,7 @@ template <typename T, typename IntType> class ParallelCopyParticle
         typedef typename traits::SizeTypeTrait<T>::type size_type;
 
         state_->copy_particle(static_cast<size_type>(copy_from_[id]),
-                              static_cast<size_type>(id));
+            static_cast<size_type>(id));
     }
 
     template <typename RangeType>
@@ -86,7 +85,7 @@ template <typename T, typename IntType> class ParallelCopyParticle
     private:
     T *const state_;
     const IntType *const copy_from_;
-};  // class ParallelCopyParticle
+}; // class ParallelCopyParticle
 
 template <typename T, typename InitType> class ParallelInitializeState
 {
@@ -97,8 +96,8 @@ template <typename T, typename InitType> class ParallelInitializeState
     }
 
     template <typename SplitType>
-    ParallelInitializeState(const ParallelInitializeState<T, InitType> &other,
-                            SplitType)
+    ParallelInitializeState(
+        const ParallelInitializeState<T, InitType> &other, SplitType)
         : init_(other.init_), particle_(other.particle_), accept_(0)
     {
     }
@@ -138,7 +137,7 @@ template <typename T, typename InitType> class ParallelInitializeState
     InitType *const init_;
     Particle<T> *const particle_;
     std::size_t accept_;
-};  // class ParallelInitializeState
+}; // class ParallelInitializeState
 
 template <typename T, typename MoveType> class ParallelMoveState
 {
@@ -195,16 +194,13 @@ template <typename T, typename MoveType> class ParallelMoveState
     const std::size_t iter_;
     Particle<T> *const particle_;
     std::size_t accept_;
-};  // class ParallelMoveState
+}; // class ParallelMoveState
 
 template <typename T, typename MonitorEvalType> class ParallelMonitorState
 {
     public:
-    ParallelMonitorState(MonitorEvalType *monitor,
-                         std::size_t iter,
-                         std::size_t dim,
-                         const Particle<T> *particle,
-                         double *res)
+    ParallelMonitorState(MonitorEvalType *monitor, std::size_t iter,
+        std::size_t dim, const Particle<T> *particle, double *res)
         : monitor_(monitor),
           iter_(iter),
           dim_(dim),
@@ -219,9 +215,7 @@ template <typename T, typename MonitorEvalType> class ParallelMonitorState
     {
         typedef typename traits::SizeTypeTrait<T>::type size_type;
 
-        monitor_->monitor_state(
-            iter_,
-            dim_,
+        monitor_->monitor_state(iter_, dim_,
             ConstSingleParticle<T>(static_cast<size_type>(id), particle_),
             res_ + id * dim_);
     }
@@ -246,15 +240,13 @@ template <typename T, typename MonitorEvalType> class ParallelMonitorState
     const std::size_t dim_;
     const Particle<T> *const particle_;
     double *const res_;
-};  // class ParallelMonitorState
+}; // class ParallelMonitorState
 
 template <typename T, typename PathEvalType> class ParallelPathState
 {
     public:
-    ParallelPathState(PathEvalType *path,
-                      std::size_t iter,
-                      const Particle<T> *particle,
-                      double *res)
+    ParallelPathState(PathEvalType *path, std::size_t iter,
+        const Particle<T> *particle, double *res)
         : path_(path), iter_(iter), particle_(particle), res_(res)
     {
     }
@@ -265,8 +257,7 @@ template <typename T, typename PathEvalType> class ParallelPathState
     {
         typedef typename traits::SizeTypeTrait<T>::type size_type;
 
-        res_[id] = path_->path_state(
-            iter_,
+        res_[id] = path_->path_state(iter_,
             ConstSingleParticle<T>(static_cast<size_type>(id), particle_));
     }
 
@@ -289,10 +280,10 @@ template <typename T, typename PathEvalType> class ParallelPathState
     const std::size_t iter_;
     const Particle<T> *const particle_;
     double *const res_;
-};  // class ParallelPathState
+}; // class ParallelPathState
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_SMP_INTERNAL_PARALLEL_WORK_HPP
+#endif // VSMC_SMP_INTERNAL_PARALLEL_WORK_HPP

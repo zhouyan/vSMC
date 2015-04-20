@@ -145,8 +145,8 @@ class pet_move_nu : public BASE_MOVE<pet_state, pet_move_nu>
 class pet_move : public BASE_MOVE<pet_state, pet_move>
 {
     public:
-    std::size_t move_state(std::size_t iter,
-                           vsmc::SingleParticle<pet_state> sp)
+    std::size_t move_state(
+        std::size_t iter, vsmc::SingleParticle<pet_state> sp)
     {
         std::size_t acc = 0;
         acc += move_phi_.move_state(iter, sp);
@@ -164,4 +164,4 @@ class pet_move : public BASE_MOVE<pet_state, pet_move>
     pet_move_nu move_nu_;
 };
 
-#endif  // VSMC_EXAMPLE_PET_MOVE
+#endif // VSMC_EXAMPLE_PET_MOVE

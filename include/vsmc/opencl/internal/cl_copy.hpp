@@ -58,9 +58,8 @@ template <typename ID> class CLCopy
         manager().run_kernel(kernel_, size_, configure_.local_size());
     }
 
-    void operator()(const ::cl::Buffer &idx,
-                    const ::cl::Buffer &tmp,
-                    const ::cl::Buffer &state)
+    void operator()(const ::cl::Buffer &idx, const ::cl::Buffer &tmp,
+        const ::cl::Buffer &state)
     {
         cl_set_kernel_args(kernel_post_, 0, idx, tmp, state);
         manager().run_kernel(kernel_, size_, configure_post_.local_size());
@@ -119,8 +118,8 @@ template <typename ID> class CLCopy
     ::cl::Kernel kernel_post_;
     CLConfigure configure_;
     CLConfigure configure_post_;
-};  // class CLCopy
+}; // class CLCopy
 }
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
-#endif  // VSMC_OPENCL_INTERNAL_COPY_HPP
+#endif // VSMC_OPENCL_INTERNAL_COPY_HPP

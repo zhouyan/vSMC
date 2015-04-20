@@ -32,8 +32,8 @@
 #ifndef VSMC_EXAMPLE_SMC_DO_HPP
 #define VSMC_EXAMPLE_SMC_DO_HPP
 
-inline void print_zconst_header(std::ostream &zconst_file,
-                                std::size_t model_num)
+inline void print_zconst_header(
+    std::ostream &zconst_file, std::size_t model_num)
 {
     if (model_num == 0)
         return;
@@ -47,11 +47,9 @@ inline void print_zconst_header(std::ostream &zconst_file,
 }
 
 template <typename T>
-inline void smc_do(vsmc::Sampler<T> &sampler,
-                   std::ostream &zconst_file,
-                   const std::string schedule_name,
-                   std::size_t model_num,
-                   std::size_t iter_num)
+inline void smc_do(vsmc::Sampler<T> &sampler, std::ostream &zconst_file,
+    const std::string schedule_name, std::size_t model_num,
+    std::size_t iter_num)
 {
     if (model_num == 0)
         return;
@@ -67,24 +65,19 @@ inline void smc_do(vsmc::Sampler<T> &sampler,
         sampler.iterate(iter_num);
     }
     watch.stop();
-    std::fprintf(stderr,
-                 "time.model.order.%u %f\n",
-                 static_cast<unsigned>(model_num),
-                 watch.seconds());
+    std::fprintf(stderr, "time.model.order.%u %f\n",
+        static_cast<unsigned>(model_num), watch.seconds());
     std::fflush(stderr);
 
     zconst_file << sampler.iter_size() - 1 << ' ';
     zconst_file << sampler.particle().value().zconst() +
-                       sampler.particle().value().log_likelihood_const()
-                << ' ';
+            sampler.particle().value().log_likelihood_const() << ' ';
     zconst_file << sampler.path_sampling() +
-                       sampler.particle().value().log_likelihood_const()
-                << ' ';
+            sampler.particle().value().log_likelihood_const() << ' ';
 #ifdef VSMC_PET_HPP
     zconst_file << sampler.monitor("vd").record(0) << ' ';
     zconst_file << sampler.monitor("vd").record(1) -
-                       sampler.monitor("vd").record(0) *
-                           sampler.monitor("vd").record(0);
+            sampler.monitor("vd").record(0) * sampler.monitor("vd").record(0);
 #endif
     zconst_file << ' ';
 
@@ -103,11 +96,10 @@ inline void smc_do(vsmc::Sampler<T> &sampler,
 }
 
 template <typename MoveType, typename T>
-inline void smc_do(vsmc::Sampler<T> &sampler,
-                   std::ostream &zconst_file,
-                   const std::string &schedule_name,
-                   typename MoveType::alpha_type::value_type alpha_config,
-                   std::size_t iter_num)
+inline void smc_do(vsmc::Sampler<T> &sampler, std::ostream &zconst_file,
+    const std::string &schedule_name,
+    typename MoveType::alpha_type::value_type alpha_config,
+    std::size_t iter_num)
 {
     sampler.move(MoveType(alpha_config, &sampler), false);
     for (std::size_t i = 0; i != Repeat; ++i) {
@@ -122,9 +114,8 @@ inline void smc_do(vsmc::Sampler<T> &sampler,
 }
 
 template <typename T, typename SD, typename Config>
-inline void smc_do(const Config &config,
-                   vsmc::Sampler<T> &sampler,
-                   std::ostream &zconst_file)
+inline void smc_do(const Config &config, vsmc::Sampler<T> &sampler,
+    std::ostream &zconst_file)
 {
     typedef move_smc<T, alpha_mh<T>, SD> mh;
     typedef move_smc<T, alpha_ess<T, ess01<T>>, SD> ess;
@@ -174,4 +165,4 @@ inline void smc_do(const Config &config,
                 sampler, zconst_file, "Posterior5", Posterior5IterNum[i], 0);
 }
 
-#endif  // VSMC_EXAMPLE_SMC_DO_HPP
+#endif // VSMC_EXAMPLE_SMC_DO_HPP

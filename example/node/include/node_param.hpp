@@ -38,8 +38,8 @@ struct node_model {
     std::vector<double> k;
     static const int rho = 10;
 
-    void operator()(const std::vector<double> &x,
-                    std::vector<double> &dxdt) const
+    void operator()(
+        const std::vector<double> &x, std::vector<double> &dxdt) const
     {
         double p = 1;
         double b = x[comp_num - 1];
@@ -353,8 +353,8 @@ class node_param
 
         for (std::size_t i = 0; i != n; ++i) {
             fit_[i] += (ode_k1_inc_[i] + 2 * ode_k2_inc_[i] +
-                        2 * ode_k3_inc_[i] + ode_k4_inc_[i]) /
-                       6;
+                           2 * ode_k3_inc_[i] + ode_k4_inc_[i]) /
+                6;
         }
         model_.time += delta;
     }
@@ -371,4 +371,4 @@ inline OutputStream &operator<<(OutputStream &os, const node_param &param)
     return os;
 }
 
-#endif  // VSMC_EXAMPLE_NODE_PARAM_HPP
+#endif // VSMC_EXAMPLE_NODE_PARAM_HPP

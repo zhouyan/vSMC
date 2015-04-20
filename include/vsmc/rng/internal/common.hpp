@@ -104,8 +104,8 @@ template <std::size_t K, std::size_t I, typename T>
 inline void rng_array_right_zero(Array<T, K> &state, std::true_type)
 {
     state[Position<I>()] = 0;
-    rng_array_right_zero<K, I - 1>(state,
-                                   std::integral_constant<bool, (I > 0)>());
+    rng_array_right_zero<K, I - 1>(
+        state, std::integral_constant<bool, (I > 0)>());
 }
 
 template <std::size_t K, std::size_t A, bool fillzero, typename T>
@@ -119,21 +119,20 @@ inline void rng_array_right_shift(Array<T, K> &state)
 
 template <typename SeedSeq, typename U, typename V = U, typename W = V>
 struct is_seed_seq
-    : public std::integral_constant<
-          bool,
+    : public std::integral_constant<bool,
           !std::is_convertible<SeedSeq, U>::value &&
               !std::is_convertible<SeedSeq, V>::value &&
               !std::is_convertible<SeedSeq, W>::value &&
               !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                            U>::value &&
+                  U>::value &&
               !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                            V>::value &&
+                  V>::value &&
               !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                            W>::value> {
+                  W>::value> {
 };
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_INTERNAL_COMMON_HPP
+#endif // VSMC_RNG_INTERNAL_COMMON_HPP

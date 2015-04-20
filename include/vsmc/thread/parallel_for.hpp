@@ -64,6 +64,6 @@ inline void parallel_for(const Range &range, WorkType &&work)
     }
 }
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_THREAD_PARALLE_FOR_HPP
+#endif // VSMC_THREAD_PARALLE_FOR_HPP

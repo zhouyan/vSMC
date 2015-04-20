@@ -50,13 +50,13 @@ inline uint64_t rdtsc()
 {
 #ifdef VSMC_MSVC
     return static_cast<uint64_t>(__rdtsc());
-#else   // VSMC_MSVC
+#else  // VSMC_MSVC
     unsigned eax = 0;
     unsigned edx = 0;
     __asm__ volatile("rdtsc\n" : "=a"(eax), "=d"(edx));
 
     return (static_cast<uint64_t>(edx) << 32) + static_cast<uint64_t>(eax);
-#endif  // VSMC_MSVC
+#endif // VSMC_MSVC
 }
 
 /// \brief Return the TSC and TSC_AUX values using RDTSCP instruction
@@ -65,7 +65,7 @@ inline uint64_t rdtscp(unsigned *aux)
 {
 #ifdef VSMC_MSVC
     return static_cast<uint64_t>(__rdtscp(aux));
-#else   // VSMC_MSVC
+#else  // VSMC_MSVC
     unsigned eax = 0;
     unsigned ecx = 0;
     unsigned edx = 0;
@@ -73,7 +73,7 @@ inline uint64_t rdtscp(unsigned *aux)
     *aux = ecx;
 
     return static_cast<uint64_t>(eax) + (static_cast<uint64_t>(edx) << 32);
-#endif  // VSMC_MSVC
+#endif // VSMC_MSVC
 }
 
 /// \brief CPU clock cycle counter using `rdtsc`
@@ -146,7 +146,7 @@ class RDTSCCounter
     uint64_t elapsed_;
     uint64_t start_;
     bool running_;
-};  // class RDTSCCounter
+}; // class RDTSCCounter
 
 /// \brief CPU clock cycle counter using `rdtscp`
 /// \ingroup RDTSC
@@ -231,8 +231,8 @@ class RDTSCPCounter
     uint64_t start_;
     unsigned start_id_;
     bool running_;
-};  // class RDTSCPCounter
+}; // class RDTSCPCounter
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_UTILITY_RDTSC_HPP
+#endif // VSMC_UTILITY_RDTSC_HPP

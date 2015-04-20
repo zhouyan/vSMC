@@ -56,10 +56,10 @@ template <typename BaseState> class StateCILK : public BaseState
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(CILK);
 
-        cilk_for(size_type to = 0; to != N;
-                 ++to) this->copy_particle(copy_from[to], to);
+        cilk_for(size_type to = 0; to != N; ++to) this->copy_particle(
+            copy_from[to], to);
     }
-};  // class StateCILK
+}; // class StateCILK
 
 /// \brief Sampler<T>::init_type subtype using Intel Cilk Plus
 /// \ingroup CILK
@@ -83,7 +83,7 @@ class InitializeCILK : public InitializeBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(CILK, Initialize)
-};  // class InitializeCILK
+}; // class InitializeCILK
 
 /// \brief Sampler<T>::move_type subtype using Intel Cilk Plus
 /// \ingroup CILK
@@ -106,7 +106,7 @@ class MoveCILK : public MoveBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(CILK, Move)
-};  // class MoveCILK
+}; // class MoveCILK
 
 /// \brief Monitor<T>::eval_type subtype using Intel Cilk Plus
 /// \ingroup CILK
@@ -114,27 +114,23 @@ template <typename T, typename Derived>
 class MonitorEvalCILK : public MonitorEvalBase<T, Derived>
 {
     public:
-    void operator()(std::size_t iter,
-                    std::size_t dim,
-                    const Particle<T> &particle,
-                    double *res)
+    void operator()(std::size_t iter, std::size_t dim,
+        const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         cilk_for(size_type i = 0; i != N; ++i)
         {
-            this->monitor_state(iter,
-                                dim,
-                                ConstSingleParticle<T>(i, &particle),
-                                res + i * dim);
+            this->monitor_state(iter, dim,
+                ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
         this->post_processor(iter, particle);
     }
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(CILK, MonitorEval)
-};  // class MonitorEvalCILK
+}; // class MonitorEvalCILK
 
 /// \brief Path<T>::eval_type subtype using Intel Cilk Plus
 /// \ingroup CILK
@@ -142,8 +138,8 @@ template <typename T, typename Derived>
 class PathEvalCILK : public PathEvalBase<T, Derived>
 {
     public:
-    double
-        operator()(std::size_t iter, const Particle<T> &particle, double *res)
+    double operator()(
+        std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -160,8 +156,8 @@ class PathEvalCILK : public PathEvalBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(CILK, PathEval)
-};  // class PathEvalCILK
+}; // class PathEvalCILK
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_SMP_BACKEND_CILK_HPP
+#endif // VSMC_SMP_BACKEND_CILK_HPP

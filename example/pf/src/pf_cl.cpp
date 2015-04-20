@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 #ifdef VSMC_PF_CL_MPI
     vsmc::MPIEnvironment env(argc, argv);
     boost::mpi::communicator world(vsmc::MPICommunicator<>::instance().get(),
-                                   boost::mpi::comm_duplicate);
+        boost::mpi::comm_duplicate);
     if (world.rank() == 0) {
         if (vsmc::CLQuery::has_device<CL_DEVICE_TYPE_CPU>())
             vsmc::CLManager<>::instance().setup(CL_DEVICE_TYPE_CPU);
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     vsmc::Sampler<cv> sampler(ParticleNum);
     std::ifstream src_file("pf_cl.cl");
     std::string src((std::istreambuf_iterator<char>(src_file)),
-                    (std::istreambuf_iterator<char>()));
+        (std::istreambuf_iterator<char>()));
     src_file.close();
     std::string opt;
     for (int i = 3; i != argc; ++i) {

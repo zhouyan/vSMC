@@ -50,9 +50,8 @@ inline void gmm_check_odd_nums(std::size_t, std::size_t) {}
 class gmm_logodds_flat
 {
     public:
-    double operator()(std::size_t old_num,
-                      std::size_t new_num,
-                      const gmm_param &)
+    double operator()(
+        std::size_t old_num, std::size_t new_num, const gmm_param &)
     {
         gmm_check_odd_nums(old_num, new_num);
 
@@ -63,9 +62,8 @@ class gmm_logodds_flat
 class gmm_logodds_pair
 {
     public:
-    double operator()(std::size_t old_num,
-                      std::size_t new_num,
-                      const gmm_param &state)
+    double operator()(
+        std::size_t old_num, std::size_t new_num, const gmm_param &state)
     {
         using std::log;
 
@@ -116,7 +114,7 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd>>
             split = rsplit(sp.rng());
         }
 
-        if (split) {  // do split move
+        if (split) { // do split move
             std::gamma_distribution<> rgamma2(2, 1);
             std::uniform_int_distribution<std::size_t> rj(0, cn - 1);
             std::uniform_real_distribution<> runif(0, 1);
@@ -186,7 +184,7 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd>>
             double u = log(runif(sp.rng()));
 
             return sp.state(0).mh_reject_rj(p, u);
-        } else {  // do combine move
+        } else { // do combine move
             std::uniform_int_distribution<std::size_t> rj(0, cn - 2);
             std::uniform_real_distribution<> runif(0, 1);
             std::size_t id1 = rj(sp.rng());
@@ -277,14 +275,14 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd>>
             birth = rbirth(sp.rng());
         }
 
-        if (birth) {  // do birth move
+        if (birth) { // do birth move
             std::gamma_distribution<> rgamma1(1, 1);
             std::gamma_distribution<> rgammak(static_cast<double>(cn), 1);
             std::uniform_real_distribution<> runif(0, 1);
-            std::normal_distribution<> rmu(sp.particle().value().mu0(),
-                                           sp.particle().value().sd0());
+            std::normal_distribution<> rmu(
+                sp.particle().value().mu0(), sp.particle().value().sd0());
             std::gamma_distribution<> rlambda(sp.particle().value().shape0(),
-                                              sp.particle().value().scale0());
+                sp.particle().value().scale0());
 
             // propose new component
             double a = rgamma1(sp.rng());
@@ -323,7 +321,7 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd>>
             double u = log(runif(sp.rng()));
 
             return sp.state(0).mh_reject_rj(p, u);
-        } else {  // do death move
+        } else { // do death move
             std::uniform_int_distribution<std::size_t> rj(0, cn - 1);
             std::uniform_real_distribution<> runif(0, 1);
 
@@ -360,4 +358,4 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd>>
     LogPriorOdd log_prior_odd_;
 };
 
-#endif  // VSMC_EXAMPLE_GMM_MOVE_RJ_HPP
+#endif // VSMC_EXAMPLE_GMM_MOVE_RJ_HPP

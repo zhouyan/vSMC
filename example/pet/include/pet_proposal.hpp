@@ -83,19 +83,19 @@ class pet_proposal_adaptive
         const vsmc::Monitor<pet_state> &monitor =
             sampler_->monitor("pet_moments");
         double lambda_sd = 2.38 * sqrt(monitor.record(2 + 2 * cn) -
-                                       monitor.record(0) * monitor.record(0));
+                                      monitor.record(0) * monitor.record(0));
         double nu_sd = 2.38 * sqrt(monitor.record(3 + 2 * cn) -
-                                   monitor.record(1) * monitor.record(1));
+                                  monitor.record(1) * monitor.record(1));
         std::vector<double> phi_sd(cn);
         std::vector<double> theta_sd(cn);
         const double coeff = 2.38 / sqrt(static_cast<double>(cn));
         for (std::size_t d = 0; d != cn; ++d) {
             phi_sd[d] =
                 coeff * sqrt(monitor.record(d + 4 + 2 * cn) -
-                             monitor.record(d + 2) * monitor.record(d + 2));
+                            monitor.record(d + 2) * monitor.record(d + 2));
             theta_sd[d] = coeff / 2 * sqrt(monitor.record(d + 4 + 3 * cn) -
-                                           monitor.record(d + 2 + cn) *
-                                               monitor.record(d + 2 + cn));
+                                          monitor.record(d + 2 + cn) *
+                                              monitor.record(d + 2 + cn));
         }
 
         for (vsmc::Particle<pet_state>::size_type i = 0; i != particle.size();
@@ -113,4 +113,4 @@ class pet_proposal_adaptive
     const vsmc::Sampler<pet_state> *const sampler_;
 };
 
-#endif  // VSMC_EXAMPLE_PET_PROPOSAL_HPP
+#endif // VSMC_EXAMPLE_PET_PROPOSAL_HPP

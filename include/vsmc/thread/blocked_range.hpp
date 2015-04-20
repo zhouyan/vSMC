@@ -84,8 +84,8 @@ template <typename T> class BlockedRange
     const_iterator begin_;
     const_iterator end_;
     size_type grainsize_;
-};  // class BlockedRange
+}; // class BlockedRange
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_THREAD_BLOCKED_RANGE_HPP
+#endif // VSMC_THREAD_BLOCKED_RANGE_HPP

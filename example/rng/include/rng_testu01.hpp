@@ -86,4 +86,4 @@ extern "C" {
         unif01_DeleteExternGen01(gen);                                       \
     }
 
-#endif  // VSMC_EXAMPLE_RNG_TESTU01_HPP
+#endif // VSMC_EXAMPLE_RNG_TESTU01_HPP

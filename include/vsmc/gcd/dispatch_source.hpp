@@ -42,17 +42,17 @@ namespace vsmc
 /// \brief Types of DispatchSource
 /// \ingroup Dispatch
 enum DispatchSourceType {
-    DispatchDataAdd,   ///< DISPATCH_SOURCE_TYPE_DATA_ADD
-    DispatchDataOr,    ///< DISPATCH_SOURCE_TYPE_DATA_OR
-    DispatchMachRecv,  ///< DISPATCH_SOURCE_TYPE_MACH_RECV
-    DispatchMachSend,  ///< DISPATCH_SOURCE_TYPE_MACH_SEND
-    DispatchProc,      ///< DISPATCH_SOURCE_TYPE_PROC
-    DispatchRead,      ///< DISPATCH_SOURCE_TYPE_READ
-    DispatchSignal,    ///< DISPATCH_SOURCE_TYPE_SIGNAL
-    DispatchTimer,     ///< DISPATCH_SOURCE_TYPE_TIMER
-    DispatchVnode,     ///< DISPATCH_SOURCE_TYPE_VNODE
-    DispatchWrite      ///< DISPATCH_SOURCE_TYPE_WRITE
-};                     // enum DispatchSourceType
+    DispatchDataAdd,  ///< DISPATCH_SOURCE_TYPE_DATA_ADD
+    DispatchDataOr,   ///< DISPATCH_SOURCE_TYPE_DATA_OR
+    DispatchMachRecv, ///< DISPATCH_SOURCE_TYPE_MACH_RECV
+    DispatchMachSend, ///< DISPATCH_SOURCE_TYPE_MACH_SEND
+    DispatchProc,     ///< DISPATCH_SOURCE_TYPE_PROC
+    DispatchRead,     ///< DISPATCH_SOURCE_TYPE_READ
+    DispatchSignal,   ///< DISPATCH_SOURCE_TYPE_SIGNAL
+    DispatchTimer,    ///< DISPATCH_SOURCE_TYPE_TIMER
+    DispatchVnode,    ///< DISPATCH_SOURCE_TYPE_VNODE
+    DispatchWrite     ///< DISPATCH_SOURCE_TYPE_WRITE
+};                    // enum DispatchSourceType
 
 template <DispatchSourceType> class DispatchSource;
 
@@ -100,8 +100,8 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
 
     void set_cancel_handler_f(::dispatch_function_t cancel_handler) const
     {
-        ::dispatch_source_set_cancel_handler_f(this->object(),
-                                               cancel_handler);
+        ::dispatch_source_set_cancel_handler_f(
+            this->object(), cancel_handler);
     }
 
     void set_event_handler_f(::dispatch_function_t event_handler) const
@@ -113,10 +113,10 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
     void set_registration_handler_f(
         ::dispatch_function_t registration_handler) const
     {
-        ::dispatch_source_set_registration_handler_f(this->object(),
-                                                     registration_handler);
+        ::dispatch_source_set_registration_handler_f(
+            this->object(), registration_handler);
     }
-#endif  // VSMC_HAS_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 
 #ifdef __BLOCKS__
     void set_cancel_handler(::dispatch_block_t cancel_handler) const
@@ -133,20 +133,19 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
     void set_registration_handler(
         ::dispatch_block_t registration_handler) const
     {
-        ::dispatch_source_set_registration_handler(this->object(),
-                                                   registration_handler);
+        ::dispatch_source_set_registration_handler(
+            this->object(), registration_handler);
     }
-#endif  // VSMC_HAS_GCD_LION
-#endif  // __BLOCKS__
+#endif // VSMC_HAS_GCD_LION
+#endif // __BLOCKS__
 
     private:
     template <DispatchSourceType> struct source_type {
     };
 
     protected:
-    DispatchSourceBase(uintptr_t handle,
-                       unsigned long mask,
-                       ::dispatch_queue_t queue)
+    DispatchSourceBase(
+        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchObject<::dispatch_source_t>(
               ::dispatch_source_create(
                   source_type_t(source_type<Type>()), handle, mask, queue),
@@ -155,8 +154,8 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
     }
 
     private:
-    static ::dispatch_source_type_t
-        source_type_t(source_type<DispatchDataAdd>)
+    static ::dispatch_source_type_t source_type_t(
+        source_type<DispatchDataAdd>)
     {
         return DISPATCH_SOURCE_TYPE_DATA_ADD;
     }
@@ -166,14 +165,14 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
         return DISPATCH_SOURCE_TYPE_DATA_OR;
     }
 
-    static ::dispatch_source_type_t
-        source_type_t(source_type<DispatchMachRecv>)
+    static ::dispatch_source_type_t source_type_t(
+        source_type<DispatchMachRecv>)
     {
         return DISPATCH_SOURCE_TYPE_MACH_RECV;
     }
 
-    static ::dispatch_source_type_t
-        source_type_t(source_type<DispatchMachSend>)
+    static ::dispatch_source_type_t source_type_t(
+        source_type<DispatchMachSend>)
     {
         return DISPATCH_SOURCE_TYPE_MACH_SEND;
     }
@@ -207,7 +206,7 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
     {
         return DISPATCH_SOURCE_TYPE_WRITE;
     }
-};  // class DispatchSourceBase
+}; // class DispatchSourceBase
 
 /// \brief A dispatch source
 /// \ingroup Dispatch
@@ -216,20 +215,18 @@ class DispatchSource : public DispatchSourceBase<Type>
 {
     public:
     template <DispatchQueueType QType>
-    DispatchSource(uintptr_t handle,
-                   unsigned long mask,
-                   const DispatchQueue<QType> &queue)
+    DispatchSource(uintptr_t handle, unsigned long mask,
+        const DispatchQueue<QType> &queue)
         : DispatchSourceBase<Type>(handle, mask, queue.object())
     {
     }
 
-    DispatchSource(uintptr_t handle,
-                   unsigned long mask,
-                   ::dispatch_queue_t queue)
+    DispatchSource(
+        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchSourceBase<Type>(handle, mask, queue)
     {
     }
-};  // class DispatchSource
+}; // class DispatchSource
 
 /// \brief Data (ADD) dispatch source
 /// \ingroup Dispatch
@@ -239,16 +236,14 @@ class DispatchSource<DispatchDataAdd>
 {
     public:
     template <DispatchQueueType QType>
-    DispatchSource(uintptr_t handle,
-                   unsigned long mask,
-                   const DispatchQueue<QType> &queue)
+    DispatchSource(uintptr_t handle, unsigned long mask,
+        const DispatchQueue<QType> &queue)
         : DispatchSourceBase<DispatchDataAdd>(handle, mask, queue.object())
     {
     }
 
-    DispatchSource(uintptr_t handle,
-                   unsigned long mask,
-                   ::dispatch_queue_t queue)
+    DispatchSource(
+        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchSourceBase<DispatchDataAdd>(handle, mask, queue)
     {
     }
@@ -257,7 +252,7 @@ class DispatchSource<DispatchDataAdd>
     {
         ::dispatch_source_merge_data(this->object(), value);
     }
-};  // class DispatchSource
+}; // class DispatchSource
 
 /// \brief Data (OR) dispatch source
 /// \ingroup Dispatch
@@ -267,16 +262,14 @@ class DispatchSource<DispatchDataOr>
 {
     public:
     template <DispatchQueueType QType>
-    DispatchSource(uintptr_t handle,
-                   unsigned long mask,
-                   const DispatchQueue<QType> &queue)
+    DispatchSource(uintptr_t handle, unsigned long mask,
+        const DispatchQueue<QType> &queue)
         : DispatchSourceBase<DispatchDataOr>(handle, mask, queue.object())
     {
     }
 
-    DispatchSource(uintptr_t handle,
-                   unsigned long mask,
-                   ::dispatch_queue_t queue)
+    DispatchSource(
+        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchSourceBase<DispatchDataOr>(handle, mask, queue)
     {
     }
@@ -285,7 +278,7 @@ class DispatchSource<DispatchDataOr>
     {
         ::dispatch_source_merge_data(this->object(), value);
     }
-};  // class DispatchSource
+}; // class DispatchSource
 
 /// \brief Timer dispatch source
 /// \ingroup Dispatch
@@ -294,28 +287,25 @@ class DispatchSource<DispatchTimer> : public DispatchSourceBase<DispatchTimer>
 {
     public:
     template <DispatchQueueType QType>
-    DispatchSource(uintptr_t handle,
-                   unsigned long mask,
-                   const DispatchQueue<QType> &queue)
+    DispatchSource(uintptr_t handle, unsigned long mask,
+        const DispatchQueue<QType> &queue)
         : DispatchSourceBase<DispatchTimer>(handle, mask, queue.object())
     {
     }
 
-    DispatchSource(uintptr_t handle,
-                   unsigned long mask,
-                   ::dispatch_queue_t queue)
+    DispatchSource(
+        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchSourceBase<DispatchTimer>(handle, mask, queue)
     {
     }
 
-    void set_timer(::dispatch_time_t start,
-                   uint64_t interval,
-                   uint64_t leeway) const
+    void set_timer(
+        ::dispatch_time_t start, uint64_t interval, uint64_t leeway) const
     {
         ::dispatch_source_set_timer(this->object(), start, interval, leeway);
     }
-};  // class DispatchSource
+}; // class DispatchSource
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_GCD_DISPATCH_SOURCE_HPP
+#endif // VSMC_GCD_DISPATCH_SOURCE_HPP

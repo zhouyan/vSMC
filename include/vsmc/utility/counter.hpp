@@ -44,16 +44,15 @@ namespace internal
 template <typename T, bool> struct CounterMask;
 
 template <typename T> struct CounterMask<T, true> {
-    static constexpr const T max_val =
-        static_cast<T>(~(static_cast<T>(0)));
+    static constexpr const T max_val = static_cast<T>(~(static_cast<T>(0)));
 
     static constexpr const T mask_hi =
         static_cast<T>(static_cast<T>(max_val << 8) >> 8);
 
     static constexpr const T mask_lo = static_cast<T>(mask_hi ^ max_val);
-};  // struct CounterMask
+}; // struct CounterMask
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 template <typename> class Counter;
 
@@ -194,8 +193,8 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
         if (++ctr[Position<N>()] != 0)
             return;
 
-        increment_single<N + 1>(ctr,
-                                std::integral_constant<bool, N + 2 < K>());
+        increment_single<N + 1>(
+            ctr, std::integral_constant<bool, N + 2 < K>());
     }
 
     template <std::size_t, std::size_t Blocks>
@@ -218,14 +217,14 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
     }
 
     template <std::size_t, std::size_t Blocks>
-    static inline void increment_block(Array<ctr_type, Blocks> &,
-                                       std::false_type)
+    static inline void increment_block(
+        Array<ctr_type, Blocks> &, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t Blocks>
-    static inline void increment_block(Array<ctr_type, Blocks> &ctr,
-                                       std::true_type)
+    static inline void increment_block(
+        Array<ctr_type, Blocks> &ctr, std::true_type)
     {
         increment_block_ctr(ctr[Position<B>()]);
         increment_block<B + 1>(
@@ -233,14 +232,14 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
     }
 
     template <std::size_t, std::size_t Blocks>
-    static inline void
-        increment_block(Array<ctr_type, Blocks> &, T, std::false_type)
+    static inline void increment_block(
+        Array<ctr_type, Blocks> &, T, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t Blocks>
-    static inline void
-        increment_block(Array<ctr_type, Blocks> &ctr, T nskip, std::true_type)
+    static inline void increment_block(
+        Array<ctr_type, Blocks> &ctr, T nskip, std::true_type)
     {
         increment_block_ctr(ctr[Position<B>()], nskip);
         increment_block<B + 1>(
@@ -279,8 +278,8 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
             ctr, std::integral_constant<bool, N + 2 < K>());
     }
 
-    static inline void
-        increment_block_nskip(ctr_type &ctr, T nskip, std::false_type)
+    static inline void increment_block_nskip(
+        ctr_type &ctr, T nskip, std::false_type)
     {
         T m = ctr.back() & mask_lo_;
         T b = ctr.back();
@@ -304,8 +303,8 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
         ctr.back() = b;
     }
 
-    static inline void
-        increment_block_nskip(ctr_type &ctr, T nskip, std::true_type)
+    static inline void increment_block_nskip(
+        ctr_type &ctr, T nskip, std::true_type)
     {
         if (nskip == 0)
             return;
@@ -325,8 +324,8 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
         increment_block_ctr(ctr);
         ctr.front() = nskip - 1;
     }
-};  // struct Counter
+}; // struct Counter
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_UTILITY_COUNTER_HPP
+#endif // VSMC_UTILITY_COUNTER_HPP

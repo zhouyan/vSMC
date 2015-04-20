@@ -134,10 +134,8 @@ class cv_move : public vsmc::MoveSEQ<cv>
     std::vector<double> incw_;
 };
 
-inline void cv_monitor_state(std::size_t,
-                             std::size_t dim,
-                             vsmc::ConstSingleParticle<cv> csp,
-                             double *res)
+inline void cv_monitor_state(std::size_t, std::size_t dim,
+    vsmc::ConstSingleParticle<cv> csp, double *res)
 {
     assert(dim <= Dim);
     for (std::size_t d = 0; d != dim; ++d)

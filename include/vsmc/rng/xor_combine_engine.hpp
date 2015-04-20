@@ -35,14 +35,12 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type)             \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_unsigned<result_type>::value),                              \
+    VSMC_STATIC_ASSERT((std::is_unsigned<result_type>::value),               \
         USE_XorCombineEngine_WITH_ENGINES_HAVE_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_SAME_TYPE(Eng1, Eng2)             \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_same<typename Eng1::resultType,                             \
-                      typename Eng2::resultType>::value),                    \
+    VSMC_STATIC_ASSERT((std::is_same<typename Eng1::resultType,              \
+                           typename Eng2::resultType>::value),               \
         USE_XorCombineEngine_WITH_TWO_RNG_ENGINES_WITH_DIFFERENT_RESULT_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE                                   \
@@ -54,10 +52,8 @@ namespace vsmc
 
 /// \brief Combine two RNG engines using XOR
 /// \ingroup RNGAdapter
-template <typename Eng1,
-          typename Eng2,
-          typename Eng1::result_type S1 = 0,
-          typename Eng2::result_type S2 = 0>
+template <typename Eng1, typename Eng2, typename Eng1::result_type S1 = 0,
+    typename Eng2::result_type S2 = 0>
 class XorCombineEngine
 {
     public:
@@ -71,13 +67,9 @@ class XorCombineEngine
     }
 
     template <typename SeedSeq>
-    explicit XorCombineEngine(
-        SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            result_type,
-            XorCombineEngine<Eng1, Eng2, S1, S2>>::value>::type * =
-            nullptr)
+    explicit XorCombineEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            XorCombineEngine<Eng1, Eng2, S1, S2>>::value>::type * = nullptr)
         : eng1_(seq), eng2_(seq)
     {
         VSMC_STATIC_ASSERT_RNG_XOR_COMBINE;
@@ -91,11 +83,8 @@ class XorCombineEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-              typename std::enable_if<internal::is_seed_seq<
-                  SeedSeq,
-                  result_type,
-                  XorCombineEngine<Eng1, Eng2, S1, S2>>::value>::type * =
-                  nullptr)
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            XorCombineEngine<Eng1, Eng2, S1, S2>>::value>::type * = nullptr)
     {
         eng1_.seed(seq);
         eng2_.seed(seq);
@@ -108,17 +97,17 @@ class XorCombineEngine
     static constexpr result_type min VSMC_MNE()
     {
         return Eng1::min VSMC_MNE() < Eng2::min VSMC_MNE() ?
-                   Eng1::min VSMC_MNE :
-                   Eng2::min
-                   VSMC_MNE();
+            Eng1::min VSMC_MNE :
+            Eng2::min
+            VSMC_MNE();
     }
 
     static constexpr result_type max VSMC_MNE()
     {
         return Eng1::max VSMC_MNE() > Eng2::max VSMC_MNE() ?
-                   Eng1::max VSMC_MNE :
-                   Eng2::max
-                   VSMC_MNE();
+            Eng1::max VSMC_MNE :
+            Eng2::max
+            VSMC_MNE();
     }
 
     result_type operator()() { return (eng1_() << S1) ^ (eng2_() << S2); }
@@ -129,24 +118,24 @@ class XorCombineEngine
             operator()();
     }
 
-    friend inline bool
-        operator==(const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
-                   const XorCombineEngine<Eng1, Eng2, S1, S2> &eng2)
+    friend inline bool operator==(
+        const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
+        const XorCombineEngine<Eng1, Eng2, S1, S2> &eng2)
     {
         return (eng1.eng1_ == eng2.eng1_ && eng1.eng2_ == eng2.eng2_);
     }
 
-    friend inline bool
-        operator!=(const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
-                   const XorCombineEngine<Eng1, Eng2, S1, S2> &eng2)
+    friend inline bool operator!=(
+        const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
+        const XorCombineEngine<Eng1, Eng2, S1, S2> &eng2)
     {
         return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
     {
         if (!os.good())
             return os;
@@ -157,9 +146,9 @@ class XorCombineEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
     {
         if (!is.good())
             return is;
@@ -180,8 +169,8 @@ class XorCombineEngine
     private:
     engine1_type eng1_;
     engine2_type eng2_;
-};  // class XorCombineEngine
+}; // class XorCombineEngine
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_COMBINE_HPP
+#endif // VSMC_RNG_COMBINE_HPP

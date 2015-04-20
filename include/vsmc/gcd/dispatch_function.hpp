@@ -68,7 +68,7 @@ template <typename T> class DispatchFunction
         DispatchFunction<T> *df_ptr = static_cast<DispatchFunction<T> *>(ctx);
         df_ptr->work_();
     }
-};  // class DispatchFunction
+}; // class DispatchFunction
 
 /// \brief Make a DispatchFunction object from an arbitrary callable object
 /// \ingroup Dispatch
@@ -84,6 +84,6 @@ inline DispatchFunction<
     return new DispatchFunction<V>(std::forward<T>(work));
 }
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_GCD_DISPATCH_FUNCTION_HPP
+#endif // VSMC_GCD_DISPATCH_FUNCTION_HPP

@@ -85,7 +85,7 @@ template <typename RngType> class RngSet<RngType, Scalar>
     private:
     std::size_t size_;
     rng_type rng_;
-};  // class RngSet
+}; // class RngSet
 
 /// \brief Vector RNG set
 /// \ingroup RNG
@@ -93,9 +93,8 @@ template <typename RngType> class RngSet<RngType, Vector>
 {
     public:
     typedef RngType rng_type;
-    typedef
-        typename std::vector<rng_type, AlignedAllocator<rng_type>>::size_type
-            size_type;
+    typedef typename std::vector<rng_type,
+        AlignedAllocator<rng_type>>::size_type size_type;
 
     explicit RngSet(size_type N = 0) : rng_(N, rng_type()) { seed(); }
 
@@ -127,7 +126,7 @@ template <typename RngType> class RngSet<RngType, Vector>
 
     private:
     std::vector<rng_type, AlignedAllocator<rng_type>> rng_;
-};  // class RngSet
+}; // class RngSet
 
 #if VSMC_HAS_TBB
 
@@ -165,9 +164,9 @@ template <typename RngType> class RngSet<RngType, ThreadLocal>
 
         return rng;
     }
-};  // class RngSet
+}; // class RngSet
 
-#endif  // VSMC_HAS_TBB
+#endif // VSMC_HAS_TBB
 
 namespace traits
 {
@@ -176,8 +175,8 @@ namespace traits
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, VSMC_RNG_SET_TYPE)
 
-}  // namespace vsmc::traits
+} // namespace vsmc::traits
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_RNG_SET_HPP
+#endif // VSMC_RNG_RNG_SET_HPP

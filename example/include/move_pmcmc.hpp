@@ -127,7 +127,7 @@ template <typename T> class pmcmc_global
         particle.value().log_target(particle.value().state(c1, 0));
         particle.value().log_target(particle.value().state(c2, 0));
         double p = particle.value().state(c1, 0).log_target_diff() +
-                   particle.value().state(c2, 0).log_target_diff();
+            particle.value().state(c2, 0).log_target_diff();
         double u = log(runif_(particle.rng(1)));
         if (p < u)
             particle.value().state(c1, 0).swap(particle.value().state(c2, 0));
@@ -165,8 +165,7 @@ template <typename T> class alpha_pair
 
 template <typename T, typename Proposal, typename InitType>
 inline std::vector<double> optimal_pmcmc_alpha(vsmc::Sampler<T> &sampler,
-                                               std::size_t burnin = 1000,
-                                               std::size_t iter_num = 1000)
+    std::size_t burnin = 1000, std::size_t iter_num = 1000)
 {
     using std::exp;
     using std::sqrt;
@@ -217,4 +216,4 @@ inline std::vector<double> optimal_pmcmc_alpha(vsmc::Sampler<T> &sampler,
     return alpha;
 }
 
-#endif  // VSMC_EXAMPLE_MOVE_PMCMC_HPP
+#endif // VSMC_EXAMPLE_MOVE_PMCMC_HPP

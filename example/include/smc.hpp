@@ -49,4 +49,4 @@ static std::vector<std::size_t> Posterior5IterNum;
 #include "smc_path.hpp"
 #include "smc_do.hpp"
 
-#endif  // VSMC_EXAMPLE_SMC_HPP
+#endif // VSMC_EXAMPLE_SMC_HPP

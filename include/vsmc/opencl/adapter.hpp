@@ -56,7 +56,7 @@ class InitializeAdapter<T, InitializeCL, F>
     {
         return this->implementation().initialize_state(kernel_name);
     }
-};  // InitializeAdapter
+}; // InitializeAdapter
 
 /// \brief Move class adapter specialization for OpenCL
 /// \ingroup Adapter
@@ -74,7 +74,7 @@ class MoveAdapter<T, MoveCL, F> : public MoveAdapterBase<T, F, MoveCL<T>>
     {
         return this->implementation().move_state(iter, kernel_name);
     }
-};  // MoveAdapter
+}; // MoveAdapter
 
 /// \brief Monitor evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
@@ -93,7 +93,7 @@ class MonitorEvalAdapter<T, MonitorEvalCL, F>
     {
         this->implementation().monitor_state(iter, kernel_name);
     }
-};  // MonitorEvalAdapter
+}; // MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
@@ -112,7 +112,7 @@ class PathEvalAdapter<T, PathEvalCL, F>
     {
         return this->implementation().path_state(iter, kernel_name);
     }
-};  // PathEvalAdapter
+}; // PathEvalAdapter
 
 /// \brief Initialize class adapter specialization for OpenCL
 /// \ingroup Adapter
@@ -127,8 +127,7 @@ class InitializeAdapter<T, InitializeCL, NullType>
     typedef typename base::pre_processor_type pre_processor_type;
     typedef typename base::post_processor_type post_processor_type;
 
-    InitializeAdapter(
-        const std::string &init_state,
+    InitializeAdapter(const std::string &init_state,
         const initialize_param_type &init_param = initialize_param_type(),
         const pre_processor_type &pre = pre_processor_type(),
         const post_processor_type &post = post_processor_type())
@@ -143,7 +142,7 @@ class InitializeAdapter<T, InitializeCL, NullType>
 
     private:
     const std::string initialize_state_;
-};  // class InitializeAdapter
+}; // class InitializeAdapter
 
 /// \brief Move class adapter specialization for OpenCL
 /// \ingroup Adapter
@@ -158,8 +157,8 @@ class MoveAdapter<T, MoveCL, NullType>
     typedef typename base::post_processor_type post_processor_type;
 
     MoveAdapter(const std::string &move_state,
-                const pre_processor_type &pre = pre_processor_type(),
-                const post_processor_type &post = post_processor_type())
+        const pre_processor_type &pre = pre_processor_type(),
+        const post_processor_type &post = post_processor_type())
         : base(pre, post), move_state_(move_state)
     {
     }
@@ -171,7 +170,7 @@ class MoveAdapter<T, MoveCL, NullType>
 
     private:
     const std::string move_state_;
-};  // class MoveAdapter
+}; // class MoveAdapter
 
 /// \brief Monitor evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
@@ -185,8 +184,7 @@ class MonitorEvalAdapter<T, MonitorEvalCL, NullType>
     typedef typename base::pre_processor_type pre_processor_type;
     typedef typename base::post_processor_type post_processor_type;
 
-    MonitorEvalAdapter(
-        const std::string &monitor_state,
+    MonitorEvalAdapter(const std::string &monitor_state,
         const pre_processor_type &pre = pre_processor_type(),
         const post_processor_type &post = post_processor_type())
         : base(pre, post), monitor_state_(monitor_state)
@@ -200,7 +198,7 @@ class MonitorEvalAdapter<T, MonitorEvalCL, NullType>
 
     private:
     const std::string monitor_state_;
-};  // class MonitorEvalAdapter
+}; // class MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter specialization for OpenCL
 /// \ingroup Adapter
@@ -216,9 +214,9 @@ class PathEvalAdapter<T, PathEvalCL, NullType>
     typedef typename base::post_processor_type post_processor_type;
 
     PathEvalAdapter(const std::string &path_state,
-                    const path_grid_type &path_grid,
-                    const pre_processor_type &pre = pre_processor_type(),
-                    const post_processor_type &post = post_processor_type())
+        const path_grid_type &path_grid,
+        const pre_processor_type &pre = pre_processor_type(),
+        const post_processor_type &post = post_processor_type())
         : base(path_grid, pre, post), path_state_(path_state)
     {
     }
@@ -230,8 +228,8 @@ class PathEvalAdapter<T, PathEvalCL, NullType>
 
     private:
     const std::string path_state_;
-};  // class PathEvalAdapter
+}; // class PathEvalAdapter
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_OPENCL_ADAPTER_HPP
+#endif // VSMC_OPENCL_ADAPTER_HPP

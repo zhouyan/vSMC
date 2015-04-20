@@ -268,4 +268,4 @@ inline OutputStream &operator<<(OutputStream &os, const pet_param &param)
     return os;
 }
 
-#endif  // VSMC_EXAMPLE_PET_PARAM_HPP
+#endif // VSMC_EXAMPLE_PET_PARAM_HPP

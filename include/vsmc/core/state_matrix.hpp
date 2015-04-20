@@ -38,21 +38,19 @@
 #include <vsmc/utility/array.hpp>
 
 #define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim)         \
-    VSMC_STATIC_ASSERT(                                                      \
-        (Dim == Dynamic),                                                    \
+    VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
         USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH             \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
-                        ("**StateMatrix::copy** SIZE MISMATCH"))
+        ("**StateMatrix::copy** SIZE MISMATCH"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim)                  \
-    VSMC_RUNTIME_ASSERT((dim >= 1),                                          \
-                        ("**StateMatrix** DIMENSION IS LESS THAN 1"))
+    VSMC_RUNTIME_ASSERT(                                                     \
+        (dim >= 1), ("**StateMatrix** DIMENSION IS LESS THAN 1"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)        \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (psize >= dim),                                                      \
+    VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
         ("**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
 namespace vsmc
@@ -66,14 +64,13 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     public:
     typedef std::size_t size_type;
     typedef T state_type;
-    typedef typename std::conditional<Dim == Dynamic,
-                                      std::vector<T>,
-                                      Array<T, Dim>>::type state_pack_type;
+    typedef typename std::conditional<Dim == Dynamic, std::vector<T>,
+        Array<T, Dim>>::type state_pack_type;
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S> {
-        single_particle_type(typename Particle<S>::size_type id,
-                             Particle<S> *particle_ptr)
+        single_particle_type(
+            typename Particle<S>::size_type id, Particle<S> *particle_ptr)
             : SingleParticleBase<S>(id, particle_ptr)
         {
         }
@@ -85,8 +82,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
         state_type &state(std::size_t pos) const
         {
-            return this->mutable_particle_ptr()->value().state(this->id(),
-                                                               pos);
+            return this->mutable_particle_ptr()->value().state(
+                this->id(), pos);
         }
 
         template <std::size_t Pos> state_type &state(Position<Pos>) const
@@ -98,12 +95,12 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         {
             return this->state(Pos);
         }
-    };  // struct single_particle_type
+    }; // struct single_particle_type
 
     template <typename S>
     struct const_single_particle_type : public ConstSingleParticleBase<S> {
         const_single_particle_type(typename Particle<S>::size_type id,
-                                   const Particle<S> *particle_ptr)
+            const Particle<S> *particle_ptr)
             : ConstSingleParticleBase<S>(id, particle_ptr)
         {
         }
@@ -128,7 +125,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         {
             return this->state(Pos);
         }
-    };  // struct const_single_particle_type
+    }; // struct const_single_particle_type
 
     void resize_dim(std::size_t dim)
     {
@@ -148,8 +145,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     const state_type &operator()(std::size_t i, std::size_t pos) const
     {
-        return static_cast<const StateMatrix<Order, Dim, T> *>(this)
-            ->state(i, pos);
+        return static_cast<const StateMatrix<Order, Dim, T> *>(this)->state(
+            i, pos);
     }
 
     T *data() { return &data_[0]; }
@@ -211,9 +208,8 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     }
 
     template <typename CharT, typename Traits>
-    std::basic_ostream<CharT, Traits> &
-        print(std::basic_ostream<CharT, Traits> &os,
-              char sepchar = '\t') const
+    std::basic_ostream<CharT, Traits> &print(
+        std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
         if (this->dim() == 0 || size_ == 0 || !os.good())
             return os;
@@ -241,8 +237,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     private:
     size_type size_;
     typename std::conditional<std::is_arithmetic<T>::value,
-                              std::vector<T, AlignedAllocator<T>>,
-                              std::vector<T>>::type data_;
+        std::vector<T, AlignedAllocator<T>>, std::vector<T>>::type data_;
 
     std::vector<T> create_pack_dispatch(std::true_type) const
     {
@@ -253,16 +248,13 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     {
         return Array<T, Dim>();
     }
-};  // class StateMatrixBase
+}; // class StateMatrixBase
 
-template <typename CharT,
-          typename Traits,
-          MatrixOrder Order,
-          std::size_t Dim,
-          typename T>
-inline std::basic_ostream<CharT, Traits> &
-    operator<<(std::basic_ostream<CharT, Traits> &os,
-               const StateMatrixBase<Order, Dim, T> &smatrix)
+template <typename CharT, typename Traits, MatrixOrder Order, std::size_t Dim,
+    typename T>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os,
+    const StateMatrixBase<Order, Dim, T> &smatrix)
 {
     return smatrix.print(os);
 }
@@ -350,8 +342,8 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     void state_unpack(size_type id, const state_pack_type &pack)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(pack.size(),
-                                                          this->dim());
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+            pack.size(), this->dim());
 
         const T *ptr = &pack[0];
         std::copy(ptr, ptr + this->dim(), row_data(id));
@@ -359,13 +351,13 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     void state_unpack(size_type id, state_pack_type &&pack)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(pack.size(),
-                                                          this->dim());
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+            pack.size(), this->dim());
 
         const T *ptr = &pack[0];
         std::move(ptr, ptr + this->dim(), row_data(id));
     }
-};  // class StateMatrix
+}; // class StateMatrix
 
 /// \brief Particle::value_type subtype
 /// \ingroup Core
@@ -452,8 +444,8 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     void state_unpack(size_type id, const state_pack_type &pack)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(pack.size(),
-                                                          this->dim());
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+            pack.size(), this->dim());
 
         for (std::size_t d = 0; d != this->dim(); ++d)
             state(id, d) = pack[d];
@@ -461,14 +453,14 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     void state_unpack(size_type id, state_pack_type &&pack)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(pack.size(),
-                                                          this->dim());
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
+            pack.size(), this->dim());
 
         for (std::size_t d = 0; d != this->dim(); ++d)
             state(id, d) = std::move(pack[d]);
     }
-};  // class StateMatrix
+}; // class StateMatrix
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_STATE_MATRIX_HPP
+#endif // VSMC_CORE_STATE_MATRIX_HPP

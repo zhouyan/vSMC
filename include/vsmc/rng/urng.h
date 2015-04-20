@@ -189,8 +189,8 @@
     } RNG##N##x##W##_rng_t;
 
 #define VSMC_DEFINE_RNG_URNG_INIT(RNG, N, W)                                 \
-    VSMC_STATIC_INLINE void RNG##N##x##W##_init(RNG##N##x##W##_rng_t *rng,   \
-                                                uint##W##_t seed)            \
+    VSMC_STATIC_INLINE void RNG##N##x##W##_init(                             \
+        RNG##N##x##W##_rng_t *rng, uint##W##_t seed)                         \
     {                                                                        \
         RNG##N##x##W##_ctr_t init_ctr = {{}};                                \
         RNG##N##x##W##_ukey_t ukey = {{}};                                   \
@@ -308,7 +308,7 @@ typedef philox4x64_rng_t cburng4x64_rng_t;
 #define cburng2x64_rand philox2x64_rand
 /// \ingroup CLRNG
 #define cburng4x64_rand philox4x64_rand
-#else  // VSMC_USE_PHILOX_CBURNG
+#else // VSMC_USE_PHILOX_CBURNG
 /// \ingroup CLRNG
 typedef threefry2x32_rng_t cburng2x32_rng_t;
 /// \ingroup CLRNG
@@ -333,6 +333,6 @@ typedef threefry4x64_rng_t cburng4x64_rng_t;
 #define cburng2x64_rand threefry2x64_rand
 /// \ingroup CLRNG
 #define cburng4x64_rand threefry4x64_rand
-#endif  // VSMC_USE_PHILOX_CBURNG
+#endif // VSMC_USE_PHILOX_CBURNG
 
-#endif  // VSMC_RNG_URNG_H
+#endif // VSMC_RNG_URNG_H

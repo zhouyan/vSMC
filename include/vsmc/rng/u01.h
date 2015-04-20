@@ -81,14 +81,14 @@
 #define U01_CLOSED_OPEN_64 u01_closed_closed_64_53
 #define U01_CLOSED_CLOSED_64 u01_closed_closed_64_53
 
-#else  // VSMC_HAS_OPENCL_DOUBLE
+#else // VSMC_HAS_OPENCL_DOUBLE
 
 #define U01_OPEN_OPEN_32 u01_open_open_32_24
 #define U01_OPEN_CLOSED_32 u01_open_closed_32_24
 #define U01_CLOSED_OPEN_32 u01_closed_closed_32_24
 #define U01_CLOSED_CLOSED_32 u01_closed_closed_32_24
 
-#endif  // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_OPENCL_DOUBLE
 
 #define VSMC_RNG_U01_31f (1.0f / (1024.0f * 1024.0f * 1024.0f * 2.0f))
 #define VSMC_RNG_U01_24f (128.0f * VSMC_RNG_U01_31f)
@@ -165,7 +165,7 @@ VSMC_STATIC_INLINE double u01_open_open_32_53(uint32_t u)
 VSMC_STATIC_INLINE double u01_closed_closed_64_53(uint64_t u)
 {
     return ((u & UINT64_C(0x7ffffffffffffe00)) + (u & 0x200)) *
-           VSMC_RNG_U01_63;
+        VSMC_RNG_U01_63;
 }
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1)\f$
@@ -233,6 +233,6 @@ VSMC_STATIC_INLINE float u01_open_open_64_24(uint64_t u)
 #endif
 }
 
-#endif  // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_OPENCL_DOUBLE
 
-#endif  // VSMC_RNG_U01_H
+#endif // VSMC_RNG_U01_H

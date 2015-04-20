@@ -39,14 +39,13 @@
 #endif
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType)                \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_same<ResultType, uint32_t>::value ||                        \
-         std::is_same<ResultType, uint64_t>::value),                         \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint32_t>::value ||         \
+                           std::is_same<ResultType, uint64_t>::value),       \
         USE_PhiloxEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K)                                \
-    VSMC_STATIC_ASSERT((K == 2 || K == 4),                                   \
-                       USE_PhiloxEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
+    VSMC_STATIC_ASSERT(                                                      \
+        (K == 2 || K == 4), USE_PhiloxEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX                                        \
     VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);                   \
@@ -84,12 +83,10 @@ template <typename, std::size_t> struct PhiloxWeylConstantValue;
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 0, UINT32_C(0x9E3779B9))
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 1, UINT32_C(0xBB67AE85))
 
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t,
-                                     0,
-                                     UINT64_C(0x9E3779B97F4A7C15))
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t,
-                                     1,
-                                     UINT64_C(0xBB67AE8584CAA73B))
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
+    uint64_t, 0, UINT64_C(0x9E3779B97F4A7C15))
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
+    uint64_t, 1, UINT64_C(0xBB67AE8584CAA73B))
 
 template <typename, std::size_t, std::size_t> struct PhiloxRoundConstantValue;
 
@@ -98,21 +95,15 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 2, 0, UINT32_C(0xd256d193))
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 4, 0, UINT32_C(0xD2511F53))
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 4, 1, UINT32_C(0xCD9E8D57))
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t,
-                                      2,
-                                      0,
-                                      UINT64_C(0xD2B74407B1CE6E93))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
+    uint64_t, 2, 0, UINT64_C(0xD2B74407B1CE6E93))
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t,
-                                      4,
-                                      0,
-                                      UINT64_C(0xD2E7470EE14C6C93))
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint64_t,
-                                      4,
-                                      1,
-                                      UINT64_C(0xCA5A826395121157))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
+    uint64_t, 4, 0, UINT64_C(0xD2E7470EE14C6C93))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
+    uint64_t, 4, 1, UINT64_C(0xCA5A826395121157))
 
-}  // namespace vsmc::traits::internal
+} // namespace vsmc::traits::internal
 
 /// \brief Traits of PhiloxEngine constants for bumping the key (Weyl
 /// sequence)
@@ -143,7 +134,7 @@ struct PhiloxRoundConstantTrait
     : public internal::PhiloxRoundConstantValue<ResultType, K, I> {
 };
 
-}  // namespace vsmc::traits
+} // namespace vsmc::traits
 
 namespace internal
 {
@@ -160,7 +151,7 @@ struct PhiloxBumpKey<ResultType, 2, N, true> {
         par[Position<0>()] +=
             traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
     }
-};  // struct PhiloxBumpKey
+}; // struct PhiloxBumpKey
 
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpKey<ResultType, 4, N, true> {
@@ -171,7 +162,7 @@ struct PhiloxBumpKey<ResultType, 4, N, true> {
         par[Position<1>()] +=
             traits::PhiloxWeylConstantTrait<ResultType, 1>::value;
     }
-};  // struct PhiloxBumpKey
+}; // struct PhiloxBumpKey
 
 template <std::size_t K, std::size_t I>
 inline void philox_hilo(uint32_t b, uint32_t &hi, uint32_t &lo)
@@ -197,7 +188,7 @@ inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
     lo = static_cast<uint64_t>(prod);
 }
 
-#elif defined(VSMC_MSVC)  // VSMC_HAS_INT128
+#elif defined(VSMC_MSVC) // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
 inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
@@ -206,7 +197,7 @@ inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
         traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value, b, &hi);
 }
 
-#else  // VSMC_HAS_INT128
+#else // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
 inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
@@ -233,19 +224,19 @@ inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
     hi += ((lo >> whalf) < (ahbl_albh & lomask));
 }
 
-#endif  // VSMC_HAS_INT128
+#endif // VSMC_HAS_INT128
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct PhiloxRound {
     static void eval(Array<ResultType, K> &, const Array<ResultType, K / 2> &)
     {
     }
-};  // struct PhiloxRound
+}; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true> {
-    static void eval(Array<ResultType, 2> &state,
-                     const Array<ResultType, 1> &par)
+    static void eval(
+        Array<ResultType, 2> &state, const Array<ResultType, 1> &par)
     {
         ResultType hi = 0;
         ResultType lo = 0;
@@ -254,12 +245,12 @@ struct PhiloxRound<ResultType, 2, N, true> {
             hi ^ (par[Position<0>()] ^ state[Position<1>()]);
         state[Position<1>()] = lo;
     }
-};  // struct PhiloxRound
+}; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true> {
-    static void eval(Array<ResultType, 4> &state,
-                     const Array<ResultType, 2> &par)
+    static void eval(
+        Array<ResultType, 4> &state, const Array<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
         ResultType lo1 = 0;
@@ -275,9 +266,9 @@ struct PhiloxRound<ResultType, 4, N, true> {
         state[Position<2>()] = hi2 ^ state[Position<3>()];
         state[Position<3>()] = lo3;
     }
-};  // struct PhiloxRound
+}; // struct PhiloxRound
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief Philox RNG engine reimplemented
 /// \ingroup R123RNG
@@ -320,9 +311,8 @@ struct PhiloxRound<ResultType, 4, N, true> {
 /// The constants of bumping the key (Weyl constants) and those used in each
 /// rounds can be set through traits, `vsmc::traits::PhiloxWeylConstantTrait`
 /// and `vsmc::traits::PhiloxRoundConstantTrait`.
-template <typename ResultType,
-          std::size_t K,
-          std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
+template <typename ResultType, std::size_t K,
+    std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxEngine
 {
     public:
@@ -342,13 +332,9 @@ class PhiloxEngine
     }
 
     template <typename SeedSeq>
-    explicit PhiloxEngine(
-        SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            result_type,
-            key_type,
-            PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
+    explicit PhiloxEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            key_type, PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
             nullptr)
         : index_(K)
     {
@@ -372,12 +358,9 @@ class PhiloxEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-              typename std::enable_if<internal::is_seed_seq<
-                  SeedSeq,
-                  result_type,
-                  key_type,
-                  PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
-                  nullptr)
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            key_type, PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
+            nullptr)
     {
         counter::reset(ctr_);
         seq.generate(key_.begin(), key_.end());
@@ -464,25 +447,25 @@ class PhiloxEngine
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
-    friend inline bool
-        operator==(const PhiloxEngine<ResultType, K, Rounds> &eng1,
-                   const PhiloxEngine<ResultType, K, Rounds> &eng2)
+    friend inline bool operator==(
+        const PhiloxEngine<ResultType, K, Rounds> &eng1,
+        const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {
         return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
-               eng1.key_ == eng2.key_;
+            eng1.key_ == eng2.key_;
     }
 
-    friend inline bool
-        operator!=(const PhiloxEngine<ResultType, K, Rounds> &eng1,
-                   const PhiloxEngine<ResultType, K, Rounds> &eng2)
+    friend inline bool operator!=(
+        const PhiloxEngine<ResultType, K, Rounds> &eng1,
+        const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {
         return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const PhiloxEngine<ResultType, K, Rounds> &eng)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const PhiloxEngine<ResultType, K, Rounds> &eng)
     {
         if (!os.good())
             return os;
@@ -496,9 +479,9 @@ class PhiloxEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   PhiloxEngine<ResultType, K, Rounds> &eng)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        PhiloxEngine<ResultType, K, Rounds> &eng)
     {
         if (!is.good())
             return is;
@@ -534,15 +517,15 @@ class PhiloxEngine
     }
 
     template <std::size_t N>
-    void
-        generate_buffer(buffer_type &buf, key_type &par, std::true_type) const
+    void generate_buffer(
+        buffer_type &buf, key_type &par, std::true_type) const
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
         internal::PhiloxRound<ResultType, K, N>::eval(buf, par);
         generate_buffer<N + 1>(
             buf, par, std::integral_constant < bool, N<Rounds>());
     }
-};  // class PhiloxEngine
+}; // class PhiloxEngine
 
 /// \brief Philox2x32 RNG engine reimplemented
 /// \ingroup R123RNG
@@ -568,6 +551,6 @@ typedef Philox4x32 Philox;
 /// \ingroup R123RNG
 typedef Philox4x64 Philox_64;
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_PHILOX_HPP
+#endif // VSMC_RNG_PHILOX_HPP

@@ -59,13 +59,10 @@
     rng_output_sw(prog_name, names, size, sw, bytes, cycles);
 
 template <typename Eng>
-inline void rng_test(std::size_t N,
-                     const std::string &name,
-                     std::vector<std::string> &names,
-                     std::vector<std::size_t> &size,
-                     std::vector<vsmc::StopWatch> &sw,
-                     std::vector<std::size_t> &bytes,
-                     std::vector<uint64_t> &cycles)
+inline void rng_test(std::size_t N, const std::string &name,
+    std::vector<std::string> &names, std::vector<std::size_t> &size,
+    std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
+    std::vector<uint64_t> &cycles)
 {
     Eng eng;
     vsmc::StopWatch watch;
@@ -93,11 +90,9 @@ inline void rng_test(std::size_t N,
 }
 
 inline void rng_output_sw(const std::string &prog_name,
-                          const std::vector<std::string> &names,
-                          std::vector<std::size_t> &size,
-                          const std::vector<vsmc::StopWatch> &sw,
-                          const std::vector<std::size_t> &bytes,
-                          std::vector<uint64_t> &cycles)
+    const std::vector<std::string> &names, std::vector<std::size_t> &size,
+    const std::vector<vsmc::StopWatch> &sw,
+    const std::vector<std::size_t> &bytes, std::vector<uint64_t> &cycles)
 {
     std::size_t M = names.size();
     if (M == 0)
@@ -130,4 +125,4 @@ inline void rng_output_sw(const std::string &prog_name,
     std::cout << std::string(90, '=') << std::endl;
 }
 
-#endif  // VSMC_EXAMPLE_RNG_TEST_HPP
+#endif // VSMC_EXAMPLE_RNG_TEST_HPP

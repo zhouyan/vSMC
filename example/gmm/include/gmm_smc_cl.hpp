@@ -132,8 +132,7 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType>
             data >> obs[i];
 #if VSMC_OPENCL_VERSION >= 120
         if (this->manager().opencl_version() >= 120) {
-            obs_ = this->manager().template create_buffer<fp_type>(
-                obs.size(),
+            obs_ = this->manager().template create_buffer<fp_type>(obs.size(),
                 CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR |
                     CL_MEM_HOST_WRITE_ONLY,
                 &obs[0]);
@@ -189,10 +188,10 @@ class gmm_state : public vsmc::StateCL<vsmc::Dynamic, FPType>
     fp_type alpha_inc_;
     double zconst_;
 
-    fp_type mu0_;     // prior mean for mu
-    fp_type sd0_;     // prior sd for mu
-    fp_type shape0_;  // prior shape for lambda
-    fp_type scale0_;  // prior scale for lambda
+    fp_type mu0_;    // prior mean for mu
+    fp_type sd0_;    // prior sd for mu
+    fp_type shape0_; // prior shape for lambda
+    fp_type scale0_; // prior scale for lambda
 
     fp_type mu_sd_;
     fp_type lambda_sd_;
@@ -208,8 +207,8 @@ class gmm_init : public vsmc::InitializeCL<gmm_state<FPType>>
         kernel_name = std::string("gmm_init");
     }
 
-    void initialize_param(vsmc::Particle<gmm_state<FPType>> &particle,
-                          void *info)
+    void initialize_param(
+        vsmc::Particle<gmm_state<FPType>> &particle, void *info)
     {
         if (info)
             particle.value().read_data(static_cast<const data_info *>(info));
@@ -238,8 +237,7 @@ class gmm_init : public vsmc::InitializeCL<gmm_state<FPType>>
             typename vsmc::Particle<gmm_state<FPType>>::size_type i0 =
                 d * state.size();
             for (typename vsmc::Particle<gmm_state<FPType>>::size_type i = 0;
-                 i != state.size();
-                 ++i) {
+                 i != state.size(); ++i) {
                 lambda_init[i0 + i] =
                     static_cast<FPType>(rlambda(particle.rng(i)));
                 weight_init[i0 + i] =
@@ -251,8 +249,7 @@ class gmm_init : public vsmc::InitializeCL<gmm_state<FPType>>
             typename vsmc::Particle<gmm_state<FPType>>::size_type i0 =
                 d * state.size();
             for (typename vsmc::Particle<gmm_state<FPType>>::size_type i = 0;
-                 i != state.size();
-                 ++i) {
+                 i != state.size(); ++i) {
                 weight_init[i0 + i] /= sum_w[i];
             }
         }
@@ -267,16 +264,12 @@ class gmm_init : public vsmc::InitializeCL<gmm_state<FPType>>
         state.manager().template write_buffer<FPType>(
             weight_init_, weight_init.size(), &weight_init[0]);
 
-        vsmc::cl_set_kernel_args(this->kernel(),
-                                 this->kernel_args_offset(),
-                                 lambda_init_,
-                                 weight_init_,
-                                 state.obs(),
-                                 static_cast<FPType>(state.mu0()),
-                                 static_cast<FPType>(state.sd0()),
-                                 static_cast<FPType>(state.shape0()),
-                                 static_cast<FPType>(state.scale0()),
-                                 state.counter());
+        vsmc::cl_set_kernel_args(this->kernel(), this->kernel_args_offset(),
+            lambda_init_, weight_init_, state.obs(),
+            static_cast<FPType>(state.mu0()),
+            static_cast<FPType>(state.sd0()),
+            static_cast<FPType>(state.shape0()),
+            static_cast<FPType>(state.scale0()), state.counter());
     }
 
     private:
@@ -295,8 +288,8 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType>>
         kernel_name = std::string("gmm_move_smc");
     }
 
-    void pre_processor(std::size_t iter,
-                       vsmc::Particle<gmm_state<FPType>> &particle)
+    void pre_processor(
+        std::size_t iter, vsmc::Particle<gmm_state<FPType>> &particle)
     {
         using std::sqrt;
 
@@ -307,23 +300,19 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType>>
             if (state.manager().opencl_version() >= 120) {
                 exp_weight_device_ =
                     state.manager().template create_buffer<FPType>(
-                        state.size(),
-                        CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY |
-                            CL_MEM_USE_HOST_PTR,
+                        state.size(), CL_MEM_WRITE_ONLY |
+                            CL_MEM_HOST_READ_ONLY | CL_MEM_USE_HOST_PTR,
                         &exp_weight_[0]);
             } else {
                 exp_weight_device_ =
                     state.manager().template create_buffer<FPType>(
-                        state.size(),
-                        CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                        state.size(), CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
                         &exp_weight_[0]);
             }
 #else
             exp_weight_device_ =
-                state.manager().template create_buffer<FPType>(
-                    state.size(),
-                    CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-                    &exp_weight_[0]);
+                state.manager().template create_buffer<FPType>(state.size(),
+                    CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, &exp_weight_[0]);
 #endif
         }
 
@@ -336,14 +325,12 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType>>
         state.lambda_sd() = (1 + sqrt(1 / a)) * 0.15f;
         state.weight_sd() = (1 + sqrt(1 / a)) * 0.20f;
 
-        vsmc::cl_set_kernel_args(this->kernel(),
-                                 this->kernel_args_offset(),
-                                 exp_weight_device_,
-                                 static_cast<FPType>(state.alpha_inc()));
+        vsmc::cl_set_kernel_args(this->kernel(), this->kernel_args_offset(),
+            exp_weight_device_, static_cast<FPType>(state.alpha_inc()));
     }
 
-    void post_processor(std::size_t,
-                        vsmc::Particle<gmm_state<FPType>> &particle)
+    void post_processor(
+        std::size_t, vsmc::Particle<gmm_state<FPType>> &particle)
     {
         using std::exp;
 
@@ -354,8 +341,7 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType>>
         double sum = 0;
         const double *wptr = particle.weight_set().weight_data();
         for (typename vsmc::Particle<gmm_state<FPType>>::size_type i = 0;
-             i != state.size();
-             ++i) {
+             i != state.size(); ++i) {
             sum += wptr[i] * exp_weight_[i];
         }
 
@@ -377,19 +363,14 @@ class gmm_move_smc : public vsmc::MoveCL<gmm_state<FPType>>
 };
 
 template <typename Move, typename FPType>
-inline void
-    gmm_move_set_args(Move *move, const gmm_state<FPType> &state, FPType sd)
+inline void gmm_move_set_args(
+    Move *move, const gmm_state<FPType> &state, FPType sd)
 {
-    vsmc::cl_set_kernel_args(move->kernel(),
-                             move->kernel_args_offset(),
-                             state.obs(),
-                             static_cast<FPType>(state.alpha()),
-                             sd,
-                             static_cast<FPType>(state.mu0()),
-                             static_cast<FPType>(state.sd0()),
-                             static_cast<FPType>(state.shape0()),
-                             static_cast<FPType>(state.scale0()),
-                             state.counter());
+    vsmc::cl_set_kernel_args(move->kernel(), move->kernel_args_offset(),
+        state.obs(), static_cast<FPType>(state.alpha()), sd,
+        static_cast<FPType>(state.mu0()), static_cast<FPType>(state.sd0()),
+        static_cast<FPType>(state.shape0()),
+        static_cast<FPType>(state.scale0()), state.counter());
 }
 
 template <typename FPType>
@@ -406,8 +387,8 @@ class gmm_move_mu : public vsmc::MoveCL<gmm_state<FPType>>
         kernel_name = std::string("gmm_move_mu");
     }
 
-    void pre_processor(std::size_t,
-                       vsmc::Particle<gmm_state<FPType>> &particle)
+    void pre_processor(
+        std::size_t, vsmc::Particle<gmm_state<FPType>> &particle)
     {
         gmm_move_set_args(this, particle.value(), particle.value().mu_sd());
 
@@ -440,8 +421,8 @@ class gmm_move_lambda : public vsmc::MoveCL<gmm_state<FPType>>
         kernel_name = std::string("gmm_move_lambda");
     }
 
-    void pre_processor(std::size_t,
-                       vsmc::Particle<gmm_state<FPType>> &particle)
+    void pre_processor(
+        std::size_t, vsmc::Particle<gmm_state<FPType>> &particle)
     {
         gmm_move_set_args(
             this, particle.value(), particle.value().lambda_sd());
@@ -475,8 +456,8 @@ class gmm_move_weight : public vsmc::MoveCL<gmm_state<FPType>>
         kernel_name = std::string("gmm_move_weight");
     }
 
-    void pre_processor(std::size_t,
-                       vsmc::Particle<gmm_state<FPType>> &particle)
+    void pre_processor(
+        std::size_t, vsmc::Particle<gmm_state<FPType>> &particle)
     {
         gmm_move_set_args(
             this, particle.value(), particle.value().weight_sd());
@@ -507,8 +488,8 @@ class gmm_path : public vsmc::PathEvalCL<gmm_state<FPType>>
         kernel_name = std::string("gmm_path_state");
     }
 
-    double path_grid(std::size_t,
-                     const vsmc::Particle<gmm_state<FPType>> &particle)
+    double path_grid(
+        std::size_t, const vsmc::Particle<gmm_state<FPType>> &particle)
     {
         return particle.value().alpha();
     }
@@ -516,13 +497,9 @@ class gmm_path : public vsmc::PathEvalCL<gmm_state<FPType>>
 
 template <typename FPType>
 inline void gmm_do_smc_model(vsmc::Sampler<gmm_state<FPType>> &sampler,
-                             std::size_t iter_num,
-                             std::size_t local_size,
-                             std::size_t model_num,
-                             std::size_t repeat,
-                             const std::string &src,
-                             const std::string &opt,
-                             const data_info &info)
+    std::size_t iter_num, std::size_t local_size, std::size_t model_num,
+    std::size_t repeat, const std::string &src, const std::string &opt,
+    const data_info &info)
 {
     if (model_num < 1)
         return;
@@ -559,15 +536,9 @@ inline void gmm_do_smc_model(vsmc::Sampler<gmm_state<FPType>> &sampler,
             double ps_sum = 0;
             double ts_max = 0;
             boost::mpi::reduce(sampler.particle().value().world(),
-                               sampler.path_sampling(),
-                               ps_sum,
-                               std::plus<double>(),
-                               0);
+                sampler.path_sampling(), ps_sum, std::plus<double>(), 0);
             boost::mpi::reduce(sampler.particle().value().world(),
-                               watch.seconds(),
-                               ts_max,
-                               boost::mpi::maximum<double>(),
-                               0);
+                watch.seconds(), ts_max, boost::mpi::maximum<double>(), 0);
 
             std::cout << std::string(78, '-') << std::endl;
             std::cout << "Model order\t\t\t\t\t" << model_num << std::endl;
@@ -582,13 +553,9 @@ inline void gmm_do_smc_model(vsmc::Sampler<gmm_state<FPType>> &sampler,
             std::cout << std::string(78, '=') << std::endl;
         } else {
             boost::mpi::reduce(sampler.particle().value().world(),
-                               sampler.path_sampling(),
-                               std::plus<double>(),
-                               0);
+                sampler.path_sampling(), std::plus<double>(), 0);
             boost::mpi::reduce(sampler.particle().value().world(),
-                               watch.seconds(),
-                               boost::mpi::maximum<double>(),
-                               0);
+                watch.seconds(), boost::mpi::maximum<double>(), 0);
         }
 #else
         std::cout << std::string(78, '-') << std::endl;
@@ -608,18 +575,11 @@ inline void gmm_do_smc_model(vsmc::Sampler<gmm_state<FPType>> &sampler,
 }
 
 template <typename FPType>
-inline void gmm_do_smc(std::size_t particle_num,
-                       std::size_t iter_num,
-                       std::size_t data_num,
-                       const std::string &data_file,
-                       double threshold,
-                       const std::string &vsmc_inc_path,
-                       const std::string &r123_inc_path,
-                       const std::string &build_option,
-                       std::size_t local_size,
-                       std::size_t sm,
-                       std::size_t cm,
-                       std::size_t repeat)
+inline void gmm_do_smc(std::size_t particle_num, std::size_t iter_num,
+    std::size_t data_num, const std::string &data_file, double threshold,
+    const std::string &vsmc_inc_path, const std::string &r123_inc_path,
+    const std::string &build_option, std::size_t local_size, std::size_t sm,
+    std::size_t cm, std::size_t repeat)
 {
     if (iter_num < 1)
         return;
@@ -642,7 +602,7 @@ inline void gmm_do_smc(std::size_t particle_num,
 
     std::ifstream src_file("gmm_smc_cl.cl");
     std::string src((std::istreambuf_iterator<char>(src_file)),
-                    std::istreambuf_iterator<char>());
+        std::istreambuf_iterator<char>());
     src_file.close();
     src_file.clear();
 
@@ -673,4 +633,4 @@ inline void gmm_do_smc(std::size_t particle_num,
     }
 }
 
-#endif  // VSMC_EXAMPLE_GMM_SMC_CL_HPP
+#endif // VSMC_EXAMPLE_GMM_SMC_CL_HPP

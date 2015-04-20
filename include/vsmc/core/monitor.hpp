@@ -41,13 +41,11 @@
         (id < dim()), ("**Monitor::" #func "** INVALID ID NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(func)                          \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (iter < iter_size()),                                                \
+    VSMC_RUNTIME_ASSERT((iter < iter_size()),                                \
         ("**Monitor::" #func "** INVALID ITERATION NUMBER ARGUMENT"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(func, caller, name)         \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        static_cast<bool>(func),                                             \
+    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                             \
         ("**Monitor::" #caller "** INVALID " #name " OBJECT"))
 
 namespace vsmc
@@ -106,10 +104,8 @@ template <typename T> class Monitor
     /// After each evaluation, the iteration number `iter` and the imporatance
     /// sampling estimates are recorded and can be retrived by `index()` and
     /// `record()`.
-    explicit Monitor(std::size_t dim,
-                     const eval_type &eval,
-                     bool record_only = false,
-                     MonitorStage stage = MonitorMCMC)
+    explicit Monitor(std::size_t dim, const eval_type &eval,
+        bool record_only = false, MonitorStage stage = MonitorMCMC)
         : dim_(dim),
           eval_(eval),
           recording_(true),
@@ -285,9 +281,8 @@ template <typename T> class Monitor
     /// it use the user defined evaluation object to compute results. When a
     /// Monitor is constructed, `recording()` always returns `true`. It can be
     /// turned off by `turn_off()` and turned on later by `turn_on()`.
-    void eval(std::size_t iter,
-              const Particle<T> &particle,
-              MonitorStage stage)
+    void eval(
+        std::size_t iter, const Particle<T> &particle, MonitorStage stage)
     {
         if (!recording_)
             return;
@@ -312,10 +307,7 @@ template <typename T> class Monitor
         const double *const wptr = particle.weight_set().weight_data();
         eval_(iter, dim_, particle, bptr);
         is_integrate_(static_cast<ISIntegrate::size_type>(N),
-                      static_cast<ISIntegrate::size_type>(dim_),
-                      bptr,
-                      wptr,
-                      rptr);
+            static_cast<ISIntegrate::size_type>(dim_), bptr, wptr, rptr);
         push_back(iter);
     }
 
@@ -353,8 +345,8 @@ template <typename T> class Monitor
         index_.push_back(iter);
         record_.insert(record_.end(), result_.begin(), result_.end());
     }
-};  // class Monitor
+}; // class Monitor
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_MONITOR_HPP
+#endif // VSMC_CORE_MONITOR_HPP

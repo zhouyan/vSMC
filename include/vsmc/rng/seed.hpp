@@ -35,23 +35,21 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T)                 \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_unsigned<T>::value),                                        \
+    VSMC_STATIC_ASSERT((std::is_unsigned<T>::value),                         \
         USE_SeedGenerator_WITH_A_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem)              \
-    VSMC_RUNTIME_ASSERT((div > rem),                                         \
-                        ("**SeedGenerator::modulo** "                        \
-                         "REMAINDER IS NOT SMALLER THAN THE DIVISOR"))
+    VSMC_RUNTIME_ASSERT(                                                     \
+        (div > rem), ("**SeedGenerator::modulo** "                           \
+                      "REMAINDER IS NOT SMALLER THAN THE DIVISOR"))
 
 #define VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem)             \
     VSMC_RUNTIME_WARNING((div == 1 && rem == 0),                             \
-                         ("**SeedGenerator::modulo** "                       \
-                          "COUNTER TYPE SEED DOES NOT SUPPORT MODULO"))
+        ("**SeedGenerator::modulo** "                                        \
+         "COUNTER TYPE SEED DOES NOT SUPPORT MODULO"))
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(seed_max)                           \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (seed_max > 1),                                                      \
+    VSMC_RUNTIME_ASSERT((seed_max > 1),                                      \
         ("**SeedGenerator::modulo** "                                        \
          "THE MAXIMUM OF THE INTERNAL SEED IS NO LARGER THAN 1"))
 
@@ -160,9 +158,9 @@ class SeedGenerator
     void skip() { seed_ = seed_ == seed_max_ ? 1 : (seed_ + 1); }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const SeedGenerator<ID, ResultType> &sg)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const SeedGenerator<ID, ResultType> &sg)
     {
         if (!os.good())
             return os;
@@ -175,9 +173,9 @@ class SeedGenerator
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   SeedGenerator<ID, ResultType> &sg)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        SeedGenerator<ID, ResultType> &sg)
     {
         if (!is.good())
             return is;
@@ -212,9 +210,9 @@ class SeedGenerator
 
     SeedGenerator(const SeedGenerator<ID, ResultType> &);
 
-    SeedGenerator<ID, ResultType> &
-        operator=(const SeedGenerator<ID, ResultType> &);
-};  // class SeedGenerator
+    SeedGenerator<ID, ResultType> &operator=(
+        const SeedGenerator<ID, ResultType> &);
+}; // class SeedGenerator
 
 /// \brief Seed generator counters
 /// \ingroup RNG
@@ -285,9 +283,9 @@ class SeedGenerator<ID, Array<T, K>>
     void skip() { Counter<result_type>::increment(seed_); }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const SeedGenerator<ID, Array<T, K>> &sg)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const SeedGenerator<ID, Array<T, K>> &sg)
     {
         if (!os.good())
             return os;
@@ -300,9 +298,9 @@ class SeedGenerator<ID, Array<T, K>>
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   SeedGenerator<ID, Array<T, K>> &sg)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        SeedGenerator<ID, Array<T, K>> &sg)
     {
         if (!is.good())
             return is;
@@ -339,14 +337,14 @@ class SeedGenerator<ID, Array<T, K>>
 
     SeedGenerator<ID, Array<T, K>>(const SeedGenerator<ID, Array<T, K>> &);
 
-    SeedGenerator<ID, Array<T, K>> &
-        operator=(const SeedGenerator<ID, Array<T, K>> &);
-};  // class SeedGenerator
+    SeedGenerator<ID, Array<T, K>> &operator=(
+        const SeedGenerator<ID, Array<T, K>> &);
+}; // class SeedGenerator
 
 /// \brief The default Seed type
 /// \ingroup RNG
 typedef SeedGenerator<NullType, VSMC_SEED_RESULT_TYPE> Seed;
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_SEED_HPP
+#endif // VSMC_RNG_SEED_HPP

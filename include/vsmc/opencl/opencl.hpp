@@ -44,4 +44,4 @@
 #include <vsmc/opencl/cl_query.hpp>
 #include <vsmc/opencl/cl_setup.hpp>
 
-#endif  // VSMC_OPENCL_OPENCL_HPP
+#endif // VSMC_OPENCL_OPENCL_HPP

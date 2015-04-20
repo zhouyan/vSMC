@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 
     std::ifstream src_file("rng_cl.cl");
     std::string src((std::istreambuf_iterator<char>(src_file)),
-                    (std::istreambuf_iterator<char>()));
+        (std::istreambuf_iterator<char>()));
     src_file.close();
     src = use_double ? "#define VSMC_HAS_OPENCL_DOUBLE 1\n" + src :
                        "#define VSMC_HAS_OPENCL_DOUBLE 0\n" + src;
@@ -79,8 +79,8 @@ int main(int argc, char **argv)
 
     cl::Program program = manager.create_program(src);
     std::string name;
-    manager.platform().getInfo(static_cast<cl_device_info>(CL_PLATFORM_NAME),
-                               &name);
+    manager.platform().getInfo(
+        static_cast<cl_device_info>(CL_PLATFORM_NAME), &name);
 
     std::ofstream output_log;
     output_log.open("rng_cl.log");
@@ -98,8 +98,8 @@ int main(int argc, char **argv)
 
     std::cout << std::string(120, '=') << std::endl;
     std::cout << "Using platform: " << name << std::endl;
-    manager.device().getInfo(static_cast<cl_device_info>(CL_DEVICE_NAME),
-                             &name);
+    manager.device().getInfo(
+        static_cast<cl_device_info>(CL_DEVICE_NAME), &name);
     std::cout << "Using device:   " << name << std::endl;
     std::cout << "Using fp type:  " << (use_double ? "double" : "float")
               << std::endl;

@@ -39,18 +39,12 @@ struct data_info {
     const double *data_value;
 
     data_info(std::size_t num, double r, const char *file)
-        : data_num(num),
-          resolution(r),
-          file_name(file),
-          data_value(VSMC_NULLPTR)
+        : data_num(num), resolution(r), file_name(file), data_value(nullptr)
     {
     }
 
     data_info(std::size_t num, double r, const double *data)
-        : data_num(num),
-          resolution(r),
-          file_name(VSMC_NULLPTR),
-          data_value(data)
+        : data_num(num), resolution(r), file_name(nullptr), data_value(data)
     {
     }
 };
@@ -69,7 +63,7 @@ class node_state
         using std::log;
 
         return -(data_num() *
-                 (vsmc::math::ln_pi_2<double>() + 2 * log(sd0_)));
+                   (vsmc::math::ln_pi_2<double>() + 2 * log(sd0_)));
     }
 
     double log_prior(node_param &state) const
@@ -177,9 +171,9 @@ class node_state
     double &zconst() { return zconst_; }
 
     private:
-    double shape0_;  // prior shape
-    double scale0_;  // prior scale
-    double sd0_;     // likelihood sd
+    double shape0_; // prior shape
+    double scale0_; // prior scale
+    double sd0_;    // likelihood sd
     double resolution_;
     double zconst_;
     std::vector<double> obs1_;
@@ -187,4 +181,4 @@ class node_state
     std::vector<double> time_;
 };
 
-#endif  // VSMC_EXAMPLE_NODE_STATE_HPP
+#endif // VSMC_EXAMPLE_NODE_STATE_HPP

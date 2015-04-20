@@ -65,10 +65,10 @@ inline void parallel_repeat(std::size_t n, WorkType &&work)
         private:
         WorkType work_;
     };
-    parallel_for(BlockedRange<std::size_t>(0, n),
-                 body(std::forward<WorkType>(work)));
+    parallel_for(
+        BlockedRange<std::size_t>(0, n), body(std::forward<WorkType>(work)));
 }
 
-}  // namesapce vsmc
+} // namesapce vsmc
 
-#endif  // VSMC_THREAD_PARALLEL_REPEAT_HPP
+#endif // VSMC_THREAD_PARALLEL_REPEAT_HPP

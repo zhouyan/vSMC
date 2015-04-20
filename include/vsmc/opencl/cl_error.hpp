@@ -127,7 +127,7 @@ inline std::string cl_error_str(cl_int status)
     }
 }
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief OpenCL exception
 /// \ingroup OpenCL
@@ -153,14 +153,14 @@ class CLError : public std::runtime_error
 
     explicit CLError(const ::cl::Error &err)
         : std::runtime_error(std::string(err.what()) + ":" +
-                             internal::cl_error_str(err.err())),
+              internal::cl_error_str(err.err())),
           status_(err.err())
     {
     }
 
     CLError(cl_int status, const char *msg)
-        : std::runtime_error(std::string(msg) + ":" +
-                             internal::cl_error_str(status)),
+        : std::runtime_error(
+              std::string(msg) + ":" + internal::cl_error_str(status)),
           status_(status)
     {
     }
@@ -177,8 +177,8 @@ class CLError : public std::runtime_error
 
     private:
     cl_int status_;
-};  // class CLError
+}; // class CLError
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_OPENCL_CL_ERROR_HPP
+#endif // VSMC_OPENCL_CL_ERROR_HPP

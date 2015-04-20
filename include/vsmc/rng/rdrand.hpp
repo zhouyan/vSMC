@@ -41,18 +41,16 @@
 #endif
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR_RESULT_TYPE(ResultType)      \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_same<ResultType, uint16_t>::value ||                        \
-         std::is_same<ResultType, uint32_t>::value ||                        \
-         std::is_same<ResultType, uint64_t>::value),                         \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||         \
+                           std::is_same<ResultType, uint32_t>::value ||      \
+                           std::is_same<ResultType, uint64_t>::value),       \
         USE_RDRANDGenerator_WITH_RESULT_TYPE_OTHER_THAN_uint16_t_OR_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR                              \
     VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR_RESULT_TYPE(ResultType);
 
 #define VSMC_RUNTIME_WARNING_RNG_RDRAND_GENERATOR_NTRIAL(ntrial, NTrialMax)  \
-    VSMC_RUNTIME_WARNING(                                                    \
-        (ntrial < NTrialMax),                                                \
+    VSMC_RUNTIME_WARNING((ntrial < NTrialMax),                               \
         ("**RDRAND::generate** MAXIMUM NUMBER OF TRIALS EXCEEDED"))
 
 namespace vsmc
@@ -115,7 +113,7 @@ class RDRANDGenerator
 
         return r;
     }
-};  // class RDRANDGenertor
+}; // class RDRANDGenertor
 
 /// \brief C++11 Engine using 16-bits RDRAND instruction
 /// \ingroup RDRNG
@@ -129,6 +127,6 @@ typedef GeneratorWrapper<uint32_t, RDRANDGenerator<uint32_t>> RDRAND32;
 /// \ingroup RDRNG
 typedef GeneratorWrapper<uint64_t, RDRANDGenerator<uint64_t>> RDRAND64;
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  //  VSMC_RNG_RDRAND_HPP
+#endif //  VSMC_RNG_RDRAND_HPP

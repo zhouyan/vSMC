@@ -180,8 +180,8 @@ template <typename T, std::size_t Power> class alpha_posterior
 template <typename T> class ess01
 {
     public:
-    double operator()(const vsmc::Particle<T> &particle,
-                      const double *mul_weight) const
+    double operator()(
+        const vsmc::Particle<T> &particle, const double *mul_weight) const
     {
         return particle.weight_set().ess(mul_weight, false);
     }
@@ -190,8 +190,8 @@ template <typename T> class ess01
 template <typename T> class cess01
 {
     public:
-    double operator()(const vsmc::Particle<T> &particle,
-                      const double *mul_weight) const
+    double operator()(
+        const vsmc::Particle<T> &particle, const double *mul_weight) const
     {
         return particle.weight_set().cess(mul_weight, false);
     }
@@ -231,8 +231,7 @@ template <typename T, typename ESS> class alpha_ess
         log_likelihood_.resize(particle.size());
         mul_weight_.resize(particle.size());
         for (typename vsmc::Particle<T>::size_type i = 0;
-             i != particle.size();
-             ++i)
+             i != particle.size(); ++i)
             log_likelihood_[i] =
                 particle.value().state(i, 0).log_likelihood();
 
@@ -247,13 +246,11 @@ template <typename T, typename ESS> class alpha_ess
         while (std::abs(u - l) > e && l <= 1) {
             double a_diff = a - a_old;
             for (typename vsmc::Particle<T>::size_type i = 0;
-                 i != particle.size();
-                 ++i) {
+                 i != particle.size(); ++i) {
                 mul_weight_[i] = a_diff * log_likelihood_[i];
             }
             for (typename vsmc::Particle<T>::size_type i = 0;
-                 i != particle.size();
-                 ++i)
+                 i != particle.size(); ++i)
                 mul_weight_[i] = exp(mul_weight_[i]);
             ess = ess_(particle, &mul_weight_[0]);
             if (ess < ess_new) {
@@ -275,4 +272,4 @@ template <typename T, typename ESS> class alpha_ess
     double ess_drop_;
 };
 
-#endif  // VSMC_EXAMPLE_MOVE_ALPHA_HPP
+#endif // VSMC_EXAMPLE_MOVE_ALPHA_HPP

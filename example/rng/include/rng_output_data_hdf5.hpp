@@ -37,8 +37,8 @@
 
 template <typename T>
 inline void rng_output_data(const std::string &base_name,
-                            const std::vector<std::string> &vnames,
-                            const std::vector<std::vector<T>> &values)
+    const std::vector<std::string> &vnames,
+    const std::vector<std::vector<T>> &values)
 {
     if (vnames.size() != values.size())
         return;
@@ -58,4 +58,4 @@ inline void rng_output_data(const std::string &base_name,
         N, M, (base_name + ".h5"), base_name, vptr.begin(), vnames.begin());
 }
 
-#endif  // VSMC_EXAMPLE_RNG_OUTPUT_DATA_HDF5_HPP
+#endif // VSMC_EXAMPLE_RNG_OUTPUT_DATA_HDF5_HPP

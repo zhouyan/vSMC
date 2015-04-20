@@ -43,8 +43,8 @@
     VSMC_STATIC_ASSERT((Pos < N), USE_Array_WITH_AN_INDEX_OUT_OF_RANGE)
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_ARRAY_RANGE(i, N)                        \
-    VSMC_RUNTIME_ASSERT((i < N),                                             \
-                        ("**Array** USED WITH AN INDEX OUT OF RANGE"))
+    VSMC_RUNTIME_ASSERT(                                                     \
+        (i < N), ("**Array** USED WITH AN INDEX OUT OF RANGE"))
 
 namespace vsmc
 {
@@ -184,7 +184,7 @@ template <typename T, std::size_t N> class Array
     void fill(const T &value)
     {
         fill(value, std::integral_constant < bool,
-             std::is_integral<T>::value &&N >= 100 > ());
+            std::is_integral<T>::value &&N >= 100 > ());
     }
 
     void swap(Array<T, N> &other)
@@ -195,8 +195,8 @@ template <typename T, std::size_t N> class Array
             swap(data_[i], other.data_[i]);
     }
 
-    friend inline bool operator==(const Array<T, N> &ary1,
-                                  const Array<T, N> &ary2)
+    friend inline bool operator==(
+        const Array<T, N> &ary1, const Array<T, N> &ary2)
     {
         for (size_type i = 0; i != N; ++i)
             if (ary1[i] != ary2[i])
@@ -205,14 +205,14 @@ template <typename T, std::size_t N> class Array
         return true;
     }
 
-    friend inline bool operator!=(const Array<T, N> &ary1,
-                                  const Array<T, N> &ary2)
+    friend inline bool operator!=(
+        const Array<T, N> &ary1, const Array<T, N> &ary2)
     {
         return !(ary1 == ary2);
     }
 
-    friend inline bool operator<(const Array<T, N> &ary1,
-                                 const Array<T, N> &ary2)
+    friend inline bool operator<(
+        const Array<T, N> &ary1, const Array<T, N> &ary2)
     {
         for (size_type i = 0; i != N; ++i) {
             if (ary1[i] < ary2[i])
@@ -224,8 +224,8 @@ template <typename T, std::size_t N> class Array
         return false;
     }
 
-    friend inline bool operator>(const Array<T, N> &ary1,
-                                 const Array<T, N> &ary2)
+    friend inline bool operator>(
+        const Array<T, N> &ary1, const Array<T, N> &ary2)
     {
         for (size_type i = 0; i != N; ++i) {
             if (ary1[i] > ary2[i])
@@ -237,22 +237,21 @@ template <typename T, std::size_t N> class Array
         return false;
     }
 
-    friend inline bool operator<=(const Array<T, N> &ary1,
-                                  const Array<T, N> &ary2)
+    friend inline bool operator<=(
+        const Array<T, N> &ary1, const Array<T, N> &ary2)
     {
         return !(ary1 > ary2);
     }
 
-    friend inline bool operator>=(const Array<T, N> &ary1,
-                                  const Array<T, N> &ary2)
+    friend inline bool operator>=(
+        const Array<T, N> &ary1, const Array<T, N> &ary2)
     {
         return !(ary1 < ary2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const Array<T, N> &ary)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os, const Array<T, N> &ary)
     {
         if (!os.good())
             return os;
@@ -265,8 +264,8 @@ template <typename T, std::size_t N> class Array
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is, Array<T, N> &ary)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, Array<T, N> &ary)
     {
         if (!is.good())
             return is;
@@ -331,7 +330,7 @@ template <typename T, std::size_t N> class Array
         for (size_type i = 0; i != N; ++i)
             data_[i] = value;
     }
-};  // class Array
+}; // class Array
 
 /// \brief Array ADL of swap
 /// \ingroup Array
@@ -383,10 +382,10 @@ struct TupleElement<I, Array<T, N>> {
     typedef T type;
 };
 
-}  // namespace vsmc
+} // namespace vsmc
 
 #ifdef VSMC_MSVC
 #pragma warning(pop)
 #endif
 
-#endif  // VSMC_UTILITY_ARRAY_HPP
+#endif // VSMC_UTILITY_ARRAY_HPP

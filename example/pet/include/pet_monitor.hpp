@@ -35,10 +35,8 @@
 class pet_phi : public BASE_MONITOR<pet_state, pet_phi>
 {
     public:
-    void monitor_state(std::size_t,
-                       std::size_t,
-                       vsmc::ConstSingleParticle<pet_state> csp,
-                       double *res)
+    void monitor_state(std::size_t, std::size_t,
+        vsmc::ConstSingleParticle<pet_state> csp, double *res)
     {
         for (std::size_t d = 0; d != csp.state(0).comp_num(); ++d)
             res[d] = csp.state(0).phi(d);
@@ -48,10 +46,8 @@ class pet_phi : public BASE_MONITOR<pet_state, pet_phi>
 class pet_theta : public BASE_MONITOR<pet_state, pet_theta>
 {
     public:
-    void monitor_state(std::size_t,
-                       std::size_t,
-                       vsmc::ConstSingleParticle<pet_state> csp,
-                       double *res)
+    void monitor_state(std::size_t, std::size_t,
+        vsmc::ConstSingleParticle<pet_state> csp, double *res)
     {
         for (std::size_t d = 0; d != csp.state(0).comp_num(); ++d)
             res[d] = csp.state(0).theta(d);
@@ -61,10 +57,8 @@ class pet_theta : public BASE_MONITOR<pet_state, pet_theta>
 class pet_vd : public BASE_MONITOR<pet_state, pet_vd>
 {
     public:
-    void monitor_state(std::size_t,
-                       std::size_t,
-                       vsmc::ConstSingleParticle<pet_state> csp,
-                       double *res)
+    void monitor_state(std::size_t, std::size_t,
+        vsmc::ConstSingleParticle<pet_state> csp, double *res)
     {
         double vd = 0;
         double decay = csp.particle().value().decay();
@@ -78,10 +72,8 @@ class pet_vd : public BASE_MONITOR<pet_state, pet_vd>
 class pet_moments : public BASE_MONITOR<pet_state, pet_moments>
 {
     public:
-    void monitor_state(std::size_t,
-                       std::size_t dim,
-                       vsmc::ConstSingleParticle<pet_state> csp,
-                       double *res)
+    void monitor_state(std::size_t, std::size_t dim,
+        vsmc::ConstSingleParticle<pet_state> csp, double *res)
     {
         using std::log;
 
@@ -105,4 +97,4 @@ class pet_moments : public BASE_MONITOR<pet_state, pet_moments>
     }
 };
 
-#endif  // VSMC_EXAMPLE_PET_MONITOR_HPP
+#endif // VSMC_EXAMPLE_PET_MONITOR_HPP

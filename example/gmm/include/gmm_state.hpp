@@ -38,12 +38,12 @@ struct data_info {
     const double *data_value;
 
     data_info(std::size_t num, const char *file)
-        : data_num(num), file_name(file), data_value(VSMC_NULLPTR)
+        : data_num(num), file_name(file), data_value(nullptr)
     {
     }
 
     data_info(std::size_t num, const double *data)
-        : data_num(num), file_name(VSMC_NULLPTR), data_value(data)
+        : data_num(num), file_name(nullptr), data_value(data)
     {
     }
 };
@@ -84,7 +84,7 @@ class gmm_state
             double resid = state.mu(d) - mu0_;
             lp += -0.5 * (resid * resid) / (sd0_ * sd0_);
             lp += (shape0_ - 1) * log(state.lambda(d)) -
-                  state.lambda(d) / scale0_;
+                state.lambda(d) / scale0_;
         }
 
         return state.log_prior() = lp;
@@ -104,10 +104,10 @@ class gmm_state
             for (std::size_t d = 0; d != state.comp_num(); ++d) {
                 double resid = obs_[i] - state.mu(d);
                 lli += state.weight(d) *
-                       exp(0.5 * state.log_lambda(d) -
+                    exp(0.5 * state.log_lambda(d) -
                            0.5 * state.lambda(d) * resid * resid);
             }
-            ll += log(lli + 1e-13);  // lli can be numerically zero!
+            ll += log(lli + 1e-13); // lli can be numerically zero!
         }
 
         return state.log_likelihood() = ll;
@@ -217,12 +217,12 @@ class gmm_state
 
     private:
     bool ordered_;
-    double mu0_;     // prior mean for mu
-    double sd0_;     // prior sd for mu
-    double shape0_;  // prior shape for lambda
-    double scale0_;  // prior scale for lambda
+    double mu0_;    // prior mean for mu
+    double sd0_;    // prior sd for mu
+    double shape0_; // prior shape for lambda
+    double scale0_; // prior scale for lambda
     double zconst_;
     std::vector<double> obs_;
 };
 
-#endif  // VSMC_EXAMPLE_GMM_STATE_HPP
+#endif // VSMC_EXAMPLE_GMM_STATE_HPP

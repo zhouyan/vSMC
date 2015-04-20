@@ -31,7 +31,7 @@
 
 #include "rng_testu01.hpp"
 
-#define VSMC_RNG_TESTU01_FUNCTION_STD(Eng)                                 \
+#define VSMC_RNG_TESTU01_FUNCTION_STD(Eng)                                   \
     extern "C" {                                                             \
     inline double rng_##Eng(void)                                            \
     {                                                                        \
@@ -42,7 +42,7 @@
     }                                                                        \
     }
 
-#define VSMC_RNG_TESTU01_OPTION_STD(Eng)                                   \
+#define VSMC_RNG_TESTU01_OPTION_STD(Eng)                                     \
     bool rng_testu01_##Eng = false;                                          \
     option.add(#Eng, "Test std::" #Eng, &rng_testu01_##Eng, false);
 

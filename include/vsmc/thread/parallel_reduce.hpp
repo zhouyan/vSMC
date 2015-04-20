@@ -68,6 +68,6 @@ inline void parallel_reduce(const Range &range, WorkType &work)
         work.join(work_vec[i]);
 }
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_THREAD_PARALLEL_REDUCE_HPP
+#endif // VSMC_THREAD_PARALLEL_REDUCE_HPP

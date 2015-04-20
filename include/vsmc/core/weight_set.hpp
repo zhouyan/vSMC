@@ -58,10 +58,8 @@ class WeightSet
 
     virtual ~WeightSet() {}
 
-    static double set_equal_weight(std::size_t N,
-                                   std::size_t RN,
-                                   double *wptr,
-                                   double *lwptr)
+    static double set_equal_weight(
+        std::size_t N, std::size_t RN, double *wptr, double *lwptr)
     {
         double ess = static_cast<double>(RN);
         if (wptr != nullptr)
@@ -410,7 +408,7 @@ class WeightSet
         weight2log_weight();
         normalize_log_weight();
     }
-};  // class WeightSet
+}; // class WeightSet
 
 /// \brief An empty weight set class
 /// \ingroup Core
@@ -501,8 +499,8 @@ class WeightSetNull
     {
         return std::numeric_limits<double>::max VSMC_MNE();
     }
-};  // class WeightSetEmtpy
+}; // class WeightSetEmtpy
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_WEIGHT_SET_HPP
+#endif // VSMC_CORE_WEIGHT_SET_HPP

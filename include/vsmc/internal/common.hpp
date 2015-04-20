@@ -74,4 +74,4 @@
 #include <sstream>
 #include <string>
 
-#endif  // VSMC_INTERNAL_COMMON_HPP
+#endif // VSMC_INTERNAL_COMMON_HPP

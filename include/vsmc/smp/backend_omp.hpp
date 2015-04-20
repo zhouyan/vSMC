@@ -68,7 +68,7 @@ template <typename BaseState> class StateOMP : public BaseState
         for (size_type to = 0; to < N; ++to)
             this->copy_particle(copy_from[to], to);
     }
-};  // class StateOMP
+}; // class StateOMP
 
 /// \brief Sampler<T>::init_type subtype using OpenMP
 /// \ingroup OMP
@@ -94,7 +94,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(OMP, Initialize)
-};  // class InitializeOMP
+}; // class InitializeOMP
 
 /// \brief Sampler<T>::move_type subtype using OpenMP
 /// \ingroup OMP
@@ -119,7 +119,7 @@ class MoveOMP : public MoveBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(OMP, Move)
-};  // class MoveOMP
+}; // class MoveOMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
@@ -127,10 +127,8 @@ template <typename T, typename Derived>
 class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
     public:
-    void operator()(std::size_t iter,
-                    std::size_t dim,
-                    const Particle<T> &particle,
-                    double *res)
+    void operator()(std::size_t iter, std::size_t dim,
+        const Particle<T> &particle, double *res)
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
@@ -138,17 +136,15 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i) {
-            this->monitor_state(iter,
-                                dim,
-                                ConstSingleParticle<T>(i, &particle),
-                                res + i * dim);
+            this->monitor_state(iter, dim,
+                ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
         this->post_processor(iter, particle);
     }
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(OMP, MonitorEval)
-};  // class MonitorEvalOMP
+}; // class MonitorEvalOMP
 
 /// \brief Path<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
@@ -156,8 +152,8 @@ template <typename T, typename Derived>
 class PathEvalOMP : public PathEvalBase<T, Derived>
 {
     public:
-    double
-        operator()(std::size_t iter, const Particle<T> &particle, double *res)
+    double operator()(
+        std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
@@ -175,8 +171,8 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(OMP, PathEval)
-};  // class PathEvalOMP
+}; // class PathEvalOMP
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_SMP_BACKEND_OMP_HPP
+#endif // VSMC_SMP_BACKEND_OMP_HPP

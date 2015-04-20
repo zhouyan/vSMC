@@ -38,4 +38,4 @@
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>
 
-#endif  // VSMC_MATH_MATH_HPP
+#endif // VSMC_MATH_MATH_HPP

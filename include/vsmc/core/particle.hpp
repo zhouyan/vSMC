@@ -57,11 +57,8 @@ template <typename T> class Particle
     typedef SingleParticle<T> sp_type;
     typedef ConstSingleParticle<T> csp_type;
 
-    typedef std::function<void(std::size_t,
-                               std::size_t,
-                               resample_rng_type &,
-                               const double *,
-                               size_type *)> resample_type;
+    typedef std::function<void(std::size_t, std::size_t, resample_rng_type &,
+        const double *, size_type *)> resample_type;
 
     explicit Particle(size_type N)
         : size_(N),
@@ -253,8 +250,8 @@ template <typename T> class Particle
 
     std::vector<size_type, AlignedAllocator<size_type>> copy_from_;
     std::vector<size_type, AlignedAllocator<size_type>> replication_;
-};  // class Particle
+}; // class Particle
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_PARTICLE_HPP
+#endif // VSMC_CORE_PARTICLE_HPP

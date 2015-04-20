@@ -69,4 +69,4 @@ inline bool is_valid(double val)
     return false;
 }
 
-#endif  // VSMC_EXAMPLE_COMMON_HPP
+#endif // VSMC_EXAMPLE_COMMON_HPP

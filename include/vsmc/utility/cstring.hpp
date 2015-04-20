@@ -125,9 +125,10 @@
 #define VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_MEMCPY(dst, src, n)              \
     VSMC_RUNTIME_ASSERT(                                                     \
         (static_cast<const char *>(dst) - static_cast<const char *>(src) <=  \
-             static_cast<std::ptrdiff_t>(n) &&                               \
-         static_cast<const char *>(src) - static_cast<const char *>(dst) <=  \
-             static_cast<std::ptrdiff_t>(n)),                                \
+                static_cast<std::ptrdiff_t>(n) &&                            \
+            static_cast<const char *>(src) -                                 \
+                    static_cast<const char *>(dst) <=                        \
+                static_cast<std::ptrdiff_t>(n)),                             \
         ("**vsmc::memcpy** OVERLAPPING BUFFERS"))
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_ALIGNED_DST(ISA, dst, func)      \
@@ -171,9 +172,9 @@
         if (n >= traits::SIMDTrait<ISA>::alignment * 2) {                    \
             n -= traits::SIMDTrait<ISA>::alignment * 2;                      \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);       \
         }                                                                    \
         memset_n<ISA, 1, da, nt>(dstc, ch, n);                               \
@@ -191,13 +192,13 @@
         if (n >= traits::SIMDTrait<ISA>::alignment * 4) {                    \
             n -= traits::SIMDTrait<ISA>::alignment * 4;                      \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);       \
         }                                                                    \
         memset_n<ISA, 2, da, nt>(dstc, ch, n);                               \
@@ -215,21 +216,21 @@
         if (n >= traits::SIMDTrait<ISA>::alignment * 8) {                    \
             n -= traits::SIMDTrait<ISA>::alignment * 8;                      \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 5 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 6 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);       \
         }                                                                    \
         memset_n<ISA, 4, da, nt>(dstc, ch, n);                               \
@@ -247,13 +248,13 @@
         while (n >= traits::SIMDTrait<ISA>::alignment * 4) {                 \
             n -= traits::SIMDTrait<ISA>::alignment * 4;                      \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);       \
         }                                                                    \
         memset_n<ISA, 2, da, nt>(dstc, ch, n);                               \
@@ -271,21 +272,21 @@
         while (n >= traits::SIMDTrait<ISA>::alignment * 8) {                 \
             n -= traits::SIMDTrait<ISA>::alignment * 8;                      \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 5 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 6 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);       \
         }                                                                    \
         memset_n<ISA, 4, da, nt>(dstc, ch, n);                               \
@@ -322,14 +323,14 @@
         const c *srcc = static_cast<const c *>(src);                         \
         if (n >= traits::SIMDTrait<ISA>::alignment * 2) {                    \
             n -= traits::SIMDTrait<ISA>::alignment * 2;                      \
-            m m0 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));  \
-            m m1 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));  \
+            m m0 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));   \
+            m m1 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));   \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m1);                                                       \
+                m1);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);       \
             srcc += traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c);       \
         }                                                                    \
@@ -347,22 +348,22 @@
         const c *srcc = static_cast<const c *>(src);                         \
         if (n >= traits::SIMDTrait<ISA>::alignment * 4) {                    \
             n -= traits::SIMDTrait<ISA>::alignment * 4;                      \
-            m m0 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));  \
-            m m1 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));  \
-            m m2 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));  \
-            m m3 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));  \
+            m m0 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));   \
+            m m1 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));   \
+            m m2 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));   \
+            m m3 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));   \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m1);                                                       \
+                m1);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c),  \
-                  m2);                                                       \
+                m2);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c),  \
-                  m3);                                                       \
+                m3);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);       \
             srcc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);       \
         }                                                                    \
@@ -380,38 +381,38 @@
         const c *srcc = static_cast<const c *>(src);                         \
         if (n >= traits::SIMDTrait<ISA>::alignment * 8) {                    \
             n -= traits::SIMDTrait<ISA>::alignment * 8;                      \
-            m m0 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));  \
-            m m1 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));  \
-            m m2 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));  \
-            m m3 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));  \
-            m m4 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c));  \
-            m m5 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 5 / sizeof(c));  \
-            m m6 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 6 / sizeof(c));  \
-            m m7 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c));  \
+            m m0 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));   \
+            m m1 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));   \
+            m m2 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));   \
+            m m3 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));   \
+            m m4 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c));   \
+            m m5 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 5 / sizeof(c));   \
+            m m6 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 6 / sizeof(c));   \
+            m m7 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c));   \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m1);                                                       \
+                m1);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c),  \
-                  m2);                                                       \
+                m2);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c),  \
-                  m3);                                                       \
+                m3);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c),  \
-                  m4);                                                       \
+                m4);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 5 / sizeof(c),  \
-                  m5);                                                       \
+                m5);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 6 / sizeof(c),  \
-                  m6);                                                       \
+                m6);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c),  \
-                  m7);                                                       \
+                m7);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);       \
             srcc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);       \
         }                                                                    \
@@ -429,22 +430,22 @@
         const c *srcc = static_cast<const c *>(src);                         \
         while (n >= traits::SIMDTrait<ISA>::alignment * 4) {                 \
             n -= traits::SIMDTrait<ISA>::alignment * 4;                      \
-            m m0 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));  \
-            m m1 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));  \
-            m m2 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));  \
-            m m3 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));  \
+            m m0 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));   \
+            m m1 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));   \
+            m m2 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));   \
+            m m3 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));   \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m1);                                                       \
+                m1);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c),  \
-                  m2);                                                       \
+                m2);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c),  \
-                  m3);                                                       \
+                m3);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);       \
             srcc += traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c);       \
         }                                                                    \
@@ -462,38 +463,38 @@
         const c *srcc = static_cast<const c *>(src);                         \
         while (n >= traits::SIMDTrait<ISA>::alignment * 8) {                 \
             n -= traits::SIMDTrait<ISA>::alignment * 8;                      \
-            m m0 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));  \
-            m m1 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));  \
-            m m2 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));  \
-            m m3 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));  \
-            m m4 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c));  \
-            m m5 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 5 / sizeof(c));  \
-            m m6 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 6 / sizeof(c));  \
-            m m7 = load(srcc +                                               \
-                        traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c));  \
+            m m0 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c));   \
+            m m1 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c));   \
+            m m2 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c));   \
+            m m3 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c));   \
+            m m4 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c));   \
+            m m5 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 5 / sizeof(c));   \
+            m m6 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 6 / sizeof(c));   \
+            m m7 = load(                                                     \
+                srcc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c));   \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 0 / sizeof(c),  \
-                  m0);                                                       \
+                m0);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 1 / sizeof(c),  \
-                  m1);                                                       \
+                m1);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 2 / sizeof(c),  \
-                  m2);                                                       \
+                m2);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 3 / sizeof(c),  \
-                  m3);                                                       \
+                m3);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 4 / sizeof(c),  \
-                  m4);                                                       \
+                m4);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 5 / sizeof(c),  \
-                  m5);                                                       \
+                m5);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 6 / sizeof(c),  \
-                  m6);                                                       \
+                m6);                                                         \
             store(dstc + traits::SIMDTrait<ISA>::alignment * 7 / sizeof(c),  \
-                  m7);                                                       \
+                m7);                                                         \
             dstc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);       \
             srcc += traits::SIMDTrait<ISA>::alignment * 8 / sizeof(c);       \
         }                                                                    \
@@ -509,10 +510,10 @@ namespace internal
 template <SIMD ISA> inline unsigned cstring_is_aligned(const void *ptr)
 {
     return reinterpret_cast<uintptr_t>(ptr) %
-                       traits::SIMDTrait<ISA>::alignment ==
-                   0 ?
-               2 :
-               0;
+                traits::SIMDTrait<ISA>::alignment ==
+            0 ?
+        2 :
+        0;
 }
 
 template <SIMD> inline void memset_0(void *dst, int ch, std::size_t n)
@@ -542,38 +543,14 @@ inline void memcpy_l(void *, const void *, std::size_t);
 
 #if VSMC_HAS_SSE2
 
-VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2,
-                                false,
-                                false,
-                                double,
-                                __m128d,
-                                _mm_castsi128_pd,
-                                _mm_set1_epi8,
-                                _mm_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2,
-                                false,
-                                true,
-                                double,
-                                __m128d,
-                                _mm_castsi128_pd,
-                                _mm_set1_epi8,
-                                _mm_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2,
-                                true,
-                                false,
-                                double,
-                                __m128d,
-                                _mm_castsi128_pd,
-                                _mm_set1_epi8,
-                                _mm_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2,
-                                true,
-                                true,
-                                double,
-                                __m128d,
-                                _mm_castsi128_pd,
-                                _mm_set1_epi8,
-                                _mm_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, false, false, double, __m128d,
+    _mm_castsi128_pd, _mm_set1_epi8, _mm_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, false, true, double, __m128d,
+    _mm_castsi128_pd, _mm_set1_epi8, _mm_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, true, false, double, __m128d,
+    _mm_castsi128_pd, _mm_set1_epi8, _mm_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(SSE2, true, true, double, __m128d,
+    _mm_castsi128_pd, _mm_set1_epi8, _mm_stream_pd)
 
 VSMC_DEFINE_UTILITY_CSTRING_CPY(
     SSE2, false, false, false, double, __m128d, _mm_loadu_pd, _mm_storeu_pd)
@@ -592,83 +569,29 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY(
 VSMC_DEFINE_UTILITY_CSTRING_CPY(
     SSE2, true, true, true, double, __m128d, _mm_load_pd, _mm_stream_pd)
 
-#endif  // VSMC_HAS_SSE2
+#endif // VSMC_HAS_SSE2
 
 #if VSMC_HAS_AVX
 
-VSMC_DEFINE_UTILITY_CSTRING_SET(AVX,
-                                false,
-                                false,
-                                double,
-                                __m256d,
-                                _mm256_castsi256_pd,
-                                _mm256_set1_epi8,
-                                _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(AVX,
-                                false,
-                                true,
-                                double,
-                                __m256d,
-                                _mm256_castsi256_pd,
-                                _mm256_set1_epi8,
-                                _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(AVX,
-                                true,
-                                false,
-                                double,
-                                __m256d,
-                                _mm256_castsi256_pd,
-                                _mm256_set1_epi8,
-                                _mm256_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_SET(AVX,
-                                true,
-                                true,
-                                double,
-                                __m256d,
-                                _mm256_castsi256_pd,
-                                _mm256_set1_epi8,
-                                _mm256_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, false, false, double, __m256d,
+    _mm256_castsi256_pd, _mm256_set1_epi8, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, false, true, double, __m256d,
+    _mm256_castsi256_pd, _mm256_set1_epi8, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, true, false, double, __m256d,
+    _mm256_castsi256_pd, _mm256_set1_epi8, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_SET(AVX, true, true, double, __m256d,
+    _mm256_castsi256_pd, _mm256_set1_epi8, _mm256_stream_pd)
 
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX,
-                                false,
-                                false,
-                                false,
-                                double,
-                                __m256d,
-                                _mm256_loadu_pd,
-                                _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX,
-                                false,
-                                false,
-                                true,
-                                double,
-                                __m256d,
-                                _mm256_loadu_pd,
-                                _mm256_storeu_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX,
-                                false,
-                                true,
-                                false,
-                                double,
-                                __m256d,
-                                _mm256_loadu_pd,
-                                _mm256_store_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX,
-                                false,
-                                true,
-                                true,
-                                double,
-                                __m256d,
-                                _mm256_loadu_pd,
-                                _mm256_stream_pd)
-VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX,
-                                true,
-                                false,
-                                false,
-                                double,
-                                __m256d,
-                                _mm256_load_pd,
-                                _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, false, false, double, __m256d,
+    _mm256_loadu_pd, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, false, true, double, __m256d,
+    _mm256_loadu_pd, _mm256_storeu_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, true, false, double, __m256d,
+    _mm256_loadu_pd, _mm256_store_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, false, true, true, double, __m256d,
+    _mm256_loadu_pd, _mm256_stream_pd)
+VSMC_DEFINE_UTILITY_CSTRING_CPY(AVX, true, false, false, double, __m256d,
+    _mm256_load_pd, _mm256_storeu_pd)
 VSMC_DEFINE_UTILITY_CSTRING_CPY(
     AVX, true, false, true, double, __m256d, _mm256_load_pd, _mm256_storeu_pd)
 VSMC_DEFINE_UTILITY_CSTRING_CPY(
@@ -676,7 +599,7 @@ VSMC_DEFINE_UTILITY_CSTRING_CPY(
 VSMC_DEFINE_UTILITY_CSTRING_CPY(
     AVX, true, true, true, double, __m256d, _mm256_load_pd, _mm256_stream_pd)
 
-#endif  // VSMC_HAS_AVX
+#endif // VSMC_HAS_AVX
 
 template <SIMD ISA, std::size_t N>
 inline void memset_n_switch(void *dst, int ch, std::size_t n, unsigned flag)
@@ -703,8 +626,8 @@ inline void memset_l_switch(void *dst, int ch, std::size_t n, unsigned flag)
 }
 
 template <SIMD ISA, std::size_t N>
-inline void
-    memcpy_n_switch(void *dst, const void *src, std::size_t n, unsigned flag)
+inline void memcpy_n_switch(
+    void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0: memcpy_n<ISA, N, false, false, false>(dst, src, n); break;
@@ -720,8 +643,8 @@ inline void
 }
 
 template <SIMD ISA, std::size_t N>
-inline void
-    memcpy_l_switch(void *dst, const void *src, std::size_t n, unsigned flag)
+inline void memcpy_l_switch(
+    void *dst, const void *src, std::size_t n, unsigned flag)
 {
     switch (flag) {
         case 0: memcpy_l<ISA, N, false, false, false>(dst, src, n); break;
@@ -736,7 +659,7 @@ inline void
     }
 }
 
-}  // namespace internal
+} // namespace internal
 
 /// \brief The threshold of buffer size above which `memcpy` use non-temporal
 /// instructions.
@@ -813,9 +736,9 @@ class CStringNonTemporalThreshold
 
     CStringNonTemporalThreshold(const CStringNonTemporalThreshold &);
 
-    CStringNonTemporalThreshold &
-        operator=(const CStringNonTemporalThreshold &);
-};  // class CStringNonTemporalThreshold
+    CStringNonTemporalThreshold &operator=(
+        const CStringNonTemporalThreshold &);
+}; // class CStringNonTemporalThreshold
 
 namespace internal
 {
@@ -829,7 +752,7 @@ template <SIMD ISA> inline void *memset_simd(void *dst, int ch, std::size_t n)
 
     unsigned flag = cstring_is_aligned<ISA>(dst);
     if (n <= traits::SIMDTrait<ISA>::alignment *
-                 traits::SIMDTrait<ISA>::grainsize) {
+            traits::SIMDTrait<ISA>::grainsize) {
         memset_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize>(
             dst, ch, n, flag);
         return dst;
@@ -865,7 +788,7 @@ inline void *memcpy_simd(void *dst, const void *src, std::size_t n)
     unsigned flag = cstring_is_aligned<ISA>(dst);
     flag |= cstring_is_aligned<ISA>(src) << 1;
     if (n <= traits::SIMDTrait<ISA>::alignment *
-                 traits::SIMDTrait<ISA>::grainsize) {
+            traits::SIMDTrait<ISA>::grainsize) {
         memcpy_n_switch<ISA, traits::SIMDTrait<ISA>::grainsize>(
             dst, src, n, flag);
         return dst;
@@ -896,7 +819,7 @@ inline void *memset_simd_nt(void *dst, int ch, std::size_t n)
     VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_ALIGNED_DST(ISA, dst, memset_simd_nt);
 
     if (n <= traits::SIMDTrait<ISA>::alignment *
-                 traits::SIMDTrait<ISA>::grainsize) {
+            traits::SIMDTrait<ISA>::grainsize) {
         memset_n<ISA, traits::SIMDTrait<ISA>::grainsize, true, true>(
             dst, ch, n);
         return dst;
@@ -917,7 +840,7 @@ inline void *memcpy_simd_nt(void *dst, const void *src, std::size_t n)
     VSMC_RUNTIME_ASSERT_UTILITY_CSTRING_ALIGNED_SRC(ISA, src, memcpy_simd_nt);
 
     if (n <= traits::SIMDTrait<ISA>::alignment *
-                 traits::SIMDTrait<ISA>::grainsize) {
+            traits::SIMDTrait<ISA>::grainsize) {
         memcpy_n<ISA, traits::SIMDTrait<ISA>::grainsize, true, true, true>(
             dst, src, n);
         return dst;
@@ -928,11 +851,8 @@ inline void *memcpy_simd_nt(void *dst, const void *src, std::size_t n)
     std::size_t offset = reinterpret_cast<uintptr_t>(srcc) % 64;
     if (offset != 0) {
         offset = 64 - offset;
-        memcpy_n<ISA,
-                 32 / traits::SIMDTrait<ISA>::alignment,
-                 true,
-                 true,
-                 true>(dstc, srcc, offset);
+        memcpy_n<ISA, 32 / traits::SIMDTrait<ISA>::alignment, true, true,
+            true>(dstc, srcc, offset);
         n -= offset;
         dstc += offset;
         srcc += offset;
@@ -943,7 +863,7 @@ inline void *memcpy_simd_nt(void *dst, const void *src, std::size_t n)
     return dst;
 }
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief Direct call to `std::memset`
 /// \ingroup CString
@@ -993,7 +913,7 @@ inline void *memcpy_sse2_nt(void *dst, const void *src, std::size_t n)
     return internal::memcpy_simd_nt<SSE2>(dst, src, n);
 }
 
-#endif  // VSMC_HAS_SSE2
+#endif // VSMC_HAS_SSE2
 
 #if VSMC_HAS_AVX
 
@@ -1029,7 +949,7 @@ inline void *memcpy_avx_nt(void *dst, const void *src, std::size_t n)
     return internal::memcpy_simd_nt<AVX>(dst, src, n);
 }
 
-#endif  // VSMC_HAS_AVX
+#endif // VSMC_HAS_AVX
 
 namespace internal
 {
@@ -1084,7 +1004,7 @@ class CStringRuntimeDispatch
             memset_nt_ = ::vsmc::memset_sse2_nt;
             memcpy_nt_ = ::vsmc::memcpy_sse2_nt;
         }
-#endif  // VSMC_HAS_SSE2
+#endif // VSMC_HAS_SSE2
 
 #if VSMC_HAS_AVX
         if (CPUID::has_feature<CPUIDFeatureAVX>()) {
@@ -1093,15 +1013,15 @@ class CStringRuntimeDispatch
             memset_nt_ = ::vsmc::memset_avx_nt;
             memcpy_nt_ = ::vsmc::memcpy_avx_nt;
         }
-#endif  // VSMC_HAS_AVX
+#endif // VSMC_HAS_AVX
     }
 
     CStringRuntimeDispatch(const CStringRuntimeDispatch &);
 
     CStringRuntimeDispatch &operator=(const CStringRuntimeDispatch &);
-};  // class CStringRuntimeDispatc
+}; // class CStringRuntimeDispatc
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief SIMD optimized `memset` with non-temporal store for large buffers
 /// \ingroup CString
@@ -1117,7 +1037,7 @@ inline void *memset(void *dst, int ch, std::size_t n)
 #else
     return memset_std(dst, ch, n);
 #endif
-#endif  // VSMC_CSTRING_RUNTIME_DISPATCH
+#endif // VSMC_CSTRING_RUNTIME_DISPATCH
 }
 
 /// \brief SIMD optimized `memcpy` with non-temporal store for large buffers
@@ -1135,7 +1055,7 @@ inline void *memcpy(void *dst, const void *src, std::size_t n)
 #else
     return memcpy_std(dst, src, n);
 #endif
-#endif  // VSMC_CSTRING_RUNTIME_DISPATCH
+#endif // VSMC_CSTRING_RUNTIME_DISPATCH
 }
 
 /// \brief SIMD optimized `memset` with non-temporal store regardless of size
@@ -1155,7 +1075,7 @@ inline void *memset_nt(void *dst, int ch, std::size_t n)
 #else
     return memset_std(dst, ch, n);
 #endif
-#endif  // VSMC_CSTRING_RUNTIME_DISPATCH
+#endif // VSMC_CSTRING_RUNTIME_DISPATCH
 }
 
 /// \brief SIMD optimized `memcpy` with non-temporal store regardless of size
@@ -1178,9 +1098,9 @@ inline void *memcpy_nt(void *dst, const void *src, std::size_t n)
 #else
     return memcpy_std(dst, src, n);
 #endif
-#endif  // VSMC_CSTRING_RUNTIME_DISPATCH
+#endif // VSMC_CSTRING_RUNTIME_DISPATCH
 }
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_UTILITY_CSTRING_HPP
+#endif // VSMC_UTILITY_CSTRING_HPP

@@ -50,31 +50,19 @@ Config.add("particle_num", "Particle number", &ParticleNum, 1000)
     .add("data_num", "Number of data", &DataNum, 100)
     .add("data_file", "Name of data file", &DataFile, "gmm.data")
     .add("simple_model", "Enable simple model with components number", &SM, 4)
-    .add("complex_model",
-         "Enable complex model with components number",
-         &CM,
-         5)
+    .add("complex_model", "Enable complex model with components number", &CM,
+        5)
     .add("vsmc_inc_path", "vSMC include path", &vSMCIncPath, ".")
     .add("r123_inc_path", "Random123 include path", &R123IncPath, ".")
     .add("cl_local_size", "Local size of mcmc moves", &LocalSize, 0)
-    .add("cl_platform_name",
-         "Platform name",
-         &PlatformName,
-         "vSMCOpenCLDefault")
+    .add("cl_platform_name", "Platform name", &PlatformName,
+        "vSMCOpenCLDefault")
     .add("cl_device_type", "Device type", &DeviceType, "vSMCOpenCLDefault")
-    .add("cl_device_vendor",
-         "Device vendor",
-         &DeviceVendorName,
-         "vSMCOpenCLDefault")
-    .add("cl_fp_type_bits",
-         "Bits of OpenCL fp type (32: float; 64: double)",
-         &FPTypeBits,
-         32)
-    .add("cl_build_option",
-         "Additional build options for OpenCL",
-         &BuildOption,
-         "")
-    .add("threshold",
-         "Threshold for resampling, only used by SMC",
-         &Threshold,
-         0.5);
+    .add("cl_device_vendor", "Device vendor", &DeviceVendorName,
+        "vSMCOpenCLDefault")
+    .add("cl_fp_type_bits", "Bits of OpenCL fp type (32: float; 64: double)",
+        &FPTypeBits, 32)
+    .add("cl_build_option", "Additional build options for OpenCL",
+        &BuildOption, "")
+    .add("threshold", "Threshold for resampling, only used by SMC",
+        &Threshold, 0.5);

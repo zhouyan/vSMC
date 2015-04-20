@@ -37,13 +37,11 @@
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a, b)  \
     VSMC_RUNTIME_ASSERT(                                                     \
-        (a <= b),                                                            \
-        ("**UniformRealDistribution** CONSTRUCTED WITH INVALID "             \
-         "MINIMUM AND MAXIMUM PARAMTER VALUES"))
+        (a <= b), ("**UniformRealDistribution** CONSTRUCTED WITH INVALID "   \
+                   "MINIMUM AND MAXIMUM PARAMTER VALUES"))
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min)   \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (eng_min == 0),                                                      \
+    VSMC_RUNTIME_ASSERT((eng_min == 0),                                      \
         ("**UniformRealDistribution::operator()** "                          \
          "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN ZERO"))
 
@@ -63,26 +61,23 @@ namespace internal
 template <uint64_t, uint64_t> struct UniformRealDistributionFRIntType;
 
 template <>
-struct UniformRealDistributionFRIntType<
-    0,
-    static_cast<uint64_t>(
-        static_cast<uint32_t>(~(static_cast<uint32_t>(0))))> {
+struct UniformRealDistributionFRIntType<0,
+    static_cast<uint64_t>(static_cast<uint32_t>(
+        ~(static_cast<uint32_t>(0))))> {
     typedef uint32_t type;
 };
 
 template <>
 struct UniformRealDistributionFRIntType<0,
-                                        static_cast<uint64_t>(
-                                            ~(static_cast<uint64_t>(0)))> {
+    static_cast<uint64_t>(~(static_cast<uint64_t>(0)))> {
     typedef uint64_t type;
 };
 
 template <typename FPType, typename Left, typename Right, typename Eng, bool>
 class UniformRealDistributionOp
 {
-    static constexpr const uint64_t uint32_t_max_ =
-        static_cast<uint64_t>(
-            static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
+    static constexpr const uint64_t uint32_t_max_ = static_cast<uint64_t>(
+        static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
 
     static constexpr const uint64_t uint64_t_max_ =
         static_cast<uint64_t>(~(static_cast<uint64_t>(0)));
@@ -107,14 +102,13 @@ class UniformRealDistributionOp
 
         return 0;
     }
-};  // class UniformRealDistributionOp
+}; // class UniformRealDistributionOp
 
 template <typename FPType, typename Left, typename Right, typename Eng>
 class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 {
     typedef typename internal::UniformRealDistributionFRIntType<
-        Eng::min VSMC_MNE(),
-        Eng::max VSMC_MNE()>::type eng_uint_t;
+        Eng::min VSMC_MNE(), Eng::max VSMC_MNE()>::type eng_uint_t;
 
     public:
     static FPType uint2fp(Eng &eng)
@@ -122,9 +116,9 @@ class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
         return U01<Left, Right, eng_uint_t, FPType>::uint2fp(
             static_cast<eng_uint_t>(eng()));
     }
-};  // class UniformRealDistributionOp
+}; // class UniformRealDistributionOp
 
-}  // namespace vsmc::interal
+} // namespace vsmc::interal
 
 /// \brief Uniform real distribution with variants open/closed variants
 /// \ingroup Distribution
@@ -175,10 +169,8 @@ class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 /// compile time, and will rais a static assertion failure if the generated
 /// integers does not cover the full range of either 32-bits or 64-bits
 /// unsigned integers.
-template <typename FPType = double,
-          typename Left = Closed,
-          typename Right = Open,
-          bool MinMaxIsConstexpr = false>
+template <typename FPType = double, typename Left = Closed,
+    typename Right = Open, bool MinMaxIsConstexpr = false>
 class UniformRealDistribution
 {
     public:
@@ -187,10 +179,8 @@ class UniformRealDistribution
     struct param_type {
         typedef FPType result_type;
 
-        typedef UniformRealDistribution<FPType,
-                                        Left,
-                                        Right,
-                                        MinMaxIsConstexpr> distribution_type;
+        typedef UniformRealDistribution<FPType, Left, Right,
+            MinMaxIsConstexpr> distribution_type;
 
         explicit param_type(result_type a = 0, result_type b = 1)
             : a_(a), b_(b)
@@ -200,8 +190,8 @@ class UniformRealDistribution
         result_type a() const { return a_; }
         result_type b() const { return b_; }
 
-        friend inline bool operator==(const param_type &param1,
-                                      const param_type &param2)
+        friend inline bool operator==(
+            const param_type &param1, const param_type &param2)
         {
             if (param1.a_ < param2.a_ || param1.a_ > param2.a_)
                 return false;
@@ -210,16 +200,15 @@ class UniformRealDistribution
             return true;
         }
 
-        friend inline bool operator!=(const param_type param1,
-                                      const param_type param2)
+        friend inline bool operator!=(
+            const param_type param1, const param_type param2)
         {
             return !(param1 == param2);
         }
 
         template <typename CharT, typename Traits>
-        friend inline std::basic_ostream<CharT, Traits> &
-            operator<<(std::basic_ostream<CharT, Traits> &os,
-                       const param_type &param)
+        friend inline std::basic_ostream<CharT, Traits> &operator<<(
+            std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
             if (!os.good())
                 return os;
@@ -230,9 +219,8 @@ class UniformRealDistribution
         }
 
         template <typename CharT, typename Traits>
-        friend inline std::basic_istream<CharT, Traits> &
-            operator>>(std::basic_istream<CharT, Traits> &is,
-                       param_type &param)
+        friend inline std::basic_istream<CharT, Traits> &operator>>(
+            std::basic_istream<CharT, Traits> &is, param_type &param)
         {
             if (!is.good())
                 return is;
@@ -257,7 +245,7 @@ class UniformRealDistribution
         private:
         result_type a_;
         result_type b_;
-    };  // class param_type
+    }; // class param_type
 
     explicit UniformRealDistribution(result_type a = 0, result_type b = 1)
         : a_(a), b_(b)
@@ -297,19 +285,14 @@ class UniformRealDistribution
     /// ~~~
     template <typename Eng> result_type operator()(Eng &eng) const
     {
-        return internal::UniformRealDistributionOp<
-                   FPType,
-                   Left,
-                   Right,
-                   Eng,
+        return internal::UniformRealDistributionOp<FPType, Left, Right, Eng,
                    MinMaxIsConstexpr>::uint2fp(eng) *
-                   (b_ - a_) +
-               a_;
+            (b_ - a_) +
+            a_;
     }
 
-    friend inline bool operator==(
-        const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
-            &runif1,
+    friend inline bool operator==(const UniformRealDistribution<FPType, Left,
+                                      Right, MinMaxIsConstexpr> &runif1,
         const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
             &runif2)
     {
@@ -320,9 +303,8 @@ class UniformRealDistribution
         return true;
     }
 
-    friend inline bool operator!=(
-        const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
-            &runif1,
+    friend inline bool operator!=(const UniformRealDistribution<FPType, Left,
+                                      Right, MinMaxIsConstexpr> &runif1,
         const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
             &runif2)
     {
@@ -371,8 +353,8 @@ class UniformRealDistribution
     private:
     result_type a_;
     result_type b_;
-};  // class UniformRealDistribution
+}; // class UniformRealDistribution
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP
+#endif // VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP

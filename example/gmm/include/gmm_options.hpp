@@ -32,7 +32,5 @@
 Config.add("data_file", "Name of data file", &DataFile, "gmm.data")
     .add("data_num", "Number of data", &DataNum, 100)
     .add("simple_model", "Enable simple model with components number", &SM, 4)
-    .add("complex_model",
-         "Enable complex model with components number",
-         &CM,
-         5);
+    .add("complex_model", "Enable complex model with components number", &CM,
+        5);

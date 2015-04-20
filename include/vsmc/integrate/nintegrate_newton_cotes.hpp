@@ -35,8 +35,7 @@
 #include <vsmc/integrate/nintegrate_base.hpp>
 
 #define VSMC_STATIC_ASSERT_INTEGRATE_NINTEGRATE_NEWTON_COTES_DEGREE(degree)  \
-    VSMC_STATIC_ASSERT(                                                      \
-        (degree >= 1 && degree <= max_degree_),                              \
+    VSMC_STATIC_ASSERT((degree >= 1 && degree <= max_degree_),               \
         USE_NIntegrateNewtonCotes_WITH_A_DEGREE_LARGER_THAN_max_degree)
 
 namespace vsmc
@@ -47,22 +46,22 @@ namespace internal
 
 template <unsigned Index, typename EvalType>
 struct NIntegrateNewtonCotesEval {
-    static double
-        result(const double *coeff, double a, double h, const EvalType &eval)
+    static double result(
+        const double *coeff, double a, double h, const EvalType &eval)
     {
         return coeff[Index] * eval(a + (Index - 1) * h) +
-               NIntegrateNewtonCotesEval<Index - 1, EvalType>::result(
+            NIntegrateNewtonCotesEval<Index - 1, EvalType>::result(
                    coeff, a, h, eval);
     }
-};  // struct NIntegrateNewtonCotesEval
+}; // struct NIntegrateNewtonCotesEval
 
 template <typename EvalType> struct NIntegrateNewtonCotesEval<1, EvalType> {
-    static double
-        result(const double *coeff, double a, double, const EvalType &eval)
+    static double result(
+        const double *coeff, double a, double, const EvalType &eval)
     {
         return coeff[1] * eval(a);
     }
-};  // struct NIntegrateNewtonCotesEval
+}; // struct NIntegrateNewtonCotesEval
 
 template <unsigned Degree> class NIntegrateNewtonCotesCoeff
 {
@@ -86,8 +85,8 @@ template <unsigned Degree> class NIntegrateNewtonCotesCoeff
 
     NIntegrateNewtonCotesCoeff(const NIntegrateNewtonCotesCoeff<Degree> &);
 
-    NIntegrateNewtonCotesCoeff<Degree> &
-        operator=(const NIntegrateNewtonCotesCoeff<Degree> &);
+    NIntegrateNewtonCotesCoeff<Degree> &operator=(
+        const NIntegrateNewtonCotesCoeff<Degree> &);
 
     void coeff_init(std::integral_constant<unsigned, 1>)
     {
@@ -203,9 +202,9 @@ template <unsigned Degree> class NIntegrateNewtonCotesCoeff
         coeff_[10] = 106300;
         coeff_[11] = 16067;
     }
-};  // NIntegrateNewtonCotesCoeff
+}; // NIntegrateNewtonCotesCoeff
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief Numerical integration with the (closed) Newton-Cotes formulae
 /// \ingroup Integrate
@@ -229,20 +228,17 @@ class NIntegrateNewtonCotes
         double h = (b - a) / Degree;
 
         return coeff[0] * (b - a) *
-               (internal::NIntegrateNewtonCotesEval<Degree,
-                                                    eval_type>::result(coeff,
-                                                                       a,
-                                                                       h,
-                                                                       eval) +
-                coeff[Degree + 1] * eval(b));
+            (internal::NIntegrateNewtonCotesEval<Degree, eval_type>::result(
+                 coeff, a, h, eval) +
+                   coeff[Degree + 1] * eval(b));
     }
 
     static constexpr unsigned max_degree() { return max_degree_; }
 
     private:
     static constexpr const unsigned max_degree_ = 10;
-};  // class NIntegrateNewtonCotes
+}; // class NIntegrateNewtonCotes
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP
+#endif // VSMC_INTEGRATE_NINTEGRATE_NEWTON_COTES_HPP

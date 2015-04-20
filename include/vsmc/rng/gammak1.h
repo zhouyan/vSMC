@@ -105,7 +105,7 @@
 #define GAMMAK1_4x64_INIT gammak1_4x64_53_init
 #define GAMMAK1_4x64_RAND gammak1_4x64_53_rand
 
-#else  // VSMC_HAS_OPENCL_DOUBLE
+#else // VSMC_HAS_OPENCL_DOUBLE
 
 #define GAMMAK1_2x32 gammak1_2x32_24
 #define GAMMAK1_2x32_INIT gammak1_2x32_24_init
@@ -115,7 +115,7 @@
 #define GAMMAK1_4x32_INIT gammak1_4x32_24_init
 #define GAMMAK1_4x32_RAND gammak1_4x32_24_rand
 
-#endif  // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_OPENCL_DOUBLE
 
 #define VSMC_DEFINE_RNG_GAMMAK1(N, W, F, FT)                                 \
     typedef struct {                                                         \
@@ -125,8 +125,7 @@
 
 #define VSMC_DEFINE_RNG_GAMMAK1_INIT(N, W, F, FT)                            \
     VSMC_STATIC_INLINE void gammak1_##N##x##W##_##F##_init(                  \
-        gammak1_##N##x##W##_##F *rgamma,                                     \
-        cburng##N##x##W##_rng_t *rng,                                        \
+        gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W##_rng_t *rng,       \
         FT shape)                                                            \
     {                                                                        \
         rgamma->c_shape = shape;                                             \
@@ -159,7 +158,7 @@
         FT q7 = 2.424e-4;                                                    \
         FT c_q0 =                                                            \
             ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r + q2) * r + \
-             q1) *                                                           \
+                q1) *                                                        \
             r;                                                               \
         if (shape <= 3.686f) {                                               \
             c_b = 0.463f + c_s + 0.178f * c_s2;                              \
@@ -252,10 +251,10 @@
                 q = c_q0 +                                                   \
                     0.5f * t * t *                                           \
                         ((((((a7 * v + a6) * v + a5) * v + a4) * v + a3) *   \
-                              v +                                            \
-                          a2) *                                              \
-                             v +                                             \
-                         a1) *                                               \
+                                 v +                                         \
+                             a2) *                                           \
+                                v +                                          \
+                            a1) *                                            \
                         v;                                                   \
             } else {                                                         \
                 q = c_q0 - c_s * t + 0.25f * t * t +                         \
@@ -283,10 +282,10 @@
                 q = c_q0 +                                                   \
                     0.5f * t * t *                                           \
                         ((((((a7 * v + a6) * v + a5) * v + a4) * v + a3) *   \
-                              v +                                            \
-                          a2) *                                              \
-                             v +                                             \
-                         a1) *                                               \
+                                 v +                                         \
+                             a2) *                                           \
+                                v +                                          \
+                            a1) *                                            \
                         v;                                                   \
             } else {                                                         \
                 q = c_q0 - c_s * t + 0.25f * t * t +                         \
@@ -349,6 +348,6 @@ VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 64, 53, double)
 /// \ingroup CLRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 64, 53, double)
 
-#endif  // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_OPENCL_DOUBLE
 
-#endif  // VSMC_RNG_GAMMAK1_H
+#endif // VSMC_RNG_GAMMAK1_H

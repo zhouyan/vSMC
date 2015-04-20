@@ -78,4 +78,4 @@
 #endif
 #endif
 
-#endif  // VSMC_INTERNAL_COMPILER_GCC_HPP
+#endif // VSMC_INTERNAL_COMPILER_GCC_HPP

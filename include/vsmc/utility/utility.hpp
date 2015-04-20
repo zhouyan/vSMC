@@ -51,4 +51,4 @@
 #include <vsmc/utility/hdf5io.hpp>
 #endif
 
-#endif  // VSMC_UTILITY_UTILITY_HPP
+#endif // VSMC_UTILITY_UTILITY_HPP

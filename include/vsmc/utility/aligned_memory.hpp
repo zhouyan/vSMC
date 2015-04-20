@@ -75,8 +75,7 @@
         USE_AlignedAllocator_WITH_ALIGNEMNT_NOT_A_POWER_OF_TWO)
 
 #define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(Alignemnt)     \
-    VSMC_STATIC_ASSERT(                                                      \
-        (Alignment >= sizeof(void *)),                                       \
+    VSMC_STATIC_ASSERT((Alignment >= sizeof(void *)),                        \
         USE_AlignedAllocator_WITH_ALIGNMENT_LESS_THAN_SIZEOF_VOID_POINTER)
 
 #define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY                            \
@@ -89,8 +88,7 @@
         "**aligned_malloc** USED WITH ALIGNMENT NOT A POWER OF TWO")
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(alignemnt)    \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (alignment >= sizeof(void *)),                                       \
+    VSMC_RUNTIME_ASSERT((alignment >= sizeof(void *)),                       \
         "**aligned_malloc** USED WITH ALIGNMENT LESS THAN sizeof(void *)")
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY                           \
@@ -135,7 +133,7 @@ class AlignedMemorySTD
         std::free(*reinterpret_cast<void **>(
                       reinterpret_cast<uintptr_t>(ptr) - sizeof(void *)));
     }
-};  // class AlignedMemmorySTD
+}; // class AlignedMemmorySTD
 
 #if VSMC_HAS_POSIX
 
@@ -163,7 +161,7 @@ class AlignedMemorySYS
     }
 
     static void aligned_free(void *ptr) { free(ptr); }
-};  // class AlignedMallocSYS
+}; // class AlignedMallocSYS
 
 #elif defined(VSMC_MSVC)
 
@@ -185,9 +183,9 @@ class AlignedMemorySYS
     }
 
     static void aligned_free(void *ptr) { _aligned_free(ptr); }
-};  // class AlignedMemorySYS
+}; // class AlignedMemorySYS
 
-#endif  // VSMC_HAS_POSIX
+#endif // VSMC_HAS_POSIX
 
 #if VSMC_HAS_JEMALLOC
 
@@ -222,9 +220,9 @@ class AlignedMemoryJE
         je_free(ptr);
 #endif
     }
-};  // AlignedMemoryJE
+}; // AlignedMemoryJE
 
-#endif  // VSMC_HAS_JEMALLOC
+#endif // VSMC_HAS_JEMALLOC
 
 #if VSMC_HAS_TBB_MALLOC
 
@@ -249,9 +247,9 @@ class AlignedMemoryTBB
     }
 
     static void aligned_free(void *ptr) { scalable_aligned_free(ptr); }
-};  // class AlignedMemoryTBB
+}; // class AlignedMemoryTBB
 
-#endif  // VSMC_HAS_TBB_MALLOC
+#endif // VSMC_HAS_TBB_MALLOC
 
 #if VSMC_HAS_MKL
 
@@ -275,9 +273,9 @@ class AlignedMemoryMKL
     }
 
     static void aligned_free(void *ptr) { mkl_free(ptr); }
-};  // class AlignedMemoryMKL
+}; // class AlignedMemoryMKL
 
-#endif  // VSMC_HAS_MKL
+#endif // VSMC_HAS_MKL
 
 /// \brief Default AlignedMemory type
 /// \ingroup AlignedMemory
@@ -294,9 +292,8 @@ typedef VSMC_ALIGNED_MEMORY_TYPE AlignedMemory;
 /// `aligned_malloc` shall behave similar to `std::malloc` but take an
 /// additional arguments for alignment. The member function `aligned_free`
 /// shall behave just like `std::free`.
-template <typename T,
-          std::size_t Alignment = 32,
-          typename Memory = AlignedMemory>
+template <typename T, std::size_t Alignment = 32,
+    typename Memory = AlignedMemory>
 class AlignedAllocator : public std::allocator<T>
 {
     public:
@@ -341,8 +338,8 @@ class AlignedAllocator : public std::allocator<T>
 
     private:
     Memory memory_;
-};  // class AlignedAllocator
+}; // class AlignedAllocator
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_UTILITY_ALIGNED_MEMORY
+#endif // VSMC_UTILITY_ALIGNED_MEMORY

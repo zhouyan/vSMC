@@ -69,4 +69,4 @@ class node_init : public BASE_INIT<node_state, node_init>
     }
 };
 
-#endif  // VSMC_EXAMPLE_NODE_INIT_HPP
+#endif // VSMC_EXAMPLE_NODE_INIT_HPP

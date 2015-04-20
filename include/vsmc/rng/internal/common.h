@@ -45,8 +45,8 @@
 #else
 #define VSMC_STATIC_INLINE inline
 #endif
-#endif  // VSMC_STATIC_INLINE
-#else   // __OPENCL_VERSION__
+#endif // VSMC_STATIC_INLINE
+#else  // __OPENCL_VERSION__
 #ifndef VSMC_HAS_OPENCL_DOUBLE
 #define VSMC_HAS_OPENCL_DOUBLE 1
 #endif
@@ -62,16 +62,16 @@
 #define VSMC_STATIC_INLINE inline
 #endif
 #include <cmath>
-#else  // __cplusplus
+#else // __cplusplus
 #ifndef VSMC_STATIC_INLINE
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #define VSMC_STATIC_INLINE static inline
 #else
 #define VSMC_STATIC_INLINE static
 #endif
-#endif  // VSMC_STATIC_INLINE
+#endif // VSMC_STATIC_INLINE
 #include <math.h>
-#endif  // __cplusplus
-#endif  // __OPENCL_VERSION__
+#endif // __cplusplus
+#endif // __OPENCL_VERSION__
 
-#endif  // VSMC_RNG_INTERNAL_COMMON_H
+#endif // VSMC_RNG_INTERNAL_COMMON_H

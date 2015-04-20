@@ -117,8 +117,8 @@ class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
 class gmm_move : public BASE_MOVE<gmm_state, gmm_move>
 {
     public:
-    std::size_t move_state(std::size_t iter,
-                           vsmc::SingleParticle<gmm_state> sp)
+    std::size_t move_state(
+        std::size_t iter, vsmc::SingleParticle<gmm_state> sp)
     {
         std::size_t acc = 0;
         acc += move_mu_.move_state(iter, sp);
@@ -134,4 +134,4 @@ class gmm_move : public BASE_MOVE<gmm_state, gmm_move>
     gmm_move_weight move_weight_;
 };
 
-#endif  // VSMC_EXAMPLE_GMM_MOVE_HPP
+#endif // VSMC_EXAMPLE_GMM_MOVE_HPP

@@ -35,10 +35,8 @@
 class node_moments : public BASE_MONITOR<node_state, node_moments>
 {
     public:
-    void monitor_state(std::size_t,
-                       std::size_t dim,
-                       vsmc::ConstSingleParticle<node_state> csp,
-                       double *res)
+    void monitor_state(std::size_t, std::size_t dim,
+        vsmc::ConstSingleParticle<node_state> csp, double *res)
     {
         using std::log;
 
@@ -60,4 +58,4 @@ class node_moments : public BASE_MONITOR<node_state, node_moments>
     }
 };
 
-#endif  // VSMC_EXAMPLE_NODE_MONITOR_HPP
+#endif // VSMC_EXAMPLE_NODE_MONITOR_HPP

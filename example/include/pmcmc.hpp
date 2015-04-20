@@ -46,4 +46,4 @@ static bool Parallel;
 #include "move_pmcmc.hpp"
 #include "pmcmc_do.hpp"
 
-#endif  // VSMC_EXAMPLE_PMCMC_HPP
+#endif // VSMC_EXAMPLE_PMCMC_HPP

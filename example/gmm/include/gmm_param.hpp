@@ -395,4 +395,4 @@ inline OutputStream &operator<<(OutputStream &os, const gmm_param &param)
     return os;
 }
 
-#endif  // VSMC_EXAMPLE_GMM_PARAM_HPP
+#endif // VSMC_EXAMPLE_GMM_PARAM_HPP

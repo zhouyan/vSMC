@@ -33,18 +33,17 @@
 #define VSMC_EXAMPLE_PF_SMP_DO_HPP
 
 template <vsmc::MatrixOrder Order>
-inline void
-    cv_do(vsmc::ResampleScheme res, char **argv, const std::string &name)
+inline void cv_do(
+    vsmc::ResampleScheme res, char **argv, const std::string &name)
 {
     vsmc::Seed::instance().set(101);
     vsmc::Sampler<cv_state<Order>> sampler(ParticleNum, res, 0.5);
     sampler.init(cv_init<Order>())
         .move(vsmc::MoveAdapter<cv_state<Order>, BASE_MOVE, cv_move<Order>>(),
-              true)
-        .monitor("pos",
-                 2,
-                 vsmc::MonitorEvalAdapter<cv_state<Order>, BASE_MONITOR>(
-                     cv_est<Order>) );
+            true)
+        .monitor(
+            "pos", 2, vsmc::MonitorEvalAdapter<cv_state<Order>, BASE_MONITOR>(
+                          cv_est<Order>) );
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
     sampler.initialize(argv[1]);
@@ -61,4 +60,4 @@ inline void
 #endif
 }
 
-#endif  // VSMC_EXAMPLE_PF_SMP_DO_HPP
+#endif // VSMC_EXAMPLE_PF_SMP_DO_HPP

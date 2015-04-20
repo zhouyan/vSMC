@@ -39,16 +39,14 @@
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func)       \
     VSMC_RUNTIME_ASSERT((iter != map.end()),                                 \
-                        ("**Sampler::" #func "** INVALID MONITOR NAME"))
+        ("**Sampler::" #func "** INVALID MONITOR NAME"))
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(func, caller, name)         \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        static_cast<bool>(func),                                             \
+    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                             \
         ("**Sampler::" #caller "** INVALID " #name " OBJECT"))
 
 #define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER                       \
-    VSMC_RUNTIME_WARNING(                                                    \
-        (!static_cast<bool>(init_)),                                         \
+    VSMC_RUNTIME_WARNING((!static_cast<bool>(init_)),                        \
         ("**Sampler::initialize** A VALID INIT OBJECT IS SET "               \
          "BUT INITILIALIZED BY ITERATING"))
 
@@ -125,9 +123,8 @@ template <typename T> class Sampler
     /// If a user defined resampling operation is set, then it is assumed that
     /// at least the user want to perform resampling at least sometime. So the
     /// threshold is set to 0.5 if not provided as the third parameter.
-    Sampler(size_type N,
-            const resample_type &res_op,
-            double resample_threshold = 0.5)
+    Sampler(size_type N, const resample_type &res_op,
+        double resample_threshold = 0.5)
         : init_by_iter_(false),
           resample_threshold_(resample_threshold),
           particle_(N),
@@ -212,8 +209,7 @@ template <typename T> class Sampler
         if (!path_.empty())
             path_.reserve(num);
         for (typename monitor_map_type::iterator m = monitor_.begin();
-             m != monitor_.end();
-             ++m) {
+             m != monitor_.end(); ++m) {
             if (!m->second.empty())
                 m->second.reserve(num);
         }
@@ -234,8 +230,8 @@ template <typename T> class Sampler
     /// \brief Force resample
     Sampler<T> &resample()
     {
-        particle_.resample(resample_op_,
-                           std::numeric_limits<double>::max VSMC_MNE());
+        particle_.resample(
+            resample_op_, std::numeric_limits<double>::max VSMC_MNE());
 
         return *this;
     }
@@ -394,7 +390,7 @@ template <typename T> class Sampler
 
             private:
             move_type move_;
-        };  // class init_op
+        }; // class init_op
 
         init_ = init_op(new_init);
 
@@ -531,8 +527,8 @@ template <typename T> class Sampler
     const Path<T> &path() const { return path_; }
 
     /// \brief Set the Path sampling evaluation object
-    Sampler<T> &path_sampling(const typename Path<T>::eval_type &eval,
-                              bool record_only = false)
+    Sampler<T> &path_sampling(
+        const typename Path<T>::eval_type &eval, bool record_only = false)
     {
         path_.set_eval(eval, record_only);
         return *this;
@@ -562,11 +558,9 @@ template <typename T> class Sampler
     /// \param stage The stage of the Monitor
     ///
     /// \sa Monitor
-    Sampler<T> &monitor(const std::string &name,
-                        std::size_t dim,
-                        const typename Monitor<T>::eval_type &eval,
-                        bool record_only = false,
-                        MonitorStage stage = MonitorMCMC)
+    Sampler<T> &monitor(const std::string &name, std::size_t dim,
+        const typename Monitor<T>::eval_type &eval, bool record_only = false,
+        MonitorStage stage = MonitorMCMC)
     {
         monitor_.insert(typename monitor_map_type::value_type(
             name, Monitor<T>(dim, eval, record_only, stage)));
@@ -608,7 +602,7 @@ template <typename T> class Sampler
     bool clear_monitor(const std::string &name)
     {
         return monitor_.erase(name) ==
-               static_cast<typename monitor_map_type::size_type>(1);
+            static_cast<typename monitor_map_type::size_type>(1);
     }
 
     /// \brief Erase all monitors
@@ -637,8 +631,7 @@ template <typename T> class Sampler
         if (path_.iter_size() > 0)
             header_size += 2;
         for (typename monitor_map_type::const_iterator m = monitor_.begin();
-             m != monitor_.end();
-             ++m) {
+             m != monitor_.end(); ++m) {
             if (m->second.iter_size() > 0)
                 header_size += m->second.dim();
         }
@@ -679,8 +672,7 @@ template <typename T> class Sampler
 
         std::stringstream ss;
         for (typename monitor_map_type::const_iterator m = monitor_.begin();
-             m != monitor_.end();
-             ++m) {
+             m != monitor_.end(); ++m) {
             if (m->second.iter_size() > 0) {
                 unsigned mond = static_cast<unsigned>(m->second.dim());
                 for (unsigned i = 0; i != mond; ++i, ++first) {
@@ -741,9 +733,8 @@ template <typename T> class Sampler
     /// \param os The ostream to which the contents are printed
     /// \param sepchar The seperator of fields
     template <typename CharT, typename Traits>
-    std::basic_ostream<CharT, Traits> &
-        print(std::basic_ostream<CharT, Traits> &os,
-              char sepchar = '\t') const
+    std::basic_ostream<CharT, Traits> &print(
+        std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
         if (iter_size() == 0 || !os.good())
             return os;
@@ -823,8 +814,7 @@ template <typename T> class Sampler
         accept_history_.clear();
         path_.clear();
         for (typename monitor_map_type::iterator m = monitor_.begin();
-             m != monitor_.end();
-             ++m)
+             m != monitor_.end(); ++m)
             m->second.clear();
 
         iter_num_ = 0;
@@ -854,10 +844,9 @@ template <typename T> class Sampler
 
     std::size_t do_move(std::size_t ia)
     {
-        for (typename std::vector<move_type>::iterator m =
-                 move_queue_.begin();
-             m != move_queue_.end();
-             ++m, ++ia) {
+        for (
+            typename std::vector<move_type>::iterator m = move_queue_.begin();
+            m != move_queue_.end(); ++m, ++ia) {
             std::size_t acc = (*m)(iter_num_, particle_);
             accept_history_[ia].push_back(acc);
         }
@@ -867,10 +856,9 @@ template <typename T> class Sampler
 
     std::size_t do_mcmc(std::size_t ia)
     {
-        for (typename std::vector<mcmc_type>::iterator m =
-                 mcmc_queue_.begin();
-             m != mcmc_queue_.end();
-             ++m, ++ia) {
+        for (
+            typename std::vector<mcmc_type>::iterator m = mcmc_queue_.begin();
+            m != mcmc_queue_.end(); ++m, ++ia) {
             std::size_t acc = (*m)(iter_num_, particle_);
             accept_history_[ia].push_back(acc);
         }
@@ -892,8 +880,7 @@ template <typename T> class Sampler
             path_.eval(iter_num_, particle_);
 
         for (typename monitor_map_type::iterator m = monitor_.begin();
-             m != monitor_.end();
-             ++m) {
+             m != monitor_.end(); ++m) {
             if (!m->second.empty())
                 m->second.eval(iter_num_, particle_, stage);
         }
@@ -947,8 +934,7 @@ template <typename T> class Sampler
             std::size_t mm = 0;
             for (typename monitor_map_type::const_iterator m =
                      monitor_.begin();
-                 m != monitor_.end();
-                 ++m, ++mm) {
+                 m != monitor_.end(); ++m, ++mm) {
                 if (m->second.iter_size() > 0) {
                     if (miter[mm] == m->second.iter_size() ||
                         iter != m->second.index(miter[mm])) {
@@ -997,8 +983,7 @@ template <typename T> class Sampler
             }
         }
         for (typename monitor_map_type::const_iterator m = monitor_.begin();
-             m != monitor_.end();
-             ++m) {
+             m != monitor_.end(); ++m) {
             if (m->second.iter_size() > 0) {
                 for (std::size_t i = 0; i != m->second.dim(); ++i) {
                     std::size_t miter = 0;
@@ -1016,16 +1001,15 @@ template <typename T> class Sampler
             }
         }
     }
-};  // class Sampler
+}; // class Sampler
 
 template <typename CharT, typename Traits, typename T>
-inline std::basic_ostream<CharT, Traits> &
-    operator<<(std::basic_ostream<CharT, Traits> &os,
-               const Sampler<T> &sampler)
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const Sampler<T> &sampler)
 {
     return sampler.print(os);
 }
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_SAMPLER_HPP
+#endif // VSMC_CORE_SAMPLER_HPP

@@ -47,10 +47,8 @@ namespace vsmc
 /// \param lmax Maximum of the local size
 /// \param mmax Maximum of the multiplier of the factor
 inline void cl_minmax_local_size(const ::cl::Kernel &kern,
-                                 const ::cl::Device &dev,
-                                 std::size_t &factor,
-                                 std::size_t &lmax,
-                                 std::size_t &mmax)
+    const ::cl::Device &dev, std::size_t &factor, std::size_t &lmax,
+    std::size_t &mmax)
 {
     try {
         kern.getWorkGroupInfo(
@@ -74,8 +72,8 @@ inline std::size_t cl_min_global_size(std::size_t N, std::size_t local_size)
         return N;
 
     return (local_size && N % local_size) ?
-               (N / local_size + 1) * local_size :
-               N;
+        (N / local_size + 1) * local_size :
+        N;
 }
 
 /// \brief The preferred global and local size
@@ -83,10 +81,8 @@ inline std::size_t cl_min_global_size(std::size_t N, std::size_t local_size)
 ///
 /// \return The difference between the preferred global size and the N
 inline std::size_t cl_preferred_work_size(std::size_t N,
-                                          const ::cl::Kernel &kern,
-                                          const ::cl::Device &dev,
-                                          std::size_t &global_size,
-                                          std::size_t &local_size)
+    const ::cl::Kernel &kern, const ::cl::Device &dev,
+    std::size_t &global_size, std::size_t &local_size)
 {
     cl::size_t<3> reqd_size;
     try {
@@ -143,15 +139,13 @@ inline void cl_set_kernel_args(::cl::Kernel &, ::cl_uint) {}
 /// by the compiler's implementation). Otherwise this function supports up to
 /// 16 arguments.
 template <typename Arg1, typename... Args>
-inline void cl_set_kernel_args(::cl::Kernel &kern,
-                               ::cl_uint offset,
-                               const Arg1 &arg1,
-                               const Args &... args)
+inline void cl_set_kernel_args(::cl::Kernel &kern, ::cl_uint offset,
+    const Arg1 &arg1, const Args &... args)
 {
     kern.setArg(offset, arg1);
     cl_set_kernel_args(kern, offset + 1, args...);
 }
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_OPENCL_CL_MANIP_HPP
+#endif // VSMC_OPENCL_CL_MANIP_HPP

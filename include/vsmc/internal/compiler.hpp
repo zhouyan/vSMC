@@ -82,19 +82,19 @@
 #define VSMC_HAS_POSIX 1
 #endif
 #endif
-#else  // VSMC_MACOSX
+#else // VSMC_MACOSX
 #include <stdlib.h>
 #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 1
 #endif
-#endif  // _POSIX_C_SOURCE >= 200112L
+#endif // _POSIX_C_SOURCE >= 200112L
 #if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 600
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 1
 #endif
-#endif  // _XOPEN_SOURCE >= 600
-#endif  // VSMC_MACOSX
+#endif // _XOPEN_SOURCE >= 600
+#endif // VSMC_MACOSX
 
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 0
@@ -210,4 +210,4 @@
 #endif
 #endif
 
-#endif  // VSMC_INTERNAL_COMPILER_HPP
+#endif // VSMC_INTERNAL_COMPILER_HPP

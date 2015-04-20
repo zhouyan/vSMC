@@ -42,8 +42,8 @@ namespace vsmc
 template <typename T> class SingleParticleBase
 {
     public:
-    SingleParticleBase(typename Particle<T>::size_type id,
-                       Particle<T> *particle_ptr)
+    SingleParticleBase(
+        typename Particle<T>::size_type id, Particle<T> *particle_ptr)
         : id_(id), particle_ptr_(particle_ptr)
     {
     }
@@ -67,15 +67,15 @@ template <typename T> class SingleParticleBase
     private:
     typename Particle<T>::size_type id_;
     Particle<T> *particle_ptr_;
-};  // class SingleParticleBase
+}; // class SingleParticleBase
 
 /// \brief A const variant to SingleParticle
 /// \ingroup Core
 template <typename T> class ConstSingleParticleBase
 {
     public:
-    ConstSingleParticleBase(typename Particle<T>::size_type id,
-                            const Particle<T> *particle_ptr)
+    ConstSingleParticleBase(
+        typename Particle<T>::size_type id, const Particle<T> *particle_ptr)
         : id_(id), particle_ptr_(particle_ptr)
     {
     }
@@ -89,7 +89,7 @@ template <typename T> class ConstSingleParticleBase
     private:
     typename Particle<T>::size_type id_;
     const Particle<T> *particle_ptr_;
-};  // class ConstSingleParticleBase
+}; // class ConstSingleParticleBase
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
@@ -118,12 +118,12 @@ class SingleParticle : public traits::SingleParticleBaseTypeTrait<T>::type
     typedef typename traits::SingleParticleBaseTypeTrait<T>::type base;
 
     public:
-    SingleParticle(typename Particle<T>::size_type id,
-                   Particle<T> *particle_ptr)
+    SingleParticle(
+        typename Particle<T>::size_type id, Particle<T> *particle_ptr)
         : base(id, particle_ptr)
     {
     }
-};  // class SingleParticle
+}; // class SingleParticle
 
 /// \brief A const variant to SingleParticle
 /// \ingroup Core
@@ -134,13 +134,13 @@ class ConstSingleParticle
     typedef typename traits::ConstSingleParticleBaseTypeTrait<T>::type base;
 
     public:
-    ConstSingleParticle(typename Particle<T>::size_type id,
-                        const Particle<T> *particle_ptr)
+    ConstSingleParticle(
+        typename Particle<T>::size_type id, const Particle<T> *particle_ptr)
         : base(id, particle_ptr)
     {
     }
-};  // class ConstSingleParticle
+}; // class ConstSingleParticle
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_SINGLE_PARTICLE_HPP
+#endif // VSMC_CORE_SINGLE_PARTICLE_HPP

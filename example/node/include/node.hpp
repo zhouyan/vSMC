@@ -62,4 +62,4 @@ static double Scale0;
 #include "node_monitor.hpp"
 #include "node_proposal.hpp"
 
-#endif  // VSMC_EXAMPLE_NODE_HPP
+#endif // VSMC_EXAMPLE_NODE_HPP

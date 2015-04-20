@@ -41,4 +41,4 @@
 #include <vsmc/resample/residual_stratified.hpp>
 #include <vsmc/resample/residual_systematic.hpp>
 
-#endif  // VSMC_RESAMPLE_RESAMPLE_HPP
+#endif // VSMC_RESAMPLE_RESAMPLE_HPP

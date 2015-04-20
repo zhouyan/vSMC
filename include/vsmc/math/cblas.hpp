@@ -77,9 +77,9 @@ template <typename T> inline void scal(std::size_t n, T a, T *x)
         x[i] *= a;
 }
 
-}  // namespace vsmc::math
+} // namespace vsmc::math
 
-}  // namespace vsmc
+} // namespace vsmc
 
 #ifdef VSMC_CBLAS_INT
 
@@ -122,8 +122,8 @@ VSMC_DEFINE_MATH_CBLAS_S1(asum, sasum, dasum)
 VSMC_DEFINE_MATH_CBLAS_S2(dot, sdot, ddot)
 VSMC_DEFINE_MATH_CBLAS_SV(scal, sscal, dscal)
 }
-}  // namespace vsmc::math
+} // namespace vsmc::math
 
-#endif  // VSMC_CBLAS_INT
+#endif // VSMC_CBLAS_INT
 
-#endif  // VSMC_MATH_CBLAS_HPP
+#endif // VSMC_MATH_CBLAS_HPP

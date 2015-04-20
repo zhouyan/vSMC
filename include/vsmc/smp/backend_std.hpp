@@ -55,12 +55,11 @@ template <typename BaseState> class StateSTD : public BaseState
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(STD);
 
-        parallel_for(
-            BlockedRange<size_type>(0, N),
+        parallel_for(BlockedRange<size_type>(0, N),
             internal::ParallelCopyParticle<StateSTD<BaseState>, IntType>(
-                this, copy_from));
+                         this, copy_from));
     }
-};  // class StateSTD
+}; // class StateSTD
 
 /// \brief Sampler<T>::init_type subtype using C++11 concurrency
 /// \ingroup STD
@@ -84,7 +83,7 @@ class InitializeSTD : public InitializeBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(STD, Initialize)
-};  // class InitializeSTD
+}; // class InitializeSTD
 
 /// \brief Sampler<T>::move_type subtype using C++11 concurrency
 /// \ingroup STD
@@ -107,7 +106,7 @@ class MoveSTD : public MoveBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(STD, Move)
-};  // class MoveSTD
+}; // class MoveSTD
 
 /// \brief Monitor<T>::eval_type subtype using C++11 concurrency
 /// \ingroup STD
@@ -115,24 +114,21 @@ template <typename T, typename Derived>
 class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 {
     public:
-    void operator()(std::size_t iter,
-                    std::size_t dim,
-                    const Particle<T> &particle,
-                    double *res)
+    void operator()(std::size_t iter, std::size_t dim,
+        const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        parallel_for(
-            BlockedRange<size_type>(0, N),
+        parallel_for(BlockedRange<size_type>(0, N),
             internal::ParallelMonitorState<T, MonitorEvalSTD<T, Derived>>(
-                this, iter, dim, &particle, res));
+                         this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(STD, MonitorEval)
-};  // class MonitorEvalSTD
+}; // class MonitorEvalSTD
 
 /// \brief Path<T>::eval_type subtype using C++11 concurrency
 /// \ingroup STD
@@ -140,14 +136,14 @@ template <typename T, typename Derived>
 class PathEvalSTD : public PathEvalBase<T, Derived>
 {
     public:
-    double
-        operator()(std::size_t iter, const Particle<T> &particle, double *res)
+    double operator()(
+        std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         parallel_for(BlockedRange<size_type>(0, N),
-                     internal::ParallelPathState<T, PathEvalSTD<T, Derived>>(
+            internal::ParallelPathState<T, PathEvalSTD<T, Derived>>(
                          this, iter, &particle, res));
         this->post_processor(iter, particle);
 
@@ -156,8 +152,8 @@ class PathEvalSTD : public PathEvalBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(STD, PathEval)
-};  // PathEvalSTD
+}; // PathEvalSTD
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_SMP_BACKEND_STD_HPP
+#endif // VSMC_SMP_BACKEND_STD_HPP

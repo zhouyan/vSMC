@@ -36,8 +36,7 @@
 #include <vsmc/rng/u01.h>
 
 #define VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Method)                     \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),                    \
+    VSMC_RUNTIME_ASSERT((n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),    \
         ("**U01Sequence" #Method "::operator[]** INVALID INDEX"))
 
 #define VSMC_DEFINE_RNG_U01(FPType, Left, Right, left, right, UBits, FBits)  \
@@ -206,7 +205,7 @@ template <typename RngType> class U01SequenceSorted
     double lmax_;
     RngType &rng_;
     std::uniform_real_distribution<double> runif_;
-};  // U01SequenceSorted
+}; // U01SequenceSorted
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
 /// variates by stratified sampling.
@@ -247,7 +246,7 @@ template <typename RngType> class U01SequenceStratified
     double delta_;
     RngType &rng_;
     std::uniform_real_distribution<double> runif_;
-};  // class U01SequenceStratified
+}; // class U01SequenceStratified
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
 /// variates by systematic sampling.
@@ -289,8 +288,8 @@ template <typename RngType> class U01SequenceSystematic
     double u_;
     double u0_;
     double delta_;
-};  // class U01SequenceSystematic
+}; // class U01SequenceSystematic
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_U01_HPP
+#endif // VSMC_RNG_U01_HPP

@@ -93,16 +93,16 @@ class gmm_init_pair : public gmm_init
 class gmm_init_rjsmc : public gmm_init
 {
     public:
-    gmm_init_rjsmc(std::size_t min_comp = MinCompNum,
-                   std::size_t max_comp = MaxCompNum)
+    gmm_init_rjsmc(
+        std::size_t min_comp = MinCompNum, std::size_t max_comp = MaxCompNum)
         : min_comp_(min_comp), max_comp_(max_comp)
     {
     }
 
     std::size_t initialize_state(vsmc::SingleParticle<gmm_state> sp)
     {
-        std::uniform_int_distribution<> rcn(static_cast<int>(min_comp_),
-                                            static_cast<int>(max_comp_));
+        std::uniform_int_distribution<> rcn(
+            static_cast<int>(min_comp_), static_cast<int>(max_comp_));
         sp.state(0).comp_num(static_cast<std::size_t>(rcn(sp.rng())));
         return gmm_init::initialize_state(sp);
     }
@@ -115,8 +115,8 @@ class gmm_init_rjsmc : public gmm_init
 class gmm_init_rjmcmc : public gmm_init_rjsmc
 {
     public:
-    gmm_init_rjmcmc(std::size_t min_comp = MinCompNum,
-                    std::size_t max_comp = MaxCompNum)
+    gmm_init_rjmcmc(
+        std::size_t min_comp = MinCompNum, std::size_t max_comp = MaxCompNum)
         : gmm_init_rjsmc(min_comp, max_comp)
     {
     }
@@ -135,4 +135,4 @@ class gmm_init_rjmcmc : public gmm_init_rjsmc
     }
 };
 
-#endif  // VSMC_EXAMPLE_GMM_INIT_HPP
+#endif // VSMC_EXAMPLE_GMM_INIT_HPP

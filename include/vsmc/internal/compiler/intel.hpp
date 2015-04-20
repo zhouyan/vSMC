@@ -75,4 +75,4 @@
 #endif
 #endif
 
-#endif  // VSMC_INTERNAL_COMPILER_INTEL_HPP
+#endif // VSMC_INTERNAL_COMPILER_INTEL_HPP

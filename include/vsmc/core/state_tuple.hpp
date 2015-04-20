@@ -38,7 +38,7 @@
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH              \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
-                        ("**StateTuple::copy** SIZE MISMATCH"))
+        ("**StateTuple::copy** SIZE MISMATCH"))
 
 namespace vsmc
 {
@@ -130,12 +130,12 @@ class StateTupleBase
         void serialize(Archive &, Position<dim_>) const
         {
         }
-    };  // struct state_pack_type
+    }; // struct state_pack_type
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S> {
-        single_particle_type(typename Particle<S>::size_type id,
-                             Particle<S> *particle_ptr)
+        single_particle_type(
+            typename Particle<S>::size_type id, Particle<S> *particle_ptr)
             : SingleParticleBase<S>(id, particle_ptr)
         {
         }
@@ -154,12 +154,12 @@ class StateTupleBase
         {
             return this->state(Position<Pos>());
         }
-    };  // struct single_particle_type
+    }; // struct single_particle_type
 
     template <typename S>
     struct const_single_particle_type : public ConstSingleParticleBase<S> {
         const_single_particle_type(typename Particle<S>::size_type id,
-                                   const Particle<S> *particle_ptr)
+            const Particle<S> *particle_ptr)
             : ConstSingleParticleBase<S>(id, particle_ptr)
         {
         }
@@ -169,8 +169,8 @@ class StateTupleBase
         template <std::size_t Pos>
         const typename state_type<Pos>::type &state(Position<Pos>) const
         {
-            return this->particle_ptr()->value().state(this->id(),
-                                                       Position<Pos>());
+            return this->particle_ptr()->value().state(
+                this->id(), Position<Pos>());
         }
 
         template <std::size_t Pos>
@@ -178,7 +178,7 @@ class StateTupleBase
         {
             return this->state(Position<Pos>());
         }
-    };  // struct const_single_particle_type
+    }; // struct const_single_particle_type
 
     size_type size() const { return size_; }
 
@@ -200,9 +200,8 @@ class StateTupleBase
     }
 
     template <typename CharT, typename Traits>
-    std::basic_ostream<CharT, Traits> &
-        print(std::basic_ostream<CharT, Traits> &os,
-              char sepchar = '\t') const
+    std::basic_ostream<CharT, Traits> &print(
+        std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
         if (dim_ == 0 || size_ == 0 || !os.good())
             return os;
@@ -221,10 +220,8 @@ class StateTupleBase
     static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
 
     template <std::size_t Pos, typename CharT, typename Traits>
-    void print_particle(std::basic_ostream<CharT, Traits> &os,
-                        size_type id,
-                        char sepchar,
-                        Position<Pos>) const
+    void print_particle(std::basic_ostream<CharT, Traits> &os, size_type id,
+        char sepchar, Position<Pos>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
@@ -233,25 +230,20 @@ class StateTupleBase
     }
 
     template <typename CharT, typename Traits>
-    void print_particle(std::basic_ostream<CharT, Traits> &os,
-                        size_type id,
-                        char,
-                        Position<dim_ - 1>) const
+    void print_particle(std::basic_ostream<CharT, Traits> &os, size_type id,
+        char, Position<dim_ - 1>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
         os << sptr->state(id, Position<dim_ - 1>()) << '\n';
     }
-};  // class StateTupleBase
+}; // class StateTupleBase
 
-template <typename CharT,
-          typename Traits,
-          MatrixOrder Order,
-          typename T,
-          typename... Types>
-inline std::basic_ostream<CharT, Traits> &
-    operator<<(std::basic_ostream<CharT, Traits> &os,
-               const StateTupleBase<Order, T, Types...> &stuple)
+template <typename CharT, typename Traits, MatrixOrder Order, typename T,
+    typename... Types>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os,
+    const StateTupleBase<Order, T, Types...> &stuple)
 {
     return stuple.print(os);
 }
@@ -270,8 +262,8 @@ class StateTuple<RowMajor, T, Types...>
     explicit StateTuple(size_type N) : state_tuple_base_type(N), state_(N) {}
 
     template <std::size_t Pos>
-    typename state_tuple_base_type::template state_type<Pos>::type &
-        state(size_type id, Position<Pos>)
+    typename state_tuple_base_type::template state_type<Pos>::type &state(
+        size_type id, Position<Pos>)
     {
         return std::get<Pos>(state_[id]);
     }
@@ -284,8 +276,8 @@ class StateTuple<RowMajor, T, Types...>
     }
 
     template <std::size_t Pos>
-    typename state_tuple_base_type::template state_type<Pos>::type &
-        state(size_type id)
+    typename state_tuple_base_type::template state_type<Pos>::type &state(
+        size_type id)
     {
         return state(id, Position<Pos>());
     }
@@ -339,7 +331,7 @@ class StateTuple<RowMajor, T, Types...>
     private:
     static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
     std::vector<std::tuple<T, Types...>> state_;
-};  // StateTuple
+}; // StateTuple
 
 /// \brief Particle::value_type subtype
 /// \ingroup Core
@@ -358,8 +350,8 @@ class StateTuple<ColMajor, T, Types...>
     }
 
     template <std::size_t Pos>
-    typename state_tuple_base_type::template state_type<Pos>::type &
-        state(size_type id, Position<Pos>)
+    typename state_tuple_base_type::template state_type<Pos>::type &state(
+        size_type id, Position<Pos>)
     {
         return std::get<Pos>(state_)[id];
     }
@@ -372,8 +364,8 @@ class StateTuple<ColMajor, T, Types...>
     }
 
     template <std::size_t Pos>
-    typename state_tuple_base_type::template state_type<Pos>::type &
-        state(size_type id)
+    typename state_tuple_base_type::template state_type<Pos>::type &state(
+        size_type id)
     {
         return state(id, Position<Pos>());
     }
@@ -386,8 +378,8 @@ class StateTuple<ColMajor, T, Types...>
     }
 
     template <std::size_t Pos>
-    typename state_tuple_base_type::template state_type<Pos>::type *
-        data(Position<Pos>)
+    typename state_tuple_base_type::template state_type<Pos>::type *data(
+        Position<Pos>)
     {
         return &std::get<Pos>(state_)[0];
     }
@@ -501,9 +493,8 @@ class StateTuple<ColMajor, T, Types...>
     void copy_particle(size_type, size_type, Position<dim_>) {}
 
     template <std::size_t Pos>
-    void pack_particle(size_type id,
-                       state_pack_type &pack,
-                       Position<Pos>) const
+    void pack_particle(
+        size_type id, state_pack_type &pack, Position<Pos>) const
     {
         std::get<Pos>(pack.data()) = state(id, Position<Pos>());
         pack_particle(id, pack, Position<Pos + 1>());
@@ -512,9 +503,8 @@ class StateTuple<ColMajor, T, Types...>
     void pack_particle(size_type, state_pack_type &, Position<dim_>) const {}
 
     template <std::size_t Pos>
-    void unpack_particle(size_type id,
-                         const state_pack_type &pack,
-                         Position<Pos>)
+    void unpack_particle(
+        size_type id, const state_pack_type &pack, Position<Pos>)
     {
         state(id, Position<Pos>()) = std::get<Pos>(pack.data());
         unpack_particle(id, pack, Position<Pos + 1>());
@@ -532,8 +522,8 @@ class StateTuple<ColMajor, T, Types...>
     }
 
     void unpack_particle(size_type, state_pack_type &&, Position<dim_>) {}
-};  // class StateTuple
+}; // class StateTuple
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_STATE_TUPLE_HPP
+#endif // VSMC_CORE_STATE_TUPLE_HPP

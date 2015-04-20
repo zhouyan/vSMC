@@ -64,14 +64,14 @@ class InitializeAdapterBase : public BaseType
 
     void pre_processor(Particle<T> &particle)
     {
-        pre_processor_dispatch(particle,
-                               typename has_pre_processor_<F>::type());
+        pre_processor_dispatch(
+            particle, typename has_pre_processor_<F>::type());
     }
 
     void post_processor(Particle<T> &particle)
     {
-        post_processor_dispatch(particle,
-                                typename has_post_processor_<F>::type());
+        post_processor_dispatch(
+            particle, typename has_post_processor_<F>::type());
     }
 
     F &implementation() { return f_; }
@@ -81,15 +81,13 @@ class InitializeAdapterBase : public BaseType
     private:
     F f_;
 
-    VSMC_DEFINE_METHOD_CHECKER(initialize_param,
-                               void,
-                               (Particle<T> &, void *))
+    VSMC_DEFINE_METHOD_CHECKER(
+        initialize_param, void, (Particle<T> &, void *))
     VSMC_DEFINE_METHOD_CHECKER(pre_processor, void, (Particle<T> &))
     VSMC_DEFINE_METHOD_CHECKER(post_processor, void, (Particle<T> &))
 
-    void initialize_param_dispatch(Particle<T> &particle,
-                                   void *param,
-                                   std::true_type)
+    void initialize_param_dispatch(
+        Particle<T> &particle, void *param, std::true_type)
     {
         f_.initialize_param(particle, param);
     }
@@ -107,7 +105,7 @@ class InitializeAdapterBase : public BaseType
     void initialize_param_dispatch(Particle<T> &, void *, std::false_type) {}
     void pre_processor_dispatch(Particle<T> &, std::false_type) {}
     void post_processor_dispatch(Particle<T> &, std::false_type) {}
-};  // InitializeAdapterBase
+}; // InitializeAdapterBase
 
 /// \brief Move class adapter base
 /// \ingroup Adapter
@@ -138,23 +136,19 @@ class MoveAdapterBase : public BaseType
     private:
     F f_;
 
-    VSMC_DEFINE_METHOD_CHECKER(pre_processor,
-                               void,
-                               (std::size_t, Particle<T> &))
-    VSMC_DEFINE_METHOD_CHECKER(post_processor,
-                               void,
-                               (std::size_t, Particle<T> &))
+    VSMC_DEFINE_METHOD_CHECKER(
+        pre_processor, void, (std::size_t, Particle<T> &))
+    VSMC_DEFINE_METHOD_CHECKER(
+        post_processor, void, (std::size_t, Particle<T> &))
 
-    void pre_processor_dispatch(std::size_t iter,
-                                Particle<T> &particle,
-                                std::true_type)
+    void pre_processor_dispatch(
+        std::size_t iter, Particle<T> &particle, std::true_type)
     {
         f_.pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch(std::size_t iter,
-                                 Particle<T> &particle,
-                                 std::true_type)
+    void post_processor_dispatch(
+        std::size_t iter, Particle<T> &particle, std::true_type)
     {
         f_.post_processor(iter, particle);
     }
@@ -165,7 +159,7 @@ class MoveAdapterBase : public BaseType
     void post_processor_dispatch(std::size_t, Particle<T> &, std::false_type)
     {
     }
-};  // MoveAdapterBase
+}; // MoveAdapterBase
 
 /// \brief Monitor evaluation base
 /// \ingroup Adapter
@@ -196,38 +190,32 @@ class MonitorEvalAdapterBase : public BaseType
     private:
     F f_;
 
-    VSMC_DEFINE_METHOD_CHECKER(pre_processor,
-                               void,
-                               (std::size_t, const Particle<T> &))
-    VSMC_DEFINE_METHOD_CHECKER(post_processor,
-                               void,
-                               (std::size_t, const Particle<T> &))
+    VSMC_DEFINE_METHOD_CHECKER(
+        pre_processor, void, (std::size_t, const Particle<T> &))
+    VSMC_DEFINE_METHOD_CHECKER(
+        post_processor, void, (std::size_t, const Particle<T> &))
 
-    void pre_processor_dispatch(std::size_t iter,
-                                const Particle<T> &particle,
-                                std::true_type)
+    void pre_processor_dispatch(
+        std::size_t iter, const Particle<T> &particle, std::true_type)
     {
         f_.pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch(std::size_t iter,
-                                 const Particle<T> &particle,
-                                 std::true_type)
+    void post_processor_dispatch(
+        std::size_t iter, const Particle<T> &particle, std::true_type)
     {
         f_.post_processor(iter, particle);
     }
 
-    void pre_processor_dispatch(std::size_t,
-                                const Particle<T> &,
-                                std::false_type)
+    void pre_processor_dispatch(
+        std::size_t, const Particle<T> &, std::false_type)
     {
     }
-    void post_processor_dispatch(std::size_t,
-                                 const Particle<T> &,
-                                 std::false_type)
+    void post_processor_dispatch(
+        std::size_t, const Particle<T> &, std::false_type)
     {
     }
-};  // MonitorEvalAdapterBase
+}; // MonitorEvalAdapterBase
 
 /// \brief Path evaluation class base
 /// \ingroup Adapter
@@ -263,38 +251,32 @@ class PathEvalAdapterBase : public BaseType
     private:
     F f_;
 
-    VSMC_DEFINE_METHOD_CHECKER(pre_processor,
-                               void,
-                               (std::size_t, const Particle<T> &))
-    VSMC_DEFINE_METHOD_CHECKER(post_processor,
-                               void,
-                               (std::size_t, const Particle<T> &))
+    VSMC_DEFINE_METHOD_CHECKER(
+        pre_processor, void, (std::size_t, const Particle<T> &))
+    VSMC_DEFINE_METHOD_CHECKER(
+        post_processor, void, (std::size_t, const Particle<T> &))
 
-    void pre_processor_dispatch(std::size_t iter,
-                                const Particle<T> &particle,
-                                std::true_type)
+    void pre_processor_dispatch(
+        std::size_t iter, const Particle<T> &particle, std::true_type)
     {
         f_.pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch(std::size_t iter,
-                                 const Particle<T> &particle,
-                                 std::true_type)
+    void post_processor_dispatch(
+        std::size_t iter, const Particle<T> &particle, std::true_type)
     {
         f_.post_processor(iter, particle);
     }
 
-    void pre_processor_dispatch(std::size_t,
-                                const Particle<T> &,
-                                std::false_type)
+    void pre_processor_dispatch(
+        std::size_t, const Particle<T> &, std::false_type)
     {
     }
-    void post_processor_dispatch(std::size_t,
-                                 const Particle<T> &,
-                                 std::false_type)
+    void post_processor_dispatch(
+        std::size_t, const Particle<T> &, std::false_type)
     {
     }
-};  // PathEvalAdapterBase
+}; // PathEvalAdapterBase
 
 /// \brief Initialize class adapter base
 /// \ingroup Adapter
@@ -338,7 +320,7 @@ class InitializeAdapterBase<T, NullType, BaseType> : public BaseType
     const initialize_param_type initialize_param_;
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
-};  // class InitializeAdapterBase
+}; // class InitializeAdapterBase
 
 /// \brief Move class adapter base
 /// \ingroup Adapter
@@ -352,7 +334,7 @@ class MoveAdapterBase<T, NullType, BaseType> : public BaseType
         post_processor_type;
 
     MoveAdapterBase(const pre_processor_type &pre = pre_processor_type(),
-                    const post_processor_type &post = post_processor_type())
+        const post_processor_type &post = post_processor_type())
         : pre_processor_(pre), post_processor_(post)
     {
     }
@@ -372,7 +354,7 @@ class MoveAdapterBase<T, NullType, BaseType> : public BaseType
     private:
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
-};  // class MoveAdapterBase
+}; // class MoveAdapterBase
 
 /// \brief Monitor evaluation base
 /// \ingroup Adapter
@@ -407,7 +389,7 @@ class MonitorEvalAdapterBase<T, NullType, BaseType> : public BaseType
     private:
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
-};  // class MonitorEvalAdapterBase
+}; // class MonitorEvalAdapterBase
 
 /// \brief Path evaluation class base
 /// \ingroup Adapter
@@ -422,8 +404,7 @@ class PathEvalAdapterBase<T, NullType, BaseType> : public BaseType
     typedef std::function<void(std::size_t, const Particle<T> &)>
         post_processor_type;
 
-    PathEvalAdapterBase(
-        const path_grid_type &path_grid,
+    PathEvalAdapterBase(const path_grid_type &path_grid,
         const pre_processor_type &pre = pre_processor_type(),
         const post_processor_type &post = post_processor_type())
         : path_grid_(path_grid), pre_processor_(pre), post_processor_(post)
@@ -451,8 +432,8 @@ class PathEvalAdapterBase<T, NullType, BaseType> : public BaseType
     const path_grid_type path_grid_;
     const pre_processor_type pre_processor_;
     const post_processor_type post_processor_;
-};  // class PathEvalAdapterBase
+}; // class PathEvalAdapterBase
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_CORE_ADAPTER_HPP
+#endif // VSMC_CORE_ADAPTER_HPP

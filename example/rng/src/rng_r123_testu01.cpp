@@ -62,10 +62,8 @@
 
 #define VSMC_RNG_TESTU01_OPTION_R123(Eng)                                    \
     bool rng_testu01_##Eng = false;                                          \
-    option.add(#Eng,                                                         \
-               "Test r123::Engine<r123::" #Eng ">",                          \
-               &rng_testu01_##Eng,                                           \
-               false);
+    option.add(#Eng, "Test r123::Engine<r123::" #Eng ">",                    \
+        &rng_testu01_##Eng, false);
 
 #if VSMC_HAS_AES_NI
 namespace r123

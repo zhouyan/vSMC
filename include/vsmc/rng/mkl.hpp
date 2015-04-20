@@ -36,15 +36,14 @@
 #include <mkl.h>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)    \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_same<FPType, float>::value ||                               \
-         std::is_same<FPType, double>::value),                               \
+    VSMC_STATIC_ASSERT((std::is_same<FPType, float>::value ||                \
+                           std::is_same<FPType, double>::value),             \
         USE_MKL##Dist##Distribution_##WITH_A_RESULT_TYPE_OTHER_THAN_float_OR_double)
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(offset)                       \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                           \
-                        ("**MKLOffsetDynamic** "                             \
-                         "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
+        ("**MKLOffsetDynamic** "                                             \
+         "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
 
 #ifndef VSMC_RNG_MKL_VSL_BUFFER_SIZE
 #define VSMC_RNG_MKL_VSL_BUFFER_SIZE 1024
@@ -171,10 +170,8 @@ inline std::string mkl_vsl_error_str(int status)
 #if VSMC_NO_RUNTIME_ASSERT
 inline void mkl_vsl_error_check(MKL_INT, int, const char *, const char *) {}
 #else
-inline void mkl_vsl_error_check(MKL_INT BRNG,
-                                int status,
-                                const char *func,
-                                const char *mklf)
+inline void mkl_vsl_error_check(
+    MKL_INT BRNG, int status, const char *func, const char *mklf)
 {
     if (status == VSL_ERROR_OK)
         return;
@@ -191,10 +188,10 @@ inline void mkl_vsl_error_check(MKL_INT BRNG,
     msg += mkl_vsl_error_str(status);
 
     VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
-}  // error_check
+} // error_check
 #endif
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 namespace traits
 {
@@ -221,7 +218,7 @@ template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned> {
     static constexpr const unsigned min VSMC_MNE = 0;
     static constexpr const unsigned max VSMC_MNE =
         static_cast<unsigned>(~(static_cast<unsigned>(0)));
-};  // struct MKLUniformBitsTrait
+}; // struct MKLUniformBitsTrait
 
 /// \brief Default uniform bits generator for MKLEngine with
 /// `unsigned MKL_INT64` output
@@ -232,7 +229,7 @@ template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
     static constexpr const unsigned MKL_INT64 max VSMC_MNE =
         static_cast<unsigned MKL_INT64>(
             ~(static_cast<unsigned MKL_INT64>(0)));
-};  // struct MKLUniformBitsTrait
+}; // struct MKLUniformBitsTrait
 
 /// \brief Default seed for MKL RNG
 /// \ingroup Traits
@@ -252,7 +249,7 @@ struct MKLSeedTrait<VSL_BRNG_NIEDERR>
     : public std::integral_constant<MKL_UINT, 10> {
 };
 
-}  // namespace traits
+} // namespace traits
 
 namespace internal
 {
@@ -262,7 +259,7 @@ struct MKLOffsetZero {
     static constexpr MKL_INT max VSMC_MNE() { return 0; }
     static void offset(MKL_INT) {}
     static constexpr MKL_INT offset() { return 0; }
-};  // struct OffsetZero
+}; // struct OffsetZero
 
 template <MKL_INT MaxOffset> struct MKLOffsetDynamic {
     MKLOffsetDynamic() : offset_(0) {}
@@ -280,7 +277,7 @@ template <MKL_INT MaxOffset> struct MKLOffsetDynamic {
 
     private:
     MKL_INT offset_;
-};  // struct OffsetDynamic
+}; // struct OffsetDynamic
 
 template <MKL_INT> struct MKLOffset {
     typedef MKLOffsetZero type;
@@ -310,7 +307,7 @@ struct MKLSkipAheadVSL {
 
     static void buffer_size(MKL_INT) {}
     static MKL_INT buffer_size() { return 0; }
-};  // struct SkipAheadVSL
+}; // struct SkipAheadVSL
 
 template <MKL_INT BRNG, typename ResultType> struct MKLSkipAheadForce {
     typedef MKL_INT size_type;
@@ -350,7 +347,7 @@ template <MKL_INT BRNG, typename ResultType> struct MKLSkipAheadForce {
     typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type
         uniform_bits_;
     MKL_INT buffer_size_;
-};  // strut SkipAheadForce
+}; // strut SkipAheadForce
 
 template <MKL_INT BRNG, typename ResultType> struct MKLSkipAhead {
     typedef MKLSkipAheadForce<BRNG, ResultType> type;
@@ -381,7 +378,7 @@ struct MKLSkipAhead<VSL_BRNG_NIEDERR, ResultType> {
     typedef MKLSkipAheadVSL type;
 };
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief MKL RNG C++11 engine stream
 /// \ingroup MKLRNG
@@ -389,8 +386,8 @@ template <MKL_INT BRNG>
 class MKLStream : public internal::MKLOffset<BRNG>::type
 {
     public:
-    explicit MKLStream(MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
-                       MKL_INT offset = 0)
+    explicit MKLStream(
+        MKL_UINT s = traits::MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
         : seed_(s), stream_ptr_(nullptr), property_()
     {
         this->offset(offset);
@@ -406,11 +403,9 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     template <typename SeedSeq>
-    explicit MKLStream(
-        SeedSeq &seq,
-        typename std::enable_if<
-            internal::is_seed_seq<SeedSeq, MKL_UINT, MKLStream<BRNG>>::
-                value>::type * = nullptr)
+    explicit MKLStream(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
+            MKLStream<BRNG>>::value>::type * = nullptr)
         : seed_(0), stream_ptr_(nullptr), property_()
     {
         seq.generate(&seed_, &seed_ + 1);
@@ -506,9 +501,8 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-              typename std::enable_if<
-                  internal::is_seed_seq<SeedSeq, MKL_UINT, MKLStream<BRNG>>::
-                      value>::type * = nullptr)
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
+            MKLStream<BRNG>>::value>::type * = nullptr)
     {
         seq.generate(&seed_, &seed_ + 1);
         seed(seed_);
@@ -522,7 +516,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     MKL_UINT seed_;
     VSLStreamStatePtr stream_ptr_;
     VSLBRngProperties property_;
-};  // class MKLStream
+}; // class MKLStream
 
 /// \brief MKL RNG C++11 engine
 /// \ingroup MKLRNG
@@ -532,8 +526,8 @@ template <MKL_INT BRNG, typename ResultType> class MKLEngine
     typedef ResultType result_type;
     typedef MKLStream<BRNG> stream_type;
 
-    explicit MKLEngine(MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
-                       MKL_INT offset = 0)
+    explicit MKLEngine(
+        MKL_UINT s = traits::MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
         : stream_(s, offset),
           buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
           index_(buffer_size_)
@@ -541,11 +535,8 @@ template <MKL_INT BRNG, typename ResultType> class MKLEngine
     }
 
     template <typename SeedSeq>
-    explicit MKLEngine(
-        SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            MKL_UINT,
+    explicit MKLEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, ResultType>>::value>::type * = nullptr)
         : stream_(seq),
           buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
@@ -557,10 +548,8 @@ template <MKL_INT BRNG, typename ResultType> class MKLEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-              typename std::enable_if<internal::is_seed_seq<
-                  SeedSeq,
-                  MKL_UINT,
-                  MKLEngine<BRNG, ResultType>>::value>::type * = nullptr)
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
+            MKLEngine<BRNG, ResultType>>::value>::type * = nullptr)
     {
         stream_.seed(seq);
     }
@@ -587,10 +576,8 @@ template <MKL_INT BRNG, typename ResultType> class MKLEngine
     /// There may be a few more than `nskip` also discarded.
     void discard(std::size_t nskip)
     {
-        skip_ahead_(
-            stream_,
-            static_cast<typename internal::MKLSkipAhead<BRNG, ResultType>::
-                            type::size_type>(nskip));
+        skip_ahead_(stream_, static_cast<typename internal::MKLSkipAhead<BRNG,
+                                 ResultType>::type::size_type>(nskip));
         index_ = buffer_size_;
     }
 
@@ -621,7 +608,7 @@ template <MKL_INT BRNG, typename ResultType> class MKLEngine
     std::vector<result_type, AlignedAllocator<result_type>> buffer_;
     MKL_INT buffer_size_;
     MKL_INT index_;
-};  // class MKLEngine
+}; // class MKLEngine
 
 /// \brief A 59-bits multiplicative congruential generator
 /// \ingroup MKLRNG
@@ -677,8 +664,8 @@ template <typename ResultType, typename Derived> class MKLDistribution
     {
         if (index_ == buffer_size_) {
             buffer_.resize(static_cast<std::size_t>(buffer_size_));
-            static_cast<Derived *>(this)
-                ->generate(stream, buffer_size_, &buffer_[0]);
+            static_cast<Derived *>(this)->generate(
+                stream, buffer_size_, &buffer_[0]);
             index_ = 0;
         }
 
@@ -728,7 +715,7 @@ template <typename ResultType, typename Derived> class MKLDistribution
     std::string mkl_vsl_name_prefix(unsigned MKL_INT64) { return "vi"; }
     std::string mkl_vsl_name_prefix(float) { return "vs"; }
     std::string mkl_vsl_name_prefix(double) { return "vd"; }
-};  // class MKLDistribution
+}; // class MKLDistribution
 
 /// \brief MKL uniform bits distribution (32-bits)
 /// \ingroup MKLRNG
@@ -745,7 +732,7 @@ class MKLUniformBits32Distribution
             VSL_RNG_METHOD_UNIFORMBITS32_STD, stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "UniformBits32");
     }
-};  // class MKLUniformBits32Distribution
+}; // class MKLUniformBits32Distribution
 
 /// \brief MKL uniform bits distribution (64-bits)
 /// \ingroup MKLRNG
@@ -762,14 +749,13 @@ class MKLUniformBits64Distribution
             VSL_RNG_METHOD_UNIFORMBITS64_STD, stream.ptr(), n, r);
         this->template generate_error_check<BRNG>(status, "UniformBits64");
     }
-};  // class MKLUniformBits64Distribution
+}; // class MKLUniformBits64Distribution
 
 /// \brief MKL Uniform distribution
 /// \ingroup MKLRNG
 template <typename ResultType, MKL_INT Method>
-class MKLUniformDistribution
-    : public MKLDistribution<ResultType,
-                             MKLUniformDistribution<ResultType, Method>>
+class MKLUniformDistribution : public MKLDistribution<ResultType,
+                                   MKLUniformDistribution<ResultType, Method>>
 {
     public:
     typedef ResultType result_type;
@@ -804,7 +790,7 @@ class MKLUniformDistribution
     {
         return ::vdRngUniform(Method, ptr, n, r, a_, b_);
     }
-};  // class MKLUniformDistribution
+}; // class MKLUniformDistribution
 
 /// \brief MKL Bernoulli distribution
 /// \ingroup MKLRNG
@@ -826,7 +812,7 @@ class MKLBernoulliDistribution
 
     private:
     double p_;
-};  // class MKLBernoulliDistribution
+}; // class MKLBernoulliDistribution
 
 /// \brief MKL Geometric distribution
 /// \ingroup MKLRNG
@@ -848,7 +834,7 @@ class MKLGeometricDistribution
 
     private:
     double p_;
-};  // class MKLGeometricDistribution
+}; // class MKLGeometricDistribution
 
 /// \brief MKL Binomial distribution
 /// \ingroup MKLRNG
@@ -874,7 +860,7 @@ class MKLBinomialDistribution
     private:
     result_type ntrial_;
     double p_;
-};  // class MKLBinomialDistribution
+}; // class MKLBinomialDistribution
 
 /// \brief MKL Hypergeometric distribution
 /// \ingroup MKLRNG
@@ -885,9 +871,8 @@ class MKLHypergeometricDistribution
     public:
     typedef MKL_INT result_type;
 
-    MKLHypergeometricDistribution(result_type population,
-                                  result_type sample,
-                                  result_type mask)
+    MKLHypergeometricDistribution(
+        result_type population, result_type sample, result_type mask)
         : l_(population), s_(sample), m_(mask)
     {
     }
@@ -904,7 +889,7 @@ class MKLHypergeometricDistribution
     result_type l_;
     result_type s_;
     result_type m_;
-};  // class MKLHypergeometricDistribution
+}; // class MKLHypergeometricDistribution
 
 /// \brief MKL Poisson distribution
 /// \ingroup MKLRNG
@@ -926,7 +911,7 @@ class MKLPoissonDistribution
 
     private:
     double lambda_;
-};  // class MKLPoissonDistribution
+}; // class MKLPoissonDistribution
 
 /// \brief MKL NegBinomial distribution
 /// \ingroup MKLRNG
@@ -953,7 +938,7 @@ class MKLNegBinomialDistribution
     private:
     double ntrial_;
     double p_;
-};  // class MKLNegBinomialDistribution
+}; // class MKLNegBinomialDistribution
 
 /// \brief MKL Gaussian distribution
 /// \ingroup MKLRNG
@@ -990,24 +975,24 @@ class MKLGaussianDistribution
     {
         return ::vdRngGaussian(Method, ptr, n, r, mean_, sd_);
     }
-};  // class MKLGaussianDistribution
+}; // class MKLGaussianDistribution
 
 /// \brief MKL Exponential distribution
 /// \ingroup MKLRNG
 template <typename FPType, MKL_INT Method>
 class MKLExponentialDistribution
     : public MKLDistribution<FPType,
-                             MKLExponentialDistribution<FPType, Method>>
+          MKLExponentialDistribution<FPType, Method>>
 {
     public:
     typedef FPType result_type;
 
-    explicit MKLExponentialDistribution(result_type displacement = 0,
-                                        result_type scale = 1)
+    explicit MKLExponentialDistribution(
+        result_type displacement = 0, result_type scale = 1)
         : disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType,
-                                                            Exponential);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(
+            FPType, Exponential);
     }
 
     template <MKL_INT BRNG>
@@ -1030,7 +1015,7 @@ class MKLExponentialDistribution
     {
         return ::vdRngExponential(Method, ptr, n, r, disp_, scale_);
     }
-};  // class MKLExponentialDistribution
+}; // class MKLExponentialDistribution
 
 /// \brief MKL Laplace distribution
 /// \ingroup MKLRNG
@@ -1041,8 +1026,8 @@ class MKLLaplaceDistribution
     public:
     typedef FPType result_type;
 
-    explicit MKLLaplaceDistribution(result_type mean = 0,
-                                    result_type scale = 1)
+    explicit MKLLaplaceDistribution(
+        result_type mean = 0, result_type scale = 1)
         : mean_(mean), scale_(scale)
     {
         VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Laplace);
@@ -1068,7 +1053,7 @@ class MKLLaplaceDistribution
     {
         return ::vdRngLaplace(Method, ptr, n, r, mean_, scale_);
     }
-};  // class MKLLaplaceDistribution
+}; // class MKLLaplaceDistribution
 
 /// \brief MKL Weibull distribution
 /// \ingroup MKLRNG
@@ -1080,8 +1065,7 @@ class MKLWeibullDistribution
     typedef FPType result_type;
 
     explicit MKLWeibullDistribution(result_type shape = 1,
-                                    result_type displacement = 0,
-                                    result_type scale = 1)
+        result_type displacement = 0, result_type scale = 1)
         : shape_(shape), disp_(displacement), scale_(scale)
     {
         VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Weibull);
@@ -1108,7 +1092,7 @@ class MKLWeibullDistribution
     {
         return ::vdRngWeibull(Method, ptr, n, r, shape_, disp_, scale_);
     }
-};  // class MKLWeibullDistribution
+}; // class MKLWeibullDistribution
 
 /// \brief MKL Cauchy distribution
 /// \ingroup MKLRNG
@@ -1119,8 +1103,8 @@ class MKLCauchyDistribution
     public:
     typedef FPType result_type;
 
-    explicit MKLCauchyDistribution(result_type displacement = 0,
-                                   result_type scale = 1)
+    explicit MKLCauchyDistribution(
+        result_type displacement = 0, result_type scale = 1)
         : disp_(displacement), scale_(scale)
     {
         VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Cauchy);
@@ -1146,7 +1130,7 @@ class MKLCauchyDistribution
     {
         return ::vdRngCauchy(Method, ptr, n, r, disp_, scale_);
     }
-};  // class MKLCauchyDistribution
+}; // class MKLCauchyDistribution
 
 /// \brief MKL Rayleigh distribution
 /// \ingroup MKLRNG
@@ -1157,8 +1141,8 @@ class MKLRayleighDistribution
     public:
     typedef FPType result_type;
 
-    explicit MKLRayleighDistribution(result_type displacement = 0,
-                                     result_type scale = 1)
+    explicit MKLRayleighDistribution(
+        result_type displacement = 0, result_type scale = 1)
         : disp_(displacement), scale_(scale)
     {
         VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Rayleigh);
@@ -1184,7 +1168,7 @@ class MKLRayleighDistribution
     {
         return ::vdRngRayleigh(Method, ptr, n, r, disp_, scale_);
     }
-};  // class MKLRayleighDistribution
+}; // class MKLRayleighDistribution
 
 /// \brief MKL Lognormal distribution
 /// \ingroup MKLRNG
@@ -1196,13 +1180,12 @@ class MKLLognormalDistribution
     typedef FPType result_type;
 
     explicit MKLLognormalDistribution(result_type mean = 0,
-                                      result_type sd = 1,
-                                      result_type displacement = 0,
-                                      result_type scale = 1)
+        result_type sd = 1, result_type displacement = 0,
+        result_type scale = 1)
         : mean_(mean), sd_(sd), disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType,
-                                                            Lognormal);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(
+            FPType, Lognormal);
     }
 
     template <MKL_INT BRNG>
@@ -1227,7 +1210,7 @@ class MKLLognormalDistribution
     {
         return ::vdRngLognormal(Method, ptr, n, r, mean_, sd_, disp_, scale_);
     }
-};  // class MKLLognormalDistribution
+}; // class MKLLognormalDistribution
 
 /// \brief MKL Gumbel distribution
 /// \ingroup MKLRNG
@@ -1238,8 +1221,8 @@ class MKLGumbelDistribution
     public:
     typedef FPType result_type;
 
-    explicit MKLGumbelDistribution(result_type displacement = 0,
-                                   result_type scale = 1)
+    explicit MKLGumbelDistribution(
+        result_type displacement = 0, result_type scale = 1)
         : disp_(displacement), scale_(scale)
     {
         VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gumbel);
@@ -1265,7 +1248,7 @@ class MKLGumbelDistribution
     {
         return ::vdRngGumbel(Method, ptr, n, r, disp_, scale_);
     }
-};  // class MKLGumbelDistribution
+}; // class MKLGumbelDistribution
 
 /// \brief MKL Gamma distribution
 /// \ingroup MKLRNG
@@ -1277,8 +1260,7 @@ class MKLGammaDistribution
     typedef FPType result_type;
 
     explicit MKLGammaDistribution(result_type shape = 1,
-                                  result_type displacement = 0,
-                                  result_type scale = 1)
+        result_type displacement = 0, result_type scale = 1)
         : shape_(shape), disp_(displacement), scale_(scale)
     {
         VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gamma);
@@ -1305,7 +1287,7 @@ class MKLGammaDistribution
     {
         return ::vdRngGamma(Method, ptr, n, r, shape_, disp_, scale_);
     }
-};  // class MKLGammaDistribution
+}; // class MKLGammaDistribution
 
 /// \brief MKL Beta distribution
 /// \ingroup MKLRNG
@@ -1317,9 +1299,8 @@ class MKLBetaDistribution
     typedef FPType result_type;
 
     explicit MKLBetaDistribution(result_type shape1 = 1,
-                                 result_type shape2 = 1,
-                                 result_type displacement = 0,
-                                 result_type scale = 1)
+        result_type shape2 = 1, result_type displacement = 0,
+        result_type scale = 1)
         : shape1_(shape1), shape2_(shape2), disp_(displacement), scale_(scale)
     {
         VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Beta);
@@ -1349,8 +1330,8 @@ class MKLBetaDistribution
         return ::vdRngBeta(
             Method, ptr, n, r, shape1_, shape2_, disp_, scale_);
     }
-};  // class MKLBetaDistribution
+}; // class MKLBetaDistribution
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_MKL_HPP
+#endif // VSMC_RNG_MKL_HPP

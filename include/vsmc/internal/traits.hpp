@@ -53,8 +53,8 @@
         template <typename U> static char2 test(...);                        \
                                                                              \
         public:                                                              \
-        static constexpr const bool value =                             \
-            sizeof(test<T>(nullptr)) == sizeof(char);                   \
+        static constexpr const bool value =                                  \
+            sizeof(test<T>(nullptr)) == sizeof(char);                        \
     };                                                                       \
                                                                              \
     template <typename T>                                                    \
@@ -74,8 +74,7 @@
     }                                                                        \
                                                                              \
     template <typename T> struct Outer##Trait {                              \
-        static constexpr const bool value =                             \
-            internal::Has##Outer<T>::value;                                  \
+        static constexpr const bool value = internal::Has##Outer<T>::value;  \
         typedef typename internal::Outer##Dispatch<T, value>::type type;     \
     };
 
@@ -96,8 +95,8 @@
         template <typename U> static char2 test(...);                        \
                                                                              \
         public:                                                              \
-        static constexpr const bool value =                             \
-            sizeof(test<T>(nullptr)) == sizeof(char);                   \
+        static constexpr const bool value =                                  \
+            sizeof(test<T>(nullptr)) == sizeof(char);                        \
     };                                                                       \
                                                                              \
     template <typename T>                                                    \
@@ -117,8 +116,7 @@
     }                                                                        \
                                                                              \
     template <typename T> struct Outer##Trait {                              \
-        static constexpr const bool value =                             \
-            internal::Has##Outer<T>::value;                                  \
+        static constexpr const bool value = internal::Has##Outer<T>::value;  \
         typedef typename internal::Outer##Dispatch<T, value>::type type;     \
     };
 
@@ -140,14 +138,13 @@
         template <typename V> static char2 test(...);                        \
                                                                              \
         public:                                                              \
-        static constexpr const bool value =                             \
-            sizeof(test<U>(nullptr)) == sizeof(char);                   \
+        static constexpr const bool value =                                  \
+            sizeof(test<U>(nullptr)) == sizeof(char);                        \
     };                                                                       \
                                                                              \
     template <typename U>                                                    \
-    struct has_##name##_                                                     \
-        : public std::integral_constant<bool,                                \
-                                        has_##name##_impl_<U>::value> {      \
+    struct has_##name##_ : public std::integral_constant<bool,               \
+                               has_##name##_impl_<U>::value> {               \
     };
 
 namespace vsmc
@@ -166,17 +163,15 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet)
 
 /// \brief SingleParticle base class trait
 /// \ingroup Traits
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(SingleParticleBaseType,
-                                         single_particle_type,
-                                         SingleParticleBase)
+VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
+    SingleParticleBaseType, single_particle_type, SingleParticleBase)
 
 /// \brief ConstSingleParticle base class trait
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
-                                         const_single_particle_type,
-                                         ConstSingleParticleBase)
+    const_single_particle_type, ConstSingleParticleBase)
 
-#if defined(_OPENMP) && _OPENMP >= 200805  // OpenMP 3.0
+#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 template <typename T> struct OMPSizeTypeTrait {
     typedef T type;
 };
@@ -247,10 +242,10 @@ template <> struct DimTrait<Dynamic> {
 
     private:
     std::size_t dim_;
-};  // struct DimTrait
+}; // struct DimTrait
 
-}  // namespace vsmc::traits
+} // namespace vsmc::traits
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_INTERNAL_TRAITS_HPP
+#endif // VSMC_INTERNAL_TRAITS_HPP

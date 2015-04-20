@@ -59,4 +59,4 @@ static std::size_t CM;
 #include "gmm_monitor.hpp"
 #include "gmm_proposal.hpp"
 
-#endif  // VSMC_EXAMPLE_GMM_HPP
+#endif // VSMC_EXAMPLE_GMM_HPP

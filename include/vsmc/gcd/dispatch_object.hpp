@@ -65,8 +65,8 @@ template <typename DispatchType> class DispatchObject
         retain();
     }
 
-    DispatchObject<DispatchType> &
-        operator=(const DispatchObject<DispatchType> &other)
+    DispatchObject<DispatchType> &operator=(
+        const DispatchObject<DispatchType> &other)
     {
         if (this != &other && object_ != other.object_) {
             release();
@@ -83,8 +83,8 @@ template <typename DispatchType> class DispatchObject
         other.object_ = nullptr;
     }
 
-    DispatchObject<DispatchType> &
-        operator=(DispatchObject<DispatchType> &&other)
+    DispatchObject<DispatchType> &operator=(
+        DispatchObject<DispatchType> &&other)
     {
         using std::swap;
 
@@ -135,8 +135,8 @@ template <typename DispatchType> class DispatchObject
         if (object_ != nullptr)
             ::dispatch_release(object_);
     }
-};  // class DispatchObject
+}; // class DispatchObject
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_GCD_DISPATCH_OBJECT_HPP
+#endif // VSMC_GCD_DISPATCH_OBJECT_HPP

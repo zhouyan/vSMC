@@ -98,7 +98,7 @@
 #define NORMAL01_4x64_INIT normal01_4x64_53_init
 #define NORMAL01_4x64_RAND normal01_4x64_53_rand
 
-#else  // VSMC_HAS_OPENCL_DOUBLE
+#else // VSMC_HAS_OPENCL_DOUBLE
 
 #define NORMAL01_2x32 normal01_2x32_24
 #define NORMAL01_2x32_INIT normal01_2x32_24_init
@@ -108,7 +108,7 @@
 #define NORMAL01_4x32_INIT normal01_4x32_24_init
 #define NORMAL01_4x32_RAND normal01_4x32_24_rand
 
-#endif  // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_OPENCL_DOUBLE
 
 #define VSMC_DEFINE_RNG_NORMAL01(N, W, F, FT)                                \
     typedef struct {                                                         \
@@ -187,6 +187,6 @@ VSMC_DEFINE_RNG_NORMAL01_RAND(2, 64, 53, double)
 /// \ingroup CLRNG
 VSMC_DEFINE_RNG_NORMAL01_RAND(4, 64, 53, double)
 
-#endif  // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_OPENCL_DOUBLE
 
-#endif  // VSMC_RNG_NORMAL01_H
+#endif // VSMC_RNG_NORMAL01_H

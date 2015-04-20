@@ -44,4 +44,4 @@ template <vsmc::MatrixOrder Order> struct BaseState {
 #include "pf_smp.hpp"
 #include "pf_smp_do.hpp"
 
-#endif  // VSMC_EXAMPLE_PF_TUPLE_HPP
+#endif // VSMC_EXAMPLE_PF_TUPLE_HPP

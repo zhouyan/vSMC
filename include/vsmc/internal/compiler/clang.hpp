@@ -68,4 +68,4 @@
 #endif
 #endif
 
-#endif  // VSMC_INTERNAL_COMPILER_CLANG_HPP
+#endif // VSMC_INTERNAL_COMPILER_CLANG_HPP

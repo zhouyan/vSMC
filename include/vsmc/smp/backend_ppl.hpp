@@ -54,9 +54,8 @@ template <typename BaseState> class StatePPL : public BaseState
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(PPL);
 
-        ::concurrency::parallel_for(static_cast<size_type>(0),
-                                    N,
-                                    copy_work_<IntType>(this, copy_from));
+        ::concurrency::parallel_for(static_cast<size_type>(0), N,
+            copy_work_<IntType>(this, copy_from));
     }
 
     private:
@@ -74,8 +73,8 @@ template <typename BaseState> class StatePPL : public BaseState
         private:
         StatePPL<BaseState> *const state_;
         const IntType *const copy_from_;
-    };  // class copy_work_
-};      // class StatePPL
+    }; // class copy_work_
+};     // class StatePPL
 
 /// \brief Sampler<T>::init_type subtype using Parallel Pattern Library
 /// \ingroup PPL
@@ -104,9 +103,8 @@ class InitializePPL : public InitializeBase<T, Derived>
     struct work_ {
         typedef typename Particle<T>::size_type size_type;
 
-        work_(InitializePPL<T, Derived> *init,
-              Particle<T> *particle,
-              ::concurrency::combinable<std::size_t> *accept)
+        work_(InitializePPL<T, Derived> *init, Particle<T> *particle,
+            ::concurrency::combinable<std::size_t> *accept)
             : init_(init), particle_(particle), accept_(accept)
         {
         }
@@ -121,14 +119,14 @@ class InitializePPL : public InitializeBase<T, Derived>
         InitializePPL<T, Derived> *const init_;
         Particle<T> *const particle_;
         ::concurrency::combinable<std::size_t> *const accept_;
-    };  // class work_
+    }; // class work_
 
     static std::size_t accept_init_() { return 0; }
     static std::size_t accept_accu_(std::size_t a, std::size_t b)
     {
         return a + b;
     }
-};  // class InitializePPL
+}; // class InitializePPL
 
 /// \brief Sampler<T>::move_type subtype using Parallel Pattern Library
 /// \ingroup PPL
@@ -142,9 +140,8 @@ class MovePPL : public MoveBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         ::concurrency::combinable<std::size_t> accept(accept_init_);
-        ::concurrency::parallel_for(static_cast<size_type>(0),
-                                    N,
-                                    work_(this, iter, &particle, &accept));
+        ::concurrency::parallel_for(static_cast<size_type>(0), N,
+            work_(this, iter, &particle, &accept));
         this->post_processor(iter, particle);
 
         return accept.combine(accept_accu_);
@@ -157,10 +154,9 @@ class MovePPL : public MoveBase<T, Derived>
     struct work_ {
         typedef typename Particle<T>::size_type size_type;
 
-        work_(MovePPL<T, Derived> *move,
-              std::size_t iter,
-              Particle<T> *particle,
-              ::concurrency::combinable<std::size_t> *accept)
+        work_(MovePPL<T, Derived> *move, std::size_t iter,
+            Particle<T> *particle,
+            ::concurrency::combinable<std::size_t> *accept)
             : move_(move), particle_(particle), accept_(accept), iter_(iter)
         {
         }
@@ -176,14 +172,14 @@ class MovePPL : public MoveBase<T, Derived>
         Particle<T> *const particle_;
         ::concurrency::combinable<std::size_t> *const accept_;
         const std::size_t iter_;
-    };  // class work_
+    }; // class work_
 
     static std::size_t accept_init_() { return 0; }
     static std::size_t accept_accu_(std::size_t a, std::size_t b)
     {
         return a + b;
     }
-};  // class MovePPL
+}; // class MovePPL
 
 /// \brief Monitor<T>::eval_type subtype using Parallel Pattern Library
 /// \ingroup PPL
@@ -191,17 +187,14 @@ template <typename T, typename Derived>
 class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 {
     public:
-    void operator()(std::size_t iter,
-                    std::size_t dim,
-                    const Particle<T> &particle,
-                    double *res)
+    void operator()(std::size_t iter, std::size_t dim,
+        const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        ::concurrency::parallel_for(static_cast<size_type>(0),
-                                    N,
-                                    work_(this, iter, dim, &particle, res));
+        ::concurrency::parallel_for(static_cast<size_type>(0), N,
+            work_(this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
 
@@ -212,11 +205,8 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
     struct work_ {
         typedef typename Particle<T>::size_type size_type;
 
-        work_(MonitorEvalPPL<T, Derived> *monitor,
-              std::size_t iter,
-              std::size_t dim,
-              const Particle<T> *particle,
-              double *res)
+        work_(MonitorEvalPPL<T, Derived> *monitor, std::size_t iter,
+            std::size_t dim, const Particle<T> *particle, double *res)
             : monitor_(monitor),
               particle_(particle),
               res_(res),
@@ -227,10 +217,8 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 
         void operator()(size_type i) const
         {
-            monitor_->monitor_state(iter_,
-                                    dim_,
-                                    ConstSingleParticle<T>(i, particle_),
-                                    res_ + i * dim_);
+            monitor_->monitor_state(iter_, dim_,
+                ConstSingleParticle<T>(i, particle_), res_ + i * dim_);
         }
 
         private:
@@ -239,8 +227,8 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
         double *const res_;
         const std::size_t iter_;
         const std::size_t dim_;
-    };  // class work_
-};      // class MonitorEvalPPL
+    }; // class work_
+};     // class MonitorEvalPPL
 
 /// \brief Path<T>::eval_type subtype using Parallel Pattern Library
 /// \ingroup PPL
@@ -248,8 +236,8 @@ template <typename T, typename Derived>
 class PathEvalPPL : public PathEvalBase<T, Derived>
 {
     public:
-    double
-        operator()(std::size_t iter, const Particle<T> &particle, double *res)
+    double operator()(
+        std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -268,18 +256,16 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
     struct work_ {
         typedef typename Particle<T>::size_type size_type;
 
-        work_(PathEvalPPL<T, Derived> *path,
-              std::size_t iter,
-              const Particle<T> *particle,
-              double *res)
+        work_(PathEvalPPL<T, Derived> *path, std::size_t iter,
+            const Particle<T> *particle, double *res)
             : path_(path), particle_(particle), res_(res), iter_(iter)
         {
         }
 
         void operator()(size_type i) const
         {
-            res_[i] = path_->path_state(iter_,
-                                        ConstSingleParticle<T>(i, particle_));
+            res_[i] = path_->path_state(
+                iter_, ConstSingleParticle<T>(i, particle_));
         }
 
         private:
@@ -287,9 +273,9 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
         const Particle<T> *const particle_;
         double *const res_;
         const std::size_t iter_;
-    };  // class work_
-};      // PathEvalPPL
+    }; // class work_
+};     // PathEvalPPL
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_SMP_BACKEND_PPL_HPP
+#endif // VSMC_SMP_BACKEND_PPL_HPP

@@ -42,19 +42,19 @@
 #define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(feat, a, c, i, b)             \
     template <> struct CPUIDFeatureInfo<CPUIDFeature##feat> {                \
         static std::string str() { return std::string(#feat); }              \
-        static constexpr const unsigned eax = a##U;                     \
-        static constexpr const unsigned ecx = c##U;                     \
-        static constexpr const unsigned bit = b##U;                     \
-        static constexpr const std::size_t index = i;                   \
+        static constexpr const unsigned eax = a##U;                          \
+        static constexpr const unsigned ecx = c##U;                          \
+        static constexpr const unsigned bit = b##U;                          \
+        static constexpr const std::size_t index = i;                        \
     };
 
 #define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(feat, a, c, i, b)         \
     template <> struct CPUIDFeatureInfo<CPUIDFeatureExt##feat> {             \
         static std::string str() { return std::string(#feat); }              \
-        static constexpr const unsigned eax = 0x80000000U + a##U;       \
-        static constexpr const unsigned ecx = c##U;                     \
-        static constexpr const unsigned bit = b##U;                     \
-        static constexpr const std::size_t index = i;                   \
+        static constexpr const unsigned eax = 0x80000000U + a##U;            \
+        static constexpr const unsigned ecx = c##U;                          \
+        static constexpr const unsigned bit = b##U;                          \
+        static constexpr const std::size_t index = i;                        \
     };
 
 namespace vsmc
@@ -66,10 +66,9 @@ namespace vsmc
 inline void cpuid(unsigned eax, unsigned ecx, unsigned *reg)
 {
 #ifdef VSMC_MSVC
-    __cpuidex(reinterpret_cast<int *>(reg),
-              static_cast<int>(eax),
-              static_cast<int>(ecx));
-#else   // VSMC_MSVC
+    __cpuidex(reinterpret_cast<int *>(reg), static_cast<int>(eax),
+        static_cast<int>(ecx));
+#else  // VSMC_MSVC
     unsigned ebx = 0x00;
     unsigned edx = 0x00;
     __asm__ volatile("cpuid\n"
@@ -79,165 +78,165 @@ inline void cpuid(unsigned eax, unsigned ecx, unsigned *reg)
     reg[1] = ebx;
     reg[2] = ecx;
     reg[3] = edx;
-#endif  // VSMC_MSVC
+#endif // VSMC_MSVC
 }
 
 /// \brief CPU features
 /// \ingroup CPUID
 enum CPUIDFeature {
-    CPUIDFeatureSSE3,          ///< EAX = 0x01, ECX = 0x00; ECX[00]
-    CPUIDFeaturePCLMULQDQ,     ///< EAX = 0x01, ECX = 0x00; ECX[01]
-    CPUIDFeatureDTES64,        ///< EAX = 0x01, ECX = 0x00; ECX[02]
-    CPUIDFeatureMONITOR,       ///< EAX = 0x01, ECX = 0x00; ECX[03]
-    CPUIDFeatureDS_CPL,        ///< EAX = 0x01, ECX = 0x00; ECX[04]
-    CPUIDFeatureVMX,           ///< EAX = 0x01, ECX = 0x00; ECX[05]
-    CPUIDFeatureSMX,           ///< EAX = 0x01, ECX = 0x00; ECX[06]
-    CPUIDFeatureEST,           ///< EAX = 0x01, ECX = 0x00; ECX[07]
-    CPUIDFeatureTM2,           ///< EAX = 0x01, ECX = 0x00; ECX[08]
-    CPUIDFeatureSSSE3,         ///< EAX = 0x01, ECX = 0x00; ECX[09]
-    CPUIDFeatureCNXT_ID,       ///< EAX = 0x01, ECX = 0x00; ECX[10]
-    CPUIDFeatureFMA,           ///< EAX = 0x01, ECX = 0x00; ECX[12]
-    CPUIDFeatureCX16,          ///< EAX = 0x01, ECX = 0x00; ECX[13]
-    CPUIDFeatureXTPR,          ///< EAX = 0x01, ECX = 0x00; ECX[14]
-    CPUIDFeaturePDCM,          ///< EAX = 0x01, ECX = 0x00; ECX[15]
-    CPUIDFeaturePCID,          ///< EAX = 0x01, ECX = 0x00; ECX[17]
-    CPUIDFeatureDCA,           ///< EAX = 0x01, ECX = 0x00; ECX[18]
-    CPUIDFeatureSSE4_1,        ///< EAX = 0x01, ECX = 0x00; ECX[19]
-    CPUIDFeatureSSE4_2,        ///< EAX = 0x01, ECX = 0x00; ECX[20]
-    CPUIDFeatureX2APIC,        ///< EAX = 0x01, ECX = 0x00; ECX[21]
-    CPUIDFeatureMOVBE,         ///< EAX = 0x01, ECX = 0x00; ECX[22]
-    CPUIDFeaturePOPCNT,        ///< EAX = 0x01, ECX = 0x00; ECX[23]
-    CPUIDFeatureTSC_DEADLINE,  ///< EAX = 0x01, ECX = 0x00; ECX[24]
-    CPUIDFeatureAES,           ///< EAX = 0x01, ECX = 0x00; ECX[25]
-    CPUIDFeatureXSAVE,         ///< EAX = 0x01, ECX = 0x00; ECX[26]
-    CPUIDFeatureOSXSAVE,       ///< EAX = 0x01, ECX = 0x00; ECX[27]
-    CPUIDFeatureAVX,           ///< EAX = 0x01, ECX = 0x00; ECX[28]
-    CPUIDFeatureF16C,          ///< EAX = 0x01, ECX = 0x00; ECX[29]
-    CPUIDFeatureRDRAND,        ///< EAX = 0x01, ECX = 0x00; ECX[30]
-    CPUIDFeatureHYPERVISOR,    ///< EAX = 0x01, ECX = 0x00; ECX[31]
+    CPUIDFeatureSSE3,         ///< EAX = 0x01, ECX = 0x00; ECX[00]
+    CPUIDFeaturePCLMULQDQ,    ///< EAX = 0x01, ECX = 0x00; ECX[01]
+    CPUIDFeatureDTES64,       ///< EAX = 0x01, ECX = 0x00; ECX[02]
+    CPUIDFeatureMONITOR,      ///< EAX = 0x01, ECX = 0x00; ECX[03]
+    CPUIDFeatureDS_CPL,       ///< EAX = 0x01, ECX = 0x00; ECX[04]
+    CPUIDFeatureVMX,          ///< EAX = 0x01, ECX = 0x00; ECX[05]
+    CPUIDFeatureSMX,          ///< EAX = 0x01, ECX = 0x00; ECX[06]
+    CPUIDFeatureEST,          ///< EAX = 0x01, ECX = 0x00; ECX[07]
+    CPUIDFeatureTM2,          ///< EAX = 0x01, ECX = 0x00; ECX[08]
+    CPUIDFeatureSSSE3,        ///< EAX = 0x01, ECX = 0x00; ECX[09]
+    CPUIDFeatureCNXT_ID,      ///< EAX = 0x01, ECX = 0x00; ECX[10]
+    CPUIDFeatureFMA,          ///< EAX = 0x01, ECX = 0x00; ECX[12]
+    CPUIDFeatureCX16,         ///< EAX = 0x01, ECX = 0x00; ECX[13]
+    CPUIDFeatureXTPR,         ///< EAX = 0x01, ECX = 0x00; ECX[14]
+    CPUIDFeaturePDCM,         ///< EAX = 0x01, ECX = 0x00; ECX[15]
+    CPUIDFeaturePCID,         ///< EAX = 0x01, ECX = 0x00; ECX[17]
+    CPUIDFeatureDCA,          ///< EAX = 0x01, ECX = 0x00; ECX[18]
+    CPUIDFeatureSSE4_1,       ///< EAX = 0x01, ECX = 0x00; ECX[19]
+    CPUIDFeatureSSE4_2,       ///< EAX = 0x01, ECX = 0x00; ECX[20]
+    CPUIDFeatureX2APIC,       ///< EAX = 0x01, ECX = 0x00; ECX[21]
+    CPUIDFeatureMOVBE,        ///< EAX = 0x01, ECX = 0x00; ECX[22]
+    CPUIDFeaturePOPCNT,       ///< EAX = 0x01, ECX = 0x00; ECX[23]
+    CPUIDFeatureTSC_DEADLINE, ///< EAX = 0x01, ECX = 0x00; ECX[24]
+    CPUIDFeatureAES,          ///< EAX = 0x01, ECX = 0x00; ECX[25]
+    CPUIDFeatureXSAVE,        ///< EAX = 0x01, ECX = 0x00; ECX[26]
+    CPUIDFeatureOSXSAVE,      ///< EAX = 0x01, ECX = 0x00; ECX[27]
+    CPUIDFeatureAVX,          ///< EAX = 0x01, ECX = 0x00; ECX[28]
+    CPUIDFeatureF16C,         ///< EAX = 0x01, ECX = 0x00; ECX[29]
+    CPUIDFeatureRDRAND,       ///< EAX = 0x01, ECX = 0x00; ECX[30]
+    CPUIDFeatureHYPERVISOR,   ///< EAX = 0x01, ECX = 0x00; ECX[31]
 
-    CPUIDFeatureFPU,     ///< EAX = 0x01, ECX = 0x00; EDX[00]
-    CPUIDFeatureVME,     ///< EAX = 0x01, ECX = 0x00; EDX[01]
-    CPUIDFeatureDE,      ///< EAX = 0x01, ECX = 0x00; EDX[02]
-    CPUIDFeaturePSE,     ///< EAX = 0x01, ECX = 0x00; EDX[03]
-    CPUIDFeatureTSC,     ///< EAX = 0x01, ECX = 0x00; EDX[04]
-    CPUIDFeatureMSR,     ///< EAX = 0x01, ECX = 0x00; EDX[05]
-    CPUIDFeaturePAE,     ///< EAX = 0x01, ECX = 0x00; EDX[06]
-    CPUIDFeatureMCE,     ///< EAX = 0x01, ECX = 0x00; EDX[07]
-    CPUIDFeatureCX8,     ///< EAX = 0x01, ECX = 0x00; EDX[08]
-    CPUIDFeatureAPIC,    ///< EAX = 0x01, ECX = 0x00; EDX[09]
-    CPUIDFeatureSEP,     ///< EAX = 0x01, ECX = 0x00; EDX[11]
-    CPUIDFeatureMTRR,    ///< EAX = 0x01, ECX = 0x00; EDX[12]
-    CPUIDFeaturePGE,     ///< EAX = 0x01, ECX = 0x00; EDX[13]
-    CPUIDFeatureMCA,     ///< EAX = 0x01, ECX = 0x00; EDX[14]
-    CPUIDFeatureCMOV,    ///< EAX = 0x01, ECX = 0x00; EDX[15]
-    CPUIDFeaturePAT,     ///< EAX = 0x01, ECX = 0x00; EDX[16]
-    CPUIDFeaturePSE_36,  ///< EAX = 0x01, ECX = 0x00; EDX[17]
-    CPUIDFeaturePSN,     ///< EAX = 0x01, ECX = 0x00; EDX[18]
-    CPUIDFeatureCLFSH,   ///< EAX = 0x01, ECX = 0x00; EDX[19]
-    CPUIDFeatureDS,      ///< EAX = 0x01, ECX = 0x00; EDX[21]
-    CPUIDFeatureACPI,    ///< EAX = 0x01, ECX = 0x00; EDX[22]
-    CPUIDFeatureMMX,     ///< EAX = 0x01, ECX = 0x00; EDX[23]
-    CPUIDFeatureFXSR,    ///< EAX = 0x01, ECX = 0x00; EDX[24]
-    CPUIDFeatureSSE,     ///< EAX = 0x01, ECX = 0x00; EDX[25]
-    CPUIDFeatureSSE2,    ///< EAX = 0x01, ECX = 0x00; EDX[26]
-    CPUIDFeatureSS,      ///< EAX = 0x01, ECX = 0x00; EDX[27]
-    CPUIDFeatureHTT,     ///< EAX = 0x01, ECX = 0x00; EDX[28]
-    CPUIDFeatureTM,      ///< EAX = 0x01, ECX = 0x00; EDX[29]
-    CPUIDFeatureIA64,    ///< EAX = 0x01, ECX = 0x00; EDX[30]
-    CPUIDFeaturePBE,     ///< EAX = 0x01, ECX = 0x00; EDX[31]
+    CPUIDFeatureFPU,    ///< EAX = 0x01, ECX = 0x00; EDX[00]
+    CPUIDFeatureVME,    ///< EAX = 0x01, ECX = 0x00; EDX[01]
+    CPUIDFeatureDE,     ///< EAX = 0x01, ECX = 0x00; EDX[02]
+    CPUIDFeaturePSE,    ///< EAX = 0x01, ECX = 0x00; EDX[03]
+    CPUIDFeatureTSC,    ///< EAX = 0x01, ECX = 0x00; EDX[04]
+    CPUIDFeatureMSR,    ///< EAX = 0x01, ECX = 0x00; EDX[05]
+    CPUIDFeaturePAE,    ///< EAX = 0x01, ECX = 0x00; EDX[06]
+    CPUIDFeatureMCE,    ///< EAX = 0x01, ECX = 0x00; EDX[07]
+    CPUIDFeatureCX8,    ///< EAX = 0x01, ECX = 0x00; EDX[08]
+    CPUIDFeatureAPIC,   ///< EAX = 0x01, ECX = 0x00; EDX[09]
+    CPUIDFeatureSEP,    ///< EAX = 0x01, ECX = 0x00; EDX[11]
+    CPUIDFeatureMTRR,   ///< EAX = 0x01, ECX = 0x00; EDX[12]
+    CPUIDFeaturePGE,    ///< EAX = 0x01, ECX = 0x00; EDX[13]
+    CPUIDFeatureMCA,    ///< EAX = 0x01, ECX = 0x00; EDX[14]
+    CPUIDFeatureCMOV,   ///< EAX = 0x01, ECX = 0x00; EDX[15]
+    CPUIDFeaturePAT,    ///< EAX = 0x01, ECX = 0x00; EDX[16]
+    CPUIDFeaturePSE_36, ///< EAX = 0x01, ECX = 0x00; EDX[17]
+    CPUIDFeaturePSN,    ///< EAX = 0x01, ECX = 0x00; EDX[18]
+    CPUIDFeatureCLFSH,  ///< EAX = 0x01, ECX = 0x00; EDX[19]
+    CPUIDFeatureDS,     ///< EAX = 0x01, ECX = 0x00; EDX[21]
+    CPUIDFeatureACPI,   ///< EAX = 0x01, ECX = 0x00; EDX[22]
+    CPUIDFeatureMMX,    ///< EAX = 0x01, ECX = 0x00; EDX[23]
+    CPUIDFeatureFXSR,   ///< EAX = 0x01, ECX = 0x00; EDX[24]
+    CPUIDFeatureSSE,    ///< EAX = 0x01, ECX = 0x00; EDX[25]
+    CPUIDFeatureSSE2,   ///< EAX = 0x01, ECX = 0x00; EDX[26]
+    CPUIDFeatureSS,     ///< EAX = 0x01, ECX = 0x00; EDX[27]
+    CPUIDFeatureHTT,    ///< EAX = 0x01, ECX = 0x00; EDX[28]
+    CPUIDFeatureTM,     ///< EAX = 0x01, ECX = 0x00; EDX[29]
+    CPUIDFeatureIA64,   ///< EAX = 0x01, ECX = 0x00; EDX[30]
+    CPUIDFeaturePBE,    ///< EAX = 0x01, ECX = 0x00; EDX[31]
 
-    CPUIDFeatureFSGSBASE,      ///< EAX = 0x07, ECX = 0x00; EBX[00]
-    CPUIDFeatureBMI1,          ///< EAX = 0x07, ECX = 0x00; EBX[03]
-    CPUIDFeatureHLE,           ///< EAX = 0x07, ECX = 0x00; EBX[04]
-    CPUIDFeatureAVX2,          ///< EAX = 0x07, ECX = 0x00; EBX[05]
-    CPUIDFeatureSMEP,          ///< EAX = 0x07, ECX = 0x00; EBX[07]
-    CPUIDFeatureBMI2,          ///< EAX = 0x07, ECX = 0x00; EBX[08]
-    CPUIDFeatureERMS,          ///< EAX = 0x07, ECX = 0x00; EBX[09]
-    CPUIDFeatureINVPCID,       ///< EAX = 0x07, ECX = 0x00; EBX[10]
-    CPUIDFeatureRTM,           ///< EAX = 0x07, ECX = 0x00; EBX[11]
-    CPUIDFeatureMPX,           ///< EAX = 0x07, ECX = 0x00; EBX[14]
-    CPUIDFeatureAVX512F,       ///< EAX = 0x07, ECX = 0x00; EBX[16]
-    CPUIDFeatureAVX512DQ,      ///< EAX = 0x07, ECX = 0x00; EBX[17]
-    CPUIDFeatureRDSEED,        ///< EAX = 0x07, ECX = 0x00; EBX[18]
-    CPUIDFeatureADX,           ///< EAX = 0x07, ECX = 0x00; EBX[19]
-    CPUIDFeatureSMAP,          ///< EAX = 0x07, ECX = 0x00; EBX[20]
-    CPUIDFeatureAVX512IFMA52,  ///< EAX = 0x07, ECX = 0x00; EBX[21]
-    CPUIDFeatureCLFLUSHOPT,    ///< EAX = 0x07, ECX = 0x00; EBX[23]
-    CPUIDFeatureINTEL_TRACE,   ///< EAX = 0x07, ECX = 0x00; EBX[25]
-    CPUIDFeatureAVX512PF,      ///< EAX = 0x07, ECX = 0x00; EBX[26]
-    CPUIDFeatureAVX512ER,      ///< EAX = 0x07, ECX = 0x00; EBX[27]
-    CPUIDFeatureAVX512CD,      ///< EAX = 0x07, ECX = 0x00; EBX[28]
-    CPUIDFeatureSHA,           ///< EAX = 0x07, ECX = 0x00; EBX[29]
-    CPUIDFeatureAVX512BW,      ///< EAX = 0x07, ECX = 0x00; EBX[30]
-    CPUIDFeatureAVX512VL,      ///< EAX = 0x07, ECX = 0x00; EBX[31]
+    CPUIDFeatureFSGSBASE,     ///< EAX = 0x07, ECX = 0x00; EBX[00]
+    CPUIDFeatureBMI1,         ///< EAX = 0x07, ECX = 0x00; EBX[03]
+    CPUIDFeatureHLE,          ///< EAX = 0x07, ECX = 0x00; EBX[04]
+    CPUIDFeatureAVX2,         ///< EAX = 0x07, ECX = 0x00; EBX[05]
+    CPUIDFeatureSMEP,         ///< EAX = 0x07, ECX = 0x00; EBX[07]
+    CPUIDFeatureBMI2,         ///< EAX = 0x07, ECX = 0x00; EBX[08]
+    CPUIDFeatureERMS,         ///< EAX = 0x07, ECX = 0x00; EBX[09]
+    CPUIDFeatureINVPCID,      ///< EAX = 0x07, ECX = 0x00; EBX[10]
+    CPUIDFeatureRTM,          ///< EAX = 0x07, ECX = 0x00; EBX[11]
+    CPUIDFeatureMPX,          ///< EAX = 0x07, ECX = 0x00; EBX[14]
+    CPUIDFeatureAVX512F,      ///< EAX = 0x07, ECX = 0x00; EBX[16]
+    CPUIDFeatureAVX512DQ,     ///< EAX = 0x07, ECX = 0x00; EBX[17]
+    CPUIDFeatureRDSEED,       ///< EAX = 0x07, ECX = 0x00; EBX[18]
+    CPUIDFeatureADX,          ///< EAX = 0x07, ECX = 0x00; EBX[19]
+    CPUIDFeatureSMAP,         ///< EAX = 0x07, ECX = 0x00; EBX[20]
+    CPUIDFeatureAVX512IFMA52, ///< EAX = 0x07, ECX = 0x00; EBX[21]
+    CPUIDFeatureCLFLUSHOPT,   ///< EAX = 0x07, ECX = 0x00; EBX[23]
+    CPUIDFeatureINTEL_TRACE,  ///< EAX = 0x07, ECX = 0x00; EBX[25]
+    CPUIDFeatureAVX512PF,     ///< EAX = 0x07, ECX = 0x00; EBX[26]
+    CPUIDFeatureAVX512ER,     ///< EAX = 0x07, ECX = 0x00; EBX[27]
+    CPUIDFeatureAVX512CD,     ///< EAX = 0x07, ECX = 0x00; EBX[28]
+    CPUIDFeatureSHA,          ///< EAX = 0x07, ECX = 0x00; EBX[29]
+    CPUIDFeatureAVX512BW,     ///< EAX = 0x07, ECX = 0x00; EBX[30]
+    CPUIDFeatureAVX512VL,     ///< EAX = 0x07, ECX = 0x00; EBX[31]
 
-    CPUIDFeaturePREFETCHWT1,  ///< EAX = 0x07, ECX = 0x00; ECX[00]
-    CPUIDFeatureAVX512VBMI,   ///< EAX = 0x07, ECX = 0x00; ECX[01]
+    CPUIDFeaturePREFETCHWT1, ///< EAX = 0x07, ECX = 0x00; ECX[00]
+    CPUIDFeatureAVX512VBMI,  ///< EAX = 0x07, ECX = 0x00; ECX[01]
 
-    CPUIDFeatureExtLAHF_LM,        ///< EAX = 0x80000001, ECX = 0x00; ECX[00]
-    CPUIDFeatureExtCMP_LEGACY,     ///< EAX = 0x80000001, ECX = 0x00; ECX[01]
-    CPUIDFeatureExtSVM,            ///< EAX = 0x80000001, ECX = 0x00; ECX[02]
-    CPUIDFeatureExtEXTAPIC,        ///< EAX = 0x80000001, ECX = 0x00; ECX[03]
-    CPUIDFeatureExtCR8_LEGACY,     ///< EAX = 0x80000001, ECX = 0x00; ECX[04]
-    CPUIDFeatureExtABM,            ///< EAX = 0x80000001, ECX = 0x00; ECX[05]
-    CPUIDFeatureExtSSE4A,          ///< EAX = 0x80000001, ECX = 0x00; ECX[06]
-    CPUIDFeatureExtMISALIGNSSE,    ///< EAX = 0x80000001, ECX = 0x00; ECX[07]
-    CPUIDFeatureExt3DNOWPREFETCH,  ///< EAX = 0x80000001, ECX = 0x00; ECX[08]
-    CPUIDFeatureExtOSVW,           ///< EAX = 0x80000001, ECX = 0x00; ECX[09]
-    CPUIDFeatureExtIBS,            ///< EAX = 0x80000001, ECX = 0x00; ECX[10]
-    CPUIDFeatureExtXOP,            ///< EAX = 0x80000001, ECX = 0x00; ECX[11]
-    CPUIDFeatureExtSKINIT,         ///< EAX = 0x80000001, ECX = 0x00; ECX[12]
-    CPUIDFeatureExtWDT,            ///< EAX = 0x80000001, ECX = 0x00; ECX[13]
-    CPUIDFeatureExtLWP,            ///< EAX = 0x80000001, ECX = 0x00; ECX[15]
-    CPUIDFeatureExtFMA4,           ///< EAX = 0x80000001, ECX = 0x00; ECX[16]
-    CPUIDFeatureExtTCE,            ///< EAX = 0x80000001, ECX = 0x00; ECX[17]
-    CPUIDFeatureExtNODEID_MSR,     ///< EAX = 0x80000001, ECX = 0x00; ECX[19]
-    CPUIDFeatureExtTBM,            ///< EAX = 0x80000001, ECX = 0x00; ECX[21]
-    CPUIDFeatureExtTOPOEXT,        ///< EAX = 0x80000001, ECX = 0x00; ECX[22]
-    CPUIDFeatureExtPERFCTR_CORE,   ///< EAX = 0x80000001, ECX = 0x00; ECX[23]
-    CPUIDFeatureExtPERFCTR_NB,     ///< EAX = 0x80000001, ECX = 0x00; ECX[24]
-    CPUIDFeatureExtDBX,            ///< EAX = 0x80000001, ECX = 0x00; ECX[26]
-    CPUIDFeatureExtPERFTSC,        ///< EAX = 0x80000001, ECX = 0x00; ECX[27]
-    CPUIDFeatureExtPCX_L2I,        ///< EAX = 0x80000001, ECX = 0x00; ECX[28]
+    CPUIDFeatureExtLAHF_LM,       ///< EAX = 0x80000001, ECX = 0x00; ECX[00]
+    CPUIDFeatureExtCMP_LEGACY,    ///< EAX = 0x80000001, ECX = 0x00; ECX[01]
+    CPUIDFeatureExtSVM,           ///< EAX = 0x80000001, ECX = 0x00; ECX[02]
+    CPUIDFeatureExtEXTAPIC,       ///< EAX = 0x80000001, ECX = 0x00; ECX[03]
+    CPUIDFeatureExtCR8_LEGACY,    ///< EAX = 0x80000001, ECX = 0x00; ECX[04]
+    CPUIDFeatureExtABM,           ///< EAX = 0x80000001, ECX = 0x00; ECX[05]
+    CPUIDFeatureExtSSE4A,         ///< EAX = 0x80000001, ECX = 0x00; ECX[06]
+    CPUIDFeatureExtMISALIGNSSE,   ///< EAX = 0x80000001, ECX = 0x00; ECX[07]
+    CPUIDFeatureExt3DNOWPREFETCH, ///< EAX = 0x80000001, ECX = 0x00; ECX[08]
+    CPUIDFeatureExtOSVW,          ///< EAX = 0x80000001, ECX = 0x00; ECX[09]
+    CPUIDFeatureExtIBS,           ///< EAX = 0x80000001, ECX = 0x00; ECX[10]
+    CPUIDFeatureExtXOP,           ///< EAX = 0x80000001, ECX = 0x00; ECX[11]
+    CPUIDFeatureExtSKINIT,        ///< EAX = 0x80000001, ECX = 0x00; ECX[12]
+    CPUIDFeatureExtWDT,           ///< EAX = 0x80000001, ECX = 0x00; ECX[13]
+    CPUIDFeatureExtLWP,           ///< EAX = 0x80000001, ECX = 0x00; ECX[15]
+    CPUIDFeatureExtFMA4,          ///< EAX = 0x80000001, ECX = 0x00; ECX[16]
+    CPUIDFeatureExtTCE,           ///< EAX = 0x80000001, ECX = 0x00; ECX[17]
+    CPUIDFeatureExtNODEID_MSR,    ///< EAX = 0x80000001, ECX = 0x00; ECX[19]
+    CPUIDFeatureExtTBM,           ///< EAX = 0x80000001, ECX = 0x00; ECX[21]
+    CPUIDFeatureExtTOPOEXT,       ///< EAX = 0x80000001, ECX = 0x00; ECX[22]
+    CPUIDFeatureExtPERFCTR_CORE,  ///< EAX = 0x80000001, ECX = 0x00; ECX[23]
+    CPUIDFeatureExtPERFCTR_NB,    ///< EAX = 0x80000001, ECX = 0x00; ECX[24]
+    CPUIDFeatureExtDBX,           ///< EAX = 0x80000001, ECX = 0x00; ECX[26]
+    CPUIDFeatureExtPERFTSC,       ///< EAX = 0x80000001, ECX = 0x00; ECX[27]
+    CPUIDFeatureExtPCX_L2I,       ///< EAX = 0x80000001, ECX = 0x00; ECX[28]
 
-    CPUIDFeatureExtFPU,       ///< EAX = 0x80000001, ECX = 0x00; EDX[00]
-    CPUIDFeatureExtVME,       ///< EAX = 0x80000001, ECX = 0x00; EDX[01]
-    CPUIDFeatureExtDE,        ///< EAX = 0x80000001, ECX = 0x00; EDX[02]
-    CPUIDFeatureExtPSE,       ///< EAX = 0x80000001, ECX = 0x00; EDX[03]
-    CPUIDFeatureExtTSC,       ///< EAX = 0x80000001, ECX = 0x00; EDX[04]
-    CPUIDFeatureExtMSR,       ///< EAX = 0x80000001, ECX = 0x00; EDX[05]
-    CPUIDFeatureExtPAE,       ///< EAX = 0x80000001, ECX = 0x00; EDX[06]
-    CPUIDFeatureExtMCE,       ///< EAX = 0x80000001, ECX = 0x00; EDX[07]
-    CPUIDFeatureExtCX8,       ///< EAX = 0x80000001, ECX = 0x00; EDX[08]
-    CPUIDFeatureExtAPIC,      ///< EAX = 0x80000001, ECX = 0x00; EDX[09]
-    CPUIDFeatureExtSYSCALL,   ///< EAX = 0x80000001, ECX = 0x00; EDX[11]
-    CPUIDFeatureExtMTRR,      ///< EAX = 0x80000001, ECX = 0x00; EDX[12]
-    CPUIDFeatureExtPGE,       ///< EAX = 0x80000001, ECX = 0x00; EDX[13]
-    CPUIDFeatureExtMCA,       ///< EAX = 0x80000001, ECX = 0x00; EDX[14]
-    CPUIDFeatureExtCMOV,      ///< EAX = 0x80000001, ECX = 0x00; EDX[15]
-    CPUIDFeatureExtPAT,       ///< EAX = 0x80000001, ECX = 0x00; EDX[16]
-    CPUIDFeatureExtPSE36,     ///< EAX = 0x80000001, ECX = 0x00; EDX[17]
-    CPUIDFeatureExtMP,        ///< EAX = 0x80000001, ECX = 0x00; EDX[19]
-    CPUIDFeatureExtNX,        ///< EAX = 0x80000001, ECX = 0x00; EDX[20]
-    CPUIDFeatureExtMMX,       ///< EAX = 0x80000001, ECX = 0x00; EDX[22]
-    CPUIDFeatureExtMMXEXT,    ///< EAX = 0x80000001, ECX = 0x00; EDX[23]
-    CPUIDFeatureExtFXSR,      ///< EAX = 0x80000001, ECX = 0x00; EDX[24]
-    CPUIDFeatureExtFXSR_OPT,  ///< EAX = 0x80000001, ECX = 0x00; EDX[25]
-    CPUIDFeatureExtGBPAGES,   ///< EAX = 0x80000001, ECX = 0x00; EDX[26]
-    CPUIDFeatureExtRDTSCP,    ///< EAX = 0x80000001, ECX = 0x00; EDX[27]
-    CPUIDFeatureExtLM,        ///< EAX = 0x80000001, ECX = 0x00; EDX[29]
-    CPUIDFeatureExt3DNOWEXT,  ///< EAX = 0x80000001, ECX = 0x00; EDX[30]
-    CPUIDFeatureExt3DNOW      ///< EAX = 0x80000001, ECX = 0x00; EDX[31]
-};                            // enum CPUIDFeature
+    CPUIDFeatureExtFPU,      ///< EAX = 0x80000001, ECX = 0x00; EDX[00]
+    CPUIDFeatureExtVME,      ///< EAX = 0x80000001, ECX = 0x00; EDX[01]
+    CPUIDFeatureExtDE,       ///< EAX = 0x80000001, ECX = 0x00; EDX[02]
+    CPUIDFeatureExtPSE,      ///< EAX = 0x80000001, ECX = 0x00; EDX[03]
+    CPUIDFeatureExtTSC,      ///< EAX = 0x80000001, ECX = 0x00; EDX[04]
+    CPUIDFeatureExtMSR,      ///< EAX = 0x80000001, ECX = 0x00; EDX[05]
+    CPUIDFeatureExtPAE,      ///< EAX = 0x80000001, ECX = 0x00; EDX[06]
+    CPUIDFeatureExtMCE,      ///< EAX = 0x80000001, ECX = 0x00; EDX[07]
+    CPUIDFeatureExtCX8,      ///< EAX = 0x80000001, ECX = 0x00; EDX[08]
+    CPUIDFeatureExtAPIC,     ///< EAX = 0x80000001, ECX = 0x00; EDX[09]
+    CPUIDFeatureExtSYSCALL,  ///< EAX = 0x80000001, ECX = 0x00; EDX[11]
+    CPUIDFeatureExtMTRR,     ///< EAX = 0x80000001, ECX = 0x00; EDX[12]
+    CPUIDFeatureExtPGE,      ///< EAX = 0x80000001, ECX = 0x00; EDX[13]
+    CPUIDFeatureExtMCA,      ///< EAX = 0x80000001, ECX = 0x00; EDX[14]
+    CPUIDFeatureExtCMOV,     ///< EAX = 0x80000001, ECX = 0x00; EDX[15]
+    CPUIDFeatureExtPAT,      ///< EAX = 0x80000001, ECX = 0x00; EDX[16]
+    CPUIDFeatureExtPSE36,    ///< EAX = 0x80000001, ECX = 0x00; EDX[17]
+    CPUIDFeatureExtMP,       ///< EAX = 0x80000001, ECX = 0x00; EDX[19]
+    CPUIDFeatureExtNX,       ///< EAX = 0x80000001, ECX = 0x00; EDX[20]
+    CPUIDFeatureExtMMX,      ///< EAX = 0x80000001, ECX = 0x00; EDX[22]
+    CPUIDFeatureExtMMXEXT,   ///< EAX = 0x80000001, ECX = 0x00; EDX[23]
+    CPUIDFeatureExtFXSR,     ///< EAX = 0x80000001, ECX = 0x00; EDX[24]
+    CPUIDFeatureExtFXSR_OPT, ///< EAX = 0x80000001, ECX = 0x00; EDX[25]
+    CPUIDFeatureExtGBPAGES,  ///< EAX = 0x80000001, ECX = 0x00; EDX[26]
+    CPUIDFeatureExtRDTSCP,   ///< EAX = 0x80000001, ECX = 0x00; EDX[27]
+    CPUIDFeatureExtLM,       ///< EAX = 0x80000001, ECX = 0x00; EDX[29]
+    CPUIDFeatureExt3DNOWEXT, ///< EAX = 0x80000001, ECX = 0x00; EDX[30]
+    CPUIDFeatureExt3DNOW     ///< EAX = 0x80000001, ECX = 0x00; EDX[31]
+};                           // enum CPUIDFeature
 
 /// \brief Type of CPU caches
 enum CPUIDCacheType {
-    CPUIDCacheTypeNull,         ///< No more cache
-    CPUIDCacheTypeData,         ///< Data cache
-    CPUIDCacheTypeInstruction,  ///< Instruction cache
-    CPUIDCacheTypeUnified       ///< Unified cache
-};                              // enum CPUIDCacheType
+    CPUIDCacheTypeNull,        ///< No more cache
+    CPUIDCacheTypeData,        ///< Data cache
+    CPUIDCacheTypeInstruction, ///< Instruction cache
+    CPUIDCacheTypeUnified      ///< Unified cache
+};                             // enum CPUIDCacheType
 
 /// \brief CPU feature information
 /// \ingroup CPUID
@@ -259,7 +258,7 @@ template <CPUIDFeature> struct CPUIDFeatureInfo {
 
     /// \brief The bit number of the feature in the register
     static constexpr const unsigned bit = 0x00U;
-};  // struct CPUIDFeatureInfo
+}; // struct CPUIDFeatureInfo
 
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSE3, 0x01, 0x00, 2, 0)
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PCLMULQDQ, 0x01, 0x00, 2, 1)
@@ -519,12 +518,12 @@ class CPUID
         bool wbinvd_;
         bool inclusiveness_;
         bool complex_indexing_;
-    };  // struct cache_param_type
+    }; // struct cache_param_type
 
     /// \brief Get CPU feature using CPUID
     template <typename CharT, typename Traits>
-    static std::basic_ostream<CharT, Traits> &
-        info(std::basic_ostream<CharT, Traits> &os)
+    static std::basic_ostream<CharT, Traits> &info(
+        std::basic_ostream<CharT, Traits> &os)
     {
         if (!os.good())
             return os;
@@ -561,11 +560,9 @@ class CPUID
     /// EAX and ECX, the CPUID instruction will not be called.
     template <unsigned EAX, unsigned ECX> static const reg_type &info()
     {
-        static reg_type reg(
-            info_dispatch<EAX, ECX>(std::integral_constant < bool,
-                                    EAX == 0x00 || EAX == ext0_ > (),
-                                    std::integral_constant < bool,
-                                    EAX<ext0_>()));
+        static reg_type reg(info_dispatch<EAX, ECX>(
+            std::integral_constant < bool, EAX == 0x00 || EAX == ext0_ > (),
+            std::integral_constant < bool, EAX<ext0_>()));
 
         return reg;
     }
@@ -686,8 +683,8 @@ class CPUID
     }
 
     template <unsigned EAX, unsigned ECX, bool Basic>
-    static reg_type info_dispatch(std::false_type,
-                                  std::integral_constant<bool, Basic>)
+    static reg_type info_dispatch(
+        std::false_type, std::integral_constant<bool, Basic>)
     {
         reg_type reg(info_dispatch<EAX, ECX>(
             std::true_type(), std::integral_constant<bool, Basic>()));
@@ -874,7 +871,7 @@ class CPUID
 
     template <typename CharT, typename Traits>
     static void print_feature(std::basic_ostream<CharT, Traits> &os,
-                              std::vector<std::string> &feats)
+        std::vector<std::string> &feats)
     {
         std::sort(feats.begin(), feats.end());
         for (std::size_t i = 0; i != feats.size(); ++i) {
@@ -886,8 +883,7 @@ class CPUID
 
     template <typename CharT, typename Traits>
     static void print_feat(std::basic_ostream<CharT, Traits> &os,
-                           std::string &str,
-                           std::size_t fix)
+        std::string &str, std::size_t fix)
     {
         os << str;
         if (str.size() < fix)
@@ -1054,17 +1050,17 @@ class CPUID
         if (has_feature<Feat>())
             feats.push_back(CPUIDFeatureInfo<Feat>::str());
     }
-};  // class CPUID
+}; // class CPUID
 
 /// \brief Query CPU information using CPUID
 /// \ingroup CPUID
 template <typename CharT, typename Traits>
-inline std::basic_ostream<CharT, Traits> &
-    operator<<(std::basic_ostream<CharT, Traits> &os, const CPUID &)
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const CPUID &)
 {
     return CPUID::info(os);
 }
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_UTILITY_CPUID_HPP
+#endif // VSMC_UTILITY_CPUID_HPP

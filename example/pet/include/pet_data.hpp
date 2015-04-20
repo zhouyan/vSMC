@@ -86,24 +86,24 @@ std::size_t prior_offset = 0;
 data_file.open(PriorFile.c_str());
 for (std::size_t i = 0; i != ModelNum; ++i)
     data_file >> Prior[prior_offset++];
-pet_ignore(data_file);  // phi_lb0
+pet_ignore(data_file); // phi_lb0
 for (std::size_t i = 0; i != ModelNum; ++i)
     data_file >> Prior[prior_offset++];
-pet_ignore(data_file);  // phi_ub0
+pet_ignore(data_file); // phi_ub0
 for (std::size_t i = 0; i != ModelNum; ++i)
     data_file >> Prior[prior_offset++];
-pet_ignore(data_file);  // theta_lb0
+pet_ignore(data_file); // theta_lb0
 for (std::size_t i = 0; i != ModelNum; ++i)
     data_file >> Prior[prior_offset++];
-pet_ignore(data_file);  // theta_ub0
+pet_ignore(data_file); // theta_ub0
 data_file >> Prior[prior_offset++];
-pet_ignore(data_file);  // lambda_a0
+pet_ignore(data_file); // lambda_a0
 data_file >> Prior[prior_offset++];
-pet_ignore(data_file);  // lambda_b0
+pet_ignore(data_file); // lambda_b0
 data_file >> Prior[prior_offset++];
-pet_ignore(data_file);  // nu_a0
+pet_ignore(data_file); // nu_a0
 data_file >> Prior[prior_offset++];
-pet_ignore(data_file);  // nu_b0
+pet_ignore(data_file); // nu_b0
 data_file.close();
 data_file.clear();
 
@@ -112,14 +112,14 @@ std::size_t sd_offset = 0;
 data_file.open(SDFile.c_str());
 for (std::size_t i = 0; i != ModelNum; ++i)
     data_file >> SD[sd_offset++];
-pet_ignore(data_file);  // phi_sd
+pet_ignore(data_file); // phi_sd
 for (std::size_t i = 0; i != ModelNum; ++i)
     data_file >> SD[sd_offset++];
-pet_ignore(data_file);  // theta_sd
+pet_ignore(data_file); // theta_sd
 data_file >> SD[sd_offset++];
-pet_ignore(data_file);  // lamda_sd;
+pet_ignore(data_file); // lamda_sd;
 data_file >> SD[sd_offset++];
-pet_ignore(data_file);  // nu_sd;
+pet_ignore(data_file); // nu_sd;
 data_file.close();
 data_file.clear();
 
@@ -129,18 +129,8 @@ conv_info info_c = {ConvNum, ConvMul, &Conv[0]};
 prior_info info_p = {ModelNum, &Prior[0]};
 sd_info info_s = {ModelNum, &SD[0]};
 model_info info_m = {Decay, ModelType};
-pet_info info = {&info_d,
-                 true,
-                 &info_t,
-                 true,
-                 &info_c,
-                 true,
-                 &info_p,
-                 true,
-                 &info_s,
-                 true,
-                 &info_m,
-                 true};
+pet_info info = {&info_d, true, &info_t, true, &info_c, true, &info_p, true,
+    &info_s, true, &info_m, true};
 
 if (Interactive) {
     std::cout << "Data reading is done." << std::endl;

@@ -42,4 +42,4 @@
 
 #include <vsmc/smp/backend_@smp@.hpp>
 
-#endif  // VSMC_EXAMPLE_PF_@SMP@_HPP
+#endif // VSMC_EXAMPLE_PF_@SMP@_HPP

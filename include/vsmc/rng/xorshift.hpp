@@ -38,22 +38,19 @@
     VSMC_STATIC_ASSERT((K != 0), USE_XorshiftEngine_WITH_ORDER_EUQAL_TO_ZERO)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType)                 \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_unsigned<ResultType>::value),                               \
+    VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),                \
         USE_XorshiftEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType)                \
-    VSMC_STATIC_ASSERT(                                                      \
-        (sizeof(ResultType) >= sizeof(uint32_t)),                            \
+    VSMC_STATIC_ASSERT((sizeof(ResultType) >= sizeof(uint32_t)),             \
         USE_XorshiftEngine_WITH_A_ResultType_SMALLER_THAN_32_BITS)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_INDEX(I, K)                          \
     VSMC_STATIC_ASSERT((I != 0 || K == 1),                                   \
-                       USE_XorshiftEngine_WITH_INDEX_##I##_EQUAL_TO_ZERO)
+        USE_XorshiftEngine_WITH_INDEX_##I##_EQUAL_TO_ZERO)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_INDEX_ORDER(R, S, K)                 \
-    VSMC_STATIC_ASSERT(                                                      \
-        (R > S || K == 1),                                                   \
+    VSMC_STATIC_ASSERT((R > S || K == 1),                                    \
         USE_XorshiftEngine_WITH_INDEX_##R##_NOT_LARGER_THAN_##S)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_SHIFT_BITS(A)                        \
@@ -61,13 +58,11 @@
         (A != 0), USE_XorshiftEngine_WITH_SHIFT_BITS_##A##_EQUAL_TO_ZERO);
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_SHIFT_BITS_C(C, K)                   \
-    VSMC_STATIC_ASSERT(                                                      \
-        (C != 0 || K != 1),                                                  \
+    VSMC_STATIC_ASSERT((C != 0 || K != 1),                                   \
         USE_XorshiftEngine_WITH_SHIFT_BITS_##C##_EQUAL_TO_ZERO);
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_SHIFT_BITS_D(D, K)                   \
-    VSMC_STATIC_ASSERT(                                                      \
-        (D != 0 || K == 1),                                                  \
+    VSMC_STATIC_ASSERT((D != 0 || K == 1),                                   \
         USE_XorshiftEngine_WITH_SHIFT_BITS_##A##_EQUAL_TO_ZERO);
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT                                      \
@@ -110,9 +105,9 @@ template <typename ResultType> struct XorshiftEngineTrait {
     /// circular
     /// buffer is implemented through the use of modulo operation.
     static constexpr const std::size_t max_loop_unroll = 4;
-};  // struct XorshiftEngineTrait
+}; // struct XorshiftEngineTrait
 
-}  // namespace vsmc::traits
+} // namespace vsmc::traits
 
 namespace internal
 {
@@ -135,12 +130,8 @@ struct XorshiftRight<true, ResultType, A> {
     static ResultType shift(ResultType x) { return x ^ (x >> A); }
 };
 
-template <typename ResultType,
-          std::size_t K,
-          std::size_t R,
-          std::size_t S,
-          bool =
-              (K <= traits::XorshiftEngineTrait<ResultType>::max_loop_unroll)>
+template <typename ResultType, std::size_t K, std::size_t R, std::size_t S,
+    bool = (K <= traits::XorshiftEngineTrait<ResultType>::max_loop_unroll)>
 struct XorshiftIndex {
     void reset() {}
 
@@ -152,7 +143,7 @@ struct XorshiftIndex {
     {
         rng_array_left_shift<K, 1, false>(state);
     }
-};  // struct XorshiftIndex
+}; // struct XorshiftIndex
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S>
 struct XorshiftIndex<ResultType, K, R, S, false> {
@@ -168,17 +159,12 @@ struct XorshiftIndex<ResultType, K, R, S, false> {
 
     private:
     std::size_t iter_;
-};  // struct XorshiftIndex
+}; // struct XorshiftIndex
 
-template <unsigned A,
-          unsigned B,
-          unsigned C,
-          unsigned,
-          typename ResultType,
-          std::size_t R,
-          std::size_t S>
-inline ResultType xorshift(Array<ResultType, 1> &state,
-                           XorshiftIndex<ResultType, 1, R, S> &)
+template <unsigned A, unsigned B, unsigned C, unsigned, typename ResultType,
+    std::size_t R, std::size_t S>
+inline ResultType xorshift(
+    Array<ResultType, 1> &state, XorshiftIndex<ResultType, 1, R, S> &)
 {
     state.front() ^= (state.front()) << A;
     state.front() ^= (state.front()) >> B;
@@ -187,16 +173,10 @@ inline ResultType xorshift(Array<ResultType, 1> &state,
     return state.front();
 }
 
-template <unsigned A,
-          unsigned B,
-          unsigned C,
-          unsigned D,
-          typename ResultType,
-          std::size_t K,
-          std::size_t R,
-          std::size_t S>
-inline ResultType xorshift(Array<ResultType, K> &state,
-                           XorshiftIndex<ResultType, K, R, S> &index)
+template <unsigned A, unsigned B, unsigned C, unsigned D, typename ResultType,
+    std::size_t K, std::size_t R, std::size_t S>
+inline ResultType xorshift(
+    Array<ResultType, K> &state, XorshiftIndex<ResultType, K, R, S> &index)
 {
     ResultType xr = state[index.r()];
     xr = XorshiftLeft<A != 0, ResultType, A>::shift(xr);
@@ -211,7 +191,7 @@ inline ResultType xorshift(Array<ResultType, K> &state,
     return state[index.k()] = xs ^ xr;
 }
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief Xorshift RNG engine
 /// \ingroup Xorshift
@@ -229,14 +209,8 @@ inline ResultType xorshift(Array<ResultType, K> &state,
 /// \tparam D Bits of second right shift (unused if `K = 1`)
 /// \tparam R Index of first xorshift (unused if `K = 1`)
 /// \tparam S Index of second xorshift (unused if `K = 1`)
-template <typename ResultType,
-          std::size_t K,
-          unsigned A,
-          unsigned B,
-          unsigned C,
-          unsigned D,
-          std::size_t R,
-          std::size_t S>
+template <typename ResultType, std::size_t K, unsigned A, unsigned B,
+    unsigned C, unsigned D, std::size_t R, std::size_t S>
 class XorshiftEngine
 {
     public:
@@ -251,11 +225,8 @@ class XorshiftEngine
     }
 
     template <typename SeedSeq>
-    explicit XorshiftEngine(
-        SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            result_type,
+    explicit XorshiftEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
             XorshiftEngine<ResultType, K, A, B, C, D, R, S>>::value>::type * =
             nullptr)
     {
@@ -275,11 +246,8 @@ class XorshiftEngine
     }
 
     template <typename SeedSeq>
-    void seed(
-        SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            result_type,
+    void seed(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
             XorshiftEngine<ResultType, K, A, B, C, D, R, S>>::value>::type * =
             nullptr)
     {
@@ -321,9 +289,9 @@ class XorshiftEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
     {
         if (!os.good())
             return os;
@@ -334,9 +302,9 @@ class XorshiftEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
     {
         if (!is.good())
             return is;
@@ -357,16 +325,15 @@ class XorshiftEngine
     static constexpr const result_type uint32_t_max_ =
         static_cast<result_type>(
             static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
-};  // class XorshiftEngine
+}; // class XorshiftEngine
 
 /// \brief Xorwow RNG engine
 /// \ingroup Xorshift
 ///
 /// \details
 /// Use Marsaglia's Xorwow algorithm with an Xorshift engine.
-template <typename Eng,
-          typename Eng::result_type D = 362437,
-          typename Eng::result_type DInit = 6615241>
+template <typename Eng, typename Eng::result_type D = 362437,
+    typename Eng::result_type DInit = 6615241>
 class XorwowEngine
 {
     public:
@@ -376,11 +343,8 @@ class XorwowEngine
     explicit XorwowEngine(result_type s = 1) : eng_(s), weyl_(DInit) {}
 
     template <typename SeedSeq>
-    explicit XorwowEngine(
-        SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            result_type,
+    explicit XorwowEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
             XorwowEngine<Eng, D, DInit>>::value>::type * = nullptr)
         : eng_(seq), weyl_(DInit)
     {
@@ -394,10 +358,8 @@ class XorwowEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-              typename std::enable_if<internal::is_seed_seq<
-                  SeedSeq,
-                  result_type,
-                  XorwowEngine<Eng, D, DInit>>::value>::type * = nullptr)
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            XorwowEngine<Eng, D, DInit>>::value>::type * = nullptr)
     {
         eng_.seed(seq);
         weyl_ = DInit;
@@ -419,21 +381,21 @@ class XorwowEngine
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend inline bool operator==(const XorwowEngine<Eng, D, DInit> &eng1,
-                                  const XorwowEngine<Eng, D, DInit> &eng2)
+        const XorwowEngine<Eng, D, DInit> &eng2)
     {
         return eng1.eng_ == eng2.eng_ && eng1.weyl_ == eng2.weyl_;
     }
 
     friend inline bool operator!=(const XorwowEngine<Eng, D, DInit> &eng1,
-                                  const XorwowEngine<Eng, D, DInit> &eng2)
+        const XorwowEngine<Eng, D, DInit> &eng2)
     {
         return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const XorwowEngine<Eng, D, DInit> &eng)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const XorwowEngine<Eng, D, DInit> &eng)
     {
         if (!os.good())
             return os;
@@ -444,9 +406,9 @@ class XorwowEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   XorwowEngine<Eng, D, DInit> &eng)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        XorwowEngine<Eng, D, DInit> &eng)
     {
         if (!is.good())
             return is;
@@ -467,7 +429,7 @@ class XorwowEngine
     private:
     Eng eng_;
     result_type weyl_;
-};  // class XorwowEngine
+}; // class XorwowEngine
 
 /// \brief Xorshift RNG engine generating \f$2^{32}-1\f$ 32-bits integers
 /// \ingroup Xorshift
@@ -605,6 +567,6 @@ typedef Xorwow128x32 Xorwow;
 /// \ingroup Xorshift
 typedef Xorwow64x64 Xorwow_64;
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_XORSHIFT_HPP
+#endif // VSMC_RNG_XORSHIFT_HPP

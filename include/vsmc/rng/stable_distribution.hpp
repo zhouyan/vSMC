@@ -36,18 +36,18 @@
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(a) \
     VSMC_RUNTIME_ASSERT((a > 0 && a <= 2),                                   \
-                        ("**StableDistribution** CONSTRUCTED WITH INVALID "  \
-                         "STABILITY PARAMETER VALUE"))
+        ("**StableDistribution** CONSTRUCTED WITH INVALID "                  \
+         "STABILITY PARAMETER VALUE"))
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SKEWNESS(a)  \
     VSMC_RUNTIME_ASSERT((a >= -1 && a <= 1),                                 \
-                        ("**StableDistribution** CONSTRUCTED WITH INVALID "  \
-                         "SKEWNESS PARAMETER VALUE"))
+        ("**StableDistribution** CONSTRUCTED WITH INVALID "                  \
+         "SKEWNESS PARAMETER VALUE"))
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SCALE(a)     \
-    VSMC_RUNTIME_ASSERT((a > 0),                                             \
-                        ("**StableDistribution** CONSTRUCTED WITH INVALID "  \
-                         "SCALE PARAMETER VALUE"))
+    VSMC_RUNTIME_ASSERT(                                                     \
+        (a > 0), ("**StableDistribution** CONSTRUCTED WITH INVALID "         \
+                  "SCALE PARAMETER VALUE"))
 
 namespace vsmc
 {
@@ -66,9 +66,8 @@ template <typename FPType> class StableDistribution
         typedef StableDistribution<FPType> distribution_type;
 
         explicit param_type(result_type stability = 1,
-                            result_type skewness = 0,
-                            result_type location = 0,
-                            result_type scale = 1)
+            result_type skewness = 0, result_type location = 0,
+            result_type scale = 1)
             : stability_(stability),
               skewness_(skewness),
               location_(location),
@@ -81,8 +80,8 @@ template <typename FPType> class StableDistribution
         result_type location() const { return location_; }
         result_type scale() const { return scale_; }
 
-        friend inline bool operator==(const param_type &param1,
-                                      const param_type &param2)
+        friend inline bool operator==(
+            const param_type &param1, const param_type &param2)
         {
             if (param1.stability_ < param2.stability_ ||
                 param1.stability_ > param2.stability_)
@@ -99,16 +98,15 @@ template <typename FPType> class StableDistribution
             return true;
         }
 
-        friend inline bool operator!=(const param_type param1,
-                                      const param_type param2)
+        friend inline bool operator!=(
+            const param_type param1, const param_type param2)
         {
             return !(param1 == param2);
         }
 
         template <typename CharT, typename Traits>
-        friend inline std::basic_ostream<CharT, Traits> &
-            operator<<(std::basic_ostream<CharT, Traits> &os,
-                       const param_type &param)
+        friend inline std::basic_ostream<CharT, Traits> &operator<<(
+            std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
             if (!os.good())
                 return os;
@@ -120,9 +118,8 @@ template <typename FPType> class StableDistribution
         }
 
         template <typename CharT, typename Traits>
-        friend inline std::basic_istream<CharT, Traits> &
-            operator>>(std::basic_istream<CharT, Traits> &is,
-                       param_type &param)
+        friend inline std::basic_istream<CharT, Traits> &operator>>(
+            std::basic_istream<CharT, Traits> &is, param_type &param)
         {
             if (!is.good())
                 return is;
@@ -156,12 +153,11 @@ template <typename FPType> class StableDistribution
         result_type skewness_;
         result_type location_;
         result_type scale_;
-    };  // class param_type
+    }; // class param_type
 
     explicit StableDistribution(result_type stability = 1,
-                                result_type skewness = 0,
-                                result_type location = 0,
-                                result_type scale = 1)
+        result_type skewness = 0, result_type location = 0,
+        result_type scale = 1)
         : stability_(stability),
           skewness_(skewness),
           location_(location),
@@ -233,7 +229,7 @@ template <typename FPType> class StableDistribution
     }
 
     friend inline bool operator==(const StableDistribution<FPType> &rstable1,
-                                  const StableDistribution<FPType> &rstable2)
+        const StableDistribution<FPType> &rstable2)
     {
         if (rstable1.stability_ < rstable2.stability_ ||
             rstable1.stability_ > rstable2.stability_)
@@ -251,15 +247,15 @@ template <typename FPType> class StableDistribution
     }
 
     friend inline bool operator!=(const StableDistribution<FPType> &rstable1,
-                                  const StableDistribution<FPType> &rstable2)
+        const StableDistribution<FPType> &rstable2)
     {
         return !(rstable1 == rstable2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const StableDistribution<FPType> &rstable)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const StableDistribution<FPType> &rstable)
     {
         if (!os.good())
             return os;
@@ -271,9 +267,9 @@ template <typename FPType> class StableDistribution
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   StableDistribution<FPType> &rstable)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        StableDistribution<FPType> &rstable)
     {
         if (!is.good())
             return is;
@@ -343,7 +339,7 @@ template <typename FPType> class StableDistribution
         result_type b = sin(stability_ * (u + xi_));
         result_type c = log(cos(u)) / stability_;
         result_type d = (1 - stability_) / stability_ *
-                        log(cos(u - stability_ * (u + xi_)) / w);
+            log(cos(u - stability_ * (u + xi_)) / w);
         result_type x = b * std::exp(a - c + d);
 
         return x;
@@ -354,8 +350,8 @@ template <typename FPType> class StableDistribution
         using std::log;
 
         return scale_ * x + location_ +
-               2 * math::pi_inv<result_type>() * skewness_ * scale_ *
-                   log(scale_);
+            2 * math::pi_inv<result_type>() * skewness_ * scale_ *
+            log(scale_);
     }
 
     result_type trans_a(result_type x) const
@@ -379,8 +375,8 @@ template <typename FPType> class StableDistribution
             xi_ = math::pi_by2<result_type>();
         }
     }
-};  // class StableDistributionBase
+}; // class StableDistributionBase
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_STABLE_DISTRIBUTION_HPP
+#endif // VSMC_RNG_STABLE_DISTRIBUTION_HPP

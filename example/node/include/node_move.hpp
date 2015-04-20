@@ -134,8 +134,8 @@ class node_move : public BASE_MOVE<node_state, node_move>
             move_k_.push_back(node_move_k(i));
     }
 
-    std::size_t move_state(std::size_t iter,
-                           vsmc::SingleParticle<node_state> sp)
+    std::size_t move_state(
+        std::size_t iter, vsmc::SingleParticle<node_state> sp)
     {
         std::size_t acc = 0;
         acc += move_a0_.move_state(iter, sp);
@@ -154,4 +154,4 @@ class node_move : public BASE_MOVE<node_state, node_move>
     std::vector<node_move_k> move_k_;
 };
 
-#endif  // VSMC_EXAMPLE_NODE_MOVE_HPP
+#endif // VSMC_EXAMPLE_NODE_MOVE_HPP

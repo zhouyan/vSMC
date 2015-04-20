@@ -50,10 +50,8 @@
 
 struct rng_device;
 
-inline void set_kernel_vec(const std::string &kbase,
-                           cl::Program &program,
-                           std::vector<cl::Kernel> &kernel_vec,
-                           bool clear_first = true)
+inline void set_kernel_vec(const std::string &kbase, cl::Program &program,
+    std::vector<cl::Kernel> &kernel_vec, bool clear_first = true)
 {
     if (clear_first)
         kernel_vec.clear();
@@ -64,10 +62,8 @@ inline void set_kernel_vec(const std::string &kbase,
 }
 
 template <typename FP, typename DistType, typename Eng>
-inline vsmc::StopWatch rng_cl_test_cpp(std::size_t N,
-                                       DistType &dist,
-                                       Eng &eng,
-                                       std::vector<FP> &host)
+inline vsmc::StopWatch rng_cl_test_cpp(
+    std::size_t N, DistType &dist, Eng &eng, std::vector<FP> &host)
 {
     vsmc::StopWatch watch;
     watch.start();
@@ -82,10 +78,8 @@ inline vsmc::StopWatch rng_cl_test_cpp(std::size_t N,
 
 template <typename FP>
 inline void rng_cl_test_ocl(std::size_t N,
-                            std::vector<cl::Kernel> &kernel_vec,
-                            cl::Buffer &buffer,
-                            std::vector<FP> &host,
-                            double tcpp)
+    std::vector<cl::Kernel> &kernel_vec, cl::Buffer &buffer,
+    std::vector<FP> &host, double tcpp)
 {
     vsmc::CLManager<rng_device> &manager =
         vsmc::CLManager<rng_device>::instance();
@@ -113,13 +107,9 @@ inline void rng_cl_test_ocl(std::size_t N,
 }
 
 template <typename FP, typename DistType, typename Eng>
-inline void rng_test_dist(std::size_t N,
-                          std::vector<cl::Kernel> &kernel_vec,
-                          const std::string &dname,
-                          DistType &dist,
-                          Eng &eng,
-                          cl::Buffer &buffer,
-                          std::vector<FP> &host)
+inline void rng_test_dist(std::size_t N, std::vector<cl::Kernel> &kernel_vec,
+    const std::string &dname, DistType &dist, Eng &eng, cl::Buffer &buffer,
+    std::vector<FP> &host)
 {
     std::cout << std::left << std::setw(20) << dname;
     vsmc::StopWatch tcpp(rng_cl_test_cpp(N, dist, eng, host));
@@ -128,13 +118,10 @@ inline void rng_test_dist(std::size_t N,
 }
 
 template <typename FP>
-inline void rng_cl_test(std::size_t N,
-                        cl::Program &program,
-                        std::vector<std::string> &dnames,
-                        std::vector<std::string> &unames,
-                        std::vector<std::string> &rcodes,
-                        std::vector<std::vector<FP>> &values,
-                        std::vector<std::vector<cl_uint>> &values_ui)
+inline void rng_cl_test(std::size_t N, cl::Program &program,
+    std::vector<std::string> &dnames, std::vector<std::string> &unames,
+    std::vector<std::string> &rcodes, std::vector<std::vector<FP>> &values,
+    std::vector<std::vector<cl_uint>> &values_ui)
 {
     vsmc::CLManager<rng_device> &manager =
         vsmc::CLManager<rng_device>::instance();
@@ -191,13 +178,8 @@ inline void rng_cl_test(std::size_t N,
         std::size_t local_size = 0;
         vsmc::cl_preferred_work_size(
             N, kernel_vec[i], manager.device(), global_size, local_size);
-        vsmc::cl_set_kernel_args(kernel_vec[i],
-                                 0,
-                                 static_cast<cl_ulong>(N),
-                                 buffer_ui_0,
-                                 buffer_ui_1,
-                                 buffer_ui_2,
-                                 buffer_ui_3);
+        vsmc::cl_set_kernel_args(kernel_vec[i], 0, static_cast<cl_ulong>(N),
+            buffer_ui_0, buffer_ui_1, buffer_ui_2, buffer_ui_3);
 
         // Run kernel once first to cache
         manager.run_kernel(kernel_vec[i], N, local_size);
@@ -279,12 +261,10 @@ inline void rng_cl_test(std::size_t N,
 }
 
 template <typename FP>
-inline void rng_cl_output(std::size_t N,
-                          std::vector<std::string> &dnames,
-                          std::vector<std::string> &unames,
-                          std::vector<std::string> &rcodes,
-                          std::vector<std::vector<FP>> &values,
-                          std::vector<std::vector<cl_uint>> &values_ui)
+inline void rng_cl_output(std::size_t N, std::vector<std::string> &dnames,
+    std::vector<std::string> &unames, std::vector<std::string> &rcodes,
+    std::vector<std::vector<FP>> &values,
+    std::vector<std::vector<cl_uint>> &values_ui)
 {
 
     rng_output_data("rng_cl", dnames, values);
@@ -318,4 +298,4 @@ template <typename FT> inline void rng_cl(std::size_t N, cl::Program &program)
     rng_cl_output<FT>(N, dnames, unames, rcodes, values, values_ui);
 }
 
-#endif  // VSMC_EXAMPLE_RNG_OPENCL_HPP
+#endif // VSMC_EXAMPLE_RNG_OPENCL_HPP

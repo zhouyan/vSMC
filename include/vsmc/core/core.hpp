@@ -43,4 +43,4 @@
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/core/state_tuple.hpp>
 
-#endif  // VSMC_CORE_CORE_HPP
+#endif // VSMC_CORE_CORE_HPP

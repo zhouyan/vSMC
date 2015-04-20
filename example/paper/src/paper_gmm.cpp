@@ -301,7 +301,7 @@ class gmm_state : public gmm_state_base
             double resid = param.mu(i) - mu0_;
             lp += -0.5 * (resid * resid) / (sd0_ * sd0_);
             lp += (shape0_ - 1) * std::log(param.lambda(i)) -
-                  param.lambda(i) / scale0_;
+                param.lambda(i) / scale0_;
         }
 
         return param.log_prior() = lp;
@@ -316,10 +316,10 @@ class gmm_state : public gmm_state_base
             for (std::size_t i = 0; i != param.comp_num(); ++i) {
                 double resid = obs_[k] - param.mu(i);
                 lli += param.weight(i) *
-                       std::exp(0.5 * param.log_lambda(i) -
-                                0.5 * param.lambda(i) * resid * resid);
+                    std::exp(0.5 * param.log_lambda(i) -
+                           0.5 * param.lambda(i) * resid * resid);
             }
-            ll += std::log(lli + 1e-13);  // lli can be numerically zero!
+            ll += std::log(lli + 1e-13); // lli can be numerically zero!
         }
 
         return param.log_likelihood() = ll;
@@ -420,8 +420,8 @@ class gmm_move_smc
     {
     }
 
-    std::size_t operator()(std::size_t iter,
-                           vsmc::Particle<gmm_state> &particle)
+    std::size_t operator()(
+        std::size_t iter, vsmc::Particle<gmm_state> &particle)
     {
         alpha_setter_(iter, particle);
 
@@ -514,8 +514,8 @@ class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
         param.save_old();
         double sum = 1;
         for (std::size_t i = 0; i != param.comp_num() - 1; ++i) {
-            param.weight(i) = std::log(param.weight(i) /
-                                       param.weight(param.comp_num() - 1));
+            param.weight(i) = std::log(
+                param.weight(i) / param.weight(param.comp_num() - 1));
             param.weight(i) += rweight(sp.rng());
             param.weight(i) = std::exp(param.weight(i));
             sum += param.weight(i);
@@ -554,8 +554,8 @@ class gmm_alpha_linear
     public:
     gmm_alpha_linear(const std::size_t iter_num) : iter_num_(iter_num) {}
 
-    void operator()(std::size_t iter,
-                    vsmc::Particle<gmm_state> &particle) const
+    void operator()(
+        std::size_t iter, vsmc::Particle<gmm_state> &particle) const
     {
         particle.value().alpha(static_cast<double>(iter) / iter_num_);
     }
@@ -574,8 +574,8 @@ class gmm_alpha_prior
     {
     }
 
-    void operator()(std::size_t iter,
-                    vsmc::Particle<gmm_state> &particle) const
+    void operator()(
+        std::size_t iter, vsmc::Particle<gmm_state> &particle) const
     {
         double base = static_cast<double>(iter) / iter_num_;
         double alpha = 1;

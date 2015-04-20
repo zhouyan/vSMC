@@ -38,4 +38,4 @@
 #include <vsmc/integrate/nintegrate_base.hpp>
 #include <vsmc/integrate/nintegrate_newton_cotes.hpp>
 
-#endif  // VSMC_INTEGRATE_INTEGRATE_HPP
+#endif // VSMC_INTEGRATE_INTEGRATE_HPP

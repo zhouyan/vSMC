@@ -36,8 +36,7 @@
 #include <vsmc/math/cblas.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param)        \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        is_positive(param),                                                  \
+    VSMC_RUNTIME_ASSERT(is_positive(param),                                  \
         ("**DiscreteDistribution** WEIGHTS ARE NOT NON-NEGATIVE"));
 
 namespace vsmc
@@ -69,10 +68,8 @@ template <typename IntType = int> class DiscreteDistribution
     }
 
     template <typename UnaryOperation>
-    DiscreteDistribution(std::size_t count,
-                         double xmin,
-                         double xmax,
-                         UnaryOperation unary_op)
+    DiscreteDistribution(
+        std::size_t count, double xmin, double xmax, UnaryOperation unary_op)
     {
         param_.reserve(count);
         double delta = (xmax - xmin) / static_cast<double>(count);
@@ -148,10 +145,8 @@ template <typename IntType = int> class DiscreteDistribution
     /// dynamic memory allocation. This function does not use dynamic memory
     /// and improve performance for normalized weights.
     template <typename URNG, typename InputIter>
-    result_type operator()(URNG &eng,
-                           InputIter first,
-                           InputIter last,
-                           bool normalized = false) const
+    result_type operator()(URNG &eng, InputIter first, InputIter last,
+        bool normalized = false) const
     {
         typedef
             typename std::iterator_traits<InputIter>::value_type value_type;
@@ -189,21 +184,21 @@ template <typename IntType = int> class DiscreteDistribution
     }
 
     friend inline bool operator==(const DiscreteDistribution<IntType> &rdisc1,
-                                  const DiscreteDistribution<IntType> &rdisc2)
+        const DiscreteDistribution<IntType> &rdisc2)
     {
         return rdisc1.param_ == rdisc2.param_;
     }
 
     friend inline bool operator!=(const DiscreteDistribution<IntType> &rdisc1,
-                                  const DiscreteDistribution<IntType> &rdisc2)
+        const DiscreteDistribution<IntType> &rdisc2)
     {
         return rdisc1.param_ != rdisc2.param_;
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const DiscreteDistribution<IntType> &rdisc)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const DiscreteDistribution<IntType> &rdisc)
     {
         if (!os.good())
             return os;
@@ -226,9 +221,9 @@ template <typename IntType = int> class DiscreteDistribution
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   DiscreteDistribution<IntType> &rdisc)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        DiscreteDistribution<IntType> &rdisc)
     {
         if (!is.good())
             return is;
@@ -278,8 +273,8 @@ template <typename IntType = int> class DiscreteDistribution
 
         return true;
     }
-};  // class DiscreteDistribution
+}; // class DiscreteDistribution
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
+#endif // VSMC_RNG_DISCRETE_DISTRIBUTION_HPP

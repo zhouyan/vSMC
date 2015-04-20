@@ -47,7 +47,7 @@ template <typename BaseState> class StateSEQ : public BaseState
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
     explicit StateSEQ(size_type N) : BaseState(N) {}
-};  // class StateSEQ
+}; // class StateSEQ
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup SEQ
@@ -71,7 +71,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(SEQ, Initialize)
-};  // class InitializeSEQ
+}; // class InitializeSEQ
 
 /// \brief Sampler<T>::move_type subtype
 /// \ingroup SEQ
@@ -94,7 +94,7 @@ class MoveSEQ : public MoveBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(SEQ, Move)
-};  // class MoveSEQ
+}; // class MoveSEQ
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup SEQ
@@ -102,26 +102,22 @@ template <typename T, typename Derived>
 class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
     public:
-    void operator()(std::size_t iter,
-                    std::size_t dim,
-                    const Particle<T> &particle,
-                    double *res)
+    void operator()(std::size_t iter, std::size_t dim,
+        const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i) {
-            this->monitor_state(iter,
-                                dim,
-                                ConstSingleParticle<T>(i, &particle),
-                                res + i * dim);
+            this->monitor_state(iter, dim,
+                ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
         this->post_processor(iter, particle);
     }
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(SEQ, MonitorEval)
-};  // class MonitorEvalSEQ
+}; // class MonitorEvalSEQ
 
 /// \brief Path<T>::eval_type subtype
 /// \ingroup SEQ
@@ -129,8 +125,8 @@ template <typename T, typename Derived>
 class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
     public:
-    double
-        operator()(std::size_t iter, const Particle<T> &particle, double *res)
+    double operator()(
+        std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -146,8 +142,8 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_IMPL_COPY(SEQ, PathEval)
-};  // class PathEvalSEQ
+}; // class PathEvalSEQ
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_SMP_BACKEND_SEQ_HPP
+#endif // VSMC_SMP_BACKEND_SEQ_HPP

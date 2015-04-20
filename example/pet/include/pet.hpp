@@ -63,4 +63,4 @@ template <typename InputStream> inline void pet_ignore(InputStream &is)
     is.ignore(std::numeric_limits<std::streamsize>::max VSMC_MNE(), '\n');
 }
 
-#endif  // VSMC_EXAMPLE_PET_HPP
+#endif // VSMC_EXAMPLE_PET_HPP

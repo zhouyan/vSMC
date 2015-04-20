@@ -94,11 +94,11 @@ class ThreadNum
 
     ThreadNum()
         : thread_num_(static_cast<std::size_t>(1) >
-                              static_cast<std::size_t>(
-                                  std::thread::hardware_concurrency()) ?
-                          static_cast<std::size_t>(1) :
-                          static_cast<std::size_t>(
-                              std::thread::hardware_concurrency()))
+                      static_cast<std::size_t>(
+                          std::thread::hardware_concurrency()) ?
+                  static_cast<std::size_t>(1) :
+                  static_cast<std::size_t>(
+                      std::thread::hardware_concurrency()))
     {
 #ifdef VSMC_MSVC
 #pragma warning(push)
@@ -116,8 +116,8 @@ class ThreadNum
 
     ThreadNum(const ThreadNum &) = delete;
     ThreadNum &operator=(const ThreadNum &) = delete;
-};  // class ThreadInfo
+}; // class ThreadInfo
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_THREAD_THREAD_NUM_HPP
+#endif // VSMC_THREAD_THREAD_NUM_HPP

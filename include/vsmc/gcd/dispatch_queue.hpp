@@ -42,10 +42,10 @@ namespace vsmc
 /// \brief Types of DispatchQueue
 /// \ingroup Dispatch
 enum DispatchQueueType {
-    DispatchMain,    ///< The queue obtained by `dispatch_get_main_queue`
-    DispatchGlobal,  ///< The queue obtained by `dispatch_get_gloal_queue`
-    DispatchPrivate  ///< The queue created by `dispatch_queue_create`
-};                   // enum DispatchQueueType
+    DispatchMain,   ///< The queue obtained by `dispatch_get_main_queue`
+    DispatchGlobal, ///< The queue obtained by `dispatch_get_gloal_queue`
+    DispatchPrivate ///< The queue created by `dispatch_queue_create`
+};                  // enum DispatchQueueType
 
 template <DispatchQueueType> class DispatchQueue;
 
@@ -69,14 +69,13 @@ class DispatchQueueBase : public DispatchObject<::dispatch_queue_t>
         return ::dispatch_queue_get_specific(this->object(), key);
     }
 
-    void set_specific(const void *key,
-                      void *context,
-                      ::dispatch_function_t destructor) const
+    void set_specific(const void *key, void *context,
+        ::dispatch_function_t destructor) const
     {
         ::dispatch_queue_set_specific(
             this->object(), key, context, destructor);
     }
-#endif  // VSMC_HAS_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 
     template <typename DispatchType>
     void set_target_queue(const DispatchObject<DispatchType> &object) const
@@ -89,16 +88,14 @@ class DispatchQueueBase : public DispatchObject<::dispatch_queue_t>
         ::dispatch_set_target_queue(object, this->object());
     }
 
-    void after_f(::dispatch_time_t when,
-                 void *context,
-                 ::dispatch_function_t f) const
+    void after_f(
+        ::dispatch_time_t when, void *context, ::dispatch_function_t f) const
     {
         ::dispatch_after_f(when, this->object(), context, f);
     }
 
-    void apply_f(std::size_t iterations,
-                 void *context,
-                 void (*work)(void *, std::size_t)) const
+    void apply_f(std::size_t iterations, void *context,
+        void (*work)(void *, std::size_t)) const
     {
         ::dispatch_apply_f(iterations, this->object(), context, work);
     }
@@ -123,7 +120,7 @@ class DispatchQueueBase : public DispatchObject<::dispatch_queue_t>
     {
         ::dispatch_barrier_sync_f(this->object(), context, work);
     }
-#endif  // VSMC_HAS_GCD_LION
+#endif // VSMC_HAS_GCD_LION
 
 #ifdef __BLOCKS__
     void after(::dispatch_time_t when, ::dispatch_block_t block) const
@@ -156,15 +153,15 @@ class DispatchQueueBase : public DispatchObject<::dispatch_queue_t>
     {
         ::dispatch_barrier_sync(this->object(), block);
     }
-#endif  // VSMC_HAS_GCD_LION
-#endif  // __BLOCKS__
+#endif // VSMC_HAS_GCD_LION
+#endif // __BLOCKS__
 
     protected:
     DispatchQueueBase(::dispatch_queue_t queue, bool retained)
         : DispatchObject<::dispatch_queue_t>(queue, retained)
     {
     }
-};  // class DispatchQueueBase
+}; // class DispatchQueueBase
 
 /// \brief The main dispatch queue (`dipatch_get_main_queue`)
 /// \ingroup Dispatch
@@ -172,7 +169,7 @@ template <> class DispatchQueue<DispatchMain> : public DispatchQueueBase
 {
     public:
     DispatchQueue() : DispatchQueueBase(dispatch_get_main_queue(), false) {}
-};  // class DispatchQueue
+}; // class DispatchQueue
 
 /// \brief The global dispatch queue (`dispatch_get_gloal_queue`)
 /// \ingroup Dispatch
@@ -182,32 +179,32 @@ template <> class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 #if VSMC_HAS_GCD_LION
     DispatchQueue(::dispatch_queue_priority_t priority =
                       DISPATCH_QUEUE_PRIORITY_DEFAULT,
-                  unsigned long flags = 0)
-        : DispatchQueueBase(::dispatch_get_global_queue(priority, flags),
-                            false)
+        unsigned long flags = 0)
+        : DispatchQueueBase(
+              ::dispatch_get_global_queue(priority, flags), false)
     {
     }
-#else   // VSMC_HAS_GCD_LION
+#else  // VSMC_HAS_GCD_LION
     DispatchQueue(long priority = 0, unsigned long flags = 0)
-        : DispatchQueueBase(::dispatch_get_global_queue(priority, flags),
-                            false)
+        : DispatchQueueBase(
+              ::dispatch_get_global_queue(priority, flags), false)
     {
     }
-#endif  // VSMC_HAS_GCD_LION
-};      // class DispatchQueue
+#endif // VSMC_HAS_GCD_LION
+};     // class DispatchQueue
 
 /// \brief A private dispatch queue (`dispatch_queue_create`)
 /// \ingroup Dispatch
 template <> class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
 {
     public:
-    DispatchQueue(const char *label = nullptr,
-                  ::dispatch_queue_attr_t attr = nullptr)
+    DispatchQueue(
+        const char *label = nullptr, ::dispatch_queue_attr_t attr = nullptr)
         : DispatchQueueBase(::dispatch_queue_create(label, attr), true)
     {
     }
-};  // class DispatchQueue
+}; // class DispatchQueue
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_GCD_DISPATCH_QUEUE_HPP
+#endif // VSMC_GCD_DISPATCH_QUEUE_HPP

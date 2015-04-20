@@ -41,15 +41,11 @@ namespace vsmc
 /// \brief Initialize class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl, typename F>
-class InitializeAdapter
-    : public InitializeAdapterBase<T,
-                                   F,
-                                   Impl<T, InitializeAdapter<T, Impl, F>>>
+class InitializeAdapter : public InitializeAdapterBase<T, F,
+                              Impl<T, InitializeAdapter<T, Impl, F>>>
 {
-    typedef InitializeAdapterBase<T,
-                                  F,
-                                  Impl<T, InitializeAdapter<T, Impl, F>>>
-        base;
+    typedef InitializeAdapterBase<T, F,
+        Impl<T, InitializeAdapter<T, Impl, F>>> base;
 
     public:
     InitializeAdapter() {}
@@ -60,7 +56,7 @@ class InitializeAdapter
     {
         return this->implementation().initialize_state(part);
     }
-};  // InitializeAdapter
+}; // InitializeAdapter
 
 /// \brief Move class adapter
 /// \ingroup Adapter
@@ -79,34 +75,28 @@ class MoveAdapter
     {
         return this->implementation().move_state(iter, part);
     }
-};  // MoveAdapter
+}; // MoveAdapter
 
 /// \brief Monitor evaluation class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl, typename F>
-class MonitorEvalAdapter
-    : public MonitorEvalAdapterBase<T,
-                                    F,
-                                    Impl<T, MonitorEvalAdapter<T, Impl, F>>>
+class MonitorEvalAdapter : public MonitorEvalAdapterBase<T, F,
+                               Impl<T, MonitorEvalAdapter<T, Impl, F>>>
 {
-    typedef MonitorEvalAdapterBase<T,
-                                   F,
-                                   Impl<T, MonitorEvalAdapter<T, Impl, F>>>
-        base;
+    typedef MonitorEvalAdapterBase<T, F,
+        Impl<T, MonitorEvalAdapter<T, Impl, F>>> base;
 
     public:
     MonitorEvalAdapter() {}
 
     MonitorEvalAdapter(const F &f) : base(f) {}
 
-    void monitor_state(std::size_t iter,
-                       std::size_t dim,
-                       ConstSingleParticle<T> part,
-                       double *res)
+    void monitor_state(std::size_t iter, std::size_t dim,
+        ConstSingleParticle<T> part, double *res)
     {
         this->implementation().monitor_state(iter, dim, part, res);
     }
-};  // MonitorEvalAdapter
+}; // MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter
 /// \ingroup Adapter
@@ -126,20 +116,16 @@ class PathEvalAdapter
     {
         return this->implementation().path_state(iter, part);
     }
-};  // PathEvalAdapter
+}; // PathEvalAdapter
 
 /// \brief Initialize class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl>
 class InitializeAdapter<T, Impl, NullType>
-    : public InitializeAdapterBase<
-          T,
-          NullType,
+    : public InitializeAdapterBase<T, NullType,
           Impl<T, InitializeAdapter<T, Impl, NullType>>>
 {
-    typedef InitializeAdapterBase<
-        T,
-        NullType,
+    typedef InitializeAdapterBase<T, NullType,
         Impl<T, InitializeAdapter<T, Impl, NullType>>> base;
 
     public:
@@ -149,8 +135,7 @@ class InitializeAdapter<T, Impl, NullType>
     typedef typename base::pre_processor_type pre_processor_type;
     typedef typename base::post_processor_type post_processor_type;
 
-    InitializeAdapter(
-        const initialize_state_type &init_state,
+    InitializeAdapter(const initialize_state_type &init_state,
         const initialize_param_type &init_param = initialize_param_type(),
         const pre_processor_type &pre = pre_processor_type(),
         const post_processor_type &post = post_processor_type())
@@ -165,19 +150,17 @@ class InitializeAdapter<T, Impl, NullType>
 
     private:
     const initialize_state_type initialize_state_;
-};  // class InitializeAdapter
+}; // class InitializeAdapter
 
 /// \brief Move class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl>
 class MoveAdapter<T, Impl, NullType>
-    : public MoveAdapterBase<T,
-                             NullType,
-                             Impl<T, MoveAdapter<T, Impl, NullType>>>
+    : public MoveAdapterBase<T, NullType,
+          Impl<T, MoveAdapter<T, Impl, NullType>>>
 {
-    typedef MoveAdapterBase<T,
-                            NullType,
-                            Impl<T, MoveAdapter<T, Impl, NullType>>> base;
+    typedef MoveAdapterBase<T, NullType,
+        Impl<T, MoveAdapter<T, Impl, NullType>>> base;
 
     public:
     typedef std::function<std::size_t(std::size_t, SingleParticle<T>)>
@@ -186,8 +169,8 @@ class MoveAdapter<T, Impl, NullType>
     typedef typename base::post_processor_type post_processor_type;
 
     MoveAdapter(const move_state_type &move_state,
-                const pre_processor_type &pre = pre_processor_type(),
-                const post_processor_type &post = post_processor_type())
+        const pre_processor_type &pre = pre_processor_type(),
+        const post_processor_type &post = post_processor_type())
         : base(pre, post), move_state_(move_state)
     {
     }
@@ -199,61 +182,50 @@ class MoveAdapter<T, Impl, NullType>
 
     private:
     const move_state_type move_state_;
-};  // class MoveAdapter
+}; // class MoveAdapter
 
 /// \brief Monitor evaluation class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl>
 class MonitorEvalAdapter<T, Impl, NullType>
-    : public MonitorEvalAdapterBase<
-          T,
-          NullType,
+    : public MonitorEvalAdapterBase<T, NullType,
           Impl<T, MonitorEvalAdapter<T, Impl, NullType>>>
 {
-    typedef MonitorEvalAdapterBase<
-        T,
-        NullType,
+    typedef MonitorEvalAdapterBase<T, NullType,
         Impl<T, MonitorEvalAdapter<T, Impl, NullType>>> base;
 
     public:
-    typedef std::function<void(
-        std::size_t, std::size_t, ConstSingleParticle<T>, double *)>
-        monitor_state_type;
+    typedef std::function<void(std::size_t, std::size_t,
+        ConstSingleParticle<T>, double *)> monitor_state_type;
     typedef typename base::pre_processor_type pre_processor_type;
     typedef typename base::post_processor_type post_processor_type;
 
-    MonitorEvalAdapter(
-        const monitor_state_type &monitor_state,
+    MonitorEvalAdapter(const monitor_state_type &monitor_state,
         const pre_processor_type &pre = pre_processor_type(),
         const post_processor_type &post = post_processor_type())
         : base(pre, post), monitor_state_(monitor_state)
     {
     }
 
-    void monitor_state(std::size_t iter,
-                       std::size_t dim,
-                       ConstSingleParticle<T> part,
-                       double *res)
+    void monitor_state(std::size_t iter, std::size_t dim,
+        ConstSingleParticle<T> part, double *res)
     {
         monitor_state_(iter, dim, part, res);
     }
 
     private:
     const monitor_state_type monitor_state_;
-};  // class MonitorEvalAdapter
+}; // class MonitorEvalAdapter
 
 /// \brief Path evaluation class adapter
 /// \ingroup Adapter
 template <typename T, template <typename, typename> class Impl>
 class PathEvalAdapter<T, Impl, NullType>
-    : public PathEvalAdapterBase<T,
-                                 NullType,
-                                 Impl<T, PathEvalAdapter<T, Impl, NullType>>>
+    : public PathEvalAdapterBase<T, NullType,
+          Impl<T, PathEvalAdapter<T, Impl, NullType>>>
 {
-    typedef PathEvalAdapterBase<T,
-                                NullType,
-                                Impl<T, PathEvalAdapter<T, Impl, NullType>>>
-        base;
+    typedef PathEvalAdapterBase<T, NullType,
+        Impl<T, PathEvalAdapter<T, Impl, NullType>>> base;
 
     public:
     typedef std::function<double(std::size_t, ConstSingleParticle<T>)>
@@ -263,9 +235,9 @@ class PathEvalAdapter<T, Impl, NullType>
     typedef typename base::post_processor_type post_processor_type;
 
     PathEvalAdapter(const path_state_type &path_state,
-                    const path_grid_type &path_grid,
-                    const pre_processor_type &pre = pre_processor_type(),
-                    const post_processor_type &post = post_processor_type())
+        const path_grid_type &path_grid,
+        const pre_processor_type &pre = pre_processor_type(),
+        const post_processor_type &post = post_processor_type())
         : base(path_grid, pre, post), path_state_(path_state)
     {
     }
@@ -277,8 +249,8 @@ class PathEvalAdapter<T, Impl, NullType>
 
     private:
     const path_state_type path_state_;
-};  // class PathEvalAdapter
+}; // class PathEvalAdapter
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_SMP_ADAPTER_HPP
+#endif // VSMC_SMP_ADAPTER_HPP

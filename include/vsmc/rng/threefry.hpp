@@ -35,14 +35,13 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType)              \
-    VSMC_STATIC_ASSERT(                                                      \
-        (std::is_same<ResultType, uint32_t>::value ||                        \
-         std::is_same<ResultType, uint64_t>::value),                         \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint32_t>::value ||         \
+                           std::is_same<ResultType, uint64_t>::value),       \
         USE_ThreefryEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K)                              \
-    VSMC_STATIC_ASSERT((K == 2 || K == 4),                                   \
-                       USE_ThreefryEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
+    VSMC_STATIC_ASSERT(                                                      \
+        (K == 2 || K == 4), USE_ThreefryEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY                                      \
     VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType);                 \
@@ -155,33 +154,33 @@ struct ThreefryRotate<ResultType, 2, N, true> {
     static void eval(Array<ResultType, 2> &state)
     {
         state[Position<0>()] += state[Position<1>()];
-        state[Position<1>()] = ThreefryRotateImpl<
-            ResultType,
-            ThreefryRotateConstantValue<ResultType, 2, r_, 0>::value>::
-            eval(state[Position<1>()]);
+        state[Position<1>()] =
+            ThreefryRotateImpl<ResultType,
+                ThreefryRotateConstantValue<ResultType, 2, r_,
+                                   0>::value>::eval(state[Position<1>()]);
         state[Position<1>()] ^= state[Position<0>()];
     }
 
     private:
     static constexpr const unsigned r_ = (N - 1) % 8;
-};  // struct ThreefryRotate
+}; // struct ThreefryRotate
 
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 4, N, true> {
     static void eval(Array<ResultType, 4> &state)
     {
         state[Position<0>()] += state[Position<i0_>()];
-        state[Position<i0_>()] = ThreefryRotateImpl<
-            ResultType,
-            ThreefryRotateConstantValue<ResultType, 4, r_, 0>::value>::
-            eval(state[Position<i0_>()]);
+        state[Position<i0_>()] =
+            ThreefryRotateImpl<ResultType,
+                ThreefryRotateConstantValue<ResultType, 4, r_,
+                                   0>::value>::eval(state[Position<i0_>()]);
         state[Position<i0_>()] ^= state[Position<0>()];
 
         state[Position<2>()] += state[Position<i2_>()];
-        state[Position<i2_>()] = ThreefryRotateImpl<
-            ResultType,
-            ThreefryRotateConstantValue<ResultType, 4, r_, 1>::value>::
-            eval(state[Position<i2_>()]);
+        state[Position<i2_>()] =
+            ThreefryRotateImpl<ResultType,
+                ThreefryRotateConstantValue<ResultType, 4, r_,
+                                   1>::value>::eval(state[Position<i2_>()]);
         state[Position<i2_>()] ^= state[Position<2>()];
     }
 
@@ -189,22 +188,20 @@ struct ThreefryRotate<ResultType, 4, N, true> {
     static constexpr const std::size_t i0_ = N % 2 ? 1 : 3;
     static constexpr const std::size_t i2_ = N % 2 ? 3 : 1;
     static constexpr const unsigned r_ = (N - 1) % 8;
-};  // struct ThreefryRotate
+}; // struct ThreefryRotate
 
-template <typename ResultType,
-          std::size_t K,
-          std::size_t N,
-          bool = (N % 4 == 0)>
+template <typename ResultType, std::size_t K, std::size_t N,
+    bool = (N % 4 == 0)>
 struct ThreefryInsertKey {
     static void eval(Array<ResultType, K> &, const Array<ResultType, K + 1> &)
     {
     }
-};  // struct ThreefryInsertKey
+}; // struct ThreefryInsertKey
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsertKey<ResultType, 2, N, true> {
-    static void eval(Array<ResultType, 2> &state,
-                     const Array<ResultType, 3> &par)
+    static void eval(
+        Array<ResultType, 2> &state, const Array<ResultType, 3> &par)
     {
         state[Position<0>()] += par[Position<i0_>()];
         state[Position<1>()] += par[Position<i1_>()];
@@ -215,12 +212,12 @@ struct ThreefryInsertKey<ResultType, 2, N, true> {
     static constexpr const std::size_t inc_ = N / 4;
     static constexpr const std::size_t i0_ = (inc_ + 0) % 3;
     static constexpr const std::size_t i1_ = (inc_ + 1) % 3;
-};  // struct ThreefryInsertKey
+}; // struct ThreefryInsertKey
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsertKey<ResultType, 4, N, true> {
-    static void eval(Array<ResultType, 4> &state,
-                     const Array<ResultType, 5> &par)
+    static void eval(
+        Array<ResultType, 4> &state, const Array<ResultType, 5> &par)
     {
         state[Position<0>()] += par[Position<i0_>()];
         state[Position<1>()] += par[Position<i1_>()];
@@ -235,9 +232,9 @@ struct ThreefryInsertKey<ResultType, 4, N, true> {
     static constexpr const std::size_t i1_ = (inc_ + 1) % 5;
     static constexpr const std::size_t i2_ = (inc_ + 2) % 5;
     static constexpr const std::size_t i3_ = (inc_ + 3) % 5;
-};  // struct ThreefryInsertKey
+}; // struct ThreefryInsertKey
 
-}  // namespace vsmc::internal
+} // namespace vsmc::internal
 
 /// \brief Threefry RNG engine reimplemented
 /// \ingroup R123RNG
@@ -268,9 +265,8 @@ struct ThreefryInsertKey<ResultType, 4, N, true> {
 /// vSMC
 /// increment the counter slightly differently, but it still cover the same
 /// range and has the same period as the original.
-template <typename ResultType,
-          std::size_t K,
-          std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
+template <typename ResultType, std::size_t K,
+    std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryEngine
 {
     public:
@@ -290,13 +286,9 @@ class ThreefryEngine
     }
 
     template <typename SeedSeq>
-    explicit ThreefryEngine(
-        SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<
-            SeedSeq,
-            result_type,
-            key_type,
-            ThreefryEngine<ResultType, K, Rounds>>::value>::type * =
+    explicit ThreefryEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            key_type, ThreefryEngine<ResultType, K, Rounds>>::value>::type * =
             nullptr)
         : index_(K)
     {
@@ -322,12 +314,9 @@ class ThreefryEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-              typename std::enable_if<internal::is_seed_seq<
-                  SeedSeq,
-                  result_type,
-                  key_type,
-                  ThreefryEngine<ResultType, K, Rounds>>::value>::type * =
-                  nullptr)
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            key_type, ThreefryEngine<ResultType, K, Rounds>>::value>::type * =
+            nullptr)
     {
         counter::reset(ctr_);
         key_type k;
@@ -423,25 +412,25 @@ class ThreefryEngine
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
-    friend inline bool
-        operator==(const ThreefryEngine<ResultType, K, Rounds> &eng1,
-                   const ThreefryEngine<ResultType, K, Rounds> &eng2)
+    friend inline bool operator==(
+        const ThreefryEngine<ResultType, K, Rounds> &eng1,
+        const ThreefryEngine<ResultType, K, Rounds> &eng2)
     {
         return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
-               eng1.par_ == eng2.par_;
+            eng1.par_ == eng2.par_;
     }
 
-    friend inline bool
-        operator!=(const ThreefryEngine<ResultType, K, Rounds> &eng1,
-                   const ThreefryEngine<ResultType, K, Rounds> &eng2)
+    friend inline bool operator!=(
+        const ThreefryEngine<ResultType, K, Rounds> &eng1,
+        const ThreefryEngine<ResultType, K, Rounds> &eng2)
     {
         return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &
-        operator<<(std::basic_ostream<CharT, Traits> &os,
-                   const ThreefryEngine<ResultType, K, Rounds> &eng)
+    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const ThreefryEngine<ResultType, K, Rounds> &eng)
     {
         if (!os.good())
             return os;
@@ -455,9 +444,9 @@ class ThreefryEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &
-        operator>>(std::basic_istream<CharT, Traits> &is,
-                   ThreefryEngine<ResultType, K, Rounds> &eng)
+    friend inline std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        ThreefryEngine<ResultType, K, Rounds> &eng)
     {
         if (!is.good())
             return is;
@@ -514,7 +503,7 @@ class ThreefryEngine
         par_.back() ^= key[Position<N>()];
         par_xor<N + 1>(key, std::integral_constant<bool, N + 1 < K>());
     }
-};  // class ThreefryEngine
+}; // class ThreefryEngine
 
 /// \brief Threefry2x32 RNG engine reimplemented
 /// \ingroup R123RNG
@@ -540,6 +529,6 @@ typedef Threefry4x32 Threefry;
 /// \ingroup R123RNG
 typedef Threefry4x64 Threefry_64;
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_RNG_THREEFRY_HPP
+#endif // VSMC_RNG_THREEFRY_HPP
